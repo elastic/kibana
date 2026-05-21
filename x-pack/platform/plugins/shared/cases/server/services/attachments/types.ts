@@ -17,13 +17,21 @@ import type {
 import type { KueryNode } from '@kbn/es-query';
 import type { AttachmentType } from '../../../common';
 import type {
+  AttachmentMode,
   AttachmentAttributesV2,
   AttachmentPatchAttributesV2,
 } from '../../../common/types/domain';
 import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
+import type { AttachmentPersistedAttributes } from '../../common/types/attachments_v1';
+import type { UnifiedAttachmentAttributes } from '../../common/types/attachments_v2';
 import type { PartialField } from '../../types';
 import type { IndexRefresh } from '../types';
 import type { ConfigType } from '../../config';
+
+export type MixSavedObjectResponse =
+  | SavedObject<AttachmentPersistedAttributes>
+  | SavedObject<UnifiedAttachmentAttributes>
+  | { id: string; error: unknown };
 
 export interface ServiceContext {
   log: Logger;
@@ -39,7 +47,8 @@ export interface AttachedToCaseArgs {
 }
 
 export interface GetAttachmentArgs {
-  attachmentId: string;
+  savedObjectId: string;
+  mode: AttachmentMode;
 }
 
 export type OptionalAttributes<T> = PartialField<SavedObject<T>, 'attributes'>;
@@ -49,7 +58,9 @@ export interface BulkOptionalAttributes<T>
   saved_objects: Array<OptionalAttributes<T>>;
 }
 
-export type GetAllAlertsAttachToCaseArgs = AttachedToCaseArgs;
+export type GetAllAlertsAttachToCaseArgs = AttachedToCaseArgs & {
+  owner: string;
+};
 
 export interface AlertIdsAggsResult {
   alertIds: {
@@ -60,7 +71,13 @@ export interface AlertIdsAggsResult {
 }
 
 export interface EventIdsAggsResult {
-  eventIds: {
+  legacyEventIds: {
+    buckets: Array<{
+      key: string;
+    }>;
+  };
+  /** Present only when `cases-attachments` is included in the find `type` list (attachments feature enabled). */
+  unifiedEventIds?: {
     buckets: Array<{
       key: string;
     }>;
@@ -79,14 +96,13 @@ export interface CountActionsAttachedToCaseArgs extends AttachedToCaseArgs {
 }
 
 export interface DeleteAttachmentArgs extends IndexRefresh {
-  attachmentIds: string[];
+  savedObjectIds: string[];
 }
 
 export interface CreateAttachmentArgs extends IndexRefresh {
   attributes: AttachmentAttributesV2;
   references: SavedObjectReference[];
   id: string;
-  owner: string;
 }
 
 export interface BulkCreateAttachments extends IndexRefresh {
@@ -95,19 +111,17 @@ export interface BulkCreateAttachments extends IndexRefresh {
     references: SavedObjectReference[];
     id: string;
   }>;
-  owner: string;
 }
 
 export interface UpdateArgs {
-  attachmentId: string;
+  savedObjectId: string;
   updatedAttributes: AttachmentPatchAttributesV2;
   options?: Omit<SavedObjectsUpdateOptions<AttachmentAttributesV2>, 'upsert'>;
-  owner?: string;
 }
 
 export type UpdateAttachmentArgs = UpdateArgs;
 
 export interface BulkUpdateAttachmentArgs extends IndexRefresh {
   comments: UpdateArgs[];
-  owner: string;
+  requestWithoutType?: boolean;
 }

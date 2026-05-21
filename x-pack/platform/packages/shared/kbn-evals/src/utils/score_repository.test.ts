@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { EvaluationScoreRepository, type EvaluationScoreDocument } from './score_repository';
+import {
+  EvaluationScoreRepository,
+  computeScoreDocumentId,
+  type EvaluationScoreDocument,
+} from './score_repository';
 import type { Model } from '@kbn/inference-common';
 import { ModelFamily, ModelProvider } from '@kbn/inference-common';
 import type { SomeDevLog } from '@kbn/some-dev-log';
@@ -39,6 +43,7 @@ const createMockScoreDocument = (
   task: {
     trace_id: 'trace-task-123',
     repetition_index: 0,
+    output: null,
     model: baseTaskModel,
   },
   evaluator: {
@@ -91,13 +96,41 @@ describe('EvaluationScoreRepository', () => {
 
     mockEsClient = {
       indices: {
-        existsIndexTemplate: jest.fn().mockResolvedValue(true),
+        existsIndexTemplate: jest.fn().mockResolvedValue(false),
         putIndexTemplate: jest.fn().mockResolvedValue({}),
-        getDataStream: jest.fn().mockResolvedValue({}),
+        getIndexTemplate: jest.fn().mockResolvedValue({
+          index_templates: [
+            {
+              index_template: {
+                template: {
+                  mappings: {
+                    _meta: { kbn_evals: { schema_version: 1 } },
+                    properties: {
+                      example: { properties: { input: { enabled: false } } },
+                      task: { properties: { output: { enabled: false } } },
+                      evaluator: { properties: { metadata: { type: 'flattened' } } },
+                    },
+                  },
+                },
+              },
+            },
+          ],
+        }),
+        getDataStream: jest.fn().mockResolvedValue({
+          data_streams: [
+            {
+              name: 'kibana-evaluations',
+              indices: [{ index_name: '.ds-kibana-evaluations-000001' }],
+            },
+          ],
+        }),
         createDataStream: jest.fn().mockResolvedValue({}),
-        create: jest.fn(),
-        delete: jest.fn(),
       },
+      security: {
+        hasPrivileges: jest.fn().mockResolvedValue({ has_all_requested: true }),
+      },
+      create: jest.fn().mockResolvedValue({}),
+      delete: jest.fn().mockResolvedValue({}),
       helpers: {
         bulk: jest.fn(),
       },
@@ -149,7 +182,8 @@ describe('EvaluationScoreRepository', () => {
       }),
     ];
 
-    it('should successfully export scores when index template and datastream exist', async () => {
+    it('should create index template then export scores when template does not exist', async () => {
+      mockEsClient.indices.existsIndexTemplate.mockResolvedValueOnce(false);
       mockEsClient.helpers.bulk.mockResolvedValue({
         total: 2,
         failed: 0,
@@ -158,6 +192,7 @@ describe('EvaluationScoreRepository', () => {
 
       await repository.exportScores(mockDocuments);
 
+      expect(mockEsClient.indices.putIndexTemplate).toHaveBeenCalled();
       expect(mockEsClient.helpers.bulk).toHaveBeenCalledWith(
         expect.objectContaining({
           datasource: mockDocuments,
@@ -166,6 +201,25 @@ describe('EvaluationScoreRepository', () => {
       );
       expect(mockLog.debug).toHaveBeenCalledWith(
         expect.stringContaining('Successfully indexed 2 evaluation scores')
+      );
+    });
+
+    it('should export scores without creating template when it already exists', async () => {
+      mockEsClient.indices.existsIndexTemplate.mockResolvedValueOnce(true);
+      mockEsClient.helpers.bulk.mockResolvedValue({
+        total: 2,
+        failed: 0,
+        successful: 2,
+      } as any);
+
+      await repository.exportScores(mockDocuments);
+
+      expect(mockEsClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+      expect(mockEsClient.helpers.bulk).toHaveBeenCalledWith(
+        expect.objectContaining({
+          datasource: mockDocuments,
+          refresh: 'wait_for',
+        })
       );
     });
 
@@ -274,6 +328,66 @@ describe('EvaluationScoreRepository', () => {
           _id: 'run-123-my-suite-gpt-4-dataset-1-example-1-Correctness-0',
         },
       });
+    });
+  });
+
+  describe('preflightExport', () => {
+    it('performs a sentinel write (and best-effort cleanup) for external clusters', async () => {
+      const prev = process.env.EVALUATIONS_ES_URL;
+      process.env.EVALUATIONS_ES_URL = 'https://example.test';
+      try {
+        await expect(repository.preflightExport()).resolves.toBeUndefined();
+
+        expect(mockEsClient.indices.getIndexTemplate).not.toHaveBeenCalled();
+        expect(mockEsClient.create).toHaveBeenCalledWith(
+          expect.objectContaining({
+            index: 'kibana-evaluations',
+            refresh: 'wait_for',
+            id: expect.stringContaining('preflight-'),
+            document: expect.objectContaining({
+              run_id: 'kbn-evals-preflight',
+              experiment_id: 'preflight',
+              evaluator: expect.objectContaining({ name: 'preflight' }),
+            }),
+          })
+        );
+        expect(mockEsClient.delete).toHaveBeenCalledWith(
+          expect.objectContaining({
+            index: 'kibana-evaluations',
+            refresh: 'wait_for',
+            id: expect.stringContaining('preflight-'),
+          })
+        );
+      } finally {
+        if (prev) process.env.EVALUATIONS_ES_URL = prev;
+        else delete process.env.EVALUATIONS_ES_URL;
+      }
+    });
+
+    it('bootstraps template and datastream for local clusters before the sentinel write', async () => {
+      // Local cluster path: no EVALUATIONS_ES_URL/EVALUATIONS_ES_API_KEY.
+      mockEsClient.indices.existsIndexTemplate.mockResolvedValueOnce(false);
+      mockEsClient.indices.getDataStream.mockRejectedValueOnce({ statusCode: 404 });
+
+      await expect(repository.preflightExport()).resolves.toBeUndefined();
+
+      expect(mockEsClient.indices.putIndexTemplate).toHaveBeenCalled();
+      expect(mockEsClient.indices.createDataStream).toHaveBeenCalledWith({
+        name: 'kibana-evaluations',
+      });
+      expect(mockEsClient.create).toHaveBeenCalled();
+    });
+
+    it('ignores delete 403 errors for writer keys without delete privileges', async () => {
+      const prev = process.env.EVALUATIONS_ES_URL;
+      process.env.EVALUATIONS_ES_URL = 'https://example.test';
+      mockEsClient.delete.mockRejectedValueOnce({ statusCode: 403 });
+      try {
+        await expect(repository.preflightExport()).resolves.toBeUndefined();
+      } finally {
+        if (prev) process.env.EVALUATIONS_ES_URL = prev;
+        else delete process.env.EVALUATIONS_ES_URL;
+      }
     });
   });
 
@@ -453,6 +567,94 @@ describe('EvaluationScoreRepository', () => {
         'Failed to retrieve scores for run ID run-123:',
         error
       );
+    });
+  });
+
+  describe('indexSingleScore', () => {
+    it('creates a single document with deterministic id and refresh: wait_for', async () => {
+      const doc = createMockScoreDocument();
+      await repository.indexSingleScore(doc);
+
+      expect(mockEsClient.create).toHaveBeenCalledWith({
+        index: 'kibana-evaluations',
+        id: 'run-123-unknown-suite-gpt-4-dataset-1-example-1-Correctness-0',
+        document: doc,
+        refresh: 'wait_for',
+      });
+    });
+
+    it('enriches the document with suite and buildkite metadata from options', async () => {
+      const doc = createMockScoreDocument();
+      await repository.indexSingleScore(doc, {
+        suiteId: 'my-suite',
+        buildkite: { build_id: 'bk-1', job_id: 'bk-j1' },
+      });
+
+      expect(mockEsClient.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'run-123-my-suite-gpt-4-dataset-1-example-1-Correctness-0',
+          document: expect.objectContaining({
+            suite: { id: 'my-suite' },
+            ci: { buildkite: { build_id: 'bk-1', job_id: 'bk-j1' } },
+          }),
+        })
+      );
+    });
+
+    it('treats 409 conflict as success', async () => {
+      mockEsClient.create.mockRejectedValueOnce({ statusCode: 409 });
+
+      await expect(repository.indexSingleScore(createMockScoreDocument())).resolves.toBeUndefined();
+    });
+
+    it('throws on non-409 errors', async () => {
+      const error = Object.assign(new Error('forbidden'), { statusCode: 403 });
+      mockEsClient.create.mockRejectedValueOnce(error);
+
+      await expect(repository.indexSingleScore(createMockScoreDocument())).rejects.toThrow(
+        'forbidden'
+      );
+    });
+  });
+
+  describe('computeScoreDocumentId', () => {
+    it('builds a deterministic id from document key fields', () => {
+      const doc = createMockScoreDocument();
+      expect(computeScoreDocumentId(doc)).toBe(
+        'run-123-unknown-suite-gpt-4-dataset-1-example-1-Correctness-0'
+      );
+    });
+
+    it('uses suite id when present', () => {
+      const doc = createMockScoreDocument({ suite: { id: 'attack-discovery' } });
+      expect(computeScoreDocumentId(doc)).toBe(
+        'run-123-attack-discovery-gpt-4-dataset-1-example-1-Correctness-0'
+      );
+    });
+
+    it('produces different ids for different evaluators on the same example', () => {
+      const docA = createMockScoreDocument();
+      const docB = createMockScoreDocument({
+        evaluator: { ...createMockScoreDocument().evaluator, name: 'Groundedness' },
+      });
+      expect(computeScoreDocumentId(docA)).not.toBe(computeScoreDocumentId(docB));
+    });
+
+    it('matches the id used by exportScores bulk onDocument', async () => {
+      const doc = createMockScoreDocument();
+
+      mockEsClient.helpers.bulk.mockResolvedValue({
+        total: 1,
+        failed: 0,
+        successful: 1,
+      } as any);
+
+      await repository.exportScores([doc]);
+
+      const bulkCall = mockEsClient.helpers.bulk.mock.calls[0][0];
+      const bulkDocId = bulkCall.onDocument(doc).create._id;
+
+      expect(bulkDocId).toBe(computeScoreDocumentId(doc));
     });
   });
 });

@@ -102,6 +102,7 @@ export * from './impl/schedules/field_names';
 
 export { transformAttackDiscoveryAlertFromApi } from './impl/utils/transform_attack_discovery_alert_from_api';
 export { transformAttackDiscoveryAlertToApi } from './impl/utils/transform_attack_discovery_alert_to_api';
+export { transformAttackDiscoveryAlertDocumentToApi } from './impl/utils/transform_search_response_to_alerts/transform_attack_discovery_alert_document_to_api';
 export { transformAttackDiscoveryScheduleFromApi } from './impl/utils/transform_attack_discovery_schedule_from_api';
 export { transformSearchResponseToAlerts } from './impl/utils/transform_search_response_to_alerts';
 

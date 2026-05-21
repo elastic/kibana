@@ -114,6 +114,7 @@ describe('getCreatedAttackDiscoveryAlerts', () => {
         alert_updated_by_user_name: 'elastic',
         alert_workflow_status: 'acknowledged',
         alert_workflow_status_updated_at: '2025-06-23T15:16:52.984Z',
+        assignees: undefined,
         connector_id: 'gemini_2_5_pro',
         connector_name: 'Gemini 2.5 Pro',
         details_markdown:
@@ -122,6 +123,7 @@ describe('getCreatedAttackDiscoveryAlerts', () => {
           'A widespread malware campaign using the compromised account of user {{ user.name 6f53c297-f5cb-48c3-8aff-2e2d7a390169 }} impacted multiple Windows hosts, including {{ host.name 6aece05f-675e-4dc0-b8fa-ba0f1a43d691 }} and {{ host.name 0d7534c9-79f5-46ed-9df9-3dfcff57e5ed }}.',
         generation_uuid: 'c10c51a5-10d2-481d-853a-e7fd5f393b23',
         id: '29ceb1fa1482f02a2eb6073991078544e529edfc633a5621b20a93eefbb63083',
+        index: '.internal.adhoc.alerts-security.attack.discovery.alerts-default-000001',
         mitre_attack_tactics: [
           'Initial Access',
           'Execution',
@@ -146,6 +148,7 @@ describe('getCreatedAttackDiscoveryAlerts', () => {
         risk_score: 6237,
         summary_markdown:
           'A widespread campaign was conducted using the compromised account of user {{ user.name 6f53c297-f5cb-48c3-8aff-2e2d7a390169 }}, deploying various malware including Sodinokibi, Emotet, Qakbot, and Bumblebee across multiple Windows hosts.',
+        tags: undefined,
         timestamp: '2025-06-23T14:25:24.104Z',
         title: 'Widespread Malware Campaign via Compromised Account',
         user_id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',

@@ -11,9 +11,10 @@ import type { IBasePath } from '@kbn/core-http-browser';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { v4 } from 'uuid';
+import type { SavedObject } from '@kbn/core/server';
 import type {
   ActionConnector,
-  Attachment,
+  AttachmentV2,
   Case,
   CaseAssignees,
   CaseAttributes,
@@ -26,6 +27,7 @@ import type {
   Observable,
   User,
 } from '../../../common/types/domain';
+import type { Template } from '../../../common/types/domain/template/latest';
 import { AttachmentType, CaseStatuses, UserActionTypes } from '../../../common/types/domain';
 import type {
   CasePostRequest,
@@ -40,6 +42,7 @@ import type { ExternalServiceComment, ExternalServiceIncident } from './types';
 import { getAlertIds } from '../utils';
 import type { CasesConnectorsMap } from '../../connectors';
 import { getCaseViewPath } from '../../common/utils';
+import { isLegacyAttachmentRequest } from '../../../common/utils/attachments';
 import * as i18n from './translations';
 
 interface CreateIncidentArgs {
@@ -60,6 +63,9 @@ export const dedupAssignees = (assignees?: CaseAssignees): CaseAssignees | undef
 
   return uniqBy(assignees, 'uid');
 };
+
+export const getCloseReasonIfValid = (closeReason?: string): string | undefined =>
+  closeReason != null && closeReason.trim().length > 0 ? closeReason : undefined;
 
 type LatestPushInfo = { index: number; pushedInfo: ExternalService | null } | null;
 
@@ -86,23 +92,27 @@ export const getLatestPushInfo = (
   return null;
 };
 
-const getCommentContent = (comment: Attachment): string => {
-  if (comment.type === AttachmentType.user) {
-    return comment.comment;
-  } else if (comment.type === AttachmentType.alert) {
-    const ids = getAlertIds(comment);
-    return `Alert with ids ${ids.join(', ')} added to case`;
-  } else if (
-    comment.type === AttachmentType.actions &&
-    (comment.actions.type === 'isolate' || comment.actions.type === 'unisolate')
-  ) {
-    const firstHostname =
-      comment.actions.targets?.length > 0 ? comment.actions.targets[0].hostname : 'unknown';
-    const totalHosts = comment.actions.targets.length;
-    const actionText = comment.actions.type === 'isolate' ? 'Isolated' : 'Released';
-    const additionalHostsText = totalHosts - 1 > 0 ? `and ${totalHosts - 1} more ` : ``;
+// Only used for comment and action attachments.
+// TODO: https://github.com/elastic/kibana/issues/262574
+const getCommentContent = (comment: AttachmentV2): string => {
+  if (isLegacyAttachmentRequest(comment)) {
+    if (comment.type === AttachmentType.user) {
+      return comment.comment;
+    } else if (comment.type === AttachmentType.alert) {
+      const ids = getAlertIds(comment);
+      return `Alert with ids ${ids.join(', ')} added to case`;
+    } else if (
+      comment.type === AttachmentType.actions &&
+      (comment.actions.type === 'isolate' || comment.actions.type === 'unisolate')
+    ) {
+      const firstHostname =
+        comment.actions.targets?.length > 0 ? comment.actions.targets[0].hostname : 'unknown';
+      const totalHosts = comment.actions.targets.length;
+      const actionText = comment.actions.type === 'isolate' ? 'Isolated' : 'Released';
+      const additionalHostsText = totalHosts - 1 > 0 ? `and ${totalHosts - 1} more ` : ``;
 
-    return `${actionText} host ${firstHostname} ${additionalHostsText}with comment: ${comment.comment}`;
+      return `${actionText} host ${firstHostname} ${additionalHostsText}with comment: ${comment.comment}`;
+    }
   }
 
   return '';
@@ -121,7 +131,7 @@ const getAlertsInfo = (
 
   const res =
     comments?.reduce<CountAlertsInfo>(({ totalComments, pushed, totalAlerts }, comment) => {
-      if (comment.type === AttachmentType.alert) {
+      if (isLegacyAttachmentRequest(comment) && comment.type === AttachmentType.alert) {
         return {
           totalComments: totalComments + 1,
           pushed: comment.pushed_at != null ? pushed + 1 : pushed,
@@ -671,4 +681,58 @@ export const processObservables = (
       updatedAt: new Date().toISOString(),
     });
   }
+};
+
+/**
+ *
+ * For cases that have a template and extended fields, fetches the template definitions
+ * and populates `extended_fields_labels` with a mapping from storage keys (e.g.,
+ * `priority_as_keyword`) to user-facing labels (e.g., "Priority"). Cases without templates
+ * or extended fields, or whose templates cannot be retrieved, are returned unchanged.
+ *
+ * @param cases - Array of cases to enrich
+ * @param templateSOs - Pre-fetched template saved objects
+ * @returns The enriched cases array, preserving original order
+ */
+export const enrichCasesWithFieldLabels = (
+  cases: Case[],
+  templateSOs: Array<SavedObject<Template>>
+): Case[] => {
+  type EligibleCase = Case & {
+    template: NonNullable<Case['template']>;
+    extended_fields: NonNullable<Case['extended_fields']>;
+  };
+  const isEligible = (c: Case): c is EligibleCase =>
+    c.template?.id != null && c.extended_fields != null;
+
+  const eligibleCases = cases.filter(isEligible);
+
+  if (eligibleCases.length === 0) {
+    return cases;
+  }
+
+  const labelsByTemplateKey = new Map<string, Record<string, string>>();
+  for (const so of templateSOs) {
+    const fieldKeyToLabel = Object.fromEntries(
+      (so.attributes.fieldNames ?? []).map((field) => [
+        `${field.name}_as_${field.type}`,
+        field.label,
+      ])
+    );
+    labelsByTemplateKey.set(
+      `${so.attributes.templateId}:${so.attributes.templateVersion}`,
+      fieldKeyToLabel
+    );
+  }
+
+  const enrichedCasesById = new Map(
+    eligibleCases.flatMap((c) => {
+      const fieldKeyToLabel = labelsByTemplateKey.get(`${c.template.id}:${c.template.version}`);
+      return fieldKeyToLabel != null
+        ? [[c.id, { ...c, extended_fields_labels: fieldKeyToLabel }]]
+        : [];
+    })
+  );
+
+  return cases.map((c) => enrichedCasesById.get(c.id) ?? c);
 };

@@ -8,23 +8,37 @@
 import type { UseQueryOptions } from '@kbn/react-query';
 import { useQuery, useQueryClient } from '@kbn/react-query';
 import { useCallback } from 'react';
+import type { GapFillStatus } from '@kbn/alerting-plugin/common';
 import type { RuleResponse, WarningSchema } from '../../../../../common/api/detection_engine';
-import { DETECTION_ENGINE_RULES_URL_FIND } from '../../../../../common/constants';
-import type { FilterOptions, PaginationOptions, SortingOptions } from '../../logic';
-import { fetchRules } from '../api';
+import type { SortOrder } from '../../../../../common/api/detection_engine/model/sorting.gen';
+import type {
+  FindRulesSortField,
+  SearchRulesAggregations,
+  SearchRulesField,
+  SearchRulesSearchAfterItem,
+  GranularRulesSearch,
+} from '../../../../../common/api/detection_engine/rule_management';
+import { RULE_MANAGEMENT_RULES_URL_SEARCH } from '../../../../../common/api/detection_engine/rule_management/urls';
+import type { PaginationOptions } from '../../logic';
+import { fetchSearchRules } from '../api';
 import { DEFAULT_QUERY_OPTIONS } from './constants';
 
 export interface FindRulesQueryArgs {
-  filterOptions?: FilterOptions;
-  sortingOptions?: SortingOptions;
+  fields?: SearchRulesField[];
+  filter?: string;
+  search?: GranularRulesSearch;
+  sort_field?: FindRulesSortField;
+  sort_order?: SortOrder;
   pagination?: Pick<PaginationOptions, 'page' | 'perPage'>;
-  gapsRange?: {
-    start: string;
-    end: string;
-  };
+  aggregations?: SearchRulesAggregations;
+  search_after?: SearchRulesSearchAfterItem[];
+  gap_fill_statuses?: GapFillStatus[];
+  gaps_range_start?: string;
+  gaps_range_end?: string;
+  gap_auto_fill_scheduler_id?: string;
 }
 
-const FIND_RULES_QUERY_KEY = ['GET', DETECTION_ENGINE_RULES_URL_FIND];
+const FIND_RULES_QUERY_KEY = ['POST', RULE_MANAGEMENT_RULES_URL_SEARCH];
 
 export interface RulesQueryResponse {
   rules: RuleResponse[];
@@ -54,7 +68,10 @@ export const useFindRulesQuery = (
   return useQuery(
     [...FIND_RULES_QUERY_KEY, queryArgs],
     async ({ signal }) => {
-      const response = await fetchRules({ signal, ...queryArgs });
+      const response = await fetchSearchRules({
+        signal,
+        ...queryArgs,
+      });
 
       return { rules: response.data, total: response.total, warnings: response.warnings };
     },

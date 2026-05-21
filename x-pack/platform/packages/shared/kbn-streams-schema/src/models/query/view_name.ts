@@ -50,3 +50,31 @@ export function getStreamNameFromViewName(viewName: string): string | null {
   }
   return null;
 }
+
+/**
+ * Generates the ES|QL view query for a wired stream.
+ * The query targets the stream's own data plus the ES|QL views of its direct children,
+ * so that each view in the hierarchy includes data from downstream children transitively.
+ * @param streamName - The wired stream name (e.g. 'logs.otel')
+ * @param directChildrenNames - Names of the stream's direct children (from routing destinations)
+ * @returns The ES|QL FROM query for the view
+ * @example getWiredStreamViewQuery('logs.otel', ['logs.otel.child1', 'logs.otel.child2'])
+ *   => 'FROM logs.otel, $.logs.otel.child1, $.logs.otel.child2'
+ * @example getWiredStreamViewQuery('logs.otel.leaf', [])
+ *   => 'FROM logs.otel.leaf'
+ */
+export function getWiredStreamViewQuery(
+  streamName: string,
+  directChildrenNames: string[] = []
+): string {
+  // METADATA _source must be declared inside each view definition so that
+  // downstream views (including draft streams) can access the raw document
+  // source. Outer METADATA on a view produces null — a known ES|QL
+  // tech-preview limitation where view expansion drops outer metadataFields:
+  // https://www.elastic.co/docs/reference/query-languages/esql/esql-views#esql-views-limitations
+  if (directChildrenNames.length === 0) {
+    return `FROM ${streamName} METADATA _source`;
+  }
+  const childViews = directChildrenNames.map(getEsqlViewName).join(', ');
+  return `FROM ${streamName}, ${childViews} METADATA _source`;
+}

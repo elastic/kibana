@@ -19,7 +19,6 @@ import type { InitialAppState } from './lens_slice';
 import { loadInitial } from './lens_slice';
 import type { Filter } from '@kbn/es-query';
 import { faker } from '@faker-js/faker';
-import { DOC_TYPE } from '../../common/constants';
 
 const history = {
   location: {
@@ -39,7 +38,7 @@ const preloadedState = {
 
 const defaultProps: InitialAppState = {
   redirectCallback: jest.fn(),
-  initialInput: { savedObjectId: defaultSavedObjectId },
+  initialInput: { ref_id: defaultSavedObjectId },
   history,
 };
 
@@ -241,7 +240,6 @@ describe('Initializing the store', () => {
         lens: expect.objectContaining({
           persistedDoc: expect.objectContaining({
             ...defaultDoc,
-            type: DOC_TYPE,
             state: {
               ...defaultDoc.state,
               visualization: 'testVis initial state',
@@ -266,7 +264,7 @@ describe('Initializing the store', () => {
 
       await loadInitialAppState(store, {
         ...defaultProps,
-        initialInput: { savedObjectId: '5678' },
+        initialInput: { ref_id: '5678' },
       });
 
       expect(deps.lensServices.attributeService.loadFromLibrary).toHaveBeenCalledTimes(2);

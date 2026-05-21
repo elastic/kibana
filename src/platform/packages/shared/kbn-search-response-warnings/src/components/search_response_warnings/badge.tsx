@@ -30,6 +30,9 @@ export const SearchResponseWarningsBadge = (props: Props) => {
   return (
     <EuiPopover
       panelPaddingSize="none"
+      aria-label={i18n.translate('searchResponseWarnings.badgePopoverAriaLabel', {
+        defaultMessage: 'Search response warnings',
+      })}
       button={
         <EuiButton
           minWidth={0}
@@ -54,6 +57,7 @@ export const SearchResponseWarningsBadge = (props: Props) => {
         >
           <EuiIcon
             type="warning"
+            aria-hidden={true}
             css={css`
               margin-left: ${euiTheme.size.xxs};
             `}

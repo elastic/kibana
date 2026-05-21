@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/evals-suite-entity-analytics'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/security-entity-analytics'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/evals-suite-entity-analytics'
+  title: '@kbn/evals-suite-entity-analytics'
   description: Moon project for @kbn/evals-suite-entity-analytics
   channel: ''
   owner: '@elastic/security-entity-analytics'
-  metadata:
-    sourceRoot: x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics
+  sourceRoot: x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics
 dependsOn:
   - '@kbn/evals'
   - '@kbn/tooling-log'
@@ -29,7 +28,8 @@ dependsOn:
   - '@kbn/test'
   - '@kbn/test-suites-xpack-platform'
   - '@kbn/core-http-common'
-  - '@kbn/ml-plugin'
+  - '@kbn/ml-common-types'
+  - '@kbn/entity-store'
 tags:
   - functional-tests
   - package

@@ -117,6 +117,9 @@ export class MetricsExpression extends Component<Props, State> {
           />
         }
         repositionOnScroll={true}
+        aria-label={i18n.translate('xpack.maps.layerPanel.metricsExpression.popoverAriaLabel', {
+          defaultMessage: 'Configure join metrics',
+        })}
       >
         <div style={{ width: 400 }}>
           <EuiPopoverTitle>

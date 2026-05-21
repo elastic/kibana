@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/telemetry-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-core'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/telemetry-plugin'
+  title: '@kbn/telemetry-plugin'
   description: Moon project for @kbn/telemetry-plugin
   channel: ''
   owner: '@elastic/kibana-core'
-  metadata:
-    sourceRoot: src/platform/plugins/shared/telemetry
+  sourceRoot: src/platform/plugins/shared/telemetry
 dependsOn:
   - '@kbn/core'
   - '@kbn/home-plugin'
@@ -47,6 +46,7 @@ dependsOn:
   - '@kbn/logging'
   - '@kbn/core-security-server'
   - '@kbn/telemetry-config'
+  - '@kbn/config'
 tags:
   - plugin
   - prod
@@ -58,18 +58,8 @@ fileGroups:
     - public/**/*
     - server/**/*
     - common/**/*
-    - schema/*.json
+    - schema/*
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

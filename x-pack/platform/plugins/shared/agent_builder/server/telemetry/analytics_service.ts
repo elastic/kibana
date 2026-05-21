@@ -19,15 +19,28 @@ import {
 import type {
   ReportAgentCreatedParams,
   ReportAgentUpdatedParams,
+  ReportPluginImportedParams,
   ReportRoundCompleteParams,
   ReportRoundErrorParams,
+  ReportSkillCreatedParams,
+  ReportSkillDeletedParams,
+  ReportSkillInvokedParams,
+  ReportSkillUpdatedParams,
   ReportToolCallErrorParams,
   ReportToolCallSuccessParams,
   ReportToolCreatedParams,
+  SkillCreationOrigin,
+  SkillInvocationOrigin,
+  SkillSolutionArea,
 } from '@kbn/agent-builder-common/telemetry/agent_builder_events';
 import type { ModelProvider } from '@kbn/inference-common';
 import { normalizeErrorType, sanitizeForCounterName } from './error_utils';
-import { normalizeAgentIdForTelemetry, normalizeToolIdForTelemetry } from './utils';
+import {
+  normalizeAgentIdForTelemetry,
+  normalizePluginIdForTelemetry,
+  normalizeSkillIdForTelemetry,
+  normalizeToolIdForTelemetry,
+} from './utils';
 
 /**
  * Server-side analytics wrapper for Agent Builder telemetry.
@@ -102,6 +115,138 @@ export class AnalyticsService {
     } catch (error) {
       // Do not fail the request if telemetry fails
       this.logger.debug('Failed to report ToolCreated telemetry event', { error });
+    }
+  }
+
+  reportSkillCreated({
+    skillId,
+    origin,
+    pluginId,
+  }: {
+    skillId: string;
+    origin?: SkillCreationOrigin;
+    pluginId?: string;
+  }): void {
+    try {
+      this.analytics.reportEvent<ReportSkillCreatedParams>(AGENT_BUILDER_EVENT_TYPES.SkillCreated, {
+        skill_id: normalizeSkillIdForTelemetry({
+          id: skillId,
+          readonly: false,
+          plugin_id: pluginId,
+        }),
+        origin,
+      });
+    } catch (error) {
+      this.logger.debug('Failed to report SkillCreated telemetry event', { error });
+    }
+  }
+
+  reportSkillUpdated({
+    skillId,
+    origin,
+    pluginId,
+  }: {
+    skillId: string;
+    origin?: SkillCreationOrigin;
+    pluginId?: string;
+  }): void {
+    try {
+      this.analytics.reportEvent<ReportSkillUpdatedParams>(AGENT_BUILDER_EVENT_TYPES.SkillUpdated, {
+        skill_id: normalizeSkillIdForTelemetry({
+          id: skillId,
+          readonly: false,
+          plugin_id: pluginId,
+        }),
+        origin,
+      });
+    } catch (error) {
+      this.logger.debug('Failed to report SkillUpdated telemetry event', { error });
+    }
+  }
+
+  reportSkillDeleted({
+    skillId,
+    origin,
+    pluginId,
+  }: {
+    skillId: string;
+    origin?: SkillCreationOrigin;
+    pluginId?: string;
+  }): void {
+    try {
+      this.analytics.reportEvent<ReportSkillDeletedParams>(AGENT_BUILDER_EVENT_TYPES.SkillDeleted, {
+        skill_id: normalizeSkillIdForTelemetry({
+          id: skillId,
+          readonly: false,
+          plugin_id: pluginId,
+        }),
+        origin,
+      });
+    } catch (error) {
+      this.logger.debug('Failed to report SkillDeleted telemetry event', { error });
+    }
+  }
+
+  reportSkillInvoked({
+    skillId,
+    origin,
+    solutionArea,
+    pluginId,
+    agentId,
+    conversationId,
+    executionId,
+    toolCount,
+  }: {
+    skillId: string;
+    origin: SkillInvocationOrigin;
+    solutionArea: SkillSolutionArea;
+    pluginId?: string;
+    agentId?: string;
+    conversationId?: string;
+    executionId?: string;
+    toolCount: number;
+  }): void {
+    try {
+      this.analytics.reportEvent<ReportSkillInvokedParams>(AGENT_BUILDER_EVENT_TYPES.SkillInvoked, {
+        skill_id: normalizeSkillIdForTelemetry({
+          id: skillId,
+          readonly: origin === 'builtin',
+          plugin_id: pluginId,
+        }),
+        origin,
+        solution_area: solutionArea,
+        plugin_id: normalizePluginIdForTelemetry(pluginId),
+        agent_id: normalizeAgentIdForTelemetry(agentId),
+        conversation_id: conversationId,
+        execution_id: executionId,
+        tool_count: toolCount,
+      });
+    } catch (error) {
+      this.logger.debug('Failed to report SkillInvoked telemetry event', { error });
+    }
+  }
+
+  reportPluginImported({
+    pluginId,
+    sourceType,
+    skillCount,
+  }: {
+    pluginId: string;
+    sourceType: 'url' | 'file';
+    skillCount: number;
+  }): void {
+    try {
+      const normalizedPluginId = normalizePluginIdForTelemetry(pluginId);
+      this.analytics.reportEvent<ReportPluginImportedParams>(
+        AGENT_BUILDER_EVENT_TYPES.PluginImported,
+        {
+          plugin_id: normalizedPluginId ?? 'unknown',
+          source_type: sourceType === 'url' ? 'url' : 'upload',
+          skill_count: skillCount,
+        }
+      );
+    } catch (error) {
+      this.logger.debug('Failed to report PluginImported telemetry event', { error });
     }
   }
 

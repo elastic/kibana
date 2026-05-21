@@ -11,5 +11,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('EQL execution logic API', function () {
     loadTestFile(require.resolve('./eql'));
     loadTestFile(require.resolve('./eql_alert_suppression'));
+    loadTestFile(require.resolve('./eql_metrics'));
   });
 }

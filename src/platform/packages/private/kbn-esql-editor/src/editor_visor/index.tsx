@@ -12,10 +12,10 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
   useEuiTheme,
   type EuiComboBoxOptionOption,
 } from '@elastic/eui';
-import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { getIndexPatternFromESQLQuery, getESQLAdHocDataview } from '@kbn/esql-utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { NL_TO_ESQL_ROUTE } from '@kbn/esql-types';
@@ -28,10 +28,11 @@ import { NoConnectorMessage } from './no_connector_message';
 import { NLInput } from './nl_input';
 import { visorStyles, visorWidthPercentage, dropdownWidthPercentage } from './visor.styles';
 import type { ESQLEditorDeps } from '../types';
+import { useNlToEsqlCheck } from '../hooks/use_nl_to_esql_check';
+import { reportEsqlError } from '../report_error';
+import type { ESQLEditorTelemetryService } from '../telemetry/telemetry_service';
 
 export { VisorMode } from './mode_selector';
-
-export const NL_TO_ESQL_FLAG = 'esql.nlToEsqlEnabled';
 
 export interface QuickSearchVisorProps {
   // Current ESQL query
@@ -44,6 +45,7 @@ export interface QuickSearchVisorProps {
   onUpdateAndSubmitQuery: (query: string) => void;
   // Callback to toggle the visor visibility
   onToggleVisor: () => void;
+  telemetryService?: ESQLEditorTelemetryService;
 }
 
 export const searchPlaceholder = i18n.translate('esqlEditor.visor.searchPlaceholder', {
@@ -58,45 +60,34 @@ const closeButtonAriaLabel = i18n.translate('esqlEditor.visor.closeButtonAriaLab
   defaultMessage: 'Close quick search visor',
 });
 
+const techPreviewTooltip = i18n.translate('esqlEditor.visor.techPreviewTooltip', {
+  defaultMessage: 'Technical preview',
+});
+
 export function QuickSearchVisor({
   query,
   isSpaceReduced,
   isVisible,
   onUpdateAndSubmitQuery,
   onToggleVisor,
+  telemetryService,
 }: QuickSearchVisorProps) {
   const kibana = useKibana<ESQLEditorDeps>();
   const { kql, core, data } = kibana.services;
-  const getLicense = kibana.services?.esql?.getLicense;
-  const isNlToEsqlFlagEnabled = core.featureFlags.getBooleanValue(NL_TO_ESQL_FLAG, false);
-  const isDarkMode = useKibanaIsDarkMode();
-  const { euiTheme } = useEuiTheme();
+  const isNlToEsqlEnabled = useNlToEsqlCheck();
+  const euiThemeContext = useEuiTheme();
   const [selectedSources, setSelectedSources] = useState<EuiComboBoxOptionOption[]>([]);
   const [searchValue, setSearchValue] = useState('');
   const [visorMode, setVisorMode] = useState<VisorMode>(VisorMode.KQL);
   const [nlValue, setNlValue] = useState('');
   const [isNlLoading, setIsNlLoading] = useState(false);
   const [hasConnector, setHasConnector] = useState<boolean | undefined>(undefined);
-  const [hasValidLicense, setHasValidLicense] = useState(false);
-  const licenseCheckRef = useRef(false);
   const connectorCheckRef = useRef(false);
   const [adHocDataView, setAdHocDataView] = useState<DataView | null>(null);
   const kqlInputRef = useRef<HTMLDivElement>(null);
   const initializedRef = useRef(false);
   const userSelectedSourceRef = useRef(false);
   const KQLComponent = kql.autocomplete.hasQuerySuggestions('kuery') ? kql.QueryStringInput : null;
-
-  useEffect(() => {
-    if (!isNlToEsqlFlagEnabled || !getLicense || licenseCheckRef.current) return;
-    licenseCheckRef.current = true;
-    getLicense().then((license) => {
-      setHasValidLicense(
-        Boolean(license && license.status === 'active' && license.hasAtLeast('enterprise'))
-      );
-    });
-  }, [isNlToEsqlFlagEnabled, getLicense]);
-
-  const isNlToEsqlEnabled = isNlToEsqlFlagEnabled && hasValidLicense;
 
   const onKqlValueChange = useCallback((kqlQuery: string) => {
     setSearchValue(kqlQuery);
@@ -121,24 +112,57 @@ export function QuickSearchVisor({
     [selectedSources, query, onUpdateAndSubmitQuery]
   );
 
+  const trackNlResult = useCallback(
+    (
+      nlLength: number,
+      contextQueryLength: number,
+      startTime: number,
+      success: boolean,
+      errorCode?: string,
+      generatedQueryLength?: number
+    ) =>
+      telemetryService?.trackVisorNlSubmitted({
+        nlLength,
+        contextQueryLength,
+        success,
+        durationMs: Date.now() - startTime,
+        ...(errorCode ? { errorCode } : {}),
+        ...(generatedQueryLength !== undefined ? { generatedQueryLength } : {}),
+      }),
+    [telemetryService]
+  );
+
   const onNlSubmit = useCallback(async () => {
     const trimmed = nlValue.trim();
     if (!trimmed || isNlLoading) return;
 
     setIsNlLoading(true);
+    const startTime = Date.now();
     try {
-      const sourceNames = selectedSources.map((s) => s.label);
       const result = await core.http.post<{ content: string }>(NL_TO_ESQL_ROUTE, {
         body: JSON.stringify({
-          query: trimmed,
-          sources: sourceNames.length ? sourceNames : undefined,
+          nlInstruction: trimmed,
+          currentQuery: query,
         }),
       });
       if (result.content) {
+        trackNlResult(
+          trimmed.length,
+          query.length,
+          startTime,
+          true,
+          undefined,
+          result.content.length
+        );
         onUpdateAndSubmitQuery(result.content);
         setNlValue('');
       }
     } catch (error) {
+      reportEsqlError(error, { errorType: 'NlToEsql' });
+      const errorCode = String(
+        (error as { body?: { statusCode?: number } })?.body?.statusCode ?? ''
+      );
+      trackNlResult(trimmed.length, query.length, startTime, false, errorCode || undefined);
       const message =
         (error as { body?: { message?: string } })?.body?.message ??
         i18n.translate('esqlEditor.visor.nlError', {
@@ -154,7 +178,8 @@ export function QuickSearchVisor({
     core.http,
     core.notifications.toasts,
     onUpdateAndSubmitQuery,
-    selectedSources,
+    query,
+    trackNlResult,
   ]);
 
   const checkConnectorAvailability = useCallback(async () => {
@@ -236,13 +261,11 @@ export function QuickSearchVisor({
   }, [selectedSources]);
 
   const styles = visorStyles(
-    euiTheme,
+    euiThemeContext,
     comboBoxWidth,
     Boolean(isSpaceReduced),
     isVisible,
-    isDarkMode,
-    visorMode,
-    isNlToEsqlEnabled
+    visorMode
   );
 
   if (!KQLComponent) {
@@ -265,10 +288,13 @@ export function QuickSearchVisor({
           alignItems="center"
           justifyContent="flexStart"
           responsive={false}
-          css={styles.visorGradientBox}
+          css={styles.visorBox}
         >
           {isNlToEsqlEnabled && (
             <>
+              <EuiFlexItem grow={false} css={styles.techPreviewIcon}>
+                <EuiIconTip type="flask" size="s" color="subdued" content={techPreviewTooltip} />
+              </EuiFlexItem>
               <EuiFlexItem grow={false} css={styles.modeSelectWrapper}>
                 <ModeSelector onModeChange={onModeChange} />
               </EuiFlexItem>

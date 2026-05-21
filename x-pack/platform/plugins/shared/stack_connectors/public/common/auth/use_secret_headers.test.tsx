@@ -8,7 +8,7 @@
 /* eslint-disable no-console */
 
 import React from 'react';
-import { renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useSecretHeaders } from './use_secret_headers';
@@ -55,7 +55,7 @@ describe('useSecretHeaders', () => {
 
   it('fetches secret headers successfully', async () => {
     getMock.mockResolvedValue(['secretHeader1', 'secretHeader2']);
-    const { result } = renderHook(() => useSecretHeaders('connector1'), {
+    const { result } = renderHook(() => useSecretHeaders('connector1', true), {
       wrapper: customWrapper(),
     });
 
@@ -67,7 +67,18 @@ describe('useSecretHeaders', () => {
   });
 
   it('returns empty array if connectorId is undefined', async () => {
-    const { result } = renderHook(() => useSecretHeaders(undefined), { wrapper: customWrapper() });
+    const { result } = renderHook(() => useSecretHeaders(undefined, true), {
+      wrapper: customWrapper(),
+    });
+
+    expect(result.current.data).toEqual([]);
+    expect(getMock).not.toHaveBeenCalled();
+  });
+
+  it('returns empty array if isEdit is false', async () => {
+    const { result } = renderHook(() => useSecretHeaders('connector1', false), {
+      wrapper: customWrapper(),
+    });
 
     expect(result.current.data).toEqual([]);
     expect(getMock).not.toHaveBeenCalled();
@@ -77,7 +88,7 @@ describe('useSecretHeaders', () => {
     const error = { body: { message: 'Failed' }, name: 'Error' };
     getMock.mockRejectedValue(error);
 
-    renderHook(() => useSecretHeaders('connector1'), { wrapper: customWrapper() });
+    renderHook(() => useSecretHeaders('connector1', true), { wrapper: customWrapper() });
 
     await waitFor(() => {
       expect(addErrorMock).toHaveBeenCalledWith(
@@ -87,5 +98,30 @@ describe('useSecretHeaders', () => {
         })
       );
     });
+  });
+
+  it('does not refetch secret headers on window focus', async () => {
+    getMock.mockResolvedValue(['secret-key']);
+    const { result } = renderHook(() => useSecretHeaders('connector1', true), {
+      wrapper: customWrapper(),
+    });
+
+    await waitFor(() => {
+      expect(result.current.data).toEqual(['secret-key']);
+    });
+    expect(getMock).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      window.dispatchEvent(new Event('focus'));
+      Object.defineProperty(document, 'visibilityState', {
+        configurable: true,
+        writable: true,
+        value: 'visible',
+      });
+      document.dispatchEvent(new Event('visibilitychange'));
+    });
+
+    expect(getMock).toHaveBeenCalledTimes(1);
+    expect(result.current.data).toEqual(['secret-key']);
   });
 });

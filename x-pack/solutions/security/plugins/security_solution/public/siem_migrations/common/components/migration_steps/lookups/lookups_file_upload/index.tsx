@@ -6,7 +6,14 @@
  */
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { EuiFilePicker, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiText } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiFilePicker,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiText,
+} from '@elastic/eui';
 import type {
   EuiFilePickerClass,
   EuiFilePickerProps,
@@ -23,6 +30,7 @@ export interface LookupsFileUploadProps {
   apiError?: string;
   isLoading?: boolean;
   migrationSource: MigrationSource;
+  onSkip?: () => void;
 }
 
 const CONFIGS: Record<MigrationSource, { prompt: string; label: string }> = {
@@ -34,10 +42,14 @@ const CONFIGS: Record<MigrationSource, { prompt: string; label: string }> = {
     prompt: i18n.REFERENCE_SETS_DATA_INPUT_FILE_UPLOAD_PROMPT,
     label: i18n.REFERENCE_SETS_DATA_INPUT_FILE_UPLOAD_LABEL,
   },
+  [MigrationSource.SENTINEL]: {
+    prompt: i18n.WATCHLISTS_DATA_INPUT_FILE_UPLOAD_PROMPT,
+    label: i18n.WATCHLISTS_DATA_INPUT_FILE_UPLOAD_LABEL,
+  },
 };
 
 export const LookupsFileUpload = React.memo<LookupsFileUploadProps>(
-  ({ createResources, apiError, isLoading, migrationSource }) => {
+  ({ createResources, apiError, isLoading, migrationSource, onSkip }) => {
     const [lookupResources, setLookupResources] = useState<SiemMigrationResourceData[]>([]);
     const filePickerRef = useRef<EuiFilePickerClass>(null);
 
@@ -170,7 +182,18 @@ export const LookupsFileUpload = React.memo<LookupsFileUploadProps>(
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFlexGroup justifyContent="flexEnd" gutterSize="none">
+          <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+            {onSkip && (
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  onClick={onSkip}
+                  aria-label={i18n.SKIP_BUTTON_ARIA_LABEL}
+                  data-test-subj="lookupsUploadSkipButton"
+                >
+                  {i18n.SKIP_BUTTON}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            )}
             <EuiFlexItem grow={false}>
               <UploadFileButton
                 onClick={createLookups}

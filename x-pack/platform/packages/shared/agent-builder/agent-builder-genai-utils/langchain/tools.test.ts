@@ -22,6 +22,7 @@ const createTool = (
     description: '',
     configuration: {},
     readonly: false,
+    experimental: false,
     tags: [],
     getSchema: () => z.object({}),
     execute: jest.fn(),

@@ -101,44 +101,142 @@ describe('Index Pattern Fetcher - server', () => {
     expect(esClient.rollup.getRollupIndexCaps).toHaveBeenCalledTimes(0);
   });
 
-  describe('getExistingIndices', () => {
-    test('getExistingIndices returns the valid matched indices', async () => {
+  describe('getIndexPatternMatches', () => {
+    describe('without negated index patterns', () => {
+      test('returns the valid matched index patterns', async () => {
+        indexPatterns = new IndexPatternsFetcher(esClient, optionalParams);
+        indexPatterns.getFieldsForWildcard = jest
+          .fn()
+          .mockResolvedValueOnce({ indices: ['index1'] })
+          .mockResolvedValue({ indices: [] });
+
+        const result = await indexPatterns.getIndexPatternMatches(['packetbeat-*', 'filebeat-*']);
+
+        expect(result.matchedIndexPatterns).toEqual(['packetbeat-*']);
+      });
+
+      test('returns the valid matched indices', async () => {
+        indexPatterns = new IndexPatternsFetcher(esClient, optionalParams);
+        indexPatterns.getFieldsForWildcard = jest
+          .fn()
+          .mockResolvedValueOnce({ indices: ['index1'] })
+          .mockResolvedValue({ indices: [] });
+
+        const result = await indexPatterns.getIndexPatternMatches(['packetbeat-*', 'filebeat-*']);
+
+        expect(result.matchedIndices).toEqual(['index1']);
+      });
+
+      test('returns the valid matched indices per index pattern', async () => {
+        indexPatterns = new IndexPatternsFetcher(esClient, optionalParams);
+        indexPatterns.getFieldsForWildcard = jest
+          .fn()
+          .mockResolvedValueOnce({ indices: ['index1'] })
+          .mockResolvedValue({ indices: ['index2'] });
+
+        const result = await indexPatterns.getIndexPatternMatches(['packetbeat-*', 'filebeat-*']);
+
+        expect(result.matchesByIndexPattern).toEqual({
+          'packetbeat-*': ['index1'],
+          'filebeat-*': ['index2'],
+        });
+      });
+    });
+
+    describe('with negated index patterns', () => {
+      test('returns the valid matched index patterns', async () => {
+        indexPatterns = new IndexPatternsFetcher(esClient, optionalParams);
+        const mockFn = jest.fn().mockResolvedValue({ indices: ['index1'] });
+        indexPatterns.getFieldsForWildcard = mockFn;
+
+        const result = await indexPatterns.getIndexPatternMatches([
+          '-filebeat-*',
+          'filebeat-*',
+          'logs-*',
+          '-logs-excluded-*',
+        ]);
+
+        expect(result.matchedIndexPatterns).toEqual(['filebeat-*', 'logs-*']);
+      });
+
+      test('returns the valid matched indices', async () => {
+        indexPatterns = new IndexPatternsFetcher(esClient, optionalParams);
+        const mockFn = jest.fn().mockResolvedValue({ indices: ['index1'] });
+        indexPatterns.getFieldsForWildcard = mockFn;
+
+        const result = await indexPatterns.getIndexPatternMatches([
+          '-filebeat-*',
+          'filebeat-*',
+          'logs-*',
+          '-logs-excluded-*',
+        ]);
+
+        expect(result.matchedIndices).toEqual(['index1']);
+      });
+
+      test('returns the valid matched indices per index pattern', async () => {
+        indexPatterns = new IndexPatternsFetcher(esClient, optionalParams);
+        const mockFn = jest
+          .fn()
+          .mockResolvedValueOnce({ indices: ['index1'] })
+          .mockResolvedValue({ indices: ['index2'] });
+        indexPatterns.getFieldsForWildcard = mockFn;
+
+        const result = await indexPatterns.getIndexPatternMatches([
+          '-filebeat-*',
+          'filebeat-*',
+          'logs-*',
+          '-logs-excluded-*',
+        ]);
+
+        expect(result.matchesByIndexPattern).toEqual({
+          'filebeat-*': ['index1'],
+          'logs-*': ['index2'],
+        });
+      });
+
+      test('queries each positive pattern with all negated patterns for field caps', async () => {
+        indexPatterns = new IndexPatternsFetcher(esClient, optionalParams);
+        const mockFn = jest.fn().mockResolvedValue({ indices: ['length'] });
+        indexPatterns.getFieldsForWildcard = mockFn;
+
+        await indexPatterns.getIndexPatternMatches([
+          '-filebeat-*',
+          'filebeat-*',
+          'logs-*',
+          '-logs-excluded-*',
+        ]);
+
+        expect(mockFn.mock.calls[0][0].pattern).toEqual([
+          'filebeat-*',
+          '-filebeat-*',
+          '-logs-excluded-*',
+        ]);
+        expect(mockFn.mock.calls[1][0].pattern).toEqual([
+          'logs-*',
+          '-filebeat-*',
+          '-logs-excluded-*',
+        ]);
+      });
+    });
+
+    test('handles an error', async () => {
       indexPatterns = new IndexPatternsFetcher(esClient, optionalParams);
       indexPatterns.getFieldsForWildcard = jest
         .fn()
-        .mockResolvedValueOnce({ indices: ['length'] })
-        .mockResolvedValue({ indices: [] });
-      const result = await indexPatterns.getIndexPatternsWithMatches([
-        'packetbeat-*',
-        'filebeat-*',
-      ]);
-      expect(indexPatterns.getFieldsForWildcard).toBeCalledTimes(2);
-      expect(result.length).toBe(1);
-    });
+        .mockRejectedValueOnce(new DataViewMissingIndices('Catch me if you can!'))
+        .mockResolvedValue({ indices: ['index1'] });
 
-    test('getExistingIndices checks the positive pattern if provided with a negative pattern', async () => {
-      indexPatterns = new IndexPatternsFetcher(esClient, optionalParams);
-      const mockFn = jest.fn().mockResolvedValue({ indices: ['length'] });
-      indexPatterns.getFieldsForWildcard = mockFn;
-      const result = await indexPatterns.getIndexPatternsWithMatches(['-filebeat-*', 'filebeat-*']);
-      expect(mockFn.mock.calls[0][0].pattern).toEqual('filebeat-*');
-      expect(mockFn.mock.calls[1][0].pattern).toEqual('filebeat-*');
-      expect(result).toEqual(['-filebeat-*', 'filebeat-*']);
-    });
+      const result = await indexPatterns.getIndexPatternMatches(['packetbeat-*', 'filebeat-*']);
 
-    test('getExistingIndices handles an error', async () => {
-      indexPatterns = new IndexPatternsFetcher(esClient, optionalParams);
-      indexPatterns.getFieldsForWildcard = jest
-        .fn()
-        .mockImplementationOnce(async () => {
-          throw new DataViewMissingIndices('Catch me if you can!');
-        })
-        .mockImplementation(() => Promise.resolve({ indices: ['length'] }));
-      const result = await indexPatterns.getIndexPatternsWithMatches([
-        'packetbeat-*',
-        'filebeat-*',
-      ]);
-      expect(result).toEqual(['filebeat-*']);
+      expect(result).toMatchObject({
+        matchedIndexPatterns: ['filebeat-*'],
+        matchedIndices: ['index1'],
+        matchesByIndexPattern: {
+          'packetbeat-*': [],
+          'filebeat-*': ['index1'],
+        },
+      });
     });
   });
 });

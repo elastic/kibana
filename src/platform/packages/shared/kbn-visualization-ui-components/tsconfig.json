@@ -34,6 +34,7 @@
     "@kbn/calculate-width-from-char-count",
     "@kbn/visualization-utils",
     "@kbn/shared-ux-button-toolbar",
-    "@kbn/kql"
+    "@kbn/kql",
+    "@kbn/chart-icons"
   ],
 }

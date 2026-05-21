@@ -31,6 +31,7 @@ export interface APMServiceContextValue {
   transactionTypeStatus: FETCH_STATUS;
   transactionTypes: string[];
   runtimeName?: string;
+  runtimeVersion?: string;
   fallbackToTransactions: boolean;
   serviceAgentStatus: FETCH_STATUS;
 }
@@ -56,6 +57,7 @@ export function ApmServiceContextProvider({ children }: { children: ReactNode })
   const {
     agentName,
     runtimeName,
+    runtimeVersion,
     serverlessType,
     telemetrySdkName,
     telemetrySdkLanguage,
@@ -105,6 +107,7 @@ export function ApmServiceContextProvider({ children }: { children: ReactNode })
         transactionTypeStatus,
         transactionTypes,
         runtimeName,
+        runtimeVersion,
         fallbackToTransactions,
         serviceAgentStatus,
       }}

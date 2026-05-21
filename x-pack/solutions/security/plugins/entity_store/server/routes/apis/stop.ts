@@ -5,25 +5,36 @@
  * 2.0.
  */
 
+import path from 'node:path';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { z } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
-import { ENTITY_STORE_ROUTES } from '../../../common';
-import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
+import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../common';
+import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
 import { ALL_ENTITY_TYPES, EntityType } from '../../../common/domain/definitions/entity_schema';
 import { ENGINE_STATUS } from '../../domain/constants';
 
 const bodySchema = z.object({
-  entityTypes: z.array(EntityType).optional().default(ALL_ENTITY_TYPES),
+  entityTypes: z
+    .array(EntityType)
+    .optional()
+    .default(ALL_ENTITY_TYPES)
+    .describe('Entity types to stop. Defaults to all running types.'),
 });
 
 export function registerStop(router: EntityStorePluginRouter) {
   router.versioned
     .put({
-      path: ENTITY_STORE_ROUTES.STOP,
-      access: 'internal',
+      path: ENTITY_STORE_ROUTES.public.STOP,
+      access: 'public',
+      summary: 'Stop Entity Store engines',
+      description:
+        'Stop running entity engines, pausing data processing for the specified entity types.',
+      options: {
+        tags: ['oas-tag:Security entity store'],
+      },
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
       },
@@ -31,11 +42,14 @@ export function registerStop(router: EntityStorePluginRouter) {
     })
     .addVersion(
       {
-        version: API_VERSIONS.internal.v2,
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
             body: buildRouteValidationWithZod(bodySchema),
           },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/entity_store_stop.yaml'),
         },
       },
       wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {

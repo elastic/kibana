@@ -22,12 +22,14 @@ import type {
   MessageSigningServiceInterface,
 } from '@kbn/fleet-plugin/server';
 import type { AlertingServerStart } from '@kbn/alerting-plugin/server';
+import type { RulesClient } from '@kbn/alerting-plugin/server/rules_client';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { FleetActionsClientInterface } from '@kbn/fleet-plugin/server/services/actions/types';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type { Space } from '@kbn/spaces-plugin/common';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import {
   ScriptsLibraryClient,
   type ScriptsLibraryClientInterface,
@@ -37,8 +39,8 @@ import {
   installScriptsLibraryIndexTemplates,
   SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE,
 } from './lib/scripts_library';
-import type { ReferenceDataClientInterface } from './lib/reference_data';
-import { ReferenceDataClient } from './lib/reference_data';
+import type { OptInStatusMetadata, ReferenceDataClientInterface } from './lib/reference_data';
+import { REF_DATA_KEYS, ReferenceDataClient } from './lib/reference_data';
 import type { TelemetryConfigProvider } from '../../common/telemetry_config/telemetry_config_provider';
 import { SavedObjectsClientFactory } from './services/saved_objects';
 import type { ResponseActionsClient } from './services';
@@ -102,6 +104,7 @@ export interface EndpointAppContextServiceStartContract {
   connectorActions: ActionsPluginStartContract;
   telemetryConfigProvider: TelemetryConfigProvider;
   spacesService: SpacesServiceStart | undefined;
+  agentBuilder?: AgentBuilderPluginStart;
 }
 
 /**
@@ -257,8 +260,6 @@ export class EndpointAppContextService {
       throw new EndpointAppContentServicesNotSetUpError();
     }
 
-    // TODO:PT check what this returns when running locally with kibana in serverless emulation
-
     return Boolean(this.setupDependencies.cloud.isServerlessEnabled);
   }
 
@@ -268,6 +269,13 @@ export class EndpointAppContextService {
     }
 
     return this.startDependencies.esClient;
+  }
+
+  public getAgentBuilder(): AgentBuilderPluginStart {
+    if (this.startDependencies?.agentBuilder == null) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+    return this.startDependencies.agentBuilder;
   }
 
   private getFleetAuthzService(): FleetStartContract['authz'] {
@@ -296,6 +304,7 @@ export class EndpointAppContextService {
       this.getLicenseService(),
       fleetAuthz,
       userRoles,
+      this.isServerless(),
       this.startDependencies.productFeaturesService
     );
   }
@@ -464,6 +473,23 @@ export class EndpointAppContextService {
     return this.startDependencies.spacesService.getActiveSpace(httpRequest);
   }
 
+  public getActiveSpaceId(httpRequest: KibanaRequest): string {
+    if (!this.startDependencies?.spacesService) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+
+    return this.startDependencies.spacesService.getSpaceId(httpRequest);
+  }
+
+  public getAccessibleSpaces(httpRequest: KibanaRequest): Promise<Space[]> {
+    if (!this.startDependencies?.spacesService) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+
+    const spacesClient = this.startDependencies.spacesService.createSpacesClient(httpRequest);
+    return spacesClient.getAll();
+  }
+
   public getReferenceDataClient(): ReferenceDataClientInterface {
     if (!this.startDependencies?.savedObjectsServiceStart) {
       throw new EndpointAppContentServicesNotStartedError();
@@ -471,8 +497,31 @@ export class EndpointAppContextService {
 
     return new ReferenceDataClient(
       this.savedObjects.createInternalScopedSoClient({ readonly: false }),
+      this.experimentalFeatures,
       this.createLogger('ReferenceDataClient')
     );
+  }
+
+  /**
+   * Returns true if Endpoint Exceptions move FF is enabled AND the user has opted in
+   * to per-policy Endpoint Exceptions.
+   */
+  public async isEndpointExceptionsPerPolicyEnabled(): Promise<boolean> {
+    if (!this.startDependencies) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+
+    if (!this.startDependencies.experimentalFeatures.endpointExceptionsMovedUnderManagement) {
+      return false;
+    }
+
+    const referenceDataClient = this.getReferenceDataClient();
+
+    const optInStatusMetadata = await referenceDataClient.get<OptInStatusMetadata>(
+      REF_DATA_KEYS.endpointExceptionsPerPolicyOptInStatus
+    );
+
+    return optInStatusMetadata.metadata.status;
   }
 
   public getServerConfigValue<TKey extends keyof ConfigType = keyof ConfigType>(
@@ -489,11 +538,16 @@ export class EndpointAppContextService {
     return this.startDependencies.config[key];
   }
 
-  getScriptsLibraryClient(spaceId: string, username: string): ScriptsLibraryClientInterface {
+  getScriptsLibraryClient(
+    spaceId: string,
+    username: string,
+    rulesClient?: RulesClient
+  ): ScriptsLibraryClientInterface {
     return new ScriptsLibraryClient({
       spaceId,
       username,
       endpointService: this,
+      rulesClient,
     });
   }
 }

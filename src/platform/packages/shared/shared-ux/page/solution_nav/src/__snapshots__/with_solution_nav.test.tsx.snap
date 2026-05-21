@@ -56,6 +56,7 @@ exports[`WithSolutionNav renders wrapped component 1`] = `
       "hasEmbellish": true,
       "minWidth": undefined,
       "paddingSize": "none",
+      "responsive": Array [],
     }
   }
 />
@@ -117,6 +118,7 @@ exports[`WithSolutionNav with children 1`] = `
       "hasEmbellish": true,
       "minWidth": undefined,
       "paddingSize": "none",
+      "responsive": Array [],
     }
   }
 >

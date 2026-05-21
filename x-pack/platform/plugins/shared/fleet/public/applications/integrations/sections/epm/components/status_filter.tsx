@@ -70,11 +70,11 @@ export const StatusFilter: React.FC<StatusFilterProps> = ({
       id={popoverId}
       isOpen={isOpen}
       closePopover={closePopover}
-      panelPaddingSize="none"
+      panelPaddingSize="s"
       button={
         <EuiFilterButton
           data-test-subj={`${testSubjPrefix}.statusBtn`}
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           onClick={togglePopover}
           isSelected={isOpen}
           numFilters={activeCount}
@@ -91,7 +91,6 @@ export const StatusFilter: React.FC<StatusFilterProps> = ({
         options={options}
         onChange={onSelectionChange}
         listProps={{
-          paddingSize: 's',
           showIcons: true,
           style: {
             minWidth: 250,

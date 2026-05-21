@@ -10,6 +10,7 @@ import { esql } from '@elastic/esql';
 import {
   AT_TIMESTAMP,
   ERROR_GROUP_ID,
+  ERROR_ID,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
@@ -46,6 +47,7 @@ export interface ESQLQueryParams {
   spanId?: string;
   traceId?: string;
   errorGroupId?: string;
+  errorId?: string;
   sortDirection?: 'ASC' | 'DESC';
 }
 
@@ -81,6 +83,7 @@ export const getESQLQuery = ({
     spanId,
     traceId,
     errorGroupId,
+    errorId,
     sortDirection,
   } = params;
 
@@ -88,6 +91,10 @@ export const getESQLQuery = ({
 
   if (errorGroupId) {
     query = query.where`${esql.col(ERROR_GROUP_ID)} == ${errorGroupId}`;
+  }
+
+  if (errorId) {
+    query = query.where`${esql.col(ERROR_ID)} == ${errorId}`;
   }
 
   if (serviceName) {

@@ -8,19 +8,21 @@
 import { getRandomString } from '@kbn/test-jest-helpers';
 import type { AutoFollowPattern } from '../../../../common/types';
 
+type AutoFollowPatternMockParams = Partial<{
+  name: string;
+  active: boolean;
+  remoteCluster: string;
+  leaderIndexPatterns: string[];
+  followIndexPattern: string;
+}>;
+
 export const getAutoFollowPatternMock = ({
   name = getRandomString(),
   active = false,
   remoteCluster = getRandomString(),
   leaderIndexPatterns = [`${getRandomString()}-*`],
   followIndexPattern = getRandomString(),
-}: {
-  name: string;
-  active: boolean;
-  remoteCluster: string;
-  leaderIndexPatterns: string[];
-  followIndexPattern: string;
-}): AutoFollowPattern => ({
+}: AutoFollowPatternMockParams = {}): AutoFollowPattern => ({
   name,
   active,
   remoteCluster,

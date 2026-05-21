@@ -9,16 +9,13 @@
 
 import type { RequestHandlerContext } from '@kbn/core/server';
 import type { ScanDashboardsResult } from './scan_dashboards';
-import type { create, read, update, deleteDashboard } from './api';
+import type { DashboardReadResponseBody } from './api';
 
 /**
  * Client interface for dashboard CRUD operations
  */
 export interface DashboardServerClient {
-  create: typeof create;
-  read: typeof read;
-  update: typeof update;
-  delete: typeof deleteDashboard;
+  read(requestCtx: RequestHandlerContext, id: string): Promise<DashboardReadResponseBody>;
 }
 
 /** The setup contract for the Dashboard plugin on the server. */

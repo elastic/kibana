@@ -26,8 +26,9 @@ import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import type { CasesServerSetup } from '@kbn/cases-plugin/server';
-import type { PluginsSetup, PluginsStart, RouteInitialization } from './types';
-import { type MlCapabilities, alertingFeatures } from '../common/types/capabilities';
+import { type MlCapabilities, alertingFeatures } from '@kbn/ml-common-types/capabilities';
+import { getPluginPrivileges } from '@kbn/ml-common-types/capabilities';
+import type { PluginsSetup, PluginsStart, RouteInitialization, ServerlessInfo } from './types';
 import { notificationsRoutes } from './routes/notifications';
 import {
   type MlFeatures,
@@ -56,7 +57,6 @@ import { systemRoutes } from './routes/system';
 import { MlLicense } from '../common/license';
 import type { SharedServices } from './shared_services';
 import { createSharedServices } from './shared_services';
-import { getPluginPrivileges } from '../common/types/capabilities';
 import { setupCapabilitiesSwitcher } from './lib/capabilities';
 import { registerKibanaSettings } from './lib/register_settings';
 import { trainedModelsRoutes } from './routes/trained_models';
@@ -102,7 +102,7 @@ export class MlServerPlugin
     nlp: true,
   };
   private compatibleModuleType: CompatibleModule | null = null;
-  private isServerless: boolean;
+  private serverless: ServerlessInfo;
 
   constructor(ctx: PluginInitializerContext<ConfigSchema>) {
     this.log = ctx.logger.get();
@@ -111,7 +111,11 @@ export class MlServerPlugin
     this.savedObjectsSyncService = new SavedObjectsSyncService(this.log);
 
     const config = ctx.config.get();
-    this.isServerless = ctx.env.packageInfo.buildFlavor === 'serverless';
+
+    this.serverless = {
+      isServerless: ctx.env.packageInfo.buildFlavor === 'serverless',
+      cpsEnabled: false,
+    };
     initEnabledFeatures(this.enabledFeatures, config);
     this.compatibleModuleType = config.compatibleModuleType ?? null;
     this.enabledFeatures = Object.freeze(this.enabledFeatures);
@@ -122,6 +126,7 @@ export class MlServerPlugin
     this.security = plugins.security;
     this.home = plugins.home;
     this.cases = plugins.cases;
+    this.serverless.cpsEnabled = plugins.cps?.getCpsEnabled() ?? false;
     const { admin, user, apmUser } = getPluginPrivileges();
 
     plugins.features.registerKibanaFeature({
@@ -221,7 +226,8 @@ export class MlServerPlugin
       () => this.auditService,
       () => this.isMlReady,
       this.compatibleModuleType,
-      this.enabledFeatures
+      this.enabledFeatures,
+      this.serverless
     );
 
     const routeInit: RouteInitialization = {
@@ -234,7 +240,8 @@ export class MlServerPlugin
         plugins.security?.authz,
         () => this.isMlReady,
         () => this.dataViews,
-        coreSetup.getStartServices
+        coreSetup.getStartServices,
+        this.serverless
       ),
       mlLicense: this.mlLicense,
       getEnabledFeatures: () => this.enabledFeatures,
@@ -277,7 +284,7 @@ export class MlServerPlugin
       getSpaces,
       cloud: plugins.cloud,
       resolveMlCapabilities,
-      isServerless: this.isServerless,
+      serverless: this.serverless,
     });
     notificationsRoutes(routeInit);
     alertingRoutes(routeInit, sharedServicesProviders);

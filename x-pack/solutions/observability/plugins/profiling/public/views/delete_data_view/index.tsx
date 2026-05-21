@@ -7,6 +7,7 @@
 
 import { EuiCard, EuiIcon, EuiLink } from '@elastic/eui';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_template';
 
@@ -18,13 +19,18 @@ export function DeleteDataView() {
   } = useProfilingDependencies();
 
   return (
-    <ProfilingAppPageTemplate tabs={[]} restrictWidth hideSearchBar>
+    <ProfilingAppPageTemplate restrictWidth hideSearchBar>
       <div style={{ display: 'flex', flexGrow: 1, justifyContent: 'center', alignItems: 'center' }}>
         <EuiCard
           style={{ flexGrow: 0, maxWidth: '500px' }}
-          icon={<EuiIcon color="danger" size="xxl" type="warning" />}
-          title="You have existing profiling data"
-          description="To proceed with the Universal Profiling setup, please delete existing profiling data following the steps described in the link below."
+          icon={<EuiIcon color="danger" size="xxl" type="warning" aria-hidden={true} />}
+          title={i18n.translate('xpack.profiling.deleteDataView.card.title', {
+            defaultMessage: 'You have existing profiling data',
+          })}
+          description={i18n.translate('xpack.profiling.deleteDataView.card.description', {
+            defaultMessage:
+              'To proceed with the Universal Profiling setup, please delete existing profiling data following the steps described in the link below.',
+          })}
           footer={
             <div>
               <EuiLink
@@ -32,7 +38,10 @@ export function DeleteDataView() {
                 href={`${docLinks.ELASTIC_WEBSITE_URL}/guide/en/observability/${docLinks.DOC_LINK_VERSION}/profiling-upgrade.html#profiling-delete-data`}
                 target="_blank"
               >
-                Delete existing profiling data
+                {i18n.translate(
+                  'xpack.profiling.deleteDataView.card.deleteExistingProfilingDataLinkLabel',
+                  { defaultMessage: 'Delete existing profiling data' }
+                )}
               </EuiLink>
             </div>
           }

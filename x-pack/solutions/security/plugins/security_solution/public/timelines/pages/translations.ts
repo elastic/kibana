@@ -14,7 +14,7 @@ export const PAGE_TITLE = i18n.translate('xpack.securitySolution.timelines.pageT
 export const ALL_TIMELINES_PANEL_TITLE = i18n.translate(
   'xpack.securitySolution.timelines.allTimelines.panelTitle',
   {
-    defaultMessage: 'All timelines',
+    defaultMessage: 'All Timelines',
   }
 );
 
@@ -28,7 +28,7 @@ export const ALL_TIMELINES_IMPORT_TIMELINE_TITLE = i18n.translate(
 export const ERROR_FETCHING_TIMELINES_TITLE = i18n.translate(
   'xpack.securitySolution.timelines.allTimelines.errorFetchingTimelinesTitle',
   {
-    defaultMessage: 'Failed to query all timelines data',
+    defaultMessage: 'Failed to query all Timelines data',
   }
 );
 
@@ -57,6 +57,6 @@ export const TIMELINE_VERSION_CONFLICT_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.timelines.timelineVersionConflictDescription',
   {
     defaultMessage:
-      'Another user has made changes to this timeline. You need to refresh the page to make changes to this timeline.',
+      'Another user has made changes to this Timeline. You need to refresh the page to make changes to this Timeline.',
   }
 );

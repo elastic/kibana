@@ -8,7 +8,6 @@
 import { schema } from '@kbn/config-schema';
 import path from 'node:path';
 import { AgentVisibility } from '@kbn/agent-builder-common';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { publicApiPath } from '../../common/constants';
@@ -40,16 +39,35 @@ const TOOL_SELECTION_SCHEMA = schema.arrayOf(
   )
 );
 
-const VISIBILITY_DISABLED_MESSAGE =
-  'The "visibility" field is disabled. Enable "agentBuilder:experimentalFeatures" to use it.';
+const SKILLS_SCHEMA = schema.arrayOf(
+  schema.string({
+    meta: { description: 'Skill ID to be available to the agent.' },
+  }),
+  {
+    maxSize: 100,
+    meta: { description: 'Array of skill IDs to be available to the agent.' },
+  }
+);
 
-const isVisibilityBlockedByExperimentalGate = ({
-  experimentalFeaturesEnabled,
-  visibility,
-}: {
-  experimentalFeaturesEnabled: boolean;
-  visibility: AgentVisibility | undefined;
-}): boolean => !experimentalFeaturesEnabled && visibility !== undefined;
+const PLUGINS_SCHEMA = schema.arrayOf(
+  schema.string({
+    meta: { description: 'Plugin ID to assign to the agent.' },
+  }),
+  {
+    maxSize: 100,
+    meta: { description: 'Array of plugin IDs to assign to the agent.' },
+  }
+);
+
+const CONNECTORS_SCHEMA = schema.arrayOf(
+  schema.string({
+    meta: { description: 'Connector ID to associate with the agent.' },
+  }),
+  {
+    maxSize: 100,
+    meta: { description: 'Array of connector IDs to associate with the agent.' },
+  }
+);
 
 export function registerAgentRoutes({
   router,
@@ -67,7 +85,7 @@ export function registerAgentRoutes({
       access: 'public',
       summary: 'List agents',
       description:
-        'List all available agents. Use this endpoint to retrieve complete agent information including their current configuration and assigned tools. To learn more, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).',
+        'List all available agents. Use this endpoint to retrieve complete agent information including their current configuration and assigned tools. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).',
       options: {
         tags: ['agent', 'oas-tag:agent builder'],
         availability: {
@@ -99,7 +117,7 @@ export function registerAgentRoutes({
       access: 'public',
       summary: 'Get an agent by ID',
       description:
-        'Get a specific agent by ID. Use this endpoint to retrieve the complete agent definition including all configuration details and tool assignments. To learn more, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).',
+        'Get a specific agent by ID. Use this endpoint to retrieve the complete agent definition including all configuration details and tool assignments. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).',
       options: {
         tags: ['agent', 'oas-tag:agent builder'],
         availability: {
@@ -140,7 +158,7 @@ export function registerAgentRoutes({
       access: 'public',
       summary: 'Create an agent',
       description:
-        "Create a new agent. Use this endpoint to define the agent's behavior, appearance, and capabilities through comprehensive configuration options. To learn more, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).",
+        "Create a new agent. Use this endpoint to define the agent's behavior, appearance, and capabilities through comprehensive configuration options. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).",
       options: {
         tags: ['agent', 'oas-tag:agent builder'],
         availability: {
@@ -210,6 +228,15 @@ export function registerAgentRoutes({
                     })
                   ),
                   tools: TOOL_SELECTION_SCHEMA,
+                  skill_ids: schema.maybe(SKILLS_SCHEMA),
+                  enable_elastic_capabilities: schema.maybe(
+                    schema.boolean({
+                      meta: {
+                        description:
+                          'When true, enables built-in Elastic capabilities for the agent.',
+                      },
+                    })
+                  ),
                   workflow_ids: schema.maybe(
                     schema.arrayOf(
                       schema.string({
@@ -221,6 +248,8 @@ export function registerAgentRoutes({
                       { maxSize: 100 }
                     )
                   ),
+                  plugin_ids: schema.maybe(PLUGINS_SCHEMA),
+                  connector_ids: schema.maybe(CONNECTORS_SCHEMA),
                 },
                 {
                   meta: { description: 'Configuration settings for the agent.' },
@@ -236,23 +265,6 @@ export function registerAgentRoutes({
       wrapHandler(async (ctx, request, response) => {
         const { agents, auditLogService } = getInternalServices();
         const service = await agents.getRegistry({ request });
-        const { uiSettings } = await ctx.core;
-        const experimentalFeaturesEnabled = await uiSettings.client.get<boolean>(
-          AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
-        );
-
-        if (
-          isVisibilityBlockedByExperimentalGate({
-            experimentalFeaturesEnabled,
-            visibility: request.body.visibility,
-          })
-        ) {
-          return response.badRequest({
-            body: {
-              message: VISIBILITY_DISABLED_MESSAGE,
-            },
-          });
-        }
 
         try {
           const profile = await service.create(request.body);
@@ -284,7 +296,7 @@ export function registerAgentRoutes({
       access: 'public',
       summary: 'Update an agent',
       description:
-        "Update an existing agent configuration. Use this endpoint to modify any aspect of the agent's behavior, appearance, or capabilities. To learn more, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).",
+        "Update an existing agent configuration. Use this endpoint to modify any aspect of the agent's behavior, appearance, or capabilities. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).",
       options: {
         tags: ['agent', 'oas-tag:agent builder'],
         availability: {
@@ -360,6 +372,15 @@ export function registerAgentRoutes({
                       })
                     ),
                     tools: schema.maybe(TOOL_SELECTION_SCHEMA),
+                    skill_ids: schema.maybe(SKILLS_SCHEMA),
+                    enable_elastic_capabilities: schema.maybe(
+                      schema.boolean({
+                        meta: {
+                          description:
+                            'When true, enables built-in Elastic capabilities for the agent.',
+                        },
+                      })
+                    ),
                     workflow_ids: schema.maybe(
                       schema.arrayOf(
                         schema.string({
@@ -371,6 +392,8 @@ export function registerAgentRoutes({
                         { maxSize: 100 }
                       )
                     ),
+                    plugin_ids: schema.maybe(PLUGINS_SCHEMA),
+                    connector_ids: schema.maybe(CONNECTORS_SCHEMA),
                   },
                   {
                     meta: { description: 'Updated configuration settings for the agent.' },
@@ -387,23 +410,6 @@ export function registerAgentRoutes({
       wrapHandler(async (ctx, request, response) => {
         const { agents, auditLogService } = getInternalServices();
         const service = await agents.getRegistry({ request });
-        const { uiSettings } = await ctx.core;
-        const experimentalFeaturesEnabled = await uiSettings.client.get<boolean>(
-          AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
-        );
-
-        if (
-          isVisibilityBlockedByExperimentalGate({
-            experimentalFeaturesEnabled,
-            visibility: request.body.visibility,
-          })
-        ) {
-          return response.badRequest({
-            body: {
-              message: VISIBILITY_DISABLED_MESSAGE,
-            },
-          });
-        }
 
         try {
           const profile = await service.update(request.params.id, request.body);
@@ -434,7 +440,7 @@ export function registerAgentRoutes({
       access: 'public',
       summary: 'Delete an agent',
       description:
-        'Delete an agent by ID. This action cannot be undone. To learn more, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).',
+        'Delete an agent by ID. This action cannot be undone. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).',
       options: {
         tags: ['agent', 'oas-tag:agent builder'],
         availability: {

@@ -38,17 +38,6 @@ describe('GroupBySelect', () => {
     expect(getByText(/None/i)).toBeInTheDocument();
   });
 
-  it('should render the filter button with "Models" when model_id is selected', () => {
-    const { getByText } = render(
-      <Wrapper>
-        <GroupBySelect value={GroupByOptions.Model} onChange={mockOnChange} />
-      </Wrapper>
-    );
-
-    expect(getByText(/Group:/i)).toBeInTheDocument();
-    expect(getByText(/Models/i)).toBeInTheDocument();
-  });
-
   it('should render the filter button with "Service" when service is selected', () => {
     const { getByText } = render(
       <Wrapper>
@@ -99,42 +88,10 @@ describe('GroupBySelect', () => {
     });
   });
 
-  it('should call onChange with GroupByOptions.Model when "Models" option is selected', async () => {
-    const { getByRole } = render(
-      <Wrapper>
-        <GroupBySelect value={GroupByOptions.None} onChange={mockOnChange} />
-      </Wrapper>
-    );
-
-    // Open popover
-    const filterButton = getByRole('button');
-    fireEvent.click(filterButton);
-
-    await waitFor(() => {
-      const options = document.querySelectorAll('[role="option"]');
-      expect(options.length).toBeGreaterThan(0);
-    });
-
-    // Find and click the "Models" option
-    const options = document.querySelectorAll('[role="option"]');
-    const modelsOption = Array.from(options).find((option) =>
-      option.textContent?.includes('Models')
-    );
-
-    expect(modelsOption).toBeDefined();
-    if (modelsOption) {
-      fireEvent.click(modelsOption);
-    }
-
-    await waitFor(() => {
-      expect(mockOnChange).toHaveBeenCalledWith(GroupByOptions.Model);
-    });
-  });
-
   it('should call onChange with GroupByOptions.None when "None" option is selected', async () => {
     const { getByRole } = render(
       <Wrapper>
-        <GroupBySelect value={GroupByOptions.Model} onChange={mockOnChange} />
+        <GroupBySelect value={GroupByOptions.Service} onChange={mockOnChange} />
       </Wrapper>
     );
 
@@ -210,12 +167,12 @@ describe('GroupBySelect', () => {
 
     // Select an option
     const options = document.querySelectorAll('[role="option"]');
-    const modelsOption = Array.from(options).find((option) =>
-      option.textContent?.includes('Models')
+    const serviceOption = Array.from(options).find((option) =>
+      option.textContent?.includes('Service')
     );
 
-    if (modelsOption) {
-      fireEvent.click(modelsOption);
+    if (serviceOption) {
+      fireEvent.click(serviceOption);
     }
 
     // Popover should close after selection
@@ -227,7 +184,7 @@ describe('GroupBySelect', () => {
   it('should mark the current selection as checked', async () => {
     const { getByRole } = render(
       <Wrapper>
-        <GroupBySelect value={GroupByOptions.Model} onChange={mockOnChange} />
+        <GroupBySelect value={GroupByOptions.Service} onChange={mockOnChange} />
       </Wrapper>
     );
 
@@ -237,18 +194,18 @@ describe('GroupBySelect', () => {
 
     await waitFor(() => {
       const options = document.querySelectorAll('[role="option"]');
-      expect(options.length).toBe(3);
+      expect(options.length).toBe(2);
     });
 
-    // Check that the "Models" option is marked as checked
+    // Check that the "Service" option is marked as checked
     const options = document.querySelectorAll('[role="option"]');
-    const modelsOption = Array.from(options).find((option) =>
-      option.textContent?.includes('Models')
+    const serviceOption = Array.from(options).find((option) =>
+      option.textContent?.includes('Service')
     ) as HTMLElement;
 
-    expect(modelsOption).toBeDefined();
-    if (modelsOption) {
-      expect(modelsOption.getAttribute('aria-selected')).toBe('true');
+    expect(serviceOption).toBeDefined();
+    if (serviceOption) {
+      expect(serviceOption.getAttribute('aria-selected')).toBe('true');
     }
   });
 });

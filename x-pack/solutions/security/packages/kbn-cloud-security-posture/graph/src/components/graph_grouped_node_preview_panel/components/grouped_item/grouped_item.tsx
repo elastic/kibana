@@ -23,13 +23,18 @@ export type GroupedItemProps =
   | {
       isLoading: true;
       item?: EntityOrEventItem;
+      scopeId?: string;
     }
   | {
       isLoading?: false;
       item: EntityOrEventItem;
+      /**
+       * Unique identifier for the graph instance, used to scope filter state.
+       */
+      scopeId: string;
     };
 
-export const GroupedItem = memo(({ item, isLoading }: GroupedItemProps) => {
+export const GroupedItem = memo(({ item, isLoading, scopeId }: GroupedItemProps) => {
   if (isLoading) {
     return (
       <Panel grow={false}>
@@ -42,7 +47,7 @@ export const GroupedItem = memo(({ item, isLoading }: GroupedItemProps) => {
     <Panel isAlert={item.itemType === DOCUMENT_TYPE_ALERT}>
       <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
         <EuiFlexItem>
-          <HeaderRow item={item} />
+          <HeaderRow item={item} scopeId={scopeId} />
         </EuiFlexItem>
 
         {item.timestamp && (

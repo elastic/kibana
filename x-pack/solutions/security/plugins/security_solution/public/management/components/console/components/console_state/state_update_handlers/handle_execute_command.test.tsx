@@ -17,9 +17,7 @@ import type {
 } from '../../../types';
 import { executionTranslations } from './translations';
 
-// FLAKY: https://github.com/elastic/kibana/issues/255342
-// FLAKY: https://github.com/elastic/kibana/issues/255721
-describe.skip('When a Console command is entered by the user', () => {
+describe('When a Console command is entered by the user', () => {
   let render: (props?: Partial<ConsoleProps>) => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let commands: ConsoleTestSetup['commands'];

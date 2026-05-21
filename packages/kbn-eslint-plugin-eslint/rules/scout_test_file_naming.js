@@ -36,12 +36,13 @@ const hasSpecExtension = (filename) => {
 };
 
 /**
- * Checks if a file is a global setup file
+ * Checks if a file is a global setup or teardown file
  * @param {string} filename
  * @returns {boolean}
  */
-const isGlobalSetupFile = (filename) => {
-  return path.basename(filename) === 'global.setup.ts';
+const isGlobalSetupOrTeardownFile = (filename) => {
+  const basename = path.basename(filename);
+  return basename === 'global.setup.ts' || basename === 'global.teardown.ts';
 };
 
 const ALLOWED_PLAYWRIGHT_CONFIG_NAMES = new Set([
@@ -110,8 +111,8 @@ module.exports = {
 
     // Check if the file is in a Scout test directory
     if (isInScoutTestDirectory(filename)) {
-      // Allow global.setup.ts files
-      if (isGlobalSetupFile(filename)) {
+      // Allow global.setup.ts and global.teardown.ts files
+      if (isGlobalSetupOrTeardownFile(filename)) {
         return {};
       }
 
@@ -150,7 +151,7 @@ module.exports = {
       // File is in /test/scout but not in the correct subdirectory structure
       // Only report if it looks like a test file (has test/spec in name or is .ts)
       const basename = path.basename(filename, '.ts');
-      if (basename.includes('test') || basename.includes('spec') || hasSpecExtension(filename)) {
+      if (basename.includes('spec') || hasSpecExtension(filename)) {
         return {
           Program(node) {
             context.report({

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiDatePicker, EuiFormRow, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiDatePicker, EuiFieldText, EuiFormRow, EuiSpacer, EuiTitle } from '@elastic/eui';
 import type { Moment } from 'moment';
 import moment from 'moment';
 import React, { useCallback, useState } from 'react';
@@ -56,8 +56,15 @@ const ExceptionItemExpireTime: React.FC<ExceptionItmeExpireTimeProps> = ({
         <h3>{i18n.EXCEPTION_EXPIRE_TIME_HEADER}</h3>
       </SectionHeader>
       <EuiSpacer size="s" />
-      <EuiFormRow error={errors} isInvalid={isInvalid} label={i18n.EXPIRE_TIME_LABEL}>
+      <EuiFormRow
+        error={errors}
+        isInvalid={isInvalid}
+        label={i18n.EXPIRE_TIME_LABEL}
+        id="exceptionExpireTime"
+      >
         <EuiDatePicker
+          customInput={<EuiFieldText controlOnly aria-labelledby="exceptionExpireTime-label" />}
+          customInputRef="inputRef"
           showTimeSelect
           selected={dateTime}
           isInvalid={isInvalid}

@@ -6,6 +6,7 @@
  */
 
 export * from './unenroll';
+export * from './remove_collector';
 export * from './upgrade';
 export * from './status';
 export * from './crud';

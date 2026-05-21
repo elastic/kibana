@@ -51,6 +51,20 @@ export interface GetProfilesOptions {
   record?: DataTableRecord;
 }
 
+/**
+ * Result returned from data source profile resolution.
+ */
+export interface ResolveDataSourceProfileResult {
+  /**
+   * Whether the resolved data source profile differs from the previously active profile.
+   */
+  didProfileChange: boolean;
+  /**
+   * Whether it's the first data source profile resolved since the manager was created.
+   */
+  isFirstResolution: boolean;
+}
+
 export class ScopedProfilesManager {
   private readonly dataSourceContext$: BehaviorSubject<ContextWithProfileId<DataSourceContext>>;
   private cachedRootContext: ContextWithProfileId<RootContext>;
@@ -92,11 +106,12 @@ export class ScopedProfilesManager {
   public async resolveDataSourceProfile(
     params: Omit<DataSourceProfileProviderParams, 'rootContext'>,
     onBeforeChange?: () => void
-  ) {
+  ): Promise<ResolveDataSourceProfileResult> {
     const serializedParams = serializeDataSourceProfileParams(params);
+    const isFirstResolution = this.prevDataSourceProfileParams === undefined;
 
     if (isEqual(this.prevDataSourceProfileParams, serializedParams)) {
-      return;
+      return { didProfileChange: false, isFirstResolution };
     }
 
     const abortController = new AbortController();
@@ -115,13 +130,18 @@ export class ScopedProfilesManager {
     }
 
     if (abortController.signal.aborted) {
-      return;
+      return { didProfileChange: false, isFirstResolution };
     }
+
+    const didProfileChange =
+      isFirstResolution || this.dataSourceContext$.getValue().profileId !== context.profileId;
 
     onBeforeChange?.();
     this.trackActiveProfiles(this.rootContext$.getValue().profileId, context.profileId);
     this.dataSourceContext$.next(context);
     this.prevDataSourceProfileParams = serializedParams;
+
+    return { didProfileChange, isFirstResolution };
   }
 
   /**

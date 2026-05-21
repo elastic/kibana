@@ -16,7 +16,7 @@ export const FLUSH_INTERVAL_MS = 500;
 
 export async function flushState(params: WorkflowExecutionLoopParams) {
   const flushSpan = apm.startSpan('persistence flush', 'workflow', 'persistence');
-  await Promise.all([params.workflowExecutionState.flush(), params.workflowLogger.flushEvents()]);
+  await Promise.all([params.stepIoService.flush(), params.workflowLogger.flushEvents()]);
   flushSpan?.end();
 }
 
@@ -45,7 +45,6 @@ export async function persistenceLoop(
   persistenceAbortSignal?: AbortSignal
 ) {
   while (params.workflowRuntime.getWorkflowExecutionStatus() === ExecutionStatus.RUNNING) {
-    // Check if we should exit immediately (execution completed)
     if (persistenceAbortSignal?.aborted) {
       return;
     }
@@ -53,9 +52,6 @@ export async function persistenceLoop(
     await flushState(params);
 
     try {
-      // Wait for flush interval, but can be interrupted by either:
-      // 1. Task abort (task cancelled)
-      // 2. Persistence abort (execution completed - exit immediately)
       const waitSpan = apm.startSpan('persistence wait', 'workflow', 'wait');
       await Promise.race([
         abortableTimeout(FLUSH_INTERVAL_MS, params.taskAbortController.signal),
@@ -63,12 +59,17 @@ export async function persistenceLoop(
           ? new Promise<void>((_, reject) => {
               if (persistenceAbortSignal.aborted) {
                 reject(new TimeoutAbortedError());
+                return;
               }
-              persistenceAbortSignal.addEventListener('abort', () => {
-                reject(new TimeoutAbortedError());
-              });
+              persistenceAbortSignal.addEventListener(
+                'abort',
+                () => reject(new TimeoutAbortedError()),
+                {
+                  once: true,
+                }
+              );
             })
-          : new Promise<void>(() => {}), // Never resolves if no signal provided
+          : new Promise<void>(() => {}),
       ]);
       waitSpan?.end();
     } catch (error) {

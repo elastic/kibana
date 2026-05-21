@@ -19,7 +19,7 @@ import { createFleetTestRendererMock } from '../../../../../mock';
 import {
   useGetUninstallToken,
   useGetUninstallTokens,
-  sendGetUninstallToken,
+  getUninstallTokenValue,
 } from '../../../../../hooks/use_request/uninstall_tokens';
 import type {
   UninstallToken,
@@ -31,7 +31,7 @@ import { UninstallTokenListPage } from '.';
 jest.mock('../../../../../hooks/use_request/uninstall_tokens', () => ({
   useGetUninstallToken: jest.fn(),
   useGetUninstallTokens: jest.fn(),
-  sendGetUninstallToken: jest.fn(),
+  getUninstallTokenValue: jest.fn(),
 }));
 
 type MockResponseType<DataType> = Pick<
@@ -48,7 +48,7 @@ describe('UninstallTokenList page', () => {
 
   const useGetUninstallTokenMock = useGetUninstallToken as jest.Mock;
   const useGetUninstallTokensMock = useGetUninstallTokens as jest.Mock;
-  const sendGetUninstallTokenMock = sendGetUninstallToken as jest.Mock;
+  const getUninstallTokenValueMock = getUninstallTokenValue as jest.Mock;
 
   afterEach(() => {
     jest.clearAllMocks();
@@ -162,11 +162,11 @@ describe('UninstallTokenList page', () => {
       const renderResult = render();
 
       expect(renderResult.queryByText(uninstallTokenFixture.token)).not.toBeInTheDocument();
-      expect(renderResult.queryAllByText('••••••••••••••••••••••••••••••••').length).toBe(2);
+      expect(renderResult.queryAllByText('••••••••••••••••••••••••').length).toBe(2);
     });
 
     it('should fetch and show token when clicking on the "Show" button', async () => {
-      sendGetUninstallTokenMock.mockReturnValue(getTokenResponseFixture);
+      getUninstallTokenValueMock.mockResolvedValue(uninstallTokenFixture.token);
 
       const renderResult = render();
 
@@ -175,7 +175,7 @@ describe('UninstallTokenList page', () => {
       await waitFor(() => {
         expect(renderResult.queryByText(uninstallTokenFixture.token)).toBeInTheDocument();
       });
-      expect(sendGetUninstallTokenMock).toHaveBeenCalledWith(uninstallTokenMetadataFixture1.id);
+      expect(getUninstallTokenValueMock).toHaveBeenCalledWith(uninstallTokenMetadataFixture1.id);
     });
 
     it('should show flyout for uninstall command when clicking on the "View uninstall command" button', async () => {

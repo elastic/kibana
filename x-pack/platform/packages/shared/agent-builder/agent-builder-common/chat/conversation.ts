@@ -6,11 +6,13 @@
  */
 
 import type { UserIdAndName } from '../base/users';
+import type { ToolOrigin } from '../tools/definition';
 import type { ToolResult } from '../tools/tool_result';
+import type { ExecutionStatus, SerializedExecutionError } from '../agents/execution_status';
 import type {
   Attachment,
-  AttachmentInput,
   VersionedAttachment,
+  AttachmentInput,
   AttachmentVersionRef,
 } from '../attachments';
 import type { PromptRequest, PromptResponse, PromptStorageState } from '../agents/prompts';
@@ -46,6 +48,7 @@ export interface ConverseInput {
   message?: string;
   /**
    * Optional attachments to provide to the agent.
+   * Use `origin` without `data` for by-reference types that implement `resolve`.
    * @deprecated Use attachment_refs with conversation-level attachments instead
    */
   attachments?: AttachmentInput[];
@@ -73,6 +76,9 @@ export interface AssistantResponse {
 export enum ConversationRoundStepType {
   toolCall = 'tool_call',
   reasoning = 'reasoning',
+  compaction = 'compaction',
+  backgroundAgentComplete = 'background_agent_complete',
+  updateTodos = 'update_todos',
 }
 
 // tool call step
@@ -89,6 +95,10 @@ export interface ToolCallProgress {
    * The full text message
    */
   message: string;
+  /**
+   * Optional structured metadata attached to this progress event.
+   */
+  metadata?: Record<string, string>;
 }
 
 /**
@@ -119,6 +129,7 @@ export interface ToolCallWithResult {
    * Optional group ID shared by tool calls that were executed in parallel from the same LLM response
    */
   tool_call_group_id?: string;
+  tool_origin?: ToolOrigin;
 }
 
 export type ToolCallStep = ConversationRoundStepMixin<
@@ -149,6 +160,10 @@ export interface ReasoningStepData {
   reasoning: string;
   /** if true, will not be displayed in the thinking panel, only used as "current thinking" **/
   transient?: boolean;
+  /** when reasoning is bound to a tool call, the corresponding tool call ID */
+  tool_call_id?: string;
+  /** when reasoning is bound to a tool call group, the corresponding tool call group ID */
+  tool_call_group_id?: string;
 }
 
 export type ReasoningStep = ConversationRoundStepMixin<
@@ -163,7 +178,79 @@ export const isReasoningStep = (step: ConversationRoundStep): step is ReasoningS
 /**
  * Defines all possible types for round steps.
  */
-export type ConversationRoundStep = ToolCallStep | ReasoningStep;
+// compaction step
+
+export interface CompactionStepData {
+  /** Number of conversation rounds that were summarized into a compact form */
+  summarized_round_count: number;
+  /** Estimated token count of the conversation before compaction */
+  token_count_before: number;
+  /** Estimated token count of the conversation after compaction */
+  token_count_after: number;
+}
+
+export type CompactionStep = ConversationRoundStepMixin<
+  ConversationRoundStepType.compaction,
+  CompactionStepData
+>;
+
+export const isCompactionStep = (step: ConversationRoundStep): step is CompactionStep => {
+  return step.type === ConversationRoundStepType.compaction;
+};
+
+export type BackgroundAgentCompleteStep = ConversationRoundStepMixin<
+  ConversationRoundStepType.backgroundAgentComplete,
+  BackgroundExecutionState
+>;
+
+export const isBackgroundAgentCompleteStep = (
+  step: ConversationRoundStep
+): step is BackgroundAgentCompleteStep => {
+  return step.type === ConversationRoundStepType.backgroundAgentComplete;
+};
+
+export interface TodosStepData {
+  todos: TodoItem[];
+  /** True when todos were inherited from the previous round, not written by the agent this round */
+  carried_over?: boolean;
+}
+
+export type TodosStep = ConversationRoundStepMixin<
+  ConversationRoundStepType.updateTodos,
+  TodosStepData
+>;
+
+export const isTodosStep = (step: ConversationRoundStep): step is TodosStep => {
+  return step.type === ConversationRoundStepType.updateTodos;
+};
+
+/**
+ * Returns the (single) todos step from a list of steps, if present.
+ * A round only ever has at most one todos step, which is updated in place.
+ */
+export const findTodosStep = (
+  steps: ConversationRoundStep[] | undefined
+): TodosStep | undefined => {
+  return steps?.find(isTodosStep);
+};
+
+/**
+ * Returns the todo list to carry over from the previous round, or undefined if nothing should carry over.
+ * Carryover only happens when at least one item is still incomplete (pending / in_progress).
+ * When carried over, both complete and incomplete items are included so the full plan is visible.
+ */
+export const carriedOverTodos = (todos: TodoItem[] | undefined): TodoItem[] | undefined => {
+  if (!todos?.length) return undefined;
+  const hasIncomplete = todos.some((t) => t.status !== 'completed' && t.status !== 'cancelled');
+  return hasIncomplete ? todos : undefined;
+};
+
+export type ConversationRoundStep =
+  | ToolCallStep
+  | ReasoningStep
+  | CompactionStep
+  | BackgroundAgentCompleteStep
+  | TodosStep;
 
 export enum ConversationRoundStatus {
   /** round is currently being processed */
@@ -185,8 +272,8 @@ export interface ConversationRound {
   status: ConversationRoundStatus;
   /** persisted state to resume interrupted states */
   state?: RoundState;
-  /** if status is awaiting_prompt, contains the current prompt request*/
-  pending_prompt?: PromptRequest;
+  /** if status is awaiting_prompt, contains the current prompt requests */
+  pending_prompts?: PromptRequest[];
   /** The user input that initiated the round */
   input: RoundInput;
   /** List of intermediate steps before the end result, such as tool calls */
@@ -260,6 +347,13 @@ export interface Conversation {
   state?: ConversationInternalState;
 }
 
+export type TodoStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';
+
+export interface TodoItem {
+  content: string;
+  status: TodoStatus;
+}
+
 /**
  * Internal storage for the conversation's arbitrary state.
  * Used for example to keep track of the prompt responses.
@@ -271,8 +365,87 @@ export interface ConversationInternalState {
    * These tools are persisted across rounds so they remain available.
    */
   dynamic_tool_ids?: string[];
+  /**
+   * Summary of compacted older conversation rounds.
+   * Generated when the conversation approaches the model's context window limit.
+   * Reused across rounds until regeneration is needed.
+   */
+  compaction_summary?: CompactionSummary;
+  /** Background sub-agent executions keyed by execution ID. */
+  background_executions?: Record<string, BackgroundExecutionState>;
+  /** Active todo list for the current conversation. Replaced wholesale on each write. */
+  todos?: TodoItem[];
+}
+
+export interface BackgroundExecutionCompletedAt {
+  /** The round it was completed at. */
+  round_id: string;
+  /** If completion was resolved inside a round, the last tool call group ID before completion. */
+  tool_call_group_id?: string;
+}
+
+export interface BackgroundExecutionState {
+  /** The execution ID of the background sub-agent. */
+  execution_id: string;
+  /** Current status of the execution. */
+  status: ExecutionStatus;
+  /** The sub-agent's response, present when status is 'completed'. */
+  response?: AssistantResponse;
+  /** Error details, present when status is 'failed'. */
+  error?: SerializedExecutionError;
+  /** When and where the execution completed, for positioning the notification. */
+  completed_at?: BackgroundExecutionCompletedAt;
 }
 
 export type ConversationWithoutRounds = Omit<Conversation, 'rounds'>;
 
 export type ConversationAction = 'regenerate';
+
+// Compaction summary types
+
+/** Compact representation of a tool call in a compaction summary */
+export interface CompactionToolCallSummary {
+  tool_id: string;
+  /** Short stringified summary of the params the tool was called with */
+  params_summary: string;
+}
+
+/** Structured entity extracted during compaction */
+export interface CompactionEntity {
+  type: string;
+  name: string;
+}
+
+/**
+ * Structured data produced by the compaction pipeline.
+ * Semantic fields (discussion_summary, user_intent, key_topics,
+ * outcomes_and_decisions, unanswered_questions, entities) are LLM-generated.
+ * Deterministic fields (tool_calls_summary, agent_actions)
+ * are extracted programmatically from the round data.
+ */
+export interface CompactionStructuredData {
+  discussion_summary: string;
+  user_intent: string;
+  key_topics: string[];
+  outcomes_and_decisions: string[];
+  agent_actions: string[];
+  entities: CompactionEntity[];
+  unanswered_questions: string[];
+  tool_calls_summary: CompactionToolCallSummary[];
+}
+
+/**
+ * Summary of compacted conversation rounds.
+ * Stored at the conversation level and reused across rounds
+ * until the context window fills up again and regeneration is needed.
+ */
+export interface CompactionSummary {
+  /** Number of rounds that were summarized */
+  summarized_round_count: number;
+  /** When the summary was generated */
+  created_at: string;
+  /** Estimated token count of the serialized summary */
+  token_count: number;
+  /** Structured summary data */
+  structured_data: CompactionStructuredData;
+}

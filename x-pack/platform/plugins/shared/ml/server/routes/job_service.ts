@@ -8,6 +8,8 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
 import { categorizationExamplesProvider } from '@kbn/ml-category-validator';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
 import type { RouteInitialization } from '../types';
@@ -15,7 +17,6 @@ import {
   categorizationFieldValidationSchema,
   basicChartSchema,
   populationChartSchema,
-  datafeedIdsSchema,
   forceStartDatafeedSchema,
   jobIdsSchema,
   optionalJobIdsSchema,
@@ -27,12 +28,12 @@ import {
   datafeedPreviewSchema,
   bulkCreateSchema,
   deleteJobsSchema,
+  stopDatafeedsSchema,
 } from './schemas/job_service_schema';
 
 import { jobForCloningSchema, jobIdSchema } from './schemas/anomaly_detectors_schema';
 
 import { jobServiceProvider } from '../models/job_service';
-import type { Datafeed, Job } from '../../common/types/anomaly_detection_jobs';
 
 /**
  * Routes for job service
@@ -91,15 +92,15 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
         version: '1',
         validate: {
           request: {
-            body: datafeedIdsSchema,
+            body: stopDatafeedsSchema,
           },
         },
       },
       routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
         try {
           const { stopDatafeeds } = jobServiceProvider(client, mlClient);
-          const { datafeedIds } = request.body;
-          const resp = await stopDatafeeds(datafeedIds);
+          const { datafeedIds, closeJobs } = request.body;
+          const resp = await stopDatafeeds(datafeedIds, closeJobs);
 
           return response.ok({
             body: resp,
@@ -848,7 +849,8 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
             end,
             analyzer,
             runtimeMappings,
-            indicesOptions
+            indicesOptions,
+            undefined
           );
 
           return response.ok({

@@ -91,7 +91,13 @@ export class UserActivityService
     this.enabled = false;
   }
 
-  private trackUserAction = ({ message, event, object }: TrackUserActionParams) => {
+  private trackUserAction = ({
+    message,
+    event,
+    object,
+    metadata,
+    error,
+  }: TrackUserActionParams) => {
     if (!this.enabled || !shouldLog(event.action, this.filters)) return;
 
     const injectedContext = this.getInjectedContext();
@@ -100,7 +106,14 @@ export class UserActivityService
       message = `User ${injectedContext.user?.name} performed ${event.action} on ${object.name} (${object.id})`;
     }
 
-    this.logger.info(message, { message, event, object, ...injectedContext });
+    this.logger.info(message, {
+      message,
+      event,
+      object,
+      ...(metadata ? { metadata } : {}),
+      ...(error ? { error } : {}),
+      ...injectedContext,
+    });
   };
 
   private setInjectedContext = (newContext: InjectedContext) => {

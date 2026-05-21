@@ -30,7 +30,10 @@ export const MonitorsDuration = ({
   monitor: OverviewStatusMetaData;
   onClickDuration: () => void;
 }) => {
-  const trendData = useSelector(selectOverviewTrends)[monitor.configId + monitor.locationId];
+  const trendDataMap = useSelector(selectOverviewTrends);
+  const locationId = monitor.locations[0]?.id ?? '';
+
+  const trendData = trendDataMap[monitor.configId] ?? trendDataMap[monitor.configId + locationId];
   return (
     <EuiText size="s" onClick={onClickDuration}>
       {getDurationToDisplay(trendData)}

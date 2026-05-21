@@ -44,8 +44,14 @@ import {
   patchExtractObservablesCasesRequest,
   patchBothSettingsCasesRequest,
   getBothSettingsUserActions,
+  patchExtendedFieldsCasesRequest,
+  patchUpdateExtendedFieldsCasesRequest,
+  getExtendedFieldsUserActions,
+  patchTemplateCasesRequest,
+  patchRemoveTemplateCasesRequest,
+  getTemplateUserActions,
 } from '../mocks';
-import { AttachmentType } from '../../../../common/types/domain';
+import { AttachmentType, UserActionTypes } from '../../../../common/types/domain';
 
 describe('UserActionPersister', () => {
   const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
@@ -313,6 +319,125 @@ describe('UserActionPersister', () => {
           user: testUser,
         })
       ).toEqual(getBothSettingsUserActions({ isMock: false }));
+    });
+
+    describe('extendedFields', () => {
+      it('creates a user action when extended_fields are set for the first time', () => {
+        expect(
+          persister.buildUserActions({
+            updatedCases: patchExtendedFieldsCasesRequest,
+            user: testUser,
+          })
+        ).toEqual(getExtendedFieldsUserActions({ isMock: false, payload: { risk_score: 'high' } }));
+      });
+
+      it('creates a user action only for the fields that changed', () => {
+        expect(
+          persister.buildUserActions({
+            updatedCases: patchUpdateExtendedFieldsCasesRequest,
+            user: testUser,
+          })
+        ).toEqual(getExtendedFieldsUserActions({ isMock: false, payload: { risk_score: 'high' } }));
+      });
+
+      it('creates no user action when extended_fields have not changed', () => {
+        const noDiffRequest = {
+          cases: [
+            {
+              ...patchUpdateExtendedFieldsCasesRequest.cases[0],
+              updatedAttributes: { extended_fields: { risk_score: 'low', severity: 'medium' } },
+            },
+          ],
+        };
+        expect(
+          persister.buildUserActions({
+            updatedCases: noDiffRequest,
+            user: testUser,
+          })
+        ).toEqual({ '1': [] });
+      });
+    });
+
+    describe('template', () => {
+      it('creates a user action when a template is applied', () => {
+        expect(
+          persister.buildUserActions({
+            updatedCases: patchTemplateCasesRequest,
+            user: testUser,
+          })
+        ).toEqual(getTemplateUserActions({ isMock: false, payload: { id: 'tmpl-1', version: 3 } }));
+      });
+
+      it('creates a user action when a template is removed (null)', () => {
+        expect(
+          persister.buildUserActions({
+            updatedCases: patchRemoveTemplateCasesRequest,
+            user: testUser,
+          })
+        ).toEqual(getTemplateUserActions({ isMock: false, payload: null }));
+      });
+    });
+
+    it('adds synced alerts count only to status user actions', () => {
+      const userActionsDict = persister.buildUserActions({
+        updatedCases: patchCasesRequest,
+        user: testUser,
+      });
+
+      const updatedUserActionsDict = persister.addSyncedAlertsCountToUserActions({
+        userActionsDict,
+        syncedAlertCountCountByCaseId: new Map([['1', 3]]),
+      });
+
+      const statusAction = updatedUserActionsDict['1'].find(
+        ({ parameters }) => parameters.attributes.type === UserActionTypes.status
+      );
+
+      expect(statusAction?.parameters.attributes.payload).toEqual({
+        status: 'closed',
+        syncedAlertCount: 3,
+      });
+      expect(updatedUserActionsDict['2']).toEqual(userActionsDict['2']);
+    });
+
+    it('adds close reason details to the status audit message when alerts are synced', () => {
+      const updatedCases = {
+        ...patchCasesRequest,
+        cases: patchCasesRequest.cases.map((theCase) => {
+          if (theCase.caseId !== '1') {
+            return theCase;
+          }
+
+          return {
+            ...theCase,
+            closeReason: 'false_positive',
+            updatedAttributes: {
+              ...theCase.updatedAttributes,
+              settings: {
+                syncAlerts: true,
+                extractObservables: false,
+              },
+            },
+          };
+        }),
+      };
+
+      const builtUserActions = persister.buildUserActions({
+        updatedCases,
+        user: testUser,
+      });
+
+      const statusAction = builtUserActions['1'].find(
+        ({ parameters }) => parameters.attributes.type === UserActionTypes.status
+      );
+
+      expect(statusAction?.eventDetails.getMessage('status-user-action-id')).toBe(
+        'User closed case id: 1 and synced alerts with a close reason - user action id: status-user-action-id'
+      );
+      expect(statusAction?.parameters.attributes.payload).toEqual({
+        status: 'closed',
+        closeReason: 'false_positive',
+      });
     });
 
     describe('customFields', () => {

@@ -79,15 +79,15 @@ const TextValue = styled.div`
 function getEuiIconType(type) {
   switch (type) {
     case 'field':
-      return 'kqlField';
+      return 'queryField';
     case 'value':
-      return 'kqlValue';
+      return 'queryValue';
     case 'recentSearch':
       return 'search';
     case 'conjunction':
-      return 'kqlSelector';
+      return 'querySelector';
     case 'operator':
-      return 'kqlOperand';
+      return 'queryOperand';
     default:
       throw new Error('Unknown type', type);
   }
@@ -102,7 +102,7 @@ function Suggestion(props) {
       onMouseEnter={props.onMouseEnter}
     >
       <Icon type={props.suggestion.type}>
-        <EuiIcon type={getEuiIconType(props.suggestion.type)} />
+        <EuiIcon type={getEuiIconType(props.suggestion.type)} aria-hidden={true} />
       </Icon>
       <TextValue>{props.suggestion.text}</TextValue>
       <Description>{props.suggestion.description}</Description>

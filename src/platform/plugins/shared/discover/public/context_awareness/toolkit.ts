@@ -15,6 +15,7 @@ import type { OpenInNewTabParams, UpdateESQLQueryFn } from './types';
 export interface ContextAwarenessToolkitActions {
   openInNewTab?: (params: OpenInNewTabParams) => Promise<void>;
   updateESQLQuery?: UpdateESQLQueryFn;
+  refreshData?: () => void;
   addFilter?: DocViewFilterFn;
   updateAdHocDataViews?: (adHocDataViews: DataView[]) => Promise<void>;
   setExpandedDoc?: (record?: DataTableRecord, options?: { initialTabId?: string }) => void;

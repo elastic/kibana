@@ -124,11 +124,11 @@ const SortFilter: React.FC = () => {
         id="browseIntegrationsSortPopover"
         isOpen={isOpen}
         closePopover={closePopover}
-        panelPaddingSize="none"
+        panelPaddingSize="s"
         button={
           <EuiFilterButton
             data-test-subj="browseIntegrations.searchBar.sortBtn"
-            iconType="arrowDown"
+            iconType="chevronSingleDown"
             onClick={togglePopover}
             isSelected={isOpen}
           >
@@ -148,7 +148,6 @@ const SortFilter: React.FC = () => {
             }
           }}
           listProps={{
-            paddingSize: 's',
             showIcons: false,
           }}
         >
@@ -211,7 +210,7 @@ const SetupMethodFilter: React.FC<{
       id="browseIntegrationsSetupMethodPopover"
       isOpen={isOpen}
       closePopover={closePopover}
-      panelPaddingSize="none"
+      panelPaddingSize="s"
       button={
         <EuiFilterButton
           data-test-subj="browseIntegrations.searchBar.setupMethodBtn"
@@ -235,7 +234,6 @@ const SetupMethodFilter: React.FC<{
         options={options}
         onChange={onSelectionChange}
         listProps={{
-          paddingSize: 's',
           showIcons: true,
           style: { minWidth: 250 },
         }}
@@ -307,7 +305,7 @@ const SignalFilter: React.FC<{
       id="browseIntegrationsSignalPopover"
       isOpen={isOpen}
       closePopover={closePopover}
-      panelPaddingSize="none"
+      panelPaddingSize="s"
       button={
         <EuiFilterButton
           data-test-subj="browseIntegrations.searchBar.signalBtn"
@@ -331,7 +329,6 @@ const SignalFilter: React.FC<{
         options={options}
         onChange={onSelectionChange}
         listProps={{
-          paddingSize: 's',
           showIcons: true,
           style: { minWidth: 250 },
         }}
@@ -606,7 +603,7 @@ export const SearchAndFiltersBar: React.FC<SearchAndFiltersBarProps> = ({
                   panelPaddingSize="none"
                   anchorPosition="downLeft"
                 >
-                  <EuiContextMenuPanel size="s" items={hiddenSubCategoriesItems} />
+                  <EuiContextMenuPanel items={hiddenSubCategoriesItems} />
                 </EuiPopover>
               </EuiFlexItem>
             )}

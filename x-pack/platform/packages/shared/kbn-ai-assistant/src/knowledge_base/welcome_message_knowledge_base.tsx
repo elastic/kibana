@@ -45,7 +45,7 @@ export function WelcomeMessageKnowledgeBase({
       <div>
         <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="center">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="checkInCircleFilled" color="success" />
+            <EuiIcon type="checkCircleFill" color="success" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText

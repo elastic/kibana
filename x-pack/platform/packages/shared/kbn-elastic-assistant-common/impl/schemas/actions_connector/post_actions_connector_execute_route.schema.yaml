@@ -6,9 +6,26 @@ paths:
   /internal/elastic_assistant/actions/connector/{connectorId}/_execute:
     post:
       x-codegen-enabled: true
+      x-codeSamples:
+        - lang: curl
+          label: Example request
+          source: |
+            curl \
+             --request POST 'http://localhost:5601/internal/elastic_assistant/actions/connector/my-connector-id/_execute' \
+             --header "Authorization: $API_KEY" \
+             --header "Content-Type: application/json" \
+             --data '{
+               "subAction": "invokeAI",
+               "actionTypeId": ".gen-ai",
+               "message": "What are common indicators of a phishing attack?",
+               "replacements": {}
+             }'
       x-labels: [ess, serverless]
       operationId: ExecuteConnector
-      description: Execute Elastic Assistant connector by id
+      description: |
+        Invokes the configured Kibana Actions connector used by the Elastic Assistant (for example a Gen AI connector) to run `invokeAI` or `invokeStream` against the model. Use this internal route when executing assistant-backed model calls server-side with the same validation as the assistant UI.
+
+        Path parameter `connectorId` identifies the connector instance. Request body must include `subAction`, `actionTypeId`, and `replacements` as enforced by the server.
       summary: Execute Elastic Assistant connector
       tags:
         - Connector API
@@ -19,6 +36,7 @@ paths:
           description: The connector's `id` value.
           schema:
             type: string
+          example: "my-connector-id"
         - name: content_references_disabled
           in: query
           required: false
@@ -26,6 +44,7 @@ paths:
           schema:
             type: boolean
             default: false
+          example: false
       requestBody:
         required: true
         content:
@@ -34,7 +53,6 @@ paths:
               type: object
               required:
                 - actionTypeId
-                - params
                 - replacements
                 - subAction
               properties:
@@ -74,9 +92,14 @@ paths:
                 promptIds:
                   $ref: '../common_attributes.schema.yaml#/components/schemas/PromptIds'
                   description: System prompt, will be appended to default system prompt. Different from conversation system prompt, which is retrieved on the server
+            example:
+              subAction: invokeAI
+              actionTypeId: .gen-ai
+              message: "What are common indicators of a phishing attack?"
+              replacements: {}
       responses:
         '200':
-          description: Successful static response
+          description: Indicates a successful call.
           content:
             application/json:
               schema:
@@ -102,8 +125,15 @@ paths:
                       traceId:
                         type: string
                         description: Could be any string, not necessarily a UUID
+              examples:
+                ExecuteConnectorResponse200Example:
+                  summary: A successful response from the connector.
+                  value:
+                    data: "Common indicators of a phishing attack include suspicious sender email addresses, urgent or threatening language, requests for sensitive information, unexpected attachments, and mismatched or spoofed URLs."
+                    connector_id: "my-connector-id"
+                    status: "ok"
         '400':
-          description: Generic Error
+          description: Bad Request response.
           content:
             application/json:
               schema:
@@ -115,3 +145,10 @@ paths:
                     type: string
                   message:
                     type: string
+              examples:
+                ExecuteConnectorResponse400Example:
+                  summary: A bad request response.
+                  value:
+                    statusCode: 400
+                    error: Bad Request
+                    message: "Invalid connector ID."

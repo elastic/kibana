@@ -25,6 +25,7 @@ import type {
   StreamsFeatureIdentificationSavedProps,
   StreamsFeatureIdentificationDeletedProps,
   StreamsTabVisitedProps,
+  StreamsInsightFeedbackProps,
 } from './types';
 
 const attachmentTypeCountFields: Record<
@@ -488,6 +489,33 @@ const streamsTabVisitedSchema: RootSchema<StreamsTabVisitedProps> = {
   },
 };
 
+const streamsInsightFeedbackSchema: RootSchema<StreamsInsightFeedbackProps> = {
+  feedback: {
+    type: 'keyword',
+    _meta: {
+      description: 'Whether the user found the insight helpful or not_helpful',
+    },
+  },
+  insight_id: {
+    type: 'keyword',
+    _meta: {
+      description: 'The unique ID of the insight being rated',
+    },
+  },
+  insight_title: {
+    type: 'text',
+    _meta: {
+      description: 'The title of the insight being rated',
+    },
+  },
+  insight_impact: {
+    type: 'keyword',
+    _meta: {
+      description: 'The severity/impact level of the insight: critical, high, medium, or low',
+    },
+  },
+};
+
 export {
   streamsAttachmentCountSchema,
   streamsAttachmentClickEventSchema,
@@ -506,4 +534,5 @@ export {
   streamsFeatureIdentificationSavedSchema,
   streamsFeatureIdentificationDeletedSchema,
   streamsTabVisitedSchema,
+  streamsInsightFeedbackSchema,
 };

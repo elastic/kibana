@@ -65,10 +65,10 @@ const addEsqlFilter = ({
   mode: Parameters<DocViewFilterFn>[2];
 }) => {
   const fieldType = typeof field !== 'string' ? field.type : undefined;
-  const isCascadeLayoutSelected = isCascadedDocumentsVisible(
-    tabState.cascadedDocumentsState.availableCascadeGroups,
-    query
-  );
+  const esFieldType = typeof field !== 'string' ? field.esTypes?.[0] : undefined;
+  const isCascadeLayoutSelected =
+    isCascadedDocumentsVisible(tabState.cascadedDocumentsState.availableCascadeGroups, query) &&
+    tabState.cascadedDocumentsState.selectedCascadeGroups.length > 0;
 
   const updatedQuery = isCascadeLayoutSelected
     ? appendFilteringWhereClauseForCascadeLayout(
@@ -85,7 +85,8 @@ const addEsqlFilter = ({
         fieldName === '_exists_' ? String(value) : fieldName,
         fieldName === '_exists_' || value == null ? undefined : value,
         getEsqlFilterOperator(fieldName, value, mode),
-        fieldType
+        fieldType,
+        esFieldType
       );
 
   if (!updatedQuery) {

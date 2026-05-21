@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type FC, useMemo, useEffect } from 'react';
+import React, { type FC, useCallback, useMemo, useRef } from 'react';
 import {
   createColumnHelper,
   getCoreRowModel,
@@ -43,7 +43,6 @@ export interface TableProps<G, L>
     | 'onRowSelectionChange'
     | 'getRowCanExpand'
   > {
-  initialData: G[];
   allowMultipleRowToggle: boolean;
   header: FC<{ table: Table<G> }>;
   rowCell: FC<CellContext<G, L>>;
@@ -54,40 +53,39 @@ export const useCascadeTable = <G extends GroupNode, L extends LeafNode>({
   enableRowSelection,
   header: Header,
   rowCell: RowCell,
-  initialData,
   ...rest
 }: TableProps<G, L>) => {
-  const columnHelper = createColumnHelper<G>();
+  const columnHelper = useMemo(() => createColumnHelper<G>(), []);
   const actions = useDataCascadeActions<G, L>();
   const state = useDataCascadeState<G, L>();
+  const tableRef = useRef<ReturnType<typeof useReactTable<G>> | null>(null);
 
-  useEffect(() => {
-    actions.setInitialState(initialData);
-  }, [initialData, actions]);
+  const coreRowModel = useMemo(() => getCoreRowModel<G>(), []);
+  const expandedRowModel = useMemo(() => getExpandedRowModel<G>(), []);
 
-  const table = useReactTable<G>({
-    ...rest,
-    data: state.groupNodes,
-    state: state.table,
-    columns: [
+  const columns = useMemo(
+    () => [
       columnHelper.display({
         id: 'cascade',
         header: Header,
-        // type cast is needed here to satisfy the generic CellContext type for column display
         cell: RowCell as FC<CellContext<G, unknown>>,
       }),
     ],
-    enableRowSelection,
-    getCoreRowModel: getCoreRowModel(),
-    getExpandedRowModel: getExpandedRowModel(),
-    getRowCanExpand: () => true,
-    onRowSelectionChange: (updater) => {
+    [columnHelper, Header, RowCell]
+  );
+
+  const onRowSelectionChange = useCallback<NonNullable<TableOptions<G>['onRowSelectionChange']>>(
+    (updater) => {
       const proposedSelectedState =
         typeof updater === 'function' ? updater(state.table.rowSelection) : updater;
 
       actions.setSelectedRows(proposedSelectedState);
     },
-    onExpandedChange: (updater) => {
+    [actions, state.table.rowSelection]
+  );
+
+  const onExpandedChangeHandler = useCallback<NonNullable<TableOptions<G>['onExpandedChange']>>(
+    (updater) => {
       const proposedExpandedState =
         typeof updater === 'function' ? updater(state.table.expanded) : updater;
 
@@ -106,7 +104,7 @@ export const useCascadeTable = <G extends GroupNode, L extends LeafNode>({
 
       // Compute the new expanded rows, comparing the proposed expanded rows with the previous expanded rows
       for (const proposedRowId of proposedExpandedRows) {
-        const row = table.getRow(proposedRowId);
+        const row = tableRef.current?.getRow(proposedRowId);
 
         // special treatment for root rows
         if (!row?.parentId) {
@@ -121,7 +119,7 @@ export const useCascadeTable = <G extends GroupNode, L extends LeafNode>({
         } else if (row?.parentId && proposedExpandedRows.includes(row?.parentId)) {
           // when row is a child, and its parent id is in previous expanded row,
           // we need to check if it has a sibling then apply a fitting treatment
-          const siblings = table.getRow(row?.parentId)?.getLeafRows() ?? [];
+          const siblings = tableRef.current?.getRow(row?.parentId)?.getLeafRows() ?? [];
           const expandedRowSiblings = siblings.filter(
             (sibling) => proposedExpandedRows.includes(sibling.id) && sibling.id !== proposedRowId
           );
@@ -140,20 +138,39 @@ export const useCascadeTable = <G extends GroupNode, L extends LeafNode>({
 
       return actions.setExpandedRows(newRootRow ? { [newRootRow]: true } : newExpandedRows);
     },
-    getRowId: (rowData) => rowData.id,
-    getSubRows: (row) => row.children as G[],
+    [state.table.expanded, actions, allowMultipleRowToggle]
+  );
+
+  const getRowCanExpand = useCallback(() => true, []);
+  const getRowId = useCallback((rowData: G) => rowData.id, []);
+  const getSubRows = useCallback((row: G) => row.children as G[], []);
+
+  tableRef.current = useReactTable<G>({
+    ...rest,
+    data: state.groupNodes,
+    state: state.table,
+    columns,
+    debugTable: false,
+    enableRowSelection,
+    getCoreRowModel: coreRowModel,
+    getExpandedRowModel: expandedRowModel,
+    getRowCanExpand,
+    onRowSelectionChange,
+    onExpandedChange: onExpandedChangeHandler,
+    getRowId,
+    getSubRows,
   });
 
   return useMemo(
     () => ({
       get headerColumns() {
-        return table.getHeaderGroups()[0].headers;
+        return tableRef.current!.getHeaderGroups()[0].headers;
       },
       get rows() {
-        return table.getRowModel().rows;
+        return tableRef.current!.getRowModel().rows;
       },
     }),
-    [table]
+    []
   );
 };
 

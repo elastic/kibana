@@ -5,46 +5,54 @@
  * 2.0.
  */
 
-import type { EntityMaintainerRegistryData, EntityMaintainerTaskEntry } from './types';
-import { EntityMaintainerTaskStatus } from './types';
+import type {
+  EntityMaintainerLifecycle,
+  EntityMaintainerRegistration,
+  EntityMaintainerTaskEntry,
+  EntityMaintainerRegistryValue,
+} from './types';
 
 export class EntityMaintainersRegistry {
-  private readonly tasks = new Map<string, EntityMaintainerRegistryData>();
+  private readonly entries = new Map<string, EntityMaintainerRegistryValue>();
 
   hasId(id: string): boolean {
-    return this.tasks.has(id);
+    return this.entries.has(id);
   }
 
-  get(id: string): EntityMaintainerTaskEntry | undefined {
-    const config = this.tasks.get(id);
-    if (!config) {
-      return undefined;
-    }
-    return { id, ...config };
+  get(id: string): EntityMaintainerTaskEntry {
+    return this.getEntryOrThrow(id).task;
   }
 
-  register({ id, interval, description }: Omit<EntityMaintainerTaskEntry, 'taskStatus'>): void {
-    this.tasks.set(id, {
-      interval,
-      taskStatus: EntityMaintainerTaskStatus.NEVER_STARTED,
-      description,
+  getLifecycle(id: string): EntityMaintainerLifecycle {
+    return this.getEntryOrThrow(id).lifecycle;
+  }
+
+  register(entry: EntityMaintainerRegistration): void {
+    this.entries.set(entry.id, {
+      task: {
+        id: entry.id,
+        interval: entry.interval,
+        description: entry.description,
+        minLicense: entry.minLicense,
+      },
+      lifecycle: {
+        run: entry.run,
+        setup: entry.setup,
+        initialState: entry.initialState,
+      },
     });
   }
 
-  update(id: string, overrides: Partial<EntityMaintainerRegistryData>): boolean {
-    const existing = this.tasks.get(id);
-    if (!existing) {
-      return false;
-    }
-    this.tasks.set(id, { ...existing, ...overrides });
-    return true;
+  getAll(): EntityMaintainerTaskEntry[] {
+    return Array.from(this.entries.values(), ({ task }) => task);
   }
 
-  getAll(): EntityMaintainerTaskEntry[] {
-    return Array.from(this.tasks.entries()).map(([id, entry]) => ({
-      id,
-      ...entry,
-    }));
+  private getEntryOrThrow(id: string): EntityMaintainerRegistryValue {
+    const entry = this.entries.get(id);
+    if (!entry) {
+      throw new Error(`Entity maintainer not found: ${id}`);
+    }
+    return entry;
   }
 }
 

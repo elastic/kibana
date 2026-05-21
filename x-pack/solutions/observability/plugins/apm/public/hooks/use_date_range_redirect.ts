@@ -7,9 +7,26 @@
 import qs from 'query-string';
 import { useHistory, useLocation } from 'react-router-dom';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import { useMemo } from 'react';
+import datemath from '@kbn/datemath';
+import type { Moment } from 'moment';
 import type { TimePickerTimeDefaults } from '../components/shared/date_picker/typings';
 import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_context';
 import { isInactiveHistoryError } from '../components/shared/links/url_helpers';
+
+function tryParseDate(date: string | string[] | null | undefined): Moment | undefined {
+  return typeof date === 'string' ? datemath.parse(date) : undefined;
+}
+
+function isValidDateRange(
+  from: string | string[] | null | undefined,
+  to: string | string[] | null | undefined
+): boolean {
+  const start = tryParseDate(from);
+  const end = tryParseDate(to);
+
+  return Boolean(start?.isValid() && end?.isValid() && start.isBefore(end));
+}
 
 export function useDateRangeRedirect() {
   const history = useHistory();
@@ -24,13 +41,22 @@ export function useDateRangeRedirect() {
 
   const timePickerSharedState = plugins.data.query.timefilter.timefilter.getTime();
 
-  const isDateRangeSet = 'rangeFrom' in query && 'rangeTo' in query;
+  const isDateRangeSet = useMemo(() => {
+    return isValidDateRange(query.rangeFrom, query.rangeTo);
+  }, [query.rangeFrom, query.rangeTo]);
 
   const redirect = () => {
+    const resolvedFrom = tryParseDate(query.rangeFrom)?.isValid()
+      ? query.rangeFrom
+      : timePickerSharedState.from;
+    const resolvedTo = tryParseDate(query.rangeTo)?.isValid()
+      ? query.rangeTo
+      : timePickerSharedState.to;
+    const isResolvedRangeValid = isValidDateRange(resolvedFrom, resolvedTo);
     const nextQuery = {
-      rangeFrom: timePickerSharedState.from ?? timePickerTimeDefaults.from,
-      rangeTo: timePickerSharedState.to ?? timePickerTimeDefaults.to,
       ...query,
+      rangeFrom: isResolvedRangeValid ? resolvedFrom : timePickerTimeDefaults.from,
+      rangeTo: isResolvedRangeValid ? resolvedTo : timePickerTimeDefaults.to,
     };
 
     try {

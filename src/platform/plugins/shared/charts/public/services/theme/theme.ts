@@ -15,6 +15,8 @@ import type { CoreSetup, CoreTheme } from '@kbn/core/public';
 import type { PartialTheme, Theme } from '@elastic/charts';
 import { LIGHT_THEME, getChartsTheme } from '@elastic/charts';
 
+import { applyNumericFontFamily } from './helpers';
+
 export class ThemeService {
   /** Returns default charts theme */
   public readonly chartsDefaultBaseTheme = LIGHT_THEME;
@@ -113,8 +115,8 @@ export class ThemeService {
   public init(theme: CoreSetup['theme']) {
     this.theme$ = theme.theme$;
     this.theme$.subscribe((newTheme) => {
-      this._chartsBaseTheme$.next(getChartsTheme(newTheme));
       const chartsTheme = getChartsTheme(newTheme);
+      applyNumericFontFamily(chartsTheme);
       const { fill } = chartsTheme.axes.tickLabel;
       chartsTheme.axes.axisTitle.fill = fill;
       chartsTheme.axes.axisTitle.fontWeight = 500;

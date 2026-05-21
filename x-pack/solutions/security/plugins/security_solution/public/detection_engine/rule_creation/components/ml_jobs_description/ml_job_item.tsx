@@ -10,7 +10,7 @@ import React, { memo } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 
-import type { MlSummaryJob } from '@kbn/ml-plugin/public';
+import type { MlSummaryJob } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
 import * as i18n from './translations';
 
 import { isJobStarted } from '../../../../../common/machine_learning/helpers';

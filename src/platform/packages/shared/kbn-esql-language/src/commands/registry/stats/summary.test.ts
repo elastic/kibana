@@ -17,6 +17,7 @@ describe('STATS summary', () => {
       expectedNewColumns: ['var0'],
       expectedAggregates: ['var0'],
       expectedGrouping: [],
+      expectedRenamedColumnsPairs: [],
     },
     {
       description: 'STATS with function aggregation',
@@ -24,6 +25,7 @@ describe('STATS summary', () => {
       expectedNewColumns: ['AVG(field2)'],
       expectedAggregates: ['AVG(field2)'],
       expectedGrouping: [],
+      expectedRenamedColumnsPairs: [],
     },
     {
       description: 'STATS with function aggregation and grouping',
@@ -31,6 +33,7 @@ describe('STATS summary', () => {
       expectedNewColumns: ['AVG(field2)'],
       expectedAggregates: ['AVG(field2)'],
       expectedGrouping: ['field1'],
+      expectedRenamedColumnsPairs: [],
     },
     {
       description: 'STATS with assigned aggregation and assigned grouping columns',
@@ -38,6 +41,7 @@ describe('STATS summary', () => {
       expectedNewColumns: ['avg', 'buckets'],
       expectedAggregates: ['avg'],
       expectedGrouping: ['buckets'],
+      expectedRenamedColumnsPairs: [],
     },
     {
       description: 'STATS with assigned aggregation and WHERE clause',
@@ -45,6 +49,7 @@ describe('STATS summary', () => {
       expectedNewColumns: ['avg'],
       expectedAggregates: ['avg'],
       expectedGrouping: [],
+      expectedRenamedColumnsPairs: [],
     },
     {
       description: 'STATS with function aggregation and WHERE clause',
@@ -52,6 +57,7 @@ describe('STATS summary', () => {
       expectedNewColumns: ['AVG(field2)'],
       expectedAggregates: ['AVG(field2)'],
       expectedGrouping: [],
+      expectedRenamedColumnsPairs: [],
     },
     {
       description: 'can handle many aggregates and groupings',
@@ -59,6 +65,7 @@ describe('STATS summary', () => {
       expectedNewColumns: ['AVG(field1)', 'field2', 'MIN(field3)'],
       expectedAggregates: ['AVG(field1)', 'field2', 'MIN(field3)'],
       expectedGrouping: ['field4', 'field5'],
+      expectedRenamedColumnsPairs: [],
     },
     {
       description: 'can have params and quoted fields in grouping',
@@ -66,6 +73,7 @@ describe('STATS summary', () => {
       expectedNewColumns: ['max(1)'],
       expectedAggregates: ['max(1)'],
       expectedGrouping: ['a😎', '?123', 'a.?b.?0.😎'],
+      expectedRenamedColumnsPairs: [],
     },
     {
       description: 'works well with BUCKET function',
@@ -73,33 +81,71 @@ describe('STATS summary', () => {
       expectedNewColumns: ['BUCKET(@timestamp,50,?_tstart,?_tend)'],
       expectedAggregates: [],
       expectedGrouping: ['BUCKET(@timestamp,50,?_tstart,?_tend)'],
+      expectedRenamedColumnsPairs: [],
     },
-  ])('$description', ({ query, expectedNewColumns, expectedAggregates, expectedGrouping }) => {
-    const {
-      root: {
-        commands: [, command],
-      },
-    } = Parser.parseQuery(query);
-    const result = summary(command, query);
+    {
+      description: 'STATS ... BY new = old is treated as a rename',
+      query: 'FROM a | STATS AVG(field2) BY new=field1',
+      expectedNewColumns: ['AVG(field2)', 'new'],
+      expectedAggregates: ['AVG(field2)'],
+      expectedGrouping: ['new'],
+      expectedRenamedColumnsPairs: [['new', 'field1']],
+    },
+    {
+      description: 'STATS ... BY new = old captures multiple renames',
+      query: 'FROM a | STATS AVG(field3) BY new1=field1, new2=field2',
+      expectedNewColumns: ['AVG(field3)', 'new1', 'new2'],
+      expectedAggregates: ['AVG(field3)'],
+      expectedGrouping: ['new1', 'new2'],
+      expectedRenamedColumnsPairs: [
+        ['new1', 'field1'],
+        ['new2', 'field2'],
+      ],
+    },
+    {
+      description: 'STATS ... BY new = bucket(...) is not a rename',
+      query: 'FROM a | STATS AVG(field2) BY buckets=BUCKET(@timestamp,50,?_tstart,?_tend)',
+      expectedNewColumns: ['AVG(field2)', 'buckets'],
+      expectedAggregates: ['AVG(field2)'],
+      expectedGrouping: ['buckets'],
+      expectedRenamedColumnsPairs: [],
+    },
+  ])(
+    '$description',
+    ({
+      query,
+      expectedNewColumns,
+      expectedAggregates,
+      expectedGrouping,
+      expectedRenamedColumnsPairs,
+    }) => {
+      const {
+        root: {
+          commands: [, command],
+        },
+      } = Parser.parseQuery(query);
+      const result = summary(command, query);
 
-    expect(result.newColumns).toEqual(new Set(expectedNewColumns));
-    expect(result.aggregates).toEqual(
-      new Set(
-        expectedAggregates.map((field) =>
-          expect.objectContaining({
-            field,
-          })
+      expect(result.newColumns).toEqual(new Set(expectedNewColumns));
+      expect(result.aggregates).toEqual(
+        new Set(
+          expectedAggregates.map((field) =>
+            expect.objectContaining({
+              field,
+            })
+          )
         )
-      )
-    );
-    expect(result.grouping).toEqual(
-      new Set(
-        expectedGrouping.map((field) =>
-          expect.objectContaining({
-            field,
-          })
+      );
+      expect(result.grouping).toEqual(
+        new Set(
+          expectedGrouping.map((field) =>
+            expect.objectContaining({
+              field,
+            })
+          )
         )
-      )
-    );
-  });
+      );
+      expect(result.renamedColumnsPairs).toEqual(new Set(expectedRenamedColumnsPairs));
+    }
+  );
 });

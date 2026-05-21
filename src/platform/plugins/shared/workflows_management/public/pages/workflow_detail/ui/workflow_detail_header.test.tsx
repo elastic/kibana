@@ -9,7 +9,8 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
-import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
+import { useWorkflowsCapabilities, type WorkflowsManagementCapabilities } from '@kbn/workflows-ui';
+import { createMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
 import type { WorkflowDetailHeaderProps } from './workflow_detail_header';
 import { WorkflowDetailHeader } from './workflow_detail_header';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
@@ -19,7 +20,6 @@ import {
   setWorkflow,
   setYamlString,
 } from '../../../entities/workflows/store/workflow_detail/slice';
-import { mockWorkflowsManagementCapabilities } from '../../../hooks/__mocks__/use_workflows_capabilities';
 import { TestWrapper } from '../../../shared/test_utils/test_wrapper';
 
 const mockUseKibana = jest.fn();
@@ -44,6 +44,8 @@ jest.mock('@kbn/workflows-ui', () => ({
 const mockUseWorkflowsCapabilities = useWorkflowsCapabilities as jest.MockedFunction<
   typeof useWorkflowsCapabilities
 >;
+const defaultWorkflowsCapabilities = createMockWorkflowsCapabilities();
+
 jest.mock('../../../hooks/use_workflow_url_state', () => ({
   useWorkflowUrlState: () => mockUseWorkflowUrlState(),
 }));
@@ -134,9 +136,7 @@ describe('WorkflowDetailHeader', () => {
       },
     });
     mockUseParams.mockReturnValue({ id: 'test-123' });
-    mockUseWorkflowsCapabilities.mockReturnValue({
-      ...mockWorkflowsManagementCapabilities,
-    });
+    mockUseWorkflowsCapabilities.mockReturnValue(createMockWorkflowsCapabilities());
     mockUseWorkflowUrlState.mockReturnValue({
       activeTab: 'workflow',
       setActiveTab: jest.fn(),
@@ -206,5 +206,155 @@ describe('WorkflowDetailHeader', () => {
     const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);
     const button = result.getByTestId('runWorkflowHeaderButton');
     expect(button).toBeEnabled();
+  });
+
+  it('disables executions tab when user cannot read workflow executions', () => {
+    mockUseWorkflowsCapabilities.mockReturnValue({
+      ...defaultWorkflowsCapabilities,
+      canReadWorkflowExecution: false,
+    });
+    const { getByRole } = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);
+    const executionsTab = getByRole('button', { name: 'Executions' });
+    expect(executionsTab).toHaveAttribute('aria-disabled', 'true');
+  });
+
+  describe('Authorization matrix', () => {
+    interface MatrixRow {
+      roleLabel: string;
+      capabilities: Partial<WorkflowsManagementCapabilities>;
+      expectRunDisabled: boolean;
+      expectSaveDisabled: boolean;
+      expectEnabledSwitchDisabled: boolean;
+      expectExecutionsTabDisabled: boolean;
+    }
+
+    const matrix: MatrixRow[] = [
+      {
+        roleLabel: 'Read-only',
+        capabilities: {
+          canReadWorkflow: true,
+          canReadWorkflowExecution: true,
+          canCreateWorkflow: false,
+          canUpdateWorkflow: false,
+          canDeleteWorkflow: false,
+          canExecuteWorkflow: false,
+          canCancelWorkflowExecution: false,
+        },
+        expectRunDisabled: true,
+        expectSaveDisabled: true,
+        expectEnabledSwitchDisabled: true,
+        expectExecutionsTabDisabled: false,
+      },
+      {
+        roleLabel: 'Operator (run, no CRUD)',
+        capabilities: {
+          canReadWorkflow: true,
+          canReadWorkflowExecution: true,
+          canCreateWorkflow: false,
+          canUpdateWorkflow: false,
+          canDeleteWorkflow: false,
+          canExecuteWorkflow: true,
+          canCancelWorkflowExecution: false,
+        },
+        expectRunDisabled: false,
+        expectSaveDisabled: true,
+        expectEnabledSwitchDisabled: true,
+        expectExecutionsTabDisabled: false,
+      },
+      {
+        roleLabel: 'Editor (no delete)',
+        capabilities: {
+          canReadWorkflow: true,
+          canReadWorkflowExecution: true,
+          canCreateWorkflow: true,
+          canUpdateWorkflow: true,
+          canDeleteWorkflow: false,
+          canExecuteWorkflow: true,
+          canCancelWorkflowExecution: false,
+        },
+        expectRunDisabled: false,
+        expectSaveDisabled: false,
+        expectEnabledSwitchDisabled: false,
+        expectExecutionsTabDisabled: false,
+      },
+      {
+        roleLabel: 'No execution read',
+        capabilities: {
+          canReadWorkflow: true,
+          canReadWorkflowExecution: false,
+          canCreateWorkflow: true,
+          canUpdateWorkflow: true,
+          canDeleteWorkflow: false,
+          canExecuteWorkflow: true,
+          canCancelWorkflowExecution: false,
+        },
+        expectRunDisabled: false,
+        expectSaveDisabled: false,
+        expectEnabledSwitchDisabled: false,
+        expectExecutionsTabDisabled: true,
+      },
+    ];
+
+    it.each(matrix)(
+      '$roleLabel: run disabled=$expectRunDisabled, save=$expectSaveDisabled, enabled switch=$expectEnabledSwitchDisabled, executions tab=$expectExecutionsTabDisabled',
+      ({
+        capabilities,
+        expectRunDisabled,
+        expectSaveDisabled,
+        expectEnabledSwitchDisabled,
+        expectExecutionsTabDisabled,
+      }) => {
+        mockUseWorkflowsCapabilities.mockReturnValue({
+          ...defaultWorkflowsCapabilities,
+          ...capabilities,
+        });
+
+        const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);
+        const runBtn = result.getByTestId('runWorkflowHeaderButton');
+        const saveBtn = result.getByTestId('saveWorkflowHeaderButton');
+
+        if (expectRunDisabled) {
+          expect(runBtn).toBeDisabled();
+        } else {
+          expect(runBtn).not.toBeDisabled();
+        }
+        if (expectSaveDisabled) {
+          expect(saveBtn).toBeDisabled();
+        } else {
+          expect(saveBtn).not.toBeDisabled();
+        }
+
+        const enabledSwitch = result.getByRole('switch');
+        if (expectEnabledSwitchDisabled) {
+          expect(enabledSwitch).toBeDisabled();
+        } else {
+          expect(enabledSwitch).not.toBeDisabled();
+        }
+
+        const executionsTab = result.getByRole('button', { name: 'Executions' });
+        if (expectExecutionsTabDisabled) {
+          expect(executionsTab).toHaveAttribute('aria-disabled', 'true');
+        } else {
+          expect(executionsTab).not.toHaveAttribute('aria-disabled', 'true');
+        }
+      }
+    );
+
+    it('New workflow URL: save requires createWorkflow, not updateWorkflow', () => {
+      mockUseParams.mockReturnValue({});
+      mockUseWorkflowsCapabilities.mockReturnValue({
+        ...defaultWorkflowsCapabilities,
+        canReadWorkflow: true,
+        canReadWorkflowExecution: true,
+        canCreateWorkflow: true,
+        canUpdateWorkflow: false,
+        canDeleteWorkflow: false,
+        canExecuteWorkflow: false,
+        canCancelWorkflowExecution: false,
+      });
+
+      const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);
+      expect(result.getByTestId('saveWorkflowHeaderButton')).not.toBeDisabled();
+    });
   });
 });

@@ -112,9 +112,12 @@ export function SelectionDropdown({ onSelectionChange }: SelectionDropdownProps)
       closePopover={closePopover}
       panelPaddingSize="s"
       data-test-subj="DataCascadeColumnSelectionPopover"
+      aria-label={i18n.translate(
+        'sharedUXPackages.data_cascade.selection_dropdown.group_by_popover_aria_label',
+        { defaultMessage: 'Group by selection' }
+      )}
     >
       <EuiContextMenu
-        size="m"
         initialPanelId={0}
         css={{ minWidth: 300 }}
         panels={[

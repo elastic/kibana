@@ -6,13 +6,14 @@
  */
 
 import type { AuthenticatedUser } from '@kbn/core/server';
+import { DEFAULT_DETECTIONS_CLOSE_REASONS_KEY } from '../../../../../common/constants';
 
 import {
-  typicalSetStatusSignalByIdsPayload,
   getSuccessfulSignalUpdateResponse,
+  typicalSetStatusSignalByIdsPayload,
 } from '../__mocks__/request_responses';
 import type { SecuritySolutionRequestHandlerContextMock } from '../__mocks__/request_context';
-import { requestContextMock, responseMock, requestMock } from '../__mocks__';
+import { requestContextMock, requestMock, responseMock } from '../__mocks__';
 import { setWorkflowStatusHandler } from './set_workflow_status_handler';
 import { responseAdapter } from '../__mocks__/test_adapters';
 
@@ -25,6 +26,7 @@ describe('set workflow status handler', () => {
     context.core.elasticsearch.client.asCurrentUser.updateByQuery.mockResponse(
       getSuccessfulSignalUpdateResponse()
     );
+    context.core.uiSettings.client.get.mockResolvedValue([]);
   });
 
   afterEach(() => {
@@ -108,13 +110,19 @@ describe('set workflow status handler', () => {
       const response = responseAdapter(mockedResponse);
 
       expect(response.status).toEqual(200);
+      expect(context.core.uiSettings.client.get).toHaveBeenCalledWith(
+        DEFAULT_DETECTIONS_CLOSE_REASONS_KEY
+      );
       expect(context.core.elasticsearch.client.asCurrentUser.updateByQuery).toHaveBeenCalled();
-      const call = context.core.elasticsearch.client.asCurrentUser.updateByQuery.mock.calls[0][0];
-      expect(
-        call.script && typeof call.script === 'object' && 'source' in call.script
-          ? call.script.source
-          : ''
-      ).toContain("'false_positive'");
+      expect(context.core.elasticsearch.client.asCurrentUser.updateByQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          script: expect.objectContaining({
+            params: expect.objectContaining({
+              reason: 'false_positive',
+            }),
+          }),
+        })
+      );
     });
 
     test('handles closed status without reason', async () => {
@@ -137,12 +145,15 @@ describe('set workflow status handler', () => {
 
       expect(response.status).toEqual(200);
       expect(context.core.elasticsearch.client.asCurrentUser.updateByQuery).toHaveBeenCalled();
-      const call = context.core.elasticsearch.client.asCurrentUser.updateByQuery.mock.calls[0][0];
-      expect(
-        call.script && typeof call.script === 'object' && 'source' in call.script
-          ? call.script.source
-          : ''
-      ).toContain("ctx._source.remove('kibana.alert.workflow_reason')");
+      expect(context.core.elasticsearch.client.asCurrentUser.updateByQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          script: expect.objectContaining({
+            params: expect.objectContaining({
+              reason: null,
+            }),
+          }),
+        })
+      );
     });
 
     test('handles different status values', async () => {
@@ -190,12 +201,15 @@ describe('set workflow status handler', () => {
         getIndexPattern: () => Promise.resolve('.alerts-security.alerts-default'),
       });
 
-      const call = context.core.elasticsearch.client.asCurrentUser.updateByQuery.mock.calls[0][0];
-      expect(
-        call.script && typeof call.script === 'object' && 'source' in call.script
-          ? call.script.source
-          : ''
-      ).toContain("'test-uid-123'");
+      expect(context.core.elasticsearch.client.asCurrentUser.updateByQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          script: expect.objectContaining({
+            params: expect.objectContaining({
+              workflowUser: 'test-uid-123',
+            }),
+          }),
+        })
+      );
     });
 
     test('handles null user in script', async () => {
@@ -215,12 +229,15 @@ describe('set workflow status handler', () => {
         getIndexPattern: () => Promise.resolve('.alerts-security.alerts-default'),
       });
 
-      const call = context.core.elasticsearch.client.asCurrentUser.updateByQuery.mock.calls[0][0];
-      expect(
-        call.script && typeof call.script === 'object' && 'source' in call.script
-          ? call.script.source
-          : ''
-      ).toContain('null');
+      expect(context.core.elasticsearch.client.asCurrentUser.updateByQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          script: expect.objectContaining({
+            params: expect.objectContaining({
+              workflowUser: null,
+            }),
+          }),
+        })
+      );
     });
 
     test('catches error if updateByQuery throws error', async () => {
@@ -269,6 +286,65 @@ describe('set workflow status handler', () => {
           ignore_unavailable: true,
         })
       );
+    });
+
+    test('allows custom closing reason from ui settings', async () => {
+      context.core.uiSettings.client.get.mockResolvedValue(['custom_close_reason']);
+      const mockedResponse = responseMock.create();
+      const request = requestMock.create({
+        method: 'post',
+        body: {
+          signal_ids: ['somefakeid1'],
+          status: 'closed',
+          reason: 'custom_close_reason',
+        },
+      });
+
+      await setWorkflowStatusHandler({
+        context: requestContextMock.convertContext(context),
+        request,
+        response: mockedResponse,
+        getIndexPattern: () => Promise.resolve('.alerts-security.alerts-default'),
+      });
+      const response = responseAdapter(mockedResponse);
+
+      expect(response.status).toEqual(200);
+      expect(context.core.elasticsearch.client.asCurrentUser.updateByQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          script: expect.objectContaining({
+            params: expect.objectContaining({
+              reason: 'custom_close_reason',
+            }),
+          }),
+        })
+      );
+    });
+
+    test('returns 400 when closing reason is invalid', async () => {
+      const mockedResponse = responseMock.create();
+      const request = requestMock.create({
+        method: 'post',
+        body: {
+          signal_ids: ['somefakeid1'],
+          status: 'closed',
+          reason: 'not_valid',
+        },
+      });
+
+      await setWorkflowStatusHandler({
+        context: requestContextMock.convertContext(context),
+        request,
+        response: mockedResponse,
+        getIndexPattern: () => Promise.resolve('.alerts-security.alerts-default'),
+      });
+      const response = responseAdapter(mockedResponse);
+
+      expect(response.status).toEqual(400);
+      expect(response.body).toEqual({
+        message: 'not_valid is an invalid closing reason.',
+        status_code: 400,
+      });
+      expect(context.core.elasticsearch.client.asCurrentUser.updateByQuery).not.toHaveBeenCalled();
     });
   });
 });

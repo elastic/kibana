@@ -102,6 +102,15 @@ describe('createContextAwarenessToolkit', () => {
     expect(openInNewTabSpy).toHaveBeenCalledWith(params);
   });
 
+  it('dispatches refreshData through fetchData with tab id', async () => {
+    const { internalState, tabId } = await setup();
+    const fetchDataSpy = jest.spyOn(internalStateActions, 'fetchData');
+
+    createContextAwarenessToolkit({ internalState, tabId }).actions.refreshData?.();
+
+    expect(fetchDataSpy).toHaveBeenCalledWith({ tabId });
+  });
+
   it('awaits updateAdHocDataViews dispatch', async () => {
     const { internalState, tabId } = await setup();
     const updateAdHocDataViewsSpy = jest.spyOn(internalStateActions, 'updateAdHocDataViews');

@@ -10,6 +10,7 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { i18n } from '@kbn/i18n';
 import type { EsWorkflow } from '@kbn/workflows';
+import { WorkflowApi } from '@kbn/workflows-ui';
 import { loadWorkflowThunk } from './load_workflow_thunk';
 import { affectsYamlMetadata, updateWorkflowYamlFields } from '../../../../../../common/lib/yaml';
 import { WorkflowsBaseTelemetry } from '../../../../../common/service/telemetry';
@@ -38,6 +39,7 @@ export const updateWorkflowThunk = createAsyncThunk<
   'detail/updateWorkflowThunk',
   async ({ workflow }, { getState, dispatch, rejectWithValue, extra: { services } }) => {
     const { http, notifications } = services;
+    const api = new WorkflowApi(http);
     const state = getState();
     const id = selectWorkflowId(state);
     const workflowDefinition = selectWorkflowDefinition(state);
@@ -53,10 +55,7 @@ export const updateWorkflowThunk = createAsyncThunk<
         throw new Error('No workflow ID to update');
       }
 
-      // Make the API call to update the workflow
-      await http.put<void>(`/api/workflows/${id}`, {
-        body: JSON.stringify(workflow),
-      });
+      await api.updateWorkflow(id, workflow);
 
       // Get original workflow state for comparison
       const originalWorkflow = selectWorkflow(state);

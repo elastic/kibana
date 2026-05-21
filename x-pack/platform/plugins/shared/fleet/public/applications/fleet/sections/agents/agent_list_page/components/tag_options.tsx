@@ -95,7 +95,7 @@ export const TagOptions: React.FC<Props> = ({ tagName, isTagHovered, onTagsUpdat
     <>
       {tagMenuButtonVisible && (
         <EuiButtonIcon
-          iconType="boxesHorizontal"
+          iconType="boxesVertical"
           aria-label={i18n.translate('xpack.fleet.tagOptions.tagOptionsToggleButtonLabel', {
             defaultMessage: 'Tag Options',
           })}
@@ -140,7 +140,7 @@ export const TagOptions: React.FC<Props> = ({ tagName, isTagHovered, onTagsUpdat
                   closePopover(true);
                 }}
               >
-                <EuiIcon type="trash" />{' '}
+                <EuiIcon type="trash" aria-hidden={true} />{' '}
                 <FormattedMessage
                   id="xpack.fleet.tagOptions.deleteText"
                   defaultMessage="Delete tag"

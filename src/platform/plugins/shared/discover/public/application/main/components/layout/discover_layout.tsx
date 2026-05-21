@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactElement } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiPage,
@@ -23,8 +22,12 @@ import { i18n } from '@kbn/i18n';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { hasTransformationalCommand } from '@kbn/esql-utils';
 import { useDragDropContext } from '@kbn/dom-drag-drop';
-import { type DataView, type DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
-import { SHOW_FIELD_STATISTICS, SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
+import { DataViewType, type DataView, type DataViewField } from '@kbn/data-views-plugin/public';
+import {
+  ErrorCallout,
+  SHOW_FIELD_STATISTICS,
+  SORT_DEFAULT_ORDER_SETTING,
+} from '@kbn/discover-utils';
 import type { UseColumnsProps } from '@kbn/unified-data-table';
 import { useColumns } from '@kbn/unified-data-table';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
@@ -33,7 +36,6 @@ import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { VIEW_MODE } from '../../../../../common/constants';
 import { useAppStateSelector } from '../../state_management/redux';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -49,10 +51,8 @@ import type { SidebarToggleState } from '../../../types';
 import { FetchStatus } from '../../../types';
 import { useDataState } from '../../hooks/use_data_state';
 import { SavedSearchURLConflictCallout } from '../../../../components/saved_search_url_conflict_callout/saved_search_url_conflict_callout';
-import { ErrorCallout } from '../../../../components/common/error_callout';
 import { addLog } from '../../../../utils/add_log';
 import { DiscoverResizableLayout } from './discover_resizable_layout';
-import type { PanelsToggleProps } from '../../../../components/panels_toggle';
 import { PanelsToggle } from '../../../../components/panels_toggle';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import {
@@ -60,6 +60,7 @@ import {
   useCurrentDataView,
   useCurrentTabAction,
   useCurrentTabSelector,
+  useCurrentTabDataStateContainer,
   useInternalStateDispatch,
   useInternalStateSelector,
 } from '../../state_management/redux';
@@ -77,12 +78,10 @@ const TopNavMemoized = React.memo((props: DiscoverTopNavProps) => (
   </QueryClientProvider>
 ));
 
-export interface DiscoverLayoutProps {
-  stateContainer: DiscoverStateContainer;
-}
-
-export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
+export function DiscoverLayout() {
   const {
+    core,
+    docLinks,
     trackUiMetric,
     capabilities,
     dataViews,
@@ -100,7 +99,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
   const styles = useMemoCss(componentStyles);
   const globalQueryState = data.query.getState();
-  const { main$ } = stateContainer.dataState.data$;
+  const dataStateContainer = useCurrentTabDataStateContainer();
+  const { main$ } = dataStateContainer.data$;
   const [query, savedQuery, columns, sort, grid] = useAppStateSelector((state) => [
     state.query,
     state.savedQuery,
@@ -243,9 +243,9 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
           })
         );
       }
-      stateContainer.dataState.refetch$.next('reset');
+      dataStateContainer.refetch$.next('reset');
     },
-    [dataView, stateContainer, currentColumns, onRemoveColumn, dispatch, updateAdHocDataViewId]
+    [dataView, dataStateContainer, currentColumns, onRemoveColumn, dispatch, updateAdHocDataViewId]
   );
 
   const onDisableFilters = useCallback(() => {
@@ -256,7 +256,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   }, [filterManager]);
 
   const contentCentered = resultState === 'uninitialized' || resultState === 'none';
-  const documentState = useDataState(stateContainer.dataState.data$.documents$);
+  const documentState = useDataState(dataStateContainer.data$.documents$);
 
   const esqlModeWarning = useMemo(() => {
     if (isEsqlMode) {
@@ -285,33 +285,22 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     () => new BehaviorSubject<SidebarToggleState>({ isCollapsed: false, toggle: () => {} })
   );
 
-  const panelsToggle: ReactElement<PanelsToggleProps> = useMemo(() => {
-    return (
-      <PanelsToggle
-        sidebarToggleState$={sidebarToggleState$}
-        renderedFor="root"
-        isChartAvailable={undefined}
-      />
-    );
-  }, [sidebarToggleState$]);
-
   const mainDisplay = useMemo(() => {
     if (resultState === 'uninitialized') {
       addLog('[DiscoverLayout] uninitialized triggers data fetching');
-      return <DiscoverUninitialized onRefresh={() => stateContainer.dataState.fetch()} />;
+      return <DiscoverUninitialized onRefresh={() => dataStateContainer.fetch()} />;
     }
 
     return (
       <>
         <DiscoverHistogramLayout
           dataView={dataView}
-          stateContainer={stateContainer}
           columns={currentColumns}
           viewMode={viewMode}
           onAddFilter={onAddFilter}
           onFieldEdited={onFieldEdited}
           onDropFieldToTable={onDropFieldToTable}
-          panelsToggle={panelsToggle}
+          sidebarToggleState$={sidebarToggleState$}
         />
         {resultState === 'loading' && <LoadingSpinner />}
       </>
@@ -319,13 +308,13 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   }, [
     resultState,
     dataView,
-    stateContainer,
     currentColumns,
     viewMode,
     onAddFilter,
     onFieldEdited,
     onDropFieldToTable,
-    panelsToggle,
+    sidebarToggleState$,
+    dataStateContainer,
   ]);
 
   const isLoading =
@@ -333,8 +322,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     documentState.fetchStatus === FetchStatus.PARTIAL;
 
   const onCancelClick = useCallback(() => {
-    stateContainer.dataState.cancel();
-  }, [stateContainer.dataState]);
+    dataStateContainer.cancel();
+  }, [dataStateContainer]);
 
   const layoutUiState = useCurrentTabSelector((state) => state.uiState.layout);
   const setLayoutUiState = useCurrentTabAction(internalStateActions.setLayoutUiState);
@@ -368,6 +357,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   return (
     <EuiPage
       className="dscPage" // class is used in tests and other styles
+      data-test-subj="dscPage"
       data-fetch-counter={fetchCounter.current}
       direction="column"
       css={[
@@ -381,7 +371,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     >
       <TopNavMemoized
         savedQuery={savedQuery}
-        stateContainer={stateContainer}
         esqlModeErrors={esqlModeErrors}
         esqlModeWarning={esqlModeWarning}
         onFieldEdited={onFieldEdited}
@@ -405,7 +394,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
             sidebarPanel={
               <SidebarMemoized
                 columns={currentColumns}
-                documents$={stateContainer.dataState.data$.documents$}
+                documents$={dataStateContainer.data$.documents$}
                 onAddBreakdownField={canSetBreakdownField ? onAddBreakdownField : undefined}
                 onAddField={onAddColumnWithTracking}
                 onAddFilter={onAddFilter}
@@ -422,14 +411,14 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
               <div css={styles.dscPageContentWrapper}>
                 {resultState === 'none' ? (
                   <>
-                    {React.isValidElement(panelsToggle) ? (
-                      <div css={styles.mainPanel}>
-                        {React.cloneElement(panelsToggle, {
-                          renderedFor: 'prompt',
-                          isChartAvailable: false,
-                        })}
-                      </div>
-                    ) : null}
+                    <div css={styles.mainPanel}>
+                      <PanelsToggle
+                        sidebarToggleState$={sidebarToggleState$}
+                        omitChartButton
+                        omitTableButton
+                        dataTestSubjSuffix="InPage"
+                      />
+                    </div>
                     {dataState.error ? (
                       <ErrorCallout
                         title={i18n.translate(
@@ -440,10 +429,13 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
                         )}
                         error={dataState.error}
                         isEsqlMode={isEsqlMode}
+                        showErrorDialog={({ title, error }) =>
+                          core.notifications.showErrorDialog({ title, error })
+                        }
+                        esqlReferenceHref={docLinks.links.query.queryESQL}
                       />
                     ) : (
                       <DiscoverNoResults
-                        stateContainer={stateContainer}
                         isTimeBased={isTimeBased}
                         query={globalQueryState.query}
                         filters={globalQueryState.filters}

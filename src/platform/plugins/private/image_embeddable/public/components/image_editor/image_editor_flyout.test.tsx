@@ -68,11 +68,9 @@ test('should call onSave when "Save" clicked (url)', async () => {
   expect(getByTestId(`imageEmbeddableEditorSave`)).toBeVisible();
   await userEvent.click(getByTestId(`imageEmbeddableEditorSave`));
   expect(onSave).toBeCalledWith({
-    altText: 'alt text',
-    backgroundColor: '',
-    sizing: {
-      objectFit: 'contain',
-    },
+    alt_text: 'alt text',
+    background_color: '',
+    object_fit: 'contain',
     src: {
       type: 'url',
       url: 'https://elastic.co/image',
@@ -82,11 +80,9 @@ test('should call onSave when "Save" clicked (url)', async () => {
 
 test('should be able to edit', async () => {
   const initialImageConfig = {
-    altText: 'alt text',
-    backgroundColor: '',
-    sizing: {
-      objectFit: 'contain' as const,
-    },
+    alt_text: 'alt text',
+    background_color: '',
+    object_fit: 'contain' as const,
     src: {
       type: 'url' as const,
       url: 'https://elastic.co/image',
@@ -105,11 +101,9 @@ test('should be able to edit', async () => {
   expect(getByTestId(`imageEmbeddableEditorSave`)).toBeVisible();
   await userEvent.click(getByTestId(`imageEmbeddableEditorSave`));
   expect(onSave).toBeCalledWith({
-    altText: 'alt text changed',
-    backgroundColor: '',
-    sizing: {
-      objectFit: 'contain',
-    },
+    alt_text: 'alt text changed',
+    background_color: '',
+    object_fit: 'contain',
     src: {
       type: 'url',
       url: 'https://elastic.co/image-changed',
@@ -119,11 +113,9 @@ test('should be able to edit', async () => {
 
 test(`shouldn't be able to save if url is invalid`, async () => {
   const initialImageConfig = {
-    altText: 'alt text',
-    backgroundColor: '',
-    sizing: {
-      objectFit: 'contain' as const,
-    },
+    alt_text: 'alt text',
+    background_color: '',
+    object_fit: 'contain' as const,
     src: {
       type: 'url' as const,
       url: 'https://elastic.co/image',

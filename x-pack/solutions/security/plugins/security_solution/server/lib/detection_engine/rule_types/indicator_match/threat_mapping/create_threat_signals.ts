@@ -339,7 +339,6 @@ export const createThreatSignals = async ({
         createEventSignal({
           sharedParams,
           currentEventList: slicedChunk,
-          currentResult: results,
           eventsTelemetry,
           filters: allEventFilters,
           reassignThreatPitId,
@@ -373,7 +372,6 @@ export const createThreatSignals = async ({
       createSignal: (slicedChunk) =>
         createThreatSignal({
           sharedParams,
-          currentResult: results,
           currentThreatList: slicedChunk,
           eventsTelemetry,
           filters: allEventFilters,

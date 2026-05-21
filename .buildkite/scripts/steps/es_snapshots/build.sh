@@ -76,6 +76,8 @@ echo "--- Build Elasticsearch"
   :distribution:archives:linux-aarch64-tar:assemble \
   :distribution:archives:linux-tar:assemble \
   :distribution:archives:windows-zip:assemble \
+  -x :distribution:tools:server-launcher:nativeImageLinuxX64 \
+  -x :distribution:tools:server-launcher:nativeImageLinuxAarch64 \
   --parallel
 
 echo "--- Create distribution archives"
@@ -88,8 +90,17 @@ docker images "docker.elastic.co/elasticsearch/elasticsearch"
 docker images "docker.elastic.co/elasticsearch/elasticsearch" --format "{{.Tag}}" | xargs -n1 echo 'docker save docker.elastic.co/elasticsearch/elasticsearch:${0} | gzip > ../es-build/elasticsearch-${0}-docker-image.tar.gz'
 docker images "docker.elastic.co/elasticsearch/elasticsearch" --format "{{.Tag}}" | xargs -n1 bash -c 'docker save docker.elastic.co/elasticsearch/elasticsearch:${0} | gzip > ../es-build/elasticsearch-${0}-docker-image.tar.gz'
 
+ES_VERSION=$(docker images "docker.elastic.co/elasticsearch/elasticsearch" --format "{{.Tag}}" | grep SNAPSHOT | head -1)
+KIBANA_ES_DEFAULT_VERSION="$ES_VERSION-$ELASTICSEARCH_GIT_COMMIT"
+KIBANA_ES_DEFAULT_IMAGE="docker.elastic.co/kibana-ci/elasticsearch:$KIBANA_ES_DEFAULT_VERSION"
+echo $ES_VERSION $KIBANA_ES_DEFAULT_VERSION $KIBANA_ES_DEFAULT_IMAGE
+docker tag "docker.elastic.co/elasticsearch/elasticsearch:$ES_VERSION" "$KIBANA_ES_DEFAULT_IMAGE"
+docker_with_retry push "$KIBANA_ES_DEFAULT_IMAGE"
+
 echo "--- Create kibana-ci docker cloud image archives"
-./gradlew :distribution:docker:cloud-ess-docker-export:assemble && {
+./gradlew :distribution:docker:cloud-ess-docker-export:assemble \
+  -x :distribution:tools:server-launcher:nativeImageLinuxX64 \
+  -x :distribution:tools:server-launcher:nativeImageLinuxAarch64 && {
   ES_CLOUD_ID=$(docker images "docker.elastic.co/elasticsearch/elasticsearch-cloud-ess" --format "{{.ID}}")
   ES_CLOUD_VERSION=$(docker images "docker.elastic.co/elasticsearch/elasticsearch-cloud-ess" --format "{{.Tag}}")
   KIBANA_ES_CLOUD_VERSION="$ES_CLOUD_VERSION-$ELASTICSEARCH_GIT_COMMIT"
@@ -119,6 +130,10 @@ cat << EOF | buildkite-agent annotate --style "info"
   - \`ES_SNAPSHOT_VERSION\` - \`$(buildkite-agent meta-data get ES_SNAPSHOT_VERSION)\`
   - \`ES_SNAPSHOT_ID\` - \`$(buildkite-agent meta-data get ES_SNAPSHOT_ID)\`
 EOF
+
+if [ "$BUILDKITE_TRIGGERED_FROM_BUILD_PIPELINE_SLUG" = "kibana-version-bump" ]; then
+  buildkite-agent meta-data set es_snapshot_manifest "$ES_SNAPSHOT_MANIFEST" --job "$PARENT_TRIGGER_JOB_ID"
+fi
 
 cat << EOF | buildkite-agent pipeline upload
 steps:

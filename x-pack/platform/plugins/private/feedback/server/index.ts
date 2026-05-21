@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { FeedbackPlugin } from './plugin';
-
-export function plugin() {
+export async function plugin() {
+  const { FeedbackPlugin } = await import('./plugin');
   return new FeedbackPlugin();
 }

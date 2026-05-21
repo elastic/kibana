@@ -103,6 +103,10 @@ describe('getConnectorTypeSuggestions', () => {
             label: 'wait',
             kind: monaco.languages.CompletionItemKind.Constant,
           }),
+          expect.objectContaining({
+            label: 'waitForInput',
+            kind: monaco.languages.CompletionItemKind.Event,
+          }),
         ])
       );
     });
@@ -189,7 +193,7 @@ describe('getConnectorTypeSuggestions', () => {
       const result = getConnectorTypeSuggestions('if', mockRange);
       const ifSuggestion = result.find((s) => s.label === 'if');
       expect(ifSuggestion?.insertText).toBe('if:\n  # snippet');
-      expect(generateBuiltInStepSnippet).toHaveBeenCalledWith('if', {});
+      expect(generateBuiltInStepSnippet).toHaveBeenCalledWith('if', {}, undefined);
     });
 
     it('should generate snippets for connectors', () => {
@@ -389,6 +393,22 @@ describe('getConnectorTypeSuggestions', () => {
       expect(customSuggestion).toMatchObject({
         label: '.custom',
         documentation: 'Workflow connector - .custom',
+      });
+    });
+
+    it('should prefer summary over description for the display label of registered steps', () => {
+      (getCachedAllConnectors as jest.Mock).mockReturnValue([
+        {
+          type: 'data.map',
+          summary: 'Map Collection',
+          description: 'Transform an array of items by applying a step to each one.',
+        },
+      ]);
+      const result = getConnectorTypeSuggestions('data.', mockRange);
+      const mapSuggestion = result.find((s) => s.detail === 'data.map');
+      expect(mapSuggestion).toMatchObject({
+        label: 'Map Collection',
+        documentation: 'Transform an array of items by applying a step to each one.',
       });
     });
   });

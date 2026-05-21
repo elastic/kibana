@@ -17,11 +17,13 @@ import type { RuleTypeMetaData } from '@kbn/alerting-plugin/common';
 import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { isValidRuleFormPlugins } from '@kbn/response-ops-rule-form/lib';
 import type { DiscoverAppMenuItemType, DiscoverAppMenuPopoverItem } from '@kbn/discover-utils';
-import type { DiscoverStateContainer } from '../../../state_management/discover_state';
 import type { AppMenuDiscoverParams } from './types';
 import type { DiscoverServices } from '../../../../../build_services';
 import { internalStateActions } from '../../../state_management/redux';
 import { createSearchSource } from '../../../state_management/utils/create_search_source';
+import type { DiscoverInternalState, InternalStateDispatch } from '../../../state_management/redux';
+import { selectTab } from '../../../state_management/redux';
+import { CreateESQLRuleFlyout } from './create_esql_rule_flyout';
 
 const EsQueryValidConsumer: RuleCreationValidConsumer[] = [
   AlertConsumers.INFRASTRUCTURE,
@@ -40,15 +42,19 @@ const RuleFormFlyoutWithType = RuleFormFlyout<EsQueryAlertMetaData>;
 const CreateAlertFlyout: React.FC<{
   discoverParams: AppMenuDiscoverParams;
   services: DiscoverServices;
+  tabId: string;
+  getState: () => DiscoverInternalState;
+  dispatch: InternalStateDispatch;
   onFinishAction: () => void;
-  stateContainer: DiscoverStateContainer;
-}> = ({ stateContainer, discoverParams, services, onFinishAction = () => {} }) => {
+}> = ({ discoverParams, services, tabId, getState, dispatch, onFinishAction = () => {} }) => {
   const { dataView, isEsqlMode, adHocDataViews } = discoverParams;
   const {
     triggersActionsUi: { ruleTypeRegistry, actionTypeRegistry },
   } = services;
+
+  // Get fresh tab state when the component renders
+  const currentTab = selectTab(getState(), tabId);
   const timeField = getTimeField(dataView);
-  const currentTab = stateContainer.getCurrentTab();
   const { query, savedQuery: savedQueryId } = currentTab.appState;
 
   /**
@@ -101,9 +107,7 @@ const CreateAlertFlyout: React.FC<{
       onCancel={onFinishAction}
       onSubmit={onFinishAction}
       onChangeMetaData={(metadata: EsQueryAlertMetaData) => {
-        void stateContainer.internalState.dispatch(
-          internalStateActions.updateAdHocDataViews(metadata.adHocDataViewList)
-        );
+        void dispatch(internalStateActions.updateAdHocDataViews(metadata.adHocDataViewList));
       }}
       ruleTypeId={ES_QUERY_ID}
       initialValues={{ params: getParams() }}
@@ -118,17 +122,51 @@ const CreateAlertFlyout: React.FC<{
 export const getAlertsAppMenuItem = ({
   discoverParams,
   services,
-  stateContainer,
+  tabId,
+  getState,
+  dispatch,
+  subscribe,
+  showCreateRuleV2,
 }: {
   discoverParams: AppMenuDiscoverParams;
   services: DiscoverServices;
-  stateContainer: DiscoverStateContainer;
+  tabId: string;
+  getState: () => DiscoverInternalState;
+  dispatch: InternalStateDispatch;
+  subscribe: (listener: () => void) => () => void;
+  showCreateRuleV2?: boolean;
 }): DiscoverAppMenuItemType => {
   const { dataView, isEsqlMode } = discoverParams;
   const timeField = getTimeField(dataView);
   const hasTimeFieldName = !isEsqlMode ? Boolean(dataView?.timeFieldName) : Boolean(timeField);
 
   const items: DiscoverAppMenuPopoverItem[] = [];
+
+  if (showCreateRuleV2) {
+    items.push({
+      id: 'create-esql-rule-v2',
+      order: 0,
+      label: i18n.translate('discover.alerts.createEsqlRuleV2', {
+        defaultMessage: 'Create ES|QL rule',
+      }),
+      labelBadgeText: i18n.translate('discover.alerts.newBadge', {
+        defaultMessage: 'New',
+      }),
+      iconType: 'bell',
+      testId: 'discoverCreateEsqlRuleV2Button',
+      run: ({ context: { onFinishAction } }) => {
+        return (
+          <CreateESQLRuleFlyout
+            services={services}
+            tabId={tabId}
+            getState={getState}
+            subscribe={subscribe}
+            onClose={onFinishAction}
+          />
+        );
+      },
+    });
+  }
 
   if (services.capabilities.management?.insightsAndAlerting?.triggersActions) {
     items.push({
@@ -139,11 +177,7 @@ export const getAlertsAppMenuItem = ({
       }),
       iconType: 'tableOfContents',
       testId: 'discoverManageAlertsButton',
-      href: services.application.getUrlForApp(
-        services.application.isAppRegistered('rules')
-          ? 'rules'
-          : 'management/insightsAndAlerting/triggersActions/rules'
-      ),
+      href: getManageRulesUrl(services),
     });
 
     if (discoverParams.authorizedRuleTypeIds.includes(ES_QUERY_ID)) {
@@ -167,7 +201,9 @@ export const getAlertsAppMenuItem = ({
               onFinishAction={onFinishAction}
               discoverParams={discoverParams}
               services={services}
-              stateContainer={stateContainer}
+              tabId={tabId}
+              getState={getState}
+              dispatch={dispatch}
             />
           );
         },
@@ -181,8 +217,8 @@ export const getAlertsAppMenuItem = ({
       defaultMessage: 'Alerts',
     }),
     testId: 'discoverAlertsButton',
-    order: 4,
-    iconType: 'alert',
+    order: 5,
+    iconType: 'warning',
     popoverWidth: 250,
     items,
   };
@@ -191,4 +227,12 @@ export const getAlertsAppMenuItem = ({
 function getTimeField(dataView: DataView | undefined) {
   const dateFields = dataView?.fields.getByType('date');
   return dataView?.timeFieldName || dateFields?.[0]?.name;
+}
+
+function getManageRulesUrl(services: DiscoverServices) {
+  return services.application.getUrlForApp(
+    services.application.isAppRegistered('rules')
+      ? 'rules'
+      : 'management/insightsAndAlerting/triggersActions/rules'
+  );
 }

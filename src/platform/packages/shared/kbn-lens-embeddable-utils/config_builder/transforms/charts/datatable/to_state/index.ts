@@ -12,24 +12,28 @@ import type {
   FormBasedPersistedState,
   PersistedIndexPatternLayer,
 } from '@kbn/lens-common';
-import type { DatatableState, DatatableStateESQL, DatatableStateNoESQL } from '../../../../schema';
+import type {
+  DatatableConfig,
+  DatatableConfigESQL,
+  DatatableConfigNoESQL,
+} from '../../../../schema';
 import { DEFAULT_LAYER_ID } from '../../../../constants';
 import { fromMetricAPItoLensState } from '../../../columns/metric';
 import { getValueColumn } from '../../../columns/esql_column';
 import { addLayerColumn, generateLayer } from '../../../utils';
 import { fromBucketLensApiToLensState } from '../../../columns/buckets';
-import { getAccessorName } from '../helpers';
+import { getAccessorName, inferDatatypeFromColor } from '../helpers';
 import {
   METRIC_ACCESSOR_PREFIX,
   ROW_ACCESSOR_PREFIX,
   SPLIT_METRIC_BY_ACCESSOR_PREFIX,
 } from '../constants';
 import { buildMetricsState, buildRowsState, buildSplitMetricsByState } from './columns';
-import { buildAppearanceState } from './appearance';
+import { buildStylingState } from './styling';
 import { processMetricColumnsWithReferences } from '../../utils';
 
 export function buildFormBasedLayer(
-  config: DatatableStateNoESQL
+  config: DatatableConfigNoESQL
 ): FormBasedPersistedState['layers'] {
   const layers: Record<string, PersistedIndexPatternLayer> = generateLayer(
     DEFAULT_LAYER_ID,
@@ -38,7 +42,9 @@ export function buildFormBasedLayer(
   const defaultLayer = layers[DEFAULT_LAYER_ID];
 
   // First, convert ALL metrics and collect them with their IDs
-  const metricsConverted = config.metrics.map(fromMetricAPItoLensState);
+  const metricsConverted = config.metrics.map(
+    (metric) => fromMetricAPItoLensState(metric, inferDatatypeFromColor(metric.color, 'number')) // Infer datatype from color config for last_value operations
+  );
   const allMetricColumnsWithIds = processMetricColumnsWithReferences(
     metricsConverted,
     (index) => getAccessorName(METRIC_ACCESSOR_PREFIX, index),
@@ -72,21 +78,30 @@ export function buildFormBasedLayer(
   return layers;
 }
 
-export function getValueColumns(config: DatatableStateESQL) {
+export function getValueColumns(config: DatatableConfigESQL) {
   return [
     ...(config.rows ?? []).map((row, index) =>
-      getValueColumn(getAccessorName(ROW_ACCESSOR_PREFIX, index), row.column)
+      getValueColumn(
+        getAccessorName(ROW_ACCESSOR_PREFIX, index),
+        row,
+        inferDatatypeFromColor(row.color, 'string')
+      )
     ),
     ...(config.split_metrics_by ?? []).map((splitBy, index) =>
-      getValueColumn(getAccessorName(SPLIT_METRIC_BY_ACCESSOR_PREFIX, index), splitBy.column)
+      getValueColumn(getAccessorName(SPLIT_METRIC_BY_ACCESSOR_PREFIX, index), splitBy)
     ),
     ...(config.metrics ?? []).map((metric, index) =>
-      getValueColumn(getAccessorName(METRIC_ACCESSOR_PREFIX, index), metric.column, 'number', true)
+      getValueColumn(
+        getAccessorName(METRIC_ACCESSOR_PREFIX, index),
+        metric,
+        inferDatatypeFromColor(metric.color, 'number'),
+        true
+      )
     ),
   ];
 }
 
-export function buildVisualizationState(config: DatatableState): DatatableVisualizationState {
+export function buildVisualizationState(config: DatatableConfig): DatatableVisualizationState {
   const metrics = buildMetricsState(config.metrics);
   const rows = buildRowsState(config.rows);
   const splitMetrics = buildSplitMetricsByState(config.split_metrics_by);
@@ -94,7 +109,7 @@ export function buildVisualizationState(config: DatatableState): DatatableVisual
   return {
     layerId: DEFAULT_LAYER_ID,
     layerType: 'data',
-    ...buildAppearanceState(config),
+    ...buildStylingState(config),
     columns: rows.concat(splitMetrics, metrics),
   };
 }

@@ -447,6 +447,18 @@ describe('functions arg suggestions', () => {
       expect(texts).toContain('($0)');
     });
 
+    it.each([
+      ['IN', 'FROM index | EVAL integerField IN /'],
+      ['NOT IN', 'FROM index | EVAL integerField NOT IN /'],
+    ])('%s operator in EVAL expression: does not add a new-column suggestion', async (_, query) => {
+      const { suggest } = await setup();
+      const suggestions = await suggest(query);
+      const texts = suggestions.map(({ text }) => text);
+
+      expect(texts).toContain('($0)');
+      expect(texts).not.toContain('col0 = ');
+    });
+
     it('NOT IN operator: suggests opening parenthesis for list', async () => {
       const { suggest } = await setup();
       const suggestions = await suggest('FROM index | EVAL result = CASE(integerField NOT IN /)');
@@ -473,6 +485,17 @@ describe('functions arg suggestions', () => {
 
       expect(suggestions.length).toBeGreaterThan(0);
       expect(fieldSuggestions.length).toBeGreaterThan(0);
+    });
+
+    it('IN operator with a started list: keeps suggestions and does not leak marker text', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest('FROM index | WHERE integerField IN (1, /)');
+
+      expect(suggestions.length).toBeGreaterThan(0);
+      suggestions.forEach(({ label, text }) => {
+        expect(label).not.toContain('marker_esql_editor');
+        expect(text).not.toContain('marker_esql_editor');
+      });
     });
 
     it('unary NOT operator in WHERE: suggests boolean fields and boolean-returning functions', async () => {

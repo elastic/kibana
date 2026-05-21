@@ -8,6 +8,7 @@
  */
 
 import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type { ProvidedType } from '@kbn/test';
 
 import type { EsArchiverProvider } from '../es_archiver';
@@ -20,12 +21,21 @@ interface Options {
   esArchiver: ProvidedType<typeof EsArchiverProvider>;
   kibanaServer: ProvidedType<typeof KibanaServerProvider>;
   retry: RetryService;
-  defaults: Record<string, any>;
+  log: ToolingLog;
+  defaults?: Record<string, any>;
+  globalDefaults?: Record<string, any>;
 }
 
-export function extendEsArchiver({ esArchiver, kibanaServer, retry, defaults }: Options) {
+export function extendEsArchiver({
+  esArchiver,
+  kibanaServer,
+  retry,
+  log,
+  defaults,
+  globalDefaults,
+}: Options) {
   // only extend the esArchiver if there are default uiSettings to restore
-  if (!defaults) {
+  if (!defaults && !globalDefaults) {
     return;
   }
 
@@ -39,15 +49,34 @@ export function extendEsArchiver({ esArchiver, kibanaServer, retry, defaults }: 
       const statsKeys = Object.keys(stats);
       const kibanaKeys = statsKeys.filter(
         // this also matches stats keys like '.kibana_1' and '.kibana_2,.kibana_1'
-        (key) => key.includes(MAIN_SAVED_OBJECT_INDEX) && stats[key].created
+        (key) => key.includes(MAIN_SAVED_OBJECT_INDEX) && (stats[key].created || stats[key].deleted)
       );
 
-      // if the kibana index was created by the esArchiver then update the uiSettings
+      // if the kibana index was created or deleted by the esArchiver then update the uiSettings
       // with the defaults to make sure that they are always in place initially
       if (kibanaKeys.length > 0) {
-        await retry.try(async () => {
-          await kibanaServer.uiSettings.update(defaults);
-        });
+        if (defaults) {
+          await retry.try(async () => {
+            await kibanaServer.uiSettings.update(defaults);
+          });
+        }
+        if (globalDefaults) {
+          await retry.try(async () => {
+            try {
+              await kibanaServer.uiSettings.updateGlobal(globalDefaults);
+            } catch (err) {
+              // If a setting is already enforced via server-level globalOverrides, the API returns 400.
+              // That's fine — the override achieves the same goal.
+              if (err?.message?.includes('because it is overridden')) {
+                log.warning(
+                  `Skipping globalDefaults update — setting already enforced by a server-level override: ${err.message}`
+                );
+                return;
+              }
+              throw err;
+            }
+          });
+        }
       }
 
       return stats;

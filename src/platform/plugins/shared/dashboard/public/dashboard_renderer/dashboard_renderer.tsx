@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { apm } from '@elastic/apm-rum';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
@@ -59,6 +60,10 @@ export interface DashboardRendererProps {
    * @param internalApi - The {@link DashboardInternalApi} instance.
    */
   onApiAvailable?: (api: DashboardApi, internalApi: DashboardInternalApi) => void;
+  /**
+   * Callback invoked when the dashboard API is destroyed.
+   */
+  onApiCleanup?: () => void;
 }
 
 export function DashboardRenderer({
@@ -68,6 +73,7 @@ export function DashboardRenderer({
   dashboardRedirect,
   getCreationOptions,
   onApiAvailable,
+  onApiCleanup,
 }: DashboardRendererProps) {
   const dashboardViewport = useRef(null);
   const dashboardContainerRef = useRef<HTMLElement | null>(null);
@@ -124,7 +130,7 @@ export function DashboardRenderer({
 
     let canceled = false;
     let cleanupDashboardApi: (() => void) | undefined;
-    loadDashboardApi({ getCreationOptions, savedObjectId })
+    loadDashboardApi({ getCreationOptions, onApiCleanup, savedObjectId })
       .then((results) => {
         if (!results) return;
         if (canceled) {
@@ -140,7 +146,14 @@ export function DashboardRenderer({
           setShowControlGroup(results.useControlsIntegration);
       })
       .catch((err) => {
-        if (!canceled) setError(err);
+        if (!canceled) {
+          apm.captureError(err, {
+            labels: {
+              error_type: 'LoadDashboardFailure',
+            },
+          });
+          setError(err);
+        }
       });
 
     return () => {

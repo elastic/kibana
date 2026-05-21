@@ -130,7 +130,7 @@ export const POLICY_ARTIFACT_TRUSTED_APPS_LABELS: Omit<
   ),
   emptyUnexistingImportButtonTitle: i18n.translate(
     'xpack.securitySolution.endpoint.policy.trustedApps.empty.unexisting.importAction',
-    { defaultMessage: 'Import trusted application list' }
+    { defaultMessage: 'Import trusted applications' }
   ),
   listTotalItemCountMessage: (totalItemsCount: number): string =>
     i18n.translate('xpack.securitySolution.endpoint.policy.trustedApps.list.totalItemCount', {

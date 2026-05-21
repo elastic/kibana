@@ -1,12 +1,12 @@
 openapi: 3.0.0
 info:
-  title: Get attack discovery generations API endpoint
+  title: Get Attack Discovery generations API endpoint
   version: '2023-10-31'
 paths:
   /api/attack_discovery/generations:
     get:
       x-codegen-enabled: true
-      x-code-samples:
+      x-codeSamples:
         - lang: curl
           label: Example request
           source: |
@@ -16,8 +16,8 @@ paths:
              --header "Content-Type: application/json"
       x-labels: [ess, serverless]
       operationId: GetAttackDiscoveryGenerations
-      description: Get the latest attack discovery generations metadata (that are not dismissed) for the current user. This endpoint retrieves generation metadata including execution status and statistics for Attack discovery generations.
-      summary: Get the latest attack discovery generations metadata for the current user
+      description: Get the latest Attack Discovery generations metadata (that are not dismissed) for the current user. This endpoint retrieves generation metadata including execution status and statistics for Attack Discovery generations.
+      summary: Get the latest Attack Discovery generations metadata for the current user
       parameters:
         - name: end
           in: query
@@ -44,7 +44,7 @@ paths:
           example: "now-24h"
       responses:
         200:
-          description: Successful response
+          description: Indicates a successful call.
           content:
             application/json:
               schema:
@@ -54,11 +54,24 @@ paths:
                 properties:
                   generations:
                     type: array
-                    description: List of attack discovery generations
+                    description: List of Attack Discovery generations
                     items:
                       $ref: '../../../generation.schema.yaml#/components/schemas/AttackDiscoveryGeneration'
+              examples:
+                GetAttackDiscoveryGenerationsResponse200Example:
+                  summary: Latest Attack Discovery generation metadata for the current user.
+                  value:
+                    generations:
+                      - execution_uuid: "46b218d5-535d-4329-be56-d0f6af6986b7"
+                        connector_id: "chatGpt5_0ChatAzure"
+                        loading_message: "AI is analyzing up to 100 alerts in the last 24 hours to generate discoveries."
+                        start: "2025-09-29T06:42:08.962Z"
+                        end: "2025-09-29T06:42:44.810Z"
+                        status: "succeeded"
+                        alerts_context_count: 75
+                        discoveries: 3
         400:
-          description: Bad request
+          description: Bad Request response.
           content:
             application/json:
               schema:
@@ -76,3 +89,10 @@ paths:
                     type: string
                     description: Human-readable error message
                     example: "Invalid size parameter. Must be a positive number."
+              examples:
+                GetAttackDiscoveryGenerationsResponse400Example:
+                  summary: Bad Request error returned when the size parameter is invalid.
+                  value:
+                    status_code: 400
+                    error: "Bad Request"
+                    message: "Invalid size parameter. Must be a positive number."

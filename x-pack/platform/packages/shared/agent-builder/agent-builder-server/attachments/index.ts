@@ -22,6 +22,7 @@ export type {
   StaticEsqlAttachmentBoundedTool,
 } from './tools';
 export type {
+  AttachmentSnapshot,
   AttachmentStateManager,
   AttachmentUpdateInput,
   ResolvedAttachmentRef,

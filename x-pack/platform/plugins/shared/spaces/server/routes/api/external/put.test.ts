@@ -8,7 +8,7 @@
 import * as Rx from 'rxjs';
 
 import type { ObjectType } from '@kbn/config-schema';
-import type { RouteValidatorConfig } from '@kbn/core/server';
+import type { RouteValidatorConfig, SavedObject } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import {
   coreMock,
@@ -26,6 +26,7 @@ import { API_VERSIONS } from '../../../../common';
 import { spacesConfig } from '../../../lib/__fixtures__';
 import { SpacesClientService } from '../../../spaces_client';
 import { SpacesService } from '../../../spaces_service';
+import type { SpaceSavedObjectAttributes } from '../../../types';
 import { usageStatsServiceMock } from '../../../usage_stats/usage_stats_service.mock';
 import {
   createMockSavedObjectsRepository,
@@ -37,14 +38,19 @@ import {
 describe('PUT /api/spaces/space', () => {
   const spacesSavedObjects = createSpaces();
 
-  const setup = async (options?: { cpsStart?: CPSServerStart }) => {
+  const setup = async (options?: {
+    cpsStart?: CPSServerStart;
+    spacesSavedObjects?: Pick<SavedObject<SpaceSavedObjectAttributes>, 'id' | 'attributes'>[];
+  }) => {
     const httpService = httpServiceMock.createSetupContract();
     const router = httpService.createRouter();
     const versionedRouterMock = router.versioned as MockedVersionedRouter;
 
     const coreStart = coreMock.createStart();
 
-    const savedObjectsRepositoryMock = createMockSavedObjectsRepository(spacesSavedObjects);
+    const savedObjectsRepositoryMock = createMockSavedObjectsRepository(
+      options?.spacesSavedObjects ?? spacesSavedObjects
+    );
 
     const log = loggingSystemMock.create().get('spaces');
 
@@ -207,6 +213,84 @@ describe('PUT /api/spaces/space', () => {
       name: 'my updated space',
       description: '',
       disabledFeatures: [],
+    });
+  });
+
+  it('should persist disabledFeatures when switching from classic to non-classic solution', async () => {
+    const storedDisabledFeatures = ['feature_1'];
+    const { routeHandler, savedObjectsRepositoryMock } = await setup({
+      spacesSavedObjects: [
+        {
+          id: 'mySpace',
+          attributes: {
+            name: 'mySpace',
+            solution: 'classic',
+            disabledFeatures: storedDisabledFeatures,
+          },
+        },
+      ],
+    });
+    const payload = {
+      id: 'mySpace',
+      name: 'mySpace',
+      disabledFeatures: [],
+      solution: 'oblt' as const,
+    };
+    const request = httpServerMock.createKibanaRequest({
+      params: { id: payload.id },
+      body: payload,
+      method: 'post',
+    });
+    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+    expect(response.status).toEqual(200);
+    expect(savedObjectsRepositoryMock.update).toHaveBeenCalledTimes(1);
+    expect(savedObjectsRepositoryMock.update).toHaveBeenCalledWith('space', 'mySpace', {
+      name: 'mySpace',
+      description: undefined,
+      color: undefined,
+      initials: undefined,
+      imageUrl: undefined,
+      disabledFeatures: storedDisabledFeatures,
+      solution: 'oblt',
+    });
+  });
+
+  it('should preserve stored disabledFeatures when switching from non-classic to classic solution', async () => {
+    const storedDisabledFeatures = ['feature_1'];
+    const { routeHandler, savedObjectsRepositoryMock } = await setup({
+      spacesSavedObjects: [
+        {
+          id: 'mySpace',
+          attributes: {
+            name: 'mySpace',
+            solution: 'oblt',
+            disabledFeatures: storedDisabledFeatures,
+          },
+        },
+      ],
+    });
+    const payload = {
+      id: 'mySpace',
+      name: 'mySpace',
+      disabledFeatures: [],
+      solution: 'classic' as const,
+    };
+    const request = httpServerMock.createKibanaRequest({
+      params: { id: payload.id },
+      body: payload,
+      method: 'post',
+    });
+    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+    expect(response.status).toEqual(200);
+    expect(savedObjectsRepositoryMock.update).toHaveBeenCalledTimes(1);
+    expect(savedObjectsRepositoryMock.update).toHaveBeenCalledWith('space', 'mySpace', {
+      name: 'mySpace',
+      description: undefined,
+      color: undefined,
+      initials: undefined,
+      imageUrl: undefined,
+      disabledFeatures: storedDisabledFeatures,
+      solution: 'classic',
     });
   });
 

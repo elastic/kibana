@@ -243,7 +243,7 @@ export const ContextMenu = ({
             id="copyAs"
             disabled={!window.navigator?.clipboard}
             onClick={() => onCopyAsSubmit()}
-            icon="copyClipboard"
+            icon="copy"
             css={styles.button}
           >
             <EuiFlexGroup
@@ -273,7 +273,7 @@ export const ContextMenu = ({
             data-test-subj="consoleMenuSelectLanguage"
             id="selectLanguage"
             onClick={() => setLanguageSelectorVisibility(true)}
-            icon="editorCodeBlock"
+            icon="code"
             disabled={isRequestConverterLoading}
           >
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
@@ -343,6 +343,9 @@ export const ContextMenu = ({
         closePopover={closePopover}
         panelPaddingSize="none"
         anchorPosition="downLeft"
+        aria-label={i18n.translate('console.contextMenu.popoverAriaLabel', {
+          defaultMessage: 'Request options',
+        })}
       >
         <EuiContextMenuPanel items={items} data-test-subj="consoleMenu" />
       </EuiPopover>

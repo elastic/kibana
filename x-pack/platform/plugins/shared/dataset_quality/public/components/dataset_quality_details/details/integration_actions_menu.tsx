@@ -69,7 +69,7 @@ export function IntegrationActionsMenu({
     <EuiButtonIcon
       title={integrationActionsText}
       aria-label={integrationActionsText}
-      iconType="boxesHorizontal"
+      iconType="boxesVertical"
       onClick={handleToggleMenu}
       data-test-subj="datasetQualityDetailsIntegrationActionsButton"
     />
@@ -201,8 +201,9 @@ export function IntegrationActionsMenu({
       button={actionButton}
       isOpen={isOpen}
       closePopover={handleCloseMenu}
+      aria-label={integrationActionsText}
     >
-      <EuiContextMenu size="s" panels={panelItems} initialPanelId={0} />
+      <EuiContextMenu panels={panelItems} initialPanelId={0} />
     </EuiPopover>
   );
 }

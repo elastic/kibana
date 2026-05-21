@@ -73,7 +73,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 "name": "*:*",
                 "error_type": "exception",
                 "message": "'Watch out!'",
-                "stall_time_seconds": 5
+                "stall_time_seconds": 30
               }
             ]
           }
@@ -81,12 +81,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       }`,
           false
         );
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        await testSubjects.exists('queryCancelButton');
+
+        // Wait for the async search to be established on ES so that cancellation can retrieve
+        // partial results via the async search ID
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+        await testSubjects.existOrFail('queryCancelButton');
         await testSubjects.click('queryCancelButton');
+        await header.waitUntilLoadingHasFinished();
 
         // Warning callout is shown
-        await testSubjects.exists('searchResponseWarningsCallout');
+        await testSubjects.existOrFail('searchResponseWarningsCallout');
 
         // No "timed out" error notification is shown
         await toasts.assertCount(0);
@@ -116,17 +120,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should show warning and results', async () => {
         await common.navigateToApp('discover');
         await discover.selectTextBaseLang();
+        await timePicker.setDefaultAbsoluteRange();
         await monacoEditor.setCodeEditorValue(`FROM logstash-*, ftr-remote:logstash-* METADATA _index
   | EVAL buckets = DATE_TRUNC(5 minute, @timestamp), delay = TO_STRING(CASE(STARTS_WITH(_index, "ftr-remote"), DELAY(10ms), false))
   | STATS count = COUNT(*) BY buckets, delay`);
-        await timePicker.setDefaultAbsoluteRange();
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        await testSubjects.exists('queryCancelButton');
-        await testSubjects.click('queryCancelButton');
+        await testSubjects.click('querySubmitButton');
 
+        // Wait for the async search to be established on ES so that cancellation can retrieve
+        // partial results via the async search ID
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+        await testSubjects.existOrFail('queryCancelButton');
+        await testSubjects.click('queryCancelButton');
         await header.waitUntilLoadingHasFinished();
+
         // Warning callout is shown
-        await testSubjects.exists('searchResponseWarningsCallout');
+        await testSubjects.existOrFail('searchResponseWarningsCallout');
 
         // No "timed out" error notification is shown
         await toasts.assertCount(0);

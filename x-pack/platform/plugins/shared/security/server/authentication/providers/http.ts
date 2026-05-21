@@ -6,12 +6,12 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
+import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
 
 import type { AuthenticationProviderOptions } from './base';
 import { BaseAuthenticationProvider } from './base';
 import { getDetailedErrorMessage } from '../../errors';
-import { ROUTE_TAG_ACCEPT_JWT } from '../../routes/tags';
+import { ROUTE_TAG_ACCEPT_JWT, ROUTE_TAG_ACCEPT_UIAM_OAUTH } from '../../routes/tags';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 
@@ -91,6 +91,23 @@ export class HTTPAuthenticationProvider extends BaseAuthenticationProvider {
       return AuthenticationResult.notHandled();
     }
 
+    if (
+      this.options.uiam &&
+      authorizationHeader.scheme.toLowerCase() === 'bearer' &&
+      isUiamCredential(authorizationHeader)
+    ) {
+      if (request.route.options.tags.includes(ROUTE_TAG_ACCEPT_UIAM_OAUTH)) {
+        return this.authenticateViaUiamOAuth(request, authorizationHeader);
+      }
+
+      this.logger.warn(
+        `Detected UIAM OAuth token on a non-MCP endpoint: ` +
+          `${request.route.method.toUpperCase()} ${request.route.path}. ` +
+          `OAuth tokens are only accepted on routes tagged with "${ROUTE_TAG_ACCEPT_UIAM_OAUTH}". ` +
+          `This may indicate a misconfigured MCP client or token misuse.`
+      );
+    }
+
     try {
       const user = await this.getUser(request);
       this.logger.debug(
@@ -145,5 +162,33 @@ export class HTTPAuthenticationProvider extends BaseAuthenticationProvider {
    */
   public getHTTPAuthenticationScheme() {
     return null;
+  }
+
+  /**
+   * Exchanges a UIAM OAuth access token for an ephemeral token via the UIAM service, verifies
+   * the audience, and resolves the user via Elasticsearch using the ephemeral token.
+   */
+  private async authenticateViaUiamOAuth(
+    request: KibanaRequest,
+    authorizationHeader: HTTPAuthorizationHeader
+  ): Promise<AuthenticationResult> {
+    try {
+      const ephemeralToken = await this.options.uiam!.exchangeOAuthToken(
+        authorizationHeader.credentials
+      );
+
+      const authHeaders = this.options.uiam!.getAuthenticationHeaders(ephemeralToken);
+
+      const user = await this.getUser(request, authHeaders);
+
+      this.logger.debug('Request authenticated via UIAM OAuth token exchange.');
+
+      return AuthenticationResult.succeeded(user, { authHeaders });
+    } catch (err) {
+      this.logger.error(
+        `Failed to authenticate via UIAM OAuth token exchange: ${getDetailedErrorMessage(err)}`
+      );
+      return AuthenticationResult.failed(err);
+    }
   }
 }

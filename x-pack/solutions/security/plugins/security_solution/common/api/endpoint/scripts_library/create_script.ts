@@ -8,10 +8,8 @@
 import { schema, type TypeOf } from '@kbn/config-schema';
 import type { DeepMutable } from '../../../endpoint/types';
 import {
-  ScriptDescriptionSchema,
-  ScriptExampleSchema,
   ScriptFileSchema,
-  ScriptInstructionsSchema,
+  ScriptFileTypeSchema,
   ScriptNameSchema,
   ScriptPathToExecutableSchema,
   ScriptPlatformSchema,
@@ -24,11 +22,17 @@ export const CreateScriptRequestSchema = {
     name: ScriptNameSchema,
     platform: ScriptPlatformSchema,
     file: ScriptFileSchema,
+    fileType: ScriptFileTypeSchema,
     requiresInput: schema.maybe(ScriptRequiresInputSchema),
-    description: schema.maybe(ScriptDescriptionSchema),
-    instructions: schema.maybe(ScriptInstructionsSchema),
-    example: schema.maybe(ScriptExampleSchema),
-    pathToExecutable: schema.maybe(ScriptPathToExecutableSchema),
+    description: schema.maybe(schema.string()),
+    instructions: schema.maybe(schema.string()),
+    example: schema.maybe(schema.string()),
+    pathToExecutable: schema.conditional(
+      schema.siblingRef('fileType'),
+      'archive',
+      ScriptPathToExecutableSchema,
+      schema.never()
+    ),
     tags: schema.maybe(getScriptsTagSchema('post')),
   }),
 };

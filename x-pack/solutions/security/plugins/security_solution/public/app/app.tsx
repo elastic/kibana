@@ -18,8 +18,8 @@ import type { AppMountParameters } from '@kbn/core/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
-import { useInstallEntityStoreV2 } from '@kbn/entity-store/public';
-import { THREAT_HUNTING_AGENT_ID, APP_NAME } from '../../common/constants';
+import { EntityStoreEuidApiProvider, useInstallEntityStoreV2 } from '@kbn/entity-store/public';
+import { APP_NAME } from '../../common/constants';
 import { UpsellingProvider } from '../common/components/upselling_provider';
 import { ManageUserInfo } from '../detections/components/user_info';
 import { ErrorToastDispatcher } from '../common/components/error_toast_dispatcher';
@@ -32,8 +32,13 @@ import { PageRouter } from './routes';
 import { UserPrivilegesProvider } from '../common/components/user_privileges/user_privileges_context';
 import { ReactQueryClientProvider } from '../common/containers/query_client/query_client_provider';
 import { DiscoverInTimelineContextProvider } from '../common/components/discover_in_timeline/provider';
+import { InitializationProvider } from '../common/components/initialization';
 import { AssistantProvider } from '../assistant/provider';
 import { TrialCompanion } from '../trial_companion/trial_companion';
+import {
+  consumePreserveAgentBuilderSessionGate,
+  readLastAgentBuilderAgentIdForSecuritySession,
+} from '../../common/agent_builder_navigation_gate';
 
 interface StartAppComponent {
   children: React.ReactNode;
@@ -56,30 +61,34 @@ const StartAppComponent: FC<StartAppComponent> = ({ children, history, store, th
     <KibanaRenderContextProvider {...services}>
       <ManageGlobalToaster>
         <ReduxStoreProvider store={store}>
-          <EuiThemeProvider darkMode={darkMode}>
-            <MlCapabilitiesProvider>
-              <UserPrivilegesProvider kibanaCapabilities={capabilities}>
-                <ManageUserInfo>
-                  <NavigationProvider core={services}>
-                    <ReactQueryClientProvider>
-                      <CellActionsProvider
-                        getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
-                      >
-                        <UpsellingProvider upsellingService={upselling}>
-                          <DiscoverInTimelineContextProvider>
-                            <PageRouter history={history}>
-                              <AssistantProvider>{children}</AssistantProvider>
-                              <TrialCompanion />
-                            </PageRouter>
-                          </DiscoverInTimelineContextProvider>
-                        </UpsellingProvider>
-                      </CellActionsProvider>
-                    </ReactQueryClientProvider>
-                  </NavigationProvider>
-                </ManageUserInfo>
-              </UserPrivilegesProvider>
-            </MlCapabilitiesProvider>
-          </EuiThemeProvider>
+          <EntityStoreEuidApiProvider>
+            <EuiThemeProvider darkMode={darkMode}>
+              <MlCapabilitiesProvider>
+                <UserPrivilegesProvider kibanaCapabilities={capabilities}>
+                  <ManageUserInfo>
+                    <NavigationProvider core={services}>
+                      <ReactQueryClientProvider>
+                        <InitializationProvider>
+                          <CellActionsProvider
+                            getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
+                          >
+                            <UpsellingProvider upsellingService={upselling}>
+                              <DiscoverInTimelineContextProvider>
+                                <PageRouter history={history}>
+                                  <AssistantProvider>{children}</AssistantProvider>
+                                  <TrialCompanion />
+                                </PageRouter>
+                              </DiscoverInTimelineContextProvider>
+                            </UpsellingProvider>
+                          </CellActionsProvider>
+                        </InitializationProvider>
+                      </ReactQueryClientProvider>
+                    </NavigationProvider>
+                  </ManageUserInfo>
+                </UserPrivilegesProvider>
+              </MlCapabilitiesProvider>
+            </EuiThemeProvider>
+          </EntityStoreEuidApiProvider>
           <ErrorToastDispatcher />
           <GlobalToaster />
         </ReduxStoreProvider>
@@ -109,22 +118,29 @@ const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
 
   useInstallEntityStoreV2(services);
 
-  // Set conversation flyout active config on mount, clear on unmount
+  // Set conversation flyout active config on mount, clear on unmount.
+  // Skip if the sidebar is already open (e.g. navigating from Agent Builder
+  // with an active conversation) to avoid clobbering its props.
   useEffect(() => {
-    if (services.agentBuilder?.setConversationFlyoutActiveConfig) {
-      services.agentBuilder.setConversationFlyoutActiveConfig({
+    if (services.agentBuilder?.setChatConfig && !services.chrome.sidebar.isOpen()) {
+      services.agentBuilder.setChatConfig({
         sessionTag: 'security',
-        agentId: THREAT_HUNTING_AGENT_ID,
         newConversation: false,
+        agentId: readLastAgentBuilderAgentIdForSecuritySession(),
       });
     }
 
     return () => {
-      if (services.agentBuilder?.clearConversationFlyoutActiveConfig) {
-        services.agentBuilder.clearConversationFlyoutActiveConfig();
+      if (consumePreserveAgentBuilderSessionGate()) {
+        return;
+      }
+      // Re-read at teardown time: the Agent Builder panel may have opened after this effect
+      // ran; using a stale `isOpen` from mount would incorrectly clear chat config mid-session.
+      if (services.agentBuilder?.clearChatConfig && !services.chrome.sidebar.isOpen()) {
+        services.agentBuilder.clearChatConfig();
       }
     };
-  }, [services.agentBuilder]);
+  }, [services.agentBuilder, services.chrome.sidebar, services.uiSettings]);
 
   return (
     <KibanaContextProvider

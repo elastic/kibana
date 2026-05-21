@@ -86,17 +86,19 @@ export class AlertService {
     };
   }
 
-  public async updateAlertsStatus(alerts: UpdateAlertStatusRequest[]) {
+  public async updateAlertsStatus(alerts: UpdateAlertStatusRequest[]): Promise<number> {
     try {
-      const bucketedAlerts = this.bucketAlertsByIndexAndStatus(alerts);
+      // Map of <index, <alert status, <alert close reason, alerts to update>>
+      const bucketedAlerts = this.bucketAlerts(alerts);
       const indexBuckets = Array.from(bucketedAlerts.entries());
 
-      await pMap(
+      const updateResults = await pMap(
         indexBuckets,
-        async (indexBucket: [string, Map<STATUS_VALUES, TranslatedUpdateAlertRequest[]>]) =>
-          this.updateByQuery(indexBucket),
+        async (indexBucket: [string, StatusAndReasonBuckets]) => this.updateByQuery(indexBucket),
         { concurrency: MAX_CONCURRENT_SEARCHES }
       );
+
+      return updateResults.reduce((acc, updatedCount) => acc + updatedCount, 0);
     } catch (error) {
       throw createCaseError({
         message: `Failed to update alert status ids: ${JSON.stringify(alerts)}: ${error}`,
@@ -106,35 +108,23 @@ export class AlertService {
     }
   }
 
-  private bucketAlertsByIndexAndStatus(
-    alerts: UpdateAlertStatusRequest[]
-  ): Map<string, Map<STATUS_VALUES, TranslatedUpdateAlertRequest[]>> {
-    return alerts.reduce<Map<string, Map<STATUS_VALUES, TranslatedUpdateAlertRequest[]>>>(
-      (acc, alert) => {
-        // skip any alerts that are empty
-        if (AlertService.isEmptyAlert(alert)) {
-          return acc;
-        }
-
-        const translatedAlert = { ...alert, status: this.translateStatus(alert) };
-        const statusToAlertId = acc.get(translatedAlert.index);
-
-        // if we haven't seen the index before
-        if (!statusToAlertId) {
-          // add a new index in the parent map, with an entry for the status the alert set to pointing
-          // to an initial array of only the current alert
-          acc.set(translatedAlert.index, createStatusToAlertMap(translatedAlert));
-        } else {
-          // We had the index in the map so check to see if we have a bucket for the
-          // status, if not add a new status entry with the alert, if so update the status entry
-          // with the alert
-          updateIndexEntryWithStatus(statusToAlertId, translatedAlert);
-        }
-
+  private bucketAlerts(alerts: UpdateAlertStatusRequest[]): Map<string, StatusAndReasonBuckets> {
+    return alerts.reduce<Map<string, StatusAndReasonBuckets>>((acc, alert) => {
+      if (AlertService.isEmptyAlert(alert)) {
         return acc;
-      },
-      new Map()
-    );
+      }
+
+      const translatedAlert = { ...alert, status: this.translateStatus(alert) };
+      const statusAndReasonBuckets = acc.get(translatedAlert.index);
+
+      if (!statusAndReasonBuckets) {
+        acc.set(translatedAlert.index, createStatusAndReasonBuckets(translatedAlert));
+      } else {
+        updateIndexEntryWithStatusAndReason(statusAndReasonBuckets, translatedAlert);
+      }
+
+      return acc;
+    }, new Map());
   }
 
   private static isEmptyAlert(alert: AlertInfo): boolean {
@@ -159,39 +149,28 @@ export class AlertService {
     return translatedStatus ?? 'open';
   }
 
-  private async updateByQuery([index, statusToAlertMap]: [
+  private async updateByQuery([index, statusAndReasonBuckets]: [
     string,
-    Map<STATUS_VALUES, TranslatedUpdateAlertRequest[]>
-  ]) {
-    const statusBuckets = Array.from(statusToAlertMap);
-    return Promise.all(
-      // this will create three update by query calls one for each of the three statuses
-      statusBuckets.map(([status, translatedAlerts]) =>
-        this.scopedClusterClient.updateByQuery({
+    StatusAndReasonBuckets
+  ]): Promise<number> {
+    const statusBuckets = Array.from(statusAndReasonBuckets.entries());
+    const updateRequests = statusBuckets.flatMap(([status, reasonToAlerts]) =>
+      Array.from(reasonToAlerts.entries()).map(async ([reason, alerts]) => {
+        const updateResponse = await this.scopedClusterClient.updateByQuery({
           index,
           conflicts: 'abort',
-          script: {
-            source: `if (ctx._source['${ALERT_WORKFLOW_STATUS}'] != null) {
-              ctx._source['${ALERT_WORKFLOW_STATUS}'] = '${status}';
-              ctx._source['${ALERT_WORKFLOW_STATUS_UPDATED_AT}'] = '${new Date().toISOString()}';
-            }
-            if (ctx._source.signal != null && ctx._source.signal.status != null) {
-              ctx._source.signal.status = '${status}'
-            }${
-              status !== 'closed'
-                ? `
-            ctx._source.remove('${ALERT_WORKFLOW_REASON}')`
-                : ''
-            }`,
-            lang: 'painless',
-          },
-          // the query here will contain all the ids that have the same status for the same index
-          // being updated
-          query: { ids: { values: translatedAlerts.map(({ id }) => id) } },
+          script: getUpdateAlertsStatusScript(status, reason),
+          // the query here will contain all the ids that have the same status (and reason for closed)
+          query: { ids: { values: alerts.map(({ id }) => id) } },
           ignore_unavailable: true,
-        })
-      )
+        });
+
+        return updateResponse?.updated ?? 0;
+      })
     );
+
+    const updatesForIndex = await Promise.all(updateRequests);
+    return updatesForIndex.reduce((acc, updatedCount) => acc + updatedCount, 0);
   }
 
   private getNonEmptyAlerts(alerts: AlertInfo[]): AlertInfo[] {
@@ -311,26 +290,86 @@ interface TranslatedUpdateAlertRequest {
   id: string;
   index: string;
   status: STATUS_VALUES;
+  closingReason?: string;
 }
+/**
+ * Buckets translated alerts by status, and then by close reason.
+ * Non-closed statuses use the `undefined` reason bucket.
+ */
+type StatusAndReasonBuckets = Map<
+  STATUS_VALUES,
+  Map<string | undefined, TranslatedUpdateAlertRequest[]>
+>;
 
-function createStatusToAlertMap(
+const getUpdateAlertsStatusScript = (status: STATUS_VALUES, reason?: string) => ({
+  source: `
+    boolean statusChanged = false;
+    boolean signalStatusChanged = false;
+    if (ctx._source['${ALERT_WORKFLOW_STATUS}'] != null && ctx._source['${ALERT_WORKFLOW_STATUS}'] != params.status) {
+      statusChanged = true;
+      ctx._source['${ALERT_WORKFLOW_STATUS}'] = params.status;
+      ctx._source['${ALERT_WORKFLOW_STATUS_UPDATED_AT}'] = params.updatedAt;
+      if (params.reason != null) {
+          ctx._source['${ALERT_WORKFLOW_REASON}'] = params.reason;
+      }
+      if (params.shouldRemoveWorkflowReason) {
+        ctx._source.remove('${ALERT_WORKFLOW_REASON}');
+      }
+    }
+    if (
+      ctx._source.signal != null &&
+      ctx._source.signal.status != null &&
+      ctx._source.signal.status != params.status
+    ) {
+      signalStatusChanged = true;
+      ctx._source.signal.status = params.status;
+    }
+
+    if (!statusChanged && !signalStatusChanged) {
+      ctx.op = 'noop';
+    }
+  `,
+  lang: 'painless',
+  params: {
+    status,
+    updatedAt: new Date().toISOString(),
+    shouldRemoveWorkflowReason: status !== 'closed',
+    reason: reason ?? null,
+  },
+});
+
+const getReasonBucketKey = (alert: TranslatedUpdateAlertRequest): string | undefined => {
+  return alert.status === 'closed' ? alert.closingReason : undefined;
+};
+
+const createStatusAndReasonBuckets = (
   alert: TranslatedUpdateAlertRequest
-): Map<STATUS_VALUES, TranslatedUpdateAlertRequest[]> {
-  return new Map<STATUS_VALUES, TranslatedUpdateAlertRequest[]>([[alert.status, [alert]]]);
-}
+): StatusAndReasonBuckets => {
+  return new Map<STATUS_VALUES, Map<string | undefined, TranslatedUpdateAlertRequest[]>>([
+    [alert.status, new Map([[getReasonBucketKey(alert), [alert]]])],
+  ]);
+};
 
-function updateIndexEntryWithStatus(
-  statusToAlerts: Map<STATUS_VALUES, TranslatedUpdateAlertRequest[]>,
+const updateIndexEntryWithStatusAndReason = (
+  statusAndReasonBuckets: StatusAndReasonBuckets,
   alert: TranslatedUpdateAlertRequest
-) {
-  const statusBucket = statusToAlerts.get(alert.status);
+) => {
+  const reasonBucketKey = getReasonBucketKey(alert);
+  const reasonToAlerts = statusAndReasonBuckets.get(alert.status);
 
-  if (!statusBucket) {
-    statusToAlerts.set(alert.status, [alert]);
-  } else {
-    statusBucket.push(alert);
+  if (!reasonToAlerts) {
+    statusAndReasonBuckets.set(alert.status, new Map([[reasonBucketKey, [alert]]]));
+    return;
   }
-}
+
+  const alerts = reasonToAlerts.get(reasonBucketKey);
+  if (!alerts) {
+    reasonToAlerts.set(reasonBucketKey, [alert]);
+    return;
+  }
+
+  alerts.push(alert);
+};
 
 export interface Alert {
   _id: string;

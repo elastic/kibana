@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IScopedClusterClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { Streams } from '@kbn/streams-schema';
 import type { LockManagerService } from '@kbn/lock-manager';
 import type { StreamsClient } from '../client';
@@ -31,10 +31,13 @@ export interface StateDependencies {
   lockManager: LockManagerService;
   streamsClient: StreamsClient;
   storageClient: StreamsStorageClient;
-  scopedClusterClient: IScopedClusterClient;
+  esClient: ElasticsearchClient;
   attachmentClient: AttachmentClient;
-  queryClient: QueryClient;
-  featureClient: FeatureClient;
+  getQueryClient?: () => Promise<QueryClient>;
+  getFeatureClient?: () => Promise<FeatureClient>;
   isServerless: boolean;
+  isSecurityEnabled: boolean;
+  isWiredStreamViewsEnabled: boolean;
   isDev: boolean;
+  deferRootDataStreamMaterialization?: boolean;
 }

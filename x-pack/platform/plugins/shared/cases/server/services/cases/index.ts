@@ -19,19 +19,27 @@ import type {
 } from '@kbn/core/server';
 
 import type { estypes } from '@elastic/elasticsearch';
+import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder, toElasticsearchQuery } from '@kbn/es-query';
 
 import type {
   SavedObjectsSearchOptions,
   SavedObjectsSearchResponse,
 } from '@kbn/core-saved-objects-api-server';
-import type { Case, CaseStatuses, User } from '../../../common/types/domain';
+import type {
+  Case,
+  CaseStatuses,
+  User,
+  AttachmentAttributesV2,
+} from '../../../common/types/domain';
 import { caseStatuses } from '../../../common/types/domain';
 import {
+  CASE_ATTACHMENT_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   MAX_DOCS_PER_PAGE,
 } from '../../../common/constants';
+import { UNIFIED_ALERT_TYPES_ARRAY } from '../../../common/utils/attachments';
 import { decodeOrThrow } from '../../common/runtime_types';
 import type {
   SavedObjectFindOptionsKueryNode,
@@ -40,7 +48,7 @@ import type {
 } from '../../common/types';
 import { defaultSortField, flattenCaseSavedObject } from '../../common/utils';
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../routes/api';
-import { combineFilters } from '../../client/utils';
+import { buildFilter, combineFilters } from '../../client/utils';
 import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
 import {
   transformSavedObjectToExternalModel,
@@ -52,6 +60,16 @@ import {
 import type { AttachmentService } from '../attachments';
 import type { AggregationBuilder, AggregationResponse } from '../../client/metrics/types';
 import { createCaseError, isSOError } from '../../common/error';
+import type {
+  ResolvedExtendedFieldFilter,
+  ResolvedFieldLabelFilter,
+} from './extended_field_search_utils';
+import {
+  buildExtendedFieldRuntimeMappings,
+  buildFieldLabelRuntimeMappings,
+  buildAllExtendedFieldValuesRuntimeMapping,
+  EF_ALL_VALUES_FIELD,
+} from './extended_field_search_utils';
 import type {
   CasePersistedAttributes,
   CaseSavedObjectTransformed,
@@ -80,7 +98,6 @@ import type {
   GetCategoryArgs,
   BulkCreateCasesArgs,
 } from './types';
-import type { AttachmentTransformedAttributes } from '../../common/types/attachments_v1';
 import { bulkDecodeSOAttributes } from '../utils';
 import {
   DEFAULT_ATTACHMENT_SEARCH_FIELDS,
@@ -90,6 +107,75 @@ import {
 } from './utils';
 
 const PartialCaseTransformedAttributesRt = getPartialCaseTransformedAttributesRt();
+
+/**
+ * Merges the legacy (`cases-comments`) and unified (`cases-attachments`) responses for
+ * `getCaseIdsByAlertId` so that downstream consumers see a single response with deduped
+ * case-id buckets and the union of authorized saved objects.
+ */
+const mergeCaseIdsByAlertIdResponses = (
+  legacyResponse: SavedObjectsFindResponse<{ owner: string }, GetCaseIdsByAlertIdAggs>,
+  unifiedResponse: SavedObjectsFindResponse<{ owner: string }, GetCaseIdsByAlertIdAggs>
+): SavedObjectsFindResponse<{ owner: string }, GetCaseIdsByAlertIdAggs> => {
+  const legacyBuckets = legacyResponse.aggregations?.references.caseIds.buckets ?? [];
+  const unifiedBuckets = unifiedResponse.aggregations?.references.caseIds.buckets ?? [];
+
+  const mergedKeys = new Set<string>();
+  const mergedBuckets: Array<{ key: string }> = [];
+  for (const bucket of [...legacyBuckets, ...unifiedBuckets]) {
+    if (!mergedKeys.has(bucket.key)) {
+      mergedKeys.add(bucket.key);
+      mergedBuckets.push({ key: bucket.key });
+    }
+  }
+
+  const legacyDocCount = legacyResponse.aggregations?.references.doc_count ?? 0;
+  const unifiedDocCount = unifiedResponse.aggregations?.references.doc_count ?? 0;
+
+  // Dedupe saved_objects across legacy + unified by id
+  const seenSavedObjectIds = new Set<string>();
+  const dedupedSavedObjects = [
+    ...legacyResponse.saved_objects,
+    ...unifiedResponse.saved_objects,
+  ].filter((so) => {
+    if (seenSavedObjectIds.has(so.id)) {
+      return false;
+    }
+    seenSavedObjectIds.add(so.id);
+    return true;
+  });
+
+  return {
+    ...legacyResponse,
+    total: dedupedSavedObjects.length,
+    saved_objects: dedupedSavedObjects,
+    aggregations: {
+      references: {
+        doc_count: legacyDocCount + unifiedDocCount,
+        caseIds: { buckets: mergedBuckets },
+      },
+    },
+  };
+};
+
+/**
+ * `cases-comments.comment` is a text-analyzed field: we use `match_phrase` so the user's
+ * input has to appear as a contiguous sequence
+ *
+ * `cases-comments.alertId` and `cases-comments.eventId` are keyword fields used
+ * to look up an exact ID, so a regular `match` is the correct semantic
+ */
+const buildAttachmentSearchClause = (
+  field: string,
+  search: string
+): estypes.QueryDslQueryContainer => {
+  // TODO: add support for CASE_ATTACHMENT_SAVED_OBJECT
+  // https://github.com/elastic/security-team/issues/15066
+  if (field === `${CASE_COMMENT_SAVED_OBJECT}.comment`) {
+    return { match_phrase: { [field]: search } };
+  }
+  return { match: { [field]: search } };
+};
 
 export class CasesService {
   private readonly log: Logger;
@@ -111,16 +197,17 @@ export class CasesService {
   }
 
   private buildCaseIdsAggs = (
+    soType: string,
     size: number = 100
   ): Record<string, estypes.AggregationsAggregationContainer> => ({
     references: {
       nested: {
-        path: `${CASE_COMMENT_SAVED_OBJECT}.references`,
+        path: `${soType}.references`,
       },
       aggregations: {
         caseIds: {
           terms: {
-            field: `${CASE_COMMENT_SAVED_OBJECT}.references.id`,
+            field: `${soType}.references.id`,
             size,
           },
         },
@@ -131,41 +218,90 @@ export class CasesService {
   public async getCaseIdsByAlertId({
     alertId,
     filter,
+    unifiedFilter,
   }: GetCaseIdsByAlertIdArgs): Promise<
     SavedObjectsFindResponse<{ owner: string }, GetCaseIdsByAlertIdAggs>
   > {
     try {
       this.log.debug(`Attempting to GET all cases for alert id ${alertId}`);
-      const combinedFilter = combineFilters([
-        nodeBuilder.is(`${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId`, alertId),
-        filter,
-      ]);
 
-      const response = await this.unsecuredSavedObjectsClient.find<
-        { owner: string },
-        GetCaseIdsByAlertIdAggs
-      >({
-        type: CASE_COMMENT_SAVED_OBJECT,
-        fields: includeFieldsRequiredForAuthentication(),
-        page: 1,
-        perPage: 1,
-        sortField: defaultSortField,
-        aggs: this.buildCaseIdsAggs(MAX_DOCS_PER_PAGE),
-        filter: combinedFilter,
+      const legacyResponse = await this.findCaseIdsForAlertByType({
+        alertId,
+        soType: CASE_COMMENT_SAVED_OBJECT,
+        alertIdField: 'alertId',
+        filter,
       });
 
-      const owners: Array<SavedObjectsFindResult<{ owner: string }>> = [];
-      for (const so of response.saved_objects) {
-        const validatedAttributes = decodeOrThrow(OwnerRt)(so.attributes);
-
-        owners.push(Object.assign(so, { attributes: validatedAttributes }));
+      if (!this.attachmentService.isUnifiedAttachmentsEnabled) {
+        return legacyResponse;
       }
 
-      return Object.assign(response, { saved_objects: owners });
+      const unifiedResponse = await this.findCaseIdsForAlertByType({
+        alertId,
+        soType: CASE_ATTACHMENT_SAVED_OBJECT,
+        alertIdField: 'attachmentId',
+        extraFilter: buildFilter({
+          filters: UNIFIED_ALERT_TYPES_ARRAY,
+          field: 'type',
+          operator: 'or',
+          type: CASE_ATTACHMENT_SAVED_OBJECT,
+        }),
+        filter: unifiedFilter,
+      });
+
+      return mergeCaseIdsByAlertIdResponses(legacyResponse, unifiedResponse);
     } catch (error) {
       this.log.error(`Error on GET all cases for alert id ${alertId}: ${error}`);
       throw error;
     }
+  }
+
+  /**
+   * Runs the per-saved-object-type alert→case lookup. Each saved-object type uses
+   * its own nested-aggregation path (`<soType>.references`), so legacy and unified
+   * attachments cannot share a single `find` aggregation; they are issued as
+   * sibling queries and merged by `getCaseIdsByAlertId`.
+   */
+  private async findCaseIdsForAlertByType({
+    alertId,
+    soType,
+    alertIdField,
+    extraFilter,
+    filter,
+  }: {
+    alertId: string;
+    soType: typeof CASE_COMMENT_SAVED_OBJECT | typeof CASE_ATTACHMENT_SAVED_OBJECT;
+    alertIdField: 'alertId' | 'attachmentId';
+    extraFilter?: KueryNode;
+    filter?: KueryNode;
+  }): Promise<SavedObjectsFindResponse<{ owner: string }, GetCaseIdsByAlertIdAggs>> {
+    const combinedFilter = combineFilters([
+      nodeBuilder.is(`${soType}.attributes.${alertIdField}`, alertId),
+      extraFilter,
+      filter,
+    ]);
+
+    const response = await this.unsecuredSavedObjectsClient.find<
+      { owner: string },
+      GetCaseIdsByAlertIdAggs
+    >({
+      type: soType,
+      fields: includeFieldsRequiredForAuthentication(),
+      page: 1,
+      perPage: 1,
+      sortField: defaultSortField,
+      aggs: this.buildCaseIdsAggs(soType, MAX_DOCS_PER_PAGE),
+      filter: combinedFilter,
+    });
+
+    const owners: Array<SavedObjectsFindResult<{ owner: string }>> = [];
+    for (const so of response.saved_objects) {
+      const validatedAttributes = decodeOrThrow(OwnerRt)(so.attributes);
+
+      owners.push(Object.assign(so, { attributes: validatedAttributes }));
+    }
+
+    return Object.assign(response, { saved_objects: owners });
   }
 
   /**
@@ -194,14 +330,7 @@ export class CasesService {
       namespaces,
       query: {
         bool: {
-          should: [
-            ...attachmentSearchFields.map((field) => ({
-              // use match instead of term to support non-keyword search for fields like comments
-              match: {
-                [field]: search,
-              },
-            })),
-          ],
+          should: attachmentSearchFields.map((field) => buildAttachmentSearchClause(field, search)),
         },
       },
     });
@@ -267,9 +396,13 @@ export class CasesService {
   public async searchCasesGroupedByID({
     caseOptions,
     namespaces,
+    extendedFieldFilters,
+    fieldLabelFilters,
   }: {
     caseOptions: SavedObjectFindOptionsKueryNode;
     namespaces: string[];
+    extendedFieldFilters?: ResolvedExtendedFieldFilter[][];
+    fieldLabelFilters?: ResolvedFieldLabelFilter[];
   }): Promise<CasesMapWithPageInfo> {
     const caseIdsByAttachmentSearch = await this.getCaseIdsByAttachmentSearch(
       namespaces,
@@ -280,15 +413,41 @@ export class CasesService {
       search: caseOptions.search,
       searchFields: caseOptions.searchFields,
       caseIds: caseIdsByAttachmentSearch,
+      extendedFieldFilters,
+      fieldLabelFilters,
     });
 
     const filterQuery = caseOptions.filter ? toElasticsearchQuery(caseOptions.filter) : undefined;
     const query = mergeSearchQuery(searchQuery, filterQuery);
 
+    const extendedFieldRuntimeMappings =
+      extendedFieldFilters && extendedFieldFilters.length > 0
+        ? buildExtendedFieldRuntimeMappings(extendedFieldFilters)
+        : {};
+
+    const fieldLabelRuntimeMappings =
+      fieldLabelFilters && fieldLabelFilters.length > 0
+        ? buildFieldLabelRuntimeMappings(fieldLabelFilters)
+        : {};
+
+    const allValuesRuntimeMappings =
+      caseOptions.search && caseOptions.searchFields?.includes(EF_ALL_VALUES_FIELD)
+        ? buildAllExtendedFieldValuesRuntimeMapping()
+        : {};
+
+    const runtimeMappings = {
+      ...extendedFieldRuntimeMappings,
+      ...fieldLabelRuntimeMappings,
+      ...allValuesRuntimeMappings,
+    };
+
+    const hasRuntimeMappings = Object.keys(runtimeMappings).length > 0;
+
     const cases = await this.searchCases({
       type: [CASE_SAVED_OBJECT],
       namespaces,
       query,
+      ...(hasRuntimeMappings ? { runtime_mappings: runtimeMappings } : {}),
       ...convertFindQueryParams(caseOptions),
     });
 
@@ -550,7 +709,8 @@ export class CasesService {
   private async getAllComments({
     id,
     options,
-  }: FindCommentsArgs): Promise<SavedObjectsFindResponse<AttachmentTransformedAttributes>> {
+    mode = 'legacy',
+  }: FindCommentsArgs): Promise<SavedObjectsFindResponse<AttachmentAttributesV2>> {
     try {
       this.log.debug(`Attempting to GET all comments internal for id ${JSON.stringify(id)}`);
       if (options?.page !== undefined || options?.perPage !== undefined) {
@@ -559,6 +719,7 @@ export class CasesService {
             sortField: defaultSortField,
             ...options,
           },
+          mode,
         });
       }
 
@@ -569,6 +730,7 @@ export class CasesService {
           sortField: defaultSortField,
           ...options,
         },
+        mode,
       });
     } catch (error) {
       this.log.error(`Error on GET all comments internal for ${JSON.stringify(id)}: ${error}`);
@@ -585,7 +747,8 @@ export class CasesService {
   public async getAllCaseComments({
     id,
     options,
-  }: FindCaseCommentsArgs): Promise<SavedObjectsFindResponse<AttachmentTransformedAttributes>> {
+    mode = 'legacy',
+  }: FindCaseCommentsArgs): Promise<SavedObjectsFindResponse<AttachmentAttributesV2>> {
     try {
       const refs = this.asArray(id).map((caseID) => ({ type: CASE_SAVED_OBJECT, id: caseID }));
       if (refs.length <= 0) {
@@ -606,6 +769,7 @@ export class CasesService {
           filter: options?.filter,
           ...options,
         },
+        mode,
       });
     } catch (error) {
       this.log.error(`Error on GET all comments for case ${JSON.stringify(id)}: ${error}`);

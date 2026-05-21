@@ -11,13 +11,23 @@ export * from './owners';
 export * from './files';
 export * from './application';
 export * from './observables';
-export { LENS_ATTACHMENT_TYPE } from './visualizations';
+export * from './attachments';
 
 /**
  * Cases connector limits.
  */
-export const MAX_OPEN_CASES = 20;
+export const MAX_OPEN_CASES_DEFAULT_MAXIMUM = 20;
+export const ABSOLUTE_MAX_CASES_PER_RUN = 1000;
 export const DEFAULT_MAX_OPEN_CASES = 5;
+export const MAX_OPEN_CASES_ADVANCED_SETTING = 'cases:maxOpenCasesPerRuleRun' as const;
+
+export const getMaximumOpenCases = (maxOpenCases?: number | null): number => {
+  if (maxOpenCases == null || Number.isNaN(maxOpenCases) || !Number.isFinite(maxOpenCases)) {
+    return MAX_OPEN_CASES_DEFAULT_MAXIMUM;
+  }
+
+  return Math.min(ABSOLUTE_MAX_CASES_PER_RUN, Math.max(1, Math.floor(maxOpenCases)));
+};
 
 export const DEFAULT_DATE_FORMAT = 'dateFormat' as const;
 export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz' as const;
@@ -35,6 +45,7 @@ export const CASE_CONFIGURE_SAVED_OBJECT = 'cases-configure' as const;
 export const CASE_RULES_SAVED_OBJECT = 'cases-rules' as const;
 export const CASE_ID_INCREMENTER_SAVED_OBJECT = 'cases-incrementing-id' as const;
 export const CASE_TEMPLATE_SAVED_OBJECT = 'cases-templates' as const;
+export const CASE_FIELD_DEFINITION_SAVED_OBJECT = 'cases-field-definition' as const;
 
 /**
  * If more values are added here please also add them here: x-pack/test/cases_api_integration/common/plugins
@@ -115,6 +126,10 @@ export const INTERNAL_BULK_EXPORT_TEMPLATES_URL = `${INTERNAL_TEMPLATES_URL}/_bu
 export const INTERNAL_TEMPLATE_TAGS_URL = `${INTERNAL_TEMPLATES_URL}/tags` as const;
 export const INTERNAL_TEMPLATE_CREATORS_URL = `${INTERNAL_TEMPLATES_URL}/creators` as const;
 
+export const INTERNAL_FIELD_DEFINITIONS_URL = `${CASES_INTERNAL_URL}/field_definitions` as const;
+export const INTERNAL_FIELD_DEFINITION_DETAILS_URL =
+  `${INTERNAL_FIELD_DEFINITIONS_URL}/{field_definition_id}` as const;
+
 /**
  * Action routes
  */
@@ -172,6 +187,7 @@ export const MAX_TEMPLATE_DESCRIPTION_LENGTH = 1000 as const;
 export const MAX_TEMPLATES_LENGTH = 10 as const;
 export const MAX_TEMPLATE_TAG_LENGTH = 50 as const;
 export const MAX_TAGS_PER_TEMPLATE = 10 as const;
+export const MAX_FIELD_DEFINITIONS_PER_OWNER = 200 as const;
 export const MAX_FILENAME_LENGTH = 160 as const;
 export const MAX_CUSTOM_OBSERVABLE_TYPES_LABEL_LENGTH = 50 as const;
 
@@ -215,6 +231,7 @@ export const CASES_CONNECTORS_CAPABILITY = 'cases_connectors' as const;
 export const CASES_REOPEN_CAPABILITY = 'case_reopen' as const;
 export const CREATE_COMMENT_CAPABILITY = 'create_comment' as const;
 export const ASSIGN_CASE_CAPABILITY = 'cases_assign' as const;
+export const MANAGE_TEMPLATES_CAPABILITY = 'cases_manage_templates' as const;
 
 /**
  * Cases API Tags
@@ -258,6 +275,8 @@ export const LOCAL_STORAGE_KEYS = {
   casesTableFiltersConfig: 'cases.list.tableFiltersConfig',
   casesTableState: 'cases.list.state',
   templatesTableState: 'templates.list.state',
+  templatesYamlEditorCreateState: 'templates.yaml.editor.create',
+  templatesYamlEditorEditState: 'templates.yaml.editor.edit',
 };
 
 /**
@@ -328,3 +347,4 @@ export const CASE_VIEW_ATTACHMENTS_SUB_TAB_CLICKED_EVENT_TYPE =
  * via lsp references.
  */
 export const CASE_EXTENDED_FIELDS = 'extended_fields' as const;
+export const CASE_EXTENDED_FIELDS_LABELS = 'extended_fields_labels' as const;

@@ -50,6 +50,10 @@ If you want to allow anonymous authentication in Kibana, these settings are supp
 ### Visualizations [ec_visualizations]
 
 
+#### Version 8.0+ [ec_vis_supported_versions_8_0_0]
+
+`vis_type_timelion.enabled`
+:   For 8.0 version and later, set to `false` to disable Timelion visualizations. **Default: `true`**
 
 #### Supported versions before 8.0.0 [ec_vis_supported_versions_before_8_0_0]
 
@@ -61,8 +65,8 @@ If you want to allow anonymous authentication in Kibana, these settings are supp
 
 #### Version 7.7+ [ec_vis_supported_versions_7_7]
 
-`vis_type_vega.enable`
-:   For 7.7 version and later, set to `false` to disable Vega vizualizations. **Default: `true`**
+`vis_type_vega.enabled`
+:   For 7.7 version and later, set to `false` to disable Vega visualizations. **Default: `true`**
 
 #### Version 7.8+ [ec_vis_supported_versions_7_8]
 
@@ -86,19 +90,36 @@ stack: ga 9.4+
 
 You can configure the following X-Pack settings from the Kibana **User Settings** editor.
 
+### Version 9.4+ [ec_version_9_4]
+```{applies_to}
+stack: ga 9.4
+```
+
+`xpack.securitySolution.maxEndpointScriptFileSize`
+:    The maximum file size in bytes for scripts uploaded to the Elastic Defend script library. Default is `26214400` (25MB).
+
+`xpack.fleet.versionSpecificPolicyAssignment.taskInterval`
+:   Configure the interval at which Fleet reassigns agents to the matching version-specific agent policy. The value must be specified in a duration format (for example, `30s`, `1m`, `5m`). Defaults to `1m`.
+
 ### Version 9.3+ [ec_version_9_3]
 ```{applies_to}
 stack: ga 9.3
 ```
 
-`xpack.actions.email.maximum_body_length`
-:    The maximum length of an email body in bytes.  Values longer than this length will be truncated.  The default is 25MB, the maximum is 25MB.
-
-`xpack.fleet.integrationRollbackTTL`
-:   Configure the time-to-live (TTL) for integration rollback availability. This setting controls how long the rollback option remains available after an integration is upgraded. The value must be specified in a duration format (for example, `7d`, `14d`, `168h`, or `1w`). Defaults to `7d` (7 days). For more information, refer to [Roll back an integration](docs-content://reference/fleet/roll-back-integration.md).
-
 `xpack.reporting.csv.maxRows`
 :    The maximum number of rows in a CSV report. Reports longer than maximum limit will be truncated. The default is 10,000. The minimum is 1.
+
+`xpack.fleet.integrationRollbackTTL`
+:   Configure the time-to-live (TTL) for integration rollback availability. This setting controls how long the rollback option remains available after an integration is upgraded. The value must be specified in a duration format (for example, `7d`, `14d`, `168h`, `1w`). Defaults to `7d` (7 days). For more information, refer to [Roll back an integration](docs-content://reference/fleet/roll-back-integration.md).
+
+`xpack.fleet.fleetPolicyRevisionsCleanup.max_revisions`
+: The maximum number of revisions to maintain for a Fleet agent policy. Defaults to `10`.
+
+`xpack.fleet.fleetPolicyRevisionsCleanup.interval`
+: The time interval for performing cleanups of Fleet agent policy revisions. The value must be specified in a duration format (for example, `30m`, `1h`, `1d`). Defaults to `1h` (1 hour).
+
+`xpack.fleet.fleetPolicyRevisionsCleanup.max_policies_per_run`
+: The maximum number of Fleet agent policies to clean up revisions from per interval. Defaults to `100`.
 
 ### Version 9.2+ [ec_version_9_2]
 ```{applies_to}
@@ -142,15 +163,6 @@ stack: ga 9.1
 
 `xpack.fleet.autoUpgrades.retryDelays`:
 :   Configure the retry delays of the automatic upgrade task for {{fleet}}-managed {{agents}}. The array's length indicates the maximum number of retries. Defaults to `['30m', '1h', '2h', '4h', '8h', '16h', '24h']`.
-
-`xpack.fleet.fleetPolicyRevisionsCleanup.max_revisions`
-: The maximum number of revisions to maintain for a Fleet agent policy. Defaults to `10`.
-
-`xpack.fleet.fleetPolicyRevisionsCleanup.interval`
-: The time interval for performing cleanups of Fleet agent policy revisions. The value must be specified in a duration format (for example, `30m`, `1h`, `1d`). Defaults to `1h` (1 hour).
-
-`xpack.fleet.fleetPolicyRevisionsCleanup.max_policies_per_run`
-: The maximum number of Fleet agent policies to clean up revisions from per interval. Defaults to `100`.
 
 ### Version 8.18+ [ec_version_8_18]
 
@@ -238,7 +250,7 @@ stack: ga 9.1
 :   Set to `true` to enable the Endpoint application.
 
 `xpack.fleet.enabled`
-:   Set to `false` to disable the Fleet application. Also enables the EPM and Agents features. For details about using this application, check the blog post [Easier data onboarding with Elastic Agent and Ingest Manager](https://www.elastic.co/blog/introducing-elastic-agent-and-ingest-manager).
+:   Set to `false` to disable the Fleet application. Also enables the EPM and Agents features. For details about using this application, check the blog post [Easier data onboarding with Elastic Agent and Ingest Manager](https://www.elastic.co/blog/introducing-elastic-agent-and-ingest-manager). This setting is not present in Kibana's configuration schema and has no effect on Kibana behavior.
 
 `xpack.fleet.agents.enabled`
 :   Set to `false` to disable the Agents API & UI.
@@ -280,19 +292,19 @@ This setting is not available in versions 8.0.0 through 8.2.0. As such, this set
 ### All supported versions [ec_all_supported_versions_5]
 
 `xpack.alerting.defaultRuleTaskTimeout`
-:   Specifies the default timeout for the all rule types tasks. Defaults to `5m`. Deprecated in versions 8.2+ and removed in versions 9.0+.
+:   Specifies the default timeout for all rule type tasks. Defaults to `5m`. Removed in 8.2. Use `xpack.alerting.rules.run.timeout` instead.
 
 `xpack.actions.microsoftGraphApiUrl`
 :   Specifies the URL to the Microsoft Graph server when using the MS Exchange Server email service. Defaults to `https://graph.microsoft.com/v1.0`.
 
 `xpack.alerting.maxEphemeralActionsPerAlert`
-:   Sets the number of actions that will be executed ephemerally. Defaults to `10`.
+:   Sets the number of actions that will be executed ephemerally. Defaults to `10`. Deprecated and ignored since Kibana 9.0. Ephemeral tasks were removed in 9.0; this setting has no effect on Kibana 9.0 and later.
 
 `xpack.task_manager.ephemeral_tasks.enabled`
-:   Enables an experimental feature that executes a limited (and configurable) number of actions in the same task as the alert which triggered them. These action tasks reduce the latency of the time it takes an action to run after it’s triggered, but are not persisted as SavedObjects. These non-persisted action tasks have a risk that they won’t be run at all if the Kibana instance running them exits unexpectedly. Defaults to `false`.
+:   Enables an experimental feature that executes a limited (and configurable) number of actions in the same task as the alert which triggered them. These action tasks reduce the latency of the time it takes an action to run after it’s triggered, but are not persisted as SavedObjects. These non-persisted action tasks have a risk that they won’t be run at all if the Kibana instance running them exits unexpectedly. Deprecated in 8.8 and ignored since Kibana 9.0. This setting has no effect on Kibana 9.0 and later. Defaults to `false`.
 
 `xpack.task_manager.ephemeral_tasks.request_capacity`
-:   Sets the size of the ephemeral queue. Defaults to `10`.
+:   Sets the size of the ephemeral queue. Deprecated in 8.8 and ignored since Kibana 9.0. This setting has no effect on Kibana 9.0 and later. Defaults to `10`.
 
 `xpack.actions.customHostSettings`
 :   An array of objects, one per host, containing the SSL/TLS settings used when executing connectors which make HTTPS and SMTP connections to the host servers.  For details about using this setting, check [Alerting and action settings in Kibana](/reference/configuration-reference/alerting-settings.md).
@@ -391,7 +403,7 @@ This setting is not available in versions 8.0.0 through 8.2.0. As such, this set
 :   Sets the maximum duration, also known as "absolute timeout". After this duration, the session will expire even if it is not idle. To learn more, check [Security settings in Kibana](/reference/configuration-reference/security-settings.md).
 
 `xpack.maps.showMapVisualizationTypes`
-:   Set to `true` if you want to create new region map visualizations.
+:   Set to `true` if you want to create new region map visualizations. Deprecated in Kibana 7.15 and removed in 8.0. This setting has no effect on Kibana 8.0 and later.
 
 `xpack.actions.allowedHosts`
 :   Set to an array of host names which actions such as email, slack, pagerduty, and webhook can connect to.  An element of `*` indicates any host can be connected to.  An empty array indicates no hosts can be connected to.  Default: `[ * ]`
@@ -452,11 +464,18 @@ This setting is not available in versions 8.0.0 through 8.2.0. As such, this set
 `csp.object_src` {applies_to}`stack: ga 9.3`
 :   Add sources for the [Content Security Policy `object-src` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/object-src).
 
+`csp.form_action` {applies_to}`stack: ga 9.5`
+:   Add sources for the [Content Security Policy `form-action` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/form-action). Rules may not contain `none` and will not override the defaults. **Default: [`'self'`]**
+
 `csp.report_uri`
 :   Add sources for the [Content Security Policy `report-uri` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/report-uri).
 
-`csp.report_only.form_action`
+`csp.report_only.form_action` {applies_to}`stack: deprecated 9.5`
 :   Add sources for the [Content Security Policy `form-action` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/form-action) in reporting mode.
+
+     :::{admonition} Deprecation details
+     Use `csp.form_action` instead. 
+     :::
 
 $$$csp-strict$$$ `csp.strict`
 :   Blocks Kibana access to any browser that does not enforce even rudimentary CSP rules. In practice, this disables support for older, less safe browsers like Internet Explorer. **Default: `true`** To learn more, check [Configure Kibana](/reference/configuration-reference/general-settings.md)].
@@ -516,11 +535,12 @@ Each method has its own unique limitations which are important to understand.
 
 
 `xpack.reporting.csv.scroll.duration`
-:   Amount of [time](elasticsearch://reference/elasticsearch/rest-apis/api-conventions.md#time-units) allowed before {{kib}} cleans the scroll context during a CSV export. Valid option is either `auto` or [time](elasticsearch://reference/elasticsearch/rest-apis/api-conventions.md#time-units), Defaults to `30s`.
+:   Amount of [time](elasticsearch://reference/elasticsearch/rest-apis/api-conventions.md#time-units) allowed before {{kib}} cleans the scroll context during a CSV export. Valid option is either `auto` or [time](elasticsearch://reference/elasticsearch/rest-apis/api-conventions.md#time-units). Defaults to `120s`.
 
 ::::{note}
-Support for the The option `auto` was included here, when the config value is set to `auto` the scroll context will be preserved for as long as is possible, before the report task is terminated due to the limits of `xpack.reporting.queue.timeout`.
+The default value was increased from `30s` to `120s` in version 9.0.
 
+When the config value is set to `auto`, the scroll context will be preserved for as long as possible, before the report task is terminated due to the limits of `xpack.reporting.queue.timeout`.
 ::::
 
 
@@ -576,20 +596,9 @@ Support for the The option `auto` was included here, when the config value is se
 :   Set to any text string. To provide your own encryption key for reports, use this setting.
 
 `xpack.reporting.roles.enabled`
-:   When `true`, grants users access to the {{report-features}} when they are assigned the `reporting_user` role. Granting access to users this way is deprecated. Set to `false` and use [Kibana privileges](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/kibana-privileges.md) instead.
+:   When `true`, grants users access to the {{report-features}} when they are assigned the `reporting_user` role. Granting access to users this way is deprecated. Set to `false` and use [Kibana privileges](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/kibana-privileges.md) instead. Removed in Kibana 9.0; the deprecated role-based model is no longer supported.
 
-Defaults to `true`.
-
-`xpack.reporting.csv.scroll.duration`
-:   Amount of [time](elasticsearch://reference/elasticsearch/rest-apis/api-conventions.md#time-units) allowed before {{kib}} cleans the scroll context during a CSV export.
-
-Defaults to `30s` (30 seconds).
-
-::::{note}
-If search latency in {{es}} is sufficiently high, such as if you are using cross-cluster search or frozen tiers, you may need to increase the setting.
-
-::::
-
+Defaults to `true` in versions before 9.0.
 
 `xpack.reporting.csv.scroll.size`
 :   Sets the number of documents retrieved from {{es}} for each scroll iteration during Kibana CSV export. Defaults to `500`.
@@ -598,7 +607,7 @@ If search latency in {{es}} is sufficiently high, such as if you are using cross
 :   Enables a check that warns you when there’s a potential formula included in the output (=, -, +, and @ chars). See OWASP: [https://www.owasp.org/index.php/CSV_Injection](https://www.owasp.org/index.php/CSV_Injection). Defaults to `true`.
 
 `xpack.reporting.csv.escapeFormulaValues`
-:   Escapes formula values in cells with a `'`. See OWASP: [https://www.owasp.org/index.php/CSV_Injection](https://www.owasp.org/index.php/CSV_Injection). Defaults to `true`.
+:   Escapes formula values in cells with a `'`. See OWASP: [https://www.owasp.org/index.php/CSV_Injection](https://www.owasp.org/index.php/CSV_Injection). Defaults to `false`.
 
 `xpack.reporting.csv.useByteOrderMarkEncoding`
 :   Adds a byte order mark (`\ufeff`) at the beginning of the CSV file. Defaults to `false`.
@@ -703,7 +712,7 @@ The following APM settings are supported in Kibana:
 :   Maximum number of unique transaction combinations sampled for generating service map focused on a specific service. Defaults to `100`.
 
 `xpack.apm.serviceMapFingerprintGlobalBucketSize`
-:   Maximum number of unique transaction combinations sampled for generating the global service map. Defaults to `100`.
+:   Maximum number of unique transaction combinations sampled for generating the global service map. Defaults to `1000`.
 
 `xpack.apm.serviceMapEnabled`
 :   Set to `false` to disable service maps. Defaults to `true`.
@@ -724,25 +733,25 @@ The following APM settings are supported in Kibana:
 :   Sets a `fixed_interval` for date histograms in metrics aggregations. Defaults to `30`.
 
 `xpack.apm.agent.migrations.enabled`
-:   Set to `false` to disable cloud APM migrations. Defaults to `true`.
+:   Set to `true` to enable cloud APM migrations. Defaults to `false`.
 
 `xpack.apm.indices.span`
-:   Matcher for indices containing span documents. Defaults to apm-*.
+:   Matcher for indices containing span documents. Defaults to `traces-apm*,apm-*,traces-*.otel-*`.
 
 `xpack.apm.indices.error`
-:   Matcher for indices containing error documents. Defaults to apm-*.
+:   Matcher for indices containing error documents. Defaults to `logs-apm*,apm-*,logs-*.otel-*`.
 
 `xpack.apm.indices.transaction`
-:   Matcher for indices containing transaction documents. Defaults to apm-*.
+:   Matcher for indices containing transaction documents. Defaults to `traces-apm*,apm-*,traces-*.otel-*`.
 
 `xpack.apm.indices.onboarding`
-:   Matcher for all onboarding indices. Defaults to apm-*.
+:   Matcher for all onboarding indices. Defaults to `apm-*`.
 
 `xpack.apm.indices.metric`
-:   Matcher for all metrics indices. Defaults to apm-*.
+:   Matcher for all metrics indices. Defaults to `metrics-apm*,apm-*,metrics-*.otel-*`.
 
 `xpack.apm.indices.sourcemap`
-:   Matcher for all source map indices. Defaults to apm-*.
+:   Matcher for all source map indices. Defaults to `apm-*`.
 
 `xpack.apm.maxSuggestions`
 :   Maximum number of suggestions fetched in autocomplete selection boxes. Defaults to `100`
@@ -753,7 +762,7 @@ The following APM settings are supported in Kibana:
 `xpack.apm.ui.maxTraceItems`
 :   Maximum number of child items displayed when viewing trace details.
 
-    Defaults to `1000`.  Any positive value is valid. To learn more, check [APM settings in Kibana](/reference/configuration-reference/apm-settings.md).
+    Defaults to `5000`.  Any positive value is valid. To learn more, check [APM settings in Kibana](/reference/configuration-reference/apm-settings.md).
 
 
 `xpack.apm.ui.enabled`

@@ -77,6 +77,70 @@ describe('tab_state_filters actions', () => {
     });
   });
 
+  it('should use the generic WHERE clause when cascade groups are available but none are selected', async () => {
+    const { internalState, tabId, services } = await setup();
+    const setQuerySpy = jest.spyOn(services.data.query.queryString, 'setQuery');
+
+    internalState.dispatch(
+      internalStateActions.setCascadedDocumentsState({
+        tabId,
+        cascadedDocumentsState: {
+          ...selectTab(internalState.getState(), tabId).cascadedDocumentsState,
+          availableCascadeGroups: ['status'],
+          selectedCascadeGroups: [],
+        },
+      })
+    );
+
+    expect(() => {
+      internalState.dispatch(
+        internalStateActions.addFilter({
+          tabId,
+          field: 'status',
+          value: 200,
+          mode: '+',
+        })
+      );
+    }).not.toThrow();
+
+    expect(setQuerySpy).toHaveBeenCalledWith({
+      esql: appendWhereClauseToESQLQuery('FROM test-index', 'status', 200, '+'),
+    });
+  });
+
+  it('should pass the ES mapping type to appendWhereClauseToESQLQuery', async () => {
+    const { internalState, tabId, services } = await setup();
+    const setQuerySpy = jest.spyOn(services.data.query.queryString, 'setQuery');
+    const keywordField = dataViewMockWithTimeField.fields.create({
+      name: 'tags.keyword',
+      type: 'string',
+      esTypes: ['keyword'],
+      scripted: false,
+      searchable: true,
+      aggregatable: true,
+    });
+
+    internalState.dispatch(
+      internalStateActions.addFilter({
+        tabId,
+        field: keywordField,
+        value: ['info', 'success'],
+        mode: '+',
+      })
+    );
+
+    expect(setQuerySpy).toHaveBeenCalledWith({
+      esql: appendWhereClauseToESQLQuery(
+        'FROM test-index',
+        'tags.keyword',
+        ['info', 'success'],
+        '+',
+        'string',
+        'keyword'
+      ),
+    });
+  });
+
   it('should add classic filter in non-ES|QL mode', async () => {
     const { internalState, tabId, services, runtimeStateManager } = await setup();
     const addFiltersSpy = jest.spyOn(services.filterManager, 'addFilters');

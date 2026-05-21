@@ -12,6 +12,7 @@ import type { ReactNode } from 'react';
 import React from 'react';
 import { ActionMenu } from '@kbn/observability-shared-plugin/public';
 import type { TypeOf } from '@kbn/typed-react-router-config';
+import { listMetricColumnPreset } from '../../../../utils/column_presets';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import type { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { getServiceNodeName, SERVICE_NODE_NAME_MISSING } from '../../../../../common/service_nodes';
@@ -70,7 +71,7 @@ export function getColumns({
       name: i18n.translate('xpack.apm.serviceOverview.instancesTableColumnNodeName', {
         defaultMessage: 'Node name',
       }),
-      width: '30%',
+      minWidth: '14em', // Will grow to fill the space
       render: (_, item) => {
         const { serviceNodeName } = item;
         const isMissingServiceNodeName = serviceNodeName === SERVICE_NODE_NAME_MISSING;
@@ -95,9 +96,9 @@ export function getColumns({
       sortable: true,
     },
     {
+      ...listMetricColumnPreset(),
       field: 'latency',
       name: getLatencyColumnLabel(latencyAggregationType),
-      align: RIGHT_ALIGNMENT,
       render: (_, { serviceNodeName, latency }) => {
         const currentPeriodTimestamp = detailedStatsData?.currentPeriod?.[serviceNodeName]?.latency;
         const previousPeriodTimestamp =
@@ -124,11 +125,11 @@ export function getColumns({
       sortable: true,
     },
     {
+      ...listMetricColumnPreset(),
       field: 'throughput',
       name: i18n.translate('xpack.apm.serviceOverview.instancesTableColumnThroughput', {
         defaultMessage: 'Throughput',
       }),
-      align: RIGHT_ALIGNMENT,
       render: (_, { serviceNodeName, throughput }) => {
         const currentPeriodTimestamp =
           detailedStatsData?.currentPeriod?.[serviceNodeName]?.throughput;
@@ -157,11 +158,11 @@ export function getColumns({
       sortable: true,
     },
     {
+      ...listMetricColumnPreset(),
       field: 'errorRate',
       name: i18n.translate('xpack.apm.serviceOverview.instancesTableColumnErrorRate', {
         defaultMessage: 'Failed transaction rate',
       }),
-      align: RIGHT_ALIGNMENT,
       render: (_, { serviceNodeName, errorRate }) => {
         const currentPeriodTimestamp =
           detailedStatsData?.currentPeriod?.[serviceNodeName]?.errorRate;
@@ -190,11 +191,11 @@ export function getColumns({
       sortable: true,
     },
     {
+      ...listMetricColumnPreset(),
       field: 'cpuUsage',
       name: i18n.translate('xpack.apm.serviceOverview.instancesTableColumnCpuUsage', {
         defaultMessage: 'CPU usage (avg.)',
       }),
-      align: RIGHT_ALIGNMENT,
       sortable: true,
       render: (_, { serviceNodeName, cpuUsage }) => {
         const currentPeriodTimestamp =
@@ -221,11 +222,11 @@ export function getColumns({
       },
     },
     {
+      ...listMetricColumnPreset(),
       field: 'memoryUsage',
       name: i18n.translate('xpack.apm.serviceOverview.instancesTableColumnMemoryUsage', {
         defaultMessage: 'Memory usage (avg.)',
       }),
-      align: RIGHT_ALIGNMENT,
       sortable: true,
       render: (_, { serviceNodeName, memoryUsage }) => {
         const currentPeriodTimestamp =
@@ -277,7 +278,7 @@ export function getColumns({
                   defaultMessage: 'Edit',
                 })}
                 data-test-subj={`instanceActionsButton_${instanceItem.serviceNodeName}`}
-                iconType="boxesHorizontal"
+                iconType="boxesVertical"
                 onClick={() => toggleRowActionMenu(instanceItem.serviceNodeName)}
               />
             }
@@ -314,7 +315,9 @@ export function getColumns({
               itemIdToExpandedRowMap[instanceItem.serviceNodeName] ? 'Collapse' : 'Expand'
             }
             iconType={
-              itemIdToExpandedRowMap[instanceItem.serviceNodeName] ? 'arrowUp' : 'arrowDown'
+              itemIdToExpandedRowMap[instanceItem.serviceNodeName]
+                ? 'chevronSingleUp'
+                : 'chevronSingleDown'
             }
           />
         );

@@ -109,6 +109,12 @@ describe('SearchEmbeddableGridComponent', () => {
           dataView={dataViewMock}
           stateManager={stateManager}
           enableDocumentViewer={true}
+          inlineEditing={{
+            isActive: false,
+            hasPendingChanges: false,
+            onApply: jest.fn(),
+            onCancel: jest.fn(),
+          }}
           docViewerRef={docViewerRef}
           expandedDoc={undefined}
           initialDocViewerTabId={undefined}

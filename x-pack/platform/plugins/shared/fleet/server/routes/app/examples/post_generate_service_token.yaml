@@ -1,0 +1,30 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        postGenerateServiceTokenRequestExample:
+          description: 'Generate a service token for a remote Fleet Server'
+          value:
+            remote: true
+responses:
+  200:
+    description: 'Successful response'
+    content:
+      application/json:
+        examples:
+          postGenerateServiceTokenExample:
+            description: 'The generated Fleet Server service token'
+            value:
+              name: 'elastic/fleet-server/token-1234567890'
+              value: 'AAEAAWVsYXN0aWMvZmxlZXQtc2VydmVyL3Rva2VuLTEyMzQ1Njc4OTA6QUJDREVGR0hJSktMTU5P'
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'An error message describing what went wrong'

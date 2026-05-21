@@ -129,7 +129,8 @@ describe('FileActionsPopoverButton', () => {
 
     expect(copyFileHashButton).toBeInTheDocument();
 
-    await userEvent.click(copyFileHashButton);
+    // EUI popover panels have `pointer-events: none` applied during animation in JSDOM.
+    await userEvent.click(copyFileHashButton, { pointerEventsCheck: 0 });
 
     expect(await screen.findByTestId('cases-files-copy-md5-hash-button')).toBeInTheDocument();
     expect(await screen.findByTestId('cases-files-copy-sha1-hash-button')).toBeInTheDocument();
@@ -138,10 +139,16 @@ describe('FileActionsPopoverButton', () => {
     expect(
       (
         await within(await screen.findByTestId('cases-files-popover-context-menu')).findAllByRole(
-          'button'
+          'menuitem'
         )
       ).length
-    ).toBe(7);
+    ).toBe(6);
+
+    expect(
+      await within(await screen.findByTestId('cases-files-popover-context-menu')).findByTestId(
+        'contextMenuPanelTitleButton'
+      )
+    ).toBeInTheDocument();
   });
 
   describe('copy file hashes', () => {

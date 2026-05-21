@@ -9,6 +9,21 @@ import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+
+jest.mock('../../remote_kibana/forward_to_remote_kibana', () => {
+  const actual = jest.requireActual('../../remote_kibana/forward_to_remote_kibana');
+  return {
+    ...actual,
+    forwardToRemoteKibana: jest.fn(),
+  };
+});
+
+import { forwardToRemoteKibana } from '../../remote_kibana/forward_to_remote_kibana';
+const mockedForwardToRemoteKibana = forwardToRemoteKibana as jest.MockedFunction<
+  typeof forwardToRemoteKibana
+>;
 import {
   API_VERSIONS,
   EVALS_DATASETS_URL,
@@ -19,6 +34,11 @@ import {
 } from '@kbn/evals-common';
 import { DatasetAlreadyExistsError } from '../../storage/dataset_already_exists_error';
 import { ExampleAlreadyExistsError } from '../../storage/example_already_exists_error';
+import { ExampleNotFoundError } from '../../storage/example_not_found_error';
+import {
+  RemoteDecryptionError,
+  DESTINATION_QUERY_PARAM,
+} from '../../remote_kibana/forward_to_remote_kibana';
 import { registerListDatasetsRoute } from './list_datasets';
 import { registerCreateDatasetRoute } from './create_dataset';
 import { registerGetDatasetRoute } from './get_dataset';
@@ -34,16 +54,19 @@ const buildRouteSetup = ({
   method,
   path,
 }: {
-  registerRoute: (deps: {
-    router: ReturnType<typeof httpServiceMock.createRouter>;
-    logger: any;
-  }) => void;
+  registerRoute: (deps: any) => void;
   method: 'get' | 'post' | 'put' | 'delete';
   path: string;
 }) => {
   const router = httpServiceMock.createRouter();
   const logger = loggingSystemMock.createLogger();
-  registerRoute({ router, logger });
+  registerRoute({
+    router,
+    logger,
+    canEncrypt: true,
+    getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
+    getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
+  });
 
   const versionedRouter = router.versioned as MockedVersionedRouter;
   const { handler } = versionedRouter.getRoute(method, path).versions[API_VERSIONS.internal.v1];
@@ -52,6 +75,7 @@ const buildRouteSetup = ({
     list: jest.fn(),
     create: jest.fn(),
     get: jest.fn(),
+    datasetExists: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
     addExamples: jest.fn(),
@@ -76,6 +100,10 @@ const buildRouteSetup = ({
 };
 
 describe('dataset routes', () => {
+  beforeEach(() => {
+    mockedForwardToRemoteKibana.mockReset();
+  });
+
   const datasetId = 'dataset-1';
   const exampleId = 'example-1';
   const dataset = {
@@ -426,7 +454,7 @@ describe('dataset routes', () => {
         method: 'post',
         path: EVALS_DATASET_EXAMPLES_URL,
       });
-      datasetClient.get.mockResolvedValueOnce({ ...dataset, examples: [datasetExample] });
+      datasetClient.datasetExists.mockResolvedValueOnce(true);
       datasetClient.addExamples.mockResolvedValueOnce({ added: 2 });
 
       const request = httpServerMock.createKibanaRequest({
@@ -457,7 +485,7 @@ describe('dataset routes', () => {
         method: 'post',
         path: EVALS_DATASET_EXAMPLES_URL,
       });
-      datasetClient.get.mockResolvedValueOnce({ ...dataset, examples: [] });
+      datasetClient.datasetExists.mockResolvedValueOnce(true);
       datasetClient.addExamples.mockResolvedValueOnce({ added: 1 });
 
       const request = httpServerMock.createKibanaRequest({
@@ -484,7 +512,7 @@ describe('dataset routes', () => {
         method: 'post',
         path: EVALS_DATASET_EXAMPLES_URL,
       });
-      datasetClient.get.mockResolvedValueOnce({ ...dataset, examples: [] });
+      datasetClient.datasetExists.mockResolvedValueOnce(true);
       datasetClient.addExamples.mockResolvedValueOnce({ added: 1 });
 
       const request = httpServerMock.createKibanaRequest({
@@ -509,7 +537,7 @@ describe('dataset routes', () => {
         method: 'post',
         path: EVALS_DATASET_EXAMPLES_URL,
       });
-      datasetClient.get.mockResolvedValueOnce(undefined);
+      datasetClient.datasetExists.mockResolvedValueOnce(false);
 
       const request = httpServerMock.createKibanaRequest({
         method: 'post',
@@ -531,7 +559,7 @@ describe('dataset routes', () => {
         method: 'post',
         path: EVALS_DATASET_EXAMPLES_URL,
       });
-      datasetClient.get.mockResolvedValueOnce({ ...dataset, examples: [datasetExample] });
+      datasetClient.datasetExists.mockResolvedValueOnce(true);
       datasetClient.addExamples.mockRejectedValueOnce(new ExampleAlreadyExistsError('1 duplicate'));
 
       const request = httpServerMock.createKibanaRequest({
@@ -557,7 +585,7 @@ describe('dataset routes', () => {
         method: 'put',
         path: EVALS_DATASET_EXAMPLE_URL,
       });
-      datasetClient.get.mockResolvedValueOnce({ ...dataset, examples: [datasetExample] });
+      datasetClient.datasetExists.mockResolvedValueOnce(true);
       datasetClient.updateExample.mockResolvedValueOnce({
         ...datasetExample,
         output: { answer: 'updated' },
@@ -575,11 +603,15 @@ describe('dataset routes', () => {
 
       const response = await handler(context as any, request, kibanaResponseFactory);
 
-      expect(datasetClient.updateExample).toHaveBeenCalledWith(exampleId, {
-        input: undefined,
-        output: { answer: 'updated' },
-        metadata: undefined,
-      });
+      expect(datasetClient.updateExample).toHaveBeenCalledWith(
+        exampleId,
+        {
+          input: undefined,
+          output: { answer: 'updated' },
+          metadata: undefined,
+        },
+        datasetId
+      );
       expect(response.status).toBe(200);
       expect(response.payload.output).toEqual({ answer: 'updated' });
     });
@@ -590,7 +622,7 @@ describe('dataset routes', () => {
         method: 'put',
         path: EVALS_DATASET_EXAMPLE_URL,
       });
-      datasetClient.get.mockResolvedValueOnce(undefined);
+      datasetClient.datasetExists.mockResolvedValueOnce(false);
 
       const request = httpServerMock.createKibanaRequest({
         method: 'put',
@@ -606,15 +638,17 @@ describe('dataset routes', () => {
 
       expect(response.status).toBe(404);
       expect(response.payload).toEqual({ message: `Evaluation dataset not found: ${datasetId}` });
+      expect(datasetClient.updateExample).not.toHaveBeenCalled();
     });
 
-    it('returns 404 when example is not in dataset', async () => {
+    it('returns 404 when the example does not exist', async () => {
       const { handler, context, datasetClient } = buildRouteSetup({
         registerRoute: registerUpdateExampleRoute,
         method: 'put',
         path: EVALS_DATASET_EXAMPLE_URL,
       });
-      datasetClient.get.mockResolvedValueOnce({ ...dataset, examples: [] });
+      datasetClient.datasetExists.mockResolvedValueOnce(true);
+      datasetClient.updateExample.mockRejectedValueOnce(new ExampleNotFoundError(exampleId));
 
       const request = httpServerMock.createKibanaRequest({
         method: 'put',
@@ -630,9 +664,17 @@ describe('dataset routes', () => {
 
       expect(response.status).toBe(404);
       expect(response.payload).toEqual({
-        message: `Evaluation dataset example not found: ${exampleId}`,
+        message: `Example not found: ${exampleId}`,
       });
-      expect(datasetClient.updateExample).not.toHaveBeenCalled();
+      expect(datasetClient.updateExample).toHaveBeenCalledWith(
+        exampleId,
+        {
+          input: {},
+          output: undefined,
+          metadata: undefined,
+        },
+        datasetId
+      );
     });
 
     it('returns 409 when updated content matches another existing example', async () => {
@@ -641,7 +683,7 @@ describe('dataset routes', () => {
         method: 'put',
         path: EVALS_DATASET_EXAMPLE_URL,
       });
-      datasetClient.get.mockResolvedValueOnce({ ...dataset, examples: [datasetExample] });
+      datasetClient.datasetExists.mockResolvedValueOnce(true);
       datasetClient.updateExample.mockRejectedValueOnce(
         new ExampleAlreadyExistsError('collision-id')
       );
@@ -670,8 +712,8 @@ describe('dataset routes', () => {
         method: 'delete',
         path: EVALS_DATASET_EXAMPLE_URL,
       });
-      datasetClient.get.mockResolvedValueOnce({ ...dataset, examples: [datasetExample] });
-      datasetClient.deleteExample.mockResolvedValueOnce(true);
+      datasetClient.datasetExists.mockResolvedValueOnce(true);
+      datasetClient.deleteExample.mockResolvedValueOnce(undefined);
 
       const request = httpServerMock.createKibanaRequest({
         method: 'delete',
@@ -686,6 +728,7 @@ describe('dataset routes', () => {
 
       expect(response.status).toBe(200);
       expect(response.payload).toEqual({ success: true });
+      expect(datasetClient.deleteExample).toHaveBeenCalledWith(exampleId, datasetId);
     });
 
     it('returns 404 when dataset does not exist', async () => {
@@ -694,7 +737,7 @@ describe('dataset routes', () => {
         method: 'delete',
         path: EVALS_DATASET_EXAMPLE_URL,
       });
-      datasetClient.get.mockResolvedValueOnce(undefined);
+      datasetClient.datasetExists.mockResolvedValueOnce(false);
 
       const request = httpServerMock.createKibanaRequest({
         method: 'delete',
@@ -709,15 +752,17 @@ describe('dataset routes', () => {
 
       expect(response.status).toBe(404);
       expect(response.payload).toEqual({ message: `Evaluation dataset not found: ${datasetId}` });
+      expect(datasetClient.deleteExample).not.toHaveBeenCalled();
     });
 
-    it('returns 404 when example is not in dataset', async () => {
+    it('returns 404 when the example does not exist', async () => {
       const { handler, context, datasetClient } = buildRouteSetup({
         registerRoute: registerDeleteExampleRoute,
         method: 'delete',
         path: EVALS_DATASET_EXAMPLE_URL,
       });
-      datasetClient.get.mockResolvedValueOnce({ ...dataset, examples: [] });
+      datasetClient.datasetExists.mockResolvedValueOnce(true);
+      datasetClient.deleteExample.mockRejectedValueOnce(new ExampleNotFoundError(exampleId));
 
       const request = httpServerMock.createKibanaRequest({
         method: 'delete',
@@ -732,9 +777,9 @@ describe('dataset routes', () => {
 
       expect(response.status).toBe(404);
       expect(response.payload).toEqual({
-        message: `Evaluation dataset example not found: ${exampleId}`,
+        message: `Example not found: ${exampleId}`,
       });
-      expect(datasetClient.deleteExample).not.toHaveBeenCalled();
+      expect(datasetClient.deleteExample).toHaveBeenCalledWith(exampleId, datasetId);
     });
   });
 
@@ -871,6 +916,114 @@ describe('dataset routes', () => {
       expect(response.status).toBe(500);
       expect(response.payload).toEqual({ message: 'Failed to upsert evaluation dataset' });
       expect(logger.error).toHaveBeenCalled();
+    });
+  });
+
+  describe('remote forwarding (GET /internal/evals/datasets)', () => {
+    const buildRemoteRouteSetup = ({ canEncrypt = true }: { canEncrypt?: boolean } = {}) => {
+      const router = httpServiceMock.createRouter();
+      const logger = loggingSystemMock.createLogger();
+      registerListDatasetsRoute({
+        router,
+        logger,
+        canEncrypt,
+        getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
+        getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
+      });
+
+      const versionedRouter = router.versioned as MockedVersionedRouter;
+      const { handler } = versionedRouter.getRoute('get', EVALS_DATASETS_URL).versions[
+        API_VERSIONS.internal.v1
+      ];
+
+      const mockCoreContext = coreMock.createRequestHandlerContext();
+      const esClient = mockCoreContext.elasticsearch.client.asCurrentUser;
+      const datasetClient = { list: jest.fn() };
+      const datasetService = { getClient: jest.fn().mockReturnValue(datasetClient) };
+      const context = coreMock.createCustomRequestHandlerContext({
+        core: mockCoreContext,
+        evals: { datasetService } as any,
+      });
+
+      return { handler, context, logger, datasetClient, esClient };
+    };
+
+    it('returns 501 when destination is remote but encryption is not configured', async () => {
+      const { handler, context } = buildRemoteRouteSetup({ canEncrypt: false });
+
+      const request = httpServerMock.createKibanaRequest({
+        method: 'get',
+        path: EVALS_DATASETS_URL,
+        query: { page: 1, per_page: 10, [DESTINATION_QUERY_PARAM]: 'remote-1' },
+      });
+
+      const response = await handler(context as any, request, kibanaResponseFactory);
+
+      expect(response.status).toBe(501);
+      expect(response.payload.message).toContain('Encrypted Saved Objects is not configured');
+      expect(mockedForwardToRemoteKibana).not.toHaveBeenCalled();
+    });
+
+    it('forwards to remote and returns 200 on success', async () => {
+      const { handler, context, datasetClient } = buildRemoteRouteSetup();
+
+      mockedForwardToRemoteKibana.mockResolvedValueOnce({
+        statusCode: 200,
+        body: { datasets: [{ id: 'remote-ds', name: 'Remote Dataset' }], total: 1 },
+      });
+
+      const request = httpServerMock.createKibanaRequest({
+        method: 'get',
+        path: EVALS_DATASETS_URL,
+        query: { page: 1, per_page: 10, [DESTINATION_QUERY_PARAM]: 'remote-1' },
+      });
+
+      const response = await handler(context as any, request, kibanaResponseFactory);
+
+      expect(response.status).toBe(200);
+      expect(response.payload).toEqual({
+        datasets: [{ id: 'remote-ds', name: 'Remote Dataset' }],
+        total: 1,
+      });
+      expect(datasetClient.list).not.toHaveBeenCalled();
+    });
+
+    it('returns 400 when remote decryption fails', async () => {
+      const { handler, context, logger } = buildRemoteRouteSetup();
+
+      mockedForwardToRemoteKibana.mockRejectedValueOnce(new RemoteDecryptionError('remote-1'));
+
+      const request = httpServerMock.createKibanaRequest({
+        method: 'get',
+        path: EVALS_DATASETS_URL,
+        query: { page: 1, per_page: 10, [DESTINATION_QUERY_PARAM]: 'remote-1' },
+      });
+
+      const response = await handler(context as any, request, kibanaResponseFactory);
+
+      expect(response.status).toBe(400);
+      expect(response.payload.message).toContain('Unable to decrypt');
+      expect(logger.error).toHaveBeenCalled();
+    });
+
+    it('maps remote 404 to local notFound response', async () => {
+      const { handler, context } = buildRemoteRouteSetup();
+
+      mockedForwardToRemoteKibana.mockResolvedValueOnce({
+        statusCode: 404,
+        body: { message: 'Not found on remote' },
+      });
+
+      const request = httpServerMock.createKibanaRequest({
+        method: 'get',
+        path: EVALS_DATASETS_URL,
+        query: { page: 1, per_page: 10, [DESTINATION_QUERY_PARAM]: 'remote-1' },
+      });
+
+      const response = await handler(context as any, request, kibanaResponseFactory);
+
+      expect(response.status).toBe(404);
+      expect(response.payload).toEqual({ message: 'Not found on remote' });
     });
   });
 });

@@ -17,7 +17,7 @@ import { createDiscoverServicesMock } from '../../__mocks__/services';
 import { DiscoverTestProvider } from '../../__mocks__/test_provider';
 import { ContextAppRoute } from './context_app_route';
 import { useDataView } from '../../hooks/use_data_view';
-import { useRootProfile } from '../../context_awareness';
+import { useRootProfile } from '../../context_awareness/hooks/use_root_profile';
 import type { ContextAppProps } from './context_app';
 import { popularizeField } from '@kbn/unified-data-table';
 
@@ -34,8 +34,7 @@ jest.mock('../../hooks/use_data_view', () => ({
   useDataView: jest.fn(),
 }));
 
-jest.mock('../../context_awareness', () => ({
-  ...jest.requireActual('../../context_awareness'),
+jest.mock('../../context_awareness/hooks/use_root_profile', () => ({
   useRootProfile: jest.fn(),
 }));
 

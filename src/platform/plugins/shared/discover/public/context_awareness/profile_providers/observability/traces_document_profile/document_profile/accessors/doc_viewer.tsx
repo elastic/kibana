@@ -16,7 +16,10 @@ import type { DocumentProfileProvider } from '../../../../../profiles';
 import type { DocViewerExtensionParams } from '../../../../../types';
 
 export const createGetDocViewer =
-  (indexes: ObservabilityIndexes): DocumentProfileProvider['profile']['getDocViewer'] =>
+  (
+    indexes: ObservabilityIndexes,
+    profileId: string
+  ): DocumentProfileProvider['profile']['getDocViewer'] =>
   (prev, { toolkit }) =>
   (params: DocViewerExtensionParams) => {
     const prevDocViewer = prev(params);
@@ -34,6 +37,7 @@ export const createGetDocViewer =
             <UnifiedDocViewerObservabilityTracesOverview
               {...props}
               indexes={indexes}
+              profileId={profileId}
               docViewActions={{
                 openInNewTab: toolkit.actions.openInNewTab,
                 updateESQLQuery: toolkit.actions.updateESQLQuery,

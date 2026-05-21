@@ -35,9 +35,11 @@ export const deleteScriptRequestHandler = (
     try {
       const spaceId = (await context.securitySolution).getSpaceId();
       const user = (await context.core).security.authc.getCurrentUser();
+      const rulesClient = await (await context.alerting).getRulesClient();
       const scriptsClient = endpointAppServices.getScriptsLibraryClient(
         spaceId,
-        user?.username || 'unknown'
+        user?.username || 'unknown',
+        rulesClient
       );
 
       await scriptsClient.delete(scriptId);

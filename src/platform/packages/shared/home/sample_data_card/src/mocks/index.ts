@@ -33,7 +33,7 @@ export const mockDataSet: SampleDataSet = {
   previewImagePath,
   appLinks: [
     {
-      icon: 'visLine',
+      icon: 'chartLine',
       label: 'View in App',
       path: 'path-to-app',
     },

@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/cloud-security-posture-graph'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/contextual-security-apps'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/cloud-security-posture-graph'
+  title: '@kbn/cloud-security-posture-graph'
   description: Moon project for @kbn/cloud-security-posture-graph
   channel: ''
   owner: '@elastic/contextual-security-apps'
-  metadata:
-    sourceRoot: x-pack/solutions/security/packages/kbn-cloud-security-posture/graph
+  sourceRoot: x-pack/solutions/security/packages/kbn-cloud-security-posture/graph
 dependsOn:
   - '@kbn/cloud-security-posture-common'
   - '@kbn/data-views-plugin'
@@ -37,8 +36,6 @@ dependsOn:
   - '@kbn/expandable-flyout'
   - '@kbn/react-query'
   - '@kbn/fleet-plugin'
-  - '@kbn/core-http-browser'
-  - '@kbn/fleet-plugin'
 tags:
   - shared-browser
   - package
@@ -54,16 +51,6 @@ fileGroups:
     - .storybook/**/*.ts
     - .storybook/**/*.tsx
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

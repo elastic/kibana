@@ -10,7 +10,11 @@
 import { monaco } from '@kbn/monaco';
 import { buildAutocompleteContext } from './context/build_autocomplete_context';
 import { getAllYamlProviders } from './intercept_monaco_yaml_provider';
-import { getSuggestions } from './suggestions/get_suggestions';
+import { getSuggestions, isInsideLoopBody } from './suggestions/get_suggestions';
+import type { GetStepPropertyHandler } from './suggestions/step_property/get_step_property_suggestions';
+import { isInWorkflowOutputWithBlock } from './suggestions/workflow/get_workflow_outputs_suggestions';
+import type { WorkflowKqlCompletionServices } from './suggestions/workflow_kql_completion_services';
+import { isDeprecatedStepType } from '../../../../../common/schema';
 import type { WorkflowDetailState } from '../../../../entities/workflows/store';
 
 // Unique identifier for the workflow completion provider
@@ -19,15 +23,25 @@ export const WORKFLOW_COMPLETION_PROVIDER_ID = 'workflows-yaml-completion-provid
 const INSERT_AS_SNIPPET = monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
 
 /**
- * Deprecated type aliases that should NOT be shown in autocomplete suggestions.
- * These are kept for backward compatibility (existing workflows still validate)
- * but we don't want users to use them in new workflows.
+ * Step types that are only valid inside loop bodies (foreach / while).
+ * The monaco-yaml schema provider suggests them everywhere, so the
+ * completion provider must strip them when the cursor is outside a loop.
  */
-const DEPRECATED_TYPE_ALIASES = new Set([
-  'kibana.createCaseDefaultSpace',
-  'kibana.getCaseDefaultSpace',
-  'kibana.updateCaseDefaultSpace',
-  'kibana.addCaseCommentDefaultSpace',
+const LOOP_ONLY_STEP_TYPES = new Set(['loop.break', 'loop.continue']);
+
+/**
+ * Match types where the cursor is inside a Liquid/variable expression.
+ * The YAML schema provider cannot contribute suggestions for these contexts
+ * and can block the completion pipeline for seconds on large documents.
+ */
+const TEMPLATE_EXPRESSION_MATCH_TYPES = new Set([
+  'variable-unfinished',
+  'variable-complete',
+  'at',
+  'foreach-variable',
+  'liquid-filter',
+  'liquid-block-filter',
+  'liquid-syntax',
 ]);
 
 /**
@@ -46,7 +60,7 @@ function getDeduplicationKey(suggestion: monaco.languages.CompletionItem): strin
 
 /**
  * Add suggestions to a deduplicated map, preferring suggestions with snippets over plain text.
- * Filters out deprecated type aliases so they don't appear in autocomplete.
+ * Filters out deprecated step types so they don't appear in autocomplete.
  */
 function mapSuggestions(
   map: Map<string, monaco.languages.CompletionItem>,
@@ -55,9 +69,9 @@ function mapSuggestions(
   for (const suggestion of suggestions) {
     const key = getDeduplicationKey(suggestion);
 
-    // Skip deprecated type aliases - they still work for backward compatibility
+    // Skip deprecated step types - they still work for backward compatibility
     // but we don't want to suggest them to users
-    if (!DEPRECATED_TYPE_ALIASES.has(key)) {
+    if (!isDeprecatedStepType(key)) {
       const existing = map.get(key);
 
       if (existing) {
@@ -75,7 +89,9 @@ function mapSuggestions(
 }
 
 export function getCompletionItemProvider(
-  getState: () => WorkflowDetailState
+  getState: () => WorkflowDetailState,
+  getKqlServices?: () => WorkflowKqlCompletionServices,
+  getPropertyHandler?: GetStepPropertyHandler
 ): monaco.languages.CompletionItemProvider {
   const provider: monaco.languages.CompletionItemProvider & { __providerId?: string } = {
     // Unique identifier to distinguish our provider from others
@@ -83,10 +99,11 @@ export function getCompletionItemProvider(
     // Trigger characters for completion:
     // '@' - variable references
     // '.' - property access within variables
-    // ' ' - space, used for separating tokens in Liquid syntax
+    // ' ' - space, Liquid / KQL tokens
     // '|' - Liquid filters (e.g., {{ variable | filter }})
     // '{' - start of Liquid blocks (e.g., {{ ... }})
-    triggerCharacters: ['@', '.', ' ', '|', '{'],
+    // ':' '(' '"' "'" — also trigger automatic quick suggest for KQL inside quoted `on.condition`.
+    triggerCharacters: ['@', '.', ' ', '"', "'", '(', ':', '|', '{'],
     provideCompletionItems: async (model, position, completionContext) => {
       const editorState = getState();
       const autocompleteContext = buildAutocompleteContext({
@@ -105,13 +122,22 @@ export function getCompletionItemProvider(
       // Incremental deduplication accumulator
       const deduplicatedMap = new Map<string, monaco.languages.CompletionItem>();
 
+      // Inside workflow.output's with: block, show only declared output field names so the user
+      // doesn't get generic YAML/JSON Schema keys; skip the YAML provider in that case.
+      const shouldUseExclusiveSuggestions = isInWorkflowOutputWithBlock(
+        autocompleteContext.focusedStepInfo
+      );
+
+      const matchType = autocompleteContext.lineParseResult?.matchType ?? '';
+      const isInTemplateExpression =
+        TEMPLATE_EXPRESSION_MATCH_TYPES.has(matchType) ||
+        (matchType === 'liquid-block-keyword' && autocompleteContext.isInLiquidBlock);
+
       let isIncomplete = false;
 
-      {
-        // Get suggestions from all stored YAML providers (excluding workflow provider)
+      if (!shouldUseExclusiveSuggestions && !isInTemplateExpression) {
         const allYamlProviders = getAllYamlProviders();
 
-        // Call all stored providers and add their suggestions incrementally
         for (const yamlProvider of allYamlProviders) {
           if (yamlProvider.provideCompletionItems) {
             try {
@@ -122,6 +148,7 @@ export function getCompletionItemProvider(
                 {} as monaco.CancellationToken
               );
               if (result) {
+                // Deduplicate across YAML providers only (snippet beats plain)
                 mapSuggestions(deduplicatedMap, result.suggestions || []);
                 if (result.incomplete) {
                   isIncomplete = true;
@@ -134,17 +161,35 @@ export function getCompletionItemProvider(
         }
       }
 
-      // Then, get workflow-specific suggestions (variables, connectors, etc.)
-      // Start with workflow suggestions (they typically have snippets and get priority in deduplication)
-      const workflowSuggestions = await getSuggestions({
-        ...autocompleteContext,
-        model,
-        position,
-      });
-      mapSuggestions(deduplicatedMap, workflowSuggestions);
+      const workflowSuggestions = await getSuggestions(
+        {
+          ...autocompleteContext,
+          model,
+          position,
+        },
+        getKqlServices?.(),
+        getPropertyHandler
+      );
+      // Workflow suggestions always win over YAML duplicates.
+      for (const suggestion of workflowSuggestions) {
+        const key = getDeduplicationKey(suggestion);
+        if (!isDeprecatedStepType(key)) {
+          deduplicatedMap.set(key, suggestion);
+        }
+      }
+
+      let suggestions = Array.from(deduplicatedMap.values());
+
+      if (!isInsideLoopBody(autocompleteContext)) {
+        suggestions = suggestions.filter((s) => {
+          const label = typeof s.label === 'string' ? s.label : s.label.label;
+          const text = typeof s.insertText === 'string' ? s.insertText : '';
+          return !LOOP_ONLY_STEP_TYPES.has(label) && !LOOP_ONLY_STEP_TYPES.has(text);
+        });
+      }
 
       return {
-        suggestions: Array.from(deduplicatedMap.values()),
+        suggestions,
         incomplete: isIncomplete,
       };
     },

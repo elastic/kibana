@@ -143,7 +143,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
        * Vega embeddable
        */
       it('emits when a vega panel is added', async () => {
-        await dashboardAddPanel.clickAddCustomVisualization();
+        await dashboardAddPanel.clickAddVega();
         await PageObjects.visualize.saveVisualizationExpectSuccess(VEGA_PANEL_TITLE, {
           saveAsNew: false,
           redirectToOrigin: true,

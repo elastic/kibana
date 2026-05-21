@@ -14,19 +14,23 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const CreateEvaluationDatasetRequestBody = lazySchema(() =>
+  z.object({
+    name: z.string(),
+    description: z.string(),
+  })
+);
 export type CreateEvaluationDatasetRequestBody = z.infer<typeof CreateEvaluationDatasetRequestBody>;
-export const CreateEvaluationDatasetRequestBody = z.object({
-  name: z.string(),
-  description: z.string(),
-});
 export type CreateEvaluationDatasetRequestBodyInput = z.input<
   typeof CreateEvaluationDatasetRequestBody
 >;
 
+export const CreateEvaluationDatasetResponse = lazySchema(() =>
+  z.object({
+    dataset_id: z.string(),
+    name: z.string(),
+  })
+);
 export type CreateEvaluationDatasetResponse = z.infer<typeof CreateEvaluationDatasetResponse>;
-export const CreateEvaluationDatasetResponse = z.object({
-  dataset_id: z.string(),
-  name: z.string(),
-});

@@ -50,7 +50,13 @@ const mappings = {
       type: 'integer',
     },
     fieldNames: {
-      type: 'keyword',
+      type: 'nested',
+      properties: {
+        name: { type: 'keyword' },
+        label: { type: 'text' },
+        type: { type: 'keyword' },
+        control: { type: 'keyword' },
+      },
     },
     lastUsedAt: {
       type: 'date',
@@ -59,6 +65,9 @@ const mappings = {
       type: 'boolean',
     },
     isLatest: {
+      type: 'boolean',
+    },
+    isEnabled: {
       type: 'boolean',
     },
   },

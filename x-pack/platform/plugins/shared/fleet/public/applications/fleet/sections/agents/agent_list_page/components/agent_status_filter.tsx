@@ -231,7 +231,7 @@ export const AgentStatusFilter: React.FC<{
         zIndex={Number(euiTheme.levels.header) - 1}
         button={
           <EuiFilterButton
-            iconType="arrowDown"
+            iconType="chevronSingleDown"
             onClick={() => updateIsStatusFilterOpen(!isStatusFilterOpen)}
             isSelected={isStatusFilterOpen}
             hasActiveFilters={selectedStatus.length > 0}
@@ -245,14 +245,13 @@ export const AgentStatusFilter: React.FC<{
         }
         isOpen={isStatusFilterOpen}
         closePopover={() => updateIsStatusFilterOpen(false)}
-        panelPaddingSize="none"
+        panelPaddingSize="s"
       >
         <EuiSelectable
           options={options}
           onChange={onOptionsChange}
           data-test-subj="agentList.agentStatusFilterOptions"
           listProps={{
-            paddingSize: 's',
             style: {
               minWidth: 140,
             },

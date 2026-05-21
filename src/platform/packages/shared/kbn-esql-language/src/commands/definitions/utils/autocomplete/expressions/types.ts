@@ -63,6 +63,7 @@ export interface ExpressionContextOptions {
   controlType?: ESQLVariableType; // Type of control variable (??/?) to suggest in empty expressions
   addSpaceAfterOperator?: boolean; // Add a space after inserting operands or functions that follow an operator
   openSuggestions?: boolean; // Reopen the suggestions popover after applying a completion
+  allowSubquery?: boolean; // Whether this expression context can suggest subquery operands
   functionsToIgnore?: {
     names: string[]; // Functions hidden for the current command/context
     allowedInsideFunctions?: Record<string, string[]>; // Exceptions: keep fn visible when inside specific parent functions
@@ -71,15 +72,17 @@ export interface ExpressionContextOptions {
 }
 
 export interface FunctionParameterContext {
+  // Resolved signatures: validSignatures if non-empty, else functionDefinition.signatures
+  signatures: Signature[];
   paramDefinitions: FunctionParameter[];
   // Flag to suggest comma after function parameters when more mandatory args exist
-  hasMoreMandatoryArgs?: boolean;
+  hasMoreMandatoryArgs: boolean;
   // Function definition for function-specific parameter handling (e.g., CASE function)
   functionDefinition?: FunctionDefinition;
   firstArgumentType?: SupportedDataType | 'unknown';
   // Type of first value in repeating signatures, used to enforce type homogeneity
   firstValueType?: SupportedDataType | 'unknown';
-  currentParameterIndex?: number;
+  currentParameterIndex: number;
   validSignatures?: Signature[];
 }
 

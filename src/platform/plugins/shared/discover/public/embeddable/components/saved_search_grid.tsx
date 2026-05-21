@@ -7,14 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
+import { useEuiTheme } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { AggregateQuery, Query, Filter } from '@kbn/es-query';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import { MAX_DOC_FIELDS_DISPLAYED, SHOW_MULTIFIELDS } from '@kbn/discover-utils';
 import {
+  type RenderDocumentViewMeta,
   type UnifiedDataTableProps,
-  type DataTableColumnsMeta,
   DataLoadingState as DiscoverGridLoadingState,
   getRenderCustomToolbarWithElements,
   getDataGridDensity,
@@ -27,6 +28,13 @@ import { SavedSearchEmbeddableBase } from './saved_search_embeddable_base';
 import { TotalDocuments } from '../../application/main/components/total_documents/total_documents';
 import { useProfileAccessor } from '../../context_awareness';
 
+export interface InlineEditing {
+  isActive: boolean;
+  hasPendingChanges: boolean;
+  onApply: () => Promise<void>;
+  onCancel: () => Promise<void>;
+}
+
 interface DiscoverGridEmbeddableProps extends Omit<UnifiedDataTableProps, 'sampleSizeState'> {
   sampleSizeState: number; // a required prop
   totalHitCount?: number;
@@ -37,6 +45,7 @@ interface DiscoverGridEmbeddableProps extends Omit<UnifiedDataTableProps, 'sampl
   onRemoveColumn: (column: string) => void;
   savedSearchId?: string;
   enableDocumentViewer: boolean;
+  inlineEditing: InlineEditing;
   expandedDoc: DataTableRecord | undefined;
   initialDocViewerTabId: string | undefined;
   onUpdateSelectedTabId?: (tabId: string | undefined) => void;
@@ -45,50 +54,10 @@ interface DiscoverGridEmbeddableProps extends Omit<UnifiedDataTableProps, 'sampl
 }
 
 export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
-  const { interceptedWarnings, enableDocumentViewer, ...gridProps } = props;
+  const { enableDocumentViewer, inlineEditing, interceptedWarnings, ...gridProps } = props;
 
-  const renderDocumentView = useCallback(
-    (
-      hit: DataTableRecord,
-      displayedRows: DataTableRecord[],
-      displayedColumns: string[],
-      expandedDocSetter: NonNullable<UnifiedDataTableProps['setExpandedDoc']>,
-      customColumnsMeta?: DataTableColumnsMeta
-    ) => (
-      <DiscoverGridFlyout
-        dataView={props.dataView}
-        hit={hit}
-        hits={displayedRows}
-        // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them
-        columns={displayedColumns}
-        columnsMeta={customColumnsMeta}
-        savedSearchId={props.savedSearchId}
-        onFilter={props.onFilter}
-        onRemoveColumn={props.onRemoveColumn}
-        onAddColumn={props.onAddColumn}
-        onClose={() => expandedDocSetter(undefined)}
-        setExpandedDoc={expandedDocSetter}
-        initialTabId={props.initialDocViewerTabId}
-        onUpdateSelectedTabId={props.onUpdateSelectedTabId}
-        query={props.query}
-        filters={props.filters}
-        docViewerRef={props.docViewerRef}
-        hideFilteringOnComputedColumns={true}
-      />
-    ),
-    [
-      props.dataView,
-      props.savedSearchId,
-      props.onFilter,
-      props.onRemoveColumn,
-      props.onAddColumn,
-      props.query,
-      props.filters,
-      props.initialDocViewerTabId,
-      props.onUpdateSelectedTabId,
-      props.docViewerRef,
-    ]
-  );
+  const { euiTheme } = useEuiTheme();
+  const [renderDocumentViewMeta, setRenderDocumentViewMeta] = useState<RenderDocumentViewMeta>();
 
   const renderCustomToolbarWithElements = useMemo(
     () =>
@@ -128,8 +97,8 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
     <SavedSearchEmbeddableBase
       totalHitCount={undefined} // it will be rendered inside the custom grid toolbar instead
       isLoading={props.loadingState === DiscoverGridLoadingState.loading}
-      dataTestSubj="embeddedSavedSearchDocTable"
-      interceptedWarnings={props.interceptedWarnings}
+      interceptedWarnings={interceptedWarnings}
+      inlineEditing={inlineEditing}
     >
       <DiscoverGrid
         {...gridProps}
@@ -140,14 +109,41 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         showMultiFields={props.services.uiSettings.get(SHOW_MULTIFIELDS)}
         hideFilteringOnComputedColumns={true}
         maxDocFieldsDisplayed={props.services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
-        renderDocumentView={enableDocumentViewer ? renderDocumentView : undefined}
+        renderDocumentView={enableDocumentViewer ? 'external' : undefined}
+        setRenderDocumentViewMeta={enableDocumentViewer ? setRenderDocumentViewMeta : undefined}
         renderCustomToolbar={renderCustomToolbarWithElements}
         externalCustomRenderers={cellRenderers}
         enableComparisonMode
         showColumnTokens
         showFullScreenButton={false}
         className="unifiedDataTable"
+        css={{ '.unifiedDataTableToolbar': { paddingBlockStart: euiTheme.size.xs } }}
       />
+      {enableDocumentViewer &&
+        props.expandedDoc &&
+        props.setExpandedDoc &&
+        renderDocumentViewMeta && (
+          <DiscoverGridFlyout
+            dataView={props.dataView}
+            hit={props.expandedDoc}
+            hits={renderDocumentViewMeta.displayedRows}
+            // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them
+            columns={renderDocumentViewMeta.displayedColumns}
+            columnsMeta={props.columnsMeta}
+            savedSearchId={props.savedSearchId}
+            onFilter={props.onFilter}
+            onRemoveColumn={props.onRemoveColumn}
+            onAddColumn={props.onAddColumn}
+            onClose={() => props.setExpandedDoc?.(undefined)}
+            setExpandedDoc={props.setExpandedDoc}
+            initialTabId={props.initialDocViewerTabId}
+            onUpdateSelectedTabId={props.onUpdateSelectedTabId}
+            query={props.query}
+            filters={props.filters}
+            docViewerRef={props.docViewerRef}
+            hideFilteringOnComputedColumns={true}
+          />
+        )}
     </SavedSearchEmbeddableBase>
   );
 }

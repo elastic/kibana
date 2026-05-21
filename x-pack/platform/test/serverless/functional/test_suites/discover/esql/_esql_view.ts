@@ -24,6 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dataViews = getService('dataViews');
   const PageObjects = getPageObjects([
+    'appMenu',
     'svlCommonPage',
     'common',
     'discover',
@@ -62,6 +63,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.waitUntilTabIsLoaded();
     });
 
+    afterEach(async () => {
+      await PageObjects.discover.resetQueryMode();
+    });
+
     after(async () => {
       await PageObjects.timePicker.resetDefaultAbsoluteRangeViaUiSettings();
     });
@@ -77,7 +82,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
         await testSubjects.existOrFail('showQueryBarMenu');
-        await testSubjects.existOrFail('superDatePickerToggleQuickMenuButton');
+        expect(await PageObjects.timePicker.timePickerExists()).to.be(true);
         await testSubjects.existOrFail('addFilter');
         await testSubjects.existOrFail('dscViewModeDocumentButton');
         await testSubjects.existOrFail('unifiedHistogramChart');
@@ -85,7 +90,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('app-menu-overflow-button');
         await testSubjects.existOrFail('discoverAlertsButton');
         await testSubjects.click('app-menu-overflow-button');
-        await testSubjects.existOrFail('shareTopNavButton');
+        await PageObjects.appMenu.existOrFail('shareTopNavButton');
         await testSubjects.existOrFail('docTableExpandToggleColumn');
         await testSubjects.existOrFail('dataGridColumnSortingButton');
         await testSubjects.existOrFail('fieldListFiltersFieldSearch');
@@ -99,7 +104,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await testSubjects.existOrFail('fieldListFiltersFieldSearch');
         await testSubjects.existOrFail('ESQLEditor');
-        await testSubjects.existOrFail('superDatePickerToggleQuickMenuButton');
+        expect(await PageObjects.timePicker.timePickerExists()).to.be(true);
 
         await testSubjects.missingOrFail('showQueryBarMenu');
         await testSubjects.missingOrFail('addFilter');
@@ -111,7 +116,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('app-menu-overflow-button');
         await testSubjects.existOrFail('discoverAlertsButton');
         await testSubjects.click('app-menu-overflow-button');
-        await testSubjects.existOrFail('shareTopNavButton');
+        await PageObjects.appMenu.existOrFail('shareTopNavButton');
         await testSubjects.missingOrFail('dataGridColumnSortingButton');
         await testSubjects.existOrFail('docTableExpandToggleColumn');
         await testSubjects.existOrFail('fieldListFiltersFieldTypeFilterToggle');
@@ -375,13 +380,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await testSubjects.click('querySubmitButton');
             await PageObjects.discover.waitUntilTabIsLoaded();
           }
-          await inspector.open();
+          await PageObjects.discover.openInspectorFromTabMenu();
           retries = retries + 1;
           const requestNames = await inspector.getRequestNames();
           expect(requestNames).to.contain('Table');
           expect(requestNames).to.contain('Visualization');
           const request = await inspector.getRequest(1);
-          expect(request.command).to.be('POST /_query/async?drop_null_columns');
+          expect(request.command).to.be('POST /_query/async?drop_null_columns=true');
         });
       });
     });

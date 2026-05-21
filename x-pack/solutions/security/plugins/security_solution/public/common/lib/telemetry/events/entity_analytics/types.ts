@@ -14,6 +14,7 @@ export enum EntityEventTypes {
   EntityRiskFiltered = 'Entity Risk Filtered',
   EntityStoreEnablementToggleClicked = 'Entity Store Enablement Toggle Clicked',
   EntityStoreDashboardInitButtonClicked = 'Entity Store Initialization Button Clicked',
+  EntityGraphClicked = 'Entity Graph Clicked',
   ToggleRiskSummaryClicked = 'Toggle Risk Summary Clicked',
   AddRiskInputToTimelineClicked = 'Add Risk Input To Timeline Clicked',
   RiskInputsExpandedFlyoutOpened = 'Risk Inputs Expanded Flyout Opened',
@@ -25,6 +26,8 @@ export enum EntityEventTypes {
   PrivilegedUserMonitoringCsvImported = 'Privileged User Monitoring CSV Imported',
   AnomaliesCountClicked = 'Anomalies Count Clicked',
   MLJobUpdate = 'ML Job Update',
+  LeadGenerationGenerateClicked = 'Lead Generation Generate Clicked',
+  LeadGenerationLeadClicked = 'Lead Generation Lead Clicked',
 }
 
 export enum ML_JOB_TELEMETRY_STATUS {
@@ -50,6 +53,8 @@ interface ReportToggleRiskSummaryClickedParams extends EntityParam {
 }
 
 type ReportRiskInputsExpandedFlyoutOpenedParams = EntityParam;
+
+type ReportEntityGraphViewClickedParams = EntityParam;
 
 interface ReportAddRiskInputToTimelineClickedParams {
   quantity: number;
@@ -107,12 +112,18 @@ interface ReportMLJobUpdateParams {
   errorMessage?: string;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface ReportLeadGenerationGenerateClickedParams {}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface ReportLeadGenerationLeadClickedParams {}
+
 export interface EntityAnalyticsTelemetryEventsMap {
   [EntityEventTypes.EntityDetailsClicked]: ReportEntityDetailsClickedParams;
   [EntityEventTypes.EntityAlertsClicked]: ReportEntityAlertsClickedParams;
   [EntityEventTypes.EntityRiskFiltered]: ReportEntityRiskFilteredParams;
   [EntityEventTypes.EntityStoreEnablementToggleClicked]: ReportEntityStoreEnablementParams;
   [EntityEventTypes.EntityStoreDashboardInitButtonClicked]: ReportEntityStoreInitParams;
+  [EntityEventTypes.EntityGraphClicked]: ReportEntityGraphViewClickedParams;
   [EntityEventTypes.ToggleRiskSummaryClicked]: ReportToggleRiskSummaryClickedParams;
   [EntityEventTypes.AddRiskInputToTimelineClicked]: ReportAddRiskInputToTimelineClickedParams;
   [EntityEventTypes.RiskInputsExpandedFlyoutOpened]: ReportRiskInputsExpandedFlyoutOpenedParams;
@@ -124,6 +135,8 @@ export interface EntityAnalyticsTelemetryEventsMap {
   [EntityEventTypes.PrivilegedUserMonitoringCsvImported]: ReportAssetCriticalityCsvImportedParams;
   [EntityEventTypes.AnomaliesCountClicked]: ReportAnomaliesCountClickedParams;
   [EntityEventTypes.MLJobUpdate]: ReportMLJobUpdateParams;
+  [EntityEventTypes.LeadGenerationGenerateClicked]: ReportLeadGenerationGenerateClickedParams;
+  [EntityEventTypes.LeadGenerationLeadClicked]: ReportLeadGenerationLeadClickedParams;
 }
 
 export interface EntityAnalyticsTelemetryEvent {

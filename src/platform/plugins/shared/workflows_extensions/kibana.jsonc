@@ -10,7 +10,8 @@
     "configPath": ["workflowsExtensions"],
     "browser": true,
     "server": true,
-    "requiredPlugins": ["actions", "inference"],
+    "requiredPlugins": ["actions", "inference", "spaces"],
+    "optionalPlugins": ["searchInferenceEndpoints"],
     "extraPublicDirs": ["common"]
   }
 }

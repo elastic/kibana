@@ -141,7 +141,7 @@ describe.skip('Elasticsearch Node Summary get_node_summary handleResponse', () =
         totalSpace: 10000,
         usedHeap: 33,
         nodeTypeLabel: 'Master Node',
-        nodeTypeClass: 'starFilled',
+        nodeTypeClass: 'starFill',
         node_ids: ['fooNode-Uuid'],
         status: 'Online',
         isOnline: true,

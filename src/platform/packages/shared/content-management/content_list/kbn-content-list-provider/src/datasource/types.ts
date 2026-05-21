@@ -19,38 +19,56 @@ export interface IncludeExcludeFilter {
   exclude?: string[];
 }
 
+/**
+ * Discriminated union for boolean flag filters (e.g. `starred`).
+ */
+export type IncludeExcludeFlag = { state: 'include' } | { state: 'exclude' };
+
 /** Filter dimension key for tag-based filtering. Matches the `fieldName` used in tag filter popovers. */
 export const TAG_FILTER_ID = 'tag';
+
+/** Filter dimension key for created-by user filtering. */
+export const CREATED_BY_FILTER_ID = 'createdBy';
 
 /**
  * Active filters applied to the content list.
  *
  * Filter dimensions (e.g. `tag`, `type`, `lastResponse`) are keyed by their
- * `fieldName` and hold an {@link IncludeExcludeFilter}. The index signature is
+ * `fieldName` and hold an {@link IncludeExcludeFilter}. Boolean flag filters
+ * (e.g. `starred`) use {@link IncludeExcludeFlag}. The index signature is
  * required to allow arbitrary filter dimensions, but note:
  *
  * - The `search` key is always `string | undefined` — access it directly.
- * - All other keys return `IncludeExcludeFilter | string | undefined`; use
- *   {@link getIncludeExcludeFilter} to safely narrow them to `IncludeExcludeFilter`.
+ * - Use {@link getIncludeExcludeFilter} to narrow to `IncludeExcludeFilter`.
+ * - Use {@link getIncludeExcludeFlag} to narrow to `IncludeExcludeFlag`.
  */
 export interface ActiveFilters {
   /** Search text extracted from the search bar, without filter syntax. */
   search?: string;
-  [filterId: string]: IncludeExcludeFilter | string | undefined;
+  [filterId: string]: IncludeExcludeFilter | IncludeExcludeFlag | string | undefined;
 }
 
 /**
- * Returns the filter value as `IncludeExcludeFilter` if it is an object; otherwise `undefined`.
- * Use when accessing `include`/`exclude` on a filter dimension, since the index signature allows `string`.
+ * Returns the filter value as {@link IncludeExcludeFilter} if it has `include` or `exclude`
+ * arrays; otherwise `undefined`.
  */
 export const getIncludeExcludeFilter = (
-  value: IncludeExcludeFilter | string | undefined
-): IncludeExcludeFilter | undefined => (value && typeof value === 'object' ? value : undefined);
+  value: IncludeExcludeFilter | IncludeExcludeFlag | string | undefined
+): IncludeExcludeFilter | undefined =>
+  value != null && typeof value === 'object' && ('include' in value || 'exclude' in value)
+    ? (value as IncludeExcludeFilter)
+    : undefined;
 
 /**
- * Per-value counts for a single filter dimension.
+ * Returns the filter value as {@link IncludeExcludeFlag} if it has a `state` field;
+ * otherwise `undefined`.
  */
-export type FilterCounts = Record<string, number>;
+export const getIncludeExcludeFlag = (
+  value: IncludeExcludeFilter | IncludeExcludeFlag | string | undefined
+): IncludeExcludeFlag | undefined =>
+  value != null && typeof value === 'object' && 'state' in value
+    ? (value as IncludeExcludeFlag)
+    : undefined;
 
 /**
  * Parameters for the `findItems` function.
@@ -64,7 +82,14 @@ export interface FindItemsParams {
    */
   searchQuery: string;
 
-  /** Active filters (includes the raw `search` text and any structured filters). */
+  /**
+   * Active filters (includes the raw `search` text and any structured filters).
+   *
+   * The `createdBy` dimension may contain sentinel keys ({@link MANAGED_USER_FILTER},
+   * {@link NO_CREATOR_USER_FILTER}) in addition to real user UIDs. Use
+   * {@link getCreatorKey} to map items to matching keys when implementing
+   * client-side filtering.
+   */
   filters: ActiveFilters;
 
   /**
@@ -101,19 +126,6 @@ export interface FindItemsResult {
 
   /** Total matching items for pagination. */
   total: number;
-
-  /**
-   * Optional per-filter counts, indexed by filter identifier.
-   *
-   * Each key (e.g. `tag`, `type`, `lastResponse`) maps to a `Record<string, number>` of
-   * value → count for the full result set (not just the current page). When present for a
-   * filter, the corresponding filter popover displays counts next to each option.
-   *
-   * Client-side data sources that iterate the full item set before paginating can compute
-   * this cheaply. Server-side data sources should omit entries unless they can retrieve
-   * counts via an aggregation query.
-   */
-  counts?: Record<string, FilterCounts>;
 }
 
 /**
@@ -121,12 +133,41 @@ export interface FindItemsResult {
  */
 export type FindItemsFn = (params: FindItemsParams) => Promise<FindItemsResult>;
 
+/** Default debounce delay (ms) matching the Table List View's fetch debounce. */
+export const DEFAULT_DEBOUNCE_MS = 300;
+
 /**
  * Data source configuration properties.
  */
 export interface DataSourceConfig {
   /** Fetches items from the data source. */
   findItems: FindItemsFn;
+
+  /**
+   * Debounce delay in milliseconds applied to query-parameter changes before
+   * a new `findItems` request is issued.
+   *
+   * Defaults to {@link DEFAULT_DEBOUNCE_MS} (300 ms), matching the Table List
+   * View's built-in fetch debounce. Set to `0` to disable debouncing.
+   */
+  debounceMs?: number;
+
+  /**
+   * Called automatically before every explicit `refetch()` (e.g. after a
+   * delete or create) so the next `findItems` call hits the server instead
+   * of returning stale cached data.
+   *
+   * Client-side providers that cache the server response between calls
+   * should set this to clear that cache. Server-based providers that
+   * always call through can omit it.
+   */
+  onInvalidate?: () => void;
+
+  /**
+   * Lightweight refresh: re-decorates cached items with external data
+   * (e.g. starred status) without a full server refetch.
+   */
+  onRefresh?: () => Promise<void>;
 
   /** Called after successful fetch. */
   onFetchSuccess?: (result: FindItemsResult) => void;
