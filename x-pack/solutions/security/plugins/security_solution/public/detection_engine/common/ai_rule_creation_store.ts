@@ -25,8 +25,7 @@ export class AiRuleCreationService {
   /**
    * Monotonically increasing sequence assigned to each rule attachment card on mount.
    * The card whose sequence matches the current value is the "active" card; older cards
-   * (lower sequences) are historical. Robust to JSON serialization differences that broke
-   * the earlier text-based identity scheme.
+   * (lower sequences) are historical.
    */
   private readonly currentAttachmentSeqSubject = new BehaviorSubject<number>(0);
   private seqCounter = 0;
@@ -105,8 +104,12 @@ export class AiRuleCreationService {
   };
 
   /**
-   * Allocates a new sequence number and publishes it as the current attachment.
-   * Called by RuleInlineContent on mount. The most recently mounted card "wins".
+   * Called by RuleInlineContent on mount via useState lazy initializer.
+   * Always allocates a new monotonically-increasing seq, so the most-recently-mounted card
+   * is always the "current" one and any previously-mounted cards become historical. This
+   * relies on React reusing the same component instance across in-place attachment version
+   * updates (e.g. save_rule_handler's addAttachment, form-sync addAttachment) — those don't
+   * re-run useState's lazy initializer, so an existing card keeps its original seq.
    */
   public claimAsCurrentAttachment = (): number => {
     this.seqCounter += 1;

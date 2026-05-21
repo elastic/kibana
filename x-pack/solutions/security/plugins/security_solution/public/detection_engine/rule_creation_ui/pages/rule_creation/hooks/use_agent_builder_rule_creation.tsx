@@ -252,7 +252,7 @@ export const useAgentBuilderRuleCreation = ({
       updateFormFromChatRef.current(parsed);
     });
     return () => subscription.unsubscribe();
-  }, [agentBuilder]);
+  }, [agentBuilder, aiRuleCreation]);
 
   useEffect(() => {
     if (

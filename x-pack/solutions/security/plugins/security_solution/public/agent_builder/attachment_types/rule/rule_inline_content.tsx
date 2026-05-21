@@ -124,7 +124,15 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
 }) => {
   const isDirty = useObservable(aiRuleCreation.dirty$, false);
   const isSaving = useObservable(aiRuleCreation.saving$, false);
-  const lastSavedRuleId = useObservable(aiRuleCreation.lastSavedRuleId$, null);
+  // Seed with the synchronous getter so the first render (and the first run of the
+  // register-buttons effect) sees the actual current value, not the `null` initial that
+  // useObservable returns before its own subscribe effect fires. This is critical for the
+  // frozen label below — without it, a card mounted after a save would briefly see
+  // lastSavedRuleId === null and freeze the wrong label.
+  const lastSavedRuleId = useObservable(
+    aiRuleCreation.lastSavedRuleId$,
+    aiRuleCreation.getLastSavedRuleId()
+  );
   // Synchronous initial values avoid a one-render lag (useObservable subscribes in an effect,
   // so without this it would render the default on the first render even if the
   // BehaviorSubject already holds a non-default value).
@@ -147,9 +155,13 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
   const isCurrentAttachment = mySeq === currentSeq;
   const showButtons = isCurrentAttachment && !agentBusy;
 
-  // Frozen save-button label. Captured the first time this card registers buttons; never
-  // updated afterwards. Without this the label flips from "Save changes" to "Save rule" in
-  // the brief window between clearDirty() (post-save) and the new attachment card mounting.
+  // Per-card frozen save-button label. Captured the first time this card registers buttons
+  // and never updated afterwards, so user actions that mutate the attachment in place
+  // (e.g. clicking "Save rule" → save_rule_handler adds a new attachment version on the same
+  // attachment id, which reuses this React instance) cannot change the label on a card that
+  // is already mounted. Only a brand-new card from a subsequent agent round — which mounts
+  // a new RuleInlineContent instance — gets a fresh frozen label reflecting the post-save
+  // state.
   const frozenSaveLabelRef = useRef<'save_rule' | 'save_changes' | null>(null);
 
   // Destructure to get a stable reference — callbacks object literal is recreated every render.
@@ -170,8 +182,12 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
     // Disabled while saving, or after a successful save until the agent makes a change.
     // savedRuleId === undefined means the rule has never been saved — always enabled.
     const isClean = savedRuleId !== undefined && !isDirty;
+    // Freeze the label on first registration based on whether a saved rule exists *at the
+    // moment this card was created*. Cards created pre-first-save show "Save rule" forever;
+    // cards created after any save (i.e. the next attachment rendered by the agent) show
+    // "Save changes" forever. The disabled state still toggles dynamically via isClean.
     if (frozenSaveLabelRef.current === null) {
-      frozenSaveLabelRef.current = !!savedRuleId && isDirty ? 'save_changes' : 'save_rule';
+      frozenSaveLabelRef.current = savedRuleId ? 'save_changes' : 'save_rule';
     }
 
     const buttons: ActionButton[] = [

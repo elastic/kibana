@@ -28,6 +28,12 @@ interface InlineAttachmentWithActionsProps {
   /** Version number of the attachment being rendered, used for canvas preview comparison */
   version?: number;
   /**
+   * Whether this is the most recent version of this attachment across the whole conversation.
+   * When false, `registerActionButtons` is not passed to the content renderer so that action
+   * buttons only appear on the latest card, not on stale/historic versions.
+   */
+  isLatestVersion?: boolean;
+  /**
    * Shared preview state for header actions/badges.
    */
   previewBadgeState?: AttachmentPreviewState;
@@ -43,6 +49,7 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
   conversationId,
   screenContext,
   version,
+  isLatestVersion = true,
   previewBadgeState,
 }) => {
   const {
@@ -152,9 +159,7 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
             screenContext,
             openSidebarConversation: isSidebar ? undefined : openSidebarConversation,
           },
-          {
-            registerActionButtons,
-          }
+          isLatestVersion ? { registerActionButtons } : undefined
         )}
       </EuiSplitPanel.Inner>
     </EuiSplitPanel.Outer>

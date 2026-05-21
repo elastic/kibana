@@ -8,7 +8,6 @@
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser/attachments';
-import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { RULES_FEATURE_LATEST } from '@kbn/security-solution-features/constants';
 import { AiRuleCreationService } from '../../../detection_engine/common/ai_rule_creation_store';
@@ -61,14 +60,6 @@ const makeUiSettings = (esqlEnabled = true) =>
     }),
   } as unknown as IUiSettingsClient);
 
-const makeActionButtonsParams = (ruleJson: string) => ({
-  attachment: makeAttachment(ruleJson),
-  isSidebar: false,
-  isCanvas: false,
-  updateOrigin: jest.fn(),
-  openSidebarConversation: jest.fn(),
-});
-
 describe('isOnRuleFormPage', () => {
   it('returns true for rule creation path', () => {
     expect(isOnRuleFormPage('/app/security/rules/create')).toBe(true);
@@ -98,6 +89,18 @@ describe('createRuleAttachmentDefinition', () => {
     aiRuleCreation = new AiRuleCreationService();
     jest.spyOn(aiRuleCreation, 'requestSaveRule');
     jest.spyOn(aiRuleCreation, 'setAiCreatedRule');
+  });
+
+  describe('definition shape', () => {
+    it('does not expose a static getActionButtons — buttons are registered dynamically from RuleInlineContent', () => {
+      const application = makeApplication(true);
+      const definition = createRuleAttachmentDefinition({
+        application,
+        aiRuleCreation,
+        uiSettings: makeUiSettings(),
+      });
+      expect(definition.getActionButtons).toBeUndefined();
+    });
   });
 
   describe('registerRuleAttachment', () => {
@@ -156,167 +159,6 @@ describe('createRuleAttachmentDefinition', () => {
         data: { text: '{}', attachmentLabel: 'My Test Security Rule' },
       };
       expect(config.getLabel(attachment)).toBe('My Test Security Rule');
-    });
-  });
-
-  describe('getActionButtons', () => {
-    it('returns empty array for invalid JSON', () => {
-      const application = makeApplication(true);
-      const definition = createRuleAttachmentDefinition({
-        application,
-        aiRuleCreation,
-        uiSettings: makeUiSettings(),
-      });
-      const buttons = definition.getActionButtons!(makeActionButtonsParams('not-json') as never);
-      expect(buttons).toEqual([]);
-    });
-
-    it('returns action buttons for rule without name', () => {
-      const application = makeApplication(true);
-      const definition = createRuleAttachmentDefinition({
-        application,
-        aiRuleCreation,
-        uiSettings: makeUiSettings(),
-      });
-      const buttons = definition.getActionButtons!(
-        makeActionButtonsParams(JSON.stringify({ type: 'query' })) as never
-      );
-      expect(buttons).toHaveLength(1);
-    });
-
-    it('returns empty array when user lacks edit capabilities', () => {
-      const application = makeApplication(false);
-      const definition = createRuleAttachmentDefinition({
-        application,
-        aiRuleCreation,
-        uiSettings: makeUiSettings(),
-      });
-      const buttons = definition.getActionButtons!(
-        makeActionButtonsParams(JSON.stringify(validRule)) as never
-      );
-      expect(buttons).toEqual([]);
-    });
-
-    it('returns empty array for esql rule when enableESQL setting is disabled', () => {
-      const application = makeApplication(true);
-      const definition = createRuleAttachmentDefinition({
-        application,
-        aiRuleCreation,
-        uiSettings: makeUiSettings(false),
-      });
-      const buttons = definition.getActionButtons!(
-        makeActionButtonsParams(JSON.stringify(validEsqlRule)) as never
-      );
-      expect(buttons).toEqual([]);
-    });
-
-    it('returns buttons for esql rule when enableESQL setting is enabled', () => {
-      const application = makeApplication(true);
-      const definition = createRuleAttachmentDefinition({
-        application,
-        aiRuleCreation,
-        uiSettings: makeUiSettings(true),
-      });
-      const buttons = definition.getActionButtons!(
-        makeActionButtonsParams(JSON.stringify(validEsqlRule)) as never
-      );
-      expect(buttons).toHaveLength(1);
-    });
-
-    it('returns buttons for non-esql rule even when enableESQL setting is disabled', () => {
-      const application = makeApplication(true);
-      const definition = createRuleAttachmentDefinition({
-        application,
-        aiRuleCreation,
-        uiSettings: makeUiSettings(false),
-      });
-      const buttons = definition.getActionButtons!(
-        makeActionButtonsParams(JSON.stringify(validRule)) as never
-      );
-      expect(buttons).toHaveLength(1);
-    });
-
-    it('returns "Open in form" as the first button', () => {
-      const application = makeApplication(true);
-      const definition = createRuleAttachmentDefinition({
-        application,
-        aiRuleCreation,
-        uiSettings: makeUiSettings(),
-      });
-      const buttons = definition.getActionButtons!(
-        makeActionButtonsParams(JSON.stringify(validRule)) as never
-      );
-      expect(buttons[0].label).toBe('Open in form');
-      expect(buttons[0].type).toBe(ActionButtonType.SECONDARY);
-    });
-
-    it('includes "View rule" button for rule with id when not on rule form page', () => {
-      (window as { location: unknown }).location = { pathname: '/app/security/overview' };
-      const ruleWithId = { ...validRule, id: 'rule-123' };
-      const application = makeApplication(true);
-      const definition = createRuleAttachmentDefinition({
-        application,
-        aiRuleCreation,
-        uiSettings: makeUiSettings(),
-      });
-      const buttons = definition.getActionButtons!(
-        makeActionButtonsParams(JSON.stringify(ruleWithId)) as never
-      );
-      expect(buttons).toHaveLength(2);
-      expect(buttons[1].label).toBe('View rule');
-    });
-
-    it('includes "View rule" button when rule has no id but lastSavedRuleId is set', () => {
-      (window as { location: unknown }).location = { pathname: '/app/security/overview' };
-      aiRuleCreation.setLastSavedRuleId('saved-rule-id');
-      const application = makeApplication(true);
-      const definition = createRuleAttachmentDefinition({
-        application,
-        aiRuleCreation,
-        uiSettings: makeUiSettings(),
-      });
-      const buttons = definition.getActionButtons!(
-        makeActionButtonsParams(JSON.stringify(validRule)) as never
-      );
-      expect(buttons).toHaveLength(2);
-      expect(buttons[1].label).toBe('View rule');
-    });
-
-    it('"Open in form" handler navigates to rule creation for rule without id', () => {
-      const application = makeApplication(true);
-      const definition = createRuleAttachmentDefinition({
-        application,
-        aiRuleCreation,
-        uiSettings: makeUiSettings(),
-      });
-      const buttons = definition.getActionButtons!(
-        makeActionButtonsParams(JSON.stringify(validRule)) as never
-      );
-
-      buttons[0].handler();
-
-      expect(application.navigateToApp).toHaveBeenCalledWith('securitySolutionUI', {
-        path: '/rules/create',
-      });
-    });
-
-    it('"Open in form" handler navigates to edit path for rule with id', () => {
-      const ruleWithId = { ...validRule, id: 'rule-123' };
-      const application = makeApplication(true);
-      const definition = createRuleAttachmentDefinition({
-        application,
-        aiRuleCreation,
-        uiSettings: makeUiSettings(),
-      });
-      const buttons = definition.getActionButtons!(
-        makeActionButtonsParams(JSON.stringify(ruleWithId)) as never
-      );
-
-      buttons[0].handler();
-
-      expect(application.navigateToApp).toHaveBeenCalledWith('securitySolutionUI', {
-        path: '/rules/id/rule-123/edit',
-      });
     });
   });
 

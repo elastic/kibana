@@ -80,21 +80,23 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     (id?: string) => {
       if (id) {
         // A valid id: clear the newConversation flag so we load the specified conversation.
-        if (currentProps.newConversation) {
-          setCurrentProps({ ...currentProps, newConversation: undefined });
-        }
+        // Use the functional form of setCurrentProps to avoid a stale closure overwriting
+        // attachments that may have been added after this callback was last re-created.
+        setCurrentProps((prev) =>
+          prev.newConversation ? { ...prev, newConversation: undefined } : prev
+        );
       } else {
         // Resetting to a new conversation: always set the flag so derived state (e.g.
         // the header title) updates even when persistedConversationId is already undefined.
-        if (!currentProps.newConversation) {
-          setCurrentProps({ ...currentProps, newConversation: true });
-        }
+        setCurrentProps((prev) =>
+          prev.newConversation ? prev : { ...prev, newConversation: true }
+        );
       }
       if (id !== persistedConversationId) {
         updatePersistedConversationId(id);
       }
     },
-    [currentProps, persistedConversationId, updatePersistedConversationId]
+    [persistedConversationId, updatePersistedConversationId]
   );
 
   const validateAndSetConversationId = useCallback(
