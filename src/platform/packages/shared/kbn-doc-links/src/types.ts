@@ -732,6 +732,7 @@ export interface DocLinks {
     readonly agentBuilderPlugins: string;
     readonly agentBuilderConnectors: string;
     readonly agentBuilderTools: string;
+    readonly elasticCapabilities: string;
     readonly programmaticAccess: string;
     readonly kibanaApi: string;
     readonly mcpServer: string;
