@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { createTestConfig } from '../common/config';
-
-export default createTestConfig({
-  license: 'basic',
-  name: 'X-Pack Observability API integration tests (basic)',
-  testFiles: [require.resolve('./tests')],
-});
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/x-pack/platform/packages/shared/ml/aiops_change_point_detection'],
+};
