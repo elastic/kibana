@@ -326,7 +326,6 @@ describe('getDataStreamDetails', () => {
           start: 1234567890,
           end: 1234567900,
           isServerless: false,
-          isSecurityEnabled: true,
         });
 
         expect(result).toEqual({});
@@ -347,7 +346,6 @@ describe('getDataStreamDetails', () => {
           start: 1234567890,
           end: 1234567900,
           isServerless: false,
-          isSecurityEnabled: true,
         });
 
         expect(mockDatasetQualityESClient.fieldCaps).toHaveBeenCalledWith({
@@ -385,7 +383,6 @@ describe('getDataStreamDetails', () => {
           start: 1234567890,
           end: 1234567900,
           isServerless: false,
-          isSecurityEnabled: true,
         });
 
         expect(result.docsCount).toBe(1000);
