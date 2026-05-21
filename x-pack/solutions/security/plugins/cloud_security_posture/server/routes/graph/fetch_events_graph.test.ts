@@ -18,7 +18,8 @@ describe('fetchEvents', () => {
   let logger: Logger;
 
   beforeEach(() => {
-    const toRecordsMock = jest.fn().mockResolvedValue([{ id: 'dummy' }]);
+    // Match the real `EsqlToRecords` shape `{ columns, records }`.
+    const toRecordsMock = jest.fn().mockResolvedValue({ columns: [], records: [{ id: 'dummy' }] });
     // Stub the esClient helpers.esql method to return an object with toRecords
     esClient.asCurrentUser.helpers.esql.mockReturnValue({
       toRecords: toRecordsMock,
@@ -74,7 +75,7 @@ describe('fetchEvents', () => {
     expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
     const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
     expect(esqlCallArgs[0].query).toContain('FROM valid_index');
-    expect(result).toEqual([{ id: 'dummy' }]);
+    expect(result).toEqual({ columns: [], records: [{ id: 'dummy' }] });
   });
 
   it('should include origin event parameters when originEventIds are provided', async () => {
@@ -125,7 +126,7 @@ describe('fetchEvents', () => {
 
     expect(ogIdKeys).toEqual(['og_id0', 'og_id1']);
     expect(ogAlertKeys).toEqual(['og_alrt_id0']);
-    expect(result).toEqual([{ id: 'dummy' }]);
+    expect(result).toEqual({ columns: [], records: [{ id: 'dummy' }] });
   });
 
   describe('enrichment integration', () => {
@@ -410,6 +411,145 @@ describe('fetchEvents', () => {
         f.bool?.should?.some((s: any) => s.exists?.field?.includes('target'))
       );
       expect(hasTargetCheck).toBe(false);
+    });
+  });
+
+  describe('CPS projectRouting', () => {
+    const ALERTS_PATTERN = '.alerts-security.alerts-default';
+
+    it('issues a single logs-only query and omits project_routing when only logs patterns are supplied', async () => {
+      await fetchEvents({
+        esClient,
+        logger,
+        start: 0,
+        end: 1000,
+        originEventIds: [] as OriginEventId[],
+        showUnknownTarget: false,
+        indexPatterns: ['logs-*'],
+        spaceId: 'default',
+        esQuery: undefined as EsQuery | undefined,
+      });
+
+      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+      const [args] = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+      expect(args.query).toContain('FROM logs-*');
+      expect(args).not.toHaveProperty('project_routing');
+    });
+
+    it('issues an alerts-only query and omits project_routing when only the alerts pattern is supplied', async () => {
+      await fetchEvents({
+        esClient,
+        logger,
+        start: 0,
+        end: 1000,
+        originEventIds: [] as OriginEventId[],
+        showUnknownTarget: false,
+        indexPatterns: [ALERTS_PATTERN],
+        spaceId: 'default',
+        esQuery: undefined as EsQuery | undefined,
+        projectRouting: '_alias:*',
+      });
+
+      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+      const [args] = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+      expect(args.query).toContain(`FROM ${ALERTS_PATTERN}`);
+      // Alerts are origin-only: caller's projectRouting must not propagate.
+      expect(args).not.toHaveProperty('project_routing');
+    });
+
+    it('splits into two queries when both patterns are supplied — project_routing applied only to the logs query', async () => {
+      await fetchEvents({
+        esClient,
+        logger,
+        start: 0,
+        end: 1000,
+        originEventIds: [] as OriginEventId[],
+        showUnknownTarget: false,
+        indexPatterns: [ALERTS_PATTERN, 'logs-*'],
+        spaceId: 'default',
+        esQuery: undefined as EsQuery | undefined,
+        projectRouting: '_alias:*',
+      });
+
+      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(2);
+      const calls = esClient.asCurrentUser.helpers.esql.mock.calls;
+
+      const logsCall = calls.find((c) => c[0].query.includes('FROM logs-*'));
+      const alertsCall = calls.find((c) => c[0].query.includes(`FROM ${ALERTS_PATTERN}`));
+
+      expect(logsCall).toBeDefined();
+      expect(alertsCall).toBeDefined();
+
+      expect(logsCall![0].project_routing).toBe('_alias:*');
+      expect(alertsCall![0]).not.toHaveProperty('project_routing');
+    });
+
+    it('passes _alias:_origin through to the logs query when supplied', async () => {
+      await fetchEvents({
+        esClient,
+        logger,
+        start: 0,
+        end: 1000,
+        originEventIds: [] as OriginEventId[],
+        showUnknownTarget: false,
+        indexPatterns: ['logs-*'],
+        spaceId: 'default',
+        esQuery: undefined as EsQuery | undefined,
+        projectRouting: '_alias:_origin',
+      });
+
+      const [args] = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+      expect(args.project_routing).toBe('_alias:_origin');
+    });
+
+    it('skips project_routing on the logs query when no projectRouting is supplied', async () => {
+      await fetchEvents({
+        esClient,
+        logger,
+        start: 0,
+        end: 1000,
+        originEventIds: [] as OriginEventId[],
+        showUnknownTarget: false,
+        indexPatterns: [ALERTS_PATTERN, 'logs-*'],
+        spaceId: 'default',
+        esQuery: undefined as EsQuery | undefined,
+        // projectRouting intentionally omitted — stateful / non-CPS regression.
+      });
+
+      const calls = esClient.asCurrentUser.helpers.esql.mock.calls;
+      for (const [args] of calls) {
+        expect(args).not.toHaveProperty('project_routing');
+      }
+    });
+
+    it('concatenates records from both split queries into a single EsqlToRecords result', async () => {
+      const logsRecord = { id: 'log-1' };
+      const alertsRecord = { id: 'alert-1' };
+      const toRecordsMock = jest
+        .fn()
+        .mockResolvedValueOnce({ columns: [], records: [logsRecord] })
+        .mockResolvedValueOnce({ columns: [], records: [alertsRecord] });
+      esClient.asCurrentUser.helpers.esql.mockReturnValue({
+        toRecords: toRecordsMock,
+        toArrowTable: jest.fn(),
+        toArrowReader: jest.fn(),
+      });
+
+      const result = await fetchEvents({
+        esClient,
+        logger,
+        start: 0,
+        end: 1000,
+        originEventIds: [] as OriginEventId[],
+        showUnknownTarget: false,
+        indexPatterns: [ALERTS_PATTERN, 'logs-*'],
+        spaceId: 'default',
+        esQuery: undefined as EsQuery | undefined,
+        projectRouting: '_alias:*',
+      });
+
+      expect(result.records).toEqual(expect.arrayContaining([logsRecord, alertsRecord]));
+      expect(result.records).toHaveLength(2);
     });
   });
 });

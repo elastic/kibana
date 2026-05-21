@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useRef } from 'react';
+import React, { memo, useCallback, useMemo, useRef } from 'react';
+import useObservable from 'react-use/lib/useObservable';
+import { of } from 'rxjs';
 import { css } from '@emotion/react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
@@ -21,7 +23,12 @@ import {
   type NodeViewModel,
 } from '@kbn/cloud-security-posture-graph';
 import { type NodeDocumentDataModel } from '@kbn/cloud-security-posture-common/types/graph/v1';
-import { DOCUMENT_TYPE_ENTITY } from '@kbn/cloud-security-posture-common/schema/graph/v1';
+import {
+  DOCUMENT_TYPE_ENTITY,
+  PROJECT_ROUTING_ALL,
+  PROJECT_ROUTING_ORIGIN,
+  type ProjectRouting,
+} from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import { isEntityNodeEnriched } from '@kbn/cloud-security-posture-graph/src/components/utils';
 import { useFlyoutBodyAvailableHeight } from './use_flyout_body_available_height';
 import { PageScope } from '../../../data_view_manager/constants';
@@ -90,8 +97,22 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
 
   const {
     application: { capabilities },
+    cps,
   } = useKibana().services;
   const { read: hasTimelineAccess } = extractTimelineCapabilities(capabilities);
+
+  // CPS project routing for cross-project events. Subscribes to the cps manager so
+  // routing changes propagate without remounting. Falls back to `of(undefined)` when
+  // the cps plugin is absent (non-serverless / stateful environments).
+  const projectRouting$ = useMemo(
+    () => cps?.cpsManager?.getProjectRouting$() ?? of(undefined),
+    [cps?.cpsManager]
+  );
+  const cpsRouting = useObservable(projectRouting$);
+  const projectRouting: ProjectRouting | undefined =
+    cpsRouting === PROJECT_ROUTING_ALL || cpsRouting === PROJECT_ROUTING_ORIGIN
+      ? cpsRouting
+      : undefined;
 
   const toasts = useToasts();
   const oldDataView = useGetScopedSourcererDataView({
@@ -316,6 +337,7 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
                       from: `${props.timestamp}||-30m`,
                       to: `${props.timestamp}||+30m`,
                     },
+                    projectRouting,
                   }
                 : {
                     dataView,
@@ -324,6 +346,7 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
                       from: 'now-30d',
                       to: 'now',
                     },
+                    projectRouting,
                   }
             }
             showInvestigateInTimeline={hasTimelineAccess}

@@ -16,6 +16,8 @@ import {
   DOCUMENT_TYPE_ENTITY,
   INDEX_PATTERN_REGEX,
 } from '@kbn/cloud-security-posture-common/schema/graph/v1';
+import type { ProjectRouting } from '@kbn/cloud-security-posture-common/schema/graph/v1';
+
 import { ALL_ENTITY_TYPES } from '@kbn/entity-store/common';
 import {
   getEuidEsqlEvaluation,
@@ -53,6 +55,15 @@ interface BuildEsqlQueryParams {
 /**
  * Fetches events/alerts from logs and alerts indices.
  * This is the core event fetching logic used by fetchGraph.
+ *
+ * CPS: ES|QL has no per-index `project_routing`, so we split the work into two queries:
+ *   - Logs query (the caller's `indexPatterns` minus the alerts pattern) — carries
+ *     `project_routing` so logs can be fetched from linked projects.
+ *   - Alerts query (`.alerts-security.alerts-${spaceId}`) — always pinned to the
+ *     origin project, regardless of `projectRouting`.
+ *
+ * Records from both queries are concatenated; `regroupEvents` consumes them
+ * unchanged.
  */
 export const fetchEvents = async ({
   esClient,
@@ -65,6 +76,7 @@ export const fetchEvents = async ({
   spaceId,
   esQuery,
   pinnedIds,
+  projectRouting,
 }: {
   esClient: IScopedClusterClient;
   logger: Logger;
@@ -76,6 +88,7 @@ export const fetchEvents = async ({
   spaceId: string;
   esQuery?: EsQuery;
   pinnedIds?: string[];
+  projectRouting?: ProjectRouting;
 }): Promise<EsqlToRecords<EventEsqlRow>> => {
   const originAlertIds = originEventIds.filter((originEventId) => originEventId.isAlert);
 
@@ -89,35 +102,81 @@ export const fetchEvents = async ({
     }
   });
 
-  const alertsMappingsIncluded = indexPatterns.some((indexPattern) =>
+  const alertsIndexPatterns = indexPatterns.filter((indexPattern) =>
     indexPattern.includes(SECURITY_ALERTS_PARTIAL_IDENTIFIER)
   );
+  const logsIndexPatterns = indexPatterns.filter(
+    (indexPattern) => !indexPattern.includes(SECURITY_ALERTS_PARTIAL_IDENTIFIER)
+  );
 
-  const query = buildEsqlQuery({
-    indexPatterns,
-    originEventIds,
-    originAlertIds,
-    alertsMappingsIncluded,
-    pinnedIds,
-  });
+  const filter = buildDslFilter(
+    originEventIds.map((originEventId) => originEventId.id),
+    showUnknownTarget,
+    start,
+    end,
+    esQuery
+  );
 
-  logger.trace(`Executing query [${query}]`);
+  // Same params for both queries — `buildEsqlQuery` references the same names
+  // (`og_id*`, `og_alrt_id*`, `pinned_id*`) regardless of which index it targets.
+  const params = [
+    ...originEventIds.map((originEventId, idx) => ({ [`og_id${idx}`]: originEventId.id })),
+    ...originAlertIds.map((originEventId, idx) => ({ [`og_alrt_id${idx}`]: originEventId.id })),
+    ...(pinnedIds ?? []).map((id, idx) => ({ [`pinned_id${idx}`]: id })),
+  ];
 
-  const eventIds = originEventIds.map((originEventId) => originEventId.id);
-  return await esClient.asCurrentUser.helpers
-    .esql({
-      columnar: false,
-      filter: buildDslFilter(eventIds, showUnknownTarget, start, end, esQuery),
-      query,
-      params: [
-        ...originEventIds.map((originEventId, idx) => ({ [`og_id${idx}`]: originEventId.id })),
-        ...originEventIds
-          .filter((originEventId) => originEventId.isAlert)
-          .map((originEventId, idx) => ({ [`og_alrt_id${idx}`]: originEventId.id })),
-        ...(pinnedIds ?? []).map((id, idx) => ({ [`pinned_id${idx}`]: id })),
-      ],
-    })
-    .toRecords<EventEsqlRow>();
+  const promises: Array<Promise<EsqlToRecords<EventEsqlRow>>> = [];
+
+  if (logsIndexPatterns.length > 0) {
+    const logsQuery = buildEsqlQuery({
+      indexPatterns: logsIndexPatterns,
+      originEventIds,
+      originAlertIds,
+      alertsMappingsIncluded: false,
+      pinnedIds,
+    });
+    logger.trace(`Executing logs query [project_routing: ${projectRouting ?? 'default'}]`);
+    promises.push(
+      esClient.asCurrentUser.helpers
+        .esql({
+          columnar: false,
+          filter,
+          query: logsQuery,
+          params,
+          ...(projectRouting ? { project_routing: projectRouting } : {}),
+        })
+        .toRecords<EventEsqlRow>()
+    );
+  }
+
+  if (alertsIndexPatterns.length > 0) {
+    const alertsQuery = buildEsqlQuery({
+      indexPatterns: alertsIndexPatterns,
+      originEventIds,
+      originAlertIds,
+      alertsMappingsIncluded: true,
+      pinnedIds,
+    });
+    logger.trace(`Executing alerts query [project_routing: origin]`);
+    promises.push(
+      esClient.asCurrentUser.helpers
+        .esql({
+          columnar: false,
+          filter,
+          query: alertsQuery,
+          params,
+          // Alerts are produced by the local detection engine on the origin project;
+          // never fan out to linked projects regardless of caller-supplied projectRouting.
+        })
+        .toRecords<EventEsqlRow>()
+    );
+  }
+
+  const results = await Promise.all(promises);
+  return {
+    columns: results[0]?.columns ?? [],
+    records: results.flatMap((r) => r.records),
+  };
 };
 
 const buildDslFilter = (
