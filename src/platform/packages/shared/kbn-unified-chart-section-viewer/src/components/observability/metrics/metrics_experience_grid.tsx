@@ -37,7 +37,6 @@ export const MetricsExperienceGrid = ({
   isTabSelected,
   breakdownField,
   onBreakdownFieldChange,
-  profileId,
 }: UnifiedMetricsGridProps) => {
   const {
     searchTerm,
