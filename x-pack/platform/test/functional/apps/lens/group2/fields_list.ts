@@ -203,6 +203,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             );
             // close the popover
             await testSubjects.click(fieldId);
+            await log.debug(
+              `fieldId: ${fieldId},newValuesCount: ${newValuesCount}, valuesCount: ${valuesCount}`
+            );
             return newValuesCount < valuesCount;
           });
         });
