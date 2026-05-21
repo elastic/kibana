@@ -233,16 +233,6 @@ export default ({ getService }: FtrProviderContext): void => {
           expectedHttpCode: 400,
         });
       });
-
-      it('400s a legacy `actions` payload with a non-security owner (transformer rejection surfaces as 400)', async () => {
-        const postedCase = await createCase(supertest, postCaseReq);
-        await createComment({
-          supertest,
-          caseId: postedCase.id,
-          params: { ...postCommentActionsReq, owner: 'observabilityFixture' },
-          expectedHttpCode: 400,
-        });
-      });
     });
 
     describe('read', () => {

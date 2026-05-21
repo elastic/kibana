@@ -163,15 +163,12 @@ describe('actionsAttachmentTransformer', () => {
       ).toThrow('legacy actions row has no targets to migrate');
     });
 
-    it('throws Boom.badRequest for non-security owners', () => {
-      expect(() =>
-        actionsAttachmentTransformer.toUnifiedSchema({
-          ...legacyActionsAttributes,
-          owner: 'observability',
-        })
-      ).toThrow(
-        "legacy actions attachments are security-solution-only (received owner 'observability')"
-      );
+    it('preserves a non-security owner verbatim on projection (transformer is owner-agnostic)', () => {
+      const projected = actionsAttachmentTransformer.toUnifiedSchema({
+        ...legacyActionsAttributes,
+        owner: 'observability',
+      }) as { owner: string };
+      expect(projected.owner).toBe('observability');
     });
 
     it.each([
@@ -357,15 +354,12 @@ describe('actionsAttachmentTransformer', () => {
       ).toThrow('Legacy actions payload has no targets to migrate');
     });
 
-    it('toUnifiedPayload throws for non-security owners', () => {
-      expect(() =>
-        actionsAttachmentTransformer.toUnifiedPayload({
-          ...legacyActionsPayload,
-          owner: 'observability',
-        } as unknown as AttachmentRequestV2)
-      ).toThrow(
-        "legacy actions attachments are security-solution-only (received owner 'observability')"
-      );
+    it('toUnifiedPayload preserves a non-security owner verbatim (owner-agnostic)', () => {
+      const result = actionsAttachmentTransformer.toUnifiedPayload({
+        ...legacyActionsPayload,
+        owner: 'observability',
+      } as unknown as AttachmentRequestV2);
+      expect((result as { owner: string }).owner).toBe('observability');
     });
 
     it('isLegacyPayload detects only legacy actions payloads', () => {

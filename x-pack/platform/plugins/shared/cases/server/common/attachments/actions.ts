@@ -15,7 +15,6 @@ import type {
 import type { ActionsAttachmentPayload } from '../../../common/types/domain';
 import { ActionsAttachmentPayloadRt } from '../../../common/types/domain/attachment/v1';
 import { SECURITY_ENDPOINT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
-import { SECURITY_SOLUTION_OWNER } from '../../../common/constants/owners';
 import type {
   AttachmentPersistedAttributes,
   UnifiedAttachmentAttributes,
@@ -72,21 +71,6 @@ function isLegacyActionsShape(attributes: unknown): attributes is LegacyActionsA
 
 function hasConvertibleTargets(attributes: LegacyActionsAttributes): boolean {
   return attributes.actions.targets.length > 0;
-}
-
-/**
- * Every legacy `actions` row in production was written by the host-isolation
- * flow under `securitySolution` owner; the legacy codec does not constrain
- * `owner`, so a synthetic row with a different owner is theoretically possible.
- * We hard-fail rather than silently coerce because there is no safe default
- * owner for an attachment with no UI write surface.
- */
-function assertSecurityOwner(attributes: LegacyActionsAttributes): void {
-  if (attributes.owner !== SECURITY_SOLUTION_OWNER) {
-    throw Boom.badRequest(
-      `legacy actions attachments are security-solution-only (received owner '${attributes.owner}')`
-    );
-  }
 }
 
 function buildUnifiedMetadata(legacyActions: LegacyActionsAttributes['actions']): {
@@ -148,8 +132,6 @@ export const actionsAttachmentTransformer: AttachmentTypeTransformer<
       );
     }
 
-    assertSecurityOwner(attributes);
-
     // `extractCommonAttributes` is typed against `AttachmentAttributesV2` but
     // only reads the audit fields (`created_by`, `pushed_by`, `updated_by`,
     // timestamps) which are present on every persisted SO row regardless of
@@ -205,7 +187,6 @@ export const actionsAttachmentTransformer: AttachmentTypeTransformer<
     if (!hasConvertibleTargets(attachment)) {
       throw Boom.badRequest('Legacy actions payload has no targets to migrate');
     }
-    assertSecurityOwner(attachment);
     return {
       type: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
       attachmentId: LEGACY_ACTIONS_SYNTHETIC_ATTACHMENT_ID,
