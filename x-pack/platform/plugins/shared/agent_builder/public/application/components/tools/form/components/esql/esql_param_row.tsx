@@ -123,9 +123,9 @@ export const EsqlParamRow: React.FC<EsqlParamRowProps> = ({
               />
             )) ||
             (source === EsqlParamSource.Inferred ? (
-              <EuiIcon type="sparkles" color="subdued" size="m" />
+              <EuiIcon type="sparkles" color="subdued" size="m" aria-hidden={true} />
             ) : (
-              <EuiIcon type="pencil" color="subdued" size="m" />
+              <EuiIcon type="pencil" color="subdued" size="m" aria-hidden={true} />
             )))}
       </EuiTableRowCell>
       <EuiTableRowCell

@@ -276,7 +276,7 @@ const ActivePluginsStatus: React.FC<{ activePluginsCount: number; totalPlugins: 
             <EuiFlexItem>
               <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <EuiIcon type={iconType} color={statusColor} size="m" />
+                  <EuiIcon type={iconType} color={statusColor} size="m" aria-hidden={true} />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiText size="m" color={statusColor}>

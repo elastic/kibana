@@ -64,7 +64,7 @@ const FormSection: React.FC<FormSectionProps> = ({ id, icon, title, description,
     <EuiFlexItem grow={1}>
       <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
         <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-          <EuiIcon type={icon} />
+          <EuiIcon type={icon} aria-hidden={true} />
           <EuiTitle size="xs">
             <h2 id={id}>{title}</h2>
           </EuiTitle>
@@ -443,6 +443,7 @@ export const SkillForm: React.FC<SkillFormProps> = ({
                       fullWidth
                     >
                       <EuiComboBox
+                        isInvalid={!!error}
                         fullWidth
                         options={toolOptions}
                         selectedOptions={value.map((toolId) => ({
