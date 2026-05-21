@@ -10,7 +10,7 @@
 import { ContentInsightsClient } from '@kbn/content-management-content-insights-public';
 import { i18n } from '@kbn/i18n';
 import { asyncForEach } from '@kbn/std';
-import type { PanelFlyoutType } from '@kbn/presentation-util';
+import type { TracksOverlays } from '@kbn/presentation-util';
 import { dashboardClient } from '../../dashboard_client';
 import { getPlacementHints } from '../../panel_placement/get_placement_hints';
 import { getAccessControlClient } from '../../services/access_control_service';
@@ -37,7 +37,7 @@ export async function loadDashboardApi({
   getCreationOptions?: () => Promise<DashboardCreationOptions>;
   onApiCleanup?: () => void;
   savedObjectId?: string;
-  panelFlyoutType?: PanelFlyoutType;
+  panelFlyoutType?: TracksOverlays['panelFlyoutType'];
 }) {
   const creationOptions = await getCreationOptions?.();
 

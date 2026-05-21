@@ -11,7 +11,7 @@ import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { BehaviorSubject, merge, Subject } from 'rxjs';
 import { v4 } from 'uuid';
 
-import type { PanelFlyoutType } from '@kbn/presentation-util';
+import type { TracksOverlays } from '@kbn/presentation-util';
 import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
 import type { DashboardState } from '../../common/types';
 import { initializeAccessControlManager } from './access_control_manager';
@@ -56,7 +56,7 @@ export function getDashboardApi({
   isAccessControlEnabled,
 }: {
   creationOptions?: DashboardCreationOptions;
-  panelFlyoutType?: PanelFlyoutType;
+  panelFlyoutType?: TracksOverlays['panelFlyoutType'];
   incomingEmbeddables: EmbeddablePackageState[] | undefined;
   initialState: DashboardState;
   readResult?: DashboardReadResponseBody;

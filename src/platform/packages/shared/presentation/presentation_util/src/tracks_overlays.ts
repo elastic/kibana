@@ -11,13 +11,6 @@ import type { EuiFlyoutProps } from '@elastic/eui';
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 
 /**
- * Controls how panel flyouts opened from a {@link TracksOverlays} host are displayed:
- * - `push` pushes the application content
- * - `overlay` opens above the existing layout
- */
-export type PanelFlyoutType = EuiFlyoutProps['type'];
-
-/**
  * Options for tracking overlays.
  *
  * @public
@@ -39,9 +32,9 @@ export interface TracksOverlaysOptions {
  */
 export interface TracksOverlays {
   /**
-   * Preferred flyout type for panel flyouts opened from a {@link TracksOverlays} host.
+   * Preferred flyout type for panel flyouts opened from this host (`push` pushes app content, `overlay` opens above layout).
    */
-  panelFlyoutType?: PanelFlyoutType;
+  panelFlyoutType?: EuiFlyoutProps['type'];
   /**
    * Registers an overlay.
    *
