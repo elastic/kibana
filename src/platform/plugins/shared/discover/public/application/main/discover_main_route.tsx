@@ -16,7 +16,7 @@ import type { AppMountParameters } from '@kbn/core/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import useLatest from 'react-use/lib/useLatest';
 import { i18n } from '@kbn/i18n';
-import { DiscoverAppHeader } from '../../components/discover_app_header';
+import { AppHeader } from '@kbn/app-header';
 import { useTopNavMenuItems } from './components/top_nav/use_top_nav_menu_items';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import type { CustomizationCallback, DiscoverCustomizationContext } from '../../customizations';
@@ -107,7 +107,7 @@ export const DiscoverMainRoute = ({
 
 const DiscoverMainAppHeader: React.FC<{ title: string }> = ({ title }) => {
   const appMenu = useTopNavMenuItems();
-  return <DiscoverAppHeader title={title} appMenu={appMenu} />;
+  return <AppHeader title={title} menu={appMenu} fallback={null} sticky={false} padding="m" />;
 };
 
 const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
@@ -271,7 +271,7 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
     <ChartPortalsRenderer runtimeStateManager={runtimeStateManager}>
       <DiscoverTopNavMenuProvider customizationContext={customizationContext}>
         <>
-          {customizationContext.displayMode === 'standalone' && (
+          {customizationContext.displayMode === 'standalone' && !tabsEnabled && (
             <DiscoverMainAppHeader title={persistedDiscoverSession?.title || 'Discover'} />
           )}
           <h1 className="euiScreenReaderOnly" data-test-subj="discoverSavedSearchTitle">
@@ -294,7 +294,7 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
              * - If tabs are disabled and Discover is standalone, hide the tabs bar but show the app menu.
              */
             tabsEnabled ? (
-              <TabsView {...props} />
+              <TabsView {...props} headerTitle={persistedDiscoverSession?.title || 'Discover'} />
             ) : customizationContext.displayMode === 'embedded' ? (
               <SingleTabView {...props} />
             ) : (
