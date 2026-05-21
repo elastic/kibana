@@ -50,9 +50,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           ),
       ]);
 
-      await PageObjects.common.navigateToActualUrl('discover', undefined, {
-        ensureCurrentUrl: false,
-      });
+      await PageObjects.discover.navigateToApp('classic');
 
       // Required as some other test switches data view to metric-*
       await dataViews.switchTo('All logs');
