@@ -95,7 +95,7 @@ export const RunbookField: React.FC<RunbookFieldProps> = ({ isOpen, onClose }) =
       style={{ width: '50vw' }}
     >
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={RUNBOOK_ROW_ID}>
           {i18n.translate('xpack.alertingV2.ruleForm.runbookTitle', {
             defaultMessage: 'Add Runbook',
           })}

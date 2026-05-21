@@ -103,10 +103,8 @@ describe('ComposeRelatedDashboardsField', () => {
   it('renders the related dashboards selector', () => {
     render(<ComposeRelatedDashboardsField />, { wrapper: createComposeFormWrapper() });
 
-    expect(screen.getByText('Related dashboards')).toBeInTheDocument();
-    expect(
-      screen.getByPlaceholderText('Link related dashboards for investigation')
-    ).toBeInTheDocument();
+    expect(screen.getByText('Related dashboards')).toBeTruthy();
+    expect(screen.getByPlaceholderText('Link related dashboards for investigation')).toBeTruthy();
   });
 
   it('writes selected dashboards to artifacts', async () => {
@@ -122,13 +120,39 @@ describe('ComposeRelatedDashboardsField', () => {
     fireEvent.focus(searchInput);
 
     await waitFor(() => {
-      expect(screen.getByText(DASHBOARD_TITLE)).toBeInTheDocument();
+      expect(screen.getByText(DASHBOARD_TITLE)).toBeTruthy();
     });
 
     await userEvent.click(screen.getByText(DASHBOARD_TITLE));
 
-    expect(screen.getByTestId('artifactValueSpy')).toHaveTextContent(DASHBOARD_ARTIFACT_TYPE);
-    expect(screen.getByTestId('artifactValueSpy')).toHaveTextContent(DASHBOARD_ID);
+    expect(screen.getByTestId('artifactValueSpy').textContent).toContain(DASHBOARD_ARTIFACT_TYPE);
+    expect(screen.getByTestId('artifactValueSpy').textContent).toContain(DASHBOARD_ID);
+  });
+
+  it('debounces dashboard searches after the selector is focused', async () => {
+    render(<ComposeRelatedDashboardsField />, { wrapper: createComposeFormWrapper() });
+
+    const searchInput = screen.getByPlaceholderText('Link related dashboards for investigation');
+    fireEvent.focus(searchInput);
+
+    await waitFor(() => {
+      expect(mockSearchExecute).toHaveBeenCalledTimes(1);
+    });
+
+    mockSearchExecute.mockClear();
+    await userEvent.type(searchInput, 'error');
+
+    await waitFor(() => {
+      expect(mockSearchExecute).toHaveBeenCalledTimes(1);
+      expect(mockSearchExecute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          search: {
+            query: 'error',
+            per_page: 100,
+          },
+        })
+      );
+    });
   });
 
   it('removes dashboard artifacts when the selection is cleared', async () => {
@@ -146,14 +170,14 @@ describe('ComposeRelatedDashboardsField', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText(DASHBOARD_TITLE)).toBeInTheDocument();
+      expect(screen.getByText(DASHBOARD_TITLE)).toBeTruthy();
     });
 
     const selectedOption = screen.getByText(DASHBOARD_TITLE);
     await userEvent.type(selectedOption, '{backspace}');
 
     await waitFor(() => {
-      expect(screen.getByTestId('artifactValueSpy')).toHaveTextContent('[]');
+      expect(screen.getByTestId('artifactValueSpy').textContent).toContain('[]');
     });
   });
 
@@ -165,6 +189,6 @@ describe('ComposeRelatedDashboardsField', () => {
       }),
     });
 
-    expect(screen.queryByText('Related dashboards')).not.toBeInTheDocument();
+    expect(screen.queryByText('Related dashboards')).toBeNull();
   });
 });

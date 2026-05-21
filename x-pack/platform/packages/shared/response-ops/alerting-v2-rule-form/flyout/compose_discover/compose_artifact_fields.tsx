@@ -5,17 +5,21 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DASHBOARD_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { useDebounceFn } from '@kbn/react-hooks';
 import { useController, useFormContext } from 'react-hook-form';
 import { useRuleFormServices } from '../../form/contexts';
 import type { ComposeFormValues } from './compose_form_types';
 import { getDashboardsById, searchRelatedDashboard } from './search_related_dashboards';
+
+const SEARCH_DEBOUNCE_MS = 300;
+const SEARCH_DEBOUNCE_OPTIONS = { wait: SEARCH_DEBOUNCE_MS };
 
 const RelatedDashboardsSelector = ({
   uiActions,
@@ -35,12 +39,17 @@ const RelatedDashboardsSelector = ({
     Array<EuiComboBoxOptionOption<string>>
   >([]);
   const [isLoading, setIsLoading] = useState(false);
+  const hasLoadedDashboardOptions = useRef(false);
 
   useEffect(() => {
     let ignore = false;
     const loadSelectedDashboards = async () => {
       try {
         const dashboardIds = dashboardsFormData.map((dashboard) => dashboard.id);
+        if (!dashboardIds.length) {
+          return;
+        }
+
         const dashboards = await getDashboardsById(uiActions, dashboardIds);
         if (ignore) {
           return;
@@ -85,6 +94,16 @@ const RelatedDashboardsSelector = ({
     },
     [uiActions]
   );
+  const { run: debouncedLoadDashboards } = useDebounceFn(loadDashboards, SEARCH_DEBOUNCE_OPTIONS);
+
+  const handleComboBoxFocus = useCallback(() => {
+    if (hasLoadedDashboardOptions.current) {
+      return;
+    }
+
+    hasLoadedDashboardOptions.current = true;
+    loadDashboards();
+  }, [loadDashboards]);
 
   const onSelectionChange = (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
     setSelectedDashboards(selectedOptions);
@@ -101,8 +120,8 @@ const RelatedDashboardsSelector = ({
       placeholder={placeholder}
       aria-label={placeholder}
       onChange={onSelectionChange}
-      onFocus={() => loadDashboards()}
-      onSearchChange={loadDashboards}
+      onFocus={handleComboBoxFocus}
+      onSearchChange={debouncedLoadDashboards}
       data-test-subj="dashboardsSelector"
     />
   );
