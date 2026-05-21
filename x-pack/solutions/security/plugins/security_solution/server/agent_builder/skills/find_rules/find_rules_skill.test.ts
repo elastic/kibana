@@ -53,8 +53,8 @@ describe('findRulesSkill', () => {
   it('has stable metadata', () => {
     const { getStartServices, mockLogger } = createMockDeps();
     const skill = createFindRulesSkill({ getStartServices, logger: mockLogger });
-    expect(skill.id).toBe('find-rules');
-    expect(skill.name).toBe('find-rules');
+    expect(skill.id).toBe('find-security-rules');
+    expect(skill.name).toBe('find-security-rules');
     expect(skill.basePath).toBe('skills/security/rules');
     expect(skill.description).toContain('detection rules');
   });
@@ -239,12 +239,12 @@ describe('buildToolFilter', () => {
   });
 
   it('builds tags clause', () => {
-    expect(buildToolFilter({ tags: ['MITRE'] })).toContain('alert.attributes.tags:("MITRE")');
+    expect(buildToolFilter({ tags: ['MITRE'] })).toContain('alert.attributes.tags: "MITRE"');
   });
 
-  it('builds tags clause with AND for multiple values', () => {
+  it('builds tags clause with OR for multiple values', () => {
     expect(buildToolFilter({ tags: ['MITRE', 'Custom'] })).toContain(
-      'alert.attributes.tags:("MITRE" AND "Custom")'
+      '(alert.attributes.tags: "MITRE" OR alert.attributes.tags: "Custom")'
     );
   });
 
@@ -285,7 +285,7 @@ describe('buildToolFilter', () => {
 
   it('combines tags with excludeTags', () => {
     const result = buildToolFilter({ tags: ['MITRE'], excludeTags: ['Custom'] });
-    expect(result).toContain('alert.attributes.tags:("MITRE")');
+    expect(result).toContain('alert.attributes.tags: "MITRE"');
     expect(result).toContain('NOT alert.attributes.tags:("Custom")');
   });
 });

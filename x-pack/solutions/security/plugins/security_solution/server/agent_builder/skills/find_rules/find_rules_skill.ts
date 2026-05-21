@@ -22,10 +22,10 @@ interface FindRulesSkillDeps {
 export const createFindRulesSkill = ({
   getStartServices,
   logger,
-}: FindRulesSkillDeps): SkillDefinition<'find-rules', 'skills/security/rules'> =>
+}: FindRulesSkillDeps): SkillDefinition<'find-security-rules', 'skills/security/rules'> =>
   defineSkillType({
-    id: 'find-rules',
-    name: 'find-rules',
+    id: 'find-security-rules',
+    name: 'find-security-rules',
     basePath: 'skills/security/rules',
     description:
       'Discover, list, rank, and count Security detection rules. ' +

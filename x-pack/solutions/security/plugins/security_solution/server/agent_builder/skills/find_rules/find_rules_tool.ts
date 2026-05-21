@@ -22,6 +22,7 @@ import {
   PARAMS_RULE_ID_FIELD,
   PARAMS_SEVERITY_FIELD,
   RULE_PARAMS_FIELDS,
+  TAGS_FIELD,
 } from '../../../../common/detection_engine/rule_management/rule_fields';
 import { findRules } from '../../../lib/detection_engine/rule_management/logic/search/find_rules';
 import type { SecuritySolutionPluginStartDependencies } from '../../../plugin_contract';
@@ -95,8 +96,9 @@ export const findRulesSchema = z
 // ---- Filter building ----
 //
 // Delegates to convertRulesFilterToKQL() for parameters it supports
-// (nameContains, enabled, ruleSource, tags, ruleType), and appends extra KQL
-// for parameters it doesn't (severity, mitreTechnique, ruleId, excludeTags).
+// (nameContains, enabled, ruleSource, ruleType), and appends extra KQL
+// for parameters it doesn't (severity, tags, mitreTechnique, ruleId, excludeTags).
+// Tags are handled here (OR) instead of by convertRulesFilterToKQL (AND).
 
 interface FilterInput {
   nameContains?: string;
@@ -116,11 +118,15 @@ export function buildToolFilter(params: FilterInput): string | undefined {
     enabled: params.enabled,
     showCustomRules: params.ruleSource === 'custom',
     showElasticRules: params.ruleSource === 'prebuilt',
-    tags: params.tags,
     includeRuleTypes: params.ruleType,
   });
 
   const extra: string[] = [];
+
+  if (params.tags?.length) {
+    const parts = params.tags.map((t) => `${TAGS_FIELD}: ${prepareKQLStringParam(t)}`);
+    extra.push(parts.length === 1 ? parts[0] : `(${parts.join(' OR ')})`);
+  }
 
   if (params.severity?.length) {
     const parts = params.severity.map(

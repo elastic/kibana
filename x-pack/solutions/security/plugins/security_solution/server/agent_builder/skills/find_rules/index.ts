@@ -6,5 +6,5 @@
  */
 
 export { createFindRulesSkill } from './find_rules_skill';
-export { buildFullFilter, FIND_RULES_INLINE_TOOL_ID } from './find_rules_tool';
+export { buildToolFilter, FIND_RULES_INLINE_TOOL_ID } from './find_rules_tool';
 export { DISCOVER_RULE_TAGS_INLINE_TOOL_ID } from './discover_rule_tags_tool';
