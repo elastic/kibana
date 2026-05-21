@@ -13,6 +13,7 @@ import {
   EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormLabel,
   EuiSplitPanel,
   EuiSpacer,
   EuiText,
@@ -68,13 +69,11 @@ export const RunbookArtifactField: React.FC = () => {
 
   return (
     <>
-      <EuiText size="s">
-        <strong>
-          {i18n.translate('xpack.alertingV2.ruleForm.runbookGroupTitle', {
-            defaultMessage: 'Runbook',
-          })}
-        </strong>
-      </EuiText>
+      <EuiFormLabel>
+        {i18n.translate('xpack.alertingV2.ruleForm.runbookGroupTitle', {
+          defaultMessage: 'Runbook',
+        })}
+      </EuiFormLabel>
       <EuiSpacer size="xs" />
       {!hasRunbook ? (
         <EuiButton

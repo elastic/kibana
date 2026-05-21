@@ -5,16 +5,108 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiFormRow, EuiText } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DASHBOARD_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
-import { DashboardsSelector } from '@kbn/dashboards-selector';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { useController, useFormContext } from 'react-hook-form';
 import { useRuleFormServices } from '../../form/contexts';
 import type { ComposeFormValues } from './compose_form_types';
+import { getDashboardsById, searchRelatedDashboard } from './search_related_dashboards';
+
+const RelatedDashboardsSelector = ({
+  uiActions,
+  dashboardsFormData,
+  onChange,
+  placeholder,
+}: {
+  uiActions: UiActionsStart;
+  dashboardsFormData: Array<{ id: string }>;
+  onChange: (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => void;
+  placeholder: string;
+}) => {
+  const [dashboardOptions, setDashboardOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
+    []
+  );
+  const [selectedDashboards, setSelectedDashboards] = useState<
+    Array<EuiComboBoxOptionOption<string>>
+  >([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    let ignore = false;
+    const loadSelectedDashboards = async () => {
+      try {
+        const dashboardIds = dashboardsFormData.map((dashboard) => dashboard.id);
+        const dashboards = await getDashboardsById(uiActions, dashboardIds);
+        if (ignore) {
+          return;
+        }
+
+        const selectedOptions = dashboards.map((dashboard) => ({
+          label: dashboard.title,
+          value: dashboard.id,
+        }));
+        setSelectedDashboards(selectedOptions);
+
+        if (selectedOptions.length !== dashboardsFormData.length) {
+          onChange(selectedOptions);
+        }
+      } catch {
+        if (!ignore) {
+          setSelectedDashboards([]);
+          onChange([]);
+        }
+      }
+    };
+
+    loadSelectedDashboards();
+    return () => {
+      ignore = true;
+    };
+  }, [dashboardsFormData, onChange, uiActions]);
+
+  const loadDashboards = useCallback(
+    async (search?: string) => {
+      setIsLoading(true);
+      try {
+        const dashboards = await searchRelatedDashboard(uiActions, { search: search?.trim() });
+        setDashboardOptions(
+          dashboards.map((dashboard) => ({ label: dashboard.title, value: dashboard.id }))
+        );
+      } catch {
+        setDashboardOptions([]);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [uiActions]
+  );
+
+  const onSelectionChange = (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
+    setSelectedDashboards(selectedOptions);
+    onChange(selectedOptions);
+  };
+
+  return (
+    <EuiComboBox
+      async
+      fullWidth
+      isLoading={isLoading}
+      options={dashboardOptions}
+      selectedOptions={selectedDashboards}
+      placeholder={placeholder}
+      aria-label={placeholder}
+      onChange={onSelectionChange}
+      onFocus={() => loadDashboards()}
+      onSearchChange={loadDashboards}
+      data-test-subj="dashboardsSelector"
+    />
+  );
+};
 
 export const ComposeRelatedDashboardsField: React.FC = () => {
   const { control } = useFormContext<ComposeFormValues>();
@@ -88,7 +180,7 @@ export const ComposeRelatedDashboardsField: React.FC = () => {
         </EuiText>
       }
     >
-      <DashboardsSelector
+      <RelatedDashboardsSelector
         uiActions={uiActions}
         dashboardsFormData={dashboardsFormData}
         onChange={updateDashboardArtifacts}

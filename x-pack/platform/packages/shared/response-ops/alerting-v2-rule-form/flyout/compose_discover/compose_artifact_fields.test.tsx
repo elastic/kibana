@@ -6,47 +6,17 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { FormProvider, useForm, useFormContext } from 'react-hook-form';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { QueryClientProvider } from '@kbn/react-query';
 import { DASHBOARD_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { createTestQueryClient, createMockServices } from '../../test_utils';
-import { RuleFormProvider } from '../../form/contexts';
+import { RuleFormProvider, type RuleFormServices } from '../../form/contexts';
 import type { ComposeFormValues } from './compose_form_types';
 import { ComposeRelatedDashboardsField } from './compose_artifact_fields';
-
-jest.mock('@kbn/dashboards-selector', () => ({
-  DashboardsSelector: ({
-    dashboardsFormData,
-    onChange,
-    placeholder,
-  }: {
-    dashboardsFormData: Array<{ id: string }>;
-    onChange: (selected: Array<{ value: string; label: string }>) => void;
-    placeholder?: string;
-  }) => (
-    <div>
-      <input
-        data-test-subj="dashboardsSelector"
-        placeholder={placeholder}
-        readOnly
-        value={dashboardsFormData.map((dashboard) => dashboard.id).join(',')}
-      />
-      <button
-        type="button"
-        data-test-subj="selectDashboard"
-        onClick={() => onChange([{ value: 'dashboard-123', label: 'Dashboard 123' }])}
-      >
-        Select dashboard
-      </button>
-      <button type="button" data-test-subj="clearDashboard" onClick={() => onChange([])}>
-        Clear dashboard
-      </button>
-    </div>
-  ),
-}));
 
 const BASE_COMPOSE_VALUES: ComposeFormValues = {
   kind: 'alert',
@@ -59,14 +29,55 @@ const BASE_COMPOSE_VALUES: ComposeFormValues = {
   artifacts: [],
 };
 
+const DASHBOARD_ID = 'dashboard-123';
+const DASHBOARD_TITLE = 'Dashboard 123';
+
+interface Dashboard {
+  id: string;
+  title: string;
+}
+
+interface SearchDashboardsContext {
+  onResults: (dashboards: Dashboard[]) => void;
+}
+
+interface GetDashboardsByIdContext {
+  ids: string[];
+  onResults: (dashboards: Dashboard[]) => void;
+}
+
+const mockSearchExecute = jest.fn((context: SearchDashboardsContext) => {
+  context.onResults([{ id: DASHBOARD_ID, title: DASHBOARD_TITLE }]);
+});
+
+const mockGetByIdExecute = jest.fn((context: GetDashboardsByIdContext) => {
+  context.onResults(
+    context.ids
+      .map((id) => (id === DASHBOARD_ID ? { id: DASHBOARD_ID, title: DASHBOARD_TITLE } : null))
+      .filter((dashboard): dashboard is Dashboard => Boolean(dashboard))
+  );
+});
+
+const mockUiActions = {
+  getAction: jest.fn((actionId: string) => {
+    if (actionId === 'getDashboardsByIdsAction') {
+      return Promise.resolve({ execute: mockGetByIdExecute });
+    }
+
+    return Promise.resolve({ execute: mockSearchExecute });
+  }),
+} as unknown as UiActionsStart;
+
 const ArtifactValueSpy = () => {
   const { watch } = useFormContext<ComposeFormValues>();
   return <div data-test-subj="artifactValueSpy">{JSON.stringify(watch('artifacts') ?? [])}</div>;
 };
 
-const createComposeFormWrapper = (defaultValues: ComposeFormValues = BASE_COMPOSE_VALUES) => {
+const createComposeFormWrapper = (
+  defaultValues: ComposeFormValues = BASE_COMPOSE_VALUES,
+  services: RuleFormServices = { ...createMockServices(), uiActions: mockUiActions }
+) => {
   const queryClient = createTestQueryClient();
-  const services = createMockServices();
 
   return ({ children }: { children: React.ReactNode }) => {
     const form = useForm<ComposeFormValues>({ defaultValues });
@@ -85,19 +96,20 @@ const createComposeFormWrapper = (defaultValues: ComposeFormValues = BASE_COMPOS
 };
 
 describe('ComposeRelatedDashboardsField', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('renders the related dashboards selector', () => {
     render(<ComposeRelatedDashboardsField />, { wrapper: createComposeFormWrapper() });
 
     expect(screen.getByText('Related dashboards')).toBeInTheDocument();
-    expect(screen.getByTestId('dashboardsSelector')).toHaveAttribute(
-      'placeholder',
-      'Link related dashboards for investigation'
-    );
+    expect(
+      screen.getByPlaceholderText('Link related dashboards for investigation')
+    ).toBeInTheDocument();
   });
 
   it('writes selected dashboards to artifacts', async () => {
-    const user = userEvent.setup();
-
     render(
       <>
         <ComposeRelatedDashboardsField />
@@ -106,15 +118,20 @@ describe('ComposeRelatedDashboardsField', () => {
       { wrapper: createComposeFormWrapper() }
     );
 
-    await user.click(screen.getByTestId('selectDashboard'));
+    const searchInput = screen.getByPlaceholderText('Link related dashboards for investigation');
+    fireEvent.focus(searchInput);
+
+    await waitFor(() => {
+      expect(screen.getByText(DASHBOARD_TITLE)).toBeInTheDocument();
+    });
+
+    await userEvent.click(screen.getByText(DASHBOARD_TITLE));
 
     expect(screen.getByTestId('artifactValueSpy')).toHaveTextContent(DASHBOARD_ARTIFACT_TYPE);
-    expect(screen.getByTestId('artifactValueSpy')).toHaveTextContent('dashboard-123');
+    expect(screen.getByTestId('artifactValueSpy')).toHaveTextContent(DASHBOARD_ID);
   });
 
   it('removes dashboard artifacts when the selection is cleared', async () => {
-    const user = userEvent.setup();
-
     render(
       <>
         <ComposeRelatedDashboardsField />
@@ -123,15 +140,31 @@ describe('ComposeRelatedDashboardsField', () => {
       {
         wrapper: createComposeFormWrapper({
           ...BASE_COMPOSE_VALUES,
-          artifacts: [
-            { id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, value: 'dashboard-123' },
-          ],
+          artifacts: [{ id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, value: DASHBOARD_ID }],
         }),
       }
     );
 
-    await user.click(screen.getByTestId('clearDashboard'));
+    await waitFor(() => {
+      expect(screen.getByText(DASHBOARD_TITLE)).toBeInTheDocument();
+    });
 
-    expect(screen.getByTestId('artifactValueSpy')).toHaveTextContent('[]');
+    const selectedOption = screen.getByText(DASHBOARD_TITLE);
+    await userEvent.type(selectedOption, '{backspace}');
+
+    await waitFor(() => {
+      expect(screen.getByTestId('artifactValueSpy')).toHaveTextContent('[]');
+    });
+  });
+
+  it('does not render when uiActions is unavailable', () => {
+    render(<ComposeRelatedDashboardsField />, {
+      wrapper: createComposeFormWrapper(BASE_COMPOSE_VALUES, {
+        ...createMockServices(),
+        uiActions: undefined,
+      }),
+    });
+
+    expect(screen.queryByText('Related dashboards')).not.toBeInTheDocument();
   });
 });
