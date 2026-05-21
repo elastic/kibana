@@ -8,44 +8,18 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FILTER_CELL_ACTION_TYPE } from '@kbn/cell-actions/constants';
-import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import type { EuiContextMenuPanelDescriptor, UseEuiTheme } from '@elastic/eui';
 import { EuiIcon, EuiPopover, EuiContextMenu, useEuiTheme } from '@elastic/eui';
 import { useLegendAction } from '@elastic/charts';
+import { css } from '@emotion/react';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { CellValueAction } from '../types';
 
 const hasFilterCellAction = (actions: CellValueAction[]) => {
   return actions.some(({ type }) => type === FILTER_CELL_ACTION_TYPE);
 };
-
-export type LegendCellValueActions = Array<
-  Omit<CellValueAction, 'execute'> & { execute: () => void }
->;
-
-export interface LegendActionPopoverProps {
-  /**
-   * Determines the panels label
-   */
-  label: string;
-  /**
-   * Callback on filter value
-   */
-  onFilter: (param?: { negate?: boolean }) => void;
-  /**
-   * Compatible actions to be added to the popover actions
-   */
-  legendCellValueActions?: LegendCellValueActions;
-  /**
-   * When true, built-in Filter for / Filter out items are shown disabled.
-   */
-  isComputedColumn?: boolean;
-  /**
-   * When true, the disabled filter message also mentions that drill downs are unavailable.
-   */
-  panelHasConfiguredDrilldowns?: boolean;
-}
 
 const getEsqlComputedColumnFilterDisabledMessage = (
   panelHasConfiguredDrilldowns: boolean = false
@@ -61,26 +35,42 @@ const getEsqlComputedColumnFilterDisabledMessage = (
       });
 };
 
-const LegendFilterDisabledMessage = ({ message }: { message: string }) => {
-  const { euiTheme } = useEuiTheme();
+const legendActionPopoverStyles = {
+  message: ({ euiTheme }: UseEuiTheme) =>
+    css`
+      padding: ${euiTheme.size.s};
+      color: ${euiTheme.colors.textSubdued};
+      border-block-start: ${euiTheme.border.thin};
+      margin-block: ${euiTheme.size.s} -${euiTheme.size.s};
+      margin-inline: -${euiTheme.size.s};
+    `,
+};
 
+const LegendFilterDisabledMessage = ({ message }: { message: string }) => {
+  const styles = useMemoCss(legendActionPopoverStyles);
   return (
-    <div
-      css={css`
-        padding: ${euiTheme.size.s};
-        color: ${euiTheme.colors.textSubdued};
-        border-block-start: ${euiTheme.border.thin};
-        margin-block: ${euiTheme.size.s} -${euiTheme.size.s};
-        margin-inline: -${euiTheme.size.s};
-      `}
-      data-test-subj="legendFilterDisabledMessage"
-    >
+    <div css={styles.message} data-test-subj="legendFilterDisabledMessage">
       {message}
     </div>
   );
 };
 
-export const LegendActionPopover: React.FunctionComponent<LegendActionPopoverProps> = ({
+export type LegendCellValueActions = Array<
+  Omit<CellValueAction, 'execute'> & { execute: () => void; disabled?: boolean }
+>;
+
+export const LegendActionPopover: React.FunctionComponent<{
+  /** Determines the panels label. */
+  label: string;
+  /** Callback on filter value. */
+  onFilter: (param?: { negate?: boolean }) => void;
+  /** Compatible actions to be added to the popover actions. */
+  legendCellValueActions?: LegendCellValueActions;
+  /** When true, built-in Filter for / Filter out items are shown disabled. */
+  isComputedColumn?: boolean;
+  /** When true, the disabled filter message also mentions that drill downs are unavailable. */
+  panelHasConfiguredDrilldowns?: boolean;
+}> = ({
   label,
   onFilter,
   legendCellValueActions = [],
@@ -91,13 +81,12 @@ export const LegendActionPopover: React.FunctionComponent<LegendActionPopoverPro
   const [ref, onClose] = useLegendAction<HTMLDivElement>();
 
   const panels: EuiContextMenuPanelDescriptor[] = useMemo(() => {
-    const defaultFilterActions = [
+    const defaultFilterActions: LegendCellValueActions = [
       {
         id: 'filterIn',
         displayName: i18n.translate('expressionXY.legend.filterForValueButtonAriaLabel', {
           defaultMessage: 'Filter for',
         }),
-        'data-test-subj': `legend-${label}-filterIn`,
         iconType: 'plusCircle',
         execute: () => {
           setPopoverOpen(false);
@@ -109,7 +98,6 @@ export const LegendActionPopover: React.FunctionComponent<LegendActionPopoverPro
         displayName: i18n.translate('expressionXY.legend.filterOutValueButtonAriaLabel', {
           defaultMessage: 'Filter out',
         }),
-        'data-test-subj': `legend-${label}-filterOut`,
         iconType: 'minusCircle',
         execute: () => {
           setPopoverOpen(false);
@@ -118,44 +106,38 @@ export const LegendActionPopover: React.FunctionComponent<LegendActionPopoverPro
       },
     ];
 
-    const filterActionsDisabledMessage = isComputedColumn
-      ? getEsqlComputedColumnFilterDisabledMessage(panelHasConfiguredDrilldowns)
-      : undefined;
-
-    const defaultFilterPanelItems = !hasFilterCellAction(legendCellValueActions)
-      ? defaultFilterActions.map((action) => ({
-          name: action.displayName,
-          'data-test-subj': `legend-${label}-${action.id}`,
-          icon: <EuiIcon type={action.iconType} size="m" aria-hidden={true} />,
-          disabled: isComputedColumn,
-          onClick: () => {
-            if (isComputedColumn) {
-              return;
-            }
-            action.execute();
-            setPopoverOpen(false);
-          },
-        }))
-      : [];
+    const allActions = [
+      ...(!hasFilterCellAction(legendCellValueActions)
+        ? isComputedColumn
+          ? defaultFilterActions.map((action) => ({
+              ...action,
+              disabled: true,
+              execute: () => {},
+            }))
+          : defaultFilterActions
+        : []),
+      ...legendCellValueActions,
+    ];
 
     const filterDisabledMessageItem =
-      filterActionsDisabledMessage && defaultFilterPanelItems.length > 0
+      !hasFilterCellAction(legendCellValueActions) && isComputedColumn
         ? [
             {
               renderItem: () => (
                 <LegendFilterDisabledMessage
                   key="legend-filter-disabled-message"
-                  message={filterActionsDisabledMessage}
+                  message={getEsqlComputedColumnFilterDisabledMessage(panelHasConfiguredDrilldowns)}
                 />
               ),
             },
           ]
         : [];
 
-    const legendCellValueActionPanelItems = legendCellValueActions.map((action) => ({
+    const legendCellValueActionPanelItems = allActions.map((action) => ({
       name: action.displayName,
       'data-test-subj': `legend-${label}-${action.id}`,
       icon: <EuiIcon type={action.iconType} size="m" aria-hidden={true} />,
+      disabled: action.disabled ?? false,
       onClick: () => {
         action.execute();
         setPopoverOpen(false);
@@ -166,11 +148,7 @@ export const LegendActionPopover: React.FunctionComponent<LegendActionPopoverPro
       {
         id: 'main',
         title: label,
-        items: [
-          ...defaultFilterPanelItems,
-          ...filterDisabledMessageItem,
-          ...legendCellValueActionPanelItems,
-        ],
+        items: [...legendCellValueActionPanelItems, ...filterDisabledMessageItem],
       },
     ];
   }, [label, legendCellValueActions, onFilter, isComputedColumn, panelHasConfiguredDrilldowns]);
