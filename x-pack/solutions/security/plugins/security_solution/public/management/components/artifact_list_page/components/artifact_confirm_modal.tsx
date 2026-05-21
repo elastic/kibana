@@ -50,13 +50,22 @@ export const CONFIRM_WARNING_MODAL_LABELS = (
         ]
       : []),
 
-    ...(warnings.hasMalformedMatchesValue ?? []).map((field) =>
-      i18n.translate('xpack.securitySolution.artifacts.confirmWarningModal.malformedMatchesValue', {
-        defaultMessage:
-          'Entry on field "{field}" uses the "{matches}" operator with an escape sequence (e.g. "\\*", "\\?"). These match literal characters, not wildcard patterns. If you intended an exact match, use "{is}" instead.',
-        values: { field, matches: matchesOperator.message, is: isOperator.message },
-      })
-    ),
+    ...((warnings.hasMalformedMatchesValue ?? []).length > 0
+      ? [
+          i18n.translate(
+            'xpack.securitySolution.artifacts.confirmWarningModal.malformedMatchesValue',
+            {
+              defaultMessage:
+                'The following fields use the "{matches}" operator with an escape sequence (e.g. "\\*", "\\?"): {fields}. These match literal characters, not wildcard patterns. If you intended an exact match, use "{is}" instead.',
+              values: {
+                matches: matchesOperator.message,
+                is: isOperator.message,
+                fields: (warnings.hasMalformedMatchesValue ?? []).join(', '),
+              },
+            }
+          ),
+        ]
+      : []),
 
     ...(warnings.hasUnnecessaryEscaping
       ? [
