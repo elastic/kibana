@@ -9,11 +9,7 @@ import React, { useMemo } from 'react';
 
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import {
-  useOptionalExecutionTracker,
-  useWorkflowsCapabilities,
-  useWorkflowsUIEnabledSetting,
-} from '@kbn/workflows-ui';
+import { useWorkflowsCapabilities, useWorkflowsUIEnabledSetting } from '@kbn/workflows-ui';
 import type { AlertTableContextMenuItem } from '../types';
 import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';
 import * as i18n from '../translations';
@@ -42,24 +38,6 @@ export const AlertWorkflowsPanel = ({ alertIds, onClose, onExecute }: AlertWorkf
     [alertIds]
   );
 
-  const executionTracker = useOptionalExecutionTracker();
-
-  const onSuccess = (executionId: string, workflowId: string, workflowName?: string) => {
-    executionTracker?.trackExecutions([
-      {
-        id: executionId,
-        workflowId,
-        workflowName,
-        inputSummary: [
-          {
-            label: i18n.ALERTS_COUNT_LABEL,
-            value: String(alertIds.length),
-          },
-        ],
-      },
-    ]);
-  };
-
   return (
     <RunWorkflowPanel
       inputs={inputs}
@@ -67,7 +45,6 @@ export const AlertWorkflowsPanel = ({ alertIds, onClose, onExecute }: AlertWorkf
       executeButtonTestSubj="execute-alert-workflow-button"
       onClose={onClose}
       onExecute={onExecute}
-      onSuccess={onSuccess}
     />
   );
 };
