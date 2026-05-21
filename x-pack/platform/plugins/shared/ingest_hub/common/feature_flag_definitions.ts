@@ -11,12 +11,17 @@ export const ONBOARDING_FEATURE_FLAG_DEFINITIONS = [
   {
     key: INGEST_HUB_ONBOARDING_ENABLED_FLAG,
     name: 'Onboarding',
-    description: 'Enables onboarding API routes in the Ingest Hub plugin',
+    description: 'Enables the onboarding app and routes in the Ingest Hub plugin',
     tags: ['ingest-hub', 'onboarding'],
     variationType: 'boolean' as const,
     variations: [
-      { name: 'Enabled', description: 'Onboarding routes are active', value: true },
-      { name: 'Disabled', description: 'Onboarding routes return 404', value: false },
+      { name: 'Enabled', description: 'The onboarding app and routes are available', value: true },
+      {
+        name: 'Disabled',
+        description:
+          'The onboarding app and routes are unavailable and users are redirected to Discover',
+        value: false,
+      },
     ],
   },
 ];
