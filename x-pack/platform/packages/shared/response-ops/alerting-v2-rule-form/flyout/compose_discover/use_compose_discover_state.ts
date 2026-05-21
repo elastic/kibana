@@ -121,7 +121,6 @@ export function reducer(
     case 'COMMIT_QUERY':
       return {
         ...state,
-        childOpen: state.yamlMode ? state.childOpen : false,
         queryCommitted: true,
       };
     case 'INVALIDATE_QUERY':

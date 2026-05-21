@@ -85,12 +85,12 @@ describe('reducer', () => {
   });
 
   describe('COMMIT_QUERY', () => {
-    it('marks queryCommitted and closes child (non-yaml mode)', () => {
+    it('marks queryCommitted and preserves childOpen', () => {
       const state = createState({ queryCommitted: false, childOpen: true, yamlMode: false });
       const next = reducer(state, { type: 'COMMIT_QUERY' });
 
       expect(next.queryCommitted).toBe(true);
-      expect(next.childOpen).toBe(false);
+      expect(next.childOpen).toBe(true);
     });
 
     it('keeps childOpen when in yaml mode', () => {

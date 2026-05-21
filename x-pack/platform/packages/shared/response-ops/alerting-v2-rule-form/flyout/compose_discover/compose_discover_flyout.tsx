@@ -334,9 +334,12 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
 
   useEffect(() => {
     if (!isBuilderMode) return;
-    setSandboxQuery(methods.getValues('query'));
-    setSandboxTimeField(methods.getValues('timeField'));
-  }, [isBuilderMode, builderState, methods]);
+    const sub = methods.watch((values) => {
+      if (values.query) setSandboxQuery(values.query as RuleQuery);
+      if (values.timeField) setSandboxTimeField(values.timeField);
+    });
+    return () => sub.unsubscribe();
+  }, [isBuilderMode, methods]);
 
   const handleRecoveryTypeChange = useCallback(
     (type: RecoveryType) => {
@@ -442,6 +445,9 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
       setYamlText(serializeFormToYaml(composeFormValuesForYamlSerialize(current)));
     }
     dispatch({ type: 'COMMIT_QUERY' });
+    if (!uiState.yamlMode) {
+      dispatch({ type: 'CLOSE_CHILD' });
+    }
   }, [sandboxQuery, sandboxTimeField, uiState.yamlMode, methods, dispatch]);
 
   const handleSubmit = methods.handleSubmit((values) => {
@@ -488,8 +494,6 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
       ? uiState.recoveryType === 'custom'
         ? ['base', 'alert', 'recovery']
         : ['base', 'alert']
-      : isBuilderMode
-      ? undefined
       : getSandboxTabs(isAlert, uiState);
 
   return (
