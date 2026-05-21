@@ -586,7 +586,7 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Fixes the email connector to reject malformed email addresses (for example, addresses with leading or trailing hyphens in the local part or domain labels) that mail servers would reject, preventing unnecessary SMTP connection attempts. Existing connectors saved with invalid addresses will fail validation after upgrade and must be updated [#268496]({{kib-pull}}268496).
 
 **Dashboards and Visualizations**:
-* Fixes a regression where the dashboard remained locked in an open-flyout state after closing the {{esql}} control edit flyout when editing an existing query-based control [#267605]({{kib-pull}}267605).
+* Fixes a regression where the dashboard remained locked in an open-flyout state after closing the control edit flyout when editing an existing query-based variable control [#267605]({{kib-pull}}267605).
 
 **Data ingestion and Fleet**:
 * Fixes agent policy background tasks failing with a `parse_exception` by sorting agent policies on `updated_at` instead of the non-existent `created_at` field [#267285]({{kib-pull}}267285).
