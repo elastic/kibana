@@ -98,10 +98,16 @@ export interface FieldDefinition<
    */
   solutionViews?: UiSettingsSolutions;
   /**
-   * Technical preview information for the field
+   * Technical preview information for the field.
+   * Mutually exclusive with {@link FieldDefinition.experimental}.
    * @see {@link TechnicalPreviewSettings}
    */
   technicalPreview?: TechnicalPreviewSettings;
+  /**
+   * Experimental information for the field. Supports the same options as {@link TechnicalPreviewSettings}.
+   * Mutually exclusive with {@link FieldDefinition.technicalPreview}.
+   */
+  experimental?: TechnicalPreviewSettings;
 }
 
 /**

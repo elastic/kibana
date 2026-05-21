@@ -109,6 +109,7 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
                   </p>
                 </React.Fragment>,
                 "displayName": "Share usage with Elastic",
+                "experimental": undefined,
                 "groupId": "Share usage with Elastic-group",
                 "id": "Usage collection",
                 "isCustom": true,
