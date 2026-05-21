@@ -157,7 +157,11 @@ describe('registerTranslationsRoute', () => {
       const { body } = (res.ok as jest.Mock).mock.calls[0][0];
       expect(body).toBeInstanceOf(PassThrough);
       const content = await collectStream(body);
-      expect(JSON.parse(content)).toEqual({ locale: 'fr-FR', formats: {}, messages: { key: 'valeur' } });
+      expect(JSON.parse(content)).toEqual({
+        locale: 'fr-FR',
+        formats: {},
+        messages: { key: 'valeur' },
+      });
     });
 
     test('locale lookup is case-insensitive', async () => {
