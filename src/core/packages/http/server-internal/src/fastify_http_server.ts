@@ -73,6 +73,7 @@ import { StaticAssets } from './static_assets';
 import {
   FastifyResponseAdapter,
   flushPendingCookieWrites,
+  stripCharsetFromNdjsonContentTypeHeader,
   syncNodeResponseHeadersToFastifyReply,
 } from './fastify/fastify_response_adapter';
 import {
@@ -457,6 +458,7 @@ export class FastifyHttpServer {
     this.fastify.addHook('onSend', async (req, reply, payload) => {
       await flushPendingCookieWrites(req);
       syncNodeResponseHeadersToFastifyReply(reply);
+      stripCharsetFromNdjsonContentTypeHeader(reply);
       return payload;
     });
 

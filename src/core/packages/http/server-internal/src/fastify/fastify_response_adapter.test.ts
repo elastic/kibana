@@ -15,7 +15,7 @@ import type { IncomingMessage } from 'http';
 import { KibanaResponse } from '@kbn/core-http-router-server-internal';
 import {
   FastifyResponseAdapter,
-  coercePayloadToPreserveExplicitJsonLikeContentType,
+  stripCharsetFromNdjsonContentTypeHeader,
   syncNodeResponseHeadersToFastifyReply,
 } from './fastify_response_adapter';
 
@@ -127,6 +127,11 @@ describe('FastifyResponseAdapter', () => {
     const fastify = Fastify();
     const adapter = new FastifyResponseAdapter();
 
+    fastify.addHook('onSend', async (_req, reply, payload) => {
+      stripCharsetFromNdjsonContentTypeHeader(reply);
+      return payload;
+    });
+
     fastify.get('/export', async (_req, reply) => {
       await adapter.handle(
         new KibanaResponse(200, '{"rule_id":"rule-1"}\n', {
@@ -144,14 +149,18 @@ describe('FastifyResponseAdapter', () => {
     await fastify.close();
   });
 
-  it('coercePayloadToPreserveExplicitJsonLikeContentType converts ndjson strings to Buffer', () => {
+  it('stripCharsetFromNdjsonContentTypeHeader removes Fastify charset suffix from ndjson', () => {
+    const headers = new Map<string, string>();
     const reply = {
-      getHeader: jest.fn().mockReturnValue('application/ndjson'),
+      getHeader: jest.fn((name: string) => headers.get(name.toLowerCase())),
+      header: jest.fn((name: string, value: string) => {
+        headers.set(name.toLowerCase(), value);
+      }),
     } as unknown as FastifyReply;
 
-    const result = coercePayloadToPreserveExplicitJsonLikeContentType('line\n', reply, true);
-    expect(Buffer.isBuffer(result)).toBe(true);
-    expect((result as Buffer).toString('utf8')).toBe('line\n');
+    headers.set('content-type', 'application/ndjson; charset=utf-8');
+    stripCharsetFromNdjsonContentTypeHeader(reply);
+    expect(headers.get('content-type')).toBe('application/ndjson');
   });
 
   it('appends charset=utf-8 to explicit text/csv responses (Hapi reporting parity)', async () => {

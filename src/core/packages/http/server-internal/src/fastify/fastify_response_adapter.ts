@@ -166,38 +166,31 @@ function ensureHapiCompatibleTextCharset(reply: FastifyReply): void {
   }
 }
 
+const NDJSON_CONTENT_TYPES_WITHOUT_CHARSET = new Set([
+  'application/ndjson',
+  'application/x-ndjson',
+]);
+
 /**
- * Fastify `Reply#send` treats any Content-Type containing `json` as JSON and appends
- * `; charset=utf-8` to string bodies (see `fastify/lib/reply.js`). Hapi only adds a charset
- * for `text/*` types ({@link appendUtf8CharsetToTextContentType}), so types like
- * `application/ndjson` must be sent as a `Buffer` to preserve the route's header value.
+ * Fastify `Reply#send` appends `; charset=utf-8` to string bodies when Content-Type contains
+ * `json` (see `fastify/lib/reply.js`), which breaks exact header assertions for ndjson exports.
+ * Hapi does not add that suffix. Run from an `onSend` hook after `send()` adjusts the header.
  *
  * @internal
  */
-export function coercePayloadToPreserveExplicitJsonLikeContentType(
-  payload: unknown,
-  reply: FastifyReply,
-  hasExplicitContentType: boolean
-): unknown {
-  if (typeof payload !== 'string' || !hasExplicitContentType) {
-    return payload;
-  }
+export function stripCharsetFromNdjsonContentTypeHeader(reply: FastifyReply): void {
   const raw =
     typeof reply.getHeader === 'function'
       ? reply.getHeader('content-type') ?? reply.getHeader('Content-Type')
       : undefined;
-  const contentType = (Array.isArray(raw) ? raw[0] : raw) as string | undefined;
-  if (typeof contentType !== 'string') {
-    return payload;
+  const typeStr = (Array.isArray(raw) ? raw[0] : raw) as string | undefined;
+  if (typeof typeStr !== 'string') {
+    return;
   }
-  const lower = contentType.toLowerCase();
-  if (lower.startsWith('text/') || lower.includes('charset=')) {
-    return payload;
+  const mime = typeStr.toLowerCase().split(';')[0].trim();
+  if (NDJSON_CONTENT_TYPES_WITHOUT_CHARSET.has(mime)) {
+    reply.header('content-type', mime);
   }
-  if (lower.includes('json')) {
-    return Buffer.from(payload, 'utf8');
-  }
-  return payload;
 }
 
 /**
@@ -378,14 +371,9 @@ export class FastifyResponseAdapter {
     ) {
       reply.header('content-type', 'text/html; charset=utf-8');
     }
-    const payloadToSend = coercePayloadToPreserveExplicitJsonLikeContentType(
-      payload,
-      reply,
-      hasExplicitContentType
-    );
-    this.applyHapiCompatiblePayloadHeaders(reply, payloadToSend, hasExplicitContentType);
+    this.applyHapiCompatiblePayloadHeaders(reply, payload, hasExplicitContentType);
     this.applyDefaultCacheControl(reply, kibanaResponse);
-    if (!this.ensureJsonSerializablePayload(payloadToSend)) {
+    if (!this.ensureJsonSerializablePayload(payload)) {
       // Hapi fails while serializing the response (e.g. circular JSON) without logging.
       reply.code(500);
       return reply.send({
@@ -394,7 +382,7 @@ export class FastifyResponseAdapter {
         message: INTERNAL_ERROR_MESSAGE,
       });
     }
-    return reply.send(payloadToSend);
+    return reply.send(payload);
   }
 
   private async toRedirect(
