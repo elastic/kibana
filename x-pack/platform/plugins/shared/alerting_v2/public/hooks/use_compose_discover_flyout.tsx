@@ -34,6 +34,7 @@ export const useComposeDiscoverFlyout = ({
   const [flyoutOpen, setFlyoutOpen] = useState(false);
   const [flyoutMode, setFlyoutMode] = useState<ComposeDiscoverMode>('create');
   const [targetRule, setTargetRule] = useState<RuleApiResponse | null>(null);
+  const [builderType, setBuilderType] = useState<string | null>(null);
   const historyKey = useMemo(() => Symbol('ruleAuthoring'), []);
   const createRuleMutation = useCreateRule();
   const updateRuleMutation = useUpdateRule();
@@ -45,22 +46,33 @@ export const useComposeDiscoverFlyout = ({
   const closeFlyout = useCallback(() => {
     setFlyoutOpen(false);
     setTargetRule(null);
+    setBuilderType(null);
   }, []);
 
   const openCreateFlyout = useCallback(() => {
     setTargetRule(null);
     setFlyoutMode('create');
+    setBuilderType(null);
+    setFlyoutOpen(true);
+  }, []);
+
+  const openCreateBuilderFlyout = useCallback((type: string) => {
+    setTargetRule(null);
+    setFlyoutMode('create');
+    setBuilderType(type);
     setFlyoutOpen(true);
   }, []);
 
   const openEditFlyout = useCallback((rule: RuleApiResponse) => {
     setTargetRule(rule);
     setFlyoutMode('edit');
+    setBuilderType(null);
     setFlyoutOpen(true);
   }, []);
 
   const openCloneFlyout = useCallback((rule: RuleApiResponse) => {
     setTargetRule(rule);
+    setBuilderType(null);
     setFlyoutMode('clone');
     setFlyoutOpen(true);
   }, []);
@@ -73,6 +85,7 @@ export const useComposeDiscoverFlyout = ({
       ruleId={flyoutMode === 'edit' ? targetRule?.id : undefined}
       onClose={closeFlyout}
       services={ruleFormServices}
+      builderType={builderType ?? undefined}
       onCreateRule={(payload) =>
         createRuleMutation.mutate(payload, {
           onSuccess: () => {
@@ -98,6 +111,7 @@ export const useComposeDiscoverFlyout = ({
   return {
     flyout,
     openCreateFlyout,
+    openCreateBuilderFlyout,
     openEditFlyout,
     openCloneFlyout,
   };

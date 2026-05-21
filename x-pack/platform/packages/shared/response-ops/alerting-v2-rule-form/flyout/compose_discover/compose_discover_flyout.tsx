@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FormProvider, useForm, useWatch } from 'react-hook-form';
 import {
   EuiBadge,
@@ -45,6 +45,7 @@ import { useEsqlAutocomplete } from './use_esql_providers';
 import { useSplitQueryCompletion } from './use_split_query_completion';
 import { useSandboxDraft, draftToRuleQuery } from './use_sandbox_draft';
 import { splitQuery, guessRecoveryBlock } from './use_heuristic_split';
+import { RULE_BUILDER_REGISTRY } from './rule_builder';
 
 const LazyYamlRuleForm = React.lazy(() =>
   import('../../form/yaml_rule_form').then((m) => ({ default: m.YamlRuleForm }))
@@ -139,6 +140,7 @@ export interface ComposeDiscoverFlyoutProps {
   onUpdateRule?: (id: string, payload: ReturnType<typeof composeFormToUpdateRequest>) => void;
   /** True while a create/update mutation is in flight. */
   isSaving?: boolean;
+  builderType?: string;
 }
 
 const FLYOUT_TITLE_ID = 'composeDiscoverFlyoutTitle';
@@ -221,7 +223,9 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   onCreateRule,
   onUpdateRule,
   isSaving = false,
+  builderType,
 }) => {
+  const isBuilderMode = Boolean(builderType);
   /*
    * ── UI state (step navigation, sandbox open/close, tab selection, etc.) ──
    * In edit mode, seed the sandbox draft with the rule's existing query so the
@@ -242,6 +246,22 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
 
   // Registered once here so providers persist across Sandbox open/close cycles.
   useEsqlAutocomplete(services);
+
+  const [builderState, setBuilderState] = useState<unknown>(() => {
+    if (!builderType) return undefined;
+    const definition = RULE_BUILDER_REGISTRY[builderType];
+    return definition ? definition.createDefaultState() : undefined;
+  });
+
+  const childOpenOverridden = useRef(false);
+  useEffect(() => {
+    if (isBuilderMode && !childOpenOverridden.current) {
+      childOpenOverridden.current = true;
+      if (uiState.childOpen) {
+        dispatch({ type: 'CLOSE_CHILD' });
+      }
+    }
+  }, [isBuilderMode, uiState.childOpen, dispatch]);
 
   // ── Form values (submitted to the API) ──
   const defaultValues = useMemo<ComposeFormValues>(() => {
@@ -299,6 +319,28 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
     }
   }, [isAlert, uiState.tracking, uiState.yamlMode, methods, setDraft, dispatch]);
 
+  useEffect(() => {
+    if (!isBuilderMode) return;
+    const q = methods.getValues('query');
+    if (q.format === 'composed') {
+      setDraft((d) => ({
+        ...d,
+        base: q.base,
+        breach: q.blocks.breach,
+        recover: q.blocks.recover ?? '',
+        timeField: methods.getValues('timeField'),
+      }));
+    } else {
+      setDraft((d) => ({
+        ...d,
+        base: '',
+        breach: q.breach,
+        recover: q.recover ?? '',
+        timeField: methods.getValues('timeField'),
+      }));
+    }
+  }, [isBuilderMode, builderState, methods, setDraft]);
+
   const handleRecoveryTypeChange = useCallback(
     (type: RecoveryType) => {
       if (type === 'custom') {
@@ -315,7 +357,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   const isCreate = mode === 'create' || mode === 'clone';
   const title = getFlyoutTitle(mode);
 
-  const steps = getSteps(uiState.tracking);
+  const steps = getSteps(uiState.tracking, builderType);
   const currentStep = steps[uiState.step];
   const isLastStep = uiState.step === steps.length - 1;
 
@@ -459,17 +501,19 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
                   />
                 )}
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonGroup
-                  legend={EDIT_MODE_LEGEND}
-                  options={EDIT_MODE_OPTIONS}
-                  idSelected={uiState.yamlMode ? 'yaml' : 'form'}
-                  onChange={(id) => handleToggleYamlMode(id === 'yaml')}
-                  isIconOnly
-                  buttonSize="compressed"
-                  data-test-subj="composeDiscoverEditModeToggle"
-                />
-              </EuiFlexItem>
+              {!isBuilderMode && (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonGroup
+                    legend={EDIT_MODE_LEGEND}
+                    options={EDIT_MODE_OPTIONS}
+                    idSelected={uiState.yamlMode ? 'yaml' : 'form'}
+                    onChange={(id) => handleToggleYamlMode(id === 'yaml')}
+                    isIconOnly
+                    buttonSize="compressed"
+                    data-test-subj="composeDiscoverEditModeToggle"
+                  />
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           </EuiFlyoutHeader>
 
@@ -489,6 +533,9 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
                 dispatch={dispatch}
                 services={services}
                 onRecoveryTypeChange={handleRecoveryTypeChange}
+                builderType={builderType}
+                builderState={builderState}
+                onBuilderStateChange={setBuilderState}
               />
             )}
           </EuiFlyoutBody>
@@ -539,7 +586,9 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
                       ) : (
                         <EuiToolTip
                           content={
-                            currentStep?.id === 'alertCondition' && !uiState.queryCommitted
+                            (currentStep?.id === 'alertCondition' ||
+                              currentStep?.id === 'builderCondition') &&
+                            !uiState.queryCommitted
                               ? NEXT_DISABLED_TOOLTIP
                               : undefined
                           }
@@ -550,7 +599,9 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
                             iconSide="right"
                             isDisabled={
                               uiState.childOpen ||
-                              (currentStep?.id === 'alertCondition' && !uiState.queryCommitted)
+                              ((currentStep?.id === 'alertCondition' ||
+                                currentStep?.id === 'builderCondition') &&
+                                !uiState.queryCommitted)
                             }
                             onClick={handleNext}
                             data-test-subj="composeDiscoverNext"
@@ -569,14 +620,15 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
           {uiState.childOpen && (
             <QuerySandboxFlyout
               draft={draft}
-              onDraftChange={handleDraftChange}
+              onDraftChange={isBuilderMode ? undefined : handleDraftChange}
               tabConfig={getSandboxTabConfig(uiState)}
               activeTab={uiState.activeTab}
               onTabChange={(tab) => dispatch({ type: 'SET_TAB', tab })}
               onAlertEditorMount={onAlertEditorMount}
               onRecoveryEditorMount={onRecoveryEditorMount}
               onClose={() => dispatch({ type: 'CLOSE_CHILD' })}
-              onApply={handleSandboxApply}
+              onApply={isBuilderMode ? undefined : handleSandboxApply}
+              readOnlyQueries={isBuilderMode}
             />
           )}
         </EuiFlyout>

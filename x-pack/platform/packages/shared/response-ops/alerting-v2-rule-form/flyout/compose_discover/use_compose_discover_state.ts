@@ -22,6 +22,11 @@ export const getStepIds = (tracking: boolean): StepId[] =>
     ? ['alertCondition', 'recoveryCondition', 'details', 'notifications']
     : ['alertCondition', 'details', 'notifications'];
 
+export const getBuilderStepIds = (tracking: boolean): StepId[] =>
+  tracking
+    ? ['builderCondition', 'recoveryCondition', 'details', 'notifications']
+    : ['builderCondition', 'details', 'notifications'];
+
 export interface InitialStateConfig {
   mode: ComposeDiscoverMode;
   initialKind?: RuleKind;

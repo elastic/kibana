@@ -16,7 +16,12 @@ export type RecoveryType = 'default' | 'custom' | 'none';
 
 export type QueryTab = 'base' | 'alert' | 'recovery';
 
-export type StepId = 'alertCondition' | 'recoveryCondition' | 'details' | 'notifications';
+export type StepId =
+  | 'alertCondition'
+  | 'builderCondition'
+  | 'recoveryCondition'
+  | 'details'
+  | 'notifications';
 
 /**
  * Editing buffer for the Sandbox flyout. Lives in the parent hook (`useSandboxDraft`),
@@ -39,6 +44,8 @@ export interface StepRenderProps {
   services: RuleFormServices;
   /** Called when the user changes the recovery type selector. */
   onRecoveryTypeChange: (type: RecoveryType) => void;
+  builderState?: unknown;
+  onBuilderStateChange?: (state: unknown) => void;
 }
 
 export interface StepDefinition {
