@@ -23,4 +23,5 @@ export * from './tags';
 export * from './health_check';
 export * from './message_signing_service';
 export * from './standalone_agent_api_key';
+export * from './managed_otlp_api_key';
 export * from './remote_synced_integrations';

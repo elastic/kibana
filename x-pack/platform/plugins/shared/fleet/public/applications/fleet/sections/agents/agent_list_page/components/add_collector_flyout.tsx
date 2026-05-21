@@ -30,6 +30,7 @@ import {
   EuiFormRow,
   EuiFieldText,
   EuiTextArea,
+  EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -47,6 +48,8 @@ import {
 } from '../../../../hooks';
 import { AgentEnrollmentConfirmationStep, usePollingAgentCount } from '../../../../components';
 import { useGetCreateApiKey } from '../../../../../../components/agent_enrollment_flyout/hooks';
+
+import { useManagedOtlp } from './use_managed_otlp';
 
 interface AddCollectorFlyoutProps {
   onClose: () => void;
@@ -145,9 +148,21 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
 
   const {
     apiKeyEncoded: esApiKeyEncoded,
-    isLoading: isCreatingApiKey,
-    onCreateApiKey,
+    isLoading: isCreatingEsApiKey,
+    onCreateApiKey: onCreateEsApiKey,
   } = useGetCreateApiKey();
+
+  const {
+    available: motlpAvailable,
+    endpoint: motlpEndpoint,
+    apiKeyEncoded: motlpApiKeyEncoded,
+    isCreatingApiKey: isCreatingMotlpApiKey,
+    onCreateApiKey: onCreateMotlpApiKey,
+  } = useManagedOtlp();
+
+  const apiKeyEncoded = motlpAvailable ? motlpApiKeyEncoded : esApiKeyEncoded;
+  const isCreatingApiKey = motlpAvailable ? isCreatingMotlpApiKey : isCreatingEsApiKey;
+  const onCreateApiKey = motlpAvailable ? onCreateMotlpApiKey : onCreateEsApiKey;
 
   const fleetServerHosts = useGetFleetServerHosts();
   const defaultFleetServerHost =
@@ -265,24 +280,43 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
           },
         },
       },
-      exporters: {
-        'elasticsearch/otel': {
-          endpoints: [defaultEsHost],
-          api_key: esApiKeyEncoded ? esApiKeyEncoded : '${API_KEY}',
-          mapping: { mode: 'otel' },
-        },
-        otlp: {
-          endpoint: 'http://localhost:4317',
-          tls: { insecure: true },
-        },
-      },
+      exporters: motlpAvailable
+        ? {
+            'otlp/managed': {
+              endpoint: motlpEndpoint,
+              headers: {
+                Authorization: `ApiKey ${motlpApiKeyEncoded || '${API_KEY}'}`,
+              },
+            },
+            otlp: {
+              endpoint: 'http://localhost:4317',
+              tls: { insecure: true },
+            },
+          }
+        : {
+            'elasticsearch/otel': {
+              endpoints: [defaultEsHost],
+              api_key: esApiKeyEncoded ? esApiKeyEncoded : '${API_KEY}',
+              mapping: { mode: 'otel' },
+            },
+            otlp: {
+              endpoint: 'http://localhost:4317',
+              tls: { insecure: true },
+            },
+          },
       service: {
         extensions: ['opamp'],
-        pipelines: {
-          logs: { receivers: ['otlp'], exporters: ['elasticsearch/otel'] },
-          metrics: { receivers: ['otlp'], exporters: ['elasticsearch/otel'] },
-          traces: { receivers: ['otlp'], exporters: ['elasticsearch/otel'] },
-        },
+        pipelines: motlpAvailable
+          ? {
+              logs: { receivers: ['otlp'], exporters: ['otlp/managed'] },
+              metrics: { receivers: ['otlp'], exporters: ['otlp/managed'] },
+              traces: { receivers: ['otlp'], exporters: ['otlp/managed'] },
+            }
+          : {
+              logs: { receivers: ['otlp'], exporters: ['elasticsearch/otel'] },
+              metrics: { receivers: ['otlp'], exporters: ['elasticsearch/otel'] },
+              traces: { receivers: ['otlp'], exporters: ['elasticsearch/otel'] },
+            },
         telemetry: {
           resource: telemetryResource,
           metrics: {
@@ -311,6 +345,9 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
     defaultEsHost,
     token,
     esApiKeyEncoded,
+    motlpAvailable,
+    motlpEndpoint,
+    motlpApiKeyEncoded,
     cloud?.isCloudEnabled,
   ]);
 
@@ -517,16 +554,65 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
           )}
           {token && defaultFleetServerHost && isFormValid ? (
             <>
+              {motlpAvailable && cloud?.isCloudEnabled && !cloud?.isServerlessEnabled && (
+                <>
+                  <EuiCallOut
+                    announceOnMount
+                    color="warning"
+                    iconType="info"
+                    title={i18n.translate(
+                      'xpack.fleet.addCollectorFlyout.managedOtlpTechPreviewTitle',
+                      {
+                        defaultMessage:
+                          'Managed OTLP Endpoint is in Tech Preview for Elastic Cloud Hosted',
+                      }
+                    )}
+                  >
+                    <p>
+                      <FormattedMessage
+                        id="xpack.fleet.addCollectorFlyout.managedOtlpTechPreviewDescription"
+                        defaultMessage="Managed OTLP Endpoint should not be used in production yet for Elastic Cloud Hosted deployments. For more details, refer to the {motlpDocumentation}."
+                        values={{
+                          motlpDocumentation: (
+                            <EuiLink
+                              data-test-subj="addCollectorManagedOtlpDocsLink"
+                              target="_blank"
+                              href="https://www.elastic.co/docs/reference/opentelemetry/motlp"
+                            >
+                              <FormattedMessage
+                                id="xpack.fleet.addCollectorFlyout.managedOtlpDocsLinkLabel"
+                                defaultMessage="Managed OTLP Endpoint documentation"
+                              />
+                            </EuiLink>
+                          ),
+                        }}
+                      />
+                    </p>
+                  </EuiCallOut>
+                  <EuiSpacer size="m" />
+                </>
+              )}
               <EuiText>
                 <p>
-                  <FormattedMessage
-                    id="xpack.fleet.addCollectorFlyout.apiKeyDescription"
-                    defaultMessage="Either use an existing API key and replace {apiKeyPlaceholder} in the {apiKeyField} field of the config below, or click the button to generate a new one."
-                    values={{
-                      apiKeyPlaceholder: <EuiCode>{'${API_KEY}'}</EuiCode>,
-                      apiKeyField: <EuiCode>api_key</EuiCode>,
-                    }}
-                  />
+                  {motlpAvailable ? (
+                    <FormattedMessage
+                      id="xpack.fleet.addCollectorFlyout.managedOtlpApiKeyDescription"
+                      defaultMessage="Either use an existing managed OTLP API key and replace {apiKeyPlaceholder} in the {apiKeyField} header of the config below, or click the button to generate a new one."
+                      values={{
+                        apiKeyPlaceholder: <EuiCode>{'${API_KEY}'}</EuiCode>,
+                        apiKeyField: <EuiCode>Authorization</EuiCode>,
+                      }}
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="xpack.fleet.addCollectorFlyout.apiKeyDescription"
+                      defaultMessage="Either use an existing API key and replace {apiKeyPlaceholder} in the {apiKeyField} field of the config below, or click the button to generate a new one."
+                      values={{
+                        apiKeyPlaceholder: <EuiCode>{'${API_KEY}'}</EuiCode>,
+                        apiKeyField: <EuiCode>api_key</EuiCode>,
+                      }}
+                    />
+                  )}
                 </p>
               </EuiText>
               <EuiSpacer size="s" />
@@ -535,8 +621,9 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
                   <EuiButton
                     onClick={onCreateApiKey}
                     isLoading={isCreatingApiKey}
-                    isDisabled={!!esApiKeyEncoded}
-                    iconType={esApiKeyEncoded ? 'check' : undefined}
+                    isDisabled={!!apiKeyEncoded}
+                    iconType={apiKeyEncoded ? 'check' : undefined}
+                    color={apiKeyEncoded ? 'success' : 'primary'}
                   >
                     <FormattedMessage
                       id="xpack.fleet.addCollectorFlyout.createApiKeyButton"
