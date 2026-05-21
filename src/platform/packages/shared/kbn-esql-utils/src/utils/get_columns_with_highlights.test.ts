@@ -59,4 +59,39 @@ describe('getColumnsWithHighlights', () => {
       },
     ]);
   });
+
+  it('handles EVAL unamed columns scenarios', () => {
+    const query = 'FROM books | EVAL TOP_SNIPPETS(description, "one", { "highlight": true })';
+    expect(getColumnsWithHighlights(query)).toEqual([
+      {
+        column: 'TOP_SNIPPETS(description, "one", { "highlight": true })',
+        preTag: DEFAULT_HIGHLIGHT_PRE_TAG,
+        postTag: DEFAULT_HIGHLIGHT_POST_TAG,
+      },
+    ]);
+  });
+
+  it('handles STATS user defined columns', () => {
+    const query =
+      'FROM books | STATS count(*) BY col0 = TOP_SNIPPETS(description, "one", { "highlight": true })';
+    expect(getColumnsWithHighlights(query)).toEqual([
+      {
+        column: 'col0',
+        preTag: DEFAULT_HIGHLIGHT_PRE_TAG,
+        postTag: DEFAULT_HIGHLIGHT_POST_TAG,
+      },
+    ]);
+  });
+
+  it('handles STATS unamed user defined columns', () => {
+    const query =
+      'FROM books | STATS count(*) BY TOP_SNIPPETS(description, "one", { "highlight": true })';
+    expect(getColumnsWithHighlights(query)).toEqual([
+      {
+        column: 'TOP_SNIPPETS(description, "one", { "highlight": true })',
+        preTag: DEFAULT_HIGHLIGHT_PRE_TAG,
+        postTag: DEFAULT_HIGHLIGHT_POST_TAG,
+      },
+    ]);
+  });
 });

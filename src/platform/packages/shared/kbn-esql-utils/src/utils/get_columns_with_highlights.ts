@@ -11,20 +11,27 @@ import {
   isAssignment,
   isBooleanLiteral,
   isColumn,
+  isMap,
   isStringLiteral,
   LeafPrinter,
   Parser,
   Walker,
 } from '@elastic/esql';
-import type { ESQLAstQueryExpression, ESQLFunction, ESQLMapEntry } from '@elastic/esql/types';
 
-const TOP_SNIPPETS_FUNCTION_NAME = 'top_snippets';
+import type { ESQLAstQueryExpression, ESQLFunction, ESQLMap } from '@elastic/esql/types';
+
+export const DEFAULT_HIGHLIGHT_PRE_TAG = '<em>';
+export const DEFAULT_HIGHLIGHT_POST_TAG = '</em>';
+
 const HIGHLIGHT_OPTION_NAME = 'highlight';
 const PRE_TAG_OPTION_NAME = 'pre_tag';
 const POST_TAG_OPTION_NAME = 'post_tag';
 
-export const DEFAULT_HIGHLIGHT_PRE_TAG = '<em>';
-export const DEFAULT_HIGHLIGHT_POST_TAG = '</em>';
+/**
+ * ES|QL functions that can produce highlight markup in output columns when
+ * called with `{ "highlight": true }`.
+ */
+export const FUNCTIONS_WITH_HIGHLIGHT_SUPPORT = ['top_snippets'];
 
 export interface EsqlColumnHighlight {
   column: string;
@@ -33,100 +40,113 @@ export interface EsqlColumnHighlight {
 }
 
 /**
- * Returns columns produced by TOP_SNIPPETS calls that enable snippet highlighting,
+ * Returns columns built using a highlighting algorithm,
  * including the opening and closing markup tags configured for each column.
+ *
+ * Example:
+ * ```
+ * FROM books
+ *  | EVAL snippets = TOP_SNIPPETS(description, "Tolkien", { "highlight": true })
+ *  | EVAL titles = TOP_SNIPPETS(title, "Tolkien", { "highlight": true, "pre_tag": "<mark>", "post_tag": "</mark>" })
+ * ```
+ * Will return the following column:
+ * ```
+ * {
+ *   column: 'snippets',
+ *   preTag: '<em>',
+ *   postTag: '</em>',
+ * }
+ * {
+ *   column: 'titles',
+ *   preTag: '<mark>',
+ *   postTag: '</mark>',
+ * }
  */
 export function getColumnsWithHighlights(query: string): EsqlColumnHighlight[] {
   const columnsWithHighlights = new Map<string, EsqlColumnHighlight>();
   const { root } = Parser.parse(query);
 
-  const topSnippetFunctions = Walker.matchAll(root, {
-    type: 'function',
-    name: TOP_SNIPPETS_FUNCTION_NAME,
-  });
+  const highlightFunctionsCandidates = Walker.findAll(
+    root,
+    (node) => node.type === 'function' && FUNCTIONS_WITH_HIGHLIGHT_SUPPORT.includes(node.name)
+  ) as ESQLFunction[];
 
-  for (const topSnippetsFunction of topSnippetFunctions) {
-    const fn = topSnippetsFunction as ESQLFunction;
+  for (const fn of highlightFunctionsCandidates) {
+    const optionsMap = fn.args.find(isMap);
 
-    if (!isHighlightEnabled(fn)) {
+    if (!optionsMap || !isHighlightEnabled(optionsMap)) {
       continue;
     }
 
-    const columnName = getColumnNameForTopSnippetsFunction(root, fn);
+    const columnName = getHighlightedColumnName(root, fn, query);
     if (!columnName) {
       continue;
     }
 
-    const { preTag, postTag } = getHighlightTags(fn);
+    const preTag =
+      getHighlightTagName(optionsMap, PRE_TAG_OPTION_NAME) ?? DEFAULT_HIGHLIGHT_PRE_TAG;
+    const postTag =
+      getHighlightTagName(optionsMap, POST_TAG_OPTION_NAME) ?? DEFAULT_HIGHLIGHT_POST_TAG;
+
     columnsWithHighlights.set(columnName, { column: columnName, preTag, postTag });
   }
 
   return Array.from(columnsWithHighlights.values());
 }
 
-const getMapOptionString = (
-  topSnippetsFunction: ESQLFunction,
-  optionName: string
-): string | undefined => {
-  const optionKey = Walker.find(
-    topSnippetsFunction,
-    (node) => isStringLiteral(node) && node.valueUnquoted === optionName
+/**
+ * Given a map of options, returns true if the `highlight` option is set to `true`.
+ */
+const isHighlightEnabled = (optionsMap: ESQLMap): boolean => {
+  const highlightEntry = optionsMap.entries.find(
+    (entry) => isStringLiteral(entry.key) && entry.key.valueUnquoted === HIGHLIGHT_OPTION_NAME
   );
-
-  if (!optionKey) {
-    return undefined;
-  }
-
-  const mapEntry = Walker.parent(topSnippetsFunction, optionKey);
-  if (mapEntry?.type !== 'map-entry') {
-    return undefined;
-  }
-
-  const { value } = mapEntry as ESQLMapEntry;
-
-  if (!isStringLiteral(value)) {
-    return undefined;
-  }
-
-  return value.valueUnquoted ?? value.text;
-};
-
-const getHighlightTags = (
-  topSnippetsFunction: ESQLFunction
-): Pick<EsqlColumnHighlight, 'preTag' | 'postTag'> => ({
-  preTag: getMapOptionString(topSnippetsFunction, PRE_TAG_OPTION_NAME) ?? DEFAULT_HIGHLIGHT_PRE_TAG,
-  postTag:
-    getMapOptionString(topSnippetsFunction, POST_TAG_OPTION_NAME) ?? DEFAULT_HIGHLIGHT_POST_TAG,
-});
-
-const isHighlightEnabled = (topSnippetsFunction: ESQLFunction): boolean => {
-  const highlightKey = Walker.find(
-    topSnippetsFunction,
-    (node) => isStringLiteral(node) && node.valueUnquoted === HIGHLIGHT_OPTION_NAME
-  );
-  if (!highlightKey) {
+  if (!highlightEntry?.value) {
     return false;
   }
 
-  const mapEntry = Walker.parent(topSnippetsFunction, highlightKey);
-  if (mapEntry?.type !== 'map-entry') {
-    return false;
-  }
-
-  const { value } = mapEntry as ESQLMapEntry;
-
-  return isBooleanLiteral(value) && value.value === 'true';
+  return (
+    isBooleanLiteral(highlightEntry.value) && highlightEntry.value.value.toLowerCase() === 'true'
+  );
 };
 
-const getColumnNameForTopSnippetsFunction = (
+/**
+ * Returns the tag name defined in the map options if it exists.
+ */
+const getHighlightTagName = (optionsMap: ESQLMap, optionName: string): string | undefined => {
+  const tagEntry = optionsMap.entries.find(
+    (entry) => isStringLiteral(entry.key) && entry.key.valueUnquoted === optionName
+  );
+
+  if (!tagEntry?.value) {
+    return undefined;
+  }
+  if (!isStringLiteral(tagEntry.value)) {
+    return undefined;
+  }
+  return tagEntry.value.valueUnquoted;
+};
+
+/**
+ * Returns the name of the column that was created using the highlight function.
+ *
+ * This function has an heuristic part, some combination of function could remove the highlighting tokens from the result.
+ * But it assumes that if the user used highlight:true, it's not interested in removing them.
+ * Doing a 100% accurate check would involve knowing the semantics of every invoked function.
+ * In the worst case of having a false positive,
+ */
+const getHighlightedColumnName = (
   root: ESQLAstQueryExpression,
-  topSnippetsFunction: ESQLFunction
+  highlightFunction: ESQLFunction,
+  query: string
 ): string | undefined => {
-  for (const parent of Walker.parents(root, topSnippetsFunction)) {
+  // Created using an assignment | EVAL col = TOP_SNIPPETS( ...
+  for (const parent of Walker.parents(root, highlightFunction)) {
     if (isAssignment(parent) && isColumn(parent.args[0])) {
       return LeafPrinter.column(parent.args[0]);
     }
   }
 
-  return undefined;
+  // Created using an expression text | EVAL TOP_SNIPPETS( ... or STATS count(*) BY TOP_SNIPPETS( ...
+  return query.substring(highlightFunction.location.min, highlightFunction.location.max + 1);
 };
