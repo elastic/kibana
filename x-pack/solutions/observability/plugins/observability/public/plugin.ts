@@ -88,6 +88,7 @@ import { getObservabilityAlertType } from './cases/attachments/alert';
 import {
   ALERTS_PATH,
   CASES_PATH,
+  NIGHTSHIFT_PATH,
   OBSERVABILITY_BASE_PATH,
   OVERVIEW_PATH,
   RULES_PATH,
@@ -219,6 +220,16 @@ export class Plugin
       path: ALERTS_PATH,
       visibleIn: [],
       keywords: ['alerts', 'rules'],
+    },
+    {
+      id: 'nightshift',
+      title: i18n.translate('xpack.observability.nightshiftLinkTitle', {
+        defaultMessage: 'Nightshift',
+      }),
+      order: 8002,
+      path: NIGHTSHIFT_PATH,
+      visibleIn: [],
+      keywords: ['nightshift', 'significant events'],
     },
   ];
 

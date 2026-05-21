@@ -5,16 +5,4 @@
  * 2.0.
  */
 
-import {
-  SERVICE_NAME,
-  SERVICE_ENVIRONMENT,
-  TRANSACTION_NAME,
-  TRANSACTION_TYPE,
-} from '../es_fields/apm';
-
-export const FILTER_OPTIONS = [
-  SERVICE_NAME,
-  SERVICE_ENVIRONMENT,
-  TRANSACTION_TYPE,
-  TRANSACTION_NAME,
-] as const;
+export { FILTER_OPTIONS } from '@kbn/apm-types';
