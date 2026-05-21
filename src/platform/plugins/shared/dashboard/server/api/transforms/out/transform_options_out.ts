@@ -8,10 +8,8 @@
  */
 
 import type { Writable } from '@kbn/utility-types';
-import type { Type, TypeOf } from '@kbn/config-schema';
 
 import type { DashboardState } from '../../types';
-import type { getDashboardStateSchema } from '../../dashboard_state_schemas';
 import { DEFAULT_DASHBOARD_OPTIONS } from '../../../../common/constants';
 
 const savedObjectToAPIOptionsKeys = {
@@ -27,9 +25,8 @@ type ParsedSavedObjectOptions = { [key in keyof typeof savedObjectToAPIOptionsKe
 
 export function transformOptionsOut(
   optionsJSON: string,
-  controlGroupShowApplyButtonSetting: boolean | undefined,
-  schema: Type<TypeOf<ReturnType<typeof getDashboardStateSchema>>['options']>
-): Partial<DashboardState['options']> {
+  controlGroupShowApplyButtonSetting: boolean | undefined
+): DashboardState['options'] {
   const options = JSON.parse(optionsJSON) as ParsedSavedObjectOptions;
   const apiOptions: Writable<Partial<DashboardState['options']>> = {};
   Object.keys(options).forEach((key) => {
@@ -38,19 +35,12 @@ export function transformOptionsOut(
     if (apiKey) apiOptions[apiKey] = options[savedObjectKey];
   });
 
-  let transformedOptions = {
+  return {
+    ...DEFAULT_DASHBOARD_OPTIONS,
     ...apiOptions,
     ...(apiOptions.auto_apply_filters === undefined &&
       controlGroupShowApplyButtonSetting !== undefined && {
         auto_apply_filters: !controlGroupShowApplyButtonSetting,
       }),
   };
-
-  try {
-    transformedOptions = schema.validate(transformOptionsOut);
-  } catch (e) {
-    // if unable to validate the options, don't throw or warn; just use the default value
-    transformedOptions = DEFAULT_DASHBOARD_OPTIONS;
-  }
-  return transformedOptions;
 }

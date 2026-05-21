@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DEFAULT_DASHBOARD_STATE } from '../default_dashboard_state';
+import { DEFAULT_DASHBOARD_STATE } from '../../../common/default_dashboard_state';
 import { loadDashboardApi } from './load_dashboard_api';
 
 jest.mock('../performance/query_performance_tracking', () => {
@@ -30,7 +30,7 @@ jest.mock('@kbn/content-management-content-insights-public', () => {
 
 jest.mock('../../dashboard_client', () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const defaultState = require('../default_dashboard_state');
+  const defaultState = require('../../../common/default_dashboard_state');
   return {
     dashboardClient: {
       get: jest.fn().mockResolvedValue({

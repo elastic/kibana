@@ -15,7 +15,7 @@ import { DEFAULT_PANEL_PLACEMENT_SETTINGS } from '../../plugin_constants';
 import { getAccessControlClient } from '../../services/access_control_service';
 import { coreServices } from '../../services/kibana_services';
 import { logger } from '../../services/logger';
-import { getLastSavedState } from '../default_dashboard_state';
+import { getLastSavedState } from '../../../common/default_dashboard_state';
 import { getDashboardApi } from '../get_dashboard_api';
 import { DASHBOARD_DURATION_START_MARK } from '../performance/dashboard_duration_start_mark';
 import { startQueryPerformanceTracking } from '../performance/query_performance_tracking';

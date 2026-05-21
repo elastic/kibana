@@ -7,11 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { type Type } from '@kbn/config-schema';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import { tagSavedObjectTypeName } from '@kbn/saved-objects-tagging-plugin/common';
+
+import { DEFAULT_DASHBOARD_STATE } from '../../../../common/default_dashboard_state';
 import type { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object';
 import { getDashboardStateSchema } from '../../dashboard_state_schemas';
-import type { DashboardState, Warnings } from '../../types';
+import type { DashboardPinnedPanelsState, DashboardState, Warnings } from '../../types';
 import { transformOptionsOut } from './transform_options_out';
 import { transformPanelsOut } from './transform_panels_out';
 import { transformPinnedPanelsOut } from './transform_pinned_panels_out';
@@ -22,9 +25,7 @@ export function transformDashboardOut(
   references: SavedObjectReference[] | undefined,
   isDashboardAppRequest: boolean = false
 ): {
-  dashboardState: Partial<
-    Omit<DashboardState, 'options'> & { options: Partial<DashboardState['options']> }
-  >;
+  dashboardState: DashboardState;
   warnings: Warnings;
 } {
   const strictPropsSchemas = getDashboardStateSchema(false).getPropSchemas();
@@ -61,7 +62,7 @@ export function transformDashboardOut(
     legacyControls,
     pinned_panels,
     references,
-    strictPropsSchemas.pinned_panels
+    strictPropsSchemas.pinned_panels as Type<DashboardPinnedPanelsState>
   );
 
   const timeRange =
@@ -72,11 +73,7 @@ export function transformDashboardOut(
         }
       : undefined;
 
-  const options = transformOptionsOut(
-    optionsJSON ?? '{}',
-    legacyControls?.showApplySelections,
-    strictPropsSchemas.options
-  );
+  const options = transformOptionsOut(optionsJSON ?? '{}', legacyControls?.showApplySelections);
 
   const {
     filters,
@@ -87,22 +84,53 @@ export function transformDashboardOut(
     query: strictPropsSchemas.query,
   });
 
+  /**
+   * Handle validating each state key that wasn't already validated above; if any validation fails,
+   * just default back to the default state for that key
+   */
+  let validatedState: Pick<
+    DashboardState,
+    | 'description'
+    | 'project_routing'
+    | 'refresh_interval'
+    | 'tags'
+    | 'time_range'
+    | 'title'
+    | 'options'
+  > = {
+    description,
+    options,
+    project_routing: projectRouting,
+    ...(refreshInterval && {
+      refresh_interval: { pause: refreshInterval.pause, value: refreshInterval.value },
+    }),
+    tags,
+    time_range: timeRange,
+    title: title ?? '',
+  };
+  (Object.keys(validatedState) as Array<keyof typeof validatedState>).forEach((key) => {
+    try {
+      validatedState = {
+        ...validatedState,
+        [key]: strictPropsSchemas[key].validate(validatedState[key]),
+      };
+    } catch (e) {
+      validatedState = {
+        ...validatedState,
+        [key]: DEFAULT_DASHBOARD_STATE[key],
+      };
+    }
+  });
+
   // try to maintain a consistent (alphabetical) order of keys
   return {
     dashboardState: {
-      description,
+      ...validatedState,
+      /** These keys were validated seperately, since they each have unique error handling */
       ...(filters && { filters }),
-      ...(Object.keys(options).length && { options }),
       panels,
       pinned_panels: pinnedPanels,
-      ...(projectRouting !== undefined && { project_routing: projectRouting }),
       ...(query && { query }),
-      ...(refreshInterval && {
-        refresh_interval: { pause: refreshInterval.pause, value: refreshInterval.value },
-      }),
-      ...(tags && tags.length && { tags }),
-      ...(timeRange && { time_range: timeRange }),
-      title: title ?? '',
     },
     warnings: [...warnings, ...pinnedPanelWarnings, ...searchSourceWarnings],
   };

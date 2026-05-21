@@ -9,18 +9,17 @@
 
 import { flow } from 'lodash';
 
-import type { Type, TypeOf } from '@kbn/config-schema';
+import type { Type } from '@kbn/config-schema';
 import type { Reference } from '@kbn/content-management-utils';
-import type {
-  LegacyIgnoreParentSettings,
-  LegacyStoredPinnedControlState,
+import {
+  type LegacyIgnoreParentSettings,
+  type LegacyStoredPinnedControlState,
 } from '@kbn/controls-schemas';
 import { transformType } from '@kbn/embeddable-plugin/server';
 
 import type { DashboardPinnedPanel, DashboardPinnedPanelsState } from '../../../../common';
 import type { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object';
 import { embeddableService } from '../../../kibana_services';
-import type { getDashboardStateSchema } from '../../dashboard_state_schemas';
 import type { DashboardState, Warnings } from '../../types';
 
 type StoredPinnedPanels = Required<DashboardSavedObjectAttributes>['pinned_panels']['panels'];
@@ -29,7 +28,7 @@ export function transformPinnedPanelsOut(
   controlGroupInput: DashboardSavedObjectAttributes['controlGroupInput'], // legacy
   pinnedPanels: DashboardSavedObjectAttributes['pinned_panels'],
   containerReferences: Reference[] = [],
-  panelsStateSchema: Type<TypeOf<ReturnType<typeof getDashboardStateSchema>>['pinned_panels']>
+  panelsStateSchema: Type<DashboardPinnedPanelsState>
 ): { panels: DashboardState['pinned_panels']; warnings: Warnings } {
   if (pinnedPanels) {
     /**
@@ -123,7 +122,7 @@ export function transformPinnedPanelProperties(
 function transformPanel(
   panels: DashboardPinnedPanelsState,
   containerReferences: Reference[],
-  panelsStateSchema: Type<TypeOf<ReturnType<typeof getDashboardStateSchema>>['pinned_panels']>
+  panelsStateSchema: Type<DashboardPinnedPanelsState>
 ): { panels: DashboardPinnedPanelsState; warnings: Warnings } {
   const transformedPanels: DashboardPinnedPanelsState = [];
   const warnings: Warnings = [];
@@ -137,9 +136,7 @@ function transformPanel(
           ...rest,
           config: transforms.transformOut(config, [], containerReferences, panel.id),
         } as DashboardPinnedPanel;
-        transformedPanels.push(
-          panelsStateSchema.validate([transformed]) as unknown as DashboardPinnedPanel
-        );
+        transformedPanels.push(panelsStateSchema.validate([transformed])[0]);
       } catch (e) {
         warnings.push({
           type: 'dropped_panel',
