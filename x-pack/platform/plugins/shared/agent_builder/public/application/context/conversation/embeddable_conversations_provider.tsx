@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo, useEffect, useCallback, useState, useRef } from 'react';
+import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -110,7 +111,12 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
           // Only surface unexpected errors; a 404 simply means the conversation no longer exists.
           coreStart.notifications.toasts.addError(
             error instanceof Error ? error : new Error(String(error)),
-            { title: 'Failed to restore conversation' }
+            {
+              title: i18n.translate(
+                'xpack.agentBuilder.embeddableConversations.failedToRestoreConversationTitle',
+                { defaultMessage: 'Failed to restore conversation' }
+              ),
+            }
           );
         }
         setConversationId(undefined);
