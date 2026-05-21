@@ -10,7 +10,6 @@
 import type { Logger } from '@kbn/logging';
 import type { z } from '@kbn/zod/v4';
 import type { ServerStepDefinition } from './types';
-import { applyPollDefaults, pollCeilingsAreDefault, validateStepDefinitionShape } from './types';
 import type { ServerStepDefinitionOrLoader } from '../types';
 
 /**
@@ -63,19 +62,12 @@ export class ServerStepRegistry {
     Output extends z.ZodType = z.ZodType,
     Config extends z.ZodObject = z.ZodObject
   >(definition: ServerStepDefinition<Input, Output, Config>): void {
-    validateStepDefinitionShape(definition as ServerStepDefinition);
     if (this.registry.has(definition.id)) {
       throw new Error(
         `Step definition for type "${definition.id}" is already registered. Each step type must have a unique definition.`
       );
     }
-    const finalDefinition = applyPollDefaults(definition as ServerStepDefinition);
-    if (pollCeilingsAreDefault(finalDefinition)) {
-      this.logger.warn(
-        `Step "${finalDefinition.id}" registered without explicit poll.ceilings; using defaults (maxAttempts=120, maxWaitMs=3600000ms). Declare poll.ceilings explicitly to silence this warning.`
-      );
-    }
-    this.registry.set(finalDefinition.id, finalDefinition);
+    this.registry.set(definition.id, definition);
   }
 
   /**

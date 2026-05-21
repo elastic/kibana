@@ -8,4 +8,3 @@
  */
 
 export { CustomStepImpl } from './custom_step_impl';
-export { POLL_AUTHOR_STATE_KEY, POLL_BOOKKEEPING_KEY } from './constants';
