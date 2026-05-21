@@ -37,7 +37,10 @@
     "@kbn/agent-builder-server",
     "@kbn/scout-search",
     "@kbn/search-agent",
-    "@kbn/shared-ux-ai-components"
+    "@kbn/shared-ux-ai-components",
+    "@kbn/agent-builder-plugin",
+    "@kbn/core-chrome-layout-constants",
+    "@kbn/spaces-plugin"
   ],
   "exclude": [
     "target/**/*"
