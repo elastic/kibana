@@ -95,7 +95,7 @@ describe('QuerySandboxFlyout — timefield auto-select', () => {
 
     renderSandbox({ timeField: '@timestamp', onTimeFieldChange });
 
-    expect(onTimeFieldChange).toHaveBeenCalledWith(expect.stringMatching(/^event\.(end|start)$/));
+    expect(onTimeFieldChange).toHaveBeenCalledWith('event.start');
   });
 
   it('resets to @timestamp when fieldMap is empty and current timeField differs', () => {

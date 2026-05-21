@@ -59,7 +59,7 @@ export class ComposeDiscoverPage {
     this.createRulePopoverButton = this.page.testSubj.locator('createRulePopoverButton');
     this.createEsqlRuleButton = this.page.testSubj.locator('createEsqlRuleButton');
     this.createEsqlRuleCard = this.page.testSubj.locator('createEsqlRuleCard');
-    this.cancelButton = this.flyout.locator('button', { hasText: 'Cancel' });
+    this.cancelButton = this.page.testSubj.locator('composeDiscoverCancel');
   }
 
   editRuleButton(ruleId: string) {

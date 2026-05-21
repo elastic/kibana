@@ -8,6 +8,11 @@
 import { expect } from '@kbn/scout/ui';
 import { buildCreateRuleData, test } from '../fixtures';
 
+// Importing @kbn/alerting-v2-rule-form transitively pulls in monaco-editor CSS,
+// which Playwright's test-listing phase cannot handle. Mirror the value here.
+// Source: x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/constants.ts
+const DEFAULT_RULE_NAME = 'Untitled rule';
+
 const TEST_INDEX = 'test-compose-discover';
 const TEST_QUERY = `FROM ${TEST_INDEX} | LIMIT 10`;
 const RULE_NAME = 'scout-compose-discover-create';
@@ -55,7 +60,7 @@ test.describe(
       pageObjects,
       apiServices,
     }) => {
-      await test.step('open ComposeDiscoverFlyout via split button menu', async () => {
+      await test.step('open ComposeDiscoverFlyout via empty-state card', async () => {
         await pageObjects.composeDiscover.openCreateFlyout();
         await expect(pageObjects.composeDiscover.flyout).toBeVisible();
       });
@@ -203,7 +208,7 @@ test.describe(
       });
 
       await test.step('"Untitled rule" placeholder text is rejected as a name', async () => {
-        await pageObjects.composeDiscover.setRuleName('Untitled rule');
+        await pageObjects.composeDiscover.setRuleName(DEFAULT_RULE_NAME);
         await pageObjects.composeDiscover.clickNext();
         await expect(pageObjects.composeDiscover.submitButton).toBeHidden();
         await expect(page.testSubj.locator('ruleNameInput')).toBeVisible();
