@@ -25,6 +25,7 @@ import {
   fixESQLQueryWithVariables,
   getCategorizeColumns,
   getArgsFromRenameFunction,
+  replaceColumnNamesIfRenamed,
   getCategorizeField,
   findClosestColumn,
   getKqlSearchQueries,
@@ -919,6 +920,23 @@ describe('esql query helpers', () => {
       const esql = 'FROM index | STATS COUNT() BY field1';
       const expected: string[] = [];
       expect(getCategorizeColumns(esql)).toEqual(expected);
+    });
+  });
+
+  describe('replaceColumnNameIfRenamed', () => {
+    it('returns column names unchanged when there is no RENAME', () => {
+      const { root } = Parser.parse('FROM index | KEEP col');
+      expect(replaceColumnNamesIfRenamed(root, ['col'])).toEqual(['col']);
+    });
+
+    it('replaces matching column names using RENAME', () => {
+      const { root } = Parser.parse('FROM index | RENAME old AS new');
+      expect(replaceColumnNamesIfRenamed(root, ['old', 'other'])).toEqual(['new', 'other']);
+    });
+
+    it('applies multiple RENAME commands in order', () => {
+      const { root } = Parser.parse('FROM index | RENAME a AS b | RENAME b AS c');
+      expect(replaceColumnNamesIfRenamed(root, ['a'])).toEqual(['c']);
     });
   });
 

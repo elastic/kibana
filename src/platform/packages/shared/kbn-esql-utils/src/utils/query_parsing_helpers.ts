@@ -27,6 +27,7 @@ import type {
   ESQLInlineCast,
   ESQLCommandOption,
   ESQLAstForkCommand,
+  ESQLAstQueryExpression,
 } from '@elastic/esql/types';
 import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
@@ -514,24 +515,7 @@ export const getCategorizeColumns = (esql: string): string[] => {
   }
 
   // If there is a rename command, we need to check if the column is renamed
-  const renameCommand = root.commands.find(({ name }) => name === 'rename');
-  if (!renameCommand) {
-    return columns;
-  }
-  const renameFunctions: ESQLFunction[] = [];
-  walk(renameCommand, {
-    visitFunction: (node) => renameFunctions.push(node),
-  });
-
-  renameFunctions.forEach((renameFunction) => {
-    const { original, renamed } = getArgsFromRenameFunction(renameFunction);
-    const oldColumn = original.name;
-    const newColumn = renamed.name;
-    if (columns.includes(oldColumn)) {
-      columns[columns.indexOf(oldColumn)] = newColumn;
-    }
-  });
-  return columns;
+  return replaceColumnNamesIfRenamed(root, columns);
 };
 
 export const getSparklineColumns = (esql: string): string[] => {
@@ -584,27 +568,8 @@ export const getSparklineColumns = (esql: string): string[] => {
     }
   }
 
-  const renameCommands = root.commands.filter(({ name }) => name === 'rename');
-  if (renameCommands.length === 0) {
-    return columns;
-  }
-  const renameFunctions: ESQLFunction[] = [];
-  renameCommands.forEach((renameCommand) => {
-    walk(renameCommand, {
-      visitFunction: (node) => renameFunctions.push(node),
-    });
-  });
-
-  renameFunctions.forEach((renameFunction) => {
-    const { original, renamed } = getArgsFromRenameFunction(renameFunction);
-    const oldColumn = original.name;
-    const newColumn = renamed.name;
-    if (columns.includes(oldColumn)) {
-      columns[columns.indexOf(oldColumn)] = newColumn;
-    }
-  });
-
-  return columns;
+  // If there is a rename command, we need to check if the column is renamed
+  return replaceColumnNamesIfRenamed(root, columns);
 };
 
 /**
@@ -707,4 +672,37 @@ export const hasTimeseriesInfoCommand = (esql?: string): boolean => {
   return root.commands.some(
     ({ name }) => name === CommandNames.METRICS_INFO || name === CommandNames.TS_INFO
   );
+};
+
+/**
+ * Given an array of column names, it returns a new array with corrected column names
+ * if any of the columns is renamed in the query.
+ */
+export const replaceColumnNamesIfRenamed = (
+  root: ESQLAstQueryExpression,
+  columnNames: string[]
+): string[] => {
+  const columns = [...columnNames];
+  const renameCommands = root.commands.filter(({ name }) => name === 'rename');
+
+  if (renameCommands.length === 0) {
+    return columns;
+  }
+
+  const renameFunctions: ESQLFunction[] = [];
+  renameCommands.forEach((renameCommand) => {
+    walk(renameCommand, {
+      visitFunction: (node) => renameFunctions.push(node),
+    });
+  });
+
+  for (const renameFunction of renameFunctions) {
+    const { original, renamed } = getArgsFromRenameFunction(renameFunction);
+    const index = columns.indexOf(original.name);
+    if (index !== -1) {
+      columns[index] = renamed.name;
+    }
+  }
+
+  return columns;
 };

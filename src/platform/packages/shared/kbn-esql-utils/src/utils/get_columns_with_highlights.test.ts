@@ -94,4 +94,28 @@ describe('getColumnsWithHighlights', () => {
       },
     ]);
   });
+
+  it('applies RENAME to resolved highlight column names', () => {
+    const query =
+      'FROM books | EVAL col0 = TOP_SNIPPETS(description, "one", { "highlight": true }) | RENAME col0 AS renamed';
+    expect(getColumnsWithHighlights(query)).toEqual([
+      {
+        column: 'renamed',
+        preTag: DEFAULT_HIGHLIGHT_PRE_TAG,
+        postTag: DEFAULT_HIGHLIGHT_POST_TAG,
+      },
+    ]);
+  });
+
+  it('can handle columns defined within quotes', () => {
+    const query =
+      'FROM books | EVAL `col0` = TOP_SNIPPETS(description, "one", { "highlight": true })';
+    expect(getColumnsWithHighlights(query)).toEqual([
+      {
+        column: 'col0',
+        preTag: DEFAULT_HIGHLIGHT_PRE_TAG,
+        postTag: DEFAULT_HIGHLIGHT_POST_TAG,
+      },
+    ]);
+  });
 });

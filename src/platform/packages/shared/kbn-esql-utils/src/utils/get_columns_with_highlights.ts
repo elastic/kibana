@@ -19,6 +19,7 @@ import {
 } from '@elastic/esql';
 
 import type { ESQLAstQueryExpression, ESQLFunction, ESQLMap } from '@elastic/esql/types';
+import { replaceColumnNamesIfRenamed } from './query_parsing_helpers';
 
 export const DEFAULT_HIGHLIGHT_PRE_TAG = '<em>';
 export const DEFAULT_HIGHLIGHT_POST_TAG = '</em>';
@@ -88,7 +89,14 @@ export function getColumnsWithHighlights(query: string): EsqlColumnHighlight[] {
     const postTag =
       getHighlightTagName(optionsMap, POST_TAG_OPTION_NAME) ?? DEFAULT_HIGHLIGHT_POST_TAG;
 
-    columnsWithHighlights.set(columnName, { column: columnName, preTag, postTag });
+    // Check if the column name has been renamed in the query
+    const [resolvedColumnName] = replaceColumnNamesIfRenamed(root, [columnName]);
+
+    columnsWithHighlights.set(resolvedColumnName, {
+      column: resolvedColumnName,
+      preTag,
+      postTag,
+    });
   }
 
   return Array.from(columnsWithHighlights.values());
