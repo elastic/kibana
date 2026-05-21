@@ -159,6 +159,9 @@ dependsOn:
   - '@kbn/expressions-plugin'
   - '@kbn/ingest-hub-plugin'
   - '@kbn/zod'
+  - '@kbn/utility-types-jest'
+  - '@kbn/server-route-repository-utils'
+  - '@kbn/as-code-filters-schema'
 tags:
   - plugin
   - prod

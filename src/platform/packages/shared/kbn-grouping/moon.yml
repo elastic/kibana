@@ -24,6 +24,7 @@ dependsOn:
   - '@kbn/kibana-react-plugin'
   - '@kbn/shared-svg'
   - '@kbn/analytics'
+  - '@kbn/react-kibana-context-styled'
 tags:
   - shared-common
   - package

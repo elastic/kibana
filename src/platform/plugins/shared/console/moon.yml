@@ -63,6 +63,7 @@ dependsOn:
   - '@kbn/esql-types'
   - '@kbn/core-application-common'
   - '@kbn/core-chrome-layout-constants'
+  - '@kbn/ingest-pipelines-plugin'
 tags:
   - plugin
   - prod

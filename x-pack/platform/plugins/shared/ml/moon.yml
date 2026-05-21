@@ -149,6 +149,7 @@ dependsOn:
   - '@kbn/lens-common'
   - '@kbn/scout'
   - '@kbn/core-http-common'
+  - '@kbn/es-query-constants'
 tags:
   - plugin
   - prod

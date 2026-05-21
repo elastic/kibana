@@ -54,6 +54,7 @@ dependsOn:
   - '@kbn/spaces-plugin'
   - '@kbn/user-profile-components'
   - '@kbn/unified-data-table'
+  - '@kbn/security-plugin-types-common'
 tags:
   - shared-browser
   - package

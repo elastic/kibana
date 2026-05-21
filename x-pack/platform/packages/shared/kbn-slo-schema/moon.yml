@@ -20,6 +20,7 @@ dependsOn:
   - '@kbn/std'
   - '@kbn/io-ts-utils'
   - '@kbn/zod'
+  - '@kbn/slo-plugin'
 tags:
   - shared-common
   - package

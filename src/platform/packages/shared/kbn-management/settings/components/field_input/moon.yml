@@ -32,6 +32,7 @@ dependsOn:
   - '@kbn/core-ui-settings-browser'
   - '@kbn/code-editor'
   - '@kbn/core-user-profile-browser-mocks'
+  - '@kbn/core'
 tags:
   - shared-browser
   - package

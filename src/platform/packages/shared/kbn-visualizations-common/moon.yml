@@ -23,6 +23,8 @@ dependsOn:
   - '@kbn/chart-expressions-common'
   - '@kbn/core'
   - '@kbn/safer-lodash-set'
+  - '@kbn/field-formats-plugin'
+  - '@kbn/utility-types'
 tags:
   - shared-common
   - package

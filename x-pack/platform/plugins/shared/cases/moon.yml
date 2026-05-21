@@ -111,6 +111,8 @@ dependsOn:
   - '@kbn/css-utils'
   - '@kbn/shared-ux-column-presets'
   - '@kbn/core-ui-settings-browser'
+  - '@kbn/data-view-editor-plugin'
+  - '@kbn/ingest-pipelines-plugin'
 tags:
   - plugin
   - prod

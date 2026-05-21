@@ -127,6 +127,9 @@ dependsOn:
   - '@kbn/yaml-loader'
   - '@kbn/charts-theme'
   - '@kbn/search-types'
+  - '@kbn/security-plugin-types-server'
+  - '@kbn/security-plugin-types-common'
+  - '@kbn/saved-objects-tagging-oss-plugin'
 tags:
   - plugin
   - prod

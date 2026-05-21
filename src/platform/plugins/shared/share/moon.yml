@@ -45,6 +45,7 @@ dependsOn:
   - '@kbn/licensing-types'
   - '@kbn/es-query'
   - '@kbn/scout'
+  - '@kbn/reporting-plugin'
 tags:
   - plugin
   - prod

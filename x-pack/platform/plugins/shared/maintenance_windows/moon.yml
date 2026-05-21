@@ -57,6 +57,7 @@ dependsOn:
   - '@kbn/core-test-helpers-model-versions'
   - '@kbn/rule-data-utils'
   - '@kbn/alerts-as-data-utils'
+  - '@kbn/es-query-constants'
 tags:
   - plugin
   - prod
