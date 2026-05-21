@@ -78,8 +78,9 @@ export const AiPromptStepCommonDefinition: CommonStepDefinition<
   }),
   documentation: {
     details: i18n.translate('xpack.inferenceWorkflows.AiPromptStep.documentation.details', {
-      defaultMessage: `The ${AiPromptStepTypeId} step sends a prompt to an AI connector and returns the response. The response can be referenced in later steps using template syntax like {templateSyntax}.`,
-      values: { templateSyntax: '`{{ steps.stepName.output }}`' },
+      defaultMessage:
+        'The {stepTypeId} step sends a prompt to an AI connector and returns the response. The response can be referenced in later steps using template syntax.',
+      values: { stepTypeId: AiPromptStepTypeId },
     }),
     examples: [
       `## Basic AI prompt

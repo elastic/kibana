@@ -67,8 +67,9 @@ export const AiClassifyStepCommonDefinition: CommonStepDefinition<
   }),
   documentation: {
     details: i18n.translate('xpack.inferenceWorkflows.AiClassifyStep.documentation.details', {
-      defaultMessage: `The ${AiClassifyStepTypeId} step categorizes input data into predefined categories using an AI connector. The classification result can be referenced in later steps using template syntax.`,
-      values: { templateSyntax: '`{{ steps.stepName.output }}`' },
+      defaultMessage:
+        'The {stepTypeId} step categorizes input data into predefined categories using an AI connector. The classification result can be referenced in later steps using template syntax.',
+      values: { stepTypeId: AiClassifyStepTypeId },
     }),
     examples: [
       `## Basic Classification

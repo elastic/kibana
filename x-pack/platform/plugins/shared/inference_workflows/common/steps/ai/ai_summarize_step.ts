@@ -61,8 +61,9 @@ export const AiSummarizeStepCommonDefinition: CommonStepDefinition<
   }),
   documentation: {
     details: i18n.translate('xpack.inferenceWorkflows.AiSummarizeStep.documentation.details', {
-      defaultMessage: `The ${AiSummarizeStepTypeId} step generates a concise summary of the provided content using an AI connector. The summary can be referenced in later steps using template syntax.`,
-      values: { templateSyntax: '`{{ steps.stepName.output }}`' },
+      defaultMessage:
+        'The {stepTypeId} step generates a concise summary of the provided content using an AI connector. The summary can be referenced in later steps using template syntax.',
+      values: { stepTypeId: AiSummarizeStepTypeId },
     }),
     examples: [
       `## Basic Summarization
