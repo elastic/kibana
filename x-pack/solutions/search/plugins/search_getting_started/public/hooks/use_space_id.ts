@@ -12,7 +12,7 @@ export const useSpaceId = () => {
   const {
     services: { spaces },
   } = useKibana();
-  const [spaceId, setSpaceId] = useState<string>('');
+  const [spaceId, setSpaceId] = useState<string | undefined>();
 
   useEffect(() => {
     if (spaces) {

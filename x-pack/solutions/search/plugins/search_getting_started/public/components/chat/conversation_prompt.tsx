@@ -12,6 +12,7 @@ import { ConversationInputShell } from '@kbn/agent-builder-plugin/public';
 import { useKibana } from '../../hooks/use_kibana';
 
 import {
+  CONVERSATION_ANIMATION_MS,
   ConversationOverlayBaseStyles,
   ConversationOverlayOpeningStyle,
   ConversationOverlayOpenStyle,
@@ -20,8 +21,6 @@ import {
   NewConversationSendButton,
   NewConversationContainer,
 } from './styles';
-
-const CONVERSATION_ANIMATION_MS = 500; // 500ms euiTheme.animation.extraSlow
 
 enum ConversationPhase {
   Closed = 'closed',
@@ -37,11 +36,6 @@ export const ConversationPrompt = () => {
   const promptLauncherRef = useRef<HTMLDivElement>(null);
   const [launcherRect, setLauncherRect] = useState<DOMRect | null>(null);
   const [chatPhase, setChatPhase] = useState<ConversationPhase>(ConversationPhase.Closed);
-  const isOverlayVisible = chatPhase !== ConversationPhase.Closed;
-  const isAnimatingToFull = chatPhase === ConversationPhase.Open;
-  // agentBuilder === undefined handled by useGettingStartChatEnabled
-  const { EmbeddableConversation } = agentBuilder!;
-
   const expandConversation = useCallback(() => {
     if (chatPhase !== ConversationPhase.Closed) return;
     if (promptLauncherRef.current) {
@@ -64,6 +58,11 @@ export const ConversationPrompt = () => {
     }, CONVERSATION_ANIMATION_MS);
   }, [chatPhase]);
 
+  const isOverlayVisible = chatPhase !== ConversationPhase.Closed;
+  const isConversationOverlayOpen = chatPhase === ConversationPhase.Open;
+  // agentBuilder === undefined handled by useGettingStartChatEnabled
+  const { EmbeddableConversation } = agentBuilder!;
+
   return (
     <>
       <div css={NewConversationContainer}>
@@ -74,9 +73,7 @@ export const ConversationPrompt = () => {
               'xpack.search.gettingStarted.chat.conversationPrompt.placeholder',
               { defaultMessage: 'How can I help you get started today?' }
             )}
-            aria-label={i18n.translate('xpack.search.gettingStarted.chat.conversationPrompt.aria', {
-              defaultMessage: 'Open the AI agent chat',
-            })}
+            aria-hidden
             readOnly
             rows={3}
             onFocus={expandConversation}
@@ -106,14 +103,14 @@ export const ConversationPrompt = () => {
         <div
           css={[
             ConversationOverlayBaseStyles,
-            !isAnimatingToFull && launcherRect
+            !isConversationOverlayOpen && launcherRect
               ? ConversationOverlayOpeningStyle(launcherRect)
               : ConversationOverlayOpenStyle,
           ]}
           data-test-subj="searchGettingStartedChatNewConversationOverlay"
         >
-          <div css={ConversationStyle(isAnimatingToFull)}>
-            {isAnimatingToFull && (
+          <div css={ConversationStyle(isConversationOverlayOpen)}>
+            {isOverlayVisible && (
               <EmbeddableConversation
                 sessionTag="search-getting-started"
                 onClose={collapseConversation}

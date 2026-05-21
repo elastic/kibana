@@ -6,6 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
+import { EuiPageTemplate, EuiSpacer } from '@elastic/eui';
 import { GETTING_STARTED_SESSIONSTORAGE_KEY } from '@kbn/search-shared-ui';
 
 import { AnalyticsEvents } from '../../common';
@@ -24,8 +25,11 @@ export const SearchGettingStartedChatPage = () => {
 
   return (
     <SearchGettingStartedPageTemplate>
-      <ChatHeader />
-      <GettingStartedChatContent />
+      <EuiPageTemplate.Section data-test-subj="gettingStartedChatSection" grow alignment="center">
+        <ChatHeader />
+        <EuiSpacer size="l" />
+        <GettingStartedChatContent />
+      </EuiPageTemplate.Section>
     </SearchGettingStartedPageTemplate>
   );
 };

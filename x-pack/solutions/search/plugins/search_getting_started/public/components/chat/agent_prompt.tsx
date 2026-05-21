@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -14,14 +14,6 @@ import { PromptModal } from '../agent_install/prompt_modal';
 
 export const GettingStartedAgentPrompt = () => {
   const [isPromptModalOpen, setIsPromptModalOpen] = useState(false);
-  const [modalPrompt, setModalPrompt] = useState('');
-  const handleOpenInAgentWorkflow = useCallback(() => {
-    const prompt = buildPrompt('cli');
-    // Show a modal with the Claude/CLI prompt for the selected use case
-    setIsPromptModalOpen(true);
-    setModalPrompt(prompt);
-  }, []);
-  const closePromptModal = useCallback(() => setIsPromptModalOpen(false), []);
 
   return (
     <>
@@ -50,7 +42,7 @@ export const GettingStartedAgentPrompt = () => {
           <span>
             <EuiButton
               color="text"
-              onClick={handleOpenInAgentWorkflow}
+              onClick={() => setIsPromptModalOpen(true)}
               iconType="copy"
               size="s"
               data-test-subj="chatFirstAgentInstallBtn"
@@ -62,7 +54,9 @@ export const GettingStartedAgentPrompt = () => {
           </span>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {isPromptModalOpen && <PromptModal prompt={modalPrompt} onClose={closePromptModal} />}
+      {isPromptModalOpen && (
+        <PromptModal prompt={buildPrompt('cli')} onClose={() => setIsPromptModalOpen(false)} />
+      )}
     </>
   );
 };

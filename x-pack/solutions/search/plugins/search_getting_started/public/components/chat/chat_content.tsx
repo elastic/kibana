@@ -6,27 +6,29 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPageTemplate } from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { ChatElasticsearchConnectionDetails } from './connection_details';
 import { ConversationPrompt } from './conversation_prompt';
-import { ChatContentSeparator } from './styles';
+import { ChatColumnsGrid, ChatContentSeparator } from './styles';
 import { GettingStartedAgentPrompt } from './agent_prompt';
 
 export const GettingStartedChatContent = () => {
   return (
-    <EuiPageTemplate.Section data-test-subj="gettingStartedChatContent">
-      <EuiFlexGroup>
-        <EuiFlexItem grow={4} css={[ChatContentSeparator]}>
-          <ConversationPrompt />
-        </EuiFlexItem>
-        <EuiFlexItem grow={2}>
-          <EuiFlexGroup direction="column" gutterSize="l">
+    <EuiFlexGrid data-test-subj="gettingStartedChatContent" columns={2} css={ChatColumnsGrid}>
+      <EuiFlexItem css={ChatContentSeparator}>
+        <ConversationPrompt />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiFlexGroup direction="column" gutterSize="l">
+          <EuiFlexItem>
             <ChatElasticsearchConnectionDetails />
+          </EuiFlexItem>
+          <EuiFlexItem>
             <GettingStartedAgentPrompt />
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPageTemplate.Section>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGrid>
   );
 };

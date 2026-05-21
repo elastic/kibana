@@ -15,7 +15,7 @@ import { useElasticsearchUrl } from '../../hooks/use_elasticsearch_url';
 import { useAgentBuilderMcpUrl } from '../../hooks/use_mcp_url';
 
 enum UrlView {
-  elasticsearch = 'es',
+  elasticsearch = 'elasticsearch',
   mcp = 'mcp',
 }
 
@@ -39,13 +39,21 @@ export const ChatElasticsearchConnectionDetails = () => {
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiBadgeGroup>
+        <EuiBadgeGroup
+          role="group"
+          aria-label={i18n.translate(
+            'xpack.search.gettingStarted.chat.elasticsearchConnectionDetails.urlSelectBadgeGroup.aria',
+            {
+              defaultMessage: 'Select endpoint type',
+            }
+          )}
+        >
           <EuiBadge
             color={urlView !== UrlView.elasticsearch ? 'hollow' : 'default'}
             onClick={() => setUrlView(UrlView.elasticsearch)}
             data-test-subj="viewElasticsearchUrlBtn"
             onClickAriaLabel={i18n.translate(
-              'xpack.search.gettingStarted.chat.elasticsearchConnectionDetails.urlSelectBadge.mcp.aria',
+              'xpack.search.gettingStarted.chat.elasticsearchConnectionDetails.urlSelectBadge.elasticsearch.aria',
               {
                 defaultMessage: 'View the elasticsearch endpoint url',
               }
