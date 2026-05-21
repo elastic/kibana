@@ -24,6 +24,8 @@ dependsOn:
   - '@kbn/core-pricing-common'
   - '@kbn/licensing-types'
   - '@kbn/field-types'
+  - '@kbn/test-es-server'
+  - '@kbn/tooling-log'
 tags:
   - shared-common
   - package
@@ -35,6 +37,7 @@ fileGroups:
   src:
     - src/**/*
     - '**/*.ts'
+    - jest.integration.config.js
     - '!target/**/*'
   jest-config:
     - jest.config.js
