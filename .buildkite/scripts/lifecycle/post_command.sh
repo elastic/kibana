@@ -69,10 +69,12 @@ if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
         SCOUT_REAL_FAIL_COUNT=$(buildkite-agent meta-data get "${BUILDKITE_STEP_KEY}_real_fail_count" --default "0" 2>/dev/null || echo 0)
       fi
       SCOUT_GH_FLAG="--no-github-update"
+      SCOUT_GH_UPDATE_STATUS="disabled"
       if [[ "$SCOUT_REAL_FAIL_COUNT" -ge 2 ]]; then
         SCOUT_GH_FLAG=""
+        SCOUT_GH_UPDATE_STATUS="enabled"
       fi
-      echo "--- Run Failed Test Reporter (Scout, real_fail_count=$SCOUT_REAL_FAIL_COUNT)"
+      echo "--- Run Failed Test Reporter (Scout, real_fail_count=$SCOUT_REAL_FAIL_COUNT, github_update=$SCOUT_GH_UPDATE_STATUS)"
       node scripts/report_failed_tests --build-url="${BUILDKITE_BUILD_URL}#${BUILDKITE_JOB_ID}" $SCOUT_GH_FLAG \
         '.scout/reports/scout-playwright-test-failures-*/scout-failures-*.ndjson'
     fi
