@@ -30,6 +30,8 @@ type StatusRuntimeMapping = NonNullable<estypes.MappingRuntimeFields> & {
   };
 };
 
+const escapePainlessString = (s: string) => s.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+
 let inactivityTimeoutsDisabled = false;
 const _buildInactiveCondition = (opts: {
   now: number;
@@ -80,9 +82,9 @@ const _buildInactiveCondition = (opts: {
   const policyClauses = inactivityTimeouts
     .map(({ inactivityTimeout, policyIds }) => {
       const inactivityTimeoutMs = inactivityTimeout * 1000;
-      const policyIdMatches = `[${policyIds.map((id) => `'${id}'`).join(',')}].contains(${field(
-        'policy_id'
-      )}.value)`;
+      const policyIdMatches = `[${policyIds
+        .map((id) => `'${escapePainlessString(id)}'`)
+        .join(',')}].contains(${field('policy_id')}.value)`;
 
       return `${policyIdMatches} && lastCheckinMillis < ${now - inactivityTimeoutMs}L`;
     })
