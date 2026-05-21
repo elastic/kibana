@@ -11,10 +11,9 @@ import { readFile } from 'fs/promises';
 import { join } from 'path';
 import {
   setupEsqlEnv,
+  mappingVariants,
   type EsqlEnv,
   type EsqlValidationFixtures,
-  type NumberType,
-  type StringType,
 } from './helpers';
 
 const loadFixtures = async () => {
@@ -23,9 +22,6 @@ const loadFixtures = async () => {
 };
 
 describe('ES|QL validation error integration', () => {
-  const stringVariants: StringType[] = ['text', 'keyword'];
-  const numberVariants: NumberType[] = ['integer', 'long', 'double', 'unsigned_long'];
-
   let esqlEnv: EsqlEnv;
   let fixtures: EsqlValidationFixtures;
 
@@ -38,31 +34,29 @@ describe('ES|QL validation error integration', () => {
     await esqlEnv?.integrationEnv.shutdown();
   });
 
-  for (const stringFieldType of stringVariants) {
-    for (const numberFieldType of numberVariants) {
-      describe(`using ${stringFieldType} string fields and ${numberFieldType} number fields`, () => {
-        beforeAll(async () => {
-          await esqlEnv.setupIndicesPolicies(stringFieldType, numberFieldType);
-        });
-
-        afterAll(async () => {
-          await esqlEnv.cleanup();
-        });
-
-        it('does not report client-side validation errors for queries accepted by Elasticsearch', async () => {
-          const failures: string[] = [];
-
-          for (const { query, error } of fixtures.testCases) {
-            const esqlResponse = await esqlEnv.sendEsqlQuery(query);
-
-            if (error.length && !esqlResponse.error) {
-              failures.push(`Client-side validator rejected a query accepted by ES: ${query}`);
-            }
-          }
-
-          expect(failures).toEqual([]);
-        });
+  for (const mappingVariant of mappingVariants) {
+    describe(`using ${mappingVariant.name}`, () => {
+      beforeAll(async () => {
+        await esqlEnv.setupIndicesPolicies(mappingVariant);
       });
-    }
+
+      afterAll(async () => {
+        await esqlEnv.cleanup();
+      });
+
+      it('does not report client-side validation errors for queries accepted by Elasticsearch', async () => {
+        const failures: string[] = [];
+
+        for (const { query, error } of fixtures.testCases) {
+          const esqlResponse = await esqlEnv.sendEsqlQuery(query);
+
+          if (error.length && !esqlResponse.error) {
+            failures.push(`Client-side validator rejected a query accepted by ES: ${query}`);
+          }
+        }
+
+        expect(failures).toEqual([]);
+      });
+    });
   }
 });

@@ -11,7 +11,4 @@ module.exports = {
   preset: '@kbn/test/jest_integration_node',
   rootDir: '../../../../..',
   roots: ['<rootDir>/src/platform/packages/shared/kbn-esql-language'],
-  testMatch: [
-    '<rootDir>/src/platform/packages/shared/kbn-esql-language/src/language/validation/**/*.test.{js,mjs,ts,tsx}',
-  ],
 };
