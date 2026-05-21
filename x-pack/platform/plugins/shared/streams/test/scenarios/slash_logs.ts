@@ -13,6 +13,7 @@ import type { LogDocument } from '@kbn/synthtrace-client';
 import { generateShortId, log } from '@kbn/synthtrace-client';
 import type { Scenario } from '@kbn/synthtrace';
 import { withClient } from '@kbn/synthtrace';
+import { getAtIndexOrRandom } from '@kbn/synthtrace';
 import {
   getAgentName,
   getCloudProvider,
@@ -27,7 +28,6 @@ import {
   getStableShortId,
   getRandomRange,
 } from './helpers/logs_mock_data';
-import { getAtIndexOrRandom } from '@kbn/synthtrace';
 
 const LINUX_PROCESSES = ['cron', 'sshd', 'systemd', 'nginx', 'apache2'];
 
