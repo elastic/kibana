@@ -13,6 +13,9 @@ on:
         description: Triggering comment id for dispatched follow-up runs
         required: false
         type: string
+  bots:
+    - github-actions[bot]
+    - kibanamachine
 resources:
   - prefetch-pr-context.yml
 imports:
