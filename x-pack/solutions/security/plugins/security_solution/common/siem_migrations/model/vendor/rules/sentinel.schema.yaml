@@ -6,11 +6,6 @@ paths: {}
 components:
   x-codegen-enabled: true
   schemas:
-    SentinelIso8601Duration:
-      type: string
-      pattern: '^P(?:(?:\d+Y(?:\d+M)?(?:\d+D)?|\d+M(?:\d+D)?|\d+D)(?:T(?:\d+H(?:\d+M)?(?:\d+S)?|\d+M(?:\d+S)?|\d+S))?|T(?:\d+H(?:\d+M)?(?:\d+S)?|\d+M(?:\d+S)?|\d+S))$'
-      description: An ISO 8601 duration.
-
     SentinelRuleProperties:
       type: object
       description: Properties of a Microsoft Sentinel Scheduled or NRT Analytics Rule
@@ -28,10 +23,10 @@ components:
           type: string
           description: The KQL query for the rule
         queryFrequency:
-          $ref: '#/components/schemas/SentinelIso8601Duration'
+          type: string
           description: The frequency in ISO 8601 duration format for this alert rule to run.
         queryPeriod:
-          $ref: '#/components/schemas/SentinelIso8601Duration'
+          type: string
           description: The period in ISO 8601 duration format that this alert rule looks at.
         severity:
           type: string
