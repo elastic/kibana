@@ -19,6 +19,8 @@ interface Props {
   searchInput: string;
 }
 
+const ALLOWED_CATEGORIES = new Set(['observability', 'os_system']);
+
 const fetchAvailablePackagesHook = (): Promise<AvailablePackagesHookType> =>
   import('@kbn/fleet-plugin/public')
     .then((module) => module.AvailablePackagesHook())
@@ -38,15 +40,17 @@ const ResultsGrid = ({ useAvailablePackages, searchInput, customCards }: Results
   });
   const rewriteUrl = useCardUrlRewrite({ category: null, search: searchInput });
 
-  const list: IntegrationCardItem[] = useMemo(
+  const filteredList = useMemo(
     () =>
       customCards
         .concat(filteredCards)
-        .filter((card) =>
-          card.categories.some((category) => ['observability', 'os_system'].includes(category))
-        )
-        .map(rewriteUrl),
-    [customCards, filteredCards, rewriteUrl]
+        .filter((card) => card.categories.some((category) => ALLOWED_CATEGORIES.has(category))),
+    [customCards, filteredCards]
+  );
+
+  const list: IntegrationCardItem[] = useMemo(
+    () => filteredList.map(rewriteUrl),
+    [filteredList, rewriteUrl]
   );
 
   if (isLoading) return <Loading />;
