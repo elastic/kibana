@@ -1,113 +1,73 @@
- /*
-  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
-  * or more contributor license agreements. Licensed under the "Elastic License
-  * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
-  * Public License v 1"; you may not use this file except in compliance with, at
-  * your election, the "Elastic License 2.0", the "GNU Affero General Public
-  * License v3.0 only", or the "Server Side Public License, v 1".
-  */
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
 
- import type { AggregateQuery, Query } from '@kbn/es-query';
- import { ESQL_CONTROL } from '@kbn/controls-constants';
- import { EsqlControlType, ESQLVariableType } from '@kbn/esql-types';
- import type { PresentationContainer } from '@kbn/presentation-publishing';
- import { getMockPresentationContainer } from '@kbn/presentation-publishing/interfaces/containers/mocks';
- import { getAllEsqlControls, getEsqlControls } from './get_esql_controls';
- import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
-+import { of } from 'rxjs';
+import type { AggregateQuery, Query } from '@kbn/es-query';
+import { isOfAggregateQueryType } from '@kbn/es-query';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
+import {
+  type PresentationContainer,
+  apiHasSerializableState,
+  apiHasType,
+  apiHasUniqueId,
+} from '@kbn/presentation-publishing';
+import { ESQL_CONTROL } from '@kbn/controls-constants';
+import { getESQLQueryVariables } from '../query_parsing_helpers';
 
- const createPresentationContainer = (children: unknown[]) =>
-   ({
-     ...getMockPresentationContainer(),
-     children$: {
-       getValue: () => Object.fromEntries(children.map((child, index) => [`child-${index}`, child])),
-     },
-   } as unknown as PresentationContainer);
+type EsqlControlState = OptionsListESQLControlState & {
+  type: typeof ESQL_CONTROL;
+};
 
- const createControlState = (variableName: string): OptionsListESQLControlState => ({
-   title: 'Control title',
-   selected_options: ['option-1'],
-   variable_name: variableName,
-   variable_type: ESQLVariableType.VALUES,
-   control_type: EsqlControlType.STATIC_VALUES,
-   single_select: true,
-   available_options: ['option-1', 'option-2'],
- });
+interface EsqlControlsState {
+  [uuid: string]: EsqlControlState;
+}
 
- const createControlApi = (
-   uuid: string,
-   state: OptionsListESQLControlState,
-   type = ESQL_CONTROL
- ) => ({
-   uuid,
-   type,
-+  anyStateChange$: of(),
-   serializeState: () => state,
-   applySerializedState: () => undefined,
- });
+export function getAllEsqlControls(
+  presentationContainer: PresentationContainer
+): EsqlControlsState {
+  const esqlControlsState: EsqlControlsState = {};
 
- describe('getAllEsqlControls', () => {
-   it('returns all valid ES|QL controls', () => {
-     const matchingState = createControlState('status');
-     const otherState = createControlState('host');
-     const noVariableState = createControlState('');
-     const presentationContainer = createPresentationContainer([
-       createControlApi('matching-control', matchingState),
-       createControlApi('other-control', otherState),
-       createControlApi('empty-variable-control', noVariableState),
-       createControlApi('wrong-type-control', matchingState, 'RANGE_SLIDER_CONTROL'),
-       { uuid: 'no-serialize', type: ESQL_CONTROL },
-       { type: ESQL_CONTROL, serializeState: () => matchingState },
-       null,
-     ]);
+  for (const api of Object.values(presentationContainer.children$.getValue())) {
+    if (
+      !(
+        apiHasType(api) &&
+        api.type === ESQL_CONTROL &&
+        apiHasUniqueId(api) &&
+        apiHasSerializableState(api)
+      )
+    ) {
+      continue;
+    }
 
-     expect(getAllEsqlControls(presentationContainer)).toStrictEqual({
-       'matching-control': {
-         type: ESQL_CONTROL,
-         ...matchingState,
-       },
-       'other-control': {
-         type: ESQL_CONTROL,
-         ...otherState,
-       },
-     });
-   });
- });
+    const controlState = api.serializeState() as OptionsListESQLControlState;
+    const variableName = controlState.variable_name;
+    if (!variableName) continue;
 
- describe('getEsqlControls', () => {
-   it('returns undefined when query is not an ES|QL query', () => {
-     const presentationContainer = createPresentationContainer([]);
-     const kqlQuery = {
-       query: 'response:200',
-       language: 'kuery',
-     } as Query;
+    esqlControlsState[api.uuid] = {
+      ...controlState,
+      type: ESQL_CONTROL,
+    };
+  }
 
-     expect(getEsqlControls(presentationContainer, undefined)).toBeUndefined();
-     expect(getEsqlControls(presentationContainer, kqlQuery)).toBeUndefined();
-   });
+  return esqlControlsState;
+}
 
-   it('returns only matching ES|QL controls used by the query', () => {
-     const matchingState = createControlState('status');
-     const nonMatchingState = createControlState('host');
-     const noVariableState = createControlState('');
-     const presentationContainer = createPresentationContainer([
-       createControlApi('matching-control', matchingState),
-       createControlApi('other-control', nonMatchingState),
-       createControlApi('empty-variable-control', noVariableState),
-       createControlApi('wrong-type-control', matchingState, 'RANGE_SLIDER_CONTROL'),
-       { uuid: 'no-serialize', type: ESQL_CONTROL },
-       { type: ESQL_CONTROL, serializeState: () => matchingState },
-       null,
-     ]);
-     const query = {
-       esql: 'FROM logs-* | WHERE status == ?status',
-     } as AggregateQuery;
+export function getEsqlControls(
+  presentationContainer: PresentationContainer,
+  query: AggregateQuery | Query | undefined
+) {
+  if (!isOfAggregateQueryType(query)) return;
 
-     expect(getEsqlControls(presentationContainer, query)).toStrictEqual({
-       'matching-control': {
-         type: ESQL_CONTROL,
-         ...matchingState,
-       },
-     });
-   });
- });
+  const usedVariables = getESQLQueryVariables(query.esql);
+
+  return Object.fromEntries(
+    Object.entries(getAllEsqlControls(presentationContainer)).filter(([, control]) =>
+      usedVariables.includes(control.variable_name)
+    )
+  );
+}
