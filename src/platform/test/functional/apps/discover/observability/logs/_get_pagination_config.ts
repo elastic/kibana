@@ -65,12 +65,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('data view mode', () => {
       it('should render default pagination with page numbers', async () => {
-        await PageObjects.common.navigateToActualUrl('discover', undefined, {
-          ensureCurrentUrl: false,
-        });
-        if (await PageObjects.discover.isInEsqlMode()) {
-          await PageObjects.discover.selectDataViewMode();
-        }
+        await PageObjects.discover.navigateToApp('classic');
+        await PageObjects.discover.waitUntilSearchingHasFinished();
         await dataViews.createFromSearchBar({
           name: 'lo', // Must be anything but log/logs, since pagination is disabled for log sources
           adHoc: true,
