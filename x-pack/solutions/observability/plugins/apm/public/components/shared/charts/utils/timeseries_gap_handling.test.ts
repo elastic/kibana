@@ -156,6 +156,17 @@ describe('expandTimeseriesWithDottedGapLines', () => {
     expect(expandTimeseriesWithDottedGapLines([bar])).toEqual([bar]);
   });
 
+  it('keeps all-null line series available to rendering callers', () => {
+    const data = [
+      { x: 1, y: null },
+      { x: 2, y: null },
+    ];
+
+    expect(expandTimeseriesWithDottedGapLines([{ title: 'All null', type: 'line', data }])).toEqual(
+      [{ title: 'All null', type: 'line', data, id: 'All null', hideLegend: false }]
+    );
+  });
+
   it('expands line series with leading and trailing edge line specs', () => {
     const expanded = expandTimeseriesWithDottedGapLines([
       {

@@ -250,37 +250,41 @@ export function SparkPlotItem({
                     lineSeriesStyle={APM_DOTTED_LINE_STYLE}
                   />
                 ) : null}
-                {comparisonSplit.interiorEdges.map((edge, i) => (
-                  <LineSeries
-                    key={`comparisonSeries_edge_gap_${i}`}
-                    id={`comparisonSeries_edge_gap_${i}`}
-                    xScaleType={ScaleType.Time}
-                    yScaleType={ScaleType.Linear}
-                    xAccessor={'x'}
-                    yAccessors={['y']}
-                    data={edge}
-                    color={comparisonSeriesColor}
-                    curve={CurveType.CURVE_MONOTONE_X}
-                    lineSeriesStyle={APM_DOTTED_LINE_STYLE}
-                  />
-                ))}
-                {comparisonSplit.mainSegments.map((segment, i) => (
-                  <AreaSeries
-                    key={`comparisonSeries${
-                      comparisonSplit.mainSegments.length === 1 ? '' : `_seg_${i}`
-                    }`}
-                    id={`comparisonSeries${
-                      comparisonSplit.mainSegments.length === 1 ? '' : `_seg_${i}`
-                    }`}
-                    xScaleType={ScaleType.Time}
-                    yScaleType={ScaleType.Linear}
-                    xAccessor={'x'}
-                    yAccessors={['y']}
-                    data={segment}
-                    color={comparisonSeriesColor}
-                    curve={CurveType.CURVE_MONOTONE_X}
-                  />
-                ))}
+                {comparisonSplit.interiorEdges.map((edge, i) => {
+                  const comparisonEdgeGapId = `comparisonSeries_edge_gap_${i}`;
+                  return (
+                    <LineSeries
+                      key={comparisonEdgeGapId}
+                      id={comparisonEdgeGapId}
+                      xScaleType={ScaleType.Time}
+                      yScaleType={ScaleType.Linear}
+                      xAccessor={'x'}
+                      yAccessors={['y']}
+                      data={edge}
+                      color={comparisonSeriesColor}
+                      curve={CurveType.CURVE_MONOTONE_X}
+                      lineSeriesStyle={APM_DOTTED_LINE_STYLE}
+                    />
+                  );
+                })}
+                {comparisonSplit.mainSegments.map((segment, i) => {
+                  const comparisonSeriesId = `comparisonSeries${
+                    comparisonSplit.mainSegments.length === 1 ? '' : `_seg_${i}`
+                  }`;
+                  return (
+                    <AreaSeries
+                      key={comparisonSeriesId}
+                      id={comparisonSeriesId}
+                      xScaleType={ScaleType.Time}
+                      yScaleType={ScaleType.Linear}
+                      xAccessor={'x'}
+                      yAccessors={['y']}
+                      data={segment}
+                      color={comparisonSeriesColor}
+                      curve={CurveType.CURVE_MONOTONE_X}
+                    />
+                  );
+                })}
               </>
             ) : null}
           </>

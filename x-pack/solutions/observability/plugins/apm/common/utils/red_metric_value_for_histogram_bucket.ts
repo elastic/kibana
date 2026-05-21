@@ -18,7 +18,7 @@ export interface RedMetricHistogramPoint {
  *   line instead of dipping to zero when there is no data.
  * - Invalid values (`null`, `NaN`) are also dropped to `null`.
  */
-export function nullifyLeadingTrailingEmptyRedMetricPoints(
+export function nullifyEmptyRedMetricPoints(
   points: ReadonlyArray<RedMetricHistogramPoint>
 ): Array<{ x: number; y: number | null }> {
   return points.map((point) => {

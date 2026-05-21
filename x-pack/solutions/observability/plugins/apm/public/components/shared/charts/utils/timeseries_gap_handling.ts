@@ -124,6 +124,24 @@ const AREA_NO_LINE_STYLE: RecursivePartial<AreaSeriesStyle> = {
   point: { opacity: 0, visible: 'never' },
 };
 
+function makeEdgeSeries(
+  serie: TimeSeries<Coordinate>,
+  id: string,
+  data: Coordinate[]
+): TimeSeries<Coordinate> {
+  return {
+    ...serie,
+    id,
+    title: id,
+    type: EDGE_SERIES_TYPE,
+    data,
+    hideLegend: true,
+    hideTooltipValue: true,
+    lineSeriesStyle: APM_DOTTED_LINE_STYLE,
+    markSizeAccessor: undefined,
+  };
+}
+
 /**
  * Expands each line, linemark, or area series into optional dotted edge segments plus the main series.
  *
@@ -153,45 +171,15 @@ export function expandTimeseriesWithDottedGapLines(
     const baseId = serie.id ?? serie.title;
 
     if (leadingEdge) {
-      out.push({
-        ...serie,
-        id: `${baseId}__edge_leading`,
-        title: `${baseId}__edge_leading`,
-        type: EDGE_SERIES_TYPE,
-        data: leadingEdge,
-        hideLegend: true,
-        hideTooltipValue: true,
-        lineSeriesStyle: APM_DOTTED_LINE_STYLE,
-        markSizeAccessor: undefined,
-      });
+      out.push(makeEdgeSeries(serie, `${baseId}__edge_leading`, leadingEdge));
     }
 
     if (trailingEdge) {
-      out.push({
-        ...serie,
-        id: `${baseId}__edge_trailing`,
-        title: `${baseId}__edge_trailing`,
-        type: EDGE_SERIES_TYPE,
-        data: trailingEdge,
-        hideLegend: true,
-        hideTooltipValue: true,
-        lineSeriesStyle: APM_DOTTED_LINE_STYLE,
-        markSizeAccessor: undefined,
-      });
+      out.push(makeEdgeSeries(serie, `${baseId}__edge_trailing`, trailingEdge));
     }
 
     interiorEdges.forEach((edge, i) => {
-      out.push({
-        ...serie,
-        id: `${baseId}__edge_gap_${i}`,
-        title: `${baseId}__edge_gap_${i}`,
-        type: EDGE_SERIES_TYPE,
-        data: edge,
-        hideLegend: true,
-        hideTooltipValue: true,
-        lineSeriesStyle: APM_DOTTED_LINE_STYLE,
-        markSizeAccessor: undefined,
-      });
+      out.push(makeEdgeSeries(serie, `${baseId}__edge_gap_${i}`, edge));
     });
 
     if (serie.type === 'area' && interiorEdges.length > 0) {
