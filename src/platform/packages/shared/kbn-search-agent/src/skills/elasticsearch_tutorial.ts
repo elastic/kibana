@@ -59,11 +59,13 @@ Before your first visible message, silently check whether \`platform.core.produc
 
   When the user says "ready", re-check the tool list. If the tool now appears, call it with a probe query, then output only the outline (Turn A). Not the outline plus steps.
 
+  If the user says they cannot install the docs or asks to skip this step, respect their request. Warn them that without the documentation tool, snippets may be less accurate since you cannot verify syntax and constraints against current docs. Then proceed to the outline (Turn A) and do your best with the topic.
+
 - **Tool is available**: Call it with a probe query for the user's topic. This doubles as your seed documentation lookup. If it returns content, proceed to the outline (Turn A). If it errors, surface that error and ask how to proceed.
 
 - **Never** call the tool if it is not in your available tools — it will fail.
 
-Ground every step in documentation from this tool. Look up the topic before writing the outline. Confirm parameter names, field types, and defaults in the tool output rather than relying on memory. Cite the URLs the tool returns in the recap (Turn E).
+Ground every step in documentation from this tool when available. Look up the topic before writing the outline. Confirm parameter names, field types, and defaults in the tool output rather than relying on memory. Cite the URLs the tool returns in the recap (Turn E).
 
 ## Tutorial format
 
