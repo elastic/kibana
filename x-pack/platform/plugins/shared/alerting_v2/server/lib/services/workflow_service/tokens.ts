@@ -5,13 +5,9 @@
  * 2.0.
  */
 
-export type {
-  DomainEvent,
-  EventBus,
-  EventBusContextRest,
-  EventBusHandlerArgs,
-  EventBusSubscriber,
-  Subscription,
-} from './types';
-export { EventBusSubscriberToken } from './types';
-export { AsyncDomainEventBus } from './event_bus';
+import type { ServiceIdentifier } from 'inversify';
+import type { WorkflowServiceContract } from './workflow_service';
+
+export const WorkflowServiceToken = Symbol.for(
+  'alerting_v2.WorkflowService'
+) as ServiceIdentifier<WorkflowServiceContract>;

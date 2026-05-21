@@ -14,28 +14,18 @@ import type { DomainEvent, EventBus } from './types';
  *
  * Use this in publisher / subscriber unit tests and assert on
  * `mock.publish` / `mock.subscribe`. The real bus has its own coverage in
- * `event_bus.test.ts`
+ * `event_bus.test.ts`.
  *
- * The generic parameter mirrors the bus's: pass the catalog union (e.g.
- * `AlertingDomainEvent`) to keep callers' `publish` arguments narrowed
- * the same way they are in production code.
- *
- * @example
- * ```ts
- * import { createEventBusMock } from '../../events/event_bus/event_bus.mock';
- * import type { AlertingDomainEvent } from '../../events/domain_events';
- *
- * const eventBus = createEventBusMock<AlertingDomainEvent>();
- * const service = new MyService(eventBus);
- *
- * service.doSomething();
- *
- * expect(eventBus.publish).toHaveBeenCalledWith({ type: 'episode.assigned', ... });
- * ```
+ * The generic parameters mirror the bus's: pass the catalog union (e.g.
+ * `AlertingDomainEvent`) for `TEvent`, and the catalog's publisher
+ * context (e.g. `AlertingPublisherContext`) for `TContext`, so callers'
+ * `publish` / `subscribe` arguments are narrowed the same way they are
+ * in production code.
  */
-export function createEventBusMock<TEvent extends DomainEvent = DomainEvent>(): jest.Mocked<
-  EventBus<TEvent>
-> {
+export function createEventBusMock<
+  TEvent extends DomainEvent = DomainEvent,
+  TContext = void
+>(): jest.Mocked<EventBus<TEvent, TContext>> {
   return {
     publish: jest.fn(),
     subscribe: jest.fn().mockReturnValue({ unsubscribe: jest.fn() }),

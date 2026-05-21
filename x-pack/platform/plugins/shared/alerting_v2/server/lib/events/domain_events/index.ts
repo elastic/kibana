@@ -21,6 +21,7 @@
  *  3. Extend the {@link AlertingDomainEvent} union below.
  */
 
+import type { KibanaRequest } from '@kbn/core/server';
 import type { ServiceIdentifier } from 'inversify';
 import type { EventBus } from '../event_bus';
 import type { AlertActionEvent } from '../alert_action_event_publisher/events';
@@ -46,27 +47,52 @@ export { EPISODE_ASSIGNED_EVENT_TYPE } from '../alert_action_event_publisher/eve
 export type AlertingDomainEvent = AlertActionEvent;
 
 /**
- * Inversify token for the singleton {@link EventBus} carrying every
- * {@link AlertingDomainEvent}.
+ * Publisher-side context threaded through every alerting bus publish call.
  *
- * Typed against the {@link AlertingDomainEvent} discriminated union so that
- * subscribers receive a fully-narrowed event in their handler:
+ * The bus is generic over its context type ({@link EventBus}'s `TContext`
+ * generic). This is the alerting catalog's concrete binding of it. It
+ * carries the request from the publishing call site to every subscriber
+ * so request-scoped consumers (e.g. the workflow subscriber, which needs
+ * to build a user-scoped workflows client) can operate under the same
+ * auth identity that produced the event, even though the bus dispatches
+ * asynchronously.
+ *
+ * Other plugins reusing the bus pick their own `TContext` (or leave it
+ * defaulted to `void`); the bus itself stays domain-agnostic.
+ */
+export interface AlertingPublisherContext {
+  /**
+   * Kibana request from the publishing call site.
+   *
+   * Subscribers may forward this to request-scoped clients (workflows,
+   * spaces, ES `asScoped`, …). It is safe to retain across the bus's
+   * `setImmediate` dispatch hop: `KibanaRequest` snapshots its headers at
+   * construction, and Kibana's auth/spaces services key their state in
+   * `WeakMap`s on the raw request object. Nothing on this path reads
+   * from the live HTTP socket.
+   */
+  readonly request: KibanaRequest;
+}
+
+/**
+ * Inversify token for the singleton {@link EventBus} carrying every
+ * {@link AlertingDomainEvent} along with an {@link AlertingPublisherContext}.
+ *
+ * Typed against both the event union and the publisher context so that
+ * subscribers receive a fully-narrowed event AND a typed context in
+ * their handler:
  *
  * ```ts
  * constructor(@inject(AlertingDomainEventBusToken)
- *             private readonly bus: EventBus<AlertingDomainEvent>) {}
+ *             private readonly bus: EventBus<AlertingDomainEvent, AlertingPublisherContext>) {}
  *
- * this.bus.subscribe('episode.assigned', (event) => {
- *   // `event` is `EpisodeAssignedEvent` here — no cast needed.
+ * this.bus.subscribe('episode.assigned', (event, { request }) => {
+ *   // `event` is `EpisodeAssignedEvent` and `request` is `KibanaRequest`.
  * });
  * ```
  *
- * Publishers can rely on the same narrowing on their `publish` call. The
- * generic `EventBus<TEvent>` interface is contravariant in `TEvent` at its
- * input positions, so the underlying `AsyncDomainEventBus` singleton
- * (declared as `<DomainEvent>` by default) safely satisfies this narrower
- * contract.
+ * Publishers get the same narrowing on `publish(event, { request })`.
  */
 export const AlertingDomainEventBusToken = Symbol.for(
   'alerting_v2.AlertingDomainEventBus'
-) as ServiceIdentifier<EventBus<AlertingDomainEvent>>;
+) as ServiceIdentifier<EventBus<AlertingDomainEvent, AlertingPublisherContext>>;

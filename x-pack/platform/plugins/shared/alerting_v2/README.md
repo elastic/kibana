@@ -46,4 +46,4 @@ If you want implementation detail for one subsystem, continue with:
 - API shape or saved object contracts: inspect `server/routes/` and `server/saved_objects/` together with the relevant subsystem docs
 - Workflow triggers (workflows_extensions registration + runtime emission): see the public and server READMEs
   - [`public/lib/workflow_extensions/README.md`](public/lib/workflow_extensions/README.md)
-  - [`server/lib/services/workflow_extensions_service/README.md`](server/lib/services/workflow_extensions_service/README.md)
+  - [`server/lib/services/workflow_service/README.md`](server/lib/services/workflow_service/README.md)

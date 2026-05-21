@@ -7,7 +7,7 @@
 
 import type { EventBus } from '../event_bus';
 import { createEventBusMock } from '../event_bus/event_bus.mock';
-import type { AlertingDomainEvent } from '../domain_events';
+import type { AlertingDomainEvent, AlertingPublisherContext } from '../domain_events';
 import { AlertActionEventPublisher } from './alert_action_event_publisher';
 
 /**
@@ -17,9 +17,9 @@ import { AlertActionEventPublisher } from './alert_action_event_publisher';
  */
 export function createAlertActionEventPublisher(): {
   publisher: AlertActionEventPublisher;
-  eventBus: jest.Mocked<EventBus<AlertingDomainEvent>>;
+  eventBus: jest.Mocked<EventBus<AlertingDomainEvent, AlertingPublisherContext>>;
 } {
-  const eventBus = createEventBusMock<AlertingDomainEvent>();
+  const eventBus = createEventBusMock<AlertingDomainEvent, AlertingPublisherContext>();
 
   return {
     publisher: new AlertActionEventPublisher(eventBus),
