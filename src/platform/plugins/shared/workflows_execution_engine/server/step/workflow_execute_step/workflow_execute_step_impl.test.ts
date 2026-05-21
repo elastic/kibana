@@ -145,6 +145,41 @@ describe('WorkflowExecuteStepImpl', () => {
         'workflow-id': 'child-workflow-id',
         inputs: { param1: 'value1' },
       });
+      expect(repo.getWorkflow).toHaveBeenCalledWith('child-workflow-id', 'default', {
+        includeGlobal: false,
+        managedFilter: 'unmanaged',
+      });
+    });
+
+    it('should include global workflows for managed parent runs', async () => {
+      const init = createMockInit();
+      const repo = init.workflowRepository as jest.Mocked<WorkflowRepository>;
+      repo.getWorkflow.mockResolvedValue(createMockWorkflow());
+      (init.stepExecutionRuntime as any).workflowExecution.managed = true;
+
+      const step = new WorkflowExecuteStepImpl(init);
+      await step.run();
+
+      expect(repo.getWorkflow).toHaveBeenCalledWith('child-workflow-id', 'default', {
+        includeGlobal: true,
+        managedFilter: 'all',
+      });
+    });
+
+    it('should not treat originManagedWorkflowId alone as a managed parent run', async () => {
+      const init = createMockInit();
+      const repo = init.workflowRepository as jest.Mocked<WorkflowRepository>;
+      repo.getWorkflow.mockResolvedValue(createMockWorkflow());
+      (init.stepExecutionRuntime as any).workflowExecution.originManagedWorkflowId =
+        'system-parent-workflow';
+
+      const step = new WorkflowExecuteStepImpl(init);
+      await step.run();
+
+      expect(repo.getWorkflow).toHaveBeenCalledWith('child-workflow-id', 'default', {
+        includeGlobal: false,
+        managedFilter: 'unmanaged',
+      });
     });
 
     it('should render inputs via context manager', async () => {
