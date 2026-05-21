@@ -15,10 +15,10 @@ import type { IntegrationCardItem } from '..';
 
 // Keep in sync with @kbn/ingest-hub-plugin/common/constants
 const ONBOARDING_ENABLED_FLAG = 'ingestHub.onboardingEnabled';
-const AWS_TITLE = i18n.translate('xpack.ingestHub.awsOnboardingTitle', {
+const AWS_TITLE = i18n.translate('xpack.fleet.onboardingOverride.awsTitle', {
   defaultMessage: 'Amazon Web Services',
 });
-const AWS_DESCRIPTION = i18n.translate('xpack.ingestHub.awsOnboardingDescription', {
+const AWS_DESCRIPTION = i18n.translate('xpack.fleet.onboardingOverride.awsDescription', {
   defaultMessage: 'Collect logs and metrics from Amazon Web Services (AWS).',
 });
 
