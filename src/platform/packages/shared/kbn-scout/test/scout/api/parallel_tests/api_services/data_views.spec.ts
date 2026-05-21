@@ -46,7 +46,7 @@ apiTest.describe(
       // Verify our test data view is in the list
       const foundDataView = dataViews.find((dv) => dv.id === dataViewId);
       expect(foundDataView).toBeDefined();
-      expect(foundDataView?.title).toBe('123');
+      expect(foundDataView?.title).toBe(dataViewTitle);
     });
 
     apiTest('should get a single data view by ID with get()', async ({ apiServices }) => {
