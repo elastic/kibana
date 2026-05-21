@@ -407,12 +407,17 @@ export class WorkflowsManagementApi {
     let resolvedYaml = workflowYaml;
     let resolvedWorkflowId = workflowId;
 
-    if (workflowId && !workflowYaml) {
-      const existingWorkflow = await this.workflowsService.getWorkflow(workflowId, spaceId);
+    // Fetch the persisted workflow when an id is provided so we can
+    // fall back to its YAML and carry managed flags into the execution.
+    let existingWorkflow: WorkflowDetailDto | null = null;
+    if (workflowId) {
+      existingWorkflow = await this.workflowsService.getWorkflow(workflowId, spaceId);
       if (!existingWorkflow) {
         throw new WorkflowNotFoundError(workflowId);
       }
-      resolvedYaml = existingWorkflow.yaml;
+      if (!resolvedYaml) {
+        resolvedYaml = existingWorkflow.yaml;
+      }
     }
 
     if (!resolvedWorkflowId) {
@@ -447,6 +452,13 @@ export class WorkflowsManagementApi {
         definition: workflowJson.definition,
         yaml: resolvedYaml,
         isTestRun: true,
+        ...(existingWorkflow?.managed === true ? { managed: true } : {}),
+        ...(typeof existingWorkflow?.managedBy === 'string'
+          ? { managedBy: existingWorkflow.managedBy }
+          : {}),
+        ...(typeof existingWorkflow?.originManagedWorkflowId === 'string'
+          ? { originManagedWorkflowId: existingWorkflow.originManagedWorkflowId }
+          : {}),
       },
       context,
       request
