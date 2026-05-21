@@ -33,31 +33,17 @@ export async function ensureDefaultSpaceNPRE(config: Config, log: ToolingLog): P
 
   const es = getEsClient(scoutConfig, new ScoutLogger('ensure-default-space-npre', 'info'));
 
-  // Registering the linked cluster can cause a brief disruption on the origin — retry a few times.
-  const MAX_ATTEMPTS = 5;
-  const RETRY_DELAY_MS = 2000;
-  let lastError: Error | undefined;
-  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
-    try {
-      await es.transport.request({
-        method: 'PUT',
-        path: `/_project_routing/${DEFAULT_SPACE_NPRE}`,
-        body: { expression: DEFAULT_EXPRESSION },
-      });
-      log.debug(`Ensured ${DEFAULT_SPACE_NPRE} => ${DEFAULT_EXPRESSION}`);
-      return;
-    } catch (e) {
+  await es.transport
+    .request({
+      method: 'PUT',
+      path: `/_project_routing/${DEFAULT_SPACE_NPRE}`,
+      body: { expression: DEFAULT_EXPRESSION },
+    })
+    .catch((e) => {
       const message = e instanceof Error ? e.message : String(e);
-      lastError = new Error(
+      throw new Error(
         `Failed to ensure default space NPRE routing — CPS environment may not be properly configured: ${message}`
       );
-      if (attempt < MAX_ATTEMPTS) {
-        log.debug(
-          `[ensureDefaultSpaceNPRE] attempt ${attempt} failed (${message}), retrying in ${RETRY_DELAY_MS}ms`
-        );
-        await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
-      }
-    }
-  }
-  throw lastError;
+    });
+  log.debug(`Ensured ${DEFAULT_SPACE_NPRE} => ${DEFAULT_EXPRESSION}`);
 }
