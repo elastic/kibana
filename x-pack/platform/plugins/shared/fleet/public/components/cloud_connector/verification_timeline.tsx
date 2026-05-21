@@ -121,7 +121,12 @@ function buildRunCompleted(event: RunCompletedEvent): EuiTimelineItemProps {
           <FormattedMessage
             id="xpack.fleet.cloudConnector.verificationTimeline.runCounts"
             defaultMessage="{verified} verified · {required} required · {denied} denied · {error} error"
-            values={counts}
+            values={{
+              verified: counts.verified,
+              required: counts.required,
+              denied: counts.denied,
+              error: counts.error,
+            }}
           />
         </EuiText>
       </div>
