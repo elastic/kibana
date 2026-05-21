@@ -15,12 +15,21 @@ import {
 } from '@kbn/core-user-storage-browser';
 
 const StringKeyValue = () => {
-  const [value] = useUserStorage<string>('test:string_key');
+  const [preloadedStringValue] = useUserStorage<string>('test:string_key');
+  const [lazyStringValue] = useUserStorage<string>('test:string_key_lazy');
   return (
-    <div data-test-subj="userStorageTest:string-key-row">
-      <span>String key: </span>
-      <span data-test-subj="userStorageTest:string-key-value">{value}</span>
-    </div>
+    <>
+      <div data-test-subj="userStorageTest:preloaded-string-key-row">
+        <span>String key (preloaded): </span>
+        <span data-test-subj="userStorageTest:preloaded-string-key-value">
+          {preloadedStringValue}
+        </span>
+      </div>
+      <div data-test-subj="userStorageTest:lazy-string-key-row">
+        <span>String key (lazy): </span>
+        <span data-test-subj="userStorageTest:lazy-string-key-value">{lazyStringValue}</span>
+      </div>
+    </>
   );
 };
 

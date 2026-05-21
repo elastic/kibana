@@ -22,7 +22,7 @@ export interface UserStorageClientParams {
 
 /**
  * Browser-side {@link IUserStorageClient}: a synchronous in-memory cache
- * seeded from server-injected metadata (for keys with `serverInject: true`),
+ * seeded from preloaded (server-injected) metadata (for keys with `preload: true`),
  * with HTTP-backed writes and per-key lazy fetching for non-injected keys.
  *
  * Lazy fetch behaviour:
@@ -58,6 +58,13 @@ export class UserStorageClient implements IUserStorageClient {
         this.loaded$.complete();
       },
     });
+  }
+
+  public peek<T = unknown>(key: string): T | undefined;
+  public peek<T = unknown>(key: string, defaultValue: T): T;
+  public peek<T = unknown>(key: string, defaultValue?: T): T | undefined {
+    const cached = this.cache[key];
+    return cached !== undefined ? (cached as T) : defaultValue;
   }
 
   public get<T = unknown>(key: string): T | undefined;

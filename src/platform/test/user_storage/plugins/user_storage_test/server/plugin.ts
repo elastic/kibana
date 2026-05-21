@@ -17,11 +17,19 @@ export class UserStorageTestPlugin implements Plugin {
         schema: z.string(),
         defaultValue: 'default_value',
         scope: 'space',
+        preload: true,
+      },
+      'test:string_key_lazy': {
+        schema: z.string(),
+        defaultValue: 'lazy_default_value',
+        scope: 'space',
+        preload: false, // make it lazy
       },
       'test:number_key': {
         schema: z.number(),
         defaultValue: 42,
         scope: 'global',
+        preload: true,
       },
       'test:object_key': {
         schema: z.object({
@@ -38,16 +46,19 @@ export class UserStorageTestPlugin implements Plugin {
           pinnedItems: [],
         },
         scope: 'space',
+        preload: true,
       },
       'test:boolean_key': {
         schema: z.boolean(),
         defaultValue: false,
         scope: 'global',
+        preload: true,
       },
       'test:array_key': {
         schema: z.array(z.string()),
         defaultValue: [],
         scope: 'space',
+        preload: true,
       },
     });
   }

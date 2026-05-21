@@ -18,6 +18,10 @@ const buildClient = (initial: Record<string, unknown> = {}): IUserStorageClient 
   const cache: Record<string, unknown> = { ...initial };
   const subject$ = new BehaviorSubject<Record<string, unknown>>(cache);
   const client: IUserStorageClient = {
+    peek: ((key: string, defaultValue?: unknown) =>
+      (cache[key] !== undefined
+        ? cache[key]
+        : defaultValue) as never) as IUserStorageClient['peek'],
     get: ((key: string, defaultValue?: unknown) =>
       (cache[key] !== undefined ? cache[key] : defaultValue) as never) as IUserStorageClient['get'],
     get$: ((key: string, defaultValue?: unknown) => {

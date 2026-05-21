@@ -13,6 +13,7 @@ import type { IUserStorageClient } from '@kbn/core-user-storage-browser';
 
 export const clientMock = (): jest.Mocked<IUserStorageClient> =>
   lazyObject({
+    peek: jest.fn(),
     get: jest.fn(),
     get$: jest.fn().mockReturnValue(new Subject<unknown>()),
     set: jest.fn().mockResolvedValue(undefined),

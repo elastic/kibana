@@ -65,9 +65,7 @@ export class UserStorageClient implements IUserStorageClient {
   }
 
   async getForInjection(): Promise<Record<string, unknown>> {
-    const injectableEntries = [...this.definitions.entries()].filter(
-      ([, d]) => d.serverInject === true
-    );
+    const injectableEntries = [...this.definitions.entries()].filter(([, d]) => d.preload === true);
     if (injectableEntries.length === 0) return {};
 
     let hasSpace = false;
