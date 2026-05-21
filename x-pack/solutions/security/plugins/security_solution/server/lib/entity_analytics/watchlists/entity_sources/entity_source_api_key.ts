@@ -12,20 +12,41 @@ import type {
   SecurityServiceStart,
 } from '@kbn/core/server';
 
+const isApiKeyAuthentication = (
+  security: SecurityServiceStart,
+  request: KibanaRequest
+): boolean => {
+  const user = security.authc.getCurrentUser(request);
+  return user?.authentication_type === 'api_key';
+};
+
 export const grantEntitySourceApiKey = async (
   security: SecurityServiceStart,
   request: KibanaRequest,
   source: { id: string; name: string }
 ): Promise<{ apiKeyId: string; apiKey: string } | null> => {
-  const result = await security.authc.apiKeys.grantAsInternalUser(request, {
-    name: `watchlist-entity-source: ${source.name}`,
-    role_descriptors: {},
-    metadata: {
-      description: 'API key used to scope watchlist entity source index sync',
-      sourceId: source.id,
-    },
-  });
+  const keyName = `watchlist-entity-source: ${source.name}`;
+  const metadata = {
+    description: 'API key used to scope watchlist entity source index sync',
+    sourceId: source.id,
+  };
 
+  // The grant endpoint only supports password/access_token auth and throws on API key auth
+  // (the case in serverless FTR). Use cloneAsInternalUser when the request uses API key auth.
+  if (isApiKeyAuthentication(security, request)) {
+    const result = await security.authc.apiKeys.cloneAsInternalUser(request, {
+      name: keyName,
+      metadata,
+    });
+    if (!result) return null;
+    return { apiKeyId: result.id, apiKey: result.api_key };
+  }
+
+  const result = await security.authc.apiKeys.grantAsInternalUser(request, {
+    name: keyName,
+    role_descriptors: {},
+    metadata,
+  });
   if (!result) return null;
   return { apiKeyId: result.id, apiKey: result.api_key };
 };
