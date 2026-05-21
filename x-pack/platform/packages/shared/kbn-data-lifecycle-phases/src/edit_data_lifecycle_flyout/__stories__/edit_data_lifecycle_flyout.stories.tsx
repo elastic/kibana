@@ -29,9 +29,16 @@ import {
   FlyoutFooterWithRetentionWarning,
   useRetentionWarning,
 } from '../../flyout_footer_with_retention_warning';
-import type { DataLifecycleMethod, IlmPolicyForFlyout } from '../types';
+import {
+  buildDataLifecycleApplyPayload,
+  type DataLifecycleMethod,
+  type IlmPolicyForFlyout,
+} from '../types';
 import { FlyoutWithTabs } from '../../flyout_with_tabs';
-import { InspectIlmPolicyFlyout } from '../../inspect_ilm_policy_flyout';
+import {
+  InspectIlmPolicyFlyout,
+  type InspectIlmPolicyFlyoutPrimaryAction,
+} from '../../inspect_ilm_policy_flyout';
 
 // ---------------------------------------------------------------------------
 // Shared fixture data
@@ -259,7 +266,7 @@ interface WithInspectProps {
   policies: IlmPolicyForFlyout[];
   inspectedPolicyName: string | null;
   setInspectedPolicyName: (name: string | null) => void;
-  onSelectAndApply: (policyName: string) => void;
+  primaryAction: InspectIlmPolicyFlyoutPrimaryAction;
   type: EuiFlyoutProps['type'];
 }
 
@@ -267,7 +274,7 @@ const InspectFlyoutIfNeeded = ({
   policies,
   inspectedPolicyName,
   setInspectedPolicyName,
-  onSelectAndApply,
+  primaryAction,
   type,
 }: WithInspectProps) => {
   const inspectedPolicy = inspectedPolicyName
@@ -282,10 +289,7 @@ const InspectFlyoutIfNeeded = ({
       policy={inspectedPolicy.serializedPolicy}
       onBack={() => setInspectedPolicyName(null)}
       onEditPolicy={action('onEditIlmPolicy')}
-      onSelectAndApply={(policyName) => {
-        onSelectAndApply(policyName);
-        setInspectedPolicyName(null);
-      }}
+      primaryAction={primaryAction}
       type={type}
     />
   );
@@ -302,6 +306,7 @@ const InspectFlyoutIfNeeded = ({
  * pre-selected and can switch policies or change to DLM.
  */
 const IndexManagementIlmSelectedStory = () => {
+  const [isOpen, setIsOpen] = useState(true);
   const [inheritLifecycle, setInheritLifecycle] = useState(false);
   const [method, setMethod] = useState<DataLifecycleMethod>('ilm');
   const [selectedPolicyName, setSelectedPolicyName] = useState<string>(
@@ -309,17 +314,55 @@ const IndexManagementIlmSelectedStory = () => {
   );
   const [inspectedPolicyName, setInspectedPolicyName] = useState<string | null>(null);
 
+  const onCancel = () => {
+    action('onCancel')();
+    setInspectedPolicyName(null);
+    setIsOpen(false);
+  };
+
+  const onApply = (overrides?: {
+    inheritLifecycle?: boolean;
+    method?: DataLifecycleMethod;
+    ilmPolicyName?: string;
+  }) => {
+    const effectiveInheritLifecycle = overrides?.inheritLifecycle ?? inheritLifecycle;
+    const effectiveMethod = overrides?.method ?? method;
+    const effectiveIlmPolicyName = overrides?.ilmPolicyName ?? selectedPolicyName;
+
+    const payload = buildDataLifecycleApplyPayload({
+      inheritLifecycle: effectiveInheritLifecycle,
+      method: effectiveMethod,
+      ilmPolicyName: effectiveIlmPolicyName,
+    });
+    if (payload) action('onApply')(payload);
+    setInspectedPolicyName(null);
+    setIsOpen(false);
+  };
+
   const inspectFlyout = (
     <InspectFlyoutIfNeeded
       policies={POLICIES}
       inspectedPolicyName={inspectedPolicyName}
       setInspectedPolicyName={setInspectedPolicyName}
-      onSelectAndApply={setSelectedPolicyName}
+      primaryAction={{
+        label: 'Apply',
+        onClick: (policyName) => {
+          setSelectedPolicyName(policyName);
+          setMethod('ilm');
+          onApply({ method: 'ilm', ilmPolicyName: policyName });
+        },
+        isDisabled: inheritLifecycle ? false : method === 'ilm' ? !selectedPolicyName : false,
+        'data-test-subj': 'inspectIlmPolicyFlyoutApplyButton',
+      }}
       type="overlay"
     />
   );
 
   const isApplyDisabled = inheritLifecycle ? false : method === 'ilm' ? !selectedPolicyName : false;
+
+  if (!isOpen) {
+    return <EuiButton onClick={() => setIsOpen(true)}>Open flyout</EuiButton>;
+  }
 
   return (
     <>
@@ -346,8 +389,8 @@ const IndexManagementIlmSelectedStory = () => {
           }}
         />
         <PlainFlyoutFooter
-          onCancel={action('onCancel')}
-          onApply={action('onApply')}
+          onCancel={onCancel}
+          onApply={onApply}
           isApplyDisabled={isApplyDisabled}
         />
       </IndexManagementFlyoutShell>
@@ -368,23 +411,58 @@ export const IndexManagementIlmSelected: StoryObj = {
  * pre-selected; Index Management renders its retention form in the body.
  */
 const IndexManagementDlmSelectedStory = () => {
+  const [isOpen, setIsOpen] = useState(true);
   const [inheritLifecycle, setInheritLifecycle] = useState(false);
   const [method, setMethod] = useState<DataLifecycleMethod>('dlm');
   const [selectedPolicyName, setSelectedPolicyName] = useState<string | undefined>(undefined);
   const [inspectedPolicyName, setInspectedPolicyName] = useState<string | null>(null);
+
+  const onCancel = () => {
+    action('onCancel')();
+    setInspectedPolicyName(null);
+    setIsOpen(false);
+  };
+
+  const onApply = (overrides?: {
+    inheritLifecycle?: boolean;
+    method?: DataLifecycleMethod;
+    ilmPolicyName?: string;
+  }) => {
+    const effectiveInheritLifecycle = overrides?.inheritLifecycle ?? inheritLifecycle;
+    const effectiveMethod = overrides?.method ?? method;
+    const effectiveIlmPolicyName = overrides?.ilmPolicyName ?? selectedPolicyName;
+
+    const payload = buildDataLifecycleApplyPayload({
+      inheritLifecycle: effectiveInheritLifecycle,
+      method: effectiveMethod,
+      ilmPolicyName: effectiveIlmPolicyName,
+    });
+    if (payload) action('onApply')(payload);
+    setInspectedPolicyName(null);
+    setIsOpen(false);
+  };
 
   const inspectFlyout = (
     <InspectFlyoutIfNeeded
       policies={POLICIES}
       inspectedPolicyName={inspectedPolicyName}
       setInspectedPolicyName={setInspectedPolicyName}
-      onSelectAndApply={(name) => {
-        setSelectedPolicyName(name);
-        setMethod('ilm');
+      primaryAction={{
+        label: 'Apply',
+        onClick: (policyName) => {
+          setSelectedPolicyName(policyName);
+          setMethod('ilm');
+          onApply({ method: 'ilm', ilmPolicyName: policyName });
+        },
+        'data-test-subj': 'inspectIlmPolicyFlyoutApplyButton',
       }}
       type="overlay"
     />
   );
+
+  if (!isOpen) {
+    return <EuiButton onClick={() => setIsOpen(true)}>Open flyout</EuiButton>;
+  }
 
   return (
     <>
@@ -415,7 +493,7 @@ const IndexManagementDlmSelectedStory = () => {
             <DataStreamLifecycleRetentionInput disabled={inheritLifecycle} />
           }
         />
-        <PlainFlyoutFooter onCancel={action('onCancel')} onApply={action('onApply')} />
+        <PlainFlyoutFooter onCancel={onCancel} onApply={onApply} />
       </IndexManagementFlyoutShell>
       {inspectFlyout}
     </>
@@ -435,6 +513,7 @@ export const IndexManagementDlmSelected: StoryObj = {
  * policy list shows only the inherited policy in a read-only panel.
  */
 const IndexManagementInheritingIlmStory = () => {
+  const [isOpen, setIsOpen] = useState(true);
   const [inheritLifecycle, setInheritLifecycle] = useState(true);
   const [method, setMethod] = useState<DataLifecycleMethod>('ilm');
   const [selectedPolicyName, setSelectedPolicyName] = useState<string>(
@@ -442,20 +521,55 @@ const IndexManagementInheritingIlmStory = () => {
   );
   const [inspectedPolicyName, setInspectedPolicyName] = useState<string | null>(null);
 
+  const isApplyDisabled = inheritLifecycle;
+
+  const onCancel = () => {
+    action('onCancel')();
+    setInspectedPolicyName(null);
+    setIsOpen(false);
+  };
+
+  const onApply = (overrides?: {
+    inheritLifecycle?: boolean;
+    method?: DataLifecycleMethod;
+    ilmPolicyName?: string;
+  }) => {
+    const effectiveInheritLifecycle = overrides?.inheritLifecycle ?? inheritLifecycle;
+    const effectiveMethod = overrides?.method ?? method;
+    const effectiveIlmPolicyName = overrides?.ilmPolicyName ?? selectedPolicyName;
+
+    const payload = buildDataLifecycleApplyPayload({
+      inheritLifecycle: effectiveInheritLifecycle,
+      method: effectiveMethod,
+      ilmPolicyName: effectiveIlmPolicyName,
+    });
+    if (payload) action('onApply')(payload);
+    setInspectedPolicyName(null);
+    setIsOpen(false);
+  };
+
   const inspectFlyout = (
     <InspectFlyoutIfNeeded
       policies={POLICIES}
       inspectedPolicyName={inspectedPolicyName}
       setInspectedPolicyName={setInspectedPolicyName}
-      onSelectAndApply={(name) => {
-        setSelectedPolicyName(name);
-        setInheritLifecycle(false);
+      primaryAction={{
+        label: 'Apply',
+        onClick: (policyName) => {
+          setSelectedPolicyName(policyName);
+          setInheritLifecycle(false);
+          onApply({ inheritLifecycle: false, ilmPolicyName: policyName });
+        },
+        isDisabled: isApplyDisabled,
+        'data-test-subj': 'inspectIlmPolicyFlyoutApplyButton',
       }}
       type="overlay"
     />
   );
 
-  const isApplyDisabled = inheritLifecycle;
+  if (!isOpen) {
+    return <EuiButton onClick={() => setIsOpen(true)}>Open flyout</EuiButton>;
+  }
 
   return (
     <>
@@ -482,8 +596,8 @@ const IndexManagementInheritingIlmStory = () => {
           }}
         />
         <PlainFlyoutFooter
-          onCancel={action('onCancel')}
-          onApply={action('onApply')}
+          onCancel={onCancel}
+          onApply={onApply}
           isApplyDisabled={isApplyDisabled}
         />
       </IndexManagementFlyoutShell>
@@ -504,6 +618,7 @@ export const IndexManagementInheritingIlm: StoryObj = {
  * ticked and the DLM method is active; the retention form is shown greyed out.
  */
 const IndexManagementInheritingDlmStory = () => {
+  const [isOpen, setIsOpen] = useState(true);
   const [inheritLifecycle, setInheritLifecycle] = useState(true);
   const [method, setMethod] = useState<DataLifecycleMethod>('dlm');
   const [selectedPolicyName, setSelectedPolicyName] = useState<string | undefined>(undefined);
@@ -511,19 +626,54 @@ const IndexManagementInheritingDlmStory = () => {
 
   const isApplyDisabled = inheritLifecycle;
 
+  const onCancel = () => {
+    action('onCancel')();
+    setInspectedPolicyName(null);
+    setIsOpen(false);
+  };
+
+  const onApply = (overrides?: {
+    inheritLifecycle?: boolean;
+    method?: DataLifecycleMethod;
+    ilmPolicyName?: string;
+  }) => {
+    const effectiveInheritLifecycle = overrides?.inheritLifecycle ?? inheritLifecycle;
+    const effectiveMethod = overrides?.method ?? method;
+    const effectiveIlmPolicyName = overrides?.ilmPolicyName ?? selectedPolicyName;
+
+    const payload = buildDataLifecycleApplyPayload({
+      inheritLifecycle: effectiveInheritLifecycle,
+      method: effectiveMethod,
+      ilmPolicyName: effectiveIlmPolicyName,
+    });
+    if (payload) action('onApply')(payload);
+    setInspectedPolicyName(null);
+    setIsOpen(false);
+  };
+
   const inspectFlyout = (
     <InspectFlyoutIfNeeded
       policies={POLICIES}
       inspectedPolicyName={inspectedPolicyName}
       setInspectedPolicyName={setInspectedPolicyName}
-      onSelectAndApply={(name) => {
-        setSelectedPolicyName(name);
-        setMethod('ilm');
-        setInheritLifecycle(false);
+      primaryAction={{
+        label: 'Apply',
+        onClick: (policyName) => {
+          setSelectedPolicyName(policyName);
+          setMethod('ilm');
+          setInheritLifecycle(false);
+          onApply({ inheritLifecycle: false, method: 'ilm', ilmPolicyName: policyName });
+        },
+        isDisabled: isApplyDisabled,
+        'data-test-subj': 'inspectIlmPolicyFlyoutApplyButton',
       }}
       type="overlay"
     />
   );
+
+  if (!isOpen) {
+    return <EuiButton onClick={() => setIsOpen(true)}>Open flyout</EuiButton>;
+  }
 
   return (
     <>
@@ -552,8 +702,8 @@ const IndexManagementInheritingDlmStory = () => {
           }
         />
         <PlainFlyoutFooter
-          onCancel={action('onCancel')}
-          onApply={action('onApply')}
+          onCancel={onCancel}
+          onApply={onApply}
           isApplyDisabled={isApplyDisabled}
         />
       </IndexManagementFlyoutShell>
@@ -579,12 +729,38 @@ export const IndexManagementInheritingDlm: StoryObj = {
  * Streams uses `FlyoutFooterWithRetentionWarning` instead of a plain footer.
  */
 const StreamsClassicIlmSelectedStory = () => {
+  const [isOpen, setIsOpen] = useState(true);
   const [inheritLifecycle, setInheritLifecycle] = useState(false);
   const [method, setMethod] = useState<DataLifecycleMethod>('ilm');
   const [selectedPolicyName, setSelectedPolicyName] = useState<string>(
     NON_DOWNSAMPLING_POLICY_NAME
   );
   const [inspectedPolicyName, setInspectedPolicyName] = useState<string | null>(null);
+
+  const onCancel = () => {
+    action('onCancel')();
+    setInspectedPolicyName(null);
+    setIsOpen(false);
+  };
+
+  const onApply = (overrides?: {
+    inheritLifecycle?: boolean;
+    method?: DataLifecycleMethod;
+    ilmPolicyName?: string;
+  }) => {
+    const effectiveInheritLifecycle = overrides?.inheritLifecycle ?? inheritLifecycle;
+    const effectiveMethod = overrides?.method ?? method;
+    const effectiveIlmPolicyName = overrides?.ilmPolicyName ?? selectedPolicyName;
+
+    const payload = buildDataLifecycleApplyPayload({
+      inheritLifecycle: effectiveInheritLifecycle,
+      method: effectiveMethod,
+      ilmPolicyName: effectiveIlmPolicyName,
+    });
+    if (payload) action('onApply')(payload);
+    setInspectedPolicyName(null);
+    setIsOpen(false);
+  };
 
   const retentionWarning = useRetentionWarning({
     ilmPolicies: POLICIES,
@@ -598,10 +774,22 @@ const StreamsClassicIlmSelectedStory = () => {
       policies={POLICIES}
       inspectedPolicyName={inspectedPolicyName}
       setInspectedPolicyName={setInspectedPolicyName}
-      onSelectAndApply={setSelectedPolicyName}
+      primaryAction={{
+        label: 'Apply',
+        onClick: (policyName) => {
+          setSelectedPolicyName(policyName);
+          setMethod('ilm');
+          onApply({ method: 'ilm', ilmPolicyName: policyName });
+        },
+        'data-test-subj': 'inspectIlmPolicyFlyoutApplyButton',
+      }}
       type="push"
     />
   );
+
+  if (!isOpen) {
+    return <EuiButton onClick={() => setIsOpen(true)}>Open flyout</EuiButton>;
+  }
 
   return (
     <>
@@ -628,8 +816,8 @@ const StreamsClassicIlmSelectedStory = () => {
           }}
         />
         <FlyoutFooterWithRetentionWarning
-          onCancel={action('onCancel')}
-          onApply={action('onApply')}
+          onCancel={onCancel}
+          onApply={onApply}
           showWarning={retentionWarning}
         />
       </StreamsFlyoutShell>
@@ -650,10 +838,36 @@ export const StreamsClassicIlmSelected: StoryObj = {
  * scrollable list even when that policy would normally appear at the end.
  */
 const StreamsClassicIlmSelectedPinnedStory = () => {
+  const [isOpen, setIsOpen] = useState(true);
   const [inheritLifecycle, setInheritLifecycle] = useState(false);
   const [method, setMethod] = useState<DataLifecycleMethod>('ilm');
   const [selectedPolicyName, setSelectedPolicyName] = useState<string>(LAST_POLICY_NAME);
   const [inspectedPolicyName, setInspectedPolicyName] = useState<string | null>(null);
+
+  const onCancel = () => {
+    action('onCancel')();
+    setInspectedPolicyName(null);
+    setIsOpen(false);
+  };
+
+  const onApply = (overrides?: {
+    inheritLifecycle?: boolean;
+    method?: DataLifecycleMethod;
+    ilmPolicyName?: string;
+  }) => {
+    const effectiveInheritLifecycle = overrides?.inheritLifecycle ?? inheritLifecycle;
+    const effectiveMethod = overrides?.method ?? method;
+    const effectiveIlmPolicyName = overrides?.ilmPolicyName ?? selectedPolicyName;
+
+    const payload = buildDataLifecycleApplyPayload({
+      inheritLifecycle: effectiveInheritLifecycle,
+      method: effectiveMethod,
+      ilmPolicyName: effectiveIlmPolicyName,
+    });
+    if (payload) action('onApply')(payload);
+    setInspectedPolicyName(null);
+    setIsOpen(false);
+  };
 
   const retentionWarning = useRetentionWarning({
     ilmPolicies: POLICIES,
@@ -667,10 +881,22 @@ const StreamsClassicIlmSelectedPinnedStory = () => {
       policies={POLICIES}
       inspectedPolicyName={inspectedPolicyName}
       setInspectedPolicyName={setInspectedPolicyName}
-      onSelectAndApply={setSelectedPolicyName}
+      primaryAction={{
+        label: 'Apply',
+        onClick: (policyName) => {
+          setSelectedPolicyName(policyName);
+          setMethod('ilm');
+          onApply({ method: 'ilm', ilmPolicyName: policyName });
+        },
+        'data-test-subj': 'inspectIlmPolicyFlyoutApplyButton',
+      }}
       type="push"
     />
   );
+
+  if (!isOpen) {
+    return <EuiButton onClick={() => setIsOpen(true)}>Open flyout</EuiButton>;
+  }
 
   return (
     <>
@@ -697,8 +923,8 @@ const StreamsClassicIlmSelectedPinnedStory = () => {
           }}
         />
         <FlyoutFooterWithRetentionWarning
-          onCancel={action('onCancel')}
-          onApply={action('onApply')}
+          onCancel={onCancel}
+          onApply={onApply}
           showWarning={retentionWarning}
         />
       </StreamsFlyoutShell>
@@ -719,10 +945,36 @@ export const StreamsClassicIlmSelectedPinned: StoryObj = {
  * retention value. The DLM card is selected and the footer shows no warning.
  */
 const StreamsClassicDlmSelectedStory = () => {
+  const [isOpen, setIsOpen] = useState(true);
   const [inheritLifecycle, setInheritLifecycle] = useState(false);
   const [method, setMethod] = useState<DataLifecycleMethod>('dlm');
   const [selectedPolicyName, setSelectedPolicyName] = useState<string | undefined>(undefined);
   const [inspectedPolicyName, setInspectedPolicyName] = useState<string | null>(null);
+
+  const onCancel = () => {
+    action('onCancel')();
+    setInspectedPolicyName(null);
+    setIsOpen(false);
+  };
+
+  const onApply = (overrides?: {
+    inheritLifecycle?: boolean;
+    method?: DataLifecycleMethod;
+    ilmPolicyName?: string;
+  }) => {
+    const effectiveInheritLifecycle = overrides?.inheritLifecycle ?? inheritLifecycle;
+    const effectiveMethod = overrides?.method ?? method;
+    const effectiveIlmPolicyName = overrides?.ilmPolicyName ?? selectedPolicyName;
+
+    const payload = buildDataLifecycleApplyPayload({
+      inheritLifecycle: effectiveInheritLifecycle,
+      method: effectiveMethod,
+      ilmPolicyName: effectiveIlmPolicyName,
+    });
+    if (payload) action('onApply')(payload);
+    setInspectedPolicyName(null);
+    setIsOpen(false);
+  };
 
   const retentionWarning = useRetentionWarning({
     ilmPolicies: POLICIES,
@@ -736,13 +988,22 @@ const StreamsClassicDlmSelectedStory = () => {
       policies={POLICIES}
       inspectedPolicyName={inspectedPolicyName}
       setInspectedPolicyName={setInspectedPolicyName}
-      onSelectAndApply={(name) => {
-        setSelectedPolicyName(name);
-        setMethod('ilm');
+      primaryAction={{
+        label: 'Apply',
+        onClick: (policyName) => {
+          setSelectedPolicyName(policyName);
+          setMethod('ilm');
+          onApply({ method: 'ilm', ilmPolicyName: policyName });
+        },
+        'data-test-subj': 'inspectIlmPolicyFlyoutApplyButton',
       }}
       type="push"
     />
   );
+
+  if (!isOpen) {
+    return <EuiButton onClick={() => setIsOpen(true)}>Open flyout</EuiButton>;
+  }
 
   return (
     <>
@@ -766,8 +1027,8 @@ const StreamsClassicDlmSelectedStory = () => {
           }}
         />
         <FlyoutFooterWithRetentionWarning
-          onCancel={action('onCancel')}
-          onApply={action('onApply')}
+          onCancel={onCancel}
+          onApply={onApply}
           showWarning={retentionWarning}
         />
       </StreamsFlyoutShell>
@@ -788,12 +1049,38 @@ export const StreamsClassicDlmSelected: StoryObj = {
  * policy set in the index template. The policy is shown read-only in the list.
  */
 const StreamsClassicInheritingIlmStory = () => {
+  const [isOpen, setIsOpen] = useState(true);
   const [inheritLifecycle, setInheritLifecycle] = useState(true);
   const [method, setMethod] = useState<DataLifecycleMethod>('ilm');
   const [selectedPolicyName, setSelectedPolicyName] = useState<string>(
     NON_DOWNSAMPLING_POLICY_NAME
   );
   const [inspectedPolicyName, setInspectedPolicyName] = useState<string | null>(null);
+
+  const onCancel = () => {
+    action('onCancel')();
+    setInspectedPolicyName(null);
+    setIsOpen(false);
+  };
+
+  const onApply = (overrides?: {
+    inheritLifecycle?: boolean;
+    method?: DataLifecycleMethod;
+    ilmPolicyName?: string;
+  }) => {
+    const effectiveInheritLifecycle = overrides?.inheritLifecycle ?? inheritLifecycle;
+    const effectiveMethod = overrides?.method ?? method;
+    const effectiveIlmPolicyName = overrides?.ilmPolicyName ?? selectedPolicyName;
+
+    const payload = buildDataLifecycleApplyPayload({
+      inheritLifecycle: effectiveInheritLifecycle,
+      method: effectiveMethod,
+      ilmPolicyName: effectiveIlmPolicyName,
+    });
+    if (payload) action('onApply')(payload);
+    setInspectedPolicyName(null);
+    setIsOpen(false);
+  };
 
   const retentionWarning = useRetentionWarning({
     ilmPolicies: POLICIES,
@@ -807,13 +1094,24 @@ const StreamsClassicInheritingIlmStory = () => {
       policies={POLICIES}
       inspectedPolicyName={inspectedPolicyName}
       setInspectedPolicyName={setInspectedPolicyName}
-      onSelectAndApply={(name) => {
-        setSelectedPolicyName(name);
-        setInheritLifecycle(false);
+      primaryAction={{
+        label: 'Apply',
+        onClick: (policyName) => {
+          setSelectedPolicyName(policyName);
+          setInheritLifecycle(false);
+          setMethod('ilm');
+          onApply({ inheritLifecycle: false, method: 'ilm', ilmPolicyName: policyName });
+        },
+        isDisabled: inheritLifecycle,
+        'data-test-subj': 'inspectIlmPolicyFlyoutApplyButton',
       }}
       type="push"
     />
   );
+
+  if (!isOpen) {
+    return <EuiButton onClick={() => setIsOpen(true)}>Open flyout</EuiButton>;
+  }
 
   return (
     <>
@@ -840,8 +1138,8 @@ const StreamsClassicInheritingIlmStory = () => {
           }}
         />
         <FlyoutFooterWithRetentionWarning
-          onCancel={action('onCancel')}
-          onApply={action('onApply')}
+          onCancel={onCancel}
+          onApply={onApply}
           isApplyDisabled={inheritLifecycle}
           showWarning={retentionWarning}
         />
@@ -863,10 +1161,36 @@ export const StreamsClassicInheritingIlm: StoryObj = {
  * the index template. The DLM method is shown disabled.
  */
 const StreamsClassicInheritingDlmStory = () => {
+  const [isOpen, setIsOpen] = useState(true);
   const [inheritLifecycle, setInheritLifecycle] = useState(true);
   const [method, setMethod] = useState<DataLifecycleMethod>('dlm');
   const [selectedPolicyName, setSelectedPolicyName] = useState<string | undefined>(undefined);
   const [inspectedPolicyName, setInspectedPolicyName] = useState<string | null>(null);
+
+  const onCancel = () => {
+    action('onCancel')();
+    setInspectedPolicyName(null);
+    setIsOpen(false);
+  };
+
+  const onApply = (overrides?: {
+    inheritLifecycle?: boolean;
+    method?: DataLifecycleMethod;
+    ilmPolicyName?: string;
+  }) => {
+    const effectiveInheritLifecycle = overrides?.inheritLifecycle ?? inheritLifecycle;
+    const effectiveMethod = overrides?.method ?? method;
+    const effectiveIlmPolicyName = overrides?.ilmPolicyName ?? selectedPolicyName;
+
+    const payload = buildDataLifecycleApplyPayload({
+      inheritLifecycle: effectiveInheritLifecycle,
+      method: effectiveMethod,
+      ilmPolicyName: effectiveIlmPolicyName,
+    });
+    if (payload) action('onApply')(payload);
+    setInspectedPolicyName(null);
+    setIsOpen(false);
+  };
 
   const retentionWarning = useRetentionWarning({
     ilmPolicies: POLICIES,
@@ -880,14 +1204,24 @@ const StreamsClassicInheritingDlmStory = () => {
       policies={POLICIES}
       inspectedPolicyName={inspectedPolicyName}
       setInspectedPolicyName={setInspectedPolicyName}
-      onSelectAndApply={(name) => {
-        setSelectedPolicyName(name);
-        setMethod('ilm');
-        setInheritLifecycle(false);
+      primaryAction={{
+        label: 'Apply',
+        onClick: (policyName) => {
+          setSelectedPolicyName(policyName);
+          setMethod('ilm');
+          setInheritLifecycle(false);
+          onApply({ inheritLifecycle: false, method: 'ilm', ilmPolicyName: policyName });
+        },
+        isDisabled: inheritLifecycle,
+        'data-test-subj': 'inspectIlmPolicyFlyoutApplyButton',
       }}
       type="push"
     />
   );
+
+  if (!isOpen) {
+    return <EuiButton onClick={() => setIsOpen(true)}>Open flyout</EuiButton>;
+  }
 
   return (
     <>
@@ -911,8 +1245,8 @@ const StreamsClassicInheritingDlmStory = () => {
           }}
         />
         <FlyoutFooterWithRetentionWarning
-          onCancel={action('onCancel')}
-          onApply={action('onApply')}
+          onCancel={onCancel}
+          onApply={onApply}
           isApplyDisabled={inheritLifecycle}
           showWarning={retentionWarning}
         />
@@ -936,11 +1270,37 @@ export const StreamsClassicInheritingDlm: StoryObj = {
  * This case only applies to Streams; Index Management does not use the warning footer.
  */
 const StreamsClassicIlmWithWarningStory = () => {
+  const [isOpen, setIsOpen] = useState(true);
   const [inheritLifecycle, setInheritLifecycle] = useState(false);
   const [method, setMethod] = useState<DataLifecycleMethod>('ilm');
   // Pre-select the policy with downsampling to show the warning immediately.
   const [selectedPolicyName, setSelectedPolicyName] = useState<string>(DOWNSAMPLING_POLICY_NAME);
   const [inspectedPolicyName, setInspectedPolicyName] = useState<string | null>(null);
+
+  const onCancel = () => {
+    action('onCancel')();
+    setInspectedPolicyName(null);
+    setIsOpen(false);
+  };
+
+  const onApply = (overrides?: {
+    inheritLifecycle?: boolean;
+    method?: DataLifecycleMethod;
+    ilmPolicyName?: string;
+  }) => {
+    const effectiveInheritLifecycle = overrides?.inheritLifecycle ?? inheritLifecycle;
+    const effectiveMethod = overrides?.method ?? method;
+    const effectiveIlmPolicyName = overrides?.ilmPolicyName ?? selectedPolicyName;
+
+    const payload = buildDataLifecycleApplyPayload({
+      inheritLifecycle: effectiveInheritLifecycle,
+      method: effectiveMethod,
+      ilmPolicyName: effectiveIlmPolicyName,
+    });
+    if (payload) action('onApply')(payload);
+    setInspectedPolicyName(null);
+    setIsOpen(false);
+  };
 
   const retentionWarning = useRetentionWarning({
     ilmPolicies: POLICIES,
@@ -954,10 +1314,22 @@ const StreamsClassicIlmWithWarningStory = () => {
       policies={POLICIES}
       inspectedPolicyName={inspectedPolicyName}
       setInspectedPolicyName={setInspectedPolicyName}
-      onSelectAndApply={setSelectedPolicyName}
+      primaryAction={{
+        label: 'Apply',
+        onClick: (policyName) => {
+          setSelectedPolicyName(policyName);
+          setMethod('ilm');
+          onApply({ method: 'ilm', ilmPolicyName: policyName });
+        },
+        'data-test-subj': 'inspectIlmPolicyFlyoutApplyButton',
+      }}
       type="push"
     />
   );
+
+  if (!isOpen) {
+    return <EuiButton onClick={() => setIsOpen(true)}>Open flyout</EuiButton>;
+  }
 
   return (
     <>
@@ -981,8 +1353,8 @@ const StreamsClassicIlmWithWarningStory = () => {
           }}
         />
         <FlyoutFooterWithRetentionWarning
-          onCancel={action('onCancel')}
-          onApply={action('onApply')}
+          onCancel={onCancel}
+          onApply={onApply}
           showWarning={retentionWarning}
         />
       </StreamsFlyoutShell>
@@ -1076,9 +1448,35 @@ export const StreamsWiredServerlessInheriting: StoryObj = {
  * hidden entirely. The user can choose between DLM and ILM.
  */
 const StreamsRootWiredStreamStory = () => {
+  const [isOpen, setIsOpen] = useState(true);
   const [method, setMethod] = useState<DataLifecycleMethod>('dlm');
   const [selectedPolicyName, setSelectedPolicyName] = useState<string | undefined>(undefined);
   const [inspectedPolicyName, setInspectedPolicyName] = useState<string | null>(null);
+
+  const onCancel = () => {
+    action('onCancel')();
+    setInspectedPolicyName(null);
+    setIsOpen(false);
+  };
+
+  const onApply = (overrides?: {
+    inheritLifecycle?: boolean;
+    method?: DataLifecycleMethod;
+    ilmPolicyName?: string;
+  }) => {
+    const effectiveInheritLifecycle = overrides?.inheritLifecycle ?? false;
+    const effectiveMethod = overrides?.method ?? method;
+    const effectiveIlmPolicyName = overrides?.ilmPolicyName ?? selectedPolicyName;
+
+    const payload = buildDataLifecycleApplyPayload({
+      inheritLifecycle: effectiveInheritLifecycle,
+      method: effectiveMethod,
+      ilmPolicyName: effectiveIlmPolicyName,
+    });
+    if (payload) action('onApply')(payload);
+    setInspectedPolicyName(null);
+    setIsOpen(false);
+  };
 
   const retentionWarning = useRetentionWarning({
     ilmPolicies: POLICIES,
@@ -1092,13 +1490,22 @@ const StreamsRootWiredStreamStory = () => {
       policies={POLICIES}
       inspectedPolicyName={inspectedPolicyName}
       setInspectedPolicyName={setInspectedPolicyName}
-      onSelectAndApply={(name) => {
-        setSelectedPolicyName(name);
-        setMethod('ilm');
+      primaryAction={{
+        label: 'Apply',
+        onClick: (policyName) => {
+          setSelectedPolicyName(policyName);
+          setMethod('ilm');
+          onApply({ method: 'ilm', ilmPolicyName: policyName });
+        },
+        'data-test-subj': 'inspectIlmPolicyFlyoutApplyButton',
       }}
       type="push"
     />
   );
+
+  if (!isOpen) {
+    return <EuiButton onClick={() => setIsOpen(true)}>Open flyout</EuiButton>;
+  }
 
   return (
     <>
@@ -1116,8 +1523,8 @@ const StreamsRootWiredStreamStory = () => {
           }}
         />
         <FlyoutFooterWithRetentionWarning
-          onCancel={action('onCancel')}
-          onApply={action('onApply')}
+          onCancel={onCancel}
+          onApply={onApply}
           showWarning={retentionWarning}
         />
       </StreamsFlyoutShell>

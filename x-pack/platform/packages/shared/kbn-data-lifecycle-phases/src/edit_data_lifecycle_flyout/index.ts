@@ -7,4 +7,9 @@
 
 export { EditDataLifecycleFlyoutBody } from './edit_data_lifecycle_flyout_body';
 export type { EditDataLifecycleFlyoutBodyProps } from './edit_data_lifecycle_flyout_body';
+export {
+  buildDataLifecycleApplyPayload,
+  type BuildDataLifecycleApplyPayloadArgs,
+  type DataLifecycleApplyPayload,
+} from './types';
 export type { DataLifecycleMethod, IlmPolicyForFlyout, IlmPolicyPhaseForFlyout } from './types';

@@ -43,7 +43,6 @@ interface RetentionSelectableRowProps {
   onInspect?: () => void;
   isSelected?: boolean;
   isDisabled?: boolean;
-  showBorderBottom?: boolean;
   showSelectionIcon?: boolean;
   showInspectAction?: boolean;
   inspectPlacement?: 'rowAction' | 'badge';
@@ -57,13 +56,12 @@ export const RetentionSelectableRow = ({
   onInspect,
   isSelected = false,
   isDisabled = false,
-  showBorderBottom = true,
   showSelectionIcon = true,
   showInspectAction = true,
   inspectPlacement = 'rowAction',
 }: RetentionSelectableRowProps) => {
   const { euiTheme } = useEuiTheme();
-  const styles = getRetentionSelectableRowStyles({ euiTheme, showBorderBottom });
+  const styles = getRetentionSelectableRowStyles({ euiTheme });
 
   const iconType = showSelectionIcon ? (isSelected ? 'check' : 'empty') : undefined;
   const safeOptionNameForTestSubj = option.name.replace(TEST_SUBJ_SANITIZE_REGEX, '_');

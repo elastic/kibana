@@ -9,6 +9,36 @@ import type { SerializedPolicy } from '@kbn/index-lifecycle-management-common-sh
 
 export type DataLifecycleMethod = 'dlm' | 'ilm';
 
+export type DataLifecycleApplyPayload =
+  | { inheritLifecycle: true }
+  | { inheritLifecycle: false; method: 'dlm' }
+  | { inheritLifecycle: false; method: 'ilm'; ilmPolicyName: string };
+
+export interface BuildDataLifecycleApplyPayloadArgs {
+  inheritLifecycle: boolean;
+  method: DataLifecycleMethod;
+  ilmPolicyName?: string;
+}
+
+/**
+ * Builds the minimal "apply" payload consumers typically need.
+ *
+ * - When inheriting, the upstream source is the source of truth, so no additional
+ *   details are returned.
+ * - When using DLM, Streams saves "infinite retention" so no policy info is needed.
+ * - When using ILM, the selected policy name is required.
+ */
+export const buildDataLifecycleApplyPayload = ({
+  inheritLifecycle,
+  method,
+  ilmPolicyName,
+}: BuildDataLifecycleApplyPayloadArgs): DataLifecycleApplyPayload | undefined => {
+  if (inheritLifecycle) return { inheritLifecycle: true };
+  if (method === 'dlm') return { inheritLifecycle: false, method: 'dlm' };
+  if (!ilmPolicyName) return undefined;
+  return { inheritLifecycle: false, method: 'ilm', ilmPolicyName };
+};
+
 /**
  * Minimal phase shape needed by the flyout body for summary stats:
  * delete age, phase count, and downsample step count.

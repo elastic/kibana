@@ -22,10 +22,4 @@ export const retentionSelectorStrings = {
   methodFilterSelectableAriaLabel: i18n.translate(`${PREFIX}.methodFilterSelectableAriaLabel`, {
     defaultMessage: 'Filter by method',
   }),
-  methodFilterOptionDlmLabel: i18n.translate(`${PREFIX}.methodFilterOptionDlmLabel`, {
-    defaultMessage: 'Data stream lifecycle',
-  }),
-  methodFilterOptionIlmLabel: i18n.translate(`${PREFIX}.methodFilterOptionIlmLabel`, {
-    defaultMessage: 'Lifecycle policy',
-  }),
 };

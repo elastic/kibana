@@ -10,31 +10,14 @@ import type { EuiThemeComputed } from '@elastic/eui';
 
 export type EuiTheme = EuiThemeComputed;
 
-export const getRetentionSelectableRowStyles = ({
-  euiTheme,
-  showBorderBottom,
-}: {
-  euiTheme: EuiTheme;
-  showBorderBottom: boolean;
-}) => ({
+export const getRetentionSelectableRowStyles = ({ euiTheme }: { euiTheme: EuiTheme }) => ({
   item: css`
+    /*
+     * Keep row-level styling minimal; list-level styling handles dividers so the
+     * separator spans both the main button and the optional extra action.
+     */
+    width: 100%;
     padding: ${euiTheme.size.s} ${euiTheme.size.l};
-    ${showBorderBottom ? `border-bottom: ${euiTheme.border.thin};` : ''}
-
-    /* Keep the row hover/focus styling independent from the inspect badge */
-    &:has([data-test-subj^='retentionSelectableRowInspect-']:hover),
-    &:has([data-test-subj^='retentionSelectableRowInspect-']:focus),
-    &:has([data-test-subj^='retentionSelectableRowInspect-']:focus-visible) {
-      background-color: transparent;
-    }
-
-    &:has([data-test-subj^='retentionSelectableRowInspect-']:hover) .euiListGroupItem__button:hover,
-    &:has([data-test-subj^='retentionSelectableRowInspect-']:hover) .euiListGroupItem__button:focus,
-    &:has([data-test-subj^='retentionSelectableRowInspect-']:focus) .euiListGroupItem__button:focus,
-    &:has([data-test-subj^='retentionSelectableRowInspect-']:focus-visible)
-      .euiListGroupItem__button:focus-visible {
-      text-decoration: none;
-    }
   `,
   nameColumn: css`
     min-width: 0;
@@ -54,6 +37,20 @@ export const getRetentionSelectorStyles = ({
   euiTheme: EuiTheme;
   height?: number | 'full';
 }) => ({
+  list: css`
+    /*
+     * Dividers + gutters live at the list level so the separator spans both the
+     * main button and the optional extra action button.
+     */
+    // Needed so the line doesn't get cut off
+    .euiListItemLayout__wrapper {
+      border-bottom: ${euiTheme.border.thin};
+      padding-right: ${euiTheme.size.l};
+    }
+    .euiListItemLayout__wrapper:last-child {
+      border-bottom: none;
+    }
+  `,
   paddedSection: css`
     padding: 0 ${euiTheme.size.l};
   `,

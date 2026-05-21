@@ -189,8 +189,8 @@ export const RetentionSelector = ({
 
   const list =
     visibleOptions.length > 0 ? (
-      <EuiListGroup maxWidth={false} wrapText>
-        {visibleOptions.map((option, idx) => (
+      <EuiListGroup maxWidth={false} wrapText css={styles.list}>
+        {visibleOptions.map((option) => (
           <RetentionSelectableRow
             key={option.name}
             option={option}
@@ -202,7 +202,6 @@ export const RetentionSelector = ({
             onInspect={onInspect ? () => onInspect(option.name) : undefined}
             isSelected={option.name === selectedOptionName}
             isDisabled={isDisabled}
-            showBorderBottom={idx < visibleOptions.length - 1}
             showSelectionIcon={showRowActions}
             showInspectAction={showRowActions && onInspect !== undefined}
             inspectPlacement={inspectPlacement}
