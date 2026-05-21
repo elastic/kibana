@@ -44,7 +44,7 @@ import {
 import { QueryClient, type StoredQueryLink } from './query_client';
 import { computeRuleId, buildEsqlQueryFromKql } from './helpers/query';
 import { V1RulesAdapter } from './v1_rules_adapter';
-import { V2RulesAdapter, V2RulesUnavailableAdapter } from './v2_rules_adapter';
+import { V2RulesAdapter, V2RulesNotInstalledAdapter } from './v2_rules_adapter';
 import { DualCleanupRulesAdapter } from './dual_cleanup_rules_adapter';
 import {
   DEFAULT_SIG_EVENTS_TUNING_CONFIG,
@@ -209,7 +209,7 @@ export class QueryService {
     const v1Adapter = new V1RulesAdapter(alertingRulesClient);
     const v2Client = alertingV2RulesClient
       ? new V2RulesAdapter(alertingV2RulesClient)
-      : new V2RulesUnavailableAdapter(this.logger);
+      : new V2RulesNotInstalledAdapter(this.logger);
 
     const rulesManagementClient = alertingV2Enabled
       ? new DualCleanupRulesAdapter(v2Client, v1Adapter, this.logger)

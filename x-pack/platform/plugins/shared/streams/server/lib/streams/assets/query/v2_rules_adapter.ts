@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-/* eslint-disable max-classes-per-file -- V2RulesUnavailableAdapter is the no-plugin stub paired with V2RulesAdapter */
+/* eslint-disable max-classes-per-file -- V2RulesNotInstalledAdapter is the no-plugin stub paired with V2RulesAdapter */
 
 import { isBoom } from '@hapi/boom';
 import type { Logger } from '@kbn/core/server';
@@ -64,13 +64,18 @@ export class V2RulesAdapter implements IRulesManagementClient {
     }
   }
 
-  /** Create that tolerates 409 (concurrent writer) — used by updateRule's 404 branch. */
+  /**
+   * Create variant used by `updateRule`'s 404 branch. A 409 here means a concurrent
+   * writer (re)created the rule between our `updateRule` 404 and this create — that's
+   * fine, the rule exists now. Swallowing keeps this terminal and prevents the
+   * create→409→update→404→create cycle the method name promises to avoid.
+   */
   private async createRuleWithoutFallback(id: string, body: CreateRuleBody): Promise<void> {
     await this.rulesClient
       .createRule({ data: toV2CreateBody(body), options: { id } })
       .catch((error) => {
         if (isBoom(error) && error.output.statusCode === 409) {
-          return this.updateRule(id, toUpdateBodyFromCreate(body));
+          return;
         }
         throw error;
       });
@@ -81,7 +86,7 @@ export class V2RulesAdapter implements IRulesManagementClient {
  * Used when the alerting v2 plugin is not installed: `DualCleanupRulesAdapter` still needs
  * a secondary client reference shape; v2 cleanup becomes a no-op.
  */
-export class V2RulesUnavailableAdapter implements IRulesManagementClient {
+export class V2RulesNotInstalledAdapter implements IRulesManagementClient {
   constructor(private readonly logger: Logger) {}
 
   async createRule(): Promise<void> {
@@ -128,6 +133,11 @@ const V2_MATCH_GROUPING_FIELDS = ['_id'] as const;
 
 const V2_QUERY_METADATA_TO_STRIP = ['_source'];
 
+/**
+ * `body.enabled` is intentionally not forwarded: the v2 create schema doesn't accept it
+ * and `RulesClient.createRule` hardcodes `enabled: true` server-side. Callers that want a
+ * disabled rule must call `disableRule` after creation.
+ */
 function toV2CreateBody(body: CreateRuleBody) {
   return {
     kind: 'signal' as const,
@@ -150,6 +160,7 @@ function toV2UpdateBody(body: UpdateRuleBody) {
       name: body.name,
       tags: toV2Tags(body.tags),
     },
+    time_field: body.params.timestampField,
     schedule: { every: body.schedule.interval, lookback: V2_MATCH_LOOKBACK },
     grouping: { fields: [...V2_MATCH_GROUPING_FIELDS] },
     evaluation: {
@@ -170,9 +181,8 @@ function toUpdateBodyFromCreate(body: CreateRuleBody): UpdateRuleBody {
 
 /**
  * Reconstructs a CreateRuleBody from an UpdateRuleBody for the update→404→create path.
- * `enabled: true` is intentional: this path is only reached from `installQueries` which
- * runs for queries that the system determined should be active. A missing rule (404) must
- * be recreated in the enabled state to maintain signal continuity.
+ * `enabled: true` satisfies the v1-shaped `CreateRuleBody` contract; v2 ignores the field
+ * and always creates rules enabled (see `toV2CreateBody`).
  */
 function toCreateBodyFromUpdate(body: UpdateRuleBody): CreateRuleBody {
   return {

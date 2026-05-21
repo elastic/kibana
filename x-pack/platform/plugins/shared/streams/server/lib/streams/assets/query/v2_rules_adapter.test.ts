@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
-import { V2RulesAdapter, V2RulesUnavailableAdapter } from './v2_rules_adapter';
+import { V2RulesAdapter, V2RulesNotInstalledAdapter } from './v2_rules_adapter';
 import type { CreateRuleBody, UpdateRuleBody } from './rules_management_client';
 import { STREAMS_RULE_CONSUMER, STREAMS_ESQL_RULE_TYPE_ID } from './rules_management_client';
 
@@ -105,7 +105,7 @@ describe('V2RulesAdapter', () => {
       expect(data.grouping).toEqual({ fields: ['_id'] });
     });
 
-    it('maps updateRule body to v2 partial shape (no kind or time_field)', async () => {
+    it('maps updateRule body to v2 partial shape (no kind)', async () => {
       const mock = makeRulesClientMock();
       mock.updateRule.mockResolvedValue({} as never);
       const adapter = makeAdapter(mock);
@@ -118,11 +118,25 @@ describe('V2RulesAdapter', () => {
             name: 'Updated title',
             tags: ['sigevents:stream:my-stream'],
           },
+          time_field: '@timestamp',
           schedule: { every: '1m', lookback: '2m' },
           grouping: { fields: ['_id'] },
           evaluation: { query: { base: 'FROM logs-* METADATA _id | WHERE level == "error"' } },
         },
       });
+    });
+
+    it('forwards timestampField as time_field in updateRule bodies', async () => {
+      const mock = makeRulesClientMock();
+      mock.updateRule.mockResolvedValue({} as never);
+      const adapter = makeAdapter(mock);
+      await adapter.updateRule('rule-1', {
+        ...updateBody,
+        params: { ...updateBody.params, timestampField: 'event.ingested' },
+      });
+
+      const data = lastUpdateCall(mock).data as { time_field: string };
+      expect(data.time_field).toBe('event.ingested');
     });
 
     it('keeps grouping in updateRule bodies so dedup config stays in sync', async () => {
@@ -245,17 +259,15 @@ describe('V2RulesAdapter', () => {
       expect(lastCreateCall(mock).options).toEqual({ id: 'rule-1' });
     });
 
-    it('falls back to updateRule on 409 during fallback create', async () => {
+    it('treats 409 during the fallback create as success (breaks the 404/409 cycle)', async () => {
       const mock = makeRulesClientMock();
-      mock.updateRule
-        .mockRejectedValueOnce(Boom.notFound('missing'))
-        .mockResolvedValueOnce({} as never);
+      mock.updateRule.mockRejectedValueOnce(Boom.notFound('missing'));
       mock.createRule.mockRejectedValueOnce(Boom.conflict('race'));
       const adapter = makeAdapter(mock);
       await expect(adapter.updateRule('rule-1', updateBody)).resolves.toBeUndefined();
 
       expect(mock.createRule).toHaveBeenCalledTimes(1);
-      expect(mock.updateRule).toHaveBeenCalledTimes(2);
+      expect(mock.updateRule).toHaveBeenCalledTimes(1);
     });
 
     it('throws on non-404 errors', async () => {
@@ -310,9 +322,9 @@ describe('V2RulesAdapter', () => {
   });
 });
 
-describe('V2RulesUnavailableAdapter', () => {
+describe('V2RulesNotInstalledAdapter', () => {
   it('bulkDeleteRules is a no-op', async () => {
-    const adapter = new V2RulesUnavailableAdapter(loggerMock.create());
+    const adapter = new V2RulesNotInstalledAdapter(loggerMock.create());
     await expect(adapter.bulkDeleteRules(['a'])).resolves.toBeUndefined();
   });
 });
