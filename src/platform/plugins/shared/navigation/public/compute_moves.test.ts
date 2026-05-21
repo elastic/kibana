@@ -28,11 +28,9 @@ describe('computeMoves', () => {
 
   it('records minimal moves — only displaced items', () => {
     // default: [a, b, c, d] → user swaps b and c → [a, c, b, d]
-    // c moves after a, b moves after c — both predecessors changed
+    // Moving c after a is sufficient; b follows without an extra move
     const moves = computeMoves(['a', 'b', 'c', 'd'], ['a', 'c', 'b', 'd']);
-    expect(moves).toHaveLength(2);
-    expect(moves).toContainEqual({ id: 'c', afterId: 'a' });
-    expect(moves).toContainEqual({ id: 'b', afterId: 'c' });
+    expect(moves).toEqual([{ id: 'c', afterId: 'a' }]);
   });
 
   it('does not record a move when only unmoved items surround it (still same predecessor)', () => {

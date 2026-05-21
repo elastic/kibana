@@ -13,9 +13,9 @@ import type { NavigationCustomizationMove } from '@kbn/core-chrome-browser';
  * Diffs `userOrder` against `defaultOrder` and returns the minimal set of moves
  * needed to reproduce the user's arrangement by replaying them on the default.
  *
- * Only items whose predecessor in `userOrder` differs from their predecessor in
- * `defaultOrder` produce a move entry — items left in their default relative
- * position are not recorded.
+ * Walks `userOrder` left to right, maintaining a working copy of the list and
+ * recording a move only when an item's current predecessor does not yet match
+ * its desired predecessor in the target order.
  *
  * Both arrays should contain the same item IDs (though `userOrder` may contain
  * items not in `defaultOrder` if new items were added, and vice versa if items
@@ -26,16 +26,39 @@ export const computeMoves = (
   userOrder: readonly string[]
 ): NavigationCustomizationMove[] => {
   const moves: NavigationCustomizationMove[] = [];
+  const working = [...defaultOrder];
+
+  const applyMove = (id: string, afterId: string | null) => {
+    const fromIdx = working.indexOf(id);
+    if (fromIdx === -1) {
+      if (afterId === null) {
+        working.unshift(id);
+      } else {
+        const afterIdx = working.indexOf(afterId);
+        working.splice(afterIdx + 1, 0, id);
+      }
+      return;
+    }
+
+    working.splice(fromIdx, 1);
+    if (afterId === null) {
+      working.unshift(id);
+    } else {
+      const afterIdx = working.indexOf(afterId);
+      working.splice(afterIdx + 1, 0, id);
+    }
+  };
 
   for (let i = 0; i < userOrder.length; i++) {
     const id = userOrder[i];
     const afterId = i === 0 ? null : userOrder[i - 1];
 
-    const defaultIdx = defaultOrder.indexOf(id);
-    const defaultAfterId = defaultIdx <= 0 ? null : defaultOrder[defaultIdx - 1];
+    const currentIdx = working.indexOf(id);
+    const currentAfterId = currentIdx <= 0 ? null : working[currentIdx - 1];
 
-    if (afterId !== defaultAfterId) {
+    if (currentAfterId !== afterId) {
       moves.push({ id, afterId });
+      applyMove(id, afterId);
     }
   }
 
