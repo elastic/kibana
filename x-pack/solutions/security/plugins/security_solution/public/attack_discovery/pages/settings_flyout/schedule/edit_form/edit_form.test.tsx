@@ -17,6 +17,10 @@ import { EditForm } from './edit_form';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { TestProviders } from '../../../../../common/mock';
 import { getDefaultQuery } from '../../../helpers';
+import type { UseGenerateWorkflowResult } from '../../workflow_configuration/hooks/use_generate_workflow';
+import { useGenerateWorkflow } from '../../workflow_configuration/hooks/use_generate_workflow';
+import { useListWorkflows } from '../../workflow_configuration/hooks/use_list_workflows';
+import { DEFAULT_WORKFLOW_CONFIGURATION } from '../../workflow_configuration';
 
 const mockConnectors: unknown[] = [
   {
@@ -36,6 +40,43 @@ jest.mock('react-router', () => ({
 }));
 jest.mock('../../../../../common/lib/kibana');
 jest.mock('../../../../../common/hooks/use_connectors');
+jest.mock('../../workflow_configuration/hooks/use_list_workflows');
+jest.mock('../../workflow_configuration/hooks/use_generate_workflow');
+jest.mock('../../../use_workflow_editor_link', () => ({
+  useWorkflowEditorLink: jest.fn().mockReturnValue({
+    editorUrl: null,
+    navigateToEditor: jest.fn(),
+    resolvedWorkflowId: null,
+  }),
+}));
+jest.mock('../../../../../common/hooks/use_space_id', () => ({
+  useSpaceId: jest.fn().mockReturnValue('default'),
+}));
+jest.mock('../../../../../data_view_manager/hooks/use_data_view', () => ({
+  useDataView: jest.fn().mockReturnValue({
+    dataView: undefined,
+    status: 'ready',
+  }),
+}));
+jest.mock('../../workflow_settings_view/alert_retrieval_step/alert_retrieval_content', () => ({
+  AlertRetrievalContent: ({
+    alertRetrievalHasError,
+    connectorId,
+    workflowConfiguration,
+  }: {
+    alertRetrievalHasError: boolean;
+    connectorId: string | undefined;
+    workflowConfiguration: { alertRetrievalMode: string; esqlQuery?: string };
+  }) => (
+    <div
+      data-test-subj="alertRetrievalContent"
+      data-alert-retrieval-has-error={String(alertRetrievalHasError)}
+      data-connector-id={connectorId ?? ''}
+      data-default-alert-retrieval-mode={workflowConfiguration.alertRetrievalMode}
+      data-esql-query={workflowConfiguration.esqlQuery ?? ''}
+    />
+  ),
+}));
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const onChangeMock = jest.fn();
@@ -75,6 +116,9 @@ describe.skip('EditForm', () => {
 
     mockUseKibana.mockReturnValue({
       services: {
+        featureFlags: {
+          getBooleanValue: jest.fn().mockResolvedValue(false),
+        },
         lens: {
           EmbeddableComponent: () => <div data-test-subj="mockEmbeddableComponent" />,
         },
@@ -187,5 +231,351 @@ describe.skip('EditForm', () => {
     fireEvent.change(input, { target: { value: 'changed' } });
 
     expect(onFormMutatedMock).toHaveBeenCalled();
+  });
+
+  describe('when isWorkflowsEnabled is false (feature flag OFF)', () => {
+    it('does NOT render AlertRetrievalContent', async () => {
+      await renderComponent();
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('alertRetrievalContent')).not.toBeInTheDocument();
+      });
+    });
+
+    it('does NOT render the alert retrieval step', async () => {
+      await renderComponent();
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('alertRetrievalStep')).not.toBeInTheDocument();
+      });
+    });
+
+    it('does NOT render the generation step', async () => {
+      await renderComponent();
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('generationStep')).not.toBeInTheDocument();
+      });
+    });
+
+    it('does NOT render the validation step', async () => {
+      await renderComponent();
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('validationStep')).not.toBeInTheDocument();
+      });
+    });
+
+    it('does NOT render the default alert retrieval accordion', async () => {
+      await renderComponent();
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('defaultAlertRetrievalAccordion')).not.toBeInTheDocument();
+      });
+    });
+
+    it('does NOT render the workflow configuration panel', async () => {
+      await renderComponent();
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('alertRetrievalWorkflowPicker')).not.toBeInTheDocument();
+      });
+    });
+
+    it('does NOT render the validation workflow picker', async () => {
+      await renderComponent();
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('validationWorkflowPicker')).not.toBeInTheDocument();
+      });
+    });
+
+    it('does NOT render the notifications step', async () => {
+      await renderComponent();
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('notificationsStep')).not.toBeInTheDocument();
+      });
+    });
+
+    it('renders the alert selection settings directly (not inside a workflow step)', async () => {
+      await renderComponent();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('alertSelection')).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('when isWorkflowsEnabled is true', () => {
+    const mockUseListWorkflows = useListWorkflows as jest.MockedFunction<typeof useListWorkflows>;
+    const mockUseGenerateWorkflow = useGenerateWorkflow as jest.MockedFunction<
+      typeof useGenerateWorkflow
+    >;
+
+    const defaultGenerateWorkflowResult: UseGenerateWorkflowResult = {
+      cancelGeneration: jest.fn(),
+      generatedWorkflow: null,
+      isGenerating: false,
+      startGeneration: jest.fn(),
+    };
+
+    const workflowProps = {
+      ...defaultProps,
+      initialValue: {
+        ...defaultProps.initialValue,
+        workflowConfig: DEFAULT_WORKFLOW_CONFIGURATION,
+      },
+      isWorkflowsEnabled: true,
+    };
+
+    const renderWorkflowComponent = async () => {
+      await act(() => {
+        render(
+          <TestProviders>
+            <EditForm {...workflowProps} />
+          </TestProviders>
+        );
+      });
+    };
+
+    beforeEach(() => {
+      mockUseListWorkflows.mockReturnValue({
+        data: [],
+        dataUpdatedAt: Date.now(),
+        error: null,
+        errorUpdateCount: 0,
+        errorUpdatedAt: 0,
+        failureCount: 0,
+        failureReason: null,
+        fetchStatus: 'idle' as const,
+        isError: false,
+        isFetched: true,
+        isFetchedAfterMount: true,
+        isFetching: false,
+        isInitialLoading: false,
+        isLoading: false,
+        isLoadingError: false,
+        isPaused: false,
+        isPending: false,
+        isPlaceholderData: false,
+        isPreviousData: false,
+        isRefetchError: false,
+        isRefetching: false,
+        isStale: false,
+        isSuccess: true,
+        refetch: jest.fn(),
+        remove: jest.fn(),
+        status: 'success' as const,
+      } as ReturnType<typeof useListWorkflows>);
+
+      mockUseGenerateWorkflow.mockReturnValue(defaultGenerateWorkflowResult);
+    });
+
+    it('renders the alert retrieval step', async () => {
+      await renderWorkflowComponent();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('alertRetrievalStep')).toBeInTheDocument();
+      });
+    });
+
+    it('renders the generation step', async () => {
+      await renderWorkflowComponent();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('generationStep')).toBeInTheDocument();
+      });
+    });
+
+    it('renders the validation step', async () => {
+      await renderWorkflowComponent();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('validationStep')).toBeInTheDocument();
+      });
+    });
+
+    it('renders AlertRetrievalContent', async () => {
+      await renderWorkflowComponent();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('alertRetrievalContent')).toBeInTheDocument();
+      });
+    });
+
+    it('passes alertRetrievalHasError=false to AlertRetrievalContent when retrieval methods are configured', async () => {
+      await renderWorkflowComponent();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('alertRetrievalContent')).toHaveAttribute(
+          'data-alert-retrieval-has-error',
+          'false'
+        );
+      });
+    });
+
+    it('passes the alertRetrievalMode to AlertRetrievalContent', async () => {
+      await renderWorkflowComponent();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('alertRetrievalContent')).toHaveAttribute(
+          'data-default-alert-retrieval-mode',
+          'custom_query'
+        );
+      });
+    });
+
+    it('renders the validation workflow picker', async () => {
+      await renderWorkflowComponent();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('validationWorkflowPicker')).toBeInTheDocument();
+      });
+    });
+
+    it('renders the notifications step', async () => {
+      await renderWorkflowComponent();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('notificationsStep')).toBeInTheDocument();
+      });
+    });
+
+    it('populates the form with saved workflow_config values', async () => {
+      const savedWorkflowConfig = {
+        alertRetrievalWorkflowIds: ['workflow-1'],
+        alertRetrievalMode: 'custom_only' as const,
+        validationWorkflowId: 'custom-validation',
+      };
+
+      await act(() => {
+        render(
+          <TestProviders>
+            <EditForm
+              {...defaultProps}
+              initialValue={{
+                ...defaultProps.initialValue,
+                workflowConfig: savedWorkflowConfig,
+              }}
+              isWorkflowsEnabled={true}
+            />
+          </TestProviders>
+        );
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('alertRetrievalStep')).toBeInTheDocument();
+      });
+    });
+
+    it('invokes onChange when rendered with workflow config', async () => {
+      await renderWorkflowComponent();
+
+      expect(onChangeMock).toHaveBeenCalled();
+    });
+
+    it('still renders the schedule form container', async () => {
+      await renderWorkflowComponent();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('attackDiscoveryScheduleForm')).toBeInTheDocument();
+      });
+    });
+
+    it('still renders the name input field', async () => {
+      await renderWorkflowComponent();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('attackDiscoveryFormNameField')).toBeInTheDocument();
+      });
+    });
+
+    it('still renders the connector selector field', async () => {
+      await renderWorkflowComponent();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('attackDiscoveryConnectorSelectorField')).toBeInTheDocument();
+      });
+    });
+
+    it('still renders the schedule field', async () => {
+      await renderWorkflowComponent();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('attackDiscoveryScheduleField')).toBeInTheDocument();
+      });
+    });
+
+    describe('when editing an existing ES|QL schedule', () => {
+      const esqlQuery = 'FROM .alerts-security.alerts-default | WHERE event.kind == "signal"';
+
+      const esqlWorkflowConfig = {
+        alertRetrievalWorkflowIds: [],
+        alertRetrievalMode: 'esql' as const,
+        esqlQuery,
+        validationWorkflowId: 'default',
+      };
+
+      const esqlProps = {
+        ...defaultProps,
+        initialValue: {
+          ...defaultProps.initialValue,
+          connectorId: 'test-id',
+          name: 'Test ES|QL Schedule',
+          workflowConfig: esqlWorkflowConfig,
+        },
+        isWorkflowsEnabled: true,
+      };
+
+      const renderEsqlComponent = async () => {
+        await act(() => {
+          render(
+            <TestProviders>
+              <EditForm {...esqlProps} />
+            </TestProviders>
+          );
+        });
+      };
+
+      it('passes alertRetrievalMode=esql to AlertRetrievalContent', async () => {
+        await renderEsqlComponent();
+
+        await waitFor(() => {
+          expect(screen.getByTestId('alertRetrievalContent')).toHaveAttribute(
+            'data-default-alert-retrieval-mode',
+            'esql'
+          );
+        });
+      });
+
+      it('passes the esqlQuery to AlertRetrievalContent', async () => {
+        await renderEsqlComponent();
+
+        await waitFor(() => {
+          expect(screen.getByTestId('alertRetrievalContent')).toHaveAttribute(
+            'data-esql-query',
+            esqlQuery
+          );
+        });
+      });
+
+      it('includes workflowConfig with esql mode in the form submit data', async () => {
+        await renderEsqlComponent();
+
+        await waitFor(() => {
+          expect(onChangeMock).toHaveBeenCalled();
+        });
+
+        let result: { isValid: boolean; data: Record<string, unknown> };
+        await act(async () => {
+          const lastCall = onChangeMock.mock.calls[onChangeMock.mock.calls.length - 1][0];
+          result = await lastCall.submit();
+        });
+
+        expect(result!.isValid).toBe(true);
+        expect(result!.data.workflowConfig).toEqual(esqlWorkflowConfig);
+      });
+    });
   });
 });
