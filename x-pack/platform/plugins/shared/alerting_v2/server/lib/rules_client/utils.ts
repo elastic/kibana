@@ -108,6 +108,7 @@ export function transformCreateRuleBodyToRuleSoAttributes(
       description: data.metadata.description,
       owner: data.metadata.owner,
       tags: data.metadata.tags,
+      builder_type: data.metadata.builder_type,
     },
     time_field: data.time_field,
     schedule: {
@@ -124,23 +125,20 @@ export function transformCreateRuleBodyToRuleSoAttributes(
     grouping: data.grouping,
     no_data: data.no_data,
     artifacts: data.artifacts,
-    builder_type: data.builder_type,
     ...serverFields,
   };
 }
 
 /**
- * Resolves the `builder_type` for an update. Auto-clears the value when the
- * caller changes `evaluation.query.base` without explicitly providing
- * `builder_type` in the same request, preventing stale builder metadata from
- * surviving API-level query edits.
+ * Resolves `metadata.builder_type` for an update. Auto-clears when the query
+ * changes without an explicit `builder_type` in the same request.
  */
 function resolveBuilderType(
   updateData: UpdateRuleData,
   existingAttrs: RuleSavedObjectAttributes
 ): string | undefined {
-  if (updateData.builder_type !== undefined) {
-    return updateData.builder_type ?? undefined;
+  if (updateData.metadata?.builder_type !== undefined) {
+    return updateData.metadata.builder_type ?? undefined;
   }
 
   const queryChanged =
@@ -151,7 +149,7 @@ function resolveBuilderType(
     return undefined;
   }
 
-  return existingAttrs.builder_type;
+  return existingAttrs.metadata.builder_type;
 }
 
 /**
@@ -172,7 +170,11 @@ export function buildUpdateRuleAttributes(
 ): RuleSavedObjectAttributes {
   return {
     ...existingAttrs,
-    metadata: { ...existingAttrs.metadata, ...updateData.metadata },
+    metadata: {
+      ...existingAttrs.metadata,
+      ...updateData.metadata,
+      builder_type: resolveBuilderType(updateData, existingAttrs),
+    },
     time_field: updateData.time_field ?? existingAttrs.time_field,
     schedule: { ...existingAttrs.schedule, ...updateData.schedule },
     evaluation: updateData.evaluation
@@ -195,7 +197,6 @@ export function buildUpdateRuleAttributes(
     no_data: nullToUndefined(updateData.no_data, existingAttrs.no_data),
     artifacts: nullToEmptyArray(updateData.artifacts, existingAttrs.artifacts),
     enabled: updateData.enabled ?? existingAttrs.enabled,
-    builder_type: resolveBuilderType(updateData, existingAttrs),
     // Server-managed fields — preserved as-is except timestamps and user.
     createdBy: existingAttrs.createdBy,
     createdAt: existingAttrs.createdAt,
@@ -221,6 +222,7 @@ export function transformRuleSoAttributesToRuleApiResponse(
       description: attrs.metadata.description,
       owner: attrs.metadata.owner,
       tags: attrs.metadata.tags,
+      builder_type: attrs.metadata.builder_type,
     },
     time_field: attrs.time_field,
     schedule: {
@@ -237,7 +239,6 @@ export function transformRuleSoAttributesToRuleApiResponse(
     grouping: attrs.grouping,
     no_data: attrs.no_data,
     artifacts: attrs.artifacts,
-    builder_type: attrs.builder_type,
     enabled: attrs.enabled,
     createdBy: attrs.createdBy,
     createdAt: attrs.createdAt,

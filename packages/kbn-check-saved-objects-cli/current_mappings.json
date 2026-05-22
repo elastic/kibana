@@ -421,10 +421,6 @@
   "alerting_rule": {
     "dynamic": false,
     "properties": {
-      "builder_type": {
-        "type": "keyword",
-        "ignore_above": 256
-      },
       "createdAt": {
         "type": "date"
       },
@@ -457,6 +453,10 @@
       },
       "metadata": {
         "properties": {
+          "builder_type": {
+            "type": "keyword",
+            "ignore_above": 256
+          },
           "description": {
             "type": "text"
           },

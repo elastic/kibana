@@ -64,6 +64,13 @@ export const metadataSchema = z
       .min(1)
       .optional()
       .describe('Tags for categorization, e.g. ["production", "infra"].'),
+    builder_type: z
+      .string()
+      .max(64)
+      .optional()
+      .describe(
+        'Identifies the rule builder that authored this rule (e.g. "threshold"). Absent for rules authored directly in ES|QL.'
+      ),
   })
   .strict()
   .describe('Rule metadata.');
@@ -241,13 +248,6 @@ export const createRuleDataBaseSchema = z
     grouping: groupingSchema.optional(),
     no_data: noDataSchema.optional(),
     artifacts: z.array(artifactSchema).max(100).optional(),
-    builder_type: z
-      .string()
-      .max(64)
-      .optional()
-      .describe(
-        'Identifies the rule builder that authored this rule (e.g. "threshold"). Absent for rules authored directly in ES|QL.'
-      ),
   })
   .strip();
 
@@ -301,7 +301,10 @@ export type ImmutableRuleField = (typeof IMMUTABLE_RULE_FIELDS)[number];
 
 export const updateRuleDataSchema = z
   .object({
-    metadata: metadataSchema.partial().optional(),
+    metadata: metadataSchema
+      .partial()
+      .extend({ builder_type: z.string().max(64).optional().nullable() })
+      .optional(),
     time_field: z.string().min(1).max(128).optional(),
     schedule: scheduleSchema.partial().optional().nullable(),
     evaluation: z
@@ -321,7 +324,6 @@ export const updateRuleDataSchema = z
     no_data: noDataSchema.optional().nullable(),
     artifacts: z.array(artifactSchema).max(100).optional().nullable(),
     enabled: z.boolean().optional().describe('Whether the rule is enabled.'),
-    builder_type: z.string().max(64).optional().nullable(),
   })
   .strip();
 

@@ -99,12 +99,12 @@ export const useComposeDiscoverFlyout = ({
       setTargetRule(rule);
       setFlyoutMode(mode);
 
-      if (rule.builder_type) {
+      if (rule.metadata.builder_type) {
         const query = rule.evaluation?.query?.base;
-        const state = query ? tryParseBuilderState(rule.builder_type, query) : null;
+        const state = query ? tryParseBuilderState(rule.metadata.builder_type, query) : null;
         if (state && typeof state === 'object') {
           const stateWithTimeField = { ...state, timeField: rule.time_field ?? '@timestamp' };
-          setBuilderType(rule.builder_type);
+          setBuilderType(rule.metadata.builder_type);
           setInitialBuilderState(stateWithTimeField);
           setFlyoutOpen(true);
           return;

@@ -195,6 +195,7 @@ export const composeFormToCreateRequest = (
       description: formValues.metadata.description,
       owner: formValues.metadata.owner,
       ...(formValues.metadata.tags?.length ? { tags: formValues.metadata.tags } : {}),
+      ...(builderType ? { builder_type: builderType } : {}),
     },
     time_field: formValues.timeField,
     schedule: { every: formValues.schedule.every, lookback: formValues.schedule.lookback },
@@ -205,7 +206,6 @@ export const composeFormToCreateRequest = (
     recovery_policy,
     state_transition: mapStateTransition(formValues),
     ...(artifacts ? { artifacts } : {}),
-    ...(builderType ? { builder_type: builderType } : {}),
   };
 };
 
@@ -214,14 +214,17 @@ export const composeFormToUpdateRequest = (
   builderType?: string
 ): UpdateRuleData => {
   const { kind, ...request } = composeFormToCreateRequest(formValues, builderType);
-  const { grouping, recovery_policy, state_transition, artifacts, builder_type, ...rest } = request;
+  const { grouping, recovery_policy, state_transition, artifacts, metadata, ...rest } = request;
   return {
     ...rest,
+    metadata: {
+      ...metadata,
+      builder_type: metadata.builder_type ?? null,
+    },
     grouping: grouping ?? null,
     recovery_policy: recovery_policy ?? null,
     state_transition: state_transition ?? null,
     artifacts: artifacts ?? null,
-    builder_type: builder_type ?? null,
   };
 };
 

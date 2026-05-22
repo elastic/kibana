@@ -123,7 +123,6 @@
     "uiamApiKey"
   ],
   "alerting_rule": [
-    "builder_type",
     "createdAt",
     "createdBy",
     "enabled",
@@ -134,6 +133,7 @@
     "grouping.fields",
     "kind",
     "metadata",
+    "metadata.builder_type",
     "metadata.description",
     "metadata.name",
     "metadata.owner",
