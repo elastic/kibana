@@ -7,9 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ListrError, ListrErrorTypes } from 'listr2';
 import { FindingsCollector } from './collector';
 import { RULE_IDS } from './types';
 import { SavedObjectsCheckError } from './error';
+
+/** Minimal Listr task stub sufficient to construct a ListrError in tests. */
+const stubTask = { path: [], options: {} } as any;
 
 describe('FindingsCollector', () => {
   it('collects added findings in order', () => {
@@ -73,6 +77,40 @@ describe('FindingsCollector', () => {
     const findings = collector.getFindings();
     expect(findings).toHaveLength(2);
     expect(findings.map((f) => f.typeName)).toEqual(['foo', 'bar']);
+  });
+
+  it('unwraps a Listr2 ListrError and extracts the nested SavedObjectsCheckError findings', () => {
+    const collector = new FindingsCollector();
+    const original = new SavedObjectsCheckError({
+      ruleId: RULE_IDS.EXISTING_TYPE_MUTATED_MODEL_VERSION,
+      severity: 'error',
+      typeName: 'my-type',
+      message: 'mutated mv',
+    });
+    const listrError = new ListrError(original, ListrErrorTypes.HAS_FAILED, stubTask);
+
+    collector.ingestErrors([listrError]);
+
+    const [finding] = collector.getFindings();
+    expect(finding.ruleId).toBe(RULE_IDS.EXISTING_TYPE_MUTATED_MODEL_VERSION);
+    expect(finding.typeName).toBe('my-type');
+    expect(finding.severity).toBe('error');
+  });
+
+  it('falls back to generic when a Listr2 ListrError wraps a plain Error', () => {
+    const collector = new FindingsCollector();
+    const listrError = new ListrError(
+      new Error('plain error message'),
+      ListrErrorTypes.HAS_FAILED,
+      stubTask
+    );
+
+    collector.ingestErrors([listrError]);
+
+    const [finding] = collector.getFindings();
+    expect(finding.ruleId).toBe(RULE_IDS.GENERIC);
+    expect(finding.message).toBe('plain error message');
+    expect(finding.typeName).toBeUndefined();
   });
 
   it('falls back to a generic finding for plain Error instances and strips leading status emojis', () => {
