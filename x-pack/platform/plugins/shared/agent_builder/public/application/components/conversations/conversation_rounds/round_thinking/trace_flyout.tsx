@@ -33,10 +33,7 @@ export const TraceFlyout: React.FC<TraceFlyoutProps> = ({ traceId, onClose }) =>
     () => createEsTraceFetcher(data.search.search, ...(index ? [{ index }] : [])),
     [data.search.search, index]
   );
-  const traceSpansResult = useTraceSpans(traceId, {
-    fetchTrace,
-    enabled: spaceId != null,
-  });
+  const traceSpansResult = useTraceSpans(traceId, { fetchTrace, index, enabled: spaceId != null });
 
   return (
     <EuiFlyoutResizable

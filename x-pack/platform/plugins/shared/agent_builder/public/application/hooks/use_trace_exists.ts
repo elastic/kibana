@@ -13,6 +13,7 @@ import { useKibana } from './use_kibana';
 import { useSpaceId } from './use_space_id';
 
 const STALE_TIME_MS = 30_000;
+const REFETCH_INTERVAL_MS = 5_000;
 
 interface TraceExistsResponse {
   rawResponse?: {
@@ -29,7 +30,7 @@ export const useTraceExists = (
   const { services } = useKibana();
   const search = services.plugins.data.search.search;
   const spaceId = useSpaceId(services.plugins.spaces);
-  const indexPattern = spaceId && buildAgentBuilderTracesIndexPattern(spaceId);
+  const indexPattern = spaceId ? buildAgentBuilderTracesIndexPattern(spaceId) : undefined;
 
   const fetchTraceExists = useCallback(async (): Promise<boolean> => {
     const response = (await lastValueFrom(
@@ -51,11 +52,12 @@ export const useTraceExists = (
   }, [search, traceId, indexPattern]);
 
   const query = useQuery<boolean, Error>({
-    queryKey: ['llm-trace-waterfall', 'trace-exists', traceId],
+    queryKey: ['llm-trace-waterfall', 'trace-exists', traceId, indexPattern],
     enabled: traceId != null && enabled && spaceId != null,
     retry: 3,
-    retryDelay: 5_000,
+    retryDelay: REFETCH_INTERVAL_MS,
     staleTime: STALE_TIME_MS,
+    refetchInterval: (data) => (data ? false : REFETCH_INTERVAL_MS),
     queryFn: fetchTraceExists,
   });
 

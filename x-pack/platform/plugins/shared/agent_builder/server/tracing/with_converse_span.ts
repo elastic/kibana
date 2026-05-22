@@ -33,7 +33,6 @@ export function withConverseSpan(
   { agentId, conversationId, spaceId, opikHeaders }: WithConverseSpanOptions,
   cb: (span?: Span) => Observable<ChatEvent>
 ): Observable<ChatEvent> {
-<<<<<<< HEAD
   return withAgentBuilderContext(
     () =>
       withActiveInferenceSpan(
@@ -67,38 +66,5 @@ export function withConverseSpan(
         }
       ),
     { spaceId }
-=======
-  return withAgentBuilderContext(() =>
-    withActiveInferenceSpan(
-      'Converse',
-      {
-        attributes: {
-          [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN',
-          [ElasticGenAIAttributes.AgentId]: agentId,
-          [ElasticGenAIAttributes.AgentConversationId]: conversationId,
-          [GenAISemanticConventions.GenAIConversationId]: conversationId,
-        },
-      },
-      (span) => {
-        if (!span) {
-          return cb();
-        }
-
-        if (opikHeaders) {
-          attachOpikDistributedTrace(span, opikHeaders);
-        }
-
-        return cb(span).pipe(
-          tap({
-            next: (event) => {
-              if (isRoundCompleteEvent(event)) {
-                span.setAttribute('output.value', safeJsonStringify(event.data) ?? 'unknown');
-              }
-            },
-          })
-        );
-      }
-    )
->>>>>>> kibana/main
   );
 }

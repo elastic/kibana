@@ -15,7 +15,7 @@ import { AgentBuilderSpanProcessor } from './agent_builder_span_processor';
 import {
   AGENT_BUILDER_OWNER_BAGGAGE_KEY,
   AGENT_BUILDER_OWNER_BAGGAGE_VALUE,
-} from './with_agent_builder_context';
+} from './agent_builder_context';
 
 const SHOULD_TRACK_ATTR = '_agent_builder_should_track';
 
