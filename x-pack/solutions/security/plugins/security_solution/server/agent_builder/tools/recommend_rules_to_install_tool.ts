@@ -223,11 +223,12 @@ export const preRankCandidateRules = (
     const seen = new Set<string>();
     for (const entry of rule.threat ?? []) {
       const tacticId = entry.tactic.id;
-      if (seen.has(tacticId)) continue;
-      seen.add(tacticId);
-      const bucket = candidatesByTactic.get(tacticId) ?? [];
-      bucket.push(rule);
-      candidatesByTactic.set(tacticId, bucket);
+      if (!seen.has(tacticId)) {
+        seen.add(tacticId);
+        const bucket = candidatesByTactic.get(tacticId) ?? [];
+        bucket.push(rule);
+        candidatesByTactic.set(tacticId, bucket);
+      }
     }
   }
 
@@ -257,21 +258,21 @@ export const preRankCandidateRules = (
     const candidateCount = candidatesByTactic.get(tacticId)?.length ?? 0;
     if (candidateCount === 0) {
       allocations.set(tacticId, 0);
-      continue;
+    } else {
+      const weight = tacticWeights.get(tacticId) ?? 0;
+      const proportional = totalPoints > 0 ? Math.floor((weight / totalPoints) * budget) : 0;
+      const clamped = Math.min(MAX_PER_TACTIC, Math.max(MIN_PER_TACTIC, proportional));
+      allocations.set(tacticId, Math.min(clamped, candidateCount));
     }
-    const weight = tacticWeights.get(tacticId) ?? 0;
-    const proportional = totalPoints > 0 ? Math.floor((weight / totalPoints) * budget) : 0;
-    const clamped = Math.min(MAX_PER_TACTIC, Math.max(MIN_PER_TACTIC, proportional));
-    allocations.set(tacticId, Math.min(clamped, candidateCount));
   }
 
   // For each tactic, sort by risk_score desc and take its allocation.
   const picks: PrebuiltRuleAsset[] = [];
   for (const [tacticId, allocation] of allocations) {
-    if (allocation === 0) continue;
-    const bucket = candidatesByTactic.get(tacticId);
-    if (!bucket) continue;
-    picks.push(...[...bucket].sort(sortByRiskScoreDesc).slice(0, allocation));
+    const bucket = allocation > 0 ? candidatesByTactic.get(tacticId) : undefined;
+    if (bucket) {
+      picks.push(...[...bucket].sort(sortByRiskScoreDesc).slice(0, allocation));
+    }
   }
 
   // Dedupe by rule_id, preserving first occurrence. A rule that fills multiple
@@ -280,9 +281,10 @@ export const preRankCandidateRules = (
   const seenRuleIds = new Set<string>();
   const recommendations: PrebuiltRuleAsset[] = [];
   for (const rule of picks) {
-    if (seenRuleIds.has(rule.rule_id)) continue;
-    seenRuleIds.add(rule.rule_id);
-    recommendations.push(rule);
+    if (!seenRuleIds.has(rule.rule_id)) {
+      seenRuleIds.add(rule.rule_id);
+      recommendations.push(rule);
+    }
   }
 
   const allocationsByTactic: Record<string, number> = {};
