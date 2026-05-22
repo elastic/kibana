@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export * from './field_map';
+export {
+  ALERTS_INDEX_PATTERN,
+  updateAlertsWithAttackIds,
+  type UpdateAlertsWithAttackIdsParams,
+} from '@kbn/attack-discovery-schedules-common';

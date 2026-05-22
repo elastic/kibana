@@ -65,6 +65,11 @@ import type {
   SearchInferenceEndpointsPluginStart,
 } from '@kbn/search-inference-endpoints/server';
 import type { BaseCheckpointSaver } from '@langchain/langgraph-checkpoint';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type {
+  AttackDiscoveryExecutorOptions,
+  AttackDiscoveryScheduleDataClient,
+} from '@kbn/attack-discovery-schedules-common';
 import type {
   GetAIAssistantKnowledgeBaseDataClientParams,
   AIAssistantKnowledgeBaseDataClient,
@@ -78,14 +83,20 @@ import type { GetRegisteredFeatures, GetRegisteredTools } from './services/app_c
 import { CallbackIds } from './services/app_context';
 import type { AIAssistantDataClient } from './ai_assistant_data_clients';
 import type { DefendInsightsDataClient } from './lib/defend_insights/persistence';
-import type { AttackDiscoveryScheduleDataClient } from './lib/attack_discovery/schedules/data_client';
 
 export const PLUGIN_ID = 'elasticAssistant' as const;
 export { CallbackIds };
 
+export type AttackDiscoveryWorkflowExecutorFactory = (
+  options: AttackDiscoveryExecutorOptions
+) => Promise<{ state: {} }>;
+
 /** The plugin setup interface */
 export interface ElasticAssistantPluginSetup {
   actions: ActionsPluginSetup;
+  registerAttackDiscoveryWorkflowExecutor: (
+    factory: AttackDiscoveryWorkflowExecutorFactory
+  ) => void;
 }
 
 /** The plugin start interface */
@@ -157,6 +168,7 @@ export interface ElasticAssistantPluginStartDependencies {
   productDocBase: ProductDocBaseStartContract;
   security: SecurityPluginStart;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
+  workflowsManagement?: WorkflowsServerPluginSetup;
 }
 
 export interface ElasticAssistantApiRequestHandlerContext {
@@ -192,6 +204,7 @@ export interface ElasticAssistantApiRequestHandlerContext {
   savedObjectsClient: SavedObjectsClientContract;
   telemetry: AnalyticsServiceSetup;
   checkPrivileges: () => CheckPrivileges;
+  workflowsManagement?: WorkflowsServerPluginSetup['management'];
   /**
    * Test purpose only.
    */

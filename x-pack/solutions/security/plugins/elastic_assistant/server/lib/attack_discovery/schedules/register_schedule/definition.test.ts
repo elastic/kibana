@@ -6,20 +6,19 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import { analyticsServiceMock, coreMock } from '@kbn/core/server/mocks';
+import { analyticsServiceMock } from '@kbn/core/server/mocks';
 import {
   ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
   AttackDiscoveryScheduleParams,
 } from '@kbn/elastic-assistant-common';
 
 import { getAttackDiscoveryScheduleType } from '.';
-import { ATTACK_DISCOVERY_ALERTS_AAD_CONFIG } from '../constants';
+import { ATTACK_DISCOVERY_ALERTS_AAD_CONFIG } from '@kbn/attack-discovery-schedules-common';
 import { TaskPriority } from '@kbn/task-manager-plugin/server';
 
 describe('getAttackDiscoveryScheduleType', () => {
   const mockLogger = loggerMock.create();
   const mockTelemetry = analyticsServiceMock.createAnalyticsServiceSetup();
-  const mockCore = coreMock.createSetup();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -27,7 +26,8 @@ describe('getAttackDiscoveryScheduleType', () => {
 
   it('should return schedule type definition', async () => {
     const scheduleType = getAttackDiscoveryScheduleType({
-      core: mockCore,
+      getInference: () => undefined,
+      getWorkflowExecutorFactory: () => undefined,
       logger: mockLogger,
       publicBaseUrl: undefined,
       telemetry: mockTelemetry,

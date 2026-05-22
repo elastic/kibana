@@ -13,20 +13,26 @@ import {
 } from '@kbn/elastic-assistant-common';
 
 import { TaskPriority } from '@kbn/task-manager-plugin/server';
-import { ATTACK_DISCOVERY_ALERTS_AAD_CONFIG } from '../constants';
-import type { AttackDiscoveryExecutorOptions, AttackDiscoveryScheduleType } from '../types';
+import {
+  ATTACK_DISCOVERY_ALERTS_AAD_CONFIG,
+  type AttackDiscoveryExecutorOptions,
+  type AttackDiscoveryScheduleType,
+} from '@kbn/attack-discovery-schedules-common';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { AttackDiscoveryWorkflowExecutorFactory } from '../../../../types';
 import { attackDiscoveryScheduleExecutor } from './executor';
-import type { ElasticAssistantPluginCoreSetupDependencies } from '../../../../types';
 
 export interface GetAttackDiscoveryScheduleParams {
-  core: ElasticAssistantPluginCoreSetupDependencies;
+  getInference: () => InferenceServerStart | undefined;
+  getWorkflowExecutorFactory: () => AttackDiscoveryWorkflowExecutorFactory | undefined;
   logger: Logger;
   publicBaseUrl: string | undefined;
   telemetry: AnalyticsServiceSetup;
 }
 
 export const getAttackDiscoveryScheduleType = ({
-  core,
+  getInference,
+  getWorkflowExecutorFactory,
   logger,
   publicBaseUrl,
   telemetry,
@@ -62,9 +68,9 @@ export const getAttackDiscoveryScheduleType = ({
     autoRecoverAlerts: false,
     alerts: ATTACK_DISCOVERY_ALERTS_AAD_CONFIG,
     executor: async (options: AttackDiscoveryExecutorOptions) => {
-      const [, startDeps] = await core.getStartServices();
       return attackDiscoveryScheduleExecutor({
-        inference: startDeps.inference,
+        getInference,
+        getWorkflowExecutorFactory,
         options,
         logger,
         publicBaseUrl,

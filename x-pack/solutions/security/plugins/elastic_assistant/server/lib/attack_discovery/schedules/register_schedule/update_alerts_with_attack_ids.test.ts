@@ -6,17 +6,17 @@
  */
 
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { ALERT_ATTACK_IDS } from '@kbn/elastic-assistant-common';
-import { updateAlertsWithAttackIds } from './updateAlertsWithAttackIds';
+import { ALERT_ATTACK_IDS } from '@kbn/attack-discovery-schedules-common';
+import { updateAlertsWithAttackIds } from './update_alerts_with_attack_ids';
 
 describe('updateAlertsWithAttackIds', () => {
-  const spaceId = 'default';
-  const esClient = elasticsearchClientMock.createElasticsearchClient();
   const alertIdToAttackIdsMap = {
     'alert-id-1': ['attack-1'],
     'alert-id-2': ['attack-2'],
     'alert-id-3': ['attack-1', 'attack-2'],
   };
+  const esClient = elasticsearchClientMock.createElasticsearchClient();
+  const spaceId = 'default';
 
   describe('Happy path', () => {
     beforeAll(async () => {
@@ -33,6 +33,7 @@ describe('updateAlertsWithAttackIds', () => {
 
     it('should call `updateByQuery` with the expected params', () => {
       expect(esClient.updateByQuery).toHaveBeenCalledWith({
+        conflicts: 'proceed',
         index: '.alerts-security.alerts-default',
         query: {
           ids: {
@@ -64,6 +65,7 @@ describe('updateAlertsWithAttackIds', () => {
       });
     });
   });
+
   describe('Edge-cases', () => {
     beforeEach(() => {
       esClient.updateByQuery.mockReset();
@@ -71,12 +73,12 @@ describe('updateAlertsWithAttackIds', () => {
 
     it('should throw if an empty spaceId is being used', async () => {
       await expect(async () => {
-        await updateAlertsWithAttackIds({ esClient, alertIdToAttackIdsMap, spaceId: '' });
+        await updateAlertsWithAttackIds({ alertIdToAttackIdsMap, esClient, spaceId: '' });
       }).rejects.toThrow();
     });
 
     it('should not call `updateByQuery` if there are no alerts to be updated', async () => {
-      await updateAlertsWithAttackIds({ esClient, spaceId, alertIdToAttackIdsMap: {} });
+      await updateAlertsWithAttackIds({ alertIdToAttackIdsMap: {}, esClient, spaceId });
 
       expect(esClient.updateByQuery).toHaveBeenCalledTimes(0);
     });
