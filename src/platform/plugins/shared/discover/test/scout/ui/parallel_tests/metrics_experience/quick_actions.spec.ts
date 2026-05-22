@@ -9,6 +9,16 @@
 
 /**
  * Quick-action placement contract for the metrics-grid card.
+ *
+ * IMPORTANT: This spec logs in via `loginAsPrivilegedUser()` (see `beforeEach`
+ * below). The reason is the second test ("should keep Add to case in the 3-dot
+ * popover"), which asserts that the `addToCase` action is visible in the
+ * overflow context menu. The "Add to case" action is gated on the `cases`
+ * feature's `create`/`update` capabilities and is filtered out for users
+ * without them. A regular (non-privileged) user would therefore never see
+ * `addToCase`, the assertion would fail, and the contract this spec exists to
+ * protect would be silently un-tested. The privileged login is required, not
+ * incidental — do not weaken it to a regular user.
  */
 
 import { expect } from '@kbn/scout/ui';
