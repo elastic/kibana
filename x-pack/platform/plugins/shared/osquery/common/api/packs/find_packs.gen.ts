@@ -20,8 +20,11 @@ import {
   PackName,
   PackDescriptionOrUndefined,
   ECSMappingArrayOrUndefined,
+  ScheduleTypeOrUndefined,
+  RRuleScheduleConfigOrUndefined,
   EnabledOrUndefined,
   PolicyIdsOrUndefined,
+  PackIntervalOrUndefined,
   ObjectQueries,
   Shards,
 } from '../model/schema/common_attributes.gen';
@@ -69,6 +72,8 @@ export const FindPacksResponse = lazySchema(() =>
               removed: z.boolean().optional(),
               timeout: z.number().int().optional(),
               ecs_mapping: ECSMappingArrayOrUndefined.optional(),
+              schedule_type: ScheduleTypeOrUndefined.optional(),
+              rrule_schedule: RRuleScheduleConfigOrUndefined.optional(),
             })
           )
           .optional(),
@@ -88,6 +93,9 @@ export const FindPacksResponse = lazySchema(() =>
          * Whether the pack is read-only (true for prebuilt packs).
          */
         read_only: z.boolean().optional(),
+        schedule_type: ScheduleTypeOrUndefined.optional(),
+        interval: PackIntervalOrUndefined.optional(),
+        rrule_schedule: RRuleScheduleConfigOrUndefined.optional(),
       })
     ),
   })
@@ -135,6 +143,9 @@ export const FindPackResponse = lazySchema(() =>
        * The namespaces the pack belongs to.
        */
       namespaces: z.array(z.string()).optional(),
+      schedule_type: ScheduleTypeOrUndefined.optional(),
+      interval: PackIntervalOrUndefined.optional(),
+      rrule_schedule: RRuleScheduleConfigOrUndefined.optional(),
     }),
   })
 );

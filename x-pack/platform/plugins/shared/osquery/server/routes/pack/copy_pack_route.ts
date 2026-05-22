@@ -20,6 +20,12 @@ import { prepareSavedObjectCopy } from '../utils/copy_saved_object';
 import type { PackResponseData } from './types';
 import { copyPackResponseSchema } from './response_schemas';
 
+// Fields that are intentionally NOT copied — they are pack-instance metadata
+// or assignments that must be regenerated for the new pack. Pack-level
+// schedule fields (`schedule_type`, `interval`, `rrule_schedule`) ARE copied
+// via `...restAttributes` so the cloned pack inherits the source's schedule.
+// Per-query `schedule_id` is regenerated below.
+
 export const copyPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
     .post({
@@ -115,6 +121,7 @@ export const copyPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
           );
 
           const { attributes } = newPackSO;
+          const isRruleFeatureEnabled = osqueryContext.experimentalFeatures.rruleScheduling;
 
           const data: PackResponseData = {
             name: attributes.name,
@@ -131,6 +138,19 @@ export const copyPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
             policy_ids: [], // No policy assignments — references are empty
             shards: attributes.shards,
             saved_object_id: newPackSO.id,
+            // Discriminated response (D14) — surface the copied pack's
+            // schedule_type + matching field only. Gated by the feature flag.
+            ...(isRruleFeatureEnabled &&
+            attributes.schedule_type === 'rrule' &&
+            attributes.rrule_schedule
+              ? { schedule_type: 'rrule' as const, rrule_schedule: attributes.rrule_schedule }
+              : {}),
+            ...(isRruleFeatureEnabled &&
+            attributes.schedule_type === 'interval' &&
+            attributes.interval !== undefined &&
+            attributes.interval !== null
+              ? { schedule_type: 'interval' as const, interval: attributes.interval }
+              : {}),
           };
 
           return response.ok({

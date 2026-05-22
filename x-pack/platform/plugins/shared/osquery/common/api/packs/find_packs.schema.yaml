@@ -63,6 +63,10 @@ components:
                       type: integer
                     ecs_mapping:
                       $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/ECSMappingArrayOrUndefined'
+                    schedule_type:
+                      $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/ScheduleTypeOrUndefined'
+                    rrule_schedule:
+                      $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/RRuleScheduleConfigOrUndefined'
               version:
                 description: 'The pack version number.'
                 type: integer
@@ -89,6 +93,12 @@ components:
               read_only:
                 description: 'Whether the pack is read-only (true for prebuilt packs).'
                 type: boolean
+              schedule_type:
+                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/ScheduleTypeOrUndefined'
+              interval:
+                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PackIntervalOrUndefined'
+              rrule_schedule:
+                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/RRuleScheduleConfigOrUndefined'
       example:
         page: 1
         per_page: 10
@@ -172,6 +182,12 @@ components:
               type: array
               items:
                 type: string
+            schedule_type:
+              $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/ScheduleTypeOrUndefined'
+            interval:
+              $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PackIntervalOrUndefined'
+            rrule_schedule:
+              $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/RRuleScheduleConfigOrUndefined'
       example:
         data:
           saved_object_id: "3c42c847-eb30-4452-80e0-728584042334"

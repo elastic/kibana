@@ -52,6 +52,7 @@ describe('findPackRoute', () => {
       logFactory: {
         get: jest.fn().mockReturnValue(loggingSystemMock.createLogger()),
       },
+      experimentalFeatures: { rruleScheduling: false },
     } as unknown as OsqueryAppContext;
 
     mockSavedObjectsClient = {

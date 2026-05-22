@@ -62,6 +62,7 @@ describe('copyPackRoute', () => {
       },
       security: {},
       getStartServices: jest.fn().mockResolvedValue([{}, { security: {} }, {}]),
+      experimentalFeatures: { rruleScheduling: false },
     } as unknown as OsqueryAppContext;
   });
 
