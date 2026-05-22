@@ -51,8 +51,7 @@ export const CollectorGroupSchema = schema.object({
   isUngrouped: schema.maybe(
     schema.boolean({
       meta: {
-        description:
-          'True when the collectors in this bucket have no value for the group-by field',
+        description: 'True when the collectors in this bucket have no value for the group-by field',
       },
     })
   ),
