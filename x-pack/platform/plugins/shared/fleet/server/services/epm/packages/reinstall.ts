@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+
 import type { Installation } from '../../../types';
 import { pkgToPkgKey } from '../registry';
 

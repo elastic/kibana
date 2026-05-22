@@ -12,6 +12,7 @@ import {
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+
 import { FLEET_INSTALL_FORMAT_VERSION } from '../../../../../constants';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../../common/constants';
 import { appContextService } from '../../../../app_context';
