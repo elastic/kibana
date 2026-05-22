@@ -53,7 +53,7 @@ describe('createBulkAlertsAttachmentType', () => {
     const attachmentType = createBulkAlertsAttachmentType(buildCoreMock(), mockLogger);
 
     it('returns valid when alertIds array is present', async () => {
-      const input = { alertIds: ['abc123', 'def456'], attachmentLabel: '2 Alerts' };
+      const input = { alertIds: ['abc123', 'def456'] };
 
       const result = await attachmentType.validate(input);
 
@@ -108,7 +108,7 @@ describe('createBulkAlertsAttachmentType', () => {
       const attachmentType = createBulkAlertsAttachmentType(core, mockLogger);
 
       const attachment: Attachment<string, unknown> = {
-        id: 'test-id',
+        id: 'id-fetch-test',
         type: SecurityAgentBuilderAttachments.alerts,
         data: { alertIds: ['abc123', 'def456'] },
       };
@@ -131,7 +131,7 @@ describe('createBulkAlertsAttachmentType', () => {
       const attachmentType = createBulkAlertsAttachmentType(core, mockLogger);
 
       const attachment: Attachment<string, unknown> = {
-        id: 'test-id',
+        id: 'id-missing-test',
         type: SecurityAgentBuilderAttachments.alerts,
         data: { alertIds: ['abc123', 'missing-id'] },
       };
@@ -143,21 +143,6 @@ describe('createBulkAlertsAttachmentType', () => {
 
       expect(representation?.value).toContain('"_id": "missing-id"');
       expect(representation?.value).toContain('"error": "not found"');
-    });
-
-    it('throws when attachment data is invalid', () => {
-      const core = buildCoreMock();
-      const attachmentType = createBulkAlertsAttachmentType(core, mockLogger);
-
-      const attachment: Attachment<string, unknown> = {
-        id: 'bad-id',
-        type: SecurityAgentBuilderAttachments.alerts,
-        data: { invalid: true },
-      };
-
-      expect(() => attachmentType.format(attachment, formatContext)).toThrow(
-        'Invalid bulk alerts attachment data for attachment bad-id'
-      );
     });
 
     it('logs a warn and returns placeholders when ES search throws', async () => {
@@ -175,7 +160,7 @@ describe('createBulkAlertsAttachmentType', () => {
       );
 
       const attachment: Attachment<string, unknown> = {
-        id: 'test-id',
+        id: 'id-error-test',
         type: SecurityAgentBuilderAttachments.alerts,
         data: { alertIds: ['abc123'] },
       };
@@ -187,13 +172,13 @@ describe('createBulkAlertsAttachmentType', () => {
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Failed to fetch'));
     });
 
-    it('logs a warn when ES returns no results and does not double-log', async () => {
+    it('logs a warn when ES returns no results', async () => {
       const core = buildCoreMock([]);
       const logger = loggerMock.create();
       const attachmentType = createBulkAlertsAttachmentType(core, logger);
 
       const attachment: Attachment<string, unknown> = {
-        id: 'test-id',
+        id: 'id-no-results-test',
         type: SecurityAgentBuilderAttachments.alerts,
         data: { alertIds: ['abc123'] },
       };
@@ -203,6 +188,39 @@ describe('createBulkAlertsAttachmentType', () => {
 
       expect(logger.warn).toHaveBeenCalledTimes(1);
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('no results'));
+    });
+
+    it('returns cached representation on repeated reads without re-fetching from ES', async () => {
+      const rawCore = coreMock.createSetup();
+      const scopedClient = {
+        asCurrentUser: {
+          search: jest.fn().mockResolvedValue({
+            hits: { hits: [{ _id: 'abc123', _source: mockAlertSource }] },
+          }),
+        },
+      };
+      (rawCore.getStartServices as jest.Mock).mockResolvedValue([
+        { elasticsearch: { client: { asScoped: jest.fn().mockReturnValue(scopedClient) } } },
+      ]);
+      const core = rawCore as unknown as SecuritySolutionPluginCoreSetupDependencies;
+      const attachmentType = createBulkAlertsAttachmentType(core, mockLogger);
+
+      const attachment: Attachment<string, unknown> = {
+        id: 'id-cache-test',
+        type: SecurityAgentBuilderAttachments.alerts,
+        data: { alertIds: ['abc123'] },
+      };
+
+      const formatted = await attachmentType.format(attachment, formatContext);
+      const first = await formatted.getRepresentation?.();
+
+      // Second read with the same attachment ID should return cached value without hitting ES
+      (rawCore.getStartServices as jest.Mock).mockClear();
+      const formatted2 = await attachmentType.format(attachment, formatContext);
+      const second = await formatted2.getRepresentation?.();
+
+      expect(second?.value).toBe(first?.value);
+      expect(rawCore.getStartServices).not.toHaveBeenCalled();
     });
   });
 

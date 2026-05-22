@@ -10,7 +10,8 @@ import type { Logger } from '@kbn/core/server';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { platformCoreTools } from '@kbn/agent-builder-common';
-import { SecurityAgentBuilderAttachments, DEFAULT_ALERTS_INDEX } from '../../../common/constants';
+import { ALERTS_BATCH_MAX_SIZE, SecurityAgentBuilderAttachments } from '../../../common/constants';
+import { getAlertsIndex } from '../../../common/entity_analytics/utils';
 import {
   SECURITY_ENTITY_RISK_SCORE_TOOL_ID,
   SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID,
@@ -21,14 +22,15 @@ import { getAlertsById } from '../tools/get_alerts_by_id';
 import { securityAttachmentDataSchema } from './security_attachment_data_schema';
 
 export const bulkAlertsAttachmentDataSchema = securityAttachmentDataSchema.extend({
-  alertIds: z.array(z.string()).min(1).max(20),
+  alertIds: z.array(z.string()).min(1).max(ALERTS_BATCH_MAX_SIZE),
 });
 
 export type BulkAlertsAttachmentData = z.infer<typeof bulkAlertsAttachmentDataSchema>;
 
-const isBulkAlertsAttachmentData = (data: unknown): data is BulkAlertsAttachmentData => {
-  return bulkAlertsAttachmentDataSchema.safeParse(data).success;
-};
+// Bounded cache to avoid re-fetching alert data from ES on every LLM attachment_read call.
+// Keyed on attachment.id (UUIDs), evicts oldest entry when full.
+const REPRESENTATION_CACHE_MAX_SIZE = 500;
+const representationCache = new Map<string, string>();
 
 export const createBulkAlertsAttachmentType = (
   core: SecuritySolutionPluginCoreSetupDependencies,
@@ -43,19 +45,21 @@ export const createBulkAlertsAttachmentType = (
       ? { valid: true, data: result.data }
       : { valid: false, error: result.error.message };
   },
-  format: (attachment: Attachment<string, unknown>, context) => {
-    const data = attachment.data;
-    if (!isBulkAlertsAttachmentData(data)) {
-      throw new Error(`Invalid bulk alerts attachment data for attachment ${attachment.id}`);
-    }
+  format: (attachment, context) => {
+    // framework guarantees validate() ran first, so data is BulkAlertsAttachmentData
+    const { data } = attachment as Attachment<string, BulkAlertsAttachmentData>;
     return {
       getRepresentation: async () => {
+        const cached = representationCache.get(attachment.id);
+        if (cached !== undefined) {
+          return { type: 'text' as const, value: cached };
+        }
+
         const [coreStart] = await core.getStartServices();
         const esClient = coreStart.elasticsearch.client.asScoped(context.request).asCurrentUser;
-        const index = `${DEFAULT_ALERTS_INDEX}-${context.spaceId}`;
+        const index = getAlertsIndex(context.spaceId);
 
-        let alertsById: Record<string, unknown>;
-        let fetchFailed = false;
+        let alertsById: Record<string, unknown> | undefined;
         try {
           alertsById = await getAlertsById({ esClient, index, ids: data.alertIds });
         } catch (err) {
@@ -64,27 +68,37 @@ export const createBulkAlertsAttachmentType = (
               err?.message ?? err
             }`
           );
-          alertsById = {};
-          fetchFailed = true;
         }
 
-        if (!fetchFailed && Object.keys(alertsById).length === 0 && data.alertIds.length > 0) {
+        if (
+          alertsById !== undefined &&
+          Object.keys(alertsById).length === 0 &&
+          data.alertIds.length > 0
+        ) {
           logger.warn(
             `ES returned no results for ${data.alertIds.length} alert ID(s) from index ${index}`
           );
         }
 
+        const resolvedAlerts = alertsById ?? {};
         const entries = data.alertIds.map((id, i) => {
-          const alert = alertsById[id] ?? { error: 'not found' };
+          const alert = resolvedAlerts[id] ?? { error: 'not found' };
           return `Alert ${i + 1}:\n${JSON.stringify({ _id: id, ...(alert as object) }, null, 2)}`;
         });
 
-        return {
-          type: 'text' as const,
-          value: `${data.alertIds.length} security alert${
-            data.alertIds.length !== 1 ? 's' : ''
-          }:\n\n${entries.join('\n\n---\n\n')}`,
-        };
+        const value = `${data.alertIds.length} security alert${
+          data.alertIds.length !== 1 ? 's' : ''
+        }:\n\n${entries.join('\n\n---\n\n')}`;
+
+        if (representationCache.size >= REPRESENTATION_CACHE_MAX_SIZE) {
+          const oldest = representationCache.keys().next().value;
+          if (oldest !== undefined) {
+            representationCache.delete(oldest);
+          }
+        }
+        representationCache.set(attachment.id, value);
+
+        return { type: 'text' as const, value };
       },
     };
   },
