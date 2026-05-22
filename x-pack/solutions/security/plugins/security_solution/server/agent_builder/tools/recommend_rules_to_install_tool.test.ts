@@ -12,23 +12,22 @@ import { preRankCandidateRules } from './recommend_rules_to_install_tool';
 // Helpers
 // ---------------------------------------------------------------------------
 
-const makeRule = (
-  overrides: Partial<PrebuiltRuleAsset> & { rule_id: string }
-): PrebuiltRuleAsset => ({
-  name: `Rule ${overrides.rule_id}`,
-  description: 'A test rule',
-  severity: 'medium',
-  risk_score: 50,
-  version: 1,
-  author: [],
-  license: 'Elastic License v2',
-  type: 'query',
-  query: '*',
-  language: 'kuery',
-  index: ['logs-*'],
-  required_fields: [{ name: 'host.name', type: 'keyword' }],
-  ...overrides,
-} as PrebuiltRuleAsset);
+const makeRule = (overrides: Partial<PrebuiltRuleAsset> & { rule_id: string }): PrebuiltRuleAsset =>
+  ({
+    name: `Rule ${overrides.rule_id}`,
+    description: 'A test rule',
+    severity: 'medium',
+    risk_score: 50,
+    version: 1,
+    author: [],
+    license: 'Elastic License v2',
+    type: 'query',
+    query: '*',
+    language: 'kuery',
+    index: ['logs-*'],
+    required_fields: [{ name: 'host.name', type: 'keyword' }],
+    ...overrides,
+  } as PrebuiltRuleAsset);
 
 const tactic = (id: string, name: string) => ({
   framework: 'MITRE ATT&CK',
@@ -69,13 +68,10 @@ describe('preRankCandidateRules', () => {
     });
 
     it('returns zero allocations for installed-only tactics when no candidates exist', () => {
-      const result = preRankCandidateRules(
-        [],
-        coverage('TA0001', 'Initial Access', 2)
-      );
+      const result = preRankCandidateRules([], coverage('TA0001', 'Initial Access', 2));
 
       expect(result.recommendations).toEqual([]);
-      expect(result.allocationsByTactic['TA0001']).toBe(0);
+      expect(result.allocationsByTactic.TA0001).toBe(0);
     });
   });
 
@@ -100,8 +96,8 @@ describe('preRankCandidateRules', () => {
       // TA0001 proportional = floor(3/4 * 200) = 150, clamped to MAX_PER_TACTIC=25
       // TA0002 proportional = floor(1/4 * 200) = 50, clamped to MAX_PER_TACTIC=25
       // Both get allocation 1 (only 1 candidate each)
-      expect(result.allocationsByTactic['TA0001']).toBe(1);
-      expect(result.allocationsByTactic['TA0002']).toBe(1);
+      expect(result.allocationsByTactic.TA0001).toBe(1);
+      expect(result.allocationsByTactic.TA0002).toBe(1);
     });
 
     it('assigns SPARSE weight (2) when installed_count is between 1 and SPARSE_INSTALLED_THRESHOLD (3)', () => {
@@ -118,8 +114,8 @@ describe('preRankCandidateRules', () => {
       // totalPoints = 2+1 = 3
       // TA0001 proportional = floor(2/3 * 200) = 133, clamped to 25, bound by 1 candidate → 1
       // TA0002 proportional = floor(1/3 * 200) = 66, clamped to 25, bound by 1 candidate → 1
-      expect(result.allocationsByTactic['TA0001']).toBe(1);
-      expect(result.allocationsByTactic['TA0002']).toBe(1);
+      expect(result.allocationsByTactic.TA0001).toBe(1);
+      expect(result.allocationsByTactic.TA0002).toBe(1);
       // Both rules appear in recommendations
       expect(result.recommendations).toHaveLength(2);
     });
@@ -168,7 +164,7 @@ describe('preRankCandidateRules', () => {
 
       const result = preRankCandidateRules(rules, {}, 200);
 
-      expect(result.allocationsByTactic['TA0001']).toBe(25);
+      expect(result.allocationsByTactic.TA0001).toBe(25);
       expect(result.recommendations).toHaveLength(25);
     });
   });
@@ -183,7 +179,7 @@ describe('preRankCandidateRules', () => {
 
       const result = preRankCandidateRules(rules, {}, 200);
 
-      expect(result.allocationsByTactic['TA0001']).toBe(2);
+      expect(result.allocationsByTactic.TA0001).toBe(2);
       expect(result.recommendations).toHaveLength(2);
     });
   });
@@ -246,8 +242,8 @@ describe('preRankCandidateRules', () => {
       const result = preRankCandidateRules([sharedRule], {}, 200);
 
       // Both tactics get an allocation of 1 (bounded by candidate count)
-      expect(result.allocationsByTactic['TA0001']).toBe(1);
-      expect(result.allocationsByTactic['TA0002']).toBe(1);
+      expect(result.allocationsByTactic.TA0001).toBe(1);
+      expect(result.allocationsByTactic.TA0002).toBe(1);
     });
 
     it('deduplicates when the same tactic appears twice in a single rule threat array', () => {
@@ -262,7 +258,7 @@ describe('preRankCandidateRules', () => {
       const result = preRankCandidateRules([rule], {}, 200);
 
       // Rule is in the TA0001 bucket only once; allocation bounded to 1 candidate
-      expect(result.allocationsByTactic['TA0001']).toBe(1);
+      expect(result.allocationsByTactic.TA0001).toBe(1);
       expect(result.recommendations).toHaveLength(1);
     });
   });
@@ -277,8 +273,8 @@ describe('preRankCandidateRules', () => {
         200
       );
 
-      expect(result.allocationsByTactic['TA0001']).toBe(0);
-      expect(result.allocationsByTactic['TA0002']).toBe(1);
+      expect(result.allocationsByTactic.TA0001).toBe(0);
+      expect(result.allocationsByTactic.TA0002).toBe(1);
     });
 
     it('does not let installed-only tactics consume budget from tactics with candidates', () => {
@@ -297,8 +293,8 @@ describe('preRankCandidateRules', () => {
 
       // TA0002 weight=3 (empty), totalPoints=3 (TA0001 excluded because no candidates)
       // proportional = floor(3/3 * 200) = 200, clamped to 25
-      expect(result.allocationsByTactic['TA0002']).toBe(25);
-      expect(result.allocationsByTactic['TA0001']).toBe(0);
+      expect(result.allocationsByTactic.TA0002).toBe(25);
+      expect(result.allocationsByTactic.TA0001).toBe(0);
     });
   });
 
@@ -325,9 +321,9 @@ describe('preRankCandidateRules', () => {
         60
       );
 
-      expect(result.allocationsByTactic['TA0001']).toBe(25); // clamped from 30
-      expect(result.allocationsByTactic['TA0002']).toBe(20);
-      expect(result.allocationsByTactic['TA0003']).toBe(10);
+      expect(result.allocationsByTactic.TA0001).toBe(25); // clamped from 30
+      expect(result.allocationsByTactic.TA0002).toBe(20);
+      expect(result.allocationsByTactic.TA0003).toBe(10);
     });
   });
 
@@ -350,7 +346,10 @@ describe('preRankCandidateRules', () => {
         rule_id: 'multi',
         threat: [tactic('TA0001', 'InitAccess'), tactic('TA0002', 'Execution')],
       });
-      const ta2OnlyRule = makeRule({ rule_id: 'ta2-only', threat: [tactic('TA0002', 'Execution')] });
+      const ta2OnlyRule = makeRule({
+        rule_id: 'ta2-only',
+        threat: [tactic('TA0002', 'Execution')],
+      });
 
       const result = preRankCandidateRules([rule, ta2OnlyRule], {}, 200);
 
