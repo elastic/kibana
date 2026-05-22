@@ -189,7 +189,9 @@ that now before reading any further.
    again. This is transient; `browser_wait_for` can block indefinitely here.
    If you are redirected to a SAML mock IDP instead of the login page, navigate again with the explicit `?auth_provider_hint=cloud-basic` URL — this is an expected Scout behaviour, not a failure.
 3. Log in with `elastic` / `changeme`
-4. If an "AI Agent" modal overlay is present after login, close it with `browser_evaluate` using `document.querySelector(...)?.remove()` before continuing — it will intercept Playwright clicks.
+4. If an "AI Agent" modal overlay is present after login, it will intercept Playwright clicks. Close it before continuing:
+   - Call `browser_snapshot` to locate the modal's selector (look for a dialog or overlay element)
+   - Run `browser_evaluate` with `document.querySelector('[YOUR_SELECTOR]')?.remove()`
 5. Follow `reproduction_steps` from `analysis.json`
 
 After the bug manifests, collect:
