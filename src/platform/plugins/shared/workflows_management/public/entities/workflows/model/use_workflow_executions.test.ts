@@ -34,6 +34,18 @@ describe('useWorkflowExecutions', () => {
     total: 2,
   };
 
+  const renderExecutionsHook = (
+    params: Parameters<typeof useWorkflowExecutions>[0],
+    options?: Parameters<typeof useWorkflowExecutions>[1]
+  ) =>
+    renderHook(() => useWorkflowExecutions(params, { retry: false, ...options }), {
+      wrapper: createQueryClientWrapper(queryClient),
+    });
+
+  const waitForExecutionsFetch = async () => {
+    await waitFor(() => expect(mockGetWorkflowExecutions).toHaveBeenCalled());
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
     mockGetWorkflowExecutions = jest.fn().mockResolvedValue(executionsPage1);
@@ -48,11 +60,9 @@ describe('useWorkflowExecutions', () => {
   });
 
   it('should fetch executions for a workflow', async () => {
-    const { result } = renderHook(() => useWorkflowExecutions({ workflowId: 'wf-1' }), {
-      wrapper: createQueryClientWrapper(queryClient),
-    });
+    renderExecutionsHook({ workflowId: 'wf-1' });
 
-    await waitFor(() => expect(result.current.isFetched).toBe(true));
+    await waitForExecutionsFetch();
 
     expect(mockGetWorkflowExecutions).toHaveBeenCalledWith(
       'wf-1',
@@ -64,19 +74,15 @@ describe('useWorkflowExecutions', () => {
   });
 
   it('should not fetch when workflowId is null', () => {
-    renderHook(() => useWorkflowExecutions({ workflowId: null }), {
-      wrapper: createQueryClientWrapper(queryClient),
-    });
+    renderExecutionsHook({ workflowId: null });
 
     expect(mockGetWorkflowExecutions).not.toHaveBeenCalled();
   });
 
   it('should flatten pages into allExecutions data', async () => {
-    const { result } = renderHook(() => useWorkflowExecutions({ workflowId: 'wf-1' }), {
-      wrapper: createQueryClientWrapper(queryClient),
-    });
+    const { result } = renderExecutionsHook({ workflowId: 'wf-1' });
 
-    await waitFor(() => expect(result.current.isFetched).toBe(true));
+    await waitFor(() => expect(result.current.data).not.toBeNull());
 
     expect(result.current.data).toEqual({
       results: [
@@ -92,11 +98,9 @@ describe('useWorkflowExecutions', () => {
   it('should pass statuses filter to query params', async () => {
     const statuses: ExecutionStatus[] = [ExecutionStatus.COMPLETED, ExecutionStatus.FAILED];
 
-    const { result } = renderHook(() => useWorkflowExecutions({ workflowId: 'wf-1', statuses }), {
-      wrapper: createQueryClientWrapper(queryClient),
-    });
+    renderExecutionsHook({ workflowId: 'wf-1', statuses });
 
-    await waitFor(() => expect(result.current.isFetched).toBe(true));
+    await waitForExecutionsFetch();
 
     expect(mockGetWorkflowExecutions).toHaveBeenCalledWith(
       'wf-1',
@@ -109,12 +113,9 @@ describe('useWorkflowExecutions', () => {
   it('should pass executionTypes filter to query params', async () => {
     const executionTypes: ExecutionType[] = [ExecutionType.TEST];
 
-    const { result } = renderHook(
-      () => useWorkflowExecutions({ workflowId: 'wf-1', executionTypes }),
-      { wrapper: createQueryClientWrapper(queryClient) }
-    );
+    renderExecutionsHook({ workflowId: 'wf-1', executionTypes });
 
-    await waitFor(() => expect(result.current.isFetched).toBe(true));
+    await waitForExecutionsFetch();
 
     expect(mockGetWorkflowExecutions).toHaveBeenCalledWith(
       'wf-1',
@@ -125,16 +126,11 @@ describe('useWorkflowExecutions', () => {
   });
 
   it('should pass executedBy filter when it has entries', async () => {
-    const { result } = renderHook(
-      () =>
-        useWorkflowExecutions({
-          workflowId: 'wf-1',
-          executedBy: ['user-1'],
-        }),
-      { wrapper: createQueryClientWrapper(queryClient) }
-    );
+    const executedBy = ['user-1'];
 
-    await waitFor(() => expect(result.current.isFetched).toBe(true));
+    renderExecutionsHook({ workflowId: 'wf-1', executedBy });
+
+    await waitForExecutionsFetch();
 
     expect(mockGetWorkflowExecutions).toHaveBeenCalledWith(
       'wf-1',
@@ -145,32 +141,20 @@ describe('useWorkflowExecutions', () => {
   });
 
   it('should not include executedBy when the array is empty', async () => {
-    const { result } = renderHook(
-      () =>
-        useWorkflowExecutions({
-          workflowId: 'wf-1',
-          executedBy: [],
-        }),
-      { wrapper: createQueryClientWrapper(queryClient) }
-    );
+    const executedBy: string[] = [];
 
-    await waitFor(() => expect(result.current.isFetched).toBe(true));
+    renderExecutionsHook({ workflowId: 'wf-1', executedBy });
+
+    await waitForExecutionsFetch();
 
     const callParams = mockGetWorkflowExecutions.mock.calls[0][1];
     expect(callParams).not.toHaveProperty('executedBy');
   });
 
   it('should pass omitStepRuns when provided', async () => {
-    const { result } = renderHook(
-      () =>
-        useWorkflowExecutions({
-          workflowId: 'wf-1',
-          omitStepRuns: true,
-        }),
-      { wrapper: createQueryClientWrapper(queryClient) }
-    );
+    renderExecutionsHook({ workflowId: 'wf-1', omitStepRuns: true });
 
-    await waitFor(() => expect(result.current.isFetched).toBe(true));
+    await waitForExecutionsFetch();
 
     expect(mockGetWorkflowExecutions).toHaveBeenCalledWith(
       'wf-1',
@@ -181,21 +165,17 @@ describe('useWorkflowExecutions', () => {
   });
 
   it('should pass time range and sort params when provided', async () => {
-    const { result } = renderHook(
-      () =>
-        useWorkflowExecutions({
-          workflowId: 'wf-1',
-          startedAfter: 'now-1w',
-          startedBefore: 'now',
-          finishedAfter: '2026-05-01T00:00:00.000Z',
-          finishedBefore: '2026-05-14T00:00:00.000Z',
-          sortField: 'finishedAt',
-          sortOrder: 'desc',
-        }),
-      { wrapper: createQueryClientWrapper(queryClient) }
-    );
+    renderExecutionsHook({
+      workflowId: 'wf-1',
+      startedAfter: 'now-1w',
+      startedBefore: 'now',
+      finishedAfter: '2026-05-01T00:00:00.000Z',
+      finishedBefore: '2026-05-14T00:00:00.000Z',
+      sortField: 'finishedAt',
+      sortOrder: 'desc',
+    });
 
-    await waitFor(() => expect(result.current.isFetched).toBe(true));
+    await waitForExecutionsFetch();
 
     expect(mockGetWorkflowExecutions).toHaveBeenCalledWith(
       'wf-1',
@@ -211,11 +191,9 @@ describe('useWorkflowExecutions', () => {
   });
 
   it('should use custom page size when provided', async () => {
-    const { result } = renderHook(() => useWorkflowExecutions({ workflowId: 'wf-1', size: 25 }), {
-      wrapper: createQueryClientWrapper(queryClient),
-    });
+    renderExecutionsHook({ workflowId: 'wf-1', size: 25 });
 
-    await waitFor(() => expect(result.current.isFetched).toBe(true));
+    await waitForExecutionsFetch();
 
     expect(mockGetWorkflowExecutions).toHaveBeenCalledWith(
       'wf-1',
@@ -226,9 +204,7 @@ describe('useWorkflowExecutions', () => {
   });
 
   it('should return null data when there are no pages', () => {
-    const { result } = renderHook(() => useWorkflowExecutions({ workflowId: null }), {
-      wrapper: createQueryClientWrapper(queryClient),
-    });
+    const { result } = renderExecutionsHook({ workflowId: null });
 
     expect(result.current.data).toBeNull();
   });
@@ -236,20 +212,15 @@ describe('useWorkflowExecutions', () => {
   it('should handle HTTP errors', async () => {
     mockGetWorkflowExecutions.mockRejectedValue(new Error('Server error'));
 
-    const { result } = renderHook(
-      () => useWorkflowExecutions({ workflowId: 'wf-1' }, { retry: false }),
-      { wrapper: createQueryClientWrapper(queryClient) }
-    );
+    const { result } = renderExecutionsHook({ workflowId: 'wf-1' }, { retry: false });
 
     await waitFor(() => expect(result.current.error).toBeTruthy());
   });
 
   it('should expose hasNextPage as false when all results fit in one page', async () => {
-    const { result } = renderHook(() => useWorkflowExecutions({ workflowId: 'wf-1' }), {
-      wrapper: createQueryClientWrapper(queryClient),
-    });
+    const { result } = renderExecutionsHook({ workflowId: 'wf-1' });
 
-    await waitFor(() => expect(result.current.isFetched).toBe(true));
+    await waitFor(() => expect(result.current.data).not.toBeNull());
 
     expect(result.current.hasNextPage).toBe(false);
   });
@@ -262,11 +233,9 @@ describe('useWorkflowExecutions', () => {
       total: 3,
     });
 
-    const { result } = renderHook(() => useWorkflowExecutions({ workflowId: 'wf-1', size: 1 }), {
-      wrapper: createQueryClientWrapper(queryClient),
-    });
+    const { result } = renderExecutionsHook({ workflowId: 'wf-1', size: 1 });
 
-    await waitFor(() => expect(result.current.isFetched).toBe(true));
+    await waitFor(() => expect(result.current.data).not.toBeNull());
 
     expect(result.current.hasNextPage).toBe(true);
   });
