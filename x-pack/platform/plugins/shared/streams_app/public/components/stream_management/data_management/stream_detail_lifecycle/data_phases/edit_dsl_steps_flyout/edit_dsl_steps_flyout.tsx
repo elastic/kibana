@@ -236,7 +236,7 @@ export const EditDslStepsFlyout = ({
         disabled={isSaveDisabled}
       >
         {i18n.translate('xpack.streams.editDslStepsFlyout.save', {
-          defaultMessage: 'Save',
+          defaultMessage: 'Apply',
         })}
       </EuiButton>
     );
