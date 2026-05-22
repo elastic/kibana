@@ -7,7 +7,6 @@
 
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { MockApmPluginStorybook } from '../../../context/apm_plugin/mock_apm_plugin_storybook';
 import type { ServiceMapAttachmentData } from '../../../../common/agent_builder/attachments';
 import { AgentServiceMap } from '../agent_service_map';
 
@@ -23,29 +22,21 @@ import { AgentServiceMap } from '../agent_service_map';
  * also verify the shared `ServiceNode` degrades gracefully without them.
  */
 
-const StoryFrame = ({ children }: { children: React.ReactNode }) => (
-  <MockApmPluginStorybook>
-    <div
-      style={{
-        width: 700,
-        height: 480,
-        border: '1px solid var(--euiColorLightShade, #d3dae6)',
-        borderRadius: 4,
-      }}
-    >
-      {children}
-    </div>
-  </MockApmPluginStorybook>
-);
-
 const meta: Meta<typeof AgentServiceMap> = {
   title: 'app/AgentBuilder/AgentServiceMap',
   component: AgentServiceMap,
   decorators: [
     (Story) => (
-      <StoryFrame>
+      <div
+        style={{
+          width: 700,
+          height: 480,
+          border: '1px solid var(--euiColorLightShade, #d3dae6)',
+          borderRadius: 4,
+        }}
+      >
         <Story />
-      </StoryFrame>
+      </div>
     ),
   ],
   parameters: {
