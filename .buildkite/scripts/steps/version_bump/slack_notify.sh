@@ -6,9 +6,6 @@ echo --- Notify Slack that branch has been created
 
 SCRIPT_DIR=".buildkite/scripts/steps/version_bump"
 
-echo "Installing dependencies..."
-npm ci --prefix "$SCRIPT_DIR"
-
 DRY_RUN_FLAG=""
 if [[ "${DRY_RUN:-false}" == "true" ]]; then
   DRY_RUN_FLAG="--dry-run"

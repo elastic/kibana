@@ -15,17 +15,17 @@ const HISTORY_LIMIT = 100;
 
 const VALID_TYPES = ['patch', 'minor'];
 
-function usage() {
-  console.error(
+function printUsage(out) {
+  out(
     'Usage: node notify.js --version <version> --type <patch|minor> [--dry-run]\n' +
       '\n' +
       '  --version   Kibana version, e.g. 9.1.0\n' +
       '  --type      Type of event:\n' +
       '                patch   - Kibana has been version-bumped\n' +
       '                minor   - Kibana branch cut completed\n' +
-      '  --dry-run   Print what would be posted without sending anything\n'
+      '  --dry-run   Print what would be posted without sending anything\n' +
+      '  --help      Show this help message\n'
   );
-  process.exit(1);
 }
 
 function parseCLIArgs(argv) {
@@ -35,12 +35,14 @@ function parseCLIArgs(argv) {
       version: { type: 'string' },
       type: { type: 'string' },
       'dry-run': { type: 'boolean', default: false },
+      help: { type: 'boolean', default: false },
     },
   });
   return {
     version: values.version,
     type: values.type,
     dryRun: values['dry-run'],
+    help: values.help,
   };
 }
 
@@ -73,14 +75,22 @@ async function findFreezeThread(client, version) {
 
 const args = parseCLIArgs(process.argv.slice(2));
 
+if (args.help) {
+  printUsage(console.log);
+  process.exit(0);
+}
+
+if (!args.version || !args.type) {
+  printUsage(console.error);
+  process.exit(1);
+}
+
 if (!args.dryRun && !process.env.SLACK_BOT_TOKEN) {
   console.error(
     'SLACK_BOT_TOKEN is not set. Add it to a .env file or export it in your environment.'
   );
   process.exit(1);
 }
-
-if (!args.version || !args.type) usage();
 if (!VALID_TYPES.includes(args.type)) {
   console.error(`Invalid --type "${args.type}". Must be one of: ${VALID_TYPES.join(', ')}`);
   process.exit(1);
