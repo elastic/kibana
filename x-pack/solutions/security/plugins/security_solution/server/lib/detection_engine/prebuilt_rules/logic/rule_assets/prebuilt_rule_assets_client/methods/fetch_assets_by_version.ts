@@ -8,6 +8,7 @@
 import type { SavedObjectsClientContract, SavedObjectsRawDocSource } from '@kbn/core/server';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import type {
+  AggregationsAggregate,
   AggregationsAggregationContainer,
   QueryDslQueryContainer,
   Sort,
@@ -35,7 +36,7 @@ export interface FetchAssetsByVersionSearchParams {
 
 export interface FetchAssetsByVersionResult {
   assets: PrebuiltRuleAsset[];
-  aggregations?: Record<string, AggregationsAggregationContainer>;
+  aggregations?: Record<string, AggregationsAggregate>;
 }
 
 /**
@@ -109,7 +110,7 @@ export async function fetchAssetsByVersion(
 
   return {
     assets: validatePrebuiltRuleAssets(orderedRuleAssets),
-    aggregations: searchResult.aggregations as Record<string, AggregationsAggregationContainer>,
+    aggregations: searchResult.aggregations as Record<string, AggregationsAggregate>,
   };
 }
 

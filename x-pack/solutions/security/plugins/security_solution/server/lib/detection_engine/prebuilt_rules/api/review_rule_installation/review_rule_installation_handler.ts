@@ -11,8 +11,9 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import type {
   PrebuiltRuleAssetsFacetCategory,
   PrebuiltRuleAssetsSort,
-  ReviewRuleInstallationField,
 } from '../../../../../../common/api/detection_engine/prebuilt_rules/review_rule_installation/review_rule_installation_route.gen';
+import type { RuleResponseField } from '../../../../../../common/api/detection_engine/prebuilt_rules/common/rule_response_field.gen';
+import type { RuleResponse } from '../../../../../../common/api/detection_engine';
 import type { RuleSummary } from '../../logic/rule_objects/prebuilt_rule_objects_client';
 import type {
   ReviewRuleInstallationRequestBody,
@@ -164,7 +165,7 @@ async function fetchRules({
   page: number;
   perPage: number;
   aggs?: Record<string, AggregationsAggregationContainer>;
-  fields?: ReviewRuleInstallationField[];
+  fields?: RuleResponseField[];
 }) {
   const installableVersions = await getInstallableRuleVersions(
     ruleAssetsClient,
@@ -175,6 +176,8 @@ async function fetchRules({
     filter
   );
 
+  // All installable SO IDs are passed so ES handles paging/sorting in one round trip.
+  // If aggregations are never needed, this could be optimised to pass only the page IDs.
   const installableRuleAssetsPage = await ruleAssetsClient.fetchAssetsByVersion(
     installableVersions,
     {
@@ -191,7 +194,11 @@ async function fetchRules({
   );
 
   return {
-    rules: convertedRules.map((rule) => narrowRuleResponseFields(rule, fields)),
+    // Cast is safe: the response is immediately serialised to JSON; the OpenAPI
+    // schema types this as RuleResponse but the `fields` parameter makes it a
+    // projection — only the requested fields plus REVIEW_RULE_BASELINE_FIELDS
+    // are guaranteed to be present.
+    rules: convertedRules.map((rule) => narrowRuleResponseFields(rule, fields) as RuleResponse),
     total: installableVersions.length,
     aggregations: installableRuleAssetsPage.aggregations,
   };

@@ -51,7 +51,7 @@ paths:
                   description: |
                     Subset of top-level `RuleResponse` keys used to narrow rule response payloads.
                   items:
-                    $ref: '../review_rule_installation/review_rule_installation_route.schema.yaml#/components/schemas/ReviewRuleInstallationField'
+                    $ref: '../common/rule_response_field.schema.yaml#/components/schemas/RuleResponseField'
       responses:
         '200':
           description: Indicates a successful call

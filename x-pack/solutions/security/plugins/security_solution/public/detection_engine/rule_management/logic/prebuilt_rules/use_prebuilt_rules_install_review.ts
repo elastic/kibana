@@ -6,10 +6,9 @@
  */
 
 import type { UseQueryOptions } from '@kbn/react-query';
-import type {
-  ReviewRuleInstallationResponseBody,
-  ReviewRuleInstallationField,
-} from '../../../../../common/api/detection_engine/prebuilt_rules';
+import type * as z from '@kbn/zod/v4';
+import type { ReviewRuleInstallationResponseBody } from '../../../../../common/api/detection_engine/prebuilt_rules';
+import type { RuleResponseField } from '../../../../../common/api/detection_engine/prebuilt_rules/common/rule_response_field.gen';
 import type {
   GranularRulesFilter,
   GranularRulesSearch,
@@ -28,7 +27,7 @@ interface UsePrebuiltRulesInstallReviewParams {
 
   sortingOptions?: PrebuiltRuleAssetsSortItem;
   aggregations?: Record<string, string[]>;
-  fields?: ReviewRuleInstallationField[];
+  fields?: RuleResponseField[];
 }
 
 const ASSET_TAGS_FIELD = 'security-rule.tags';

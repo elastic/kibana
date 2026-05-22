@@ -21,94 +21,11 @@ import {
   GranularRulesSearch,
   FacetCounts,
 } from '../../rule_management/granular_rules/granular_rules_contract.gen';
+import { RuleResponseField } from '../common/rule_response_field.gen';
 import { SortOrder } from '../../model/sorting.gen';
 import { RuleTagArray } from '../../model/rule_schema/common_attributes.gen';
 import { RuleResponse } from '../../model/rule_schema/rule_schemas.gen';
 import { WarningSchema } from '../../model/warning_schema.gen';
-
-/**
-  * Top-level key from detection rule API responses (`RuleResponse`).
-
-  */
-export const ReviewRuleInstallationField = lazySchema(() =>
-  z.enum([
-    'actions',
-    'alias_purpose',
-    'alias_target_id',
-    'alert_suppression',
-    'anomaly_threshold',
-    'author',
-    'building_block_type',
-    'concurrent_searches',
-    'created_at',
-    'created_by',
-    'data_view_id',
-    'description',
-    'enabled',
-    'event_category_override',
-    'exceptions_list',
-    'execution_summary',
-    'false_positives',
-    'filters',
-    'from',
-    'history_window_start',
-    'id',
-    'immutable',
-    'index',
-    'investigation_fields',
-    'items_per_search',
-    'interval',
-    'language',
-    'license',
-    'machine_learning_job_id',
-    'max_signals',
-    'meta',
-    'name',
-    'namespace',
-    'new_terms_fields',
-    'note',
-    'outcome',
-    'output_index',
-    'query',
-    'references',
-    'related_integrations',
-    'required_fields',
-    'response_actions',
-    'revision',
-    'risk_score',
-    'risk_score_mapping',
-    'rule_id',
-    'rule_name_override',
-    'rule_source',
-    'saved_id',
-    'severity',
-    'severity_mapping',
-    'setup',
-    'tags',
-    'threat',
-    'threat_filters',
-    'threat_index',
-    'threat_indicator_path',
-    'threat_language',
-    'threat_mapping',
-    'threat_query',
-    'throttle',
-    'tiebreaker_field',
-    'timeline_id',
-    'timeline_title',
-    'timestamp_field',
-    'timestamp_override',
-    'timestamp_override_fallback_disabled',
-    'to',
-    'type',
-    'updated_at',
-    'updated_by',
-    'version',
-  ])
-);
-export type ReviewRuleInstallationField = z.infer<typeof ReviewRuleInstallationField>;
-export type ReviewRuleInstallationFieldEnum = typeof ReviewRuleInstallationField.enum;
-export const ReviewRuleInstallationFieldEnum = ReviewRuleInstallationField.enum;
 
 /**
  * Field to sort prebuilt rule assets by.
@@ -258,7 +175,7 @@ installable rules.
       * Subset of top-level `RuleResponse` keys used to narrow rule response payloads.
 
       */
-      fields: z.array(ReviewRuleInstallationField).optional(),
+      fields: z.array(RuleResponseField).optional(),
     })
     .strict()
 );

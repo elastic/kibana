@@ -5,29 +5,25 @@
  * 2.0.
  */
 
-import type { RulesClient } from '@kbn/alerting-plugin/server';
-import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import {
   buildAggregations,
   expandRawAggregationResult,
-  fetchGranularFacetCountsChunked,
+  fetchGranularFacetCounts,
 } from './granular_facet_aggregations';
-import { findRules } from './find_rules';
 
-jest.mock('./find_rules');
-
-const findRulesMock = findRules as jest.MockedFunction<typeof findRules>;
-
-const aggregationsResponse = (
-  raw: Record<string, { buckets: Array<{ key: string; doc_count: number }> }>
-) =>
-  ({
-    page: 1,
-    perPage: 0,
+const makeSoClient = (
+  aggregations?: Record<string, { buckets: Array<{ key: string; doc_count: number }> }>
+): SavedObjectsClientContract => {
+  const client = savedObjectsClientMock.create();
+  client.search.mockResolvedValue({
     total: 0,
-    data: [],
-    aggregations: raw,
-  } as unknown as Awaited<ReturnType<typeof findRules>>);
+    hits: [],
+    aggregations: aggregations ?? {},
+  } as unknown as Awaited<ReturnType<SavedObjectsClientContract['search']>>);
+  return client;
+};
 
 describe('buildAggregations', () => {
   it('maps friendly facet names to ES fields', () => {
@@ -67,140 +63,73 @@ describe('expandRawAggregationResult', () => {
   });
 });
 
-describe('fetchGranularFacetCountsChunked', () => {
-  let rulesClient: RulesClient;
+describe('fetchGranularFacetCounts', () => {
+  it('short-circuits to {} and never calls search when ruleIds is empty', async () => {
+    const savedObjectsClient = makeSoClient();
 
-  beforeEach(() => {
-    rulesClient = rulesClientMock.create() as unknown as RulesClient;
-    findRulesMock.mockReset();
-  });
-
-  it('short-circuits to {} and never calls findRules when ruleIds is empty', async () => {
-    const result = await fetchGranularFacetCountsChunked({
-      rulesClient,
+    const result = await fetchGranularFacetCounts({
+      savedObjectsClient,
       ruleIds: [],
       categories: ['tags'],
     });
 
     expect(result).toEqual({});
-    expect(findRulesMock).not.toHaveBeenCalled();
+    expect(savedObjectsClient.search).not.toHaveBeenCalled();
   });
 
-  it('short-circuits to {} and never calls findRules when categories is empty', async () => {
-    const result = await fetchGranularFacetCountsChunked({
-      rulesClient,
+  it('short-circuits to {} and never calls search when categories is empty', async () => {
+    const savedObjectsClient = makeSoClient();
+
+    const result = await fetchGranularFacetCounts({
+      savedObjectsClient,
       ruleIds: ['so-1', 'so-2'],
       categories: [],
     });
 
     expect(result).toEqual({});
-    expect(findRulesMock).not.toHaveBeenCalled();
+    expect(savedObjectsClient.search).not.toHaveBeenCalled();
   });
 
-  it('runs a single chunk when ruleIds.length <= chunkSize and returns the passthrough counts', async () => {
-    findRulesMock.mockResolvedValueOnce(
-      aggregationsResponse({
-        facet_tags: {
-          buckets: [
-            { key: 'tag-a', doc_count: 2 },
-            { key: 'tag-b', doc_count: 1 },
-          ],
-        },
-      })
-    );
-
-    const result = await fetchGranularFacetCountsChunked({
-      rulesClient,
-      ruleIds: ['so-1', 'so-2', 'so-3'],
-      categories: ['tags'],
-      chunkSize: 1024,
+  it('issues a single search with terms: { _id } and returns the aggregation result', async () => {
+    const savedObjectsClient = makeSoClient({
+      facet_tags: {
+        buckets: [
+          { key: 'tag-a', doc_count: 2 },
+          { key: 'tag-b', doc_count: 1 },
+        ],
+      },
     });
 
-    expect(findRulesMock).toHaveBeenCalledTimes(1);
-    const call = findRulesMock.mock.calls[0][0];
-    expect(call.ruleIds).toEqual(['so-1', 'so-2', 'so-3']);
-    expect(call.perPage).toBe(0);
-    expect(call.filter).toBeUndefined();
-    expect(call.aggregations).toBeDefined();
+    const result = await fetchGranularFacetCounts({
+      savedObjectsClient,
+      ruleIds: ['so-1', 'so-2', 'so-3'],
+      categories: ['tags'],
+    });
+
+    expect(savedObjectsClient.search).toHaveBeenCalledTimes(1);
+    const call = (savedObjectsClient.search as jest.Mock).mock.calls[0][0];
+    expect(call.query).toEqual({ terms: { _id: ['alert:so-1', 'alert:so-2', 'alert:so-3'] } });
+    expect(call.size).toBe(0);
+    expect(call.aggs).toBeDefined();
 
     expect(result).toEqual({
       tags: { 'tag-a': 2, 'tag-b': 1 },
     });
   });
 
-  it('chunks the id list and merges per-chunk bucket counts by summing doc_count per (category, key)', async () => {
-    findRulesMock
-      .mockResolvedValueOnce(
-        aggregationsResponse({
-          facet_tags: {
-            buckets: [
-              { key: 'tag-a', doc_count: 1 },
-              { key: 'tag-b', doc_count: 1 },
-            ],
-          },
-        })
-      )
-      .mockResolvedValueOnce(
-        aggregationsResponse({
-          facet_tags: {
-            buckets: [
-              { key: 'tag-a', doc_count: 2 },
-              { key: 'tag-c', doc_count: 1 },
-            ],
-          },
-        })
-      )
-      .mockResolvedValueOnce(
-        aggregationsResponse({
-          facet_tags: {
-            buckets: [{ key: 'tag-b', doc_count: 1 }],
-          },
-        })
-      );
+  it('returns {} when the search response has no aggregations', async () => {
+    const savedObjectsClient = savedObjectsClientMock.create();
+    savedObjectsClient.search.mockResolvedValue({
+      total: 0,
+      hits: [],
+    } as unknown as Awaited<ReturnType<SavedObjectsClientContract['search']>>);
 
-    const result = await fetchGranularFacetCountsChunked({
-      rulesClient,
-      ruleIds: ['so-1', 'so-2', 'so-3', 'so-4', 'so-5'],
+    const result = await fetchGranularFacetCounts({
+      savedObjectsClient,
+      ruleIds: ['so-1'],
       categories: ['tags'],
-      chunkSize: 2,
     });
 
-    expect(findRulesMock).toHaveBeenCalledTimes(3);
-    expect(findRulesMock.mock.calls[0][0].ruleIds).toEqual(['so-1', 'so-2']);
-    expect(findRulesMock.mock.calls[1][0].ruleIds).toEqual(['so-3', 'so-4']);
-    expect(findRulesMock.mock.calls[2][0].ruleIds).toEqual(['so-5']);
-
-    expect(result).toEqual({
-      tags: {
-        'tag-a': 3,
-        'tag-b': 2,
-        'tag-c': 1,
-      },
-    });
-  });
-
-  it('tolerates a chunk response that is missing aggregations and continues to the next chunk', async () => {
-    findRulesMock
-      .mockResolvedValueOnce({
-        page: 1,
-        perPage: 0,
-        total: 0,
-        data: [],
-      } as unknown as Awaited<ReturnType<typeof findRules>>)
-      .mockResolvedValueOnce(
-        aggregationsResponse({
-          facet_tags: { buckets: [{ key: 'tag-z', doc_count: 4 }] },
-        })
-      );
-
-    const result = await fetchGranularFacetCountsChunked({
-      rulesClient,
-      ruleIds: ['so-1', 'so-2', 'so-3'],
-      categories: ['tags'],
-      chunkSize: 2,
-    });
-
-    expect(findRulesMock).toHaveBeenCalledTimes(2);
-    expect(result).toEqual({ tags: { 'tag-z': 4 } });
+    expect(result).toEqual({});
   });
 });

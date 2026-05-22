@@ -22,7 +22,7 @@ import {
   SearchRulesAggregations,
   FacetCounts,
 } from '../../rule_management/granular_rules/granular_rules_contract.gen';
-import { ReviewRuleInstallationField } from '../review_rule_installation/review_rule_installation_route.gen';
+import { RuleResponseField } from '../common/rule_response_field.gen';
 import { FindRulesSortField } from '../../rule_management/find_rules/find_rules_route.gen';
 import { SortOrder } from '../../model/sorting.gen';
 import {
@@ -212,7 +212,7 @@ upgradeable rules.
       * Subset of top-level `RuleResponse` keys used to narrow rule response payloads.
 
       */
-      fields: z.array(ReviewRuleInstallationField).optional(),
+      fields: z.array(RuleResponseField).optional(),
     })
     .strict()
 );

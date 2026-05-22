@@ -5,36 +5,33 @@
  * 2.0.
  */
 
+import * as z from '@kbn/zod/v4';
+import {
+  PrebuiltAssetBaseProps,
+  PrebuiltRuleAssetIdentityFields,
+} from '../../../model/rule_assets/prebuilt_rule_asset';
+import { TypeSpecificCreatePropsInternal } from '../../../../../../../common/api/detection_engine/model/rule_schema';
 import { PREBUILT_RULE_ASSETS_SO_TYPE } from '../prebuilt_rule_assets_type';
+
+const requiredKeysOf = (shape: z.ZodRawShape): string[] =>
+  Object.entries(shape)
+    .filter(([, def]) => def._zod.optin !== 'optional')
+    .map(([key]) => key);
 
 /**
  * Top-level `security-rule` attribute keys that must be fetched from ES no
  * matter what `fields` the caller asks for, otherwise the rule will fail
  * `validatePrebuiltRuleAssets` or `convertPrebuiltRuleAssetToRuleResponse`.
  *
+ * Derived from the Zod schemas so it stays in sync automatically when required
+ * fields are added or removed.
  */
 export const PREBUILT_RULE_ASSET_BASELINE_FIELDS: ReadonlySet<string> = new Set([
-  // Identity / shared base required
-  'rule_id',
-  'version',
-  'type',
-  'name',
-  'description',
-  'risk_score',
-  'severity',
-
-  // Per rule type variant required fields.
-  'query',
-  'language',
-  'saved_id',
-  'threshold',
-  'threat_query',
-  'threat_mapping',
-  'threat_index',
-  'anomaly_threshold',
-  'machine_learning_job_id',
-  'new_terms_fields',
-  'history_window_start',
+  ...requiredKeysOf(PrebuiltAssetBaseProps.shape),
+  ...TypeSpecificCreatePropsInternal.options.flatMap((v) =>
+    requiredKeysOf(v.shape as z.ZodRawShape)
+  ),
+  ...requiredKeysOf(PrebuiltRuleAssetIdentityFields.shape),
 ]);
 
 export const buildPrebuiltRuleAssetSourceIncludes = (

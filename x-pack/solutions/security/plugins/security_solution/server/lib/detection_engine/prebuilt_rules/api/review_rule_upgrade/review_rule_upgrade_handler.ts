@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { KibanaRequest, KibanaResponseFactory, Logger } from '@kbn/core/server';
+import type {
+  KibanaRequest,
+  KibanaResponseFactory,
+  Logger,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type {
@@ -19,7 +24,7 @@ import type {
   SearchRulesAggregations,
 } from '../../../../../../common/api/detection_engine/rule_management';
 import type { FacetCounts } from '../../../../../../common/api/detection_engine/rule_management/granular_rules/granular_rules_contract.gen';
-import type { SortOrder } from '../../../../../../common/api/detection_engine';
+import type { RuleResponse, SortOrder } from '../../../../../../common/api/detection_engine';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';
 import { calculateRuleDiff } from '../../logic/diff/calculate_rule_diff';
@@ -38,7 +43,7 @@ import { getPossibleUpgrades } from '../../logic/utils';
 import { findRules } from '../../../rule_management/logic/search/find_rules';
 import { internalRuleToAPIResponse } from '../../../rule_management/logic/detection_rules_client/converters/internal_rule_to_api_response';
 import { buildGranularRulesKql } from '../../../rule_management/logic/search/build_granular_rules_kql';
-import { fetchGranularFacetCountsChunked } from '../../../rule_management/logic/search/granular_facet_aggregations';
+import { fetchGranularFacetCounts } from '../../../rule_management/logic/search/granular_facet_aggregations';
 import { narrowRuleResponseFields } from '../narrow_rule_response_fields';
 
 export const reviewRuleUpgradeHandler = async (
@@ -71,6 +76,7 @@ export const reviewRuleUpgradeHandler = async (
     const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
     const mlAuthz = ctx.securitySolution.getMlAuthz();
 
+    // Schema enforces maxItems: 1, so only one sort criterion is supported for now.
     const firstSort = sort?.[0];
 
     const {
@@ -79,6 +85,7 @@ export const reviewRuleUpgradeHandler = async (
       counts,
     } = await calculateUpgradeableRulesDiff({
       rulesClient,
+      savedObjectsClient: soClient,
       ruleAssetsClient,
       ruleObjectsClient,
       mlAuthz,
@@ -100,8 +107,12 @@ export const reviewRuleUpgradeHandler = async (
       },
       rules: upgradeInfo.map((entry) => ({
         ...entry,
-        current_rule: narrowRuleResponseFields(entry.current_rule, fields),
-        target_rule: narrowRuleResponseFields(entry.target_rule, fields),
+        // Casts are safe: the response is immediately serialised to JSON; the
+        // OpenAPI schema types these as RuleResponse but the `fields` parameter
+        // makes them projections — only the requested fields plus
+        // REVIEW_RULE_BASELINE_FIELDS are guaranteed to be present.
+        current_rule: narrowRuleResponseFields(entry.current_rule, fields) as RuleResponse,
+        target_rule: narrowRuleResponseFields(entry.target_rule, fields) as RuleResponse,
       })),
       page,
       per_page: perPage,
@@ -121,6 +132,7 @@ export const reviewRuleUpgradeHandler = async (
 
 interface CalculateUpgradeableRulesDiffArgs {
   rulesClient: RulesClient;
+  savedObjectsClient: SavedObjectsClientContract;
   ruleAssetsClient: IPrebuiltRuleAssetsClient;
   ruleObjectsClient: IPrebuiltRuleObjectsClient;
   mlAuthz: MlAuthz;
@@ -135,6 +147,7 @@ interface CalculateUpgradeableRulesDiffArgs {
 
 export async function calculateUpgradeableRulesDiff({
   rulesClient,
+  savedObjectsClient,
   ruleAssetsClient,
   ruleObjectsClient,
   mlAuthz,
@@ -201,8 +214,8 @@ export async function calculateUpgradeableRulesDiff({
   let counts: FacetCounts | undefined;
 
   if (categoryCounts.length > 0) {
-    counts = await fetchGranularFacetCountsChunked({
-      rulesClient,
+    counts = await fetchGranularFacetCounts({
+      savedObjectsClient: soClient,
       ruleIds: upgradeableSoIds,
       categories: categoryCounts,
     });
