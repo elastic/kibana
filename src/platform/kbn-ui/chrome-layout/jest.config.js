@@ -7,14 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { ChromeLayout, type ChromeLayoutProps } from './layout';
-
-export {
-  LayoutConfigProvider as ChromeLayoutConfigProvider,
-  type LayoutConfig as ChromeLayoutConfig,
-  type LayoutConfigProviderProps as ChromeLayoutConfigProviderProps,
-  useLayoutUpdate,
-  useLayoutConfig,
-} from './layout_config_context';
-export type { ChromeStyle } from './layout.types';
-export { LayoutDebugOverlay } from './debug/layout_debug_overlay';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../',
+  roots: ['<rootDir>/src/platform/kbn-ui/chrome-layout'],
+};

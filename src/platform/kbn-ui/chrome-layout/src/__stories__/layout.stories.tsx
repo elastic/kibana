@@ -11,7 +11,7 @@ import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { css, Global } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
-import { ChromeLayout, ChromeLayoutConfigProvider } from '..';
+import { ChromeLayout, ChromeLayoutConfigProvider } from '../..';
 import { LayoutDebugOverlay } from '../debug/layout_debug_overlay';
 import { Box } from './box';
 
