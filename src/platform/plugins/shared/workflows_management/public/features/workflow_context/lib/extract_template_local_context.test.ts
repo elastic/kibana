@@ -9,6 +9,7 @@
 
 import {
   forLoopScopesContainingOffset,
+  getAllForLoopScopes,
   getTemplateLocalContext,
 } from './extract_template_local_context';
 
@@ -95,6 +96,72 @@ describe('getTemplateLocalContext', () => {
       expect(ctx.forLoopScopes).toHaveLength(1);
       expect(ctx.forLoopScopes[0].variableName).toBe('item');
       expect(ctx.forLoopScopes[0].collectionPath).toBe('steps.fetch.outputs.results');
+    });
+  });
+
+  describe('getAllForLoopScopes', () => {
+    it('returns all for-loop scopes regardless of cursor offset', () => {
+      const template =
+        '{% for xx in steps.a %} {{ xx }} {% endfor %}{% for yy in steps.b %} {{ yy }} {% endfor %}';
+      const scopes = getAllForLoopScopes(template);
+      expect(scopes).toHaveLength(2);
+      expect(scopes.map((s) => s.variableName)).toEqual(['xx', 'yy']);
+      expect(scopes[0].collectionPath).toBe('steps.a');
+      expect(scopes[1].collectionPath).toBe('steps.b');
+    });
+
+    it('includes collection token offsets when available', () => {
+      const template = '{% for item in steps.fetch.output %} {{ item }} {% endfor %}';
+      const scopes = getAllForLoopScopes(template);
+      expect(scopes[0].collectionStart).toBeDefined();
+      expect(scopes[0].collectionEnd).toBeDefined();
+      expect(scopes[0].collectionEnd).toBeGreaterThan(scopes[0].collectionStart!);
+    });
+
+    it('returns nested for-loop scopes from getAllForLoopScopes', () => {
+      const template =
+        '{% for outer in a %}{% for inner in b %}{{ inner }}{% endfor %}{% endfor %}';
+      const scopes = getAllForLoopScopes(template);
+      expect(scopes.map((s) => s.variableName)).toEqual(['outer', 'inner']);
+    });
+
+    it('returns scopes for hyphen-trimmed for tags via AST, not regex', () => {
+      const template = '{%- for item in steps.items -%}{{ item }}{%- endfor -%}';
+      const scopes = getAllForLoopScopes(template);
+      expect(scopes).toHaveLength(1);
+      expect(scopes[0].variableName).toBe('item');
+      expect(scopes[0].collectionPath).toBe('steps.items');
+    });
+
+    it('returns empty array for invalid partial liquid', () => {
+      expect(getAllForLoopScopes('{% for x in')).toEqual([]);
+    });
+
+    it('collects all for-loop scopes while active scopes at offset filter to containing bodies', () => {
+      const template =
+        '{% for a in items %}{{ a }}{% endfor %}{% for b in items %}{{ b }}{% endfor %}';
+      const allScopes = getAllForLoopScopes(template);
+      const ctx = getTemplateLocalContext(template, template.length);
+      const offsetInsideFirstBody = template.indexOf('{{ a }}') + 3;
+      const activeInFirst = forLoopScopesContainingOffset(ctx.forLoopScopes, offsetInsideFirstBody);
+      const offsetInsideSecondBody = template.indexOf('{{ b }}') + 3;
+      const activeInSecond = forLoopScopesContainingOffset(
+        ctx.forLoopScopes,
+        offsetInsideSecondBody
+      );
+      expect(allScopes).toHaveLength(2);
+      expect(activeInFirst.map((s) => s.variableName)).toEqual(['a']);
+      expect(activeInSecond.map((s) => s.variableName)).toEqual(['b']);
+    });
+  });
+
+  describe('getTemplateLocalContext AST tag probe', () => {
+    it('returns empty context for output-only templates without liquid tags', () => {
+      const template = '{{ steps.fetch.outputs.value }}';
+      const ctx = getTemplateLocalContext(template, template.length);
+      expect(ctx.assignVars).toHaveLength(0);
+      expect(ctx.captureNames).toHaveLength(0);
+      expect(ctx.forLoopScopes).toHaveLength(0);
     });
   });
 
