@@ -163,12 +163,23 @@ describe('v2 migration', () => {
       });
 
       it('collects corrupt saved object documents across batches', async () => {
+        expect.hasAssertions();
         try {
           await transformErrorsKit.runMigrations();
         } catch (error) {
-          const lines = error.message
+          const complexLines = (error.message as string)
             .split('\n')
-            .filter((line: string) => line.includes(`'complex'`))
+            .filter((line: string) => line.includes(`'complex'`));
+          // Verify that errors are collected across batches (more than 10 = more than one batch)
+          expect(error.message).toMatch(/showing the first 10 - check the logs for the full list/);
+          // Verify the format of the error lines, redacting UUIDs to keep the assertion stable
+          const lines = complexLines
+            .map((line) =>
+              line.replace(
+                /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi,
+                '<uuid>'
+              )
+            )
             .join('\n');
           expect(lines).toMatchSnapshot();
         }

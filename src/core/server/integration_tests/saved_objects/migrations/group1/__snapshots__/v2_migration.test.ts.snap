@@ -1,14 +1,14 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`v2 migration to a newer stack version with transform errors collects corrupt saved object documents across batches 1`] = `
-"Error: Cannot convert 'complex' objects with values that are multiple of 100 16f55dcb-df6d-49d5-862b-ef65ccb0473b
-Error: Cannot convert 'complex' objects with values that are multiple of 100 ab57fbb2-ba55-4dca-9fb6-45f497e7990a
-Error: Cannot convert 'complex' objects with values that are multiple of 100 fbee80c7-8ee6-41fd-bb84-f28d4e561bcc
-Error: Cannot convert 'complex' objects with values that are multiple of 100 b89c4033-4774-462b-abb6-fcb38943cfb7
-Error: Cannot convert 'complex' objects with values that are multiple of 100 17afcdcd-a0b1-4f45-a52a-558b2b68479f
-Error: Cannot convert 'complex' objects with values that are multiple of 100 811d692a-8f80-4359-92df-1c009fc18462
-Error: Cannot convert 'complex' objects with values that are multiple of 100 10596a69-faa4-4b83-8438-26d93024e686
-Error: Cannot convert 'complex' objects with values that are multiple of 100 2d2f9a30-c845-49b0-b6b5-2b23883daa8b
-Error: Cannot convert 'complex' objects with values that are multiple of 100 12898fde-d034-41fb-ad88-8f6dc65b32bb
-Error: Cannot convert 'complex' objects with values that are multiple of 100 7a0928ea-66bd-497c-8061-c37ea99eba90"
+"Error: Cannot convert 'complex' objects with values that are multiple of 100 <uuid>
+Error: Cannot convert 'complex' objects with values that are multiple of 100 <uuid>
+Error: Cannot convert 'complex' objects with values that are multiple of 100 <uuid>
+Error: Cannot convert 'complex' objects with values that are multiple of 100 <uuid>
+Error: Cannot convert 'complex' objects with values that are multiple of 100 <uuid>
+Error: Cannot convert 'complex' objects with values that are multiple of 100 <uuid>
+Error: Cannot convert 'complex' objects with values that are multiple of 100 <uuid>
+Error: Cannot convert 'complex' objects with values that are multiple of 100 <uuid>
+Error: Cannot convert 'complex' objects with values that are multiple of 100 <uuid>
+Error: Cannot convert 'complex' objects with values that are multiple of 100 <uuid>"
 `;
