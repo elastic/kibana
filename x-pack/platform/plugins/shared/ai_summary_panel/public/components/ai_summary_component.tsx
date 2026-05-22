@@ -7,6 +7,7 @@
 
 import {
   EuiBadge,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiProgress,
@@ -54,9 +55,9 @@ export const AiSummaryComponent = ({
   const { euiTheme } = useEuiTheme();
   const [html, setHtml] = useState('');
   const [isLoading, setIsLoading] = useState(Boolean(prompt));
+  const [error, setError] = useState<string | undefined>();
   const abortRef = useRef<AbortController | null>(null);
   const accRef = useRef('');
-  // Sync latest html into a ref so the effect can check it without adding html to deps
   const htmlRef = useRef('');
   htmlRef.current = html;
 
@@ -69,8 +70,10 @@ export const AiSummaryComponent = ({
 
     accRef.current = '';
     setIsLoading(true);
+    setError(undefined);
 
     let failed = false;
+    let failedMessage = '';
 
     // Stream partial updates only on first load (no existing html).
     // On regeneration the old html stays visible while the progress bar runs at the top.
@@ -92,13 +95,18 @@ export const AiSummaryComponent = ({
       .catch((err) => {
         if (err.name !== 'AbortError') {
           failed = true;
+          failedMessage = err instanceof Error ? err.message : String(err);
         }
       })
       .finally(() => {
         if (interval) clearInterval(interval);
         if (controller.signal.aborted) return;
         setIsLoading(false);
-        if (!failed) setHtml(accRef.current);
+        if (failed) {
+          setError(failedMessage || 'Failed to generate panel content');
+        } else {
+          setHtml(accRef.current);
+        }
       });
 
     return () => {
@@ -140,7 +148,19 @@ export const AiSummaryComponent = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
-      {html && (
+      {error && (
+        <EuiCallOut
+          color="danger"
+          title={i18n.translate('aiSummaryPanel.error.title', {
+            defaultMessage: 'Failed to generate panel',
+          })}
+          style={{ margin: 16 }}
+          announceOnMount
+        >
+          {error}
+        </EuiCallOut>
+      )}
+      {!error && html && (
         <div css={iframeContainerCss}>
           <iframe css={iframeCss} srcDoc={html} sandbox="" title={title ?? 'AI panel'} />
         </div>
