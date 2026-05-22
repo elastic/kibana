@@ -11,6 +11,7 @@ import { ReportTypes } from '@kbn/exploratory-view-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { ClientPluginsStart } from '../../../../../plugin';
 import { useMonitorQueryFilters } from '../hooks/use_monitor_query_filters';
+import { useSyntheticsDataViewIndexPatterns } from '../hooks/use_synthetics_data_view_index_patterns';
 
 interface MonitorTotalRunsCountProps {
   from: string;
@@ -23,6 +24,7 @@ export const MonitorTotalRunsCount = (props: MonitorTotalRunsCountProps) => {
   } = useKibana<ClientPluginsStart>().services;
 
   const { queryIdFilter, locationFilter } = useMonitorQueryFilters();
+  const dataTypesIndexPatterns = useSyntheticsDataViewIndexPatterns();
 
   if (!queryIdFilter) {
     return null;
@@ -33,6 +35,7 @@ export const MonitorTotalRunsCount = (props: MonitorTotalRunsCountProps) => {
       id="monitorTotalRunsCount"
       align="left"
       reportType={ReportTypes.SINGLE_METRIC}
+      dataTypesIndexPatterns={dataTypesIndexPatterns}
       attributes={[
         {
           time: props,
