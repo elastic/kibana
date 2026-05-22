@@ -7,14 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Type } from '@kbn/config-schema';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import { tagSavedObjectTypeName } from '@kbn/saved-objects-tagging-plugin/common';
 
-import { DEFAULT_DASHBOARD_STATE } from '../../../../common/default_dashboard_state';
 import type { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object';
 import { getDashboardStateSchema } from '../../dashboard_state_schemas';
-import type { DashboardPinnedPanelsState, DashboardState, Warnings } from '../../types';
+import type { DashboardState, Warnings } from '../../types';
 import { transformOptionsOut } from './transform_options_out';
 import { transformPanelsOut } from './transform_panels_out';
 import { transformPinnedPanelsOut } from './transform_pinned_panels_out';
@@ -28,7 +26,7 @@ export function transformDashboardOut(
   dashboardState: DashboardState;
   warnings: Warnings;
 } {
-  const strictPropsSchemas = getDashboardStateSchema(false).getPropSchemas();
+  const strictPropsSchemas = getDashboardStateSchema(false);
 
   const {
     pinned_panels,
@@ -62,7 +60,7 @@ export function transformDashboardOut(
     legacyControls,
     pinned_panels,
     references,
-    strictPropsSchemas.pinned_panels as Type<DashboardPinnedPanelsState>
+    strictPropsSchemas
   );
 
   const timeRange =
@@ -79,10 +77,7 @@ export function transformDashboardOut(
     filters,
     query,
     warnings: searchSourceWarnings,
-  } = transformSearchSourceOut(kibanaSavedObjectMeta, references, {
-    filters: strictPropsSchemas.filters,
-    query: strictPropsSchemas.query,
-  });
+  } = transformSearchSourceOut(kibanaSavedObjectMeta, references, strictPropsSchemas);
 
   /**
    * Handle validating each state key that wasn't already validated above; if any validation fails,
@@ -109,17 +104,17 @@ export function transformDashboardOut(
     title: title ?? '',
   };
   (Object.keys(validatedState) as Array<keyof typeof validatedState>).forEach((key) => {
-    try {
-      validatedState = {
-        ...validatedState,
-        [key]: strictPropsSchemas[key].validate(validatedState[key]),
-      };
-    } catch (e) {
-      validatedState = {
-        ...validatedState,
-        [key]: DEFAULT_DASHBOARD_STATE[key],
-      };
-    }
+    const result = strictPropsSchemas
+      .getSchema()
+      .extract(key)
+      .failover(null) // fallback if validation fails; does not accept undefined, so using null instead
+      .empty(null) // treat null values as undefined
+      // validation will inject defaults for all undefined values
+      .validate(validatedState[key]).value;
+    validatedState = {
+      ...validatedState,
+      [key]: result,
+    };
   });
 
   // try to maintain a consistent (alphabetical) order of keys
