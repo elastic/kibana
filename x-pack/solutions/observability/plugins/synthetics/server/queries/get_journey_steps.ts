@@ -12,6 +12,7 @@ import type { JourneyStep } from '../../common/runtime_types/ping/synthetics';
 
 export interface GetJourneyStepsParams {
   checkGroup: string;
+  remoteName?: string;
 }
 
 type ResultType = JourneyStep & { '@timestamp': string };
@@ -19,10 +20,20 @@ type ResultType = JourneyStep & { '@timestamp': string };
 export const getJourneySteps = async ({
   syntheticsEsClient,
   checkGroup,
+  remoteName,
 }: GetJourneyStepsParams & {
   syntheticsEsClient: SyntheticsEsClient;
 }): Promise<JourneyStep[]> => {
+  // For journeys belonging to a monitor that lives on a remote cluster,
+  // target `${remoteName}:synthetics-*` via Cross-Cluster Search. When
+  // `remoteName` is absent we let SyntheticsEsClient.search fall back to
+  // its default (local) heartbeat indices.
+  const remoteIndex = remoteName
+    ? `${remoteName}:${syntheticsEsClient.heartbeatIndices}`
+    : undefined;
+
   const params = {
+    ...(remoteIndex ? { index: remoteIndex } : {}),
     query: {
       bool: {
         filter: [

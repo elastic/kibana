@@ -5,9 +5,54 @@
  * 2.0.
  */
 
-import { getLastSuccessfulStepParams } from './get_last_successful_check';
+import { getLastSuccessfulCheck, getLastSuccessfulStepParams } from './get_last_successful_check';
+import { getUptimeESMockClient } from './test_helpers';
 
 describe('getLastSuccessfulStep', () => {
+  describe('getLastSuccessfulCheck remoteName CCS index override', () => {
+    const emptyResponse = {
+      took: 18,
+      timed_out: false,
+      _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+      hits: {
+        hits: [],
+        max_score: 0.0,
+        total: { value: 0, relation: 'eq' as const },
+      },
+    };
+
+    it('does not override the index when remoteName is absent', async () => {
+      const { esClient: mockEsClient, syntheticsEsClient } = getUptimeESMockClient();
+      mockEsClient.search.mockResponseOnce(emptyResponse);
+
+      await getLastSuccessfulCheck({
+        syntheticsEsClient,
+        monitorId: 'my-monitor',
+        timestamp: '2021-10-31T19:47:52.392Z',
+        location: 'au-heartbeat',
+      });
+
+      const call: any = mockEsClient.search.mock.calls[0][0];
+      expect(call.index).toBe(syntheticsEsClient.heartbeatIndices);
+    });
+
+    it('prefixes the index with remoteName when present', async () => {
+      const { esClient: mockEsClient, syntheticsEsClient } = getUptimeESMockClient();
+      mockEsClient.search.mockResponseOnce(emptyResponse);
+
+      await getLastSuccessfulCheck({
+        syntheticsEsClient,
+        monitorId: 'my-monitor',
+        timestamp: '2021-10-31T19:47:52.392Z',
+        location: 'au-heartbeat',
+        remoteName: 'cluster1',
+      });
+
+      const call: any = mockEsClient.search.mock.calls[0][0];
+      expect(call.index).toBe(`cluster1:${syntheticsEsClient.heartbeatIndices}`);
+    });
+  });
+
   describe('getLastSuccessfulStepParams', () => {
     it('formats ES params with location', () => {
       const monitorId = 'my-monitor';

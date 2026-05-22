@@ -85,8 +85,10 @@ export const getLastSuccessfulCheck = async ({
   monitorId,
   timestamp,
   location,
+  remoteName,
 }: GetStepScreenshotParams & {
   syntheticsEsClient: SyntheticsEsClient;
+  remoteName?: string;
 }): Promise<Ping | null> => {
   const lastSuccessCheckParams = getLastSuccessfulStepParams({
     monitorId,
@@ -94,7 +96,18 @@ export const getLastSuccessfulCheck = async ({
     location,
   });
 
-  const { body: result } = await syntheticsEsClient.search(lastSuccessCheckParams);
+  // For checks belonging to a monitor that lives on a remote cluster,
+  // target `${remoteName}:synthetics-*` via Cross-Cluster Search. When
+  // `remoteName` is absent we let SyntheticsEsClient.search fall back to
+  // its default (local) heartbeat indices.
+  const remoteIndex = remoteName
+    ? `${remoteName}:${syntheticsEsClient.heartbeatIndices}`
+    : undefined;
+
+  const { body: result } = await syntheticsEsClient.search({
+    ...(remoteIndex ? { index: remoteIndex } : {}),
+    ...lastSuccessCheckParams,
+  });
 
   if (result.hits.total.value < 1) {
     return null;

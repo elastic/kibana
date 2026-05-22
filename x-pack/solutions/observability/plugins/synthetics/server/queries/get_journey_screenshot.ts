@@ -21,13 +21,24 @@ export const getJourneyScreenshot = async ({
   checkGroup,
   stepIndex,
   syntheticsEsClient,
+  remoteName,
 }: {
   checkGroup: string;
   stepIndex: number;
+  remoteName?: string;
 } & {
   syntheticsEsClient: SyntheticsEsClient;
 }): Promise<ScreenshotReturnTypesUnion> => {
+  // For journeys belonging to a monitor that lives on a remote cluster,
+  // target `${remoteName}:synthetics-*` via Cross-Cluster Search. When
+  // `remoteName` is absent we let SyntheticsEsClient.search fall back to
+  // its default (local) heartbeat indices.
+  const remoteIndex = remoteName
+    ? `${remoteName}:${syntheticsEsClient.heartbeatIndices}`
+    : undefined;
+
   const body = {
+    ...(remoteIndex ? { index: remoteIndex } : {}),
     track_total_hits: true,
     size: 0,
     query: {

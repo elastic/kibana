@@ -12,6 +12,7 @@ import type { JourneyStep, Ping, SyntheticsJourneyApiResponse } from '../../comm
 
 export interface GetJourneyDetails {
   checkGroup: string;
+  remoteName?: string;
 }
 
 type DocumentSource = (Ping & { '@timestamp': string; synthetics: { type: string } }) | JourneyStep;
@@ -19,10 +20,20 @@ type DocumentSource = (Ping & { '@timestamp': string; synthetics: { type: string
 export const getJourneyDetails = async ({
   syntheticsEsClient,
   checkGroup,
+  remoteName,
 }: GetJourneyDetails & {
   syntheticsEsClient: SyntheticsEsClient;
 }): Promise<SyntheticsJourneyApiResponse['details']> => {
+  // For journeys belonging to a monitor that lives on a remote cluster,
+  // target `${remoteName}:synthetics-*` via Cross-Cluster Search. When
+  // `remoteName` is absent we let SyntheticsEsClient.search fall back to
+  // its default (local) heartbeat indices.
+  const remoteIndex = remoteName
+    ? `${remoteName}:${syntheticsEsClient.heartbeatIndices}`
+    : undefined;
+
   const params = createEsParams({
+    ...(remoteIndex ? { index: remoteIndex } : {}),
     query: {
       bool: {
         filter: [
@@ -61,6 +72,7 @@ export const getJourneyDetails = async ({
 
   if (journeySource && foundJourney) {
     const baseSiblingParams = createEsParams({
+      ...(remoteIndex ? { index: remoteIndex } : {}),
       query: {
         bool: {
           must_not: [

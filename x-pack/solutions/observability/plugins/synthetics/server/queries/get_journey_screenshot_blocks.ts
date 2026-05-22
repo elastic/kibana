@@ -21,12 +21,23 @@ interface ScreenshotBlockResultType {
 export const getJourneyScreenshotBlocks = async ({
   blockIds,
   syntheticsEsClient,
+  remoteName,
 }: {
   blockIds: string[];
+  remoteName?: string;
 } & {
   syntheticsEsClient: SyntheticsEsClient;
 }): Promise<ScreenshotBlockDoc[]> => {
+  // For screenshot blocks belonging to a monitor that lives on a remote
+  // cluster, target `${remoteName}:synthetics-*` via Cross-Cluster Search.
+  // When `remoteName` is absent we let SyntheticsEsClient.search fall back
+  // to its default (local) heartbeat indices.
+  const remoteIndex = remoteName
+    ? `${remoteName}:${syntheticsEsClient.heartbeatIndices}`
+    : undefined;
+
   const body = {
+    ...(remoteIndex ? { index: remoteIndex } : {}),
     query: {
       bool: {
         filter: [

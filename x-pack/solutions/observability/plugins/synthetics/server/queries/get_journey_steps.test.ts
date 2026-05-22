@@ -137,6 +137,35 @@ describe('getJourneySteps request module', () => {
       });
     });
 
+    describe('remoteName CCS index override', () => {
+      it('does not override the index when remoteName is absent', async () => {
+        const { esClient: mockEsClient, syntheticsEsClient } = getUptimeESMockClient();
+        mockEsClient.search.mockResolvedValueOnce(data);
+
+        await getJourneySteps({
+          syntheticsEsClient,
+          checkGroup: '2bf952dc-64b5-11eb-8b3b-42010a84000d',
+        });
+
+        const call: any = mockEsClient.search.mock.calls[0][0];
+        expect(call.index).toBe(syntheticsEsClient.heartbeatIndices);
+      });
+
+      it('prefixes the index with remoteName when present', async () => {
+        const { esClient: mockEsClient, syntheticsEsClient } = getUptimeESMockClient();
+        mockEsClient.search.mockResolvedValueOnce(data);
+
+        await getJourneySteps({
+          syntheticsEsClient,
+          checkGroup: '2bf952dc-64b5-11eb-8b3b-42010a84000d',
+          remoteName: 'cluster1',
+        });
+
+        const call: any = mockEsClient.search.mock.calls[0][0];
+        expect(call.index).toBe(`cluster1:${syntheticsEsClient.heartbeatIndices}`);
+      });
+    });
+
     it('notes screenshot exists when a document of type step/screenshot is included', async () => {
       const { esClient: mockEsClient, syntheticsEsClient } = getUptimeESMockClient();
 
