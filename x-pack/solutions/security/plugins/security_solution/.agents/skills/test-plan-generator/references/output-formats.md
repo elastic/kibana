@@ -104,8 +104,14 @@ The full rubric and procedure live in [`issue-clarity-assessment.md`](issue-clar
 
 **Issue Coverage Ratio: <X> / <Y> scenarios (<Z>%)** are derivable from issue text alone. <breakdown of fact categories that required PR analysis, or "All scenarios derivable from issue text — no PR-only facts." when Z = 100>.
 
+<!--
+  Include the next two lines (heading + bullets) ONLY when at least one
+  per-issue score is ≤ 3 OR the Coverage Ratio is below 60%.
+  When both conditions fail, OMIT the heading and the bullets entirely —
+  do not emit "**Actionable feedback:**" as an empty header.
+-->
 **Actionable feedback:**
-- <Bullet feedback. Include this block only when at least one issue scored ≤ 3 or the Coverage Ratio is below 60%. Otherwise omit the whole "Actionable feedback" block entirely.>
+- <Specific feedback: which issue, which dimension, what to add. Generic recommendations are not allowed.>
 
 </details>
 ```

@@ -14,6 +14,7 @@ This file defines exactly how to gather all context needed to generate a test pl
 - [Linked GitHub issues](#linked-github-issues)
 - [Parent issue](#parent-issue)
 - [Sub-issues](#sub-issues)
+- [Acceptance criterion extraction and origin tagging](#acceptance-criterion-extraction-and-origin-tagging)
 - [Pull requests and test coverage](#pull-requests-and-test-coverage)
 - [Context window management](#context-window-management)
 
@@ -104,11 +105,29 @@ gh issue view <number> --repo <owner>/<repo> --json number,title,body,comments
 
 Fall back to GitHub MCP if unavailable. For each sub-issue: read the full title, body, all comments, all images, and all URLs. Apply the same context-gathering process recursively. Treat sub-issue content as first-class context — as important as the main issue.
 
-For each sub-issue, extract every acceptance criterion — both explicit bullet points and implied requirements — and add them to a **flat acceptance criteria list** keyed by sub-issue number. **Tag every AC entry with its origin: `issue` when it appears in the issue/sub-issue body or comment, `pr` when it appears only in the PR description/diff/review and not in any issue, and `both` when present in both.** This list is a critical artifact: it will be used in Step 2 to build the consolidated checklist, in Step 3's self-review to verify complete coverage, and in the Issue Clarity Assessment to compute the Coverage Ratio.
-
 For each sub-issue, check its comments for an existing test plan (body starts with `<!-- test-plan-generated -->`). If found, store as **sub-issue test plan for #<number>**. Collect all of them — they will be used in Step 2 to avoid duplication.
 
 Do not proceed to the pull requests section until all sub-issues have been fully read.
+
+---
+
+## Acceptance criterion extraction and origin tagging
+
+Run this step **after** all issue-corpus members have been fetched (target issue, parent issue if any, every sub-issue, every linked GitHub issue) and **before** reading the linked PRs in the next section.
+
+Walk **every issue in the corpus** and extract every acceptance criterion — both explicit bullet points and implied requirements — into a single **flat acceptance criteria list** keyed by issue number. The list must include the target issue, the parent, every sub-issue, and every linked issue — not only sub-issues. Coverage Ratio and Step 2's consolidated checklist both depend on every issue's ACs being present and tagged.
+
+**Origin tag** — assign exactly one to each AC entry:
+
+| Tag | When |
+|---|---|
+| `issue` | The AC appears in **any** issue body or comment in the corpus (target, parent, sub-issue, or linked issue). |
+| `pr` | The AC appears **only** in a PR description, PR diff, or PR review comment and not in any issue. |
+| `both` | The AC appears in both at least one issue and at least one PR. |
+
+PR sources do not exist yet at this point (the next section reads them); revisit the list while reading PRs to upgrade `issue` → `both` and to add new `pr` entries.
+
+This list is a critical artifact: it feeds Step 2 (consolidated AC checklist), Step 3's self-review (complete coverage verification), and the Issue Clarity Assessment Coverage Ratio (`issue` vs `pr` classification per scenario).
 
 ---
 

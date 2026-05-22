@@ -73,6 +73,21 @@ Each issue is graded against the same five dimensions. Each dimension is rated *
 
 **Marking N/A is a judgement call.** When in doubt, mark **❌ Missing** rather than N/A — N/A removes the dimension from the score and biases it upward.
 
+### How N/A affects scoring
+
+The 1–5 rubric below applies to the **applicable dimensions only** (those not marked N/A). Each rubric anchor (*"all applicable dimensions ✅ Present"* for 5, *"at most one applicable dimension at ⚠️ Partial"* for 4, etc.) is read against the count of **applicable** dimensions, not against the literal number 5.
+
+| Applicable dimensions | How the rubric thresholds apply |
+|---|---|
+| 5 (no N/A) | Rubric applies as written. |
+| 4 (1 N/A — common for trivial fixes or telemetry-only changes) | Same thresholds, applied to 4 dimensions. |
+| 3 (2 N/A — typical purely-backend feature, UX/UI + Data & Roles both N/A) | Same thresholds, applied to 3 dimensions. Score 1 is only reachable via the AC tie-breaker (3+ ❌ requires three applicable dimensions to be ❌, impossible with 3 total unless all three fail). |
+| 2 (3 N/A) | Rare. Re-check whether some dimensions should be ⚠️ Partial rather than N/A before scoring. |
+
+The **AC tie-breaker** (AC ❌ → cap at 2; AC ❌ and Scope ❌ → 1) applies regardless of N/A — Acceptance Criteria is never N/A (see *The five dimensions* table above).
+
+**Worked example.** Pure backend parser: UX/UI = N/A, Data & Roles = N/A, AC = ✅, Scope = ✅, Edge cases = ⚠️. Three applicable dimensions, one at ⚠️ Partial → score = **4**. See [`example-test-plan-backend.md`](example-test-plan-backend.md) for the full assessment block of this case.
+
 ---
 
 ## Grading anchors
