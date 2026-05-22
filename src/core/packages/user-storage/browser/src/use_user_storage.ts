@@ -31,7 +31,7 @@ export const useUserStorageClient = (): IUserStorageClient => {
   return client;
 };
 
-export type UserStorageSetter<T> = (newValue: T) => Promise<void>;
+export type UserStorageSetter<T> = (newValue: T) => Promise<T>;
 
 /**
  * Subscribes to a single user-storage key and returns a `[value, setter]`
