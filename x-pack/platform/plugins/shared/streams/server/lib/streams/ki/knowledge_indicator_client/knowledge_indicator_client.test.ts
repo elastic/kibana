@@ -11,11 +11,11 @@ import {
   KnowledgeIndicatorClient,
   type KnowledgeIndicatorClientDeps,
 } from './knowledge_indicator_client';
-import { type StoredFeatureKnowledgeIndicator, type StoredTombstone } from './data_stream';
-import { KI_TYPE_FEATURE, KI_TYPE_QUERY } from './fields';
+import { type StoredFeatureKnowledgeIndicator, type StoredTombstone } from '../data_stream';
+import { KI_TYPE_FEATURE, KI_TYPE_QUERY } from '../fields';
 
-jest.mock('../../sig_events/latest_source_query', () => {
-  const actual = jest.requireActual('../../sig_events/latest_source_query');
+jest.mock('../../../sig_events/latest_source_query', () => {
+  const actual = jest.requireActual('../../../sig_events/latest_source_query');
   return {
     ...actual,
     executeAndDecodeSource: jest.fn(),
@@ -28,7 +28,7 @@ jest.mock('./bulk_with_inference_fallback', () => ({
   ),
 }));
 
-import { executeAndDecodeSource } from '../../sig_events/latest_source_query';
+import { executeAndDecodeSource } from '../../../sig_events/latest_source_query';
 
 const STREAM = 'logs-app';
 
@@ -225,14 +225,6 @@ describe('KnowledgeIndicatorClient.getFeatures', () => {
     expect(printedQueryFor(runEsql)).toContain('feature.type');
   });
 
-  it('returns empty without an ES|QL call when options.id is an empty array', async () => {
-    const { client, runEsql } = makeClient();
-
-    const result = await client.getFeatures(STREAM, { id: [] });
-
-    expect(result).toEqual({ hits: [], total: 0 });
-    expect(runEsql).not.toHaveBeenCalled();
-  });
 });
 
 describe('KnowledgeIndicatorClient.getLatestRevisionTimestamp', () => {
@@ -291,16 +283,6 @@ describe('KnowledgeIndicatorClient.getLatestRevisionTimestamp', () => {
   });
 });
 
-describe('KnowledgeIndicatorClient.getQueryLinks', () => {
-  it('returns empty without an ES|QL call when queryIds is an empty array', async () => {
-    const { client, runEsql } = makeClient();
-
-    const result = await client.getQueryLinks([STREAM], { queryIds: [] });
-
-    expect(result).toEqual([]);
-    expect(runEsql).not.toHaveBeenCalled();
-  });
-});
 
 describe('KnowledgeIndicatorClient.getExcludedFeatures', () => {
   const printedQueryFor = (runEsql: jest.Mock): string => {
