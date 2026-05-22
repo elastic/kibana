@@ -32,6 +32,7 @@ type TabId = 'overview' | 'related' | 'metadata' | 'runbook';
 
 export interface AlertEpisodeDetailsFlyoutProps {
   episodeId: string;
+  groupHash: string | undefined;
   onClose: () => void;
   services: AlertEpisodeMetadataSectionServices;
   getEpisodeDetailsHref: (episodeId: string) => string;
@@ -40,6 +41,7 @@ export interface AlertEpisodeDetailsFlyoutProps {
 
 export const AlertEpisodeDetailsFlyout = ({
   episodeId,
+  groupHash,
   onClose,
   services,
   getEpisodeDetailsHref,
@@ -133,6 +135,7 @@ export const AlertEpisodeDetailsFlyout = ({
         {tab === 'overview' && (
           <AlertEpisodeOverviewSection
             episodeId={episodeId}
+            groupHash={groupHash}
             services={services}
             getRuleDetailsHref={getRuleDetailsHref}
           />
@@ -143,7 +146,7 @@ export const AlertEpisodeDetailsFlyout = ({
             services={services}
             getEpisodeDetailsHref={getEpisodeDetailsHref}
             showHeading={false}
-            flush
+            compressed
           />
         )}
         {tab === 'metadata' && (

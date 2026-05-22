@@ -7,43 +7,42 @@
 
 import React from 'react';
 import { EuiLoadingSpinner, EuiText } from '@elastic/eui';
-import { useFetchEpisodeEventsQuery } from '../../hooks/use_fetch_episode_events_query';
 import { useFetchEpisodeActions } from '../../hooks/use_fetch_episode_actions';
 import { useFetchGroupActions } from '../../hooks/use_fetch_group_actions';
-import { getGroupHashFromEpisodeRows } from '../../utils/episode_series_derived';
 import { AlertEpisodeActionsOverview } from './actions_overview';
 import type { AlertEpisodeDetailsServices } from './types';
 import * as i18n from './translations';
 
 export interface AlertEpisodeActionsOverviewSectionProps {
   episodeId: string;
+  groupHash: string | undefined;
   services: AlertEpisodeDetailsServices;
 }
 
 export const AlertEpisodeActionsOverviewSection = ({
   episodeId,
+  groupHash,
   services,
 }: AlertEpisodeActionsOverviewSectionProps) => {
   const {
-    data: eventRows,
-    isLoading: isLoadingEvents,
-    isError: isEventsError,
-  } = useFetchEpisodeEventsQuery({ episodeId, services });
-  const rows = eventRows ?? [];
-
-  const groupHash = getGroupHashFromEpisodeRows(rows);
-
-  const { data: episodeActionsMap, isError: isEpisodeActionsError } = useFetchEpisodeActions({
+    data: episodeActionsMap,
+    isLoading: isLoadingEpisodeActions,
+    isError: isEpisodeActionsError,
+  } = useFetchEpisodeActions({
     episodeIds: [episodeId],
     services,
   });
 
-  const { data: groupActionsMap, isError: isGroupActionsError } = useFetchGroupActions({
+  const {
+    data: groupActionsMap,
+    isLoading: isLoadingGroupActions,
+    isError: isGroupActionsError,
+  } = useFetchGroupActions({
     groupHashes: groupHash ? [groupHash] : [],
     services,
   });
 
-  if (isEventsError || isEpisodeActionsError || isGroupActionsError) {
+  if (isEpisodeActionsError || isGroupActionsError) {
     return (
       <EuiText
         size="s"
@@ -55,7 +54,7 @@ export const AlertEpisodeActionsOverviewSection = ({
     );
   }
 
-  if (isLoadingEvents) {
+  if (isLoadingEpisodeActions || (groupHash && isLoadingGroupActions)) {
     return (
       <EuiLoadingSpinner size="m" data-test-subj="alertingV2EpisodeActionsOverviewSectionLoading" />
     );

@@ -132,6 +132,7 @@ export const AlertEpisodesListPage = () => {
     (hit) => (
       <AlertEpisodeDetailsFlyout
         episodeId={hit.flattened['episode.id'] as string}
+        groupHash={hit.flattened.group_hash as string | undefined}
         onClose={closeFlyout}
         services={{
           data: services.data,

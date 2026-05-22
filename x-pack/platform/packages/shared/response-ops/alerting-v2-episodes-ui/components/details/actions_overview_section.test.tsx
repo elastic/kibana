@@ -10,10 +10,8 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
-import { runEsqlAsyncSearch } from '../../utils/run_esql_async_search';
 import { fetchEpisodeActions } from '../../apis/fetch_episode_actions';
 import { fetchGroupActions } from '../../apis/fetch_group_actions';
 import {
@@ -24,11 +22,9 @@ import {
 import { AlertEpisodeActionsOverviewSection } from './actions_overview_section';
 import type { AlertEpisodeDetailsServices } from './types';
 
-jest.mock('../../utils/run_esql_async_search');
 jest.mock('../../apis/fetch_episode_actions');
 jest.mock('../../apis/fetch_group_actions');
 
-const runEsqlAsyncSearchMock = jest.mocked(runEsqlAsyncSearch);
 const fetchEpisodeActionsMock = jest.mocked(fetchEpisodeActions);
 const fetchGroupActionsMock = jest.mocked(fetchGroupActions);
 
@@ -56,21 +52,16 @@ describe('AlertEpisodeActionsOverviewSection', () => {
   });
 
   it('renders the empty state when no actions exist', async () => {
-    runEsqlAsyncSearchMock.mockResolvedValue({
-      columns: [
-        { name: '@timestamp', type: 'date' },
-        { name: 'episode.status', type: 'keyword' },
-        { name: 'rule.id', type: 'keyword' },
-        { name: 'group_hash', type: 'keyword' },
-      ],
-      values: [['2024-01-01T00:00:00.000Z', ALERT_EPISODE_STATUS.ACTIVE, 'rule-1', 'gh-1']],
-    });
     fetchEpisodeActionsMock.mockResolvedValue([]);
     fetchGroupActionsMock.mockResolvedValue([]);
 
     render(
       <I18nProvider>
-        <AlertEpisodeActionsOverviewSection episodeId="ep-1" services={mockServices} />
+        <AlertEpisodeActionsOverviewSection
+          episodeId="ep-1"
+          groupHash="gh-1"
+          services={mockServices}
+        />
       </I18nProvider>,
       { wrapper }
     );
@@ -80,14 +71,17 @@ describe('AlertEpisodeActionsOverviewSection', () => {
     );
   });
 
-  it('renders the loading state while events are loading', () => {
-    runEsqlAsyncSearchMock.mockImplementation(() => new Promise(() => {}));
+  it('renders the loading state while actions are loading', () => {
     fetchEpisodeActionsMock.mockImplementation(() => new Promise(() => {}));
     fetchGroupActionsMock.mockImplementation(() => new Promise(() => {}));
 
     render(
       <I18nProvider>
-        <AlertEpisodeActionsOverviewSection episodeId="ep-1" services={mockServices} />
+        <AlertEpisodeActionsOverviewSection
+          episodeId="ep-1"
+          groupHash="gh-1"
+          services={mockServices}
+        />
       </I18nProvider>,
       { wrapper }
     );
@@ -97,14 +91,58 @@ describe('AlertEpisodeActionsOverviewSection', () => {
     ).toBeInTheDocument();
   });
 
-  it('renders the error state when events fail to load', async () => {
-    runEsqlAsyncSearchMock.mockRejectedValue(new Error('boom'));
+  it('does not wait on group actions when groupHash is undefined', async () => {
     fetchEpisodeActionsMock.mockResolvedValue([]);
+    fetchGroupActionsMock.mockImplementation(() => new Promise(() => {}));
+
+    render(
+      <I18nProvider>
+        <AlertEpisodeActionsOverviewSection
+          episodeId="ep-1"
+          groupHash={undefined}
+          services={mockServices}
+        />
+      </I18nProvider>,
+      { wrapper }
+    );
+
+    await waitFor(() =>
+      expect(screen.getByTestId('alertingV2EpisodeDetailsActionsOverviewEmpty')).toBeInTheDocument()
+    );
+    expect(fetchGroupActionsMock).not.toHaveBeenCalled();
+  });
+
+  it('renders the error state when episode actions fail to load', async () => {
+    fetchEpisodeActionsMock.mockRejectedValue(new Error('boom'));
     fetchGroupActionsMock.mockResolvedValue([]);
 
     render(
       <I18nProvider>
-        <AlertEpisodeActionsOverviewSection episodeId="ep-1" services={mockServices} />
+        <AlertEpisodeActionsOverviewSection
+          episodeId="ep-1"
+          groupHash="gh-1"
+          services={mockServices}
+        />
+      </I18nProvider>,
+      { wrapper }
+    );
+
+    await waitFor(() =>
+      expect(screen.getByTestId('alertingV2EpisodeActionsOverviewSectionError')).toBeInTheDocument()
+    );
+  });
+
+  it('renders the error state when group actions fail to load', async () => {
+    fetchEpisodeActionsMock.mockResolvedValue([]);
+    fetchGroupActionsMock.mockRejectedValue(new Error('boom'));
+
+    render(
+      <I18nProvider>
+        <AlertEpisodeActionsOverviewSection
+          episodeId="ep-1"
+          groupHash="gh-1"
+          services={mockServices}
+        />
       </I18nProvider>,
       { wrapper }
     );

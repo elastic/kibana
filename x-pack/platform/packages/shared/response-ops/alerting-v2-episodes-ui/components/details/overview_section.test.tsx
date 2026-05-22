@@ -45,6 +45,10 @@ const { AlertEpisodeRuleOverviewPanelSection } = jest.requireMock(
   AlertEpisodeRuleOverviewPanelSection: jest.Mock;
 };
 
+const { AlertEpisodeActionsOverviewSection } = jest.requireMock('./actions_overview_section') as {
+  AlertEpisodeActionsOverviewSection: jest.Mock;
+};
+
 const mockServices: AlertEpisodeDetailsServices = {
   data: dataPluginMock.createStartContract(),
   http: httpServiceMock.createStartContract(),
@@ -64,6 +68,7 @@ describe('AlertEpisodeOverviewSection', () => {
     render(
       <AlertEpisodeOverviewSection
         episodeId="ep-1"
+        groupHash="gh-1"
         services={mockServices}
         getRuleDetailsHref={getRuleDetailsHref}
       />
@@ -75,10 +80,27 @@ describe('AlertEpisodeOverviewSection', () => {
     expect(screen.getByTestId('ruleOverviewPanelSectionStub')).toBeInTheDocument();
   });
 
+  it('forwards groupHash to the actions overview section', () => {
+    render(
+      <AlertEpisodeOverviewSection
+        episodeId="ep-1"
+        groupHash="gh-1"
+        services={mockServices}
+        getRuleDetailsHref={getRuleDetailsHref}
+      />
+    );
+
+    expect(AlertEpisodeActionsOverviewSection).toHaveBeenCalledWith(
+      expect.objectContaining({ episodeId: 'ep-1', groupHash: 'gh-1' }),
+      expect.anything()
+    );
+  });
+
   it('passes collapsible=true to the rule overview panel section', () => {
     render(
       <AlertEpisodeOverviewSection
         episodeId="ep-1"
+        groupHash="gh-1"
         services={mockServices}
         getRuleDetailsHref={getRuleDetailsHref}
       />

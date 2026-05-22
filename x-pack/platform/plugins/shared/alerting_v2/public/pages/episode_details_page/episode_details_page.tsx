@@ -330,7 +330,11 @@ export function EpisodeDetailsPage() {
               services={detailsServices}
             />
             <EuiSpacer size="l" />
-            <AlertEpisodeActionsOverviewSection episodeId={episodeId} services={detailsServices} />
+            <AlertEpisodeActionsOverviewSection
+              episodeId={episodeId}
+              groupHash={groupHash}
+              services={detailsServices}
+            />
             <EuiSpacer size="l" />
             <AlertEpisodeRuleOverviewPanelSection
               episodeId={episodeId}

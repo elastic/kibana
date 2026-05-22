@@ -27,6 +27,7 @@ jest.mock('./runbook_section', () => ({
 
 const baseProps = {
   episodeId: 'ep-1',
+  groupHash: 'gh-1',
   onClose: jest.fn(),
   services: {} as any,
   getEpisodeDetailsHref: (id: string) => `/episodes/${id}`,

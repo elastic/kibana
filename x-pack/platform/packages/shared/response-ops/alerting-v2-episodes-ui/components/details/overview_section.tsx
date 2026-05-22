@@ -15,19 +15,25 @@ import type { AlertEpisodeDetailsServices } from './types';
 
 export interface AlertEpisodeOverviewSectionProps {
   episodeId: string;
+  groupHash: string | undefined;
   services: AlertEpisodeDetailsServices;
   getRuleDetailsHref: (ruleId: string) => string;
 }
 
 export const AlertEpisodeOverviewSection = ({
   episodeId,
+  groupHash,
   services,
   getRuleDetailsHref,
 }: AlertEpisodeOverviewSectionProps) => (
   <>
     <AlertEpisodeMetadataDetailsListSection episodeId={episodeId} services={services} />
     <EuiSpacer size="l" />
-    <AlertEpisodeActionsOverviewSection episodeId={episodeId} services={services} />
+    <AlertEpisodeActionsOverviewSection
+      episodeId={episodeId}
+      groupHash={groupHash}
+      services={services}
+    />
     <EuiSpacer size="l" />
     <AlertEpisodeLifecycleHeatmapSection episodeId={episodeId} services={services} />
     <EuiSpacer size="l" />
