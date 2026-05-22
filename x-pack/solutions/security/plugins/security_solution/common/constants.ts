@@ -336,6 +336,12 @@ export const DETECTION_ENGINE_SET_UNIFIED_ALERTS_ASSIGNEES_URL =
   `${DETECTION_ENGINE_UNIFIED_ALERTS_URL}/assignees` as const;
 
 /**
+ * Detection Engine attacks routes
+ */
+
+export const DETECTION_ENGINE_ATTACKS_URL = `${DETECTION_ENGINE_URL}/attacks` as const;
+
+/**
  * Telemetry detection endpoint for any previews requested of what data we are
  * providing through UI/UX and for e2e tests.
  *   curl http//localhost:5601/internal/security_solution/telemetry
