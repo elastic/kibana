@@ -82,6 +82,7 @@ describe('derive_change_point_cards', () => {
       expect(cards).toHaveLength(1);
       expect(cards![0].lineEsql).toContain('FROM idx');
       expect(cards![0].lineEsql).toContain('STATS avg_bytes');
+      expect(cards![0].seriesType).toBeUndefined();
       expect(cards![0].annotationEvents).toHaveLength(1);
       expect(cards![0].annotationEvents[0].name).toContain('mean_shift');
       expect(cards![0].annotationEvents[0].name).toContain('pvalue=');
@@ -128,7 +129,64 @@ describe('derive_change_point_cards', () => {
       expect(cards![0].lineEsql).not.toContain('| WHERE host == "b"');
     });
 
-    it('skips annotation markers when type is set but pvalue is null', () => {
+    it('uses full query and "No change points detected" title when all rows have null type (no BY)', () => {
+      const table = {
+        type: 'datatable' as const,
+        columns: [
+          { id: 'bucket', name: 'bucket', meta: { type: 'date' as const } },
+          { id: 'avg_bytes', name: 'avg_bytes', meta: { type: 'number' as const } },
+          { id: 'type', name: 'type', meta: { type: 'string' as const } },
+          { id: 'pvalue', name: 'pvalue', meta: { type: 'number' as const } },
+        ],
+        rows: [{ bucket: '2023-11-15T00:00:00.000Z', avg_bytes: 14, type: null, pvalue: null }],
+      };
+      const cards = buildChangePointCards({ table, esql });
+      expect(cards).toHaveLength(1);
+      expect(cards![0].annotationEvents).toHaveLength(0);
+      expect(cards![0].title).toBe('No change points detected');
+      expect(cards![0].lineEsql).toContain('CHANGE_POINT');
+      expect(cards![0].seriesType).toBe('bar');
+    });
+
+    it('returns one aggregate card with full query titled "No change points detected" for CHANGE_POINT BY with no chartable changes', () => {
+      const esqlWithHost =
+        'FROM idx | STATS avg_bytes = AVG(bytes) BY host, bucket = BUCKET(@timestamp, 1 day) | CHANGE_POINT avg_bytes ON bucket BY host';
+      const table = {
+        type: 'datatable' as const,
+        columns: [
+          { id: 'host', name: 'host', meta: { type: 'string' as const } },
+          { id: 'bucket', name: 'bucket', meta: { type: 'date' as const } },
+          { id: 'avg_bytes', name: 'avg_bytes', meta: { type: 'number' as const } },
+          { id: 'type', name: 'type', meta: { type: 'string' as const } },
+          { id: 'pvalue', name: 'pvalue', meta: { type: 'number' as const } },
+        ],
+        rows: [
+          {
+            host: 'a',
+            bucket: '2023-11-15T00:00:00.000Z',
+            avg_bytes: 14,
+            type: null,
+            pvalue: null,
+          },
+          {
+            host: 'b',
+            bucket: '2023-11-16T00:00:00.000Z',
+            avg_bytes: 20,
+            type: null,
+            pvalue: null,
+          },
+        ],
+      };
+      const cards = buildChangePointCards({ table, esql: esqlWithHost });
+      expect(cards).toHaveLength(1);
+      expect(cards![0].annotationEvents).toHaveLength(0);
+      expect(cards![0].title).toBe('No change points detected');
+      expect(cards![0].lineEsql).toContain('CHANGE_POINT');
+      expect(cards![0].lineEsql).not.toContain('WHERE');
+      expect(cards![0].seriesType).toBe('bar');
+    });
+
+    it('uses full query and "No change points detected" title when type is set but pvalue is null', () => {
       const table = {
         type: 'datatable' as const,
         columns: [
@@ -151,6 +209,9 @@ describe('derive_change_point_cards', () => {
 
       expect(cards).toHaveLength(1);
       expect(cards![0].annotationEvents).toHaveLength(0);
+      expect(cards![0].title).toBe('No change points detected');
+      expect(cards![0].lineEsql).toContain('CHANGE_POINT');
+      expect(cards![0].seriesType).toBe('bar');
     });
   });
 });

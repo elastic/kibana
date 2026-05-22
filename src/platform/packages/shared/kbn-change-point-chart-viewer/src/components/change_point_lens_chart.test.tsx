@@ -133,6 +133,21 @@ describe('ChangePointLensChart', () => {
 
     expect(capturedLayers).toHaveLength(1);
     expect((capturedLayers[0] as { type?: string }).type).toBe('series');
+    expect((capturedLayers[0] as { seriesType?: string }).seriesType).toBe('area');
+  });
+
+  it('renders histogram fallback cards as bar series', () => {
+    const capturedLayers: unknown[] = [];
+    useChangePointLensProps.mockImplementation(({ chartLayers }: { chartLayers: unknown }) => {
+      capturedLayers.push(...(chartLayers as unknown[]));
+      return { lensProps: stubLensProps, buildError: undefined };
+    });
+
+    render(<ChangePointLensChart {...baseProps} card={stubCard({ seriesType: 'bar' })} />);
+
+    expect(capturedLayers).toHaveLength(1);
+    expect((capturedLayers[0] as { type?: string }).type).toBe('series');
+    expect((capturedLayers[0] as { seriesType?: string }).seriesType).toBe('bar');
   });
 
   it('does not populate extraActions when there are no annotations', () => {

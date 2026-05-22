@@ -38,8 +38,6 @@ describe('hasChangePointCommand', () => {
   });
 
   it('should return false when CHANGE_POINT only appears inside FORK branches', () => {
-    // FORK sub-queries are not top-level pipeline commands; the change-point data source
-    // profile must not activate for FORK-only queries.
     const forkQuery = `FROM gallery-*
 | FORK
   ( WHERE referer == "http://domainsigma.com" | STATS avg_bytes = AVG(bytes) BY bucket = BUCKET(@timestamp, 1 day) | SORT bucket | CHANGE_POINT avg_bytes ON bucket )

@@ -100,7 +100,7 @@ export const ChangePointLensChart: React.FC<ChangePointLensChartProps> = ({
   const chartLayers = useMemo((): LensXYConfig['layers'] => {
     const seriesLayer: LensSeriesLayer = {
       type: 'series',
-      seriesType: 'area',
+      seriesType: card.seriesType ?? 'area',
       // String xAxis omits `meta.type: date`, so Lens treats X as ordinal — not a time chart and
       // event annotations do not render. Date histogram maps the ES|QL time column as interval/date.
       xAxis: { type: 'dateHistogram', field: timeColumn, minimumInterval: 'auto' },
@@ -128,7 +128,7 @@ export const ChangePointLensChart: React.FC<ChangePointLensChartProps> = ({
     };
 
     return [seriesLayer, annotationLayer];
-  }, [card.annotationEvents, euiTheme.colors.danger, timeColumn, valueColumn]);
+  }, [card.annotationEvents, card.seriesType, euiTheme.colors.danger, timeColumn, valueColumn]);
 
   // If any annotation falls before the Discover time range, extend `from` so Lens doesn't clip it.
   // fetchParams.timeRange is always resolved to absolute ISO by processFetchParams, so the

@@ -52,6 +52,8 @@ export interface ChangePointCardModel {
   readonly id: string;
   readonly title: string;
   readonly lineEsql: string;
+  /** Lens XY series type. Defaults to area for change-point charts; bar is used for histogram fallback cards. */
+  readonly seriesType?: 'area' | 'bar';
   /** The BY grouping column names when the query uses `CHANGE_POINT ... BY col[, col]`. */
   readonly byColumns?: readonly string[];
   readonly annotationEvents: Array<{ name: string; datetime: string }>;
@@ -346,12 +348,19 @@ export const buildChangePointCards = (params: {
     if (isSplitQuery && annotationEvents.length === 0) continue;
 
     const cardOrdinal = cards.length + 1;
-    const title =
-      buildCardTitle(byColumns, entityColumnIds, firstRow) ||
-      i18n.translate('changePointChartViewer.card.defaultTitleN', {
-        defaultMessage: 'Change point series {ordinal}',
-        values: { ordinal: cardOrdinal },
-      });
+    // When no change points can be charted, use the full query so Lens renders the same result
+    // rows shown in the table, and set a descriptive title.
+    const noChangePoints = !isByMode && annotationEvents.length === 0;
+    const cardLineEsql = noChangePoints ? esql : lineEsql;
+    const title = noChangePoints
+      ? i18n.translate('changePointChartViewer.card.noChangePointsTitle', {
+          defaultMessage: 'No change points detected',
+        })
+      : buildCardTitle(byColumns, entityColumnIds, firstRow) ||
+        i18n.translate('changePointChartViewer.card.defaultTitleN', {
+          defaultMessage: 'Change point series {ordinal}',
+          values: { ordinal: cardOrdinal },
+        });
 
     const entityValues: Record<string, string> = {};
     for (const col of entityColumnIds) {
@@ -367,13 +376,32 @@ export const buildChangePointCards = (params: {
       // Use entity label as the stable card ID so React remounts when the entity changes.
       id: `cp-card-${entityLabel || 'all'}`,
       title,
-      lineEsql,
+      lineEsql: cardLineEsql,
+      seriesType: noChangePoints ? 'bar' : undefined,
       byColumns: byColumns ? [...byColumns] : undefined,
       annotationEvents,
       minPvalue,
       changePointTypes: [...typesSeen],
       entityValues,
       entityDescription,
+    });
+  }
+
+  // BY split query where no entity group produced a chartable change point. Return one aggregate
+  // card using the full query so Lens renders the same result rows shown in the table.
+  if (!isByMode && isSplitQuery && cards.length === 0 && groups.size > 0) {
+    cards.push({
+      id: 'cp-card-all',
+      title: i18n.translate('changePointChartViewer.card.noChangePointsTitle', {
+        defaultMessage: 'No change points detected',
+      }),
+      lineEsql: esql,
+      seriesType: 'bar',
+      annotationEvents: [],
+      changePointTypes: [],
+      entityValues: {},
+      entityDescription: undefined,
+      minPvalue: undefined,
     });
   }
 
