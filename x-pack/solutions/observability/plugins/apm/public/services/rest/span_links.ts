@@ -35,7 +35,6 @@ export const fetchSpanLinks = async (
         query: { kuery: '', start, end, processorEvent },
       },
       signal,
-      context: { meta: { operation_id: FETCH_SPAN_LINKS_OPERATION_ID } },
     });
   } catch (error) {
     apm.captureError(error as Error, {

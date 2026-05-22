@@ -24,22 +24,6 @@ describe('fetchSpanLinks', () => {
     jest.clearAllMocks();
   });
 
-  it('forwards the operation_id execution context to callApmApi', async () => {
-    callApmApiSpy.mockResolvedValueOnce({
-      incomingSpanLinks: [],
-      outgoingSpanLinks: [],
-    });
-
-    await fetchSpanLinks({ traceId: 'trace-1', docId: 'span-1', start: 'from', end: 'to' }, signal);
-
-    expect(callApmApiSpy).toHaveBeenCalledWith(
-      'GET /internal/apm/traces/{traceId}/span_links/{spanId}',
-      expect.objectContaining({
-        context: { meta: { operation_id: FETCH_SPAN_LINKS_OPERATION_ID } },
-      })
-    );
-  });
-
   it('captures APM error with kibana_meta_operation_id label and re-throws when callApmApi fails', async () => {
     const error = new Error('boom');
     callApmApiSpy.mockRejectedValueOnce(error);

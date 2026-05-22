@@ -35,7 +35,6 @@ export const fetchRootSpanByTraceId = async (
         },
       },
       signal,
-      context: { meta: { operation_id: FETCH_TRACE_ROOT_SPAN_OPERATION_ID } },
     });
   } catch (error) {
     apm.captureError(error as Error, {

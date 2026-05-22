@@ -24,22 +24,6 @@ describe('fetchErrorsByTraceId', () => {
     jest.clearAllMocks();
   });
 
-  it('forwards the operation_id execution context to callApmApi', async () => {
-    callApmApiSpy.mockResolvedValueOnce({ traceErrors: [], source: 'apm' });
-
-    await fetchErrorsByTraceId(
-      { traceId: 'trace-1', docId: 'span-1', start: 'from', end: 'to' },
-      signal
-    );
-
-    expect(callApmApiSpy).toHaveBeenCalledWith(
-      'GET /internal/apm/unified_traces/{traceId}/errors',
-      expect.objectContaining({
-        context: { meta: { operation_id: FETCH_TRACE_ERRORS_OPERATION_ID } },
-      })
-    );
-  });
-
   it('captures APM error with kibana_meta_operation_id label and re-throws when callApmApi fails', async () => {
     const error = new Error('boom');
     callApmApiSpy.mockRejectedValueOnce(error);

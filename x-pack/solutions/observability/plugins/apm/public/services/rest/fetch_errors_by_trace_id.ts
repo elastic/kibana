@@ -38,7 +38,6 @@ export const fetchErrorsByTraceId = async (
         },
       },
       signal,
-      context: { meta: { operation_id: FETCH_TRACE_ERRORS_OPERATION_ID } },
     });
   } catch (error) {
     apm.captureError(error as Error, {
