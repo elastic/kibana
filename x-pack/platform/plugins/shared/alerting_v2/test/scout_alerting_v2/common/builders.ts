@@ -49,11 +49,6 @@ export type BuildAlertEventInput = Partial<AlertEvent>;
   group_hash: string;
 }
 
-/**
- * Builds an `AlertEvent` ready to be passed to `ruleEvents.seed(...)` for the
- * alert-action endpoint specs. Defaults `@timestamp = now`, `type = 'alert'`,
- * `status = 'breached'`, `space_id = 'default'`, `rule.version = 1`.
- */
 export const buildAlertEvent = (input: BuildAlertEventInput): AlertEvent => {
   const now = new Date().toISOString();
   return {
