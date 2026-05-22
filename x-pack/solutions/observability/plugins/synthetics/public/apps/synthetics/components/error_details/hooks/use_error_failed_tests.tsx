@@ -22,11 +22,13 @@ export function useErrorFailedTests() {
 
   const { errorStateId, monitorId } = useParams<{ errorStateId: string; monitorId: string }>();
 
-  const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
+  const { dateRangeStart, dateRangeEnd, remoteName } = useGetUrlParams();
 
   const { data, loading } = useReduxEsSearch(
     {
-      index: SYNTHETICS_INDEX_PATTERN,
+      // For remote monitors the heartbeat docs live on the source cluster, so
+      // query `${remoteName}:synthetics-*` via CCS instead of the local index.
+      index: remoteName ? `${remoteName}:${SYNTHETICS_INDEX_PATTERN}` : SYNTHETICS_INDEX_PATTERN,
       size: 10000,
       query: {
         bool: {
@@ -48,7 +50,7 @@ export function useErrorFailedTests() {
       },
       sort: [{ '@timestamp': 'desc' }],
     },
-    [lastRefresh, monitorId, dateRangeStart, dateRangeEnd],
+    [lastRefresh, monitorId, dateRangeStart, dateRangeEnd, remoteName],
     { name: 'getMonitorErrorFailedTests' }
   );
 
