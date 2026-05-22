@@ -500,8 +500,8 @@ Expected one of:
     case 'tsdbIncompatibleFunction':
       return {
         message: i18n.translate('kbn-esql-language.esql.validation.tsdbIncompatibleFunction', {
-          defaultMessage: 'Function {name} is not supported in time series (TS) pipelines',
-          values: { name: out.name.toUpperCase() },
+          defaultMessage: 'Function {fnName} is not supported in time series (TS) pipelines',
+          values: { fnName: out.fnName.toUpperCase() },
         }),
       };
   }
