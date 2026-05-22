@@ -9,11 +9,7 @@
 import { SOURCES_TYPES } from '@kbn/esql-types';
 import type { ESQLAstAllCommands } from '@elastic/esql/types';
 import { isSubQuery, isSource } from '@elastic/esql';
-import {
-  pipeCompleteItem,
-  commaCompleteItem,
-  buildSubqueryCompleteItems,
-} from '../complete_items';
+import { pipeCompleteItem, commaCompleteItem, buildSubqueryCompleteItems } from '../complete_items';
 import {
   getSourcesFromCommands,
   getSourceSuggestions,
