@@ -4523,6 +4523,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/agent-builder-dashboards-common@link:x-pack/platform/packages/shared/agent-builder-dashboards/agent-builder-dashboards-common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/agent-builder-dashboards-plugin@link:x-pack/platform/plugins/shared/agent_builder_dashboards":
+  version "0.0.0"
+  uid ""
+
 "@kbn/agent-builder-genai-utils@link:x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils":
   version "0.0.0"
   uid ""
@@ -6331,14 +6339,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/dashboard-agent-common@link:x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common":
-  version "0.0.0"
-  uid ""
-
-"@kbn/dashboard-agent-plugin@link:x-pack/platform/plugins/shared/dashboard_agent":
-  version "0.0.0"
-  uid ""
-
 "@kbn/dashboard-markdown@link:src/platform/plugins/shared/dashboard_markdown":
   version "0.0.0"
   uid ""
@@ -6828,6 +6828,10 @@
   uid ""
 
 "@kbn/esql-resource-browser@link:src/platform/packages/shared/kbn-esql-resource-browser":
+  version "0.0.0"
+  uid ""
+
+"@kbn/esql-scripts@link:src/platform/packages/private/kbn-esql-scripts":
   version "0.0.0"
   uid ""
 
@@ -21995,7 +21999,7 @@ exponential-backoff@3.1.1:
   resolved "https://registry.yarnpkg.com/exponential-backoff/-/exponential-backoff-3.1.1.tgz#64ac7526fe341ab18a39016cd22c787d01e00bf6"
   integrity sha512-dX7e/LHVJ6W3DE1MHWi9S1EYzDESENfLrYohG2G++ovZrYOkm4Knwa0mc1cn84xJOR4KEU0WSchhLbd0UklbHw==
 
-express-rate-limit@8.5.2, express-rate-limit@^8.2.1:
+express-rate-limit@^8.2.1:
   version "8.5.2"
   resolved "https://registry.yarnpkg.com/express-rate-limit/-/express-rate-limit-8.5.2.tgz#5922dbf76df2124611cea955d93432b37514b2f3"
   integrity sha512-5Kb34ipNX694DH48vN9irak1Qx30nb0PLYHXfJgw4YEjiC3ZEmZJhwOp+VfiCYwFzvFTdB9QkArYS5kXa2cx2A==
@@ -33371,7 +33375,7 @@ socks-proxy-agent@^8.0.5:
     debug "^4.3.4"
     socks "^2.8.3"
 
-socks@2.8.9, socks@^2.8.3:
+socks@^2.8.3:
   version "2.8.9"
   resolved "https://registry.yarnpkg.com/socks/-/socks-2.8.9.tgz#aa5f130ca0f88a43fa44faf4869c50d22aa27752"
   integrity sha512-LJhUYUvItdQ0LkJTmPeaEObWXAqFyfmP85x0tch/ez9cahmhlBBLbIqDFnvBnUJGagb0JbIQrkBs1wJ+yRYpEw==
