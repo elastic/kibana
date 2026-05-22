@@ -9,7 +9,11 @@
 import { SOURCES_TYPES } from '@kbn/esql-types';
 import type { ESQLAstAllCommands } from '@elastic/esql/types';
 import { isSubQuery, isSource } from '@elastic/esql';
-import { pipeCompleteItem, commaCompleteItem, buildSubqueryCompleteItem } from '../complete_items';
+import {
+  pipeCompleteItem,
+  commaCompleteItem,
+  buildSubqueryCompleteItems,
+} from '../complete_items';
 import {
   getSourcesFromCommands,
   getSourceSuggestions,
@@ -72,7 +76,9 @@ async function handleFromAutocomplete(
   // checks need to operate on the current command only, not the entire query
   const commandText = query.substring(command.location.min, cursorPos);
   const subquerySuggestion =
-    commandText.length > command.name.length ? buildSubqueryCompleteItem() : undefined;
+    commandText.length > command.name.length
+      ? buildSubqueryCompleteItems([command.name]).at(0)
+      : undefined;
   const indicesBrowserSuggestion = await getIndicesBrowserSuggestion({
     callbacks,
     context,
