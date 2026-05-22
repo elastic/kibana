@@ -180,7 +180,14 @@ export const getEntityAnalyticsApiService = ({
             headers: {
               'elastic-api-version': API_VERSIONS.internal.v1,
             },
+            // The risk engine status API returns 400 when Entity Store V2 is
+            // enabled. Treat that as NOT_INSTALLED — callers (deleteRiskEngineConfiguration,
+            // waitForRiskEngineCleanup) will short-circuit correctly.
+            ignoreErrors: [400],
           });
+          if (response.status === 400) {
+            return { risk_engine_status: 'NOT_INSTALLED' } as RiskEngineStatusResponse;
+          }
           return response.data;
         }
       );
@@ -411,7 +418,14 @@ export const getEntityAnalyticsApiService = ({
               const status = await service.getRiskEngineStatus();
               lastStatus = status;
 
-              if (status.risk_engine_status === expectedStatus) {
+              // NOT_INSTALLED is returned when the risk engine API is unavailable
+              // (Entity Store V2 FF on). Treat it as equivalent to DISABLED — both
+              // mean the risk engine is not running, so the UI combined-status will
+              // reflect "off".
+              if (
+                status.risk_engine_status === expectedStatus ||
+                (expectedStatus === 'DISABLED' && status.risk_engine_status === 'NOT_INSTALLED')
+              ) {
                 return status;
               }
             } catch (error) {

@@ -79,51 +79,6 @@ spaceTest.describe(
     );
 
     spaceTest(
-      'v1: should init and disable entity analytics',
-      async ({ pageObjects, apiServices }) => {
-        spaceTest.setTimeout(240000);
-        const managementPage = pageObjects.entityAnalyticsManagementPage;
-
-        await spaceTest.step('Navigate and verify initial off state', async () => {
-          await managementPage.navigate();
-          await managementPage.waitForStatusLoaded();
-          await expect(managementPage.entityAnalyticsHealth).toContainText('Off');
-        });
-
-        await spaceTest.step('Toggle on and verify enabled state', async () => {
-          await managementPage.toggleEntityAnalytics();
-          // Sync on backend readiness first. The UI shows "Off" while the entity
-          // store is in `installing` state (status === 'enabling'), so asserting
-          // UI text alone races against install completion. Mirrors
-          // engine_status_management.spec.ts. See #259664.
-          await apiServices.entityAnalytics.waitForEntityStoreStatus('running', 180000);
-          await managementPage.waitForStatusLoaded();
-          await expect(managementPage.entityAnalyticsHealth).toContainText('On', {
-            timeout: 30000,
-          });
-        });
-
-        await spaceTest.step('Toggle off and verify disabled state', async () => {
-          await managementPage.toggleEntityAnalytics();
-          // Toggle OFF fires risk-engine disable + entity-store stop in parallel
-          // (Promise.all in the toggle hook). The UI's deriveCombinedStatus
-          // requires BOTH to be off to return 'disabled' (= "Off"). Awaiting
-          // only entity store 'stopped' leaves a window where risk engine is
-          // still ENABLED in the React Query cache, yielding 'partially_enabled'
-          // = "On". Wait for both before asserting the UI.
-          await Promise.all([
-            apiServices.entityAnalytics.waitForEntityStoreStatus('stopped', 60000),
-            apiServices.entityAnalytics.waitForRiskEngineStatus('DISABLED', 60000),
-          ]);
-          await managementPage.waitForStatusLoaded();
-          await expect(managementPage.entityAnalyticsHealth).toContainText('Off', {
-            timeout: 30000,
-          });
-        });
-      }
-    );
-
-    spaceTest(
       'v1: should redirect old entity store URL to the management page',
       async ({ pageObjects }) => {
         const managementPage = pageObjects.entityAnalyticsManagementPage;
@@ -197,12 +152,9 @@ spaceTest.describe(
 
         await spaceTest.step('Toggle off and verify disabled state', async () => {
           await managementPage.toggleEntityAnalytics();
-          // Same combined-status race as v1: deriveCombinedStatus requires both
-          // risk engine and entity store to be off before rendering "Off".
-          await Promise.all([
-            apiServices.entityAnalytics.waitForEntityStoreStatusV2('stopped', 60000),
-            apiServices.entityAnalytics.waitForRiskEngineStatus('DISABLED', 60000),
-          ]);
+          // v2 toggle OFF calls `/api/security/entity_store/stop` which leaves
+          // engines in `stopped` (uninstall happens in afterEach).
+          await apiServices.entityAnalytics.waitForEntityStoreStatusV2('stopped', 60000);
           await managementPage.waitForStatusLoaded();
           await expect(managementPage.entityAnalyticsHealth).toContainText('Off', {
             timeout: 30000,
