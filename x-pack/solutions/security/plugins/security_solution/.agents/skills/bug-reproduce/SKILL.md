@@ -156,7 +156,7 @@ Execute from `prerequisites` and `reproduction_steps`:
 2. **Data** — index documents, saved objects, detection rules via API. Browser MCP only
    for wizard steps with no API equivalent.
 3. **Feature state** — walk through required states via browser MCP
-4. **License** — `curl -u elastic:changeme http://localhost:5601/api/licensing/info`
+4. **License** — `curl -u elastic:changeme http://localhost:5620/api/licensing/info`
 
 Ask the user only for: external tooling, large datasets, physical access requirements.
 If you are unsure how to create any required prerequisite — even via API or browser —
