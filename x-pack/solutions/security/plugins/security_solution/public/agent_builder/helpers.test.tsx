@@ -87,7 +87,8 @@ describe('stringifyEssentialAlertData', () => {
       anotherNonEssential: ['shouldAlsoBeExcluded'],
     };
 
-    const parsed = JSON.parse(stringifyEssentialAlertData(rawData));
+    const result = stringifyEssentialAlertData(rawData);
+    const parsed = JSON.parse(result);
 
     expect(parsed).toHaveProperty(ESSENTIAL_ALERT_FIELDS[0]);
     expect(parsed).toHaveProperty(ESSENTIAL_ALERT_FIELDS[1]);
@@ -96,18 +97,36 @@ describe('stringifyEssentialAlertData', () => {
   });
 
   it('excludes non-essential fields', () => {
-    const parsed = JSON.parse(
-      stringifyEssentialAlertData({ field1: ['value1'], field2: ['value2'] })
-    );
+    const rawData: Record<string, string[]> = {
+      field1: ['value1'],
+      field2: ['value2'],
+    };
+
+    const result = stringifyEssentialAlertData(rawData);
+    const parsed = JSON.parse(result);
+
     expect(Object.keys(parsed).length).toBe(0);
   });
 
   it('returns valid JSON string', () => {
-    const rawData = { [ESSENTIAL_ALERT_FIELDS[0]]: ['value1'] };
-    expect(JSON.parse(stringifyEssentialAlertData(rawData))).toEqual(rawData);
+    const rawData: Record<string, string[]> = {
+      [ESSENTIAL_ALERT_FIELDS[0]]: ['value1'],
+    };
+
+    const result = stringifyEssentialAlertData(rawData);
+
+    expect(() => JSON.parse(result)).not.toThrow();
+    expect(JSON.parse(result)).toEqual({
+      [ESSENTIAL_ALERT_FIELDS[0]]: ['value1'],
+    });
   });
 
   it('handles empty input', () => {
-    expect(JSON.parse(stringifyEssentialAlertData({}))).toEqual({});
+    const rawData: Record<string, string[]> = {};
+
+    const result = stringifyEssentialAlertData(rawData);
+    const parsed = JSON.parse(result);
+
+    expect(parsed).toEqual({});
   });
 });

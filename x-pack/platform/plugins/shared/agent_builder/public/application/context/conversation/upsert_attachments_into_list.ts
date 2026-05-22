@@ -24,14 +24,21 @@ export const upsertAttachmentsIntoList = (
 ): ConversationAttachment[] => {
   const existing = [...(existingAttachments ?? [])];
 
+  // Map of id -> attachment for the incoming list (only items with id). Used to update
+  // existing entries in O(1). keyBy keeps last occurrence when ids repeat, which we want.
   const nextById = keyBy(
     nextAttachments.filter((a): a is ConversationAttachment & { id: string } => Boolean(a.id)),
     'id'
   );
 
+  // Ids already present in existing list — used to decide which next items are truly "new"
+  // and should be appended (we must not re-append when we only meant to update by id).
   const existingIds = new Set(existing.map((a) => a.id).filter((id): id is string => Boolean(id)));
 
+  // Preserve existing order: each slot keeps its item or the updated version from nextById.
   const updated = existing.map((a) => (a.id && nextById[a.id] ? nextById[a.id] : a));
+
+  // Append only items that are new (no id) or whose id was not in the existing list.
   const newItems = nextAttachments.filter((a) => !a.id || !existingIds.has(a.id));
 
   return [...updated, ...newItems];
