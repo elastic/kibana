@@ -6,71 +6,67 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
-import { TestProvider } from '../../mocks/test_provider';
-import { CreateIntegrationCardButton } from './create_integration_card_button';
-import { mockServices } from '../../services/mocks/services';
+import { render, screen, fireEvent } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
+import { CreateIntegrationSideCardButton } from './create_integration_card_button';
+import { AutomaticImportTelemetryEventType } from '../../../common';
 
-const renderOptions = { wrapper: TestProvider };
+const mockNavigateToUrl = jest.fn();
+const mockGetUrlForApp = jest.fn(
+  (app: string, options?: { path?: string }) => `/${app}${options?.path ?? ''}`
+);
+const mockReportEvent = jest.fn();
 
-describe('CreateIntegrationCardButton', () => {
-  describe('when not compressed (default)', () => {
-    let element: React.ReactElement;
+jest.mock('../../common/hooks/use_kibana', () => ({
+  useKibana: () => ({
+    services: {
+      application: {
+        navigateToUrl: mockNavigateToUrl,
+        getUrlForApp: mockGetUrlForApp,
+      },
+      telemetry: {
+        reportEvent: mockReportEvent,
+      },
+    },
+  }),
+}));
 
-    beforeEach(() => {
-      element = <CreateIntegrationCardButton />;
-    });
+const renderComponent = () =>
+  render(
+    <I18nProvider>
+      <CreateIntegrationSideCardButton />
+    </I18nProvider>
+  );
 
-    it('should render the link button', () => {
-      const result = render(element, renderOptions);
-      expect(result.queryByTestId('createIntegrationLink')).toBeInTheDocument();
-    });
-
-    it('should render the sub-title', () => {
-      const result = render(element, renderOptions);
-      expect(
-        result.queryByText('Create a custom one to fit your requirements')
-      ).toBeInTheDocument();
-    });
-
-    it('should navigate when button clicked', () => {
-      const url = '/app/integrations';
-      mockServices.application.getUrlForApp.mockReturnValueOnce(url);
-
-      const result = render(element, renderOptions);
-      result.queryByTestId('createIntegrationLink')?.click();
-
-      expect(mockServices.application.navigateToUrl).toHaveBeenCalledWith(url);
-    });
+describe('CreateIntegrationSideCardButton telemetry', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
-  describe('when compressed', () => {
-    let element: React.ReactElement;
+  it('calls reportEvent with UploadIntegrationClicked when upload link is clicked', () => {
+    renderComponent();
 
-    beforeEach(() => {
-      element = <CreateIntegrationCardButton compressed />;
-    });
+    fireEvent.click(screen.getByTestId('uploadIntegrationPackageLink'));
 
-    it('should render the link button', () => {
-      const result = render(element, renderOptions);
-      expect(result.queryByTestId('createIntegrationLink')).toBeInTheDocument();
-    });
+    expect(mockReportEvent).toHaveBeenCalledWith(
+      AutomaticImportTelemetryEventType.UploadIntegrationClicked,
+      {}
+    );
+  });
 
-    it('should not render the sub-title', () => {
-      const result = render(element, renderOptions);
-      expect(
-        result.queryByText('Create a custom one to fit your requirements')
-      ).not.toBeInTheDocument();
-    });
+  it('does not call reportEvent when create integration button is clicked', () => {
+    renderComponent();
 
-    it('should navigate when button clicked', () => {
-      const url = '/app/integrations';
-      mockServices.application.getUrlForApp.mockReturnValueOnce(url);
+    fireEvent.click(screen.getByTestId('createNewIntegrationLink'));
 
-      const result = render(element, renderOptions);
+    expect(mockReportEvent).not.toHaveBeenCalled();
+  });
 
-      result.queryByTestId('createIntegrationLink')?.click();
-      expect(mockServices.application.navigateToUrl).toHaveBeenCalledWith(url);
-    });
+  it('navigates to upload path when upload link is clicked', () => {
+    renderComponent();
+
+    fireEvent.click(screen.getByTestId('uploadIntegrationPackageLink'));
+
+    expect(mockNavigateToUrl).toHaveBeenCalledWith('/integrations/upload');
   });
 });

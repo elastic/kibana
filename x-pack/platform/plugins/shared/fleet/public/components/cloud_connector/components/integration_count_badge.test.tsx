@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import { useCloudConnectorUsage } from '../hooks/use_cloud_connector_usage';
@@ -22,9 +22,6 @@ const mockUseCloudConnectorUsage = useCloudConnectorUsage as jest.MockedFunction
   typeof useCloudConnectorUsage
 >;
 
-// EuiToolTip has a 250ms delay for "long" - we need fake timers
-const TOOLTIP_DELAY_MS = 300;
-
 describe('IntegrationCountBadge', () => {
   const renderBadge = (cloudConnectorId: string, count: number) => {
     return render(
@@ -36,16 +33,11 @@ describe('IntegrationCountBadge', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.useFakeTimers();
     mockUseCloudConnectorUsage.mockReturnValue({
       data: undefined,
       isLoading: false,
       isError: false,
     } as unknown as ReturnType<typeof useCloudConnectorUsage>);
-  });
-
-  afterEach(() => {
-    jest.useRealTimers();
   });
 
   describe('badge rendering', () => {
@@ -99,16 +91,9 @@ describe('IntegrationCountBadge', () => {
       const badge = container.querySelector('.euiBadge');
       expect(badge).toBeInTheDocument();
 
-      // Trigger hover on the tooltip anchor (EuiToolTip's wrapper)
-      const tooltipAnchor = container.querySelector('.euiToolTipAnchor');
-      fireEvent.mouseOver(tooltipAnchor!);
+      fireEvent.mouseEnter(container.firstChild as HTMLElement);
+      fireEvent.mouseOver(container.querySelector('.euiToolTipAnchor')!);
 
-      // Advance past the tooltip delay
-      act(() => {
-        jest.advanceTimersByTime(TOOLTIP_DELAY_MS);
-      });
-
-      // Wait for tooltip to appear
       await waitFor(() => {
         expect(screen.getByText('Policy 1')).toBeInTheDocument();
       });
@@ -125,14 +110,8 @@ describe('IntegrationCountBadge', () => {
 
       const { container } = renderBadge('connector-1', 2);
 
-      // Trigger hover on the tooltip anchor
-      const tooltipAnchor = container.querySelector('.euiToolTipAnchor');
-      fireEvent.mouseOver(tooltipAnchor!);
-
-      // Advance past the tooltip delay
-      act(() => {
-        jest.advanceTimersByTime(TOOLTIP_DELAY_MS);
-      });
+      fireEvent.mouseEnter(container.firstChild as HTMLElement);
+      fireEvent.mouseOver(container.querySelector('.euiToolTipAnchor')!);
 
       await waitFor(() => {
         expect(screen.getByText('Loading...')).toBeInTheDocument();
@@ -148,14 +127,8 @@ describe('IntegrationCountBadge', () => {
 
       const { container } = renderBadge('connector-1', 2);
 
-      // Trigger hover on the tooltip anchor
-      const tooltipAnchor = container.querySelector('.euiToolTipAnchor');
-      fireEvent.mouseOver(tooltipAnchor!);
-
-      // Advance past the tooltip delay
-      act(() => {
-        jest.advanceTimersByTime(TOOLTIP_DELAY_MS);
-      });
+      fireEvent.mouseEnter(container.firstChild as HTMLElement);
+      fireEvent.mouseOver(container.querySelector('.euiToolTipAnchor')!);
 
       await waitFor(() => {
         expect(screen.getByText('Failed to load integrations')).toBeInTheDocument();
@@ -191,14 +164,8 @@ describe('IntegrationCountBadge', () => {
 
       const { container } = renderBadge('connector-1', 2);
 
-      // Trigger hover on the tooltip anchor
-      const tooltipAnchor = container.querySelector('.euiToolTipAnchor');
-      fireEvent.mouseOver(tooltipAnchor!);
-
-      // Advance past the tooltip delay
-      act(() => {
-        jest.advanceTimersByTime(TOOLTIP_DELAY_MS);
-      });
+      fireEvent.mouseEnter(container.firstChild as HTMLElement);
+      fireEvent.mouseOver(container.querySelector('.euiToolTipAnchor')!);
 
       await waitFor(() => {
         expect(screen.getByText('CSPM Policy')).toBeInTheDocument();
@@ -228,14 +195,8 @@ describe('IntegrationCountBadge', () => {
 
       const { container } = renderBadge('connector-1', 15);
 
-      // Trigger hover on the tooltip anchor
-      const tooltipAnchor = container.querySelector('.euiToolTipAnchor');
-      fireEvent.mouseOver(tooltipAnchor!);
-
-      // Advance past the tooltip delay
-      act(() => {
-        jest.advanceTimersByTime(TOOLTIP_DELAY_MS);
-      });
+      fireEvent.mouseEnter(container.firstChild as HTMLElement);
+      fireEvent.mouseOver(container.querySelector('.euiToolTipAnchor')!);
 
       await waitFor(() => {
         expect(screen.getByText('+5 more')).toBeInTheDocument();
@@ -266,17 +227,10 @@ describe('IntegrationCountBadge', () => {
 
       const { container } = renderBadge('connector-123', 1);
 
-      // Trigger hover on the tooltip anchor
-      const tooltipAnchor = container.querySelector('.euiToolTipAnchor');
-      fireEvent.mouseOver(tooltipAnchor!);
-
-      // Advance past the tooltip delay
-      act(() => {
-        jest.advanceTimersByTime(TOOLTIP_DELAY_MS);
-      });
+      fireEvent.mouseEnter(container.firstChild as HTMLElement);
+      fireEvent.mouseOver(container.querySelector('.euiToolTipAnchor')!);
 
       await waitFor(() => {
-        // Verify the hook is called with the correct parameters including staleTime: 0
         expect(mockUseCloudConnectorUsage).toHaveBeenCalledWith('connector-123', 1, 10, {
           staleTime: 0,
         });

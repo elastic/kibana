@@ -49,18 +49,40 @@ describe('getDispatchableAlertEventsQuery', () => {
     );
   });
 
-  it('aggregates by rule_id, group_hash, episode_id, episode_status', () => {
+  it('aggregates by rule_id, group_hash, episode_id with episode_status as LAST aggregation', () => {
     const req = getDispatchableAlertEventsQuery();
 
-    expect(req.query).toContain('BY rule_id, group_hash, episode_id, episode_status');
+    expect(req.query).toContain('BY rule_id, group_hash, episode_id');
+    expect(req.query).not.toContain('BY rule_id, group_hash, episode_id, episode_status');
+    expect(req.query).toContain('last_episode_status = LAST(episode_status, @timestamp)');
   });
 
-  it('keeps the expected output columns', () => {
+  it('fetches _source metadata', () => {
+    const req = getDispatchableAlertEventsQuery();
+
+    expect(req.query).toContain('METADATA _source');
+    expect(req.query).not.toContain('_index');
+  });
+
+  it('extracts data_json from _source using JSON_EXTRACT for rule-events rows', () => {
+    const req = getDispatchableAlertEventsQuery();
+
+    expect(req.query).toContain('JSON_EXTRACT(_source, "$.data")');
+  });
+
+  it('aggregates data_json using LAST by timestamp', () => {
+    const req = getDispatchableAlertEventsQuery();
+
+    expect(req.query).toContain('data_json = LAST(data_json, @timestamp)');
+  });
+
+  it('keeps the expected output columns and renames episode_status', () => {
     const req = getDispatchableAlertEventsQuery();
 
     expect(req.query).toContain(
-      'KEEP last_event_timestamp, rule_id, group_hash, episode_id, episode_status'
+      'KEEP last_event_timestamp, rule_id, group_hash, episode_id, last_episode_status, data_json'
     );
+    expect(req.query).toContain('RENAME last_episode_status AS episode_status');
   });
 
   it('sorts by timestamp ascending with a limit', () => {
@@ -183,18 +205,18 @@ describe('getAlertEpisodeSuppressionsQuery', () => {
 });
 
 describe('getLastNotifiedTimestampsQuery', () => {
-  it('builds a query for a single notification group', () => {
+  it('builds a query for a single action group', () => {
     const req = getLastNotifiedTimestampsQuery(['group-1']);
 
-    expect(req.query).toContain('notification_group_id IN ("group-1")');
+    expect(req.query).toContain('action_group_id IN ("group-1")');
     expect(req.query).toContain('.alert-actions');
     expect(req.query).toContain('last_notified = MAX(@timestamp)');
   });
 
-  it('builds a query for multiple notification groups', () => {
+  it('builds a query for multiple action groups', () => {
     const req = getLastNotifiedTimestampsQuery(['group-1', 'group-2']);
 
-    expect(req.query).toContain('notification_group_id IN ("group-1", "group-2")');
+    expect(req.query).toContain('action_group_id IN ("group-1", "group-2")');
   });
 
   it('filters for notified action type', () => {
@@ -206,12 +228,18 @@ describe('getLastNotifiedTimestampsQuery', () => {
   it('keeps the expected output columns', () => {
     const req = getLastNotifiedTimestampsQuery(['group-1']);
 
-    expect(req.query).toContain('KEEP notification_group_id, last_notified');
+    expect(req.query).toContain('KEEP action_group_id, last_notified, episode_status');
   });
 
-  it('groups by notification_group_id', () => {
+  it('aggregates episode_status using LAST by timestamp', () => {
     const req = getLastNotifiedTimestampsQuery(['group-1']);
 
-    expect(req.query).toContain('BY notification_group_id');
+    expect(req.query).toContain('episode_status = LAST(episode_status, @timestamp)');
+  });
+
+  it('groups by action_group_id', () => {
+    const req = getLastNotifiedTimestampsQuery(['group-1']);
+
+    expect(req.query).toContain('BY action_group_id');
   });
 });

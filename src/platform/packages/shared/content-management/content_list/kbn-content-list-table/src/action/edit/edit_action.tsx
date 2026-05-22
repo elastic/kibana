@@ -8,6 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { ContentListItem } from '@kbn/content-list-provider';
 import type { EditActionProps, ActionOutput, ActionBuilderContext } from '../types';
 
 /** Default i18n-translated label for the edit action. */
@@ -24,13 +25,15 @@ const DEFAULT_EDIT_DESCRIPTION = i18n.translate(
 /**
  * Build a `DefaultItemAction` for the edit action preset.
  *
- * Returns `undefined` when:
- * - The table is in read-only mode.
- * - No edit handler (`onEdit`) or edit URL generator (`getEditUrl`) is configured.
+ * Returns `undefined` when read-only or when neither
+ * `actions.edit.onItemAction` nor `actions.edit.getItemActionHref` is
+ * configured. Composes `enabled` and `description` with
+ * `actions.edit.restriction` to disable the icon and surface the reason
+ * when restricted.
  *
- * When both `getEditUrl` and `onEdit` are provided, the action renders as a link
- * (`href`) and also fires `onEdit` on click. This enables composable behavior
- * such as navigating to an edit page while also tracking analytics.
+ * When `getItemActionHref` is configured the row icon renders as an
+ * `<a href>` link (with native right-click / middle-click open-in-new-tab
+ * affordances). Otherwise it renders as a button calling `onItemAction`.
  *
  * @param attributes - The declarative attributes from the parsed `Action.Edit` element.
  * @param context - Builder context with provider configuration.
@@ -46,22 +49,46 @@ export const buildEditAction = (
     return undefined;
   }
 
-  const { getEditUrl, onEdit } = itemConfig;
+  const editConfig = itemConfig.actions?.edit;
+  const onItemAction = editConfig?.onItemAction;
+  const getItemActionHref = editConfig?.getItemActionHref;
 
-  if (!getEditUrl && !onEdit) {
+  if (!onItemAction && !getItemActionHref) {
     return undefined;
   }
 
   const label = attributes.label ?? DEFAULT_EDIT_LABEL;
+  const { enabled: consumerEnabled } = attributes;
+  const restriction = editConfig?.restriction;
+
+  const enabled = (item: ContentListItem): boolean => {
+    if (restriction && restriction(item) !== undefined) {
+      return false;
+    }
+    return consumerEnabled ? consumerEnabled(item) : true;
+  };
+
+  // EUI surfaces `description` as the icon's tooltip. When a restriction
+  // predicate is configured we forward a function so the tooltip can carry
+  // the per-item reason; otherwise we keep the static string (preserves
+  // EUI's fast-path for static descriptions).
+  const description: ActionOutput['description'] = restriction
+    ? (item) => {
+        const reason = restriction(item);
+        return reason ?? DEFAULT_EDIT_DESCRIPTION;
+      }
+    : DEFAULT_EDIT_DESCRIPTION;
 
   return {
     name: label,
-    description: DEFAULT_EDIT_DESCRIPTION,
+    description,
     icon: 'pencil',
     type: 'icon',
     isPrimary: true,
-    ...(getEditUrl && { href: (item) => getEditUrl(item) }),
-    ...(onEdit && { onClick: (item) => onEdit(item) }),
+    enabled,
     'data-test-subj': 'content-list-table-action-edit',
+    ...(getItemActionHref
+      ? { href: (item) => getItemActionHref(item) }
+      : { onClick: (item) => onItemAction!(item) }),
   };
 };

@@ -7,7 +7,7 @@
 
 import type { HttpStart } from '@kbn/core/public';
 import type { EntityType } from '../common';
-import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../common/constants';
+import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../common';
 
 export interface BulkUpdateEntitiesParams {
   entityType: EntityType;
@@ -33,8 +33,8 @@ export async function bulkUpdateEntities(
   params: BulkUpdateEntitiesParams,
   options?: { signal?: AbortSignal }
 ): Promise<BulkUpdateEntitiesResponse> {
-  return http.fetch<BulkUpdateEntitiesResponse>(ENTITY_STORE_ROUTES.CRUD_BULK_UPDATE, {
-    version: API_VERSIONS.internal.v2,
+  return http.fetch<BulkUpdateEntitiesResponse>(ENTITY_STORE_ROUTES.public.CRUD_BULK_UPDATE, {
+    version: API_VERSIONS.public.v1,
     method: 'PUT',
     query: params.force === undefined ? undefined : { force: params.force },
     body: JSON.stringify({

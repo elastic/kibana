@@ -7,6 +7,7 @@
 
 import pMap from 'p-map';
 import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from '@kbn/core/server';
+import { escapeQuotes } from '@kbn/es-query';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import { appContextService } from '../app_context';
@@ -20,7 +21,7 @@ import {
 import { agentPolicyService } from '../agent_policy';
 import { packagePolicyService } from '../package_policy';
 import { getAgentsByKuery, forceUnenrollAgent } from '../agents';
-import { listEnrollmentApiKeys, deleteEnrollmentApiKey } from '../api_keys';
+import { listEnrollmentApiKeys, deleteEnrollmentApiKeys } from '../api_keys';
 import type { AgentPolicy } from '../../types';
 import { AgentPolicyInvalidError } from '../../errors';
 
@@ -161,7 +162,7 @@ async function _deleteExistingData(
   const { agents } = await getAgentsByKuery(esClient, soClient, {
     showInactive: true,
     perPage: SO_SEARCH_LIMIT,
-    kuery: existingPolicies.map((policy) => `policy_id:"${policy.id}"`).join(' or '),
+    kuery: existingPolicies.map((policy) => `policy_id:"${escapeQuotes(policy.id)}"`).join(' or '),
   });
 
   // Delete
@@ -175,17 +176,17 @@ async function _deleteExistingData(
   const { items: enrollmentApiKeys } = await listEnrollmentApiKeys(esClient, {
     perPage: SO_SEARCH_LIMIT,
     showInactive: true,
-    kuery: existingPolicies.map((policy) => `policy_id:"${policy.id}"`).join(' or '),
+    kuery: existingPolicies.map((policy) => `policy_id:"${escapeQuotes(policy.id)}"`).join(' or '),
   });
 
   if (enrollmentApiKeys.length > 0) {
     logger.info(`Deleting ${enrollmentApiKeys.length} enrollment api keys`);
-    await pMap(
-      enrollmentApiKeys,
-      (enrollmentKey) => deleteEnrollmentApiKey(esClient, enrollmentKey.id, true),
-      {
-        concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20,
-      }
+    await deleteEnrollmentApiKeys(
+      esClient,
+      enrollmentApiKeys.map((k) => k.id),
+      true,
+      undefined,
+      true
     );
   }
   logger.info(`Deleting ${existingPolicies.length} agent policies`);

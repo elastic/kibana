@@ -16,7 +16,7 @@ import {
   ignoredFeatureSchema,
 } from '@kbn/streams-schema';
 import { withSpan } from '@kbn/apm-utils';
-import { conditionSchema, type Condition } from '@kbn/streamlang';
+import { conditionSchema, isConditionComplete, type Condition } from '@kbn/streamlang';
 import { createIdentifyFeaturesPrompt } from './prompt';
 import { formatRawDocument } from './utils/format_raw_document';
 import { sumTokens } from '../helpers/sum_tokens';
@@ -29,6 +29,17 @@ export interface PreviouslyIdentifiedFeature {
   description?: string;
   properties: Record<string, unknown>;
 }
+
+export const toPreviouslyIdentifiedFeature = (
+  feature: BaseFeature
+): PreviouslyIdentifiedFeature => ({
+  id: feature.id,
+  type: feature.type,
+  subtype: feature.subtype,
+  title: feature.title,
+  description: feature.description,
+  properties: feature.properties,
+});
 export type { IgnoredFeature } from '@kbn/streams-schema';
 
 export interface ExcludedFeatureSummary {
@@ -57,7 +68,6 @@ export async function identifyFeatures({
   excludedFeatures,
   systemPrompt,
   inferenceClient,
-  logger,
   signal,
   previouslyIdentifiedFeatures = [],
 }: IdentifyFeaturesOptions): Promise<{
@@ -65,8 +75,6 @@ export async function identifyFeatures({
   ignoredFeatures: IgnoredFeature[];
   tokensUsed: ChatCompletionTokenCount;
 }> {
-  logger.debug(`Identifying features from ${sampleDocuments.length} sample documents`);
-
   const formattedDocuments = compact(
     sampleDocuments.map((hit) =>
       formatRawDocument({
@@ -122,7 +130,7 @@ export async function identifyFeatures({
   return {
     features,
     ignoredFeatures,
-    tokensUsed: sumTokens({ prompt: 0, completion: 0, total: 0, cached: 0 }, response.tokens),
+    tokensUsed: sumTokens({ added: response.tokens }),
   };
 }
 
@@ -132,5 +140,9 @@ function tryParseFilter(maybeFilter: unknown): Condition | undefined {
   }
 
   const result = conditionSchema.safeParse(maybeFilter);
-  return result.success ? result.data : undefined;
+  if (!result.success) {
+    return undefined;
+  }
+
+  return isConditionComplete(result.data) ? result.data : undefined;
 }

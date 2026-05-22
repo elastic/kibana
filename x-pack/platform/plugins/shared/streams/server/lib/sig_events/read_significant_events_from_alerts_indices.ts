@@ -13,10 +13,12 @@ import type { IScopedClusterClient } from '@kbn/core/server';
 import type { ChangePointType } from '@kbn/es-types/src';
 import type { StreamQuery, SignificantEventsGetResponse } from '@kbn/streams-schema';
 import { get, isArray, isEmpty, keyBy } from 'lodash';
-import type { QueryLink } from '../../../common/queries';
+import type { QueryLink, SearchMode } from '../../../common/queries';
 import type { QueryClient, QueryLinkFilters } from '../streams/assets/query/query_client';
 import { parseError } from '../streams/errors/parse_error';
 import { SecurityError } from '../streams/errors/security_error';
+
+const EMPTY_CHANGE_POINTS = { type: {} } as const;
 
 export async function readSignificantEventsFromAlertsIndices(
   params: {
@@ -26,6 +28,7 @@ export async function readSignificantEventsFromAlertsIndices(
     bucketSize: string;
     query?: string;
     filters?: QueryLinkFilters;
+    searchMode?: SearchMode;
   },
   dependencies: {
     queryClient: QueryClient;
@@ -33,10 +36,10 @@ export async function readSignificantEventsFromAlertsIndices(
   }
 ): Promise<SignificantEventsGetResponse> {
   const { queryClient, scopedClusterClient } = dependencies;
-  const { streamNames = [], from, to, bucketSize, query, filters } = params;
+  const { streamNames = [], from, to, bucketSize, query, filters, searchMode } = params;
 
   const queryLinks = query
-    ? await queryClient.findQueries(streamNames, query, filters)
+    ? await queryClient.findQueries(streamNames, query, filters, searchMode)
     : await queryClient.getQueryLinks(streamNames, filters);
 
   if (isEmpty(queryLinks)) {
@@ -138,47 +141,46 @@ export async function readSignificantEventsFromAlertsIndices(
       throw err;
     });
 
-  if (!response.aggregations || !isArray(response.aggregations.by_rule.buckets)) {
+  const byRuleBuckets = response.aggregations?.by_rule?.buckets;
+  if (!byRuleBuckets || !isArray(byRuleBuckets)) {
     return {
       significant_events: queryLinks.map((queryLink) => ({
         ...toStreamQuery(queryLink),
         stream_name: queryLink.stream_name,
         occurrences: [],
-        change_points: {
-          type: {
-            stationary: { p_value: 0, change_point: 0 },
-          },
-        },
+        change_points: EMPTY_CHANGE_POINTS,
         rule_backed: queryLink.rule_backed,
       })),
       aggregated_occurrences: [],
     };
   }
 
-  const aggregatedBuckets = response.aggregations.aggregated_occurrences.buckets;
+  const aggregatedBuckets = response.aggregations?.aggregated_occurrences?.buckets;
   const aggregatedOccurrences = isArray(aggregatedBuckets)
     ? aggregatedBuckets.map((bucket) => ({ date: bucket.key_as_string, count: bucket.doc_count }))
     : [];
 
-  const significantEvents = response.aggregations.by_rule.buckets.map((bucket) => {
-    const ruleId = bucket.key;
-    const queryLink = queryLinkByRuleId[ruleId];
-    const occurrences = get(bucket, 'occurrences.buckets');
-    const changePoints = get(bucket, 'change_points') ?? {};
+  const significantEvents = byRuleBuckets
+    .filter((bucket) => queryLinkByRuleId[bucket.key] !== undefined)
+    .map((bucket) => {
+      const ruleId = bucket.key;
+      const queryLink = queryLinkByRuleId[ruleId];
+      const occurrences = get(bucket, 'occurrences.buckets');
+      const changePoints = get(bucket, 'change_points') ?? {};
 
-    return {
-      ...toStreamQuery(queryLink),
-      stream_name: queryLink.stream_name,
-      occurrences: isArray(occurrences)
-        ? occurrences.map((occurrence) => ({
-            date: occurrence.key_as_string,
-            count: occurrence.doc_count,
-          }))
-        : [],
-      rule_backed: queryLink.rule_backed,
-      change_points: changePoints,
-    };
-  });
+      return {
+        ...toStreamQuery(queryLink),
+        stream_name: queryLink.stream_name,
+        occurrences: isArray(occurrences)
+          ? occurrences.map((occurrence) => ({
+              date: occurrence.key_as_string,
+              count: occurrence.doc_count,
+            }))
+          : [],
+        rule_backed: queryLink.rule_backed,
+        change_points: changePoints,
+      };
+    });
 
   const foundSignificantEventsIds = significantEvents.map((event) => event.id);
   const notFoundSignificantEvents = queryLinks
@@ -187,11 +189,7 @@ export async function readSignificantEventsFromAlertsIndices(
       ...toStreamQuery(queryLink),
       stream_name: queryLink.stream_name,
       occurrences: [],
-      change_points: {
-        type: {
-          stationary: { p_value: 0, change_point: 0 },
-        },
-      },
+      change_points: EMPTY_CHANGE_POINTS,
       rule_backed: queryLink.rule_backed,
     }));
 

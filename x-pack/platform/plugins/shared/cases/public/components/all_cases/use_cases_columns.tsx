@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { Status } from '@kbn/cases-components/src/status/status';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import { CaseStatuses } from '../../../common/types/domain';
 
 import {
   tableColumnPresetDateRelative,
@@ -39,6 +40,7 @@ import { AssigneesColumn } from './assignees_column';
 import { builderMap as customFieldsBuilderMap } from '../custom_fields/builder';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 import { IncrementalIdText } from '../incremental_id';
+import { ExtendedFieldsColumnCell } from './extended_fields_column_cell';
 
 type CasesColumns = EuiBasicTableColumn<CaseUI>;
 
@@ -178,9 +180,9 @@ export const useCasesColumns = ({
 
             return (
               <EuiToolTip
+                content={unclampedBadges}
                 data-test-subj="case-table-column-tags-tooltip"
                 position="left"
-                content={unclampedBadges}
               >
                 {clampedBadges}
               </EuiToolTip>
@@ -284,6 +286,17 @@ export const useCasesColumns = ({
           return getEmptyCellValue();
         },
       },
+      extendedFields: {
+        minWidth: '10em',
+        width: '14em',
+        name: casesColumnsConfig.extendedFields.name,
+        render: (theCase: CaseUI) => (
+          <ExtendedFieldsColumnCell
+            extendedFields={theCase.extendedFields}
+            extendedFieldsLabels={theCase.extendedFieldsLabels}
+          />
+        ),
+      },
       severity: {
         ...tableColumnPresetSeverity<CaseUI>({}),
         field: casesColumnsConfig.severity.field,
@@ -295,16 +308,18 @@ export const useCasesColumns = ({
         align: RIGHT_ALIGNMENT,
         render: (theCase: CaseUI) => {
           if (theCase.id != null) {
-            const disabled = disabledCases?.has(theCase.id) ?? false;
+            const isAlreadyAttached = disabledCases?.has(theCase.id) ?? false;
+            const isClosed = theCase.status === CaseStatuses.closed;
+            const disabled = isAlreadyAttached || isClosed;
             return (
               <EuiButton
                 data-test-subj={`cases-table-row-select-${theCase.id}`}
                 onClick={() => assignCaseAction(theCase)}
                 size="s"
-                iconType={disabled ? 'check' : undefined}
+                iconType={isAlreadyAttached ? 'check' : undefined}
                 disabled={disabled}
               >
-                {disabled ? i18n.ALREADY_ATTACHED : i18n.SELECT}
+                {isAlreadyAttached ? i18n.ALREADY_ATTACHED : i18n.SELECT}
               </EuiButton>
             );
           }

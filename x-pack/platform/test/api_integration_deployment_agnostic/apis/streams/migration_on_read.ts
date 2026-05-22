@@ -7,10 +7,7 @@
 
 import expect from '@kbn/expect';
 import type { Streams } from '@kbn/streams-schema';
-import {
-  OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS,
-  OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
-} from '@kbn/management-settings-ids';
+import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { disableStreams, enableStreams, indexDocument } from './helpers/requests';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
@@ -208,6 +205,7 @@ const expectedQueriesResponse = {
   queries: [
     {
       id: '12345',
+      type: 'match',
       title: 'Test',
       description: '',
       esql: {
@@ -245,8 +243,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await enableStreams(apiClient);
       await kibanaServer.uiSettings.update({
         [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: true,
-        [OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS]: true,
       });
+      await kibanaServer.uiSettings.waitForEventualCacheRefresh();
       // link and unlink dashboard to make sure attachments index is created
       await apiClient.fetch(
         'PUT /api/streams/{streamName}/attachments/{attachmentType}/{attachmentId} 2023-10-31',
@@ -337,8 +335,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await esClient.indices.deleteDataStream({ name: TEST_STREAM_NAME });
       await kibanaServer.uiSettings.update({
         [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: false,
-        [OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS]: false,
       });
+      await kibanaServer.uiSettings.waitForEventualCacheRefresh();
     });
 
     it('should read and return existing orphaned classic stream', async () => {

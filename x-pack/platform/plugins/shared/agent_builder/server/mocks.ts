@@ -10,6 +10,7 @@ import { createMockedExecutableTool, createToolRegistryMock } from './test_utils
 import { createMockedAgentRegistry } from './test_utils/agents';
 import { createFormatContextMock } from './test_utils/attachments';
 import { createToolHandlerContextMock } from './test_utils/runner';
+import { createModelProviderMock } from './test_utils/model_provider';
 
 export type { ToolHandlerContextMock } from './test_utils/runner';
 
@@ -35,9 +36,7 @@ const createSetupContractMock = (): AgentBuilderPluginSetupMock => {
     plugins: {
       register: jest.fn(),
     },
-    sml: {
-      registerType: jest.fn(),
-    },
+    topSnippets: { numSnippets: 2, numWords: 750 },
   };
 };
 
@@ -68,8 +67,11 @@ const createStartContractMock = (): AgentBuilderPluginStartMock => {
     runtime: {
       createModelProvider: jest.fn(),
     },
-    sml: {
-      indexAttachment: jest.fn(),
+    conversations: {
+      getScopedClient: jest.fn().mockResolvedValue({
+        get: jest.fn(),
+        list: jest.fn(),
+      }),
     },
   };
 };
@@ -84,4 +86,5 @@ export const agentBuilderMocks = {
   tools: {
     createHandlerContext: createToolHandlerContextMock,
   },
+  createModelProvider: createModelProviderMock,
 };

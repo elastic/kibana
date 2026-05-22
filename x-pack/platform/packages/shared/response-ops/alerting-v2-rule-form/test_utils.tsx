@@ -15,6 +15,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { applicationServiceMock } from '@kbn/core/public/mocks';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
+import { DELAY_MODE } from './form/types';
 import type { FormValues } from './form/types';
 import { RuleFormProvider, type RuleFormServices, type RuleFormMeta } from './form/contexts';
 
@@ -76,6 +77,8 @@ export const defaultTestFormValues: FormValues = {
   recoveryPolicy: {
     type: 'no_breach',
   },
+  stateTransitionAlertDelayMode: DELAY_MODE.immediate,
+  stateTransitionRecoveryDelayMode: DELAY_MODE.immediate,
 };
 
 /**

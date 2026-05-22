@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { hostname as osHostname } from 'os';
 import type { InferenceConnectorType, InferenceConnector, Model } from '@kbn/inference-common';
 import { getConnectorModel, getConnectorFamily, getConnectorProvider } from '@kbn/inference-common';
 import { createRestClient } from '@kbn/inference-plugin/common';
@@ -27,7 +28,12 @@ import {
   checkEvaluationsPluginEnabled,
 } from './utils/evaluations_kbn_client';
 import { createCriteriaEvaluator } from './evaluators/criteria';
-import { mapToEvaluationScoreDocuments, exportEvaluations } from './utils/report_model_score';
+import {
+  mapToEvaluationScoreDocuments,
+  exportEvaluations,
+  buildSingleScoreDocument,
+} from './utils/report_model_score';
+import { getGitMetadata } from './utils/git_metadata';
 import { createDefaultTerminalReporter } from './utils/reporting/evaluation_reporter';
 import { createConnectorFixture, resolveConnectorId } from './utils/create_connector_fixture';
 import { wrapInferenceClientWithEisConnectorTelemetry } from './utils/wrap_inference_client_with_connector_telemetry';
@@ -111,11 +117,23 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
     },
     { scope: 'worker' },
   ],
+  workerRunId: [
+    async ({}, use) => {
+      await use({ current: undefined as string | undefined });
+    },
+    { scope: 'worker' },
+  ],
   fetch: [
-    async ({ kbnClient, log }, use) => {
-      // add a HttpHandler as a fixture, so consumers can use
-      // modules that depend on it (like the inference client)
-      const fetch = httpHandlerFromKbnClient({ kbnClient, log });
+    async ({ kbnClient, log, workerRunId }, use) => {
+      // Add a HttpHandler as a fixture, so consumers can use
+      // modules that depend on it (like the inference client).
+      // workerRunId.current is set by executorClient after connector resolution so
+      // inference requests carry the per-model run ID in OTel baggage.
+      const fetch = httpHandlerFromKbnClient({
+        kbnClient,
+        log,
+        getRunId: () => workerRunId.current,
+      });
       await use(fetch);
     },
     { scope: 'worker' },
@@ -233,6 +251,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
         log,
         evaluationsKbnClient,
         evaluationsPluginEnabled,
+        workerRunId,
         connector,
         evaluationConnector,
         repetitions,
@@ -268,10 +287,15 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
 
       const scoreRepository = new EvaluationScoreRepository(evaluationsEsClient, log);
 
-      const currentRunId = process.env.TEST_RUN_ID;
-      if (!currentRunId) {
+      const baseRunId = process.env.TEST_RUN_ID;
+      if (!baseRunId) {
         throw new Error('runId must be provided via TEST_RUN_ID environment variable');
       }
+
+      const currentRunId = `${baseRunId}-${connector.id}`;
+      log.info(`Run ID for this worker: ${currentRunId}`);
+
+      workerRunId.current = currentRunId;
 
       const shouldPreflightExport =
         process.env.KBN_EVALS_SKIP_PREFLIGHT_EXPORT !== 'true' &&
@@ -324,6 +348,9 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
           }
         : undefined;
 
+      const incrementalGitMetadata = getGitMetadata();
+      const incrementalHostName = osHostname();
+
       const executorClient = new KibanaEvalsClient({
         log,
         model,
@@ -331,15 +358,22 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
         repetitions,
         upsertDataset,
         getDatasetByName,
+        onEvaluationComplete: async (event) => {
+          const document = buildSingleScoreDocument({
+            event,
+            taskModel: model,
+            evaluatorModel,
+            runId: currentRunId,
+            totalRepetitions: repetitions,
+            timestamp: new Date().toISOString(),
+            gitMetadata: incrementalGitMetadata,
+            hostName: incrementalHostName,
+          });
+          await scoreRepository.indexSingleScore(document);
+        },
       });
 
       await use(executorClient);
-
-      if (!currentRunId) {
-        throw new Error(
-          'runId must be provided via TEST_RUN_ID environment variable before exporting scores'
-        );
-      }
 
       const experiments = await executorClient.getRanExperiments();
       const documents = await mapToEvaluationScoreDocuments({

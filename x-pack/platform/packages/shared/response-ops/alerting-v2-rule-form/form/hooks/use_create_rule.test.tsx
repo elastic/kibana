@@ -9,6 +9,7 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { createQueryClientWrapper } from '../../test_utils';
+import { ALERTING_V2_RULE_API_PATH } from '@kbn/alerting-v2-constants';
 import { useCreateRule } from './use_create_rule';
 import type { FormValues } from '../types';
 
@@ -40,27 +41,27 @@ describe('useCreateRule', () => {
     metadata: {
       name: 'Test Rule',
       enabled: true,
-      labels: ['tag1', 'tag2'],
+      tags: ['tag1', 'tag2'],
     },
     timeField: '@timestamp',
     schedule: { every: '5m', lookback: '1m' },
     evaluation: {
       query: {
         base: 'FROM logs | LIMIT 10',
-        condition: '',
       },
     },
     grouping: { fields: ['host.name'] },
+    stateTransitionAlertDelayMode: 'immediate',
+    stateTransitionRecoveryDelayMode: 'immediate',
   };
 
   // Expected API payload after mapping FormValues to CreateRuleData
   // Note: timeField in form is mapped to time_field in API
-  // Note: empty condition field is omitted from the payload
   const expectedApiPayload = {
     kind: 'signal',
     metadata: {
       name: 'Test Rule',
-      labels: ['tag1', 'tag2'],
+      tags: ['tag1', 'tag2'],
     },
     time_field: '@timestamp',
     schedule: { every: '5m', lookback: '1m' },
@@ -92,7 +93,7 @@ describe('useCreateRule', () => {
     });
 
     await waitFor(() => {
-      expect(http.post).toHaveBeenCalledWith('/internal/alerting/v2/rule', expect.any(Object));
+      expect(http.post).toHaveBeenCalledWith(ALERTING_V2_RULE_API_PATH, expect.any(Object));
     });
   });
 
@@ -116,7 +117,7 @@ describe('useCreateRule', () => {
     });
 
     await waitFor(() => {
-      expect(http.post).toHaveBeenCalledWith('/internal/alerting/v2/rule', {
+      expect(http.post).toHaveBeenCalledWith(ALERTING_V2_RULE_API_PATH, {
         body: JSON.stringify(expectedApiPayload),
       });
     });
@@ -199,6 +200,8 @@ describe('useCreateRule', () => {
           base: 'FROM logs | LIMIT 10',
         },
       },
+      stateTransitionAlertDelayMode: 'duration',
+      stateTransitionRecoveryDelayMode: 'immediate',
       stateTransition: {
         pendingCount: 3,
         pendingTimeframe: '10m',
@@ -214,6 +217,7 @@ describe('useCreateRule', () => {
       expect(body.state_transition).toEqual({
         pending_count: 3,
         pending_timeframe: '10m',
+        recovering_count: 0,
       });
     });
   });
@@ -236,6 +240,8 @@ describe('useCreateRule', () => {
           base: 'FROM logs | LIMIT 10',
         },
       },
+      stateTransitionAlertDelayMode: 'immediate',
+      stateTransitionRecoveryDelayMode: 'immediate',
       stateTransition: {
         pendingCount: 3,
       },
@@ -251,7 +257,7 @@ describe('useCreateRule', () => {
     });
   });
 
-  it('omits state_transition when kind is alert but state transition is empty', async () => {
+  it('emits pending_count: 0 and recovering_count: 0 when kind is alert and both modes are immediate', async () => {
     const { http, result } = setupUseCreateRule();
 
     http.post.mockResolvedValue({ id: 'rule-789', metadata: { name: 'Alert Rule' } });
@@ -269,6 +275,8 @@ describe('useCreateRule', () => {
           base: 'FROM logs | LIMIT 10',
         },
       },
+      stateTransitionAlertDelayMode: 'immediate',
+      stateTransitionRecoveryDelayMode: 'immediate',
       stateTransition: {},
     };
 
@@ -278,7 +286,7 @@ describe('useCreateRule', () => {
 
     await waitFor(() => {
       const body = getLastPostedBody(http);
-      expect(body.state_transition).toBeUndefined();
+      expect(body.state_transition).toEqual({ pending_count: 0, recovering_count: 0 });
     });
   });
 
@@ -300,6 +308,8 @@ describe('useCreateRule', () => {
           base: 'FROM logs | LIMIT 10',
         },
       },
+      stateTransitionAlertDelayMode: 'breaches',
+      stateTransitionRecoveryDelayMode: 'immediate',
       stateTransition: {
         pendingCount: 5,
       },
@@ -311,7 +321,7 @@ describe('useCreateRule', () => {
 
     await waitFor(() => {
       const body = getLastPostedBody(http);
-      expect(body.state_transition).toEqual({ pending_count: 5 });
+      expect(body.state_transition).toEqual({ pending_count: 5, recovering_count: 0 });
     });
   });
 
@@ -336,27 +346,27 @@ describe('useCreateRule', () => {
         name: 'Complex Rule',
         enabled: false,
         description: 'A complex rule',
-        labels: ['production', 'critical'],
+        tags: ['production', 'critical'],
       },
       timeField: 'event.timestamp',
       schedule: { every: '1m', lookback: '1m' },
       evaluation: {
         query: {
           base: 'FROM metrics | WHERE cpu > 90',
-          condition: '',
         },
       },
       grouping: { fields: ['host.name', 'service.name'] },
+      stateTransitionAlertDelayMode: 'immediate',
+      stateTransitionRecoveryDelayMode: 'immediate',
     };
 
     // Note: timeField in form is mapped to time_field in API
-    // Note: empty condition field is omitted from the payload
     const expectedPayload = {
       kind: 'signal',
       metadata: {
         name: 'Complex Rule',
         description: 'A complex rule',
-        labels: ['production', 'critical'],
+        tags: ['production', 'critical'],
       },
       time_field: 'event.timestamp',
       schedule: { every: '1m', lookback: '1m' },
@@ -373,60 +383,13 @@ describe('useCreateRule', () => {
     });
 
     await waitFor(() => {
-      expect(http.post).toHaveBeenCalledWith('/internal/alerting/v2/rule', {
+      expect(http.post).toHaveBeenCalledWith(ALERTING_V2_RULE_API_PATH, {
         body: JSON.stringify(expectedPayload),
       });
     });
   });
 
-  it('maps recovery_policy with condition-only mode using evaluation base query', async () => {
-    const http = httpServiceMock.createStartContract();
-    const notifications = notificationServiceMock.createStartContract();
-
-    http.post.mockResolvedValue({ id: 'rule-789', metadata: { name: 'Recovery Rule' } });
-
-    const { result } = renderHook(() => useCreateRule({ http, notifications }), {
-      wrapper: createQueryClientWrapper(),
-    });
-
-    const formData: FormValues = {
-      kind: 'alert',
-      metadata: { name: 'Recovery Rule', enabled: true },
-      timeField: '@timestamp',
-      schedule: { every: '5m', lookback: '1m' },
-      evaluation: {
-        query: {
-          base: 'FROM logs | STATS count() BY host',
-          condition: 'WHERE count > 100',
-        },
-      },
-      recoveryPolicy: {
-        type: 'query',
-        query: {
-          condition: 'WHERE count <= 50',
-        },
-      },
-    };
-
-    await act(async () => {
-      result.current.createRule(formData);
-    });
-
-    await waitFor(() => {
-      const payload = JSON.parse(
-        (http.post.mock.calls[0] as unknown as [string, { body: string }])[1].body
-      );
-      expect(payload.recovery_policy).toEqual({
-        type: 'query',
-        query: {
-          base: 'FROM logs | STATS count() BY host',
-          condition: 'WHERE count <= 50',
-        },
-      });
-    });
-  });
-
-  it('maps recovery_policy with full base query when no condition is set', async () => {
+  it('maps recovery_policy with base query', async () => {
     const http = httpServiceMock.createStartContract();
     const notifications = notificationServiceMock.createStartContract();
 
@@ -452,6 +415,8 @@ describe('useCreateRule', () => {
           base: 'FROM logs | STATS count() BY host | WHERE count <= 10',
         },
       },
+      stateTransitionAlertDelayMode: 'immediate',
+      stateTransitionRecoveryDelayMode: 'immediate',
     };
 
     await act(async () => {
@@ -490,6 +455,8 @@ describe('useCreateRule', () => {
         query: { base: 'FROM logs | STATS count() BY host' },
       },
       recoveryPolicy: { type: 'no_breach' },
+      stateTransitionAlertDelayMode: 'immediate',
+      stateTransitionRecoveryDelayMode: 'immediate',
     };
 
     await act(async () => {

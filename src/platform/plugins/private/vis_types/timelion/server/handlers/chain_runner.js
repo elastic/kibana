@@ -27,6 +27,11 @@ const MAX_SHEETS = 1;
  * We should not render/compute more then 100 series per chart, doesn't have a analyticsl sense
  */
 const MAX_SERIES_PER_SHEET = 100;
+/**
+ * Maximum depth for resolving references. Prevents infinite recursion
+ * from circular references (e.g. @1 referencing its own sheet).
+ */
+const MAX_RESOLVE_DEPTH = 10;
 
 export default function chainRunner(tlConfig) {
   const preprocessChain = require('./lib/preprocess_chain')(tlConfig);
@@ -48,8 +53,9 @@ export default function chainRunner(tlConfig) {
   }
 
   // Invokes a modifier function, resolving arguments into series as needed
-  function invoke(fnName, args) {
+  function invoke(fnName, args, parentIsDatasource, depth = 0) {
     const functionDef = tlConfig.getFunction(fnName);
+    const isDatasourceContext = parentIsDatasource || functionDef.datasource;
 
     function resolveArgument(item) {
       if (Array.isArray(item)) {
@@ -60,13 +66,23 @@ export default function chainRunner(tlConfig) {
         switch (item.type) {
           case 'function': {
             const itemFunctionDef = tlConfig.getFunction(item.function);
+            if (isDatasourceContext && itemFunctionDef.datasource) {
+              throw new Error(
+                `Cannot use datasource function ${item.function}() as an argument to another datasource function. Datasource functions cannot be nested.`
+              );
+            }
             if (itemFunctionDef.cacheKey && queryCache[itemFunctionDef.cacheKey(item)]) {
               stats.queryCount++;
               return Promise.resolve(_.cloneDeep(queryCache[itemFunctionDef.cacheKey(item)]));
             }
-            return invoke(item.function, item.arguments);
+            return invoke(item.function, item.arguments, isDatasourceContext, depth);
           }
           case 'reference': {
+            if (depth >= MAX_RESOLVE_DEPTH) {
+              throw new Error(
+                'Maximum expression resolution depth exceeded. This is usually caused by circular references.'
+              );
+            }
             let reference;
             if (item.series) {
               reference = sheet[item.plot - 1][item.series - 1];
@@ -76,12 +92,12 @@ export default function chainRunner(tlConfig) {
                 list: sheet[item.plot - 1],
               };
             }
-            return invoke('first', [reference]);
+            return invoke('first', [reference], false, depth + 1);
           }
           case 'chain':
-            return invokeChain(item);
+            return invokeChain(item, undefined, isDatasourceContext, depth);
           case 'chainList':
-            return resolveChainList(item.list);
+            return resolveChainList(item.list, isDatasourceContext, depth);
           case 'literal':
             return item.value;
           case 'requestList':
@@ -111,7 +127,7 @@ export default function chainRunner(tlConfig) {
     });
   }
 
-  function invokeChain(chainObj, result) {
+  function invokeChain(chainObj, result, parentIsDatasource, depth = 0) {
     if (chainObj.chain.length === 0) return result[0];
 
     const chain = _.clone(chainObj.chain);
@@ -119,25 +135,28 @@ export default function chainRunner(tlConfig) {
 
     let promise;
     if (link.type === 'chain') {
-      promise = invokeChain(link);
+      promise = invokeChain(link, undefined, parentIsDatasource, depth);
     } else if (!result) {
-      promise = invoke('first', [link]);
+      promise = invoke('first', [link], parentIsDatasource, depth);
     } else {
+      const functionDef = tlConfig.getFunction(link.function);
+      if (functionDef.datasource) {
+        throw new Error(
+          `Cannot chain datasource function ${link.function}() after another function. Datasource functions must be used at the start of a chain.`
+        );
+      }
       const args = link.arguments ? result.concat(link.arguments) : result;
-      promise = invoke(link.function, args);
+      promise = invoke(link.function, args, parentIsDatasource, depth);
     }
 
     return promise.then(function (result) {
-      return invokeChain({ type: 'chain', chain: chain }, [result]);
+      return invokeChain({ type: 'chain', chain: chain }, [result], parentIsDatasource, depth);
     });
   }
 
-  function resolveChainList(chainList) {
+  function resolveChainList(chainList, parentIsDatasource, depth = 0) {
     const seriesList = _.map(chainList, function (chain) {
-      const values = invoke('first', [chain]);
-      return values.then(function (args) {
-        return args;
-      });
+      return invoke('first', [chain], parentIsDatasource, depth);
     });
     return Promise.all(seriesList).then(function (args) {
       const list = _.chain(args).map('list').flatten().value();

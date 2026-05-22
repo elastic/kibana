@@ -73,7 +73,9 @@ export const useResponsiveTabs = ({
   useEffect(() => {
     onScroll();
     // `dimensions.width` added here to trigger in cases when the container width changes
-  }, [onScroll, dimensions.width]);
+    // `tabsSizeConfig.isScrollable` added here to trigger scroll state recalculation
+    // when items are added/removed and scrollability changes (e.g. after tab restoration)
+  }, [onScroll, dimensions.width, tabsSizeConfig.isScrollable]);
 
   const scrollLeft = useCallback(() => {
     if (tabsContainerElement) {
@@ -97,7 +99,7 @@ export const useResponsiveTabs = ({
       tabsSizeConfig.isScrollable ? (
         <EuiButtonIcon
           data-test-subj="unifiedTabs_tabsBar_scrollLeftBtn"
-          iconType="arrowLeft"
+          iconType="chevronSingleLeft"
           color="text"
           disabled={scrollState?.isScrollableLeft === false}
           aria-label={scrollLeftButtonLabel}
@@ -113,7 +115,7 @@ export const useResponsiveTabs = ({
       tabsSizeConfig.isScrollable ? (
         <EuiButtonIcon
           data-test-subj="unifiedTabs_tabsBar_scrollRightBtn"
-          iconType="arrowRight"
+          iconType="chevronSingleRight"
           color="text"
           disabled={scrollState?.isScrollableRight === false}
           aria-label={scrollRightButtonLabel}

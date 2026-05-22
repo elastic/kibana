@@ -11,7 +11,11 @@ import {
 } from '@kbn/elastic-assistant/impl/assistant_context/constants';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { TraceOptions } from '@kbn/elastic-assistant/impl/assistant/types';
-import type { LangSmithOptions } from '../../../common';
+
+export interface LangSmithOptions {
+  projectName: string;
+  apiKey: string;
+}
 
 const sessionStorage = new Storage(window.sessionStorage);
 
@@ -32,8 +36,6 @@ export const getLangSmithOptions = (
   }
 
   const { langSmithProject, langSmithApiKey } = sessionStorageTraceOptions;
-
-  // Only return options when both fields are filled in; empty strings are not valid credentials.
   if (!langSmithProject || !langSmithApiKey) {
     return;
   }

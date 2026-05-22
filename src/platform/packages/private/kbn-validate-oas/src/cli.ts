@@ -14,6 +14,7 @@ import { run } from '@kbn/dev-cli-runner';
 import { validate, OAS_3_0_SCHEMA_PATH } from './validate';
 import { filtersMatch } from './filters_match';
 import { toInstancePathFilter } from './path_filters';
+import { validateCompatibility } from './compatibility';
 
 const kibanaYamlRelativePath = './oas_docs/output/kibana.yaml';
 const kibanaServerlessYamlRelativePath = './oas_docs/output/kibana.serverless.yaml';
@@ -56,7 +57,10 @@ run(
     }
 
     let invalidSpec = false;
+    let schemaValidationFailed = false;
+    let compatibilityValidationFailed = false;
     const errorCounts: Record<string, number> = {};
+    const compatibilityErrorMessages: Record<string, string> = {};
 
     const yamlPaths: string[] = [];
     if (only === 'traditional') {
@@ -80,14 +84,18 @@ run(
       log.info(`About to validate spec at ${chalk.underline(yamlPath)}`);
       await log.indent(4, async () => {
         const result = validate(yamlPath);
+        const compatibilityResult = await validateCompatibility(yamlPath);
+
+        let hasValidationIssues = false;
+        let schemaErrorMessage: undefined | string;
+        let schemaErrorCount = 0;
+
         if (!result.valid) {
+          hasValidationIssues = true;
+          schemaValidationFailed = true;
           log.warning(`${chalk.underline(yamlPath)} is NOT valid`);
-
-          let errorMessage: undefined | string;
-          let errorCount = 0;
-
           if (Array.isArray(result.errors)) {
-            errorMessage = result.errors
+            schemaErrorMessage = result.errors
               .filter(
                 (error) =>
                   // The below is noisey and a result of how the schema validation works. No aspect of the OAS spec should
@@ -101,26 +109,66 @@ run(
                     : true)
               )
               .map(({ instancePath, message, schemaPath }) => {
-                errorCount++;
+                schemaErrorCount++;
                 return `${chalk.bold(
                   instancePath
                 )}\n${message}\nFailed check @ schema path: ${schemaPath}`;
               })
               .join('\n\n');
           } else if (typeof result.errors === 'string') {
-            errorCount = 1;
-            errorMessage = result.errors;
+            schemaErrorCount = 1;
+            schemaErrorMessage = result.errors;
           }
 
           if (!skipPrintingIssues) {
-            log.warning('Found the following issues\n\n' + errorMessage + '\n');
+            log.warning('Found the following issues\n\n' + schemaErrorMessage + '\n');
           }
-          errorCounts[yamlPath] = errorCount;
-          if (errorCount) {
-            log.warning(`Found ${chalk.bold(errorCount)} errors in ${chalk.underline(yamlPath)}`);
-            invalidSpec = true;
+          log.warning(
+            `Found ${chalk.bold(schemaErrorCount)} errors in ${chalk.underline(yamlPath)}`
+          );
+          invalidSpec = true;
+        }
+
+        errorCounts[yamlPath] = schemaErrorCount;
+
+        if (compatibilityResult && !compatibilityResult.valid) {
+          hasValidationIssues = true;
+          compatibilityValidationFailed = true;
+          invalidSpec = true;
+          log.warning(`${chalk.underline(yamlPath)} failed compatibility validation`);
+
+          let compatibilityErrorCount = 0;
+          const compatibilityErrorMessage = compatibilityResult.issues
+            .filter((issue) =>
+              instancePathFilters?.length
+                ? instancePathFilters.some((instancePathFilter) =>
+                    issue.path.startsWith(instancePathFilter)
+                  )
+                : true
+            )
+            .map(({ path, message }) => {
+              compatibilityErrorCount++;
+              return `${chalk.bold(path)}\n${message}`;
+            })
+            .join('\n\n');
+
+          if (compatibilityErrorMessage) {
+            compatibilityErrorMessages[yamlPath] = compatibilityErrorMessage;
           }
-        } else {
+
+          if (!skipPrintingIssues) {
+            log.warning(
+              'Found the following compatibility issues\n\n' + compatibilityErrorMessage + '\n'
+            );
+          }
+          log.warning(
+            `Found ${chalk.bold(compatibilityErrorCount)} compatibility errors in ${chalk.underline(
+              yamlPath
+            )}`
+          );
+        }
+
+        if (!hasValidationIssues) {
           log.success(`${chalk.underline(yamlPath)} is valid`);
         }
       });
@@ -144,6 +192,21 @@ run(
         }
       }
       log.info('Count comparison:' + report);
+      if (compatibilityValidationFailed) {
+        for (const yamlPath of yamlPaths) {
+          if (!compatibilityErrorMessages[yamlPath]) {
+            continue;
+          }
+
+          log.error(
+            `Compatibility issues in ${chalk.underline(yamlPath)}\n\n${
+              compatibilityErrorMessages[yamlPath]
+            }\n`
+          );
+        }
+        log.error('Compatibility validation failed.');
+        process.exit(1);
+      }
       if (increased) {
         log.error(
           'Error count has increased compared to baseline, not updating the baseline count; exit(1).'
@@ -163,11 +226,13 @@ run(
 
     log.info('Validation complete');
     if (invalidSpec) {
-      log.info(
-        `${chalk.bold(
-          'TIP'
-        )}: Use the "Failed check @ schema path <path>" to see the JSONSchema for the expected shape in:\n${OAS_3_0_SCHEMA_PATH}`
-      );
+      if (schemaValidationFailed) {
+        log.info(
+          `${chalk.bold(
+            'TIP'
+          )}: Use the "Failed check @ schema path <path>" to see the JSONSchema for the expected shape in:\n${OAS_3_0_SCHEMA_PATH}`
+        );
+      }
       process.exit(1);
     } else {
       log.success(`No errors found in the OAS spec`);
@@ -181,7 +246,7 @@ run(
       boolean: ['assert-no-error-increase', 'update-baseline', 'skip-printing-issues'],
       string: ['path', 'only'],
       help: `
-      --assert-no-error-increase  Will error if the number of errors in the OAS spec compared to the baseline has increased. Cannot be combined with other flags.
+      --assert-no-error-increase  Will error if the number of schema-validation errors in the OAS spec compared to the baseline has increased.
       --update-baseline          Update or create the baseline file with current error counts.
       --path                     Pass in the (start of) a custom API route path (for example /api/fleet/agent_policies), can be specified multiple times.
       --only                     Validate only OAS for the a specific offering, one of "traditional" or "serverless". Omitting this will validate all offerings.

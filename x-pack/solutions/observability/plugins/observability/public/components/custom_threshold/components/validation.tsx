@@ -130,7 +130,10 @@ export function validateCustomThreshold({
       });
     }
 
-    if (comparator === COMPARATORS.BETWEEN && (!threshold || threshold.length < 2)) {
+    if (
+      (comparator === COMPARATORS.BETWEEN || comparator === COMPARATORS.BETWEEN_INCLUSIVE) &&
+      (!threshold || threshold.length < 2)
+    ) {
       errors[id].critical.threshold1.push(
         i18n.translate(
           'xpack.observability.customThreshold.rule.alertFlyout.error.thresholdRequired',

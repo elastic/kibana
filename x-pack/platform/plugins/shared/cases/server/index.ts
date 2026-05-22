@@ -35,4 +35,5 @@ export const plugin = async (initializerContext: PluginInitializerContext) => {
   return new CasePlugin(initializerContext);
 };
 
-export type { CasesServerSetup, CasesServerStart } from './types';
+export type { CasesServerSetup, CasesServerStart, CloseReasonValidator } from './types';
+export type { UnifiedAttachmentTypeSetup } from './attachment_framework/types';

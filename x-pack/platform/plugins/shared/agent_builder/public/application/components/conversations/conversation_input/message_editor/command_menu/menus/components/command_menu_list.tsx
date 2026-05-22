@@ -41,14 +41,21 @@ const noMatchesLabel = i18n.translate(
 
 export interface CommandMenuListOption {
   readonly key: string;
+  /**
+   * Plain string for accessibility and default label; use `renderLabel` for rich rows.
+   */
   readonly label: string;
+  readonly renderLabel?: React.ReactNode;
 }
+
+/** After EuiSelectableList merges `option.data` into the option, `renderOption` receives this shape. */
+type CommandMenuListSelectableRow = EuiSelectableOption &
+  Partial<Pick<CommandMenuListOption, 'renderLabel'>>;
 
 interface CommandMenuListProps {
   readonly options: readonly CommandMenuListOption[];
   readonly isLoading: boolean;
   readonly onSelect: (option: CommandMenuListOption) => void;
-  readonly renderExtraContent?: (key: string) => React.ReactNode;
   readonly width?: number;
   readonly 'data-test-subj'?: string;
 }
@@ -59,7 +66,6 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
       options,
       isLoading,
       onSelect,
-      renderExtraContent,
       width: menuWidth = MENU_WIDTH,
       'data-test-subj': dataTestSubj = 'commandMenuList',
     },
@@ -99,6 +105,7 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
         options.map((option) => ({
           label: option.label,
           key: option.key,
+          data: option.renderLabel != null ? { renderLabel: option.renderLabel } : undefined,
         })),
       [options]
     );
@@ -126,32 +133,13 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
       },
     }));
 
-    const optionRowStyles = css`
-      display: flex;
-      align-items: baseline;
-      gap: ${euiTheme.size.s};
-      min-width: 0;
-    `;
-
-    const renderOption = renderExtraContent
-      ? (option: EuiSelectableOption) => {
-          const extraContent = renderExtraContent(option.key ?? '');
-          return (
-            <span css={optionRowStyles}>
-              <span>{option.label}</span>
-              {extraContent}
-            </span>
-          );
-        }
-      : undefined;
-
     const containerStyles = css`
       width: ${menuWidth}px;
     `;
 
     const activeHighlightStyles = css`
       .euiSelectableListItem:nth-child(${activeIndex + 1}) {
-        background-color: ${euiTheme.colors.backgroundLightPrimary};
+        background-color: ${euiTheme.focus.backgroundColor};
       }
     `;
 
@@ -186,7 +174,9 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
         <EuiSelectable
           options={selectableOptions}
           singleSelection
-          renderOption={renderOption}
+          renderOption={(option: CommandMenuListSelectableRow) =>
+            option.renderLabel ?? option.label
+          }
           listProps={{
             showIcons: false,
             bordered: false,

@@ -45,7 +45,7 @@ export class ApiKeyService implements ApiKeyServiceContract {
     const username = this.securityService.authc.getCurrentUser(this.request)?.username;
     if (!username) {
       throw new Error(
-        `Failed to create API key for notification policy: ${name} - unable to determine current user`
+        `Failed to create API key for action policy: ${name} - unable to determine current user`
       );
     }
 
@@ -103,7 +103,7 @@ export class ApiKeyService implements ApiKeyServiceContract {
     const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(this.request);
     if (!authorizationHeader?.credentials) {
       throw new Error(
-        `Failed to extract API key from authorization header for notification policy: ${name}`
+        `Failed to extract API key from authorization header for action policy: ${name}`
       );
     }
 
@@ -111,7 +111,7 @@ export class ApiKeyService implements ApiKeyServiceContract {
 
     if (!apiKeyId || !apiKeyValue) {
       throw new Error(
-        `Failed to parse API key credentials from authorization header for notification policy: ${name}`
+        `Failed to parse API key credentials from authorization header for action policy: ${name}`
       );
     }
 
@@ -135,7 +135,7 @@ export class ApiKeyService implements ApiKeyServiceContract {
       });
 
       if (!uiamResult) {
-        throw new Error(`Failed to create UIAM API key for notification policy: ${name}`);
+        throw new Error(`Failed to create UIAM API key for action policy: ${name}`);
       }
 
       return {
@@ -148,11 +148,11 @@ export class ApiKeyService implements ApiKeyServiceContract {
     const esResult = await this.securityService.authc.apiKeys.grantAsInternalUser(this.request, {
       name,
       role_descriptors: {},
-      metadata: { managed: true, kibana: { type: 'notification_policy' } },
+      metadata: { managed: true, kibana: { type: 'action_policy' } },
     });
 
     if (!esResult) {
-      throw new Error(`Failed to create ES API key for notification policy: ${name}`);
+      throw new Error(`Failed to create ES API key for action policy: ${name}`);
     }
 
     return {

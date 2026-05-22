@@ -8,7 +8,7 @@
  */
 
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
-import { type ESQLStatsQueryMeta } from '@kbn/esql-utils/src/utils/cascaded_documents_helpers';
+import { GROUP_NOT_SET_VALUE, type ESQLStatsQueryMeta } from '@kbn/esql-utils';
 import { useMemo, useState } from 'react';
 import {
   type DataCascadeRowProps,
@@ -22,6 +22,7 @@ import useLatest from 'react-use/lib/useLatest';
 import { type ESQLDataGroupNode } from '../blocks';
 import type { CascadedDocumentsContext } from '../cascaded_documents_provider';
 import { useCascadedDocumentsContext } from '../cascaded_documents_provider';
+import { useCascadedDocumentsTelemetry } from '../telemetry';
 
 interface UseGroupedCascadeDataProps
   extends Pick<UnifiedDataTableProps, 'rows'>,
@@ -56,15 +57,10 @@ export const useGroupedCascadeData = ({
         }
 
         const rowsGroupedByValue = Object.groupBy(rows ?? [], (row) =>
-          String(row.flattened[resolvedGroupColumn])
+          String(row.flattened[resolvedGroupColumn] ?? GROUP_NOT_SET_VALUE)
         );
 
         Object.entries(rowsGroupedByValue).forEach(([groupValue, groupRows = []]) => {
-          // skip undefined and null values
-          if (groupValue === 'undefined' || groupValue === 'null') {
-            return;
-          }
-
           const groupNode: ESQLDataGroupNode = {
             id: uuidv5(`${groupColumn}-${groupValue}`, NODE_ID_NAMESPACE),
             // While we use explicit properties for better typing, the document_data_cascade package
@@ -92,11 +88,23 @@ export const useGroupedCascadeData = ({
                     } else if (isNil(existingValue)) {
                       allValues[identifier] = currentValue;
                     }
+                  } else if (typeof currentValue === 'string') {
+                    if (!columnTypes.has(identifier)) {
+                      columnTypes.set(identifier, 'array');
+                    }
+                    if (Array.isArray(existingValue)) {
+                      allValues[identifier] = [...existingValue, currentValue];
+                    } else if (isNil(existingValue)) {
+                      allValues[identifier] = [currentValue];
+                    }
                   } else if (Array.isArray(currentValue)) {
                     if (!columnTypes.has(identifier)) {
                       columnTypes.set(identifier, 'array');
                     }
-                    const valuesArray = currentValue.map(String);
+
+                    const valuesArray = currentValue.map((value) =>
+                      typeof value === 'number' ? value : String(value)
+                    );
 
                     if (Array.isArray(existingValue)) {
                       allValues[identifier] = [...existingValue, ...valuesArray];
@@ -159,6 +167,7 @@ export function useDataCascadeRowExpansionHandlers({
   > {
   const { cascadedDocumentsFetcher, esqlQuery, esqlVariables, timeRange } =
     useCascadedDocumentsContext();
+  const { trackCascadeExpanded, trackCascadeCollapsed } = useCascadedDocumentsTelemetry();
 
   /**
    * Callback invoked when a group node gets expanded, used to fetch data for group nodes.
@@ -191,6 +200,8 @@ export function useDataCascadeRowExpansionHandlers({
       DataCascadeRowCellProps<ESQLDataGroupNode, DataTableRecord>
     >['onCascadeLeafNodeExpanded']
   >(({ row, nodePath, nodePathMap }) => {
+    trackCascadeExpanded(row.id);
+
     return cascadedDocumentsFetcher.fetchCascadedDocuments({
       nodeId: row.id,
       nodeType: 'leaf',
@@ -211,6 +222,8 @@ export function useDataCascadeRowExpansionHandlers({
       DataCascadeRowCellProps<ESQLDataGroupNode, DataTableRecord>['onCascadeLeafNodeCollapsed']
     >
   >(({ row }) => {
+    trackCascadeCollapsed(row.id);
+
     cascadedDocumentsFetcher.cancelFetch(row.id);
   });
 

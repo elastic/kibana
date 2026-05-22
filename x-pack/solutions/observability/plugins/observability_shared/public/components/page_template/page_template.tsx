@@ -24,6 +24,7 @@ import type {
   KibanaPageTemplateKibanaDependencies,
 } from '@kbn/shared-ux-page-kibana-template';
 
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { NavNameWithBadge, hideBadge } from './nav_name_with_badge';
 import { NavNameWithBetaBadge } from './nav_name_with_beta_badge';
 
@@ -111,7 +112,16 @@ export function ObservabilityPageTemplate({
   const currentAppId = useObservable(currentAppId$, undefined);
   const { pathname: currentPath } = useLocation();
 
-  const { services } = useKibana();
+  const { services } = useKibana<{ spaces?: SpacesPluginStart }>();
+
+  const areAnnouncementsEnabled = services.notifications?.tours.isEnabled();
+  const canManageSpaces = services.application?.capabilities.spaces?.manage;
+
+  const SolutionViewSwitchCallout = services.spaces?.ui?.components?.getSolutionViewSwitchCallout;
+  const solutionNavFooter =
+    areAnnouncementsEnabled && canManageSpaces && SolutionViewSwitchCallout ? (
+      <SolutionViewSwitchCallout currentSolution="oblt" />
+    ) : undefined;
 
   const sideNavItems = useMemo<Array<EuiSideNavItemType<unknown>>>(
     () =>
@@ -196,6 +206,7 @@ export function ObservabilityPageTemplate({
                 icon: 'logoObservability',
                 items: sideNavItems,
                 name: sideNavTitle,
+                footer: solutionNavFooter,
               }
             : undefined
         }

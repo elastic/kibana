@@ -8,9 +8,8 @@
 import {
   EuiBadge,
   EuiBasicTable,
-  EuiButton,
+  EuiButtonEmpty,
   EuiButtonIcon,
-  EuiCallOut,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,14 +17,15 @@ import {
   EuiPanel,
   EuiText,
   EuiTitle,
-  EuiToolTip,
   useEuiTheme,
   type CriteriaWithPagination,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import { QUERY_TYPE_MATCH, QUERY_TYPE_STATS } from '@kbn/streams-schema';
 import { useMutation, useQueryClient } from '@kbn/react-query';
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import {
@@ -39,21 +39,18 @@ import {
 } from '../../../../../hooks/sig_events/use_fetch_discovery_queries_occurrences';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useQueriesApi } from '../../../../../hooks/sig_events/use_queries_api';
-import {
-  UNBACKED_QUERIES_COUNT_QUERY_KEY,
-  useUnbackedQueriesCount,
-} from '../../../../../hooks/sig_events/use_unbacked_queries_count';
 import { getFormattedError } from '../../../../../util/errors';
+import { AssetImage } from '../../../../asset_image';
+import { useStreamsAppRouter } from '../../../../../hooks/use_streams_app_router';
+import { useStreamsAppParams } from '../../../../../hooks/use_streams_app_params';
 import { LoadingPanel } from '../../../../loading_panel';
 import { SparkPlot } from '../../../../spark_plot';
 import { StreamsAppSearchBar } from '../../../../streams_app_search_bar';
 import { SeverityBadge } from '../severity_badge/severity_badge';
-import { useFetchStreams } from '../../hooks/use_fetch_streams';
 import { useTimefilter } from '../../../../../hooks/use_timefilter';
 import { buildDiscoverParams } from '../../utils/discover_helpers';
 import {
   ACTIONS_COLUMN_TITLE,
-  BACKED_STATUS_COLUMN,
   CHART_SERIES_NAME,
   CHART_TITLE,
   DELETE_QUERY_ERROR_TOAST_TITLE,
@@ -61,42 +58,41 @@ import {
   IMPACT_COLUMN,
   LAST_OCCURRED_COLUMN,
   NO_ITEMS_MESSAGE,
-  NOT_PROMOTED_BADGE_LABEL,
-  NOT_PROMOTED_TOOLTIP_CONTENT,
   OCCURRENCES_COLUMN,
   OCCURRENCES_TOOLTIP_NAME,
+  THRESHOLD_BREACHES_TOOLTIP_NAME,
   OPEN_IN_DISCOVER_ACTION_DESCRIPTION,
   OPEN_IN_DISCOVER_ACTION_TITLE,
-  PROMOTED_BADGE_LABEL,
-  PROMOTED_TOOLTIP_CONTENT,
-  PROMOTE_ALL_BUTTON,
-  PROMOTE_ALL_CALLOUT_DESCRIPTION,
-  PROMOTE_ALL_ERROR_TOAST_TITLE,
-  PROMOTE_QUERY_ACTION_DESCRIPTION,
-  PROMOTE_QUERY_ACTION_TITLE,
-  SAVE_QUERY_ERROR_TOAST_TITLE,
   SEARCH_PLACEHOLDER,
   STREAM_COLUMN,
   TABLE_CAPTION,
   TITLE_COLUMN,
+  STATS_LAST_OCCURRED_PLACEHOLDER,
   UNABLE_TO_LOAD_QUERIES_BODY,
   UNABLE_TO_LOAD_QUERIES_TITLE,
   getEventsCount,
-  getPromoteAllCalloutTitle,
-  getPromoteAllSuccessToast,
+  CLEAR_SELECTION_LABEL,
+  DELETE_SELECTED_LABEL,
+  DELETE_QUERIES_MODAL_TITLE,
+  getSelectedCountLabel,
+  BULK_DEMOTE_SUCCESS_MESSAGE,
+  BULK_DEMOTE_ERROR_TITLE,
 } from './translations';
-import { PromoteAction } from './promote_action';
+import { DeleteQueriesModal } from './delete_queries_modal';
 import { QueryDetailsFlyout } from './query_details_flyout';
+import { QueryTypeBadge } from '../query_type_badge/query_type_badge';
 import { formatLastOccurredAt } from './utils';
 
 const DEFAULT_PAGINATION = { index: 0, size: 10 };
 const PAGE_SIZE_OPTIONS = [10, 25, 50] as const;
 
 export function QueriesTable() {
+  const router = useStreamsAppRouter();
+  const { query: routeQuery } = useStreamsAppParams('/_discovery/{tab}');
   const { euiTheme } = useEuiTheme();
   const {
     dependencies: {
-      start: { unifiedSearch, share },
+      start: { share },
     },
     core: {
       notifications: { toasts },
@@ -110,11 +106,6 @@ export function QueriesTable() {
     size: number;
   }>({ ...DEFAULT_PAGINATION });
 
-  const [selectedQuery, setSelectedQuery] = useState<SignificantEventQueryRow | null>(null);
-
-  const handleSelectQuery = useCallback((item: SignificantEventQueryRow) => {
-    setSelectedQuery((prev) => (prev?.query.id === item.query.id ? null : item));
-  }, []);
   const {
     data: queriesData,
     isLoading: queriesLoading,
@@ -123,64 +114,80 @@ export function QueriesTable() {
     query: searchQuery,
     page: pagination.index + 1,
     perPage: pagination.size,
-    status: ['active', 'draft'],
+    status: ['active'],
   });
+
+  const selectedQuery = useMemo(
+    () =>
+      routeQuery?.selectedItem
+        ? queriesData?.queries.find((q) => q.query.id === routeQuery.selectedItem) ?? null
+        : null,
+    [queriesData?.queries, routeQuery?.selectedItem]
+  );
+
+  const buildQueryRouteParams = useCallback(
+    (selectedItem?: string) => ({
+      ...(routeQuery?.rangeFrom ? { rangeFrom: routeQuery.rangeFrom } : {}),
+      ...(routeQuery?.rangeTo ? { rangeTo: routeQuery.rangeTo } : {}),
+      ...(selectedItem ? { selectedItem } : {}),
+    }),
+    [routeQuery?.rangeFrom, routeQuery?.rangeTo]
+  );
+
+  const handleSelectQuery = useCallback(
+    (item: SignificantEventQueryRow) => {
+      const isAlreadyOpen = item.query.id === routeQuery?.selectedItem;
+      router.push('/_discovery/{tab}', {
+        path: { tab: 'queries' },
+        query: buildQueryRouteParams(isAlreadyOpen ? undefined : item.query.id),
+      });
+    },
+    [router, routeQuery?.selectedItem, buildQueryRouteParams]
+  );
+
+  const closeQueryFlyout = useCallback(() => {
+    router.push('/_discovery/{tab}', {
+      path: { tab: 'queries' },
+      query: buildQueryRouteParams(),
+    });
+  }, [router, buildQueryRouteParams]);
+
+  useEffect(() => {
+    setSelectedItems([]);
+  }, [timeState.start, timeState.end]);
+
   const { data: occurrencesData } = useFetchDiscoveryQueriesOccurrences({ query: searchQuery });
-  const {
-    data: streamsData,
-    isLoading: streamsLoading,
-    isError: hasStreamsError,
-  } = useFetchStreams();
-  const { count: unbackedCount } = useUnbackedQueriesCount();
+
   const queryClient = useQueryClient();
-  const { promoteAll, upsertQuery, removeQuery } = useQueriesApi();
+  const { demote, removeQuery } = useQueriesApi();
+
+  const [selectedItems, setSelectedItems] = useState<SignificantEventQueryRow[]>([]);
+  const [itemsToDelete, setItemsToDelete] = useState<SignificantEventQueryRow[]>([]);
+
+  const isSelectionEmpty = selectedItems.length === 0;
 
   const invalidateQueriesData = useCallback(
     async () =>
       Promise.all([
         queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERIES_QUERY_KEY }),
         queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERIES_OCCURRENCES_QUERY_KEY }),
-        queryClient.invalidateQueries({ queryKey: UNBACKED_QUERIES_COUNT_QUERY_KEY }),
       ]),
     [queryClient]
   );
 
-  const promoteAllMutation = useMutation<{ promoted: number }, Error>({
-    mutationFn: promoteAll,
-    onSuccess: async ({ promoted }) => {
-      toasts.addSuccess(getPromoteAllSuccessToast(promoted));
+  const bulkDemoteMutation = useMutation<{ demoted: number }, Error, SignificantEventQueryRow[]>({
+    mutationFn: (items) => {
+      const queryIds = items.map((item) => item.query.id);
+      return demote({ queryIds });
+    },
+    onSuccess: async () => {
+      setSelectedItems([]);
+      setItemsToDelete([]);
       await invalidateQueriesData();
+      toasts.addSuccess(BULK_DEMOTE_SUCCESS_MESSAGE);
     },
     onError: (error) => {
-      toasts.addError(getFormattedError(error), {
-        title: PROMOTE_ALL_ERROR_TOAST_TITLE,
-      });
-    },
-  });
-
-  const saveQueryMutation = useMutation<
-    void,
-    Error,
-    { updatedQuery: SignificantEventQueryRow['query']; streamName: string }
-  >({
-    mutationFn: async ({ updatedQuery, streamName }) => {
-      await upsertQuery({ query: updatedQuery, streamName });
-    },
-    onSuccess: async (_, variables) => {
-      await invalidateQueriesData();
-      setSelectedQuery((currentSelectedQuery) =>
-        currentSelectedQuery !== null
-          ? {
-              ...currentSelectedQuery,
-              query: variables.updatedQuery,
-            }
-          : currentSelectedQuery
-      );
-    },
-    onError: (error) => {
-      toasts.addError(error, {
-        title: SAVE_QUERY_ERROR_TOAST_TITLE,
-      });
+      toasts.addError(getFormattedError(error), { title: BULK_DEMOTE_ERROR_TITLE });
     },
   });
 
@@ -188,9 +195,10 @@ export function QueriesTable() {
     mutationFn: async ({ queryId, streamName }) => {
       await removeQuery({ queryId, streamName });
     },
-    onSuccess: async () => {
+    onSuccess: async (_, { queryId }) => {
       await invalidateQueriesData();
-      setSelectedQuery(null);
+      closeQueryFlyout();
+      setSelectedItems((prev) => prev.filter((item) => item.query.id !== queryId));
     },
     onError: (error) => {
       toasts.addError(error, {
@@ -206,6 +214,7 @@ export function QueriesTable() {
       }
 
       setPagination(page);
+      setSelectedItems([]);
     },
     []
   );
@@ -213,7 +222,6 @@ export function QueriesTable() {
   const tableItems = queriesData?.queries ?? [];
 
   const columns: Array<EuiBasicTableColumn<SignificantEventQueryRow>> = useMemo(() => {
-    const streamDefinitions = streamsData?.streams ?? [];
     const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
 
     return [
@@ -254,6 +262,13 @@ export function QueriesTable() {
         name: LAST_OCCURRED_COLUMN,
         width: '240px',
         render: (_: unknown, item: SignificantEventQueryRow) => {
+          if (item.query.type === QUERY_TYPE_STATS && !item.rule_backed) {
+            return (
+              <EuiText size="s" color="subdued">
+                {STATS_LAST_OCCURRED_PLACEHOLDER}
+              </EuiText>
+            );
+          }
           return <EuiText size="s">{formatLastOccurredAt(item.occurrences)}</EuiText>;
         },
       },
@@ -266,7 +281,11 @@ export function QueriesTable() {
           return (
             <SparkPlot
               id={`sparkplot-${item.query.id}`}
-              name={OCCURRENCES_TOOLTIP_NAME}
+              name={
+                item.query.type === QUERY_TYPE_STATS
+                  ? THRESHOLD_BREACHES_TOOLTIP_NAME
+                  : OCCURRENCES_TOOLTIP_NAME
+              }
               type="bar"
               timeseries={item.occurrences}
               annotations={[]}
@@ -278,31 +297,22 @@ export function QueriesTable() {
         },
       },
       {
+        field: 'query.type',
+        name: i18n.translate('xpack.streams.queriesTable.typeColumn', {
+          defaultMessage: 'Type',
+        }),
+        width: '80px',
+        render: (_: unknown, item: SignificantEventQueryRow) => (
+          <QueryTypeBadge type={item.query.type ?? QUERY_TYPE_MATCH} />
+        ),
+      },
+      {
         field: 'stream_name',
         name: STREAM_COLUMN,
         width: '130px',
         render: (_: unknown, item: SignificantEventQueryRow) => (
           <EuiBadge color="hollow">{item.stream_name}</EuiBadge>
         ),
-      },
-      {
-        field: 'rule_backed',
-        name: BACKED_STATUS_COLUMN,
-        width: '120px',
-        render: (_: unknown, item: SignificantEventQueryRow) => {
-          return (
-            <EuiToolTip
-              content={item.rule_backed ? PROMOTED_TOOLTIP_CONTENT : NOT_PROMOTED_TOOLTIP_CONTENT}
-            >
-              <span tabIndex={0}>
-                {item.rule_backed && <EuiBadge color="hollow">{PROMOTED_BADGE_LABEL}</EuiBadge>}
-                {!item.rule_backed && (
-                  <EuiBadge color="warning">{NOT_PROMOTED_BADGE_LABEL}</EuiBadge>
-                )}
-              </span>
-            </EuiToolTip>
-          );
-        },
       },
       {
         name: ACTIONS_COLUMN_TITLE,
@@ -314,42 +324,23 @@ export function QueriesTable() {
             icon: 'discoverApp',
             description: OPEN_IN_DISCOVER_ACTION_DESCRIPTION,
             enabled: () => discoverLocator !== undefined,
-            onClick: (item) => {
-              const definition = streamDefinitions.find(
-                (streamItem) => streamItem.stream.name === item.stream_name
-              );
-
-              if (!definition) {
-                return;
-              }
-
-              discoverLocator?.navigate(
-                buildDiscoverParams(item.query, definition.stream, timeState)
-              );
+            onClick: (item: SignificantEventQueryRow) => {
+              discoverLocator?.navigate(buildDiscoverParams(item.query, timeState));
             },
             isPrimary: true,
             'data-test-subj': 'significant_events_table_open_in_discover_action',
           },
-          {
-            type: 'button',
-            color: 'primary',
-            name: PROMOTE_QUERY_ACTION_TITLE,
-            description: PROMOTE_QUERY_ACTION_DESCRIPTION,
-            render: (item: SignificantEventQueryRow) => {
-              return <PromoteAction item={item} />;
-            },
-          },
         ],
       },
     ];
-  }, [share.url.locators, streamsData, timeState, selectedQuery, handleSelectQuery]);
+  }, [share.url.locators, timeState, selectedQuery, handleSelectQuery]);
 
-  const isLoading = queriesLoading || streamsLoading;
+  const isLoading = queriesLoading;
   if (isLoading) {
     return <LoadingPanel size="l" />;
   }
 
-  const hasError = hasQueriesError || hasStreamsError;
+  const hasError = hasQueriesError;
   if (hasError) {
     return (
       <EuiEmptyPrompt
@@ -361,56 +352,67 @@ export function QueriesTable() {
     );
   }
 
+  const isEmpty = !queriesLoading && (queriesData?.total ?? 0) === 0 && !searchQuery;
+  if (isEmpty) {
+    return (
+      <EuiEmptyPrompt
+        aria-live="polite"
+        titleSize="xs"
+        icon={<AssetImage type="significantEventsEmptyState" />}
+        title={
+          <h2>
+            {i18n.translate(
+              'xpack.streams.significantEventsDiscovery.queriesTable.emptyState.title',
+              { defaultMessage: 'Rules' }
+            )}
+          </h2>
+        }
+        body={
+          <p>
+            {i18n.translate(
+              'xpack.streams.significantEventsDiscovery.queriesTable.emptyState.description',
+              {
+                defaultMessage:
+                  'No rules created yet. Promote queries from the Knowledge Indicators tab to create rules.',
+              }
+            )}
+          </p>
+        }
+        actions={
+          <EuiButtonEmpty
+            href={router.link('/_discovery/{tab}', {
+              path: { tab: 'knowledge_indicators' },
+            })}
+          >
+            {i18n.translate(
+              'xpack.streams.significantEventsDiscovery.queriesTable.emptyState.goToKnowledgeIndicatorsButton',
+              { defaultMessage: 'Go to Knowledge Indicators' }
+            )}
+          </EuiButtonEmpty>
+        }
+      />
+    );
+  }
+
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
-      {unbackedCount > 0 && (
-        <EuiFlexItem grow={false}>
-          <EuiCallOut
-            announceOnMount
-            title={getPromoteAllCalloutTitle(unbackedCount)}
-            iconType="info"
-            data-test-subj="queriesPromoteAllCallout"
-          >
-            <p>{PROMOTE_ALL_CALLOUT_DESCRIPTION}</p>
-            <EuiButton
-              fill
-              onClick={() => promoteAllMutation.mutate()}
-              isLoading={promoteAllMutation.isLoading}
-              data-test-subj="queriesPromoteAllButton"
-            >
-              {PROMOTE_ALL_BUTTON}
-            </EuiButton>
-          </EuiCallOut>
-        </EuiFlexItem>
-      )}
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiFlexItem>
-            <unifiedSearch.ui.SearchBar
-              appName="streamsApp"
-              showFilterBar={false}
-              showQueryMenu={false}
-              showQueryInput
-              showDatePicker={false}
-              submitButtonStyle="iconOnly"
-              displayStyle="inPage"
-              disableQueryLanguageSwitcher
-              onQuerySubmit={(queryPayload) => {
-                setSearchQuery(String(queryPayload.query?.query ?? ''));
-                setPagination((currentPagination) => ({ index: 0, size: currentPagination.size }));
-              }}
-              query={{
-                query: searchQuery,
-                language: 'text',
-              }}
-              isLoading={queriesLoading}
-              placeholder={SEARCH_PLACEHOLDER}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <StreamsAppSearchBar showDatePicker />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <StreamsAppSearchBar
+          isLoading={queriesLoading}
+          onQuerySubmit={(queryPayload) => {
+            setSearchQuery(String(queryPayload.query?.query ?? ''));
+            setPagination((currentPagination) => ({ index: 0, size: currentPagination.size }));
+            setSelectedItems([]);
+          }}
+          placeholder={SEARCH_PLACEHOLDER}
+          query={{
+            query: searchQuery,
+            language: 'text',
+          }}
+          showDatePicker
+          showQueryInput
+          submitButtonStyle="iconOnly"
+        />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiPanel hasBorder hasShadow={false}>
@@ -434,7 +436,41 @@ export function QueriesTable() {
         </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiText size="s">{getEventsCount(queriesData?.total ?? 0)}</EuiText>
+        <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiText size="s">{getEventsCount(queriesData?.total ?? 0)}</EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              iconType="cross"
+              size="xs"
+              aria-label={CLEAR_SELECTION_LABEL}
+              isDisabled={isSelectionEmpty}
+              onClick={() => setSelectedItems([])}
+            >
+              {CLEAR_SELECTION_LABEL}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              iconType="trash"
+              color="danger"
+              size="xs"
+              isDisabled={isSelectionEmpty || bulkDemoteMutation.isLoading}
+              isLoading={bulkDemoteMutation.isLoading}
+              onClick={() => setItemsToDelete(selectedItems)}
+            >
+              {DELETE_SELECTED_LABEL}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          {!isSelectionEmpty && (
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                {getSelectedCountLabel(selectedItems.length)}
+              </EuiText>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiBasicTable
@@ -450,8 +486,8 @@ export function QueriesTable() {
           rowProps={(item: SignificantEventQueryRow) => ({
             isSelected: selectedQuery?.query.id === item.query.id,
           })}
-          loading={queriesLoading || streamsLoading}
-          noItemsMessage={!queriesLoading && !streamsLoading ? NO_ITEMS_MESSAGE : ''}
+          loading={queriesLoading}
+          noItemsMessage={!queriesLoading ? NO_ITEMS_MESSAGE : ''}
           pagination={{
             pageIndex: pagination.index,
             pageSize: pagination.size,
@@ -459,19 +495,28 @@ export function QueriesTable() {
             pageSizeOptions: [...PAGE_SIZE_OPTIONS],
           }}
           onChange={onTableChange}
+          selection={{
+            selected: selectedItems,
+            onSelectionChange: setSelectedItems,
+          }}
         />
       </EuiFlexItem>
+      {itemsToDelete.length > 0 && (
+        <DeleteQueriesModal
+          title={DELETE_QUERIES_MODAL_TITLE(itemsToDelete.length)}
+          items={itemsToDelete}
+          onCancel={() => setItemsToDelete([])}
+          onConfirm={() => bulkDemoteMutation.mutate(itemsToDelete)}
+          isLoading={bulkDemoteMutation.isLoading}
+        />
+      )}
       {selectedQuery && (
         <QueryDetailsFlyout
           item={selectedQuery}
-          onClose={() => setSelectedQuery(null)}
-          onSave={(updatedQuery, streamName) =>
-            saveQueryMutation.mutateAsync({ updatedQuery, streamName })
-          }
+          onClose={closeQueryFlyout}
           onDelete={(queryId, streamName) =>
             deleteQueryMutation.mutateAsync({ queryId, streamName })
           }
-          isSaving={saveQueryMutation.isLoading}
           isDeleting={deleteQueryMutation.isLoading}
         />
       )}

@@ -14,8 +14,7 @@ import {
   type VisualizationAttachmentData,
 } from '@kbn/agent-builder-common/attachments';
 import { ToolResultType, SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import { buildVisualizationConfig, type VisualizationConfig } from '@kbn/agent-builder-genai-utils';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import { buildVisualizationConfig, type VisualizationConfig } from '@kbn/agent-builder-tools-base';
 
 /** Attachment type for visualization configurations */
 const VISUALIZATION_ATTACHMENT_TYPE = 'visualization';
@@ -78,15 +77,6 @@ This tool will:
 4. Generate a valid visualization configuration
 5. Store the result as an attachment (creating new or updating existing) for future modifications`,
     schema: createVisualizationSchema,
-    availability: {
-      cacheMode: 'space',
-      handler: async ({ uiSettings }) => {
-        const enabled = await uiSettings.get<boolean>(
-          AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
-        );
-        return { status: enabled ? 'available' : 'unavailable' };
-      },
-    },
     tags: [],
     handler: async (
       { query: nlQuery, index, chartType, esql, attachment_id: attachmentId },

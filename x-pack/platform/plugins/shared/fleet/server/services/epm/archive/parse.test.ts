@@ -317,6 +317,69 @@ describe('parseTopLevelElasticsearchEntry', () => {
       },
     });
   });
+  it('Should preserve index_mode', () => {
+    expect(parseTopLevelElasticsearchEntry({ index_mode: 'time_series' })).toEqual({
+      index_mode: 'time_series',
+    });
+  });
+  it('Should preserve source_mode', () => {
+    expect(parseTopLevelElasticsearchEntry({ source_mode: 'synthetic' })).toEqual({
+      source_mode: 'synthetic',
+    });
+  });
+  it('Should preserve dynamic_dataset and dynamic_namespace', () => {
+    expect(
+      parseTopLevelElasticsearchEntry({ dynamic_dataset: true, dynamic_namespace: true })
+    ).toEqual({ dynamic_dataset: true, dynamic_namespace: true });
+  });
+  it('Should not include junk keys but preserve all documented fields', () => {
+    expect(
+      parseTopLevelElasticsearchEntry({
+        index_mode: 'time_series',
+        source_mode: 'synthetic',
+        dynamic_dataset: true,
+        dynamic_namespace: true,
+        privileges: { indices: ['auto_configure', 'create_doc'] },
+        'index_template.settings': { 'index.lifecycle.name': 'my-policy' },
+        unknown_field: 'should be dropped',
+      })
+    ).toEqual({
+      index_mode: 'time_series',
+      source_mode: 'synthetic',
+      dynamic_dataset: true,
+      dynamic_namespace: true,
+      privileges: { indices: ['auto_configure', 'create_doc'] },
+      'index_template.settings': { 'index.lifecycle.name': 'my-policy' },
+    });
+  });
+  it('should handle the same documented fields as parseDataStreamElasticsearchEntry', () => {
+    // This test guards against adding a new field to parseDataStreamElasticsearchEntry
+    // and forgetting to add it to parseTopLevelElasticsearchEntry.
+    // ingest_pipeline.name and index_template.data_stream are intentionally data-stream-only
+    // and must remain in the exclusion list below.
+    const allDocumentedFields = {
+      index_mode: 'time_series',
+      source_mode: 'synthetic',
+      dynamic_dataset: true,
+      dynamic_namespace: true,
+      privileges: { indices: ['auto_configure'], cluster: ['monitor'] },
+      index_template: {
+        mappings: { dynamic: false },
+        settings: { 'index.lifecycle.name': 'my-policy' },
+      },
+    };
+
+    const fromDataStream = parseDataStreamElasticsearchEntry(allDocumentedFields);
+    const fromTopLevel = parseTopLevelElasticsearchEntry(allDocumentedFields);
+
+    const {
+      'ingest_pipeline.name': _ingestPipeline,
+      'index_template.data_stream': _dataStream,
+      ...dataStreamComparable
+    } = fromDataStream;
+
+    expect(fromTopLevel).toEqual(dataStreamComparable);
+  });
 });
 
 describe('parseAndVerifyArchive', () => {
@@ -426,7 +489,7 @@ describe('parseAndVerifyArchive', () => {
         'input_only-0.1.0/manifest.yml': buf,
       })
     ).toThrowError(
-      'Could not parse top-level package manifest at top-level directory input_only-0.1.0: YAMLException'
+      'Could not parse top-level package manifest at top-level directory input_only-0.1.0: Manifest must be a valid YAML object'
     );
   });
 
@@ -573,7 +636,9 @@ describe('parseAndVerifyDataStreams', () => {
           'input-only-0.1.0/data_stream/stream1/manifest.yml': Buffer.alloc(1),
         },
       })
-    ).toThrowError("Could not parse package manifest for data stream 'stream1': YAMLException");
+    ).toThrowError(
+      "Could not parse package manifest for data stream 'stream1': Manifest must be a valid YAML object"
+    );
   });
 
   it('should throw when data stream manifest missing type', async () => {

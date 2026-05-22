@@ -6,11 +6,15 @@
  */
 
 import React, { memo } from 'react';
-import { BaseEdge, getBezierPath, type EdgeProps } from '@xyflow/react';
+import { BaseEdge, getBezierPath, Position, type EdgeProps } from '@xyflow/react';
+import { useServiceMapSearchContext } from '../../shared/service_map/service_map_search_context';
+import { useAdjustedEndpoint } from './get_highlight_offset';
 
 export const ServiceMapEdge = memo(
   ({
     id,
+    source,
+    target,
     sourceX,
     sourceY,
     targetX,
@@ -20,13 +24,28 @@ export const ServiceMapEdge = memo(
     style,
     markerEnd,
     markerStart,
+    data,
   }: EdgeProps) => {
+    const { activeMatchNodeId } = useServiceMapSearchContext();
+    const adjustEndpoint = useAdjustedEndpoint();
+
+    const sourceHighlighted = Boolean(data?.sourceContextHighlight) || activeMatchNodeId === source;
+    const targetHighlighted = Boolean(data?.targetContextHighlight) || activeMatchNodeId === target;
+
+    const { x: sX, y: sY } = sourceHighlighted
+      ? adjustEndpoint(source, sourceX, sourceY, targetX, targetY, sourcePosition ?? Position.Right)
+      : { x: sourceX, y: sourceY };
+
+    const { x: tX, y: tY } = targetHighlighted
+      ? adjustEndpoint(target, targetX, targetY, sourceX, sourceY, targetPosition ?? Position.Left)
+      : { x: targetX, y: targetY };
+
     const [edgePath] = getBezierPath({
-      sourceX,
-      sourceY,
+      sourceX: sX,
+      sourceY: sY,
       sourcePosition,
-      targetX,
-      targetY,
+      targetX: tX,
+      targetY: tY,
       targetPosition,
     });
 
@@ -37,6 +56,7 @@ export const ServiceMapEdge = memo(
         style={style}
         markerEnd={markerEnd}
         markerStart={markerStart}
+        data-test-subj={`serviceMapEdge-${id}`}
       />
     );
   }

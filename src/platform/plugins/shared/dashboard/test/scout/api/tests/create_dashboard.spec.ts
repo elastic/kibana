@@ -10,13 +10,7 @@
 import type { RoleApiCredentials } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
-import {
-  apiTest,
-  COMMON_HEADERS,
-  DASHBOARD_API_PATH,
-  KBN_ARCHIVES,
-  TEST_DASHBOARD_ID,
-} from '../fixtures';
+import { apiTest, COMMON_HEADERS, DASHBOARD_API_PATH, KBN_ARCHIVES } from '../fixtures';
 
 apiTest.describe('dashboards - create', { tag: tags.deploymentAgnostic }, () => {
   let editorCredentials: RoleApiCredentials;
@@ -52,25 +46,6 @@ apiTest.describe('dashboards - create', { tag: tags.deploymentAgnostic }, () => 
     expect(response.body.data.title).toStrictEqual(title);
   });
 
-  apiTest('can create a dashboard with a specific id', async ({ apiClient }) => {
-    const title = `foo-${Date.now()}-${Math.random()}`;
-    const id = `bar-${Date.now()}`;
-
-    const response = await apiClient.post(`${DASHBOARD_API_PATH}/${id}`, {
-      headers: {
-        ...COMMON_HEADERS,
-        ...editorCredentials.apiKeyHeader,
-      },
-      body: {
-        title,
-      },
-      responseType: 'json',
-    });
-
-    expect(response).toHaveStatusCode(201);
-    expect(response.body.id).toBe(id);
-  });
-
   // TODO Maybe move this test to x-pack/platform/test/api_integration/dashboards
   apiTest('can create a dashboard in a defined space', async ({ apiClient }) => {
     const title = `foo-${Date.now()}-${Math.random()}`;
@@ -89,67 +64,6 @@ apiTest.describe('dashboards - create', { tag: tags.deploymentAgnostic }, () => 
 
     expect(response).toHaveStatusCode(201);
   });
-
-  apiTest('return error if provided id already exists', async ({ apiClient }) => {
-    const title = `foo-${Date.now()}-${Math.random()}`;
-
-    const response = await apiClient.post(`${DASHBOARD_API_PATH}/${TEST_DASHBOARD_ID}`, {
-      headers: {
-        ...COMMON_HEADERS,
-        ...editorCredentials.apiKeyHeader,
-      },
-      body: {
-        title,
-      },
-      responseType: 'json',
-    });
-
-    expect(response).toHaveStatusCode(409);
-    expect(response.body.message).toBe(`A dashboard with ID ${TEST_DASHBOARD_ID} already exists.`);
-  });
-
-  apiTest('validation - returns error when id is too long', async ({ apiClient }) => {
-    const id = `this-is-my-test-dashboard-with-specific-identifier-that-is-way-more-than-two-hundred-and-fifty-characters-and-should-fail-validation-because-it-is-much-too-long-and-should-be-two-hundred-and-fifty-characters-or-less-to-be-a-valid-identifier-1234567890_`;
-    const response = await apiClient.post(`${DASHBOARD_API_PATH}/${id}`, {
-      headers: {
-        ...COMMON_HEADERS,
-        ...editorCredentials.apiKeyHeader,
-      },
-      body: {
-        content: '# Test',
-        title: 'Test title',
-      },
-      responseType: 'json',
-    });
-
-    expect(response).toHaveStatusCode(400);
-    expect(response.body.message).toBe(
-      '[request params.id]: value has length [252] but it must have a maximum length of [250].'
-    );
-  });
-
-  apiTest(
-    'validation - returns error when id contains invalid characters',
-    async ({ apiClient }) => {
-      const id = `test-dashboard-with-Specific-id-that.contains&invalid*characters`;
-      const response = await apiClient.post(`${DASHBOARD_API_PATH}/${id}`, {
-        headers: {
-          ...COMMON_HEADERS,
-          ...editorCredentials.apiKeyHeader,
-        },
-        body: {
-          content: '# Test',
-          title: 'Test title',
-        },
-        responseType: 'json',
-      });
-
-      expect(response).toHaveStatusCode(400);
-      expect(response.body.message).toBe(
-        '[request params.id]: ID must contain only lowercase letters, numbers, hyphens, and underscores.'
-      );
-    }
-  );
 
   apiTest('validation - returns error when title is not provided', async ({ apiClient }) => {
     const response = await apiClient.post(DASHBOARD_API_PATH, {

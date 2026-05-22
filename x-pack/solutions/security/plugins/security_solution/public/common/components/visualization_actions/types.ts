@@ -47,6 +47,15 @@ export interface UseLensAttributesProps {
    * Indices to use when fetching the lens componen
    */
   signalIndexName?: string | null;
+  /**
+   * Additional drop-list of index patterns layered on top of the scope's
+   * allowlist as a *negated* `_index` filter (CPS-expanded). The chart's
+   * primary scope is always the CPS-expanded `selectedPatterns` allowlist;
+   * `excludedPatterns` adds a defensive exclusion (e.g. alert-backing
+   * indices). An empty array is equivalent to `undefined`. Ignored when
+   * `signalIndexName` is set. See `buildIndexFilters` for full semantics.
+   */
+  excludedPatterns?: string[];
 }
 
 export enum VisualizationContextMenuActions {
@@ -130,6 +139,12 @@ export interface LensEmbeddableComponentProps {
    * Indices to use when fetching the lens component
    */
   signalIndexName?: string | null;
+  /**
+   * Additional drop-list of index patterns layered on top of the chart's
+   * allowlist as a negated `_index` filter (CPS-expanded). See
+   * `UseLensAttributesProps.excludedPatterns`.
+   */
+  excludedPatterns?: string[];
   width?: string | number;
   withActions?: VisualizationContextMenuActions[];
   /**
@@ -189,6 +204,8 @@ export interface Response {
 export interface ExtraOptions {
   breakdownField?: string;
   dnsIsPtrIncluded?: boolean;
+  /** When true, host KPI Lens charts use Entity Store v2 latest indices as the data source. */
+  entityStoreV2Enabled?: boolean;
   filters?: Filter[];
   ruleId?: string;
   showLegend?: boolean;

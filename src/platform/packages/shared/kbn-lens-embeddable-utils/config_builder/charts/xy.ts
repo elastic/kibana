@@ -293,6 +293,7 @@ export async function buildXY(
 
   return {
     title: config.title,
+    description: config.description,
     visualizationType: 'lnsXY',
     references,
     state: {

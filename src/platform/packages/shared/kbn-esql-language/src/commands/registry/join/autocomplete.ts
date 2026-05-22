@@ -65,7 +65,6 @@ export async function autocomplete(
           asSnippet: true,
           detail: description,
           kind: 'Keyword',
-          sortText: `${i}-MNEMONIC`,
         })
       );
     }
@@ -83,10 +82,7 @@ export async function autocomplete(
         (source) => source.name === indexNameInput || source.aliases.includes(indexNameInput)
       );
       if (canCreate && !indexAlreadyExists) {
-        const createIndexCommandSuggestion = getLookupIndexCreateSuggestion(
-          innerText,
-          indexNameInput
-        );
+        const createIndexCommandSuggestion = getLookupIndexCreateSuggestion(indexNameInput);
         suggestions.push(createIndexCommandSuggestion);
       }
 
@@ -114,7 +110,6 @@ export async function autocomplete(
           defaultMessage: 'Specify JOIN field conditions',
         }),
         kind: 'Keyword',
-        sortText: '0-ON',
       });
 
       return [suggestion];

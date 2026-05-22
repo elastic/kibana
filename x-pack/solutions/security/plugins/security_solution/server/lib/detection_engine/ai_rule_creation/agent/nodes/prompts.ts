@@ -49,7 +49,6 @@ A: Please find matched rule JSON object below:
 \`\`\`
 </example_response>`,
   ],
-  ['ai', 'Please find generated rule JSON object below:'],
 ]);
 
 export const TAGS_SELECTION_PROMPT = ChatPromptTemplate.fromMessages([
@@ -107,7 +106,7 @@ LOOKBACK Guidelines:
 Respond with ONLY a JSON object in this exact format:
 {{
   "interval": "5m",
-  "lookback": "1m",
+  "lookback": "1m"
 }}
 Examples:
 User query: Run detection query every 10 minutes looking back at data from the last 12 minutes.
@@ -115,7 +114,7 @@ User query: Run detection query every 10 minutes looking back at data from the l
 Based on the above, provide the schedule in the following JSON format:
 {{
   "interval": "10m",
-  "lookback": "2m",
+  "lookback": "2m"
 }}`,
   ],
   [

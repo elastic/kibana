@@ -49,7 +49,7 @@ export const SearchEmptyPrompt: React.FC<SearchEmptyPromptProps> = ({
           <EuiFlexItem>
             <EuiButtonEmpty
               data-test-subj="serverlessSearchElasticManagedWebCrawlerEmptyBackButton"
-              iconType="arrowLeft"
+              iconType="chevronSingleLeft"
               onClick={backButton.onClickBack}
             >
               {backButton.label}
@@ -58,7 +58,7 @@ export const SearchEmptyPrompt: React.FC<SearchEmptyPromptProps> = ({
         )}
         {icon && (
           <EuiFlexItem>
-            <EuiIcon size="xxl" type={icon} />
+            <EuiIcon aria-hidden={true} size="xxl" type={icon} />
           </EuiFlexItem>
         )}
         <EuiFlexItem>

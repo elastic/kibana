@@ -5,12 +5,24 @@
  * 2.0.
  */
 
-import { EuiSplitPanel, EuiResizableContainer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiSplitPanel,
+  EuiResizableContainer,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonIcon,
+  EuiLink,
+  EuiPopover,
+  EuiText,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { Streams } from '@kbn/streams-schema';
+import { isDraftStream } from '@kbn/streams-schema';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { getStreamTypeFromDefinition } from '../../../../util/get_stream_type_from_definition';
 import { useKbnUrlStateStorageFromRouterContext } from '../../../../util/kbn_url_state_context';
@@ -45,9 +57,17 @@ import { useKibana } from '../../../../hooks/use_kibana';
 import { buildUpsertStreamRequestPayload } from './utils';
 import { getUpsertFields } from './state_management/stream_enrichment_state_machine/utils';
 import { RequestPreviewFlyout } from '../request_preview_flyout';
-import { installDevConsoleHelpers, cleanupDevConsoleHelpers } from './dev_console_helpers';
+import {
+  installDevConsoleHelpers,
+  cleanupDevConsoleHelpers,
+  collectStreamsSuggestionData,
+} from './dev_console_helpers';
 
 const MemoSimulationPlayground = React.memo(SimulationPlayground);
+
+const ADD_TO_DATASET_ARIA_LABEL = i18n.translate('xpack.streams.enrichment.addToDatasetAriaLabel', {
+  defaultMessage: 'Add enrichment suggestion to dataset',
+});
 
 interface StreamDetailEnrichmentContentProps {
   definition: Streams.ingest.all.GetResponse;
@@ -120,6 +140,22 @@ export function StreamDetailEnrichmentContentImpl() {
       cleanupDevConsoleHelpers();
     };
   }, [simulatorRef, interactiveModeRef]);
+
+  const evals = context.dependencies.start.evals;
+  const onAddToDataset = useCallback(() => {
+    if (!evals) return;
+    const data = collectStreamsSuggestionData(
+      () => simulatorRef.getSnapshot(),
+      () => interactiveModeRef?.getSnapshot() ?? null
+    );
+    evals.openAddToDatasetFlyout({
+      initialExample: {
+        input: { raw_samples: data.raw_samples, suggestionType: data.suggestionType },
+        output: { processed_samples: data.processed_samples, suggestion: data.suggestion },
+        metadata: { source: 'streams_app_enrichment' },
+      },
+    });
+  }, [evals, simulatorRef, interactiveModeRef]);
 
   // Calculate schemaEditorFields with result property
   const schemaEditorFields = React.useMemo(() => {
@@ -208,6 +244,8 @@ export function StreamDetailEnrichmentContentImpl() {
   const hasChanges = useStreamEnrichmentSelector((state) => state.context.hasChanges);
 
   const streamType = useStreamEnrichmentSelector((snapshot) => selectStreamType(snapshot.context));
+
+  const isWiredDraft = isDraftStream(definition.stream);
 
   // Pipeline suggestion state from interactive mode machine (defaults to false when not in interactive mode)
   const isLoadingSuggestion = useOptionalInteractiveModeSelector(
@@ -322,10 +360,29 @@ export function StreamDetailEnrichmentContentImpl() {
                       <EuiFlexItem grow={false}>
                         <EditModeToggle />
                       </EuiFlexItem>
+                      {isWiredDraft && (
+                        <EuiFlexItem
+                          grow={false}
+                          data-test-subj="streamsAppProcessingDraftSimulationTipAnchor"
+                        >
+                          <DraftSimulationInfoPopover />
+                        </EuiFlexItem>
+                      )}
                       <EuiFlexItem grow />
                       {isYamlMode && (
                         <EuiFlexItem grow={false}>
                           <RunSimulationButton />
+                        </EuiFlexItem>
+                      )}
+                      {evals?.canAddToDataset && (
+                        <EuiFlexItem grow={false}>
+                          <EuiButtonIcon
+                            aria-label={ADD_TO_DATASET_ARIA_LABEL}
+                            iconType="beaker"
+                            color="text"
+                            onClick={onAddToDataset}
+                            data-test-subj="streamsEnrichmentAddToDatasetButton"
+                          />
                         </EuiFlexItem>
                       )}
                     </EuiFlexGroup>
@@ -380,3 +437,54 @@ const verticalFlexCss = css`
   display: flex;
   flex-direction: column;
 `;
+
+const DRAFT_SIMULATION_INFO_LABEL = i18n.translate(
+  'xpack.streams.enrichment.draftSimulationInfo.ariaLabel',
+  { defaultMessage: 'Draft simulation info' }
+);
+
+const DraftSimulationInfoPopover = () => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <EuiPopover
+      button={
+        <EuiButtonIcon
+          iconType="info"
+          color="text"
+          size="xs"
+          aria-label={DRAFT_SIMULATION_INFO_LABEL}
+          onClick={() => setIsOpen((prev) => !prev)}
+          data-test-subj="streamsAppProcessingDraftSimulationInfoButton"
+        />
+      }
+      isOpen={isOpen}
+      closePopover={() => setIsOpen(false)}
+      anchorPosition="downLeft"
+      panelPaddingSize="s"
+      panelStyle={{ maxWidth: 320 }}
+      aria-label={DRAFT_SIMULATION_INFO_LABEL}
+    >
+      <EuiText size="s">
+        <FormattedMessage
+          id="xpack.streams.enrichment.draftSimulationPopover.content"
+          defaultMessage="Draft stream simulation combines read-time ES|QL with ingest pipeline simulation. Results may differ slightly from materialized streams. {learnMore}"
+          values={{
+            learnMore: (
+              <EuiLink
+                href="https://www.elastic.co/docs/solutions/observability/streams/management/extract#streams-processor-inconsistencies"
+                target="_blank"
+                external
+              >
+                <FormattedMessage
+                  id="xpack.streams.enrichment.draftSimulationPopover.learnMore"
+                  defaultMessage="Learn more"
+                />
+              </EuiLink>
+            ),
+          }}
+        />
+      </EuiText>
+    </EuiPopover>
+  );
+};

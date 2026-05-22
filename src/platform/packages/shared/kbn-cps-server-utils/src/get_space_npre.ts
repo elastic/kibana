@@ -8,31 +8,38 @@
  */
 
 import { DEFAULT_SPACE_ID, getSpaceIdFromPath } from '@kbn/spaces-utils';
+import type { ScopeableUrlRequest } from '@kbn/core-elasticsearch-server';
 
 /**
  * Get the NPRE for a given space ID or a request carrying a URL.
  *
- * When a request object is provided, the space is extracted from the URL pathname.
+ * When a request object is provided, the space is taken from a URL pathname via
+ * {@link getSpaceIdFromPath}. If the request has a `rewrittenUrl` (set by core
+ * when the first `onPreRouting` handler returns `rewriteUrl`), that URL is
+ * used instead of `url`. This matches HTTP requests after the Spaces plugin
+ * strips `/s/:spaceId` from `request.url` during pre-routing: the original
+ * browser path (including the space segment) remains on `rewrittenUrl`.
  *
- * **Assumption**: this function assumes that the server base path is `/` (the
- * default). If Kibana is configured with a custom `server.basePath`, the base
- * path prefix will not be stripped before matching the space segment, causing
- * the function to always fall back to the default space. CPS is a
- * Serverless-only feature and Serverless deployments always run at the root
- * path, so this is not a practical concern today.
+ * **Server base path**: {@link getSpaceIdFromPath} is called with the pathname
+ * only; a non-root `server.basePath` is not stripped here. CPS is only
+ * available on Serverless, where custom base paths are not used, so this
+ * limitation is not a practical concern for CPS.
  *
- * @param spaceIdOrRequest - The space ID string, or an object with a `url: URL` property
+ * @param spaceIdOrRequest - Space ID string, or a `ScopeableUrlRequest` (incoming
+ *   `KibanaRequest` / synthetic `UrlRequest` from `@kbn/core-elasticsearch-server`).
  * @returns The NPRE
  * @throws {Error} if a Request-like object without a `url` is provided.
  *   This is not expected in normal use but guards against JavaScript callers
  *   bypassing the type system.
  */
-export function getSpaceNPRE(spaceIdOrRequest: string | { url: URL }): string {
+export function getSpaceNPRE(spaceIdOrRequest: string | ScopeableUrlRequest): string {
   if (typeof spaceIdOrRequest === 'string') {
     return `@kibana_space_${spaceIdOrRequest || DEFAULT_SPACE_ID}_default`;
   }
-  // Explicitly widen to URL | undefined so the defensive check below is valid.
-  const url: URL | undefined = spaceIdOrRequest.url;
+
+  const request = spaceIdOrRequest as ScopeableUrlRequest;
+  const url =
+    'rewrittenUrl' in request && request.rewrittenUrl ? request.rewrittenUrl : request.url;
   if (!url) {
     throw new Error(`Cannot determine space NPRE: the Request object is missing a 'url' property.`);
   }

@@ -16,14 +16,14 @@ const MISSING_CONNECTOR = i18n.translate('xpack.securitySolution.alertSummary.mi
 const CONNECTOR_MISSING_MESSAGE = i18n.translate(
   'xpack.securitySolution.alertSummary.noConnectorMessage',
   {
-    defaultMessage: 'Your default AI connector is invalid and may have been deleted.',
+    defaultMessage: 'Your default model is invalid and may have been deleted.',
   }
 );
 const CONNECTOR_MISSING_MESSAGE_ADMIN = i18n.translate(
   'xpack.securitySolution.alertSummary.noConnectorMessageForAdmin',
   {
     defaultMessage:
-      'Your default AI connector is invalid and may have been deleted. You may update the default AI connector via',
+      'Your default model is invalid and may have been deleted. You may update the default model via',
   }
 );
 const ADVANCED_SETTINGS_LINK_TITLE = i18n.translate(
@@ -55,7 +55,7 @@ export const ConnectorMissingCallout = memo(
       () =>
         navigateTo({
           appId: 'management',
-          path: '/ai/genAiSettings',
+          path: '/modelManagement/model_settings',
         }),
       [navigateTo]
     );

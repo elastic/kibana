@@ -47,18 +47,8 @@ export const ENDPOINTS = '[data-test-subj~="nav-item-id-endpoints"]';
 
 export const POLICIES = '[data-test-subj~="nav-item-id-policy"]';
 
-export const TRUSTED_APPS = '[data-test-subj~="nav-item-id-trusted_apps"]';
-
-export const TRUSTED_DEVICES = '[data-test-subj~="nav-item-id-trusted_devices"]';
-
-export const EVENT_FILTERS = '[data-test-subj~="nav-item-id-event_filters"]';
-
-export const BLOCKLIST = '[data-test-subj~="nav-item-id-blocklist"]';
-
-export const HOST_ISOLATION_EXCEPTIONS =
-  '[data-test-subj~="nav-item-id-host_isolation_exceptions"]';
-
-export const ENDPOINT_EXCEPTIONS = '[data-test-subj~="nav-item-id-endpoint_exceptions"]';
+/** Unified Artifacts entry (replaces per-type artifact nav items) */
+export const ARTIFACTS = '[data-test-subj~="nav-item-id-artifacts"]';
 
 export const RESPONSE_ACTIONS_HISTORY = '[data-test-subj~="nav-item-id-response_actions_history"]';
 
@@ -104,7 +94,7 @@ export const openNavigationPanelFor = (pageName: string) => {
       break;
     }
     case FLEET:
-    case ENDPOINT_EXCEPTIONS:
+    case ARTIFACTS:
     case ENDPOINTS: {
       panel = ASSETS_PANEL_BTN;
       break;
@@ -115,9 +105,30 @@ export const openNavigationPanelFor = (pageName: string) => {
   }
 };
 
-// opens the navigation panel of a main link
-export const openNavigationPanel = (pageName: string) => {
-  cy.get(pageName).click();
+/**
+ * Serverless chrome can move top-level nav items into the "More" overflow when the strip is full.
+ * Unconditionally opening "More" when the control is already visible is a common flake (extra overlay, layout races).
+ */
+const clickWhenVisibleElseOpenMore = (selector: string) => {
+  cy.get('body').then(($body) => {
+    const hasVisible = $body.find(selector).filter(':visible').length > 0;
+    if (hasVisible) {
+      cy.get(selector).filter(':visible').first().should('be.visible').click();
+    } else {
+      showMoreItems();
+      cy.get(selector).filter(':visible').first().should('be.visible').click();
+    }
+  });
+};
+
+// opens the navigation panel of a main link (panel opener may be under "More")
+export const openNavigationPanel = (panelSelector: string) => {
+  clickWhenVisibleElseOpenMore(panelSelector);
+};
+
+/** Clicks a nav control that may be on the primary strip or under "More" (e.g. deep links with no panel). */
+export const clickServerlessChromeNavControl = (selector: string) => {
+  clickWhenVisibleElseOpenMore(selector);
 };
 
 export const showMoreItems = () => {
@@ -125,8 +136,8 @@ export const showMoreItems = () => {
   // so we really try to get a stable reference here before proceeding
   // https://github.com/elastic/kibana/issues/239331
   cy.get('[data-test-subj~="nav-item"]').should('exist');
-  cy.get('[data-test-subj="globalLoadingIndicator-hidden"').should('exist');
-  cy.get('[data-test-subj="globalLoadingIndicator"').should('not.exist');
+  cy.get('[data-test-subj="globalLoadingIndicator-hidden"]').should('exist');
+  cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
 
   // TODO: https://github.com/elastic/kibana/issues/239331
   // eslint-disable-next-line cypress/no-unnecessary-waiting

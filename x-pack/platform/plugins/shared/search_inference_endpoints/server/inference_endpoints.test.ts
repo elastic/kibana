@@ -399,6 +399,29 @@ describe('getForFeature', () => {
     });
   });
 
+  it('returns different endpoint lists for different SO clients (simulating two spaces)', async () => {
+    registry.register(createValidFeature({ featureId: 'f1' }));
+
+    const soClientSpaceA = createSoClient([
+      { feature_id: 'f1', endpoints: [{ id: 'ep-space-a' }] },
+    ]);
+    const soClientSpaceB = createSoClient([
+      { feature_id: 'f1', endpoints: [{ id: 'ep-space-b' }] },
+    ]);
+    const getConnectorById = createGetConnectorById(['ep-space-a', 'ep-space-b']);
+
+    const [resultA, resultB] = await Promise.all([
+      getForFeature(registry, soClientSpaceA, getConnectorById, 'f1', logger),
+      getForFeature(registry, soClientSpaceB, getConnectorById, 'f1', logger),
+    ]);
+
+    expect(resultA.soEntryFound).toBe(true);
+    expect(resultB.soEntryFound).toBe(true);
+    expect(resultA.endpoints[0].connectorId).toBe('ep-space-a');
+    expect(resultB.endpoints[0].connectorId).toBe('ep-space-b');
+    expect(resultA.endpoints[0].connectorId).not.toBe(resultB.endpoints[0].connectorId);
+  });
+
   it('prefers recommendedEndpoints over Kibana default endpoint', async () => {
     registry.register(
       createValidFeature({

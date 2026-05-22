@@ -70,7 +70,7 @@ export const ActionColumn = <Item extends ItemWithAnID>({
             aria-label={SAVE_BUTTON_LABEL}
             data-test-subj="saveButton"
             color="primary"
-            iconType="checkInCircleFilled"
+            iconType="checkCircleFill"
             onClick={isEditingUnsavedItem ? saveNewItem : saveExistingItem}
             disabled={
               isLoading ||
@@ -112,7 +112,12 @@ export const ActionColumn = <Item extends ItemWithAnID>({
       <EuiFlexItem grow={null}>
         {!canRemoveLastItem && displayedItems.length === 1 ? (
           <EuiToolTip content={lastItemWarning}>
-            <EuiButtonEmpty aria-label={DELETE_BUTTON_LABEL} size="xs" disabled>
+            <EuiButtonEmpty
+              data-test-subj="contentConnectorsActionColumnButton"
+              aria-label={DELETE_BUTTON_LABEL}
+              size="xs"
+              disabled
+            >
               {DELETE_BUTTON_LABEL}
             </EuiButtonEmpty>
           </EuiToolTip>

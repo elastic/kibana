@@ -20,13 +20,15 @@ export const useUpdateRule = () => {
   return useMutation({
     mutationFn: ({ id, payload }: { id: string; payload: UpdateRuleData }) =>
       rulesApi.updateRule(id, payload),
-    onSuccess: (_data, variables) => {
+    onSuccess: (data, variables) => {
       toasts.addSuccess(
         i18n.translate('xpack.alertingV2.hooks.useUpdateRule.successMessage', {
-          defaultMessage: 'Rule updated successfully',
+          defaultMessage: 'Rule "{ruleName}" updated successfully',
+          values: { ruleName: data.metadata.name },
         })
       );
       queryClient.invalidateQueries(ruleKeys.lists());
+      queryClient.invalidateQueries(ruleKeys.tags());
       queryClient.invalidateQueries(ruleKeys.detail(variables.id));
     },
     onError: () => {

@@ -106,11 +106,43 @@ describe('getResultCountsForActions', () => {
       aggregations: { action_ids: { buckets: [] } },
     });
 
-    await getResultCountsForActions(esClient, ['action-1'], 'production');
+    await getResultCountsForActions(esClient, ['action-1'], ['production']);
 
     expect(esClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
+        allow_no_indices: true,
         index: 'logs-osquery_manager.action.responses-production',
+        ignore_unavailable: true,
+      })
+    );
+  });
+
+  it('uses all resolved integration namespaces', async () => {
+    const esClient = createMockEsClient({
+      aggregations: { action_ids: { buckets: [] } },
+    });
+
+    await getResultCountsForActions(esClient, ['action-1'], ['prod', 'default']);
+
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index:
+          'logs-osquery_manager.action.responses-prod,logs-osquery_manager.action.responses-default',
+      })
+    );
+  });
+
+  it('uses CCS-prefixed index when ccsEnabled is true', async () => {
+    const esClient = createMockEsClient({
+      aggregations: { action_ids: { buckets: [] } },
+    });
+
+    await getResultCountsForActions(esClient, ['action-1'], ['default'], true);
+
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index:
+          'logs-osquery_manager.action.responses-default,*:logs-osquery_manager.action.responses-default',
       })
     );
   });

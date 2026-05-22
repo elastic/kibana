@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useForm, FormProvider, Controller } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import { validateEsqlQuery } from '@kbn/alerting-v2-schemas';
@@ -49,8 +49,8 @@ export interface DynamicRuleFormProps {
  * The time field is automatically derived from the query's available date fields
  * by the TimeFieldSelect component (preferring @timestamp if available).
  *
- * Uses react-hook-form's `values` prop to sync form state on each prop change,
- * with `resetOptions: { keepDirtyValues: true }` to preserve user input.
+ * The query is the only externally-driven field; a useEffect syncs it via
+ * setValue when the prop changes. All other fields are internally managed.
  */
 export const DynamicRuleForm = ({
   query,
@@ -71,11 +71,12 @@ export const DynamicRuleForm = ({
 
   const methods = useForm<FormValues>({
     mode: 'onBlur',
-    values: formValues, // Sync form state on each prop change
-    resetOptions: {
-      keepDirtyValues: true, // Do not reset user's input
-    },
+    defaultValues: formValues,
   });
+
+  useEffect(() => {
+    methods.setValue('evaluation.query.base', query);
+  }, [query, methods]);
 
   return (
     <FormProvider {...methods}>

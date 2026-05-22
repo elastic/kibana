@@ -8,6 +8,7 @@
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { cleanupMapping } from './cleanup_mapping';
+import { batchByUrlLength } from '../batch_by_url_length';
 
 export interface GetIndexMappingEntry {
   mappings: MappingTypeMapping;
@@ -27,14 +28,22 @@ export const getIndexMappings = async ({
   cleanup?: boolean;
   esClient: ElasticsearchClient;
 }): Promise<GetIndexMappingsResult> => {
-  const response = await esClient.indices.getMapping({
-    index: indices,
-  });
+  const batches = batchByUrlLength(indices);
 
-  return Object.entries(response).reduce((res, [indexName, mappingRes]) => {
-    res[indexName] = {
-      mappings: cleanup ? cleanupMapping(mappingRes.mappings) : mappingRes.mappings,
-    };
-    return res;
-  }, {} as GetIndexMappingsResult);
+  const batchResults = await Promise.all(
+    batches.map(async (batch) => {
+      const response = await esClient.indices.getMapping({
+        index: batch,
+      });
+
+      return Object.entries(response).reduce((res, [indexName, mappingRes]) => {
+        res[indexName] = {
+          mappings: cleanup ? cleanupMapping(mappingRes.mappings) : mappingRes.mappings,
+        };
+        return res;
+      }, {} as GetIndexMappingsResult);
+    })
+  );
+
+  return Object.assign({}, ...batchResults);
 };

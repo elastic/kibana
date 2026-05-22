@@ -19,6 +19,22 @@ jest.mock('@elastic/eui', () => {
     useEuiTheme: () => ({ euiTheme: MOCK_EUI_THEME_FOR_USE_THEME }),
   };
 });
+
+jest.mock('../../../context/apm_plugin/use_apm_plugin_context', () => ({
+  useApmPluginContext: () => ({
+    core: {
+      docLinks: {
+        links: {
+          apm: {
+            supportedServiceMaps: 'https://example.com/docs',
+            supportedServiceMapsLegend: 'https://example.com/docs#service-maps-legend',
+          },
+        },
+      },
+    },
+  }),
+}));
+
 let mockScreenReaderAnnouncementValue = '';
 const mockSetScreenReaderAnnouncement = jest.fn();
 
@@ -30,6 +46,11 @@ jest.mock('./use_keyboard_navigation', () => ({
     setScreenReaderAnnouncement: mockSetScreenReaderAnnouncement,
   })),
 }));
+
+jest.mock('./use_service_map_alerts_tab_href', () =>
+  jest.requireActual('./use_service_map_alerts_tab_href.test_mock')
+);
+
 jest.mock('@xyflow/react', () => {
   const original = jest.requireActual('@xyflow/react');
   return {
@@ -38,27 +59,19 @@ jest.mock('@xyflow/react', () => {
       <div data-testid="react-flow">{children}</div>
     ),
     Background: () => <div data-testid="react-flow-background" />,
+    Panel: ({ children }: { children?: React.ReactNode }) => (
+      <div data-testid="react-flow-panel">{children}</div>
+    ),
     Controls: ({ children }: { children?: React.ReactNode }) => (
       <div data-testid="react-flow-controls">{children}</div>
-    ),
-    ControlButton: ({
-      children,
-      onClick,
-      'data-test-subj': dataTestSubj,
-      ...rest
-    }: {
-      children?: React.ReactNode;
-      onClick?: () => void;
-      'data-test-subj'?: string;
-    }) => (
-      <button type="button" onClick={onClick} data-test-subj={dataTestSubj} {...rest}>
-        {children}
-      </button>
     ),
     useNodesState: jest.fn((initialNodes) => [initialNodes, jest.fn()]),
     useEdgesState: jest.fn((initialEdges) => [initialEdges, jest.fn()]),
     useReactFlow: jest.fn(() => ({
       fitView: jest.fn(),
+      zoomIn: jest.fn(),
+      zoomOut: jest.fn(),
+      setCenter: jest.fn(),
     })),
   };
 });
@@ -81,7 +94,7 @@ jest.mock('./popover', () => ({
   MapPopover: () => <div data-testid="service-map-popover" />,
 }));
 
-jest.mock('./layout', () => ({
+jest.mock('../../shared/service_map/layout', () => ({
   applyDagreLayout: jest.fn((nodes) => nodes),
 }));
 
@@ -218,5 +231,6 @@ describe('ServiceMapGraph - Screen Reader Announcements', () => {
     expect(instructions.textContent).toContain('Arrow keys');
     expect(instructions.textContent).toContain('Enter or Space');
     expect(instructions.textContent).toContain('Escape');
+    expect(instructions.textContent).toMatch(/Command K|Control K/);
   });
 });

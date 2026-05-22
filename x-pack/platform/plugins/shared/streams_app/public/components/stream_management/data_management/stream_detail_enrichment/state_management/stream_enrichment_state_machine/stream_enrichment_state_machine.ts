@@ -4,13 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { getRoot, isEnabledFailureStore, LOGS_ECS_STREAM_NAME, Streams } from '@kbn/streams-schema';
+import {
+  getRoot,
+  isDraftStream,
+  isEnabledFailureStore,
+  LOGS_ECS_STREAM_NAME,
+  Streams,
+} from '@kbn/streams-schema';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import type { ActorRefFrom, MachineImplementationsFrom, SnapshotFrom } from 'xstate';
 import { assign, cancel, forwardTo, raise, sendTo, setup, stopChild } from 'xstate';
 
 import {
   addDeterministicCustomIdentifiers,
+  addDeterministicCustomIdentifiersFromIngestProcessing,
   checkAdditiveChanges,
   validateStreamlang,
   validateStreamlangModeCompatibility,
@@ -85,8 +92,15 @@ export const streamEnrichmentMachine = setup({
     /* Validation actions */
     computeValidation: assign(({ context }) => {
       // First, check for schema errors (Zod parsing)
-      // Use pre-built strict schema to catch excess keys, matching server-side validation behavior
-      const parseResult = streamlangDSLSchemaStrict.safeParse(context.nextStreamlangDSL);
+      // Use pre-built strict schema to catch excess keys, matching server-side validation behavior.
+      // Only validate the Streamlang shape: context may briefly carry ingest.processing metadata
+      // like `updated_at`, which DeepStrict correctly rejects as excess root keys.
+      const dslForStrictValidation: StreamlangDSL = {
+        steps: Array.isArray(context.nextStreamlangDSL.steps)
+          ? context.nextStreamlangDSL.steps
+          : [],
+      };
+      const parseResult = streamlangDSLSchemaStrict.safeParse(dslForStrictValidation);
       if (!parseResult.success) {
         const schemaErrors = parseResult.error.issues.map((issue) => {
           const path = issue.path.length > 0 ? issue.path.join('.') : 'root';
@@ -134,7 +148,7 @@ export const streamEnrichmentMachine = setup({
     })),
     // When the definition is refreshed (outside of the machine), this resets state back to match it.
     resetStateFromDefinition: assign(({ context }) => {
-      const dslWithIdentifiers = addDeterministicCustomIdentifiers(
+      const dslWithIdentifiers = addDeterministicCustomIdentifiersFromIngestProcessing(
         context.definition.stream.ingest.processing
       );
       return {
@@ -212,20 +226,30 @@ export const streamEnrichmentMachine = setup({
     /* Data sources actions */
     setupDataSources: assign((assignArgs) => {
       const { definition, urlState } = assignArgs.context;
-      const dataSources = [...urlState.dataSources];
 
-      // Add failure store data source by default if available and not already present
-      const isFailureStoreAvailable =
-        isEnabledFailureStore(definition.effective_failure_store) &&
-        definition.privileges?.read_failure_store;
-      const hasFailureStoreDataSource = dataSources.some((ds) => ds.type === 'failure-store');
+      const isWiredDraft = isDraftStream(definition.stream);
 
-      if (isFailureStoreAvailable && !hasFailureStoreDataSource) {
-        // Add with enabled: false since there's already an active data source
-        dataSources.push({
-          ...createFailureStoreDataSource(definition.stream.name),
-          enabled: false,
-        });
+      const dataSources = isWiredDraft
+        ? urlState.dataSources.filter(
+            (ds) => ds.type !== 'kql-samples' && ds.type !== 'failure-store'
+          )
+        : [...urlState.dataSources];
+
+      // Add failure store data source by default if available and not already present.
+      // Draft streams have no backing data stream so failure store is not applicable.
+      if (!isWiredDraft) {
+        const isFailureStoreAvailable =
+          isEnabledFailureStore(definition.effective_failure_store) &&
+          definition.privileges?.read_failure_store;
+        const hasFailureStoreDataSource = dataSources.some((ds) => ds.type === 'failure-store');
+
+        if (isFailureStoreAvailable && !hasFailureStoreDataSource) {
+          // Add with enabled: false since there's already an active data source
+          dataSources.push({
+            ...createFailureStoreDataSource(definition.stream.name),
+            enabled: false,
+          });
+        }
       }
 
       return {
@@ -325,10 +349,10 @@ export const streamEnrichmentMachine = setup({
     const streamType = getStreamTypeFromDefinition(input.definition.stream);
     return {
       definition: input.definition,
-      previousStreamlangDSL: addDeterministicCustomIdentifiers(
+      previousStreamlangDSL: addDeterministicCustomIdentifiersFromIngestProcessing(
         input.definition.stream.ingest.processing
       ),
-      nextStreamlangDSL: addDeterministicCustomIdentifiers(
+      nextStreamlangDSL: addDeterministicCustomIdentifiersFromIngestProcessing(
         input.definition.stream.ingest.processing
       ),
       hasChanges: false,
@@ -673,6 +697,7 @@ export const createStreamEnrichmentMachineImplementations = ({
         toasts: core.notifications.toasts,
         telemetryClient,
         streamsRepositoryClient,
+        uiSettings: core.uiSettings,
       })
     ),
     simulationMachine: simulationMachine.provide(

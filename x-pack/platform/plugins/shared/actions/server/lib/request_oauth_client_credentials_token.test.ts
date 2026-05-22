@@ -38,9 +38,9 @@ describe('requestOAuthClientCredentialsToken', () => {
     axiosInstanceMock.mockReturnValueOnce({
       status: 200,
       data: {
-        tokenType: 'Bearer',
-        accessToken: 'dfjsdfgdjhfgsjdf',
-        expiresIn: 123,
+        token_type: 'Bearer',
+        access_token: 'dfjsdfgdjhfgsjdf',
+        expires_in: 123,
       },
     });
     await requestOAuthClientCredentialsToken(
@@ -70,6 +70,7 @@ describe('requestOAuthClientCredentialsToken', () => {
           "beforeRedirect": [Function],
           "data": "client_id=123456&client_secret=secrert123&grant_type=client_credentials&scope=test",
           "headers": Object {
+            "Accept": "application/json",
             "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
           },
           "httpAgent": undefined,
@@ -123,9 +124,9 @@ describe('requestOAuthClientCredentialsToken', () => {
     axiosInstanceMock.mockReturnValueOnce({
       status: 200,
       data: {
-        tokenType: 'Bearer',
-        accessToken: 'tokenwithfields',
-        expiresIn: 456,
+        token_type: 'Bearer',
+        access_token: 'tokenwithfields',
+        expires_in: 456,
       },
     });
 
@@ -206,6 +207,43 @@ describe('requestOAuthClientCredentialsToken', () => {
         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
       })
     );
+  });
+
+  test('omits client_secret from body when clientSecret is absent (assertion-based auth)', async () => {
+    const configurationUtilities = actionsConfigMock.create();
+    axiosInstanceMock.mockReturnValueOnce({
+      status: 200,
+      data: {
+        token_type: 'Bearer',
+        access_token: 'assertion-token',
+        expires_in: 600,
+      },
+    });
+
+    await requestOAuthClientCredentialsToken(
+      'https://test-assertion',
+      mockLogger,
+      {
+        scope: 'https://graph.microsoft.com/.default',
+        clientId: 'client-cert',
+        client_assertion: 'signed.jwt.assertion',
+        client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
+      },
+      configurationUtilities
+    );
+
+    const receivedDataString = axiosInstanceMock.mock.calls[0][1].data;
+    const receivedParams = new URLSearchParams(receivedDataString);
+    const paramsObject = paramsToObject(receivedParams);
+
+    expect(paramsObject).not.toHaveProperty('client_secret');
+    expect(paramsObject).toEqual({
+      client_id: 'client-cert',
+      client_assertion: 'signed.jwt.assertion',
+      client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
+      grant_type: 'client_credentials',
+      scope: 'https://graph.microsoft.com/.default',
+    });
   });
 
   test('throw the exception and log the proper error if token was not get successfuly', async () => {

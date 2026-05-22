@@ -12,10 +12,12 @@ import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import {
   createInternalStateStore,
   createRuntimeStateManager,
+  DEFAULT_EXPANDED_DOC_OWNER,
   internalStateActions,
   selectTabRuntimeState,
   selectTab,
 } from '.';
+import { discardFlyoutsOnTabChange } from './internal_state';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { mockControlState } from '../../../../__mocks__/esql_controls';
@@ -358,12 +360,29 @@ describe('InternalStateStore', () => {
       internalStateActions.setExpandedDoc({
         tabId,
         expandedDoc: mockDoc,
+        expandedDocOwner: 'test-grid',
         initialDocViewerTabId: 'Table',
       })
     );
 
     expect(selectTab(store.getState(), tabId).expandedDoc).toBe(mockDoc);
+    expect(selectTab(store.getState(), tabId).expandedDocOwner).toBe('test-grid');
     expect(selectTab(store.getState(), tabId).initialDocViewerTabId).toBe('Table');
+  });
+
+  it('should default expandedDocOwner to the main grid when not provided', async () => {
+    const { store } = await createTestStore();
+    const tabId = store.getState().tabs.unsafeCurrentId;
+    const mockDoc = buildDataTableRecord({ _index: 'test', _id: 'doc1' }, dataViewMock);
+
+    store.dispatch(
+      internalStateActions.setExpandedDoc({
+        tabId,
+        expandedDoc: mockDoc,
+      })
+    );
+
+    expect(selectTab(store.getState(), tabId).expandedDocOwner).toBe(DEFAULT_EXPANDED_DOC_OWNER);
   });
 
   it('should maintain separate expandedDoc state for different tabs', async () => {
@@ -376,6 +395,7 @@ describe('InternalStateStore', () => {
       internalStateActions.setExpandedDoc({
         tabId: initialTabId,
         expandedDoc: mockDoc1,
+        expandedDocOwner: 'grid-1',
         initialDocViewerTabId: 'Table',
       })
     );
@@ -391,34 +411,191 @@ describe('InternalStateStore', () => {
       internalStateActions.setExpandedDoc({
         tabId: secondTabId,
         expandedDoc: mockDoc2,
+        expandedDocOwner: 'grid-2',
         initialDocViewerTabId: 'JSON',
       })
     );
 
     expect(selectTab(store.getState(), initialTabId).expandedDoc).toBe(mockDoc1);
+    expect(selectTab(store.getState(), initialTabId).expandedDocOwner).toBe('grid-1');
     expect(selectTab(store.getState(), initialTabId).initialDocViewerTabId).toBe('Table');
     expect(selectTab(store.getState(), secondTabId).expandedDoc).toBe(mockDoc2);
+    expect(selectTab(store.getState(), secondTabId).expandedDocOwner).toBe('grid-2');
     expect(selectTab(store.getState(), secondTabId).initialDocViewerTabId).toBe('JSON');
+  });
+
+  it('should clear renderDocumentViewMeta when expandedDoc owner changes', async () => {
+    const { store } = await createTestStore();
+    const tabId = store.getState().tabs.unsafeCurrentId;
+    const mockDoc = buildDataTableRecord({ _index: 'test', _id: 'doc1' }, dataViewMock);
+    const renderDocumentViewMeta = {
+      displayedColumns: ['@timestamp'],
+      displayedRows: [mockDoc],
+    };
+
+    store.dispatch(
+      internalStateActions.setExpandedDoc({
+        tabId,
+        expandedDoc: mockDoc,
+        expandedDocOwner: 'grid-1',
+      })
+    );
+    store.dispatch(
+      internalStateActions.setRenderDocumentViewMeta({
+        tabId,
+        renderDocumentViewMeta,
+      })
+    );
+
+    store.dispatch(
+      internalStateActions.setExpandedDoc({
+        tabId,
+        expandedDoc: mockDoc,
+        expandedDocOwner: 'grid-2',
+      })
+    );
+
+    expect(selectTab(store.getState(), tabId).expandedDoc).toBe(mockDoc);
+    expect(selectTab(store.getState(), tabId).expandedDocOwner).toBe('grid-2');
+    expect(selectTab(store.getState(), tabId).renderDocumentViewMeta).toBeUndefined();
+  });
+
+  it('should set renderDocumentViewMeta for a specific tab', async () => {
+    const { store } = await createTestStore();
+    const tabId = store.getState().tabs.unsafeCurrentId;
+    const mockDoc = buildDataTableRecord({ _index: 'test', _id: 'doc1' }, dataViewMock);
+    const renderDocumentViewMeta = {
+      displayedColumns: ['@timestamp'],
+      displayedRows: [mockDoc],
+    };
+
+    expect(selectTab(store.getState(), tabId).renderDocumentViewMeta).toBeUndefined();
+
+    store.dispatch(
+      internalStateActions.setRenderDocumentViewMeta({
+        tabId,
+        renderDocumentViewMeta,
+      })
+    );
+
+    expect(selectTab(store.getState(), tabId).renderDocumentViewMeta).toEqual(
+      renderDocumentViewMeta
+    );
   });
 
   it('should clear expandedDoc state when resetOnSavedSearchChange is dispatched', async () => {
     const { store } = await createTestStore();
     const tabId = store.getState().tabs.unsafeCurrentId;
     const mockDoc = buildDataTableRecord({ _index: 'test', _id: 'doc1' }, dataViewMock);
+    const renderDocumentViewMeta = {
+      displayedColumns: ['@timestamp'],
+      displayedRows: [mockDoc],
+    };
 
     store.dispatch(
       internalStateActions.setExpandedDoc({
         tabId,
         expandedDoc: mockDoc,
+        expandedDocOwner: 'grid-1',
         initialDocViewerTabId: 'Table',
+      })
+    );
+    store.dispatch(
+      internalStateActions.setRenderDocumentViewMeta({
+        tabId,
+        renderDocumentViewMeta,
       })
     );
 
     expect(selectTab(store.getState(), tabId).expandedDoc).toBe(mockDoc);
+    expect(selectTab(store.getState(), tabId).expandedDocOwner).toBe('grid-1');
 
     store.dispatch(internalStateActions.resetOnSavedSearchChange({ tabId }));
 
     expect(selectTab(store.getState(), tabId).expandedDoc).toBeUndefined();
+    expect(selectTab(store.getState(), tabId).expandedDocOwner).toBeUndefined();
+    expect(selectTab(store.getState(), tabId).renderDocumentViewMeta).toBeUndefined();
     expect(selectTab(store.getState(), tabId).initialDocViewerTabId).toBeUndefined();
+  });
+
+  it('should clear renderDocumentViewMeta when expandedDoc is closed', async () => {
+    const { store } = await createTestStore();
+    const tabId = store.getState().tabs.unsafeCurrentId;
+    const mockDoc = buildDataTableRecord({ _index: 'test', _id: 'doc1' }, dataViewMock);
+    const renderDocumentViewMeta = {
+      displayedColumns: ['@timestamp'],
+      displayedRows: [mockDoc],
+    };
+
+    store.dispatch(
+      internalStateActions.setExpandedDoc({
+        tabId,
+        expandedDoc: mockDoc,
+        expandedDocOwner: 'grid-1',
+      })
+    );
+    store.dispatch(
+      internalStateActions.setRenderDocumentViewMeta({
+        tabId,
+        renderDocumentViewMeta,
+      })
+    );
+
+    store.dispatch(
+      internalStateActions.setExpandedDoc({
+        tabId,
+        expandedDoc: undefined,
+      })
+    );
+
+    expect(selectTab(store.getState(), tabId).expandedDoc).toBeUndefined();
+    expect(selectTab(store.getState(), tabId).expandedDocOwner).toBeUndefined();
+    expect(selectTab(store.getState(), tabId).renderDocumentViewMeta).toBeUndefined();
+  });
+
+  describe('discardFlyoutsOnTabChange', () => {
+    // dismissFlyouts works by clicking known close buttons in the DOM. We
+    // simulate the Lens edit and metric insights flyouts via fake close
+    // buttons and assert which one is clicked when the action is dispatched.
+    const setupFakeFlyouts = () => {
+      const lensEditFlyout = document.createElement('div');
+      lensEditFlyout.id = 'lnsCancelEditOnFlyFlyout';
+      const lensEditClick = jest.fn();
+      lensEditFlyout.addEventListener('click', lensEditClick);
+
+      const metricsFlyout = document.createElement('div');
+      metricsFlyout.setAttribute('data-test-subj', 'metricsExperienceFlyout');
+      const metricsCloseButton = document.createElement('button');
+      metricsCloseButton.setAttribute('data-test-subj', 'euiFlyoutCloseButton');
+      const metricsClick = jest.fn();
+      metricsCloseButton.addEventListener('click', metricsClick);
+      metricsFlyout.appendChild(metricsCloseButton);
+
+      document.body.appendChild(lensEditFlyout);
+      document.body.appendChild(metricsFlyout);
+
+      return {
+        lensEditClick,
+        metricsClick,
+        cleanup: () => {
+          lensEditFlyout.remove();
+          metricsFlyout.remove();
+        },
+      };
+    };
+
+    it('dismisses the Lens edit flyout but preserves the metric insights flyout', async () => {
+      const { store } = await createTestStore();
+      const { lensEditClick, metricsClick, cleanup } = setupFakeFlyouts();
+
+      try {
+        store.dispatch(discardFlyoutsOnTabChange());
+
+        expect(lensEditClick).toHaveBeenCalledTimes(1);
+        expect(metricsClick).not.toHaveBeenCalled();
+      } finally {
+        cleanup();
+      }
+    });
   });
 });

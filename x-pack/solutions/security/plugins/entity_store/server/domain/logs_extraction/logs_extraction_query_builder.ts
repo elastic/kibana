@@ -8,6 +8,7 @@
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { Condition } from '@kbn/streamlang';
 import { conditionToESQL } from '@kbn/streamlang';
+import { HASH_ALG } from '../../../common/domain/euid';
 import { recentData } from '../../../common/domain/definitions/esql';
 import { esqlIsNotNullOrEmpty } from '../../../common/esql/strings';
 import {
@@ -16,13 +17,15 @@ import {
   type EntityType,
 } from '../../../common/domain/definitions/entity_schema';
 import { getEuidEsqlEvaluation } from '../../../common/domain/euid/esql';
-import { HASH_ALG } from '../constants';
+
 import {
   buildExtractionSourceClause,
+  buildLogPageProbeSourceClause,
   buildFieldEvaluations,
   buildSetFieldsByCondition,
   type PaginationParams,
   type PaginationFields,
+  type LogSlicePaginationParams,
   ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
   ENGINE_METADATA_UNTYPED_ID_FIELD,
   ENGINE_METADATA_TYPE_FIELD,
@@ -65,6 +68,8 @@ interface LogsExtractionQueryParams {
   toDateISO: string;
   recoveryId?: string;
   pagination?: PaginationParams;
+  logsPageCursorStart?: LogSlicePaginationParams;
+  logsPageCursorEnd?: LogSlicePaginationParams;
 }
 
 export function buildRemainingLogsCountQuery(params: {
@@ -72,10 +77,10 @@ export function buildRemainingLogsCountQuery(params: {
   type: EntityType;
   fromDateISO: string;
   toDateISO: string;
-  recoveryId?: string;
+  logsPageCursorStart?: LogSlicePaginationParams;
 }): string {
   return (
-    buildExtractionSourceClause(params) +
+    buildLogPageProbeSourceClause(params) +
     `
   | STATS document_count = COUNT()`
   );
@@ -90,6 +95,8 @@ export function buildLogsExtractionEsqlQuery({
   latestIndex,
   recoveryId,
   pagination,
+  logsPageCursorStart,
+  logsPageCursorEnd,
 }: LogsExtractionQueryParams): string {
   const { fields, type, entityTypeFallback } = entityDefinition;
 
@@ -97,7 +104,14 @@ export function buildLogsExtractionEsqlQuery({
 
   // FROM and WHERE
   parts.push(
-    buildExtractionSourceClause({ indexPatterns, type, fromDateISO, toDateISO, recoveryId })
+    buildExtractionSourceClause({
+      indexPatterns,
+      type,
+      fromDateISO,
+      toDateISO,
+      logsPageCursorStart,
+      logsPageCursorEnd,
+    })
   );
 
   // Special evaluations for entity id

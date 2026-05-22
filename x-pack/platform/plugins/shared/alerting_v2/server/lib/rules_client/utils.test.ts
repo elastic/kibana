@@ -11,6 +11,8 @@ import {
   transformCreateRuleBodyToRuleSoAttributes,
   transformRuleSoAttributesToRuleApiResponse,
   buildUpdateRuleAttributes,
+  assertImmutableUnchanged,
+  pickImmutable,
 } from './utils';
 
 const serverFields = {
@@ -81,6 +83,50 @@ describe('utils', () => {
       expect(result.metadata.name).toBe('renamed');
       expect(result.metadata.description).toBe('Existing desc');
     });
+
+    it('clears state_transition when update sends null (immediate mode)', () => {
+      const existing = createRuleSoAttributes({
+        state_transition: { pending_count: 3 },
+      });
+      const updateData: UpdateRuleData = {
+        state_transition: null,
+      };
+
+      const result = buildUpdateRuleAttributes(existing, updateData, {
+        updatedBy: 'user-2',
+        updatedAt: '2025-01-02T00:00:00.000Z',
+      });
+
+      expect(result.state_transition).toBeNull();
+    });
+
+    it('preserves existing state_transition when update omits it', () => {
+      const existing = createRuleSoAttributes({
+        state_transition: { pending_count: 3 },
+      });
+      const updateData: UpdateRuleData = {};
+
+      const result = buildUpdateRuleAttributes(existing, updateData, {
+        updatedBy: 'user-2',
+        updatedAt: '2025-01-02T00:00:00.000Z',
+      });
+
+      expect(result.state_transition).toEqual({ pending_count: 3 });
+    });
+
+    it('sets state_transition when update provides a value', () => {
+      const existing = createRuleSoAttributes({});
+      const updateData: UpdateRuleData = {
+        state_transition: { pending_count: 5 },
+      };
+
+      const result = buildUpdateRuleAttributes(existing, updateData, {
+        updatedBy: 'user-2',
+        updatedAt: '2025-01-02T00:00:00.000Z',
+      });
+
+      expect(result.state_transition).toEqual({ pending_count: 5 });
+    });
   });
 
   describe('transformRuleSoAttributesToRuleApiResponse', () => {
@@ -112,6 +158,64 @@ describe('utils', () => {
       const response = transformRuleSoAttributesToRuleApiResponse('rule-rt-1', soAttrs);
 
       expect(response.metadata.description).toBe('Round-trip desc');
+    });
+  });
+
+  describe('assertImmutableUnchanged', () => {
+    it('does not throw when all immutable fields match the existing rule', () => {
+      const existing = createRuleSoAttributes({ kind: 'alert' });
+
+      expect(() =>
+        assertImmutableUnchanged({ ...baseCreateData, kind: 'alert' }, existing)
+      ).not.toThrow();
+    });
+
+    it('throws Boom.conflict (409) when an immutable field differs', () => {
+      const existing = createRuleSoAttributes({ kind: 'alert' });
+
+      expect(() =>
+        assertImmutableUnchanged({ ...baseCreateData, kind: 'signal' }, existing)
+      ).toThrow(
+        expect.objectContaining({
+          isBoom: true,
+          output: expect.objectContaining({ statusCode: 409 }),
+          message: 'Some fields cannot be changed after creation: kind.',
+        })
+      );
+    });
+
+    it('attaches IMMUTABLE_FIELDS_CHANGED code and the changed fields in details', () => {
+      const existing = createRuleSoAttributes({ kind: 'alert' });
+
+      expect(() =>
+        assertImmutableUnchanged({ ...baseCreateData, kind: 'signal' }, existing)
+      ).toThrow(
+        expect.objectContaining({
+          data: {
+            code: 'IMMUTABLE_FIELDS_CHANGED',
+            details: { fields: ['kind'] },
+          },
+        })
+      );
+    });
+  });
+
+  describe('pickImmutable', () => {
+    it('returns only the fields declared in IMMUTABLE_RULE_FIELDS', () => {
+      const existing = createRuleSoAttributes({ kind: 'signal' });
+
+      expect(pickImmutable(existing)).toEqual({ kind: 'signal' });
+    });
+
+    it('preserves immutable fields when spread last over a mutated copy', () => {
+      const existing = createRuleSoAttributes({ kind: 'alert' });
+      // Simulate an earlier step in a builder that incorrectly mutates an
+      // immutable field. `pickImmutable(existing)` spread last must restore it.
+      const buggyIntermediate = { ...existing, kind: 'signal' as const };
+
+      const next = { ...buggyIntermediate, ...pickImmutable(existing) };
+
+      expect(next.kind).toBe('alert');
     });
   });
 });

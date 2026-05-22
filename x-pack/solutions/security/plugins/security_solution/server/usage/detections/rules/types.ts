@@ -53,6 +53,10 @@ export interface UpgradeableRulesSummary {
   disabled: number;
 }
 
+export interface DeprecatedRulesSummary {
+  total: number;
+}
+
 export interface RuleCustomizationCounts {
   alert_suppression: number;
   anomaly_threshold: number;
@@ -102,12 +106,20 @@ export interface SpacesUsage {
   rules_in_spaces: number[];
 }
 
+export interface AiCreatedRulesUsage {
+  total: number;
+  enabled: number;
+  disabled: number;
+}
+
 export interface RuleAdoption {
   detection_rule_detail: RuleMetric[];
   detection_rule_usage: RulesTypeUsage;
   detection_rule_status: EventLogStatusMetric;
   elastic_detection_rule_upgrade_status: UpgradeableRulesSummary;
   elastic_detection_rule_customization_status: RuleCustomizationCounts;
+  elastic_detection_rule_deprecated_status: DeprecatedRulesSummary;
+  ai_created_rules: AiCreatedRulesUsage;
   spaces_usage: SpacesUsage;
 }
 
@@ -135,6 +147,7 @@ export interface RuleMetric {
   has_response_actions_endpoint: boolean;
   has_response_actions_osquery: boolean;
   has_does_not_match_condition?: boolean; // Only for threat match rules
+  ai_created: boolean;
 }
 
 /**

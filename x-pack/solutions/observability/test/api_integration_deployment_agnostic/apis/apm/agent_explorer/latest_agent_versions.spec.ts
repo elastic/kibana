@@ -10,6 +10,7 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const apmApiClient = getService('apmApi');
+  const retry = getService('retry');
   const nodeAgentName = 'nodejs';
   const unlistedAgentName = 'unlistedAgent';
 
@@ -21,22 +22,32 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
   describe('Agent latest versions when configuration is defined', () => {
     it('returns a version when agent is listed in the file', async () => {
-      const { status, body } = await callApi();
-      expect(status).to.be(200);
-      const agents = body.data;
-      const nodeAgent = agents[nodeAgentName] as ElasticApmAgentLatestVersion;
-      expect(nodeAgent?.latest_version).not.to.be(undefined);
+      await retry.tryForTime(120000, async () => {
+        const { status, body } = await callApi();
+        expect(status).to.be(200);
+        if (body.error) {
+          throw new Error(`Latest agent versions fetch failed: ${JSON.stringify(body.error)}`);
+        }
+        const agents = body.data;
+        const nodeAgent = agents[nodeAgentName] as ElasticApmAgentLatestVersion;
+        expect(nodeAgent?.latest_version).not.to.be(undefined);
+      });
     });
 
     it('returns undefined when agent is not listed in the file', async () => {
-      const { status, body } = await callApi();
-      expect(status).to.be(200);
+      await retry.tryForTime(120000, async () => {
+        const { status, body } = await callApi();
+        expect(status).to.be(200);
+        if (body.error) {
+          throw new Error(`Latest agent versions fetch failed: ${JSON.stringify(body.error)}`);
+        }
 
-      const agents = body.data;
+        const agents = body.data;
 
-      // @ts-ignore
-      const unlistedAgent = agents[unlistedAgentName] as ElasticApmAgentLatestVersion;
-      expect(unlistedAgent?.latest_version).to.be(undefined);
+        // @ts-ignore
+        const unlistedAgent = agents[unlistedAgentName] as ElasticApmAgentLatestVersion;
+        expect(unlistedAgent?.latest_version).to.be(undefined);
+      });
     });
   });
 }

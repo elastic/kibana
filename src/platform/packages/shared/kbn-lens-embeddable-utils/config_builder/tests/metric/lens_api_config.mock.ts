@@ -7,13 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { MetricState } from '../../schema';
+import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
+import type { MetricConfig } from '../../schema';
+import type { MetricConfigNoESQL } from '../../schema/charts/metric';
+import { DEFAULT_PRIMARY_VALUE_ALIGNMENT } from '../../transforms/charts/metric/defaults';
 
 export const breakdownMetricAPIAttributes = {
   type: 'metric',
   title: 'Metric - Breakdown',
   description: 'Metric with breakdown',
-  dataset: { type: 'dataView', id: 'testId' },
+  data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'testId' },
   metrics: [
     {
       type: 'primary',
@@ -34,15 +37,15 @@ export const breakdownMetricAPIAttributes = {
   breakdown_by: {
     operation: 'terms',
     fields: ['extension.keyword'],
-    size: 5,
+    limit: 5,
   },
-} as MetricState;
+} as MetricConfigNoESQL;
 
 export const complexMetricAPIAttributes = {
   type: 'metric',
   title: 'Metric - Complex case',
   description: 'Metric with background chart and breakdown',
-  dataset: { type: 'dataView', id: 'testId' },
+  data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'testId' },
   metrics: [
     {
       type: 'primary',
@@ -61,8 +64,6 @@ export const complexMetricAPIAttributes = {
           percentile: 95,
         },
       },
-      position: 'top',
-      title_weight: 'normal',
     },
     {
       type: 'secondary',
@@ -74,23 +75,26 @@ export const complexMetricAPIAttributes = {
         palette: 'status',
         value: false,
       },
-      value: {
-        alignment: 'left',
-      },
     },
   ],
   breakdown_by: {
     operation: 'terms',
     fields: ['extension.keyword'],
-    size: 5,
+    limit: 5,
   },
-} as MetricState;
+  styling: {
+    primary: {
+      position: 'top',
+      value: { alignment: DEFAULT_PRIMARY_VALUE_ALIGNMENT },
+    },
+  },
+} as MetricConfig;
 
 export const simpleMetricAPIAttributes = {
   type: 'metric',
   title: 'Simple Metric',
   description: 'A simple metric visualization',
-  dataset: { type: 'dataView', id: 'testId' },
+  data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'testId' },
   metrics: [
     {
       type: 'primary',
@@ -99,17 +103,16 @@ export const simpleMetricAPIAttributes = {
       empty_as_null: true,
     },
   ],
-} as MetricState;
+} as MetricConfig;
 
 export const complexESQLMetricAPIAttributes = {
   type: 'metric',
   title: 'Metric - ESQL Complex case',
   description: 'ESQL Metric with background chart and breakdown',
-  dataset: { type: 'esql', query: 'FROM logs | STATS ...' },
+  data_source: { type: 'esql', query: 'FROM logs | STATS ...' },
   metrics: [
     {
       type: 'primary',
-      operation: 'value',
       column: 'count',
       color: {
         type: 'dynamic',
@@ -119,14 +122,12 @@ export const complexESQLMetricAPIAttributes = {
       background_chart: {
         type: 'bar',
         max_value: {
-          operation: 'value',
           column: 'bytes',
         },
       },
     },
     {
       type: 'secondary',
-      operation: 'value',
       column: 'bytes',
       compare: {
         to: 'baseline',
@@ -137,16 +138,15 @@ export const complexESQLMetricAPIAttributes = {
     },
   ],
   breakdown_by: {
-    operation: 'value',
     column: 'extension.keyword',
   },
-} as MetricState;
+} as MetricConfig;
 
 export const metricAPIWithTermsRankedBySecondary = {
   type: 'metric',
   title: 'Metric - Breakdown ranked by secondary',
   description: 'Metric with breakdown ranked by secondary metric',
-  dataset: { type: 'dataView', id: 'testId' },
+  data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'testId' },
   ignore_global_filters: false,
   sampling: 1,
   metrics: [
@@ -169,11 +169,11 @@ export const metricAPIWithTermsRankedBySecondary = {
   breakdown_by: {
     operation: 'terms',
     fields: ['extension.keyword'],
-    size: 5,
+    limit: 5,
     rank_by: {
-      type: 'column',
-      metric: 1,
+      type: 'metric',
+      metric_index: 1,
       direction: 'desc',
     },
   },
-} as MetricState;
+} as MetricConfig;

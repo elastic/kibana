@@ -59,6 +59,7 @@ import { registerAssetInventoryRoutes } from '../lib/asset_inventory/routes';
 import { registerSiemReadinessRoutes } from '../lib/siem_readiness';
 import type { TrialCompanionRoutesDeps } from '../lib/trial_companion/types';
 import { registerDataGeneratorRoutes } from './data_generator/register_data_generator_routes';
+import { registerInitializationRoutes } from '../lib/initialization';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -161,9 +162,11 @@ export const initRoutes = (
 
   registerAssetInventoryRoutes({ router, logger });
 
-  registerSiemReadinessRoutes({ router, logger });
+  registerSiemReadinessRoutes({ router, logger, isServerless });
 
   registerTrialCompanionRoutes(trialCompanionDeps);
+
+  registerInitializationRoutes({ router, logger });
 
   if (enableDataGeneratorRoutes) {
     registerDataGeneratorRoutes(router, getStartServices);

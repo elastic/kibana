@@ -433,7 +433,7 @@ export const CategoryAccordionTable = <T extends Record<string, unknown>>({
                             values: { itemName, category: category.category },
                           }
                         )}
-                        tableLayout="auto"
+                        tableLayout="fixed"
                       />
                     </>
                   )}

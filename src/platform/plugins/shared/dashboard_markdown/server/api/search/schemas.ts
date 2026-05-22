@@ -8,48 +8,42 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { baseMetaSchema, createdMetaSchema, updatedMetaSchema } from '../meta_schemas';
-
-const MAX_PER_PAGE = 10000;
+import {
+  asCodeMetaSchema,
+  asCodePaginationParamsSchema,
+  asCodePaginationResponseMetaSchema,
+  PAGINATION_MAX_SIZE,
+} from '@kbn/as-code-shared-schemas';
 
 export const searchRequestQuerySchema = schema.object({
   query: schema.maybe(
     schema.string({
       meta: {
         description:
-          'An Elasticsearch simple_query_string query that filters the markdown panels in the response by "title" and "description"',
+          'Filters results by `title` and `description` using Elasticsearch [`simple_query_string`](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-simple-query-string-query) syntax. Multi-word terms require all words to match.',
       },
     })
   ),
-  page: schema.maybe(
-    schema.number({
-      meta: {
-        description: 'The page of markdown panels to return',
-      },
-    })
-  ),
-  per_page: schema.maybe(
-    schema.number({
-      meta: {
-        description: 'The number of markdown panels to return per page',
-      },
-      max: MAX_PER_PAGE,
-    })
-  ),
+  ...asCodePaginationParamsSchema.getPropSchemas(),
 });
 
 export const searchResponseBodySchema = schema.object({
-  markdowns: schema.arrayOf(
+  data: schema.arrayOf(
     schema.object({
-      id: schema.string(),
+      id: schema.string({ meta: { description: 'The markdown library item ID.' } }),
       data: schema.object({
-        description: schema.maybe(schema.string()),
-        title: schema.string(),
+        description: schema.maybe(
+          schema.string({ meta: { description: 'The markdown library item description.' } })
+        ),
+        title: schema.string({ meta: { description: 'The markdown library item title.' } }),
       }),
-      meta: schema.allOf([baseMetaSchema, createdMetaSchema, updatedMetaSchema]),
+      meta: asCodeMetaSchema,
     }),
-    { minSize: 0, maxSize: MAX_PER_PAGE }
+    {
+      minSize: 0,
+      maxSize: PAGINATION_MAX_SIZE,
+      meta: { description: 'List of markdown library items matching the query.' },
+    }
   ),
-  total: schema.number(),
-  page: schema.number(),
+  meta: asCodePaginationResponseMetaSchema,
 });

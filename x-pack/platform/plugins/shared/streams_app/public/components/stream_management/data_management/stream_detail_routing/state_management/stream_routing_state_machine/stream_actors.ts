@@ -56,13 +56,14 @@ export interface ForkStreamInput {
   where: Condition;
   status: RoutingStatus;
   destination: string;
+  draft?: boolean;
 }
 export function createForkStreamActor({
   streamsRepositoryClient,
-  forkSuccessNofitier,
+  forkSuccessNotifier,
   telemetryClient,
 }: Pick<StreamRoutingServiceDependencies, 'streamsRepositoryClient'> & {
-  forkSuccessNofitier: (streamName: string) => void;
+  forkSuccessNotifier?: (streamName: string) => void;
   telemetryClient: StreamsTelemetryClient;
 }) {
   return fromPromise<ForkStreamResponse, ForkStreamInput>(async ({ input, signal }) => {
@@ -70,6 +71,7 @@ export function createForkStreamActor({
       where: input.where,
       status: input.status,
       destination: input.destination,
+      ...(input.draft ? { draft: true } : {}),
     });
 
     const response = await streamsRepositoryClient.fetch(
@@ -85,7 +87,7 @@ export function createForkStreamActor({
       }
     );
 
-    forkSuccessNofitier(input.destination);
+    forkSuccessNotifier?.(input.destination);
     telemetryClient.trackChildStreamCreated({
       name: input.destination,
     });
@@ -96,7 +98,7 @@ export function createForkStreamActor({
 
 /**
  * Delete stream actor factory
- * This actor is used to fork a stream, creating a new stream with the same definition
+ * This actor is used to delete a stream
  */
 export type DeleteStreamResponse = APIReturnType<'DELETE /api/streams/{name} 2023-10-31'>;
 export interface DeleteStreamInput {
@@ -152,7 +154,7 @@ export function createQueryStreamActor({
  * Notifier factories
  */
 
-export const createStreamSuccessNofitier =
+export const createStreamSuccessNotifier =
   ({ toasts }: { toasts: IToasts }) =>
   () => {
     toasts.addSuccess({
@@ -174,7 +176,18 @@ export const createQueryStreamSuccessNotifier =
     });
   };
 
-export const createStreamFailureNofitier =
+export const updateQueryStreamSuccessNotifier =
+  ({ toasts }: { toasts: IToasts }) =>
+  () => {
+    toasts.addSuccess({
+      title: i18n.translate('xpack.streams.streamDetailRouting.queryStreamUpdated', {
+        defaultMessage: 'Query stream updated',
+      }),
+      toastLifeTimeMs: 3000,
+    });
+  };
+
+export const createStreamFailureNotifier =
   ({ toasts }: { toasts: IToasts }) =>
   (params: { event: unknown }) => {
     const event = params.event as ErrorActorEvent<esErrors.ResponseError, string>;

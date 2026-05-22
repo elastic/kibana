@@ -22,6 +22,8 @@ import { useEndpointExceptionsCapability } from '../../hooks/use_endpoint_except
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { ENDPOINT_ARTIFACT_LIST_IDS } from '@kbn/securitysolution-list-constants';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-exceptions-common/api';
+import { useGetEndpointExceptionsPerPolicyOptIn } from '../../../management/hooks/artifacts/use_endpoint_per_policy_opt_in';
+import type { OptInStatusMetadata } from '../../../../server/endpoint/lib/reference_data';
 
 jest.mock('../../../common/components/user_privileges');
 jest.mock('../../../common/utils/route/mocks');
@@ -53,6 +55,11 @@ jest.mock('../../../detections/containers/detection_engine/lists/use_lists_confi
   useListsConfig: jest.fn().mockReturnValue({ loading: false }),
 }));
 
+jest.mock('@kbn/cps-utils', () => ({
+  useRouteBasedCpsPickerAccess: jest.fn(),
+  ProjectRoutingAccess: { READONLY: 'readonly' },
+}));
+
 jest.mock('../../hooks/use_endpoint_exceptions_capability');
 jest.mock('../../components/create_shared_exception_list', () => ({
   CreateSharedListFlyout: ({ handleCloseFlyout }: { handleCloseFlyout: () => void }) => (
@@ -67,7 +74,10 @@ jest.mock('../../components/create_shared_exception_list', () => ({
 jest.mock('../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
 }));
+jest.mock('../../../management/hooks/artifacts/use_endpoint_per_policy_opt_in');
 const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
+const mockUseGetEndpointExceptionsPerPolicyOptIn =
+  useGetEndpointExceptionsPerPolicyOptIn as jest.Mock;
 
 describe('SharedLists', () => {
   const mockHistory = generateHistoryMock();
@@ -114,6 +124,7 @@ describe('SharedLists', () => {
     (useEndpointExceptionsCapability as jest.Mock).mockReturnValue(true);
 
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+    mockUseGetEndpointExceptionsPerPolicyOptIn.mockReturnValue({ data: { status: false } });
   });
 
   it('renders empty view if no lists exist', async () => {
@@ -139,6 +150,34 @@ describe('SharedLists', () => {
       const emptyViewerState = wrapper.getByTestId('emptyViewerState');
       expect(emptyViewerState).toBeInTheDocument();
     });
+  });
+
+  it('does not render pagination when no lists exist', async () => {
+    (useExceptionLists as jest.Mock).mockReturnValue([
+      false,
+      [],
+      {
+        page: 1,
+        perPage: 20,
+        total: 0,
+      },
+      jest.fn(),
+    ]);
+
+    (useAllExceptionLists as jest.Mock).mockReturnValue([false, [], {}]);
+    const wrapper = render(
+      <TestProviders>
+        <SharedLists />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(wrapper.getByTestId('emptyViewerState')).toBeInTheDocument();
+    });
+
+    expect(
+      wrapper.queryByRole('navigation', { name: 'Custom pagination example' })
+    ).not.toBeInTheDocument();
   });
 
   it('renders loading state when fetching lists', async () => {
@@ -245,8 +284,11 @@ describe('SharedLists', () => {
       );
     });
 
-    it('should display dismissible callout when FF is enabled', () => {
+    it('should display dismissible callout when FF is enabled but user has not opted in to per-policy yet', () => {
       mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+      mockUseGetEndpointExceptionsPerPolicyOptIn.mockReturnValue({
+        data: { status: false } as OptInStatusMetadata,
+      });
 
       const { getByTestId } = render(
         <TestProviders>
@@ -259,6 +301,41 @@ describe('SharedLists', () => {
       expect(callout).toHaveTextContent('Endpoint exceptions have moved.');
 
       expect(getByTestId('euiDismissCalloutButton')).toBeTruthy();
+    });
+
+    it('should display dismissible callout when FF is enabled and user has opted in to per-policy', () => {
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+      mockUseGetEndpointExceptionsPerPolicyOptIn.mockReturnValue({
+        data: { status: true, reason: 'userOptedIn' } as OptInStatusMetadata,
+      });
+
+      const { getByTestId } = render(
+        <TestProviders>
+          <SharedLists />
+        </TestProviders>
+      );
+
+      const callout = getByTestId('EndpointExceptionsMovedCallout');
+      expect(callout).toBeInTheDocument();
+      expect(callout).toHaveTextContent('Endpoint exceptions have moved.');
+
+      expect(getByTestId('euiDismissCalloutButton')).toBeTruthy();
+    });
+
+    it('should NOT display dismissible callout when FF is enabled on a new deployment', () => {
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+      mockUseGetEndpointExceptionsPerPolicyOptIn.mockReturnValue({
+        data: { status: true, reason: 'newDeployment' } as OptInStatusMetadata,
+      });
+
+      const { queryByTestId } = render(
+        <TestProviders>
+          <SharedLists />
+        </TestProviders>
+      );
+
+      const callout = queryByTestId('EndpointExceptionsMovedCallout');
+      expect(callout).not.toBeInTheDocument();
     });
 
     it('should fetch "endpoint_list" but hide other endpoint artifacts when Endpoint exceptions moved FF is disabled', async () => {

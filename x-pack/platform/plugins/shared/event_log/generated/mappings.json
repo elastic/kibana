@@ -477,6 +477,9 @@
                                                         }
                                                     }
                                                 },
+                                                "matched_indices_count": {
+                                                    "type": "long"
+                                                },
                                                 "frozen_indices_queried_count": {
                                                     "type": "long"
                                                 },
@@ -558,6 +561,13 @@
                             "type": "boolean"
                         }
                     }
+                },
+                "cps_scope_expression": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                },
+                "cps_scope_linked_projects": {
+                    "type": "flattened"
                 },
                 "space_ids": {
                     "type": "keyword",
@@ -686,6 +696,66 @@
                                         },
                                         "error": {
                                             "type": "keyword"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "alerting_v2": {
+                    "properties": {
+                        "dispatcher": {
+                            "properties": {
+                                "episode_count": {
+                                    "type": "long"
+                                },
+                                "episode_ids": {
+                                    "type": "keyword",
+                                    "ignore_above": 1024,
+                                    "meta": {
+                                        "isArray": "true"
+                                    }
+                                },
+                                "rule_count": {
+                                    "type": "long"
+                                },
+                                "rule_ids": {
+                                    "type": "keyword",
+                                    "ignore_above": 1024,
+                                    "meta": {
+                                        "isArray": "true"
+                                    }
+                                },
+                                "action_group_count": {
+                                    "type": "long"
+                                },
+                                "action_group_ids": {
+                                    "type": "keyword",
+                                    "ignore_above": 1024,
+                                    "meta": {
+                                        "isArray": "true"
+                                    }
+                                },
+                                "workflow_ids": {
+                                    "type": "keyword",
+                                    "ignore_above": 1024,
+                                    "meta": {
+                                        "isArray": "true"
+                                    }
+                                },
+                                "workflow_execution_ids": {
+                                    "type": "keyword",
+                                    "ignore_above": 1024,
+                                    "meta": {
+                                        "isArray": "true"
+                                    }
+                                },
+                                "execution": {
+                                    "properties": {
+                                        "uuid": {
+                                            "type": "keyword",
+                                            "ignore_above": 1024
                                         }
                                     }
                                 }

@@ -24,7 +24,6 @@ ui/
 │   ├── selection_modal.spec.ts
 │   ├── selection_modal.no_ab_privilege.spec.ts
 │   ├── selection_modal.no_assistant_privilege.spec.ts
-│   ├── confirmation_modal.spec.ts
 │   ├── documentation_section.spec.ts
 │   ├── agent_nav_button.no_ab_privilege.spec.ts
 │   ├── agent_mode_complete_flow.spec.ts
@@ -50,7 +49,7 @@ This follows the convention used in other Scout tests (e.g., `rules_page_header.
 node scripts/scout.js start-server [--stateful|--serverless=[es|oblt|security]]
 
 # Run all tests
-npx playwright test --config x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/parallel.playwright.config.ts \
+node scripts/playwright test --config x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/parallel.playwright.config.ts \
   --project local --ui
 
 # Run tests with specific tag
@@ -123,7 +122,6 @@ Available solution values: `'security'`, `'oblt'`, `'es'`, `'classic'`
 | `selection_modal.spec.ts`                                | `@ess`                                     | Selection modal interactions                           |
 | `selection_modal.no_ab_privilege.spec.ts`                | `@ess`                                     | Selection modal without Agent Builder privilege        |
 | `selection_modal.no_assistant_privilege.spec.ts`         | `@ess`                                     | Selection modal without AI Assistant privilege         |
-| `confirmation_modal.spec.ts`                             | `@ess`, `@svlOblt`, `@svlSecurity`         | Confirmation modal when switching to Agent mode        |
 | `documentation_section.spec.ts`                          | `@ess`, `@svlOblt`, `@svlSecurity`         | Documentation section visibility in Agent mode         |
 | `agent_nav_button.no_ab_privilege.spec.ts`               | `@ess`, `@svl*` | Agent nav button without Agent Builder privilege       |
 | `agent_mode_complete_flow.spec.ts`                       | `@ess`, `@svlOblt`, `@svlSecurity`         | Complete Agent mode switching flow                     |
@@ -145,7 +143,6 @@ Key methods in `GenAiSettingsPage`:
 | `getAiAssistantNavButton()`              | Get the AI Assistant nav button (Classic)            |
 | `getAiAssistantNavButtonSecurity()`      | Get the AI Assistant nav button (Security)           |
 | `getAIAssistantNavButtonObltSearch()` | Get the AI Assistant nav button (Observability/Search)      |
-| `getConfirmModalConfirmButton()`         | Get confirm button in Agent confirmation modal               |
 | `getSaveButton()`                        | Get the save button                                  |
 | `getDocumentationSection()`              | Get the documentation section (Agent mode only)      |
 

@@ -9,7 +9,11 @@ import React from 'react';
 import type { BoolQuery } from '@kbn/es-query';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { UrlSyncedAlertsSearchBar } from '../../alerts_search_bar/url_synced_alerts_search_bar';
-import { RULE_DETAILS_ALERTS_SEARCH_BAR_PARAMS_URL_STORAGE_KEY } from '../../alerts_search_bar/constants';
+import {
+  RULE_DETAILS_ALERTS_SEARCH_BAR_PARAMS_URL_STORAGE_KEY,
+  RULE_DETAILS_FILTER_CONTROLS,
+  RULE_DETAILS_FILTER_CONTROLS_STORAGE_KEY,
+} from '../../alerts_search_bar/constants';
 import {
   alertSearchBarStateContainer,
   Provider,
@@ -37,7 +41,9 @@ export const RuleAlertSearchBar = ({ ruleTypeId, onEsQueryChange }: RuleAlertSea
             showDatePicker
             showSubmitButton
             urlStorageKey={RULE_DETAILS_ALERTS_SEARCH_BAR_PARAMS_URL_STORAGE_KEY}
+            filterControlsStorageKey={RULE_DETAILS_FILTER_CONTROLS_STORAGE_KEY}
             onEsQueryChange={onEsQueryChange}
+            defaultFilterControls={RULE_DETAILS_FILTER_CONTROLS}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

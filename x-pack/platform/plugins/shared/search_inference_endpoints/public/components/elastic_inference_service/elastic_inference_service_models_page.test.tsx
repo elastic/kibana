@@ -8,10 +8,22 @@
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import { ElasticInferenceServiceModelsPage } from './elastic_inference_service_models_page';
+import type { EisInferenceEndpoint } from '../../../common/types';
 import { useEisModels } from '../../hooks/use_eis_models';
 import { InferenceEndpoints } from '../../__mocks__/inference_endpoints';
 
 jest.mock('../../hooks/use_eis_models');
+jest.mock('../../hooks/use_kibana', () => ({
+  useKibana: () => ({
+    services: {
+      notifications: { toasts: { addSuccess: jest.fn(), addDanger: jest.fn() } },
+    },
+  }),
+}));
+jest.mock('@kbn/react-query', () => ({
+  useQueryClient: () => ({ invalidateQueries: jest.fn() }),
+}));
+
 const mockUseEisModels = useEisModels as jest.Mock;
 
 const endpoints = InferenceEndpoints.filter((ep) => ep.service === 'elastic');
@@ -50,7 +62,7 @@ describe('ElasticInferenceServiceModelsPage', () => {
     mockUseEisModels.mockReturnValue({ data: endpoints, isLoading: false, isError: false });
     const { getByLabelText, queryByTestId } = render(<ElasticInferenceServiceModelsPage />);
 
-    const searchInput = getByLabelText('Find Elastic Inference Service models');
+    const searchInput = getByLabelText('Search Elastic Inference Service models');
     fireEvent.change(searchInput, { target: { value: 'Jina Reranker v2' } });
 
     expect(queryByTestId('eisModelCard-Jina Reranker v2')).toBeInTheDocument();
@@ -85,7 +97,7 @@ describe('ElasticInferenceServiceModelsPage', () => {
     mockUseEisModels.mockReturnValue({ data: endpoints, isLoading: false, isError: false });
     const { getByLabelText, getByText } = render(<ElasticInferenceServiceModelsPage />);
 
-    const searchInput = getByLabelText('Find Elastic Inference Service models');
+    const searchInput = getByLabelText('Search Elastic Inference Service models');
     fireEvent.change(searchInput, { target: { value: 'nonexistent-model-xyz-999' } });
 
     expect(getByText('No models found')).toBeInTheDocument();
@@ -113,5 +125,33 @@ describe('ElasticInferenceServiceModelsPage', () => {
       const cards = container.querySelectorAll('[data-test-subj^="eisModelCard-"]');
       expect(cards.length).toBeGreaterThan(0);
     });
+  });
+
+  it('opens model detail flyout when clicking a card with valid model_id', () => {
+    mockUseEisModels.mockReturnValue({ data: endpoints, isLoading: false, isError: false });
+    const { getByTestId, queryByTestId } = render(<ElasticInferenceServiceModelsPage />);
+
+    fireEvent.click(getByTestId('eisModelCard-Jina Reranker v2'));
+
+    expect(queryByTestId('modelDetailFlyout')).toBeInTheDocument();
+  });
+
+  it('does not open model detail flyout when endpoint has empty model_id', () => {
+    const endpointWithoutModelId: EisInferenceEndpoint = {
+      inference_id: 'no-model-id-endpoint',
+      task_type: 'chat_completion',
+      service: 'elastic',
+      service_settings: { model_id: '' },
+    };
+    mockUseEisModels.mockReturnValue({
+      data: [endpointWithoutModelId],
+      isLoading: false,
+      isError: false,
+    });
+    const { getByTestId, queryByTestId } = render(<ElasticInferenceServiceModelsPage />);
+
+    fireEvent.click(getByTestId('eisModelCard-no-model-id-endpoint'));
+
+    expect(queryByTestId('modelDetailFlyout')).not.toBeInTheDocument();
   });
 });

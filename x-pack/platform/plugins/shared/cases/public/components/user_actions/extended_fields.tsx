@@ -5,12 +5,16 @@
  * 2.0.
  */
 
+import React from 'react';
 import { startCase } from 'lodash';
 import type { SnakeToCamelCase } from '../../../common/types';
 import type { ExtendedFieldsUserAction } from '../../../common/types/domain';
 import type { UserActionBuilder } from './types';
 import { createCommonUpdateUserActionBuilder } from './common';
+import { ScrollableMarkdown } from '../markdown_editor';
+import { PreferenceFormattedDate } from '../formatted_date';
 import * as i18n from './translations';
+import { getMaybeDate } from '../formatted_date/maybe_date';
 
 const getFieldDisplayName = (key: string): string => {
   // The key arrives as camelCase (e.g. "riskScoreAsKeyword") because convertToCamelCase
@@ -20,16 +24,47 @@ const getFieldDisplayName = (key: string): string => {
   return startCase(withoutTypeSuffix);
 };
 
-const getLabelTitle = (userAction: SnakeToCamelCase<ExtendedFieldsUserAction>): string => {
+const isMultilineValue = (value: unknown): value is string =>
+  typeof value === 'string' && value.includes('\n');
+
+interface LabelAndBody {
+  label: React.ReactNode;
+  body?: React.ReactNode;
+}
+
+const getLabelAndBody = (userAction: SnakeToCamelCase<ExtendedFieldsUserAction>): LabelAndBody => {
   const extendedFields = userAction.payload.extendedFields ?? {};
   const entries = Object.entries(extendedFields);
 
   if (entries.length === 1) {
     const [key, value] = entries[0];
-    return i18n.SET_TEMPLATE_FIELD_LABEL(getFieldDisplayName(key), String(value));
+    const displayName = getFieldDisplayName(key);
+
+    if (key.endsWith('AsDate') && typeof value === 'string') {
+      const maybeDate = getMaybeDate(value);
+      if (maybeDate.isValid()) {
+        return {
+          label: (
+            <>
+              {i18n.SET_TEMPLATE_FIELD_LABEL_PREFIX(displayName)}{' '}
+              <PreferenceFormattedDate value={maybeDate.toDate()} stripMs />
+            </>
+          ),
+        };
+      }
+    }
+
+    if (isMultilineValue(value)) {
+      return {
+        label: i18n.SET_TEMPLATE_FIELD_LABEL_PREFIX(displayName),
+        body: <ScrollableMarkdown content={value} />,
+      };
+    }
+
+    return { label: i18n.SET_TEMPLATE_FIELD_LABEL(displayName, String(value)) };
   }
 
-  return i18n.UPDATED_TEMPLATE_FIELDS;
+  return { label: i18n.UPDATED_TEMPLATE_FIELDS };
 };
 
 export const createExtendedFieldsUserActionBuilder: UserActionBuilder = ({
@@ -39,7 +74,7 @@ export const createExtendedFieldsUserActionBuilder: UserActionBuilder = ({
 }) => ({
   build: () => {
     const extendedFieldsUserAction = userAction as SnakeToCamelCase<ExtendedFieldsUserAction>;
-    const label = getLabelTitle(extendedFieldsUserAction);
+    const { label, body } = getLabelAndBody(extendedFieldsUserAction);
     const commonBuilder = createCommonUpdateUserActionBuilder({
       userAction,
       userProfiles,
@@ -48,6 +83,12 @@ export const createExtendedFieldsUserActionBuilder: UserActionBuilder = ({
       icon: 'dot',
     });
 
-    return commonBuilder.build();
+    const result = commonBuilder.build();
+
+    if (body) {
+      result[0].children = body;
+    }
+
+    return result;
   },
 });

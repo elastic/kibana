@@ -1,5 +1,5 @@
 {
-  "sha1": "497ba62263201cb3b8c52d2974e89918faf833e2",
+  "sha1": "d4d6da025c383b8a658e10b9468555948972f865",
   "tests": [
     {
       "id": "b77b3725a7cda3a-a405bc5e45e74c0",
@@ -13,7 +13,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/global.setup.ts",
-        "line": 10,
+        "line": 59,
         "column": 16
       }
     },
@@ -74,6 +74,22 @@
       }
     },
     {
+      "id": "d0c1f04cf9e25c8-8345f73a5865487",
+      "title": "Explore from SLO Details - APM Navigation Source panel renders with APM links for APM-based SLO",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/explore_from_slo_details.spec.ts",
+        "line": 75,
+        "column": 9
+      }
+    },
+    {
       "id": "3789b2ba4b5abe6-f1d0e5a2143a659",
       "title": "Health Scan pagination paginates through health scan results and shows correct content per page",
       "expectedStatus": "passed",
@@ -86,6 +102,38 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/health_scan_pagination.spec.ts",
         "line": 71,
+        "column": 9
+      }
+    },
+    {
+      "id": "19d28556f6339bb-853a135b3f756e3",
+      "title": "SLO Overview Embeddable configures a single SLO overview panel from the add panel flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/slo_overview_embeddable.spec.ts",
+        "line": 29,
+        "column": 9
+      }
+    },
+    {
+      "id": "19d28556f6339bb-336a9b37545e893",
+      "title": "SLO Overview Embeddable configures a group SLO overview panel from the add panel flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/slo_overview_embeddable.spec.ts",
+        "line": 70,
         "column": 9
       }
     },

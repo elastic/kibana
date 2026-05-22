@@ -38,6 +38,11 @@ const defaultProps = {
   rangeFrom: '2025-01-01T00:00:00.000Z',
   rangeTo: '2025-01-01T01:00:00.000Z',
   core: {} as any,
+  ebt: {
+    row: { element: 'row' },
+    errorBadge: { element: 'errorBadge' },
+    serviceBadge: { element: 'serviceBadge' },
+  },
 };
 
 const renderComponent = (props = {}) =>
@@ -95,6 +100,30 @@ describe('FullTraceWaterfallRenderer', () => {
     renderComponent();
 
     expect(screen.getByTestId('traceWaterfall')).toBeInTheDocument();
+  });
+
+  describe('service badge navigation', () => {
+    it('passes getServiceBadgeHref to TraceWaterfall', () => {
+      mockUseFetcher.mockReturnValue({
+        data: {
+          traceItems: [],
+          errors: [],
+          agentMarks: {},
+          traceDocsTotal: 2,
+          maxTraceItems: 5000,
+        },
+        status: useFetcherModule.FETCH_STATUS.SUCCESS,
+        error: undefined,
+        refetch: jest.fn(),
+      });
+
+      renderComponent();
+
+      expect(mockTraceWaterfall).toHaveBeenCalledWith(
+        expect.objectContaining({ getServiceBadgeHref: expect.any(Function) }),
+        expect.anything()
+      );
+    });
   });
 
   describe('WaterfallSizeWarning props', () => {

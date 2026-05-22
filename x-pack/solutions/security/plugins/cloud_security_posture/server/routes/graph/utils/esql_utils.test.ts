@@ -8,7 +8,7 @@
 import {
   getFieldNamespace,
   generateFieldHintCases,
-  formatJsonProperty,
+  concatJsonObjectPropertyEsqlExprSafe,
   buildLookupJoinEsql,
 } from './esql_utils';
 
@@ -84,14 +84,14 @@ describe('ESQL utils', () => {
   });
 
   describe('formatJsonProperty', () => {
-    it('should generate ESQL that outputs JSON property with comma prefix, or empty string if null', () => {
-      const result = formatJsonProperty('name', 'entityName');
+    it('should generate ESQL that outputs JSON property, or empty string if null', () => {
+      const result = concatJsonObjectPropertyEsqlExprSafe('name', 'entityName');
 
-      expect(result).toBe('COALESCE(CONCAT(",\\"name\\":\\"", entityName, "\\""), "")');
+      expect(result).toBe('COALESCE(CONCAT("\\"name\\":\\"", entityName, "\\""), "")');
     });
 
     it('should include the property name and variable in the output', () => {
-      const result = formatJsonProperty('customProp', 'customVar');
+      const result = concatJsonObjectPropertyEsqlExprSafe('customProp', 'customVar');
 
       expect(result).toContain('customProp');
       expect(result).toContain('customVar');
@@ -100,37 +100,39 @@ describe('ESQL utils', () => {
 
   describe('buildLookupJoinEsql', () => {
     it('should generate LOOKUP JOIN statements with provided index name', () => {
-      const result = buildLookupJoinEsql('.entities.v2.latest.security_default');
+      const result = buildLookupJoinEsql('.entities.v2.latest.security_default-00001');
 
       expect(result).toContain('| DROP entity.id');
       expect(result).toContain('| DROP entity.target.id');
-      expect(result).toContain('| LOOKUP JOIN .entities.v2.latest.security_default ON entity.id');
+      expect(result).toContain(
+        '| LOOKUP JOIN .entities.v2.latest.security_default-00001 ON entity.id'
+      );
       expect(result).toContain('| RENAME actorEntityName    = entity.name');
       expect(result).toContain('| RENAME actorEntityType    = entity.type');
       expect(result).toContain('| RENAME actorEntitySubType = entity.sub_type');
-      expect(result).toContain('| RENAME actorHostIp        = host.ip');
+      expect(result).toContain('| INLINE STATS actorHostIp = VALUES(TO_STRING(host.ip))');
       expect(result).toContain('| RENAME targetEntityName    = entity.name');
       expect(result).toContain('| RENAME targetEntityType    = entity.type');
       expect(result).toContain('| RENAME targetEntitySubType = entity.sub_type');
-      expect(result).toContain('| RENAME targetHostIp        = host.ip');
+      expect(result).toContain('| INLINE STATS targetHostIp = VALUES(TO_STRING(host.ip))');
     });
 
     it('should include two LOOKUP JOIN statements for actor and target', () => {
-      const result = buildLookupJoinEsql('.entities.v2.latest.security_test');
+      const result = buildLookupJoinEsql('.entities.v2.latest.security_test-00001');
 
       const lookupJoinMatches = result.match(/LOOKUP JOIN/g);
       expect(lookupJoinMatches).toHaveLength(2);
     });
 
     it('should use the provided index name in both LOOKUP JOIN statements', () => {
-      const indexName = '.entities.v2.latest.security_custom';
+      const indexName = '.entities.v2.latest.security_custom-00001';
       const result = buildLookupJoinEsql(indexName);
 
       const indexMatches = result.match(new RegExp(indexName.replace(/\./g, '\\.'), 'g'));
       expect(indexMatches).toHaveLength(2);
     });
     it('should preserve the lookup entity id aliases for both joins', () => {
-      const result = buildLookupJoinEsql('.entities.v2.latest.security_test');
+      const result = buildLookupJoinEsql('.entities.v2.latest.security_test-00001');
 
       expect(result).toContain('| RENAME actorLookupEntityId = entity.id');
       expect(result).toContain('| RENAME targetLookupEntityId = entity.id');

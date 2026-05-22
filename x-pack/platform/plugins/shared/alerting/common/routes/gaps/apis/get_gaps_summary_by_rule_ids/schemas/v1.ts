@@ -5,12 +5,15 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
+import { optionalExcludedGapReasonsSchema } from '../../../../../schemas';
 
 export const getGapsSummaryByRuleIdsBodySchema = schema.object(
   {
     end: schema.string(),
     start: schema.string(),
     rule_ids: schema.arrayOf(schema.string(), { maxSize: 100 }),
+    excluded_reasons: optionalExcludedGapReasonsSchema,
+    gap_auto_fill_scheduler_id: schema.maybe(schema.string()),
   },
   {
     validate({ start, end }) {
@@ -31,14 +34,17 @@ export const getGapsSummaryByRuleIdsBodySchema = schema.object(
   }
 );
 
-export const getGapsSummaryByRuleIdsResponseSchema = schema.object({
-  data: schema.arrayOf(
-    schema.object({
-      rule_id: schema.string(),
-      total_unfilled_duration_ms: schema.number(),
-      total_in_progress_duration_ms: schema.number(),
-      total_filled_duration_ms: schema.number(),
-      gap_fill_status: schema.maybe(schema.string()),
-    })
-  ),
-});
+export const getGapsSummaryByRuleIdsResponseSchema = schema.object(
+  {
+    data: schema.arrayOf(
+      schema.object({
+        rule_id: schema.string(),
+        total_unfilled_duration_ms: schema.number(),
+        total_in_progress_duration_ms: schema.number(),
+        total_filled_duration_ms: schema.number(),
+        gap_fill_status: schema.maybe(schema.string()),
+      })
+    ),
+  },
+  { meta: { id: 'get_gaps_summary_by_rule_ids_response' } }
+);

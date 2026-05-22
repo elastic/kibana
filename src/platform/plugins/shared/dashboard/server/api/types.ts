@@ -8,7 +8,6 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { storedFilterSchema, querySchema } from '@kbn/es-query-server';
 import type { Writable } from '@kbn/utility-types';
 import type {
   getDashboardStateSchema,
@@ -17,11 +16,10 @@ import type {
   optionsSchema,
   panelGridSchema,
 } from './dashboard_state_schemas';
+import type { warningsSchema } from './warnings_schema';
 
-/** A filter stored in a dashboard. */
-export type DashboardFilter = TypeOf<typeof storedFilterSchema>;
-/** A query stored in a dashboard. */
-export type DashboardQuery = TypeOf<typeof querySchema>;
+export type Warnings = TypeOf<typeof warningsSchema>;
+
 /** Display options for a dashboard. */
 export type DashboardOptions = TypeOf<typeof optionsSchema>;
 /** Grid position and size data for a panel. */
@@ -34,3 +32,4 @@ export type DashboardSection = TypeOf<ReturnType<typeof getSectionSchema>>;
 export type DashboardState = Writable<TypeOf<ReturnType<typeof getDashboardStateSchema>>>;
 export type DashboardPinnedPanelsState = NonNullable<DashboardState['pinned_panels']>;
 export type DashboardPinnedPanel = DashboardPinnedPanelsState[number];
+export type Operation = 'create' | 'read' | 'update' | 'search';

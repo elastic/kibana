@@ -36,6 +36,7 @@ import { AddToTimelineButton } from '../../timelines/add_to_timeline_button';
 import { TagsColumn } from '../../actions/components/tags_column';
 import { RowKebabMenu } from './row_kebab_menu';
 import { useIsExperimentalFeatureEnabled } from '../../common/experimental_features_context';
+import { ExportFiltersProvider } from '../../results/export_filters_context';
 import type { AddToTimelineHandler } from '../../types';
 
 const truncateTooltipTextCss = {
@@ -62,10 +63,9 @@ const queryClampFlexItemCss = {
   minWidth: 0,
 };
 
-// TODO fix types
-const euiBasicTableCss = {
+const euiBasicTableCss = ({ euiTheme }: UseEuiTheme) => ({
   '.euiTableRow.euiTableRow-isExpandedRow > td > div': {
-    border: '1px solid #d3dae6',
+    border: euiTheme.border.thin,
   },
 
   '.euiTableRow.euiTableRow-isExpandedRow .euiTableCellContent': {
@@ -87,7 +87,7 @@ const euiBasicTableCss = {
     borderLeft: '0px',
     borderRight: '0px',
   },
-};
+});
 
 const EMPTY_ARRAY: PackQueryStatusItem[] = [];
 
@@ -174,6 +174,7 @@ interface PackQueriesStatusTableProps {
   executionCount?: number;
   packName?: string;
   tags?: string[];
+  onSaveQuery?: () => void;
 }
 
 const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = ({
@@ -189,6 +190,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   executionCount,
   packName,
   tags,
+  onSaveQuery,
 }) => {
   const isHistoryEnabled = useIsExperimentalFeatureEnabled('queryHistoryRework');
   const [queryDetailsFlyoutOpen, setQueryDetailsFlyoutOpen] = useState<{
@@ -458,15 +460,8 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   );
 
   const renderActionsColumn = useCallback(
-    (row: PackQueryStatusItem) => (
-      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-        {data && data.length > 1 && (
-          <EuiFlexItem grow={false}>{renderToggleResultsAction(row)}</EuiFlexItem>
-        )}
-        <EuiFlexItem grow={false}>{renderResultActions(row)}</EuiFlexItem>
-      </EuiFlexGroup>
-    ),
-    [data, renderResultActions, renderToggleResultsAction]
+    (row: PackQueryStatusItem) => renderResultActions(row),
+    [renderResultActions]
   );
 
   const renderViewQueryColumn = useCallback(
@@ -482,14 +477,40 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
     [handleQueryFlyoutOpen]
   );
 
+  const renderExpanderColumn = useCallback(
+    (item: PackQueryStatusItem) =>
+      item?.action_id && item?.id ? (
+        <EuiButtonIcon
+          data-test-subj={`toggleIcon-${item.id}`}
+          onClick={getHandleErrorsToggle(item)}
+          iconType={itemIdToExpandedRowMap[item.id] ? 'arrowDown' : 'arrowRight'}
+          aria-label={i18n.translate('xpack.osquery.pack.queriesTable.toggleResultsAriaLabel', {
+            defaultMessage: 'Toggle results',
+          })}
+        />
+      ) : null,
+    [getHandleErrorsToggle, itemIdToExpandedRowMap]
+  );
+
   const columns = useMemo(
     () => [
+      ...(isHistoryEnabled && data && data.length > 1
+        ? [
+            {
+              field: '',
+              name: '',
+              width: '28px',
+              isExpander: true,
+              render: renderExpanderColumn,
+            },
+          ]
+        : []),
       ...(isHistoryEnabled
         ? [
             {
               field: '',
               name: '',
-              width: '40px',
+              width: '28px',
               render: renderViewQueryColumn,
             },
           ]
@@ -598,6 +619,8 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
     ],
     [
       isHistoryEnabled,
+      data,
+      renderExpanderColumn,
       renderViewQueryColumn,
       renderIDColumn,
       renderQueryColumn,
@@ -653,6 +676,9 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
           agentIds={agentIds}
           addToTimeline={addToTimeline}
           isScheduled={!!scheduleId}
+          scheduleId={scheduleId}
+          executionCount={executionCount}
+          onSaveQuery={onSaveQuery}
         />
       )}
       <EuiBasicTable
@@ -673,4 +699,10 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   );
 };
 
-export const PackQueriesStatusTable = React.memo(PackQueriesStatusTableComponent);
+const PackQueriesStatusTableMemo = React.memo(PackQueriesStatusTableComponent);
+
+export const PackQueriesStatusTable: React.FC<PackQueriesStatusTableProps> = (props) => (
+  <ExportFiltersProvider>
+    <PackQueriesStatusTableMemo {...props} />
+  </ExportFiltersProvider>
+);

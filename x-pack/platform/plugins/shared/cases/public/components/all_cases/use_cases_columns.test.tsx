@@ -14,6 +14,7 @@ import { useGetCasesMockState } from '../../containers/mock';
 import { connectors, useCaseConfigureResponse } from '../configure_cases/__mock__';
 
 import { readCasesPermissions, renderWithTestingProviders, TestProviders } from '../../common/mock';
+import { KibanaServices } from '../../common/lib/kibana';
 import { renderHook, screen } from '@testing-library/react';
 import { CaseStatuses, CustomFieldTypes } from '../../../common/types/domain';
 import { userProfilesMap } from '../../containers/user_profiles/api.mock';
@@ -338,6 +339,15 @@ describe('useCasesColumns ', () => {
           },
           Object {
             "className": "eui-textNoWrap",
+            "field": "status",
+            "minWidth": "6.5em",
+            "name": "Status",
+            "render": [Function],
+            "sortable": true,
+            "width": "6.5em",
+          },
+          Object {
+            "className": "eui-textNoWrap",
             "field": "severity",
             "minWidth": "6em",
             "name": "Severity",
@@ -391,6 +401,15 @@ describe('useCasesColumns ', () => {
             "render": [Function],
             "sortable": true,
             "width": "9em",
+          },
+          Object {
+            "className": "eui-textNoWrap",
+            "field": "status",
+            "minWidth": "6.5em",
+            "name": "Status",
+            "render": [Function],
+            "sortable": true,
+            "width": "6.5em",
           },
           Object {
             "className": "eui-textNoWrap",
@@ -450,6 +469,15 @@ describe('useCasesColumns ', () => {
           },
           Object {
             "className": "eui-textNoWrap",
+            "field": "status",
+            "minWidth": "6.5em",
+            "name": "Status",
+            "render": [Function],
+            "sortable": true,
+            "width": "6.5em",
+          },
+          Object {
+            "className": "eui-textNoWrap",
             "field": "severity",
             "minWidth": "6em",
             "name": "Severity",
@@ -465,6 +493,29 @@ describe('useCasesColumns ', () => {
         ],
         "isLoadingColumns": false,
         "rowHeader": "title",
+      }
+    `);
+  });
+
+  it('keeps the selector action column for closed status filtering', async () => {
+    const { result } = renderHook(
+      () =>
+        useCasesColumns({
+          ...useCasesColumnsProps,
+          isSelectorView: true,
+          filterStatus: [CaseStatuses.closed],
+        }),
+      {
+        wrapper: TestProviders,
+      }
+    );
+
+    const assignActionColumn = result.current.columns[result.current.columns.length - 1];
+    expect(assignActionColumn).toMatchInlineSnapshot(`
+      Object {
+        "align": "right",
+        "render": [Function],
+        "width": "8em",
       }
     `);
   });
@@ -698,6 +749,43 @@ describe('useCasesColumns ', () => {
         "rowHeader": "title",
       }
     `);
+  });
+
+  describe('extended fields column', () => {
+    const license = licensingMock.createLicense({
+      license: { type: 'platinum' },
+    });
+
+    beforeEach(() => {
+      jest.spyOn(KibanaServices, 'getConfig').mockReturnValue({
+        templates: { enabled: true },
+      } as ReturnType<typeof KibanaServices.getConfig>);
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('includes the extended fields column when selected and templates are enabled', () => {
+      const { result } = renderHook(
+        () =>
+          useCasesColumns({
+            ...useCasesColumnsProps,
+            selectedColumns: [
+              ...DEFAULT_SELECTED_COLUMNS,
+              { field: 'extendedFields', name: 'Extended fields', isChecked: true },
+            ],
+          }),
+        {
+          wrapper: (props) => <TestProviders {...props} license={license} />,
+        }
+      );
+
+      const extendedColumn = result.current.columns.find((col) => col.name === 'Extended fields');
+
+      expect(extendedColumn).toBeDefined();
+      expect(extendedColumn?.name).toBe('Extended fields');
+    });
   });
 
   describe('ExternalServiceColumn ', () => {

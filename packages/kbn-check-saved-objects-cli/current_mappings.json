@@ -72,6 +72,7 @@
             "type": "keyword"
           },
           "params": {
+            "ignore_above": 4096,
             "type": "flattened"
           }
         },
@@ -284,6 +285,18 @@
         },
         "type": "nested"
       },
+      "snoozedInstances": {
+        "properties": {
+          "instanceId": {
+            "type": "keyword"
+          },
+          "snoozeSnapshot": {
+            "dynamic": false,
+            "type": "object"
+          }
+        },
+        "type": "nested"
+      },
       "tags": {
         "type": "keyword"
       },
@@ -301,21 +314,7 @@
       }
     }
   },
-  "alerting_api_key_pending_invalidation": {
-    "dynamic": false,
-    "properties": {
-      "apiKeyId": {
-        "type": "keyword"
-      },
-      "createdAt": {
-        "type": "date"
-      },
-      "uiamApiKey": {
-        "type": "binary"
-      }
-    }
-  },
-  "alerting_notification_policy": {
+  "alerting_action_policy": {
     "dynamic": false,
     "properties": {
       "auth": {
@@ -336,9 +335,6 @@
         "type": "date"
       },
       "createdBy": {
-        "type": "keyword"
-      },
-      "createdByUsername": {
         "type": "keyword"
       },
       "description": {
@@ -367,6 +363,9 @@
       "groupBy": {
         "type": "keyword"
       },
+      "groupingMode": {
+        "type": "keyword"
+      },
       "name": {
         "fields": {
           "keyword": {
@@ -376,17 +375,45 @@
         },
         "type": "text"
       },
+      "ruleId": {
+        "type": "keyword"
+      },
       "snoozedUntil": {
         "type": "date"
+      },
+      "tags": {
+        "type": "keyword"
+      },
+      "throttle": {
+        "properties": {
+          "strategy": {
+            "type": "keyword"
+          }
+        },
+        "type": "object"
+      },
+      "type": {
+        "type": "keyword"
       },
       "updatedAt": {
         "type": "date"
       },
       "updatedBy": {
         "type": "keyword"
-      },
-      "updatedByUsername": {
+      }
+    }
+  },
+  "alerting_api_key_pending_invalidation": {
+    "dynamic": false,
+    "properties": {
+      "apiKeyId": {
         "type": "keyword"
+      },
+      "createdAt": {
+        "type": "date"
+      },
+      "uiamApiKey": {
+        "type": "binary"
       }
     }
   },
@@ -408,9 +435,6 @@
             "properties": {
               "base": {
                 "type": "text"
-              },
-              "condition": {
-                "type": "text"
               }
             }
           }
@@ -431,13 +455,18 @@
           "description": {
             "type": "text"
           },
-          "labels": {
-            "type": "keyword"
-          },
           "name": {
+            "fields": {
+              "keyword": {
+                "type": "keyword"
+              }
+            },
             "type": "text"
           },
           "owner": {
+            "type": "keyword"
+          },
+          "tags": {
             "type": "keyword"
           }
         }
@@ -457,9 +486,6 @@
           "query": {
             "properties": {
               "base": {
-                "type": "text"
-              },
-              "condition": {
                 "type": "text"
               }
             }
@@ -1323,31 +1349,6 @@
       }
     }
   },
-  "data_connector": {
-    "dynamic": false,
-    "properties": {
-      "kscIds": {
-        "type": "keyword"
-      },
-      "name": {
-        "fields": {
-          "keyword": {
-            "type": "keyword"
-          }
-        },
-        "type": "text"
-      },
-      "toolIds": {
-        "type": "keyword"
-      },
-      "type": {
-        "type": "keyword"
-      },
-      "workflowIds": {
-        "type": "keyword"
-      }
-    }
-  },
   "data_stream-config": {
     "dynamic": false,
     "properties": {
@@ -1379,6 +1380,9 @@
       },
       "result": {
         "properties": {}
+      },
+      "title": {
+        "type": "text"
       }
     }
   },
@@ -1620,6 +1624,10 @@
       }
     }
   },
+  "entity-store-ccs-state": {
+    "dynamic": false,
+    "properties": {}
+  },
   "entity-store-global-state": {
     "dynamic": false,
     "properties": {}
@@ -1735,6 +1743,10 @@
         "properties": {}
       },
       "pending_upgrade_review": {
+        "dynamic": false,
+        "properties": {}
+      },
+      "previous_dependency_versions": {
         "dynamic": false,
         "properties": {}
       },
@@ -2218,6 +2230,9 @@
       "is_protected": {
         "type": "boolean"
       },
+      "is_verifier": {
+        "type": "boolean"
+      },
       "keep_monitoring_alive": {
         "type": "boolean"
       },
@@ -2298,6 +2313,24 @@
       },
       "vars": {
         "type": "flattened"
+      },
+      "verification_failed_at": {
+        "type": "date"
+      },
+      "verification_started_at": {
+        "type": "date"
+      },
+      "verification_status": {
+        "type": "keyword"
+      }
+    }
+  },
+  "fleet-cloud-onboarding-deployment": {
+    "dynamic": false,
+    "properties": {
+      "connectorId": {
+        "ignore_above": 1024,
+        "type": "keyword"
       }
     }
   },
@@ -2658,6 +2691,9 @@
       "is_protected": {
         "type": "boolean"
       },
+      "is_verifier": {
+        "type": "boolean"
+      },
       "keep_monitoring_alive": {
         "type": "boolean"
       },
@@ -2836,6 +2872,12 @@
       },
       "name": {
         "type": "keyword"
+      },
+      "otel_disable_beatsauth": {
+        "type": "boolean"
+      },
+      "otel_exporter_config_yaml": {
+        "type": "text"
       },
       "output_id": {
         "index": false,
@@ -3123,6 +3165,9 @@
   "integration-config": {
     "dynamic": false,
     "properties": {
+      "connector_id": {
+        "type": "keyword"
+      },
       "created_by": {
         "type": "keyword"
       },
@@ -3169,6 +3214,10 @@
     "properties": {}
   },
   "kql-telemetry": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "lead-generation-config": {
     "dynamic": false,
     "properties": {}
   },
@@ -3500,6 +3549,9 @@
       "enabled": {
         "type": "boolean"
       },
+      "interval": {
+        "type": "integer"
+      },
       "name": {
         "type": "text"
       },
@@ -3529,6 +3581,14 @@
             "type": "keyword"
           }
         }
+      },
+      "rrule_schedule": {
+        "dynamic": false,
+        "properties": {}
+      },
+      "schedule_type": {
+        "ignore_above": 1024,
+        "type": "keyword"
       },
       "shards": {
         "dynamic": false,
@@ -3905,6 +3965,65 @@
       },
       "version": {
         "type": "long"
+      }
+    }
+  },
+  "security:endpoint-scripts-library": {
+    "dynamic": false,
+    "properties": {
+      "created_at": {
+        "type": "date"
+      },
+      "created_by": {
+        "type": "keyword"
+      },
+      "description": {
+        "type": "keyword"
+      },
+      "example": {
+        "type": "keyword"
+      },
+      "file_hash_sha256": {
+        "type": "keyword"
+      },
+      "file_id": {
+        "type": "keyword"
+      },
+      "file_name": {
+        "type": "keyword"
+      },
+      "file_size": {
+        "type": "long"
+      },
+      "file_type": {
+        "type": "keyword"
+      },
+      "id": {
+        "type": "keyword"
+      },
+      "instructions": {
+        "type": "keyword"
+      },
+      "name": {
+        "type": "keyword"
+      },
+      "path_to_executable": {
+        "type": "keyword"
+      },
+      "platform": {
+        "type": "keyword"
+      },
+      "requires_input": {
+        "type": "boolean"
+      },
+      "tags": {
+        "type": "keyword"
+      },
+      "updated_at": {
+        "type": "date"
+      },
+      "updated_by": {
+        "type": "keyword"
       }
     }
   },
@@ -4342,6 +4461,60 @@
       }
     }
   },
+  "slo-composite": {
+    "dynamic": false,
+    "properties": {
+      "budgetingMethod": {
+        "ignore_above": 256,
+        "type": "keyword"
+      },
+      "compositeMethod": {
+        "ignore_above": 256,
+        "type": "keyword"
+      },
+      "createdAt": {
+        "type": "date"
+      },
+      "description": {
+        "type": "text"
+      },
+      "enabled": {
+        "type": "boolean"
+      },
+      "id": {
+        "ignore_above": 256,
+        "type": "keyword"
+      },
+      "members": {
+        "properties": {
+          "instanceId": {
+            "ignore_above": 256,
+            "type": "keyword"
+          },
+          "sloId": {
+            "ignore_above": 256,
+            "type": "keyword"
+          }
+        }
+      },
+      "name": {
+        "fields": {
+          "keyword": {
+            "ignore_above": 256,
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      },
+      "tags": {
+        "ignore_above": 256,
+        "type": "keyword"
+      },
+      "updatedAt": {
+        "type": "date"
+      }
+    }
+  },
   "slo-settings": {
     "dynamic": false,
     "properties": {}
@@ -4388,10 +4561,6 @@
     "properties": {}
   },
   "stream-prompts": {
-    "dynamic": false,
-    "properties": {}
-  },
-  "streams-significant-events-settings": {
     "dynamic": false,
     "properties": {}
   },
@@ -4671,6 +4840,10 @@
     "dynamic": false,
     "properties": {}
   },
+  "synthetics-settings-multi-space": {
+    "dynamic": false,
+    "properties": {}
+  },
   "tag": {
     "properties": {
       "color": {
@@ -4734,6 +4907,9 @@
         "properties": {
           "apiKeyId": {
             "type": "keyword"
+          },
+          "uiamApiKeyId": {
+            "type": "keyword"
           }
         }
       }
@@ -4773,6 +4949,9 @@
         "type": "keyword"
       },
       "entityType": {
+        "type": "keyword"
+      },
+      "errorCode": {
         "type": "keyword"
       },
       "message": {
@@ -4867,6 +5046,22 @@
       }
     }
   },
+  "user-storage": {
+    "dynamic": false,
+    "properties": {
+      "userId": {
+        "type": "keyword"
+      }
+    }
+  },
+  "user-storage-global": {
+    "dynamic": false,
+    "properties": {
+      "userId": {
+        "type": "keyword"
+      }
+    }
+  },
   "user_connector_token": {
     "dynamic": false,
     "properties": {
@@ -4926,6 +5121,16 @@
       },
       "name": {
         "type": "text"
+      },
+      "range": {
+        "properties": {
+          "end": {
+            "type": "keyword"
+          },
+          "start": {
+            "type": "keyword"
+          }
+        }
       },
       "type": {
         "type": "keyword"

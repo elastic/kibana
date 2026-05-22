@@ -17,6 +17,11 @@ export interface AuthenticationServiceSetup {
    * Determines if API Keys are currently enabled.
    */
   areAPIKeysEnabled: () => Promise<boolean>;
+
+  /**
+   * Determines if UIAM (User Identity and Access Management) is enabled for this deployment.
+   */
+  isUIAMEnabled: () => boolean;
 }
 
 /**

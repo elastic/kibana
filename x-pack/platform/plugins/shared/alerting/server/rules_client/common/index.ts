@@ -24,6 +24,7 @@ export {
   modifyFilterKueryNode,
 } from './mapped_params_utils';
 export {
+  API_KEY_ATTRIBUTES_TO_STRIP,
   apiKeyAsAlertAttributes,
   apiKeyAsRuleDomainProperties,
   addMissingUiamKeyTagIfNeeded,
@@ -52,3 +53,5 @@ export {
   verifySnoozeScheduleLimit,
 } from './snooze_utils';
 export { tryToRemoveTasks } from './try_to_remove_tasks';
+export { resolveRuleAPIKey } from './resolve_rule_api_key';
+export type { ResolvedAPIKey, RuleApiKeyOwnership } from './resolve_rule_api_key';

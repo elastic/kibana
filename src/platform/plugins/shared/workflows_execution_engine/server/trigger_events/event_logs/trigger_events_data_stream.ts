@@ -1,0 +1,98 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { DataStreamsSetup, DataStreamsStart } from '@kbn/core-data-streams-server';
+import type { IDataStreamClient } from '@kbn/data-streams';
+import type { MappingsDefinition } from '@kbn/es-mappings';
+import { mappings } from '@kbn/es-mappings';
+import { WORKFLOWS_EVENTS_DATA_STREAM } from './constants';
+
+// Note: Bump the version when you make changes to the definition.
+export const initializeTriggerEventsDataStream = (coreDataStreams: DataStreamsSetup): void => {
+  coreDataStreams.registerDataStream({
+    name: WORKFLOWS_EVENTS_DATA_STREAM,
+    version: 3,
+    template: {
+      mappings: triggerEventsMappings,
+      settings: {
+        auto_expand_replicas: '0-1',
+      },
+    },
+  });
+};
+
+const triggerEventsMappings = {
+  dynamic: false,
+  properties: {
+    '@timestamp': mappings.date(),
+    eventId: mappings.keyword(),
+    triggerId: mappings.keyword(),
+    spaceId: mappings.keyword(),
+    subscriptions: mappings.keyword(),
+    sourceExecutionId: mappings.keyword(),
+    payload: mappings.object({ properties: {} }),
+  },
+} satisfies MappingsDefinition;
+
+export interface TriggerEventDocument {
+  '@timestamp': string;
+  eventId: string;
+  triggerId: string;
+  spaceId: string;
+  subscriptions: string[];
+  sourceExecutionId?: string;
+  payload: Record<string, unknown>;
+}
+
+export type TriggerEventsDataStreamClient = IDataStreamClient<
+  typeof triggerEventsMappings,
+  TriggerEventDocument
+>;
+
+/**
+ * Bump when Elasticsearch index mappings for the workflows trigger-events data stream change.
+ * Compared on startup against `mappings._meta.managed_index_mappings_version` on backing indices
+ * to decide whether to schedule a lazy rollover.
+ *
+ * This is independent of `registerDataStream({ version })` above (template lifecycle) and from
+ * `WORKFLOWS_LOGS_MANAGED_INDEX_MAPPINGS_VERSION` — logs and events streams can bump separately.
+ */
+export const WORKFLOWS_EVENTS_MANAGED_INDEX_MAPPINGS_VERSION = 3;
+
+export const initializeTriggerEventsClient = (
+  coreDataStreams: DataStreamsStart
+): Promise<TriggerEventsDataStreamClient> => {
+  return coreDataStreams.initializeClient(WORKFLOWS_EVENTS_DATA_STREAM);
+};
+
+export async function writeTriggerEvent(
+  client: TriggerEventsDataStreamClient,
+  params: {
+    timestamp: string;
+    eventId: string;
+    triggerId: string;
+    spaceId: string;
+    subscriptions: string[];
+    payload: Record<string, unknown>;
+    sourceExecutionId?: string;
+  }
+): Promise<void> {
+  const doc: TriggerEventDocument = {
+    '@timestamp': params.timestamp,
+    eventId: params.eventId,
+    triggerId: params.triggerId,
+    spaceId: params.spaceId,
+    subscriptions: params.subscriptions,
+    payload: params.payload,
+    ...(params.sourceExecutionId !== undefined && params.sourceExecutionId !== ''
+      ? { sourceExecutionId: params.sourceExecutionId }
+      : {}),
+  };
+  await client.create({ documents: [doc] });
+}

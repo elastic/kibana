@@ -22,6 +22,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 import pRetry from 'p-retry';
 import type { LicenseType } from '@kbn/licensing-types';
+import { addSpanLabels } from '@kbn/apm-utils';
 
 import type {
   KibanaAssetReference,
@@ -704,7 +705,7 @@ export async function installPackageWithStateMachine(options: {
   }
 
   try {
-    span?.addLabels({
+    addSpanLabels({
       packageName: pkgName,
       packageVersion: pkgVersion,
       installType,

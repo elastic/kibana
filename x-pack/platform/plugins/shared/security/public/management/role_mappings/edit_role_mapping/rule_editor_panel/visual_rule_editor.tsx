@@ -65,7 +65,7 @@ export class VisualRuleEditor extends Component<Props, {}> {
           !this.props.readOnly && (
             <EuiButton
               color="primary"
-              iconType="plusInCircle"
+              iconType="plusCircle"
               data-test-subj="roleMappingsAddRuleButton"
               onClick={() => {
                 this.props.onChange(new AllRule([new FieldRule('username', '*')]));

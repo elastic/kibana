@@ -11,7 +11,7 @@ import type { PaletteRegistry } from '@kbn/coloring';
 import { getOverridePaletteStops } from '@kbn/coloring';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 // eslint-disable-next-line @elastic/eui/no-restricted-eui-imports
-import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { IconChartMetric } from '@kbn/chart-icons';
 import type { AccessorConfig } from '@kbn/visualization-ui-components';
 import type { ThemeServiceStart } from '@kbn/core/public';
@@ -25,13 +25,15 @@ import type {
   FormBasedPersistedState,
   MetricVisualizationState,
   SecondaryTrend,
+  DatasourcePublicAPI,
 } from '@kbn/lens-common';
 import {
   LENS_LAYER_TYPES as layerTypes,
   LENS_METRIC_ID,
   LENS_METRIC_GROUP_ID,
+  LENS_METRIC_DEFAULT_STYLE_TEMPLATE_CONFIG,
 } from '@kbn/lens-common';
-import { getUpdatedMetricState } from '../../../common/content_management/v1/transforms/metric';
+import { convertToRuntimeState } from './runtime_state';
 import { isNumericFieldForDatatable } from '../../../common/expressions/impl/datatable/utils';
 import { getSuggestions } from './suggestions';
 import {
@@ -48,6 +50,7 @@ import { getDefaultConfigForMode } from './palette_config';
 import { getAccessorType } from '../../shared_components';
 import { MetricAppearanceSettings } from './toolbar';
 import { FlyoutToolbar } from '../../shared_components/flyout_toolbar';
+import { getColumnFromActiveData } from '../utils';
 
 export const DEFAULT_MAX_COLUMNS = 3;
 
@@ -58,7 +61,7 @@ export const showingBar = (
 
 export const getDefaultColor = (state: MetricVisualizationState, isMetricNumeric?: boolean) => {
   if (showingBar(state) && isMetricNumeric) {
-    return euiLightVars.euiColorPrimary;
+    return euiThemeVars.euiColorVis2;
   }
   if (state.applyColorTo === 'value') {
     return euiThemeVars.euiColorVisText0;
@@ -86,11 +89,23 @@ const getMetricLayerConfiguration = (
   groups: VisualizationDimensionGroupConfig[];
 } => {
   const datasource = props.frame.datasourceLayers[props.state.layerId];
+  const primaryMetricTypeFallback = getColumnFromActiveData({
+    accessor: props.state.metricAccessor,
+    layerId: props.state.layerId,
+    activeData: props.frame.activeData,
+  })?.meta?.type;
   const isPrimaryMetricNumeric = Boolean(
-    props.state.metricAccessor && getAccessorType(datasource, props.state.metricAccessor).isNumeric
+    props.state.metricAccessor &&
+      getAccessorType(datasource, props.state.metricAccessor, primaryMetricTypeFallback).isNumeric
   );
 
   const getPrimaryAccessorDisplayConfig = (): Partial<AccessorConfig> => {
+    if (props.state.applyColorTo === undefined) {
+      return {
+        triggerIconType: 'none',
+      };
+    }
+
     const hasDynamicColoring = Boolean(isPrimaryMetricNumeric && props.state.palette);
 
     if (hasDynamicColoring) {
@@ -108,9 +123,16 @@ const getMetricLayerConfiguration = (
     };
   };
 
+  const secondaryMetricTypeFallback = getColumnFromActiveData({
+    accessor: props.state.secondaryMetricAccessor,
+    layerId: props.state.layerId,
+    activeData: props.frame.activeData,
+  })?.meta?.type;
+
   const isSecondaryMetricNumeric = Boolean(
     props.state.secondaryMetricAccessor &&
-      getAccessorType(datasource, props.state.secondaryMetricAccessor).isNumeric
+      getAccessorType(datasource, props.state.secondaryMetricAccessor, secondaryMetricTypeFallback)
+        .isNumeric
   );
 
   const getSecondaryAccessorDisplayConfig = (): Partial<AccessorConfig> => {
@@ -352,6 +374,40 @@ const removeBreakdownByDimension = (state: MetricVisualizationState) => {
   delete state.maxCols;
 };
 
+const cleanupMetricState = (
+  state: MetricVisualizationState,
+  datasource: Pick<DatasourcePublicAPI, 'getOperationForColumnId' | 'isTextBasedLanguage'>
+): MetricVisualizationState => {
+  const { isNumeric: isPrimaryMetricNumeric } = getAccessorType(datasource, state.metricAccessor);
+  const { isNumeric: isSecondaryMetricNumeric } = getAccessorType(
+    datasource,
+    state.secondaryMetricAccessor
+  );
+
+  let updatedState = state;
+
+  // Clear primary metric palette when it becomes non-numeric
+  if (!isPrimaryMetricNumeric && state.palette) {
+    updatedState = {
+      ...updatedState,
+      palette: undefined,
+    };
+  }
+
+  // Fix secondary metric coloring when it becomes non-numeric or when the trend configuration is invalid
+  const colorMode = getColorMode(updatedState.secondaryTrend, isSecondaryMetricNumeric);
+  if (
+    isSecondaryTrendConfigInvalid(updatedState.secondaryTrend, colorMode, isPrimaryMetricNumeric)
+  ) {
+    return {
+      ...updatedState,
+      secondaryTrend: getDefaultConfigForMode(colorMode),
+    };
+  }
+
+  return updatedState;
+};
+
 export const getMetricVisualization = ({
   paletteService,
   theme,
@@ -402,13 +458,18 @@ export const getMetricVisualization = ({
   getSuggestions,
 
   initialize(addNewLayer, state, mainPalette) {
-    if (state) return getUpdatedMetricState(state);
+    if (state) return convertToRuntimeState(state);
 
     return {
       layerId: addNewLayer(),
       layerType: layerTypes.DATA,
+      ...LENS_METRIC_DEFAULT_STYLE_TEMPLATE_CONFIG,
       palette: mainPalette?.type === 'legacyPalette' ? mainPalette.value : undefined,
     };
+  },
+
+  convertToRuntimeState(state) {
+    return convertToRuntimeState(state);
   },
 
   triggers: [VIS_EVENT_TO_TRIGGER.filter],
@@ -559,6 +620,15 @@ export const getMetricVisualization = ({
   toExpression: (state, datasourceLayers, _attributes, datasourceExpressionsByLayers) =>
     toExpression(paletteService, state, datasourceLayers, datasourceExpressionsByLayers, theme),
 
+  onDatasourceUpdate(state, frame) {
+    const datasource = frame?.datasourceLayers?.[state.layerId];
+    if (!datasource) {
+      return state;
+    }
+
+    return cleanupMetricState(state, datasource);
+  },
+
   getPersistableState: (state, datasource, datasourceState) => {
     const datasourceLayer = datasource?.getPublicAPI({
       state: datasourceState?.state,
@@ -570,30 +640,7 @@ export const getMetricVisualization = ({
       return { state, references: [] };
     }
 
-    // this should clean up the secondary trend state if in conflict
-    const { isNumeric: isPrimaryMetricNumeric } = getAccessorType(
-      datasourceLayer,
-      state.metricAccessor
-    );
-    const { isNumeric: isSecondaryMetricNumeric } = getAccessorType(
-      datasourceLayer,
-      state.secondaryMetricAccessor
-    );
-    const colorMode = getColorMode(state.secondaryTrend, isSecondaryMetricNumeric);
-
-    if (isSecondaryTrendConfigInvalid(state.secondaryTrend, colorMode, isPrimaryMetricNumeric)) {
-      return {
-        state: {
-          ...state,
-          secondaryLabel: undefined,
-          secondaryTrend: getDefaultConfigForMode(colorMode),
-          secondaryLabelPosition: 'before',
-        },
-        references: [],
-      };
-    }
-    // if there are no conflicts, it's all persistable as is
-    return { state, references: [] };
+    return { state: cleanupMetricState(state, datasourceLayer), references: [] };
   },
 
   setDimension({ prevState, columnId, groupId }) {
@@ -757,7 +804,12 @@ export const getMetricVisualization = ({
 
     const { isNumeric: isMetricNumeric } = getAccessorType(
       frame?.datasourceLayers[state.layerId],
-      state.metricAccessor
+      state.metricAccessor,
+      getColumnFromActiveData({
+        accessor: state.metricAccessor,
+        layerId: state.layerId,
+        activeData: frame?.activeData,
+      })?.meta?.type
     );
 
     return {

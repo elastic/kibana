@@ -101,7 +101,7 @@ const LogAnalysisSetupFlyoutSubPage: FC<
           data-test-subj="infraLogAnalysisSetupFlyoutSubPageAllMachineLearningJobsButton"
           flush="left"
           iconSide="left"
-          iconType="arrowLeft"
+          iconType="chevronSingleLeft"
           onClick={onViewModuleList}
         >
           <FormattedMessage

@@ -73,6 +73,15 @@ export const DEFAULT_VALID_CONSUMERS: RuleCreationValidConsumer[] = [
 export const CREATE_RULE_ROUTE = '/rule/create/:ruleTypeId' as const;
 export const EDIT_RULE_ROUTE = '/rule/edit/:id' as const;
 
+export const LLM_CONNECTOR_IDS: readonly string[] = [
+  '.bedrock',
+  '.gemini',
+  '.gen-ai',
+  '.inference',
+] as const;
+
+export const isLLMConnectorTypeId = (id: string): boolean => LLM_CONNECTOR_IDS.includes(id);
+
 export enum RuleFormStepId {
   DEFINITION = 'rule-definition',
   ACTIONS = 'rule-actions',

@@ -34,6 +34,7 @@ import {
 } from '@kbn/reporting-public/share';
 import type { InjectedIntl } from '@kbn/i18n-react';
 import type { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
+import type { ReportingCSVSharingData } from '@kbn/reporting-public/types';
 import type { ReportingSetup, ReportingStart } from '.';
 import { ReportingNotifierStreamHandler as StreamHandler } from './lib/stream_handler';
 import type { StartServices } from './types';
@@ -218,7 +219,7 @@ export class ReportingPublicPlugin
       });
     });
 
-    shareSetup.registerShareIntegration<ExportShare>(
+    shareSetup.registerShareIntegration<ExportShare<ReportingCSVSharingData>>(
       'search',
       // TODO: export the reporting pdf export provider for registration in the actual plugins that depend on it
       reportingCsvExportShareIntegration({

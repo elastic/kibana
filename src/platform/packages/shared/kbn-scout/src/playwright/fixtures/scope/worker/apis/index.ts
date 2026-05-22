@@ -48,13 +48,13 @@ export const apiServicesFixture = coreWorkerFixtures.extend<
   { apiServices: ApiServicesFixture }
 >({
   apiServices: [
-    async ({ kbnClient, log }, use) => {
+    async ({ kbnClient, esClient, log }, use) => {
       const services = {
         alerting: getAlertingApiHelper(log, kbnClient),
         cases: getCasesApiHelper(log, kbnClient),
         dataViews: getDataViewsApiHelper(log, kbnClient),
         fleet: getFleetApiHelper(log, kbnClient),
-        ml: getMlApiHelper(log, kbnClient),
+        ml: getMlApiHelper(log, kbnClient, esClient),
         sampleData: getSampleDataApiHelper(log, kbnClient),
         spaces: getSpacesApiHelper(log, kbnClient),
         streams: getStreamsApiService({ kbnClient, log }),

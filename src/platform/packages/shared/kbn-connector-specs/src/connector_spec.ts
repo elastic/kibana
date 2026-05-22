@@ -78,14 +78,37 @@ export interface ConnectorMetadata {
 // OAuth2, SSL/mTLS, AWS SigV4 → Phase 2 (see connector_rfc.ts)
 
 // Auth schemas defined in ./auth_types
-export interface GetTokenOpts {
+// oauth authz code and client credentials with client secret
+export interface OAuthGetTokenOpts {
+  authType: 'oauth';
   tokenUrl: string;
   scope?: string;
   clientId: string;
   clientSecret: string;
   additionalFields?: Record<string, unknown>;
   tokenEndpointAuthMethod?: 'client_secret_post' | 'client_secret_basic';
+  accessTokenPath?: string;
+  tokenTypePath?: string;
+  tokenType?: string;
 }
+
+export interface OAuthClientCredsPrivateKeyJWTGetTokenOpts {
+  authType: 'oauth_client_credentials_private_key_jwt';
+  tokenUrl: string;
+  scope?: string;
+  clientId: string;
+}
+
+export interface EarsGetTokenOpts {
+  authType: 'ears';
+  provider: string;
+  scope?: string;
+}
+
+export type GetTokenOpts =
+  | OAuthGetTokenOpts
+  | OAuthClientCredsPrivateKeyJWTGetTokenOpts
+  | EarsGetTokenOpts;
 
 export interface AuthContext {
   getCustomHostSettings: (url: string) => CustomHostSettings | undefined;
@@ -269,11 +292,10 @@ export interface ConnectorSpec {
 
   transformations?: Transformations;
 
-  // Workflow YAML template strings for Agent Builder. When present, these
-  // workflows are automatically created when a connector of this type is added.
-  // Each string is a raw YAML template that may contain Mustache-style
-  // variables (e.g., `<%= connector-id %>`).
-  agentBuilderWorkflows?: string[];
+  // Optional skill content for Agent Builder. When present, this string is
+  // included in the connector's agent attachment representation so the LLM
+  // has richer context about how to use the connector's sub-actions.
+  skill?: string;
 }
 
 // ============================================================================

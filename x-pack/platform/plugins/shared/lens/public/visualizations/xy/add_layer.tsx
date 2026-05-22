@@ -122,6 +122,7 @@ export function AddLayerButton({
       key="lsnLayerAdd"
     >
       <EuiPopover
+        aria-label={buttonLabel}
         data-test-subj="lnsConfigPanel__addLayerPopover"
         button={
           <EuiToolTip content={buttonLabel} disableScreenReaderOutput>
@@ -142,7 +143,6 @@ export function AddLayerButton({
       >
         <EuiContextMenu
           initialPanelId={AddLayerPanelType.main}
-          size="s"
           panels={[
             {
               id: AddLayerPanelType.main,
@@ -194,7 +194,7 @@ export function AddLayerButton({
                   name: i18n.translate('xpack.lens.configPanel.newAnnotation', {
                     defaultMessage: 'New annotation',
                   }),
-                  icon: 'plusInCircle',
+                  icon: 'plusCircle',
                   onClick: () => {
                     addLayer(LayerTypes.ANNOTATIONS);
                     toggleLayersChoice(false);

@@ -13,6 +13,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Router } from '@kbn/shared-ux-router';
 import type { AppPluginStartDependencies } from './types';
+import { UsageTrackerContextProvider } from './contexts/usage_tracker_context';
 
 const renderMgmtApp = (
   core: CoreStart,
@@ -24,9 +25,11 @@ const renderMgmtApp = (
     <KibanaRenderContextProvider {...core}>
       <KibanaContextProvider services={{ ...core, ...services }}>
         <I18nProvider>
-          <Router history={services.history}>
-            <Component />
-          </Router>
+          <UsageTrackerContextProvider usageCollection={services.usageCollection}>
+            <Router history={services.history}>
+              <Component />
+            </Router>
+          </UsageTrackerContextProvider>
         </I18nProvider>
       </KibanaContextProvider>
     </KibanaRenderContextProvider>,

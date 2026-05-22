@@ -31,6 +31,7 @@ export const connectorToInference = (connector: RawConnector): InferenceConnecto
     capabilities: {},
     isInferenceEndpoint: false,
     isPreconfigured: connector.isPreconfigured ?? false,
+    ...(connector.isEis !== undefined && { isEis: connector.isEis }),
     ...(connector.isDeprecated !== undefined && { isDeprecated: connector.isDeprecated }),
     ...(connector.isConnectorTypeDeprecated !== undefined && {
       isConnectorTypeDeprecated: connector.isConnectorTypeDeprecated,

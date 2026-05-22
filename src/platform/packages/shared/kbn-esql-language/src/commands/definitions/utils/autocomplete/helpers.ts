@@ -22,6 +22,7 @@ import type {
 } from '../../../registry/types';
 import { Location } from '../../../registry/types';
 import type { SupportedDataType } from '../../types';
+import type { FunctionDefinitionTypes } from '../../types';
 import { filterFunctionDefinitions, getAllFunctions, getFunctionSuggestion } from '../functions';
 import { SuggestionCategory } from '../../../../language/autocomplete/utils/sorting/types';
 import { buildConstantsDefinitions, getCompatibleLiterals, getDateLiterals } from '../literals';
@@ -48,19 +49,8 @@ export const buildUserDefinedColumnsDefinitions = (
     detail: i18n.translate('kbn-esql-language.esql.autocomplete.variableDefinition', {
       defaultMessage: `Column specified by the user within the ES|QL query`,
     }),
-    sortText: 'D',
     category: SuggestionCategory.USER_DEFINED_COLUMN,
   }));
-
-export function pushItUpInTheList(suggestions: ISuggestionItem[], shouldPromote: boolean) {
-  if (!shouldPromote) {
-    return suggestions;
-  }
-  return suggestions.map(({ sortText, ...rest }) => ({
-    ...rest,
-    sortText: `1${sortText}`,
-  }));
-}
 
 export const findFinalWord = (text: string) => {
   const words = text.split(/\s+/);
@@ -83,7 +73,6 @@ interface FieldSuggestionsOptions {
   addSpaceAfterField?: boolean;
   openSuggestions?: boolean;
   addComma?: boolean;
-  promoteToTop?: boolean;
   canBeMultiValue?: boolean;
 }
 
@@ -98,7 +87,6 @@ export async function getFieldsSuggestions(
     addSpaceAfterField = false,
     openSuggestions = false,
     addComma = false,
-    promoteToTop = true,
     canBeMultiValue = false,
   } = options;
 
@@ -108,14 +96,12 @@ export async function getFieldsSuggestions(
     return ESQLVariableType.FIELDS;
   })();
 
-  const suggestions = await getFieldsByType(types, ignoreColumns, {
+  return (await getFieldsByType(types, ignoreColumns, {
     advanceCursor: addSpaceAfterField,
     openSuggestions,
     addComma,
     variableType,
-  });
-
-  return pushItUpInTheList(suggestions as ISuggestionItem[], promoteToTop);
+  })) as ISuggestionItem[];
 }
 
 interface FunctionSuggestionOptions {
@@ -124,6 +110,7 @@ interface FunctionSuggestionOptions {
   addSpaceAfterFunction?: boolean;
   constantGeneratingOnly?: boolean;
   suggestOnlyName?: boolean;
+  functionTypes?: FunctionDefinitionTypes[];
 }
 
 interface GetFunctionsSuggestionsParams {
@@ -147,19 +134,21 @@ export function getFunctionsSuggestions({
     suggestOnlyName = false,
     addSpaceAfterFunction = false,
     constantGeneratingOnly = false,
+    functionTypes,
   } = options;
 
   const predicates = {
     location,
     returnTypes: types,
     ignored,
+    isTimeseriesSource: context?.isTimeseriesSource,
   };
 
   const hasMinimumLicenseRequired = callbacks?.hasMinimumLicenseRequired;
   const activeProduct = context?.activeProduct;
 
   let filteredFunctions = filterFunctionDefinitions(
-    getAllFunctions({ includeOperators: false }),
+    getAllFunctions({ includeOperators: false, type: functionTypes }),
     predicates,
     hasMinimumLicenseRequired,
     activeProduct
@@ -268,7 +257,6 @@ export function getControlSuggestion(
             detail: i18n.translate('kbn-esql-language.esql.autocomplete.createControlDetailLabel', {
               defaultMessage: 'Click to create',
             }),
-            sortText: '1',
             category: SuggestionCategory.CUSTOM_ACTION,
             command: {
               id: `esql.control.${type}.create`,
@@ -289,7 +277,6 @@ export function getControlSuggestion(
           i18n.translate('kbn-esql-language.esql.autocomplete.namedParamDefinition', {
             defaultMessage: 'Named parameter',
           }),
-          '1A',
           undefined,
           undefined,
           SuggestionCategory.USER_DEFINED_COLUMN
@@ -332,7 +319,6 @@ export function createInferenceEndpointToCompletionItem(
     }),
     kind: 'Reference',
     label: inferenceEndpoint.inference_id,
-    sortText: '1',
     text: inferenceEndpoint.inference_id,
     category: SuggestionCategory.VALUE,
   };
@@ -407,18 +393,7 @@ function createMultiCommand(
   };
 }
 
-export function getLookupIndexCreateSuggestion(
-  innerText: string,
-  indexName?: string
-): ISuggestionItem {
-  const start = indexName ? innerText.lastIndexOf(indexName) : -1;
-  const rangeToReplace =
-    indexName && start !== -1
-      ? {
-          start,
-          end: start + indexName.length,
-        }
-      : undefined;
+export function getLookupIndexCreateSuggestion(indexName?: string): ISuggestionItem {
   return {
     label: indexName
       ? i18n.translate(
@@ -448,8 +423,6 @@ export function getLookupIndexCreateSuggestion(
       }
     ),
 
-    sortText: '0',
-
     category: SuggestionCategory.CUSTOM_ACTION,
 
     command: {
@@ -465,8 +438,6 @@ export function getLookupIndexCreateSuggestion(
 
       arguments: [{ indexName }],
     },
-
-    rangeToReplace,
 
     incomplete: true,
   } as ISuggestionItem;

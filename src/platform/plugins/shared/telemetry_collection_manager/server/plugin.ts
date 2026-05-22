@@ -22,6 +22,7 @@ import type {
 } from '@kbn/core/server';
 
 import { firstValueFrom, ReplaySubject } from 'rxjs';
+import { addSpanLabels } from '@kbn/apm-utils';
 import apm from 'elastic-apm-node';
 import { SpanStatusCode, type SpanOptions } from '@opentelemetry/api';
 import { withActiveSpan } from '@kbn/tracing-utils';
@@ -278,7 +279,7 @@ export class TelemetryCollectionManagerPlugin
           'Retrieve Snapshot Telemetry',
           'telemetry'
         );
-        retrieveSnapshotTelemetryTransaction.addLabels({
+        addSpanLabels({
           unencrypted: config.unencrypted,
           refresh: config.refreshCache,
         });

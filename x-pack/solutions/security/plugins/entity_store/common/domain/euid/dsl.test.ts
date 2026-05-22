@@ -285,7 +285,7 @@ describe('getEuidDslFilterBasedOnDocument', () => {
       expect(result?.bool?.must_not).toBeUndefined();
     });
 
-    it('returns filter for user.name and host.id when whenConditionTrueSetFieldsPreAgg sets entity.namespace to local (non-IDP)', () => {
+    it('returns filter for user.name and host.id when fieldEvaluations set entity.namespace to local (non-IDP)', () => {
       const result = getEuidDslFilterBasedOnDocument('user', {
         user: { name: 'alice' },
         host: { id: 'host-1' },
@@ -304,6 +304,48 @@ describe('getEuidDslFilterBasedOnDocument', () => {
         ? filter.map((clause) => Object.keys(clause.term ?? {})[0]).filter(Boolean)
         : [];
       expect(filterFields).not.toContain('entity.namespace');
+    });
+
+    it('evaluates correctly for real non-IDP document', () => {
+      expect(
+        getEuidDslFilterBasedOnDocument('user', {
+          '@timestamp': '2026-04-22T12:55:59.638Z',
+          data_stream: {
+            dataset: ['endpoint.events.file', 'endpoint.events.process'],
+          },
+          host: {
+            name: 'tyrese.goldner-mac',
+            id: '4a7a8b68-1814-487f-9e56-5e7bed425edc',
+          },
+          event: {
+            kind: 'event',
+            module: 'endpoint',
+            category: ['file', 'process'],
+            type: ['creation', 'info'],
+            dataset: ['endpoint.events.file', 'endpoint.events.process'],
+          },
+          user: {
+            name: 'tyrese.goldner',
+            id: '1025',
+          },
+          entity: {
+            lifecycle: {
+              first_seen: '2026-04-22T10:14:02.635Z',
+              last_seen: '2026-04-22T12:55:59.638Z',
+            },
+            EngineMetadata: {
+              Type: 'user',
+              UntypedId: 'tyrese.goldner@4a7a8b68-1814-487f-9e56-5e7bed425edc@local',
+            },
+            confidence: 'medium',
+            namespace: 'local',
+            name: 'tyrese.goldner@tyrese.goldner-mac',
+            source: 'endpoint',
+            id: 'user:tyrese.goldner@4a7a8b68-1814-487f-9e56-5e7bed425edc@local',
+            type: 'Identity',
+          },
+        })
+      ).toMatchSnapshot();
     });
   });
 

@@ -5,9 +5,120 @@
  * 2.0.
  */
 
-import { calculateIsValidPing } from './helpers';
+import { loggerMock } from '@kbn/logging-mocks';
+import type { AlertStatusConfigs } from '../../../../common/runtime_types/alert_rules/common';
+import { calculateIsValidPing, getPendingConfigs } from './helpers';
 
 describe('helpers', () => {
+  describe('getPendingConfigs', () => {
+    const logger = loggerMock.create();
+
+    const makeMonitorSO = (
+      soId: string,
+      monitorQueryId: string,
+      name: string,
+      locationIds: string[] = ['loc-1']
+    ) => ({
+      id: soId,
+      type: 'synthetics-monitor' as const,
+      score: 1,
+      attributes: {
+        id: monitorQueryId,
+        name,
+        type: 'http',
+        config_id: soId,
+        locations: locationIds.map((id) => ({ id, label: `Label ${id}` })),
+        tags: [],
+        labels: {},
+      },
+      created_at: '2020-01-01T00:00:00.000Z',
+      references: [],
+    });
+
+    it('uses configId (SO UUID) for keys, not monitorQueryId, for project monitors', () => {
+      const soId = 'so-uuid-123';
+      const journeyId = 'my-project-my-monitor';
+      const locationId = 'us-east';
+
+      const monitors = [makeMonitorSO(soId, journeyId, 'Project Mon', [locationId])];
+
+      const downConfigs = {
+        [`${soId}-${locationId}`]: {
+          configId: soId,
+          monitorQueryId: journeyId,
+          locationId,
+          status: 'down',
+          timestamp: '2025-01-01T00:00:00.000Z',
+          latestPing: {},
+          checks: { downWithinXChecks: 1, down: 1 },
+        },
+      } as unknown as AlertStatusConfigs;
+
+      const result = getPendingConfigs({
+        monitorQueryIds: [journeyId],
+        monitorLocationIds: [locationId],
+        upConfigs: {},
+        downConfigs,
+        monitorsData: {
+          [journeyId]: { scheduleInMs: 60000, locations: [locationId], type: 'http' },
+        },
+        monitors: monitors as any,
+        logger,
+      });
+
+      // Should NOT be pending because down config with SO-UUID key exists
+      expect(result).toEqual({});
+    });
+
+    it('creates pending config with SO UUID as configId for project monitors', () => {
+      const soId = 'so-uuid-456';
+      const journeyId = 'my-project-monitor-2';
+      const locationId = 'us-west';
+
+      const monitors = [makeMonitorSO(soId, journeyId, 'Project Mon 2', [locationId])];
+
+      const result = getPendingConfigs({
+        monitorQueryIds: [journeyId],
+        monitorLocationIds: [locationId],
+        upConfigs: {},
+        downConfigs: {},
+        monitorsData: {
+          [journeyId]: { scheduleInMs: 60000, locations: [locationId], type: 'http' },
+        },
+        monitors: monitors as any,
+        logger,
+      });
+
+      // Key should use SO UUID, not journey ID
+      expect(result[`${soId}-${locationId}`]).toBeDefined();
+      expect(result[`${journeyId}-${locationId}`]).toBeUndefined();
+      expect(result[`${soId}-${locationId}`].configId).toBe(soId);
+      expect(result[`${soId}-${locationId}`].monitorQueryId).toBe(journeyId);
+    });
+
+    it('works correctly for regular monitors where configId === monitorQueryId', () => {
+      const monitorId = 'regular-monitor-id';
+      const locationId = 'eu-west';
+
+      const monitors = [makeMonitorSO(monitorId, monitorId, 'Regular Mon', [locationId])];
+
+      const result = getPendingConfigs({
+        monitorQueryIds: [monitorId],
+        monitorLocationIds: [locationId],
+        upConfigs: {},
+        downConfigs: {},
+        monitorsData: {
+          [monitorId]: { scheduleInMs: 60000, locations: [locationId], type: 'http' },
+        },
+        monitors: monitors as any,
+        logger,
+      });
+
+      expect(result[`${monitorId}-${locationId}`]).toBeDefined();
+      expect(result[`${monitorId}-${locationId}`].configId).toBe(monitorId);
+    });
+  });
+
   describe('calculateIsValidPing', () => {
     // Store the original Date implementation
     const originalDate = global.Date;

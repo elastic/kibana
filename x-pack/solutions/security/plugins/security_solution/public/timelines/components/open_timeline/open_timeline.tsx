@@ -273,7 +273,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
                       <UtilityBarAction
                         dataTestSubj="batchActions"
                         iconSide="right"
-                        iconType="arrowDown"
+                        iconType="chevronSingleDown"
                         popoverContent={getBatchItemsPopoverContent}
                         data-test-subj="utility-bar-action"
                       >

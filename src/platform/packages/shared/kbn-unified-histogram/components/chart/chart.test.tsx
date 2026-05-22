@@ -9,7 +9,6 @@
 
 import type { Capabilities } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { ReactElement } from 'react';
 import type { Suggestion } from '@kbn/lens-plugin/public';
 import type { UnifiedHistogramFetchStatus } from '../../types';
 import React from 'react';
@@ -24,7 +23,7 @@ import { of } from 'rxjs';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { UnifiedHistogramChart, type UnifiedHistogramChartProps } from './chart';
-import { unifiedHistogramServicesMock } from '../../__mocks__/services';
+import { lensSaveModalComponentMock, unifiedHistogramServicesMock } from '../../__mocks__/services';
 import userEvent from '@testing-library/user-event';
 
 jest.mock('./hooks/use_edit_visualization', () => ({
@@ -35,7 +34,6 @@ let mockUseEditVisualization: jest.Mock | undefined = jest.fn();
 const mockedSearchSourceInstanceMockFetch$ = jest.mocked(searchSourceInstanceMock.fetch$);
 
 interface MountComponentProps {
-  customToggle?: ReactElement;
   noChart?: boolean;
   noHits?: boolean;
   noBreakdown?: boolean;
@@ -49,9 +47,10 @@ interface MountComponentProps {
   mockEditVisualization?: jest.Mock | undefined;
 }
 
+const toggleActionsTestId = 'default-chart-toggle-actions';
+
 const mountComponent = async (mountProps: MountComponentProps = {}) => {
   const {
-    customToggle,
     noChart,
     noHits,
     noBreakdown,
@@ -139,7 +138,7 @@ const mountComponent = async (mountProps: MountComponentProps = {}) => {
     onTimeIntervalChange: jest.fn(),
     withDefaultActions: undefined,
     isChartAvailable: checkChartAvailability({ chart, dataView, isPlainRecord }),
-    renderCustomChartToggleActions: customToggle ? () => customToggle : undefined,
+    renderToggleActions: () => <span data-test-subj={toggleActionsTestId}>Toggle actions</span>,
     fetch$: getFetch$Mock(),
     fetchParams,
     dataLoading$: undefined,
@@ -159,56 +158,49 @@ const mountComponent = async (mountProps: MountComponentProps = {}) => {
 };
 
 describe('Chart', () => {
-  test('render when chart is undefined', async () => {
+  test('renders a hidden placeholder when chart is undefined', async () => {
     await mountComponent({ noChart: true });
 
-    expect(screen.getByText('Show chart')).toBeVisible();
-  });
-
-  test('should render a custom toggle when provided', async () => {
-    await mountComponent({
-      customToggle: <span data-test-subj="custom-toggle" />,
-    });
-
-    expect(screen.getByTestId('custom-toggle')).toBeVisible();
-    expect(screen.queryByText('Show chart')).not.toBeInTheDocument();
-  });
-
-  test('should not render when custom toggle is provided and chart is hidden', async () => {
-    await mountComponent({
-      customToggle: <span data-test-subj="custom-toggle" />,
-      chartHidden: true,
-    });
-
     expect(screen.getByTestId('unifiedHistogramChartPanelHidden')).toBeVisible();
-    expect(screen.queryByTestId('custom-toggle')).not.toBeInTheDocument();
+  });
+
+  test('should render chart toggle actions when chart is defined', async () => {
+    await mountComponent();
+
+    expect(screen.queryByTestId(toggleActionsTestId)).toBeVisible();
+  });
+
+  test('should not render chart toggle actions when chart is hidden', async () => {
+    await mountComponent({ chartHidden: true });
+
+    expect(screen.queryByTestId(toggleActionsTestId)).not.toBeInTheDocument();
   });
 
   test('render when chart is defined and onEditVisualization is undefined', async () => {
     await mountComponent({ mockEditVisualization: undefined });
 
-    expect(screen.getByText('Hide chart')).toBeVisible();
+    expect(screen.getByTestId(toggleActionsTestId)).toBeVisible();
     expect(screen.queryByText('Edit visualization')).not.toBeInTheDocument();
   });
 
   test('render when chart is defined and onEditVisualization is defined', async () => {
     await mountComponent();
 
-    expect(screen.getByText('Hide chart')).toBeVisible();
+    expect(screen.getByTestId(toggleActionsTestId)).toBeVisible();
     expect(screen.getByText('Edit visualization')).toBeVisible();
   });
 
   test('render when chart.hidden is true', async () => {
     await mountComponent({ chartHidden: true });
 
-    expect(screen.getByText('Show chart')).toBeVisible();
+    expect(screen.getByTestId('unifiedHistogramChartPanelHidden')).toBeVisible();
     expect(screen.queryByTestId('unifiedHistogramChart')).not.toBeInTheDocument();
   });
 
   test('render when chart.hidden is false', async () => {
     await mountComponent({ chartHidden: false });
 
-    expect(screen.getByText('Hide chart')).toBeVisible();
+    expect(screen.getByTestId(toggleActionsTestId)).toBeVisible();
     expect(screen.getByTestId('unifiedHistogramChart')).toBeVisible();
   });
 
@@ -219,10 +211,10 @@ describe('Chart', () => {
       isTransformationalESQL: true,
     });
 
-    expect(screen.getByText('Hide chart')).toBeVisible();
+    expect(screen.getByTestId(toggleActionsTestId)).toBeVisible();
     expect(screen.getByTestId('unifiedHistogramChart')).toBeVisible();
     expect(screen.getByText('Edit visualization')).toBeVisible();
-    expect(screen.getByText('Save visualization')).toBeVisible();
+    expect(screen.getByText('Save visualization to dashboard')).toBeVisible();
   });
 
   test('should not render when is text based, non-transformational and non-time-based', async () => {
@@ -232,10 +224,10 @@ describe('Chart', () => {
       isTransformationalESQL: false,
     });
 
-    expect(screen.getByText('Show chart')).toBeVisible();
+    expect(screen.getByTestId('unifiedHistogramChartPanelHidden')).toBeVisible();
     expect(screen.queryByTestId('unifiedHistogramChart')).not.toBeInTheDocument();
     expect(screen.queryByText('Edit visualization')).not.toBeInTheDocument();
-    expect(screen.queryByText('Save visualization')).not.toBeInTheDocument();
+    expect(screen.queryByText('Save visualization to dashboard')).not.toBeInTheDocument();
   });
 
   test('should not render when is text based, non-transformational, non-time-based and suggestions are available', async () => {
@@ -246,10 +238,10 @@ describe('Chart', () => {
       isTransformationalESQL: false,
     });
 
-    expect(screen.getByText('Show chart')).toBeVisible();
+    expect(screen.getByTestId('unifiedHistogramChartPanelHidden')).toBeVisible();
     expect(screen.queryByTestId('unifiedHistogramChart')).not.toBeInTheDocument();
     expect(screen.queryByText('Edit visualization')).not.toBeInTheDocument();
-    expect(screen.queryByText('Save visualization')).not.toBeInTheDocument();
+    expect(screen.queryByText('Save visualization to dashboard')).not.toBeInTheDocument();
   });
 
   test('should render when is text based, non-transformational and time-based', async () => {
@@ -258,10 +250,10 @@ describe('Chart', () => {
       isTransformationalESQL: false,
     });
 
-    expect(screen.getByText('Hide chart')).toBeVisible();
+    expect(screen.getByTestId(toggleActionsTestId)).toBeVisible();
     expect(screen.getByTestId('unifiedHistogramChart')).toBeVisible();
     expect(screen.getByText('Edit visualization')).toBeVisible();
-    expect(screen.getByText('Save visualization')).toBeVisible();
+    expect(screen.getByText('Save visualization to dashboard')).toBeVisible();
   });
 
   test('should render when is text based, transformational and time-based', async () => {
@@ -270,10 +262,10 @@ describe('Chart', () => {
       isTransformationalESQL: true,
     });
 
-    expect(screen.getByText('Hide chart')).toBeVisible();
+    expect(screen.getByTestId(toggleActionsTestId)).toBeVisible();
     expect(screen.getByTestId('unifiedHistogramChart')).toBeVisible();
     expect(screen.getByText('Edit visualization')).toBeVisible();
-    expect(screen.getByText('Save visualization')).toBeVisible();
+    expect(screen.getByText('Save visualization to dashboard')).toBeVisible();
   });
 
   test('should not render when is text based, transformational and no suggestions available', async () => {
@@ -283,10 +275,10 @@ describe('Chart', () => {
       isTransformationalESQL: true,
     });
 
-    expect(screen.getByText('Show chart')).toBeVisible();
+    expect(screen.getByTestId('unifiedHistogramChartPanelHidden')).toBeVisible();
     expect(screen.queryByTestId('unifiedHistogramChart')).not.toBeInTheDocument();
     expect(screen.queryByText('Edit visualization')).not.toBeInTheDocument();
-    expect(screen.queryByText('Save visualization')).not.toBeInTheDocument();
+    expect(screen.queryByText('Save visualization to dashboard')).not.toBeInTheDocument();
   });
 
   test('render progress bar when text based and request is loading', async () => {
@@ -359,7 +351,7 @@ describe('Chart', () => {
     });
 
     expect(screen.getByTestId('unifiedHistogramChart')).toBeVisible();
-    expect(screen.queryByText('Save visualization')).not.toBeInTheDocument();
+    expect(screen.queryByText('Save visualization to dashboard')).not.toBeInTheDocument();
   });
 
   it('should not render the save button when the dashboard save by value permissions are false', async () => {
@@ -369,6 +361,26 @@ describe('Chart', () => {
     });
 
     expect(screen.getByTestId('unifiedHistogramChart')).toBeVisible();
-    expect(screen.queryByText('Save visualization')).not.toBeInTheDocument();
+    expect(screen.queryByText('Save visualization to dashboard')).not.toBeInTheDocument();
+  });
+
+  it('opens save modal with an empty title', async () => {
+    const user = userEvent.setup();
+    lensSaveModalComponentMock.mockClear();
+
+    await mountComponent({
+      isPlainRecord: true,
+      isTransformationalESQL: true,
+      dataView: dataViewMock,
+    });
+
+    await user.click(screen.getByText('Save visualization to dashboard'));
+
+    expect(lensSaveModalComponentMock).toHaveBeenCalled();
+    const firstCall = lensSaveModalComponentMock.mock.calls[0] as unknown as
+      | [{ initialInput: { attributes: { title: string } } }]
+      | undefined;
+    expect(firstCall).toBeDefined();
+    expect(firstCall![0].initialInput.attributes.title).toBe('');
   });
 });

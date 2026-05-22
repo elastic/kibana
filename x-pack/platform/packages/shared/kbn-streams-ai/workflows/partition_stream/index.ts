@@ -9,7 +9,6 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
 import type { Feature, Streams } from '@kbn/streams-schema';
-import { isEqual } from 'lodash';
 import { conditionSchema, type Condition } from '@kbn/streamlang';
 import { DeepStrict } from '@kbn/zod-helpers/v4';
 import { clusterLogs } from '../../src/cluster_logs/cluster_logs';
@@ -45,6 +44,8 @@ export async function partitionStream({
   maxSteps,
   signal,
   getFeatures,
+  userPrompt,
+  existingPartitions = [],
 }: {
   definition: Streams.WiredStream.Definition;
   inferenceClient: BoundInferenceClient;
@@ -59,6 +60,8 @@ export async function partitionStream({
     minConfidence?: number;
     limit?: number;
   }): Promise<Feature[]>;
+  userPrompt?: string;
+  existingPartitions?: Array<{ name: string; condition: Condition }>;
 }): Promise<PartitionStreamResponse> {
   const enabledChildConditions = definition.ingest.wired.routing
     .filter((route) => route.status !== 'disabled')
@@ -70,7 +73,7 @@ export async function partitionStream({
     end,
     index: definition.name,
     logger,
-    partitions: [],
+    partitions: existingPartitions,
     excludeConditions: enabledChildConditions,
     size: 1000,
   });
@@ -123,6 +126,10 @@ export async function partitionStream({
       stream: definition,
       initial_clustering: JSON.stringify(initialClusters),
       condition_schema: JSON.stringify(schema),
+      ...(userPrompt ? { user_prompt: userPrompt } : {}),
+      ...(existingPartitions.length > 0
+        ? { existing_partitions: JSON.stringify(existingPartitions) }
+        : {}),
     },
     maxSteps,
     toolCallbacks: {
@@ -183,27 +190,43 @@ export async function partitionStream({
     abortSignal: signal,
   });
 
-  const proposedPartitions =
-    response?.toolCalls
-      ?.flatMap((toolCall) => toolCall.function.arguments.partitions ?? [])
-      .map(({ name, condition }) => {
-        // Sanitize name to be alphanumeric with dashes only, lowercase
-        const sanitizedName = name
-          .toLowerCase()
-          .replace(/[^a-z0-9-]/g, '-')
-          .replace(/-+/g, '-')
-          .replace(/^-+|-+$/g, '');
-        return {
-          name: `${definition.name}.${sanitizedName}`,
-          condition: condition as Condition,
-        };
-      }) ?? [];
+  const seenNames = new Set<string>();
+  const proposedPartitions = (response?.toolCalls
+    ?.flatMap((toolCall) => toolCall.function.arguments.partitions ?? [])
+    .map(({ name, condition }) => {
+      // Strip the parent stream prefix if the LLM echoed it back (e.g. "logs.otel.foo" → "foo")
+      const baseName = name.startsWith(`${definition.name}.`)
+        ? name.slice(definition.name.length + 1)
+        : name;
+
+      // Sanitize name to be alphanumeric with dashes only, lowercase
+      const sanitizedName = baseName
+        .toLowerCase()
+        .replace(/[^a-z0-9-]/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-+|-+$/g, '');
+
+      if (!sanitizedName) {
+        return null;
+      }
+
+      const fullName = `${definition.name}.${sanitizedName}`;
+
+      if (seenNames.has(fullName)) {
+        return null;
+      }
+      seenNames.add(fullName);
+
+      return {
+        name: fullName,
+        condition: condition as Condition,
+      };
+    })
+    .filter(Boolean) ?? []) as Array<{ name: string; condition: Condition }>;
 
   const partitions = proposedPartitions.filter(
-    ({ condition }) =>
-      strictConditionSchema.safeParse(condition).success && !isEqual(condition, { always: {} })
+    ({ condition }) => strictConditionSchema.safeParse(condition).success
   );
-
   return {
     partitions,
     reason: partitions.length === 0 ? 'no_clusters' : undefined,

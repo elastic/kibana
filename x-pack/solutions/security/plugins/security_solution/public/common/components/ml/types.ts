@@ -6,6 +6,7 @@
  */
 
 import type { MlInfluencer } from '@kbn/ml-anomaly-utils';
+import type { EntityStoreRecord } from '../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import type { FlowTarget } from '../../../../common/search_strategy';
 
 import type { HostsType } from '../../../explore/hosts/store/model';
@@ -93,6 +94,8 @@ export interface AnomaliesTableCommonProps {
 export type AnomaliesHostTableProps = AnomaliesTableCommonProps & {
   hostName?: string;
   type: HostsType;
+  /** Entity Store / EUID identity fields; drives ML exists filter and anomaly row matching. */
+  identityFields?: Record<string, string>;
 };
 
 export type AnomaliesNetworkTableProps = AnomaliesTableCommonProps & {
@@ -104,6 +107,9 @@ export type AnomaliesNetworkTableProps = AnomaliesTableCommonProps & {
 export type AnomaliesUserTableProps = AnomaliesTableCommonProps & {
   userName?: string;
   type: UsersType;
+  entityRecord?: EntityStoreRecord | null;
+  /** Entity Store / EUID identity fields; drives ML exists filter and anomaly row matching. */
+  identityFields?: Record<string, string>;
 };
 
 const sourceOrDestination = ['source.ip', 'destination.ip'];

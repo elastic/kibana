@@ -32,7 +32,7 @@ export const createOptionsListControlAction = (): CreateControlTypeAction<
     id: OPTIONS_LIST_ACTION,
     type: OPTIONS_LIST_CONTROL,
     order: 1,
-    getIconType: () => 'editorChecklist',
+    getIconType: () => 'listCheck',
     getDisplayName: () =>
       i18n.translate('controls.optionsList.action.displayName', {
         defaultMessage: 'Options list',
@@ -43,12 +43,11 @@ export const createOptionsListControlAction = (): CreateControlTypeAction<
       const field = dataView.getFieldByName(fieldName);
       return Boolean(field && isFieldCompatible(field));
     },
-    execute: async ({ embeddable, state, controlId, isPinned }) => {
+    execute: async ({ embeddable, state, controlId }) => {
       createDataControlOfType(OPTIONS_LIST_CONTROL, {
         embeddable,
         state: { ...DEFAULT_DSL_OPTIONS_LIST_STATE, ...state },
         controlId,
-        isPinned,
       });
     },
     extension: {

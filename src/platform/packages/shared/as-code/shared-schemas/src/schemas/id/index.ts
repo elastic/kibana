@@ -8,4 +8,3 @@
  */
 
 export { asCodeIdSchema } from './id';
-export type { AsCodeId } from './id';

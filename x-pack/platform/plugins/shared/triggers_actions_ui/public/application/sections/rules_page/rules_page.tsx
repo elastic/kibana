@@ -7,7 +7,6 @@
 
 import React, { lazy, useCallback, useEffect, useRef, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSpacer } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
@@ -25,7 +24,6 @@ import { RulesListDocLink } from '../rules_list/components/rules_list_doc_link';
 import { RulesPageTemplate } from './rules_page_template';
 import { useKibana } from '../../../common/lib/kibana';
 import { getAlertingSectionBreadcrumb, getRulesBreadcrumbWithHref } from '../../lib/breadcrumb';
-import { useSetBreadcrumbs } from '../../hooks/use_set_breadcrumbs';
 import { CreateRuleButton } from '../rules_list/components/create_rule_button';
 import { getCurrentDocTitle } from '../../lib/doc_title';
 import type { Section } from '../../constants';
@@ -44,8 +42,8 @@ const RulesPage = () => {
     notifications: { toasts },
     ruleTypeRegistry,
     cps,
+    setBreadcrumbs,
   } = useKibana().services;
-  const setBreadcrumbs = useSetBreadcrumbs();
 
   const { authorizedToReadAnyRules, authorizedToCreateAnyRules } = useGetRuleTypesPermissions({
     http,
@@ -200,7 +198,6 @@ const RulesPage = () => {
           })),
         }}
       >
-        <EuiSpacer size="l" />
         <Routes>
           <Route exact path="/logs" component={renderLogsList} />
           <Route exact path="/" component={renderRulesList} />

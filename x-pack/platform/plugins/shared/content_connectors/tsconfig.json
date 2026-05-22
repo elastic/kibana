@@ -57,6 +57,8 @@
     "@kbn/spaces-plugin",
     "@kbn/core-http-browser-mocks",
     "@kbn/home-plugin",
-    "@kbn/logging"
+    "@kbn/logging",
+    "@kbn/shared-ux-ai-components",
+    "@kbn/deeplinks-management"
   ]
 }

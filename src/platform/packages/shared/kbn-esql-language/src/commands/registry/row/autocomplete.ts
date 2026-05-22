@@ -18,6 +18,7 @@ import {
 } from '../complete_items';
 import { Location } from '../types';
 import { isRestartingExpression } from '../../definitions/utils/shared';
+import { endsWithAssignment } from '../../definitions/utils/regex';
 
 export async function autocomplete(
   query: string,
@@ -28,7 +29,7 @@ export async function autocomplete(
 ): Promise<ISuggestionItem[]> {
   const innerText = query.substring(0, cursorPosition);
   // ROW col0 = /
-  if (/=\s*$/.test(innerText)) {
+  if (endsWithAssignment(innerText)) {
     return getFunctionsSuggestions({
       location: Location.ROW,
       types: ['any'],

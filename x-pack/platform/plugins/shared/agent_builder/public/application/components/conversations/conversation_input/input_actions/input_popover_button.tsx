@@ -11,14 +11,24 @@ import { css } from '@emotion/react';
 import type { PropsWithChildren } from 'react';
 import React from 'react';
 
+const truncateStyles = css`
+  max-width: 100%;
+  .euiButtonEmpty__text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+`;
+
 export const InputPopoverButton: React.FC<
   PropsWithChildren<{
     open: boolean;
     disabled: boolean;
     iconType: IconType;
     onClick: () => void;
-    'aria-labelledby'?: string;
+    'aria-label'?: string;
     'data-test-subj'?: string;
+    ebtProps?: Record<string, string>;
   }>
 > = ({
   open,
@@ -26,15 +36,16 @@ export const InputPopoverButton: React.FC<
   iconType,
   onClick,
   children,
-  'aria-labelledby': ariaLabelledBy,
+  'aria-label': ariaLabel,
   'data-test-subj': dataTestSubj,
+  ebtProps,
 }) => {
   const openStyles = css`
     text-decoration: underline;
   `;
   return (
     <EuiButtonEmpty
-      css={open && openStyles}
+      css={[truncateStyles, open && openStyles]}
       color="text"
       iconSide="left"
       flush="both"
@@ -46,8 +57,9 @@ export const InputPopoverButton: React.FC<
       }}
       disabled={disabled}
       aria-haspopup="menu"
-      aria-labelledby={ariaLabelledBy}
+      aria-label={ariaLabel}
       data-test-subj={dataTestSubj}
+      {...ebtProps}
     >
       {children}
     </EuiButtonEmpty>

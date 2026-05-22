@@ -10,6 +10,7 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/zod"
+    "@kbn/zod",
+    "@kbn/alerting-v2-constants"
   ]
 }

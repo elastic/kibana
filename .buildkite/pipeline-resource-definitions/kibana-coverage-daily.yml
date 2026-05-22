@@ -23,7 +23,7 @@ spec:
         GITHUB_COMMIT_STATUS_CONTEXT: kibana-code-coverage-main
         CODE_COVERAGE: '1'
         FTR_CONFIGS_RETRY_COUNT: '0'
-        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
+        KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'true'
       allow_rebuilds: false
       branch_configuration: main
       default_branch: main

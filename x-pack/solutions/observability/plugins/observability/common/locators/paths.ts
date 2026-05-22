@@ -10,7 +10,6 @@ export const ROOT_PATH = '/' as const;
 export const LANDING_PATH = '/landing' as const;
 export const OVERVIEW_PATH = '/overview' as const;
 export const ALERTS_PATH = '/alerts' as const;
-export const ALERTING_V2_PATH = '/alerts-v2' as const;
 export const ALERT_DETAIL_PATH = '/alerts/:alertId' as const;
 export const EXPLORATORY_VIEW_PATH = '/exploratory-view' as const; // has been moved to its own app. Keeping around for redirecting purposes.
 export const RULES_PATH = '/alerts/rules' as const;
@@ -21,6 +20,7 @@ export const CREATE_RULE_FROM_TEMPLATE_PATH = '/alerts/rules/create/template/:te
 export const EDIT_RULE_PATH = '/alerts/rules/edit/:id' as const;
 export const CASES_PATH = '/cases' as const;
 export const ANNOTATIONS_PATH = '/annotations' as const;
+export const NIGHTSHIFT_PATH = '/nightshift' as const;
 export const SETTINGS_PATH = '/slos/settings' as const;
 
 // // SLOs have been moved to its own app (slo). Keeping around for redirecting purposes.

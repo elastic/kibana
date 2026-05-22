@@ -10,6 +10,7 @@
 import React, { useCallback } from 'react';
 import { EuiResizeObserver } from '@elastic/eui';
 import { UnifiedTabs, type UnifiedTabsProps } from '@kbn/unified-tabs';
+import { i18n } from '@kbn/i18n';
 import { AppMenuComponent } from '@kbn/core-chrome-app-menu-components';
 import { SingleTabView, type SingleTabViewProps } from '../single_tab_view';
 import {
@@ -40,8 +41,13 @@ export const TabsView = (props: SingleTabViewProps) => {
   const currentDataView = useCurrentTabRuntimeState((tab) => tab.currentDataView$);
   const scopedEbtManager = useCurrentTabRuntimeState((tab) => tab.scopedEbtManager$);
 
-  const { shouldCollapseAppMenu, onResize, getAdditionalTabMenuItems, topNavMenuItems } =
-    useAppMenuData({ currentDataView });
+  const {
+    shouldCollapseAppMenu,
+    onResize,
+    getTopTabMenuItems,
+    getAdditionalTabMenuItems,
+    topNavMenuItems,
+  } = useAppMenuData({ currentDataView });
 
   const onEvent: UnifiedTabsProps['onEBTEvent'] = useCallback(
     (event) => {
@@ -70,6 +76,22 @@ export const TabsView = (props: SingleTabViewProps) => {
     [currentTabId, props]
   );
 
+  const onTabLimitReached: UnifiedTabsProps['onTabLimitReached'] = useCallback(
+    (droppedCount: number) => {
+      services.toastNotifications.addWarning({
+        title: i18n.translate('discover.tabs.tabLimitReachedWarningTitle', {
+          defaultMessage: 'Tab limit reached',
+        }),
+        text: i18n.translate('discover.tabs.tabLimitReachedWarningText', {
+          defaultMessage:
+            'The last {droppedCount, plural, one {# tab} other {# tabs}} in the group {droppedCount, plural, one {was} other {were}} not restored because the maximum number of {maxTabs} tabs has been reached.',
+          values: { droppedCount, maxTabs: MAX_TABS_COUNT },
+        }),
+      });
+    },
+    [services.toastNotifications]
+  );
+
   return (
     /**
      * AppMenuComponent handles responsiveness on its own, however, there are some edge cases e.g opening push flyout
@@ -92,6 +114,8 @@ export const TabsView = (props: SingleTabViewProps) => {
             onChanged={onChanged}
             onEBTEvent={onEvent}
             onClearRecentlyClosed={onClearRecentlyClosed}
+            onTabLimitReached={onTabLimitReached}
+            getTopTabMenuItems={getTopTabMenuItems}
             getAdditionalTabMenuItems={getAdditionalTabMenuItems}
             appendRight={
               <AppMenuComponent config={topNavMenuItems} isCollapsed={shouldCollapseAppMenu} />

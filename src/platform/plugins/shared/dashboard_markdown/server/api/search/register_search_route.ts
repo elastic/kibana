@@ -17,8 +17,10 @@ import { MARKDOWN_API_PATH } from '../../../common/constants';
 export function registerSearchRoute(router: VersionedRouter<RequestHandlerContext>) {
   const searchRoute = router.get({
     path: MARKDOWN_API_PATH,
-    summary: `List markdown panels`,
+    summary: `Search markdown library items`,
     ...commonRouteConfig,
+    description:
+      'Returns a paginated list of markdown library items. Each result includes title, description, and metadata, but not the content. Use `GET /api/markdown/{id}` to retrieve the complete state.',
   });
 
   searchRoute.addVersion(
@@ -31,18 +33,18 @@ export function registerSearchRoute(router: VersionedRouter<RequestHandlerContex
         response: {
           200: {
             body: () => searchResponseBodySchema,
-            description: 'Indicates that the markdown panels is retrieved successfully.',
+            description: 'success',
           },
           403: {
-            description: 'Indicates that this call is forbidden.',
+            description: 'forbidden',
           },
         },
       },
     },
     async (ctx, req, res) => {
-      let result;
       try {
-        result = await search(ctx, req.query);
+        const result = await search(ctx, req.query);
+        return res.ok({ body: result });
       } catch (e) {
         if (e.isBoom && e.output.statusCode === 403) {
           return res.forbidden({ body: { message: e.message } });
@@ -50,8 +52,6 @@ export function registerSearchRoute(router: VersionedRouter<RequestHandlerContex
 
         return res.badRequest({ body: { message: e.message } });
       }
-
-      return res.ok({ body: result });
     }
   );
 }

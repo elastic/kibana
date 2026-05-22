@@ -22,7 +22,7 @@ interface RecoveryBaseQueryFieldProps {
   /** Validation rules provided by the parent (from useRecoveryValidation hook). */
   rules?: {
     required?: string;
-    validate?: (value: string | undefined) => string | boolean | Promise<string | boolean>;
+    validate?: (value: string | null | undefined) => string | boolean | Promise<string | boolean>;
   };
   /** Errors to display in the editor (e.g., grouping validation errors). */
   errors?: Error[];

@@ -105,7 +105,7 @@ export const ComparisonControls = ({
       <EuiFlexItem grow={false}>
         <div className="unifiedDataTableToolbarControlButton" css={toolbarStyles.controlButton}>
           <EuiDataGridToolbarControl
-            iconType="exit"
+            iconType="logOut"
             onClick={() => {
               setIsCompareActive(false);
             }}
@@ -156,6 +156,9 @@ const ComparisonSettings = ({
 
   return (
     <EuiPopover
+      aria-label={i18n.translate('unifiedDataTable.comparisonSettingsPopover', {
+        defaultMessage: 'Comparison settings',
+      })}
       button={
         <div className="unifiedDataTableToolbarControlButton" css={toolbarStyles.controlButton}>
           <EuiDataGridToolbarControl
@@ -180,7 +183,6 @@ const ComparisonSettings = ({
       anchorPosition="downCenter"
     >
       <EuiContextMenuPanel
-        size="s"
         data-test-subj="unifiedDataTableComparisonSettingsMenu"
         css={{
           '.euiContextMenuItem__text': {
@@ -338,7 +340,6 @@ const SectionHeader = ({
 
   return (
     <EuiContextMenuItem
-      size="s"
       css={[
         noPadding && { paddingTop: 0 },
         { paddingBottom: 0 },
@@ -382,7 +383,6 @@ const DiffModeEntry: FC<
     <EuiContextMenuItem
       key={entryDiffMode}
       icon={diffMode === entryDiffMode ? 'check' : 'empty'}
-      size="s"
       aria-current={diffMode === entryDiffMode}
       disabled={disabled}
       toolTipContent={disabled ? enableShowDiffTooltip : undefined}
@@ -413,7 +413,6 @@ const DiffOptionSwitch = ({
 }) => {
   return (
     <EuiContextMenuItem
-      size="s"
       disabled={disabled}
       toolTipContent={disabled ? enableShowDiffTooltip : undefined}
       css={itemCss}

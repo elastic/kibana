@@ -8,7 +8,7 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { StateTransitionCountField } from './state_transition_count_field';
-import { createFormWrapper } from '../../test_utils';
+import { createFormWrapper, createMockServices } from '../../test_utils';
 
 describe('StateTransitionCountField', () => {
   it('renders the consecutive breaches count input', () => {
@@ -30,6 +30,14 @@ describe('StateTransitionCountField', () => {
     });
 
     expect(screen.getByTestId('stateTransitionCountInput')).toHaveValue(5);
+  });
+
+  it('renders correctly in flyout layout', () => {
+    render(<StateTransitionCountField />, {
+      wrapper: createFormWrapper({ kind: 'alert' }, createMockServices(), { layout: 'flyout' }),
+    });
+
+    expect(screen.getByTestId('stateTransitionCountInput')).toBeInTheDocument();
   });
 
   describe('variant="recovering"', () => {

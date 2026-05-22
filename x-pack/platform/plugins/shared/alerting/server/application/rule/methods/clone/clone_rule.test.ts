@@ -26,6 +26,7 @@ import { getBeforeSetup } from '../../../../rules_client/tests/lib';
 import type { RuleDomain } from '../../types';
 import type { ConstructorOptions } from '../../../../rules_client/rules_client';
 import { RulesClient } from '../../../../rules_client/rules_client';
+import { TaskStatus } from '@kbn/task-manager-plugin/server/task';
 import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
 
 describe('clone', () => {
@@ -54,6 +55,7 @@ describe('clone', () => {
     namespace: 'default',
     getUserName: jest.fn(),
     createAPIKey: createAPIKeyMock,
+    cloneAPIKey: jest.fn(),
     logger: loggingSystemMock.create().get(),
     internalSavedObjectsRepository,
     encryptedSavedObjectsClient: encryptedSavedObjects,
@@ -81,6 +83,102 @@ describe('clone', () => {
     jest.clearAllMocks();
     getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
     rulesClient = new RulesClient(rulesClientParams);
+  });
+
+  describe('api keys', () => {
+    it('does not copy api key fields from the source rule when cloning a disabled rule', async () => {
+      const sourceApiKey = Buffer.from('source-id:source-secret').toString('base64');
+      const sourceUiamApiKey = Buffer.from('uiam-id:uiam-secret').toString('base64');
+
+      const disabledRule = {
+        id: 'test-rule',
+        type: RULE_SAVED_OBJECT_TYPE,
+        attributes: {
+          name: 'My rule',
+          alertTypeId: '123',
+          schedule: { interval: '10s' },
+          params: { bar: true },
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          actions: [],
+          enabled: false,
+          executionStatus: {},
+          apiKey: sourceApiKey,
+          apiKeyOwner: 'user-a',
+          apiKeyCreatedByUser: false,
+          uiamApiKey: sourceUiamApiKey,
+        },
+        references: [],
+      };
+
+      encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(disabledRule);
+      unsecuredSavedObjectsClient.create.mockResolvedValue(disabledRule);
+
+      await rulesClient.clone({ id: 'test-rule', newId: 'cloned-rule' });
+
+      const createdAttributes = unsecuredSavedObjectsClient.create.mock.calls[0][1] as RuleDomain;
+      expect(createdAttributes.apiKey).toBeNull();
+      expect(createdAttributes.apiKeyOwner).toBeNull();
+      expect(createdAttributes.apiKeyCreatedByUser).toBeNull();
+      expect(createdAttributes.uiamApiKey).not.toBe(sourceUiamApiKey);
+    });
+
+    it('does not copy api key fields from the source rule when cloning an enabled rule', async () => {
+      const sourceApiKey = Buffer.from('source-id:source-secret').toString('base64');
+      const sourceUiamApiKey = Buffer.from('uiam-id:uiam-secret').toString('base64');
+      const freshApiKey = Buffer.from('fresh-id:fresh-secret').toString('base64');
+
+      const enabledRule = {
+        id: 'test-rule',
+        type: RULE_SAVED_OBJECT_TYPE,
+        attributes: {
+          name: 'My rule',
+          alertTypeId: '123',
+          schedule: { interval: '10s' },
+          params: { bar: true },
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          actions: [],
+          enabled: true,
+          executionStatus: {},
+          apiKey: sourceApiKey,
+          apiKeyOwner: 'user-a',
+          apiKeyCreatedByUser: false,
+          uiamApiKey: sourceUiamApiKey,
+        },
+        references: [],
+      };
+
+      isAuthenticationTypeApiKeyMock.mockReturnValueOnce(false);
+      createAPIKeyMock.mockResolvedValueOnce({
+        apiKeysEnabled: true,
+        result: { id: 'fresh-id', name: 'fresh', api_key: 'fresh-secret' },
+      });
+      encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(enabledRule);
+      unsecuredSavedObjectsClient.create.mockResolvedValue(enabledRule);
+      taskManager.schedule.mockResolvedValueOnce({
+        id: 'scheduled-task-id',
+        taskType: 'alerting:123',
+        scheduledAt: new Date(),
+        attempts: 1,
+        status: TaskStatus.Idle,
+        runAt: new Date(),
+        startedAt: null,
+        retryAt: null,
+        state: {},
+        params: {},
+        ownerId: null,
+        enabled: true,
+      });
+
+      await rulesClient.clone({ id: 'test-rule', newId: 'cloned-rule' });
+
+      const createdAttributes = unsecuredSavedObjectsClient.create.mock.calls[0][1] as RuleDomain;
+      expect(createdAttributes.apiKey).toBe(freshApiKey);
+      expect(createdAttributes.apiKeyOwner).toBe('elastic');
+      expect(createdAttributes.apiKeyCreatedByUser).toBe(false);
+      expect(createdAttributes.uiamApiKey).not.toBe(sourceUiamApiKey);
+    });
   });
 
   describe('actions', () => {

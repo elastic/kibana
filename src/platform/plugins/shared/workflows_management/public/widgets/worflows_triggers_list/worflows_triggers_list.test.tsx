@@ -27,14 +27,14 @@ describe('WorkflowsTriggersList', () => {
     expect(screen.getByText('No triggers')).toBeInTheDocument();
   });
 
-  it('renders a single trigger with its label', () => {
+  it('renders a single trigger as an icon with the label as a tooltip title', () => {
     render(<WorkflowsTriggersList triggers={[{ type: 'manual' }]} />);
-    expect(screen.getByText('Manual')).toBeInTheDocument();
+    expect(document.querySelector('[title="Manual"]')).toBeInTheDocument();
   });
 
   it('renders the first trigger and an overflow badge for multiple triggers', () => {
     render(<WorkflowsTriggersList triggers={[{ type: 'alert' }, { type: 'manual' }]} />);
-    expect(screen.getByText('Alert')).toBeInTheDocument();
+    expect(document.querySelector('[title="Alert"]')).toBeInTheDocument();
     expect(screen.getByText('+1')).toBeInTheDocument();
   });
 
@@ -44,12 +44,30 @@ describe('WorkflowsTriggersList', () => {
         triggers={[{ type: 'alert' }, { type: 'manual' }, { type: 'scheduled' }]}
       />
     );
-    expect(screen.getByText('Alert')).toBeInTheDocument();
+    expect(document.querySelector('[title="Alert"]')).toBeInTheDocument();
     expect(screen.getByText('+2')).toBeInTheDocument();
   });
 
-  it('uses capitalized type as label for unknown trigger types', () => {
+  it('uses capitalized type as the title for unknown trigger types', () => {
     render(<WorkflowsTriggersList triggers={[{ type: 'custom_thing' }]} />);
-    expect(screen.getByText('Custom_thing')).toBeInTheDocument();
+    expect(document.querySelector('[title="Custom_thing"]')).toBeInTheDocument();
+  });
+
+  describe('responsive structure', () => {
+    it('renders trigger icon with title attribute for native tooltip', () => {
+      render(<WorkflowsTriggersList triggers={[{ type: 'manual' }]} />);
+      const icon = document.querySelector('[title="Manual"]');
+      expect(icon).toBeInTheDocument();
+    });
+
+    it('renders only the icon (no inline label text) for a single trigger', () => {
+      render(<WorkflowsTriggersList triggers={[{ type: 'alert' }]} />);
+      expect(screen.queryByText('Alert')).not.toBeInTheDocument();
+    });
+
+    it('renders the "No triggers" text for empty triggers', () => {
+      render(<WorkflowsTriggersList triggers={[]} />);
+      expect(screen.getByText('No triggers')).toBeInTheDocument();
+    });
   });
 });

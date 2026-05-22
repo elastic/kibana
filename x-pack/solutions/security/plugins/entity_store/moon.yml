@@ -45,6 +45,8 @@ dependsOn:
   - '@kbn/safer-lodash-set'
   - '@kbn/tracing-utils'
   - '@kbn/esql-language'
+  - '@kbn/licensing-plugin'
+  - '@kbn/licensing-types'
 tags:
   - plugin
   - prod
