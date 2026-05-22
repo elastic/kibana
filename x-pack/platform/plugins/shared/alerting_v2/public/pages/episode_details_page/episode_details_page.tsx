@@ -24,11 +24,11 @@ import {
 } from '@elastic/eui';
 import { useQueryClient } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useFetchEpisodeEventDataQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_event_data_query';
 import { useFetchEpisodeEventsQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_events_query';
 import { useFetchEpisodeActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_actions';
 import { useFetchGroupActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_group_actions';
 import { useFetchRule } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_rule';
+import { useInvalidateEpisodeQueries } from '@kbn/alerting-v2-episodes-ui/hooks/use_invalidate_episode_queries';
 import {
   getEpisodeDurationMs,
   getGroupHashFromEpisodeRows,
@@ -78,11 +78,12 @@ export function EpisodeDetailsPage() {
   const smallMediaQuery = useEuiMaxBreakpoint('s');
   const largeMediaQuery = useEuiMinBreakpoint('m');
 
+  const invalidateEpisodeQueries = useInvalidateEpisodeQueries();
+
   const {
     data: eventRows = [],
     isLoading: isLoadingEvents,
     isError: isEventsError,
-    refetch: refetchEpisodeEvents,
   } = useFetchEpisodeEventsQuery({
     episodeId,
     services: { data, spaces },
@@ -93,22 +94,14 @@ export function EpisodeDetailsPage() {
 
   const { data: rule, isLoading: isLoadingRule } = useFetchRule({ id: ruleId, http });
 
-  const { data: episodeActionsMap, refetch: refetchEpisodeActions } = useFetchEpisodeActions({
+  const { data: episodeActionsMap } = useFetchEpisodeActions({
     episodeIds: episodeId ? [episodeId] : [],
     services: { expressions, spaces },
   });
 
-  const { data: groupActionsMap, refetch: refetchGroupActions } = useFetchGroupActions({
+  const { data: groupActionsMap } = useFetchGroupActions({
     groupHashes: groupHash ? [groupHash] : [],
     services: { expressions, spaces },
-  });
-
-  // The metadata section fetches its own copy of the episode event data via
-  // React Query; this duplicate page-level call shares the same query key so
-  // we can invalidate it via `refetchEpisodeEventData` when an action succeeds.
-  const { refetch: refetchEpisodeEventData } = useFetchEpisodeEventDataQuery({
-    episodeId,
-    services: { data, spaces },
   });
 
   const episodeBreadcrumbTitle =
@@ -223,13 +216,6 @@ export function EpisodeDetailsPage() {
         : [],
     [episodeActions, episode]
   );
-
-  const handleActionSuccess = useCallback(() => {
-    refetchEpisodeEvents();
-    refetchEpisodeActions();
-    refetchGroupActions();
-    refetchEpisodeEventData();
-  }, [refetchEpisodeEvents, refetchEpisodeActions, refetchGroupActions, refetchEpisodeEventData]);
 
   const isLoading = isLoadingEvents || (Boolean(ruleId) && isLoadingRule);
   const episodeNotFound = !isLoading && eventRows.length === 0;
@@ -399,7 +385,7 @@ export function EpisodeDetailsPage() {
             key="alertingV2EpisodeHeaderActions"
             actions={applicableActions}
             episodes={episode ? [episode] : []}
-            onSuccess={handleActionSuccess}
+            onSuccess={invalidateEpisodeQueries}
           />,
         ],
         rightSideGroupProps: { gutterSize: 's' },

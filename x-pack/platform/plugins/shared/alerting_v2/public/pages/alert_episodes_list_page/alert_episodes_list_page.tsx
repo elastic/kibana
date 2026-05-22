@@ -34,6 +34,7 @@ import { css } from '@emotion/react';
 import { useQueryClient } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useFetchAlertingEpisodesQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_alerting_episodes_query';
+import { useInvalidateEpisodeQueries } from '@kbn/alerting-v2-episodes-ui/hooks/use_invalidate_episode_queries';
 import type { EpisodesSortState } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
 import { useAlertingRulesCache } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_cache';
 import { createEpisodeActions, type EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
@@ -108,6 +109,7 @@ const getTableCss = (euiTheme: EuiThemeComputed) => css`
 export const AlertEpisodesListPage = () => {
   const services = useKibana<AlertEpisodesKibanaServices>().services;
   const queryClient = useQueryClient();
+  const invalidateEpisodeQueries = useInvalidateEpisodeQueries();
   const { euiTheme } = useEuiTheme();
   const timefilter = services.data.query.timefilter.timefilter;
 
@@ -243,19 +245,19 @@ export const AlertEpisodesListPage = () => {
             <Control
               iconType={action.iconType}
               label={action.displayName}
-              onClick={() => action.execute({ episodes, onSuccess: refetch })}
+              onClick={() => action.execute({ episodes, onSuccess: invalidateEpisodeQueries })}
               tooltipContent={action.displayName}
             />
           );
         },
       })),
-    [episodeActions, refetch]
+    [episodeActions, invalidateEpisodeQueries]
   );
 
   const customBulkActions = useEpisodesBulkActions({
     actions: episodeActions,
     episodesData,
-    onSuccess: refetch,
+    onSuccess: invalidateEpisodeQueries,
   });
 
   const assigneeUids = useMemo(
