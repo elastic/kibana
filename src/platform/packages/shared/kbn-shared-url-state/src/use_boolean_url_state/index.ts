@@ -7,11 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-<<<<<<<< HEAD:src/platform/packages/shared/kbn-shared-url-state/src/use_boolean_url_state/index.ts
 export * from './use_boolean_url_state';
-========
-export { getSchemaForAuthType, AUTH_TYPE_DISCRIMINATOR } from './get_schema_for_auth_type';
-export { generateSecretsSchemaFromSpec } from './generate_secrets_schema_from_spec';
-export { configureAxiosInstanceWithSsl } from './configure_axios_instance_with_ssl';
-export { getMeta } from '../connector_spec_ui';
->>>>>>>> bac58f3f002c (revert: undo barrel cleanup, remove utils public export from kbn-alerts-ui-shared):src/platform/packages/shared/kbn-connector-specs/src/lib/index.ts

@@ -198,10 +198,8 @@ describe('EditConnectorFlyout', () => {
       />
     );
 
-    await waitFor(() => {
-      expect(getByTestId('edit-connector-flyout-save-btn')).toBeInTheDocument();
-      expect(getByTestId('edit-connector-flyout-close-btn')).toBeInTheDocument();
-    });
+    expect(await screen.findByTestId('edit-connector-flyout-save-btn')).toBeInTheDocument();
+    expect(await screen.findByTestId('edit-connector-flyout-close-btn')).toBeInTheDocument();
   });
 
   it('does not show the save button if the use does not have permissions to update connector', async () => {
@@ -382,9 +380,7 @@ describe('EditConnectorFlyout', () => {
       );
 
       expect(getByTestId('configureConnectorTab')).toBeInTheDocument();
-      await waitFor(() => {
-        expect(getByTestId('testConnectorTab')).toBeInTheDocument();
-      });
+      expect(await screen.findByTestId('testConnectorTab')).toBeInTheDocument();
     });
 
     it('navigates to the test form', async () => {
@@ -398,9 +394,7 @@ describe('EditConnectorFlyout', () => {
       );
 
       expect(getByTestId('configureConnectorTab')).toBeInTheDocument();
-      await waitFor(() => {
-        expect(getByTestId('testConnectorTab')).toBeInTheDocument();
-      });
+      expect(await screen.findByTestId('testConnectorTab')).toBeInTheDocument();
 
       await userEvent.click(getByTestId('testConnectorTab'));
 
@@ -587,9 +581,7 @@ describe('EditConnectorFlyout', () => {
         />
       );
 
-      await waitFor(() => {
-        expect(screen.getByTestId('nameInput')).toBeInTheDocument();
-      });
+      expect(await screen.findByTestId('nameInput')).toBeInTheDocument();
 
       await userEvent.clear(screen.getByTestId('nameInput'));
       await userEvent.type(screen.getByTestId('nameInput'), 'My new name');
@@ -755,9 +747,7 @@ describe('EditConnectorFlyout', () => {
       );
 
       expect(getByTestId('configureConnectorTab')).toBeInTheDocument();
-      await waitFor(() => {
-        expect(screen.getByTestId('testConnectorTab')).toBeEnabled();
-      });
+      expect(await screen.findByTestId('testConnectorTab')).toBeEnabled();
     });
   });
 });
