@@ -32,7 +32,7 @@ The OTLP endpoint can be any OTel/EDOT collector. It is recommended to use the m
 
 ### Supported exporters protocols
 
-{{kib}} supports gRPC, protobuf and plain HTTP protocols to export the OTel Traces. The config syntax is the same for all of them. The protocol to use is specified in the config via top property name in the exporter's declaration.
+{{kib}} supports gRPC, protobuf and plain HTTP protocols to export the OTel Traces. The protocol to use is specified in the config via top property name in the exporter's declaration. The config syntax is the same for all.
 
 ```yaml
 telemetry.tracing:
@@ -66,7 +66,8 @@ When using the mOTLP endpoint, the port is the same, but the endpoint changes:
 
 :::::{important}
 OTel instrumentation is only available on the server side. For RUM observability, {{kib}} uses [Elastic RUM](https://www.elastic.co/docs/solutions/observability/apm/apm-agents/real-user-monitoring-rum).
-OTel instrumentation in the browser will be available in the future, once the [OTel for RUM is ready for production](https://www.elastic.co/docs/solutions/observability/applications/otel-rum).
+
+OTel instrumentation in the browser will be available in the future, once the [OTel for RUM](https://www.elastic.co/docs/solutions/observability/applications/otel-rum) is ready for production.
 :::::
 
 To enable Elastic RUM alongside the OTel instrumentation, define the APM Server's URL in the Kibana config. [Any settings accepted by the agent](https://www.elastic.co/docs/reference/apm/agents/rum-js/configuration) are also accepted.
@@ -91,7 +92,7 @@ This approach is deprecated. Use [OTel Traces](#_instrumenting_with_otel_traces)
 
 {{kib}} ships with the [Elastic APM Node.js Agent](https://github.com/elastic/apm-agent-nodejs) built-in for debugging purposes.
 
-With an application as varied and complex as Kibana has become, it’s not practical or scalable to craft all possible performance measurements by hand ahead of time. As such, we need to rely on tooling to help us catch things we may otherwise have missed.
+With an application as varied and complex as Kibana has become, it’s not practical or scalable to craft all possible performance measurements by hand ahead of time. As such, we need to rely on tooling to help us catch things we might otherwise have missed.
 
 For example, say you implement a brand new feature, plugin or service but don’t quite know how it will impact Kibana’s performance as a whole. APM allows us to not only spot that something is slow, but also hints at why it might be performing slowly. For example, if a function is slow on specific types of inputs, we can see where the time is spent by viewing the trace for that function call in the APM UI.
 
