@@ -14,6 +14,31 @@ export const addDataSetFlyoutStrings = {
       values: { dataSource },
     }),
 
+  titlePickSource: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.titlePickSource', {
+      defaultMessage: 'Add data set',
+    }),
+
+  sourceLabel: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.sourceLabel', {
+      defaultMessage: 'Data source',
+    }),
+
+  sourceHelp: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.sourceHelp', {
+      defaultMessage: 'Select the external connection this data set belongs to.',
+    }),
+
+  sourcePlaceholder: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.sourcePlaceholder', {
+      defaultMessage: 'Select a data source',
+    }),
+
+  sourceRequired: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.sourceRequired', {
+      defaultMessage: 'Select a data source.',
+    }),
+
   datasetIdLabel: () =>
     i18n.translate('dataSourceManagement.addDataSetFlyout.datasetIdLabel', {
       defaultMessage: 'Dataset ID',

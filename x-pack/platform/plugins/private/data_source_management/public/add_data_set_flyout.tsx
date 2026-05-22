@@ -27,11 +27,13 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import type { DataSourceListItem } from '../common/sample_data_sources_client';
 import type { DataSetPartitionDetection } from '../common/sample_data_sets_client';
 import { addDataSetFlyoutStrings } from './add_data_set_flyout_i18n';
 import { dataSourcePreviewFlyoutStrings } from './data_source_preview_flyout_i18n';
 
 export interface AddDataSetFlyoutPayload {
+  sourceName: string;
   datasetId: string;
   resource: string;
   description: string;
@@ -39,22 +41,33 @@ export interface AddDataSetFlyoutPayload {
 }
 
 export interface AddDataSetFlyoutProps {
-  sourceName: string;
+  /**
+   * When set, create a data set for this source without showing the source picker.
+   * Omit to show a data source dropdown (supply `sourcesForPicker`).
+   */
+  presetSource?: DataSourceListItem;
+  /** When `presetSource` is omitted, used to populate the data source picker. */
+  sourcesForPicker?: DataSourceListItem[];
   onClose: () => void;
   /** Resolve `null` on success, or an error message to display in the flyout. */
   onSave: (values: AddDataSetFlyoutPayload) => Promise<string | null>;
 }
 
 export const AddDataSetFlyout: FunctionComponent<AddDataSetFlyoutProps> = ({
-  sourceName,
+  presetSource,
+  sourcesForPicker = [],
   onClose,
   onSave,
 }) => {
   const titleId = 'addDataSetFlyoutTitle';
+  const isPickSourceMode = !presetSource;
+
+  const [pickedSourceName, setPickedSourceName] = useState('');
   const [datasetId, setDatasetId] = useState('');
   const [resource, setResource] = useState('');
   const [description, setDescription] = useState('');
   const [partitionDetection, setPartitionDetection] = useState<DataSetPartitionDetection>('none');
+  const [sourceError, setSourceError] = useState<string | undefined>();
   const [datasetIdError, setDatasetIdError] = useState<string | undefined>();
   const [resourceError, setResourceError] = useState<string | undefined>();
   const [saveError, setSaveError] = useState<string | undefined>();
@@ -68,13 +81,29 @@ export const AddDataSetFlyout: FunctionComponent<AddDataSetFlyoutProps> = ({
     []
   );
 
+  const sourcePickerOptions = useMemo(() => {
+    const sorted = [...sourcesForPicker].sort((a, b) => a.name.localeCompare(b.name));
+    return [
+      { value: '', text: addDataSetFlyoutStrings.sourcePlaceholder(), disabled: true },
+      ...sorted.map((src) => ({ value: src.name, text: src.name })),
+    ];
+  }, [sourcesForPicker]);
+
+  const resolvedSourceName = presetSource ? presetSource.name : pickedSourceName;
+
   const handleSave = useCallback(async () => {
     const trimmedId = datasetId.trim();
     const trimmedResource = resource.trim();
+    const sourceName = resolvedSourceName.trim();
+    setSourceError(undefined);
     setDatasetIdError(undefined);
     setResourceError(undefined);
     setSaveError(undefined);
 
+    if (isPickSourceMode && sourceName === '') {
+      setSourceError(addDataSetFlyoutStrings.sourceRequired());
+      return;
+    }
     if (!trimmedId) {
       setDatasetIdError(addDataSetFlyoutStrings.datasetIdRequired());
       return;
@@ -87,6 +116,7 @@ export const AddDataSetFlyout: FunctionComponent<AddDataSetFlyoutProps> = ({
     setIsSaving(true);
     try {
       const message = await onSave({
+        sourceName,
         datasetId: trimmedId,
         resource: trimmedResource,
         description: description.trim(),
@@ -98,7 +128,15 @@ export const AddDataSetFlyout: FunctionComponent<AddDataSetFlyoutProps> = ({
     } finally {
       setIsSaving(false);
     }
-  }, [datasetId, description, onSave, partitionDetection, resource]);
+  }, [
+    datasetId,
+    description,
+    isPickSourceMode,
+    onSave,
+    partitionDetection,
+    resource,
+    resolvedSourceName,
+  ]);
 
   return (
     <EuiFlyout
@@ -110,7 +148,11 @@ export const AddDataSetFlyout: FunctionComponent<AddDataSetFlyoutProps> = ({
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2 id={titleId}>{addDataSetFlyoutStrings.title(sourceName)}</h2>
+          <h2 id={titleId}>
+            {presetSource
+              ? addDataSetFlyoutStrings.title(presetSource.name)
+              : addDataSetFlyoutStrings.titlePickSource()}
+          </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
@@ -120,6 +162,29 @@ export const AddDataSetFlyout: FunctionComponent<AddDataSetFlyoutProps> = ({
               <EuiText color="danger" size="s" data-test-subj="addDataSetFlyoutSaveError">
                 {saveError}
               </EuiText>
+              <EuiSpacer size="m" />
+            </>
+          ) : null}
+          {isPickSourceMode ? (
+            <>
+              <EuiFormRow
+                label={addDataSetFlyoutStrings.sourceLabel()}
+                helpText={addDataSetFlyoutStrings.sourceHelp()}
+                isInvalid={Boolean(sourceError)}
+                error={sourceError}
+                fullWidth
+              >
+                <EuiSelect
+                  options={sourcePickerOptions}
+                  value={pickedSourceName}
+                  onChange={(e) => setPickedSourceName(e.target.value)}
+                  isInvalid={Boolean(sourceError)}
+                  data-test-subj="addDataSetFlyoutDataSource"
+                  fullWidth
+                  aria-label={addDataSetFlyoutStrings.sourceLabel()}
+                  autoFocus
+                />
+              </EuiFormRow>
               <EuiSpacer size="m" />
             </>
           ) : null}
@@ -136,7 +201,7 @@ export const AddDataSetFlyout: FunctionComponent<AddDataSetFlyoutProps> = ({
               onChange={(e) => setDatasetId(e.target.value)}
               isInvalid={Boolean(datasetIdError)}
               data-test-subj="addDataSetFlyoutDatasetId"
-              autoFocus
+              autoFocus={!isPickSourceMode}
               fullWidth
               aria-label={addDataSetFlyoutStrings.datasetIdLabel()}
             />
@@ -189,9 +254,7 @@ export const AddDataSetFlyout: FunctionComponent<AddDataSetFlyoutProps> = ({
               <EuiSelect
                 options={partitionOptions}
                 value={partitionDetection}
-                onChange={(e) =>
-                  setPartitionDetection(e.target.value as DataSetPartitionDetection)
-                }
+                onChange={(e) => setPartitionDetection(e.target.value as DataSetPartitionDetection)}
                 data-test-subj="addDataSetFlyoutPartitionDetection"
                 aria-label={addDataSetFlyoutStrings.partitionDetectionLabel()}
               />
@@ -213,7 +276,7 @@ export const AddDataSetFlyout: FunctionComponent<AddDataSetFlyoutProps> = ({
               data-test-subj="addDataSetFlyoutSave"
               onClick={() => void handleSave()}
               isLoading={isSaving}
-              disabled={isSaving}
+              disabled={isSaving || (isPickSourceMode && sourcesForPicker.length === 0)}
             >
               {addDataSetFlyoutStrings.saveButton()}
             </EuiButton>

@@ -44,14 +44,9 @@ export interface DataSourcePreviewTitleWithTypeProps {
   titleTestSubj?: string;
 }
 
-export const DataSourcePreviewTitleWithType: FunctionComponent<DataSourcePreviewTitleWithTypeProps> = ({
-  title,
-  source,
-  titleSize,
-  heading,
-  titleId,
-  titleTestSubj,
-}) => (
+export const DataSourcePreviewTitleWithType: FunctionComponent<
+  DataSourcePreviewTitleWithTypeProps
+> = ({ title, source, titleSize, heading, titleId, titleTestSubj }) => (
   <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
     <EuiFlexItem grow={false}>
       <EuiTitle size={titleSize}>
@@ -105,7 +100,7 @@ export interface DataSourcePreviewDetailsProps {
   onDataSetsChanged?: () => void;
 }
 
-/** Data sets list — same `EuiInMemoryTable` setup as the Data sources page (search, sort, pagination). */
+/** Data sets list — same `EuiInMemoryTable` setup as the External data sets page (search, sort, pagination). */
 export const DataSourcePreviewDetails: FunctionComponent<DataSourcePreviewDetailsProps> = ({
   sets,
   onDataSetsChanged,
@@ -254,18 +249,11 @@ export interface DataSourcePreviewFooterActionsProps {
   showCloseAction?: boolean;
 }
 
-export const DataSourcePreviewFooterActions: FunctionComponent<DataSourcePreviewFooterActionsProps> = ({
-  closeLabel,
-  onClose,
-  onManageDataSets = () => {},
-  showCloseAction = true,
-}) => {
+export const DataSourcePreviewFooterActions: FunctionComponent<
+  DataSourcePreviewFooterActionsProps
+> = ({ closeLabel, onClose, onManageDataSets = () => {}, showCloseAction = true }) => {
   const manageButton = (
-    <EuiButton
-      fill
-      data-test-subj="dataSourcePreviewAddDataSet"
-      onClick={onManageDataSets}
-    >
+    <EuiButton fill data-test-subj="dataSourcePreviewAddDataSet" onClick={onManageDataSets}>
       {dataSourcePreviewFlyoutStrings.addDataSetButton()}
     </EuiButton>
   );

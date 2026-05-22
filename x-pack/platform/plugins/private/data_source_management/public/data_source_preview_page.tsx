@@ -39,7 +39,9 @@ import type { AddDataSetFlyoutPayload } from './add_data_set_flyout';
 import { DATA_SOURCE_MANAGEMENT_ROUTES } from './data_source_management_routes';
 import { useDataSourceManagementAppContext } from './data_source_management_app_context';
 
-type MatchParams = { sourceId: string };
+interface MatchParams {
+  sourceId: string;
+}
 
 export const DataSourcePreviewPage: FunctionComponent<RouteComponentProps<MatchParams>> = ({
   history,
@@ -76,10 +78,7 @@ export const DataSourcePreviewPage: FunctionComponent<RouteComponentProps<MatchP
   }, [dataSourcesClient, dataSetsClient, sourceId]);
 
   const previewSets = useMemo(
-    () =>
-      source
-        ? dataSetItems.filter((setItem) => setItem.sourceName === source.name)
-        : [],
+    () => (source ? dataSetItems.filter((setItem) => setItem.sourceName === source.name) : []),
     [dataSetItems, source]
   );
 
@@ -113,9 +112,12 @@ export const DataSourcePreviewPage: FunctionComponent<RouteComponentProps<MatchP
       if (!source) {
         return 'Unknown error';
       }
+      if (values.sourceName !== source.name) {
+        return 'Unknown error';
+      }
       try {
         await dataSetsClient.add({
-          sourceName: source.name,
+          sourceName: values.sourceName,
           datasetId: values.datasetId,
           resource: values.resource,
           description: values.description,
@@ -165,14 +167,7 @@ export const DataSourcePreviewPage: FunctionComponent<RouteComponentProps<MatchP
         await dataSourcesClient.delete([source.name]);
         history.push(DATA_SOURCE_MANAGEMENT_ROUTES.list);
       });
-  }, [
-    closeManagePopover,
-    dataSetsClient,
-    dataSourcesClient,
-    history,
-    overlays,
-    source,
-  ]);
+  }, [closeManagePopover, dataSetsClient, dataSourcesClient, history, overlays, source]);
 
   const manageMenuItems = useMemo(
     () => [
@@ -262,6 +257,7 @@ export const DataSourcePreviewPage: FunctionComponent<RouteComponentProps<MatchP
             </EuiButton>,
             <EuiPopover
               key="dataSourcePreviewManage"
+              aria-label={dataSourcePreviewPageStrings.manageButton()}
               button={manageMenuButton}
               isOpen={isManagePopoverOpen}
               closePopover={closeManagePopover}
@@ -285,7 +281,7 @@ export const DataSourcePreviewPage: FunctionComponent<RouteComponentProps<MatchP
       {isAddDataSetFlyoutOpen ? (
         <AddDataSetFlyout
           key={source.id}
-          sourceName={source.name}
+          presetSource={source}
           onClose={handleCloseAddDataSetFlyout}
           onSave={handleAddDataSetSave}
         />

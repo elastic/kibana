@@ -1384,7 +1384,7 @@ Array [
         "kibana",
       ],
       "management": Object {
-        "kibana": Array [
+        "data": Array [
           "data_source_management",
         ],
       },
@@ -1402,7 +1402,7 @@ Array [
         "kibana",
       ],
       "management": Object {
-        "kibana": Array [
+        "data": Array [
           "data_source_management",
         ],
       },
@@ -2584,7 +2584,7 @@ Array [
         "kibana",
       ],
       "management": Object {
-        "kibana": Array [
+        "data": Array [
           "data_source_management",
         ],
       },
@@ -2602,7 +2602,7 @@ Array [
         "kibana",
       ],
       "management": Object {
-        "kibana": Array [
+        "data": Array [
           "data_source_management",
         ],
       },
