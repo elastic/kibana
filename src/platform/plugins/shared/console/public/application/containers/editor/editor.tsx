@@ -29,9 +29,11 @@ import {
   useRequestActionContext,
   useEditorActionContext,
   useEditorReadContext,
+  OutputFilterContextProvider,
 } from '../../contexts';
 import { OutputPanel } from './output_panel';
 import { InputPanel } from './input_panel';
+import { OutputFilterControls } from './components';
 import { getResponseWithMostSevereStatusCode } from '../../../lib/utils';
 import { useStyles } from './editor_styles';
 import { PanelStorage } from './panel_storage';
@@ -111,7 +113,7 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
   const isLoading = loading || requestInFlight;
 
   return (
-    <>
+    <OutputFilterContextProvider>
       {fetchingAutocompleteEntities ? (
         <div css={styles.requestProgressBarContainer}>
           <EuiProgress size="xs" color="accent" position="absolute" />
@@ -221,7 +223,13 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
                         </EuiButtonEmpty>
                       </EuiFlexItem>
 
-                      <EuiFlexItem>
+                      <EuiFlexItem />
+
+                      <EuiFlexItem grow={false}>
+                        <OutputFilterControls />
+                      </EuiFlexItem>
+
+                      <EuiFlexItem grow={false} style={{ marginLeft: 8 }}>
                         <NetworkRequestStatusBar />
                       </EuiFlexItem>
                     </EuiFlexGroup>
@@ -232,6 +240,6 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
           </>
         )}
       </EuiResizableContainer>
-    </>
+    </OutputFilterContextProvider>
   );
 });

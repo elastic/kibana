@@ -7,5 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { ContextMenu } from './context_menu';
-export { OutputFilterControls } from './output_filter';
+export { OutputFilterControls } from './output_filter_controls';
