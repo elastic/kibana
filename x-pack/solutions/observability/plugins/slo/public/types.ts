@@ -11,6 +11,7 @@ import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DeveloperToolbarStart } from '@kbn/developer-toolbar-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -110,6 +111,7 @@ export interface SLOPublicPluginsStart {
   apmSourcesAccess: ApmSourceAccessPluginStart;
   contentManagement: ContentManagementPublicStart;
   agentBuilder?: AgentBuilderPluginStart;
+  developerToolbar?: DeveloperToolbarStart;
 }
 
 export type SLOPublicSetup = ReturnType<SLOPlugin['setup']>;

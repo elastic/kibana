@@ -17,6 +17,7 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import type { DefaultClientOptions } from '@kbn/server-route-repository-client';
 import { createRepositoryClient } from '@kbn/server-route-repository-client';
 import { SLOS_BASE_PATH } from '@kbn/slo-shared-plugin/common/locators/paths';
+import { startDuplicateRequestDetector } from '@kbn/observability-shared-plugin/public';
 import { lazy } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { PLUGIN_NAME, sloAppId } from '../common';
@@ -142,6 +143,18 @@ export class SLOPlugin
 
   public start(core: CoreStart, plugins: SLOPublicPluginsStart) {
     const kibanaVersion = this.initContext.env.packageInfo.version;
+
+    if (this.initContext.env.mode.dev) {
+      startDuplicateRequestDetector({
+        http: core.http,
+        application: core.application,
+        toasts: core.notifications.toasts,
+        overlays: core.overlays,
+        rendering: core.rendering,
+        source: 'slo',
+        developerToolbar: plugins.developerToolbar,
+      });
+    }
 
     const sloClient = createRepositoryClient<SLORouteRepository, DefaultClientOptions>(core);
 

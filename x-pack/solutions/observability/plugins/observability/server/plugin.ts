@@ -45,6 +45,8 @@ import { bootstrapAnnotations } from './lib/annotations/bootstrap_annotations';
 import { registerRuleTypes } from './lib/rules/register_rule_types';
 import { getObservabilityServerRouteRepository } from './routes/get_global_observability_server_route_repository';
 import { registerRoutes } from './routes/register_routes';
+import { registerPluginOwnersRoute } from './routes/dev_tools/plugin_owners';
+import { registerMyTeamsRoute } from './routes/dev_tools/my_teams';
 import { threshold } from './saved_objects/threshold';
 import { AlertDetailsContextualInsightsService } from './services';
 import { uiSettings } from './ui_settings';
@@ -123,6 +125,16 @@ export class ObservabilityPlugin
       alertsLocator,
       logsLocator,
     });
+
+    // Dev-mode-only: serves the pluginId -> GitHub-team map used by the
+    // duplicate request detector's "scope to my teams" filter. Registered
+    // here (rather than in observability_shared) because that plugin is
+    // browser-only; this route's data has no consumers outside dev tooling.
+    if (this.initContext.env.mode.dev) {
+      const devToolsRouter = core.http.createRouter();
+      registerPluginOwnersRoute(devToolsRouter, this.logger.get('plugin_owners'));
+      registerMyTeamsRoute(devToolsRouter, this.logger.get('my_teams'));
+    }
 
     void core.getStartServices().then(([coreStart, pluginStart]) => {
       const isCompleteOverviewEnabled = coreStart.pricing.isFeatureAvailable(

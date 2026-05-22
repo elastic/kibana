@@ -97,6 +97,7 @@ dependsOn:
   - '@kbn/presentation-util-plugin'
   - '@kbn/core-application-browser'
   - '@kbn/dashboard-plugin'
+  - '@kbn/developer-toolbar-plugin'
   - '@kbn/search-types'
   - '@kbn/slo-schema'
   - '@kbn/alerting-types'

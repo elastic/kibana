@@ -160,6 +160,7 @@ dependsOn:
   - '@kbn/expressions-plugin'
   - '@kbn/ingest-hub-plugin'
   - '@kbn/zod'
+  - '@kbn/repo-info'
 tags:
   - plugin
   - prod
