@@ -14,7 +14,6 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { Router } from '@kbn/shared-ux-router';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import { AgentBuilderUiClickTelemetry } from './agent_builder_ui_click_telemetry';
 import { AgentBuilderRoutes } from './routes';
 import type { AgentBuilderInternalService } from '../services';
 import type { AgentBuilderStartDependencies } from '../types';
