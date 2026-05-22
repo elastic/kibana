@@ -11,14 +11,12 @@ import {
   getActionPoliciesApiService,
   getAlertActionsApiService,
   getDispatcherApiService,
-  getInsightsApiService,
   getMaintenanceWindowsApiService,
   getRuleExecutionsApiService,
   getRulesApiService,
   type ActionPoliciesApiService,
   type AlertActionsApiService,
   type DispatcherApiService,
-  type InsightsApiService,
   type MaintenanceWindowsApiService,
   type RuleExecutionsApiService,
   type RulesApiService,
@@ -34,7 +32,6 @@ export interface AlertingApiServices {
   alertActions: AlertActionsApiService;
   actionPolicies: ActionPoliciesApiService;
   maintenanceWindows: MaintenanceWindowsApiService;
-  insights: InsightsApiService;
   sourceIndex: SourceIndexApiService;
   ruleExecutions: RuleExecutionsApiService;
   dispatcher: DispatcherApiService;
@@ -63,7 +60,6 @@ export const buildAlertingApiServices = ({
   alertActions: getAlertActionsApiService({ esClient, log }),
   actionPolicies: getActionPoliciesApiService({ kbnClient, log }),
   maintenanceWindows: getMaintenanceWindowsApiService({ kbnClient, log }),
-  insights: getInsightsApiService({ esClient, log }),
   sourceIndex: getSourceIndexApiService({ esClient, log }),
   ruleExecutions: getRuleExecutionsApiService({ esClient, log }),
   dispatcher: getDispatcherApiService({ esClient, log }),
