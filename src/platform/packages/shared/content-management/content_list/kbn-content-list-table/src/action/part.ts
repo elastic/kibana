@@ -12,14 +12,14 @@ import { table } from '../assembly';
 import type {
   EditActionProps,
   DeleteActionProps,
-  InspectActionProps,
+  ContentEditorActionProps,
   ActionOutput,
   ActionBuilderContext,
   ActionProps,
 } from './types';
 import { buildEditAction } from './edit/edit_action';
 import { buildDeleteAction } from './delete/delete_action';
-import { buildInspectAction } from './inspect/inspect_action';
+import { buildContentEditorAction } from './content_editor/content_editor_action';
 
 /**
  * Preset-to-props mapping for table actions.
@@ -27,7 +27,7 @@ import { buildInspectAction } from './inspect/inspect_action';
 export interface ActionPresets {
   edit: EditActionProps;
   delete: DeleteActionProps;
-  inspect: InspectActionProps;
+  contentEditor: ContentEditorActionProps;
 }
 
 /** Part factory for table actions. */
@@ -163,11 +163,20 @@ export const EditAction = action.createPreset({ name: 'edit', resolve: buildEdit
 export const DeleteAction = action.createPreset({ name: 'delete', resolve: buildDeleteAction });
 
 /**
- * Inspect action preset component for `ContentListTable`.
+ * Content editor (view details) action preset component for `ContentListTable`.
  *
- * This is a declarative component that doesn't render anything.
- * It specifies the inspect (view details) action within a `Column.Actions` context.
- * Opens the content editor flyout for the selected item.
+ * Declarative — renders nothing on its own. Opens the content editor flyout
+ * for the row when clicked. The handler is sourced from
+ * `features.contentEditor.open` on the provider, not from `item.actions`.
+ *
+ * Renders the row icon only when `features.contentEditor.open` is set on
+ * the provider. When unset (no editor wired), the action skips itself and
+ * the table omits the icon entirely — no consumer-side gating is needed.
+ *
+ * The user-facing label remains `'View details'`. The internal `ContentEditor`
+ * naming reflects the action's actual scope (a list-level editor opened
+ * against a row), which matters when consumers reach for `Action.ContentEditor`
+ * in TypeScript autocomplete.
  *
  * @example
  * ```tsx
@@ -177,13 +186,16 @@ export const DeleteAction = action.createPreset({ name: 'delete', resolve: build
  *   <Column.Name />
  *   <Column.Actions>
  *     <Action.Edit />
- *     <Action.Inspect />
+ *     <Action.ContentEditor />
  *     <Action.Delete />
  *   </Column.Actions>
  * </ContentListTable>
  * ```
  */
-export const InspectAction = action.createPreset({ name: 'inspect', resolve: buildInspectAction });
+export const ContentEditorAction = action.createPreset({
+  name: 'contentEditor',
+  resolve: buildContentEditorAction,
+});
 
 /**
  * Custom action component for `ContentListTable`.
