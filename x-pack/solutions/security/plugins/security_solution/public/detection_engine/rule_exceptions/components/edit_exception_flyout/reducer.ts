@@ -21,6 +21,8 @@ export interface State {
   expireErrorExists: boolean;
   wildcardWarningExists: boolean;
   partialCodeSignatureWarningExists: boolean;
+  malformedMatchesValueExists: boolean;
+  malformedMatchesFields: string[];
 }
 
 export type Action =
@@ -71,6 +73,10 @@ export type Action =
   | {
       type: 'setPartialCodeSignature';
       warningExists: boolean;
+    }
+  | {
+      type: 'setMalformedMatchesValue';
+      fields: string[];
     };
 
 export const createExceptionItemsReducer =
@@ -172,6 +178,14 @@ export const createExceptionItemsReducer =
         return {
           ...state,
           partialCodeSignatureWarningExists: warningExists,
+        };
+      }
+      case 'setMalformedMatchesValue': {
+        const { fields } = action;
+        return {
+          ...state,
+          malformedMatchesValueExists: fields.length > 0,
+          malformedMatchesFields: fields,
         };
       }
       default:
