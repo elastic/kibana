@@ -24,6 +24,7 @@ import type {
 } from '@kbn/unified-histogram/types';
 import { getFetchParamsMock, getFetch$Mock } from '@kbn/unified-histogram/__mocks__/fetch_params';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { EsqlResponseError } from '../../../common/errors/esql_response_error';
 import type { ParsedMetricItem, Dimension, UnifiedMetricsGridProps } from '../../../types';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 import * as metricsExperienceStateProvider from './context/metrics_experience_state_provider';
@@ -204,13 +205,13 @@ describe('MetricsExperienceGrid', () => {
     expect(getByTestId('metricsExperienceToolbarFullScreen')).toBeInTheDocument();
   });
 
-  it('renders Discover ErrorCallout when METRICS_INFO fetch fails', () => {
+  it('renders Discover ErrorCallout when METRICS_INFO fetch fails with a network error', () => {
     useFetchMetricsDataMock.mockReturnValue({
       metricItems: [],
       allDimensions: [],
       activeDimensions: [],
       loading: false,
-      error: new Error('METRICS_INFO failed'),
+      error: new Error('Network error'),
     });
     useMetricFieldsFilterMock.mockReturnValue({ filteredMetricItems: [] });
 
@@ -221,8 +222,61 @@ describe('MetricsExperienceGrid', () => {
     expect(getByTestId('discoverErrorCalloutTitle')).toHaveTextContent(
       'Unable to retrieve search results'
     );
-    expect(getByTestId('discoverErrorCalloutMessage')).toHaveTextContent('METRICS_INFO failed');
+    expect(getByTestId('discoverErrorCalloutMessage')).toHaveTextContent('Network error');
     expect(queryByTestId('toggleActions')).not.toBeInTheDocument();
+  });
+
+  it('renders Discover ErrorCallout with embedded ES|QL error message (HTTP 200 + error body)', () => {
+    const embeddedError = new EsqlResponseError(
+      {
+        type: 'illegal_argument_exception',
+        reason: 'Unknown column [bad.field]',
+      },
+      { status: 400 }
+    );
+
+    useFetchMetricsDataMock.mockReturnValue({
+      metricItems: [],
+      allDimensions: [],
+      activeDimensions: [],
+      loading: false,
+      error: embeddedError,
+    });
+    useMetricFieldsFilterMock.mockReturnValue({ filteredMetricItems: [] });
+
+    const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
+      wrapper: TestWrapper,
+    });
+
+    expect(getByTestId('discoverErrorCalloutMessage')).toHaveTextContent(
+      'illegal_argument_exception: Unknown column [bad.field]'
+    );
+  });
+
+  it('renders ES|QL reference link when chartSectionSearchError provides esqlReferenceHref', () => {
+    useFetchMetricsDataMock.mockReturnValue({
+      metricItems: [],
+      allDimensions: [],
+      activeDimensions: [],
+      loading: false,
+      error: new Error('METRICS_INFO failed'),
+    });
+    useMetricFieldsFilterMock.mockReturnValue({ filteredMetricItems: [] });
+
+    const { getByTestId } = render(
+      <MetricsExperienceGrid
+        {...defaultProps}
+        chartSectionSearchError={{
+          esqlReferenceHref: 'https://www.elastic.co/docs/reference/esql',
+        }}
+      />,
+      { wrapper: TestWrapper }
+    );
+
+    expect(getByTestId('discoverErrorCalloutESQLReferenceButton')).toHaveAttribute(
+      'href',
+      'https://www.elastic.co/docs/reference/esql'
+    );
   });
 
   it('does not render the METRICS_INFO error state for AbortError (shows chart grid instead)', () => {

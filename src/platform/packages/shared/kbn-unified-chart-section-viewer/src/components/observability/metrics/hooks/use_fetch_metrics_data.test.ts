@@ -47,6 +47,7 @@ jest.mock('../../../../context/chart_section_inspector', () => ({
 }));
 
 import { renderHook, waitFor, act } from '@testing-library/react';
+import { EsqlResponseError } from '../../../../common/errors/esql_response_error';
 import type { Dimension, ParsedMetricsWithTelemetry } from '../../../../types';
 import { useFetchMetricsData } from './use_fetch_metrics_data';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
@@ -438,9 +439,38 @@ describe('useFetchMetricsData', () => {
         expect(result.current.error).toBeTruthy();
       });
 
+      expect(result.current.error).toBe(fetchError);
       expect(result.current.metricItems).toEqual([]);
       expect(result.current.allDimensions).toEqual([]);
       expect(result.current.activeDimensions).toEqual([]);
+    });
+
+    it('returns EsqlResponseError when ES|QL responds with HTTP 200 and embedded error', async () => {
+      const embeddedError = new EsqlResponseError(
+        {
+          type: 'remote_transport_exception',
+          reason: 'ccs query failed',
+          root_cause: [{ type: 'index_not_found_exception', reason: 'no such index [metrics-*]' }],
+        },
+        { status: 400 }
+      );
+      mockExecuteEsqlQuery.mockRejectedValue(embeddedError);
+
+      const params = createDefaultParams();
+      const { result } = renderHook(() => useFetchMetricsData(params));
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+        expect(result.current.error).toBe(embeddedError);
+      });
+
+      expect(result.current.error).toBeInstanceOf(EsqlResponseError);
+      expect(result.current.error).toMatchObject({
+        message: 'remote_transport_exception: ccs query failed',
+        status: 400,
+        rootCause: [{ type: 'index_not_found_exception', reason: 'no such index [metrics-*]' }],
+      });
+      expect(result.current.metricItems).toEqual([]);
     });
 
     it('returns empty arrays and null error in initial state', () => {

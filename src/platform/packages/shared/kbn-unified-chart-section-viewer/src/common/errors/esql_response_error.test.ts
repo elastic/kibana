@@ -160,6 +160,19 @@ describe('EsqlResponseError', () => {
 
     expect(err.status).toBe(400);
   });
+
+  it('formats message from multiple root_cause entries when top-level type and reason are absent', () => {
+    const err = new EsqlResponseError({
+      root_cause: [
+        { type: 'index_not_found_exception', reason: 'no such index [cluster-a:metrics-*]' },
+        { type: 'index_not_found_exception', reason: 'no such index [cluster-b:metrics-*]' },
+      ],
+    });
+
+    expect(err.message).toBe(
+      'index_not_found_exception: no such index [cluster-a:metrics-*]\nindex_not_found_exception: no such index [cluster-b:metrics-*]'
+    );
+  });
 });
 
 describe('isEsqlResponseError', () => {
