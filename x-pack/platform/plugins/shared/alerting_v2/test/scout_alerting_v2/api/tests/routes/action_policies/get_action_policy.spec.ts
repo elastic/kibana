@@ -19,17 +19,7 @@ import {
   testData,
 } from '../../../fixtures';
 
-/*
- * Custom-role auth (`requestAuth.getApiKeyForCustomRole`) is not yet supported
- * on Elastic Cloud Hosted — ECH falls back to `viewer` for unsupported custom
- * roles, which would silently turn 403 assertions into false positives. This
- * suite is restricted to local stateful (classic) until ECH support lands.
- */
 apiTest.describe('Get action policy API', { tag: '@local-stateful-classic' }, () => {
-  // The endpoint requires `actionPolicies.read`, so the default headers used by
-  // happy-path/validation tests come from READ_ROLE — the least-privileged
-  // role that can call GET. Setup (creating policies/rules) still goes through
-  // apiServices, which uses admin credentials.
   let readerHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ requestAuth }) => {
@@ -46,8 +36,6 @@ apiTest.describe('Get action policy API', { tag: '@local-stateful-classic' }, ()
   apiTest.afterAll(async ({ apiServices }) => {
     await apiServices.alertingV2.actionPolicies.cleanUp();
   });
-
-  // ---------- happy paths ----------
 
   apiTest(
     'get: returns full action policy by id with all schema fields populated',
@@ -78,8 +66,8 @@ apiTest.describe('Get action policy API', { tag: '@local-stateful-classic' }, ()
       expect(response.body.matcher).toBe("env == 'production' && region == 'us-east-1'");
       expect(response.body.groupBy).toStrictEqual(['service.name']);
       expect(response.body.throttle).toStrictEqual({ interval: '10m' });
-      expect(typeof response.body.createdAt).toBe('string');
-      expect(typeof response.body.updatedAt).toBe('string');
+      expect(new Date(response.body.createdAt).toISOString()).toBe(response.body.createdAt);
+      expect(new Date(response.body.updatedAt).toISOString()).toBe(response.body.updatedAt);
       expect(typeof response.body.auth.owner).toBe('string');
       expect(response.body.auth.apiKey).toBeUndefined();
     }
@@ -136,8 +124,6 @@ apiTest.describe('Get action policy API', { tag: '@local-stateful-classic' }, ()
     }
   );
 
-  // ---------- not found ----------
-
   apiTest('not found: returns 404 for a non-existent id', async ({ apiClient }) => {
     const response = await apiClient.get(getActionPolicyUrl('non-existent-id'), {
       headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
@@ -146,8 +132,6 @@ apiTest.describe('Get action policy API', { tag: '@local-stateful-classic' }, ()
     expect(response).toHaveStatusCode(404);
   });
 
-  // ---------- schema validation ----------
-
   apiTest('validation: rejects id over the maximum length', async ({ apiClient }) => {
     const response = await apiClient.get(getActionPolicyUrl('a'.repeat(ID_MAX_LENGTH + 1)), {
       headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
@@ -155,8 +139,6 @@ apiTest.describe('Get action policy API', { tag: '@local-stateful-classic' }, ()
 
     expect(response).toHaveStatusCode(400);
   });
-
-  // ---------- authorization ----------
 
   apiTest(
     'authorization: 200 with read-only alerting_v2 privileges',

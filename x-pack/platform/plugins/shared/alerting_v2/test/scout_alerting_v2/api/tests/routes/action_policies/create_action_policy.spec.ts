@@ -8,6 +8,7 @@
 import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
 import {
+  ACTION_POLICY_MAX_DESTINATIONS,
   ID_MAX_LENGTH,
   MAX_DESCRIPTION_LENGTH,
   MAX_FIELD_NAME_LENGTH,
@@ -15,9 +16,8 @@ import {
   MAX_KQL_LENGTH,
   MAX_NAME_LENGTH,
 } from '@kbn/alerting-v2-schemas';
-import { buildDestinations } from '../../../../common/builders';
+import { buildActionPolicyDestinations } from '../../../../common/builders';
 import {
-  ACTION_POLICY_MAX_DESTINATIONS,
   ALL_ROLE,
   apiTest,
   buildCreateActionPolicyData,
@@ -27,19 +27,13 @@ import {
   testData,
 } from '../../../fixtures';
 
-/*
- * Custom-role auth (`requestAuth.getApiKeyForCustomRole`) is not yet supported
- * on Elastic Cloud Hosted — ECH falls back to `viewer` for unsupported custom
- * roles, which would silently turn 403 assertions into false positives. This
- * suite is restricted to local stateful (classic) until ECH support lands.
- */
 apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' }, () => {
-  let adminCredentials: RoleApiCredentials;
-  let adminHeaders: Record<string, string>;
+  let writerCredentials: RoleApiCredentials;
+  let writerHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ requestAuth }) => {
-    adminCredentials = await requestAuth.getApiKeyForAdmin();
-    adminHeaders = { ...adminCredentials.apiKeyHeader };
+    writerCredentials = await requestAuth.getApiKeyForCustomRole(ALL_ROLE);
+    writerHeaders = { ...writerCredentials.apiKeyHeader };
   });
 
   apiTest.beforeEach(async ({ apiServices }) => {
@@ -49,8 +43,6 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
   apiTest.afterAll(async ({ apiServices }) => {
     await apiServices.alertingV2.actionPolicies.cleanUp();
   });
-
-  // ---------- happy paths ----------
 
   apiTest(
     'create: creates with auto-generated id and full response shape',
@@ -64,7 +56,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
         throttle: { interval: '1m' },
       });
       const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
-        headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
         body,
       });
 
@@ -80,7 +72,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
 
   apiTest('create: only required fields returns documented defaults', async ({ apiClient }) => {
     const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: {
         name: 'minimal-policy',
         description: 'minimal-policy description',
@@ -105,7 +97,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
 
   apiTest('create: per_field grouping with time_interval strategy', async ({ apiClient }) => {
     const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: buildCreateActionPolicyData({
         name: 'per-field-policy',
         groupBy: ['host.name'],
@@ -124,7 +116,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
 
   apiTest('create: per_episode grouping with on_status_change strategy', async ({ apiClient }) => {
     const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: buildCreateActionPolicyData({
         name: 'per-episode-policy',
         groupingMode: 'per_episode',
@@ -141,7 +133,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
 
   apiTest('create: all grouping with every_time strategy', async ({ apiClient }) => {
     const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: buildCreateActionPolicyData({
         name: 'all-mode-policy',
         groupingMode: 'all',
@@ -158,7 +150,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
 
   apiTest('type: defaults to "global" when omitted', async ({ apiClient }) => {
     const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: buildCreateActionPolicyData({ name: 'default-type-policy' }),
     });
 
@@ -174,7 +166,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
       );
 
       const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
-        headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
         body: buildCreateActionPolicyData({
           name: 'single-rule-policy',
           type: 'single_rule',
@@ -190,11 +182,9 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
     }
   );
 
-  // ---------- schema validation ----------
-
   apiTest('validation: rejects missing name', async ({ apiClient }) => {
     const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: {
         description: 'no name',
         destinations: [{ type: 'workflow', id: 'wf-1' }],
@@ -207,7 +197,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
 
   apiTest('validation: rejects empty name', async ({ apiClient }) => {
     const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: buildCreateActionPolicyData({ name: '' }),
     });
 
@@ -216,7 +206,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
 
   apiTest('validation: rejects name over the maximum length', async ({ apiClient }) => {
     const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: buildCreateActionPolicyData({ name: 'a'.repeat(MAX_NAME_LENGTH + 1) }),
     });
 
@@ -225,7 +215,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
 
   apiTest('validation: rejects missing description', async ({ apiClient }) => {
     const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: {
         name: 'no-description',
         destinations: [{ type: 'workflow', id: 'wf-1' }],
@@ -237,7 +227,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
 
   apiTest('validation: rejects description over the maximum length', async ({ apiClient }) => {
     const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: buildCreateActionPolicyData({
         description: 'a'.repeat(MAX_DESCRIPTION_LENGTH + 1),
       }),
@@ -248,7 +238,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
 
   apiTest('validation: rejects missing destinations', async ({ apiClient }) => {
     const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: { name: 'no-destinations', description: 'no-destinations' },
     });
 
@@ -257,7 +247,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
 
   apiTest('validation: rejects empty destinations array', async ({ apiClient }) => {
     const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: buildCreateActionPolicyData({ destinations: [] }),
     });
 
@@ -268,9 +258,9 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
     'validation: rejects more than the maximum number of destinations',
     async ({ apiClient }) => {
       const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
-        headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
         body: buildCreateActionPolicyData({
-          destinations: buildDestinations(ACTION_POLICY_MAX_DESTINATIONS + 1),
+          destinations: buildActionPolicyDestinations(ACTION_POLICY_MAX_DESTINATIONS + 1),
         }),
       });
 
@@ -280,13 +270,11 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
 
   apiTest('validation: rejects destination with unknown type', async ({ apiClient }) => {
     const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: buildCreateActionPolicyData({
-        // `email` is not in the destination discriminator union. Cast through
-        // unknown so the test exercises the runtime validator rather than the
-        // compile-time type narrowing.
         destinations: [
-          { type: 'email', id: 'wf-1' } as unknown as { type: 'workflow'; id: string },
+          // @ts-expect-error
+          { type: 'email', id: 'wf-1' },
         ],
       }),
     });
@@ -296,7 +284,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
 
   apiTest('validation: rejects destination with empty id', async ({ apiClient }) => {
     const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: buildCreateActionPolicyData({
         destinations: [{ type: 'workflow', id: '' }],
       }),
@@ -307,7 +295,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
 
   apiTest('validation: rejects destination with id over max length', async ({ apiClient }) => {
     const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: buildCreateActionPolicyData({
         destinations: [{ type: 'workflow', id: 'a'.repeat(ID_MAX_LENGTH + 1) }],
       }),
@@ -318,7 +306,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
 
   apiTest('validation: rejects matcher over the maximum length', async ({ apiClient }) => {
     const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: buildCreateActionPolicyData({ matcher: 'a'.repeat(MAX_KQL_LENGTH + 1) }),
     });
 
@@ -327,7 +315,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
 
   apiTest('validation: rejects groupBy with too many fields', async ({ apiClient }) => {
     const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: buildCreateActionPolicyData({
         groupBy: Array.from({ length: MAX_GROUPING_FIELDS + 1 }, (_, i) => `field.${i}`),
       }),
@@ -338,7 +326,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
 
   apiTest('validation: rejects groupBy with empty field name', async ({ apiClient }) => {
     const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: buildCreateActionPolicyData({ groupBy: [''] }),
     });
 
@@ -347,7 +335,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
 
   apiTest('validation: rejects groupBy field name over max length', async ({ apiClient }) => {
     const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: buildCreateActionPolicyData({
         groupBy: ['a'.repeat(MAX_FIELD_NAME_LENGTH + 1)],
       }),
@@ -358,10 +346,10 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
 
   apiTest('validation: rejects unknown groupingMode', async ({ apiClient }) => {
     const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: buildCreateActionPolicyData({
-        // Intentionally invalid enum value.
-        groupingMode: 'per_galaxy' as unknown as 'per_episode',
+        // @ts-expect-error
+        groupingMode: 'per_galaxy',
       }),
     });
 
@@ -370,9 +358,10 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
 
   apiTest('validation: rejects unknown throttle.strategy', async ({ apiClient }) => {
     const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: buildCreateActionPolicyData({
-        throttle: { strategy: 'whenever' as unknown as 'every_time' },
+        // @ts-expect-error
+        throttle: { strategy: 'whenever' },
       }),
     });
 
@@ -381,7 +370,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
 
   apiTest('validation: rejects invalid throttle.interval format', async ({ apiClient }) => {
     const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: buildCreateActionPolicyData({
         throttle: { interval: 'not-a-duration' },
       }),
@@ -392,7 +381,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
 
   apiTest('validation: rejects time_interval strategy without interval', async ({ apiClient }) => {
     const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: buildCreateActionPolicyData({
         groupingMode: 'all',
         throttle: { strategy: 'time_interval' },
@@ -406,7 +395,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
     'validation: rejects per_status_interval strategy without interval',
     async ({ apiClient }) => {
       const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
-        headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
         body: buildCreateActionPolicyData({
           groupingMode: 'per_episode',
           throttle: { strategy: 'per_status_interval' },
@@ -418,10 +407,8 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
   );
 
   apiTest('validation: rejects strategy/groupingMode combo mismatch', async ({ apiClient }) => {
-    // `on_status_change` is a per-episode strategy and is not valid for the
-    // aggregate `all` grouping mode.
     const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: buildCreateActionPolicyData({
         groupingMode: 'all',
         throttle: { strategy: 'on_status_change' },
@@ -433,9 +420,10 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
 
   apiTest('validation: rejects unknown type enum value', async ({ apiClient }) => {
     const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: buildCreateActionPolicyData({
-        type: 'group_of_rules' as unknown as 'global',
+        // @ts-expect-error
+        type: 'group_of_rules',
       }),
     });
 
@@ -444,7 +432,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
 
   apiTest('validation: rejects type:"single_rule" without ruleId', async ({ apiClient }) => {
     const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: buildCreateActionPolicyData({ type: 'single_rule' }),
     });
 
@@ -453,28 +441,21 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
 
   apiTest('validation: rejects type:"global" with ruleId', async ({ apiClient }) => {
     const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: buildCreateActionPolicyData({ type: 'global', ruleId: 'some-rule-id' }),
     });
 
     expect(response).toHaveStatusCode(400);
   });
 
-  // ---------- authorization ----------
+  apiTest('authorization: 201 with full alerting_v2 privileges (write)', async ({ apiClient }) => {
+    const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+      body: buildCreateActionPolicyData({ name: 'authorized-write' }),
+    });
 
-  apiTest(
-    'authorization: 201 with full alerting_v2 privileges (write)',
-    async ({ apiClient, requestAuth }) => {
-      const writerCredentials = await requestAuth.getApiKeyForCustomRole(ALL_ROLE);
-
-      const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
-        headers: { ...testData.COMMON_HEADERS, ...writerCredentials.apiKeyHeader },
-        body: buildCreateActionPolicyData({ name: 'authorized-write' }),
-      });
-
-      expect(response).toHaveStatusCode(201);
-    }
-  );
+    expect(response).toHaveStatusCode(201);
+  });
 
   apiTest(
     'authorization: 403 with read-only alerting_v2 privileges',

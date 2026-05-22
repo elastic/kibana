@@ -33,11 +33,6 @@ const DEFAULTS: CreateRuleData = {
   state_transition: { pending_count: 0, recovering_count: 0 },
 };
 
-/**
- * Defaults used by `buildCreateActionPolicyData`. `type` is intentionally
- * omitted so specs exercise the schema's `default('global')` branch; specs
- * that need a single-rule policy override `type` and supply `ruleId`.
- */
 const ACTION_POLICY_DEFAULTS: CreateActionPolicyDataInput = {
   name: 'scout-action-policy',
   description: 'Scout action policy',
@@ -60,11 +55,8 @@ export const buildCreateActionPolicyData = (
   ...input,
 });
 
-export const buildDestinations = (count: number) =>
+export const buildActionPolicyDestinations = (count: number) =>
   Array.from({ length: count }, (_, i) => ({
     type: 'workflow' as const,
     id: `wf-${i}`,
   }));
-
-export const futureIsoDate = (offsetMs: number = 86_400_000): string =>
-  new Date(Date.now() + offsetMs).toISOString();

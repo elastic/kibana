@@ -18,19 +18,13 @@ import {
   testData,
 } from '../../../fixtures';
 
-/*
- * Custom-role auth (`requestAuth.getApiKeyForCustomRole`) is not yet supported
- * on Elastic Cloud Hosted — ECH falls back to `viewer` for unsupported custom
- * roles, which would silently turn 403 assertions into false positives. This
- * suite is restricted to local stateful (classic) until ECH support lands.
- */
 apiTest.describe('Delete action policy API', { tag: '@local-stateful-classic' }, () => {
-  let adminCredentials: RoleApiCredentials;
-  let adminHeaders: Record<string, string>;
+  let writerCredentials: RoleApiCredentials;
+  let writerHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ requestAuth }) => {
-    adminCredentials = await requestAuth.getApiKeyForAdmin();
-    adminHeaders = { ...adminCredentials.apiKeyHeader };
+    writerCredentials = await requestAuth.getApiKeyForCustomRole(ALL_ROLE);
+    writerHeaders = { ...writerCredentials.apiKeyHeader };
   });
 
   apiTest.beforeEach(async ({ apiServices }) => {
@@ -40,8 +34,6 @@ apiTest.describe('Delete action policy API', { tag: '@local-stateful-classic' },
   apiTest.afterAll(async ({ apiServices }) => {
     await apiServices.alertingV2.actionPolicies.cleanUp();
   });
-
-  // ---------- happy path ----------
 
   apiTest(
     'delete: deletes an action policy and returns 204',
@@ -55,27 +47,19 @@ apiTest.describe('Delete action policy API', { tag: '@local-stateful-classic' },
       );
 
       const deleteResponse = await apiClient.delete(getActionPolicyUrl(created.id), {
-        headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       });
 
       expect(deleteResponse).toHaveStatusCode(204);
 
-      // Side-effect verification via the GET endpoint to confirm the policy is
-      // actually gone. We use apiClient (not apiServices) here because the
-      // service helpers throw on 4xx, which would obscure the assertion. This
-      // GET is a verifier — it is not the endpoint under test.
-      const getResponse = await apiClient.get(getActionPolicyUrl(created.id), {
-        headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
-      });
-      expect(getResponse).toHaveStatusCode(404);
+      const remaining = await apiServices.alertingV2.actionPolicies.list({ perPage: 100 });
+      expect(remaining.items.map((policy) => policy.id)).not.toContain(created.id);
     }
   );
 
-  // ---------- not found / idempotency ----------
-
   apiTest('not found: returns 404 for a non-existent id', async ({ apiClient }) => {
     const response = await apiClient.delete(getActionPolicyUrl('non-existent-id'), {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
     });
 
     expect(response).toHaveStatusCode(404);
@@ -89,39 +73,34 @@ apiTest.describe('Delete action policy API', { tag: '@local-stateful-classic' },
       );
 
       const firstDelete = await apiClient.delete(getActionPolicyUrl(created.id), {
-        headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       });
       expect(firstDelete).toHaveStatusCode(204);
 
       const secondDelete = await apiClient.delete(getActionPolicyUrl(created.id), {
-        headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       });
       expect(secondDelete).toHaveStatusCode(404);
     }
   );
 
-  // ---------- schema validation ----------
-
   apiTest('validation: rejects id over the maximum length', async ({ apiClient }) => {
     const response = await apiClient.delete(getActionPolicyUrl('a'.repeat(ID_MAX_LENGTH + 1)), {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
     });
 
     expect(response).toHaveStatusCode(400);
   });
 
-  // ---------- authorization ----------
-
   apiTest(
     'authorization: 204 with full alerting_v2 privileges (write)',
-    async ({ apiClient, apiServices, requestAuth }) => {
-      const writerCredentials = await requestAuth.getApiKeyForCustomRole(ALL_ROLE);
+    async ({ apiClient, apiServices }) => {
       const created = await apiServices.alertingV2.actionPolicies.create(
         buildCreateActionPolicyData({ name: 'writer-can-delete' })
       );
 
       const response = await apiClient.delete(getActionPolicyUrl(created.id), {
-        headers: { ...testData.COMMON_HEADERS, ...writerCredentials.apiKeyHeader },
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       });
 
       expect(response).toHaveStatusCode(204);

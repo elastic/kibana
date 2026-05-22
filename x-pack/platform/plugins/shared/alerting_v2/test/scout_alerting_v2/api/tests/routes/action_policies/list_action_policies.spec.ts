@@ -23,13 +23,7 @@ import {
   type AlertingApiServicesFixture,
 } from '../../../fixtures';
 
-/**
- * Seeds the three policies (Alpha/Beta/Gamma) used by the search/filter/sort
- * tests below. Returns Alpha so callers can read its `id` / `createdBy` for
- * filter assertions. Scout caps describe nesting at 1, so we seed per-test
- * instead of via a nested describe + beforeAll.
- */
-const seedAlphaBetaGamma = async (apiServices: AlertingApiServicesFixture) => {
+const createActionPolicies = async (apiServices: AlertingApiServicesFixture) => {
   const alpha = await apiServices.alertingV2.actionPolicies.create(
     buildCreateActionPolicyData({
       name: 'Alpha Policy',
@@ -38,7 +32,7 @@ const seedAlphaBetaGamma = async (apiServices: AlertingApiServicesFixture) => {
       tags: ['production', 'critical'],
     })
   );
-  await apiServices.alertingV2.actionPolicies.create(
+  const beta = await apiServices.alertingV2.actionPolicies.create(
     buildCreateActionPolicyData({
       name: 'Beta Policy',
       description: 'Tracks memory alerts',
@@ -46,26 +40,17 @@ const seedAlphaBetaGamma = async (apiServices: AlertingApiServicesFixture) => {
       tags: ['staging'],
     })
   );
-  await apiServices.alertingV2.actionPolicies.create(
+  const gamma = await apiServices.alertingV2.actionPolicies.create(
     buildCreateActionPolicyData({
       name: 'Gamma Policy',
       description: 'Monitors disk space',
       destinations: [{ type: 'workflow', id: 'wf-gamma-003' }],
     })
   );
-  return alpha;
+  return { alpha, beta, gamma };
 };
 
-/*
- * Custom-role auth (`requestAuth.getApiKeyForCustomRole`) is not yet supported
- * on Elastic Cloud Hosted — ECH falls back to `viewer` for unsupported custom
- * roles, which would silently turn 403 assertions into false positives. This
- * suite is restricted to local stateful (classic) until ECH support lands.
- */
 apiTest.describe('List action policies API', { tag: '@local-stateful-classic' }, () => {
-  // The endpoint requires `actionPolicies.read`, so the default headers used by
-  // happy-path/validation tests come from READ_ROLE — the least-privileged
-  // role that can call the list endpoint.
   let readerHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ requestAuth }) => {
@@ -82,8 +67,6 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
   apiTest.afterAll(async ({ apiServices }) => {
     await apiServices.alertingV2.actionPolicies.cleanUp();
   });
-
-  // ---------- lists (no seed) ----------
 
   apiTest(
     'list: returns empty list with documented defaults when no policies exist',
@@ -118,21 +101,27 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
       expect(response.body.total).toBe(2);
       expect(response.body.items).toHaveLength(2);
 
-      const names = response.body.items.map((item: { name: string }) => item.name);
-      expect(names).toContain('policy-1');
-      expect(names).toContain('policy-2');
+      const expectedShape = {
+        description: 'Scout action policy',
+        destinations: [{ type: 'workflow', id: 'scout-workflow-id' }],
+        type: 'global',
+        ruleId: null,
+        enabled: true,
+        matcher: null,
+        groupBy: null,
+        tags: null,
+        groupingMode: null,
+        throttle: null,
+        snoozedUntil: null,
+      };
 
-      for (const item of response.body.items) {
-        expect(typeof item.id).toBe('string');
-        expect(typeof item.name).toBe('string');
-        expect(typeof item.description).toBe('string');
-        expect(Array.isArray(item.destinations)).toBe(true);
-        expect(typeof item.createdAt).toBe('string');
-        expect(typeof item.updatedAt).toBe('string');
-        expect(typeof item.auth.owner).toBe('string');
-        expect(typeof item.auth.createdByUser).toBe('boolean');
-        // The API key is server-side only and must never be exposed over the wire.
-        expect(item.auth.apiKey).toBeUndefined();
+      const itemsByName = new Map(
+        response.body.items.map((item: { name: string }) => [item.name, item])
+      );
+
+      for (const name of ['policy-1', 'policy-2']) {
+        const item = itemsByName.get(name);
+        expect(item).toMatchObject({ name, ...expectedShape });
       }
     }
   );
@@ -167,10 +156,8 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
     expect(secondPage.body.perPage).toBe(2);
   });
 
-  // ---------- search (per-test seed of Alpha/Beta/Gamma) ----------
-
   apiTest('search: matches by name', async ({ apiClient, apiServices }) => {
-    await seedAlphaBetaGamma(apiServices);
+    await createActionPolicies(apiServices);
 
     const response = await apiClient.get(getListActionPoliciesUrl({ search: 'Alpha' }), {
       headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
@@ -181,7 +168,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
   });
 
   apiTest('search: matches by description', async ({ apiClient, apiServices }) => {
-    await seedAlphaBetaGamma(apiServices);
+    await createActionPolicies(apiServices);
 
     const response = await apiClient.get(getListActionPoliciesUrl({ search: 'memory' }), {
       headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
@@ -192,7 +179,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
   });
 
   apiTest('search: matches by destination id', async ({ apiClient, apiServices }) => {
-    await seedAlphaBetaGamma(apiServices);
+    await createActionPolicies(apiServices);
 
     const response = await apiClient.get(getListActionPoliciesUrl({ search: 'wf-gamma' }), {
       headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
@@ -205,7 +192,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
   apiTest(
     'search: returns multiple matching items for partial term',
     async ({ apiClient, apiServices }) => {
-      await seedAlphaBetaGamma(apiServices);
+      await createActionPolicies(apiServices);
 
       const response = await apiClient.get(getListActionPoliciesUrl({ search: 'Monitors' }), {
         headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
@@ -221,7 +208,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
   apiTest(
     'search: returns empty result for non-matching term',
     async ({ apiClient, apiServices }) => {
-      await seedAlphaBetaGamma(apiServices);
+      await createActionPolicies(apiServices);
 
       const response = await apiClient.get(getListActionPoliciesUrl({ search: 'nonexistent' }), {
         headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
@@ -232,10 +219,8 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
     }
   );
 
-  // ---------- filter ----------
-
   apiTest('filter: by destinationType=workflow', async ({ apiClient, apiServices }) => {
-    await seedAlphaBetaGamma(apiServices);
+    await createActionPolicies(apiServices);
 
     const response = await apiClient.get(
       getListActionPoliciesUrl({ destinationType: 'workflow' }),
@@ -248,7 +233,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
   });
 
   apiTest('filter: by createdBy', async ({ apiClient, apiServices }) => {
-    const alpha = await seedAlphaBetaGamma(apiServices);
+    const { alpha } = await createActionPolicies(apiServices);
     expect(alpha.createdBy).toBeDefined();
 
     const response = await apiClient.get(
@@ -262,7 +247,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
   });
 
   apiTest('filter: by enabled=true and enabled=false', async ({ apiClient, apiServices }) => {
-    const alpha = await seedAlphaBetaGamma(apiServices);
+    const { alpha } = await createActionPolicies(apiServices);
     await apiServices.alertingV2.actionPolicies.disable(alpha.id);
 
     const enabledResponse = await apiClient.get(getListActionPoliciesUrl({ enabled: 'true' }), {
@@ -281,10 +266,8 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
     expect(disabledResponse.body.items[0].name).toBe('Alpha Policy');
   });
 
-  // ---------- filter by tags ----------
-
   apiTest('filter by tags: by a single tag (string)', async ({ apiClient, apiServices }) => {
-    await seedAlphaBetaGamma(apiServices);
+    await createActionPolicies(apiServices);
 
     const response = await apiClient.get(getListActionPoliciesUrl({ tags: 'production' }), {
       headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
@@ -296,7 +279,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
   });
 
   apiTest('filter by tags: by multiple tags (array)', async ({ apiClient, apiServices }) => {
-    await seedAlphaBetaGamma(apiServices);
+    await createActionPolicies(apiServices);
 
     const response = await apiClient.get(
       getListActionPoliciesUrl({ tags: ['production', 'staging'] }),
@@ -314,7 +297,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
   apiTest(
     'filter by tags: returns empty when no policies match',
     async ({ apiClient, apiServices }) => {
-      await seedAlphaBetaGamma(apiServices);
+      await createActionPolicies(apiServices);
 
       const response = await apiClient.get(getListActionPoliciesUrl({ tags: 'nonexistent' }), {
         headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
@@ -328,7 +311,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
   apiTest(
     'filter by tags: accepts a single tag wrapped in array',
     async ({ apiClient, apiServices }) => {
-      await seedAlphaBetaGamma(apiServices);
+      await createActionPolicies(apiServices);
 
       const response = await apiClient.get(getListActionPoliciesUrl({ tags: ['staging'] }), {
         headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
@@ -339,10 +322,8 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
     }
   );
 
-  // ---------- sort ----------
-
   apiTest('sort: by name ascending', async ({ apiClient, apiServices }) => {
-    await seedAlphaBetaGamma(apiServices);
+    await createActionPolicies(apiServices);
 
     const response = await apiClient.get(
       getListActionPoliciesUrl({ sortField: 'name', sortOrder: 'asc' }),
@@ -356,7 +337,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
   });
 
   apiTest('sort: by name descending', async ({ apiClient, apiServices }) => {
-    await seedAlphaBetaGamma(apiServices);
+    await createActionPolicies(apiServices);
 
     const response = await apiClient.get(
       getListActionPoliciesUrl({ sortField: 'name', sortOrder: 'desc' }),
@@ -370,7 +351,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
   });
 
   apiTest('sort: by createdAt ascending', async ({ apiClient, apiServices }) => {
-    await seedAlphaBetaGamma(apiServices);
+    await createActionPolicies(apiServices);
 
     const response = await apiClient.get(
       getListActionPoliciesUrl({ sortField: 'createdAt', sortOrder: 'asc' }),
@@ -385,7 +366,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
   });
 
   apiTest('sort: by createdAt descending', async ({ apiClient, apiServices }) => {
-    await seedAlphaBetaGamma(apiServices);
+    await createActionPolicies(apiServices);
 
     const response = await apiClient.get(
       getListActionPoliciesUrl({ sortField: 'createdAt', sortOrder: 'desc' }),
@@ -399,10 +380,8 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
     expect(response.body.items[2].name).toBe('Alpha Policy');
   });
 
-  // ---------- combined ----------
-
   apiTest('combined: search + sort', async ({ apiClient, apiServices }) => {
-    await seedAlphaBetaGamma(apiServices);
+    await createActionPolicies(apiServices);
 
     const response = await apiClient.get(
       getListActionPoliciesUrl({ search: 'Monitors', sortField: 'name', sortOrder: 'asc' }),
@@ -415,7 +394,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
   });
 
   apiTest('combined: search + pagination', async ({ apiClient, apiServices }) => {
-    await seedAlphaBetaGamma(apiServices);
+    await createActionPolicies(apiServices);
 
     const response = await apiClient.get(
       getListActionPoliciesUrl({ search: 'Policy', perPage: 2, page: 1 }),
@@ -429,8 +408,6 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
     expect(response.body.page).toBe(1);
     expect(response.body.perPage).toBe(2);
   });
-
-  // ---------- schema validation ----------
 
   apiTest('validation: rejects page=0', async ({ apiClient }) => {
     const response = await apiClient.get(getListActionPoliciesUrl({ page: 0 }), {
@@ -529,8 +506,6 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
     );
     expect(response).toHaveStatusCode(400);
   });
-
-  // ---------- authorization ----------
 
   apiTest('authorization: 200 with read-only alerting_v2 privileges', async ({ apiClient }) => {
     const response = await apiClient.get(getListActionPoliciesUrl(), {

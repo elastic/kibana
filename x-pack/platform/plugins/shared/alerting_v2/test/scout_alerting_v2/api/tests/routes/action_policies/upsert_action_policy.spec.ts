@@ -19,19 +19,13 @@ import {
   testData,
 } from '../../../fixtures';
 
-/*
- * Custom-role auth (`requestAuth.getApiKeyForCustomRole`) is not yet supported
- * on Elastic Cloud Hosted — ECH falls back to `viewer` for unsupported custom
- * roles, which would silently turn 403 assertions into false positives. This
- * suite is restricted to local stateful (classic) until ECH support lands.
- */
 apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' }, () => {
-  let adminCredentials: RoleApiCredentials;
-  let adminHeaders: Record<string, string>;
+  let writerCredentials: RoleApiCredentials;
+  let writerHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ requestAuth }) => {
-    adminCredentials = await requestAuth.getApiKeyForAdmin();
-    adminHeaders = { ...adminCredentials.apiKeyHeader };
+    writerCredentials = await requestAuth.getApiKeyForCustomRole(ALL_ROLE);
+    writerHeaders = { ...writerCredentials.apiKeyHeader };
   });
 
   apiTest.beforeEach(async ({ apiServices }) => {
@@ -41,8 +35,6 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
   apiTest.afterAll(async ({ apiServices }) => {
     await apiServices.alertingV2.actionPolicies.cleanUp();
   });
-
-  // ---------- upsert: create-via-PUT ----------
 
   apiTest(
     'upsert: 201 creates with the supplied id when it does not exist',
@@ -54,7 +46,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
       });
 
       const response = await apiClient.put(getActionPolicyUrl(id), {
-        headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
         body,
       });
 
@@ -76,7 +68,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
     const id = 'upsert-default-type';
 
     const response = await apiClient.put(getActionPolicyUrl(id), {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: buildCreateActionPolicyData({ name: 'default-type-via-put' }),
     });
 
@@ -92,7 +84,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
       );
 
       const response = await apiClient.put(getActionPolicyUrl('upsert-single-rule-policy'), {
-        headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
         body: buildCreateActionPolicyData({
           name: 'single-rule-via-put',
           type: 'single_rule',
@@ -105,8 +97,6 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
       expect(response.body.ruleId).toBe(rule.id);
     }
   );
-
-  // ---------- upsert: replace ----------
 
   apiTest(
     'upsert: 200 replaces and rotates version+updatedAt, preserves createdAt/createdBy',
@@ -124,7 +114,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
       );
 
       const replaced = await apiClient.put(getActionPolicyUrl(id), {
-        headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
         body: buildCreateActionPolicyData({
           name: 'second-version',
           description: 'after replace',
@@ -135,19 +125,13 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
       expect(replaced).toHaveStatusCode(200);
       expect(replaced.body.id).toBe(id);
 
-      // Replaced fields take the new values.
       expect(replaced.body.name).toBe('second-version');
       expect(replaced.body.description).toBe('after replace');
       expect(replaced.body.destinations).toStrictEqual([{ type: 'workflow', id: 'wf-2' }]);
 
-      // Audit metadata is preserved across replace.
       expect(replaced.body.createdBy).toBe(created.createdBy);
       expect(replaced.body.createdAt).toBe(created.createdAt);
 
-      // updatedAt advances and version changes; together these prove the SO was
-      // rewritten and the API key was rotated. The actual key string is never
-      // returned over the wire — see action_policy_client unit tests for direct
-      // verification of apiKeyService.create / markApiKeysForInvalidation calls.
       expect(replaced.body.updatedAt).not.toBe(created.createdAt);
       expect(replaced.body.version).not.toBe(created.version);
     }
@@ -168,13 +152,11 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
       );
 
       const replaced = await apiClient.put(getActionPolicyUrl(id), {
-        headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
         body: buildCreateActionPolicyData({ name: 'minimal-replacement' }),
       });
 
       expect(replaced).toHaveStatusCode(200);
-      // PUT fully replaces — fields not in the new body fall back to their
-      // documented defaults (null).
       expect(replaced.body.matcher).toBeNull();
       expect(replaced.body.groupBy).toBeNull();
       expect(replaced.body.throttle).toBeNull();
@@ -191,7 +173,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
     await apiServices.alertingV2.actionPolicies.disable(id);
 
     const replaced = await apiClient.put(getActionPolicyUrl(id), {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: buildCreateActionPolicyData({ name: 'replaced-while-disabled' }),
     });
 
@@ -210,7 +192,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
     await apiServices.alertingV2.actionPolicies.snooze(id, snoozedUntil);
 
     const replaced = await apiClient.put(getActionPolicyUrl(id), {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: buildCreateActionPolicyData({ name: 'replaced-while-snoozed' }),
     });
 
@@ -218,15 +200,9 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
     expect(replaced.body.snoozedUntil).toBe(snoozedUntil);
   });
 
-  // ---------- schema validation ----------
-  // The body uses the same createActionPolicyDataSchema as POST /create, which
-  // is exhaustively validated in create_action_policy.spec.ts. The cases below
-  // cover the FTR-parity set plus the most important cross-field branches so
-  // the upsert route's validation wiring is verified independently.
-
   apiTest('validation: rejects missing name', async ({ apiClient }) => {
     const response = await apiClient.put(getActionPolicyUrl('upsert-missing-name'), {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: {
         description: 'no name',
         destinations: [{ type: 'workflow', id: 'wf-1' }],
@@ -238,7 +214,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
 
   apiTest('validation: rejects missing description', async ({ apiClient }) => {
     const response = await apiClient.put(getActionPolicyUrl('upsert-missing-description'), {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: {
         name: 'no-description',
         destinations: [{ type: 'workflow', id: 'wf-1' }],
@@ -250,7 +226,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
 
   apiTest('validation: rejects missing destinations', async ({ apiClient }) => {
     const response = await apiClient.put(getActionPolicyUrl('upsert-missing-destinations'), {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: { name: 'incomplete', description: 'no destinations' },
     });
 
@@ -259,7 +235,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
 
   apiTest('validation: rejects empty destinations array', async ({ apiClient }) => {
     const response = await apiClient.put(getActionPolicyUrl('upsert-empty-destinations'), {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: buildCreateActionPolicyData({ destinations: [] }),
     });
 
@@ -268,7 +244,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
 
   apiTest('validation: rejects name over the maximum length', async ({ apiClient }) => {
     const response = await apiClient.put(getActionPolicyUrl('upsert-name-too-long'), {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: buildCreateActionPolicyData({ name: 'a'.repeat(MAX_NAME_LENGTH + 1) }),
     });
 
@@ -277,10 +253,11 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
 
   apiTest('validation: rejects destination with unknown type', async ({ apiClient }) => {
     const response = await apiClient.put(getActionPolicyUrl('upsert-bad-destination'), {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: buildCreateActionPolicyData({
         destinations: [
-          { type: 'email', id: 'wf-1' } as unknown as { type: 'workflow'; id: string },
+          // @ts-expect-error
+          { type: 'email', id: 'wf-1' },
         ],
       }),
     });
@@ -290,7 +267,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
 
   apiTest('validation: rejects strategy/groupingMode combo mismatch', async ({ apiClient }) => {
     const response = await apiClient.put(getActionPolicyUrl('upsert-bad-combo'), {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: buildCreateActionPolicyData({
         groupingMode: 'all',
         throttle: { strategy: 'on_status_change' },
@@ -302,7 +279,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
 
   apiTest('validation: rejects time_interval strategy without interval', async ({ apiClient }) => {
     const response = await apiClient.put(getActionPolicyUrl('upsert-missing-interval'), {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: buildCreateActionPolicyData({
         groupingMode: 'all',
         throttle: { strategy: 'time_interval' },
@@ -314,7 +291,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
 
   apiTest('validation: rejects type:"single_rule" without ruleId', async ({ apiClient }) => {
     const response = await apiClient.put(getActionPolicyUrl('upsert-single-no-rule-id'), {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: buildCreateActionPolicyData({ type: 'single_rule' }),
     });
 
@@ -323,28 +300,21 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
 
   apiTest('validation: rejects type:"global" with ruleId', async ({ apiClient }) => {
     const response = await apiClient.put(getActionPolicyUrl('upsert-global-with-rule-id'), {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: buildCreateActionPolicyData({ type: 'global', ruleId: 'some-rule-id' }),
     });
 
     expect(response).toHaveStatusCode(400);
   });
 
-  // ---------- authorization ----------
+  apiTest('authorization: 201 with full alerting_v2 privileges (write)', async ({ apiClient }) => {
+    const response = await apiClient.put(getActionPolicyUrl('upsert-authorized-write'), {
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+      body: buildCreateActionPolicyData({ name: 'authorized-write' }),
+    });
 
-  apiTest(
-    'authorization: 201 with full alerting_v2 privileges (write)',
-    async ({ apiClient, requestAuth }) => {
-      const writerCredentials = await requestAuth.getApiKeyForCustomRole(ALL_ROLE);
-
-      const response = await apiClient.put(getActionPolicyUrl('upsert-authorized-write'), {
-        headers: { ...testData.COMMON_HEADERS, ...writerCredentials.apiKeyHeader },
-        body: buildCreateActionPolicyData({ name: 'authorized-write' }),
-      });
-
-      expect(response).toHaveStatusCode(201);
-    }
-  );
+    expect(response).toHaveStatusCode(201);
+  });
 
   apiTest(
     'authorization: 403 with read-only alerting_v2 privileges',

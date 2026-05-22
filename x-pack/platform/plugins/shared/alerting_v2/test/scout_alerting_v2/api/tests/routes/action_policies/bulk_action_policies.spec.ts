@@ -12,29 +12,22 @@ import {
   ALL_ROLE,
   apiTest,
   buildCreateActionPolicyData,
-  getActionPolicyUrl,
   getBulkActionPoliciesUrl,
   NO_ACCESS_ROLE,
   READ_ROLE,
   testData,
 } from '../../../fixtures';
 
-const futureIsoDate = (offsetMs: number = 86_400_000): string =>
+const getSnoozeDate = (offsetMs: number = 86_400_000): string =>
   new Date(Date.now() + offsetMs).toISOString();
 
-/*
- * Custom-role auth (`requestAuth.getApiKeyForCustomRole`) is not yet supported
- * on Elastic Cloud Hosted — ECH falls back to `viewer` for unsupported custom
- * roles, which would silently turn 403 assertions into false positives. This
- * suite is restricted to local stateful (classic) until ECH support lands.
- */
 apiTest.describe('Bulk action policies API', { tag: '@local-stateful-classic' }, () => {
-  let adminCredentials: RoleApiCredentials;
-  let adminHeaders: Record<string, string>;
+  let writerCredentials: RoleApiCredentials;
+  let writerHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ requestAuth }) => {
-    adminCredentials = await requestAuth.getApiKeyForAdmin();
-    adminHeaders = { ...adminCredentials.apiKeyHeader };
+    writerCredentials = await requestAuth.getApiKeyForCustomRole(ALL_ROLE);
+    writerHeaders = { ...writerCredentials.apiKeyHeader };
   });
 
   apiTest.beforeEach(async ({ apiServices }) => {
@@ -44,8 +37,6 @@ apiTest.describe('Bulk action policies API', { tag: '@local-stateful-classic' },
   apiTest.afterAll(async ({ apiServices }) => {
     await apiServices.alertingV2.actionPolicies.cleanUp();
   });
-
-  // ---------- bulk enable / disable ----------
 
   apiTest('bulk: enables disabled policies', async ({ apiClient, apiServices }) => {
     const p1 = await apiServices.alertingV2.actionPolicies.create(
@@ -58,7 +49,7 @@ apiTest.describe('Bulk action policies API', { tag: '@local-stateful-classic' },
     await apiServices.alertingV2.actionPolicies.disable(p2.id);
 
     const response = await apiClient.post(getBulkActionPoliciesUrl(), {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: {
         actions: [
           { id: p1.id, action: 'enable' },
@@ -87,7 +78,7 @@ apiTest.describe('Bulk action policies API', { tag: '@local-stateful-classic' },
     );
 
     const response = await apiClient.post(getBulkActionPoliciesUrl(), {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: {
         actions: [
           { id: p1.id, action: 'disable' },
@@ -105,8 +96,6 @@ apiTest.describe('Bulk action policies API', { tag: '@local-stateful-classic' },
     expect(updated2.enabled).toBe(false);
   });
 
-  // ---------- bulk snooze / unsnooze ----------
-
   apiTest('bulk: snoozes policies with snoozedUntil', async ({ apiClient, apiServices }) => {
     const p1 = await apiServices.alertingV2.actionPolicies.create(
       buildCreateActionPolicyData({ name: 'bulk-snooze-1' })
@@ -114,10 +103,10 @@ apiTest.describe('Bulk action policies API', { tag: '@local-stateful-classic' },
     const p2 = await apiServices.alertingV2.actionPolicies.create(
       buildCreateActionPolicyData({ name: 'bulk-snooze-2' })
     );
-    const snoozedUntil = futureIsoDate();
+    const snoozedUntil = getSnoozeDate();
 
     const response = await apiClient.post(getBulkActionPoliciesUrl(), {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: {
         actions: [
           { id: p1.id, action: 'snooze', snoozedUntil },
@@ -142,12 +131,12 @@ apiTest.describe('Bulk action policies API', { tag: '@local-stateful-classic' },
     const p2 = await apiServices.alertingV2.actionPolicies.create(
       buildCreateActionPolicyData({ name: 'bulk-unsnooze-2' })
     );
-    const snoozedUntil = futureIsoDate();
+    const snoozedUntil = getSnoozeDate();
     await apiServices.alertingV2.actionPolicies.snooze(p1.id, snoozedUntil);
     await apiServices.alertingV2.actionPolicies.snooze(p2.id, snoozedUntil);
 
     const response = await apiClient.post(getBulkActionPoliciesUrl(), {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: {
         actions: [
           { id: p1.id, action: 'unsnooze' },
@@ -165,8 +154,6 @@ apiTest.describe('Bulk action policies API', { tag: '@local-stateful-classic' },
     expect(updated2.snoozedUntil).toBeNull();
   });
 
-  // ---------- bulk delete ----------
-
   apiTest('bulk: deletes policies', async ({ apiClient, apiServices }) => {
     const p1 = await apiServices.alertingV2.actionPolicies.create(
       buildCreateActionPolicyData({ name: 'bulk-delete-1' })
@@ -176,7 +163,7 @@ apiTest.describe('Bulk action policies API', { tag: '@local-stateful-classic' },
     );
 
     const response = await apiClient.post(getBulkActionPoliciesUrl(), {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: {
         actions: [
           { id: p1.id, action: 'delete' },
@@ -190,18 +177,11 @@ apiTest.describe('Bulk action policies API', { tag: '@local-stateful-classic' },
     expect(response.body.total).toBe(2);
     expect(response.body.errors).toStrictEqual([]);
 
-    // Side-effect verification via GET — the policies must be gone.
-    const get1 = await apiClient.get(getActionPolicyUrl(p1.id), {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
-    });
-    const get2 = await apiClient.get(getActionPolicyUrl(p2.id), {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
-    });
-    expect(get1).toHaveStatusCode(404);
-    expect(get2).toHaveStatusCode(404);
+    const remaining = await apiServices.alertingV2.actionPolicies.list({ perPage: 100 });
+    const remainingIds = remaining.items.map((policy) => policy.id);
+    expect(remainingIds).not.toContain(p1.id);
+    expect(remainingIds).not.toContain(p2.id);
   });
-
-  // ---------- bulk update API key ----------
 
   apiTest('bulk: rotates API keys', async ({ apiClient, apiServices }) => {
     const p1 = await apiServices.alertingV2.actionPolicies.create(
@@ -212,7 +192,7 @@ apiTest.describe('Bulk action policies API', { tag: '@local-stateful-classic' },
     );
 
     const response = await apiClient.post(getBulkActionPoliciesUrl(), {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: {
         actions: [
           { id: p1.id, action: 'update_api_key' },
@@ -237,8 +217,6 @@ apiTest.describe('Bulk action policies API', { tag: '@local-stateful-classic' },
     expect(updated2.version).not.toBe(p2.version);
   });
 
-  // ---------- mixed actions ----------
-
   apiTest(
     'mixed: enable + disable + snooze + unsnooze in one request',
     async ({ apiClient, apiServices }) => {
@@ -256,11 +234,11 @@ apiTest.describe('Bulk action policies API', { tag: '@local-stateful-classic' },
       );
 
       await apiServices.alertingV2.actionPolicies.disable(pEnable.id);
-      const snoozedUntil = futureIsoDate();
+      const snoozedUntil = getSnoozeDate();
       await apiServices.alertingV2.actionPolicies.snooze(pUnsnooze.id, snoozedUntil);
 
       const response = await apiClient.post(getBulkActionPoliciesUrl(), {
-        headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
         body: {
           actions: [
             { id: pEnable.id, action: 'enable' },
@@ -298,7 +276,7 @@ apiTest.describe('Bulk action policies API', { tag: '@local-stateful-classic' },
     await apiServices.alertingV2.actionPolicies.disable(pEnable.id);
 
     const response = await apiClient.post(getBulkActionPoliciesUrl(), {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: {
         actions: [
           { id: pEnable.id, action: 'enable' },
@@ -315,13 +293,9 @@ apiTest.describe('Bulk action policies API', { tag: '@local-stateful-classic' },
     const updatedEnable = await apiServices.alertingV2.actionPolicies.get(pEnable.id);
     expect(updatedEnable.enabled).toBe(true);
 
-    const getDeleted = await apiClient.get(getActionPolicyUrl(pDelete.id), {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
-    });
-    expect(getDeleted).toHaveStatusCode(404);
+    const remaining = await apiServices.alertingV2.actionPolicies.list({ perPage: 100 });
+    expect(remaining.items.map((policy) => policy.id)).not.toContain(pDelete.id);
   });
-
-  // ---------- partial failures ----------
 
   apiTest(
     'partial failure: reports errors for non-existent ids',
@@ -331,7 +305,7 @@ apiTest.describe('Bulk action policies API', { tag: '@local-stateful-classic' },
       );
 
       const response = await apiClient.post(getBulkActionPoliciesUrl(), {
-        headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
         body: {
           actions: [
             { id: existing.id, action: 'enable' },
@@ -356,7 +330,7 @@ apiTest.describe('Bulk action policies API', { tag: '@local-stateful-classic' },
       );
 
       const response = await apiClient.post(getBulkActionPoliciesUrl(), {
-        headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
         body: {
           actions: [
             { id: existing.id, action: 'delete' },
@@ -371,10 +345,8 @@ apiTest.describe('Bulk action policies API', { tag: '@local-stateful-classic' },
       expect(response.body.errors).toHaveLength(1);
       expect(response.body.errors[0].id).toBe('non-existent-del-id');
 
-      const getDeleted = await apiClient.get(getActionPolicyUrl(existing.id), {
-        headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
-      });
-      expect(getDeleted).toHaveStatusCode(404);
+      const remaining = await apiServices.alertingV2.actionPolicies.list({ perPage: 100 });
+      expect(remaining.items.map((policy) => policy.id)).not.toContain(existing.id);
     }
   );
 
@@ -386,7 +358,7 @@ apiTest.describe('Bulk action policies API', { tag: '@local-stateful-classic' },
       );
 
       const response = await apiClient.post(getBulkActionPoliciesUrl(), {
-        headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
         body: {
           actions: [
             { id: existing.id, action: 'update_api_key' },
@@ -403,11 +375,9 @@ apiTest.describe('Bulk action policies API', { tag: '@local-stateful-classic' },
     }
   );
 
-  // ---------- schema validation ----------
-
   apiTest('validation: rejects empty actions array', async ({ apiClient }) => {
     const response = await apiClient.post(getBulkActionPoliciesUrl(), {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: { actions: [] },
     });
 
@@ -422,7 +392,7 @@ apiTest.describe('Bulk action policies API', { tag: '@local-stateful-classic' },
       );
 
       const response = await apiClient.post(getBulkActionPoliciesUrl(), {
-        headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
         body: {
           actions: [{ id: created.id, action: 'snooze', snoozedUntil: 'not-a-date' }],
         },
@@ -438,12 +408,9 @@ apiTest.describe('Bulk action policies API', { tag: '@local-stateful-classic' },
     );
 
     const response = await apiClient.post(getBulkActionPoliciesUrl(), {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: {
-        // 'archive' is not part of the discriminated union of bulk actions.
-        actions: [
-          { id: created.id, action: 'archive' } as unknown as { id: string; action: 'enable' },
-        ],
+        actions: [{ id: created.id, action: 'archive' }],
       },
     });
 
@@ -458,16 +425,9 @@ apiTest.describe('Bulk action policies API', { tag: '@local-stateful-classic' },
       );
 
       const response = await apiClient.post(getBulkActionPoliciesUrl(), {
-        headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
         body: {
-          // snooze requires snoozedUntil — the discriminated union enforces this.
-          actions: [
-            { id: created.id, action: 'snooze' } as unknown as {
-              id: string;
-              action: 'snooze';
-              snoozedUntil: string;
-            },
-          ],
+          actions: [{ id: created.id, action: 'snooze' }],
         },
       });
 
@@ -477,7 +437,7 @@ apiTest.describe('Bulk action policies API', { tag: '@local-stateful-classic' },
 
   apiTest('validation: rejects empty action id', async ({ apiClient }) => {
     const response = await apiClient.post(getBulkActionPoliciesUrl(), {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: { actions: [{ id: '', action: 'enable' }] },
     });
 
@@ -486,7 +446,7 @@ apiTest.describe('Bulk action policies API', { tag: '@local-stateful-classic' },
 
   apiTest('validation: rejects action id over the maximum length', async ({ apiClient }) => {
     const response = await apiClient.post(getBulkActionPoliciesUrl(), {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: {
         actions: [{ id: 'a'.repeat(ID_MAX_LENGTH + 1), action: 'enable' }],
       },
@@ -502,25 +462,22 @@ apiTest.describe('Bulk action policies API', { tag: '@local-stateful-classic' },
     }));
 
     const response = await apiClient.post(getBulkActionPoliciesUrl(), {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: { actions: tooManyActions },
     });
 
     expect(response).toHaveStatusCode(400);
   });
 
-  // ---------- authorization ----------
-
   apiTest(
     'authorization: 200 with full alerting_v2 privileges (write)',
-    async ({ apiClient, apiServices, requestAuth }) => {
-      const writerCredentials = await requestAuth.getApiKeyForCustomRole(ALL_ROLE);
+    async ({ apiClient, apiServices }) => {
       const created = await apiServices.alertingV2.actionPolicies.create(
         buildCreateActionPolicyData({ name: 'writer-bulk' })
       );
 
       const response = await apiClient.post(getBulkActionPoliciesUrl(), {
-        headers: { ...testData.COMMON_HEADERS, ...writerCredentials.apiKeyHeader },
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
         body: { actions: [{ id: created.id, action: 'disable' }] },
       });
 

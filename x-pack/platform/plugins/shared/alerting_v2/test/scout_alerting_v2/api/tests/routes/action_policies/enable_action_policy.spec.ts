@@ -18,19 +18,13 @@ import {
   testData,
 } from '../../../fixtures';
 
-/*
- * Custom-role auth (`requestAuth.getApiKeyForCustomRole`) is not yet supported
- * on Elastic Cloud Hosted — ECH falls back to `viewer` for unsupported custom
- * roles, which would silently turn 403 assertions into false positives. This
- * suite is restricted to local stateful (classic) until ECH support lands.
- */
 apiTest.describe('Enable action policy API', { tag: '@local-stateful-classic' }, () => {
-  let adminCredentials: RoleApiCredentials;
-  let adminHeaders: Record<string, string>;
+  let writerCredentials: RoleApiCredentials;
+  let writerHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ requestAuth }) => {
-    adminCredentials = await requestAuth.getApiKeyForAdmin();
-    adminHeaders = { ...adminCredentials.apiKeyHeader };
+    writerCredentials = await requestAuth.getApiKeyForCustomRole(ALL_ROLE);
+    writerHeaders = { ...writerCredentials.apiKeyHeader };
   });
 
   apiTest.beforeEach(async ({ apiServices }) => {
@@ -41,8 +35,6 @@ apiTest.describe('Enable action policy API', { tag: '@local-stateful-classic' },
     await apiServices.alertingV2.actionPolicies.cleanUp();
   });
 
-  // ---------- happy path ----------
-
   apiTest(
     'enable: enables a disabled action policy and returns enabled=true',
     async ({ apiClient, apiServices }) => {
@@ -52,7 +44,7 @@ apiTest.describe('Enable action policy API', { tag: '@local-stateful-classic' },
       await apiServices.alertingV2.actionPolicies.disable(created.id);
 
       const response = await apiClient.post(getEnableActionPolicyUrl(created.id), {
-        headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       });
 
       expect(response).toHaveStatusCode(200);
@@ -60,8 +52,6 @@ apiTest.describe('Enable action policy API', { tag: '@local-stateful-classic' },
       expect(response.body.enabled).toBe(true);
     }
   );
-
-  // ---------- idempotency ----------
 
   apiTest(
     'idempotency: enabling an already-enabled policy returns enabled=true',
@@ -71,7 +61,7 @@ apiTest.describe('Enable action policy API', { tag: '@local-stateful-classic' },
       );
 
       const response = await apiClient.post(getEnableActionPolicyUrl(created.id), {
-        headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       });
 
       expect(response).toHaveStatusCode(200);
@@ -79,10 +69,8 @@ apiTest.describe('Enable action policy API', { tag: '@local-stateful-classic' },
     }
   );
 
-  // ---------- state preservation ----------
-
   apiTest(
-    'state: preserves snoozedUntil after a disable → enable round-trip',
+    'state: preserves snoozedUntil and all other fields after a disable → enable round-trip',
     async ({ apiClient, apiServices }) => {
       const created = await apiServices.alertingV2.actionPolicies.create(
         buildCreateActionPolicyData({ name: 'test-enable-keep-snooze' })
@@ -90,51 +78,53 @@ apiTest.describe('Enable action policy API', { tag: '@local-stateful-classic' },
       const futureDate = new Date(Date.now() + 86_400_000).toISOString();
 
       await apiServices.alertingV2.actionPolicies.snooze(created.id, futureDate);
-      await apiServices.alertingV2.actionPolicies.disable(created.id);
+      const disabled = await apiServices.alertingV2.actionPolicies.disable(created.id);
 
       const response = await apiClient.post(getEnableActionPolicyUrl(created.id), {
-        headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       });
 
       expect(response).toHaveStatusCode(200);
-      expect(response.body.enabled).toBe(true);
-      expect(response.body.snoozedUntil).toBe(futureDate);
+      expect(response.body).toStrictEqual({
+        ...disabled,
+        enabled: true,
+        updatedAt: response.body.updatedAt,
+        updatedBy: response.body.updatedBy,
+        version: response.body.version,
+      });
+      expect(Date.parse(response.body.updatedAt)).toBeGreaterThanOrEqual(
+        Date.parse(disabled.updatedAt)
+      );
+      expect(response.body.version).not.toBe(disabled.version);
     }
   );
 
-  // ---------- not found ----------
-
   apiTest('not found: returns 404 for a non-existent id', async ({ apiClient }) => {
     const response = await apiClient.post(getEnableActionPolicyUrl('non-existent-id'), {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
     });
 
     expect(response).toHaveStatusCode(404);
   });
 
-  // ---------- schema validation ----------
-
   apiTest('validation: rejects id over the maximum length', async ({ apiClient }) => {
     const response = await apiClient.post(getEnableActionPolicyUrl('a'.repeat(ID_MAX_LENGTH + 1)), {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
     });
 
     expect(response).toHaveStatusCode(400);
   });
 
-  // ---------- authorization ----------
-
   apiTest(
     'authorization: 200 with full alerting_v2 privileges (write)',
-    async ({ apiClient, apiServices, requestAuth }) => {
-      const writerCredentials = await requestAuth.getApiKeyForCustomRole(ALL_ROLE);
+    async ({ apiClient, apiServices }) => {
       const created = await apiServices.alertingV2.actionPolicies.create(
         buildCreateActionPolicyData({ name: 'writer-can-enable' })
       );
       await apiServices.alertingV2.actionPolicies.disable(created.id);
 
       const response = await apiClient.post(getEnableActionPolicyUrl(created.id), {
-        headers: { ...testData.COMMON_HEADERS, ...writerCredentials.apiKeyHeader },
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       });
 
       expect(response).toHaveStatusCode(200);

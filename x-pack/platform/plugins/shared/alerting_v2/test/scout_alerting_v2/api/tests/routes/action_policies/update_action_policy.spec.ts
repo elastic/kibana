@@ -7,9 +7,12 @@
 
 import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
-import { ID_MAX_LENGTH, MAX_NAME_LENGTH } from '@kbn/alerting-v2-schemas';
 import {
   ACTION_POLICY_VERSION_MAX_LENGTH,
+  ID_MAX_LENGTH,
+  MAX_NAME_LENGTH,
+} from '@kbn/alerting-v2-schemas';
+import {
   ALL_ROLE,
   apiTest,
   buildCreateActionPolicyData,
@@ -19,19 +22,13 @@ import {
   testData,
 } from '../../../fixtures';
 
-/*
- * Custom-role auth (`requestAuth.getApiKeyForCustomRole`) is not yet supported
- * on Elastic Cloud Hosted — ECH falls back to `viewer` for unsupported custom
- * roles, which would silently turn 403 assertions into false positives. This
- * suite is restricted to local stateful (classic) until ECH support lands.
- */
 apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' }, () => {
-  let adminCredentials: RoleApiCredentials;
-  let adminHeaders: Record<string, string>;
+  let writerCredentials: RoleApiCredentials;
+  let writerHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ requestAuth }) => {
-    adminCredentials = await requestAuth.getApiKeyForAdmin();
-    adminHeaders = { ...adminCredentials.apiKeyHeader };
+    writerCredentials = await requestAuth.getApiKeyForCustomRole(ALL_ROLE);
+    writerHeaders = { ...writerCredentials.apiKeyHeader };
   });
 
   apiTest.beforeEach(async ({ apiServices }) => {
@@ -41,8 +38,6 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
   apiTest.afterAll(async ({ apiServices }) => {
     await apiServices.alertingV2.actionPolicies.cleanUp();
   });
-
-  // ---------- happy paths ----------
 
   apiTest('update: patches all mutable fields', async ({ apiClient, apiServices }) => {
     const created = await apiServices.alertingV2.actionPolicies.create(
@@ -57,7 +52,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
     );
 
     const response = await apiClient.patch(getActionPolicyUrl(created.id), {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: {
         name: 'updated-policy',
         description: 'updated-policy-description',
@@ -80,12 +75,10 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
     expect(response.body.matcher).toBe("env == 'production' && region == 'us-west-2'");
     expect(response.body.groupBy).toStrictEqual(['service.name', 'environment']);
     expect(response.body.throttle).toStrictEqual({ interval: '5m' });
-    expect(typeof response.body.updatedAt).toBe('string');
+    expect(new Date(response.body.updatedAt).toISOString()).toBe(response.body.updatedAt);
     // The API key is server-side only and must never be exposed over the wire.
     expect(response.body.auth.apiKey).toBeUndefined();
   });
-
-  // ---------- partial updates ----------
 
   apiTest(
     'partial: updates only name and preserves other fields',
@@ -102,7 +95,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
       );
 
       const response = await apiClient.patch(getActionPolicyUrl(created.id), {
-        headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
         body: { name: 'only-name-updated', version: created.version },
       });
 
@@ -133,7 +126,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
       );
 
       const response = await apiClient.patch(getActionPolicyUrl(created.id), {
-        headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
         body: { description: 'only-description-updated', version: created.version },
       });
 
@@ -164,7 +157,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
       );
 
       const response = await apiClient.patch(getActionPolicyUrl(created.id), {
-        headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
         body: {
           matcher: "env == 'staging' && region == 'eu-central-1'",
           groupBy: ['service.name', 'host.name'],
@@ -200,7 +193,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
       );
 
       const response = await apiClient.patch(getActionPolicyUrl(created.id), {
-        headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
         body: {
           destinations: [{ type: 'workflow', id: 'updated-dest-workflow' }],
           version: created.version,
@@ -233,7 +226,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
       );
 
       const response = await apiClient.patch(getActionPolicyUrl(created.id), {
-        headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
         body: {
           groupingMode: 'all',
           throttle: { strategy: 'time_interval', interval: '10m' },
@@ -265,7 +258,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
       );
 
       const updated = await apiClient.patch(getActionPolicyUrl(created.id), {
-        headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
         body: {
           throttle: { strategy: 'on_status_change' },
           version: created.version,
@@ -284,8 +277,6 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
     }
   );
 
-  // ---------- nullable clearing ----------
-
   apiTest(
     'nullable: clears groupingMode/groupBy/throttle when set to null',
     async ({ apiClient, apiServices }) => {
@@ -301,7 +292,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
       );
 
       const response = await apiClient.patch(getActionPolicyUrl(created.id), {
-        headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
         body: {
           groupingMode: null,
           groupBy: null,
@@ -332,7 +323,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
       );
 
       const response = await apiClient.patch(getActionPolicyUrl(created.id), {
-        headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
         body: {
           matcher: null,
           groupBy: null,
@@ -352,8 +343,6 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
     }
   );
 
-  // ---------- concurrency / not found ----------
-
   apiTest('concurrency: returns 409 when version is stale', async ({ apiClient, apiServices }) => {
     const created = await apiServices.alertingV2.actionPolicies.create(
       buildCreateActionPolicyData({
@@ -365,13 +354,13 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
     const staleVersion = created.version;
 
     const firstUpdate = await apiClient.patch(getActionPolicyUrl(created.id), {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: { name: 'first-update', version: staleVersion },
     });
     expect(firstUpdate).toHaveStatusCode(200);
 
     const secondUpdate = await apiClient.patch(getActionPolicyUrl(created.id), {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: { name: 'second-update', version: staleVersion },
     });
     expect(secondUpdate).toHaveStatusCode(409);
@@ -379,7 +368,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
 
   apiTest('not found: returns 404 for a non-existent id', async ({ apiClient }) => {
     const response = await apiClient.patch(getActionPolicyUrl('non-existent-id'), {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: {
         name: 'some-name',
         description: 'some-description',
@@ -391,15 +380,13 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
     expect(response).toHaveStatusCode(404);
   });
 
-  // ---------- schema validation ----------
-
   apiTest('validation: rejects empty destinations array', async ({ apiClient, apiServices }) => {
     const created = await apiServices.alertingV2.actionPolicies.create(
       buildCreateActionPolicyData({ name: 'empty-dest-policy' })
     );
 
     const response = await apiClient.patch(getActionPolicyUrl(created.id), {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: { destinations: [], version: created.version },
     });
 
@@ -412,7 +399,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
     );
 
     const response = await apiClient.patch(getActionPolicyUrl(created.id), {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: { name: 'no-version-update' },
     });
 
@@ -425,7 +412,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
     );
 
     const response = await apiClient.patch(getActionPolicyUrl(created.id), {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: { name: 'empty-version-update', version: '' },
     });
 
@@ -440,7 +427,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
       );
 
       const response = await apiClient.patch(getActionPolicyUrl(created.id), {
-        headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
         body: {
           name: 'long-version-update',
           version: 'a'.repeat(ACTION_POLICY_VERSION_MAX_LENGTH + 1),
@@ -459,7 +446,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
       );
 
       const response = await apiClient.patch(getActionPolicyUrl(created.id), {
-        headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
         body: { name: '', version: created.version },
       });
 
@@ -475,7 +462,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
       );
 
       const response = await apiClient.patch(getActionPolicyUrl(created.id), {
-        headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
         body: {
           name: 'a'.repeat(MAX_NAME_LENGTH + 1),
           version: created.version,
@@ -489,15 +476,12 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
   apiTest(
     'validation: rejects immutable field "type" (.strict() schema)',
     async ({ apiClient, apiServices }) => {
-      // The PATCH body schema is .strict(): type and ruleId are immutable, so
-      // sending them returns 400 instead of being silently stripped. To change
-      // type, callers must delete and recreate the policy.
       const created = await apiServices.alertingV2.actionPolicies.create(
         buildCreateActionPolicyData({ name: 'mutate-type-policy' })
       );
 
       const response = await apiClient.patch(getActionPolicyUrl(created.id), {
-        headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
         body: { type: 'single_rule', version: created.version },
       });
 
@@ -513,7 +497,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
       );
 
       const response = await apiClient.patch(getActionPolicyUrl(created.id), {
-        headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
         body: { ruleId: 'some-rule-id', version: created.version },
       });
 
@@ -529,8 +513,8 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
       );
 
       const response = await apiClient.patch(getActionPolicyUrl(created.id), {
-        headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
-        body: { foo: 'bar', version: created.version } as unknown as { version: string },
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+        body: { foo: 'bar', version: created.version },
       });
 
       expect(response).toHaveStatusCode(400);
@@ -539,7 +523,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
 
   apiTest('validation: rejects id over the maximum length', async ({ apiClient }) => {
     const response = await apiClient.patch(getActionPolicyUrl('a'.repeat(ID_MAX_LENGTH + 1)), {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: {
         name: 'too-long-id-update',
         version: 'WzEsMV0=',
@@ -549,18 +533,15 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
     expect(response).toHaveStatusCode(400);
   });
 
-  // ---------- authorization ----------
-
   apiTest(
     'authorization: 200 with full alerting_v2 privileges (write)',
-    async ({ apiClient, apiServices, requestAuth }) => {
-      const writerCredentials = await requestAuth.getApiKeyForCustomRole(ALL_ROLE);
+    async ({ apiClient, apiServices }) => {
       const created = await apiServices.alertingV2.actionPolicies.create(
         buildCreateActionPolicyData({ name: 'writer-can-patch' })
       );
 
       const response = await apiClient.patch(getActionPolicyUrl(created.id), {
-        headers: { ...testData.COMMON_HEADERS, ...writerCredentials.apiKeyHeader },
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
         body: { name: 'writer-can-patch-updated', version: created.version },
       });
 
