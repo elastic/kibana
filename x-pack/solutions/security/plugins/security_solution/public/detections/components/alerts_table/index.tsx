@@ -12,7 +12,6 @@ import type { Filter } from '@kbn/es-query';
 import type {
   AlertsTableProps as ResponseOpsAlertsTableProps,
   RenderContext as ResponseOpsRenderContext,
-  TimelineItem,
 } from '@kbn/response-ops-alerts-table/types';
 import { ALERT_BUILDING_BLOCK_TYPE, AlertConsumers } from '@kbn/rule-data-utils';
 import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
@@ -39,9 +38,7 @@ import { ActionsCell } from './actions_cell';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useLicense } from '../../../common/hooks/use_license';
 import { APP_ID, CASES_FEATURE_ID, VIEW_SELECTION } from '../../../../common/constants';
-import { BULK_ALERTS_ATTACHMENT_PROMPT } from '../../../agent_builder/components/prompts';
-import { alertsToAttachmentInputs } from '../../../agent_builder/helpers';
-import { useReportAddToChat } from '../../../agent_builder/hooks/use_report_add_to_chat';
+import { useBulkAddToChatConfig } from '../../../agent_builder/hooks/use_bulk_add_to_chat_config';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 import { eventsDefaultModel } from '../../../common/components/events_viewer/default_model';
@@ -463,18 +460,11 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
 
   const onLoaded = useCallback(({ alerts }: { alerts: Alert[] }) => onLoad(alerts), [onLoad]);
 
-  const reportAddToChat = useReportAddToChat();
-  const convertAlertToAttachment = useCallback(
-    (alertItems: TimelineItem[]) => {
-      const pathway =
-        tableType === TableId.alertsOnRuleDetailsPage
-          ? 'bulk_alerts_rule_details'
-          : 'bulk_alerts_alerts_page';
-      reportAddToChat({ pathway, attachments: ['alert'], alert_count: alertItems.length });
-      return alertsToAttachmentInputs(alertItems);
-    },
-    [reportAddToChat, tableType]
-  );
+  const pathway =
+    tableType === TableId.alertsOnRuleDetailsPage
+      ? ('bulk_alerts_rule_details' as const)
+      : ('bulk_alerts_alerts_page' as const);
+  const bulkAddToChatConfig = useBulkAddToChatConfig(pathway);
 
   /**
    * We want to hide additional controls (like grouping) if the table is being rendered
@@ -533,10 +523,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
               showInspectButton
               showCsvExportButton
               services={services}
-              bulkAddToChatConfig={{
-                convertAlertToAttachment,
-                initialMessage: BULK_ALERTS_ATTACHMENT_PROMPT,
-              }}
+              bulkAddToChatConfig={bulkAddToChatConfig}
               {...tablePropsOverrides}
             />
           </AlertTableCellContextProvider>

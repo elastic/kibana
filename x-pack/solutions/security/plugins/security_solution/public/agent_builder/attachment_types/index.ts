@@ -69,22 +69,21 @@ export const registerAttachmentUiDefinitions = (attachments: AttachmentServiceSt
     createAttachmentTypeConfig(ALERT_ATTACHMENT_CONFIG.label, ALERT_ATTACHMENT_CONFIG.icon)
   );
 
-  attachments.addAttachmentType<
-    Attachment<string, { alertIds?: unknown[]; attachmentLabel?: string }>
-  >(SecurityAgentBuilderAttachments.alerts, {
-    getLabel: (attachment) => {
-      const customLabel = attachment.data?.attachmentLabel;
-      if (customLabel) return customLabel;
-      const count = attachment.data?.alertIds?.length ?? 0;
-      return count > 0
-        ? i18n.translate('xpack.securitySolution.agentBuilder.attachments.alerts.countLabel', {
-            defaultMessage: '{count} {count, plural, one {Alert} other {Alerts}}',
-            values: { count },
-          })
-        : ALERTS_DEFAULT_LABEL;
-    },
-    getIcon: () => 'bell',
-  });
+  attachments.addAttachmentType<Attachment<string, { alertIds?: unknown[] }>>(
+    SecurityAgentBuilderAttachments.alerts,
+    {
+      getLabel: (attachment) => {
+        const count = attachment.data?.alertIds?.length ?? 0;
+        return count > 0
+          ? i18n.translate('xpack.securitySolution.agentBuilder.attachments.alerts.countLabel', {
+              defaultMessage: '{count} {count, plural, one {Alert} other {Alerts}}',
+              values: { count },
+            })
+          : ALERTS_DEFAULT_LABEL;
+      },
+      getIcon: () => 'bell',
+    }
+  );
 };
 
 /**

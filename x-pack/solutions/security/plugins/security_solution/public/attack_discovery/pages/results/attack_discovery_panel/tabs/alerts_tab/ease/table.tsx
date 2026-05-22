@@ -10,7 +10,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { AlertsTable } from '@kbn/response-ops-alerts-table';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { AlertsTableImperativeApi, TimelineItem } from '@kbn/response-ops-alerts-table/types';
+import type { AlertsTableImperativeApi } from '@kbn/response-ops-alerts-table/types';
 import { useBrowserFields } from '../../../../../../../data_view_manager/hooks/use_browser_fields';
 import { PageScope } from '../../../../../../../data_view_manager/constants';
 import type { AdditionalTableContext } from '../../../../../../../detections/components/alert_summary/table/table';
@@ -27,9 +27,7 @@ import {
 } from '../../../../../../../detections/components/alert_summary/table/table';
 import { ActionsCell } from '../../../../../../../detections/components/alert_summary/table/actions_cell';
 import { useKibana } from '../../../../../../../common/lib/kibana';
-import { BULK_ALERTS_ATTACHMENT_PROMPT } from '../../../../../../../agent_builder/components/prompts';
-import { alertsToAttachmentInputs } from '../../../../../../../agent_builder/helpers';
-import { useReportAddToChat } from '../../../../../../../agent_builder/hooks/use_report_add_to_chat';
+import { useBulkAddToChatConfig } from '../../../../../../../agent_builder/hooks/use_bulk_add_to_chat_config';
 import { CellValue } from '../../../../../../../detections/components/alert_summary/table/render_cell';
 import { useAdditionalBulkActions } from '../../../../../../../detections/hooks/alert_summary/use_additional_bulk_actions';
 
@@ -98,18 +96,7 @@ export const Table = memo(({ dataView, id, packages, query }: TableProps) => {
     ]
   );
 
-  const reportAddToChat = useReportAddToChat();
-  const convertAlertToAttachment = useCallback(
-    (alertItems: TimelineItem[]) => {
-      reportAddToChat({
-        pathway: 'bulk_alerts_attack_discovery',
-        attachments: ['alert'],
-        alert_count: alertItems.length,
-      });
-      return alertsToAttachmentInputs(alertItems);
-    },
-    [reportAddToChat]
-  );
+  const bulkAddToChatConfig = useBulkAddToChatConfig('bulk_alerts_attack_discovery');
 
   const browserFields = useBrowserFields(PageScope.alerts, dataView);
 
@@ -151,10 +138,7 @@ export const Table = memo(({ dataView, id, packages, query }: TableProps) => {
         ruleTypeIds={RULE_TYPE_IDS}
         services={services}
         toolbarVisibility={TOOLBAR_VISIBILITY}
-        bulkAddToChatConfig={{
-          convertAlertToAttachment,
-          initialMessage: BULK_ALERTS_ATTACHMENT_PROMPT,
-        }}
+        bulkAddToChatConfig={bulkAddToChatConfig}
       />
     </EuiDataGridStyleWrapper>
   );

@@ -7,63 +7,74 @@
 
 import { ESSENTIAL_ALERT_FIELDS } from '../../common';
 import { SecurityAgentBuilderAttachments } from '../../common/constants';
-import { alertsToAttachmentInputs, stringifyEssentialAlertData } from './helpers';
+import { alertsToAttachmentGroup, stringifyEssentialAlertData } from './helpers';
 
 const makeItem = (id: string) =>
   ({ _id: id, data: [], ecs: { _id: id, _index: '' } } as unknown as Parameters<
-    typeof alertsToAttachmentInputs
+    typeof alertsToAttachmentGroup
   >[0][number]);
 
-describe('alertsToAttachmentInputs', () => {
-  it('returns a single visible attachment for ≤20 alerts', () => {
-    const items = Array.from({ length: 5 }, (_, i) => makeItem(`id-${i}`));
-    const result = alertsToAttachmentInputs(items);
-
-    expect(result).toHaveLength(1);
-    expect(result[0].hidden).toBeFalsy();
-    expect(result[0].data?.attachmentLabel).toBe('5 Alerts');
-    expect(result[0].type).toBe(SecurityAgentBuilderAttachments.alerts);
+describe('alertsToAttachmentGroup', () => {
+  it('returns an AttachmentGroup with type "group"', () => {
+    const items = [makeItem('a')];
+    const result = alertsToAttachmentGroup(items);
+    expect(result.type).toBe('group');
+    expect(result.id).toBeDefined();
+    expect(typeof result.id).toBe('string');
   });
 
-  it('returns N batches with only the first visible for >20 alerts', () => {
-    const items = Array.from({ length: 50 }, (_, i) => makeItem(`id-${i}`));
-    const result = alertsToAttachmentInputs(items);
+  it('returns a single item in items for ≤20 alerts', () => {
+    const items = Array.from({ length: 5 }, (_, i) => makeItem(`id-${i}`));
+    const result = alertsToAttachmentGroup(items);
 
-    expect(result).toHaveLength(3);
-    expect(result[0].hidden).toBeFalsy();
-    expect(result[0].data?.attachmentLabel).toBe('50 Alerts');
-    expect(result[1].hidden).toBe(true);
-    expect(result[1].data?.attachmentLabel).toBeUndefined();
-    expect(result[2].hidden).toBe(true);
+    expect(result.items).toHaveLength(1);
+    expect(result.items[0].hidden).toBeFalsy();
+    expect(result.items[0].type).toBe(SecurityAgentBuilderAttachments.alerts);
+  });
+
+  it('returns N batches in items for >20 alerts', () => {
+    const items = Array.from({ length: 50 }, (_, i) => makeItem(`id-${i}`));
+    const result = alertsToAttachmentGroup(items);
+
+    expect(result.items).toHaveLength(3);
+    result.items.forEach((item) => {
+      expect(item.hidden).toBeFalsy();
+    });
+  });
+
+  it('uses plural label for multiple alerts', () => {
+    const items = Array.from({ length: 5 }, (_, i) => makeItem(`id-${i}`));
+    expect(alertsToAttachmentGroup(items).label).toBe('5 Alerts');
   });
 
   it('uses singular label for 1 alert', () => {
-    const result = alertsToAttachmentInputs([makeItem('x')]);
-    expect(result[0].data?.attachmentLabel).toBe('1 Alert');
+    expect(alertsToAttachmentGroup([makeItem('x')]).label).toBe('1 Alert');
   });
 
   it('each batch contains the correct alert IDs', () => {
     const items = Array.from({ length: 25 }, (_, i) => makeItem(`id-${i}`));
-    const result = alertsToAttachmentInputs(items);
+    const result = alertsToAttachmentGroup(items);
 
-    expect(result[0].data?.alertIds).toHaveLength(20);
-    expect(result[1].data?.alertIds).toHaveLength(5);
+    expect(result.items[0].data).toEqual({ alertIds: items.slice(0, 20).map((i) => i._id) });
+    expect(result.items[1].data).toEqual({ alertIds: items.slice(20).map((i) => i._id) });
   });
 
-  it('all batches share the same groupId', () => {
+  it('items do not have groupId or hidden fields', () => {
     const items = Array.from({ length: 25 }, (_, i) => makeItem(`id-${i}`));
-    const result = alertsToAttachmentInputs(items);
+    const result = alertsToAttachmentGroup(items);
 
-    expect(result[0].groupId).toBeDefined();
-    expect(result[0].groupId).toBe(result[1].groupId);
+    result.items.forEach((item) => {
+      expect(item).not.toHaveProperty('groupId');
+      expect(item.hidden).toBeFalsy();
+    });
   });
 
-  it('groupId differs between separate calls', () => {
+  it('group id differs between separate calls', () => {
     const items = Array.from({ length: 5 }, (_, i) => makeItem(`id-${i}`));
-    const first = alertsToAttachmentInputs(items);
-    const second = alertsToAttachmentInputs(items);
+    const first = alertsToAttachmentGroup(items);
+    const second = alertsToAttachmentGroup(items);
 
-    expect(first[0].groupId).not.toBe(second[0].groupId);
+    expect(first.id).not.toBe(second.id);
   });
 });
 
@@ -76,8 +87,7 @@ describe('stringifyEssentialAlertData', () => {
       anotherNonEssential: ['shouldAlsoBeExcluded'],
     };
 
-    const result = stringifyEssentialAlertData(rawData);
-    const parsed = JSON.parse(result);
+    const parsed = JSON.parse(stringifyEssentialAlertData(rawData));
 
     expect(parsed).toHaveProperty(ESSENTIAL_ALERT_FIELDS[0]);
     expect(parsed).toHaveProperty(ESSENTIAL_ALERT_FIELDS[1]);
@@ -86,36 +96,18 @@ describe('stringifyEssentialAlertData', () => {
   });
 
   it('excludes non-essential fields', () => {
-    const rawData: Record<string, string[]> = {
-      field1: ['value1'],
-      field2: ['value2'],
-    };
-
-    const result = stringifyEssentialAlertData(rawData);
-    const parsed = JSON.parse(result);
-
+    const parsed = JSON.parse(
+      stringifyEssentialAlertData({ field1: ['value1'], field2: ['value2'] })
+    );
     expect(Object.keys(parsed).length).toBe(0);
   });
 
   it('returns valid JSON string', () => {
-    const rawData: Record<string, string[]> = {
-      [ESSENTIAL_ALERT_FIELDS[0]]: ['value1'],
-    };
-
-    const result = stringifyEssentialAlertData(rawData);
-
-    expect(() => JSON.parse(result)).not.toThrow();
-    expect(JSON.parse(result)).toEqual({
-      [ESSENTIAL_ALERT_FIELDS[0]]: ['value1'],
-    });
+    const rawData = { [ESSENTIAL_ALERT_FIELDS[0]]: ['value1'] };
+    expect(JSON.parse(stringifyEssentialAlertData(rawData))).toEqual(rawData);
   });
 
   it('handles empty input', () => {
-    const rawData: Record<string, string[]> = {};
-
-    const result = stringifyEssentialAlertData(rawData);
-    const parsed = JSON.parse(result);
-
-    expect(parsed).toEqual({});
+    expect(JSON.parse(stringifyEssentialAlertData({}))).toEqual({});
   });
 });

@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { ESSENTIAL_ALERT_FIELDS } from '../../../common/constants';
+import { ALERTS_BATCH_MAX_SIZE, ESSENTIAL_ALERT_FIELDS } from '../../../common/constants';
 import { getAlertsById } from './get_alerts_by_id';
 
 const makeClient = (hits: Array<{ _id?: string; _source?: unknown }>) =>
@@ -26,12 +26,14 @@ describe('getAlertsById', () => {
     expect(esClient.search).not.toHaveBeenCalled();
   });
 
-  it('throws when more than 20 ids are provided', async () => {
+  it('throws when more than ALERTS_BATCH_MAX_SIZE ids are provided', async () => {
     const esClient = makeClient([]);
-    const ids = Array.from({ length: 21 }, (_, i) => `id-${i}`);
+    const ids = Array.from({ length: ALERTS_BATCH_MAX_SIZE + 1 }, (_, i) => `id-${i}`);
 
     await expect(getAlertsById({ esClient, index, ids })).rejects.toThrow(
-      'getAlertsById: ids.length (21) exceeds the maximum of 20'
+      `getAlertsById: ids.length (${
+        ALERTS_BATCH_MAX_SIZE + 1
+      }) exceeds the maximum of ${ALERTS_BATCH_MAX_SIZE}`
     );
     expect(esClient.search).not.toHaveBeenCalled();
   });

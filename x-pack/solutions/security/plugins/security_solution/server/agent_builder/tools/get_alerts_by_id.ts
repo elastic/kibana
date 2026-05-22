@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { ESSENTIAL_ALERT_FIELDS } from '../../../common/constants';
+import { ALERTS_BATCH_MAX_SIZE, ESSENTIAL_ALERT_FIELDS } from '../../../common/constants';
 
 /**
  * Fetches alerts by their _id values from Elasticsearch, returning only essential fields.
@@ -23,8 +23,10 @@ export const getAlertsById = async ({
   if (ids.length === 0) {
     return {};
   }
-  if (ids.length > 20) {
-    throw new Error(`getAlertsById: ids.length (${ids.length}) exceeds the maximum of 20`);
+  if (ids.length > ALERTS_BATCH_MAX_SIZE) {
+    throw new Error(
+      `getAlertsById: ids.length (${ids.length}) exceeds the maximum of ${ALERTS_BATCH_MAX_SIZE}`
+    );
   }
 
   const response = await esClient.search({

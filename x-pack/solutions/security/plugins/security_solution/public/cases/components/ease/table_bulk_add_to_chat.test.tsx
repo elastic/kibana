@@ -15,7 +15,7 @@ import { AlertsTable } from '@kbn/response-ops-alerts-table';
 import type { TimelineItem } from '@kbn/response-ops-alerts-table/types';
 import { TestProviders } from '../../../common/mock';
 import { BULK_ALERTS_ATTACHMENT_PROMPT } from '../../../agent_builder/components/prompts';
-import { alertsToAttachmentInputs } from '../../../agent_builder/helpers';
+import { alertsToAttachmentGroup } from '../../../agent_builder/helpers';
 import { useReportAddToChat } from '../../../agent_builder/hooks/use_report_add_to_chat';
 import { Table } from './table';
 
@@ -24,7 +24,7 @@ jest.mock('@kbn/response-ops-alerts-table', () => ({
 }));
 jest.mock('../../../agent_builder/hooks/use_report_add_to_chat');
 jest.mock('../../../agent_builder/helpers', () => ({
-  alertsToAttachmentInputs: jest.fn(() => []),
+  alertsToAttachmentGroup: jest.fn(() => []),
 }));
 jest.mock('../../../data_view_manager/hooks/use_browser_fields', () => ({
   useBrowserFields: jest.fn(() => ({})),
@@ -84,13 +84,13 @@ describe('Cases Table — bulkAddToChatConfig', () => {
     });
   });
 
-  it('delegates to alertsToAttachmentInputs and returns its result', () => {
-    const mockAttachments = [{ id: 'x', type: 'alert', data: {} }];
-    (alertsToAttachmentInputs as jest.Mock).mockReturnValueOnce(mockAttachments);
+  it('delegates to alertsToAttachmentGroup and returns its result', () => {
+    const mockGroup = { type: 'group', id: 'x', label: '1 Alert', items: [] };
+    (alertsToAttachmentGroup as jest.Mock).mockReturnValueOnce(mockGroup);
     const { convertAlertToAttachment } = renderAndGetBulkConfig();
     const items = [makeItem('a')];
     const result = convertAlertToAttachment(items);
-    expect(alertsToAttachmentInputs).toHaveBeenCalledWith(items);
-    expect(result).toBe(mockAttachments);
+    expect(alertsToAttachmentGroup).toHaveBeenCalledWith(items);
+    expect(result).toEqual([mockGroup]);
   });
 });

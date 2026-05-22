@@ -12,13 +12,10 @@ import { AlertsTable } from '@kbn/response-ops-alerts-table';
 import type {
   AlertsTableImperativeApi,
   AlertsTableOnLoadedProps,
-  TimelineItem,
 } from '@kbn/response-ops-alerts-table/types';
 import React, { memo, useCallback, useMemo, useRef } from 'react';
 import { useKibana } from '../../../common/lib/kibana';
-import { BULK_ALERTS_ATTACHMENT_PROMPT } from '../../../agent_builder/components/prompts';
-import { alertsToAttachmentInputs } from '../../../agent_builder/helpers';
-import { useReportAddToChat } from '../../../agent_builder/hooks/use_report_add_to_chat';
+import { useBulkAddToChatConfig } from '../../../agent_builder/hooks/use_bulk_add_to_chat_config';
 import { ActionsCell } from '../../../detections/components/alert_summary/table/actions_cell';
 import { CellValue } from '../../../detections/components/alert_summary/table/render_cell';
 import { useBrowserFields } from '../../../data_view_manager/hooks/use_browser_fields';
@@ -106,18 +103,7 @@ export const Table = memo(({ dataView, id, onLoaded, packages, query }: TablePro
     ]
   );
 
-  const reportAddToChat = useReportAddToChat();
-  const convertAlertToAttachment = useCallback(
-    (alertItems: TimelineItem[]) => {
-      reportAddToChat({
-        pathway: 'bulk_alerts_cases',
-        attachments: ['alert'],
-        alert_count: alertItems.length,
-      });
-      return alertsToAttachmentInputs(alertItems);
-    },
-    [reportAddToChat]
-  );
+  const bulkAddToChatConfig = useBulkAddToChatConfig('bulk_alerts_cases');
 
   const browserFields = useBrowserFields(PageScope.alerts, dataView);
 
@@ -155,10 +141,7 @@ export const Table = memo(({ dataView, id, onLoaded, packages, query }: TablePro
         runtimeMappings={runtimeMappings}
         services={services}
         toolbarVisibility={TOOLBAR_VISIBILITY}
-        bulkAddToChatConfig={{
-          convertAlertToAttachment,
-          initialMessage: BULK_ALERTS_ATTACHMENT_PROMPT,
-        }}
+        bulkAddToChatConfig={bulkAddToChatConfig}
       />
     </EuiDataGridStyleWrapper>
   );

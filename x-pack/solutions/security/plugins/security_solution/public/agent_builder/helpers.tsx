@@ -7,49 +7,39 @@
 
 import { pick } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
-import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import type { AttachmentInput, AttachmentGroup } from '@kbn/agent-builder-common/attachments';
 import type { TimelineItem } from '@kbn/response-ops-alerts-table/types';
 
 import { ESSENTIAL_ALERT_FIELDS } from '../../common';
-import { SecurityAgentBuilderAttachments } from '../../common/constants';
+import { ALERTS_BATCH_MAX_SIZE, SecurityAgentBuilderAttachments } from '../../common/constants';
 
 export type BulkAlertsAttachmentInput = AttachmentInput<
   typeof SecurityAgentBuilderAttachments.alerts,
-  { alertIds: string[]; attachmentLabel?: string }
+  { alertIds: string[] }
 >;
 
-// 20 alerts per batch keeps each attachment well within maxContentLength: 50_000.
-// With the framework's inline threshold of 5 active attachments, this means up to
-// 100 alerts (5 batches × 20) are rendered inline in the LLM context without tool calls.
-const DEFAULT_ALERTS_BATCH_SIZE = 20;
-
-/**
- * Splits alert items into batches and returns one AttachmentInput per batch.
- * Only the first attachment is visible in the UI (chip); subsequent batches are hidden so the
- * user sees a single chip regardless of how many internal batches are created for the LLM.
- */
-export const alertsToAttachmentInputs = (
-  alertItems: TimelineItem[]
-): BulkAlertsAttachmentInput[] => {
-  const totalLabel = `${alertItems.length} Alert${alertItems.length !== 1 ? 's' : ''}`;
-  const groupId = uuidv4();
+const chunkAlerts = (alertItems: TimelineItem[]): BulkAlertsAttachmentInput[] => {
   const batches: BulkAlertsAttachmentInput[] = [];
-  for (let i = 0; i < alertItems.length; i += DEFAULT_ALERTS_BATCH_SIZE) {
-    const batch = alertItems.slice(i, i + DEFAULT_ALERTS_BATCH_SIZE);
+  for (let i = 0; i < alertItems.length; i += ALERTS_BATCH_MAX_SIZE) {
     batches.push({
       type: SecurityAgentBuilderAttachments.alerts,
-      data: { alertIds: batch.map((a) => a._id), ...(i === 0 && { attachmentLabel: totalLabel }) },
-      ...(i > 0 && { hidden: true }),
-      groupId,
+      data: { alertIds: alertItems.slice(i, i + ALERTS_BATCH_MAX_SIZE).map((a) => a._id) },
     });
   }
   return batches;
 };
 
 /**
- * Filters raw alert data to only include essential fields and stringifies the result.
- * This reduces context window usage by keeping only the most relevant information.
+ * Converts alert items into a single AttachmentGroup whose items are the chunked batches.
+ * The group renders as one chip in the UI and is flattened to AttachmentInput[] at the
+ * serialization boundary before being sent to the server.
  */
-export const stringifyEssentialAlertData = (rawData: Record<string, string[]>): string => {
-  return JSON.stringify(pick(rawData, ESSENTIAL_ALERT_FIELDS));
-};
+export const alertsToAttachmentGroup = (alertItems: TimelineItem[]): AttachmentGroup => ({
+  type: 'group',
+  id: uuidv4(),
+  label: `${alertItems.length} Alert${alertItems.length !== 1 ? 's' : ''}`,
+  items: chunkAlerts(alertItems),
+});
+
+export const stringifyEssentialAlertData = (rawData: Record<string, string[]>): string =>
+  JSON.stringify(pick(rawData, ESSENTIAL_ALERT_FIELDS));
