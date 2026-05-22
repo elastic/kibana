@@ -1,6 +1,6 @@
 ---
 name: kbn-ui-package
-description: This skill should be used when the user asks to "create a kbn-ui package", "onboard a component to kbn-ui", "package a Kibana component for external distribution", "add a package to kbn-ui", "set up packaging for a Kibana component", or any mention of distributing a Kibana UI component to Cloud UI or external consumers. Guides the full interactive process: gathers inputs, moves source files, scaffolds the packaging layer, and updates all Kibana imports.
+description: 'This skill should be used when the user asks to "create a kbn-ui package", "onboard a component to kbn-ui", "package a Kibana component for external distribution", "add a package to kbn-ui", "set up packaging for a Kibana component", or any mention of distributing a Kibana UI component to Cloud UI or external consumers. Guides the full interactive process: gathers inputs, moves source files, scaffolds the packaging layer, and updates all Kibana imports.'
 disable-model-invocation: true
 ---
 
