@@ -52,7 +52,7 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
   });
   const renderStreamField = useStreamsFieldRenderer();
 
-  const sourceLink = useMemo(() => {
+  const dataStreamLink = useMemo(() => {
     if (!metricItem.dataStream) {
       return undefined;
     }
@@ -111,7 +111,7 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
     <div data-test-subj="metricsExperienceFlyoutOverviewTabContent">
       <TabTitleAndDescription metricItem={metricItem} description={description} />
 
-      <OverviewTabMetadata metricItem={metricItem} sourceRow={sourceLink} />
+      <OverviewTabMetadata metricItem={metricItem} indexRow={dataStreamLink} />
 
       {metricItem.dimensionFields && metricItem.dimensionFields.length > 0 && (
         <>
