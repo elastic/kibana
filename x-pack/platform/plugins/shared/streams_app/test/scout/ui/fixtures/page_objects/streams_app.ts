@@ -177,6 +177,7 @@ export class StreamsApp {
       .locator('a[data-test-subj^="breadcrumb"]')
       .filter({ hasText: /^Streams$/ })
       .click();
+    await this.expectStreamsTableVisible();
   }
 
   // Streams table utility methods
