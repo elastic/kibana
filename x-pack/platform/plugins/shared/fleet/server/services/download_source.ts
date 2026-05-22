@@ -32,6 +32,7 @@ import {
   FleetError,
 } from '../errors';
 import { SO_SEARCH_LIMIT } from '../../common';
+import { validateFleetSavedObjectId } from '../../common/services';
 
 import { deleteDownloadSourceSecrets, deleteSecrets, isSecretStorageEnabled } from './secrets';
 
@@ -134,7 +135,11 @@ class DownloadSourceService {
     const logger = appContextService.getLogger();
     logger.debug(`Creating new download source`);
 
-    const data: DownloadSourceSOAttributes = { ...omit(downloadSource, ['ssl', 'secrets']) };
+    validateFleetSavedObjectId(options?.id);
+
+    const data: DownloadSourceSOAttributes = {
+      ...omit(downloadSource, ['ssl', 'auth', 'secrets']),
+    };
 
     if (!appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt) {
       throw new FleetEncryptedSavedObjectEncryptionKeyRequired(
