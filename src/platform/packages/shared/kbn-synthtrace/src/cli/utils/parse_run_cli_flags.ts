@@ -13,8 +13,9 @@ import path from 'path';
 import { LogLevel } from '../../lib/utils/create_logger';
 import type { RunCliFlags } from '../run_synthtrace';
 
-// Repo root is 8 levels above this file's compiled location.
-const REPO_ROOT = path.resolve(__dirname, '../../../../../../..');
+// Repo root is 8 levels above this file's source location:
+// utils → cli → src → kbn-synthtrace → shared → packages → platform → src → <root>
+const REPO_ROOT = path.resolve(__dirname, '../../../../../../../../');
 
 /**
  * Maps short scenario names to their colocated plugin paths.
