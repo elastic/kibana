@@ -20,17 +20,7 @@ export {
   type ReportUsedByWarningShownParams,
   type ReportUsedByWarningProceededParams,
   type ReportInappChatOpenParams,
-  type ReportInappAgentSwitchParams,
-  type ReportInappOpenFullscreenParams,
   type ReportFullscreenEntryPointParams,
   type FullscreenEntryPointSource,
-  type ReportSidebarLayerTransitionParams,
-  type ReportAgentSwitchParams,
-  type ReportConversationStartParams,
-  type ReportConversationResumeParams,
-  type ReportConversationSearchParams,
-  type ReportEntityEditFromAgentParams,
-  type ReportManageEntityEditParams,
-  type ReportManageEntityDeleteParams,
 } from './agent_builder_events';
 export { AGENT_BUILDER_UI_EBT, type AgentBuilderUiEbt } from './agent_builder_ui_ebt';

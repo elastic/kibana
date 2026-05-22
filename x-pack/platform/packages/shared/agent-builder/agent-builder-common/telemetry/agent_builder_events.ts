@@ -32,23 +32,7 @@ export const AGENT_BUILDER_EVENT_TYPES = {
   UsedByWarningShown: `${TELEMETRY_PREFIX}_used_by_warning_shown`,
   UsedByWarningProceeded: `${TELEMETRY_PREFIX}_used_by_warning_proceeded`,
   InappChatOpen: `${TELEMETRY_PREFIX}_inapp_chat_open`,
-  InappAgentSwitch: `${TELEMETRY_PREFIX}_inapp_agent_switch`,
-  InappOpenFullscreen: `${TELEMETRY_PREFIX}_inapp_open_fullscreen`,
   FullscreenEntryPoint: `${TELEMETRY_PREFIX}_fullscreen_entry_point`,
-  SidebarLayerTransition: `${TELEMETRY_PREFIX}_sidebar_layer_transition`,
-  SidebarNavigationClick: `${TELEMETRY_PREFIX}_sidebar_navigation_click`,
-  AgentSwitch: `${TELEMETRY_PREFIX}_agent_switch`,
-  ManageAllAgentsClick: `${TELEMETRY_PREFIX}_manage_all_agents_click`,
-  ConversationStart: `${TELEMETRY_PREFIX}_conversation_start`,
-  ConversationResume: `${TELEMETRY_PREFIX}_conversation_resume`,
-  ConversationSearch: `${TELEMETRY_PREFIX}_conversation_search`,
-  EntityEditFromAgent: `${TELEMETRY_PREFIX}_entity_edit_from_agent`,
-  EntityAddFromLibrary: `${TELEMETRY_PREFIX}_entity_add_from_library`,
-  EntityCreateNew: `${TELEMETRY_PREFIX}_entity_create_new`,
-  EntityRemove: `${TELEMETRY_PREFIX}_entity_remove`,
-  EntityDetailView: `${TELEMETRY_PREFIX}_entity_detail_view`,
-  ManageEntityEdit: `${TELEMETRY_PREFIX}_manage_entity_edit`,
-  ManageEntityDelete: `${TELEMETRY_PREFIX}_manage_entity_delete`,
 } as const;
 
 export type OptInSource =
@@ -283,100 +267,12 @@ export interface ReportInappChatOpenParams {
   agent_count?: number;
 }
 
-export interface ReportInappAgentSwitchParams {
-  from_agent_id: string;
-  to_agent_id: string;
-}
-
-export interface ReportInappOpenFullscreenParams {
-  agent_id: string;
-  conversation_id?: string;
-  conversation_length?: number;
-  kibana_app?: string;
-}
-
 export type FullscreenEntryPointSource = 'inapp_escalation' | 'direct' | 'bookmark' | 'redirect';
 
 export interface ReportFullscreenEntryPointParams {
   agent_id: string;
   conversation_id: string;
   source: FullscreenEntryPointSource;
-}
-
-export interface ReportSidebarLayerTransitionParams {
-  from_layer: 'conversation' | 'manage';
-  to_layer: 'conversation' | 'manage';
-  trigger: 'customize_click' | 'manage_click' | 'back_click';
-}
-
-export interface ReportSidebarNavigationClickParams {
-  layer: 'conversation' | 'manage';
-  item: string;
-  agent_id?: string;
-}
-
-export interface ReportManageAllAgentsClickParams {
-  current_agent_id: string;
-}
-
-export interface ReportAgentSwitchParams {
-  from_agent_id: string;
-  to_agent_id: string;
-  is_default_agent: boolean;
-}
-
-export interface ReportConversationStartParams {
-  agent_id: string;
-  is_default_agent: boolean;
-  entry_point: string;
-}
-
-export interface ReportConversationResumeParams {
-  agent_id: string;
-  conversation_age_hours: number;
-}
-
-export interface ReportConversationSearchParams {
-  has_results: boolean;
-  result_count: number;
-}
-
-export interface ReportEntityEditFromAgentParams {
-  entity_type: 'tool' | 'skill';
-  agent_id?: string;
-  used_by_agent_count?: number;
-}
-
-export interface ReportEntityAddFromLibraryParams {
-  entity_type: string;
-  agent_id: string;
-}
-
-export interface ReportEntityCreateNewParams {
-  entity_type: string;
-  agent_id: string;
-}
-
-export interface ReportEntityRemoveParams {
-  entity_type: string;
-  agent_id: string;
-}
-
-export interface ReportEntityDetailViewParams {
-  entity_type: string;
-  view_format: 'flyout' | 'split' | 'page';
-  agent_id: string;
-}
-
-export interface ReportManageEntityEditParams {
-  entity_type: 'tool' | 'skill';
-  used_by_agent_count?: number;
-}
-
-export interface ReportManageEntityDeleteParams {
-  entity_type: 'tool' | 'skill' | 'plugin';
-  used_by_agent_count?: number;
-  was_blocked?: boolean;
 }
 
 export interface AgentBuilderTelemetryEventsMap {
@@ -405,23 +301,7 @@ export interface AgentBuilderTelemetryEventsMap {
   [AGENT_BUILDER_EVENT_TYPES.UsedByWarningShown]: ReportUsedByWarningShownParams;
   [AGENT_BUILDER_EVENT_TYPES.UsedByWarningProceeded]: ReportUsedByWarningProceededParams;
   [AGENT_BUILDER_EVENT_TYPES.InappChatOpen]: ReportInappChatOpenParams;
-  [AGENT_BUILDER_EVENT_TYPES.InappAgentSwitch]: ReportInappAgentSwitchParams;
-  [AGENT_BUILDER_EVENT_TYPES.InappOpenFullscreen]: ReportInappOpenFullscreenParams;
   [AGENT_BUILDER_EVENT_TYPES.FullscreenEntryPoint]: ReportFullscreenEntryPointParams;
-  [AGENT_BUILDER_EVENT_TYPES.SidebarLayerTransition]: ReportSidebarLayerTransitionParams;
-  [AGENT_BUILDER_EVENT_TYPES.SidebarNavigationClick]: ReportSidebarNavigationClickParams;
-  [AGENT_BUILDER_EVENT_TYPES.AgentSwitch]: ReportAgentSwitchParams;
-  [AGENT_BUILDER_EVENT_TYPES.ManageAllAgentsClick]: ReportManageAllAgentsClickParams;
-  [AGENT_BUILDER_EVENT_TYPES.ConversationStart]: ReportConversationStartParams;
-  [AGENT_BUILDER_EVENT_TYPES.ConversationResume]: ReportConversationResumeParams;
-  [AGENT_BUILDER_EVENT_TYPES.ConversationSearch]: ReportConversationSearchParams;
-  [AGENT_BUILDER_EVENT_TYPES.EntityEditFromAgent]: ReportEntityEditFromAgentParams;
-  [AGENT_BUILDER_EVENT_TYPES.EntityAddFromLibrary]: ReportEntityAddFromLibraryParams;
-  [AGENT_BUILDER_EVENT_TYPES.EntityCreateNew]: ReportEntityCreateNewParams;
-  [AGENT_BUILDER_EVENT_TYPES.EntityRemove]: ReportEntityRemoveParams;
-  [AGENT_BUILDER_EVENT_TYPES.EntityDetailView]: ReportEntityDetailViewParams;
-  [AGENT_BUILDER_EVENT_TYPES.ManageEntityEdit]: ReportManageEntityEditParams;
-  [AGENT_BUILDER_EVENT_TYPES.ManageEntityDelete]: ReportManageEntityDeleteParams;
 }
 
 export type AgentBuilderTelemetryEvent =
@@ -445,23 +325,7 @@ export type AgentBuilderTelemetryEvent =
   | EventTypeOpts<ReportUsedByWarningShownParams>
   | EventTypeOpts<ReportUsedByWarningProceededParams>
   | EventTypeOpts<ReportInappChatOpenParams>
-  | EventTypeOpts<ReportInappAgentSwitchParams>
-  | EventTypeOpts<ReportInappOpenFullscreenParams>
-  | EventTypeOpts<ReportFullscreenEntryPointParams>
-  | EventTypeOpts<ReportSidebarLayerTransitionParams>
-  | EventTypeOpts<ReportSidebarNavigationClickParams>
-  | EventTypeOpts<ReportAgentSwitchParams>
-  | EventTypeOpts<ReportManageAllAgentsClickParams>
-  | EventTypeOpts<ReportConversationStartParams>
-  | EventTypeOpts<ReportConversationResumeParams>
-  | EventTypeOpts<ReportConversationSearchParams>
-  | EventTypeOpts<ReportEntityEditFromAgentParams>
-  | EventTypeOpts<ReportEntityAddFromLibraryParams>
-  | EventTypeOpts<ReportEntityCreateNewParams>
-  | EventTypeOpts<ReportEntityRemoveParams>
-  | EventTypeOpts<ReportEntityDetailViewParams>
-  | EventTypeOpts<ReportManageEntityEditParams>
-  | EventTypeOpts<ReportManageEntityDeleteParams>;
+  | EventTypeOpts<ReportFullscreenEntryPointParams>;
 // Type union of all event type strings for use in union types
 export type AgentBuilderEventTypes =
   | typeof AGENT_BUILDER_EVENT_TYPES.OptInAction
@@ -484,23 +348,7 @@ export type AgentBuilderEventTypes =
   | typeof AGENT_BUILDER_EVENT_TYPES.UsedByWarningShown
   | typeof AGENT_BUILDER_EVENT_TYPES.UsedByWarningProceeded
   | typeof AGENT_BUILDER_EVENT_TYPES.InappChatOpen
-  | typeof AGENT_BUILDER_EVENT_TYPES.InappAgentSwitch
-  | typeof AGENT_BUILDER_EVENT_TYPES.InappOpenFullscreen
-  | typeof AGENT_BUILDER_EVENT_TYPES.FullscreenEntryPoint
-  | typeof AGENT_BUILDER_EVENT_TYPES.SidebarLayerTransition
-  | typeof AGENT_BUILDER_EVENT_TYPES.SidebarNavigationClick
-  | typeof AGENT_BUILDER_EVENT_TYPES.AgentSwitch
-  | typeof AGENT_BUILDER_EVENT_TYPES.ManageAllAgentsClick
-  | typeof AGENT_BUILDER_EVENT_TYPES.ConversationStart
-  | typeof AGENT_BUILDER_EVENT_TYPES.ConversationResume
-  | typeof AGENT_BUILDER_EVENT_TYPES.ConversationSearch
-  | typeof AGENT_BUILDER_EVENT_TYPES.EntityEditFromAgent
-  | typeof AGENT_BUILDER_EVENT_TYPES.EntityAddFromLibrary
-  | typeof AGENT_BUILDER_EVENT_TYPES.EntityCreateNew
-  | typeof AGENT_BUILDER_EVENT_TYPES.EntityRemove
-  | typeof AGENT_BUILDER_EVENT_TYPES.EntityDetailView
-  | typeof AGENT_BUILDER_EVENT_TYPES.ManageEntityEdit
-  | typeof AGENT_BUILDER_EVENT_TYPES.ManageEntityDelete;
+  | typeof AGENT_BUILDER_EVENT_TYPES.FullscreenEntryPoint;
 
 const OPT_IN_EVENT: AgentBuilderTelemetryEvent = {
   eventType: AGENT_BUILDER_EVENT_TYPES.OptInAction,
@@ -1331,54 +1179,6 @@ const INAPP_CHAT_OPEN_EVENT: AgentBuilderTelemetryEvent = {
   },
 };
 
-const INAPP_AGENT_SWITCH_EVENT: AgentBuilderTelemetryEvent = {
-  eventType: AGENT_BUILDER_EVENT_TYPES.InappAgentSwitch,
-  schema: {
-    from_agent_id: {
-      type: 'keyword',
-      _meta: {
-        description: 'ID of the agent the user switched away from in the in-app chat',
-        optional: false,
-      },
-    },
-    to_agent_id: {
-      type: 'keyword',
-      _meta: {
-        description: 'ID of the agent the user switched to in the in-app chat',
-        optional: false,
-      },
-    },
-  },
-};
-
-const INAPP_OPEN_FULLSCREEN_EVENT: AgentBuilderTelemetryEvent = {
-  eventType: AGENT_BUILDER_EVENT_TYPES.InappOpenFullscreen,
-  schema: {
-    agent_id: {
-      type: 'keyword',
-      _meta: { description: 'ID of the active agent when full-screen was opened', optional: false },
-    },
-    conversation_id: {
-      type: 'keyword',
-      _meta: { description: 'ID of the conversation carried into full-screen', optional: true },
-    },
-    conversation_length: {
-      type: 'integer',
-      _meta: {
-        description: 'Number of rounds in the conversation at the time of escalation',
-        optional: true,
-      },
-    },
-    kibana_app: {
-      type: 'keyword',
-      _meta: {
-        description: 'Kibana application from which full-screen was opened',
-        optional: true,
-      },
-    },
-  },
-};
-
 const FULLSCREEN_ENTRY_POINT_EVENT: AgentBuilderTelemetryEvent = {
   eventType: AGENT_BUILDER_EVENT_TYPES.FullscreenEntryPoint,
   schema: {
@@ -1401,330 +1201,6 @@ const FULLSCREEN_ENTRY_POINT_EVENT: AgentBuilderTelemetryEvent = {
   },
 };
 
-const SIDEBAR_LAYER_TRANSITION_EVENT: AgentBuilderTelemetryEvent = {
-  eventType: AGENT_BUILDER_EVENT_TYPES.SidebarLayerTransition,
-  schema: {
-    from_layer: {
-      type: 'keyword',
-      _meta: {
-        description: 'The sidebar layer the user is navigating away from (conversation|manage)',
-        optional: false,
-      },
-    },
-    to_layer: {
-      type: 'keyword',
-      _meta: {
-        description: 'The sidebar layer the user is navigating to (conversation|manage)',
-        optional: false,
-      },
-    },
-    trigger: {
-      type: 'keyword',
-      _meta: {
-        description:
-          'What triggered the layer transition (customize_click|manage_click|back_click)',
-        optional: false,
-      },
-    },
-  },
-};
-
-const SIDEBAR_NAVIGATION_CLICK_EVENT: AgentBuilderTelemetryEvent = {
-  eventType: AGENT_BUILDER_EVENT_TYPES.SidebarNavigationClick,
-  schema: {
-    layer: {
-      type: 'keyword',
-      _meta: {
-        description: 'Sidebar layer where the navigation click occurred (conversation|manage)',
-        optional: false,
-      },
-    },
-    item: {
-      type: 'keyword',
-      _meta: {
-        description:
-          'Nav item clicked (instructions|skills|plugins|connectors|advanced|agents|tools)',
-        optional: false,
-      },
-    },
-    agent_id: {
-      type: 'keyword',
-      _meta: {
-        description: 'ID of the agent in context when the nav item was clicked',
-        optional: true,
-      },
-    },
-  },
-};
-
-const MANAGE_ALL_AGENTS_CLICK_EVENT: AgentBuilderTelemetryEvent = {
-  eventType: AGENT_BUILDER_EVENT_TYPES.ManageAllAgentsClick,
-  schema: {
-    current_agent_id: {
-      type: 'keyword',
-      _meta: {
-        description: 'ID of the agent that was selected when the user clicked Manage all agents',
-        optional: false,
-      },
-    },
-  },
-};
-
-const AGENT_SWITCH_EVENT: AgentBuilderTelemetryEvent = {
-  eventType: AGENT_BUILDER_EVENT_TYPES.AgentSwitch,
-  schema: {
-    from_agent_id: {
-      type: 'keyword',
-      _meta: {
-        description: 'ID of the agent the user was on before switching',
-        optional: false,
-      },
-    },
-    to_agent_id: {
-      type: 'keyword',
-      _meta: {
-        description: 'ID of the agent the user switched to',
-        optional: false,
-      },
-    },
-    is_default_agent: {
-      type: 'boolean',
-      _meta: {
-        description: 'Whether the destination agent is the default agent',
-        optional: false,
-      },
-    },
-  },
-};
-
-const CONVERSATION_START_EVENT: AgentBuilderTelemetryEvent = {
-  eventType: AGENT_BUILDER_EVENT_TYPES.ConversationStart,
-  schema: {
-    agent_id: {
-      type: 'keyword',
-      _meta: {
-        description: 'ID of the agent for the new conversation',
-        optional: false,
-      },
-    },
-    is_default_agent: {
-      type: 'boolean',
-      _meta: {
-        description: 'Whether the agent is the default agent',
-        optional: false,
-      },
-    },
-    entry_point: {
-      type: 'keyword',
-      _meta: {
-        description: 'Where the new conversation was initiated from (e.g. sidebar_new)',
-        optional: false,
-      },
-    },
-  },
-};
-
-const CONVERSATION_RESUME_EVENT: AgentBuilderTelemetryEvent = {
-  eventType: AGENT_BUILDER_EVENT_TYPES.ConversationResume,
-  schema: {
-    agent_id: {
-      type: 'keyword',
-      _meta: {
-        description: 'ID of the agent the conversation belongs to',
-        optional: false,
-      },
-    },
-    conversation_age_hours: {
-      type: 'integer',
-      _meta: {
-        description: 'Age of the conversation in hours (based on last updated time)',
-        optional: false,
-      },
-    },
-  },
-};
-
-const CONVERSATION_SEARCH_EVENT: AgentBuilderTelemetryEvent = {
-  eventType: AGENT_BUILDER_EVENT_TYPES.ConversationSearch,
-  schema: {
-    has_results: {
-      type: 'boolean',
-      _meta: {
-        description: 'Whether the search returned any results',
-        optional: false,
-      },
-    },
-    result_count: {
-      type: 'integer',
-      _meta: {
-        description: 'Number of conversations matching the search query',
-        optional: false,
-      },
-    },
-  },
-};
-
-const ENTITY_EDIT_FROM_AGENT_EVENT: AgentBuilderTelemetryEvent = {
-  eventType: AGENT_BUILDER_EVENT_TYPES.EntityEditFromAgent,
-  schema: {
-    entity_type: {
-      type: 'keyword',
-      _meta: {
-        description: 'Type of entity being edited from the agent view (tool|skill)',
-        optional: false,
-      },
-    },
-    agent_id: {
-      type: 'keyword',
-      _meta: {
-        description: 'ID of the agent from whose view the entity is being edited',
-        optional: true,
-      },
-    },
-    used_by_agent_count: {
-      type: 'integer',
-      _meta: {
-        description: 'Number of agents currently using this entity',
-        optional: true,
-      },
-    },
-  },
-};
-
-const MANAGE_ENTITY_EDIT_EVENT: AgentBuilderTelemetryEvent = {
-  eventType: AGENT_BUILDER_EVENT_TYPES.ManageEntityEdit,
-  schema: {
-    entity_type: {
-      type: 'keyword',
-      _meta: {
-        description: 'Type of entity saved in the manage view (tool|skill)',
-        optional: false,
-      },
-    },
-    used_by_agent_count: {
-      type: 'integer',
-      _meta: {
-        description: 'Number of agents currently using this entity',
-        optional: true,
-      },
-    },
-  },
-};
-
-const MANAGE_ENTITY_DELETE_EVENT: AgentBuilderTelemetryEvent = {
-  eventType: AGENT_BUILDER_EVENT_TYPES.ManageEntityDelete,
-  schema: {
-    entity_type: {
-      type: 'keyword',
-      _meta: {
-        description: 'Type of entity deleted in the manage view (tool|skill|plugin)',
-        optional: false,
-      },
-    },
-    used_by_agent_count: {
-      type: 'integer',
-      _meta: {
-        description: 'Number of agents currently using this entity',
-        optional: true,
-      },
-    },
-    was_blocked: {
-      type: 'boolean',
-      _meta: {
-        description: 'Whether the deletion was blocked (e.g. entity still in use)',
-        optional: true,
-      },
-    },
-  },
-};
-
-const ENTITY_ADD_FROM_LIBRARY_EVENT: AgentBuilderTelemetryEvent = {
-  eventType: AGENT_BUILDER_EVENT_TYPES.EntityAddFromLibrary,
-  schema: {
-    entity_type: {
-      type: 'keyword',
-      _meta: {
-        description: 'Type of entity added from the library (tool|skill|plugin)',
-        optional: false,
-      },
-    },
-    agent_id: {
-      type: 'keyword',
-      _meta: {
-        description: 'ID of the agent the entity was added to',
-        optional: false,
-      },
-    },
-  },
-};
-
-const ENTITY_CREATE_NEW_EVENT: AgentBuilderTelemetryEvent = {
-  eventType: AGENT_BUILDER_EVENT_TYPES.EntityCreateNew,
-  schema: {
-    entity_type: {
-      type: 'keyword',
-      _meta: {
-        description: 'Type of entity being created (tool|skill|plugin)',
-        optional: false,
-      },
-    },
-    agent_id: {
-      type: 'keyword',
-      _meta: {
-        description: 'ID of the agent context when creating the entity',
-        optional: false,
-      },
-    },
-  },
-};
-
-const ENTITY_REMOVE_EVENT: AgentBuilderTelemetryEvent = {
-  eventType: AGENT_BUILDER_EVENT_TYPES.EntityRemove,
-  schema: {
-    entity_type: {
-      type: 'keyword',
-      _meta: {
-        description: 'Type of entity removed from the agent (tool|skill|plugin)',
-        optional: false,
-      },
-    },
-    agent_id: {
-      type: 'keyword',
-      _meta: {
-        description: 'ID of the agent the entity was removed from',
-        optional: false,
-      },
-    },
-  },
-};
-
-const ENTITY_DETAIL_VIEW_EVENT: AgentBuilderTelemetryEvent = {
-  eventType: AGENT_BUILDER_EVENT_TYPES.EntityDetailView,
-  schema: {
-    entity_type: {
-      type: 'keyword',
-      _meta: {
-        description: 'Type of entity whose detail panel was opened (tool|skill|plugin)',
-        optional: false,
-      },
-    },
-    view_format: {
-      type: 'keyword',
-      _meta: {
-        description: 'How the detail is presented (flyout|split|page)',
-        optional: false,
-      },
-    },
-    agent_id: {
-      type: 'keyword',
-      _meta: {
-        description: 'ID of the agent context when viewing entity details',
-        optional: false,
-      },
-    },
-  },
-};
-
 export const agentBuilderPublicEbtEvents: Array<EventTypeOpts<Record<string, unknown>>> = [
   OPT_IN_EVENT,
   OPT_OUT_EVENT,
@@ -1734,23 +1210,7 @@ export const agentBuilderPublicEbtEvents: Array<EventTypeOpts<Record<string, unk
   USED_BY_WARNING_SHOWN_EVENT,
   USED_BY_WARNING_PROCEEDED_EVENT,
   INAPP_CHAT_OPEN_EVENT,
-  INAPP_AGENT_SWITCH_EVENT,
-  INAPP_OPEN_FULLSCREEN_EVENT,
   FULLSCREEN_ENTRY_POINT_EVENT,
-  SIDEBAR_LAYER_TRANSITION_EVENT,
-  SIDEBAR_NAVIGATION_CLICK_EVENT,
-  MANAGE_ALL_AGENTS_CLICK_EVENT,
-  AGENT_SWITCH_EVENT,
-  CONVERSATION_START_EVENT,
-  CONVERSATION_RESUME_EVENT,
-  CONVERSATION_SEARCH_EVENT,
-  ENTITY_EDIT_FROM_AGENT_EVENT,
-  ENTITY_ADD_FROM_LIBRARY_EVENT,
-  ENTITY_CREATE_NEW_EVENT,
-  ENTITY_REMOVE_EVENT,
-  ENTITY_DETAIL_VIEW_EVENT,
-  MANAGE_ENTITY_EDIT_EVENT,
-  MANAGE_ENTITY_DELETE_EVENT,
 ];
 
 export const agentBuilderServerEbtEvents: Array<EventTypeOpts<Record<string, unknown>>> = [
