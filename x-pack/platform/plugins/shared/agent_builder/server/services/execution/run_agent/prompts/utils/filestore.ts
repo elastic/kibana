@@ -52,7 +52,7 @@ export const getFileSystemInstructions = (): string => {
 
   #### Skills
 
-  File type: "${FileEntryType.skill}" for main skill files (SKILL.md) amd "${FileEntryType.skillReferenceContent}" for additional skill files.
+  File type: "${FileEntryType.skill}" for main skill files (SKILL.md) and "${FileEntryType.skillReferenceContent}" for additional skill files.
 
   Skills contained detailed instructions for a specific task. They are all stored under the "/skills" folder.`);
 };
