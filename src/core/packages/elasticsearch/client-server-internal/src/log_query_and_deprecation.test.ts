@@ -107,6 +107,29 @@ describe('instrumentQueryAndDeprecationLogger', () => {
     expect(logger.get).toHaveBeenCalledWith('query', 'test123');
   });
 
+  it('includes per-request duration in the log message', () => {
+    instrumentEsQueryAndDeprecationLogger({
+      logger,
+      client,
+      type: 'test type',
+      apisToRedactInLogs: [],
+    });
+
+    const event = createApiResponse({
+      body: {},
+      statusCode: 200,
+      params: { method: 'GET', path: '/foo' },
+    });
+    // Attach an id so request and response events can be correlated
+    (event.meta.request as any).id = 'req-timing-test';
+
+    client.diagnostic.emit('request', null, event);
+    client.diagnostic.emit('response', null, event);
+
+    // Duration is appended as `- <N>ms` after the response size
+    expect(loggingSystemMock.collect(logger).debug[0][0]).toMatch(/- \d+ms/);
+  });
+
   describe('logs each query', () => {
     it('when request body is an object', () => {
       instrumentEsQueryAndDeprecationLogger({
