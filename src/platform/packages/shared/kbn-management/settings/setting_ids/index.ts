@@ -64,6 +64,8 @@ export const ACCESSIBILITY_DISABLE_ANIMATIONS_ID = 'accessibility:disableAnimati
 export const AGENT_BUILDER_NAV_ENABLED_SETTING_ID = 'agentBuilder:navEnabled';
 export const AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID = 'agentBuilder:experimentalFeatures';
 export const AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS = 'agentBuilder:prePromptWorkflowIds';
+export const AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID =
+  'agentBuilder:uiamOAuthClientManagement';
 
 // Autocomplete settings
 export const AUTOCOMPLETE_USE_TIME_RANGE_ID = 'autocomplete:useTimeRange';
@@ -201,6 +203,8 @@ export const SECURITY_SOLUTION_SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING =
 export const SECURITY_SOLUTION_DEFAULT_ALERT_TAGS_KEY = 'securitySolution:alertTags' as const;
 export const SECURITY_SOLUTION_EXCLUDED_GAP_REASONS_KEY =
   'securitySolution:excludedGapReasons' as const;
+export const SECURITY_SOLUTION_INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION =
+  'securitySolution:includedDataStreamNamespacesForRuleExecution' as const;
 /** This Kibana Advanced Setting allows users to enable/disable the Asset Criticality feature */
 export const SECURITY_SOLUTION_ENABLE_ASSET_CRITICALITY_SETTING =
   'securitySolution:enableAssetCriticality' as const;

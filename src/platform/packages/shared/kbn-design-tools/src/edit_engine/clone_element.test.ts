@@ -557,4 +557,25 @@ describe('copyStylesDeep', () => {
 
     original.remove();
   });
+
+  it('should not pin dimensions on children with Emotion truncation classes', () => {
+    const original = document.createElement('div');
+    const child = document.createElement('div');
+    child.classList.add('css-ugua3-euiText-m-menu_item--truncatedStyles');
+    child.textContent = 'Agents';
+    original.appendChild(child);
+    document.body.appendChild(original);
+
+    const clone = original.cloneNode(true) as HTMLElement;
+    child.getBoundingClientRect = () => mockRect(0, 0, 53, 16);
+
+    copyStylesDeep(original, clone);
+
+    // Width should NOT be pinned because the class contains "truncat"
+    const clonedChild = clone.querySelector('div')!;
+    expect(clonedChild.style.width).toBe('');
+    expect(clonedChild.style.height).toBe('');
+
+    original.remove();
+  });
 });
