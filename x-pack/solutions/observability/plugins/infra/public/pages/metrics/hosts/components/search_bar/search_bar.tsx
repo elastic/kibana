@@ -18,6 +18,7 @@ import { ControlsContent } from './controls_content';
 import { LimitOptions } from './limit_options';
 import type { HostLimitOptions } from '../../types';
 import { useTimeRangeMetadataContext } from '../../../../../hooks/use_time_range_metadata';
+import { PocSettingsPopover } from '../poc_settings_popover';
 
 export const SearchBar = () => {
   const { searchCriteria, onLimitChange, onPanelFiltersChange, onSubmit, onPreferredSchemaChange } =
@@ -90,6 +91,9 @@ export const SearchBar = () => {
               limit={searchCriteria.limit as HostLimitOptions}
               onChange={onLimitChange}
             />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <PocSettingsPopover />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

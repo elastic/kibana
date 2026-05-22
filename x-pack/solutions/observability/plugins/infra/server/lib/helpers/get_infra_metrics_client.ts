@@ -53,6 +53,13 @@ export async function getInfraMetricsClient({
 
   const excludedQuery = excludedDataTiers.length ? excludeTiersQuery(excludedDataTiers) : undefined;
 
+  // PoC gear toggle ("Use universal fixes" → OFF). The Hosts page client
+  // adds the `x-poc-legacy-bool-wrap` header when the user wants to see
+  // the pre-P5 behaviour: every search wrapped in an extra `bool { filter,
+  // must: [query] }` layer even when there's no excluded-tier filter to
+  // apply. Header is set per-request, so server-side state stays clean.
+  const legacyBoolWrap = request?.headers?.['x-poc-legacy-bool-wrap'] === 'true';
+
   return {
     search<TDocument, TParams extends RequiredParams>(
       searchParams: TParams,
@@ -63,14 +70,17 @@ export async function getInfraMetricsClient({
       // P5 — only wrap the caller's query in an extra `bool` when there is
       // an excluded-tier filter to apply; otherwise pass the query straight
       // through. Saves a redundant Lucene rewrite layer on every infra search.
-      const wrappedQuery = excludedQuery
-        ? {
-            bool: {
-              filter: excludedQuery,
-              must: [searchParams.query],
-            },
-          }
-        : searchParams.query;
+      // PoC toggle (`legacyBoolWrap`) forces the wrap unconditionally for
+      // before/after benchmarking from the Hosts page.
+      const wrappedQuery =
+        excludedQuery || legacyBoolWrap
+          ? {
+              bool: {
+                filter: excludedQuery ?? [],
+                must: [searchParams.query],
+              },
+            }
+          : searchParams.query;
       const finalParams = {
         ...searchParams,
         ignore_unavailable: true,

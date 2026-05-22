@@ -18,6 +18,15 @@ import { KpiCharts } from './kpi_charts';
 jest.mock('./host_kpi_tiles', () => ({
   HostKpiTiles: () => <div data-test-subj="hostKpiTiles">HostKpiTiles</div>,
 }));
+jest.mock('./legacy_kpi_charts', () => ({
+  LegacyKpiCharts: () => <div data-test-subj="legacyKpiCharts">LegacyKpiCharts</div>,
+}));
+
+const mockUsePocSettingsContext = jest.fn();
+jest.mock('../../hooks/use_poc_settings', () => ({
+  usePocSettingsContext: () => mockUsePocSettingsContext(),
+  pocFlags: { useNewKpis: true, useNewTable: true, useUniversalFixes: true },
+}));
 
 const renderKpiCharts = () =>
   render(
@@ -27,8 +36,21 @@ const renderKpiCharts = () =>
   );
 
 describe('KpiCharts', () => {
-  it('renders the new endpoint-backed KPI tiles', () => {
+  afterEach(() => {
+    mockUsePocSettingsContext.mockReset();
+  });
+
+  it('renders the new endpoint-backed KPI tiles when the PoC toggle is on', () => {
+    mockUsePocSettingsContext.mockReturnValue({ useNewKpis: true });
     renderKpiCharts();
     expect(screen.getByTestId('hostKpiTiles')).toBeInTheDocument();
+    expect(screen.queryByTestId('legacyKpiCharts')).not.toBeInTheDocument();
+  });
+
+  it('renders the legacy Lens-backed KPI charts when the PoC toggle is off', () => {
+    mockUsePocSettingsContext.mockReturnValue({ useNewKpis: false });
+    renderKpiCharts();
+    expect(screen.getByTestId('legacyKpiCharts')).toBeInTheDocument();
+    expect(screen.queryByTestId('hostKpiTiles')).not.toBeInTheDocument();
   });
 });

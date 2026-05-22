@@ -30,6 +30,7 @@ import {
   type StringDateRangeTimestamp,
 } from './use_unified_search_url_state';
 import { retrieveFieldsFromFilter } from '../../../../utils/filters/build';
+import { usePocSettingsContext } from './use_poc_settings';
 
 const buildQuerySubmittedPayload = (
   hostState: HostsState & { parsedDateRange: StringDateRangeTimestamp }
@@ -69,6 +70,7 @@ export const useUnifiedSearch = () => {
   const { services } = useKibanaContextForPlugin();
   const { inventoryPrefill } = useAlertPrefillContext();
   const kibanaQuerySettings = useKibanaQuerySettings();
+  const { useUniversalFixes } = usePocSettingsContext();
 
   const parsedDateRange = useTimeRange({
     rangeFrom: searchCriteria.dateRange.from,
@@ -312,7 +314,12 @@ export const useUnifiedSearch = () => {
     (timeRangeMetadataStatus === FETCH_STATUS.SUCCESS &&
       (timeRangeMetadata?.schemas?.length ?? 0) === 0);
 
-  const isReady = metricsView?.dataViewReference != null && schemaSettled;
+  // PoC gear toggle: when "Use universal fixes" is OFF, surface `isReady`
+  // as `true` from the first render. Downstream `useFetcher` callsites that
+  // gate on this will fire immediately and re-fire when the metrics view /
+  // preferred schema resolve, restoring the pre-P5.5 first-paint double
+  // fetch for comparison runs.
+  const isReady = !useUniversalFixes || (metricsView?.dataViewReference != null && schemaSettled);
 
   return {
     error,

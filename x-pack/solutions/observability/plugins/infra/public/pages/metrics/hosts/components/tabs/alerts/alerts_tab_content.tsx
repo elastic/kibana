@@ -30,6 +30,7 @@ import { LinkToAlertsPage } from '../../../../../../components/shared/alerts/lin
 import { AlertFlyout } from '../../../../../../alerting/inventory/components/alert_flyout';
 import { usePluginConfig } from '../../../../../../containers/plugin_config_context';
 import { useHostsViewContext } from '../../../hooks/use_hosts_view';
+import { usePocSettingsContext } from '../../../hooks/use_poc_settings';
 
 export const AlertsTabContent = () => {
   const { featureFlags } = usePluginConfig();
@@ -48,8 +49,15 @@ export const AlertsTabContent = () => {
   // on the Alerts page, which is materially cheaper than emitting one
   // `match_phrase` per host name when the table is at 500-host capacity.
   // Same semantics.
+  //
+  // PoC gear toggle: when "Use universal fixes" is OFF, fall back to the
+  // pre-P2 shape (`host.name: "a" or host.name: "b"`) so the link's KQL
+  // matches what the page produced before this PR.
+  const { useUniversalFixes } = usePocSettingsContext();
   const hostNamesKuery = hostNodes.length
-    ? `host.name: (${hostNodes.map((host) => `"${host.name}"`).join(' or ')})`
+    ? useUniversalFixes
+      ? `host.name: (${hostNodes.map((host) => `"${host.name}"`).join(' or ')})`
+      : hostNodes.map((host) => `host.name: "${host.name}"`).join(' or ')
     : '';
 
   const focusTrapProps = createFocusTrapProps(createAlertRuleButtonRef.current);

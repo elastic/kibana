@@ -31,11 +31,14 @@ import { FETCH_STATUS, isPending, useFetcher } from '../../../../hooks/use_fetch
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { useUnifiedSearchContext } from './use_unified_search';
 import { useHostsTableUrlState } from './use_hosts_table_url_state';
+import { usePocSettingsContext } from './use_poc_settings';
 import type {
   GetHostsListRequestBodyPayloadClient,
   GetHostsListResponsePayload,
   GetHostsMetricsRequestBodyPayloadClient,
   GetHostsMetricsResponsePayload,
+  GetInfraMetricsRequestBodyPayloadClient,
+  GetInfraMetricsResponsePayload,
   HostsListSort,
   InfraEntityMetricsItem,
   InfraEntityMetricType,
@@ -58,6 +61,7 @@ const OTEL_HOSTS_TABLE_METRICS: InfraEntityMetricType[] = [...COMMON_HOST_METRIC
 
 const LIST_PATH = '/api/metrics/infra/host/list';
 const METRICS_PATH = '/api/metrics/infra/host/metrics';
+const LEGACY_PATH = '/api/metrics/infra/host';
 
 // Field names from `useHostsTableUrlState` that map cleanly to Phase A's
 // sort union. `alertsCount` / `title` aren't valid server-side sort fields
@@ -83,6 +87,7 @@ export const useHostsView = () => {
   } = useKibanaContextForPlugin();
   const { buildQuery, isReady, parsedDateRange, searchCriteria } = useUnifiedSearchContext();
   const [{ sorting, pagination }] = useHostsTableUrlState();
+  const { useNewTable } = usePocSettingsContext();
 
   const schema = searchCriteria?.preferredSchema || DEFAULT_SCHEMA;
   const metrics = schema === 'semconv' ? OTEL_HOSTS_TABLE_METRICS : HOST_TABLE_METRICS;
@@ -136,8 +141,10 @@ export const useHostsView = () => {
   } = useFetcher(
     // P5.5 — return `undefined` synchronously while prerequisites aren't
     // ready so `useFetcher` doesn't fire the throwaway initial request.
+    // PoC gear toggle — when "Use new Hosts table" is off, the legacy
+    // fetcher below owns the data and Phase A/B stay idle.
     (callApi) => {
-      if (!isReady) return;
+      if (!isReady || !useNewTable) return;
       return (async () => {
         const start = performance.now();
         const response = await callApi(LIST_PATH, {
@@ -156,7 +163,7 @@ export const useHostsView = () => {
         );
       })();
     },
-    [isReady, listPayload, searchCriteria.limit, telemetry]
+    [isReady, useNewTable, listPayload, searchCriteria.limit, telemetry]
   );
 
   const pageNames = useMemo(() => (listData?.nodes ?? []).map((n) => n.name), [listData?.nodes]);
@@ -185,7 +192,7 @@ export const useHostsView = () => {
     status: metricsStatus,
   } = useFetcher(
     (callApi) => {
-      if (!isReady) return;
+      if (!isReady || !useNewTable) return;
       if (pageNames.length === 0) return;
       return (async () => {
         const start = performance.now();
@@ -205,7 +212,54 @@ export const useHostsView = () => {
         );
       })();
     },
-    [isReady, pageNames, metricsPayload, telemetry]
+    [isReady, useNewTable, pageNames, metricsPayload, telemetry]
+  );
+
+  // ---------------------------------------------------------------------
+  // Legacy single-endpoint fallback (PoC gear toggle: "Use new Hosts table"
+  // OFF). Fetches the full host set + metrics + metadata + alerts in one
+  // shot, matching the pre-Tier-3 behaviour. Sort + pagination are then
+  // applied client-side in `useHostsTable`.
+  // ---------------------------------------------------------------------
+
+  const legacyPayload = useMemo<string>(
+    () =>
+      JSON.stringify(
+        buildLegacyRequest({
+          dateRange: parsedDateRange,
+          esQuery: buildQuery(),
+          limit: searchCriteria.limit,
+          metrics,
+          schema,
+        })
+      ),
+    [buildQuery, parsedDateRange, searchCriteria.limit, metrics, schema]
+  );
+
+  const {
+    data: legacyData,
+    error: legacyError,
+    status: legacyStatus,
+  } = useFetcher(
+    (callApi) => {
+      if (!isReady || useNewTable) return;
+      return (async () => {
+        const start = performance.now();
+        const response = await callApi<GetInfraMetricsResponsePayload>(LEGACY_PATH, {
+          method: 'POST',
+          body: legacyPayload,
+        });
+        const duration = performance.now() - start;
+        telemetry.reportPerformanceMetricEvent(
+          'infra_hosts_table_load',
+          duration,
+          { key1: 'data_load', value1: duration },
+          { limit: searchCriteria.limit }
+        );
+        return response;
+      })();
+    },
+    [isReady, useNewTable, legacyPayload, searchCriteria.limit, telemetry]
   );
 
   // ---------------------------------------------------------------------
@@ -215,6 +269,10 @@ export const useHostsView = () => {
   // ---------------------------------------------------------------------
 
   const hostNodes: TwoPhaseHostNode[] = useMemo(() => {
+    if (!useNewTable) {
+      return legacyData?.nodes ?? [];
+    }
+
     const listNodes = listData?.nodes ?? [];
     if (listNodes.length === 0) return [];
 
@@ -241,9 +299,25 @@ export const useHostsView = () => {
       }
       return node;
     });
-  }, [listData?.nodes, metricsData?.nodes, metrics]);
+  }, [useNewTable, legacyData?.nodes, listData?.nodes, metricsData?.nodes, metrics]);
 
-  const totalHosts = listData?.totalHosts ?? 0;
+  // Two-phase: Phase A returns the ranked fleet count so pagination math
+  // doesn't depend on the page's length. Legacy: the table client-paginates
+  // over what the endpoint returned, so totalHosts is the response length.
+  const totalHosts = useNewTable ? listData?.totalHosts ?? 0 : legacyData?.nodes?.length ?? 0;
+
+  if (!useNewTable) {
+    return {
+      loading: isPending(legacyStatus),
+      phaseBLoading: false,
+      error: legacyError ?? undefined,
+      hostNodes,
+      totalHosts,
+      phaseAStatus: legacyStatus,
+      phaseBStatus: legacyStatus,
+      isPhaseAReady: legacyStatus === FETCH_STATUS.SUCCESS,
+    };
+  }
 
   return {
     // Phase A drives the loading state. Phase B's loading is hidden because
@@ -314,6 +388,31 @@ function buildMetricsRequest({
     to: dateRange.to,
     names,
     metrics,
+    schema,
+  };
+}
+
+// PoC-only — payload for the pre-Tier-3 single-endpoint flow used when the
+// "Use new Hosts table" toggle is off.
+function buildLegacyRequest({
+  esQuery,
+  dateRange,
+  limit,
+  metrics,
+  schema,
+}: {
+  esQuery: { bool: BoolQuery };
+  dateRange: StringDateRange;
+  limit: number;
+  metrics: InfraEntityMetricType[];
+  schema?: DataSchemaFormat;
+}): GetInfraMetricsRequestBodyPayloadClient {
+  return {
+    query: esQuery,
+    from: dateRange.from,
+    to: dateRange.to,
+    metrics,
+    limit,
     schema,
   };
 }

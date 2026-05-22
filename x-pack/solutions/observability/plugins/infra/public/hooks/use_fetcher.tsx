@@ -16,6 +16,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { InfraHttpError } from '../types';
 import { useKibanaContextForPlugin } from './use_kibana';
 import { useReloadRequestTimeContext } from './use_reload_request_time';
+import { pocFlags } from '../pages/metrics/hosts/hooks/use_poc_settings';
 
 export enum FETCH_STATUS {
   LOADING = 'loading',
@@ -100,10 +101,21 @@ function createInfraApiClient(
   return ((path: string, options: HttpFetchOptions) => {
     const shouldInspect = inspectEnabled && isInspectableRoute(path);
 
+    // PoC gear toggle ("Use universal fixes"): when off, send a header so
+    // `getInfraMetricsClient` restores the pre-P5 `bool { filter, must }`
+    // wrap around the caller's query. Hosts-page-only — `pocFlags` is a
+    // module-level mirror updated by `<PocSettingsProvider>`, which is
+    // mounted exclusively on the Hosts page.
+    const pocHeaders =
+      isInspectableRoute(path) && pocFlags.useUniversalFixes === false
+        ? { 'x-poc-legacy-bool-wrap': 'true' }
+        : undefined;
+
     return http
       .fetch(path, {
         ...options,
         signal,
+        headers: { ...(options.headers ?? {}), ...(pocHeaders ?? {}) },
         query: {
           ...(options.query as Record<string, unknown>),
           ...(shouldInspect ? { _inspect: true } : {}),

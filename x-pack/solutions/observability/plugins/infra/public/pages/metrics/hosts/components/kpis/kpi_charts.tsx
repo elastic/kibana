@@ -17,6 +17,8 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { HostKpiTiles } from './host_kpi_tiles';
+import { LegacyKpiCharts } from './legacy_kpi_charts';
+import { usePocSettingsContext } from '../../hooks/use_poc_settings';
 import {
   MAX_AS_FIRST_FUNCTION_PATTERN,
   AVG_OR_AVERAGE_AS_FIRST_FUNCTION_PATTERN,
@@ -68,5 +70,6 @@ export const getSubtitle = ({
 };
 
 export const KpiCharts = () => {
-  return <HostKpiTiles />;
+  const { useNewKpis } = usePocSettingsContext();
+  return useNewKpis ? <HostKpiTiles /> : <LegacyKpiCharts />;
 };

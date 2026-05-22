@@ -8,12 +8,15 @@
 import {
   buildPhraseFilter,
   buildPhrasesFilter,
+  buildCombinedFilter,
+  BooleanRelation,
   type Filter,
   isCombinedFilter,
 } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import type { InfraCustomDashboardAssetType } from '../../../common/custom_dashboards';
+import { pocFlags } from '../../pages/metrics/hosts/hooks/use_poc_settings';
 
 // P1 — flat `terms` filter instead of an `OR`-of-`match_phrase`.
 /**
@@ -28,6 +31,10 @@ import type { InfraCustomDashboardAssetType } from '../../../common/custom_dashb
  *
  * The `meta` is built via `buildPhrasesFilter` so the filter bar renders
  * the familiar "field is one of [...]" pill with full value list.
+ *
+ * **PoC gear toggle**: when `pocFlags.useUniversalFixes === false`, this
+ * helper falls back to the pre-P1 `OR`-of-`match_phrase` shape so the
+ * Hosts page can be benchmarked against the original filter cost.
  */
 export const buildCombinedAssetFilter = ({
   field,
@@ -39,6 +46,12 @@ export const buildCombinedAssetFilter = ({
   dataView?: DataView;
 }) => {
   const indexField = dataView?.getFieldByName(field);
+
+  if (!pocFlags.useUniversalFixes && dataView && indexField) {
+    const filtersFromValues = values.map((value) => buildPhraseFilter(indexField, value, dataView));
+    return buildCombinedFilter(BooleanRelation.OR, filtersFromValues, dataView);
+  }
+
   const termsQuery = { terms: { [field]: values } };
 
   if (!dataView || !indexField) {
