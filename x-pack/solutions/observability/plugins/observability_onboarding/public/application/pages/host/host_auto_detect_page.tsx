@@ -21,7 +21,7 @@ import { usePerformanceContext } from '@kbn/ebt-tools';
 import type { ObservabilityOnboardingAppServices } from '../../..';
 import { OnboardingFlowLayout } from '../../shared/onboarding_flow_layout';
 import type { HostOs } from './host_os';
-import { ApproachSelector } from '../../shared/approach_selector';
+import { CollectionMethodSelector } from '../../shared/collection_method_selector';
 import type { SupportedLogo } from '../../shared/logo_icon';
 import { ObservabilityOnboardingPricingFeature } from '../../../../common/pricing_features';
 import { getAutoDetectCommand } from '../../quickstart_flows/auto_detect/get_auto_detect_command';
@@ -40,10 +40,10 @@ import {
   type IngestionMode,
 } from '../../quickstart_flows/shared/wired_streams_ingestion_selector';
 import {
-  buildHostApproachOptions,
-  HOST_APPROACH_SELECTOR_LEGEND,
-  HOST_APPROACH_STEP_TITLE,
-} from './host_approach_options';
+  buildHostCollectionMethodOptions,
+  HOST_SELECTOR_LEGEND,
+  HOST_SELECTOR_STEP_TITLE,
+} from './host_collection_method_options';
 
 export interface HostAutoDetectPageProps {
   os: Extract<HostOs, 'linux' | 'mac'>;
@@ -62,7 +62,7 @@ export const HostAutoDetectPage: React.FC<HostAutoDetectPageProps> = ({
   subtitle,
   logo,
 }) => {
-  useFlowBreadcrumb({ text: breadcrumbLabel });
+  useFlowBreadcrumb(breadcrumbLabel);
 
   const { status, data, error, refetch, installedIntegrations } = useOnboardingFlow();
   const metricsOnboardingEnabled = usePricingFeature(
@@ -129,15 +129,12 @@ export const HostAutoDetectPage: React.FC<HostAutoDetectPageProps> = ({
   const steps: EuiStepsProps['steps'] = useMemo(
     () => [
       {
-        title: HOST_APPROACH_STEP_TITLE,
+        title: HOST_SELECTOR_STEP_TITLE,
         children: (
-          <ApproachSelector
-            legend={HOST_APPROACH_SELECTOR_LEGEND}
+          <CollectionMethodSelector
+            legend={HOST_SELECTOR_LEGEND}
             selectedId="auto-detect"
-            options={buildHostApproachOptions({
-              otel: { navigateTo: otelNavigateTo },
-              elasticAgent: { navigateTo: eaNavigateTo },
-            })}
+            options={buildHostCollectionMethodOptions({ otelNavigateTo, eaNavigateTo })}
           />
         ),
       },

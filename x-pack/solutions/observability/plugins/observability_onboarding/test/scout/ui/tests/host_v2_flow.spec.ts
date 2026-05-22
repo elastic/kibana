@@ -33,7 +33,7 @@ test.describe.serial(
       });
     });
 
-    test('Linux tile navigates to /host/linux with the OTel approach selected', async ({
+    test('Linux tile navigates to /host/linux with OTel as the selected collection method', async ({
       pageObjects,
       page,
     }) => {
@@ -42,28 +42,28 @@ test.describe.serial(
 
       await expect(pageObjects.hostV2.layout('linux')).toBeVisible();
       await expect(page).toHaveURL(/\/host\/linux/);
-      await expect(pageObjects.hostV2.approachSelector()).toBeVisible();
-      await expect(pageObjects.hostV2.approachCard('otel')).toHaveAttribute(
+      await expect(pageObjects.hostV2.collectionMethodSelector()).toBeVisible();
+      await expect(pageObjects.hostV2.collectionMethodCard('otel')).toHaveAttribute(
         'data-selected',
         'true'
       );
     });
 
-    test('Linux approach selector toggles between OTel and Elastic Agent', async ({
+    test('Linux collection method selector toggles between OTel and Elastic Agent', async ({
       pageObjects,
       page,
     }) => {
       await pageObjects.hostV2.gotoPath('/host/linux');
 
-      await pageObjects.hostV2.approachCard('auto-detect').click();
+      await pageObjects.hostV2.collectionMethodCard('auto-detect').click();
       await expect(page).toHaveURL(/\/host\/linux\/auto-detect/);
 
-      await pageObjects.hostV2.approachCard('otel').click();
+      await pageObjects.hostV2.collectionMethodCard('otel').click();
       // Anchored so /host/linuxxyz and /host/linux/foo don't match.
       await expect(page).toHaveURL(/\/host\/linux(\?|$|#)/);
     });
 
-    test('Linux ingestion mode persists across the approach toggle', async ({
+    test('Linux ingestion mode persists across the collection method toggle', async ({
       pageObjects,
       page,
     }) => {
@@ -76,12 +76,12 @@ test.describe.serial(
         await expect(page).toHaveURL(/ingestion=wired/);
       });
 
-      await test.step('switch approach to Elastic Agent', async () => {
-        await pageObjects.hostV2.approachCard('auto-detect').click();
+      await test.step('switch collection method to Elastic Agent', async () => {
+        await pageObjects.hostV2.collectionMethodCard('auto-detect').click();
         await expect(page).toHaveURL(/\/host\/linux\/auto-detect.*ingestion=wired/);
       });
 
-      await test.step('ingestion mode survives the approach switch', async () => {
+      await test.step('ingestion mode survives the collection method switch', async () => {
         await expect(pageObjects.onboarding.wiredStreamsOption).toHaveAttribute(
           'aria-pressed',
           'true'
@@ -89,18 +89,21 @@ test.describe.serial(
       });
     });
 
-    test('macOS landing has the OTel approach selected', async ({ pageObjects, page }) => {
+    test('macOS landing has OTel as the selected collection method', async ({
+      pageObjects,
+      page,
+    }) => {
       await pageObjects.hostV2.gotoPath('/host/macos');
       await expect(pageObjects.hostV2.layout('mac')).toBeVisible();
       await expect(page).toHaveURL(/\/host\/macos/);
-      await expect(pageObjects.hostV2.approachSelector()).toBeVisible();
-      await expect(pageObjects.hostV2.approachCard('otel')).toHaveAttribute(
+      await expect(pageObjects.hostV2.collectionMethodSelector()).toBeVisible();
+      await expect(pageObjects.hostV2.collectionMethodCard('otel')).toHaveAttribute(
         'data-selected',
         'true'
       );
     });
 
-    test('macOS tile navigates to /host/macos with the OTel approach selected', async ({
+    test('macOS tile navigates to /host/macos with OTel as the selected collection method', async ({
       pageObjects,
       page,
     }) => {
@@ -109,8 +112,8 @@ test.describe.serial(
 
       await expect(pageObjects.hostV2.layout('mac')).toBeVisible();
       await expect(page).toHaveURL(/\/host\/macos/);
-      await expect(pageObjects.hostV2.approachSelector()).toBeVisible();
-      await expect(pageObjects.hostV2.approachCard('otel')).toHaveAttribute(
+      await expect(pageObjects.hostV2.collectionMethodSelector()).toBeVisible();
+      await expect(pageObjects.hostV2.collectionMethodCard('otel')).toHaveAttribute(
         'data-selected',
         'true'
       );
@@ -123,7 +126,7 @@ test.describe.serial(
       await pageObjects.hostV2.gotoPath('/host/windows');
       await expect(pageObjects.hostV2.layout('windows')).toBeVisible();
       await expect(page).toHaveURL(/\/host\/windows/);
-      await expect(pageObjects.hostV2.approachSelector()).toHaveCount(0);
+      await expect(pageObjects.hostV2.collectionMethodSelector()).toHaveCount(0);
 
       const codeBlock = pageObjects.hostV2.otelInstallCodeBlock();
       await expect(codeBlock).toBeVisible();
@@ -138,7 +141,7 @@ test.describe.serial(
 
       await expect(pageObjects.hostV2.layout('linux')).toBeVisible();
       await expect(pageObjects.hostV2.returnLink()).toBeVisible();
-      await expect(pageObjects.hostV2.approachSelector()).toBeVisible();
+      await expect(pageObjects.hostV2.collectionMethodSelector()).toBeVisible();
       await expect(pageObjects.hostV2.emptyPrompt()).toBeVisible();
 
       const retry = pageObjects.hostV2.emptyPromptRetryButton();

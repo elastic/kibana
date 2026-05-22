@@ -108,9 +108,9 @@ describe('HostWindowsOtelPage', () => {
     expect(screen.getByTestId('observabilityOnboardingHostV2Layout-windows')).toBeInTheDocument();
   });
 
-  it('does not render the approach selector', () => {
+  it('does not render the collection method selector', () => {
     renderWindowsOtelPage();
-    expect(screen.queryByTestId('approachSelector')).toBeNull();
+    expect(screen.queryByTestId('collectionMethodSelector')).toBeNull();
   });
 
   it('renders the OTel install step', () => {
@@ -189,7 +189,7 @@ describe('HostWindowsOtelPage', () => {
     }
   });
 
-  it('does not render the approach step title', () => {
+  it('does not render the collection method step title', () => {
     renderWindowsOtelPage();
     expect(screen.queryByText('Choose how to collect host telemetry')).toBeNull();
   });

@@ -29,12 +29,11 @@ import { AutoDetectInstallStep, AutoDetectVisualizeStep } from './steps';
 import { type IngestionMode } from '../shared/wired_streams_ingestion_selector';
 
 export const AutoDetectPanel: FunctionComponent = () => {
-  useFlowBreadcrumb({
-    text: i18n.translate(
-      'xpack.observability_onboarding.autoDetectPanel.breadcrumbs.autoDetectLabel',
-      { defaultMessage: 'Elastic Agent: Logs & Metrics' }
-    ),
-  });
+  useFlowBreadcrumb(
+    i18n.translate('xpack.observability_onboarding.autoDetectPanel.breadcrumbs.autoDetectLabel', {
+      defaultMessage: 'Elastic Agent: Logs & Metrics',
+    })
+  );
   const { status, data, error, refetch, installedIntegrations } = useOnboardingFlow();
   const metricsOnboardingEnabled = usePricingFeature(
     ObservabilityOnboardingPricingFeature.METRICS_ONBOARDING

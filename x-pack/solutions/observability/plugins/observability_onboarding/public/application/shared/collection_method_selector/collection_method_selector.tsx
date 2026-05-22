@@ -21,26 +21,26 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { useHistory } from 'react-router-dom';
 import { LogoIcon } from '../logo_icon';
-import type { ApproachOption } from './types';
+import type { CollectionMethodOption } from './types';
 
-interface ApproachSelectorProps {
+interface CollectionMethodSelectorProps {
   legend: string;
   selectedId: string;
-  options: ApproachOption[];
+  options: CollectionMethodOption[];
 }
 
-export const ApproachSelector: React.FC<ApproachSelectorProps> = ({
+export const CollectionMethodSelector: React.FC<CollectionMethodSelectorProps> = ({
   legend,
   selectedId,
   options,
 }) => {
   const history = useHistory();
-  const radioGroupId = useMemo(() => htmlIdGenerator('approachSelector')(), []);
+  const radioGroupId = useMemo(() => htmlIdGenerator('collectionMethodSelector')(), []);
 
   return (
     <EuiFormFieldset
       legend={{ children: legend, display: 'hidden' }}
-      data-test-subj="approachSelector"
+      data-test-subj="collectionMethodSelector"
     >
       <EuiFlexGrid columns={2}>
         {options.map((option) => {
@@ -48,7 +48,7 @@ export const ApproachSelector: React.FC<ApproachSelectorProps> = ({
           return (
             <EuiFlexItem
               key={option.id}
-              data-test-subj={`approachSelectorCard-${option.id}`}
+              data-test-subj={`collectionMethodSelectorCard-${option.id}`}
               data-selected={isSelected ? 'true' : 'false'}
             >
               <EuiCheckableCard
@@ -76,10 +76,10 @@ export const ApproachSelector: React.FC<ApproachSelectorProps> = ({
                         <EuiFlexItem grow={false}>
                           <EuiBadge
                             color="success"
-                            data-test-subj={`approachSelectorRecommendedBadge-${option.id}`}
+                            data-test-subj={`collectionMethodSelectorRecommendedBadge-${option.id}`}
                           >
                             {i18n.translate(
-                              'xpack.observability_onboarding.approachSelector.recommendedBadge',
+                              'xpack.observability_onboarding.collectionMethodSelector.recommendedBadge',
                               { defaultMessage: 'Recommended' }
                             )}
                           </EuiBadge>

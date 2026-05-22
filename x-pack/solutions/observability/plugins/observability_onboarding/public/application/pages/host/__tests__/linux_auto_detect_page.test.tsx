@@ -91,14 +91,14 @@ describe('HostLinuxAutoDetectPage', () => {
     expect(screen.getByTestId('observabilityOnboardingHostV2Layout-linux')).toBeInTheDocument();
   });
 
-  it('marks Elastic Agent as the selected approach', () => {
+  it('marks Elastic Agent as the selected collection method', () => {
     renderPage();
     expect(
-      screen.getByTestId('approachSelectorCard-auto-detect').getAttribute('data-selected')
+      screen.getByTestId('collectionMethodSelectorCard-auto-detect').getAttribute('data-selected')
     ).toBe('true');
-    expect(screen.getByTestId('approachSelectorCard-otel').getAttribute('data-selected')).toBe(
-      'false'
-    );
+    expect(
+      screen.getByTestId('collectionMethodSelectorCard-otel').getAttribute('data-selected')
+    ).toBe('false');
   });
 
   it('renders the auto-detect install step', () => {

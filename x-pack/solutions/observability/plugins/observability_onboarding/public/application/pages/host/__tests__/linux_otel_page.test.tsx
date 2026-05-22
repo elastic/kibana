@@ -112,13 +112,13 @@ describe('HostLinuxOtelPage', () => {
     expect(screen.getByTestId('observabilityOnboardingHostV2Layout-linux')).toBeInTheDocument();
   });
 
-  it('renders the approach selector with OTel selected', () => {
+  it('renders the collection method selector with OTel selected', () => {
     renderPage();
-    expect(screen.getByTestId('approachSelectorCard-otel').getAttribute('data-selected')).toBe(
-      'true'
-    );
     expect(
-      screen.getByTestId('approachSelectorCard-auto-detect').getAttribute('data-selected')
+      screen.getByTestId('collectionMethodSelectorCard-otel').getAttribute('data-selected')
+    ).toBe('true');
+    expect(
+      screen.getByTestId('collectionMethodSelectorCard-auto-detect').getAttribute('data-selected')
     ).toBe('false');
   });
 

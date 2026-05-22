@@ -19,7 +19,6 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
-import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { useHistory, useLocation } from 'react-router-dom';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { useIconForLogo, type SupportedLogo } from '../logo_icon';
@@ -29,7 +28,6 @@ export interface OnboardingFlowHeaderProps {
   subtitle: string;
   returnTo: string;
   logo?: SupportedLogo;
-  euiIconType?: EuiIconType;
   returnLabel?: string;
   returnDataTestSubj?: string;
 }
@@ -44,7 +42,6 @@ export const OnboardingFlowHeader: React.FC<OnboardingFlowHeaderProps> = ({
   subtitle,
   returnTo,
   logo,
-  euiIconType,
   returnLabel = DEFAULT_RETURN_LABEL,
   returnDataTestSubj = 'observabilityOnboardingFlowHeaderReturn',
 }) => {
@@ -55,8 +52,7 @@ export const OnboardingFlowHeader: React.FC<OnboardingFlowHeaderProps> = ({
     history,
     `${returnTo}${location.search}`
   );
-  const iconFromLogo = useIconForLogo(logo);
-  const avatarIconType = euiIconType ?? iconFromLogo;
+  const avatarIconType = useIconForLogo(logo);
 
   return (
     <EuiPageTemplate.Section grow={false} paddingSize="xl" restrictWidth bottomBorder="extended">
@@ -73,7 +69,7 @@ export const OnboardingFlowHeader: React.FC<OnboardingFlowHeaderProps> = ({
         {returnLabel}
       </EuiButtonEmpty>
       <EuiSpacer size="m" />
-      <EuiFlexGroup alignItems="center">
+      <EuiFlexGroup alignItems="center" responsive={false}>
         {avatarIconType && (
           <EuiFlexItem grow={false}>
             <EuiAvatar

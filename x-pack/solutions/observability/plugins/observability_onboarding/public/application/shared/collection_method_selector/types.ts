@@ -8,7 +8,7 @@
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import type { SupportedLogo } from '../logo_icon';
 
-export interface ApproachOption {
+export interface CollectionMethodOption {
   id: string;
   label: string;
   description: string;

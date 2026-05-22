@@ -41,7 +41,7 @@ export const IntegrationTile = ({ tile }: Props) => {
       title={tile.title}
       description={<EuiTextColor color="subdued">{tile.description}</EuiTextColor>}
       data-test-subj={`observabilityOnboardingIntegrationTile-${tile.id}`}
-      {...(routeNavigation ?? { onClick: () => undefined })}
+      {...routeNavigation}
     />
   );
 };

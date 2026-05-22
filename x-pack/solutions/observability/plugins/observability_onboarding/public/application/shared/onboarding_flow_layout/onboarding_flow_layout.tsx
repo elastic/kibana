@@ -14,7 +14,6 @@ import {
   useEuiTheme,
   type EuiStepsProps,
 } from '@elastic/eui';
-import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { css } from '@emotion/react';
 import type { SupportedLogo } from '../logo_icon';
 import { OnboardingFlowHeader } from '../onboarding_flow_header';
@@ -24,7 +23,6 @@ export interface OnboardingFlowLayoutProps {
   subtitle: string;
   returnTo: string;
   logo?: SupportedLogo;
-  euiIconType?: EuiIconType;
   banners?: React.ReactNode;
   steps: EuiStepsProps['steps'];
   feedback?: React.ReactNode;
@@ -37,7 +35,6 @@ export const OnboardingFlowLayout: React.FC<OnboardingFlowLayoutProps> = ({
   subtitle,
   returnTo,
   logo,
-  euiIconType,
   banners,
   steps,
   feedback,
@@ -51,14 +48,28 @@ export const OnboardingFlowLayout: React.FC<OnboardingFlowLayoutProps> = ({
         title={title}
         subtitle={subtitle}
         logo={logo}
-        euiIconType={euiIconType}
         returnTo={returnTo}
         returnDataTestSubj={returnDataTestSubj}
       />
       <EuiPageTemplate.Section paddingSize="xl" restrictWidth>
         <div data-test-subj={bodyDataTestSubj}>
           <EuiFlexGroup direction="column" gutterSize="m">
-            {banners && <EuiFlexItem grow={false}>{banners}</EuiFlexItem>}
+            {banners && (
+              <EuiFlexItem
+                grow={false}
+                // Banner components may render null when their conditions
+                // aren't met. Without this rule the empty wrapper still
+                // contributes the EuiFlexGroup gutter, so the step list sits
+                // lower on pages with banner slots than on pages without.
+                css={css`
+                  &:empty {
+                    display: none;
+                  }
+                `}
+              >
+                {banners}
+              </EuiFlexItem>
+            )}
 
             <EuiFlexItem
               grow={false}

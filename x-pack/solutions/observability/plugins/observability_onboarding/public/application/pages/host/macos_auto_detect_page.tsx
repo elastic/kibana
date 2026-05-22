@@ -7,21 +7,25 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { useEuiTheme } from '@elastic/eui';
 import { HostAutoDetectPage } from './host_auto_detect_page';
 
-export const HostMacosAutoDetectPage: React.FC = () => (
-  <HostAutoDetectPage
-    os="mac"
-    routePath="/host/macos"
-    breadcrumbLabel={i18n.translate('xpack.observability_onboarding.hostV2.breadcrumbs.macos', {
-      defaultMessage: 'macOS',
-    })}
-    title={i18n.translate('xpack.observability_onboarding.hostV2.macos.title', {
-      defaultMessage: 'Set up macOS',
-    })}
-    subtitle={i18n.translate('xpack.observability_onboarding.hostV2.macos.subtitle', {
-      defaultMessage: 'Collect logs and metrics from your macOS host.',
-    })}
-    logo="apple_black"
-  />
-);
+export const HostMacosAutoDetectPage: React.FC = () => {
+  const { colorMode } = useEuiTheme();
+  return (
+    <HostAutoDetectPage
+      os="mac"
+      routePath="/host/macos"
+      breadcrumbLabel={i18n.translate('xpack.observability_onboarding.hostV2.breadcrumbs.macos', {
+        defaultMessage: 'macOS',
+      })}
+      title={i18n.translate('xpack.observability_onboarding.hostV2.macos.title', {
+        defaultMessage: 'Set up macOS',
+      })}
+      subtitle={i18n.translate('xpack.observability_onboarding.hostV2.macos.subtitle', {
+        defaultMessage: 'Collect logs and metrics from your macOS host.',
+      })}
+      logo={colorMode === 'DARK' ? 'apple_white' : 'apple_black'}
+    />
+  );
+};

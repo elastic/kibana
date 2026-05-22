@@ -48,11 +48,11 @@ import {
 } from './data_detection_constants';
 
 export const OtelLogsPanel: React.FC = () => {
-  useFlowBreadcrumb({
-    text: i18n.translate('xpack.observability_onboarding.otelLogsPanel.breadcrumb', {
+  useFlowBreadcrumb(
+    i18n.translate('xpack.observability_onboarding.otelLogsPanel.breadcrumb', {
       defaultMessage: 'OpenTelemetry: Logs & Metrics',
-    }),
-  });
+    })
+  );
   const { onPageReady } = usePerformanceContext();
   const {
     services: { share, docLinks },

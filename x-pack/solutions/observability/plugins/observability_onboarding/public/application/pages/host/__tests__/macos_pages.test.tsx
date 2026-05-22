@@ -128,13 +128,13 @@ describe('HostMacosOtelPage', () => {
     expect(screen.getByTestId('observabilityOnboardingHostV2Layout-mac')).toBeInTheDocument();
   });
 
-  it('renders the approach selector with OTel selected', () => {
+  it('renders the collection method selector with OTel selected', () => {
     renderMacosOtelPage();
-    expect(screen.getByTestId('approachSelectorCard-otel').getAttribute('data-selected')).toBe(
-      'true'
-    );
     expect(
-      screen.getByTestId('approachSelectorCard-auto-detect').getAttribute('data-selected')
+      screen.getByTestId('collectionMethodSelectorCard-otel').getAttribute('data-selected')
+    ).toBe('true');
+    expect(
+      screen.getByTestId('collectionMethodSelectorCard-auto-detect').getAttribute('data-selected')
     ).toBe('false');
   });
 
@@ -221,14 +221,14 @@ describe('HostMacosAutoDetectPage', () => {
     expect(screen.getByTestId('observabilityOnboardingHostV2Layout-mac')).toBeInTheDocument();
   });
 
-  it('marks Elastic Agent as the selected approach', () => {
+  it('marks Elastic Agent as the selected collection method', () => {
     renderMacosAutoDetectPage();
     expect(
-      screen.getByTestId('approachSelectorCard-auto-detect').getAttribute('data-selected')
+      screen.getByTestId('collectionMethodSelectorCard-auto-detect').getAttribute('data-selected')
     ).toBe('true');
-    expect(screen.getByTestId('approachSelectorCard-otel').getAttribute('data-selected')).toBe(
-      'false'
-    );
+    expect(
+      screen.getByTestId('collectionMethodSelectorCard-otel').getAttribute('data-selected')
+    ).toBe('false');
   });
 
   it('renders the auto-detect install step', () => {

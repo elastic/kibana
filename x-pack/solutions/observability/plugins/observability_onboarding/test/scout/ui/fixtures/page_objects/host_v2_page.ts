@@ -9,7 +9,7 @@ import type { ScoutPage } from '@kbn/scout-oblt';
 
 type HostV2Os = 'linux' | 'mac' | 'windows';
 type HostTileId = 'linux' | 'macos' | 'windows';
-type HostApproachId = 'otel' | 'auto-detect';
+type HostCollectionMethodId = 'otel' | 'auto-detect';
 
 export class HostV2Page {
   constructor(private readonly page: ScoutPage) {}
@@ -36,12 +36,12 @@ export class HostV2Page {
     return this.page.getByTestId(`observabilityOnboardingHostV2Layout-${os}`);
   }
 
-  approachSelector() {
-    return this.page.getByTestId('approachSelector');
+  collectionMethodSelector() {
+    return this.page.getByTestId('collectionMethodSelector');
   }
 
-  approachCard(id: HostApproachId) {
-    return this.page.getByTestId(`approachSelectorCard-${id}`);
+  collectionMethodCard(id: HostCollectionMethodId) {
+    return this.page.getByTestId(`collectionMethodSelectorCard-${id}`);
   }
 
   ingestionSelector() {

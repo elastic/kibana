@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { ApproachSelector } from './approach_selector';
-export type { ApproachOption } from './types';
+export { CollectionMethodSelector } from './collection_method_selector';
+export type { CollectionMethodOption } from './types';

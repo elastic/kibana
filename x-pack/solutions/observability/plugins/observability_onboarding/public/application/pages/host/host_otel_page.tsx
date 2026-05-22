@@ -18,7 +18,7 @@ import { useFetcher } from '../../../hooks/use_fetcher';
 import type { ObservabilityOnboardingAppServices } from '../../..';
 import { OnboardingFlowLayout } from '../../shared/onboarding_flow_layout';
 import type { HostOs } from './host_os';
-import { ApproachSelector } from '../../shared/approach_selector';
+import { CollectionMethodSelector } from '../../shared/collection_method_selector';
 import type { SupportedLogo } from '../../shared/logo_icon';
 import { usePreExistingDataCheck } from '../../quickstart_flows/shared/use_pre_existing_data_check';
 import { useWindowBlurDataMonitoringTrigger } from '../../quickstart_flows/shared/use_window_blur_data_monitoring_trigger';
@@ -48,10 +48,10 @@ import { EmptyPrompt } from '../../quickstart_flows/shared/empty_prompt';
 import { useFlowBreadcrumb } from '../../shared/use_flow_breadcrumbs';
 import { WIRED_OTEL_DATA_VIEW_SPEC } from '../../quickstart_flows/shared/wired_streams_data_view';
 import {
-  buildHostApproachOptions,
-  HOST_APPROACH_SELECTOR_LEGEND,
-  HOST_APPROACH_STEP_TITLE,
-} from './host_approach_options';
+  buildHostCollectionMethodOptions,
+  HOST_SELECTOR_LEGEND,
+  HOST_SELECTOR_STEP_TITLE,
+} from './host_collection_method_options';
 
 export interface HostOtelPageProps {
   os: HostOs;
@@ -72,7 +72,7 @@ export const HostOtelPage: React.FC<HostOtelPageProps> = ({
   logo,
   installStepTitle,
 }) => {
-  useFlowBreadcrumb({ text: breadcrumbLabel });
+  useFlowBreadcrumb(breadcrumbLabel);
 
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -168,9 +168,9 @@ export const HostOtelPage: React.FC<HostOtelPageProps> = ({
   const hasPreExistingDataFinal = hasPreExistingData || hasPreExistingDataEarly;
 
   // Elastic Agent auto-detect script is bash-only; Windows has no counterpart.
-  const showApproachSelector = os !== 'windows';
+  const showCollectionMethodSelector = os !== 'windows';
   const otelNavigateTo = `${routePath}${location.search}`;
-  const eaNavigateTo = showApproachSelector
+  const eaNavigateTo = showCollectionMethodSelector
     ? `${routePath}/auto-detect${location.search}`
     : undefined;
 
@@ -227,18 +227,15 @@ export const HostOtelPage: React.FC<HostOtelPageProps> = ({
   );
 
   const steps: EuiStepsProps['steps'] = useMemo(() => {
-    const approachStep =
-      showApproachSelector && eaNavigateTo
+    const collectionMethodStep =
+      showCollectionMethodSelector && eaNavigateTo
         ? {
-            title: HOST_APPROACH_STEP_TITLE,
+            title: HOST_SELECTOR_STEP_TITLE,
             children: (
-              <ApproachSelector
-                legend={HOST_APPROACH_SELECTOR_LEGEND}
+              <CollectionMethodSelector
+                legend={HOST_SELECTOR_LEGEND}
                 selectedId="otel"
-                options={buildHostApproachOptions({
-                  otel: { navigateTo: otelNavigateTo },
-                  elasticAgent: { navigateTo: eaNavigateTo },
-                })}
+                options={buildHostCollectionMethodOptions({ otelNavigateTo, eaNavigateTo })}
               />
             ),
           }
@@ -276,7 +273,7 @@ export const HostOtelPage: React.FC<HostOtelPageProps> = ({
         };
 
     if (error) {
-      return approachStep ? [approachStep, installStep] : [installStep];
+      return collectionMethodStep ? [collectionMethodStep, installStep] : [installStep];
     }
 
     const startStep = {
@@ -307,12 +304,12 @@ export const HostOtelPage: React.FC<HostOtelPageProps> = ({
       ),
     };
 
-    return approachStep
-      ? [approachStep, installStep, startStep, visualizeStep]
+    return collectionMethodStep
+      ? [collectionMethodStep, installStep, startStep, visualizeStep]
       : [installStep, startStep, visualizeStep];
   }, [
     os,
-    showApproachSelector,
+    showCollectionMethodSelector,
     installStepTitle,
     otelNavigateTo,
     eaNavigateTo,

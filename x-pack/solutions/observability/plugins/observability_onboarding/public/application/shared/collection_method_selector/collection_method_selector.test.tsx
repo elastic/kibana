@@ -10,10 +10,10 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter, useLocation } from 'react-router-dom';
 import { CompatRouter } from 'react-router-dom-v5-compat';
-import { ApproachSelector } from './approach_selector';
-import type { ApproachOption } from './types';
+import { CollectionMethodSelector } from './collection_method_selector';
+import type { CollectionMethodOption } from './types';
 
-const buildOptions = (): ApproachOption[] => [
+const buildOptions = (): CollectionMethodOption[] => [
   {
     id: 'otel',
     label: 'OpenTelemetry',
@@ -45,13 +45,17 @@ const LocationProbe = () => {
 const renderSelector = (
   selectedId: string,
   initialEntries: string[] = ['/host/linux'],
-  options: ApproachOption[] = buildOptions()
+  options: CollectionMethodOption[] = buildOptions()
 ) =>
   render(
     <I18nProvider>
       <MemoryRouter initialEntries={initialEntries}>
         <CompatRouter>
-          <ApproachSelector legend="Choose approach" selectedId={selectedId} options={options} />
+          <CollectionMethodSelector
+            legend="Choose collection method"
+            selectedId={selectedId}
+            options={options}
+          />
           <LocationProbe />
         </CompatRouter>
       </MemoryRouter>
@@ -66,7 +70,7 @@ const getLocation = () => {
   };
 };
 
-describe('ApproachSelector', () => {
+describe('CollectionMethodSelector', () => {
   it('renders one card per option with the labels visible', () => {
     renderSelector('otel');
     expect(screen.getByText('OpenTelemetry')).toBeInTheDocument();
@@ -75,25 +79,25 @@ describe('ApproachSelector', () => {
 
   it('marks the recommended option with a recommended badge', () => {
     renderSelector('otel');
-    expect(screen.getByTestId('approachSelectorRecommendedBadge-otel')).toBeInTheDocument();
-    expect(screen.queryByTestId('approachSelectorRecommendedBadge-auto-detect')).toBeNull();
+    expect(screen.getByTestId('collectionMethodSelectorRecommendedBadge-otel')).toBeInTheDocument();
+    expect(screen.queryByTestId('collectionMethodSelectorRecommendedBadge-auto-detect')).toBeNull();
   });
 
   it('reflects the selected option from the prop (not internal state)', () => {
     const { rerender } = renderSelector('otel');
-    expect(screen.getByTestId('approachSelectorCard-otel').getAttribute('data-selected')).toBe(
-      'true'
-    );
     expect(
-      screen.getByTestId('approachSelectorCard-auto-detect').getAttribute('data-selected')
+      screen.getByTestId('collectionMethodSelectorCard-otel').getAttribute('data-selected')
+    ).toBe('true');
+    expect(
+      screen.getByTestId('collectionMethodSelectorCard-auto-detect').getAttribute('data-selected')
     ).toBe('false');
 
     rerender(
       <I18nProvider>
         <MemoryRouter initialEntries={['/host/linux']}>
           <CompatRouter>
-            <ApproachSelector
-              legend="Choose approach"
+            <CollectionMethodSelector
+              legend="Choose collection method"
               selectedId="auto-detect"
               options={buildOptions()}
             />
@@ -103,11 +107,11 @@ describe('ApproachSelector', () => {
       </I18nProvider>
     );
     expect(
-      screen.getByTestId('approachSelectorCard-auto-detect').getAttribute('data-selected')
+      screen.getByTestId('collectionMethodSelectorCard-auto-detect').getAttribute('data-selected')
     ).toBe('true');
-    expect(screen.getByTestId('approachSelectorCard-otel').getAttribute('data-selected')).toBe(
-      'false'
-    );
+    expect(
+      screen.getByTestId('collectionMethodSelectorCard-otel').getAttribute('data-selected')
+    ).toBe('false');
   });
 
   it('navigates to the option path when selecting an unselected card', () => {
@@ -124,6 +128,6 @@ describe('ApproachSelector', () => {
 
   it('exposes the group with its accessible label', () => {
     renderSelector('otel');
-    expect(screen.getByRole('group', { name: 'Choose approach' })).toBeInTheDocument();
+    expect(screen.getByRole('group', { name: 'Choose collection method' })).toBeInTheDocument();
   });
 });
