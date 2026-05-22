@@ -134,11 +134,35 @@ export interface IndexDocCount {
   error?: string;
 }
 
+// Blast radius types for finding enrichment
+export type FindingSeverity = 'CRITICAL' | 'WARNING' | 'INFORMATIONAL';
+
+export interface AffectedRule {
+  id: string;
+  name: string;
+}
+
+export interface AffectedTactic {
+  id: string;
+  name: string;
+  totalRules: number;
+  affectedRulesCount: number;
+}
+
+export interface RecommendedAction {
+  label: string;
+  href: string;
+}
+
 export interface ActionableFinding {
   category?: MainCategories;
-  severity: 'critical' | 'warning';
+  severity: FindingSeverity;
   message: string;
   resource: string;
+  affectedRules?: AffectedRule[];
+  affectedTactics?: AffectedTactic[];
+  affectedPlatform?: string;
+  recommendedActions?: RecommendedAction[];
 }
 
 export interface CoveragePayload {

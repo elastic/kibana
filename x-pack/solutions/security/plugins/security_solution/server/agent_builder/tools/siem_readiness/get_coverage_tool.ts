@@ -13,6 +13,7 @@ import type { Logger } from '@kbn/logging';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
 import { getCoverage } from '../../../lib/siem_readiness/dimensions';
+import { fetchRulesReverseMap } from '../../../lib/siem_readiness/fetchers';
 import { SIEM_READINESS_COVERAGE_TOOL_ID } from './tool_ids';
 
 const schema = z.object({});
@@ -33,12 +34,27 @@ export const getCoverageTool = (
       return getAgentBuilderResourceAvailability({ core, request, logger });
     },
   },
-  handler: async (_params, { esClient, savedObjectsClient, logger: handlerLogger }) => {
+  handler: async (_params, { esClient, savedObjectsClient, logger: handlerLogger, request }) => {
     try {
+      const [coreStart, startPlugins] = await core.getStartServices();
+      const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(request);
+      const dataViewsService = await startPlugins.dataViews.dataViewsServiceFactory(
+        savedObjectsClient,
+        esClient.asCurrentUser
+      );
+
+      const reverseMapResult = await fetchRulesReverseMap({
+        rulesClient,
+        esClient: esClient.asCurrentUser,
+        dataViewsService,
+        logger: handlerLogger,
+      });
+
       const payload = await getCoverage({
         esClient: esClient.asCurrentUser,
         savedObjectsClient,
         logger: handlerLogger,
+        reverseMapResult,
       });
       return {
         results: [

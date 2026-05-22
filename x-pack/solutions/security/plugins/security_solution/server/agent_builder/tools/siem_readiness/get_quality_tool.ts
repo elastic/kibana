@@ -15,7 +15,7 @@ import { getIndexCategoryMap, isQualityIncompatible } from '@kbn/siem-readiness'
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
 import { getQuality } from '../../../lib/siem_readiness/dimensions';
-import { fetchCategories } from '../../../lib/siem_readiness/fetchers';
+import { fetchCategories, fetchRulesReverseMap } from '../../../lib/siem_readiness/fetchers';
 import { SIEM_READINESS_QUALITY_TOOL_ID } from './tool_ids';
 
 const schema = z.object({});
@@ -36,12 +36,31 @@ export const getQualityTool = (
       return getAgentBuilderResourceAvailability({ core, request, logger });
     },
   },
-  handler: async (_params, { esClient, logger: handlerLogger }) => {
+  handler: async (_params, { esClient, logger: handlerLogger, request }) => {
     try {
-      const [payload, categoriesResult] = await Promise.all([
-        getQuality({ esClient: esClient.asCurrentUser, logger: handlerLogger }),
+      const [coreStart, startPlugins] = await core.getStartServices();
+      const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
+      const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(request);
+      const dataViewsService = await startPlugins.dataViews.dataViewsServiceFactory(
+        savedObjectsClient,
+        esClient.asCurrentUser
+      );
+
+      const [reverseMapResult, categoriesResult] = await Promise.all([
+        fetchRulesReverseMap({
+          rulesClient,
+          esClient: esClient.asCurrentUser,
+          dataViewsService,
+          logger: handlerLogger,
+        }),
         fetchCategories({ esClient: esClient.asCurrentUser, logger: handlerLogger }),
       ]);
+
+      const payload = await getQuality({
+        esClient: esClient.asCurrentUser,
+        logger: handlerLogger,
+        reverseMapResult,
+      });
 
       const indexToCategoryMap = getIndexCategoryMap(categoriesResult);
 

@@ -11,8 +11,9 @@ import type {
   ActionableFinding,
   DataQualityResultDocument,
   QualityPayload,
+  ReverseMapResult,
 } from '@kbn/siem-readiness';
-import { isQualityIncompatible } from '@kbn/siem-readiness';
+import { isQualityIncompatible, enrichFindings } from '@kbn/siem-readiness';
 
 const DATA_QUALITY_RESULTS_INDEX = '.kibana-data-quality-dashboard-results-*';
 
@@ -56,16 +57,18 @@ const fetchDataQualityResults = async ({
 export const getQuality = async ({
   esClient,
   logger,
+  reverseMapResult,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
+  reverseMapResult?: ReverseMapResult;
 }): Promise<QualityPayload> => {
   const qualityResults = await fetchDataQualityResults({ esClient, logger });
 
   const actionableFindings: ActionableFinding[] = qualityResults
     .filter((result) => isQualityIncompatible(result.incompatibleFieldCount))
     .map((result) => ({
-      severity: 'warning' as const,
+      severity: 'WARNING' as const,
       message: `${result.indexName} has ${result.incompatibleFieldCount} incompatible ECS fields`,
       resource: result.indexName,
     }));
@@ -79,7 +82,17 @@ export const getQuality = async ({
 
   const summary = buildQualitySummary(status, qualityResults.length, actionableFindings.length);
 
-  return { status, summary, items: qualityResults, actionableFindings };
+  const enrichedFindings = reverseMapResult
+    ? enrichFindings(actionableFindings, {
+        indexToRules: reverseMapResult.indexToRules,
+        pipelineToIndices: reverseMapResult.pipelineToIndices,
+        categoryToIndices: reverseMapResult.categoryToIndices,
+        tacticTotals: reverseMapResult.tacticTotals,
+        dimension: 'quality',
+      })
+    : actionableFindings;
+
+  return { status, summary, items: qualityResults, actionableFindings: enrichedFindings };
 };
 
 const buildQualitySummary = (

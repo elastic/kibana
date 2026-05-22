@@ -15,7 +15,7 @@ import { isRetentionNonCompliant, filterRetentionItemsByCategories } from '@kbn/
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
 import { getRetention } from '../../../lib/siem_readiness/dimensions';
-import { fetchCategories } from '../../../lib/siem_readiness/fetchers';
+import { fetchCategories, fetchRulesReverseMap } from '../../../lib/siem_readiness/fetchers';
 import { SIEM_READINESS_RETENTION_TOOL_ID } from './tool_ids';
 
 const schema = z.object({});
@@ -37,12 +37,32 @@ export const getRetentionTool = (
       return getAgentBuilderResourceAvailability({ core, request, logger });
     },
   },
-  handler: async (_params, { esClient, logger: handlerLogger }) => {
+  handler: async (_params, { esClient, logger: handlerLogger, request }) => {
     try {
-      const [payload, categoriesResult] = await Promise.all([
-        getRetention({ esClient: esClient.asCurrentUser, isServerless, logger: handlerLogger }),
+      const [coreStart, startPlugins] = await core.getStartServices();
+      const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
+      const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(request);
+      const dataViewsService = await startPlugins.dataViews.dataViewsServiceFactory(
+        savedObjectsClient,
+        esClient.asCurrentUser
+      );
+
+      const [reverseMapResult, categoriesResult] = await Promise.all([
+        fetchRulesReverseMap({
+          rulesClient,
+          esClient: esClient.asCurrentUser,
+          dataViewsService,
+          logger: handlerLogger,
+        }),
         fetchCategories({ esClient: esClient.asCurrentUser, logger: handlerLogger }),
       ]);
+
+      const payload = await getRetention({
+        esClient: esClient.asCurrentUser,
+        isServerless,
+        logger: handlerLogger,
+        reverseMapResult,
+      });
 
       // Shared predicate — same function used by the UI retention tab
       const categorizedItems = filterRetentionItemsByCategories(payload.items, categoriesResult);
@@ -97,7 +117,9 @@ export const getRetentionTool = (
         ],
       };
     } catch (error: unknown) {
-      const e = error as { message?: string };
+      const e = error as { message?: string; stack?: string };
+      handlerLogger.error(`[get_retention_tool] Error: ${e.message ?? 'unknown error'}`);
+      handlerLogger.error(`[get_retention_tool] Stack: ${e.stack ?? 'no stack'}`);
       return {
         results: [
           {

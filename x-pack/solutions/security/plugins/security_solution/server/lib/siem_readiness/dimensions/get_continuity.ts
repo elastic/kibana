@@ -7,25 +7,27 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import type { ActionableFinding, ContinuityPayload } from '@kbn/siem-readiness';
-import { isCriticalFailureRate } from '@kbn/siem-readiness';
+import type { ActionableFinding, ContinuityPayload, ReverseMapResult } from '@kbn/siem-readiness';
+import { isCriticalFailureRate, enrichFindings } from '@kbn/siem-readiness';
 import { fetchPipelines } from '../fetchers';
 
 export const getContinuity = async ({
   esClient,
   isServerless,
   logger,
+  reverseMapResult,
 }: {
   esClient: ElasticsearchClient;
   isServerless: boolean;
   logger: Logger;
+  reverseMapResult?: ReverseMapResult;
 }): Promise<ContinuityPayload> => {
   const pipelines = await fetchPipelines({ esClient, isServerless, logger });
 
   const actionableFindings: ActionableFinding[] = pipelines
     .filter((p) => p.statsAvailable && isCriticalFailureRate(p.failedDocsCount, p.docsCount))
     .map((p) => ({
-      severity: 'critical' as const,
+      severity: 'CRITICAL' as const,
       message: `Pipeline ${p.name} has a critical document failure rate (${p.failedDocsCount} of ${p.docsCount} failed)`,
       resource: p.name,
     }));
@@ -39,7 +41,17 @@ export const getContinuity = async ({
 
   const summary = buildContinuitySummary(status, pipelines.length, actionableFindings.length);
 
-  return { status, summary, items: pipelines, actionableFindings };
+  const enrichedFindings = reverseMapResult
+    ? enrichFindings(actionableFindings, {
+        indexToRules: reverseMapResult.indexToRules,
+        pipelineToIndices: reverseMapResult.pipelineToIndices,
+        categoryToIndices: reverseMapResult.categoryToIndices,
+        tacticTotals: reverseMapResult.tacticTotals,
+        dimension: 'continuity',
+      })
+    : actionableFindings;
+
+  return { status, summary, items: pipelines, actionableFindings: enrichedFindings };
 };
 
 const buildContinuitySummary = (

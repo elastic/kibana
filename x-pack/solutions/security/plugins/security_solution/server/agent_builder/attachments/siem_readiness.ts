@@ -24,11 +24,32 @@ export const SIEM_READINESS_ATTACHMENT_ID = 'security.siem_readiness';
 
 // ---- Shared sub-schemas ----
 
+const affectedRuleSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+});
+
+const affectedTacticSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  totalRules: z.number(),
+  affectedRulesCount: z.number(),
+});
+
+const recommendedActionSchema = z.object({
+  label: z.string(),
+  href: z.string(),
+});
+
 const actionableFindingSchema = z.object({
   category: z.string().optional(),
-  severity: z.enum(['critical', 'warning']),
+  severity: z.enum(['CRITICAL', 'WARNING', 'INFORMATIONAL']),
   message: z.string(),
   resource: z.string(),
+  affectedRules: z.array(affectedRuleSchema).optional(),
+  affectedTactics: z.array(affectedTacticSchema).optional(),
+  affectedPlatform: z.string().optional(),
+  recommendedActions: z.array(recommendedActionSchema).optional(),
 });
 
 // ---- Coverage ----
@@ -121,9 +142,49 @@ const STATUS_LABELS: Record<string, string> = {
   healthy: 'Healthy',
   actionsRequired: 'Actions Required',
   noData: 'No Data',
+  CRITICAL: 'Critical',
+  WARNING: 'Warning',
+  INFORMATIONAL: 'Informational',
 };
 
 const formatStatus = (status: string): string => STATUS_LABELS[status] ?? status;
+
+const formatFindingWithBlastRadius = (f: z.infer<typeof actionableFindingSchema>): string[] => {
+  const lines: string[] = [];
+  lines.push(`  [${f.severity}] ${f.message}`);
+
+  if (f.affectedRules && f.affectedRules.length > 0) {
+    lines.push(`    Affected Rules (${f.affectedRules.length}):`);
+    f.affectedRules.slice(0, 5).forEach((rule) => {
+      lines.push(`      - ${rule.name}`);
+    });
+    if (f.affectedRules.length > 5) {
+      lines.push(`      ... and ${f.affectedRules.length - 5} more`);
+    }
+  }
+
+  if (f.affectedTactics && f.affectedTactics.length > 0) {
+    lines.push(`    Affected MITRE Tactics:`);
+    f.affectedTactics.forEach((tactic) => {
+      lines.push(
+        `      - ${tactic.name} (${tactic.affectedRulesCount}/${tactic.totalRules} rules)`
+      );
+    });
+  }
+
+  if (f.affectedPlatform) {
+    lines.push(`    Platform: ${f.affectedPlatform}`);
+  }
+
+  if (f.recommendedActions && f.recommendedActions.length > 0) {
+    lines.push(`    Actions:`);
+    f.recommendedActions.forEach((action) => {
+      lines.push(`      - ${action.label}: ${action.href}`);
+    });
+  }
+
+  return lines;
+};
 
 const formatCoverageForAgent = (data: CoveragePayload & { dimension: 'coverage' }): string => {
   const lines = [`SIEM Coverage — ${formatStatus(data.status)}`, data.summary];
@@ -135,7 +196,10 @@ const formatCoverageForAgent = (data: CoveragePayload & { dimension: 'coverage' 
   });
   if (data.actionableFindings?.length) {
     lines.push('Findings:');
-    data.actionableFindings.forEach((f) => lines.push(`  [${f.severity}] ${f.message}`));
+    data.actionableFindings.forEach((f) => {
+      const finding = f as z.infer<typeof actionableFindingSchema>;
+      lines.push(...formatFindingWithBlastRadius(finding));
+    });
   }
   return lines.join('\n');
 };
@@ -144,7 +208,10 @@ const formatQualityForAgent = (data: QualityPayload & { dimension: 'quality' }):
   const lines = [`SIEM Quality — ${formatStatus(data.status)}`, data.summary];
   if (data.actionableFindings?.length) {
     lines.push('Findings:');
-    data.actionableFindings.forEach((f) => lines.push(`  [${f.severity}] ${f.message}`));
+    data.actionableFindings.forEach((f) => {
+      const finding = f as z.infer<typeof actionableFindingSchema>;
+      lines.push(...formatFindingWithBlastRadius(finding));
+    });
   }
   return lines.join('\n');
 };
@@ -182,7 +249,10 @@ const formatContinuityForAgent = (
 
   if (data.actionableFindings?.length) {
     lines.push('Findings:');
-    data.actionableFindings.forEach((f) => lines.push(`  [${f.severity}] ${f.message}`));
+    data.actionableFindings.forEach((f) => {
+      const finding = f as z.infer<typeof actionableFindingSchema>;
+      lines.push(...formatFindingWithBlastRadius(finding));
+    });
   }
   return lines.join('\n');
 };
@@ -214,7 +284,10 @@ const formatRetentionForAgent = (data: RetentionPayload & { dimension: 'retentio
 
   if (data.actionableFindings?.length) {
     lines.push('Findings:');
-    data.actionableFindings.forEach((f) => lines.push(`  [${f.severity}] ${f.message}`));
+    data.actionableFindings.forEach((f) => {
+      const finding = f as z.infer<typeof actionableFindingSchema>;
+      lines.push(...formatFindingWithBlastRadius(finding));
+    });
   }
   return lines.join('\n');
 };
@@ -226,7 +299,14 @@ The attachment contains:
 - status: overall health verdict (healthy | actionsRequired | noData)
 - summary: pre-computed narrative summary
 - items: raw dimension data (pipelines, indices, data streams, or category groups)
-- actionableFindings: pre-shaped findings with category, severity, message, and resource
+- actionableFindings: pre-shaped findings with blast radius context
+
+Each actionable finding includes:
+- category, severity (CRITICAL | WARNING | INFORMATIONAL), message, resource
+- affectedRules: detection rules impacted by this finding
+- affectedTactics: MITRE ATT&CK tactics with rule counts (total vs affected)
+- affectedPlatform: primary platform impacted (e.g., AWS, Endpoint, Azure)
+- recommendedActions: links to relevant Kibana pages and case creation
 
 Field mapping (tool output camelCase → attachment snake_case):
 - pipeline name: name → pipeline_name
@@ -234,7 +314,7 @@ Field mapping (tool output camelCase → attachment snake_case):
 - retention days: retentionDays → retention_days
 - policy name: policyName → policy_name
 
-Use these findings to answer dimension-specific questions. Always structure your response using the four-section format: Status → Summary → Findings by dimension then by category → Suggested Actions.
+Use the blast radius information to prioritize findings by impact. Always structure your response using the four-section format: Status → Summary → Findings by dimension then by category → Suggested Actions.
 `;
 
 // ---- Attachment type definition ----

@@ -9,3 +9,5 @@ export { fetchPipelines } from './fetch_pipelines';
 export { fetchCategories } from './fetch_categories';
 export { fetchRetention } from './fetch_retention';
 export { fetchIndicesDocCounts } from './fetch_indices_doc_counts';
+export { fetchRulesReverseMap } from './fetch_rules_reverse_map';
+export type { FetchRulesReverseMapDeps } from './fetch_rules_reverse_map';

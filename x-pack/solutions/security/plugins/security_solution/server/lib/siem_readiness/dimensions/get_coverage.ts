@@ -8,8 +8,13 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
-import type { ActionableFinding, CoveragePayload, MainCategories } from '@kbn/siem-readiness';
-import { CATEGORY_ORDER, getCoverageStatus } from '@kbn/siem-readiness';
+import type {
+  ActionableFinding,
+  CoveragePayload,
+  MainCategories,
+  ReverseMapResult,
+} from '@kbn/siem-readiness';
+import { CATEGORY_ORDER, getCoverageStatus, enrichFindings } from '@kbn/siem-readiness';
 import { fetchCategories } from '../fetchers';
 
 const fetchHasEnabledDetectionRules = async (
@@ -34,10 +39,12 @@ export const getCoverage = async ({
   esClient,
   savedObjectsClient,
   logger,
+  reverseMapResult,
 }: {
   esClient: ElasticsearchClient;
   savedObjectsClient: SavedObjectsClientContract;
   logger: Logger;
+  reverseMapResult?: ReverseMapResult;
 }): Promise<CoveragePayload> => {
   const [categoriesData, hasDetectionRules] = await Promise.all([
     fetchCategories({ esClient, logger }),
@@ -53,7 +60,7 @@ export const getCoverage = async ({
   if (!hasDetectionRules) {
     actionableFindings.push({
       category: 'Endpoint',
-      severity: 'warning',
+      severity: 'WARNING',
       message: 'No enabled detection rules found. Enable rules to improve SIEM coverage.',
       resource: 'detection_rules',
     });
@@ -65,7 +72,7 @@ export const getCoverage = async ({
     if (totalDocs === 0) {
       actionableFindings.push({
         category: category as MainCategories,
-        severity: 'warning',
+        severity: 'WARNING',
         message: `No data ingested for the ${category} category.`,
         resource: category,
       });
@@ -78,11 +85,21 @@ export const getCoverage = async ({
     hasDetectionRules
   );
 
+  const enrichedFindings = reverseMapResult
+    ? enrichFindings(actionableFindings, {
+        indexToRules: reverseMapResult.indexToRules,
+        pipelineToIndices: reverseMapResult.pipelineToIndices,
+        categoryToIndices: reverseMapResult.categoryToIndices,
+        tacticTotals: reverseMapResult.tacticTotals,
+        dimension: 'coverage',
+      })
+    : actionableFindings;
+
   return {
     status,
     summary,
     items: categoriesData?.mainCategoriesMap ?? [],
-    actionableFindings,
+    actionableFindings: enrichedFindings,
   };
 };
 
