@@ -40,6 +40,20 @@ describe('query_builders', () => {
         },
       });
     });
+
+    it('filters by eval_run_id when filterField is specified', () => {
+      const query = buildDatasetExampleScoresQuery('dataset-123', 'run-abc', {
+        filterField: 'eval_run_id',
+      });
+      expect(query).toEqual({
+        bool: {
+          must: [
+            { term: { 'example.dataset.id': 'dataset-123' } },
+            { term: { eval_run_id: 'run-abc' } },
+          ],
+        },
+      });
+    });
   });
 
   describe('buildExperimentFilterQuery', () => {
@@ -73,6 +87,13 @@ describe('query_builders', () => {
     it('ignores empty string options', () => {
       const query = buildExperimentFilterQuery('experiment-123', { suiteId: '', modelId: '' });
       expect(query.bool.must).toHaveLength(1);
+    });
+
+    it('filters by eval_run_id when filterField is specified', () => {
+      const query = buildExperimentFilterQuery('run-abc', { filterField: 'eval_run_id' });
+      expect(query).toEqual({
+        bool: { must: [{ term: { eval_run_id: 'run-abc' } }] },
+      });
     });
   });
 
@@ -175,6 +196,16 @@ describe('query_builders', () => {
       });
     });
 
+    it('filters by buildId', () => {
+      const query = buildExperimentsListingFilterQuery({ buildId: 'bk-abc123' });
+      expect(query).toEqual({
+        bool: {
+          must_not: [preflightExclusion],
+          filter: [{ term: { 'ci.buildkite.build_id': 'bk-abc123' } }],
+        },
+      });
+    });
+
     it('combines all filters when all options are provided', () => {
       const query = buildExperimentsListingFilterQuery({
         suiteId: 'suite-a',
@@ -182,8 +213,9 @@ describe('query_builders', () => {
         branch: 'main',
         datasetId: 'dataset-1',
         datasetName: 'Dataset One',
+        buildId: 'bk-abc123',
       }) as { bool: { filter: unknown[]; must_not: unknown[] } };
-      expect(query.bool.filter).toHaveLength(5);
+      expect(query.bool.filter).toHaveLength(6);
       expect(query.bool.must_not).toEqual([preflightExclusion]);
     });
   });
@@ -194,9 +226,14 @@ describe('query_builders', () => {
       expect(agg.experiments.terms.size).toBe(75);
     });
 
-    it('includes cardinality aggregation for total_experiments', () => {
+    it('includes cardinality aggregation for total_experiments by eval_run_id', () => {
       const agg = buildExperimentsListingAggregation({ page: 1, perPage: 10 });
-      expect(agg.total_experiments).toEqual({ cardinality: { field: 'experiment_id' } });
+      expect(agg.total_experiments).toEqual({ cardinality: { field: 'eval_run_id' } });
+    });
+
+    it('groups by eval_run_id', () => {
+      const agg = buildExperimentsListingAggregation({ page: 1, perPage: 10 });
+      expect(agg.experiments.terms.field).toBe('eval_run_id');
     });
 
     it('sorts by latest_timestamp descending', () => {
@@ -210,6 +247,8 @@ describe('query_builders', () => {
       expect(subAggs).toEqual(
         expect.arrayContaining([
           'latest_timestamp',
+          'experiment_count',
+          'experiment_name',
           'suite_id',
           'dataset_id',
           'dataset_name',
@@ -231,9 +270,11 @@ describe('query_builders', () => {
 
   describe('parseExperimentsListingResponse', () => {
     const makeBucket = (overrides: Partial<Record<string, unknown>> = {}) => ({
-      key: 'experiment-1',
+      key: 'build-run-1',
       doc_count: 10,
       latest_timestamp: { value_as_string: '2025-01-01T00:00:00Z' },
+      experiment_count: { value: 3 },
+      experiment_name: { buckets: [{ key: 'My Experiment' }] },
       suite_id: { buckets: [{ key: 'suite-a' }] },
       dataset_id: { buckets: [{ key: 'dataset-1' }] },
       dataset_name: { buckets: [{ key: 'Dataset One' }] },
@@ -274,11 +315,14 @@ describe('query_builders', () => {
       expect(result.total).toBe(1);
       expect(result.experiments).toHaveLength(1);
       expect(result.experiments[0]).toEqual({
-        experiment_id: 'experiment-1',
+        eval_run_id: 'build-run-1',
+        experiment_id: 'build-run-1',
+        experiment_name: 'My Experiment',
+        experiment_count: 3,
         timestamp: '2025-01-01T00:00:00Z',
         suite_id: 'suite-a',
-        dataset_id: 'dataset-1',
-        dataset_name: 'Dataset One',
+        dataset_ids: ['dataset-1'],
+        dataset_names: ['Dataset One'],
         task_model: { id: 'gpt-4', family: 'gpt-4', provider: 'openai' },
         evaluator_model: { id: 'claude-3', family: 'claude-3', provider: 'anthropic' },
         git_branch: 'main',
@@ -290,24 +334,18 @@ describe('query_builders', () => {
 
     it('slices to the correct page window', () => {
       const buckets = Array.from({ length: 5 }, (_, i) =>
-        makeBucket({ key: `experiment-${i}`, doc_count: i + 1 })
+        makeBucket({ key: `build-run-${i}`, doc_count: i + 1 })
       );
       const aggs = { total_experiments: { value: 5 }, experiments: { buckets } };
 
       const page1 = parseExperimentsListingResponse(aggs, { page: 1, perPage: 2 });
-      expect(page1.experiments.map((e) => e.experiment_id)).toEqual([
-        'experiment-0',
-        'experiment-1',
-      ]);
+      expect(page1.experiments.map((e) => e.eval_run_id)).toEqual(['build-run-0', 'build-run-1']);
 
       const page2 = parseExperimentsListingResponse(aggs, { page: 2, perPage: 2 });
-      expect(page2.experiments.map((e) => e.experiment_id)).toEqual([
-        'experiment-2',
-        'experiment-3',
-      ]);
+      expect(page2.experiments.map((e) => e.eval_run_id)).toEqual(['build-run-2', 'build-run-3']);
 
       const page3 = parseExperimentsListingResponse(aggs, { page: 3, perPage: 2 });
-      expect(page3.experiments.map((e) => e.experiment_id)).toEqual(['experiment-4']);
+      expect(page3.experiments.map((e) => e.eval_run_id)).toEqual(['build-run-4']);
     });
 
     it('returns empty experiments for a page beyond results', () => {
@@ -320,7 +358,7 @@ describe('query_builders', () => {
       expect(result.total).toBe(1);
     });
 
-    it('falls back to null for missing git metadata', () => {
+    it('falls back to null for missing git metadata and empty arrays for missing datasets', () => {
       const bucket = makeBucket({
         git_branch: { buckets: [] },
         git_commit_sha: undefined,
@@ -331,8 +369,8 @@ describe('query_builders', () => {
       const result = parseExperimentsListingResponse(aggs, { page: 1, perPage: 25 });
       expect(result.experiments[0].git_branch).toBeNull();
       expect(result.experiments[0].git_commit_sha).toBeNull();
-      expect(result.experiments[0].dataset_id).toBeNull();
-      expect(result.experiments[0].dataset_name).toBeNull();
+      expect(result.experiments[0].dataset_ids).toEqual([]);
+      expect(result.experiments[0].dataset_names).toEqual([]);
     });
 
     it('defaults total_repetitions to 1 when missing', () => {

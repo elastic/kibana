@@ -16,21 +16,22 @@ export const queryKeys = {
     all: ['evals', 'remotes'] as const,
     list: () => ['evals', 'remotes', 'list'] as const,
   },
-  runs: {
-    all: ['evals', 'runs'] as const,
+  experiments: {
+    all: ['evals', 'experiments'] as const,
     list: (filters?: {
       suiteId?: string;
       modelId?: string;
       branch?: string;
+      buildId?: string;
       page?: number;
       perPage?: number;
-    }) => ['evals', 'runs', 'list', filters] as const,
-    detail: (runId: string) => ['evals', 'runs', 'detail', runId] as const,
-    scores: (runId: string) => ['evals', 'runs', 'scores', runId] as const,
-    datasetExamples: (runId: string, datasetId: string) =>
-      ['evals', 'runs', 'datasets', 'examples', runId, datasetId] as const,
-    compare: (runIdA: string, runIdB: string) =>
-      ['evals', 'runs', 'compare', runIdA, runIdB] as const,
+    }) => ['evals', 'experiments', 'list', filters] as const,
+    detail: (experimentId: string) => ['evals', 'experiments', 'detail', experimentId] as const,
+    scores: (experimentId: string) => ['evals', 'experiments', 'scores', experimentId] as const,
+    datasetExamples: (experimentId: string, datasetId: string) =>
+      ['evals', 'experiments', 'datasets', 'examples', experimentId, datasetId] as const,
+    compare: (experimentIdA: string, experimentIdB: string) =>
+      ['evals', 'experiments', 'compare', experimentIdA, experimentIdB] as const,
   },
   examples: {
     all: ['evals', 'examples'] as const,

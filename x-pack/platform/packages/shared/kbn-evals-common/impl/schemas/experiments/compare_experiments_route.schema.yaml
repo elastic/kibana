@@ -15,16 +15,28 @@ paths:
       parameters:
         - name: experiment_id_a
           in: query
-          required: true
+          required: false
           schema:
             type: string
-          description: First experiment ID
+          description: First experiment ID (use for individual experiment comparison)
         - name: experiment_id_b
           in: query
-          required: true
+          required: false
           schema:
             type: string
-          description: Second experiment ID
+          description: Second experiment ID (use for individual experiment comparison)
+        - name: eval_run_id_a
+          in: query
+          required: false
+          schema:
+            type: string
+          description: First eval run ID (use for suite run comparison)
+        - name: eval_run_id_b
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Second eval run ID (use for suite run comparison)
       responses:
         '200':
           description: Successful response

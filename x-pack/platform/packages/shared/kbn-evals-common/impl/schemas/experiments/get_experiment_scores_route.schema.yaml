@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Get Evaluation Experiment Scores API endpoint
-  version: "1"
+  version: '1'
 paths:
   /internal/evals/experiments/{experimentId}/scores:
     get:
@@ -30,8 +30,14 @@ paths:
           schema:
             type: string
           description: Filter by task model ID
+        - name: eval_run_id
+          in: query
+          required: false
+          schema:
+            type: string
+          description: When provided, fetches scores for all experiments in this suite run
       responses:
-        "200":
+        '200':
           description: Successful response
           content:
             application/json:

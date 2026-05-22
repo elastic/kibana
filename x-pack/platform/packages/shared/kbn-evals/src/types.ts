@@ -136,6 +136,12 @@ export interface EvalsExecutorClient {
   >(
     options: {
       /**
+       * Human-readable experiment name (e.g. the task name).
+       * Optional for single-dataset experiments (falls back to dataset.name).
+       * Required when passing an array of datasets.
+       */
+      name?: string;
+      /**
        * One or more datasets to run the experiment against.
        * When an array is provided, each dataset is processed independently
        * and a separate {@link RanExperiment} is returned per dataset.
@@ -183,6 +189,7 @@ export interface EvaluationRun {
 
 export interface RanExperiment {
   id: string;
+  experimentName: string;
   datasetId: string;
   datasetName: string;
   datasetDescription?: string;
@@ -199,6 +206,7 @@ export interface RanExperiment {
  */
 export interface EvaluationCompleteEvent {
   experimentId: string;
+  experimentName: string;
   datasetId: string;
   datasetName: string;
   taskRun: TaskRun;
@@ -233,6 +241,10 @@ export interface WorkerExperimentIdRef {
   current: string | undefined;
 }
 
+export interface WorkerEvalRunIdRef {
+  current: string | undefined;
+}
+
 export interface EvaluationSpecificWorkerFixtures {
   inferenceClient: BoundInferenceClient;
   evalsClient: EvalsClient;
@@ -244,6 +256,7 @@ export interface EvaluationSpecificWorkerFixtures {
   evaluators: DefaultEvaluators;
   fetch: HttpHandler;
   workerExperimentId: WorkerExperimentIdRef;
+  workerEvalRunId: WorkerEvalRunIdRef;
   connector: AvailableConnectorWithId;
   evaluationConnector: AvailableConnectorWithId;
   repetitions: number;

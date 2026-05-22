@@ -83,10 +83,7 @@ export function withPhoenixExecutor<T extends { extend: (...args: any[]) => any 
         },
         use: (client: EvalsExecutorClient) => Promise<void>
       ) => {
-        const experimentId = process.env.TEST_RUN_ID;
-        if (!experimentId) {
-          throw new Error('TEST_RUN_ID environment variable is required for the Phoenix executor');
-        }
+        const evalRunId = process.env.TEST_RUN_ID;
 
         const model = buildModelFromConnector(connector);
         const evaluatorModel = buildModelFromConnector(evaluationConnector);
@@ -100,43 +97,45 @@ export function withPhoenixExecutor<T extends { extend: (...args: any[]) => any 
           config: getPhoenixConfig(),
           log,
           model,
-          experimentId,
+          evalRunId,
           repetitions,
         });
 
         await use(phoenixClient);
 
         const experiments = await phoenixClient.getRanExperiments();
-        const ingestRequests = buildIngestRequest({
-          source: { kind: 'experiments', experiments },
-          experimentId,
-          taskModel: model,
-          evaluatorModel,
-          repetitions,
-          hostName,
-          gitMetadata,
-          suiteId,
-          buildkiteMetadata,
-          log,
-        });
 
-        try {
-          await Promise.all(
-            ingestRequests.map((ingestRequest) => evalsKbnClient.ingestScores(ingestRequest))
-          );
-        } catch (error) {
-          log.error(
-            `Failed to ingest evaluation results for experiment ID: ${experimentId}. ${String(
-              error
-            )}`
-          );
-          throw error;
+        for (const experiment of experiments) {
+          const ingestRequests = buildIngestRequest({
+            source: { kind: 'experiments', experiments: [experiment] },
+            taskModel: model,
+            evaluatorModel,
+            repetitions,
+            hostName,
+            gitMetadata,
+            suiteId,
+            buildkiteMetadata,
+            log,
+          });
+
+          try {
+            await Promise.all(
+              ingestRequests.map((ingestRequest) => evalsKbnClient.ingestScores(ingestRequest))
+            );
+          } catch (error) {
+            log.error(
+              `Failed to ingest evaluation results for experiment "${experiment.experimentName}" (${
+                experiment.id
+              }). ${String(error)}`
+            );
+            throw error;
+          }
+
+          await reportModelScore(evalsKbnClient, experiment.id, log, {
+            taskModelId: model.id,
+            suiteId,
+          });
         }
-
-        await reportModelScore(evalsKbnClient, experimentId, log, {
-          taskModelId: model.id,
-          suiteId,
-        });
       },
       { scope: 'worker' },
     ],

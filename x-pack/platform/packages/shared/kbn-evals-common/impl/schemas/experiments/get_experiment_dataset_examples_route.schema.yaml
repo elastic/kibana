@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Get Evaluation Experiment Dataset Examples API endpoint
-  version: "1"
+  version: '1'
 paths:
   /internal/evals/experiments/{experimentId}/datasets/{datasetId}/examples:
     get:
@@ -23,8 +23,14 @@ paths:
           required: true
           schema:
             type: string
+        - name: eval_run_id
+          in: query
+          required: false
+          schema:
+            type: string
+          description: When provided, fetches examples for all experiments in this suite run
       responses:
-        "200":
+        '200':
           description: Successful response
           content:
             application/json:

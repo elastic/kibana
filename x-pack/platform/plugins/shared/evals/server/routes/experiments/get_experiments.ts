@@ -44,6 +44,7 @@ export const registerGetExperimentsRoute = ({ router, logger }: RouteDependencie
             model_id: modelId,
             branch,
             dataset_id: datasetId,
+            build_id: buildId,
             page,
             per_page: perPage,
           } = request.query;
@@ -52,7 +53,13 @@ export const registerGetExperimentsRoute = ({ router, logger }: RouteDependencie
           const pagination = { page, perPage };
           const aggResponse = await evalsContext.evaluationScoreService.search({
             size: 0,
-            query: buildExperimentsListingFilterQuery({ suiteId, modelId, branch, datasetId }),
+            query: buildExperimentsListingFilterQuery({
+              suiteId,
+              modelId,
+              branch,
+              datasetId,
+              buildId,
+            }),
             aggs: buildExperimentsListingAggregation(pagination),
           });
 

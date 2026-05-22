@@ -24,8 +24,24 @@ import type {
 } from '../types';
 import { getCurrentTraceId, withEvaluatorSpan, withTaskSpan } from '../utils/tracing';
 
+const EXPERIMENT_UUID_NAMESPACE = 'c7e6c018-66dc-4511-b97d-046e2194d017';
+
 function computeDatasetId(name: string): string {
   return uuidv5(name, DATASET_UUID_NAMESPACE);
+}
+
+function computeExperimentId(
+  evalRunId: string | undefined,
+  experimentName: string,
+  modelId: string | undefined
+): string {
+  if (!evalRunId) {
+    return randomUUID();
+  }
+  return uuidv5(
+    `${evalRunId}::${experimentName}::${modelId ?? 'unknown'}`,
+    EXPERIMENT_UUID_NAMESPACE
+  );
 }
 
 export class KibanaEvalsClient implements EvalsExecutorClient {
@@ -35,13 +51,14 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
     private readonly options: {
       log: SomeDevLog;
       model: Model;
-      experimentId: string;
+      evalRunId?: string;
       repetitions?: number;
       upsertDataset?: (dataset: EvaluationDataset) => Promise<void>;
       getDatasetByName?: (
         datasetName: string
       ) => Promise<EvaluationDataset | EvaluationDatasetWithId | null>;
       onEvaluationComplete?: OnEvaluationComplete;
+      onExperimentStart?: (experimentId: string) => void;
     }
   ) {}
 
@@ -79,12 +96,14 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
     TTaskOutput extends TaskOutput = TaskOutput
   >(
     {
+      name,
       dataset,
       task,
       metadata: experimentMetadata,
       concurrency,
       trustUpstreamDataset = false,
     }: {
+      name?: string;
       dataset: TEvaluationDataset | TEvaluationDataset[];
       metadata?: Record<string, unknown>;
       task: ExperimentTask<TEvaluationDataset['examples'][number], TTaskOutput>;
@@ -95,12 +114,27 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
   ): Promise<RanExperiment | RanExperiment[]> {
     const datasets = Array.isArray(dataset) ? dataset : [dataset];
 
+    if (datasets.length > 1 && !name) {
+      throw new Error(
+        'Experiment name is required when passing multiple datasets. Provide a `name` option to runExperiment().'
+      );
+    }
+
+    const experimentName = name ?? datasets[0].name;
+
     if (datasets.length > 1) {
       const results: RanExperiment[] = [];
       for (const ds of datasets) {
         results.push(
           await this.runSingleDatasetExperiment(
-            { dataset: ds, task, metadata: experimentMetadata, concurrency, trustUpstreamDataset },
+            {
+              experimentName,
+              dataset: ds,
+              task,
+              metadata: experimentMetadata,
+              concurrency,
+              trustUpstreamDataset,
+            },
             evaluators
           )
         );
@@ -110,6 +144,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
 
     return this.runSingleDatasetExperiment(
       {
+        experimentName,
         dataset: datasets[0],
         task,
         metadata: experimentMetadata,
@@ -125,12 +160,14 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
     TTaskOutput extends TaskOutput = TaskOutput
   >(
     {
+      experimentName,
       dataset,
       task,
       metadata: experimentMetadata,
       concurrency,
       trustUpstreamDataset = false,
     }: {
+      experimentName: string;
       dataset: TEvaluationDataset;
       metadata?: Record<string, unknown>;
       task: ExperimentTask<TEvaluationDataset['examples'][number], TTaskOutput>;
@@ -144,7 +181,12 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
       await this.options.upsertDataset?.(resolvedDataset);
 
       const datasetId = computeDatasetId(resolvedDataset.name);
-      const experimentId = randomUUID();
+      const experimentId = computeExperimentId(
+        this.options.evalRunId,
+        experimentName,
+        this.options.model.id
+      );
+      this.options.onExperimentStart?.(experimentId);
       const repetitions = this.options.repetitions ?? 3;
       const runConcurrency = Math.max(1, concurrency ?? 5);
       const limiter = pLimit(runConcurrency);
@@ -155,7 +197,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
       const runJobs: Array<Promise<void>> = [];
 
       this.options.log.info(
-        `🧪 Starting experiment "${this.options.experimentId} - Dataset: ${resolvedDataset.name}" with ${evaluators.length} evaluators and ${runConcurrency} concurrent runs`
+        `🧪 Starting experiment "${experimentName} - Dataset: ${resolvedDataset.name}" with ${evaluators.length} evaluators and ${runConcurrency} concurrent runs`
       );
 
       for (let rep = 0; rep < repetitions; rep++) {
@@ -243,6 +285,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                   try {
                     await this.options.onEvaluationComplete({
                       experimentId,
+                      experimentName,
                       datasetId,
                       datasetName: resolvedDataset.name,
                       taskRun: runs[runKey],
@@ -251,7 +294,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                     });
                   } catch (err) {
                     this.options.log.warning(
-                      `Incremental score export failed for experiment "${this.options.experimentId}" (example=${exampleIndex}, repetition=${rep}): ${err}`
+                      `Incremental score export failed for experiment "${experimentName}" (example=${exampleIndex}, repetition=${rep}): ${err}`
                     );
                   }
                 }
@@ -266,6 +309,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
 
       const ranExperiment: RanExperiment = {
         id: experimentId,
+        experimentName,
         datasetId,
         datasetName: resolvedDataset.name,
         datasetDescription: resolvedDataset.description,
@@ -274,7 +318,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
         experimentMetadata: {
           ...experimentMetadata,
           model: this.options.model,
-          experimentId: this.options.experimentId,
+          evalRunId: this.options.evalRunId,
         },
       };
 

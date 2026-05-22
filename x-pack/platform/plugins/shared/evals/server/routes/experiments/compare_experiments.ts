@@ -52,19 +52,38 @@ export const registerCompareExperimentsRoute = ({ router, logger }: RouteDepende
       },
       async (context, request, response) => {
         try {
-          const { experiment_id_a: experimentIdA, experiment_id_b: experimentIdB } = request.query;
+          const {
+            experiment_id_a: experimentIdA,
+            experiment_id_b: experimentIdB,
+            eval_run_id_a: evalRunIdA,
+            eval_run_id_b: evalRunIdB,
+          } = request.query;
+
+          const idA = evalRunIdA ?? experimentIdA;
+          const idB = evalRunIdB ?? experimentIdB;
+          const filterField = evalRunIdA || evalRunIdB ? 'eval_run_id' : 'experiment_id';
+
+          if (!idA || !idB) {
+            return response.badRequest({
+              body: {
+                message:
+                  'Provide either experiment_id_a + experiment_id_b or eval_run_id_a + eval_run_id_b',
+              },
+            });
+          }
+
           const evalsContext = await context.evals;
 
           const [responseA, responseB] = await Promise.all([
             evalsContext.evaluationScoreService.search({
-              query: buildExperimentFilterQuery(experimentIdA),
+              query: buildExperimentFilterQuery(idA, { filterField }),
               sort: SCORES_SORT_ORDER,
               size: MAX_SCORES_PER_EXPERIMENT,
               _source: COMPARE_SOURCE_FIELDS,
               track_total_hits: true,
             }),
             evalsContext.evaluationScoreService.search({
-              query: buildExperimentFilterQuery(experimentIdB),
+              query: buildExperimentFilterQuery(idB, { filterField }),
               sort: SCORES_SORT_ORDER,
               size: MAX_SCORES_PER_EXPERIMENT,
               _source: COMPARE_SOURCE_FIELDS,
@@ -86,7 +105,7 @@ export const registerCompareExperimentsRoute = ({ router, logger }: RouteDepende
           if (truncatedA || truncatedB) {
             logger.warn(
               `Compare experiments: results truncated to ${MAX_SCORES_PER_EXPERIMENT} scores per experiment. ` +
-                `Experiment A (${experimentIdA}): ${totalHitsA} total, Experiment B (${experimentIdB}): ${totalHitsB} total.`
+                `A (${idA}): ${totalHitsA} total, B (${idB}): ${totalHitsB} total.`
             );
           }
 
@@ -100,12 +119,12 @@ export const registerCompareExperimentsRoute = ({ router, logger }: RouteDepende
 
           if (scoresA.length === 0) {
             return response.notFound({
-              body: { message: `No scores found for experiment: ${experimentIdA}` },
+              body: { message: `No scores found for ${filterField}: ${idA}` },
             });
           }
           if (scoresB.length === 0) {
             return response.notFound({
-              body: { message: `No scores found for experiment: ${experimentIdB}` },
+              body: { message: `No scores found for ${filterField}: ${idB}` },
             });
           }
 

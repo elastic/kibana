@@ -27,6 +27,21 @@ export const EvaluationExperimentDatasetExample = lazySchema(() =>
 );
 export type EvaluationExperimentDatasetExample = z.infer<typeof EvaluationExperimentDatasetExample>;
 
+export const GetEvaluationExperimentDatasetExamplesRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * When provided, fetches examples for all experiments in this suite run
+     */
+    eval_run_id: z.string().optional(),
+  })
+);
+export type GetEvaluationExperimentDatasetExamplesRequestQuery = z.infer<
+  typeof GetEvaluationExperimentDatasetExamplesRequestQuery
+>;
+export type GetEvaluationExperimentDatasetExamplesRequestQueryInput = z.input<
+  typeof GetEvaluationExperimentDatasetExamplesRequestQuery
+>;
+
 export const GetEvaluationExperimentDatasetExamplesRequestParams = lazySchema(() =>
   z.object({
     experimentId: z.string(),

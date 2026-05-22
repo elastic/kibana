@@ -41,10 +41,16 @@ export const registerGetExperimentScoresRoute = ({ router, logger }: RouteDepend
       async (context, request, response) => {
         try {
           const { experimentId } = request.params;
-          const { suite_id: suiteId, model_id: modelId } = request.query;
+          const { suite_id: suiteId, model_id: modelId, eval_run_id: evalRunId } = request.query;
           const evalsContext = await context.evals;
 
-          const query = buildExperimentFilterQuery(experimentId, { suiteId, modelId });
+          const filterId = evalRunId ?? experimentId;
+          const filterField = evalRunId ? 'eval_run_id' : 'experiment_id';
+          const query = buildExperimentFilterQuery(filterId, {
+            suiteId,
+            modelId,
+            filterField,
+          });
 
           const searchResponse = await evalsContext.evaluationScoreService.search({
             query,

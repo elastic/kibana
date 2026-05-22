@@ -21,6 +21,8 @@ import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
 
 interface EvalDocSource {
+  experiment_name?: string;
+  suite?: { id?: string };
   task?: { model?: { id?: string; family?: string; provider?: string } };
   evaluator?: { model?: { id?: string; family?: string; provider?: string } };
   experiment_metadata?: {
@@ -65,10 +67,16 @@ export const registerGetExperimentRoute = ({ router, logger }: RouteDependencies
       async (context, request, response) => {
         try {
           const { experimentId } = request.params;
-          const { suite_id: suiteId, model_id: modelId } = request.query;
+          const { suite_id: suiteId, model_id: modelId, eval_run_id: evalRunId } = request.query;
           const evalsContext = await context.evals;
 
-          const query = buildExperimentFilterQuery(experimentId, { suiteId, modelId });
+          const filterId = evalRunId ?? experimentId;
+          const filterField = evalRunId ? 'eval_run_id' : 'experiment_id';
+          const query = buildExperimentFilterQuery(filterId, {
+            suiteId,
+            modelId,
+            filterField,
+          });
 
           const metadataResponse = await evalsContext.evaluationScoreService.search({
             query,
@@ -105,6 +113,8 @@ export const registerGetExperimentRoute = ({ router, logger }: RouteDependencies
           return response.ok({
             body: {
               experiment_id: experimentId,
+              experiment_name: firstDoc.experiment_name ?? null,
+              suite_id: firstDoc.suite?.id ?? null,
               timestamp: firstDoc['@timestamp'],
               task_model: toModelDisplay(firstDoc.task?.model),
               evaluator_model: toModelDisplay(firstDoc.evaluator?.model),

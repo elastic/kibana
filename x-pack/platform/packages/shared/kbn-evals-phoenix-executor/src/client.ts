@@ -41,7 +41,7 @@ export class KibanaPhoenixClient implements EvalsExecutorClient {
       config: PhoenixConfig;
       log: SomeDevLog;
       model: Model;
-      experimentId: string;
+      evalRunId?: string;
       repetitions?: number;
     }
   ) {
@@ -164,6 +164,7 @@ export class KibanaPhoenixClient implements EvalsExecutorClient {
 
   async runExperiment<TEvaluationDataset extends EvaluationDataset, TTaskOutput extends TaskOutput>(
     options: {
+      name?: string;
       dataset: TEvaluationDataset;
       metadata?: Record<string, unknown>;
       task: ExperimentTask<TEvaluationDataset['examples'][number], TTaskOutput>;
@@ -178,12 +179,14 @@ export class KibanaPhoenixClient implements EvalsExecutorClient {
   ): Promise<RanExperiment> {
     return withInferenceContext(async () => {
       const {
+        name,
         dataset,
         task,
         metadata: experimentMetadata,
         concurrency,
         trustUpstreamDataset,
       } = options;
+      const experimentName = name ?? dataset.name;
 
       const datasetId = trustUpstreamDataset
         ? (await this.getDatasetByName(dataset.name)).id
@@ -194,13 +197,13 @@ export class KibanaPhoenixClient implements EvalsExecutorClient {
       const ran = await experiments.runExperiment({
         client: this.phoenixClient,
         dataset: { datasetId },
-        experimentName: `Experiment: ${this.options.experimentId} - Dataset: ${dataset.name}`,
+        experimentName: `Experiment: ${experimentName} - Dataset: ${dataset.name}`,
         // Phoenix expects its own task/evaluator types. Keep the adapter boundary here.
         task: task as any,
         experimentMetadata: {
           ...experimentMetadata,
           model: this.options.model,
-          experimentId: this.options.experimentId,
+          evalRunId: this.options.evalRunId,
         },
         setGlobalTracerProvider: false,
         evaluators: evaluators.map((evaluator) => {
@@ -276,6 +279,7 @@ export class KibanaPhoenixClient implements EvalsExecutorClient {
 
       const ranExperiment: RanExperiment = {
         id: ran.id ?? '',
+        experimentName,
         datasetId: ran.datasetId,
         datasetName: dataset.name,
         datasetDescription: dataset.description,

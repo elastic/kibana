@@ -30,6 +30,7 @@ const createEvent = (
   overrides: Partial<EvaluationCompleteEvent> = {}
 ): EvaluationCompleteEvent => ({
   experimentId: 'exp-1',
+  experimentName: 'test-experiment',
   datasetId: 'dataset-1',
   datasetName: 'Dataset 1',
   taskRun: {
@@ -60,7 +61,6 @@ const createEvent = (
 describe('buildIngestRequest', () => {
   it('builds a single request for a single event source', () => {
     const requests = buildIngestRequest({
-      experimentId: 'experiment-123',
       taskModel,
       evaluatorModel,
       repetitions: 2,
@@ -73,7 +73,8 @@ describe('buildIngestRequest', () => {
 
     expect(requests).toHaveLength(1);
     expect(requests[0]).toMatchObject({
-      experiment_id: 'experiment-123',
+      experiment_id: 'exp-1',
+      experiment_name: 'test-experiment',
       suite_id: 'suite-a',
       task_model: taskModel,
       evaluator_model: evaluatorModel,
@@ -99,6 +100,7 @@ describe('buildIngestRequest', () => {
     const experiments: RanExperiment[] = [
       {
         id: 'exp-1',
+        experimentName: 'experiment-a',
         datasetId: 'dataset-1',
         datasetName: 'Dataset 1',
         runs: {
@@ -108,6 +110,7 @@ describe('buildIngestRequest', () => {
       },
       {
         id: 'exp-2',
+        experimentName: 'experiment-b',
         datasetId: 'dataset-2',
         datasetName: 'Dataset 2',
         runs: {
@@ -127,7 +130,6 @@ describe('buildIngestRequest', () => {
     ];
 
     const requests = buildIngestRequest({
-      experimentId: 'experiment-456',
       taskModel,
       evaluatorModel,
       repetitions: 1,
@@ -137,6 +139,8 @@ describe('buildIngestRequest', () => {
     });
 
     expect(requests).toHaveLength(2);
+    expect(requests[0].experiment_id).toBe('exp-1');
+    expect(requests[1].experiment_id).toBe('exp-2');
   });
 
   it('chunks scores into requests of at most 1000 items', () => {
@@ -157,7 +161,6 @@ describe('buildIngestRequest', () => {
     );
 
     const requests = buildIngestRequest({
-      experimentId: 'experiment-789',
       taskModel,
       evaluatorModel,
       repetitions: 3,
@@ -168,6 +171,7 @@ describe('buildIngestRequest', () => {
         experiments: [
           {
             id: 'exp-chunk',
+            experimentName: 'chunk-experiment',
             datasetId: 'dataset-chunk',
             datasetName: 'Dataset Chunk',
             runs,
@@ -185,7 +189,6 @@ describe('buildIngestRequest', () => {
   it('skips scores and logs warning when model id is missing', () => {
     const log = createLog();
     const requests = buildIngestRequest({
-      experimentId: 'experiment-000',
       taskModel: { ...taskModel, id: '' },
       evaluatorModel,
       repetitions: 1,
@@ -197,6 +200,7 @@ describe('buildIngestRequest', () => {
         experiments: [
           {
             id: 'exp-skip',
+            experimentName: 'skip-experiment',
             datasetId: 'dataset-skip',
             datasetName: 'Dataset Skip',
             runs: {
@@ -220,8 +224,6 @@ describe('buildIngestRequest', () => {
     });
 
     expect(requests).toEqual([]);
-    expect(log.warning).toHaveBeenCalledWith(
-      'Skipped 2 score(s) for experiment "experiment-000" due to missing model id'
-    );
+    expect(log.warning).toHaveBeenCalledWith('Skipped 2 score(s) due to missing model id');
   });
 });

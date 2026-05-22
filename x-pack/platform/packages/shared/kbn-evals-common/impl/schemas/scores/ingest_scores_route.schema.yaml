@@ -21,6 +21,10 @@ paths:
               properties:
                 experiment_id:
                   type: string
+                experiment_name:
+                  type: string
+                eval_run_id:
+                  type: string
                 suite_id:
                   type: string
                 task_model:

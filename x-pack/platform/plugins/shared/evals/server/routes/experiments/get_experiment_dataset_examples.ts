@@ -13,6 +13,7 @@ import {
   buildDatasetExampleScoresQuery,
   SCORES_SORT_ORDER,
   GetEvaluationExperimentDatasetExamplesRequestParams,
+  GetEvaluationExperimentDatasetExamplesRequestQuery,
   type EvaluationScoreDocument,
   type GetEvaluationExperimentDatasetExamplesResponse,
 } from '@kbn/evals-common';
@@ -57,16 +58,20 @@ export const registerGetExperimentDatasetExamplesRoute = ({
             params: buildRouteValidationWithZod(
               GetEvaluationExperimentDatasetExamplesRequestParams
             ),
+            query: buildRouteValidationWithZod(GetEvaluationExperimentDatasetExamplesRequestQuery),
           },
         },
       },
       async (context, request, response) => {
         try {
           const { experimentId, datasetId } = request.params;
+          const { eval_run_id: evalRunId } = request.query;
           const evalsContext = await context.evals;
 
+          const filterId = evalRunId ?? experimentId;
+          const filterField = evalRunId ? 'eval_run_id' : 'experiment_id';
           const searchResponse = await evalsContext.evaluationScoreService.search({
-            query: buildDatasetExampleScoresQuery(datasetId, experimentId),
+            query: buildDatasetExampleScoresQuery(datasetId, filterId, { filterField }),
             sort: SCORES_SORT_ORDER,
             size: MAX_SCORES_PER_QUERY,
           });

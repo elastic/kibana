@@ -21,13 +21,13 @@ type BuildIngestRequestSource =
   | { kind: 'experiments'; experiments: RanExperiment[] };
 
 interface BuildIngestRequestArgs {
-  experimentId: string;
   taskModel: InferenceModel;
   evaluatorModel: InferenceModel;
   repetitions: number;
   hostName: string;
   gitMetadata: GitMetadata;
   suiteId?: string;
+  evalRunId?: string;
   buildkiteMetadata?: BuildkiteCiMetadata;
   log?: Pick<SomeDevLog, 'warning'>;
   source: BuildIngestRequestSource;
@@ -35,6 +35,7 @@ interface BuildIngestRequestArgs {
 
 interface BuildableScore {
   experimentId: string;
+  experimentName?: string;
   score: IngestScore;
 }
 
@@ -123,6 +124,7 @@ function getEventsFromExperiment(experiment: RanExperiment): EvaluationCompleteE
 
     events.push({
       experimentId: experiment.id,
+      experimentName: experiment.experimentName,
       datasetId: experiment.datasetId,
       datasetName,
       taskRun,
@@ -136,54 +138,62 @@ function getEventsFromExperiment(experiment: RanExperiment): EvaluationCompleteE
 
 function buildScores(source: BuildIngestRequestSource): BuildableScore[] {
   if (source.kind === 'event') {
-    return [{ experimentId: source.event.experimentId, score: buildScorePayload(source.event) }];
+    return [
+      {
+        experimentId: source.event.experimentId,
+        experimentName: source.event.experimentName,
+        score: buildScorePayload(source.event),
+      },
+    ];
   }
 
   return source.experiments.flatMap((experiment) =>
     getEventsFromExperiment(experiment).map((event) => ({
       experimentId: event.experimentId,
+      experimentName: event.experimentName,
       score: buildScorePayload(event),
     }))
   );
 }
 
 export function buildIngestRequest({
-  experimentId: topLevelExperimentId,
   taskModel,
   evaluatorModel,
   repetitions,
   hostName,
   gitMetadata,
   suiteId,
+  evalRunId,
   buildkiteMetadata,
   log,
   source,
 }: BuildIngestRequestArgs): IngestScoresRequestBodyInput[] {
   const scores = buildScores(source);
-  const requestsByExperiment = new Map<string, IngestScore[]>();
+  const requestsByExperiment = new Map<
+    string,
+    { experimentName?: string; scores: IngestScore[] }
+  >();
   const taskModelId = taskModel.id;
   const evaluatorModelId = evaluatorModel.id;
 
   if (!taskModelId || !evaluatorModelId) {
     if (scores.length > 0) {
-      log?.warning?.(
-        `Skipped ${scores.length} score(s) for experiment "${topLevelExperimentId}" due to missing model id`
-      );
+      log?.warning?.(`Skipped ${scores.length} score(s) due to missing model id`);
     }
     return [];
   }
 
-  for (const { experimentId, score } of scores) {
-    const existingScores = requestsByExperiment.get(experimentId) ?? [];
-    existingScores.push(score);
-    requestsByExperiment.set(experimentId, existingScores);
+  for (const { experimentId, experimentName, score } of scores) {
+    const existing = requestsByExperiment.get(experimentId) ?? { experimentName, scores: [] };
+    existing.scores.push(score);
+    requestsByExperiment.set(experimentId, existing);
   }
 
   const requests: IngestScoresRequestBodyInput[] = [];
   const ingestTaskModel = toTaskModel(taskModel, taskModelId);
   const ingestEvaluatorModel = toEvaluatorModel(evaluatorModel, evaluatorModelId);
 
-  for (const [, experimentScores] of requestsByExperiment) {
+  for (const [experimentId, { experimentName, scores: experimentScores }] of requestsByExperiment) {
     for (let offset = 0; offset < experimentScores.length; offset += MAX_INGEST_BATCH_SIZE) {
       const chunk = experimentScores.slice(offset, offset + MAX_INGEST_BATCH_SIZE);
       if (chunk.length === 0) {
@@ -191,7 +201,9 @@ export function buildIngestRequest({
       }
 
       requests.push({
-        experiment_id: topLevelExperimentId,
+        experiment_id: experimentId,
+        ...(experimentName != null && { experiment_name: experimentName }),
+        eval_run_id: evalRunId ?? experimentId,
         ...(suiteId != null && { suite_id: suiteId }),
         task_model: ingestTaskModel,
         evaluator_model: ingestEvaluatorModel,

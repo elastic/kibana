@@ -26,27 +26,27 @@ import {
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import type { EvaluationExperimentSummary } from '@kbn/evals-common';
-import { useEvaluationRuns } from '../../hooks/use_evals_api';
+import { useEvaluationExperiments } from '../../hooks/use_evals_api';
 import { resolvePrUrl } from '../../utils/pr_url';
 import * as i18n from './translations';
 
-export const RunsListPage: React.FC = () => {
+export const ExperimentsListPage: React.FC = () => {
   const history = useHistory();
   const { euiTheme } = useEuiTheme();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [searchText, setSearchText] = useState('');
   const [suiteIdFilter, setSuiteIdFilter] = useState('');
-  const [selectedRuns, setSelectedRuns] = useState<EvaluationExperimentSummary[]>([]);
+  const [selectedExperiments, setSelectedExperiments] = useState<EvaluationExperimentSummary[]>([]);
 
-  const { data, isLoading, error, refetch } = useEvaluationRuns({
+  const { data, isLoading, error, refetch } = useEvaluationExperiments({
     page: pageIndex + 1,
     perPage: pageSize,
     branch: searchText || undefined,
     suiteId: suiteIdFilter || undefined,
   });
 
-  const { data: suiteFilterData } = useEvaluationRuns({
+  const { data: suiteFilterData } = useEvaluationExperiments({
     page: 1,
     perPage: 100,
     branch: searchText || undefined,
@@ -69,31 +69,55 @@ export const RunsListPage: React.FC = () => {
     return options;
   }, [suiteFilterData?.experiments]);
 
+  const navigateToDetail = useCallback(
+    (item: EvaluationExperimentSummary) => {
+      const evalRunId = item.eval_run_id ?? item.experiment_id;
+      const expPath = encodeURIComponent(item.experiment_id);
+      const brParam = encodeURIComponent(evalRunId);
+      history.push(`/experiments/${expPath}?eval_run_id=${brParam}`);
+    },
+    [history]
+  );
+
   const columns: Array<EuiBasicTableColumn<EvaluationExperimentSummary>> = useMemo(
     () => [
       {
-        field: 'experiment_id',
-        name: i18n.COLUMN_RUN_ID,
+        field: 'experiment_name',
+        name: i18n.COLUMN_NAME,
         sortable: true,
         truncateText: true,
         width: '200px',
-        render: (experimentId: string) => (
-          <EuiLink onClick={() => history.push(`/runs/${encodeURIComponent(experimentId)}`)}>
-            {experimentId.slice(0, 12)}...
-          </EuiLink>
-        ),
+        render: (_name: string | null | undefined, item: EvaluationExperimentSummary) => {
+          const isSuiteRun = !!item.suite_id;
+          const displayName = isSuiteRun
+            ? item.suite_id ?? item.experiment_name ?? item.experiment_id.slice(0, 12)
+            : item.experiment_name ?? item.experiment_id.slice(0, 12);
+          const tooltipId = item.eval_run_id ?? item.experiment_id;
+          const link = <EuiLink onClick={() => navigateToDetail(item)}>{displayName}</EuiLink>;
+          return <EuiToolTip content={tooltipId}>{link}</EuiToolTip>;
+        },
+      },
+      {
+        field: 'experiment_count',
+        name: i18n.COLUMN_EXPERIMENTS,
+        width: '150px',
+        render: (count: number | undefined, item: EvaluationExperimentSummary) => {
+          const c = count ?? 1;
+          if (c > 1 || !!item.suite_id) {
+            return (
+              <EuiBadge color="hollow">
+                {c} {i18n.getExperimentsBadge(c)}
+              </EuiBadge>
+            );
+          }
+          return '-';
+        },
       },
       {
         field: 'timestamp',
         name: i18n.COLUMN_TIMESTAMP,
         sortable: true,
         render: (timestamp: string) => (timestamp ? new Date(timestamp).toLocaleString() : '-'),
-      },
-      {
-        field: 'suite_id',
-        name: i18n.COLUMN_SUITE,
-        render: (suiteId: string | undefined) =>
-          suiteId ? <EuiBadge color="hollow">{suiteId}</EuiBadge> : '-',
       },
       {
         field: 'task_model',
@@ -157,7 +181,7 @@ export const RunsListPage: React.FC = () => {
         },
       },
     ],
-    [history]
+    [navigateToDetail]
   );
 
   const pagination = {
@@ -174,45 +198,57 @@ export const RunsListPage: React.FC = () => {
     }
   };
 
-  const hasSelection = selectedRuns.length > 0;
-  const lockedSuiteId = hasSelection ? selectedRuns[0].suite_id : undefined;
-  const selectedRunIds = useMemo(
-    () => new Set(selectedRuns.map((r) => r.experiment_id)),
-    [selectedRuns]
+  const hasSelection = selectedExperiments.length > 0;
+  const lockedSuiteId = hasSelection ? selectedExperiments[0].suite_id : undefined;
+  const selectedEvalRunIds = useMemo(
+    () => new Set(selectedExperiments.map((r) => r.eval_run_id ?? r.experiment_id)),
+    [selectedExperiments]
   );
-  const selectionFull = selectedRuns.length >= 2;
+  const selectionFull = selectedExperiments.length >= 2;
 
   const selection: EuiTableSelectionType<EvaluationExperimentSummary> = useMemo(
     () => ({
-      onSelectionChange: (items: EvaluationExperimentSummary[]) => setSelectedRuns(items),
-      selectable: (run: EvaluationExperimentSummary) => {
-        if (selectedRunIds.has(run.experiment_id)) return true;
+      onSelectionChange: (items: EvaluationExperimentSummary[]) => setSelectedExperiments(items),
+      selectable: (experiment: EvaluationExperimentSummary) => {
+        const evalRunId = experiment.eval_run_id ?? experiment.experiment_id;
+        if (selectedEvalRunIds.has(evalRunId)) return true;
         if (selectionFull) return false;
-        return !hasSelection || run.suite_id === lockedSuiteId;
+        if (!hasSelection) return true;
+        return experiment.suite_id === lockedSuiteId;
       },
-      selectableMessage: (selectable: boolean, run: EvaluationExperimentSummary) => {
+      selectableMessage: (selectable: boolean, experiment: EvaluationExperimentSummary) => {
         if (selectable) return '';
-        if (selectionFull && !selectedRunIds.has(run.experiment_id))
+        const evalRunId = experiment.eval_run_id ?? experiment.experiment_id;
+        if (selectionFull && !selectedEvalRunIds.has(evalRunId))
           return i18n.COMPARE_MAX_SELECTED_HINT;
         return i18n.COMPARE_DIFFERENT_SUITE_HINT;
       },
     }),
-    [hasSelection, lockedSuiteId, selectedRunIds, selectionFull]
+    [hasSelection, lockedSuiteId, selectedEvalRunIds, selectionFull]
   );
 
-  const totalRuns = data?.total ?? 0;
-  const showCompareControls = totalRuns >= 2;
-  const canCompare = selectedRuns.length === 2;
+  const totalExperiments = data?.total ?? 0;
+  const showCompareControls = totalExperiments >= 2;
+  const canCompare = selectedExperiments.length === 2;
 
   const handleCompare = useCallback(() => {
     if (!canCompare) return;
-    const [runA, runB] = selectedRuns;
-    history.push(
-      `/compare?runA=${encodeURIComponent(runA.experiment_id)}&runB=${encodeURIComponent(
-        runB.experiment_id
-      )}`
-    );
-  }, [canCompare, selectedRuns, history]);
+    const [a, b] = selectedExperiments;
+    const isSuiteRun = !!a.suite_id || !!b.suite_id;
+    if (isSuiteRun) {
+      const idA = a.eval_run_id ?? a.experiment_id;
+      const idB = b.eval_run_id ?? b.experiment_id;
+      history.push(
+        `/compare?evalRunA=${encodeURIComponent(idA)}&evalRunB=${encodeURIComponent(idB)}`
+      );
+    } else {
+      history.push(
+        `/compare?experimentA=${encodeURIComponent(
+          a.experiment_id
+        )}&experimentB=${encodeURIComponent(b.experiment_id)}`
+      );
+    }
+  }, [canCompare, selectedExperiments, history]);
 
   return (
     <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
@@ -224,7 +260,7 @@ export const RunsListPage: React.FC = () => {
             onChange={(e) => {
               setSearchText(e.target.value);
               setPageIndex(0);
-              setSelectedRuns([]);
+              setSelectedExperiments([]);
             }}
             isClearable
           />
@@ -237,7 +273,7 @@ export const RunsListPage: React.FC = () => {
             onChange={(event) => {
               setSuiteIdFilter(event.target.value);
               setPageIndex(0);
-              setSelectedRuns([]);
+              setSelectedExperiments([]);
             }}
           />
         </EuiFlexItem>
@@ -271,7 +307,7 @@ export const RunsListPage: React.FC = () => {
         <EuiBasicTable<EvaluationExperimentSummary>
           tableCaption={i18n.TABLE_CAPTION}
           items={data?.experiments ?? []}
-          itemId="experiment_id"
+          itemId="eval_run_id"
           columns={columns}
           loading={isLoading}
           pagination={pagination}
@@ -281,7 +317,7 @@ export const RunsListPage: React.FC = () => {
             onClick: (e: React.MouseEvent) => {
               const target = e.target as HTMLElement;
               if (target.closest('.euiTableRowCellCheckbox, .euiLink, a')) return;
-              history.push(`/runs/${encodeURIComponent(item.experiment_id)}`);
+              navigateToDetail(item);
             },
             style: { cursor: 'pointer' },
           })}

@@ -114,11 +114,26 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
     },
     { scope: 'worker' },
   ],
+  workerEvalRunId: [
+    async ({}, use) => {
+      await use({ current: undefined as string | undefined });
+    },
+    { scope: 'worker' },
+  ],
+  workerExperimentId: [
+    async ({}, use) => {
+      await use({ current: undefined as string | undefined });
+    },
+    { scope: 'worker' },
+  ],
   fetch: [
-    async ({ kbnClient, log }, use) => {
-      // add a HttpHandler as a fixture, so consumers can use
-      // modules that depend on it (like the inference client)
-      const fetch = httpHandlerFromKbnClient({ kbnClient, log });
+    async ({ kbnClient, log, workerEvalRunId, workerExperimentId }, use) => {
+      const fetch = httpHandlerFromKbnClient({
+        kbnClient,
+        log,
+        getEvalRunId: () => workerEvalRunId.current,
+        getExperimentId: () => workerExperimentId.current,
+      });
       await use(fetch);
     },
     { scope: 'worker' },
@@ -240,6 +255,8 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
         evaluationConnector,
         repetitions,
         reportModelScore,
+        workerEvalRunId,
+        workerExperimentId,
       },
       use
     ) => {
@@ -270,10 +287,10 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
       const suiteId = process.env.EVAL_SUITE_ID;
       const buildkiteMetadata = getBuildkiteCiMetadataFromEnv();
 
-      const currentExperimentId = process.env.TEST_RUN_ID;
-      if (!currentExperimentId) {
-        throw new Error('experiment ID must be provided via TEST_RUN_ID environment variable');
-      }
+      const baseEvalRunId = process.env.TEST_RUN_ID;
+      const evalRunId = baseEvalRunId && model.id ? `${baseEvalRunId}::${model.id}` : baseEvalRunId;
+
+      workerEvalRunId.current = evalRunId;
 
       const upsertDataset = async (dataset: EvaluationDataset) => {
         await evaluationsKbnClient.request({
@@ -320,20 +337,23 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
       const executorClient = new KibanaEvalsClient({
         log,
         model,
-        experimentId: currentExperimentId,
+        evalRunId,
         repetitions,
         upsertDataset,
         getDatasetByName,
+        onExperimentStart: (experimentId) => {
+          workerExperimentId.current = experimentId;
+        },
         onEvaluationComplete: async (event) => {
           try {
             const ingestRequests = buildIngestRequest({
-              experimentId: currentExperimentId,
               taskModel: model,
               evaluatorModel,
               repetitions,
               hostName,
               gitMetadata,
               suiteId,
+              evalRunId,
               buildkiteMetadata,
               source: { kind: 'event', event },
               log,
@@ -358,10 +378,13 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
 
       await use(executorClient);
 
-      await reportModelScore(evalsClient, currentExperimentId, log, {
-        taskModelId: model.id,
-        suiteId,
-      });
+      const experiments = await executorClient.getRanExperiments();
+      for (const experiment of experiments) {
+        await reportModelScore(evalsClient, experiment.id, log, {
+          taskModelId: model.id,
+          suiteId,
+        });
+      }
     },
     {
       scope: 'worker',

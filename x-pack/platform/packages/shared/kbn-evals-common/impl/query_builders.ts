@@ -12,6 +12,7 @@
 interface ExperimentFilterOptions {
   suiteId?: string;
   modelId?: string;
+  filterField?: 'experiment_id' | 'eval_run_id';
 }
 
 interface ExperimentsListingFilterOptions {
@@ -20,6 +21,7 @@ interface ExperimentsListingFilterOptions {
   branch?: string;
   datasetId?: string;
   datasetName?: string;
+  buildId?: string;
 }
 
 interface ExperimentsListingPaginationOptions {
@@ -35,6 +37,8 @@ interface ExperimentBucket {
   key: string;
   doc_count: number;
   latest_timestamp?: { value_as_string?: string };
+  experiment_count?: { value?: number };
+  experiment_name?: TermsBucket;
   suite_id?: TermsBucket;
   dataset_id?: TermsBucket;
   dataset_name?: TermsBucket;
@@ -58,11 +62,14 @@ interface ExperimentsListingAggregations {
 
 export interface ExperimentsListingResult {
   experiments: Array<{
+    eval_run_id: string;
     experiment_id: string;
+    experiment_name: string | null;
+    experiment_count: number;
     timestamp: string | undefined;
     suite_id: string | undefined;
-    dataset_id: string | null;
-    dataset_name: string | null;
+    dataset_ids: string[];
+    dataset_names: string[];
     task_model: { id: string; family: string | undefined; provider: string | undefined };
     evaluator_model: { id: string; family: string | undefined; provider: string | undefined };
     git_branch: string | null;
@@ -85,7 +92,8 @@ export const buildExperimentFilterQuery = (
   experimentId: string,
   options?: ExperimentFilterOptions
 ): { bool: { must: Array<Record<string, unknown>> } } => {
-  const must: Array<Record<string, unknown>> = [{ term: { experiment_id: experimentId } }];
+  const field = options?.filterField ?? 'experiment_id';
+  const must: Array<Record<string, unknown>> = [{ term: { [field]: experimentId } }];
   if (options?.suiteId) {
     must.push({ term: { 'suite.id': options.suiteId } });
   }
@@ -108,19 +116,20 @@ export const buildExampleScoresQuery = (
 
 /**
  * Builds a bool/must query that filters evaluation score documents by
- * dataset ID and experiment ID.
+ * dataset ID and experiment ID (or eval_run_id when filterField is specified).
  */
 export const buildDatasetExampleScoresQuery = (
   datasetId: string,
-  experimentId: string
-): { bool: { must: Array<Record<string, unknown>> } } => ({
-  bool: {
-    must: [
-      { term: { 'example.dataset.id': datasetId } },
-      { term: { experiment_id: experimentId } },
-    ],
-  },
-});
+  experimentId: string,
+  options?: { filterField?: 'experiment_id' | 'eval_run_id' }
+): { bool: { must: Array<Record<string, unknown>> } } => {
+  const field = options?.filterField ?? 'experiment_id';
+  return {
+    bool: {
+      must: [{ term: { 'example.dataset.id': datasetId } }, { term: { [field]: experimentId } }],
+    },
+  };
+};
 
 // ---------------------------------------------------------------------------
 // Per-experiment stats aggregation
@@ -197,6 +206,9 @@ export const buildExperimentsListingFilterQuery = (
   if (options?.datasetName) {
     filters.push({ term: { 'example.dataset.name': options.datasetName } });
   }
+  if (options?.buildId) {
+    filters.push({ term: { 'ci.buildkite.build_id': options.buildId } });
+  }
   return {
     bool: {
       must_not: [{ term: { experiment_id: PREFLIGHT_EXPERIMENT_ID } }],
@@ -219,19 +231,21 @@ export const buildExperimentsListingAggregation = ({
   perPage,
 }: ExperimentsListingPaginationOptions) => ({
   total_experiments: {
-    cardinality: { field: 'experiment_id' },
+    cardinality: { field: 'eval_run_id' },
   },
   experiments: {
     terms: {
-      field: 'experiment_id',
+      field: 'eval_run_id',
       size: page * perPage,
       order: { latest_timestamp: 'desc' as const },
     },
     aggs: {
       latest_timestamp: { max: { field: '@timestamp' } },
+      experiment_count: { cardinality: { field: 'experiment_id' } },
+      experiment_name: { terms: { field: 'experiment_name', size: 1 } },
       suite_id: { terms: { field: 'suite.id', size: 1 } },
-      dataset_id: { terms: { field: 'example.dataset.id', size: 1 } },
-      dataset_name: { terms: { field: 'example.dataset.name', size: 1 } },
+      dataset_id: { terms: { field: 'example.dataset.id', size: 50 } },
+      dataset_name: { terms: { field: 'example.dataset.name', size: 50 } },
       task_model_id: { terms: { field: 'task.model.id', size: 1 } },
       task_model_family: { terms: { field: 'task.model.family', size: 1 } },
       task_model_provider: { terms: { field: 'task.model.provider', size: 1 } },
@@ -273,11 +287,14 @@ export const parseExperimentsListingResponse = (
     const evalProvider = firstBucket(bucket.evaluator_model_provider);
 
     return {
+      eval_run_id: bucket.key,
       experiment_id: bucket.key,
+      experiment_name: firstBucket(bucket.experiment_name) ?? null,
+      experiment_count: bucket.experiment_count?.value ?? 1,
       timestamp: bucket.latest_timestamp?.value_as_string,
       suite_id: firstBucket(bucket.suite_id),
-      dataset_id: firstBucket(bucket.dataset_id) ?? null,
-      dataset_name: firstBucket(bucket.dataset_name) ?? null,
+      dataset_ids: allBucketKeys(bucket.dataset_id),
+      dataset_names: allBucketKeys(bucket.dataset_name),
       task_model: {
         id: buildModelDisplayId(firstBucket(bucket.task_model_id), taskFamily, taskProvider),
         family: taskFamily,
@@ -396,3 +413,5 @@ export const buildModelDisplayId = (id?: string, family?: string, provider?: str
 // ---------------------------------------------------------------------------
 
 const firstBucket = (agg: TermsBucket | undefined): string | undefined => agg?.buckets?.[0]?.key;
+const allBucketKeys = (agg: TermsBucket | undefined): string[] =>
+  agg?.buckets?.map((b) => b.key) ?? [];

@@ -23,9 +23,13 @@ type HttpHandlerArgs =
 export function httpHandlerFromKbnClient({
   kbnClient,
   log,
+  getEvalRunId,
+  getExperimentId,
 }: {
   kbnClient: KbnClient;
   log: ToolingLog;
+  getEvalRunId?: () => string | undefined;
+  getExperimentId?: () => string | undefined;
 }) {
   const fetch: HttpHandler = async (...args: HttpHandlerArgs) => {
     const options: HttpFetchOptionsWithPath =
@@ -33,19 +37,26 @@ export function httpHandlerFromKbnClient({
 
     const { method = 'GET', body, asResponse, rawResponse, query, signal, headers } = options;
 
-    // Add a W3C baggage entry so Kibana can tag OTEL spans with the eval experiment id.
-    // This enables correlating traces (traces-*) with eval score docs (.kibana-evaluation-scores*) via experiment_id.
-    const experimentId = process.env.TEST_RUN_ID;
+    // Add a W3C baggage entry so Kibana can tag OTEL spans with the per-model build run ID.
+    const evalRunId = getEvalRunId?.() ?? process.env.TEST_RUN_ID;
     const nextHeaders: Record<string, string> = headers
       ? ({ ...(headers as Record<string, unknown>) } as Record<string, string>)
       : {};
 
+    const baggageEntries: string[] = [];
+    if (evalRunId) {
+      baggageEntries.push(`kibana.evals.eval_run_id=${encodeURIComponent(evalRunId)}`);
+    }
+    const experimentId = getExperimentId?.();
     if (experimentId) {
-      const baggageEntry = `kibana.evals.experiment_id=${encodeURIComponent(experimentId)}`;
+      baggageEntries.push(`kibana.evals.experiment_id=${encodeURIComponent(experimentId)}`);
+    }
+    if (baggageEntries.length > 0) {
       const existingKey = Object.keys(nextHeaders).find((k) => k.toLowerCase() === 'baggage');
       const existing = existingKey ? nextHeaders[existingKey] : undefined;
-
-      const merged = existing ? `${existing},${baggageEntry}` : baggageEntry;
+      const merged = existing
+        ? `${existing},${baggageEntries.join(',')}`
+        : baggageEntries.join(',');
       nextHeaders[existingKey ?? 'baggage'] = merged;
     }
 

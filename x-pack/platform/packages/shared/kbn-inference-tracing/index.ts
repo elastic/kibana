@@ -12,6 +12,7 @@ export { GenAISemanticConventions, ElasticGenAIAttributes } from './src/types';
 export {
   BAGGAGE_TRACKING_BEACON_KEY,
   BAGGAGE_TRACKING_BEACON_VALUE,
+  EVAL_RUN_ID_BAGGAGE_KEY,
   EVAL_EXPERIMENT_ID_BAGGAGE_KEY,
 } from './src/baggage';
 

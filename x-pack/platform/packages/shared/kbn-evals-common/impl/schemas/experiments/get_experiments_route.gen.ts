@@ -20,11 +20,14 @@ import { Model, BuildkiteMetadata } from '../common_attributes.gen';
 
 export const EvaluationExperimentSummary = lazySchema(() =>
   z.object({
+    eval_run_id: z.string().optional(),
     experiment_id: z.string(),
+    experiment_name: z.string().nullable().optional(),
+    experiment_count: z.number().int().optional(),
     timestamp: z.string(),
     suite_id: z.string().optional(),
-    dataset_id: z.string().nullable().optional(),
-    dataset_name: z.string().nullable().optional(),
+    dataset_ids: z.array(z.string()).optional(),
+    dataset_names: z.array(z.string()).optional(),
     task_model: Model.optional(),
     evaluator_model: Model.optional(),
     git_branch: z.string().nullable().optional(),
@@ -53,6 +56,10 @@ export const GetEvaluationExperimentsRequestQuery = lazySchema(() =>
      * Filter by dataset ID
      */
     dataset_id: z.string().optional(),
+    /**
+     * Filter by CI build ID (ci.buildkite.build_id)
+     */
+    build_id: z.string().optional(),
     page: z.coerce.number().int().min(1).optional().default(1),
     per_page: z.coerce.number().int().min(1).max(100).optional().default(25),
   })

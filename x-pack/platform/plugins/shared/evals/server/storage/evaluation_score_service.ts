@@ -47,6 +47,8 @@ const toEvaluationScoreDocuments = (
     const payload: EvaluationScoreDocument = {
       '@timestamp': timestamp,
       experiment_id: request.experiment_id,
+      experiment_name: request.experiment_name,
+      eval_run_id: request.eval_run_id ?? request.experiment_id,
       suite: request.suite_id ? { id: request.suite_id } : undefined,
       ci: request.ci,
       example: {

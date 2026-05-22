@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Get Evaluation Experiment API endpoint
-  version: "1"
+  version: '1'
 paths:
   /internal/evals/experiments/{experimentId}:
     get:
@@ -30,8 +30,14 @@ paths:
           schema:
             type: string
           description: Filter stats by task model ID
+        - name: eval_run_id
+          in: query
+          required: false
+          schema:
+            type: string
+          description: When provided, fetches all experiments in this suite run instead of the single experiment from the path param
       responses:
-        "200":
+        '200':
           description: Successful response
           content:
             application/json:
@@ -40,6 +46,9 @@ paths:
                 properties:
                   experiment_id:
                     type: string
+                  experiment_name:
+                    type: string
+                    nullable: true
                   timestamp:
                     type: string
                   task_model:
@@ -54,6 +63,10 @@ paths:
                     nullable: true
                   ci:
                     $ref: '../common_attributes.schema.yaml#/components/schemas/BuildkiteMetadata'
+                  suite_id:
+                    type: string
+                    nullable: true
+                    description: The suite ID when this experiment belongs to a suite run
                   total_repetitions:
                     type: integer
                   stats:
@@ -63,7 +76,7 @@ paths:
                 required:
                   - experiment_id
                   - stats
-        "404":
+        '404':
           description: Experiment not found
           content:
             application/json:

@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Evals Common Attributes
-  version: "1"
+  version: '1'
 paths: {}
 components:
   schemas:
@@ -23,6 +23,10 @@ components:
         '@timestamp':
           type: string
         experiment_id:
+          type: string
+        experiment_name:
+          type: string
+        eval_run_id:
           type: string
         suite:
           type: object

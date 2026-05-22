@@ -28,6 +28,10 @@ export const GetEvaluationExperimentScoresRequestQuery = lazySchema(() =>
      * Filter by task model ID
      */
     model_id: z.string().optional(),
+    /**
+     * When provided, fetches scores for all experiments in this suite run
+     */
+    eval_run_id: z.string().optional(),
   })
 );
 export type GetEvaluationExperimentScoresRequestQuery = z.infer<

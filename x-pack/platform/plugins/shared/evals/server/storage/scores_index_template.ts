@@ -13,6 +13,8 @@ const evaluationsDataStreamMappings = {
   properties: {
     '@timestamp': { type: 'date' },
     experiment_id: { type: 'keyword' },
+    experiment_name: { type: 'keyword' },
+    eval_run_id: { type: 'keyword' },
     suite: {
       type: 'object',
       properties: {

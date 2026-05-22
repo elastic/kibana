@@ -21,6 +21,8 @@ import { Model, BuildkiteMetadata } from '../common_attributes.gen';
 export const IngestScoresRequestBody = lazySchema(() =>
   z.object({
     experiment_id: z.string(),
+    experiment_name: z.string().optional(),
+    eval_run_id: z.string().optional(),
     suite_id: z.string().optional(),
     task_model: Model,
     evaluator_model: Model,

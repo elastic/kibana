@@ -87,6 +87,8 @@ export const EvaluationScoreDocument = lazySchema(() =>
   z.object({
     '@timestamp': z.string(),
     experiment_id: z.string(),
+    experiment_name: z.string().optional(),
+    eval_run_id: z.string().optional(),
     suite: z
       .object({
         id: z.string().optional(),
