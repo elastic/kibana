@@ -697,12 +697,7 @@ describe('utils', () => {
 
       expect(panels).toHaveLength(1);
       const panelItems = panels[0].items as Array<{ key?: string; isSeparator?: boolean }>;
-      expect(panelItems.map((i) => i.key)).toEqual([
-        '2',
-        '1',
-        'static-items-separator',
-        'static1',
-      ]);
+      expect(panelItems.map((i) => i.key)).toEqual(['2', '1', 'static-items-separator', 'static1']);
       expect(panelItems[2].isSeparator).toBe(true);
     });
 

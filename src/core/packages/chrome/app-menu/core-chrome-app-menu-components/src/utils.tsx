@@ -436,8 +436,7 @@ export const getPopoverPanels = ({
       const staticPanelItems = staticPanel.items as EuiContextMenuPanelItemDescriptor[];
 
       // Only add a separator between regular and static items
-      const separator =
-        mainItems.length > 0 ? [createSeparatorItem('static-items-separator')] : [];
+      const separator = mainItems.length > 0 ? [createSeparatorItem('static-items-separator')] : [];
 
       mainPanel.items = [...mainItems, ...separator, ...staticPanelItems];
       panels.splice(panels.indexOf(staticPanel), 1);
