@@ -21,10 +21,10 @@ export interface RelatedAlertEpisodesListProps {
   getGroupAction: (groupHash: string) => RelatedAlertEpisodeProps['groupAction'];
   getEpisodeDetailsHref: (episodeId: string) => string;
   /**
-   * Render each card with smaller padding. Forwarded as `compact` to
+   * Render each card with smaller padding. Forwarded as `compressed` to
    * `RelatedAlertEpisode`.
    */
-  compact?: boolean;
+  compressed?: boolean;
 }
 
 export function RelatedAlertEpisodesList({
@@ -33,7 +33,7 @@ export function RelatedAlertEpisodesList({
   getEpisodeAction,
   getGroupAction,
   getEpisodeDetailsHref,
-  compact = false,
+  compressed = false,
 }: RelatedAlertEpisodesListProps) {
   return (
     <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="alertingV2RelatedEpisodesList">
@@ -48,7 +48,7 @@ export function RelatedAlertEpisodesList({
             episodeAction={getEpisodeAction(relatedId)}
             groupAction={relatedGroupHash ? getGroupAction(relatedGroupHash) : undefined}
             href={getEpisodeDetailsHref(relatedId)}
-            compact={compact}
+            compressed={compressed}
           />
         );
       })}

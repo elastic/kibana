@@ -46,7 +46,7 @@ export interface RelatedEpisodesGroupSubsectionProps {
    * flush with its consumer's edges. Useful when rendering inside a container
    * that already provides outer padding (e.g. a narrow flyout body).
    */
-  flush?: boolean;
+  compressed?: boolean;
 }
 
 /**
@@ -58,7 +58,7 @@ export function RelatedEpisodesGroupSubsection({
   rule,
   ruleId,
   getEpisodeDetailsHref,
-  flush = false,
+  compressed = false,
 }: RelatedEpisodesGroupSubsectionProps) {
   const { euiTheme } = useEuiTheme();
   const {
@@ -110,18 +110,18 @@ export function RelatedEpisodesGroupSubsection({
     <div
       data-test-subj="alertingV2RelatedEpisodesGroupSubsection"
       css={
-        flush
+        compressed
           ? undefined
           : css`
               padding-inline: ${euiTheme.size.m};
             `
       }
     >
-      <EuiTitle size={flush ? 'xxs' : 'xs'}>
+      <EuiTitle size={compressed ? 'xxs' : 'xs'}>
         <h4>{i18n.RELATED_SAME_GROUP_TITLE}</h4>
       </EuiTitle>
       <EuiText
-        size={flush ? 'xs' : 's'}
+        size={compressed ? 'xs' : 's'}
         color="subdued"
         css={{ marginBlockStart: euiTheme.size.xs }}
       >
@@ -155,7 +155,7 @@ export function RelatedEpisodesGroupSubsection({
           getEpisodeAction={(id) => sameGroupEpisodeActionsMap?.get(id)}
           getGroupAction={(gh) => sameGroupGroupActionsMap?.get(gh)}
           getEpisodeDetailsHref={getEpisodeDetailsHref}
-          compact={flush}
+          compressed={compressed}
         />
       )}
     </div>

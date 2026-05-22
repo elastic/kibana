@@ -29,7 +29,7 @@ export interface AlertEpisodesRelatedProps {
    * content sits flush with the consumer's edges. Useful inside narrow
    * containers (e.g. a flyout) that already provide outer padding.
    */
-  flush?: boolean;
+  compressed?: boolean;
 }
 
 export function AlertEpisodesRelated({
@@ -39,7 +39,7 @@ export function AlertEpisodesRelated({
   ruleId,
   getEpisodeDetailsHref,
   showHeading = true,
-  flush = false,
+  compressed = false,
 }: AlertEpisodesRelatedProps) {
   return (
     <>
@@ -59,9 +59,9 @@ export function AlertEpisodesRelated({
             rule={rule}
             ruleId={ruleId}
             getEpisodeDetailsHref={getEpisodeDetailsHref}
-            flush={flush}
+            compressed={compressed}
           />
-          <EuiSpacer size={flush ? 'm' : 'l'} />
+          <EuiSpacer size={compressed ? 'm' : 'l'} />
         </>
       ) : null}
       <RelatedEpisodesRuleSubsection
@@ -70,7 +70,7 @@ export function AlertEpisodesRelated({
         rule={rule}
         ruleId={ruleId}
         getEpisodeDetailsHref={getEpisodeDetailsHref}
-        flush={flush}
+        compressed={compressed}
       />
     </>
   );

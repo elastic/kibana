@@ -22,7 +22,7 @@ export interface AlertEpisodesRelatedSectionProps {
   services: AlertEpisodeDetailsServices;
   getEpisodeDetailsHref: (episodeId: string) => string;
   showHeading?: boolean;
-  flush?: boolean;
+  compressed?: boolean;
 }
 
 export const AlertEpisodesRelatedSection = ({
@@ -30,7 +30,7 @@ export const AlertEpisodesRelatedSection = ({
   services,
   getEpisodeDetailsHref,
   showHeading,
-  flush,
+  compressed,
 }: AlertEpisodesRelatedSectionProps) => {
   const {
     data: eventRows,
@@ -68,7 +68,7 @@ export const AlertEpisodesRelatedSection = ({
       ruleId={ruleId}
       getEpisodeDetailsHref={getEpisodeDetailsHref}
       showHeading={showHeading}
-      flush={flush}
+      compressed={compressed}
     />
   );
 };

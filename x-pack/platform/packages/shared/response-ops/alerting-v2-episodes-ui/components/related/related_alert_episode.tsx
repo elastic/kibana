@@ -25,7 +25,7 @@ export interface RelatedAlertEpisodeProps {
    * Render the card with smaller padding. Useful inside narrow containers
    * (e.g. a flyout) where the default `paddingSize="m"` feels excessive.
    */
-  compact?: boolean;
+  compressed?: boolean;
 }
 
 export function RelatedAlertEpisode({
@@ -34,7 +34,7 @@ export function RelatedAlertEpisode({
   episodeAction,
   groupAction,
   href,
-  compact = false,
+  compressed = false,
 }: RelatedAlertEpisodeProps) {
   const status = episode['episode.status'];
   const episodeId = episode['episode.id'];
@@ -46,13 +46,18 @@ export function RelatedAlertEpisode({
   return (
     <EuiCard
       display="subdued"
-      paddingSize={compact ? 's' : 'm'}
+      paddingSize={compressed ? 's' : 'm'}
       href={href}
       textAlign="left"
       titleSize="xs"
       titleElement="h3"
       title={
-        <EuiFlexGroup alignItems="center" gutterSize={compact ? 'xs' : 's'} responsive={true} wrap>
+        <EuiFlexGroup
+          alignItems="center"
+          gutterSize={compressed ? 'xs' : 's'}
+          responsive={true}
+          wrap
+        >
           <EuiFlexItem grow={false}>{rule.metadata.name}</EuiFlexItem>
           {status ? (
             <EuiFlexItem grow={false}>
@@ -72,7 +77,7 @@ export function RelatedAlertEpisode({
       {showGroupingBadges ? (
         <EuiFlexGroup
           alignItems="center"
-          gutterSize={compact ? 'xs' : 's'}
+          gutterSize={compressed ? 'xs' : 's'}
           wrap
           data-test-subj="relatedAlertEpisodeGrouping"
         >
