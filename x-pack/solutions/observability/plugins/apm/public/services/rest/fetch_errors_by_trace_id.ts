@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { apm } from '@elastic/apm-rum';
 import type { APIReturnType } from './create_call_apm_api';
 import { callApmApi } from './create_call_apm_api';
 
 type ErrorsByTraceId = APIReturnType<'GET /internal/apm/unified_traces/{traceId}/errors'>;
 
-export const fetchErrorsByTraceId = (
+export const FETCH_TRACE_ERRORS_OPERATION_ID = 'fetch-trace-errors';
+
+export const fetchErrorsByTraceId = async (
   {
     traceId,
     docId,
@@ -23,15 +26,24 @@ export const fetchErrorsByTraceId = (
     end: string;
   },
   signal: AbortSignal
-): Promise<ErrorsByTraceId> =>
-  callApmApi('GET /internal/apm/unified_traces/{traceId}/errors', {
-    params: {
-      path: { traceId },
-      query: {
-        docId,
-        start,
-        end,
+): Promise<ErrorsByTraceId> => {
+  try {
+    return await callApmApi('GET /internal/apm/unified_traces/{traceId}/errors', {
+      params: {
+        path: { traceId },
+        query: {
+          docId,
+          start,
+          end,
+        },
       },
-    },
-    signal,
-  });
+      signal,
+      context: { meta: { operation_id: FETCH_TRACE_ERRORS_OPERATION_ID } },
+    });
+  } catch (error) {
+    apm.captureError(error as Error, {
+      labels: { kibana_meta_operation_id: FETCH_TRACE_ERRORS_OPERATION_ID },
+    });
+    throw error;
+  }
+};
