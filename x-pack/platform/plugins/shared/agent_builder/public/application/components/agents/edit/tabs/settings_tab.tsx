@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiFormRow,
@@ -34,11 +34,15 @@ import {
   AGENT_BUILDER_UI_EBT,
   VISIBILITY_ICON,
   canChangeAgentVisibility,
+  AgentAclRole,
+  type AgentAclEntry,
+  type AgentDefinition,
   type UserIdAndName,
 } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import type { Control, FormState } from 'react-hook-form';
-import { Controller } from 'react-hook-form';
+import { Controller, useWatch } from 'react-hook-form';
+import { AccessForm } from '../../access/access_form';
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { labels } from '../../../../utils/i18n';
 import { useAgentLabels } from '../../../../hooks/agents/use_agent_labels';
@@ -86,6 +90,19 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
       currentUser,
       isAdmin,
     });
+
+  const currentVisibility = useWatch({ control, name: 'visibility' });
+
+  const [draftEntries, setDraftEntries] = useState<AgentAclEntry[]>([
+    { type: 'user', name: 'Sarah Chen', role: AgentAclRole.Editor },
+    { type: 'user', name: 'Marcus Reyes', role: AgentAclRole.Editor },
+    { type: 'user', name: 'Jamie Park', role: AgentAclRole.User },
+  ]);
+
+  const agentStub = useMemo(
+    () => ({ id: agentId ?? 'preview', visibility: currentVisibility } as AgentDefinition),
+    [agentId, currentVisibility]
+  );
 
   const showAgentWorkflowsSection = useMemo(() => {
     return isPreExecutionWorkflowEnabled(uiSettings);
@@ -367,7 +384,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                 'xpack.agentBuilder.agents.form.settings.organizationAccessDescription',
                 {
                   defaultMessage:
-                    'Use labels to organize agents and visibility to control who can view and edit.',
+                    'Use labels to organize agents and control who can view and interact with them.',
                 }
               )}
             </EuiText>
@@ -417,7 +434,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                         'xpack.agentBuilder.agents.form.settings.visibilityMeaningSharedDescription',
                         {
                           defaultMessage:
-                            'Anyone can view. Only the owner or an administrator can edit.',
+                            'Anyone can view. Only the owner, an administrator, or people you explicitly grant access to can edit.',
                         }
                       )}
                     </EuiText>
@@ -435,7 +452,8 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                       {i18n.translate(
                         'xpack.agentBuilder.agents.form.settings.visibilityMeaningPrivateDescription',
                         {
-                          defaultMessage: 'Only the owner or an administrator can view and edit.',
+                          defaultMessage:
+                            'Only the owner, an administrator, or people you explicitly grant access to can view and edit.',
                         }
                       )}
                     </EuiText>
@@ -525,6 +543,18 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
               )}
             />
           </EuiFormRow>
+
+          {!isCreateMode && (
+            <>
+              <EuiSpacer size="m" />
+              <AccessForm
+                agent={agentStub}
+                entries={draftEntries}
+                ownerName={owner?.username ?? currentUser?.username}
+                onChange={setDraftEntries}
+              />
+            </>
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
 

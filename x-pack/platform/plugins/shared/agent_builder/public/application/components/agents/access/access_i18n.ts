@@ -65,7 +65,7 @@ export const accessFlyoutPeopleSection = i18n.translate(
 
 export const accessFlyoutPeopleHelp = i18n.translate(
   'xpack.agentBuilder.acl.flyout.peopleSectionHelp',
-  { defaultMessage: 'Grant access to a specific user.' }
+  { defaultMessage: 'Grant additional access beyond the visibility setting.' }
 );
 
 export const accessFlyoutAddPeoplePlaceholder = i18n.translate(
