@@ -110,6 +110,25 @@ const serializeDatePickerMetadata = (
   }
 };
 
+const serializeTextareaMetadata = (
+  out: string[],
+  field: Extract<Field, { control: 'TEXTAREA' }>
+) => {
+  const meta = field.metadata;
+  if (!meta) return;
+  const defaultValue = meta.default;
+  const hasDefault = typeof defaultValue === 'string';
+  const hasMarkdown = meta.markdown === true;
+  if (!hasDefault && !hasMarkdown) return;
+  out.push(`      metadata:`);
+  if (hasDefault) {
+    out.push(`        default: ${yamlString(defaultValue)}`);
+  }
+  if (hasMarkdown) {
+    out.push(`        markdown: true`);
+  }
+};
+
 const serializeCheckboxGroupMetadata = (
   out: string[],
   field: Extract<Field, { control: 'CHECKBOX_GROUP' }>
@@ -180,7 +199,11 @@ const serializeFieldMetadata = (out: string[], field: InlineField) => {
     serializeUserPickerMetadata(out, field);
     return;
   }
-  // INPUT_TEXT, INPUT_NUMBER, TEXTAREA
+  if (field.control === FieldType.TEXTAREA) {
+    serializeTextareaMetadata(out, field);
+    return;
+  }
+  // INPUT_TEXT, INPUT_NUMBER
   const defaultValue = field.metadata?.default;
   if (
     defaultValue !== undefined &&
