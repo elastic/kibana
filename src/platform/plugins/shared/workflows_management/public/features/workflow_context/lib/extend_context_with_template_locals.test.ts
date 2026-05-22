@@ -401,7 +401,6 @@ describe('getContextSchemaWithTemplateLocals', () => {
         '- {{ yy.name }}',
         '{%- endfor %}',
       ];
-      const templateString = templateLines.join(' ');
       const yamlSource = `value: >-\n${templateLines.map((l) => `  ${l}`).join('\n')}\n`;
       const doc = parseDocument(yamlSource);
       const varYamlOffset = yamlSource.indexOf('{{ yy.name }}');

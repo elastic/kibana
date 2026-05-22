@@ -12,6 +12,7 @@ import type { WorkflowYaml } from '@kbn/workflows';
 import { DynamicStepContextSchema } from '@kbn/workflows';
 import { getShape } from '@kbn/workflows/common/utils/zod';
 import { WorkflowGraph } from '@kbn/workflows/graph';
+import type { ConnectorStep } from '@kbn/workflows/spec/schema';
 import { VARIABLE_REGEX_GLOBAL } from '@kbn/workflows-yaml';
 import {
   FOR_LOOP_NESTED_YAML,
@@ -106,7 +107,14 @@ steps:
         with:
           message: '{% for row in consts.items %}{{ forloop.index }}{% endfor %}'
 `;
-    const definition = {
+    const innerStep: ConnectorStep = {
+      name: 'inner',
+      type: 'console',
+      with: {
+        message: '{% for row in consts.items %}{{ forloop.index }}{% endfor %}',
+      },
+    };
+    const definition: WorkflowYaml = {
       version: '1',
       name: 'Forloop index',
       enabled: false,
@@ -117,18 +125,10 @@ steps:
           name: 'iterate',
           type: 'foreach',
           foreach: '{{ consts.items }}',
-          steps: [
-            {
-              name: 'inner',
-              type: 'console',
-              with: {
-                message: '{% for row in consts.items %}{{ forloop.index }}{% endfor %}',
-              },
-            },
-          ],
+          steps: [innerStep],
         },
       ],
-    } as WorkflowYaml;
+    };
     const graph = WorkflowGraph.fromWorkflowDefinition(definition);
     const doc = parseDocument(templateYaml);
     const innerModel = createFakeMonacoModel(templateYaml);
@@ -202,7 +202,17 @@ steps:
       message: |-
         ${templateLines.join('\n        ')}
 `;
-    const literalDefinition = {
+    const logItemStep: ConnectorStep = {
+      name: 'log_item',
+      type: 'console',
+      with: { message: '{{ foreach.item.name }}' },
+    };
+    const summarizeStep: ConnectorStep = {
+      name: 'summarize',
+      type: 'console',
+      with: { message: templateLines.join('\n') },
+    };
+    const literalDefinition: WorkflowYaml = {
       version: '1',
       name: 'Literal block',
       enabled: false,
@@ -213,21 +223,11 @@ steps:
           name: 'iterate_items',
           type: 'foreach',
           foreach: '{{ consts.items }}',
-          steps: [
-            {
-              name: 'log_item',
-              type: 'console',
-              with: { message: '{{ foreach.item.name }}' },
-            },
-          ],
+          steps: [logItemStep],
         },
-        {
-          name: 'summarize',
-          type: 'console',
-          with: { message: templateLines.join('\n') },
-        },
+        summarizeStep,
       ],
-    } as WorkflowYaml;
+    };
     const literalGraph = WorkflowGraph.fromWorkflowDefinition(literalDefinition);
     const literalDoc = parseDocument(yamlSource);
     const literalModel = createFakeMonacoModel(yamlSource);
