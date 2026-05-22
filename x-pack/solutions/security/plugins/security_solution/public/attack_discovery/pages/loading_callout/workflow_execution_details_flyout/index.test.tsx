@@ -19,6 +19,7 @@ import { useWorkflowExecutionDetails } from '../../hooks/use_workflow_execution_
 import { WorkflowPipelineMonitor } from '../workflow_pipeline_monitor';
 import type { AggregatedWorkflowExecution, StepExecutionWithLink } from '../types';
 import type { TroubleshootWithAiProps } from './troubleshoot_with_ai';
+import { FailureSection } from './failure_section';
 
 jest.mock('../../hooks/use_pipeline_data');
 jest.mock('../../hooks/use_workflow_execution_details');
@@ -62,10 +63,14 @@ jest.mock('./troubleshoot_with_ai', () => ({
     </div>
   )),
 }));
+jest.mock('./failure_section', () => ({
+  FailureSection: jest.fn(() => <div data-test-subj="failureSection" />),
+}));
 
 const MockWorkflowPipelineMonitor = WorkflowPipelineMonitor as unknown as jest.Mock;
 const mockUsePipelineData = usePipelineData as jest.Mock;
 const mockUseWorkflowExecutionDetails = useWorkflowExecutionDetails as jest.Mock;
+const MockFailureSection = FailureSection as jest.MockedFunction<typeof FailureSection>;
 
 const mockPipelineDataResponse: PipelineDataResponse = {
   alert_retrieval: [
@@ -316,8 +321,6 @@ describe('WorkflowExecutionDetailsFlyout', () => {
         executionUuid: 'exec-uuid-789',
         http: mockHttp,
         stubData: {
-          alertsContextCount: undefined,
-          discoveriesCount: undefined,
           eventActions: undefined,
           generationStatus: undefined,
         },
@@ -338,8 +341,6 @@ describe('WorkflowExecutionDetailsFlyout', () => {
         executionUuid: 'exec-uuid-789',
         http: mockHttp,
         stubData: {
-          alertsContextCount: undefined,
-          discoveriesCount: undefined,
           eventActions: undefined,
           generationStatus: undefined,
         },
@@ -360,8 +361,6 @@ describe('WorkflowExecutionDetailsFlyout', () => {
         executionUuid: 'exec-uuid-789',
         http: mockHttp,
         stubData: {
-          alertsContextCount: undefined,
-          discoveriesCount: undefined,
           eventActions: undefined,
           generationStatus: undefined,
         },
@@ -674,68 +673,93 @@ describe('WorkflowExecutionDetailsFlyout', () => {
     });
   });
 
-  describe('TroubleshootWithAi integration', () => {
-    it('renders TroubleshootWithAi when generationStatus is failed', () => {
+  describe('FailureSection rendering', () => {
+    it('renders FailureSection when generationStatus is failed', () => {
       render(
         <TestProviders>
           <WorkflowExecutionDetailsFlyout {...defaultProps} generationStatus="failed" />
         </TestProviders>
       );
 
-      expect(screen.getByTestId('troubleshootWithAi')).toBeInTheDocument();
+      expect(screen.getByTestId('failureSection')).toBeInTheDocument();
     });
 
-    it('renders TroubleshootWithAi when generationStatus is canceled', () => {
+    it('renders FailureSection when generationStatus is canceled', () => {
       render(
         <TestProviders>
           <WorkflowExecutionDetailsFlyout {...defaultProps} generationStatus="canceled" />
         </TestProviders>
       );
 
-      expect(screen.getByTestId('troubleshootWithAi')).toBeInTheDocument();
+      expect(screen.getByTestId('failureSection')).toBeInTheDocument();
     });
 
-    it('renders TroubleshootWithAi when generationStatus is dismissed', () => {
+    it('renders FailureSection when generationStatus is dismissed', () => {
       render(
         <TestProviders>
           <WorkflowExecutionDetailsFlyout {...defaultProps} generationStatus="dismissed" />
         </TestProviders>
       );
 
-      expect(screen.getByTestId('troubleshootWithAi')).toBeInTheDocument();
+      expect(screen.getByTestId('failureSection')).toBeInTheDocument();
     });
 
-    it('does NOT render TroubleshootWithAi when generationStatus is succeeded', () => {
+    it('does NOT render FailureSection when generationStatus is succeeded', () => {
       render(
         <TestProviders>
           <WorkflowExecutionDetailsFlyout {...defaultProps} generationStatus="succeeded" />
         </TestProviders>
       );
 
-      expect(screen.queryByTestId('troubleshootWithAi')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('failureSection')).not.toBeInTheDocument();
     });
 
-    it('does NOT render TroubleshootWithAi when generationStatus is started', () => {
+    it('renders FailureSection when a step has FAILED status even if generationStatus is not failed', () => {
+      mockUseWorkflowExecutionDetails.mockReturnValue({
+        data: {
+          ...mockExecutionData,
+          steps: [
+            {
+              ...mockStepExecutions[0],
+              status: ExecutionStatus.FAILED,
+              stepId: 'validate_discoveries',
+            },
+          ],
+        },
+        error: undefined,
+        isLoading: false,
+      });
+
+      render(
+        <TestProviders>
+          <WorkflowExecutionDetailsFlyout {...defaultProps} generationStatus="succeeded" />
+        </TestProviders>
+      );
+
+      expect(screen.getByTestId('failureSection')).toBeInTheDocument();
+    });
+
+    it('does NOT render FailureSection when generationStatus is started', () => {
       render(
         <TestProviders>
           <WorkflowExecutionDetailsFlyout {...defaultProps} generationStatus="started" />
         </TestProviders>
       );
 
-      expect(screen.queryByTestId('troubleshootWithAi')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('failureSection')).not.toBeInTheDocument();
     });
 
-    it('does NOT render TroubleshootWithAi when generationStatus is undefined', () => {
+    it('does NOT render FailureSection when generationStatus is undefined', () => {
       render(
         <TestProviders>
           <WorkflowExecutionDetailsFlyout {...defaultProps} />
         </TestProviders>
       );
 
-      expect(screen.queryByTestId('troubleshootWithAi')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('failureSection')).not.toBeInTheDocument();
     });
 
-    it('does NOT render TroubleshootWithAi when execution data is not available', () => {
+    it('does NOT render FailureSection when execution data is not available', () => {
       mockUseWorkflowExecutionDetails.mockReturnValue({
         data: undefined,
         error: undefined,
@@ -748,7 +772,203 @@ describe('WorkflowExecutionDetailsFlyout', () => {
         </TestProviders>
       );
 
-      expect(screen.queryByTestId('troubleshootWithAi')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('failureSection')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('prop forwarding to FailureSection', () => {
+    const failedProps = {
+      ...defaultProps,
+      generationStatus: 'failed' as const,
+    };
+
+    beforeEach(() => {
+      MockFailureSection.mockClear();
+    });
+
+    it('passes sourceMetadata to FailureSection', () => {
+      const sourceMetadata = { rule_id: 'rule-1', rule_name: 'My Rule' };
+
+      render(
+        <TestProviders>
+          <WorkflowExecutionDetailsFlyout {...failedProps} sourceMetadata={sourceMetadata} />
+        </TestProviders>
+      );
+
+      expect(MockFailureSection).toHaveBeenCalledWith(
+        expect.objectContaining({ sourceMetadata }),
+        expect.anything()
+      );
+    });
+
+    it('passes averageSuccessfulDurationMs to FailureSection', () => {
+      render(
+        <TestProviders>
+          <WorkflowExecutionDetailsFlyout {...failedProps} averageSuccessfulDurationMs={1500} />
+        </TestProviders>
+      );
+
+      expect(MockFailureSection).toHaveBeenCalledWith(
+        expect.objectContaining({ averageSuccessfulDurationMs: 1500 }),
+        expect.anything()
+      );
+    });
+
+    it('passes configuredMaxAlerts to FailureSection', () => {
+      render(
+        <TestProviders>
+          <WorkflowExecutionDetailsFlyout {...failedProps} configuredMaxAlerts={200} />
+        </TestProviders>
+      );
+
+      expect(MockFailureSection).toHaveBeenCalledWith(
+        expect.objectContaining({ configuredMaxAlerts: 200 }),
+        expect.anything()
+      );
+    });
+
+    it('passes connectorActionTypeId to FailureSection', () => {
+      render(
+        <TestProviders>
+          <WorkflowExecutionDetailsFlyout {...failedProps} connectorActionTypeId=".bedrock" />
+        </TestProviders>
+      );
+
+      expect(MockFailureSection).toHaveBeenCalledWith(
+        expect.objectContaining({ connectorActionTypeId: '.bedrock' }),
+        expect.anything()
+      );
+    });
+
+    it('passes connectorModel to FailureSection', () => {
+      render(
+        <TestProviders>
+          <WorkflowExecutionDetailsFlyout {...failedProps} connectorModel="claude-3-5" />
+        </TestProviders>
+      );
+
+      expect(MockFailureSection).toHaveBeenCalledWith(
+        expect.objectContaining({ connectorModel: 'claude-3-5' }),
+        expect.anything()
+      );
+    });
+
+    it('passes dateRangeEnd to FailureSection', () => {
+      render(
+        <TestProviders>
+          <WorkflowExecutionDetailsFlyout
+            {...failedProps}
+            dateRangeEnd="2025-01-15T10:00:00.000Z"
+          />
+        </TestProviders>
+      );
+
+      expect(MockFailureSection).toHaveBeenCalledWith(
+        expect.objectContaining({ dateRangeEnd: '2025-01-15T10:00:00.000Z' }),
+        expect.anything()
+      );
+    });
+
+    it('passes dateRangeStart to FailureSection', () => {
+      render(
+        <TestProviders>
+          <WorkflowExecutionDetailsFlyout
+            {...failedProps}
+            dateRangeStart="2025-01-14T10:00:00.000Z"
+          />
+        </TestProviders>
+      );
+
+      expect(MockFailureSection).toHaveBeenCalledWith(
+        expect.objectContaining({ dateRangeStart: '2025-01-14T10:00:00.000Z' }),
+        expect.anything()
+      );
+    });
+
+    it('passes duplicatesDroppedCount to FailureSection', () => {
+      render(
+        <TestProviders>
+          <WorkflowExecutionDetailsFlyout {...failedProps} duplicatesDroppedCount={5} />
+        </TestProviders>
+      );
+
+      expect(MockFailureSection).toHaveBeenCalledWith(
+        expect.objectContaining({ duplicatesDroppedCount: 5 }),
+        expect.anything()
+      );
+    });
+
+    it('passes generatedCount to FailureSection', () => {
+      render(
+        <TestProviders>
+          <WorkflowExecutionDetailsFlyout {...failedProps} generatedCount={12} />
+        </TestProviders>
+      );
+
+      expect(MockFailureSection).toHaveBeenCalledWith(
+        expect.objectContaining({ generatedCount: 12 }),
+        expect.anything()
+      );
+    });
+
+    it('passes hallucinationsFilteredCount to FailureSection', () => {
+      render(
+        <TestProviders>
+          <WorkflowExecutionDetailsFlyout {...failedProps} hallucinationsFilteredCount={4} />
+        </TestProviders>
+      );
+
+      expect(MockFailureSection).toHaveBeenCalledWith(
+        expect.objectContaining({ hallucinationsFilteredCount: 4 }),
+        expect.anything()
+      );
+    });
+
+    it('passes persistedCount to FailureSection', () => {
+      render(
+        <TestProviders>
+          <WorkflowExecutionDetailsFlyout {...failedProps} persistedCount={8} />
+        </TestProviders>
+      );
+
+      expect(MockFailureSection).toHaveBeenCalledWith(
+        expect.objectContaining({ persistedCount: 8 }),
+        expect.anything()
+      );
+    });
+
+    it('passes perWorkflowAlertRetrieval extracted from pipelineData to FailureSection', () => {
+      mockUsePipelineData.mockReturnValue({
+        data: {
+          ...mockPipelineDataResponse,
+          alert_retrieval: [
+            {
+              alerts: ['alert-1'],
+              alerts_context_count: 5,
+              extraction_strategy: 'default_esql' as const,
+              workflow_run_id: 'run-abc',
+            },
+          ],
+        },
+        error: undefined,
+        isError: false,
+        isLoading: false,
+      });
+
+      render(
+        <TestProviders>
+          <WorkflowExecutionDetailsFlyout {...failedProps} />
+        </TestProviders>
+      );
+
+      expect(MockFailureSection).toHaveBeenCalledWith(
+        expect.objectContaining({
+          perWorkflowAlertRetrieval: expect.arrayContaining([
+            expect.objectContaining({ alertsContextCount: 5, workflowRunId: 'run-abc' }),
+          ]),
+        }),
+        expect.anything()
+      );
     });
   });
 
