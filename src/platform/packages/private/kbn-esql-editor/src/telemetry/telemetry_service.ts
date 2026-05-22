@@ -34,10 +34,20 @@ import {
   ESQL_RECOMMENDED_QUERY_CLICKED,
   ESQL_STARRED_QUERY_CLICKED,
   ESQL_SUGGESTIONS_WITH_CUSTOM_COMMAND_SHOWN,
+  ESQL_VISOR_NL_SUBMITTED,
+  ESQL_COMMENT_TO_ESQL_SUBMITTED,
+  ESQL_COMMENT_TO_ESQL_REVIEWED,
+  ESQL_FIX_WITH_AI_SUBMITTED,
+  ESQL_FIX_WITH_AI_REVIEWED,
 } from './events_registration';
 import type { IndexEditorCommandArgs } from '../lookup_join/use_lookup_index_editor';
 import { COMMAND_ID as LOOKUP_INDEX_EDITOR_COMMAND } from '../lookup_join/use_lookup_index_editor';
 import { reportEsqlError } from '../report_error';
+
+export enum AiReviewAction {
+  ACCEPT = 'accept',
+  REJECT = 'reject',
+}
 
 export enum ResourceBrowserType {
   DATA_SOURCES = 'data_sources',
@@ -275,5 +285,79 @@ export class ESQLEditorTelemetryService {
     this._reportPerformanceEvent(
       this._buildBaseLatencyEvent('esql_editor_validation_latency', payload)
     );
+  }
+
+  public trackVisorNlSubmitted(params: {
+    nlLength: number;
+    contextQueryLength: number;
+    success: boolean;
+    errorCode?: string;
+    durationMs: number;
+    generatedQueryLength?: number;
+  }) {
+    this._reportEvent(ESQL_VISOR_NL_SUBMITTED, {
+      nl_length: params.nlLength,
+      context_query_length: params.contextQueryLength,
+      success: params.success,
+      duration_ms: params.durationMs,
+      ...(params.errorCode !== undefined ? { error_code: params.errorCode } : {}),
+      ...(params.generatedQueryLength !== undefined
+        ? { generated_query_length: params.generatedQueryLength }
+        : {}),
+    });
+  }
+
+  public trackCommentToEsqlSubmitted(params: {
+    nlLength: number;
+    isCompletion: boolean;
+    contextQueryLength: number;
+    success: boolean;
+    errorCode?: string;
+    durationMs: number;
+    generatedLineCount?: number;
+  }) {
+    this._reportEvent(ESQL_COMMENT_TO_ESQL_SUBMITTED, {
+      nl_length: params.nlLength,
+      is_completion: params.isCompletion,
+      context_query_length: params.contextQueryLength,
+      success: params.success,
+      duration_ms: params.durationMs,
+      ...(params.errorCode !== undefined ? { error_code: params.errorCode } : {}),
+      ...(params.generatedLineCount !== undefined
+        ? { generated_line_count: params.generatedLineCount }
+        : {}),
+    });
+  }
+
+  public trackCommentToEsqlReviewed(params: { action: AiReviewAction; linesGenerated: number }) {
+    this._reportEvent(ESQL_COMMENT_TO_ESQL_REVIEWED, {
+      action: params.action,
+      lines_generated: params.linesGenerated,
+    });
+  }
+
+  public trackFixWithAiSubmitted(params: {
+    errorCode?: string;
+    queryLength: number;
+    success: boolean;
+    durationMs: number;
+    changedLineCount?: number;
+  }) {
+    this._reportEvent(ESQL_FIX_WITH_AI_SUBMITTED, {
+      query_length: params.queryLength,
+      success: params.success,
+      duration_ms: params.durationMs,
+      ...(params.errorCode !== undefined ? { error_code: params.errorCode } : {}),
+      ...(params.changedLineCount !== undefined
+        ? { changed_line_count: params.changedLineCount }
+        : {}),
+    });
+  }
+
+  public trackFixWithAiReviewed(params: { action: AiReviewAction; linesChanged: number }) {
+    this._reportEvent(ESQL_FIX_WITH_AI_REVIEWED, {
+      action: params.action,
+      lines_changed: params.linesChanged,
+    });
   }
 }
