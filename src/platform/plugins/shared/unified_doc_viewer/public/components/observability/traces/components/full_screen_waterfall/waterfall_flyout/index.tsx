@@ -8,6 +8,7 @@
  */
 
 import {
+  EuiEmptyPrompt,
   EuiErrorBoundary,
   EuiFlyout,
   EuiFlyoutBody,
@@ -140,23 +141,48 @@ export function WaterfallFlyout({
           }
         `}
       >
-        {loading || !hit ? (
+        {loading ? (
           <EuiSkeletonText lines={5} />
+        ) : !hit ? (
+          <EuiEmptyPrompt
+            data-test-subj="unifiedDocViewerWaterfallFlyoutNotFound"
+            iconType="search"
+            titleSize="s"
+            title={
+              <h2>
+                {i18n.translate(
+                  'unifiedDocViewer.observability.traces.fullScreenWaterfall.flyout.notFound.title',
+                  { defaultMessage: 'Document not found' }
+                )}
+              </h2>
+            }
+            body={
+              <p>
+                {i18n.translate(
+                  'unifiedDocViewer.observability.traces.fullScreenWaterfall.flyout.notFound.body',
+                  {
+                    defaultMessage:
+                      'The document could not be found. It may no longer be available or an error occurred while fetching it.',
+                  }
+                )}
+              </p>
+            }
+          />
         ) : (
           <>
             <EuiTabs size="s">
               <FlyoutTabs onClick={setSelectedTabId} selectedTabId={selectedTabId} />
             </EuiTabs>
             <EuiSkeletonText isLoading={loading}>
-              {selectedTabId === tabIds.OVERVIEW && hit ? (
+              {selectedTabId === tabIds.OVERVIEW ? (
                 <EuiErrorBoundary>{children}</EuiErrorBoundary>
               ) : null}
 
-              {selectedTabId === tabIds.TABLE && hit ? (
+              {selectedTabId === tabIds.TABLE ? (
                 <DocViewerTable hit={hit} dataView={dataView} />
               ) : null}
 
-              {selectedTabId === tabIds.JSON && hit ? (
+              {selectedTabId === tabIds.JSON ? (
                 <DocViewerSource
                   id={hit.id}
                   index={hit.raw._index}

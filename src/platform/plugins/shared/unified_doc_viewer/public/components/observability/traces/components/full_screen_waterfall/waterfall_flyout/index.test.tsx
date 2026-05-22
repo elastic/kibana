@@ -70,12 +70,17 @@ describe('WaterfallFlyout', () => {
 
       expect(screen.getAllByRole('progressbar').length).toBeGreaterThan(0);
       expect(screen.queryByTestId('customChildren')).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('unifiedDocViewerWaterfallFlyoutNotFound')
+      ).not.toBeInTheDocument();
     });
+  });
 
-    it('should display skeleton when hit is unavailable', () => {
-      render(<WaterfallFlyout {...defaultProps} hit={null} />);
+  describe('not found state', () => {
+    it('should display the empty prompt when the fetch finishes with no hit', () => {
+      render(<WaterfallFlyout {...defaultProps} hit={null} loading={false} />);
 
-      expect(screen.getAllByRole('progressbar').length).toBeGreaterThan(0);
+      expect(screen.getByTestId('unifiedDocViewerWaterfallFlyoutNotFound')).toBeInTheDocument();
       expect(screen.queryByTestId('customChildren')).not.toBeInTheDocument();
     });
   });
