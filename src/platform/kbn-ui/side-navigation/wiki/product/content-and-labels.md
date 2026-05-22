@@ -8,7 +8,7 @@ Information architecture for side navigation should be validated with users thro
 
 | Area | Limit | Notes |
 | --- | --- | --- |
-| Top primary items | **12** max (logo excluded from overflow math) | Items beyond cap → overflow to [More](./more-menu.md) |
+| Top primary items | **12** max (logo excluded from overflow math) | Items beyond cap → overflow to [More](./primary-menu.md#more-menu) |
 | Bottom / footer | **5** max, **3** recommended | Utilities only |
 
 Prioritize **global, high-traffic** contexts in the primary column; push depth into the secondary menu.

@@ -1,12 +1,27 @@
 # Testing and troubleshooting
 
-## Running tests
+## Development setup
 
 ```bash
 yarn kbn bootstrap
+```
+
+## Running tests
+
+The package uses Jest and React Testing Library.
+
+```bash
 node scripts/jest src/platform/kbn-ui/side-navigation             # run all tests
 node scripts/jest src/platform/kbn-ui/side-navigation --watch     # watch mode
-node scripts/jest src/platform/kbn-ui/side-navigation --coverage  # with coverage
+node scripts/jest src/platform/kbn-ui/side-navigation --coverage  # coverage report
+```
+
+Equivalent via yarn script (if configured in your environment):
+
+```bash
+yarn test:jest src/platform/kbn-ui/side-navigation
+yarn test:jest src/platform/kbn-ui/side-navigation --watch
+yarn test:jest src/platform/kbn-ui/side-navigation --coverage
 ```
 
 ## Storybook
@@ -15,7 +30,7 @@ node scripts/jest src/platform/kbn-ui/side-navigation --coverage  # with coverag
 yarn storybook shared_ux
 ```
 
-Open `http://localhost:9001` — navigation stories live under the shared UX section.
+Open [http://localhost:9001](http://localhost:9001) — navigation stories live under the shared UX section.
 
 ## What is covered
 

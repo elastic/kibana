@@ -1,10 +1,10 @@
 # Solution-focused side navigation
 
-| Information | Details |
-| --- | --- |
-| **Date** | 2026-05-19 |
-| **Author** | [@katesosedova](https://github.com/katesosedova) |
-| **Relevant links** | [Workspace chrome guidelines](https://docs.elastic.dev) · [EUI](https://eui.elastic.co) · Storybook: `yarn storybook shared_ux` |
+**Date**: 2026-05-23
+**Author**: [@ek-so](https://github.com/katesosedova)
+**Descriptio**n: Kibana side navigtaion structure and overview: how primary and secondary navigation panels are connected to each other and function holistically
+**Relevant links**: [Workspace chrome guidelines](../README.md) · [Kibana dev docs — Chrome Navigation](https://www.elastic.co/guide/en/kibana/master/chrome-navigation.html) (index: `dev_docs/shared_ux/chrome_navigation.mdx`)
+**Tags**: `kibana`, `dev`, `chrome`, `navigation`, `side`, `sidenav`, `badges`, `sharedux`
 
 ---
 
@@ -14,25 +14,26 @@
 
 Solution-focused side navigation is Kibana's default way to help users find their way around. It has two parts: a **primary menu** on the left (top-level sections with icons and labels) and an optional **secondary panel** (the child pages and sub-sections of wherever you currently are). Together they keep users oriented as they move through a solution.
 
-Kibana also has a legacy "classic" navigation style — new work should use the solution-focused pattern instead. See [modes](./wiki/product/modes.md).
+The `@kbn/ui-side-navigation` package implements the widget (responsive layout, nested menus, accessibility). Product behavior is documented under [`wiki/product/`](./wiki/product/); engineering usage under [`wiki/engineering/`](./wiki/engineering/).
 
-### What it solves
+| Expanded mode | Collapsed mode |
+| --- | --- |
+| ![Expanded](./assets/expanded_mode.png) | ![Collapsed](./assets/collapsed_mode.png) |
+
+### Problem it solves
 
 - Keeps the top-level list short, so Kibana doesn't feel overwhelming at first glance.
 - Surfaces only the destinations relevant to the current solution (Observability, Security, Elasticsearch, and so on) instead of one giant flat list.
 - Lets users collapse the nav when they need more screen space — handy for flyouts, the AI Assistant, or just focusing on content.
-- Gives all solutions a consistent shell, so users feel familiar as they move between them.
+- Gives all solutions a consistent shell (strcuture, UI, interactions), so users feel familiar as they move between them.
 
 ### When to use
 
-Use this when you're building or updating a Kibana solution shell (Observability, Security, Elasticsearch, and similar) and you have a meaningful set of top-level destinations, each with their own child pages.
+Everytime when working with soltuon views – Observability, Security, Elasticsearch, and similar.
 
 ### When not to use
 
-- **Within a single feature area** — use tabs, breadcrumbs, or page-level links instead.
-- **Very flat IA** (two or three sibling pages) — a landing page with links or just tabs is simpler.
-- **Product announcements or marketing** — put those in What's New, in-page messages, or contextual cues. The secondary menu is not a bulletin board. See [secondary menu](./wiki/product/secondary-menu.md).
-- **Classic Kibana chrome** — avoid mixing both styles on the same deployment without a migration plan.
+Kibana also has a legacy "classic" navigation style: [`CollapsibleNav`](../../../core/packages/chrome/browser-components/src/classic/collapsible_nav.tsx), which is the only exception.
 
 ### Anatomy
 
@@ -40,17 +41,15 @@ Use this when you're building or updating a Kibana solution shell (Observability
 | --- | --- |
 | [Solution logo / home](./wiki/product/primary-menu.md#solution-logo) | Returns to the solution home; not counted toward the overflow limit. |
 | [Primary menu (top)](./wiki/product/primary-menu.md) | Top-level destinations — icons and labels when expanded, icons only when collapsed. |
-| [Primary menu (bottom / footer)](./wiki/product/footer.md) | Utility items like Settings; labels stay hidden even in expanded mode. |
+| [Primary menu (bottom / footer)](./wiki/product/primary-menu.md#footer-bottom-primary-menu) | Utility items like Settings; labels stay hidden even in expanded mode. |
 | [Secondary menu / side panel](./wiki/product/secondary-menu.md) | Child pages and sections for the selected primary item. Stays open in expanded mode, appears on hover in collapsed. |
 | [Popover](./wiki/product/primary-menu.md#popover-behavior) | Shows secondary content on hover when collapsed, or when no parent item is selected yet. |
-| [More menu](./wiki/product/more-menu.md) | Catches primary items that don't fit — either because the list exceeds 12 items, or the window is too short to show them all. |
+| [More menu](./wiki/product/primary-menu.md#more-menu) | Catches primary items that don't fit — either because the list exceeds 12 items, or the window is too short to show them all. |
 | [Collapse control](./wiki/product/modes.md#collapse-and-expand) | Toggles between expanded and collapsed mode. |
 
 ### Behavior
 
-| Expanded (default) | Collapsed |
-| --- | --- |
-| ![Expanded mode](./wiki/assets/expanded_mode.png) | ![Collapsed mode](./wiki/assets/collapsed_mode.png) |
+The navigation has 2 modes: [expanded](./wiki/assets/expanded_mode.png) and [collapsed](./wiki/assets/collapsed_mode.png).
 
 **Expanded vs collapsed**
 
@@ -62,7 +61,7 @@ Exactly one primary item is active at a time, always reflecting the user's curre
 
 **Overflow (More menu)**
 
-When the primary list has more than 12 items, or when the window is too short to show them all, extra items are tucked into a "More" entry at the bottom. This adjusts live as the nav container is resized — no manual threshold needed. See [more menu](./wiki/product/more-menu.md).
+When the primary list has more than 12 items, or when the window is too short to show them all, extra items are tucked into a "More" entry at the bottom. This adjusts live as the nav container is resized — no manual threshold needed. See [more menu](./wiki/product/primary-menu.md#more-menu).
 
 **Content guidelines**
 
@@ -71,7 +70,7 @@ When the primary list has more than 12 items, or when the window is too short to
 - "Discover" and "Dashboards" are always the first two items after the logo, across all solutions.
 - Secondary menu item names must match their page headers exactly.
 
-Further detail: [content and labels](./wiki/product/content-and-labels.md) · [badges](./wiki/product/badges.md) · [listing pages](./wiki/product/listing-pages.md) (planned).
+Further detail: [content and labels](./wiki/product/content-and-labels.md) · [badges](./wiki/product/badges.md) · [listing pages](./wiki/product/secondary-menu.md#listing-pages) (planned).
 
 ---
 

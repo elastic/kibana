@@ -22,7 +22,9 @@ In Kibana, solution-focused navigation is rendered through **chrome**, not by ea
 
 ## Documentation
 
-**Source of truth:** `README.md` and the `wiki/` directory in this package.
+**Source of truth:** [`README.md`](../../README.md) and the [`wiki/`](../../wiki/) directory in this package.
+
+**Kibana dev docs (published):** [/kibana-dev-docs/chrome/navigation](https://www.elastic.co/guide/en/kibana/master/chrome-navigation.html) — landing page in `dev_docs/shared_ux/chrome_navigation.mdx` links here.
 
 ## Related platform docs
 
