@@ -1,5 +1,5 @@
 {
-  "sha1": "f7b4ca4e38ff1b39ea4618c9042faadd56cfa8d6",
+  "sha1": "da585937bf53426175c5c19762962a6ca0053b8a",
   "tests": [
     {
       "id": "bd41f0240dfdfcb-9b0e8252d0034ea",
@@ -62,28 +62,28 @@
     {
       "id": "f24ba03baeb5e26-0723e6c11fe5d87",
       "title": "APM integration not installed but setup completed Admin user",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_setup_apm_not_installed.spec.ts",
-        "line": 64,
+        "line": 65,
         "column": 12
       }
     },
     {
       "id": "f24ba03baeb5e26-76b2ff68d4e7a1b",
       "title": "APM integration not installed but setup completed Viewer user",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_setup_apm_not_installed.spec.ts",
-        "line": 79,
+        "line": 80,
         "column": 12
       }
     },
@@ -118,29 +118,29 @@
     {
       "id": "8b3eca81b16d245-3ee5b04db1c974d",
       "title": "Collector integration is not installed collector integration missing",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_setup_with_integrations.spec.ts",
-        "line": 79,
-        "column": 10
+        "line": 83,
+        "column": 12
       }
     },
     {
       "id": "8b3eca81b16d245-7029a2aca281cbb",
       "title": "Collector integration is not installed Symbolizer integration is not installed",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_setup_with_integrations.spec.ts",
-        "line": 102,
-        "column": 10
+        "line": 109,
+        "column": 12
       }
     }
   ]
