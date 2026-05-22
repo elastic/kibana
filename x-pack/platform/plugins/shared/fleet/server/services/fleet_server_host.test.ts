@@ -19,7 +19,11 @@ import {
 
 import { appContextService } from './app_context';
 
-import { deleteFleetServerHost, migrateSettingsToFleetServerHost } from './fleet_server_host';
+import {
+  createFleetServerHost,
+  deleteFleetServerHost,
+  migrateSettingsToFleetServerHost,
+} from './fleet_server_host';
 import { agentPolicyService } from './agent_policy';
 
 jest.mock('./app_context');
@@ -121,7 +125,22 @@ describe('migrateSettingsToFleetServerHost', () => {
   });
 });
 
+describe('create', () => {
+  it('should throw FleetError when given an invalid id', async () => {
+    const soClientMock = savedObjectsClientMock.create();
+
+    await expect(
+      createFleetServerHost(
+        soClientMock,
+        { name: 'Test', host_urls: [], is_default: false, is_preconfigured: false },
+        { id: '../bad-id' }
+      )
+    ).rejects.toThrow('id is not valid');
+  });
+});
+
 describe('deleteFleetServerHost', () => {
+
   it('should removeFleetServerHostFromAll agent policies without force if not deleted from preconfiguration', async () => {
     const soMock = savedObjectsClientMock.create();
 

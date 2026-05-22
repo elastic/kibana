@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { errors } from '@elastic/elasticsearch';
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 
-import { toElasticsearchQuery } from '@kbn/es-query';
+import { toElasticsearchQuery, escapeQuotes } from '@kbn/es-query';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { ESSearchResponse as SearchResponse } from '@kbn/es-types';
 
@@ -100,7 +100,7 @@ export async function hasEnrollementAPIKeysForPolicy(
   policyId: string
 ) {
   const res = await listEnrollmentApiKeys(esClient, {
-    kuery: `policy_id:"${policyId}"`,
+    kuery: `policy_id:"${escapeQuotes(policyId)}"`,
   });
 
   return res.total !== 0;
@@ -195,7 +195,7 @@ export async function deleteEnrollmentApiKeyForAgentPolicyId(
     const { items } = await listEnrollmentApiKeys(esClient, {
       page: page++,
       perPage: 100,
-      kuery: `policy_id:"${agentPolicyId}"`,
+      kuery: `policy_id:"${escapeQuotes(agentPolicyId)}"`,
     });
 
     if (items.length === 0) {
