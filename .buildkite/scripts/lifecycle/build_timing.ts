@@ -23,7 +23,7 @@ const formatTimingSummary = (build: Build, now: Date): string => {
   const finishedAt = build.finished_at ? new Date(build.finished_at) : now;
   const totalDurationMs = finishedAt.getTime() - startedAt.getTime();
 
-  return `**Build duration**: ${minutesFromMs(totalDurationMs)}`;
+  return `* Build duration: ${minutesFromMs(totalDurationMs)}`;
 };
 
 (async () => {
@@ -37,7 +37,7 @@ const formatTimingSummary = (build: Build, now: Date): string => {
     }
 
     const summary = formatTimingSummary(build, new Date());
-    client.setMetadata('pr_comment:build_timing:body', summary);
+    client.setMetadata('pr_comment:build_timing:head', summary);
     console.log('Build timing summary:', summary);
   } catch (ex: any) {
     console.error('Build timing error:', ex.message);
