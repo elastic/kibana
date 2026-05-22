@@ -142,10 +142,7 @@ describe('Navigation Plugin', () => {
         navigationTree$,
       });
 
-      expect(coreStart.chrome.project.initNavigation).toHaveBeenCalledWith(
-        'oblt',
-        navigationTree$
-      );
+      expect(coreStart.chrome.project.initNavigation).toHaveBeenCalledWith('oblt', navigationTree$);
     });
   });
 
