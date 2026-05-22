@@ -95,6 +95,7 @@ export class ApmConfiguration {
     };
 
     const serviceOverride = merge(
+      {},
       baseConfig.servicesOverrides?.[serviceName],
       servicesOverrides[serviceName]
     );
