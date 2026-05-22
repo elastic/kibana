@@ -691,6 +691,9 @@
     "verification_started_at",
     "verification_status"
   ],
+  "fleet-cloud-onboarding-deployment": [
+    "connectorId"
+  ],
   "fleet-fleet-server-host": [
     "host_urls",
     "is_default",
