@@ -219,6 +219,22 @@ function ensureHapiCompatibleTextCharset(reply: FastifyReply): void {
   }
 }
 
+/** Hapi adds `; charset=utf-8` to JSON error/success bodies; Fastify leaves bare `application/json`. */
+function ensureHapiCompatibleJsonCharset(reply: FastifyReply): void {
+  const raw =
+    typeof reply.getHeader === 'function'
+      ? reply.getHeader('content-type') ?? reply.getHeader('Content-Type')
+      : undefined;
+  const typeStr = Array.isArray(raw) ? raw[0] : raw;
+  if (typeof typeStr !== 'string') {
+    return;
+  }
+  const lower = typeStr.toLowerCase();
+  if (lower.startsWith('application/json') && !lower.includes('charset=')) {
+    reply.header('content-type', 'application/json; charset=utf-8');
+  }
+}
+
 const NDJSON_CONTENT_TYPES_WITHOUT_CHARSET = new Set([
   'application/ndjson',
   'application/x-ndjson',
@@ -364,6 +380,7 @@ export class FastifyResponseAdapter {
     }
 
     ensureHapiCompatibleTextCharset(reply);
+    ensureHapiCompatibleJsonCharset(reply);
   }
 
   private ensureJsonSerializablePayload(payload: unknown): boolean {

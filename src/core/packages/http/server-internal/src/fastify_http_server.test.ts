@@ -459,6 +459,57 @@ describe('FastifyHttpServer', () => {
       expect(JSON.parse(res.body)).toEqual({ raw: '{"proxy":true}' });
     }, 15000);
 
+    it('treats bodyless POST as an empty stream for parse: false stream routes (Console proxy .send())', async () => {
+      const ctx = createCoreContext();
+      const config = createHttpConfig(PORT);
+      const config$ = new BehaviorSubject(config);
+
+      server = new FastifyHttpServer(ctx, 'Kibana', new BehaviorSubject(config.shutdownTimeout));
+      const setup = await server.setup({ config$ });
+
+      const enhanceHandler = (handler: any) => async (req: any, res: any) =>
+        handler({} as any, req, res);
+
+      const router = new Router('/api/fastify-mvp', ctx.logger.get('router'), enhanceHandler, {
+        env,
+      });
+
+      router.post(
+        {
+          path: '/empty-stream-body',
+          security: { authz: { enabled: false, reason: 'test' } },
+          validate: {
+            body: schema.stream(),
+          },
+          options: {
+            body: {
+              output: 'stream',
+              parse: false,
+            },
+          },
+        },
+        async (_context, req, res) => {
+          expect(typeof (req.body as { pipe?: unknown })?.pipe).toBe('function');
+          const chunks: Buffer[] = [];
+          for await (const chunk of req.body as Readable) {
+            chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+          }
+          return res.ok({ body: { bytes: Buffer.concat(chunks).length } });
+        }
+      );
+
+      setup.registerRouter(router);
+      await server.start();
+
+      const address = (setup.server as any).server.address();
+      listenPort = typeof address === 'object' && address ? address.port : 0;
+      expect(listenPort).toBeGreaterThan(0);
+
+      const res = await httpRequest(listenPort, '/api/fastify-mvp/empty-stream-body', 'POST');
+      expect(res.statusCode).toBe(200);
+      expect(JSON.parse(res.body)).toEqual({ bytes: 0 });
+    }, 15000);
+
     it('accepts PUT image/png bodies for stream routes (Files upload / defaultImage parity)', async () => {
       const ctx = createCoreContext();
       const config = createHttpConfig(PORT);

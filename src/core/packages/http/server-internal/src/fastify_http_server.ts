@@ -81,6 +81,7 @@ import {
   buildHapiCompatRequestFromFastify,
   toPlainRouteParams,
 } from './fastify/fastify_to_hapi_request';
+import { kibanaResponseFromRouteHandlerError } from './fastify/kibana_route_handler_errors';
 import {
   adoptToFastifyOnPostAuth,
   adoptToFastifyOnPreAuth,
@@ -432,8 +433,6 @@ export class FastifyHttpServer {
       done();
     });
 
-    await this.installFastifyRequestBodyAdapters(this.fastify, config);
-
     (this.fastify as any).getKibanaAuthRegistered = () => this.authRegistered;
 
     // Fastify forbids registering routes after `listen()`, but Kibana relies on adding
@@ -453,7 +452,10 @@ export class FastifyHttpServer {
       },
     });
     this.installFastifyDispatcher(this.fastify, this.fmw);
+    // Register before body parsers and any other `preParsing` hooks so `request.app.matchedRoute`
+    // is set when content-type parsers run (e.g. Console proxy `parse: false` + `output: stream`).
     this.installRouteLookupHook(this.fastify, this.fmw, config.socketTimeout);
+    await this.installFastifyRequestBodyAdapters(this.fastify, config);
     this.installRedactedSessionIdPostAuthHandler();
 
     this.fastify.addHook('onSend', async (req, reply, payload) => {
@@ -1064,6 +1066,21 @@ export class FastifyHttpServer {
         }
       }
       const plainParams = toPlainRouteParams(params);
+      const hasEmptyNamedParam = Object.entries(plainParams).some(
+        ([name, value]) =>
+          value === '' && name !== wildcardName && name !== '*' && !name.endsWith('*')
+      );
+      if (hasEmptyNamedParam) {
+        if (this.fallbackHandler) {
+          (req as { params: unknown }).params = {};
+          return this.fallbackHandler(req, reply, {});
+        }
+        return reply.code(404).send({
+          statusCode: 404,
+          error: 'Not Found',
+          message: `Not Found`,
+        });
+      }
       (req as { params: unknown }).params = plainParams;
       return (match.handler as unknown as FmwHandler)(req, reply, plainParams);
     };
@@ -1312,6 +1329,11 @@ export class FastifyHttpServer {
             }),
             reply
           );
+        }
+
+        const mapped = kibanaResponseFromRouteHandlerError(error);
+        if (mapped) {
+          return await this.responseAdapter.handle(mapped, reply);
         }
 
         this.log.error(

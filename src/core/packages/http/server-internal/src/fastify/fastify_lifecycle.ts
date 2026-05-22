@@ -41,6 +41,7 @@ import { KIBANA_HAPI_COMPAT_REQUEST } from './fastify_request_compat_symbol';
 import { kibanaRouteOptionsFromRouterRoute } from './fastify_route_lookup';
 import {
   getKibanaCompatRequestUrl,
+  coercePayloadForUnparsedStreamRoute,
   mapRouteSecurityToHapiAuthSettings,
   toPlainQuery,
   toPlainRouteParams,
@@ -148,7 +149,10 @@ const syncHapiCompatRouteMetadata = (
   compatRecord.method = String(req.method ?? '').toLowerCase();
   compatRecord.params = toPlainRouteParams((req as { params?: unknown }).params);
   compatRecord.query = toPlainQuery((req as { query?: Record<string, unknown> }).query);
-  compatRecord.payload = (req as { body?: unknown }).body;
+  compatRecord.payload = coercePayloadForUnparsedStreamRoute(
+    matchedRoute ?? { options: {} },
+    (req as { body?: unknown }).body
+  );
   compatRecord.info.host = hostHeader;
   compatRecord.route = {
     method: String(matched?.method ?? req.method ?? '').toLowerCase(),
@@ -313,6 +317,11 @@ export function adoptToFastifyOnPreAuth(fn: OnPreAuthHandler, log: Logger) {
     reply: FastifyReply,
     payload: unknown
   ): Promise<unknown> {
+    const app = (req as { app?: { matchedRoute?: unknown } }).app;
+    // Catch-all Fastify routing runs lifecycle hooks before the dispatcher 404s unregistered paths.
+    if (!app?.matchedRoute) {
+      return payload === undefined ? Buffer.alloc(0) : payload;
+    }
     try {
       const result = await fn(
         CoreKibanaRequest.from(buildKibanaRequest(req, reply)),
@@ -345,6 +354,10 @@ export function adoptToFastifyOnPostAuth(fn: OnPostAuthHandler, log: Logger) {
     req: FastifyRequest,
     reply: FastifyReply
   ): Promise<FastifyReply | void> {
+    const app = (req as { app?: { matchedRoute?: unknown } }).app;
+    if (!app?.matchedRoute) {
+      return;
+    }
     try {
       const result = await fn(
         CoreKibanaRequest.from(buildKibanaRequest(req, reply)),
@@ -359,8 +372,8 @@ export function adoptToFastifyOnPostAuth(fn: OnPostAuthHandler, log: Logger) {
         return;
       }
       if (result.type === OnPostAuthResultType.authzResult) {
-        const app = (req as any).app ?? ((req as any).app = {});
-        Object.defineProperty(app, 'authzResult', {
+        const reqApp = (req as any).app ?? ((req as any).app = {});
+        Object.defineProperty(reqApp, 'authzResult', {
           value: deepFreeze(result.authzResult),
           configurable: false,
           writable: false,

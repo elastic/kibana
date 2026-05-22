@@ -14,21 +14,13 @@ import type { RouterRoute } from '@kbn/core-http-server';
 import { routeHasUnparsedPayload, routeWantsStreamPayload } from './fastify_route_body_options';
 
 /**
- * JSON routes that declare `parse: false` and `output: 'stream'` must see the raw payload
- * as a Node Readable — e.g. Console `/api/console/proxy` pipes the body to Elasticsearch.
- */
-function routeWantsUnparsedJsonBodyStream(route: RouterRoute | undefined): boolean {
-  return routeHasUnparsedPayload(route) && routeWantsStreamPayload(route);
-}
-
-/**
  * Fastify rejects requests that declare `Content-Type: application/json` but send an
  * empty body (`FST_ERR_CTP_EMPTY_JSON_BODY`). Hapi accepted these; bodyless JSON POSTs are
- * treated as `null` (e.g. `schema.nullable(...)` routes). Routes without body validation still
- * receive `{}` from {@link CoreKibanaRequest.from} when no schema is declared.
+ * treated as `{}` (e.g. export routes with `schema.object` fields). Explicit JSON `null` still
+ * parses to `null` for `schema.nullable(...)` routes.
  *
  * Install before routes listen; replaces the built-in `application/json` parser with one
- * that treats an empty string body as `null` (Hapi parity for bodyless JSON POSTs),
+ * that treats an empty string body as `{}` (Hapi parity for bodyless JSON POSTs),
  * delegating otherwise to Fastify's default
  * JSON parser (same proto / constructor poisoning settings as the instance).
  *
@@ -50,14 +42,17 @@ export function installHapiCompatibleJsonBodyParser(fastify: FastifyInstance): v
     { parseAs: 'buffer' },
     function kibanaLenientJsonParser(request: FastifyRequest, body: Buffer, done) {
       const route = (request as { app?: { matchedRoute?: RouterRoute } }).app?.matchedRoute;
-      if (routeWantsUnparsedJsonBodyStream(route)) {
-        done(null, Readable.from(body.length > 0 ? body : Buffer.alloc(0)));
+      if (routeHasUnparsedPayload(route)) {
+        const buf = body.length > 0 ? body : Buffer.alloc(0);
+        done(null, routeWantsStreamPayload(route) ? Readable.from(buf) : buf);
         return;
       }
 
       const text = body.length === 0 ? '' : body.toString('utf8');
       if (text === '') {
-        done(null, null);
+        // Hapi treats bodyless `application/json` POSTs as `{}` for `schema.object` routes; `null`
+        // only comes from an explicit JSON `null` body or `schema.nullable(...)`.
+        done(null, {});
         return;
       }
       defaultJsonParser(request, text, done);

@@ -79,6 +79,10 @@ export function registerFastifyAuthentication(params: {
   // `registerAuth`; using `preValidation` keeps authenticate-before-postAuth ordering intact.
   fastify.addHook('preValidation', async (req: FastifyRequest, reply: FastifyReply) => {
     const app = ((req as any).app = (req as any).app ?? {});
+    // Unregistered routes should 404 from the dispatcher; security auth throws on many of them.
+    if (!app.matchedRoute) {
+      return;
+    }
     // Always run through buildKibanaRequest so `app.fastifyReply` stays current for session
     // cookie reads in {@link createFastifyCookieSessionStorageFactory}.
     const compat = buildKibanaRequest(req, reply);
@@ -168,6 +172,10 @@ export function registerFastifyAuthentication(params: {
     } catch (error) {
       log.error(error);
       if (isReplyCommitted(reply)) {
+        return;
+      }
+      // Unregistered routes should 404 from the dispatcher; do not mask auth failures as 500.
+      if (!app.matchedRoute) {
         return;
       }
       await responseAdapter.handle(

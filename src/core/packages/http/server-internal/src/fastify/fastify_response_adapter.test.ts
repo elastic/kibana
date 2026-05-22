@@ -164,6 +164,36 @@ describe('FastifyResponseAdapter', () => {
     expect(headers.get('content-type')).toBe('application/ndjson');
   });
 
+  it('appends charset=utf-8 to application/json responses (Hapi parity)', async () => {
+    const recordedHeaders = new Map<string, string | number | string[]>();
+
+    const reply = {
+      request: { app: {} },
+      code: jest.fn().mockReturnThis(),
+      header(this: void, name: string, value: string | number | string[]) {
+        recordedHeaders.set(name.toLowerCase(), value);
+      },
+      hasHeader(name: string) {
+        return recordedHeaders.has(name.toLowerCase());
+      },
+      getHeader(name: string) {
+        return recordedHeaders.get(name.toLowerCase());
+      },
+      getHeaders() {
+        return Object.fromEntries(recordedHeaders);
+      },
+      send: jest.fn().mockReturnThis(),
+    } as unknown as FastifyReply;
+
+    const adapter = new FastifyResponseAdapter();
+    await adapter.handle(
+      new KibanaResponse(200, { ok: true }, { headers: { 'content-type': 'application/json' } }),
+      reply
+    );
+
+    expect(recordedHeaders.get('content-type')).toBe('application/json; charset=utf-8');
+  });
+
   it('appends charset=utf-8 to explicit text/csv responses (Hapi reporting parity)', async () => {
     const recordedHeaders = new Map<string, string | number | string[]>();
 

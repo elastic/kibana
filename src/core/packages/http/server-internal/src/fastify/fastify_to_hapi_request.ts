@@ -9,6 +9,7 @@
 
 import { inspect } from 'util';
 import { URL } from 'url';
+import { Readable } from 'node:stream';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { Request as HapiRequest } from '@hapi/hapi';
 import type {
@@ -17,6 +18,7 @@ import type {
   RouteSecurity,
   RouterRoute,
 } from '@kbn/core-http-server';
+import { routeHasUnparsedPayload, routeWantsStreamPayload } from './fastify_route_body_options';
 
 /**
  * {@link CoreKibanaRequest} param validation (config-schema ObjectType) requires a
@@ -117,6 +119,36 @@ export function isHapiRouteAuthDisabled(auth: unknown): boolean {
 }
 
 /**
+ * Supertest may POST with `Content-Type: application/json` and body `{}` even when the route
+ * declares `parse: false` + `output: 'stream'` (Hapi treated that as an empty stream). Coerce
+ * plain objects to an empty Readable before {@link CoreKibanaRequest} stream validation runs.
+ */
+export function coercePayloadForUnparsedStreamRoute(
+  route: Pick<RouterRoute, 'options'>,
+  payload: unknown
+): unknown {
+  if (
+    !routeHasUnparsedPayload(route as RouterRoute) ||
+    !routeWantsStreamPayload(route as RouterRoute)
+  ) {
+    return payload;
+  }
+  if (
+    payload === undefined ||
+    payload === null ||
+    (typeof payload === 'object' &&
+      !Buffer.isBuffer(payload) &&
+      !(payload instanceof Readable) &&
+      typeof (payload as { pipe?: unknown }).pipe !== 'function')
+  ) {
+    // Hapi stream routes with `parse: false` expose an empty Readable for bodyless POSTs
+    // (e.g. Console proxy `.send()`). `sanitizeRequest` would otherwise turn `undefined` into `{}`.
+    return Readable.from(Buffer.alloc(0));
+  }
+  return payload;
+}
+
+/**
  * Builds an object that satisfies the subset of the Hapi `Request` interface read by
  * {@link CoreKibanaRequest.from} so the existing Kibana request machinery can be reused
  * unchanged when running on Fastify.
@@ -162,7 +194,7 @@ export function buildHapiCompatRequestFromFastify(
     method: String(fastifyReq.method ?? '').toLowerCase(),
     params: toPlainRouteParams(fastifyReq.params),
     query: toPlainQuery((fastifyReq as { query?: Record<string, unknown> }).query),
-    payload: fastifyReq.body,
+    payload: coercePayloadForUnparsedStreamRoute(route, fastifyReq.body),
     path: url.pathname,
     raw: {
       req: fastifyReq.raw,

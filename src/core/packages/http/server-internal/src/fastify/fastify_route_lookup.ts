@@ -124,10 +124,24 @@ export function populateMatchedRouteFromFindMyWay(
       }
     }
     const plainParams = toPlainRouteParams(params);
-    app.matchedRouteParams = plainParams;
-    // Mutate before `preValidation` (registerAuth): auth caches the Hapi-compat request,
-    // which snapshots `req.params` for route validation.
-    (req as { params: unknown }).params = plainParams;
+    // Hapi does not treat a trailing slash as an empty `{param}` capture (e.g. `/alerts/` does
+    // not satisfy `/alerts/{alert_id}`). find-my-way matches with `alert_id: ''`, which changes
+    // status codes (400 vs 302/404) for consumers that rely on the missing-param behavior.
+    const hasEmptyNamedParam = Object.entries(plainParams).some(
+      ([name, value]) =>
+        value === '' && name !== wildcardName && name !== '*' && !name.endsWith('*')
+    );
+    if (hasEmptyNamedParam) {
+      delete app.matchedRoute;
+      delete app.matchedKibanaRouteOptions;
+      delete app.matchedRouteParams;
+      (req as { params: unknown }).params = {};
+    } else {
+      app.matchedRouteParams = plainParams;
+      // Mutate before `preValidation` (registerAuth): auth caches the Hapi-compat request,
+      // which snapshots `req.params` for route validation.
+      (req as { params: unknown }).params = plainParams;
+    }
   } else {
     delete app.matchedRoute;
     delete app.matchedKibanaRouteOptions;
