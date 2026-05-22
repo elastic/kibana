@@ -67,7 +67,7 @@ export function registerGetStepDefinitionsRoute(
  * - **Start + poll** (`createPollServerStepDefinition` with `start` and `poll`):
  *   SHA-256 of `start` and `poll` source joined with `\n--\n` (order: start, then poll).
  *
- * `pollPolicy`, `pollCeilings`, and `onCancel` are not hashed — only the phase
+ * `policy`, `ceilings`, and `onCancel` are not hashed — only the phase
  * functions that implement step behavior. Changing policy/ceilings or cancel cleanup
  * without editing `poll` / `start` / `handler` does not change the hash.
  */

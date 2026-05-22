@@ -127,7 +127,7 @@ describe('CustomStepImpl', () => {
       const mocks = createMocks();
       const stepDefinition = {
         poll: jest.fn(),
-        pollPolicy: { strategy: 'fixed', intervalMs: 1000 },
+        policy: { strategy: 'fixed', intervalMs: 1000 },
       };
 
       buildImpl(stepDefinition, mocks);
@@ -147,7 +147,7 @@ describe('CustomStepImpl', () => {
       const stepDefinition = {
         start: jest.fn(),
         poll: jest.fn(),
-        pollPolicy: { strategy: 'fixed', intervalMs: 1000 },
+        policy: { strategy: 'fixed', intervalMs: 1000 },
       };
 
       buildImpl(stepDefinition, mocks);
@@ -187,7 +187,7 @@ describe('CustomStepImpl', () => {
 
       const impl = buildImpl({
         poll: jest.fn(),
-        pollPolicy: { strategy: 'fixed', intervalMs: 1000 },
+        policy: { strategy: 'fixed', intervalMs: 1000 },
       });
       const result = await (impl as any)._run({});
 
@@ -241,7 +241,7 @@ describe('CustomStepImpl', () => {
 
       const impl = buildImpl({
         poll: jest.fn(),
-        pollPolicy: { strategy: 'fixed', intervalMs: 1000 },
+        policy: { strategy: 'fixed', intervalMs: 1000 },
       });
       await impl.onCancel();
 

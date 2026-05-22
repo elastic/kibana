@@ -20,7 +20,7 @@ This separation ensures:
 Server-side custom steps use one of two definition helpers:
 
 - **[Single-shot custom steps](#single-shot-custom-steps-createserverstepdefinition)** — `createServerStepDefinition` with a `handler` (synchronous or fast work).
-- **[Durable start/poll custom steps](#durable-startpoll-custom-steps-createpollserverstepdefinition)** — `createPollServerStepDefinition` with `poll`, `pollPolicy`, and optionally `start` (async work that wakes in `WAITING` until complete).
+- **[Durable start/poll custom steps](#durable-startpoll-custom-steps-createpollserverstepdefinition)** — `createPollServerStepDefinition` with `poll`, `policy`, and optionally `start` (async work that wakes in `WAITING` until complete).
 
 Both paths share the same registration model (your plugin, common + public definitions). See the single-shot guide below for the default contributor walkthrough.
 
@@ -934,7 +934,7 @@ The public definition must include:
 
 ## Durable start/poll custom steps (`createPollServerStepDefinition`)
 
-Use this section when a step cannot finish in a single handler invocation: you **start** work, then **check status on a schedule** until the job completes or fails. The execution engine persists author state, moves the step to `WAITING` between polls, and wakes it according to `pollPolicy`.
+Use this section when a step cannot finish in a single handler invocation: you **start** work, then **check status on a schedule** until the job completes or fails. The execution engine persists author state, moves the step to `WAITING` between polls, and wakes it according to `policy`.
 
 **Good fits:** async exports/reports, ML or Osquery actions, connector jobs, any upstream API that returns a job id and a status endpoint.
 
@@ -945,7 +945,7 @@ Do **not** mix APIs on one definition: poll-based steps omit `handler` and are b
 | Helper | Server shape | Returns from `start` / `poll` |
 |--------|--------------|-------------------------------------|
 | `createServerStepDefinition` | `handler` | `StepHandlerResult` — `{ output }` or `{ error }` |
-| `createPollServerStepDefinition` | `poll`, `pollPolicy` (required), `start` (optional), `pollCeilings` (optional) | `DurablePhaseResult` — see below |
+| `createPollServerStepDefinition` | `poll`, `policy` (required), `start` (optional), `ceilings` (optional) | `DurablePhaseResult` — see below |
 
 ```mermaid
 sequenceDiagram
@@ -956,7 +956,7 @@ sequenceDiagram
   Engine->>StartPhase: first execution
   StartPhase-->>Engine: state handoff
   loop until output or error
-    Engine->>PollHandler: wake after pollPolicy delay
+    Engine->>PollHandler: wake after policy delay
     PollHandler-->>Engine: continue or output or error
   end
 ```
@@ -967,14 +967,14 @@ Same as single-shot steps: define `id`, `inputSchema`, `outputSchema`, and optio
 
 ### Step 2: Server definition with `createPollServerStepDefinition`
 
-Import `createPollServerStepDefinition` from `@kbn/workflows-extensions/server`. Spread your common definition and add `poll`, `pollPolicy` (and optionally `start`, `pollCeilings`, `stateSchema`, `onCancel`).
+Import `createPollServerStepDefinition` from `@kbn/workflows-extensions/server`. Spread your common definition and add `poll`, `policy` (and optionally `start`, `ceilings`, `stateSchema`, `onCancel`).
 
 **Execution modes**
 
 | Mode | Fields | Behavior |
 |------|--------|----------|
-| **`start` + `poll`** | `start`, `poll`, `pollPolicy` | `start` may return `{ output }` / `{ error }` immediately, or `{ state }` to hand off. The first `poll` runs on the **next** wake-up (not in the same turn as `start`). |
-| **`poll` only** | `poll`, `pollPolicy` | No `start`. `poll` runs on first execution, then on each scheduled wake-up until done. |
+| **`start` + `poll`** | `start`, `poll`, `policy` | `start` may return `{ output }` / `{ error }` immediately, or `{ state }` to hand off. The first `poll` runs on the **next** wake-up (not in the same turn as `start`). |
+| **`poll` only** | `poll`, `policy` | No `start`. `poll` runs on first execution, then on each scheduled wake-up until done. |
 
 **`DurablePhaseResult`** (return type for both `start` and `poll`):
 
@@ -982,7 +982,7 @@ Import `createPollServerStepDefinition` from `@kbn/workflows-extensions/server`.
 - **`{ error }`** — failure; step fails with that error.
 - **`PollContinueResult`** — continue in `WAITING` (schedule another wake-up). Any of:
   - **`undefined`** — continue polling; keep the previously persisted author state (same as returning `{}` without `output` / `error`).
-  - **`{ state?, nextPollDelayMs? }`** — continue and optionally update state or override the next delay. Omit `state` to keep prior author state. If `nextPollDelayMs` is a positive number, the **next** wake-up uses that delay from now; otherwise spacing follows `pollPolicy`.
+  - **`{ state?, nextPollDelayMs? }`** — continue and optionally update state or override the next delay. Omit `state` to keep prior author state. If `nextPollDelayMs` is a positive number, the **next** wake-up uses that delay from now; otherwise spacing follows `policy`.
 
 Optional **`stateSchema`**: a `z.object({ ... })` describing author state passed between `start` and `poll` invocations. It types `context.state` in `poll` and the `state` field on `{ state }` continuations from `start` / `poll`.
 
@@ -991,12 +991,12 @@ Optional **`stateSchema`**: a `z.object({ ... })` describing author state passed
 - **`state`** — author state from the previous `start` / `poll` (typed from `stateSchema` when provided; `undefined` on the first poll of a poll-only step).
 - **`attempt`** — 0-based index of this `poll` invocation (does not count `start`).
 
-**`pollPolicy`** (required; fixed at definition time, not overridable from workflow YAML):
+**`policy`** (required; fixed at definition time, not overridable from workflow YAML):
 
 - **`fixed`** — `{ strategy: 'fixed', intervalMs: number }` — same delay between every poll.
 - **`exponential`** — `{ strategy: 'exponential', initialMs, maxMs, multiplier?, jitter? }` — delay grows by `multiplier` (default `2`), capped at `maxMs`. With `jitter: true`, delay is randomized in `[computed/2, computed]` ms (same jitter helper as on-failure retry).
 
-**`pollCeilings`** (optional): `{ maxAttempts?, maxWaitMs? }`. When omitted, defaults are **120** attempts and **3_600_000** ms (1 hour). The step registry logs a **warning** at registration if you rely on defaults — declare explicit ceilings in production. Exceeding a ceiling fails the step with `ExecutionError` type `'PollCeilingExceeded'`.
+**`ceilings`** (optional): `{ maxAttempts?, maxWaitMs? }`. When omitted, defaults are **120** attempts and **3_600_000** ms (1 hour). The step registry logs a **warning** at registration if you rely on defaults — declare explicit ceilings in production. Exceeding a ceiling fails the step with `ExecutionError` type `'PollCeilingExceeded'`.
 
 ### Cancellation cleanup (`onCancel`) for start/poll steps
 
@@ -1023,8 +1023,8 @@ export const myAsyncStep = createPollServerStepDefinition({
     }
     return { state: { jobId: context.state!.jobId } };
   },
-  pollPolicy: { strategy: 'fixed', intervalMs: 5000 },
-  pollCeilings: { maxAttempts: 60, maxWaitMs: 300_000 },
+  policy: { strategy: 'fixed', intervalMs: 5000 },
+  ceilings: { maxAttempts: 60, maxWaitMs: 300_000 },
   onCancel: async (context) => {
     context.logger.info('Workflow cancelled — aborting export if still running');
     // await cancelExport(context.input, persistedState...);
@@ -1052,8 +1052,8 @@ Run Kibana with `yarn start --run-examples`, open **Developer examples** → **W
 | `start` queues a fake `requestId`, returns `{ state: { phase: 'queued', ... } }` | POST to export/report API or enqueue a background task |
 | `poll` advances `phase` until `simulatedRenderPolls` | GET job status from Elasticsearch or an upstream service |
 | `{ output: { documentDownloadPath, ... } }` | Final artifact URL and metadata |
-| `pollPolicy: { strategy: 'fixed', intervalMs: 2000 }` | Tune per integration SLA |
-| `pollCeilings: { maxAttempts: 12, maxWaitMs: 60_000 }` | Set explicitly for your job duration |
+| `policy: { strategy: 'fixed', intervalMs: 2000 }` | Tune per integration SLA |
+| `ceilings: { maxAttempts: 12, maxWaitMs: 60_000 }` | Set explicitly for your job duration |
 
 **Workflow YAML**
 
@@ -1083,8 +1083,8 @@ export const durablePollStepDefinition = createPollServerStepDefinition({
     }
     return { output: { requestId: context.state!.requestId, documentDownloadPath: '…', totalHits: 42, generatedAt: new Date().toISOString() } };
   },
-  pollPolicy: { strategy: 'fixed', intervalMs: 2000 },
-  pollCeilings: { maxAttempts: 12, maxWaitMs: 60_000 },
+  policy: { strategy: 'fixed', intervalMs: 2000 },
+  ceilings: { maxAttempts: 12, maxWaitMs: 60_000 },
 });
 ```
 
@@ -1098,8 +1098,8 @@ createPollServerStepDefinition({
     if (job.status === 'complete') return { output: { result: job.result } };
     return {};
   },
-  pollPolicy: { strategy: 'exponential', initialMs: 1000, maxMs: 60_000, jitter: true },
-  pollCeilings: { maxAttempts: 30, maxWaitMs: 600_000 },
+  policy: { strategy: 'exponential', initialMs: 1000, maxMs: 60_000, jitter: true },
+  ceilings: { maxAttempts: 30, maxWaitMs: 600_000 },
 });
 ```
 

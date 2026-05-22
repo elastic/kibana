@@ -41,8 +41,8 @@ describe('PollPolicyStepHandler', () => {
       const stepDefinition = {
         start,
         poll: pollHandler,
-        pollPolicy: { strategy: 'fixed' as const, intervalMs: 5_000 },
-        pollCeilings: { maxAttempts: 10, maxWaitMs: 60_000 },
+        policy: { strategy: 'fixed' as const, intervalMs: 5_000 },
+        ceilings: { maxAttempts: 10, maxWaitMs: 60_000 },
       };
       const mocks = createHandlerTestMocks();
       const handler = buildPollHandler(stepDefinition, mocks);
@@ -64,8 +64,8 @@ describe('PollPolicyStepHandler', () => {
       const pollHandler = jest.fn().mockResolvedValue({ state: { progress: 1 } });
       const stepDefinition = {
         poll: pollHandler,
-        pollPolicy: { strategy: 'fixed' as const, intervalMs: 1_000 },
-        pollCeilings: { maxAttempts: 10, maxWaitMs: 60_000 },
+        policy: { strategy: 'fixed' as const, intervalMs: 1_000 },
+        ceilings: { maxAttempts: 10, maxWaitMs: 60_000 },
       };
       const mocks = createHandlerTestMocks();
       const handler = buildPollHandler(stepDefinition, mocks);
@@ -101,8 +101,8 @@ describe('PollPolicyStepHandler', () => {
       const mocks = createHandlerTestMocks(initialState);
       const stepDefinition = {
         poll: pollHandler,
-        pollPolicy: { strategy: 'fixed' as const, intervalMs: 5_000 },
-        pollCeilings: { maxAttempts: 100, maxWaitMs: 60 * 60_000 },
+        policy: { strategy: 'fixed' as const, intervalMs: 5_000 },
+        ceilings: { maxAttempts: 100, maxWaitMs: 60 * 60_000 },
       };
       const handler = buildPollHandler(stepDefinition, mocks);
 
@@ -135,7 +135,7 @@ describe('PollPolicyStepHandler', () => {
       const mocks = createHandlerTestMocks(initialState);
       const stepDefinition = {
         poll: pollHandler,
-        pollPolicy: { strategy: 'fixed' as const, intervalMs: 5_000 },
+        policy: { strategy: 'fixed' as const, intervalMs: 5_000 },
       };
       const handler = buildPollHandler(stepDefinition, mocks);
 
@@ -161,8 +161,8 @@ describe('PollPolicyStepHandler', () => {
       const mocks = createHandlerTestMocks(initialState);
       const stepDefinition = {
         poll: pollHandler,
-        pollPolicy: { strategy: 'fixed' as const, intervalMs: 1_000 },
-        pollCeilings: { maxAttempts: 10, maxWaitMs: 60_000 },
+        policy: { strategy: 'fixed' as const, intervalMs: 1_000 },
+        ceilings: { maxAttempts: 10, maxWaitMs: 60_000 },
       };
       const handler = buildPollHandler(stepDefinition, mocks);
 
@@ -185,8 +185,8 @@ describe('PollPolicyStepHandler', () => {
       const mocks = createHandlerTestMocks(initialState);
       const stepDefinition = {
         poll: pollHandler,
-        pollPolicy: { strategy: 'fixed' as const, intervalMs: 1_000 },
-        pollCeilings: { maxAttempts: 10, maxWaitMs: 60_000 },
+        policy: { strategy: 'fixed' as const, intervalMs: 1_000 },
+        ceilings: { maxAttempts: 10, maxWaitMs: 60_000 },
       };
       const handler = buildPollHandler(stepDefinition, mocks);
 
@@ -211,8 +211,8 @@ describe('PollPolicyStepHandler', () => {
       const mocks = createHandlerTestMocks(initialState);
       const stepDefinition = {
         poll: pollHandler,
-        pollPolicy: { strategy: 'fixed' as const, intervalMs: 100 },
-        pollCeilings: { maxAttempts: 5, maxWaitMs: 60_000 },
+        policy: { strategy: 'fixed' as const, intervalMs: 100 },
+        ceilings: { maxAttempts: 5, maxWaitMs: 60_000 },
       };
       const handler = buildPollHandler(stepDefinition, mocks);
 
@@ -238,8 +238,8 @@ describe('PollPolicyStepHandler', () => {
       const mocks = createHandlerTestMocks(initialState);
       const stepDefinition = {
         poll: pollHandler,
-        pollPolicy: { strategy: 'fixed' as const, intervalMs: 10_000 },
-        pollCeilings: { maxAttempts: 100, maxWaitMs: 60_000 },
+        policy: { strategy: 'fixed' as const, intervalMs: 10_000 },
+        ceilings: { maxAttempts: 100, maxWaitMs: 60_000 },
       };
       const handler = buildPollHandler(stepDefinition, mocks);
 
@@ -261,8 +261,8 @@ describe('PollPolicyStepHandler', () => {
       const mocks = createHandlerTestMocks(initialState);
       const stepDefinition = {
         poll: pollHandler,
-        pollPolicy: { strategy: 'fixed' as const, intervalMs: 60_000 },
-        pollCeilings: { maxAttempts: 10, maxWaitMs: 120_000 },
+        policy: { strategy: 'fixed' as const, intervalMs: 60_000 },
+        ceilings: { maxAttempts: 10, maxWaitMs: 120_000 },
       };
       const handler = buildPollHandler(stepDefinition, mocks);
 
@@ -290,7 +290,7 @@ describe('PollPolicyStepHandler', () => {
       const mocks = createHandlerTestMocks(initialState);
       const stepDefinition = {
         poll: pollHandler,
-        pollPolicy: { strategy: 'fixed' as const, intervalMs: 1_000 },
+        policy: { strategy: 'fixed' as const, intervalMs: 1_000 },
         onCancel,
       };
       const handler = buildPollHandler(stepDefinition, mocks);

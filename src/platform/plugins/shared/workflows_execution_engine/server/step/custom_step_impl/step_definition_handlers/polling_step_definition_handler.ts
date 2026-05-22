@@ -179,7 +179,7 @@ export class PollPolicyStepHandler implements CustomStepDefinitionHandler {
     }
 
     const data = await this.enforceCeilings({
-      ceilings: this.stepDefinition.pollCeilings,
+      ceilings: this.stepDefinition.ceilings,
       attempt,
       nextPollAt,
       startedAt: stepState.startedAt,
@@ -253,7 +253,7 @@ export class PollPolicyStepHandler implements CustomStepDefinitionHandler {
 
   private async calculateNextPollAt(params: { currentAttempt: number }): Promise<string> {
     const { currentAttempt } = params;
-    const policy = this.stepDefinition.pollPolicy;
+    const policy = this.stepDefinition.policy;
 
     const now = new Date();
 

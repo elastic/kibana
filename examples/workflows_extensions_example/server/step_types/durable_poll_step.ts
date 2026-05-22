@@ -65,6 +65,6 @@ export const durablePollStepDefinition = createPollServerStepDefinition({
       },
     };
   },
-  pollPolicy: { strategy: 'fixed', intervalMs: 2000 },
-  pollCeilings: { maxAttempts: 12, maxWaitMs: 20_000 },
+  policy: { strategy: 'fixed', intervalMs: 2000 },
+  ceilings: { maxAttempts: 12, maxWaitMs: 20_000 },
 });

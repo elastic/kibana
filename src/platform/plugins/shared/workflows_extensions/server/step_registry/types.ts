@@ -232,7 +232,7 @@ export type PollOnCancelHandler<
 > = (context: PollHandlerContext<Input, Config, State>) => Promise<void> | void;
 
 /**
- * Full server definition for **`poll` only** (flat `poll`, `pollPolicy`, `pollCeilings`).
+ * Full server definition for **`poll` only** (flat `poll`, `policy`, `ceilings`).
  */
 export type PollOnlyStepDefinition<
   Input extends z.ZodType = z.ZodType,
@@ -241,8 +241,8 @@ export type PollOnlyStepDefinition<
   State extends z.ZodObject = z.ZodObject
 > = Omit<CommonServerStepDefinition<Input, Output, Config>, 'handler'> & {
   poll: PollHandler<Input, Output, Config, State>;
-  pollPolicy: PollPolicy;
-  pollCeilings?: PollCeilings;
+  policy: PollPolicy;
+  ceilings?: PollCeilings;
   stateSchema?: State;
   onCancel?: PollOnCancelHandler<Input, Config, State>;
 };

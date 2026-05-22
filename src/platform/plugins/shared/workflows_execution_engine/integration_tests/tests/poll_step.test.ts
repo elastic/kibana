@@ -31,8 +31,8 @@ const pollOnlyStep = createPollServerStepDefinition({
     }
     return { state: { count: count + 1 } };
   },
-  pollPolicy: { strategy: 'fixed', intervalMs: LONG_POLL_MS },
-  pollCeilings: { maxAttempts: 10, maxWaitMs: 120_000 },
+  policy: { strategy: 'fixed', intervalMs: LONG_POLL_MS },
+  ceilings: { maxAttempts: 10, maxWaitMs: 120_000 },
 });
 
 const startThenPollStep = createPollServerStepDefinition({
@@ -50,8 +50,8 @@ const startThenPollStep = createPollServerStepDefinition({
     }
     return { state: { ready: true } };
   },
-  pollPolicy: { strategy: 'fixed', intervalMs: LONG_POLL_MS },
-  pollCeilings: { maxAttempts: 10, maxWaitMs: 120_000 },
+  policy: { strategy: 'fixed', intervalMs: LONG_POLL_MS },
+  ceilings: { maxAttempts: 10, maxWaitMs: 120_000 },
 });
 
 const wireStepMocks = (fixture: WorkflowRunFixture) => {
