@@ -16,7 +16,6 @@ import {
   enrichNewExceptionItemsWithComments,
   enrichExistingExceptionItemWithComments,
   enrichExceptionItemsWithOS,
-  prepareEndpointExceptionItemsForBulkClose,
   prepareExceptionItemsForBulkClose,
   lowercaseHashValues,
   getPrepopulatedEndpointException,
@@ -46,7 +45,6 @@ import { getEntryMatchMock } from '@kbn/lists-plugin/common/schemas/types/entry_
 import { getCommentsArrayMock } from '@kbn/lists-plugin/common/schemas/types/comment.mock';
 import { ENTRIES, OLD_DATE_RELATIVE_TO_DATE_NOW } from '@kbn/lists-plugin/common/constants.mock';
 import type { CodeSignature } from '@kbn/securitysolution-ecs';
-import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import {
   ALERT_ORIGINAL_EVENT_KIND,
   ALERT_ORIGINAL_EVENT_MODULE,
@@ -374,130 +372,6 @@ describe('Exception helpers', () => {
       const payload = [exceptionItemWithComment];
       const result = prepareExceptionItemsForBulkClose(payload);
       expect(result).toEqual([getExceptionListItemSchemaMock()]);
-    });
-  });
-
-  describe('#prepareEndpointExceptionItemsForBulkClose', () => {
-    const getEndpointExceptionListItem = (entries: EntriesArray): ExceptionListItemSchema =>
-      getExceptionListItemSchemaMock({
-        entries,
-        list_id: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
-      });
-
-    test('it should return no exceptions when passed in an empty array', () => {
-      const payload: ExceptionListItemSchema[] = [];
-      const result = prepareEndpointExceptionItemsForBulkClose(payload);
-      expect(result).toEqual([]);
-    });
-
-    test('should not update non-endpoint exception list items', () => {
-      const payload = [
-        getExceptionListItemSchemaMock({
-          entries: [
-            {
-              field: 'process.executable.caseless',
-              operator: 'included',
-              type: 'wildcard',
-              value: 'C:\\Users\\*\\app.exe',
-            },
-          ],
-        }),
-      ];
-      const result = prepareEndpointExceptionItemsForBulkClose(payload);
-      expect(result).toEqual(payload);
-      expect(result[0]).toBe(payload[0]);
-    });
-
-    test('should escape backslashes for endpoint wildcard entries', () => {
-      const payload = [
-        getEndpointExceptionListItem([
-          {
-            field: 'process.executable.caseless',
-            operator: 'included',
-            type: 'wildcard',
-            value: 'C:\\Users\\*\\app.exe',
-          },
-        ]),
-      ];
-      const result = prepareEndpointExceptionItemsForBulkClose(payload);
-      expect(result[0].entries[0]).toEqual({
-        field: 'process.executable.caseless',
-        operator: 'included',
-        type: 'wildcard',
-        value: 'C:\\\\Users\\\\*\\\\app.exe',
-      });
-      expect(payload[0].entries[0]).toEqual({
-        field: 'process.executable.caseless',
-        operator: 'included',
-        type: 'wildcard',
-        value: 'C:\\Users\\*\\app.exe',
-      });
-    });
-
-    test('should preserve wildcard characters and excluded operators', () => {
-      const payload = [
-        getEndpointExceptionListItem([
-          {
-            field: 'file.path.caseless',
-            operator: 'excluded',
-            type: 'wildcard',
-            value: 'C:\\Users\\?\\*.exe',
-          },
-        ]),
-      ];
-      const result = prepareEndpointExceptionItemsForBulkClose(payload);
-      expect(result[0].entries[0]).toEqual({
-        field: 'file.path.caseless',
-        operator: 'excluded',
-        type: 'wildcard',
-        value: 'C:\\\\Users\\\\?\\\\*.exe',
-      });
-    });
-
-    test('should leave non-wildcard entries unchanged', () => {
-      const payload = [
-        getEndpointExceptionListItem([
-          {
-            field: 'process.executable.caseless',
-            operator: 'included',
-            type: 'match',
-            value: 'C:\\Windows\\explorer.exe',
-          },
-          {
-            field: 'file.path.caseless',
-            operator: 'included',
-            type: 'match_any',
-            value: ['C:\\Windows\\explorer.exe'],
-          },
-          {
-            field: 'file.hash.sha256',
-            operator: 'included',
-            type: 'exists',
-          },
-        ]),
-      ];
-      const result = prepareEndpointExceptionItemsForBulkClose(payload);
-      expect(result[0].entries).toEqual(payload[0].entries);
-    });
-
-    test('should escape every backslash in endpoint wildcard entries', () => {
-      const payload = [
-        getEndpointExceptionListItem([
-          {
-            field: 'file.path.caseless',
-            operator: 'included',
-            type: 'wildcard',
-            value: 'C:\\\\server\\\\share',
-          },
-        ]),
-      ];
-      const result = prepareEndpointExceptionItemsForBulkClose(payload);
-      expect(result[0].entries[0]).toEqual({
-        field: 'file.path.caseless',
-        operator: 'included',
-        type: 'wildcard',
-        value: 'C:\\\\\\\\server\\\\\\\\share',
-      });
     });
   });
 

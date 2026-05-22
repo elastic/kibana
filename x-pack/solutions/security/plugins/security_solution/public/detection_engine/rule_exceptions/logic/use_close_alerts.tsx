@@ -14,10 +14,7 @@ import {
 } from '../../../detections/components/alerts_table/default_config';
 import { getEsQueryFilter } from '../utils/get_es_query_filter';
 import type { IndexPatternArray } from '../../../../common/api/detection_engine/model/rule_schema';
-import {
-  prepareEndpointExceptionItemsForBulkClose,
-  prepareExceptionItemsForBulkClose,
-} from '../utils/helpers';
+import { prepareExceptionItemsForBulkClose } from '../utils/helpers';
 import * as i18nCommon from '../../../common/translations';
 import * as i18n from './translations';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
@@ -80,16 +77,13 @@ export const useCloseAlertsFromExceptions = (): ReturnUseCloseAlertsFromExceptio
           ]);
 
           const filterByRuleIds = buildAlertsFilterByRuleIds(ruleStaticIds);
-          const exceptionItemsForBulkClose = prepareEndpointExceptionItemsForBulkClose(
-            prepareExceptionItemsForBulkClose(exceptionItems)
-          );
 
           const filter = await getEsQueryFilter(
             '',
             'kuery',
             [...filterByRuleIds, ...alertStatusFilter],
             bulkCloseIndex,
-            exceptionItemsForBulkClose,
+            prepareExceptionItemsForBulkClose(exceptionItems),
             false
           );
 
