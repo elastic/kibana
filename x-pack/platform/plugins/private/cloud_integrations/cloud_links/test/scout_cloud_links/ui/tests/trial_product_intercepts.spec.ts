@@ -44,7 +44,7 @@ test.describe('Trial Product Intercept', { tag: tags.stateful.classic }, () => {
     const welcomeInterstitial = page.testSubj.locator('homeWelcomeInterstitial');
     await welcomeInterstitial.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
     await page.keyboard.press('Escape');
-    await welcomeInterstitial.waitFor({ state: 'hidden' });
+    await welcomeInterstitial.waitFor({ state: 'detached' });
 
     // Backdate the intercept timer in localStorage so the prompter fires on reload,
     // without needing a short trialInterceptInterval server arg.

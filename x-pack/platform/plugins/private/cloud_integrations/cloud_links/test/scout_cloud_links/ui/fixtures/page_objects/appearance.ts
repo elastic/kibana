@@ -23,6 +23,7 @@ export class AppearancePageObject {
     const userMenu = this.page.testSubj.locator('userMenu');
     if (!(await userMenu.isVisible())) {
       await this.page.testSubj.click('userMenuButton');
+      await userMenu.waitFor({ state: 'visible' });
     }
     await this.page.testSubj.click('appearanceSelector');
     await this.page.testSubj.waitForSelector('appearanceModal', { state: 'visible' });

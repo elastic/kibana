@@ -16,7 +16,7 @@ test.describe('Appearance selector modal', { tag: tags.stateful.classic }, () =>
     const welcomeInterstitial = page.testSubj.locator('homeWelcomeInterstitial');
     await welcomeInterstitial.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
     await page.keyboard.press('Escape');
-    await welcomeInterstitial.waitFor({ state: 'hidden' });
+    await welcomeInterstitial.waitFor({ state: 'detached' });
   });
 
   test.afterAll(async ({ uiSettings }) => {

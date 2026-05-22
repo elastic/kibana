@@ -16,7 +16,7 @@ test.describe('Cloud Links integration: Unprivileged User', { tag: tags.stateful
     const welcomeInterstitial = page.testSubj.locator('homeWelcomeInterstitial');
     await welcomeInterstitial.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
     await page.keyboard.press('Escape');
-    await welcomeInterstitial.waitFor({ state: 'hidden' });
+    await welcomeInterstitial.waitFor({ state: 'detached' });
   });
 
   test('viewer sees nav and org/profile links but not billing', async ({ pageObjects }) => {

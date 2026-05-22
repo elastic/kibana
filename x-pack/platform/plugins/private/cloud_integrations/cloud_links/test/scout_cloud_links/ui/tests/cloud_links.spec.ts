@@ -15,7 +15,7 @@ async function dismissWelcomeInterstitial(page: ScoutPage) {
   const welcomeInterstitial = page.testSubj.locator('homeWelcomeInterstitial');
   await welcomeInterstitial.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
   await page.keyboard.press('Escape');
-  await welcomeInterstitial.waitFor({ state: 'hidden' });
+  await welcomeInterstitial.waitFor({ state: 'detached' });
 }
 
 test.describe('Cloud Links integration', { tag: tags.stateful.classic }, () => {
