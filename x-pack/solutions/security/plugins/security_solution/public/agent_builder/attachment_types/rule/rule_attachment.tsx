@@ -61,7 +61,5 @@ export const createRuleAttachmentDefinition = ({
       callbacks={callbacks}
     />
   ),
-  // All action buttons are registered dynamically from RuleInlineContent so they respect
-  // the per-card "is current attachment" check and the "agent is busy" state. Returning
-  // static buttons here would bypass those gates and cause buttons to appear on stale cards.
+  // Buttons are registered dynamically from RuleInlineContent to respect per-card currency and agentBusy state.
 });

@@ -31,8 +31,7 @@ interface AddRuleAttachmentFromFormProps {
   scheduleStepData: ScheduleStepRule;
   actionsStepData: ActionsStepRule;
   actionTypeRegistry: ActionTypeRegistryContract;
-  /** When editing an existing rule, pass its server-assigned id so the attachment
-   * carries `id` and the chat shows "Save changes" instead of "Save rule". */
+  /** Existing rule id — injects `id` into the attachment so chat shows "Save changes" instead of "Save rule". */
   existingRuleId?: string;
   rule?: never;
 }
@@ -71,8 +70,7 @@ export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButt
   const { services } = useKibana();
   const { aiRuleCreation } = services;
 
-  // Tell ai_rule_creation_handler which rule this page is about. Stable for the page lifetime —
-  // not reset on conversation switches (unlike lastSavedRuleId).
+  // For rule-response usage: register the rule id with the handler so saves know to PATCH not POST.
   const ruleId = rule?.id;
   useEffect(() => {
     aiRuleCreation.setExistingRuleId(ruleId ?? null);
@@ -97,8 +95,7 @@ export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButt
         actionsStepData,
         actionTypeRegistry
       );
-      // Preserve the server-assigned id when editing an existing rule so the chat
-      // attachment knows this is an update, not a new rule.
+      // Inject id so the attachment treats this as an update, not a new rule.
       formattedRule = existingRuleId ? { ...fromForm, id: existingRuleId } : fromForm;
     } else {
       formattedRule = rule;
@@ -113,9 +110,7 @@ export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButt
         text: attachmentData,
         attachmentLabel,
       },
-      // Top-level VersionedAttachment.description used by the chat's
-      // "Attachment added: …" label (RoundAttachmentReferences). Without it
-      // the line shows up blank in the user's input round.
+      // description populates the chat's "Attachment added: …" label.
       attachmentDescription: attachmentLabel,
     };
   }, [

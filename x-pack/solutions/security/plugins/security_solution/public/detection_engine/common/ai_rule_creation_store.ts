@@ -25,10 +25,7 @@ export class AiRuleCreationService {
   private readonly savingSubject = new BehaviorSubject<boolean>(false);
   private readonly aiRuleSubject = new BehaviorSubject<RuleResponse | null>(null);
   private readonly formSyncSubject = new BehaviorSubject<boolean>(false);
-  /**
-   * True while a chat round is in flight (agent is reasoning / streaming / tool-calling).
-   * Cards hide action buttons while busy to avoid flicker as transient events arrive.
-   */
+  // True while agent is mid-round — cards hide action buttons to avoid flicker.
   private readonly agentBusySubject = new BehaviorSubject<boolean>(false);
   private session: AiRuleCreationSession | null = null;
 

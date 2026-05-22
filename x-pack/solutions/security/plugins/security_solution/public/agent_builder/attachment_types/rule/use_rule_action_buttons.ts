@@ -66,13 +66,9 @@ export const useRuleActionButtons = ({
       return;
     }
     const savedRuleId = rule.id ?? lastSavedRuleId ?? undefined;
-    // Disabled while saving, or after a successful save until the agent makes a change.
-    // savedRuleId === undefined means the rule has never been saved — always enabled.
+    // Disabled after a save until the agent makes another change; unsaved rules always enabled.
     const isClean = savedRuleId !== undefined && !isDirty;
-    // Freeze the label on first registration based on whether a saved rule exists *at the
-    // moment this card was created*. Cards created pre-first-save show "Save rule" forever;
-    // cards created after any save (i.e. the next attachment rendered by the agent) show
-    // "Save changes" forever. The disabled state still toggles dynamically via isClean.
+    // Freeze label at first registration: pre-first-save cards show "Save rule", post-save show "Save changes".
     if (frozenSaveLabelRef.current === null) {
       frozenSaveLabelRef.current = savedRuleId ? 'save_changes' : 'save_rule';
     }

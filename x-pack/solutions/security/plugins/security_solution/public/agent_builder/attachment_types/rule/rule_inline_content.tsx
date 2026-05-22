@@ -109,11 +109,7 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
 }) => {
   const isDirty = useObservable(aiRuleCreation.dirty$, false);
   const isSaving = useObservable(aiRuleCreation.saving$, false);
-  // Seed with the synchronous getter so the first render (and the first run of the
-  // register-buttons effect) sees the actual current value, not the `null` initial that
-  // useObservable returns before its own subscribe effect fires. This is critical for the
-  // frozen label below — without it, a card mounted after a save would briefly see
-  // lastSavedRuleId === null and freeze the wrong label.
+  // Seed from getter so first render sees the real value — useObservable's async subscribe would briefly return null, freezing the wrong label.
   const lastSavedRuleId = useObservable(
     aiRuleCreation.lastSavedRuleId$,
     aiRuleCreation.getLastSavedRuleId()
@@ -122,9 +118,7 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
 
   const rule = useMemo(() => parseRuleFromAttachment(attachment), [attachment]);
 
-  // The platform passes registerActionButtons only for the card showing the latest attachment
-  // version. Use that as the proxy for "is this the current card" — no need for a separate
-  // seq counter.
+  // registerActionButtons is only passed to the latest card — use it as the "is current" proxy.
   const isCurrentAttachment = callbacks?.registerActionButtons !== undefined;
   const showButtons = isCurrentAttachment && !agentBusy;
 
@@ -169,10 +163,6 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
           <EuiSpacer size="s" />
         </>
       ) : (
-        // "Modified" badge tracks the same condition as the action-button visibility:
-        // we show it on any card that is no longer the current attachment. A newer
-        // version of this rule exists further down in the conversation, so this card
-        // represents a stale snapshot — that's exactly what "Modified" communicates.
         !isCurrentAttachment && (
           <>
             <EuiBadge color="warning">

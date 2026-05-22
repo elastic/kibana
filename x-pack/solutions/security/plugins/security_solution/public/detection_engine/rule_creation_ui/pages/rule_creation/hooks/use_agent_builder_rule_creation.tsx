@@ -57,11 +57,7 @@ interface UseAgentBuilderRuleCreationParams {
   scheduleStepData?: ScheduleStepRule;
   actionsStepData?: ActionsStepRule;
   actionTypeRegistry?: ActionTypeRegistryContract;
-  /**
-   * Server-assigned id of the rule being edited. When provided, the form → agent sync
-   * injects this id into every attachment push so the chat always sees an existing rule
-   * (showing "Save changes", not "Save rule").
-   */
+  /** Existing rule id — injected into every form→agent sync so chat shows "Save changes" not "Save rule". */
   existingRuleId?: string;
 }
 
@@ -87,8 +83,7 @@ export const useAgentBuilderRuleCreation = ({
   const isAiRuleUpdateRef = useRef(false);
   const [isSyncActive, setIsSyncActive] = useState(false);
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout>>();
-  // Tracks the rule id to preserve in form→agent syncs. Seeded from existingRuleId
-  // (edit page) and updated if the agent provides a rule with an id via Open in form.
+  // Rule id to inject into form→agent syncs; updated when agent provides an id.
   const syncRuleIdRef = useRef<string | undefined>(existingRuleId);
 
   useEffect(() => {
@@ -96,8 +91,7 @@ export const useAgentBuilderRuleCreation = ({
     return () => subscription.unsubscribe();
   }, [aiRuleCreation]);
 
-  // Tell ai_rule_creation_handler which rule this page is editing. Unlike lastSavedRuleId, this
-  // is not reset on conversation switches — it's stable for the lifetime of the page.
+  // Stable for page lifetime; not reset on conversation switches unlike lastSavedRuleId.
   useEffect(() => {
     aiRuleCreation.setExistingRuleId(existingRuleId ?? null);
     return () => aiRuleCreation.setExistingRuleId(null);
@@ -111,10 +105,8 @@ export const useAgentBuilderRuleCreation = ({
       const attachment: AttachmentInput = {
         id: SECURITY_RULE_ATTACHMENT_ID,
         type: SecurityAgentBuilderAttachments.rule,
-        // `description` is the user-facing label used by the chat's "Attachment added: …"
-        // line (see RoundAttachmentReferences). Without it the line shows up blank.
-        // Guard against empty string — the server update path treats "" as a valid value and
-        // would overwrite a previously-set description with blank.
+        // description populates the chat's "Attachment added: …" label.
+        // Guard against empty string — server update path treats "" as valid and would overwrite a prior label.
         ...(label ? { description: label } : {}),
         data: {
           text: JSON.stringify(ruleData),
@@ -203,8 +195,7 @@ export const useAgentBuilderRuleCreation = ({
         (a) => a.type === SecurityAgentBuilderAttachments.rule
       );
       if (!ruleAttachment) return;
-      // roundComplete attachments are VersionedAttachment — data lives inside versions[].data,
-      // not at the top level. Use getLatestVersion to reach the current version's data.
+      // roundComplete has VersionedAttachment — data is in versions[].data, not top-level.
       const latestVersion = getLatestVersion(ruleAttachment);
       if (!latestVersion) return;
       let parsed: RuleResponse | undefined;
@@ -218,8 +209,7 @@ export const useAgentBuilderRuleCreation = ({
         // Malformed attachment text — ignore silently
         return;
       }
-      // Do NOT call addRuleAttachment here — the agent already owns the attachment;
-      // the debounced form→agent sync (below) will push any subsequent user edits back.
+      // Don't add attachment here — agent owns it; form→agent sync handles subsequent edits.
       updateFormFromChatRef.current(parsed, { silent: true });
     });
     return () => subscription.unsubscribe();
@@ -251,18 +241,12 @@ export const useAgentBuilderRuleCreation = ({
           actionsStepData,
           actionTypeRegistry
         );
-        // Preserve the rule id (existing rule being edited) so the chat attachment
-        // never loses track of which rule this is after form edits.
+        // Inject rule id so the attachment keeps track of which rule after form edits.
         const ruleToSync = syncRuleIdRef.current
           ? { ...formattedRule, id: syncRuleIdRef.current }
           : formattedRule;
         addRuleAttachment(ruleToSync, ruleToSync.name || 'Rule');
-        // Any reach of this branch means the form changed (the effect's deps are the form
-        // data objects). Mark dirty so the chat's "Save changes" button becomes enabled —
-        // user-initiated form edits should be just as savable from chat as agent edits.
-        // This is redundant when the change originated from updateFormFromChat (which
-        // already fires markDirty via ai_rule_creation_handler's roundComplete subscriber), but
-        // that's fine — markDirty is idempotent.
+        // Mark dirty on any form change so user edits are also savable from chat.
         aiRuleCreation.markDirty();
       } catch {
         // Incomplete form data may cause formatting errors — ignore silently

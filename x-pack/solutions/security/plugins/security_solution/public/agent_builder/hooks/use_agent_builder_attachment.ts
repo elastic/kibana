@@ -38,9 +38,7 @@ export interface UseAgentBuilderAttachmentParams {
 }
 
 export interface UseAgentBuilderAttachmentResult {
-  /**
-   * Function to open the agent builder flyout with attachments and prefilled conversation
-   */
+  /** Opens the agent builder flyout with the attachment loaded and an optional pre-filled message. */
   openAgentBuilderFlyout: () => void;
 }
 

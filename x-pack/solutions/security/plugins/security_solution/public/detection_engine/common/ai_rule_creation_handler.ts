@@ -92,10 +92,6 @@ export const createAiRuleCreationHandler = ({
 
     try {
       let saved: RuleResponse;
-      // Resolve the rule id to determine create vs update:
-      // 1. rule.id — present when the attachment JSON already carries a server id
-      // 2. lastSavedRuleId — set after a successful save in this session
-      // 3. existingRuleId — set on mount by the page that knows the rule (details/editing)
       const savedRuleId =
         rule.id ??
         aiRuleCreation.getLastSavedRuleId() ??
@@ -134,8 +130,7 @@ export const createAiRuleCreationHandler = ({
         exact: false,
       });
       if (isUpdate) {
-        // Immediately push the saved rule into the detail-page cache so the rule details
-        // page reflects changes without waiting for a background refetch.
+        // Push to cache immediately so rule details page reflects changes without waiting for refetch.
         securitySolutionQueryClient.setQueryData(
           ['GET', DETECTION_ENGINE_RULES_URL, saved.id],
           transformInput(saved)
@@ -148,8 +143,7 @@ export const createAiRuleCreationHandler = ({
       agentBuilder?.addAttachment({
         id: SECURITY_RULE_ATTACHMENT_ID,
         type: SecurityAgentBuilderAttachments.rule,
-        // `description` is the user-facing label used by the chat's "Attachment added: …"
-        // line (see RoundAttachmentReferences). Without it the line shows up blank.
+        // description populates the chat's "Attachment added: …" label.
         description: saved.name,
         data: { text: JSON.stringify(saved), attachmentLabel: saved.name },
       });
@@ -168,9 +162,7 @@ export const createAiRuleCreationHandler = ({
     }
   });
 
-  // Mark dirty when any tool modifies the rule attachment after a save. roundComplete carries
-  // only the attachments that changed during the round, covering both attachment_update and
-  // create_detection_rule (which also replaces the attachment's content).
+  // Mark dirty when agent modifies the rule attachment after a save (roundComplete only carries changed attachments).
   const dirtySub = agentBuilder?.events.chat$.subscribe((event) => {
     if (!isRoundCompleteEvent(event)) return;
     const ruleAttachment = event.data.attachments?.find(
@@ -183,23 +175,19 @@ export const createAiRuleCreationHandler = ({
     }
   });
 
-  // Reset lastSavedRuleId when the active conversation changes so a new conversation
-  // starts fresh ("Save rule" not "Save changes"). Using pairwise so the initial
-  // BehaviorSubject emission on subscribe does not trigger a spurious reset.
+  // Reset lastSavedRuleId on conversation switch so each new conversation starts fresh.
+  // pairwise() prevents the initial BehaviorSubject emission from triggering a spurious reset.
   const conversationSub = agentBuilder?.events.ui.activeConversation$
     .pipe(pairwise())
     .subscribe(([prev, curr]) => {
-      // Use loose != to guard against both null and undefined — the BehaviorSubject
-      // initial value may be undefined rather than null on first emission.
+      // != guards against both null and undefined on BehaviorSubject's initial emission.
       if (prev != null && curr != null && prev?.id !== curr?.id) {
         aiRuleCreation.setLastSavedRuleId(null);
         aiRuleCreation.clearDirty();
       }
     });
 
-  // Track whether the agent is mid-round so attachment cards can hide their action buttons
-  // during reasoning/streaming. Runs globally (not per-page) so standalone chat-first
-  // surfaces get the same button gating as the rule create/edit form pages.
+  // Track agent mid-round globally so all surfaces (form pages and standalone chat) gate buttons consistently.
   const agentBusySub = agentBuilder?.events.chat$.subscribe((event) => {
     if (isRoundCompleteEvent(event)) {
       aiRuleCreation.setAgentBusy(false);
@@ -208,7 +196,6 @@ export const createAiRuleCreationHandler = ({
     }
   });
 
-  // Return a combined subscription so all are cleaned up on unsubscribe
   saveSub.add(dirtySub);
   saveSub.add(conversationSub);
   saveSub.add(agentBusySub);
