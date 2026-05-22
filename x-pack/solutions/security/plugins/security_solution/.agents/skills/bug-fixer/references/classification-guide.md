@@ -41,6 +41,12 @@ Always test at the **lowest layer** where the bug behavior can be exercised.
 
 When fix touches both server and client, write tests at **both** layers.
 
+## Testing Footguns
+
+**JSDOM + imperative event listeners**: `fireEvent.input` (and `fireEvent.change`) dispatch native DOM events. Native listeners added via `addEventListener` inside `useEffect` don't fire in JSDOM — they're bypassed by React's synthetic event system. If a test passes in the browser but is silently ignored in Jest, check whether the handler is imperative. Fix: use a React `onInput`/`onChange` prop on a wrapper element instead of `addEventListener`.
+
+**Component state machine**: Before writing a test for a component bug, read the component source and list every internal state value and its transitions (e.g., `SEARCHING → LOADING → null`). Undocumented state makes tests fragile — a test that reaches the wrong intermediate state will fail for the wrong reason.
+
 ## Fix Strategies
 
 | Pattern | Fix Strategy |

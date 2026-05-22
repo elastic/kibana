@@ -2,7 +2,7 @@
 
 Detailed checklists and templates for Phase 4 (Fix) and the Knowledge Update. Read this file when entering Phase 4 Step 1.
 
-## SELF-CHECK #3 — Six questions before designing any fix
+## SELF-CHECK #3 — Seven questions before designing any fix
 
 Answer all six using evidence gathered from your parallel research tasks:
 

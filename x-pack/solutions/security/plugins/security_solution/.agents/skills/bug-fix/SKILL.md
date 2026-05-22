@@ -37,6 +37,7 @@ reproduction before fix work can begin."_
 | "I'll write the test after the fix — I already know what it should test" | Test-after verifies "does the code do what I wrote?" Test-first verifies "does the code do what is *correct*?" Only one catches the wrong fix. |
 | "I need to read source files to understand the area before checking the report" | Read the artifacts first. Source reading before context is how you import the reproduction-phase bias into the fix phase. |
 | "Silence / a question from the user means I can proceed" | Ambiguous or missing responses are not approval. Present the plan again and wait. |
+| "I wrote the test and the fix — I'll confirm it passes in Phase 5" | Phase 5 is a clean-environment check, not a substitute for first running the test. The specific test for this bug must be green before Phase 5 begins. If it isn't, the fix is incomplete. |
 
 ## Phase 4: Fix (TDD)
 
@@ -102,6 +103,8 @@ If you are about to create or edit a test file and cannot point to an explicit a
 message in the conversation, stop. Revert any edits made since presenting the plan and
 re-present it. No exceptions for bugs that seem obvious.
 
+**For component bugs** — before writing any test, map the component's state machine: list every state value and the transitions between them (e.g., `SEARCHING → LOADING → null`). Internal state that isn't documented must be read from the source before you write a test that depends on it — otherwise each failed run is just blind trial-and-error until you happen to reach the right state.
+
 For Scout tests, use these skills before writing (REQUIRED):
 1. scout-create-scaffold
 2. scout-best-practices-reviewer
@@ -128,7 +131,14 @@ or architectural changes means stop and ask the user before continuing.
    node scripts/jest <path/to/test.ts> --no-coverage
    node scripts/jest --testPathPattern='<area-pattern>' --no-coverage
    ```
-4. Iterate until `fix_verified`
+4. Iterate until the specific test for this bug is **green**:
+   ```bash
+   node scripts/jest <path/to/test.ts> --no-coverage
+   echo "Exit code: $?"
+   # ZERO = green confirmed ✓  |  Non-zero = fix is incomplete — do not proceed to Phase 5
+   ```
+
+   **Hard gate**: Do not move to Phase 5, write the summary, or claim the fix is complete until you have seen this exact command exit with code 0. A test you wrote but haven't re-run after the fix could still be red.
 
 ## Phase 5: Verify
 
