@@ -491,10 +491,8 @@ TS metrics
 | STATS SUM(RATE(search_requests)) BY TBUCKET(1 hour), host
 ```
 
-Use explicit time filters (`TRANGE` or `WHERE @timestamp`) only for:
-
-- API queries (`POST /_query`)
-- CLI queries (`elastic es esql query --query "..."`)
+Use explicit time filters (`TRANGE` or `WHERE @timestamp`) only for queries made directly to Elasticsearch (e.g.,
+`POST /_query`).
 
 ---
 

@@ -288,7 +288,7 @@ explicitly overrides the date picker.
 PROMQL index=metrics-* sum by (instance) (rate(http_requests_total))
 ```
 
-For ad-hoc queries outside Kibana (HTTP API, `elastic es esql query --query "..."`), set `start` and `end` explicitly.
+For ad-hoc queries outside Kibana (e.g., `POST /_query`), set `start` and `end` explicitly.
 
 ---
 

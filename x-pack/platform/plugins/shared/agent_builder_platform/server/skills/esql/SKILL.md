@@ -3,6 +3,11 @@ name: elasticsearch-esql
 description: >
   Execute ES|QL (Elasticsearch Query Language) queries, use when the user wants to query Elasticsearch data, analyze
   logs, aggregate metrics, explore data, or create charts and dashboards from ES|QL results.
+compatibility: >
+  Requires Elasticsearch 8.11+ (8.14+ for GA ES|QL) or Elastic Cloud Serverless. Uses the `elastic` CLI when installed,
+  or the `elastic` MCP server (tools: `discover`, `man`, `exec`) when the CLI is not available. CLI credentials are read
+  from ELASTICSEARCH_URL or ELASTICSEARCH_CLOUD_ID plus ELASTICSEARCH_API_KEY (or
+  ELASTICSEARCH_USERNAME/ELASTICSEARCH_PASSWORD).
 metadata:
   author: es-analytical-engine
   version: "0.5.0"
@@ -45,27 +50,41 @@ ES|QL uses pipes (`|`) to chain commands:
 >   features from development — if a query fails with an unknown function/command, it may simply not have landed yet.
 >   Elastic employees commonly use snapshot builds for testing.
 
-### Environment Configuration
+## Environment Configuration
 
-See [Environment Setup](references/environment-setup.md) for full connection configuration options (Elastic Cloud,
-direct URL, basic auth, local development).
+This skill executes Elasticsearch operations through one of two integrations. Detect which is available, in this order,
+before running any other step:
 
-Verify the connection (test connection operation) before exploring further. If the test fails, refer the user to the
-environment setup guide, then stop. Do not try to explore further until a successful connection test.
+1. **`elastic` CLI** (preferred). Run `which elastic`. When the binary is on `PATH`, route every operation in the
+   [Operations](#operations) table through the CLI command in column 2.
+2. **`elastic` MCP server** (fallback). When the CLI is not installed, check whether the `elastic` MCP server is
+   connected — its tools (`discover`, `man`, and `exec`) must be exposed in the current agent session. If so, route
+   every operation through the MCP tool in column 3 of the [Operations](#operations) table.
+3. **Neither installed nor connected.** Stop and ask the user:
 
-See the [Operations](#operations) table at the end of this document for the exact CLI invocations
-and equivalent Elasticsearch HTTP API calls for every operation referenced below (test connection, list indices, get
-mapping, get index settings, execute ES|QL query, etc.).
+   > "Neither the `elastic` CLI nor the `elastic` MCP server is available. Would you like to install the
+   > [`elastic` CLI](https://github.com/elastic/cli#configuration) (recommended) or connect the `elastic` MCP server
+   > before continuing?"
+
+   Wait for the user's response. Do not guess credentials, call the HTTP API directly, or attempt other workarounds.
+
+This skill references operations in HTTP-shorthand form (e.g., `GET /`, `GET /_cat/indices`, `GET /<index>/_mapping`,
+`GET /<index>/_settings/index.mode`, `POST /_query`). The [Operations](#operations) table at the end of this document
+maps each shorthand to the equivalent CLI command and MCP tool — always use whichever integration is available rather
+than calling the HTTP API directly.
+
+Verify the connection by calling `GET /`. If verification fails on the CLI path, point the user to the
+[CLI configuration instructions](https://github.com/elastic/cli#configuration).
 
 ## Guidelines
 
-1. **Detect deployment type**: Always test the connection first. This detects whether the deployment is a Serverless
-   project (all features available) or a versioned cluster (features depend on version). The `build_flavor` field from
-   the cluster info response is the authoritative signal — if it equals `"serverless"`, ignore the reported version
-   number and use all ES|QL features freely.
+1. **Detect deployment type**: Always run `GET /` first. This detects whether the deployment is a Serverless project
+   (all features available) or a versioned cluster (features depend on version). The `build_flavor` field from the
+   cluster info response is the authoritative signal — if it equals `"serverless"`, ignore the reported version number
+   and use all ES|QL features freely.
 
-2. **Discover schema** (required — never guess index or field names): list matching indices, then fetch the field
-   mappings for the chosen index.
+2. **Discover schema** (required — never guess index or field names): list matching indices
+   (`GET /_cat/indices/<pattern>`), then fetch the field mappings for the chosen index (`GET /<index>/_mapping`).
 
    Always run schema discovery before generating queries. Index names and field names vary across deployments and cannot
    be reliably guessed. Even common-sounding data (e.g., "logs") may live in indices named `logs-test`, `logs-app-*`, or
@@ -77,17 +96,17 @@ mapping, get index settings, execute ES|QL query, etc.).
    index for the question. When multiple indices contain similar data, prefer the one with the most complete schema for
    the task at hand.
 
-   The schema output reports the index mode. If it shows `Index mode: time_series`, the output includes the data stream
-   name and copy-pasteable TS syntax — use `TS <data-stream>` (not `FROM`), `TBUCKET(interval)` (not `DATE_TRUNC`), and
-   wrap counter fields with `SUM(RATE(...))`. Read the full TS section in
+   `GET /<index>/_mapping` reports the index mode. If it shows `Index mode: time_series`, the output includes the data
+   stream name and copy-pasteable TS syntax — use `TS <data-stream>` (not `FROM`), `TBUCKET(interval)` (not
+   `DATE_TRUNC`), and wrap counter fields with `SUM(RATE(...))`. Read the full TS section in
    [Generation Tips](references/generation-tips.md) before writing any time series query. You can also check the index
-   mode directly via the get index settings operation, filtering on `index.mode`.
+   mode directly via `GET /<index>/_settings/index.mode`.
 
    For TSDS indices on 9.4+, prefer the in-language discovery commands `METRICS_INFO` and `TS_INFO` (both GA) over
    inspecting mappings — they enumerate the metric catalogue and the dimension labels of each time series directly. Both
    must follow `TS` and must precede `STATS`/`SORT`/`LIMIT`. See
-   [Time Series Queries](references/time-series-queries.md#metric-and-time-series-discovery). Run them via the execute
-   ES|QL query (TSV) operation with queries like `TS metrics-tsds | METRICS_INFO | SORT metric_name` and
+   [Time Series Queries](references/time-series-queries.md#metric-and-time-series-discovery). Run them via
+   `POST /_query?format=tsv` with queries like `TS metrics-tsds | METRICS_INFO | SORT metric_name` and
    `TS metrics-tsds | TS_INFO | KEEP metric_name, dimensions | SORT metric_name`.
 
 3. **Choose the right ES|QL feature for the task**: Before writing queries, match the user's intent to the most
@@ -129,16 +148,7 @@ mapping, get index settings, execute ES|QL query, etc.).
    - For detecting spikes, dips, or anomalies, use `CHANGE_POINT` after time-bucketed aggregation
    - Add `SORT` and `LIMIT` as needed
 
-6. **Execute with TSV format** for clean, undecorated tab-separated output. Use the execute ES|QL query (TSV) operation
-   from the [Operations](#operations) table.
-
-7. **Offer a Kibana preview link.** After successfully executing a query, offer the user a clickable link to open the
-   results in Kibana Discover. Generate the URL with the preview ES|QL query in Kibana operation from the
-   [Operations](#operations) table, then present it as a markdown link (e.g., `[Open in Kibana](<url>)`) so it is
-   clickable in the user's terminal or chat UI. Pass the exact query that was executed, and forward any
-   `@timestamp`/`TRANGE` window the user specified via `--time-from` / `--time-to` (the defaults are `now-15m` to
-   `now`). Do not generate the link if query execution failed, and skip it silently if the command is unavailable. Keep
-   the offer brief — a single line is enough.
+6. **Execute with TSV format** for clean, undecorated tab-separated output. Use `POST /_query?format=tsv`
 
 ## ES|QL Quick Reference
 
@@ -156,7 +166,7 @@ FROM index-pattern
 | LIMIT n
 ```
 
-### Common Patterns
+### Examples
 
 **Filter and limit:**
 
@@ -352,7 +362,6 @@ For complete ES|QL syntax including all commands, functions, and operators, read
 - [Time Series Queries](references/time-series-queries.md) - TS command, time series aggregation functions, TBUCKET
 - [PROMQL Command](references/promql-command.md) - PromQL source command for TSDS indices (9.4+ preview)
 - [DSL to ES|QL Migration](references/dsl-to-esql-migration.md) - Convert Query DSL to ES|QL
-- [Environment Setup](references/environment-setup.md) - Connection configuration options
 
 ## Error Handling
 
@@ -364,8 +373,8 @@ When query execution fails, the script returns:
 
 **Common issues:**
 
-- Field doesn't exist → Always use `get_schema` and `list_indices` before writing a query. Never guess field or index
-  names — they vary across deployments.
+- Field doesn't exist → Always use `GET /<index>/_mapping` and `GET /_cat/indices` before writing a query. Never guess
+  field or index names — they vary across deployments.
 - Type mismatch → Use type conversion functions (TO_STRING, TO_INTEGER, etc.)
 - Syntax error → Review ES|QL reference for correct syntax. Always use **double quotes** for strings, never single
   quotes.
@@ -377,20 +386,26 @@ When query execution fails, the script returns:
 
 ## Operations
 
-The following table lists every `elastic` CLI command referenced by this skill, alongside its equivalent Elasticsearch
-HTTP API call (in shorthand).
+The body of this skill references Elasticsearch operations in HTTP-shorthand form. The following table maps each
+shorthand to its `elastic` CLI command and to the equivalent tool on the `elastic` MCP server.
 
-Default to using the CLI for interactive/shell workflows; but use the HTTP API when calling Elasticsearch
-directly from code, other tooling or when the CLI can't be installed.
+**Pick the integration based on what is available** — see [Environment Configuration](#environment-configuration):
 
-| Operation                       | CLI command                                                           | HTTP API (shorthand)                            |
-| ------------------------------- | --------------------------------------------------------------------- | ----------------------------------------------- |
-| Test connection / cluster info  | `elastic es info`                                                     | `GET /`                                         |
-| List all indices                | `elastic es cat indices`                                              | `GET /_cat/indices`                             |
-| List indices matching a pattern | `elastic es cat indices --index '<pattern>'`                          | `GET /_cat/indices/<pattern>`                   |
-| Get index details               | `elastic es indices get --index '<pattern>'`                          | `GET /<pattern>`                                |
-| Get index mapping               | `elastic es indices get-mapping --index '<index>'`                    | `GET /<index>/_mapping`                         |
-| Get index setting (e.g. mode)   | `elastic es indices get-settings --name index.mode --index '<index>'` | `GET /<index>/_settings/index.mode`             |
-| Execute ES\|QL query            | `elastic es esql query --query "<esql>"`                              | `POST /_query` `{"query": "<esql>"}`            |
-| Execute ES\|QL query (TSV)      | `elastic es esql query --format tsv --query "<esql>"`                 | `POST /_query?format=tsv` `{"query": "<esql>"}` |
-| Preview ES\|QL query in Kibana  | `elastic kb esql preview-url "<esql>"`                                | n/a (Kibana Discover deep link)                 |
+- CLI installed → use the `elastic` CLI commands in column 2.
+- CLI not installed, MCP server connected → call the `exec` tool on the `elastic` MCP server with the JSON object in
+  column 3 as the `arguments` payload.
+- Neither available → stop and prompt the user to install the CLI or connect the MCP server.
+
+For operations not listed below, call `discover` to find the matching command id, then `man` to read its `input_schema`
+before calling `exec` with snake_case keys.
+
+| HTTP API (shorthand)                | `elastic` CLI command                                                 | `elastic` MCP `exec` arguments                                                           |
+| ----------------------------------- | --------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `GET /`                             | `elastic es info`                                                     | `{"id": "es.info", "input": {}}`                                                         |
+| `GET /_cat/indices`                 | `elastic es cat indices`                                              | `{"id": "es.cat.indices", "input": {}}`                                                  |
+| `GET /_cat/indices/<pattern>`       | `elastic es cat indices --index '<pattern>'`                          | `{"id": "es.cat.indices", "input": {"index": "<pattern>"}}`                              |
+| `GET /<pattern>`                    | `elastic es indices get --index '<pattern>'`                          | `{"id": "es.indices.get", "input": {"index": "<pattern>"}}`                              |
+| `GET /<index>/_mapping`             | `elastic es indices get-mapping --index '<index>'`                    | `{"id": "es.indices.get-mapping", "input": {"index": "<index>"}}`                        |
+| `GET /<index>/_settings/index.mode` | `elastic es indices get-settings --name index.mode --index '<index>'` | `{"id": "es.indices.get-settings", "input": {"name": "index.mode", "index": "<index>"}}` |
+| `POST /_query`                      | `elastic es esql query --query "<esql>"`                              | `{"id": "es.esql.query", "input": {"query": "<esql>"}}`                                  |
+| `POST /_query?format=tsv`           | `elastic es esql query --format tsv --query "<esql>"`                 | `{"id": "es.esql.query", "input": {"format": "tsv", "query": "<esql>"}}`                 |
