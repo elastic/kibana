@@ -56,13 +56,13 @@ interface SpanWithOutcome {
 }
 
 /**
- * @internal Prefer `useReportChartSectionError` from this module. It binds the
- * package logger from `useExternalServices()` context, which is the only way to
- * record APM-transport failures (the second arg below) without leaking that
- * plumbing to call sites.
- *
  * Reports a non-render chart-section error to APM.
  * No-ops on `AbortError` (per `isSuppressedFetchError`) and non-Error values.
+ *
+ * @internal Use {@link useReportChartSectionError} instead.
+ * @remarks The hook binds the package logger from {@link useExternalServices},
+ *   which is required to record APM-transport failures (the second arg below)
+ *   without leaking that plumbing to call sites.
  */
 export const reportChartSectionError = (
   { error, source, labels: callerLabels }: ReportChartSectionErrorArgs,
@@ -126,9 +126,9 @@ export const reportChartSectionError = (
 
 /**
  * Returns a stable reporter bound to the package logger from
- * `useExternalServices()` context. Callers must use this hook — the
- * underlying `reportChartSectionError` is `@internal` because the logger
- * must come from context, not from a call-site argument.
+ * {@link useExternalServices} context. Callers must use this hook — the
+ * underlying {@link reportChartSectionError} is `@internal` because the
+ * logger must come from context, not from a call-site argument.
  */
 export const useReportChartSectionError = (): ((args: ReportChartSectionErrorArgs) => void) => {
   const logger = useExternalServices()?.logger;

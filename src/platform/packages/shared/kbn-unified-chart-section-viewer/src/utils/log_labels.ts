@@ -8,14 +8,14 @@
  */
 
 /**
- * Centralized inventory of label values emitted by this package via
- * @kbn/logging. Keeping them here makes the package's log signal grep-able
- * and lets operators build dashboards or alerts without searching individual
- * source files.
+ * Centralized inventory of `error_type` label values emitted by this package
+ * via @kbn/logging and @elastic/apm-rum. Keeping them here makes the package's
+ * log signal grep-able and lets operators build dashboards or alerts without
+ * searching individual source files.
  *
- * Label keys (e.g. `error_type`) use snake_case to match the package's APM
- * label vocabulary, so operators can query the same field name across logs
- * and APM.
+ * Values are PascalCase to match the existing APM `error_type` vocabulary
+ * (e.g. `APMReportingFailure`, `ChartSectionNonRenderError`). The APM/log key
+ * itself (`error_type`, snake_case) is written at the call sites that emit it.
  */
 export const ERROR_TYPE = {
   APM_REPORTING_FAILURE: 'APMReportingFailure',
