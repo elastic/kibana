@@ -94,6 +94,30 @@ describe('parse range parts', () => {
       ]);
     });
 
+    // Mirrors parse_text.ts's durationPast templates which accept both "last" and "past".
+    it('treats "past N units" the same as "last N units"', () => {
+      expect(parseDisplayParts('Past 7 days')).toEqual([
+        expect.objectContaining({
+          text: 'Past',
+          kind: 'relative-direction',
+          navigable: true,
+          rangeIndex: null,
+        }),
+        expect.objectContaining({
+          text: '7',
+          kind: 'relative-value',
+          navigable: true,
+          rangeIndex: null,
+        }),
+        expect.objectContaining({
+          text: 'days',
+          kind: 'relative-unit',
+          navigable: true,
+          rangeIndex: null,
+        }),
+      ]);
+    });
+
     it('classifies time-only end display parts as hour and minute', () => {
       expect(parseDisplayParts('May 5, 00:00 → 23:59')).toEqual([
         expect.objectContaining({ text: 'May', kind: 'month', rangeIndex: 0 }),

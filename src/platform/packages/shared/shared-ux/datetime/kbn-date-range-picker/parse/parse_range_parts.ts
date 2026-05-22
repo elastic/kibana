@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DATE_RANGE_DISPLAY_DELIMITER, DATE_TYPE_NOW } from '../constants';
+import { DATE_RANGE_DISPLAY_DELIMITER, DATE_TYPE_NOW, NOW_KEYWORD } from '../constants';
 import type { DateType } from '../types';
-import { PARSER_DELIMITERS, buildDelimiterPattern } from './parse_text';
+import { PARSER_DELIMITERS, buildDelimiterPattern, escapeRegExp } from './parse_text';
 
 export type DateUnit = 'month' | 'day' | 'year' | 'hour' | 'minute' | 'second' | 'millisecond';
 
@@ -39,9 +39,18 @@ interface DelimiterSplit {
 }
 
 // TODO some of these target English words, we need to account for translations very soon
+//
+// TODO Share input grammar with parse_text.ts. The regexes below describe the
+// same syntax as the compiled templates there (durations like "last 7 days",
+// instants like "in 5 minutes", shorthand like "now-7d/d"), so changes need to
+// be made in both places — e.g. "past" matches durationPast in parse_text and
+// is now mirrored in LONG_RELATIVE_RE here. Plan: extend CompiledTemplate to
+// expose direction-token group positions, export the templates from
+// parse_text.ts, and consume them here to drive RangePart emission from a
+// single source.
 const INPUT_DELIMITERS = [...PARSER_DELIMITERS, '-'];
 const SHORTHAND_RELATIVE_RE = /^(now)?([+-])(\d+)([a-zA-Z]+)(\/[smhdwMy])?$/;
-const LONG_RELATIVE_RE = /^(last|next)\s+(\d+)\s+(\w+)$/i;
+const LONG_RELATIVE_RE = /^(last|past|next)\s+(\d+)\s+(\w+)$/i;
 const NATURAL_INSTANT_RE = /^(\d+)\s+(\w+)\s+(ago|from now)$/i;
 const INSTANT_FROM_NOW_RE = /^(in)\s+(\d+)\s+(\w+)$/i;
 const ABSOLUTE_TOKEN_RE = /([A-Za-z]+|\d+)/g;
@@ -71,8 +80,6 @@ const MONTH_NAMES = new Set([
   'dec',
   'december',
 ]);
-
-const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 const getMatchIndex = (match: RegExpMatchArray): number => match.index ?? 0;
 
@@ -335,7 +342,7 @@ const parseSide = (
   const trimmed = getTrimmedSide(side, offset);
   if (!trimmed.text) return [];
 
-  if (trimmed.text === 'now') {
+  if (trimmed.text === NOW_KEYWORD) {
     return [
       {
         text: trimmed.text,
