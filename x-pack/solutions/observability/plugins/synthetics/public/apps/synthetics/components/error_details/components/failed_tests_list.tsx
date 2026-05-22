@@ -16,6 +16,7 @@ import { useDateFormat } from '../../../../../hooks/use_date_format';
 import { getTestRunDetailRelativeLink } from '../../common/links/test_details_link';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { useSelectedLocation } from '../../monitor_details/hooks/use_selected_location';
+import { useUrlSpaceId } from '../../../hooks/use_url_space_id';
 
 export const FailedTestsList = ({
   failedTests,
@@ -37,6 +38,7 @@ export const FailedTestsList = ({
 
   const history = useHistory();
   const selectedLocation = useSelectedLocation();
+  const spaceId = useUrlSpaceId();
 
   const formatter = useDateFormat();
 
@@ -48,10 +50,11 @@ export const FailedTestsList = ({
       name: TIMESTAMP_LABEL,
       sortable: true,
       render: (value: string, item: Ping) => {
+        const spaceIdQuery = spaceId ? `?spaceId=${spaceId}` : '';
         return (
           <EuiLink
             data-test-subj="failed-test-link"
-            href={`${basePath}/app/synthetics/monitor/${monitorId}/test-run/${item.monitor.check_group}`}
+            href={`${basePath}/app/synthetics/monitor/${monitorId}/test-run/${item.monitor.check_group}${spaceIdQuery}`}
           >
             {formatter(value)}
           </EuiLink>
@@ -84,6 +87,7 @@ export const FailedTestsList = ({
               monitorId,
               checkGroup: item.monitor.check_group,
               locationId: selectedLocation?.id,
+              spaceId,
             })
           );
         },
