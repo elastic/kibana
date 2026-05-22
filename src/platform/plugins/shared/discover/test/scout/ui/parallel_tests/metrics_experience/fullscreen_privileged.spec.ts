@@ -7,10 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// The context menu in fullscreen requires the 3-dot toggle to render, which only
-// happens when there are overflow (non-quick) actions. After the action reorg,
-// the only remaining popover-only action is "Add to case", which needs cases
-// create/update capabilities — privileged login required.
+// IMPORTANT: This spec MUST run with a privileged user (loginAsPrivilegedUser).
+//
+// The 3-dot context-menu toggle in fullscreen mode only renders when there is at
+// least one overflow (non-quick) action available on the panel. After the action
+// reorg, the only remaining popover-only action exposed by the metrics-grid card
+// is "Add to case", and that action is gated on the `cases` feature's
+// `create`/`update` capabilities. Without those capabilities, "Add to case" is
+// filtered out, no overflow actions remain, the 3-dot toggle does not render,
+// and every assertion in this spec fails.
+//
+// In short: privileged login is not a convenience here — it is the only way the
+// context menu under test exists at all. Do not "simplify" this to a regular
+// user; the spec will silently lose its subject.
 
 import { expect } from '@kbn/scout/ui';
 import {
