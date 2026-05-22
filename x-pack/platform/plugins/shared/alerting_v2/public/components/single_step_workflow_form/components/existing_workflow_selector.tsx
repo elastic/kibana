@@ -20,7 +20,7 @@ const CREATE_NEW_OPTION_VALUE = '__create_new_workflow__';
 
 interface ExistingWorkflowSelectorProps {
   value: string | null;
-  onSelect: (workflowId: string) => void;
+  onSelect: (workflowId: string | null) => void;
   onCreateNew: () => void;
   isInvalid?: boolean;
   errorMessage?: string;
@@ -55,7 +55,7 @@ export const ExistingWorkflowSelector = ({
     {
       label: i18n.translate(
         'xpack.alertingV2.singleStepWorkflow.existing.createNewWorkflowOption',
-        { defaultMessage: '+ Create new single-step workflow' }
+        { defaultMessage: '+ Create new workflow' }
       ),
       value: CREATE_NEW_OPTION_VALUE,
     },
@@ -119,13 +119,17 @@ export const ExistingWorkflowSelector = ({
         isInvalid={!!isInvalid}
         data-test-subj="singleStepWorkflowSelector"
         placeholder={i18n.translate('xpack.alertingV2.singleStepWorkflow.existing.placeholder', {
-          defaultMessage: 'Search or create a single-step workflow',
+          defaultMessage: 'Search or create a workflow',
         })}
         selectedOptions={selectedOptions}
         onSearchChange={setSearchQuery}
         onChange={(options) => {
+          if (options.length === 0) {
+            setSelectedWorkflow(null);
+            onSelect(null);
+            return;
+          }
           const next = options[0];
-          if (!next) return;
           if (next.value === CREATE_NEW_OPTION_VALUE) {
             onCreateNew();
             return;

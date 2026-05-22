@@ -166,9 +166,7 @@ const CoverageOverviewMitreTechniquePanelPopoverComponent = ({
         >
           <EuiListGroup
             data-test-subj="coverageOverviewEnabledRulesList"
-            flush
             listItems={enabledRuleListItems}
-            size="s"
           />
         </EuiAccordion>
         <EuiSpacer size="s" />
@@ -179,9 +177,7 @@ const CoverageOverviewMitreTechniquePanelPopoverComponent = ({
         >
           <EuiListGroup
             data-test-subj="coverageOverviewDisabledRulesList"
-            flush
             listItems={disabledRuleListItems}
-            size="s"
           />
         </EuiAccordion>
         <EuiSpacer size="s" />

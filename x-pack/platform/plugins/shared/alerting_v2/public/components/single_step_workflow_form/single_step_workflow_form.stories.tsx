@@ -73,7 +73,7 @@ export const CreateNewFilled: Story = {
       typeId: 'email',
       connectorId: 'email-ops',
       params:
-        'to: "{{ policyId }}@example.com"\nsubject: "Alert for {{ id }}"\nmessage: "{{ episodes }} episodes"\n',
+        'to: "{{ inputs.policyId }}@example.com"\nsubject: "Alert for {{ inputs.id }}"\nmessage: "{{ inputs.episodes }} episodes"\n',
     },
   },
 };

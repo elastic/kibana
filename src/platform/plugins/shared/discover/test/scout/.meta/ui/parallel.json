@@ -1,5 +1,5 @@
 {
-  "sha1": "5c7d61ab5983c3b2fa10070ad4c1c93cf7dcf385",
+  "sha1": "263819489fdca04f40e27cd53c330af48581e9dc",
   "tests": [
     {
       "id": "71242d88739937b-70753e6cedbcd4d",
@@ -389,6 +389,102 @@
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/dimensions_wipe.spec.ts",
         "line": 82,
+        "column": 14
+      }
+    },
+    {
+      "id": "e80b4991658b98b-5e6d6232d074dc9",
+      "title": "Metrics in Discover - Insights Flyout Persistence persists open metric and selected tab across Discover tab navigation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/flyout_persistence.spec.ts",
+        "line": 54,
+        "column": 14
+      }
+    },
+    {
+      "id": "e80b4991658b98b-210633fb01c8208",
+      "title": "Metrics in Discover - Insights Flyout Persistence duplicating a tab preserves the open metric and selected flyout tab in the new tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/flyout_persistence.spec.ts",
+        "line": 104,
+        "column": 14
+      }
+    },
+    {
+      "id": "e80b4991658b98b-b4c7dd9b70683b9",
+      "title": "Metrics in Discover - Insights Flyout Persistence opening a different metric flyout in the duplicated tab does not affect the original tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/flyout_persistence.spec.ts",
+        "line": 148,
+        "column": 14
+      }
+    },
+    {
+      "id": "e80b4991658b98b-70c1747ee807ac5",
+      "title": "Metrics in Discover - Insights Flyout Persistence clears stale flyout state when the underlying metric disappears from a populated grid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/flyout_persistence.spec.ts",
+        "line": 184,
         "column": 14
       }
     },
@@ -1000,7 +1096,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/custom_columns.spec.ts",
-        "line": 51,
+        "line": 48,
         "column": 14
       }
     },

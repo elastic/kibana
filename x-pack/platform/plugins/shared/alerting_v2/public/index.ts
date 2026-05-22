@@ -7,7 +7,7 @@
 
 import { ContainerModule } from 'inversify';
 import { OnSetup, PluginSetup, PluginStart, Start } from '@kbn/core-di';
-import { CoreSetup } from '@kbn/core-di-browser';
+import { CoreSetup, CoreStart } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -17,7 +17,8 @@ import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
-import type { RuleFormServices } from '@kbn/alerting-v2-rule-form';
+import { WorkflowApi } from '@kbn/workflows-ui';
+import { NOOP_WORKFLOW_FORM } from '@kbn/alerting-v2-rule-form';
 import {
   ALERTING_V2_SECTION_ID,
   ALERTING_V2_RULES_APP_ID,
@@ -30,10 +31,8 @@ import { ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID } from '../common/advanced
 import { ActionPoliciesApi } from './services/action_policies_api';
 import { ExecutionHistoryApi } from './services/execution_history_api';
 import { RulesApi } from './services/rules_api';
-import { WorkflowsApi } from './services/workflows_api';
 import { registerTriggerDefinitions } from './lib/workflow_extensions/register_trigger_definitions';
 import { setKibanaServices } from './kibana_services';
-import { createSingleStepWorkflowFormService } from './components/single_step_workflow_form';
 import { DynamicRuleFormFlyout } from './create_rule_form_flyout';
 import type { AlertingV2PublicStart } from './types';
 
@@ -44,7 +43,9 @@ export const module = new ContainerModule(({ bind }) => {
   bind(RulesApi).toSelf().inSingletonScope();
   bind(ActionPoliciesApi).toSelf().inSingletonScope();
   bind(ExecutionHistoryApi).toSelf().inSingletonScope();
-  bind(WorkflowsApi).toSelf().inSingletonScope();
+  bind(WorkflowApi)
+    .toDynamicValue(({ get }) => new WorkflowApi(get(CoreStart('http'))))
+    .inSingletonScope();
   bind(Start).toConstantValue({
     DynamicRuleFormFlyout,
   } satisfies AlertingV2PublicStart);
@@ -67,7 +68,7 @@ export const module = new ContainerModule(({ bind }) => {
         lens: diContainer.get(PluginStart('lens')) as LensPublicStart,
         expressions: diContainer.get(PluginStart('expressions')) as ExpressionsStart,
         uiActions: diContainer.get(PluginStart('uiActions')) as UiActionsStart,
-        workflowForm: createSingleStepWorkflowFormService() as RuleFormServices['workflowForm'],
+        workflowForm: NOOP_WORKFLOW_FORM,
       });
 
       const experimentalEnabled = coreStart.settings.globalClient.get<boolean>(
@@ -78,7 +79,6 @@ export const module = new ContainerModule(({ bind }) => {
       const agentBuilderToken = PluginStart('agentBuilder');
       if (experimentalEnabled && diContainer.isBound(agentBuilderToken)) {
         const agentBuilder = diContainer.get(agentBuilderToken) as AgentBuilderPluginStart;
-        const rulesApi = diContainer.get(RulesApi);
         import(
           /* webpackChunkName: "alerting_v2_rule_attachment" */
           './agent_builder/attachments/rule_attachment_definition'
@@ -86,14 +86,26 @@ export const module = new ContainerModule(({ bind }) => {
           agentBuilder.attachments.addAttachmentType(
             ruleAttachmentType,
             createRuleAttachmentDefinition({
-              rulesApi,
-              application: coreStart.application,
-              basePath: coreStart.http.basePath,
-              notifications: coreStart.notifications,
               container: diContainer,
             })
           );
         });
+        import(
+          /* webpackChunkName: "alerting_v2_action_policy_attachment" */
+          './agent_builder/attachments/action_policy_attachment_definition'
+        ).then(
+          ({
+            createActionPolicyAttachmentDefinition,
+            ACTION_POLICY_ATTACHMENT_TYPE: actionPolicyAttachmentType,
+          }) => {
+            agentBuilder.attachments.addAttachmentType(
+              actionPolicyAttachmentType,
+              createActionPolicyAttachmentDefinition({
+                container: diContainer,
+              })
+            );
+          }
+        );
       }
     });
 

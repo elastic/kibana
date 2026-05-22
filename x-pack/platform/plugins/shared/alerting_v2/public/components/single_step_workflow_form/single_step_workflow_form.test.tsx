@@ -157,6 +157,16 @@ describe('SingleStepWorkflowForm', () => {
     expect(screen.queryByText('Workflow is required')).not.toBeInTheDocument();
   });
 
+  it('clears the workflow when the user clicks Clear input', async () => {
+    const user = userEvent.setup({ pointerEventsCheck: 0 });
+    const { onChange } = renderForm({ mode: 'existing', workflowId: 'wf-1' });
+
+    const clearButton = screen.getByLabelText('Clear input');
+    await user.click(clearButton);
+
+    expect(onChange).toHaveBeenCalledWith({ mode: 'existing', workflowId: null });
+  });
+
   it('reverts to existing mode when the back link is clicked', async () => {
     const user = userEvent.setup();
     const { onChange } = renderForm({

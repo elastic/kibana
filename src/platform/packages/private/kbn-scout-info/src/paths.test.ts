@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import fs from 'node:fs';
+import path from 'node:path';
 import mm from 'micromatch';
+import { REPO_ROOT } from '@kbn/repo-info';
 import {
   TESTABLE_COMPONENT_SCOUT_ROOT_PATH_GLOB,
   SCOUT_CONFIG_PATH_GLOB,
@@ -16,6 +19,8 @@ import {
   SCOUT_EXAMPLES_PLAYWRIGHT_CONFIG_REGEX,
   SCOUT_UNIFIED_CONFIG_PATH_REGEX,
   TESTABLE_COMPONENT_SCOUT_ROOT_PATH_REGEX,
+  SCOUT_TESTS_ONLY_IGNORE_PATTERNS,
+  SCOUT_TESTS_ONLY_SCOPE_GLOBS,
 } from './paths';
 
 describe('Scout path globs', () => {
@@ -404,4 +409,37 @@ describe('Scout path regexes', () => {
       ).toBe(false);
     });
   });
+});
+
+/**
+ * `selective_scout.ts` (under `.buildkite/pipeline-utils/`) can't import from
+ * `@kbn/*` packages, so it keeps its own copy of these patterns. This test
+ * reads that file and checks each pattern is still present, so the two
+ * copies stay in sync.
+ */
+describe('Scout tests-only patterns duplicated in pipeline-utils/selective_scout', () => {
+  const duplicatePath = path.resolve(
+    REPO_ROOT,
+    '.buildkite/pipeline-utils/ci-stats/pick_test_group_run_order/selective_scout.ts'
+  );
+  const duplicateSource = fs.readFileSync(duplicatePath, 'utf-8');
+
+  // Match the pattern whether it's written with single or double quotes,
+  // so reformatting selective_scout.ts can't accidentally break this test.
+  const containsPatternLiteral = (source: string, pattern: string): boolean =>
+    source.includes(`'${pattern}'`) || source.includes(`"${pattern}"`);
+
+  it.each(SCOUT_TESTS_ONLY_IGNORE_PATTERNS)(
+    'selective_scout.ts contains ignore pattern verbatim: %s',
+    (pattern) => {
+      expect(containsPatternLiteral(duplicateSource, pattern)).toBe(true);
+    }
+  );
+
+  it.each(SCOUT_TESTS_ONLY_SCOPE_GLOBS)(
+    'selective_scout.ts contains scope glob verbatim: %s',
+    (pattern) => {
+      expect(containsPatternLiteral(duplicateSource, pattern)).toBe(true);
+    }
+  );
 });

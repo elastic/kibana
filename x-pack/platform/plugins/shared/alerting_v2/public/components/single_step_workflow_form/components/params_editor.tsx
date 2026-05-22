@@ -35,8 +35,13 @@ export const ParamsEditor = ({ value, onChange, height = 200 }: ParamsEditorProp
     })}
     helpText={i18n.translate('xpack.alertingV2.singleStepWorkflow.params.helpText', {
       defaultMessage:
-        'Use {syntax} to reference dispatcher payload values such as policyId, groupKey, or episodes.',
-      values: { syntax: '{{ ... }}' },
+        'Use {syntax} to reference dispatcher payload values such as {policyId}, {groupKey}, or {episodes}.',
+      values: {
+        syntax: '{{ ... }}',
+        policyId: '{{ inputs.policyId }}',
+        groupKey: '{{ inputs.groupKey }}',
+        episodes: '{{ inputs.episodes }}',
+      },
     })}
     fullWidth
   >

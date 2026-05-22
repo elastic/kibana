@@ -24,6 +24,8 @@ export interface FleetApiService {
   };
   integration: {
     install: (name: string) => Promise<any>;
+    installPackage: (name: string, version: string, opts?: { force?: boolean }) => Promise<any>;
+    getPackage: (name: string) => Promise<any>;
     delete: (name: string) => Promise<any>;
   };
   package_policies: {
@@ -103,6 +105,33 @@ export const getFleetApiHelper = (log: ScoutLogger, kbnClient: KbnClient): Fleet
               },
             });
             return { status: response.status };
+          }
+        );
+      },
+
+      installPackage: async (name: string, version: string, opts?: { force?: boolean }) => {
+        return await measurePerformanceAsync(
+          log,
+          `fleetApi.integration.installPackage [${name}@${version}]`,
+          async () => {
+            return await kbnClient.request({
+              method: 'POST',
+              path: `/api/fleet/epm/packages/${name}/${version}`,
+              body: { force: opts?.force ?? true },
+            });
+          }
+        );
+      },
+
+      getPackage: async (name: string) => {
+        return await measurePerformanceAsync(
+          log,
+          `fleetApi.integration.getPackage [${name}]`,
+          async () => {
+            return await kbnClient.request({
+              method: 'GET',
+              path: `/api/fleet/epm/packages/${name}`,
+            });
           }
         );
       },

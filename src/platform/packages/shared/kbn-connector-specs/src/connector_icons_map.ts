@@ -47,6 +47,10 @@ export const ConnectorIconsMap: Map<
     ),
   ],
   [
+    '.bigquery',
+    lazy(() => import(/* webpackChunkName: "connectorIconBigQuery" */ './specs/bigquery/icon')),
+  ],
+  [
     '.github',
     lazy(() => import(/* webpackChunkName: "connectorIconGithub" */ './specs/github/icon')),
   ],
