@@ -309,6 +309,13 @@ export const recommendRulesToInstallTool = (
       const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
       const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(request);
 
+      // Resolve the active Kibana space so the LLM can construct links that
+      // land users on the correct space-scoped page. Default space has id
+      // 'default' and uses no URL prefix; custom spaces use /s/<id>.
+      const activeSpace = await startPlugins.spaces?.spacesService.getActiveSpace(request);
+      const spaceUrlPrefix =
+        activeSpace && activeSpace.id !== 'default' ? `/s/${activeSpace.id}` : '';
+
       const ruleAssetsClient = createPrebuiltRuleAssetsClient(savedObjectsClient);
       const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
 
@@ -379,6 +386,7 @@ export const recommendRulesToInstallTool = (
           {
             type: ToolResultType.other,
             data: {
+              space_url_prefix: spaceUrlPrefix,
               installable_runnable_rules: recommendations.map(buildRuleCard),
               installed_coverage_by_tactic: coverageWithAllocation,
               stats: {

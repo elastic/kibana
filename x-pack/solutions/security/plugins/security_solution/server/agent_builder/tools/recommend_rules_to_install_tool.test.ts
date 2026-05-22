@@ -26,11 +26,12 @@ const makeRule = (
   query: '*',
   language: 'kuery',
   index: ['logs-*'],
-  required_fields: [{ name: 'host.name', type: 'keyword', ecs: true }],
+  required_fields: [{ name: 'host.name', type: 'keyword' }],
   ...overrides,
-});
+} as PrebuiltRuleAsset);
 
 const tactic = (id: string, name: string) => ({
+  framework: 'MITRE ATT&CK',
   tactic: { id, name, reference: `https://attack.mitre.org/tactics/${id}/` },
   technique: [],
 });
@@ -209,7 +210,6 @@ describe('preRankCandidateRules', () => {
         risk_score: 70,
         threat: [tactic('TA0001', 'InitAccess')],
       });
-      // @ts-expect-error intentionally omitting risk_score to test fallback
       const { risk_score: _, ...withoutScore } = ruleWithScore;
       const ruleWithoutScore = withoutScore as PrebuiltRuleAsset;
       ruleWithoutScore.rule_id = 'no-score';
