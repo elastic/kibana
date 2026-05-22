@@ -16,6 +16,7 @@ export * from './auth_types/gcp_service_account';
 export * from './auth_types/none';
 export * from './auth_types/oauth';
 export { OAuthAuthorizationCode } from './auth_types/oauth_authorization_code';
+export { OAuthClientCredentialsPrivateKeyJwt } from './auth_types/oauth_client_credentials_private_key_jwt';
 export { Ears } from './auth_types/ears';
 
 // Skipping PFX and CRT exports for now as they will require updates to
