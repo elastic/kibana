@@ -6,5 +6,5 @@ products:
   target: 2026-05-20
 areas:
 - Kibana platform
-title: Fix missing aria labels on Stack Management modals and popovers
+title: Fix missing aria labels on modals and popovers
 description: Modals and popovers in Stack Management now expose accessible names for screen readers through `aria-label` or `aria-labelledby` attributes.
