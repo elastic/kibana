@@ -14,23 +14,31 @@ jest.mock('../../../hooks', () => ({
   useGetUrlParams: () => mockUrlParams(),
 }));
 
+const ALERTS_INDEX_PATTERN = '.alerts-observability*';
+
 describe('useSyntheticsDataViewIndexPatterns', () => {
   afterEach(() => jest.clearAllMocks());
 
-  it('returns the local synthetics index pattern when remoteName is absent', () => {
+  it('returns the local synthetics and alerts index patterns when remoteName is absent', () => {
     mockUrlParams.mockReturnValue({});
 
     const { result } = renderHook(() => useSyntheticsDataViewIndexPatterns());
 
-    expect(result.current).toEqual({ synthetics: SYNTHETICS_INDEX_PATTERN });
+    expect(result.current).toEqual({
+      synthetics: SYNTHETICS_INDEX_PATTERN,
+      alerts: ALERTS_INDEX_PATTERN,
+    });
   });
 
-  it('returns a CCS-prefixed pattern when remoteName is present', () => {
+  it('returns CCS-prefixed patterns for both data types when remoteName is present', () => {
     mockUrlParams.mockReturnValue({ remoteName: 'remote-a' });
 
     const { result } = renderHook(() => useSyntheticsDataViewIndexPatterns());
 
-    expect(result.current).toEqual({ synthetics: `remote-a:${SYNTHETICS_INDEX_PATTERN}` });
+    expect(result.current).toEqual({
+      synthetics: `remote-a:${SYNTHETICS_INDEX_PATTERN}`,
+      alerts: `remote-a:${ALERTS_INDEX_PATTERN}`,
+    });
   });
 
   it('returns a referentially stable object across renders for the same remoteName', () => {
@@ -53,6 +61,9 @@ describe('useSyntheticsDataViewIndexPatterns', () => {
     rerender();
 
     expect(result.current).not.toBe(first);
-    expect(result.current).toEqual({ synthetics: `remote-b:${SYNTHETICS_INDEX_PATTERN}` });
+    expect(result.current).toEqual({
+      synthetics: `remote-b:${SYNTHETICS_INDEX_PATTERN}`,
+      alerts: `remote-b:${ALERTS_INDEX_PATTERN}`,
+    });
   });
 });
