@@ -71,6 +71,7 @@ export const HttpFormDataFieldSchema = lazySchema(() =>
       content: z.string(),
       filename: z.string().optional(),
       content_type: z.string().optional(),
+      encoding: z.enum(['utf8', 'base64']).optional(),
     })
   )
 );

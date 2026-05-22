@@ -1116,6 +1116,149 @@ describe('execute()', () => {
       expect(result?.serviceMessage).toBe('Cannot set both body and form_data');
       expect(requestMock).not.toHaveBeenCalled();
     });
+
+    test('returns an error when body is set and form_data is an empty object', async () => {
+      const result = await connectorType.executor?.({
+        actionId: 'some-id',
+        services,
+        config: baseConfig,
+        secrets: { ...emptySecrets, user: 'abc', password: '123' },
+        params: {
+          method: 'POST',
+          path: '/upload',
+          body: 'some data',
+          form_data: {},
+        },
+        configurationUtilities,
+        logger: mockedLogger,
+        connectorUsageCollector,
+      });
+
+      expect(result?.status).toBe('error');
+      expect(result?.serviceMessage).toBe('Cannot set both body and form_data');
+      expect(requestMock).not.toHaveBeenCalled();
+    });
+
+    test('round-trips raw bytes when encoding is base64', async () => {
+      const bytes = Buffer.from([0x00, 0xff, 0x10, 0x20, 0x7f, 0x80, 0xab, 0xcd]);
+
+      await connectorType.executor?.({
+        actionId: 'some-id',
+        services,
+        config: baseConfig,
+        secrets: { ...emptySecrets, user: 'abc', password: '123' },
+        params: {
+          method: 'POST',
+          path: '/upload',
+          form_data: {
+            file: {
+              content: bytes.toString('base64'),
+              filename: 'binary.bin',
+              content_type: 'application/x-bin',
+              encoding: 'base64',
+            },
+          },
+        },
+        configurationUtilities,
+        logger: mockedLogger,
+        connectorUsageCollector,
+      });
+
+      const form = requestMock.mock.calls[0][0].data as FormData;
+      const entry = Array.from(form.entries()).find(([key]) => key === 'file')?.[1];
+      expect(entry).toBeInstanceOf(Blob);
+      const file = entry as File;
+      expect(file.name).toBe('binary.bin');
+      expect(file.type).toBe('application/x-bin');
+      const roundTripped = Buffer.from(await file.arrayBuffer());
+      expect(roundTripped.equals(bytes)).toBe(true);
+    });
+
+    test('defaults base64 fields to application/octet-stream when content_type is omitted', async () => {
+      await connectorType.executor?.({
+        actionId: 'some-id',
+        services,
+        config: baseConfig,
+        secrets: { ...emptySecrets, user: 'abc', password: '123' },
+        params: {
+          method: 'POST',
+          path: '/upload',
+          form_data: {
+            blob_field: {
+              content: Buffer.from([0x01, 0x02, 0x03]).toString('base64'),
+              encoding: 'base64',
+            },
+          },
+        },
+        configurationUtilities,
+        logger: mockedLogger,
+        connectorUsageCollector,
+      });
+
+      const form = requestMock.mock.calls[0][0].data as FormData;
+      const entry = Array.from(form.entries()).find(([key]) => key === 'blob_field')?.[1];
+      // Base64 fields always go through the Blob branch (never plain text),
+      // even when no filename or content_type is set.
+      expect(entry).toBeInstanceOf(Blob);
+      expect((entry as Blob).type).toBe('application/octet-stream');
+    });
+
+    test('tolerates whitespace inside base64 content (e.g. line-wrapped input)', async () => {
+      const bytes = Buffer.from('hello world');
+      const wrapped = bytes.toString('base64').replace(/(.{4})/g, '$1\n');
+
+      await connectorType.executor?.({
+        actionId: 'some-id',
+        services,
+        config: baseConfig,
+        secrets: { ...emptySecrets, user: 'abc', password: '123' },
+        params: {
+          method: 'POST',
+          path: '/upload',
+          form_data: {
+            file: {
+              content: wrapped,
+              filename: 'hello.txt',
+              content_type: 'text/plain',
+              encoding: 'base64',
+            },
+          },
+        },
+        configurationUtilities,
+        logger: mockedLogger,
+        connectorUsageCollector,
+      });
+
+      const form = requestMock.mock.calls[0][0].data as FormData;
+      const entry = Array.from(form.entries()).find(([key]) => key === 'file')?.[1] as File;
+      expect(await entry.text()).toBe('hello world');
+    });
+
+    test('returns an error when encoding is base64 and content is not valid base64', async () => {
+      const result = await connectorType.executor?.({
+        actionId: 'some-id',
+        services,
+        config: baseConfig,
+        secrets: { ...emptySecrets, user: 'abc', password: '123' },
+        params: {
+          method: 'POST',
+          path: '/upload',
+          form_data: {
+            file: {
+              content: 'not valid base64!!!',
+              encoding: 'base64',
+            },
+          },
+        },
+        configurationUtilities,
+        logger: mockedLogger,
+        connectorUsageCollector,
+      });
+
+      expect(result?.status).toBe('error');
+      expect(result?.serviceMessage).toBe('Invalid base64 content in form_data field "file"');
+      expect(requestMock).not.toHaveBeenCalled();
+    });
   });
 
   test('renders parameter templates as expected', async () => {

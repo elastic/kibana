@@ -33,7 +33,7 @@ export const HttpParamsSchema = z.object({
     'The body of the request. Can be a raw string, a JSON object, or a JSON array.'
   ),
   form_data: HttpFormDataFieldSchema.optional().describe(
-    'The form data to send in the request. Can be a JSON object with the field name as the key and the field value as the value.'
+    'The form data to send in the request. Can be a JSON object with the field name as the key and the field value as the value. Supports utf8 (default) and base64 encoding.'
   ),
   query: z.record(z.string(), z.string()).optional(),
   headers: z.record(z.string(), z.string()).optional(),

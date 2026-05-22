@@ -143,8 +143,16 @@ function renderParameterTemplates(
 
   if (params.form_data) {
     const renderedFormData: HttpFormDataField = {};
-    for (const [key, value] of Object.entries(params.form_data)) {
-      renderedFormData[key] = renderMustacheString(logger, value, variables, 'json');
+    for (const [key, entry] of Object.entries(params.form_data)) {
+      renderedFormData[key] = {
+        content: renderMustacheString(logger, entry.content, variables, 'json'),
+        filename: entry.filename
+          ? renderMustacheString(logger, entry.filename, variables, 'json')
+          : undefined,
+        content_type: entry.content_type
+          ? renderMustacheString(logger, entry.content_type, variables, 'json')
+          : undefined,
+      };
     }
     renderedParams.form_data = renderedFormData;
   }
@@ -209,20 +217,27 @@ function serializeHttpRequestBody(body: unknown): string {
 function buildFormData(formData: HttpFormDataField): FormData {
   const form = new FormData();
   for (const [fieldName, spec] of Object.entries(formData)) {
-    if (spec.filename !== undefined) {
-      // File field: include filename so the server gets Content-Disposition: form-data; filename="..."
-      const blob = new Blob([spec.content], {
+    let blob: Blob;
+    if (spec.encoding === 'base64') {
+      // Binary field — always go through the Blob branch so the bytes round-trip intact.
+      // Wrap the Buffer in a Uint8Array so the underlying storage is an ArrayBuffer (Buffer's `.buffer` is typed as ArrayBufferLike).
+      // Strip whitespace so multi-line base64 (line-wrapped at 64/76 chars) is accepted.
+      // Node's Buffer.from(..., 'base64') silently drops invalid characters, so validate the normalized input upfront to surface a clear error to the user.
+      const normalized = spec.content.replace(/\s+/g, '');
+      if (normalized.length % 4 !== 0 || !/^[A-Za-z0-9+/]*={0,2}$/.test(normalized)) {
+        throw new Error(`Invalid base64 content in form_data field "${fieldName}"`);
+      }
+      const buf = Buffer.from(normalized, 'base64');
+      blob = new Blob([new Uint8Array(buf)], {
         type: spec.content_type ?? 'application/octet-stream',
       });
-      form.append(fieldName, blob, spec.filename);
-    } else if (spec.content_type !== undefined) {
-      // Typed blob without a filename (e.g. application/json fragment)
-      const blob = new Blob([spec.content], { type: spec.content_type });
-      form.append(fieldName, blob);
     } else {
-      // Plain text field — serialize as a string so Content-Disposition has no filename
-      form.append(fieldName, spec.content);
+      // utf8
+      blob = new Blob([spec.content], {
+        type: spec.content_type ?? 'application/octet-stream',
+      });
     }
+    form.append(fieldName, blob, spec.filename); // filename is optional
   }
   return form;
 }
@@ -275,6 +290,17 @@ export async function executor(
     return errorResultInvalid(actionId, 'Cannot set both body and form_data');
   }
 
+  let requestData: unknown;
+  try {
+    if (formData) {
+      requestData = buildFormData(formData);
+    } else {
+      requestData = serializeHttpRequestBody(body);
+    }
+  } catch (error) {
+    return errorResultInvalid(actionId, error.message);
+  }
+
   const [axiosConfig, axiosConfigError] = await getAxiosConfig({
     connectorId: actionId,
     services,
@@ -305,13 +331,6 @@ export async function executor(
 
   const mergedQuery = { ...(secretQueryParams ?? {}), ...(query ?? {}) };
   const url = appendQueryString(combineUrl(baseUrl, path), mergedQuery);
-
-  let requestData: unknown;
-  if (formData) {
-    requestData = buildFormData(formData);
-  } else {
-    requestData = serializeHttpRequestBody(body);
-  }
 
   // Merge headers: params headers take precedence over config headers. When
   // sending multipart/form-data, strip any user-supplied Content-Type so axios
