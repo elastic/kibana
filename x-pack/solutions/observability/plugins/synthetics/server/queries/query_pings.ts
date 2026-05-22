@@ -53,10 +53,20 @@ export async function queryPings<F>(
     pageIndex,
     locations,
     excludedLocations,
+    remoteName,
   } = params;
   const size = sizeParam ?? DEFAULT_PAGE_SIZE;
 
+  // For monitors that live on a remote cluster, target
+  // `${remoteName}:synthetics-*` via Cross-Cluster Search. When `remoteName`
+  // is absent we let SyntheticsEsClient use its default (local) heartbeat
+  // indices.
+  const remoteIndex = remoteName
+    ? `${remoteName}:${syntheticsEsClient.heartbeatIndices}`
+    : undefined;
+
   const searchBody = {
+    ...(remoteIndex ? { index: remoteIndex } : {}),
     size,
     from: pageIndex !== undefined ? pageIndex * size : 0,
     ...(index ? { from: index * size } : {}),
