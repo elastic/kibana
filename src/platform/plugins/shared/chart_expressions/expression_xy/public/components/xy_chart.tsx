@@ -20,6 +20,8 @@ import type {
   XYChartElementEvent,
   XYChartSeriesIdentifier,
   SettingsProps,
+  TooltipValue,
+  PointerValue,
 } from '@elastic/charts';
 import {
   Chart,
@@ -37,6 +39,7 @@ import {
 } from '@elastic/charts';
 import { partition } from 'lodash';
 import type { IconType } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { PaletteRegistry } from '@kbn/coloring';
@@ -120,6 +123,7 @@ import { XYCurrentTime } from './xy_current_time';
 import { TooltipHeader } from './tooltip';
 import { LegendColorPickerWrapperContext, LegendColorPickerWrapper } from './legend_color_picker';
 import { createSplitPoint, getTooltipActions, getXSeriesPoint } from './tooltip/tooltip_actions';
+import { getComputedColumnWarning } from './tooltip/computed_column_warning';
 import { GlobalXYChartStyles } from './xy_chart.styles';
 
 declare global {
@@ -196,6 +200,19 @@ function getIconForSeriesType(layer: CommonXYDataLayerConfig): IconType {
     )?.icon || 'empty'
   );
 }
+
+/** Renders the computed-column filter warning inside the chart tooltip footer. */
+const TooltipComputedColumnWarning: React.FC<{ message: string }> = ({ message }) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <div
+      css={css({ color: euiTheme.colors.textSubdued, fontSize: euiTheme.size.m })}
+      data-test-subj="xyChartComputedColumnWarning"
+    >
+      {message}
+    </div>
+  );
+};
 
 export const XYChartReportable = React.memo(XYChart);
 
@@ -348,6 +365,26 @@ export function XYChart({
     [dataLayers, splitColumnAccessor, splitRowAccessor, formatFactory]
   );
 
+  const isEsqlMode = dataLayers.some((l) => l.table?.meta?.type === ESQL_TABLE_TYPE);
+
+  // Compute warning message for ES|QL computed columns that cannot be filtered.
+  // Shown in the tooltip footer on every hover.
+  const computedColumnWarningMessage = useMemo(
+    () => getComputedColumnWarning(dataLayers, isEsqlMode, panelHasConfiguredDrilldowns ?? false),
+    [dataLayers, isEsqlMode, panelHasConfiguredDrilldowns]
+  );
+
+  const TooltipWarningFooter = useMemo<
+    | React.ComponentType<{
+        items: Array<TooltipValue<Record<string, string | number>, XYChartSeriesIdentifier>>;
+        header: PointerValue<Record<string, string | number>> | null;
+      }>
+    | 'default'
+  >(() => {
+    if (!computedColumnWarningMessage) return 'default';
+    return () => <TooltipComputedColumnWarning message={computedColumnWarningMessage} />;
+  }, [computedColumnWarningMessage]);
+
   const icon: IconType = getIconForSeriesType(getDataLayers(layers)?.[0]);
 
   if (dataLayers.length === 0) {
@@ -420,7 +457,6 @@ export function XYChart({
   const defaultXScaleType = isTimeViz ? XScaleTypes.TIME : XScaleTypes.ORDINAL;
 
   const isHistogramViz = dataLayers.every((l) => l.isHistogram);
-  const isEsqlMode = dataLayers.some((l) => l.table?.meta?.type === ESQL_TABLE_TYPE);
   const hasBars = dataLayers.some((l) => l.seriesType === SeriesTypes.BAR);
 
   const { baseDomain: rawXDomain, extendedDomain: xDomain } = getXDomain(
@@ -836,6 +872,7 @@ export function XYChart({
                   : undefined
               }
               type={args.showTooltip ? TooltipType.VerticalCursor : TooltipType.None}
+              footer={TooltipWarningFooter}
             />
             <Settings
               noResults={

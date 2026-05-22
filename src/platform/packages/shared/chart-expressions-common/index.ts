@@ -32,6 +32,7 @@ export {
   getLegendLayout,
 } from './legend';
 
+export { getComputedColumnWarningForColumns } from './computed_column_warning';
 export type { Simplify, MakeOverridesSerializable, ChartSizeSpec, ChartSizeEvent } from './types';
 export { isChartSizeEvent } from './types';
 export type { ExpressionValueVisDimension } from './expression_value_dimension';

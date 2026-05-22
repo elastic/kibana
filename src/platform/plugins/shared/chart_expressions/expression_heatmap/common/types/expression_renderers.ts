@@ -54,4 +54,5 @@ export type HeatmapRenderProps = HeatmapExpressionProps & {
   syncCursor: boolean;
   renderComplete: IInterpreterRenderHandlers['done'];
   uiSettings?: CoreSetup['uiSettings'];
+  panelHasConfiguredDrilldowns?: boolean;
 };

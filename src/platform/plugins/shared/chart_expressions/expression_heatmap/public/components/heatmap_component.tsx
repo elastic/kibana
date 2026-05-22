@@ -9,6 +9,8 @@
 
 import type { FC } from 'react';
 import React, { memo, useMemo, useState, useCallback, useRef } from 'react';
+import { css } from '@emotion/react';
+import { useEuiTheme } from '@elastic/eui';
 import moment from 'moment';
 import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
 import type {
@@ -23,12 +25,17 @@ import type {
   SettingsProps,
   SeriesIdentifier,
   TooltipValue,
+  PointerValue,
 } from '@elastic/charts';
 import { Chart, Heatmap, ScaleType, Settings, TooltipType, Tooltip } from '@elastic/charts';
 import type { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { search } from '@kbn/data-plugin/public';
 import { LegendToggle, EmptyPlaceholder, useActiveCursor } from '@kbn/charts-plugin/public';
-import { getAccessorByDimension, getFormatByAccessor } from '@kbn/chart-expressions-common';
+import {
+  getAccessorByDimension,
+  getFormatByAccessor,
+  getComputedColumnWarningForColumns,
+} from '@kbn/chart-expressions-common';
 import { i18n } from '@kbn/i18n';
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
 import { IconChartHeatmap } from '@kbn/chart-icons';
@@ -279,6 +286,19 @@ export function getDateFormatPattern(
   return uiSettings.get('dateFormat');
 }
 
+/** Renders the computed-column filter warning inside the chart tooltip footer. */
+const TooltipComputedColumnWarning: React.FC<{ message: string }> = ({ message }) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <div
+      css={css({ color: euiTheme.colors.textSubdued, fontSize: euiTheme.size.m })}
+      data-test-subj="heatmapChartComputedColumnWarning"
+    >
+      {message}
+    </div>
+  );
+};
+
 export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
   ({
     data: table,
@@ -299,6 +319,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     renderComplete,
     overrides,
     uiSettings,
+    panelHasConfiguredDrilldowns,
   }) => {
     const chartRef = useRef<Chart>(null);
     const isDarkTheme = useKibanaIsDarkMode();
@@ -453,6 +474,31 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     }, [formatFactory, xAxisMeta?.params, xAxisMeta?.type, xScale, uiSettings, isEsqlMode]);
 
     const hasTooltipActions = interactive && !isEsqlMode;
+
+    // Compute warning message for ES|QL computed columns that cannot be filtered.
+    // Shown in the tooltip footer on every hover (tooltip actions only show when pinned).
+    const computedColumnWarningMessage = useMemo(
+      () =>
+        isEsqlMode
+          ? getComputedColumnWarningForColumns(
+              [xAxisColumn, yAxisColumn],
+              panelHasConfiguredDrilldowns ?? false
+            )
+          : undefined,
+      [isEsqlMode, xAxisColumn, yAxisColumn, panelHasConfiguredDrilldowns]
+    );
+
+    const TooltipWarningFooter = useMemo<
+      | React.ComponentType<{
+          items: Array<TooltipValue<Record<string, string | number>, SeriesIdentifier>>;
+          header: PointerValue<Record<string, string | number>> | null;
+        }>
+      | 'default'
+    >(() => {
+      if (!computedColumnWarningMessage) return 'default';
+      const message = computedColumnWarningMessage;
+      return () => <TooltipComputedColumnWarning message={message} />;
+    }, [computedColumnWarningMessage]);
 
     const onElementClick = useCallback(
       (e: HeatmapElementEvent[]) => {
@@ -860,6 +906,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
                   : undefined
               }
               type={args.showTooltip ? TooltipType.Follow : TooltipType.None}
+              footer={TooltipWarningFooter}
             />
             <Settings
               onRenderChange={onRenderChange}
