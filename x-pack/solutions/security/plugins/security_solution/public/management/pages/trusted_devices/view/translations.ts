@@ -200,3 +200,10 @@ export const REMOVE_ENTRY_ARIA_LABEL = i18n.translate(
     defaultMessage: 'Remove entry',
   }
 );
+
+export const VALUE_INPUT_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.trustedDevices.form.valueInputPlaceholder',
+  {
+    defaultMessage: 'Enter or select value',
+  }
+);

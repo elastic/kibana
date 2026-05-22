@@ -24,7 +24,7 @@ import {
   EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import {
   OperatingSystem,
   TrustedDeviceConditionEntryField,
@@ -65,23 +65,25 @@ import {
   OS_OPTIONS_PLACEHOLDER,
   AND_BUTTON_LABEL,
   REMOVE_ENTRY_ARIA_LABEL,
+  VALUE_INPUT_PLACEHOLDER,
 } from '../translations';
+
+type ValidationFieldKey = 'name' | 'description' | 'os' | 'entries' | 'entryValues';
 
 interface ValidationResult {
   isValid: boolean;
-  errors: Record<string, string[]>;
-  warnings: Record<string, string[]>;
+  errors: Partial<Record<ValidationFieldKey, string[]>>;
+  warnings: Partial<Record<ValidationFieldKey, string[]>>;
 }
 
 type DeviceEntry = ExceptionListItemSchema['entries'][0];
 
-const defaultDeviceEntry = (): DeviceEntry =>
-  ({
-    field: TrustedDeviceConditionEntryField.DEVICE_ID,
-    operator: 'included' as const,
-    type: 'match' as const,
-    value: '',
-  } as const);
+const defaultDeviceEntry = (): DeviceEntry => ({
+  field: TrustedDeviceConditionEntryField.DEVICE_ID,
+  operator: 'included',
+  type: 'match',
+  value: '',
+});
 
 const OS_OPTIONS: Array<EuiComboBoxOptionOption<OsTypeArray>> = [
   {
@@ -151,17 +153,13 @@ const OPERATOR_OPTIONS = [
 const DEVICE_EVENTS_INDEX_NAMES = [DEVICE_EVENTS_INDEX_PATTERN];
 
 interface EntryValidationResult {
-  errors: string[];
+  duplicateErrors: string[];
   warnings: string[];
   anyEntryEmpty: boolean;
-  visitedEntryEmpty: boolean;
 }
 
-const validateEntries = (
-  entries: ExceptionListItemSchema['entries'],
-  hasVisitedAnyEntry: boolean
-): EntryValidationResult => {
-  const errors: string[] = [];
+const validateEntries = (entries: ExceptionListItemSchema['entries']): EntryValidationResult => {
+  const duplicateErrors: string[] = [];
   const warnings: string[] = [];
   const fieldCounts = new Map<string, number>();
   let anyEntryEmpty = false;
@@ -187,19 +185,15 @@ const validateEntries = (
     }
   }
 
-  const visitedEntryEmpty = anyEntryEmpty && hasVisitedAnyEntry;
-
-  if (visitedEntryEmpty) {
-    errors.push(INPUT_ERRORS.entryValueEmpty);
-  }
-
   for (const [field, count] of fieldCounts) {
     if (count > 1) {
-      errors.push(INPUT_ERRORS.noDuplicateField(field as TrustedDeviceConditionEntryField));
+      duplicateErrors.push(
+        INPUT_ERRORS.noDuplicateField(field as TrustedDeviceConditionEntryField)
+      );
     }
   }
 
-  return { errors, warnings, anyEntryEmpty, visitedEntryEmpty };
+  return { duplicateErrors, warnings, anyEntryEmpty };
 };
 
 const computeValidation = (
@@ -207,8 +201,8 @@ const computeValidation = (
   visitedFields: Record<string, boolean>,
   hasVisitedAnyEntry: boolean
 ): ValidationResult => {
-  const errors: Record<string, string[]> = {};
-  const warnings: Record<string, string[]> = {};
+  const errors: Partial<Record<ValidationFieldKey, string[]>> = {};
+  const warnings: Partial<Record<ValidationFieldKey, string[]>> = {};
 
   if (!formData.name?.trim()) {
     errors.name = [INPUT_ERRORS.name];
@@ -231,16 +225,21 @@ const computeValidation = (
     if (!formData.entries?.length) {
       errors.entries = [INPUT_ERRORS.entriesAtLeastOne];
     } else {
-      const entryValidation = validateEntries(formData.entries, hasVisitedAnyEntry);
+      const entryValidation = validateEntries(formData.entries);
 
-      if (entryValidation.errors.length > 0) {
-        errors.entries = entryValidation.errors;
+      if (entryValidation.duplicateErrors.length > 0) {
+        errors.entries = entryValidation.duplicateErrors;
       }
+
+      if (entryValidation.anyEntryEmpty && hasVisitedAnyEntry) {
+        errors.entryValues = [INPUT_ERRORS.entryValueEmpty];
+      }
+
       if (entryValidation.warnings.length > 0) {
         warnings.entries = entryValidation.warnings;
       }
 
-      if (entryValidation.anyEntryEmpty && !entryValidation.visitedEntryEmpty) {
+      if (entryValidation.anyEntryEmpty && !hasVisitedAnyEntry) {
         return { isValid: false, errors, warnings };
       }
     }
@@ -431,7 +430,7 @@ const ConditionEntryRow = memo<ConditionEntryRowProps>(
         <EuiFlexItem>
           <EuiFormRow label={showLabels ? 'Value' : undefined}>
             <EuiComboBox
-              placeholder="Enter or select value"
+              placeholder={VALUE_INPUT_PLACEHOLDER}
               singleSelection={{ asPlainText: true }}
               options={suggestions.map((suggestion, idx) => ({
                 label: suggestion,
@@ -480,15 +479,15 @@ const ConditionGroupFlexGroup = styled(EuiFlexGroup)`
   .and-badge {
     padding-top: 20px;
     padding-bottom: ${({ theme }) => {
-      return `calc(${theme.eui.euiButtonHeightSmall} + (${theme.eui.euiSizeS} * 2) + 3px);`;
+      return `calc(${theme.euiTheme.size.xl} + (${theme.euiTheme.size.s} * 2) + 3px);`;
     }};
   }
 
   .group-entries {
-    margin-bottom: ${({ theme }) => theme.eui.euiSizeS};
+    margin-bottom: ${({ theme }) => theme.euiTheme.size.s};
 
     & > * {
-      margin-bottom: ${({ theme }) => theme.eui.euiSizeS};
+      margin-bottom: ${({ theme }) => theme.euiTheme.size.s};
 
       &:last-child {
         margin-bottom: 0;
@@ -572,8 +571,11 @@ const ConditionsSection = memo<{
         <EuiFormRow
           fullWidth
           data-test-subj={getTestId('conditionsRow')}
-          isInvalid={visitedFields.entries && !!validationResult.errors.entries}
-          error={visitedFields.entries ? validationResult.errors.entries : undefined}
+          isInvalid={!!validationResult.errors.entries || !!validationResult.errors.entryValues}
+          error={[
+            ...(validationResult.errors.entries ?? []),
+            ...(validationResult.errors.entryValues ?? []),
+          ]}
           helpText={
             visitedFields.entries && validationResult.warnings.entries
               ? validationResult.warnings.entries[0]
@@ -757,7 +759,7 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
           entries: updatedEntries,
         };
 
-        const { isValid } = computeValidation(updatedItem, visitedFields, new Set());
+        const { isValid } = computeValidation(updatedItem, visitedFields, false);
 
         updateVisitedFields({ ...visitedFields, os: true });
 
@@ -786,6 +788,7 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
       (index: number, value: string) => {
         updateEntryAtIndex(index, { field: value, value: '' });
         updateVisitedFields({ entries: false });
+        setHasVisitedAnyEntry(false);
       },
       [updateEntryAtIndex, updateVisitedFields]
     );
@@ -794,6 +797,7 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
       (index: number, value: string) => {
         const type = value === 'is' ? 'match' : 'wildcard';
         updateEntryAtIndex(index, { type });
+        setHasVisitedAnyEntry(false);
       },
       [updateEntryAtIndex]
     );
@@ -820,22 +824,24 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
         : [defaultDeviceEntry()];
       const entries = [...existingEntries, defaultDeviceEntry()];
       const updatedItem = { ...currentItem, entries };
-      const { isValid } = computeValidation(updatedItem, visitedFields, hasVisitedAnyEntry);
+      const { isValid } = computeValidation(updatedItem, visitedFields, false);
 
       setHasFormChanged(true);
+      setHasVisitedAnyEntry(false);
       onChange({ item: updatedItem, isValid });
-    }, [currentItem, visitedFields, hasVisitedAnyEntry, onChange]);
+    }, [currentItem, visitedFields, onChange]);
 
     const handleRemoveEntry = useCallback(
       (index: number) => {
         const entries = (currentItem.entries ?? []).filter((_, i) => i !== index);
         const updatedItem = { ...currentItem, entries };
 
-        const { isValid } = computeValidation(updatedItem, visitedFields, hasVisitedAnyEntry);
+        const { isValid } = computeValidation(updatedItem, visitedFields, false);
         setHasFormChanged(true);
+        setHasVisitedAnyEntry(false);
         onChange({ item: updatedItem, isValid });
       },
-      [currentItem, visitedFields, hasVisitedAnyEntry, onChange]
+      [currentItem, visitedFields, onChange]
     );
 
     const handlePolicyChange = useCallback<EffectedPolicySelectProps['onChange']>(

@@ -641,7 +641,7 @@ describe('Trusted devices form', () => {
   });
 
   describe('Duplicate field validation', () => {
-    it('should show a duplicate field error when two entries share the same field', async () => {
+    it('should show a duplicate field error immediately without requiring user interaction', async () => {
       formProps.item = createItem({
         entries: [
           createEntry(TrustedDeviceConditionEntryField.DEVICE_ID, 'match', 'device-1'),
@@ -650,14 +650,7 @@ describe('Trusted devices form', () => {
       });
       await render();
 
-      // Trigger validateForm so validationResult.errors.entries is populated
-      await setTextFieldValue(getNameField(), 'My TD');
-
-      // Blur a value field to make visitedFields.entries true, surfacing the error
-      act(() => {
-        fireEvent.blur(getEntryValueField(0));
-      });
-
+      // Duplicate errors are always surfaced — no blur or visit required
       expect(
         renderResult.getByText(
           INPUT_ERRORS.noDuplicateField(TrustedDeviceConditionEntryField.DEVICE_ID)
@@ -674,12 +667,6 @@ describe('Trusted devices form', () => {
       });
       await render();
 
-      await setTextFieldValue(getNameField(), 'My TD');
-
-      act(() => {
-        fireEvent.blur(getEntryValueField(0));
-      });
-
       expect(
         renderResult.queryByText(
           INPUT_ERRORS.noDuplicateField(TrustedDeviceConditionEntryField.DEVICE_ID)
@@ -687,7 +674,23 @@ describe('Trusted devices form', () => {
       ).toBeNull();
     });
 
-    it('should show both empty-value and duplicate-field errors when both conditions exist', async () => {
+    it('should report isValid as false (disabling the submit button) when a duplicate field error is present', async () => {
+      formProps.item = createItem({
+        entries: [
+          createEntry(TrustedDeviceConditionEntryField.DEVICE_ID, 'match', 'device-1'),
+          createEntry(TrustedDeviceConditionEntryField.DEVICE_ID, 'match', 'device-2'),
+        ],
+      });
+      await render();
+
+      // Trigger an onChange so we can inspect isValid
+      await setTextFieldValue(getNameField(), 'My TD');
+
+      const lastCall = (formProps.onChange as jest.Mock).mock.calls.at(-1)?.[0];
+      expect(lastCall?.isValid).toBe(false);
+    });
+
+    it('should show duplicate-field error immediately and empty-value error only after blur', async () => {
       formProps.item = createItem({
         entries: [
           createEntry(TrustedDeviceConditionEntryField.DEVICE_ID, 'match', ''),
@@ -696,8 +699,16 @@ describe('Trusted devices form', () => {
       });
       await render();
 
-      await setTextFieldValue(getNameField(), 'My TD');
+      // Duplicate error visible right away
+      expect(
+        renderResult.getByText(
+          INPUT_ERRORS.noDuplicateField(TrustedDeviceConditionEntryField.DEVICE_ID)
+        )
+      ).toBeTruthy();
+      // Empty-value error not yet shown (no entry visited)
+      expect(renderResult.queryByText(INPUT_ERRORS.entryValueEmpty)).toBeNull();
 
+      // After visiting an entry value, the empty-value error also appears
       act(() => {
         fireEvent.blur(getEntryValueField(0));
       });
@@ -708,6 +719,95 @@ describe('Trusted devices form', () => {
           INPUT_ERRORS.noDuplicateField(TrustedDeviceConditionEntryField.DEVICE_ID)
         )
       ).toBeTruthy();
+    });
+
+    it('should keep the duplicate-field error visible after changing the operator', async () => {
+      formProps.item = createItem({
+        entries: [
+          createEntry(TrustedDeviceConditionEntryField.DEVICE_ID, 'match', 'device-1'),
+          createEntry(TrustedDeviceConditionEntryField.DEVICE_ID, 'match', 'device-2'),
+        ],
+      });
+      await render();
+
+      // Duplicate error is visible immediately
+      expect(
+        renderResult.getByText(
+          INPUT_ERRORS.noDuplicateField(TrustedDeviceConditionEntryField.DEVICE_ID)
+        )
+      ).toBeTruthy();
+
+      // Change the operator on entry 0
+      await userEvent.click(getEntryOperatorSelect(0));
+      await userEvent.click(screen.getByRole('option', { name: OPERATOR_TITLES.matches }));
+      rerenderWithLatestProps();
+
+      // Duplicate error must still be visible — changing the operator doesn't fix it
+      expect(
+        renderResult.getByText(
+          INPUT_ERRORS.noDuplicateField(TrustedDeviceConditionEntryField.DEVICE_ID)
+        )
+      ).toBeTruthy();
+    });
+
+    it('should hide the empty-value error after changing the operator', async () => {
+      formProps.item = createItem({
+        entries: [
+          createEntry(TrustedDeviceConditionEntryField.DEVICE_ID, 'match', ''),
+          createEntry(TrustedDeviceConditionEntryField.HOST, 'match', 'my-host'),
+        ],
+      });
+      await render();
+
+      // Visit the empty entry to surface its error
+      act(() => {
+        fireEvent.blur(getEntryValueField(0));
+      });
+      expect(renderResult.getByText(INPUT_ERRORS.entryValueEmpty)).toBeTruthy();
+
+      // Changing the operator should hide the empty-value error
+      await userEvent.click(getEntryOperatorSelect(0));
+      await userEvent.click(screen.getByRole('option', { name: OPERATOR_TITLES.matches }));
+      rerenderWithLatestProps();
+
+      expect(renderResult.queryByText(INPUT_ERRORS.entryValueEmpty)).toBeNull();
+    });
+
+    it('should hide the empty-value error after adding an entry', async () => {
+      formProps.item = createItem({
+        entries: [createEntry(TrustedDeviceConditionEntryField.DEVICE_ID, 'match', '')],
+      });
+      await render();
+
+      act(() => {
+        fireEvent.blur(getEntryValueField(0));
+      });
+      expect(renderResult.getByText(INPUT_ERRORS.entryValueEmpty)).toBeTruthy();
+
+      await userEvent.click(getAndButton());
+      rerenderWithLatestProps();
+
+      expect(renderResult.queryByText(INPUT_ERRORS.entryValueEmpty)).toBeNull();
+    });
+
+    it('should hide the empty-value error after removing an entry', async () => {
+      formProps.item = createItem({
+        entries: [
+          createEntry(TrustedDeviceConditionEntryField.DEVICE_ID, 'match', ''),
+          createEntry(TrustedDeviceConditionEntryField.HOST, 'match', 'my-host'),
+        ],
+      });
+      await render();
+
+      act(() => {
+        fireEvent.blur(getEntryValueField(0));
+      });
+      expect(renderResult.getByText(INPUT_ERRORS.entryValueEmpty)).toBeTruthy();
+
+      await userEvent.click(getEntryRemoveButton(1));
+      rerenderWithLatestProps();
+
+      expect(renderResult.queryByText(INPUT_ERRORS.entryValueEmpty)).toBeNull();
     });
   });
 
@@ -744,6 +844,14 @@ describe('Trusted devices form', () => {
       });
       await render();
 
+      // Duplicate error is visible without any interaction
+      expect(
+        renderResult.queryByText(
+          INPUT_ERRORS.noDuplicateField(TrustedDeviceConditionEntryField.DEVICE_ID)
+        )
+      ).toBeTruthy();
+
+      // Trigger an onChange so we can later inspect isValid, then blur to surface the empty-value error
       await setTextFieldValue(getNameField(), 'My TD');
       rerenderWithLatestProps();
 
