@@ -8,7 +8,8 @@
  */
 
 import { DEVTOOL_MANAGED_ATTR, DEVELOPER_TOOLBAR_HEIGHT } from '../lib/constants';
-import { cloneClean, setImportant, softHideElement } from './clone_element';
+import { cloneClean, softHideElement } from './clone_element';
+import { setImportant } from '../lib/dom/set_important';
 import { snapToGrid } from '../lib/dom/snap_to_grid';
 import type { LayoutConfig } from '../lib/layout/layout_config';
 import type { ElementSession, ElementRegistry } from './element_registry';
