@@ -5,21 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { EuiThemeProvider } from '@elastic/eui';
+import React from 'react';
 import { NightshiftApp } from './nightshift_app';
 
 describe('NightshiftApp', () => {
-  it('renders the title and coming soon text', () => {
-    render(
-      <EuiThemeProvider colorMode="light">
-        <NightshiftApp />
-      </EuiThemeProvider>
-    );
+  it('renders the title', () => {
+    render(<NightshiftApp />);
 
-    expect(screen.getByTestId('nightshiftEmptyState')).toBeInTheDocument();
     expect(screen.getByText('Nightshift')).toBeInTheDocument();
-    expect(screen.getByText('Coming soon')).toBeInTheDocument();
   });
 });

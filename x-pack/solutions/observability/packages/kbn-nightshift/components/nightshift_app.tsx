@@ -14,7 +14,7 @@ export function NightshiftApp() {
   return (
     <EuiEmptyPrompt
       data-test-subj="nightshiftEmptyState"
-      icon={<NightshiftIcon width={64} height={64} />}
+      icon={<NightshiftIcon size="xxl" />}
       title={
         <h2>
           {i18n.translate('xpack.nightshift.emptyState.title', {

@@ -18,7 +18,6 @@ type Story = StoryObj<typeof NightshiftIcon>;
 
 export const Icon: Story = {
   args: {
-    width: 512,
-    height: 512,
+    size: 'xxl',
   },
 };

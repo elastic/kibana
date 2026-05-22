@@ -44,7 +44,6 @@ test.describe(
 
       await expect(page).toHaveURL(/\/app\/observability\/nightshift/, { timeout: 60_000 });
       await expect(page.testSubj.locator('nightshiftPage')).toBeVisible({ timeout: 60_000 });
-      await expect(page.locator('svg[viewBox="0 0 32 32"]')).toBeVisible();
     });
   }
 );
