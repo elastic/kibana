@@ -11,7 +11,9 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { MlDataSourcePicker } from './ml_data_source_picker';
 import type { MlDataSourcePickerServices } from './ml_data_source_picker';
 
+const mockHistoryReplace = jest.fn();
 jest.mock('react-router-dom', () => ({
+  useHistory: jest.fn(() => ({ replace: mockHistoryReplace })),
   useLocation: jest.fn(() => ({ pathname: '/jobs/new_job/step/data_view', search: '' })),
 }));
 
@@ -43,7 +45,6 @@ jest.mock('./ml_open_session_flyout', () => ({
   },
 }));
 
-const mockNavigateToPath = jest.fn();
 const mockGetIdsWithTitle = jest.fn().mockResolvedValue([]);
 const mockOpenEditor = jest.fn().mockResolvedValue(() => {});
 
@@ -71,7 +72,6 @@ const renderComponent = (props: { currentDataView: any; services?: MlDataSourceP
       <MlDataSourcePicker
         currentDataView={props.currentDataView}
         services={props.services ?? buildServices()}
-        navigateToPath={mockNavigateToPath}
         DataViewPickerComponent={MockDataViewPicker}
         SavedObjectFinderComponent={MockSavedObjectFinder}
       />
@@ -118,9 +118,7 @@ describe('MlDataSourcePicker', () => {
       capturedDataViewPickerProps.onChangeDataView('test-index-id');
     });
 
-    expect(mockNavigateToPath).toHaveBeenCalledWith(
-      '/jobs/new_job/step/data_view?index=test-index-id'
-    );
+    expect(mockHistoryReplace).toHaveBeenCalledWith({ search: '?index=test-index-id' });
   });
 
   it('renders MlOpenSessionFlyout when "Open Discover session" button is clicked', async () => {
@@ -152,9 +150,9 @@ describe('MlDataSourcePicker', () => {
       fireEvent.click(screen.getByTestId('openSavedSearch'));
     });
 
-    expect(mockNavigateToPath).toHaveBeenCalledWith(
-      '/jobs/new_job/step/data_view?savedSearchId=saved-search-id-1'
-    );
+    expect(mockHistoryReplace).toHaveBeenCalledWith({
+      search: '?savedSearchId=saved-search-id-1',
+    });
     expect(screen.queryByTestId('mockOpenSessionFlyout')).toBeNull();
   });
 
@@ -170,7 +168,7 @@ describe('MlDataSourcePicker', () => {
       await capturedDataViewPickerProps.onDataViewCreated({ id: 'new-dv-id' });
     });
 
-    expect(mockNavigateToPath).toHaveBeenCalledWith('/jobs/new_job/step/data_view?index=new-dv-id');
+    expect(mockHistoryReplace).toHaveBeenCalledWith({ search: '?index=new-dv-id' });
     expect(mockGetIdsWithTitle).toHaveBeenCalledTimes(2);
   });
 

@@ -61,7 +61,7 @@ describe('DataSourceContextProvider', () => {
     (useMlKibana as jest.Mock).mockReturnValue(buildKibanaMock());
   });
 
-  it('renders children when default data view is found (no URL params)', async () => {
+  it('uses default data view when no URL params are present', async () => {
     mockLocationSearch.mockReturnValue('');
     mockGetDefaultDataView.mockResolvedValue({
       id: 'default-dv',
@@ -75,6 +75,50 @@ describe('DataSourceContextProvider', () => {
     });
 
     expect(mockGetDefaultDataView).toHaveBeenCalled();
+  });
+
+  it('uses managed default data view directly without falling back to list', async () => {
+    mockLocationSearch.mockReturnValue('');
+    mockGetDefaultDataView.mockResolvedValue({
+      id: 'logs-star',
+      title: 'logs-*',
+      managed: true,
+    });
+
+    renderProvider();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('child-content')).toBeInTheDocument();
+    });
+
+    expect(mockGetDefaultDataView).toHaveBeenCalled();
+  });
+
+  it('renders children with null data view when getDefaultDataView throws', async () => {
+    mockLocationSearch.mockReturnValue('');
+    mockGetDefaultDataView.mockRejectedValue(new Error('No default data view'));
+
+    renderProvider();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('child-content')).toBeInTheDocument();
+    });
+
+    expect(mockGetDefaultDataView).toHaveBeenCalled();
+    expect(mockGet).not.toHaveBeenCalled();
+  });
+
+  it('renders children with null data view when no default and no data views exist', async () => {
+    mockLocationSearch.mockReturnValue('');
+    mockGetDefaultDataView.mockResolvedValue(null);
+
+    renderProvider();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('child-content')).toBeInTheDocument();
+    });
+
+    expect(mockGet).not.toHaveBeenCalled();
   });
 
   it('renders children when index URL param is present', async () => {

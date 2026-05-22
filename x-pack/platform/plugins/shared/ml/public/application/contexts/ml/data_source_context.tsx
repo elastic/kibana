@@ -73,18 +73,14 @@ export const DataSourceContextProvider: FC<PropsWithChildren<unknown>> = ({ chil
       );
     }
 
-    let dataViewAndSavedSearch: DataViewAndSavedSearch = {
-      savedSearch: null,
-      dataView: null,
-    };
+    let dataViewAndSavedSearch: DataViewAndSavedSearch = { savedSearch: null, dataView: null };
 
     if (savedSearchId !== undefined) {
       dataViewAndSavedSearch = await getDataViewAndSavedSearchCb(savedSearchId);
     } else if (dataViewId !== undefined) {
       dataViewAndSavedSearch.dataView = await dataViews.get(dataViewId);
     } else {
-      const defaultDataView = await dataViews.getDefaultDataView().catch(() => null);
-      dataViewAndSavedSearch.dataView = defaultDataView ?? null;
+      dataViewAndSavedSearch.dataView = await dataViews.getDefaultDataView().catch(() => null);
     }
 
     const { savedSearch, dataView } = dataViewAndSavedSearch;
