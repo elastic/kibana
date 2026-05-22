@@ -28,6 +28,7 @@ import { AgentBuilderPluginsPage } from './pages/plugins';
 import { AgentBuilderPluginDetailsPage } from './pages/plugin_details';
 import { AgentBuilderConnectorsPage } from './pages/connectors';
 import { AgentBuilderMcpClientsPage } from './pages/mcp_clients';
+import { AgentBuilderMcpClientCreatePage } from './pages/mcp_client_create';
 import { agentBuilderViewIds } from './agent_builder_view_ids';
 import { appPaths } from './utils/app_paths';
 
@@ -206,6 +207,14 @@ export const manageRoutes: RouteDefinition[] = [
     viewId: agentBuilderViewIds.manageToolBulkImportMcp,
     sidebarView: 'manage',
     element: <AgentBuilderBulkImportMcpToolsPage />,
+  },
+  {
+    path: '/manage/tools/mcp_clients/new',
+    viewId: agentBuilderViewIds.manageMcpClientCreate,
+    sidebarView: 'manage',
+    requiresUIAM: true,
+    requiresUiamOAuthClientManagement: true,
+    element: <AgentBuilderMcpClientCreatePage />,
   },
   {
     path: '/manage/tools/mcp_clients',

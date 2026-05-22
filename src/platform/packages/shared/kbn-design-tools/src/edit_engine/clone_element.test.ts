@@ -18,14 +18,20 @@ import {
   restoreDimensions,
   deduplicateSvgIds,
   roundRect,
-  setImportant,
   softHideElement,
   restoreHiddenElement,
   cloneElement,
   copyStylesDeep,
   widenForTruncation,
 } from './clone_element';
-import { DEVTOOL_HIDDEN_ATTR, DEVTOOL_MANAGED_ATTR } from '../lib/constants';
+import { setImportant } from '../lib/dom/set_important';
+import {
+  DEVTOOL_HIDDEN_ATTR,
+  DEVTOOL_MANAGED_ATTR,
+  EUI_CARD_ROOT_CLASS,
+  EUI_CARD_ICON_CLASS,
+  EUI_CARD_IMAGE_CLASS,
+} from '../lib/constants';
 import '../lib/tests/mocks';
 
 const mockRect = (x = 0, y = 0, w = 100, h = 50): DOMRect => new DOMRect(x, y, w, h) as DOMRect;
@@ -111,16 +117,72 @@ describe('reflowAfterStyleChange', () => {
     expect(child.style.width).toBe('');
   });
 
-  it('should unfreeze both dimensions for padding change', () => {
+  it('should unfreeze the edited element but preserve child dimensions for padding change', () => {
     const parent = document.createElement('div');
+    parent.style.width = '100px';
+    parent.style.height = '50px';
+    parent.style.maxWidth = '100px';
+    parent.style.maxHeight = '50px';
     const child = document.createElement('div');
     child.style.width = '50px';
     child.style.height = '30px';
     parent.appendChild(child);
 
     reflowAfterStyleChange(parent, 'padding');
-    expect(child.style.width).toBe('');
-    expect(child.style.height).toBe('');
+    expect(parent.style.width).toBe('');
+    expect(parent.style.height).toBe('');
+    expect(parent.style.maxWidth).toBe('');
+    expect(parent.style.maxHeight).toBe('');
+    expect(child.style.width).toBe('50px');
+    expect(child.style.height).toBe('30px');
+  });
+
+  it('should sync EUI Card image offsets for padding change', () => {
+    const card = document.createElement('div');
+    card.classList.add(EUI_CARD_ROOT_CLASS);
+    card.style.padding = '12px';
+    const imageWrapper = document.createElement('div');
+    imageWrapper.classList.add(EUI_CARD_IMAGE_CLASS);
+    imageWrapper.style.width = '280px';
+    const image = document.createElement('img');
+    image.style.width = '280px';
+    image.style.height = '120px';
+    const icon = document.createElement('div');
+    icon.classList.add(EUI_CARD_ICON_CLASS);
+    imageWrapper.appendChild(image);
+    card.appendChild(imageWrapper);
+    card.appendChild(icon);
+
+    reflowAfterStyleChange(card, 'padding');
+
+    expect(imageWrapper.style.getPropertyValue('width')).toBe('calc(100% + 24px)');
+    expect(imageWrapper.style.getPropertyPriority('width')).toBe('important');
+    expect(imageWrapper.style.getPropertyValue('left')).toBe('-12px');
+    expect(imageWrapper.style.getPropertyValue('top')).toBe('-12px');
+    expect(imageWrapper.style.getPropertyValue('margin-bottom')).toBe('-12px');
+    expect(image.style.getPropertyValue('width')).toBe('100%');
+    expect(image.style.getPropertyValue('height')).toBe('120px');
+    expect(icon.style.getPropertyValue('transform')).toBe('translate(-50%, calc(-50% - 12px))');
+  });
+
+  it('should not sync EUI Card image offsets when padding changes on a card descendant', () => {
+    const card = document.createElement('div');
+    card.classList.add(EUI_CARD_ROOT_CLASS);
+    const top = document.createElement('div');
+    top.classList.add(`${EUI_CARD_ROOT_CLASS}__top`);
+    top.style.padding = '12px';
+    const imageWrapper = document.createElement('div');
+    imageWrapper.classList.add(EUI_CARD_IMAGE_CLASS);
+    imageWrapper.style.width = '280px';
+    top.appendChild(imageWrapper);
+    card.appendChild(top);
+
+    reflowAfterStyleChange(top, 'padding');
+
+    expect(imageWrapper.style.getPropertyValue('width')).toBe('280px');
+    expect(imageWrapper.style.getPropertyValue('left')).toBe('');
+    expect(imageWrapper.style.getPropertyValue('top')).toBe('');
+    expect(imageWrapper.style.getPropertyValue('margin-bottom')).toBe('');
   });
 
   it('should unfreeze ancestors up to root when root is provided', () => {
@@ -142,14 +204,16 @@ describe('reflowAfterStyleChange', () => {
     const root = document.createElement('div');
     const child = document.createElement('div');
     wrapper.style.width = '500px';
+    root.style.setProperty('max-width', '300px');
     root.style.width = '300px';
     wrapper.appendChild(root);
     root.appendChild(child);
 
     reflowAfterStyleChange(child, 'width', root);
-    // Root is unfrozen (it's inside the boundary)
-    expect(root.style.width).toBe('');
-    // Wrapper is outside the boundary — untouched
+    // Root is the boundary and should stay fixed
+    expect(root.style.width).toBe('300px');
+    expect(root.style.getPropertyValue('max-width')).toBe('300px');
+    // Wrapper is outside the boundary and untouched
     expect(wrapper.style.width).toBe('500px');
   });
 });
@@ -169,6 +233,47 @@ describe('reflowAfterTextChange', () => {
     expect(parent.style.height).toBe('');
     expect(child.style.width).toBe('');
     expect(child.style.height).toBe('');
+  });
+
+  it('should unfreeze ancestors up to root when root is provided', () => {
+    const root = document.createElement('div');
+    const mid = document.createElement('div');
+    const parent = document.createElement('div');
+    setImportant(mid, 'width', '300px');
+    setImportant(mid, 'height', '200px');
+    root.appendChild(mid);
+    mid.appendChild(parent);
+
+    reflowAfterTextChange(parent, root);
+    expect(mid.style.width).toBe('');
+    expect(mid.style.height).toBe('');
+  });
+
+  it('should not unfreeze ancestors past root boundary', () => {
+    const wrapper = document.createElement('div');
+    const root = document.createElement('div');
+    const parent = document.createElement('div');
+    setImportant(wrapper, 'width', '500px');
+    setImportant(root, 'width', '300px');
+    setImportant(root, 'height', '200px');
+    wrapper.appendChild(root);
+    root.appendChild(parent);
+
+    reflowAfterTextChange(parent, root);
+    expect(root.style.width).toBe('300px');
+    expect(root.style.height).toBe('');
+    expect(wrapper.style.width).toBe('500px');
+  });
+
+  it('should unfreeze root width for no-wrap text contexts', () => {
+    const root = document.createElement('div');
+    const parent = document.createElement('span');
+    setImportant(root, 'width', '123px');
+    setImportant(parent, 'white-space', 'nowrap');
+    root.appendChild(parent);
+
+    reflowAfterTextChange(parent, root);
+    expect(root.style.width).toBe('');
   });
 });
 
@@ -254,6 +359,41 @@ describe('collectTextReflowDimensions', () => {
     const dims = collectTextReflowDimensions(parent);
     expect(dims).toHaveLength(0);
   });
+
+  it('should capture ancestor dimensions up to root', () => {
+    const root = document.createElement('div');
+    const mid = document.createElement('div');
+    const parent = document.createElement('div');
+    setImportant(mid, 'width', '280px');
+    setImportant(mid, 'height', '120px');
+    setImportant(root, 'height', '400px');
+    root.appendChild(mid);
+    mid.appendChild(parent);
+
+    const dims = collectTextReflowDimensions(parent, root);
+    expect(dims).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ element: mid, property: 'width', value: '280px' }),
+        expect.objectContaining({ element: mid, property: 'height', value: '120px' }),
+        expect.objectContaining({ element: root, property: 'height', value: '400px' }),
+      ])
+    );
+  });
+
+  it('should capture root width for no-wrap text contexts', () => {
+    const root = document.createElement('div');
+    const parent = document.createElement('span');
+    setImportant(root, 'width', '123px');
+    setImportant(parent, 'white-space', 'nowrap');
+    root.appendChild(parent);
+
+    const dims = collectTextReflowDimensions(parent, root);
+    expect(dims).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ element: root, property: 'width', value: '123px' }),
+      ])
+    );
+  });
 });
 
 describe('collectStyleReflowDimensions', () => {
@@ -287,8 +427,12 @@ describe('collectStyleReflowDimensions', () => {
     );
   });
 
-  it('should capture both dimensions for padding change', () => {
+  it('should capture edited element dimensions for padding change', () => {
     const parent = document.createElement('div');
+    setImportant(parent, 'width', '100px');
+    setImportant(parent, 'height', '40px');
+    setImportant(parent, 'max-width', '100px');
+    setImportant(parent, 'max-height', '40px');
     const child = document.createElement('div');
     setImportant(child, 'width', '50px');
     setImportant(child, 'height', '30px');
@@ -297,8 +441,43 @@ describe('collectStyleReflowDimensions', () => {
     const dims = collectStyleReflowDimensions(parent, 'padding');
     expect(dims).toEqual(
       expect.arrayContaining([
+        expect.objectContaining({ element: parent, property: 'width', value: '100px' }),
+        expect.objectContaining({ element: parent, property: 'height', value: '40px' }),
+        expect.objectContaining({ element: parent, property: 'max-width', value: '100px' }),
+        expect.objectContaining({ element: parent, property: 'max-height', value: '40px' }),
+      ])
+    );
+    expect(dims).not.toEqual(
+      expect.arrayContaining([
         expect.objectContaining({ element: child, property: 'width', value: '50px' }),
         expect.objectContaining({ element: child, property: 'height', value: '30px' }),
+      ])
+    );
+  });
+
+  it('should capture EUI Card image padding styles for padding change', () => {
+    const card = document.createElement('div');
+    card.classList.add(EUI_CARD_ROOT_CLASS);
+    const imageWrapper = document.createElement('div');
+    imageWrapper.classList.add(EUI_CARD_IMAGE_CLASS);
+    imageWrapper.style.width = '280px';
+    const image = document.createElement('img');
+    image.style.width = '280px';
+    const icon = document.createElement('div');
+    icon.classList.add(EUI_CARD_ICON_CLASS);
+    card.appendChild(imageWrapper);
+    card.appendChild(icon);
+    imageWrapper.appendChild(image);
+
+    const dims = collectStyleReflowDimensions(card, 'padding');
+    expect(dims).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ element: imageWrapper, property: 'width', value: '280px' }),
+        expect.objectContaining({ element: imageWrapper, property: 'left', value: '' }),
+        expect.objectContaining({ element: imageWrapper, property: 'top', value: '' }),
+        expect.objectContaining({ element: imageWrapper, property: 'margin-bottom', value: '' }),
+        expect.objectContaining({ element: image, property: 'width', value: '280px' }),
+        expect.objectContaining({ element: icon, property: 'transform', value: '' }),
       ])
     );
   });
@@ -516,6 +695,45 @@ describe('widenForTruncation', () => {
     target.remove();
   });
 
+  it('should increase height when natural scrollHeight exceeds rect height', () => {
+    const target = document.createElement('span');
+    target.classList.add('eui-textTruncate');
+    document.body.appendChild(target);
+
+    const clone = document.createElement('span');
+    Object.defineProperty(clone, 'scrollWidth', { value: 90, configurable: true });
+    Object.defineProperty(clone, 'scrollHeight', { value: 78, configurable: true });
+
+    const rect = new DOMRect(0, 0, 100, 40);
+    const result = widenForTruncation(target, clone, rect);
+
+    expect(result.width).toBe(100);
+    expect(result.height).toBe(78);
+    expect(clone.style.getPropertyValue('height')).toBe('78px');
+
+    target.remove();
+  });
+
+  it('should increase both width and height when both natural dimensions exceed rect', () => {
+    const target = document.createElement('span');
+    target.classList.add('eui-textTruncate');
+    document.body.appendChild(target);
+
+    const clone = document.createElement('span');
+    Object.defineProperty(clone, 'scrollWidth', { value: 161, configurable: true });
+    Object.defineProperty(clone, 'scrollHeight', { value: 79, configurable: true });
+
+    const rect = new DOMRect(0, 0, 100, 40);
+    const result = widenForTruncation(target, clone, rect);
+
+    expect(result.width).toBe(161);
+    expect(result.height).toBe(79);
+    expect(clone.style.getPropertyValue('width')).toBe('161px');
+    expect(clone.style.getPropertyValue('height')).toBe('79px');
+
+    target.remove();
+  });
+
   it('should restore clone visibility after measurement', () => {
     const target = document.createElement('span');
     target.classList.add('eui-textTruncate');
@@ -554,6 +772,53 @@ describe('copyStylesDeep', () => {
     const clonedChild = clone.querySelector('span')!;
     expect(clonedChild.style.width).toBe('80px');
     expect(clonedChild.style.height).toBe('20px');
+
+    original.remove();
+  });
+
+  it('should ceil text-bearing child dimensions so labels do not wrap from rounding down', () => {
+    const original = document.createElement('div');
+    const child = document.createElement('h4');
+    child.textContent = 'Launchpad';
+    original.appendChild(child);
+    document.body.appendChild(original);
+
+    const clone = original.cloneNode(true) as HTMLElement;
+    child.getBoundingClientRect = () => mockRect(0, 0, 86.4, 23.2);
+
+    copyStylesDeep(original, clone);
+
+    const clonedChild = clone.querySelector('h4')!;
+    expect(clonedChild.style.width).toBe('87px');
+    expect(clonedChild.style.height).toBe('24px');
+
+    original.remove();
+  });
+
+  it('should preserve scoped layout styles for centered icon boxes', () => {
+    const original = document.createElement('div');
+    const iconBox = document.createElement('span');
+    const icon = document.createElement('img');
+    iconBox.style.display = 'flex';
+    iconBox.style.alignItems = 'center';
+    iconBox.style.padding = '12px';
+    iconBox.style.borderRadius = '50%';
+    iconBox.appendChild(icon);
+    original.appendChild(iconBox);
+    document.body.appendChild(original);
+
+    const clone = original.cloneNode(true) as HTMLElement;
+    iconBox.getBoundingClientRect = () => mockRect(0, 0, 48, 48);
+    icon.getBoundingClientRect = () => mockRect(0, 0, 24, 24);
+
+    copyStylesDeep(original, clone);
+
+    const clonedIconBox = clone.querySelector('span')!;
+    expect(clonedIconBox.style.display).toBe('flex');
+    expect(clonedIconBox.style.alignItems).toBe('center');
+    expect(clonedIconBox.style.paddingLeft).toBe('12px');
+    expect(clonedIconBox.style.paddingRight).toBe('12px');
+    expect(clonedIconBox.style.borderRadius).toBe('50%');
 
     original.remove();
   });
