@@ -8,6 +8,7 @@
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { useReduxEsSearch } from '../../../hooks/use_redux_es_search';
+import { useGetUrlParams } from '../../../hooks';
 import { formatBytes } from './use_object_metrics';
 import { formatMillisecond } from '../step_metrics/step_metrics';
 import {
@@ -36,9 +37,12 @@ export const useStepMetrics = (step?: JourneyStep) => {
   const checkGroupId = step?.monitor.check_group ?? urlParams.checkGroupId;
   const stepIndex = step?.synthetics.step?.index ?? urlParams.stepIndex;
 
+  const { remoteName } = useGetUrlParams();
+  const index = remoteName ? `${remoteName}:${SYNTHETICS_INDEX_PATTERN}` : SYNTHETICS_INDEX_PATTERN;
+
   const { data } = useReduxEsSearch(
     {
-      index: SYNTHETICS_INDEX_PATTERN,
+      index,
       size: 0,
       query: {
         bool: {
@@ -89,13 +93,13 @@ export const useStepMetrics = (step?: JourneyStep) => {
         },
       },
     },
-    [],
+    [remoteName],
     { name: `stepMetrics/${checkGroupId}/${stepIndex}` }
   );
 
   const { data: transferData } = useReduxEsSearch(
     {
-      index: SYNTHETICS_INDEX_PATTERN,
+      index,
       size: 0,
       runtime_mappings: {
         'synthetics.payload.transfer_size': {
@@ -131,7 +135,7 @@ export const useStepMetrics = (step?: JourneyStep) => {
         },
       },
     },
-    [],
+    [remoteName],
     {
       name: `stepMetricsFromNetworkInfos/${checkGroupId}/${stepIndex}`,
     }

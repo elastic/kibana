@@ -9,6 +9,7 @@ import { useParams } from 'react-router-dom';
 import moment from 'moment';
 import { useJourneySteps } from '../../monitor_details/hooks/use_journey_steps';
 import { useReduxEsSearch } from '../../../hooks/use_redux_es_search';
+import { useGetUrlParams } from '../../../hooks';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 
 export const MONITOR_DURATION_US = 'monitor.duration.us';
@@ -33,9 +34,12 @@ export const usePreviousObjectMetrics = () => {
 
   const timestamp = data?.details?.timestamp;
 
+  const { remoteName } = useGetUrlParams();
+  const index = remoteName ? `${remoteName}:${SYNTHETICS_INDEX_PATTERN}` : SYNTHETICS_INDEX_PATTERN;
+
   const { data: prevObjectMetrics } = useReduxEsSearch(
     {
-      index: SYNTHETICS_INDEX_PATTERN,
+      index,
       track_total_hits: false,
       sort: [
         {
@@ -117,7 +121,7 @@ export const usePreviousObjectMetrics = () => {
         },
       },
     },
-    [stepIndex, monitorId, checkGroupId],
+    [stepIndex, monitorId, checkGroupId, remoteName],
     {
       name: `previousObjectMetrics/${monitorId}/${checkGroupId}/${stepIndex}/`,
       isRequestReady: !!timestamp,

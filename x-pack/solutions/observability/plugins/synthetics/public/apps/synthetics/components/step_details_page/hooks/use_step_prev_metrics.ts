@@ -20,6 +20,7 @@ import type { JourneyStep } from '../../../../../../common/runtime_types';
 import { median } from './use_network_timings_prev';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 import { useReduxEsSearch } from '../../../hooks/use_redux_es_search';
+import { useGetUrlParams } from '../../../hooks';
 
 export const MONITOR_DURATION_US = 'monitor.duration.us';
 export const SYNTHETICS_CLS = 'browser.experience.cls';
@@ -41,9 +42,12 @@ export const useStepPrevMetrics = (step?: JourneyStep) => {
   const checkGroupId = step?.monitor.check_group ?? urlParams.checkGroupId;
   const stepIndex = step?.synthetics.step?.index ?? urlParams.stepIndex;
 
+  const { remoteName } = useGetUrlParams();
+  const index = remoteName ? `${remoteName}:${SYNTHETICS_INDEX_PATTERN}` : SYNTHETICS_INDEX_PATTERN;
+
   const { data, loading } = useReduxEsSearch(
     {
-      index: SYNTHETICS_INDEX_PATTERN,
+      index,
       size: 0,
       query: {
         bool: {
@@ -110,12 +114,12 @@ export const useStepPrevMetrics = (step?: JourneyStep) => {
         },
       },
     },
-    [],
+    [remoteName],
     { name: `previousStepMetrics/${monitorId}/${checkGroupId}/${stepIndex}` }
   );
   const { data: transferData } = useReduxEsSearch(
     {
-      index: SYNTHETICS_INDEX_PATTERN,
+      index,
       size: 0,
       runtime_mappings: {
         'synthetics.payload.transfer_size': {
@@ -170,7 +174,7 @@ export const useStepPrevMetrics = (step?: JourneyStep) => {
         },
       },
     },
-    [],
+    [remoteName],
     {
       name: `previousStepMetricsFromNetworkInfos/${monitorId}/${checkGroupId}/${stepIndex}`,
     }

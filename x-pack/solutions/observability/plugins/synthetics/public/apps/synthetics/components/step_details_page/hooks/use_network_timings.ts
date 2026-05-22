@@ -20,6 +20,7 @@ import {
 } from '@kbn/observability-shared-plugin/common';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 import { useReduxEsSearch } from '../../../hooks/use_redux_es_search';
+import { useGetUrlParams } from '../../../hooks';
 
 export const useStepFilters = (checkGroupId: string, stepIndex: number) => {
   return [
@@ -42,6 +43,9 @@ export const useNetworkTimings = (checkGroupIdArg?: string, stepIndexArg?: numbe
   const checkGroupId = checkGroupIdArg ?? params.checkGroupId;
   const stepIndex = stepIndexArg ?? Number(params.stepIndex);
 
+  const { remoteName } = useGetUrlParams();
+  const index = remoteName ? `${remoteName}:${SYNTHETICS_INDEX_PATTERN}` : SYNTHETICS_INDEX_PATTERN;
+
   const runTimeMappings = NETWORK_TIMINGS_FIELDS.reduce(
     (acc, field) => ({
       ...acc,
@@ -54,7 +58,7 @@ export const useNetworkTimings = (checkGroupIdArg?: string, stepIndexArg?: numbe
 
   const { data } = useReduxEsSearch(
     {
-      index: SYNTHETICS_INDEX_PATTERN,
+      index,
       size: 0,
       runtime_mappings: runTimeMappings,
 
@@ -113,7 +117,7 @@ export const useNetworkTimings = (checkGroupIdArg?: string, stepIndexArg?: numbe
         },
       },
     },
-    [],
+    [remoteName],
     { name: `stepNetworkTimingsMetrics/${checkGroupId}/${stepIndex}` }
   );
 

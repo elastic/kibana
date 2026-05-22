@@ -22,6 +22,7 @@ import moment from 'moment';
 import { useJourneySteps } from '../../monitor_details/hooks/use_journey_steps';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 import { useReduxEsSearch } from '../../../hooks/use_redux_es_search';
+import { useGetUrlParams } from '../../../hooks';
 import { getTimingWithLabels } from './use_network_timings';
 
 export const useStepFilters = (checkGroupId: string, stepIndex: number) => {
@@ -54,6 +55,9 @@ export const useNetworkTimingsPrevious24Hours = (
 
   const timestamp = timestampArg ?? currentStep?.['@timestamp'];
 
+  const { remoteName } = useGetUrlParams();
+  const index = remoteName ? `${remoteName}:${SYNTHETICS_INDEX_PATTERN}` : SYNTHETICS_INDEX_PATTERN;
+
   const runTimeMappings = NETWORK_TIMINGS_FIELDS.reduce(
     (acc, field) => ({
       ...acc,
@@ -66,7 +70,7 @@ export const useNetworkTimingsPrevious24Hours = (
 
   const { data, loading } = useReduxEsSearch(
     {
-      index: SYNTHETICS_INDEX_PATTERN,
+      index,
       size: 0,
       runtime_mappings: runTimeMappings,
       query: {
@@ -156,7 +160,7 @@ export const useNetworkTimingsPrevious24Hours = (
         },
       },
     },
-    [],
+    [remoteName],
     {
       name: `stepNetworkPreviousTimings/${configId}/${checkGroupId}/${stepIndex}`,
       isRequestReady: Boolean(timestamp),
