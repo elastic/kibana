@@ -11,7 +11,7 @@ import { sortBy } from 'lodash';
 import type { HttpStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { Tag } from '../types';
-import { INDEX_PATTERN_TYPE } from '../types';
+import { INDEX_KIND } from '../types';
 import type { MatchedItem, ResolveIndexResponse } from '../types';
 import { ResolveIndexResponseItemIndexAttrs } from '../types';
 
@@ -36,7 +36,7 @@ const getIndexTags = (isRollupIndex: (indexName: string) => boolean) => (indexNa
   isRollupIndex(indexName)
     ? [
         {
-          key: INDEX_PATTERN_TYPE.ROLLUP,
+          key: INDEX_KIND.ROLLUP,
           name: rollupLabel,
           color: 'warning',
         },
@@ -129,7 +129,9 @@ export const responseToItemArray = (
   const source: MatchedItem[] = [];
 
   (response.indices || []).forEach((index) => {
-    const tags: MatchedItem['tags'] = [{ key: 'index', name: indexLabel, color: 'default' }];
+    const tags: MatchedItem['tags'] = [
+      { key: INDEX_KIND.INDEX, name: indexLabel, color: 'default' },
+    ];
     const isFrozen = (index.attributes || []).includes(ResolveIndexResponseItemIndexAttrs.FROZEN);
 
     tags.push(...getTags(index.name));
@@ -137,7 +139,7 @@ export const responseToItemArray = (
       tags.push(...getTags(alias));
     });
     if (isFrozen) {
-      tags.push({ name: frozenLabel, key: 'frozen', color: 'danger' });
+      tags.push({ name: frozenLabel, key: INDEX_KIND.FROZEN, color: 'danger' });
     }
 
     source.push({
@@ -149,7 +151,7 @@ export const responseToItemArray = (
   (response.aliases || []).forEach((alias) => {
     const item = {
       name: alias.name,
-      tags: [{ key: 'alias', name: aliasLabel, color: 'default' }],
+      tags: [{ key: INDEX_KIND.ALIAS, name: aliasLabel, color: 'default' }],
       item: alias,
     };
     // we only need to check the first index to see if its a rollup since there can only be one alias match
@@ -160,7 +162,7 @@ export const responseToItemArray = (
   (response.data_streams || []).forEach((dataStream) => {
     source.push({
       name: dataStream.name,
-      tags: [{ key: 'data_stream', name: dataStreamLabel, color: 'primary' }],
+      tags: [{ key: INDEX_KIND.DATA_STREAM, name: dataStreamLabel, color: 'primary' }],
       item: dataStream,
     });
   });

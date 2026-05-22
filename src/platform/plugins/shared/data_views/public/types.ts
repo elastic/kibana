@@ -22,6 +22,20 @@ export enum INDEX_PATTERN_TYPE {
   DEFAULT = 'default',
 }
 
+/**
+ * Discriminator for the entries returned by `dataViews.getIndices()` (backed by
+ * the Elasticsearch `_resolve/index` endpoint). Written to each
+ * `MatchedItem.tags[].key`; consumers should compare against these members
+ * instead of magic strings.
+ */
+export enum INDEX_KIND {
+  INDEX = 'index',
+  ALIAS = 'alias',
+  DATA_STREAM = 'data_stream',
+  FROZEN = 'frozen',
+  ROLLUP = 'rollup',
+}
+
 export enum IndicesResponseItemIndexAttrs {
   OPEN = 'open',
   CLOSED = 'closed',
@@ -188,7 +202,7 @@ export interface ResolveIndexResponseItemIndex extends ResolveIndexResponseItem 
 
 export interface Tag {
   name: string;
-  key: string;
+  key: INDEX_KIND;
   color: string;
 }
 export enum ResolveIndexResponseItemIndexAttrs {
