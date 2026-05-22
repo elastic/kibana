@@ -1946,6 +1946,57 @@ describe('EPM template', () => {
       expect(mappings).toEqual(runtimeFieldMapping);
     });
 
+    // TODO(#270746): this test documents a known bug — the intermediate object
+    // template "a.*.b" is incorrectly dropped when two sibling wildcard fields
+    // share it. See the TODO in MappingsBuilder.addDynamicTemplate for details.
+    it.skip('tests that sibling wildcard fields sharing a deep intermediate object preserve all dynamic templates', () => {
+      const yml = `
+- name: a.*.b.value
+  type: object
+  object_type: keyword
+- name: a.*.b.other
+  type: object
+  object_type: keyword
+`;
+      const fields: Field[] = parse(yml);
+      const processedFields = processFields(fields);
+      const mappings = generateMappings(processedFields);
+      // "a.*.b" is an intermediate wildcard object shared by both fields.
+      // It should appear once in dynamic_templates, and both leaf templates
+      // should be present. The stale-index bug (#270746) in addDynamicTemplate
+      // causes "a.*.b.other" to be dropped and "a.*" to appear twice instead.
+      expect(mappings.dynamic_templates).toEqual([
+        {
+          'a.*.b.value': {
+            path_match: 'a.*.b.value',
+            match_mapping_type: 'string',
+            mapping: { type: 'keyword' },
+          },
+        },
+        {
+          'a.*.b.other': {
+            path_match: 'a.*.b.other',
+            match_mapping_type: 'string',
+            mapping: { type: 'keyword' },
+          },
+        },
+        {
+          'a.*.b': {
+            path_match: 'a.*.b',
+            match_mapping_type: 'object',
+            mapping: { type: 'object', dynamic: true },
+          },
+        },
+        {
+          'a.*': {
+            path_match: 'a.*',
+            match_mapping_type: 'object',
+            mapping: { type: 'object', dynamic: true },
+          },
+        },
+      ]);
+    });
+
     it('tests unexpected type for field as dynamic template fails', () => {
       const textWithRuntimeFieldsLiteralYml = `
 - name: labels.*

@@ -287,9 +287,9 @@ export class MappingsBuilder {
       if (name.includes('*') && properties?.type === 'object') {
         // Conflicting intermediate object: drop the older one so more specific
         // templates are matched first.
-        // TODO: this splice does NOT update the recorded indices of entries
-        // after `index` in `dynamicTemplateNames`. A subsequent conflict on a
-        // later template would splice the wrong entry. Switch to a stable
+        // TODO(#270746): this splice does NOT update the recorded indices of
+        // entries after `index` in `dynamicTemplateNames`. A subsequent conflict
+        // on a later template would splice the wrong entry. Switch to a stable
         // store (e.g. tombstone the entry then compact at the end) before
         // adding more callers of the conflict-resolution path.
         const index = this.dynamicTemplateNames[name];
