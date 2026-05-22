@@ -8,7 +8,12 @@
 import type { IDataStreamClient } from '@kbn/data-streams';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { type CommonSearchOptions } from '../query_utils';
-import { runLatestSourceEsqlQuery } from '../latest_source_query';
+import {
+  executeAndDecodeSource,
+  latestSourceFrom,
+  pickLatestPerGroup,
+  withTimeRange,
+} from '../latest_source_query';
 import {
   EVENTS_DATA_STREAM,
   type SigEvent,
@@ -35,12 +40,11 @@ export class EventClient {
   }
 
   async findLatest(options: CommonSearchOptions = {}): Promise<{ hits: SigEvent[] }> {
-    return runLatestSourceEsqlQuery<SigEvent>({
-      esClient: this.clients.esClient,
-      space: this.clients.space,
-      options,
-      index: EVENTS_DATA_STREAM,
-      groupBy: 'event_id',
-    });
+    let query = latestSourceFrom(EVENTS_DATA_STREAM, this.clients.space);
+    query = withTimeRange(query, options);
+    query = pickLatestPerGroup(query, 'event_id');
+    query = query.keep('_source');
+
+    return executeAndDecodeSource<SigEvent>(this.clients.esClient, query);
   }
 }

@@ -11,16 +11,16 @@ import {
   KnowledgeIndicatorClient,
   type KnowledgeIndicatorClientDeps,
 } from './knowledge_indicator_client';
-import {
-  type StoredFeatureKnowledgeIndicator,
-  type StoredKnowledgeIndicator,
-  type StoredTombstone,
-} from './data_stream';
+import { type StoredFeatureKnowledgeIndicator, type StoredTombstone } from './data_stream';
 import { KI_TYPE_FEATURE } from './fields';
 
-jest.mock('../../sig_events/latest_source_query', () => ({
-  runLatestSourceEsqlQuery: jest.fn(),
-}));
+jest.mock('../../sig_events/latest_source_query', () => {
+  const actual = jest.requireActual('../../sig_events/latest_source_query');
+  return {
+    ...actual,
+    executeAndDecodeSource: jest.fn(),
+  };
+});
 
 jest.mock('./bulk_with_inference_fallback', () => ({
   bulkCreateWithInferenceFallback: jest.fn(async (_logger, attempt) =>
@@ -28,7 +28,7 @@ jest.mock('./bulk_with_inference_fallback', () => ({
   ),
 }));
 
-import { runLatestSourceEsqlQuery } from '../../sig_events/latest_source_query';
+import { executeAndDecodeSource } from '../../sig_events/latest_source_query';
 
 const STREAM = 'logs-app';
 const SPACE = 'default';
@@ -71,7 +71,9 @@ function makeClient(): {
   logger: Logger;
 } {
   const create = jest.fn().mockResolvedValue({ errors: false, items: [] });
-  const dataStreamClient = { create } as unknown as KnowledgeIndicatorClientDeps['dataStreamClient'];
+  const dataStreamClient = {
+    create,
+  } as unknown as KnowledgeIndicatorClientDeps['dataStreamClient'];
   const logger = loggerMock.create() as unknown as Logger;
   const deps: KnowledgeIndicatorClientDeps = {
     dataStreamClient,
@@ -82,11 +84,11 @@ function makeClient(): {
     logger,
   };
   const client = new KnowledgeIndicatorClient(deps);
-  return { client, create, runEsql: runLatestSourceEsqlQuery as jest.Mock, logger };
+  return { client, create, runEsql: executeAndDecodeSource as jest.Mock, logger };
 }
 
 beforeEach(() => {
-  (runLatestSourceEsqlQuery as jest.Mock).mockReset();
+  (executeAndDecodeSource as jest.Mock).mockReset();
 });
 
 describe('KnowledgeIndicatorClient.bulk', () => {
@@ -183,6 +185,11 @@ describe('KnowledgeIndicatorClient.bulk', () => {
 });
 
 describe('KnowledgeIndicatorClient.getFeatures', () => {
+  const printedQueryFor = (runEsql: jest.Mock): string => {
+    const query = runEsql.mock.calls[0][1] as { print: () => string };
+    return query.print();
+  };
+
   it('hides excluded features by default', async () => {
     const { client, runEsql } = makeClient();
     runEsql.mockResolvedValueOnce({ hits: [createFeatureDoc()] });
@@ -190,16 +197,9 @@ describe('KnowledgeIndicatorClient.getFeatures', () => {
     await client.getFeatures(STREAM);
 
     expect(runEsql).toHaveBeenCalledTimes(1);
-    const args = runEsql.mock.calls[0][0];
-    const printedFilter = args.postGroupingWhere?.toString
-      ? args.postGroupingWhere.toString()
-      : JSON.stringify(args.postGroupingWhere);
-    // We can't easily compare AST objects; sanity check that a filter is set.
-    expect(args.postGroupingWhere).toBeDefined();
     // The default filter must include `excluded` — distinct from the
     // tombstone-only filter applied when includeExcluded=true.
-    expect(JSON.stringify(args.postGroupingWhere)).toContain('excluded');
-    expect(printedFilter).toBeDefined();
+    expect(printedQueryFor(runEsql)).toContain('excluded');
   });
 
   it('returns active and excluded merged when includeExcluded is set', async () => {
@@ -211,11 +211,66 @@ describe('KnowledgeIndicatorClient.getFeatures', () => {
     const { hits } = await client.getFeatures(STREAM, { includeExcluded: true });
 
     expect(hits).toHaveLength(2);
-    const args = runEsql.mock.calls[0][0];
     // includeExcluded relaxes back to the tombstone-only filter — should not
     // mention `excluded`.
-    expect(JSON.stringify(args.postGroupingWhere)).not.toContain('excluded');
+    expect(printedQueryFor(runEsql)).not.toContain('excluded');
     expect(hits.find((h) => h.id === 'b')?.excluded).toBe(true);
+  });
+});
+
+describe('KnowledgeIndicatorClient.getLatestRevisionTimestamp', () => {
+  const printedQueryFor = (runEsql: jest.Mock): string => {
+    const query = runEsql.mock.calls[0][1] as { print: () => string };
+    return query.print();
+  };
+
+  it('returns the newest @timestamp among matching live revisions', async () => {
+    const { client, runEsql } = makeClient();
+    runEsql.mockResolvedValueOnce({
+      hits: [
+        createFeatureDoc({ id: 'a', '@timestamp': '2026-04-01T00:00:00.000Z' }),
+        createFeatureDoc({ id: 'b', '@timestamp': '2026-05-01T00:00:00.000Z' }),
+        createFeatureDoc({ id: 'c', '@timestamp': '2026-03-01T00:00:00.000Z' }),
+      ],
+    });
+
+    const result = await client.getLatestRevisionTimestamp(STREAM);
+
+    expect(result).toEqual({ '@timestamp': '2026-05-01T00:00:00.000Z' });
+  });
+
+  it('returns null when no revisions match', async () => {
+    const { client, runEsql } = makeClient();
+    runEsql.mockResolvedValueOnce({ hits: [] });
+
+    const result = await client.getLatestRevisionTimestamp(STREAM);
+
+    expect(result).toBeNull();
+  });
+
+  it('filters tombstones and excluded revisions via the post-grouping WHERE', async () => {
+    const { client, runEsql } = makeClient();
+    runEsql.mockResolvedValueOnce({ hits: [] });
+
+    await client.getLatestRevisionTimestamp(STREAM);
+
+    expect(runEsql).toHaveBeenCalledTimes(1);
+    // The post-grouping filter must reference both `deleted` and
+    // `excluded` so groups whose latest revision is a tombstone or an
+    // exclusion drop out. Without this, user-driven bulk deletes or
+    // bulk excludes would extend the identification throttle.
+    const printed = printedQueryFor(runEsql);
+    expect(printed).toContain('deleted');
+    expect(printed).toContain('excluded');
+  });
+
+  it('passes the feature-type filter through to the WHERE clause', async () => {
+    const { client, runEsql } = makeClient();
+    runEsql.mockResolvedValueOnce({ hits: [] });
+
+    await client.getLatestRevisionTimestamp(STREAM, { types: ['entity', 'metric'] });
+
+    expect(printedQueryFor(runEsql)).toContain('feature.type');
   });
 });
 
@@ -238,39 +293,5 @@ describe('KnowledgeIndicatorClient.getExcludedFeatures', () => {
 
     expect(hits.map((h) => h.id)).toEqual(['new', 'old']);
     expect(hits.every((h) => h.excluded === true)).toBe(true);
-  });
-});
-
-describe('KnowledgeIndicatorClient.refreshExcludedFeatures', () => {
-  it('appends a fresh excluded revision per currently-excluded feature', async () => {
-    const { client, create, runEsql } = makeClient();
-    const original: StoredFeatureKnowledgeIndicator = createFeatureDoc({
-      id: 'feat-1',
-      excluded: true,
-      '@timestamp': '2026-01-01T00:00:00.000Z',
-    });
-    runEsql.mockResolvedValueOnce({ hits: [original] });
-
-    const { refreshed } = await client.refreshExcludedFeatures(STREAM);
-
-    expect(refreshed).toBe(1);
-    expect(create).toHaveBeenCalledTimes(1);
-    const [{ documents }] = create.mock.calls[0];
-    expect(documents).toHaveLength(1);
-    const written = documents[0] as StoredFeatureKnowledgeIndicator;
-    expect(written.id).toBe('feat-1');
-    expect(written.excluded).toBe(true);
-    expect(written['@timestamp']).not.toBe(original['@timestamp']);
-    expect(written.feature).toEqual(original.feature);
-  });
-
-  it('is a no-op when nothing is excluded', async () => {
-    const { client, create, runEsql } = makeClient();
-    runEsql.mockResolvedValueOnce({ hits: [] as StoredKnowledgeIndicator[] });
-
-    const { refreshed } = await client.refreshExcludedFeatures(STREAM);
-
-    expect(refreshed).toBe(0);
-    expect(create).not.toHaveBeenCalled();
   });
 });

@@ -9,7 +9,14 @@ import type { IDataStreamClient } from '@kbn/data-streams';
 import { esql } from '@elastic/esql';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { type CommonSearchOptions } from '../query_utils';
-import { type LatestSourceWhereCondition, runLatestSourceEsqlQuery } from '../latest_source_query';
+import {
+  executeAndDecodeSource,
+  latestSourceFrom,
+  pickLatestPerGroup,
+  withTimeRange,
+  withWhere,
+  type LatestSourceWhereCondition,
+} from '../latest_source_query';
 import {
   DETECTIONS_DATA_STREAM,
   type Detection,
@@ -62,13 +69,12 @@ export class DetectionClient {
       where = andWhere(where, esql.exp`${esql.col('rule_name')} == ${esql.str(options.rule_name)}`);
     }
 
-    return runLatestSourceEsqlQuery<Detection>({
-      esClient: this.clients.esClient,
-      space: this.clients.space,
-      options,
-      index: DETECTIONS_DATA_STREAM,
-      where,
-      groupBy: 'detection_id',
-    });
+    let query = latestSourceFrom(DETECTIONS_DATA_STREAM, this.clients.space);
+    query = withTimeRange(query, options);
+    query = withWhere(query, where);
+    query = pickLatestPerGroup(query, 'detection_id');
+    query = query.keep('_source');
+
+    return executeAndDecodeSource<Detection>(this.clients.esClient, query);
   }
 }

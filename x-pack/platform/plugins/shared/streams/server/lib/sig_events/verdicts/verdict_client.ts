@@ -8,7 +8,12 @@
 import type { IDataStreamClient } from '@kbn/data-streams';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { type CommonSearchOptions } from '../query_utils';
-import { runLatestSourceEsqlQuery } from '../latest_source_query';
+import {
+  executeAndDecodeSource,
+  latestSourceFrom,
+  pickLatestPerGroup,
+  withTimeRange,
+} from '../latest_source_query';
 import {
   VERDICTS_DATA_STREAM,
   type StoredVerdict,
@@ -35,12 +40,11 @@ export class VerdictClient {
   }
 
   async findLatest(options: CommonSearchOptions = {}): Promise<{ hits: Verdict[] }> {
-    return runLatestSourceEsqlQuery<Verdict>({
-      esClient: this.clients.esClient,
-      space: this.clients.space,
-      options,
-      index: VERDICTS_DATA_STREAM,
-      groupBy: 'verdict_id',
-    });
+    let query = latestSourceFrom(VERDICTS_DATA_STREAM, this.clients.space);
+    query = withTimeRange(query, options);
+    query = pickLatestPerGroup(query, 'verdict_id');
+    query = query.keep('_source');
+
+    return executeAndDecodeSource<Verdict>(this.clients.esClient, query);
   }
 }

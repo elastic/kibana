@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { esql, type ComposerQueryTagHole, type ComposerSortShorthand } from '@elastic/esql';
+import {
+  esql,
+  type ComposerQuery,
+  type ComposerQueryTagHole,
+  type ComposerSortShorthand,
+} from '@elastic/esql';
 import type { ESQLAstExpression } from '@elastic/esql/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { type CommonSearchOptions } from './query_utils';
@@ -21,16 +26,46 @@ export type LatestSourceWhereCondition = ESQLAstExpression & ComposerQueryTagHol
  */
 export type LatestSourceGroupBy = string | [string, string] | [string, string, string];
 
-interface RunLatestSourceEsqlQueryArgs {
-  esClient: ElasticsearchClient;
-  space: string;
-  options: CommonSearchOptions;
-  index: string;
-  where?: LatestSourceWhereCondition;
-  postGroupingWhere?: LatestSourceWhereCondition;
-  sort?: ComposerSortShorthand[];
-  groupBy: LatestSourceGroupBy;
-}
+/**
+ * Start a `FROM <index> METADATA _id, _source | WHERE kibana.space_ids == <space>`
+ * pipeline scoped to a single space.
+ */
+export const latestSourceFrom = (index: string, space: string): ComposerQuery =>
+  esql.from([index], ['_id', '_source']).where`\`kibana.space_ids\` == ${space}`;
+
+/**
+ * Add `@timestamp >=` / `@timestamp <=` predicates only when the matching
+ * option is set. No-op for absent bounds so callers can pass a partial
+ * range (or none at all) without conditional plumbing.
+ */
+export const withTimeRange = (
+  query: ComposerQuery,
+  options: CommonSearchOptions
+): ComposerQuery => {
+  let next = query;
+  if (options.from !== undefined) {
+    next = next.where`@timestamp >= TO_DATETIME(${esql.str(options.from)})`;
+  }
+  if (options.to !== undefined) {
+    next = next.where`@timestamp <= TO_DATETIME(${esql.str(options.to)})`;
+  }
+  return next;
+};
+
+/**
+ * Append a `WHERE` predicate when one is provided; identity otherwise.
+ * Used both before grouping (filter the input set) and after grouping
+ * (filter the latest-per-group output, e.g. drop tombstones).
+ */
+export const withWhere = (
+  query: ComposerQuery,
+  condition?: LatestSourceWhereCondition
+): ComposerQuery => {
+  if (!condition) {
+    return query;
+  }
+  return query.where`${condition}`;
+};
 
 const buildGroupByCols = (groupBy: LatestSourceGroupBy) => {
   if (typeof groupBy === 'string') {
@@ -39,52 +74,41 @@ const buildGroupByCols = (groupBy: LatestSourceGroupBy) => {
   return groupBy.map((field) => esql.col(field));
 };
 
-export const runLatestSourceEsqlQuery = async <T>({
-  esClient,
-  space,
-  options,
-  index,
-  where,
-  postGroupingWhere,
-  sort,
-  groupBy,
-}: RunLatestSourceEsqlQueryArgs): Promise<{ hits: T[] }> => {
-  let query = esql.from([index], ['_id', '_source']).where`\`kibana.space_ids\` == ${space}`;
-
-  if (options.from !== undefined) {
-    query = query.where`@timestamp >= TO_DATETIME(${esql.str(options.from)})`;
-  }
-
-  if (options.to !== undefined) {
-    query = query.where`@timestamp <= TO_DATETIME(${esql.str(options.to)})`;
-  }
-
-  if (where) {
-    query = query.where`${where}`;
-  }
-
+/**
+ * Two-stage `INLINE STATS` reduction that keeps the latest revision per
+ * group: first by `MAX(@timestamp)`, then by `MAX(_id)` as a tiebreaker
+ * when multiple events share the same timestamp.
+ */
+export const pickLatestPerGroup = (
+  query: ComposerQuery,
+  groupBy: LatestSourceGroupBy
+): ComposerQuery => {
   const groupByCols = buildGroupByCols(groupBy);
 
-  // pick the latest events by group
-  query = query.pipe`INLINE STATS latest_ts = MAX(@timestamp) BY ${groupByCols}`
-    .where`@timestamp == latest_ts`;
-
-  // use _id as a tiebreak in case multiple events share the same timestamp
-  query = query.pipe`INLINE STATS tiebreaker_id = MAX(_id) BY ${groupByCols}`
+  return query.pipe`INLINE STATS latest_ts = MAX(@timestamp) BY ${groupByCols}`
+    .where`@timestamp == latest_ts`.pipe`INLINE STATS tiebreaker_id = MAX(_id) BY ${groupByCols}`
     .where`_id == tiebreaker_id`;
+};
 
-  // post-grouping filter (e.g. drop tombstones) — applied after the
-  // latest-per-group reduction so it operates on the latest revision only.
-  if (postGroupingWhere) {
-    query = query.where`${postGroupingWhere}`;
+/**
+ * Apply a `SORT` clause when at least one sort key is provided.
+ */
+export const withSort = (query: ComposerQuery, sort?: ComposerSortShorthand[]): ComposerQuery => {
+  if (!sort?.length) {
+    return query;
   }
+  return query.sort(sort[0], ...sort.slice(1));
+};
 
-  if (sort?.length) {
-    query = query.sort(sort[0], ...sort.slice(1));
-  }
-
-  query = query.keep('_source');
-
+/**
+ * Run the composed query, locate the `_source` column in the response,
+ * and decode each row by stripping the `kibana` envelope (added by
+ * `IDataStreamClient` on write) so consumers see the typed payload only.
+ */
+export const executeAndDecodeSource = async <T>(
+  esClient: ElasticsearchClient,
+  query: ComposerQuery
+): Promise<{ hits: T[] }> => {
   const response = await runEsqlQuery(esClient, query.print());
   if (!response) {
     return { hits: [] };
