@@ -2326,6 +2326,15 @@
       }
     }
   },
+  "fleet-cloud-onboarding-deployment": {
+    "dynamic": false,
+    "properties": {
+      "connectorId": {
+        "ignore_above": 1024,
+        "type": "keyword"
+      }
+    }
+  },
   "fleet-fleet-server-host": {
     "dynamic": false,
     "properties": {
