@@ -28,7 +28,7 @@ import {
   ACTION_EXPLORE_IN_DISCOVER_TAB,
   ACTION_OPEN_IN_DISCOVER,
   ACTION_VIEW_DETAILS,
-  OPEN_INSPECTOR_ACTION_ID,
+  ACTION_INSPECT_PANEL,
 } from '../../../common/constants';
 import { useChartLayers } from '../../chart/hooks/use_chart_layers';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
@@ -38,7 +38,7 @@ import { getEsqlQuery } from './utils/get_esql_query';
 // Order is product-driven (see PR #267302): Explore, Inspect, View details, Copy to dashboard.
 const METRICS_QUICK_ACTION_IDS: ReadonlyArray<string> = [
   ACTION_EXPLORE_IN_DISCOVER_TAB,
-  OPEN_INSPECTOR_ACTION_ID,
+  ACTION_INSPECT_PANEL,
   ACTION_VIEW_DETAILS,
   ACTION_COPY_TO_DASHBOARD,
 ];

@@ -14,12 +14,12 @@ import type { QuickActionIds } from '@kbn/embeddable-plugin/public';
 import type { LensProps } from './hooks/use_lens_props';
 import { useLensExtraActions } from './hooks/use_lens_extra_actions';
 import { resolveEsqlVariables } from './helpers/resolve_esql_variables';
-import { ACTION_EXPLORE_IN_DISCOVER_TAB, OPEN_INSPECTOR_ACTION_ID } from '../../common/constants';
+import { ACTION_EXPLORE_IN_DISCOVER_TAB, ACTION_INSPECT_PANEL } from '../../common/constants';
 import type { UnifiedMetricsGridProps } from '../../types';
 
 const DEFAULT_QUICK_ACTION_VIEW: ReadonlyArray<string> = [
   ACTION_EXPLORE_IN_DISCOVER_TAB,
-  OPEN_INSPECTOR_ACTION_ID,
+  ACTION_INSPECT_PANEL,
 ];
 
 export type LensWrapperProps = {

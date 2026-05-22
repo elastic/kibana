@@ -20,7 +20,7 @@ import {
   ACTION_COPY_TO_DASHBOARD,
   ACTION_EXPLORE_IN_DISCOVER_TAB,
   ACTION_VIEW_DETAILS,
-  OPEN_INSPECTOR_ACTION_ID,
+  ACTION_INSPECT_PANEL,
 } from '../../common/constants';
 
 // Mock the EmbeddableComponent
@@ -272,7 +272,7 @@ describe('LensWrapper', () => {
     it('falls back to [Explore, openInspector] when quickActionIds is not provided', () => {
       const view = renderAndCaptureViewList({});
 
-      expect(view).toEqual([ACTION_EXPLORE_IN_DISCOVER_TAB, OPEN_INSPECTOR_ACTION_ID]);
+      expect(view).toEqual([ACTION_EXPLORE_IN_DISCOVER_TAB, ACTION_INSPECT_PANEL]);
     });
 
     it('uses caller-provided quickActionIds verbatim', () => {
@@ -280,7 +280,7 @@ describe('LensWrapper', () => {
         ACTION_EXPLORE_IN_DISCOVER_TAB,
         ACTION_VIEW_DETAILS,
         ACTION_COPY_TO_DASHBOARD,
-        OPEN_INSPECTOR_ACTION_ID,
+        ACTION_INSPECT_PANEL,
       ];
 
       const view = renderAndCaptureViewList({ quickActionIds: ids });
@@ -294,7 +294,7 @@ describe('LensWrapper', () => {
         onViewDetails: jest.fn(),
       });
 
-      expect(view).toEqual([ACTION_EXPLORE_IN_DISCOVER_TAB, OPEN_INSPECTOR_ACTION_ID]);
+      expect(view).toEqual([ACTION_EXPLORE_IN_DISCOVER_TAB, ACTION_INSPECT_PANEL]);
     });
   });
 
