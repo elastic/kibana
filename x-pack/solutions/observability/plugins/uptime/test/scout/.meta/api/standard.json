@@ -1,5 +1,5 @@
 {
-  "sha1": "",
+  "sha1": "5468f66aa8dfbca4630df7e832a08a85e6a4c4a8",
   "tests": [
     {
       "id": "567909ceb07724b-3b647c7c5404028",
@@ -368,39 +368,39 @@
     {
       "id": "31c1bb347b9557c-d428ab40a194f03",
       "title": "pingList query returns a list of pings for the date range and given size",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/ping_list.spec.ts",
-        "line": 23,
+        "line": 24,
         "column": 10
       }
     },
     {
       "id": "31c1bb347b9557c-71902d4960e506b",
       "title": "pingList query returns a list of pings for a monitor ID",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/ping_list.spec.ts",
-        "line": 92,
+        "line": 93,
         "column": 10
       }
     },
     {
       "id": "31c1bb347b9557c-46c2ae1874d2be4",
       "title": "pingList query returns a list of pings sorted ascending",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/ping_list.spec.ts",
-        "line": 129,
+        "line": 130,
         "column": 10
       }
     },
