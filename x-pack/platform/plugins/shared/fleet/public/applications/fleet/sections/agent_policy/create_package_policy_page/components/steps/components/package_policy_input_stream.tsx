@@ -35,7 +35,6 @@ import {
   DATA_STREAM_TYPE_VAR_NAME,
   USE_APM_VAR_NAME,
 } from '../../../../../../../../../common/constants';
-import { OTEL_COLLECTOR_INPUT_TYPE } from '../../../../../../../../../common/constants/epm';
 
 import { sendGetDataStreams, useStartServices } from '../../../../../../../../hooks';
 
@@ -86,7 +85,7 @@ interface Props {
   forceShowErrors?: boolean;
   isEditPage?: boolean;
   isUpgrade?: boolean;
-  isAgentless?: boolean;
+  showConditionField?: boolean;
   hasStreamToggle?: boolean;
   varGroupSelections?: Record<string, string>;
   /** Parent input's `policy_template`; required for correct composable multi-template matching. */
@@ -103,7 +102,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     forceShowErrors,
     isEditPage,
     isUpgrade,
-    isAgentless = false,
+    showConditionField = false,
     hasStreamToggle = true,
     varGroupSelections = {},
     inputPolicyTemplate,
@@ -269,10 +268,6 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
 
     // Showing advanced options toggle state
     const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(isDefaultDatastream);
-    const showConditionField =
-      packagePolicyInputStream.enabled &&
-      !isAgentless &&
-      packageInputStream.input !== OTEL_COLLECTOR_INPUT_TYPE;
     const hasAdvancedOptions = useMemo(() => {
       return (
         showConditionField ||

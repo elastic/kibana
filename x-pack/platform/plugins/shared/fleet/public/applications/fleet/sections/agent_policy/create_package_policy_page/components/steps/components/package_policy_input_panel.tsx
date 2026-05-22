@@ -49,6 +49,7 @@ import {
   DATA_STREAM_TYPE_VAR_NAME,
   USE_APM_VAR_NAME,
 } from '../../../../../../../../../common/constants';
+import { OTEL_COLLECTOR_INPUT_TYPE } from '../../../../../../../../../common/constants/epm';
 
 import type { StreamAdvancedVarsConfig } from './package_policy_input_config';
 import { PackagePolicyInputConfig } from './package_policy_input_config';
@@ -187,6 +188,9 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
     const theme = useEuiTheme();
     const defaultDataStreamId = useDataStreamId();
     const { isAgentlessEnabled } = useAgentless();
+
+    const conditionFieldAllowed =
+      !isAgentless && packagePolicyInput.type !== OTEL_COLLECTOR_INPUT_TYPE;
 
     const inputVarGroups = packageInput.var_groups?.length ? packageInput.var_groups : undefined;
 
@@ -556,7 +560,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
               inputValidationResults={inputValidationResults}
               forceShowErrors={forceShowErrors}
               isEditPage={isEditPage}
-              isAgentless={isAgentless}
+              showConditionField={packagePolicyInput.enabled && conditionFieldAllowed}
               varGroups={inputVarGroups}
               varGroupSelections={inputVarGroupSelections}
               onVarGroupSelectionChange={handleInputVarGroupSelectionChange}
@@ -629,7 +633,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                     }
                     forceShowErrors={forceShowErrors}
                     isEditPage={isEditPage}
-                    isAgentless={isAgentless}
+                    showConditionField={packagePolicyInputStream!.enabled && conditionFieldAllowed}
                     varGroupSelections={varGroupSelections}
                   />
                   {index !== inputStreams.length - 1 ? (
