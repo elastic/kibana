@@ -34,7 +34,6 @@ export type {
   ChromeNavLink,
   ChromeNavLinks,
   ChromeNextAiButton,
-  ChromeNextGlobalSearchConfig,
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,
   ChromeSetup,

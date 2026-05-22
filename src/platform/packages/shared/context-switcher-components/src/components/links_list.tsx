@@ -30,7 +30,7 @@ export const LinksList = ({ items }: LinksListProps) => {
   `;
 
   return (
-    <EuiListGroup gutterSize="none" flush>
+    <EuiListGroup>
       {items.map((item) => (
         <EuiListGroupItem
           css={itemCss}
@@ -41,7 +41,6 @@ export const LinksList = ({ items }: LinksListProps) => {
           external={item.external}
           isDisabled={item.disabled}
           iconType={item.iconType}
-          size="s"
           color="text"
           data-test-subj={item['data-test-subj']}
         />
