@@ -114,6 +114,7 @@ paths:
               properties:
                 description:
                   type: string
+                  maxLength: 1024
                   description: A description of the pipeline.
                 pipeline:
                   type: string
