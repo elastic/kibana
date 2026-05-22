@@ -31,7 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('begin creating rule', async () => {
       await testSubjects.click('app-menu-overflow-button');
-      await find.clickByButtonText('Alerts');
+      await find.clickByButtonText('Create alert rule');
       await find.clickByButtonText('Create search threshold rule');
       await find.clickByButtonText('Details');
     });
