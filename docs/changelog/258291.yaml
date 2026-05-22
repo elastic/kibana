@@ -9,4 +9,5 @@ products:
   target: 2026-05-20
 areas:
 - Search and data
-title: 'feat: add secretQueryParams support to HTTP connector'
+title: Add secret query parameter support to HTTP connector
+description: HTTP connectors can store encrypted query parameters in connector secrets and inject them into every request URL, similar to secret headers.

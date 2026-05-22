@@ -8,5 +8,5 @@ products:
   target: 2026-05-20
 areas:
 - Alerting and reporting
-title: Fix missing ignore_above in rule action params mapping
-description: Fixes a bug that caused rules with large actions payloads to break
+title: Fix rule saves with oversized action message payloads
+description: 'Rules with very large action message bodies no longer fail to save after upgrade because `actions.params` now uses `ignore_above` like other rule parameter fields.'

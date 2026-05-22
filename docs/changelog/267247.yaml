@@ -6,4 +6,5 @@ type: bug-fix
 products:
 - product: cloud-serverless
   target: 2026-05-20
-title: enforce enableESQL setting in AI rule creation flow
+title: Fix AI rule creation when ES|QL is disabled in a space
+description: When the `enableESQL` advanced setting is off, AI-assisted rule creation and ES|QL rule tools are unavailable instead of bypassing the setting.

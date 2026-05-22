@@ -6,5 +6,5 @@ type: bug-fix
 products:
 - product: cloud-serverless
   target: 2026-05-20
-title: "  [Osquery] Fix empty pack details columns for scheduled queries"
-description: Fix empty `Last results`, `# of docs`, and `# of agents` columns on the Osquery pack details page for scheduled queries.
+title: Fix empty pack details columns for scheduled Osquery queries
+description: Scheduled queries on the Osquery pack details page now show values in the "Last results", "# of docs", and "# of agents" columns.

@@ -6,4 +6,5 @@ type: bug-fix
 products:
 - product: cloud-serverless
   target: 2026-05-20
-title: Preserve user-typed single source in chart query
+title: Fix metric chart queries when using a single backing index source
+description: Chart queries in the Metrics experience now keep the same index scope you type in the ES|QL source bar, preventing verification errors on metric cards.

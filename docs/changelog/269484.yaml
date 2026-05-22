@@ -4,4 +4,5 @@ type: enhancement
 products:
 - product: cloud-serverless
   target: 2026-05-20
-title: Telemetry for Metrics with multiple units
+title: Improve Discover Metrics telemetry for rows with multiple units
+description: Adds a `units` counter to Discover Metrics telemetry so mixed-unit metric rows can be measured alongside existing data stream and field type counters.

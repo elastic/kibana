@@ -6,4 +6,4 @@ type: enhancement
 products:
 - product: cloud-serverless
   target: 2026-05-20
-title: Merge Triggers and Steps into single column
+title: Merge Triggers and Steps into a single column in the workflow list
