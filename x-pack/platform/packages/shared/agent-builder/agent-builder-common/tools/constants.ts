@@ -69,9 +69,10 @@ export const filestoreTools = {
 };
 
 export const internalTools = {
-  subAgentTool: 'run_subagent',
-  sleepTool: 'sleep',
-  writeTodosTool: 'write_todos',
+  runSubagent: 'run_subagent',
+  sleep: 'sleep',
+  writeTodos: 'write_todos',
+  loadSkill: 'load_skill',
 };
 
 export const isAttachmentTool = (toolName: string) =>
