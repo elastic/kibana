@@ -34,8 +34,8 @@ components:
         - immutable
         - index
         - investigation_fields
-        - items_per_search
         - interval
+        - items_per_search
         - language
         - license
         - machine_learning_job_id

@@ -8,7 +8,10 @@
 import type { UseQueryOptions } from '@kbn/react-query';
 import type { ReviewRuleInstallationResponseBody } from '../../../../../common/api/detection_engine/prebuilt_rules';
 import type { RuleResponseField } from '../../../../../common/api/detection_engine/prebuilt_rules/common/rule_response_field.gen';
-import type { PrebuiltRuleAssetsSortItem } from '../../../../../common/api/detection_engine/prebuilt_rules/review_rule_installation/review_rule_installation_route.gen';
+import type {
+  PrebuiltRuleAssetsAggregations,
+  PrebuiltRuleAssetsSortItem,
+} from '../../../../../common/api/detection_engine/prebuilt_rules/review_rule_installation/review_rule_installation_route.gen';
 import type {
   GranularRulesFilter,
   GranularRulesSearch,
@@ -25,7 +28,7 @@ interface UsePrebuiltRulesInstallReviewParams {
   filterOptions?: AddPrebuiltRulesTableFilterOptions;
 
   sortingOptions?: PrebuiltRuleAssetsSortItem;
-  aggregations?: Record<string, string[]>;
+  aggregations?: PrebuiltRuleAssetsAggregations;
   fields?: RuleResponseField[];
 }
 
