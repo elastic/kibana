@@ -12,6 +12,7 @@ import type { NetworkEvent } from '../../common/runtime_types';
 export interface GetNetworkEventsParams {
   checkGroup: string;
   stepIndex: string;
+  remoteName?: string;
 }
 
 export const secondsToMillis = (seconds: number) =>
@@ -22,6 +23,7 @@ export const getNetworkEvents = async ({
   syntheticsEsClient,
   checkGroup,
   stepIndex,
+  remoteName,
 }: GetNetworkEventsParams & {
   syntheticsEsClient: SyntheticsEsClient;
 }): Promise<{
@@ -30,7 +32,16 @@ export const getNetworkEvents = async ({
   isWaterfallSupported: boolean;
   hasNavigationRequest: boolean;
 }> => {
+  // For network events belonging to a journey on a remote cluster, target
+  // `${remoteName}:synthetics-*` via Cross-Cluster Search. When `remoteName`
+  // is absent we let SyntheticsEsClient.search fall back to its default
+  // (local) heartbeat indices.
+  const remoteIndex = remoteName
+    ? `${remoteName}:${syntheticsEsClient.heartbeatIndices}`
+    : undefined;
+
   const params = {
+    ...(remoteIndex ? { index: remoteIndex } : {}),
     track_total_hits: true,
     query: {
       bool: {
