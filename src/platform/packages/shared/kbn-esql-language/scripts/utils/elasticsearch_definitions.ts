@@ -32,8 +32,10 @@ export interface ListDefinitionDirectoriesOptions {
 export const ELASTICSEARCH_ESQL_KIBANA_ROOT = 'docs/reference/query-languages/esql/kibana';
 export const ELASTICSEARCH_PROMQL_KIBANA_ROOT = 'docs/reference/query-languages/promql/kibana';
 
-/** Shape of JSON definition objects from Elasticsearch; `name` is required for merge/sort. */
-export type ElasticsearchJsonDefinition = Record<string, any> & { name: string };
+/** Minimum shape of JSON definition objects from Elasticsearch; `name` is required for merge/sort. */
+export interface ElasticsearchJsonDefinition {
+  name: string;
+}
 
 export function readElasticsearchDefinitions<T extends ElasticsearchJsonDefinition>(
   options: ReadDefinitionsOptions
