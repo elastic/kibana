@@ -57,9 +57,9 @@ describe('normalizeChangePointChartLegacyFields', () => {
     });
   });
 
-  it('falls back to defaults for view_type and max_series_to_plot when both forms are missing', () => {
+  it('falls back to defaults when both forms are missing', () => {
     expect(normalizeChangePointChartLegacyFields({})).toEqual({
-      aggregation_function: undefined,
+      aggregation_function: 'avg',
       view_type: 'charts',
       data_view_id: undefined,
       metric_field: undefined,

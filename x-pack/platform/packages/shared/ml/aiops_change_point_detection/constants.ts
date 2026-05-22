@@ -27,3 +27,5 @@ export type ChangePointDetectionViewType =
 export const CHANGE_POINT_CHART_MAX_SERIES = 50;
 
 export const CHANGE_POINT_CHART_DEFAULT_SERIES = 6;
+
+export const CHANGE_POINT_CHART_DEFAULT_AGG_FUNCTION = 'avg' as const;

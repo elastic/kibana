@@ -29,6 +29,15 @@ describe('change point chart embeddable transforms', () => {
     });
   });
 
+  it('defaults aggregation_function to avg when omitted from the schema input', () => {
+    const state = changePointChartEmbeddableStateSchema.validate({
+      data_view_id: 'data-view-id',
+      metric_field: 'bytes',
+    });
+
+    expect(state.aggregation_function).toBe('avg');
+  });
+
   it('rejects unsupported aggregation functions', () => {
     expect(() =>
       changePointChartEmbeddableStateSchema.validate({
@@ -129,22 +138,22 @@ describe('change point chart embeddable transforms', () => {
     ).toThrow('Invalid change point chart embeddable state: missing metric_field');
   });
 
-  it('throws when stored state is missing the aggregation function', () => {
+  it('defaults aggregation_function to avg when missing from stored state', () => {
     const storedState = {
       view_type: 'charts',
       metric_field: 'bytes',
       max_series_to_plot: 6,
     } as unknown as StoredChangePointChartEmbeddableState;
 
-    expect(() =>
-      transformOut(storedState, [
-        {
-          id: 'data-view-id',
-          name: CHANGE_POINT_CHART_DATA_VIEW_REF_NAME,
-          type: DATA_VIEW_SAVED_OBJECT_TYPE,
-        },
-      ])
-    ).toThrow('Invalid change point chart embeddable state: missing aggregation_function');
+    const result = transformOut(storedState, [
+      {
+        id: 'data-view-id',
+        name: CHANGE_POINT_CHART_DATA_VIEW_REF_NAME,
+        type: DATA_VIEW_SAVED_OBJECT_TYPE,
+      },
+    ]);
+
+    expect(result.aggregation_function).toBe('avg');
   });
 
   it('throws when stored state is missing the data view reference', () => {
