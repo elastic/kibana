@@ -63,28 +63,21 @@ both skills consume:
   skills, registry-tool wiring (`generateEsql`, `productDocumentation`,
   `security.security_labs_search`). ✅
 - **Phase 2b** — `automatic-migration-correction` backing registry tools:
-  `security.migration_translated_rules_search`,
-  `security.migration_translated_rule_get`, and
-  `security.migration_translated_rule_update`. The update tool accepts an
-  `updates: [{ rule_id, patch }]` array (capped at 50) so single-rule and
-  bulk corrections share one tool surface and one `confirm: z.literal(true)`
-  structural gate. The update handler routes through the canonical SIEM
-  migration data layer via
-  `siemMigrationsService.createRulesClient(...).data.items.update`, reusing
-  the same `transformToInternalUpdateRuleMigrationData` helper as the
-  `PATCH /internal/siem_migrations/rules/{migration_id}/rules` route — so
-  ES|QL re-validation (`translation_result` recomputation) stays in lock-
-  step with the canonical helper rather than via a duplicated inline copy.
-  Audit logging emits via `core.security.audit.asScoped(request)` against
-  the `SiemMigrationsAuditActions` action set. ✅
+  `security.migration_translated_rules_search` and
+  `security.migration_translated_rule_get` (read-only). Write operations
+  (rule update) use `platform.workflows.workflow_execute_step` with
+  `kibana.request` targeting the canonical
+  `PATCH /internal/siem_migrations/rules/{migration_id}/rules` route.
+  This route applies `withLicense`, `withExistingMigration`, audit logging,
+  and ES|QL re-validation (`translation_result` recomputation via
+  `transformToInternalUpdateRuleMigrationData`). The platform's HITL dialog
+  gates execution of the destructive step. ✅
 - **Phase 3** — `automatic-migration-context` backing registry tools:
-  `security.migration_resources_list`, `security.migration_resource_upsert`,
-  and `security.migration_resource_remove`. Destructive ops gated by
-  schema-enforced `confirm: z.literal(true)`. Upsert routes through
-  `siemMigrationsService.createRulesClient(...).data.resources.upsert`
-  (same canonical client as the
-  `POST /internal/siem_migrations/rules/{migration_id}/resources` route);
-  remove is the only operation still backed by a direct-ES delete because
+  `security.migration_resources_list` and
+  `security.migration_resource_remove`. Write operations (resource upsert)
+  use `platform.workflows.workflow_execute_step` with `kibana.request`
+  targeting `POST /internal/siem_migrations/rules/{migration_id}/resources`.
+  Remove is the only operation still backed by a direct-ES delete because
   the canonical resources client exposes a bulk `prepareDelete` (all
   resources for a migration) but no per-resource delete method —
   documented as a known architectural seam below. ✅

@@ -11,9 +11,9 @@ import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definitio
 import {
   SECURITY_LABS_SEARCH_TOOL_ID,
   SECURITY_MIGRATION_RESOURCES_LIST_TOOL_ID,
-  SECURITY_MIGRATION_RESOURCE_UPSERT_TOOL_ID,
-  SECURITY_MIGRATION_RESOURCE_REMOVE_TOOL_ID,
 } from '../../tools';
+
+const WORKFLOW_EXECUTE_STEP_TOOL_ID = 'platform.workflows.workflow_execute_step';
 
 export const AUTOMATIC_MIGRATION_CONTEXT_SKILL_ID = 'automatic-migration-context';
 
@@ -43,8 +43,7 @@ export const getAutomaticMigrationContextSkill = () =>
     content: SKILL_CONTENT,
     getRegistryTools: () => [
       SECURITY_MIGRATION_RESOURCES_LIST_TOOL_ID,
-      SECURITY_MIGRATION_RESOURCE_UPSERT_TOOL_ID,
-      SECURITY_MIGRATION_RESOURCE_REMOVE_TOOL_ID,
+      WORKFLOW_EXECUTE_STEP_TOOL_ID,
       platformCoreTools.productDocumentation,
       SECURITY_LABS_SEARCH_TOOL_ID,
     ],
@@ -115,13 +114,18 @@ When the user asks to manage migration context, follow this order:
    schema before calling the upsert endpoint — schema-level validation
    is mandatory, not advisory.
 
-5. **Confirm destructive operations.** *Removing* or *replacing* an
-   existing resource is destructive: the next translation run will see
-   different context and may produce different output. Use
-   \`security.migration_resource_upsert\` for creates / replacements and
-   \`security.migration_resource_remove\` for deletes; both require
-   \`confirm: true\` — the schema rejects calls without it. Never
-   substitute prose for the structural gate.
+5. **Confirm destructive operations via workflow_execute_step.**
+   *Replacing* an existing resource is destructive: the next
+   translation run will see different context and may produce different
+   output. Use \`platform.workflows.workflow_execute_step\` with an
+   inline YAML block targeting the internal resources POST route (see
+   "Upsert Resources API" section below). The platform gates this call
+   with a user confirmation dialog (HITL) — populate
+   \`confirmation_body\` with the resource name, type, and whether it
+   is a create or a replace. Resource removal is not supported by this
+   skill — resources are automatically managed based on the uploaded
+   rules. If the user asks to remove a resource, explain that resources
+   are cleaned up when the migration is deleted or re-uploaded.
 
 6. **Report what landed.** After upsert, list the migration's
    resources again so the user can verify the change. Remind them the
@@ -187,13 +191,13 @@ Steps:
    \`type=document, name=index_taxonomy\`.
 2. Show the user *before* / *after* — what is being replaced, what
    replaces it.
-3. **Use the \`confirmation\` field** to gate the replace — this is
-   destructive (the prior resource's content is overwritten and the
-   next translation pass will see different context).
-4. After confirmation, upsert. Report the resource id and warn:
-   "Rules translated *before* this change still reflect the old
-   context; only the *next* translation run picks up the new
-   version."
+3. Invoke \`workflow_execute_step\` with the resources POST route YAML
+   (the platform's HITL dialog gates this — the user sees the
+   \`confirmation_body\` and approves).
+4. After confirmation, the route processes the upsert. Report the
+   resource name and warn: "Rules translated *before* this change
+   still reflect the old context; only the *next* translation run
+   picks up the new version."
 
 ### Example 5: Refusal — wrong skill
 
@@ -212,9 +216,10 @@ Response:
   \`migrationId\`. Refuse to act if it is missing; ask first.
 - **No global resources.** Resources are always migration-scoped. Refuse
   any request to "upload this everywhere".
-- **Confirmation is structural, not prose.** Replace / remove
-  operations MUST use the Agent Builder \`confirmation\` field. Prose
-  "are you sure?" gating is not acceptable.
+- **Confirmation is platform-gated (HITL), not prose.** Replace
+  operations route through \`workflow_execute_step\` which triggers the
+  platform's user confirmation dialog.
+  Prose "are you sure?" gating is not acceptable.
 - **Schema-level validation.** Validate resource payloads against the
   type's schema before calling upsert. Surface the validation error
   verbatim if it fails.
@@ -228,6 +233,44 @@ Response:
   refuse politely and direct them to the bulk import API; this skill
   is for one-resource-at-a-time interactive work.
 
+## Upsert Resources API (write via workflow_execute_step)
+
+Use this exact \`workflow_execute_step\` call shape to create or replace a
+migration context resource. The route applies license checks, migration-
+existence validation, audit logging, lookup processing, and resource
+identification on the server. The HITL dialog gates execution.
+
+\`\`\`
+tool_id: platform.workflows.workflow_execute_step
+params:
+  stepName: upsert_migration_resource
+  confirmation_body: |
+    Upsert resource \`<type>/<name>\` on migration \`<migration-id>\`.
+    This will <create / replace> the resource. The next translation run
+    will use the new content.
+  yaml: |
+    version: "1"
+    name: migration_resource_upsert
+    triggers:
+      - type: manual
+    steps:
+      - name: upsert_migration_resource
+        type: kibana.request
+        with:
+          method: POST
+          path: /internal/siem_migrations/rules/<migration-id>/resources
+          headers:
+            elastic-api-version: "1"
+          body:
+            - type: "macro"
+              name: "<resource-name>"
+              content: "<resource-body>"
+\`\`\`
+
+Body is an array of \`{ type, name, content, metadata? }\` objects.
+Supported types: \`macro\`, \`lookup\`. The natural key is
+\`(migration_id, type, name)\` — re-upserting replaces the previous entry.
+
 ## Response Format
 
 For upload / attach turns:
@@ -235,10 +278,10 @@ For upload / attach turns:
 1. One short sentence confirming the migration and the resource type.
 2. The parsed / validated payload preview (compact — id, name, type,
    first ~200 chars of body, or a row count for lookups).
-3. The confirmation prompt (rendered via the Agent Builder
-   \`confirmation\` field for destructive operations).
+3. The confirmation is handled by the platform HITL dialog
+   (triggered by \`workflow_execute_step\` for destructive operations).
 4. After confirmation + persistence: a one-line confirmation with the
-   resource id, plus the "applies on next translation run" reminder.
+   resource name, plus the "applies on next translation run" reminder.
 
 For list / diagnose turns:
 

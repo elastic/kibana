@@ -12,8 +12,9 @@ import {
   SECURITY_LABS_SEARCH_TOOL_ID,
   SECURITY_MIGRATION_TRANSLATED_RULES_SEARCH_TOOL_ID,
   SECURITY_MIGRATION_TRANSLATED_RULE_GET_TOOL_ID,
-  SECURITY_MIGRATION_TRANSLATED_RULE_UPDATE_TOOL_ID,
 } from '../../tools';
+
+const WORKFLOW_EXECUTE_STEP_TOOL_ID = 'platform.workflows.workflow_execute_step';
 
 export const AUTOMATIC_MIGRATION_CORRECTION_SKILL_ID = 'automatic-migration-correction';
 
@@ -21,12 +22,13 @@ export const AUTOMATIC_MIGRATION_CORRECTION_SKILL_ID = 'automatic-migration-corr
  * `automatic-migration-correction` skill — chat-driven polishing of one
  * or more rules produced by an automatic SIEM rule migration.
  *
- * Supports BOTH single-rule edits and bulk edits in the same call: the
- * `migration_translated_rule_update` tool accepts an array of per-rule
- * patches, capped at 50 entries, with ONE structural confirmation
- * covering the batch. ES|QL queries are re-validated on save —
- * `translation_result` flips to `full` / `partial` / `untranslatable`
- * automatically based on `parseEsqlQuery` output.
+ * Supports BOTH single-rule edits and bulk edits in the same call:
+ * `workflow_execute_step` with `kibana.request` targets the canonical
+ * migration PATCH route, capped at 50 entries per call, with the
+ * platform's HITL dialog gating execution. ES|QL queries are
+ * re-validated on save — `translation_result` flips to `full` /
+ * `partial` / `untranslatable` automatically based on `parseEsqlQuery`
+ * output.
  *
  * Registered behind `automaticMigrationSkillsEnabled` (default `false`).
  */
@@ -45,7 +47,7 @@ export const getAutomaticMigrationCorrectionSkill = () =>
     getRegistryTools: () => [
       SECURITY_MIGRATION_TRANSLATED_RULES_SEARCH_TOOL_ID,
       SECURITY_MIGRATION_TRANSLATED_RULE_GET_TOOL_ID,
-      SECURITY_MIGRATION_TRANSLATED_RULE_UPDATE_TOOL_ID,
+      WORKFLOW_EXECUTE_STEP_TOOL_ID,
       platformCoreTools.generateEsql,
       SECURITY_LABS_SEARCH_TOOL_ID,
     ],
@@ -145,37 +147,38 @@ order:
    about. For ES|QL changes, include a one-sentence rationale
    referencing the diagnostic from step 3.
 
-6. **Confirm before persisting (single confirmation per batch).**
+6. **Persist via workflow_execute_step + kibana.request.**
    Persisting corrected rules into the migration draft is destructive
    (overwrites the translator output for every rule listed). Use
-   \`security.migration_translated_rule_update\` with the \`updates\`
-   array (1–50 entries; one entry per rule, each with its own
-   \`patch\`) and pass \`confirm: true\` ONLY after the operator has
-   explicitly approved the diff for the entire batch. The schema
-   rejects calls without \`confirm: true\` — this is the structural
-   contract; never substitute prose for it. The patch on each entry
-   accepts only \`query\`, \`severity\`, \`risk_score\`, \`description\`;
+   \`platform.workflows.workflow_execute_step\` with an inline YAML
+   block targeting the internal migration PATCH route (see "Update
+   Rules API" section below). The platform gates this call with a
+   user confirmation dialog (HITL) — the user sees what will be sent
+   and approves or rejects. Always populate \`confirmation_body\` with
+   a Markdown preview of the impacted rules, the fields changing, and
+   a one-line diff summary. Each entry in the body array accepts
+   \`id\` (the rule's ES \`_id\`), optional \`elastic_rule\` partial
+   (\`query\`, \`severity\`, \`risk_score\`, \`description\`, \`title\`);
    omitted fields are preserved. The migration model does not carry rule
    tags — for tag changes the operator should first install the rule and
    then edit it via the regular detection-engine surface. If the batch
    would exceed 50 rules, split it into 50-rule chunks and re-confirm
    before each chunk.
 
-7. **Report what landed and what didn't.** The tool returns a
-   per-rule summary (\`succeeded\`, \`failed\`, \`per_rule\` with the
-   updated fields and the recomputed \`translation_result\`). For
-   single-rule turns: one-line confirmation. For batches: a compact
-   tally ("48 / 50 succeeded; 2 failed with these reasons") plus the
-   failures. ES|QL re-validation runs on save — surface the new
-   \`translation_result\` so the user knows whether the corrected
-   query parses cleanly. Always remind the user that updated rules
-   still have to be **installed** via the migration install flow; this
-   skill only edits the draft. If the operator wants the translator
-   re-invoked on the corrected rules (e.g. the patch changed the
-   context the LLM would have used), surface the
+7. **Report what landed and what didn't.** The route returns
+   \`{ updated: true }\` on success or a 400 with an error message
+   on failure. For single-rule turns: one-line confirmation. For
+   batches: confirm the batch succeeded. ES|QL re-validation runs
+   on save (the route uses the same
+   \`transformToInternalUpdateRuleMigrationData\` helper that invokes
+   \`convertEsqlQueryToTranslationResult\`) — the \`translation_result\`
+   flips to \`full\` / \`partial\` / \`untranslatable\` automatically.
+   Always remind the user that updated rules still have to be
+   **installed** via the migration install flow; this skill only edits
+   the draft. If the operator wants the translator re-invoked on the
+   corrected rules, surface the
    \`POST /internal/siem_migrations/rules/{migration_id}/start\` with
-   \`retry: 'selected'\` follow-up as a hand-off — this skill does not
-   trigger LLM re-translation directly.
+   \`retry: 'selected'\` follow-up as a hand-off.
 
 ## Examples
 
@@ -196,8 +199,8 @@ Steps:
    \`process.command_line\`."
 4. Propose the rewrite — show the diff, name the trade-off (ES|QL
    \`GROK\` vs \`DISSECT\`), and ask for confirmation.
-5. After the user confirms, invoke the update with
-   \`confirm: true\` and report what landed.
+5. After the user confirms, invoke \`workflow_execute_step\` with
+   the PATCH route YAML and report what landed.
 
 ### Example 2: MITRE remapping
 
@@ -263,13 +266,13 @@ Steps:
 
    Plus a one-line summary: *"48 rules selected, uniform GROK rewrite,
    same rationale."*
-5. After ONE structural confirmation covering the batch, invoke
-   \`security.migration_translated_rule_update\` with
-   \`updates: [{ rule_id, patch: { query: <rewrite> } }, …]\` and
-   \`confirm: true\`.
-6. Report the per-rule tally returned by the tool. ES|QL re-validation
-   ran on save — \`translation_result\` should now be \`full\` for the
-   succeeded entries. Remind: *"Updated rules still need to be installed
+5. After ONE user confirmation (the HITL dialog from
+   \`workflow_execute_step\`) covering the batch, invoke the PATCH
+   route via the "Update Rules API" YAML shape below with the full
+   body array.
+6. Report the outcome. ES|QL re-validation
+   ran on save — \`translation_result\` should now be \`full\` for
+   corrected queries. Remind: *"Updated rules still need to be installed
    via the migration install flow. If you want the LLM translator to
    re-run on these (so it picks up the corrected context for downstream
    rules in the same migration), use the retry-selected start
@@ -294,42 +297,43 @@ is no \`migrationId\` to scope the change to.
   \`migrationId\` and at least one rule identifier. Refuse to act if
   the user has not supplied both (or if a previous turn does not
   contain them); ask instead.
-- **Bulk corrections require batch preview + ONE structural confirm.**
+- **Bulk corrections require batch preview + HITL confirmation.**
   Bulk is supported (epic success criterion #1: "Bulk edit rules via a
   chat experience") but the agent MUST surface the impacted-rule list
   AND a diff preview AND a one-line summary of the shared rationale
-  before invoking the update. ONE \`confirm: true\` covers the entire
-  batch; partial confirmations are not a thing here. Hard cap is 50
-  rules per call — wider sweeps must be split with re-confirmation
-  before each chunk.
+  in the \`confirmation_body\` field before invoking
+  \`workflow_execute_step\`. The platform's HITL dialog is the gate —
+  the user sees the confirmation_body and approves or rejects. Hard
+  cap is 50 rules per call — wider sweeps must be split with
+  re-confirmation before each chunk.
 - **Bulk requires uniform diagnosis.** Before applying a uniform fix
   to N rules, diagnose 2–3 representative rules in the set. If
   diagnostics diverge (different parser errors, different intents),
   abort the bulk path and fall back to single-rule corrections.
   Silently applying a rewrite that's right for some rules and wrong
   for others is the foot-gun this rule prevents.
-- **Confirmation is structural, not prose.** Destructive operations
-  MUST use the Agent Builder \`confirm: true\` schema primitive.
-  Never substitute "Are you sure?" prose for the schema gate.
+- **Confirmation is platform-gated (HITL), not prose.** Destructive
+  operations route through \`workflow_execute_step\` which triggers the
+  platform's user confirmation dialog. Never substitute "Are you
+  sure?" prose — the HITL dialog IS the gate. Always populate
+  \`confirmation_body\` with a Markdown summary of the side effects.
 - **RBAC.** Operators need the existing
   \`SIEM_MIGRATIONS_API_ACTION_ALL\` privilege; the migration routes
-  enforce this. Note: this skill currently writes directly to the
-  translated-rules index via \`esClient\` and does NOT route through
-  \`PATCH /internal/siem_migrations/rules/{migration_id}/rules\`
-  middleware (\`withLicense\`, \`withExistingMigration\`,
-  \`logUpdateRules\` audit). See the "Known Limitations" section in
-  \`automatic_migration/README.md\` — the route delegation is
-  scheduled follow-up work.
+  enforce this. Writes route through
+  \`PATCH /internal/siem_migrations/rules/{migration_id}/rules\` which applies
+  \`withLicense\`, \`withExistingMigration\`, and audit logging
+  middleware — all enforcement is server-side.
 - **ES|QL rewrites are diagnosed, not guessed.** If the user reports
   a query error, surface the parser / runtime error before proposing
   a fix. A "best-guess rewrite" with no diagnostic is a yellow flag
   — show the diagnostic first.
-- **ES|QL is re-validated on save.** The handler invokes
+- **ES|QL is re-validated on save.** The route's
+  \`transformToInternalUpdateRuleMigrationData\` helper invokes
   \`parseEsqlQuery\` for any patched \`query\` and writes
   \`translation_result\` (\`full\` / \`partial\` / \`untranslatable\`)
-  alongside the update. The agent should surface the new
-  \`translation_result\` in the post-confirmation report so the user
-  sees whether the corrected query actually parses.
+  alongside the update. After the write, re-read the rule with
+  \`security.migration_translated_rule_get\` to surface the new
+  \`translation_result\` to the user.
 - **Re-translation is a separate operation.** This skill applies
   field-level corrections. To re-run the LLM translator on corrected
   rules, hand off to the retry-selected start endpoint
@@ -338,6 +342,48 @@ is no \`migrationId\` to scope the change to.
 - **Don't touch installed rules.** This skill operates on the
   migration draft. Installed rules are out of scope; route those to
   \`detection-rule-edit\`.
+
+## Update Rules API (write via workflow_execute_step)
+
+Use this exact \`workflow_execute_step\` call shape to persist rule corrections.
+The route applies license checks, migration-existence validation, audit logging,
+and ES|QL re-validation (via \`transformToInternalUpdateRuleMigrationData\`) on
+the server. The HITL dialog gates execution.
+
+\`\`\`
+tool_id: platform.workflows.workflow_execute_step
+params:
+  stepName: update_translated_rules
+  confirmation_body: |
+    Update <N> translated rule(s) in migration \`<migration-id>\`:
+    - <rule-name-1>: <fields changing>
+    - <rule-name-2>: <fields changing>
+    This overwrites the prior translator output for each listed rule.
+  yaml: |
+    version: "1"
+    name: migration_rule_update
+    triggers:
+      - type: manual
+    steps:
+      - name: update_translated_rules
+        type: kibana.request
+        with:
+          method: PATCH
+          path: /internal/siem_migrations/rules/<migration-id>/rules
+          headers:
+            elastic-api-version: "1"
+          body:
+            - id: "<rule-es-doc-id>"
+              elastic_rule:
+                query: "<corrected ES|QL>"
+                severity: "high"
+                risk_score: 80
+                description: "<updated description>"
+\`\`\`
+
+Body is an array of \`{ id, elastic_rule? }\` objects. Only include fields
+being changed in \`elastic_rule\` — omitted fields are preserved. Cap at
+50 entries per call.
 
 ## Response Format
 
@@ -349,9 +395,10 @@ For **single-rule** correction turns:
 3. The proposed diff — \`before\` / \`after\` on the *named* fields
    only.
 4. A one-sentence rationale.
-5. The confirmation request (the agent invokes the update tool with
-   \`confirm: true\` only after the operator approves; the schema
-   primitive IS the gate — no free-text "Are you sure?" prose).
+5. The confirmation is handled by the platform HITL dialog
+   (triggered by \`workflow_execute_step\` for the unsafe
+   \`kibana.request\` step type). The \`confirmation_body\` you provide
+   is shown to the user.
 6. After confirmation + persistence: a one-line confirmation of what
    landed, including the new \`translation_result\` if the patch
    touched \`query\`. Reminder that the rule still has to be installed
@@ -369,14 +416,13 @@ For **bulk** correction turns:
    before/after excerpts). Truncate long values; do not paper over
    divergence.
 4. A one-line summary of the count and the shared rationale.
-5. The confirmation request covers the whole batch; the agent invokes
-   the update tool with the full \`updates\` array and a single
-   \`confirm: true\`.
+5. The confirmation request covers the whole batch via the platform
+   HITL dialog (the \`confirmation_body\` you set is what the user sees).
 6. After persistence: a compact tally ("48 / 50 succeeded; 2 failed"),
-   the failures broken out with the \`error\` strings the tool
-   returned, and the recomputed \`translation_result\` distribution for
-   the patched queries. Reminder: rules still need installing; for
-   re-translation, hand off to the retry-selected start endpoint.
+   the failures broken out with error strings, and the recomputed
+   \`translation_result\` distribution for the patched queries.
+   Reminder: rules still need installing; for re-translation, hand off
+   to the retry-selected start endpoint.
 
 For **refusal / hand-off** turns:
 

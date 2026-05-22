@@ -20,13 +20,8 @@ import { registerSiemReadinessTools } from './siem_readiness';
 import {
   migrationTranslatedRulesSearchTool,
   migrationTranslatedRuleGetTool,
-  migrationTranslatedRuleUpdateTool,
 } from './migration_translated_rules_tools';
-import {
-  migrationResourcesListTool,
-  migrationResourceUpsertTool,
-  migrationResourceRemoveTool,
-} from './migration_resources_tools';
+import { migrationResourcesListTool } from './migration_resources_tools';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 import type { SiemMigrationsService } from '../../lib/siem_migrations/siem_migrations_service';
 
@@ -36,10 +31,11 @@ import type { SiemMigrationsService } from '../../lib/siem_migrations/siem_migra
  * PCI compliance tools are gated behind `experimentalFeatures.pciComplianceAgentBuilder` so
  * the feature can ship dark and be enabled per environment.
  *
- * `siemMigrationsService` is threaded through so the destructive automatic-migration
- * tools (update + resource upsert) can construct a request-scoped
- * `SiemRuleMigrationsClient` and delegate writes through the canonical migration
- * data layer instead of poking ES directly.
+ * Read-only migration tools (search, get, list) are registered as registry tools.
+ * Write operations (rule update, resource upsert) route through
+ * `workflow_execute_step` + `kibana.request` targeting the canonical migration
+ * HTTP routes, which apply license checks, audit logging, and validation
+ * middleware server-side. The platform's HITL dialog gates execution.
  */
 export const registerTools = async (
   agentBuilder: AgentBuilderPluginSetup,
@@ -47,7 +43,7 @@ export const registerTools = async (
   logger: Logger,
   experimentalFeatures: ExperimentalFeatures,
   isServerless: boolean = false,
-  siemMigrationsService: SiemMigrationsService
+  _siemMigrationsService: SiemMigrationsService
 ) => {
   agentBuilder.tools.register(entityRiskScoreTool(core, logger));
   agentBuilder.tools.register(attackDiscoverySearchTool(core, logger));
@@ -70,13 +66,6 @@ export const registerTools = async (
       migrationTranslatedRulesSearchTool(core, logger, experimentalFeatures)
     );
     agentBuilder.tools.register(migrationTranslatedRuleGetTool(core, logger, experimentalFeatures));
-    agentBuilder.tools.register(
-      migrationTranslatedRuleUpdateTool(core, logger, experimentalFeatures, siemMigrationsService)
-    );
     agentBuilder.tools.register(migrationResourcesListTool(core, logger, experimentalFeatures));
-    agentBuilder.tools.register(
-      migrationResourceUpsertTool(core, logger, experimentalFeatures, siemMigrationsService)
-    );
-    agentBuilder.tools.register(migrationResourceRemoveTool(core, logger, experimentalFeatures));
   }
 };

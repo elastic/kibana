@@ -31,14 +31,8 @@ export {
   SECURITY_MIGRATION_TRANSLATED_RULES_SEARCH_TOOL_ID,
   migrationTranslatedRuleGetTool,
   SECURITY_MIGRATION_TRANSLATED_RULE_GET_TOOL_ID,
-  migrationTranslatedRuleUpdateTool,
-  SECURITY_MIGRATION_TRANSLATED_RULE_UPDATE_TOOL_ID,
 } from './migration_translated_rules_tools';
 export {
   migrationResourcesListTool,
   SECURITY_MIGRATION_RESOURCES_LIST_TOOL_ID,
-  migrationResourceUpsertTool,
-  SECURITY_MIGRATION_RESOURCE_UPSERT_TOOL_ID,
-  migrationResourceRemoveTool,
-  SECURITY_MIGRATION_RESOURCE_REMOVE_TOOL_ID,
 } from './migration_resources_tools';
