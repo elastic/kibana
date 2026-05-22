@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiDataGridStyle } from '@elastic/eui';
+import { mathWithUnits, type EuiDataGridStyle, type EuiThemeComputed } from '@elastic/eui';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { useCallback, useMemo } from 'react';
 import { useRestorableRef } from '../restorable_state';
@@ -40,6 +40,18 @@ export function getDensityFromStyle(style: EuiDataGridStyle) {
     ? DataGridDensity.NORMAL
     : DataGridDensity.EXPANDED;
 }
+
+// Paddings are copied from EUI since it doesn't provide access to the raw styles
+export const getDataGridDensityPadding = (euiTheme: EuiThemeComputed, density: DataGridDensity) => {
+  switch (density) {
+    case DataGridDensity.COMPACT:
+      return euiTheme.size.xs;
+    case DataGridDensity.NORMAL:
+      return mathWithUnits(euiTheme.size.m, (x) => x / 2);
+    case DataGridDensity.EXPANDED:
+      return euiTheme.size.s;
+  }
+};
 
 const DATA_GRID_DENSITY_STORAGE_KEY = 'dataGridDensity';
 const getStorageKey = (consumer: string) => `${consumer}:${DATA_GRID_DENSITY_STORAGE_KEY}`;
