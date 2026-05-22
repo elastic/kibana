@@ -136,10 +136,16 @@ export async function logTransactionDurationAlertPrerequisites({
     tracesRuleWindow,
     { thresholdMicroseconds, aggregationType: ruleParams.aggregationType }
   );
-  logWindowStats(log, 'traces via APM index patterns (wider sanity check)', '30m', tracesWideWindow, {
-    thresholdMicroseconds,
-    aggregationType: ruleParams.aggregationType,
-  });
+  logWindowStats(
+    log,
+    'traces via APM index patterns (wider sanity check)',
+    '30m',
+    tracesWideWindow,
+    {
+      thresholdMicroseconds,
+      aggregationType: ruleParams.aggregationType,
+    }
+  );
   logWindowStats(
     log,
     'metrics via APM index patterns (rule path when searchAggregatedTransactions≠never)',
@@ -147,10 +153,16 @@ export async function logTransactionDurationAlertPrerequisites({
     metricsRuleWindow,
     { thresholdMicroseconds, aggregationType: ruleParams.aggregationType }
   );
-  logWindowStats(log, 'metrics via APM index patterns (wider sanity check)', '30m', metricsWideWindow, {
-    thresholdMicroseconds,
-    aggregationType: ruleParams.aggregationType,
-  });
+  logWindowStats(
+    log,
+    'metrics via APM index patterns (wider sanity check)',
+    '30m',
+    metricsWideWindow,
+    {
+      thresholdMicroseconds,
+      aggregationType: ruleParams.aggregationType,
+    }
+  );
 
   if (replayedTracesRuleWindow) {
     logWindowStats(
