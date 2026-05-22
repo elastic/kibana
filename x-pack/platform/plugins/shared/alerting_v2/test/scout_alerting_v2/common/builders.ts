@@ -42,9 +42,8 @@ export const buildCreateRuleData = (input: BuildCreateRuleDataInput = {}): Creat
 });
 
 /**
- * Shape accepted by `buildAlertEvent`. Callers always provide `group_hash` (the
- * alert-action endpoints look events up by it); every other field is filled in
- * with sensible defaults so a typical seed is one line.
+ * Defaults used by `buildAlertEvent` so the integration specs only have to
+ * spell out what makes each alert event unique.
  */
 export type BuildAlertEventInput = Partial<AlertEvent>;
   group_hash: string;
