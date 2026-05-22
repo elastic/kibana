@@ -132,7 +132,8 @@ export const ALERT_SCENARIOS: Record<string, AlertScenario> = {
         params: {
           threshold: 10,
           aggregationType: '95th' as TransactionDurationAggregationType,
-          windowSize: 5,
+          // Replay maps snapshot max→now; a 5m window often misses `ad` traffic at the recording tail.
+          windowSize: 30,
           windowUnit: 'm',
           serviceName: 'ad',
           environment: 'ENVIRONMENT_ALL',
