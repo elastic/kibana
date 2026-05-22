@@ -553,14 +553,15 @@ export class MonacoEditorActionsProvider {
         endLineNumber: lineNumber,
         endColumn: column,
       });
+      const fullLineContent = model.getLineContent(lineNumber);
       const lineTokens = getLineTokens(lineContent);
       // if there is 1 or fewer tokens, suggest method — but only when the
-      // line could plausibly start a request. The parser produces a partial
-      // request (`startOffset` only) on lines that begin with `"`, `{`, `[`,
-      // etc., so this branch is reached even for body-like content.
+      // full line could plausibly start a request. The parser produces a
+      // partial request (`startOffset` only) on lines that begin with `"`, `{`,
+      // `[`, etc., so this branch is reached even for body-like content.
       // https://github.com/elastic/kibana/issues/186767
       if (lineTokens.length <= 1) {
-        if (!isRequestLineStart(lineContent)) {
+        if (!isRequestLineStart(fullLineContent)) {
           return null;
         }
         return AutocompleteType.METHOD;

@@ -238,6 +238,21 @@ describe('Editor actions provider', () => {
       expect(completionItems?.suggestions).toEqual([]);
     });
 
+    it('does not suggest methods when the cursor is before a quote-starting line', async () => {
+      mockGetParsedRequests.mockResolvedValue([{ startOffset: 0 }]);
+      const quoteLineModel = {
+        ...mockModel,
+        getLineContent: () => '"key": "value"',
+        getValueInRange: () => '',
+      } as unknown as jest.Mocked<monaco.editor.ITextModel>;
+      const completionItems = await editorActionsProvider.provideCompletionItems(
+        quoteLineModel,
+        mockPosition,
+        mockContext
+      );
+      expect(completionItems?.suggestions).toEqual([]);
+    });
+
     it('does not suggest methods when there is no parsed request and the line begins with a quote', async () => {
       // When the parser produces no request at all (e.g. on a totally fresh
       // line), the no-request branch must also be guarded.
