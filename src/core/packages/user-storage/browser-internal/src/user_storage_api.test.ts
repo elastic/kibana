@@ -30,14 +30,16 @@ describe('UserStorageApi', () => {
     expect(result).toEqual({ hidden: ['discover'] });
   });
 
-  it('PUTs /internal/user_storage/{key} with a value-wrapped body', async () => {
-    http.put.mockResolvedValue(undefined);
+  it('PUTs /internal/user_storage/{key} with a value-wrapped body and returns the validated value', async () => {
+    const stored = { hidden: ['discover'] };
+    http.put.mockResolvedValue({ value: stored });
 
-    await api.set('navigation:layout', { hidden: ['discover'] });
+    const result = await api.set('navigation:layout', { hidden: ['discover'] });
 
     expect(http.put).toHaveBeenCalledWith('/internal/user_storage/navigation%3Alayout', {
       body: JSON.stringify({ value: { hidden: ['discover'] } }),
     });
+    expect(result).toEqual(stored);
   });
 
   it('DELETEs /internal/user_storage/{key} for remove', async () => {
@@ -49,7 +51,7 @@ describe('UserStorageApi', () => {
   });
 
   it('encodes special characters in keys', async () => {
-    http.put.mockResolvedValue(undefined);
+    http.put.mockResolvedValue({ value: 1 });
 
     await api.set('a/b c', 1);
 

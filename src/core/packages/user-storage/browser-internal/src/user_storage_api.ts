@@ -27,10 +27,12 @@ export class UserStorageApi {
     return response.value;
   }
 
-  public async set(key: string, value: unknown): Promise<void> {
-    await this.http.put(`${BASE_PATH}/${encodeURIComponent(key)}`, {
-      body: JSON.stringify({ value }),
-    });
+  public async set(key: string, value: unknown): Promise<unknown> {
+    const response = await this.http.put<{ value: unknown }>(
+      `${BASE_PATH}/${encodeURIComponent(key)}`,
+      { body: JSON.stringify({ value }) }
+    );
+    return response.value;
   }
 
   public async remove(key: string): Promise<void> {

@@ -37,7 +37,7 @@ describe('UserStorageService', () => {
   it('writes through to http.put on set', async () => {
     const service = new UserStorageService();
     const deps = buildDeps();
-    deps.http.put.mockResolvedValue(undefined);
+    deps.http.put.mockResolvedValue({ value: { hidden: ['discover'] } });
 
     const client = service.setup(deps);
 

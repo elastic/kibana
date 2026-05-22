@@ -107,6 +107,8 @@ export class MyPlugin implements Plugin {
 
 Each key may only be registered once across all plugins. Duplicate registrations throw at boot.
 
+Registration also rejects top-level Zod schemas that accept **`null`** (reserved as the removal tombstone in saved objects) or **`undefined`** (reserved for “no cached value” on the client and unreliable over JSON, since `JSON.stringify({ value: undefined })` drops the `value` key).
+
 ## Reading and writing on the server
 
 `asScoped(request)` returns a client bound to the authenticated user behind a `KibanaRequest`. It returns `null` when the request has no `profile_uid` (typically API-key authentication or anonymous pages); always check.

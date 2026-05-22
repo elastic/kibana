@@ -16,7 +16,7 @@ export const clientMock = (): jest.Mocked<IUserStorageClient> =>
     peek: jest.fn(),
     get: jest.fn(),
     get$: jest.fn().mockReturnValue(new Subject<unknown>()),
-    set: jest.fn().mockResolvedValue(undefined),
+    set: jest.fn().mockImplementation((_key: string, value: unknown) => Promise.resolve(value)),
     remove: jest.fn().mockResolvedValue(undefined),
     getUpdate$: jest.fn().mockReturnValue(new Subject<unknown>()),
     getHttpError$: jest.fn().mockReturnValue(new Subject<Error>()),

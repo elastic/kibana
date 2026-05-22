@@ -117,9 +117,9 @@ export class UserStorageClient implements IUserStorageClient {
     return result;
   }
 
-  async set<T = unknown>(key: string, value: T): Promise<void> {
+  async set<T = unknown>(key: string, value: T): Promise<T> {
     const definition = this.assertRegistered(key);
-    const validated = definition.schema.parse(value);
+    const validated = definition.schema.parse(value) as T;
     const soType = this.getSoType(definition);
 
     this.logger.debug(`Setting userStorage key [${key}] (scope: ${definition.scope})`);
@@ -149,6 +149,8 @@ export class UserStorageClient implements IUserStorageClient {
         throw err;
       }
     }
+
+    return validated;
   }
 
   async remove(key: string): Promise<void> {
