@@ -51,7 +51,7 @@ const fullState: Required<
   primaryPosition: 'bottom',
   iconAlign: 'right',
   valueFontMode: 'default',
-  spacing: 'small',
+  spacing: 'large',
   secondaryTrend: { type: 'none' },
   secondaryLabelPosition: 'before',
   applyColorTo: 'background',

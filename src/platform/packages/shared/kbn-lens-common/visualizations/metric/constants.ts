@@ -69,7 +69,7 @@ export const LENS_METRIC_STATE_DEFAULTS: MetricStateDefaults = {
   ...LENS_METRIC_DEFAULT_STYLE_TEMPLATE_CONFIG,
   iconAlign: 'right',
   valueFontMode: 'default',
-  spacing: 'small',
+  spacing: 'large',
   secondaryLabelPosition: 'before',
   applyColorTo: 'background',
 };
