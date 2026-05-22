@@ -111,13 +111,13 @@ export async function getCollectorGroups(
   const nextAfterKey = hasNextPage ? JSON.stringify(buckets[buckets.length - 1].key) : undefined;
 
   const items: CollectorGroup[] = buckets.map((bucket) => {
-    const isMissingGroupKey = bucket.key.group == null;
+    const isUngrouped = bucket.key.group == null;
     return {
       group: bucket.key.group ?? 'others',
       groupDisplayName: bucket.group_name.buckets[0]?.key ?? bucket.key.group ?? 'Others',
       docCount: bucket.doc_count,
       signals: bucket.signals.buckets.map((b) => b.key),
-      ...(isMissingGroupKey ? { isMissingGroupKey: true } : {}),
+      ...(isUngrouped ? { isUngrouped: true } : {}),
     };
   });
 

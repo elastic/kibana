@@ -102,7 +102,7 @@ const CollectorGroupRow: React.FC<{ group: CollectorGroup }> = ({ group }) => {
                   </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiBadge color="hollow">{group.docCount}</EuiBadge>
+                  <EuiBadge color="subdued">{group.docCount}</EuiBadge>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>

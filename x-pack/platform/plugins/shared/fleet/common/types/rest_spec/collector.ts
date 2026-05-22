@@ -48,11 +48,11 @@ export const CollectorGroupSchema = schema.object({
   signals: schema.arrayOf(schema.string(), {
     meta: { description: 'Signal types present in this group (e.g. logs, metrics, traces)' },
   }),
-  isMissingGroupKey: schema.maybe(
+  isUngrouped: schema.maybe(
     schema.boolean({
       meta: {
         description:
-          'True when the group key is missing on the underlying documents (missing_bucket)',
+          'True when the collectors in this bucket have no value for the group-by field',
       },
     })
   ),

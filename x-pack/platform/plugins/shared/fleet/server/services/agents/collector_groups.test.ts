@@ -104,7 +104,7 @@ describe('getCollectorGroups', () => {
     expect(result.afterKey).toBeUndefined();
   });
 
-  it('sets isMissingGroupKey when group key is null', async () => {
+  it('sets isUngrouped when group key is null', async () => {
     const esClient = createMockEsClient({
       hits: { hits: [] },
       aggregations: {
@@ -132,7 +132,7 @@ describe('getCollectorGroups', () => {
         groupDisplayName: 'Others',
         docCount: 4,
         signals: ['logs'],
-        isMissingGroupKey: true,
+        isUngrouped: true,
       },
     ]);
   });
