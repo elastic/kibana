@@ -524,15 +524,25 @@ export class StreamsPlugin
     });
 
     if (plugins.workflowsExtensions) {
-      installMemoryWorkflows({ workflowsExtensions: plugins.workflowsExtensions }).catch(
-        (error) => {
+      const workflowsExtensions = plugins.workflowsExtensions;
+      const soClient = core.savedObjects.getUnsafeInternalClient();
+      const uiSettings = core.uiSettings.asScopedToClient(soClient);
+      uiSettings
+        .get<boolean>(OBSERVABILITY_STREAMS_ENABLE_MEMORY)
+        .then(async (memoryEnabled) => {
+          if (!memoryEnabled) {
+            this.logger.debug('streams: memory is disabled, skipping memory workflow installation');
+            return;
+          }
+          await installMemoryWorkflows({ workflowsExtensions });
+        })
+        .catch((error: unknown) => {
           this.logger.error(
             `streams: Failed to install memory managed workflows: ${
               error instanceof Error ? error.message : String(error)
             }`
           );
-        }
-      );
+        });
     }
 
     if (this.server) {

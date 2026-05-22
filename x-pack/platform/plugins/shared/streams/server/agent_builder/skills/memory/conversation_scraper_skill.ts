@@ -26,7 +26,7 @@ Review conversations between users and an AI assistant. Extract durable knowledg
 
 - **Extract knowledge, not conversation**: Don't summarize what was said. Distill what was *learned* — architectural facts, operational patterns, troubleshooting steps, configuration details.
 - **Skip ephemeral content**: Ignore greetings, debugging sessions that led nowhere, questions about UI navigation, and other content that won't be useful in the future.
-- **Merge with existing knowledge**: Read existing pages before writing. Update them with new information rather than creating duplicates. Use \`platform.streams.memory.list\` and \`platform.streams.memory.read\` before writing.
+- **Merge with existing knowledge**: Read existing pages before writing. Update them with new information rather than creating duplicates. Use \`platform_streams_memory_list\` and \`platform_streams_memory_read\` before writing.
 - **Be selective**: Not every conversation contains durable knowledge. It's fine to process conversations and write nothing if they don't contain reusable information.
 - **Attribute patterns, not conversations**: Write "the nginx service uses port 8080" not "in a conversation, the user mentioned nginx uses port 8080".
 - **Cross-reference**: When mentioning a concept that has its own page, add the \`page_name\` to the references array. Prefer linking over duplicating content.

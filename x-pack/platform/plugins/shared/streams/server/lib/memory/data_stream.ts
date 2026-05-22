@@ -29,7 +29,7 @@ export const memoriesMappings = {
     updated_at: mappings.date({ format: 'strict_date_optional_time' }),
     created_by: mappings.keyword(),
     updated_by: mappings.keyword(),
-    // Soft-delete flag (used by workflow write_memory_page tool)
+    // Soft-delete flag: true on tombstone documents written by MemoryServiceImpl.delete()
     is_deleted: mappings.boolean(),
   },
 } satisfies MappingsDefinition;

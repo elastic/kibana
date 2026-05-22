@@ -145,7 +145,7 @@ const useMemoryTaskAction = (
       queryClient.invalidateQueries({ queryKey: memoryKeys.all });
       core.notifications.toasts.addSuccess(
         i18n.translate('xpack.streams.memory.taskSuccess', {
-          defaultMessage: '{actionName} started successfully.',
+          defaultMessage: '{actionName} queued. Results will appear once the workflow completes.',
           values: { actionName },
         })
       );

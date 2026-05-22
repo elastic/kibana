@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import type { IUiSettingsClient, Logger } from '@kbn/core/server';
 import { OBSERVABILITY_STREAMS_ENABLE_MEMORY } from '@kbn/management-settings-ids';
-import { notFound } from '@hapi/boom';
+import { notFound, forbidden, serverUnavailable } from '@hapi/boom';
 import {
   STREAMS_MEMORY_SYNTHESIS_WORKFLOW_ID,
   STREAMS_MEMORY_CONSOLIDATION_WORKFLOW_ID,
@@ -28,7 +28,7 @@ import { MemoryServiceImpl } from '../../../lib/memory';
 const assertMemoryEnabled = async (uiSettingsClient: IUiSettingsClient) => {
   const useMemory = await uiSettingsClient.get<boolean>(OBSERVABILITY_STREAMS_ENABLE_MEMORY);
   if (!useMemory) {
-    throw new Error(
+    throw forbidden(
       'Memory is disabled. Enable the Streams memory advanced setting (observability:streamsEnableMemory).'
     );
   }
@@ -433,7 +433,7 @@ const createWorkflowTriggerRoute = (
 
       const wfMgmt = server.workflowsManagement;
       if (!wfMgmt) {
-        throw new Error(
+        throw serverUnavailable(
           'Workflows management plugin is not available. Cannot trigger memory workflow.'
         );
       }

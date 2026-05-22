@@ -25,11 +25,11 @@ import type {
 
 /**
  * MemoryServiceImpl backed by two append-only data streams:
- *   - .significant_events-memories  (pages, latest-by-@timestamp per name)
+ *   - .significant_events-memories  (pages, latest version resolved via collapse on `name`, sorted by version desc)
  *   - .significant_events-memory-history  (version history, append-only)
  *
  * Pages are written by indexing a new document with the current @timestamp.
- * "Latest" is resolved by collapsing on `name` sorted by @timestamp desc.
+ * "Latest" is resolved by collapsing on `name` sorted by `version desc, @timestamp desc`.
  */
 export class MemoryServiceImpl implements MemoryService {
   private readonly esClient: ElasticsearchClient;
@@ -75,17 +75,13 @@ export class MemoryServiceImpl implements MemoryService {
   private async _getByName(name: string): Promise<MemoryEntry | undefined> {
     const hits = await this._searchLatest({ bool: { filter: [{ term: { name } }] } });
     const entry = hits[0]?._source;
-    return entry && (entry as MemoryEntry & { is_deleted?: boolean }).is_deleted !== true
-      ? entry
-      : undefined;
+    return entry?.is_deleted !== true ? entry : undefined;
   }
 
   private async _getById(id: string): Promise<MemoryEntry | undefined> {
     const hits = await this._searchLatest({ bool: { filter: [{ term: { id } }] } });
     const entry = hits[0]?._source;
-    return entry && (entry as MemoryEntry & { is_deleted?: boolean }).is_deleted !== true
-      ? entry
-      : undefined;
+    return entry?.is_deleted !== true ? entry : undefined;
   }
 
   // ── Public API ──
@@ -299,7 +295,10 @@ export class MemoryServiceImpl implements MemoryService {
 
   async getBacklinks({ id }: { id: string }): Promise<MemoryEntry[]> {
     return (
-      await this._searchLatest({ bool: { filter: [{ term: { references: id } }] } }, 1000)
+      await this._searchLatest(
+        { bool: { filter: [{ term: { references: id } }, { term: { is_deleted: false } }] } },
+        1000
+      )
     ).map((h) => h._source);
   }
 
@@ -392,7 +391,7 @@ export class MemoryServiceImpl implements MemoryService {
         bool: { filter: [{ term: { categories: category } }, { term: { is_deleted: false } }] },
       },
       collapse: { field: 'name' },
-      sort: [{ '@timestamp': { order: 'desc' } }, { name: { order: 'asc' } }],
+      sort: [{ version: { order: 'desc' } }, { '@timestamp': { order: 'desc' } }],
       size: 1000,
     });
     return response.hits.hits.map((h) => h._source as MemoryEntry);
