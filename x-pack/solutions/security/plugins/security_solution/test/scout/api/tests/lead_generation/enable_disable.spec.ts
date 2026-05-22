@@ -35,67 +35,72 @@ apiTest.describe(
     });
 
     apiTest.afterAll(async ({ apiClient, esClient }) => {
-      // Best-effort cleanup — disable may already have been called by a test.
-      await apiClient
-        .post(LEAD_GENERATION_ROUTES.DISABLE, {
-          headers: defaultHeaders,
-          responseType: 'json',
-          body: {},
-        })
-        .catch(() => {});
-      await cleanupLeadsIndex(esClient, DEFAULT_SPACE_ID);
-    });
-
-    apiTest('POST /enable returns 200 with { success: true }', async ({ apiClient }) => {
-      const response = await apiClient.post(LEAD_GENERATION_ROUTES.ENABLE, {
-        headers: defaultHeaders,
-        responseType: 'json',
-        body: { connectorId: 'test-connector' },
-      });
-
-      expect(response).toHaveStatusCode(200);
-      expect(response.body).toStrictEqual({ success: true });
-    });
-
-    apiTest('GET /status shows isEnabled=true after enable', async ({ apiClient }) => {
-      const response = await apiClient.get(LEAD_GENERATION_ROUTES.STATUS, {
-        headers: defaultHeaders,
-        responseType: 'json',
-      });
-
-      expect(response).toHaveStatusCode(200);
-      expect(response.body.isEnabled).toBe(true);
-    });
-
-    apiTest('GET /status shows indexExists=true after enable', async ({ apiClient }) => {
-      const response = await apiClient.get(LEAD_GENERATION_ROUTES.STATUS, {
-        headers: defaultHeaders,
-        responseType: 'json',
-      });
-
-      expect(response).toHaveStatusCode(200);
-      expect(response.body.indexExists).toBe(true);
-    });
-
-    apiTest('POST /disable returns 200 with { success: true }', async ({ apiClient }) => {
-      const response = await apiClient.post(LEAD_GENERATION_ROUTES.DISABLE, {
+      // Best-effort cleanup: disable may already be off if the disable test ran.
+      // Only suppress the expected "task not found" / already-disabled response;
+      // unexpected errors (network, ES corruption) are rethrown so CI is notified.
+      const disableResponse = await apiClient.post(LEAD_GENERATION_ROUTES.DISABLE, {
         headers: defaultHeaders,
         responseType: 'json',
         body: {},
       });
-
-      expect(response).toHaveStatusCode(200);
-      expect(response.body).toStrictEqual({ success: true });
+      if (disableResponse.status !== 200 && disableResponse.status !== 404) {
+        throw new Error(
+          `Unexpected status from /disable during cleanup: ${disableResponse.status}`
+        );
+      }
+      await cleanupLeadsIndex(esClient, DEFAULT_SPACE_ID);
     });
 
-    apiTest('GET /status shows isEnabled=false after disable', async ({ apiClient }) => {
-      const response = await apiClient.get(LEAD_GENERATION_ROUTES.STATUS, {
-        headers: defaultHeaders,
-        responseType: 'json',
+    apiTest('POST /enable transitions feature to enabled state', async ({ apiClient }) => {
+      await apiTest.step('enable returns success', async () => {
+        const response = await apiClient.post(LEAD_GENERATION_ROUTES.ENABLE, {
+          headers: defaultHeaders,
+          responseType: 'json',
+          body: { connectorId: 'test-connector' },
+        });
+        expect(response).toHaveStatusCode(200);
+        expect(response.body).toStrictEqual({ success: true });
       });
 
-      expect(response).toHaveStatusCode(200);
-      expect(response.body.isEnabled).toBe(false);
+      await apiTest.step('status reflects isEnabled=true and indexExists=true', async () => {
+        const response = await apiClient.get(LEAD_GENERATION_ROUTES.STATUS, {
+          headers: defaultHeaders,
+          responseType: 'json',
+        });
+        expect(response).toHaveStatusCode(200);
+        expect.soft(response.body.isEnabled).toBe(true);
+        expect.soft(response.body.indexExists).toBe(true);
+      });
+    });
+
+    apiTest('POST /disable transitions feature to disabled state', async ({ apiClient }) => {
+      await apiTest.step('enable first so disable has something to act on', async () => {
+        const response = await apiClient.post(LEAD_GENERATION_ROUTES.ENABLE, {
+          headers: defaultHeaders,
+          responseType: 'json',
+          body: { connectorId: 'test-connector' },
+        });
+        expect(response).toHaveStatusCode(200);
+      });
+
+      await apiTest.step('disable returns success', async () => {
+        const response = await apiClient.post(LEAD_GENERATION_ROUTES.DISABLE, {
+          headers: defaultHeaders,
+          responseType: 'json',
+          body: {},
+        });
+        expect(response).toHaveStatusCode(200);
+        expect(response.body).toStrictEqual({ success: true });
+      });
+
+      await apiTest.step('status reflects isEnabled=false', async () => {
+        const response = await apiClient.get(LEAD_GENERATION_ROUTES.STATUS, {
+          headers: defaultHeaders,
+          responseType: 'json',
+        });
+        expect(response).toHaveStatusCode(200);
+        expect(response.body.isEnabled).toBe(false);
+      });
     });
 
     apiTest('POST /enable returns 400 when connectorId is missing', async ({ apiClient }) => {

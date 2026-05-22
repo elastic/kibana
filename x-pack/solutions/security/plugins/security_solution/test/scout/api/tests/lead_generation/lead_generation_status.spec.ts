@@ -49,43 +49,28 @@ apiTest.describe(
       });
     });
 
-    apiTest('returns a well-formed status object', async ({ apiClient }) => {
-      const response = await apiClient.get(LEAD_GENERATION_ROUTES.STATUS, {
-        headers: defaultHeaders,
-        responseType: 'json',
-      });
+    apiTest(
+      'returns a well-formed status object and reflects the enabled state',
+      async ({ apiClient }) => {
+        const response = await apiClient.get(LEAD_GENERATION_ROUTES.STATUS, {
+          headers: defaultHeaders,
+          responseType: 'json',
+        });
 
-      expect(response).toHaveStatusCode(200);
-      // Required fields from leadGenerationStatusSchema
-      expect(typeof response.body.isEnabled).toBe('boolean');
-      expect(typeof response.body.indexExists).toBe('boolean');
-      expect(typeof response.body.totalLeads).toBe('number');
-      // lastRun is string | null
-      expect(response.body.lastRun === null || typeof response.body.lastRun === 'string').toBe(
-        true
-      );
-    });
-
-    apiTest('reflects isEnabled=true after enable', async ({ apiClient }) => {
-      // enable was already called in beforeAll
-      const response = await apiClient.get(LEAD_GENERATION_ROUTES.STATUS, {
-        headers: defaultHeaders,
-        responseType: 'json',
-      });
-
-      expect(response).toHaveStatusCode(200);
-      expect(response.body.isEnabled).toBe(true);
-    });
-
-    apiTest('reports indexExists=true after enable creates the index', async ({ apiClient }) => {
-      const response = await apiClient.get(LEAD_GENERATION_ROUTES.STATUS, {
-        headers: defaultHeaders,
-        responseType: 'json',
-      });
-
-      expect(response).toHaveStatusCode(200);
-      expect(response.body.indexExists).toBe(true);
-    });
+        expect(response).toHaveStatusCode(200);
+        // Shape assertions — all run even if one fails
+        expect.soft(typeof response.body.isEnabled).toBe('boolean');
+        expect.soft(typeof response.body.indexExists).toBe('boolean');
+        expect.soft(typeof response.body.totalLeads).toBe('number');
+        // lastRun is null before any run, or an ISO-8601 string afterwards
+        expect
+          .soft(response.body.lastRun, 'lastRun must be null or a string')
+          .toBeOneOf([null, expect.any(String)]);
+        // enable was called in beforeAll — confirm it is reflected
+        expect.soft(response.body.isEnabled).toBe(true);
+        expect.soft(response.body.indexExists).toBe(true);
+      }
+    );
 
     apiTest(
       'totalLeads reflects the count of seeded documents',
@@ -106,7 +91,7 @@ apiTest.describe(
     apiTest(
       'lastRun is set to the most recent lead timestamp after seeding',
       async ({ apiClient, esClient }) => {
-        const { id: _id } = await seedLead(esClient);
+        await seedLead(esClient);
 
         const response = await apiClient.get(LEAD_GENERATION_ROUTES.STATUS, {
           headers: defaultHeaders,
