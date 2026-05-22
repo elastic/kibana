@@ -6,6 +6,7 @@
  */
 
 import type {
+  AppDeepLinkLocations,
   AppMountParameters,
   AppUpdater,
   CoreSetup,
@@ -47,7 +48,7 @@ export class ProfilingPlugin
           defaultMessage: 'Stacktraces',
         }),
         path: '/stacktraces',
-        visibleIn: ['globalSearch', 'sideNav'],
+        visibleIn: ['globalSearch', 'sideNav'] as AppDeepLinkLocations[],
       },
       {
         id: 'flamegraphs',
@@ -55,7 +56,7 @@ export class ProfilingPlugin
           defaultMessage: 'Flamegraphs',
         }),
         path: '/flamegraphs',
-        visibleIn: ['globalSearch', 'sideNav'],
+        visibleIn: ['globalSearch', 'sideNav'] as AppDeepLinkLocations[],
       },
       {
         id: 'functions',
@@ -63,7 +64,7 @@ export class ProfilingPlugin
           defaultMessage: 'Functions',
         }),
         path: '/functions',
-        visibleIn: ['globalSearch', 'sideNav'],
+        visibleIn: ['globalSearch', 'sideNav'] as AppDeepLinkLocations[],
       },
     ];
 
