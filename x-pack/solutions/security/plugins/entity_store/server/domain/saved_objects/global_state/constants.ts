@@ -10,14 +10,14 @@ import { z } from '@kbn/zod/v4';
 export const DEFAULT_HISTORY_SNAPSHOT_FREQUENCY = '24h';
 
 export const LOG_EXTRACTION_DELAY_DEFAULT = '1m';
-export const LOG_EXTRACTION_LOOKBACK_PERIOD_DEFAULT = '3h';
+export const LOG_EXTRACTION_LOOKBACK_PERIOD_DEFAULT = '30d';
 export const LOG_EXTRACTION_FREQUENCY_DEFAULT = '1m';
 // Max amount of entities to extract in one ESQL query
 export const LOG_EXTRACTION_DOCS_LIMIT_DEFAULT = 10000;
 // Max raw log documents per logs to be processed in a query (inside elastic search)
 export const LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT = 40000;
 export const LOG_EXTRACTION_TIMEOUT_DEFAULT = '59s';
-export const LOG_EXTRACTION_MAX_TIME_WINDOW_SIZE_DEFAULT = '15m';
+export const LOG_EXTRACTION_MAX_TIME_WINDOW_SIZE_DEFAULT = '1d';
 // Max total raw log documents to process per task run; 0 = no cap
 export const LOG_EXTRACTION_MAX_LOGS_PER_WINDOW_DEFAULT = 500_000;
 export const LOG_EXTRACTION_CAP_BEHAVIOR_DEFAULT = 'defer' as const;

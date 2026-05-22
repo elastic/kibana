@@ -32,8 +32,20 @@ export const AnomalySummaryEntry = lazySchema(() =>
   z.object({
     jobId: z.string(),
     detectorIndex: z.number(),
+    /**
+     * ML detector function (e.g. rare, high_count, time_of_day)
+     */
+    detectorFunction: z.string(),
+    /**
+     * The field the detector analyses (ML field_name)
+     */
+    fieldName: z.string().nullable(),
     byFieldName: z.string().nullable(),
     byFieldValue: z.string().nullable(),
+    overFieldName: z.string().nullable(),
+    overFieldValue: z.string().nullable(),
+    partitionFieldName: z.string().nullable(),
+    partitionFieldValue: z.string().nullable(),
     recordScore: z.number(),
     /**
      * ISO-8601 timestamp of the anomaly bucket
@@ -42,7 +54,6 @@ export const AnomalySummaryEntry = lazySchema(() =>
     actual: z.array(z.number()),
     typical: z.array(z.number()),
     baseline: z.array(BaselineBucket),
-    sourceIndex: z.array(z.string()),
     /**
      * Populated if this entry partially failed
      */

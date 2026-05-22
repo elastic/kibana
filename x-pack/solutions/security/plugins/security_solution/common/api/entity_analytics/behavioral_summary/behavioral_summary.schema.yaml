@@ -48,23 +48,47 @@ components:
       required:
         - jobId
         - detectorIndex
+        - detectorFunction
+        - fieldName
         - byFieldName
         - byFieldValue
+        - overFieldName
+        - overFieldValue
+        - partitionFieldName
+        - partitionFieldValue
         - recordScore
         - timestamp
         - actual
         - typical
         - baseline
-        - sourceIndex
       properties:
         jobId:
           type: string
         detectorIndex:
           type: number
+        detectorFunction:
+          type: string
+          description: ML detector function (e.g. rare, high_count, time_of_day)
+        fieldName:
+          type: string
+          nullable: true
+          description: The field the detector analyses (ML field_name)
         byFieldName:
           type: string
           nullable: true
         byFieldValue:
+          type: string
+          nullable: true
+        overFieldName:
+          type: string
+          nullable: true
+        overFieldValue:
+          type: string
+          nullable: true
+        partitionFieldName:
+          type: string
+          nullable: true
+        partitionFieldValue:
           type: string
           nullable: true
         recordScore:
@@ -84,10 +108,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/BaselineBucket'
-        sourceIndex:
-          type: array
-          items:
-            type: string
         error:
           type: string
           description: Populated if this entry partially failed

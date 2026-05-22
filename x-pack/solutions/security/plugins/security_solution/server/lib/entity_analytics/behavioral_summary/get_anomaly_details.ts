@@ -23,8 +23,14 @@ export const parseAnomalySearchResponse = (
       {
         jobId: source.anomaly.job_id,
         detectorIndex: source.anomaly.detector_index,
+        detectorFunction: source.anomaly.detector_function,
+        fieldName: source.anomaly.field_name ?? null,
         byFieldName: source.anomaly.by_field_name ?? null,
         byFieldValue: source.anomaly.by_field_value ?? null,
+        overFieldName: source.anomaly.over_field_name ?? null,
+        overFieldValue: source.anomaly.over_field_value ?? null,
+        partitionFieldName: source.anomaly.partition_field_name ?? null,
+        partitionFieldValue: source.anomaly.partition_field_value ?? null,
         recordScore: source.anomaly.record_score,
         timestamp: new Date(source.anomaly.timestamp).toISOString(),
         actual: source.anomaly.actual != null ? [source.anomaly.actual] : [],
@@ -34,7 +40,6 @@ export const parseAnomalySearchResponse = (
           docCount: b.doc_count,
           topHits: b.top_hits,
         })),
-        sourceIndex: [],
       },
     ];
   });
@@ -61,7 +66,7 @@ export const getAnomaliesFromDetailsIndex = async ({
       inner_hits: {
         name: 'most_recent',
         size: 1,
-        sort: [{ 'anomaly.timestamp': { order: 'desc' } }],
+        sort: [{ '@timestamp': { order: 'desc' } }],
       },
     },
   });
