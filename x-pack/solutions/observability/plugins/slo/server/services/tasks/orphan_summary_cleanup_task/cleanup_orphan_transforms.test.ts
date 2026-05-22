@@ -41,12 +41,28 @@ describe('parseSloTransformId', () => {
     });
   });
 
+  it('should parse a transform id with a multi-digit revision', () => {
+    expect(parseSloTransformId('slo-my-slo-id-42')).toEqual({ id: 'my-slo-id', revision: 42 });
+  });
+
+  it('should return null for an empty id', () => {
+    expect(parseSloTransformId('')).toBeNull();
+  });
+
   it('should return null for non-SLO transform ids', () => {
     expect(parseSloTransformId('some-other-transform')).toBeNull();
   });
 
   it('should return null for malformed ids without revision', () => {
     expect(parseSloTransformId('slo-')).toBeNull();
+  });
+
+  it('should return null for a bare summary prefix', () => {
+    expect(parseSloTransformId('slo-summary-')).toBeNull();
+  });
+
+  it('should return null for a summary id without a revision', () => {
+    expect(parseSloTransformId('slo-summary-my-slo-id')).toBeNull();
   });
 
   it('should return null for ids with non-numeric revision', () => {

@@ -43,33 +43,21 @@ const DEFAULT_PAGE_SIZE = 100;
 const DEFAULT_MAX_PAGES = 10;
 const DEFAULT_CONCURRENCY = 5;
 
-const SLO_SUMMARY_TRANSFORM_PREFIX = 'slo-summary-';
-const SLO_TRANSFORM_PREFIX = 'slo-';
 const SLO_TRANSFORM_PATTERN = 'slo-*';
+const SLO_TRANSFORM_ID_REGEX = /^slo-(?:summary-)?(?<id>.+)-(?<revision>\d+)$/;
 
 export function parseSloTransformId(transformId: string): SLO | null {
-  const isSummary = transformId.startsWith(SLO_SUMMARY_TRANSFORM_PREFIX);
-  const prefix = isSummary ? SLO_SUMMARY_TRANSFORM_PREFIX : SLO_TRANSFORM_PREFIX;
-
-  if (!transformId.startsWith(prefix)) {
+  const groups = SLO_TRANSFORM_ID_REGEX.exec(transformId)?.groups;
+  if (!groups) {
     return null;
   }
 
-  const remainder = transformId.slice(prefix.length);
-  const lastDashIndex = remainder.lastIndexOf('-');
-  if (lastDashIndex === -1) {
+  const revision = Number(groups.revision);
+  if (revision < 1) {
     return null;
   }
 
-  const sloId = remainder.slice(0, lastDashIndex);
-  const revisionStr = remainder.slice(lastDashIndex + 1);
-  const revision = Number(revisionStr);
-
-  if (!sloId || !Number.isInteger(revision) || revision < 1) {
-    return null;
-  }
-
-  return { id: sloId, revision };
+  return { id: groups.id, revision };
 }
 
 export async function cleanupOrphanTransforms(
