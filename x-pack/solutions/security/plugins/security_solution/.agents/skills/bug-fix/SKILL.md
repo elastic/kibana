@@ -78,10 +78,10 @@ Dispatch these as subagents — PR diffs and source files are large:
 3. **Search codebase conventions** — `rg` for existing patterns, hardcoded namespaces,
    plugin boundaries, lifecycle phases (SELF-CHECK #3 questions 1–4)
 4. **Find all call sites** — every invocation of the broken hook/utility/action
-   (SELF-CHECK #3 questions 5–6)
+   (SELF-CHECK #3 questions 5–7)
 5. **Find existing tests** — copy patterns, determine test layer
 
-Read `x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-fixer/references/fix-workflow.md` and answer all six
+Read `x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-fixer/references/fix-workflow.md` and answer all seven
 SELF-CHECK #3 questions using the gathered evidence.
 
 Present the Root Cause Analysis and Fix Plan using the template in `fix-workflow.md`.
