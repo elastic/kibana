@@ -116,7 +116,7 @@ describe('transformSentinelRuleToOriginalRule', () => {
     const result = transformSentinelRuleToOriginalRule({
       ...baseSentinelRule,
       queryFrequency: 'PT5M',
-      queryPeriod: 'PT5M',
+      queryPeriod: 'PT5M30S',
     });
 
     expect(result.annotations).toEqual({
