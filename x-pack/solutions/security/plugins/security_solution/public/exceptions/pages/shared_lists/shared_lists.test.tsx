@@ -231,6 +231,71 @@ describe('SharedLists', () => {
     });
   });
 
+  it('resets stale search filter on Refresh when search bar was cleared via backspace', async () => {
+    const mockRefreshExceptions = jest.fn();
+
+    (useExceptionLists as jest.Mock).mockReturnValue([
+      false,
+      [exceptionList1, exceptionList2],
+      { page: 1, perPage: 20, total: 2 },
+      jest.fn(),
+      mockRefreshExceptions,
+      { field: 'created_at', order: 'desc' },
+      jest.fn(),
+    ]);
+
+    const { getByTestId } = render(
+      <TestProviders>
+        <SharedLists />
+      </TestProviders>
+    );
+
+    // Initial load: wait for Refresh button to become visible (viewerStatus → null)
+    await waitFor(() => {
+      expect(getByTestId('refreshRulesAction')).toBeInTheDocument();
+    });
+
+    const searchInput = getByTestId('exceptionsHeaderSearchInput');
+
+    // Simulate the useAllExceptionLists loading phase so viewerStatus transitions back to null
+    // after the search is committed (SEARCHING → LOADING → null)
+    (useAllExceptionLists as jest.Mock).mockReturnValueOnce([
+      true,
+      [
+        { ...exceptionList1, rules: [] },
+        { ...exceptionList2, rules: [] },
+      ],
+      { not_endpoint_list: exceptionList2, endpoint_list: exceptionList1 },
+    ]);
+
+    // Commit a search — sets filter to { name: 'test' }
+    fireEvent.change(searchInput, { target: { value: 'test' } });
+
+    // Wait for Refresh button to reappear (viewerStatus back to null via loading phase)
+    await waitFor(() => {
+      expect(getByTestId('refreshRulesAction')).toBeInTheDocument();
+    });
+
+    // Simulate backspace clearing the search (raw input event — does NOT commit the search)
+    fireEvent.input(searchInput, { target: { value: '' } });
+
+    // Click Refresh with an empty input but stale filter state
+    fireEvent.click(getByTestId('refreshRulesAction'));
+
+    // After the fix: setFilters(undefined) is called instead of refreshExceptions(),
+    // so useExceptionLists re-renders with no name filter
+    await waitFor(() => {
+      expect(useExceptionLists).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          filterOptions: expect.not.objectContaining({ name: 'test' }),
+        })
+      );
+    });
+
+    // refreshExceptions should not be called — the filter reset triggers the re-fetch
+    expect(mockRefreshExceptions).not.toHaveBeenCalled();
+  });
+
   describe('when moving Endpoint exceptions to Management', () => {
     it('should not fetch "endpoint_list" when Endpoint exceptions moved FF is enabled', async () => {
       mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);

@@ -117,6 +117,7 @@ export const SharedLists = React.memo(() => {
     exceptionReferenceModalInitialState
   );
   const [filters, setFilters] = useState<ExceptionListFilter | undefined>();
+  const searchTextRef = useRef<string>('');
 
   const [viewerStatus, setViewStatus] = useState<ViewerStatus | null>(ViewerStatus.LOADING);
 
@@ -272,9 +273,15 @@ export const SharedLists = React.memo(() => {
   const handleRefresh = useCallback((): void => {
     if (refreshExceptions != null) {
       setLastUpdated(Date.now());
-      refreshExceptions();
+      if (!searchTextRef.current && filters) {
+        // Search bar is visually empty but filter is stale (cleared via backspace without Enter).
+        // Reset the filter — useExceptionLists will re-fetch automatically.
+        setFilters(undefined);
+      } else {
+        refreshExceptions();
+      }
     }
-  }, [refreshExceptions]);
+  }, [filters, refreshExceptions]);
 
   useEffect(() => {
     if (initLoading && !loading && !loadingExceptions && !loadingTableInfo) {
@@ -287,6 +294,7 @@ export const SharedLists = React.memo(() => {
       query,
       queryText,
     }: Parameters<NonNullable<EuiSearchBarProps['onChange']>>[0]): Promise<void> => {
+      searchTextRef.current = queryText;
       setViewStatus(ViewerStatus.SEARCHING);
       const filterOptions = {
         name: null,
@@ -628,7 +636,14 @@ export const SharedLists = React.memo(() => {
             <EndpointExceptionsMovedCallout id="sharedListsPage" dismissable title="moved" />
           )}
 
-        {!initLoading && <ListsSearchBar onSearch={handleSearch} />}
+        {!initLoading && (
+          <ListsSearchBar
+            onSearch={handleSearch}
+            onInputChange={(text) => {
+              searchTextRef.current = text;
+            }}
+          />
+        )}
         <EuiSpacer size="m" />
         {viewerStatus != null ? (
           <EmptyViewerState

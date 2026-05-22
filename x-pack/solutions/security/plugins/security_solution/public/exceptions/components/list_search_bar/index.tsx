@@ -13,6 +13,7 @@ import * as i18n from '../../translations';
 
 interface ExceptionListsTableSearchProps {
   onSearch: (args: Parameters<NonNullable<EuiSearchBarProps['onChange']>>[0]) => void;
+  onInputChange?: (text: string) => void;
 }
 
 // TODO replace this component with the @Kbn/securitysolution-exception-list-components
@@ -37,20 +38,36 @@ export const EXCEPTIONS_SEARCH_SCHEMA = {
   },
 };
 
-export const ListsSearchBar = React.memo<ExceptionListsTableSearchProps>(({ onSearch }) => {
-  return (
-    <EuiSearchBar
-      data-test-subj="exceptionsHeaderSearch"
-      aria-label={i18n.EXCEPTIONS_LISTS_SEARCH_PLACEHOLDER}
-      onChange={onSearch}
-      box={{
-        [`data-test-subj`]: 'exceptionsHeaderSearchInput',
-        placeholder: i18n.EXCEPTION_LIST_SEARCH_PLACEHOLDER,
-        incremental: false,
-        schema: EXCEPTIONS_SEARCH_SCHEMA,
-      }}
-    />
-  );
-});
+export const ListsSearchBar = React.memo<ExceptionListsTableSearchProps>(
+  ({ onSearch, onInputChange }) => {
+    const handleWrapperInput = onInputChange
+      ? (e: React.FormEvent<HTMLDivElement>) => {
+          const input = e.target as HTMLInputElement;
+          if (input.tagName === 'INPUT') {
+            onInputChange(input.value);
+          }
+        }
+      : undefined;
+
+    return (
+      // onInput captures raw keystrokes (including backspace) from the inner EuiSearchBar input
+      // via React's synthetic event delegation, allowing the parent to track the current text
+      // independently of whether the search has been "committed" (Enter / X button).
+      <div onInput={handleWrapperInput}>
+        <EuiSearchBar
+          data-test-subj="exceptionsHeaderSearch"
+          aria-label={i18n.EXCEPTIONS_LISTS_SEARCH_PLACEHOLDER}
+          onChange={onSearch}
+          box={{
+            [`data-test-subj`]: 'exceptionsHeaderSearchInput',
+            placeholder: i18n.EXCEPTION_LIST_SEARCH_PLACEHOLDER,
+            incremental: false,
+            schema: EXCEPTIONS_SEARCH_SCHEMA,
+          }}
+        />
+      </div>
+    );
+  }
+);
 
 ListsSearchBar.displayName = 'ListsSearchBar';
