@@ -11,6 +11,7 @@ import { readFileSync } from 'fs';
 import { writeFile, mkdir } from 'fs/promises';
 import { join, basename } from 'path';
 import _ from 'lodash';
+import { readElasticsearchDefinitions } from '@kbn/esql-scripts';
 import type {
   FunctionDefinition,
   FunctionParameterType,
@@ -34,7 +35,6 @@ import {
   comparisonOperatorSignatures,
 } from './constants';
 import { extraFunctions, excludedFunctions, enrichFunctionParameters } from './functions';
-import { readElasticsearchDefinitions } from './utils/elasticsearch_definitions';
 
 /** Raw ES|QL function/operator JSON from Elasticsearch definition files. */
 interface EsqlFunctionOrOperatorJson {

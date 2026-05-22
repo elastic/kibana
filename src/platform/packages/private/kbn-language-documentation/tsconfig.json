@@ -17,7 +17,7 @@
     "@kbn/test-jest-helpers",
     "@kbn/shared-ux-markdown",
     "@kbn/licensing-types",
-    "@kbn/esql-language",
+    "@kbn/esql-scripts",
   ],
   "exclude": [
     "target/**/*",

@@ -10,7 +10,7 @@
 /* eslint-disable no-console */
 
 import * as fs from 'fs';
-import { readElasticsearchDefinitions } from '@kbn/esql-language/scripts/utils/elasticsearch_definitions';
+import { readElasticsearchDefinitions } from '@kbn/esql-scripts';
 import {
   processingCommandsIntro,
   processingCommandsItems,

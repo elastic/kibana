@@ -11,8 +11,8 @@
 
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
+import { readElasticsearchDefinitions } from '@kbn/esql-scripts';
 import type { ElasticsearchCommandDefinition } from '../src/commands/definitions/types';
-import { readElasticsearchDefinitions } from './utils/elasticsearch_definitions';
 
 const GENERATED_COMMANDS_BASE_PATH = '../src/commands/definitions/generated/commands';
 
