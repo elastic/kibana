@@ -174,9 +174,9 @@ export class ManagementPlugin
                 // Project chrome (solution spaces): the navigation tree provides "Stack Management > App".
                 // Management apps provide breadcrumbs as [Stack Management, App, ...details].
                 // We drop the first two and append the rest to the nav tree path.
-                const [, , ...trailingBreadcrumbs] = newBreadcrumbs;
+                const [, , ...projectTrailingBreadcrumbs] = newBreadcrumbs;
                 coreStart.chrome.setBreadcrumbs([], {
-                  project: { value: trailingBreadcrumbs },
+                  project: { value: projectTrailingBreadcrumbs },
                 });
               } else {
                 // Classic chrome: use full breadcrumb trail as-is
