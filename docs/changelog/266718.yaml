@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/266718
+issues:
+- https://github.com/elastic/kibana/issues/235834
+type: feature
+products:
+- product: cloud-serverless
+  target: 2026-05-20
+title: Preserve metric details flyout state across Discover navigation
+description: The metric details flyout in the Metrics experience stays open on the same metric and tab when you switch Discover tabs or duplicate a tab.
