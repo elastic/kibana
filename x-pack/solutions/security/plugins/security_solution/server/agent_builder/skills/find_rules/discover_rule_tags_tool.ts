@@ -13,12 +13,11 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { TAGS_FIELD } from '../../../../common/detection_engine/rule_management/rule_fields';
 import { findRules } from '../../../lib/detection_engine/rule_management/logic/search/find_rules';
-import { EXPECTED_MAX_TAGS } from '../../../lib/detection_engine/rule_management/constants';
 import type { SecuritySolutionPluginStartDependencies } from '../../../plugin_contract';
 
 export const DISCOVER_RULE_TAGS_INLINE_TOOL_ID = 'security.discover_rule_tags';
 
-const GROUP_BY_TERMS_SIZE = EXPECTED_MAX_TAGS;
+const GROUP_BY_TERMS_SIZE = 1000;
 
 export const discoverRuleTagsSchema = z.object({}).strict();
 

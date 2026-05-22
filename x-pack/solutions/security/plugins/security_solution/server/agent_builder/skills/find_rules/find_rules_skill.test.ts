@@ -116,6 +116,29 @@ describe('findRulesSkill', () => {
     expect(skill.content).toMatch(/must come from a tool result/i);
   });
 
+  it('content forbids setting perPage above 10 unless the user explicitly asks', () => {
+    const { getStartServices, mockLogger } = createMockDeps();
+    const skill = createFindRulesSkill({ getStartServices, logger: mockLogger });
+    expect(skill.content).toMatch(/Never set `perPage` above 10/);
+    expect(skill.content).toMatch(/explicitly states a number/);
+  });
+
+  it('content requires query filter summary before listing results', () => {
+    const { getStartServices, mockLogger } = createMockDeps();
+    const skill = createFindRulesSkill({ getStartServices, logger: mockLogger });
+    expect(skill.content).toMatch(
+      /Always.*open your reply with one sentence describing the exact filters/
+    );
+  });
+
+  it('content addresses multi-turn follow-up refinement with category words', () => {
+    const { getStartServices, mockLogger } = createMockDeps();
+    const skill = createFindRulesSkill({ getStartServices, logger: mockLogger });
+    expect(skill.content).toMatch(/which of them are network/);
+    expect(skill.content).toMatch(/fresh.*security\.discover_rule_tags/);
+    expect(skill.content).toMatch(/carry-over filters/);
+  });
+
   it('content teaches discover-then-filter for tags via security.discover_rule_tags', () => {
     const { getStartServices, mockLogger } = createMockDeps();
     const skill = createFindRulesSkill({ getStartServices, logger: mockLogger });
@@ -394,6 +417,31 @@ describe('findRules inline tool handler', () => {
 
     expect(result.results[0].type).toBe(ToolResultType.error);
     expect(result.results[0].data.message).toContain('boom');
+  });
+
+  it('explicitly tells the user results are truncated when total exceeds perPage', async () => {
+    const { toolDef, findMock, mockEsClient, mockLogger, mockRequest } = await setup();
+    const fakeRules = Array.from({ length: 20 }, (_, i) => ({
+      id: `rule-${i}`,
+      name: `Rule ${i}`,
+      tags: [],
+      enabled: true,
+      alertTypeId: 'siem.queryRule',
+      params: { ruleId: `rl-${i}`, severity: 'medium', riskScore: 47, type: 'query' },
+      updatedAt: '2026-01-01T00:00:00Z',
+    }));
+    findMock.mockResolvedValue({ total: 847, data: fakeRules });
+
+    const result = await toolDef.handler(
+      { perPage: 20 },
+      createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+    );
+
+    const message = (result.results[0].data as { message: string }).message;
+    expect(message).toContain('847');
+    expect(message).toContain('top 20');
+    expect(message).toContain('Narrow');
+    expect(result.results[0].data).toMatchObject({ total: 847 });
   });
 
   it('hints at security.discover_rule_tags when zero results and the filter used tags', async () => {

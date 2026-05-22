@@ -46,7 +46,11 @@ export const findRulesSchema = z
       .string()
       .min(1)
       .optional()
-      .describe('Search text across rule name, index patterns, and MITRE tactic/technique fields.'),
+      .describe(
+        'Free-text search across rule name, index patterns, and MITRE tactic/technique fields. ' +
+          'For category-flavored words like "network", "endpoint", "windows", also call ' +
+          '`security.discover_rule_tags` — a tag filter is usually more precise than free text.'
+      ),
     enabled: z.boolean().optional().describe('Match enabled (true) or disabled (false) rules.'),
     ruleSource: z
       .enum(['custom', 'prebuilt'])
@@ -87,8 +91,12 @@ export const findRulesSchema = z
       .int()
       .min(1)
       .max(100)
-      .default(20)
-      .describe('Maximum rules to return (1-100). Set to N for "top N" queries.'),
+      .default(10)
+      .describe(
+        'Number of results to return (default 10, max 100). ' +
+          'Keep the default of 10 unless the user explicitly requests a specific count ("show me 50", "show me all"). ' +
+          'Never increase it on follow-up turns just because a previous result was truncated.'
+      ),
     sortField: z
       .enum(SORT_FIELDS)
       .optional()
@@ -202,7 +210,10 @@ export const createFindRulesInlineTool = ({
   type: ToolType.builtin,
   description:
     'Find, list, and sort Security detection rules using structured filters. ' +
-    'Returns rule names, metadata, and total count.',
+    'Returns rule names, metadata, and total count. ' +
+    'Always call `security.discover_rule_tags` before calling this tool for the first time in a conversation. ' +
+    'Use the discovered tag list to decide which tag values (if any) to include in the filter. ' +
+    'Read-only: never suggest enabling, disabling, editing, or deleting rules.',
   schema: findRulesSchema,
   handler: async (input, { request }) => {
     try {
@@ -224,12 +235,15 @@ export const createFindRulesInlineTool = ({
 
       const rules = findResult.data.map(summarizeRule);
       const hasTagFilter = Boolean(input.tags?.length || input.excludeTags?.length);
+      const truncated = findResult.total > rules.length;
 
       const ruleNames = rules.map((r) => r.name).join(', ');
       const baseMessage =
         findResult.total === 0
           ? 'No detection rules matched the filter.'
-          : `Found ${findResult.total} detection rules (showing ${rules.length}): ${ruleNames}.`;
+          : truncated
+          ? `Found ${findResult.total} detection rules — showing top ${rules.length}: ${ruleNames}. Results exceed the display limit. Narrow by severity, rule type, tag, or MITRE technique to see more specific results.`
+          : `Found ${findResult.total} detection rules: ${ruleNames}.`;
 
       return {
         results: [

@@ -50,14 +50,14 @@ This skill cannot enable, disable, delete, duplicate, or bulk-edit detection rul
 
 ## Tools
 
-This skill has two inline tools — pick the one that matches the user's intent:
+This skill has two inline tools:
 
 | Tool | When to use | Returns |
 |---|---|---|
-| \`security.find_rules\` | List, filter, sort rules, answer simple total-count questions | Rule names + metadata + total |
-| \`security.discover_rule_tags\` | Discover available tag values | Tag buckets + counts |
+| \`security.discover_rule_tags\` | **Always call this first** — gets available tag values for reasoning | Tag buckets + counts |
+| \`security.find_rules\` | List, filter, sort, count rules — call after discovery | Rule names + metadata + total |
 
-**Default to \`security.find_rules\`** for rule-list queries and simple total-count questions. Exception: before using any \`tags\` filter, call \`security.discover_rule_tags\` first and choose exact tag values from the result.
+**Always call \`security.discover_rule_tags\` before \`security.find_rules\`.** Use the discovered tag list to decide which tag values (if any) belong in the filter. On the first turn, run discovery then immediately run \`security.find_rules\`. On follow-up turns, the tag list is already in the transcript — skip re-calling discovery and go straight to \`security.find_rules\`.
 
 ## Grounding
 
@@ -65,18 +65,21 @@ Call \`security.find_rules\` for every new or different rule query. Do not reuse
 
 Every tag name, index pattern, rule name, rule ID, alert count, and total in the response must come from a tool result in this conversation. If a filter returns zero results, say so.
 
+In a multi-turn conversation, do not infer tag values from rule results — rule \`tags\` arrays in \`security.find_rules\` responses only reflect the rules already fetched. Use the canonical tag list from the \`security.discover_rule_tags\` result earlier in this conversation.
+
+When the user refines a previous query — phrases like "which of them are network", "now show the Windows ones", "filter by endpoint" — make a fresh \`security.find_rules\` call combining the matching tag from the existing discovery result with any carry-over filters (e.g. severity). Do not filter the in-memory results from the previous response.
+
 ## Tag Discovery
 
 Tag values are environment-specific. Even widely-used names like "MITRE" may be spelled, cased, or absent differently in this space.
 
-Call \`security.discover_rule_tags\` before any tag-name or category filter. This includes explicit tag names like "MITRE" and vague category text such as "network rules", "endpoint rules", or "Windows rules".
+**Always call \`security.discover_rule_tags\` before your first \`security.find_rules\` call in a conversation.** This gives you the full list of available tag values so you can reason about which (if any) match the user's intent and include them as a \`tags\` filter. Discovery is one cheap aggregation call.
 
-Do NOT call \`security.discover_rule_tags\` when the user filters only by severity, enabled state, name, rule type, or MITRE ID. Those filters work directly — just pass them in \`security.find_rules\`.
+Once \`security.discover_rule_tags\` has been called in this conversation, the tag list is in the transcript — do not call it again. Use the result from the transcript for all subsequent \`security.find_rules\` calls.
 
-Before filtering by tag:
-1. Call \`security.discover_rule_tags\` with \`{}\` to list available tag values.
-2. Choose exact tag values from the result.
-3. Call \`security.find_rules\` with \`tags: ["<exact value>"]\`.
+After discovery:
+1. Scan all returned tag values — both prebuilt tags (which follow a \`Category: Value\` pattern like \`Domain: Network\`, \`Use Case: Network Security Monitoring\`, \`Tactic: Execution\`) and custom tags (which may be free-form like \`my-team\` or \`prod\`). Find every tag that matches the user's intent, across all categories and formats.
+2. Call \`security.find_rules\` with \`tags: ["<value1>", "<value2>", ...]\` including every matching tag. Tags are OR-ed, so the result includes rules with any of them. If no tag matches, omit the tags filter.
 
 If no returned tag matches the user's intent, say so and mention the closest available values.
 
@@ -100,6 +103,8 @@ All filter parameters are flat and optional. Different parameters are ANDed toge
 
 Parameters: \`searchTerm\`, \`enabled\`, \`ruleSource\`, \`severity\`, \`ruleType\`, \`tags\`, \`excludeTags\`, \`mitreTechnique\`, \`ruleId\`.
 
+**Omit \`perPage\`** unless the user explicitly states a number ("show me 50") or asks for more/all results. When omitted, the tool defaults to 10. Never set it on follow-up turns just because the previous result was truncated — narrow the filter instead.
+
 Examples:
 - Enabled critical rules: \`{ enabled: true, severity: ["critical"] }\`
 - Critical or high severity: \`{ severity: ["critical", "high"] }\`
@@ -110,12 +115,17 @@ Examples:
 
 ## Rendering
 
-- \`security.find_rules\`: show **Name | Severity | Enabled | Type** by default. Add columns only when the user asks for them, sorted/filtered by them, or they are needed to explain the answer. Show at most 20 rows and say when more matches exist. For simple count questions, answer from \`total\`.
+- **Always** open your reply with one sentence describing the exact filters used, before showing any results. Example: "I searched for low-severity rules." This is required so the user can spot and correct a wrong filter immediately.
+- \`security.find_rules\`: show **Name | Severity | Enabled | Type** by default. Add columns only when the user asks for them, sorted/filtered by them, or they are needed to explain the answer. Show at most 10 rows by default; use a higher \`perPage\` only when the user explicitly asks for more. Say when more matches exist. For simple count questions, answer from \`total\`.
 - \`security.discover_rule_tags\`: show **Value | Count**. If the user asked to list rules, follow tag discovery with a \`security.find_rules\` call using the discovered tag filter.
 - Alert-volume rankings: show **Rule Name | Alert Count**.
 - Sort: \`sortField: "severity"\` (or \`risk_score\`, \`updatedAt\`, etc.) + \`sortOrder: "desc"\`
 - Top-N: \`perPage: N\`
-- If \`truncated: true\`, mention that additional groups exist beyond the returned buckets.`,
+- If \`truncated: true\`, mention that additional groups exist beyond the returned buckets.
+
+## No Actions
+
+This skill is read-only. Never suggest or offer to enable, disable, edit, delete, duplicate, or bulk-edit rules. Do not prompt the user to take any action on the rules returned. If the user asks to modify a rule, direct them to the Detection Rules UI.`,
     getRegistryTools: () => [SECURITY_ALERTS_TOOL_ID],
     getInlineTools: () => [
       createFindRulesInlineTool({ getStartServices, logger }),
