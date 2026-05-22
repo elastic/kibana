@@ -25,7 +25,19 @@ jest.mock('./legacy_kpi_charts', () => ({
 const mockUsePocSettingsContext = jest.fn();
 jest.mock('../../hooks/use_poc_settings', () => ({
   usePocSettingsContext: () => mockUsePocSettingsContext(),
-  pocFlags: { useNewKpis: true, useNewTable: true, useUniversalFixes: true },
+  pocFlags: {
+    useKpiEndpoint: true,
+    dropKpiTrendline: true,
+    useTwoPhaseFetch: true,
+    useServerSideSort: true,
+    useScopedAlerts: true,
+    useEsqlPhaseB: true,
+    useMetricsTimeseriesEndpoint: true,
+    useTermsFilter: true,
+    useConsolidatedKql: true,
+    useStrippedBoolWrap: true,
+    useReadyGate: true,
+  },
 }));
 
 const renderKpiCharts = () =>
@@ -41,14 +53,14 @@ describe('KpiCharts', () => {
   });
 
   it('renders the new endpoint-backed KPI tiles when the PoC toggle is on', () => {
-    mockUsePocSettingsContext.mockReturnValue({ useNewKpis: true });
+    mockUsePocSettingsContext.mockReturnValue({ useKpiEndpoint: true });
     renderKpiCharts();
     expect(screen.getByTestId('hostKpiTiles')).toBeInTheDocument();
     expect(screen.queryByTestId('legacyKpiCharts')).not.toBeInTheDocument();
   });
 
   it('renders the legacy Lens-backed KPI charts when the PoC toggle is off', () => {
-    mockUsePocSettingsContext.mockReturnValue({ useNewKpis: false });
+    mockUsePocSettingsContext.mockReturnValue({ useKpiEndpoint: false });
     renderKpiCharts();
     expect(screen.getByTestId('legacyKpiCharts')).toBeInTheDocument();
     expect(screen.queryByTestId('hostKpiTiles')).not.toBeInTheDocument();

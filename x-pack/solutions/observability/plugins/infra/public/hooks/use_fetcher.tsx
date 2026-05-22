@@ -101,15 +101,25 @@ function createInfraApiClient(
   return ((path: string, options: HttpFetchOptions) => {
     const shouldInspect = inspectEnabled && isInspectableRoute(path);
 
-    // PoC gear toggle ("Use universal fixes"): when off, send a header so
-    // `getInfraMetricsClient` restores the pre-P5 `bool { filter, must }`
-    // wrap around the caller's query. Hosts-page-only — `pocFlags` is a
-    // module-level mirror updated by `<PocSettingsProvider>`, which is
-    // mounted exclusively on the Hosts page.
-    const pocHeaders =
-      isInspectableRoute(path) && pocFlags.useUniversalFixes === false
-        ? { 'x-poc-legacy-bool-wrap': 'true' }
-        : undefined;
+    // PoC gear toggles: when their respective switch is OFF, send a header
+    // that tells the server to restore the pre-PoC behaviour. Hosts-page-
+    // only — `pocFlags` is a module-level mirror updated by
+    // `<PocSettingsProvider>`, which is mounted exclusively on the Hosts
+    // page. Building the header dict lazily so a fully-default page sends
+    // no PoC headers at all.
+    const pocHeaders = isInspectableRoute(path)
+      ? {
+          // P5 — restore the redundant outer `bool` wrap in the metrics
+          // client's `search()` calls.
+          ...(pocFlags.useStrippedBoolWrap === false ? { 'x-poc-legacy-bool-wrap': 'true' } : {}),
+          // P5.6 — widen the alerts API scope from the visible page to the
+          // full Phase A result. Read by the `/host/list` route.
+          ...(pocFlags.useScopedAlerts === false ? { 'x-poc-skip-alert-scoping': 'true' } : {}),
+          // P12 — force Phase B onto the DSL fallback even when the schema
+          // is semconv. Read by the `/host/metrics` route.
+          ...(pocFlags.useEsqlPhaseB === false ? { 'x-poc-force-dsl-phase-b': 'true' } : {}),
+        }
+      : undefined;
 
     return http
       .fetch(path, {

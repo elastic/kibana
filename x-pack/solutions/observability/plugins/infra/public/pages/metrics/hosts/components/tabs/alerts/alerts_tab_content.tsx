@@ -53,9 +53,12 @@ export const AlertsTabContent = () => {
   // PoC gear toggle: when "Use universal fixes" is OFF, fall back to the
   // pre-P2 shape (`host.name: "a" or host.name: "b"`) so the link's KQL
   // matches what the page produced before this PR.
-  const { useUniversalFixes } = usePocSettingsContext();
+  // P2 — when ON, the deep link uses the single-field
+  // `host.name: ("a" or "b")` form. When OFF, each host is OR'd as its own
+  // clause (pre-P2 shape).
+  const { useConsolidatedKql } = usePocSettingsContext();
   const hostNamesKuery = hostNodes.length
-    ? useUniversalFixes
+    ? useConsolidatedKql
       ? `host.name: (${hostNodes.map((host) => `"${host.name}"`).join(' or ')})`
       : hostNodes.map((host) => `host.name: "${host.name}"`).join(' or ')
     : '';

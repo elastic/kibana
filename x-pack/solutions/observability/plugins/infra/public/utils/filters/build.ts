@@ -32,7 +32,7 @@ import { pocFlags } from '../../pages/metrics/hosts/hooks/use_poc_settings';
  * The `meta` is built via `buildPhrasesFilter` so the filter bar renders
  * the familiar "field is one of [...]" pill with full value list.
  *
- * **PoC gear toggle**: when `pocFlags.useUniversalFixes === false`, this
+ * **PoC gear toggle**: when `pocFlags.useTermsFilter === false`, this
  * helper falls back to the pre-P1 `OR`-of-`match_phrase` shape so the
  * Hosts page can be benchmarked against the original filter cost.
  */
@@ -47,7 +47,7 @@ export const buildCombinedAssetFilter = ({
 }) => {
   const indexField = dataView?.getFieldByName(field);
 
-  if (!pocFlags.useUniversalFixes && dataView && indexField) {
+  if (!pocFlags.useTermsFilter && dataView && indexField) {
     const filtersFromValues = values.map((value) => buildPhraseFilter(indexField, value, dataView));
     return buildCombinedFilter(BooleanRelation.OR, filtersFromValues, dataView);
   }

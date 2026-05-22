@@ -20,6 +20,8 @@ import {
   GetHostsMetricsResponsePayloadRT,
   GetHostsKpisRequestBodyPayloadRT,
   GetHostsKpisResponsePayloadRT,
+  GetHostsMetricsTimeseriesRequestBodyPayloadRT,
+  GetHostsMetricsTimeseriesResponsePayloadRT,
 } from '../../../common/http_api/infra';
 import type { InfraBackendLibs } from '../../lib/infra_types';
 import { getInfraAlertsClient } from '../../lib/helpers/get_infra_alerts_client';
@@ -28,6 +30,7 @@ import { getHostsCount } from './lib/host/get_hosts_count';
 import { getHostsList } from './lib/host/get_hosts_list';
 import { getHostsMetrics } from './lib/host/get_hosts_metrics';
 import { getHostsKpis } from './lib/host/get_hosts_kpis';
+import { getHostsMetricsTimeseries } from './lib/host/get_hosts_metrics_timeseries';
 import { getInfraMetricsClient } from '../../lib/helpers/get_infra_metrics_client';
 import { withInspect } from '../../lib/helpers/with_inspect';
 import { getApmDataAccessClient } from '../../lib/helpers/get_apm_data_access_client';
@@ -153,6 +156,11 @@ export const initInfraAssetRoutes = (libs: InfraBackendLibs) => {
     withInspect(async (context, request) => {
       const { from, to, limit, query, schema = DEFAULT_SCHEMA, sort, page } = request.body;
 
+      // P5.6 PoC toggle — `x-poc-skip-alert-scoping: true` widens the alerts
+      // agg back to the full Phase A result (up to `limit`) instead of the
+      // visible page. Lets a reviewer measure how much P5.6 actually saved.
+      const skipAlertScoping = request?.headers?.['x-poc-skip-alert-scoping'] === 'true';
+
       const apmDataAccessClient = getApmDataAccessClient({ request, libs, context });
 
       const [infraMetricsClient, alertsClient, apmDataAccessServices] = await Promise.all([
@@ -172,6 +180,7 @@ export const initInfraAssetRoutes = (libs: InfraBackendLibs) => {
         infraMetricsClient,
         alertsClient,
         apmDataAccessServices,
+        skipAlertScoping,
       });
 
       return GetHostsListResponsePayloadRT.encode(result);
@@ -190,6 +199,13 @@ export const initInfraAssetRoutes = (libs: InfraBackendLibs) => {
     },
     withInspect(async (context, request) => {
       const { from, to, names, metrics, query, schema = DEFAULT_SCHEMA } = request.body;
+
+      // P12 PoC toggle — when the gear switch is OFF the client sends
+      // `x-poc-force-dsl-phase-b: true`, which we plumb through to the
+      // handler so the semconv ES|QL path is skipped in favour of the DSL
+      // fallback. Lets reviewers measure ES|QL's contribution to Phase B
+      // latency without touching the schema selector.
+      const forceDslPhaseB = request?.headers?.['x-poc-force-dsl-phase-b'] === 'true';
 
       // Per-request hosts cap. Derived from the UI's
       // `HOSTS_TABLE_PAGE_SIZE_OPTIONS` (max value) so adding a new page-
@@ -234,6 +250,11 @@ export const initInfraAssetRoutes = (libs: InfraBackendLibs) => {
         metrics,
         query,
         schema,
+        // PoC: skip the semconv ES|QL fast path and exercise the DSL
+        // fallback for both schemas. `fetchHostsMetricsDsl` keys on
+        // `schema` to choose the right fields, so we keep the real schema
+        // and only short-circuit the ES|QL dispatch.
+        forceDsl: forceDslPhaseB,
       });
 
       return GetHostsMetricsResponsePayloadRT.encode(result);
@@ -283,6 +304,50 @@ export const initInfraAssetRoutes = (libs: InfraBackendLibs) => {
       });
 
       return GetHostsKpisResponsePayloadRT.encode(result);
+    })
+  );
+
+  // P16 — Hosts UI Metrics tab time-series endpoint. Replaces the eleven
+  // Lens-driven xy charts with a single round-trip that returns every
+  // metric × host × time bucket the table currently shows. Page-bounded by
+  // `MAX_HOSTS_PER_METRICS_REQUEST` (same constant Phase B uses) so the
+  // server's per-request cost is proportional to the visible page size, not
+  // the fleet size.
+  framework.registerRoute(
+    {
+      method: 'post',
+      path: '/api/metrics/infra/host/metrics_timeseries',
+      validate: {
+        body: createRouteValidationFunction(GetHostsMetricsTimeseriesRequestBodyPayloadRT),
+        query: createRouteValidationFunction(InspectQueryRT),
+      },
+    },
+    withInspect(async (context, request) => {
+      const { from, to, names, metrics, query, schema = DEFAULT_SCHEMA, bucketSpan } = request.body;
+
+      if (names.length > MAX_HOSTS_PER_METRICS_REQUEST) {
+        throw Object.assign(
+          new Error(
+            `Metrics timeseries is page-bounded: at most ${MAX_HOSTS_PER_METRICS_REQUEST} host names per request (received ${names.length}).`
+          ),
+          { statusCode: 400 }
+        );
+      }
+
+      const infraMetricsClient = await getInfraMetricsClient({ request, libs, context });
+
+      const result = await getHostsMetricsTimeseries({
+        infraMetricsClient,
+        from,
+        to,
+        names,
+        metrics,
+        query,
+        schema,
+        bucketSpan,
+      });
+
+      return GetHostsMetricsTimeseriesResponsePayloadRT.encode(result);
     })
   );
 };

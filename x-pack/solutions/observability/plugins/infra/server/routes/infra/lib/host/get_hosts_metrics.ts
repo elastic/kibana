@@ -51,6 +51,11 @@ interface GetHostsMetricsParameters {
   from: number;
   to: number;
   schema?: DataSchemaFormat;
+  // P12 PoC toggle — when `true`, skip the semconv ES|QL fast path and use
+  // the DSL fallback regardless of schema. The fallback already supports
+  // both schemas, so this only changes Phase B's evaluation engine, not
+  // its result.
+  forceDsl?: boolean;
 }
 
 export async function getHostsMetrics({
@@ -62,6 +67,7 @@ export async function getHostsMetrics({
   from,
   to,
   schema = DEFAULT_SCHEMA,
+  forceDsl = false,
 }: GetHostsMetricsParameters): Promise<GetHostsMetricsResponsePayload> {
   if (names.length === 0) {
     return { entityType: 'host', nodes: [] };
@@ -82,7 +88,7 @@ export async function getHostsMetrics({
     end: to,
   });
 
-  if (schema === 'semconv') {
+  if (schema === 'semconv' && !forceDsl) {
     try {
       return await fetchSemconvHostsMetrics({
         infraMetricsClient,

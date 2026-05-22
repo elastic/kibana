@@ -22,18 +22,25 @@ jest.mock('../../../../hooks/use_kibana');
 // The PoC gear toggle defaults to ON in production; the existing test
 // expectations were written against the new (two-phase) data shape so we
 // pin the toggle here to keep the assertion stable.
-jest.mock('./use_poc_settings', () => ({
-  usePocSettingsContext: () => ({
-    useNewKpis: true,
-    useNewTable: true,
-    useUniversalFixes: true,
-  }),
-  pocFlags: {
-    useNewKpis: true,
-    useNewTable: true,
-    useUniversalFixes: true,
-  },
-}));
+jest.mock('./use_poc_settings', () => {
+  const allOn = {
+    useKpiEndpoint: true,
+    dropKpiTrendline: true,
+    useTwoPhaseFetch: true,
+    useServerSideSort: true,
+    useScopedAlerts: true,
+    useEsqlPhaseB: true,
+    useMetricsTimeseriesEndpoint: true,
+    useTermsFilter: true,
+    useConsolidatedKql: true,
+    useStrippedBoolWrap: true,
+    useReadyGate: true,
+  };
+  return {
+    usePocSettingsContext: () => allOn,
+    pocFlags: { ...allOn },
+  };
+});
 
 const mockUseUnifiedSearchContext =
   useUnifiedSearchHooks.useUnifiedSearchContext as jest.MockedFunction<

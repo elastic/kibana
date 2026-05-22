@@ -9,3 +9,4 @@ export * from './get_infra_metrics';
 export * from './get_infra_count';
 export * from './get_hosts_two_phase';
 export * from './get_hosts_kpis';
+export * from './get_hosts_metrics_timeseries';

@@ -70,7 +70,10 @@ export const useUnifiedSearch = () => {
   const { services } = useKibanaContextForPlugin();
   const { inventoryPrefill } = useAlertPrefillContext();
   const kibanaQuerySettings = useKibanaQuerySettings();
-  const { useUniversalFixes } = usePocSettingsContext();
+  // P5.5 — schema-resolution gate. When ON the data fetches wait for the
+  // metrics view + schema to settle so they fire once. When OFF every
+  // endpoint double-fires on first paint (original pre-P5.5 behaviour).
+  const { useReadyGate: useUniversalFixes } = usePocSettingsContext();
 
   const parsedDateRange = useTimeRange({
     rangeFrom: searchCriteria.dateRange.from,

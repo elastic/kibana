@@ -26,6 +26,7 @@ import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import { useHostsViewContext } from '../../hooks/use_hosts_view';
 import { useHostCountContext } from '../../hooks/use_host_count';
 import { useAfterLoadedState } from '../../hooks/use_after_loaded_state';
+import { usePocSettingsContext } from '../../hooks/use_poc_settings';
 import { getSubtitle } from './kpi_charts';
 
 // P15a — the inventory model dropped `trendLine: true` from these four
@@ -39,6 +40,11 @@ export const LegacyKpiCharts = () => {
   const { hostNodes, loading: hostsLoading } = useHostsViewContext();
   const { loading: hostCountLoading, count: hostCount } = useHostCountContext();
   const { metricsView } = useMetricsDataViewContext();
+  // P15a — when ON, the legacy Lens KPI charts render without their per-
+  // tile `date_histogram` sparkline (this is what the inventory model emits
+  // today). When OFF, we restore `trendLine: true` so the comparison sees
+  // the full pre-P15 cost.
+  const { dropKpiTrendline } = usePocSettingsContext();
 
   const shouldUseSearchCriteria = hostNodes.length === 0;
   const loading = hostsLoading || hostCountLoading;
@@ -69,9 +75,12 @@ export const LegacyKpiCharts = () => {
     schema: searchCriteria.preferredSchema,
   });
 
-  const chartsWithTrendline: KpiLensConfig[] = useMemo(
-    () => baseCharts.map((chart) => ({ ...chart, trendLine: true } as KpiLensConfig)),
-    [baseCharts]
+  const chartsForRender: KpiLensConfig[] = useMemo(
+    () =>
+      dropKpiTrendline
+        ? (baseCharts as KpiLensConfig[])
+        : baseCharts.map((chart) => ({ ...chart, trendLine: true } as KpiLensConfig)),
+    [baseCharts, dropKpiTrendline]
   );
 
   const { afterLoadedState } = useAfterLoadedState(loading, {
@@ -79,7 +88,7 @@ export const LegacyKpiCharts = () => {
     query: shouldUseSearchCriteria ? searchCriteria.query : undefined,
     filters,
     reloadRequestTime,
-    charts: chartsWithTrendline,
+    charts: chartsForRender,
   });
 
   return (

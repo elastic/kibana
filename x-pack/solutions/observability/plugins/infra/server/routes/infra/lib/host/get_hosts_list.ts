@@ -56,6 +56,11 @@ interface GetHostsListParameters
   infraMetricsClient: InfraMetricsClient;
   alertsClient: InfraAlertsClient;
   apmDataAccessServices?: ApmDataAccessServicesWrapper;
+  // P5.6 PoC toggle — when `true`, scope the alerts agg to the full Phase A
+  // result (up to `limit`) instead of the visible page. Bypassing the
+  // page-bound scope lets reviewers measure how much of Phase A's wall time
+  // P5.6 actually saved on real fleets.
+  skipAlertScoping?: boolean;
 }
 
 export async function getHostsList({
@@ -67,6 +72,7 @@ export async function getHostsList({
   to,
   limit,
   schema = DEFAULT_SCHEMA,
+  skipAlertScoping = false,
   sort = DEFAULT_SORT,
   page = DEFAULT_PAGE,
 }: GetHostsListParameters): Promise<GetHostsListResponsePayload> {
@@ -112,15 +118,22 @@ export async function getHostsList({
   // P5.6 — alerts scoped to infra-bearing names on the visible page.
   // APM-only hosts can't bucket into the alerts query the same way, and
   // bounding to the page keeps the alerts agg O(20) by construction.
-  const visibleInfraNames = pageSlice.filter((n) => infraSet.has(n));
+  //
+  // PoC: when `skipAlertScoping` is `true`, widen back to the whole Phase A
+  // result. The page still only displays counts for visible hosts (we look
+  // them up by name from the response below) but ES does the work for the
+  // full fleet, replicating the pre-P5.6 cost.
+  const alertScopeNames = skipAlertScoping
+    ? infraNamesInOrder
+    : pageSlice.filter((n) => infraSet.has(n));
 
-  const alertsResponse = visibleInfraNames.length
+  const alertsResponse = alertScopeNames.length
     ? await getHostsAlertsCount({
         alertsClient,
-        hostNames: visibleInfraNames,
+        hostNames: alertScopeNames,
         from,
         to,
-        limit: visibleInfraNames.length,
+        limit: alertScopeNames.length,
       })
     : [];
 

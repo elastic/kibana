@@ -87,7 +87,11 @@ export const useHostsView = () => {
   } = useKibanaContextForPlugin();
   const { buildQuery, isReady, parsedDateRange, searchCriteria } = useUnifiedSearchContext();
   const [{ sorting, pagination }] = useHostsTableUrlState();
-  const { useNewTable } = usePocSettingsContext();
+  // P10 — `useTwoPhaseFetch` controls whether the page issues Phase A +
+  // Phase B against the new endpoints or falls back to the legacy single
+  // `/api/metrics/infra/host` call. Renamed from `useNewTable` so each
+  // proposal has its own switch.
+  const { useTwoPhaseFetch: useNewTable } = usePocSettingsContext();
 
   const schema = searchCriteria?.preferredSchema || DEFAULT_SCHEMA;
   const metrics = schema === 'semconv' ? OTEL_HOSTS_TABLE_METRICS : HOST_TABLE_METRICS;

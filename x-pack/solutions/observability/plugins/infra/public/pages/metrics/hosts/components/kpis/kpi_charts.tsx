@@ -70,6 +70,6 @@ export const getSubtitle = ({
 };
 
 export const KpiCharts = () => {
-  const { useNewKpis } = usePocSettingsContext();
-  return useNewKpis ? <HostKpiTiles /> : <LegacyKpiCharts />;
+  const { useKpiEndpoint } = usePocSettingsContext();
+  return useKpiEndpoint ? <HostKpiTiles /> : <LegacyKpiCharts />;
 };

@@ -21,5 +21,12 @@ export const PAGE_SIZE_OPTIONS = [...HOSTS_TABLE_PAGE_SIZE_OPTIONS];
 export const LOCAL_STORAGE_HOST_LIMIT_KEY = 'hostsView:hostLimitSelection';
 export const LOCAL_STORAGE_PAGE_SIZE_KEY = 'hostsView:pageSizeSelection';
 
-export const HOST_LIMIT_OPTIONS = [50, 100, 500] as const;
+// PoC widening: 1000 / 2000 / 3000 / 10000 added on top of the historical
+// [50, 100, 500] set so reviewers can drive the page well past the original
+// safe ceiling. Phase A already validates `limit ≤ MAX_HOST_COUNT_LIMIT
+// (10 000)` server-side, so the wider options are just exposed in the UI.
+// 10 000 is the legacy `MAX_HOST_COUNT_LIMIT`; values above that are rejected
+// at the route validator and would also blow the host-count `cardinality`
+// agg's precision_threshold on real fleets.
+export const HOST_LIMIT_OPTIONS = [50, 100, 500, 1000, 2000, 3000, 10000] as const;
 export const HOST_METRICS_DOC_HREF = 'https://ela.st/docs-infra-host-metrics';

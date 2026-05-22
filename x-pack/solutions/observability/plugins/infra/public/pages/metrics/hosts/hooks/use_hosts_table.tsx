@@ -171,7 +171,13 @@ export const useHostsTable = () => {
   const [selectedItems, setSelectedItems] = useState<HostNodeRow[]>([]);
   const { hostNodes } = useHostsViewContext();
   const { searchCriteria } = useUnifiedSearchContext();
-  const { useNewTable } = usePocSettingsContext();
+  // P10 + P11. `useTwoPhaseFetch` decides between the two-phase and legacy
+  // paths; `useServerSideSort` decides, within the two-phase path, whether
+  // sort + pagination happen server-side (Phase A drives them) or client-
+  // side over the visible page. When the latter is OFF, the new path
+  // behaves like the legacy unsupported-sort fallback (sort the page only).
+  const { useTwoPhaseFetch, useServerSideSort } = usePocSettingsContext();
+  const useNewTable = useTwoPhaseFetch && useServerSideSort;
 
   const displayAlerts = hostNodes.some((item) => 'alertsCount' in item);
   const showApmHostTroubleshooting = hostNodes.some((item) => !item.hasSystemMetrics);
