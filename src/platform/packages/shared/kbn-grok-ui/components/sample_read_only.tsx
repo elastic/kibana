@@ -10,11 +10,13 @@
 import type { ReactNode } from 'react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
-import { useEuiTheme, EuiToolTip } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import { combineLatest, debounceTime } from 'rxjs';
-import type { DraftGrokExpression, FieldDefinition, GrokCollection } from '../models';
+import type { DraftGrokExpression, GrokCollection } from '../models';
 import { colourToClassName } from './utils';
 import { semanticNameLabel, patternNameLabel, typeNameLabel } from './constants';
+import { applyHighlights } from './highlight_utils';
+import type { HighlightConfiguration } from './highlight_utils';
 
 // For singular read only sample highlighting, e.g. a column in a data grid
 export const Sample = ({
@@ -68,6 +70,27 @@ export const Sample = ({
   );
 };
 
+const buildFieldTooltip = (fieldDef: {
+  name: string;
+  pattern: string;
+  type: string | null;
+}): ReactNode => (
+  <>
+    <p>
+      {semanticNameLabel} {fieldDef.name}
+    </p>{' '}
+    <p>
+      {' '}
+      {patternNameLabel} {fieldDef.pattern}
+    </p>{' '}
+    {fieldDef.type && (
+      <p>
+        {typeNameLabel} {fieldDef.type}
+      </p>
+    )}
+  </>
+);
+
 const renderProcessedSample = (draftGrokExpressions: DraftGrokExpression[], sample: string) => {
   for (const expression of draftGrokExpressions) {
     const regexp = expression.getRegex();
@@ -80,16 +103,13 @@ const renderProcessedSample = (draftGrokExpressions: DraftGrokExpression[], samp
         if (regexpPatternSource) {
           const regexpPattern = new RegExp(
             regexpPatternSource.source,
-            // d flag is added to allow for indices tracking
             regexpPatternSource.flags + 'd'
           );
 
-          // We expect one match per sample (we are not using global matches / flags) or none
           const match = sample.match(regexpPattern);
 
-          const highlightSpans = [];
+          const highlightSpans: HighlightConfiguration[] = [];
 
-          // Overall continuous match highlight (highlights the whole Grok pattern match)
           if (match && match.length > 0) {
             const matchingText = match[0];
             const startIndex = match.index;
@@ -100,7 +120,6 @@ const renderProcessedSample = (draftGrokExpressions: DraftGrokExpression[], samp
             }
           }
 
-          // Semantic (field name) match highlights
           const matchGroupResults = regexpPattern.exec(sample);
           if (matchGroupResults && matchGroupResults.indices && matchGroupResults.indices.groups) {
             for (const [key, value] of Object.entries(matchGroupResults.indices.groups)) {
@@ -110,14 +129,13 @@ const renderProcessedSample = (draftGrokExpressions: DraftGrokExpression[], samp
                 highlightSpans.push({
                   startIndex,
                   endIndex,
-                  className: colourToClassName(fieldDefinition?.colour),
-                  fieldDefinition,
+                  className: colourToClassName(fieldDefinition.colour),
+                  tooltipContent: buildFieldTooltip(fieldDefinition),
                 });
               }
             }
           }
 
-          // Apply highlights to the sample string
           const highlightedSample = applyHighlights(sample, highlightSpans);
 
           return <div>{highlightedSample}</div>;
@@ -128,110 +146,3 @@ const renderProcessedSample = (draftGrokExpressions: DraftGrokExpression[], samp
 
   return <>{sample}</>;
 };
-
-const applyHighlights = (sample: string, highlights: HighlightConfiguration[]): React.ReactNode => {
-  // Sort highlights by startIndex and endIndex to handle nesting
-  const sortedHighlights = [...highlights].sort((a, b) => {
-    if (a.startIndex === b.startIndex) {
-      return b.endIndex - a.endIndex; // Longer spans come first for nesting
-    }
-    return a.startIndex - b.startIndex;
-  });
-
-  const processText = (
-    text: string,
-    startIndex: number,
-    endIndex: number,
-    activeHighlights: HighlightConfiguration[]
-  ): React.ReactNode => {
-    if (activeHighlights.length === 0) {
-      // No active highlights, return plain text
-      return text.slice(startIndex, endIndex);
-    }
-
-    const currentHighlight = activeHighlights[0];
-    const remainingHighlights = activeHighlights.slice(1);
-
-    const parts: React.ReactNode[] = [];
-
-    // Add text before the current highlight
-    if (startIndex < currentHighlight.startIndex) {
-      parts.push(
-        <span key={`pre-${startIndex}-${currentHighlight.startIndex}`}>
-          {text.slice(startIndex, currentHighlight.startIndex)}
-        </span>
-      );
-    }
-
-    const highlightedTextSpan = (
-      <span
-        key={`hl-${currentHighlight.startIndex}-${currentHighlight.endIndex}`}
-        className={currentHighlight.className}
-      >
-        {processText(
-          text,
-          currentHighlight.startIndex,
-          currentHighlight.endIndex,
-          remainingHighlights.filter(
-            (h) =>
-              h.startIndex >= currentHighlight.startIndex && h.endIndex <= currentHighlight.endIndex
-          )
-        )}
-      </span>
-    );
-    // Add the highlighted text, recursively processing nested highlights
-    parts.push(
-      currentHighlight.fieldDefinition ? (
-        <EuiToolTip
-          key={`tt-${currentHighlight.startIndex}-${currentHighlight.endIndex}`}
-          position="top"
-          content={
-            <>
-              <p>
-                {semanticNameLabel} {currentHighlight.fieldDefinition.name}
-              </p>{' '}
-              <p>
-                {' '}
-                {patternNameLabel} {currentHighlight.fieldDefinition.pattern}
-              </p>{' '}
-              {currentHighlight.fieldDefinition.type && (
-                <p>
-                  {typeNameLabel} {currentHighlight.fieldDefinition.type}
-                </p>
-              )}
-            </>
-          }
-        >
-          {highlightedTextSpan}
-        </EuiToolTip>
-      ) : (
-        highlightedTextSpan
-      )
-    );
-
-    // Add text after the current highlight
-    if (currentHighlight.endIndex < endIndex) {
-      parts.push(
-        <span key={`post-${currentHighlight.endIndex}-${endIndex}`}>
-          {processText(
-            text,
-            currentHighlight.endIndex,
-            endIndex,
-            remainingHighlights.filter((h) => h.startIndex >= currentHighlight.endIndex)
-          )}
-        </span>
-      );
-    }
-
-    return parts;
-  };
-
-  return processText(sample, 0, sample.length, sortedHighlights);
-};
-
-interface HighlightConfiguration {
-  startIndex: number;
-  endIndex: number;
-  className: string;
-  fieldDefinition?: FieldDefinition;
-}

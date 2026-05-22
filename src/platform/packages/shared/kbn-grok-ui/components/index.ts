@@ -10,3 +10,4 @@
 export * from './expression';
 export * from './sample_input';
 export * from './sample_read_only';
+export * from './highlight_utils';

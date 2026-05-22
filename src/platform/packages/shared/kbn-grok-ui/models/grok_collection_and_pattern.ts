@@ -20,6 +20,7 @@ import { Subject } from 'rxjs';
 import { PATTERN_MAP } from '../constants/pattern_map';
 import type { FieldDefinition } from './types';
 import { SupportedTypeConversion } from './types';
+import { EUI_COLOR_PALETTE_VALUES, getColourPaletteStyles } from './pattern_colour_utils';
 
 // Grok patterns use this official naming: %{SYNTAX:SEMANTIC:TYPE}
 
@@ -54,17 +55,6 @@ const CUSTOM_NAMED_CAPTURE_PATTERN_PREFIX = i18n.translate(
   'kbn.grokUi.customNamedCapturePatternPrefix',
   { defaultMessage: 'Custom named capture ' }
 );
-
-const EUI_COLOR_PALETTE_VALUES = [
-  'Primary',
-  'Accent',
-  'AccentSecondary',
-  'Neutral',
-  'Success',
-  'Warning',
-  'Risk',
-  'Danger',
-];
 
 export class GrokCollection {
   // Core patterns. Will be used for the lifetime of this collection.
@@ -224,8 +214,6 @@ export class GrokCollection {
 
     if (this.isFieldNameUsedByOtherSources(releasedName, source)) return;
 
-    // The new name is already registered (e.g. mid-rename now matches a sibling row).
-    // Adopt that colour and free the old name's slot for future rotation.
     if (this.fieldColourMap.has(acquiredName)) {
       this.fieldColourMap.delete(releasedName);
       return;
@@ -237,10 +225,6 @@ export class GrokCollection {
     this.fieldColourMap.set(acquiredName, colour);
   };
 
-  /**
-   * Drops colour-map entries for field names that are no longer referenced by any registered
-   * draft.
-   */
   public flushFieldUsage = () => {
     const activeFieldNames = new Set<string>();
     for (const source of this.fieldUsageSources) {
@@ -251,10 +235,6 @@ export class GrokCollection {
     }
   };
 
-  /**
-   * Returns the colour assigned to a field name, allocating the next palette slot if the
-   * name has never been seen.
-   */
   public getColour = (fieldName?: string): string => {
     if (fieldName !== undefined) {
       const existing = this.fieldColourMap.get(fieldName);
@@ -266,7 +246,6 @@ export class GrokCollection {
     return colour;
   };
 
-  /** Read-only colour lookup for UI decoration without advancing the palette. */
   public lookupAssignedColour = (fieldName: string): string | undefined => {
     return this.fieldColourMap.get(fieldName);
   };
@@ -284,21 +263,8 @@ export class GrokCollection {
     return false;
   };
 
-  // Only relevant for Monaco users.
-  // Monaco doesn't support dynamic inline styles, so we need to generate static styles for the colour palette.
   public getColourPaletteStyles = (euiTheme: EuiThemeComputed) => {
-    const styles: Record<string, { backgroundColor: string; color: string; cursor: string }> = {};
-    for (let $i = 0; $i < EUI_COLOR_PALETTE_VALUES.length; $i++) {
-      const colour = EUI_COLOR_PALETTE_VALUES[$i];
-      styles[`.grok-pattern-match-${colour}`] = {
-        backgroundColor: euiTheme.colors[
-          `backgroundLight${colour}` as keyof EuiThemeComputed['colors']
-        ] as string,
-        color: euiTheme.colors[`text${colour}` as keyof EuiThemeComputed['colors']] as string,
-        cursor: 'pointer',
-      };
-    }
-    return styles;
+    return getColourPaletteStyles(euiTheme);
   };
 }
 
