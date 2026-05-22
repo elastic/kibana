@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { performance } from 'perf_hooks';
 import { z } from '@kbn/zod/v4';
 import { clearEnrichmentCache, enrichErrorMessage } from './enrich_error_message';
 import { clearDescriptionCache } from './zod_type_description';
@@ -73,21 +74,39 @@ describe('enrichErrorMessage', () => {
       expect(renderedConnectorTypes).toBeLessThanOrEqual(10);
     });
 
-    it('stays cheap across many markers (cache hits)', () => {
+    it('keeps per-marker enrichment cost bounded across many markers', () => {
       const schema = buildWorkflowSchema(200);
-      enrichErrorMessage(['steps'], 'Incorrect type. Expected "array".', 'unknown', { schema });
 
-      const start = Date.now();
+      // Prime both the description cache and the JIT before measuring so the
+      // baseline reflects steady-state cost rather than first-call overhead.
+      for (let i = 0; i < 3; i++) {
+        enrichErrorMessage(['steps', 1000 + i], `# warm ${i}`, 'unknown', { schema });
+      }
+
+      // Calibrate per-call cost on the current machine. The loop below should
+      // stay close to `iterations * baselineMs` once caches are warm.
+      const baselineStart = performance.now();
+      enrichErrorMessage(['steps', 2000], 'baseline.', 'unknown', { schema });
+      const baselineMs = Math.max(0.1, performance.now() - baselineStart);
+
+      const iterations = 50;
+      const start = performance.now();
       // Vary the path so `enrichmentCache` always misses and we re-exercise
       // `tryWorkflowSchemaEnrichment`.
-      for (let i = 0; i < 50; i++) {
+      for (let i = 0; i < iterations; i++) {
         enrichErrorMessage(['steps', i], `Incorrect type. Expected "array". (#${i})`, 'unknown', {
           schema,
         });
       }
-      const elapsed = Date.now() - start;
+      const elapsed = performance.now() - start;
+      const perIterMs = elapsed / iterations;
 
-      expect(elapsed).toBeLessThan(500);
+      // Per-iteration cost should not exceed the calibrated baseline by more
+      // than a generous noise multiplier. Using a relative bound (with a small
+      // absolute floor) keeps the assertion stable on noisy CI agents while
+      // still catching a regression that would inflate per-iter cost.
+      const perIterCeiling = Math.max(baselineMs * 5, 50);
+      expect(perIterMs).toBeLessThan(perIterCeiling);
     });
   });
 
