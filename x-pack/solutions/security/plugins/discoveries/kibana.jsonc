@@ -1,0 +1,39 @@
+{
+  "type": "plugin",
+  "id": "@kbn/discoveries-plugin",
+  "owner": [
+    "@elastic/security-generative-ai"
+  ],
+  "group": "security",
+  "visibility": "private",
+  "description": "Discoveries plugin for Attack Discovery workflows integration",
+  "plugin": {
+    "id": "discoveries",
+    "browser": true,
+    "server": true,
+    "configPath": [
+      "xpack",
+      "discoveries"
+    ],
+    "requiredPlugins": [
+      "actions",
+      "alerting",
+      "eventLog",
+      "security",
+      "workflowsExtensions"
+    ],
+    "optionalPlugins": [
+      "agentBuilder",
+      "elasticAssistant",
+      "inference",
+      "ruleRegistry",
+      "spaces",
+      "workflowsManagement"
+    ],
+    "requiredBundles": []
+  }
+}
+
+
+
+

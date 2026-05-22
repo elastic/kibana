@@ -1,0 +1,168 @@
+version: '1'
+name: Security - Attack discovery - Query DSL alert retrieval (Test)
+description: |
+  Test workflow that replicates the behavior of the ES|QL Example Alert
+  Retrieval workflow, but uses an `elasticsearch.search` step with
+  Elasticsearch Query DSL instead of the `elasticsearch.esql.query` step.
+
+  The DSL query is the workflow equivalent of the TypeScript function
+  `getOpenAndAcknowledgedAlertsQuery` from:
+  kbn-elastic-assistant-common/impl/alerts/get_open_and_acknowledged_alerts_query
+
+  It retrieves open and acknowledged security alerts, excludes building
+  block alerts, and returns security-relevant fields. The `fields` list
+  mirrors the KEEP clause from the ES|QL example workflow.
+
+  SORT NOTE: The original TypeScript query sorts by risk_score DESC
+  then @timestamp DESC, but the workflow JSON schema for
+  `elasticsearch.search` flattens body and URL query params, causing
+  the URL-param `sort` type (string-only) to override the body `sort`
+  type (which supports objects with order). Sort is therefore omitted
+  to avoid schema validation errors that prevent enabling the workflow.
+
+  NORMALIZATION NOTE: The `elasticsearch.search` step returns the full
+  Elasticsearch search response (`{ hits: { hits: [...] }, ... }`), which
+  is NOT the ES|QL `{ columns, values }` shape. `normalizeLastStepOutput`
+  will JSON.stringify the entire response as one single alert string (the
+  "plain object" fallback), collapsing all hits into one blob. This is
+  realistic: a real user writing a Query DSL workflow would not add a
+  reformatting step -- they would just run the query and expect it to work.
+  This tests how the extraction pipeline handles the Elasticsearch search
+  response shape.
+
+  NOTE: This is a TEST workflow. It is NOT registered at startup.
+enabled: true
+tags:
+  - Attack discovery
+  - Security
+  - Test
+  - attackDiscovery:query_dsl_alert_retrieval
+
+triggers:
+  - type: manual
+
+inputs:
+  - name: alerts_index_pattern
+    type: string
+    required: false
+    description: >
+      Elasticsearch index pattern for security alerts. When not provided,
+      defaults to .alerts-security.alerts-<spaceId> using the current
+      Kibana space (via workflow.spaceId).
+  - name: size
+    type: number
+    default: 100
+    description: Maximum alerts to retrieve (1-10000)
+  - name: start
+    type: string
+    required: false
+    default: now-24h
+    description: Time range start (date math, e.g., now-24h, now-7d)
+  - name: end
+    type: string
+    required: false
+    default: now
+    description: Time range end (date math, e.g., now)
+
+steps:
+  # Execute an Elasticsearch Query DSL search that is equivalent to the
+  # TypeScript function getOpenAndAcknowledgedAlertsQuery from
+  # kbn-elastic-assistant-common.
+  #
+  # The query:
+  # - Filters for open/acknowledged alerts (workflow_status)
+  # - Excludes building block alerts (must_not exists building_block_type)
+  # - Applies a time range filter on @timestamp
+  # - Returns only the security-relevant fields (matching the ESQL KEEP clause)
+  # - Uses _source: false with explicit fields for efficiency
+  # - Sort is omitted (see SORT NOTE in description)
+  - name: search_alerts
+    type: elasticsearch.search
+    timeout: '5m'
+    with:
+      index: '{%- if inputs.alerts_index_pattern -%}{{ inputs.alerts_index_pattern }}{%- else -%}.alerts-security.alerts-{{ workflow.spaceId }}{%- endif -%}'
+      size: "{{ inputs.size }}"
+      _source: false
+      fields:
+        - field: "@timestamp"
+        - field: "agent.id"
+        - field: "destination.ip"
+        - field: "event.category"
+        - field: "event.dataset"
+        - field: "event.module"
+        - field: "event.outcome"
+        - field: "file.hash.sha256"
+        - field: "file.name"
+        - field: "file.path"
+        - field: "host.name"
+        - field: "host.os.name"
+        - field: "host.os.version"
+        - field: "kibana.alert.original_time"
+        - field: "kibana.alert.risk_score"
+        - field: "kibana.alert.rule.description"
+        - field: "kibana.alert.rule.name"
+        - field: "kibana.alert.rule.references"
+        - field: "kibana.alert.rule.threat.framework"
+        - field: "kibana.alert.rule.threat.tactic.id"
+        - field: "kibana.alert.rule.threat.tactic.name"
+        - field: "kibana.alert.rule.threat.tactic.reference"
+        - field: "kibana.alert.rule.threat.technique.id"
+        - field: "kibana.alert.rule.threat.technique.name"
+        - field: "kibana.alert.rule.threat.technique.reference"
+        - field: "kibana.alert.rule.threat.technique.subtechnique.id"
+        - field: "kibana.alert.rule.threat.technique.subtechnique.name"
+        - field: "kibana.alert.rule.threat.technique.subtechnique.reference"
+        - field: "kibana.alert.severity"
+        - field: "kibana.alert.workflow_status"
+        - field: "message"
+        - field: "network.protocol"
+        - field: "process.args"
+        - field: "process.command_line"
+        - field: "process.executable"
+        - field: "process.hash.sha256"
+        - field: "process.name"
+        - field: "process.pid"
+        - field: "process.parent.command_line"
+        - field: "process.parent.executable"
+        - field: "process.parent.name"
+        - field: "source.ip"
+        - field: "user.domain"
+        - field: "user.name"
+      query:
+        bool:
+          filter:
+            - bool:
+                must: []
+                filter:
+                  # Only open or acknowledged alerts
+                  - bool:
+                      should:
+                        - match_phrase:
+                            kibana.alert.workflow_status:
+                              query: "open"
+                        - match_phrase:
+                            kibana.alert.workflow_status:
+                              query: "acknowledged"
+                      minimum_should_match: 1
+                  # Time range filter (supports date math like now-24h)
+                  - range:
+                      '@timestamp':
+                        gte: '${{ inputs.start }}'
+                        lte: '${{ inputs.end }}'
+                        format: strict_date_optional_time
+                should: []
+                # Exclude building block alerts
+                must_not:
+                  - exists:
+                      field: kibana.alert.building_block_type
+      # NOTE: Sort is intentionally omitted. The workflow JSON schema
+      # flattens body and URL query params for elasticsearch.search,
+      # and the URL query param `sort` type (string-only) overrides
+      # the body `sort` type (which supports objects with order).
+      # This means we cannot express `sort: [{ risk_score: desc }]`
+      # in a schema-compliant way. The original TypeScript query
+      # sorts by risk_score DESC then @timestamp DESC. Without
+      # explicit sort, Elasticsearch returns results in index order
+      # for filter-only queries. This is acceptable for a test
+      # workflow whose purpose is to exercise the normalization
+      # pipeline, not to validate sort order.

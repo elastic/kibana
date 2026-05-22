@@ -90,6 +90,7 @@ import {
 } from './agent_builder/attachment_types';
 import type { SecurityCanvasEmbeddedBundle } from './agent_builder/components/security_redux_embedded_provider';
 import { registerWorkflowSteps } from './workflows/step_types';
+import { createEsqlAlertsSourceEnricher } from './attack_discovery/esql_alerts_source_enricher';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private config: SecuritySolutionUiConfigType;
@@ -147,6 +148,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     if (workflowsExtensions) {
       registerWorkflowSteps(workflowsExtensions, core);
     }
+
+    plugins.esql?.registerSourceEnricher(createEsqlAlertsSourceEnricher(core.getStartServices));
 
     // Lazily instantiate subPlugins and initialize services
     const mountDependencies = async (params?: AppMountParameters) => {

@@ -1,0 +1,83 @@
+version: '1'
+name: Security - Attack discovery - Default alert retrieval
+description: |
+  Retrieves alerts for Attack Discovery analysis via custom queries, or ES|QL.
+  This is the DEFAULT alert retrieval workflow - for custom alert retrieval, create your own workflow.
+enabled: true
+tags:
+  - Attack discovery
+  - Security
+  - attackDiscovery:default_alert_retrieval
+
+triggers:
+  - type: manual
+
+inputs:
+  additionalProperties: false
+  properties:
+    alerts_index_pattern:
+      description: >
+        Elasticsearch index pattern for security alerts. When not provided,
+        defaults to .alerts-security.alerts-<spaceId> using the current
+        Kibana space (via workflow.spaceId).
+      type: string
+    anonymization_fields:
+      description: Fields to anonymize
+      items:
+        additionalProperties: true
+        type: object
+      type: array
+    api_config:
+      additionalProperties: false
+      description: LLM API configuration
+      properties:
+        action_type_id:
+          type: string
+        connector_id:
+          type: string
+        model:
+          type: string
+      required:
+        - connector_id
+      type: object
+    end:
+      description: Time range end
+      type: string
+    esql_query:
+      description: >
+        Optional ES|QL query for alert retrieval. When provided, overrides the
+        default DSL-based retrieval and executes this ES|QL query instead.
+      type: string
+    filter:
+      additionalProperties: true
+      description: Query filter for alerts
+      type: object
+    replacements:
+      additionalProperties: true
+      description: Existing anonymization replacements to use
+      type: object
+    size:
+      default: 150
+      description: Maximum alerts to retrieve
+      type: integer
+    start:
+      description: Time range start
+      type: string
+  required:
+    - anonymization_fields
+    - api_config
+
+steps:
+  - name: retrieve_alerts
+    type: security.attack-discovery.defaultAlertRetrieval
+    timeout: '5m'
+    with:
+      alerts_index_pattern: '{%- if inputs.alerts_index_pattern -%}{{ inputs.alerts_index_pattern }}{%- else -%}.alerts-security.alerts-{{ workflow.spaceId }}{%- endif -%}'
+      anonymization_fields: ${{ inputs.anonymization_fields }}
+      api_config: ${{ inputs.api_config }}
+      end: ${{ inputs.end }}
+      esql_query: ${{ inputs.esql_query }}
+      filter: ${{ inputs.filter }}
+      replacements: ${{ inputs.replacements }}
+      size: ${{ inputs.size }}
+      start: ${{ inputs.start }}
