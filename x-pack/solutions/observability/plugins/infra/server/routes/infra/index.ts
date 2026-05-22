@@ -18,6 +18,8 @@ import {
   GetHostsListResponsePayloadRT,
   GetHostsMetricsRequestBodyPayloadRT,
   GetHostsMetricsResponsePayloadRT,
+  GetHostsKpisRequestBodyPayloadRT,
+  GetHostsKpisResponsePayloadRT,
 } from '../../../common/http_api/infra';
 import type { InfraBackendLibs } from '../../lib/infra_types';
 import { getInfraAlertsClient } from '../../lib/helpers/get_infra_alerts_client';
@@ -25,10 +27,15 @@ import { getHosts } from './lib/host/get_hosts';
 import { getHostsCount } from './lib/host/get_hosts_count';
 import { getHostsList } from './lib/host/get_hosts_list';
 import { getHostsMetrics } from './lib/host/get_hosts_metrics';
+import { getHostsKpis } from './lib/host/get_hosts_kpis';
 import { getInfraMetricsClient } from '../../lib/helpers/get_infra_metrics_client';
 import { withInspect } from '../../lib/helpers/with_inspect';
 import { getApmDataAccessClient } from '../../lib/helpers/get_apm_data_access_client';
-import { DEFAULT_SCHEMA, MAX_HOSTS_PER_METRICS_REQUEST } from '../../../common/constants';
+import {
+  DEFAULT_SCHEMA,
+  MAX_HOSTS_PER_METRICS_REQUEST,
+  MAX_HOST_COUNT_LIMIT,
+} from '../../../common/constants';
 import type { InfraEntityMetricType } from '../../../common/http_api/infra';
 
 const InspectQueryRT = rt.exact(rt.partial({ _inspect: jsonRt.pipe(rt.boolean) }));
@@ -230,6 +237,52 @@ export const initInfraAssetRoutes = (libs: InfraBackendLibs) => {
       });
 
       return GetHostsMetricsResponsePayloadRT.encode(result);
+    })
+  );
+
+  // P15b — KPI summary endpoint. Replaces four parallel Lens-driven DSL
+  // fan-outs (one per tile) with one request that returns the four headline
+  // scalars + the host count for the "Average (of N hosts)" subtitle. No
+  // time bucketing — the trend line was already dropped in P15a — so the
+  // engine-side cell count is `O(hosts × per-state slices)`, well under any
+  // realistic Serverless circuit-breaker budget.
+  framework.registerRoute(
+    {
+      method: 'post',
+      path: '/api/metrics/infra/host/kpis',
+      validate: {
+        body: createRouteValidationFunction(GetHostsKpisRequestBodyPayloadRT),
+        query: createRouteValidationFunction(InspectQueryRT),
+      },
+    },
+    withInspect(async (context, request) => {
+      const { from, to, names, query, schema = DEFAULT_SCHEMA } = request.body;
+
+      // Defence in depth: matches Phase A's ceiling so we can't be tricked
+      // into aggregating across the whole fleet by a malicious / buggy
+      // client. The KPI cost-model invariant (`cells = hosts × states`)
+      // assumes this bound holds.
+      if (names && names.length > MAX_HOST_COUNT_LIMIT) {
+        throw Object.assign(
+          new Error(
+            `Too many names: KPI endpoint accepts at most ${MAX_HOST_COUNT_LIMIT} host names per request (received ${names.length}).`
+          ),
+          { statusCode: 400 }
+        );
+      }
+
+      const infraMetricsClient = await getInfraMetricsClient({ request, libs, context });
+
+      const result = await getHostsKpis({
+        infraMetricsClient,
+        from,
+        to,
+        names,
+        query,
+        schema,
+      });
+
+      return GetHostsKpisResponsePayloadRT.encode(result);
     })
   );
 };

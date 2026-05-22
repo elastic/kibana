@@ -18,13 +18,33 @@ import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 export interface Props extends Pick<MetricWTrend, 'title' | 'color' | 'extra' | 'subtitle'> {
   id: string;
   loading: boolean;
-  value: number;
+  // P15b — accept `null` so KPI tiles can surface "no data" without faking a
+  // numeric value. The default formatter renders "–" in that case.
+  value: number | null;
   toolTip: React.ReactNode;
   style?: CSSProperties;
+  // Optional value formatter (default: `d.toString()`). KPI tiles use a
+  // percent formatter; the host-count tile keeps the default.
+  valueFormatter?: (value: number) => string;
 }
 
+const DEFAULT_FORMATTER = (d: number) => d.toString();
+const NO_DATA_PLACEHOLDER = '–';
+
 export const MetricChartWrapper = React.memo(
-  ({ color, extra, id, loading, value, subtitle, title, toolTip, style, ...props }: Props) => {
+  ({
+    color,
+    extra,
+    id,
+    loading,
+    value,
+    subtitle,
+    title,
+    toolTip,
+    style,
+    valueFormatter,
+    ...props
+  }: Props) => {
     const { euiTheme } = useEuiTheme();
     const loadedOnce = useRef(false);
 
@@ -40,13 +60,19 @@ export const MetricChartWrapper = React.memo(
       }
     }, [loading]);
 
+    // `Metric` only renders numbers, so swap `null` → `NaN` and have the
+    // formatter return the placeholder string. Keeps the chart shape intact
+    // (color band, padding) while clearly signalling "no data".
+    const numericValue = value ?? Number.NaN;
+    const format = valueFormatter ?? DEFAULT_FORMATTER;
+
     const metricsData: MetricWNumber = {
       title,
       subtitle,
       color,
       extra,
-      value,
-      valueFormatter: (d: number) => d.toString(),
+      value: numericValue,
+      valueFormatter: (d: number) => (Number.isFinite(d) ? format(d) : NO_DATA_PLACEHOLDER),
     };
 
     return (
