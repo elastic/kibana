@@ -88,8 +88,8 @@ export function ContextAppRoute() {
       return;
     }
 
+    const newFilters = generateFilters(filterManager, mapping, values, operation, dataView);
     const fieldName = typeof mapping === 'string' ? mapping : mapping.name;
-    const newFilters = generateFilters(filterManager, fieldName, values, operation, dataView);
 
     void popularizeField(dataView, fieldName, dataViews, capabilities);
     filterManager.addFilters(newFilters);

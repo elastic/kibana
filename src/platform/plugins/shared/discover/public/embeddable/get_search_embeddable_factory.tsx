@@ -284,11 +284,9 @@ export const getSearchEmbeddableFactory = ({
           return;
         }
 
-        const fieldName = typeof mapping === 'string' ? mapping : mapping.name;
-
         let newFilters = generateFilters(
           discoverServices.filterManager,
-          fieldName,
+          mapping,
           values,
           operation,
           dataView
