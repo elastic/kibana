@@ -21,14 +21,14 @@ async function dismissWelcomeInterstitial(page: ScoutPage) {
 test.describe('Cloud Links integration', { tag: tags.stateful.classic }, () => {
   // The billing link requires _ec_billing_admin. Mirror the FTR setup: map the SAML realm to
   // include the role for the duration of this suite, then restore it afterwards.
-  let originalRoles: string[] = [];
+  let originalMapping: { roles: string[]; existed: boolean } = { roles: [], existed: false };
 
   test.beforeAll(async ({ esClient }) => {
     try {
       const { 'cloud-saml-kibana': mapping } = await esClient.security.getRoleMapping({
         name: 'cloud-saml-kibana',
       });
-      originalRoles = mapping?.roles ?? [];
+      originalMapping = { roles: mapping?.roles ?? [], existed: true };
     } catch {
       // mapping may not exist yet
     }
@@ -45,12 +45,16 @@ test.describe('Cloud Links integration', { tag: tags.stateful.classic }, () => {
   });
 
   test.afterAll(async ({ esClient }) => {
-    await esClient.security.putRoleMapping({
-      name: 'cloud-saml-kibana',
-      roles: originalRoles,
-      enabled: true,
-      rules: { field: { 'realm.name': 'cloud-saml-kibana' } },
-    });
+    if (!originalMapping.existed) {
+      await esClient.security.deleteRoleMapping({ name: 'cloud-saml-kibana' });
+    } else {
+      await esClient.security.putRoleMapping({
+        name: 'cloud-saml-kibana',
+        roles: originalMapping.roles,
+        enabled: true,
+        rules: { field: { 'realm.name': 'cloud-saml-kibana' } },
+      });
+    }
   });
 
   test('connection details overlay shows ES URL and Cloud ID', async ({
