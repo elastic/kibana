@@ -152,10 +152,13 @@ describe('bulkScheduleWorkflow', () => {
     );
 
     expect(mockAreWorkflowsEnabled).toHaveBeenCalledTimes(1);
-    expect(mockAreWorkflowsEnabled).toHaveBeenCalledWith([
-      { workflowId: 'wf-a', spaceId: 'default' },
-      { workflowId: 'wf-b', spaceId: 'default' },
-    ]);
+    expect(mockAreWorkflowsEnabled).toHaveBeenCalledWith(
+      [
+        { workflowId: 'wf-a', spaceId: 'default' },
+        { workflowId: 'wf-b', spaceId: 'default' },
+      ],
+      { includeGlobal: true }
+    );
     expect(mockBulkCreateWorkflowExecutions).toHaveBeenCalledTimes(1);
     expect(mockBulkCreateWorkflowExecutions).toHaveBeenCalledWith(
       expect.arrayContaining([
