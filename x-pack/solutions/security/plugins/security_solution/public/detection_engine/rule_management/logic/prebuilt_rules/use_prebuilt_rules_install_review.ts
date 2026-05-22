@@ -7,7 +7,6 @@
 
 import type { UseQueryOptions } from '@kbn/react-query';
 import type { ReviewRuleInstallationResponseBody } from '../../../../../common/api/detection_engine/prebuilt_rules';
-import type { RuleResponseField } from '../../../../../common/api/detection_engine/prebuilt_rules/common/rule_response_field.gen';
 import type {
   PrebuiltRuleAssetsAggregations,
   PrebuiltRuleAssetsSortItem,
@@ -29,7 +28,7 @@ interface UsePrebuiltRulesInstallReviewParams {
 
   sortingOptions?: PrebuiltRuleAssetsSortItem;
   aggregations?: PrebuiltRuleAssetsAggregations;
-  fields?: RuleResponseField[];
+  fields?: string[];
 }
 
 const ASSET_TAGS_FIELD = 'security-rule.tags';

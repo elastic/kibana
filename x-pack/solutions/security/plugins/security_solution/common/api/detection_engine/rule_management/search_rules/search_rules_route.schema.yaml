@@ -48,7 +48,6 @@ paths:
                   description: Restrict the response to only include the specified fields and necessary metadata.
                   items:
                     type: string
-                    maxLength: 256
                 filter:
                   description: Structured KQL filter applied to detection rules (alert saved objects).
                   $ref: '../granular_rules/granular_rules_contract.schema.yaml#/components/schemas/GranularRulesFilter'

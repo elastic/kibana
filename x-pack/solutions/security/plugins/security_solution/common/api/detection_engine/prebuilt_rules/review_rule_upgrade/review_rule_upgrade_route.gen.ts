@@ -23,7 +23,6 @@ import {
   FacetCounts,
 } from '../../rule_management/granular_rules/granular_rules_contract.gen';
 import { FindRulesSortField } from '../../rule_management/find_rules/find_rules_route.gen';
-import { RuleResponseField } from '../common/rule_response_field.gen';
 import { SortOrder } from '../../model/sorting.gen';
 import {
   RuleTagArray,
@@ -212,7 +211,7 @@ upgradeable rules.
       * Subset of top-level `RuleResponse` keys used to narrow rule response payloads.
 
       */
-      fields: z.array(RuleResponseField).optional(),
+      fields: z.array(z.string()).optional(),
     })
     .strict()
 );
