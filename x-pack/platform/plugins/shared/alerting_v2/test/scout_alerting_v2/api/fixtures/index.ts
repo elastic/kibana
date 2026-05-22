@@ -82,17 +82,19 @@ export const apiTest = baseApiTest.extend<{}, { apiServices: AlertingApiServices
 });
 
 export { ALL_ROLE, NO_ACCESS_ROLE, READ_ROLE } from '../../common/roles';
-export { buildCreateRuleData, buildCreateActionPolicyData } from '../../common/builders';
+export { buildAlertEvent, buildCreateRuleData } from '../../common/builders';
 export {
   getActionPolicyUrl,
-  getBulkActionPoliciesUrl,
-  getDisableActionPolicyUrl,
-  getEnableActionPolicyUrl,
-  getListActionPoliciesUrl,
+  getAckAlertActionUrl,
+  getUnackAlertActionUrl,
+  getAssignAlertActionUrl,
+  getTagAlertActionUrl,
+  getSnoozeAlertActionUrl,
+  getUnsnoozeAlertActionUrl,
+  getActivateAlertActionUrl,
+  getDeactivateAlertActionUrl,
   getRuleUrl,
-  getSnoozeActionPolicyUrl,
-  getUnsnoozeActionPolicyUrl,
-  getUpdateActionPolicyApiKeyUrl,
+  BULK_ALERT_ACTION_URL,
 } from '../../common/urls';
 export { expectNoBulkTruncationMetadata } from '../../common/assertions';
 export {

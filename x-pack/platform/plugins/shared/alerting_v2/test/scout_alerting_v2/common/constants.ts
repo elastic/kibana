@@ -24,6 +24,7 @@ export const ACTION_POLICY_CREATED_BY_MAX_LENGTH = 256;
 
 export {
   ALERTING_V2_RULE_API_PATH as RULE_API_PATH,
+  ALERTING_V2_ALERT_API_PATH as ALERT_API_PATH,
   ALERTING_V2_ACTION_POLICY_API_PATH as ACTION_POLICY_API_PATH,
 } from '@kbn/alerting-v2-constants';
 export { ALERT_EVENTS_DATA_STREAM } from '../../../server/resources/datastreams/alert_events';
