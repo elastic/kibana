@@ -9,9 +9,11 @@ import React, { useContext, useEffect, useMemo } from 'react';
 import { EuiCallOut, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormProvider, useForm } from 'react-hook-form';
 import {
+  UseField,
   useFormContext as useParentFormContext,
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { HiddenField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { CASE_EXTENDED_FIELDS } from '../../../common/constants';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useTemplateFormSync } from './use_template_form_sync';
@@ -126,7 +128,7 @@ export const CreateCaseTemplateFields: React.FC = () => {
   }, [templateId, template, templateFields]);
 
   if (isLoading || isLoadingFields || isLoadingGlobalDefs || isGlobalDefsError) {
-    return null;
+    return <UseField path={CASE_EXTENDED_FIELDS} component={HiddenField} />;
   }
 
   // Render nothing if there are no visible global fields and no template fields to show.
@@ -136,6 +138,7 @@ export const CreateCaseTemplateFields: React.FC = () => {
   ) {
     return (
       <>
+        <UseField path={CASE_EXTENDED_FIELDS} component={HiddenField} />
         <EuiSpacer />
         <EuiCallOut announceOnMount title={i18n.TEMPLATE_NOT_SELECTED_TITLE} size="s">
           <p>{i18n.TEMPLATE_NOT_SELECTED_DESCRIPTION}</p>
@@ -145,10 +148,13 @@ export const CreateCaseTemplateFields: React.FC = () => {
   }
 
   return (
-    <FormProvider {...innerForm}>
-      {globalFieldsFragment}
-      {templateFieldsFragment}
-    </FormProvider>
+    <>
+      <UseField path={CASE_EXTENDED_FIELDS} component={HiddenField} />
+      <FormProvider {...innerForm}>
+        {globalFieldsFragment}
+        {templateFieldsFragment}
+      </FormProvider>
+    </>
   );
 };
 
