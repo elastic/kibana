@@ -49,6 +49,8 @@ export interface AwsServiceMatrixEntry {
   packageName: string;
   /** Whether the data stream is enabled by default when the integration is installed */
   defaultEnabled: boolean;
+  /** Whether this service should be shown in the AWS onboarding UI */
+  showInUI: boolean;
   badge?: Badge;
 }
 
@@ -64,6 +66,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
     packageName: 'aws',
     defaultEnabled: true,
+    showInUI: true,
   },
   {
     id: 'apigateway_metrics',
@@ -75,6 +78,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     requiredConfig: ['regions'],
     packageName: 'aws',
     defaultEnabled: true,
+    showInUI: true,
   },
   {
     id: 'lambda',
@@ -86,6 +90,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     requiredConfig: ['regions'],
     packageName: 'aws',
     defaultEnabled: true,
+    showInUI: true,
   },
   {
     id: 'lambda_logs',
@@ -97,6 +102,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     requiredConfig: ['log_group_arn', 'region_name'],
     packageName: 'aws',
     defaultEnabled: true,
+    showInUI: true,
   },
 
   // ── aws package — Infrastructure ────────────────────────────────────────
@@ -110,6 +116,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
     packageName: 'aws',
     defaultEnabled: true,
+    showInUI: true,
   },
   {
     id: 'ec2_metrics',
@@ -121,6 +128,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     requiredConfig: ['regions'],
     packageName: 'aws',
     defaultEnabled: true,
+    showInUI: true,
   },
   {
     id: 'ecs_metrics',
@@ -132,6 +140,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     requiredConfig: ['regions'],
     packageName: 'aws',
     defaultEnabled: true,
+    showInUI: true,
   },
   {
     id: 'emr_logs',
@@ -143,6 +152,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
     packageName: 'aws',
     defaultEnabled: true,
+    showInUI: true,
   },
   {
     id: 'emr_metrics',
@@ -154,6 +164,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     requiredConfig: ['regions'],
     packageName: 'aws',
     defaultEnabled: true,
+    showInUI: true,
   },
 
   // ── aws package — Monitoring ────────────────────────────────────────────
@@ -167,6 +178,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     requiredConfig: ['regions'],
     packageName: 'aws',
     defaultEnabled: true,
+    showInUI: true,
   },
   {
     id: 'cloudwatch_logs',
@@ -178,6 +190,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     requiredConfig: ['log_group_arn', 'region_name'],
     packageName: 'aws',
     defaultEnabled: false,
+    showInUI: true,
   },
   {
     id: 'cloudwatch_metrics',
@@ -189,6 +202,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     requiredConfig: ['regions', 'metrics'],
     packageName: 'aws',
     defaultEnabled: false,
+    showInUI: true,
   },
 
   // ── aws package — Cost & Billing ────────────────────────────────────────
@@ -202,6 +216,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     requiredConfig: [],
     packageName: 'aws',
     defaultEnabled: true,
+    showInUI: true,
   },
   {
     id: 'usage',
@@ -213,6 +228,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     requiredConfig: ['regions'],
     packageName: 'aws',
     defaultEnabled: true,
+    showInUI: true,
   },
 
   // ── aws package — Security ──────────────────────────────────────────────
@@ -226,6 +242,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
     packageName: 'aws',
     defaultEnabled: true,
+    showInUI: true,
   },
   {
     id: 'config',
@@ -237,6 +254,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     requiredConfig: ['aws_region'],
     packageName: 'aws',
     defaultEnabled: true,
+    showInUI: true,
   },
   {
     id: 'guardduty',
@@ -248,6 +266,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     requiredConfig: ['aws_region', 'detector_id', 'bucket_arn', 'region'],
     packageName: 'aws',
     defaultEnabled: true,
+    showInUI: true,
   },
   {
     id: 'inspector',
@@ -259,6 +278,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     requiredConfig: ['aws_region'],
     packageName: 'aws',
     defaultEnabled: true,
+    showInUI: true,
   },
   {
     id: 'firewall_logs',
@@ -270,6 +290,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
     packageName: 'aws',
     defaultEnabled: true,
+    showInUI: true,
   },
   {
     id: 'firewall_metrics',
@@ -281,6 +302,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     requiredConfig: ['regions'],
     packageName: 'aws',
     defaultEnabled: true,
+    showInUI: true,
   },
   {
     id: 'securityhub_findings',
@@ -292,6 +314,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     requiredConfig: ['aws_region'],
     packageName: 'aws',
     defaultEnabled: true,
+    showInUI: true,
   },
   {
     id: 'securityhub_findings_full_posture',
@@ -303,6 +326,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     requiredConfig: ['aws_region'],
     packageName: 'aws',
     defaultEnabled: true,
+    showInUI: true,
   },
   {
     id: 'securityhub_insights',
@@ -314,6 +338,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     requiredConfig: ['aws_region'],
     packageName: 'aws',
     defaultEnabled: true,
+    showInUI: true,
   },
   {
     id: 'waf',
@@ -325,6 +350,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
     packageName: 'aws',
     defaultEnabled: true,
+    showInUI: true,
   },
 
   // ── aws package — Networking ────────────────────────────────────────────
@@ -338,6 +364,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     requiredConfig: ['bucket_arn', 'region'],
     packageName: 'aws',
     defaultEnabled: true,
+    showInUI: true,
   },
   {
     id: 'elb_logs',
@@ -349,6 +376,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
     packageName: 'aws',
     defaultEnabled: true,
+    showInUI: true,
   },
   {
     id: 'elb_metrics',
@@ -360,6 +388,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     requiredConfig: ['regions'],
     packageName: 'aws',
     defaultEnabled: true,
+    showInUI: true,
   },
   {
     id: 'natgateway',
@@ -371,6 +400,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     requiredConfig: ['regions'],
     packageName: 'aws',
     defaultEnabled: true,
+    showInUI: true,
   },
   {
     id: 'route53_public_logs',
@@ -382,6 +412,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     requiredConfig: ['log_group_arn', 'region_name'],
     packageName: 'aws',
     defaultEnabled: true,
+    showInUI: true,
   },
   {
     id: 'route53_resolver_logs',
@@ -393,6 +424,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
     packageName: 'aws',
     defaultEnabled: true,
+    showInUI: true,
   },
   {
     id: 'transitgateway',
@@ -404,6 +436,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     requiredConfig: ['regions'],
     packageName: 'aws',
     defaultEnabled: true,
+    showInUI: true,
   },
   {
     id: 'vpcflow',
@@ -415,6 +448,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
     packageName: 'aws',
     defaultEnabled: true,
+    showInUI: true,
   },
   {
     id: 'vpn',
@@ -426,6 +460,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     requiredConfig: ['regions'],
     packageName: 'aws',
     defaultEnabled: true,
+    showInUI: true,
   },
 
   // ── aws package — Storage ───────────────────────────────────────────────
@@ -439,6 +474,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     requiredConfig: ['regions'],
     packageName: 'aws',
     defaultEnabled: true,
+    showInUI: true,
   },
   {
     id: 's3_daily_storage',
@@ -450,6 +486,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     requiredConfig: ['regions'],
     packageName: 'aws',
     defaultEnabled: true,
+    showInUI: true,
   },
   {
     id: 's3_request',
@@ -461,6 +498,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     requiredConfig: ['regions'],
     packageName: 'aws',
     defaultEnabled: true,
+    showInUI: true,
   },
   {
     id: 's3access',
@@ -472,6 +510,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     requiredConfig: ['bucket_arn', 'region'],
     packageName: 'aws',
     defaultEnabled: true,
+    showInUI: true,
   },
   {
     id: 's3_storage_lens',
@@ -483,6 +522,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     requiredConfig: ['regions'],
     packageName: 'aws',
     defaultEnabled: true,
+    showInUI: true,
   },
 
   // ── aws package — Databases ─────────────────────────────────────────────
@@ -496,6 +536,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     requiredConfig: ['regions'],
     packageName: 'aws',
     defaultEnabled: true,
+    showInUI: true,
   },
   {
     id: 'rds',
@@ -507,6 +548,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     requiredConfig: ['regions'],
     packageName: 'aws',
     defaultEnabled: true,
+    showInUI: true,
   },
   {
     id: 'redshift',
@@ -518,6 +560,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     requiredConfig: ['regions'],
     packageName: 'aws',
     defaultEnabled: true,
+    showInUI: true,
   },
 
   // ── aws package — Messaging ─────────────────────────────────────────────
@@ -531,6 +574,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     requiredConfig: ['regions'],
     packageName: 'aws',
     defaultEnabled: true,
+    showInUI: true,
   },
   {
     id: 'kinesis',
@@ -542,6 +586,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     requiredConfig: ['regions'],
     packageName: 'aws',
     defaultEnabled: true,
+    showInUI: true,
   },
   {
     id: 'sns',
@@ -553,6 +598,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     requiredConfig: ['regions'],
     packageName: 'aws',
     defaultEnabled: true,
+    showInUI: true,
   },
   {
     id: 'sqs',
@@ -564,6 +610,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     requiredConfig: ['regions'],
     packageName: 'aws',
     defaultEnabled: true,
+    showInUI: true,
   },
 
   // ── aws_bedrock package — AI / ML ───────────────────────────────────────
@@ -577,6 +624,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     requiredConfig: ['regions'],
     packageName: 'aws_bedrock',
     defaultEnabled: true,
+    showInUI: true,
   },
   {
     id: 'invocation',
@@ -588,6 +636,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
     packageName: 'aws_bedrock',
     defaultEnabled: true,
+    showInUI: true,
   },
   {
     id: 'runtime',
@@ -599,6 +648,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     requiredConfig: ['regions'],
     packageName: 'aws_bedrock',
     defaultEnabled: true,
+    showInUI: true,
   },
   // TODO(PM): delivery method and signal type TBD — awaiting PM ratification
   {
@@ -611,6 +661,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     requiredConfig: [],
     packageName: 'aws_bedrock_agentcore',
     defaultEnabled: false,
+    showInUI: false,
   },
 
   // ── awsfargate package — Infrastructure ─────────────────────────────────
@@ -624,6 +675,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     requiredConfig: ['regions'],
     packageName: 'awsfargate',
     defaultEnabled: true,
+    showInUI: true,
   },
 
   // ── aws_mq package — Messaging ──────────────────────────────────────────
@@ -638,6 +690,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     requiredConfig: [],
     packageName: 'aws_mq',
     defaultEnabled: false,
+    showInUI: false,
   },
 
   // ── OTel packages — Technical preview ───────────────────────────────────
@@ -651,6 +704,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     requiredConfig: [],
     packageName: 'aws_cloudtrail_otel',
     defaultEnabled: false,
+    showInUI: true,
     badge: 'technical_preview',
   },
   {
@@ -663,6 +717,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     requiredConfig: [],
     packageName: 'aws_vpcflow_otel',
     defaultEnabled: false,
+    showInUI: true,
     badge: 'technical_preview',
   },
   {
@@ -675,6 +730,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     requiredConfig: [],
     packageName: 'aws_waf_otel',
     defaultEnabled: false,
+    showInUI: true,
     badge: 'technical_preview',
   },
 
@@ -689,6 +745,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
     packageName: 'aws_logs',
     defaultEnabled: false,
+    showInUI: true,
   },
 
   // ── awsfirehose package — Monitoring ────────────────────────────────────
@@ -702,5 +759,6 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     requiredConfig: [],
     packageName: 'awsfirehose',
     defaultEnabled: false,
+    showInUI: true,
   },
 ];

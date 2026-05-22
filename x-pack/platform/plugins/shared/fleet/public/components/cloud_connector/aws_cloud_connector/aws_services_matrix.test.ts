@@ -77,5 +77,9 @@ describe('AWS_SERVICES_MATRIX', () => {
     it('has a boolean defaultEnabled', () => {
       expect(typeof entry.defaultEnabled).toBe('boolean');
     });
+
+    it('has a boolean showInUI', () => {
+      expect(typeof entry.showInUI).toBe('boolean');
+    });
   });
 });
