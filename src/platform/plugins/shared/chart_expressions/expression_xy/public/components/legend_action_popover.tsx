@@ -87,10 +87,7 @@ export const LegendActionPopover: React.FunctionComponent<{
           defaultMessage: 'Filter for',
         }),
         iconType: 'plusCircle',
-        execute: () => {
-          setPopoverOpen(false);
-          onFilter();
-        },
+        execute: () => onFilter(),
       },
       {
         id: 'filterOut',
@@ -98,10 +95,7 @@ export const LegendActionPopover: React.FunctionComponent<{
           defaultMessage: 'Filter out',
         }),
         iconType: 'minusCircle',
-        execute: () => {
-          setPopoverOpen(false);
-          onFilter({ negate: true });
-        },
+        execute: () => onFilter({ negate: true }),
       },
     ];
 
@@ -137,7 +131,6 @@ export const LegendActionPopover: React.FunctionComponent<{
           {
             renderItem: () => (
               <LegendFilterDisabledMessage
-                key="legend-filter-disabled-message"
                 message={getEsqlComputedColumnFilterDisabledMessage(panelHasConfiguredDrilldowns)}
               />
             ),
@@ -169,7 +162,7 @@ export const LegendActionPopover: React.FunctionComponent<{
         marginRight: 4,
       }}
       data-test-subj={`legend-${label}`}
-      onKeyPress={() => setPopoverOpen(!popoverOpen)}
+      onKeyDown={() => setPopoverOpen(!popoverOpen)}
       onClick={() => setPopoverOpen(!popoverOpen)}
       aria-label={i18n.translate('expressionXY.legend.legendActionsAria', {
         defaultMessage: 'Legend actions',
