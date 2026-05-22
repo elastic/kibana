@@ -13,15 +13,23 @@ import { WorkflowExecutionsPage } from './executions_page';
 import { createStartServicesMock } from '../../mocks';
 import { getTestProvider } from '../../shared/mocks/test_providers';
 
+// These tests can take more than the standard 5s Jest timeout
+// when rendering UnifiedDataTable in jsdom (see elastic/kibana#269865).
+const SPECIAL_TEST_TIMEOUT = 50_000;
+
 describe('WorkflowExecutionsPage', () => {
-  it('renders the executions shell and stub grid', async () => {
-    const services = createStartServicesMock();
-    services.workflowsManagement.globalExecutionsView.enabled = true;
+  it(
+    'renders the executions shell and stub grid',
+    async () => {
+      const services = createStartServicesMock();
+      services.workflowsManagement.globalExecutionsView.enabled = true;
 
-    render(<WorkflowExecutionsPage />, { wrapper: getTestProvider({ services }) });
+      render(<WorkflowExecutionsPage />, { wrapper: getTestProvider({ services }) });
 
-    expect(screen.getByTestId('workflowExecutionsPage')).toBeInTheDocument();
-    expect(screen.getByTestId('workflowExecutionsSearchFilterScaffold')).toBeInTheDocument();
-    await screen.findByTestId('discoverDocTable');
-  });
+      expect(screen.getByTestId('workflowExecutionsPage')).toBeInTheDocument();
+      expect(screen.getByTestId('workflowExecutionsSearchFilterScaffold')).toBeInTheDocument();
+      await screen.findByTestId('discoverDocTable');
+    },
+    SPECIAL_TEST_TIMEOUT
+  );
 });
