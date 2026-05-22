@@ -10,6 +10,7 @@ import { EuiEmptyPrompt } from '@elastic/eui';
 
 import { CASE_SETTINGS_TITLE, UNDER_CONSTRUCTION } from './translations';
 
+// Placeholder — will be replaced with the full redesigned Case Settings page.
 export const ConfigureCasesRedesign: React.FC = () => (
   <EuiEmptyPrompt
     data-test-subj="cases-redesign-configure-cases"

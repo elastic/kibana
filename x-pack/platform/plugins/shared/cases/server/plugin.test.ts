@@ -176,6 +176,11 @@ describe('Cases Plugin', () => {
             "attachments": Object {
               "enabled": true,
             },
+            "casesRedesign": Object {
+              "details": false,
+              "list": false,
+              "settings": false,
+            },
             "enabled": true,
             "files": Object {
               "allowedMimeTypes": Array [

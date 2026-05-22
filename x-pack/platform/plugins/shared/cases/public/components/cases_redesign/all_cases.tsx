@@ -10,6 +10,7 @@ import { EuiEmptyPrompt } from '@elastic/eui';
 
 import { CASES_LIST_TITLE, UNDER_CONSTRUCTION } from './translations';
 
+// Placeholder — will be replaced with the full redesigned Cases List page.
 export const AllCasesRedesign: React.FC = () => (
   <EuiEmptyPrompt
     data-test-subj="cases-redesign-all-cases"
