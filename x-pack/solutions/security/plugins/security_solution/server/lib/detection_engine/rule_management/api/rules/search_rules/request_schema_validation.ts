@@ -10,6 +10,7 @@ import type { FindRulesRequestQueryInput } from '../../../../../../../common/api
 import { validateFindRulesRequestQuery } from '../../../../../../../common/api/detection_engine/rule_management/find_rules/request_schema_validation';
 import type { GranularRulesFilter } from '../../../../../../../common/api/detection_engine/rule_management/granular_rules/granular_rules_contract.gen';
 import type { SearchRulesRequestBodyInput } from '../../../../../../../common/api/detection_engine/rule_management/search_rules/search_rules_route.gen';
+import { VALID_SEARCH_FIELDS } from '../../../logic/search/search_rules_field_translation';
 
 export const MAX_SEARCH_RULES_SEARCH_TERM_LENGTH = 1000;
 
@@ -53,6 +54,17 @@ export const validateSearchAfterRequiresSort = (body: SearchRulesRequestBodyInpu
   return [];
 };
 
+export const validateSearchRulesFields = (fields: string[] | undefined): string[] => {
+  if (fields == null || fields.length === 0) {
+    return [];
+  }
+  const invalid = fields.filter((f) => !VALID_SEARCH_FIELDS.has(f));
+  if (invalid.length === 0) {
+    return [];
+  }
+  return [`unsupported fields: ${invalid.map((f) => `"${f}"`).join(', ')}`];
+};
+
 export const validateAggregationsCountsUnique = (
   aggregations: { counts?: string[] } | undefined
 ): string[] => {
@@ -76,6 +88,7 @@ export const validateSearchRulesRequestBody = (body: SearchRulesRequestBodyInput
   errors.push(...validateSearchRulesFilter(body.filter));
   errors.push(...validateSearchAfterRequiresSort(body));
   errors.push(...validateAggregationsCountsUnique(body.aggregations));
+  errors.push(...validateSearchRulesFields(body.fields));
 
   const searchMode = body.search?.mode;
   if (searchMode != null && searchMode !== 'legacy') {

@@ -12,7 +12,6 @@ import type {
   PrebuiltRuleAssetsFacetCategory,
   PrebuiltRuleAssetsSort,
 } from '../../../../../../common/api/detection_engine/prebuilt_rules/review_rule_installation/review_rule_installation_route.gen';
-import type { RuleResponseField } from '../../../../../../common/api/detection_engine/prebuilt_rules/common/rule_response_field.gen';
 import type { RuleResponse } from '../../../../../../common/api/detection_engine';
 import type { RuleSummary } from '../../logic/rule_objects/prebuilt_rule_objects_client';
 import type {
@@ -165,7 +164,7 @@ async function fetchRules({
   page: number;
   perPage: number;
   aggs?: Record<string, AggregationsAggregationContainer>;
-  fields?: RuleResponseField[];
+  fields?: string[];
 }) {
   const installableVersions = await getInstallableRuleVersions(
     ruleAssetsClient,

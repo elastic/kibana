@@ -76,7 +76,7 @@ export const reviewRuleUpgradeHandler = async (
     const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
     const mlAuthz = ctx.securitySolution.getMlAuthz();
 
-    // Schema enforces maxItems: 1, so only one sort criterion is supported for now.
+    // Schema is an array to support multi sort in the future, but we currently only use the first item.
     const firstSort = sort?.[0];
 
     const {
@@ -215,7 +215,7 @@ export async function calculateUpgradeableRulesDiff({
 
   if (categoryCounts.length > 0) {
     counts = await fetchGranularFacetCounts({
-      savedObjectsClient: soClient,
+      savedObjectsClient,
       ruleIds: upgradeableSoIds,
       categories: categoryCounts,
     });

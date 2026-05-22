@@ -15,7 +15,6 @@ import type {
   FindRulesSortField,
   GranularRulesFilter,
   SearchRulesAggregations,
-  SearchRulesField,
   SearchRulesSearchAfterItem,
   GranularRulesSearch,
 } from '../../../../../common/api/detection_engine/rule_management';
@@ -25,7 +24,7 @@ import { fetchSearchRules } from '../api';
 import { DEFAULT_QUERY_OPTIONS } from './constants';
 
 export interface FindRulesQueryArgs {
-  fields?: SearchRulesField[];
+  fields?: string[];
   filter?: GranularRulesFilter;
   search?: GranularRulesSearch;
   sort_field?: FindRulesSortField;

@@ -27,7 +27,6 @@ import type {
   CoverageOverviewFilter,
   GranularRulesFilter,
   SearchRulesAggregations,
-  SearchRulesField,
   SearchRulesResponse,
   SearchRulesSearchAfterItem,
   GranularRulesSearch,
@@ -123,7 +122,7 @@ export interface FetchRulesResponse {
 
 export interface FetchSearchRulesProps {
   pagination?: Pick<PaginationOptions, 'page' | 'perPage'>;
-  fields?: SearchRulesField[];
+  fields?: string[];
   filter?: GranularRulesFilter;
   search?: GranularRulesSearch;
   sort_field?: z.infer<typeof FindRulesSortField>;

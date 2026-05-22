@@ -9,6 +9,7 @@ import type { SearchRulesRequestBodyInput } from '../../../../../../../common/ap
 import {
   MAX_SEARCH_RULES_FILTER_KQL_LENGTH,
   MAX_SEARCH_RULES_SEARCH_TERM_LENGTH,
+  validateSearchRulesFields,
   validateSearchRulesFilter,
   validateSearchRulesRequestBody,
 } from './request_schema_validation';
@@ -49,6 +50,38 @@ describe('validateSearchRulesFilter', () => {
       JSON.parse('{"term":"alert.attributes.enabled:true","mode":"esql"}')
     );
     expect(errors).toEqual(['unsupported filter.mode "esql"']);
+  });
+});
+
+describe('validateSearchRulesFields', () => {
+  it('returns no errors for undefined or empty input', () => {
+    expect(validateSearchRulesFields(undefined)).toEqual([]);
+    expect(validateSearchRulesFields([])).toEqual([]);
+  });
+
+  it('accepts valid RuleResponse field names', () => {
+    expect(validateSearchRulesFields(['name', 'severity', 'risk_score', 'tags'])).toEqual([]);
+  });
+
+  it('rejects unknown field names', () => {
+    const errors = validateSearchRulesFields(['name', 'not_a_real_field']);
+    expect(errors).toHaveLength(1);
+    expect(errors[0]).toContain('"not_a_real_field"');
+  });
+
+  it('rejects Alerting Framework internal names that are not in RuleResponse', () => {
+    const errors = validateSearchRulesFields(['rule_type_id', 'params', 'snooze_schedule']);
+    expect(errors).toHaveLength(1);
+    expect(errors[0]).toContain('"rule_type_id"');
+    expect(errors[0]).toContain('"params"');
+    expect(errors[0]).toContain('"snooze_schedule"');
+  });
+
+  it('reports all invalid fields in a single error message', () => {
+    const errors = validateSearchRulesFields(['bad_one', 'bad_two']);
+    expect(errors).toHaveLength(1);
+    expect(errors[0]).toContain('"bad_one"');
+    expect(errors[0]).toContain('"bad_two"');
   });
 });
 
@@ -239,5 +272,22 @@ describe('validateSearchRulesRequestBody', () => {
         gaps_range_end: '2024-01-02T00:00:00Z',
       })
     ).toEqual([]);
+  });
+
+  it('accepts valid fields', () => {
+    expect(
+      validateSearchRulesRequestBody({
+        ...defaultInput,
+        fields: ['name', 'severity', 'enabled'],
+      })
+    ).toEqual([]);
+  });
+
+  it('rejects unknown fields', () => {
+    const errors = validateSearchRulesRequestBody({
+      ...defaultInput,
+      fields: ['name', 'not_a_real_field'],
+    });
+    expect(errors.some((e) => e.includes('"not_a_real_field"'))).toBe(true);
   });
 });

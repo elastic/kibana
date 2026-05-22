@@ -66,38 +66,6 @@ export type GranularRulesFacetCategoryEnum = typeof GranularRulesFacetCategory.e
 export const GranularRulesFacetCategoryEnum = GranularRulesFacetCategory.enum;
 
 /**
-  * A rule attribute that can be requested via the `fields` parameter on `_search`.
-
-  */
-export const SearchRulesField = lazySchema(() =>
-  z.enum([
-    'id',
-    'name',
-    'tags',
-    'enabled',
-    'alertTypeId',
-    'params',
-    'schedule',
-    'actions',
-    'createdBy',
-    'updatedBy',
-    'createdAt',
-    'updatedAt',
-    'revision',
-    'executionStatus',
-    'lastRun',
-    'monitoring',
-    'snoozeSchedule',
-    'muteAll',
-    'running',
-    'nextRun',
-  ])
-);
-export type SearchRulesField = z.infer<typeof SearchRulesField>;
-export type SearchRulesFieldEnum = typeof SearchRulesField.enum;
-export const SearchRulesFieldEnum = SearchRulesField.enum;
-
-/**
   * Aggregation options on `_search`.
 
   */
