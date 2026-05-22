@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { EuiThemeProviderDecorator } from '@kbn/kibana-react-plugin/common';
-import * as jest from 'jest-mock';
-
-window.jest = jest;
-export const decorators = [EuiThemeProviderDecorator];
+export const TRANSACTIONS_TABLE_EBT_ELEMENTS = {
+  ROW_ACTIONS: 'transactionsTableRowActions',
+} as const;
