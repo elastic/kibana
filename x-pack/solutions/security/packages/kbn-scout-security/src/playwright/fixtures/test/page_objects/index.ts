@@ -17,6 +17,7 @@ import { DetectionsAttackDiscoveryPage } from './detections_attack_discovery';
 import { ThreatMatchRuleCreatePage } from './threat_match_rule_create_page';
 import { AttackDetailsRightPanelPage } from './attack_details_right_panel';
 import { ServerlessProjectChromePage } from './serverless_project_chrome_page';
+import { GraphFlyoutPage } from './graph_flyout_page';
 
 export type { ThreatMatchRuleCreatePage } from './threat_match_rule_create_page';
 
@@ -32,6 +33,8 @@ export interface SecurityPageObjects extends PageObjects {
   threatMatchRuleCreatePage: ThreatMatchRuleCreatePage;
   attackDetailsRightPanelPage: AttackDetailsRightPanelPage;
   serverlessProjectChromePage: ServerlessProjectChromePage;
+  /** Graph Visualization tab inside the alert/event details left panel. */
+  graphFlyoutPage: GraphFlyoutPage;
 }
 
 export function extendPageObjects(
@@ -55,5 +58,6 @@ export function extendPageObjects(
     threatMatchRuleCreatePage: createLazyPageObject(ThreatMatchRuleCreatePage, page),
     attackDetailsRightPanelPage: createLazyPageObject(AttackDetailsRightPanelPage, page),
     serverlessProjectChromePage: createLazyPageObject(ServerlessProjectChromePage, page),
+    graphFlyoutPage: createLazyPageObject(GraphFlyoutPage, page),
   };
 }
