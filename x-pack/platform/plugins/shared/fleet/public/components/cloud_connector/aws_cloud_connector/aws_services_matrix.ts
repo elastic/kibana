@@ -172,7 +172,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     id: 'awshealth',
     name: 'AWS Health',
     category: 'Monitoring',
-    signalType: 'logs',
+    signalType: 'metrics',
     deliveryMethods: ['agentless'],
     inputs: ['aws/metrics'],
     requiredConfig: ['regions'],
