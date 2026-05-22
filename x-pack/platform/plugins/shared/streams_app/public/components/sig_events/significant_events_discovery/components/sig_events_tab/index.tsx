@@ -11,10 +11,10 @@ import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
   EuiSuperDatePicker,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { SigEvent } from '@kbn/streams-schema';
 import {
@@ -127,27 +127,70 @@ export const SigEventsTab = () => {
 
   const flyoutDetails = selectedEvent
     ? [
-        { title: 'Event ID', description: selectedEvent.event_id },
-        { title: 'Title', description: selectedEvent.title },
-        { title: 'Verdict', description: selectedEvent.verdict },
         {
-          title: 'Criticality',
+          title: i18n.translate('xpack.streams.sigEventsTab.flyout.eventId', {
+            defaultMessage: 'Event ID',
+          }),
+          description: selectedEvent.event_id,
+        },
+        {
+          title: i18n.translate('xpack.streams.sigEventsTab.flyout.title', {
+            defaultMessage: 'Title',
+          }),
+          description: selectedEvent.title,
+        },
+        {
+          title: i18n.translate('xpack.streams.sigEventsTab.flyout.verdict', {
+            defaultMessage: 'Verdict',
+          }),
+          description: selectedEvent.verdict,
+        },
+        {
+          title: i18n.translate('xpack.streams.sigEventsTab.flyout.criticality', {
+            defaultMessage: 'Criticality',
+          }),
           description: selectedEvent.criticality ? String(selectedEvent.criticality) : '-',
         },
         {
-          title: 'Confidence',
+          title: i18n.translate('xpack.streams.sigEventsTab.flyout.confidence', {
+            defaultMessage: 'Confidence',
+          }),
           description: selectedEvent.confidence ? String(selectedEvent.confidence) : '-',
         },
-        { title: 'Summary', description: selectedEvent.summary },
-        { title: 'Root Cause', description: selectedEvent.root_cause },
-        { title: 'Impact', description: selectedEvent.impact ?? '-' },
-        { title: 'Recommended Action', description: selectedEvent.recommended_action ?? '-' },
         {
-          title: 'Streams',
+          title: i18n.translate('xpack.streams.sigEventsTab.flyout.summary', {
+            defaultMessage: 'Summary',
+          }),
+          description: selectedEvent.summary,
+        },
+        {
+          title: i18n.translate('xpack.streams.sigEventsTab.flyout.rootCause', {
+            defaultMessage: 'Root Cause',
+          }),
+          description: selectedEvent.root_cause,
+        },
+        {
+          title: i18n.translate('xpack.streams.sigEventsTab.flyout.impact', {
+            defaultMessage: 'Impact',
+          }),
+          description: selectedEvent.impact ?? '-',
+        },
+        {
+          title: i18n.translate('xpack.streams.sigEventsTab.flyout.recommendedAction', {
+            defaultMessage: 'Recommended Action',
+          }),
+          description: selectedEvent.recommended_action ?? '-',
+        },
+        {
+          title: i18n.translate('xpack.streams.sigEventsTab.flyout.streams', {
+            defaultMessage: 'Streams',
+          }),
           description: (selectedEvent.stream_names ?? []).join(', ') || '-',
         },
         {
-          title: 'Rules',
+          title: i18n.translate('xpack.streams.sigEventsTab.flyout.rules', {
+            defaultMessage: 'Rules',
+          }),
           description: (selectedEvent.rule_names ?? []).join(', ') || '-',
         },
       ]
@@ -158,41 +201,60 @@ export const SigEventsTab = () => {
       (historyData?.hits ?? []).map((entry) => ({
         timestamp: new Date(entry['@timestamp']).toLocaleString(),
         summary: entry.criticality
-          ? `${entry.verdict}: ${entry.title} (criticality: ${entry.criticality})`
-          : `${entry.verdict}: ${entry.title}`,
+          ? i18n.translate('xpack.streams.sigEventsTab.historySummaryWithCriticality', {
+              defaultMessage: '{verdict}: {title} (criticality: {criticality})',
+              values: {
+                verdict: entry.verdict,
+                title: entry.title,
+                criticality: String(entry.criticality),
+              },
+            })
+          : i18n.translate('xpack.streams.sigEventsTab.historySummary', {
+              defaultMessage: '{verdict}: {title}',
+              values: { verdict: entry.verdict, title: entry.title },
+            }),
       })),
     [historyData]
   );
 
   return (
-    <div css={{ flex: '0 0 auto' }}>
-      <div css={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <EuiSuperDatePicker
-          start={rangeFrom}
-          end={rangeTo}
-          onTimeChange={({ start: s, end: e }) => updateTimeRange({ from: s, to: e })}
-          onRefresh={() => refetch()}
-          compressed
-          showUpdateButton="iconOnly"
-          updateButtonProps={{ size: 's', fill: false }}
+    <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <EuiSuperDatePicker
+              start={rangeFrom}
+              end={rangeTo}
+              onTimeChange={({ start: s, end: e }) => updateTimeRange({ from: s, to: e })}
+              onRefresh={() => refetch()}
+              compressed
+              showUpdateButton="iconOnly"
+              updateButtonProps={{ size: 's', fill: false }}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiBasicTable
+          tableCaption={i18n.translate('xpack.streams.sigEventsTab.tableCaption', {
+            defaultMessage: 'Significant Events',
+          })}
+          items={data?.hits ?? []}
+          columns={columns}
+          pagination={euiPagination}
+          onChange={onTableChange}
+          loading={isLoading}
+          noItemsMessage={i18n.translate('xpack.streams.sigEventsTab.emptyBody', {
+            defaultMessage: 'No significant events found.',
+          })}
+          rowProps={(item) => ({
+            onClick: () => setSelectedEvent(item),
+            css: css`
+              cursor: pointer;
+            `,
+          })}
         />
-      </div>
-      <EuiSpacer size="s" />
-      <EuiBasicTable
-        tableCaption="Significant Events"
-        items={data?.hits ?? []}
-        columns={columns}
-        pagination={euiPagination}
-        onChange={onTableChange}
-        loading={isLoading}
-        noItemsMessage={i18n.translate('xpack.streams.sigEventsTab.emptyBody', {
-          defaultMessage: 'No significant events found.',
-        })}
-        rowProps={(item) => ({
-          onClick: () => setSelectedEvent(item),
-          style: { cursor: 'pointer' },
-        })}
-      />
+      </EuiFlexItem>
       {selectedEvent && (
         <EntityDetailFlyout
           title={selectedEvent.title}
@@ -203,6 +265,6 @@ export const SigEventsTab = () => {
           onClose={() => setSelectedEvent(undefined)}
         />
       )}
-    </div>
+    </EuiFlexGroup>
   );
 };

@@ -6,8 +6,15 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { EuiBasicTable, EuiBadge, EuiSpacer, EuiSuperDatePicker } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSuperDatePicker,
+} from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { Detection } from '@kbn/streams-schema';
 import {
@@ -52,7 +59,11 @@ const columns: Array<EuiBasicTableColumn<Detection>> = [
       defaultMessage: 'Processed',
     }),
     render: (processed: boolean) => (
-      <EuiBadge color={processed ? 'success' : 'default'}>{processed ? 'Yes' : 'No'}</EuiBadge>
+      <EuiBadge color={processed ? 'success' : 'default'}>
+        {processed
+          ? i18n.translate('xpack.streams.detectionsTab.processedYes', { defaultMessage: 'Yes' })
+          : i18n.translate('xpack.streams.detectionsTab.processedNo', { defaultMessage: 'No' })}
+      </EuiBadge>
     ),
   },
 ];
@@ -87,16 +98,60 @@ export const DetectionsTab = () => {
 
   const flyoutDetails = selectedDetection
     ? [
-        { title: 'Detection ID', description: selectedDetection.detection_id ?? '-' },
-        { title: 'Rule', description: selectedDetection.rule_name ?? '-' },
-        { title: 'Rule UUID', description: selectedDetection.rule_uuid ?? '-' },
-        { title: 'Stream', description: selectedDetection.stream_name ?? '-' },
         {
-          title: 'Peak alerts (30m)',
+          title: i18n.translate('xpack.streams.detectionsTab.flyout.detectionId', {
+            defaultMessage: 'Detection ID',
+          }),
+          description: selectedDetection.detection_id ?? '-',
+        },
+        {
+          title: i18n.translate('xpack.streams.detectionsTab.flyout.rule', {
+            defaultMessage: 'Rule',
+          }),
+          description: selectedDetection.rule_name ?? '-',
+        },
+        {
+          title: i18n.translate('xpack.streams.detectionsTab.flyout.ruleUuid', {
+            defaultMessage: 'Rule UUID',
+          }),
+          description: selectedDetection.rule_uuid ?? '-',
+        },
+        {
+          title: i18n.translate('xpack.streams.detectionsTab.flyout.stream', {
+            defaultMessage: 'Stream',
+          }),
+          description: selectedDetection.stream_name ?? '-',
+        },
+        {
+          title: i18n.translate('xpack.streams.detectionsTab.flyout.peakAlerts', {
+            defaultMessage: 'Peak alerts (30m)',
+          }),
           description: String(selectedDetection.peak_30m_alert_count ?? '-'),
         },
-        { title: 'Silent', description: selectedDetection.silent ? 'Yes' : 'No' },
-        { title: 'Processed', description: selectedDetection.processed ? 'Yes' : 'No' },
+        {
+          title: i18n.translate('xpack.streams.detectionsTab.flyout.silent', {
+            defaultMessage: 'Silent',
+          }),
+          description: selectedDetection.silent
+            ? i18n.translate('xpack.streams.detectionsTab.flyout.silentYes', {
+                defaultMessage: 'Yes',
+              })
+            : i18n.translate('xpack.streams.detectionsTab.flyout.silentNo', {
+                defaultMessage: 'No',
+              }),
+        },
+        {
+          title: i18n.translate('xpack.streams.detectionsTab.flyout.processed', {
+            defaultMessage: 'Processed',
+          }),
+          description: selectedDetection.processed
+            ? i18n.translate('xpack.streams.detectionsTab.flyout.processedYes', {
+                defaultMessage: 'Yes',
+              })
+            : i18n.translate('xpack.streams.detectionsTab.flyout.processedNo', {
+                defaultMessage: 'No',
+              }),
+        },
       ]
     : [];
 
@@ -104,42 +159,56 @@ export const DetectionsTab = () => {
     () =>
       (historyData?.hits ?? []).map((entry) => ({
         timestamp: new Date(entry['@timestamp']).toLocaleString(),
-        summary: `Rule: ${entry.rule_name ?? '-'}, Peak 30m: ${
-          entry.peak_30m_alert_count ?? '-'
-        }, Processed: ${entry.processed ? 'Yes' : 'No'}`,
+        summary: i18n.translate('xpack.streams.detectionsTab.historySummary', {
+          defaultMessage: 'Rule: {ruleName}, Peak 30m: {peakAlerts}, Processed: {processed}',
+          values: {
+            ruleName: entry.rule_name ?? '-',
+            peakAlerts: String(entry.peak_30m_alert_count ?? '-'),
+            processed: entry.processed ? 'Yes' : 'No',
+          },
+        }),
       })),
     [historyData]
   );
 
   return (
-    <div css={{ flex: '0 0 auto' }}>
-      <div css={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <EuiSuperDatePicker
-          start={rangeFrom}
-          end={rangeTo}
-          onTimeChange={({ start: s, end: e }) => updateTimeRange({ from: s, to: e })}
-          onRefresh={() => refetch()}
-          compressed
-          showUpdateButton="iconOnly"
-          updateButtonProps={{ size: 's', fill: false }}
+    <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <EuiSuperDatePicker
+              start={rangeFrom}
+              end={rangeTo}
+              onTimeChange={({ start: s, end: e }) => updateTimeRange({ from: s, to: e })}
+              onRefresh={() => refetch()}
+              compressed
+              showUpdateButton="iconOnly"
+              updateButtonProps={{ size: 's', fill: false }}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiBasicTable
+          tableCaption={i18n.translate('xpack.streams.detectionsTab.tableCaption', {
+            defaultMessage: 'Detections',
+          })}
+          items={data?.hits ?? []}
+          columns={columns}
+          pagination={euiPagination}
+          onChange={onTableChange}
+          loading={isLoading}
+          noItemsMessage={i18n.translate('xpack.streams.detectionsTab.emptyBody', {
+            defaultMessage: 'No detections found.',
+          })}
+          rowProps={(item) => ({
+            onClick: () => setSelectedDetection(item),
+            css: css`
+              cursor: pointer;
+            `,
+          })}
         />
-      </div>
-      <EuiSpacer size="s" />
-      <EuiBasicTable
-        tableCaption="Detections"
-        items={data?.hits ?? []}
-        columns={columns}
-        pagination={euiPagination}
-        onChange={onTableChange}
-        loading={isLoading}
-        noItemsMessage={i18n.translate('xpack.streams.detectionsTab.emptyBody', {
-          defaultMessage: 'No detections found.',
-        })}
-        rowProps={(item) => ({
-          onClick: () => setSelectedDetection(item),
-          style: { cursor: 'pointer' },
-        })}
-      />
+      </EuiFlexItem>
       {selectedDetection && (
         <EntityDetailFlyout
           title={selectedDetection.rule_name ?? 'Detection'}
@@ -150,6 +219,6 @@ export const DetectionsTab = () => {
           onClose={() => setSelectedDetection(undefined)}
         />
       )}
-    </div>
+    </EuiFlexGroup>
   );
 };

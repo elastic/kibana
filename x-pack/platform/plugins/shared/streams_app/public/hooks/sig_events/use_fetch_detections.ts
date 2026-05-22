@@ -5,18 +5,12 @@
  * 2.0.
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { type QueryFunctionContext, useQuery } from '@kbn/react-query';
 import type { Detection } from '@kbn/streams-schema';
+import type { PaginatedResponse } from '@kbn/streams-plugin/common';
 import { useKibana } from '../use_kibana';
 import { useFetchErrorToast } from '../use_fetch_error_toast';
-
-interface PaginatedDetectionsResponse {
-  hits: Detection[];
-  page: number;
-  perPage: number;
-  total: number;
-}
 
 interface UseFetchDetectionsParams {
   from: string | number;
@@ -35,8 +29,12 @@ export const useFetchDetections = ({ from, to }: UseFetchDetectionsParams) => {
 
   const [pagination, setPagination] = useState({ page: 1, perPage: 25 });
 
+  useEffect(() => {
+    setPagination((prev) => (prev.page === 1 ? prev : { ...prev, page: 1 }));
+  }, [from, to]);
+
   const fetchDetections = useCallback(
-    async ({ signal }: QueryFunctionContext): Promise<PaginatedDetectionsResponse> => {
+    async ({ signal }: QueryFunctionContext): Promise<PaginatedResponse<Detection>> => {
       return streamsRepositoryClient.fetch('GET /internal/sig_events/detections', {
         params: {
           query: {
@@ -52,7 +50,7 @@ export const useFetchDetections = ({ from, to }: UseFetchDetectionsParams) => {
     [streamsRepositoryClient, pagination, from, to]
   );
 
-  const query = useQuery<PaginatedDetectionsResponse, Error>({
+  const query = useQuery<PaginatedResponse<Detection>, Error>({
     queryKey: ['detections', pagination.page, pagination.perPage, from, to],
     queryFn: fetchDetections,
     onError: showFetchErrorToast,

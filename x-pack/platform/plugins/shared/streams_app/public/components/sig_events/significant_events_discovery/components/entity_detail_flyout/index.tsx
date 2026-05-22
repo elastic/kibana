@@ -15,7 +15,7 @@ import {
   EuiSpacer,
   EuiAccordion,
   EuiText,
-  EuiLoadingElastic,
+  EuiLoadingSpinner,
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
@@ -75,7 +75,7 @@ export const EntityDetailFlyout = ({
         >
           <EuiSpacer size="s" />
           {isHistoryLoading ? (
-            <EuiLoadingElastic size="m" />
+            <EuiLoadingSpinner size="m" />
           ) : history.length === 0 ? (
             <EuiText size="s" color="subdued">
               {i18n.translate('xpack.streams.entityDetailFlyout.noHistory', {

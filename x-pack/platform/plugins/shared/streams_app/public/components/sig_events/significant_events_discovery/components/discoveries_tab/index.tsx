@@ -11,10 +11,10 @@ import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
   EuiSuperDatePicker,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { Discovery } from '@kbn/streams-schema';
 import {
@@ -107,25 +107,58 @@ export const DiscoveriesTab = () => {
 
   const flyoutDetails = selectedDiscovery
     ? [
-        { title: 'Discovery ID', description: selectedDiscovery.discovery_id },
-        { title: 'Title', description: selectedDiscovery.title },
-        { title: 'Kind', description: selectedDiscovery.kind },
         {
-          title: 'Criticality',
+          title: i18n.translate('xpack.streams.discoveriesTab.flyout.discoveryId', {
+            defaultMessage: 'Discovery ID',
+          }),
+          description: selectedDiscovery.discovery_id,
+        },
+        {
+          title: i18n.translate('xpack.streams.discoveriesTab.flyout.title', {
+            defaultMessage: 'Title',
+          }),
+          description: selectedDiscovery.title,
+        },
+        {
+          title: i18n.translate('xpack.streams.discoveriesTab.flyout.kind', {
+            defaultMessage: 'Kind',
+          }),
+          description: selectedDiscovery.kind,
+        },
+        {
+          title: i18n.translate('xpack.streams.discoveriesTab.flyout.criticality', {
+            defaultMessage: 'Criticality',
+          }),
           description: selectedDiscovery.criticality ? String(selectedDiscovery.criticality) : '-',
         },
         {
-          title: 'Confidence',
+          title: i18n.translate('xpack.streams.discoveriesTab.flyout.confidence', {
+            defaultMessage: 'Confidence',
+          }),
           description: selectedDiscovery.confidence ? String(selectedDiscovery.confidence) : '-',
         },
-        { title: 'Summary', description: selectedDiscovery.summary },
-        { title: 'Root Cause', description: selectedDiscovery.root_cause },
         {
-          title: 'Streams',
+          title: i18n.translate('xpack.streams.discoveriesTab.flyout.summary', {
+            defaultMessage: 'Summary',
+          }),
+          description: selectedDiscovery.summary,
+        },
+        {
+          title: i18n.translate('xpack.streams.discoveriesTab.flyout.rootCause', {
+            defaultMessage: 'Root Cause',
+          }),
+          description: selectedDiscovery.root_cause,
+        },
+        {
+          title: i18n.translate('xpack.streams.discoveriesTab.flyout.streams', {
+            defaultMessage: 'Streams',
+          }),
           description: (selectedDiscovery.stream_names ?? []).join(', ') || '-',
         },
         {
-          title: 'Rules',
+          title: i18n.translate('xpack.streams.discoveriesTab.flyout.rules', {
+            defaultMessage: 'Rules',
+          }),
           description: (selectedDiscovery.rule_names ?? []).join(', ') || '-',
         },
       ]
@@ -136,41 +169,53 @@ export const DiscoveriesTab = () => {
       (historyData?.hits ?? []).map((entry) => ({
         timestamp: new Date(entry['@timestamp']).toLocaleString(),
         summary: entry.criticality
-          ? `${entry.title} (criticality: ${entry.criticality})`
+          ? i18n.translate('xpack.streams.discoveriesTab.historySummaryWithCriticality', {
+              defaultMessage: '{title} (criticality: {criticality})',
+              values: { title: entry.title, criticality: String(entry.criticality) },
+            })
           : entry.title,
       })),
     [historyData]
   );
 
   return (
-    <div css={{ flex: '0 0 auto' }}>
-      <div css={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <EuiSuperDatePicker
-          start={rangeFrom}
-          end={rangeTo}
-          onTimeChange={({ start: s, end: e }) => updateTimeRange({ from: s, to: e })}
-          onRefresh={() => refetch()}
-          compressed
-          showUpdateButton="iconOnly"
-          updateButtonProps={{ size: 's', fill: false }}
+    <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <EuiSuperDatePicker
+              start={rangeFrom}
+              end={rangeTo}
+              onTimeChange={({ start: s, end: e }) => updateTimeRange({ from: s, to: e })}
+              onRefresh={() => refetch()}
+              compressed
+              showUpdateButton="iconOnly"
+              updateButtonProps={{ size: 's', fill: false }}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiBasicTable
+          tableCaption={i18n.translate('xpack.streams.discoveriesTab.tableCaption', {
+            defaultMessage: 'Discoveries',
+          })}
+          items={data?.hits ?? []}
+          columns={columns}
+          pagination={euiPagination}
+          onChange={onTableChange}
+          loading={isLoading}
+          noItemsMessage={i18n.translate('xpack.streams.discoveriesTab.emptyBody', {
+            defaultMessage: 'No discoveries found.',
+          })}
+          rowProps={(item) => ({
+            onClick: () => setSelectedDiscovery(item),
+            css: css`
+              cursor: pointer;
+            `,
+          })}
         />
-      </div>
-      <EuiSpacer size="s" />
-      <EuiBasicTable
-        tableCaption="Discoveries"
-        items={data?.hits ?? []}
-        columns={columns}
-        pagination={euiPagination}
-        onChange={onTableChange}
-        loading={isLoading}
-        noItemsMessage={i18n.translate('xpack.streams.discoveriesTab.emptyBody', {
-          defaultMessage: 'No discoveries found.',
-        })}
-        rowProps={(item) => ({
-          onClick: () => setSelectedDiscovery(item),
-          style: { cursor: 'pointer' },
-        })}
-      />
+      </EuiFlexItem>
       {selectedDiscovery && (
         <EntityDetailFlyout
           title={selectedDiscovery.title}
@@ -181,6 +226,6 @@ export const DiscoveriesTab = () => {
           onClose={() => setSelectedDiscovery(undefined)}
         />
       )}
-    </div>
+    </EuiFlexGroup>
   );
 };

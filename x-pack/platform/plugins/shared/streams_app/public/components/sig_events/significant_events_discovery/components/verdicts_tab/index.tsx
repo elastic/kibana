@@ -11,10 +11,10 @@ import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
   EuiSuperDatePicker,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { Verdict } from '@kbn/streams-schema';
 import {
@@ -114,28 +114,76 @@ export const VerdictsTab = () => {
 
   const flyoutDetails = selectedVerdict
     ? [
-        { title: 'Discovery ID', description: selectedVerdict.discovery_id ?? '-' },
-        { title: 'Verdict ID', description: selectedVerdict.verdict_id ?? '-' },
-        { title: 'Title', description: selectedVerdict.title },
-        { title: 'Verdict', description: selectedVerdict.verdict },
         {
-          title: 'Criticality',
+          title: i18n.translate('xpack.streams.verdictsTab.flyout.discoveryId', {
+            defaultMessage: 'Discovery ID',
+          }),
+          description: selectedVerdict.discovery_id ?? '-',
+        },
+        {
+          title: i18n.translate('xpack.streams.verdictsTab.flyout.verdictId', {
+            defaultMessage: 'Verdict ID',
+          }),
+          description: selectedVerdict.verdict_id ?? '-',
+        },
+        {
+          title: i18n.translate('xpack.streams.verdictsTab.flyout.title', {
+            defaultMessage: 'Title',
+          }),
+          description: selectedVerdict.title,
+        },
+        {
+          title: i18n.translate('xpack.streams.verdictsTab.flyout.verdict', {
+            defaultMessage: 'Verdict',
+          }),
+          description: selectedVerdict.verdict,
+        },
+        {
+          title: i18n.translate('xpack.streams.verdictsTab.flyout.criticality', {
+            defaultMessage: 'Criticality',
+          }),
           description: selectedVerdict.criticality ? String(selectedVerdict.criticality) : '-',
         },
         {
-          title: 'Confidence',
+          title: i18n.translate('xpack.streams.verdictsTab.flyout.confidence', {
+            defaultMessage: 'Confidence',
+          }),
           description: selectedVerdict.confidence ? String(selectedVerdict.confidence) : '-',
         },
-        { title: 'Summary', description: selectedVerdict.verdict_summary },
-        { title: 'Root Cause', description: selectedVerdict.root_cause },
-        { title: 'Impact', description: selectedVerdict.impact ?? '-' },
-        { title: 'Recommended Action', description: selectedVerdict.recommended_action ?? '-' },
         {
-          title: 'Streams',
+          title: i18n.translate('xpack.streams.verdictsTab.flyout.summary', {
+            defaultMessage: 'Summary',
+          }),
+          description: selectedVerdict.verdict_summary,
+        },
+        {
+          title: i18n.translate('xpack.streams.verdictsTab.flyout.rootCause', {
+            defaultMessage: 'Root Cause',
+          }),
+          description: selectedVerdict.root_cause,
+        },
+        {
+          title: i18n.translate('xpack.streams.verdictsTab.flyout.impact', {
+            defaultMessage: 'Impact',
+          }),
+          description: selectedVerdict.impact ?? '-',
+        },
+        {
+          title: i18n.translate('xpack.streams.verdictsTab.flyout.recommendedAction', {
+            defaultMessage: 'Recommended Action',
+          }),
+          description: selectedVerdict.recommended_action ?? '-',
+        },
+        {
+          title: i18n.translate('xpack.streams.verdictsTab.flyout.streams', {
+            defaultMessage: 'Streams',
+          }),
           description: (selectedVerdict.stream_names ?? []).join(', ') || '-',
         },
         {
-          title: 'Rules',
+          title: i18n.translate('xpack.streams.verdictsTab.flyout.rules', {
+            defaultMessage: 'Rules',
+          }),
           description: (selectedVerdict.rule_names ?? []).join(', ') || '-',
         },
       ]
@@ -146,41 +194,60 @@ export const VerdictsTab = () => {
       (historyData?.hits ?? []).map((entry) => ({
         timestamp: new Date(entry['@timestamp']).toLocaleString(),
         summary: entry.criticality
-          ? `${entry.verdict}: ${entry.title} (criticality: ${entry.criticality})`
-          : `${entry.verdict}: ${entry.title}`,
+          ? i18n.translate('xpack.streams.verdictsTab.historySummaryWithCriticality', {
+              defaultMessage: '{verdict}: {title} (criticality: {criticality})',
+              values: {
+                verdict: entry.verdict,
+                title: entry.title,
+                criticality: String(entry.criticality),
+              },
+            })
+          : i18n.translate('xpack.streams.verdictsTab.historySummary', {
+              defaultMessage: '{verdict}: {title}',
+              values: { verdict: entry.verdict, title: entry.title },
+            }),
       })),
     [historyData]
   );
 
   return (
-    <div css={{ flex: '0 0 auto' }}>
-      <div css={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <EuiSuperDatePicker
-          start={rangeFrom}
-          end={rangeTo}
-          onTimeChange={({ start: s, end: e }) => updateTimeRange({ from: s, to: e })}
-          onRefresh={() => refetch()}
-          compressed
-          showUpdateButton="iconOnly"
-          updateButtonProps={{ size: 's', fill: false }}
+    <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <EuiSuperDatePicker
+              start={rangeFrom}
+              end={rangeTo}
+              onTimeChange={({ start: s, end: e }) => updateTimeRange({ from: s, to: e })}
+              onRefresh={() => refetch()}
+              compressed
+              showUpdateButton="iconOnly"
+              updateButtonProps={{ size: 's', fill: false }}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiBasicTable
+          tableCaption={i18n.translate('xpack.streams.verdictsTab.tableCaption', {
+            defaultMessage: 'Verdicts',
+          })}
+          items={data?.hits ?? []}
+          columns={columns}
+          pagination={euiPagination}
+          onChange={onTableChange}
+          loading={isLoading}
+          noItemsMessage={i18n.translate('xpack.streams.verdictsTab.emptyBody', {
+            defaultMessage: 'No verdicts found.',
+          })}
+          rowProps={(item) => ({
+            onClick: () => setSelectedVerdict(item),
+            css: css`
+              cursor: pointer;
+            `,
+          })}
         />
-      </div>
-      <EuiSpacer size="s" />
-      <EuiBasicTable
-        tableCaption="Verdicts"
-        items={data?.hits ?? []}
-        columns={columns}
-        pagination={euiPagination}
-        onChange={onTableChange}
-        loading={isLoading}
-        noItemsMessage={i18n.translate('xpack.streams.verdictsTab.emptyBody', {
-          defaultMessage: 'No verdicts found.',
-        })}
-        rowProps={(item) => ({
-          onClick: () => setSelectedVerdict(item),
-          style: { cursor: 'pointer' },
-        })}
-      />
+      </EuiFlexItem>
       {selectedVerdict && (
         <EntityDetailFlyout
           title={selectedVerdict.title}
@@ -191,6 +258,6 @@ export const VerdictsTab = () => {
           onClose={() => setSelectedVerdict(undefined)}
         />
       )}
-    </div>
+    </EuiFlexGroup>
   );
 };

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+export type { PaginatedResponse } from '../../../common/pagination';
+
 export interface CommonSearchOptions {
   /** ISO 8601 formatted datetime */
   from?: string;
@@ -15,11 +17,4 @@ export interface CommonSearchOptions {
 export interface PaginatedSearchOptions extends CommonSearchOptions {
   page?: number;
   perPage?: number;
-}
-
-export interface PaginatedResponse<T> {
-  hits: T[];
-  page: number;
-  perPage: number;
-  total: number;
 }

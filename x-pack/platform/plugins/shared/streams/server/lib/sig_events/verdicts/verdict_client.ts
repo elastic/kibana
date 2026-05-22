@@ -66,7 +66,7 @@ export class VerdictClient {
     });
   }
 
-  async findById(discoveryId: string): Promise<{ hits: Verdict[] }> {
+  async findByDiscoveryId(discoveryId: string): Promise<{ hits: Verdict[] }> {
     return runFindByIdEsqlQuery<Verdict>({
       esClient: this.clients.esClient,
       space: this.clients.space,
