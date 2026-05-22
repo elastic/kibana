@@ -5,9 +5,13 @@
  * 2.0.
  */
 
+import { apm } from '@elastic/apm-rum';
 import type { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { callApmApi } from './create_call_apm_api';
-export const fetchSpanLinks = (
+
+export const FETCH_SPAN_LINKS_OPERATION_ID = 'fetch-span-links';
+
+export const fetchSpanLinks = async (
   {
     traceId,
     docId,
@@ -23,8 +27,20 @@ export const fetchSpanLinks = (
     processorEvent?: ProcessorEvent;
   },
   signal: AbortSignal
-) =>
-  callApmApi('GET /internal/apm/traces/{traceId}/span_links/{spanId}', {
-    params: { path: { traceId, spanId: docId }, query: { kuery: '', start, end, processorEvent } },
-    signal,
-  });
+) => {
+  try {
+    return await callApmApi('GET /internal/apm/traces/{traceId}/span_links/{spanId}', {
+      params: {
+        path: { traceId, spanId: docId },
+        query: { kuery: '', start, end, processorEvent },
+      },
+      signal,
+      context: { meta: { operation_id: FETCH_SPAN_LINKS_OPERATION_ID } },
+    });
+  } catch (error) {
+    apm.captureError(error as Error, {
+      labels: { kibana_meta_operation_id: FETCH_SPAN_LINKS_OPERATION_ID },
+    });
+    throw error;
+  }
+};
