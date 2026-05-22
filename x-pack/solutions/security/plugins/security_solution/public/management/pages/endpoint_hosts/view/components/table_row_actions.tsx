@@ -61,6 +61,10 @@ export const TableRowActions = memo<TableRowActionProps>(({ endpointInfo }) => {
       }
       isOpen={isOpen}
       closePopover={handleCloseMenu}
+      aria-label={i18n.translate(
+        'xpack.securitySolution.endpoint.list.actionmenu.popover.ariaLabel',
+        { defaultMessage: 'Endpoint row actions' }
+      )}
     >
       <EuiContextMenuPanel items={menuItems} />
     </EuiPopover>

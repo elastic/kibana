@@ -47,6 +47,7 @@ const ChartSettingsPopoverComponent: React.FC<Props> = ({
 
   return (
     <EuiPopover
+      aria-label={i18n.CHART_SETTINGS_POPOVER_ARIA_LABEL}
       anchorPosition="downCenter"
       button={button}
       className={BUTTON_CLASS}

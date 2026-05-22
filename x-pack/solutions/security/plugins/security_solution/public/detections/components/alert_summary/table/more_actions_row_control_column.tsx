@@ -95,6 +95,7 @@ export const MoreActionsRowControlColumn = memo(({ alert }: MoreActionsRowContro
 
   return (
     <EuiPopover
+      aria-label={MORE_ACTIONS_BUTTON_ARIA_LABEL}
       button={button}
       closePopover={togglePopover}
       isOpen={isPopoverOpen}

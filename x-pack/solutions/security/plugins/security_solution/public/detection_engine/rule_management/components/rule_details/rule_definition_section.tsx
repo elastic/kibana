@@ -293,7 +293,7 @@ const UnavailableMlJobLink: React.FC<UnavailableMlJobLinkProps> = ({ jobId }) =>
   return (
     <EuiText component="span" color="subdued" size="s">
       {jobId}
-      <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={togglePopover}>
+      <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={togglePopover} aria-label={i18n.MACHINE_LEARNING_JOB_NOT_AVAILABLE}>
         {i18n.MACHINE_LEARNING_JOB_NOT_AVAILABLE}
       </EuiPopover>
     </EuiText>

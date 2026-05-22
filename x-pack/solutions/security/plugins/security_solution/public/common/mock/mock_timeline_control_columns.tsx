@@ -62,6 +62,7 @@ const TestTrailingColumn = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   return (
     <EuiPopover
+      aria-label="Actions"
       isOpen={isPopoverOpen}
       anchorPosition="upCenter"
       panelPaddingSize="s"

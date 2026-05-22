@@ -53,6 +53,7 @@ export const GroupsFilterPopoverComponent = ({
 
   return (
     <EuiPopover
+      aria-label={i18n.GROUPS}
       ownFocus
       button={
         <EuiFilterButton

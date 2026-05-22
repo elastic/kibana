@@ -30,7 +30,7 @@ export function SuppressionInfoIcon(): JSX.Element {
   );
 
   return (
-    <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={closePopover}>
+    <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={closePopover} aria-label={ALERT_SUPPRESSION_MISSING_FIELDS_HELP_ARIA_LABEL}>
       <EuiText css={{ width: POPOVER_WIDTH }} size="s">
         <FormattedMessage
           id="xpack.securitySolution.detectionEngine.createRule.stepDefineRule.alertSuppressionMissingFieldsTooltipContent"

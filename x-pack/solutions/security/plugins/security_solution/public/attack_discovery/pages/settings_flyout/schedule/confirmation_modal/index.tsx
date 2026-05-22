@@ -16,6 +16,7 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiSpacer,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
@@ -27,8 +28,11 @@ interface Props {
   onDiscard: () => void;
 }
 
-const ConfirmationModalComponent: React.FC<Props> = ({ onCancel, onDiscard }) => (
+const ConfirmationModalComponent: React.FC<Props> = ({ onCancel, onDiscard }) => {
+  const modalTitleId = useGeneratedHtmlId();
+  return (
   <EuiModal
+    aria-labelledby={modalTitleId}
     css={css`
       max-width: 454px;
     `}
@@ -36,7 +40,7 @@ const ConfirmationModalComponent: React.FC<Props> = ({ onCancel, onDiscard }) =>
     onClose={onCancel}
   >
     <EuiModalHeader>
-      <EuiModalHeaderTitle data-test-subj="title">
+      <EuiModalHeaderTitle data-test-subj="title" id={modalTitleId}>
         {i18n.DISCARD_UNSAVED_CHANGES}
       </EuiModalHeaderTitle>
     </EuiModalHeader>
@@ -63,7 +67,8 @@ const ConfirmationModalComponent: React.FC<Props> = ({ onCancel, onDiscard }) =>
       </EuiFlexGroup>
     </EuiModalFooter>
   </EuiModal>
-);
+  );
+};
 
 ConfirmationModalComponent.displayName = 'ConfirmationModal';
 

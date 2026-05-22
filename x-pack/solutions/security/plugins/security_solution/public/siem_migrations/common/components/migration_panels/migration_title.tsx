@@ -165,6 +165,7 @@ export const MigrationPanelTitle = React.memo(function MigrationPanelTitle({
               closePopover={closePopover}
               panelPaddingSize="none"
               anchorPosition="downCenter"
+              aria-label={i18n.OPEN_MIGRATION_OPTIONS_BUTTON}
             >
               <EuiContextMenuPanel>
                 <EuiContextMenuItem

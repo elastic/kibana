@@ -115,6 +115,12 @@ export const AISummarySectionSettings: React.FC<AISummarySectionSettingsProps> =
 
   return (
     <EuiPopover
+      aria-label={i18n.translate(
+        'xpack.securitySolution.attackDetailsFlyout.overview.AISummary.settingsPopoverAriaLabel',
+        {
+          defaultMessage: 'Attack summary settings',
+        }
+      )}
       button={
         <EuiButtonIcon
           aria-label={i18n.translate(

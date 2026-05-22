@@ -91,6 +91,7 @@ const CountdownComponent: React.FC<Props> = ({
         <EuiOutsideClickDetector isDisabled={!isPopoverOpen} onOutsideClick={() => closePopover()}>
           <EuiPopover
             anchorPosition="upCenter"
+            aria-label={i18n.INFORMATION}
             button={iconInQuestionButton}
             closePopover={closePopover}
             data-test-subj="infoPopover"

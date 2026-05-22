@@ -69,6 +69,7 @@ const ExceptionsAddToListsOptionsComponent: React.FC<ExceptionsAddToListsOptions
                 isOpen={isPopoverOpen}
                 closePopover={closePopover}
                 anchorPosition="upCenter"
+                aria-label={i18n.ADD_TO_LISTS_OPTION_TOOLTIP_ARIA_LABEL}
               >
                 <div css={{ width: '300px' }}>
                   <EuiText size="s">

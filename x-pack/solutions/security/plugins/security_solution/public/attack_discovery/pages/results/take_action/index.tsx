@@ -457,6 +457,7 @@ const TakeActionComponent: React.FC<Props> = ({
     <>
       <EuiPopover
         anchorPosition="downCenter"
+        aria-label={i18n.TAKE_ACTION}
         button={button}
         closePopover={closePopover}
         data-test-subj="takeAction"

@@ -93,6 +93,9 @@ export const ActionsContextMenu = memo<ActionsContextMenuProps>(
         button={menuButton}
         isOpen={isOpen}
         closePopover={handleCloseMenu}
+        aria-label={i18n.translate('xpack.securitySolution.actionsContextMenu.popover.ariaLabel', {
+          defaultMessage: 'Actions menu',
+        })}
       >
         <EuiContextMenuPanel items={menuItems} data-test-subj={getTestId('contextMenuPanel')} />
       </EuiPopover>

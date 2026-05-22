@@ -82,6 +82,7 @@ export const AttacksViewOptionsPopover: React.FC<AttacksViewOptionsPopoverProps>
   return (
     <EuiPopover
       id="attacksViewOptionsPopover"
+      aria-label={i18n.VIEW_OPTIONS_ARIA_LABEL}
       button={button}
       isOpen={isPopoverOpen}
       closePopover={closePopover}

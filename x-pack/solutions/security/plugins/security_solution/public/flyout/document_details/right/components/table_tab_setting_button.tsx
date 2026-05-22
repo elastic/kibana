@@ -121,6 +121,7 @@ export const TableTabSettingButton = ({
   return (
     <EuiToolTip content={TABLE_TAB_SETTING_BUTTON_LABEL}>
       <EuiPopover
+        aria-label={TABLE_TAB_SETTING_BUTTON_LABEL}
         button={
           <EuiButtonIcon
             aria-label={TABLE_TAB_SETTING_BUTTON_LABEL}

@@ -80,6 +80,7 @@ const BulkActionsComponent: React.FC<OwnProps> = ({
   return (
     <BulkActionsContainer data-test-subj="bulk-actions-button-container">
       <EuiPopover
+        aria-label={selectText}
         isOpen={isActionsPopoverOpen}
         anchorPosition="upCenter"
         panelPaddingSize="none"

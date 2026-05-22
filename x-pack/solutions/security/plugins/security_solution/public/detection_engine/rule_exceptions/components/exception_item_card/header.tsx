@@ -17,6 +17,7 @@ import {
   EuiContextMenuItem,
 } from '@elastic/eui';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { EXCEPTION_ITEM_ACTIONS_MENU_ARIA_LABEL } from './translations';
 
 export interface ExceptionItemCardHeaderProps {
   item: ExceptionListItemSchema;
@@ -60,7 +61,7 @@ export const ExceptionItemCardHeader = memo<ExceptionItemCardHeaderProps>(
             button={
               <EuiButtonIcon
                 isDisabled={disableActions}
-                aria-label="Exception item actions menu"
+                aria-label={EXCEPTION_ITEM_ACTIONS_MENU_ARIA_LABEL}
                 iconType="boxesVertical"
                 onClick={onItemActionsClick}
                 data-test-subj={`${dataTestSubj}-actionButton`}
@@ -70,6 +71,7 @@ export const ExceptionItemCardHeader = memo<ExceptionItemCardHeaderProps>(
             isOpen={isPopoverOpen}
             closePopover={onClosePopover}
             data-test-subj={`${dataTestSubj}-items`}
+            aria-label={EXCEPTION_ITEM_ACTIONS_MENU_ARIA_LABEL}
           >
             <EuiContextMenuPanel items={itemActions} />
           </EuiPopover>
