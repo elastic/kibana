@@ -215,7 +215,7 @@ describe('processPanel', () => {
       const resultColumns = get(
         result,
         `embeddableConfig.attributes.state.datasourceStates.textBased.layers.${layerId}.columns`
-      ) as Array<{ meta: { type: string } }>;
+      ) as unknown as Array<{ meta: { type: string } }>;
 
       expect(resultColumns[0].meta.type).toBe('number');
       expect(resultColumns[1].meta.type).toBe('date');
@@ -241,7 +241,7 @@ describe('processPanel', () => {
       const resultColumns = get(
         result,
         `embeddableConfig.attributes.state.datasourceStates.textBased.layers.${layerId}.columns`
-      ) as Array<{ meta: { type: string } }>;
+      ) as unknown as Array<{ meta: { type: string } }>;
 
       expect(resultColumns[0].meta.type).toBe('number');
     });
@@ -266,7 +266,7 @@ describe('processPanel', () => {
       const resultColumns = get(
         result,
         `embeddableConfig.attributes.state.datasourceStates.textBased.layers.${layerId}.columns`
-      ) as Array<{ inMetricDimension?: boolean }>;
+      ) as unknown as Array<{ inMetricDimension?: boolean }>;
 
       expect(resultColumns[0].inMetricDimension).toBe(true);
       expect(resultColumns[1].inMetricDimension).toBeUndefined();
