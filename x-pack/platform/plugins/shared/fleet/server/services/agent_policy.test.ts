@@ -546,6 +546,20 @@ describe('Agent policy', () => {
       );
     });
 
+    it('should throw FleetError when given an invalid id', async () => {
+      const soClient = getAgentPolicyCreateMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      await expect(
+        agentPolicyService.create(
+          soClient,
+          esClient,
+          { name: 'test', namespace: 'default' },
+          { id: '../bad-id' }
+        )
+      ).rejects.toThrow('id is not valid');
+    });
+
     it('should throw error when attempting to create policy with supports_agentless true on serverless environment that does not support the agentless feature', async () => {
       jest
         .spyOn(appContextService, 'getExperimentalFeatures')
