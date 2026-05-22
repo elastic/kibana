@@ -20,8 +20,6 @@ import {
   EuiTourStep,
   EuiBadge,
   EuiToolTip,
-  EuiLoadingSpinner,
-  EuiI18nNumber,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
@@ -36,7 +34,6 @@ import {
 } from '@kbn/streams-schema';
 import useAsync from 'react-use/lib/useAsync';
 import type { WiredStreamsStatus } from '@kbn/streams-plugin/public';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { useStreamsTour } from '../streams_tour';
 import type { TableRow, SortableField } from './utils';
 import {
@@ -61,7 +58,8 @@ import { useTimefilter } from '../../hooks/use_timefilter';
 import { useStreamsIngestionRates } from '../../hooks/use_streams_ingestion_rates';
 import { useStreamsStorageStats } from '../../hooks/use_streams_storage_stats';
 import { useTimeRange } from '../../hooks/use_time_range';
-import { formatBytes } from '../stream_management/data_management/stream_detail_lifecycle/helpers/format_bytes';
+import { IngestionColumn } from './ingestion_column';
+import { StorageColumn } from './storage_column';
 import { RetentionColumn } from './retention_column';
 import { calculateDataQuality } from '../../util/calculate_data_quality';
 import {
@@ -577,18 +575,15 @@ export function StreamsTreeTable({
             : false,
           align: 'right',
           dataType: 'number',
-          render: (_: unknown, item: TableRow) => {
-            if (!item.data_stream) return '-';
-            if (!ingestionLoaded) return <EuiLoadingSpinner size="s" />;
-            const rate = ingestionByStream[item.stream.name] ?? 0;
-            return (
-              <FormattedMessage
-                id="xpack.streams.ingestionColumn.cellValue"
-                defaultMessage="{ingestionRate} docs/s"
-                values={{ ingestionRate: <EuiI18nNumber value={rate} /> }}
+          render: (_: unknown, item: TableRow) =>
+            item.data_stream ? (
+              <IngestionColumn
+                rate={ingestionByStream[item.stream.name] ?? 0}
+                isLoading={!ingestionLoaded}
               />
-            );
-          },
+            ) : (
+              '-'
+            ),
         },
         {
           field: 'storageBytes',
@@ -599,12 +594,15 @@ export function StreamsTreeTable({
             : false,
           align: 'right',
           dataType: 'number',
-          render: (_: unknown, item: TableRow) => {
-            if (!item.data_stream) return '-';
-            if (!storageLoaded) return <EuiLoadingSpinner size="s" />;
-            const bytes = storageByStream[item.stream.name] ?? 0;
-            return <span>{formatBytes(bytes)}</span>;
-          },
+          render: (_: unknown, item: TableRow) =>
+            item.data_stream ? (
+              <StorageColumn
+                sizeBytes={storageByStream[item.stream.name] ?? 0}
+                isLoading={!storageLoaded}
+              />
+            ) : (
+              '-'
+            ),
         },
         {
           field: 'dataQuality',
