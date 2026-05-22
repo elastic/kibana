@@ -46,7 +46,7 @@ export const buildCreateRuleData = (input: BuildCreateRuleDataInput = {}): Creat
  * alert-action endpoints look events up by it); every other field is filled in
  * with sensible defaults so a typical seed is one line.
  */
-export interface BuildAlertEventInput extends Partial<AlertEvent> {
+export type BuildAlertEventInput = Partial<AlertEvent>;
   group_hash: string;
 }
 
