@@ -145,9 +145,12 @@ export const registerDashboardAttachmentUiDefinition = ({
       }
       return [
         {
-          label: i18n.translate('xpack.agentBuilderDashboards.attachments.dashboard.previewActionLabel', {
-            defaultMessage: 'Preview',
-          }),
+          label: i18n.translate(
+            'xpack.agentBuilderDashboards.attachments.dashboard.previewActionLabel',
+            {
+              defaultMessage: 'Preview',
+            }
+          ),
           icon: 'eye',
           type: ActionButtonType.SECONDARY,
           handler: async () => {

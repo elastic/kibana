@@ -6,7 +6,10 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { AttachmentPanel, DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
+import type {
+  AttachmentPanel,
+  DashboardAttachmentData,
+} from '@kbn/agent-builder-dashboards-common';
 import type { z } from '@kbn/zod/v4';
 import type { ResolveVisualizationConfig } from '../inline_visualization';
 import type { VisualizationFailure } from '../utils';

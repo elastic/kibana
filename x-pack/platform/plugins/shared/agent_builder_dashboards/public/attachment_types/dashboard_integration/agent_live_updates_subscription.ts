@@ -10,7 +10,10 @@ import { isRoundCompleteEvent } from '@kbn/agent-builder-common';
 import { ATTACHMENT_REF_OPERATION, getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { DashboardAttachment } from '@kbn/agent-builder-dashboards-common';
-import { attachmentDataToDashboardState, isDashboardAttachment } from '@kbn/agent-builder-dashboards-common';
+import {
+  attachmentDataToDashboardState,
+  isDashboardAttachment,
+} from '@kbn/agent-builder-dashboards-common';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 
 export interface AgentLiveUpdatesSubscriptionParams {

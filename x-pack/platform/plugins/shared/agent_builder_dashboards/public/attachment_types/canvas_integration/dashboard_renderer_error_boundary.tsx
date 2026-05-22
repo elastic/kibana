@@ -65,14 +65,20 @@ export const DashboardPreviewErrorCallout = ({}: {}) => (
       announceOnMount
       color="danger"
       iconType="error"
-      title={i18n.translate('xpack.agentBuilderDashboards.attachments.dashboard.previewErrorCalloutTitle', {
-        defaultMessage: 'This dashboard preview could not be rendered.',
-      })}
+      title={i18n.translate(
+        'xpack.agentBuilderDashboards.attachments.dashboard.previewErrorCalloutTitle',
+        {
+          defaultMessage: 'This dashboard preview could not be rendered.',
+        }
+      )}
       data-test-subj="dashboardRendererError"
     >
-      {i18n.translate('xpack.agentBuilderDashboards.attachments.dashboard.previewErrorCalloutBody', {
-        defaultMessage: 'Ask the agent to repair the invalid or incomplete dashboard state.',
-      })}
+      {i18n.translate(
+        'xpack.agentBuilderDashboards.attachments.dashboard.previewErrorCalloutBody',
+        {
+          defaultMessage: 'Ask the agent to repair the invalid or incomplete dashboard state.',
+        }
+      )}
     </EuiCallOut>
   </div>
 );

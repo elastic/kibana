@@ -38,7 +38,10 @@ export class AgentBuilderDashboardsPlugin
   }
 
   setup(
-    coreSetup: CoreSetup<AgentBuilderDashboardsStartDependencies, AgentBuilderDashboardsPluginStart>,
+    coreSetup: CoreSetup<
+      AgentBuilderDashboardsStartDependencies,
+      AgentBuilderDashboardsPluginStart
+    >,
     setupDeps: AgentBuilderDashboardsSetupDependencies
   ): AgentBuilderDashboardsPluginSetup {
     const getDashboardClient = async () => {

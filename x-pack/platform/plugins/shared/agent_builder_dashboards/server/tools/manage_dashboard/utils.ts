@@ -8,8 +8,14 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
-import type { AttachmentPanel, DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
-import { DASHBOARD_ATTACHMENT_TYPE, isDashboardAttachment } from '@kbn/agent-builder-dashboards-common';
+import type {
+  AttachmentPanel,
+  DashboardAttachmentData,
+} from '@kbn/agent-builder-dashboards-common';
+import {
+  DASHBOARD_ATTACHMENT_TYPE,
+  isDashboardAttachment,
+} from '@kbn/agent-builder-dashboards-common';
 import type { Logger } from '@kbn/core/server';
 import { type AttachmentVersion, getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import { z } from '@kbn/zod/v4';

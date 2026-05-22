@@ -29,7 +29,10 @@ export class AgentBuilderDashboardsPlugin
   constructor(_initContext: PluginInitializerContext) {}
 
   public setup(
-    _core: CoreSetup<AgentBuilderDashboardsPluginPublicStartDependencies, AgentBuilderDashboardsPluginPublicStart>,
+    _core: CoreSetup<
+      AgentBuilderDashboardsPluginPublicStartDependencies,
+      AgentBuilderDashboardsPluginPublicStart
+    >,
     _plugins: AgentBuilderDashboardsPluginPublicSetupDependencies
   ): AgentBuilderDashboardsPluginPublicSetup {
     return {};

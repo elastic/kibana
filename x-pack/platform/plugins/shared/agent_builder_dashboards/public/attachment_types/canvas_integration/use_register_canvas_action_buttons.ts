@@ -89,9 +89,12 @@ export const useRegisterCanvasActionButtons = ({
     if (dashboardApi.locator) {
       const { locator } = dashboardApi;
       buttons.push({
-        label: i18n.translate('xpack.agentBuilderDashboards.attachments.dashboard.canvasEditActionLabel', {
-          defaultMessage: 'Edit in Dashboards',
-        }),
+        label: i18n.translate(
+          'xpack.agentBuilderDashboards.attachments.dashboard.canvasEditActionLabel',
+          {
+            defaultMessage: 'Edit in Dashboards',
+          }
+        ),
         type: ActionButtonType.PRIMARY,
         disabled: isWriteActionDisabled,
         disabledReason,
@@ -110,9 +113,12 @@ export const useRegisterCanvasActionButtons = ({
       });
     }
     buttons.push({
-      label: i18n.translate('xpack.agentBuilderDashboards.attachments.dashboard.canvasSaveActionLabel', {
-        defaultMessage: 'Save',
-      }),
+      label: i18n.translate(
+        'xpack.agentBuilderDashboards.attachments.dashboard.canvasSaveActionLabel',
+        {
+          defaultMessage: 'Save',
+        }
+      ),
       icon: 'save',
       type: ActionButtonType.PRIMARY,
       disabled: isWriteActionDisabled,

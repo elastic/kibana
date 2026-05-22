@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { AttachmentPanel, DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
+import type {
+  AttachmentPanel,
+  DashboardAttachmentData,
+} from '@kbn/agent-builder-dashboards-common';
 import type { Logger } from '@kbn/core/server';
 import type { ResolveVisualizationConfig } from './inline_visualization';
 import type { VisualizationFailure } from './utils';
