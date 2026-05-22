@@ -57,7 +57,7 @@ export async function waitForActiveAlert({
     const total =
       typeof response.hits.total === 'number'
         ? response.hits.total
-        : (response.hits.total?.value ?? 0);
+        : response.hits.total?.value ?? 0;
 
     log.info(
       `No active alert for rule ${ruleId} (attempt ${attempt}, hits: ${total}). Retrying in ${pollIntervalMs}ms...`
