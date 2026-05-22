@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { createPlaywrightConfig } from '@kbn/scout';
+import type { TagsHandlerContext } from '../../../types';
 
-export default createPlaywrightConfig({
-  testDir: './tests',
-  workers: 1,
-});
+export const deleteTag = async (requestContext: TagsHandlerContext, id: string): Promise<void> => {
+  const { tagsClient } = await requestContext.tags;
+  await tagsClient.delete(id);
+};

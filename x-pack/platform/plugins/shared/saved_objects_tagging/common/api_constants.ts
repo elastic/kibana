@@ -5,9 +5,5 @@
  * 2.0.
  */
 
-import { createPlaywrightConfig } from '@kbn/scout';
-
-export default createPlaywrightConfig({
-  testDir: './tests',
-  workers: 1,
-});
+export const TAGS_API_PATH = '/api/tags';
+export const TAGS_API_VERSION = '2023-10-31';
