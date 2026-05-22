@@ -11,10 +11,11 @@ import React, { memo, useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { TableId } from '@kbn/securitysolution-data-table';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { AttackDiscoveryMarkdownFormatter } from '../../../../attack_discovery/pages/results/attack_discovery_markdown_formatter';
-import { useOverviewTabData } from '../../../../flyout/attack_details/hooks/use_overview_tab_data';
+import { useOverviewTabData } from '../hooks/use_overview_tab_data';
 import { ExpandableSection } from '../../../shared/components/expandable_section';
-import { FLYOUT_STORAGE_KEYS } from '../../../../flyout/attack_details/constants/local_storage';
+import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
 import { useExpandSection } from '../../../shared/hooks/use_expand_section';
 import { AISummarySectionSettings } from './ai_summary_section_settings';
 
@@ -24,6 +25,14 @@ const titleIconCss = css`
   margin-left: 4px;
 `;
 
+export interface AISummarySectionProps {
+  /**
+   * The attack-discovery document hit. Forwarded to `useOverviewTabData` to
+   * read the four summary/details markdown fields.
+   */
+  hit: DataTableRecord;
+}
+
 /**
  * Renders the AI Summary section in the Overview tab of the Attack Details flyout.
  *
@@ -31,7 +40,7 @@ const titleIconCss = css`
  * to switch between anonymized and resolved values. The section is expandable
  * and persists its expanded state.
  */
-export const AISummarySection = memo(() => {
+export const AISummarySection = memo(({ hit }: AISummarySectionProps) => {
   const expanded = useExpandSection({
     storageKey: FLYOUT_STORAGE_KEYS.ATTACK_DETAILS_OVERVIEW_TAB_EXPANDED_SECTIONS,
     title: KEY,
@@ -42,7 +51,7 @@ export const AISummarySection = memo(() => {
     summaryMarkdownWithReplacements,
     detailsMarkdown,
     detailsMarkdownWithReplacements,
-  } = useOverviewTabData();
+  } = useOverviewTabData(hit);
 
   const hasAnonymizedContent = summaryMarkdown.trim() !== '' || detailsMarkdown.trim() !== '';
 

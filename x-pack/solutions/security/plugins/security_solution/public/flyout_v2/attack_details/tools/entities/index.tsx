@@ -12,7 +12,6 @@ import { EuiFlyoutBody, EuiFlyoutHeader, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { ToolsFlyoutHeader } from '../../../shared/components/tools_flyout_header';
-import { AttackDetailsProvider } from '../../main/context';
 import { ATTACK_ENTITIES_FLYOUT_TEST_ID } from '../../main/constants/test_ids';
 import { AttackEntitiesDetails } from './components/attack_entities_details';
 
@@ -23,10 +22,9 @@ const TITLE = i18n.translate('xpack.securitySolution.flyout.attackDetails.attack
 export interface AttackEntitiesProps {
   /**
    * The attack-discovery alert document this child flyout is opened from.
-   * Used to (re)build the v2 `AttackDetailsProvider` inside the new
-   * system-flyout root so the ported left-panel content can read attack
-   * data via the legacy hooks (`useAttackEntitiesLists`, `useHeaderData`,
-   * etc.).
+   * Threaded through to {@link AttackEntitiesDetails} so the
+   * `useAttackEntitiesLists` / `useHeaderData` hooks can derive
+   * `originalAlertIds` and `timestamp` directly from `hit.flattened`.
    */
   hit: DataTableRecord;
 }
@@ -41,7 +39,7 @@ export const AttackEntities: FC<AttackEntitiesProps> = memo(({ hit }) => {
   const { euiTheme } = useEuiTheme();
 
   return (
-    <AttackDetailsProvider hit={hit}>
+    <>
       <EuiFlyoutHeader
         hasBorder
         css={css`
@@ -52,9 +50,9 @@ export const AttackEntities: FC<AttackEntitiesProps> = memo(({ hit }) => {
         <ToolsFlyoutHeader hit={hit} title={TITLE} />
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <AttackEntitiesDetails />
+        <AttackEntitiesDetails hit={hit} />
       </EuiFlyoutBody>
-    </AttackDetailsProvider>
+    </>
   );
 });
 

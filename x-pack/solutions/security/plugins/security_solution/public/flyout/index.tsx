@@ -117,8 +117,7 @@ import {
   AttackDetailsPreviewPanelKey,
   AttackDetailsRightPanelKey,
 } from './attack_details/constants/panel_keys';
-import type { AttackDetailsProps } from './attack_details/types';
-import { AttackDetailsProvider } from './attack_details/context';
+import type { AttackDetailsLeftPanelProps, AttackDetailsProps } from './attack_details/types';
 import { AttackDetailsPreviewPanel, AttackDetailsRightPanel } from './attack_details';
 import { AttackDetailsLeftPanel } from './attack_details/left';
 import type { IOCDetailsProps } from './ioc_details/types';
@@ -299,27 +298,30 @@ export const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredP
   {
     key: AttackDetailsRightPanelKey,
     component: (props) => (
-      <AttackDetailsProvider {...(props as AttackDetailsProps).params}>
-        <AttackDetailsRightPanel path={props.path as AttackDetailsProps['path']} />
-      </AttackDetailsProvider>
+      <AttackDetailsRightPanel
+        params={(props as AttackDetailsProps).params}
+        path={props.path as AttackDetailsProps['path']}
+      />
     ),
     'aria-label': ATTACK_DETAILS_RIGHT_PANEL_ARIA_LABEL,
   },
   {
     key: AttackDetailsPreviewPanelKey,
     component: (props) => (
-      <AttackDetailsProvider {...(props as AttackDetailsProps).params} isPreviewMode={true}>
-        <AttackDetailsPreviewPanel path={props.path as AttackDetailsProps['path']} />
-      </AttackDetailsProvider>
+      <AttackDetailsPreviewPanel
+        params={(props as AttackDetailsProps).params}
+        path={props.path as AttackDetailsProps['path']}
+      />
     ),
     'aria-label': ATTACK_DETAILS_PREVIEW_PANEL_ARIA_LABEL,
   },
   {
     key: AttackDetailsLeftPanelKey,
     component: (props) => (
-      <AttackDetailsProvider {...(props as AttackDetailsProps).params}>
-        <AttackDetailsLeftPanel path={props.path as AttackDetailsProps['path']} />
-      </AttackDetailsProvider>
+      <AttackDetailsLeftPanel
+        params={(props as AttackDetailsLeftPanelProps).params}
+        path={props.path as AttackDetailsLeftPanelProps['path']}
+      />
     ),
     'aria-label': ATTACK_DETAILS_LEFT_PANEL_ARIA_LABEL,
   },

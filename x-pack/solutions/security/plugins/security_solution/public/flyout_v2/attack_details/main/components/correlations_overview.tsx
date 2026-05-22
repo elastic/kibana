@@ -9,8 +9,9 @@ import React, { memo, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { SectionPanel } from './section_panel';
-import { useOriginalAlertIds } from '../../../../flyout/attack_details/hooks/use_original_alert_ids';
+import { useOriginalAlertIds } from '../hooks/use_original_alert_ids';
 import { INSIGHTS_CORRELATIONS_TEST_ID } from '../constants/test_ids';
 
 const TITLE = (
@@ -29,9 +30,14 @@ const TOOLTIP = (
 
 export interface CorrelationsOverviewProps {
   /**
+   * The attack-discovery document hit. Forwarded to `useOriginalAlertIds`
+   * for the related-alerts count.
+   */
+  hit: DataTableRecord;
+  /**
    * Callback that opens the attack-specific Correlations child flyout when
    * the section title link is clicked. The wiring lives in
-   * `flyout_v2/attack_details/index.tsx`.
+   * `flyout_v2/attack_details/main/index.tsx`.
    */
   onShowAttackCorrelations: () => void;
 }
@@ -42,9 +48,9 @@ export interface CorrelationsOverviewProps {
  * attack-specific Correlations child flyout (related-alerts-by-ancestry only).
  */
 export const CorrelationsOverview: React.FC<CorrelationsOverviewProps> = memo(
-  ({ onShowAttackCorrelations }) => {
+  ({ hit, onShowAttackCorrelations }) => {
     const { euiTheme } = useEuiTheme();
-    const originalAlertIds = useOriginalAlertIds();
+    const originalAlertIds = useOriginalAlertIds(hit);
     const relatedAlertsCount = originalAlertIds.length;
 
     const link = useMemo(

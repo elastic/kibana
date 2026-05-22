@@ -7,36 +7,9 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { TestProviders } from '../../../../common/mock';
 import { NotesTab } from './notes_tab';
-import { AttackDetailsProvider } from '../../context';
-
-jest.mock('../../../../common/hooks/use_space_id', () => ({
-  useSpaceId: () => 'default',
-}));
-
-jest.mock('../../hooks/use_attack_details', () => ({
-  useAttackDetails: jest.fn().mockReturnValue({
-    loading: false,
-    attack: {
-      id: 'test-alert-1',
-      alertIds: ['alert-1'],
-      detectionEngineRuleId: 'rule-1',
-      ruleStatus: 'enabled',
-      ruleVersion: 1,
-      timestamp: '2024-01-01T00:00:00Z',
-      entities: { users: [], hosts: [] },
-      summaryMarkdown: '# Test Alert Summary',
-      mitreTactics: [],
-      mitreTechniques: [],
-    },
-    browserFields: {},
-    dataFormattedForFieldBrowser: [],
-    searchHit: { _index: 'test', _id: 'attack-123' },
-    getFieldsData: jest.fn(),
-    refetch: jest.fn(),
-  }),
-}));
 
 jest.mock('../../../../flyout_v2/shared/tools/notes/components/notes_details_content', () => ({
   NotesDetailsContent: jest.fn(() => (
@@ -44,18 +17,19 @@ jest.mock('../../../../flyout_v2/shared/tools/notes/components/notes_details_con
   )),
 }));
 
+jest.mock('../../../../flyout_v2/shared/tools/notes/components/notes_remote_callout', () => ({
+  NotesRemoteCallout: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
+}));
+
 jest.mock('../../../../flyout_v2/shared/tools/notes/hooks/use_timeline_config', () => ({
   useTimelineConfig: jest.fn().mockReturnValue(undefined),
 }));
 
-const renderNotesTab = () =>
-  render(
-    <TestProviders>
-      <AttackDetailsProvider attackId="attack-123" indexName=".alerts-security.alerts-default">
-        <NotesTab />
-      </AttackDetailsProvider>
-    </TestProviders>
-  );
+const hit: DataTableRecord = {
+  id: 'attack-123',
+  raw: { _id: 'attack-123', _index: 'test', _source: {} },
+  flattened: {},
+};
 
 describe('NotesTab', () => {
   beforeEach(() => {
@@ -63,7 +37,11 @@ describe('NotesTab', () => {
   });
 
   it('renders notes details content', () => {
-    renderNotesTab();
+    render(
+      <TestProviders>
+        <NotesTab hit={hit} />
+      </TestProviders>
+    );
 
     expect(screen.getByTestId('notes-details-content')).toBeInTheDocument();
   });
@@ -73,10 +51,14 @@ describe('NotesTab', () => {
       '../../../../flyout_v2/shared/tools/notes/components/notes_details_content'
     );
 
-    renderNotesTab();
+    render(
+      <TestProviders>
+        <NotesTab hit={hit} />
+      </TestProviders>
+    );
 
     expect(NotesDetailsContent).toHaveBeenCalledWith(
-      expect.objectContaining({ hideTimelineIcon: false }),
+      expect.objectContaining({ hit, hideTimelineIcon: false }),
       expect.anything()
     );
   });

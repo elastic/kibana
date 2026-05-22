@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isNonLocalIndexName } from '@kbn/es-query';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { UsersAvatarsPanel } from '../../../../common/components/user_profiles/users_avatars_panel';
 import { useBulkGetUserProfiles } from '../../../../common/components/user_profiles/use_bulk_get_user_profiles';
@@ -27,8 +28,7 @@ import { useUpsellingMessage } from '../../../../common/hooks/use_upselling';
 import { useAttackAssigneesContextMenuItems } from '../../../../detections/hooks/attacks/bulk_actions/context_menu_items/use_attack_assignees_context_menu_items';
 import { useAttacksPrivileges } from '../../../../detections/hooks/attacks/bulk_actions/use_attacks_privileges';
 import { useInvalidateFindAttackDiscoveries } from '../../../../attack_discovery/pages/use_find_attack_discoveries';
-import { useAttackDetailsContext } from '../context';
-import { useHeaderData } from '../../../../flyout/attack_details/hooks/use_header_data';
+import { useHeaderData } from '../hooks/use_header_data';
 import {
   ATTACK_DETAILS_FLYOUT_TEST_ID,
   HEADER_ASSIGNEES_ADD_BUTTON_TEST_ID,
@@ -62,15 +62,31 @@ const AssigneesButton: FC<{
 ));
 AssigneesButton.displayName = 'AssigneesButton';
 
+export interface AssigneesProps {
+  /**
+   * The attack-discovery document hit. Provides `attackId` (`hit.raw._id`)
+   * and `indexName` (`hit.raw._index`), and is forwarded to `useHeaderData`
+   * to derive `alertIds` / `assignees` for the popover.
+   */
+  hit: DataTableRecord;
+  /**
+   * Callback invoked after assignee mutations succeed; refetches the attack
+   * document so the avatar group reflects the new assignees.
+   */
+  refetch: () => Promise<void>;
+}
+
 /**
  * Assignees block for the Attack details flyout header.
- * Follows the same pattern as status_popover_button: useAttackDetailsContext + useHeaderData
- * + useAttackAssigneesContextMenuItems, with EuiPopover + EuiContextMenu.
+ * Mirrors `StatusPopoverButton`: reads `alertIds` / `assignees` from
+ * `useHeaderData(hit)` and combines them with `useAttackAssigneesContextMenuItems`
+ * to render an `EuiPopover` + `EuiContextMenu`.
  */
-export const Assignees = memo(() => {
-  const { attackId, indexName, refetch } = useAttackDetailsContext();
+export const Assignees = memo(({ hit, refetch }: AssigneesProps) => {
+  const attackId = hit.raw._id ?? '';
+  const indexName = hit.raw._index ?? '';
   const isRemoteDocument = isNonLocalIndexName(indexName);
-  const { alertIds, assignees } = useHeaderData();
+  const { alertIds, assignees } = useHeaderData(hit);
   const invalidateFindAttackDiscoveries = useInvalidateFindAttackDiscoveries();
   const { hasIndexWrite, hasAttackIndexWrite, loading: privilegesLoading } = useAttacksPrivileges();
   const isPlatinumPlus = useLicense().isPlatinumPlus();

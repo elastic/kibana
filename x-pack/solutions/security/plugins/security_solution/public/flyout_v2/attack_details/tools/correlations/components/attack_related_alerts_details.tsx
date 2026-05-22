@@ -7,13 +7,20 @@
 
 import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { CorrelationsDetailsAlertsTable } from '../../../../document/tools/correlations/components/correlations_details_alerts_table';
-import { useOriginalAlertIds } from '../../../../../flyout/attack_details/hooks/use_original_alert_ids';
-import { useAttackDetailsContext } from '../../../main/context';
+import { useOriginalAlertIds } from '../../../main/hooks/use_original_alert_ids';
+import { useSpaceId } from '../../../../../common/hooks/use_space_id';
 import { getColumns } from '../../../../document/tools/correlations/utils/get_columns';
 import { ATTACK_CORRELATIONS_RELATED_ALERTS_TABLE_TEST_ID } from '../../../main/constants/test_ids';
 
 export interface AttackRelatedAlertsDetailsProps {
+  /**
+   * The attack-discovery document hit. `originalAlertIds` and `attackId`
+   * (used as `eventId` on the table) are derived from `hit.flattened` /
+   * `hit.raw._id`.
+   */
+  hit: DataTableRecord;
   /**
    * Callback invoked when the preview button on an alert row is clicked.
    * The v2 wiring opens the alert in a child document flyout via
@@ -28,13 +35,14 @@ export interface AttackRelatedAlertsDetailsProps {
  * Mirrors the legacy `flyout/attack_details/left/components/attack_related_alerts_details.tsx`
  * but accepts `onShowAlert` as a prop instead of pulling
  * `openPreviewPanel` from `useExpandableFlyoutApi` — the parent
- * (`flyout_v2/attack_details/index.tsx`) wires the preview to the v2
+ * (`flyout_v2/attack_details/main/index.tsx`) wires the preview to the v2
  * system-flyout flow.
  */
 export const AttackRelatedAlertsDetails: React.FC<AttackRelatedAlertsDetailsProps> = memo(
-  ({ onShowAlert }) => {
-    const { scopeId, attackId } = useAttackDetailsContext();
-    const alertIds = useOriginalAlertIds();
+  ({ hit, onShowAlert }) => {
+    const scopeId = useSpaceId() ?? '';
+    const attackId = hit.raw._id ?? '';
+    const alertIds = useOriginalAlertIds(hit);
 
     const columns = useMemo(
       () =>

@@ -13,7 +13,7 @@ import { CorrelationsDetailsView } from '../../../../flyout_v2/document/tools/co
 import { DocumentDetailsPreviewPanelKey } from '../../shared/constants/panel_keys';
 import { ALERT_PREVIEW_BANNER } from '../../preview/constants';
 import { AttackDetailsPreviewPanelKey } from '../../../attack_details/constants/panel_keys';
-import { ATTACK_PREVIEW_BANNER } from '../../../attack_details/context';
+import { ATTACK_PREVIEW_BANNER } from '../../../attack_details/constants/preview_banner';
 
 export const CORRELATIONS_TAB_ID = 'correlations';
 

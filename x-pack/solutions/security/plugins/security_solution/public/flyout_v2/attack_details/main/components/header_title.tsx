@@ -9,6 +9,8 @@ import React, { memo } from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import {
   FlyoutHeaderBlock,
   flyoutHeaderBlockStyles,
@@ -24,8 +26,7 @@ import {
   HEADER_BADGE_TEST_ID,
   HEADER_TITLE_TEST_ID,
 } from '../constants/test_ids';
-import { useHeaderData } from '../../../../flyout/attack_details/hooks/use_header_data';
-import { useAttackDetailsContext } from '../context';
+import { useHeaderData } from '../hooks/use_header_data';
 
 const ATTACK_HEADER_BADGE = i18n.translate(
   'xpack.securitySolution.attackDetailsFlyout.header.badge.attackLabel',
@@ -34,78 +35,116 @@ const ATTACK_HEADER_BADGE = i18n.translate(
   }
 );
 
+export interface HeaderTitleProps {
+  /**
+   * The attack-discovery document hit.
+   */
+  hit: DataTableRecord;
+  /**
+   * Browser fields used by the Status block to enrich the workflow-status
+   * field for the popover button.
+   */
+  browserFields: BrowserFields;
+  /**
+   * Field-browser-friendly representation of the event, used by the Status
+   * block to find the workflow-status row.
+   */
+  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[];
+  /**
+   * Callback invoked after status mutations succeed; refetches the attack
+   * document so the header reflects the new status.
+   */
+  refetch: () => Promise<void>;
+  /**
+   * Callback used by the Notes block to open the notes sub-flyout.
+   */
+  onShowNotes: () => void;
+}
+
 /**
  * Header data for the Attack details flyout
  */
-export const HeaderTitle = memo(({ onShowNotes }: { onShowNotes: () => void }) => {
-  const { title, timestamp, alertsCount } = useHeaderData();
-  const { attackId } = useAttackDetailsContext();
+export const HeaderTitle = memo(
+  ({
+    hit,
+    browserFields,
+    dataFormattedForFieldBrowser,
+    refetch,
+    onShowNotes,
+  }: HeaderTitleProps) => {
+    const { title, timestamp, alertsCount } = useHeaderData(hit);
+    const attackId = hit.raw._id ?? '';
 
-  return (
-    <>
-      {timestamp && (
-        <>
-          <PreferenceFormattedDate value={new Date(timestamp)} />
-          <EuiSpacer size="xs" />
-        </>
-      )}
-      <FlyoutTitle data-test-subj={HEADER_TITLE_TEST_ID} title={title} iconType={'bolt'} />
-      <EuiSpacer size="s" />
-      <EuiBadge
-        aria-label={ATTACK_HEADER_BADGE}
-        color="hollow"
-        data-test-subj={HEADER_BADGE_TEST_ID}
-        tabIndex={0}
-      >
-        {ATTACK_HEADER_BADGE}
-      </EuiBadge>
-      <EuiSpacer size="m" />
-      <EuiFlexGroup direction="row" gutterSize="s" responsive={false} wrap>
-        <EuiFlexItem css={flyoutHeaderBlockStyles}>
-          <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
-            <EuiFlexItem>
-              <Status />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <FlyoutHeaderBlock
-                hasBorder
-                title={
-                  <FormattedMessage
-                    id="xpack.securitySolution.attackDetailsFlyout.header.alertsTitle"
-                    defaultMessage="Alerts"
-                  />
-                }
-                data-test-subj={HEADER_ALERTS_BLOCK_TEST_ID}
-              >
-                {alertsCount}
-              </FlyoutHeaderBlock>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem css={flyoutHeaderBlockStyles}>
-          <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
-            <EuiFlexItem>
-              <FlyoutHeaderBlock
-                hasBorder
-                title={
-                  <FormattedMessage
-                    id="xpack.securitySolution.attackDetailsFlyout.header.assigneesTitle"
-                    defaultMessage="Assignees"
-                  />
-                }
-                data-test-subj={HEADER_ASSIGNEES_BLOCK_TEST_ID}
-              >
-                <Assignees />
-              </FlyoutHeaderBlock>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <Notes documentId={attackId} onShowNotes={onShowNotes} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </>
-  );
-});
+    return (
+      <>
+        {timestamp && (
+          <>
+            <PreferenceFormattedDate value={new Date(timestamp)} />
+            <EuiSpacer size="xs" />
+          </>
+        )}
+        <FlyoutTitle data-test-subj={HEADER_TITLE_TEST_ID} title={title} iconType={'bolt'} />
+        <EuiSpacer size="s" />
+        <EuiBadge
+          aria-label={ATTACK_HEADER_BADGE}
+          color="hollow"
+          data-test-subj={HEADER_BADGE_TEST_ID}
+          tabIndex={0}
+        >
+          {ATTACK_HEADER_BADGE}
+        </EuiBadge>
+        <EuiSpacer size="m" />
+        <EuiFlexGroup direction="row" gutterSize="s" responsive={false} wrap>
+          <EuiFlexItem css={flyoutHeaderBlockStyles}>
+            <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
+              <EuiFlexItem>
+                <Status
+                  hit={hit}
+                  browserFields={browserFields}
+                  dataFormattedForFieldBrowser={dataFormattedForFieldBrowser}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <FlyoutHeaderBlock
+                  hasBorder
+                  title={
+                    <FormattedMessage
+                      id="xpack.securitySolution.attackDetailsFlyout.header.alertsTitle"
+                      defaultMessage="Alerts"
+                    />
+                  }
+                  data-test-subj={HEADER_ALERTS_BLOCK_TEST_ID}
+                >
+                  {alertsCount}
+                </FlyoutHeaderBlock>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem css={flyoutHeaderBlockStyles}>
+            <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
+              <EuiFlexItem>
+                <FlyoutHeaderBlock
+                  hasBorder
+                  title={
+                    <FormattedMessage
+                      id="xpack.securitySolution.attackDetailsFlyout.header.assigneesTitle"
+                      defaultMessage="Assignees"
+                    />
+                  }
+                  data-test-subj={HEADER_ASSIGNEES_BLOCK_TEST_ID}
+                >
+                  <Assignees hit={hit} refetch={refetch} />
+                </FlyoutHeaderBlock>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <Notes documentId={attackId} onShowNotes={onShowNotes} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </>
+    );
+  }
+);
 
 HeaderTitle.displayName = 'HeaderTitle';

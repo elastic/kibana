@@ -5,24 +5,43 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import { isNonLocalIndexName } from '@kbn/es-query';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { AttacksGroupTakeActionItems } from '../../../detections/components/attacks/table/attacks_group_take_action_items';
 import { AttackAiAssistantButton } from '../../../detections/components/attacks/table/attack_details/attack_ai_assistant_button';
 import {
   FLYOUT_FOOTER_TAKE_ACTION_BUTTON_TEST_ID,
   FLYOUT_FOOTER_TEST_ID,
 } from './constants/test_ids';
-import { useAttackDetailsContext } from './context';
+
+export interface FooterProps {
+  /**
+   * The attack-discovery document hit. Provides `indexName` from
+   * `hit.raw._index` for the remote-document gating.
+   */
+  hit: DataTableRecord;
+  /**
+   * The parsed attack object from {@link useAttackDetails}. Required by the
+   * take-action items and the AI-assistant button.
+   */
+  attack: AttackDiscoveryAlert;
+  /**
+   * Callback invoked after a take-action item succeeds; refetches the attack
+   * document so the footer's state reflects the mutation.
+   */
+  refetch: () => Promise<void>;
+}
 
 /**
  * Footer of the v2 attack details flyout. Mirrors the legacy `PanelFooter`
  * minus the `<EuiFlyoutFooter>` wrapper (the parent index.tsx provides it).
  */
-export const Footer = () => {
-  const { attack, indexName, refetch } = useAttackDetailsContext();
+export const Footer = memo(({ hit, attack, refetch }: FooterProps) => {
+  const indexName = hit.raw._index ?? '';
   const isRemoteDocument = useMemo(() => isNonLocalIndexName(indexName), [indexName]);
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -57,8 +76,6 @@ export const Footer = () => {
     [togglePopover]
   );
 
-  if (!attack) return null;
-
   return (
     <EuiFlexGroup
       justifyContent="flexEnd"
@@ -82,7 +99,6 @@ export const Footer = () => {
             attack={attack}
             onActionSuccess={onActionSuccess}
             closePopover={closePopover}
-            size="s"
             telemetrySource="attacks_page_flyout_take_action"
             showAiAssistantAction={false}
             isRemoteDocument={isRemoteDocument}
@@ -91,6 +107,6 @@ export const Footer = () => {
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-};
+});
 
 Footer.displayName = 'Footer';

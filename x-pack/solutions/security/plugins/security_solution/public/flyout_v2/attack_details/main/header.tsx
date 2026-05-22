@@ -9,10 +9,30 @@ import { EuiSpacer, EuiTab, EuiTabs, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { FC } from 'react';
 import React, { memo } from 'react';
+import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { HeaderTitle } from './components/header_title';
 import type { AttackDetailsPanelPaths, AttackDetailsPanelTabType } from './types';
 
 export interface HeaderProps {
+  /**
+   * The attack-discovery document hit forwarded to {@link HeaderTitle}.
+   */
+  hit: DataTableRecord;
+  /**
+   * Browser fields used by the Status block inside the header title.
+   */
+  browserFields: BrowserFields;
+  /**
+   * Field-browser-friendly representation of the event used by the Status
+   * block.
+   */
+  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[];
+  /**
+   * Refetch callback forwarded to the Status / Assignees children so the
+   * header updates after mutations.
+   */
+  refetch: () => Promise<void>;
   /**
    * Id of the tab currently selected.
    */
@@ -38,7 +58,16 @@ export interface HeaderProps {
  * the tab strip; intended to be wrapped in `<EuiFlyoutHeader>` by the parent.
  */
 export const Header: FC<HeaderProps> = memo(
-  ({ selectedTabId, setSelectedTabId, tabs, onShowNotes }) => {
+  ({
+    hit,
+    browserFields,
+    dataFormattedForFieldBrowser,
+    refetch,
+    selectedTabId,
+    setSelectedTabId,
+    tabs,
+    onShowNotes,
+  }) => {
     const { euiTheme } = useEuiTheme();
     // Pull the tab strip down by `EuiFlyoutHeader`'s built-in
     // `padding-block-end` (16px from the parent flyout's `paddingSize: 'm'`)
@@ -51,7 +80,13 @@ export const Header: FC<HeaderProps> = memo(
     `;
     return (
       <>
-        <HeaderTitle onShowNotes={onShowNotes} />
+        <HeaderTitle
+          hit={hit}
+          browserFields={browserFields}
+          dataFormattedForFieldBrowser={dataFormattedForFieldBrowser}
+          refetch={refetch}
+          onShowNotes={onShowNotes}
+        />
         <EuiSpacer size="m" />
         <EuiTabs bottomBorder={false} expand css={tabsCss}>
           {tabs.map((tab) => (

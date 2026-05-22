@@ -9,6 +9,7 @@ import { EuiContextMenu, EuiPopover, EuiPopoverTitle } from '@elastic/eui';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import type { inputsModel } from '../../../../common/store';
 import { inputsSelectors } from '../../../../common/store';
 import { useInvalidateFindAttackDiscoveries } from '../../../../attack_discovery/pages/use_find_attack_discoveries';
@@ -18,15 +19,20 @@ import { CLICK_TO_CHANGE_ALERT_STATUS } from '../../../../detections/components/
 import { FormattedFieldValue } from '../../../../timelines/components/timeline/body/renderers/formatted_field';
 import { getFieldFormat } from '../../../../flyout/document_details/right/utils/get_field_format';
 import type { EnrichedFieldInfoWithValues } from '../../../../flyout/document_details/right/utils/enriched_field_info';
-import { useAttackDetailsContext } from '../context';
 import { STATUS_POPOVER_BUTTON_TEST_ID, STATUS_POPOVER_TEST_ID } from '../constants/test_ids';
-import { useHeaderData } from '../../../../flyout/attack_details/hooks/use_header_data';
+import { useHeaderData } from '../hooks/use_header_data';
 import type { AlertWorkflowStatus } from '../../../../common/types';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 
 interface StatusPopoverButtonProps {
   /**
-   * Information used to
+   * The attack-discovery document hit. Provides `attackId` (`hit.raw._id`)
+   * and is forwarded to `useHeaderData` to derive `alertIds` for the
+   * status context-menu items.
+   */
+  hit: DataTableRecord;
+  /**
+   * Information used to render and update the workflow-status field.
    */
   enrichedFieldInfo: EnrichedFieldInfoWithValues;
   /**
@@ -41,9 +47,9 @@ interface StatusPopoverButtonProps {
  * It is used in the header of the attack details flyout.
  */
 export const StatusPopoverButton = memo(
-  ({ enrichedFieldInfo, disabled }: StatusPopoverButtonProps) => {
-    const { attackId } = useAttackDetailsContext();
-    const { alertIds } = useHeaderData();
+  ({ hit, enrichedFieldInfo, disabled }: StatusPopoverButtonProps) => {
+    const attackId = hit.raw._id ?? '';
+    const { alertIds } = useHeaderData(hit);
     const currentSpaceId = useSpaceId();
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const togglePopover = useCallback(() => setIsPopoverOpen((open) => !open), []);
@@ -67,14 +73,13 @@ export const StatusPopoverButton = memo(
       refetchGlobalQuery();
     }, [invalidateFindAttackDiscoveries, refetchGlobalQuery]);
 
+    const attacksWithWorkflowStatus = useMemo(
+      () => [{ attackId, relatedAlertIds: alertIds, workflowStatus: currentWorkflowStatus }],
+      [attackId, alertIds, currentWorkflowStatus]
+    );
+
     const { items, panels } = useAttackWorkflowStatusContextMenuItems({
-      attacksWithWorkflowStatus: [
-        {
-          attackId,
-          relatedAlertIds: alertIds,
-          workflowStatus: currentWorkflowStatus,
-        },
-      ],
+      attacksWithWorkflowStatus,
       closePopover: togglePopover,
       onSuccess: onWorkflowStatusChange,
       telemetrySource: 'attacks_page_flyout_header',

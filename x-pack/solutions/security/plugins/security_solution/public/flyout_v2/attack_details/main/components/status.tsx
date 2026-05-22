@@ -9,6 +9,8 @@ import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { find } from 'lodash/fp';
 import { isNonLocalIndexName } from '@kbn/es-query';
+import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { SIGNAL_STATUS_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
 import { getEnrichedFieldInfo } from '../../../../flyout/document_details/right/utils/enriched_field_info';
@@ -20,7 +22,6 @@ import type {
   EnrichedFieldInfoWithValues,
 } from '../../../../flyout/document_details/right/utils/enriched_field_info';
 import { StatusPopoverButton } from './status_popover_button';
-import { useAttackDetailsContext } from '../context';
 import { HEADER_STATUS_BLOCK_TEST_ID } from '../constants/test_ids';
 
 /**
@@ -30,9 +31,26 @@ function hasData(fieldInfo?: EnrichedFieldInfo): fieldInfo is EnrichedFieldInfoW
   return !!fieldInfo && Array.isArray(fieldInfo.values);
 }
 
-export const Status = memo(() => {
-  const { attackId, indexName, browserFields, dataFormattedForFieldBrowser } =
-    useAttackDetailsContext();
+export interface StatusProps {
+  /**
+   * The attack-discovery document hit. Provides `attackId` (`hit.raw._id`)
+   * and `indexName` (`hit.raw._index`) for the workflow-status popover.
+   */
+  hit: DataTableRecord;
+  /**
+   * Browser fields used to enrich the workflow-status field.
+   */
+  browserFields: BrowserFields;
+  /**
+   * Field-browser representation of the attack document; the workflow-status
+   * row is looked up here.
+   */
+  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[];
+}
+
+export const Status = memo(({ hit, browserFields, dataFormattedForFieldBrowser }: StatusProps) => {
+  const attackId = hit.raw._id ?? '';
+  const indexName = hit.raw._index ?? '';
   const currentSpaceId = useSpaceId();
   const isRemoteDocument = isNonLocalIndexName(indexName);
   const statusData = useMemo(() => {
@@ -66,7 +84,7 @@ export const Status = memo(() => {
       {!statusData || !hasData(statusData) ? (
         getEmptyTagValue()
       ) : (
-        <StatusPopoverButton enrichedFieldInfo={statusData} disabled={isRemoteDocument} />
+        <StatusPopoverButton hit={hit} enrichedFieldInfo={statusData} disabled={isRemoteDocument} />
       )}
     </FlyoutHeaderBlock>
   );

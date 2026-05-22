@@ -50,7 +50,7 @@ import {
 } from '../../../../timelines/components/field_renderers/default_renderer';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { CellActions as DocumentDetailsCellActions } from '../../shared/components/cell_actions';
-import { CellActions as AttackDetailsCellActions } from '../../../attack_details/components/cell_actions';
+import { CellActions as AttackDetailsCellActions } from '../../../../flyout_v2/attack_details/main/components/cell_actions';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { manageQuery } from '../../../../common/components/page/manage_query';
 import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';

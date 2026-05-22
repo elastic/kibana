@@ -6,12 +6,28 @@
  */
 
 import { useCallback, useMemo, useState } from 'react';
-import { FLYOUT_STORAGE_KEYS } from '../../../../flyout/attack_details/constants/local_storage';
+import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
 import { useKibana } from '../../../../common/lib/kibana';
 import * as tabs from '../tabs';
 import type { AttackDetailsPanelPaths, AttackDetailsPanelTabType } from '../types';
 
 export interface UseTabsProps {
+  /**
+   * The attack-discovery document hit forwarded to every tab.
+   */
+  hit: DataTableRecord;
+  /**
+   * Browser fields resolved by {@link useAttackDetails}; needed by the Table
+   * tab's column renderers.
+   */
+  browserFields: BrowserFields;
+  /**
+   * Field-browser-friendly representation of the event needed by the Table
+   * tab to render one row per field.
+   */
+  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[];
   /**
    * Callback that opens the attack-specific Entities child flyout (forwarded
    * into the Overview tab).
@@ -45,17 +61,16 @@ export interface UseTabsResult {
  * expandable-flyout panel state); the v2 flyout has no such routing so the
  * initial tab comes from local storage and the active tab is tracked in
  * component state. The same local-storage key as the legacy hook is reused
- * intentionally: a user who switches between the legacy attack flyout (in
- * the security app) and the v2 one (in Discover) will see consistent tab
- * preferences.
+ * intentionally so users see consistent tab preferences across surfaces.
  *
- * The Overview tab needs per-instance callbacks for the Insights → Entities
- * and Insights → Correlations title links — they're constructed in the
- * parent {@link AttackDetails} using `overlays.openSystemFlyout(...)` and
- * threaded into this hook so the displayed tab list rebuilds when the
- * callbacks change.
+ * Each tab is built via its factory so it can receive `hit` (and, for the
+ * Overview tab, the two child-flyout callbacks; for the Table tab, the
+ * resolved browser fields).
  */
 export const useTabs = ({
+  hit,
+  browserFields,
+  dataFormattedForFieldBrowser,
   onShowAttackEntities,
   onShowAttackCorrelations,
 }: UseTabsProps): UseTabsResult => {
@@ -63,11 +78,17 @@ export const useTabs = ({
 
   const tabsDisplayed = useMemo<AttackDetailsPanelTabType[]>(
     () => [
-      tabs.overviewTab({ onShowAttackEntities, onShowAttackCorrelations }),
-      tabs.tableTab,
-      tabs.jsonTab,
+      tabs.overviewTab({ hit, onShowAttackEntities, onShowAttackCorrelations }),
+      tabs.tableTab({ hit, browserFields, dataFormattedForFieldBrowser }),
+      tabs.jsonTab({ hit }),
     ],
-    [onShowAttackEntities, onShowAttackCorrelations]
+    [
+      browserFields,
+      dataFormattedForFieldBrowser,
+      hit,
+      onShowAttackCorrelations,
+      onShowAttackEntities,
+    ]
   );
 
   const [selectedTabId, setSelectedTabIdState] = useState<AttackDetailsPanelPaths>(() => {

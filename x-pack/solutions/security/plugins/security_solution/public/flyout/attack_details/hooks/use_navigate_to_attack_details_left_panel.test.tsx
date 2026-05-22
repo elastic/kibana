@@ -8,7 +8,6 @@
 import { renderHook } from '@testing-library/react';
 import { useNavigateToAttackDetailsLeftPanel } from './use_navigate_to_attack_details_left_panel';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useAttackDetailsContext } from '../context';
 import { AttackDetailsLeftPanelKey, AttackDetailsRightPanelKey } from '../constants/panel_keys';
 
 const mockOpenLeftPanel = jest.fn();
@@ -16,10 +15,6 @@ const mockOpenFlyout = jest.fn();
 
 jest.mock('@kbn/expandable-flyout', () => ({
   useExpandableFlyoutApi: jest.fn(),
-}));
-
-jest.mock('../context', () => ({
-  useAttackDetailsContext: jest.fn(),
 }));
 
 describe('useNavigateToAttackDetailsLeftPanel', () => {
@@ -38,15 +33,12 @@ describe('useNavigateToAttackDetailsLeftPanel', () => {
       closeFlyout: jest.fn(),
       closeLeftPanel: jest.fn(),
     } as unknown as ReturnType<typeof useExpandableFlyoutApi>);
-    jest.mocked(useAttackDetailsContext).mockReturnValue({
-      attackId,
-      indexName,
-      isPreviewMode: false,
-    } as ReturnType<typeof useAttackDetailsContext>);
   });
 
   it('returns a callback that opens the left panel with correct params and default tab and subTab', () => {
-    const { result } = renderHook(() => useNavigateToAttackDetailsLeftPanel());
+    const { result } = renderHook(() =>
+      useNavigateToAttackDetailsLeftPanel({ attackId, indexName })
+    );
 
     result.current();
 
@@ -65,7 +57,9 @@ describe('useNavigateToAttackDetailsLeftPanel', () => {
   });
 
   it('returns a callback that opens the left panel with custom tab when provided', () => {
-    const { result } = renderHook(() => useNavigateToAttackDetailsLeftPanel({ tab: 'notes' }));
+    const { result } = renderHook(() =>
+      useNavigateToAttackDetailsLeftPanel({ attackId, indexName, tab: 'notes' })
+    );
 
     result.current();
 
@@ -83,13 +77,9 @@ describe('useNavigateToAttackDetailsLeftPanel', () => {
   });
 
   it('returns a callback that opens a full flyout when in preview mode', () => {
-    jest.mocked(useAttackDetailsContext).mockReturnValue({
-      attackId,
-      indexName,
-      isPreviewMode: true,
-    } as ReturnType<typeof useAttackDetailsContext>);
-
-    const { result } = renderHook(() => useNavigateToAttackDetailsLeftPanel());
+    const { result } = renderHook(() =>
+      useNavigateToAttackDetailsLeftPanel({ attackId, indexName, isPreviewMode: true })
+    );
 
     result.current();
 
@@ -118,7 +108,7 @@ describe('useNavigateToAttackDetailsLeftPanel', () => {
 
   it('returns a callback that opens the left panel with correlation subTab when provided', () => {
     const { result } = renderHook(() =>
-      useNavigateToAttackDetailsLeftPanel({ subTab: 'correlation' })
+      useNavigateToAttackDetailsLeftPanel({ attackId, indexName, subTab: 'correlation' })
     );
 
     result.current();

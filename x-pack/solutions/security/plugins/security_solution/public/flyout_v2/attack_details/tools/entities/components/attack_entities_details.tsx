@@ -8,15 +8,24 @@
 import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSkeletonText, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useAttackDetailsContext } from '../../../main/context';
-import { useHeaderData } from '../../../../../flyout/attack_details/hooks/use_header_data';
-import { useAttackEntitiesLists } from '../../../../../flyout/attack_details/hooks/use_attack_entities_lists';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import { useHeaderData } from '../../../main/hooks/use_header_data';
+import { useAttackEntitiesLists } from '../../../main/hooks/use_attack_entities_lists';
+import { useSpaceId } from '../../../../../common/hooks/use_space_id';
 import { UserDetails } from '../../../../../flyout/document_details/left/components/user_details';
 import { HostDetails } from '../../../../../flyout/document_details/left/components/host_details';
 import {
   ATTACK_ENTITIES_DETAILS_LOADING_TEST_ID,
   ATTACK_ENTITIES_DETAILS_TEST_ID,
 } from '../../../main/constants/test_ids';
+
+export interface AttackEntitiesDetailsProps {
+  /**
+   * The attack-discovery document hit. `timestamp`, alert ids, and entity
+   * lists are all derived from `hit.flattened`.
+   */
+  hit: DataTableRecord;
+}
 
 /**
  * Entities (related users and hosts) displayed in the v2 Attack Details
@@ -26,10 +35,11 @@ import {
  * components from the document_details flyout (per the spec exception for
  * presentation-shared components).
  */
-export const AttackEntitiesDetails: React.FC = memo(() => {
-  const { scopeId } = useAttackDetailsContext();
-  const { timestamp } = useHeaderData();
-  const { userEntityIdentifiers, hostEntityIdentifiers, loading, error } = useAttackEntitiesLists();
+export const AttackEntitiesDetails: React.FC<AttackEntitiesDetailsProps> = memo(({ hit }) => {
+  const scopeId = useSpaceId() ?? '';
+  const { timestamp } = useHeaderData(hit);
+  const { userEntityIdentifiers, hostEntityIdentifiers, loading, error } =
+    useAttackEntitiesLists(hit);
 
   const timestampOrFallback = timestamp ?? '';
 
@@ -74,10 +84,10 @@ export const AttackEntitiesDetails: React.FC = memo(() => {
           </h3>
         </EuiTitle>
         <EuiSpacer size="s" />
-        {userEntityIdentifiers.map((identifiers, index) => {
+        {userEntityIdentifiers.map((identifiers) => {
           const userName = identifiers['user.name'] ?? Object.values(identifiers)[0];
           return (
-            <React.Fragment key={`user-${index}-${userName}`}>
+            <React.Fragment key={`user-${userName}`}>
               <UserDetails
                 userName={userName}
                 timestamp={timestampOrFallback}
@@ -101,10 +111,10 @@ export const AttackEntitiesDetails: React.FC = memo(() => {
           </h3>
         </EuiTitle>
         <EuiSpacer size="s" />
-        {hostEntityIdentifiers.map((identifiers, index) => {
+        {hostEntityIdentifiers.map((identifiers) => {
           const hostName = identifiers['host.name'] ?? Object.values(identifiers)[0];
           return (
-            <React.Fragment key={`host-${index}-${hostName}`}>
+            <React.Fragment key={`host-${hostName}`}>
               <HostDetails
                 hostName={hostName}
                 timestamp={timestampOrFallback}

@@ -12,7 +12,6 @@ import { EuiFlyoutBody, EuiFlyoutHeader, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { ToolsFlyoutHeader } from '../../../shared/components/tools_flyout_header';
-import { AttackDetailsProvider } from '../../main/context';
 import { ATTACK_CORRELATIONS_FLYOUT_TEST_ID } from '../../main/constants/test_ids';
 import { AttackRelatedAlertsDetails } from './components/attack_related_alerts_details';
 
@@ -26,9 +25,9 @@ const TITLE = i18n.translate(
 export interface AttackCorrelationsProps {
   /**
    * The attack-discovery alert document this child flyout is opened from.
-   * Used to (re)build the v2 `AttackDetailsProvider` inside the new
-   * system-flyout root so the related-alerts table can read attack data
-   * via the legacy `useOriginalAlertIds` hook.
+   * Threaded through to {@link AttackRelatedAlertsDetails} so the
+   * `useOriginalAlertIds` hook can derive `originalAlertIds` directly from
+   * `hit.flattened`.
    */
   hit: DataTableRecord;
   /**
@@ -54,7 +53,7 @@ export const AttackCorrelations: FC<AttackCorrelationsProps> = memo(({ hit, onSh
   const { euiTheme } = useEuiTheme();
 
   return (
-    <AttackDetailsProvider hit={hit}>
+    <>
       <EuiFlyoutHeader
         hasBorder
         css={css`
@@ -65,9 +64,9 @@ export const AttackCorrelations: FC<AttackCorrelationsProps> = memo(({ hit, onSh
         <ToolsFlyoutHeader hit={hit} title={TITLE} />
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <AttackRelatedAlertsDetails onShowAlert={onShowAlert} />
+        <AttackRelatedAlertsDetails hit={hit} onShowAlert={onShowAlert} />
       </EuiFlyoutBody>
-    </AttackDetailsProvider>
+    </>
   );
 });
 

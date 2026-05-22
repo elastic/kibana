@@ -7,9 +7,10 @@
 
 import React, { memo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { useExpandSection } from '../../../shared/hooks/use_expand_section';
 import { ExpandableSection } from '../../../shared/components/expandable_section';
-import { FLYOUT_STORAGE_KEYS } from '../../../../flyout/attack_details/constants/local_storage';
+import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
 import { INSIGHTS_SECTION_TEST_ID } from '../constants/test_ids';
 import { CorrelationsOverview } from './correlations_overview';
 import { EntitiesOverview } from './entities_overview';
@@ -17,6 +18,11 @@ import { EntitiesOverview } from './entities_overview';
 const KEY = 'insights';
 
 export interface InsightsSectionProps {
+  /**
+   * The attack-discovery document hit. Forwarded to `EntitiesOverview` and
+   * `CorrelationsOverview` so they can drive their counts off the hit.
+   */
+  hit: DataTableRecord;
   /**
    * Callback to open the attack-specific Entities child flyout. Forwarded
    * to {@link EntitiesOverview} as its title-link callback.
@@ -33,7 +39,7 @@ export interface InsightsSectionProps {
  * Renders the Overview tab - InsightsSection content in the Attack Details flyout.
  */
 export const InsightsSection: React.FC<InsightsSectionProps> = memo(
-  ({ onShowAttackEntities, onShowAttackCorrelations }) => {
+  ({ hit, onShowAttackEntities, onShowAttackCorrelations }) => {
     const expanded = useExpandSection({
       storageKey: FLYOUT_STORAGE_KEYS.ATTACK_DETAILS_OVERVIEW_TAB_EXPANDED_SECTIONS,
       title: KEY,
@@ -54,8 +60,8 @@ export const InsightsSection: React.FC<InsightsSectionProps> = memo(
         gutterSize="s"
         data-test-subj={INSIGHTS_SECTION_TEST_ID}
       >
-        <EntitiesOverview onShowAttackEntities={onShowAttackEntities} />
-        <CorrelationsOverview onShowAttackCorrelations={onShowAttackCorrelations} />
+        <EntitiesOverview hit={hit} onShowAttackEntities={onShowAttackEntities} />
+        <CorrelationsOverview hit={hit} onShowAttackCorrelations={onShowAttackCorrelations} />
       </ExpandableSection>
     );
   }

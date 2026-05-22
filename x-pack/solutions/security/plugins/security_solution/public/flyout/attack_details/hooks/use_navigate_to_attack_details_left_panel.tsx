@@ -10,9 +10,24 @@ import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { AttackDetailsLeftPanelKey, AttackDetailsRightPanelKey } from '../constants/panel_keys';
 import { INSIGHTS_TAB_ID, ENTITIES_TAB_ID } from '../constants/left_panel_paths';
-import { useAttackDetailsContext } from '../context';
 
 export interface UseNavigateToAttackDetailsLeftPanelParams {
+  /**
+   * Id of the attack document the navigation targets. Read by the right /
+   * left panel registrations as the `params.attackId` panel key.
+   */
+  attackId: string;
+  /**
+   * Index name of the attack document. Read by the right / left panel
+   * registrations as the `params.indexName` panel key.
+   */
+  indexName: string;
+  /**
+   * Whether the caller is opening from the preview panel surface. When true
+   * the callback uses `openFlyout({ right, left })` so the right panel is
+   * restored alongside the left; when false it just opens the left panel.
+   */
+  isPreviewMode?: boolean;
   /**
    * Optional tab to open in the left panel. Defaults to the Insights tab.
    * Use 'notes' to open the Notes tab.
@@ -27,13 +42,20 @@ export interface UseNavigateToAttackDetailsLeftPanelParams {
 
 /**
  * Hook that returns a callback to open the Attack Details left panel.
+ * Callers must provide `attackId` / `indexName` / `isPreviewMode` directly —
+ * the legacy shared `useAttackDetailsContext()` no longer exists.
  */
 export const useNavigateToAttackDetailsLeftPanel = (
-  params: UseNavigateToAttackDetailsLeftPanelParams = {}
+  params: UseNavigateToAttackDetailsLeftPanelParams
 ): (() => void) => {
-  const { tab = INSIGHTS_TAB_ID, subTab = ENTITIES_TAB_ID } = params;
+  const {
+    attackId,
+    indexName,
+    isPreviewMode = false,
+    tab = INSIGHTS_TAB_ID,
+    subTab = ENTITIES_TAB_ID,
+  } = params;
   const { openLeftPanel, openFlyout } = useExpandableFlyoutApi();
-  const { attackId, indexName, isPreviewMode } = useAttackDetailsContext();
 
   const left: FlyoutPanelProps = useMemo(
     () => ({
