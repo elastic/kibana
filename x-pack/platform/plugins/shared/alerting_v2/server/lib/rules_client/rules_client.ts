@@ -16,36 +16,37 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { KibanaRequest as CoreKibanaRequest } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import type { z } from '@kbn/zod/v4';
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
-
+import { treeifyError, type z } from '@kbn/zod/v4';
 import { type RuleSavedObjectAttributes } from '../../saved_objects';
+import { type ActionPolicyClient } from '../action_policy_client';
+import { withApm as withApmDecorator } from '../apm/with_apm_decorator';
+import { ALERTING_V2_ERROR_CODES } from '../errors/error_codes';
 import { ALERTING_RULE_EXECUTOR_TASK_TYPE } from '../rule_executor';
 import { ensureRuleExecutorTaskScheduled, getRuleExecutorTaskId } from '../rule_executor/schedule';
 import type { RuleExecutorTaskParams } from '../rule_executor/types';
 import type { RulesSavedObjectServiceContract } from '../services/rules_saved_object_service/rules_saved_object_service';
 import type { UserServiceContract } from '../services/user_service/user_service';
+import { buildRuleSoFilter } from './build_rule_filter';
+import { buildSoSearch, RULE_SEARCH_FIELDS } from './build_so_search';
 import type {
   BulkOperationError,
   BulkOperationResponse,
   BulkRulesParams,
   CreateRuleData,
   CreateRuleParams,
-  FindRulesSortField,
   FindRulesParams,
   FindRulesResponse,
+  FindRulesSortField,
   RuleResponse,
   UpdateRuleData,
 } from './types';
 import {
+  assertImmutableUnchanged,
+  buildUpdateRuleAttributes,
   transformCreateRuleBodyToRuleSoAttributes,
   transformRuleSoAttributesToRuleApiResponse,
-  buildUpdateRuleAttributes,
-  assertImmutableUnchanged,
 } from './utils';
-import { buildRuleSoFilter } from './build_rule_filter';
-import { buildSoSearch, RULE_SEARCH_FIELDS } from './build_so_search';
-import { withApm as withApmDecorator } from '../apm/with_apm_decorator';
 
 const withApm = withApmDecorator('RulesClient');
 
@@ -80,6 +81,7 @@ interface RulesClientParams {
     rulesSavedObjectService: RulesSavedObjectServiceContract;
     taskManager: TaskManagerStartContract;
     userService: UserServiceContract;
+    actionPolicyClient: ActionPolicyClient;
   };
   options: {
     spaceId: string;
@@ -91,6 +93,7 @@ export class RulesClient {
   private readonly rulesSavedObjectService: RulesSavedObjectServiceContract;
   private readonly taskManager: TaskManagerStartContract;
   private readonly userService: UserServiceContract;
+  private readonly actionPolicyClient: ActionPolicyClient;
   private readonly spaceId: string;
 
   constructor({ services, options }: RulesClientParams) {
@@ -98,6 +101,7 @@ export class RulesClient {
     this.rulesSavedObjectService = services.rulesSavedObjectService;
     this.taskManager = services.taskManager;
     this.userService = services.userService;
+    this.actionPolicyClient = services.actionPolicyClient;
     this.spaceId = options.spaceId;
   }
 
@@ -113,7 +117,11 @@ export class RulesClient {
     const parsed = schema.safeParse(data);
     if (!parsed.success) {
       throw Boom.badRequest(
-        `Error validating ${context} rule data - ${stringifyZodError(parsed.error)}`
+        `Error validating ${context} rule data - ${stringifyZodError(parsed.error)}`,
+        {
+          code: ALERTING_V2_ERROR_CODES.INVALID_RULE_DATA,
+          details: { context, errors: treeifyError(parsed.error) },
+        }
       );
     }
     return parsed.data;
@@ -127,7 +135,10 @@ export class RulesClient {
       return { attrs: doc.attributes, version: doc.version };
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-        throw Boom.notFound(`Rule with id "${id}" not found`);
+        throw Boom.notFound(`Rule with id "${id}" not found`, {
+          code: ALERTING_V2_ERROR_CODES.RULE_NOT_FOUND,
+          details: { rule_id: id },
+        });
       }
       throw e;
     }
@@ -166,7 +177,10 @@ export class RulesClient {
       await this.rulesSavedObjectService.update({ id, attrs, version });
     } catch (e) {
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
-        throw Boom.conflict(`Rule with id "${id}" has already been updated by another user`);
+        throw Boom.conflict(`Rule with id "${id}" has already been updated by another user`, {
+          code: ALERTING_V2_ERROR_CODES.RULE_VERSION_CONFLICT,
+          details: { rule_id: id },
+        });
       }
       throw e;
     }
@@ -177,14 +191,15 @@ export class RulesClient {
     const { spaceId } = this.getSpaceContext();
     const parsed = this.parseRuleData(createRuleDataSchema, params.data, 'create');
 
-    const username = await this.userService.getCurrentUsername();
+    const userProfileUid = await this.userService.getCurrentUserProfileUid();
+
     const nowIso = new Date().toISOString();
 
     const ruleAttributes = transformCreateRuleBodyToRuleSoAttributes(parsed, {
       enabled: true,
-      createdBy: username,
+      createdBy: userProfileUid,
       createdAt: nowIso,
-      updatedBy: username,
+      updatedBy: userProfileUid,
       updatedAt: nowIso,
     });
 
@@ -197,7 +212,10 @@ export class RulesClient {
     } catch (e) {
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
         const conflictId = params.options?.id ?? 'unknown';
-        throw Boom.conflict(`Rule with id "${conflictId}" already exists`);
+        throw Boom.conflict(`Rule with id "${conflictId}" already exists`, {
+          code: ALERTING_V2_ERROR_CODES.RULE_ALREADY_EXISTS,
+          details: { rule_id: conflictId },
+        });
       }
       throw e;
     }
@@ -227,7 +245,7 @@ export class RulesClient {
     const { spaceId } = this.getSpaceContext();
     const parsed = this.parseRuleData(updateRuleDataSchema, data, 'update');
 
-    const username = await this.userService.getCurrentUsername();
+    const userProfileUid = await this.userService.getCurrentUserProfileUid();
     const nowIso = new Date().toISOString();
 
     const { attrs: existingAttrs, version: existingVersion } = await this.getExistingRule(id);
@@ -238,11 +256,14 @@ export class RulesClient {
         state_transition: parsed.state_transition,
       })
     ) {
-      throw Boom.badRequest('stateTransition is only allowed for rules of kind "alert".');
+      throw Boom.badRequest('stateTransition is only allowed for rules of kind "alert".', {
+        code: ALERTING_V2_ERROR_CODES.INVALID_STATE_TRANSITION,
+        details: { rule_id: id, rule_kind: existingAttrs.kind },
+      });
     }
 
     const nextAttrs = buildUpdateRuleAttributes(existingAttrs, parsed, {
-      updatedBy: username,
+      updatedBy: userProfileUid,
       updatedAt: nowIso,
     });
 
@@ -294,20 +315,28 @@ export class RulesClient {
     const { spaceId } = this.getSpaceContext();
 
     if (!(await this.ruleExists({ id }))) {
-      throw Boom.notFound(`Rule with id "${id}" not found`);
+      throw Boom.notFound(`Rule with id "${id}" not found`, {
+        code: ALERTING_V2_ERROR_CODES.RULE_NOT_FOUND,
+        details: { rule_id: id },
+      });
     }
 
     const taskId = getRuleExecutorTaskId({ ruleId: id, spaceId });
     await this.taskManager.removeIfExists(taskId);
 
     await this.rulesSavedObjectService.delete({ id });
+
+    await this.actionPolicyClient.deleteActionPoliciesByFilter({
+      type: 'single_rule',
+      ruleId: id,
+    });
   }
 
   @withApm
   public async enableRule({ id }: { id: string }): Promise<RuleResponse> {
     const { spaceId } = this.getSpaceContext();
 
-    const username = await this.userService.getCurrentUsername();
+    const userProfileUid = await this.userService.getCurrentUserProfileUid();
     const nowIso = new Date().toISOString();
 
     const { attrs: existingAttrs, version: existingVersion } = await this.getExistingRule(id);
@@ -315,7 +344,7 @@ export class RulesClient {
     const nextAttrs: RuleSavedObjectAttributes = {
       ...existingAttrs,
       enabled: true,
-      updatedBy: username,
+      updatedBy: userProfileUid,
       updatedAt: nowIso,
     };
 
@@ -334,7 +363,7 @@ export class RulesClient {
   public async disableRule({ id }: { id: string }): Promise<RuleResponse> {
     const { spaceId } = this.getSpaceContext();
 
-    const username = await this.userService.getCurrentUsername();
+    const userProfileUid = await this.userService.getCurrentUserProfileUid();
     const nowIso = new Date().toISOString();
 
     const { attrs: existingAttrs, version: existingVersion } = await this.getExistingRule(id);
@@ -342,7 +371,7 @@ export class RulesClient {
     const nextAttrs: RuleSavedObjectAttributes = {
       ...existingAttrs,
       enabled: false,
-      updatedBy: username,
+      updatedBy: userProfileUid,
       updatedAt: nowIso,
     };
 
@@ -394,7 +423,9 @@ export class RulesClient {
    */
   private async resolveRuleIds(params: BulkRulesParams): Promise<ResolveRuleIdsResult> {
     if (params.ids && (params.filter || params.search)) {
-      throw Boom.badRequest('ids cannot be combined with filter or search');
+      throw Boom.badRequest('ids cannot be combined with filter or search', {
+        code: ALERTING_V2_ERROR_CODES.INVALID_BULK_PARAMS,
+      });
     }
 
     if (params.ids) {
@@ -699,7 +730,7 @@ export class RulesClient {
     }
 
     const { spaceId } = this.getSpaceContext();
-    const username = await this.userService.getCurrentUsername();
+    const userProfileUid = await this.userService.getCurrentUserProfileUid();
     const nowIso = new Date().toISOString();
 
     const { attrs: existingAttrs, version: existingVersion } = await this.getExistingRule(id);
@@ -710,7 +741,7 @@ export class RulesClient {
       enabled: existingAttrs.enabled,
       createdBy: existingAttrs.createdBy,
       createdAt: existingAttrs.createdAt,
-      updatedBy: username,
+      updatedBy: userProfileUid,
       updatedAt: nowIso,
     });
 

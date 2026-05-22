@@ -22,6 +22,7 @@ import type {
   EsWorkflow,
   EsWorkflowStepExecution,
   GetAvailableConnectorsResponse,
+  ResumeWorkflowExecutionResponseDto,
   UpdatedWorkflowResponseDto,
   ValidateWorkflowResponseDto,
   WorkflowDetailDto,
@@ -64,6 +65,7 @@ export interface GetWorkflowsParams {
   enabled?: boolean[];
   tags?: string[];
   query?: string;
+  managedFilter?: 'all' | 'managed' | 'unmanaged';
   _full?: boolean;
 }
 
@@ -121,6 +123,10 @@ export interface SearchStepExecutionsParams {
   includeOutput?: boolean;
   page?: number;
   size?: number;
+  /** Datemath lower bound for filtering by startedAt. */
+  startedAfter?: string;
+  /** Datemath upper bound for filtering by startedAt. */
+  startedBefore?: string;
 }
 
 export interface GetAvailableConnectorsParams {
@@ -578,10 +584,11 @@ export class WorkflowsManagementApi {
 
   public async cancelWorkflowExecution(
     workflowExecutionId: string,
-    spaceId: string
+    spaceId: string,
+    request?: KibanaRequest
   ): Promise<void> {
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
-    return workflowsExecutionEngine.cancelWorkflowExecution(workflowExecutionId, spaceId);
+    return workflowsExecutionEngine.cancelWorkflowExecution(workflowExecutionId, spaceId, request);
   }
 
   public async cancelAllActiveWorkflowExecutions(
@@ -601,7 +608,7 @@ export class WorkflowsManagementApi {
     spaceId: string,
     input: Record<string, unknown>,
     request: KibanaRequest
-  ): Promise<void> {
+  ): Promise<ResumeWorkflowExecutionResponseDto> {
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
     return workflowsExecutionEngine.resumeWorkflowExecution(executionId, spaceId, input, request);
   }

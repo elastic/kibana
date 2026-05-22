@@ -8,6 +8,7 @@
 import type { SingleCaseMetricsResponse } from '../../../../common/types/api';
 import { CaseMetricsFeature } from '../../../../common/types/api';
 import { Operations } from '../../../authorization';
+import { getAttachmentAuthorizationFilter } from '../../../authorization/utils';
 import { createCaseError } from '../../../common/error';
 import { SingleCaseBaseHandler } from '../single_case_base_handler';
 import type { SingleCaseBaseHandlerCommonOptions } from '../types';
@@ -22,6 +23,7 @@ export class AlertsCount extends SingleCaseBaseHandler {
       authorization,
       services: { attachmentService },
       logger,
+      config,
     } = this.options.clientArgs;
 
     const { casesClient } = this.options;
@@ -33,8 +35,10 @@ export class AlertsCount extends SingleCaseBaseHandler {
         includeComments: false,
       });
 
-      const { filter: authorizationFilter } = await authorization.getAuthorizationFilter(
-        Operations.getAttachmentMetrics
+      const { filter: authorizationFilter } = await getAttachmentAuthorizationFilter(
+        authorization,
+        Operations.getAttachmentMetrics,
+        { isCasesAttachmentsEnabled: config.attachments?.enabled === true }
       );
 
       const alertsCount = await attachmentService.countAlertsAttachedToCase({

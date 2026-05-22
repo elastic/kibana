@@ -4241,6 +4241,7 @@ const sparklineDefinition: FunctionDefinition = {
     defaultMessage:
       'The values representing the y-axis values of a sparkline graph for a given aggregation over a period of time.',
   }),
+  tsdbCompatible: false,
   preview: true,
   alias: undefined,
   signatures: [
@@ -4252,6 +4253,9 @@ const sparklineDefinition: FunctionDefinition = {
           optional: false,
           description:
             'Aggregation that calculates the y-axis value of the sparkline graph for each datapoint.',
+          hint: {
+            kind: 'aggregation',
+          },
         },
         {
           name: 'key',
@@ -4288,6 +4292,9 @@ const sparklineDefinition: FunctionDefinition = {
           optional: false,
           description:
             'Aggregation that calculates the y-axis value of the sparkline graph for each datapoint.',
+          hint: {
+            kind: 'aggregation',
+          },
         },
         {
           name: 'key',
@@ -4324,6 +4331,9 @@ const sparklineDefinition: FunctionDefinition = {
           optional: false,
           description:
             'Aggregation that calculates the y-axis value of the sparkline graph for each datapoint.',
+          hint: {
+            kind: 'aggregation',
+          },
         },
         {
           name: 'key',

@@ -123,6 +123,23 @@ The data stream uses `dynamic: false` and the following index mapping (defined b
 
 Variable-shape field `object.snapshot` is stored but unmapped; `metadata` uses the `flattened` type so arbitrary keys can be stored and indexed without dynamic mapping.
 
+### Index Lifecycle Management (ILM)
+
+The data stream is linked to a managed ILM policy named:
+
+```
+.kibana-change-history-ilm-policy
+```
+
+The default policy ships with a single `hot` phase and no actions — change history documents are kept indefinitely with no automatic rollover or deletion. The policy is installed only when it does not already exist, so cluster admins can customize it in place without their changes being overwritten on the next Kibana startup.
+
+To adjust retention or add a rollover strategy, edit the policy via:
+
+- the Kibana UI: **Stack Management → Index Lifecycle Policies → `.kibana-change-history-ilm-policy`**, or
+- the Elasticsearch API: `PUT _ilm/policy/.kibana-change-history-ilm-policy`.
+
+Edits take effect on existing backing indices on the next ILM poll.
+
 ### Dependencies
 
 See [tsconfig.json](tsconfig.json) for internal kibana references.

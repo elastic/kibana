@@ -601,7 +601,6 @@ describe('breadcrumbs', () => {
                 </EuiContextMenuItem>,
               ]
             }
-            size="s"
           />,
           "popoverProps": Object {
             "panelPaddingSize": "none",
@@ -664,7 +663,6 @@ describe('breadcrumbs', () => {
                 </EuiContextMenuItem>,
               ]
             }
-            size="s"
           />,
           "popoverProps": Object {
             "panelPaddingSize": "none",
@@ -721,7 +719,6 @@ describe('breadcrumbs', () => {
                 </EuiContextMenuItem>,
               ]
             }
-            size="s"
           />,
           "popoverProps": Object {
             "panelPaddingSize": "none",
