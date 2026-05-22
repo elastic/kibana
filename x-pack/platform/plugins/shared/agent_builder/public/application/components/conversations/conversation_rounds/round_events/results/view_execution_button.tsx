@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SubAgentExecutionFlyout } from '../flyouts/sub_agent_execution_flyout';
 
@@ -48,9 +48,9 @@ export const ViewExecutionButton: React.FC<ViewExecutionButtonProps> = ({
 
   return (
     <>
-      <EuiButtonEmpty iconType="popout" size="s" onClick={() => setIsOpen(true)} flush="left">
+      <EuiButton iconType="popout" size="s" color="text" onClick={() => setIsOpen(true)}>
         {buttonLabel}
-      </EuiButtonEmpty>
+      </EuiButton>
       {isOpen && (
         <SubAgentExecutionFlyout
           executionId={executionId}

@@ -6,14 +6,14 @@
  */
 
 import React, { useState, Fragment } from 'react';
-import { EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
 import { ToolResponseFlyout } from '../flyouts/tool_response_flyout';
 import { ToolResult as ToolResultDispatcher } from './tool_result';
 
 const buttonLabel = i18n.translate('xpack.agentBuilder.roundEvents.results.viewResponse', {
-  defaultMessage: 'View response',
+  defaultMessage: 'View JSON',
 });
 
 interface ViewResponseButtonProps {
@@ -32,9 +32,9 @@ export const ViewResponseButton: React.FC<ViewResponseButtonProps> = ({ results 
 
   return (
     <>
-      <EuiButtonEmpty iconType="popout" size="s" onClick={() => setIsOpen(true)} flush="left">
+      <EuiButton iconType="editorCodeBlock" size="s" color="text" onClick={() => setIsOpen(true)}>
         {buttonLabel}
-      </EuiButtonEmpty>
+      </EuiButton>
       <ToolResponseFlyout isOpen={isOpen} onClose={() => setIsOpen(false)}>
         {results.map((result, index) => (
           <Fragment key={`flyout-result-${index}`}>

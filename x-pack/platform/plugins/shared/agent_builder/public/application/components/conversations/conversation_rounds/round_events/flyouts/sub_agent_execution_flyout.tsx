@@ -8,7 +8,6 @@
 import React from 'react';
 import {
   EuiCallOut,
-  EuiCodeBlock,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
@@ -23,6 +22,7 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useFollowExecution } from '../../../../../hooks/use_follow_execution';
 import { RoundEvents } from '../round_events';
+import { JsonCodeBlock } from '../json_code_block';
 
 interface SubAgentExecutionFlyoutProps {
   executionId: string;
@@ -83,15 +83,14 @@ export const SubAgentExecutionFlyout: React.FC<SubAgentExecutionFlyoutProps> = (
       <EuiFlyoutBody>
         {params && (
           <>
-            <EuiCodeBlock language="json" paddingSize="s" fontSize="s" isCopyable>
-              {JSON.stringify(params, null, 2)}
-            </EuiCodeBlock>
+            <JsonCodeBlock data={params} />
             <EuiSpacer size="m" />
           </>
         )}
         {error && (
           <>
             <EuiCallOut
+              announceOnMount
               title={
                 <FormattedMessage
                   id="xpack.agentBuilder.roundEvents.subAgentExecutionFlyout.errorTitle"

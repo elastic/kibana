@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { EuiBadge, EuiCodeBlock, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiBadge, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -15,6 +15,7 @@ import type { ToolCallStep as ToolCallStepData } from '@kbn/agent-builder-common
 import type { ToolResult as ToolResultData } from '@kbn/agent-builder-common/tools/tool_result';
 import { isErrorResult } from '@kbn/agent-builder-common/tools/tool_result';
 import { StepLayout } from '../step_layout';
+import { JsonCodeBlock } from '../json_code_block';
 import { ToolResult, isInlineRenderableResult } from '../results/tool_result';
 import { ViewResponseButton } from '../results/view_response_button';
 import { ViewExecutionButton } from '../results/view_execution_button';
@@ -30,13 +31,9 @@ const labels = {
     defaultMessage: 'Progression',
   }),
   result: i18n.translate('xpack.agentBuilder.roundEvents.steps.toolCall.resultLabel', {
-    defaultMessage: 'Result',
+    defaultMessage: 'Response returned.',
   }),
 };
-
-const codeblockStyles = css`
-  word-break: break-word;
-`;
 
 interface ToolCallStepProps {
   step: ToolCallStepData;
@@ -120,11 +117,6 @@ interface ToolCallExpansionProps {
 }
 
 const ToolCallExpansion: React.FC<ToolCallExpansionProps> = ({ step }) => {
-  const { euiTheme } = useEuiTheme();
-  const sectionStyles = css`
-    padding-bottom: ${euiTheme.size.s};
-  `;
-
   const inlineResults = step.results.filter(isInlineRenderableResult);
   const flyoutResults = step.results.filter((r: ToolResultData) => !isInlineRenderableResult(r));
 
@@ -143,40 +135,23 @@ const ToolCallExpansion: React.FC<ToolCallExpansionProps> = ({ step }) => {
     : hasInlineResults || hasFlyoutResults;
 
   return (
-    <>
-      {/* Parameters */}
-      <div css={sectionStyles}>
-        <EuiText size="xs" color="subdued">
-          <strong>{labels.parameters}</strong>
-        </EuiText>
-        <EuiSpacer size="xs" />
-        <EuiCodeBlock language="json" paddingSize="s" fontSize="s" isCopyable css={codeblockStyles}>
-          {JSON.stringify(step.params, null, 2)}
-        </EuiCodeBlock>
-      </div>
+    <SubStepList>
+      <SubStep label={labels.parameters}>
+        <JsonCodeBlock data={step.params} />
+      </SubStep>
 
-      {/* Progression */}
       {step.progression && step.progression.length > 0 && (
-        <div css={sectionStyles}>
-          <EuiText size="xs" color="subdued">
-            <strong>{labels.progression}</strong>
-          </EuiText>
-          <EuiSpacer size="xs" />
+        <SubStep label={labels.progression}>
           {step.progression.map((p, idx) => (
             <EuiText key={`progression-${idx}`} size="s">
               <p>{p.message}</p>
             </EuiText>
           ))}
-        </div>
+        </SubStep>
       )}
 
-      {/* Result(s) */}
       {showResultSection && (
-        <div css={sectionStyles}>
-          <EuiText size="xs" color="subdued">
-            <strong>{labels.result}</strong>
-          </EuiText>
-          <EuiSpacer size="xs" />
+        <SubStep label={labels.result}>
           {isSubAgentCall ? (
             <ViewExecutionButton executionId={subAgentExecutionId!} params={step.params} />
           ) : (
@@ -191,9 +166,42 @@ const ToolCallExpansion: React.FC<ToolCallExpansionProps> = ({ step }) => {
               {hasFlyoutResults && <ViewResponseButton results={flyoutResults} />}
             </>
           )}
-        </div>
+        </SubStep>
       )}
-    </>
+    </SubStepList>
+  );
+};
+
+const SubStepList: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { euiTheme } = useEuiTheme();
+  const styles = css`
+    list-style: disc;
+    margin: 0;
+    & > li::marker {
+      color: ${euiTheme.colors.textSubdued};
+    }
+  `;
+  return <ul css={styles}>{children}</ul>;
+};
+
+interface SubStepProps {
+  label: string;
+  children: React.ReactNode;
+}
+
+const SubStep: React.FC<SubStepProps> = ({ label, children }) => {
+  const { euiTheme } = useEuiTheme();
+  const itemStyles = css`
+    padding-bottom: ${euiTheme.size.s};
+  `;
+  return (
+    <li css={itemStyles}>
+      <EuiText size="s" color="subdued">
+        {label}
+      </EuiText>
+      <EuiSpacer size="xs" />
+      {children}
+    </li>
   );
 };
 
