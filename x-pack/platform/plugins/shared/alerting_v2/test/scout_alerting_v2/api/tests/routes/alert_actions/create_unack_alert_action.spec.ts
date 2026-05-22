@@ -9,6 +9,7 @@ import type { RoleApiCredentials } from '@kbn/scout';
 import {
   ALL_ROLE,
   apiTest,
+  buildAlertEvent,
   getUnackAlertActionUrl,
   NO_ACCESS_ROLE,
   READ_ROLE,
@@ -25,30 +26,35 @@ apiTest.describe('Create unack alert action API', { tag: '@local-stateful-classi
   });
 
   apiTest.beforeEach(async ({ apiServices }) => {
-    await apiServices.alertingV2.alertActions.cleanUpAll();
+    await apiServices.alertingV2.ruleEvents.cleanUp();
+    await apiServices.alertingV2.alertActions.cleanUp();
   });
 
   apiTest.afterAll(async ({ apiServices }) => {
-    await apiServices.alertingV2.alertActions.cleanUpAll();
+    await apiServices.alertingV2.ruleEvents.cleanUp();
+    await apiServices.alertingV2.alertActions.cleanUp();
   });
 
   apiTest('unack: writes an unack action and returns 204', async ({ apiClient, apiServices }) => {
     const ruleId = 'unack-happy-rule';
     const groupHash = 'unack-happy-group';
     const episodeId = 'unack-happy-episode';
-    await apiServices.alertingV2.alertActions.seedEvents([
-      {
+    await apiServices.alertingV2.ruleEvents.seed([
+      buildAlertEvent({
         rule: { id: ruleId, version: 1 },
         group_hash: groupHash,
         episode: { id: episodeId, status: 'active' },
-      },
+      }),
     ]);
     const response = await apiClient.post(getUnackAlertActionUrl(groupHash), {
       headers: writerHeaders,
       body: { episode_id: episodeId },
     });
     expect(response).toHaveStatusCode(204);
-    const actions = await apiServices.alertingV2.alertActions.findActions([ruleId]);
+    const actions = await apiServices.alertingV2.alertActions.find({
+      ruleId,
+      actionTypes: ['unack'],
+    });
     expect(actions).toHaveLength(1);
     expect(actions[0]).toMatchObject({
       action_type: 'unack',
@@ -112,12 +118,12 @@ apiTest.describe('Create unack alert action API', { tag: '@local-stateful-classi
     async ({ apiClient, apiServices }) => {
       const ruleId = 'unack-404-rule';
       const groupHash = 'unack-404-group';
-      await apiServices.alertingV2.alertActions.seedEvents([
-        {
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
           rule: { id: ruleId, version: 1 },
           group_hash: groupHash,
           episode: { id: 'real-episode', status: 'active' },
-        },
+        }),
       ]);
       const response = await apiClient.post(getUnackAlertActionUrl(groupHash), {
         headers: writerHeaders,
@@ -129,21 +135,11 @@ apiTest.describe('Create unack alert action API', { tag: '@local-stateful-classi
 
   apiTest(
     'authorization: returns 403 for a user with read-only alerting_v2 privileges',
-    async ({ apiClient, apiServices, requestAuth }) => {
-      const ruleId = 'unack-authz-read-rule';
-      const groupHash = 'unack-authz-read-group';
-      const episodeId = 'unack-authz-read-episode';
-      await apiServices.alertingV2.alertActions.seedEvents([
-        {
-          rule: { id: ruleId, version: 1 },
-          group_hash: groupHash,
-          episode: { id: episodeId, status: 'active' },
-        },
-      ]);
+    async ({ apiClient, requestAuth }) => {
       const readerCredentials = await requestAuth.getApiKeyForCustomRole(READ_ROLE);
-      const response = await apiClient.post(getUnackAlertActionUrl(groupHash), {
+      const response = await apiClient.post(getUnackAlertActionUrl('unack-authz-read-group'), {
         headers: { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader },
-        body: { episode_id: episodeId },
+        body: { episode_id: 'unack-authz-read-episode' },
       });
       expect(response).toHaveStatusCode(403);
     }
@@ -151,21 +147,11 @@ apiTest.describe('Create unack alert action API', { tag: '@local-stateful-classi
 
   apiTest(
     'authorization: returns 403 for a user without alerting_v2 privileges',
-    async ({ apiClient, apiServices, requestAuth }) => {
-      const ruleId = 'unack-authz-none-rule';
-      const groupHash = 'unack-authz-none-group';
-      const episodeId = 'unack-authz-none-episode';
-      await apiServices.alertingV2.alertActions.seedEvents([
-        {
-          rule: { id: ruleId, version: 1 },
-          group_hash: groupHash,
-          episode: { id: episodeId, status: 'active' },
-        },
-      ]);
+    async ({ apiClient, requestAuth }) => {
       const noAccessCredentials = await requestAuth.getApiKeyForCustomRole(NO_ACCESS_ROLE);
-      const response = await apiClient.post(getUnackAlertActionUrl(groupHash), {
+      const response = await apiClient.post(getUnackAlertActionUrl('unack-authz-none-group'), {
         headers: { ...testData.COMMON_HEADERS, ...noAccessCredentials.apiKeyHeader },
-        body: { episode_id: episodeId },
+        body: { episode_id: 'unack-authz-none-episode' },
       });
       expect(response).toHaveStatusCode(403);
     }

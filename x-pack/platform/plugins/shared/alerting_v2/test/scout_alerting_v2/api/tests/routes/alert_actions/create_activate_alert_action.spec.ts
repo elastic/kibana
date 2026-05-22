@@ -10,6 +10,7 @@ import type { RoleApiCredentials } from '@kbn/scout';
 import {
   ALL_ROLE,
   apiTest,
+  buildAlertEvent,
   getActivateAlertActionUrl,
   NO_ACCESS_ROLE,
   READ_ROLE,
@@ -26,11 +27,13 @@ apiTest.describe('Create activate alert action API', { tag: '@local-stateful-cla
   });
 
   apiTest.beforeEach(async ({ apiServices }) => {
-    await apiServices.alertingV2.alertActions.cleanUpAll();
+    await apiServices.alertingV2.ruleEvents.cleanUp();
+    await apiServices.alertingV2.alertActions.cleanUp();
   });
 
   apiTest.afterAll(async ({ apiServices }) => {
-    await apiServices.alertingV2.alertActions.cleanUpAll();
+    await apiServices.alertingV2.ruleEvents.cleanUp();
+    await apiServices.alertingV2.alertActions.cleanUp();
   });
 
   apiTest(
@@ -39,19 +42,22 @@ apiTest.describe('Create activate alert action API', { tag: '@local-stateful-cla
       const ruleId = 'activate-happy-rule';
       const groupHash = 'activate-happy-group';
       const reason = 'needs immediate attention';
-      await apiServices.alertingV2.alertActions.seedEvents([
-        {
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
           rule: { id: ruleId, version: 1 },
           group_hash: groupHash,
           episode: { id: 'activate-happy-episode', status: 'active' },
-        },
+        }),
       ]);
       const response = await apiClient.post(getActivateAlertActionUrl(groupHash), {
         headers: writerHeaders,
         body: { reason },
       });
       expect(response).toHaveStatusCode(204);
-      const actions = await apiServices.alertingV2.alertActions.findActions([ruleId]);
+      const actions = await apiServices.alertingV2.alertActions.find({
+        ruleId,
+        actionTypes: ['activate'],
+      });
       expect(actions).toHaveLength(1);
       expect(actions[0]).toMatchObject({
         action_type: 'activate',
@@ -113,18 +119,9 @@ apiTest.describe('Create activate alert action API', { tag: '@local-stateful-cla
 
   apiTest(
     'authorization: returns 403 for a user with read-only alerting_v2 privileges',
-    async ({ apiClient, apiServices, requestAuth }) => {
-      const ruleId = 'activate-authz-read-rule';
-      const groupHash = 'activate-authz-read-group';
-      await apiServices.alertingV2.alertActions.seedEvents([
-        {
-          rule: { id: ruleId, version: 1 },
-          group_hash: groupHash,
-          episode: { id: 'activate-authz-read-episode', status: 'active' },
-        },
-      ]);
+    async ({ apiClient, requestAuth }) => {
       const readerCredentials = await requestAuth.getApiKeyForCustomRole(READ_ROLE);
-      const response = await apiClient.post(getActivateAlertActionUrl(groupHash), {
+      const response = await apiClient.post(getActivateAlertActionUrl('activate-authz-read-group'), {
         headers: { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader },
         body: { reason: 'valid reason' },
       });
@@ -134,18 +131,9 @@ apiTest.describe('Create activate alert action API', { tag: '@local-stateful-cla
 
   apiTest(
     'authorization: returns 403 for a user without alerting_v2 privileges',
-    async ({ apiClient, apiServices, requestAuth }) => {
-      const ruleId = 'activate-authz-none-rule';
-      const groupHash = 'activate-authz-none-group';
-      await apiServices.alertingV2.alertActions.seedEvents([
-        {
-          rule: { id: ruleId, version: 1 },
-          group_hash: groupHash,
-          episode: { id: 'activate-authz-none-episode', status: 'active' },
-        },
-      ]);
+    async ({ apiClient, requestAuth }) => {
       const noAccessCredentials = await requestAuth.getApiKeyForCustomRole(NO_ACCESS_ROLE);
-      const response = await apiClient.post(getActivateAlertActionUrl(groupHash), {
+      const response = await apiClient.post(getActivateAlertActionUrl('activate-authz-none-group'), {
         headers: { ...testData.COMMON_HEADERS, ...noAccessCredentials.apiKeyHeader },
         body: { reason: 'valid reason' },
       });

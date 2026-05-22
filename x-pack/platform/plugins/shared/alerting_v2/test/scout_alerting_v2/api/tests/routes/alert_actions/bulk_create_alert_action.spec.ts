@@ -10,6 +10,7 @@ import type { RoleApiCredentials } from '@kbn/scout';
 import {
   ALL_ROLE,
   apiTest,
+  buildAlertEvent,
   BULK_ALERT_ACTION_URL,
   NO_ACCESS_ROLE,
   READ_ROLE,
@@ -26,11 +27,13 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
   });
 
   apiTest.beforeEach(async ({ apiServices }) => {
-    await apiServices.alertingV2.alertActions.cleanUpAll();
+    await apiServices.alertingV2.ruleEvents.cleanUp();
+    await apiServices.alertingV2.alertActions.cleanUp();
   });
 
   apiTest.afterAll(async ({ apiServices }) => {
-    await apiServices.alertingV2.alertActions.cleanUpAll();
+    await apiServices.alertingV2.ruleEvents.cleanUp();
+    await apiServices.alertingV2.alertActions.cleanUp();
   });
 
   apiTest(
@@ -40,12 +43,12 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
       const groupHash = 'bulk-single-group';
       const episodeId = 'bulk-single-episode';
 
-      await apiServices.alertingV2.alertActions.seedEvents([
-        {
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
           rule: { id: ruleId, version: 1 },
           group_hash: groupHash,
           episode: { id: episodeId, status: 'active' },
-        },
+        }),
       ]);
 
       const response = await apiClient.post(BULK_ALERT_ACTION_URL, {
@@ -56,7 +59,10 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
       expect(response).toHaveStatusCode(200);
       expect(response.body).toStrictEqual({ processed: 1, total: 1 });
 
-      const actions = await apiServices.alertingV2.alertActions.findActions([ruleId]);
+      const actions = await apiServices.alertingV2.alertActions.find({
+        ruleId,
+        actionTypes: ['ack'],
+      });
       expect(actions).toHaveLength(1);
       expect(actions[0]).toMatchObject({
         action_type: 'ack',
@@ -76,22 +82,22 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
       const groupHashAck = 'bulk-mixed-group-ack';
       const ackEpisodeId = 'bulk-mixed-ack-episode';
 
-      await apiServices.alertingV2.alertActions.seedEvents([
-        {
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
           rule: { id: ruleId, version: 1 },
           group_hash: groupHashTag,
           episode: { id: 'bulk-mixed-tag-episode', status: 'active' },
-        },
-        {
+        }),
+        buildAlertEvent({
           rule: { id: ruleId, version: 1 },
           group_hash: groupHashActivate,
           episode: { id: 'bulk-mixed-activate-episode', status: 'active' },
-        },
-        {
+        }),
+        buildAlertEvent({
           rule: { id: ruleId, version: 1 },
           group_hash: groupHashAck,
           episode: { id: ackEpisodeId, status: 'active' },
-        },
+        }),
       ]);
 
       const response = await apiClient.post(BULK_ALERT_ACTION_URL, {
@@ -106,7 +112,10 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
       expect(response).toHaveStatusCode(200);
       expect(response.body).toStrictEqual({ processed: 3, total: 3 });
 
-      const actions = await apiServices.alertingV2.alertActions.findActions([ruleId]);
+      const actions = await apiServices.alertingV2.alertActions.find({
+        ruleId,
+        actionTypes: ['tag', 'activate', 'ack'],
+      });
       expect(actions).toHaveLength(3);
 
       const tagAction = actions.find((doc) => doc.action_type === 'tag');
@@ -132,12 +141,12 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
       const knownGroup = 'bulk-partial-known-group';
       const knownEpisode = 'bulk-partial-known-episode';
 
-      await apiServices.alertingV2.alertActions.seedEvents([
-        {
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
           rule: { id: ruleId, version: 1 },
           group_hash: knownGroup,
           episode: { id: knownEpisode, status: 'active' },
-        },
+        }),
       ]);
 
       const response = await apiClient.post(BULK_ALERT_ACTION_URL, {
@@ -155,7 +164,10 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
       expect(response).toHaveStatusCode(200);
       expect(response.body).toStrictEqual({ processed: 1, total: 2 });
 
-      const actions = await apiServices.alertingV2.alertActions.findActions([ruleId]);
+      const actions = await apiServices.alertingV2.alertActions.find({
+        ruleId,
+        actionTypes: ['ack'],
+      });
       expect(actions).toHaveLength(1);
       expect(actions[0]).toMatchObject({
         action_type: 'ack',
@@ -185,7 +197,10 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
       expect(response).toHaveStatusCode(200);
       expect(response.body).toStrictEqual({ processed: 0, total: 2 });
 
-      const actions = await apiServices.alertingV2.alertActions.findActions([ruleId]);
+      const actions = await apiServices.alertingV2.alertActions.find({
+        ruleId,
+        actionTypes: ['ack', 'snooze'],
+      });
       expect(actions).toHaveLength(0);
     }
   );
@@ -278,24 +293,18 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
 
   apiTest(
     'authorization: returns 403 for a user with read-only alerting_v2 privileges',
-    async ({ apiClient, apiServices, requestAuth }) => {
-      const ruleId = 'bulk-authz-read-rule';
-      const groupHash = 'bulk-authz-read-group';
-      const episodeId = 'bulk-authz-read-episode';
-
-      await apiServices.alertingV2.alertActions.seedEvents([
-        {
-          rule: { id: ruleId, version: 1 },
-          group_hash: groupHash,
-          episode: { id: episodeId, status: 'active' },
-        },
-      ]);
-
+    async ({ apiClient, requestAuth }) => {
       const readerCredentials = await requestAuth.getApiKeyForCustomRole(READ_ROLE);
 
       const response = await apiClient.post(BULK_ALERT_ACTION_URL, {
         headers: { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader },
-        body: [{ group_hash: groupHash, action_type: 'ack', episode_id: episodeId }],
+        body: [
+          {
+            group_hash: 'bulk-authz-read-group',
+            action_type: 'ack',
+            episode_id: 'bulk-authz-read-episode',
+          },
+        ],
       });
 
       expect(response).toHaveStatusCode(403);
@@ -304,24 +313,18 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
 
   apiTest(
     'authorization: returns 403 for a user without alerting_v2 privileges',
-    async ({ apiClient, apiServices, requestAuth }) => {
-      const ruleId = 'bulk-authz-none-rule';
-      const groupHash = 'bulk-authz-none-group';
-      const episodeId = 'bulk-authz-none-episode';
-
-      await apiServices.alertingV2.alertActions.seedEvents([
-        {
-          rule: { id: ruleId, version: 1 },
-          group_hash: groupHash,
-          episode: { id: episodeId, status: 'active' },
-        },
-      ]);
-
+    async ({ apiClient, requestAuth }) => {
       const noAccessCredentials = await requestAuth.getApiKeyForCustomRole(NO_ACCESS_ROLE);
 
       const response = await apiClient.post(BULK_ALERT_ACTION_URL, {
         headers: { ...testData.COMMON_HEADERS, ...noAccessCredentials.apiKeyHeader },
-        body: [{ group_hash: groupHash, action_type: 'ack', episode_id: episodeId }],
+        body: [
+          {
+            group_hash: 'bulk-authz-none-group',
+            action_type: 'ack',
+            episode_id: 'bulk-authz-none-episode',
+          },
+        ],
       });
 
       expect(response).toHaveStatusCode(403);

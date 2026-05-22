@@ -10,6 +10,7 @@ import type { RoleApiCredentials } from '@kbn/scout';
 import {
   ALL_ROLE,
   apiTest,
+  buildAlertEvent,
   getAckAlertActionUrl,
   NO_ACCESS_ROLE,
   READ_ROLE,
@@ -32,30 +33,35 @@ apiTest.describe('Create ack alert action API', { tag: '@local-stateful-classic'
   });
 
   apiTest.beforeEach(async ({ apiServices }) => {
-    await apiServices.alertingV2.alertActions.cleanUpAll();
+    await apiServices.alertingV2.ruleEvents.cleanUp();
+    await apiServices.alertingV2.alertActions.cleanUp();
   });
 
   apiTest.afterAll(async ({ apiServices }) => {
-    await apiServices.alertingV2.alertActions.cleanUpAll();
+    await apiServices.alertingV2.ruleEvents.cleanUp();
+    await apiServices.alertingV2.alertActions.cleanUp();
   });
 
   apiTest('ack: writes an ack action and returns 204', async ({ apiClient, apiServices }) => {
     const ruleId = 'ack-happy-rule';
     const groupHash = 'ack-happy-group';
     const episodeId = 'ack-happy-episode';
-    await apiServices.alertingV2.alertActions.seedEvents([
-      {
+    await apiServices.alertingV2.ruleEvents.seed([
+      buildAlertEvent({
         rule: { id: ruleId, version: 1 },
         group_hash: groupHash,
         episode: { id: episodeId, status: 'active' },
-      },
+      }),
     ]);
     const response = await apiClient.post(getAckAlertActionUrl(groupHash), {
       headers: writerHeaders,
       body: { episode_id: episodeId },
     });
     expect(response).toHaveStatusCode(204);
-    const actions = await apiServices.alertingV2.alertActions.findActions([ruleId]);
+    const actions = await apiServices.alertingV2.alertActions.find({
+      ruleId,
+      actionTypes: ['ack'],
+    });
     expect(actions).toHaveLength(1);
     expect(actions[0]).toMatchObject({
       action_type: 'ack',
@@ -119,12 +125,12 @@ apiTest.describe('Create ack alert action API', { tag: '@local-stateful-classic'
     async ({ apiClient, apiServices }) => {
       const ruleId = 'ack-404-rule';
       const groupHash = 'ack-404-group';
-      await apiServices.alertingV2.alertActions.seedEvents([
-        {
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
           rule: { id: ruleId, version: 1 },
           group_hash: groupHash,
           episode: { id: 'real-episode', status: 'active' },
-        },
+        }),
       ]);
       const response = await apiClient.post(getAckAlertActionUrl(groupHash), {
         headers: writerHeaders,
@@ -136,21 +142,11 @@ apiTest.describe('Create ack alert action API', { tag: '@local-stateful-classic'
 
   apiTest(
     'authorization: returns 403 for a user with read-only alerting_v2 privileges',
-    async ({ apiClient, apiServices, requestAuth }) => {
-      const ruleId = 'ack-authz-read-rule';
-      const groupHash = 'ack-authz-read-group';
-      const episodeId = 'ack-authz-read-episode';
-      await apiServices.alertingV2.alertActions.seedEvents([
-        {
-          rule: { id: ruleId, version: 1 },
-          group_hash: groupHash,
-          episode: { id: episodeId, status: 'active' },
-        },
-      ]);
+    async ({ apiClient, requestAuth }) => {
       const readerCredentials = await requestAuth.getApiKeyForCustomRole(READ_ROLE);
-      const response = await apiClient.post(getAckAlertActionUrl(groupHash), {
+      const response = await apiClient.post(getAckAlertActionUrl('ack-authz-read-group'), {
         headers: { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader },
-        body: { episode_id: episodeId },
+        body: { episode_id: 'ack-authz-read-episode' },
       });
       expect(response).toHaveStatusCode(403);
     }
@@ -158,21 +154,11 @@ apiTest.describe('Create ack alert action API', { tag: '@local-stateful-classic'
 
   apiTest(
     'authorization: returns 403 for a user without alerting_v2 privileges',
-    async ({ apiClient, apiServices, requestAuth }) => {
-      const ruleId = 'ack-authz-none-rule';
-      const groupHash = 'ack-authz-none-group';
-      const episodeId = 'ack-authz-none-episode';
-      await apiServices.alertingV2.alertActions.seedEvents([
-        {
-          rule: { id: ruleId, version: 1 },
-          group_hash: groupHash,
-          episode: { id: episodeId, status: 'active' },
-        },
-      ]);
+    async ({ apiClient, requestAuth }) => {
       const noAccessCredentials = await requestAuth.getApiKeyForCustomRole(NO_ACCESS_ROLE);
-      const response = await apiClient.post(getAckAlertActionUrl(groupHash), {
+      const response = await apiClient.post(getAckAlertActionUrl('ack-authz-none-group'), {
         headers: { ...testData.COMMON_HEADERS, ...noAccessCredentials.apiKeyHeader },
-        body: { episode_id: episodeId },
+        body: { episode_id: 'ack-authz-none-episode' },
       });
       expect(response).toHaveStatusCode(403);
     }

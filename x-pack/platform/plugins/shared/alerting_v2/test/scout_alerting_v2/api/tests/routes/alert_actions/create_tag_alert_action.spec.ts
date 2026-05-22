@@ -10,6 +10,7 @@ import type { RoleApiCredentials } from '@kbn/scout';
 import {
   ALL_ROLE,
   apiTest,
+  buildAlertEvent,
   getTagAlertActionUrl,
   NO_ACCESS_ROLE,
   READ_ROLE,
@@ -26,30 +27,35 @@ apiTest.describe('Create tag alert action API', { tag: '@local-stateful-classic'
   });
 
   apiTest.beforeEach(async ({ apiServices }) => {
-    await apiServices.alertingV2.alertActions.cleanUpAll();
+    await apiServices.alertingV2.ruleEvents.cleanUp();
+    await apiServices.alertingV2.alertActions.cleanUp();
   });
 
   apiTest.afterAll(async ({ apiServices }) => {
-    await apiServices.alertingV2.alertActions.cleanUpAll();
+    await apiServices.alertingV2.ruleEvents.cleanUp();
+    await apiServices.alertingV2.alertActions.cleanUp();
   });
 
   apiTest('tag: writes a tag action and returns 204', async ({ apiClient, apiServices }) => {
     const ruleId = 'tag-happy-rule';
     const groupHash = 'tag-happy-group';
     const tags = ['production', 'reviewed'];
-    await apiServices.alertingV2.alertActions.seedEvents([
-      {
+    await apiServices.alertingV2.ruleEvents.seed([
+      buildAlertEvent({
         rule: { id: ruleId, version: 1 },
         group_hash: groupHash,
         episode: { id: 'tag-happy-episode', status: 'active' },
-      },
+      }),
     ]);
     const response = await apiClient.post(getTagAlertActionUrl(groupHash), {
       headers: writerHeaders,
       body: { tags },
     });
     expect(response).toHaveStatusCode(204);
-    const actions = await apiServices.alertingV2.alertActions.findActions([ruleId]);
+    const actions = await apiServices.alertingV2.alertActions.find({
+      ruleId,
+      actionTypes: ['tag'],
+    });
     expect(actions).toHaveLength(1);
     expect(actions[0]).toMatchObject({
       action_type: 'tag',
@@ -68,19 +74,22 @@ apiTest.describe('Create tag alert action API', { tag: '@local-stateful-classic'
       // to record "tags were touched" without listing any.
       const ruleId = 'tag-empty-rule';
       const groupHash = 'tag-empty-group';
-      await apiServices.alertingV2.alertActions.seedEvents([
-        {
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
           rule: { id: ruleId, version: 1 },
           group_hash: groupHash,
           episode: { id: 'tag-empty-episode', status: 'active' },
-        },
+        }),
       ]);
       const response = await apiClient.post(getTagAlertActionUrl(groupHash), {
         headers: writerHeaders,
         body: { tags: [] },
       });
       expect(response).toHaveStatusCode(204);
-      const actions = await apiServices.alertingV2.alertActions.findActions([ruleId]);
+      const actions = await apiServices.alertingV2.alertActions.find({
+        ruleId,
+        actionTypes: ['tag'],
+      });
       expect(actions).toHaveLength(1);
       expect(actions[0]).toMatchObject({
         action_type: 'tag',
@@ -156,18 +165,9 @@ apiTest.describe('Create tag alert action API', { tag: '@local-stateful-classic'
 
   apiTest(
     'authorization: returns 403 for a user with read-only alerting_v2 privileges',
-    async ({ apiClient, apiServices, requestAuth }) => {
-      const ruleId = 'tag-authz-read-rule';
-      const groupHash = 'tag-authz-read-group';
-      await apiServices.alertingV2.alertActions.seedEvents([
-        {
-          rule: { id: ruleId, version: 1 },
-          group_hash: groupHash,
-          episode: { id: 'tag-authz-read-episode', status: 'active' },
-        },
-      ]);
+    async ({ apiClient, requestAuth }) => {
       const readerCredentials = await requestAuth.getApiKeyForCustomRole(READ_ROLE);
-      const response = await apiClient.post(getTagAlertActionUrl(groupHash), {
+      const response = await apiClient.post(getTagAlertActionUrl('tag-authz-read-group'), {
         headers: { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader },
         body: { tags: ['production'] },
       });
@@ -177,18 +177,9 @@ apiTest.describe('Create tag alert action API', { tag: '@local-stateful-classic'
 
   apiTest(
     'authorization: returns 403 for a user without alerting_v2 privileges',
-    async ({ apiClient, apiServices, requestAuth }) => {
-      const ruleId = 'tag-authz-none-rule';
-      const groupHash = 'tag-authz-none-group';
-      await apiServices.alertingV2.alertActions.seedEvents([
-        {
-          rule: { id: ruleId, version: 1 },
-          group_hash: groupHash,
-          episode: { id: 'tag-authz-none-episode', status: 'active' },
-        },
-      ]);
+    async ({ apiClient, requestAuth }) => {
       const noAccessCredentials = await requestAuth.getApiKeyForCustomRole(NO_ACCESS_ROLE);
-      const response = await apiClient.post(getTagAlertActionUrl(groupHash), {
+      const response = await apiClient.post(getTagAlertActionUrl('tag-authz-none-group'), {
         headers: { ...testData.COMMON_HEADERS, ...noAccessCredentials.apiKeyHeader },
         body: { tags: ['production'] },
       });

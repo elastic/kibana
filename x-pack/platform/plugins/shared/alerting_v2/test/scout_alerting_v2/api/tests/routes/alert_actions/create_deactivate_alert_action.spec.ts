@@ -10,6 +10,7 @@ import type { RoleApiCredentials } from '@kbn/scout';
 import {
   ALL_ROLE,
   apiTest,
+  buildAlertEvent,
   getDeactivateAlertActionUrl,
   NO_ACCESS_ROLE,
   READ_ROLE,
@@ -26,11 +27,13 @@ apiTest.describe('Create deactivate alert action API', { tag: '@local-stateful-c
   });
 
   apiTest.beforeEach(async ({ apiServices }) => {
-    await apiServices.alertingV2.alertActions.cleanUpAll();
+    await apiServices.alertingV2.ruleEvents.cleanUp();
+    await apiServices.alertingV2.alertActions.cleanUp();
   });
 
   apiTest.afterAll(async ({ apiServices }) => {
-    await apiServices.alertingV2.alertActions.cleanUpAll();
+    await apiServices.alertingV2.ruleEvents.cleanUp();
+    await apiServices.alertingV2.alertActions.cleanUp();
   });
 
   apiTest(
@@ -40,12 +43,12 @@ apiTest.describe('Create deactivate alert action API', { tag: '@local-stateful-c
       const groupHash = 'deactivate-happy-group';
       const reason = 'no longer relevant';
 
-      await apiServices.alertingV2.alertActions.seedEvents([
-        {
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
           rule: { id: ruleId, version: 1 },
           group_hash: groupHash,
           episode: { id: 'deactivate-happy-episode', status: 'active' },
-        },
+        }),
       ]);
 
       const response = await apiClient.post(getDeactivateAlertActionUrl(groupHash), {
@@ -55,7 +58,10 @@ apiTest.describe('Create deactivate alert action API', { tag: '@local-stateful-c
 
       expect(response).toHaveStatusCode(204);
 
-      const actions = await apiServices.alertingV2.alertActions.findActions([ruleId]);
+      const actions = await apiServices.alertingV2.alertActions.find({
+        ruleId,
+        actionTypes: ['deactivate'],
+      });
       expect(actions).toHaveLength(1);
       expect(actions[0]).toMatchObject({
         action_type: 'deactivate',
@@ -123,24 +129,16 @@ apiTest.describe('Create deactivate alert action API', { tag: '@local-stateful-c
 
   apiTest(
     'authorization: returns 403 for a user with read-only alerting_v2 privileges',
-    async ({ apiClient, apiServices, requestAuth }) => {
-      const ruleId = 'deactivate-authz-read-rule';
-      const groupHash = 'deactivate-authz-read-group';
-
-      await apiServices.alertingV2.alertActions.seedEvents([
-        {
-          rule: { id: ruleId, version: 1 },
-          group_hash: groupHash,
-          episode: { id: 'deactivate-authz-read-episode', status: 'active' },
-        },
-      ]);
-
+    async ({ apiClient, requestAuth }) => {
       const readerCredentials = await requestAuth.getApiKeyForCustomRole(READ_ROLE);
 
-      const response = await apiClient.post(getDeactivateAlertActionUrl(groupHash), {
-        headers: { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader },
-        body: { reason: 'valid reason' },
-      });
+      const response = await apiClient.post(
+        getDeactivateAlertActionUrl('deactivate-authz-read-group'),
+        {
+          headers: { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader },
+          body: { reason: 'valid reason' },
+        }
+      );
 
       expect(response).toHaveStatusCode(403);
     }
@@ -148,24 +146,16 @@ apiTest.describe('Create deactivate alert action API', { tag: '@local-stateful-c
 
   apiTest(
     'authorization: returns 403 for a user without alerting_v2 privileges',
-    async ({ apiClient, apiServices, requestAuth }) => {
-      const ruleId = 'deactivate-authz-none-rule';
-      const groupHash = 'deactivate-authz-none-group';
-
-      await apiServices.alertingV2.alertActions.seedEvents([
-        {
-          rule: { id: ruleId, version: 1 },
-          group_hash: groupHash,
-          episode: { id: 'deactivate-authz-none-episode', status: 'active' },
-        },
-      ]);
-
+    async ({ apiClient, requestAuth }) => {
       const noAccessCredentials = await requestAuth.getApiKeyForCustomRole(NO_ACCESS_ROLE);
 
-      const response = await apiClient.post(getDeactivateAlertActionUrl(groupHash), {
-        headers: { ...testData.COMMON_HEADERS, ...noAccessCredentials.apiKeyHeader },
-        body: { reason: 'valid reason' },
-      });
+      const response = await apiClient.post(
+        getDeactivateAlertActionUrl('deactivate-authz-none-group'),
+        {
+          headers: { ...testData.COMMON_HEADERS, ...noAccessCredentials.apiKeyHeader },
+          body: { reason: 'valid reason' },
+        }
+      );
 
       expect(response).toHaveStatusCode(403);
     }

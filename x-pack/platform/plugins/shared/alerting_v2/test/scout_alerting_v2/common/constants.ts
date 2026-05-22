@@ -16,21 +16,9 @@ export const LOOKBACK_WINDOW = '1m';
 export const POLL_TIMEOUT_MS = 45_000;
 export const POLL_INTERVAL_MS = 1_000;
 
-/**
- * Action types written by the alerting_v2 dispatcher (store_actions_step) into
- * `.alert-actions`. Tests that assert "user-written" actions must filter these
- * out, otherwise they can flakily observe `unmatched` / `notified` instead of
- * the action they POSTed (e.g. `ack`, `tag`).
- */
-export const DISPATCHER_SYSTEM_ACTION_TYPES = [
-  'fire',
-  'suppress',
-  'unmatched',
-  'notified',
-] as const;
-
 export {
   ALERTING_V2_RULE_API_PATH as RULE_API_PATH,
+  ALERTING_V2_ALERT_API_PATH as ALERT_API_PATH,
   ALERTING_V2_ACTION_POLICY_API_PATH as ACTION_POLICY_API_PATH,
 } from '@kbn/alerting-v2-constants';
 export { ALERT_EVENTS_DATA_STREAM } from '../../../server/resources/datastreams/alert_events';

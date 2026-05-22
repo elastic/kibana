@@ -10,6 +10,7 @@ import type { RoleApiCredentials } from '@kbn/scout';
 import {
   ALL_ROLE,
   apiTest,
+  buildAlertEvent,
   getSnoozeAlertActionUrl,
   NO_ACCESS_ROLE,
   READ_ROLE,
@@ -26,11 +27,13 @@ apiTest.describe('Create snooze alert action API', { tag: '@local-stateful-class
   });
 
   apiTest.beforeEach(async ({ apiServices }) => {
-    await apiServices.alertingV2.alertActions.cleanUpAll();
+    await apiServices.alertingV2.ruleEvents.cleanUp();
+    await apiServices.alertingV2.alertActions.cleanUp();
   });
 
   apiTest.afterAll(async ({ apiServices }) => {
-    await apiServices.alertingV2.alertActions.cleanUpAll();
+    await apiServices.alertingV2.ruleEvents.cleanUp();
+    await apiServices.alertingV2.alertActions.cleanUp();
   });
 
   apiTest(
@@ -39,19 +42,22 @@ apiTest.describe('Create snooze alert action API', { tag: '@local-stateful-class
       const ruleId = 'snooze-happy-rule';
       const groupHash = 'snooze-happy-group';
       const expiry = '2099-01-01T00:00:00.000Z';
-      await apiServices.alertingV2.alertActions.seedEvents([
-        {
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
           rule: { id: ruleId, version: 1 },
           group_hash: groupHash,
           episode: { id: 'snooze-happy-episode', status: 'active' },
-        },
+        }),
       ]);
       const response = await apiClient.post(getSnoozeAlertActionUrl(groupHash), {
         headers: writerHeaders,
         body: { expiry },
       });
       expect(response).toHaveStatusCode(204);
-      const actions = await apiServices.alertingV2.alertActions.findActions([ruleId]);
+      const actions = await apiServices.alertingV2.alertActions.find({
+        ruleId,
+        actionTypes: ['snooze'],
+      });
       expect(actions).toHaveLength(1);
       expect(actions[0]).toMatchObject({
         action_type: 'snooze',
@@ -68,19 +74,22 @@ apiTest.describe('Create snooze alert action API', { tag: '@local-stateful-class
     async ({ apiClient, apiServices }) => {
       const ruleId = 'snooze-no-expiry-rule';
       const groupHash = 'snooze-no-expiry-group';
-      await apiServices.alertingV2.alertActions.seedEvents([
-        {
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
           rule: { id: ruleId, version: 1 },
           group_hash: groupHash,
           episode: { id: 'snooze-no-expiry-episode', status: 'active' },
-        },
+        }),
       ]);
       const response = await apiClient.post(getSnoozeAlertActionUrl(groupHash), {
         headers: writerHeaders,
         body: {},
       });
       expect(response).toHaveStatusCode(204);
-      const actions = await apiServices.alertingV2.alertActions.findActions([ruleId]);
+      const actions = await apiServices.alertingV2.alertActions.find({
+        ruleId,
+        actionTypes: ['snooze'],
+      });
       expect(actions).toHaveLength(1);
       expect(actions[0]).toMatchObject({
         action_type: 'snooze',
@@ -135,18 +144,9 @@ apiTest.describe('Create snooze alert action API', { tag: '@local-stateful-class
 
   apiTest(
     'authorization: returns 403 for a user with read-only alerting_v2 privileges',
-    async ({ apiClient, apiServices, requestAuth }) => {
-      const ruleId = 'snooze-authz-read-rule';
-      const groupHash = 'snooze-authz-read-group';
-      await apiServices.alertingV2.alertActions.seedEvents([
-        {
-          rule: { id: ruleId, version: 1 },
-          group_hash: groupHash,
-          episode: { id: 'snooze-authz-read-episode', status: 'active' },
-        },
-      ]);
+    async ({ apiClient, requestAuth }) => {
       const readerCredentials = await requestAuth.getApiKeyForCustomRole(READ_ROLE);
-      const response = await apiClient.post(getSnoozeAlertActionUrl(groupHash), {
+      const response = await apiClient.post(getSnoozeAlertActionUrl('snooze-authz-read-group'), {
         headers: { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader },
         body: {},
       });
@@ -156,18 +156,9 @@ apiTest.describe('Create snooze alert action API', { tag: '@local-stateful-class
 
   apiTest(
     'authorization: returns 403 for a user without alerting_v2 privileges',
-    async ({ apiClient, apiServices, requestAuth }) => {
-      const ruleId = 'snooze-authz-none-rule';
-      const groupHash = 'snooze-authz-none-group';
-      await apiServices.alertingV2.alertActions.seedEvents([
-        {
-          rule: { id: ruleId, version: 1 },
-          group_hash: groupHash,
-          episode: { id: 'snooze-authz-none-episode', status: 'active' },
-        },
-      ]);
+    async ({ apiClient, requestAuth }) => {
       const noAccessCredentials = await requestAuth.getApiKeyForCustomRole(NO_ACCESS_ROLE);
-      const response = await apiClient.post(getSnoozeAlertActionUrl(groupHash), {
+      const response = await apiClient.post(getSnoozeAlertActionUrl('snooze-authz-none-group'), {
         headers: { ...testData.COMMON_HEADERS, ...noAccessCredentials.apiKeyHeader },
         body: {},
       });
