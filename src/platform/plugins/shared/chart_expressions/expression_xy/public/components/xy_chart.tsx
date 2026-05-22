@@ -309,6 +309,7 @@ export function XYChart({
   );
 
   const dataLayers: CommonXYDataLayerConfig[] = filteredLayers.filter(isDataLayer);
+
   const isTimeViz = isTimeChart(dataLayers);
 
   useEffect(() => {
@@ -483,6 +484,36 @@ export function XYChart({
   const linesPaddings = !shouldHideDetails
     ? getLinesCausedPaddings(visualConfigs, yAxesMap, shouldRotate)
     : {};
+
+  const getYAxesStyle = (axis: AxisConfiguration): RecursivePartial<AxisStyle> => {
+    const tickVisible = axis.showLabels;
+    const position = getOriginalAxisPosition(axis.position, shouldRotate);
+
+    const style = {
+      tickLabel: {
+        fill: axis.labelColor,
+        visible: tickVisible,
+        rotation: axis.labelsOrientation,
+        padding:
+          linesPaddings[position] != null
+            ? {
+                inner: linesPaddings[position],
+              }
+            : undefined,
+      },
+      axisTitle: {
+        visible: axis.showTitle,
+        // if labels are not visible add the padding to the title
+        padding:
+          !tickVisible && linesPaddings[position] != null
+            ? {
+                inner: linesPaddings[position],
+              }
+            : undefined,
+      },
+    };
+    return style;
+  };
 
   const getYAxisDomain = (axis: GroupsConfiguration[number]) => {
     const extent: AxisExtentConfigResult = axis.extent || {
@@ -673,38 +704,8 @@ export function XYChart({
     strokeWidth: 1,
   };
 
-  const getYAxesStyle = (axis: AxisConfiguration): RecursivePartial<AxisStyle> => {
-    const tickVisible = axis.showLabels;
-    const position = getOriginalAxisPosition(axis.position, shouldRotate);
-    const style = {
-      tickLabel: {
-        fill: axis.labelColor,
-        visible: tickVisible,
-        rotation: axis.labelsOrientation,
-        padding:
-          linesPaddings[position] != null
-            ? {
-                inner: linesPaddings[position],
-              }
-            : undefined,
-      },
-      axisTitle: {
-        visible: axis.showTitle,
-        // if labels are not visible add the padding to the title
-        padding:
-          !tickVisible && linesPaddings[position] != null
-            ? {
-                inner: linesPaddings[position],
-              }
-            : undefined,
-      },
-    };
-    return style;
-  };
-
-  const getXAxisStyle = (): RecursivePartial<AxisStyle> => {
-    if (isHorizontalTimeAxis) {
-      return {
+  const xAxisStyle: RecursivePartial<AxisStyle> = isHorizontalTimeAxis
+    ? {
         tickLabel: {
           visible: Boolean(xAxisConfig?.showLabels),
           fill: xAxisConfig?.labelColor,
@@ -715,26 +716,22 @@ export function XYChart({
         axisTitle: {
           visible: xAxisConfig?.showTitle,
         },
+      }
+    : {
+        tickLabel: {
+          visible: xAxisConfig?.showLabels,
+          rotation: xAxisConfig?.labelsOrientation,
+          padding: linesPaddings.bottom != null ? { inner: linesPaddings.bottom } : undefined,
+          fill: xAxisConfig?.labelColor,
+        },
+        axisTitle: {
+          visible: xAxisConfig?.showTitle,
+          padding:
+            !xAxisConfig?.showLabels && linesPaddings.bottom != null
+              ? { inner: linesPaddings.bottom }
+              : undefined,
+        },
       };
-    }
-
-    return {
-      tickLabel: {
-        visible: xAxisConfig?.showLabels,
-        rotation: xAxisConfig?.labelsOrientation,
-        padding: linesPaddings.bottom != null ? { inner: linesPaddings.bottom } : undefined,
-        fill: xAxisConfig?.labelColor,
-      },
-      axisTitle: {
-        visible: xAxisConfig?.showTitle,
-        padding:
-          !xAxisConfig?.showLabels && linesPaddings.bottom != null
-            ? { inner: linesPaddings.bottom }
-            : undefined,
-      },
-    };
-  };
-
   const isSplitChart = splitColumnAccessor || splitRowAccessor;
   const splitTable = isSplitChart ? dataLayers[0].table : undefined;
   const splitColumnId =
@@ -954,7 +951,7 @@ export function XYChart({
               hide={xAxisConfig?.hide || dataLayers[0]?.simpleView || !dataLayers[0]?.xAccessor}
               tickFormat={(d) => safeXAccessorLabelRenderer(d) || ''}
               maximumFractionDigits={xTickDecimals}
-              style={getXAxisStyle()}
+              style={xAxisStyle}
               showOverlappingLabels={xAxisConfig?.showOverlappingLabels}
               showDuplicatedTicks={xAxisConfig?.showDuplicates}
               tickLabelMaxLength={
