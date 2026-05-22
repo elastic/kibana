@@ -323,9 +323,7 @@ export const getSearchEmbeddableFactory = ({
       const toolkit: ContextAwarenessToolkit = {
         actions: {
           addFilter,
-          refreshData: () => {
-            refreshTrigger$.next(undefined);
-          },
+          refreshData: () => refreshTrigger$.next(undefined),
           setExpandedDoc: enableDocumentViewer ? setExpandedDoc : undefined,
         },
       };
