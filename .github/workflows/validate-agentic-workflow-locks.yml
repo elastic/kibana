@@ -5,6 +5,7 @@ on:
     paths:
       - '.github/workflows/*.md'
       - '.github/workflows/*.lock.yml'
+      - '.github/actionlint.yaml'
       - '.github/aw/actions-lock.json'
       - '.github/workflows/validate-agentic-workflow-locks.yml'
 
@@ -15,7 +16,7 @@ permissions:
 # github/gh-aw-actions/setup entry in .github/aw/actions-lock.json;
 # the verify step below enforces that.
 env:
-  GH_AW_VERSION: v0.71.5
+  GH_AW_VERSION: v0.74.4
 
 concurrency:
   group: validate-agentic-workflow-locks-${{ github.event.pull_request.number || github.ref }}
@@ -50,9 +51,12 @@ jobs:
           fi
 
       - name: Install gh-aw CLI
-        uses: github/gh-aw/actions/setup-cli@489dbab88cc78e35506b5ccbf08a4037166824ac # v0.72.1
+        uses: github/gh-aw/actions/setup-cli@4d44d0e89851a877f4ddc0cb6c0197e42b1016c5 # v0.73.0
         with:
           version: ${{ env.GH_AW_VERSION }}
+
+      - name: Lint generated workflow locks
+        run: gh aw lint
 
       - name: Compile and validate all agentic workflows
         run: gh aw compile --purge --validate --no-check-update

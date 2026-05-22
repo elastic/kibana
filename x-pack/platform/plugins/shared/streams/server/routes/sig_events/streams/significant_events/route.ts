@@ -17,7 +17,10 @@ import { PromptsConfigService } from '../../../../lib/sig_events/saved_objects/p
 import { generateSignificantEventDefinitions } from '../../../../lib/sig_events/generate_significant_events';
 import { previewSignificantEvents } from '../../../../lib/sig_events/preview_significant_events';
 import { readSignificantEventsFromAlertsIndices } from '../../../../lib/sig_events/read_significant_events_from_alerts_indices';
-import { getSignificantEventsResponse } from '../../../../oas_examples';
+import {
+  getSignificantEventsResponse,
+  previewSignificantEventsRequest,
+} from '../../../../oas_examples';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { createConnectorSSEError } from '../../../utils/create_connector_sse_error';
@@ -26,16 +29,21 @@ import { resolveConnectorId } from '../../../utils/resolve_connector_id';
 import { searchModeSchema } from '../../../utils/search_mode';
 
 // Make sure strings are expected for input, but still converted to a
-// Date, without breaking the OpenAPI generator
-const dateFromString = z.string().transform((input) => new Date(input));
+// Date, without breaking the OpenAPI generator.
+// Descriptions must be on the inner z.string() so they propagate to OAS parameters.
+const makeDateFromString = (description: string) =>
+  z
+    .string()
+    .describe(description)
+    .transform((input) => new Date(input));
 
 const previewSignificantEventsRoute = createServerRoute({
   endpoint: 'POST /api/streams/{name}/significant_events/_preview 2023-10-31',
   params: z.object({
     path: z.object({ name: z.string().describe('The name of the stream.') }),
     query: z.object({
-      from: dateFromString.describe('Start of the time range as an ISO 8601 date string.'),
-      to: dateFromString.describe('End of the time range as an ISO 8601 date string.'),
+      from: makeDateFromString('Start of the time range as an ISO 8601 date string.'),
+      to: makeDateFromString('End of the time range as an ISO 8601 date string.'),
       bucketSize: z.string().describe('The bucket size for aggregating events (e.g. "1m", "1h").'),
     }),
     body: z.object({
@@ -55,6 +63,15 @@ const previewSignificantEventsRoute = createServerRoute({
       stability: 'experimental',
     },
     oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {
+              previewSignificantEvents: { value: previewSignificantEventsRequest },
+            },
+          },
+        },
+      },
       responses: {
         200: {
           description: 'Significant event preview results.',
@@ -108,8 +125,8 @@ const readStreamSignificantEventsRoute = createServerRoute({
   params: z.object({
     path: z.object({ name: z.string().describe('The name of the stream.') }),
     query: z.object({
-      from: dateFromString.describe('Start of the time range as an ISO 8601 date string.'),
-      to: dateFromString.describe('End of the time range as an ISO 8601 date string.'),
+      from: makeDateFromString('Start of the time range as an ISO 8601 date string.'),
+      to: makeDateFromString('End of the time range as an ISO 8601 date string.'),
       bucketSize: z.string().describe('The bucket size for aggregating events (e.g. "1m", "1h").'),
       query: z
         .string()
@@ -128,6 +145,13 @@ const readStreamSignificantEventsRoute = createServerRoute({
       stability: 'experimental',
     },
     oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {},
+          },
+        },
+      },
       responses: {
         200: {
           description: 'Significant events for the stream.',
@@ -192,8 +216,8 @@ const generateSignificantEventsRoute = createServerRoute({
         .describe(
           'Optional connector ID. If not provided, the default AI connector from settings will be used.'
         ),
-      from: dateFromString.describe('Start of the time range as an ISO 8601 date string.'),
-      to: dateFromString.describe('End of the time range as an ISO 8601 date string.'),
+      from: makeDateFromString('Start of the time range as an ISO 8601 date string.'),
+      to: makeDateFromString('End of the time range as an ISO 8601 date string.'),
       sampleDocsSize: z
         .number()
         .optional()
@@ -211,6 +235,13 @@ const generateSignificantEventsRoute = createServerRoute({
       stability: 'experimental',
     },
     oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {},
+          },
+        },
+      },
       responses: {
         200: {
           description: 'Generated significant event query definitions.',
