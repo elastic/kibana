@@ -34,6 +34,7 @@ describe('resolveWorkflowIdFromAlias', () => {
       expect(mockHttpFetch).toHaveBeenCalledWith('/api/workflows', {
         method: 'GET',
         query: {
+          managed: 'all',
           page: 1,
           size: 1,
           tags: expectedTag,

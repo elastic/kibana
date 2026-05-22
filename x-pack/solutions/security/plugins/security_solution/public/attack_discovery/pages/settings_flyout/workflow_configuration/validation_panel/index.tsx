@@ -31,6 +31,13 @@ const DEFAULT_VALIDATION_WORKFLOW_ID = 'default';
  */
 const VALIDATE_WORKFLOW_ALIAS = 'attack-discovery-validate';
 
+/**
+ * The well-known ID of the system-managed default validation workflow.
+ * Used as a fallback to identify the real default entry before the
+ * `useWorkflowEditorLink` alias resolves.
+ */
+const SYSTEM_VALIDATE_WORKFLOW_ID = 'system-attack-discovery-validate';
+
 export interface ValidationPanelProps {
   isInvalid?: boolean;
   onChange: (validationWorkflowId: string) => void;
@@ -68,32 +75,28 @@ const ValidationPanelComponent: React.FC<ValidationPanelProps> = ({
   // If the real default validation workflow hasn't been registered yet (first run),
   // insert a fallback entry so the user always has a default option.
   const validationWorkflows: WorkflowItem[] = useMemo(() => {
-    const realDefaultFound =
-      defaultValidateRealId != null && workflows.some((w) => w.id === defaultValidateRealId);
+    // Prefer the alias-resolved ID; fall back to the well-known system ID so
+    // the real entry is recognised even before the alias has resolved.
+    const defaultId = defaultValidateRealId ?? SYSTEM_VALIDATE_WORKFLOW_ID;
 
-    if (realDefaultFound) {
-      const mapped = workflows.map((workflow) => ({
-        description: workflow.description || workflow.name,
-        enabled: workflow.enabled,
-        id: workflow.id,
-        isDefault: workflow.id === defaultValidateRealId,
-        name: workflow.name,
-        tags: workflow.tags,
-      }));
-
-      return filterWorkflowsForValidation(mapped);
-    }
-
-    // Fallback: the real workflow isn't in the list yet (or the alias couldn't
-    // be resolved). Insert an artificial entry that the server will resolve.
     const mapped = workflows.map((workflow) => ({
       description: workflow.description || workflow.name,
       enabled: workflow.enabled,
       id: workflow.id,
+      isDefault: workflow.id === defaultId,
       name: workflow.name,
       tags: workflow.tags,
     }));
 
+    const filtered = filterWorkflowsForValidation(mapped);
+
+    if (filtered.some((w) => w.isDefault)) {
+      return filtered;
+    }
+
+    // Fallback: the real workflow isn't in the list yet (first run before
+    // managed workflows are installed). Insert an artificial entry that the
+    // server will resolve at generation time.
     return [
       {
         description: i18n.DEFAULT_VALIDATION_WORKFLOW_DESCRIPTION,
@@ -102,7 +105,7 @@ const ValidationPanelComponent: React.FC<ValidationPanelProps> = ({
         isDefault: true,
         name: i18n.DEFAULT_VALIDATION_WORKFLOW_LABEL,
       },
-      ...filterWorkflowsForValidation(mapped),
+      ...filtered,
     ];
   }, [defaultValidateRealId, workflows]);
 
@@ -112,7 +115,9 @@ const ValidationPanelComponent: React.FC<ValidationPanelProps> = ({
 
       telemetry.reportEvent(AttackDiscoveryEventTypes.ValidationWorkflowChanged, {
         is_default:
-          selectedId === DEFAULT_VALIDATION_WORKFLOW_ID || selectedId === defaultValidateRealId,
+          selectedId === DEFAULT_VALIDATION_WORKFLOW_ID ||
+          selectedId === SYSTEM_VALIDATE_WORKFLOW_ID ||
+          selectedId === defaultValidateRealId,
       });
 
       onChange(selectedId);
@@ -127,12 +132,16 @@ const ValidationPanelComponent: React.FC<ValidationPanelProps> = ({
       return [];
     }
 
-    if (value === DEFAULT_VALIDATION_WORKFLOW_ID && defaultValidateRealId != null) {
-      return [defaultValidateRealId];
+    if (value === DEFAULT_VALIDATION_WORKFLOW_ID) {
+      const realId = defaultValidateRealId ?? SYSTEM_VALIDATE_WORKFLOW_ID;
+      // Use the real ID only if it's actually in the list; otherwise keep
+      // the sentinel ID so the picker highlights the synthetic fallback entry.
+      const hasRealInList = validationWorkflows.some((w) => w.id === realId);
+      return [hasRealInList ? realId : DEFAULT_VALIDATION_WORKFLOW_ID];
     }
 
     return [value];
-  }, [defaultValidateRealId, value]);
+  }, [defaultValidateRealId, validationWorkflows, value]);
 
   const helpText = useMemo(() => <>{i18n.VALIDATION_WORKFLOW_HELP}</>, []);
 
