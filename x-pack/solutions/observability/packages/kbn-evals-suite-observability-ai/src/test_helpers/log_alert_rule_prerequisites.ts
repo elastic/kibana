@@ -54,28 +54,43 @@ export async function logTransactionDurationAlertPrerequisites({
   );
 
   if (replayedIndices?.length) {
-    log.info(`[alert-prereq] Replayed indices (${replayedIndices.length}): ${replayedIndices.join(', ')}`);
+    log.info(
+      `[alert-prereq] Replayed indices (${replayedIndices.length}): ${replayedIndices.join(', ')}`
+    );
   }
 
-  const [tracesRuleWindow, tracesWideWindow, metricsRuleWindow, metricsWideWindow] = await Promise.all([
-    queryTraceLatencyStats(esClient, serviceName, window, ruleParams.aggregationType),
-    queryTraceLatencyStats(esClient, serviceName, '30m', ruleParams.aggregationType),
-    queryMetricLatencyStats(esClient, serviceName, window, ruleParams.aggregationType),
-    queryMetricLatencyStats(esClient, serviceName, '30m', ruleParams.aggregationType),
-  ]);
+  const [tracesRuleWindow, tracesWideWindow, metricsRuleWindow, metricsWideWindow] =
+    await Promise.all([
+      queryTraceLatencyStats(esClient, serviceName, window, ruleParams.aggregationType),
+      queryTraceLatencyStats(esClient, serviceName, '30m', ruleParams.aggregationType),
+      queryMetricLatencyStats(esClient, serviceName, window, ruleParams.aggregationType),
+      queryMetricLatencyStats(esClient, serviceName, '30m', ruleParams.aggregationType),
+    ]);
 
-  logWindowStats(log, 'traces (rule path when searchAggregatedTransactions=never)', window, tracesRuleWindow, {
-    thresholdMicroseconds,
-    aggregationType: ruleParams.aggregationType,
-  });
+  logWindowStats(
+    log,
+    'traces (rule path when searchAggregatedTransactions=never)',
+    window,
+    tracesRuleWindow,
+    {
+      thresholdMicroseconds,
+      aggregationType: ruleParams.aggregationType,
+    }
+  );
   logWindowStats(log, 'traces (wider sanity check)', '30m', tracesWideWindow, {
     thresholdMicroseconds,
     aggregationType: ruleParams.aggregationType,
   });
-  logWindowStats(log, 'metrics rollups (rule path when searchAggregatedTransactions≠never)', window, metricsRuleWindow, {
-    thresholdMicroseconds,
-    aggregationType: ruleParams.aggregationType,
-  });
+  logWindowStats(
+    log,
+    'metrics rollups (rule path when searchAggregatedTransactions≠never)',
+    window,
+    metricsRuleWindow,
+    {
+      thresholdMicroseconds,
+      aggregationType: ruleParams.aggregationType,
+    }
+  );
   logWindowStats(log, 'metrics rollups (wider sanity check)', '30m', metricsWideWindow, {
     thresholdMicroseconds,
     aggregationType: ruleParams.aggregationType,
@@ -108,7 +123,10 @@ function logWindowStats(
   {
     thresholdMicroseconds,
     aggregationType,
-  }: { thresholdMicroseconds: number; aggregationType: TransactionDurationRuleParams['aggregationType'] }
+  }: {
+    thresholdMicroseconds: number;
+    aggregationType: TransactionDurationRuleParams['aggregationType'];
+  }
 ): void {
   const latencyMs =
     stats.p95Microseconds === null ? null : Math.round(stats.p95Microseconds / 1000);
@@ -117,7 +135,9 @@ function logWindowStats(
 
   log.info(
     `[alert-prereq] ${label} @ now-${window}: docCount=${stats.docCount}, ` +
-      `${aggregationType === 'avg' ? 'avg' : 'p95'}=${latencyMs === null ? 'null' : `${latencyMs} ms`}, ` +
+      `${aggregationType === 'avg' ? 'avg' : 'p95'}=${
+        latencyMs === null ? 'null' : `${latencyMs} ms`
+      }, ` +
       `max @timestamp=${stats.maxTimestamp ?? 'n/a'}, wouldBreach=${wouldBreach}`
   );
 }
@@ -202,7 +222,7 @@ async function queryLatencyStats({
     const docCount =
       typeof response.hits.total === 'number'
         ? response.hits.total
-        : (response.hits.total?.value ?? 0);
+        : response.hits.total?.value ?? 0;
 
     let p95Microseconds: number | null = null;
     const latencyAgg = response.aggregations?.latency as
@@ -248,7 +268,7 @@ async function logAlertsForRule(
     const total =
       typeof response.hits.total === 'number'
         ? response.hits.total
-        : (response.hits.total?.value ?? 0);
+        : response.hits.total?.value ?? 0;
 
     const statusBuckets =
       (response.aggregations?.by_status as { buckets?: Array<{ key: string; doc_count: number }> })
