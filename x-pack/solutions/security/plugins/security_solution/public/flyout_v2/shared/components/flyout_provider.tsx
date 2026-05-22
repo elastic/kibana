@@ -57,18 +57,15 @@ export const flyoutProviders = ({
                 <UpsellingProvider upsellingService={services.upselling}>
                   <DiscoverInTimelineContextProvider>
                     <CaseProvider>
-                      <AssistantProvider>
-                        {/*
-                          The EUID API is provided at the security app root in
-                          `app/app.tsx`, but v2 system flyouts mount in a
-                          separate React portal that does not inherit the app
-                          tree. Re-providing it here keeps `useEntityStoreEuidApi`
-                          working for any v2 flyout opened via
-                          `overlays.openSystemFlyout(...)` (e.g. attack-details
-                          entities sub-flyout, prevalence, highlighted fields).
-                        */}
-                        <EntityStoreEuidApiProvider>{flyoutContent}</EntityStoreEuidApiProvider>
-                      </AssistantProvider>
+                      {/*
+                        EntityStoreEuidApiProvider is already provided at the
+                        security app root, but v2 system flyouts mount in a
+                        separate React portal that does not inherit the app
+                        tree, so it has to be re-provided here.
+                      */}
+                      <EntityStoreEuidApiProvider>
+                        <AssistantProvider>{flyoutContent}</AssistantProvider>
+                      </EntityStoreEuidApiProvider>
                     </CaseProvider>
                   </DiscoverInTimelineContextProvider>
                 </UpsellingProvider>

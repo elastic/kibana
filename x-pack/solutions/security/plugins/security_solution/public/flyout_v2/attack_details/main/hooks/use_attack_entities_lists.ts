@@ -9,7 +9,7 @@ import { useMemo, useEffect } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { EntityStoreEuidApi } from '@kbn/entity-store/public';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
-import { useOriginalAlertIds } from './use_original_alert_ids';
+import { useHeaderData } from './use_header_data';
 import { useQueryAlerts } from '../../../../detections/containers/detection_engine/alerts/use_query';
 import { fetchQueryAlerts } from '../../../../detections/containers/detection_engine/alerts/api';
 import { ALERTS_QUERY_NAMES } from '../../../../detections/containers/detection_engine/alerts/constants';
@@ -69,7 +69,7 @@ export interface UseAttackEntitiesListsResult {
  * with terms aggregations on the EUID runtime fields and top_hits to get a sample document per entity for identifier extraction.
  */
 export const useAttackEntitiesLists = (hit: DataTableRecord): UseAttackEntitiesListsResult => {
-  const originalAlertIds = useOriginalAlertIds(hit);
+  const { originalAlertIds } = useHeaderData(hit);
   const euidApi = useEntityStoreEuidApi();
 
   const query = useMemo(() => {

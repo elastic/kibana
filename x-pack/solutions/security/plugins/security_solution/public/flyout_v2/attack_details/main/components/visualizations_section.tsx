@@ -12,9 +12,9 @@ import { EuiSpacer } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { useExpandSection } from '../../../shared/hooks/use_expand_section';
 import { ExpandableSection } from '../../../shared/components/expandable_section';
+import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
 import { AttackChain } from '../../../../attack_discovery/pages/results/attack_discovery_panel/tabs/attack_discovery_tab/attack/attack_chain';
-import { SectionPanel } from './section_panel';
 
 const KEY = 'visualizations';
 
@@ -58,16 +58,18 @@ export const VisualizationsSection = memo(({ hit }: VisualizationsSectionProps) 
       gutterSize="s"
       data-test-subj={KEY}
     >
-      <SectionPanel
-        title={
-          <FormattedMessage
-            id="xpack.securitySolution.attackDetailsFlyout.overview.visualizationsSection.attackChainTitle"
-            defaultMessage="Attack Chain"
-          />
-        }
+      <ExpandablePanel
+        header={{
+          title: (
+            <FormattedMessage
+              id="xpack.securitySolution.attackDetailsFlyout.overview.visualizationsSection.attackChainTitle"
+              defaultMessage="Attack Chain"
+            />
+          ),
+        }}
       >
         <AttackChain isVertical attackTactics={tacticsField} />
-      </SectionPanel>
+      </ExpandablePanel>
       <EuiSpacer size="s" />
     </ExpandableSection>
   );

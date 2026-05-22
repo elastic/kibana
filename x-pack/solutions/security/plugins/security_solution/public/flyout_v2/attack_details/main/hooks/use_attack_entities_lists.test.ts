@@ -8,7 +8,7 @@
 import { renderHook } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { useAttackEntitiesLists } from './use_attack_entities_lists';
-import { useOriginalAlertIds } from './use_original_alert_ids';
+import { useHeaderData } from './use_header_data';
 import { useQueryAlerts } from '../../../../detections/containers/detection_engine/alerts/use_query';
 
 const hit: DataTableRecord = {
@@ -26,21 +26,24 @@ jest.mock('@kbn/entity-store/public', () => {
   };
 });
 
-jest.mock('./use_original_alert_ids', () => ({
-  useOriginalAlertIds: jest.fn(),
+jest.mock('./use_header_data', () => ({
+  useHeaderData: jest.fn(),
 }));
 
 jest.mock('../../../../detections/containers/detection_engine/alerts/use_query', () => ({
   useQueryAlerts: jest.fn(),
 }));
 
+const mockHeaderData = (originalAlertIds: string[]) =>
+  ({ originalAlertIds } as unknown as ReturnType<typeof useHeaderData>);
+
 describe('useAttackEntitiesLists', () => {
-  const mockUseOriginalAlertIds = jest.mocked(useOriginalAlertIds);
+  const mockUseHeaderData = jest.mocked(useHeaderData);
   const mockUseQueryAlerts = jest.mocked(useQueryAlerts);
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseOriginalAlertIds.mockReturnValue([]);
+    mockUseHeaderData.mockReturnValue(mockHeaderData([]));
     mockUseQueryAlerts.mockReturnValue({
       loading: false,
       data: null,
@@ -52,7 +55,7 @@ describe('useAttackEntitiesLists', () => {
   });
 
   it('returns empty lists and skips query when alertIds is empty', () => {
-    mockUseOriginalAlertIds.mockReturnValue([]);
+    mockUseHeaderData.mockReturnValue(mockHeaderData([]));
 
     const { result } = renderHook(() => useAttackEntitiesLists(hit));
 
@@ -67,7 +70,7 @@ describe('useAttackEntitiesLists', () => {
   });
 
   it('passes query with ids filter, EUID runtime_mappings and terms aggs when alertIds exist', () => {
-    mockUseOriginalAlertIds.mockReturnValue(['id1', 'id2']);
+    mockUseHeaderData.mockReturnValue(mockHeaderData(['id1', 'id2']));
 
     renderHook(() => useAttackEntitiesLists(hit));
 
@@ -111,7 +114,7 @@ describe('useAttackEntitiesLists', () => {
   });
 
   it('parses userEntityIdentifiers and hostEntityIdentifiers from EUID aggregation buckets with sample _source', () => {
-    mockUseOriginalAlertIds.mockReturnValue(['id1']);
+    mockUseHeaderData.mockReturnValue(mockHeaderData(['id1']));
     mockUseQueryAlerts.mockReturnValue({
       loading: false,
       data: {
@@ -209,7 +212,7 @@ describe('useAttackEntitiesLists', () => {
   });
 
   it('returns empty arrays when aggregations are missing', () => {
-    mockUseOriginalAlertIds.mockReturnValue(['id1']);
+    mockUseHeaderData.mockReturnValue(mockHeaderData(['id1']));
     mockUseQueryAlerts.mockReturnValue({
       loading: false,
       data: {
@@ -232,7 +235,7 @@ describe('useAttackEntitiesLists', () => {
   });
 
   it('skips buckets with missing or invalid sample _source', () => {
-    mockUseOriginalAlertIds.mockReturnValue(['id1']);
+    mockUseHeaderData.mockReturnValue(mockHeaderData(['id1']));
     mockUseQueryAlerts.mockReturnValue({
       loading: false,
       data: {

@@ -9,7 +9,7 @@ import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { CorrelationsDetailsAlertsTable } from '../../../../document/tools/correlations/components/correlations_details_alerts_table';
-import { useOriginalAlertIds } from '../../../main/hooks/use_original_alert_ids';
+import { useHeaderData } from '../../../main/hooks/use_header_data';
 import { useSpaceId } from '../../../../../common/hooks/use_space_id';
 import { getColumns } from '../../../../document/tools/correlations/utils/get_columns';
 import { ATTACK_CORRELATIONS_RELATED_ALERTS_TABLE_TEST_ID } from '../../../main/constants/test_ids';
@@ -42,7 +42,7 @@ export const AttackRelatedAlertsDetails: React.FC<AttackRelatedAlertsDetailsProp
   ({ hit, onShowAlert }) => {
     const scopeId = useSpaceId() ?? '';
     const attackId = hit.raw._id ?? '';
-    const alertIds = useOriginalAlertIds(hit);
+    const { originalAlertIds: alertIds } = useHeaderData(hit);
 
     const columns = useMemo(
       () =>

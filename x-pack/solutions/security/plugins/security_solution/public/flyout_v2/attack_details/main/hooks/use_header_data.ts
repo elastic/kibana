@@ -9,13 +9,14 @@ import { useMemo } from 'react';
 import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
+import { getOriginalAlertIds } from '@kbn/elastic-assistant-common';
 
 const FIELD_ATTACK_TITLE = 'kibana.alert.attack_discovery.title' as const;
 const FIELD_TIMESTAMP = '@timestamp' as const;
 const FIELD_ALERT_IDS = 'kibana.alert.attack_discovery.alert_ids' as const;
 const FIELD_REPLACEMENTS = 'kibana.alert.attack_discovery.replacements' as const;
 
-const EMPTY_REPLACEMENTS = {};
+const EMPTY_REPLACEMENTS: Record<string, string> = {};
 
 /**
  * Normalize a value into a string array
@@ -69,6 +70,11 @@ export const useHeaderData = (hit: DataTableRecord) => {
     return normalizeToStringArray(value);
   }, [hit]);
 
+  const originalAlertIds = useMemo(
+    () => getOriginalAlertIds({ alertIds, replacements }),
+    [alertIds, replacements]
+  );
+
   return useMemo(
     () => ({
       title,
@@ -77,7 +83,16 @@ export const useHeaderData = (hit: DataTableRecord) => {
       alertsCount: alertIds.length,
       replacements,
       assignees,
+      originalAlertIds,
     }),
-    [title, timestamp, nonDuplicatedAlertIds, alertIds.length, replacements, assignees]
+    [
+      title,
+      timestamp,
+      nonDuplicatedAlertIds,
+      alertIds.length,
+      replacements,
+      assignees,
+      originalAlertIds,
+    ]
   );
 };

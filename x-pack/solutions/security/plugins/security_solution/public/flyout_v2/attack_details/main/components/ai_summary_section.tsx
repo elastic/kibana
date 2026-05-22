@@ -6,29 +6,161 @@
  */
 
 import type { EuiSwitchEvent } from '@elastic/eui';
-import { EuiIcon, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
-import React, { memo, useCallback, useState } from 'react';
+import {
+  EuiButtonIcon,
+  EuiContextMenu,
+  EuiContextMenuItem,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiPanel,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiSpacer,
+  EuiSwitch,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import { TableId } from '@kbn/securitysolution-data-table';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import { getFieldValue } from '@kbn/discover-utils';
 import { AttackDiscoveryMarkdownFormatter } from '../../../../attack_discovery/pages/results/attack_discovery_markdown_formatter';
-import { useOverviewTabData } from '../hooks/use_overview_tab_data';
 import { ExpandableSection } from '../../../shared/components/expandable_section';
 import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
 import { useExpandSection } from '../../../shared/hooks/use_expand_section';
-import { AISummarySectionSettings } from './ai_summary_section_settings';
 
 const KEY = 'aisummary';
+
+const FIELD_SUMMARY_MARKDOWN = 'kibana.alert.attack_discovery.summary_markdown' as const;
+const FIELD_SUMMARY_MARKDOWN_WITH_REPLACEMENTS =
+  'kibana.alert.attack_discovery.summary_markdown_with_replacements' as const;
+const FIELD_DETAILS_MARKDOWN = 'kibana.alert.attack_discovery.details_markdown' as const;
+const FIELD_DETAILS_MARKDOWN_WITH_REPLACEMENTS =
+  'kibana.alert.attack_discovery.details_markdown_with_replacements' as const;
 
 const titleIconCss = css`
   margin-left: 4px;
 `;
 
+const contextMenuCss = css`
+  width: 280px;
+`;
+
+interface AISummarySectionSettingsProps {
+  showAnonymized: boolean;
+  onChangeShowAnonymized: (event: EuiSwitchEvent) => void;
+  closePopover: () => void;
+  openPopover: () => void;
+  isPopoverOpen: boolean;
+  hasAnonymizedContent: boolean;
+}
+
+const AISummarySectionSettings: React.FC<AISummarySectionSettingsProps> = ({
+  showAnonymized,
+  onChangeShowAnonymized,
+  closePopover,
+  openPopover,
+  isPopoverOpen,
+  hasAnonymizedContent,
+}) => {
+  const panels = useMemo(
+    () => [
+      {
+        id: 0,
+        items: [
+          {
+            key: 'ai-summary-settings-options-title',
+            renderItem: () => (
+              <EuiPopoverTitle
+                paddingSize="s"
+                aria-label={i18n.translate(
+                  'xpack.securitySolution.attackDetailsFlyout.overview.AISummary.optionsMenuTitle.ariaLabel',
+                  {
+                    defaultMessage: 'Options',
+                  }
+                )}
+              >
+                <EuiText size="xs">
+                  <strong>
+                    <FormattedMessage
+                      id="xpack.securitySolution.attackDetailsFlyout.overview.AISummary.optionsMenuTitle"
+                      defaultMessage="Options"
+                    />
+                  </strong>
+                </EuiText>
+              </EuiPopoverTitle>
+            ),
+          },
+          {
+            key: 'ai-summary-show-anonymized',
+            renderItem: () => (
+              <EuiContextMenuItem
+                aria-label={i18n.translate(
+                  'xpack.securitySolution.attackDetailsFlyout.overview.AISummary.showAnonymizedAriaLabel',
+                  {
+                    defaultMessage: 'Show anonymized values',
+                  }
+                )}
+              >
+                <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiSwitch
+                      checked={showAnonymized}
+                      compressed
+                      data-test-subj="overview-tab-toggle-anonymized"
+                      label={
+                        <FormattedMessage
+                          id="xpack.securitySolution.attackDetailsFlyout.overview.AISummary.showAnonymizedLabel"
+                          defaultMessage="Show anonymized values"
+                        />
+                      }
+                      onChange={onChangeShowAnonymized}
+                      disabled={!hasAnonymizedContent}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiContextMenuItem>
+            ),
+          },
+        ],
+      },
+    ],
+    [hasAnonymizedContent, onChangeShowAnonymized, showAnonymized]
+  );
+
+  return (
+    <EuiPopover
+      button={
+        <EuiButtonIcon
+          aria-label={i18n.translate(
+            'xpack.securitySolution.attackDetailsFlyout.overview.AISummary.openMenuAriaLabel',
+            {
+              defaultMessage: 'Attack summary settings menu',
+            }
+          )}
+          data-test-subj="overview-tab-ai-summary-settings-menu"
+          iconType="boxesVertical"
+          onClick={openPopover}
+        />
+      }
+      isOpen={isPopoverOpen}
+      closePopover={closePopover}
+      panelPaddingSize="none"
+      anchorPosition="leftUp"
+    >
+      <EuiContextMenu css={contextMenuCss} initialPanelId={0} panels={panels} />
+    </EuiPopover>
+  );
+};
+
 export interface AISummarySectionProps {
   /**
-   * The attack-discovery document hit. Forwarded to `useOverviewTabData` to
-   * read the four summary/details markdown fields.
+   * The attack-discovery document hit. The four markdown fields are read
+   * directly off `hit.flattened` via `getFieldValue`.
    */
   hit: DataTableRecord;
 }
@@ -46,12 +178,13 @@ export const AISummarySection = memo(({ hit }: AISummarySectionProps) => {
     title: KEY,
     defaultValue: true,
   });
-  const {
-    summaryMarkdown,
-    summaryMarkdownWithReplacements,
-    detailsMarkdown,
-    detailsMarkdownWithReplacements,
-  } = useOverviewTabData(hit);
+
+  const summaryMarkdown = (getFieldValue(hit, FIELD_SUMMARY_MARKDOWN) as string | undefined) ?? '';
+  const summaryMarkdownWithReplacements =
+    (getFieldValue(hit, FIELD_SUMMARY_MARKDOWN_WITH_REPLACEMENTS) as string | undefined) ?? '';
+  const detailsMarkdown = (getFieldValue(hit, FIELD_DETAILS_MARKDOWN) as string | undefined) ?? '';
+  const detailsMarkdownWithReplacements =
+    (getFieldValue(hit, FIELD_DETAILS_MARKDOWN_WITH_REPLACEMENTS) as string | undefined) ?? '';
 
   const hasAnonymizedContent = summaryMarkdown.trim() !== '' || detailsMarkdown.trim() !== '';
 

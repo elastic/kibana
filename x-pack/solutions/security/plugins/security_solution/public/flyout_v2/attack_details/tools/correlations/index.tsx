@@ -25,8 +25,8 @@ const TITLE = i18n.translate(
 export interface AttackCorrelationsProps {
   /**
    * The attack-discovery alert document this child flyout is opened from.
-   * Threaded through to {@link AttackRelatedAlertsDetails} so the
-   * `useOriginalAlertIds` hook can derive `originalAlertIds` directly from
+   * Threaded through to {@link AttackRelatedAlertsDetails} so
+   * `useHeaderData` can derive `originalAlertIds` directly from
    * `hit.flattened`.
    */
   hit: DataTableRecord;

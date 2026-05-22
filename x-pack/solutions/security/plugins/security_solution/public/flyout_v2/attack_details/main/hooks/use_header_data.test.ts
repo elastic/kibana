@@ -7,8 +7,13 @@
 
 import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
 import { renderHook } from '@testing-library/react';
+import { getOriginalAlertIds } from '@kbn/elastic-assistant-common';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { useHeaderData } from './use_header_data';
+
+jest.mock('@kbn/elastic-assistant-common', () => ({
+  getOriginalAlertIds: jest.fn(({ alertIds }: { alertIds: string[] }) => alertIds),
+}));
 
 const buildHit = (flattened: Record<string, unknown>): DataTableRecord => ({
   id: 'attack-1',
@@ -17,6 +22,10 @@ const buildHit = (flattened: Record<string, unknown>): DataTableRecord => ({
 });
 
 describe('useHeaderData', () => {
+  beforeEach(() => {
+    jest.mocked(getOriginalAlertIds).mockImplementation(({ alertIds }) => alertIds);
+  });
+
   it('returns correct header data with single values', () => {
     const hit = buildHit({
       'kibana.alert.attack_discovery.title': 'Test Attack',
@@ -90,5 +99,36 @@ describe('useHeaderData', () => {
     const { result } = renderHook(() => useHeaderData(hit));
 
     expect(result.current.assignees).toEqual([]);
+  });
+
+  it('returns originalAlertIds computed from alertIds and replacements', () => {
+    const replacements = { 'uuid-1': 'real-id-1' };
+    const hit = buildHit({
+      'kibana.alert.attack_discovery.alert_ids': ['uuid-1'],
+      'kibana.alert.attack_discovery.replacements': replacements,
+    });
+
+    const mockGetOriginalAlertIds = jest.mocked(getOriginalAlertIds);
+    mockGetOriginalAlertIds.mockReturnValue(['real-id-1']);
+
+    const { result } = renderHook(() => useHeaderData(hit));
+
+    expect(getOriginalAlertIds).toHaveBeenCalledWith({
+      alertIds: ['uuid-1'],
+      replacements,
+    });
+    expect(result.current.originalAlertIds).toEqual(['real-id-1']);
+  });
+
+  it('returns empty originalAlertIds when alert_ids field is missing', () => {
+    const hit = buildHit({});
+
+    const { result } = renderHook(() => useHeaderData(hit));
+
+    expect(getOriginalAlertIds).toHaveBeenCalledWith({
+      alertIds: [],
+      replacements: {},
+    });
+    expect(result.current.originalAlertIds).toEqual([]);
   });
 });

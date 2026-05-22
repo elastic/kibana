@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { SectionPanel } from './section_panel';
+import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import { useAttackEntitiesCounts } from '../hooks/use_attack_entities_counts';
 import { INSIGHTS_ENTITIES_TEST_ID } from '../constants/test_ids';
 
@@ -65,12 +65,13 @@ export const EntitiesOverview: React.FC<EntitiesOverviewProps> = memo(
     );
 
     return (
-      <SectionPanel
+      <ExpandablePanel
         data-test-subj={INSIGHTS_ENTITIES_TEST_ID}
-        title={TITLE}
-        highlightTitle
-        link={link}
-        linkIconType="chevronLimitLeft"
+        header={{
+          title: TITLE,
+          link,
+          iconType: 'chevronLimitLeft',
+        }}
       >
         <EuiFlexGroup
           direction="column"
@@ -129,7 +130,7 @@ export const EntitiesOverview: React.FC<EntitiesOverviewProps> = memo(
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </SectionPanel>
+      </ExpandablePanel>
     );
   }
 );

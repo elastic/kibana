@@ -7,7 +7,7 @@
 
 import { useMemo, useEffect } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { useOriginalAlertIds } from './use_original_alert_ids';
+import { useHeaderData } from './use_header_data';
 import { useQueryAlerts } from '../../../../detections/containers/detection_engine/alerts/use_query';
 import { fetchQueryAlerts } from '../../../../detections/containers/detection_engine/alerts/api';
 import { ALERTS_QUERY_NAMES } from '../../../../detections/containers/detection_engine/alerts/constants';
@@ -29,7 +29,7 @@ export interface UseAttackEntitiesCountsResult {
  * Queries the detection alerts index filtered by the attack's alert IDs and uses cardinality aggregations.
  */
 export const useAttackEntitiesCounts = (hit: DataTableRecord): UseAttackEntitiesCountsResult => {
-  const originalAlertIds = useOriginalAlertIds(hit);
+  const { originalAlertIds } = useHeaderData(hit);
 
   const query = useMemo(
     () => ({

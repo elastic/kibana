@@ -10,8 +10,8 @@ import { css } from '@emotion/react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { SectionPanel } from './section_panel';
-import { useOriginalAlertIds } from '../hooks/use_original_alert_ids';
+import { ExpandablePanel } from '../../../shared/components/expandable_panel';
+import { useHeaderData } from '../hooks/use_header_data';
 import { INSIGHTS_CORRELATIONS_TEST_ID } from '../constants/test_ids';
 
 const TITLE = (
@@ -30,8 +30,8 @@ const TOOLTIP = (
 
 export interface CorrelationsOverviewProps {
   /**
-   * The attack-discovery document hit. Forwarded to `useOriginalAlertIds`
-   * for the related-alerts count.
+   * The attack-discovery document hit. Forwarded to `useHeaderData` to
+   * derive the original alert IDs for the related-alerts count.
    */
   hit: DataTableRecord;
   /**
@@ -50,7 +50,7 @@ export interface CorrelationsOverviewProps {
 export const CorrelationsOverview: React.FC<CorrelationsOverviewProps> = memo(
   ({ hit, onShowAttackCorrelations }) => {
     const { euiTheme } = useEuiTheme();
-    const originalAlertIds = useOriginalAlertIds(hit);
+    const { originalAlertIds } = useHeaderData(hit);
     const relatedAlertsCount = originalAlertIds.length;
 
     const link = useMemo(
@@ -59,12 +59,13 @@ export const CorrelationsOverview: React.FC<CorrelationsOverviewProps> = memo(
     );
 
     return (
-      <SectionPanel
+      <ExpandablePanel
         data-test-subj={INSIGHTS_CORRELATIONS_TEST_ID}
-        title={TITLE}
-        highlightTitle
-        link={link}
-        linkIconType="arrowStart"
+        header={{
+          title: TITLE,
+          link,
+          iconType: 'arrowStart',
+        }}
       >
         <EuiFlexGroup
           direction="column"
@@ -95,7 +96,7 @@ export const CorrelationsOverview: React.FC<CorrelationsOverviewProps> = memo(
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </SectionPanel>
+      </ExpandablePanel>
     );
   }
 );
