@@ -13,10 +13,14 @@ import {
   DEVTOOL_CLONE_HIDDEN_ATTR,
   DEVTOOL_MANAGED_ATTR,
   INHERITED_CSS_PROPS,
+  CLONE_LAYOUT_CSS_PROPS,
   BACKGROUND_CSS_PROPS,
   CSS_VAR_PREFIX,
   MAX_TREE_DEPTH,
   PSEUDO_CLASS_PREFIX,
+  EUI_CARD_ROOT_CLASS,
+  EUI_CARD_IMAGE_CLASS,
+  EUI_CARD_ICON_CLASS,
 } from '../lib/constants';
 import { stripTruncationClasses, isTruncatedDeep } from './truncation_helpers';
 import { collectAllTextNodes } from './collect_text_nodes';
@@ -115,9 +119,232 @@ const unfreezeAncestors = (
 };
 
 /**
+ * Remove the edited element's frozen inline size for one dimension.
+ *
+ * @param el - The element whose own dimension should be unfrozen.
+ * @param property - The dimension property to remove.
+ * @returns Nothing.
+ */
+const unfreezeOwnDimension = (el: HTMLElement, property: 'width' | 'height'): void => {
+  const maxProp = property === 'width' ? 'max-width' : 'max-height';
+  el.style.removeProperty(property);
+  el.style.removeProperty(maxProp);
+};
+
+/**
+ * A frozen inline dimension captured before reflow removes it.
+ * Used to restore dimensions on undo/revert.
+ */
+export interface DimensionRecord {
+  readonly element: HTMLElement;
+  readonly property: string;
+  readonly value: string;
+  readonly priority: string;
+}
+
+/**
+ * Record an inline dimension style only when it currently exists.
+ *
+ * @param el - The element whose inline dimension should be recorded.
+ * @param prop - The CSS property to record.
+ * @param out - The output collection receiving the record.
+ * @returns Nothing.
+ */
+const recordDim = (el: HTMLElement, prop: string, out: DimensionRecord[]): void => {
+  const value = el.style.getPropertyValue(prop);
+  if (value) {
+    out.push({ element: el, property: prop, value, priority: el.style.getPropertyPriority(prop) });
+  }
+};
+
+/**
+ * Record an inline style property even when it is currently unset.
+ *
+ * @param el - The element whose inline style should be recorded.
+ * @param prop - The CSS property to record.
+ * @param out - The output collection receiving the record.
+ * @returns Nothing.
+ */
+const recordStyleProp = (el: HTMLElement, prop: string, out: DimensionRecord[]): void => {
+  out.push({
+    element: el,
+    property: prop,
+    value: el.style.getPropertyValue(prop),
+    priority: el.style.getPropertyPriority(prop),
+  });
+};
+
+/**
+ * Parse a computed CSS pixel value, falling back to zero for non-numeric values.
+ *
+ * @param value - The CSS value to parse.
+ * @returns The numeric pixel value, or zero when parsing fails.
+ */
+const parseCssPx = (value: string): number => {
+  const parsed = parseFloat(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+};
+
+/**
+ * Check whether an element is the root of an EUI Card.
+ *
+ * @param el - The element to inspect.
+ * @returns True when the element has the exact EUI Card root class.
+ */
+const isEuiCardRoot = (el: HTMLElement): boolean => el.classList.contains(EUI_CARD_ROOT_CLASS);
+
+/**
+ * Find descendant EUI Card elements that belong to the edited card itself.
+ *
+ * @param el - The edited element, expected to be an EUI Card root.
+ * @param className - The descendant class name to match.
+ * @returns Matching descendants whose nearest EUI Card root is the edited element.
+ */
+const queryOwnCardElements = (el: HTMLElement, className: string): HTMLElement[] => {
+  if (!isEuiCardRoot(el)) return [];
+  return [...el.querySelectorAll<HTMLElement>(`.${className}`)].filter(
+    (child) => child.closest(`.${EUI_CARD_ROOT_CLASS}`) === el
+  );
+};
+
+/**
+ * Synchronize EUI Card image and icon styles with edited padding.
+ *
+ * @param el - The edited EUI Card root whose padding changed.
+ * @returns Nothing.
+ */
+const syncEuiCardImagePaddingStyles = (el: HTMLElement): void => {
+  const computed = getComputedStyle(el);
+  const paddingTop = parseCssPx(computed.paddingTop);
+  const paddingRight = parseCssPx(computed.paddingRight);
+  const paddingLeft = parseCssPx(computed.paddingLeft);
+  const images = queryOwnCardElements(el, EUI_CARD_IMAGE_CLASS);
+
+  for (const image of images) {
+    setImportant(image, 'width', `calc(100% + ${paddingLeft + paddingRight}px)`);
+    setImportant(image, 'left', `${-paddingLeft}px`);
+    setImportant(image, 'top', `${-paddingTop}px`);
+    setImportant(image, 'margin-bottom', `${-paddingTop}px`);
+
+    for (const child of image.children) {
+      if (child instanceof HTMLElement && MEDIA_TAGS.has(child.tagName)) {
+        setImportant(child, 'width', '100%');
+      }
+    }
+  }
+
+  if (images.length > 0) {
+    for (const icon of queryOwnCardElements(el, EUI_CARD_ICON_CLASS)) {
+      setImportant(icon, 'transform', `translate(-50%, calc(-50% - ${paddingTop}px))`);
+    }
+  }
+};
+
+/**
+ * Record EUI Card image and icon styles before padding reflow rewrites them.
+ *
+ * @param el - The edited EUI Card root whose padding is about to change.
+ * @param out - The output collection receiving the captured style records.
+ * @returns Nothing.
+ */
+const collectEuiCardImagePaddingStyles = (el: HTMLElement, out: DimensionRecord[]): void => {
+  const images = queryOwnCardElements(el, EUI_CARD_IMAGE_CLASS);
+
+  for (const image of images) {
+    recordStyleProp(image, 'width', out);
+    recordStyleProp(image, 'left', out);
+    recordStyleProp(image, 'top', out);
+    recordStyleProp(image, 'margin-bottom', out);
+
+    for (const child of image.children) {
+      if (child instanceof HTMLElement && MEDIA_TAGS.has(child.tagName)) {
+        recordStyleProp(child, 'width', out);
+      }
+    }
+  }
+
+  if (images.length > 0) {
+    for (const icon of queryOwnCardElements(el, EUI_CARD_ICON_CLASS)) {
+      recordStyleProp(icon, 'transform', out);
+    }
+  }
+};
+
+/**
+ * Component-specific padding reflow hook.
+ *
+ * Some EUI components derive child offsets, widths, or transforms from their
+ * original padding prop. When the edit modal changes padding with inline CSS,
+ * these handlers keep those dependent styles in sync and record them for undo.
+ */
+interface PaddingDependentStyleHandler {
+  /**
+   * Check whether this handler owns the edited element.
+   *
+   * @param el - The element whose padding changed.
+   * @returns True when this handler should process the element.
+   */
+  readonly matches: (el: HTMLElement) => boolean;
+
+  /**
+   * Apply padding-derived style updates after the padding value changes.
+   *
+   * @param el - The element whose padding changed.
+   * @returns Nothing.
+   */
+  readonly sync: (el: HTMLElement) => void;
+
+  /**
+   * Capture inline styles that {@link sync} will rewrite.
+   *
+   * @param el - The element whose padding is about to change.
+   * @param out - The output collection receiving captured style records.
+   * @returns Nothing.
+   */
+  readonly collect: (el: HTMLElement, out: DimensionRecord[]) => void;
+}
+
+/** Padding-derived component style handlers run during padding reflow. */
+const PADDING_DEPENDENT_STYLE_HANDLERS: PaddingDependentStyleHandler[] = [
+  {
+    matches: isEuiCardRoot,
+    sync: syncEuiCardImagePaddingStyles,
+    collect: collectEuiCardImagePaddingStyles,
+  },
+];
+
+/**
+ * Synchronize component styles that derive from an edited element's padding.
+ *
+ * @param el - The element whose padding changed.
+ * @returns Nothing.
+ */
+const syncPaddingDependentStyles = (el: HTMLElement): void => {
+  for (const handler of PADDING_DEPENDENT_STYLE_HANDLERS) {
+    if (handler.matches(el)) handler.sync(el);
+  }
+};
+
+/**
+ * Record component styles that will be rewritten after padding changes.
+ *
+ * @param el - The element whose padding is about to change.
+ * @param out - The output collection receiving captured style records.
+ * @returns Nothing.
+ */
+const collectPaddingDependentStyles = (el: HTMLElement, out: DimensionRecord[]): void => {
+  for (const handler of PADDING_DEPENDENT_STYLE_HANDLERS) {
+    if (handler.matches(el)) handler.collect(el, out);
+  }
+};
+
+/**
  * Unfreeze children after a style property change so they reflow naturally.
  * For width/height, only the changed dimension is unfrozen.
- * For padding/margin, both dimensions are unfrozen since the content area changes.
+ * For padding, the edited element and both dimensions are unfrozen so its
+ * border box can be recomputed from the existing child footprint + padding.
+ * For margin, both child/ancestor dimensions are unfrozen since the outer
+ * footprint changes.
  *
  * When `root` is provided, ancestors between `el` and `root` are also
  * unfrozen so the parent chain can grow to accommodate the new size.
@@ -141,7 +368,13 @@ export const reflowAfterStyleChange = (
   if (cssProp === 'width' || cssProp === 'height') {
     unfreezeChildren(el, cssProp);
     unfreezeAncestors(el, cssProp, root);
-  } else if (cssProp === 'padding' || cssProp === 'margin') {
+  } else if (cssProp === 'padding') {
+    unfreezeOwnDimension(el, 'width');
+    unfreezeOwnDimension(el, 'height');
+    syncPaddingDependentStyles(el);
+    unfreezeAncestors(el, 'width', root);
+    unfreezeAncestors(el, 'height', root);
+  } else if (cssProp === 'margin') {
     unfreezeChildren(el, 'width');
     unfreezeChildren(el, 'height');
     unfreezeAncestors(el, 'width', root);
@@ -172,6 +405,13 @@ export const reflowAfterTextChange = (parent: HTMLElement, root?: HTMLElement | 
   unfreezeAncestors(parent, 'height', root, true);
 };
 
+/**
+ * Check whether text reflow should unfreeze the clone root's width.
+ *
+ * @param parent - The parent element containing the changed text node.
+ * @param root - Optional clone root for ancestor unfreezing.
+ * @returns True when a no-wrap text chain requires root width reflow.
+ */
 const shouldUnfreezeRootWidthForText = (
   parent: HTMLElement,
   root?: HTMLElement | null
@@ -212,23 +452,32 @@ export const reflowManagedText = (parent: HTMLElement | null): void => {
 };
 
 /**
- * A frozen inline dimension captured before reflow removes it.
- * Used to restore dimensions on undo/revert.
+ * Record the edited element's own frozen inline size for one dimension.
+ *
+ * @param el - The element whose own dimension should be recorded.
+ * @param property - The dimension property to record.
+ * @param out - The output collection receiving any existing dimension records.
+ * @returns Nothing.
  */
-export interface DimensionRecord {
-  readonly element: HTMLElement;
-  readonly property: string;
-  readonly value: string;
-  readonly priority: string;
-}
-
-const recordDim = (el: HTMLElement, prop: string, out: DimensionRecord[]): void => {
-  const value = el.style.getPropertyValue(prop);
-  if (value) {
-    out.push({ element: el, property: prop, value, priority: el.style.getPropertyPriority(prop) });
-  }
+const collectOwnDimension = (
+  el: HTMLElement,
+  property: 'width' | 'height',
+  out: DimensionRecord[]
+): void => {
+  const maxProp = property === 'width' ? 'max-width' : 'max-height';
+  recordDim(el, property, out);
+  recordDim(el, maxProp, out);
 };
 
+/**
+ * Recursively record descendant dimensions that style reflow may remove.
+ *
+ * @param parent - The parent element whose descendants should be inspected.
+ * @param property - The dimension property to record.
+ * @param out - The output collection receiving dimension records.
+ * @param depth - Current recursion depth.
+ * @returns Nothing.
+ */
 const collectChildDims = (
   parent: HTMLElement,
   property: 'width' | 'height',
@@ -251,6 +500,16 @@ const collectChildDims = (
   }
 };
 
+/**
+ * Record ancestor dimensions up to the optional clone root boundary.
+ *
+ * @param el - The edited element whose ancestors should be inspected.
+ * @param property - The dimension property to record.
+ * @param root - Optional clone root that bounds ancestor collection.
+ * @param out - The output collection receiving dimension records.
+ * @param includeRoot - Whether the root boundary itself should be recorded.
+ * @returns Nothing.
+ */
 const collectAncestorDims = (
   el: HTMLElement,
   property: 'width' | 'height',
@@ -312,7 +571,13 @@ export const collectStyleReflowDimensions = (
   if (cssProp === 'width' || cssProp === 'height') {
     collectChildDims(el, cssProp, out);
     collectAncestorDims(el, cssProp, root, out);
-  } else if (cssProp === 'padding' || cssProp === 'margin') {
+  } else if (cssProp === 'padding') {
+    collectOwnDimension(el, 'width', out);
+    collectOwnDimension(el, 'height', out);
+    collectPaddingDependentStyles(el, out);
+    collectAncestorDims(el, 'width', root, out);
+    collectAncestorDims(el, 'height', root, out);
+  } else if (cssProp === 'margin') {
     collectChildDims(el, 'width', out);
     collectChildDims(el, 'height', out);
     collectAncestorDims(el, 'width', root, out);
@@ -502,6 +767,21 @@ const copyInheritedStyles = (target: HTMLElement, clone: HTMLElement): void => {
 };
 
 /**
+ * Copy computed layout styles that do not inherit across reparenting.
+ *
+ * @param target - The original element whose computed styles should be copied.
+ * @param clone - The cloned element receiving the copied layout styles.
+ * @returns Nothing.
+ */
+const copyLayoutStyles = (target: HTMLElement, clone: HTMLElement): void => {
+  const computed = getComputedStyle(target);
+
+  for (const prop of CLONE_LAYOUT_CSS_PROPS) {
+    clone.style.setProperty(prop, computed.getPropertyValue(prop));
+  }
+};
+
+/**
  * Replicate a pseudo-element's visual appearance on the clone via an
  * injected inline <style> rule. Pseudo-elements aren't part of the DOM
  * and cloneNode does not copy them.
@@ -601,6 +881,7 @@ export const copyStylesDeep = (
   }
 
   copyInheritedStyles(original, clone);
+  copyLayoutStyles(original, clone);
   applyPseudoStyle(original, clone, '::before');
   applyPseudoStyle(original, clone, '::after');
 
@@ -609,11 +890,11 @@ export const copyStylesDeep = (
   const shouldPinDimensions = !isRoot && !hadTruncationClass;
   if (shouldPinDimensions) {
     const childRect = original.getBoundingClientRect();
-    // Round dimensions for text-bearing elements to prevent subpixel
-    // blur. Layout-only containers keep exact float values so flex/grid
-    // sibling widths sum correctly and text doesn't reflow.
-    const w = hasDirectText(original) ? Math.round(childRect.width) : childRect.width;
-    const h = hasDirectText(original) ? Math.round(childRect.height) : childRect.height;
+    // Ceil dimensions for text-bearing elements to prevent subpixel blur
+    // without freezing text into a box that is slightly too small. Layout-only
+    // containers keep exact float values so flex/grid sibling widths sum correctly.
+    const w = hasDirectText(original) ? Math.ceil(childRect.width) : childRect.width;
+    const h = hasDirectText(original) ? Math.ceil(childRect.height) : childRect.height;
     clone.style.width = `${w}px`;
     clone.style.height = `${h}px`;
     clone.style.boxSizing = 'border-box';
