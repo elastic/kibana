@@ -111,7 +111,7 @@ mapped_pages:
 | --- | --- |
 | [actions](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/actions/README.md) | The Kibana actions plugin provides a framework to create executable actions. You can: |
 | [agentBuilder](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/agent_builder/README.md) | Home of the Agent Builder framework. |
-| [agentBuilderDashboards](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/agent_builder_dashboards/README.md) | Agent Builder enrichment plugin that provides dashboard tools, attachment types, and a dashboard-management skill for dashboards in chat via the AgentBuilder framework. |
+| [agentBuilderDashboards](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/agent_builder_dashboards/README.md) | Contains dashboard-related entities for the Agent Builder, including tools, attachment types, and a dashboard skill. |
 | [agentBuilderPlatform](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/agent_builder_platform/README.md) | Contains the platform-owned agent builder entities |
 | [agentBuilderWorkflows](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/agent_builder_workflows/README.md) | Contains workflow-related entities for the agent builder. |
 | [agentContextLayer](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/agent_context_layer/README.md) | The Agent Context Layer plugin provides a centralized service for indexing, crawling, and searching Kibana assets (visualizations, dashboards, connectors, workflows, etc.) via the Semantic Metadata Layer (SML). |
