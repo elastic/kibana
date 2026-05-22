@@ -143,14 +143,6 @@ describe('workflowExecutor', () => {
     coreStart: {},
     pluginsStart: {},
   });
-  const mockWorkflowInitService = {
-    ensureWorkflowsForSpace: jest.fn().mockResolvedValue({
-      default_alert_retrieval: 'wf-legacy',
-      generation: 'wf-generation',
-      validate: 'wf-validate',
-    }),
-    verifyAndRepairWorkflows: jest.fn(),
-  };
   const mockWorkflowsManagementApi = {} as WorkflowExecutorDeps['workflowsManagementApi'];
 
   const deps: WorkflowExecutorDeps = {
@@ -160,7 +152,6 @@ describe('workflowExecutor', () => {
     logger: mockLogger,
     publicBaseUrl: 'https://localhost:5601',
     request: mockRequest,
-    workflowInitService: mockWorkflowInitService,
     workflowsManagementApi: mockWorkflowsManagementApi,
   };
 
@@ -229,7 +220,6 @@ describe('workflowExecutor', () => {
           alert_retrieval_mode: 'custom_query' as const,
           validation_workflow_id: 'default',
         },
-        workflowInitService: mockWorkflowInitService,
         workflowsManagementApi: mockWorkflowsManagementApi,
       })
     );
