@@ -6,9 +6,10 @@
  */
 
 import type { z } from '@kbn/zod/v4';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { EuiFormRow, EuiRadioGroup } from '@elastic/eui';
+import { InlineFieldActions } from './inline_field_actions';
 import { CASE_EXTENDED_FIELDS } from '../../../../../common/constants';
 import { getFieldSnakeKey } from '../../../../../common/utils';
 import type {
@@ -26,8 +27,10 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
   type,
   metadata,
   isRequired,
+  onConfirm,
 }) => {
-  const { control, setValue } = useFormContext();
+  const { control, setValue, resetField } = useFormContext();
+  const [hasPendingChange, setHasPendingChange] = useState(false);
   const path = `${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`;
   const firstOption = metadata.options[0];
   const defaultValue = metadata.default ?? firstOption;
@@ -46,30 +49,50 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
     };
   }, [isRequired]);
 
+  const showInlineActions = hasPendingChange && onConfirm != null;
+
   return (
-    <Controller
-      key={name}
-      name={path}
-      control={control}
-      rules={rules}
-      defaultValue={defaultValue}
-      render={({ field, fieldState }) => (
-        <RadioGroupRender
+    <>
+      <Controller
+        key={name}
+        name={path}
+        control={control}
+        rules={rules}
+        defaultValue={defaultValue}
+        render={({ field, fieldState }) => (
+          <RadioGroupRender
+            name={name}
+            path={path}
+            label={label ?? ''}
+            isRequired={isRequired ?? false}
+            options={options}
+            firstOption={firstOption}
+            value={typeof field.value === 'string' ? field.value : ''}
+            isInvalid={!!fieldState.error}
+            errorMessage={fieldState.error?.message}
+            onChange={(id) => {
+              field.onChange(id);
+              field.onBlur();
+              setHasPendingChange(true);
+            }}
+            setValue={setValue}
+          />
+        )}
+      />
+      {showInlineActions && (
+        <InlineFieldActions
           name={name}
-          path={path}
-          label={label ?? ''}
-          isRequired={isRequired ?? false}
-          options={options}
-          firstOption={firstOption}
-          value={typeof field.value === 'string' ? field.value : ''}
-          isInvalid={!!fieldState.error}
-          errorMessage={fieldState.error?.message}
-          onChange={field.onChange}
-          onBlur={field.onBlur}
-          setValue={setValue}
+          onConfirm={() => {
+            setHasPendingChange(false);
+            onConfirm();
+          }}
+          onCancel={() => {
+            setHasPendingChange(false);
+            resetField(path);
+          }}
         />
       )}
-    />
+    </>
   );
 };
 RadioGroup.displayName = 'RadioGroup';
@@ -85,7 +108,6 @@ interface RadioGroupRenderProps {
   isInvalid: boolean;
   errorMessage?: string;
   onChange: (next: string) => void;
-  onBlur: () => void;
   setValue: ReturnType<typeof useFormContext>['setValue'];
 }
 
@@ -100,7 +122,6 @@ const RadioGroupRender: React.FC<RadioGroupRenderProps> = ({
   isInvalid,
   errorMessage,
   onChange,
-  onBlur,
   setValue,
 }) => {
   // When the form value is empty (e.g. set to '' by useYamlFormSync when no
@@ -123,15 +144,7 @@ const RadioGroupRender: React.FC<RadioGroupRenderProps> = ({
       isInvalid={isInvalid}
       fullWidth
     >
-      <EuiRadioGroup
-        name={name}
-        options={options}
-        idSelected={idSelected}
-        onChange={(id) => {
-          onChange(id);
-          onBlur();
-        }}
-      />
+      <EuiRadioGroup name={name} options={options} idSelected={idSelected} onChange={onChange} />
     </EuiFormRow>
   );
 };
