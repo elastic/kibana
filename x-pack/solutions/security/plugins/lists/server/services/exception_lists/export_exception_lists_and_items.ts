@@ -8,7 +8,6 @@
 import type {
   ExceptionListItemSchema,
   ExceptionListSchema,
-  ExportExceptionDetails,
   FoundExceptionListItemSchema,
   FoundExceptionListSchema,
   NamespaceType,
@@ -27,9 +26,14 @@ interface ExportExceptionListsAndItemsOptions {
   filter: string | undefined;
 }
 
+interface BulkExportExceptionDetails {
+  exported_exception_list_count: number;
+  exported_exception_list_item_count: number;
+}
+
 export interface ExportExceptionListsAndItemsReturn {
   exportData: string;
-  exportDetails: ExportExceptionDetails;
+  exportDetails: BulkExportExceptionDetails;
 }
 
 /**
@@ -140,16 +144,11 @@ export const exportExceptionListsAndItems = async ({
 
   const { exportData } = getExport([...exceptionLists, ...exceptionItems]);
 
-  // TODO: Add logic for missing lists and items on errors
   return {
     exportData,
     exportDetails: {
       exported_exception_list_count: exceptionLists.length,
       exported_exception_list_item_count: exceptionItems.length,
-      missing_exception_list_item_count: 0,
-      missing_exception_list_items: [],
-      missing_exception_lists: [],
-      missing_exception_lists_count: 0,
     },
   };
 };
