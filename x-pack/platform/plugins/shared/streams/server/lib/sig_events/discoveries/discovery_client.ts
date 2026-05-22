@@ -8,7 +8,12 @@
 import type { IDataStreamClient } from '@kbn/data-streams';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { type CommonSearchOptions } from '../query_utils';
-import { runLatestSourceEsqlQuery } from '../latest_source_query';
+import {
+  executeAndDecodeSource,
+  latestSourceFrom,
+  pickLatestPerGroup,
+  withTimeRange,
+} from '../latest_source_query';
 import {
   DISCOVERIES_DATA_STREAM,
   type Discovery,
@@ -38,12 +43,11 @@ export class DiscoveryClient {
   }
 
   async findLatest(options: CommonSearchOptions = {}): Promise<{ hits: Discovery[] }> {
-    return runLatestSourceEsqlQuery<Discovery>({
-      esClient: this.clients.esClient,
-      space: this.clients.space,
-      options,
-      index: DISCOVERIES_DATA_STREAM,
-      groupBy: 'discovery_id',
-    });
+    let query = latestSourceFrom(DISCOVERIES_DATA_STREAM, this.clients.space);
+    query = withTimeRange(query, options);
+    query = pickLatestPerGroup(query, 'discovery_id');
+    query = query.keep('_source');
+
+    return executeAndDecodeSource<Discovery>(this.clients.esClient, query);
   }
 }

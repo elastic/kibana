@@ -19,7 +19,6 @@ function makeFeature(overrides: Partial<Feature> = {}): Feature {
     description: 'Feature description',
     properties: {},
     confidence: 90,
-    deleted: false,
     run_id: 'run-id',
     ...overrides,
   } as Feature;

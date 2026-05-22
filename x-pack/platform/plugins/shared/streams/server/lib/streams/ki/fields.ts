@@ -16,7 +16,6 @@ export const TAGS = 'tags';
 export const EVIDENCE = 'evidence';
 export const STREAM_NAME = 'stream.name';
 export const SEARCH_EMBEDDING = 'search_embedding';
-export const DELETED = 'deleted';
 export const EXCLUDED = 'excluded';
 export const RUN_ID = 'run_id';
 

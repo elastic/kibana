@@ -6,28 +6,31 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { runLatestSourceEsqlQuery } from './latest_source_query';
+import {
+  executeAndDecodeSource,
+  latestSourceFrom,
+  pickLatestPerGroup,
+} from './latest_source_query';
 
-describe('runLatestSourceEsqlQuery', () => {
-  it('builds a latest-source query with multi-field grouping', async () => {
-    const queryMock = jest.fn().mockResolvedValue({
-      columns: [{ name: '_source', type: 'unsupported' }],
-      values: [[{ id: 'feature-id', kibana: { space_ids: ['default'] } }]],
-    });
-    const esClient = { esql: { query: queryMock } } as unknown as ElasticsearchClient;
+describe('pickLatestPerGroup', () => {
+  it('emits the expected INLINE STATS reduction for tuple group-bys', () => {
+    const query = pickLatestPerGroup(latestSourceFrom('.streams-knowledge-indicators', 'default'), [
+      'stream.name',
+      'type',
+      'id',
+    ]);
 
-    const { hits } = await runLatestSourceEsqlQuery<{ id: string }>({
-      esClient,
-      space: 'default',
-      options: {},
-      index: '.streams-knowledge-indicators',
-      groupBy: ['stream.name', 'type', 'id'],
-    });
+    const printed = query.print();
 
-    expect(queryMock).toHaveBeenCalledTimes(1);
-    expect(queryMock.mock.calls[0][0].query).toContain('BY `stream.name`, type, id');
-    expect(hits).toEqual([{ id: 'feature-id' }]);
+    expect(printed).toContain('INLINE STATS latest_ts = MAX(@timestamp) BY');
+    expect(printed).toContain('INLINE STATS tiebreaker_id = MAX(_id) BY');
+    expect(printed).toContain('BY `stream.name`, type, id');
   });
+});
+
+describe('executeAndDecodeSource', () => {
+  const buildEsClient = (queryMock: jest.Mock): ElasticsearchClient =>
+    ({ esql: { query: queryMock } } as unknown as ElasticsearchClient);
 
   it('returns empty hits when the backing data stream does not exist yet', async () => {
     const queryMock = jest
@@ -37,15 +40,12 @@ describe('runLatestSourceEsqlQuery', () => {
           'verification_exception Root causes: verification_exception: Unknown index [.significant_events-knowledge_indicators]'
         )
       );
-    const esClient = { esql: { query: queryMock } } as unknown as ElasticsearchClient;
 
-    const { hits } = await runLatestSourceEsqlQuery<{ id: string }>({
-      esClient,
-      space: 'default',
-      options: {},
-      index: '.significant_events-knowledge_indicators',
-      groupBy: ['stream.name', 'type', 'id'],
-    });
+    const query = latestSourceFrom('.significant_events-knowledge_indicators', 'default').keep(
+      '_source'
+    );
+
+    const { hits } = await executeAndDecodeSource<{ id: string }>(buildEsClient(queryMock), query);
 
     expect(hits).toEqual([]);
   });
@@ -54,16 +54,13 @@ describe('runLatestSourceEsqlQuery', () => {
     const queryMock = jest
       .fn()
       .mockRejectedValue(new Error('verification_exception: Unknown column [nonexistent.field]'));
-    const esClient = { esql: { query: queryMock } } as unknown as ElasticsearchClient;
+
+    const query = latestSourceFrom('.significant_events-knowledge_indicators', 'default').keep(
+      '_source'
+    );
 
     await expect(
-      runLatestSourceEsqlQuery<{ id: string }>({
-        esClient,
-        space: 'default',
-        options: {},
-        index: '.significant_events-knowledge_indicators',
-        groupBy: ['stream.name', 'type', 'id'],
-      })
+      executeAndDecodeSource<{ id: string }>(buildEsClient(queryMock), query)
     ).rejects.toThrow('Unknown column');
   });
 });

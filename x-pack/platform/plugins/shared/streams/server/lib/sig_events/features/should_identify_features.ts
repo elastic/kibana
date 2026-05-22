@@ -14,14 +14,27 @@ export interface ShouldIdentifyFeaturesResult {
 
 /**
  * Determine whether features identification should run for a stream by
- * comparing the latest revision timestamp of any inferred feature against
- * a threshold expressed in hours.
+ * comparing the latest revision timestamp of any **active** inferred
+ * feature (not tombstoned, not excluded) against a threshold expressed
+ * in hours.
  *
  * The legacy implementation queried `feature.last_seen`, which existed only
  * on inferred features and tracked the wall-clock of the most recent run.
- * In the unified KI model that field is gone — the data stream's append-only
- * `@timestamp` of the latest revision is now the same signal because every
- * identification run writes a new revision (or a tombstone) for each feature.
+ * In the unified KI model that field is gone, and the data stream's
+ * append-only `@timestamp` on the latest revision plays the same role:
+ * `reconcileInferredFeatures` unconditionally re-pushes every LLM-surfaced
+ * feature on its first encounter in a run (matched features land in
+ * `updatedFeatures` regardless of payload equality, because the new
+ * revision differs at least by `run_id`). So a successful iteration that
+ * surfaces any features refreshes the latest active revision timestamp.
+ *
+ * Tombstones and excluded revisions are intentionally filtered out by
+ * `getLatestRevisionTimestamp`. The identification loop never writes
+ * either — both come exclusively from user-driven actions (delete,
+ * exclude, restore, stream deletion). Counting them would let an
+ * external bulk delete or bulk exclude extend the throttle, which is
+ * the regression `ea464366a3c0` was written to prevent for the legacy
+ * `getFeatures`-based gate.
  */
 export async function shouldIdentifyFeatures({
   kiClient,

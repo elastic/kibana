@@ -80,14 +80,14 @@ export type IgnoredFeature = z.infer<typeof ignoredFeatureSchema>;
  * latest revision's `@timestamp` when reading and is not a property of the
  * write payload (`BaseFeature`).
  *
- * `excluded` is a root-level marker on the storage doc (mirrors `deleted`)
- * surfaced here so the UI can split active vs. excluded features when the
- * caller opts into `include_excluded=true`.
+ * `excluded` is a root-level marker on the storage doc surfaced here so the
+ * UI can split active vs. excluded features when the caller opts into
+ * `include_excluded=true`. Soft deletes use tombstone revisions (`deleted:
+ * true` on identity-only docs), not this field.
  */
 export const featureSchema = baseFeatureSchema.and(
   z.object({
     run_id: z.string().optional(),
-    deleted: z.boolean().optional(),
     excluded: z.boolean().optional(),
     updated_at: z.string().optional(),
   })

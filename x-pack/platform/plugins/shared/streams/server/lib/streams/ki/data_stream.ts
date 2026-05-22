@@ -105,7 +105,6 @@ export interface StoredFeatureKnowledgeIndicator extends StoredKiRevisionIdentit
   title?: string;
   tags?: string[];
   evidence?: string[];
-  deleted?: boolean;
   excluded?: boolean;
   run_id?: string;
   search_embedding?: string;
