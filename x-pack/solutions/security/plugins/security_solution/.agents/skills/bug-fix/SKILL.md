@@ -27,6 +27,7 @@ reproduction before fix work can begin."_
 | **4 — Fix (TDD)** | Root cause analysis → fix plan → user approval → red test → green fix | User explicitly approves plan; test passes |
 | **5 — Verify** | Clean environment, browser re-reproduction, test suite | All pass + bug gone in browser |
 | **6 — PR** | Open draft PR with description and before/after screenshots | PR URL presented to user |
+| **7 — Review** | Respond to reviewer comments; push back when justified | All reviewer threads resolved |
 
 ## Red Flags — Stop and Re-read the Phase
 
@@ -38,6 +39,7 @@ reproduction before fix work can begin."_
 | "I need to read source files to understand the area before checking the report" | Read the artifacts first. Source reading before context is how you import the reproduction-phase bias into the fix phase. |
 | "Silence / a question from the user means I can proceed" | Ambiguous or missing responses are not approval. Present the plan again and wait. |
 | "I wrote the test and the fix — I'll confirm it passes in Phase 5" | Phase 5 is a clean-environment check, not a substitute for first running the test. The specific test for this bug must be green before Phase 5 begins. If it isn't, the fix is incomplete. |
+| "My test is `expect(component.find(X)).toHaveLength(0)` — that covers the removal" | Existence checks for removed elements are fragile (any future tooltip anywhere in the tree breaks the test) and misrepresentative (they test presence, not the behavior the bug was about). Assert the broken behavior instead, or document why no meaningful test exists. |
 
 ## Phase 4: Fix (TDD)
 
@@ -105,6 +107,8 @@ re-present it. No exceptions for bugs that seem obvious.
 
 **For component bugs** — before writing any test, map the component's state machine: list every state value and the transitions between them (e.g., `SEARCHING → LOADING → null`). Internal state that isn't documented must be read from the source before you write a test that depends on it — otherwise each failed run is just blind trial-and-error until you happen to reach the right state.
 
+**Removal fixes** — if the fix deletes or unwraps UI elements (e.g., removing `EuiToolTip` wrappers), ask before writing the test: *"Can I assert the behavior that was wrong, rather than the element's absence?"* `expect(wrapper.find(EuiToolTip)).toHaveLength(0)` is fragile (any future tooltip in the tree breaks it) and misrepresentative (the bug was about behavior, not existence). For removal fixes where no meaningful behavior assertion exists, it is acceptable to skip the unit test and document the decision in the PR description. Do not force an existence check just to satisfy TDD.
+
 For Scout tests, use these skills before writing (REQUIRED):
 1. scout-create-scaffold
 2. scout-best-practices-reviewer
@@ -147,6 +151,10 @@ Restart services for a clean environment — stale reproduction state produces f
 1. Stop and restart the Scout server (same commands as Phase 1, same `server_args` and `config_sets/bug_fixer/kibana.yml`)
 2. Re-create test data from scratch (same steps as Phase 2)
 3. Browser reproduction — bug should not reproduce; `browser_take_screenshot` → `.bug-fixer-session/after.png`
+
+   **Known environment conditions** (expected — not failures):
+   - After server restart the browser may redirect to the SAML mock IDP. Always navigate explicitly to `http://localhost:5620/login?auth_provider_hint=cloud-basic`.
+   - An "AI Agent" modal overlay may intercept Playwright clicks on first page load. Close it with `browser_evaluate` using `querySelector` before interacting with the page.
 4. `browser_console_messages` + `browser_network_requests` — Phase 3 errors gone, no new errors
 5. **Lifecycle edge case** — if the fix involves startup or boot-time seeding, create a new
    space/resource *after* services are running and verify it works
@@ -174,6 +182,9 @@ End your message with exactly:
 Stop there. Re-read the user's next message — if they didn't explicitly say yes, skip to Output.
 
 If confirmed:
+
+Before running `gh pr create`, re-read the `--title` value for typos. Fix it in the command — do not submit and edit after.
+
 ```bash
 git checkout -b fix/<issue-number>
 git add -- <files listed in the Fix Plan>
@@ -238,6 +249,19 @@ fi
 ```
 
 Present the PR URL to the user.
+
+## Phase 7: Respond to Review Comments
+
+This phase begins when a reviewer posts feedback on the PR. It is not a scheduled step — watch for it.
+
+For each comment:
+
+1. **Read before implementing** — understand what the reviewer is asking and why before writing any code. Do not start editing files while still reading the thread.
+2. **Verify the claim** — if the reviewer says something is wrong, reproduce their concern in the code or browser before agreeing. Reviewers are sometimes mistaken; silent compliance with wrong feedback produces a worse fix.
+3. **Push back when justified** — if the reviewer's suggestion would produce a worse outcome, explain why with evidence: the code path, test result, or prior pattern you followed. Disagreement with reasoning is professional and expected.
+4. **Reply inline** — respond on the specific comment thread, not as a top-level PR comment. Inline replies keep context attached to the exact code they address.
+5. **One push per round** — batch all addressed comments into a single push; don't push after each individual comment.
+6. **If feedback reveals a misdiagnosis** — stop. Return to Phase 4 Step 1. Re-read `reproduction-report.md` and present a revised Root Cause Analysis before writing any new code.
 
 ## Output
 

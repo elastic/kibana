@@ -187,8 +187,10 @@ that now before reading any further.
 1. `browser_navigate` → `http://localhost:5620/login?auth_provider_hint=cloud-basic`
 2. `browser_snapshot` — if you see "Please upgrade your browser", call `browser_snapshot`
    again. This is transient; `browser_wait_for` can block indefinitely here.
+   If you are redirected to a SAML mock IDP instead of the login page, navigate again with the explicit `?auth_provider_hint=cloud-basic` URL — this is an expected Scout behaviour, not a failure.
 3. Log in with `elastic` / `changeme`
-4. Follow `reproduction_steps` from `analysis.json`
+4. If an "AI Agent" modal overlay is present after login, close it with `browser_evaluate` using `document.querySelector(...)?.remove()` before continuing — it will intercept Playwright clicks.
+5. Follow `reproduction_steps` from `analysis.json`
 
 After the bug manifests, collect:
 - `browser_console_messages` — JS exceptions, React errors

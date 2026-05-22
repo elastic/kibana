@@ -12,3 +12,5 @@
 | `gh api` errors | `gh auth status` and `gh auth refresh` |
 | "Please upgrade your browser" on login | Transient — call `browser_snapshot` again; using `browser_wait_for` here can block indefinitely |
 | Browser can't find element | Take fresh `browser_snapshot` after navigation/waits |
+| After server restart, browser redirects to SAML mock IDP | Expected condition — always navigate explicitly to `http://localhost:5620/login?auth_provider_hint=cloud-basic`; never rely on the default redirect after a restart |
+| "AI Agent" modal intercepts Playwright clicks | Expected condition — close it with `browser_evaluate` using `document.querySelector(...)?.remove()` on the modal element before interacting with the page |
