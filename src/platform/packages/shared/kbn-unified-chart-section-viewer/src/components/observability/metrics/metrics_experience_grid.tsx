@@ -22,7 +22,7 @@ import { MetricsExperienceGridContent } from './metrics_experience_grid_content'
 import { ChartSectionSearchError } from '../../chart_section_search_error/chart_section_search_error';
 import type { Dimension, UnifiedMetricsGridProps } from '../../../types';
 import { useDimensionsWipe, useDiscoverFieldForBreakdown, useMetricFieldsFilter } from './hooks';
-import { isSuppressedFetchError } from './utils/is_suppressed_fetch_error';
+import { isSuppressedFetchError } from '../../chart/utils/is_suppressed_fetch_error';
 
 export const MetricsExperienceGrid = ({
   renderToggleActions,
@@ -47,6 +47,7 @@ export const MetricsExperienceGrid = ({
     onToggleFullscreen,
     selectedDimensions,
     onDimensionsChange,
+    profileId,
   } = useMetricsExperienceState();
 
   const {
@@ -60,6 +61,7 @@ export const MetricsExperienceGrid = ({
     services,
     isComponentVisible,
     selectedDimensionNames: selectedDimensions,
+    profileId,
   });
 
   const { filteredMetricItems } = useMetricFieldsFilter({

@@ -1,7 +1,7 @@
 pageLoadAssetSize:
   actions: 20500
   advancedSettings: 6196
-  agentBuilder: 52831
+  agentBuilder: 58540
   agentBuilderPlatform: 8737
   agentBuilderWorkflows: 25000
   agentContextLayer: 1883
@@ -44,7 +44,7 @@ pageLoadAssetSize:
   dataViewManagement: 6250
   dataViews: 66000
   dataVisualizer: 32727
-  developerToolbar: 5000
+  developerToolbar: 5758
   devTools: 8107
   discover: 30501
   discoverEnhanced: 5353
@@ -92,7 +92,7 @@ pageLoadAssetSize:
   indexManagement: 39694
   inference: 10368
   infra: 56302
-  ingestHub: 6112
+  ingestHub: 12728
   ingestPipelines: 17866
   inputControlVis: 7660
   inspectComponent: 4590
@@ -211,6 +211,6 @@ pageLoadAssetSize:
   visualizationListing: 5148
   visualizations: 52092
   watcher: 10485
-  workflowsExtensions: 38938
+  workflowsExtensions: 43032
   workflowsManagement: 39968
   workplaceAIApp: 6234
