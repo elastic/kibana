@@ -162,7 +162,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.header.waitUntilLoadingHasFinished();
         const url = await browser.getCurrentUrl();
         if (!url.includes(`/app/management/insightsAndAlerting/triggersActions/rule/${ruleId}`)) {
-          throw new Error(`Expected URL to contain '/app/management/insightsAndAlerting/triggersActions/rule/${ruleId}' but got: ${url}`);
+          throw new Error(
+            `Expected URL to contain '/app/management/insightsAndAlerting/triggersActions/rule/${ruleId}' but got: ${url}`
+          );
         }
       });
 
