@@ -147,7 +147,6 @@ src/core/packages/chrome/browser-internal-types @elastic/appex-sharedux
 src/core/packages/chrome/browser-mocks @elastic/appex-sharedux
 src/core/packages/chrome/feature-flags @elastic/appex-sharedux
 src/core/packages/chrome/layout/core-chrome-layout @elastic/appex-sharedux
-src/core/packages/chrome/layout/core-chrome-layout-components @elastic/appex-sharedux
 src/core/packages/chrome/layout/core-chrome-layout-constants @elastic/appex-sharedux
 src/core/packages/chrome/layout/core-chrome-layout-utils @elastic/appex-sharedux
 src/core/packages/chrome/sidebar/sidebar @elastic/appex-sharedux
@@ -357,6 +356,7 @@ src/core/packages/user-storage/server-mocks @elastic/appex-sharedux
 src/core/packages/user-storage/test/plugins/user_storage_test @elastic/appex-sharedux
 src/core/test-helpers/kbn-server @elastic/kibana-core
 src/core/test-helpers/model-versions @elastic/kibana-core
+src/platform/kbn-ui/chrome-layout @elastic/appex-sharedux
 src/platform/kbn-ui/side-navigation @elastic/appex-sharedux
 src/platform/packages/private/analytics/utils/analytics_collection_utils @elastic/kibana-core
 src/platform/packages/private/dashboard/dashboard-navigation-options-common @elastic/kibana-presentation
@@ -376,6 +376,7 @@ src/platform/packages/private/kbn-data-streams @elastic/kibana-core
 src/platform/packages/private/kbn-dot-text @elastic/kibana-operations
 src/platform/packages/private/kbn-dot-text-loader @elastic/kibana-operations
 src/platform/packages/private/kbn-esql-editor @elastic/kibana-esql
+src/platform/packages/private/kbn-esql-scripts @elastic/kibana-esql
 src/platform/packages/private/kbn-ftr-screenshot-filename @elastic/kibana-operations @elastic/appex-qa
 src/platform/packages/private/kbn-gen-ai-functional-testing @elastic/search-kibana
 src/platform/packages/private/kbn-generate-csv @elastic/response-ops
@@ -985,6 +986,7 @@ x-pack/platform/packages/private/security/ui_components @elastic/kibana-security
 x-pack/platform/packages/private/upgrade-assistant/common @elastic/kibana-management
 x-pack/platform/packages/private/upgrade-assistant/public @elastic/kibana-management
 x-pack/platform/packages/private/upgrade-assistant/server @elastic/kibana-management
+x-pack/platform/packages/shared/agent-builder-dashboards/agent-builder-dashboards-common @elastic/appex-ai-infra
 x-pack/platform/packages/shared/agent-builder/agent-builder-browser @elastic/workchat-eng
 x-pack/platform/packages/shared/agent-builder/agent-builder-common @elastic/workchat-eng
 x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils @elastic/workchat-eng
@@ -1003,7 +1005,6 @@ x-pack/platform/packages/shared/ai-infra/inference-langchain @elastic/search-kib
 x-pack/platform/packages/shared/ai-infra/kbn-evals-suite-llm-tasks @elastic/appex-ai-infra
 x-pack/platform/packages/shared/ai-infra/product-doc-common @elastic/appex-ai-infra
 x-pack/platform/packages/shared/alerting-rule-utils @elastic/actionable-obs-team
-x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common @elastic/appex-ai-infra
 x-pack/platform/packages/shared/file-upload @elastic/ml-ui
 x-pack/platform/packages/shared/file-upload-common @elastic/ml-ui
 x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared @elastic/kibana-management
@@ -1144,6 +1145,7 @@ x-pack/platform/plugins/private/upgrade_assistant @elastic/kibana-management
 x-pack/platform/plugins/private/watcher @elastic/kibana-management
 x-pack/platform/plugins/shared/actions @elastic/response-ops
 x-pack/platform/plugins/shared/agent_builder @elastic/workchat-eng
+x-pack/platform/plugins/shared/agent_builder_dashboards @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/agent_builder_platform @elastic/workchat-eng
 x-pack/platform/plugins/shared/agent_builder_workflows @elastic/workchat-eng @elastic/workflows-eng
 x-pack/platform/plugins/shared/agent_context_layer @elastic/workchat-eng
@@ -1159,7 +1161,6 @@ x-pack/platform/plugins/shared/cases @elastic/kibana-cases
 x-pack/platform/plugins/shared/cloud @elastic/kibana-core
 x-pack/platform/plugins/shared/cloud_connect @elastic/kibana-management
 x-pack/platform/plugins/shared/content_connectors @elastic/search-kibana
-x-pack/platform/plugins/shared/dashboard_agent @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/data_quality @elastic/kibana-management
 x-pack/platform/plugins/shared/dataset_quality @elastic/kibana-management
 x-pack/platform/plugins/shared/elastic_console @elastic/obs-elastic-brain-team
@@ -3333,6 +3334,7 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 # Shared UX
 /src/core/packages/chrome @elastic/appex-sharedux
 /src/platform/kbn-ui/_tooling @elastic/appex-sharedux
+/src/platform/kbn-ui/chrome-layout @elastic/appex-sharedux
 /src/platform/kbn-ui/side-navigation @elastic/appex-sharedux
 /x-pack/platform/test/serverless/api_integration/test_suites/favorites @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200985
 /src/platform/test/api_integration/apis/short_url/**/*.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200209/files#r1846654156
