@@ -193,3 +193,17 @@ describe('UserStorageClient.getForInjection()', () => {
     await expect(client.getForInjection()).rejects.toThrow('boom');
   });
 });
+
+describe('UserStorageClient.set()', () => {
+  it('returns the schema-validated value', async () => {
+    const definitions = new Map<string, UserStorageDefinition>([
+      ['space:a', { schema: z.string().trim(), defaultValue: '', scope: 'space' }],
+    ]);
+    const { client, savedObjectsClient } = buildClient(definitions);
+    savedObjectsClient.update.mockResolvedValue({} as any);
+
+    const result = await client.set('space:a', '  hello  ');
+
+    expect(result).toBe('hello');
+  });
+});

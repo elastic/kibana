@@ -111,9 +111,12 @@ export class UserStorageClient implements IUserStorageClient {
     ).pipe(share());
   }
 
-  public async set<T = unknown>(key: string, value: T): Promise<void> {
+  public async set<T = unknown>(key: string, value: T): Promise<T> {
+    let stored: T;
     try {
-      await this.api.set(key, value);
+      // Cache the server-validated value (post-transform/strip) rather than
+      // the raw input, so the browser state stays in sync with what ES holds.
+      stored = (await this.api.set(key, value)) as T;
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
       this.httpErrors$.next(err);
@@ -121,8 +124,9 @@ export class UserStorageClient implements IUserStorageClient {
     }
 
     const oldValue = this.cache[key];
-    this.cache[key] = value;
-    this.update$.next({ type: 'set', key, newValue: value, oldValue });
+    this.cache[key] = stored;
+    this.update$.next({ type: 'set', key, newValue: stored, oldValue });
+    return stored;
   }
 
   public async remove(key: string): Promise<void> {

@@ -68,12 +68,12 @@ export interface IUserStorageClient {
   get$<T = unknown>(key: string, defaultValue: T): Observable<T>;
 
   /**
-   * Persists a new value via `PUT /internal/user_storage/{key}`. On success
-   * the local cache is updated and subscribers to `get$` / `getUpdate$` are
-   * notified. On HTTP failure the cache is left untouched, the error is
-   * published to `getHttpError$`, and the returned promise rejects.
+   * Persists a new value via `PUT /internal/user_storage/{key}`. Returns the
+   * server-validated form of the value (after any Zod transforms or stripping),
+   * which is also what gets cached locally. On HTTP failure the cache is left
+   * untouched, the error is published to `getHttpError$`, and the promise rejects.
    */
-  set<T = unknown>(key: string, value: T): Promise<void>;
+  set<T = unknown>(key: string, value: T): Promise<T>;
 
   /**
    * Removes the user override via `DELETE /internal/user_storage/{key}`.

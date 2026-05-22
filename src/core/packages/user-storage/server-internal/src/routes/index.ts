@@ -98,8 +98,9 @@ export const registerRoutes = ({ router, definitions, logger }: RegisterRoutesPa
       const { key } = request.params;
       const { value } = request.body;
 
+      let validated: unknown;
       try {
-        await client.set(key, value);
+        validated = await client.set(key, value);
       } catch (err) {
         if (err instanceof z.ZodError) {
           return response.badRequest({ body: { message: `Validation failed: ${err.message}` } });
@@ -110,7 +111,7 @@ export const registerRoutes = ({ router, definitions, logger }: RegisterRoutesPa
         throw err;
       }
 
-      return response.ok({ body: {} });
+      return response.ok({ body: { value: validated } });
     }
   );
 

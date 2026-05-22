@@ -49,8 +49,12 @@ export interface IUserStorageClient {
    * service to embed values in the initial HTML payload.
    */
   getForInjection(): Promise<Record<string, unknown>>;
-  /** Validate and persist a value for the current user. */
-  set<T = unknown>(key: string, value: T): Promise<void>;
+  /**
+   * Validate and persist a value for the current user. Returns the
+   * schema-validated form of the value as stored (after any Zod transforms
+   * or stripping), so callers can use the canonical representation.
+   */
+  set<T = unknown>(key: string, value: T): Promise<T>;
   /** Remove the user override so the key falls back to its default. */
   remove(key: string): Promise<void>;
 }

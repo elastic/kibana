@@ -33,6 +33,7 @@ const buildClient = (initial: Record<string, unknown> = {}): IUserStorageClient 
     set: jest.fn(async (key: string, value: unknown) => {
       cache[key] = value;
       subject$.next({ ...cache });
+      return value;
     }) as IUserStorageClient['set'],
     remove: jest.fn(async (key: string) => {
       delete cache[key];

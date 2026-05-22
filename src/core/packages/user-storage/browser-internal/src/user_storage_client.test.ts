@@ -96,7 +96,7 @@ describe('UserStorageClient', () => {
   describe('get$', () => {
     it('emits the current value immediately and on subsequent updates', async () => {
       const { client, api } = buildClient({ key: 'first' });
-      api.set.mockResolvedValue(undefined);
+      api.set.mockResolvedValue('second');
 
       const emissions = lastValueFrom(client.get$<string>('key').pipe(take(2), toArray()));
 
@@ -107,7 +107,7 @@ describe('UserStorageClient', () => {
 
     it('does not emit for unrelated keys', async () => {
       const { client, api } = buildClient({ a: 'initial' });
-      api.set.mockResolvedValue(undefined);
+      api.set.mockResolvedValue(99);
 
       const first = firstValueFrom(client.get$('a'));
       await client.set('b', 99);
@@ -154,7 +154,7 @@ describe('UserStorageClient', () => {
   describe('set', () => {
     it('updates cache and emits on update$ after a successful HTTP call', async () => {
       const { client, api } = buildClient({ key: 'old' });
-      api.set.mockResolvedValue(undefined);
+      api.set.mockResolvedValue('new');
 
       const updates = firstValueFrom(client.getUpdate$());
 
@@ -167,6 +167,29 @@ describe('UserStorageClient', () => {
         newValue: 'new',
         oldValue: 'old',
       });
+    });
+
+    it('caches the server-validated value rather than the raw input', async () => {
+      // Simulates a schema that transforms the value (e.g. z.string().trim()).
+      // The server returns the post-transform value; the browser must cache that.
+      const { client, api } = buildClient({});
+      api.set.mockResolvedValue('trimmed');
+
+      const stored = await client.set('key', '  trimmed  ');
+
+      expect(stored).toBe('trimmed');
+      expect(client.get('key')).toBe('trimmed');
+    });
+
+    it('update$ emits the server-validated newValue, not the raw input', async () => {
+      const { client, api } = buildClient({});
+      api.set.mockResolvedValue('normalised');
+
+      const updates = firstValueFrom(client.getUpdate$());
+
+      await client.set('key', 'raw input');
+
+      await expect(updates).resolves.toEqual(expect.objectContaining({ newValue: 'normalised' }));
     });
 
     it('does not mutate cache or emit when the HTTP call fails, and rejects', async () => {
