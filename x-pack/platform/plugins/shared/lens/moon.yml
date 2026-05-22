@@ -169,5 +169,5 @@ fileGroups:
     - test/scout/**/*
     - '!target/**/*'
   jest-config:
-    - jest.config.cjs
+    - jest.config.js
 tasks: {}
