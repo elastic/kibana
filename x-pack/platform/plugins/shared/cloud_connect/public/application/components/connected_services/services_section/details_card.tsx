@@ -216,6 +216,12 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
               closePopover={closeLicensePopover}
               panelPaddingSize="s"
               anchorPosition="upCenter"
+              aria-label={i18n.translate(
+                'xpack.cloudConnect.connectedServices.service.licensePopoverAriaLabel',
+                {
+                  defaultMessage: 'License information',
+                }
+              )}
             >
               <div style={{ maxWidth: '300px' }}>
                 <EuiText size="s">
@@ -410,6 +416,12 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
               panelPaddingSize="none"
               anchorPosition="downRight"
               data-test-subj="serviceCardMoreActionsPopover"
+              aria-label={i18n.translate(
+                'xpack.cloudConnect.connectedServices.service.moreActionsPopoverAriaLabel',
+                {
+                  defaultMessage: 'More actions',
+                }
+              )}
             >
               <EuiContextMenuPanel items={menuItems} />
             </EuiPopover>

@@ -29,7 +29,7 @@ import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/act
 import type { Space } from '@kbn/spaces-plugin/common';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/server';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import {
   ScriptsLibraryClient,
   type ScriptsLibraryClientInterface,

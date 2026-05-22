@@ -17,6 +17,11 @@ export const GENERATE_LEADS = i18n.translate(
   { defaultMessage: 'Generate' }
 );
 
+export const GENERATE_DISABLED_NO_CONNECTOR_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.leads.generateDisabledNoConnectorTooltip',
+  { defaultMessage: 'Ensure that you have a connector available and selected' }
+);
+
 export const REGENERATE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.threatHunting.leads.regenerate',
   { defaultMessage: 'Regenerate' }
@@ -49,7 +54,7 @@ export const HUNT_WITH_AI = i18n.translate(
 
 export const getSeeAllLeadsLabel = (count: number) =>
   i18n.translate('xpack.securitySolution.entityAnalytics.threatHunting.leads.seeAllCount', {
-    defaultMessage: 'Recent leads ({count})',
+    defaultMessage: 'See recent leads ({count})',
     values: { count },
   });
 
@@ -94,7 +99,7 @@ export const NO_DATA_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.entityAnalytics.threatHunting.leads.noDataDescription',
   {
     defaultMessage:
-      'No entities, risk scores, or alerts were found to generate hunting leads. Ensure the Entity Store and Risk Engine are enabled with data available.',
+      'No entities, risk scores, or alerts were found to generate hunting leads. Ensure the Entity Store and risk score maintainer are enabled with data available.',
   }
 );
 
@@ -119,6 +124,14 @@ export const GENERATE_SUCCESS = i18n.translate(
 export const GENERATE_ERROR = i18n.translate(
   'xpack.securitySolution.entityAnalytics.threatHunting.leads.generateError',
   { defaultMessage: 'Failed to generate leads' }
+);
+
+export const GENERATE_TIMEOUT = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.leads.generateTimeout',
+  {
+    defaultMessage:
+      'Lead generation is taking longer than expected. Results will appear when ready.',
+  }
 );
 
 export const STALENESS_FRESH = i18n.translate(
@@ -166,9 +179,42 @@ export const FETCH_STATUS_ERROR = i18n.translate(
   { defaultMessage: 'Failed to fetch lead generation status' }
 );
 
+export const SETTINGS = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.leads.settings',
+  { defaultMessage: 'Settings' }
+);
+
+export const CONNECTOR_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.leads.connectorLabel',
+  { defaultMessage: 'Connector' }
+);
+
+export const OPTIONS_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.leads.optionsLabel',
+  { defaultMessage: 'Options' }
+);
+
+export const OPEN_GENAI_SETTINGS = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.openGenAiSettings',
+  { defaultMessage: 'Open GenAI settings' }
+);
+
+export const NO_CONNECTOR_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.noConnectorDescription',
+  {
+    defaultMessage:
+      'Enable AI Agent as your default chat experience to start generating threat hunting leads from your entity data',
+  }
+);
+
 export const SCHEDULE_UPDATE_ERROR = i18n.translate(
   'xpack.securitySolution.entityAnalytics.threatHunting.leads.scheduleUpdateError',
   { defaultMessage: 'Failed to update schedule' }
+);
+
+export const GENERATE_DISABLED_NO_WRITE_PERMISSION_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.leads.generateDisabledNoWritePermissionTooltip',
+  { defaultMessage: "You don't have write access to the leads index" }
 );
 
 export const getStalenessLabel = (staleness: string): string => {

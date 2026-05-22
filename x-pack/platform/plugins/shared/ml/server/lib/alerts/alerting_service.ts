@@ -32,15 +32,6 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
 import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { ANOMALY_RESULT_TYPE_SCORE_FIELDS } from '../../../common/constants/alerts';
-import { getAnomalyDescription } from '../../../common/util/anomaly_description';
-import { getMetricChangeDescription } from '../../../common/util/metric_change_description';
-import { formatTimeValue } from '../../../common/util/format_time_value';
-import type { MlClient } from '../ml_client';
-import type {
-  MlAnomalyDetectionAlertParams,
-  MlAnomalyDetectionAlertPreviewRequest,
-} from '../../routes/schemas/alerting_schema';
 import type {
   AlertExecutionResult,
   FormattedRecordAnomalyAlertDoc,
@@ -51,7 +42,17 @@ import type {
   TopHitsResultsKeys,
   TopInfluencerAADDoc,
   TopRecordAADDoc,
-} from '../../../common/types/alerts';
+} from '@kbn/ml-common-types/alerts';
+import type { FieldFormatsRegistryProvider } from '@kbn/ml-common-types/kibana';
+import { ANOMALY_RESULT_TYPE_SCORE_FIELDS } from '../../../common/constants/alerts';
+import { formatTimeValue } from '../../../common/util/format_time_value';
+import { getAnomalyDescription } from '../../../common/util/anomaly_description';
+import { getMetricChangeDescription } from '../../../common/util/metric_change_description';
+import type { MlClient } from '../ml_client';
+import type {
+  MlAnomalyDetectionAlertParams,
+  MlAnomalyDetectionAlertPreviewRequest,
+} from '../../routes/schemas/alerting_schema';
 import type {
   AnomalyDetectionAlertContext,
   AnomalyDetectionAlertPayload,
@@ -59,7 +60,6 @@ import type {
 import { resolveMaxTimeInterval } from '../../../common/util/job_utils';
 import { getTopNBuckets, resolveLookbackInterval } from '../../../common/util/alerts';
 import type { DatafeedsService } from '../../models/job_service/datafeeds';
-import type { FieldFormatsRegistryProvider } from '../../../common/types/kibana';
 import { getTypicalAndActualValues } from '../../models/results_service/results_service';
 import type { GetDataViewsService } from '../data_views_utils';
 import { assertUserError } from './utils';

@@ -46,6 +46,11 @@ paths:
                   type: string
                   format: binary
                   description: The `.ndjson` file containing the rules.
+            examples:
+              rulesFile:
+                summary: Multipart part containing a rule export
+                value:
+                  file: rules_import.ndjson
       parameters:
         - name: overwrite
           in: query

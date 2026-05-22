@@ -98,7 +98,7 @@ const BulkActionsComponent: React.FC<OwnProps> = ({
         }
         closePopover={closeActionPopover}
       >
-        <EuiContextMenu size="s" panels={panels} initialPanelId={0} />
+        <EuiContextMenu panels={panels} initialPanelId={0} />
       </EuiPopover>
 
       <EuiButtonEmpty

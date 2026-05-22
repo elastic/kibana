@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/security-labs-artifact-builder'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/security-generative-ai'
+  defaultOwner: '@elastic/security-threat-hunting'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/security-labs-artifact-builder'
   description: Moon project for @kbn/security-labs-artifact-builder
   channel: ''
-  owner: '@elastic/security-generative-ai'
+  owner: '@elastic/security-threat-hunting'
   sourceRoot: x-pack/packages/ai-infra/security-labs-artifact-builder
 dependsOn:
   - '@kbn/tooling-log'

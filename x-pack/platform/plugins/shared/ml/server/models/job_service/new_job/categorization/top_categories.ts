@@ -7,7 +7,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 
-import type { CategoryId, Category } from '../../../../../common/types/categories';
+import type { CategoryId, Category } from '@kbn/ml-common-types/categories';
 import type { MlClient } from '../../../../lib/ml_client';
 
 export function topCategoriesProvider(mlClient: MlClient) {

@@ -232,7 +232,7 @@ export class Artifact {
       const cacheMeta = cache.readMeta(dest);
       const tmpPath = `${dest}.tmp`;
 
-      if (useCached) {
+      if (useCached || process.env.KBN_ES_SNAPSHOT_USE_CACHED === 'true') {
         if (cacheMeta.exists) {
           this.log.info(
             'use-cached passed, forcing to use existing snapshot',

@@ -7,7 +7,7 @@
 
 import { boomify, isBoom } from '@hapi/boom';
 
-import { isLensLegacyAttributes } from '@kbn/lens-embeddable-utils/config_builder/utils';
+import { isLensLegacyAttributes } from '@kbn/lens-embeddable-utils';
 import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
 import {
   LENS_INTERNAL_VIS_API_PATH,

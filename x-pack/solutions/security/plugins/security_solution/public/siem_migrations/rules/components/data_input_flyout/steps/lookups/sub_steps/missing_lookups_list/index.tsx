@@ -14,6 +14,7 @@ import {
 import { MissingLookupsList } from '../../../../../../../common/components';
 import { useUpsertResources } from '../../../../../../service/hooks/use_upsert_resources';
 import type { RuleMigrationTaskStats } from '../../../../../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { MigrationSource } from '../../../../../../../common/types';
 import * as i18n from './translations';
 
 export interface MissingLookupsListStepProps {
@@ -63,6 +64,7 @@ export const useMissingLookupsListStep = ({
     children: (
       <MissingLookupsList
         onCopied={onCopied}
+        migrationSource={migrationStats.vendor as MigrationSource}
         missingLookups={missingLookups}
         uploadedLookups={uploadedLookups}
         omitLookup={omitLookup}

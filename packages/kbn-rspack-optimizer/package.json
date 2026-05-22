@@ -1,0 +1,9 @@
+{
+  "name": "@kbn/rspack-optimizer",
+  "version": "1.0.0",
+  "private": true,
+  "author": "Tiago Costa <tiago.costa@elastic.co>",
+  "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts"
+}

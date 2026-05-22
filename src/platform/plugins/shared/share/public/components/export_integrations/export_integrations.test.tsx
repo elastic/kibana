@@ -13,7 +13,7 @@ import { userEvent } from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { EuiFlyout, EuiButton } from '@elastic/eui';
-import { ExportMenu, ManagedFlyout } from './export_integrations';
+import { ExportMenu, ManagedExportFlyout } from './export_integrations';
 import type { IShareContext } from '../context';
 import type { ExportShareConfig, ShareConfigs } from '../../types';
 
@@ -48,7 +48,7 @@ const mockShareContext: IShareContext = {
     },
   },
   objectType: 'type',
-  sharingData: { title: 'title', url: 'url' },
+  sharingData: { title: 'title', url: 'url', locatorParams: { id: 'test', params: {} } },
   isDirty: false,
   onClose: jest.fn(),
 };
@@ -201,7 +201,7 @@ describe('Export Integrations', () => {
       if (isFlyoutVisible) {
         flyout = (
           <EuiFlyout ownFocus onClose={() => setIsFlyoutVisible(false)} aria-label="Export">
-            <ManagedFlyout
+            <ManagedExportFlyout
               exportIntegration={mockCsvConfigForFlyout}
               shareObjectType={mockShareContext.objectType}
               shareObjectTypeMeta={mockCsvObjectTypeMeta}

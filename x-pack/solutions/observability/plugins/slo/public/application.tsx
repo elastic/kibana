@@ -13,6 +13,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
+import { InspectorContextProvider } from '@kbn/observability-shared-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
@@ -22,6 +23,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import type { ExperimentalFeatures } from '../common/config';
 import { PluginContext } from './context/plugin_context';
+import { InspectedSloClientProvider } from './components/inspect/inspected_slo_client_provider';
 import { usePluginContext } from './hooks/use_plugin_context';
 import { getRoutes } from './routes/routes';
 import type { SLOPublicPluginsStart, SLORepositoryClient } from './types';
@@ -117,13 +119,17 @@ export const renderApp = ({
               }}
             >
               <Router history={history}>
-                <RedirectAppLinks coreStart={core} data-test-subj="observabilityMainContainer">
-                  <PerformanceContextProvider>
-                    <QueryClientProvider client={queryClient}>
-                      <App />
-                    </QueryClientProvider>
-                  </PerformanceContextProvider>
-                </RedirectAppLinks>
+                <InspectorContextProvider>
+                  <InspectedSloClientProvider>
+                    <RedirectAppLinks coreStart={core} data-test-subj="observabilityMainContainer">
+                      <PerformanceContextProvider>
+                        <QueryClientProvider client={queryClient}>
+                          <App />
+                        </QueryClientProvider>
+                      </PerformanceContextProvider>
+                    </RedirectAppLinks>
+                  </InspectedSloClientProvider>
+                </InspectorContextProvider>
               </Router>
             </PluginContext.Provider>
           </KibanaContextProvider>

@@ -7,6 +7,7 @@ exports[`LinkIcon it renders 1`] = `
   onClick={[Function]}
 >
   <EuiIcon
+    aria-hidden={true}
     size="xxl"
     type="warning"
   />

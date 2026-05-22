@@ -128,7 +128,21 @@ export async function deleteEmptyFolders(
         }
 
         return Rx.from(stats).pipe(
-          Rx.mergeMap((s) => (s.isDirectory() ? handleDir$(resolve(path, s.name)) : []))
+          Rx.mergeMap((s) => (s.isDirectory() ? handleDir$(resolve(path, s.name)) : [])),
+          Rx.toArray(),
+          Rx.mergeMap((deletedChildren) =>
+            fsReadDir$(path).pipe(
+              Rx.mergeMap((currentEntries) => {
+                if (currentEntries.length === 0) {
+                  return Rx.concat(
+                    Rx.from(deletedChildren),
+                    rmdir$(path, { maxRetries: 1 }).pipe(Rx.map(() => path))
+                  );
+                }
+                return Rx.from(deletedChildren);
+              })
+            )
+          )
         );
       })
     );

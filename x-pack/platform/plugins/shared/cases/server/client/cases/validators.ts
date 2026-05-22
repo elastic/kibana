@@ -8,11 +8,19 @@
 import { differenceWith, intersectionWith, isEmpty } from 'lodash';
 import Boom from '@hapi/boom';
 import type { CustomFieldsConfiguration } from '../../../common/types/domain';
-import type { CaseRequestCustomFields, CasesSearchRequest } from '../../../common/types/api';
+import type {
+  CasePatchRequest,
+  CaseRequestCustomFields,
+  CasesSearchRequest,
+} from '../../../common/types/api';
 import { validateDuplicatedKeysInRequest } from '../validators';
 import type { ICasesCustomField } from '../../custom_fields';
 import { casesCustomFields } from '../../custom_fields';
 import { MAX_CUSTOM_FIELDS_PER_CASE } from '../../../common/constants';
+import type { CaseSavedObjectTransformed } from '../../common/types/case';
+import type { TemplatesService } from '../../services/templates';
+import { parseTemplate } from '../../routes/api/templates/parse_template';
+import { validateExtendedFields } from '../../../common/types/domain/template/validate_extended_fields';
 
 interface CustomFieldValidationParams {
   requestCustomFields?: CaseRequestCustomFields;
@@ -145,6 +153,42 @@ export const validateRequiredCustomFields = ({
         ', '
       )}`
     );
+  }
+};
+
+export const validateExtendedFieldsInRequest = async ({
+  updateReq,
+  originalCase,
+  templatesService,
+}: {
+  updateReq: CasePatchRequest;
+  originalCase: CaseSavedObjectTransformed;
+  templatesService: TemplatesService;
+}): Promise<void> => {
+  if (!updateReq.extended_fields) return;
+  if (updateReq.template === null) {
+    throw Boom.badRequest('extended_fields cannot be set when template is being cleared');
+  }
+  const templateId = updateReq.template?.id ?? originalCase.attributes.template?.id;
+  if (!templateId) {
+    throw Boom.badRequest('extended_fields require a template to be specified on the case');
+  }
+  const templateSO = await templatesService.getTemplate(templateId);
+  if (!templateSO) {
+    throw Boom.badRequest(`Template ${templateId} not found`);
+  }
+  let parsedTemplate;
+  try {
+    parsedTemplate = parseTemplate(templateSO.attributes);
+  } catch (err) {
+    throw Boom.badRequest(`Template ${templateId} has an invalid definition`);
+  }
+  const errors = validateExtendedFields(
+    updateReq.extended_fields,
+    parsedTemplate.definition.fields
+  );
+  if (errors.length) {
+    throw Boom.badRequest(`Invalid extended_fields: ${errors.join('; ')}`);
   }
 };
 

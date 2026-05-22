@@ -15,6 +15,7 @@ import type {
   RuleToImport,
   RuleSource,
 } from '../../../../../../common/api/detection_engine';
+import type { RuleChangesHistoryResponse } from '../../../../../../common/api/detection_engine/rule_management';
 import type { IRuleSourceImporter } from '../import/rule_source_importer';
 import type { RuleImportErrorObject } from '../import/errors';
 import type { PrebuiltRuleAsset } from '../../../prebuilt_rules';
@@ -33,6 +34,7 @@ export interface IDetectionRulesClient {
   revertPrebuiltRule: (args: RevertPrebuiltRuleArgs) => Promise<RuleResponse>;
   importRule: (args: ImportRuleArgs) => Promise<RuleResponse>;
   importRules: (args: ImportRulesArgs) => Promise<Array<RuleResponse | RuleImportErrorObject>>;
+  getHistoryForRule: (args: GetHistoryForRuleArgs) => Promise<RuleChangesHistoryResponse>;
 }
 
 export interface CreateCustomRuleArgs {
@@ -85,4 +87,10 @@ export interface ImportRulesArgs {
   overwriteRules: boolean;
   ruleSourceImporter: IRuleSourceImporter;
   allowMissingConnectorSecrets?: boolean;
+}
+
+export interface GetHistoryForRuleArgs {
+  ruleId: RuleObjectId;
+  page?: number;
+  perPage?: number;
 }

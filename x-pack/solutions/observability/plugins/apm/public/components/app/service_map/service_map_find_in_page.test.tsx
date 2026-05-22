@@ -6,13 +6,14 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ServiceMapNode } from '../../../../common/service_map';
 import { MOCK_EUI_THEME_FOR_USE_THEME, NODE_HEIGHT, NODE_WIDTH } from './constants';
 import { ServiceMapFindInPage } from './service_map_find_in_page';
 
 const mockSetCenter = jest.fn();
+const mockSetSearchHighlight = jest.fn();
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -31,6 +32,13 @@ jest.mock('@xyflow/react', () => {
     }),
   };
 });
+
+jest.mock('../../shared/service_map/service_map_search_context', () => ({
+  ...jest.requireActual('../../shared/service_map/service_map_search_context'),
+  useServiceMapSearchContext: () => ({
+    setSearchHighlight: mockSetSearchHighlight,
+  }),
+}));
 
 function serviceNode(
   id: string,
@@ -59,6 +67,7 @@ describe('ServiceMapFindInPage', () => {
 
   beforeEach(() => {
     mockSetCenter.mockClear();
+    mockSetSearchHighlight.mockClear();
   });
 
   it('centers the first match on the first next click', async () => {
@@ -91,5 +100,57 @@ describe('ServiceMapFindInPage', () => {
 
     await user.click(screen.getByTestId('serviceMapFindPrevious'));
     expectCenteredOn(apricot);
+  });
+
+  describe('search highlight context', () => {
+    it('sets matching node ids when typing a query', async () => {
+      const user = userEvent.setup();
+      render(<ServiceMapFindInPage nodes={nodes} />);
+      const input = screen.getByTestId('serviceMapControlsSearch');
+
+      await user.type(input, 'ap');
+      input.focus();
+
+      const lastCall = mockSetSearchHighlight.mock.calls.at(-1)?.[0];
+      expect(lastCall.matchNodeIds).toEqual(new Set(['svc-apple', 'svc-apricot']));
+    });
+
+    it('sets active match node id after navigating to next', async () => {
+      const user = userEvent.setup();
+      render(<ServiceMapFindInPage nodes={nodes} />);
+      const input = screen.getByTestId('serviceMapControlsSearch');
+
+      await user.type(input, 'ap');
+      await user.click(screen.getByTestId('serviceMapFindNext'));
+
+      const lastCall = mockSetSearchHighlight.mock.calls.at(-1)?.[0];
+      expect(lastCall.activeMatchNodeId).toBe('svc-apple');
+    });
+
+    it('clears highlight when search query is emptied', async () => {
+      const user = userEvent.setup();
+      render(<ServiceMapFindInPage nodes={nodes} />);
+      const input = screen.getByTestId('serviceMapControlsSearch');
+
+      await user.type(input, 'ap');
+      await user.clear(input);
+
+      const lastCall = mockSetSearchHighlight.mock.calls.at(-1)?.[0];
+      expect(lastCall.matchNodeIds.size).toBe(0);
+      expect(lastCall.activeMatchNodeId).toBeNull();
+    });
+
+    it('clears highlight when input loses focus', async () => {
+      const user = userEvent.setup();
+      render(<ServiceMapFindInPage nodes={nodes} />);
+      const input = screen.getByTestId('serviceMapControlsSearch');
+
+      await user.type(input, 'ap');
+      fireEvent.blur(input);
+
+      const lastCall = mockSetSearchHighlight.mock.calls.at(-1)?.[0];
+      expect(lastCall.matchNodeIds.size).toBe(0);
+      expect(lastCall.activeMatchNodeId).toBeNull();
+    });
   });
 });

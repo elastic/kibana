@@ -2088,6 +2088,54 @@ describe('Fleet - validatePackagePolicyConfig', () => {
     });
   });
 
+  describe('Data stream type', () => {
+    const validateDataStreamType = (type: string, packageType: string = 'input') => {
+      return validatePackagePolicyConfig(
+        {
+          type: 'text',
+          value: type,
+        },
+        {
+          name: 'data_stream.type',
+          type: 'text',
+        },
+        'data_stream.type',
+        parse,
+        packageType
+      );
+    };
+
+    it('should return null for valid types', () => {
+      expect(validateDataStreamType('logs')).toBeNull();
+      expect(validateDataStreamType('metrics')).toBeNull();
+      expect(validateDataStreamType('traces')).toBeNull();
+      expect(validateDataStreamType('synthetics')).toBeNull();
+      expect(validateDataStreamType('profiling')).toBeNull();
+    });
+
+    it('should return an error for an unknown type', () => {
+      const res = validateDataStreamType('bogus');
+      expect(res).toEqual([
+        'Data stream type must be one of: logs, metrics, traces, synthetics, profiling',
+      ]);
+    });
+
+    it('should return null when value is undefined', () => {
+      const res = validatePackagePolicyConfig(
+        { type: 'text', value: undefined },
+        { name: 'data_stream.type', type: 'text' },
+        'data_stream.type',
+        parse,
+        'input'
+      );
+      expect(res).toBeNull();
+    });
+
+    it('should return null for non-input package type', () => {
+      expect(validateDataStreamType('bogus', 'integration')).toBeNull();
+    });
+  });
+
   describe('URL validation', () => {
     it('should not return an error message for a valid URL', () => {
       const res = validatePackagePolicyConfig(

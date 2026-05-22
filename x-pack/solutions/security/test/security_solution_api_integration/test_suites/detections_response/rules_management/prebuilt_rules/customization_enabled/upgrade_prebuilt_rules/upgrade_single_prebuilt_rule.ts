@@ -87,14 +87,17 @@ export default ({ getService }: FtrProviderContext): void => {
                 query: { rule_id: DEFAULT_TEST_RULE_ID },
               });
 
-              const expected = {
+              expect(response.results.updated).toMatchObject([
+                {
+                  rule_id: DEFAULT_TEST_RULE_ID,
+                  version: 2,
+                },
+              ]);
+              expect(upgradedRule.body).toMatchObject({
                 rule_id: DEFAULT_TEST_RULE_ID,
                 version: 2,
                 name: 'Updated name',
-              };
-
-              expect(response.results.updated).toMatchObject([expected]);
-              expect(upgradedRule.body).toMatchObject(expected);
+              });
             });
 
             it(`upgrades customized ${ruleType} rule`, async () => {
@@ -133,14 +136,17 @@ export default ({ getService }: FtrProviderContext): void => {
                 query: { rule_id: DEFAULT_TEST_RULE_ID },
               });
 
-              const expected = {
+              expect(response.results.updated).toMatchObject([
+                {
+                  rule_id: DEFAULT_TEST_RULE_ID,
+                  version: 2,
+                },
+              ]);
+              expect(upgradedRule.body).toMatchObject({
                 rule_id: DEFAULT_TEST_RULE_ID,
                 version: 2,
                 name: 'Updated name',
-              };
-
-              expect(response.results.updated).toMatchObject([expected]);
-              expect(upgradedRule.body).toMatchObject(expected);
+              });
             });
           }
 
@@ -183,15 +189,17 @@ export default ({ getService }: FtrProviderContext): void => {
                 query: { rule_id: DEFAULT_TEST_RULE_ID },
               });
 
-              const expected = {
+              expect(response.results.updated).toMatchObject([
+                {
+                  rule_id: DEFAULT_TEST_RULE_ID,
+                  version: 2,
+                },
+              ]);
+              expect(upgradedRule.body).toMatchObject({
                 rule_id: DEFAULT_TEST_RULE_ID,
                 version: 2,
                 type: ruleTypeB,
-                name: 'Updated name',
-              };
-
-              expect(response.results.updated).toMatchObject([expected]);
-              expect(upgradedRule.body).toMatchObject(expected);
+              });
             });
 
             it(`upgrades customized ${ruleTypeA} rule to ${ruleTypeB} rule type`, async () => {
@@ -230,15 +238,17 @@ export default ({ getService }: FtrProviderContext): void => {
                 query: { rule_id: DEFAULT_TEST_RULE_ID },
               });
 
-              const expected = {
+              expect(response.results.updated).toMatchObject([
+                {
+                  rule_id: DEFAULT_TEST_RULE_ID,
+                  version: 2,
+                },
+              ]);
+              expect(upgradedRule.body).toMatchObject({
                 rule_id: DEFAULT_TEST_RULE_ID,
                 version: 2,
                 type: ruleTypeB,
-                name: 'Updated name',
-              };
-
-              expect(response.results.updated).toMatchObject([expected]);
-              expect(upgradedRule.body).toMatchObject(expected);
+              });
             });
           }
 
@@ -349,7 +359,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
               expect(response.results.updated).toMatchObject([
                 {
-                  ...NON_UPGRADABLE_FIELDS,
+                  rule_id: DEFAULT_TEST_RULE_ID,
                   version: 2,
                 },
               ]);

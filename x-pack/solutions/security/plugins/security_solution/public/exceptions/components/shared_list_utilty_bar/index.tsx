@@ -66,7 +66,6 @@ export const ExceptionsTableUtilityBar: React.FC<ExceptionsTableUtilityBarProps>
                 popoverPanelPaddingSize={'s'}
                 popoverContent={() => (
                   <EuiContextMenuPanel
-                    size="s"
                     items={sortFields?.map((item) => {
                       const isSelectedSortItem = selectedSortField?.field === item.field;
                       let nextSortOrder = item.defaultOrder;

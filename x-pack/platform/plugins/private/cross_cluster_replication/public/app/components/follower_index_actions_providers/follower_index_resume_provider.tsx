@@ -1,0 +1,184 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { PureComponent, Fragment, type ReactNode, type SyntheticEvent } from 'react';
+import { connect } from 'react-redux';
+import type { AnyAction } from 'redux';
+import type { ThunkDispatch } from 'redux-thunk';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiConfirmModal, EuiLink, htmlIdGenerator } from '@elastic/eui';
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import type { CcrState } from '../../store/reducers';
+import { routing } from '../../services/routing';
+import { resumeFollowerIndex } from '../../store/actions';
+import { arrify } from '../../../../common/services/utils';
+
+interface Props {
+  resumeFollowerIndex: (id: string | string[]) => void;
+  children: (resumeFollowerIndex: (id: string | string[]) => void) => ReactNode;
+  onConfirm?: () => void;
+}
+
+interface State {
+  isModalOpen: boolean;
+  ids: string[] | null;
+}
+
+class FollowerIndexResumeProviderUi extends PureComponent<Props, State> {
+  state: State = {
+    isModalOpen: false,
+    ids: null,
+  };
+
+  stopModalEventPropagation = (event: SyntheticEvent) => {
+    // This component can sometimes be used inside of an EuiToolTip, in which case mousing over
+    // the modal can trigger the tooltip. Stopping propagation prevents this.
+    event.stopPropagation();
+  };
+
+  resumeFollowerIndex = (id: string | string[]) => {
+    this.setState({ isModalOpen: true, ids: arrify(id) });
+  };
+
+  onConfirm = () => {
+    const { ids } = this.state;
+    if (!ids) {
+      return;
+    }
+    this.props.resumeFollowerIndex(ids);
+    this.setState({ isModalOpen: false, ids: null });
+    this.props.onConfirm?.();
+  };
+
+  closeConfirmModal = () => {
+    this.setState({
+      isModalOpen: false,
+    });
+  };
+
+  renderModal = () => {
+    const { ids } = this.state;
+    if (!ids) {
+      return null;
+    }
+    const reactRouter = routing.reactRouterOrThrow;
+    const isSingle = ids.length === 1;
+    const title = isSingle
+      ? i18n.translate(
+          'xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.resumeSingleTitle',
+          {
+            defaultMessage: `Resume replication to follower index ''{name}''?`,
+            values: { name: ids[0] },
+          }
+        )
+      : i18n.translate(
+          'xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.resumeMultipleTitle',
+          {
+            defaultMessage: `Resume replication to {count} follower indices?`,
+            values: { count: ids.length },
+          }
+        );
+
+    const confirmModalTitleId = htmlIdGenerator()('confirmModalTitle');
+
+    return (
+      <EuiConfirmModal
+        aria-labelledby={confirmModalTitleId}
+        title={title}
+        titleProps={{ id: confirmModalTitleId }}
+        onCancel={this.closeConfirmModal}
+        onConfirm={this.onConfirm}
+        cancelButtonText={i18n.translate(
+          'xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.cancelButtonText',
+          {
+            defaultMessage: 'Cancel',
+          }
+        )}
+        buttonColor="primary"
+        confirmButtonText={i18n.translate(
+          'xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.confirmButtonText',
+          {
+            defaultMessage: 'Resume replication',
+          }
+        )}
+        onMouseOver={this.stopModalEventPropagation}
+        onFocus={this.stopModalEventPropagation}
+        data-test-subj="resumeReplicationConfirmation"
+      >
+        {isSingle ? (
+          <p>
+            <FormattedMessage
+              id="xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.singleResumeDescription"
+              defaultMessage="Replication resumes using the default advanced settings. To use
+                  custom advanced settings, {editLink}."
+              values={{
+                editLink: (
+                  <EuiLink
+                    {...reactRouterNavigate(
+                      reactRouter.history,
+                      routing.getFollowerIndexPath(ids[0])
+                    )}
+                    data-test-subj="editLink"
+                  >
+                    <FormattedMessage
+                      id="xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.singleResumeEditLink"
+                      defaultMessage="edit the follower index"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          </p>
+        ) : (
+          <Fragment>
+            <p>
+              <FormattedMessage
+                id="xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.multipleResumeDescriptionWithSettingWarning"
+                defaultMessage="Replication resumes using the default advanced settings."
+              />
+            </p>
+
+            <p>
+              <FormattedMessage
+                id="xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.multipleResumeDescription"
+                defaultMessage="Replication will resume on these follower indices:"
+              />
+            </p>
+
+            <ul>
+              {ids.map((id) => (
+                <li key={id}>{id}</li>
+              ))}
+            </ul>
+          </Fragment>
+        )}
+      </EuiConfirmModal>
+    );
+  };
+
+  render() {
+    const { children } = this.props;
+    const { isModalOpen } = this.state;
+
+    return (
+      <Fragment>
+        {children(this.resumeFollowerIndex)}
+        {isModalOpen && this.renderModal()}
+      </Fragment>
+    );
+  }
+}
+
+const mapDispatchToProps = (dispatch: ThunkDispatch<CcrState, undefined, AnyAction>) => ({
+  resumeFollowerIndex: (id: string | string[]) => dispatch(resumeFollowerIndex(id)),
+});
+
+export const FollowerIndexResumeProvider = connect(
+  undefined,
+  mapDispatchToProps
+)(FollowerIndexResumeProviderUi);

@@ -32,6 +32,10 @@ xpack.features.overrides:
   agentBuilder:
     category: 'security'
     order: 1101
+  ### Agent Context Layer should match Agent Builder for role management.
+  agentContextLayer:
+    category: 'security'
+    order: 1102
 
   ## Fine-tune the security solution essentials feature privileges. These feature privilege overrides are set individually for each project type. Also, refer to `serverless.yml` for the project-agnostic overrides.
   siemV5:

@@ -5,13 +5,18 @@
  * 2.0.
  */
 
+import { isArray } from 'lodash';
+import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import type { PackSavedObject } from '../../common/types';
+import { convertECSMappingToObject, type ECSMappingArray } from '../../../common/utils/converters';
 
 export interface PackLookupEntry {
   packId: string;
   packName: string;
   queryName: string;
   queryText: string;
+  /** ECS mapping from the pack query, converted to object form for use in exports. */
+  ecsMapping?: ECSMapping;
 }
 
 export const buildPackLookup = (
@@ -24,11 +29,19 @@ export const buildPackLookup = (
     const { queries, name: packName } = packSO.attributes;
     if (!queries) continue;
     for (const query of queries) {
+      const rawEcsMapping = query.ecs_mapping;
+      const ecsMapping: ECSMapping | undefined = rawEcsMapping
+        ? isArray(rawEcsMapping)
+          ? convertECSMappingToObject(rawEcsMapping as ECSMappingArray)
+          : (rawEcsMapping as ECSMapping)
+        : undefined;
+
       const entry: PackLookupEntry = {
         packId: packSO.id,
         packName,
         queryName: query.name ?? query.id,
         queryText: query.query,
+        ecsMapping,
       };
 
       if (query.schedule_id) {

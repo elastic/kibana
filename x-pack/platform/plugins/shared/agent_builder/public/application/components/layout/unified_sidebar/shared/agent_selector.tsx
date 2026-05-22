@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 
 import { useAgentBuilderAgents } from '../../../../hooks/agents/use_agents';
 import { storageKeys } from '../../../../storage_keys';
+import { useActiveSpaceId } from '../../../../context/active_space_context';
 import { AgentSelectorDropdown } from '../../../common/agent_selector/agent_selector_dropdown';
 
 const deletedAgentLabel = i18n.translate('xpack.agentBuilder.sidebar.agentSelector.deletedAgent', {
@@ -27,7 +28,8 @@ interface AgentSelectorProps {
 export const AgentSelector: React.FC<AgentSelectorProps> = ({ agentId, getNavigationPath }) => {
   const { agents, isLoading } = useAgentBuilderAgents();
   const navigate = useNavigate();
-  const [, setStoredAgentId] = useLocalStorage<string>(storageKeys.agentId);
+  const spaceId = useActiveSpaceId();
+  const [, setStoredAgentId] = useLocalStorage<string>(storageKeys.getAgentIdKey(spaceId));
 
   const currentAgent = agents.find((a) => a.id === agentId);
 

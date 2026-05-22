@@ -40,6 +40,8 @@ describe('liquid_completions', () => {
       expect(filterNames).toContain('minus');
       expect(filterNames).toContain('base64_encode');
       expect(filterNames).toContain('base64_decode');
+      expect(filterNames).toContain('sha256');
+      expect(filterNames).toContain('hmac_sha256');
     });
 
     it('should have proper structure for each filter', () => {

@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { BehaviorSubject, map, merge } from 'rxjs';
+import { BehaviorSubject, map, merge, skip } from 'rxjs';
 import type { MlEntityField } from '@kbn/ml-anomaly-utils';
 import type { StateComparators, TitlesApi } from '@kbn/presentation-publishing';
-import type { SeverityThreshold } from '../../../common/types/anomalies';
-import type { JobId } from '../../../common/types/anomaly_detection_jobs';
-import { DEFAULT_MAX_SERIES_TO_PLOT } from '../../application/services/anomaly_explorer_charts_service';
 import type {
-  AnomalyChartsComponentApi,
-  AnomalyChartsDataLoadingApi,
   AnomalyChartsEmbeddableRuntimeState,
+  SeverityThreshold,
   AnomalyChartsEmbeddableState,
-} from '../types';
+} from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
+import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+
+import { DEFAULT_MAX_SERIES_TO_PLOT } from '../../application/services/anomaly_explorer_charts_service';
+import type { AnomalyChartsComponentApi, AnomalyChartsDataLoadingApi } from '../types';
 
 export const anomalyChartsComparators: StateComparators<AnomalyChartsEmbeddableRuntimeState> = {
   jobIds: 'deepEquality',
@@ -87,8 +87,23 @@ export const initializeAnomalyChartsControls = (
       onLoading,
       onError,
     } as AnomalyChartsDataLoadingApi,
-    anyStateChange$: merge(jobIds$, maxSeriesToPlot$, severityThreshold$, selectedEntities$).pipe(
-      map(() => undefined)
+    anyStateChange$: merge(
+      jobIds$.pipe(
+        skip(1),
+        map(() => undefined)
+      ),
+      maxSeriesToPlot$.pipe(
+        skip(1),
+        map(() => undefined)
+      ),
+      severityThreshold$.pipe(
+        skip(1),
+        map(() => undefined)
+      ),
+      selectedEntities$.pipe(
+        skip(1),
+        map(() => undefined)
+      )
     ),
     getLatestState,
     reinitializeState: (lastSavedState: AnomalyChartsEmbeddableState) => {

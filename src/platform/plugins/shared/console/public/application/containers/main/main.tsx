@@ -57,6 +57,7 @@ import {
   INITIAL_TOUR_CONFIG,
   FILES_TOUR_STEP,
   EXPORT_FILE_NAME,
+  EXPORT_REQUESTS_METRIC_ID,
 } from './constants';
 
 interface MainProps {
@@ -128,7 +129,7 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
 
   const {
     docLinks,
-    services: { notifications, routeHistory },
+    services: { notifications, routeHistory, trackUiMetric },
   } = useServicesContext();
 
   const [tourStepProps, actions, tourState] = useEuiTour(
@@ -271,12 +272,13 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
                     <EuiButtonEmpty
                       iconType="upload"
                       disabled={inputEditorValue === ''}
-                      onClick={() =>
+                      onClick={() => {
                         downloadFileAs(EXPORT_FILE_NAME, {
                           content: inputEditorValue,
                           type: 'text/plain',
-                        })
-                      }
+                        });
+                        trackUiMetric.count(EXPORT_REQUESTS_METRIC_ID);
+                      }}
                       size="xs"
                       data-test-subj="consoleExportButton"
                       aria-label={MAIN_PANEL_LABELS.exportButtonTooltip}

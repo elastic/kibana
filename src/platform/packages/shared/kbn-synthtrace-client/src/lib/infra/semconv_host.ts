@@ -31,13 +31,13 @@ export interface SemconvHostMetricsDocument extends SemconvHostDocument {
   'metricset.name'?: string;
   state?: string;
   direction?: string;
-  'system.cpu.utilization'?: number;
-  'system.cpu.logical.count'?: number;
-  'system.cpu.load_average.1m'?: number;
+  'metrics.system.cpu.utilization'?: number;
+  'metrics.system.cpu.logical.count'?: number;
+  'metrics.system.cpu.load_average.1m'?: number;
   'system.memory.utilization'?: number;
   'system.memory.usage'?: number;
   'metrics.system.filesystem.usage'?: number;
-  'system.network.io'?: number;
+  'metrics.system.network.io'?: number;
   'device.keyword'?: string;
 }
 
@@ -45,21 +45,21 @@ class SemconvHostMetrics extends Serializable<SemconvHostMetricsDocument> {}
 
 export class SemconvHost extends Entity<SemconvHostDocument> {
   cpu() {
-    const idle = 0.3 + Math.random() * 0.4;
-    const wait = Math.random() * 0.1;
+    const loadAvg1m = 1 + Math.random() * 3;
     return [
-      { state: 'idle', 'system.cpu.utilization': idle },
-      { state: 'wait', 'system.cpu.utilization': wait },
-      { state: 'user', 'system.cpu.utilization': Math.random() * 0.3 },
-      { state: 'system', 'system.cpu.utilization': Math.random() * 0.2 },
+      { state: 'idle', utilization: 0.3 + Math.random() * 0.4 },
+      { state: 'wait', utilization: Math.random() * 0.1 },
+      { state: 'user', utilization: Math.random() * 0.3 },
+      { state: 'system', utilization: Math.random() * 0.2 },
     ].map(
-      (cpu) =>
+      ({ state, utilization }) =>
         new SemconvHostMetrics({
           ...this.fields,
-          ...cpu,
+          state,
           'metricset.name': 'cpu',
-          'system.cpu.logical.count': 4,
-          'system.cpu.load_average.1m': 1 + Math.random() * 3,
+          'metrics.system.cpu.utilization': utilization,
+          'metrics.system.cpu.logical.count': 4,
+          'metrics.system.cpu.load_average.1m': loadAvg1m,
         })
     );
   }
@@ -69,34 +69,23 @@ export class SemconvHost extends Entity<SemconvHostDocument> {
     const used = total * (0.4 + Math.random() * 0.3);
     const free = total - used;
     return [
-      { state: 'used', 'system.memory.utilization': used / total, 'system.memory.usage': used },
-      { state: 'free', 'system.memory.utilization': free / total, 'system.memory.usage': free },
-      {
-        state: 'cached',
-        'system.memory.utilization': 0.1,
-        'system.memory.usage': total * 0.1,
-      },
-      {
-        state: 'buffered',
-        'system.memory.utilization': 0.05,
-        'system.memory.usage': total * 0.05,
-      },
-      {
-        state: 'slab_reclaimable',
-        'system.memory.utilization': 0.02,
-        'system.memory.usage': total * 0.02,
-      },
-      {
-        state: 'slab_unreclaimable',
-        'system.memory.utilization': 0.01,
-        'system.memory.usage': total * 0.01,
-      },
+      { state: 'used', utilization: used / total, usage: used },
+      { state: 'free', utilization: free / total, usage: free },
+      { state: 'cached', utilization: 0.1, usage: total * 0.1 },
+      { state: 'buffered', utilization: 0.05, usage: total * 0.05 },
+      { state: 'slab_reclaimable', utilization: 0.02, usage: total * 0.02 },
+      { state: 'slab_unreclaimable', utilization: 0.01, usage: total * 0.01 },
     ].map(
-      (mem) =>
+      ({ state, utilization, usage }) =>
         new SemconvHostMetrics({
           ...this.fields,
-          ...mem,
+          state,
           'metricset.name': 'memory',
+          // The semconv `memoryUsage` Lens formula targets `system.memory.utilization`
+          // (no `metrics.` prefix) to match how real OTel collectors land that field;
+          // the `metrics.*` variants are kept for the formulas that do use the prefix.
+          'system.memory.utilization': utilization,
+          'system.memory.usage': usage,
         })
     );
   }
@@ -121,15 +110,16 @@ export class SemconvHost extends Entity<SemconvHostDocument> {
 
   network() {
     return [
-      { direction: 'transmit', 'system.network.io': Math.floor(Math.random() * 1e9) },
-      { direction: 'receive', 'system.network.io': Math.floor(Math.random() * 1e9) },
+      { direction: 'transmit', io: Math.floor(Math.random() * 1e9) },
+      { direction: 'receive', io: Math.floor(Math.random() * 1e9) },
     ].map(
-      (net) =>
+      ({ direction, io }) =>
         new SemconvHostMetrics({
           ...this.fields,
-          ...net,
+          direction,
           'metricset.name': 'network',
           'device.keyword': 'eth0',
+          'metrics.system.network.io': io,
         })
     );
   }

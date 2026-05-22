@@ -7,10 +7,12 @@
 
 import React, { useMemo } from 'react';
 import { EuiFlyoutFooter, EuiPanel, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { TakeAction } from '../shared/components/take_action';
-import { EntityIdentifierFields } from '../../../../common/entity_analytics/types';
+import { EntityIdentifierFields, EntityType } from '../../../../common/entity_analytics/types';
 import type { IdentityFields } from '../../document_details/shared/utils';
 import type { EntityStoreRecord } from '../shared/hooks/use_entity_from_store';
+import { AiAssistantButton } from '../../../entity_analytics/components/ai_assistant_button/ai_assistant_button';
 
 export const HostPanelFooter = ({
   identityFields,
@@ -25,12 +27,30 @@ export const HostPanelFooter = ({
     [identityFields]
   );
 
+  const euidApi = useEntityStoreEuidApi();
+  const euidEntityFilter = useMemo((): string | undefined => {
+    if (!euidApi?.euid || !entity) {
+      return undefined;
+    }
+    return euidApi.euid.kql.getEuidFilterBasedOnDocument('host', entity);
+  }, [euidApi?.euid, entity]);
+
   return (
     <EuiFlyoutFooter>
       <EuiPanel color="transparent">
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
           <EuiFlexItem grow={false}>
-            <TakeAction isDisabled={!hostName} kqlQuery={`host.name: "${hostName}"`} />
+            <AiAssistantButton
+              entityType={EntityType.host}
+              entityName={hostName}
+              telemetryPathway="entity_flyout"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <TakeAction
+              isDisabled={!hostName}
+              kqlQuery={euidEntityFilter ?? `host.name: "${hostName}"`}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>

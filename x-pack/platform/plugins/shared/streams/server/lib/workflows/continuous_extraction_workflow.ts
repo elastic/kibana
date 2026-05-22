@@ -112,9 +112,11 @@ export const createContinuousKiExtractionWorkflowService = (
       }
 
       if (existing) {
-        await cancelRunningTasks(taskClient).catch((err) =>
-          log.warn(`Failed to cancel running tasks: ${err}`)
-        );
+        try {
+          await cancelRunningTasks(taskClient);
+        } catch (err) {
+          throw new Error('Cannot delete workflow: failed to cancel running tasks', { cause: err });
+        }
         await hardDelete(request);
       }
 

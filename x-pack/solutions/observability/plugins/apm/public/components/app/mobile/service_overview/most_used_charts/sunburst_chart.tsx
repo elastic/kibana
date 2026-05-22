@@ -138,7 +138,7 @@ export function NoResultsFound() {
   return (
     <div css={noResultsFoundStyle}>
       <EuiText data-test-subj="mostUsedNoResultsFound" textAlign="center" color="subdued" size="xs">
-        <EuiIcon type={IconChartDonut} color="subdued" size="l" />
+        <EuiIcon type={IconChartDonut} color="subdued" size="l" aria-hidden={true} />
         <EuiSpacer size="s" />
         <p>{noResultsFoundText}</p>
       </EuiText>

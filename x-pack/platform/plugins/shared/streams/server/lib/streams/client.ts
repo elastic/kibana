@@ -29,6 +29,7 @@ import {
   LOGS_ECS_STREAM_NAME,
   ROOT_STREAM_NAMES,
 } from '@kbn/streams-schema';
+import type { StreamSummary } from '../../../common';
 import type { QueryClient } from './assets/query/query_client';
 import type { AttachmentClient } from './attachments/attachment_client';
 import {
@@ -43,6 +44,7 @@ import { State } from './state_management/state';
 import type { StreamsStorageClient } from './storage/streams_storage_client';
 import { checkAccess, checkAccessBulk } from './stream_crud';
 import { upsertDataStream } from './data_streams/manage_data_streams';
+import { shouldExcludeFromStreamsList } from './data_streams/should_exclude_from_streams_list';
 import type { FeatureClient } from './feature';
 
 interface AcknowledgeResponse<TResult extends Result> {
@@ -483,11 +485,13 @@ export class StreamsClient {
     name,
     where: condition,
     status,
+    draft,
   }: {
     parent: string;
     name: string;
     where: Condition;
     status: RoutingStatus;
+    draft?: boolean;
   }): Promise<ForkStreamResponse> {
     const parentDefinition = Streams.WiredStream.Definition.parse(await this.getStream(parent));
 
@@ -513,6 +517,7 @@ export class StreamsClient {
                   destination: name,
                   where: condition,
                   status,
+                  ...(draft ? { draft: true } : {}),
                 }),
               },
             },
@@ -533,6 +538,7 @@ export class StreamsClient {
               wired: {
                 fields: {},
                 routing: [],
+                ...(draft ? { draft: true } : {}),
               },
               failure_store: { inherit: {} },
             },
@@ -799,6 +805,37 @@ export class StreamsClient {
     };
   }
 
+  async getPrivilegesPerStream(
+    names: string[]
+  ): Promise<Record<string, { read_failure_store: boolean }>> {
+    if (!this.dependencies.isSecurityEnabled) {
+      // Security disabled - all streams have all privileges
+      const result: Record<string, { read_failure_store: boolean }> = {};
+      names.forEach((name) => {
+        result[name] = { read_failure_store: true };
+      });
+      return result;
+    }
+
+    const privileges = await this.dependencies.esClient.security.hasPrivileges({
+      index: [
+        {
+          names,
+          privileges: ['read_failure_store'],
+        },
+      ],
+    });
+
+    const result: Record<string, { read_failure_store: boolean }> = {};
+    names.forEach((name) => {
+      result[name] = {
+        read_failure_store: privileges.index[name]?.read_failure_store ?? false,
+      };
+    });
+
+    return result;
+  }
+
   /**
    * Creates an on-the-fly ingest stream definition
    * from a concrete data stream.
@@ -840,6 +877,20 @@ export class StreamsClient {
       });
 
     return exists;
+  }
+
+  /**
+   * Fetches a summary (name, type, description) for each requested stream name.
+   * Stream names for which no managed stream exists are ignored.
+   */
+  async getStreamSummaries(names: string[]): Promise<StreamSummary[]> {
+    if (names.length === 0) {
+      return [];
+    }
+    const streams = await this.getManagedStreams({
+      query: { terms: { name: names } },
+    });
+    return streams.map(({ name, type, description }) => ({ name, type, description }));
   }
 
   /**
@@ -896,19 +947,21 @@ export class StreamsClient {
 
     const now = new Date().toISOString();
 
-    return response.data_streams.map((dataStream) => ({
-      type: 'classic' as const,
-      name: dataStream.name,
-      description: '',
-      updated_at: now,
-      ingest: {
-        lifecycle: { inherit: {} },
-        processing: { steps: [], updated_at: now },
-        settings: {},
-        classic: {},
-        failure_store: { inherit: {} },
-      },
-    }));
+    return response.data_streams
+      .filter((dataStream) => !shouldExcludeFromStreamsList(dataStream))
+      .map((dataStream) => ({
+        type: 'classic' as const,
+        name: dataStream.name,
+        description: '',
+        updated_at: now,
+        ingest: {
+          lifecycle: { inherit: {} },
+          processing: { steps: [], updated_at: now },
+          settings: {},
+          classic: {},
+          failure_store: { inherit: {} },
+        },
+      }));
   }
 
   /**

@@ -27,7 +27,7 @@ export const useAnomalyBands: () => {
   const { euiTheme } = useEuiTheme();
 
   const bandDefinitions = [
-    { start: 0, end: 3, color: '#E5F6Fa' }, // TODO, this color needs to align with the usage in ML, ongoing discussion in this ticket: https://github.com/elastic/kibana/issues/217508. Issue to track this todo: https://github.com/elastic/security-team/issues/12810
+    { start: 0, end: 3, color: euiTheme.colors.severity.unknown },
     { start: 3, end: 25, color: euiTheme.colors.severity.neutral },
     { start: 25, end: 50, color: euiTheme.colors.severity.warning },
     { start: 50, end: 75, color: euiTheme.colors.severity.risk },

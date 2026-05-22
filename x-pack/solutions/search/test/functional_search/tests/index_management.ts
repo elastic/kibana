@@ -11,6 +11,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'header',
     'common',
     'indexManagement',
+    'solutionNavigation',
   ]);
   const es = getService('es');
   const searchSpace = getService('searchSpace');
@@ -76,6 +77,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             );
             await pageObjects.searchIndexDetailsPage.expectIndexDetailPageHeader();
             await pageObjects.searchIndexDetailsPage.expectSearchIndexDetailsTabsExists();
+          });
+        });
+        describe('breadcrumbs', function () {
+          it('displays correct breadcrumbs on index list page', async () => {
+            await pageObjects.solutionNavigation.breadcrumbs.expectBreadcrumbTexts([
+              'Data management',
+              'Indices and data streams',
+              'Index Management',
+              'Indices',
+            ]);
           });
         });
       });

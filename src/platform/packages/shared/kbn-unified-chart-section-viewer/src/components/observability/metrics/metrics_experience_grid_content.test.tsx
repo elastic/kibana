@@ -110,6 +110,7 @@ describe('MetricsExperienceGridContent', () => {
         updateESQLQuery: jest.fn(),
       },
       histogramCss: { name: '', styles: '' },
+      isTabSelected: true,
     };
 
     useMetricsExperienceStateMock.mockReturnValue({
@@ -121,6 +122,10 @@ describe('MetricsExperienceGridContent', () => {
       searchTerm: '',
       onSearchTermChange: jest.fn(),
       onToggleFullscreen: jest.fn(),
+      flyoutState: undefined,
+      onFlyoutStateChange: jest.fn(),
+      onFlyoutSelectedTabChange: jest.fn(),
+      profileId: 'test-profile-id',
     });
 
     usePaginationMock.mockReturnValue({
@@ -180,6 +185,10 @@ describe('MetricsExperienceGridContent', () => {
       searchTerm: 'cpu',
       onSearchTermChange: jest.fn(),
       onToggleFullscreen: jest.fn(),
+      flyoutState: undefined,
+      onFlyoutStateChange: jest.fn(),
+      onFlyoutSelectedTabChange: jest.fn(),
+      profileId: 'test-profile-id',
     });
 
     const cpuMetricItems = allFieldsSomeWithCpu.filter((f) => f.metricName.includes('cpu'));

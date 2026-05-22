@@ -246,7 +246,8 @@ async function processRow(
   try {
     const { linked, skipped } = await deps.resolutionClient.linkEntities(
       resolvedTo,
-      matchedEntityIds
+      matchedEntityIds,
+      { refresh: false }
     );
     return {
       status: 'success',

@@ -445,6 +445,66 @@ describe('GraphInvestigation Component', () => {
     });
   });
 
+  describe('dismisses external overlays on ReactFlow pane click', () => {
+    const openFilterDropdown = async (container: HTMLElement) => {
+      await showActionsByNode(container, 'admin@example.com');
+      await waitFor(() => {
+        expect(container.querySelector(`[data-test-subj*="filter-id-0"]`)).not.toBeNull();
+      });
+      (container.querySelector(`[data-test-subj*="filter-id-0"]`) as HTMLButtonElement).click();
+      await waitFor(() => {
+        expect(screen.getByTestId('disableFilter')).toBeInTheDocument();
+      });
+    };
+
+    it('dispatches synthetic mouse events on the container when pointer-down hits the graph pane', async () => {
+      // Asserts the synthesized signal is dispatched; jsdom doesn't fully run
+      // the focus trap, so the actual overlay close isn't observable here.
+      const { container } = renderStory({ showToggleSearch: true });
+      await openFilterDropdown(container);
+
+      const pane = container.querySelector('.react-flow__pane') as HTMLElement;
+      expect(pane).not.toBeNull();
+      const root = container.querySelector(
+        `[data-test-subj="${GRAPH_INVESTIGATION_TEST_ID}"]`
+      ) as HTMLElement;
+
+      const mouseupSpy = jest.fn();
+      root.addEventListener('mouseup', mouseupSpy);
+      try {
+        fireEvent.pointerDown(pane, { button: 0, isPrimary: true });
+      } finally {
+        root.removeEventListener('mouseup', mouseupSpy);
+      }
+
+      expect(mouseupSpy).toHaveBeenCalled();
+      expect(mouseupSpy.mock.calls[0][0].target).toBe(root);
+    });
+
+    it('does not dispatch synthetic mouse events when only a graph-internal popover is open', async () => {
+      const { container } = renderStory({ showToggleSearch: true });
+      await expandNode(container, 'admin@example.com');
+      await waitFor(() => {
+        expect(screen.getByTestId(GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID)).toBeInTheDocument();
+      });
+
+      const pane = container.querySelector('.react-flow__pane') as HTMLElement;
+      const root = container.querySelector(
+        `[data-test-subj="${GRAPH_INVESTIGATION_TEST_ID}"]`
+      ) as HTMLElement;
+
+      const mouseupSpy = jest.fn();
+      root.addEventListener('mouseup', mouseupSpy);
+      try {
+        fireEvent.pointerDown(pane, { button: 0, isPrimary: true });
+      } finally {
+        root.removeEventListener('mouseup', mouseupSpy);
+      }
+
+      expect(mouseupSpy).not.toHaveBeenCalled();
+    });
+  });
+
   describe('investigateInTimeline', () => {
     it('has originEventIds, empty query and no filters - calls onInvestigateInTimeline action with event.id filter only', () => {
       const onInvestigateInTimeline = jest.fn();

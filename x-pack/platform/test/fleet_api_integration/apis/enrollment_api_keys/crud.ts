@@ -157,6 +157,32 @@ export default function (providerContext: FtrProviderContext) {
         expect(apiKeys).length(1);
         expect(apiKeys[0].invalidated).eql(true);
       });
+
+      it('should not delete a hidden key (managed policy) by default', async () => {
+        const { body: allKeys } = await supertest
+          .get(`/api/fleet/enrollment_api_keys?kuery=policy_id:policy2`)
+          .expect(200);
+        const hiddenKeyId = allKeys.items[0]?.id;
+        expect(hiddenKeyId).to.be.ok();
+
+        await supertest
+          .delete(`/api/fleet/enrollment_api_keys/${hiddenKeyId}`)
+          .set('kbn-xsrf', 'xxx')
+          .expect(404);
+      });
+
+      it('should delete a hidden key when includeHidden=true', async () => {
+        const { body: allKeys } = await supertest
+          .get(`/api/fleet/enrollment_api_keys?kuery=policy_id:policy2`)
+          .expect(200);
+        const hiddenKeyId = allKeys.items[0]?.id;
+        expect(hiddenKeyId).to.be.ok();
+
+        await supertest
+          .delete(`/api/fleet/enrollment_api_keys/${hiddenKeyId}?includeHidden=true`)
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+      });
     });
 
     describe('POST /fleet/enrollment_api_keys', () => {

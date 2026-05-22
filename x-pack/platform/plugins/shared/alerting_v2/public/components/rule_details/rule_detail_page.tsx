@@ -8,25 +8,24 @@
 import { EuiButtonEmpty, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CoreStart, useService } from '@kbn/core-di-browser';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { RuleDetailsActionsMenu } from './rule_details_actions_menu';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useDeleteRule } from '../../hooks/use_delete_rule';
+import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyout';
 import { DeleteConfirmationModal } from '../rule/modals/delete_confirmation_modal';
 import { RuleHeaderDescription, RuleTitleWithBadges } from './rule_header_description';
 import { RuleSidebar } from './sidebar/rule_sidebar';
 import { useRule } from './rule_context';
-import { paths } from '../../constants';
 
 export const RuleDetailPage: React.FunctionComponent = () => {
   const rule = useRule();
   useBreadcrumbs('rule_details', { ruleName: rule.metadata?.name });
-  const { basePath } = useService(CoreStart('http'));
 
   const history = useHistory();
   const { mutate: deleteRule, isLoading: isDeleting } = useDeleteRule();
+  const { flyout, openEditFlyout, openCloneFlyout } = useComposeDiscoverFlyout();
   const [showDeleteConfirmation, setShowDeleteConfirmation] = React.useState(false);
 
   const showDeleteConfirmationModal = () => {
@@ -35,11 +34,14 @@ export const RuleDetailPage: React.FunctionComponent = () => {
 
   const handleRuleDelete = () => {
     setShowDeleteConfirmation(false);
-    deleteRule(rule.id, {
-      onSuccess: () => {
-        history.push('/');
-      },
-    });
+    deleteRule(
+      { id: rule.id, name: rule.metadata.name },
+      {
+        onSuccess: () => {
+          history.push('/');
+        },
+      }
+    );
   };
 
   return (
@@ -52,6 +54,7 @@ export const RuleDetailPage: React.FunctionComponent = () => {
           <RuleDetailsActionsMenu
             key="actions"
             showDeleteConfirmation={showDeleteConfirmationModal}
+            onClone={() => openCloneFlyout(rule)}
           />,
           <EuiButtonEmpty
             aria-label={i18n.translate(
@@ -62,7 +65,7 @@ export const RuleDetailPage: React.FunctionComponent = () => {
             color="text"
             iconType="pencil"
             name="edit"
-            href={basePath.prepend(paths.ruleEdit(rule.id))}
+            onClick={() => openEditFlyout(rule)}
           >
             <FormattedMessage
               id="xpack.alertingV2.sections.ruleDetails.editRuleButtonLabel"
@@ -85,6 +88,7 @@ export const RuleDetailPage: React.FunctionComponent = () => {
           isLoading={isDeleting}
         />
       )}
+      {flyout}
     </>
   );
 };

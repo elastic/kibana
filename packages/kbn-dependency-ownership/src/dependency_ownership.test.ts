@@ -38,6 +38,12 @@ describe('identifyDependencyOwnership', () => {
         enabled: true,
       },
       {
+        groupName: 'gh-aw',
+        reviewers: ['team:kibana-operations'],
+        matchDepNames: ['github/gh-aw'],
+        enabled: true,
+      },
+      {
         groupName: 'disabled-libs',
         reviewers: ['team:disabled-team'],
         matchPackageNames: ['disabled-package'],

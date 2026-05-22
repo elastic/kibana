@@ -170,7 +170,7 @@ export function CustomTooltip(props: TooltipInfo & { latencyFormatter: TimeForma
         <SingleInstanceCustomTooltip {...props} />
       )}
       <div style={{ padding: euiTheme.size.xs }}>
-        <EuiIcon type="filter" /> {clickToFilterDescription}
+        <EuiIcon type="filter" aria-hidden={true} /> {clickToFilterDescription}
       </div>
     </div>
   );

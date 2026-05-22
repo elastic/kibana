@@ -317,6 +317,95 @@ describe('The metric threshold rule type', () => {
       await execute(COMPARATORS.NOT_BETWEEN, [0, 1.5]);
       testNAlertsReported(0);
     });
+
+    test('should report alert with the between (inclusive) comparator when condition is met', async () => {
+      setResults(COMPARATORS.BETWEEN_INCLUSIVE, [0, 1.5], true);
+      await execute(COMPARATORS.BETWEEN_INCLUSIVE, [0, 1.5]);
+      testNAlertsReported(1);
+      testAlertReported(1, {
+        id: '*',
+        conditions: [
+          { metric: 'test.metric.1', threshold: [0, 1.5], value: '1', evaluation_value: 1 },
+        ],
+        actionGroup: FIRED_ACTIONS.id,
+        alertState: 'ALERT',
+        reason: 'test.metric.1 is 1 in the last 1 min. Alert when between (inclusive) 0 and 1.5.',
+        tags: [],
+      });
+    });
+
+    test('should not report any alerts with the between (inclusive) comparator when condition is not met', async () => {
+      setResults(COMPARATORS.BETWEEN_INCLUSIVE, [0, 0.75], false);
+      await execute(COMPARATORS.BETWEEN_INCLUSIVE, [0, 0.75]);
+      testNAlertsReported(0);
+    });
+
+    test('should report alert with the between (inclusive) comparator when value equals lower bound', async () => {
+      setResults(COMPARATORS.BETWEEN_INCLUSIVE, [1, 1.5], true);
+      await execute(COMPARATORS.BETWEEN_INCLUSIVE, [1, 1.5]);
+      testNAlertsReported(1);
+      testAlertReported(1, {
+        id: '*',
+        conditions: [
+          { metric: 'test.metric.1', threshold: [1, 1.5], value: '1', evaluation_value: 1 },
+        ],
+        actionGroup: FIRED_ACTIONS.id,
+        alertState: 'ALERT',
+        reason: 'test.metric.1 is 1 in the last 1 min. Alert when between (inclusive) 1 and 1.5.',
+        tags: [],
+      });
+    });
+
+    test('should report alert with the between (inclusive) comparator when value equals upper bound', async () => {
+      setResults(COMPARATORS.BETWEEN_INCLUSIVE, [0.5, 1], true);
+      await execute(COMPARATORS.BETWEEN_INCLUSIVE, [0.5, 1]);
+      testNAlertsReported(1);
+      testAlertReported(1, {
+        id: '*',
+        conditions: [
+          { metric: 'test.metric.1', threshold: [0.5, 1], value: '1', evaluation_value: 1 },
+        ],
+        actionGroup: FIRED_ACTIONS.id,
+        alertState: 'ALERT',
+        reason: 'test.metric.1 is 1 in the last 1 min. Alert when between (inclusive) 0.5 and 1.',
+        tags: [],
+      });
+    });
+
+    test('should report alert with the not between (inclusive) comparator when condition is met', async () => {
+      setResults(COMPARATORS.NOT_BETWEEN_INCLUSIVE, [0, 0.75], true);
+      await execute(COMPARATORS.NOT_BETWEEN_INCLUSIVE, [0, 0.75]);
+      testNAlertsReported(1);
+      testAlertReported(1, {
+        id: '*',
+        conditions: [
+          { metric: 'test.metric.1', threshold: [0, 0.75], value: '1', evaluation_value: 1 },
+        ],
+        actionGroup: FIRED_ACTIONS.id,
+        alertState: 'ALERT',
+        reason:
+          'test.metric.1 is 1 in the last 1 min. Alert when not between (inclusive) 0 and 0.75.',
+        tags: [],
+      });
+    });
+
+    test('should not report any alerts with the not between (inclusive) comparator when condition is not met', async () => {
+      setResults(COMPARATORS.NOT_BETWEEN_INCLUSIVE, [0, 1.5], false);
+      await execute(COMPARATORS.NOT_BETWEEN_INCLUSIVE, [0, 1.5]);
+      testNAlertsReported(0);
+    });
+
+    test('should not report alert with the not between (inclusive) comparator when value equals lower bound', async () => {
+      setResults(COMPARATORS.NOT_BETWEEN_INCLUSIVE, [1, 1.5], false);
+      await execute(COMPARATORS.NOT_BETWEEN_INCLUSIVE, [1, 1.5]);
+      testNAlertsReported(0);
+    });
+
+    test('should not report alert with the not between (inclusive) comparator when value equals upper bound', async () => {
+      setResults(COMPARATORS.NOT_BETWEEN_INCLUSIVE, [0.5, 1], false);
+      await execute(COMPARATORS.NOT_BETWEEN_INCLUSIVE, [0.5, 1]);
+      testNAlertsReported(0);
+    });
   });
 
   describe('data view fetching', () => {

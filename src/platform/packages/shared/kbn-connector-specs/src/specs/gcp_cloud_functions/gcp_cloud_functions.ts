@@ -24,7 +24,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
 import { getGcpIdToken, parseServiceAccountKey } from '../../auth_types/gcp_jwt_helpers';
 
@@ -122,46 +122,50 @@ export const GcpCloudFunctionsConnector: ConnectorSpec = {
     },
   },
 
-  schema: z.object({
-    projectId: z
-      .string()
-      .min(1)
-      .describe(
-        i18n.translate('connectorSpecs.gcpCloudFunctions.config.projectId', {
-          defaultMessage: 'GCP Project ID',
-        })
-      )
-      .meta({
-        widget: 'text',
-        label: i18n.translate('connectorSpecs.gcpCloudFunctions.config.projectId.label', {
-          defaultMessage: 'GCP Project ID',
+  schema: lazySchema(() =>
+    z.object({
+      projectId: z
+        .string()
+        .min(1)
+        .describe(
+          i18n.translate('connectorSpecs.gcpCloudFunctions.config.projectId', {
+            defaultMessage: 'GCP Project ID',
+          })
+        )
+        .meta({
+          widget: 'text',
+          label: i18n.translate('connectorSpecs.gcpCloudFunctions.config.projectId.label', {
+            defaultMessage: 'GCP Project ID',
+          }),
+          placeholder: 'my-gcp-project',
         }),
-        placeholder: 'my-gcp-project',
-      }),
-    region: z
-      .string()
-      .min(1)
-      .describe(
-        i18n.translate('connectorSpecs.gcpCloudFunctions.config.region', {
-          defaultMessage: 'GCP Region (e.g., us-central1, europe-west1)',
-        })
-      )
-      .meta({
-        widget: 'text',
-        label: i18n.translate('connectorSpecs.gcpCloudFunctions.config.region.label', {
-          defaultMessage: 'GCP Region',
+      region: z
+        .string()
+        .min(1)
+        .describe(
+          i18n.translate('connectorSpecs.gcpCloudFunctions.config.region', {
+            defaultMessage: 'GCP Region (e.g., us-central1, europe-west1)',
+          })
+        )
+        .meta({
+          widget: 'text',
+          label: i18n.translate('connectorSpecs.gcpCloudFunctions.config.region.label', {
+            defaultMessage: 'GCP Region',
+          }),
+          placeholder: 'us-central1',
         }),
-        placeholder: 'us-central1',
-      }),
-  }),
+    })
+  ),
 
   actions: {
     invoke: {
       isTool: true,
-      input: z.object({
-        functionName: z.string().min(1).describe('Cloud Function or Cloud Run service name'),
-        payload: z.unknown().optional().describe('JSON payload to send to the function'),
-      }),
+      input: lazySchema(() =>
+        z.object({
+          functionName: z.string().min(1).describe('Cloud Function or Cloud Run service name'),
+          payload: z.unknown().optional().describe('JSON payload to send to the function'),
+        })
+      ),
       handler: async (ctx, input) => {
         const typedInput = input as {
           functionName: string;
@@ -206,16 +210,18 @@ export const GcpCloudFunctionsConnector: ConnectorSpec = {
 
     listFunctions: {
       isTool: true,
-      input: z.object({
-        pageSize: z
-          .number()
-          .int()
-          .min(1)
-          .max(500)
-          .optional()
-          .describe('Maximum number of functions to return (1-500)'),
-        pageToken: z.string().optional().describe('Pagination token from a previous response'),
-      }),
+      input: lazySchema(() =>
+        z.object({
+          pageSize: z
+            .number()
+            .int()
+            .min(1)
+            .max(500)
+            .optional()
+            .describe('Maximum number of functions to return (1-500)'),
+          pageToken: z.string().optional().describe('Pagination token from a previous response'),
+        })
+      ),
       handler: async (ctx, input) => {
         const typedInput = input as {
           pageSize?: number;
@@ -270,9 +276,11 @@ export const GcpCloudFunctionsConnector: ConnectorSpec = {
 
     getFunction: {
       isTool: true,
-      input: z.object({
-        functionName: z.string().min(1).describe('Cloud Function or Cloud Run service name'),
-      }),
+      input: lazySchema(() =>
+        z.object({
+          functionName: z.string().min(1).describe('Cloud Function or Cloud Run service name'),
+        })
+      ),
       handler: async (ctx, input) => {
         const typedInput = input as {
           functionName: string;

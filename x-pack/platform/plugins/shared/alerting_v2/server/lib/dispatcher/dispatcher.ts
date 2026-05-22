@@ -6,6 +6,7 @@
  */
 
 import { inject, injectable } from 'inversify';
+import { v4 as uuidV4 } from 'uuid';
 import { DispatcherPipeline, type DispatcherPipelineContract } from './execution_pipeline';
 import type { DispatcherExecutionParams, DispatcherExecutionResult } from './types';
 
@@ -21,8 +22,9 @@ export class DispatcherService implements DispatcherServiceContract {
     previousStartedAt = new Date(),
   }: DispatcherExecutionParams): Promise<DispatcherExecutionResult> {
     const startedAt = new Date();
+    const executionUuid = uuidV4();
 
-    await this.pipeline.execute({ startedAt, previousStartedAt });
+    await this.pipeline.execute({ startedAt, previousStartedAt, executionUuid });
 
     return { startedAt };
   }

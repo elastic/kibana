@@ -19,7 +19,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { type SLOWithSummaryResponse } from '@kbn/slo-schema';
 import type { TimeRange } from '@kbn/es-query';
 import React, { useCallback, useMemo } from 'react';
+import { getEbtProps } from '@kbn/ebt-click';
 import { isApmIndicatorType } from '../../../../utils/slo/indicator';
+import { SLO_DETAILS_EBT_ACTIONS, SLO_DETAILS_EBT_ELEMENTS } from '../../ebt_constants';
 import { useGetPreviewData } from '../../../../hooks/use_get_preview_data';
 import { useFetchApmIndices } from '../../../../hooks/use_fetch_apm_indices';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -176,6 +178,11 @@ export function EventsChartPanel({ slo, range, dynamicTimeRange = false, onBrush
                 data-action={
                   slo.indicator.type !== 'sli.metric.timeslice' ? 'viewGoodVsBadEvents' : undefined
                 }
+                {...getEbtProps({
+                  action: SLO_DETAILS_EBT_ACTIONS.VIEW_GOOD_VS_BAD_EVENTS,
+                  element: SLO_DETAILS_EBT_ELEMENTS.GOOD_VS_BAD_EVENTS_CHART,
+                  detail: slo.indicator.type,
+                })}
               >
                 <FormattedMessage
                   id="xpack.slo.sloDetails.viewEventsLink"

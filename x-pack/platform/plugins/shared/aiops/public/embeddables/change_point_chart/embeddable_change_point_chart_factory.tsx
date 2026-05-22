@@ -9,7 +9,7 @@ import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '@kbn/aiops-change-point-dete
 import { openLazyFlyout } from '@kbn/presentation-util';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
   apiHasExecutionContext,
@@ -27,6 +27,7 @@ import fastIsEqual from 'fast-deep-equal';
 import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject, EMPTY, distinctUntilChanged, map, merge, skipWhile } from 'rxjs';
+import type { ChangePointChartEmbeddableState } from '@kbn/aiops-server-schemas/embeddables/change_point_chart';
 import { getChangePointDetectionComponent } from '../../shared_components';
 import type { AiopsPluginStart, AiopsPluginStartDeps } from '../../types';
 import {
@@ -34,17 +35,21 @@ import {
   initializeChangePointControls,
 } from './initialize_change_point_controls';
 import type { ChangePointEmbeddableApi } from './types';
-import type { ChangePointEmbeddableState } from '../../../common/embeddables/change_point_chart/types';
+import { canUseAiops } from '../../capabilities';
 
 export type EmbeddableChangePointChartType = typeof EMBEDDABLE_CHANGE_POINT_CHART_TYPE;
 
 export const getChangePointChartEmbeddableFactory = (
   getStartServices: StartServicesAccessor<AiopsPluginStartDeps, AiopsPluginStart>
 ) => {
-  const factory: EmbeddableFactory<ChangePointEmbeddableState, ChangePointEmbeddableApi> = {
+  const factory: EmbeddablePublicDefinition<
+    ChangePointChartEmbeddableState,
+    ChangePointEmbeddableApi
+  > = {
     type: EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const [coreStart, pluginStart] = await getStartServices();
+      canUseAiops(coreStart, true);
 
       const timeRangeManager = initializeTimeRangeManager(initialState);
       const titleManager = initializeTitleManager(initialState);
@@ -57,7 +62,7 @@ export const getChangePointChartEmbeddableFactory = (
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
 
       const dataViews$ = new BehaviorSubject<DataView[] | undefined>([
-        await pluginStart.data.dataViews.get(state.dataViewId),
+        await pluginStart.data.dataViews.get(state.data_view_id),
       ]);
 
       const filtersApi = apiPublishesFilters(parentApi) ? parentApi : undefined;
@@ -70,7 +75,7 @@ export const getChangePointChartEmbeddableFactory = (
         };
       }
 
-      const unsavedChangesApi = initializeUnsavedChanges<ChangePointEmbeddableState>({
+      const unsavedChangesApi = initializeUnsavedChanges<ChangePointChartEmbeddableState>({
         uuid,
         parentApi,
         serializeState,

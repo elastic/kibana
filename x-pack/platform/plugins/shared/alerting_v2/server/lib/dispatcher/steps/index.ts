@@ -8,6 +8,7 @@
 export { FetchEpisodesStep } from './fetch_episodes_step';
 export { FetchSuppressionsStep } from './fetch_suppressions_step';
 export { ApplySuppressionStep } from './apply_suppression_step';
+export { ApplyMaintenanceWindowStep } from './apply_maintenance_window_step';
 export { FetchRulesStep } from './fetch_rules_step';
 export { FetchPoliciesStep } from './fetch_policies_step';
 export { EvaluateMatchersStep } from './evaluate_matchers_step';
@@ -15,3 +16,4 @@ export { BuildGroupsStep } from './build_groups_step';
 export { ApplyThrottlingStep } from './apply_throttling_step';
 export { DispatchStep } from './dispatch_step';
 export { StoreActionsStep } from './store_actions_step';
+export { StoreExecutionHistoryStep } from './store_execution_history_step';

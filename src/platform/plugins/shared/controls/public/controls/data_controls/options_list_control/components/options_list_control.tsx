@@ -183,7 +183,6 @@ export const OptionsListControl = ({
                   customStrings?.invalidSelectionsLabel ??
                   OptionsListStrings.control.getInvalidSelectionWarningLabel(invalidSelections.size)
                 }
-                delay="long"
               >
                 <EuiToken
                   tabIndex={0}

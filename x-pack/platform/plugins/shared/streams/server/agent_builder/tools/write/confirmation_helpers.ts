@@ -5,10 +5,25 @@
  * 2.0.
  */
 
-/**
- * Extracts the LLM-provided description from tool params, falling back to a
- * fenced JSON block of the remaining params when the description is absent.
- */
+const buildReadableSummary = (params: Record<string, unknown>): string => {
+  const lines: string[] = [];
+  for (const [key, value] of Object.entries(params)) {
+    if (value === undefined || value === null) continue;
+    const label = key.replace(/_/g, ' ');
+    if (typeof value === 'string') {
+      lines.push(`**${label}:** ${value}`);
+    } else if (typeof value === 'number' || typeof value === 'boolean') {
+      lines.push(`**${label}:** ${String(value)}`);
+    } else if (Array.isArray(value)) {
+      lines.push(`**${label}:** ${value.length} item${value.length !== 1 ? 's' : ''}`);
+    } else if (typeof value === 'object') {
+      const keys = Object.keys(value as Record<string, unknown>);
+      lines.push(`**${label}:** ${keys.join(', ')}`);
+    }
+  }
+  return lines.length > 0 ? lines.join('\n') : '(no details available)';
+};
+
 export const getConfirmationMessage = (
   toolParams: Record<string, unknown>,
   descriptionKey: string
@@ -17,5 +32,5 @@ export const getConfirmationMessage = (
   if (typeof description === 'string' && description.length > 0) {
     return description;
   }
-  return '```json\n' + JSON.stringify(rest, null, 2) + '\n```';
+  return buildReadableSummary(rest);
 };

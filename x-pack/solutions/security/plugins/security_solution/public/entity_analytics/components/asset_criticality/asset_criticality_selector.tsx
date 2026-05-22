@@ -250,7 +250,7 @@ export const AssetCriticalityTitle = () => (
     content={
       <FormattedMessage
         id="xpack.securitySolution.entityAnalytics.assetCriticality.accordionTooltip"
-        defaultMessage="You can now categorize entities based on your organization's sensitivity and business risk. The classification tiers can be used to prioritize alert triage and investigation tasks. If the entity risk engine is enabled, the asset classification tier will dynamically impact the entity risk."
+        defaultMessage="You can now categorize entities based on your organization's sensitivity and business risk. The classification tiers can be used to prioritize alert triage and investigation tasks. If the entity risk score maintainer is enabled, the asset classification tier will dynamically impact the entity risk."
       />
     }
   >

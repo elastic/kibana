@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import {
   ImportTimelines,
@@ -22,17 +22,19 @@ import {
   ImportTimelineResult,
 } from '../model/components.gen';
 
+export const InstallPrepackedTimelinesRequestBody = lazySchema(() =>
+  z.object({
+    timelinesToInstall: z.array(ImportTimelines.nullable()),
+    timelinesToUpdate: z.array(ImportTimelines.nullable()),
+    prepackagedTimelines: z.array(TimelineSavedToReturnObject.nullable()),
+  })
+);
 export type InstallPrepackedTimelinesRequestBody = z.infer<
   typeof InstallPrepackedTimelinesRequestBody
 >;
-export const InstallPrepackedTimelinesRequestBody = z.object({
-  timelinesToInstall: z.array(ImportTimelines.nullable()),
-  timelinesToUpdate: z.array(ImportTimelines.nullable()),
-  prepackagedTimelines: z.array(TimelineSavedToReturnObject.nullable()),
-});
 export type InstallPrepackedTimelinesRequestBodyInput = z.input<
   typeof InstallPrepackedTimelinesRequestBody
 >;
 
+export const InstallPrepackedTimelinesResponse = lazySchema(() => ImportTimelineResult);
 export type InstallPrepackedTimelinesResponse = z.infer<typeof InstallPrepackedTimelinesResponse>;
-export const InstallPrepackedTimelinesResponse = ImportTimelineResult;

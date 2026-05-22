@@ -7,6 +7,13 @@
 
 import { set } from '@kbn/safer-lodash-set';
 import { UserRt, UserWithProfileInfoRt, UsersRt, CaseUserProfileRt, CaseAssigneesRt } from './v1';
+import {
+  UserSchema,
+  UserWithProfileInfoSchema,
+  UsersSchema,
+  CaseUserProfileSchema,
+  CaseAssigneesSchema,
+} from '../../domain_zod/user/v1';
 
 describe('User', () => {
   describe('UserRt', () => {
@@ -35,6 +42,18 @@ describe('User', () => {
         _tag: 'Right',
         right: defaultRequest,
       });
+    });
+
+    it('zod: has expected attributes in request', () => {
+      const result = UserSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
+
+    it('zod: strips unknown fields', () => {
+      const result = UserSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
   });
 
@@ -95,6 +114,41 @@ describe('User', () => {
         right: defaultRequest,
       });
     });
+
+    it('zod: has expected attributes in request', () => {
+      const result = UserWithProfileInfoSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
+
+    it.each(['initials', 'color', 'imageUrl'])(
+      'zod: does not return an error if %s is null',
+      (key) => {
+        const req = set(
+          { ...defaultRequest, avatar: { ...defaultRequest.avatar } },
+          `avatar.${key}`,
+          null
+        );
+        const result = UserWithProfileInfoSchema.safeParse(req);
+        expect(result.success).toBe(true);
+        expect(result.data).toStrictEqual(req);
+      }
+    );
+
+    it('zod: strips unknown fields', () => {
+      const result = UserWithProfileInfoSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
+
+    it('zod: strips unknown fields from avatar', () => {
+      const result = UserWithProfileInfoSchema.safeParse({
+        ...defaultRequest,
+        avatar: { ...defaultRequest.avatar, foo: 'bar' },
+      });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
   });
 
   describe('UsersRt', () => {
@@ -134,6 +188,18 @@ describe('User', () => {
         right: [defaultRequest[0]],
       });
     });
+
+    it('zod: has expected attributes in request', () => {
+      const result = UsersSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
+
+    it('zod: strips unknown fields', () => {
+      const result = UsersSchema.safeParse([{ ...defaultRequest[0], foo: 'bar' }]);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual([defaultRequest[0]]);
+    });
   });
 
   describe('UserProfile', () => {
@@ -162,6 +228,27 @@ describe('User', () => {
           right: {
             uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
           },
+        });
+      });
+
+      it('zod: has expected attributes in response', () => {
+        const result = CaseUserProfileSchema.safeParse({
+          uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
+        });
+        expect(result.success).toBe(true);
+        expect(result.data).toStrictEqual({
+          uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
+        });
+      });
+
+      it('zod: strips unknown fields', () => {
+        const result = CaseUserProfileSchema.safeParse({
+          uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
+          foo: 'bar',
+        });
+        expect(result.success).toBe(true);
+        expect(result.data).toStrictEqual({
+          uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
         });
       });
     });
@@ -196,6 +283,18 @@ describe('User', () => {
           _tag: 'Right',
           right: [{ uid: '1' }, { uid: '2' }],
         });
+      });
+
+      it('zod: has expected attributes in request', () => {
+        const result = CaseAssigneesSchema.safeParse(defaultRequest);
+        expect(result.success).toBe(true);
+        expect(result.data).toStrictEqual(defaultRequest);
+      });
+
+      it('zod: strips unknown fields', () => {
+        const result = CaseAssigneesSchema.safeParse([{ uid: '1', foo: 'bar' }, { uid: '2' }]);
+        expect(result.success).toBe(true);
+        expect(result.data).toStrictEqual([{ uid: '1' }, { uid: '2' }]);
       });
     });
   });

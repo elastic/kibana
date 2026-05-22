@@ -103,6 +103,13 @@ export const euid = {
      */
     getEuidDocumentsContainsIdFilter: euidModule.getEuidDslDocumentsContainsIdFilter,
   },
+  kql: {
+    /**
+     * KQL that should match documents sharing the same identity fields as the given sample document.
+     * Input: entity type and one document; output: KQL, or `undefined` if identity or pipeline gate fails.
+     */
+    getEuidFilterBasedOnDocument: euidModule.getEuidKqlFilterBasedOnDocument,
+  },
 };
 
 /** Full EUID API (memory + painless + esql + dsl) — same object for Node and browser lazy chunk. */

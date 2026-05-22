@@ -8,6 +8,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
+import type { RequestTiming } from '@kbn/core-http-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type {
   SavedObjectsBaseOptions,
@@ -117,6 +118,7 @@ export interface SavedObjectsRepositoryOptions {
   allowedTypes: string[];
   logger: Logger;
   extensions?: SavedObjectsExtensions;
+  serverTiming?: RequestTiming;
 }
 
 /**
@@ -138,6 +140,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
   private readonly apiExecutionContext: ApiExecutionContext;
   private readonly extensions: SavedObjectsExtensions;
   private readonly helpers: RepositoryHelpers;
+  private readonly serverTiming?: RequestTiming;
 
   /**
    * A factory function for creating SavedObjectRepository instances.
@@ -154,6 +157,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     logger: Logger,
     includedHiddenTypes: string[] = [],
     extensions?: SavedObjectsExtensions,
+    serverTiming?: RequestTiming,
     /** The injectedConstructor is only used for unit testing */
     injectedConstructor: any = SavedObjectsRepository
   ): ISavedObjectsRepository {
@@ -181,6 +185,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       client,
       logger,
       extensions,
+      serverTiming,
     });
   }
 
@@ -195,6 +200,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       allowedTypes = [],
       logger,
       extensions = {},
+      serverTiming,
     } = options;
 
     if (allowedTypes.length === 0) {
@@ -209,6 +215,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     this.serializer = serializer;
     this.logger = logger;
     this.extensions = extensions;
+    this.serverTiming = serverTiming;
     this.helpers = createRepositoryHelpers({
       logger,
       client: this.client,
@@ -240,14 +247,19 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     attributes: T,
     options: SavedObjectsCreateOptions = {}
   ): Promise<SavedObject<T>> {
-    return await performCreate(
-      {
-        type,
-        attributes,
-        options,
-      },
-      this.apiExecutionContext
-    );
+    const timer = this.serverTiming?.start('so-create', type);
+    try {
+      return await performCreate(
+        {
+          type,
+          attributes,
+          options,
+        },
+        this.apiExecutionContext
+      );
+    } finally {
+      timer?.end();
+    }
   }
 
   /**
@@ -257,13 +269,18 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     objects: Array<SavedObjectsBulkCreateObject<T>>,
     options: SavedObjectsCreateOptions = {}
   ): Promise<SavedObjectsBulkResponse<T>> {
-    return await performBulkCreate(
-      {
-        objects,
-        options,
-      },
-      this.apiExecutionContext
-    );
+    const timer = this.serverTiming?.start('so-bulk-create');
+    try {
+      return await performBulkCreate(
+        {
+          objects,
+          options,
+        },
+        this.apiExecutionContext
+      );
+    } finally {
+      timer?.end();
+    }
   }
 
   /**
@@ -273,27 +290,37 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     objects: SavedObjectsCheckConflictsObject[] = [],
     options: SavedObjectsBaseOptions = {}
   ): Promise<SavedObjectsCheckConflictsResponse> {
-    return await performCheckConflicts(
-      {
-        objects,
-        options,
-      },
-      this.apiExecutionContext
-    );
+    const timer = this.serverTiming?.start('so-check-conflicts');
+    try {
+      return await performCheckConflicts(
+        {
+          objects,
+          options,
+        },
+        this.apiExecutionContext
+      );
+    } finally {
+      timer?.end();
+    }
   }
 
   /**
    * {@inheritDoc ISavedObjectsRepository.delete}
    */
   async delete(type: string, id: string, options: SavedObjectsDeleteOptions = {}): Promise<{}> {
-    return await performDelete(
-      {
-        type,
-        id,
-        options,
-      },
-      this.apiExecutionContext
-    );
+    const timer = this.serverTiming?.start('so-delete', type);
+    try {
+      return await performDelete(
+        {
+          type,
+          id,
+          options,
+        },
+        this.apiExecutionContext
+      );
+    } finally {
+      timer?.end();
+    }
   }
 
   /**
@@ -303,13 +330,18 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     objects: SavedObjectsBulkDeleteObject[],
     options: SavedObjectsBulkDeleteOptions = {}
   ): Promise<SavedObjectsBulkDeleteResponse> {
-    return await performBulkDelete(
-      {
-        objects,
-        options,
-      },
-      this.apiExecutionContext
-    );
+    const timer = this.serverTiming?.start('so-bulk-delete');
+    try {
+      return await performBulkDelete(
+        {
+          objects,
+          options,
+        },
+        this.apiExecutionContext
+      );
+    } finally {
+      timer?.end();
+    }
   }
 
   /**
@@ -319,13 +351,18 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     namespace: string,
     options: SavedObjectsDeleteByNamespaceOptions = {}
   ): Promise<any> {
-    return await performDeleteByNamespace(
-      {
-        namespace,
-        options,
-      },
-      this.apiExecutionContext
-    );
+    const timer = this.serverTiming?.start('so-delete-by-namespace', namespace);
+    try {
+      return await performDeleteByNamespace(
+        {
+          namespace,
+          options,
+        },
+        this.apiExecutionContext
+      );
+    } finally {
+      timer?.end();
+    }
   }
 
   /**
@@ -335,13 +372,18 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     options: SavedObjectsFindOptions,
     internalOptions: SavedObjectsFindInternalOptions = {}
   ): Promise<SavedObjectsFindResponse<T, A>> {
-    return await performFind(
-      {
-        options,
-        internalOptions,
-      },
-      this.apiExecutionContext
-    );
+    const timer = this.serverTiming?.start('so-find');
+    try {
+      return await performFind(
+        {
+          options,
+          internalOptions,
+        },
+        this.apiExecutionContext
+      );
+    } finally {
+      timer?.end();
+    }
   }
 
   /**
@@ -350,7 +392,12 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
   async search<T extends SavedObjectsRawDocSource = SavedObjectsRawDocSource, A = unknown>(
     options: SavedObjectsSearchOptions
   ): Promise<SavedObjectsSearchResponse<T, A>> {
-    return performSearch({ options }, this.apiExecutionContext);
+    const timer = this.serverTiming?.start('so-search');
+    try {
+      return await performSearch({ options }, this.apiExecutionContext);
+    } finally {
+      timer?.end();
+    }
   }
 
   /**
@@ -367,13 +414,18 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     objects: SavedObjectsBulkGetObject[] = [],
     options: SavedObjectsGetOptions = {}
   ): Promise<SavedObjectsBulkResponse<T>> {
-    return await performBulkGet(
-      {
-        objects,
-        options,
-      },
-      this.apiExecutionContext
-    );
+    const timer = this.serverTiming?.start('so-bulk-get');
+    try {
+      return await performBulkGet(
+        {
+          objects,
+          options,
+        },
+        this.apiExecutionContext
+      );
+    } finally {
+      timer?.end();
+    }
   }
 
   /**
@@ -383,13 +435,18 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     objects: SavedObjectsBulkResolveObject[],
     options: SavedObjectsResolveOptions = {}
   ): Promise<SavedObjectsBulkResolveResponse<T>> {
-    return await performBulkResolve(
-      {
-        objects,
-        options,
-      },
-      this.apiExecutionContext
-    );
+    const timer = this.serverTiming?.start('so-bulk-resolve');
+    try {
+      return await performBulkResolve(
+        {
+          objects,
+          options,
+        },
+        this.apiExecutionContext
+      );
+    } finally {
+      timer?.end();
+    }
   }
 
   /**
@@ -400,14 +457,19 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     id: string,
     options: SavedObjectsGetOptions = {}
   ): Promise<SavedObject<T>> {
-    return await performGet(
-      {
-        type,
-        id,
-        options,
-      },
-      this.apiExecutionContext
-    );
+    const timer = this.serverTiming?.start('so-get', type);
+    try {
+      return await performGet(
+        {
+          type,
+          id,
+          options,
+        },
+        this.apiExecutionContext
+      );
+    } finally {
+      timer?.end();
+    }
   }
 
   /**
@@ -418,14 +480,19 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     id: string,
     options: SavedObjectsResolveOptions = {}
   ): Promise<SavedObjectsResolveResponse<T>> {
-    return await performResolve(
-      {
-        type,
-        id,
-        options,
-      },
-      this.apiExecutionContext
-    );
+    const timer = this.serverTiming?.start('so-resolve', type);
+    try {
+      return await performResolve(
+        {
+          type,
+          id,
+          options,
+        },
+        this.apiExecutionContext
+      );
+    } finally {
+      timer?.end();
+    }
   }
 
   /**
@@ -437,15 +504,20 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     attributes: Partial<T>,
     options: SavedObjectsUpdateOptions<T> = {}
   ): Promise<SavedObjectsUpdateResponse<T>> {
-    return await performUpdate(
-      {
-        type,
-        id,
-        attributes,
-        options,
-      },
-      this.apiExecutionContext
-    );
+    const timer = this.serverTiming?.start('so-update', type);
+    try {
+      return await performUpdate(
+        {
+          type,
+          id,
+          attributes,
+          options,
+        },
+        this.apiExecutionContext
+      );
+    } finally {
+      timer?.end();
+    }
   }
 
   /**
@@ -455,13 +527,18 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     objects: SavedObjectsCollectMultiNamespaceReferencesObject[],
     options: SavedObjectsCollectMultiNamespaceReferencesOptions = {}
   ) {
-    return await performCollectMultiNamespaceReferences(
-      {
-        objects,
-        options,
-      },
-      this.apiExecutionContext
-    );
+    const timer = this.serverTiming?.start('so-collect-refs');
+    try {
+      return await performCollectMultiNamespaceReferences(
+        {
+          objects,
+          options,
+        },
+        this.apiExecutionContext
+      );
+    } finally {
+      timer?.end();
+    }
   }
 
   /**
@@ -473,15 +550,20 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     spacesToRemove: string[],
     options: SavedObjectsUpdateObjectsSpacesOptions = {}
   ): Promise<SavedObjectsUpdateObjectsSpacesResponse> {
-    return await performUpdateObjectsSpaces(
-      {
-        objects,
-        spacesToAdd,
-        spacesToRemove,
-        options,
-      },
-      this.apiExecutionContext
-    );
+    const timer = this.serverTiming?.start('so-update-spaces');
+    try {
+      return await performUpdateObjectsSpaces(
+        {
+          objects,
+          spacesToAdd,
+          spacesToRemove,
+          options,
+        },
+        this.apiExecutionContext
+      );
+    } finally {
+      timer?.end();
+    }
   }
 
   /**
@@ -491,13 +573,18 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     objects: Array<SavedObjectsBulkUpdateObject<T>>,
     options: SavedObjectsBulkUpdateOptions = {}
   ): Promise<SavedObjectsBulkUpdateResponse<T>> {
-    return await performBulkUpdate(
-      {
-        objects,
-        options,
-      },
-      this.apiExecutionContext
-    );
+    const timer = this.serverTiming?.start('so-bulk-update');
+    try {
+      return await performBulkUpdate(
+        {
+          objects,
+          options,
+        },
+        this.apiExecutionContext
+      );
+    } finally {
+      timer?.end();
+    }
   }
 
   /**
@@ -508,14 +595,19 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     id: string,
     options: SavedObjectsRemoveReferencesToOptions = {}
   ): Promise<SavedObjectsRemoveReferencesToResponse> {
-    return await performRemoveReferencesTo(
-      {
-        type,
-        id,
-        options,
-      },
-      this.apiExecutionContext
-    );
+    const timer = this.serverTiming?.start('so-remove-refs', type);
+    try {
+      return await performRemoveReferencesTo(
+        {
+          type,
+          id,
+          options,
+        },
+        this.apiExecutionContext
+      );
+    } finally {
+      timer?.end();
+    }
   }
 
   /**
@@ -527,15 +619,20 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     counterFields: Array<string | SavedObjectsIncrementCounterField>,
     options: SavedObjectsIncrementCounterOptions<T> = {}
   ) {
-    return await performIncrementCounter(
-      {
-        type,
-        id,
-        counterFields,
-        options,
-      },
-      this.apiExecutionContext
-    );
+    const timer = this.serverTiming?.start('so-increment-counter', type);
+    try {
+      return await performIncrementCounter(
+        {
+          type,
+          id,
+          counterFields,
+          options,
+        },
+        this.apiExecutionContext
+      );
+    } finally {
+      timer?.end();
+    }
   }
 
   /**
@@ -546,14 +643,19 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     options: SavedObjectsOpenPointInTimeOptions = {},
     internalOptions: SavedObjectsFindInternalOptions = {}
   ): Promise<SavedObjectsOpenPointInTimeResponse> {
-    return await performOpenPointInTime(
-      {
-        type,
-        options,
-        internalOptions,
-      },
-      this.apiExecutionContext
-    );
+    const timer = this.serverTiming?.start('so-open-pit');
+    try {
+      return await performOpenPointInTime(
+        {
+          type,
+          options,
+          internalOptions,
+        },
+        this.apiExecutionContext
+      );
+    } finally {
+      timer?.end();
+    }
   }
 
   /**
@@ -564,12 +666,17 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     options?: SavedObjectsClosePointInTimeOptions,
     internalOptions: SavedObjectsFindInternalOptions = {}
   ): Promise<SavedObjectsClosePointInTimeResponse> {
-    const { disableExtensions } = internalOptions;
-    if (!disableExtensions && this.extensions.securityExtension) {
-      this.extensions.securityExtension.auditClosePointInTime();
-    }
+    const timer = this.serverTiming?.start('so-close-pit');
+    try {
+      const { disableExtensions } = internalOptions;
+      if (!disableExtensions && this.extensions.securityExtension) {
+        this.extensions.securityExtension.auditClosePointInTime();
+      }
 
-    return await this.client.closePointInTime({ id });
+      return await this.client.closePointInTime({ id });
+    } finally {
+      timer?.end();
+    }
   }
 
   /**
@@ -615,7 +722,12 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     objects: SavedObjectsChangeAccessControlObject[],
     options: SavedObjectsChangeOwnershipOptions
   ): Promise<SavedObjectsChangeAccessControlResponse> {
-    return await performChangeOwnership({ objects, options }, this.apiExecutionContext);
+    const timer = this.serverTiming?.start('so-change-owner');
+    try {
+      return await performChangeOwnership({ objects, options }, this.apiExecutionContext);
+    } finally {
+      timer?.end();
+    }
   }
 
   /**
@@ -625,6 +737,11 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     objects: SavedObjectsChangeAccessControlObject[],
     options: SavedObjectsChangeAccessModeOptions
   ): Promise<SavedObjectsChangeAccessControlResponse> {
-    return await performChangeAccessMode({ objects, options }, this.apiExecutionContext);
+    const timer = this.serverTiming?.start('so-change-access');
+    try {
+      return await performChangeAccessMode({ objects, options }, this.apiExecutionContext);
+    } finally {
+      timer?.end();
+    }
   }
 }

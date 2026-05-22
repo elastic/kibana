@@ -135,6 +135,7 @@ export class InfraServerPlugin
     core.savedObjects.registerType(inventoryViewSavedObjectType);
     core.savedObjects.registerType(infraCustomDashboardsSavedObjectType);
     if (this.config.featureFlags.metricsExplorerEnabled) {
+      // eslint-disable-next-line @kbn/eslint/no_conditional_saved_object_type_registration -- TODO: remove conditional registration; tracked for follow-up PR
       core.savedObjects.registerType(metricsExplorerViewSavedObjectType);
     }
 

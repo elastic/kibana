@@ -1,0 +1,135 @@
+{
+  "sha1": "18013bdeee89c0534d9709ffc54696111a2a35f3",
+  "tests": [
+    {
+      "id": "f1dad64d304bcaf-c783dc02c5f3544",
+      "title": "Workflow schema OOM prevention create and update workflow succeeds under constrained heap",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_oom_testing/api/tests/schema_oom_prevention.spec.ts",
+        "line": 84,
+        "column": 12
+      }
+    },
+    {
+      "id": "f1dad64d304bcaf-cd6fd605fb40130",
+      "title": "Workflow schema OOM prevention validate workflow succeeds under constrained heap",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_oom_testing/api/tests/schema_oom_prevention.spec.ts",
+        "line": 99,
+        "column": 12
+      }
+    },
+    {
+      "id": "f1dad64d304bcaf-59f9aa1b3687c41",
+      "title": "Workflow schema OOM prevention validate invalid workflow returns errors under constrained heap",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_oom_testing/api/tests/schema_oom_prevention.spec.ts",
+        "line": 106,
+        "column": 12
+      }
+    },
+    {
+      "id": "f1dad64d304bcaf-e843cb8f448b65e",
+      "title": "Workflow schema OOM prevention create multi-step workflow succeeds under constrained heap",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_oom_testing/api/tests/schema_oom_prevention.spec.ts",
+        "line": 122,
+        "column": 12
+      }
+    },
+    {
+      "id": "f1dad64d304bcaf-27eb182b53be619",
+      "title": "Workflow schema OOM prevention bulk create workflows succeeds under constrained heap",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_oom_testing/api/tests/schema_oom_prevention.spec.ts",
+        "line": 131,
+        "column": 12
+      }
+    }
+  ]
+}

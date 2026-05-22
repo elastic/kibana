@@ -10,7 +10,6 @@ export { waitForPluginInitialized, result, loadAlertArchive } from './helpers';
 export {
   cleanupEntityStore,
   waitForEntityDataIndexed,
-  enableAssetInventory,
   installCloudAssetInventoryPackage,
   initEntityEnginesWithRetry,
   installEntityStoreV2,

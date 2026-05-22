@@ -9,7 +9,8 @@ jest.mock('../ears/get_ears_access_token');
 jest.mock('../ears/url');
 
 import type { AxiosInstance } from 'axios';
-import type { EarsGetTokenOpts, GetTokenOpts } from '@kbn/connector-specs';
+import { authTypeSpecs } from '@kbn/connector-specs';
+import type { AuthContext, EarsGetTokenOpts, GetTokenOpts } from '@kbn/connector-specs';
 import { loggerMock } from '@kbn/logging-mocks';
 import { actionsConfigMock } from '../../actions_config.mock';
 import { connectorTokenClientMock } from '../connector_token_client.mock';
@@ -174,6 +175,50 @@ describe('EarsStrategy', () => {
         expect.objectContaining({ provider: 'my-provider', forceRefresh: true })
       );
     });
+  });
+
+  describe('configure (bearer normalization)', () => {
+    it.each([
+      ['bearer initial-token', 'Bearer initial-token'],
+      ['Bearer initial-token', 'Bearer initial-token'],
+    ])(
+      'sets Authorization header with title-case Bearer scheme at setup time (%s -> %s)',
+      async (input, expected) => {
+        const ctx = {
+          getToken: jest.fn().mockResolvedValue(input),
+        } as unknown as AuthContext;
+        const { instance } = createMockAxiosInstance();
+
+        await authTypeSpecs.Ears.configure(ctx, instance, { provider: 'google' });
+
+        expect(instance.defaults.headers.common.Authorization).toBe(expected);
+      }
+    );
+
+    it.each([
+      ['bearer refreshed-token', 'Bearer refreshed-token'],
+      ['Bearer refreshed-token', 'Bearer refreshed-token'],
+    ])(
+      'sets Authorization header with title-case Bearer scheme at refresh time (%s -> %s)',
+      async (input, expected) => {
+        const { instance, mockRequest } = createMockAxiosInstance();
+        strategy.installResponseInterceptor(instance, baseDeps);
+        const onRejected = getOnRejected(instance);
+
+        mockGetEarsAccessToken.mockResolvedValue(input);
+        mockRequest.mockResolvedValue({ status: 200 });
+
+        const error = {
+          config: { _retry: false, headers: {} as Record<string, string> },
+          response: { status: 401 },
+          message: 'Unauthorized',
+        };
+        await onRejected(error);
+
+        expect(error.config.headers.Authorization).toBe(expected);
+        expect(instance.defaults.headers.common.Authorization).toBe(expected);
+      }
+    );
   });
 
   describe('getToken', () => {

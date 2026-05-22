@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataView } from '@kbn/data-views-plugin/common';
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import {
   AGENT_NAME,
   AT_TIMESTAMP,
@@ -40,7 +38,6 @@ import {
   USER_AGENT_VERSION,
 } from '@kbn/apm-types';
 import type { DataTableRecord, TraceDocumentOverview } from '../types';
-import { getFormattedFields } from './get_formatted_fields';
 import { getFlattenedFields } from './get_flattened_fields';
 
 const fields: Array<keyof TraceDocumentOverview> = [
@@ -75,13 +72,6 @@ const fields: Array<keyof TraceDocumentOverview> = [
   LINKS_SPAN_ID,
   LINKS_TRACE_ID,
 ];
-
-export function getTraceDocumentOverview(
-  doc: DataTableRecord,
-  { dataView, fieldFormats }: { dataView: DataView; fieldFormats: FieldFormatsStart }
-): TraceDocumentOverview {
-  return getFormattedFields<TraceDocumentOverview>(doc, fields, { dataView, fieldFormats });
-}
 
 export function getFlattenedTraceDocumentOverview(doc: DataTableRecord): TraceDocumentOverview {
   return getFlattenedFields<TraceDocumentOverview>(doc, fields);

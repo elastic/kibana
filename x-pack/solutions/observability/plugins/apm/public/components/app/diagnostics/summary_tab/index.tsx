@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiCallOut, EuiDescriptionList, EuiSpacer } from '@elastic/eui';
-import { isCCSRemoteIndexName } from '@kbn/es-query';
+import { EuiCallOut, EuiDescriptionList, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
+import { isNonLocalIndexName } from '@kbn/es-query';
 
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { ApmIntegrationPackageStatus } from './apm_integration_package_status';
@@ -101,6 +101,6 @@ function PrivilegesCallout({ diagnosticsBundle }: { diagnosticsBundle: Diagnosti
 
 export function getIsCrossCluster(diagnosticsBundle?: DiagnosticsBundle) {
   return Object.values(diagnosticsBundle?.apmIndices ?? {}).some((indicies) => {
-    return isCCSRemoteIndexName(indicies);
+    return isNonLocalIndexName(indicies);
   });
 }

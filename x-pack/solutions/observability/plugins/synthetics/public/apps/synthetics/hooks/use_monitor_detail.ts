@@ -12,10 +12,13 @@ import type { Ping } from '../../../../common/runtime_types';
 
 export const useMonitorDetail = (
   configId: string,
-  location: string
+  location: string,
+  remoteName?: string
 ): { data?: Ping; loading?: boolean } => {
+  const index = remoteName ? `${remoteName}:${SYNTHETICS_INDEX_PATTERN}` : SYNTHETICS_INDEX_PATTERN;
+
   const params = {
-    index: SYNTHETICS_INDEX_PATTERN,
+    index,
     size: 1,
     query: {
       bool: {
@@ -42,7 +45,7 @@ export const useMonitorDetail = (
   };
   const { data: result, loading } = useEsSearch<Ping & { '@timestamp': string }, SearchRequest>(
     params,
-    [configId, location],
+    [configId, location, remoteName],
     {
       name: 'getMonitorStatusByLocation',
     }

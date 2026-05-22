@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { JsonValue } from '@kbn/utility-types';
 import type { EsWorkflowExecution, EsWorkflowStepExecution, StackFrame } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
@@ -14,8 +15,54 @@ import { ExecutionError } from '@kbn/workflows/server';
 import { createMockWorkflowEventLogger } from '../../workflow_event_logger/mocks';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/types';
 import { StepExecutionRuntime } from '../step_execution_runtime';
+import type { StepIoService } from '../step_io_service';
 import type { WorkflowContextManager } from '../workflow_context_manager';
 import type { WorkflowExecutionState } from '../workflow_execution_state';
+
+/**
+ * Builds a `StepIoService` test double that owns its own IO maps — mirrors
+ * the production split where state holds metadata only and the service is
+ * sovereign over `input` / `output`. Lifecycle writes still go through
+ * `state.upsertStep`; the runtime tests assert against those calls directly.
+ */
+function createPassthroughStepIoService(state: WorkflowExecutionState): StepIoService {
+  const inputs = new Map<string, JsonValue>();
+  const outputs = new Map<string, JsonValue | null>();
+  const sizes = new Map<string, number>();
+  return {
+    setStepInput: (id: string, input: JsonValue) => {
+      inputs.set(id, input);
+    },
+    setStepOutput: (id: string, output: JsonValue | null, sizeBytes?: number) => {
+      outputs.set(id, output);
+      if (sizeBytes !== undefined && Number.isFinite(sizeBytes) && sizeBytes >= 0) {
+        sizes.set(id, sizeBytes);
+      }
+    },
+    getStepInput: jest.fn((id: string) => inputs.get(id)),
+    getStepOutput: jest.fn((id: string) => outputs.get(id)),
+    getStepError: jest.fn((id: string) => state.getStepExecution(id)?.error),
+    getLatestStepIO: jest.fn((stepId: string) => {
+      const latest = state.getLatestStepExecution(stepId);
+      if (!latest) return undefined;
+      return {
+        input: inputs.get(latest.id),
+        output: outputs.get(latest.id),
+        error: latest.error,
+      };
+    }),
+    getDataSetVariables: jest.fn(() => ({} as Record<string, unknown>)),
+    getOutputSizeStats: jest.fn(() => {
+      let totalBytes = 0;
+      for (const bytes of sizes.values()) totalBytes += bytes;
+      return { totalBytes, stepCount: sizes.size };
+    }),
+    hasEvictedOutputs: jest.fn().mockReturnValue(false),
+    rehydrateOutputs: jest.fn().mockResolvedValue(undefined),
+    prepareForRead: jest.fn().mockResolvedValue(undefined),
+    releaseTransientlyRehydratedOutputs: jest.fn(),
+  } as unknown as StepIoService;
+}
 
 describe('StepExecutionRuntime', () => {
   let underTest: StepExecutionRuntime;
@@ -23,6 +70,7 @@ describe('StepExecutionRuntime', () => {
   let workflowExecutionGraph: WorkflowGraph;
   let workflowLogger: IWorkflowEventLogger;
   let workflowExecutionState: WorkflowExecutionState;
+  let stepIoService: StepIoService;
   let workflowContextManager: WorkflowContextManager;
   const fakeStepExecutionId = 'fake_step_execution_id';
   const fakeNode = {
@@ -104,6 +152,8 @@ describe('StepExecutionRuntime', () => {
       }
     });
 
+    stepIoService = createPassthroughStepIoService(workflowExecutionState);
+
     underTest = new StepExecutionRuntime({
       node: fakeNode,
       stackFrames: fakeStackFrames,
@@ -112,6 +162,7 @@ describe('StepExecutionRuntime', () => {
       workflowExecutionGraph,
       stepLogger: workflowLogger,
       workflowExecutionState,
+      stepIoService,
     });
   });
 
@@ -130,10 +181,12 @@ describe('StepExecutionRuntime', () => {
     it('should be able to retrieve the step result', () => {
       (workflowExecutionState.getStepExecution as jest.Mock).mockReturnValue({
         stepId: 'node1',
-        input: {},
-        output: { success: true, data: {} },
         error: { type: 'Error', message: 'Fake error' },
       } as Partial<EsWorkflowStepExecution>);
+      // IO lives in the service now — seed it through the passthrough mock.
+      stepIoService.setStepInput(fakeStepExecutionId, {});
+      stepIoService.setStepOutput(fakeStepExecutionId, { success: true, data: {} });
+
       const stepResult = underTest.getCurrentStepResult();
       expect(workflowExecutionState.getStepExecution).toHaveBeenCalledWith(
         `fake_step_execution_id`
@@ -592,6 +645,7 @@ describe('StepExecutionRuntime', () => {
         workflowExecutionGraph,
         stepLogger: workflowLogger,
         workflowExecutionState,
+        stepIoService,
       });
 
       runtime.failStep(new Error('fail'));
@@ -617,6 +671,7 @@ describe('StepExecutionRuntime', () => {
         workflowExecutionGraph,
         stepLogger: workflowLogger,
         workflowExecutionState,
+        stepIoService,
       });
 
       runtime.failStep(new Error('fail'));

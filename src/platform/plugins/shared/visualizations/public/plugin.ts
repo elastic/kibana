@@ -479,7 +479,7 @@ export class VisualizationsPlugin
     expressions.registerFunction(rangeExpressionFunction);
     expressions.registerFunction(visDimensionExpressionFunction);
     expressions.registerFunction(xyDimensionExpressionFunction);
-    embeddable.registerReactEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, async () => {
+    embeddable.registerEmbeddablePublicDefinition(VISUALIZE_EMBEDDABLE_TYPE, async () => {
       const { visualizeEmbeddableFactory } = await import('./embeddable/embeddable_module');
       return visualizeEmbeddableFactory;
     });

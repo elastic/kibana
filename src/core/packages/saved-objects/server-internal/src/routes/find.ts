@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import path from 'node:path';
 import { schema } from '@kbn/config-schema';
 import type { RouteAccess, RouteDeprecationInfo } from '@kbn/core-http-server';
 import type { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
@@ -34,6 +35,9 @@ export const registerFindRoute = (
   });
   const searchOperatorSchema = schema.oneOf([schema.literal('OR'), schema.literal('AND')], {
     defaultValue: 'OR',
+    meta: {
+      description: 'The boolean operator to use when combining multiple values.',
+    },
   });
   const { allowHttpApiAccess } = config;
   router.get(
@@ -41,9 +45,15 @@ export const registerFindRoute = (
       path: '/_find',
       options: {
         summary: `Search for saved objects`,
+        description: `WARNING: This API is deprecated. This is a legacy Saved Objects API and may be removed in a future version of Kibana.
+
+Searches for Kibana saved objects.
+
+For transferring or backing up saved objects, prefer the export API (\`POST /api/saved_objects/_export\`).`,
         tags: ['oas-tag:saved objects'],
         access,
         deprecated: deprecationInfo,
+        oasOperationObject: () => path.resolve(__dirname, './find.examples.yaml'),
       },
       security: {
         authz: {
@@ -53,30 +63,65 @@ export const registerFindRoute = (
       },
       validate: {
         query: schema.object({
-          per_page: schema.number({ min: 0, defaultValue: 20 }),
-          page: schema.number({ min: 0, defaultValue: 1 }),
-          type: schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })]),
-          search: schema.maybe(schema.string()),
+          per_page: schema.number({
+            min: 0,
+            defaultValue: 20,
+            meta: { description: 'The number of items per page.' },
+          }),
+          page: schema.number({
+            min: 0,
+            defaultValue: 1,
+            meta: { description: 'The page index to return.' },
+          }),
+          type: schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })], {
+            meta: {
+              description:
+                'The saved object type or types to search for. Use multiple `type` values to search across types.',
+            },
+          }),
+          search: schema.maybe(schema.string({ meta: { description: 'A text search string.' } })),
           default_search_operator: searchOperatorSchema,
           search_fields: schema.maybe(
-            schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })])
+            schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })], {
+              meta: { description: 'The fields to search on.' },
+            })
           ),
-          sort_field: schema.maybe(schema.string()),
+          sort_field: schema.maybe(
+            schema.string({ meta: { description: 'The field to sort on.' } })
+          ),
           has_reference: schema.maybe(
-            schema.oneOf([referenceSchema, schema.arrayOf(referenceSchema, { maxSize: 100 })])
+            schema.oneOf([referenceSchema, schema.arrayOf(referenceSchema, { maxSize: 100 })], {
+              meta: {
+                description:
+                  'Return only saved objects that have a reference to the specified saved object(s).',
+              },
+            })
           ),
           has_reference_operator: searchOperatorSchema,
           has_no_reference: schema.maybe(
-            schema.oneOf([referenceSchema, schema.arrayOf(referenceSchema, { maxSize: 100 })])
+            schema.oneOf([referenceSchema, schema.arrayOf(referenceSchema, { maxSize: 100 })], {
+              meta: {
+                description:
+                  'Return only saved objects that do not have a reference to the specified saved object(s).',
+              },
+            })
           ),
           has_no_reference_operator: searchOperatorSchema,
           fields: schema.maybe(
-            schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })])
+            schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })], {
+              meta: { description: 'The fields to return for each saved object.' },
+            })
           ),
-          filter: schema.maybe(schema.string()),
-          aggs: schema.maybe(schema.string()),
+          filter: schema.maybe(
+            schema.string({ meta: { description: 'A KQL filter to apply to the search.' } })
+          ),
+          aggs: schema.maybe(
+            schema.string({ meta: { description: 'Aggregations as a JSON string.' } })
+          ),
           namespaces: schema.maybe(
-            schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })])
+            schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })], {
+              meta: { description: 'The namespaces (spaces) to search in.' },
+            })
           ),
         }),
       },

@@ -19,7 +19,7 @@ spec:
       description: 'Run scripts and trigger CI for Kibana Renovate PRs'
     spec:
       env:
-        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'false'
+        KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'false'
 
       allow_rebuilds: true
       branch_configuration: main

@@ -13,6 +13,7 @@ export class AccountSettingsPageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly userMenu = this.ctx.getService('userMenu');
   private readonly log = this.ctx.getService('log');
+  private readonly retry = this.ctx.getService('retry');
 
   async verifyAccountSettings(expectedUserName: string) {
     await this.userMenu.clickProvileLink();
@@ -48,8 +49,10 @@ export class AccountSettingsPageObject extends FtrService {
 
     await this.testSubjects.clickWhenNotDisabled('changePasswordFormSubmitButton');
 
-    const toast = await this.testSubjects.find('euiToastHeader', 20000);
-    const title = await toast.getVisibleText();
-    expect(title).to.contain('Password successfully changed');
+    await this.retry.try(async () => {
+      const toast = await this.testSubjects.find('euiToastHeader', 20000);
+      const title = await toast.getVisibleText();
+      expect(title).to.contain('Password successfully changed');
+    });
   }
 }

@@ -172,6 +172,9 @@ export class ConsoleMenu extends Component<Props, State> {
           closePopover={this.closePopover}
           panelPaddingSize="none"
           anchorPosition="downLeft"
+          aria-label={i18n.translate('console.consoleMenu.popoverAriaLabel', {
+            defaultMessage: 'Request options',
+          })}
         >
           <EuiContextMenuPanel items={items} data-test-subj="consoleMenu" />
         </EuiPopover>

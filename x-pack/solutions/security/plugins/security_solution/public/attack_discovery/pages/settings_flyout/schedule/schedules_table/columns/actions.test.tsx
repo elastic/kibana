@@ -15,7 +15,6 @@ import { TestProviders } from '../../../../../../common/mock';
 import { mockAttackDiscoverySchedule } from '../../../../mock/mock_attack_discovery_schedule';
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { ATTACK_DISCOVERY_FEATURE_ID } from '../../../../../../../common/constants';
-import { waitForEuiToolTipVisible } from '@elastic/eui/lib/test/rtl';
 
 jest.mock('../../../../../../common/lib/kibana');
 
@@ -95,7 +94,6 @@ describe('Actions Column', () => {
 
       const deleteButton = screen.getByTestId('deleteButton');
       fireEvent.mouseOver(deleteButton.parentElement as Node);
-      await waitForEuiToolTipVisible();
 
       const tooltip = screen.getByRole('tooltip');
       expect(tooltip).toHaveTextContent('Missing privileges');

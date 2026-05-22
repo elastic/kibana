@@ -47,3 +47,12 @@ export const sendGetUninstallToken = (uninstallTokenId: string) =>
     path: uninstallTokensRouteService.getInfoPath(uninstallTokenId),
     version: API_VERSIONS.public.v1,
   });
+
+export async function getUninstallTokenValue(uninstallTokenId: string): Promise<string> {
+  const data = await sendRequestForRq<GetUninstallTokenResponse>({
+    method: 'get',
+    path: uninstallTokensRouteService.getInfoPath(uninstallTokenId),
+    version: API_VERSIONS.public.v1,
+  });
+  return data.item.token;
+}

@@ -38,3 +38,4 @@ export * from './composite_slo/composite_slo_find';
 export * from './composite_slo/composite_slo_update';
 export * from './composite_slo/composite_slo_delete';
 export * from './composite_slo/composite_slo_historical_summary';
+export * from './composite_slo/composite_slo_summary_refresh';

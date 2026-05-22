@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { sortBy } from 'lodash';
 import type { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
 import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
@@ -65,31 +64,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             expect(response.body.items.length).to.be.greaterThan(0);
           });
 
-          it('all items have a health status set', () => {
-            // Under the assumption that the loaded archive has
-            // at least one APM ML job, and the time range is longer
-            // than 15m, at least one items should have a health status
-            // set. Note that we currently have a bug where healthy
-            // services report as unknown (so without any health status):
-            // https://github.com/elastic/kibana/issues/77083
-
-            const healthStatuses = sortBy(response.body.items, 'serviceName').map(
-              (item: any) => item.healthStatus
+          it('includes anomaly scores from ML when the user has ML access', () => {
+            // Archive includes APM ML jobs; the API merges max record_score per service as
+            // anomalyScore. Only services present in ML anomaly results get a score.
+            const itemsWithScore = response.body.items.filter(
+              (item) => item.anomalyScore !== undefined && item.anomalyScore !== null
             );
 
-            expect(healthStatuses.filter(Boolean).length).to.be.greaterThan(0);
+            expect(itemsWithScore.length).to.be.greaterThan(0);
 
-            expectSnapshot(healthStatuses).toMatchInline(`
-              Array [
-                "healthy",
-                "healthy",
-                "healthy",
-                "healthy",
-                "healthy",
-                "healthy",
-                "healthy",
-              ]
-            `);
+            for (const item of itemsWithScore) {
+              expect(item.anomalyScore).to.be.a('number');
+            }
           });
         });
       });
@@ -122,12 +108,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expect(response.body.items.length).to.be.greaterThan(0);
         });
 
-        it('contains no health statuses', () => {
-          const definedHealthStatuses = response.body.items
-            .map((item) => item.healthStatus)
-            .filter(Boolean);
+        it('contains no anomaly scores when the user has no ML access', () => {
+          const definedScores = response.body.items
+            .map((item) => item.anomalyScore)
+            .filter((score) => score !== undefined && score !== null);
 
-          expect(definedHealthStatuses.length).to.be(0);
+          expect(definedScores.length).to.be(0);
         });
       });
 
@@ -151,7 +137,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
         });
 
-        it('does not return health statuses for services that are not found in APM data', () => {
+        it('returns only services that match the kuery filter', () => {
           expect(response.status).to.be(200);
 
           expect(response.body.items.length).to.be(1);

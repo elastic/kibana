@@ -201,6 +201,10 @@ export const QueryRuleListItemContent: React.FC<QueryRuleListItemContentProps> =
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiPopover
+                  aria-label={i18n.translate(
+                    'xpack.search.queryRulesetDetail.draggableList.actionsPopover.ariaLabel',
+                    { defaultMessage: 'Rule actions' }
+                  )}
                   id="queryRuleActionsPopover"
                   button={
                     <EuiButtonIcon

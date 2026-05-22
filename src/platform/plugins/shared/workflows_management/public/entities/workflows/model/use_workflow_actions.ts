@@ -9,6 +9,7 @@
 
 import { v4 as generateUuid } from 'uuid';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
+import { resolveCollisionId } from '@kbn/human-readable-id';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import type {
   RunStepCommand,
@@ -19,7 +20,6 @@ import type {
 } from '@kbn/workflows';
 import type { BulkCreateWorkflowsResponse } from '@kbn/workflows-ui';
 import { useRunWorkflow, useWorkflowsApi } from '@kbn/workflows-ui';
-import { resolveCollisionId } from '../../../../common/lib/import';
 import { rewriteWorkflowReferences } from '../../../common/lib/export/rewrite_workflow_references';
 import type { WorkflowPreview } from '../../../common/lib/export/workflow_preview';
 import { parseImportFile } from '../../../features/import_workflows/lib/parse_import_file';

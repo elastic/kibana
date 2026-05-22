@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import type { NewPackagePolicyInput, PackageInfo } from '../types';
+import type { NewPackagePolicyInput, PackageInfo, RegistryDataStream } from '../types';
 
 import {
   packageToPackagePolicy,
   packageToPackagePolicyInputs,
   getInputEffectiveName,
+  dataStreamUsesOtelInput,
 } from './package_to_package_policy';
 import { AWS_PACKAGE } from './fixtures/aws_package';
 
@@ -673,5 +674,65 @@ describe('Fleet - packageToPackagePolicy', () => {
         )
       ).toMatchSnapshot();
     });
+  });
+});
+
+describe('dataStreamUsesOtelInput', () => {
+  const makePackageInfo = (
+    inputs: Array<{ name?: string; type: string }>
+  ): Pick<PackageInfo, 'policy_templates'> => ({
+    policy_templates: [
+      {
+        name: 'otel',
+        title: 'OTel template',
+        description: '',
+        inputs,
+      } as any,
+    ],
+  });
+
+  const makeDataStream = (inputRef: string): Pick<RegistryDataStream, 'streams'> => ({
+    streams: [{ input: inputRef, title: 'stream' } as any],
+  });
+
+  it('returns true when stream.input is "otelcol" directly (regression)', () => {
+    const pkgInfo = makePackageInfo([{ type: 'otelcol' }]);
+    expect(dataStreamUsesOtelInput(pkgInfo, makeDataStream('otelcol'))).toBe(true);
+  });
+
+  it('returns true when stream.input matches the name of an otelcol input (named input case)', () => {
+    const pkgInfo = makePackageInfo([
+      { name: 'otel_logs', type: 'otelcol' },
+      { name: 'otel_metrics', type: 'otelcol' },
+    ]);
+    expect(dataStreamUsesOtelInput(pkgInfo, makeDataStream('otel_logs'))).toBe(true);
+    expect(dataStreamUsesOtelInput(pkgInfo, makeDataStream('otel_metrics'))).toBe(true);
+  });
+
+  it('returns false when stream.input is a named input of a non-otelcol type (regression)', () => {
+    const pkgInfo = makePackageInfo([{ name: 'my_logfile', type: 'logfile' }]);
+    expect(dataStreamUsesOtelInput(pkgInfo, makeDataStream('my_logfile'))).toBe(false);
+  });
+
+  it('returns false when stream.input matches a name that exists but on a non-otelcol input', () => {
+    const pkgInfo = makePackageInfo([{ name: 'otel_logs', type: 'logfile' }]);
+    expect(dataStreamUsesOtelInput(pkgInfo, makeDataStream('otel_logs'))).toBe(false);
+  });
+
+  it('returns false when there are no streams', () => {
+    const pkgInfo = makePackageInfo([{ name: 'otel_logs', type: 'otelcol' }]);
+    expect(dataStreamUsesOtelInput(pkgInfo, { streams: [] })).toBe(false);
+    expect(dataStreamUsesOtelInput(pkgInfo, {})).toBe(false);
+  });
+
+  it('does not crash when policy_templates is absent and returns false for non-otelcol streams', () => {
+    // policy_templates absent/empty — no named inputs to resolve; direct 'otelcol' still matches
+    expect(dataStreamUsesOtelInput({}, makeDataStream('otelcol'))).toBe(true);
+    expect(dataStreamUsesOtelInput({ policy_templates: [] }, makeDataStream('otelcol'))).toBe(true);
+    // A named reference that can't be resolved (no policy_templates) → false
+    expect(dataStreamUsesOtelInput({}, makeDataStream('some_named_input'))).toBe(false);
+    expect(
+      dataStreamUsesOtelInput({ policy_templates: [] }, makeDataStream('some_named_input'))
+    ).toBe(false);
   });
 });

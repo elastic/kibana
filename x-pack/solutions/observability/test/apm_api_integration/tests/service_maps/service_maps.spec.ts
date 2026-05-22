@@ -119,7 +119,6 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
                       Object {
                         "actualValue": 868025.86875,
                         "anomalyScore": 0,
-                        "healthStatus": "healthy",
                         "jobId": "apm-production-6117-high_mean_transaction_duration",
                         "serviceName": "opbeans-dotnet",
                         "transactionType": "request",
@@ -127,7 +126,6 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
                       Object {
                         "actualValue": 102786.319148936,
                         "anomalyScore": 0,
-                        "healthStatus": "healthy",
                         "jobId": "apm-testing-41e5-high_mean_transaction_duration",
                         "serviceName": "opbeans-go",
                         "transactionType": "request",
@@ -135,7 +133,6 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
                       Object {
                         "actualValue": 175568.855769231,
                         "anomalyScore": 0,
-                        "healthStatus": "healthy",
                         "jobId": "apm-production-6117-high_mean_transaction_duration",
                         "serviceName": "opbeans-java",
                         "transactionType": "request",
@@ -165,12 +162,6 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
               expect(anomaly.serviceName).to.be.a('string');
               expect(anomaly.serviceName.length).to.be.greaterThan(0);
               expect(anomaly.jobId).to.match(/^apm-/);
-
-              // healthStatus must be valid and match anomalyScore
-              expect(anomaly.healthStatus).to.match(/^(healthy|warning|critical)$/);
-              if (anomaly.anomalyScore === 0) {
-                expect(anomaly.healthStatus).to.equal('healthy');
-              }
             });
           });
         });

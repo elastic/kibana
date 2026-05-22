@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 
 import { EuiFlexGroup, EuiHorizontalRule, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { useFeatureFlags } from '../../../../hooks/use_feature_flags';
+import { useRouteAccessConfig } from '../../../../hooks/use_route_access_config';
 import { getManageNavItems } from '../../../../route_config';
 import { SidebarNavList } from '../shared/sidebar_nav_list';
 
@@ -18,10 +18,10 @@ interface ManageSidebarViewProps {
 }
 
 export const ManageSidebarView: React.FC<ManageSidebarViewProps> = ({ pathname }) => {
-  const featureFlags = useFeatureFlags();
+  const routeAccessConfig = useRouteAccessConfig();
   const { euiTheme } = useEuiTheme();
 
-  const navItems = useMemo(() => getManageNavItems(featureFlags), [featureFlags]);
+  const navItems = useMemo(() => getManageNavItems(routeAccessConfig), [routeAccessConfig]);
 
   const isActive = (path: string) => pathname.startsWith(path);
 

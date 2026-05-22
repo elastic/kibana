@@ -13,7 +13,7 @@ import {
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { installPrebuiltWatchlists } from './install_prebuilt_watchlists';
 import {
-  PRIVILEGED_USER_WATCHLIST_ID,
+  getPrivilegedUserWatchlistSavedObjectId,
   PRIVILEGED_USER_WATCHLIST_NAME,
 } from '../../../../../common/entity_analytics/watchlists/constants';
 import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
@@ -83,7 +83,13 @@ describe('installPrebuiltWatchlists', function () {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockWatchlistCreate.mockResolvedValue({ id: PRIVILEGED_USER_WATCHLIST_ID });
+    mockWatchlistCreate.mockImplementation(async (_attrs, opts?: { id?: string }) => {
+      if (!opts?.id) {
+        throw new Error('Prebuilt watchlist creation must always pass a deterministic id');
+      }
+
+      return { id: opts.id };
+    });
     mockEntitySourceCreate.mockResolvedValue({ id: 'entity-source-id' });
     mockEntitySourceList.mockResolvedValue({ sources: [] });
     mockAddEntitySourceReference.mockResolvedValue(undefined);
@@ -115,11 +121,15 @@ describe('installPrebuiltWatchlists', function () {
 
   it('should skip creation when the prebuilt watchlist already exists', async () => {
     mockSoClient.find.mockResolvedValue(buildSpacesResponse(['default']));
-    mockWatchlistGet.mockResolvedValue({ id: PRIVILEGED_USER_WATCHLIST_ID });
+    mockWatchlistGet.mockResolvedValue({
+      id: getPrivilegedUserWatchlistSavedObjectId('default'),
+    });
 
     await callInstall();
 
-    expect(mockWatchlistGet).toHaveBeenCalledWith(PRIVILEGED_USER_WATCHLIST_ID);
+    expect(mockWatchlistGet).toHaveBeenCalledWith(
+      getPrivilegedUserWatchlistSavedObjectId('default')
+    );
     expect(mockWatchlistCreate).not.toHaveBeenCalled();
   });
 
@@ -135,7 +145,7 @@ describe('installPrebuiltWatchlists', function () {
         description: 'System-managed watchlist for tracking privileged users',
         managed: true,
       }),
-      { id: PRIVILEGED_USER_WATCHLIST_ID }
+      { id: getPrivilegedUserWatchlistSavedObjectId('default') }
     );
     expect(mockLogger.info).toHaveBeenCalledWith(
       expect.stringContaining(`Prebuilt watchlist '${PRIVILEGED_USER_WATCHLIST_NAME}' initialized.`)
@@ -163,6 +173,54 @@ describe('installPrebuiltWatchlists', function () {
     await callInstall();
 
     expect(mockWatchlistCreate).toHaveBeenCalledTimes(2);
+  });
+
+  it('should create integration entity sources with managed: true', async () => {
+    mockSoClient.find.mockResolvedValue(buildSpacesResponse(['default']));
+    mockWatchlistGet.mockRejectedValue(new Error('Saved object not found'));
+
+    await callInstall();
+
+    // Both okta and ad entity sources should be created with managed: true
+    expect(mockEntitySourceCreate).toHaveBeenCalledTimes(2);
+    expect(mockEntitySourceCreate).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'okta', managed: true })
+    );
+    expect(mockEntitySourceCreate).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'ad', managed: true })
+    );
+  });
+
+  it('entity source index patterns use each space namespace', async () => {
+    mockSoClient.find.mockResolvedValue(buildSpacesResponse(['space-2']));
+    mockWatchlistGet.mockRejectedValue(new Error('Saved object not found'));
+
+    await callInstall();
+
+    expect(mockEntitySourceCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'okta',
+        indexPattern: 'logs-entityanalytics_okta.user-default',
+      })
+    );
+    expect(mockEntitySourceCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'ad',
+        indexPattern: 'logs-entityanalytics_ad.user-default',
+      })
+    );
+    expect(mockEntitySourceCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'okta',
+        indexPattern: 'logs-entityanalytics_okta.user-space-2',
+      })
+    );
+    expect(mockEntitySourceCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'ad',
+        indexPattern: 'logs-entityanalytics_ad.user-space-2',
+      })
+    );
   });
 
   it('should deduplicate default namespace when it appears in spaces response', async () => {

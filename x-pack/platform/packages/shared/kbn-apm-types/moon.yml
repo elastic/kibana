@@ -18,6 +18,13 @@ project:
   sourceRoot: x-pack/platform/packages/shared/kbn-apm-types
 dependsOn:
   - '@kbn/elastic-agent-utils'
+  - '@kbn/i18n'
+  - '@kbn/es-query'
+  - '@kbn/io-ts-utils'
+  - '@kbn/es-types'
+  - '@kbn/apm-types-shared'
+  - '@kbn/slo-schema'
+  - '@kbn/rule-data-utils'
 tags:
   - shared-common
   - package

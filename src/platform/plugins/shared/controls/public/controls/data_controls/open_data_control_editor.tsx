@@ -20,7 +20,6 @@ export const openDataControlEditor = <State extends DataControlState = DataContr
   initialState,
   parentApi,
   setLastUsedDataViewId,
-  isPinned,
   controlId,
   controlType,
   initialDefaultPanelTitle,
@@ -29,7 +28,6 @@ export const openDataControlEditor = <State extends DataControlState = DataContr
   initialState: Partial<State>;
   parentApi: unknown;
   setLastUsedDataViewId?: (dataViewId: string) => void;
-  isPinned?: boolean;
   // these props are only provided when the control already exists and is being edited
   controlId?: string;
   controlType?: string;
@@ -87,7 +85,6 @@ export const openDataControlEditor = <State extends DataControlState = DataContr
             closeFlyout();
             if (setLastUsedDataViewId && dataViewId) setLastUsedDataViewId(dataViewId);
           }}
-          isPinned={isPinned}
         />
       );
     },

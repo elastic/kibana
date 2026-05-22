@@ -85,10 +85,14 @@ describe('safeOutputSize', () => {
     expect(safeOutputSize(stream)).toBeGreaterThan(0);
   });
 
-  it('should return -1 for circular references', () => {
+  it('should return null for circular references', () => {
     const obj: any = { a: 1 };
     obj.self = obj;
-    expect(safeOutputSize(obj)).toBe(-1);
+    expect(safeOutputSize(obj)).toBeNull();
+  });
+
+  it('should return null for BigInt (non-serializable)', () => {
+    expect(safeOutputSize({ big: BigInt(1) })).toBeNull();
   });
 
   it('should return size for null', () => {

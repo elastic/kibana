@@ -135,7 +135,7 @@ describe('Settings', () => {
     });
 
     mockUseStreamsPrivileges.mockReturnValue({
-      features: { overviewPage: { enabled: true } },
+      features: {},
     } as ReturnType<typeof useStreamsPrivileges>);
 
     mockUseUnsavedChangesPrompt.mockImplementation(() => {});

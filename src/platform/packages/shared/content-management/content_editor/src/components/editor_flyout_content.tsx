@@ -72,20 +72,15 @@ export const ContentEditorFlyoutContent: FC<Props> = ({
   const form = useMetadataForm({ item, customValidators });
 
   const hasNoChanges = () => {
-    const itemTags = item.tags.map((obj) => obj.id).sort();
+    const itemTags = item.tags.slice().sort();
     const formTags = form.tags.value.slice().sort();
-
-    const compareTags = (arr1: string[], arr2: string[]) => {
-      if (arr1.length !== arr2.length) return false;
-      return arr1.every((tag: string, index) => tag === arr2[index]);
-    };
-
     const description = item.description || '';
 
     return (
       item.title === form.title.value &&
       description === form.description.value &&
-      compareTags(itemTags, formTags)
+      itemTags.length === formTags.length &&
+      itemTags.every((tag, i) => tag === formTags[i])
     );
   };
 
@@ -137,7 +132,6 @@ export const ContentEditorFlyoutContent: FC<Props> = ({
               defaultMessage: 'To edit these details, contact your administrator for access.',
             })
           }
-          tagsReferences={item.tags}
           TagList={TagList}
           TagSelector={TagSelector}
         >

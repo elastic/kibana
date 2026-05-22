@@ -37,6 +37,7 @@ import { resetSLORoute } from './reset_slo';
 import { repairSLORoute } from './repair_slo';
 import { fetchCompositeHistoricalSummaryRoute } from './composite_slo/fetch_composite_historical_summary';
 import { getCompositeSLOSuggestionsRoute } from './composite_slo/get_composite_slo_suggestions';
+import { postCompositeSloSummaryRefreshRoute } from './composite_slo/post_composite_slo_summary_refresh';
 import { updateCompositeSLORoute } from './composite_slo/update_composite_slo';
 import { updateSLORoute } from './update_slo';
 import { updateSloSettings } from './update_slo_settings';
@@ -100,5 +101,6 @@ export const getSloRouteRepository = ({
     ...(isCompositeSloEnabled ? fetchCompositeHistoricalSummaryRoute : {}),
     ...(isCompositeSloEnabled ? batchGetCompositeSLORoute : {}),
     ...(isCompositeSloEnabled ? getCompositeSLOSuggestionsRoute : {}),
+    ...(isCompositeSloEnabled ? postCompositeSloSummaryRefreshRoute : {}),
   };
 };

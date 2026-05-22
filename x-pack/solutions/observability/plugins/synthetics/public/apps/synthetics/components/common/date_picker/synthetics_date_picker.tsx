@@ -6,6 +6,7 @@
  */
 
 import React, { useContext, useEffect } from 'react';
+import type { OnRefreshChangeProps } from '@elastic/eui';
 import { EuiSuperDatePicker } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ClientPluginsStart } from '../../../../../plugin';
@@ -16,7 +17,13 @@ import { SyntheticsSettingsContext, SyntheticsRefreshContext } from '../../../co
 export const SyntheticsDatePicker = ({ fullWidth }: { fullWidth?: boolean }) => {
   const [getUrlParams, updateUrl] = useUrlParams();
   const { commonlyUsedRanges } = useContext(SyntheticsSettingsContext);
-  const { refreshApp } = useContext(SyntheticsRefreshContext);
+  // The picker's built-in auto-refresh dropdown was previously local-state
+  // only — clicking it did nothing app-wide. Wire it to
+  // SyntheticsRefreshContext so the picker is the single source of truth for
+  // both range and auto-refresh, matching what the standalone
+  // <AutoRefreshButton /> exposes elsewhere.
+  const { refreshApp, refreshInterval, refreshPaused, setRefreshInterval, setRefreshPaused } =
+    useContext(SyntheticsRefreshContext);
 
   const { data } = useKibana<ClientPluginsStart>().services;
 
@@ -48,11 +55,21 @@ export const SyntheticsDatePicker = ({ fullWidth }: { fullWidth?: boolean }) => 
       )
     : CLIENT_DEFAULTS.COMMONLY_USED_DATE_RANGES;
 
+  const onRefreshChange = ({ isPaused, refreshInterval: nextIntervalMs }: OnRefreshChangeProps) => {
+    setRefreshPaused(isPaused);
+    // EUI exposes ms; the synthetics context stores seconds — same conversion
+    // the standalone AutoRefreshButton already does.
+    setRefreshInterval(nextIntervalMs / 1000);
+  };
+
   return (
     <EuiSuperDatePicker
       width={fullWidth ? 'full' : 'auto'}
       start={start}
       end={end}
+      isPaused={refreshPaused}
+      refreshInterval={refreshInterval * 1000}
+      onRefreshChange={onRefreshChange}
       commonlyUsedRanges={euiCommonlyUsedRanges}
       onTimeChange={({ start: startN, end: endN }) => {
         if (data?.query?.timefilter?.timefilter) {

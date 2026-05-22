@@ -14,6 +14,8 @@ import {
   BELOW_OR_EQ_TEXT,
   BETWEEN_TEXT,
   NOT_BETWEEN_TEXT,
+  BETWEEN_INCLUSIVE_TEXT,
+  NOT_BETWEEN_INCLUSIVE_TEXT,
 } from '../../../../common/i18n';
 import { convertToBuiltInComparators, formatDurationFromTimeUnitChar } from '../../../../common';
 import type { Evaluation } from './lib/evaluate_rule';
@@ -32,9 +34,13 @@ const recoveredComparatorToI18n = (
 ) => {
   switch (comparator) {
     case COMPARATORS.BETWEEN:
-      return currentValue < threshold[0] ? BELOW_TEXT : ABOVE_TEXT;
+      return currentValue <= threshold[0] ? BELOW_TEXT : ABOVE_TEXT;
+    case COMPARATORS.BETWEEN_INCLUSIVE:
+      return currentValue < threshold[0] ? BELOW_OR_EQ_TEXT : ABOVE_OR_EQ_TEXT;
     case COMPARATORS.NOT_BETWEEN:
       return BETWEEN_TEXT;
+    case COMPARATORS.NOT_BETWEEN_INCLUSIVE:
+      return BETWEEN_INCLUSIVE_TEXT;
     case COMPARATORS.GREATER_THAN:
       return ABOVE_TEXT;
     case COMPARATORS.GREATER_THAN_OR_EQUALS:
@@ -50,8 +56,12 @@ const alertComparatorToI18n = (comparator: COMPARATORS) => {
   switch (comparator) {
     case COMPARATORS.BETWEEN:
       return BETWEEN_TEXT;
+    case COMPARATORS.BETWEEN_INCLUSIVE:
+      return BETWEEN_INCLUSIVE_TEXT;
     case COMPARATORS.NOT_BETWEEN:
       return NOT_BETWEEN_TEXT;
+    case COMPARATORS.NOT_BETWEEN_INCLUSIVE:
+      return NOT_BETWEEN_INCLUSIVE_TEXT;
     case COMPARATORS.GREATER_THAN:
       return ABOVE_TEXT;
     case COMPARATORS.GREATER_THAN_OR_EQUALS:

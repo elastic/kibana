@@ -21,7 +21,9 @@ export const useSendEndpointExceptionsPerPolicyOptIn = () => {
   });
 };
 
-export const useGetEndpointExceptionsPerPolicyOptIn = (): UseQueryResult<
+export const useGetEndpointExceptionsPerPolicyOptIn = ({
+  enabled = true,
+}: { enabled?: boolean } = {}): UseQueryResult<
   GetEndpointExceptionsPerPolicyOptInResponse,
   Error
 > => {
@@ -32,7 +34,7 @@ export const useGetEndpointExceptionsPerPolicyOptIn = (): UseQueryResult<
 
   return useQuery<GetEndpointExceptionsPerPolicyOptInResponse, Error>({
     queryKey: ['endpointExceptionsPerPolicyOptIn'],
-    enabled: isEndpointExceptionsMovedUnderManagementFFEnabled,
+    enabled: isEndpointExceptionsMovedUnderManagementFFEnabled && enabled,
     queryFn: async () =>
       http.get<GetEndpointExceptionsPerPolicyOptInResponse>(
         ENDPOINT_EXCEPTIONS_PER_POLICY_OPT_IN_ROUTE,

@@ -5,25 +5,19 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const testSubjects = getService('testSubjects');
   const spacesService = getService('spaces');
   const securityService = getService('security');
-  const inspector = getService('inspector');
   const filterBar = getService('filterBar');
-  const { common, header, discover, security, timePicker, searchSessionsManagement } =
-    getPageObjects([
-      'common',
-      'header',
-      'discover',
-      'security',
-      'timePicker',
-      'searchSessionsManagement',
-    ]);
-  const browser = getService('browser');
+  const { common, header, discover, security, timePicker } = getPageObjects([
+    'common',
+    'header',
+    'discover',
+    'security',
+    'timePicker',
+  ]);
   const searchSessions = getService('searchSessions');
   const kibanaServer = getService('kibanaServer');
   const toasts = getService('toasts');
@@ -57,34 +51,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
         await timePicker.setDefaultAbsoluteRange();
         await searchSessions.save({ withRefresh: true });
-        await discover.openInspectorFromTabMenu();
 
-        const savedSessionId = await (
-          await testSubjects.find('inspectorRequestSearchSessionId')
-        ).getAttribute('data-search-session-id');
-        await inspector.close();
+        // Dismiss the "Background search created" toast
+        await toasts.dismissAllWithChecks();
+        await searchSessions.openCompletedSearchFromToast();
 
-        // purge client side search cache
-        // https://github.com/elastic/kibana/issues/106074#issuecomment-920462094
-        await browser.refresh();
-
-        await searchSessions.openFlyout();
-
-        const searchSessionList = await searchSessionsManagement.getList();
-        const searchSessionItem = searchSessionList.find(
-          (session) => session.id === savedSessionId
-        );
-
-        if (!searchSessionItem) throw new Error(`Can\'t find session with id = ${savedSessionId}`);
-
-        // navigate to discover
-        await searchSessionItem.view();
-
+        // Wait for discover to load
         await header.waitUntilLoadingHasFinished();
         await discover.waitForDocTableLoadingComplete();
 
         // Check that session is restored
-        expect(await toasts.getCount()).to.be(0); // no session restoration related warnings
+        await searchSessions.expectNoErrorsOrWarnings();
       });
     });
     describe('Disabled storing search sessions in space', () => {

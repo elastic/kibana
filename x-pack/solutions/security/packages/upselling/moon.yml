@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/security-solution-upselling'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/security-threat-hunting-investigations'
+  defaultOwner: '@elastic/security-threat-hunting'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/security-solution-upselling'
   description: Moon project for @kbn/security-solution-upselling
   channel: ''
-  owner: '@elastic/security-threat-hunting-investigations'
+  owner: '@elastic/security-threat-hunting'
   sourceRoot: x-pack/solutions/security/packages/upselling
 dependsOn:
   - '@kbn/i18n'

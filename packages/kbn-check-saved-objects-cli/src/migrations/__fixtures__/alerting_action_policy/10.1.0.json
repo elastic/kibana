@@ -1,0 +1,104 @@
+{
+  "0.0.0": [
+    {
+      "name": "My global policy",
+      "description": "Routes all alerts to the on-call workflow",
+      "type": "global",
+      "ruleId": null,
+      "enabled": true,
+      "destinations": [{ "type": "workflow", "id": "on-call-workflow-id" }],
+      "matcher": "env : 'production' and region : 'us-east-1'",
+      "groupBy": ["service.name", "environment"],
+      "tags": ["production", "on-call"],
+      "groupingMode": "per_field",
+      "throttle": { "strategy": "time_interval", "interval": "5m" },
+      "snoozedUntil": null,
+      "auth": {
+        "apiKey": "encryptedApiKeyBase64==",
+        "owner": "elastic",
+        "createdByUser": true
+      },
+      "createdBy": "u_elastic",
+      "createdByUsername": "elastic",
+      "updatedBy": "u_elastic",
+      "updatedByUsername": "elastic",
+      "createdAt": "2026-01-01T00:00:00.000Z",
+      "updatedAt": "2026-01-01T00:00:00.000Z"
+    },
+    {
+      "name": "My single rule policy",
+      "description": "Notifies on status change for a single rule",
+      "type": "single_rule",
+      "ruleId": "rule-1",
+      "enabled": true,
+      "destinations": [{ "type": "workflow", "id": "wf-1" }],
+      "matcher": null,
+      "groupBy": null,
+      "tags": null,
+      "groupingMode": "per_episode",
+      "throttle": { "strategy": "on_status_change" },
+      "snoozedUntil": "2026-02-01T00:00:00.000Z",
+      "auth": {
+        "owner": "elastic",
+        "createdByUser": false
+      },
+      "createdBy": null,
+      "createdByUsername": null,
+      "updatedBy": null,
+      "updatedByUsername": null,
+      "createdAt": "2026-01-01T00:00:00.000Z",
+      "updatedAt": "2026-01-01T00:00:00.000Z"
+    }
+  ],
+  "10.1.0": [
+    {
+      "name": "My global policy",
+      "description": "Routes all alerts to the on-call workflow",
+      "type": "global",
+      "ruleId": null,
+      "enabled": true,
+      "destinations": [{ "type": "workflow", "id": "on-call-workflow-id" }],
+      "matcher": "env : 'production' and region : 'us-east-1'",
+      "groupBy": ["service.name", "environment"],
+      "tags": ["production", "on-call"],
+      "groupingMode": "per_field",
+      "throttle": { "strategy": "time_interval", "interval": "5m" },
+      "snoozedUntil": null,
+      "auth": {
+        "apiKey": "encryptedApiKeyBase64==",
+        "owner": "elastic",
+        "createdByUser": true
+      },
+      "createdBy": "u_elastic",
+      "createdByUsername": "elastic",
+      "updatedBy": "u_elastic",
+      "updatedByUsername": "elastic",
+      "createdAt": "2026-01-01T00:00:00.000Z",
+      "updatedAt": "2026-01-01T00:00:00.000Z"
+    },
+    {
+      "name": "My single rule policy",
+      "description": "Notifies on status change for a single rule",
+      "type": "single_rule",
+      "ruleId": "rule-1",
+      "enabled": true,
+      "destinations": [{ "type": "workflow", "id": "wf-1" }],
+      "matcher": null,
+      "groupBy": null,
+      "tags": null,
+      "groupingMode": "per_episode",
+      "throttle": { "strategy": "on_status_change" },
+      "snoozedUntil": "2026-02-01T00:00:00.000Z",
+      "auth": {
+        "owner": "elastic",
+        "createdByUser": false
+      },
+      "createdBy": null,
+      "createdByUsername": null,
+      "updatedBy": null,
+      "updatedByUsername": null,
+      "createdAt": "2026-01-01T00:00:00.000Z",
+      "updatedAt": "2026-01-01T00:00:00.000Z"
+    }
+  ]
+}

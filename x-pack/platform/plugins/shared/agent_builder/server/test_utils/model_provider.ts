@@ -17,8 +17,9 @@ export type ModelProviderFactoryMock = jest.MockedFn<
 export const createModelProviderMock = (): ModelProviderMock => {
   return {
     getDefaultModel: jest.fn(),
-    getModel: jest.fn(),
-    getUsageStats: jest.fn(),
+    selectModel: jest.fn(),
+    getModelById: jest.fn(),
+    getUsageStats: jest.fn().mockReturnValue({ calls: [] }),
   };
 };
 

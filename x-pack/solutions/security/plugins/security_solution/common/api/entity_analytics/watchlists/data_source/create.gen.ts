@@ -14,50 +14,55 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
-import { EntitySourceType, Matcher, Filter, MonitoringEntitySource } from './common.gen';
+import { EntitySourceType, Matcher, Filter, DateRange, MonitoringEntitySource } from './common.gen';
 
+export const CreateWatchlistEntitySourceRequestParams = lazySchema(() =>
+  z.object({
+    watchlist_id: z.string(),
+  })
+);
 export type CreateWatchlistEntitySourceRequestParams = z.infer<
   typeof CreateWatchlistEntitySourceRequestParams
 >;
-export const CreateWatchlistEntitySourceRequestParams = z.object({
-  watchlist_id: z.string(),
-});
 export type CreateWatchlistEntitySourceRequestParamsInput = z.input<
   typeof CreateWatchlistEntitySourceRequestParams
 >;
 
+export const CreateWatchlistEntitySourceRequestBody = lazySchema(() =>
+  z
+    .object({
+      type: EntitySourceType,
+      name: z.string(),
+      indexPattern: z.string().optional(),
+      /**
+       * Required when type is entity_analytics_integration. One of entityanalytics_okta, entityanalytics_ad.
+       */
+      integrationName: z.string().optional(),
+      enabled: z.boolean().optional(),
+      /**
+       * Field used to query the entity store for index-type sources
+       */
+      identifierField: z.string().optional(),
+      /**
+       * KQL query used to filter data from the provided index patterns
+       */
+      queryRule: z.string().optional(),
+      matchers: z.array(Matcher).optional(),
+      filter: Filter.optional(),
+      range: DateRange.optional(),
+    })
+    .strict()
+);
 export type CreateWatchlistEntitySourceRequestBody = z.infer<
   typeof CreateWatchlistEntitySourceRequestBody
 >;
-export const CreateWatchlistEntitySourceRequestBody = z
-  .object({
-    type: EntitySourceType,
-    name: z.string(),
-    indexPattern: z.string().optional(),
-    /**
-     * Required when type is entity_analytics_integration. One of entityanalytics_okta, entityanalytics_ad.
-     */
-    integrationName: z.string().optional(),
-    enabled: z.boolean().optional(),
-    /**
-     * Field used to query the entity store for index-type sources
-     */
-    identifierField: z.string().optional(),
-    /**
-     * KQL query used to filter data from the provided index patterns
-     */
-    queryRule: z.string().optional(),
-    matchers: z.array(Matcher).optional(),
-    filter: Filter.optional(),
-  })
-  .strict();
 export type CreateWatchlistEntitySourceRequestBodyInput = z.input<
   typeof CreateWatchlistEntitySourceRequestBody
 >;
 
+export const CreateWatchlistEntitySourceResponse = lazySchema(() => MonitoringEntitySource);
 export type CreateWatchlistEntitySourceResponse = z.infer<
   typeof CreateWatchlistEntitySourceResponse
 >;
-export const CreateWatchlistEntitySourceResponse = MonitoringEntitySource;

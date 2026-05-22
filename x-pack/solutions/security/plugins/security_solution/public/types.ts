@@ -67,9 +67,10 @@ import type { ElasticAssistantSharedStatePublicPluginStart } from '@kbn/elastic-
 import type { InferencePublicStart } from '@kbn/inference-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { KqlPluginStart } from '@kbn/kql/public';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { Logger } from '@kbn/logging';
 import type { CPSPluginStart } from '@kbn/cps/public';
+import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import type { EvalsPublicStart } from '@kbn/evals-plugin/public';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
@@ -120,6 +121,7 @@ export interface SetupPlugins {
   cases?: CasesPublicSetup;
   data: DataPublicPluginSetup;
   discoverShared: DiscoverSharedPublicStart;
+  workflowsExtensions?: WorkflowsExtensionsPublicPluginSetup;
 }
 
 /**

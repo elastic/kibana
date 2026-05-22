@@ -30,6 +30,11 @@ jest.mock('./use_keyboard_navigation', () => ({
     setScreenReaderAnnouncement: mockSetScreenReaderAnnouncement,
   })),
 }));
+
+jest.mock('./use_service_map_alerts_tab_href', () =>
+  jest.requireActual('./use_service_map_alerts_tab_href.test_mock')
+);
+
 jest.mock('@xyflow/react', () => {
   const original = jest.requireActual('@xyflow/react');
   return {
@@ -43,20 +48,6 @@ jest.mock('@xyflow/react', () => {
     ),
     Controls: ({ children }: { children?: React.ReactNode }) => (
       <div data-testid="react-flow-controls">{children}</div>
-    ),
-    ControlButton: ({
-      children,
-      onClick,
-      'data-test-subj': dataTestSubj,
-      ...rest
-    }: {
-      children?: React.ReactNode;
-      onClick?: () => void;
-      'data-test-subj'?: string;
-    }) => (
-      <button type="button" onClick={onClick} data-test-subj={dataTestSubj} {...rest}>
-        {children}
-      </button>
     ),
     useNodesState: jest.fn((initialNodes) => [initialNodes, jest.fn()]),
     useEdgesState: jest.fn((initialEdges) => [initialEdges, jest.fn()]),

@@ -28,6 +28,7 @@ export function FullTraceWaterfallRenderer({
   onNodeClick,
   onErrorClick,
   core,
+  ebt,
   ...scrollProps
 }: Props) {
   useEffectOnce(() => {
@@ -80,6 +81,7 @@ export function FullTraceWaterfallRenderer({
       showLegend
       serviceName={serviceName}
       onErrorClick={onErrorClick}
+      ebt={ebt}
       getServiceBadgeHref={getServiceBadgeHref}
       agentMarks={data.agentMarks}
       showCriticalPathControl

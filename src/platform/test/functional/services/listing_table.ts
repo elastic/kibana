@@ -88,9 +88,7 @@ export class ListingTableService extends FtrService {
 
   public async waitUntilTableIsLoaded() {
     await this.retry.try(async () => {
-      const isLoaded = await this.find.existsByDisplayedByCssSelector(
-        '[data-test-subj="itemsInMemTable"]:not(.euiBasicTable-loading)'
-      );
+      const isLoaded = await this.testSubjects.exists('listingTable-isLoaded');
 
       if (isLoaded) {
         return true;

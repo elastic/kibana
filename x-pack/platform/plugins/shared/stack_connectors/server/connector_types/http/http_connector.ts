@@ -38,6 +38,7 @@ import type {
 import type { Result } from '../lib/result_type';
 
 import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_header';
+import { processBufferResponse, type ResponseBuffer } from '../lib/process_buffer_response';
 import { isOk, promiseResult } from '../lib/result_type';
 import { getAxiosConfig } from './get_axios_config';
 import { ensureUriAllowed, validateConnectorTypeConfig } from './validations';
@@ -167,20 +168,24 @@ function renderParameterTemplates(
 }
 
 function combineUrl(basePath: string, path?: string): string {
-  const basePathNormalized = basePath.endsWith('/') ? basePath.slice(0, -1) : basePath;
-  const pathNormalized = path?.startsWith('/') ? path : path ? `/${path}` : '';
-  return `${basePathNormalized}${pathNormalized}`;
+  if (!path) return basePath;
+  const url = new URL(basePath);
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  url.pathname = url.pathname.replace(/\/$/, '') + normalizedPath;
+  return url.toString();
 }
 
-function buildQueryString(query?: Record<string, string>): string {
+function appendQueryString(baseUrl: string, query?: Record<string, string>): string {
   if (!query || Object.keys(query).length === 0) {
-    return '';
+    return baseUrl;
   }
-  const params = new URLSearchParams();
+  const url = new URL(baseUrl);
   for (const [key, value] of Object.entries(query)) {
-    params.append(key, value);
+    if (!url.searchParams.has(key)) {
+      url.searchParams.set(key, value);
+    }
   }
-  return `?${params.toString()}`;
+  return url.toString();
 }
 
 function serializeHttpRequestBody(body: unknown): string {
@@ -190,6 +195,15 @@ function serializeHttpRequestBody(body: unknown): string {
   return safeJsonStringify(body, (error) => {
     throw new Error(`Error serializing request body: ${error.message}`);
   }) as string; // will return a string or throw an error if it fails
+}
+
+function processResponseHeaders(headers: object): Record<string, string> {
+  return Object.entries(headers || {}).reduce<Record<string, string>>((acc, [key, value]) => {
+    if (value != null) {
+      acc[key] = String(value);
+    }
+    return acc;
+  }, {});
 }
 
 // action executor
@@ -215,9 +229,6 @@ export async function executor(
     return errorResultInvalid(actionId, 'URL is required');
   }
 
-  // Combine base url and path
-  const url = combineUrl(baseUrl, path) + buildQueryString(query);
-
   const [axiosConfig, axiosConfigError] = await getAxiosConfig({
     connectorId: actionId,
     services,
@@ -239,7 +250,15 @@ export async function executor(
     );
   }
 
-  const { axiosInstance, headers: configHeaders, sslOverrides: baseSslOverrides } = axiosConfig;
+  const {
+    axiosInstance,
+    headers: configHeaders,
+    sslOverrides: baseSslOverrides,
+    secretQueryParams,
+  } = axiosConfig;
+
+  const mergedQuery = { ...(secretQueryParams ?? {}), ...(query ?? {}) };
+  const url = appendQueryString(combineUrl(baseUrl, path), mergedQuery);
 
   // Merge headers: params headers take precedence over config headers
   const finalHeaders = { ...configHeaders, ...(paramsHeaders || {}) };
@@ -273,7 +292,7 @@ export async function executor(
     keepAlive = fetcher.keep_alive;
   }
 
-  const result: Result<AxiosResponse, AxiosError<{ message: string }>> = await promiseResult(
+  const result: Result<AxiosResponse<ResponseBuffer>, AxiosError<unknown>> = await promiseResult(
     request({
       axios: axiosInstance,
       method,
@@ -291,6 +310,7 @@ export async function executor(
         maxContentLength: fetcher.max_content_length,
         maxBodyLength: fetcher.max_content_length,
       }),
+      responseType: 'arraybuffer', // Guaranteed to return a buffer data type
       signal,
     })
   );
@@ -300,26 +320,27 @@ export async function executor(
   }
 
   if (isOk(result)) {
-    const {
-      value: { status, statusText, data },
-    } = result;
+    const { status, statusText } = result.value;
     logger.debug(`response from http action "${actionId}": [HTTP ${status}] ${statusText}`);
 
-    const headers = Object.entries(result.value.headers || {}).reduce<Record<string, string>>(
-      (acc, [key, value]) => {
-        if (value != null) {
-          acc[key] = String(value);
-        }
-        return acc;
-      },
-      {}
-    );
+    const headers = processResponseHeaders(result.value.headers);
+    const data = processBufferResponse(result.value.data, headers);
 
     return { status: 'ok', actionId, data: { status, statusText, headers, data } };
   } else {
     const { error } = result;
     if (error.response) {
-      const { status, statusText, headers: responseHeaders } = error.response;
+      const { status, statusText, data: responseData } = error.response;
+
+      const responseHeaders = processResponseHeaders(error.response.headers);
+
+      // Using `responseType: 'arraybuffer'`, error response bodies also arrive as
+      // raw bytes. Decode them via `processBufferResponse` so the existing
+      // error-message extraction (which expects an object/string body, e.g.
+      // `{ message: '...' }`) continues to work for HTTP errors.
+      if (responseData instanceof ArrayBuffer || ArrayBuffer.isView(responseData)) {
+        error.response.data = processBufferResponse(responseData, responseHeaders);
+      }
 
       const responseMessage = getErrorResponseMessage(error);
       const responseMessageAsSuffix = responseMessage ? `: ${responseMessage}` : '';

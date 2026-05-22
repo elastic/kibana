@@ -10,13 +10,13 @@ import { BehaviorSubject } from 'rxjs';
 
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { useSearchApi } from '@kbn/presentation-publishing';
-import type { PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
+import type { PresentationPanelProps } from '@kbn/embeddable-plugin/public';
 import {
   LENS_EMBEDDABLE_TYPE,
   type LensRendererProps,
   type LensSerializedState,
 } from '@kbn/lens-common';
-import type { LensApi, LensSerializedAPIConfig } from '@kbn/lens-common-2';
+import type { LensApi, LensWireAPIConfig } from '@kbn/lens-common-2';
 
 import { createEmptyLensState, transformToApiConfig } from '../helper';
 import type { LensParentApi } from './types';
@@ -55,6 +55,7 @@ type PanelProps = Pick<
  */
 export function LensRenderer({
   title,
+  description,
   withDefaultActions,
   extraActions,
   showInspector,
@@ -100,7 +101,9 @@ export function LensRenderer({
     return rest;
   }, [props.attributes]);
   const initialStateRef = useRef<LensSerializedState>(
-    props.attributes ? { attributes: cleanedAttributes } : createEmptyLensState(null, title)
+    props.attributes
+      ? { attributes: cleanedAttributes, description }
+      : createEmptyLensState(null, title, description)
   );
 
   const searchApi = useSearchApi({ query, filters, timeRange });
@@ -126,6 +129,14 @@ export function LensRenderer({
       lensApi.updateOverrides(props.overrides);
     }
   }, [lensApi, cleanedAttributes, props.overrides]);
+
+  // workaround: `description` is not currently exposed as an observable so we manually keep it in sync here
+  // Revisit if the Lens API aligns `description` with the observable pattern in the future.
+  useEffect(() => {
+    if (lensApi) {
+      lensApi.setDescription(description);
+    }
+  }, [lensApi, description]);
 
   useEffect(() => {
     if (syncColors != null && settings.syncColors$.getValue() !== syncColors) {
@@ -157,7 +168,7 @@ export function LensRenderer({
   }, [showInspector, withDefaultActions, extraActions, lensApi, titleHighlight]);
 
   return (
-    <EmbeddableRenderer<LensSerializedAPIConfig, LensApi>
+    <EmbeddableRenderer<LensWireAPIConfig, LensApi>
       type={LENS_EMBEDDABLE_TYPE}
       maybeId={id}
       getParentApi={() =>

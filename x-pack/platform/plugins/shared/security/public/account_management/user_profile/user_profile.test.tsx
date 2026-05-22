@@ -76,6 +76,7 @@ describe('useUserProfileForm', () => {
           "userSettings": Object {
             "contrastMode": "system",
             "darkMode": "space_default",
+            "locale": "en",
           },
         },
         "user": Object {

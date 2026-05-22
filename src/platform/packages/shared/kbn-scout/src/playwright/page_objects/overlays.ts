@@ -8,36 +8,11 @@
  */
 
 import type { ScoutPage } from '..';
-import { expect } from '..';
 
 export class OverlaysPage {
   constructor(private readonly page: ScoutPage) {}
 
   public get docViewerFlyout() {
     return this.page.testSubj.locator('docViewerFlyout');
-  }
-
-  public get newsfeedButton() {
-    return this.page.testSubj.locator('newsfeed');
-  }
-
-  public get newsfeedFlyout() {
-    return this.page.testSubj.locator('NewsfeedFlyout');
-  }
-
-  public get newsfeedFlyoutCloseButton() {
-    return this.page.testSubj
-      .locator('NewsfeedFlyout')
-      .locator('[data-test-subj="euiFlyoutCloseButton"]');
-  }
-
-  public async openNewsfeedFlyout() {
-    await this.newsfeedButton.click();
-    await expect(this.newsfeedFlyout).toBeVisible();
-  }
-
-  public async closeNewsfeedFlyout() {
-    await this.newsfeedFlyoutCloseButton.click();
-    await expect(this.newsfeedFlyout).toBeHidden();
   }
 }

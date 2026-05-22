@@ -126,4 +126,17 @@ export class Homepage {
   async getBodyLinkByText(text: string) {
     return this.page.getByRole('link', { name: text });
   }
+
+  // Metric Badges methods
+  async getMetricBadgesContainer() {
+    return this.page.testSubj.locator('searchHomepageMetricBadges');
+  }
+
+  async getMetricBadges() {
+    return this.page.locator('[data-test-subj^="searchHomepageMetricBadge-"]');
+  }
+
+  async getMetricBadge(type: string) {
+    return this.page.testSubj.locator(`searchHomepageMetricBadge-${type}`);
+  }
 }

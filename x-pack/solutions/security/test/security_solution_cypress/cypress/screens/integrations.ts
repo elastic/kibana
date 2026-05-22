@@ -12,3 +12,6 @@ export const SKIP_AGENT_INSTALLATION_BTN = '[data-test-subj="skipAgentInstallati
 export const SAVE_AND_CONTINUE_BTN = '[data-test-subj="createPackagePolicySaveButton"]';
 
 export const MODAL_CONFIRMATION_TITLE = '[data-test-subj="confirmModalTitleText"]';
+
+export const INTEGRATION_CARD = (integrationName: string) =>
+  `[data-test-subj="integration-card:epr:${integrationName}"]`;

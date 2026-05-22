@@ -111,4 +111,32 @@ describe('DynamicRuleFormFlyout', () => {
 
     expect(capturedFlyoutProps.push).toBe(true);
   });
+
+  it('defaults includeYaml to true', async () => {
+    const mockServices = createMockServices();
+
+    render(<DynamicRuleFormFlyout query="FROM logs-*" />);
+
+    resolveServices(mockServices);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('mockDynamicRuleFormFlyout')).toBeInTheDocument();
+    });
+
+    expect(capturedFlyoutProps.includeYaml).toBe(true);
+  });
+
+  it('forwards includeYaml=false when explicitly set', async () => {
+    const mockServices = createMockServices();
+
+    render(<DynamicRuleFormFlyout query="FROM logs-*" includeYaml={false} />);
+
+    resolveServices(mockServices);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('mockDynamicRuleFormFlyout')).toBeInTheDocument();
+    });
+
+    expect(capturedFlyoutProps.includeYaml).toBe(false);
+  });
 });

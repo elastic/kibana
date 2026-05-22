@@ -97,6 +97,7 @@ describe('types/utils', () => {
         ExecutionStatus.PENDING,
         ExecutionStatus.WAITING,
         ExecutionStatus.WAITING_FOR_INPUT,
+        ExecutionStatus.WAITING_FOR_CHILD,
       ]);
 
       it.each(allStatuses)('returns %s for status "%s"', (status) => {
@@ -131,6 +132,7 @@ describe('types/utils', () => {
         ExecutionStatus.RUNNING,
         ExecutionStatus.WAITING,
         ExecutionStatus.WAITING_FOR_INPUT,
+        ExecutionStatus.WAITING_FOR_CHILD,
         ExecutionStatus.PENDING,
       ]);
 

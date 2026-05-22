@@ -239,9 +239,7 @@ describe('Scripts library schemas', () => {
       it.each(optionalStringFields)('should error if `%s` is an empty string', (field) => {
         reqBody[field] = '     ';
 
-        expect(() => CreateScriptRequestSchema.body.validate(reqBody)).toThrow(
-          `[${field}]: Value can not be an empty string`
-        );
+        expect(() => CreateScriptRequestSchema.body.validate(reqBody)).not.toThrow();
       });
     });
   });

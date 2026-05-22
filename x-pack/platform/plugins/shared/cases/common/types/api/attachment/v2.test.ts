@@ -7,6 +7,10 @@
 
 import { AttachmentType } from '../../domain/attachment/v1';
 import { AttachmentRequestRtV2, BulkCreateAttachmentsRequestRtV2 } from './v2';
+import {
+  AttachmentRequestSchemaV2,
+  BulkCreateAttachmentsRequestSchemaV2,
+} from '../../api_zod/attachment/v2';
 
 describe('Unified Attachments', () => {
   describe('AttachmentRequestRtV2', () => {
@@ -179,6 +183,28 @@ describe('Unified Attachments', () => {
         expect(query.right).not.toHaveProperty('data');
       }
     });
+
+    it('zod: accepts v1 user comment attachment request', () => {
+      const v1Request = {
+        comment: 'This is a comment',
+        type: AttachmentType.user,
+        owner: 'cases',
+      };
+      const result = AttachmentRequestSchemaV2.safeParse(v1Request);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(v1Request);
+    });
+
+    it('zod: accepts v2 unified attachment request', () => {
+      const v2Request = {
+        type: 'lens',
+        attachmentId: 'attachment-123',
+        owner: 'cases',
+      };
+      const result = AttachmentRequestSchemaV2.safeParse(v2Request);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(v2Request);
+    });
   });
 
   describe('BulkCreateAttachmentsRequestRtV2', () => {
@@ -332,6 +358,25 @@ describe('Unified Attachments', () => {
           },
         ],
       });
+    });
+
+    it('zod: accepts array of v1 attachment requests', () => {
+      const v1Requests = [
+        {
+          comment: 'First comment',
+          type: AttachmentType.user,
+          owner: 'cases',
+        },
+      ];
+      const result = BulkCreateAttachmentsRequestSchemaV2.safeParse(v1Requests);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(v1Requests);
+    });
+
+    it('zod: accepts empty array', () => {
+      const result = BulkCreateAttachmentsRequestSchemaV2.safeParse([]);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual([]);
     });
   });
 });

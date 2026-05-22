@@ -7,15 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  FieldBasedIndexPatternColumn,
-  PercentileIndexPatternColumn,
-  PercentileRanksIndexPatternColumn,
-  TermsIndexPatternColumn,
+import {
+  LENS_DOCUMENT_FIELD_NAME,
+  type FieldBasedIndexPatternColumn,
+  type PercentileIndexPatternColumn,
+  type PercentileRanksIndexPatternColumn,
+  type TermsIndexPatternColumn,
+  type CountIndexPatternColumn,
 } from '@kbn/lens-common';
 import type {
   LensApiTermsOperation,
-  TermOperationRankByCustomBaseType,
+  TermOperationRankByCustomCountOperationType,
+  TermOperationRankByCustomOperationType,
   TermOperationRankByCustomPercentileRankType,
   TermOperationRankByCustomPercentileType,
 } from '../../schema/bucket_ops';
@@ -35,9 +38,15 @@ function isPercentileRanksOrderAgg(
   return orderAgg.operationType === 'percentile_rank';
 }
 
+function isCountOrderAgg(
+  orderAgg: FieldBasedIndexPatternColumn
+): orderAgg is CountIndexPatternColumn {
+  return orderAgg.operationType === 'count';
+}
+
 function isBaseCustomOperation(
   operation: string
-): operation is TermOperationRankByCustomBaseType['operation'] {
+): operation is TermOperationRankByCustomOperationType['operation'] {
   const ops: string[] = [
     'min',
     'max',
@@ -45,7 +54,6 @@ function isBaseCustomOperation(
     'median',
     'standard_deviation',
     'unique_count',
-    'count',
     'sum',
     'last_value',
   ];
@@ -131,7 +139,8 @@ export function fromTermsLensApiToLensState(
 
 function getCustomOrderAgg(
   rankBy:
-    | TermOperationRankByCustomBaseType
+    | TermOperationRankByCustomOperationType
+    | TermOperationRankByCustomCountOperationType
     | TermOperationRankByCustomPercentileType
     | TermOperationRankByCustomPercentileRankType
 ): TermsIndexPatternColumn['params']['orderAgg'] {
@@ -157,6 +166,18 @@ function getCustomOrderAgg(
     };
     return orderAgg;
   }
+
+  if (rankBy.operation === 'count') {
+    const orderAgg: CountIndexPatternColumn = {
+      operationType: rankBy.operation,
+      sourceField: rankBy.field || LENS_DOCUMENT_FIELD_NAME,
+      dataType: 'number',
+      isBucketed: false,
+      label: '',
+    };
+    return orderAgg;
+  }
+
   return {
     operationType: rankBy.operation,
     sourceField: rankBy.field,
@@ -192,8 +213,19 @@ function getCustomRankByFromOrderAgg(
     };
     return rankBy;
   }
+
+  if (isCountOrderAgg(orderAgg)) {
+    const rankBy: TermOperationRankByCustomCountOperationType = {
+      type: 'custom',
+      operation: 'count',
+      direction: orderDirection,
+      ...(sourceField !== LENS_DOCUMENT_FIELD_NAME ? { field: sourceField } : {}),
+    };
+    return rankBy;
+  }
+
   if (isBaseCustomOperation(orderAgg.operationType)) {
-    const rankBy: TermOperationRankByCustomBaseType = {
+    const rankBy: TermOperationRankByCustomOperationType = {
       type: 'custom',
       operation: orderAgg.operationType,
       field: sourceField,

@@ -10,6 +10,7 @@ import {
   isConversationCreatedEvent,
   isConversationUpdatedEvent,
   isRoundCompleteEvent,
+  AgentExecutionMode,
 } from '@kbn/agent-builder-common';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { firstValueFrom, toArray } from 'rxjs';
@@ -62,6 +63,7 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
         });
 
         const { events$ } = await executionService.executeAgent({
+          mode: AgentExecutionMode.conversation,
           request,
           abortSignal: context.abortSignal,
           params: {

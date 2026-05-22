@@ -90,6 +90,7 @@ import { useUserPrivileges } from '../../../../common/components/user_privileges
 import { AddRuleAttachmentToChatButton } from '../../components/add_rule_attachment_to_chat_button';
 import { useAgentBuilderRuleCreation } from './hooks/use_agent_builder_rule_creation';
 import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
+import { useRuleCreationTelemetry } from './hooks/use_rule_creation_telemetry';
 
 const MyEuiPanel = styled(EuiPanel)<{
   zindex?: number;
@@ -223,7 +224,8 @@ const CreateRulePageComponent: React.FC<{}> = () => {
   const defineFieldsTransform = useExperimentalFeatureFieldsTransform<DefineStepRule>();
 
   const onAiCreatedRuleAppliedRef = useRef<(() => void | Promise<void>) | undefined>(undefined);
-  const isAiRuleAppliedRef = useRef(false);
+  const { isAiRuleAppliedRef, getAiMeta, reportRuleCreated, reportRuleCreationError } =
+    useRuleCreationTelemetry(ruleType);
 
   const { isAiRuleUpdateRef } = useAgentBuilderRuleCreation({
     defineStepForm,
@@ -314,7 +316,7 @@ const CreateRulePageComponent: React.FC<{}> = () => {
       }
       setActiveStep(step);
     },
-    [activeStep, openSteps]
+    [activeStep, isAiRuleAppliedRef, openSteps]
   );
 
   const toggleStepAccordion = (step: RuleStep | null) => {
@@ -444,7 +446,7 @@ const CreateRulePageComponent: React.FC<{}> = () => {
         goToStep(step);
       }
     },
-    [validateStep, activeStep, goToStep]
+    [validateStep, activeStep, goToStep, isAiRuleAppliedRef]
   );
 
   const createRuleFromFormData = useCallback(
@@ -461,28 +463,41 @@ const CreateRulePageComponent: React.FC<{}> = () => {
         }
         await startMlJobs(localDefineStepData.machineLearningJobId);
       };
-      const [, createdRule] = await Promise.all([
-        startMlJobsIfNeeded(),
-        createRule(
-          formatRule<RuleCreateProps>(
-            localDefineStepData,
-            localAboutStepData,
-            localScheduleStepData,
-            {
-              ...localActionsStepData,
-              enabled,
-            },
-            triggersActionsUi.actionTypeRegistry
-          )
-        ),
-      ]);
 
-      addSuccess(i18n.SUCCESSFULLY_CREATED_RULES(createdRule.name));
+      const formattedRule = formatRule<RuleCreateProps>(
+        localDefineStepData,
+        localAboutStepData,
+        localScheduleStepData,
+        {
+          ...localActionsStepData,
+          enabled,
+        },
+        triggersActionsUi.actionTypeRegistry
+      );
 
-      navigateToApp(APP_UI_ID, {
-        deepLinkId: SecurityPageName.rules,
-        path: getRuleDetailsUrl(createdRule.id),
-      });
+      const aiMeta = getAiMeta();
+      if (aiMeta) {
+        formattedRule.meta = { ...formattedRule.meta, ...aiMeta };
+      }
+
+      try {
+        const [, createdRule] = await Promise.all([
+          startMlJobsIfNeeded(),
+          createRule(formattedRule),
+        ]);
+
+        reportRuleCreated({ rule: createdRule });
+
+        addSuccess(i18n.SUCCESSFULLY_CREATED_RULES(createdRule.name));
+
+        navigateToApp(APP_UI_ID, {
+          deepLinkId: SecurityPageName.rules,
+          path: getRuleDetailsUrl(createdRule.id),
+        });
+      } catch (error) {
+        reportRuleCreationError({ ruleType, error });
+        throw error;
+      }
     },
     [
       aboutStepForm,
@@ -491,7 +506,10 @@ const CreateRulePageComponent: React.FC<{}> = () => {
       createRule,
       defineFieldsTransform,
       defineStepForm,
+      getAiMeta,
       navigateToApp,
+      reportRuleCreated,
+      reportRuleCreationError,
       ruleType,
       scheduleStepForm,
       startMlJobs,

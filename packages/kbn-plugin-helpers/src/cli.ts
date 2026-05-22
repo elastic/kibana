@@ -19,6 +19,14 @@ import type { TaskContext } from './task_context';
 import { resolveKibanaVersion } from './resolve_kibana_version';
 import { loadConfig } from './config';
 
+/**
+ * Check if RSPack mode is enabled via environment variable
+ */
+function isRspackMode(): boolean {
+  const v = process.env.KBN_USE_RSPACK;
+  return v === 'true' || v === '1';
+}
+
 export function runCli() {
   new RunWithCommands({
     description: 'Some helper tasks for plugin-authors',
@@ -88,7 +96,15 @@ export function runCli() {
 
         await Tasks.initTargets(context);
         await Tasks.buildWebpackPackages(context);
-        await Tasks.optimize(context);
+
+        // Use RSPack or webpack based on environment
+        if (isRspackMode()) {
+          log.info('Using RSPack optimizer (KBN_USE_RSPACK=true)');
+          await Tasks.optimizeRspack(context);
+        } else {
+          await Tasks.optimize(context);
+        }
+
         await Tasks.brotliCompressBundles(context);
         await Tasks.writePublicAssets(context);
         await Tasks.writeServerFiles(context);
@@ -166,7 +182,14 @@ export function runCli() {
 
         await Tasks.initDev(context);
         await Tasks.buildWebpackPackages(context);
-        await Tasks.optimize(context);
+
+        // Use RSPack or webpack based on environment
+        if (isRspackMode()) {
+          log.info('Using RSPack optimizer (KBN_USE_RSPACK=true)');
+          await Tasks.optimizeRspack(context);
+        } else {
+          await Tasks.optimize(context);
+        }
       },
     })
     .execute();

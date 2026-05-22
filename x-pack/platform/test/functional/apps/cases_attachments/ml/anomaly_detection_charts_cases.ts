@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import type { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
-import type { AnomalySwimLaneEmbeddableState } from '@kbn/ml-plugin/public';
-import type { AnomalySwimlaneEmbeddableStateViewBy } from '@kbn/ml-plugin/public/embeddables/anomaly_swimlane/types';
-import { SWIMLANE_TYPE } from '@kbn/ml-plugin/server/embeddable/schemas';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type {
+  AnomalySwimLaneEmbeddableState,
+  AnomalySwimlaneEmbeddableStateViewBy,
+} from '@kbn/ml-server-schemas/embeddables/anomaly_swimlane';
+import { SWIMLANE_TYPE } from '@kbn/ml-common-types/embeddables/swimlane_type';
 import { stringHash } from '@kbn/ml-string-hash';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../services/ml/security_common';

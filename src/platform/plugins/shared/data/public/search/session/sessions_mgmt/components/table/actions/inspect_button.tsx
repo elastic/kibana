@@ -22,7 +22,7 @@ export const createInspectActionDescriptor = (
   core: CoreStart,
   isWithinFlyout: boolean = false
 ): IClickActionDescriptor => ({
-  iconType: 'document',
+  iconType: 'inspect',
   label: (
     <FormattedMessage
       id="data.mgmt.searchSessions.flyoutTitle"

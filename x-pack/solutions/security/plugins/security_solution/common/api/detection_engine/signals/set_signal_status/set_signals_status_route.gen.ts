@@ -14,81 +14,91 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { isNonEmptyString } from '@kbn/zod-helpers/v4';
 
 import { AlertStatusExceptClosed } from '../../../model/alert.gen';
 
+export const ReasonEnum = lazySchema(() =>
+  z.enum([
+    'false_positive',
+    'duplicate',
+    'true_positive',
+    'benign_positive',
+    'automated_closure',
+    'other',
+  ])
+);
 export type ReasonEnum = z.infer<typeof ReasonEnum>;
-export const ReasonEnum = z.enum([
-  'false_positive',
-  'duplicate',
-  'true_positive',
-  'benign_positive',
-  'automated_closure',
-  'other',
-]);
 export type ReasonEnumEnum = typeof ReasonEnum.enum;
 export const ReasonEnumEnum = ReasonEnum.enum;
 
 /**
  * The reason for closing the alerts. Can be one of following predefined reasons: [false_positive, duplicate, true_positive, benign_positive, automated_closure, other] or a custom reason provided by the user through the advanced settings.
  */
+export const Reason = lazySchema(() => z.union([ReasonEnum, z.string()]));
 export type Reason = z.infer<typeof Reason>;
-export const Reason = z.union([ReasonEnum, z.string()]);
 
+export const SetAlertsStatusByIdsBase = lazySchema(() =>
+  z.object({
+    /**
+     * List of alert ids. Use field `_id` on alert document or `kibana.alert.uuid`. Note: signals are a deprecated term for alerts.
+     */
+    signal_ids: z.array(z.string().min(1).superRefine(isNonEmptyString)).min(1),
+    status: AlertStatusExceptClosed,
+  })
+);
 export type SetAlertsStatusByIdsBase = z.infer<typeof SetAlertsStatusByIdsBase>;
-export const SetAlertsStatusByIdsBase = z.object({
-  /**
-   * List of alert ids. Use field `_id` on alert document or `kibana.alert.uuid`. Note: signals are a deprecated term for alerts.
-   */
-  signal_ids: z.array(z.string().min(1).superRefine(isNonEmptyString)).min(1),
-  status: AlertStatusExceptClosed,
-});
 
+export const CloseAlertsByIds = lazySchema(() =>
+  z.object({
+    /**
+     * List of alert ids. Use field `_id` on alert document or `kibana.alert.uuid`. Note: signals are a deprecated term for alerts.
+     */
+    signal_ids: z.array(z.string().min(1).superRefine(isNonEmptyString)).min(1),
+    status: z.literal('closed'),
+    reason: Reason.optional(),
+  })
+);
 export type CloseAlertsByIds = z.infer<typeof CloseAlertsByIds>;
-export const CloseAlertsByIds = z.object({
-  /**
-   * List of alert ids. Use field `_id` on alert document or `kibana.alert.uuid`. Note: signals are a deprecated term for alerts.
-   */
-  signal_ids: z.array(z.string().min(1).superRefine(isNonEmptyString)).min(1),
-  status: z.literal('closed'),
-  reason: Reason.optional(),
-});
 
+export const SetAlertsStatusByIds = lazySchema(() =>
+  z.discriminatedUnion('status', [CloseAlertsByIds, SetAlertsStatusByIdsBase])
+);
 export type SetAlertsStatusByIds = z.infer<typeof SetAlertsStatusByIds>;
-export const SetAlertsStatusByIds = z.discriminatedUnion('status', [
-  CloseAlertsByIds,
-  SetAlertsStatusByIdsBase,
-]);
 
+export const SetAlertsStatusByQueryBase = lazySchema(() =>
+  z.object({
+    query: z.object({}).catchall(z.unknown()),
+    status: AlertStatusExceptClosed,
+    conflicts: z.enum(['abort', 'proceed']).optional().default('abort'),
+  })
+);
 export type SetAlertsStatusByQueryBase = z.infer<typeof SetAlertsStatusByQueryBase>;
-export const SetAlertsStatusByQueryBase = z.object({
-  query: z.object({}).catchall(z.unknown()),
-  status: AlertStatusExceptClosed,
-  conflicts: z.enum(['abort', 'proceed']).optional().default('abort'),
-});
 
+export const CloseAlertsByQuery = lazySchema(() =>
+  z.object({
+    query: z.object({}).catchall(z.unknown()),
+    status: z.literal('closed'),
+    conflicts: z.enum(['abort', 'proceed']).optional().default('abort'),
+    reason: Reason.optional(),
+  })
+);
 export type CloseAlertsByQuery = z.infer<typeof CloseAlertsByQuery>;
-export const CloseAlertsByQuery = z.object({
-  query: z.object({}).catchall(z.unknown()),
-  status: z.literal('closed'),
-  conflicts: z.enum(['abort', 'proceed']).optional().default('abort'),
-  reason: Reason.optional(),
-});
 
+export const SetAlertsStatusByQuery = lazySchema(() =>
+  z.discriminatedUnion('status', [CloseAlertsByQuery, SetAlertsStatusByQueryBase])
+);
 export type SetAlertsStatusByQuery = z.infer<typeof SetAlertsStatusByQuery>;
-export const SetAlertsStatusByQuery = z.discriminatedUnion('status', [
-  CloseAlertsByQuery,
-  SetAlertsStatusByQueryBase,
-]);
 
+export const SetAlertsStatusRequestBody = lazySchema(() =>
+  z.union([SetAlertsStatusByIds, SetAlertsStatusByQuery])
+);
 export type SetAlertsStatusRequestBody = z.infer<typeof SetAlertsStatusRequestBody>;
-export const SetAlertsStatusRequestBody = z.union([SetAlertsStatusByIds, SetAlertsStatusByQuery]);
 export type SetAlertsStatusRequestBodyInput = z.input<typeof SetAlertsStatusRequestBody>;
 
 /**
  * Elasticsearch update by query response
  */
+export const SetAlertsStatusResponse = lazySchema(() => z.object({}).catchall(z.unknown()));
 export type SetAlertsStatusResponse = z.infer<typeof SetAlertsStatusResponse>;
-export const SetAlertsStatusResponse = z.object({}).catchall(z.unknown());

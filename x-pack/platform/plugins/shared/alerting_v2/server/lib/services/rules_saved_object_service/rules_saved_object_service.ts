@@ -60,6 +60,8 @@ export interface RulesSavedObjectServiceContract {
     page: number;
     perPage: number;
     filter?: string;
+    search?: string;
+    searchFields?: string[];
     sortField?: string;
     sortOrder?: 'asc' | 'desc';
   }): Promise<{
@@ -223,12 +225,16 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
     page,
     perPage,
     filter,
+    search,
+    searchFields,
     sortField = 'updatedAt',
     sortOrder = 'desc',
   }: {
     page: number;
     perPage: number;
     filter?: string;
+    search?: string;
+    searchFields?: string[];
     sortField?: string;
     sortOrder?: 'asc' | 'desc';
   }) {
@@ -239,6 +245,7 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
       sortField,
       sortOrder,
       ...(filter ? { filter } : {}),
+      ...(search ? { search, searchFields, defaultSearchOperator: 'AND' as const } : {}),
     });
   }
 

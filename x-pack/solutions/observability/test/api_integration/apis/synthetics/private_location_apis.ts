@@ -46,8 +46,6 @@ export default function ({ getService }: FtrProviderContext) {
     const monitorTestService = new SyntheticsMonitorTestService(getService);
 
     before(async () => {
-      await testPrivateLocations.installSyntheticsPackage();
-
       await kServer.savedObjects.clean({
         types: [legacyPrivateLocationsSavedObjectName, privateLocationSavedObjectName],
       });
@@ -80,7 +78,7 @@ export default function ({ getService }: FtrProviderContext) {
           id: legacyPrivateLocationsSavedObjectId,
         });
       } catch (e) {
-        expect(e.response.status).to.be(404);
+        expect(e.status).to.be(404);
       }
     });
 

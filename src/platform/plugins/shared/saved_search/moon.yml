@@ -33,7 +33,6 @@ dependsOn:
   - '@kbn/utility-types-jest'
   - '@kbn/expressions-plugin'
   - '@kbn/embeddable-plugin'
-  - '@kbn/saved-objects-plugin'
   - '@kbn/es-query'
   - '@kbn/logging'
   - '@kbn/core-plugins-server'

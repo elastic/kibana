@@ -66,7 +66,6 @@ export const CopyToClipboardContextMenu: FC<CopyToClipboardProps> = ({
       <EuiContextMenuItem
         key="copyToClipboard"
         icon={COPY_ICON}
-        size="s"
         onClick={copy}
         data-test-subj={dataTestSub}
       >

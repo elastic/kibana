@@ -31,6 +31,7 @@ export interface MigrationReadyPanelProps {
 const RULE_MIGRATION_READY_MISSING_RESOURCES_DESCRIPTION: Record<MigrationSource, string> = {
   [MigrationSource.SPLUNK]: i18n.RULE_MIGRATION_READY_MISSING_RESOURCES_SPLUNK,
   [MigrationSource.QRADAR]: i18n.RULE_MIGRATION_READY_MISSING_RESOURCES_QRADAR,
+  [MigrationSource.SENTINEL]: i18n.RULE_MIGRATION_READY_MISSING_RESOURCES_SENTINEL,
 };
 
 export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migrationStats }) => {

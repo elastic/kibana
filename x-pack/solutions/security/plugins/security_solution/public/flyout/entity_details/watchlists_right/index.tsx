@@ -39,7 +39,9 @@ export const WatchlistsFlyoutPanel = ({
     isDisabled,
     isNameTooLong,
     isDescriptionTooLong,
+    isRiskModifierInvalid,
     setWatchlistField,
+    setSourceValid,
   } = useWatchlistFormState({
     mode,
     watchlistId,
@@ -73,6 +75,8 @@ export const WatchlistsFlyoutPanel = ({
       isDisabled={isDisabled}
       isNameTooLong={isNameTooLong}
       isDescriptionTooLong={isDescriptionTooLong}
+      isRiskModifierInvalid={isRiskModifierInvalid}
+      onSourceValidationChange={setSourceValid}
     />
   );
 };

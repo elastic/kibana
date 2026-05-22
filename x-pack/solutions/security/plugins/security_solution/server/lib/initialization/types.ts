@@ -9,25 +9,26 @@ import type { Logger } from '@kbn/core/server';
 import type {
   InitializationFlowId,
   InitializationFlowErrorResult,
-  CreateListIndicesReadyResult,
-  SecurityDataViewsReadyResult,
 } from '../../../common/api/initialization';
 import type { SecuritySolutionRequestHandlerContext } from '../../types';
 
 export interface InitializationFlowContext {
   requestHandlerContext: SecuritySolutionRequestHandlerContext;
+  logger: Logger;
 }
 
-export interface InitializationFlowDefinition<ProvisionContext> {
+export type InitializationFlowResult<TPayload> =
+  | { status: 'ready'; payload: TPayload }
+  | InitializationFlowErrorResult;
+
+export interface InitializationFlowDefinition<TPayload> {
   id: InitializationFlowId;
-  resolveProvisionContext: (
-    requestHandlerContext: InitializationFlowContext,
-    logger: Logger
-  ) => Promise<ProvisionContext>;
-  provision: (
-    context: ProvisionContext,
-    logger: Logger
-  ) => Promise<
-    CreateListIndicesReadyResult | SecurityDataViewsReadyResult | InitializationFlowErrorResult
-  >;
+  spaceAware?: boolean;
+  /**
+   * When true, this flow is executed sequentially and must complete before any
+   * non-priority flows start in parallel. Multiple priority flows
+   * are also executed one at a time, in the order they appear in the request.
+   */
+  runFirst?: boolean;
+  runFlow(context: InitializationFlowContext): Promise<InitializationFlowResult<TPayload>>;
 }

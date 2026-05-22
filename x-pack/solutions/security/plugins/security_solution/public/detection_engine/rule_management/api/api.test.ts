@@ -27,6 +27,7 @@ import {
   updateRule,
   patchRule,
   fetchRules,
+  fetchSearchRules,
   fetchRuleById,
   importRules,
   exportRules,
@@ -501,6 +502,80 @@ describe('Detections Rules API', () => {
     test('happy path', async () => {
       const rulesResp = await fetchRules({});
       expect(rulesResp).toEqual(rulesMock);
+    });
+  });
+
+  describe('fetchSearchRules', () => {
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(rulesMock);
+    });
+
+    test('uses _search with default sort and API version', async () => {
+      await fetchSearchRules({});
+      expect(fetchMock).toHaveBeenCalledWith(
+        '/internal/detection_engine/rules/_search',
+        expect.objectContaining({
+          method: 'POST',
+          version: '1',
+          body: JSON.stringify({
+            page: 1,
+            per_page: 20,
+            sort_field: 'enabled',
+            sort_order: 'desc',
+          }),
+        })
+      );
+    });
+
+    test('sends structured filter, legacy search, and sort_field / sort_order', async () => {
+      await fetchSearchRules({
+        filter: 'alert.attributes.params.immutable: false',
+        search: { term: 'hello', mode: 'legacy' },
+        sort_field: 'name',
+        sort_order: 'asc',
+      });
+      expect(fetchMock).toHaveBeenCalledWith(
+        '/internal/detection_engine/rules/_search',
+        expect.objectContaining({
+          method: 'POST',
+          version: '1',
+          body: JSON.stringify({
+            page: 1,
+            per_page: 20,
+            sort_field: 'name',
+            sort_order: 'asc',
+            filter: 'alert.attributes.params.immutable: false',
+            search: { term: 'hello', mode: 'legacy' },
+          }),
+        })
+      );
+    });
+
+    test('includes aggregations when provided', async () => {
+      await fetchSearchRules({
+        aggregations: { counts: ['tags', 'enabled'] },
+      });
+      const [, options] = fetchMock.mock.calls[0];
+      expect(JSON.parse(options.body as string)).toEqual(
+        expect.objectContaining({
+          aggregations: { counts: ['tags', 'enabled'] },
+        })
+      );
+    });
+
+    test('passes search_after in the body when provided', async () => {
+      await fetchSearchRules({ search_after: [42, 'rule-id'] });
+      const [, options] = fetchMock.mock.calls[0];
+      expect(JSON.parse(options.body as string)).toEqual(
+        expect.objectContaining({ search_after: [42, 'rule-id'] })
+      );
+    });
+
+    test('omits filter from the JSON body when the filter is empty or whitespace', async () => {
+      await fetchSearchRules({ filter: '   ' });
+      const [, options] = fetchMock.mock.calls[0];
+      expect(JSON.parse(options.body as string)).not.toHaveProperty('filter');
     });
   });
 

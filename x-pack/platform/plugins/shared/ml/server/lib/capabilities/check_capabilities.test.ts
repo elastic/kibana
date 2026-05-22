@@ -8,7 +8,7 @@
 import { getAdminCapabilities, getUserCapabilities } from './__mocks__/ml_capabilities';
 import { capabilitiesProvider } from './check_capabilities';
 import type { MlLicense } from '../../../common/license';
-import { getDefaultCapabilities } from '../../../common/types/capabilities';
+import { getDefaultMlCapabilities } from '@kbn/ml-common-types/capabilities';
 import type { MlClient } from '../ml_client';
 
 const mlLicense = {
@@ -299,7 +299,7 @@ describe('check_capabilities', () => {
     test('full capabilities, ml disabled in space', async () => {
       const { getCapabilities } = capabilitiesProvider(
         mlClientNonUpgrade,
-        getDefaultCapabilities(),
+        getDefaultMlCapabilities(),
         mlLicense,
         mlIsNotEnabled
       );
@@ -361,7 +361,7 @@ describe('check_capabilities', () => {
   test('full capabilities, basic license, ml disabled in space', async () => {
     const { getCapabilities } = capabilitiesProvider(
       mlClientNonUpgrade,
-      getDefaultCapabilities(),
+      getDefaultMlCapabilities(),
       mlLicenseBasic,
       mlIsNotEnabled
     );

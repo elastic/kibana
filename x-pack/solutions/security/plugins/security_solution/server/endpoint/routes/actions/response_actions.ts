@@ -69,7 +69,7 @@ export function registerResponseActionRoutes(
   router: SecuritySolutionPluginRouter,
   endpointContext: EndpointAppContext
 ) {
-  const logger = endpointContext.logFactory.get('hostIsolation');
+  const logger = endpointContext.logFactory.get('responseActionsRoutes');
 
   router.versioned
     .post({

@@ -11,7 +11,7 @@ import { ShowAllSpaces } from '../../common/show_all_spaces';
 import type { OverviewStatusMetaData } from '../../../../../../../common/runtime_types';
 import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../../../../../../../common/embeddables/monitors_overview/constants';
 import { AddToDashboard } from '../../../common/components/add_to_dashboard';
-import { useOverviewStatus } from '../../hooks/use_overview_status';
+import { useOverviewStatusState } from '../../hooks/use_overview_status';
 import { GroupFields } from './grid_by_group/group_fields';
 import type { OverviewView } from '../../../../state/overview';
 import { setFlyoutConfig } from '../../../../state/overview';
@@ -31,13 +31,7 @@ export const OverviewGrid = memo(
   ({ view, isEmbeddable }: { view: OverviewView; isEmbeddable?: boolean }) => {
     const dispatch = useDispatch();
 
-    const {
-      status,
-      loaded: isInitialized,
-      loading,
-    } = useOverviewStatus({
-      scopeStatusByLocation: true,
-    });
+    const { status, loaded: isInitialized, loading } = useOverviewStatusState();
     const monitorsSortedByStatus: OverviewStatusMetaData[] = useMonitorsSortedByStatus();
 
     const setFlyoutConfigCallback = useCallback(
@@ -46,9 +40,15 @@ export const OverviewGrid = memo(
     );
     const { lastRefresh } = useSyntheticsRefreshContext();
 
+    // Trend refreshes are only consumed by the card view's sparklines. The
+    // compact view drives its own trend fetches via `useOverviewTrendsRequests`
+    // keyed to the visible page, so dispatching here would just be duplicate
+    // work. Also wait for the first overview load — refreshing before we know
+    // what monitors exist throws away the response anyway.
     useEffect(() => {
+      if (view !== 'cardView' || !isInitialized) return;
       dispatch(refreshOverviewTrends.get());
-    }, [dispatch, lastRefresh]);
+    }, [dispatch, lastRefresh, view, isInitialized]);
 
     // Display no monitors found when down, up, or disabled filter produces no results
     if (status && !monitorsSortedByStatus.length && isInitialized) {
@@ -86,7 +86,14 @@ export const OverviewGrid = memo(
             </EuiFlexItem>
           ) : null}
         </EuiFlexGroup>
-        {loading && isInitialized ? (
+        {/*
+          Card view has no built-in refresh indicator, so we surface a thin
+          progress bar above the grid while a fetch is in flight. The compact
+          (table) view already paints its own loading overlay via
+          `EuiBasicTable loading={...}`, so showing the progress bar there too
+          would render two competing spinners.
+        */}
+        {loading && isInitialized && view !== 'compactView' ? (
           <>
             <EuiProgress size="xs" color="accent" />
             <EuiSpacer
@@ -102,6 +109,7 @@ export const OverviewGrid = memo(
           <OverviewCardView
             monitorsSortedByStatus={monitorsSortedByStatus}
             setFlyoutConfigCallback={setFlyoutConfigCallback}
+            loaded={isInitialized}
           />
         ) : view === 'compactView' ? (
           <OverviewGridCompactView setFlyoutConfigCallback={setFlyoutConfigCallback} />

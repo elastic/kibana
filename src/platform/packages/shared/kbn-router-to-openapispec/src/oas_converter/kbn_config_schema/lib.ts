@@ -138,7 +138,7 @@ const convertObjectMembersToParameterObjects = (
     return {
       name: schemaKey,
       in: isPathParameter ? 'path' : 'query',
-      required: isPathParameter ? !paramSchema.optional : isSubSchemaRequired,
+      required: isPathParameter || isSubSchemaRequired,
       schema: finalSchema,
       description,
     };

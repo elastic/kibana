@@ -33,6 +33,11 @@ export const forkStreamsRoute = createServerRoute({
           },
         },
       },
+      responses: {
+        200: {
+          description: 'The stream was forked successfully.',
+        },
+      },
     }),
   },
   security: {
@@ -42,12 +47,13 @@ export const forkStreamsRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      name: z.string(),
+      name: z.string().describe('The name of the parent stream to fork from.'),
     }),
     body: z.object({
       stream: z.object({ name: z.string() }),
       where: conditionSchema,
       status: routingStatus.optional(),
+      draft: z.boolean().optional(),
     }),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<{ acknowledged: true }> => {
@@ -66,6 +72,7 @@ export const forkStreamsRoute = createServerRoute({
       where: params.body.where,
       name: params.body.stream.name,
       status: conditionStatus,
+      draft: params.body.draft,
     });
   },
 });
@@ -80,6 +87,20 @@ export const resyncStreamsRoute = createServerRoute({
       since: '9.1.0',
       stability: 'experimental',
     },
+    oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {},
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'Streams were resynced successfully.',
+        },
+      },
+    }),
   },
   security: {
     authz: {

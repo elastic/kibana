@@ -186,3 +186,25 @@ Example of natural language queries which can be passed to the tool:
     }
   );
 };
+
+export const noMatchingResourceToolName = 'no_matching_resource';
+
+export const NO_MATCHING_RESOURCE_ERROR = 'Could not figure out which data source to use';
+
+export const createNoMatchingResourceTool = () => {
+  return toTool(
+    async () => {
+      const result = createErrorResult({ message: NO_MATCHING_RESOURCE_ERROR });
+      const content = JSON.stringify({ results: [result] });
+      const artifact = { results: [result] };
+      return [content, artifact];
+    },
+    {
+      name: noMatchingResourceToolName,
+      responseFormat: 'content_and_artifact',
+      schema: z.object({}),
+      description:
+        'Call this ONLY when none of the available resources can plausibly answer the query. Prefer attempting a search with one of the other tools when any resource plausibly fits.',
+    }
+  );
+};

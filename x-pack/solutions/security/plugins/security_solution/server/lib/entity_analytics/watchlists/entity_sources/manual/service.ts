@@ -12,12 +12,7 @@ import { uniq } from 'lodash';
 
 import type { WatchlistEntityAssignResponseItem } from '../../../../../../common/api/entity_analytics/watchlists/entities/assign.gen';
 import type { WatchlistEntityUnassignResponseItem } from '../../../../../../common/api/entity_analytics/watchlists/entities/unassign.gen';
-import {
-  getExistingEntitiesMap,
-  getErrorFromBulkResponse,
-  errorsMsg,
-  partitionBulkResults,
-} from '../sync/utils';
+import { getErrorFromBulkResponse, errorsMsg, partitionBulkResults } from '../sync/utils';
 import { bulkUpsertOperationsFactory } from '../bulk/upsert';
 import { addWatchlistAttributeToStore } from '../sync/entity_store_sync';
 import { applyBulkRemoveSource } from '../bulk/soft_delete';
@@ -25,7 +20,7 @@ import { MANUAL_SOURCE_ID } from './constants';
 import type { BulkItemOutcome, WatchlistBulkEntity } from '../types';
 import type { WatchlistEntityDoc } from '../../entities/types';
 import type { WatchlistsByEuid } from '../../entities/service';
-import { getEntityType } from '../../entities/utils';
+import { getEntityType, type EntityTypeSource } from '../../entities/utils';
 
 interface ServiceDeps {
   esClient: ElasticsearchClient;
@@ -84,13 +79,11 @@ export const createManualEntityService = ({
     }
 
     try {
-      const existingMap = await getExistingEntitiesMap(esClient, watchlist, [...foundEuids]);
       const bulkEntities: WatchlistBulkEntity[] = foundEntities.map((e) => ({
         euid: e.euid,
         type: e.type,
         name: e.name,
         sourceId: MANUAL_SOURCE_ID,
-        existingEntityId: existingMap.get(e.euid),
         currentWatchlists: e.currentWatchlists,
       }));
 
@@ -211,7 +204,7 @@ const findEntitiesInStore = async (crudClient: CRUDClient, euids: string[]) => {
     return [
       {
         euid: id,
-        type: getEntityType(entity as Parameters<typeof getEntityType>[0]),
+        type: getEntityType(entity as EntityTypeSource),
         name: entity.entity?.name,
         currentWatchlists: normalizeWatchlists(entity.entity?.attributes?.watchlists),
       },

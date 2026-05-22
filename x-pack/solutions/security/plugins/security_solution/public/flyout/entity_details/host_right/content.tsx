@@ -9,7 +9,6 @@ import React from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
 import type { Entity } from '../../../../common/api/entity_analytics';
 import { ObservedDataSection } from './components/observed_data_section';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useHasEntityResolutionLicense } from '../../../common/hooks/use_has_entity_resolution_license';
 import { EntityHighlightsAccordion } from '../../../entity_analytics/components/entity_details_flyout/components/entity_highlights';
 import { EntityInsight } from '../../../cloud_security_posture/components/entity_insight';
@@ -21,7 +20,7 @@ import { HOST_PANEL_OBSERVED_HOST_QUERY_ID, HOST_PANEL_RISK_SCORE_QUERY_ID } fro
 import type { EntityDetailsPath } from '../shared/components/left_panel/left_panel_header';
 import type { IdentityFields } from '../../document_details/shared/utils';
 import type { ObservedEntityData } from '../shared/components/observed_entity/types';
-import type { HostItem } from '../../../../common/search_strategy';
+import type { EntityRiskScore, HostItem } from '../../../../common/search_strategy';
 import { VisualizationsSection } from '../shared/components/right/visualizations_section';
 import { ResolutionSection } from '../../../entity_analytics/components/entity_resolution/resolution_section';
 
@@ -42,6 +41,8 @@ interface HostPanelContentProps {
   /** When true (e.g. entity store v2 enabled but no entity found), hide risk score and asset criticality. */
   skipRiskAndCriticality?: boolean;
   entityStoreEntityId?: string;
+  /** See {@link RiskSummaryProps.prefetchedResolutionRisk}. */
+  prefetchedResolutionRisk?: EntityRiskScore<EntityType.host>;
 }
 
 export const HostPanelContent = ({
@@ -57,10 +58,8 @@ export const HostPanelContent = ({
   entityRecord,
   skipRiskAndCriticality = false,
   entityStoreEntityId,
+  prefetchedResolutionRisk,
 }: HostPanelContentProps) => {
-  const isEntityDetailsHighlightsAIEnabled = useIsExperimentalFeatureEnabled(
-    'entityDetailsHighlightsEnabled'
-  );
   const hasEntityResolutionLicense = useHasEntityResolutionLicense();
 
   // Extract hostName from identityFields for components that need a string
@@ -70,7 +69,7 @@ export const HostPanelContent = ({
 
   return (
     <>
-      {!skipRiskAndCriticality && isEntityDetailsHighlightsAIEnabled && (
+      {!skipRiskAndCriticality && (
         <EntityHighlightsAccordion
           entityIdentifier={entityRecord ? entityRecord.entity.id : hostName}
           entityType={EntityType.host}
@@ -88,10 +87,22 @@ export const HostPanelContent = ({
               openDetailsPanel={openDetailsPanel}
               isPreviewMode={isPreviewMode}
               entityId={entityRecord?.entity.id}
+              prefetchedResolutionRisk={prefetchedResolutionRisk}
             />
             <EuiHorizontalRule />
           </>
         )}
+      {entityStoreEntityId && (
+        <>
+          <VisualizationsSection
+            entityId={entityStoreEntityId}
+            isPreviewMode={isPreviewMode}
+            scopeId={scopeId}
+            openDetailsPanel={openDetailsPanel}
+          />
+          <EuiHorizontalRule margin="m" />
+        </>
+      )}
       {entityStoreEntityId && !isPreviewMode && hasEntityResolutionLicense && (
         <>
           <ResolutionSection
@@ -110,26 +121,17 @@ export const HostPanelContent = ({
         />
       )}
       <EntityInsight
+        entityRecord={entityRecord}
         identityFields={identityFields}
         isPreviewMode={isPreviewMode}
         openDetailsPanel={openDetailsPanel}
         entityType={EntityType.host}
       />
-      {entityStoreEntityId && (
-        <>
-          <VisualizationsSection
-            entityId={entityStoreEntityId}
-            isPreviewMode={isPreviewMode}
-            scopeId={scopeId}
-            openDetailsPanel={openDetailsPanel}
-          />
-          <EuiHorizontalRule margin="m" />
-        </>
-      )}
       <ObservedDataSection
         observedHost={observedHost}
         contextID={contextID}
         identityFields={identityFields}
+        entityRecord={entityRecord}
         scopeId={scopeId}
         queryId={HOST_PANEL_OBSERVED_HOST_QUERY_ID}
       />

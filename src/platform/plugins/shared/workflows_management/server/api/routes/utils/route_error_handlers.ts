@@ -18,7 +18,7 @@ import {
   InvalidYamlSyntaxError,
   isWorkflowConflictError,
   isWorkflowValidationError,
-} from '../../../../common/lib/errors';
+} from '@kbn/workflows-yaml';
 
 /**
  * Unified error handler for workflow management routes

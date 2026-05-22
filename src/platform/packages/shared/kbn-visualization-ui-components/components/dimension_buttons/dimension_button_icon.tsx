@@ -134,7 +134,7 @@ export function DimensionButtonIcon({
         )}
         {severity && (
           <EuiFlexItem grow={false}>
-            <EuiIcon type={severity === 'error' ? 'error' : 'alert'} />
+            <EuiIcon type={severity === 'error' ? 'error' : 'alert'} aria-hidden={true} />
           </EuiFlexItem>
         )}
       </>

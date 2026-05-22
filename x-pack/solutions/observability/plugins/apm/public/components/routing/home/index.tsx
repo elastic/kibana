@@ -17,6 +17,8 @@ import { environmentRt } from '../../../../common/environment_rt';
 import { ApmTimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
 import { RedirectTo } from '../redirect_to';
 import { SearchBar } from '../../shared/search_bar/search_bar';
+import { ServiceMapSearchBar } from '../../app/service_map/service_map_search_bar';
+import { ServiceMapSearchProvider } from '../../app/service_map/service_map_search_context';
 import { dependencies } from './dependencies';
 import { legacyBackends } from './legacy_backends';
 import { storageExplorer } from './storage_explorer';
@@ -45,12 +47,14 @@ function serviceGroupPage<TPath extends string>({
   title,
   searchBar,
   serviceGroupContextTab,
+  contextWrapper: ContextWrapper,
 }: {
   path: TPath;
   element: React.ReactElement<any, any>;
   title: string;
   searchBar?: React.ReactNode;
   serviceGroupContextTab: ComponentProps<typeof ServiceGroupTemplate>['serviceGroupContextTab'];
+  contextWrapper?: React.ComponentType<{ children: React.ReactNode }>;
 }): Record<
   TPath,
   {
@@ -59,18 +63,19 @@ function serviceGroupPage<TPath extends string>({
     defaults: { query: { serviceGroup: string } };
   }
 > {
+  const template = (
+    <ServiceGroupTemplate
+      pageTitle={title}
+      pagePath={path}
+      searchBar={searchBar}
+      serviceGroupContextTab={serviceGroupContextTab}
+    >
+      {element}
+    </ServiceGroupTemplate>
+  );
   return {
     [path]: {
-      element: (
-        <ServiceGroupTemplate
-          pageTitle={title}
-          pagePath={path}
-          searchBar={searchBar}
-          serviceGroupContextTab={serviceGroupContextTab}
-        >
-          {element}
-        </ServiceGroupTemplate>
-      ),
+      element: ContextWrapper ? <ContextWrapper>{template}</ContextWrapper> : template,
       params: t.type({
         query: t.type({ serviceGroup: t.string }),
       }),
@@ -145,7 +150,8 @@ export const homeRoute = {
         path: '/service-map',
         title: ServiceMapTitle,
         element: <ServiceMapHome />,
-        searchBar: <SearchBar showTimeComparison showEnvironmentFilter />,
+        searchBar: <ServiceMapSearchBar />,
+        contextWrapper: ServiceMapSearchProvider,
         serviceGroupContextTab: 'service-map',
       }),
       '/traces': {

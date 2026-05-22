@@ -12,6 +12,8 @@ import { isColumn } from '@elastic/esql';
 import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
 import { pipeCompleteItem, commaCompleteItem } from '../complete_items';
 import type { ISuggestionItem } from '../types';
+import { ReplacementRangeStrategyKind } from '../../../language/autocomplete/utils/prefix_range';
+import { endsWithComma, endsWithWhitespace } from '../../definitions/utils/regex';
 
 export type SortPosition =
   | 'expression'
@@ -25,7 +27,7 @@ export const getSortPos = (
   command: ESQLAstAllCommands
 ): { position: SortPosition | undefined; expressionRoot: ESQLSingleAstItem | undefined } => {
   const lastArg = command.args[command.args.length - 1];
-  const afterComma = /,\s+$/.test(query);
+  const afterComma = endsWithComma(query) && endsWithWhitespace(query);
   const hasExpressionArg = lastArg && !Array.isArray(lastArg) && lastArg.type !== 'order';
 
   // Expression context: no arg, after comma, or within an expression (not order node)
@@ -114,12 +116,9 @@ export const getSuggestionsAfterCompleteExpression = (
   });
 
   // does the query end with whitespace?
-  if (/\s$/.test(innerText)) {
-    // Replace the trailing space so `field ` + `, ` becomes `field, `.
-    // This is one small local explicit-range case.
-    commaSuggestion.rangeToReplace = {
-      start: innerText.length - 1,
-      end: innerText.length,
+  if (endsWithWhitespace(innerText)) {
+    commaSuggestion.replacementRangeStrategy = {
+      kind: ReplacementRangeStrategyKind.TRAILING_WHITESPACE,
     };
   }
   // special case: cursor right after a column name

@@ -31,10 +31,12 @@ export const StreamingText = ({
   attachmentRefs,
   conversationId,
 }: StreamingTextProps) => {
-  const [displayedText, setDisplayedText] = useState('');
+  // Initial state derives from the content already in the cache so navigating away and back
+  // mid-stream doesn't replay the full text. Only chunks arriving AFTER mount get animated.
+  const [displayedText, setDisplayedText] = useState(content);
   const tokenQueueRef = useRef<string[]>([]);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const previousContentLengthRef = useRef(0);
+  const previousContentLengthRef = useRef(content.length);
 
   useEffect(() => {
     const previousContentLength = previousContentLengthRef.current;

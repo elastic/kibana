@@ -72,7 +72,7 @@ const renderContextMenu = (items: AlertTableContextMenuItem[]) => {
       closePopover={() => {}}
       button={<></>}
     >
-      <EuiContextMenu size="s" initialPanelId={0} panels={panels} />
+      <EuiContextMenu initialPanelId={0} panels={panels} />
     </EuiPopover>
   );
 };
@@ -128,7 +128,16 @@ describe('useAddToCaseActions', () => {
       result.current.handleAddToNewCaseClick();
     });
     expect(open).toHaveBeenCalledWith({
-      attachments: [{ alertId: '123', index: '', rule: null, type: 'alert' }],
+      attachments: [
+        {
+          type: 'security.alert',
+          attachmentId: '123',
+          metadata: {
+            index: '',
+            rule: null,
+          },
+        },
+      ],
       observables: mockObservable,
     });
   });

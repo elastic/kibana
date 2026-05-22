@@ -79,7 +79,7 @@ export const entitySchema = schema.object({
   ),
   host: schema.maybe(
     schema.object({
-      ip: schema.maybe(schema.string()),
+      ip: schema.maybe(schema.arrayOf(schema.string())),
     })
   ),
   availableInEntityStore: schema.maybe(schema.boolean()),

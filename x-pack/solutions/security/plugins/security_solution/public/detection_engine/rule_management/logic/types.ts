@@ -25,6 +25,11 @@ import type {
 } from '../../../../common/api/detection_engine/model/rule_schema';
 import type {
   CoverageOverviewFilter,
+  SearchRulesAggregations,
+  SearchRulesField,
+  SearchRulesResponse,
+  SearchRulesSearchAfterItem,
+  GranularRulesSearch,
   PatchRuleRequestBody,
 } from '../../../../common/api/detection_engine/rule_management';
 import { FindRulesSortField } from '../../../../common/api/detection_engine/rule_management';
@@ -114,6 +119,24 @@ export interface FetchRulesResponse {
   data: RuleResponse[];
   warnings?: WarningSchema[];
 }
+
+export interface FetchSearchRulesProps {
+  pagination?: Pick<PaginationOptions, 'page' | 'perPage'>;
+  fields?: SearchRulesField[];
+  filter?: string;
+  search?: GranularRulesSearch;
+  sort_field?: z.infer<typeof FindRulesSortField>;
+  sort_order?: z.infer<typeof SortOrder>;
+  aggregations?: SearchRulesAggregations;
+  search_after?: SearchRulesSearchAfterItem[];
+  gap_fill_statuses?: GapFillStatus[];
+  gaps_range_start?: string;
+  gaps_range_end?: string;
+  gap_auto_fill_scheduler_id?: string;
+  signal?: AbortSignal;
+}
+
+export type FetchSearchRulesResponse = SearchRulesResponse;
 
 export interface FetchRuleProps {
   id: string;

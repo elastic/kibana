@@ -18,8 +18,8 @@ jest.mock('./connector_id/get_connector_id_suggestions', () => ({
 jest.mock('./connector_type/get_connector_type_suggestions', () => ({
   getConnectorTypeSuggestions: jest.fn(() => [{ label: 'type-1' }]),
 }));
-jest.mock('./custom_property/get_custom_property_suggestions', () => ({
-  getCustomPropertySuggestions: jest.fn(() => []),
+jest.mock('./step_property/get_step_property_suggestions', () => ({
+  getStepPropertySuggestions: jest.fn(() => []),
 }));
 jest.mock('./json_schema/get_json_schema_suggestions', () => ({
   getJsonSchemaSuggestions: jest.fn(() => []),

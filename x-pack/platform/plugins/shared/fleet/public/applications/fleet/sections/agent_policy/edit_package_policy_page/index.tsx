@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef, memo } from 'react';
 import { useRouteMatch, useLocation } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -48,6 +48,7 @@ import {
   StepDefinePackagePolicy,
 } from '../create_package_policy_page/components';
 import {
+  applyNamespaceCustomizationChange,
   computeDefaultVarGroupSelections,
   type VarGroupSelection,
 } from '../create_package_policy_page/services';
@@ -178,7 +179,14 @@ export const EditPackagePolicyForm = memo<{
   const [isFirstLoad, setIsFirstLoad] = useState<boolean>(true);
   const [newAgentPolicyName, setNewAgentPolicyName] = useState<string | undefined>();
 
-  // make form dirty if new agent policy is selected
+  const installedNamespaceCustomizationEnabledFor = useMemo(() => {
+    if (packageInfo && 'installationInfo' in packageInfo) {
+      return packageInfo.installationInfo?.namespace_customization_enabled_for ?? [];
+    }
+    return [];
+  }, [packageInfo]);
+  const namespaceCustomizationEnabledRef = useRef<boolean>(false);
+
   useEffect(() => {
     if (newAgentPolicyName) {
       setIsEdited(true);
@@ -353,6 +361,17 @@ export const EditPackagePolicyForm = memo<{
         : packagePolicy.policy_ids,
     });
     if (!error) {
+      if (packageInfo) {
+        await applyNamespaceCustomizationChange(
+          packageInfo.name,
+          packageInfo.version,
+          packagePolicy.namespace,
+          namespaceCustomizationEnabledRef.current,
+          installedNamespaceCustomizationEnabledFor,
+          notifications,
+          packageInfo.title ?? packageInfo.name
+        );
+      }
       setIsEdited(false);
       application.navigateToUrl(successRedirectPath);
       notifications.toasts.addSuccess({
@@ -464,6 +483,13 @@ export const EditPackagePolicyForm = memo<{
               isEditPage={true}
               isAgentlessSelected={hasAgentlessAgentPolicy}
               agentPolicies={agentPolicies}
+              onNamespaceCustomizationEnabledChange={(enabled, isInit) => {
+                namespaceCustomizationEnabledRef.current = enabled;
+                if (!isInit) {
+                  setIsEdited(true);
+                }
+              }}
+              packagePolicyId={packagePolicyId}
             />
           )}
 
@@ -519,6 +545,8 @@ export const EditPackagePolicyForm = memo<{
       isUpgrade,
       validationResults,
       varGroupSelections,
+      packagePolicyId,
+      setIsEdited,
     ]
   );
 

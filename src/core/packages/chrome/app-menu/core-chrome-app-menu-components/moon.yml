@@ -17,7 +17,6 @@ project:
   owner: '@elastic/appex-sharedux'
   sourceRoot: src/core/packages/chrome/app-menu/core-chrome-app-menu-components
 dependsOn:
-  - '@kbn/split-button'
   - '@kbn/i18n'
   - '@kbn/router-utils'
 tags:

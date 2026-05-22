@@ -347,12 +347,17 @@ exports[`ImportedEvents Renders imported events 1`] = `
       class="euiCheckbox emotion-euiCheckbox"
     >
       <div
-        class="euiCheckbox__square emotion-euiCheckbox__square-unselected"
+        class="euiCheckbox__square emotion-euiCheckbox__square"
       >
         <span
-          class="emotion-euiCheckbox__icon-check"
-          data-euiicon-type="empty"
-        />
+          class="euiCheckboxControl emotion-euiCheckboxControl-unselected"
+        >
+          <span
+            class="emotion-euiCheckbox__icon-check"
+            data-euiicon-type="empty"
+            role="presentation"
+          />
+        </span>
         <input
           class="euiCheckbox__input emotion-euiCheckbox__input"
           id="ml-include-past-events"

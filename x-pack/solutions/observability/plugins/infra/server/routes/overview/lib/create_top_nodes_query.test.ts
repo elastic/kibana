@@ -57,22 +57,22 @@ describe('createTopNodesQuery', () => {
       const query = createTopNodesQuery(baseOptions, source, 'ecs');
       expect(query.aggs.nodes.terms.order).toEqual({ uptime: 'asc' });
     });
-
-    it('defaults to ECS when no schema is provided', () => {
-      const query = createTopNodesQuery(baseOptions, source);
-      const filters = query.query.bool.filter;
-      const systemFilter = filters.find(
-        (f: Record<string, unknown>) =>
-          'bool' in f &&
-          (f as { bool: { should: Array<{ term: Record<string, string> }> } }).bool.should?.some(
-            (clause) => clause.term?.['event.module'] === 'system'
-          )
-      );
-      expect(systemFilter).toBeDefined();
-    });
   });
 
   describe('semconv schema', () => {
+    it('defaults to semconv when no schema is provided', () => {
+      const query = createTopNodesQuery(baseOptions, source);
+      const filters = query.query.bool.filter;
+      const datasetFilter = filters.find(
+        (f: Record<string, unknown>) =>
+          'bool' in f &&
+          (f as { bool: { filter: Array<{ term: Record<string, string> }> } }).bool.filter?.some(
+            (ff) => ff.term?.['data_stream.dataset'] === 'hostmetricsreceiver.otel'
+          )
+      );
+      expect(datasetFilter).toBeDefined();
+    });
+
     it('uses data_stream.dataset filter', () => {
       const query = createTopNodesQuery(baseOptions, source, 'semconv');
       const filters = query.query.bool.filter;

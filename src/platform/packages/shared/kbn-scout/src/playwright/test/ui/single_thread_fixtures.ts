@@ -80,6 +80,7 @@ export interface ScoutWorkerFixtures extends ApiServicesFixture {
   linkedProject: LinkedProjectFixture;
   uiSettings: UiSettingsFixture;
   apiServices: ApiServicesFixture;
+  isSnapshotBuild: boolean;
 }
 
 export const lighthouseFixtures = mergeTests(

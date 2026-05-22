@@ -11,7 +11,6 @@ import { omit } from 'lodash';
 import { test } from '../../../fixtures';
 import { generateLogsData } from '../../../fixtures/generators';
 import {
-  closeToastsIfPresent,
   openRetentionModal,
   saveRetentionChanges,
   setCustomRetention,
@@ -89,26 +88,37 @@ test.describe(
   'Stream data retention - custom retention periods',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
-      await browserAuth.loginAsAdmin();
-      // Clear existing rules
+    test.beforeAll(async ({ apiServices }) => {
       await apiServices.streams.clearStreamChildren('logs.otel');
-      // Create a test stream with routing rules first
+      const logsDefinition = await apiServices.streams.getStreamDefinition('logs.otel');
+      await apiServices.streams.updateStream('logs.otel', {
+        ingest: {
+          ...logsDefinition.stream.ingest,
+          processing: omit(logsDefinition.stream.ingest.processing, 'updated_at'),
+          lifecycle: { dsl: {} },
+        },
+      });
       await apiServices.streams.forkStream('logs.otel', 'logs.otel.nginx', {
         field: 'service.name',
         eq: 'nginx',
       });
+    });
 
+    test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
+      await browserAuth.loginAsAdmin();
+      // Reset only the child stream's retention via API — no fork/delete cycle
+      const childDefinition = await apiServices.streams.getStreamDefinition('logs.otel.nginx');
+      await apiServices.streams.updateStream('logs.otel.nginx', {
+        ingest: {
+          ...childDefinition.stream.ingest,
+          processing: omit(childDefinition.stream.ingest.processing, 'updated_at'),
+          lifecycle: { dsl: {} },
+        },
+      });
       await pageObjects.streams.gotoDataRetentionTab('logs.otel.nginx');
     });
 
-    test.afterEach(async ({ apiServices, page }) => {
-      await closeToastsIfPresent(page);
-      await apiServices.streams.clearStreamChildren('logs.otel');
-    });
-
     test.afterAll(async ({ apiServices }) => {
-      // Clear existing rules
       await apiServices.streams.clearStreamChildren('logs.otel');
     });
 
@@ -252,7 +262,10 @@ test.describe(
         await page.getByTestId('downsamplingPhase-1h-label').click();
         await page.getByTestId('downsamplingPopover-step1-removeButton').click();
 
-        await expect(page.getByTestId('downsamplingBar-label')).toHaveCount(0);
+        await expect(page.getByTestId('downsamplingBar-emptyLabel')).toBeVisible();
+        await expect(page.getByTestId('downsamplingBar-emptyLabel')).toContainText(
+          'No downsampling'
+        );
       } finally {
         await cleanupTsdbResources({ esClient, templateName, streamName });
       }

@@ -16,6 +16,7 @@ import type {
 } from '../constants';
 import type {
   snoozeScheduleSchema,
+  snoozedInstanceSchema,
   ruleExecutionStatusSchema,
   ruleLastRunSchema,
   monitoringSchema,
@@ -35,6 +36,7 @@ export type RuleExecutionStatusWarningReason =
 
 export type RuleParams = TypeOf<typeof ruleParamsSchema>;
 export type RuleSnoozeSchedule = TypeOf<typeof snoozeScheduleSchema>;
+export type RuleSnoozedInstance = TypeOf<typeof snoozedInstanceSchema>;
 export type RuleLastRun = TypeOf<typeof ruleLastRunSchema>;
 export type Monitoring = TypeOf<typeof monitoringSchema>;
 type RuleSchemaType = TypeOf<typeof ruleSchema>;
@@ -72,6 +74,7 @@ export interface Rule<Params extends RuleParams = never> {
   muteAll: RuleSchemaType['muteAll'];
   notifyWhen?: RuleSchemaType['notifyWhen'];
   mutedInstanceIds: RuleSchemaType['mutedInstanceIds'];
+  snoozedInstances?: RuleSchemaType['snoozedInstances'];
   executionStatus?: RuleExecutionStatus;
   monitoring?: RuleSchemaType['monitoring'];
   snoozeSchedule?: RuleSchemaType['snoozeSchedule'];
@@ -114,6 +117,7 @@ export interface RuleDomain<Params extends RuleParams = never> {
   muteAll: RuleDomainSchemaType['muteAll'];
   notifyWhen?: RuleDomainSchemaType['notifyWhen'];
   mutedInstanceIds: RuleDomainSchemaType['mutedInstanceIds'];
+  snoozedInstances?: RuleDomainSchemaType['snoozedInstances'];
   executionStatus?: RuleExecutionStatus;
   monitoring?: RuleDomainSchemaType['monitoring'];
   snoozeSchedule?: RuleDomainSchemaType['snoozeSchedule'];

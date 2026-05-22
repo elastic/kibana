@@ -8,26 +8,29 @@
  */
 
 import type { VersionedRouter } from '@kbn/core-http-server';
-import type { RequestHandlerContext } from '@kbn/core/server';
+import type { Logger, RequestHandlerContext } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { schema } from '@kbn/config-schema';
 import { once } from 'lodash';
+import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
 import { getRouteConfig } from '../get_route_config';
 import { getReadResponseBodySchema } from './schemas';
 import { read } from './read';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
-import { telemetryHandler } from '../telemetry_handler';
+import { logRequest } from '../log_request';
 
 export function registerReadRoute(
   router: VersionedRouter<RequestHandlerContext>,
   usageCounter: UsageCounter | undefined,
-  isDashboardAppRequest: boolean
+  isDashboardAppRequest: boolean,
+  logger: Logger
 ) {
   const { basePath, routeConfig, routeVersion } = getRouteConfig(isDashboardAppRequest);
   const readRoute = router.get({
     path: `${basePath}/{id}`,
     summary: `Get a dashboard`,
     ...routeConfig,
+    description: 'Returns the complete state of a dashboard by ID.',
   });
 
   // Do not call getDashboardStateSchema when registering route.
@@ -45,7 +48,7 @@ export function registerReadRoute(
           params: schema.object({
             id: schema.string({
               meta: {
-                description: 'A unique identifier for the dashboard.',
+                description: 'The dashboard ID, as returned by the create or search endpoints.',
               },
             }),
           }),
@@ -55,11 +58,17 @@ export function registerReadRoute(
             body: () => getReadResponseBodySchema(isDashboardAppRequest),
             description: 'success',
           },
+          400: {
+            description: 'invalid response',
+          },
           403: {
             description: 'forbidden',
           },
           404: {
             description: 'not found',
+          },
+          500: {
+            description: 'internal server error',
           },
         },
       }),
@@ -71,6 +80,7 @@ export function registerReadRoute(
             ctx,
             getCachedDashboardStateSchema(),
             req.params.id,
+            req.serverTiming,
             isDashboardAppRequest
           );
           return res.ok({
@@ -79,18 +89,27 @@ export function registerReadRoute(
           });
         } catch (e) {
           if (e.isBoom && e.output.statusCode === 404) {
+            const message = `A dashboard with ID [${req.params.id}] was not found.`;
+            logRequest(logger, req, 'debug', message);
             return res.notFound({
               body: {
-                message: `A dashboard with ID [${req.params.id}] was not found.`,
+                message,
               },
             });
           }
 
           if (e.isBoom && e.output.statusCode === 403) {
+            logRequest(logger, req, 'debug', e.message);
             return res.forbidden({ body: { message: e.message } });
           }
 
-          return res.badRequest({ body: { message: e.message } });
+          if (e.isBoom && e.output.statusCode === 400) {
+            logRequest(logger, req, 'warn', e.message);
+            return res.badRequest({ body: { message: e.message } });
+          }
+
+          logRequest(logger, req, 'error', e.message);
+          return res.customError({ statusCode: 500, body: { message: e.message } });
         }
       })
   );

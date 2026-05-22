@@ -27,10 +27,11 @@ describe('RelatedAlertEpisode', () => {
     first_timestamp: '2026-04-06T13:30:00.000Z',
     last_timestamp: '2026-04-06T13:31:00.000Z',
     duration: 60000,
+    episode_data: JSON.stringify({ host: { name: 'server-1' } }),
     ...overrides,
   });
 
-  it('renders rule name, status badges, and grouping', () => {
+  it('renders rule name, status badges, and grouping value tags', () => {
     render(
       <RelatedAlertEpisode
         episode={makeEpisode({ 'episode.id': 'ep-1' })}
@@ -42,7 +43,9 @@ describe('RelatedAlertEpisode', () => {
     expect(screen.getByText('CPU spike')).toBeInTheDocument();
     expect(screen.getByTestId('relatedAlertEpisode-ep-1')).toBeInTheDocument();
     expect(screen.getByTestId('relatedAlertEpisodeGrouping')).toBeInTheDocument();
-    expect(screen.getByText('host.name')).toBeInTheDocument();
+    expect(screen.getByTestId('relatedAlertEpisodeGroupingTags')).toBeInTheDocument();
+    expect(screen.getByText('server-1')).toBeInTheDocument();
+    expect(screen.getByLabelText('host.name: server-1')).toBeInTheDocument();
   });
 
   it('omits status badges when episode status is missing', () => {

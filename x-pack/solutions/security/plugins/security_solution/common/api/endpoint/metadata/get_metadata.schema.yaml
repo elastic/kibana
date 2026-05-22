@@ -14,31 +14,37 @@ paths:
         - name: page
           in: query
           required: false
+          description: The page number to return.
           schema:
             $ref: '../model/schema/common.schema.yaml#/components/schemas/Page'
         - name: pageSize
           in: query
           required: false
+          description: The number of endpoints to return per page.
           schema:
             $ref: '../model/schema/common.schema.yaml#/components/schemas/PageSize'
         - name: kuery
           in: query
           required: false
+          description: A KQL string to filter the endpoint metadata results.
           schema:
             $ref: '../model/schema/common.schema.yaml#/components/schemas/Kuery'
         - name: hostStatuses
           in: query
           required: true
+          description: A set of host statuses to filter the results by (for example, `healthy`, `updating`).
           schema:
             $ref: '../model/schema/common.schema.yaml#/components/schemas/HostStatuses'
         - name: sortField
           in: query
           required: false
+          description: The field used to sort the results.
           schema:
             $ref: '../model/schema/common.schema.yaml#/components/schemas/SortField'
         - name: sortDirection
           in: query
           required: false
+          description: The sort order, either `asc` or `desc`.
           schema:
             $ref: '../model/schema/common.schema.yaml#/components/schemas/SortDirection'
       responses:
@@ -48,6 +54,36 @@ paths:
             application/json:
               schema:
                 $ref: './list_metadata.schema.yaml#/components/schemas/MetadataListResponse'
+              examples:
+                metadataList:
+                  summary: A list of endpoint host metadata
+                  value:
+                    data:
+                      - host_status: 'healthy'
+                        last_checkin: '2023-07-04T15:47:57.432Z'
+                        metadata:
+                          agent:
+                            id: '285297c6-3bff-4b83-9a07-f3e749801123'
+                            type: 'endpoint'
+                            version: '8.10.0'
+                          host:
+                            hostname: 'WinDev2104Eval'
+                            os:
+                              name: 'Windows'
+                              platform: 'windows'
+                              version: '20H2'
+                          Endpoint:
+                            status: 'enrolled'
+                            policy:
+                              applied:
+                                id: 'd5371dcd-93b7-4627-af88-4084f7d6aa3e'
+                                name: 'test'
+                                status: 'success'
+                    total: 1
+                    page: 0
+                    pageSize: 10
+                    sortField: 'enrolled_at'
+                    sortDirection: 'desc'
 
   /internal/api/endpoint/metadata/transforms:
     get:
@@ -86,3 +122,27 @@ paths:
             application/json:
               schema:
                 $ref: './list_metadata.schema.yaml#/components/schemas/EndpointMetadataResponse'
+              examples:
+                endpointMetadata:
+                  summary: Host metadata for a specific endpoint
+                  value:
+                    host_status: 'healthy'
+                    last_checkin: '2023-07-04T15:48:57.360Z'
+                    metadata:
+                      agent:
+                        id: 'abb8a826-6812-448c-a571-6d8269b51449'
+                        type: 'endpoint'
+                        version: '8.10.0'
+                      host:
+                        hostname: 'WinDev2104Eval'
+                        os:
+                          name: 'Windows'
+                          platform: 'windows'
+                          version: '20H2'
+                      Endpoint:
+                        status: 'enrolled'
+                        policy:
+                          applied:
+                            id: 'd5371dcd-93b7-4627-af88-4084f7d6aa3e'
+                            name: 'test'
+                            status: 'success'

@@ -37,7 +37,7 @@ export function routes(coreSetup: CoreSetup<StartDeps, unknown>, logger: Logger)
           request: {
             body: schema.object({
               grokPattern: schema.string(),
-              text: schema.arrayOf(schema.string()),
+              text: schema.arrayOf(schema.string(), { maxSize: 10000 }),
               ecsCompatibility: schema.maybe(schema.string()),
             }),
           },

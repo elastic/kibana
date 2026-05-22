@@ -10,6 +10,10 @@ xpack.features.overrides:
   agentBuilder:
     category: "security"
     order: 1101
+  ### Agent Context Layer should match Agent Builder for role management.
+  agentContextLayer:
+    category: "security"
+    order: 1102
 
 # Elastic Managed LLMs
 xpack.actions.preconfigured:

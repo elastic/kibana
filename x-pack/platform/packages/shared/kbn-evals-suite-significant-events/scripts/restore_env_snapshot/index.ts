@@ -18,15 +18,18 @@ run(({ log, flags }) => restoreEnvSnapshot({ log, flags }), {
   description: `
     Restore a Streams/SigEvents environment from a GCS snapshot.
 
-    Automates the full four-step restore workflow:
+    Automates the full restore workflow:
       1. Restore system indices with rename: snapshot-* → .*
-      2. Enable streams via Kibana API
-      3. Replay data indices with timestamp transformation
-      4. Recreate system indices aliases (.kibana_streams_* and .internal.alerts-streams.alerts-default-* indices)
+      2. Ensure system-index aliases (.kibana_streams_*)
+      3. Enable streams via Kibana API
+      4. Replay data indices with timestamp transformation
+      5. Ensure alert-index alias (.alerts-streams.alerts-default)
+      6. Repromote queries (reactivates alerts after restore)
 
     Prerequisites:
       - Local Elasticsearch running
       - Access to the GCS bucket containing the snapshot
+      - The configured user must have the manage_security cluster privilege (required to create and delete the temporary superuser account)
 
     Examples:
       node scripts/restore_sigevents_env_snapshot.js \\
@@ -39,6 +42,7 @@ run(({ log, flags }) => restoreEnvSnapshot({ log, flags }), {
       'es-url',
       'es-username',
       'es-password',
+      'kibana-url',
       'snapshot-name',
       'gcs-bucket',
       'gcs-base-path',
@@ -65,6 +69,7 @@ run(({ log, flags }) => restoreEnvSnapshot({ log, flags }), {
       --es-url                Elasticsearch URL (default: from kibana.dev.yml)
       --es-username           ES username (default: from kibana.dev.yml)
       --es-password           ES password (default: from kibana.dev.yml)
+      --kibana-url            Kibana base URL (default: from kibana.dev.yml)
     `,
   },
 });

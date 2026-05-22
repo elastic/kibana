@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import userEvent from '@testing-library/user-event';
 import { BehaviorSubject } from 'rxjs';
@@ -47,6 +47,8 @@ describe('Panels toggle component', () => {
         />
       </DiscoverToolkitTestProvider>
     );
+
+    return toolkit;
   };
 
   it('should render correctly when sidebar is visible and histogram is visible', async () => {
@@ -198,5 +200,51 @@ describe('Panels toggle component', () => {
     });
 
     expect(screen.getByTestId('dscHideTableButton')).toBeDisabled();
+  });
+
+  it('should persist chart visibility when toggled', async () => {
+    const user = userEvent.setup();
+    const sidebarToggleState$ = new BehaviorSubject<SidebarToggleState>({
+      isCollapsed: false,
+      toggle: jest.fn(),
+    });
+    const toolkit = await renderComponent({
+      hideChart: false,
+      hideTable: false,
+      omitChartButton: false,
+      omitTableButton: false,
+      sidebarToggleState$,
+    });
+    const storageSetSpy = jest.spyOn(toolkit.services.storage, 'set');
+
+    await user.click(screen.getByTestId('dscHideHistogramButton'));
+
+    await waitFor(() => {
+      expect(storageSetSpy).toHaveBeenCalledWith('discover:chartHidden', true);
+      expect(toolkit.getCurrentTab().appState.hideChart).toBe(true);
+    });
+  });
+
+  it('should persist table visibility when toggled', async () => {
+    const user = userEvent.setup();
+    const sidebarToggleState$ = new BehaviorSubject<SidebarToggleState>({
+      isCollapsed: false,
+      toggle: jest.fn(),
+    });
+    const toolkit = await renderComponent({
+      hideChart: false,
+      hideTable: false,
+      omitChartButton: false,
+      omitTableButton: false,
+      sidebarToggleState$,
+    });
+    const storageSetSpy = jest.spyOn(toolkit.services.storage, 'set');
+
+    await user.click(screen.getByTestId('dscHideTableButton'));
+
+    await waitFor(() => {
+      expect(storageSetSpy).toHaveBeenCalledWith('discover:tableHidden', true);
+      expect(toolkit.getCurrentTab().appState.hideTable).toBe(true);
+    });
   });
 });

@@ -45,6 +45,11 @@ const mockChildren = {
     uuid: 'esqlPanel',
     query$: new BehaviorSubject({ esql: 'FROM index | WHERE field == ?variable' }),
   },
+  /** Publishes `query$` but no value yet (e.g. optional KQL); must not throw in ES|QL type guard */
+  panelWithUndefinedQuery: {
+    uuid: 'panelWithUndefinedQuery',
+    query$: new BehaviorSubject(undefined),
+  },
   panelInSection: { uuid: 'panelInSection', sectionId: 'a' },
   controlInSection: {
     uuid: 'controlInSection',
@@ -135,6 +140,11 @@ describe('initializeRelatedPanelsManager', () => {
     test('should mark ES|QL panels as related to the ES|QL controls whose variables they include', () => {
       expect(arePanelsRelated('esqlPanel', 'esqlControl')).toBe(true);
       expect(arePanelsRelated('esqlPanel', 'esqlControl2')).toBe(false);
+    });
+
+    test('should not throw when a panel publishes query$ with undefined value', () => {
+      expect(() => arePanelsRelated('panel', 'panelWithUndefinedQuery')).not.toThrow();
+      expect(arePanelsRelated('esqlPanel', 'panelWithUndefinedQuery')).toBe(false);
     });
 
     test('should mark controls as related to each other only if they use global filters', () => {

@@ -1,0 +1,30 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "jsx": "react",
+    "esModuleInterop": true,
+    "types": [
+      "jest",
+      "node",
+      "react",
+      "@kbn/ambient-ui-types",
+      "@testing-library/jest-dom",
+      "@testing-library/react"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx"
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/content-list-provider",
+    "@kbn/content-list-toolbar",
+    "@kbn/content-list-table",
+    "@kbn/content-list-footer",
+    "@kbn/i18n"
+  ]
+}

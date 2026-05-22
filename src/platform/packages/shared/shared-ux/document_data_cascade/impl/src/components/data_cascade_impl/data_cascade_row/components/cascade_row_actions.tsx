@@ -114,7 +114,7 @@ export const CascadeRowActions = function RowActions({
             button={hiddenActionsButton}
             panelPaddingSize="none"
           >
-            <EuiContextMenuPanel size="m" items={hiddenActions} />
+            <EuiContextMenuPanel items={hiddenActions} />
           </EuiPopover>
         </EuiFlexItem>
       )}

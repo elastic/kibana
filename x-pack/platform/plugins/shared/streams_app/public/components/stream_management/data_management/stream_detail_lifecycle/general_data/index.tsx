@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/react-hooks';
 import { type IngestStreamLifecycle, type Streams, type IlmPolicy } from '@kbn/streams-schema';
@@ -17,6 +17,11 @@ import { useTimefilter } from '../../../../../hooks/use_timefilter';
 import { getFormattedError } from '../../../../../util/errors';
 import { getStreamTypeFromDefinition } from '../../../../../util/get_stream_type_from_definition';
 import type { useDataStreamStats } from '../hooks/use_data_stream_stats';
+import {
+  LifecycleAfterSaveProvider,
+  useLifecycleAfterSave,
+} from '../common/hooks/lifecycle_after_save';
+import { LifecyclePreviewProvider, useLifecyclePreview } from '../common/hooks/lifecycle_preview';
 import { SectionPanel } from '../common/section_panel';
 import { EditLifecycleModal } from './modal';
 import { RetentionCard } from './cards/retention_card';
@@ -25,7 +30,7 @@ import { IngestionCard } from './cards/ingestion_card';
 import { LifecycleSummary } from './lifecycle_summary';
 import { IngestionRate } from './ingestion_rate';
 
-export const StreamDetailGeneralData = ({
+const StreamDetailGeneralDataInner = ({
   definition,
   refreshDefinition,
   data,
@@ -49,12 +54,11 @@ export const StreamDetailGeneralData = ({
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [updateInProgress, setUpdateInProgress] = useState(false);
-  const [isEditLifecycleFlyoutOpen, setIsEditLifecycleFlyoutOpen] = useState(false);
-  const [hasUnsavedEditLifecycleFlyoutChanges, setHasUnsavedEditLifecycleFlyoutChanges] =
-    useState(false);
+  const lifecyclePreview = useLifecyclePreview();
+  const { notifyAfterSave } = useLifecycleAfterSave();
 
   useUnsavedChangesPrompt({
-    hasUnsavedChanges: hasUnsavedEditLifecycleFlyoutChanges,
+    hasUnsavedChanges: lifecyclePreview.hasUnsavedChanges,
     history: appParams.history,
     http,
     navigateToUrl: application.navigateToUrl,
@@ -107,6 +111,7 @@ export const StreamDetailGeneralData = ({
         signal,
       });
 
+      notifyAfterSave();
       refreshDefinition();
       setIsEditModalOpen(false);
 
@@ -144,12 +149,9 @@ export const StreamDetailGeneralData = ({
       <EuiTitle size="xs">
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiIcon type="checkCircleFill" color="success" aria-hidden={true} />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
             <h4>
-              {i18n.translate('xpack.streams.streamDetailLifecycle.successfulIngestData', {
-                defaultMessage: 'Successful ingest data',
+              {i18n.translate('xpack.streams.streamDetailLifecycle.successfulData', {
+                defaultMessage: 'Successful data',
               })}
             </h4>
           </EuiFlexItem>
@@ -159,11 +161,7 @@ export const StreamDetailGeneralData = ({
       {/* Retention Section */}
       <SectionPanel
         topCard={
-          <RetentionCard
-            definition={definition}
-            openEditModal={() => setIsEditModalOpen(true)}
-            isEditLifecycleFlyoutOpen={isEditLifecycleFlyoutOpen}
-          />
+          <RetentionCard definition={definition} openEditModal={() => setIsEditModalOpen(true)} />
         }
         bottomCard={
           <StorageSizeCard
@@ -180,8 +178,6 @@ export const StreamDetailGeneralData = ({
             stats={data.stats?.ds.stats}
             isMetricsStream={definition.index_mode === 'time_series'}
             refreshDefinition={refreshDefinition}
-            onFlyoutOpenChange={setIsEditLifecycleFlyoutOpen}
-            onFlyoutUnsavedChangesChange={setHasUnsavedEditLifecycleFlyoutChanges}
           />
         ) : null}
       </SectionPanel>
@@ -215,5 +211,27 @@ export const StreamDetailGeneralData = ({
         />
       </SectionPanel>
     </EuiFlexGroup>
+  );
+};
+
+export const StreamDetailGeneralData = ({
+  definition,
+  refreshDefinition,
+  data,
+}: {
+  definition: Streams.ingest.all.GetResponse;
+  refreshDefinition: () => void;
+  data: ReturnType<typeof useDataStreamStats>;
+}) => {
+  return (
+    <LifecycleAfterSaveProvider>
+      <LifecyclePreviewProvider>
+        <StreamDetailGeneralDataInner
+          definition={definition}
+          refreshDefinition={refreshDefinition}
+          data={data}
+        />
+      </LifecyclePreviewProvider>
+    </LifecycleAfterSaveProvider>
   );
 };

@@ -13,6 +13,7 @@ import { ContentListProvider } from '../context';
 import type { ContentListProviderProps } from '../context';
 import { getIncludeExcludeFilter, type FindItemsResult, type FindItemsParams } from '../datasource';
 import type { ContentListItem } from '../item';
+import { contentListQueryClient } from '../query';
 import { useContentListItems } from './use_content_list_items';
 import { useContentListSearch } from '../features/search/use_content_list_search';
 import { useContentListFilters } from '../features/filtering/use_content_list_filters';
@@ -49,6 +50,11 @@ describe('useContentListItems', () => {
     jest.clearAllMocks();
   });
 
+  afterEach(async () => {
+    await contentListQueryClient.cancelQueries();
+    contentListQueryClient.clear();
+  });
+
   describe('error handling', () => {
     it('throws when used outside provider', () => {
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
@@ -64,7 +70,7 @@ describe('useContentListItems', () => {
   });
 
   describe('return shape', () => {
-    it('returns items, totalItems, isLoading, error, and refetch', () => {
+    it('returns items, totalItems, isLoading, isFetching, error, hasNoItems, hasNoResults, and refetch', () => {
       const { result } = renderHook(() => useContentListItems(), {
         wrapper: createWrapper(),
       });
@@ -72,7 +78,10 @@ describe('useContentListItems', () => {
       expect(result.current).toHaveProperty('items');
       expect(result.current).toHaveProperty('totalItems');
       expect(result.current).toHaveProperty('isLoading');
+      expect(result.current).toHaveProperty('isFetching');
       expect(result.current).toHaveProperty('error');
+      expect(result.current).toHaveProperty('hasNoItems');
+      expect(result.current).toHaveProperty('hasNoResults');
       expect(result.current).toHaveProperty('refetch');
       expect(typeof result.current.refetch).toBe('function');
     });
@@ -415,6 +424,238 @@ describe('useContentListItems', () => {
       await waitFor(() => {
         expect(mockFindItems.mock.calls.length).toBeGreaterThan(callCount);
       });
+    });
+  });
+
+  describe('hasNoItems', () => {
+    it('is false while loading', () => {
+      // Use a dedicated provider id so the shared React Query cache from
+      // preceding tests (which all use the default `id: 'test-list'`) does
+      // not serve stale data and short-circuit the `isLoading` assertion.
+      const { result } = renderHook(() => useContentListItems(), {
+        wrapper: createWrapper({ id: 'hasNoItems-isLoading' }),
+      });
+
+      // On first render the query is still loading.
+      expect(result.current.isLoading).toBe(true);
+      expect(result.current.hasNoItems).toBe(false);
+    });
+
+    it('is true when totalItems is 0 and queryText is empty after loading', async () => {
+      const emptyFindItems = jest.fn(async () => ({ items: [] as ContentListItem[], total: 0 }));
+
+      const { result } = renderHook(() => useContentListItems(), {
+        wrapper: createWrapper({
+          id: 'empty-no-query',
+          dataSource: { findItems: emptyFindItems },
+        }),
+      });
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      expect(result.current.hasNoItems).toBe(true);
+      expect(result.current.hasNoResults).toBe(false);
+    });
+
+    it('stays true during a background refetch of an empty unfiltered list', async () => {
+      let callCount = 0;
+      let resolveRefetch: ((value: FindItemsResult) => void) | undefined;
+      const emptyFindItems = jest.fn((_params: FindItemsParams): Promise<FindItemsResult> => {
+        callCount++;
+
+        if (callCount === 1) {
+          return Promise.resolve({ items: [] as ContentListItem[], total: 0 });
+        }
+
+        return new Promise<FindItemsResult>((resolve) => {
+          resolveRefetch = resolve;
+        });
+      });
+
+      const { result } = renderHook(() => useContentListItems(), {
+        wrapper: createWrapper({
+          id: 'empty-background-refetch',
+          dataSource: { findItems: emptyFindItems },
+        }),
+      });
+
+      await waitFor(() => {
+        expect(result.current.hasNoItems).toBe(true);
+      });
+
+      act(() => {
+        void result.current.refetch();
+      });
+
+      await waitFor(() => {
+        expect(result.current.isFetching).toBe(true);
+      });
+
+      expect(result.current.hasNoItems).toBe(true);
+      expect(result.current.hasNoResults).toBe(false);
+
+      await act(async () => {
+        resolveRefetch?.({ items: [] as ContentListItem[], total: 0 });
+      });
+
+      await waitFor(() => {
+        expect(result.current.isFetching).toBe(false);
+      });
+
+      expect(result.current.hasNoItems).toBe(true);
+    });
+
+    it('is true when queryText contains only whitespace', async () => {
+      const emptyFindItems = jest.fn(async () => ({ items: [] as ContentListItem[], total: 0 }));
+
+      const { result } = renderHook(() => useContentListItems(), {
+        wrapper: createWrapper({
+          id: 'empty-whitespace-query',
+          dataSource: { findItems: emptyFindItems },
+          // A whitespace-only initialSearch is treated as an empty query.
+          features: { search: { initialSearch: '   ' } },
+        }),
+      });
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      expect(result.current.hasNoItems).toBe(true);
+    });
+
+    it('is false when totalItems > 0', async () => {
+      const { result } = renderHook(() => useContentListItems(), {
+        wrapper: createWrapper(),
+      });
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      expect(result.current.totalItems).toBe(3);
+      expect(result.current.hasNoItems).toBe(false);
+    });
+
+    it('is false when error is set', async () => {
+      const failingFindItems = jest.fn(async () => {
+        throw new Error('Network failure');
+      });
+
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+      const { result } = renderHook(() => useContentListItems(), {
+        wrapper: createWrapper({
+          id: 'error-has-no-items',
+          dataSource: { findItems: failingFindItems },
+        }),
+      });
+
+      await waitFor(() => {
+        expect(result.current.error).toBeDefined();
+      });
+
+      expect(result.current.hasNoItems).toBe(false);
+
+      consoleSpy.mockRestore();
+    });
+  });
+
+  describe('hasNoResults', () => {
+    it('is false while loading', () => {
+      const { result } = renderHook(() => useContentListItems(), {
+        wrapper: createWrapper({
+          features: { search: { initialSearch: 'something' } },
+        }),
+      });
+
+      expect(result.current.isLoading).toBe(true);
+      expect(result.current.hasNoResults).toBe(false);
+    });
+
+    it('is true when totalItems is 0 and a query is active', async () => {
+      const emptyFindItems = jest.fn(async () => ({ items: [] as ContentListItem[], total: 0 }));
+
+      const { result } = renderHook(
+        () => ({
+          items: useContentListItems(),
+          search: useContentListSearch(),
+        }),
+        {
+          wrapper: createWrapper({
+            id: 'empty-with-query',
+            dataSource: { findItems: emptyFindItems },
+            features: { search: { initialSearch: 'no match' } },
+          }),
+        }
+      );
+
+      await waitFor(() => {
+        expect(result.current.items.isLoading).toBe(false);
+      });
+
+      expect(result.current.items.hasNoResults).toBe(true);
+      expect(result.current.items.hasNoItems).toBe(false);
+    });
+
+    it('is false when totalItems > 0 even with an active query', async () => {
+      const { result } = renderHook(() => useContentListItems(), {
+        wrapper: createWrapper({
+          features: { search: { initialSearch: 'Dashboard' } },
+        }),
+      });
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      expect(result.current.totalItems).toBe(3);
+      expect(result.current.hasNoResults).toBe(false);
+    });
+
+    it('is false when error is set', async () => {
+      const failingFindItems = jest.fn(async () => {
+        throw new Error('Network failure');
+      });
+
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+      const { result } = renderHook(() => useContentListItems(), {
+        wrapper: createWrapper({
+          id: 'error-has-no-results',
+          dataSource: { findItems: failingFindItems },
+          features: { search: { initialSearch: 'something' } },
+        }),
+      });
+
+      await waitFor(() => {
+        expect(result.current.error).toBeDefined();
+      });
+
+      expect(result.current.hasNoResults).toBe(false);
+
+      consoleSpy.mockRestore();
+    });
+  });
+
+  describe('hasNoItems / hasNoResults mutual exclusivity', () => {
+    it('hasNoItems and hasNoResults are never both true simultaneously', async () => {
+      const emptyFindItems = jest.fn(async () => ({ items: [] as ContentListItem[], total: 0 }));
+
+      const { result } = renderHook(() => useContentListItems(), {
+        wrapper: createWrapper({
+          id: 'mutual-exclusivity',
+          dataSource: { findItems: emptyFindItems },
+        }),
+      });
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      expect(result.current.hasNoItems && result.current.hasNoResults).toBe(false);
     });
   });
 });

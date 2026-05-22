@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 import { useCallback, useMemo } from 'react';
 import { TableId } from '@kbn/securitysolution-data-table';
+import type { Alert } from '@kbn/alerting-types';
 import type { RenderContext } from '@kbn/response-ops-alerts-table/types';
 import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { PageScope } from '../../../data_view_manager/constants';
@@ -27,7 +27,7 @@ export const useCellActionsOptions = (
   tableId: TableId,
   context?: Pick<
     RenderContext<SecurityAlertsTableContext>,
-    'columns' | 'oldAlertsData' | 'pageIndex' | 'pageSize' | 'dataGridRef'
+    'columns' | 'alerts' | 'pageIndex' | 'pageSize' | 'dataGridRef'
   >
 ) => {
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
@@ -35,7 +35,7 @@ export const useCellActionsOptions = (
 
   const {
     columns = [],
-    oldAlertsData: data = [],
+    alerts: data = [],
     pageIndex = 0,
     pageSize = 0,
     dataGridRef,
@@ -64,29 +64,23 @@ export const useCellActionsOptions = (
     [columns, experimentalDataView.fields, oldGetFieldSpec, newDataViewPickerEnabled]
   );
 
-  /**
-   * There is difference between how `triggers actions` fetched data v/s
-   * how security solution fetches data via timelineSearchStrategy
-   *
-   * _id and _index fields are array in timelineSearchStrategy  but not in
-   * ruleStrategy
-   *
-   *
-   */
-
   const finalData = useMemo(
     () =>
-      (data as TimelineNonEcsData[][]).map((row) =>
-        row.map((field) => {
-          let localField = field;
-          if (['_id', '_index'].includes(field.field)) {
-            const newValue = field.value ?? '';
-            localField = {
-              field: field.field,
-              value: Array.isArray(newValue) ? newValue : [newValue],
+      (data as Alert[]).map((alert) =>
+        Object.entries(alert).map(([field, value]) => {
+          if (['_id', '_index'].includes(field)) {
+            const strValue = (value as string) ?? '';
+            return {
+              field,
+              value: [strValue],
             };
           }
-          return localField;
+          const arrValue = Array.isArray(value)
+            ? (value as string[])
+            : value != null
+            ? [String(value)]
+            : [];
+          return { field, value: arrValue };
         })
       ),
     [data]

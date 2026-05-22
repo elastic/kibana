@@ -8,6 +8,7 @@
 import type { PropsWithChildren, ReactElement } from 'react';
 import React from 'react';
 import type { ReactWrapper } from 'enzyme';
+import { act } from 'react-dom/test-utils';
 import { Provider } from 'react-redux';
 import type { PreloadedState } from '@reduxjs/toolkit';
 import type { RenderOptions } from '@testing-library/react';
@@ -93,7 +94,10 @@ export const renderWithReduxStore = (
     </Provider>
   );
 
-  const rtlRender = renderWithProviders(ui, { wrapper: Wrapper, ...options });
+  let rtlRender: ReturnType<typeof renderWithProviders>;
+  act(() => {
+    rtlRender = renderWithProviders(ui, { wrapper: Wrapper, ...options });
+  });
 
   return {
     store,
@@ -152,10 +156,13 @@ export const mountWithReduxStore = (
     };
   }
 
-  const instance = mountWithProviders(component, {
-    ...options,
-    wrappingComponent,
-  } as unknown as ReactWrapper);
+  let instance: ReactWrapper;
+  act(() => {
+    instance = mountWithProviders(component, {
+      ...options,
+      wrappingComponent,
+    } as unknown as ReactWrapper);
+  });
 
-  return { instance, lensStore, deps };
+  return { instance: instance!, lensStore, deps };
 };

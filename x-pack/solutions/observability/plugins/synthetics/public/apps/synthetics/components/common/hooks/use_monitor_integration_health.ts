@@ -15,6 +15,7 @@ import {
 import {
   ConfigKey,
   PrivateLocationHealthStatusValue,
+  type EncryptedSyntheticsSavedMonitor,
 } from '../../../../../../common/runtime_types';
 import { fetchMonitorHealthAction, selectMonitorHealth } from '../../../state/monitor_health';
 import { resetMonitorAPI, resetMonitorBulkAPI } from '../../../state/monitor_management/api';
@@ -34,6 +35,29 @@ export interface MonitorIntegrationStatus {
 interface UseMonitorIntegrationHealthOptions {
   configIds?: string[];
 }
+
+const getPrivateLocationMonitorIds = (monitors: EncryptedSyntheticsSavedMonitor[]): string[] =>
+  monitors
+    .filter((m) => (m[ConfigKey.LOCATIONS] ?? []).some((loc) => !loc.isServiceManaged))
+    .map((m) => m[ConfigKey.CONFIG_ID]);
+
+const getMonitorIdsFetchKey = ({
+  explicitConfigIdsKey,
+  listLoaded,
+  listMonitors,
+}: {
+  explicitConfigIdsKey: string | undefined;
+  listLoaded: boolean;
+  listMonitors: EncryptedSyntheticsSavedMonitor[];
+}): string => {
+  if (explicitConfigIdsKey !== undefined) {
+    return explicitConfigIdsKey;
+  }
+  if (!listLoaded) {
+    return '';
+  }
+  return getPrivateLocationMonitorIds(listMonitors).join(',');
+};
 
 interface UseMonitorIntegrationHealthReturn {
   statuses: Map<string, MonitorIntegrationStatus[]>;
@@ -73,22 +97,28 @@ export const useMonitorIntegrationHealth = (
     }
   }, [dispatch, configIds, listLoaded, listLoading]);
 
-  const monitorIdsToFetch = useMemo(() => {
-    if (configIds) {
-      return configIds;
-    }
-    if (!listLoaded) {
-      return [];
-    }
-    return listMonitors
-      .filter((m) => (m[ConfigKey.LOCATIONS] ?? []).some((loc) => !loc.isServiceManaged))
-      .map((m) => m[ConfigKey.CONFIG_ID]);
-  }, [configIds, listLoaded, listMonitors]);
+  // Compare by joined ids — callers often pass inline arrays (e.g. [configId]).
+  const explicitConfigIdsKey = configIds?.join(',');
+
+  const monitorIdsFetchKey = useMemo(
+    () =>
+      getMonitorIdsFetchKey({
+        explicitConfigIdsKey,
+        listLoaded,
+        listMonitors,
+      }),
+    [explicitConfigIdsKey, listLoaded, listMonitors]
+  );
+
+  const monitorIdsToFetch = useMemo(
+    () => (monitorIdsFetchKey ? monitorIdsFetchKey.split(',') : []),
+    [monitorIdsFetchKey]
+  );
 
   useEffect(() => {
     if (monitorIdsToFetch.length === 0) return;
     dispatch(fetchMonitorHealthAction.get(monitorIdsToFetch));
-  }, [dispatch, monitorIdsToFetch, lastRefresh]);
+  }, [dispatch, lastRefresh, monitorIdsToFetch]);
 
   const statuses = useMemo(() => {
     const map = new Map<string, MonitorIntegrationStatus[]>();

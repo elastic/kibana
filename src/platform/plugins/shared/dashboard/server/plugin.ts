@@ -129,7 +129,7 @@ export class DashboardPlugin
 
     core.uiSettings.register(getUISettings());
 
-    registerRoutes(core.http, this.apiUsageCounter);
+    registerRoutes(core.http, this.apiUsageCounter, this.logger);
 
     void registerAccessControl({
       http: core.http,

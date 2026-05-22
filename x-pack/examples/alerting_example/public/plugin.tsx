@@ -66,7 +66,6 @@ export class AlertingExamplePlugin implements Plugin<Setup, Start, AlertingExamp
           label: 'README',
           href: 'https://github.com/elastic/kibana/tree/main/x-pack/plugins/alerting',
           iconType: 'logoGithub',
-          size: 's',
           target: '_blank',
         },
       ],

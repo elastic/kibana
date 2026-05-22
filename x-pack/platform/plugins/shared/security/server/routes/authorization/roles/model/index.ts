@@ -10,3 +10,10 @@ export { transformPutPayloadToElasticsearchRole, getPutPayloadSchema } from './p
 
 export { getBulkCreateOrUpdatePayloadSchema } from './bulk_create_or_update_payload';
 export type { BulkCreateOrUpdateRolesPayloadSchemaType } from './bulk_create_or_update_payload';
+
+export {
+  roleResponseSchema,
+  getRolesResponseSchema,
+  queryRolesResponseSchema,
+  bulkCreateOrUpdateRolesResponseSchema,
+} from './role_response';

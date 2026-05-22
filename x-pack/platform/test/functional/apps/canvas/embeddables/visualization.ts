@@ -61,7 +61,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('by-value', () => {
       it('creates new vega embeddable', async () => {
         const originalEmbeddableCount = await canvas.getEmbeddableCount();
-        await canvas.addNewPanel('Custom visualization');
+        await canvas.addNewPanel('Vega');
         await visualize.saveVisualizationAndReturn();
         await retry.try(async () => {
           const embeddableCount = await canvas.getEmbeddableCount();

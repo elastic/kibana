@@ -14,10 +14,12 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const ReadAlertsIndexResponse = lazySchema(() =>
+  z.object({
+    name: z.string(),
+    index_mapping_outdated: z.boolean().nullable(),
+  })
+);
 export type ReadAlertsIndexResponse = z.infer<typeof ReadAlertsIndexResponse>;
-export const ReadAlertsIndexResponse = z.object({
-  name: z.string(),
-  index_mapping_outdated: z.boolean().nullable(),
-});

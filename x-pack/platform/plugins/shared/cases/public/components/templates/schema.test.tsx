@@ -57,7 +57,7 @@ describe('Template schema', () => {
               },
             ],
           },
-          "extendedFields": Object {
+          "extended_fields": Object {
             "defaultValue": Object {},
             "labelAppend": <EuiText
               color="subdued"

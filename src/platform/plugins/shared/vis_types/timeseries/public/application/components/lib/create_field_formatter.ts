@@ -7,17 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactNode } from 'react';
 import { isNumber } from 'lodash';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import type { FieldFormatMap, DataView } from '@kbn/data-views-plugin/common';
-import type { FieldFormatsContentType } from '@kbn/field-formats-plugin/common';
 import { isEmptyValue, DISPLAY_EMPTY_VALUE } from '../../../../common/last_value_utils';
 import { getFieldFormats } from '../../../services';
 
-export const createFieldFormatter = (
+const getFieldFormatAndType = (
   fieldName: string = '',
   fieldFormatMap?: FieldFormatMap,
-  contextType?: FieldFormatsContentType,
   hasColorRules: boolean = false,
   dataView?: DataView
 ) => {
@@ -42,12 +41,51 @@ export const createFieldFormatter = (
     shouldSkipFormatting ? defaultFieldFormat : serializedFieldFormat
   );
 
-  return (value: unknown) => {
+  return { fieldFormat, fieldType, shouldSkipFormatting };
+};
+
+export const createTextFieldFormatter = (
+  fieldName: string = '',
+  fieldFormatMap?: FieldFormatMap,
+  hasColorRules: boolean = false,
+  dataView?: DataView
+) => {
+  const { fieldFormat, fieldType, shouldSkipFormatting } = getFieldFormatAndType(
+    fieldName,
+    fieldFormatMap,
+    hasColorRules,
+    dataView
+  );
+
+  return (value: unknown): string => {
     if (isEmptyValue(value)) {
       return DISPLAY_EMPTY_VALUE;
     }
     return fieldType !== 'number' || isNumber(value) || !shouldSkipFormatting
-      ? fieldFormat.convert(value, contextType)
-      : value;
+      ? fieldFormat.convert(value, 'text')
+      : String(value);
+  };
+};
+
+export const createReactFieldFormatter = (
+  fieldName: string = '',
+  fieldFormatMap?: FieldFormatMap,
+  hasColorRules: boolean = false,
+  dataView?: DataView
+) => {
+  const { fieldFormat, fieldType, shouldSkipFormatting } = getFieldFormatAndType(
+    fieldName,
+    fieldFormatMap,
+    hasColorRules,
+    dataView
+  );
+
+  return (value: unknown): ReactNode => {
+    if (isEmptyValue(value)) {
+      return DISPLAY_EMPTY_VALUE;
+    }
+    return fieldType !== 'number' || isNumber(value) || !shouldSkipFormatting
+      ? fieldFormat.reactConvert(value)
+      : String(value);
   };
 };

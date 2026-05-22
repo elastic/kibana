@@ -105,7 +105,7 @@ export const suggest = async (
     cursorPosition
   );
 
-  return attachReplacementRanges(innerText, suggestions, contextWithRoot);
+  return attachReplacementRanges(innerText, suggestions, { commandContext: contextWithRoot });
 };
 
 export const expectSuggestions = async (

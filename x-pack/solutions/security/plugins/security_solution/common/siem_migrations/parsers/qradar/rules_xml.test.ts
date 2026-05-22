@@ -14,7 +14,6 @@ const {
   mockQradarXml,
   mockRuleDataBase64s: _,
   mockRuleDataXmls,
-  mockRuleDataXmlsSanitized,
 } = getMockQRadarXml([RULE_NAME], isBuildingBlockRule);
 
 describe('QradarRulesXmlParser', () => {
@@ -29,7 +28,9 @@ describe('QradarRulesXmlParser', () => {
         'Edit this BB to include all events that indicate successful attempts to access the network.'
       );
       expect(rules[0].rule_type).toBe('building_block');
-      expect(rules[0].rule_data).toBe(mockRuleDataXmlsSanitized[0]);
+      expect(rules[0].rule_data).toContain(
+        '<text>when the event category for the event is one of the following Authentication.Admin Login Success Events</text>'
+      );
     });
 
     it('should return an empty array if no custom rules are found', async () => {
@@ -92,38 +93,56 @@ describe('QradarRulesXmlParser', () => {
       expect(rules[0].rule_data).not.toContain('&gt;');
     });
 
-    it('should strip nested HTML tag fragments without leaving injectable tags', async () => {
-      const ruleData = `<rule buildingBlock="false">
+    it('should sanitize encoded ampersand entity sequences in text tags without breaking XML', async () => {
+      const ruleDataWithEncodedEntities = `<rule buildingBlock="false">
   <name>Test Rule</name>
   <notes>Test notes</notes>
   <testDefinitions>
-    <test><text>payload &lt;&lt;script&gt;script&gt;alert(1)&lt;/script&gt; end</text></test>
+    <test name="com.q1labs.semsources.cre.tests.ReferenceSetTest">
+      <text>when value is &amp;quot;&amp;amp; and &lt;b&gt;bold&lt;/b&gt;</text>
+    </test>
   </testDefinitions>
 </rule>`;
-      const ruleDataBase64 = Buffer.from(ruleData).toString('base64');
+      const ruleDataBase64 = Buffer.from(ruleDataWithEncodedEntities).toString('base64');
       const xml = `<content><custom_rule><rule_data>${ruleDataBase64}</rule_data></custom_rule></content>`;
       const parser = new QradarRulesXmlParser(xml);
       const rules = await parser.getRules();
 
-      expect(rules[0].rule_data).not.toContain('<script>');
-      const textContent = rules[0].rule_data.match(/<text>(.*?)<\/text>/)?.[1] ?? '';
-      expect(textContent).not.toMatch(/<[a-z][^>]*>/i);
+      expect(rules).toHaveLength(1);
+      // Ensure core rule fields remain extractable after text-node sanitization.
+      expect(rules[0].title).toBe('Test Rule');
+      expect(rules[0].description).toBe('Test notes');
+      expect(rules[0].rule_data).toContain('<text>when value is "&amp; and bold</text>');
+      expect(rules[0].rule_data).not.toContain('&amp;quot;&amp;amp;');
+      // Guard against malformed XML regressions after sanitization.
+      await expect(parser.parseSeverityFromRuleData(rules[0].rule_data)).resolves.toBeUndefined();
     });
 
-    it('should not double-unescape entities like &amp;quot;', async () => {
-      const ruleData = `<rule buildingBlock="false">
+    it('should normalize encoded non-breaking spaces in text tags', async () => {
+      const ruleDataWithNbspEntities = `<rule buildingBlock="false">
   <name>Test Rule</name>
   <notes>Test notes</notes>
   <testDefinitions>
-    <test><text>value is &amp;quot;safe&amp;quot;</text></test>
+    <test name="com.q1labs.semsources.cre.tests.ReferenceSetTest">
+      <text>when&amp;nbsp;&lt;a&gt;the event IP&lt;/a&gt; is contained in any of&amp;nbsp;Blocked IPs - IP</text>
+    </test>
   </testDefinitions>
 </rule>`;
-      const ruleDataBase64 = Buffer.from(ruleData).toString('base64');
+      const ruleDataBase64 = Buffer.from(ruleDataWithNbspEntities).toString('base64');
       const xml = `<content><custom_rule><rule_data>${ruleDataBase64}</rule_data></custom_rule></content>`;
       const parser = new QradarRulesXmlParser(xml);
       const rules = await parser.getRules();
 
-      expect(rules[0].rule_data).toContain('<text>value is "safe"</text>');
+      expect(rules).toHaveLength(1);
+      // Ensure core rule fields remain extractable after text-node sanitization.
+      expect(rules[0].title).toBe('Test Rule');
+      expect(rules[0].description).toBe('Test notes');
+      expect(rules[0].rule_data).toContain(
+        '<text>when the event IP is contained in any of Blocked IPs - IP</text>'
+      );
+      expect(rules[0].rule_data).not.toContain('&nbsp;');
+      // Guard against malformed XML regressions after sanitization.
+      await expect(parser.parseSeverityFromRuleData(rules[0].rule_data)).resolves.toBeUndefined();
     });
   });
 

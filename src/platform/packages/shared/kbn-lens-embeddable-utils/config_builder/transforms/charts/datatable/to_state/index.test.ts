@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DatatableState, DatatableStateESQL } from '../../../../schema';
+import type { DatatableConfig, DatatableConfigESQL } from '../../../../schema';
 import { buildVisualizationState, getValueColumns } from '.';
 
 describe('Datatable ES|QL column ordering', () => {
   describe('buildVisualizationState', () => {
     it('should order visualization columns as rows, split_metrics_by, then metrics', () => {
-      const config: DatatableState = {
+      const config: DatatableConfig = {
         type: 'data_table',
         data_source: {
           type: 'esql',
@@ -39,7 +39,7 @@ describe('Datatable ES|QL column ordering', () => {
     });
 
     it('should mark row columns as isMetric: false and metric columns as isMetric: true', () => {
-      const config: DatatableState = {
+      const config: DatatableConfig = {
         type: 'data_table',
         data_source: {
           type: 'esql',
@@ -68,7 +68,7 @@ describe('Datatable ES|QL column ordering', () => {
         metrics: [{ column: 'bytes' }, { column: 'requests' }],
         rows: [{ column: 'host' }],
         split_metrics_by: [{ column: 'region' }],
-      } as unknown as DatatableStateESQL;
+      } as unknown as DatatableConfigESQL;
 
       const result = getValueColumns(config);
 

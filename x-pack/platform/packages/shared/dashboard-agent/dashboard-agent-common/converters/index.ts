@@ -7,4 +7,4 @@
 
 export { dashboardStateToAttachmentData } from './to_attachment';
 
-export { attachmentDataToDashboardState, DEFAULT_TIME_RANGE } from './from_attachment';
+export { attachmentDataToDashboardState } from './from_attachment';

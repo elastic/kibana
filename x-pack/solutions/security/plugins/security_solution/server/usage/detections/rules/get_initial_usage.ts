@@ -6,6 +6,7 @@
  */
 
 import type {
+  AiCreatedRulesUsage,
   EventLogStatusMetric,
   MaxAvgMin,
   RulesTypeUsage,
@@ -18,6 +19,7 @@ import type {
   UpgradeableRulesSummary,
   ThreatMatchFeatureTypeUsage,
   RuleCustomizationCounts,
+  DeprecatedRulesSummary,
 } from './types';
 
 export const initialAlertSuppression: AlertSuppressionUsage = {
@@ -171,6 +173,16 @@ export const getInitialMaxAvgMin = (): MaxAvgMin => ({
 export const getInitialRuleUpgradeStatus = (): UpgradeableRulesSummary => ({
   total: 0,
   customized: 0,
+  enabled: 0,
+  disabled: 0,
+});
+
+export const getInitialRuleDeprecatedStatus = (): DeprecatedRulesSummary => ({
+  total: 0,
+});
+
+export const getInitialAiCreatedRulesUsage = (): AiCreatedRulesUsage => ({
+  total: 0,
   enabled: 0,
   disabled: 0,
 });

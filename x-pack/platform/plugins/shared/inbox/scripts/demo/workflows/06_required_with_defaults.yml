@@ -1,0 +1,32 @@
+# Inbox demo workflow — required fields plus defaults (covers Scenario 2 of #16707)
+name: inbox-demo-required-with-defaults
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: ask_triage_decision
+    type: waitForInput
+    with:
+      message: "Confirm triage decision for the alert cluster."
+      schema:
+        type: object
+        properties:
+          escalate:
+            type: boolean
+            title: Escalate to on-call
+            default: false
+          severity:
+            type: string
+            title: Severity
+            enum: ["low", "medium", "high", "critical"]
+            default: "medium"
+          notes:
+            type: string
+            title: Analyst notes
+        required:
+          - escalate
+          - severity
+  - name: log_decision
+    type: console
+    with:
+      message: "Triage: escalate={{ steps.ask_triage_decision.output.escalate }} severity={{ steps.ask_triage_decision.output.severity }}"

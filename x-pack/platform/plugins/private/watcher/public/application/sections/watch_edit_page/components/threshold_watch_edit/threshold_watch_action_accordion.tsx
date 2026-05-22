@@ -132,7 +132,7 @@ export const WatchActionsAccordion: React.FunctionComponent<Props> = ({
           buttonContent={
             <EuiFlexGroup gutterSize="s" alignItems="center">
               <EuiFlexItem grow={false}>
-                <EuiIcon type={action.iconClass} size="m" />
+                <EuiIcon type={action.iconClass} size="m" aria-hidden={true} />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiTitle size="s">

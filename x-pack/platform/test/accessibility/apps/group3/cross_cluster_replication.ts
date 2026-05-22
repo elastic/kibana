@@ -82,10 +82,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           it('auto follower index page ', async () => {
             await PageObjects.crossClusterReplication.clickAutoFollowerPatternButton();
             await a11y.testAppSnapshot();
-            await PageObjects.crossClusterReplication.createAutoFollowerPattern(
-              autoFollower,
-              'logstash*'
-            );
+            await es.transport.request({
+              method: 'PUT',
+              path: `/_ccr/auto_follow/${encodeURIComponent(autoFollower)}`,
+              body: {
+                remote_cluster: remoteName,
+                leader_index_patterns: ['logstash*'],
+                follow_index_pattern: '{{leader_index}}',
+              },
+            });
+            await PageObjects.common.navigateToApp('crossClusterReplication');
+            await PageObjects.crossClusterReplication.clickAutoFollowerTab();
+            await PageObjects.crossClusterReplication.openAutoFollowerPatternDetails(autoFollower);
           });
           it('auto follower index flyout', async () => {
             await a11y.testAppSnapshot();

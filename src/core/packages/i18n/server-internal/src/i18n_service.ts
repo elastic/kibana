@@ -9,8 +9,7 @@
 
 import { firstValueFrom } from 'rxjs';
 import { createHash } from 'crypto';
-import type { Translation } from '@kbn/i18n';
-import { i18n } from '@kbn/i18n';
+import { i18n, getLocaleLabel, type AvailableLocale } from '@kbn/i18n';
 import type { Logger } from '@kbn/logging';
 import type { IConfigService } from '@kbn/config';
 import type { CoreContext } from '@kbn/core-base-server-internal';
@@ -21,7 +20,11 @@ import type {
 import type { I18nServiceSetup } from '@kbn/core-i18n-server';
 import type { I18nConfigType } from './i18n_config';
 import { config as i18nConfigDef } from './i18n_config';
-import { getKibanaTranslationFiles } from './get_kibana_translation_files';
+import {
+  getAllKibanaTranslationFiles,
+  computeLocaleFileHash,
+  groupFilesByLocale,
+} from './get_kibana_translation_files';
 import { initTranslations } from './init_translations';
 import { registerRoutes } from './routes';
 
@@ -37,6 +40,8 @@ export interface SetupDeps {
 
 export interface InternalI18nServicePreboot {
   getTranslationHash(): string;
+  getTranslationHashes(): Record<string, string>;
+  getAvailableLocales(): ReadonlyArray<AvailableLocale>;
 }
 
 export class I18nService {
@@ -49,28 +54,54 @@ export class I18nService {
   }
 
   public async preboot({ pluginPaths, http }: PrebootDeps): Promise<InternalI18nServicePreboot> {
-    const { locale, translationHash } = await this.initTranslations(pluginPaths);
+    const { defaultLocale, availableLocales, translationHash, translationHashes, localeFileMap } =
+      await this.initTranslations(pluginPaths);
     const { dist: isDist } = this.coreContext.env.packageInfo;
     http.registerRoutes('', (router) =>
-      registerRoutes({ router, locale, isDist, translationHash })
+      registerRoutes({
+        router,
+        locale: defaultLocale,
+        isDist,
+        translationHashes,
+        localeFileMap,
+      })
     );
 
     return {
       getTranslationHash: () => translationHash,
+      getTranslationHashes: () => translationHashes,
+      getAvailableLocales: () => availableLocales,
     };
   }
 
   public async setup({ pluginPaths, http }: SetupDeps): Promise<I18nServiceSetup> {
-    const { locale, translationFiles, translationHash } = await this.initTranslations(pluginPaths);
+    const {
+      defaultLocale,
+      locales,
+      availableLocales,
+      translationFiles,
+      translationHash,
+      translationHashes,
+      localeFileMap,
+    } = await this.initTranslations(pluginPaths);
 
     const router = http.createRouter('');
     const { dist: isDist } = this.coreContext.env.packageInfo;
-    registerRoutes({ router, locale, isDist, translationHash });
+    registerRoutes({
+      router,
+      locale: defaultLocale,
+      isDist,
+      translationHashes,
+      localeFileMap,
+    });
 
     return {
-      getLocale: () => locale,
+      getLocale: () => defaultLocale,
+      getLocales: () => locales,
+      getAvailableLocales: () => availableLocales,
       getTranslationFiles: () => translationFiles,
       getTranslationHash: () => translationHash,
+      getTranslationHashes: () => translationHashes,
     };
   }
 
@@ -79,21 +110,47 @@ export class I18nService {
       this.configService.atPath<I18nConfigType>(i18nConfigDef.path)
     );
 
-    const locale = i18nConfig.locale;
-    this.log.debug(`Using locale: ${locale}`);
+    const { defaultLocale, locales } = i18nConfig;
+    this.log.debug(`Using defaultLocale: ${defaultLocale}, locales: [${locales.join(', ')}]`);
 
-    const translationFiles = await getKibanaTranslationFiles(locale, pluginPaths);
+    // Register translation files for all configured locales upfront.
+    const allTranslationFiles = await getAllKibanaTranslationFiles(pluginPaths, locales);
 
-    this.log.debug(`Using translation files: [${translationFiles.join(', ')}]`);
-    await initTranslations(locale, translationFiles);
+    this.log.debug(`Using translation files: [${allTranslationFiles.join(', ')}]`);
+    await initTranslations(defaultLocale, allTranslationFiles);
 
-    const translationHash = getTranslationHash(i18n.getTranslation());
+    // Group files by locale so the route handler can locate them for on-demand serving.
+    const localeFileMap = groupFilesByLocale(allTranslationFiles);
 
-    return { locale, translationFiles, translationHash };
+    // Compute hashes for cache-busted translation URLs. The default locale is already
+    // in memory from initTranslations(); non-default locales are hashed from raw file
+    // bytes only — no JSON parsing, nothing retained in the loader cache.
+    const translationHashes: Record<string, string> = {};
+    translationHashes[defaultLocale] = computeHash(JSON.stringify(i18n.getTranslation()));
+    for (const locale of locales) {
+      if (locale === defaultLocale) continue;
+      translationHashes[locale] = await computeLocaleFileHash(localeFileMap[locale] ?? []);
+    }
+
+    const translationHash = translationHashes[defaultLocale];
+
+    const availableLocales: AvailableLocale[] = locales.map((id) => ({
+      id,
+      label: getLocaleLabel(id),
+    }));
+
+    return {
+      defaultLocale,
+      locales,
+      availableLocales,
+      translationFiles: allTranslationFiles,
+      translationHash,
+      translationHashes,
+      localeFileMap,
+    };
   }
 }
 
-const getTranslationHash = (translations: Translation) => {
-  const serialized = JSON.stringify(translations);
+const computeHash = (serialized: string) => {
   return createHash('sha256').update(serialized).digest('hex').slice(0, 12);
 };

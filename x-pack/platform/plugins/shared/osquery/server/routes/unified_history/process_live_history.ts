@@ -17,6 +17,8 @@ export interface ProcessLiveHistoryParams {
   liveHits: LiveActionHit[];
   osqueryContext: OsqueryAppContext;
   spaceId: string;
+  integrationNamespaces?: readonly string[];
+  ccsEnabled?: boolean;
   logger: Logger;
 }
 
@@ -36,6 +38,8 @@ export const processLiveHistory = async ({
   liveHits,
   osqueryContext,
   spaceId,
+  integrationNamespaces,
+  ccsEnabled = false,
   logger,
 }: ProcessLiveHistoryParams): Promise<ProcessLiveHistoryResult> => {
   const liveRows: LiveHistoryRow[] = liveHits.map(mapLiveHitToRow);
@@ -53,7 +57,13 @@ export const processLiveHistory = async ({
 
   if (liveRows.length > 0) {
     try {
-      await enrichWithResultCounts(liveHits, liveRows, osqueryContext, spaceId);
+      await enrichWithResultCounts(
+        liveHits,
+        liveRows,
+        osqueryContext,
+        integrationNamespaces ?? [spaceId],
+        ccsEnabled
+      );
     } catch (err) {
       logger.warn(`Failed to enrich live rows with result counts: ${(err as Error).message}`);
     }
@@ -66,7 +76,8 @@ const enrichWithResultCounts = async (
   liveHits: LiveActionHit[],
   liveRows: LiveHistoryRow[],
   osqueryContext: OsqueryAppContext,
-  spaceId: string
+  integrationNamespaces: readonly string[],
+  ccsEnabled: boolean
 ): Promise<void> => {
   const allSubActionIds = liveHits.flatMap(collectSubActionIds);
   const uniqueActionIds = [...new Set(allSubActionIds)];
@@ -78,7 +89,8 @@ const enrichWithResultCounts = async (
   const resultCountsMap = await getResultCountsForActions(
     internalEsClient,
     uniqueActionIds,
-    spaceId
+    integrationNamespaces,
+    ccsEnabled
   );
 
   for (let i = 0; i < liveRows.length; i++) {

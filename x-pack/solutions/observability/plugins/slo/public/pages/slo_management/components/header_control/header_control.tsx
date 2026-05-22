@@ -37,6 +37,7 @@ export function HeaderControl() {
   return (
     <EuiPopover
       data-test-subj="headerControlPopover"
+      panelPaddingSize="none"
       button={
         <EuiButton
           data-test-subj="headerControlActionsButton"
@@ -55,7 +56,6 @@ export function HeaderControl() {
       closePopover={closePopover}
     >
       <EuiContextMenuPanel
-        size="m"
         items={[
           <EuiContextMenuItem
             key="healthScan"

@@ -12,8 +12,9 @@ import { ParsedTemplateDefinitionSchema } from '../../../../common/types/domain/
  * URI identifier for the template JSON Schema.
  * This is an arbitrary unique identifier used by monaco-yaml to associate
  * the schema with YAML files in the editor.
+ * Note: This URI is displayed in Monaco hover tooltips as the schema source.
  */
-export const TEMPLATE_SCHEMA_URI = 'file:///cases-template-schema.json';
+export const TEMPLATE_SCHEMA_URI = 'kibana://cases/template-definition-schema';
 
 interface OverrideCtx {
   zodSchema: z.core.$ZodTypes;

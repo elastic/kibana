@@ -16,7 +16,7 @@ describe('AddToLibraryAction', () => {
   const replacePanelMock = jest.fn();
   const embeddableApi = {
     defaultTitle$: new BehaviorSubject('Panel one'),
-    checkForDuplicateTitle: async () => {},
+    hasLibraryItemWithTitle: async () => false,
     canLinkToLibrary: async () => false,
     canUnlinkFromLibrary: async () => true,
     getSerializedStateByReference: () => ({}),

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { DataStreamsTable } from './data_steams_table';
 import type { DataStreamResponse } from '../../../../../../common';
@@ -36,8 +36,10 @@ const mockDeleteDataStreamMutation = {
 };
 
 const mockReanalyzeMutate = jest.fn();
+const mockReanalyzeMutateAsync = jest.fn().mockResolvedValue(undefined);
 const mockReanalyzeDataStreamMutation = {
   mutate: mockReanalyzeMutate,
+  mutateAsync: mockReanalyzeMutateAsync,
   isLoading: false,
   variables: undefined as
     | { dataStreamId: string; integrationId: string; connectorId: string }
@@ -345,10 +347,12 @@ describe('DataStreamsTable', () => {
       const confirmButton = screen.getByRole('button', { name: /Re-Analyze/i });
       await userEvent.click(confirmButton);
 
-      expect(mockReanalyzeMutate).toHaveBeenCalledWith({
-        integrationId: 'integration-123',
-        dataStreamId: 'ds-1',
-        connectorId: 'test-connector-id',
+      await waitFor(() => {
+        expect(mockReanalyzeMutateAsync).toHaveBeenCalledWith({
+          integrationId: 'integration-123',
+          dataStreamId: 'ds-1',
+          connectorId: 'test-connector-id',
+        });
       });
     });
 

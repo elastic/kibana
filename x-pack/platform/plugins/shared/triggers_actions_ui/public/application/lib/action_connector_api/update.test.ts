@@ -21,6 +21,7 @@ describe('updateActionConnector', () => {
       connector_type_id: 'te/st',
       is_preconfigured: false,
       is_deprecated: false,
+      is_missing_secrets: false,
       is_system_action: false,
       is_connector_type_deprecated: false,
       name: 'My test',
@@ -35,6 +36,7 @@ describe('updateActionConnector', () => {
       name: 'My test',
       config: {},
       secrets: {},
+      isMissingSecrets: false,
     });
     const resolvedValue = { ...connector, id };
 

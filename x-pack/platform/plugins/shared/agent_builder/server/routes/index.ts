@@ -13,6 +13,7 @@ import { registerInternalConversationRoutes } from './internal/conversations';
 import { registerConsumptionRoutes } from './consumption';
 import { registerInternalUserPromptsRoutes } from './internal/user_prompts';
 import { registerInternalSmlRoutes } from './internal/sml';
+import { registerInternalInferenceEndpointsRoute } from './internal/inference_endpoints';
 import { registerAgentRoutes } from './agents';
 import { registerChatRoutes } from './chat';
 import { registerConversationRoutes } from './conversations';
@@ -21,6 +22,7 @@ import { registerMCPRoutes } from './mcp';
 import { registerA2ARoutes } from './a2a';
 import { registerSkillsRoutes } from './skills';
 import { registerPluginsRoutes } from './plugins';
+import { registerInternalExecutionRoutes } from './internal/executions';
 
 export const registerRoutes = (dependencies: RouteDependencies) => {
   registerToolsRoutes(dependencies);
@@ -30,6 +32,7 @@ export const registerRoutes = (dependencies: RouteDependencies) => {
   registerConsumptionRoutes(dependencies);
   registerInternalUserPromptsRoutes(dependencies);
   registerInternalSmlRoutes(dependencies);
+  registerInternalInferenceEndpointsRoute(dependencies);
   registerAgentRoutes(dependencies);
   registerChatRoutes(dependencies);
   registerConversationRoutes(dependencies);
@@ -38,4 +41,5 @@ export const registerRoutes = (dependencies: RouteDependencies) => {
   registerA2ARoutes(dependencies);
   registerSkillsRoutes(dependencies);
   registerPluginsRoutes(dependencies);
+  registerInternalExecutionRoutes(dependencies);
 };

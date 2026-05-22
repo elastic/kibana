@@ -65,6 +65,7 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
           fileUpload: deps.fileUpload,
           http: coreStart.http,
           notifications: coreStart.notifications,
+          capabilities: coreStart.application.capabilities,
         },
         null,
         false,
@@ -74,7 +75,14 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
         'lookup-index-editor'
       );
     },
-    [coreStart.analytics, coreStart.http, coreStart.notifications, deps.data, deps.fileUpload]
+    [
+      coreStart.analytics,
+      coreStart.http,
+      coreStart.notifications,
+      deps.data,
+      deps.fileUpload,
+      coreStart.application.capabilities,
+    ]
   );
 
   const [fileUploadManager, setFileUploadManager] = useState<FileUploadManager>(() =>

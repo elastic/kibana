@@ -41,6 +41,7 @@ export class FetchRulesStep implements DispatcherStep {
       rules.set(doc.id, {
         id: doc.id,
         spaceId: savedObjectNamespacesToSpaceId(doc.namespaces),
+        kind: doc.attributes.kind,
         name: doc.attributes.metadata.name,
         description: doc.attributes.metadata.owner ?? '',
         tags: doc.attributes.metadata.tags ?? [],

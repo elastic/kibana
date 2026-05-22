@@ -116,13 +116,21 @@ export const createPrebuiltRuleObjectsClient = (
       return withSecuritySpan(
         'IPrebuiltRuleObjectsClient.fetchInstalledRuleVersionsByIds',
         async () => {
-          const filterKQL = convertRulesFilterToKQL({
+          if (ruleIds.length === 0) {
+            return [];
+          }
+
+          // ruleIds are prebuilt rule signature IDs (params.ruleId), not alerting
+          // SO IDs, so filter via KQL like fetchInstalledRulesByIds does rather
+          // than the findRules `ruleIds` option (which targets alert.id).
+          const baseFilterKQL = convertRulesFilterToKQL({
             showElasticRules: true,
           });
+          const ruleIdsKQL = `alert.attributes.params.ruleId:(${ruleIds.join(' or ')})`;
+          const filterKQL = baseFilterKQL ? `(${baseFilterKQL}) AND (${ruleIdsKQL})` : ruleIdsKQL;
 
           const rulesData = await findRules({
             rulesClient,
-            ruleIds,
             filter: filterKQL,
             perPage: MAX_PREBUILT_RULES_COUNT,
             page: 1,

@@ -11,7 +11,6 @@ import type { ContentManagementPublicStart } from '@kbn/content-management-plugi
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SpacesApi } from '@kbn/spaces-plugin/public';
-import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import { SavedSearchType } from '../../common';
 import type { SavedSearchCrudTypes } from '../../common/content_management';
 import type { SavedSearch, SerializableSavedSearch } from '../../common/types';
@@ -26,7 +25,7 @@ import type {
 } from './save_discover_session';
 import { saveDiscoverSession } from './save_discover_session';
 import type { SavedSearchUnwrapResult } from './to_saved_search';
-import { checkForDuplicateTitle } from './check_for_duplicate_title';
+import { hasLibraryItemWithTitle } from './has_library_item_with_title';
 import { byValueToSavedSearch } from './to_saved_search';
 
 export interface SavedSearchesServiceDeps {
@@ -103,15 +102,8 @@ export class SavedSearchesService {
     );
   };
 
-  checkForDuplicateTitle = (
-    props: Pick<OnSaveProps, 'newTitle' | 'isTitleDuplicateConfirmed' | 'onTitleDuplicate'>
-  ): Promise<void> => {
-    return checkForDuplicateTitle({
-      title: props.newTitle,
-      isTitleDuplicateConfirmed: props.isTitleDuplicateConfirmed,
-      onTitleDuplicate: props.onTitleDuplicate,
-      contentManagement: this.deps.contentManagement,
-    });
+  hasLibraryItemWithTitle = (title: string): Promise<boolean> => {
+    return hasLibraryItemWithTitle(title, this.deps.contentManagement);
   };
 
   byValueToSavedSearch = <Serialized extends boolean = false>(

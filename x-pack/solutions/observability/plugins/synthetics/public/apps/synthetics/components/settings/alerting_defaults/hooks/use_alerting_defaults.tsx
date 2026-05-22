@@ -37,6 +37,7 @@ export const useAlertingDefaults = () => {
         <EuiIcon
           type={actionTypeRegistry.get(connectorAction.actionTypeId as string).iconClass}
           size="s"
+          aria-hidden={true}
         />
       ),
     }));

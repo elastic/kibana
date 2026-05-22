@@ -10,7 +10,7 @@ import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plu
 import type { Observable } from 'rxjs';
 import type { BehaviorSubject } from 'rxjs';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { EvalsPublicStart } from '@kbn/evals-plugin/public';
 import type {
   ChatCompletionChunkEvent,

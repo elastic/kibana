@@ -60,9 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       beforeEach(async () => {
         await dataGrid.clickRowToggle();
         await discover.isShowingDocViewer();
-        await retry.waitFor('rendered items', async () => {
-          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length > 0;
-        });
+        await dataGrid.waitForDocViewerFieldsToRender();
       });
 
       afterEach(async () => {
@@ -140,9 +138,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       beforeEach(async () => {
         await dataGrid.clickRowToggle();
         await discover.isShowingDocViewer();
-        await retry.waitFor('rendered items', async () => {
-          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length > 0;
-        });
+        await dataGrid.waitForDocViewerFieldsToRender();
       });
 
       it('should reveal and hide the filter form when the toggle is clicked', async function () {
@@ -188,9 +184,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await dataGrid.clickRowToggle();
         await discover.isShowingDocViewer();
-        await retry.waitFor('rendered items', async () => {
-          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length > 0;
-        });
+        await dataGrid.waitForDocViewerFieldsToRender();
 
         // Clear any unexpected active type filters
         const filterToggle = await testSubjects.find(
@@ -273,9 +267,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await dataGrid.clickRowToggle();
         await discover.isShowingDocViewer();
-        await retry.waitFor('rendered items', async () => {
-          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length > 0;
-        });
+        await dataGrid.waitForDocViewerFieldsToRender();
 
         await discover.openFilterByFieldTypeInDocViewer();
         await testSubjects.click('typeFilter-keyword');
@@ -451,9 +443,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should be able to pin and unpin fields', async function () {
         await dataGrid.clickRowToggle();
         await discover.isShowingDocViewer();
-        await retry.waitFor('rendered items', async () => {
-          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length > 0;
-        });
+        await dataGrid.waitForDocViewerFieldsToRender();
 
         let fieldNameCells = await find.allByCssSelector('.kbnDocViewer__fieldName');
         let fieldNames = await Promise.all(fieldNameCells.map((cell) => cell.getVisibleText()));

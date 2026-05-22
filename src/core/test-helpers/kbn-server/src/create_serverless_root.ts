@@ -33,7 +33,6 @@ export interface TestServerlessUtils {
 
 const ES_BASE_PATH_DIR = Path.join(REPO_ROOT, '.es/es_test_serverless');
 const DEFAULT_PROJECT_TYPE: ServerlessProjectType = 'es';
-const DEFAULT_KIBANA_URL = 'http://localhost:5601/';
 
 /**
  * See docs in {@link TestUtils}. This function provides the same utilities but
@@ -47,7 +46,6 @@ export function createTestServerlessInstances({
   enableCPS = false,
   esArgs = [],
   projectType = DEFAULT_PROJECT_TYPE,
-  kibanaUrl = DEFAULT_KIBANA_URL,
 }: {
   kibana?: {
     settings?: {};
@@ -62,7 +60,6 @@ export function createTestServerlessInstances({
    *
    * Equivalent to running:
    *  `yarn es serverless --projectType observability --uiam --kill --clean \
-   *    --kibanaUrl http://localhost:5601/ \
    *    -E serverless.cross_project.enabled=true -E remote_cluster_server.enabled=true`
    *
    * @default false
@@ -84,15 +81,6 @@ export function createTestServerlessInstances({
    * Defaults to `es` for existing tests.
    */
   projectType?: ServerlessProjectType;
-  /**
-   * Passed through to the `@kbn/es` serverless docker runner as `--kibanaUrl`.
-   *
-   * This is important for UIAM mode: the serverless runner only applies the
-   * UIAM-related ES args (including project metadata) when `kibanaUrl` is set.
-   *
-   * See `resolveEsArgs()` in `src/platform/packages/shared/kbn-es/src/utils/docker.ts`.
-   */
-  kibanaUrl?: string;
 } = {}): TestServerlessUtils {
   adjustTimeout?.(150_000);
 
@@ -100,8 +88,6 @@ export function createTestServerlessInstances({
     enableCPS,
     esArgs,
     projectType,
-    // Ensure the serverless runner configures mock IDP/UIAM settings when CPS is enabled.
-    kibanaUrl: enableCPS ? kibanaUrl : undefined,
   });
 
   if (enableCPS) {
@@ -161,12 +147,10 @@ function createServerlessES({
   enableCPS = false,
   esArgs = [],
   projectType = DEFAULT_PROJECT_TYPE,
-  kibanaUrl,
 }: {
   enableCPS?: boolean;
   esArgs?: string[];
   projectType?: ServerlessProjectType;
-  kibanaUrl?: string;
 } = {}) {
   const log = new ToolingLog({
     level: 'info',
@@ -192,7 +176,6 @@ function createServerlessES({
         clean: true,
         kill: true,
         waitForReady: true,
-        ...(kibanaUrl ? { kibanaUrl } : {}),
         ...esServerlessImageParams,
         ...(enableCPS
           ? {

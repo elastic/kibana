@@ -14,61 +14,71 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ArrayFromString, BooleanFromString } from '@kbn/zod-helpers/v4';
 
 import { EntityType } from '../common.gen';
 
+export const DeleteEntityEngineRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * Control flag to also delete the entity data.
+     */
+    delete_data: BooleanFromString.optional(),
+    /**
+     * Control flag to also delete the entity data.
+     */
+    data: BooleanFromString.optional(),
+  })
+);
 export type DeleteEntityEngineRequestQuery = z.infer<typeof DeleteEntityEngineRequestQuery>;
-export const DeleteEntityEngineRequestQuery = z.object({
-  /**
-   * Control flag to also delete the entity data.
-   */
-  delete_data: BooleanFromString.optional(),
-  /**
-   * Control flag to also delete the entity data.
-   */
-  data: BooleanFromString.optional(),
-});
 export type DeleteEntityEngineRequestQueryInput = z.input<typeof DeleteEntityEngineRequestQuery>;
 
+export const DeleteEntityEngineRequestParams = lazySchema(() =>
+  z.object({
+    /**
+     * The entity type of the engine (either 'user' or 'host').
+     */
+    entityType: EntityType,
+  })
+);
 export type DeleteEntityEngineRequestParams = z.infer<typeof DeleteEntityEngineRequestParams>;
-export const DeleteEntityEngineRequestParams = z.object({
-  /**
-   * The entity type of the engine (either 'user' or 'host').
-   */
-  entityType: EntityType,
-});
 export type DeleteEntityEngineRequestParamsInput = z.input<typeof DeleteEntityEngineRequestParams>;
 
+export const DeleteEntityEngineResponse = lazySchema(() =>
+  z.object({
+    /**
+     * Whether the engine was successfully deleted.
+     */
+    deleted: z.boolean().optional(),
+  })
+);
 export type DeleteEntityEngineResponse = z.infer<typeof DeleteEntityEngineResponse>;
-export const DeleteEntityEngineResponse = z.object({
-  /**
-   * Whether the engine was successfully deleted.
-   */
-  deleted: z.boolean().optional(),
-});
+export const DeleteEntityEnginesRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * The entity type of the engine ('user', 'host', 'service', 'generic').
+     */
+    entityTypes: ArrayFromString(EntityType).optional(),
+    /**
+     * Control flag to also delete the entity data.
+     */
+    delete_data: BooleanFromString.optional(),
+  })
+);
 export type DeleteEntityEnginesRequestQuery = z.infer<typeof DeleteEntityEnginesRequestQuery>;
-export const DeleteEntityEnginesRequestQuery = z.object({
-  /**
-   * The entity type of the engine ('user', 'host', 'service', 'generic').
-   */
-  entityTypes: ArrayFromString(EntityType).optional(),
-  /**
-   * Control flag to also delete the entity data.
-   */
-  delete_data: BooleanFromString.optional(),
-});
 export type DeleteEntityEnginesRequestQueryInput = z.input<typeof DeleteEntityEnginesRequestQuery>;
 
+export const DeleteEntityEnginesResponse = lazySchema(() =>
+  z.object({
+    /**
+     * Entity types whose engines were successfully deleted.
+     */
+    deleted: z.array(EntityType).optional(),
+    /**
+     * Entity types whose engines are still running.
+     */
+    still_running: z.array(EntityType).optional(),
+  })
+);
 export type DeleteEntityEnginesResponse = z.infer<typeof DeleteEntityEnginesResponse>;
-export const DeleteEntityEnginesResponse = z.object({
-  /**
-   * Entity types whose engines were successfully deleted.
-   */
-  deleted: z.array(EntityType).optional(),
-  /**
-   * Entity types whose engines are still running.
-   */
-  still_running: z.array(EntityType).optional(),
-});

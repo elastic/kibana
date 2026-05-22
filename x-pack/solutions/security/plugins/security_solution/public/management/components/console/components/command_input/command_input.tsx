@@ -207,7 +207,8 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
             prevLeftOfCursor,
             prevRightOfCursor,
             prevParsedInput,
-            prevEnteredCommand
+            prevEnteredCommand,
+            key
           );
 
           inputText.addValue(processedValue ?? '', selection);

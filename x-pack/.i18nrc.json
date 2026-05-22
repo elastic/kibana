@@ -145,6 +145,7 @@
     "xpack.serverless": "platform/plugins/shared/serverless",
     "xpack.serverlessSearch": "solutions/search/plugins/serverless_search",
     "xpack.serverlessObservability": "solutions/observability/plugins/serverless_observability",
+    "xpack.serverlessVectordb": "solutions/vectordb/plugins/serverless_vectordb",
     "xpack.securitySolution": "solutions/security/plugins/security_solution",
     "xpack.securitySolutionEss": "solutions/security/plugins/security_solution_ess",
     "xpack.securitySolutionServerless": "solutions/security/plugins/security_solution_serverless",

@@ -16,52 +16,72 @@ paths:
       description: Get a list of all response actions.
       operationId: EndpointGetActionsList
       parameters:
-        - in: query
+        - description: The page number to return.
+          in: query
           name: page
           required: false
           schema:
             $ref: '#/components/schemas/Page'
-        - in: query
+        - description: The number of response actions to return per page.
+          in: query
           name: pageSize
           required: false
           schema:
             $ref: '#/components/schemas/PageSize'
-        - in: query
+        - description: A list of response action command names to filter by.
+          in: query
           name: commands
           required: false
           schema:
             $ref: '#/components/schemas/Commands'
-        - in: query
+        - description: A list of Elastic Agent IDs to filter the response actions by.
+          in: query
           name: agentIds
           required: false
           schema:
             $ref: '#/components/schemas/AgentIds'
-        - in: query
+        - description: A list of user IDs that submitted the response actions.
+          in: query
           name: userIds
           required: false
           schema:
             $ref: '#/components/schemas/UserIds'
-        - in: query
+        - description: >-
+            A start date in ISO 8601 format or Date Math format (for example,
+            `now-24h`).
+          in: query
           name: startDate
           required: false
           schema:
             $ref: '#/components/schemas/StartDate'
-        - in: query
+        - description: >-
+            An end date in ISO 8601 format or Date Math format (for example,
+            `now`).
+          in: query
           name: endDate
           required: false
           schema:
             $ref: '#/components/schemas/EndDate'
-        - in: query
+        - description: >-
+            The agent type to filter response actions by. Defaults to
+            `endpoint`.
+          in: query
           name: agentTypes
           required: false
           schema:
             $ref: '#/components/schemas/AgentTypes'
-        - in: query
+        - description: >-
+            A list of response action IDs whose outputs should be included in
+            the response.
+          in: query
           name: withOutputs
           required: false
           schema:
             $ref: '#/components/schemas/WithOutputs'
-        - in: query
+        - description: >-
+            A list of response action types to filter by (`automated`,
+            `manual`).
+          in: query
           name: types
           required: false
           schema:
@@ -70,6 +90,40 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                actionsList:
+                  summary: A list of response actions
+                  value:
+                    data:
+                      - agents:
+                          - afdc366c-e2e0-4cdb-ae1d-94575bd2d8e0
+                        agentType: endpoint
+                        command: running-processes
+                        completedAt: '2022-08-08T09:50:47.672Z'
+                        createdBy: elastic
+                        id: b3d6de74-36b0-4fa8-be46-c375bf1771bf
+                        isCompleted: true
+                        isExpired: false
+                        startedAt: '2022-08-08T15:24:57.402Z'
+                        wasSuccessful: true
+                      - agents:
+                          - afdc366c-e2e0-4cdb-ae1d-94575bd2d8e0
+                        agentType: endpoint
+                        command: isolate
+                        completedAt: '2022-08-08T10:41:57.352Z'
+                        createdBy: elastic
+                        id: 43b4098b-8752-4fbb-a7a7-6df7c74d0ee3
+                        isCompleted: true
+                        isExpired: false
+                        startedAt: '2022-08-08T15:23:37.359Z'
+                        wasSuccessful: true
+                    elasticAgentIds:
+                      - afdc366c-e2e0-4cdb-ae1d-94575bd2d8e0
+                    endDate: now
+                    page: 1
+                    pageSize: 10
+                    startDate: now-24h/h
+                    total: 2
               schema:
                 $ref: '#/components/schemas/GetEndpointActionListResponse'
           description: Indicates a successful call.
@@ -91,6 +145,21 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                actionStatus:
+                  summary: Pending response actions per agent
+                  value:
+                    data:
+                      - agent_id: afdc366c-e2e0-4cdb-ae1d-94575bd2d8e0
+                        pending_actions:
+                          execute: 0
+                          get-file: 0
+                          isolate: 0
+                          kill-process: 1
+                          running-processes: 0
+                          scan: 0
+                          unisolate: 0
+                          upload: 0
               schema:
                 $ref: '#/components/schemas/ActionStatusSuccessResponse'
           description: Indicates a successful call.
@@ -102,17 +171,33 @@ paths:
       description: Get the details of a response action using the action ID.
       operationId: EndpointGetActionsDetails
       parameters:
-        - in: path
+        - description: The ID of the response action to retrieve.
+          in: path
           name: action_id
           required: true
           schema:
-            description: The ID of the action to retrieve.
             example: fr518850-681a-4y60-aa98-e22640cae2b8
             type: string
       responses:
         '200':
           content:
             application/json:
+              examples:
+                actionDetails:
+                  summary: Details of an isolate response action
+                  value:
+                    data:
+                      agents:
+                        - ed518850-681a-4d60-bb98-e22640cae2a8
+                      agentType: endpoint
+                      command: isolate
+                      completedAt: '2022-08-08T10:41:57.352Z'
+                      createdBy: elastic
+                      id: 233db9ea-6733-4849-9226-5a7039c7161d
+                      isCompleted: true
+                      isExpired: false
+                      startedAt: '2022-08-08T15:23:37.359Z'
+                      wasSuccessful: true
               schema:
                 $ref: '#/components/schemas/ActionDetailsResponse'
           description: OK
@@ -150,6 +235,21 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                fileInfo:
+                  summary: File information for a response action upload
+                  value:
+                    data:
+                      actionId: 233db9ea-6733-4849-9226-5a7039c7161d
+                      agentId: ed518850-681a-4d60-bb98-e22640cae2a8
+                      agentType: endpoint
+                      created: '2025-02-26T13:37:30.452Z'
+                      id: >-
+                        233db9ea-6733-4849-9226-5a7039c7161d.ed518850-681a-4d60-bb98-e22640cae2a8
+                      mimeType: application/zip
+                      name: memory_dump.zip
+                      size: 1048576
+                      status: READY
               schema:
                 properties:
                   data:
@@ -233,6 +333,12 @@ paths:
         '200':
           content:
             application/octet-stream:
+              examples:
+                fileDownload:
+                  summary: >-
+                    Password-protected ZIP archive containing the response
+                    action file
+                  value: binary file content (password-protected .zip)
               schema:
                 format: binary
                 type: string
@@ -700,6 +806,16 @@ paths:
         content:
           application/json:
             examples:
+              Elastic Defend:
+                description: Endpoint runscript to collect logs
+                summary: Run a script against an Elastic Defend agent
+                value:
+                  agent_type: endpoint
+                  endpoint_ids:
+                    - ed518850-681a-4d60-bb98-e22640cae2a8
+                  parameters:
+                    scriptId: 1111-2222-3333-4444-5555-6666-7777-8888
+                    scriptInput: '--path= /usr/log/exec.log'
               MDE:
                 description: Microsoft Defender Endpoint runscript
                 summary: Run a script against a Microsoft Defender Endpoint agent
@@ -826,6 +942,12 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                actionsState:
+                  summary: Response actions state with encryption enabled
+                  value:
+                    data:
+                      canEncrypt: true
               schema:
                 $ref: '#/components/schemas/ActionStateSuccessResponse'
           description: OK
@@ -1009,6 +1131,16 @@ paths:
       requestBody:
         content:
           multipart/form-data:
+            examples:
+              uploadFile:
+                summary: Upload a script file to a specific endpoint
+                value:
+                  comment: Pushing remediation script to host
+                  endpoint_ids:
+                    - ed518850-681a-4d60-bb98-e22640cae2a8
+                  file: RWxhc3RpYw==
+                  parameters:
+                    overwrite: false
             schema:
               $ref: '#/components/schemas/UploadRouteRequestBody'
         required: true
@@ -1057,32 +1189,40 @@ paths:
       description: Get a list of all endpoint host metadata.
       operationId: GetEndpointMetadataList
       parameters:
-        - in: query
+        - description: The page number to return.
+          in: query
           name: page
           required: false
           schema:
             $ref: '#/components/schemas/Page'
-        - in: query
+        - description: The number of endpoints to return per page.
+          in: query
           name: pageSize
           required: false
           schema:
             $ref: '#/components/schemas/PageSize'
-        - in: query
+        - description: A KQL string to filter the endpoint metadata results.
+          in: query
           name: kuery
           required: false
           schema:
             $ref: '#/components/schemas/Kuery'
-        - in: query
+        - description: >-
+            A set of host statuses to filter the results by (for example,
+            `healthy`, `updating`).
+          in: query
           name: hostStatuses
           required: true
           schema:
             $ref: '#/components/schemas/HostStatuses'
-        - in: query
+        - description: The field used to sort the results.
+          in: query
           name: sortField
           required: false
           schema:
             $ref: '#/components/schemas/SortField'
-        - in: query
+        - description: The sort order, either `asc` or `desc`.
+          in: query
           name: sortDirection
           required: false
           schema:
@@ -1091,6 +1231,36 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                metadataList:
+                  summary: A list of endpoint host metadata
+                  value:
+                    data:
+                      - host_status: healthy
+                        last_checkin: '2023-07-04T15:47:57.432Z'
+                        metadata:
+                          agent:
+                            id: 285297c6-3bff-4b83-9a07-f3e749801123
+                            type: endpoint
+                            version: 8.10.0
+                          Endpoint:
+                            policy:
+                              applied:
+                                id: d5371dcd-93b7-4627-af88-4084f7d6aa3e
+                                name: test
+                                status: success
+                            status: enrolled
+                          host:
+                            hostname: WinDev2104Eval
+                            os:
+                              name: Windows
+                              platform: windows
+                              version: 20H2
+                    page: 0
+                    pageSize: 10
+                    sortDirection: desc
+                    sortField: enrolled_at
+                    total: 1
               schema:
                 $ref: '#/components/schemas/MetadataListResponse'
           description: Indicates a successful call.
@@ -1113,6 +1283,30 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                endpointMetadata:
+                  summary: Host metadata for a specific endpoint
+                  value:
+                    host_status: healthy
+                    last_checkin: '2023-07-04T15:48:57.360Z'
+                    metadata:
+                      agent:
+                        id: abb8a826-6812-448c-a571-6d8269b51449
+                        type: endpoint
+                        version: 8.10.0
+                      Endpoint:
+                        policy:
+                          applied:
+                            id: d5371dcd-93b7-4627-af88-4084f7d6aa3e
+                            name: test
+                            status: success
+                        status: enrolled
+                      host:
+                        hostname: WinDev2104Eval
+                        os:
+                          name: Windows
+                          platform: windows
+                          version: 20H2
               schema:
                 $ref: '#/components/schemas/EndpointMetadataResponse'
           description: Indicates a successful call.
@@ -1134,6 +1328,23 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                policyResponse:
+                  summary: The most recent policy response for an endpoint
+                  value:
+                    policy_response:
+                      '@timestamp': '2023-07-04T15:48:57.360Z'
+                      agent:
+                        id: ed518850-681a-4d60-bb98-e22640cae2a8
+                        version: 7.16.0
+                      Endpoint:
+                        policy:
+                          applied:
+                            endpoint_policy_version: '2'
+                            id: d5371dcd-93b7-4627-af88-4084f7d6aa3e
+                            name: My endpoint policy
+                            status: success
+                            version: '3'
               schema:
                 $ref: '#/components/schemas/SuccessResponse'
           description: Indicates a successful call.
@@ -1155,6 +1366,13 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                protectionUpdatesNote:
+                  summary: The protection updates note for a package policy
+                  value:
+                    note: >-
+                      Pinned protection updates to 2025-01-01 while validating
+                      new signatures.
               schema:
                 $ref: '#/components/schemas/ProtectionUpdatesNoteResponse'
           description: Indicates a successful call.
@@ -1176,6 +1394,13 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              setNote:
+                summary: Set a new protection updates note
+                value:
+                  note: >-
+                    Pinned protection updates to 2025-01-01 while validating new
+                    signatures.
             schema:
               type: object
               properties:
@@ -1187,10 +1412,307 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                noteSaved:
+                  summary: Protection updates note saved
+                  value:
+                    note: >-
+                      Pinned protection updates to 2025-01-01 while validating
+                      new signatures.
               schema:
                 $ref: '#/components/schemas/ProtectionUpdatesNoteResponse'
           description: Indicates a successful call.
       summary: Create or update a protection updates note
+      tags:
+        - Security Endpoint Management API
+  /api/endpoint/scripts_library:
+    get:
+      description: Retrieve a list of scripts
+      operationId: EndpointScriptLibraryListScripts
+      parameters:
+        - description: Page number of the results to return. Defaults to 1.
+          in: query
+          name: page
+          required: false
+          schema:
+            $ref: '#/components/schemas/Page'
+        - description: >-
+            Number of results to return per page. Defaults to 10. Max value is
+            1000.
+          in: query
+          name: pageSize
+          required: false
+          schema:
+            $ref: '#/components/schemas/ApiPageSize'
+        - description: The field to sort the results by. Defaults to name.
+          in: query
+          name: sortField
+          required: false
+          schema:
+            $ref: '#/components/schemas/ApiSortField'
+        - description: The direction to sort the results by. Defaults to asc (ascending).
+          in: query
+          name: sortDirection
+          required: false
+          schema:
+            $ref: '#/components/schemas/SortDirection'
+        - description: >
+            A KQL query string to filter the list of scripts. Nearly all fields
+            in the script object are searchable.
+          in: query
+          name: kuery
+          required: false
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/Kuery'
+              - example: platform:windows
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                response:
+                  summary: List of scripts response example
+                  value:
+                    data: []
+                    page: 1
+                    pageSize: 10
+                    sortDirection: asc
+                    sortField: name
+                    total: 100
+              schema:
+                type: object
+                properties:
+                  data:
+                    items:
+                      $ref: '#/components/schemas/EndpointScript'
+                    type: array
+                  page:
+                    $ref: '#/components/schemas/Page'
+                  pageSize:
+                    $ref: '#/components/schemas/ApiPageSize'
+                  sortDirection:
+                    $ref: '#/components/schemas/SortDirection'
+                  sortField:
+                    $ref: '#/components/schemas/ApiSortField'
+                  total:
+                    description: The total number of scripts matching the query
+                    type: integer
+          description: List of scripts response
+      summary: Get a list of scripts
+      tags:
+        - Security Endpoint Management API
+    post:
+      description: Create a new script entry by uploading a script file
+      operationId: EndpointScriptLibraryCreateScript
+      requestBody:
+        content:
+          multipart/form-data:
+            examples:
+              CreateArchiveScriptEntry:
+                summary: Create an archive script entry
+                value:
+                  description: Collects host data for investigation
+                  example: ./collect_host_data.sh --help
+                  file: ./collect_host_data.zip
+                  fileType: archive
+                  instructions: Collects host data for investigation
+                  name: Collect host data
+                  pathToExecutable: ./bin/collect_host_data.sh
+                  platform:
+                    - linux
+                    - macos
+                  requiresInput: false
+              CreateScriptEntry:
+                summary: Create a script entry
+                value:
+                  description: Collects host data for investigation
+                  example: ./collect_host_data.sh --help
+                  file: ./collect_host_data.sh
+                  fileType: script
+                  instructions: Collects host data for investigation
+                  name: Collect host data
+                  platform:
+                    - linux
+                    - macos
+                  requiresInput: false
+            schema:
+              $ref: '#/components/schemas/CreateScriptRouteRequestBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                CreateScriptEntrySuccess:
+                  summary: Create a script entry
+                  value:
+                    data:
+                      description: Collects host data for investigation
+                      file: ./collect_host_data.sh
+                      fileType: script
+                      id: 1234567890
+                      instructions: No arguments required
+                      name: Collect host data
+                      platform:
+                        - linux
+                        - macos
+              schema:
+                $ref: '#/components/schemas/ScriptsApiResponse'
+          description: Action request was successfully created
+      summary: Create script
+      tags:
+        - Security Endpoint Management API
+  /api/endpoint/scripts_library/{script_id}:
+    delete:
+      description: Delete a script
+      operationId: EndpointScriptLibraryDeleteScript
+      parameters:
+        - description: The ID of the script entry to be deleted.
+          example: fr518850-681a-4y60-aa98-e22640cae2b8
+          in: path
+          name: script_id
+          required: true
+          schema:
+            description: The ID of the script entry to be deleted.
+            example: fr518850-681a-4y60-aa98-e22640cae2b8
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                response:
+                  summary: Delete script response example.
+                  value: {}
+              schema:
+                type: object
+          description: Delete script response.
+      summary: Delete a script
+      tags:
+        - Security Endpoint Management API
+    get:
+      description: Get a script
+      operationId: EndpointScriptLibraryGetOneScript
+      parameters:
+        - description: The ID of the script entry.
+          example: fr518850-681a-4y60-aa98-e22640cae2b8
+          in: path
+          name: script_id
+          required: true
+          schema:
+            description: The ID of the script entry.
+            example: fr518850-681a-4y60-aa98-e22640cae2b8
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                UpdateScriptEntrySuccess:
+                  summary: Get one script entry success
+                  value:
+                    data:
+                      description: Collects host data for investigation
+                      file: ./collect_host_data.sh
+                      fileType: script
+                      id: 1234567890
+                      instructions: No arguments required
+                      name: Collect host data
+                      platform:
+                        - linux
+                        - macos
+              schema:
+                $ref: '#/components/schemas/ScriptsApiResponse'
+          description: Get script response
+      summary: Get script
+      tags:
+        - Security Endpoint Management API
+    patch:
+      description: Update (full or partial) a script entry
+      operationId: EndpointScriptLibraryPatchUpdateScript
+      parameters:
+        - description: The ID of the script entry to be updated.
+          example: fr518850-681a-4y60-aa98-e22640cae2b8
+          in: path
+          name: script_id
+          required: true
+          schema:
+            description: The ID of the script entry to be updated.
+            example: fr518850-681a-4y60-aa98-e22640cae2b8
+            type: string
+      requestBody:
+        content:
+          multipart/form-data:
+            examples:
+              PatchUpdateScriptEntry:
+                summary: Update script entry instructions
+                value:
+                  instructions: ./collect_host_data.sh --help
+              PatchUpdateScriptEntryFromArchiveToScript:
+                summary: Update script entry from an archive to a script
+                value:
+                  fileType: script
+              PatchUpdateScriptEntryToArchive:
+                summary: Update script entry to be an archive
+                value:
+                  fileType: archive
+                  pathToExecutable: ./bin/collect_host_data.sh
+            schema:
+              $ref: '#/components/schemas/PatchUpdateScriptRouteRequestBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                UpdateScriptEntrySuccess:
+                  summary: Update script entry success
+                  value:
+                    data:
+                      description: Collects host data for investigation
+                      file: ./collect_host_data.sh
+                      fileType: script
+                      id: 1234567890
+                      instructions: No arguments required
+                      name: Collect host data
+                      platform:
+                        - linux
+                        - macos
+              schema:
+                $ref: '#/components/schemas/ScriptsApiResponse'
+          description: Action request was successfully updated
+      summary: Update script
+      tags:
+        - Security Endpoint Management API
+  /api/endpoint/scripts_library/{script_id}/download:
+    get:
+      description: Download a script file
+      operationId: EndpointScriptLibraryDownloadScript
+      parameters:
+        - description: The ID of the script entry.
+          example: fr518850-681a-4y60-aa98-e22640cae2b8
+          in: path
+          name: script_id
+          required: true
+          schema:
+            description: The ID of the script entry.
+            example: fr518850-681a-4y60-aa98-e22640cae2b8
+            type: string
+      responses:
+        '200':
+          content:
+            application/octet-stream:
+              examples:
+                response:
+                  summary: Download script file response example.
+                  value: null
+              schema:
+                description: A download stream is returned.
+                format: binary
+                type: string
+          description: Download script file response.
+      summary: Download a script file
       tags:
         - Security Endpoint Management API
 components:
@@ -1227,41 +1749,34 @@ components:
     ActionStateSuccessResponse:
       type: object
       properties:
-        body:
+        data:
           type: object
           properties:
-            data:
-              type: object
-              properties:
-                canEncrypt:
-                  description: >-
-                    Whether the Kibana instance has encryption enabled for
-                    response actions.
-                  type: boolean
-          required:
-            - data
+            canEncrypt:
+              description: >-
+                Whether the Kibana instance has encryption enabled for response
+                actions.
+              type: boolean
       required:
-        - body
+        - data
     ActionStatusSuccessResponse:
       type: object
       properties:
-        body:
-          type: object
-          properties:
-            data:
-              type: object
-              properties:
-                agent_id:
-                  $ref: '#/components/schemas/AgentId'
-                pending_actions:
-                  $ref: '#/components/schemas/PendingActionsSchema'
-              required:
-                - agent_id
-                - pending_actions
-          required:
-            - data
+        data:
+          description: One pending-actions summary entry per requested agent.
+          items:
+            type: object
+            properties:
+              agent_id:
+                $ref: '#/components/schemas/AgentId'
+              pending_actions:
+                $ref: '#/components/schemas/PendingActionsSchema'
+            required:
+              - agent_id
+              - pending_actions
+          type: array
       required:
-        - body
+        - data
     AgentId:
       description: Agent ID
       type: string
@@ -1288,6 +1803,32 @@ components:
         - crowdstrike
         - microsoft_defender_endpoint
       example: endpoint
+      type: string
+    ApiPageSize:
+      default: 10
+      description: Number of items per page
+      example: 10
+      maximum: 1000
+      minimum: 1
+      type: integer
+    ApiSortField:
+      description: Determines which field is used to sort the results.
+      enum:
+        - name
+        - createdAt
+        - createdBy
+        - updatedAt
+        - updatedBy
+        - fileSize
+      example: updatedAt
+      type: string
+    ArchivePathToExecutableSchema:
+      description: >-
+        Used only for when the uploaded script is an archive (.zip file for
+        example). This property defines the relative path to the file included
+        in the archive that should be executed once its contents are extracted.
+        The path should be relative to the root of the archive.
+      example: ./bin/script.sh
       type: string
     Cancel:
       allOf:
@@ -1412,6 +1953,49 @@ components:
       description: Optional comment
       example: This is a comment
       type: string
+    CreateScriptRouteRequestBody:
+      type: object
+      properties:
+        description:
+          description: Description of the script and its purpose/functionality
+          type: string
+        example:
+          description: Example usage of the script
+          type: string
+        file:
+          description: The script file upload
+          format: binary
+          type: object
+        fileType:
+          $ref: '#/components/schemas/EndpointScriptFileType'
+        instructions:
+          description: >-
+            Instructions for using the script, including details around its
+            supported input arguments
+          type: string
+        name:
+          description: Name of the script
+          type: string
+        pathToExecutable:
+          $ref: '#/components/schemas/ArchivePathToExecutableSchema'
+        platform:
+          description: Platforms supported by the the script
+          items:
+            $ref: '#/components/schemas/EndpointScriptPlatform'
+          type: array
+        requiresInput:
+          description: Whether the script requires input arguments
+          type: boolean
+        tags:
+          description: Tags to categorize the script
+          items:
+            $ref: '#/components/schemas/EndpointScriptTags'
+          type: array
+      required:
+        - name
+        - platform
+        - file
+        - fileType
     DownloadUri:
       type: object
       properties:
@@ -1527,6 +2111,134 @@ components:
               revision: 2
       type: object
       properties: {}
+    EndpointRunScriptParameters:
+      description: >-
+        Parameters for Run Script response action against Elastic Defend agent
+        type.
+      example:
+        agent_type: endpoint
+        endpoint_ids:
+          - endpoint-id-1
+        parameters:
+          scriptId: 1111-2222-3333-4444-5555-6666-7777-8888
+          scriptInput: '--some-parameter some-value'
+      properties:
+        scriptId:
+          description: The script ID from the scripts library that will be executed.
+          minLength: 1
+          type: string
+        scriptInput:
+          description: >-
+            The input parameter arguments (if any) for the script that will be
+            executed.
+          minLength: 1
+          type: string
+      required:
+        - scriptId
+      title: Elastic Defend Run Script Parameters
+      type: object
+    EndpointScript:
+      type: object
+      properties:
+        createdAt:
+          format: date-time
+          type: string
+        createdBy:
+          example: elastic
+          type: string
+        description:
+          description: Description of the script and its purpose/functionality
+          example: Collects host data for investigation
+          type: string
+        downloadUri:
+          description: >-
+            URI to download the script file. Note that this is the relative path
+            and does not include the space (if applicable)
+          example: >-
+            /api/endpoint/scripts_library/123e4567-e89b-12d3-a456-426655440000/download
+          type: string
+        example:
+          type: string
+        fileHash:
+          description: SHA256 hash of the script file that was uploaded
+          example: abf573681eb54aac5e05e35bf186d4d31abe45ecf242461490523f11d2a8fbb8
+          type: string
+        fileName:
+          description: Name of the script file that was uploaded
+          example: collect_host_data.sh
+          type: string
+        fileSize:
+          description: Size of the script file that was uploaded in bytes
+          example: 12345
+          type: integer
+        id:
+          example: 123e4567-e89b-12d3-a456-426655440000
+          format: uuid
+          type: string
+        instructions:
+          description: >-
+            Instructions for using the script, including details around its
+            supported input arguments
+          type: string
+        name:
+          example: Collect host data
+          type: string
+        pathToExecutable:
+          description: >
+            The relative path to the file included in the archive that should be
+            executed once its contents are extracted. Applicable only for
+            scripts uploaded as an archive (.zip file for example).
+          type: string
+        platform:
+          items:
+            $ref: '#/components/schemas/EndpointScriptPlatform'
+          type: array
+        requiresInput:
+          type: boolean
+        tags:
+          description: Tags that categorize the script
+          items:
+            $ref: '#/components/schemas/EndpointScriptTags'
+          type: array
+        updatedAt:
+          format: date-time
+          type: string
+        updatedBy:
+          example: admin
+          type: string
+        version:
+          type: string
+    EndpointScriptFileType:
+      description: >-
+        The type of the uploaded file, which determines the expected value of
+        `pathToExecutable`. If `fileType` is "script", then `pathToExecutable`
+        should not be included. If `fileType` is "archive", then
+        `pathToExecutable` is required and should specify the path to the
+        executable file within the archive.
+      enum:
+        - script
+        - archive
+      type: string
+    EndpointScriptPlatform:
+      enum:
+        - linux
+        - macos
+        - windows
+      type: string
+    EndpointScriptTags:
+      enum:
+        - remediationAction
+        - dataCollection
+        - networkDiagnostics
+        - networkAction
+        - systemInventory
+        - forensicCollection
+        - threatHunting
+        - discovery
+        - systemManagement
+        - userManagement
+        - troubleshooting
+      type: string
     Execute:
       allOf:
         - $ref: '#/components/schemas/ResponseActionDetails'
@@ -2409,6 +3121,48 @@ components:
     Parameters:
       description: Parameters object
       type: object
+    PatchUpdateScriptRouteRequestBody:
+      description: >-
+        The script entry properties to be updated. At least one property must be
+        provided.
+      minProperties: 1
+      type: object
+      properties:
+        description:
+          description: Description of the script and its purpose/functionality
+          type: string
+        example:
+          description: Example usage of the script
+          type: string
+        file:
+          description: The script file upload
+          format: binary
+          type: object
+        fileType:
+          $ref: '#/components/schemas/EndpointScriptFileType'
+        instructions:
+          description: >-
+            Instructions for using the script, including details around its
+            supported input arguments
+          type: string
+        name:
+          description: Name of the script
+          type: string
+        pathToExecutable:
+          $ref: '#/components/schemas/ArchivePathToExecutableSchema'
+        platform:
+          description: Platforms supported by the the script
+          items:
+            $ref: '#/components/schemas/EndpointScriptPlatform'
+          type: array
+        requiresInput:
+          description: Whether the script requires input arguments
+          type: boolean
+        tags:
+          description: Tags to categorize the script
+          items:
+            $ref: '#/components/schemas/EndpointScriptTags'
+          type: array
     PendingActionDataType:
       description: Number of pending actions of this type.
       type: integer
@@ -2743,9 +3497,11 @@ components:
         - type: object
           properties:
             parameters:
-              description: |
-                One of the following set of parameters must be provided
+              description: >
+                One of the following set of parameters must be provided for the
+                `agentType` that is specified.
               oneOf:
+                - $ref: '#/components/schemas/EndpointRunScriptParameters'
                 - $ref: '#/components/schemas/RawScriptParameters'
                 - $ref: '#/components/schemas/HostPathScriptParameters'
                 - $ref: '#/components/schemas/CloudFileScriptParameters'
@@ -2827,6 +3583,27 @@ components:
                 - path
           required:
             - parameters
+    ScriptsApiResponse:
+      example:
+        data:
+          description: Collects host data for investigation
+          downloadUri: >-
+            /api/endpoint/scripts_library/123e4567-e89b-12d3-a456-426655440000/download
+          example: ./collect_host_data.sh --help
+          fileHash: abf573681eb54aac5e05e35bf186d4d31abe45ecf242461490523f11d2a8fbb8
+          fileName: collect_host_data.sh
+          fileSize: 12345
+          id: 123e4567-e89b-12d3-a456-426655440000
+          instructions: Collects host data for investigation
+          name: Collect host data
+          platform:
+            - linux
+            - macos
+          requiresInput: false
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/EndpointScript'
     SentinelOneRunScriptParameters:
       description: >-
         Parameters for Run Script response action against SentinelOne agent

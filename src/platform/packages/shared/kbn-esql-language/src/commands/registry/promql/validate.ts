@@ -15,12 +15,7 @@ import type {
   ESQLLocation,
 } from '@elastic/esql/types';
 import { isIdentifier, isList, isSource, Walker } from '@elastic/esql';
-import type {
-  PromQLBinaryExpression,
-  PromQLFunction,
-  PromQLLabelName,
-  PromQLSelector,
-} from '@elastic/esql';
+import type { PromQLBinaryExpression, PromQLFunction } from '@elastic/esql';
 import type { ICommandContext } from '../types';
 import { getMessageFromId } from '../../definitions/utils';
 import {
@@ -31,7 +26,6 @@ import {
 import { getPromqlExpressionType } from '../../definitions/utils/expressions';
 import { sourceExists } from '../../definitions/utils/sources';
 import { errors } from '../../definitions/utils/errors';
-import { validateColumnForCommand } from '../../definitions/utils/validation/column';
 import type { ESQLMessage, PromQLFunctionDefinition } from '../../definitions/types';
 import {
   getPromqlFunctionArityCheck,
@@ -186,8 +180,7 @@ export const validate = (
     });
   }
 
-  const shouldValidateColumns = hasQuery && !command.query?.incomplete;
-  return [...messages, ...validatePromqlQuery(command, _context, shouldValidateColumns)];
+  return [...messages, ...validatePromqlQuery(command)];
 };
 
 // ============================================================================
@@ -435,11 +428,7 @@ function extractTrailingParamFromQuery(
 // PromQL query validation (walker-based)
 // ============================================================================
 
-function validatePromqlQuery(
-  command: ESQLAstPromqlCommand,
-  context?: ICommandContext,
-  shouldValidateColumns: boolean = false
-): ESQLMessage[] {
+function validatePromqlQuery(command: ESQLAstPromqlCommand): ESQLMessage[] {
   const queryNode = command.query;
 
   if (!queryNode || queryNode.incomplete) {
@@ -447,8 +436,6 @@ function validatePromqlQuery(
   }
 
   const messages: ESQLMessage[] = [];
-  const selectors: PromQLSelector[] = [];
-  const groupingArgs: PromQLLabelName[] = [];
 
   // ES|QL Walker needed: command.query can be ESQLParens/ESQLFunction wrapping PromQL content.
   Walker.walk(queryNode, {
@@ -462,11 +449,6 @@ function validatePromqlQuery(
           ...getMatchingSignatureErrors(fn, definition),
           ...getGroupingErrors(fn)
         );
-        if (fn.grouping) groupingArgs.push(...fn.grouping.args);
-      },
-
-      visitPromqlSelector: (selector) => {
-        selectors.push(selector);
       },
 
       visitPromqlBinaryExpression: (binary) => {
@@ -475,11 +457,6 @@ function validatePromqlQuery(
       },
     },
   });
-
-  if (context && shouldValidateColumns) {
-    const completeSelectors = selectors.filter(({ incomplete }) => !incomplete);
-    messages.push(...getColumnErrors(completeSelectors, groupingArgs, command.name, context));
-  }
 
   return messages;
 }
@@ -588,29 +565,6 @@ function getBinaryOperatorTypeErrors(
       locations: getPromqlNodeLocation(mismatchedNode, binary.location),
     }),
   ];
-}
-
-/* Returns errors for PromQL column references (metrics, labels, grouping) not found in ES|QL columns. */
-function getColumnErrors(
-  selectors: PromQLSelector[],
-  groupingArgs: PromQLLabelName[],
-  commandName: string,
-  context: ICommandContext
-): ESQLMessage[] {
-  const metrics = selectors.map(({ metric }) => metric);
-  const labels = selectors.flatMap(
-    ({ labelMap }) => labelMap?.args.map(({ labelName }) => labelName) ?? []
-  );
-
-  const columns = [...metrics, ...labels, ...groupingArgs].filter((node) => isIdentifier(node));
-
-  return columns.flatMap((column) =>
-    validateColumnForCommand(
-      { ...column, text: column.name, incomplete: !!column.incomplete },
-      commandName,
-      context
-    )
-  );
 }
 
 // ----------------------------------------------------------------------------

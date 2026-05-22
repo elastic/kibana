@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPopover, EuiFilterButton, EuiFilterSelectItem, useEuiTheme } from '@elastic/eui';
 import type { ActionType } from '../../../../types';
@@ -42,6 +43,10 @@ export const ActionTypeFilter: React.FunctionComponent<ActionTypeFilterProps> = 
     <EuiPopover
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopoverOpen(false)}
+      aria-label={i18n.translate(
+        'xpack.triggersActionsUI.sections.rulesList.actionTypeFilterPopoverAriaLabel',
+        { defaultMessage: 'Filter by action type' }
+      )}
       button={
         <EuiFilterButton
           iconType="chevronSingleDown"

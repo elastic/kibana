@@ -116,12 +116,17 @@ exports[`Filter Lists Table renders with filter lists and selection supplied 1`]
                     class="euiCheckbox emotion-euiCheckbox"
                   >
                     <div
-                      class="euiCheckbox__square emotion-euiCheckbox__square-unselected"
+                      class="euiCheckbox__square emotion-euiCheckbox__square"
                     >
                       <span
-                        class="emotion-euiCheckbox__icon-check"
-                        data-euiicon-type="empty"
-                      />
+                        class="euiCheckboxControl emotion-euiCheckboxControl-unselected"
+                      >
+                        <span
+                          class="emotion-euiCheckbox__icon-check"
+                          data-euiicon-type="empty"
+                          role="presentation"
+                        />
+                      </span>
                       <input
                         aria-label="Select all rows"
                         class="euiCheckbox__input emotion-euiCheckbox__input"
@@ -288,12 +293,17 @@ exports[`Filter Lists Table renders with filter lists and selection supplied 1`]
                     class="euiCheckbox emotion-euiCheckbox"
                   >
                     <div
-                      class="euiCheckbox__square emotion-euiCheckbox__square-disabled-unselected"
+                      class="euiCheckbox__square emotion-euiCheckbox__square"
                     >
                       <span
-                        class="emotion-euiCheckbox__icon-check"
-                        data-euiicon-type="empty"
-                      />
+                        class="euiCheckboxControl emotion-euiCheckboxControl-disabled-unselected"
+                      >
+                        <span
+                          class="emotion-euiCheckbox__icon-check"
+                          data-euiicon-type="empty"
+                          role="presentation"
+                        />
+                      </span>
                       <input
                         aria-label="Select row 1"
                         class="euiCheckbox__input emotion-euiCheckbox__input"
@@ -380,12 +390,17 @@ exports[`Filter Lists Table renders with filter lists and selection supplied 1`]
                     class="euiCheckbox emotion-euiCheckbox"
                   >
                     <div
-                      class="euiCheckbox__square emotion-euiCheckbox__square-unselected"
+                      class="euiCheckbox__square emotion-euiCheckbox__square"
                     >
                       <span
-                        class="emotion-euiCheckbox__icon-check"
-                        data-euiicon-type="empty"
-                      />
+                        class="euiCheckboxControl emotion-euiCheckboxControl-unselected"
+                      >
+                        <span
+                          class="emotion-euiCheckbox__icon-check"
+                          data-euiicon-type="empty"
+                          role="presentation"
+                        />
+                      </span>
                       <input
                         aria-label="Select row 2"
                         class="euiCheckbox__input emotion-euiCheckbox__input"
@@ -692,12 +707,17 @@ exports[`Filter Lists Table renders with filter lists supplied 1`] = `
                     class="euiCheckbox emotion-euiCheckbox"
                   >
                     <div
-                      class="euiCheckbox__square emotion-euiCheckbox__square-unselected"
+                      class="euiCheckbox__square emotion-euiCheckbox__square"
                     >
                       <span
-                        class="emotion-euiCheckbox__icon-check"
-                        data-euiicon-type="empty"
-                      />
+                        class="euiCheckboxControl emotion-euiCheckboxControl-unselected"
+                      >
+                        <span
+                          class="emotion-euiCheckbox__icon-check"
+                          data-euiicon-type="empty"
+                          role="presentation"
+                        />
+                      </span>
                       <input
                         aria-label="Select all rows"
                         class="euiCheckbox__input emotion-euiCheckbox__input"
@@ -864,12 +884,17 @@ exports[`Filter Lists Table renders with filter lists supplied 1`] = `
                     class="euiCheckbox emotion-euiCheckbox"
                   >
                     <div
-                      class="euiCheckbox__square emotion-euiCheckbox__square-disabled-unselected"
+                      class="euiCheckbox__square emotion-euiCheckbox__square"
                     >
                       <span
-                        class="emotion-euiCheckbox__icon-check"
-                        data-euiicon-type="empty"
-                      />
+                        class="euiCheckboxControl emotion-euiCheckboxControl-disabled-unselected"
+                      >
+                        <span
+                          class="emotion-euiCheckbox__icon-check"
+                          data-euiicon-type="empty"
+                          role="presentation"
+                        />
+                      </span>
                       <input
                         aria-label="Select row 1"
                         class="euiCheckbox__input emotion-euiCheckbox__input"
@@ -956,12 +981,17 @@ exports[`Filter Lists Table renders with filter lists supplied 1`] = `
                     class="euiCheckbox emotion-euiCheckbox"
                   >
                     <div
-                      class="euiCheckbox__square emotion-euiCheckbox__square-unselected"
+                      class="euiCheckbox__square emotion-euiCheckbox__square"
                     >
                       <span
-                        class="emotion-euiCheckbox__icon-check"
-                        data-euiicon-type="empty"
-                      />
+                        class="euiCheckboxControl emotion-euiCheckboxControl-unselected"
+                      >
+                        <span
+                          class="emotion-euiCheckbox__icon-check"
+                          data-euiicon-type="empty"
+                          role="presentation"
+                        />
+                      </span>
                       <input
                         aria-label="Select row 2"
                         class="euiCheckbox__input emotion-euiCheckbox__input"

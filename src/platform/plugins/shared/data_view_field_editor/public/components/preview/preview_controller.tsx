@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 import type {
   DataView,
@@ -491,11 +492,11 @@ export class PreviewController {
     value: unknown;
     format: Params['format'];
     type: Params['type'];
-  }) => {
+  }): ReactNode => {
     if (format?.id) {
       const formatter = this.deps.fieldFormats.getInstance(format.id, format.params);
       if (formatter) {
-        return formatter.getConverterFor('html')(value) ?? JSON.stringify(value);
+        return formatter.reactConvert(value) ?? JSON.stringify(value);
       }
     }
 
@@ -503,7 +504,7 @@ export class PreviewController {
       const fieldType = castEsToKbnFieldTypeName(type);
       const defaultFormatterForType = this.deps.fieldFormats.getDefaultInstance(fieldType);
       if (defaultFormatterForType) {
-        return defaultFormatterForType.getConverterFor('html')(value) ?? JSON.stringify(value);
+        return defaultFormatterForType.reactConvert(value) ?? JSON.stringify(value);
       }
     }
 

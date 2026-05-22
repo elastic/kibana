@@ -11,7 +11,11 @@ import type { EntityStoreCoreSetup } from '../types';
 import { AssetManagerClient } from '../domain/asset_manager';
 import { LogsExtractionClient } from '../domain/logs_extraction';
 import { CcsLogsExtractionClient } from '../domain/logs_extraction';
-import { EngineDescriptorClient, EntityStoreGlobalStateClient } from '../domain/saved_objects';
+import {
+  CcsLogExtractionStateClient,
+  EngineDescriptorClient,
+  EntityStoreGlobalStateClient,
+} from '../domain/saved_objects';
 import type { TelemetryReporter } from '../telemetry/events';
 
 export interface LogsExtractionClientFactoryResult {
@@ -47,7 +51,12 @@ export async function createLogsExtractionClient({
   );
 
   const esClient = clusterClient.asCurrentUser;
-  const ccsLogsExtractionClient = new CcsLogsExtractionClient(logger, esClient, namespace);
+  const ccsLogsExtractionClient = new CcsLogsExtractionClient(
+    logger,
+    esClient,
+    namespace,
+    new CcsLogExtractionStateClient(soClient, namespace, logger)
+  );
 
   const logsExtractionClient = new LogsExtractionClient({
     logger,
@@ -85,6 +94,7 @@ export async function createAssetManagerClient({
   const soClient = coreStart.savedObjects.getScopedClient(fakeRequest);
   const engineDescriptorClient = new EngineDescriptorClient(soClient, namespace, logger);
   const globalStateClient = new EntityStoreGlobalStateClient(soClient, namespace, logger);
+  const ccsLogExtractionStateClient = new CcsLogExtractionStateClient(soClient, namespace, logger);
   const { logsExtractionClient } = await createLogsExtractionClient({
     core,
     fakeRequest,
@@ -100,6 +110,7 @@ export async function createAssetManagerClient({
       taskManager: pluginsStart.taskManager,
       engineDescriptorClient,
       globalStateClient,
+      ccsLogExtractionStateClient,
       namespace,
       isServerless,
       logsExtractionClient,

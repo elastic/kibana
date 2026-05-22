@@ -48,6 +48,7 @@ interface SavedSearchEmbeddableComponentProps {
   };
   dataView: DataView;
   onAddFilter?: DocViewFilterFn;
+  onRefreshData?: () => void;
   enableDocumentViewer: boolean;
   inlineEditing: InlineEditing;
   stateManager: SearchEmbeddableStateManager;
@@ -59,6 +60,7 @@ export function SearchEmbeddableGridComponent({
   api,
   dataView,
   onAddFilter,
+  onRefreshData,
   enableDocumentViewer,
   inlineEditing,
   stateManager,
@@ -234,6 +236,7 @@ export function SearchEmbeddableGridComponent({
       dataView={dataView}
       interceptedWarnings={interceptedWarnings}
       onFilter={onAddFilter}
+      onRefreshData={onRefreshData}
       rows={rows}
       rowsPerPageState={savedSearch.rowsPerPage ?? defaults.rowsPerPage}
       sampleSizeState={fetchedSampleSize}

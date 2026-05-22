@@ -142,7 +142,6 @@ export function TopNavMenuItem(props: TopNavMenuItemProps) {
           : {
               content: upperFirst(props.label || props.id!),
               position: 'bottom',
-              delay: 'long',
             }),
       },
       <EuiButtonIcon

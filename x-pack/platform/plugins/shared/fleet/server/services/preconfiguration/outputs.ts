@@ -151,11 +151,10 @@ export async function createOrUpdatePreconfiguredOutputs(
           secretHashes,
         });
         // Bump revision of all policies using that output
-        if (outputData.is_default || outputData.is_default_monitoring) {
-          await agentPolicyService.bumpAllAgentPolicies(esClient);
-        } else {
-          await agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, id);
-        }
+        await agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, id, {
+          isDefault: outputData.is_default,
+          isDefaultMonitoring: outputData.is_default_monitoring,
+        });
       }
     }
   };

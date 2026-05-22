@@ -127,7 +127,7 @@ export async function queryPings<F>(
       httpBody.content_bytes = Buffer.byteLength(httpBody.content);
     }
 
-    const remote = getRemoteMonitorInfo(_index);
+    const remote = getRemoteMonitorInfo(_index, _source?.kibanaUrl);
 
     return { ..._source, timestamp: _source['@timestamp'], docId: _id, ...(remote && { remote }) };
   });

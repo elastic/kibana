@@ -37,14 +37,14 @@ export default function ({ loadTestFile, getService }: DeploymentAgnosticFtrProv
     loadTestFile(require.resolve('./edit_monitor_public_api'));
     loadTestFile(require.resolve('./edit_monitor'));
     loadTestFile(require.resolve('./enable_default_alerting'));
-    loadTestFile(require.resolve('./get_filters'));
+    // get_filters migrated to Scout: x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/get_filters.spec.ts
     loadTestFile(require.resolve('./get_monitor_project'));
     loadTestFile(require.resolve('./get_monitor'));
     loadTestFile(require.resolve('./inspect_monitor'));
     loadTestFile(require.resolve('./suggestions.ts'));
     loadTestFile(require.resolve('./sync_global_params'));
     loadTestFile(require.resolve('./sync_global_params_for_filtered_monitors'));
-    loadTestFile(require.resolve('./synthetics_enablement'));
+    // synthetics_enablement migrated to Scout: x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/synthetics_enablement.spec.ts
     loadTestFile(require.resolve('./test_now_monitor'));
     loadTestFile(require.resolve('./edit_private_location'));
     loadTestFile(require.resolve('./get_private_location_monitors'));

@@ -8,7 +8,10 @@
 import { PREFIX } from '../../../flyout/shared/test_ids';
 
 export const RESOLUTION_SECTION_TEST_ID = `${PREFIX}ResolutionSection` as const;
+export const RESOLUTION_GROUP_LINK_TEST_ID = `${PREFIX}ResolutionGroupLink` as const;
 export const RESOLUTION_GROUP_TABLE_TEST_ID = `${PREFIX}ResolutionGroupTable` as const;
+export const RESOLUTION_PRIMARY_ENTITY_ICON_TEST_ID =
+  `${PREFIX}ResolutionPrimaryEntityIcon` as const;
 export const RESOLUTION_GROUP_TAB_TEST_ID = `${PREFIX}ResolutionGroupTab` as const;
 export const RESOLUTION_GROUP_TAB_CONTENT_TEST_ID = `${PREFIX}ResolutionGroupTabContent` as const;
 export const ADD_ENTITIES_SECTION_TEST_ID = `${PREFIX}AddEntitiesSection` as const;

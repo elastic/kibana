@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { IlmPhaseFilter } from '.';
@@ -65,14 +65,14 @@ describe('IlmPhaseFilter', () => {
       await userEvent.click(searchInput);
 
       expect(screen.getByTitle('frozen')).toHaveAttribute('role', 'option');
-      expect(screen.getByTitle('frozen')).toBeDisabled();
+      expect(screen.getByTitle('frozen')).toHaveAttribute('aria-disabled', 'true');
       expect(screen.getByTitle('cold')).toHaveAttribute('role', 'option');
-      expect(screen.getByTitle('cold')).toBeDisabled();
+      expect(screen.getByTitle('cold')).toHaveAttribute('aria-disabled', 'true');
     });
   });
 
   describe('when hovering over search input', () => {
-    it('shows a tooltip with the ilm check description', async () => {
+    it('shows a tooltip with the ilm check description', () => {
       render(
         <TestExternalProviders>
           <TestDataQualityProviders>
@@ -81,11 +81,9 @@ describe('IlmPhaseFilter', () => {
         </TestExternalProviders>
       );
 
-      await userEvent.hover(screen.getByTestId('comboBoxSearchInput'));
+      fireEvent.mouseOver(screen.getByTestId('comboBoxSearchInput'));
 
-      await waitFor(() =>
-        expect(screen.getByRole('tooltip')).toHaveTextContent(INDEX_LIFECYCLE_MANAGEMENT_PHASES)
-      );
+      expect(screen.getByRole('tooltip')).toHaveTextContent(INDEX_LIFECYCLE_MANAGEMENT_PHASES);
     });
   });
 
@@ -120,11 +118,8 @@ describe('IlmPhaseFilter', () => {
 
         const searchInput = screen.getByTestId('comboBoxSearchInput');
         await userEvent.click(searchInput);
-        await userEvent.hover(screen.getByText(option.toLowerCase()), { pointerEventsCheck: 0 });
 
-        await waitFor(() =>
-          expect(screen.getByRole('tooltip')).toHaveTextContent(tooltipDescription)
-        );
+        expect(screen.getByText(tooltipDescription)).toBeInTheDocument();
       });
     });
   });

@@ -9,9 +9,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import type { EuiTourStepProps } from '@elastic/eui';
 import {
   EuiButton,
-  EuiHorizontalRule,
   EuiPopover,
-  useEuiPaddingSize,
   EuiContextMenuItem,
   useGeneratedHtmlId,
   EuiContextMenuPanel,
@@ -24,6 +22,7 @@ import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { SecurityPageName } from '../../../../app/types';
 import { SecuritySolutionLinkAnchor } from '../../../../common/components/links';
 import { useKibana } from '../../../../common/lib/kibana';
+import { RuleCreationEventTypes } from '../../../../common/lib/telemetry/types';
 import {
   NEW_FEATURES_TOUR_STORAGE_KEYS,
   SecurityAgentBuilderAttachments,
@@ -91,7 +90,7 @@ export const CreateRuleMenu: React.FC<CreateRuleContextMenuProps> = ({ loading, 
     prefix: 'createRuleContextMenuLinks',
   });
   const { services } = useKibana();
-  const { agentBuilder, storage, notifications } = services;
+  const { agentBuilder, storage, notifications, telemetry, aiRuleCreation } = services;
   const isTourEnabled = notifications.tours.isEnabled();
 
   const [aiRuleCreationMenuTourState, setAiRuleCreationMenuTourState] =
@@ -118,8 +117,6 @@ export const CreateRuleMenu: React.FC<CreateRuleContextMenuProps> = ({ loading, 
   const shouldShowAiRuleCreationMenuTour =
     isTourEnabled && aiRuleCreationMenuTourState.isTourActive && !isDisabled && !loading;
 
-  const m = useEuiPaddingSize('m');
-  const xl = useEuiPaddingSize('xl');
   const onButtonClick = useCallback(() => {
     setIsPopoverOpen(!isPopoverOpen);
   }, [isPopoverOpen]);
@@ -130,6 +127,12 @@ export const CreateRuleMenu: React.FC<CreateRuleContextMenuProps> = ({ loading, 
 
   const handleAiRuleCreation = useCallback(() => {
     closePopover();
+
+    const session = aiRuleCreation.startSession();
+    telemetry.reportEvent(RuleCreationEventTypes.CreationInitialized, {
+      creationSource: 'ai',
+      sessionId: session.sessionId,
+    });
 
     const emptyRuleAttachment: AttachmentInput = {
       id: SECURITY_RULE_ATTACHMENT_ID,
@@ -149,7 +152,7 @@ export const CreateRuleMenu: React.FC<CreateRuleContextMenuProps> = ({ loading, 
         attachments: [emptyRuleAttachment],
       });
     }
-  }, [closePopover, agentBuilder]);
+  }, [closePopover, agentBuilder, aiRuleCreation, telemetry]);
 
   const createRuleButton = (
     <EuiButton
@@ -233,7 +236,6 @@ export const CreateRuleMenu: React.FC<CreateRuleContextMenuProps> = ({ loading, 
         <EuiContextMenuPanel>
           <EuiContextMenuItem
             key="ai-rule-creation"
-            style={{ padding: `${m} ${xl}` }}
             onClick={handleAiRuleCreation}
             data-test-subj="ai-rule-creation"
             icon="productAgent"
@@ -243,8 +245,7 @@ export const CreateRuleMenu: React.FC<CreateRuleContextMenuProps> = ({ loading, 
               defaultMessage="AI rule creation"
             />
           </EuiContextMenuItem>
-          <EuiHorizontalRule key="separator" margin="none" />
-          <EuiContextMenuItem key="manual-rule-creation" style={{ padding: `${m} ${xl}` }}>
+          <EuiContextMenuItem key="manual-rule-creation">
             <SecuritySolutionLinkAnchor
               deepLinkId={SecurityPageName.rulesCreate}
               data-test-subj="manual-rule-creation"

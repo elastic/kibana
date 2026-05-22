@@ -28,6 +28,7 @@ export function object<T>(def: WithoutTypeField<ObjectMapping<T>>): ObjectMappin
   const defaults: ObjectMapping = omitUnsetKeys(
     {
       type: 'object',
+      dynamic: false,
     },
     def
   );

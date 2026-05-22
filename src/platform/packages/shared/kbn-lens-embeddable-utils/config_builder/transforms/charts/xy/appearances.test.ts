@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type XYStyling } from '../../../schema/charts/xy';
+import type { XYConfig } from '../../../schema/charts/xy';
 import {
   convertStylingToAPIFormat,
   convertStylingToStateFormat,
@@ -27,7 +27,7 @@ const allLayersPresent: LayerPresence = { hasBars: true, hasLines: true, hasArea
 
 describe('XY Appearances Transforms', () => {
   it('should return empty state when given empty API config', () => {
-    const apiConfig: XYStyling = {};
+    const apiConfig: XYConfig['styling'] = {};
     const result = convertStylingToStateFormat(apiConfig);
     expect(result).toEqual({});
   });
@@ -168,7 +168,7 @@ describe('XY Appearances Transforms', () => {
   });
 
   it('should preserve complex config through API -> State -> API', () => {
-    const original: XYStyling = {
+    const original: XYConfig['styling'] = {
       overlays: {
         partial_buckets: { visible: true },
         current_time_marker: { visible: true },

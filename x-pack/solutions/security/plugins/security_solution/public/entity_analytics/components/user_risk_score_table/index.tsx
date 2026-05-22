@@ -7,8 +7,9 @@
 
 import React, { useMemo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
-
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { EuiFilterGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { UserPanelKey } from '../../../flyout/entity_details/shared/constants';
 import type {
   Columns,
   Criteria,
@@ -82,6 +83,7 @@ const UserRiskScoreTableComponent: React.FC<UserRiskScoreTableProps> = ({
   type,
 }) => {
   const dispatch = useDispatch();
+  const { openFlyout } = useExpandableFlyoutApi();
 
   const getUserRiskScoreSelector = useMemo(() => usersSelectors.userRiskScoreSelector(), []);
   const { activePage, limit, sort } = useDeepEqualSelector((state: State) =>
@@ -139,9 +141,27 @@ const UserRiskScoreTableComponent: React.FC<UserRiskScoreTableProps> = ({
     },
     [dispatch]
   );
+
+  const openUserFlyout = useCallback(
+    (userName: string) => {
+      openFlyout({
+        right: {
+          id: UserPanelKey,
+          params: {
+            userName,
+            contextID: tableType,
+            scopeId: tableType,
+            isPreviewMode: false,
+          },
+        },
+      });
+    },
+    [openFlyout]
+  );
+
   const columns = useMemo(
-    () => getUserRiskScoreColumns({ dispatchSeverityUpdate }),
-    [dispatchSeverityUpdate]
+    () => getUserRiskScoreColumns({ dispatchSeverityUpdate, openUserFlyout }),
+    [dispatchSeverityUpdate, openUserFlyout]
   );
 
   const risk = (

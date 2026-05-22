@@ -29,6 +29,41 @@ export const COPY_ID_ACTION_SUCCESS = i18n.translate('xpack.cases.caseView.copyI
   defaultMessage: 'Copied case ID to clipboard',
 });
 
+export const APPLY_TEMPLATE_ACTION_LABEL = i18n.translate(
+  'xpack.cases.caseView.applyTemplateAction',
+  {
+    defaultMessage: 'Apply template',
+  }
+);
+
+export const APPLY_TEMPLATE_MODAL_TITLE = i18n.translate(
+  'xpack.cases.caseView.applyTemplateModal.title',
+  {
+    defaultMessage: 'Apply template',
+  }
+);
+
+export const APPLY_TEMPLATE_MODAL_TEMPLATE_LABEL = i18n.translate(
+  'xpack.cases.caseView.applyTemplateModal.templateLabel',
+  {
+    defaultMessage: 'Template',
+  }
+);
+
+export const APPLY_TEMPLATE_MODAL_TEMPLATE_PLACEHOLDER = i18n.translate(
+  'xpack.cases.caseView.applyTemplateModal.templatePlaceholder',
+  {
+    defaultMessage: 'Select a template',
+  }
+);
+
+export const APPLY_TEMPLATE_MODAL_APPLY = i18n.translate(
+  'xpack.cases.caseView.applyTemplateModal.apply',
+  {
+    defaultMessage: 'Apply',
+  }
+);
+
 export const NAME = i18n.translate('xpack.cases.caseView.name', {
   defaultMessage: 'Name',
 });

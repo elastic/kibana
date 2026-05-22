@@ -8,7 +8,7 @@
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
 import { generateFilters, type DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
   apiHasExecutionContext,
@@ -104,7 +104,7 @@ export const getFieldStatsChartEmbeddableFactory = (
     DataVisualizerPluginStart
   >
 ) => {
-  const factory: EmbeddableFactory<
+  const factory: EmbeddablePublicDefinition<
     FieldStatisticsTableEmbeddableState,
     FieldStatisticsTableEmbeddableApi
   > = {

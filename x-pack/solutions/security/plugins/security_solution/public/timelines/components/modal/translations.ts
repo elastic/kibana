@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 export const CLOSE_TIMELINE_OR_TEMPLATE = (isTimeline: boolean) =>
   i18n.translate('xpack.securitySolution.timeline.flyout.header.closeTimelineButtonLabel', {
-    defaultMessage: 'Close {isTimeline, select, true {timeline} other {template}}',
+    defaultMessage: 'Close {isTimeline, select, true {Timeline} other {template}}',
     values: {
       isTimeline,
     },

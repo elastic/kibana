@@ -23,7 +23,7 @@ import {
   RESOLUTION_GROUP_LINK_TITLE,
   RESOLUTION_GROUP_LINK_TOOLTIP,
 } from './translations';
-import { RESOLUTION_SECTION_TEST_ID } from './test_ids';
+import { RESOLUTION_GROUP_LINK_TEST_ID, RESOLUTION_SECTION_TEST_ID } from './test_ids';
 import { getEntityId, getEntityName } from './helpers';
 
 interface ResolutionSectionProps {
@@ -102,6 +102,7 @@ export const ResolutionSection: React.FC<ResolutionSectionProps> = ({
           iconType: 'arrowStart',
         }}
         expand={{ expandable: false }}
+        data-test-subj={RESOLUTION_GROUP_LINK_TEST_ID}
       >
         <ResolutionGroupTable
           group={group ?? null}

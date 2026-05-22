@@ -39,6 +39,8 @@ paths:
             oneOf:
               - type: string
               - type: array
+                items:
+                  type: string
         - name: monitorTypes
           description: The monitor types to filter.
           in: query
@@ -51,6 +53,13 @@ paths:
                   - icmp
                   - tcp
               - type: array
+                items:
+                  type: string
+                  enum:
+                    - browser
+                    - http
+                    - icmp
+                    - tcp
         - name: page 
           description: The page number for paginated results.
           in: query
@@ -68,6 +77,8 @@ paths:
             oneOf:
               - type: string
               - type: array
+                items:
+                  type: string
         - name: query
           description: A free-text query string.
           in: query
@@ -79,6 +90,8 @@ paths:
           schema:
             oneOf:
               - type: array
+                items:
+                  type: string
               - type: string
         - name: sortField 
           description: The field to sort the results by.
@@ -104,6 +117,8 @@ paths:
           schema:
             oneOf:
               - type: array
+                items:
+                  type: string
               - type: string
         - name: tags
           description: Tags to filter monitors.
@@ -112,6 +127,8 @@ paths:
             oneOf:
               - type: string
               - type: array
+                items:
+                  type: string
         - name: useLogicalAndFor
           description: >
             Specifies whether to apply logical AND filtering for specific fields.

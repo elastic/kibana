@@ -26,7 +26,9 @@ export const resolveConnector = async (
   // Try to get default connector
   try {
     const defaultConnector = await inference.getDefaultConnector(request);
-    return defaultConnector.connectorId;
+    if (defaultConnector) {
+      return defaultConnector.connectorId;
+    }
   } catch {
     // No default connector
   }

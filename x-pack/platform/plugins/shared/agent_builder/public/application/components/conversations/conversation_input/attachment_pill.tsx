@@ -18,6 +18,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 
 const removeAriaLabel = i18n.translate('xpack.agentBuilder.attachmentPill.removeAriaLabel', {
@@ -80,7 +82,7 @@ export const AttachmentPill: React.FC<AttachmentPillProps> = ({
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
           <div className={iconContainerStyles}>
-            <EuiIcon type={iconType} size="m" color="primary" />
+            <EuiIcon type={iconType} size="m" color="primary" aria-hidden={true} />
           </div>
         </EuiFlexItem>
         <EuiFlexItem style={{ minWidth: 0 }}>
@@ -96,6 +98,11 @@ export const AttachmentPill: React.FC<AttachmentPillProps> = ({
               color="text"
               aria-label={removeAriaLabel}
               onClick={onRemoveAttachment}
+              {...getEbtProps({
+                element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                action: AGENT_BUILDER_UI_EBT.action.conversation.REMOVE_ATTACHMENT,
+                detail: 'conversation',
+              })}
             />
           </EuiFlexItem>
         )}

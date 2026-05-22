@@ -17,10 +17,11 @@ import {
   type UseEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import React, { useState, useCallback, useEffect, useRef } from 'react';
+import { TASK_TYPE_DESCRIPTIONS } from '@kbn/inference-endpoint-ui-common';
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 import { isEndpointPreconfigured } from '../../../../utils/preconfigured_endpoint_helper';
-import * as i18n from './translations';
 import { isProviderTechPreview } from '../../../../utils/reranker_helper';
 
 const COPIED_ICON_DISPLAY_DURATION_MS = 1000;
@@ -82,7 +83,13 @@ export const EndpointInfo: React.FC<EndpointInfoProps> = ({ inferenceId, endpoin
             <strong>{inferenceId}</strong>
           </EuiFlexItem>
           <EuiFlexItem grow={false} className="copyButton" css={getCopyButtonStyles(isCopied)}>
-            <EuiCopy textToCopy={inferenceId} afterMessage={i18n.COPY_ID_COPIED}>
+            <EuiCopy
+              textToCopy={inferenceId}
+              afterMessage={i18n.translate(
+                'xpack.searchInferenceEndpoints.elasticsearch.endpointInfo.copyIdCopied',
+                { defaultMessage: 'Copied' }
+              )}
+            >
               {(copy) => (
                 <EuiButtonIcon
                   size="xs"
@@ -95,7 +102,17 @@ export const EndpointInfo: React.FC<EndpointInfoProps> = ({ inferenceId, endpoin
                       ? 'inference-endpoint-copy-id-button-copied'
                       : 'inference-endpoint-copy-id-button'
                   }
-                  aria-label={isCopied ? i18n.COPY_ID_COPIED : i18n.COPY_ID_TO_CLIPBOARD}
+                  aria-label={
+                    isCopied
+                      ? i18n.translate(
+                          'xpack.searchInferenceEndpoints.elasticsearch.endpointInfo.copyIdCopied',
+                          { defaultMessage: 'Copied' }
+                        )
+                      : i18n.translate(
+                          'xpack.searchInferenceEndpoints.elasticsearch.endpointInfo.copyIdToClipboard',
+                          { defaultMessage: 'Copy endpoint ID to clipboard' }
+                        )
+                  }
                 />
               )}
             </EuiCopy>
@@ -105,7 +122,7 @@ export const EndpointInfo: React.FC<EndpointInfoProps> = ({ inferenceId, endpoin
       <EuiFlexItem grow={false}>
         <EuiBadgeGroup gutterSize="xs">
           {taskType != null && (
-            <EuiToolTip content={i18n.TASK_TYPE_TOOLTIPS[taskType] ?? taskType}>
+            <EuiToolTip content={TASK_TYPE_DESCRIPTIONS[taskType] ?? taskType}>
               <EuiBadge
                 tabIndex={0}
                 data-test-subj={`table-column-task-type-${taskType}`}
@@ -116,17 +133,36 @@ export const EndpointInfo: React.FC<EndpointInfoProps> = ({ inferenceId, endpoin
             </EuiToolTip>
           )}
           {isPreconfigured && (
-            <EuiToolTip content={i18n.PRECONFIGURED_TOOLTIP}>
+            <EuiToolTip
+              content={i18n.translate(
+                'xpack.searchInferenceEndpoints.elasticsearch.endpointInfo.preconfiguredTooltip',
+                {
+                  defaultMessage: 'This endpoint is preconfigured by Elastic and cannot be deleted',
+                }
+              )}
+            >
               <EuiBadge tabIndex={0} data-test-subj="preconfiguredBadge" color="hollow">
-                {i18n.PRECONFIGURED_LABEL}
+                {i18n.translate(
+                  'xpack.searchInferenceEndpoints.elasticsearch.endpointInfo.preconfigured',
+                  { defaultMessage: 'PRECONFIGURED' }
+                )}
               </EuiBadge>
             </EuiToolTip>
           )}
           {isTechPreview && (
             <EuiBetaBadge
               tabIndex={0}
-              label={i18n.TECH_PREVIEW_LABEL}
-              tooltipContent={i18n.TECH_PREVIEW_TOOLTIP}
+              label={i18n.translate(
+                'xpack.searchInferenceEndpoints.elasticsearch.endpointInfo.techPreview',
+                { defaultMessage: 'TECH PREVIEW' }
+              )}
+              tooltipContent={i18n.translate(
+                'xpack.searchInferenceEndpoints.elasticsearch.endpointInfo.techPreviewTooltip',
+                {
+                  defaultMessage:
+                    'This functionality is experimental and not supported. It may change or be removed at any time.',
+                }
+              )}
               size="s"
               color="subdued"
               alignment="middle"

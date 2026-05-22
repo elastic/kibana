@@ -24,6 +24,7 @@ const createMockTool = (
   tags: [],
   configuration: {},
   readonly: false,
+  experimental: false,
   isAvailable: jest.fn().mockResolvedValue({ status: 'available' }),
   getSchema: jest.fn().mockResolvedValue(z.object({})),
   getHandler: jest.fn().mockResolvedValue(jest.fn()),

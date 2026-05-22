@@ -122,6 +122,14 @@ test.describe('Standard Product intercept', { tag: '@local-stateful-classic' }, 
     // Switch back to the original tab and expect the intercept to be displayed
     await page.bringToFront();
 
+    // Playwright's bringToFront() does not reliably fire the visibilitychange event
+    // that a real browser tab switch would. Dispatch it synthetically so the
+    // intercept prompter re-evaluates the timer.
+    await page.evaluate(() => {
+      Object.defineProperty(document, 'hidden', { value: false, configurable: true });
+      document.dispatchEvent(new Event('visibilitychange'));
+    });
+
     await pageObjects.intercepts.waitForInterceptDisplayed(TRIGGER_DEF_ID);
 
     // Verify the intercept is visible

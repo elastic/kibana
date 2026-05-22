@@ -9,8 +9,8 @@ import { i18n } from '@kbn/i18n';
 
 import type { ChromeBreadcrumb, CoreStart } from '@kbn/core/public';
 
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import type { NavigateToPath } from '../contexts/kibana';
-import { ML_PAGES } from '../../../common/constants/locator';
 
 export type NavigateToApp = CoreStart['application']['navigateToApp'];
 

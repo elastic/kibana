@@ -58,6 +58,13 @@ interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery'> {
   hideQueryToggle?: boolean;
   sourcererScopeId?: PageScope;
   applyGlobalQueriesAndFilters?: boolean;
+  /**
+   * Additional drop-list of index patterns layered on top of the histogram's
+   * allowlist as a negated `_index` filter (e.g. alert-backing indices).
+   * Forwarded to the Lens embeddable as `excludedPatterns` and CPS-expanded
+   * downstream so it covers both local and remote-prefixed `_index` values.
+   */
+  excludedPatterns?: string[];
 }
 
 const getHistogramOption = (fieldName: string): MatrixHistogramOption => ({
@@ -89,6 +96,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
   to,
   hideQueryToggle = false,
   applyGlobalQueriesAndFilters,
+  excludedPatterns,
 }) => {
   const uniqueQueryId = useMemo(() => `${ID}-${queryType}`, [queryType]);
 
@@ -196,6 +204,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
       chartHeight={CHART_HEIGHT}
       hideQueryToggle={hideQueryToggle}
       applyGlobalQueriesAndFilters={applyGlobalQueriesAndFilters}
+      excludedPatterns={excludedPatterns}
     />
   );
 };

@@ -207,12 +207,11 @@ const transactionLatencyChartsRoute = createApmServerRoute({
     }),
     query: t.intersection([
       t.type({
-        transactionType: t.string,
         latencyAggregationType: latencyAggregationTypeRt,
         bucketSizeInSeconds: toNumberRt,
         useDurationSummary: toBooleanRt,
       }),
-      t.partial({ transactionName: t.string, filters: filtersRt }),
+      t.partial({ transactionType: t.string, transactionName: t.string, filters: filtersRt }),
       t.intersection([environmentRt, kueryRt, rangeRt, offsetRt]),
       serviceTransactionDataSourceRt,
     ]),

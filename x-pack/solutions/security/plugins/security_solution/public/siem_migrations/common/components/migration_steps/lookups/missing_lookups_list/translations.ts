@@ -39,3 +39,21 @@ export const CLEAR_EMPTY_REFERENCE_SET_TOOLTIP = i18n.translate(
   'xpack.securitySolution.siemMigrations.common.dataInputFlyout.lookups.missingReferenceSetsList.clearEmptyReferenceSetTooltip',
   { defaultMessage: 'Mark the reference set as empty' }
 );
+
+export const WATCHLISTS_SENTINEL_APP = i18n.translate(
+  'xpack.securitySolution.siemMigrations.common.dataInputFlyout.lookups.missingWatchlistsList.sentinelAppSection',
+  {
+    defaultMessage:
+      'Below are the watchlists found in your rules. Export them from Microsoft Sentinel and upload here.',
+  }
+);
+
+export const COPY_WATCHLIST_NAME_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.siemMigrations.common.dataInputFlyout.lookups.missingWatchlistsList.copyWatchlistNameTooltip',
+  { defaultMessage: 'Copy watchlist name' }
+);
+
+export const CLEAR_EMPTY_WATCHLIST_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.siemMigrations.common.dataInputFlyout.lookups.missingWatchlistsList.clearEmptyWatchlistTooltip',
+  { defaultMessage: 'Mark the watchlist as empty' }
+);

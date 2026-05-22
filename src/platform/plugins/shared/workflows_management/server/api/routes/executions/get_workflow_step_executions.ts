@@ -15,7 +15,7 @@ import { API_VERSION, AVAILABILITY, MAX_PAGE_SIZE, OAS_TAG } from '../utils/rout
 import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_EXECUTION_READ_SECURITY } from '../utils/route_security';
 import { workflowIdParamSchema } from '../utils/schemas';
-import { withLicenseCheck } from '../utils/with_license_check';
+import { withAvailabilityCheck } from '../utils/with_availability_check';
 
 export function registerGetWorkflowStepExecutionsRoute({ router, api, spaces }: RouteDependencies) {
   router.versioned
@@ -59,11 +59,27 @@ export function registerGetWorkflowStepExecutionsRoute({ router, api, spaces }: 
                   meta: { description: 'Number of results per page.' },
                 })
               ),
+              startedAfter: schema.maybe(
+                schema.string({
+                  meta: {
+                    description:
+                      'Datemath lower bound for filtering step executions by startedAt (inclusive when parsed).',
+                  },
+                })
+              ),
+              startedBefore: schema.maybe(
+                schema.string({
+                  meta: {
+                    description:
+                      'Datemath upper bound for filtering step executions by startedAt (inclusive when parsed with roundUp).',
+                  },
+                })
+              ),
             }),
           },
         },
       },
-      withLicenseCheck(async (context, request, response) => {
+      withAvailabilityCheck(async (context, request, response) => {
         try {
           const spaceId = spaces.getSpaceId(request);
           const { workflowId } = request.params;
@@ -76,6 +92,8 @@ export function registerGetWorkflowStepExecutionsRoute({ router, api, spaces }: 
             includeOutput: query.includeOutput ?? false,
             page: query.page,
             size: query.size,
+            startedAfter: query.startedAfter,
+            startedBefore: query.startedBefore,
           };
 
           return response.ok({

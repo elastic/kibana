@@ -17,6 +17,7 @@ import { getQueryRuleParams } from '../../rule_schema/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { docLinksServiceMock } from '@kbn/core/server/mocks';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
 import { hasTimestampFields } from '../utils/utils';
 import { createMockEndpointAppContextService } from '../../../../endpoint/mocks';
@@ -81,6 +82,9 @@ describe('Custom Query Alerts', () => {
     licensing,
     scheduleNotificationResponseActionsService: () => null,
     endpointAppContextService: createMockEndpointAppContextService(),
+    getEntityStore: jest.fn().mockResolvedValue({
+      createCRUDClient: jest.fn().mockReturnValue({ listEntities: jest.fn() }),
+    }),
   });
 
   afterEach(() => {
@@ -291,5 +295,47 @@ describe('Custom Query Alerts', () => {
     expect(mockedStatusLogger.warn).toHaveBeenCalledWith(
       "The rule's max alerts per run setting (10000) is greater than the Kibana alerting limit (1000). The rule will only write a maximum of 1000 alerts per rule run."
     );
+  });
+
+  describe('when exiting early due to an error resolving the input index', () => {
+    const dataViewId = 'missing-data-view-id';
+
+    const registerAndRun = async () => {
+      const queryAlertType = securityRuleTypeWrapper(
+        createQueryAlertType({
+          id: QUERY_RULE_TYPE_ID,
+          name: 'Custom Query Rule',
+        })
+      );
+
+      alerting.registerType(queryAlertType);
+
+      await executor({ params: getQueryRuleParams({ dataViewId }) });
+    };
+
+    it('closes the rule execution logger when the data view is not found, so the last run object is updated', async () => {
+      services.savedObjectsClient.get.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createGenericNotFoundError('index-pattern', dataViewId)
+      );
+
+      await registerAndRun();
+
+      expect(mockedStatusLogger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Data view is not found.'),
+        expect.objectContaining({ userError: true })
+      );
+      expect(mockedStatusLogger.close).toHaveBeenCalledTimes(1);
+    });
+
+    it('closes the rule execution logger when resolving the input index fails unexpectedly, so the last run object is updated', async () => {
+      services.savedObjectsClient.get.mockRejectedValueOnce(new Error('Unexpected failure'));
+
+      await registerAndRun();
+
+      expect(mockedStatusLogger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Check for indices to search failed.')
+      );
+      expect(mockedStatusLogger.close).toHaveBeenCalledTimes(1);
+    });
   });
 });

@@ -59,6 +59,16 @@ const PLUGINS_SCHEMA = schema.arrayOf(
   }
 );
 
+const CONNECTORS_SCHEMA = schema.arrayOf(
+  schema.string({
+    meta: { description: 'Connector ID to associate with the agent.' },
+  }),
+  {
+    maxSize: 100,
+    meta: { description: 'Array of connector IDs to associate with the agent.' },
+  }
+);
+
 export function registerAgentRoutes({
   router,
   getInternalServices,
@@ -75,7 +85,7 @@ export function registerAgentRoutes({
       access: 'public',
       summary: 'List agents',
       description:
-        'List all available agents. Use this endpoint to retrieve complete agent information including their current configuration and assigned tools. To learn more, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).',
+        'List all available agents. Use this endpoint to retrieve complete agent information including their current configuration and assigned tools. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).',
       options: {
         tags: ['agent', 'oas-tag:agent builder'],
         availability: {
@@ -107,7 +117,7 @@ export function registerAgentRoutes({
       access: 'public',
       summary: 'Get an agent by ID',
       description:
-        'Get a specific agent by ID. Use this endpoint to retrieve the complete agent definition including all configuration details and tool assignments. To learn more, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).',
+        'Get a specific agent by ID. Use this endpoint to retrieve the complete agent definition including all configuration details and tool assignments. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).',
       options: {
         tags: ['agent', 'oas-tag:agent builder'],
         availability: {
@@ -148,7 +158,7 @@ export function registerAgentRoutes({
       access: 'public',
       summary: 'Create an agent',
       description:
-        "Create a new agent. Use this endpoint to define the agent's behavior, appearance, and capabilities through comprehensive configuration options. To learn more, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).",
+        "Create a new agent. Use this endpoint to define the agent's behavior, appearance, and capabilities through comprehensive configuration options. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).",
       options: {
         tags: ['agent', 'oas-tag:agent builder'],
         availability: {
@@ -239,6 +249,7 @@ export function registerAgentRoutes({
                     )
                   ),
                   plugin_ids: schema.maybe(PLUGINS_SCHEMA),
+                  connector_ids: schema.maybe(CONNECTORS_SCHEMA),
                 },
                 {
                   meta: { description: 'Configuration settings for the agent.' },
@@ -285,7 +296,7 @@ export function registerAgentRoutes({
       access: 'public',
       summary: 'Update an agent',
       description:
-        "Update an existing agent configuration. Use this endpoint to modify any aspect of the agent's behavior, appearance, or capabilities. To learn more, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).",
+        "Update an existing agent configuration. Use this endpoint to modify any aspect of the agent's behavior, appearance, or capabilities. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).",
       options: {
         tags: ['agent', 'oas-tag:agent builder'],
         availability: {
@@ -382,6 +393,7 @@ export function registerAgentRoutes({
                       )
                     ),
                     plugin_ids: schema.maybe(PLUGINS_SCHEMA),
+                    connector_ids: schema.maybe(CONNECTORS_SCHEMA),
                   },
                   {
                     meta: { description: 'Updated configuration settings for the agent.' },
@@ -428,7 +440,7 @@ export function registerAgentRoutes({
       access: 'public',
       summary: 'Delete an agent',
       description:
-        'Delete an agent by ID. This action cannot be undone. To learn more, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).',
+        'Delete an agent by ID. This action cannot be undone. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).',
       options: {
         tags: ['agent', 'oas-tag:agent builder'],
         availability: {

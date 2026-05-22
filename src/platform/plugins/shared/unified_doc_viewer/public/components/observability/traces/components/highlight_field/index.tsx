@@ -9,13 +9,13 @@
 
 import type { EuiTextProps } from '@elastic/eui';
 import { EuiText } from '@elastic/eui';
-import React from 'react';
+import React, { type ReactNode } from 'react';
 import type { FieldConfigValue } from '../../../../content_framework';
 
 interface Props {
   value?: FieldConfigValue;
-  formattedValue?: string;
-  children?: (props: { content: React.ReactNode }) => React.ReactNode | React.ReactNode;
+  formattedValue?: ReactNode;
+  children?: (props: { content: ReactNode }) => ReactNode;
   textSize?: EuiTextProps['size'];
 
   as?: keyof JSX.IntrinsicElements;
@@ -40,25 +40,17 @@ const FormattedValue = ({
   textSize,
   as,
 }: {
-  value: string;
+  value: ReactNode;
   textSize: EuiTextProps['size'];
   as?: keyof JSX.IntrinsicElements;
 }) => {
   if (as) {
     const As = as;
-    return (
-      <As
-        // Value returned from formatFieldValue is always sanitized
-        dangerouslySetInnerHTML={{ __html: value }}
-      />
-    );
+    return <As>{value}</As>;
   }
   return (
-    <EuiText
-      className="eui-textTruncate"
-      size={textSize}
-      // Value returned from formatFieldValue is always sanitized
-      dangerouslySetInnerHTML={{ __html: value }}
-    />
+    <EuiText className="eui-textTruncate" size={textSize}>
+      {value}
+    </EuiText>
   );
 };

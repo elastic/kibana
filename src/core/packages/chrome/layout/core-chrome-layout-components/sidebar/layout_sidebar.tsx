@@ -29,6 +29,7 @@ export const LayoutSidebar = ({ children }: LayoutSidebarProps) => {
       css={styles.root}
       className="kbnChromeLayoutSidebar"
       data-test-subj="kbnChromeLayoutSidebar"
+      data-kbn-preserve-zindex="true"
       {...euiIncludeSelectorInFocusTrap.prop}
     >
       {children}

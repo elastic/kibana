@@ -94,7 +94,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await createSLOButton.click();
 
         const sloTitleElement = await testSubjects.find('addSLOFlyoutTitle');
-        expect(await sloTitleElement.getVisibleText()).to.equal('Create SLO');
+
+        await retry.try(async () => {
+          expect(await sloTitleElement.getVisibleText()).to.equal('Create SLO');
+        });
       });
     });
 

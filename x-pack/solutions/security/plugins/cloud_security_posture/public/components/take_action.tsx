@@ -199,7 +199,7 @@ export const TakeAction = ({
       anchorPosition="downLeft"
       data-test-subj={TAKE_ACTION_SUBJ}
     >
-      <EuiContextMenuPanel size="s" items={actionsItems} />
+      <EuiContextMenuPanel items={actionsItems} />
     </EuiPopover>
   );
 };

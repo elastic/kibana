@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import path from 'node:path';
 import { schema } from '@kbn/config-schema';
 import type { RouteAccess, RouteDeprecationInfo } from '@kbn/core-http-server';
 import type { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
@@ -37,9 +38,15 @@ export const registerBulkCreateRoute = (
       path: '/_bulk_create',
       options: {
         summary: `Create saved objects`,
+        description: `WARNING: This API is deprecated. This is a legacy Saved Objects API and may be removed in a future version of Kibana.
+
+Creates multiple Kibana saved objects in a single request.
+
+For transferring or backing up saved objects, prefer the import and export APIs (\`POST /api/saved_objects/_import\` and \`POST /api/saved_objects/_export\`).`,
         tags: ['oas-tag:saved objects'],
         access,
         deprecated: deprecationInfo,
+        oasOperationObject: () => path.resolve(__dirname, './bulk_create.examples.yaml'),
       },
       security: {
         authz: {
@@ -49,7 +56,12 @@ export const registerBulkCreateRoute = (
       },
       validate: {
         query: schema.object({
-          overwrite: schema.boolean({ defaultValue: false }),
+          overwrite: schema.boolean({
+            defaultValue: false,
+            meta: {
+              description: 'Overwrite existing saved objects that match the same type and ID.',
+            },
+          }),
         }),
         body: schema.arrayOf(
           schema.object({

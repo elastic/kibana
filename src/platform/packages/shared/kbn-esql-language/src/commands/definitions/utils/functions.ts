@@ -105,11 +105,23 @@ export const filterFunctionDefinitions = (
   if (!predicates) {
     return functions;
   }
-  const { location, returnTypes, ignored = [], allowed = [] } = predicates;
+  const { location, returnTypes, ignored = [], allowed = [], isTimeseriesSource } = predicates;
 
   return functions.filter(
-    ({ name, locationsAvailable, ignoreAsSuggestion, signatures, license, observabilityTier }) => {
+    ({
+      name,
+      locationsAvailable,
+      ignoreAsSuggestion,
+      tsdbCompatible,
+      signatures,
+      license,
+      observabilityTier,
+    }) => {
       if (ignoreAsSuggestion) {
+        return false;
+      }
+
+      if (isTimeseriesSource && tsdbCompatible === false) {
         return false;
       }
 

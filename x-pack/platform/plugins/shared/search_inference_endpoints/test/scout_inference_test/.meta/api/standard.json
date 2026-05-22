@@ -1,0 +1,230 @@
+{
+  "sha1": "63793ffcd2b26cee9d3d486a944ff3b4ba7c2da1",
+  "tests": [
+    {
+      "id": "0e7ddf934973be7-7cabd7589c944d7",
+      "title": "Inference settings authorization feature-privileged user can GET settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_authorization.spec.ts",
+        "line": 36,
+        "column": 10
+      }
+    },
+    {
+      "id": "0e7ddf934973be7-9bb79f552c777d9",
+      "title": "Inference settings authorization feature-privileged user can PUT settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_authorization.spec.ts",
+        "line": 45,
+        "column": 10
+      }
+    },
+    {
+      "id": "0e7ddf934973be7-4192c89357af784",
+      "title": "Inference settings authorization user without searchInferenceEndpoints privilege gets 403 on GET",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_authorization.spec.ts",
+        "line": 57,
+        "column": 10
+      }
+    },
+    {
+      "id": "0e7ddf934973be7-5ed69e05e2e8c78",
+      "title": "Inference settings authorization user without searchInferenceEndpoints privilege gets 403 on PUT",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_authorization.spec.ts",
+        "line": 68,
+        "column": 10
+      }
+    },
+    {
+      "id": "964bfbb376806bb-b6520dc048a3af3",
+      "title": "Inference settings CRUD GET returns empty defaults when no settings exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_crud.spec.ts",
+        "line": 32,
+        "column": 10
+      }
+    },
+    {
+      "id": "964bfbb376806bb-3b4091c18ac09b0",
+      "title": "Inference settings CRUD PUT creates settings and returns the saved payload",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_crud.spec.ts",
+        "line": 42,
+        "column": 10
+      }
+    },
+    {
+      "id": "964bfbb376806bb-b03d8671447b7a0",
+      "title": "Inference settings CRUD PUT overwrites existing settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_crud.spec.ts",
+        "line": 56,
+        "column": 10
+      }
+    },
+    {
+      "id": "964bfbb376806bb-8131746a47cb8f4",
+      "title": "Inference settings CRUD settings persist across GET requests",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_crud.spec.ts",
+        "line": 75,
+        "column": 10
+      }
+    },
+    {
+      "id": "e63d3e121692033-0b4bca09131e781",
+      "title": "Inference settings space isolation settings written in one space are not visible in another",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_spaces.spec.ts",
+        "line": 41,
+        "column": 10
+      }
+    },
+    {
+      "id": "e63d3e121692033-d34cce7503c6698",
+      "title": "Inference settings space isolation settings written in one space are readable from the same space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_spaces.spec.ts",
+        "line": 57,
+        "column": 10
+      }
+    },
+    {
+      "id": "e63d3e121692033-7a730e89c349b67",
+      "title": "Inference settings space isolation each space maintains its own independent settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_spaces.spec.ts",
+        "line": 76,
+        "column": 10
+      }
+    },
+    {
+      "id": "f00615c0ec6db07-a5156ffdd17284e",
+      "title": "Inference settings validation rejects duplicate feature_id values",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_validation.spec.ts",
+        "line": 20,
+        "column": 10
+      }
+    },
+    {
+      "id": "f00615c0ec6db07-abd35e29be0e23b",
+      "title": "Inference settings validation rejects duplicate endpoints within a feature",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_validation.spec.ts",
+        "line": 36,
+        "column": 10
+      }
+    },
+    {
+      "id": "f00615c0ec6db07-e701e692b15379d",
+      "title": "Inference settings validation rejects an empty feature_id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_validation.spec.ts",
+        "line": 54,
+        "column": 10
+      }
+    },
+    {
+      "id": "f00615c0ec6db07-450abdec621608e",
+      "title": "Inference settings validation rejects a missing features field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_validation.spec.ts",
+        "line": 66,
+        "column": 10
+      }
+    }
+  ]
+}

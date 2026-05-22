@@ -69,6 +69,7 @@ export interface LegacyStoredESQLControlExplicitInput {
     hideExists?: boolean;
     hideSort?: boolean;
   };
+  title?: string;
   esqlQuery: string;
   selectedOptions: string[];
   singleSelect?: boolean;

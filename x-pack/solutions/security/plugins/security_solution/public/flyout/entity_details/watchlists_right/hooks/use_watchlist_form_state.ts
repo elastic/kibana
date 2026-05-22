@@ -25,10 +25,12 @@ export interface WatchlistFormState {
   isDisabled: boolean;
   isNameTooLong: boolean;
   isDescriptionTooLong: boolean;
+  isRiskModifierInvalid: boolean;
   setWatchlistField: <K extends keyof CreateWatchlistRequestBodyInput>(
     key: K,
     value: CreateWatchlistRequestBodyInput[K]
   ) => void;
+  setSourceValid: (valid: boolean) => void;
 }
 
 export const useWatchlistFormState = ({

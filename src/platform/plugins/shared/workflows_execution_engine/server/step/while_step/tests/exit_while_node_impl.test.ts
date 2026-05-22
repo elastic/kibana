@@ -9,8 +9,8 @@
 
 import type { ExitWhileNode, WorkflowGraph } from '@kbn/workflows/graph';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
+import type { StepIoService } from '../../../workflow_context_manager/step_io_service';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
-import type { WorkflowExecutionState } from '../../../workflow_context_manager/workflow_execution_state';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger';
 import { ExitWhileNodeImpl } from '../exit_while_node_impl';
 
@@ -19,7 +19,7 @@ describe('ExitWhileNodeImpl', () => {
   let wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager;
   let stepExecutionRuntime: StepExecutionRuntime;
   let workflowLogger: IWorkflowEventLogger;
-  let workflowExecutionState: WorkflowExecutionState;
+  let stepIoService: StepIoService;
   let workflowGraph: WorkflowGraph;
   let underTest: ExitWhileNodeImpl;
 
@@ -40,16 +40,16 @@ describe('ExitWhileNodeImpl', () => {
     stepExecutionRuntime.finishStep = jest.fn();
     stepExecutionRuntime.getCurrentStepState = jest.fn();
     stepExecutionRuntime.contextManager = {
-      renderValueAccordingToContext: jest.fn().mockImplementation((input) => input),
+      renderValueWithContext: jest.fn().mockImplementation((input) => input),
       getContext: jest.fn().mockReturnValue({}),
     } as any;
 
     workflowLogger = {} as unknown as IWorkflowEventLogger;
     workflowLogger.logDebug = jest.fn();
 
-    workflowExecutionState = {
+    stepIoService = {
       evictStaleLoopOutputs: jest.fn(),
-    } as unknown as WorkflowExecutionState;
+    } as unknown as StepIoService;
 
     workflowGraph = {
       getInnerStepIds: jest.fn().mockReturnValue(new Set(['inner_step'])),
@@ -60,7 +60,7 @@ describe('ExitWhileNodeImpl', () => {
       stepExecutionRuntime,
       wfExecutionRuntimeManager,
       workflowLogger,
-      workflowExecutionState,
+      stepIoService,
       workflowGraph
     );
   });
@@ -82,15 +82,16 @@ describe('ExitWhileNodeImpl', () => {
       (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({
         iteration: 1,
       });
-      (
-        stepExecutionRuntime.contextManager.renderValueAccordingToContext as jest.Mock
-      ).mockReturnValue(true);
+      (stepExecutionRuntime.contextManager.renderValueWithContext as jest.Mock).mockReturnValue(
+        true
+      );
     });
 
     it('should loop back to the start node', () => {
       underTest.run();
 
       expect(wfExecutionRuntimeManager.navigateToNode).toHaveBeenCalledWith(node.startNodeId);
+      expect(stepExecutionRuntime.contextManager.getContext).toHaveBeenCalledTimes(1);
     });
 
     it('should not finish the step', () => {
@@ -105,9 +106,9 @@ describe('ExitWhileNodeImpl', () => {
       (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({
         iteration: 2,
       });
-      (
-        stepExecutionRuntime.contextManager.renderValueAccordingToContext as jest.Mock
-      ).mockReturnValue(false);
+      (stepExecutionRuntime.contextManager.renderValueWithContext as jest.Mock).mockReturnValue(
+        false
+      );
     });
 
     it('should finish the step', () => {
@@ -165,9 +166,7 @@ describe('ExitWhileNodeImpl', () => {
       it('should not evaluate the condition', () => {
         underTest.run();
 
-        expect(
-          stepExecutionRuntime.contextManager.renderValueAccordingToContext
-        ).not.toHaveBeenCalled();
+        expect(stepExecutionRuntime.contextManager.renderValueWithContext).not.toHaveBeenCalled();
       });
     });
 
@@ -202,9 +201,9 @@ describe('ExitWhileNodeImpl', () => {
     });
 
     it('should handle boolean true condition', () => {
-      (
-        stepExecutionRuntime.contextManager.renderValueAccordingToContext as jest.Mock
-      ).mockReturnValue(true);
+      (stepExecutionRuntime.contextManager.renderValueWithContext as jest.Mock).mockReturnValue(
+        true
+      );
 
       underTest.run();
 
@@ -212,9 +211,9 @@ describe('ExitWhileNodeImpl', () => {
     });
 
     it('should handle boolean false condition', () => {
-      (
-        stepExecutionRuntime.contextManager.renderValueAccordingToContext as jest.Mock
-      ).mockReturnValue(false);
+      (stepExecutionRuntime.contextManager.renderValueWithContext as jest.Mock).mockReturnValue(
+        false
+      );
 
       underTest.run();
 
@@ -223,9 +222,9 @@ describe('ExitWhileNodeImpl', () => {
     });
 
     it('should handle undefined condition as false', () => {
-      (
-        stepExecutionRuntime.contextManager.renderValueAccordingToContext as jest.Mock
-      ).mockReturnValue(undefined);
+      (stepExecutionRuntime.contextManager.renderValueWithContext as jest.Mock).mockReturnValue(
+        undefined
+      );
 
       underTest.run();
 
@@ -239,16 +238,14 @@ describe('ExitWhileNodeImpl', () => {
       (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({
         iteration: 2,
       });
-      (
-        stepExecutionRuntime.contextManager.renderValueAccordingToContext as jest.Mock
-      ).mockReturnValue(false);
+      (stepExecutionRuntime.contextManager.renderValueWithContext as jest.Mock).mockReturnValue(
+        false
+      );
 
       underTest.run();
 
       expect(workflowGraph.getInnerStepIds).toHaveBeenCalledWith('testStep');
-      expect(workflowExecutionState.evictStaleLoopOutputs).toHaveBeenCalledWith(
-        new Set(['inner_step'])
-      );
+      expect(stepIoService.evictStaleLoopOutputs).toHaveBeenCalledWith(new Set(['inner_step']));
     });
 
     it('should evict stale loop outputs when max-iterations reached with continue', () => {
@@ -259,7 +256,7 @@ describe('ExitWhileNodeImpl', () => {
 
       underTest.run();
 
-      expect(workflowExecutionState.evictStaleLoopOutputs).toHaveBeenCalled();
+      expect(stepIoService.evictStaleLoopOutputs).toHaveBeenCalled();
     });
 
     it('should evict stale loop outputs before throwing on max-iterations with on-limit fail', () => {
@@ -270,22 +267,20 @@ describe('ExitWhileNodeImpl', () => {
       node.onLimit = 'fail';
 
       expect(() => underTest.run()).toThrow();
-      expect(workflowExecutionState.evictStaleLoopOutputs).toHaveBeenCalledWith(
-        new Set(['inner_step'])
-      );
+      expect(stepIoService.evictStaleLoopOutputs).toHaveBeenCalledWith(new Set(['inner_step']));
     });
 
     it('should not evict stale loop outputs when looping back', () => {
       (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({
         iteration: 0,
       });
-      (
-        stepExecutionRuntime.contextManager.renderValueAccordingToContext as jest.Mock
-      ).mockReturnValue(true);
+      (stepExecutionRuntime.contextManager.renderValueWithContext as jest.Mock).mockReturnValue(
+        true
+      );
 
       underTest.run();
 
-      expect(workflowExecutionState.evictStaleLoopOutputs).not.toHaveBeenCalled();
+      expect(stepIoService.evictStaleLoopOutputs).not.toHaveBeenCalled();
     });
   });
 });

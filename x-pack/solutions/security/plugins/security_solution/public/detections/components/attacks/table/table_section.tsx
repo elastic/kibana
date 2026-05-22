@@ -8,10 +8,11 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import { TableId } from '@kbn/securitysolution-data-table';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { isGroupingBucket } from '@kbn/grouping/src';
 import type { GroupingSort, ParsedGroupingAggregation, RawBucket } from '@kbn/grouping/src';
+import { isGroupingBucket } from '@kbn/grouping/src';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
 import { AttackDetailsRightPanelKey } from '../../../../flyout/attack_details/constants/panel_keys';
@@ -42,7 +43,7 @@ import { AlertsTab } from './attack_details/alerts_tab';
 import { EmptyResultsPrompt } from './empty_results_prompt';
 import { dsl } from '../utils/dsl';
 import { groupingOptions, groupingSettings } from './grouping_settings/grouping_configs';
-import { buildConnectorIdFilter, buildAttacksOnlyFilter } from './filtering_configs';
+import { buildAttacksOnlyFilter, buildConnectorIdFilter } from './filtering_configs';
 import type { GroupTakeActionItems } from '../../alerts_table/types';
 import { AttacksGroupTakeActionItems } from './attacks_group_take_action_items';
 import { useGroupStats } from './grouping_settings/use_group_stats';
@@ -259,6 +260,7 @@ export const TableSection = React.memo(
             attack={attack}
             closePopover={props.closePopover}
             telemetrySource="attacks_page_group_take_action"
+            isRemoteDocument={isNonLocalIndexName(attack.index ?? '')}
           />
         );
       },

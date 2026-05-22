@@ -15,10 +15,12 @@ import { createRuleRoute } from './rules/create_rule/route';
 import { deleteRuleRoute } from './rules/delete_rule/route';
 import { exportRulesRoute } from './rules/export_rules/route';
 import { findRulesRoute } from './rules/find_rules/route';
+import { searchRulesRoute } from './rules/search_rules/route';
 import { importRulesRoute } from './rules/import_rules/route';
 import { getRuleManagementFilters } from './rules/filters/route';
 import { patchRuleRoute } from './rules/patch_rule/route';
 import { readRuleRoute } from './rules/read_rule/route';
+import { ruleHistoryRoute } from './rules/rule_history/route';
 import { updateRuleRoute } from './rules/update_rule/route';
 import { readTagsRoute } from './tags/read_tags/route';
 import { getCoverageOverviewRoute } from './rules/coverage_overview/route';
@@ -45,6 +47,7 @@ export const registerRuleManagementRoutes = (
 
   // Rules search
   findRulesRoute(router, logger);
+  searchRulesRoute(router, logger);
 
   // Rule tags
   readTagsRoute(router);
@@ -54,4 +57,11 @@ export const registerRuleManagementRoutes = (
 
   // Rules coverage overview
   getCoverageOverviewRoute(router);
+
+  // Rule changes history (gated by experimental flag; the feature also
+  // requires `xpack.alerting.ruleChangeTracking.enabled` to be on for the
+  // alerting framework to actually produce history records).
+  if (config.experimentalFeatures.ruleChangesHistoryEnabled) {
+    ruleHistoryRoute(router);
+  }
 };

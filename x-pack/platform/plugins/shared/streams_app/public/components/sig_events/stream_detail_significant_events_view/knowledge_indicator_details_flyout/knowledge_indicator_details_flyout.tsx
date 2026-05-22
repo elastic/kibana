@@ -24,6 +24,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import { isComputedFeature } from '@kbn/streams-schema';
+import type { Feature } from '@kbn/streams-schema';
 import { upperFirst } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import { getConfidenceColor } from '../utils/get_confidence_color';
@@ -48,18 +49,25 @@ interface Props {
   knowledgeIndicator: KnowledgeIndicator;
   occurrencesByQueryId: Record<string, Array<{ x: number; y: number }>>;
   onClose: () => void;
+  features: Feature[];
 }
 
 export function KnowledgeIndicatorDetailsFlyout({
   knowledgeIndicator,
   occurrencesByQueryId,
   onClose,
+  features,
 }: Props) {
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'knowledgeIndicatorDetailsFlyoutTitle' });
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
 
   const streamName = getKnowledgeIndicatorStreamName(knowledgeIndicator);
+
+  const streamFeatures = useMemo(
+    () => features.filter((f) => f.stream_name === streamName),
+    [features, streamName]
+  );
 
   const {
     excludeFeature,
@@ -214,7 +222,7 @@ export function KnowledgeIndicatorDetailsFlyout({
               panelPaddingSize="none"
               anchorPosition="downRight"
             >
-              <EuiContextMenuPanel size="s" items={[...featureActionItems, ...queryActionItems]} />
+              <EuiContextMenuPanel items={[...featureActionItems, ...queryActionItems]} />
             </EuiPopover>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -280,6 +288,7 @@ export function KnowledgeIndicatorDetailsFlyout({
             <KnowledgeIndicatorQueryDetailsContent
               query={knowledgeIndicator.query}
               occurrences={occurrencesByQueryId[knowledgeIndicator.query.id]}
+              streamFeatures={streamFeatures}
             />
           )}
         </EuiFlyoutBody>

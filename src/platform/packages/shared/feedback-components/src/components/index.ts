@@ -22,4 +22,5 @@ export { FeedbackBody } from './body';
 export { SendFeedbackButton } from './footer';
 export { FeedbackFooter } from './footer';
 
+export { FeedbackContainerSkeleton } from './feedback_container_skeleton';
 export { FeedbackContainer } from './feedback_container';

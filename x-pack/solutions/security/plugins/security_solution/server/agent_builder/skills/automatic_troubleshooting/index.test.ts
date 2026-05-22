@@ -24,7 +24,7 @@ describe('createAutomaticTroubleshootingSkill', () => {
 
       expect(skill).toBeDefined();
       expect(skill.id).toBe('automatic_troubleshooting');
-      expect(skill.name).toBe('elastic_defend_configuration_troubleshooting');
+      expect(skill.name).toBe('elastic-defend-configuration-troubleshooting');
       expect(skill.basePath).toBe('skills/security/endpoint');
       expect(skill.description).toContain(
         'Troubleshoot Elastic Defend endpoint configuration issues'
@@ -69,13 +69,13 @@ describe('createAutomaticTroubleshootingSkill', () => {
   });
 
   describe('getInlineTools', () => {
-    it('returns two inline tools', () => {
+    it('returns three inline tools', () => {
       const skill = createAutomaticTroubleshootingSkill(mockEndpointAppContextService);
 
       const inlineTools = skill.getInlineTools?.();
 
       expect(inlineTools).toBeDefined();
-      expect(inlineTools).toHaveLength(2);
+      expect(inlineTools).toHaveLength(3);
     });
 
     it('includes get_package_configurations tool', async () => {

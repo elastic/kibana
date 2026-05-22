@@ -24,6 +24,7 @@ import {
 } from '@kbn/esql-utils';
 import type { getHistoryItems } from '../history_local_storage';
 import type { StarredQueryMetadata } from '../editor_footer/esql_starred_queries_service';
+import { DATA_SOURCES_CACHE_KEY, HISTORY_STARRED_ITEMS_CACHE_KEY } from '../helpers';
 
 interface UseMemoizedCachesParams {
   code: string;
@@ -66,7 +67,7 @@ export const useMemoizedCaches = ({
   const effectiveProjectRouting = setProjectRouting ?? pickerProjectRouting;
 
   const { cache: dataSourcesCache, memoizedSources } = useMemo(() => {
-    // Keying on effectiveProjectRouting ensures a fresh cache (and therefore a fresh fetch)
+    // effectiveProjectRouting as a useMemo dependency ensures a fresh cache (and therefore a fresh fetch)
     // whenever either the SET statement or the picker selection changes.
     const fn = memoize(
       (
@@ -78,7 +79,8 @@ export const useMemoizedCaches = ({
       ) => ({
         timestamp: Date.now(),
         result: getESQLSources(...args, undefined, effectiveProjectRouting),
-      })
+      }),
+      () => DATA_SOURCES_CACHE_KEY
     );
 
     return { cache: fn.cache, memoizedSources: fn };
@@ -115,7 +117,7 @@ export const useMemoizedCaches = ({
         })(),
       }),
       // Constant key: single cache entry, invalidated via cache.clear() in clearCacheWhenOld()
-      () => 'historyStarredItems'
+      () => HISTORY_STARRED_ITEMS_CACHE_KEY
     );
 
     return { cache: fn.cache, memoizedHistoryStarredItems: fn };

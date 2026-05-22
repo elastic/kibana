@@ -101,7 +101,7 @@ describe('ApiKeyInvalidationTaskRunner', () => {
     });
 
     expect(logger.error).toHaveBeenCalledWith(
-      'Error executing notification policy apiKey invalidation task: invalidation failed',
+      'Error executing action policy apiKey invalidation task: invalidation failed',
       expect.any(Object)
     );
     expect(result).toEqual({

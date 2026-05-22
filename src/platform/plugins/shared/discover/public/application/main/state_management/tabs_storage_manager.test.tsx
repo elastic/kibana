@@ -8,8 +8,10 @@
  */
 
 import { omit } from 'lodash';
+import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram';
 import { createKbnUrlStateStorage, Storage } from '@kbn/kibana-utils-plugin/public';
+import { mockControlState } from '../../../__mocks__/esql_controls';
 import { createDiscoverServicesMock } from '../../../__mocks__/services';
 import {
   createTabsStorageManager,
@@ -283,7 +285,7 @@ describe('TabsStorageManager', () => {
     const storedSerializedSearchSource = { index: 'test-index' };
     const storedSearchSessionId = 'test-session-id';
     const legacyVisContext = { legacyVis: 'legacyValue' };
-    const legacyControlGroupState = { legacyControlGroup: 'legacyGroupValue' };
+    const legacyControlGroupState = mockControlState;
 
     const toLegacyStoredTab = (tab: TabState | RecentlyClosedTabState) => {
       const storedTab = { ...toStoredTab(tab), attributes: undefined };
@@ -319,13 +321,74 @@ describe('TabsStorageManager', () => {
     const loadedTab = loadedProps.allTabs[0];
     expect(loadedTab.attributes).toStrictEqual({
       visContext: legacyVisContext,
-      controlGroupState: legacyControlGroupState,
+      controlGroupState: {
+        ...legacyControlGroupState,
+        panel1: {
+          ...legacyControlGroupState.panel1,
+          type: ESQL_CONTROL,
+        },
+      },
       timeRestore: false,
     });
+    expect(loadedTab.esqlVariables).toStrictEqual([
+      {
+        key: 'foo',
+        type: 'values',
+        value: 'bar',
+      },
+    ]);
     expect(loadedTab.initialInternalState).toStrictEqual({
       serializedSearchSource: storedSerializedSearchSource,
       searchSessionId: storedSearchSessionId,
     });
+  });
+
+  it('should normalize legacy controlGroupState stored in attributes', async () => {
+    const {
+      tabsStorageManager,
+      urlStateStorage,
+      services: { storage },
+    } = create();
+
+    storage.set(TABS_LOCAL_STORAGE_KEY, {
+      userId: mockUserId,
+      spaceId: mockSpaceId,
+      openTabs: [
+        {
+          ...toStoredTab(mockTab1),
+          attributes: {
+            ...mockTab1.attributes,
+            controlGroupState: mockControlState,
+          },
+        },
+      ],
+      closedTabs: [],
+    });
+
+    await urlStateStorage.set(TAB_STATE_URL_KEY, {
+      tabId: mockTab1.id,
+    });
+
+    const loadedProps = tabsStorageManager.loadLocally({
+      userId: mockUserId,
+      spaceId: mockSpaceId,
+      defaultTabState: DEFAULT_TAB_STATE,
+    });
+
+    expect(loadedProps.allTabs[0]?.attributes.controlGroupState).toStrictEqual({
+      ...mockControlState,
+      panel1: {
+        ...mockControlState.panel1,
+        type: ESQL_CONTROL,
+      },
+    });
+    expect(loadedProps.allTabs[0]?.esqlVariables).toStrictEqual([
+      {
+        key: 'foo',
+        type: 'values',
+        value: 'bar',
+      },
+    ]);
   });
 
   it('should clear tabs and select a default one', () => {

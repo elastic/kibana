@@ -37,6 +37,8 @@ export type {
   AuthenticationServiceStart,
   InvalidateAPIKeyResult,
   GrantAPIKeyResult,
+  CloneAPIKeyParams,
+  CloneAPIKeyResult,
   ValidateAPIKeyParams,
   CreateAPIKeyResult,
   InvalidateAPIKeysParams,
@@ -88,6 +90,7 @@ export const config: PluginConfigDescriptor<TypeOf<typeof ConfigSchema>> = {
     showNavLinks: true,
     ui: true,
     roleManagementEnabled: true,
+    uiam: { enabled: true },
   },
 };
 export const plugin: PluginInitializer<

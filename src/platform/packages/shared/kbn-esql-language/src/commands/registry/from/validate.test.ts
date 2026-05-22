@@ -109,6 +109,39 @@ describe('FROM Validation', () => {
         fromExpectErrors('FROM other_view', ['Unknown data source "other_view"'], contextWithViews);
       });
 
+      test('no errors when using a dataset name from context.datasets', () => {
+        const contextWithDatasets = {
+          ...mockContext,
+          datasets: [
+            {
+              name: 'my_dataset',
+              data_source: 'prod_s3_logs',
+              resource: 's3://logs-bucket/access/**/*.parquet',
+            },
+          ],
+        };
+        fromExpectErrors('FROM my_dataset', [], contextWithDatasets);
+        fromExpectErrors('FROM my_dataset, index', [], contextWithDatasets);
+      });
+
+      test('errors on unknown dataset when datasets are provided but name is not in list', () => {
+        const contextWithDatasets = {
+          ...mockContext,
+          datasets: [
+            {
+              name: 'my_dataset',
+              data_source: 'prod_s3_logs',
+              resource: 's3://logs-bucket/access/**/*.parquet',
+            },
+          ],
+        };
+        fromExpectErrors(
+          'FROM other_dataset',
+          ['Unknown data source "other_dataset"'],
+          contextWithDatasets
+        );
+      });
+
       test('uses "Unknown index" (not "Unknown data source") for unknown source inside subquery', () => {
         const query = 'FROM index, (FROM missingIndex)';
         const { root } = Parser.parse(query);

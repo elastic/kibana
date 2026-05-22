@@ -25,6 +25,7 @@ export {
   getBatchedFieldsFromFieldCaps,
   getIndexFields,
   type IndexFieldsResult,
+  type IndexFieldType,
 } from './ccs';
 export { generateXmlTree, type XmlNode } from './formatting';
 export { errorResult, otherResult } from './results';

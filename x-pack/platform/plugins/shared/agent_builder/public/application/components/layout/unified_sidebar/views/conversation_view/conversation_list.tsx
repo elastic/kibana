@@ -17,11 +17,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { appPaths } from '../../../../../utils/app_paths';
+import { useStreamingContext } from '../../../../../context/streaming/streaming_context';
 import { useConversationList } from '../../../../../hooks/use_conversation_list';
 import {
   createConversationListItemStyles,
   createActiveConversationListItemStyles,
 } from '../../../../conversations/conversation_list_item_styles';
+import { ConversationListItemRow } from './conversation_list_item_row';
 
 const newConversationLabel = i18n.translate(
   'xpack.agentBuilder.sidebar.conversation.newConversation',
@@ -43,6 +45,7 @@ export const ConversationList: React.FC<ConversationListProps> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const { conversations = [], isLoading } = useConversationList({ agentId });
+  const { activeStreams } = useStreamingContext();
 
   const sortedConversations = useMemo(
     () =>
@@ -89,14 +92,15 @@ export const ConversationList: React.FC<ConversationListProps> = ({
         const isActive = currentConversationId === conversation.id;
         return (
           <EuiFlexItem grow={false} key={conversation.id}>
-            <Link
-              to={appPaths.agent.conversations.byId({ agentId, conversationId: conversation.id })}
-              css={isActive ? activeLinkStyles : linkStyles}
-              data-test-subj={`agentBuilderSidebarConversation-${conversation.id}`}
-              onClick={onItemClick}
-            >
-              <EuiTextTruncate text={conversation.title || conversation.id} />
-            </Link>
+            <ConversationListItemRow
+              agentId={agentId}
+              conversationId={conversation.id}
+              title={conversation.title || conversation.id}
+              isActive={isActive}
+              routeConversationId={currentConversationId}
+              showActionsMenu={!activeStreams.has(conversation.id)}
+              onItemClick={onItemClick}
+            />
           </EuiFlexItem>
         );
       })}

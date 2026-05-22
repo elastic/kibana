@@ -69,7 +69,7 @@ describe('TimelineModalHeader', () => {
     const { getByTestId, getByText } = renderTimelineModalHeader();
 
     expect(getByTestId('timeline-favorite-empty-star')).toBeInTheDocument();
-    expect(getByText('Untitled timeline')).toBeInTheDocument();
+    expect(getByText('Untitled Timeline')).toBeInTheDocument();
     expect(getByTestId('timeline-save-status')).toBeInTheDocument();
     expect(getByTestId('timeline-modal-header-actions')).toBeInTheDocument();
     expect(getByTestId('timeline-modal-new-timeline-dropdown-button')).toBeInTheDocument();

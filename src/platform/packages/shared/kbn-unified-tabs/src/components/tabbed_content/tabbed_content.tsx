@@ -67,6 +67,8 @@ export interface TabbedContentProps
   getTopTabMenuItems?: (item: TabItem) => TabMenuItem[];
   /** Optional function to provide additional menu items placed at the end of the menu */
   getAdditionalTabMenuItems?: (item: TabItem) => TabMenuItem[];
+  /** Optional callback invoked when tabs are dropped due to the max tab limit */
+  onTabLimitReached?: (droppedCount: number) => void;
 }
 
 export interface TabbedContentState {
@@ -111,6 +113,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   appendRight,
   getTopTabMenuItems,
   getAdditionalTabMenuItems,
+  onTabLimitReached,
 }) => {
   const { euiTheme } = useEuiTheme();
   const tabsBarApi = useRef<TabsBarApi | null>(null);
@@ -229,6 +232,9 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
           ? Math.max(0, maxItemsCount - prevState.items.length)
           : itemsToRestore.length;
 
+        const droppedCount =
+          itemsToRestore.length - Math.min(itemsToRestore.length, remainingCapacity);
+
         const restoredItems = itemsToRestore.slice(0, remainingCapacity).map((item) => {
           const newItem = createItem();
           return { ...omit(item, 'closedAt'), id: newItem.id, restoredFromId: item.id };
@@ -236,6 +242,10 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
 
         if (restoredItems.length === 0) {
           return prevState;
+        }
+
+        if (droppedCount > 0) {
+          onTabLimitReached?.(droppedCount);
         }
 
         const nextSelectedItem = restoredItems.at(0) ?? prevState.selectedItem;
@@ -257,7 +267,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
         };
       });
     },
-    [changeState, createItem, maxItemsCount, onEBTEvent]
+    [changeState, createItem, maxItemsCount, onEBTEvent, onTabLimitReached]
   );
 
   const onClose = useCallback(

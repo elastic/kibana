@@ -21,8 +21,8 @@ import type {
   SchemaMetadata,
 } from '../../common/types/schema';
 // Static paths required — must match FALLBACK_*_VERSION in common/constants.ts
-import fallbackOsquerySchemaJson from '../../public/common/schemas/osquery/v5.19.0.json';
-import fallbackEcsSchemaJson from '../../public/common/schemas/ecs/v9.2.0.json';
+import fallbackOsquerySchemaJson from '../../common/schemas/osquery/v5.19.0.json';
+import fallbackEcsSchemaJson from '../../common/schemas/ecs/v9.2.0.json';
 
 interface PackageInfo {
   pkgVersion: string;

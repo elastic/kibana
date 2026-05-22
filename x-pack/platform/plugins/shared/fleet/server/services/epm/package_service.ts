@@ -52,7 +52,7 @@ import {
 import type { FetchFindLatestPackageOptions } from './registry';
 import { getPackageFieldsMetadata } from './registry';
 import * as Registry from './registry';
-import { fetchFindLatestPackageOrThrow, getPackage } from './registry';
+import { fetchFindLatestPackageOrThrow } from './registry';
 
 import { installTransforms, isTransform } from './elasticsearch/transform/install';
 import {
@@ -64,6 +64,7 @@ import {
   getPackageInfo,
   getInstalledPackages,
 } from './packages';
+import { getPackageFromSource } from './packages/get';
 import { generatePackageInfoFromArchiveBuffer } from './archive';
 import { getAsset, getEsPackage } from './archive/storage';
 import type { PackageAsset } from './archive/storage';
@@ -120,8 +121,8 @@ export interface PackageClient {
   getPackage(
     packageName: string,
     packageVersion: string,
-    options?: Parameters<typeof getPackage>['2']
-  ): ReturnType<typeof getPackage>;
+    options?: { ignoreUnverified?: boolean }
+  ): ReturnType<typeof getPackageFromSource>;
 
   getPackageFieldsMetadata(
     params: Parameters<typeof getPackageFieldsMetadata>['0'],
@@ -359,10 +360,15 @@ class PackageClientImpl implements PackageClient {
   public async getPackage(
     packageName: string,
     packageVersion: string,
-    options?: Parameters<typeof getPackage>['2']
+    options?: { ignoreUnverified?: boolean }
   ) {
     await this.#runPreflight(READ_PACKAGE_INFO_AUTHZ);
-    return getPackage(packageName, packageVersion, options);
+    return getPackageFromSource({
+      pkgName: packageName,
+      pkgVersion: packageVersion,
+      savedObjectsClient: this.internalSoClient,
+      ignoreUnverified: options?.ignoreUnverified,
+    });
   }
 
   public async getPackageFieldsMetadata(

@@ -8,8 +8,7 @@
  */
 
 import React, { useMemo } from 'react';
-import type { LensSeriesLayer } from '@kbn/lens-embeddable-utils/config_builder';
-import type { LensYBoundsConfig } from '@kbn/lens-embeddable-utils/config_builder/types';
+import type { LensYBoundsConfig, LensSeriesLayer } from '@kbn/lens-embeddable-utils';
 import { useTraceMetricsContext } from './context/trace_metrics_context';
 import { Chart } from '../../chart';
 import { ACTION_OPEN_IN_DISCOVER } from '../../../common/constants';
@@ -34,7 +33,7 @@ const ErrorRateChartContent = ({
   color,
   title,
 }: ErrorRateChartContentProps) => {
-  const { services, fetchParams, discoverFetch$, onBrushEnd, onFilter, actions } =
+  const { services, fetchParams, discoverFetch$, onBrushEnd, onFilter, actions, profileId } =
     useTraceMetricsContext();
 
   const chartLayers = useMemo<LensSeriesLayer[]>(
@@ -62,6 +61,7 @@ const ErrorRateChartContent = ({
 
   return (
     <Chart
+      id="errorRate"
       esqlQuery={query}
       size="s"
       discoverFetch$={discoverFetch$}
@@ -76,6 +76,7 @@ const ErrorRateChartContent = ({
       syncTooltips
       yBounds={ERROR_RATE_Y_BOUNDS}
       extraDisabledActions={[ACTION_OPEN_IN_DISCOVER]}
+      profileId={profileId}
     />
   );
 };

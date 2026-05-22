@@ -14,7 +14,7 @@ import type {
   WorkflowExecutionDto,
 } from '@kbn/workflows';
 import { getStepExecutionsByWorkflowExecution } from '@kbn/workflows/server';
-import { stringifyWorkflowDefinition } from '../../../common/lib/yaml';
+import { stringifyWorkflowDefinition } from '@kbn/workflows-yaml';
 
 interface GetWorkflowExecutionParams {
   esClient: ElasticsearchClient;
@@ -111,5 +111,6 @@ function transformToWorkflowExecutionDetailDto(
     yaml,
     traceId: workflowExecution.traceId,
     entryTransactionId: workflowExecution.entryTransactionId,
+    concurrencyGroupKey: workflowExecution.concurrencyGroupKey,
   };
 }

@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGrid,
   EuiFlexGroup,
+  EuiFlexItem,
   EuiImage,
   EuiSpacer,
   EuiSplitPanel,
@@ -23,6 +24,7 @@ import type { ApplicationStart } from '@kbn/core/public';
 import { WORKFLOWS_UI_SETTING_ENABLED_ID } from '../../../common';
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 import { useKibana } from '../../hooks/use_kibana';
+import { useGetLicenseInfo } from '../../hooks/use_get_license_info';
 
 const PANEL_TYPES = [
   'discover',
@@ -199,6 +201,7 @@ const MetricPanelEmpty = ({ panel }: MetricPanelEmptyProps) => {
 };
 
 export const MetricPanels = () => {
+  const { hasEnterpriseLicense } = useGetLicenseInfo();
   const { services } = useKibana();
   const { chrome, uiSettings } = services;
 
@@ -208,7 +211,7 @@ export const MetricPanels = () => {
     const capabilityChecks: Record<MetricPanelType, boolean> = {
       discover: chrome.navLinks.get('discover') !== undefined,
       dashboards: chrome.navLinks.get('dashboards') !== undefined,
-      agentBuilder: chrome.navLinks.get('agent_builder') !== undefined,
+      agentBuilder: chrome.navLinks.get('agent_builder') !== undefined && hasEnterpriseLicense,
       workflows: isWorkflowsUiEnabled && chrome.navLinks.get('workflows') !== undefined,
       machineLearning:
         chrome.navLinks.get('ml:overview') !== undefined || chrome.navLinks.get('ml') !== undefined,
@@ -216,13 +219,32 @@ export const MetricPanels = () => {
     };
 
     return METRIC_PANEL_ITEMS.filter((panel) => capabilityChecks[panel.type]);
-  }, [chrome.navLinks, isWorkflowsUiEnabled]);
+  }, [chrome.navLinks, isWorkflowsUiEnabled, hasEnterpriseLicense]);
+
+  const gridColumns = useMemo(() => {
+    const count = panels.length;
+    if (count === 1 || count === 2 || count === 4) {
+      return 2;
+    }
+    return 3;
+  }, [panels.length]);
+
+  if (panels.length === 0) {
+    return null;
+  }
 
   return (
-    <EuiFlexGrid gutterSize="l" columns={3} data-test-subj="searchHomepageNavLinksTabGrid">
-      {panels.map((panel, index) => (
-        <MetricPanelEmpty panel={panel} key={panel.type + '-' + index} />
-      ))}
-    </EuiFlexGrid>
+    <EuiFlexItem>
+      <EuiSpacer size="l" />
+      <EuiFlexGrid
+        gutterSize="l"
+        columns={gridColumns}
+        data-test-subj="searchHomepageNavLinksTabGrid"
+      >
+        {panels.map((panel, index) => (
+          <MetricPanelEmpty panel={panel} key={panel.type + '-' + index} />
+        ))}
+      </EuiFlexGrid>
+    </EuiFlexItem>
   );
 };

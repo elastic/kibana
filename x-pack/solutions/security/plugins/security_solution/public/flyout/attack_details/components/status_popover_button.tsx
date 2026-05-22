@@ -30,113 +30,127 @@ interface StatusPopoverButtonProps {
    * Information used to
    */
   enrichedFieldInfo: EnrichedFieldInfoWithValues;
+  /**
+   * When true, suppresses the status-change popover regardless of user permissions.
+   * Use this when status mutations are not possible (e.g. remote/CCS documents).
+   */
+  disabled: boolean;
 }
 
 /**
  * Renders a button and its popover + modal to display the status of an attack and allows the user to change it.
  * It is used in the header of the attack details flyout.
  */
-export const StatusPopoverButton = memo(({ enrichedFieldInfo }: StatusPopoverButtonProps) => {
-  const { attackId } = useAttackDetailsContext();
-  const { alertIds } = useHeaderData();
-  const currentSpaceId = useSpaceId();
-  const { closeFlyout } = useExpandableFlyoutApi();
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const togglePopover = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
-  const closePopover = useCallback(() => setIsPopoverOpen(false), []);
+export const StatusPopoverButton = memo(
+  ({ enrichedFieldInfo, disabled }: StatusPopoverButtonProps) => {
+    const { attackId } = useAttackDetailsContext();
+    const { alertIds } = useHeaderData();
+    const currentSpaceId = useSpaceId();
+    const { closeFlyout } = useExpandableFlyoutApi();
+    const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+    const togglePopover = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
+    const closePopover = useCallback(() => setIsPopoverOpen(false), []);
 
-  const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuery(), []);
+    const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuery(), []);
 
-  const globalQueries = useDeepEqualSelector(getGlobalQuerySelector);
+    const globalQueries = useDeepEqualSelector(getGlobalQuerySelector);
 
-  // refetch alerts after status change
-  const refetchGlobalQuery = useCallback(() => {
-    globalQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
-  }, [globalQueries]);
+    // refetch alerts after status change
+    const refetchGlobalQuery = useCallback(() => {
+      globalQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
+    }, [globalQueries]);
 
-  // force attacks to be refetched automatically after status change
-  const invalidateFindAttackDiscoveries = useInvalidateFindAttackDiscoveries();
+    // force attacks to be refetched automatically after status change
+    const invalidateFindAttackDiscoveries = useInvalidateFindAttackDiscoveries();
 
-  const currentWorkflowStatus = useMemo(
-    () => enrichedFieldInfo.values[0] as AlertWorkflowStatus,
-    [enrichedFieldInfo.values]
-  );
-  const onWorkflowStatusChange = useCallback(() => {
-    invalidateFindAttackDiscoveries();
-    refetchGlobalQuery();
-    closeFlyout();
-  }, [closeFlyout, invalidateFindAttackDiscoveries, refetchGlobalQuery]);
+    const currentWorkflowStatus = useMemo(
+      () => enrichedFieldInfo.values[0] as AlertWorkflowStatus,
+      [enrichedFieldInfo.values]
+    );
+    const onWorkflowStatusChange = useCallback(() => {
+      invalidateFindAttackDiscoveries();
+      refetchGlobalQuery();
+      closeFlyout();
+    }, [closeFlyout, invalidateFindAttackDiscoveries, refetchGlobalQuery]);
 
-  const { items, panels } = useAttackWorkflowStatusContextMenuItems({
-    attacksWithWorkflowStatus: [
-      {
-        attackId,
-        relatedAlertIds: alertIds,
-        workflowStatus: currentWorkflowStatus,
-      },
-    ],
-    closePopover: togglePopover,
-    onSuccess: onWorkflowStatusChange,
-    telemetrySource: 'attacks_page_flyout_header',
-  });
+    const { items, panels } = useAttackWorkflowStatusContextMenuItems({
+      attacksWithWorkflowStatus: [
+        {
+          attackId,
+          relatedAlertIds: alertIds,
+          workflowStatus: currentWorkflowStatus,
+        },
+      ],
+      closePopover: togglePopover,
+      onSuccess: onWorkflowStatusChange,
+      telemetrySource: 'attacks_page_flyout_header',
+    });
 
-  const button = useMemo(
-    () => (
-      <FormattedFieldValue
-        contextId={`${currentSpaceId}-attack-details-flyout-status-popover-button`}
-        eventId={attackId}
-        value={enrichedFieldInfo.values[0]}
-        fieldName={enrichedFieldInfo.data.field}
-        linkValue={enrichedFieldInfo.linkValue}
-        fieldType={enrichedFieldInfo.data.type}
-        fieldFormat={getFieldFormat(enrichedFieldInfo.data)}
-        truncate={false}
-        isButton={true}
-        onClick={true ? togglePopover : undefined}
-        onClickAriaLabel={CLICK_TO_CHANGE_ALERT_STATUS}
-      />
-    ),
-    [
-      currentSpaceId,
-      attackId,
-      enrichedFieldInfo.values,
-      enrichedFieldInfo.data,
-      enrichedFieldInfo.linkValue,
-      togglePopover,
-    ]
-  );
+    const statusPopoverVisible = useMemo(() => items.length > 0 && !disabled, [items, disabled]);
 
-  return (
-    <>
-      <EuiPopover
-        button={button}
-        isOpen={isPopoverOpen}
-        closePopover={closePopover}
-        panelPaddingSize="none"
-        data-test-subj={STATUS_POPOVER_TEST_ID}
-      >
-        <EuiPopoverTitle paddingSize="m">
-          {i18n.translate(
-            'xpack.securitySolution.attackDetailsFlyout.header.popover.changeAttackStatus',
-            {
-              defaultMessage: 'Change attack status',
-            }
-          )}
-        </EuiPopoverTitle>
-        <EuiContextMenu
-          panels={[
-            {
-              id: 0,
-              items,
-            },
-            ...panels,
-          ]}
-          initialPanelId={0}
-          data-test-subj={STATUS_POPOVER_BUTTON_TEST_ID}
+    const button = useMemo(
+      () => (
+        <FormattedFieldValue
+          contextId={`${currentSpaceId}-attack-details-flyout-status-popover-button`}
+          eventId={attackId}
+          value={enrichedFieldInfo.values[0]}
+          fieldName={enrichedFieldInfo.data.field}
+          linkValue={enrichedFieldInfo.linkValue}
+          fieldType={enrichedFieldInfo.data.type}
+          fieldFormat={getFieldFormat(enrichedFieldInfo.data)}
+          truncate={false}
+          isButton={statusPopoverVisible}
+          onClick={statusPopoverVisible ? togglePopover : undefined}
+          onClickAriaLabel={CLICK_TO_CHANGE_ALERT_STATUS}
         />
-      </EuiPopover>
-    </>
-  );
-});
+      ),
+      [
+        currentSpaceId,
+        attackId,
+        enrichedFieldInfo.values,
+        enrichedFieldInfo.data,
+        enrichedFieldInfo.linkValue,
+        togglePopover,
+        statusPopoverVisible,
+      ]
+    );
+
+    if (!statusPopoverVisible) {
+      return button;
+    }
+
+    return (
+      <>
+        <EuiPopover
+          button={button}
+          isOpen={isPopoverOpen}
+          closePopover={closePopover}
+          panelPaddingSize="none"
+          data-test-subj={STATUS_POPOVER_TEST_ID}
+        >
+          <EuiPopoverTitle paddingSize="m">
+            {i18n.translate(
+              'xpack.securitySolution.attackDetailsFlyout.header.popover.changeAttackStatus',
+              {
+                defaultMessage: 'Change attack status',
+              }
+            )}
+          </EuiPopoverTitle>
+          <EuiContextMenu
+            panels={[
+              {
+                id: 0,
+                items,
+              },
+              ...panels,
+            ]}
+            initialPanelId={0}
+            data-test-subj={STATUS_POPOVER_BUTTON_TEST_ID}
+          />
+        </EuiPopover>
+      </>
+    );
+  }
+);
 
 StatusPopoverButton.displayName = 'StatusPopoverButton';

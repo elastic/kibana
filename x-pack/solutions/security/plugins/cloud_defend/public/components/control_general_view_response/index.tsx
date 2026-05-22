@@ -312,7 +312,6 @@ export const ControlGeneralViewResponse = ({
               anchorPosition="downLeft"
             >
               <EuiContextMenuPanel
-                size="s"
                 items={[
                   <EuiContextMenuItem
                     key="duplicate"

@@ -8,7 +8,17 @@
  */
 
 export { takeSnapshot } from './take_snapshot';
-export { fetchSnapshot } from './fetch_snapshot';
+export { fetchSnapshot, gcsSnapshotUrl } from './fetch_snapshot';
+export { compareSnapshots } from './compare_snapshots';
 export { getNewTypes } from './get_new_types';
-export { getUpdatedTypes } from './get_updated_types';
-export { validateChangesNewType, validateChangesExistingType } from './validate_changes';
+export {
+  classifyUpdatedTypes,
+  getUpdatedTypes,
+  getTypesWithNewModelVersions,
+} from './get_updated_types';
+export type { ClassifiedUpdatedTypes } from './get_updated_types';
+export {
+  validateChangesNewType,
+  validateChangesExistingType,
+  validateNoVirtualVersionDowngrade,
+} from './validate_changes';

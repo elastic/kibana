@@ -244,14 +244,12 @@ export class DashboardPageObject extends FtrService {
       ? 'breadcrumb breadcrumb-deepLinkId-dashboards'
       : 'breadcrumb dashboardListingBreadcrumb first';
     await this.testSubjects.click(breadcrumbLink);
-    await this.retry.try(async () => {
-      const warning = await this.testSubjects.exists('confirmModalTitleText');
-      if (warning) {
-        await this.testSubjects.click(
-          ignorePageLeaveWarning ? 'confirmModalConfirmButton' : 'confirmModalCancelButton'
-        );
-      }
-    });
+    const warning = await this.testSubjects.exists('confirmModalTitleText');
+    if (warning) {
+      await this.testSubjects.click(
+        ignorePageLeaveWarning ? 'confirmModalConfirmButton' : 'confirmModalCancelButton'
+      );
+    }
     await this.expectExistsDashboardLandingPage();
   }
 

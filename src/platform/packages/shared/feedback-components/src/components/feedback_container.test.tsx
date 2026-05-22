@@ -14,7 +14,7 @@ import userEvent from '@testing-library/user-event';
 import { FeedbackContainer } from './feedback_container';
 
 const mockProps = {
-  getQuestions: jest.fn().mockReturnValue([
+  getQuestions: jest.fn().mockResolvedValue([
     {
       id: 'experience',
       type: 'experience',
@@ -37,32 +37,37 @@ describe('FeedbackContainer', () => {
     jest.clearAllMocks();
   });
 
-  it('should render container', () => {
+  it('should render container', async () => {
     renderWithI18n(<FeedbackContainer {...mockProps} />);
 
-    expect(screen.getByTestId('feedbackContainer')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByTestId('feedbackContainer')).toBeInTheDocument();
+    });
   });
 
-  it('should render header, body, and footer', () => {
+  it('should render header, body, and footer', async () => {
     renderWithI18n(<FeedbackContainer {...mockProps} />);
 
-    expect(screen.getByTestId('feedbackHeader')).toBeInTheDocument();
-    expect(screen.getByTestId('feedbackBody')).toBeInTheDocument();
-    expect(screen.getByTestId('feedbackFooter')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByTestId('feedbackHeader')).toBeInTheDocument();
+      expect(screen.getByTestId('feedbackBody')).toBeInTheDocument();
+      expect(screen.getByTestId('feedbackFooter')).toBeInTheDocument();
+    });
   });
 
-  it('should disable send button when no data is entered', () => {
+  it('should disable send button when no data is entered', async () => {
     renderWithI18n(<FeedbackContainer {...mockProps} />);
 
-    const sendButton = screen.getByTestId('feedbackFooterSendFeedbackButton');
-
-    expect(sendButton).toBeDisabled();
+    await waitFor(() => {
+      const sendButton = screen.getByTestId('feedbackFooterSendFeedbackButton');
+      expect(sendButton).toBeDisabled();
+    });
   });
 
   it('should enable send button when CSAT score is selected', async () => {
     renderWithI18n(<FeedbackContainer {...mockProps} />);
 
-    const emailConsentCheckbox = screen.getByTestId('feedbackEmailConsentCheckbox');
+    const emailConsentCheckbox = await screen.findByTestId('feedbackEmailConsentCheckbox');
     await userEvent.click(emailConsentCheckbox);
 
     const csatButtons = screen.getAllByRole('button', { name: /^\d$/ });
@@ -77,7 +82,7 @@ describe('FeedbackContainer', () => {
   it('should submit feedback with correct data', async () => {
     renderWithI18n(<FeedbackContainer {...mockProps} />);
 
-    const emailConsentCheckbox = screen.getByTestId('feedbackEmailConsentCheckbox');
+    const emailConsentCheckbox = await screen.findByTestId('feedbackEmailConsentCheckbox');
     await userEvent.click(emailConsentCheckbox);
 
     const csatButtons = screen.getAllByRole('button', { name: /^\d$/ });
@@ -103,7 +108,7 @@ describe('FeedbackContainer', () => {
   it('should show success toast and hide container on successful submit', async () => {
     renderWithI18n(<FeedbackContainer {...mockProps} />);
 
-    const emailConsentCheckbox = screen.getByTestId('feedbackEmailConsentCheckbox');
+    const emailConsentCheckbox = await screen.findByTestId('feedbackEmailConsentCheckbox');
     await userEvent.click(emailConsentCheckbox);
 
     const csatButtons = screen.getAllByRole('button', { name: /^\d$/ });
@@ -129,7 +134,7 @@ describe('FeedbackContainer', () => {
   it('should block submission and show email error when email is invalid and email consent is checked', async () => {
     renderWithI18n(<FeedbackContainer {...mockProps} />);
 
-    const emailConsentCheckbox = screen.getByTestId('feedbackEmailConsentCheckbox');
+    const emailConsentCheckbox = await screen.findByTestId('feedbackEmailConsentCheckbox');
     expect(emailConsentCheckbox).toBeChecked();
 
     const csatButtons = screen.getAllByRole('button', { name: /^\d$/ });
@@ -154,7 +159,7 @@ describe('FeedbackContainer', () => {
   it('should enable send button when email is valid and email consent is checked', async () => {
     renderWithI18n(<FeedbackContainer {...mockProps} />);
 
-    const emailConsentCheckbox = screen.getByTestId('feedbackEmailConsentCheckbox');
+    const emailConsentCheckbox = await screen.findByTestId('feedbackEmailConsentCheckbox');
     expect(emailConsentCheckbox).toBeChecked();
 
     const csatButtons = screen.getAllByRole('button', { name: /^\d$/ });
@@ -174,7 +179,7 @@ describe('FeedbackContainer', () => {
     mockProps.getCurrentUserEmail.mockResolvedValue(undefined);
     renderWithI18n(<FeedbackContainer {...mockProps} />);
 
-    const emailConsentCheckbox = screen.getByTestId('feedbackEmailConsentCheckbox');
+    const emailConsentCheckbox = await screen.findByTestId('feedbackEmailConsentCheckbox');
     expect(emailConsentCheckbox).toBeChecked();
 
     const csatButtons = screen.getAllByRole('button', { name: /^\d$/ });
@@ -196,7 +201,7 @@ describe('FeedbackContainer', () => {
   it('should enable send button when email consent is unchecked', async () => {
     renderWithI18n(<FeedbackContainer {...mockProps} />);
 
-    const emailConsentCheckbox = screen.getByTestId('feedbackEmailConsentCheckbox');
+    const emailConsentCheckbox = await screen.findByTestId('feedbackEmailConsentCheckbox');
     expect(emailConsentCheckbox).toBeChecked();
 
     const csatButtons = screen.getAllByRole('button', { name: /^\d$/ });

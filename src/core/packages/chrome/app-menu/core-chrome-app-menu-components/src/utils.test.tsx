@@ -15,12 +15,13 @@ import {
   getAppMenuItems,
   mapAppMenuItemToPanelItem,
   getPopoverActionItems,
+  getPopoverSwitchItems,
   getPopoverPanels,
   getIsSelectedColor,
   processStaticItems,
 } from './utils';
 import { APP_MENU_ITEM_LIMIT } from './constants';
-import type { AppMenuItemType, AppMenuPopoverItem } from './types';
+import type { AppMenuItemType, AppMenuPopoverItem, AppMenuSwitch } from './types';
 
 describe('utils', () => {
   describe('createReturnFocus', () => {
@@ -486,7 +487,40 @@ describe('utils', () => {
     });
   });
 
+  describe('getPopoverSwitchItems', () => {
+    const defaultSwitch: AppMenuSwitch = {
+      id: 'test-switch',
+      label: 'Test switch',
+      labelProps: {},
+      checked: false,
+      onChange: jest.fn(),
+    };
+
+    it('should return a separator and a switch item', () => {
+      const result = getPopoverSwitchItems({ switchConfig: defaultSwitch });
+
+      expect(result).toHaveLength(2);
+      expect(result[0].isSeparator).toBe(true);
+      expect(result[0].key).toBe('switch-separator');
+      expect(result[1].key).toBe('switch-test-switch');
+    });
+
+    it('should have a renderItem function for the switch item', () => {
+      const result = getPopoverSwitchItems({ switchConfig: defaultSwitch });
+
+      expect(result[1].renderItem).toBeDefined();
+    });
+  });
+
   describe('getPopoverPanels', () => {
+    const defaultSwitch: AppMenuSwitch = {
+      id: 'test-switch',
+      label: 'Test switch',
+      labelProps: {},
+      checked: false,
+      onChange: jest.fn(),
+    };
+
     it('should create single panel for flat items', () => {
       const items: AppMenuPopoverItem[] = [
         { id: '1', label: 'Item 1', run: jest.fn(), order: 1 },
@@ -704,6 +738,37 @@ describe('utils', () => {
       const staticIndex = panelItems.findIndex((i) => i.key === 'static1');
       const actionIndex = panelItems.findIndex((i) => i.key === 'action-items');
       expect(staticIndex).toBeLessThan(actionIndex);
+    });
+
+    it('should append switch items as the very last items in the panel', () => {
+      const items: AppMenuPopoverItem[] = [{ id: '1', label: 'Item 1', run: jest.fn(), order: 1 }];
+
+      const panels = getPopoverPanels({
+        items,
+        switchConfig: defaultSwitch,
+      });
+
+      const panelItems = panels[0].items as Array<{ key?: string; isSeparator?: boolean }>;
+      const switchIndex = panelItems.findIndex((i) => i.key === 'switch-test-switch');
+      expect(switchIndex).toBe(panelItems.length - 1);
+      // Separator should be right before the switch
+      expect(panelItems[switchIndex - 1].isSeparator).toBe(true);
+    });
+
+    it('should place switch after action items when both are present', () => {
+      const items: AppMenuPopoverItem[] = [{ id: '1', label: 'Item 1', run: jest.fn(), order: 1 }];
+
+      const panels = getPopoverPanels({
+        items,
+        primaryActionItem: { id: 'save', label: 'Save', run: jest.fn(), iconType: 'save' },
+        switchConfig: defaultSwitch,
+      });
+
+      const panelItems = panels[0].items as Array<{ key?: string }>;
+      const actionIndex = panelItems.findIndex((i) => i.key === 'action-items');
+      const switchIndex = panelItems.findIndex((i) => i.key === 'switch-test-switch');
+      expect(actionIndex).toBeLessThan(switchIndex);
+      expect(switchIndex).toBe(panelItems.length - 1);
     });
   });
 

@@ -228,6 +228,7 @@ export const CustomTimelineDataGridBody: FC<CustomTimelineDataGridBodyProps> = m
                           return (
                             <div
                               role="row"
+                              aria-rowindex={index + 2}
                               style={style}
                               css={{ width: 'fit-content' }}
                               key={`${gridWidth}-${index}`}
@@ -270,7 +271,6 @@ const CustomGridRow = styled.div.attrs<{
   className?: string;
 }>((props) => ({
   className: `euiDataGridRow ${props.className ?? ''}`,
-  role: 'row',
 }))``;
 
 /* below styles as per : https://eui.elastic.co/#/tabular-content/data-grid-advanced#custom-body-renderer */
@@ -278,7 +278,6 @@ const CustomGridRowCellWrapper = styled.div.attrs<{
   className?: string;
 }>((props) => ({
   className: `rowCellWrapper ${props.className ?? ''}`,
-  role: 'row',
 }))`
   height: ${(props: { $cssRowHeight: string }) => props.$cssRowHeight};
   .euiDataGridRowCell,

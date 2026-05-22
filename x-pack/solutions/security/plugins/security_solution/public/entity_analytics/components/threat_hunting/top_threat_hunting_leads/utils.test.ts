@@ -12,15 +12,19 @@ describe('getEntityIcon', () => {
     expect(getEntityIcon('user')).toBe('user');
   });
 
-  it('returns "desktop" for host entity type', () => {
-    expect(getEntityIcon('host')).toBe('desktop');
+  it('returns "storage" for host entity type', () => {
+    expect(getEntityIcon('host')).toBe('storage');
   });
 
-  it('returns "gear" for service entity type', () => {
-    expect(getEntityIcon('service')).toBe('gear');
+  it('returns "node" for service entity type', () => {
+    expect(getEntityIcon('service')).toBe('node');
   });
 
-  it('returns fallback icon for unknown entity type', () => {
-    expect(getEntityIcon('unknown')).toBe('questionInCircle');
+  it('returns "globe" for generic entity type', () => {
+    expect(getEntityIcon('generic')).toBe('globe');
+  });
+
+  it('returns "globe" as fallback icon for unknown entity type', () => {
+    expect(getEntityIcon('unknown')).toBe('globe');
   });
 });

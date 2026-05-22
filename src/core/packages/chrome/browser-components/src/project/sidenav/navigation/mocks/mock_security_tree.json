@@ -1102,9 +1102,9 @@
           "sideNavStatus": "visible",
           "children": [
             {
-              "id": "management:triggersActions",
-              "href": "/jom/app/management/insightsAndAlerting/triggersActions",
-              "path": "stack_management.node-1.management:triggersActions",
+              "id": "stackRules",
+              "href": "/jom/app/rules",
+              "path": "stack_management.node-1.stackRules",
               "title": "Rules",
               "deepLink": {},
               "isExternalLink": false,

@@ -12,24 +12,24 @@ import type { Streams } from '@kbn/streams-schema';
 import { isRoot, LOGS_ROOT_STREAM_NAME } from '@kbn/streams-schema';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { getStreamTypeFromDefinition } from '../../../../../util/get_stream_type_from_definition';
-import { StreamDescription } from '../../../../sig_events/stream_detail_systems/stream_description';
 import { IndexConfiguration } from './index_configuration';
 import { DeleteStreamPanel } from './delete_stream';
 import { ImportExportPanel } from './import_export';
 import { useStreamsPrivileges } from '../../../../../hooks/use_streams_privileges';
-import { useAIFeatures } from '../../../../../hooks/use_ai_features';
+import { DraftMaterializationCTA } from '../../draft_materialization_cta';
 
 export function WiredAdvancedView({
   definition,
   refreshDefinition,
+  isDraft = false,
 }: {
   definition: Streams.WiredStream.GetResponse;
   refreshDefinition: () => void;
+  isDraft?: boolean;
 }) {
   const {
     features: { contentPacks, significantEvents },
   } = useStreamsPrivileges();
-  const aiFeatures = useAIFeatures();
 
   const { onPageReady } = usePerformanceContext();
 
@@ -47,37 +47,35 @@ export function WiredAdvancedView({
 
   return (
     <>
+      {isDraft && (
+        <>
+          <DraftMaterializationCTA definition={definition} refreshDefinition={refreshDefinition} />
+          <EuiSpacer />
+        </>
+      )}
       {contentPacks.enabled && (
         <>
           <ImportExportPanel definition={definition} refreshDefinition={refreshDefinition} />
           <EuiSpacer />
         </>
       )}
-      {significantEvents?.enabled && significantEvents?.available && (
-        <>
-          <StreamDescription
-            definition={definition}
-            refreshDefinition={refreshDefinition}
-            aiFeatures={aiFeatures}
+      {!isDraft && (
+        <IndexConfiguration definition={definition} refreshDefinition={refreshDefinition}>
+          <EuiCallOut
+            announceOnMount={false}
+            iconType="warning"
+            color="primary"
+            title={i18n.translate(
+              'xpack.streams.streamDetailView.indexConfiguration.inheritSettingsTitle',
+              {
+                defaultMessage:
+                  'Changes will be inherited by child streams unless they override them explicitly.',
+              }
+            )}
           />
-          <EuiSpacer />
-        </>
+          <EuiSpacer size="l" />
+        </IndexConfiguration>
       )}
-      <IndexConfiguration definition={definition} refreshDefinition={refreshDefinition}>
-        <EuiCallOut
-          announceOnMount={false}
-          iconType="warning"
-          color="primary"
-          title={i18n.translate(
-            'xpack.streams.streamDetailView.indexConfiguration.inheritSettingsTitle',
-            {
-              defaultMessage:
-                'Changes will be inherited by child streams unless they override them explicitly.',
-            }
-          )}
-        />
-        <EuiSpacer size="l" />
-      </IndexConfiguration>
       {(!isRoot(definition.stream.name) || definition.stream.name === LOGS_ROOT_STREAM_NAME) && (
         <>
           <EuiSpacer />

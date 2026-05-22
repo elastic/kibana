@@ -42,11 +42,9 @@ describe('runSaveLensVisualization', () => {
       newTitle: faker.lorem.word(),
       newDescription: faker.lorem.sentence(),
       newTags: [faker.lorem.word(), faker.lorem.word()],
-      isTitleDuplicateConfirmed: false,
       returnToOrigin: false,
       dashboardId: undefined,
       newCopyOnSave: false,
-      onTitleDuplicate: jest.fn(),
       ...propsOverrides,
     };
     const options = {

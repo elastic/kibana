@@ -143,7 +143,6 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
                 closePopover={closePopover}
               >
                 <EuiContextMenu
-                  size="s"
                   initialPanelId={0}
                   panels={[
                     {

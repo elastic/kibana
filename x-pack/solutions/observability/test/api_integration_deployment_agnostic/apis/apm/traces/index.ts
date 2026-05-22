@@ -9,11 +9,9 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider
 
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
   describe('Traces', () => {
-    loadTestFile(require.resolve('./large_trace/large_trace.spec.ts'));
     loadTestFile(require.resolve('./large_trace/unified_large_trace.spec.ts'));
     loadTestFile(require.resolve('./span_details.spec.ts'));
     loadTestFile(require.resolve('./top_traces.spec.ts'));
-    loadTestFile(require.resolve('./trace_by_id.spec.ts'));
     loadTestFile(require.resolve('./transaction_details.spec.ts'));
     loadTestFile(require.resolve('./focused_trace.spec.ts'));
     loadTestFile(require.resolve('./unified_trace_errors.spec.ts'));

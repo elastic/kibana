@@ -28,7 +28,7 @@ export function ruleFilter(rule: RenovatePackageRule) {
     'undici', // These updates are always handled manually, and only with Node.js upgrades
   ];
   // Rules that use custom managers are not supported by this tool, and are ignored.
-  const rulesWithCustomManagers = ['chainguard', 'chainguard-fips'];
+  const rulesWithCustomManagers = ['chainguard', 'chainguard-fips', 'gh-aw'];
 
   return (
     // Only include rules that are enabled or explicitly allowed to be disabled

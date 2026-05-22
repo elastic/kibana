@@ -531,13 +531,16 @@ export class AlertUtils {
     return response;
   }
 
-  public async runSoon(ruleId: string) {
+  public async runSoon(ruleId: string, options?: { force?: boolean }) {
     let request = this.supertestWithoutAuth
       .post(`${getUrlPrefix(this.space.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
       .set('kbn-xsrf', 'foo');
 
     if (this.user) {
       request = request.auth(this.user.username, this.user.password);
+    }
+    if (options?.force) {
+      request = request.query({ force: true });
     }
     return await request.send();
   }

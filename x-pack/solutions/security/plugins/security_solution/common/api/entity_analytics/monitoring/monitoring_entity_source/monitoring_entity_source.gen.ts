@@ -14,153 +14,179 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { BooleanFromString } from '@kbn/zod-helpers/v4';
 
+export const MonitoringEntitySourceType = lazySchema(() =>
+  z.enum(['index', 'entity_analytics_integration'])
+);
 export type MonitoringEntitySourceType = z.infer<typeof MonitoringEntitySourceType>;
-export const MonitoringEntitySourceType = z.enum(['index', 'entity_analytics_integration']);
 export type MonitoringEntitySourceTypeEnum = typeof MonitoringEntitySourceType.enum;
 export const MonitoringEntitySourceTypeEnum = MonitoringEntitySourceType.enum;
 
-export type Matcher = z.infer<typeof Matcher>;
-export const Matcher = z.object({
-  fields: z.array(z.string()),
-  /**
+export const Matcher = lazySchema(() =>
+  z.object({
+    fields: z.array(z.string()),
+    /**
       * Matcher values. Must be either an array of strings (e.g. group or role names) or an array of booleans (e.g. integration-derived flags like privileged_group_member). Mixed types are intentionally not supported for simplicity and predictability.
 
       */
-  values: z.union([z.array(z.string()), z.array(z.boolean())]),
-});
+    values: z.union([z.array(z.string()), z.array(z.boolean())]),
+  })
+);
+export type Matcher = z.infer<typeof Matcher>;
 
+export const Filter = lazySchema(() =>
+  z.object({
+    kuery: z.union([z.string(), z.object({})]).optional(),
+  })
+);
 export type Filter = z.infer<typeof Filter>;
-export const Filter = z.object({
-  kuery: z.union([z.string(), z.object({})]).optional(),
-});
 
+export const Integrations = lazySchema(() =>
+  z.object({
+    /**
+     * Index to read latest sync markers from
+     */
+    syncMarkerIndex: z.string().optional(),
+    /**
+     * integrations latest full sync and update syncData
+     */
+    syncData: z
+      .object({
+        /**
+         * Timestamp of the last full sync from integrations
+         */
+        lastFullSync: z.string().datetime().optional(),
+        /**
+         * Timestamp of the last update processed from integrations
+         */
+        lastUpdateProcessed: z.string().datetime().optional(),
+      })
+      .optional(),
+  })
+);
 export type Integrations = z.infer<typeof Integrations>;
-export const Integrations = z.object({
-  /**
-   * Index to read latest sync markers from
-   */
-  syncMarkerIndex: z.string().optional(),
-  /**
-   * integrations latest full sync and update syncData
-   */
-  syncData: z
-    .object({
-      /**
-       * Timestamp of the last full sync from integrations
-       */
-      lastFullSync: z.string().datetime().optional(),
-      /**
-       * Timestamp of the last update processed from integrations
-       */
-      lastUpdateProcessed: z.string().datetime().optional(),
-    })
-    .optional(),
-});
 
+export const UpdateableMonitoringEntitySourceProperties = lazySchema(() =>
+  z.object({
+    name: z.string().optional(),
+    indexPattern: z.string().optional(),
+    integrationName: z.string().optional(),
+    enabled: z.boolean().optional(),
+    matchers: z.array(Matcher).optional(),
+    filter: Filter.optional(),
+    integrations: Integrations.optional(),
+  })
+);
 export type UpdateableMonitoringEntitySourceProperties = z.infer<
   typeof UpdateableMonitoringEntitySourceProperties
 >;
-export const UpdateableMonitoringEntitySourceProperties = z.object({
-  name: z.string().optional(),
-  indexPattern: z.string().optional(),
-  integrationName: z.string().optional(),
-  enabled: z.boolean().optional(),
-  matchers: z.array(Matcher).optional(),
-  filter: Filter.optional(),
-  integrations: Integrations.optional(),
-});
 
+export const UpdateEntitySourceNoadditionalProps = lazySchema(() =>
+  UpdateableMonitoringEntitySourceProperties.merge(z.object({}).strict())
+);
 export type UpdateEntitySourceNoadditionalProps = z.infer<
   typeof UpdateEntitySourceNoadditionalProps
 >;
-export const UpdateEntitySourceNoadditionalProps = UpdateableMonitoringEntitySourceProperties.merge(
-  z.object({}).strict()
-);
 
+export const MonitoringEntitySourceProperties = lazySchema(() =>
+  UpdateableMonitoringEntitySourceProperties.merge(
+    z.object({
+      type: MonitoringEntitySourceType.optional(),
+      managed: z.boolean().optional(),
+      managedVersion: z.number().int().optional(),
+      matchersModifiedByUser: z.boolean().optional(),
+    })
+  )
+);
 export type MonitoringEntitySourceProperties = z.infer<typeof MonitoringEntitySourceProperties>;
-export const MonitoringEntitySourceProperties = UpdateableMonitoringEntitySourceProperties.merge(
-  z.object({
-    type: MonitoringEntitySourceType.optional(),
-    managed: z.boolean().optional(),
-    managedVersion: z.number().int().optional(),
-    matchersModifiedByUser: z.boolean().optional(),
-  })
-);
 
+export const MonitoringEntitySourceAttributes = lazySchema(() =>
+  MonitoringEntitySourceProperties.merge(z.object({}))
+);
 export type MonitoringEntitySourceAttributes = z.infer<typeof MonitoringEntitySourceAttributes>;
-export const MonitoringEntitySourceAttributes = MonitoringEntitySourceProperties.merge(
-  z.object({})
-);
 
+export const MonitoringEntitySource = lazySchema(() =>
+  MonitoringEntitySourceProperties.merge(
+    z.object({
+      id: z.string(),
+    })
+  )
+);
 export type MonitoringEntitySource = z.infer<typeof MonitoringEntitySource>;
-export const MonitoringEntitySource = MonitoringEntitySourceProperties.merge(
+
+export const CreateEntitySourceRequestBody = lazySchema(() =>
+  z
+    .object({
+      type: MonitoringEntitySourceType,
+      name: z.string(),
+      indexPattern: z.string().optional(),
+      enabled: z.boolean().optional(),
+      matchers: z.array(Matcher).optional(),
+      filter: Filter.optional(),
+    })
+    .strict()
+);
+export type CreateEntitySourceRequestBody = z.infer<typeof CreateEntitySourceRequestBody>;
+export type CreateEntitySourceRequestBodyInput = z.input<typeof CreateEntitySourceRequestBody>;
+
+export const CreateEntitySourceResponse = lazySchema(() => MonitoringEntitySource);
+export type CreateEntitySourceResponse = z.infer<typeof CreateEntitySourceResponse>;
+
+export const DeleteEntitySourceRequestParams = lazySchema(() =>
   z.object({
     id: z.string(),
   })
 );
-
-export type CreateEntitySourceRequestBody = z.infer<typeof CreateEntitySourceRequestBody>;
-export const CreateEntitySourceRequestBody = z
-  .object({
-    type: MonitoringEntitySourceType,
-    name: z.string(),
-    indexPattern: z.string().optional(),
-    enabled: z.boolean().optional(),
-    matchers: z.array(Matcher).optional(),
-    filter: Filter.optional(),
-  })
-  .strict();
-export type CreateEntitySourceRequestBodyInput = z.input<typeof CreateEntitySourceRequestBody>;
-
-export type CreateEntitySourceResponse = z.infer<typeof CreateEntitySourceResponse>;
-export const CreateEntitySourceResponse = MonitoringEntitySource;
-
 export type DeleteEntitySourceRequestParams = z.infer<typeof DeleteEntitySourceRequestParams>;
-export const DeleteEntitySourceRequestParams = z.object({
-  id: z.string(),
-});
 export type DeleteEntitySourceRequestParamsInput = z.input<typeof DeleteEntitySourceRequestParams>;
 
+export const GetEntitySourceRequestParams = lazySchema(() =>
+  z.object({
+    id: z.string(),
+  })
+);
 export type GetEntitySourceRequestParams = z.infer<typeof GetEntitySourceRequestParams>;
-export const GetEntitySourceRequestParams = z.object({
-  id: z.string(),
-});
 export type GetEntitySourceRequestParamsInput = z.input<typeof GetEntitySourceRequestParams>;
 
+export const GetEntitySourceResponse = lazySchema(() => MonitoringEntitySource);
 export type GetEntitySourceResponse = z.infer<typeof GetEntitySourceResponse>;
-export const GetEntitySourceResponse = MonitoringEntitySource;
+export const ListEntitySourcesRequestQuery = lazySchema(() =>
+  z.object({
+    type: z.string().optional(),
+    managed: BooleanFromString.optional(),
+    name: z.string().optional(),
+    page: z.coerce.number().int().min(1).optional(),
+    per_page: z.coerce.number().int().min(1).max(10000).optional(),
+    sort_field: z.string().optional(),
+    sort_order: z.enum(['asc', 'desc']).optional(),
+  })
+);
 export type ListEntitySourcesRequestQuery = z.infer<typeof ListEntitySourcesRequestQuery>;
-export const ListEntitySourcesRequestQuery = z.object({
-  type: z.string().optional(),
-  managed: BooleanFromString.optional(),
-  name: z.string().optional(),
-  page: z.coerce.number().int().min(1).optional(),
-  per_page: z.coerce.number().int().min(1).max(10000).optional(),
-  sort_field: z.string().optional(),
-  sort_order: z.enum(['asc', 'desc']).optional(),
-});
 export type ListEntitySourcesRequestQueryInput = z.input<typeof ListEntitySourcesRequestQuery>;
 
+export const ListEntitySourcesResponse = lazySchema(() =>
+  z.object({
+    sources: z.array(MonitoringEntitySource),
+    page: z.number().int().min(1),
+    per_page: z.number().int().min(1).max(10000),
+    total: z.number().int().min(0),
+  })
+);
 export type ListEntitySourcesResponse = z.infer<typeof ListEntitySourcesResponse>;
-export const ListEntitySourcesResponse = z.object({
-  sources: z.array(MonitoringEntitySource),
-  page: z.number().int().min(1),
-  per_page: z.number().int().min(1).max(10000),
-  total: z.number().int().min(0),
-});
 
+export const UpdateEntitySourceRequestParams = lazySchema(() =>
+  z.object({
+    id: z.string(),
+  })
+);
 export type UpdateEntitySourceRequestParams = z.infer<typeof UpdateEntitySourceRequestParams>;
-export const UpdateEntitySourceRequestParams = z.object({
-  id: z.string(),
-});
 export type UpdateEntitySourceRequestParamsInput = z.input<typeof UpdateEntitySourceRequestParams>;
 
+export const UpdateEntitySourceRequestBody = lazySchema(() => UpdateEntitySourceNoadditionalProps);
 export type UpdateEntitySourceRequestBody = z.infer<typeof UpdateEntitySourceRequestBody>;
-export const UpdateEntitySourceRequestBody = UpdateEntitySourceNoadditionalProps;
 export type UpdateEntitySourceRequestBodyInput = z.input<typeof UpdateEntitySourceRequestBody>;
 
+export const UpdateEntitySourceResponse = lazySchema(() => MonitoringEntitySource);
 export type UpdateEntitySourceResponse = z.infer<typeof UpdateEntitySourceResponse>;
-export const UpdateEntitySourceResponse = MonitoringEntitySource;

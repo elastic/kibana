@@ -36,7 +36,7 @@ export const createBehavioralAnalysisModule = ({
     const observations: Observation[] = [];
 
     for (const entity of entities) {
-      const summary = alertDataByEntity.get(`${entity.type}:${entity.name}`);
+      const summary = alertDataByEntity.get(entity.id);
       if (summary && summary.totalAlerts > 0) {
         observations.push(...buildObservationsForEntity(entity, summary));
       }

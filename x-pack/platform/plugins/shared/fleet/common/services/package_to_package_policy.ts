@@ -16,7 +16,10 @@ import type {
   NewPackagePolicy,
   PackagePolicyConfigRecordEntry,
   RegistryStreamWithDataStream,
+  RegistryDataStream,
 } from '../types';
+
+import { OTEL_COLLECTOR_INPUT_TYPE } from '../constants';
 
 import { doesPackageHaveIntegrations } from '.';
 import {
@@ -39,6 +42,34 @@ type PackagePolicyStream = RegistryStream & {
  */
 export const getInputEffectiveName = (input: { name?: string; type: string }): string =>
   input.name ?? input.type;
+
+/**
+ * Returns true if the given data stream effectively uses the OTel collector input type.
+ *
+ * A data stream is considered OTel when any of its `streams[].input` values is either:
+ * - the literal type `'otelcol'`, or
+ * - the `name` of an input within `pkgInfo.policy_templates[*].inputs` whose `type` is `'otelcol'`.
+ *
+ * The second case handles the named-input feature (package-spec 3.6.1+) where multiple inputs
+ * of the same type coexist in one policy template and data streams reference them by name instead
+ * of by type.
+ */
+export const dataStreamUsesOtelInput = (
+  pkgInfo: Pick<PackageInfo, 'policy_templates'>,
+  dataStream: Pick<RegistryDataStream, 'streams'>
+): boolean => {
+  const namedOtelInputs = new Set<string>();
+  for (const tpl of pkgInfo.policy_templates ?? []) {
+    for (const input of getNormalizedInputs(tpl)) {
+      if (input.type === OTEL_COLLECTOR_INPUT_TYPE && input.name) {
+        namedOtelInputs.add(input.name);
+      }
+    }
+  }
+  return (dataStream.streams ?? []).some(
+    (stream) => stream.input === OTEL_COLLECTOR_INPUT_TYPE || namedOtelInputs.has(stream.input)
+  );
+};
 
 /**
  * Builds the composite key used to index input validation results and var definitions.

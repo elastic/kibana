@@ -11,6 +11,7 @@ import type { SavedObject } from '@kbn/core-saved-objects-api-server';
 import { savedObjectToItem, itemToAttributes } from './transform_utils';
 import type { StoredLink, StoredLinksState, LinksState, ExternalLink } from './types';
 import { EXTERNAL_LINK_TYPE } from '../../../../common/content_management/v1';
+import { DEFAULT_EXTERNAL_LINK_OPTIONS } from '../../../../common/constants';
 
 const makeSavedObject = (
   links: Array<StoredLink & { order?: number }>
@@ -26,9 +27,24 @@ describe('Links content management transform utils', () => {
     it('sorts links by order and removes the order property', () => {
       const result = savedObjectToItem(
         makeSavedObject([
-          { type: EXTERNAL_LINK_TYPE, destination: 'https://b.co', order: 2 },
-          { type: EXTERNAL_LINK_TYPE, destination: 'https://a.co', order: 0 },
-          { type: EXTERNAL_LINK_TYPE, destination: 'https://c.co', order: 1 },
+          {
+            type: EXTERNAL_LINK_TYPE,
+            destination: 'https://b.co',
+            options: DEFAULT_EXTERNAL_LINK_OPTIONS,
+            order: 2,
+          },
+          {
+            type: EXTERNAL_LINK_TYPE,
+            destination: 'https://a.co',
+            options: DEFAULT_EXTERNAL_LINK_OPTIONS,
+            order: 0,
+          },
+          {
+            type: EXTERNAL_LINK_TYPE,
+            destination: 'https://c.co',
+            options: DEFAULT_EXTERNAL_LINK_OPTIONS,
+            order: 1,
+          },
         ])
       );
 
@@ -49,12 +65,18 @@ describe('Links content management transform utils', () => {
           {
             type: EXTERNAL_LINK_TYPE,
             destination: 'https://third.co',
+            options: DEFAULT_EXTERNAL_LINK_OPTIONS,
             order: 1,
           },
-          { type: EXTERNAL_LINK_TYPE, destination: 'https://first.co' },
+          {
+            type: EXTERNAL_LINK_TYPE,
+            destination: 'https://first.co',
+            options: DEFAULT_EXTERNAL_LINK_OPTIONS,
+          },
           {
             type: EXTERNAL_LINK_TYPE,
             destination: 'https://second.co',
+            options: DEFAULT_EXTERNAL_LINK_OPTIONS,
           },
         ])
       );
@@ -72,9 +94,24 @@ describe('Links content management transform utils', () => {
     it('sorts links by order and removes the order property', () => {
       const state = {
         links: [
-          { type: EXTERNAL_LINK_TYPE, destination: 'https://z.co', order: 3 },
-          { type: EXTERNAL_LINK_TYPE, destination: 'https://y.co', order: 1 },
-          { type: EXTERNAL_LINK_TYPE, destination: 'https://x.co', order: 2 },
+          {
+            type: EXTERNAL_LINK_TYPE,
+            destination: 'https://z.co',
+            options: DEFAULT_EXTERNAL_LINK_OPTIONS,
+            order: 3,
+          },
+          {
+            type: EXTERNAL_LINK_TYPE,
+            destination: 'https://y.co',
+            options: DEFAULT_EXTERNAL_LINK_OPTIONS,
+            order: 1,
+          },
+          {
+            type: EXTERNAL_LINK_TYPE,
+            destination: 'https://x.co',
+            options: DEFAULT_EXTERNAL_LINK_OPTIONS,
+            order: 2,
+          },
         ],
       };
 

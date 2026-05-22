@@ -29,7 +29,8 @@ import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
 import type { ISuggestionItem } from '../types';
 import { getFunctionDefinition } from '../../definitions/utils/functions';
 import { FunctionDefinitionTypes } from '../../definitions/types';
-import { TRAILING_COMMA_REGEX } from '../../definitions/utils/shared';
+import { ReplacementRangeStrategyKind } from '../../../language/autocomplete/utils/prefix_range';
+import { endsWithComma, endsWithWhitespace } from '../../definitions/utils/regex';
 
 /**
  * Position of the caret in the sort command:
@@ -57,18 +58,18 @@ export const getPosition = (command: ESQLAstAllCommands, innerText: string): Car
     // in the BY clause
 
     const lastOptionArg = lastCommandArg.args[lastCommandArg.args.length - 1];
-    if (isAssignment(lastOptionArg) && !TRAILING_COMMA_REGEX.test(innerText)) {
+    if (isAssignment(lastOptionArg) && !endsWithComma(innerText)) {
       return 'grouping_expression_after_assignment';
     }
 
     return 'grouping_expression_without_assignment';
   }
 
-  if (isAssignment(lastCommandArg) && !TRAILING_COMMA_REGEX.test(innerText)) {
+  if (isAssignment(lastCommandArg) && !endsWithComma(innerText)) {
     return 'expression_after_assignment';
   }
 
-  if (isWhereExpression(lastCommandArg) && !TRAILING_COMMA_REGEX.test(innerText)) {
+  if (isWhereExpression(lastCommandArg) && !endsWithComma(innerText)) {
     return 'after_where';
   }
 
@@ -189,11 +190,9 @@ export const getCommaAndPipe = (
   });
 
   // does the query end with whitespace?
-  if (/\s$/.test(innerText)) {
-    // if so, comma needs to be sent back a column to replace the trailing space
-    commaSuggestion.rangeToReplace = {
-      start: innerText.length - 1,
-      end: innerText.length,
+  if (endsWithWhitespace(innerText)) {
+    commaSuggestion.replacementRangeStrategy = {
+      kind: ReplacementRangeStrategyKind.TRAILING_WHITESPACE,
     };
   }
   // special case: cursor right after a column name

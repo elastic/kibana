@@ -1429,3 +1429,209 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "id": "35",
+    "index": ".entities.v2.latest.security_entities-space-00001",
+    "source": {
+      "@timestamp": "2025-07-20T17:26:09.361Z",
+      "cloud": {
+        "account": {
+          "id": "rel-hierarchy-account",
+          "name": "Relationship Hierarchy Test"
+        },
+        "provider": "aws",
+        "region": "us-east-1",
+        "service": {
+          "name": "AWS EC2"
+        }
+      },
+      "entity": {
+        "EngineMetadata": {
+          "Type": "host"
+        },
+        "id": "host:host-with-multiple-ips",
+        "name": "Host with multiple ips",
+        "source": ".ds-logs-cloud_asset_inventory.asset_inventory-compute_aws_ec2_instance-entities-space-2025.07.16-000005",
+        "sub_type": "AWS EC2 Instance",
+        "type": "Host"
+      },
+      "event": {
+        "ingested": "2025-07-20T17:27:13.583Z"
+      },
+      "host": {
+        "id": "host-with-multiple-ips",
+        "ip": ["10.0.1.100", "::1", "127.0.0.1"],
+        "name": "Host with multiple ips"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "36",
+    "index": ".entities.v2.latest.security_entities-space-00001",
+    "source": {
+      "@timestamp": "2025-07-20T17:26:09.361Z",
+      "cloud": {
+        "account": {
+          "id": "rel-hierarchy-account",
+          "name": "Relationship Hierarchy Test"
+        },
+        "provider": "aws",
+        "region": "us-east-1",
+        "service": {
+          "name": "AWS EC2"
+        }
+      },
+      "entity": {
+        "EngineMetadata": {
+          "Type": "host"
+        },
+        "id": "host:host-with-single-ip",
+        "name": "Host with single ip",
+        "source": ".ds-logs-cloud_asset_inventory.asset_inventory-compute_aws_ec2_instance-entities-space-2025.07.16-000005",
+        "sub_type": "AWS EC2 Instance",
+        "type": "Host"
+      },
+      "event": {
+        "ingested": "2025-07-20T17:27:13.583Z"
+      },
+      "host": {
+        "id": "host-with-single-ip",
+        "ip": "10.0.1.100",
+        "name": "Host with single ip"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "37",
+    "index": ".entities.v2.latest.security_entities-space-00001",
+    "source": {
+      "@timestamp": "2025-07-20T17:26:09.361Z",
+      "cloud": {
+        "account": {
+          "id": "rel-hierarchy-account",
+          "name": "Relationship Hierarchy Test"
+        },
+        "provider": "aws",
+        "region": "us-east-1",
+        "service": {
+          "name": "AWS EC2"
+        }
+      },
+      "entity": {
+        "EngineMetadata": {
+          "Type": "host"
+        },
+        "id": "host:host-with-no-ip",
+        "name": "Host with no ip",
+        "source": ".ds-logs-cloud_asset_inventory.asset_inventory-compute_aws_ec2_instance-entities-space-2025.07.16-000005",
+        "sub_type": "AWS EC2 Instance",
+        "type": "Host"
+      },
+      "event": {
+        "ingested": "2025-07-20T17:27:13.583Z"
+      },
+      "host": {
+        "id": "host-with-no-ip",
+        "name": "Host with no ip"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "38",
+    "index": ".entities.v2.latest.security_entities-space-00001",
+    "source": {
+      "@timestamp": "2025-07-20T17:26:09.361Z",
+      "cloud": {
+        "account": {
+          "id": "rel-hierarchy-account",
+          "name": "Relationship Hierarchy Test"
+        },
+        "provider": "aws",
+        "region": "us-east-1",
+        "service": {
+          "name": "AWS EC2"
+        }
+      },
+      "entity": {
+        "EngineMetadata": {
+          "Type": "host"
+        },
+        "id": "host:host-with-multiple-ips-actor",
+        "name": "Actor Host with multiple ips",
+        "source": ".ds-logs-cloud_asset_inventory.asset_inventory-compute_aws_ec2_instance-entities-space-2025.07.16-000005",
+        "sub_type": "AWS EC2 Instance",
+        "type": "Host",
+        "relationships": {
+          "owns": {
+            "ids": [
+              "host:host-with-multiple-ips-target"
+            ]
+          }
+        }
+      },
+      "event": {
+        "ingested": "2025-07-20T17:27:13.583Z"
+      },
+      "host": {
+        "id": "host:host-with-multiple-ips-actor",
+        "ip": ["10.0.1.100", "::1", "127.0.0.1"],
+        "name": "Actor Host with multiple ips"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "39",
+    "index": ".entities.v2.latest.security_entities-space-00001",
+    "source": {
+      "@timestamp": "2025-07-20T17:26:09.361Z",
+      "cloud": {
+        "account": {
+          "id": "rel-hierarchy-account",
+          "name": "Relationship Hierarchy Test"
+        },
+        "provider": "aws",
+        "region": "us-east-1",
+        "service": {
+          "name": "AWS EC2"
+        }
+      },
+      "entity": {
+        "EngineMetadata": {
+          "Type": "host"
+        },
+        "id": "host:host-with-multiple-ips-target",
+        "name": "Target Host with multiple ips",
+        "source": ".ds-logs-cloud_asset_inventory.asset_inventory-compute_aws_ec2_instance-entities-space-2025.07.16-000005",
+        "sub_type": "AWS EC2 Instance",
+        "type": "Host"
+      },
+      "event": {
+        "ingested": "2025-07-20T17:27:13.583Z"
+      },
+      "host": {
+        "id": "host:host-with-multiple-ips-target",
+        "ip": ["10.0.1.100", "::1", "127.0.0.1"],
+        "name": "Target Host with multiple ips"
+      }
+    }
+  }
+}

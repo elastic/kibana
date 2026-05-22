@@ -333,11 +333,19 @@ describe('CPSManager', () => {
       expect(cpsManager.getProjectRouting()).toBe(DEFAULT_NPRE_VALUE);
     });
 
-    it('returns undefined when access is DISABLED, regardless of override', async () => {
+    it('returns override value when access is DISABLED', async () => {
       await changeAccess(ProjectRoutingAccess.DISABLED);
 
       expect(cpsManager.getProjectRouting()).toBeUndefined();
-      expect(cpsManager.getProjectRouting('_alias:_origin')).toBeUndefined();
+      expect(cpsManager.getProjectRouting('_alias:_origin')).toBe('_alias:_origin');
+    });
+
+    it('returns override value when access is READONLY', async () => {
+      await cpsManager.whenReady();
+      await changeAccess(ProjectRoutingAccess.READONLY);
+
+      expect(cpsManager.getProjectRouting()).toBe(DEFAULT_NPRE_VALUE);
+      expect(cpsManager.getProjectRouting('_alias:_origin')).toBe('_alias:_origin');
     });
 
     it('resets projectRouting$ to default when access changes to DISABLED', async () => {

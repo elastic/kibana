@@ -23,7 +23,9 @@ const useStepStyles = () => {
   };
 };
 
-export const ManagementContents = React.memo(() => {
+export const ManagementContents = React.memo<{
+  onDataStreamReanalyzeSuccess?: () => void;
+}>(({ onDataStreamReanalyzeSuccess }) => {
   const styles = useStepStyles();
 
   const steps: EuiStepsProps['steps'] = [
@@ -35,7 +37,7 @@ export const ManagementContents = React.memo(() => {
     {
       title: i18n.STEP_DEFINE_DATA_STREAMS,
       titleSize: 'xs',
-      children: <DataStreams />,
+      children: <DataStreams onDataStreamReanalyzeSuccess={onDataStreamReanalyzeSuccess} />,
     },
   ];
 

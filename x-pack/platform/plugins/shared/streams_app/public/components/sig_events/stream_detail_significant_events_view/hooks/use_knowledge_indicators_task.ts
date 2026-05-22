@@ -34,7 +34,7 @@ export function useKnowledgeIndicatorsTask({ streamName, onComplete, onError }: 
     },
   } = useKibana();
   const { getOnboardingTaskStatus, scheduleOnboardingTask, cancelOnboardingTask } =
-    useOnboardingApi({ saveQueries: true });
+    useOnboardingApi();
 
   const scheduleTaskMutation = useMutation({
     mutationFn: scheduleOnboardingTask,
@@ -128,7 +128,7 @@ export function useKnowledgeIndicatorsTask({ streamName, onComplete, onError }: 
   useQuery<TaskResult<OnboardingResult>, Error>({
     queryKey: ['knowledgeIndicatorsTaskStatus', streamName],
     queryFn: fetchStatus,
-    enabled: isPending && !scheduleTaskMutation.isLoading && !cancelTaskMutation.isLoading,
+    enabled: !scheduleTaskMutation.isLoading && !cancelTaskMutation.isLoading,
     refetchInterval: 2000,
   });
 

@@ -26,6 +26,10 @@ export interface InternalToolDefinition<
   TSchema extends ZodObject<any> = ZodObject<any>
 > extends ToolDefinition<TType, TConfig> {
   /**
+   * When true, this tool is only available when experimental features are enabled.
+   */
+  experimental: boolean;
+  /**
    * Check if the tool is available for the current context.
    */
   isAvailable: InternalToolAvailabilityHandler;

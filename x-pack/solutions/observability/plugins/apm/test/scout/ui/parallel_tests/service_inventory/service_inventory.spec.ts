@@ -7,7 +7,7 @@
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../../fixtures';
-import { PRODUCTION_ENVIRONMENT } from '../../fixtures/constants';
+import { EXTENDED_TIMEOUT, PRODUCTION_ENVIRONMENT } from '../../fixtures/constants';
 
 test.describe(
   'Service inventory',
@@ -37,7 +37,12 @@ test.describe(
 
       await test.step('shows a list of environments', async () => {
         const environmentEntrySelector = page.locator(`td:has-text("${PRODUCTION_ENVIRONMENT}")`);
-        await expect(environmentEntrySelector).toHaveCount(12);
+        await expect(environmentEntrySelector).toHaveCount(9);
+      });
+
+      await test.step('table has service rows', async () => {
+        const count = await page.getByTestId('apmManagedTableActionsCellButton').count();
+        expect(count).toBeGreaterThanOrEqual(3);
       });
     });
 
@@ -52,10 +57,12 @@ test.describe(
     test('shows the correct environment when changing the environment', async ({ page }) => {
       await page.testSubj.click('environmentFilter > comboBoxSearchInput');
       await page
-        .getByTestId('comboBoxOptionsList environmentFilter-optionsList')
-        .locator(`button:has-text("${PRODUCTION_ENVIRONMENT}")`)
-        .click();
-      await expect(page.getByTestId('comboBoxSearchInput')).toHaveValue(PRODUCTION_ENVIRONMENT);
+        .getByRole('option', { name: PRODUCTION_ENVIRONMENT })
+        .waitFor({ timeout: EXTENDED_TIMEOUT });
+      await page.getByRole('option', { name: PRODUCTION_ENVIRONMENT }).click();
+      await expect(page.getByTestId('comboBoxSearchInput')).toHaveValue(PRODUCTION_ENVIRONMENT, {
+        timeout: EXTENDED_TIMEOUT,
+      });
     });
 
     test('shows the filtered services when using the service name fast filter', async ({

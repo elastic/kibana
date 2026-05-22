@@ -643,6 +643,18 @@ describe('Agents CRUD test', () => {
         message: 'User updated agent [id=test-agent-id]',
       });
     });
+
+    it('should use retry_on_conflict', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      esClient.update.mockResolvedValueOnce({} as any);
+
+      await updateAgent(esClient, 'test-agent-id', { tags: ['new-tag'] });
+
+      expect(esClient.update).toHaveBeenCalledWith(
+        expect.objectContaining({ retry_on_conflict: 5 })
+      );
+    });
   });
 
   describe('openPointInTime', () => {

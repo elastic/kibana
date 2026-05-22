@@ -21,10 +21,14 @@ import type {
   ToolResultEvent,
   RuntimeAgentConfigurationOverrides,
   CompactionStep,
+  BackgroundAgentCompleteEvent,
+  BackgroundAgentCompleteStep,
+  TodosStep,
 } from '@kbn/agent-builder-common';
 import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import type { RoundState } from '@kbn/agent-builder-common/chat/round_state';
+import type { TodoItem } from '@kbn/agent-builder-common/chat/conversation';
 import {
   ChatEventType,
   ConversationRoundStepType,
@@ -37,6 +41,11 @@ import {
   isPromptRequestEvent,
   isReasoningEvent,
   isToolCallStep,
+  isBackgroundAgentCompleteEvent,
+  isToolUiEvent,
+  carriedOverTodos,
+  TODOS_UPDATED_UI_EVENT,
+  type TodosUpdatedUiEventData,
 } from '@kbn/agent-builder-common';
 import type {
   ConversationInternalState,
@@ -55,10 +64,10 @@ import type { CompactedConversation } from './conversation_compactor';
 
 type SourceEvents = ConvertedEvents;
 
-type StepEvents = ReasoningEvent | ToolCallEvent;
+type StepEvents = ReasoningEvent | ToolCallEvent | BackgroundAgentCompleteEvent;
 
 const isStepEvent = (event: SourceEvents): event is StepEvents => {
-  return isReasoningEvent(event) || isToolCallEvent(event);
+  return isReasoningEvent(event) || isToolCallEvent(event) || isBackgroundAgentCompleteEvent(event);
 };
 
 export const addRoundCompleteEvent = ({
@@ -72,6 +81,8 @@ export const addRoundCompleteEvent = ({
   attachmentStateManager,
   configurationOverrides,
   compactionResult,
+  roundId: providedRoundId,
+  initialTodos,
 }: {
   pendingRound: ConversationRound | undefined;
   userInput: RoundInput;
@@ -84,6 +95,10 @@ export const addRoundCompleteEvent = ({
   configurationOverrides?: RuntimeAgentConfigurationOverrides;
   /** Result of the compaction pipeline; used to build the compaction step and audit trail */
   compactionResult?: CompactedConversation;
+  /** Optional pre-generated round ID. If not provided, a new UUID is generated. */
+  roundId?: string;
+  /** Todo list at round start; used as fallback when the agent never called todoWrite this round */
+  initialTodos?: TodoItem[];
 }): OperatorFunction<SourceEvents, SourceEvents | RoundCompleteEvent> => {
   return (events$) => {
     const shared$ = events$.pipe(share());
@@ -106,6 +121,7 @@ export const addRoundCompleteEvent = ({
                 compactionResult,
               })
             : createRound({
+                roundId: providedRoundId,
                 events,
                 input: userInput,
                 startTime,
@@ -114,6 +130,7 @@ export const addRoundCompleteEvent = ({
                 attachmentRefs,
                 configurationOverrides,
                 compactionResult,
+                initialTodos,
               });
 
           round.state = buildRoundState({ round, events, stateManager });
@@ -252,6 +269,7 @@ const mergeAttachmentRefs = (
 };
 
 const createRound = ({
+  roundId: providedRoundId,
   events,
   input,
   startTime,
@@ -260,7 +278,9 @@ const createRound = ({
   attachmentRefs,
   configurationOverrides,
   compactionResult,
+  initialTodos,
 }: {
+  roundId?: string;
   events: SourceEvents[];
   input: RoundInput;
   startTime: Date;
@@ -269,6 +289,7 @@ const createRound = ({
   attachmentRefs: AttachmentVersionRef[];
   configurationOverrides?: RuntimeAgentConfigurationOverrides;
   compactionResult?: CompactedConversation;
+  initialTodos?: TodoItem[];
 }): ConversationRound => {
   const toolResults = events.filter(isToolResultEvent);
   const toolProgressions = events.filter(isToolProgressEvent);
@@ -276,6 +297,19 @@ const createRound = ({
   const stepEvents = events.filter(isStepEvent);
   const thinkingCompleteEvent = events.find(isThinkingCompleteEvent);
   const promptRequestEvents = events.filter(isPromptRequestEvent);
+
+  // Collect todos_updated UI events; only the last snapshot is stored as a round step
+  const lastTodosData = events.reduce<TodoItem[] | undefined>((last, e) => {
+    if (
+      isToolUiEvent<typeof TODOS_UPDATED_UI_EVENT, TodosUpdatedUiEventData>(
+        e,
+        TODOS_UPDATED_UI_EVENT
+      )
+    ) {
+      return e.data.data.todos;
+    }
+    return last;
+  }, undefined);
 
   const eventToStep = (event: StepEvents): ConversationRoundStep[] => {
     if (isToolCallEvent(event)) {
@@ -295,6 +329,9 @@ const createRound = ({
       } else {
         return [];
       }
+    }
+    if (isBackgroundAgentCompleteEvent(event)) {
+      return [createBackgroundAgentStep(event)];
     }
     throw new Error(`Unknown event type: ${(event as any).type}`);
   };
@@ -325,8 +362,18 @@ const createRound = ({
 
   steps.push(...stepEvents.flatMap(eventToStep));
 
+  const todosForStep = lastTodosData ?? carriedOverTodos(initialTodos);
+  if (todosForStep !== undefined) {
+    const todosStep: TodosStep = {
+      type: ConversationRoundStepType.updateTodos,
+      todos: todosForStep,
+      ...(lastTodosData === undefined ? { carried_over: true } : {}),
+    };
+    steps.push(todosStep);
+  }
+
   const round: ConversationRound = {
-    id: uuidv4(),
+    id: providedRoundId ?? uuidv4(),
     status: hasPromptRequests
       ? ConversationRoundStatus.awaitingPrompt
       : ConversationRoundStatus.completed,
@@ -363,6 +410,15 @@ const createReasoningStep = (event: ReasoningEvent): ReasoningStep => {
   };
 };
 
+const createBackgroundAgentStep = (
+  event: BackgroundAgentCompleteEvent
+): BackgroundAgentCompleteStep => {
+  return {
+    type: ConversationRoundStepType.backgroundAgentComplete,
+    ...event.data.execution,
+  };
+};
+
 const createToolCallStep = ({
   toolCall,
   toolResult,
@@ -377,9 +433,13 @@ const createToolCallStep = ({
     tool_id: toolCall.data.tool_id,
     params: toolCall.data.params,
     tool_call_id: toolCall.data.tool_call_id,
-    progression: toolProgress.map(({ data: { message } }) => ({ message })),
+    progression: toolProgress.map(({ data: { message, metadata } }) => ({
+      message,
+      metadata,
+    })),
     results: toolResult?.data.results ?? [],
     tool_call_group_id: toolCall.data.tool_call_group_id,
+    tool_origin: toolCall.data.tool_origin,
   };
 };
 

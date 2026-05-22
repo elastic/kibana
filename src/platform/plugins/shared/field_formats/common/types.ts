@@ -7,27 +7,42 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactNode } from 'react';
 import type { Serializable, SerializableRecord } from '@kbn/utility-types';
 import type { FieldFormat } from './field_format';
 import type { FieldFormatsRegistry } from './field_formats_registry';
 
-/** @public **/
-export type FieldFormatsContentType = 'html' | 'text';
+/**
+ * Content type for string-based field format converters.
+ * @public
+ */
+export type FieldFormatsContentType = 'text';
 
 /**
- * Html converter options
+ * React converter options
  */
-export interface HtmlContextTypeOptions {
+export interface ReactContextTypeOptions {
   field?: { name: string };
   hit?: { highlight?: Record<string, string[]> };
   skipFormattingInStringifiedJSON?: boolean;
 }
 
 /**
- * To html converter function
+ * To React node converter function.
  * @public
  */
-export type HtmlContextTypeConvert = (value: any, options?: HtmlContextTypeOptions) => string;
+export type ReactContextTypeConvert = (value: any, options?: ReactContextTypeOptions) => ReactNode;
+
+/**
+ * Single-value React node converter. Like {@link ReactContextTypeConvert} but explicitly
+ * excludes arrays — use this for `reactConvertSingle` overrides so that callers cannot
+ * accidentally pass an array where only scalar values are expected.
+ * @public
+ */
+export type ReactContextTypeSingleConvert = (
+  value: string | number | boolean | null | undefined | Record<string, unknown>,
+  options?: ReactContextTypeOptions
+) => ReactNode;
 
 /**
  * Plain text converter options
@@ -48,12 +63,11 @@ export type TextContextTypeConvert = (value: any, options?: TextContextTypeOptio
  * Converter function
  * @public
  */
-export type FieldFormatConvertFunction = HtmlContextTypeConvert | TextContextTypeConvert;
+export type FieldFormatConvertFunction = TextContextTypeConvert;
 
 /** @public **/
 export interface FieldFormatConvert {
   text: TextContextTypeConvert;
-  html: HtmlContextTypeConvert;
 }
 
 /** @public **/

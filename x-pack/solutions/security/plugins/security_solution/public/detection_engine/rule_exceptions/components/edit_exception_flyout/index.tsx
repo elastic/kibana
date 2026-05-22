@@ -12,6 +12,7 @@ import {
   EuiHorizontalRule,
   EuiFlyoutBody,
   EuiTitle,
+  EuiFlexGroup,
   EuiFlyout,
   EuiSkeletonText,
   useGeneratedHtmlId,
@@ -27,12 +28,14 @@ import {
 } from '@kbn/securitysolution-io-ts-list-types';
 
 import {
+  getMalformedMatchesFields,
   hasWrongOperatorWithWildcard,
   hasPartialCodeSignatureEntry,
 } from '@kbn/securitysolution-list-utils';
 import type { ExceptionsBuilderReturnExceptionItem } from '@kbn/securitysolution-list-utils';
 
 import {
+  MalformedMatchesValueCallout,
   WildCardWithWrongOperatorCallout,
   PartialCodeSignatureCallout,
 } from '@kbn/securitysolution-exception-list-components';
@@ -45,6 +48,7 @@ import {
   isNewTermsRule,
   isThresholdRule,
 } from '../../../../../common/detection_engine/utils';
+import { useKibana } from '../../../../common/lib/kibana';
 
 import type { Rule } from '../../../rule_management/logic/types';
 import { ExceptionsFlyoutMeta } from '../flyout_components/item_meta_form';
@@ -64,8 +68,10 @@ import { useEditExceptionItems } from './use_edit_exception';
 import * as i18n from './translations';
 import { RULE_EXCEPTION, ENDPOINT_EXCEPTION } from '../../utils/translations';
 import { ExceptionsExpireTime } from '../flyout_components/expire_time';
-import { CONFIRM_WARNING_MODAL_LABELS } from '../../../../management/common/translations';
-import { ArtifactConfirmModal } from '../../../../management/components/artifact_list_page/components/artifact_confirm_modal';
+import {
+  ArtifactConfirmModal,
+  CONFIRM_WARNING_MODAL_LABELS,
+} from '../../../../management/components/artifact_list_page/components/artifact_confirm_modal';
 import { ExceptionFlyoutFooter } from '../flyout_components/footer';
 import { ExceptionFlyoutHeader } from '../flyout_components/header';
 import * as headerI18n from '../flyout_components/header/translations';
@@ -104,6 +110,9 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
   onCancel,
   onConfirm,
 }): JSX.Element => {
+  const {
+    docLinks: { links },
+  } = useKibana().services;
   const selectedOs = useMemo(() => itemToEdit.os_types, [itemToEdit]);
   const rules = useMemo(() => (rule != null ? [rule] : null), [rule]);
   const listType = useMemo((): ExceptionListTypeEnum => list.type as ExceptionListTypeEnum, [list]);
@@ -128,6 +137,8 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
       expireErrorExists,
       wildcardWarningExists,
       partialCodeSignatureWarningExists,
+      malformedMatchesValueExists,
+      malformedMatchesFields,
     },
     dispatch,
   ] = useReducer(createExceptionItemsReducer(), {
@@ -143,6 +154,8 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
     expireErrorExists: false,
     wildcardWarningExists: false,
     partialCodeSignatureWarningExists: false,
+    malformedMatchesValueExists: false,
+    malformedMatchesFields: [],
   });
 
   const allowLargeValueLists = useMemo((): boolean => {
@@ -187,6 +200,8 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
         type: 'setPartialCodeSignature',
         warningExists: hasPartialCodeSignatureEntry(items),
       });
+      const fields = getMalformedMatchesFields(items);
+      dispatch({ type: 'setMalformedMatchesValue', fields });
       dispatch({
         type: 'setExceptionItems',
         items,
@@ -351,12 +366,12 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
   ]);
 
   const handleOnSubmit = useCallback(() => {
-    if (wildcardWarningExists) {
+    if (wildcardWarningExists || malformedMatchesValueExists) {
       setShowConfirmModal(true);
     } else {
       return handleSubmitException();
     }
-  }, [wildcardWarningExists, handleSubmitException]);
+  }, [wildcardWarningExists, malformedMatchesValueExists, handleSubmitException]);
 
   const isSubmitButtonDisabled = useMemo(
     () =>
@@ -389,22 +404,24 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
   }, [listType]);
 
   const confirmModal = useMemo(() => {
-    const { title, body, confirmButton, cancelButton } = CONFIRM_WARNING_MODAL_LABELS(
-      listType === ExceptionListTypeEnum.ENDPOINT ? ENDPOINT_EXCEPTION : RULE_EXCEPTION
+    const labels = CONFIRM_WARNING_MODAL_LABELS(
+      listType === ExceptionListTypeEnum.ENDPOINT ? ENDPOINT_EXCEPTION : RULE_EXCEPTION,
+      {
+        hasWildcardWithWrongOperator: wildcardWarningExists,
+        hasMalformedMatchesValue: malformedMatchesFields,
+      },
+      links
     );
 
     return (
       <ArtifactConfirmModal
-        title={title}
-        body={body}
-        confirmButton={confirmButton}
-        cancelButton={cancelButton}
+        labels={labels}
         onSuccess={handleSubmitException}
         onCancel={() => setShowConfirmModal(false)}
         data-test-subj="artifactConfirmModal"
       />
     );
-  }, [listType, handleSubmitException]);
+  }, [listType, wildcardWarningExists, links, handleSubmitException, malformedMatchesFields]);
 
   return (
     <EuiFlyout
@@ -440,8 +457,15 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
           onSetErrorExists={setConditionsValidationError}
           getExtendedFields={getExtendedFields}
         />
-        {wildcardWarningExists && <WildCardWithWrongOperatorCallout />}
-        {partialCodeSignatureWarningExists && <PartialCodeSignatureCallout />}
+        {(wildcardWarningExists ||
+          malformedMatchesValueExists ||
+          partialCodeSignatureWarningExists) && (
+          <EuiFlexGroup direction="column" gutterSize="s">
+            {wildcardWarningExists && <WildCardWithWrongOperatorCallout />}
+            {malformedMatchesValueExists && <MalformedMatchesValueCallout />}
+            {partialCodeSignatureWarningExists && <PartialCodeSignatureCallout />}
+          </EuiFlexGroup>
+        )}
         {!openedFromListDetailPage && listType === ExceptionListTypeEnum.DETECTION && (
           <>
             <EuiHorizontalRule />

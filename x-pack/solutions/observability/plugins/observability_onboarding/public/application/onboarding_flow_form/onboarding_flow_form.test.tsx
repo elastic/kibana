@@ -40,16 +40,19 @@ jest.mock('../package_list/package_list', () => ({
   ),
 }));
 
-jest.mock('../package_list_search_form/package_list_search_form', () => ({
-  PackageListSearchForm: () => <div data-test-subj="package-search-form">Search Form</div>,
-}));
-
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const mockUsePricingFeature = usePricingFeature as jest.MockedFunction<typeof usePricingFeature>;
+const mockPackageListSearchForm = jest.fn(({ searchQuery }: { searchQuery: string }) => (
+  <div data-test-subj="package-search-form">Search Form: {searchQuery}</div>
+));
 
-const renderWithProviders = (children: React.ReactNode) => {
+jest.mock('../package_list_search_form/package_list_search_form', () => ({
+  PackageListSearchForm: (props: { searchQuery: string }) => mockPackageListSearchForm(props),
+}));
+
+const renderWithProviders = (children: React.ReactNode, initialEntries: string[] = ['/']) => {
   return render(
-    <MemoryRouter>
+    <MemoryRouter initialEntries={initialEntries}>
       <I18nProvider>{children}</I18nProvider>
     </MemoryRouter>
   );
@@ -176,6 +179,16 @@ describe('OnboardingFlowForm', () => {
 
       expect(screen.getByText(/Search through other ways of ingesting data/)).toBeInTheDocument();
       expect(screen.getByTestId('package-search-form')).toBeInTheDocument();
+    });
+
+    it('should pass empty searchQuery to search form when URL search is invalid KQL', () => {
+      mockUsePricingFeature.mockReturnValue(true);
+
+      renderWithProviders(<OnboardingFlowForm />, ['/?search=host:(']);
+
+      expect(mockPackageListSearchForm).toHaveBeenCalledWith(
+        expect.objectContaining({ searchQuery: '' })
+      );
     });
   });
 });

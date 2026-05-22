@@ -58,7 +58,7 @@ Spec files must end with `.spec.ts`.
 
 - [Browser authentication](./browser-auth.md)
 - [Deployment tags](./deployment-tags.md)
-- [Best practices](./best-practices.md)
+- [UI test best practices](./ui-best-practices.md)
 - [Page objects](./page-objects.md)
 - [Fixtures](./fixtures.md)
 - [Accessibility (a11y) checks](./a11y-checks.md)

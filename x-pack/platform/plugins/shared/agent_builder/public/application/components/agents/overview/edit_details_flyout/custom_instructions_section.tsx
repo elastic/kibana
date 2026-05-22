@@ -21,11 +21,11 @@ export const CustomInstructionsSection: React.FC = () => {
       <EuiTitle size="xs">
         <h3>{flyoutLabels.instructionsTitle}</h3>
       </EuiTitle>
-      <EuiSpacer size="xs" />
-      <EuiText size="xs" color="subdued">
+      <EuiSpacer size="s" />
+      <EuiText size="s" color="subdued" component="p">
         {flyoutLabels.instructionsDescription}
       </EuiText>
-      <EuiSpacer size="s" />
+      <EuiSpacer size="l" />
 
       <Controller
         name="configuration.instructions"

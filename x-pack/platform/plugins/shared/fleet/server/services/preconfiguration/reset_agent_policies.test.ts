@@ -12,7 +12,7 @@ import { packagePolicyService } from '../package_policy';
 import { PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE } from '../../constants';
 import { setupFleet } from '../setup';
 import { getAgentsByKuery, forceUnenrollAgent } from '../agents';
-import { listEnrollmentApiKeys, deleteEnrollmentApiKey } from '../api_keys';
+import { listEnrollmentApiKeys, deleteEnrollmentApiKeys } from '../api_keys';
 
 import { resetPreconfiguredAgentPolicies } from './reset_agent_policies';
 
@@ -26,8 +26,8 @@ const mockedSetupFleet = setupFleet as jest.MockedFunction<typeof setupFleet>;
 const mockedForceUnenrollAgent = forceUnenrollAgent as jest.MockedFunction<
   typeof forceUnenrollAgent
 >;
-const mockedDeleteEnrollmentApiKey = deleteEnrollmentApiKey as jest.MockedFunction<
-  typeof deleteEnrollmentApiKey
+const mockedDeleteEnrollmentApiKeys = deleteEnrollmentApiKeys as jest.MockedFunction<
+  typeof deleteEnrollmentApiKeys
 >;
 const mockedGetAgentsByKuery = getAgentsByKuery as jest.MockedFunction<typeof getAgentsByKuery>;
 const mockedListEnrollmentApiKeys = listEnrollmentApiKeys as jest.MockedFunction<
@@ -84,7 +84,7 @@ describe('reset agent policies', () => {
 
     expect(mockedSetupFleet).toBeCalled();
     expect(mockedForceUnenrollAgent).not.toBeCalled();
-    expect(mockedDeleteEnrollmentApiKey).not.toBeCalled();
+    expect(mockedDeleteEnrollmentApiKeys).not.toBeCalled();
   });
 
   it('should unenroll agents and revoke enrollment api keys if there is policies', async () => {
@@ -115,6 +115,6 @@ describe('reset agent policies', () => {
 
     expect(mockedSetupFleet).toBeCalled();
     expect(mockedForceUnenrollAgent).toBeCalled();
-    expect(mockedDeleteEnrollmentApiKey).toBeCalled();
+    expect(mockedDeleteEnrollmentApiKeys).toBeCalled();
   });
 });

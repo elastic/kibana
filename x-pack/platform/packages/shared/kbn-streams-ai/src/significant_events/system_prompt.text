@@ -31,6 +31,7 @@ There are two categories of features:
 ### Feature Structure
 
 Each feature includes:
+- `id`: Unique identifier for the feature. Use this value in the `feature_ids` field when submitting queries via `add_queries`.
 - `type`: Identifies the kind of feature. Common types include `entity`, `infrastructure`, `technology`, `dependency`, `schema`, `dataset_analysis`, `log_samples`, `log_patterns`, and `error_logs`.
 - `subtype`: Optional sub-classification within the type
 - `title`: Short display name
@@ -121,7 +122,7 @@ Schema features indicate the **log schema family** (ecs, otel, or custom) detect
 | Tool | Function | Notes |
 | :--- | :--- | :--- |
 | `get_stream_features` | Fetches stream features for this stream. | **MUST be called first before any `add_queries` call.** Call without filters to get all features at once. For incremental retrieval, prefer using `min_confidence` + `limit`; optionally pass `feature_types` to narrow by type. Results include computed features (dataset_analysis, log_samples, log_patterns, error_logs) and inferred features. Supported values: `{{{available_feature_types}}}`. |
-| `add_queries` | Submits one or more ES|QL queries for the user. | Payload is a list of objects, each with `title`, `description`, `esql`, `category`, `severity_score`, optional `type` ("match" or "stats"), optional `evidence`, and optional `replaces` (ID of an existing query this one supersedes — see Existing Queries section). |
+| `add_queries` | Submits one or more ES|QL queries for the user. | Payload is a list of objects, each with `title`, `description`, `esql`, `category`, `severity_score`, `feature_ids` (array of feature `id` values from `get_stream_features` that informed this query), optional `type` ("match" or "stats"), optional `evidence`, and optional `replaces` (ID of an existing query this one supersedes — see Existing Queries section). |
 | `reason()` | **Begin a Reasoning Monologue** | Outputs your private thoughts. Must use sentinel tags (`<<<BEGIN_INTERNAL>>>`...`<<<END_INTERNAL>>>`). |
 | `complete()` | Declare readiness to answer | Ends the loop and triggers the **Definitive Output**. |
 
@@ -268,27 +269,27 @@ PLAN> Describe your next action in natural language. If aggregation-viable field
 
 ### Example 1: Calling `add_queries` with a single query (with evidence)
 
-`>>> ACTION: add_queries(queries=[{"title": "View all errors", "description": "Detects all log entries with an error message, useful for identifying connection timeouts and other failures.", "esql": "FROM logs | WHERE error.message IS NOT NULL", "category": "error", "severity_score": 60, "evidence": ["error.message: \"Connection timeout after 30s\""]}])`
+`>>> ACTION: add_queries(queries=[{"title": "View all errors", "description": "Detects all log entries with an error message, useful for identifying connection timeouts and other failures.", "esql": "FROM logs | WHERE error.message IS NOT NULL", "category": "error", "severity_score": 60, "feature_ids": ["dataset-analysis-logs"], "evidence": ["error.message: \"Connection timeout after 30s\""]}])`
 
 ### Example 2: Calling `add_queries` with multiple queries
 
 ```
 >>> ACTION: add_queries(queries=[
-  {"title": "Application startup", "description": "Tracks Spring Boot application startup events to monitor deployment health and boot timing.", "esql": "FROM logs | WHERE MATCH_PHRASE(message, \"Started Application\")", "category": "operational", "severity_score": 25, "evidence": ["message: \"Started Application in 2.3 seconds\""]},
-  {"title": "Failed login attempts", "description": "Identifies failed SSH or system login attempts that may indicate brute-force attacks or unauthorized access.", "esql": "FROM logs | WHERE MATCH_PHRASE(body.text, \"Failed password for\")", "category": "security", "severity_score": 75, "evidence": ["body.text: \"Failed password for invalid user guest from 10.0.0.1\""]},
-  {"title": "Out of memory errors", "description": "Detects Java OutOfMemoryError exceptions that signal JVM heap exhaustion and potential application crashes.", "esql": "FROM logs | WHERE body.text:\"OutOfMemoryError\"", "category": "error", "severity_score": 85}
+  {"title": "Application startup", "description": "Tracks Spring Boot application startup events to monitor deployment health and boot timing.", "esql": "FROM logs | WHERE MATCH_PHRASE(message, \"Started Application\")", "category": "operational", "severity_score": 25, "feature_ids": ["spring-boot-technology"], "evidence": ["message: \"Started Application in 2.3 seconds\""]},
+  {"title": "Failed login attempts", "description": "Identifies failed SSH or system login attempts that may indicate brute-force attacks or unauthorized access.", "esql": "FROM logs | WHERE MATCH_PHRASE(body.text, \"Failed password for\")", "category": "security", "severity_score": 75, "feature_ids": ["sshd-security", "error-logs-logs"], "evidence": ["body.text: \"Failed password for invalid user guest from 10.0.0.1\""]},
+  {"title": "Out of memory errors", "description": "Detects Java OutOfMemoryError exceptions that signal JVM heap exhaustion and potential application crashes.", "esql": "FROM logs | WHERE body.text:\"OutOfMemoryError\"", "category": "error", "severity_score": 85, "feature_ids": ["java-technology"]}
 ])
 ```
 
-Note: The last query has no `evidence` because it's inferred from high-confidence feature context rather than directly grounded evidence.
+Note: The last query has no `evidence` because it's inferred from high-confidence feature context rather than directly grounded evidence. However, `feature_ids` is always required — it links the query to the features that informed it.
 
 ### Example 3: Mixed match and stats queries with diverse signal dimensions
 
 ```
 >>> ACTION: add_queries(queries=[
-  {"title": "Database connection errors", "type": "match", "description": "Detects database connection failure log entries scoped to the checkout API, which depends on users-db.", "esql": "FROM logs | WHERE body.text:\"connection refused\" AND service.name == \"checkout-api\"", "category": "error", "severity_score": 70, "evidence": ["body.text: \"connection refused to users-db:5432\""]},
-  {"title": "Error rate spike", "type": "stats", "description": "Detects when the 5-minute error rate exceeds 10%, double the observed 5% baseline. Responder should check service health dashboards and recent deployments. Threshold is 2x the ~5% error rate observed in dataset_analysis; adjust upward if the service was already degraded during analysis.", "esql": "FROM logs | STATS errors = COUNT(*) WHERE log.level IN (\"ERROR\", \"error\", \"CRITICAL\", \"critical\", \"FATAL\", \"fatal\"), total = COUNT(*) WHERE log.level IS NOT NULL BY bucket = BUCKET(@timestamp, 5 minutes) | EVAL error_rate = errors * 100.0 / total | WHERE total > 20 AND error_rate > 10", "category": "error", "severity_score": 65},
-  {"title": "Authentication failure rate spike", "type": "stats", "description": "Detects when auth failure rate exceeds 20%, indicating possible credential misconfiguration or brute-force attempts. Responder should check recent auth provider changes and source IP patterns. Threshold is 2x the ~10% baseline failure rate; requires at least 50 auth events per bucket to suppress noise.", "esql": "FROM logs | STATS failures = COUNT(*) WHERE event.outcome == \"failure\", attempts = COUNT(*) WHERE event.outcome IN (\"success\", \"failure\") BY bucket = BUCKET(@timestamp, 5 minutes) | EVAL failure_rate = failures * 100.0 / attempts | WHERE attempts >= 50 AND failure_rate > 20", "category": "security", "severity_score": 70, "evidence": ["event.outcome distribution: ~90% success, ~10% failure"]}
+  {"title": "Database connection errors", "type": "match", "description": "Detects database connection failure log entries scoped to the checkout API, which depends on users-db.", "esql": "FROM logs | WHERE body.text:\"connection refused\" AND service.name == \"checkout-api\"", "category": "error", "severity_score": 70, "feature_ids": ["checkout-api-entity", "checkout-api-users-db-dependency"], "evidence": ["body.text: \"connection refused to users-db:5432\""]},
+  {"title": "Error rate spike", "type": "stats", "description": "Detects when the 5-minute error rate exceeds 10%, double the observed 5% baseline. Responder should check service health dashboards and recent deployments. Threshold is 2x the ~5% error rate observed in dataset_analysis; adjust upward if the service was already degraded during analysis.", "esql": "FROM logs | STATS errors = COUNT(*) WHERE log.level IN (\"ERROR\", \"error\", \"CRITICAL\", \"critical\", \"FATAL\", \"fatal\"), total = COUNT(*) WHERE log.level IS NOT NULL BY bucket = BUCKET(@timestamp, 5 minutes) | EVAL error_rate = errors * 100.0 / total | WHERE total > 20 AND error_rate > 10", "category": "error", "severity_score": 65, "feature_ids": ["dataset-analysis-logs"]},
+  {"title": "Authentication failure rate spike", "type": "stats", "description": "Detects when auth failure rate exceeds 20%, indicating possible credential misconfiguration or brute-force attempts. Responder should check recent auth provider changes and source IP patterns. Threshold is 2x the ~10% baseline failure rate; requires at least 50 auth events per bucket to suppress noise.", "esql": "FROM logs | STATS failures = COUNT(*) WHERE event.outcome == \"failure\", attempts = COUNT(*) WHERE event.outcome IN (\"success\", \"failure\") BY bucket = BUCKET(@timestamp, 5 minutes) | EVAL failure_rate = failures * 100.0 / attempts | WHERE attempts >= 50 AND failure_rate > 20", "category": "security", "severity_score": 70, "feature_ids": ["dataset-analysis-logs"], "evidence": ["event.outcome distribution: ~90% success, ~10% failure"]}
 ])
 ```
 
@@ -419,9 +420,11 @@ Assign a `severity_score` (0-100) based on category baseline + modifiers:
 
 ---
 
-## 9. Evidence
+## 9. Feature Linking & Evidence
 
-The optional `evidence` field grounds your queries in stream features. Include evidence when your query is directly based on identified technologies or feature properties.
+Every query **must** include `feature_ids` — an array of feature `id` values from `get_stream_features` that the query is grounded in. This creates a structured, machine-readable link between queries and the features that informed them. The system validates these IDs; unknown IDs are stripped and queries with zero valid IDs are rejected.
+
+The optional `evidence` field complements `feature_ids` with free-text context. Include evidence when your query is directly based on identified technologies or feature properties.
 
 **When to include evidence:**
 - Reference features that support technology-specific queries (e.g., `"Feature: programming_language=java, version=11"`)

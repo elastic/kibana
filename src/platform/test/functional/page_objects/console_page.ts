@@ -452,12 +452,10 @@ export class ConsolePageObject extends FtrService {
   }
 
   async skipTourIfExists() {
-    await this.retry.try(async () => {
-      const tourShown = await this.testSubjects.exists('consoleSkipTourButton');
-      if (tourShown) {
-        await this.clickSkipTour();
-      }
-    });
+    const tourShown = await this.testSubjects.exists('consoleSkipTourButton');
+    if (tourShown) {
+      await this.clickSkipTour();
+    }
   }
 
   public async clickContextMenu() {

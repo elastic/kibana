@@ -8,7 +8,6 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { convertLegacyFieldsToJsonSchema } from './field_conversion';
 import { type ConnectorContractUnion } from '../..';
 import { getDeprecatedStepMessage, getStepDeprecationInfo } from '../deprecated_step_metadata';
 import { KIBANA_TYPE_ALIASES } from '../kibana/aliases';
@@ -35,7 +34,6 @@ import {
   WorkflowSchemaForAutocompleteBase,
   WorkflowSettingsSchema,
 } from '../schema';
-import type { JsonModelSchema } from '../schema/common/json_model_schema';
 import { getTriggerSchema } from '../schema/triggers';
 
 export function getStepId(stepName: string): string {
@@ -72,31 +70,10 @@ export function generateYamlSchemaFromConnectors(
     triggers: z.array(triggerSchema).min(1),
   });
 
-  return workflowBaseWithTriggers
-    .extend({
-      settings: getWorkflowSettingsSchema(recursiveStepSchema, loose).optional(),
-      steps: z.array(recursiveStepSchema),
-    })
-    .transform((data) => {
-      let normalizedInputs: z.infer<typeof JsonModelSchema> | undefined;
-      if (data.inputs) {
-        if (
-          'properties' in data.inputs &&
-          typeof data.inputs === 'object' &&
-          !Array.isArray(data.inputs)
-        ) {
-          normalizedInputs = data.inputs as z.infer<typeof JsonModelSchema>;
-        } else if (Array.isArray(data.inputs)) {
-          normalizedInputs = convertLegacyFieldsToJsonSchema(data.inputs);
-        }
-      }
-      const { inputs: _, ...rest } = data;
-      return {
-        ...rest,
-        version: '1' as const,
-        ...(normalizedInputs !== undefined && { inputs: normalizedInputs }),
-      };
-    });
+  return workflowBaseWithTriggers.extend({
+    settings: getWorkflowSettingsSchema(recursiveStepSchema, loose).optional(),
+    steps: z.array(recursiveStepSchema),
+  });
 }
 
 function createRecursiveStepSchema(
@@ -149,6 +126,17 @@ function createRecursiveStepSchema(
   return stepSchema;
 }
 
+/**
+ * Returns true when a step's params schema has no required fields, meaning `with` can be omitted.
+ * This covers steps like `data.parseJson` whose inputs are all optional or entirely absent.
+ */
+function hasNoRequiredFields(schema: z.ZodType): boolean {
+  if (!(schema instanceof z.ZodObject)) return false;
+  return Object.values(schema.shape).every(
+    (field) => field instanceof z.ZodOptional || field instanceof z.ZodDefault
+  );
+}
+
 function generateStepSchemaForConnector(
   connector: ConnectorContractUnion,
   stepSchema: z.ZodType,
@@ -161,11 +149,17 @@ function generateStepSchemaForConnector(
       connector.hasConnectorId === 'required' ? z.string() : z.string().optional();
   }
 
+  // If all params are optional (or there are none), `with` itself should be optional so users
+  // don't have to write an empty `with: {}` block for steps that need no inputs.
+  const withSchema = hasNoRequiredFields(connector.paramsSchema)
+    ? connector.paramsSchema.optional()
+    : connector.paramsSchema;
+
   return BaseConnectorStepSchema.extend({
     type: connector.description
       ? z.literal(connector.type).describe(connector.description)
       : z.literal(connector.type),
-    with: connector.paramsSchema,
+    with: withSchema,
     ...connectorIdSchema,
     'on-failure': getOnFailureStepSchema(stepSchema, loose).optional(),
     ...(connector.configSchema && connector.configSchema.shape),

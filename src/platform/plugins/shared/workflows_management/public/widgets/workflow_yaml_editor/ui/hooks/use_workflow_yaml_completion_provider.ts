@@ -12,12 +12,14 @@ import { useSelector } from 'react-redux';
 import type { monaco } from '@kbn/monaco';
 import type { WorkflowDetailState } from '../../../../entities/workflows/store';
 import { selectDetail } from '../../../../entities/workflows/store/workflow_detail/selectors';
+import { useGetPropertyHandler } from '../../../../features/validate_workflow_yaml/lib/property_handlers/use_get_property_handler';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { getCompletionItemProvider } from '../../lib/autocomplete/get_completion_item_provider';
 import type { WorkflowKqlCompletionServices } from '../../lib/autocomplete/suggestions/workflow_kql_completion_services';
 
 export const useWorkflowYamlCompletionProvider = (): monaco.languages.CompletionItemProvider => {
   const { services } = useKibana();
+  const getPropertyHandler = useGetPropertyHandler();
   const editorState = useSelector(selectDetail);
   const editorStateRef = useRef<WorkflowDetailState>(editorState);
   editorStateRef.current = editorState;
@@ -27,8 +29,12 @@ export const useWorkflowYamlCompletionProvider = (): monaco.languages.Completion
       kql: services.kql,
       fieldFormats: services.fieldFormats,
     });
-    return getCompletionItemProvider(() => editorStateRef.current, getKqlServices);
-  }, [services.fieldFormats, services.kql]);
+    return getCompletionItemProvider(
+      () => editorStateRef.current,
+      getKqlServices,
+      getPropertyHandler
+    );
+  }, [getPropertyHandler, services.fieldFormats, services.kql]);
 
   return completionProvider;
 };

@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Serializable } from '@kbn/utility-types';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
@@ -20,6 +19,44 @@ import {
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import { getESQLQueryVariables } from './query_parsing_helpers';
 
+type EsqlControlState = OptionsListESQLControlState & {
+  type: typeof ESQL_CONTROL;
+};
+
+interface EsqlControlsState {
+  [uuid: string]: EsqlControlState;
+}
+
+export function getAllEsqlControls(
+  presentationContainer: PresentationContainer
+): EsqlControlsState {
+  const esqlControlsState: EsqlControlsState = {};
+
+  for (const api of Object.values(presentationContainer.children$.getValue())) {
+    if (
+      !(
+        apiHasType(api) &&
+        api.type === ESQL_CONTROL &&
+        apiHasUniqueId(api) &&
+        apiHasSerializableState(api)
+      )
+    ) {
+      continue;
+    }
+
+    const controlState = api.serializeState() as OptionsListESQLControlState;
+    const variableName = controlState.variable_name;
+    if (!variableName) continue;
+
+    esqlControlsState[api.uuid] = {
+      ...controlState,
+      type: ESQL_CONTROL,
+    };
+  }
+
+  return esqlControlsState;
+}
+
 export function getEsqlControls(
   presentationContainer: PresentationContainer,
   query: AggregateQuery | Query | undefined
@@ -28,35 +65,9 @@ export function getEsqlControls(
 
   const usedVariables = getESQLQueryVariables(query.esql);
 
-  const esqlControlState = Object.values(presentationContainer.children$.getValue()).reduce(
-    (acc: { [uuid: string]: Serializable }, api, index) => {
-      if (
-        !(
-          apiHasType(api) &&
-          api.type === ESQL_CONTROL &&
-          apiHasUniqueId(api) &&
-          apiHasSerializableState(api)
-        )
-      ) {
-        return acc;
-      }
-
-      const controlState = api.serializeState() as OptionsListESQLControlState;
-      const variableName = controlState.variable_name;
-      if (!variableName) return acc;
-      const isUsed = usedVariables.includes(variableName);
-      if (!isUsed) return acc;
-
-      return {
-        ...acc,
-        [api.uuid]: {
-          type: api.type,
-          ...controlState,
-        },
-      };
-    },
-    {}
+  return Object.fromEntries(
+    Object.entries(getAllEsqlControls(presentationContainer)).filter(([, control]) =>
+      usedVariables.includes(control.variable_name)
+    )
   );
-
-  return esqlControlState;
 }

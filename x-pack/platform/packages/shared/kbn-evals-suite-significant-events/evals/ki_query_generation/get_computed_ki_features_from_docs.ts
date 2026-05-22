@@ -6,13 +6,13 @@
  */
 
 import type { Feature } from '@kbn/streams-schema';
+import { selectLogPatternsForLlm } from '@kbn/streams-ai/src/features/computed/log_patterns';
 import { CANONICAL_LAST_SEEN } from '../../src/data_generators/canonical_ki_features';
 
 const ERROR_KEYWORDS = ['error', 'exception', 'fatal', 'fail', 'panic', 'timeout', 'traceback'];
 const MAX_FIELD_VALUE_SAMPLES = 5;
 const MAX_SAMPLE_DOCS = 5;
 const MAX_ERROR_SAMPLES = 5;
-const MAX_PATTERNS = 5;
 
 /**
  * Recursively flattens a nested ES document into dot-delimited field names.
@@ -159,19 +159,19 @@ const buildLogPatterns = (
     }
   }
 
-  const patterns = [...patternGroups.values()]
+  const sorted = [...patternGroups.values()]
     .sort((a, b) => b.count - a.count)
-    .slice(0, MAX_PATTERNS)
     .map(({ count, sample }) => ({
       count,
-      field: 'body.text',
-      regex: '.*',
       sample,
+      field: 'body.text',
       pattern: sample
         .slice(0, 80)
         .replace(/[0-9a-f]{8,}/gi, '*')
         .replace(/\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}/g, '*'),
     }));
+
+  const patterns = selectLogPatternsForLlm(sorted);
 
   return {
     id: 'log_patterns',

@@ -5,24 +5,17 @@
  * 2.0.
  */
 
-import type { ComponentType } from 'react';
 import React from 'react';
 import { ErrorDistribution } from '.';
-import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 
 export default {
   title: 'app/ErrorGroupDetails/distribution',
   component: ErrorDistribution,
-  decorators: [
-    (Story: ComponentType) => {
-      return (
-        <MockApmPluginStorybook routePath="/services/{serviceName}/errors/{groupId}?kuery=&rangeFrom=now-15m&rangeTo=now&environment=ENVIRONMENT_ALL&serviceGroup=&comparisonEnabled=true&transactionType=request&offset=1d">
-          <Story />
-        </MockApmPluginStorybook>
-      );
-    },
-  ],
+  parameters: {
+    routePath:
+      '/services/{serviceName}/errors/{groupId}?kuery=&rangeFrom=now-15m&rangeTo=now&environment=ENVIRONMENT_ALL&serviceGroup=&comparisonEnabled=true&transactionType=request&offset=1d',
+  },
 };
 
 export function Example() {

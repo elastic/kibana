@@ -14,15 +14,20 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { TimelineType, PersistTimelineResponse } from '../model/components.gen';
 
+export const GetDraftTimelinesRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * Which draft to load (`default` investigation timeline or `template` timeline template).
+     */
+    timelineType: TimelineType,
+  })
+);
 export type GetDraftTimelinesRequestQuery = z.infer<typeof GetDraftTimelinesRequestQuery>;
-export const GetDraftTimelinesRequestQuery = z.object({
-  timelineType: TimelineType,
-});
 export type GetDraftTimelinesRequestQueryInput = z.input<typeof GetDraftTimelinesRequestQuery>;
 
+export const GetDraftTimelinesResponse = lazySchema(() => PersistTimelineResponse);
 export type GetDraftTimelinesResponse = z.infer<typeof GetDraftTimelinesResponse>;
-export const GetDraftTimelinesResponse = PersistTimelineResponse;

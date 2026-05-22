@@ -29,7 +29,7 @@ export const useOpenGenericEntityDetailsLeftPanel = (
   const { identityFields, entityDocId, entityId, scopeId } = params;
   const { openLeftPanel } = useExpandableFlyoutApi();
   const euidApi = useEntityStoreEuidApi();
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
   const { hasMisconfigurationFindings } = useHasMisconfigurations(
     buildEuidCspPreviewOptions('generic', identityFields, euidApi, { entityStoreV2Enabled })
   );

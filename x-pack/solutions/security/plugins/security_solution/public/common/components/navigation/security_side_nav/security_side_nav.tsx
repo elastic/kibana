@@ -31,6 +31,7 @@ import { useKibana } from '../../../lib/kibana';
 import { getNavCategories } from './categories';
 import { useParentLinks } from '../../../links/links_hooks';
 import { CLASSIC_LAUNCHPAD_PANEL_LINK_ENTRIES } from '../../../../onboarding/links';
+import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 
 export const EUI_HEADER_HEIGHT = '93px';
 
@@ -251,7 +252,9 @@ const usePanelBottomOffset = (): string | undefined => {
  */
 export const SecuritySideNav: React.FC = () => {
   const { uiSettings } = useKibana().services;
-
+  const isNewEAHomePageEnabled = useIsExperimentalFeatureEnabled(
+    'entityAnalyticsNewHomePageEnabled'
+  );
   const items = useSolutionSideNavItems();
   const selectedId = useSelectedId();
   const panelTopOffset = usePanelTopOffset();
@@ -262,8 +265,8 @@ export const SecuritySideNav: React.FC = () => {
       ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
       false
     );
-    return getNavCategories(enableAlertsAndAttacksAlignment);
-  }, [uiSettings]);
+    return getNavCategories(enableAlertsAndAttacksAlignment, isNewEAHomePageEnabled);
+  }, [uiSettings, isNewEAHomePageEnabled]);
 
   if (!items) {
     return <EuiLoadingSpinner size="m" data-test-subj="sideNavLoader" />;

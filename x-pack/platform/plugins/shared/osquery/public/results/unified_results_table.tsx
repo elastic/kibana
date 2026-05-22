@@ -49,6 +49,7 @@ import {
   PaginationLimitToastContent,
   euiProgressCss,
 } from './results_table_shared';
+import { useExportFiltersContext } from './export_filters_context';
 
 const ITEMS_PER_PAGE_OPTIONS = [...PAGE_SIZE_OPTIONS];
 
@@ -236,6 +237,36 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     scheduleId,
     executionCount,
   });
+
+  // Publish active filters to the ref-backed context so the page-header export
+  // button and row kebab menu can read them. The store does not re-render this
+  // tree on writes; only subscribers of this `actionId` re-render.
+  const exportFiltersStore = useExportFiltersContext();
+  const unfilteredTotal = actionResultsData?.aggregations?.totalRowCount;
+  useEffect(() => {
+    exportFiltersStore?.setFilters(actionId, {
+      kuery: userKuery,
+      activeFilters,
+      filteredTotal: allResultsData?.total,
+      total: unfilteredTotal,
+    });
+  }, [
+    exportFiltersStore,
+    actionId,
+    userKuery,
+    activeFilters,
+    allResultsData?.total,
+    unfilteredTotal,
+  ]);
+
+  // Drop the store entry when this row's results table unmounts (e.g. pack
+  // row collapse) so stale filter state can't be served to a later mount.
+  useEffect(
+    () => () => {
+      exportFiltersStore?.clearFilters(actionId);
+    },
+    [exportFiltersStore, actionId]
+  );
 
   // Register missing columns as runtime fields on the data view so that
   // UnifiedDataTable can resolve their field type tokens (icons in column headers).

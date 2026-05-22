@@ -20,15 +20,14 @@ const log = new ToolingLog();
 const writer = new ToolingLogCollectingWriter();
 log.setWriters([writer]);
 
+const fetchMock = jest.spyOn(global, 'fetch');
+
 afterEach(() => {
   writer.messages.length = 0;
   jest.clearAllMocks();
 });
 
-jest.mock('axios', () => ({
-  request: jest.fn(),
-}));
-const Axios = jest.requireMock('axios');
+const jsonResponse = (data: unknown) => new Response(JSON.stringify(data), { status: 200 });
 
 const mockTestFailure: Omit<TestFailure, 'classname' | 'name'> = {
   failure: '',
@@ -41,12 +40,15 @@ const mockTestFailure: Omit<TestFailure, 'classname' | 'name'> = {
 it('captures a list of failed test issue, loads the bodies for each issue, and only fetches what is needed', async () => {
   const existing = new ExistingFailedTestIssues(log);
 
-  Axios.request.mockImplementation(({ data }: any) => ({
-    data: {
-      existingIssues: data.failures
-        .filter((t: any) => t.classname.includes('foo'))
+  fetchMock.mockImplementation(async (_input, init) => {
+    const body = JSON.parse(init?.body as string) as {
+      failures: Array<{ classname: string; name: string }>;
+    };
+    return jsonResponse({
+      existingIssues: body.failures
+        .filter((t) => t.classname.includes('foo'))
         .map(
-          (t: any, i: any): FailedTestIssue => ({
+          (t, i): FailedTestIssue => ({
             classname: t.classname,
             name: t.name,
             github: {
@@ -57,8 +59,8 @@ it('captures a list of failed test issue, loads the bodies for each issue, and o
             },
           })
         ),
-    },
-  }));
+    });
+  });
 
   const fooFailure: TestFailure = {
     ...mockTestFailure,
@@ -98,72 +100,42 @@ it('captures a list of failed test issue, loads the bodies for each issue, and o
       " debg loaded 1 existing test issues",
     ]
   `);
-  expect(Axios.request).toMatchInlineSnapshot(`
-    [MockFunction] {
-      "calls": Array [
-        Array [
-          Object {
-            "allowAbsoluteUrls": false,
-            "baseURL": "https://ci-stats.kibana.dev",
-            "data": Object {
-              "failures": Array [
-                Object {
-                  "classname": "foo classname",
-                  "name": "foo test",
-                },
-              ],
+
+  expect(fetchMock).toHaveBeenCalledTimes(2);
+  // Argument shape: each call should be (url, init) with method POST and a JSON body
+  // describing the failure to look up. Snapshot the call args after parsing the body.
+  const calls = fetchMock.mock.calls.map(([url, init]) => ({
+    url: typeof url === 'string' ? url : url.toString(),
+    method: init?.method,
+    body: JSON.parse(init?.body as string),
+  }));
+  expect(calls).toMatchInlineSnapshot(`
+    Array [
+      Object {
+        "body": Object {
+          "failures": Array [
+            Object {
+              "classname": "foo classname",
+              "name": "foo test",
             },
-            "method": "POST",
-            "url": "/v1/find_failed_test_issues",
-          },
-        ],
-        Array [
-          Object {
-            "allowAbsoluteUrls": false,
-            "baseURL": "https://ci-stats.kibana.dev",
-            "data": Object {
-              "failures": Array [
-                Object {
-                  "classname": "bar classname",
-                  "name": "bar test",
-                },
-              ],
-            },
-            "method": "POST",
-            "url": "/v1/find_failed_test_issues",
-          },
-        ],
-      ],
-      "results": Array [
-        Object {
-          "type": "return",
-          "value": Object {
-            "data": Object {
-              "existingIssues": Array [
-                Object {
-                  "classname": "foo classname",
-                  "github": Object {
-                    "body": "FAILURE: foo classname/foo test",
-                    "htmlUrl": "htmlurl(foo classname/foo test)",
-                    "nodeId": "nodeid(foo classname/foo test)",
-                    "number": 21,
-                  },
-                  "name": "foo test",
-                },
-              ],
-            },
-          },
+          ],
         },
-        Object {
-          "type": "return",
-          "value": Object {
-            "data": Object {
-              "existingIssues": Array [],
+        "method": "POST",
+        "url": "https://ci-stats.kibana.dev/v1/find_failed_test_issues",
+      },
+      Object {
+        "body": Object {
+          "failures": Array [
+            Object {
+              "classname": "bar classname",
+              "name": "bar test",
             },
-          },
+          ],
         },
-      ],
-    }
+        "method": "POST",
+        "url": "https://ci-stats.kibana.dev/v1/find_failed_test_issues",
+      },
+    ]
   `);
 });
 
@@ -193,12 +165,15 @@ describe('Scout failures', () => {
   it('matches Scout failures by name only, ignoring target differences', async () => {
     const existing = new ExistingFailedTestIssues(log);
 
-    Axios.request.mockImplementation(({ data }: any) => ({
-      data: {
-        existingIssues: data.failures
-          .filter((t: any) => t.name === 'scout test name')
+    fetchMock.mockImplementation(async (_input, init) => {
+      const body = JSON.parse(init?.body as string) as {
+        failures: Array<{ classname: string; name: string }>;
+      };
+      return jsonResponse({
+        existingIssues: body.failures
+          .filter((t) => t.name === 'scout test name')
           .map(
-            (t: any): FailedTestIssue => ({
+            (t): FailedTestIssue => ({
               classname: t.classname || 'scout suite',
               name: t.name,
               github: {
@@ -209,8 +184,8 @@ describe('Scout failures', () => {
               },
             })
           ),
-      },
-    }));
+      });
+    });
 
     // First Scout failure with target chrome
     const scoutFailure1: TestFailure & { id: string; target: string; location: string } = {
@@ -249,11 +224,7 @@ describe('Scout failures', () => {
   it('correctly identifies seen Scout failures by name only', async () => {
     const existing = new ExistingFailedTestIssues(log);
 
-    Axios.request.mockImplementation(() => ({
-      data: {
-        existingIssues: [],
-      },
-    }));
+    fetchMock.mockImplementation(async () => jsonResponse({ existingIssues: [] }));
 
     // First Scout failure with target chrome
     const scoutFailure1: TestFailure & { id: string; target: string; location: string } = {
@@ -283,16 +254,19 @@ describe('Scout failures', () => {
     await existing.loadForFailures([scoutFailure1, scoutFailure2]);
 
     // Should only make one API call (for the first failure, second is already seen)
-    expect(Axios.request).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
   it('distinguishes between Scout and FTR failures correctly', async () => {
     const existing = new ExistingFailedTestIssues(log);
 
-    Axios.request.mockImplementation(({ data }: any) => ({
-      data: {
-        existingIssues: data.failures.map(
-          (t: any, i: number): FailedTestIssue => ({
+    fetchMock.mockImplementation(async (_input, init) => {
+      const body = JSON.parse(init?.body as string) as {
+        failures: Array<{ classname: string; name: string }>;
+      };
+      return jsonResponse({
+        existingIssues: body.failures.map(
+          (t, i): FailedTestIssue => ({
             classname: t.classname,
             name: t.name,
             github: {
@@ -303,8 +277,8 @@ describe('Scout failures', () => {
             },
           })
         ),
-      },
-    }));
+      });
+    });
 
     const scoutFailure: TestFailure & { id: string; target: string; location: string } = {
       ...mockTestFailure,
@@ -337,11 +311,7 @@ describe('Scout failures', () => {
   it('returns undefined for Scout failures when no matching issue exists', async () => {
     const existing = new ExistingFailedTestIssues(log);
 
-    Axios.request.mockImplementation(() => ({
-      data: {
-        existingIssues: [],
-      },
-    }));
+    fetchMock.mockImplementation(async () => jsonResponse({ existingIssues: [] }));
 
     const scoutFailure: TestFailure & { id: string; target: string; location: string } = {
       ...mockTestFailure,

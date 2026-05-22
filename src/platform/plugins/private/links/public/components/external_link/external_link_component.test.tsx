@@ -15,7 +15,7 @@ import { LINKS_VERTICAL_LAYOUT } from '../../../common/content_management';
 import { ExternalLinkComponent } from './external_link_component';
 import { coreServices } from '../../services/kibana_services';
 import type { ResolvedLink } from '../../types';
-import { DEFAULT_EXTERNAL_LINK_OPTIONS } from './constants';
+import { DEFAULT_EXTERNAL_LINK_OPTIONS } from '../../../common/constants';
 
 describe('external link component', () => {
   const defaultLinkInfo: ResolvedLink = {
@@ -23,6 +23,7 @@ describe('external link component', () => {
     id: 'foo',
     type: 'externalLink' as const,
     title: 'https://example.com',
+    options: DEFAULT_EXTERNAL_LINK_OPTIONS,
   };
 
   beforeEach(async () => {

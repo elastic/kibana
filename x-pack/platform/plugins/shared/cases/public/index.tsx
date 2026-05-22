@@ -32,6 +32,8 @@ export {
 export type {
   UnifiedReferenceAttachmentType,
   CommonAttachmentTabViewProps,
+  UnifiedReferenceAttachmentViewProps,
 } from './client/attachment_framework/types';
-export { AttachmentActionType } from './client/attachment_framework/types';
+export { AttachmentActionType, defineAttachment } from './client/attachment_framework/types';
 export { useCasesContext } from './components/cases_context/use_cases_context';
+export { ShowTableButton } from './components/attachments/common/show_table_button';

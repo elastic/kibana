@@ -11,13 +11,17 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 
 import {
+  DATA_STREAM_TYPE_VAR_NAME,
   FLEET_APM_PACKAGE,
   FLEET_CONNECTORS_PACKAGE,
   FLEET_UNIVERSAL_PROFILING_COLLECTOR_PACKAGE,
   FLEET_UNIVERSAL_PROFILING_SYMBOLIZER_PACKAGE,
   OTEL_COLLECTOR_INPUT_TYPE,
+  OTEL_TEMPLATE_SUFFIX,
   USE_APM_VAR_NAME,
 } from '../../../common/constants';
+
+import { appContextService } from '../app_context';
 
 import { getNormalizedDataStreams } from '../../../common/services';
 
@@ -68,13 +72,38 @@ export const AGENTLESS_INDEX_PERMISSIONS = [
   'view_index_metadata',
 ];
 
+/**
+ * Appends the `.otel` suffix to a dataset string for OTel input streams when building agent
+ * index privileges, mirroring the EPM side (`getRegistryDataStreamAssetBaseName` with
+ * `isOtelInputType`). Only applies when:
+ *   - the source input is `otelcol`
+ *   - `enableOtelIntegrations` is on (same gate as EPM)
+ *   - the stream is not dynamic_dataset (wildcard already covers .otel)
+ *   - the stream is not dataset_is_prefix (wildcard `<dataset>.*` already covers .otel)
+ *   - the dataset doesn't already end in `.otel` (defensive against double-append)
+ */
+function applyOtelDatasetSuffixIfNeeded(
+  dataset: string,
+  opts: {
+    isOtelInput: boolean;
+    dynamicDataset?: boolean;
+    datasetIsPrefix?: boolean;
+  }
+): string {
+  if (!opts.isOtelInput) return dataset;
+  if (!appContextService.getExperimentalFeatures().enableOtelIntegrations) return dataset;
+  if (opts.dynamicDataset) return dataset;
+  if (opts.datasetIsPrefix) return dataset;
+  if (dataset.endsWith(`.${OTEL_TEMPLATE_SUFFIX}`)) return dataset;
+  return `${dataset}.${OTEL_TEMPLATE_SUFFIX}`;
+}
+
 export function storedPackagePoliciesToAgentPermissions(
   packageInfoCache: Map<string, PackageInfo>,
   agentPolicyNamespace: string,
   packagePolicies?: PackagePolicy[],
   agentInputs?: FullAgentPolicyInput[] | TemplateAgentPolicyInput[]
 ): FullAgentPolicyOutputPermissions | undefined {
-  // I'm not sure what permissions to return for this case, so let's return the defaults
   if (!packagePolicies) {
     throw new PackagePolicyRequestError(
       'storedPackagePoliciesToAgentPermissions should be called with a PackagePolicy'
@@ -163,14 +192,9 @@ export function storedPackagePoliciesToAgentPermissions(
           const otelcolPipelines = agentInputs?.find((i) => i.type === OTEL_COLLECTOR_INPUT_TYPE)
             ?.streams?.[0]?.service?.pipelines;
 
-          let signalTypes: string[];
-          if (otelcolPipelines) {
-            // Use pipelines if available
-            signalTypes = extractSignalTypesFromPipelines(otelcolPipelines);
-          } else {
-            // If no pipelines found, return empty array
-            signalTypes = [];
-          }
+          const signalTypes = otelcolPipelines
+            ? extractSignalTypesFromPipelines(otelcolPipelines)
+            : [];
 
           const baseMeta: DataStreamMeta = {
             type: 'logs',
@@ -209,7 +233,11 @@ export function storedPackagePoliciesToAgentPermissions(
                     return;
                   }
 
-                  if (!stream.data_stream.type) {
+                  const effectiveStreamType =
+                    (stream.vars?.[DATA_STREAM_TYPE_VAR_NAME]?.value as string | undefined) ||
+                    stream.data_stream.type;
+
+                  if (!effectiveStreamType) {
                     if (inputAllowsDynamic) {
                       // Dynamic signal types input — type is resolved at runtime, skip
                       return;
@@ -220,15 +248,34 @@ export function storedPackagePoliciesToAgentPermissions(
                     );
                   }
 
+                  const rawDataset = isOtelInput
+                    ? getEffectiveOtelStreamDataset(stream)
+                    : stream.compiled_stream?.data_stream?.dataset ?? stream.data_stream.dataset;
+
+                  // Look up dataset_is_prefix from the registry data stream definition —
+                  // it is not stored on the policy stream's data_stream object.
+                  const registryDs = dataStreams.find(
+                    (rds) =>
+                      rds.type === stream.data_stream.type &&
+                      rds.dataset === stream.data_stream.dataset
+                  );
+                  const datasetIsPrefix = registryDs?.dataset_is_prefix;
+
                   const ds: DataStreamMeta = {
-                    type: stream.data_stream.type,
-                    dataset: isOtelInput
-                      ? getEffectiveOtelStreamDataset(stream)
-                      : stream.compiled_stream?.data_stream?.dataset ?? stream.data_stream.dataset,
+                    type: effectiveStreamType,
+                    dataset: applyOtelDatasetSuffixIfNeeded(rawDataset, {
+                      isOtelInput,
+                      dynamicDataset: stream.data_stream.elasticsearch?.dynamic_dataset,
+                      datasetIsPrefix,
+                    }),
                   };
 
                   if (stream.data_stream.elasticsearch) {
                     ds.elasticsearch = stream.data_stream.elasticsearch;
+                  }
+
+                  if (datasetIsPrefix) {
+                    ds.dataset_is_prefix = true;
                   }
 
                   dataStreams_.push(ds);
@@ -243,7 +290,11 @@ export function storedPackagePoliciesToAgentPermissions(
                     );
                     dataStreams_.push({
                       type: 'logs',
-                      dataset: getEffectiveOtelStreamDataset(stream),
+                      dataset: applyOtelDatasetSuffixIfNeeded(rawDataset, {
+                        isOtelInput: true,
+                        dynamicDataset: spanEventElasticsearch?.dynamic_dataset,
+                        datasetIsPrefix,
+                      }),
                       ...(spanEventElasticsearch ? { elasticsearch: spanEventElasticsearch } : {}),
                     });
 

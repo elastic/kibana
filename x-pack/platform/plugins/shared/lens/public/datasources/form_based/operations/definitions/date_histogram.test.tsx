@@ -214,6 +214,28 @@ describe('date_histogram', () => {
       );
     });
 
+    it('uses data view time field when column source field is empty', () => {
+      const esAggsFn = dateHistogramOperation.toEsAggsFn(
+        {
+          ...(layer.columns.col1 as DateHistogramIndexPatternColumn),
+          sourceField: '',
+        },
+        'col1',
+        indexPattern1,
+        layer,
+        uiSettingsMock,
+        []
+      );
+
+      expect(esAggsFn).toEqual(
+        expect.objectContaining({
+          arguments: expect.objectContaining({
+            field: ['timestamp'],
+          }),
+        })
+      );
+    });
+
     it('should use restricted time zone and omit use normalized es interval for rollups', () => {
       const esAggsFn = dateHistogramOperation.toEsAggsFn(
         layer.columns.col1 as DateHistogramIndexPatternColumn,

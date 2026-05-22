@@ -20,6 +20,7 @@ import {
 } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/formatters/saved_object_to_monitor';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
+import { cleanSyntheticsTestData } from './services/private_location_test_service';
 
 export const keyToOmitList = [
   'created_at',
@@ -51,7 +52,7 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       _httpMonitorJson = getFixtureJson('http_monitor');
       _browserMonitorJson = getFixtureJson('browser_monitor');
-      await kibanaServer.savedObjects.cleanStandardList();
+      await cleanSyntheticsTestData(kibanaServer);
     });
 
     beforeEach(() => {

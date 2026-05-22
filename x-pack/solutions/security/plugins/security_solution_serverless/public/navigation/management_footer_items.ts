@@ -114,7 +114,8 @@ export const createManagementFooterItemsTree = (
                 children: [
                   { link: 'management:rules' as const },
                   { link: 'management:episodes' as const, breadcrumbStatus: 'hidden' as const },
-                  { link: 'management:notification_policies' as const },
+                  { link: 'management:action_policies' as const },
+                  { link: 'management:execution_history' as const },
                 ],
               },
             ]
@@ -124,7 +125,8 @@ export const createManagementFooterItemsTree = (
           breadcrumbStatus: 'hidden',
           children: [
             {
-              link: 'management:triggersActions',
+              id: 'stackRules',
+              link: 'rules',
               breadcrumbStatus: 'hidden',
             },
             {

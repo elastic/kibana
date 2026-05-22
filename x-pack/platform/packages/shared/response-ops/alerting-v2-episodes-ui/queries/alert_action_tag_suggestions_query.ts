@@ -5,14 +5,17 @@
  * 2.0.
  */
 
+import { escapeStringValue } from '@kbn/esql-utils/src/utils/append_to_query/utils';
 import { ALERT_ACTIONS_DATA_STREAM } from '../constants';
 
 export const ALERT_ACTION_TAG_SUGGESTIONS_LIMIT = 20;
 
-export const buildAlertActionTagSuggestionsQuery = (): string =>
+export const buildAlertActionTagSuggestionsQuery = (spaceId: string): string =>
   `
 FROM ${ALERT_ACTIONS_DATA_STREAM}
-| WHERE action_type == "tag" AND episode_id IS NOT NULL
+| WHERE space_id == ${escapeStringValue(
+    spaceId
+  )} AND action_type == "tag" AND episode_id IS NOT NULL
 | STATS last_tags = LAST(tags, @timestamp) BY episode_id
 | MV_EXPAND last_tags
 | STATS cnt = COUNT(*) BY last_tags

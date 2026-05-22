@@ -146,6 +146,7 @@ Prompt-to-spec mapping showing which strategy doc prompts are covered by which s
 | V2 | Entity Store V2 get_entity routing | `v2/entity_store_v2_get_entity.spec.ts` |
 | V2 | Entity Store V2 search_entities routing | `v2/entity_store_v2_search_entities.spec.ts` |
 | V2 | Entity Store V2 multi-skill routing | `v2/entity_store_v2_multi_skill.spec.ts` |
+| V2 | `security.entity` attachment side-effects (single card, table, not-found) | `v2/entity_attachment_side_effect.spec.ts` |
 
 ## Adding New Tests
 
@@ -155,6 +156,13 @@ To add new evaluation tests:
 2. Use the `evaluate` fixture from `src/evaluate.ts`
 3. Define your dataset with `examples` containing `input` and `output` fields
 4. Use `criteria` in the output for criteria-based evaluation
+5. Use `attachments` in the output to assert conversation-level attachments
+   (e.g. `security.entity` side-effects) persisted during the run. Each entry
+   supports `{ type, shape?: 'single' | 'table', entityId?, entityType?,
+   minEntities?, count?: { exact?|min?|max? }, criteria? }`. Count-based
+   assertions (including `count.exact: 0` for negative checks) are evaluated
+   deterministically; `criteria` delegates to the LLM judge over the matched
+   payload.
 
 Example:
 

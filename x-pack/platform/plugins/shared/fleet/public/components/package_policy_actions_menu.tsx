@@ -6,13 +6,20 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { EuiContextMenuItem, EuiPortal } from '@elastic/eui';
+import { EuiContextMenuItem, EuiCopy, EuiPortal } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import { EXCLUDED_FROM_PACKAGE_POLICY_COPY_PACKAGES } from '../../common/constants';
 import type { AgentPolicy, InMemoryPackagePolicy } from '../types';
-import { useAgentPolicyRefresh, useAuthz, useLink, useUpgradeReviewActions } from '../hooks';
+import {
+  useAgentPolicyRefresh,
+  useAuthz,
+  useGetOneAgentPolicy,
+  useLink,
+  useStartServices,
+  useUpgradeReviewActions,
+} from '../hooks';
 import { policyHasFleetServer } from '../services';
 
 import { scheduleAutoOpenModal } from '../applications/integrations/sections/epm/screens/installed_integrations/components/pending_upgrade_review_status';
@@ -49,10 +56,47 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
   const refreshAgentPolicy = useAgentPolicyRefresh();
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(defaultIsOpen);
 
+  const { cloud } = useStartServices();
+
   const isManaged = Boolean(packagePolicy.is_managed);
   const agentPolicyIsManaged = Boolean(agentPolicy?.is_managed);
   const isOrphanedPolicy = !agentPolicy && packagePolicy.policy_ids.length === 0;
   const isAgentlessPolicy = packagePolicy.supports_agentless;
+
+  // For agentless policies the agentPolicies prop may be empty (the parent hook doesn't always
+  // fetch them). Fetch the agent policy directly so we can include cluster_id in the support bundle.
+  const agentlessPolicyId =
+    isAgentlessPolicy && !agentPolicy ? packagePolicy.policy_ids[0] : undefined;
+  const { data: agentlessPolicyData } = useGetOneAgentPolicy(agentlessPolicyId);
+  const effectiveAgentPolicy = agentPolicy ?? agentlessPolicyData?.item;
+
+  const supportBundleText = useMemo(() => {
+    if (!isAgentlessPolicy) return '';
+    return [
+      'elastic-support-bundle',
+      cloud?.isServerlessEnabled && cloud?.serverless?.projectId
+        ? `project_id=${cloud.serverless.projectId}`
+        : null,
+      !cloud?.isServerlessEnabled && cloud?.deploymentId
+        ? `deployment_id=${cloud.deploymentId}`
+        : null,
+      effectiveAgentPolicy?.agentless?.cluster_id
+        ? `cluster_id=${effectiveAgentPolicy.agentless.cluster_id}`
+        : null,
+      effectiveAgentPolicy?.id ?? packagePolicy.policy_ids[0]
+        ? `policy_id=${effectiveAgentPolicy?.id ?? packagePolicy.policy_ids[0]}`
+        : null,
+      packagePolicy.package?.name ? `integration=${packagePolicy.package.name}` : null,
+    ]
+      .filter(Boolean)
+      .join('\n');
+  }, [
+    isAgentlessPolicy,
+    cloud,
+    effectiveAgentPolicy,
+    packagePolicy.policy_ids,
+    packagePolicy.package?.name,
+  ]);
 
   const isAddAgentVisible =
     showAddAgent && agentPolicy && !agentPolicyIsManaged && !agentPolicy?.supports_agentless;
@@ -194,6 +238,28 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
       />
     </EuiContextMenuItem>,
   ];
+
+  if (isAgentlessPolicy) {
+    menuItems.push(
+      <EuiCopy textToCopy={supportBundleText} key="packagePolicyCopySupportInfo">
+        {(copy) => (
+          <EuiContextMenuItem
+            data-test-subj="PackagePolicyActionsCopySupportInfoItem"
+            icon="copy"
+            onClick={() => {
+              copy();
+              setIsActionsMenuOpen(false);
+            }}
+          >
+            <FormattedMessage
+              id="xpack.fleet.policyDetails.packagePoliciesTable.copySupportInfoActionTitle"
+              defaultMessage="Copy support info"
+            />
+          </EuiContextMenuItem>
+        )}
+      </EuiCopy>
+    );
+  }
 
   if (!agentPolicy || !agentPolicyIsManaged || agentPolicy?.supports_agentless) {
     const ContextMenuItem = canWriteIntegrationPolicies

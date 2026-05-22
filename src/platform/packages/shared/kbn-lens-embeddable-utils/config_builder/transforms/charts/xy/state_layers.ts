@@ -24,7 +24,7 @@ import type {
   DataLayerType,
   ReferenceLineLayerType,
   AnnotationLayerByValueType,
-  XYState,
+  XYConfig,
 } from '../../../schema/charts/xy';
 import { addLayerColumn, generateLayer } from '../../utils';
 import {
@@ -78,7 +78,7 @@ export function getValueColumns(
   ];
 }
 
-function buildDataLayer(config: XYState, layer: DataLayerType, i: number): XYDataLayerConfig {
+function buildDataLayer(config: XYConfig, layer: DataLayerType, i: number): XYDataLayerConfig {
   const seriesTypeLabel = (
     layer.type.includes('percentage') ? `${layer.type}_stacked` : layer.type
   ) as SeriesType;
@@ -219,7 +219,7 @@ function buildReferenceLineLayer(
 }
 
 export function buildXYLayer(
-  config: XYState,
+  config: XYConfig,
   layer: unknown,
   i: number,
   dataViewId: string,

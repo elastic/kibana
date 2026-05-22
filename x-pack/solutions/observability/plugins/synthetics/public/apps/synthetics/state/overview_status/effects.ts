@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { debounce } from 'redux-saga/effects';
+import { takeLatest } from 'redux-saga/effects';
 import { fetchEffectFactory } from '../utils/fetch_effect';
 import { fetchOverviewStatusAction, quietFetchOverviewStatusAction } from './actions';
 import { fetchOverviewStatus } from './api';
 
 export function* fetchOverviewStatusEffect() {
-  yield debounce(
-    300, // Only take the latest while ignoring any intermediate triggers
+  yield takeLatest(
     [fetchOverviewStatusAction.get, quietFetchOverviewStatusAction.get],
     fetchEffectFactory(
       fetchOverviewStatus,

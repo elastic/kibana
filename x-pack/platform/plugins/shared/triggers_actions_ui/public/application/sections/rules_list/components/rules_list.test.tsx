@@ -540,7 +540,7 @@ describe('rules_list ', () => {
       fireEvent.mouseOver(await within(durationColumnHeader).findByText('Info'));
 
       await waitFor(() =>
-        expect(screen.getByRole('tooltip')).toHaveTextContent(
+        expect(screen.getByRole('tooltip', { hidden: true })).toHaveTextContent(
           'The length of time it took for the rule to run (mm:ss).'
         )
       );

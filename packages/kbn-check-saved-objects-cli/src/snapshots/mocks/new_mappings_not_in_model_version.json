@@ -129,7 +129,8 @@
         "properties.partition.type": "integer",
         "properties.priority.type": "integer",
         "properties.userScope.properties.apiKeyId.type": "keyword",
-        "properties.newUndeclaredField.type": "keyword"
+        "properties.newUndeclaredField.type": "keyword",
+        "properties.newUndeclaredField.ignore_above": 1024
       }
     }
   }

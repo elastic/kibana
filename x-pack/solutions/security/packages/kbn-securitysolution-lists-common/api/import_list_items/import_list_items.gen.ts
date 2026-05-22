@@ -14,33 +14,35 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { ListId, ListType } from '../model/list_common.gen';
 import { List } from '../model/list_schemas.gen';
 
-export type ImportListItemsRequestQuery = z.infer<typeof ImportListItemsRequestQuery>;
-export const ImportListItemsRequestQuery = z.object({
-  /**
+export const ImportListItemsRequestQuery = lazySchema(() =>
+  z.object({
+    /**
       * List's id.
 
 Required when importing to an existing list.
 
       */
-  list_id: ListId.optional(),
-  /**
+    list_id: ListId.optional(),
+    /**
       * Type of the importing list.
 
 Required when importing a new list whose list `id` is not specified.
 
       */
-  type: ListType.optional(),
-  /**
-   * Determines when changes made by the request are made visible to search.
-   */
-  refresh: z.enum(['true', 'false', 'wait_for']).optional(),
-});
+    type: ListType.optional(),
+    /**
+     * Determines when changes made by the request are made visible to search.
+     */
+    refresh: z.enum(['true', 'false', 'wait_for']).optional(),
+  })
+);
+export type ImportListItemsRequestQuery = z.infer<typeof ImportListItemsRequestQuery>;
 export type ImportListItemsRequestQueryInput = z.input<typeof ImportListItemsRequestQuery>;
 
+export const ImportListItemsResponse = lazySchema(() => List);
 export type ImportListItemsResponse = z.infer<typeof ImportListItemsResponse>;
-export const ImportListItemsResponse = List;

@@ -105,7 +105,9 @@ export const getTableColumns = (
   const columnsArray = [
     {
       field: 'status',
-      name: '',
+      name: i18n.translate('esqlEditor.query.querieshistory.statusColumnHeader', {
+        defaultMessage: 'Status',
+      }),
       sortable: false,
       'data-test-subj': 'status',
       render: (status: QueryHistoryItem['status']) => {
@@ -195,7 +197,9 @@ export const getTableColumns = (
       width: isOnReducedSpaceLayout ? 'auto' : '240px',
     },
     {
-      name: '',
+      name: i18n.translate('esqlEditor.query.querieshistory.actionsColumnHeader', {
+        defaultMessage: 'Actions',
+      }),
       actions,
       'data-test-subj': 'actions',
       width: isOnReducedSpaceLayout ? 'auto' : '60px',

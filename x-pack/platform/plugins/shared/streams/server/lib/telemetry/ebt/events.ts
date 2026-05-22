@@ -14,6 +14,7 @@ import {
   STREAMS_PROCESSING_PIPELINE_SUGGESTED_EVENT_TYPE,
   STREAMS_FEATURES_IDENTIFIED_EVENT_TYPE,
   STREAMS_AGENT_BUILDER_KNOWLEDGE_INDICATOR_CREATED_EVENT_TYPE,
+  STREAMS_AGENT_TOOL_KI_IDENTIFICATION_STARTED_EVENT_TYPE,
 } from './constants';
 import {
   streamsEndpointLatencySchema,
@@ -24,6 +25,7 @@ import {
   streamsProcessingPipelineSuggestedSchema,
   streamsFeaturesIdentifiedSchema,
   streamsAgentBuilderKnowledgeIndicatorCreatedSchema,
+  streamsAgentToolKiIdentificationStartedSchema,
 } from './schemas';
 
 const streamsEndpointLatencyEventType = {
@@ -64,6 +66,11 @@ const streamsAgentBuilderKnowledgeIndicatorCreatedEventType = {
   schema: streamsAgentBuilderKnowledgeIndicatorCreatedSchema,
 };
 
+const streamsAgentToolKiIdentificationStartedEventType = {
+  eventType: STREAMS_AGENT_TOOL_KI_IDENTIFICATION_STARTED_EVENT_TYPE,
+  schema: streamsAgentToolKiIdentificationStartedSchema,
+};
+
 export {
   streamsEndpointLatencyEventType,
   streamsStateErrorEventType,
@@ -73,4 +80,5 @@ export {
   streamsProcessingPipelineSuggestedEventType,
   streamsFeaturesIdentifiedEventType,
   streamsAgentBuilderKnowledgeIndicatorCreatedEventType,
+  streamsAgentToolKiIdentificationStartedEventType,
 };

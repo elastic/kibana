@@ -507,7 +507,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       enableNestedVirtualization: true
-      machineType: n2-standard-4
+      machineType: n2-highmem-4
       diskSizeGb: 120
     depends_on:
       - build

@@ -11,6 +11,7 @@ export { ChromeComponentsProvider } from './src/context';
 export type { ChromeComponentsDeps } from './src/context';
 
 export { ClassicHeader } from './src/classic';
+export { ChromeNextGlobalHeader } from './src/chrome_next';
 export { ProjectHeader } from './src/project';
 export { GridLayoutProjectSideNav } from './src/project/sidenav/grid_layout_sidenav';
 export { Sidebar } from './src/sidebar';

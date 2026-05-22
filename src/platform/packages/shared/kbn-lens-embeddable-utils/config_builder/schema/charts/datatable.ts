@@ -39,7 +39,10 @@ import { objectUnion } from './utils/object_union';
  * so it uses a datatable-specific schema rather than the shared applyColorToSchema.
  */
 const applyColorToDatatableSchema = schema.oneOf([applyColorToSchema, schema.literal('badge')], {
-  meta: { description: 'Where to apply the color for datatable (value, background, or badge)' },
+  meta: {
+    description:
+      'Column color target: `value` for cell text, `background` for cell background, or `badge` for a badge overlay.',
+  },
 });
 
 /**
@@ -51,13 +54,13 @@ const sortingSchema = schema.oneOf(
     schema.object(
       {
         column_type: schema.oneOf([schema.literal('metric'), schema.literal('row')], {
-          meta: { description: 'Type of column to sort by' },
+          meta: { description: 'Type of column to sort by.' },
         }),
         index: schema.number({
           min: 0,
-          meta: { description: 'Index of the column/row to sort by (0-based)' },
+          meta: { description: 'Index of the column or row to sort by (0-based).' },
         }),
-        direction: builderEnums.direction({ meta: { description: 'Sort direction' } }),
+        direction: builderEnums.direction({ meta: { description: 'Sort direction.' } }),
       },
       { meta: { description: 'Sort by a metric or row column' } }
     ),
@@ -79,7 +82,7 @@ const sortingSchema = schema.oneOf(
             description: 'Array of pivot values, one for each split_metrics_by column in order',
           },
         }),
-        direction: builderEnums.direction({ meta: { description: 'Sort direction' } }),
+        direction: builderEnums.direction({ meta: { description: 'Sort direction.' } }),
       },
       {
         meta: {
@@ -113,7 +116,7 @@ const datatableStylingSchema = schema.object(
               [schema.literal('compact'), schema.literal('default'), schema.literal('expanded')],
               {
                 defaultValue: 'default',
-                meta: { description: 'Density mode' },
+                meta: { description: 'Display density mode.' },
               }
             )
           ),
@@ -137,7 +140,7 @@ const datatableStylingSchema = schema.object(
                   ],
                   {
                     meta: {
-                      description: 'Maximum number of lines to use before header is truncated',
+                      description: 'Number of lines before the header is truncated.',
                     },
                   }
                 )
@@ -157,7 +160,7 @@ const datatableStylingSchema = schema.object(
                   ],
                   {
                     meta: {
-                      description: 'Number of lines to display per table body cell',
+                      description: 'Number of lines to display per table body cell.',
                     },
                   }
                 )
@@ -168,7 +171,7 @@ const datatableStylingSchema = schema.object(
         {
           meta: {
             id: 'datatableDensity',
-            description: 'Density configuration for the datatable',
+            description: 'Density configuration for the datatable.',
           },
         }
       )
@@ -187,7 +190,8 @@ const datatableStylingSchema = schema.object(
         ],
         {
           meta: {
-            description: 'Enables pagination and sets the number of rows to display per page',
+            description:
+              'Rows per page. When set, pagination is enabled with the specified number of rows.',
           },
         }
       )
@@ -202,7 +206,7 @@ const datatableStylingSchema = schema.object(
     row_numbers: schema.maybe(
       schema.object(
         {
-          visible: schema.boolean({ meta: { description: 'Show row numbers' } }),
+          visible: schema.boolean({ meta: { description: 'When `true`, displays row numbers.' } }),
         },
         {
           meta: {
@@ -221,7 +225,7 @@ const datatableStylingSchema = schema.object(
   }
 );
 
-const datatableStateCommonOptionsSchema = {
+const datatableConfigCommonOptionsSchema = {
   /**
    * Where to apply the color (background, value or badge)
    */
@@ -229,27 +233,32 @@ const datatableStateCommonOptionsSchema = {
   /**
    * Show the column
    */
-  visible: schema.maybe(schema.boolean({ defaultValue: true })),
+  visible: schema.maybe(
+    schema.boolean({
+      defaultValue: true,
+      meta: { description: 'When `false`, hides the column from the datatable.' },
+    })
+  ),
   /**
    * Column width in pixels
    */
   width: schema.maybe(
     schema.number({
       min: 0,
-      meta: { description: 'Column width in pixels' },
+      meta: { description: 'Column width in pixels.' },
     })
   ),
 };
 
-const datatableStateRowsOptionsNoESQLSchema = {
-  ...datatableStateCommonOptionsSchema,
+const datatableConfigRowsOptionsNoESQLSchema = {
+  ...datatableConfigCommonOptionsSchema,
   /**
    * Alignment of the rows
    */
   alignment: schema.maybe(
     horizontalAlignmentSchema({
       defaultValue: 'left',
-      meta: { description: 'Alignment of the rows' },
+      meta: { description: 'Alignment of the rows.' },
     })
   ),
   /**
@@ -266,7 +275,7 @@ const datatableStateRowsOptionsNoESQLSchema = {
   click_filter: schema.maybe(
     schema.boolean({
       defaultValue: false,
-      meta: { description: 'Whether to enable the one click filter' },
+      meta: { description: 'When `true`, enables one-click filtering on cell values.' },
     })
   ),
   /**
@@ -277,8 +286,8 @@ const datatableStateRowsOptionsNoESQLSchema = {
   collapse_by: schema.maybe(collapseBySchema),
 };
 
-const datatableStateRowsOptionsESQLSchema = {
-  ...datatableStateRowsOptionsNoESQLSchema,
+const datatableConfigRowsOptionsESQLSchema = {
+  ...datatableConfigRowsOptionsNoESQLSchema,
   /**
    * Color configuration
    */
@@ -293,8 +302,8 @@ const datatableStateRowsOptionsESQLSchema = {
   ),
 };
 
-const datatableStateMetricsOptionsSchema = {
-  ...datatableStateCommonOptionsSchema,
+const datatableConfigMetricsOptionsSchema = {
+  ...datatableConfigCommonOptionsSchema,
   /**
    * Color configuration
    */
@@ -313,7 +322,7 @@ const datatableStateMetricsOptionsSchema = {
   alignment: schema.maybe(
     horizontalAlignmentSchema({
       defaultValue: 'right',
-      meta: { description: 'Alignment of the columns' },
+      meta: { description: 'Alignment of the columns.' },
     })
   ),
   /**
@@ -330,9 +339,9 @@ const datatableStateMetricsOptionsSchema = {
             schema.literal('min'),
             schema.literal('max'),
           ],
-          { meta: { description: 'Type of summary function to apply to the column' } }
+          { meta: { description: 'Type of summary function to apply to the column.' } }
         ),
-        label: schema.maybe(schema.string({ meta: { description: 'Summary row label' } })),
+        label: schema.maybe(schema.string({ meta: { description: 'Summary row label.' } })),
       },
       { meta: { description: 'Summary row configuration' } }
     )
@@ -397,7 +406,7 @@ function validateSortBy({
   }
 }
 
-export const datatableStateSchemaNoESQL = schema.object(
+export const datatableConfigSchemaNoESQL = schema.object(
   {
     type: schema.literal('data_table'),
     ...sharedPanelInfoSchema,
@@ -409,7 +418,10 @@ export const datatableStateSchemaNoESQL = schema.object(
      * Metric columns configuration, must define operation.
      */
     metrics: schema.arrayOf(
-      mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(datatableStateMetricsOptionsSchema),
+      mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
+        datatableConfigMetricsOptionsSchema,
+        'datatableMetric'
+      ),
       {
         minSize: 1,
         maxSize: 1000,
@@ -421,7 +433,10 @@ export const datatableStateSchemaNoESQL = schema.object(
      */
     rows: schema.maybe(
       schema.arrayOf(
-        mergeAllBucketsWithChartDimensionSchema(datatableStateRowsOptionsNoESQLSchema),
+        mergeAllBucketsWithChartDimensionSchema(
+          datatableConfigRowsOptionsNoESQLSchema,
+          'datatableRow'
+        ),
         {
           minSize: 1,
           maxSize: 50,
@@ -450,7 +465,7 @@ export const datatableStateSchemaNoESQL = schema.object(
   }
 );
 
-export const datatableStateSchemaESQL = schema.object(
+export const datatableConfigSchemaESQL = schema.object(
   {
     type: schema.literal('data_table'),
     ...sharedPanelInfoSchema,
@@ -462,7 +477,7 @@ export const datatableStateSchemaESQL = schema.object(
      */
     metrics: schema.maybe(
       schema.arrayOf(
-        esqlColumnWithFormatSchema.extends(datatableStateMetricsOptionsSchema, {
+        esqlColumnWithFormatSchema.extends(datatableConfigMetricsOptionsSchema, {
           meta: { id: 'datatableESQLMetric', title: 'Datatable Metric (ES|QL)' },
         }),
         {
@@ -476,7 +491,7 @@ export const datatableStateSchemaESQL = schema.object(
      * Row configuration, optional operations.
      */
     rows: schema.maybe(
-      schema.arrayOf(esqlColumnWithFormatSchema.extends(datatableStateRowsOptionsESQLSchema), {
+      schema.arrayOf(esqlColumnWithFormatSchema.extends(datatableConfigRowsOptionsESQLSchema), {
         minSize: 1,
         maxSize: 50,
         meta: { description: 'Array of operations to split the datatable rows by' },
@@ -514,8 +529,8 @@ export const datatableStateSchemaESQL = schema.object(
   }
 );
 
-export const datatableStateSchema = objectUnion(
-  [datatableStateSchemaNoESQL, datatableStateSchemaESQL],
+export const datatableConfigSchema = objectUnion(
+  [datatableConfigSchemaNoESQL, datatableConfigSchemaESQL],
   {
     meta: {
       id: 'datatableChart',
@@ -525,7 +540,6 @@ export const datatableStateSchema = objectUnion(
   }
 );
 
-export type DatatableState = TypeOf<typeof datatableStateSchema>;
-export type DatatableStateNoESQL = TypeOf<typeof datatableStateSchemaNoESQL>;
-export type DatatableStateESQL = TypeOf<typeof datatableStateSchemaESQL>;
-export type DatatableStyling = TypeOf<typeof datatableStylingSchema>;
+export type DatatableConfig = TypeOf<typeof datatableConfigSchema>;
+export type DatatableConfigNoESQL = TypeOf<typeof datatableConfigSchemaNoESQL>;
+export type DatatableConfigESQL = TypeOf<typeof datatableConfigSchemaESQL>;

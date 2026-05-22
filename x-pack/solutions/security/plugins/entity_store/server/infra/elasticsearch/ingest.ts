@@ -105,9 +105,19 @@ export async function ingestEntities({
   }
 
   const ignoreSet = new Set(fieldsToIgnore ?? []);
+
+  const columnNameSet = new Set(columns.map((col) => col.name));
+  const isMultiFieldSubField = (name: string): boolean => {
+    const lastDot = name.lastIndexOf('.');
+    return lastDot !== -1 && columnNameSet.has(name.substring(0, lastDot));
+  };
+
   const columnMeta = columns.map((col) => ({
     name: col.name,
-    skip: (useUpsertById && col.name === esIdField) || ignoreSet.has(col.name),
+    skip:
+      (useUpsertById && col.name === esIdField) ||
+      ignoreSet.has(col.name) ||
+      isMultiFieldSubField(col.name),
     isIdField: useUpsertById && col.name === esIdField,
   }));
 

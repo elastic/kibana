@@ -140,6 +140,7 @@ interface AgentBase {
   capabilities?: string[];
   health?: ComponentHealth;
   effective_config?: any;
+  signals?: string[];
 }
 
 export enum UnhealthyReason {

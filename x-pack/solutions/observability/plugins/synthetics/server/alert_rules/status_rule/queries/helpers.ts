@@ -101,8 +101,16 @@ export const getPendingConfigs = ({
   const pendingConfigs: AlertPendingStatusConfigs = {};
 
   for (const monitorQueryId of monitorQueryIds) {
+    // Resolve the saved object to get the canonical configId (SO UUID).
+    // For regular monitors: configId === monitorQueryId.
+    // For project monitors: configId is the SO UUID, monitorQueryId is the journey ID.
+    const monitorSO = monitors.find(
+      (m) => m.id === monitorQueryId || m.attributes[ConfigKey.MONITOR_QUERY_ID] === monitorQueryId
+    );
+    const configId = monitorSO?.id ?? monitorQueryId;
+
     for (const locationId of monitorLocationIds) {
-      const configWithLocationId = `${monitorQueryId}-${locationId}`;
+      const configWithLocationId = `${configId}-${locationId}`;
 
       const isConfigMissing =
         !upConfigs[configWithLocationId] &&
@@ -122,7 +130,7 @@ export const getPendingConfigs = ({
           ) {
             pendingConfigs[configWithLocationId] = {
               status: 'pending',
-              configId: monitorQueryId,
+              configId,
               monitorQueryId,
               locationId,
               monitorInfo,

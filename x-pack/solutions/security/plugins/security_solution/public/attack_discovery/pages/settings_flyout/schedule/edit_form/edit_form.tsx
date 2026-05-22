@@ -114,6 +114,20 @@ export const EditForm: React.FC<FormProps> = React.memo((props) => {
     return getMessageVariables();
   }, []);
 
+  const ruleActionsComponentProps = useMemo(
+    () => ({
+      ruleTypeId: ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
+      messageVariables,
+      defaultRuleFrequency: {
+        notifyWhen: RuleNotifyWhen.ACTIVE,
+        throttle: null,
+        summary: false,
+      },
+      onNewConnectorCreated: (connector: ActionConnector) => setCurrentConnector(connector),
+    }),
+    [messageVariables, setCurrentConnector]
+  );
+
   return (
     <Form form={form} data-test-subj="attackDiscoveryScheduleForm">
       <EuiFlexGroup direction="column" responsive={false}>
@@ -149,16 +163,7 @@ export const EditForm: React.FC<FormProps> = React.memo((props) => {
           <UseField
             path="actions"
             component={RuleActionsField}
-            componentProps={{
-              ruleTypeId: ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
-              messageVariables,
-              defaultRuleFrequency: {
-                notifyWhen: RuleNotifyWhen.ACTIVE,
-                throttle: null,
-                summary: false,
-              },
-              onNewConnectorCreated: (connector: ActionConnector) => setCurrentConnector(connector),
-            }}
+            componentProps={ruleActionsComponentProps}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

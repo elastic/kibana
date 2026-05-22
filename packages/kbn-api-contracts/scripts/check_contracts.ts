@@ -11,7 +11,15 @@ import { execSync } from 'child_process';
 import { writeFileSync, mkdirSync, rmSync } from 'fs';
 import { resolve } from 'path';
 import { run } from '@kbn/dev-cli-runner';
-import { runOasdiff, parseOasdiff, applyAllowlist } from '../src/diff';
+import {
+  runOasdiff,
+  runOasdiffStructural,
+  parseOasdiff,
+  applyAllowlist,
+  buildRequestBodyIndex,
+  detectAdditionalPropertiesTightening,
+} from '../src/diff';
+import { loadOas } from '../src/input/load_oas';
 import { formatFailure } from '../src/report/format_failure';
 import { writeImpactReport } from '../src/report/write_impact_report';
 import { loadAllowlist } from '../src/allowlist/load_allowlist';
@@ -185,8 +193,10 @@ run(
         log.info(`Filtering oasdiff to ${terraformApis.length} Terraform provider API paths`);
       }
       let diffEntries;
+      let structuralDiff: unknown;
       try {
         diffEntries = runOasdiff(basePath, currentPath, { matchPath });
+        structuralDiff = runOasdiffStructural(basePath, currentPath, { matchPath });
       } catch (error: unknown) {
         // Some older branch specs (e.g. 9.3) have example objects incorrectly
         // placed under `#/components/schemas/` instead of `#/components/examples/`.
@@ -202,7 +212,17 @@ run(
         }
         throw error;
       }
-      const allBreakingChanges = parseOasdiff(diffEntries);
+
+      const currentOas = await loadOas(currentPath);
+      const requestBodyIndex = buildRequestBodyIndex(currentOas);
+      const { entries: syntheticEntries, warnings: detectorWarnings } =
+        detectAdditionalPropertiesTightening(structuralDiff, requestBodyIndex);
+
+      for (const warning of detectorWarnings) {
+        log.warning(warning);
+      }
+
+      const allBreakingChanges = parseOasdiff([...diffEntries, ...syntheticEntries]);
 
       if (allBreakingChanges.length === 0) {
         log.success('No breaking changes detected');

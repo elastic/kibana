@@ -35,6 +35,15 @@ export enum ToolType {
 }
 
 /**
+ * Source category of a tool call in a conversation.
+ */
+export enum ToolOrigin {
+  registry = 'registry',
+  inline = 'inline',
+  internal = 'internal',
+}
+
+/**
  * Serializable representation of a tool, without its handler or schema.
  *
  * Use as a common base for browser-side and server-side tool types.
@@ -67,6 +76,10 @@ export interface ToolDefinition<
    * The type-specific configuration for this tool.
    */
   configuration: TConfig;
+  /**
+   * When true, this tool is only available when experimental features are enabled.
+   */
+  experimental: boolean;
 }
 
 export interface ToolDefinitionWithSchema<

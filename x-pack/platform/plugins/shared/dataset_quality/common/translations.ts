@@ -104,6 +104,20 @@ export const flyoutFailedDocsTrendText = i18n.translate(
   }
 );
 
+export const degradedDocsOverTimeText = i18n.translate(
+  'xpack.datasetQuality.overview.degradedDocsOverTime',
+  {
+    defaultMessage: 'Degraded documents over time',
+  }
+);
+
+export const failedDocsOverTimeText = i18n.translate(
+  'xpack.datasetQuality.overview.failedDocsOverTime',
+  {
+    defaultMessage: 'Failed documents over time',
+  }
+);
+
 export const flyoutDegradedDocsPercentageText = i18n.translate(
   'xpack.datasetQuality.flyoutDegradedDocsPercentage',
   {
@@ -760,6 +774,13 @@ export const manualMitigationCustomPipelineCopyPipelineNameAriaText = i18n.trans
   'xpack.datasetQuality.details.degradedField.possibleMitigation.copyPipelineNameAriaText',
   {
     defaultMessage: 'Copy pipeline name',
+  }
+);
+
+export const manualMitigationCustomPipelineCopyPipelineNameSuccessText = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.possibleMitigation.copyPipelineNameSuccess',
+  {
+    defaultMessage: 'Pipeline name copied to clipboard',
   }
 );
 

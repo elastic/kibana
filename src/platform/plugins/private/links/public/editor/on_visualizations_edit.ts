@@ -14,13 +14,13 @@ import { resolveLinks } from '../lib/resolve_links';
 import { coreServices } from '../services/kibana_services';
 import type { LinksState } from '../../server';
 
-export async function onVisualizationsEdit(savedObjectId: string) {
+export async function onVisualizationsEdit(refId: string) {
   openLazyFlyout({
     core: coreServices,
     loadContent: async ({ closeFlyout }) => {
       let linksState: LinksState | undefined;
       try {
-        linksState = await loadFromLibrary(savedObjectId);
+        linksState = await loadFromLibrary(refId);
       } catch (error) {
         coreServices.notifications.toasts.addWarning(error.message);
         return;
@@ -28,7 +28,7 @@ export async function onVisualizationsEdit(savedObjectId: string) {
 
       return getEditorFlyout({
         initialState: {
-          savedObjectId,
+          refId,
           ...linksState,
           links: await resolveLinks(linksState.links ?? []),
         },

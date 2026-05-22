@@ -21,7 +21,7 @@ import {
 } from './shared';
 import { objectUnion } from './utils/object_union';
 
-const tagcloudStateTagsByOptionsSchema = {
+const tagcloudConfigTagsByOptionsSchema = {
   /**
    * Color configuration
    */
@@ -32,7 +32,7 @@ const tagcloudStylingSchema = schema.object(
   {
     orientation: schema.maybe(
       builderEnums.orientation({
-        meta: { description: 'Orientation of the tagcloud' },
+        meta: { description: 'Orientation of the tagcloud.' },
         defaultValue: 'horizontal',
       })
     ),
@@ -42,15 +42,15 @@ const tagcloudStylingSchema = schema.object(
           min: schema.number({
             defaultValue: LENS_TAGCLOUD_DEFAULT_STATE.minFontSize,
             min: 1,
-            meta: { description: 'Minimum font size' },
+            meta: { description: 'Minimum font size.' },
           }),
           max: schema.number({
             defaultValue: LENS_TAGCLOUD_DEFAULT_STATE.maxFontSize,
             max: 120,
-            meta: { description: 'Maximum font size' },
+            meta: { description: 'Maximum font size.' },
           }),
         },
-        { meta: { description: 'Minimum and maximum font size for the tags' } }
+        { meta: { description: 'Font size range for tags.' } }
       )
     ),
     /**
@@ -60,7 +60,7 @@ const tagcloudStylingSchema = schema.object(
       schema.object(
         {
           visible: schema.boolean({
-            meta: { description: 'Show caption' },
+            meta: { description: 'When `true`, displays the caption.' },
             defaultValue: LENS_TAGCLOUD_DEFAULT_STATE.showCaption,
           }),
         },
@@ -82,7 +82,7 @@ const tagcloudStylingSchema = schema.object(
   }
 );
 
-export const tagcloudStateSchemaNoESQL = schema.object(
+export const tagcloudConfigSchemaNoESQL = schema.object(
   {
     type: schema.literal('tag_cloud'),
     ...sharedPanelInfoSchema,
@@ -93,16 +93,25 @@ export const tagcloudStateSchemaNoESQL = schema.object(
     /**
      * Primary value configuration, must define operation.
      */
-    metric: mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps({}),
+    metric: mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps({}, 'tagcloudMetric'),
     /**
      * Configure how to break down to tags
      */
-    tag_by: mergeAllBucketsWithChartDimensionSchema(tagcloudStateTagsByOptionsSchema),
+    tag_by: mergeAllBucketsWithChartDimensionSchema(
+      tagcloudConfigTagsByOptionsSchema,
+      'tagcloudTag'
+    ),
   },
-  { meta: { id: 'tagcloudNoESQL', title: 'Tag Cloud Chart (DSL)' } }
+  {
+    meta: {
+      id: 'tagcloudNoESQL',
+      title: 'Tag Cloud Chart (DSL)',
+      description: 'Tag Cloud configuration using a data view.',
+    },
+  }
 );
 
-export const tagcloudStateSchemaESQL = schema.object(
+export const tagcloudConfigSchemaESQL = schema.object(
   {
     type: schema.literal('tag_cloud'),
     ...sharedPanelInfoSchema,
@@ -116,18 +125,28 @@ export const tagcloudStateSchemaESQL = schema.object(
     /**
      * Configure how to break down the metric (e.g. show one metric per term).
      */
-    tag_by: esqlColumnWithFormatSchema.extends(tagcloudStateTagsByOptionsSchema),
+    tag_by: esqlColumnWithFormatSchema.extends(tagcloudConfigTagsByOptionsSchema),
   },
-  { meta: { id: 'tagcloudESQL', title: 'Tag Cloud Chart (ES|QL)' } }
-);
-
-export const tagcloudStateSchema = objectUnion(
-  [tagcloudStateSchemaNoESQL, tagcloudStateSchemaESQL],
   {
-    meta: { id: 'tagcloudChart', title: 'Tag Cloud Chart' },
+    meta: {
+      id: 'tagcloudESQL',
+      title: 'Tag Cloud Chart (ES|QL)',
+      description: 'Tag Cloud configuration using an ES|QL query.',
+    },
   }
 );
 
-export type TagcloudState = TypeOf<typeof tagcloudStateSchema>;
-export type TagcloudStateNoESQL = TypeOf<typeof tagcloudStateSchemaNoESQL>;
-export type TagcloudStateESQL = TypeOf<typeof tagcloudStateSchemaESQL>;
+export const tagcloudConfigSchema = objectUnion(
+  [tagcloudConfigSchemaNoESQL, tagcloudConfigSchemaESQL],
+  {
+    meta: {
+      id: 'tagcloudChart',
+      title: 'Tag Cloud Chart',
+      description: 'A word cloud with terms sized by metric value.',
+    },
+  }
+);
+
+export type TagcloudConfig = TypeOf<typeof tagcloudConfigSchema>;
+export type TagcloudConfigNoESQL = TypeOf<typeof tagcloudConfigSchemaNoESQL>;
+export type TagcloudConfigESQL = TypeOf<typeof tagcloudConfigSchemaESQL>;

@@ -128,12 +128,38 @@ export const useContentListItemsQuery = (
     return query.error instanceof Error ? query.error : new Error(String(query.error));
   }, [query.error]);
 
+  const total = query.data?.total ?? 0;
+  const hasCurrentData = !query.isLoading && !query.isPreviousData && !query.error;
+
+  // hasActiveQuery must reflect the filters that produced the data currently on
+  // screen, not the live (possibly mid-debounce) activeFilters. During the
+  // debounce window the live search text has already changed but the query has
+  // not yet fired, so using live activeFilters here would flip hasNoItems /
+  // hasNoResults before the new result arrives:
+  //   • typing into an empty list → hasActiveQuery flips true immediately →
+  //     the full-page CTA disappears before any search has run.
+  //   • clearing a zero-result search → hasActiveQuery flips false immediately
+  //     → the full-page CTA reappears while stale zero-result data is still
+  //     showing via keepPreviousData.
+  //
+  // queryParams.filters already substitutes debouncedSearchText for the live
+  // search term, so it exactly matches what the last-fired query used.
+  // However, filters: { ...activeFilters, search: debouncedSearchText } always
+  // includes a `search` key even when debouncedSearchText is '', so we must
+  // exclude empty-string values before counting active keys.
+  const hasActiveQuery = Object.entries(queryParams.filters).some(
+    ([, v]) => v !== '' && v !== undefined && v !== null
+  );
+
   return {
     items: query.data?.items ?? [],
-    totalItems: query.data?.total ?? 0,
+    totalItems: total,
     isLoading: query.isLoading,
     isFetching: query.isFetching,
     error,
+    hasNoItems: hasCurrentData && total === 0 && !hasActiveQuery,
+    hasNoResults: hasCurrentData && total === 0 && hasActiveQuery,
+    hasActiveQuery,
     refetch,
     requery,
   };

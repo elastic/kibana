@@ -68,7 +68,7 @@ describe('getKpiTotalUsersAreaLensAttributes', () => {
     expect(attrs?.references).toEqual([]);
     expect(attrs?.state.internalReferences).toHaveLength(2);
     const spec = Object.values(attrs?.state.adHocDataViews ?? {})[0];
-    expect(spec?.title).toBe('.entities.v2.latest.security_my_space');
+    expect(spec?.title).toBe('.entities.v2.latest.security_my_space-00001');
     const userTypeFilter = attrs?.state.filters?.find(
       (f) => f.meta?.key === 'entity.EngineMetadata.Type'
     );

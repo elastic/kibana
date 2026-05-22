@@ -1,0 +1,16 @@
+spec_id: .microsoft-teams
+name: "Microsoft Teams (testing)"
+auth_type: oauth_authorization_code
+secrets:
+  tokenUrl:
+    value: "https://login.microsoftonline.com/common/oauth2/v2.0/token"
+  authorizationUrl:
+    value: "https://login.microsoftonline.com/common/oauth2/v2.0/authorize"
+  scope:
+    value: "Team.ReadBasic.All Channel.ReadBasic.All Chat.Read ChannelMessage.Read.All offline_access"
+  clientId:
+    vault: secret/ent-search-team/workplace-ai-oauth/dev/microsoft
+    field: client_id
+  clientSecret:
+    vault: secret/ent-search-team/workplace-ai-oauth/dev/microsoft
+    field: client_secret

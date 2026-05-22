@@ -26,7 +26,7 @@ import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 
 import { events } from './lib/telemetry/event_based_telemetry';
 import {
-  aiAssistantParentInferenceFeature,
+  securityParentInferenceFeature,
   elasticAiAssistantInferenceFeature,
 } from './inference_feature';
 import type {
@@ -95,7 +95,7 @@ export class ElasticAssistantPlugin
     this.logger.debug('elasticAssistant: Setup');
 
     if (plugins.searchInferenceEndpoints) {
-      plugins.searchInferenceEndpoints.features.register(aiAssistantParentInferenceFeature);
+      plugins.searchInferenceEndpoints.features.register(securityParentInferenceFeature);
       plugins.searchInferenceEndpoints.features.register(elasticAiAssistantInferenceFeature);
     }
 

@@ -1,0 +1,64 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { unset } from 'lodash';
+
+import { LensConfigBuilder } from '../../../config_builder';
+import type { LensApiConfig, LensApiConfigByType, LensApiConfigChartType } from '../../../schema';
+import { lensApiConfigSchema } from '../../../schema';
+import type { ValidateTransform } from './types';
+import { getChartSchema } from './schema';
+
+/**
+ * Test harness to validate LensConfigBuilder conversions
+ *
+ * - Starts with LensAPI config format
+ * - Validates against the provided schema
+ * - Validates against the general lensApiConfigSchema
+ * - Converts to LensAttributes
+ * - Converts LensAttributes back to API format
+ * - Validates against the provided schema
+ * - Validates against the general lensApiConfigSchema
+ * - Excludes specified fields from the API config
+ * - Checks that the new API config includes the filtered API config
+ * - Note: the excluded fields are expected to be omitted during the conversion to LensStateConfig, so they are not included in the new API config
+ */
+export function validateApiTransformsFn(
+  chartType: LensApiConfigChartType
+): ValidateTransform<LensApiConfigByType[typeof chartType]>['fromApi'] {
+  const schema = getChartSchema(chartType);
+  const builder = new LensConfigBuilder(undefined, true);
+
+  return function validateApiTransforms(apiConfig: LensApiConfig, excludedFields?: string[]) {
+    expect(() => {
+      schema.validate(apiConfig);
+    }).not.toThrow();
+
+    expect(() => {
+      lensApiConfigSchema.validate(apiConfig);
+    }).not.toThrow();
+
+    const lensStateConfig = builder.fromAPIFormat(apiConfig);
+
+    const newApiConfig = builder.toAPIFormat(lensStateConfig);
+
+    expect(() => {
+      schema.validate(newApiConfig);
+    }).not.toThrow();
+
+    expect(() => {
+      lensApiConfigSchema.validate(newApiConfig);
+    }).not.toThrow();
+
+    const filteredApiConfig = structuredClone(apiConfig);
+    excludedFields?.forEach((fieldPath) => unset(filteredApiConfig, fieldPath));
+
+    expect(newApiConfig).toMatchObject(filteredApiConfig);
+  };
+}

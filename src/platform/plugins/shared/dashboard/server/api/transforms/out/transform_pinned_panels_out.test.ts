@@ -83,7 +83,7 @@ describe('pinned panels', () => {
 
   it('should transform pinned panels object to array with all transformations applied', () => {
     const result = transformPinnedPanelsOut(undefined, { panels: mockPinnedPanels }, []);
-    expect(result).toEqual(transformedPinnedPanels);
+    expect(result.panels).toEqual(transformedPinnedPanels);
   });
 
   it('should transform pinned panels object to array', () => {
@@ -114,7 +114,7 @@ describe('pinned panels', () => {
     it('should transform serialized control state to array with all transformations applied', () => {
       const serializedControlState = { panelsJSON: JSON.stringify(mockPinnedPanels) };
       const result = transformPinnedPanelsOut(serializedControlState, undefined, []);
-      expect(result).toEqual(transformedPinnedPanels);
+      expect(result.panels).toEqual(transformedPinnedPanels);
     });
   });
 });

@@ -8,7 +8,7 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { BehaviorSubject, debounceTime, first, map, merge, pairwise } from 'rxjs';
+import { BehaviorSubject, debounceTime, first, map, merge, pairwise, skip } from 'rxjs';
 
 import { EuiInputPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -22,7 +22,7 @@ import {
 } from '@kbn/presentation-publishing';
 
 import { DEFAULT_TIME_SLIDER_STATE, TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { TimeSlice, TimeSliderControlState } from '@kbn/controls-schemas';
@@ -47,7 +47,7 @@ const displayName = i18n.translate('controls.timesliderControl.displayName', {
   defaultMessage: 'Time slider',
 });
 
-export const getTimesliderControlFactory = (): EmbeddableFactory<
+export const getTimesliderControlFactory = (): EmbeddablePublicDefinition<
   TimeSliderControlState,
   TimeSliderControlApi
 > => {
@@ -236,7 +236,10 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
         serializeState,
         anyStateChange$: merge(
           timeRangePercentage.anyStateChange$,
-          isAnchored$.pipe(map(() => undefined))
+          isAnchored$.pipe(
+            skip(1),
+            map(() => undefined)
+          )
         ),
         getComparators: () => {
           return {

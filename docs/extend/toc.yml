@@ -74,11 +74,13 @@ toc:
       - file: scout/ui-testing.md
         children:
           - file: scout/write-ui-tests.md
+          - file: scout/ui-best-practices.md
           - file: scout/browser-auth.md
           - file: scout/a11y-checks.md
       - file: scout/api-testing.md
         children:
           - file: scout/write-api-tests.md
+          - file: scout/api-best-practices.md
           - file: scout/api-auth.md
   - file: external-plugin-development.md
     children:

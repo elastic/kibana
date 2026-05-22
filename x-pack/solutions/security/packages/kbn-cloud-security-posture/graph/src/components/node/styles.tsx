@@ -52,6 +52,13 @@ export const NODE_HEIGHT = 100;
 export const NODE_LABEL_WIDTH = 200;
 
 /**
+ * The width of the identity label rendered below an entity node, in pixels.
+ * Narrower than `NODE_LABEL_WIDTH` to limit overflow past the entity shape.
+ * Must be a multiple of `GRID_SIZE * 2`.
+ */
+export const ENTITY_NODE_LABEL_WIDTH = 160;
+
+/**
  * The total height of a label node including the shape and details below, in pixels.
  * Required in layout_graph.ts
  */

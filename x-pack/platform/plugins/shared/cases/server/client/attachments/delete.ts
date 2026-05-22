@@ -7,12 +7,10 @@
 
 import Boom from '@hapi/boom';
 
-import { isLegacyAttachmentRequest } from '../../../common/utils/attachments';
-import type { AlertAttachmentPayload } from '../../../common/types/domain';
 import { UserActionActions, UserActionTypes } from '../../../common/types/domain';
 import { decodeOrThrow } from '../../common/runtime_types';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
-import { getAlertInfoFromComments, isCommentRequestTypeAlert } from '../../common/utils';
+import { getAlertInfoFromComments } from '../../common/utils';
 import type { CasesClientArgs } from '../types';
 import { createCaseError } from '../../common/error';
 import { Operations } from '../../authorization';
@@ -169,16 +167,12 @@ interface HandleAlertsArgs {
 }
 
 const handleAlerts = async ({ alertsService, attachments, caseId }: HandleAlertsArgs) => {
-  const alertAttachments = attachments.filter(
-    (attachment): attachment is AlertAttachmentPayload =>
-      isLegacyAttachmentRequest(attachment) && isCommentRequestTypeAlert(attachment)
-  );
+  const alerts = getAlertInfoFromComments(attachments);
 
-  if (alertAttachments.length === 0) {
+  if (alerts.length === 0) {
     return;
   }
 
-  const alerts = getAlertInfoFromComments(alertAttachments);
   await alertsService.removeCaseIdFromAlerts({ alerts, caseId });
 };
 

@@ -8,6 +8,7 @@
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../../fixtures';
+import { EXTENDED_TIMEOUT } from '../../fixtures/constants';
 
 test.describe(
   'Service map',
@@ -48,8 +49,7 @@ test.describe(
     }) => {
       await serviceMapPage.gotoWithDateSelected(testData.START_DATE, testData.END_DATE);
       await serviceMapPage.typeInTheSearchBar('_id : foo');
-      await serviceMapPage.waitForServiceMapToLoad();
-      await expect(serviceMapPage.noServicesPlaceholder).toBeVisible();
+      await expect(serviceMapPage.noServicesPlaceholder).toBeVisible({ timeout: EXTENDED_TIMEOUT });
       await expect(serviceMapPage.noServicesPlaceholder).toHaveText('No services available');
       await expect(page.getByTestId('apmUnifiedSearchBar')).toBeVisible();
     });
@@ -67,7 +67,7 @@ test.describe(
 
       await expect(page.getByPlaceholder('Alert status')).toBeVisible();
       await expect(page.getByPlaceholder('SLO Status')).toBeVisible();
-      await expect(page.getByPlaceholder('Anomaly Status')).toBeVisible();
+      await expect(page.getByPlaceholder('Anomaly Severity')).toBeVisible();
 
       await serviceMapPage.serviceMapFindInPageInput.fill('opbeans');
       await expect(serviceMapPage.serviceMapFindMatchSummary).toHaveText(

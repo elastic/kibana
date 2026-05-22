@@ -17,7 +17,8 @@ import type {
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/types';
 import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
-import type { GaugeState, LensApiState } from '../../schema';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
+import type { GaugeConfig, LensApiConfig } from '../../schema';
 import {
   AUTO_COLOR,
   NO_COLOR,
@@ -47,7 +48,7 @@ import {
   getSharedChartLensStateToAPI,
   stripUndefined,
 } from './utils';
-import type { GaugeStateESQL, GaugeStateNoESQL } from '../../schema/charts/gauge';
+import type { GaugeConfigESQL, GaugeConfigNoESQL } from '../../schema/charts/gauge';
 import { fromMetricAPItoLensState } from '../columns/metric';
 import type { LensApiAllMetricOperations } from '../../schema/metric_ops';
 import { getValueApiColumn, getValueColumn } from '../columns/esql_column';
@@ -59,7 +60,7 @@ function getAccessorName(type: 'metric' | 'max' | 'min' | 'goal') {
   return `${ACCESSOR}_${type}`;
 }
 
-function convertColorToLensState(color: GaugeState['metric']['color']): {
+function convertColorToLensState(color: GaugeConfig['metric']['color']): {
   colorMode: GaugeVisualizationState['colorMode'];
   palette?: PaletteOutput<CustomPaletteParams>;
 } {
@@ -77,7 +78,7 @@ function convertColorToLensState(color: GaugeState['metric']['color']): {
   };
 }
 
-function buildVisualizationState(config: GaugeState): GaugeVisualizationState {
+function buildVisualizationState(config: GaugeConfig): GaugeVisualizationState {
   const layer = config;
 
   return {
@@ -115,7 +116,7 @@ function reverseBuildVisualizationState(
   adHocDataViews: Record<string, DataViewSpec>,
   references: SavedObjectReference[],
   adhocReferences?: SavedObjectReference[]
-): GaugeState {
+): GaugeConfig {
   const metricAccessor = getMetricAccessor(visualization);
   if (metricAccessor == null) {
     throw new Error('Metric accessor is missing in the visualization state');
@@ -133,7 +134,7 @@ function reverseBuildVisualizationState(
     throw new Error('Unsupported DataSource type');
   }
 
-  const props: DeepPartial<DeepMutable<GaugeState>> = {
+  const props: DeepPartial<DeepMutable<GaugeConfig>> = {
     ...generateApiLayer(layer),
     styling: stripUndefined({
       shape:
@@ -185,7 +186,7 @@ function reverseBuildVisualizationState(
               }
             : {}),
         },
-  } as GaugeState;
+  } as GaugeConfig;
 
   if (props.metric) {
     props.metric.title = {
@@ -219,12 +220,12 @@ function reverseBuildVisualizationState(
 
   return {
     type: 'gauge',
-    data_source: dataSource satisfies GaugeState['data_source'],
+    data_source: dataSource satisfies GaugeConfig['data_source'],
     ...props,
-  } as GaugeState;
+  } as GaugeConfig;
 }
 
-function buildFormBasedLayer(layer: GaugeStateNoESQL): FormBasedPersistedState['layers'] {
+function buildFormBasedLayer(layer: GaugeConfigNoESQL): FormBasedPersistedState['layers'] {
   const columns = fromMetricAPItoLensState(layer.metric);
 
   const layers: Record<string, PersistedIndexPatternLayer> = generateLayer(DEFAULT_LAYER_ID, layer);
@@ -257,7 +258,7 @@ function buildFormBasedLayer(layer: GaugeStateNoESQL): FormBasedPersistedState['
   return layers;
 }
 
-function getValueColumns(layer: GaugeStateESQL) {
+function getValueColumns(layer: GaugeConfigESQL) {
   return [
     getValueColumn(getAccessorName('metric'), layer.metric, 'number'),
     ...(layer.metric.max
@@ -281,8 +282,9 @@ type GaugeAttributesWithoutFiltersAndQuery = Omit<GaugeAttributes, 'state'> & {
   state: Omit<GaugeAttributes['state'], 'filters' | 'query'>;
 };
 
-export function fromAPItoLensState(config: GaugeState): GaugeAttributesWithoutFiltersAndQuery {
-  const _buildDataLayer = (cfg: unknown, i: number) => buildFormBasedLayer(cfg as GaugeStateNoESQL);
+export function fromAPItoLensState(config: GaugeConfig): GaugeAttributesWithoutFiltersAndQuery {
+  const _buildDataLayer = (cfg: unknown, i: number) =>
+    buildFormBasedLayer(cfg as GaugeConfigNoESQL);
 
   const { layers, usedDataviews } = buildDatasourceStates(config, _buildDataLayer, getValueColumns);
 
@@ -300,6 +302,7 @@ export function fromAPItoLensState(config: GaugeState): GaugeAttributesWithoutFi
     visualizationType: 'lnsGauge',
     ...getSharedChartAPIToLensState(config),
     references,
+    version: LENS_ITEM_LATEST_VERSION,
     state: {
       datasourceStates: layers,
       internalReferences,
@@ -311,7 +314,7 @@ export function fromAPItoLensState(config: GaugeState): GaugeAttributesWithoutFi
 
 export function fromLensStateToAPI(
   config: LensAttributes
-): Extract<LensApiState, { type: 'gauge' }> {
+): Extract<LensApiConfig, { type: 'gauge' }> {
   const { state } = config;
   const visualization = state.visualization as GaugeVisualizationState;
   const layers = getDatasourceLayers(state);

@@ -25,6 +25,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     loadTestFile(require.resolve('./_doc_viewer')); // 7 min
+    loadTestFile(require.resolve('./_doc_viewer_pinning')); // 3 min
     loadTestFile(require.resolve('./_panels_toggle')); // 5 min
   });
 }

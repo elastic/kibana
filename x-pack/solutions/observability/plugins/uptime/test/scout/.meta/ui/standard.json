@@ -1,0 +1,252 @@
+{
+  "sha1": "b9110693532955e815162f28ffb815e375f2f20f",
+  "tests": [
+    {
+      "id": "6393a5cc96ae333-5ac88d9d8aa60c3",
+      "title": "Ingest uptime test data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/global.setup.ts",
+        "line": 11,
+        "column": 16
+      }
+    },
+    {
+      "id": "90c8d7eb320b9dd-8e26af62e646ccd",
+      "title": "Uptime certificates navigates to cert page and displays certificates",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/certificates.spec.ts",
+        "line": 119,
+        "column": 7
+      }
+    },
+    {
+      "id": "90c8d7eb320b9dd-13cc7d3c939a961",
+      "title": "Uptime certificates displays specific certificate",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/certificates.spec.ts",
+        "line": 142,
+        "column": 7
+      }
+    },
+    {
+      "id": "90c8d7eb320b9dd-ee8b710a04f860b",
+      "title": "Uptime certificates performs search against monitor id",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/certificates.spec.ts",
+        "line": 160,
+        "column": 7
+      }
+    },
+    {
+      "id": "3905773253ef187-63dd7c985a9735c",
+      "title": "Uptime missing mappings redirects to mappings error page when mappings are incomplete",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/missing_mappings.spec.ts",
+        "line": 44,
+        "column": 7
+      }
+    },
+    {
+      "id": "d5aa4398f8a3b78-21e8cd8f93839ec",
+      "title": "Uptime ML anomaly create and delete ML anomaly job",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/ml_anomaly.spec.ts",
+        "line": 46,
+        "column": 7
+      }
+    },
+    {
+      "id": "c6399cf0f7007b7-6b553c2ad50d07a",
+      "title": "Uptime overview page loads and displays uptime data based on date range",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/overview.spec.ts",
+        "line": 18,
+        "column": 7
+      }
+    },
+    {
+      "id": "c6399cf0f7007b7-410500c31c67b57",
+      "title": "Uptime overview page applies filters for multiple fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/overview.spec.ts",
+        "line": 22,
+        "column": 7
+      }
+    },
+    {
+      "id": "c6399cf0f7007b7-a8c50293ccd9ca2",
+      "title": "Uptime overview page pagination is cleared when filter or page size changes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/overview.spec.ts",
+        "line": 45,
+        "column": 7
+      }
+    },
+    {
+      "id": "c6399cf0f7007b7-20e3c494c347ebe",
+      "title": "Uptime overview page pagination size updates to reflect current selection",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/overview.spec.ts",
+        "line": 98,
+        "column": 7
+      }
+    },
+    {
+      "id": "c6399cf0f7007b7-a36d7bc5abedabd",
+      "title": "Uptime overview page snapshot counts are not affected by status filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/overview.spec.ts",
+        "line": 127,
+        "column": 7
+      }
+    },
+    {
+      "id": "c6399cf0f7007b7-1c73d38cd802eaa",
+      "title": "Uptime overview page runs kql filter query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/overview.spec.ts",
+        "line": 142,
+        "column": 7
+      }
+    },
+    {
+      "id": "8c623033d0dd20d-6b7076eecc75344",
+      "title": "Uptime settings page changing index pattern setting is reflected elsewhere in UI",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/settings.spec.ts",
+        "line": 25,
+        "column": 7
+      }
+    },
+    {
+      "id": "8c623033d0dd20d-45f00bd067e7ddc",
+      "title": "Uptime settings page changing certificate thresholds is reflected in settings page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/settings.spec.ts",
+        "line": 56,
+        "column": 7
+      }
+    },
+    {
+      "id": "8b40ca8166c5e57-101ffe2860186f0",
+      "title": "Uptime feature controls - security user with all uptime privileges can access and sees no read-only badge",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/uptime_security.spec.ts",
+        "line": 12,
+        "column": 7
+      }
+    },
+    {
+      "id": "8b40ca8166c5e57-e276a2b6f6c586d",
+      "title": "Uptime feature controls - security user with read-only uptime privileges sees read-only badge",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/uptime_security.spec.ts",
+        "line": 47,
+        "column": 7
+      }
+    },
+    {
+      "id": "8b40ca8166c5e57-d7b3bf136c16774",
+      "title": "Uptime feature controls - security user without uptime privileges cannot access uptime",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/uptime_security.spec.ts",
+        "line": 83,
+        "column": 7
+      }
+    },
+    {
+      "id": "75426ed0ea75b5b-ad08776c5b58990",
+      "title": "Uptime feature controls - spaces shows uptime navlink in space with no disabled features",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/uptime_spaces.spec.ts",
+        "line": 12,
+        "column": 7
+      }
+    },
+    {
+      "id": "75426ed0ea75b5b-0262a05342f29ec",
+      "title": "Uptime feature controls - spaces hides uptime and renders not found in space with uptime disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/uptime_spaces.spec.ts",
+        "line": 42,
+        "column": 7
+      }
+    }
+  ]
+}

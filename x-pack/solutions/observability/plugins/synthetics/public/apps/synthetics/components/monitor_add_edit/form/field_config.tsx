@@ -52,6 +52,7 @@ import {
   FieldPassword,
   Checkbox,
   ComboBox,
+  LocationsComboBox,
   Select,
   Switch,
   Source,
@@ -428,7 +429,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     fieldKey: ConfigKey.LOCATIONS,
     required: true,
     controlled: true,
-    component: ComboBox,
+    component: LocationsComboBox,
     label: i18n.translate('xpack.synthetics.monitorConfig.locations.label', {
       defaultMessage: 'Locations',
     }),
@@ -1345,7 +1346,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
         id="xpack.synthetics.monitorConfig.throttlingDisabled.label"
         defaultMessage="Connection profile ( {icon} Important information about throttling: {link})"
         values={{
-          icon: <EuiIcon type="warning" color="warning" size="s" />,
+          icon: <EuiIcon type="warning" color="warning" size="s" aria-hidden={true} />,
           link: (
             <EuiLink
               data-test-subj="syntheticsFIELDNoticeLink"

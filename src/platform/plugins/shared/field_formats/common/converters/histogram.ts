@@ -46,7 +46,7 @@ export class HistogramFormat extends FieldFormat {
           ? PercentFormat
           : NumberFormat;
       const converter = new SubFormat(this.param('params'), this.getConfig);
-      return converter.textConvert(val, options);
+      return converter.convert(val, 'text', options);
     } else {
       return JSON.stringify(val);
     }

@@ -9,7 +9,6 @@ import { EuiFlexGroup, EuiSpacer, EuiFlexItem } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { Redirect, useLocation } from 'react-router-dom';
-import { selectOverviewStatus } from '../../../state/overview_status';
 import { DisabledCallout } from '../management/disabled_callout';
 import { FilterGroup } from '../common/monitor_filters/filter_group';
 import { OverviewAlerts } from './overview/overview_alerts';
@@ -19,6 +18,7 @@ import { getServiceLocations } from '../../../state/service_locations';
 import { GETTING_STARTED_ROUTE, MONITORS_ROUTE } from '../../../../../../common/constants';
 
 import { useMonitorList } from '../hooks/use_monitor_list';
+import { useOverviewStatus } from '../hooks/use_overview_status';
 import { useOverviewBreadcrumbs } from './use_breadcrumbs';
 import { OverviewGrid } from './overview/overview_grid';
 import { OverviewStatus } from './overview/overview_status';
@@ -54,7 +54,9 @@ export const OverviewPage: React.FC = () => {
 
   const { isEnabled, loading: enablementLoading } = useEnablement();
 
-  const { allConfigs, loaded: overviewLoaded } = useSelector(selectOverviewStatus);
+  const { allConfigs, loaded: overviewLoaded } = useOverviewStatus({
+    scopeStatusByLocation: true,
+  });
 
   const {
     loading: monitorsLoading,

@@ -103,6 +103,15 @@ describe('CreateESQLControlAction', () => {
         },
       });
     });
+
+    it('should open lazy flyout with correct configuration when no cancel is provided', async () => {
+      await action.execute({ ...mockContext, onCancelControl: undefined });
+      expect(mockOpenLazyFlyout).toHaveBeenCalledWith(
+        expect.objectContaining({
+          flyoutProps: expect.not.objectContaining({ onClose: expect.any(Function) }),
+        })
+      );
+    });
   });
 
   describe('isCompatible', () => {

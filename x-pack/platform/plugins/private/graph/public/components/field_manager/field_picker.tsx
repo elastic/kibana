@@ -74,6 +74,7 @@ export function FieldPicker({
 
   return (
     <EuiPopover
+      aria-label={badgeDescription}
       id="graphFieldPicker"
       anchorPosition="downCenter"
       ownFocus

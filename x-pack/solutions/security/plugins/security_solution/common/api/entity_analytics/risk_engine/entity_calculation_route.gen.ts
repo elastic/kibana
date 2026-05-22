@@ -14,56 +14,68 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { IdentifierType, EntityRiskScoreRecord } from '../common/common.gen';
 
+export const RiskScoresEntityCalculationRequest = lazySchema(() =>
+  z.object({
+    /**
+     * Used to identify the entity.
+     */
+    identifier: z.string(),
+    /**
+     * Used to define the type of entity.
+     */
+    identifier_type: IdentifierType,
+    /**
+     * If 'wait_for' the request will wait for the index refresh.
+     */
+    refresh: z.literal('wait_for').optional(),
+  })
+);
 export type RiskScoresEntityCalculationRequest = z.infer<typeof RiskScoresEntityCalculationRequest>;
-export const RiskScoresEntityCalculationRequest = z.object({
-  /**
-   * Used to identify the entity.
-   */
-  identifier: z.string(),
-  /**
-   * Used to define the type of entity.
-   */
-  identifier_type: IdentifierType,
-  /**
-   * If 'wait_for' the request will wait for the index refresh.
-   */
-  refresh: z.literal('wait_for').optional(),
-});
 
+export const RiskScoresEntityCalculationResponse = lazySchema(() =>
+  z.object({
+    success: z.boolean(),
+    score: EntityRiskScoreRecord.optional(),
+  })
+);
 export type RiskScoresEntityCalculationResponse = z.infer<
   typeof RiskScoresEntityCalculationResponse
 >;
-export const RiskScoresEntityCalculationResponse = z.object({
-  success: z.boolean(),
-  score: EntityRiskScoreRecord.optional(),
-});
 
+export const DeprecatedTriggerRiskScoreCalculationRequestBody = lazySchema(
+  () => RiskScoresEntityCalculationRequest
+);
 export type DeprecatedTriggerRiskScoreCalculationRequestBody = z.infer<
   typeof DeprecatedTriggerRiskScoreCalculationRequestBody
 >;
-export const DeprecatedTriggerRiskScoreCalculationRequestBody = RiskScoresEntityCalculationRequest;
 export type DeprecatedTriggerRiskScoreCalculationRequestBodyInput = z.input<
   typeof DeprecatedTriggerRiskScoreCalculationRequestBody
 >;
 
+export const DeprecatedTriggerRiskScoreCalculationResponse = lazySchema(
+  () => RiskScoresEntityCalculationResponse
+);
 export type DeprecatedTriggerRiskScoreCalculationResponse = z.infer<
   typeof DeprecatedTriggerRiskScoreCalculationResponse
 >;
-export const DeprecatedTriggerRiskScoreCalculationResponse = RiskScoresEntityCalculationResponse;
 
+export const TriggerRiskScoreCalculationRequestBody = lazySchema(
+  () => RiskScoresEntityCalculationRequest
+);
 export type TriggerRiskScoreCalculationRequestBody = z.infer<
   typeof TriggerRiskScoreCalculationRequestBody
 >;
-export const TriggerRiskScoreCalculationRequestBody = RiskScoresEntityCalculationRequest;
 export type TriggerRiskScoreCalculationRequestBodyInput = z.input<
   typeof TriggerRiskScoreCalculationRequestBody
 >;
 
+export const TriggerRiskScoreCalculationResponse = lazySchema(
+  () => RiskScoresEntityCalculationResponse
+);
 export type TriggerRiskScoreCalculationResponse = z.infer<
   typeof TriggerRiskScoreCalculationResponse
 >;
-export const TriggerRiskScoreCalculationResponse = RiskScoresEntityCalculationResponse;

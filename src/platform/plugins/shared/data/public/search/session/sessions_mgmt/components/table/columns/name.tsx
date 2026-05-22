@@ -11,6 +11,7 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { hasActiveModifierKey } from '@kbn/shared-ux-utility';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import type { CoreStart } from '@kbn/core/public';
@@ -116,6 +117,7 @@ export const nameColumn = ({
           status={status}
           href={href}
           onClick={(event) => {
+            if (hasActiveModifierKey(event)) return;
             trackAction?.();
             onBackgroundSearchOpened?.({ session, event });
           }}

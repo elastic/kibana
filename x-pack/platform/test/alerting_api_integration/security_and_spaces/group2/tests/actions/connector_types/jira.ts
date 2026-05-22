@@ -260,7 +260,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                message: `error validating action params: ✖ Invalid input\n  → at subAction`,
+                message: `error validating action params: ✖ Invalid discriminator value. Expected 'getFields' | 'getIncident' | 'handshake' | 'pushToService' | 'issueTypes' | 'fieldsByIssueType' | 'issues' | 'issue'\n  → at subAction`,
                 errorSource: TaskErrorSource.USER,
               });
             });

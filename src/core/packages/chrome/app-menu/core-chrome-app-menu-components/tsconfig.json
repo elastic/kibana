@@ -6,6 +6,7 @@
       "jest",
       "node",
       "react",
+      "@kbn/ambient-ui-types",
     ]
   },
   "include": [
@@ -16,7 +17,6 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/split-button",
     "@kbn/i18n",
     "@kbn/router-utils"
   ]

@@ -9,6 +9,7 @@
 
 import type { Document } from 'yaml';
 import type { DynamicStepContextSchema } from '@kbn/workflows';
+import { getSchemaAtPath } from '@kbn/workflows/common/utils/zod/get_schema_at_path';
 import { z } from '@kbn/zod/v4';
 import {
   forLoopScopesContainingOffset,
@@ -16,7 +17,6 @@ import {
 } from './extract_template_local_context';
 import { getForeachItemSchema } from './get_foreach_state_schema';
 import { getScalarValueAtOffset } from '../../../../common/lib/yaml/get_scalar_value_at_offset';
-import { getSchemaAtPath } from '../../../../common/lib/zod';
 
 // ---------------------------------------------------------------------------
 // Block scalar offset mapping

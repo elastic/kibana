@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { useSendMessage } from '../../../../context/send_message/send_message_context';
+import { useConversationStream } from '../../../../hooks/use_conversation_stream';
 import { RoundIcon } from './round_icon';
 import { lineClampStyles } from '../../../../../common.styles';
 
@@ -38,7 +38,7 @@ interface RoundThinkingTitleProps {
 const MIN_HEIGHT = '40px';
 
 export const RoundThinkingTitle = ({ isLoading, hasSteps, onShow }: RoundThinkingTitleProps) => {
-  const { agentReasoning } = useSendMessage();
+  const { agentReasoning } = useConversationStream();
 
   let thinkingButtonLabel = thinkingCompletedLabel;
   if (isLoading) {

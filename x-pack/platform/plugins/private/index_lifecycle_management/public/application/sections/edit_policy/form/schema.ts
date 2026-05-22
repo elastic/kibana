@@ -75,6 +75,36 @@ export const searchableSnapshotFields = {
       }
     ),
   },
+  force_merge_index: {
+    label: i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshot.forceMergeIndexLabel',
+      {
+        defaultMessage: 'Force merge index',
+      }
+    ),
+    helpText: i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshot.forceMergeIndexHelpText',
+      {
+        defaultMessage:
+          'Force merge the index to a single segment before creating the snapshot. Fewer segments mean fewer reads when restoring or searching the snapshot.',
+      }
+    ),
+  },
+  force_merge_on_clone: {
+    label: i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshot.forceMergeOnCloneLabel',
+      {
+        defaultMessage: 'Force merge on clone',
+      }
+    ),
+    helpText: i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshot.forceMergeOnCloneHelpText',
+      {
+        defaultMessage:
+          'Clone the index with zero replicas first, then perform the force merge on the clone. This avoids performing the force merge redundantly on replica shards.',
+      }
+    ),
+  },
 };
 
 const numberOfReplicasField = {

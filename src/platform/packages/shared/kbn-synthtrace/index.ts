@@ -32,3 +32,26 @@ export { indexAll } from './src/lib/utils/with_client';
 export * from './src/scenarios/agent_builder';
 
 export { sigEvents } from './src/lib/service_graph_logs';
+
+export {
+  APM_METRICS_SERVICE_NAMES,
+  APM_METRICS_DASHBOARD_SERVICES,
+  APM_METRICS_NON_DASHBOARD_SERVICES,
+  APM_METRICS_ALL_SERVICES,
+  SYSTEM_METRICS as APM_SYSTEM_METRICS,
+  JAVA_APM_METRICS,
+  NODEJS_APM_METRICS,
+  OTEL_JAVA_HEAP_METRICS,
+  OTEL_JAVA_NON_HEAP_METRICS,
+  OTEL_NODEJS_METRICS,
+  OTEL_DOTNET_METRICS,
+  OTEL_NATIVE_EDOT_JAVA_METRICS,
+  OTEL_NATIVE_OTHER_JAVA_METRICS,
+  OTEL_PYTHON_METRICS,
+  OTEL_GO_METRICS,
+  RUBY_JRUBY_METRICS,
+  type ApmMetricsServiceConfig,
+  type ApmMetricsServiceInstance,
+  createMetricsServiceInstance,
+  generateAppMetrics,
+} from './src/scenarios/helpers/apm_metrics_dashboards';

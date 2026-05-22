@@ -9,7 +9,7 @@
 
 import { renderHook, act } from '@testing-library/react';
 import { QuerySource } from '@kbn/esql-types';
-import type { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/code-editor';
 import { useQueryActions } from './use_query_actions';
 import type { ESQLEditorTelemetryService } from '../telemetry/telemetry_service';
 import type { ESQLEditorProps } from '../types';

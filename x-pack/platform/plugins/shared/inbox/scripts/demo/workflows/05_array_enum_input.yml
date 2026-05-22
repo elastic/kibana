@@ -1,0 +1,32 @@
+# Inbox demo workflow — multi-select array of enum
+name: inbox-demo-array-enum
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: ask_tags
+    type: waitForInput
+    with:
+      message: "Select the relevant MITRE ATT&CK tactics observed."
+      schema:
+        type: object
+        properties:
+          tactics:
+            type: array
+            title: Tactics
+            items:
+              type: string
+              enum:
+                - initial_access
+                - execution
+                - persistence
+                - privilege_escalation
+                - defense_evasion
+                - lateral_movement
+                - exfiltration
+        required:
+          - tactics
+  - name: log_tactics
+    type: console
+    with:
+      message: "Tactics = {{ steps.ask_tags.output.tactics }}"

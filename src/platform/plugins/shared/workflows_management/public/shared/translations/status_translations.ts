@@ -23,6 +23,12 @@ export const STATUS_LABELS = {
       defaultMessage: 'Waiting',
     }
   ),
+  [ExecutionStatus.WAITING_FOR_CHILD]: i18n.translate(
+    'workflowsManagement.executionStatus.waitingForChild',
+    {
+      defaultMessage: 'Waiting',
+    }
+  ),
   [ExecutionStatus.RUNNING]: i18n.translate('workflowsManagement.executionStatus.running', {
     defaultMessage: 'Running',
   }),

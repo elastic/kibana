@@ -54,7 +54,7 @@ export const ChartPlaceholder = ({ style, error, isEmpty }: ChartPlaceholderProp
           direction="column"
         >
           <EuiFlexItem grow={false}>
-            <EuiIcon type={'alert'} size="l" color={'danger'} />
+            <EuiIcon type={'alert'} size="l" color={'danger'} aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             {error.message && (

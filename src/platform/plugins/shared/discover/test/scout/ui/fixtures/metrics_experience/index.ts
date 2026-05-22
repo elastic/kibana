@@ -63,7 +63,10 @@ export const spaceTest = spaceBaseTest.extend<
       // the core page object.
       // See https://github.com/elastic/kibana/issues/257436
       discover: extendPageObject(pageObjects.discover, {
-        goto: async () => {
+        goto: async (options = {}) => {
+          if (options.queryMode) {
+            await pageObjects.discover.setQueryMode(options.queryMode);
+          }
           await page.gotoApp('discover');
           await page.testSubj.locator('dscPage').waitFor({ state: 'visible', timeout: 30_000 });
         },

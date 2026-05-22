@@ -186,7 +186,7 @@ const LogEntryContext: React.FC<{ context: LogEntry['context']; discoverLink?: s
           >
             <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiIcon type="discoverApp" size="s" color="primary" />
+                <EuiIcon type="discoverApp" size="s" color="primary" aria-hidden={true} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiText size="xs">

@@ -12,4 +12,6 @@ import type { StoredLinksState } from '../../server';
 
 export type { LinksByReferenceState, LinksByValueState, LinksEmbeddableState } from '../../server';
 
-export type StoredLinksEmbeddableState = SerializedTitles & StoredLinksState;
+// links never supported enhancements, but some legacy states serialized an empty enhancements object
+export type StoredLinksEmbeddableState = SerializedTitles &
+  StoredLinksState & { enhancements?: unknown };

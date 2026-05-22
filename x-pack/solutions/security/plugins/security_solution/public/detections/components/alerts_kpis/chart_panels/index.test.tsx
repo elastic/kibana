@@ -143,7 +143,7 @@ const resetGroupByFields = () => {
   const menuButton = screen.getByRole('button', { name: CHART_SETTINGS_POPOVER_ARIA_LABEL });
   fireEvent.click(menuButton);
 
-  const resetMenuItem = screen.getByRole('button', { name: RESET_GROUP_BY_FIELDS });
+  const resetMenuItem = screen.getByRole('menuitem', { name: RESET_GROUP_BY_FIELDS });
   fireEvent.click(resetMenuItem);
 };
 

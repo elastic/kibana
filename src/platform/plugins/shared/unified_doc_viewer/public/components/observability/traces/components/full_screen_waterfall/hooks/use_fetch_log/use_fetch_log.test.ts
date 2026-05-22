@@ -25,7 +25,7 @@ const mockFetchLogDocumentById = jest.fn<
   >,
   any
 >();
-const mockAddDanger = jest.fn();
+const mockAdd = jest.fn();
 
 const mockGetById: jest.Mock<
   | {
@@ -55,7 +55,7 @@ const mockGetById: jest.Mock<
   core: {
     notifications: {
       toasts: {
-        addDanger: mockAddDanger,
+        add: mockAdd,
       },
     },
   },
@@ -70,7 +70,6 @@ describe('useFetchLog', () => {
     mockGetById.mockReturnValue({
       fetchLogDocumentById: mockFetchLogDocumentById,
     });
-    mockAddDanger.mockClear();
   });
 
   it('should return undefined when feature is not registered', async () => {
@@ -209,7 +208,9 @@ describe('useFetchLog', () => {
     await waitFor(() => !result.current.loading);
 
     await waitFor(() => {
-      expect(mockAddDanger).toHaveBeenCalledWith({
+      expect(mockAdd).toHaveBeenCalledWith({
+        color: 'danger',
+        iconType: 'error',
         title: 'An error occurred while fetching the log document',
         text: errorMessage,
       });
@@ -225,7 +226,9 @@ describe('useFetchLog', () => {
     await waitFor(() => !result.current.loading);
 
     await waitFor(() => {
-      expect(mockAddDanger).toHaveBeenCalledWith({
+      expect(mockAdd).toHaveBeenCalledWith({
+        color: 'danger',
+        iconType: 'error',
         title: 'An error occurred while fetching the log document',
         text: errorMessage,
       });

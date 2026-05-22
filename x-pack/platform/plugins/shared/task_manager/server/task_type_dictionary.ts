@@ -31,6 +31,9 @@ export const REMOVED_TYPES: string[] = [
   // deprecated in https://github.com/elastic/kibana/pull/216916
   'obs-ai-assistant:knowledge-base-migration',
 
+  // Legacy SML crawler task types
+  'agent_builder:sml_crawler',
+
   // removed in https://github.com/elastic/kibana/pull/250218
   'logs-data-telemetry',
 ];

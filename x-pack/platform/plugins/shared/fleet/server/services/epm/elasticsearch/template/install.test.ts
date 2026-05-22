@@ -871,6 +871,119 @@ describe('EPM index template install', () => {
         },
       });
     });
+
+    it('should apply .otel index pattern suffix for integration package with named otelcol input (named input case)', () => {
+      // This test covers the bug: when a data stream's stream.input references the *name*
+      // of an otelcol input (rather than the literal type "otelcol"), Fleet must still
+      // recognise it as an OTel data stream and apply the .otel suffix to the index pattern.
+      const integrationOtelPackageInstallContext = {
+        packageInfo: {
+          name: 'good_integration_otel',
+          version: '0.0.1',
+          type: 'integration',
+          policy_templates: [
+            {
+              name: 'otel',
+              title: 'OTel template',
+              inputs: [
+                { name: 'otel_logs', type: 'otelcol', title: 'OTel Logs', description: '' },
+                { name: 'otel_metrics', type: 'otelcol', title: 'OTel Metrics', description: '' },
+              ],
+            },
+          ],
+        },
+        paths: [],
+        archiveIterator: {},
+      } as any as PackageInstallContext;
+
+      appContextService.start(
+        createAppContextStartContractMock(
+          { internal: { disableILMPolicies: false } } as any,
+          undefined,
+          undefined,
+          { enableOtelIntegrations: true } as ExperimentalFeatures
+        )
+      );
+
+      const dataStream = {
+        type: 'logs',
+        dataset: 'good_integration_otel.otel_logs',
+        title: 'OTel Logs',
+        release: 'experimental',
+        package: 'good_integration_otel',
+        path: 'otel_logs',
+        ingest_pipeline: 'default',
+        streams: [
+          {
+            // Named input reference — NOT the literal type 'otelcol'
+            input: 'otel_logs',
+            title: 'OTel log stream',
+          },
+        ],
+      } as RegistryDataStream;
+
+      const { indexTemplate } = prepareTemplate({
+        packageInstallContext: integrationOtelPackageInstallContext,
+        fieldAssetsMap: new Map(),
+        dataStream,
+        ilmMigrationStatusMap: new Map(),
+      });
+
+      // The index pattern MUST include the .otel suffix
+      expect(indexTemplate.indexTemplate.index_patterns).toEqual([
+        'logs-good_integration_otel.otel_logs.otel-*',
+      ]);
+    });
+
+    it('should NOT apply .otel suffix when enableOtelIntegrations is false, even for named otelcol input', () => {
+      const integrationOtelPackageInstallContext = {
+        packageInfo: {
+          name: 'good_integration_otel',
+          version: '0.0.1',
+          type: 'integration',
+          policy_templates: [
+            {
+              name: 'otel',
+              title: 'OTel template',
+              inputs: [{ name: 'otel_logs', type: 'otelcol', title: 'OTel Logs', description: '' }],
+            },
+          ],
+        },
+        paths: [],
+        archiveIterator: {},
+      } as any as PackageInstallContext;
+
+      appContextService.start(
+        createAppContextStartContractMock(
+          { internal: { disableILMPolicies: false } } as any,
+          undefined,
+          undefined,
+          { enableOtelIntegrations: false } as ExperimentalFeatures
+        )
+      );
+
+      const dataStream = {
+        type: 'logs',
+        dataset: 'good_integration_otel.otel_logs',
+        title: 'OTel Logs',
+        release: 'experimental',
+        package: 'good_integration_otel',
+        path: 'otel_logs',
+        ingest_pipeline: 'default',
+        streams: [{ input: 'otel_logs', title: 'OTel log stream' }],
+      } as RegistryDataStream;
+
+      const { indexTemplate } = prepareTemplate({
+        packageInstallContext: integrationOtelPackageInstallContext,
+        fieldAssetsMap: new Map(),
+        dataStream,
+        ilmMigrationStatusMap: new Map(),
+      });
+
+      expect(indexTemplate.indexTemplate.index_patterns).toEqual([
+        'logs-good_integration_otel.otel_logs-*',
+      ]);
+    });
   });
 
   describe('prepareToInstallTemplates', () => {

@@ -2033,6 +2033,12 @@ class TimeseriesChartIntl extends Component {
               closePopover={() => this.closePopover()}
               panelPaddingSize="none"
               anchorPosition="upLeft"
+              aria-label={i18n.translate(
+                'xpack.ml.timeSeriesExplorer.timeSeriesChart.anomalyActionsPopoverAriaLabel',
+                {
+                  defaultMessage: 'Anomaly actions',
+                }
+              )}
             >
               <LinksMenuUI
                 anomaly={this.state.popoverData}

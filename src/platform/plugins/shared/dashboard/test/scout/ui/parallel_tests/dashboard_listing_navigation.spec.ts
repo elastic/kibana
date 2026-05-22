@@ -13,56 +13,60 @@ import { DASHBOARD_DEFAULT_INDEX_TITLE, DASHBOARD_SAVED_SEARCH_ARCHIVE } from '.
 
 const DASHBOARD_NAME = 'Navigation Test Dashboard';
 
-spaceTest.describe('Dashboard listing navigation', { tag: tags.deploymentAgnostic }, () => {
-  spaceTest.beforeAll(async ({ scoutSpace }) => {
-    await scoutSpace.savedObjects.cleanStandardList();
-    await scoutSpace.savedObjects.load(DASHBOARD_SAVED_SEARCH_ARCHIVE);
-    await scoutSpace.uiSettings.setDefaultIndex(DASHBOARD_DEFAULT_INDEX_TITLE);
-  });
+spaceTest.describe(
+  'Dashboard listing navigation',
+  { tag: [...tags.deploymentAgnostic, ...tags.serverless.observability.logs_essentials] },
+  () => {
+    spaceTest.beforeAll(async ({ scoutSpace }) => {
+      await scoutSpace.savedObjects.cleanStandardList();
+      await scoutSpace.savedObjects.load(DASHBOARD_SAVED_SEARCH_ARCHIVE);
+      await scoutSpace.uiSettings.setDefaultIndex(DASHBOARD_DEFAULT_INDEX_TITLE);
+    });
 
-  spaceTest.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginAsPrivilegedUser();
-  });
+    spaceTest.beforeEach(async ({ browserAuth }) => {
+      await browserAuth.loginAsPrivilegedUser();
+    });
 
-  spaceTest.afterAll(async ({ scoutSpace }) => {
-    await scoutSpace.uiSettings.unset('defaultIndex');
-    await scoutSpace.savedObjects.cleanStandardList();
-  });
+    spaceTest.afterAll(async ({ scoutSpace }) => {
+      await scoutSpace.uiSettings.unset('defaultIndex');
+      await scoutSpace.savedObjects.cleanStandardList();
+    });
 
-  spaceTest(
-    'clicking create new dashboard and navigating back to listing page',
-    async ({ page, pageObjects }) => {
-      await spaceTest.step(
-        'clicking create new dashboard button navigates to the editor',
-        async () => {
-          await pageObjects.dashboard.goto();
-          await page.testSubj.click('newItemButton');
-          await expect(page.testSubj.locator('dashboardAddTopNavButton')).toBeVisible({
-            timeout: 20_000,
-          });
-        }
-      );
+    spaceTest(
+      'clicking create new dashboard and navigating back to listing page',
+      async ({ page, pageObjects }) => {
+        await spaceTest.step(
+          'clicking create new dashboard button navigates to the editor',
+          async () => {
+            await pageObjects.dashboard.goto();
+            await page.testSubj.click('newItemButton');
+            await expect(page.testSubj.locator('dashboardAddTopNavButton')).toBeVisible({
+              timeout: 20_000,
+            });
+          }
+        );
 
-      await spaceTest.step('navigating back to listing page from a new dashboard', async () => {
+        await spaceTest.step('navigating back to listing page from a new dashboard', async () => {
+          await page.goBack();
+          await expect(page.testSubj.locator('newItemButton')).toBeVisible();
+        });
+      }
+    );
+
+    spaceTest(
+      'saving a dashboard and returning to the listing page shows it',
+      async ({ page, pageObjects }) => {
+        await pageObjects.dashboard.goto();
+        await page.testSubj.click('newItemButton');
+        await expect(page.testSubj.locator('dashboardAddTopNavButton')).toBeVisible({
+          timeout: 20_000,
+        });
+        await pageObjects.dashboard.saveDashboard(DASHBOARD_NAME);
         await page.goBack();
-        await expect(page.testSubj.locator('newItemButton')).toBeVisible();
-      });
-    }
-  );
-
-  spaceTest(
-    'saving a dashboard and returning to the listing page shows it',
-    async ({ page, pageObjects }) => {
-      await pageObjects.dashboard.goto();
-      await page.testSubj.click('newItemButton');
-      await expect(page.testSubj.locator('dashboardAddTopNavButton')).toBeVisible({
-        timeout: 20_000,
-      });
-      await pageObjects.dashboard.saveDashboard(DASHBOARD_NAME);
-      await page.goBack();
-      await expect(
-        page.testSubj.locator(`dashboardListingTitleLink-${DASHBOARD_NAME.split(' ').join('-')}`)
-      ).toBeVisible();
-    }
-  );
-});
+        await expect(
+          page.testSubj.locator(`dashboardListingTitleLink-${DASHBOARD_NAME.split(' ').join('-')}`)
+        ).toBeVisible();
+      }
+    );
+  }
+);

@@ -13,6 +13,7 @@ import type {
   AttackDiscoveryScheduleCreateProps,
   AttackDiscoveryScheduleParams,
   AttackDiscoveryScheduleUpdateProps,
+  BulkActionAttackDiscoverySchedulesResponse,
 } from '@kbn/elastic-assistant-common';
 import {
   ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
@@ -40,6 +41,20 @@ export interface AttackDiscoveryScheduleDataClientParams {
 
 export class AttackDiscoveryScheduleDataClient {
   constructor(public readonly options: AttackDiscoveryScheduleDataClientParams) {}
+
+  private transformBulkActionResult = ({
+    errors,
+    rules,
+    total,
+  }: {
+    errors: BulkActionAttackDiscoverySchedulesResponse['errors'];
+    rules: Array<{ id: string }>;
+    total: number;
+  }): BulkActionAttackDiscoverySchedulesResponse => ({
+    ids: rules.map(({ id }) => id),
+    errors,
+    total,
+  });
 
   public findSchedules = async ({
     page = 0,
@@ -124,5 +139,29 @@ export class AttackDiscoveryScheduleDataClient {
 
   public disableSchedule = async (ruleToDisable: { id: string }) => {
     await this.options.rulesClient.disableRule(ruleToDisable);
+  };
+
+  public bulkDeleteSchedules = async ({ ids }: { ids: string[] }) => {
+    const result = await this.options.rulesClient.bulkDeleteRules({
+      ids,
+    });
+
+    return this.transformBulkActionResult(result);
+  };
+
+  public bulkEnableSchedules = async ({ ids }: { ids: string[] }) => {
+    const result = await this.options.rulesClient.bulkEnableRules({
+      ids,
+    });
+
+    return this.transformBulkActionResult(result);
+  };
+
+  public bulkDisableSchedules = async ({ ids }: { ids: string[] }) => {
+    const result = await this.options.rulesClient.bulkDisableRules({
+      ids,
+    });
+
+    return this.transformBulkActionResult(result);
   };
 }

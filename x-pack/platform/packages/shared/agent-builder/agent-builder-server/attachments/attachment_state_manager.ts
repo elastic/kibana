@@ -75,6 +75,18 @@ export interface ResolvedAttachmentRef {
 }
 
 /**
+ * Snapshot of an attachment at a specific version, returned by
+ * {@link AttachmentStateManager.get}. Carries the attachment id, the
+ * resolved version number, the type discriminator, and the version data.
+ */
+export interface AttachmentSnapshot {
+  id: string;
+  version: number;
+  type: string;
+  data: AttachmentVersion;
+}
+
+/**
  * Interface for managing conversation attachment state.
  * Provides CRUD operations with version tracking.
  */
@@ -86,14 +98,7 @@ export interface AttachmentStateManager {
       actor?: AttachmentRefActor;
       version?: number;
     }
-  ):
-    | {
-        id: string;
-        version: number;
-        type: AttachmentType;
-        data: AttachmentVersion;
-      }
-    | undefined;
+  ): AttachmentSnapshot | undefined;
   /** Get the raw stored attachment record (all versions, metadata). */
   getAttachmentRecord(id: string): VersionedAttachment | undefined;
   /** Get all active (non-deleted) attachments */

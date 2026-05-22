@@ -45,7 +45,7 @@ export const UnitField: FunctionComponent<Props> = ({ path, options, euiFieldPro
               </EuiButtonEmpty>
             }
             ownFocus
-            panelPaddingSize="none"
+            panelPaddingSize="s"
             isOpen={open}
             closePopover={() => setOpen(false)}
             {...euiFieldProps}

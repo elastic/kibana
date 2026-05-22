@@ -60,16 +60,19 @@ export const reviewRuleInstallationHandler = async (
       installedRuleVersions.map((version) => [version.rule_id, version])
     );
 
-    const [rules, stats] = await Promise.all([
-      fetchRules({
-        ruleAssetsClient,
-        logger,
-        mlAuthz,
-        installedRuleVersionsMap,
-        requestParameters,
-      }),
-      fetchStats({ ruleAssetsClient, logger, mlAuthz, installedRuleVersionsMap }),
-    ]);
+    const rules = await fetchRules({
+      ruleAssetsClient,
+      logger,
+      mlAuthz,
+      installedRuleVersionsMap,
+      requestParameters,
+    });
+    const stats = await fetchStats({
+      ruleAssetsClient,
+      logger,
+      mlAuthz,
+      installedRuleVersionsMap,
+    });
 
     const body: ReviewRuleInstallationResponseBody = {
       page: requestParameters.page,

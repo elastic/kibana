@@ -27,6 +27,9 @@ export const mockContextDependencies = () => ({
     logging: { console: false },
     http: { allowedHosts: ['*'] },
     maxResponseSize: new ByteSizeValue(10 * 1024 * 1024), // 10mb
+    eviction: {
+      minPayloadSize: new ByteSizeValue(10 * 1024), // 10kb
+    },
     collectQueueMetrics: false,
   },
 });

@@ -23,6 +23,7 @@ import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import { debounce } from 'lodash';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import type { KqlPluginStart } from '@kbn/kql/public';
+import { builtInComparatorsWithInclusive } from '../../../constants/comparators';
 import { convertToBuiltInComparators } from '../../../../common/utils/convert_legacy_outside_comparator';
 import { Aggregators } from '../../../../common/custom_threshold_rule/types';
 import type { MetricExpression } from '../types';
@@ -210,6 +211,7 @@ const ThresholdElement: React.FC<{
   return (
     <>
       <ThresholdExpression
+        customComparators={builtInComparatorsWithInclusive}
         thresholdComparator={thresholdComparator()}
         threshold={displayedThreshold}
         onChangeSelectedThresholdComparator={updateComparator}

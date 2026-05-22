@@ -28,7 +28,6 @@ import {
   useMigrateSpaceAwarenessMutation,
   usePutSettingsMutation,
   useStartServices,
-  useAgentlessResources,
 } from '../../../../hooks';
 
 export const AdvancedSection: React.FunctionComponent<{}> = ({}) => {
@@ -42,9 +41,6 @@ export const AdvancedSection: React.FunctionComponent<{}> = ({}) => {
   const [deleteUnenrolledAgentsChecked, setDeleteUnenrolledAgentsChecked] =
     React.useState<boolean>(deleteUnenrolledAgents);
   const { mutateAsync: mutateSettingsAsync } = usePutSettingsMutation();
-
-  // Agentless resources toggle state
-  const { showAgentless, setShowAgentless } = useAgentlessResources();
 
   const { mutateAsync: mutateSpaceAwarenessAsync, isLoading: mutateSpaceAwarenessIsLoading } =
     useMigrateSpaceAwarenessMutation();
@@ -223,44 +219,6 @@ export const AdvancedSection: React.FunctionComponent<{}> = ({}) => {
               disabled={!authz.fleet.allSettings || isPreconfigured}
             />
           </EuiToolTip>
-        </EuiFormRow>
-      </EuiDescribedFormGroup>
-
-      <EuiSpacer size="m" />
-
-      <EuiDescribedFormGroup
-        title={
-          <h3>
-            <FormattedMessage
-              id="xpack.fleet.settings.showAgentlessResourcesLabel"
-              defaultMessage="Show agentless resources"
-            />
-          </h3>
-        }
-        description={
-          <p>
-            <FormattedMessage
-              id="xpack.fleet.settings.showAgentlessResourcesDescription"
-              defaultMessage="Enable this toggle to display agentless agents and policies in Fleet for debugging and diagnostics purposes. This setting is stored locally and is only visible to you."
-            />
-          </p>
-        }
-      >
-        <EuiFormRow>
-          <EuiSwitch
-            label={
-              <FormattedMessage
-                id="xpack.fleet.settings.showAgentlessResourcesLabel"
-                defaultMessage="Show agentless resources"
-              />
-            }
-            checked={showAgentless}
-            onChange={(e) => {
-              setShowAgentless(e.target.checked);
-              setShowAgentless(e.target.checked);
-            }}
-            data-test-subj="showAgentlessResourcesSwitch"
-          />
         </EuiFormRow>
       </EuiDescribedFormGroup>
 

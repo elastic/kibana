@@ -13,6 +13,8 @@ exports[`Error AGENT_NAME 1`] = `"java"`;
 
 exports[`Error AGENT_VERSION 1`] = `"agent version"`;
 
+exports[`Error ANOMALY_DETECTOR_TYPE 1`] = `undefined`;
+
 exports[`Error APP_LAUNCH_TIME 1`] = `undefined`;
 
 exports[`Error ATTRIBUTE_HTTP_SCHEME 1`] = `undefined`;
@@ -459,6 +461,8 @@ exports[`Span AGENT_NAME 1`] = `"java"`;
 
 exports[`Span AGENT_VERSION 1`] = `"agent version"`;
 
+exports[`Span ANOMALY_DETECTOR_TYPE 1`] = `undefined`;
+
 exports[`Span APP_LAUNCH_TIME 1`] = `undefined`;
 
 exports[`Span ATTRIBUTE_HTTP_SCHEME 1`] = `undefined`;
@@ -887,6 +891,8 @@ exports[`Transaction AGENT_ACTIVATION_METHOD 1`] = `undefined`;
 exports[`Transaction AGENT_NAME 1`] = `"java"`;
 
 exports[`Transaction AGENT_VERSION 1`] = `"agent version"`;
+
+exports[`Transaction ANOMALY_DETECTOR_TYPE 1`] = `undefined`;
 
 exports[`Transaction APP_LAUNCH_TIME 1`] = `undefined`;
 

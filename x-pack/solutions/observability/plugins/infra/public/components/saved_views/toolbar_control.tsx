@@ -130,7 +130,7 @@ export function SavedViewsToolbarControls<TSingleSavedViewState extends SavedVie
         closePopover={closePopover}
         anchorPosition="leftCenter"
       >
-        <EuiListGroup flush={true}>
+        <EuiListGroup>
           <EuiListGroupItem
             data-test-subj="savedViews-manageViews"
             iconType="indexSettings"

@@ -369,10 +369,28 @@ describe('TemplatesService', () => {
                     }),
                   }),
                   expect.objectContaining({
-                    wildcard: expect.objectContaining({
-                      [`${CASE_TEMPLATE_SAVED_OBJECT}.fieldNames`]: expect.objectContaining({
-                        value: '*my-search*',
-                        case_insensitive: true,
+                    nested: expect.objectContaining({
+                      path: `${CASE_TEMPLATE_SAVED_OBJECT}.fieldNames`,
+                      query: expect.objectContaining({
+                        bool: expect.objectContaining({
+                          should: expect.arrayContaining([
+                            expect.objectContaining({
+                              wildcard: expect.objectContaining({
+                                [`${CASE_TEMPLATE_SAVED_OBJECT}.fieldNames.name`]:
+                                  expect.objectContaining({
+                                    value: '*my-search*',
+                                    case_insensitive: true,
+                                  }),
+                              }),
+                            }),
+                            expect.objectContaining({
+                              match: expect.objectContaining({
+                                [`${CASE_TEMPLATE_SAVED_OBJECT}.fieldNames.label`]: 'my-search',
+                              }),
+                            }),
+                          ]),
+                          minimum_should_match: 1,
+                        }),
                       }),
                     }),
                   }),
@@ -548,12 +566,18 @@ describe('TemplatesService', () => {
         const soMatch = createTemplateSO('so-match', {
           templateId: 't-match',
           name: 'Matching Template',
-          fieldNames: ['severity', 'hostname'],
+          fieldNames: [
+            { name: 'severity', label: 'Severity', type: 'keyword', control: 'TEXT' },
+            { name: 'hostname', label: 'Hostname', type: 'keyword', control: 'TEXT' },
+          ],
         });
         const soNoMatch = createTemplateSO('so-nomatch', {
           templateId: 't-nomatch',
           name: 'No Match Template',
-          fieldNames: ['effort', 'details'],
+          fieldNames: [
+            { name: 'effort', label: 'Effort', type: 'keyword', control: 'TEXT' },
+            { name: 'details', label: 'Details', type: 'keyword', control: 'TEXT' },
+          ],
         });
 
         unsecuredSavedObjectsClient.search.mockResolvedValue(
@@ -578,7 +602,10 @@ describe('TemplatesService', () => {
         const so = createTemplateSO('so-1', {
           templateId: 't-1',
           name: 'Template',
-          fieldNames: ['HostName', 'Severity'],
+          fieldNames: [
+            { name: 'HostName', label: 'HostName', type: 'keyword', control: 'TEXT' },
+            { name: 'Severity', label: 'Severity', type: 'keyword', control: 'TEXT' },
+          ],
         });
 
         unsecuredSavedObjectsClient.search.mockResolvedValue(createMockSearchResponse([so]));
@@ -597,7 +624,10 @@ describe('TemplatesService', () => {
         const so = createTemplateSO('so-1', {
           templateId: 't-1',
           name: 'Template',
-          fieldNames: ['severity', 'hostname'],
+          fieldNames: [
+            { name: 'severity', label: 'Severity', type: 'keyword', control: 'TEXT' },
+            { name: 'hostname', label: 'Hostname', type: 'keyword', control: 'TEXT' },
+          ],
         });
 
         unsecuredSavedObjectsClient.search.mockResolvedValue(createMockSearchResponse([so]));
@@ -673,6 +703,129 @@ describe('TemplatesService', () => {
 
       expect(result).toBeUndefined();
     });
+
+    it('returns undefined when version is not a valid number', async () => {
+      const service = createService();
+
+      // Should not call search at all for invalid version
+      const result = await service.getTemplate('template-1', 'abc');
+
+      expect(result).toBeUndefined();
+      expect(unsecuredSavedObjectsClient.search).not.toHaveBeenCalled();
+    });
+
+    it('returns undefined when version is an empty string', async () => {
+      const service = createService();
+
+      const result = await service.getTemplate('template-1', '');
+
+      expect(result).toBeUndefined();
+      expect(unsecuredSavedObjectsClient.search).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('getTemplateVersionsForExtendedFieldSearch', () => {
+    it('fetches all template versions without isLatest filter', async () => {
+      const service = createService();
+      const templateV1 = createTemplateSO('template-v1', {
+        templateId: 'incident-template',
+        name: 'Incident Template v1',
+        templateVersion: 1,
+        isLatest: false,
+        owner: 'securitySolution',
+        fieldNames: [
+          {
+            name: 'effort_estimate',
+            label: 'Effort Estimate',
+            type: 'long',
+            control: 'INPUT_NUMBER',
+          },
+        ],
+      });
+      const templateV2 = createTemplateSO('template-v2', {
+        templateId: 'incident-template',
+        name: 'Incident Template v2',
+        templateVersion: 2,
+        isLatest: true,
+        owner: 'securitySolution',
+        fieldNames: [
+          { name: 'some_estimate', label: 'Some Estimate', type: 'long', control: 'INPUT_NUMBER' },
+        ],
+      });
+
+      const searchResponse = createMockSearchResponse([templateV1, templateV2]);
+      unsecuredSavedObjectsClient.search.mockResolvedValue(searchResponse);
+      savedObjectsSerializer.rawToSavedObject
+        .mockReturnValueOnce(templateV1)
+        .mockReturnValueOnce(templateV2);
+
+      const result = await service.getTemplateVersionsForExtendedFieldSearch({
+        owner: ['securitySolution'],
+      });
+
+      expect(result).toHaveLength(2);
+      expect(result).toEqual([templateV1, templateV2]);
+
+      const searchCall = unsecuredSavedObjectsClient.search.mock.calls[0][0];
+      expect(searchCall.query?.bool?.filter).toBeDefined();
+      // Verify no isLatest filter is applied
+      const filterStrings = JSON.stringify(searchCall.query?.bool?.filter);
+      expect(filterStrings).not.toContain('isLatest');
+    });
+
+    it('fetches all template versions across multiple template IDs', async () => {
+      const service = createService();
+      const template1V1 = createTemplateSO('t1-v1', {
+        templateId: 'template-1',
+        name: 'Template 1 v1',
+        templateVersion: 1,
+        isLatest: false,
+        owner: 'securitySolution',
+        fieldNames: [],
+      });
+      const template1V2 = createTemplateSO('t1-v2', {
+        templateId: 'template-1',
+        name: 'Template 1 v2',
+        templateVersion: 2,
+        isLatest: true,
+        owner: 'securitySolution',
+        fieldNames: [],
+      });
+      const template2V1 = createTemplateSO('t2-v1', {
+        templateId: 'template-2',
+        name: 'Template 2 v1',
+        templateVersion: 1,
+        isLatest: true,
+        owner: 'securitySolution',
+        fieldNames: [],
+      });
+
+      const searchResponse = createMockSearchResponse([template1V1, template1V2, template2V1]);
+      unsecuredSavedObjectsClient.search.mockResolvedValue(searchResponse);
+      savedObjectsSerializer.rawToSavedObject
+        .mockReturnValueOnce(template1V1)
+        .mockReturnValueOnce(template1V2)
+        .mockReturnValueOnce(template2V1);
+
+      const result = await service.getTemplateVersionsForExtendedFieldSearch({
+        owner: ['securitySolution'],
+      });
+
+      expect(result).toHaveLength(3);
+    });
+
+    it('returns empty array when no templates exist for owner', async () => {
+      const service = createService();
+
+      const searchResponse = createMockSearchResponse([]);
+      unsecuredSavedObjectsClient.search.mockResolvedValue(searchResponse);
+
+      const result = await service.getTemplateVersionsForExtendedFieldSearch({
+        owner: ['nonexistent'],
+      });
+
+      expect(result).toEqual([]);
+    });
   });
 
   it('persists description, tags, author, fieldCount and fieldNames on create', async () => {
@@ -703,7 +856,9 @@ describe('TemplatesService', () => {
         tags: ['security', 'network'],
         author: 'alice',
         fieldCount: 1,
-        fieldNames: ['field_one'],
+        fieldNames: [
+          { name: 'field_one', label: 'field_one', type: 'keyword', control: 'INPUT_TEXT' },
+        ],
         isLatest: true,
       }),
       expect.objectContaining({ id: 'generated-id' })
@@ -891,7 +1046,9 @@ describe('TemplatesService', () => {
         tags: ['updated', 'tag'],
         author: 'bob',
         fieldCount: 1,
-        fieldNames: ['field_one'],
+        fieldNames: [
+          { name: 'field_one', label: 'field_one', type: 'keyword', control: 'INPUT_TEXT' },
+        ],
         isLatest: true,
       }),
       expect.any(Object)

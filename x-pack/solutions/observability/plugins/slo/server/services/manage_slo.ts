@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import { addTransactionLabels } from '@kbn/apm-utils';
 import { getSLOSummaryTransformId, getSLOTransformId } from '../../common/constants';
 import type { SLODefinitionRepository } from './slo_definition_repository';
 import type { TransformManager } from './transform_manager';
+import { getSloApmLabels } from './utils';
 
 export class ManageSLO {
   constructor(
@@ -19,6 +21,7 @@ export class ManageSLO {
 
   async enable(sloId: string) {
     const slo = await this.repository.findById(sloId);
+    addTransactionLabels(getSloApmLabels(slo));
     if (slo.enabled) {
       return;
     }
@@ -33,6 +36,7 @@ export class ManageSLO {
 
   async disable(sloId: string) {
     const slo = await this.repository.findById(sloId);
+    addTransactionLabels(getSloApmLabels(slo));
     if (!slo.enabled) {
       return;
     }

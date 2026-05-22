@@ -16,14 +16,12 @@ import type { AttachmentUIV2 } from '../../../../common/ui/types';
 import { createCommonUpdateUserActionBuilder } from '../common';
 import * as i18n from './translations';
 import { createUnifiedAttachmentUserActionBuilder } from './unified_attachment';
-import { createAlertAttachmentUserActionBuilder } from '../../attachments/alert/alert';
 import { createActionAttachmentUserActionBuilder } from '../../attachments/host_isolation/actions';
 import { createExternalReferenceAttachmentUserActionBuilder } from './external_reference';
 import type { AttachmentType as AttachmentFrameworkAttachmentType } from '../../../client/attachment_framework/types';
 import {
   isLegacyAttachmentRequest,
   isUnifiedAttachmentRequest,
-  isUnifiedReferenceAttachmentRequest,
   toUnifiedAttachmentType,
 } from '../../../../common/utils/attachments';
 
@@ -45,13 +43,6 @@ const getDeleteLabelTitle = ({
   const { comment } = userAction.payload;
   const owner = Array.isArray(caseData.owner) ? caseData.owner[0] : caseData.owner;
   if (isLegacyAttachmentRequest(comment)) {
-    if (comment.type === AttachmentType.alert) {
-      const totalAlerts = Array.isArray(comment.alertId) ? comment.alertId.length : 1;
-      const alertLabel = i18n.MULTIPLE_ALERTS(totalAlerts);
-
-      return `${i18n.REMOVED_FIELD} ${alertLabel}`;
-    }
-
     if (comment.type === AttachmentType.externalReference) {
       return getDeleteLabelFromRegistry({
         caseData,
@@ -64,13 +55,13 @@ const getDeleteLabelTitle = ({
       });
     }
   }
-  if (isUnifiedReferenceAttachmentRequest(comment)) {
+  if (isUnifiedAttachmentRequest(comment)) {
     return getDeleteLabelFromRegistry({
       caseData,
       registry: unifiedAttachmentTypeRegistry,
       getId: () => toUnifiedAttachmentType(comment.type, owner),
       getAttachmentProps: () => ({
-        attachmentId: comment.attachmentId,
+        attachmentId: 'attachmentId' in comment ? comment.attachmentId : undefined,
         metadata: comment.metadata,
       }),
     });
@@ -160,11 +151,6 @@ const getCreateCommentUserAction = ({
   loadingCommentIds,
   euiTheme,
   handleDeleteComment,
-  getRuleDetailsHref,
-  loadingAlertData,
-  onRuleDetailsClick,
-  alertData,
-  onShowAlertDetails,
   actionsNavigation,
 }: {
   userAction: SnakeToCamelCase<CommentUserAction>;
@@ -179,22 +165,6 @@ const getCreateCommentUserAction = ({
 >): EuiCommentProps[] => {
   if (isLegacyAttachmentRequest(attachment)) {
     switch (attachment.type) {
-      case AttachmentType.alert:
-        const alertBuilder = createAlertAttachmentUserActionBuilder({
-          userProfiles,
-          alertData,
-          attachment,
-          userAction,
-          getRuleDetailsHref,
-          loadingAlertData,
-          onRuleDetailsClick,
-          onShowAlertDetails,
-          handleDeleteComment,
-          loadingCommentIds,
-        });
-
-        return alertBuilder.build();
-
       case AttachmentType.actions:
         const actionBuilder = createActionAttachmentUserActionBuilder({
           userProfiles,
@@ -263,12 +233,7 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
   manageMarkdownEditIds,
   selectedOutlineCommentId,
   loadingCommentIds,
-  loadingAlertData,
-  alertData,
   euiTheme,
-  getRuleDetailsHref,
-  onRuleDetailsClick,
-  onShowAlertDetails,
   handleDeleteComment,
   handleOutlineComment,
   actionsNavigation,
@@ -307,12 +272,7 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
         manageMarkdownEditIds,
         selectedOutlineCommentId,
         loadingCommentIds,
-        loadingAlertData,
-        alertData,
         euiTheme,
-        getRuleDetailsHref,
-        onRuleDetailsClick,
-        onShowAlertDetails,
         handleDeleteComment,
         actionsNavigation,
         caseConnectors,

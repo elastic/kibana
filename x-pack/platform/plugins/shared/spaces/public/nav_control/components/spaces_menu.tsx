@@ -114,6 +114,7 @@ class SpacesMenuUI extends Component<Props & WithEuiThemeProps> {
             rowHeight: 40,
             showIcons: true,
             onFocusBadge: false,
+            paddingSize: 's',
           }}
           isLoading={this.props.isLoading}
           loadingMessage={i18n.translate('xpack.spaces.navControl.loadingMessage', {

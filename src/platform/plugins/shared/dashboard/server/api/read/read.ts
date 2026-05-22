@@ -8,6 +8,7 @@
  */
 
 import type { RequestHandlerContext } from '@kbn/core/server';
+import type { RequestTiming } from '@kbn/core-http-server';
 import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import { getDashboardCRUResponseBody } from '../get_cru_response_body';
@@ -18,9 +19,11 @@ export async function read(
   requestCtx: RequestHandlerContext,
   dashboardStateSchema: ReturnType<typeof getDashboardStateSchema>,
   id: string,
+  serverTiming?: RequestTiming,
   isDashboardAppRequest: boolean = false
 ): Promise<{ body: DashboardReadResponseBody; resolveHeaders: Record<string, string> }> {
   const { core } = await requestCtx.resolve(['core']);
+
   const {
     saved_object: savedObject,
     outcome,
@@ -46,7 +49,8 @@ export async function read(
       savedObject,
       'read',
       dashboardStateSchema,
-      isDashboardAppRequest
+      isDashboardAppRequest,
+      serverTiming
     ),
     resolveHeaders,
   };

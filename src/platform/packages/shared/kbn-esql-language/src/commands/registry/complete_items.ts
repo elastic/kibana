@@ -84,7 +84,9 @@ export function buildMapKeySuggestion(
     kind: 'Constant',
     detail: description || paramName,
     ...(options?.filterText && { filterText: options.filterText }),
-    ...(options?.rangeToReplace && { rangeToReplace: options.rangeToReplace }),
+    ...(options?.replacementRangeStrategy && {
+      replacementRangeStrategy: options.replacementRangeStrategy,
+    }),
   });
 }
 
@@ -138,7 +140,9 @@ export function buildAddValuePlaceholder(
     }),
     category: SuggestionCategory.VALUE,
     filterText: text,
-    ...(options?.rangeToReplace && { rangeToReplace: options.rangeToReplace }),
+    ...(options?.replacementRangeStrategy && {
+      replacementRangeStrategy: options.replacementRangeStrategy,
+    }),
   });
 }
 
@@ -353,7 +357,7 @@ export const MAP_VALUE_SNIPPETS: Record<MapValueType, string> = {
 
 export interface MapKeySuggestionOptions {
   filterText?: string;
-  rangeToReplace?: { start: number; end: number };
+  replacementRangeStrategy?: ISuggestionItem['replacementRangeStrategy'];
 }
 
 export function buildSubqueryCompleteItem(): ISuggestionItem {

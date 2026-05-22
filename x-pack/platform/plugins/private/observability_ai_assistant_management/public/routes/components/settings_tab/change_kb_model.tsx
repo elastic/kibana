@@ -237,7 +237,6 @@ export function ChangeKbModel({
           >
             <EuiSuperSelect
               fullWidth
-              hasDividers
               isLoading={isLoadingEndpoints}
               options={superSelectOptions}
               valueOfSelected={selectedInferenceId}

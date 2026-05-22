@@ -11,6 +11,7 @@ import { monaco } from '@kbn/monaco';
 import { buildAutocompleteContext } from './context/build_autocomplete_context';
 import { getAllYamlProviders } from './intercept_monaco_yaml_provider';
 import { getSuggestions, isInsideLoopBody } from './suggestions/get_suggestions';
+import type { GetStepPropertyHandler } from './suggestions/step_property/get_step_property_suggestions';
 import { isInWorkflowOutputWithBlock } from './suggestions/workflow/get_workflow_outputs_suggestions';
 import type { WorkflowKqlCompletionServices } from './suggestions/workflow_kql_completion_services';
 import { isDeprecatedStepType } from '../../../../../common/schema';
@@ -89,7 +90,8 @@ function mapSuggestions(
 
 export function getCompletionItemProvider(
   getState: () => WorkflowDetailState,
-  getKqlServices?: () => WorkflowKqlCompletionServices
+  getKqlServices?: () => WorkflowKqlCompletionServices,
+  getPropertyHandler?: GetStepPropertyHandler
 ): monaco.languages.CompletionItemProvider {
   const provider: monaco.languages.CompletionItemProvider & { __providerId?: string } = {
     // Unique identifier to distinguish our provider from others
@@ -165,7 +167,8 @@ export function getCompletionItemProvider(
           model,
           position,
         },
-        getKqlServices?.()
+        getKqlServices?.(),
+        getPropertyHandler
       );
       // Workflow suggestions always win over YAML duplicates.
       for (const suggestion of workflowSuggestions) {

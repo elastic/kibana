@@ -12,13 +12,22 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     require.resolve('../../../../../config/ess/config.base.trial')
   );
 
+  const baseServerArgs: string[] = functionalConfig.get('kbnTestServer.serverArgs');
+  // Do not append a second --xpack.securitySolution.enableExperimental=…; the last flag wins and
+  // would drop previewTelemetryUrlEnabled / endpointExceptionsMovedUnderManagement from config.base.
+  const serverArgsWithoutExperimental = baseServerArgs.filter(
+    (arg) => !arg.startsWith('--xpack.securitySolution.enableExperimental=')
+  );
+
   return {
     ...functionalConfig.getAll(),
     kbnTestServer: {
       ...functionalConfig.get('kbnTestServer'),
       serverArgs: [
-        ...functionalConfig.get('kbnTestServer.serverArgs'),
+        ...serverArgsWithoutExperimental,
         `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+          'previewTelemetryUrlEnabled',
+          'endpointExceptionsMovedUnderManagement',
           'entityAnalyticsWatchlistEnabled',
         ])}`,
       ],

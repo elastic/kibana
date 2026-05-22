@@ -31,6 +31,11 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
           },
         },
       },
+      notifications: {
+        tours: {
+          isEnabled: jest.fn(() => true),
+        },
+      },
     },
   }),
 }));

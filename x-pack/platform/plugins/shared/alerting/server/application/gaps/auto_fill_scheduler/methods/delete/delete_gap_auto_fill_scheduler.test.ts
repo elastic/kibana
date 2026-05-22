@@ -58,6 +58,7 @@ describe('deleteGapAutoFillScheduler()', () => {
     namespace: 'default',
     getUserName: jest.fn().mockResolvedValue('elastic'),
     createAPIKey: jest.fn(),
+    cloneAPIKey: jest.fn(),
     logger,
     internalSavedObjectsRepository,
     encryptedSavedObjectsClient: encryptedSavedObjects,

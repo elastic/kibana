@@ -13,6 +13,7 @@ import expect from '@kbn/expect';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import { SyntheticsMonitorTestService } from './services/synthetics_monitor_test_service';
+import { cleanSyntheticsTestData } from './services/private_location_test_service';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('SyntheticsAPISecurity', function () {
@@ -106,7 +107,7 @@ export default function ({ getService }: FtrProviderContext) {
     };
 
     before(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
+      await cleanSyntheticsTestData(kibanaServer);
     });
 
     const allRoutes = syntheticsAppRestApiRoutes.concat(syntheticsAppPublicRestApiRoutes);

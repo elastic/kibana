@@ -30,6 +30,7 @@ export interface ProvisioningStatusDocs {
     entityType: string;
     status: string;
     message?: string;
+    errorCode?: string;
   };
 }
 
@@ -37,8 +38,13 @@ export interface ApiKeyToConvert {
   ruleId: string;
   /** Full decrypted rule attributes (includes apiKey); required for ESO-safe full rule update when persisting uiamApiKey */
   attributes: RawRule;
-  /** Rule's primary namespace for rulesClient.bulkEdit (space-scoped) */
+  /** Saved object version token; forwarded to bulkUpdate for optimistic concurrency control */
   version?: string;
+  /**
+   * Space the rule lives in. Threaded through to bulkUpdate so the SOR targets
+   * the correct namespace for `multiple-isolated` rules.
+   */
+  namespace?: string;
 }
 
 export interface UiamApiKeyByRuleId {
@@ -46,8 +52,13 @@ export interface UiamApiKeyByRuleId {
   uiamApiKey: string;
   /** Full decrypted rule attributes; required for ESO-safe full rule update */
   attributes: RawRule;
-  /** Rule's primary namespace for rulesClient.bulkEdit (space-scoped) */
+  /** Saved object version token; forwarded to bulkUpdate for optimistic concurrency control */
   version?: string;
+  /**
+   * Space the rule lives in. Threaded through to bulkUpdate so the SOR targets
+   * the correct namespace for `multiple-isolated` rules.
+   */
+  namespace?: string;
 }
 
 export interface GetApiKeysToConvertResult {

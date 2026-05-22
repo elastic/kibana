@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PanelPlacementStrategy } from '@kbn/presentation-util-plugin/public';
+import { PlacementStrategy } from '@kbn/embeddable-plugin/public';
 import type { DashboardLayout } from '../dashboard_api/layout_manager';
 import { getMockLayout, getMockLayoutWithSections } from '../mocks';
 import { runPanelPlacementStrategy } from './place_new_panel_strategies';
@@ -16,7 +16,7 @@ describe('new panel placement strategies', () => {
   describe('place at top', () => {
     it('no other panels', () => {
       const { newPanelPlacement, otherPanels } = runPanelPlacementStrategy(
-        PanelPlacementStrategy.placeAtTop,
+        PlacementStrategy.placeAtTop,
         { width: 6, height: 6, currentPanels: {} }
       );
       expect(newPanelPlacement).toEqual({
@@ -31,7 +31,7 @@ describe('new panel placement strategies', () => {
     it('push other panels down', () => {
       const panels = getMockLayout().panels;
       const { newPanelPlacement, otherPanels } = runPanelPlacementStrategy(
-        PanelPlacementStrategy.placeAtTop,
+        PlacementStrategy.placeAtTop,
         { width: 6, height: 6, currentPanels: panels }
       );
       expect(newPanelPlacement).toEqual({
@@ -60,7 +60,7 @@ describe('new panel placement strategies', () => {
     it('ignores panels in other sections', () => {
       const panels = getMockLayoutWithSections().panels;
       const { newPanelPlacement, otherPanels } = runPanelPlacementStrategy(
-        PanelPlacementStrategy.placeAtTop,
+        PlacementStrategy.placeAtTop,
         { width: 6, height: 6, currentPanels: panels, sectionId: 'section1' }
       );
       expect(newPanelPlacement).toEqual({
@@ -98,7 +98,7 @@ describe('new panel placement strategies', () => {
         },
       };
       const { newPanelPlacement, otherPanels } = runPanelPlacementStrategy(
-        PanelPlacementStrategy.placeAtTop,
+        PlacementStrategy.placeAtTop,
         { width: 6, height: 6, currentPanels: panels, beside: '3' }
       );
       expect(newPanelPlacement).toEqual({
@@ -121,7 +121,7 @@ describe('new panel placement strategies', () => {
   describe('Find top left most open space', () => {
     it('no other panels', () => {
       const { newPanelPlacement, otherPanels } = runPanelPlacementStrategy(
-        PanelPlacementStrategy.findTopLeftMostOpenSpace,
+        PlacementStrategy.findTopLeftMostOpenSpace,
         { width: 6, height: 6, currentPanels: {} }
       );
       expect(newPanelPlacement).toEqual({
@@ -143,7 +143,7 @@ describe('new panel placement strategies', () => {
       };
 
       const { newPanelPlacement, otherPanels } = runPanelPlacementStrategy(
-        PanelPlacementStrategy.findTopLeftMostOpenSpace,
+        PlacementStrategy.findTopLeftMostOpenSpace,
         { width: 6, height: 6, currentPanels: panels }
       );
       expect(newPanelPlacement).toEqual({
@@ -164,7 +164,7 @@ describe('new panel placement strategies', () => {
         },
       };
       const { newPanelPlacement, otherPanels } = runPanelPlacementStrategy(
-        PanelPlacementStrategy.findTopLeftMostOpenSpace,
+        PlacementStrategy.findTopLeftMostOpenSpace,
         { width: 6, height: 6, currentPanels: panels }
       );
       expect(newPanelPlacement).toEqual({
@@ -197,7 +197,7 @@ describe('new panel placement strategies', () => {
         },
       };
       const { newPanelPlacement, otherPanels } = runPanelPlacementStrategy(
-        PanelPlacementStrategy.findTopLeftMostOpenSpace,
+        PlacementStrategy.findTopLeftMostOpenSpace,
         { width: 6, height: 6, currentPanels: panels, sectionId: 'section1' }
       );
       expect(newPanelPlacement).toEqual({
@@ -218,7 +218,7 @@ describe('new panel placement strategies', () => {
         },
       };
       const { newPanelPlacement, otherPanels } = runPanelPlacementStrategy(
-        PanelPlacementStrategy.findTopLeftMostOpenSpace,
+        PlacementStrategy.findTopLeftMostOpenSpace,
         { width: 6, height: 6, currentPanels: panels, beside: '3' }
       );
       // place beside panel 3

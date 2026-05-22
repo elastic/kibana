@@ -15,6 +15,7 @@ import {
   Settings,
 } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, EuiCallOut } from '@elastic/eui';
+import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useIntervalForHeatmap } from './anomaly_heatmap_interval';
@@ -102,6 +103,7 @@ export const AnomalyHeatmap: React.FC<AnomalyHeatmapProps> = ({
   const timeFormatter = useTimeFormatter();
   const xDomain = useXDomainFromGlobalTime();
   const styling = getAnomalyChartStyling(compressed);
+  const baseTheme = useElasticChartsTheme();
 
   return (
     <EuiFlexItem
@@ -128,6 +130,7 @@ export const AnomalyHeatmap: React.FC<AnomalyHeatmapProps> = ({
       {!isLoading && !isError && (
         <Chart>
           <Settings
+            baseTheme={baseTheme}
             theme={{ heatmap: heatmapComponentStyle }}
             noResults={noResultsComponent ?? undefined}
             xDomain={xDomain}

@@ -17,7 +17,6 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import { i18n } from '@kbn/i18n';
-import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import { once } from 'lodash';
@@ -65,9 +64,7 @@ export interface SavedSearchPublicPluginStart {
     discoverSession: SaveDiscoverSessionParams,
     options?: SaveDiscoverSessionOptions
   ) => ReturnType<typeof saveDiscoverSession>;
-  checkForDuplicateTitle: (
-    props: Pick<OnSaveProps, 'newTitle' | 'isTitleDuplicateConfirmed' | 'onTitleDuplicate'>
-  ) => Promise<void>;
+  hasLibraryItemWithTitle: (title: string) => Promise<boolean>;
   byValueToSavedSearch: <Serialized extends boolean = false>(
     result: SavedSearchUnwrapResult,
     serialized?: Serialized
@@ -171,9 +168,9 @@ export class SavedSearchPublicPlugin
         const service = await getSavedSearchesService(deps);
         return service.saveDiscoverSession(discoverSession, options);
       },
-      checkForDuplicateTitle: async (props) => {
+      hasLibraryItemWithTitle: async (props) => {
         const service = await getSavedSearchesService(deps);
-        return service.checkForDuplicateTitle(props);
+        return service.hasLibraryItemWithTitle(props);
       },
       byValueToSavedSearch: async (result, serialized) => {
         const service = await getSavedSearchesService(deps);

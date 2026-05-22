@@ -11,8 +11,8 @@ import { getField, getFieldArray } from '../../shared/utils';
 import type { GetFieldsData } from '../../shared/hooks/use_get_fields_data';
 import { getRowRenderer } from '../../../../timelines/components/timeline/body/renderers/get_row_renderer';
 import { defaultRowRenderers } from '../../../../timelines/components/timeline/body/renderers';
-import { isEcsAllowedValue } from '../../../../flyout_v2/document/utils/event_utils';
-import { EventKind } from '../../../../flyout_v2/document/constants/event_kinds';
+import { isEcsAllowedValue } from '../../../../flyout_v2/document/main/utils/event_utils';
+import { EventKind } from '../../../../flyout_v2/document/main/constants/event_kinds';
 
 export interface UseShowEventOverviewParams {
   /**

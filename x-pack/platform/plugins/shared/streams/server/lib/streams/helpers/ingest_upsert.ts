@@ -51,12 +51,14 @@ export async function updateWiredIngest({
   attachmentClient,
   name,
   ingest,
+  description,
 }: {
   streamsClient: StreamsClient;
   queryClient: QueryClient;
   attachmentClient: AttachmentClient;
   name: string;
   ingest: WiredIngestUpsertRequest;
+  description?: string;
 }): Promise<UpsertStreamResponse> {
   const { dashboards, queries, rules } = await getStreamAssets({
     name,
@@ -70,13 +72,19 @@ export async function updateWiredIngest({
     throw badData(`Can't update wired capabilities of a non-wired stream`);
   }
 
-  const { name: _name, updated_at: _updatedAt, ...stream } = definition;
+  const {
+    name: _name,
+    updated_at: _updatedAt,
+    query_streams: _queryStreams,
+    ...stream
+  } = definition;
 
   const upsertRequest: Streams.WiredStream.UpsertRequest = {
     dashboards,
     queries,
     stream: {
       ...stream,
+      ...(description !== undefined && { description }),
       ingest,
     },
     rules,
@@ -94,12 +102,14 @@ export async function updateClassicIngest({
   attachmentClient,
   name,
   ingest,
+  description,
 }: {
   streamsClient: StreamsClient;
   queryClient: QueryClient;
   attachmentClient: AttachmentClient;
   name: string;
   ingest: ClassicIngestUpsertRequest;
+  description?: string;
 }): Promise<UpsertStreamResponse> {
   const { dashboards, queries, rules } = await getStreamAssets({
     name,
@@ -113,13 +123,19 @@ export async function updateClassicIngest({
     throw badData(`Can't update classic capabilities of a non-classic stream`);
   }
 
-  const { name: _name, updated_at: _updatedAt, ...stream } = definition;
+  const {
+    name: _name,
+    updated_at: _updatedAt,
+    query_streams: _queryStreams,
+    ...stream
+  } = definition;
 
   const upsertRequest: Streams.ClassicStream.UpsertRequest = {
     dashboards,
     queries,
     stream: {
       ...stream,
+      ...(description !== undefined && { description }),
       ingest,
     },
     rules,
@@ -145,6 +161,11 @@ const stripProcessingTimestamp = (
     | ClassicIngestUpsertRequest;
 };
 
+export interface StreamPatch {
+  ingest: Streams.ingest.all.Definition['ingest'];
+  description?: string;
+}
+
 export async function patchIngestAndUpsert({
   streamsClient,
   queryClient,
@@ -156,9 +177,7 @@ export async function patchIngestAndUpsert({
   queryClient: QueryClient;
   attachmentClient: AttachmentClient;
   name: string;
-  patchFn: (
-    currentIngest: Streams.ingest.all.Definition['ingest']
-  ) => Streams.ingest.all.Definition['ingest'];
+  patchFn: (definition: Streams.ingest.all.Definition) => StreamPatch;
 }): Promise<UpsertStreamResponse> {
   const definition = await streamsClient.getStream(name);
 
@@ -169,8 +188,8 @@ export async function patchIngestAndUpsert({
     throw badData(`Stream "${name}" is not a wired or classic stream`);
   }
 
-  const patchedIngest = patchFn((definition as Streams.ingest.all.Definition).ingest);
-  const upsertIngest = stripProcessingTimestamp(patchedIngest);
+  const patch = patchFn(definition as Streams.ingest.all.Definition);
+  const upsertIngest = stripProcessingTimestamp(patch.ingest);
 
   if (isWired) {
     return await updateWiredIngest({
@@ -179,6 +198,7 @@ export async function patchIngestAndUpsert({
       attachmentClient,
       name,
       ingest: upsertIngest as WiredIngestUpsertRequest,
+      description: patch.description,
     });
   }
 
@@ -188,5 +208,6 @@ export async function patchIngestAndUpsert({
     attachmentClient,
     name,
     ingest: upsertIngest as ClassicIngestUpsertRequest,
+    description: patch.description,
   });
 }

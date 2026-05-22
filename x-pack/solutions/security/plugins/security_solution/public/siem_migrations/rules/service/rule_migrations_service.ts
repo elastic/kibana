@@ -11,6 +11,7 @@ import { ExperimentalFeaturesService } from '../../../common/experimental_featur
 import type { TelemetryServiceStart } from '../../../common/lib/telemetry';
 import type {
   CreateQRadarRuleMigrationRulesRequestBody,
+  CreateSentinelRuleMigrationRulesRequestBody,
   CreateRuleMigrationRulesRequestBody,
   StartRuleMigrationResponse,
   StopRuleMigrationResponse,
@@ -49,6 +50,11 @@ export type CreateRuleMigrationParams =
       rules: CreateQRadarRuleMigrationRulesRequestBody;
       migrationName: string;
       vendor: 'qradar';
+    }
+  | {
+      rules: CreateSentinelRuleMigrationRulesRequestBody;
+      migrationName: string;
+      vendor: 'microsoft-sentinel';
     };
 
 export class SiemRulesMigrationsService extends SiemMigrationsServiceBase<RuleMigrationStats> {
@@ -98,6 +104,19 @@ export class SiemRulesMigrationsService extends SiemMigrationsServiceBase<RuleMi
     return { count };
   }
 
+  public async addSentinelRulesToMigration(
+    migrationId: string,
+    rules: CreateSentinelRuleMigrationRulesRequestBody
+  ) {
+    if (!rules.resources?.length) {
+      throw new Error(i18n.EMPTY_RULES_ERROR);
+    }
+
+    const { count } = await api.addRulesToSentinelMigration({ migrationId, body: rules });
+
+    return { count };
+  }
+
   /** Adds rules to a rule migration, batching the requests to avoid hitting the max payload size limit of the API */
   public async addRulesToMigration(
     migrationId: string,
@@ -142,6 +161,19 @@ export class SiemRulesMigrationsService extends SiemMigrationsServiceBase<RuleMi
           name: migrationName,
         });
         const { count } = await this.addQradarRulesToMigration(migrationId, rules);
+        this.telemetry.reportSetupMigrationCreated({ migrationId, count, vendor });
+
+        return migrationId;
+      } else if (vendor === MigrationSource.SENTINEL) {
+        if (!rules.resources?.length) {
+          throw new Error(i18n.EMPTY_RULES_ERROR);
+        }
+
+        // create the migration
+        const { migration_id: migrationId } = await api.createRuleMigration({
+          name: migrationName,
+        });
+        const { count } = await this.addSentinelRulesToMigration(migrationId, rules);
         this.telemetry.reportSetupMigrationCreated({ migrationId, count, vendor });
 
         return migrationId;

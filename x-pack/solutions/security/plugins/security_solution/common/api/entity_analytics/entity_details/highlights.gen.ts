@@ -14,52 +14,56 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import { Replacements } from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
 import { EntityType } from '../entity_store/common.gen';
 
+export const EntityDetailsHighlightsRequestBody = lazySchema(() =>
+  z.object({
+    entityType: EntityType,
+    /**
+     * The identifier of the entity.
+     */
+    entityIdentifier: z.string(),
+    anonymizationFields: z.array(AnonymizationFieldResponse),
+    /**
+     * The 'from' date.
+     */
+    from: z.number(),
+    /**
+     * The 'to' date.
+     */
+    to: z.number(),
+    /**
+     * The connector id.
+     */
+    connectorId: z.string(),
+  })
+);
 export type EntityDetailsHighlightsRequestBody = z.infer<typeof EntityDetailsHighlightsRequestBody>;
-export const EntityDetailsHighlightsRequestBody = z.object({
-  entityType: EntityType,
-  /**
-   * The identifier of the entity.
-   */
-  entityIdentifier: z.string(),
-  anonymizationFields: z.array(AnonymizationFieldResponse),
-  /**
-   * The 'from' date.
-   */
-  from: z.number(),
-  /**
-   * The 'to' date.
-   */
-  to: z.number(),
-  /**
-   * The connector id.
-   */
-  connectorId: z.string(),
-});
 export type EntityDetailsHighlightsRequestBodyInput = z.input<
   typeof EntityDetailsHighlightsRequestBody
 >;
 
+export const EntityDetailsHighlightsResponse = lazySchema(() =>
+  z.object({
+    /**
+     * The highlights of the entity.
+     */
+    summary: z.object({
+      assetCriticality: z.array(z.object({}).catchall(z.unknown())).optional(),
+      riskScore: z.array(z.object({}).catchall(z.unknown())).optional(),
+      vulnerabilities: z.array(z.object({}).catchall(z.unknown())).optional(),
+      vulnerabilitiesTotal: z.object({}).catchall(z.number()).optional(),
+      anomalies: z.array(z.object({}).catchall(z.unknown())).optional(),
+    }),
+    replacements: Replacements,
+    /**
+     * The prompt used to generate the highlights.
+     */
+    prompt: z.string(),
+  })
+);
 export type EntityDetailsHighlightsResponse = z.infer<typeof EntityDetailsHighlightsResponse>;
-export const EntityDetailsHighlightsResponse = z.object({
-  /**
-   * The highlights of the entity.
-   */
-  summary: z.object({
-    assetCriticality: z.array(z.object({}).catchall(z.unknown())).optional(),
-    riskScore: z.array(z.object({}).catchall(z.unknown())).optional(),
-    vulnerabilities: z.array(z.object({}).catchall(z.unknown())).optional(),
-    vulnerabilitiesTotal: z.object({}).catchall(z.number()).optional(),
-    anomalies: z.array(z.object({}).catchall(z.unknown())).optional(),
-  }),
-  replacements: Replacements,
-  /**
-   * The prompt used to generate the highlights.
-   */
-  prompt: z.string(),
-});

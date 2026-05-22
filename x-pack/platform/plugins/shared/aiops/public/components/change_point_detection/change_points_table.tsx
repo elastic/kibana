@@ -122,9 +122,19 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
     [onRenderComplete, pagination.pageSize]
   );
 
+  const isDashboardEmbedding = embeddingOrigin === 'dashboard';
   const hasActions = fieldConfig.splitField !== undefined && embeddingOrigin !== 'cases';
 
   const { bucketInterval } = useChangePointDetectionContext();
+
+  // Prevents timestamp and p-value cells from wrapping excessively in narrow tables,
+  // which would make the values unreadable. Capped at 3 lines as a safe maximum.
+  const lineClampStyle: React.CSSProperties = {
+    display: '-webkit-box',
+    WebkitLineClamp: 3,
+    WebkitBoxOrient: 'vertical',
+    overflow: 'hidden',
+  };
 
   const columns: Array<EuiBasicTableColumn<ChangePointAnnotation>> = [
     {
@@ -134,10 +144,15 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
       name: i18n.translate('xpack.aiops.changePointDetection.timeColumn', {
         defaultMessage: 'Time',
       }),
+      dataType: 'date',
       sortable: true,
       truncateText: false,
-      width: '230px',
-      render: (timestamp: ChangePointAnnotation['timestamp']) => dateFormatter.convert(timestamp),
+      render: (timestamp: ChangePointAnnotation['timestamp']) => (
+        <span style={isDashboardEmbedding ? lineClampStyle : undefined}>
+          {dateFormatter.convert(timestamp)}
+        </span>
+      ),
+      width: isDashboardEmbedding ? '180px' : '20%',
     },
     {
       id: 'preview',
@@ -172,9 +187,9 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
         defaultMessage: 'Type',
       }),
       sortable: true,
-      truncateText: false,
+      truncateText: true,
       render: (type: ChangePointAnnotation['type']) => <EuiBadge color="hollow">{type}</EuiBadge>,
-      width: '150px',
+      width: isDashboardEmbedding ? '130px' : '15%',
     },
     {
       id: 'pValue',
@@ -191,9 +206,12 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
       },
       sortable: true,
       truncateText: false,
-      render: (pValue: ChangePointAnnotation['p_value']) =>
-        pValue !== undefined ? pValue.toPrecision(3) : '-',
-      width: '130px',
+      render: (pValue: ChangePointAnnotation['p_value']) => (
+        <span style={isDashboardEmbedding ? lineClampStyle : undefined}>
+          {pValue !== undefined ? pValue.toPrecision(3) : '-'}
+        </span>
+      ),
+      width: isDashboardEmbedding ? '120px' : '15%',
     },
     ...(fieldConfig.splitField
       ? [
@@ -201,11 +219,13 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
             id: 'groupValue',
             'data-test-subj': 'aiopsChangePointGroupValue',
             field: 'group.value',
-            name: i18n.translate('xpack.aiops.changePointDetection.fieldValueColumn', {
-              defaultMessage: 'Field value',
-            }),
+            name: fieldConfig.splitField,
             truncateText: false,
             sortable: true,
+            width: isDashboardEmbedding ? '120px' : '15%',
+            render: (value: string) => (
+              <span style={isDashboardEmbedding ? lineClampStyle : undefined}>{value}</span>
+            ),
           },
           ...(hasActions
             ? [
@@ -297,7 +317,7 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
 
   return (
     <EuiInMemoryTable<ChangePointAnnotation>
-      tableLayout="auto"
+      tableLayout={isDashboardEmbedding ? 'auto' : 'fixed'}
       tableCaption={i18n.translate('xpack.aiops.changePointDetection.resultsTableCaption', {
         defaultMessage: 'Change point detection results',
       })}

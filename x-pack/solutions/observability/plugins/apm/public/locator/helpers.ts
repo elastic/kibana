@@ -12,6 +12,15 @@ import { environmentRt } from '../../common/environment_rt';
 import { apmRouter } from '../components/routing/apm_route_config';
 import type { TimePickerTimeDefaults } from '../components/shared/date_picker/typings';
 
+const SERVICE_OVERVIEW_TAB_PATHS = {
+  logs: '/services/{serviceName}/logs',
+  metrics: '/services/{serviceName}/metrics',
+  traces: '/services/{serviceName}/transactions',
+  transactions: '/services/{serviceName}/transactions/view',
+  errors: '/services/{serviceName}/errors',
+  default: '/services/{serviceName}/overview',
+} as const;
+
 export const APMLocatorPayloadValidator = t.union([
   t.type({ serviceName: t.undefined }),
   t.intersection([
@@ -32,6 +41,7 @@ export const APMLocatorPayloadValidator = t.union([
         errors: null,
         transactions: null,
       }),
+      errorGroupId: t.string,
     }),
     t.type({
       query: t.intersection([
@@ -57,6 +67,7 @@ export function getPathForServiceDetail(
   }
 ) {
   const decodedPayload = APMLocatorPayloadValidator.decode(payload);
+
   if (!isRight(decodedPayload)) {
     throw new Error(PathReporter.report(decodedPayload).join('\n'));
   }
@@ -76,10 +87,8 @@ export function getPathForServiceDetail(
     });
   }
 
-  let path;
   if (payload.dashboardId !== undefined) {
-    const apmPath = '/services/{serviceName}/dashboards';
-    path = apmRouter.link(apmPath, {
+    return apmRouter.link('/services/{serviceName}/dashboards', {
       path: {
         serviceName: payload.serviceName,
       },
@@ -89,28 +98,27 @@ export function getPathForServiceDetail(
         dashboardId: payload.dashboardId,
       },
     });
-    return path;
-  } else {
-    const mapObj = {
-      logs: '/services/{serviceName}/logs',
-      metrics: '/services/{serviceName}/metrics',
-      traces: '/services/{serviceName}/transactions',
-      transactions: '/services/{serviceName}/transactions/view',
-      errors: '/services/{serviceName}/errors',
-      default: '/services/{serviceName}/overview',
-    } as const;
-    const apmPath = mapObj[payload.serviceOverviewTab || 'default'];
+  }
 
-    const query = {
-      ...defaultQueryParams,
-      ...payload.query,
-    };
+  const query = {
+    ...defaultQueryParams,
+    ...payload.query,
+  };
 
-    path = apmRouter.link(apmPath, {
-      path: { serviceName: payload.serviceName },
+  if (payload.serviceOverviewTab === 'errors' && payload.errorGroupId) {
+    return apmRouter.link('/services/{serviceName}/errors/{groupId}', {
+      path: {
+        serviceName: payload.serviceName,
+        groupId: payload.errorGroupId,
+      },
       query,
     });
   }
 
-  return path;
+  const apmPath = SERVICE_OVERVIEW_TAB_PATHS[payload.serviceOverviewTab || 'default'];
+
+  return apmRouter.link(apmPath, {
+    path: { serviceName: payload.serviceName },
+    query,
+  });
 }

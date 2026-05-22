@@ -9,7 +9,7 @@ import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import type { MetricsSourceConfiguration } from '../../../../common/metrics_sources';
 import type { TopNodesRequest } from '../../../../common/http_api/overview_api';
-import { TIMESTAMP_FIELD } from '../../../../common/constants';
+import { DEFAULT_SCHEMA, TIMESTAMP_FIELD } from '../../../../common/constants';
 
 const getNodeFilter = (schema: DataSchemaFormat) => {
   const inventoryModel = findInventoryModel('host');
@@ -205,7 +205,7 @@ const getSemconvAggs = (options: TopNodesRequest) => ({
 export const createTopNodesQuery = (
   options: TopNodesRequest,
   source: MetricsSourceConfiguration,
-  schema: DataSchemaFormat = 'ecs'
+  schema: DataSchemaFormat = DEFAULT_SCHEMA
 ) => {
   const isEcs = schema === 'ecs';
 

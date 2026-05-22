@@ -17,7 +17,7 @@ describe('validateSigEventsTuningConfig', () => {
       diverse_ratio: 0.4,
       max_excluded_features_in_prompt: 10,
       max_entity_filters: 5,
-      semantic_min_score: 50,
+      semantic_min_score: 0.15,
       rrf_rank_constant: 20,
     });
     expect(errors).toEqual([]);

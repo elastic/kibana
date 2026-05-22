@@ -24,6 +24,7 @@ const userSettingsDataPath = 'userSettings';
  */
 export interface InternalUserSettingsServiceSetup {
   getUserSettingDarkMode: (request: KibanaRequest) => Promise<DarkModeValue | undefined>;
+  getUserSettingLocale: (request: KibanaRequest) => Promise<string | undefined>;
 }
 
 /**
@@ -42,6 +43,10 @@ export class UserSettingsService {
       getUserSettingDarkMode: async (request: KibanaRequest) => {
         const userSettings = await this.getSettings(request);
         return getUserSettingDarkMode(userSettings);
+      },
+      getUserSettingLocale: async (request: KibanaRequest) => {
+        const userSettings = await this.getSettings(request);
+        return getUserSettingLocale(userSettings);
       },
     };
   }
@@ -78,4 +83,8 @@ const getUserSettingDarkMode = (
     return darkMode.toUpperCase() === 'SYSTEM' ? 'system' : darkMode.toUpperCase() === 'DARK';
   }
   return undefined;
+};
+
+const getUserSettingLocale = (userSettings: Record<string, string>): string | undefined => {
+  return userSettings.locale || undefined;
 };

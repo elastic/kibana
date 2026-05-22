@@ -9,6 +9,7 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiBadge, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
+import { QUERY_TYPE_STATS } from '@kbn/streams-schema';
 import React, { useMemo } from 'react';
 import { SparkPlot } from '../../../../spark_plot';
 import { KnowledgeIndicatorActionsCell } from '../../../stream_detail_significant_events_view/knowledge_indicator_actions_cell';
@@ -19,7 +20,8 @@ import {
   TITLE_COLUMN_LABEL,
   EVENTS_COLUMN_LABEL,
   TYPE_COLUMN_LABEL,
-  QUERY_TYPE_LABEL,
+  MATCH_QUERY_TYPE_LABEL,
+  STATS_QUERY_TYPE_LABEL,
   STREAM_COLUMN_LABEL,
   ACTIONS_COLUMN_LABEL,
   VIEW_DETAILS_ARIA_LABEL,
@@ -108,7 +110,11 @@ export const useKnowledgeIndicatorsColumns = ({
               </EuiBadge>
             );
           }
-          return <EuiBadge color="hollow">{QUERY_TYPE_LABEL}</EuiBadge>;
+          return (
+            <EuiBadge color="hollow">
+              {ki.query.type === QUERY_TYPE_STATS ? STATS_QUERY_TYPE_LABEL : MATCH_QUERY_TYPE_LABEL}
+            </EuiBadge>
+          );
         },
       },
       {

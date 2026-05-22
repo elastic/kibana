@@ -46,9 +46,14 @@ export const createIndexSyncService = ({
 
   const plainIndexSync = async (sources: SyncSourceEntry[]) => {
     await sourcesSyncService.syncBySourceIds({
-      descriptorClient,
       sources,
-      process: async (source, entityStoreEntityIdsByType, correlationMap, watchlistsByEuid) => {
+      process: async (
+        source,
+        entityStoreEntityIdsByType,
+        correlationMap,
+        watchlistsByEuid,
+        pageRange
+      ) => {
         const entities = await updateDetectionService.updateDetection(
           source,
           entityStoreEntityIdsByType,
@@ -56,7 +61,12 @@ export const createIndexSyncService = ({
           watchlistsByEuid
         );
         const currentEuids = entities.map((e) => e.euid);
-        await deletionDetectionService.deletionDetection(source, currentEuids, watchlistsByEuid);
+        await deletionDetectionService.deletionDetection(
+          source,
+          currentEuids,
+          watchlistsByEuid,
+          pageRange
+        );
       },
     });
   };

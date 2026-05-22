@@ -93,9 +93,16 @@ const DataQualityComponent: React.FC = () => {
     }
   }, [isILMAvailable]);
 
+  /**
+   * Merges the detection alerts index with sourcerer / data view index patterns for the ECS Data Quality panel.
+   * Deduplicates when the same pattern (e.g. `.alerts-security.alerts-default`) appears as `signalIndexName` and again in `selectedPatterns`.
+   */
   const alertsAndSelectedPatterns = useMemo(
-    () =>
-      signalIndexName != null ? [signalIndexName, ...selectedPatterns] : [...selectedPatterns],
+    () => [
+      ...new Set(
+        signalIndexName != null ? [signalIndexName, ...selectedPatterns] : selectedPatterns
+      ),
+    ],
     [selectedPatterns, signalIndexName]
   );
 

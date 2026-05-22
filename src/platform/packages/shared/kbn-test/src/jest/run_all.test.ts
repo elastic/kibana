@@ -18,11 +18,40 @@ const mockLog = {
 
 jest.mock('getopts', () => jest.fn());
 
-jest.mock('fs', () => ({
-  promises: {
-    mkdir: jest.fn().mockResolvedValue(undefined),
-    writeFile: jest.fn().mockResolvedValue(undefined),
-  },
+jest.mock('fs', () => {
+  const { EventEmitter: EE } = jest.requireActual('events');
+  // Minimal createWriteStream/createReadStream stubs: emit 'finish'/'end'
+  // synchronously enough for the run_all drain logic to proceed.
+  const makeWriteStream = () => {
+    const s: any = new EE();
+    s.write = jest.fn().mockReturnValue(true);
+    s.end = jest.fn(() => {
+      s.closed = true;
+      process.nextTick(() => s.emit('finish'));
+    });
+    s.closed = false;
+    return s;
+  };
+  const makeReadStream = () => {
+    const s: any = new EE();
+    s.pipe = jest.fn((dest: any) => dest);
+    process.nextTick(() => s.emit('end'));
+    return s;
+  };
+  return {
+    promises: {
+      mkdir: jest.fn().mockResolvedValue(undefined),
+      writeFile: jest.fn().mockResolvedValue(undefined),
+      unlink: jest.fn().mockResolvedValue(undefined),
+    },
+    createWriteStream: jest.fn(makeWriteStream),
+    createReadStream: jest.fn(makeReadStream),
+  };
+});
+
+// `stream/promises` pipeline() expects a real readable; provide a noop that resolves.
+jest.mock('stream/promises', () => ({
+  pipeline: jest.fn().mockResolvedValue(undefined),
 }));
 
 jest.mock('@kbn/repo-info', () => ({
@@ -338,7 +367,9 @@ describe('run_all.ts', () => {
         // Expected due to process.exit mock
       });
 
-      // Simulate process output
+      // Simulate process output. Output is captured to a per-config temp file
+      // and streamed back to process.stdout on exit (mocked); we just verify
+      // the Buildkite section header is emitted via log.write.
       process.nextTick(() => {
         mockProcess.stdout.emit('data', Buffer.from('Test output from stdout'));
         mockProcess.stderr.emit('data', Buffer.from('Test output from stderr'));
@@ -347,10 +378,7 @@ describe('run_all.ts', () => {
 
       await runPromise;
 
-      // Verify that output was captured and written (via log.write in Buildkite section)
-      expect(mockLog.write).toHaveBeenCalledWith(
-        expect.stringContaining('Test output from stdout')
-      );
+      expect(mockLog.write).toHaveBeenCalledWith(expect.stringMatching(/--- ✅ .*\.js \(\d+s\)\n/));
     });
 
     describe('logging and reporting', () => {

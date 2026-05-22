@@ -56,6 +56,7 @@ export const PercentileSelectablePopover = memo((props: Props) => {
 
   return (
     <EuiPopover
+      aria-label={iconButtonTitle}
       button={
         <EuiButtonIcon
           iconType="gear"

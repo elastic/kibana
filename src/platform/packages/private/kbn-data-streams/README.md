@@ -106,8 +106,12 @@ This approach works across all backing indices in the data stream, unlike Elasti
 
 All CRUD operations (`create`, `search`) accept an optional `space` parameter:
 
-* **When provided**: Documents are space-bound. IDs are prefixed as `{space}::{id}` (e.g. `myspace::abc123`). Documents are decorated with `kibana.space_ids: [space]`. Searches are filtered to that space. The system property `kibana.space_ids` is stripped from responses.
-* **When undefined**: Documents are space-agnostic. No ID prefixing or `kibana.space_ids` decoration. Searches return only space-agnostic documents. IDs containing the `::` separator are rejected (reserved for system use).
+* **When provided** (including `'default'`): Documents are space-bound. IDs are prefixed as `{space}::{id}` (e.g. `myspace::abc123`, `default::abc123`). Documents are decorated with `kibana.space_ids: [space]`. Searches are filtered strictly to documents belonging to that space. The system property `kibana.space_ids` is stripped from `_source` in all responses.
+* **When undefined**: Documents are space-agnostic. No ID prefixing or `kibana.space_ids` decoration. Searches return only space-agnostic documents (those without `kibana.space_ids`). IDs containing the `::` separator are rejected (reserved for system use).
+
+**Important distinctions:**
+* `space: undefined` and `space: 'default'` are **not** equivalent. Space-agnostic documents (created without a space) are **not** returned when searching with `space: 'default'`, and vice versa. Teams that need both during a migration from space-agnostic to space-aware mode should issue two separate queries.
+* `kibana.space_ids` is a system-managed field. It is stored in Elasticsearch but stripped from all `search` responses — callers do not need to account for it in their document types.
 
 Data streams can contain both space-bound and space-agnostic documents. The package does not handle RBAC; higher-level repositories should wrap these APIs for access control.
 

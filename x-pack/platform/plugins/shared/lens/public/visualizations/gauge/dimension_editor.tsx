@@ -160,14 +160,19 @@ export function GaugeDimensionEditor(
                     'Places ticks on each band border instead of distributing them evenly',
                 })}
                 condition={true}
-                delay="regular"
               >
                 <span>
                   {i18n.translate('xpack.lens.shared.ticksPositionOptions', {
                     defaultMessage: 'Ticks on bands',
                   })}
 
-                  <EuiIcon type="question" color="subdued" size="s" className="eui-alignTop" />
+                  <EuiIcon
+                    type="question"
+                    color="subdued"
+                    size="s"
+                    className="eui-alignTop"
+                    aria-hidden={true}
+                  />
                 </span>
               </TooltipWrapper>
             }

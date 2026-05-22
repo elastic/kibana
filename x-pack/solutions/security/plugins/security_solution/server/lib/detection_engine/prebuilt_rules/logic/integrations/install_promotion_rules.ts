@@ -16,7 +16,7 @@ import { upgradePrebuiltRules } from '../rule_objects/upgrade_prebuilt_rules';
 import type {
   RuleBootstrapError,
   RuleBootstrapResults,
-} from '../../../../../../common/api/detection_engine/prebuilt_rules/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.gen';
+} from '../../../../../../common/api/detection_engine/prebuilt_rules/bootstrap_ease_rules/bootstrap_ease_rules.gen';
 import { getErrorMessage } from '../../../../../utils/error_helpers';
 import type { EndpointInternalFleetServicesInterface } from '../../../../../endpoint/services/fleet';
 import { PROMOTION_RULE_TAGS } from '../../../../../../common/constants';

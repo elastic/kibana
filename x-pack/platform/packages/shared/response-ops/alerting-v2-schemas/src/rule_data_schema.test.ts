@@ -10,7 +10,12 @@ import {
   ARTIFACT_VALUE_LIMITS,
   RUNBOOK_ARTIFACT_TYPE,
 } from '@kbn/alerting-v2-constants';
-import { createRuleDataSchema, updateRuleDataSchema } from './rule_data_schema';
+import {
+  createRuleDataBaseSchema,
+  createRuleDataSchema,
+  updateRuleDataSchema,
+  IMMUTABLE_RULE_FIELDS,
+} from './rule_data_schema';
 
 const validCreateData = {
   kind: 'alert',
@@ -149,25 +154,46 @@ describe('createRuleDataSchema', () => {
   });
 
   describe('metadata.tags', () => {
-    it('rejects tags exceeding 100 items', () => {
+    it('rejects tags exceeding 20 items', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
         metadata: {
           name: 'test rule',
-          tags: Array.from({ length: 101 }, (_, i) => `label-${i}`),
+          tags: Array.from({ length: 21 }, (_, i) => `label-${i}`),
         },
       });
 
       expect(result.success).toBe(false);
     });
 
-    it('rejects a label exceeding 64 characters', () => {
+    it('accepts up to 20 tags', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
-        metadata: { name: 'test rule', tags: ['a'.repeat(65)] },
+        metadata: {
+          name: 'test rule',
+          tags: Array.from({ length: 20 }, (_, i) => `label-${i}`),
+        },
+      });
+
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects a label exceeding 128 characters', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        metadata: { name: 'test rule', tags: ['a'.repeat(129)] },
       });
 
       expect(result.success).toBe(false);
+    });
+
+    it('accepts a label at the 128 character limit', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        metadata: { name: 'test rule', tags: ['a'.repeat(128)] },
+      });
+
+      expect(result.success).toBe(true);
     });
   });
 
@@ -734,9 +760,9 @@ describe('updateRuleDataSchema', () => {
       expect(result.success).toBe(false);
     });
 
-    it('rejects more than 100 tags', () => {
+    it('rejects more than 20 tags', () => {
       const result = updateRuleDataSchema.safeParse({
-        metadata: { tags: Array.from({ length: 101 }, (_, i) => `label-${i}`) },
+        metadata: { tags: Array.from({ length: 21 }, (_, i) => `label-${i}`) },
       });
 
       expect(result.success).toBe(false);
@@ -889,5 +915,45 @@ describe('updateRuleDataSchema', () => {
 
       expect(result.success).toBe(false);
     });
+  });
+});
+
+/**
+ * These tests are the safety net for {@link IMMUTABLE_RULE_FIELDS}. They keep
+ * `upsertRule` (PUT — rejects mutation) and `buildUpdateRuleAttributes`
+ * (PATCH — silently preserves) honest as the rule schema evolves.
+ */
+describe('rule field immutability classification', () => {
+  it('IMMUTABLE_RULE_FIELDS only references real top-level schema keys', () => {
+    const schemaKeys = new Set<string>(Object.keys(createRuleDataBaseSchema.shape));
+    const orphans = IMMUTABLE_RULE_FIELDS.filter((field) => !schemaKeys.has(field));
+
+    expect(orphans).toEqual([]);
+  });
+
+  // Tripwire: when a new top-level field is added to the create-rule schema,
+  // this snapshot fails. Update the snapshot if the field is meant to be
+  // mutable, or add it to IMMUTABLE_RULE_FIELDS if it is meant to be
+  // immutable. Either way, the change is visible in the PR diff so reviewers
+  // can confirm the classification.
+  it('matches the snapshot of mutable top-level rule fields', () => {
+    const immutable = new Set<string>(IMMUTABLE_RULE_FIELDS);
+    const mutable = Object.keys(createRuleDataBaseSchema.shape)
+      .filter((key) => !immutable.has(key))
+      .sort();
+
+    expect(mutable).toMatchInlineSnapshot(`
+      Array [
+        "artifacts",
+        "evaluation",
+        "grouping",
+        "metadata",
+        "no_data",
+        "recovery_policy",
+        "schedule",
+        "state_transition",
+        "time_field",
+      ]
+    `);
   });
 });

@@ -8,5 +8,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// Quick check that bootstrap has likely been run before loading linked packages
+var fs = require('fs');
+var path = require('path');
+
+var integrityFile = path.resolve(__dirname, '..', 'node_modules', '.yarn-integrity');
+if (!fs.existsSync(integrityFile)) {
+  console.error('\nDependencies not installed. Run `yarn kbn bootstrap` first.\n');
+  process.exit(1);
+}
+
 require('@kbn/setup-node-env');
 require('../src/dev/run_check');

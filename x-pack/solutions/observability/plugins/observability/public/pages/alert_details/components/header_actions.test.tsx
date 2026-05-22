@@ -122,13 +122,15 @@ describe('Header Actions', () => {
 
       expect(attachments).toEqual([
         {
-          alertId: mockAlertUuid,
-          index: 'alert-index',
-          rule: {
-            id: mockRuleId,
-            name: mockRuleName,
+          type: 'observability.alert',
+          attachmentId: mockAlertUuid,
+          metadata: {
+            index: 'alert-index',
+            rule: {
+              id: mockRuleId,
+              name: mockRuleName,
+            },
           },
-          type: 'alert',
         },
       ]);
     });

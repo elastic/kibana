@@ -8,6 +8,9 @@
  */
 
 import React from 'react';
+import { render, screen } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
+import { EuiProvider } from '@elastic/eui';
 import { ManageData } from './manage_data';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import type { ApplicationStart } from '@kbn/core/public';
@@ -112,5 +115,35 @@ describe('ManageData', () => {
       />
     );
     expect(component).toMatchSnapshot();
+  });
+
+  test('renders dev tools link when capability is enabled', () => {
+    render(
+      <EuiProvider>
+        <I18nProvider>
+          <ManageData
+            addBasePath={addBasePathMock}
+            application={applicationStartMock}
+            features={mockFeatures}
+          />
+        </I18nProvider>
+      </EuiProvider>
+    );
+    expect(screen.getByTestId('homeDevTools')).toBeInTheDocument();
+  });
+
+  test('does not render dev tools link when capability is disabled', () => {
+    render(
+      <EuiProvider>
+        <I18nProvider>
+          <ManageData
+            addBasePath={addBasePathMock}
+            application={applicationStartMockRestricted}
+            features={mockFeatures}
+          />
+        </I18nProvider>
+      </EuiProvider>
+    );
+    expect(screen.queryByTestId('homeDevTools')).not.toBeInTheDocument();
   });
 });

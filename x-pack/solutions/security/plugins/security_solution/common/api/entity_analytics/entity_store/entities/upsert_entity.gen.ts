@@ -14,30 +14,34 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { BooleanFromString } from '@kbn/zod-helpers/v4';
 
 import { EntityType } from '../common.gen';
 import { Entity } from './common.gen';
 
+export const UpsertEntityRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * When true, allows updating protected fields.
+     */
+    force: BooleanFromString.optional().default(false),
+  })
+);
 export type UpsertEntityRequestQuery = z.infer<typeof UpsertEntityRequestQuery>;
-export const UpsertEntityRequestQuery = z.object({
-  /**
-   * When true, allows updating protected fields.
-   */
-  force: BooleanFromString.optional().default(false),
-});
 export type UpsertEntityRequestQueryInput = z.input<typeof UpsertEntityRequestQuery>;
 
+export const UpsertEntityRequestParams = lazySchema(() =>
+  z.object({
+    entityType: EntityType,
+  })
+);
 export type UpsertEntityRequestParams = z.infer<typeof UpsertEntityRequestParams>;
-export const UpsertEntityRequestParams = z.object({
-  entityType: EntityType,
-});
 export type UpsertEntityRequestParamsInput = z.input<typeof UpsertEntityRequestParams>;
 
+export const UpsertEntityRequestBody = lazySchema(() => Entity);
 export type UpsertEntityRequestBody = z.infer<typeof UpsertEntityRequestBody>;
-export const UpsertEntityRequestBody = Entity;
 export type UpsertEntityRequestBodyInput = z.input<typeof UpsertEntityRequestBody>;
 
+export const UpsertEntityResponse = lazySchema(() => Entity);
 export type UpsertEntityResponse = z.infer<typeof UpsertEntityResponse>;
-export const UpsertEntityResponse = Entity;

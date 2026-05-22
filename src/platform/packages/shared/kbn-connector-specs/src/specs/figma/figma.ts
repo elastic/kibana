@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
 import type * as Figma from './types';
 const FIGMA_API_BASE = 'https://api.figma.com';
@@ -67,21 +67,23 @@ export const FigmaConnector: ConnectorSpec = {
         'only pages, depth=2 returns pages and top-level objects). Optionally pass nodeIds to ' +
         'retrieve only specific nodes and their subtrees. The response includes the document tree, ' +
         'a components map, and a styles map.',
-      input: z.object({
-        fileKey: z
-          .string()
-          .describe('File key from the Figma file URL (e.g. from figma.com/file/FILE_KEY/...)'),
-        nodeIds: z
-          .string()
-          .optional()
-          .describe('Comma-separated node IDs to retrieve specific nodes (e.g. "1:2,1:3")'),
-        depth: z
-          .number()
-          .optional()
-          .describe(
-            'Tree depth: 1 = pages only, 2 = pages + top-level objects; omit for full tree'
-          ),
-      }),
+      input: lazySchema(() =>
+        z.object({
+          fileKey: z
+            .string()
+            .describe('File key from the Figma file URL (e.g. from figma.com/file/FILE_KEY/...)'),
+          nodeIds: z
+            .string()
+            .optional()
+            .describe('Comma-separated node IDs to retrieve specific nodes (e.g. "1:2,1:3")'),
+          depth: z
+            .number()
+            .optional()
+            .describe(
+              'Tree depth: 1 = pages only, 2 = pages + top-level objects; omit for full tree'
+            ),
+        })
+      ),
       handler: async (ctx, input: Figma.GetFileInput) => {
         const params: Record<string, string | number> = {};
         if (input.depth !== undefined) {
@@ -112,24 +114,26 @@ export const FigmaConnector: ConnectorSpec = {
         'temporary image URLs (valid for 30 days). Supports PNG, JPG, SVG, and PDF formats. ' +
         'Use scale (0.01 to 4) to control resolution. Node IDs can be found in Figma URLs ' +
         '(?node-id=1:2) or from the getFile action output.',
-      input: z.object({
-        fileKey: z.string().describe('File key from the Figma file URL'),
-        nodeIds: z
-          .string()
-          .describe(
-            'Comma-separated node IDs to render (e.g. "1:2,1:3"); find in URL ?node-id= or get_file output'
-          ),
-        format: z
-          .enum(['png', 'jpg', 'svg', 'pdf'])
-          .default('png')
-          .describe('Image format (default: png)'),
-        scale: z
-          .number()
-          .min(0.01)
-          .max(4)
-          .default(1)
-          .describe('Scale factor between 0.01 and 4 (default: 1)'),
-      }),
+      input: lazySchema(() =>
+        z.object({
+          fileKey: z.string().describe('File key from the Figma file URL'),
+          nodeIds: z
+            .string()
+            .describe(
+              'Comma-separated node IDs to render (e.g. "1:2,1:3"); find in URL ?node-id= or get_file output'
+            ),
+          format: z
+            .enum(['png', 'jpg', 'svg', 'pdf'])
+            .default('png')
+            .describe('Image format (default: png)'),
+          scale: z
+            .number()
+            .min(0.01)
+            .max(4)
+            .default(1)
+            .describe('Scale factor between 0.01 and 4 (default: 1)'),
+        })
+      ),
       handler: async (ctx, input: Figma.RenderNodesInput) => {
         const params: Record<string, string | number> = { ids: input.nodeIds };
         if (input.format) {
@@ -153,11 +157,13 @@ export const FigmaConnector: ConnectorSpec = {
         'List all files in a Figma project. Returns file names, keys, thumbnail URLs, and ' +
         'last modified dates. Use the file keys from the results with the getFile or ' +
         'renderNodes actions to inspect individual files.',
-      input: z.object({
-        projectId: z
-          .string()
-          .describe('Figma project ID (from list with type teamProjects or project URL)'),
-      }),
+      input: lazySchema(() =>
+        z.object({
+          projectId: z
+            .string()
+            .describe('Figma project ID (from list with type teamProjects or project URL)'),
+        })
+      ),
       handler: async (ctx, input: Figma.ListProjectFilesInput) => {
         const response = await ctx.client.get(
           `${FIGMA_API_BASE}/v1/projects/${input.projectId}/files`,
@@ -176,20 +182,22 @@ export const FigmaConnector: ConnectorSpec = {
         'to browse files. Provide either teamId (from the team page URL, e.g. figma.com/team/123/Team-Name) ' +
         'or a full Figma team page url from which the team ID will be extracted. If neither is ' +
         'available in the conversation context, ask the user to provide one.',
-      input: z.object({
-        teamId: z
-          .string()
-          .optional()
-          .describe(
-            'Figma team ID from the team page URL. If you do not have it, use url instead or ask the user to paste the team page URL (e.g. figma.com/team/123/Team-Name).'
-          ),
-        url: z
-          .string()
-          .optional()
-          .describe(
-            'Figma team page URL. Provide this if teamId is not available; the team ID will be extracted. If neither teamId nor url is provided, ask the user to paste the team page URL.'
-          ),
-      }),
+      input: lazySchema(() =>
+        z.object({
+          teamId: z
+            .string()
+            .optional()
+            .describe(
+              'Figma team ID from the team page URL. If you do not have it, use url instead or ask the user to paste the team page URL (e.g. figma.com/team/123/Team-Name).'
+            ),
+          url: z
+            .string()
+            .optional()
+            .describe(
+              'Figma team page URL. Provide this if teamId is not available; the team ID will be extracted. If neither teamId nor url is provided, ask the user to paste the team page URL.'
+            ),
+        })
+      ),
       handler: async (ctx, input: Figma.ListTeamProjectsInput) => {
         let teamId = input.teamId;
         if (teamId === undefined && input.url !== undefined) {
@@ -219,7 +227,7 @@ export const FigmaConnector: ConnectorSpec = {
         'Get the currently authenticated Figma user. Returns the user ID, handle, email, ' +
         'and profile image URL for the API credentials in use. Useful for verifying which ' +
         'Figma account is connected.',
-      input: z.object({}),
+      input: lazySchema(() => z.object({})),
       handler: async (ctx): Promise<Figma.WhoAmIResult> => {
         const response = await ctx.client.get(`${FIGMA_API_BASE}/v1/me`);
         const data = response.data as Figma.WhoAmIResult;

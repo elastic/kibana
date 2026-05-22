@@ -18,6 +18,7 @@ import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
 import { createServerRoute } from '../create_server_route';
 import { StatusError } from '../../lib/streams/errors/status_error';
 import { generateArchive, parseArchive } from '../../lib/content';
+import { exportContentRequest } from '../../oas_examples';
 import {
   prepareStreamsForExport,
   prepareStreamsForImport,
@@ -40,10 +41,26 @@ const exportContentRoute = createServerRoute({
       since: '9.1.0',
       stability: 'experimental',
     },
+    oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {
+              exportContent: { value: exportContentRequest },
+            },
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'Content pack archive for the stream.',
+        },
+      },
+    }),
   },
   params: z.object({
     path: z.object({
-      name: z.string(),
+      name: z.string().describe('The name of the stream to export content from.'),
     }),
     body: z.object({
       name: z.string(),
@@ -155,10 +172,31 @@ const importContentRoute = createServerRoute({
       maxBytes: MAX_CONTENT_PACK_SIZE_BYTES,
       output: 'stream',
     },
+    oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'multipart/form-data': {
+            examples: {
+              importContent: {
+                value: {
+                  include: JSON.stringify({ objects: { all: {} } }),
+                  content: '<binary zip archive>',
+                },
+              },
+            },
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'Content was imported into the stream successfully.',
+        },
+      },
+    }),
   },
   params: z.object({
     path: z.object({
-      name: z.string(),
+      name: z.string().describe('The name of the stream to import content into.'),
     }),
     body: z.object({
       include: z

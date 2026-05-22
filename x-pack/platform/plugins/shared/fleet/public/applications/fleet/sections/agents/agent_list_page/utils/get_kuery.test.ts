@@ -18,54 +18,56 @@ describe('getKuery', () => {
   const inactiveStatuses = ['unhealthy', 'offline', 'inactive', 'unenrolled'];
 
   it('should return a kuery with base search', () => {
-    expect(getKuery({ search })).toEqual('base search');
+    expect(getKuery({ search })).toEqual('(base search) and NOT type:OPAMP');
   });
 
   it('should return a kuery with selected tags', () => {
     expect(getKuery({ selectedTags })).toEqual(
-      'fleet-agents.tags : ("tag_1" or "tag_2" or "tag_3")'
+      '(fleet-agents.tags : ("tag_1" or "tag_2" or "tag_3")) and NOT type:OPAMP'
     );
   });
   it('should return a kuery for no tags if selected', () => {
-    expect(getKuery({ selectedTags: noTags })).toEqual('((NOT fleet-agents.tags : (*)))');
+    expect(getKuery({ selectedTags: noTags })).toEqual(
+      '(((NOT fleet-agents.tags : (*)))) and NOT type:OPAMP'
+    );
   });
   it('should return a kuery for no tags and other tags when multiple are selected', () => {
     expect(getKuery({ selectedTags: [...noTags, ...selectedTags] })).toEqual(
-      '((NOT fleet-agents.tags : (*)) or fleet-agents.tags : ("tag_1" or "tag_2" or "tag_3"))'
+      '(((NOT fleet-agents.tags : (*)) or fleet-agents.tags : ("tag_1" or "tag_2" or "tag_3"))) and NOT type:OPAMP'
     );
   });
 
   it('should return a kuery with selected agent policies', () => {
     expect(getKuery({ selectedAgentPolicies })).toEqual(
-      'fleet-agents.policy_id : ("policy1" or "policy2" or "policy3")'
+      '(fleet-agents.policy_id : ("policy1" or "policy2" or "policy3")) and NOT type:OPAMP'
     );
   });
 
   it('should return a kuery with selected agent ids', () => {
     expect(getKuery({ selectedAgentIds })).toEqual(
-      'fleet-agents.agent.id : ("agent_id1" or "agent_id2")'
+      '(fleet-agents.agent.id : ("agent_id1" or "agent_id2")) and NOT type:OPAMP'
     );
   });
 
   it('should return a kuery with healthy selected status', () => {
     expect(getKuery({ selectedStatus: healthyStatuses })).toEqual(
-      'status:online or (status:updating or status:unenrolling or status:enrolling)'
+      '(status:online or (status:updating or status:unenrolling or status:enrolling)) and NOT type:OPAMP'
     );
   });
 
   it('should return a kuery with unhealthy selected status', () => {
     expect(getKuery({ selectedStatus: inactiveStatuses })).toEqual(
-      '(status:error or status:degraded) or status:offline or status:inactive or status:unenrolled'
+      '((status:error or status:degraded) or status:offline or status:inactive or status:unenrolled) and NOT type:OPAMP'
     );
   });
 
   it('should return a kuery with a combination of previous kueries', () => {
     expect(getKuery({ search, selectedTags, selectedStatus })).toEqual(
-      '((base search) and fleet-agents.tags : ("tag_1" or "tag_2" or "tag_3")) and (status:online or (status:error or status:degraded))'
+      '(((base search) and fleet-agents.tags : ("tag_1" or "tag_2" or "tag_3")) and (status:online or (status:error or status:degraded))) and NOT type:OPAMP'
     );
   });
 
-  it('should return empty string if nothing is passed', () => {
-    expect(getKuery({})).toEqual('');
+  it('should exclude OpAMP agents even when no filters are passed', () => {
+    expect(getKuery({})).toEqual('NOT type:OPAMP');
   });
 });

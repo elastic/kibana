@@ -1,0 +1,197 @@
+openapi: 3.0.0
+info:
+  title: Search Rules API endpoint
+  version: '1'
+paths:
+  /internal/detection_engine/rules/_search:
+    post:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: SearchRules
+      summary: Search detection rules with KQL filter, facet counts, and search_after pagination
+      description: Retrieve a paginated list of detection rules with KQL filter, facet counts, and search_after pagination.
+      tags:
+        - Rules API
+      requestBody:
+        required: true
+        content:
+          application/json:
+            examples:
+              paginatedDefaults:
+                summary: First page with default page size
+                value:
+                  page: 1
+                  per_page: 20
+              withFilterSortAndFacets:
+                summary: KQL filter, sort, free-text search, and facet counts
+                value:
+                  page: 1
+                  per_page: 50
+                  filter: 'alert.attributes.enabled:true'
+                  sort_field: 'name'
+                  sort_order: 'asc'
+                  search:
+                    term: 'powershell'
+                    mode: 'legacy'
+                  aggregations:
+                    counts:
+                      - 'tags'
+                      - 'enabled'
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                fields:
+                  type: array
+                  description: Restrict the response to only include the specified fields and necessary metadata.
+                  items:
+                    $ref: '../granular_rules/granular_rules_contract.schema.yaml#/components/schemas/SearchRulesField'
+                filter:
+                  type: string
+                  description: |
+                    KQL filter string.
+                aggregations:
+                  $ref: '../granular_rules/granular_rules_contract.schema.yaml#/components/schemas/SearchRulesAggregations'
+                search:
+                  $ref: '../granular_rules/granular_rules_contract.schema.yaml#/components/schemas/GranularRulesSearch'
+                sort_field:
+                  $ref: '../find_rules/find_rules_route.schema.yaml#/components/schemas/FindRulesSortField'
+                sort_order:
+                  $ref: '../../model/sorting.schema.yaml#/components/schemas/SortOrder'
+                page:
+                  type: integer
+                  minimum: 1
+                  default: 1
+                  description: Page number. Ignored when `search_after` is provided.
+                  example: 1
+                per_page:
+                  type: integer
+                  minimum: 0
+                  maximum: 10000
+                  default: 20
+                  description: Page size.
+                  example: 20
+                search_after:
+                  type: array
+                  minItems: 1
+                  description: |
+                    For pagination beyond elasticsearch's default 10,000 result window, requires `sort_field` and `sort_order`. When set, `page` is ignored.
+                  items:
+                    $ref: '#/components/schemas/SearchRulesSearchAfterItem'
+                gap_fill_statuses:
+                  type: array
+                  description: |
+                    Filter rules to specific gap fill statuses.
+                    When active, the result set is capped and `search_after` is not supported. Use
+                    offset pagination (`page` / `per_page`) instead.
+                  items:
+                    $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/GapFillStatus'
+                gaps_range_start:
+                  type: string
+                  description: Gap range start. 
+                gaps_range_end:
+                    type: string
+                    description: Gap range end.
+                gap_auto_fill_scheduler_id:
+                  type: string
+                  description: Gap auto fill scheduler ID used to determine gap fill status for rules
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              examples:
+                basicSearch:
+                  summary: Paginated response with facet counts and a search_after cursor
+                  value:
+                    page: 1
+                    perPage: 20
+                    total: 42
+                    data: []
+                    search_after:
+                      - 1700000000000
+                      - 'abcd'
+                    counts:
+                      tags:
+                        Windows: 12
+                        Linux: 7
+                      enabled:
+                        'true': 30
+                        'false': 12
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  page:
+                    type: integer
+                  perPage:
+                    type: integer
+                  total:
+                    type: integer
+                  data:
+                    type: array
+                    items:
+                      $ref: '../../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/RuleResponse'
+                  warnings:
+                    type: array
+                    items:
+                      $ref: '../../model/warning_schema.schema.yaml#/components/schemas/WarningSchema'
+                  search_after:
+                    type: array
+                    description: |
+                      Sort values of the last hit on this page, for use as `search_after` on the next
+                      request. Only included when deep pagination applies (offset
+                      at or past the default 10,000-result max) or the request used `search_after`.
+                    items:
+                      $ref: '#/components/schemas/SearchRulesSearchAfterItem'
+                  counts:
+                    $ref: '../granular_rules/granular_rules_contract.schema.yaml#/components/schemas/FacetCounts'
+                required:
+                  - page
+                  - perPage
+                  - total
+                  - data
+        '400':
+          description: |
+            Request validation failed (for example invalid KQL, incompatible sort and
+            `search_after`, or gap filter constraints).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchRulesValidationErrorResponse'
+              examples:
+                validationErrors:
+                  summary: Multiple validation failures
+                  value:
+                    message:
+                      - 'when "sort_order" and "sort_field" must exist together or not at all'
+                      - 'invalid KQL filter: expected end of input, but found unexpected character'
+                    status_code: 400
+components:
+  schemas:
+    SearchRulesValidationErrorResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - message
+        - status_code
+      properties:
+        message:
+          type: array
+          items:
+            type: string
+        status_code:
+          type: integer
+          enum:
+            - 400
+    SearchRulesSearchAfterItem:
+      description: |
+        One value in a `search_after` array. Elasticsearch sort values may be a
+        string, number, boolean, or null.
+      oneOf:
+        - type: string
+          nullable: true
+        - type: number
+          nullable: true
+        - type: boolean
+          nullable: true

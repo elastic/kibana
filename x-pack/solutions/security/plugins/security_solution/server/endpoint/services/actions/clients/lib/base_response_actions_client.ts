@@ -11,12 +11,12 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { CasesClient } from '@kbn/cases-plugin/server';
 import type { Logger } from '@kbn/logging';
 import { v4 as uuidv4 } from 'uuid';
-import { AttachmentType, ExternalReferenceStorageType } from '@kbn/cases-plugin/common';
-import type { CaseAttachments } from '@kbn/cases-plugin/public/types';
+import type { BulkCreateAttachmentsRequestV2 } from '@kbn/cases-plugin/common/types/api/attachment/v2';
 import { i18n } from '@kbn/i18n';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import { SECURITY_ENDPOINT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import type { MemoryDumpActionRequestBody } from '../../../../../../common/api/endpoint/actions/response_actions/memory_dump';
 import type { CustomScriptsRequestQueryParams } from '../../../../../../common/api/endpoint/custom_scripts/get_custom_scripts_route';
 import type { ResponseActionRequestTag } from '../../constants';
@@ -107,7 +107,6 @@ import type {
   CancelActionRequestBody,
 } from '../../../../../../common/api/endpoint';
 import { stringify } from '../../../../utils/stringify';
-import { CASE_ATTACHMENT_ENDPOINT_TYPE_ID } from '../../../../../../common/constants';
 import { EMPTY_COMMENT } from '../../../../utils/translations';
 
 const ELASTIC_RESPONSE_ACTION_MESSAGE = (
@@ -406,22 +405,18 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
 
     this.log.debug(() => `Updating cases:\n${stringify(allCases)}`);
 
-    const attachments: CaseAttachments = [
+    const targets = hosts.map(({ hostId: endpointId, hostname }) => ({
+      endpointId,
+      hostname,
+      agentType: this.agentType,
+    }));
+
+    const attachments: BulkCreateAttachmentsRequestV2 = [
       {
-        type: AttachmentType.externalReference,
-        externalReferenceId: actionId,
-        externalReferenceStorage: {
-          type: ExternalReferenceStorageType.elasticSearchDoc,
-        },
-        externalReferenceAttachmentTypeId: CASE_ATTACHMENT_ENDPOINT_TYPE_ID,
-        externalReferenceMetadata: {
-          targets: hosts.map(({ hostId: endpointId, hostname }) => {
-            return {
-              endpointId,
-              hostname,
-              agentType: this.agentType,
-            };
-          }),
+        type: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
+        attachmentId: actionId,
+        metadata: {
+          targets,
           command,
           comment: comment || EMPTY_COMMENT,
         },

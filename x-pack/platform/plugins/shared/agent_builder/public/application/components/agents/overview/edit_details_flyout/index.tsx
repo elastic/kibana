@@ -25,10 +25,12 @@ import {
 import { css } from '@emotion/react';
 import {
   AgentVisibility,
+  AGENT_BUILDER_UI_EBT,
   VISIBILITY_BADGE_COLOR,
   VISIBILITY_ICON,
   type AgentDefinition,
 } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { useAgentBuilderServices } from '../../../../hooks/use_agent_builder_service';
@@ -48,7 +50,6 @@ const { editDetails: flyoutLabels } = labels.agentOverview;
 interface EditDetailsFlyoutProps {
   agent: AgentDefinition;
   onClose: () => void;
-  isExperimentalFeaturesEnabled: boolean;
   canChangeVisibility: boolean;
   showWorkflowSection: boolean;
 }
@@ -56,7 +57,6 @@ interface EditDetailsFlyoutProps {
 export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
   agent,
   onClose,
-  isExperimentalFeaturesEnabled,
   canChangeVisibility,
   showWorkflowSection,
 }) => {
@@ -158,16 +158,16 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
           <div css={contentPadding}>
             <IdentificationSection />
 
-            <EuiHorizontalRule margin="l" />
+            <EuiHorizontalRule margin="xl" />
             <AccessSection canChangeVisibility={canChangeVisibility} />
 
-            <EuiHorizontalRule margin="l" />
+            <EuiHorizontalRule margin="xl" />
             <CustomizationSection showWorkflowSection={showWorkflowSection} />
 
-            <EuiHorizontalRule margin="l" />
+            <EuiHorizontalRule margin="xl" />
             <CustomInstructionsSection />
 
-            <EuiHorizontalRule margin="l" />
+            <EuiHorizontalRule margin="xl" />
             <TagsSection />
           </div>
         </EuiFlyoutBody>
@@ -175,7 +175,15 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={onClose} data-test-subj="editDetailsCancelButton">
+              <EuiButtonEmpty
+                onClick={onClose}
+                data-test-subj="editDetailsCancelButton"
+                {...getEbtProps({
+                  element: AGENT_BUILDER_UI_EBT.element.flyout,
+                  action: AGENT_BUILDER_UI_EBT.action.agentOverview.EDIT_FLYOUT_CANCEL,
+                  detail: AGENT_BUILDER_UI_EBT.entity.AGENT,
+                })}
+              >
                 {flyoutLabels.cancelButton}
               </EuiButtonEmpty>
             </EuiFlexItem>
@@ -186,6 +194,11 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
                 isLoading={updateMutation.isLoading}
                 isDisabled={!formState.isDirty}
                 data-test-subj="editDetailsSaveButton"
+                {...getEbtProps({
+                  element: AGENT_BUILDER_UI_EBT.element.flyout,
+                  action: AGENT_BUILDER_UI_EBT.action.agentOverview.EDIT_FLYOUT_SAVE,
+                  detail: AGENT_BUILDER_UI_EBT.entity.AGENT,
+                })}
               >
                 {flyoutLabels.saveButton}
               </EuiButton>

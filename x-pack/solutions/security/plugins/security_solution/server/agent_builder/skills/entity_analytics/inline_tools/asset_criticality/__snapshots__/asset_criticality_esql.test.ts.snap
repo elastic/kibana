@@ -4,7 +4,7 @@ exports[`assetCriticalityDynamicInlineToolHandler should modify additional conte
 "
         This is a set of rules that you must follow strictly:
         * The criticality value is stored in the field 'criticality_level'.,
-        * When searching the asset criticality of an entity of type 'host', you must **ALWAYS** use exact and entire filter: \\"'WHERE (NOT(\`host.id\` IS NULL) AND \`host.id\` != \\"\\" OR NOT(\`host.name\` IS NULL) AND \`host.name\` != \\"\\" OR NOT(\`host.hostname\` IS NULL) AND \`host.hostname\` != \\"\\")'\\""
+        * When searching the asset criticality of an entity of type 'host', you must **ALWAYS** use exact and entire filter: \\"'WHERE (NOT(\`host.id\` IS NULL) AND COALESCE(\`host.id\` != \\"\\", TRUE) OR NOT(\`host.name\` IS NULL) AND COALESCE(\`host.name\` != \\"\\", TRUE) OR NOT(\`host.hostname\` IS NULL) AND COALESCE(\`host.hostname\` != \\"\\", TRUE))'\\""
 `;
 
 exports[`assetCriticalityDynamicInlineToolHandler should return asset criticality message with ESQL query when asset criticality index exists 1`] = `

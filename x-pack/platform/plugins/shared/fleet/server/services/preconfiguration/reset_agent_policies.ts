@@ -20,7 +20,7 @@ import {
 import { agentPolicyService } from '../agent_policy';
 import { packagePolicyService } from '../package_policy';
 import { getAgentsByKuery, forceUnenrollAgent } from '../agents';
-import { listEnrollmentApiKeys, deleteEnrollmentApiKey } from '../api_keys';
+import { listEnrollmentApiKeys, deleteEnrollmentApiKeys } from '../api_keys';
 import type { AgentPolicy } from '../../types';
 import { AgentPolicyInvalidError } from '../../errors';
 
@@ -180,12 +180,12 @@ async function _deleteExistingData(
 
   if (enrollmentApiKeys.length > 0) {
     logger.info(`Deleting ${enrollmentApiKeys.length} enrollment api keys`);
-    await pMap(
-      enrollmentApiKeys,
-      (enrollmentKey) => deleteEnrollmentApiKey(esClient, enrollmentKey.id, true),
-      {
-        concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20,
-      }
+    await deleteEnrollmentApiKeys(
+      esClient,
+      enrollmentApiKeys.map((k) => k.id),
+      true,
+      undefined,
+      true
     );
   }
   logger.info(`Deleting ${existingPolicies.length} agent policies`);

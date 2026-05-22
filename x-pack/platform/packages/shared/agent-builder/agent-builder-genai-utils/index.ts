@@ -16,6 +16,7 @@ export {
   getFieldsFromFieldCaps,
   getIndexFields,
   type IndexFieldsResult,
+  type IndexFieldType,
   type MappingField,
 } from './tools/utils';
 export {
@@ -36,6 +37,8 @@ export {
   type IndexExplorerResponse,
   generateEsql,
   type GenerateEsqlResponse,
+  generateEsqlCompletion,
+  type GenerateEsqlCompletionResponse,
   relevanceSearch,
   type RelevanceSearchResponse,
   naturalLanguageSearch,
@@ -44,7 +47,8 @@ export {
   type TopSnippetsConfig,
 } from './tools';
 export {
-  buildVisualizationConfig,
-  getChartTypeSelectionPromptContent,
-  type VisualizationConfig,
-} from './tools/visualization';
+  resolveResourceForEsqlWithSamplingStats,
+  type ResolvedResourceWithSampling,
+  formatResourceWithSampledValues,
+} from './tools/utils/resources';
+export { type MappingFieldWithStats } from './tools/utils/sampling';

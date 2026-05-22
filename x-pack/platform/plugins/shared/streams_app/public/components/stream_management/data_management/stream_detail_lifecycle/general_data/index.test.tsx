@@ -93,8 +93,26 @@ jest.mock('./modal', () => ({
 }));
 
 jest.mock('./lifecycle_summary', () => ({
-  LifecycleSummary: (props: MockLifecycleSummaryProps) => {
-    mockLifecycleSummaryProps = props;
+  LifecycleSummary: () => {
+    // Keep this unit test focused on StreamDetailGeneralData + unsaved prompt wiring.
+    // We emulate the lifecycle flyout updating the shared preview state.
+    const { useLifecyclePreview } = jest.requireActual(
+      '../common/hooks/lifecycle_preview'
+    ) as typeof import('../common/hooks/lifecycle_preview');
+    const preview = useLifecyclePreview();
+
+    mockLifecycleSummaryProps = {
+      onFlyoutOpenChange: (isOpen: boolean) => {
+        preview.setIsActive(isOpen);
+        if (!isOpen) {
+          preview.setHasUnsavedChanges(false);
+        }
+      },
+      onFlyoutUnsavedChangesChange: (hasUnsavedChanges: boolean) => {
+        preview.setHasUnsavedChanges(hasUnsavedChanges);
+      },
+    };
+
     return <div data-test-subj="mockLifecycleSummary" />;
   },
 }));

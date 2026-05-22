@@ -60,7 +60,10 @@ export {
   TriggerSchema,
   getTriggerSchema,
   TriggerTypes,
+  WORKFLOW_EVENTS_VALUES_SET,
+  WorkflowEventsSchema,
   type TriggerType,
+  type WorkflowEventsValue,
 } from './spec/schema/triggers';
 
 // Export specific types that are commonly used

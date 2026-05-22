@@ -9,6 +9,7 @@
 
 export {
   getESQLAdHocDataview,
+  getESQLTimeFieldFromQuery,
   getIndexPatternFromESQLQuery,
   getSourceCommandFromESQLQuery,
   hasTransformationalCommand,
@@ -63,6 +64,7 @@ export {
   getJoinIndices,
   getTimeseriesIndices,
   getViews,
+  getDatasets,
   getInferenceEndpoints,
   getEditorExtensions,
   getProjectRoutingFromEsqlQuery,
@@ -70,7 +72,12 @@ export {
   hasTimeseriesInfoCommand,
   isComputedColumn,
   getQuerySummary,
+  buildRenameSourceFieldMap,
   getEsqlControls,
+  getAllEsqlControls,
+  convertFiltersToESQLExpression,
+  convertQueryToESQLExpression,
+  injectWhereClauseAfterSourceCommand,
   type ESQLStatsQueryMeta,
 } from './src';
 

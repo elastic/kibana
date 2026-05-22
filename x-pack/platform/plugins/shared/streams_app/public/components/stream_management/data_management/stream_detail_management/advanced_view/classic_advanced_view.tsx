@@ -8,11 +8,8 @@
 import React from 'react';
 import type { Streams } from '@kbn/streams-schema';
 import { EuiSpacer } from '@elastic/eui';
-import { StreamDescription } from '../../../../sig_events/stream_detail_systems/stream_description';
 import { DeleteStreamPanel } from './delete_stream';
-import { useStreamsPrivileges } from '../../../../../hooks/use_streams_privileges';
 import { UnmanagedElasticsearchAssets } from './unmanaged_elasticsearch_assets';
-import { useAIFeatures } from '../../../../../hooks/use_ai_features';
 
 export function ClassicAdvancedView({
   definition,
@@ -21,25 +18,10 @@ export function ClassicAdvancedView({
   definition: Streams.ClassicStream.GetResponse;
   refreshDefinition: () => void;
 }) {
-  const {
-    features: { significantEvents },
-  } = useStreamsPrivileges();
-  const aiFeatures = useAIFeatures();
-
   const isReplicated = definition.replicated === true;
 
   return (
     <>
-      {significantEvents?.enabled && significantEvents?.available ? (
-        <>
-          <StreamDescription
-            definition={definition}
-            refreshDefinition={refreshDefinition}
-            aiFeatures={aiFeatures}
-          />
-          <EuiSpacer />
-        </>
-      ) : null}
       {!isReplicated && (
         <>
           <UnmanagedElasticsearchAssets

@@ -7,9 +7,11 @@
 
 import React, { useCallback, useRef, useState } from 'react';
 import {
+  EuiAccordion,
   EuiBetaBadge,
   EuiButton,
   EuiCallOut,
+  EuiCode,
   EuiCodeBlock,
   EuiFieldText,
   EuiFlexGroup,
@@ -83,22 +85,44 @@ export const SetupPage: React.FC = () => {
 
         <EuiSpacer />
 
-        <EuiFlexGroup gutterSize="m" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiButton fill onClick={handleSetup} isLoading={isLoading}>
-              Generate credentials
-            </EuiButton>
-          </EuiFlexItem>
-          {setupData && (
-            <EuiFlexItem grow={false}>
-              <EuiButton onClick={() => formRef.current?.submit()} iconType="popout">
-                Connect local agent
-              </EuiButton>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
+        {!setupData && (
+          <EuiButton fill onClick={handleSetup} isLoading={isLoading}>
+            Generate credentials
+          </EuiButton>
+        )}
 
-        <EuiSpacer />
+        {setupData && (
+          <>
+            <EuiCallOut title="Credentials generated" color="success" iconType="check">
+              <p>
+                Your API key and connection details are ready. Click{' '}
+                <strong>Connect local agent</strong> to send them automatically to your local agent,
+                or copy them manually below.
+              </p>
+            </EuiCallOut>
+
+            <EuiSpacer />
+
+            <EuiFlexGroup alignItems="center" gutterSize="m">
+              <EuiFlexItem grow={false}>
+                <EuiButton fill onClick={() => formRef.current?.submit()} iconType="popout">
+                  Connect local agent
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+
+            <EuiSpacer size="s" />
+
+            <EuiText size="s" color="subdued">
+              <p>
+                The <strong>Connect local agent</strong> button will POST your credentials to{' '}
+                <EuiCode>{LOCAL_AGENT_URL}</EuiCode>. Make sure your agent is running.
+              </p>
+            </EuiText>
+
+            <EuiSpacer size="l" />
+          </>
+        )}
 
         {error && (
           <>
@@ -158,44 +182,52 @@ export const SetupPage: React.FC = () => {
               />
               <input type="hidden" name="model" value="kibana/default" />
             </form>
-            <EuiFlexGroup direction="column" gutterSize="m">
-              <EuiFlexItem>
-                <EuiFormRow label="Kibana URL" fullWidth>
-                  <EuiFieldText value={setupData.kibanaUrl} readOnly fullWidth />
-                </EuiFormRow>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiFormRow label="Elasticsearch URL" fullWidth>
-                  <EuiFieldText value={setupData.elasticsearchUrl} readOnly fullWidth />
-                </EuiFormRow>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiFormRow label="API Key (Base64)" fullWidth>
-                  <EuiCodeBlock language="text" paddingSize="s" isCopyable>
-                    {setupData.apiKeyEncoded}
-                  </EuiCodeBlock>
-                </EuiFormRow>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiCopy
-                  textToCopy={JSON.stringify(
-                    {
-                      kibanaUrl: setupData.kibanaUrl,
-                      elasticsearchUrl: setupData.elasticsearchUrl,
-                      apiKey: setupData.apiKeyEncoded,
-                    },
-                    null,
-                    2
-                  )}
-                >
-                  {(copy) => (
-                    <EuiButton onClick={copy} iconType="copy">
-                      Copy all as JSON
-                    </EuiButton>
-                  )}
-                </EuiCopy>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+
+            <EuiAccordion
+              id="connectionCredentials"
+              buttonContent="Connection credentials"
+              initialIsOpen={false}
+            >
+              <EuiSpacer />
+              <EuiFlexGroup direction="column" gutterSize="m">
+                <EuiFlexItem>
+                  <EuiFormRow label="Kibana URL" fullWidth>
+                    <EuiFieldText value={setupData.kibanaUrl} readOnly fullWidth />
+                  </EuiFormRow>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiFormRow label="Elasticsearch URL" fullWidth>
+                    <EuiFieldText value={setupData.elasticsearchUrl} readOnly fullWidth />
+                  </EuiFormRow>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiFormRow label="API Key (Base64)" fullWidth>
+                    <EuiCodeBlock language="text" paddingSize="s" isCopyable>
+                      {setupData.apiKeyEncoded}
+                    </EuiCodeBlock>
+                  </EuiFormRow>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiCopy
+                    textToCopy={JSON.stringify(
+                      {
+                        kibanaUrl: setupData.kibanaUrl,
+                        elasticsearchUrl: setupData.elasticsearchUrl,
+                        apiKey: setupData.apiKeyEncoded,
+                      },
+                      null,
+                      2
+                    )}
+                  >
+                    {(copy) => (
+                      <EuiButton onClick={copy} iconType="copy">
+                        Copy all as JSON
+                      </EuiButton>
+                    )}
+                  </EuiCopy>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiAccordion>
           </>
         )}
       </EuiPageTemplate.Section>

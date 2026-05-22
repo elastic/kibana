@@ -37,6 +37,23 @@ describe('transformRuleDomainToRule', () => {
     params: {},
   };
 
+  const snoozedInstances = [
+    {
+      instanceId: 'alert-1',
+      expiresAt: '2025-01-01T00:00:00.000Z',
+      conditions: [
+        { type: 'field_change' as const, field: 'kibana.alert.severity' },
+        { type: 'severity_equals' as const, value: 'info' as const },
+      ],
+      conditionOperator: 'any' as const,
+      snoozeSnapshot: {
+        'kibana.alert.severity': 'low',
+      },
+      snoozedAt: '2024-12-31T00:00:00.000Z',
+      snoozedBy: 'elastic',
+    },
+  ];
+
   const rule: RuleDomain<{}> = {
     id: 'test',
     enabled: false,
@@ -55,6 +72,7 @@ describe('transformRuleDomainToRule', () => {
     legacyId: 'legacyId',
     muteAll: false,
     mutedInstanceIds: [],
+    snoozedInstances,
     snoozeSchedule: [],
     scheduledTaskId: 'task-123',
     executionStatus: {
@@ -93,6 +111,7 @@ describe('transformRuleDomainToRule', () => {
       updatedAt: new Date('2019-02-12T21:01:22.479Z'),
       muteAll: false,
       mutedInstanceIds: [],
+      snoozedInstances,
       snoozeSchedule: [],
       scheduledTaskId: 'task-123',
       executionStatus: {
@@ -150,6 +169,14 @@ describe('transformRuleDomainToRule', () => {
     });
   });
 
+  it('should not expose snoozedInstances if isPublic is true', () => {
+    const result = transformRuleDomainToRule(rule, {
+      isPublic: true,
+    });
+
+    expect(result).not.toHaveProperty('snoozedInstances');
+  });
+
   it('should include legacy id if includeLegacyId is true', () => {
     const result = transformRuleDomainToRule(rule, {
       includeLegacyId: true,
@@ -173,6 +200,7 @@ describe('transformRuleDomainToRule', () => {
       updatedAt: new Date('2019-02-12T21:01:22.479Z'),
       muteAll: false,
       mutedInstanceIds: [],
+      snoozedInstances,
       snoozeSchedule: [],
       scheduledTaskId: 'task-123',
       executionStatus: {
@@ -277,5 +305,11 @@ describe('transformRuleDomainToRule', () => {
         ],
       },
     });
+  });
+
+  it('should preserve snoozedInstances', () => {
+    const result = transformRuleDomainToRule(rule);
+
+    expect(result.snoozedInstances).toEqual(snoozedInstances);
   });
 });

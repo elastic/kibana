@@ -21,6 +21,7 @@ import { css } from '@emotion/react';
 import type { ServiceMapNode } from '../../../../common/service_map';
 import { isServiceNodeData } from '../../../../common/service_map';
 import { NODE_WIDTH, NODE_HEIGHT, CENTER_ANIMATION_DURATION_MS } from './constants';
+import { useServiceMapSearchContext } from '../../shared/service_map/service_map_search_context';
 
 export const SERVICE_MAP_FIND_INPUT_ID = 'serviceMapFindInPageInput';
 
@@ -62,6 +63,9 @@ export function ServiceMapFindInPage({ nodes }: ServiceMapFindInPageProps) {
   const { euiTheme } = useEuiTheme();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [isFocused, setIsFocused] = useState(false);
+  const { setSearchHighlight } = useServiceMapSearchContext();
+
   /** False until the user has used next/enter/down at least once for this query (first action centers match 0). */
   const roundStartedRef = useRef(false);
   const searchResultsRef = useRef<ServiceMapNode[]>([]);
@@ -92,6 +96,19 @@ export function ServiceMapFindInPage({ nodes }: ServiceMapFindInPageProps) {
       searchResults.length === 0 ? 0 : Math.min(idx, searchResults.length - 1)
     );
   }, [searchResults.length]);
+
+  const matchNodeIds = useMemo(() => new Set(searchResults.map((n) => n.id)), [searchResults]);
+
+  useEffect(() => {
+    if (isFocused && searchResults.length > 0) {
+      setSearchHighlight({
+        matchNodeIds,
+        activeMatchNodeId: searchResults[selectedIndex]?.id ?? null,
+      });
+    } else {
+      setSearchHighlight({ matchNodeIds: new Set(), activeMatchNodeId: null });
+    }
+  }, [matchNodeIds, searchResults, selectedIndex, isFocused, setSearchHighlight]);
 
   const centerMapOnNode = useCallback(
     (node: ServiceMapNode) => {
@@ -201,6 +218,8 @@ export function ServiceMapFindInPage({ nodes }: ServiceMapFindInPageProps) {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           onKeyDown={onSearchKeyDown}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
           fullWidth
           compressed
           isClearable

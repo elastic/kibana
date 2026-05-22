@@ -185,7 +185,7 @@ export const TagsAddRemove: React.FC<Props> = ({
     >
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
-          <EuiIcon type="plus" />
+          <EuiIcon type="plus" aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem>
           <FormattedMessage

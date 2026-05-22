@@ -14,6 +14,7 @@ import { ChromeLayout, ChromeLayoutConfigProvider } from '@kbn/core-chrome-layou
 import {
   ChromeComponentsProvider,
   ClassicHeader,
+  ChromeNextGlobalHeader,
   ProjectHeader,
   GridLayoutProjectSideNav,
   HeaderTopBanner,
@@ -29,13 +30,18 @@ import {
   useSidebarWidth,
   useSideNavWidth,
 } from '@kbn/core-chrome-browser-hooks';
+import { isNextChrome } from '@kbn/core-chrome-feature-flags';
 import { useGlobalFooter, useHasHeaderBanner } from '@kbn/core-chrome-browser-hooks/internal';
 import { GridLayoutGlobalStyles } from './grid_global_app_style';
 import type { LayoutService, LayoutServiceStartDeps } from '../../layout_service';
 import { AppWrapper } from '../../app_containers';
 import { APP_FIXED_VIEWPORT_ID } from '../../app_fixed_viewport';
 
-const layoutConfigs: { classic: ChromeLayoutConfig; project: ChromeLayoutConfig } = {
+const layoutConfigs: {
+  classic: ChromeLayoutConfig;
+  project: ChromeLayoutConfig;
+  projectNext: ChromeLayoutConfig;
+} = {
   classic: {
     chromeStyle: 'classic',
     headerHeight: 96,
@@ -49,9 +55,20 @@ const layoutConfigs: { classic: ChromeLayoutConfig; project: ChromeLayoutConfig 
     headerHeight: 48,
     bannerHeight: 32,
 
-    /** The application top bar renders the app specific menu */
-    /** we use it only in project style, because in classic it is included as part of the global header */
+    /** Project style renders the app-specific menu in a separate top bar. */
     applicationTopBarHeight: 48,
+    applicationMarginRight: 8,
+    applicationMarginBottom: 8,
+    sidebarWidth: 0,
+    footerHeight: 0,
+    navigationWidth: 0,
+  },
+  projectNext: {
+    chromeStyle: 'project',
+    headerHeight: 48,
+    bannerHeight: 32,
+    /** Chrome Next folds app-level header controls into the new header surface. */
+    applicationTopBarHeight: 0,
     applicationMarginRight: 8,
     applicationMarginBottom: 8,
     sidebarWidth: 0,
@@ -70,10 +87,11 @@ export class GridLayout implements LayoutService {
    * Returns a layout component with the provided dependencies
    */
   public getComponent(): React.ComponentType {
-    const { application, overlays, http, docLinks, customBranding } = this.deps;
+    const { application, overlays, http, docLinks, customBranding, featureFlags } = this.deps;
 
     const appComponent = application.getComponent();
     const appBannerComponent = overlays.banners.getComponent();
+    const nextChrome = isNextChrome(featureFlags);
 
     const componentDeps: ChromeComponentsDeps = {
       application,
@@ -91,8 +109,11 @@ export class GridLayout implements LayoutService {
       const sidebarWidth = useSidebarWidth();
       const navigationWidth = useSideNavWidth();
 
+      const layoutConfigKey =
+        chromeStyle === 'classic' ? 'classic' : nextChrome ? 'projectNext' : 'project';
+
       const layoutConfig = {
-        ...layoutConfigs[chromeStyle],
+        ...layoutConfigs[layoutConfigKey],
         sidebarWidth,
         navigationWidth,
       };
@@ -107,8 +128,8 @@ export class GridLayout implements LayoutService {
         if (chromeStyle === 'classic') {
           header = <ClassicHeader />;
         } else {
-          header = <ProjectHeader />;
-          if (hasAppMenu) {
+          header = nextChrome ? <ChromeNextGlobalHeader /> : <ProjectHeader />;
+          if (!nextChrome && hasAppMenu) {
             applicationTopBar = <AppMenuBar />;
           }
 

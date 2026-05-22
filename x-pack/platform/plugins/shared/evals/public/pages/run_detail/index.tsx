@@ -32,9 +32,13 @@ import { css } from '@emotion/css';
 import { useParams, useHistory, useLocation } from 'react-router-dom';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import type { EvaluatorStats } from '@kbn/evals-common';
-import { useEvaluationRun, useRunDatasetExamples } from '../../hooks/use_evals_api';
+import { TraceWaterfall, useTraceSpans } from '@kbn/llm-trace-waterfall';
+import {
+  useEvaluationRun,
+  useEvalsTraceFetcher,
+  useRunDatasetExamples,
+} from '../../hooks/use_evals_api';
 import { ExampleScoresTable } from '../../components/example_scores_table';
-import { TraceWaterfall } from '../../components/trace_waterfall';
 import { resolvePrUrl } from '../../utils/pr_url';
 import * as i18n from './translations';
 
@@ -160,6 +164,13 @@ export const RunDetailPage: React.FC = () => {
   const openDatasetId = searchParams.get('dataset_id');
   const selectedExampleId = searchParams.get('example_id');
   const selectedTraceId = searchParams.get('trace_id');
+  const fetchTrace = useEvalsTraceFetcher();
+  const {
+    spans,
+    durationMs,
+    isLoading: traceLoading,
+    error: traceError,
+  } = useTraceSpans(selectedTraceId, { fetchTrace });
   const prUrl = useMemo(() => {
     const pr = runDetail?.ci?.pull_request;
     return pr ? resolvePrUrl(pr) : null;
@@ -462,7 +473,13 @@ export const RunDetailPage: React.FC = () => {
             `}
           >
             <div style={{ height: '100%', padding: 16 }}>
-              <TraceWaterfall traceId={selectedTraceId} />
+              <TraceWaterfall
+                spans={spans}
+                traceId={selectedTraceId}
+                durationMs={durationMs}
+                isLoading={traceLoading}
+                error={traceError}
+              />
             </div>
           </EuiFlyoutBody>
         </EuiFlyoutResizable>

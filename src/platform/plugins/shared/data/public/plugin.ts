@@ -26,6 +26,7 @@ import type {
 import { SearchService } from './search/search_service';
 import { QueryService } from './query';
 import {
+  setHttp,
   setIndexPatterns,
   setOverlays,
   setSearchService,
@@ -146,9 +147,10 @@ export class DataPublicPlugin
       cps,
     }: DataStartDependencies
   ): DataPublicPluginStart {
-    const { uiSettings, overlays } = core;
+    const { uiSettings, overlays, http } = core;
     setOverlays(overlays);
     setUiSettings(uiSettings);
+    setHttp(http);
     setIndexPatterns(dataViews);
 
     const query = this.queryService.start({

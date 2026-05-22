@@ -14,10 +14,12 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const ReadPrivilegesResponse = lazySchema(() =>
+  z.object({
+    is_authenticated: z.boolean(),
+    has_encryption_key: z.boolean(),
+  })
+);
 export type ReadPrivilegesResponse = z.infer<typeof ReadPrivilegesResponse>;
-export const ReadPrivilegesResponse = z.object({
-  is_authenticated: z.boolean(),
-  has_encryption_key: z.boolean(),
-});

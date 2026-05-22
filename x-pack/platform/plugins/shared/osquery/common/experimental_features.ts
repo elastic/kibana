@@ -25,6 +25,11 @@ export const allowedExperimentalValues = Object.freeze({
    * adding KQL search, document flyout, per-row actions, and column curation.
    */
   unifiedDataTable: true,
+  /**
+   * Enables the "Export Results" button and server-side streaming export endpoints
+   * for downloading osquery results as NDJSON, JSON, or CSV files.
+   */
+  exportResults: false,
 });
 
 type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValues]: boolean };

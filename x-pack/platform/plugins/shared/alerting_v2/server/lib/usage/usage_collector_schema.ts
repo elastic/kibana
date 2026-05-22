@@ -172,33 +172,33 @@ export const AlertingV2UsageCollectorSchema: MakeSchemaFrom<AlertingV2Usage> = {
     _meta: { description: 'Total dispatcher executions in the last 24 hours.' },
   },
 
-  notification_policies_count: {
+  action_policies_count: {
     type: 'long',
-    _meta: { description: 'Total number of notification policies.' },
+    _meta: { description: 'Total number of action policies.' },
   },
-  notification_policies_unique_workflow_count: {
+  action_policies_unique_workflow_count: {
     type: 'long',
-    _meta: { description: 'Number of unique workflows referenced by notification policies.' },
+    _meta: { description: 'Number of unique workflows referenced by action policies.' },
   },
-  notification_policies_count_with_matcher: {
+  action_policies_count_with_matcher: {
     type: 'long',
-    _meta: { description: 'Number of notification policies with a matcher.' },
+    _meta: { description: 'Number of action policies with a matcher.' },
   },
-  notification_policies_count_with_group_by: {
+  action_policies_count_with_group_by: {
     type: 'long',
-    _meta: { description: 'Number of notification policies with group by.' },
+    _meta: { description: 'Number of action policies with group by.' },
   },
-  notification_policies_avg_group_by_fields_count: {
+  action_policies_avg_group_by_fields_count: {
     type: 'float',
-    _meta: { description: 'Average number of group by fields per notification policy.' },
+    _meta: { description: 'Average number of group by fields per action policy.' },
   },
-  notification_policies_count_by_throttle_interval: {
+  action_policies_count_by_throttle_interval: {
     type: 'array',
     items: {
       name: { type: 'keyword', _meta: { description: 'Throttle interval duration string.' } },
       value: {
         type: 'long',
-        _meta: { description: 'Number of notification policies with this throttle interval.' },
+        _meta: { description: 'Number of action policies with this throttle interval.' },
       },
     },
   },

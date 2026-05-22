@@ -23,10 +23,7 @@ import type {
   SaveResult,
 } from '@kbn/saved-objects-plugin/public';
 import { showSaveModal, SavedObjectSaveModalOrigin } from '@kbn/saved-objects-plugin/public';
-import {
-  LazySavedObjectSaveModalDashboardWithSaveResult,
-  withSuspense,
-} from '@kbn/presentation-util-plugin/public';
+import { SavedObjectSaveModalDashboard } from '@kbn/presentation-util-plugin/public';
 import { unhashUrl } from '@kbn/kibana-utils-plugin/public';
 import type {
   EmbeddableStateTransfer,
@@ -53,6 +50,7 @@ import { getUiActions } from '../../services';
 import { getVizEditorOriginatingAppUrl } from './utils';
 
 import { serializeState } from '../../embeddable/state';
+import { hasLibraryItemWithTitle } from '../../utils/saved_objects_utils';
 
 interface VisualizeCapabilities {
   createShortUrl: boolean;
@@ -81,10 +79,6 @@ export interface TopNavConfigParams {
   showBadge: boolean;
   eventEmitter?: EventEmitter;
 }
-
-const SavedObjectSaveModalDashboardWithSaveResult = withSuspense(
-  LazySavedObjectSaveModalDashboardWithSaveResult
-);
 
 export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => {
   if (!anonymousUserCapabilities.visualize_v2) return false;
@@ -563,8 +557,6 @@ export const getTopNavConfig = (
               const onSave = async ({
                 newTitle,
                 newCopyOnSave,
-                isTitleDuplicateConfirmed,
-                onTitleDuplicate,
                 newDescription,
                 returnToOrigin,
                 dashboardId,
@@ -621,8 +613,6 @@ export const getTopNavConfig = (
                 // add to a dashboard if necessary
                 const response = await doSave({
                   confirmOverwrite: false,
-                  isTitleDuplicateConfirmed,
-                  onTitleDuplicate,
                   returnToOrigin: resolvedReturnToOrigin,
                   dashboardId: !!dashboardId ? dashboardId : undefined,
                   copyOnSave: newCopyOnSave,
@@ -659,6 +649,8 @@ export const getTopNavConfig = (
                 saveModal = (
                   <SavedObjectSaveModalOrigin
                     documentInfo={savedVis || { title: '' }}
+                    lastSavedTitle={savedVis?.title ?? ''}
+                    hasLibraryItemWithTitle={hasLibraryItemWithTitle}
                     onSave={onSave}
                     options={tagOptions}
                     getAppNameFromId={stateTransfer.getAppNameFromId}
@@ -684,13 +676,15 @@ export const getTopNavConfig = (
                 );
               } else {
                 saveModal = (
-                  <SavedObjectSaveModalDashboardWithSaveResult
+                  <SavedObjectSaveModalDashboard
                     documentInfo={{
                       id: visualizeCapabilities.save ? savedVis?.id : undefined,
                       title: savedVis?.title || '',
                       description: savedVis?.description || '',
                     }}
                     canSaveByReference={Boolean(visualizeCapabilities.save)}
+                    lastSavedTitle={savedVis?.title ?? ''}
+                    hasLibraryItemWithTitle={hasLibraryItemWithTitle}
                     onSave={onSave}
                     tagOptions={tagOptions}
                     objectType={i18n.translate(

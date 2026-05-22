@@ -171,13 +171,15 @@ const SavedSearchComponentTable: React.FC<
   const embeddableApi = useRef<SearchEmbeddableApi | undefined>(undefined);
   const [isEmbeddableApiAvailable, setIsEmbeddableApiAvailable] = useState(false);
 
+  const { executionContext } = props;
   const parentApi = useMemo(() => {
     return {
+      ...(executionContext ? { executionContext } : {}),
       getSerializedStateForChild: () => {
         return initialSerializedState;
       },
     };
-  }, [initialSerializedState]);
+  }, [initialSerializedState, executionContext]);
 
   useEffect(
     function syncIndex() {

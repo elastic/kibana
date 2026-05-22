@@ -15,4 +15,5 @@ export type Section =
   | 'enrollment_tokens'
   | 'uninstall_tokens'
   | 'data_streams'
-  | 'settings';
+  | 'settings'
+  | 'collectors';

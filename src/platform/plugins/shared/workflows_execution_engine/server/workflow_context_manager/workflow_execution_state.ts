@@ -8,18 +8,7 @@
  */
 
 import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
-import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
-
-/**
- * Step types whose outputs must never be evicted from in-memory state,
- * even for non-latest iterations in a loop.
- *
- * - data.set: getVariables reads all executions, not just the latest
- * - waitForInput: user-provided answers must be preserved for auditability
- *   and downstream access across all loop iterations
- */
-const EVICTION_EXEMPT_STEP_TYPES = new Set(['data.set', 'waitForInput']);
 
 /** Context for the step that failed during this run; used to build workflow_execution_failed event. */
 export interface FailedStepContext {
@@ -28,46 +17,109 @@ export interface FailedStepContext {
   stepExecutionId: string;
 }
 
+/**
+ * Step-execution metadata held by `WorkflowExecutionState`. Excludes
+ * `input` / `output` — those live in `StepIoService` and are merged in only
+ * at flush time. Callers that need IO must go through the service.
+ */
+export type StepExecutionMetadata = Omit<EsWorkflowStepExecution, 'input' | 'output'>;
+
+/**
+ * Narrow shape required by `createStep`: `id` is mandatory at creation time;
+ * `stepId` is *expected* but historically allowed to be undefined (status-only
+ * seed writes that fill it in on a later upsert). `input` / `output` are
+ * deliberately rejected — IO writes go through `StepIoService.setStepInput`
+ * / `setStepOutput`, never through `state.upsertStep`.
+ */
+type CreateStepInput = Omit<Partial<EsWorkflowStepExecution>, 'input' | 'output'> &
+  Pick<EsWorkflowStepExecution, 'id'>;
+
+/**
+ * Narrow view of `WorkflowExecutionState` used by `StepIoService`. Implemented
+ * structurally via `Pick<WorkflowExecutionState, …>` rather than a separate
+ * interface — the boundary is enforced by the type but costs nothing at
+ * runtime (no closure bag, no extra allocation per state instance). State
+ * still has no dependency on the IO layer.
+ *
+ * Surfaces metadata reads, workflow-level reads, and the lifecycle
+ * change-tracking primitives that the service merges with its own IO
+ * partials at flush time. IO storage and ES persistence (bulk upsert /
+ * mget) belong to the service.
+ */
+export type StepIoStateAccessor = Pick<
+  WorkflowExecutionState,
+  | 'getStepExecution'
+  | 'getLatestStepExecution'
+  | 'getAllStepExecutions'
+  | 'getStepExecutionIdsByStepId'
+  | 'getWorkflowExecutionStatus'
+  | 'getWorkflowExecutionId'
+  | 'getWorkflowExecutionScopeStack'
+  | 'getWorkflowExecutionStepExecutionIds'
+  | 'drainPendingStepChanges'
+  | 'ingestLoadedStepDocs'
+  | 'flushWorkflowDoc'
+>;
+
+/**
+ * In-memory step/workflow document store with deferred ES persistence.
+ *
+ * Owns step *metadata* (status, scopeStack, error, indices, etc.) and the
+ * workflow-level document. **Does not own `input` / `output`** — those live
+ * in `StepIoService`, which:
+ *   - holds the canonical IO maps,
+ *   - drives the step-execution bulk-upsert (merging state's lifecycle
+ *     partials with its own IO partials),
+ *   - owns eviction / rehydration.
+ *
+ * The dependency is strictly one-way: state → workflowExecutionRepository;
+ * service → state (via the structural `StepIoStateAccessor` type) and
+ * stepExecutionRepository.
+ */
 export class WorkflowExecutionState {
-  private stepExecutions: Map<string, EsWorkflowStepExecution> = new Map();
+  private stepExecutions: Map<string, StepExecutionMetadata> = new Map();
   private workflowExecution: EsWorkflowExecution;
   private workflowDocumentChanges: Partial<EsWorkflowExecution> | undefined = undefined;
-  private stepDocumentsChanges: Map<string, Partial<EsWorkflowStepExecution>> = new Map();
+  private stepDocumentsChanges: Map<string, Partial<StepExecutionMetadata>> = new Map();
 
   private lastFailedStepContext: FailedStepContext | undefined = undefined;
 
   /**
-   * Maps step IDs to their execution IDs in chronological order.
-   * This index enables efficient lookup of all executions for a given step,
-   * which is especially important for steps that execute multiple times
-   * (e.g., in loops or retries).
+   * Maps step IDs to their execution IDs in chronological order. Enables
+   * efficient lookup of all executions for a step that runs multiple times
+   * (loops, retries).
    */
   private stepIdExecutionIdIndex = new Map<string, string[]>();
 
   constructor(
     initialWorkflowExecution: EsWorkflowExecution,
-    private workflowExecutionRepository: WorkflowExecutionRepository,
-    private workflowStepExecutionRepository: StepExecutionRepository
+    private workflowExecutionRepository: WorkflowExecutionRepository
   ) {
     this.workflowExecution = initialWorkflowExecution;
   }
 
-  public async load(): Promise<void> {
-    if (!this.workflowExecution.stepExecutionIds) {
-      throw new Error(
-        'WorkflowExecutionState: Workflow execution must have step execution IDs to be loaded'
-      );
-    }
-
-    const foundSteps = await this.workflowStepExecutionRepository.getStepExecutionsByIds(
-      this.workflowExecution.stepExecutionIds
-    );
-    foundSteps.forEach((stepExecution) => this.stepExecutions.set(stepExecution.id, stepExecution));
-    this.buildStepIdExecutionIdIndex();
-  }
-
   public getWorkflowExecution(): EsWorkflowExecution {
     return this.workflowExecution;
+  }
+
+  public getWorkflowExecutionStatus(): EsWorkflowExecution['status'] {
+    return this.workflowExecution.status;
+  }
+
+  public getWorkflowExecutionId(): string {
+    return this.workflowExecution.id;
+  }
+
+  public getWorkflowExecutionScopeStack(): EsWorkflowExecution['scopeStack'] {
+    return this.workflowExecution.scopeStack;
+  }
+
+  public getWorkflowExecutionStepExecutionIds(): string[] | undefined {
+    return this.workflowExecution.stepExecutionIds;
+  }
+
+  public getStepExecutionIdsByStepId(stepId: string): ReadonlyArray<string> | undefined {
+    return this.stepIdExecutionIdIndex.get(stepId);
   }
 
   public setLastFailedStepContext(ctx: FailedStepContext): void {
@@ -89,74 +141,95 @@ export class WorkflowExecutionState {
     };
   }
 
-  public getAllStepExecutions(): EsWorkflowStepExecution[] {
+  public getAllStepExecutions(): StepExecutionMetadata[] {
     return Array.from(this.stepExecutions.values());
   }
 
-  public getStepExecution(stepExecutionId: string): EsWorkflowStepExecution | undefined {
+  public getStepExecution(stepExecutionId: string): StepExecutionMetadata | undefined {
     return this.stepExecutions.get(stepExecutionId);
   }
 
   /**
-   * Retrieves all executions for a specific workflow step in chronological order.
-   * @param stepId The unique identifier of the step
-   * @returns An array of step execution objects or undefined if no executions exist
+   * Retrieves all executions for a workflow step in chronological order.
+   * Returns `[]` when the step has not executed yet.
+   *
+   * Skips IDs missing from the canonical map (rather than asserting them
+   * with a cast). The index and the canonical map are kept in sync by
+   * `createStep` / `buildStepIdExecutionIdIndex`, but a defensive skip
+   * keeps a future bug from surfacing as a downstream `undefined`.
    */
-  public getStepExecutionsByStepId(stepId: string): EsWorkflowStepExecution[] {
-    if (!this.stepIdExecutionIdIndex.has(stepId)) {
+  public getStepExecutionsByStepId(stepId: string): StepExecutionMetadata[] {
+    const executionIds = this.stepIdExecutionIdIndex.get(stepId);
+    if (!executionIds?.length) {
       return [];
     }
+    const result: StepExecutionMetadata[] = [];
+    for (const executionId of executionIds) {
+      const exec = this.stepExecutions.get(executionId);
+      if (exec) result.push(exec);
+    }
+    return result;
+  }
 
-    return (
-      this.stepIdExecutionIdIndex
-        .get(stepId)
-        ?.map((executionId) => this.stepExecutions.get(executionId) as EsWorkflowStepExecution) ??
-      []
-    );
+  public getLatestStepExecution(stepId: string): StepExecutionMetadata | undefined {
+    const allExecutions = this.getStepExecutionsByStepId(stepId);
+    return allExecutions.length ? allExecutions[allExecutions.length - 1] : undefined;
   }
 
   /**
-   * Retrieves the latest execution for a specific workflow step.
-   * @param stepId The unique identifier of the step
-   * @returns The latest step execution object or undefined if no executions exist
+   * Records a step-metadata change. `input` / `output` are *not* permitted
+   * here — those flow through `StepIoService.setStepInput` /
+   * `setStepOutput`. The compile-time `Omit` already excludes them; this
+   * runtime guard catches stray callers that bypass typing via casts.
    */
-  public getLatestStepExecution(stepId: string): EsWorkflowStepExecution | undefined {
-    const allExecutions = this.getStepExecutionsByStepId(stepId);
-
-    if (!allExecutions?.length) {
-      return undefined;
-    }
-
-    return allExecutions[allExecutions.length - 1];
-  }
-
-  public upsertStep(step: Partial<EsWorkflowStepExecution>): void {
+  public upsertStep(step: Partial<StepExecutionMetadata>): void {
     if (!step.id) {
       throw new Error('WorkflowExecutionState: Step execution must have an ID to be upserted');
     }
-
-    if (!this.stepExecutions.has(step.id)) {
-      this.createStep(step);
-    } else {
-      this.updateStep(step.id, step);
+    if ('input' in step || 'output' in step) {
+      throw new Error(
+        'WorkflowExecutionState: input/output writes must go through StepIoService, not upsertStep'
+      );
     }
-  }
 
-  public async flushStepChanges(): Promise<void> {
-    if (!this.stepDocumentsChanges.size) {
+    if (this.stepExecutions.has(step.id)) {
+      this.updateStep(step.id, step);
       return;
     }
-    const stepDocumentsChanges = Array.from(this.stepDocumentsChanges.values());
 
-    this.stepDocumentsChanges.clear();
-    await this.workflowStepExecutionRepository.bulkUpsert(stepDocumentsChanges);
+    this.createStep({ ...step, id: step.id });
   }
 
-  public async flush(): Promise<void> {
-    await Promise.all([this.flushWorkflowChanges(), this.flushStepChanges()]);
+  // ----- ES persistence primitives -----------------------------------------
+
+  /**
+   * Drains pending step-document changes. Returns a `Map<id, partial>` whose
+   * values are pure metadata (no `input` / `output`). The caller (the IO
+   * service) merges this with its own IO partials and runs the combined
+   * `bulkUpsert`. Returns an empty map when nothing is pending.
+   */
+  public drainPendingStepChanges(): Map<string, Partial<StepExecutionMetadata>> {
+    if (!this.stepDocumentsChanges.size) {
+      return new Map();
+    }
+    const drained = this.stepDocumentsChanges;
+    this.stepDocumentsChanges = new Map();
+    return drained;
   }
 
-  private async flushWorkflowChanges(): Promise<void> {
+  /**
+   * Ingests step docs loaded from ES at resume time. The caller (the IO
+   * service) is responsible for stripping `output` (and ingesting it into
+   * its own IO map for pinned step types). State stores the metadata only.
+   */
+  public ingestLoadedStepDocs(steps: ReadonlyArray<StepExecutionMetadata>): void {
+    for (const step of steps) {
+      this.stepExecutions.set(step.id, step);
+    }
+    this.buildStepIdExecutionIdIndex();
+  }
+
+  public async flushWorkflowDoc(): Promise<void> {
     if (!this.workflowDocumentChanges) {
       return;
     }
@@ -169,102 +242,81 @@ export class WorkflowExecutionState {
     });
   }
 
-  private createStep(step: Partial<EsWorkflowStepExecution>) {
-    const stepExecutions = this.getStepExecutionsByStepId(step.stepId as string) || [];
-    if (!stepExecutions.length) {
-      this.stepIdExecutionIdIndex.set(step.stepId as string, []);
+  private createStep(step: CreateStepInput) {
+    const { id, stepId } = step;
+    // Index entry is keyed by stepId — only register when we actually have
+    // one (a partial seed write may not). The index is rebuilt on resume.
+    let previousExecutionCount = 0;
+    if (stepId) {
+      let executionIds = this.stepIdExecutionIdIndex.get(stepId);
+      previousExecutionCount = executionIds?.length ?? 0;
+      if (!executionIds) {
+        executionIds = [];
+        this.stepIdExecutionIdIndex.set(stepId, executionIds);
+      }
+      executionIds.push(id);
     }
-    this.stepIdExecutionIdIndex.get(step.stepId as string)?.push(step.id as string);
-    const newStep: EsWorkflowStepExecution = {
+
+    // `scopeStack` is required on the doc; default to an empty array so we
+    // never write `undefined` into ES (callers in the engine always supply
+    // it, but this guards against a future Partial caller).
+    //
+    // The cast is intentional: `EsWorkflowStepExecution` requires
+    // `status` / `startedAt` / `topologicalIndex`, but a minimal "create
+    // shell" call (e.g. just to seed `state`) may not have them. Those
+    // fields are populated on the next `updateStep`, and ES partial-update
+    // semantics tolerate missing fields on doc_as_upsert.
+    const newStep = {
       ...step,
-      id: step.id,
+      id,
+      scopeStack: step.scopeStack ?? [],
       globalExecutionIndex: this.stepExecutions.size,
-      stepExecutionIndex: stepExecutions.length,
+      stepExecutionIndex: previousExecutionCount,
       workflowRunId: this.workflowExecution.id,
       workflowId: this.workflowExecution.workflowId,
       spaceId: this.workflowExecution.spaceId,
       isTestRun: Boolean(this.workflowExecution.isTestRun),
-    } as EsWorkflowStepExecution;
-    this.stepExecutions.set(step.id as string, newStep);
-    this.stepDocumentsChanges.set(step.id as string, newStep);
-    // As we are creating a new step execution, we need to update the workflow execution with the new step execution ID
-    // Due to the fact that execution and flushes are synchronous, it's safe to use incremental approach to update the step execution IDs
-    // while still keeping the order of the step execution IDs according to the global execution index
-    // At the same time it's safer because we don't rely on how many step executions are loaded in resume task.
+    } as StepExecutionMetadata;
+    this.stepExecutions.set(id, newStep);
+    this.stepDocumentsChanges.set(id, newStep);
+    // Execution and flushes are synchronous, so an incremental update here
+    // preserves the global execution order without depending on what was
+    // loaded by the resume task.
     this.updateWorkflowExecution({
-      stepExecutionIds: [...(this.workflowExecution.stepExecutionIds || []), step.id as string],
+      stepExecutionIds: [...(this.workflowExecution.stepExecutionIds || []), id],
     });
   }
 
-  private updateStep(stepId: string, step: Partial<EsWorkflowStepExecution>) {
+  private updateStep(stepId: string, step: Partial<StepExecutionMetadata>) {
     const existingStep = this.stepExecutions.get(stepId);
-    const updatedStep = {
+    if (!existingStep) {
+      // upsertStep already routed us through createStep when the step was
+      // missing — reaching this branch with no existing step is a logic bug.
+      throw new Error(`WorkflowExecutionState: updateStep called for ${stepId} but no step exists`);
+    }
+    const updatedStep: StepExecutionMetadata = {
       ...existingStep,
       ...step,
-    } as EsWorkflowStepExecution;
+    };
     this.stepExecutions.set(stepId, updatedStep);
-    // Accumulate changes for the next flush — merge with any pending changes
-    // ES partial update (doc_as_upsert) preserves fields not included in the update
+    // Accumulate changes for the next flush — merge with any pending changes.
+    // ES partial update (doc_as_upsert) preserves fields not included.
     this.stepDocumentsChanges.set(stepId, {
       ...(this.stepDocumentsChanges.get(stepId) || {}),
       ...step,
     });
   }
 
-  /**
-   * Nullifies `output` and `input` on non-latest in-memory step executions
-   * for the given step IDs, reducing memory pressure after a loop completes.
-   *
-   * Preserves:
-   * - The latest execution per stepId (needed by getContext → getLatestStepExecution)
-   * - All data.set step outputs (needed by getVariables which reads all executions)
-   * - All waitForInput step outputs (user-provided values that must be preserved for
-   *   auditability and downstream access across all iterations)
-   * - All metadata fields (needed by telemetry at terminal state)
-   *
-   * Note: eviction uses global-latest-wins semantics — it keeps the absolute latest
-   * execution per stepId across all loop iterations, not scoped to a specific loop scope.
-   * This means that after outer-loop eviction, only the latest execution from the last
-   * outer iteration retains its output. This is correct because getLatestStepExecution
-   * always returns the absolute latest execution.
-   *
-   * Does NOT touch ES-persisted documents — this is in-memory only.
-   * On resume, ES documents still hold the original outputs.
-   */
-  public evictStaleLoopOutputs(innerStepIds: Iterable<string>): void {
-    for (const stepId of innerStepIds) {
-      const executionIds = this.stepIdExecutionIdIndex.get(stepId);
-      if (executionIds && executionIds.length > 1) {
-        const staleIds = executionIds.slice(0, -1);
-        for (const execId of staleIds) {
-          const stepExec = this.stepExecutions.get(execId);
-          if (
-            stepExec &&
-            (stepExec.stepType == null || !EVICTION_EXEMPT_STEP_TYPES.has(stepExec.stepType))
-          ) {
-            // Replace with a shallow copy so any pending stepDocumentsChanges entry
-            // for this execution is not mutated (it shares the same object reference
-            // when the step was first created via createStep).
-            this.stepExecutions.set(execId, { ...stepExec, output: undefined, input: undefined });
-          }
-        }
-      }
-    }
-  }
-
   private buildStepIdExecutionIdIndex(): void {
     this.stepIdExecutionIdIndex.clear();
     for (const step of this.stepExecutions.values()) {
       let idsList = this.stepIdExecutionIdIndex.get(step.stepId);
-
       if (!idsList) {
         idsList = [];
         this.stepIdExecutionIdIndex.set(step.stepId, idsList);
       }
-
       idsList.push(step.id);
     }
-
     for (const [stepId, stepExecutionIds] of this.stepIdExecutionIdIndex.entries()) {
       this.stepIdExecutionIdIndex.set(
         stepId,

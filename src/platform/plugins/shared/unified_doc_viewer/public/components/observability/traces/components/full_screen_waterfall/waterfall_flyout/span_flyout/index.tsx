@@ -17,8 +17,6 @@ import { useDocViewerExtensionActionsContext } from '../../../../../../../hooks/
 export { useSpanFlyoutData } from './use_span_flyout_data';
 export type { UseSpanFlyoutDataParams, SpanFlyoutData } from './use_span_flyout_data';
 
-export const spanFlyoutId = 'spanDetailFlyout' as const;
-
 export interface SpanFlyoutContentProps {
   hit: DataTableRecord;
   dataView: DocViewRenderProps['dataView'];
@@ -26,7 +24,7 @@ export interface SpanFlyoutContentProps {
 }
 
 export function SpanFlyoutContent({ hit, dataView, activeSection }: SpanFlyoutContentProps) {
-  const { indexes } = useDataSourcesContext();
+  const { indexes, profileId } = useDataSourcesContext();
   const [flyoutRef, setFlyoutRef] = useState<OverviewApi | null>(null);
   const actions = useDocViewerExtensionActionsContext();
 
@@ -42,6 +40,7 @@ export function SpanFlyoutContent({ hit, dataView, activeSection }: SpanFlyoutCo
       docViewActions={actions}
       hit={hit}
       indexes={indexes}
+      profileId={profileId}
       showWaterfall={false}
       showActions={false}
       dataView={dataView}

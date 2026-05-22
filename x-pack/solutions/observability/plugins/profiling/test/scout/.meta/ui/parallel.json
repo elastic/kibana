@@ -1,5 +1,5 @@
 {
-  "sha1": "57e6e1fddb5c572b4ad3592af022358bfa60e7a6",
+  "sha1": "221a30eccbc80086589540e42ead02c3d9caf47d",
   "tests": [
     {
       "id": "01827b5a57152a5-eaaf5032684392c",
@@ -221,7 +221,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/home/home.spec.ts",
-        "line": 32,
+        "line": 34,
         "column": 7
       }
     },

@@ -268,9 +268,9 @@ describe('rule_request_mappers', () => {
         name: 'My Rule',
         description: 'A description',
         owner: 'owner',
-        tags: [],
       });
       expect(result.metadata).not.toHaveProperty('enabled');
+      expect(result.metadata).not.toHaveProperty('tags');
     });
 
     it('passes artifacts through to API request', () => {

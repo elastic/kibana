@@ -60,10 +60,9 @@ import {
 import { useEditorFrameService } from '../editor_frame_service/editor_frame_service_context';
 
 export type SaveProps = Simplify<
-  Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
+  Omit<OnSaveProps, 'newDescription'> & {
     returnToOrigin: boolean;
     dashboardId?: string | null;
-    onTitleDuplicate: OnSaveProps['onTitleDuplicate'];
     newDescription?: string;
     newTags?: string[];
     panelTimeRange?: TimeRange;

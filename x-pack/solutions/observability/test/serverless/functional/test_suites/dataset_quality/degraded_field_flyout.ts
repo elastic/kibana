@@ -692,11 +692,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             'datasetQualityDetailsDegradedFieldFlyoutPossibleMitigationTitle'
           );
 
-          // It's a technical preview
-          await testSubjects.existOrFail(
-            'datasetQualityDetailsDegradedFieldFlyoutPossibleMitigationTechPreviewBadge'
-          );
-
           // Should display Edit/Create Component Template Link option
           await testSubjects.existOrFail(
             'datasetQualityManualMitigationsCustomComponentTemplateLink'
@@ -764,11 +759,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           // Possible Mitigation Section should exist
           await testSubjects.existOrFail(
             'datasetQualityDetailsDegradedFieldFlyoutPossibleMitigationTitle'
-          );
-
-          // It's a technical preview
-          await testSubjects.existOrFail(
-            'datasetQualityDetailsDegradedFieldFlyoutPossibleMitigationTechPreviewBadge'
           );
 
           // Should display Edit/Create Component Template Link option
@@ -1293,10 +1283,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await testSubjects.existOrFail(
             'datasetQualityDetailsDegradedFieldFlyoutIssueDoesNotExist'
-          );
-
-          await testSubjects.existOrFail(
-            'datasetQualityDetailsDegradedFieldFlyoutPossibleMitigationTechPreviewBadge'
           );
 
           await testSubjects.existOrFail(

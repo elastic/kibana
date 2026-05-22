@@ -45,6 +45,21 @@ type ESQLResults = Array<
   [EntityType, { scores: EntityRiskScoreRecord[]; afterKey: EntityAfterKey }]
 >;
 
+const escapeEsqlStringLiteral = (value: string): string =>
+  value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+
+// Chars that cannot be safely interpolated into an ES|QL double-quoted literal
+// (NUL/LF/CR/LS/PS). Reject loud rather than risk silent reinterpretation —
+// IDs containing them are almost certainly malformed upstream.
+const ESQL_INVALID_LITERAL_CHARS = /[\u0000\u000A\u000D\u2028\u2029]/;
+const assertEsqlInterpolatableIds = (ids: string[]): void => {
+  if (ids.some((id) => ESQL_INVALID_LITERAL_CHARS.test(id))) {
+    throw new Error(
+      'Entity ID contains an unsupported control character (NUL/LF/CR/LS/PS) and cannot be safely interpolated into ES|QL'
+    );
+  }
+};
+
 export const calculateScoresWithESQL = async (
   params: {
     assetCriticalityService: AssetCriticalityService;
@@ -363,6 +378,7 @@ export const getESQL = (
   const rangeClause = [lower, upper].filter(Boolean).join(' and ');
 
   const query = /* SQL */ `
+  SET unmapped_fields="nullify";
   FROM ${index} METADATA _index
     | WHERE kibana.alert.risk_score IS NOT NULL AND KQL("${rangeClause}")
     | RENAME kibana.alert.risk_score as risk_score,
@@ -527,25 +543,41 @@ export const getBaseScoreESQL = (
     throw new Error('Either lower or upper bound must be provided for EUID pagination');
   }
 
-  const lower = bounds.lower ? `entity_id > "${bounds.lower}"` : undefined;
-  const upper = bounds.upper ? `entity_id <= "${bounds.upper}"` : undefined;
+  // Bounds come from composite-agg bucket keys derived from alert fields
+  // (host.id, user.name, ...) and may contain quotes, backslashes, or
+  // unsupported control characters. Validate + escape before interpolating
+  // into the double-quoted ES|QL literal — same pattern as
+  // getResolutionScoreESQLByIds.
+  const boundsToValidate = [bounds.lower, bounds.upper].filter(
+    (value): value is string => value !== undefined
+  );
+  assertEsqlInterpolatableIds(boundsToValidate);
+
+  const lower = bounds.lower ? `entity_id > "${escapeEsqlStringLiteral(bounds.lower)}"` : undefined;
+  const upper = bounds.upper
+    ? `entity_id <= "${escapeEsqlStringLiteral(bounds.upper)}"`
+    : undefined;
   const rangeClause = [lower, upper].filter(Boolean).join(' AND ');
 
+  // Filter on entity_id (computed from cheap field evals) BEFORE the
+  // CONCAT/base64 builders run, so non-matching alerts skip the per-row
+  // string-allocation work.
   const query = /* esql */ `
+  SET unmapped_fields="nullify";
   FROM ${index} METADATA _index
     | WHERE kibana.alert.risk_score IS NOT NULL AND (${containsIdFilter})
     ${fieldEvalsClause}
+    | EVAL entity_id = ${euidEval}
+    | WHERE ${rangeClause}
     | RENAME kibana.alert.risk_score as risk_score,
              kibana.alert.rule.name as rule_name,
              kibana.alert.rule.uuid as rule_id,
              kibana.alert.uuid as alert_id,
              event.kind as category,
              @timestamp as time
-    | EVAL entity_id = ${euidEval},
-           rule_name_b64 = TO_BASE64(rule_name),
+    | EVAL rule_name_b64 = TO_BASE64(rule_name),
            category_b64 = TO_BASE64(category)
     | EVAL input = CONCAT(""" {"risk_score": """", risk_score::keyword, """", "time": """", time::keyword, """", "index": """", _index, """", "rule_name_b64": """", rule_name_b64, """\", "category_b64": """", category_b64, """\", "id": \"""", alert_id, """\" } """)
-    | WHERE ${rangeClause}
     | STATS
         alert_count = count(risk_score),
         scores = MV_PSERIES_WEIGHTED_SUM(TOP(risk_score, ${
@@ -567,7 +599,11 @@ export const getResolutionCompositeQuery = (
 ) => ({
   index,
   size: 0,
-  query: { exists: { field: 'resolution_target_id' } },
+  query: {
+    term: {
+      relationship_type: 'entity.relationships.resolution.resolved_to',
+    },
+  },
   aggs: {
     by_resolution_target: {
       composite: {
@@ -579,9 +615,19 @@ export const getResolutionCompositeQuery = (
   },
 });
 
-export const getResolutionScoreESQL = (
+/**
+ * Resolution scoring filtered by an explicit `resolution_target_id IN (...)` list.
+ *
+ * `COALESCE(resolution_target_id, entity_id)` after the LOOKUP JOIN routes
+ * alerts on resolution targets that aren't themselves iterated by the entity
+ * store (so they have no lookup row) to their own EUID — keeping their alerts
+ * attributed to the requested target. `relationship_type` defaults to "self"
+ * on the same path; `parseEsqlResolutionScoreRow` drops "self" entries from
+ * `related_entities`.
+ */
+export const getResolutionScoreESQLByIds = (
   entityType: EntityType,
-  bounds: { lower?: string; upper?: string },
+  resolutionTargetIds: string[],
   sampleSize: number,
   pageSize: number,
   alertsIndex: string,
@@ -592,30 +638,37 @@ export const getResolutionScoreESQL = (
   const fieldEvals = euid.esql.getFieldEvaluations(entityType);
   const fieldEvalsClause = fieldEvals ? `| EVAL ${fieldEvals}` : '';
 
-  if (!bounds.lower && !bounds.upper) {
-    throw new Error('Either lower or upper bound must be provided for resolution pagination');
+  if (resolutionTargetIds.length === 0) {
+    throw new Error('At least one resolution target ID must be provided for resolution scoring');
   }
 
-  const lower = bounds.lower ? `resolution_target_id > "${bounds.lower}"` : undefined;
-  const upper = bounds.upper ? `resolution_target_id <= "${bounds.upper}"` : undefined;
-  const rangeClause = [lower, upper].filter(Boolean).join(' AND ');
+  assertEsqlInterpolatableIds(resolutionTargetIds);
 
+  const idsClause = resolutionTargetIds.map((id) => `"${escapeEsqlStringLiteral(id)}"`).join(', ');
+
+  // Compute entity_id (cheap), then LOOKUP JOIN to recover
+  // resolution_target_id, then filter on resolution_target_id BEFORE the
+  // CONCAT/base64 builders run so per-row string-allocation work only
+  // happens for alerts that survive the IN-clause.
   const query = /* esql */ `
+  SET unmapped_fields="nullify";
   FROM ${alertsIndex} METADATA _index
     | WHERE kibana.alert.risk_score IS NOT NULL AND (${containsIdFilter})
     ${fieldEvalsClause}
+    | EVAL entity_id = ${euidEval}
+    | LOOKUP JOIN ${lookupIndex} ON entity_id
+    | EVAL resolution_target_id = COALESCE(resolution_target_id, entity_id),
+           relationship_type = COALESCE(relationship_type, "self")
+    | WHERE resolution_target_id IN (${idsClause})
     | RENAME kibana.alert.risk_score as risk_score,
              kibana.alert.rule.name as rule_name,
              kibana.alert.rule.uuid as rule_id,
              kibana.alert.uuid as alert_id,
              event.kind as category,
              @timestamp as time
-    | EVAL entity_id = ${euidEval},
-           rule_name_b64 = TO_BASE64(rule_name),
+    | EVAL rule_name_b64 = TO_BASE64(rule_name),
            category_b64 = TO_BASE64(category)
     | EVAL input = CONCAT(""" {"risk_score": """", risk_score::keyword, """", "time": """", time::keyword, """", "index": """", _index, """", "rule_name_b64": """", rule_name_b64, """\", "category_b64": """", category_b64, """\", "id": \"""", alert_id, """\" } """)
-    | LOOKUP JOIN ${lookupIndex} ON entity_id
-    | WHERE resolution_target_id IS NOT NULL AND (${rangeClause})
     | EVAL entity_with_rel = CONCAT(entity_id, "|", relationship_type)
     | STATS
         alert_count = count(risk_score),

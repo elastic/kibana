@@ -9,6 +9,7 @@ import type { AxiosHeaderValue, AxiosInstance, InternalAxiosRequestConfig } from
 import axios from 'axios';
 import type { Logger } from '@kbn/core/server';
 import type { AuthMode, GetTokenOpts } from '@kbn/connector-specs';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { ActionInfo } from './action_executor';
 import type { AuthTypeRegistry } from '../auth_types';
 import { getCustomAgents } from './get_custom_agents';
@@ -19,8 +20,23 @@ import { getAxiosAuthStrategy } from './axios_auth_strategies';
 
 export type ConnectorInfo = Omit<ActionInfo, 'rawAction'>;
 
+export const buildUserAgent = (cloud?: CloudSetup): string => {
+  const parts = [`axios/${axios.VERSION}`];
+
+  const projectId = cloud?.serverless?.projectId;
+  const deploymentId = cloud?.deploymentId;
+  if (projectId) {
+    parts.push(`elastic (project:${projectId})`);
+  } else if (deploymentId) {
+    parts.push(`elastic (deployment:${deploymentId})`);
+  }
+
+  return parts.join(' ');
+};
+
 interface GetAxiosInstanceOpts {
   authTypeRegistry: AuthTypeRegistry;
+  cloud?: CloudSetup;
   configurationUtilities: ActionsConfigurationUtilities;
   logger: Logger;
 }
@@ -41,6 +57,7 @@ export type GetAxiosInstanceWithAuthFn = (
 ) => Promise<AxiosInstance>;
 export const getAxiosInstanceWithAuth = ({
   authTypeRegistry,
+  cloud,
   configurationUtilities,
   logger,
 }: GetAxiosInstanceOpts): GetAxiosInstanceWithAuthFn => {
@@ -70,6 +87,8 @@ export const getAxiosInstanceWithAuth = ({
         beforeRedirect: getBeforeRedirectFn(configurationUtilities),
         signal,
       });
+
+      axiosInstance.defaults.headers.common['User-Agent'] = buildUserAgent(cloud);
 
       // add any additional headers that should be included in every request
       if (additionalHeaders) {

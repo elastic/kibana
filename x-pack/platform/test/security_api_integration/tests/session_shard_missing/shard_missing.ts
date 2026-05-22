@@ -67,11 +67,11 @@ export default function ({ getService }: FtrProviderContext) {
 
   async function resetCleanupTask() {
     log.debug('Resetting cleanup task state to 0');
-    await runCleanupTaskSoon();
+
     let shardMissingCounter = -1;
     while (shardMissingCounter !== 0) {
+      await runCleanupTaskSoon(); // trigger on every iteration
       await setTimeoutAsync(5000);
-
       const state = await getCleanupTaskStatus();
       log.debug(`Task status: ${JSON.stringify(state)}`);
       shardMissingCounter = state.shardMissingCounter ?? 0;

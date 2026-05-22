@@ -14,29 +14,35 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const DatasetSummary = lazySchema(() =>
+  z.object({
+    id: z.string(),
+    name: z.string(),
+    description: z.string(),
+    examples_count: z.number().int(),
+    created_at: z.string(),
+    updated_at: z.string(),
+  })
+);
 export type DatasetSummary = z.infer<typeof DatasetSummary>;
-export const DatasetSummary = z.object({
-  id: z.string(),
-  name: z.string(),
-  description: z.string(),
-  examples_count: z.number().int(),
-  created_at: z.string(),
-  updated_at: z.string(),
-});
 
+export const GetEvaluationDatasetsRequestQuery = lazySchema(() =>
+  z.object({
+    page: z.coerce.number().int().min(1).optional().default(1),
+    per_page: z.coerce.number().int().min(1).max(1000).optional().default(25),
+  })
+);
 export type GetEvaluationDatasetsRequestQuery = z.infer<typeof GetEvaluationDatasetsRequestQuery>;
-export const GetEvaluationDatasetsRequestQuery = z.object({
-  page: z.coerce.number().int().min(1).optional().default(1),
-  per_page: z.coerce.number().int().min(1).max(1000).optional().default(25),
-});
 export type GetEvaluationDatasetsRequestQueryInput = z.input<
   typeof GetEvaluationDatasetsRequestQuery
 >;
 
+export const GetEvaluationDatasetsResponse = lazySchema(() =>
+  z.object({
+    datasets: z.array(DatasetSummary),
+    total: z.number().int(),
+  })
+);
 export type GetEvaluationDatasetsResponse = z.infer<typeof GetEvaluationDatasetsResponse>;
-export const GetEvaluationDatasetsResponse = z.object({
-  datasets: z.array(DatasetSummary),
-  total: z.number().int(),
-});

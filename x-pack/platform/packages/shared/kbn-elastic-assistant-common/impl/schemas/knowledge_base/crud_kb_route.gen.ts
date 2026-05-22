@@ -14,121 +14,135 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { BooleanFromString } from '@kbn/zod-helpers/v4';
 
 /**
  * AI assistant KnowledgeBase.
  */
+export const KnowledgeBaseResponse = lazySchema(() =>
+  z.object({
+    /**
+     * Identify the success of the method execution.
+     */
+    success: z.boolean().optional(),
+  })
+);
 export type KnowledgeBaseResponse = z.infer<typeof KnowledgeBaseResponse>;
-export const KnowledgeBaseResponse = z.object({
-  /**
-   * Identify the success of the method execution.
-   */
-  success: z.boolean().optional(),
-});
 
+export const KnowledgeBaseResponse400 = lazySchema(() =>
+  z.object({
+    /**
+     * The HTTP status code of the error.
+     */
+    statusCode: z.number().optional(),
+    /**
+     * A short description of the error.
+     */
+    error: z.string().optional(),
+    /**
+     * A detailed error message.
+     */
+    message: z.string().optional(),
+  })
+);
 export type KnowledgeBaseResponse400 = z.infer<typeof KnowledgeBaseResponse400>;
-export const KnowledgeBaseResponse400 = z.object({
-  /**
-   * The HTTP status code of the error.
-   */
-  statusCode: z.number().optional(),
-  /**
-   * A short description of the error.
-   */
-  error: z.string().optional(),
-  /**
-   * A detailed error message.
-   */
-  message: z.string().optional(),
-});
 
+export const KnowledgeBaseReadResponse200 = lazySchema(() =>
+  z.object({
+    /**
+     * Indicates if the ELSER model exists for the KnowledgeBase.
+     */
+    elser_exists: z.boolean().optional(),
+    /**
+     * Indicates if the setup process is available for the KnowledgeBase.
+     */
+    is_setup_available: z.boolean().optional(),
+    /**
+     * Indicates if the setup process is currently in progress.
+     */
+    is_setup_in_progress: z.boolean().optional(),
+    /**
+     * Indicates if Security Labs documentation exists in the KnowledgeBase.
+     */
+    security_labs_exists: z.boolean().optional(),
+    /**
+     * Indicates if Defend Insights documentation exists in the KnowledgeBase.
+     */
+    defend_insights_exists: z.boolean().optional(),
+    /**
+     * Indicates if user data exists in the KnowledgeBase.
+     */
+    user_data_exists: z.boolean().optional(),
+    /**
+     * The status of the product documentation in the KnowledgeBase.
+     */
+    product_documentation_status: z.string().optional(),
+  })
+);
 export type KnowledgeBaseReadResponse200 = z.infer<typeof KnowledgeBaseReadResponse200>;
-export const KnowledgeBaseReadResponse200 = z.object({
-  /**
-   * Indicates if the ELSER model exists for the KnowledgeBase.
-   */
-  elser_exists: z.boolean().optional(),
-  /**
-   * Indicates if the setup process is available for the KnowledgeBase.
-   */
-  is_setup_available: z.boolean().optional(),
-  /**
-   * Indicates if the setup process is currently in progress.
-   */
-  is_setup_in_progress: z.boolean().optional(),
-  /**
-   * Indicates if Security Labs documentation exists in the KnowledgeBase.
-   */
-  security_labs_exists: z.boolean().optional(),
-  /**
-   * Indicates if Defend Insights documentation exists in the KnowledgeBase.
-   */
-  defend_insights_exists: z.boolean().optional(),
-  /**
-   * Indicates if user data exists in the KnowledgeBase.
-   */
-  user_data_exists: z.boolean().optional(),
-  /**
-   * The status of the product documentation in the KnowledgeBase.
-   */
-  product_documentation_status: z.string().optional(),
-});
 
+export const CreateKnowledgeBaseRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * ELSER modelId to use when setting up the Knowledge Base. If not provided, a default model will be used.
+     */
+    modelId: z.string().optional(),
+    /**
+     * Indicates whether we should or should not install Security Labs docs when setting up the Knowledge Base. Defaults to `false`.
+     */
+    ignoreSecurityLabs: BooleanFromString.optional().default(false),
+  })
+);
 export type CreateKnowledgeBaseRequestQuery = z.infer<typeof CreateKnowledgeBaseRequestQuery>;
-export const CreateKnowledgeBaseRequestQuery = z.object({
-  /**
-   * ELSER modelId to use when setting up the Knowledge Base. If not provided, a default model will be used.
-   */
-  modelId: z.string().optional(),
-  /**
-   * Indicates whether we should or should not install Security Labs docs when setting up the Knowledge Base. Defaults to `false`.
-   */
-  ignoreSecurityLabs: BooleanFromString.optional().default(false),
-});
 export type CreateKnowledgeBaseRequestQueryInput = z.input<typeof CreateKnowledgeBaseRequestQuery>;
 
+export const CreateKnowledgeBaseRequestParams = lazySchema(() =>
+  z.object({
+    /**
+     * The KnowledgeBase `resource` value.
+     */
+    resource: z.string(),
+  })
+);
 export type CreateKnowledgeBaseRequestParams = z.infer<typeof CreateKnowledgeBaseRequestParams>;
-export const CreateKnowledgeBaseRequestParams = z.object({
-  /**
-   * The KnowledgeBase `resource` value.
-   */
-  resource: z.string(),
-});
 export type CreateKnowledgeBaseRequestParamsInput = z.input<
   typeof CreateKnowledgeBaseRequestParams
 >;
 
+export const CreateKnowledgeBaseResponse = lazySchema(() => KnowledgeBaseResponse);
 export type CreateKnowledgeBaseResponse = z.infer<typeof CreateKnowledgeBaseResponse>;
-export const CreateKnowledgeBaseResponse = KnowledgeBaseResponse;
 
+export const GetKnowledgeBaseResponse = lazySchema(() => KnowledgeBaseReadResponse200);
 export type GetKnowledgeBaseResponse = z.infer<typeof GetKnowledgeBaseResponse>;
-export const GetKnowledgeBaseResponse = KnowledgeBaseReadResponse200;
+export const PostKnowledgeBaseRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * ELSER modelId to use when setting up the Knowledge Base. If not provided, a default model will be used.
+     */
+    modelId: z.string().optional(),
+    /**
+     * Indicates whether we should or should not install Security Labs docs when setting up the Knowledge Base. Defaults to `false`.
+     */
+    ignoreSecurityLabs: BooleanFromString.optional().default(false),
+  })
+);
 export type PostKnowledgeBaseRequestQuery = z.infer<typeof PostKnowledgeBaseRequestQuery>;
-export const PostKnowledgeBaseRequestQuery = z.object({
-  /**
-   * ELSER modelId to use when setting up the Knowledge Base. If not provided, a default model will be used.
-   */
-  modelId: z.string().optional(),
-  /**
-   * Indicates whether we should or should not install Security Labs docs when setting up the Knowledge Base. Defaults to `false`.
-   */
-  ignoreSecurityLabs: BooleanFromString.optional().default(false),
-});
 export type PostKnowledgeBaseRequestQueryInput = z.input<typeof PostKnowledgeBaseRequestQuery>;
 
+export const PostKnowledgeBaseResponse = lazySchema(() => KnowledgeBaseResponse);
 export type PostKnowledgeBaseResponse = z.infer<typeof PostKnowledgeBaseResponse>;
-export const PostKnowledgeBaseResponse = KnowledgeBaseResponse;
 
+export const ReadKnowledgeBaseRequestParams = lazySchema(() =>
+  z.object({
+    /**
+     * The KnowledgeBase `resource` value.
+     */
+    resource: z.string(),
+  })
+);
 export type ReadKnowledgeBaseRequestParams = z.infer<typeof ReadKnowledgeBaseRequestParams>;
-export const ReadKnowledgeBaseRequestParams = z.object({
-  /**
-   * The KnowledgeBase `resource` value.
-   */
-  resource: z.string(),
-});
 export type ReadKnowledgeBaseRequestParamsInput = z.input<typeof ReadKnowledgeBaseRequestParams>;
 
+export const ReadKnowledgeBaseResponse = lazySchema(() => KnowledgeBaseReadResponse200);
 export type ReadKnowledgeBaseResponse = z.infer<typeof ReadKnowledgeBaseResponse>;
-export const ReadKnowledgeBaseResponse = KnowledgeBaseReadResponse200;

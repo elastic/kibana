@@ -8,9 +8,11 @@
  */
 
 import getopts from 'getopts';
-import { promises as fs } from 'fs';
+import { promises as fs, createWriteStream, createReadStream } from 'fs';
 import { relative } from 'path';
 import { spawn } from 'child_process';
+import { createHash } from 'crypto';
+import { pipeline } from 'stream/promises';
 import Table from 'cli-table3';
 import chalk from 'chalk';
 import { ToolingLog } from '@kbn/tooling-log';
@@ -38,7 +40,6 @@ interface SlowTest {
 interface FailedTest {
   fullName: string;
   filePath: string;
-  failureMessage: string;
 }
 
 // Run multiple Jest configs in parallel using separate Jest processes (one per config).
@@ -253,8 +254,9 @@ async function runConfigs(
         // Parse shard annotation if present (e.g., "/abs/path/config.js||shard=1/2")
         const { config: cleanConfig, shard } = parseShardAnnotation(config);
 
-        // Create unique output file for this config's slow tests
-        const configHash = cleanConfig.replace(/[^a-zA-Z0-9]/g, '_');
+        // Short stable id for filenames; full paths blow past the 255-byte
+        // per-component filename limit on deeply nested configs.
+        const configHash = createHash('sha256').update(cleanConfig).digest('hex').slice(0, 12);
         const shardSuffix = shard ? `_shard_${shard.replace('/', '_')}` : '';
         const slowTestsFile = `${slowTestsDir}/slow-tests-${configHash}${shardSuffix}-${Date.now()}.json`;
 
@@ -278,21 +280,38 @@ async function runConfigs(
           },
           stdio: ['ignore', 'pipe', 'pipe'],
         });
-        let buffer = '';
+        // Buffer output to a per-config temp file rather than an in-memory string;
+        // a noisy Jest run can exceed V8's ~512 MiB string limit (RangeError:
+        // Invalid string length) when concatenated. The file is streamed back out
+        // to log on exit and then unlinked.
+        const outputFile = `${slowTestsDir}/output-${configHash}${shardSuffix}-${Date.now()}.log`;
+        const outputStream = createWriteStream(outputFile);
         let stdoutEnded = false;
         let stderrEnded = false;
+        let outputClosed = false;
+        const failedTestsCollector = createFailedTestsCollector();
 
-        proc.stdout.on('data', (d) => {
-          buffer += d.toString();
-        });
-        proc.stderr.on('data', (d) => {
-          buffer += d.toString();
-        });
+        const onChunk = (d: Buffer) => {
+          outputStream.write(d);
+          failedTestsCollector.feed(d);
+        };
+        const maybeCloseOutput = () => {
+          if (stdoutEnded && stderrEnded && !outputClosed) {
+            outputClosed = true;
+            failedTestsCollector.flush();
+            outputStream.end();
+          }
+        };
+
+        proc.stdout.on('data', onChunk);
+        proc.stderr.on('data', onChunk);
         proc.stdout.on('end', () => {
           stdoutEnded = true;
+          maybeCloseOutput();
         });
         proc.stderr.on('end', () => {
           stderrEnded = true;
+          maybeCloseOutput();
         });
 
         // Use 'exit' (not 'close') to avoid hanging if a grandchild process
@@ -304,17 +323,27 @@ async function runConfigs(
           const DRAIN_TIMEOUT_MS = 3_000;
           let settled = false;
 
-          const onReady = () => {
+          const onReady = async () => {
             if (settled) return;
             settled = true;
 
             const code = c == null ? 1 : c;
             const durationMs = Date.now() - start;
 
-            // Parse failed tests from output if the run failed.
-            // Strip ANSI color codes first so regexes match on CI where Jest colorizes output.
-            const cleanBuffer = buffer.replace(/\x1b\[[0-9;]*m/g, '');
-            const failedTests = code !== 0 ? parseFailedTests(cleanBuffer) : [];
+            // Ensure the write stream is finalized (forces close even if one of
+            // the pipes never emitted 'end' within the drain window).
+            if (!outputClosed) {
+              outputClosed = true;
+              failedTestsCollector.flush();
+              outputStream.end();
+            }
+            await new Promise<void>((res) => {
+              if ((outputStream as any).closed) return res();
+              outputStream.once('finish', () => res());
+              outputStream.once('error', () => res());
+            });
+
+            const failedTests = code !== 0 ? failedTestsCollector.failedTests : [];
 
             results.push({ config, code, durationMs, slowTestsFile, failedTests });
 
@@ -329,7 +358,18 @@ async function runConfigs(
             } else {
               log.write(`+++ ❌ ${relConfigPath} (${sec}s) - FAILED\n`);
             }
-            log.write(buffer + '\n');
+
+            try {
+              await pipeline(createReadStream(outputFile), process.stdout, { end: false });
+              process.stdout.write('\n');
+            } catch {
+              // Best-effort flush; if the file is missing or unreadable, fall through.
+            }
+            try {
+              await fs.unlink(outputFile);
+            } catch {
+              // Best-effort cleanup.
+            }
 
             const proceed = () => {
               // Log how many configs are left to complete (after checkpoint is written)
@@ -411,51 +451,62 @@ async function runConfigs(
   return [...skippedResults, ...results];
 }
 
-function parseFailedTests(output: string): FailedTest[] {
+// Streaming line-based failed-test detector. Fed chunks as they arrive from
+// stdout/stderr; never materializes the full output string.
+//
+// Recognizes two Jest line patterns:
+//   FAIL path/to/test.ts       -> remember as current file
+//   ● Suite › Test Name        -> record { fullName, filePath: currentFile }
+const ANSI_RE = /\x1b\[[0-9;]*m/g;
+const FAIL_RE = /^\s*FAIL\s+(.+\.(?:test|spec)\.[tj]sx?)/;
+const FAILED_TEST_RE = /^\s*●\s+(.+)$/;
+
+interface FailedTestsCollector {
+  feed: (chunk: Buffer | string) => void;
+  flush: () => void;
+  readonly failedTests: FailedTest[];
+}
+
+function createFailedTestsCollector(): FailedTestsCollector {
   const failedTests: FailedTest[] = [];
-  const lines = output.split('\n');
-
-  // Look for patterns like:
-  // ● Test Suite Name › Test Name
-  // or
-  // FAIL path/to/test.ts
-
+  let pending = '';
   let currentFile = '';
 
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
+  const handleLine = (rawLine: string) => {
+    const line = rawLine.replace(ANSI_RE, '');
 
-    // Detect test file from FAIL lines (may have timing info like "(10.51 s)" at end)
-    const failMatch = line.match(/^\s*FAIL\s+(.+\.(?:test|spec)\.[tj]sx?)/);
+    const failMatch = line.match(FAIL_RE);
     if (failMatch) {
       currentFile = failMatch[1].trim();
-      continue;
+      return;
     }
 
-    // Detect failed test names (lines starting with ●)
-    const testMatch = line.match(/^\s*●\s+(.+)$/);
+    const testMatch = line.match(FAILED_TEST_RE);
     if (testMatch && currentFile) {
-      const fullName = testMatch[1].trim();
-
-      // Extract error message (next few lines until we hit another ● or blank line)
-      let failureMessage = '';
-      let j = i + 1;
-      while (j < lines.length && !lines[j].match(/^\s*●/) && j < i + 10) {
-        if (lines[j].trim()) {
-          failureMessage += lines[j] + '\n';
-        }
-        j++;
-      }
-
-      failedTests.push({
-        fullName,
-        filePath: currentFile,
-        failureMessage: failureMessage.trim().substring(0, 200), // Limit message length
-      });
+      failedTests.push({ fullName: testMatch[1].trim(), filePath: currentFile });
     }
-  }
+  };
 
-  return failedTests;
+  return {
+    feed(chunk) {
+      pending += typeof chunk === 'string' ? chunk : chunk.toString();
+      let nlIndex = pending.indexOf('\n');
+      while (nlIndex !== -1) {
+        handleLine(pending.slice(0, nlIndex));
+        pending = pending.slice(nlIndex + 1);
+        nlIndex = pending.indexOf('\n');
+      }
+    },
+    flush() {
+      if (pending) {
+        handleLine(pending);
+        pending = '';
+      }
+    },
+    get failedTests() {
+      return failedTests;
+    },
+  };
 }
 
 function writeFailureSummary(failedResults: JestConfigResult[], log: ToolingLog) {

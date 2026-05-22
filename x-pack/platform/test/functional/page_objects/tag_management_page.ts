@@ -187,7 +187,6 @@ class TagModal extends FtrService {
  */
 class TagAssignmentFlyout extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
-  private readonly find = this.ctx.getService('find');
 
   constructor(ctx: FtrProviderContext, private readonly page: TagManagementPageObject) {
     super(ctx);
@@ -233,9 +232,7 @@ class TagAssignmentFlyout extends FtrService {
    * Wait until the assignable object results are displayed in the flyout.
    */
   async waitUntilResultsAreLoaded() {
-    return this.find.waitForDeletedByCssSelector(
-      '*[data-test-subj="assignFlyoutResultList"] .euiLoadingSpinner'
-    );
+    return this.testSubjects.waitForDeleted('assignFlyoutResultList-loading');
   }
 
   /**

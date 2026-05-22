@@ -30,7 +30,7 @@ export const FancySelect: React.FC<FancySelectProps> = ({
       valueOfSelected={value}
       options={options.map((option) => ({
         value: option.id,
-        icon: option.icon,
+        prepend: option.icon,
         layoutAlign: 'center',
         inputDisplay: (
           <EuiFlexGroup justifyContent={'spaceBetween'} alignItems={'center'} gutterSize={'s'}>

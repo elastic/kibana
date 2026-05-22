@@ -16,7 +16,7 @@ import { isEmpty } from 'lodash';
 import moment from 'moment';
 import objectHash from 'object-hash';
 import { hasStatsCommand } from '@kbn/streams-schema';
-import { MAX_ALERTS_PER_EXECUTION, MATCH_LOOKBACK_MINUTES } from './common';
+import { MAX_ALERTS_PER_EXECUTION, MAX_DEDUP_IDS, MATCH_LOOKBACK_MINUTES } from './common';
 import { buildEsqlSearchRequest } from './lib/build_esql_search_request';
 import { executeEsqlRequest } from './lib/execute_esql_request';
 import type { EsqlRuleInstanceState, EsqlRuleParams } from './types';
@@ -68,7 +68,7 @@ export async function getRuleExecutor(
   if (results.length === 0) {
     return {
       state: {
-        previousOriginalDocumentIds: [],
+        previousOriginalDocumentIds,
       },
     };
   }
@@ -116,9 +116,13 @@ export async function getRuleExecutor(
     }
   }
 
+  // Previous IDs come first, new IDs are appended — slice(-N) keeps the most recent ones.
+  const mergedIds = [...new Set([...previousOriginalDocumentIds, ...originalDocumentIds])];
+
   return {
     state: {
-      previousOriginalDocumentIds: originalDocumentIds,
+      previousOriginalDocumentIds:
+        mergedIds.length > MAX_DEDUP_IDS ? mergedIds.slice(-MAX_DEDUP_IDS) : mergedIds,
     },
   };
 }

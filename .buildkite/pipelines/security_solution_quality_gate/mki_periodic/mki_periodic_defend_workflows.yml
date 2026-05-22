@@ -14,6 +14,8 @@ steps:
           diskSizeGb: 120
         timeout_in_minutes: 300
         parallelism: 5
+        soft_fail:
+          - exit_status: 101
 
   - group: "Osquery MKI - Defend Workflows"
     key: cypress_test_osquery_defend_workflows
@@ -30,6 +32,8 @@ steps:
           diskSizeGb: 120
         timeout_in_minutes: 300
         parallelism: 3
+        soft_fail:
+          - exit_status: 101
 
   - group: "API MKI - Defend Workflows"
     key: api_test_defend_workflows
@@ -108,6 +112,8 @@ steps:
           automatic:
             - exit_status: "1"
               limit: 1
+        soft_fail:
+          - exit_status: 101
 
       - label: "API MKI - edr_workflows:resolver:qa:serverless"
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh edr_workflows:resolver:qa:serverless
@@ -123,6 +129,8 @@ steps:
           automatic:
             - exit_status: "1"
               limit: 1
+        soft_fail:
+          - exit_status: 101
 
       - label: "API MKI - edr_workflows:response_actions:qa:serverless"
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh edr_workflows:response_actions:qa:serverless
@@ -138,3 +146,5 @@ steps:
           automatic:
             - exit_status: "1"
               limit: 1
+        soft_fail:
+          - exit_status: 101

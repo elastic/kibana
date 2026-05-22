@@ -32,7 +32,7 @@ export const AgentPolicySummaryLine = memo<{
   agent?: Agent;
   direction?: 'column' | 'row';
   withDescription?: boolean;
-  /** When true (e.g. in agent list/details), show policy id in parentheses: "Policy Name (policy_id)" */
+  /** When true (e.g. in agent list/details), show policy ID in a tooltip on hover instead of inline. */
   showPolicyId?: boolean;
   isVersionSpecific?: boolean;
 }>(
@@ -46,7 +46,7 @@ export const AgentPolicySummaryLine = memo<{
   }) => {
     const { getHref } = useLink();
     const { name, id, is_managed: isManaged, description } = policy;
-    const policyDisplayName = showPolicyId && name ? `${name} (${id})` : name || id;
+    const policyDisplayName = name || id;
 
     const revision = agent ? agent.policy_revision : policy.revision;
     const isOutdated = agent?.policy_revision && policy.revision > agent.policy_revision;
@@ -157,14 +157,26 @@ export const AgentPolicySummaryLine = memo<{
               </EuiFlexItem>
             )}
             <EuiFlexItem grow={false} css={MIN_WIDTH}>
-              <EuiLink
-                className="eui-textBreakWord"
-                href={getHref('policy_details', { policyId: id })}
-                title={policyDisplayName}
-                data-test-subj="agentPolicyNameLink"
+              <EuiToolTip
+                content={
+                  showPolicyId && name ? (
+                    <FormattedMessage
+                      id="xpack.fleet.agentPolicySummaryLine.policyIdTooltip"
+                      defaultMessage="ID: {id}"
+                      values={{ id }}
+                    />
+                  ) : undefined
+                }
               >
-                {policyDisplayName}
-              </EuiLink>
+                <EuiLink
+                  className="eui-textBreakWord"
+                  href={getHref('policy_details', { policyId: id })}
+                  title={policyDisplayName}
+                  data-test-subj="agentPolicyNameLink"
+                >
+                  {policyDisplayName}
+                </EuiLink>
+              </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

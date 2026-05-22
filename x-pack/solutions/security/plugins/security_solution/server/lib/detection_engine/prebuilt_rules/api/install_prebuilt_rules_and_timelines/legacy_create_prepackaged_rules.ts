@@ -55,12 +55,9 @@ export const legacyCreatePrepackagedRules = async (
     await exceptionsListClient.createEndpointList();
   }
 
-  const latestPrebuiltRules = await ensureLatestRulesPackageInstalled(
-    ruleAssetsClient,
-    context,
-    logger
-  );
+  await ensureLatestRulesPackageInstalled(ruleAssetsClient, context, logger);
 
+  const latestPrebuiltRules = await ruleAssetsClient.fetchLatestAssets();
   const installedPrebuiltRules = rulesToMap(
     await getExistingPrepackagedRules({ rulesClient, logger })
   );

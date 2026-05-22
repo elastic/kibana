@@ -35,7 +35,7 @@ fi
 
 if [ "$configs" == "" ] && [ "$FTR_CONFIG_GROUP_KEY" != "" ]; then
   echo "--- downloading ftr test run order"
-  download_artifact ftr_run_order.json .
+  download_tmp_artifact ftr_run_order.json . "$BUILDKITE_BUILD_ID"
   configs=$(jq -r '.[env.FTR_CONFIG_GROUP_KEY].names[]' ftr_run_order.json)
 fi
 

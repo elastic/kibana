@@ -45,13 +45,13 @@ export interface AlertingV2Usage {
   executions_delay_p99_ms?: number | null;
   dispatcher_executions_count_24hr?: number;
 
-  // notification policy stats
-  notification_policies_count?: number;
-  notification_policies_unique_workflow_count?: number;
-  notification_policies_count_with_matcher?: number;
-  notification_policies_count_with_group_by?: number;
-  notification_policies_avg_group_by_fields_count?: number | null;
-  notification_policies_count_by_throttle_interval?: NameValuePair[];
+  // action policy stats
+  action_policies_count?: number;
+  action_policies_unique_workflow_count?: number;
+  action_policies_count_with_matcher?: number;
+  action_policies_count_with_group_by?: number;
+  action_policies_avg_group_by_fields_count?: number | null;
+  action_policies_count_by_throttle_interval?: NameValuePair[];
 
   // alert event stats
   alerts_count?: number;

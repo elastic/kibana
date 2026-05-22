@@ -27,6 +27,7 @@ export type {
   UserSettingsData,
   ContrastModeValue,
   DarkModeValue,
+  LocaleValue,
   UserProfileAvatarData,
 } from './src/types';
 export { useUpdateUserProfile, type UpdateUserProfileHook } from './src/hooks';

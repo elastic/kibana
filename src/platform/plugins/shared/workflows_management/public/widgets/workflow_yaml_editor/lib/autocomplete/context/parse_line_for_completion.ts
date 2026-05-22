@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { parsePath } from '@kbn/workflows/common/utils/zod/get_schema_at_path';
 import {
   LIQUID_BLOCK_FILTER_REGEX,
   LIQUID_BLOCK_KEYWORD_REGEX,
   LIQUID_FILTER_REGEX,
   UNFINISHED_VARIABLE_REGEX_GLOBAL,
   VARIABLE_REGEX_GLOBAL,
-} from '../../../../../../common/lib/regex';
-import { parsePath } from '../../../../../../common/lib/zod';
+} from '@kbn/workflows-yaml';
 
 interface BaseLineParseResult {
   fullKey: string;

@@ -17,6 +17,7 @@ import {
   EuiPopoverTitle,
   EuiSpacer,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { FC, ReactNode } from 'react';
 import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -35,7 +36,7 @@ const SELECT_PICKER_HEIGHT = '250px';
 const NoFilterItems = () => {
   return (
     <EuiSelectableMessage>
-      <EuiIcon type="minusCircle" />
+      <EuiIcon aria-hidden={true} type="minusCircle" />
       <EuiSpacer size="xs" />
       <p>
         <FormattedMessage
@@ -121,6 +122,12 @@ export const MultiSelectPicker: FC<{
         isOpen={isPopoverOpen}
         closePopover={closePopover}
         panelPaddingSize="none"
+        aria-label={i18n.translate(
+          'xpack.dataVisualizer.multiSelectPicker.filterOptionsAriaLabel',
+          {
+            defaultMessage: 'Filter options',
+          }
+        )}
       >
         <EuiPopoverTitle paddingSize="s">
           <EuiFieldSearch

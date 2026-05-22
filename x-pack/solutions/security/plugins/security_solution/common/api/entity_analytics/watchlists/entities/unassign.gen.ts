@@ -14,66 +14,74 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const WatchlistEntityUnassignResponseItem = lazySchema(() =>
+  z.object({
+    /**
+     * The EUID of the entity
+     */
+    euid: z.string(),
+    status: z.enum(['success', 'failure', 'not_found']),
+    /**
+     * Error message if the entity failed to process
+     */
+    error: z.string().optional(),
+  })
+);
 export type WatchlistEntityUnassignResponseItem = z.infer<
   typeof WatchlistEntityUnassignResponseItem
 >;
-export const WatchlistEntityUnassignResponseItem = z.object({
-  /**
-   * The EUID of the entity
-   */
-  euid: z.string(),
-  status: z.enum(['success', 'failure', 'not_found']),
-  /**
-   * Error message if the entity failed to process
-   */
-  error: z.string().optional(),
-});
 
+export const UnassignWatchlistEntitiesRequestParams = lazySchema(() =>
+  z.object({
+    /**
+     * The ID of the watchlist to remove entities from
+     */
+    watchlist_id: z.string(),
+  })
+);
 export type UnassignWatchlistEntitiesRequestParams = z.infer<
   typeof UnassignWatchlistEntitiesRequestParams
 >;
-export const UnassignWatchlistEntitiesRequestParams = z.object({
-  /**
-   * The ID of the watchlist to remove entities from
-   */
-  watchlist_id: z.string(),
-});
 export type UnassignWatchlistEntitiesRequestParamsInput = z.input<
   typeof UnassignWatchlistEntitiesRequestParams
 >;
 
+export const UnassignWatchlistEntitiesRequestBody = lazySchema(() =>
+  z.object({
+    /**
+     * The EUIDs of the entities to unassign
+     */
+    euids: z.array(z.string()),
+  })
+);
 export type UnassignWatchlistEntitiesRequestBody = z.infer<
   typeof UnassignWatchlistEntitiesRequestBody
 >;
-export const UnassignWatchlistEntitiesRequestBody = z.object({
-  /**
-   * The EUIDs of the entities to unassign
-   */
-  euids: z.array(z.string()),
-});
 export type UnassignWatchlistEntitiesRequestBodyInput = z.input<
   typeof UnassignWatchlistEntitiesRequestBody
 >;
 
+export const UnassignWatchlistEntitiesResponse = lazySchema(() =>
+  z.object({
+    /**
+     * Number of entities successfully unassigned
+     */
+    successful: z.number().int(),
+    /**
+     * Number of entities that failed to process
+     */
+    failed: z.number().int(),
+    /**
+     * Number of entities not found in the manual watchlist assignment
+     */
+    not_found: z.number().int(),
+    /**
+     * Total number of entities processed
+     */
+    total: z.number().int(),
+    items: z.array(WatchlistEntityUnassignResponseItem),
+  })
+);
 export type UnassignWatchlistEntitiesResponse = z.infer<typeof UnassignWatchlistEntitiesResponse>;
-export const UnassignWatchlistEntitiesResponse = z.object({
-  /**
-   * Number of entities successfully unassigned
-   */
-  successful: z.number().int(),
-  /**
-   * Number of entities that failed to process
-   */
-  failed: z.number().int(),
-  /**
-   * Number of entities not found in the manual watchlist assignment
-   */
-  not_found: z.number().int(),
-  /**
-   * Total number of entities processed
-   */
-  total: z.number().int(),
-  items: z.array(WatchlistEntityUnassignResponseItem),
-});

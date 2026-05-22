@@ -285,9 +285,10 @@ const GroupingComponent = <T,>({
         }
         className="eui-xScroll"
       >
-        {isLoading ? (
+        {isLoading && (
           <EuiProgress data-test-subj="is-loading-grouping-table" size="xs" color="accent" />
-        ) : groupCount > 0 ? (
+        )}
+        {groupCount > 0 ? (
           <span data-test-subj={`grouping-level-${groupingLevel}`}>
             {groupPanels}
             {groupCount > 0 && (
@@ -315,7 +316,7 @@ const GroupingComponent = <T,>({
             )}
           </span>
         ) : (
-          emptyComponent
+          !isLoading && emptyComponent
         )}
       </div>
     </div>

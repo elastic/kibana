@@ -140,6 +140,26 @@ const alertWorkflowPanelContent = 'alert-workflow-panel-content';
 const runDocumentWorkflowActionButton = 'run-document-workflow-action';
 const documentWorkflowPanelContent = 'document-workflow-panel-content';
 
+// `alert_context_menu.tsx` eagerly imports four flyout components that are
+// never opened by any test in this file. Their transitive module graphs add a
+// large one-time cost to the first render through `<TestProviders>` +
+// `<AlertContextMenu>`, which under CI load was pushing the first `Case
+// actions` test past Jest's default 5s test timeout (flake on
+// kibana-on-merge build 96698). Replacing the flyouts with no-op components
+// removes the cost at its source.
+jest.mock(
+  '../../../../management/pages/endpoint_exceptions/view/components/endpoint_exceptions_flyout',
+  () => ({ EndpointExceptionsFlyout: () => null })
+);
+jest.mock('../../osquery/osquery_flyout', () => ({ OsqueryFlyout: () => null }));
+jest.mock('../../../../detection_engine/rule_exceptions/components/add_exception_flyout', () => ({
+  AddExceptionFlyout: () => null,
+}));
+jest.mock(
+  '../../../../management/pages/event_filters/view/components/event_filters_flyout',
+  () => ({ EventFiltersFlyout: () => null })
+);
+
 describe('Alert table context menu', () => {
   describe('Case actions', () => {
     test('it render AddToCase context menu item if timelineId === TimelineId.detectionsPage', async () => {
@@ -257,6 +277,12 @@ describe('Alert table context menu', () => {
     });
 
     test('it shows the workflow panel when run workflow action is clicked', async () => {
+      // EuiPopover applies `pointer-events: none` on the panel until its mount
+      // transition completes. user-event v14 throws synchronously when it
+      // encounters that style, which made this click flaky. Disabling the
+      // pointer-events check here mirrors the sibling Document workflow test
+      // below and is the same fix the user-event docs recommend for popovers.
+      const user = userEvent.setup({ pointerEventsCheck: 0 });
       mockUseRunAlertWorkflowPanel.mockReturnValue({
         runWorkflowMenuItem: mockRunWorkflowMenuItem,
         runAlertWorkflowPanel: mockRunAlertWorkflowPanel,
@@ -268,8 +294,8 @@ describe('Alert table context menu', () => {
         </TestProviders>
       );
 
-      await userEvent.click(wrapper.getByTestId(actionMenuButton));
-      await userEvent.click(wrapper.getByTestId(runWorkflowActionButton));
+      await user.click(wrapper.getByTestId(actionMenuButton));
+      await user.click(wrapper.getByTestId(runWorkflowActionButton));
 
       await waitFor(() => {
         expect(wrapper.getByTestId(alertWorkflowPanelContent)).toBeInTheDocument();

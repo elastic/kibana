@@ -1,8 +1,0 @@
-type: string
-description: The type of comment.
-enum:
-  - actions
-  - alert
-  - event
-  - user
-example: user

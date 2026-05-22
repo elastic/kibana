@@ -7,11 +7,18 @@
 
 import React from 'react';
 import styled from '@emotion/styled';
-import type { AgentMark } from '../../../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_agent_marks';
-import type { ErrorMark } from '../../../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_error_marks';
+import type { AgentMark } from './agent_marker';
 import { AgentMarker } from './agent_marker';
+import type { ErrorMark } from './error_marker';
 import { ErrorMarker } from './error_marker';
 import { ErrorMarkerWithLink } from './error_marker_with_link';
+
+export interface Mark {
+  type: string;
+  offset: number;
+  verticalLine: boolean;
+  id: string;
+}
 
 interface Props {
   mark: ErrorMark | AgentMark;

@@ -9,6 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import type { IndicesGetResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
+import { isNotFoundError } from '@kbn/es-errors';
 import { Streams, isIlmLifecycle, type IlmPolicyWithUsage } from '@kbn/streams-schema';
 import { processAsyncInChunks } from '../../../../utils/process_async_in_chunks';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
@@ -88,16 +89,32 @@ const lifecycleStatsRoute = createServerRoute({
       throw new StatusError('Lifecycle stats are only available for ILM policy', 400);
     }
 
-    const { policy } = await scopedClusterClient.asCurrentUser.ilm
-      .getLifecycle({ name: lifecycle.ilm.policy })
-      .then((policies) => policies[lifecycle.ilm.policy]);
+    const policyName = lifecycle.ilm.policy;
+    let policyDetails: Awaited<
+      ReturnType<typeof scopedClusterClient.asCurrentUser.ilm.getLifecycle>
+    >;
+    try {
+      policyDetails = await scopedClusterClient.asCurrentUser.ilm.getLifecycle({
+        name: policyName,
+      });
+    } catch (error) {
+      if (isNotFoundError(error)) {
+        return { phases: undefined, policy_missing: true };
+      }
+      throw error;
+    }
+
+    const { policy } = policyDetails[policyName];
 
     const [{ indices: indicesIlmDetails }, { indices: indicesStats = {} }] = await Promise.all([
       scopedClusterClient.asCurrentUser.ilm.explainLifecycle({ index: name }),
       scopedClusterClient.asCurrentUser.indices.stats({ index: dataStream.name }),
     ]);
 
-    return { phases: ilmPhases({ policy, indicesIlmDetails, indicesStats }) };
+    return {
+      phases: ilmPhases({ policy, indicesIlmDetails, indicesStats }),
+      policy_missing: false,
+    };
   },
 });
 

@@ -15,9 +15,6 @@ export const configSchema = schema.object({
     interval: schema.string({ defaultValue: '5m', validate: validateDuration }),
     removalDelay: schema.string({ defaultValue: '1h', validate: validateDuration }),
   }),
-  ui: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
-  }),
 });
 
 export type PluginConfig = TypeOf<typeof configSchema>;

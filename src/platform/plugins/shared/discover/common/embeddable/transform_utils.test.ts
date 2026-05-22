@@ -289,7 +289,6 @@ describe('search embeddable transform utils', () => {
                 },
                 data_view_id: 'c7d7a1f5-19da-4ba9-af15-5919e8cd2528',
                 disabled: false,
-                negate: false,
               },
             ],
             sort: [{ name: '@timestamp', direction: 'desc' }],
@@ -530,14 +529,13 @@ describe('search embeddable transform utils', () => {
               type: AS_CODE_DATA_VIEW_SPEC_TYPE,
               index_pattern: 'my-*',
               time_field: '@timestamp',
-              runtime_fields: [
-                {
-                  name: 'rt',
+              field_settings: {
+                rt: {
                   type: 'keyword',
                   script: 'emit("x")',
                   format: { type: 'string' },
                 },
-              ],
+              },
             },
           },
         ],

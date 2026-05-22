@@ -1,0 +1,215 @@
+overlay: 1.0.0
+info:
+  title: Bump slim overlay — replace Dashboards & Visualizations with tech-preview placeholders
+  version: 0.0.1
+  # ⚠️  TEMPORARY — retire this file when Dashboards & Visualizations APIs reach GA.
+  # See https://github.com/elastic/kibana/issues/266195 for the full revert checklist.
+  # Current external hosting: https://elastic.github.io/dashboards-api-spec/
+
+actions:
+  # ──────────────────────────────────────────────
+  # DASHBOARDS
+  # Strategy: strip each operation down to just a redirect notice.
+  # - Remove real operation (parameters, requestBody, responses, description)
+  # - Re-inject a minimal shell with the tech-preview notice as the sole description
+  # This keeps every endpoint visible in the Bump nav while rendering nothing
+  # except the link to the external full reference.
+  #
+  # ⚠️  Ordering dependency: the remove actions MUST run before the update (re-inject)
+  # actions for the same path. The Bump overlay spec processes actions top-to-bottom,
+  # so this ordering is currently guaranteed by the sequence in this file. If Bump ever
+  # changes this behaviour, the re-injected shells would be overwritten by the removes
+  # and the endpoints would disappear from the nav entirely.
+  # ──────────────────────────────────────────────
+
+  # ⚠️  TODO before tech preview GA: update the URLs in the descriptions below.
+  - target: "$.paths['/api/dashboards'].get"
+    description: "Strip GET /api/dashboards down to redirect notice"
+    remove: true
+  - target: "$.paths['/api/dashboards'].post"
+    description: "Strip POST /api/dashboards down to redirect notice"
+    remove: true
+  - target: "$.paths['/api/dashboards']"
+    description: "Re-inject minimal GET and POST for /api/dashboards"
+    update:
+      get:
+        tags:
+          - Dashboards
+        summary: "Get dashboards"
+        operationId: get-dashboards-redirect
+        description: |
+          > **Technical preview** — The Dashboards API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+          >
+          > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards)**
+        responses:
+          '200':
+            description: See the full Dashboards API reference for detailed response schemas.
+      post:
+        tags:
+          - Dashboards
+        summary: "Create a dashboard"
+        operationId: create-dashboard-redirect
+        description: |
+          > **Technical preview** — The Dashboards API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+          >
+          > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards)**
+        responses:
+          '200':
+            description: See the full Dashboards API reference for detailed response schemas.
+
+  - target: "$.paths['/api/dashboards/{id}'].get"
+    description: "Strip GET /api/dashboards/{id} down to redirect notice"
+    remove: true
+  - target: "$.paths['/api/dashboards/{id}'].put"
+    description: "Strip PUT /api/dashboards/{id} down to redirect notice"
+    remove: true
+  - target: "$.paths['/api/dashboards/{id}'].delete"
+    description: "Strip DELETE /api/dashboards/{id} down to redirect notice"
+    remove: true
+  - target: "$.paths['/api/dashboards/{id}']"
+    description: "Re-inject minimal GET, PUT, DELETE for /api/dashboards/{id}"
+    update:
+      get:
+        tags:
+          - Dashboards
+        summary: "Get a dashboard"
+        operationId: get-dashboard-redirect
+        description: |
+          > **Technical preview** — The Dashboards API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+          >
+          > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards)**
+        responses:
+          '200':
+            description: See the full Dashboards API reference for detailed response schemas.
+      put:
+        tags:
+          - Dashboards
+        summary: "Update a dashboard"
+        operationId: update-dashboard-redirect
+        description: |
+          > **Technical preview** — The Dashboards API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+          >
+          > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards)**
+        responses:
+          '200':
+            description: See the full Dashboards API reference for detailed response schemas.
+      delete:
+        tags:
+          - Dashboards
+        summary: "Delete a dashboard"
+        operationId: delete-dashboard-redirect
+        description: |
+          > **Technical preview** — The Dashboards API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+          >
+          > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards)**
+        responses:
+          '200':
+            description: See the full Dashboards API reference for detailed response schemas.
+
+  # ──────────────────────────────────────────────
+  # VISUALIZATIONS — same strategy.
+  # ──────────────────────────────────────────────
+
+  # ⚠️  TODO before tech preview GA: update the URLs in the descriptions below.
+  - target: "$.paths['/api/visualizations'].get"
+    description: "Strip GET /api/visualizations down to redirect notice"
+    remove: true
+  - target: "$.paths['/api/visualizations'].post"
+    description: "Strip POST /api/visualizations down to redirect notice"
+    remove: true
+  - target: "$.paths['/api/visualizations']"
+    description: "Re-inject minimal GET and POST for /api/visualizations"
+    update:
+      get:
+        tags:
+          - Visualizations
+        summary: "Get visualizations"
+        operationId: get-visualizations-redirect
+        description: |
+          > **Technical preview** — The Visualizations API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+          >
+          > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/visualizations#tag/Visualizations)**
+        responses:
+          '200':
+            description: See the full Visualizations API reference for detailed response schemas.
+      post:
+        tags:
+          - Visualizations
+        summary: "Create a visualization"
+        operationId: create-visualization-redirect
+        description: |
+          > **Technical preview** — The Visualizations API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+          >
+          > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/visualizations#tag/Visualizations)**
+        responses:
+          '200':
+            description: See the full Visualizations API reference for detailed response schemas.
+
+  - target: "$.paths['/api/visualizations/{id}'].get"
+    description: "Strip GET /api/visualizations/{id} down to redirect notice"
+    remove: true
+  - target: "$.paths['/api/visualizations/{id}'].put"
+    description: "Strip PUT /api/visualizations/{id} down to redirect notice"
+    remove: true
+  - target: "$.paths['/api/visualizations/{id}'].delete"
+    description: "Strip DELETE /api/visualizations/{id} down to redirect notice"
+    remove: true
+  - target: "$.paths['/api/visualizations/{id}']"
+    description: "Re-inject minimal GET, PUT, DELETE for /api/visualizations/{id}"
+    update:
+      get:
+        tags:
+          - Visualizations
+        summary: "Get a visualization"
+        operationId: get-visualization-redirect
+        description: |
+          > **Technical preview** — The Visualizations API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+          >
+          > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/visualizations#tag/Visualizations)**
+        responses:
+          '200':
+            description: See the full Visualizations API reference for detailed response schemas.
+      put:
+        tags:
+          - Visualizations
+        summary: "Update a visualization"
+        operationId: update-visualization-redirect
+        description: |
+          > **Technical preview** — The Visualizations API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+          >
+          > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/visualizations#tag/Visualizations)**
+        responses:
+          '200':
+            description: See the full Visualizations API reference for detailed response schemas.
+      delete:
+        tags:
+          - Visualizations
+        summary: "Delete a visualization"
+        operationId: delete-visualization-redirect
+        description: |
+          > **Technical preview** — The Visualizations API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+          >
+          > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/visualizations#tag/Visualizations)**
+        responses:
+          '200':
+            description: See the full Visualizations API reference for detailed response schemas.
+
+  # ──────────────────────────────────────────────
+  # Tag-level descriptions (section intro above the operations list).
+  # ──────────────────────────────────────────────
+  # ⚠️  TODO before tech preview GA: update the URLs below.
+  - target: '$.tags[?(@.name=="Dashboards")]'
+    description: "Replace Dashboards tag description with tech-preview notice"
+    update:
+      description: |
+        > **Technical preview** — The Dashboards API is currently in technical preview and its reference documentation is temporarily hosted at a separate location.
+        >
+        > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards)**
+
+  - target: '$.tags[?(@.name=="Visualizations")]'
+    description: "Replace Visualizations tag description with tech-preview notice"
+    update:
+      description: |
+        > **Technical preview** — The Visualizations API is currently in technical preview and its reference documentation is temporarily hosted at a separate location.
+        >
+        > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/visualizations#tag/Visualizations)**

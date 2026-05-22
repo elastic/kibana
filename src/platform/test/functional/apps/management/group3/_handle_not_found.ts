@@ -26,8 +26,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it(`redirects to the main view if data view is missing`, async () => {
       await PageObjects.common.navigateToUrl('settings', 'kibana/dataViews/patterns/111111111111', {
-        ensureCurrentUrl: false,
         shouldUseHashForSubUrl: false,
+        ensureCurrentUrl: false,
       });
 
       await testSubjects.existOrFail('noDataViewsPrompt');

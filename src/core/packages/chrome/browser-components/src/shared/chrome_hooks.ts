@@ -17,6 +17,7 @@ import type {
   ChromeHelpMenuLink,
   ChromeNavControl,
   ChromeNavLink,
+  GlobalSearchConfig,
 } from '@kbn/core-chrome-browser';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
@@ -278,4 +279,15 @@ export function useHasAppMenu(): boolean {
   const hasLegacyActionMenu = useHasLegacyActionMenu();
   const hasAppMenuConfig = useHasAppMenuConfig();
   return hasLegacyActionMenu || hasAppMenuConfig;
+}
+
+/**
+ * Returns the current global search configuration, or `undefined` if none is set.
+ * Used by `SearchButton` (global header).
+ */
+
+export function useGlobalSearch(): GlobalSearchConfig | undefined {
+  const chrome = useChromeService();
+  const config$ = useMemo(() => chrome.next.globalSearch.get$(), [chrome]);
+  return useObservable(config$, undefined);
 }

@@ -7,6 +7,13 @@
 
 import type { CoreStart } from '@kbn/core/public';
 
+const APPS_WITHOUT_CATEGORY_PREFIX = [
+  'ml:singleMetricViewer',
+  'ml:resultExplorer',
+  'ml:analyticsMap',
+  'ml:anomalyExplorer',
+];
+
 /**
  * Get current app details from browser URL and nav links.
  * Uses the actual browser URL for accurate deep link detection.
@@ -45,7 +52,7 @@ export const getAppDetails = (core: CoreStart) => {
   let title = match?.title;
   const category = match?.category;
 
-  if (category) {
+  if (category && !APPS_WITHOUT_CATEGORY_PREFIX.includes(match?.id)) {
     title = `${category.label} - ${match?.title}`;
   }
 

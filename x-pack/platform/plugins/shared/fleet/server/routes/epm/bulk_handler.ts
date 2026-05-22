@@ -8,15 +8,24 @@
 import type { TypeOf } from '@kbn/config-schema';
 
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import pMap from 'p-map';
 
 import { appContextService, licenseService, packagePolicyService } from '../../services';
 import type {
   BulkRollbackPackagesRequestSchema,
+  BulkNamespaceCustomizationRequestSchema,
   BulkUninstallPackagesRequestSchema,
   BulkUpgradePackagesRequestSchema,
   FleetRequestHandler,
   GetOneBulkOperationPackagesRequestSchema,
 } from '../../types';
+import { updatePackage } from '../../services/epm/packages/update';
+import { scheduleSyncNamespaceTemplatesTask } from '../../tasks/sync_namespace_templates_task';
+import {
+  getAllowedNamespacePrefixesForSpace,
+  isNamespaceAllowedByPrefixes,
+} from '../../services/spaces/policy_namespaces';
 
 import type {
   BulkOperationPackagesResponse,
@@ -179,4 +188,109 @@ export const postBulkRollbackPackagesHandler: FleetRequestHandler<
     taskId,
   };
   return response.ok({ body });
+};
+
+// Number of concurrent per-package namespace-customization updates in the bulk
+// endpoint. Each one hits the Installation SO; kept small to avoid SO client contention.
+const BULK_NAMESPACE_CUSTOMIZATION_CONCURRENCY = 5;
+
+export const postBulkNamespaceCustomizationHandler: FleetRequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof BulkNamespaceCustomizationRequestSchema.body>
+> = async (context, request, response) => {
+  const fleetContext = await context.fleet;
+  const savedObjectsClient = fleetContext.internalSoClient;
+  const spaceId = savedObjectsClient.getCurrentNamespace() ?? DEFAULT_SPACE_ID;
+
+  const { packages, enable = [], disable = [] } = request.body;
+
+  const conflicts = enable.filter((ns) => disable.includes(ns));
+  if (conflicts.length > 0) {
+    throw new FleetError(
+      `Namespaces must not appear in both enable and disable: ${conflicts.join(', ')}`
+    );
+  }
+
+  const taskManagerStart = getTaskManagerStart();
+  const allowedPrefixes = await getAllowedNamespacePrefixesForSpace(spaceId);
+
+  const items = await pMap(
+    packages,
+    async (packageName) => {
+      const installation = await getInstallationsByName({
+        savedObjectsClient,
+        pkgNames: [packageName],
+      });
+      if (installation.length === 0) {
+        return {
+          name: packageName,
+          success: false,
+          error: `Package ${packageName} is not installed`,
+        };
+      }
+
+      const current = installation[0].namespace_customization_enabled_for ?? [];
+      // Tracks the persisted state across the try block: starts at `current`, advances
+      // to `newList` once `updatePackage` has committed. The catch handler returns this
+      // so the response always reflects what's actually in the SO.
+      let persistedList = current;
+
+      try {
+        const afterEnable = [...new Set([...current, ...enable])];
+        const newList = afterEnable.filter((ns) => !disable.includes(ns));
+
+        // Gate both added and removed namespaces on the current space's allowed_namespace_prefixes.
+        const added = newList.filter((ns) => !current.includes(ns));
+        const removed = current.filter((ns) => !newList.includes(ns));
+        const changed = [...added, ...removed];
+        const blocked = changed.filter((ns) => !isNamespaceAllowedByPrefixes(ns, allowedPrefixes));
+        if (blocked.length > 0) {
+          return {
+            name: packageName,
+            success: false,
+            namespace_customization_enabled_for: current,
+            error: `Cannot change namespace customization for: ${blocked.join(
+              ', '
+            )}. Allowed prefixes in this space: ${(allowedPrefixes ?? []).join(', ')}`,
+          };
+        }
+
+        const { namespaceCustomizationDiff } = await updatePackage({
+          savedObjectsClient,
+          pkgName: packageName,
+          namespace_customization_enabled_for: newList,
+        });
+        persistedList = newList;
+
+        if (
+          namespaceCustomizationDiff.addedNamespaces.length > 0 ||
+          namespaceCustomizationDiff.removedNamespaces.length > 0
+        ) {
+          await scheduleSyncNamespaceTemplatesTask(taskManagerStart, {
+            spaceId,
+            packageName,
+            addedNamespaces: namespaceCustomizationDiff.addedNamespaces,
+            removedNamespaces: namespaceCustomizationDiff.removedNamespaces,
+          });
+        }
+
+        return {
+          name: packageName,
+          success: true,
+          namespace_customization_enabled_for: newList,
+        };
+      } catch (err) {
+        return {
+          name: packageName,
+          success: false,
+          namespace_customization_enabled_for: persistedList,
+          error: err instanceof Error ? err.message : String(err),
+        };
+      }
+    },
+    { concurrency: BULK_NAMESPACE_CUSTOMIZATION_CONCURRENCY }
+  );
+
+  return response.ok({ body: { items } });
 };

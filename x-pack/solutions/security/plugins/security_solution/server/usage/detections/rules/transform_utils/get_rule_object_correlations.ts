@@ -83,6 +83,7 @@ export const getRuleObjectCorrelations = ({
       has_response_actions_endpoint: hasResponseActionsEndpoint,
       has_response_actions_osquery: hasResponseActionsOsquery,
       has_does_not_match_condition: getThreatMatchUsage(attributes).hasDoesNotMatchCondition,
+      ai_created: attributes.params.meta?.creationSource === 'ai',
     };
   });
 };
