@@ -16,7 +16,7 @@ import { popularizeField } from '@kbn/unified-data-table';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DocViewerApi } from '@kbn/unified-doc-viewer';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import useLatest from 'react-use/lib/useLatest';
+import { useStableCallback } from '@kbn/react-hooks';
 import { ContextApp } from './context_app';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { useDataView } from '../../hooks/use_data_view';
@@ -84,7 +84,7 @@ export function ContextAppRoute() {
     []
   );
 
-  const addFilter = useLatest<DocViewFilterFn>((mapping, values, operation) => {
+  const addFilter = useStableCallback<DocViewFilterFn>((mapping, values, operation) => {
     if (!dataView || !mapping) {
       return;
     }
@@ -102,16 +102,12 @@ export function ContextAppRoute() {
     });
   });
 
-  const [stableAddFilter] = useState((): DocViewFilterFn => {
-    return (...params) => addFilter.current(...params);
-  });
-
   const [scopedProfilesManager] = useState(() =>
     profilesManager.createScopedProfilesManager({
       scopedEbtManager,
       toolkit: {
         actions: {
-          addFilter: stableAddFilter,
+          addFilter,
           setExpandedDoc,
         },
       },
@@ -153,7 +149,7 @@ export function ContextAppRoute() {
         anchorId={anchorId}
         dataView={dataView}
         referrer={locationState?.referrer}
-        addFilter={stableAddFilter}
+        addFilter={addFilter}
         expandedDoc={expandedDoc}
         initialDocViewerTabId={initialDocViewerTabId}
         docViewerRef={docViewerRef}
