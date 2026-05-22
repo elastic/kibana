@@ -195,9 +195,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const valuesCount = await readStatsFooterCount();
           // close the popover
           await testSubjects.click(fieldId);
-          // ensure the stats popover is fully unmounted before opening the add-filter
-          // popover (prevents the previous popover from intercepting the next click)
-          await testSubjects.missingOrFail('lnsFieldListPanel-statsFooter');
           // define a filter
           await filterBar.addFilter({ field: 'geo.src', operation: 'is', value: 'CN' });
           await header.waitUntilLoadingHasFinished();
