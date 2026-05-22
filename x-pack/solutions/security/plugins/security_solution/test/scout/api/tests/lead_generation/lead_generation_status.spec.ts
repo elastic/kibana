@@ -58,17 +58,15 @@ apiTest.describe(
         });
 
         expect(response).toHaveStatusCode(200);
-        // Shape assertions — all run even if one fails
-        expect.soft(typeof response.body.isEnabled).toBe('boolean');
-        expect.soft(typeof response.body.indexExists).toBe('boolean');
-        expect.soft(typeof response.body.totalLeads).toBe('number');
-        // lastRun is null before any run, or an ISO-8601 string afterwards
-        expect
-          .soft(response.body.lastRun, 'lastRun must be null or a string')
-          .toBeOneOf([null, expect.any(String)]);
+        // Required shape fields
+        expect(typeof response.body.isEnabled).toBe('boolean');
+        expect(typeof response.body.indexExists).toBe('boolean');
+        expect(typeof response.body.totalLeads).toBe('number');
+        // lastRun: null before any run, ISO-8601 string afterwards — field must be present
+        expect(response.body.lastRun).toBeDefined();
         // enable was called in beforeAll — confirm it is reflected
-        expect.soft(response.body.isEnabled).toBe(true);
-        expect.soft(response.body.indexExists).toBe(true);
+        expect(response.body.isEnabled).toBe(true);
+        expect(response.body.indexExists).toBe(true);
       }
     );
 

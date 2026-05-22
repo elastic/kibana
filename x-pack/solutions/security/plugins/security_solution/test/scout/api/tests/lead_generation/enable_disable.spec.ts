@@ -43,9 +43,9 @@ apiTest.describe(
         responseType: 'json',
         body: {},
       });
-      if (disableResponse.status !== 200 && disableResponse.status !== 404) {
+      if (disableResponse.statusCode !== 200 && disableResponse.statusCode !== 404) {
         throw new Error(
-          `Unexpected status from /disable during cleanup: ${disableResponse.status}`
+          `Unexpected status from /disable during cleanup: ${disableResponse.statusCode}`
         );
       }
       await cleanupLeadsIndex(esClient, DEFAULT_SPACE_ID);
@@ -68,8 +68,8 @@ apiTest.describe(
           responseType: 'json',
         });
         expect(response).toHaveStatusCode(200);
-        expect.soft(response.body.isEnabled).toBe(true);
-        expect.soft(response.body.indexExists).toBe(true);
+        expect(response.body.isEnabled).toBe(true);
+        expect(response.body.indexExists).toBe(true);
       });
     });
 
