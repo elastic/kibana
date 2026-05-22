@@ -43,7 +43,6 @@ const buildToolDeps = () => ({
     } as unknown,
   }),
   logger: loggingSystemMock.createLogger(),
-  workflowInitService: {} as unknown as ReturnType<typeof Object>,
   workflowsManagementApi: undefined,
 });
 
