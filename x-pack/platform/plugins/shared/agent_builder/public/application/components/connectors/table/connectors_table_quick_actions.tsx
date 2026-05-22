@@ -7,6 +7,8 @@
 
 import { EuiButtonIcon, EuiFlexGroup } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import React from 'react';
 import type { ConnectorItem } from '../../../../../common/http_api/tools';
 import { useConnectorsActions } from '../../../context/connectors_provider';
@@ -42,6 +44,10 @@ export const ConnectorQuickActions = ({ connector }: ConnectorQuickActionsProps)
         color="danger"
         onClick={() => deleteConnector(connector)}
         aria-label={labels.connectors.deleteConnectorButtonLabel}
+        {...getEbtProps({
+          element: AGENT_BUILDER_UI_EBT.element.pageContent,
+          action: AGENT_BUILDER_UI_EBT.action.connectors.DELETE_CONNECTOR,
+        })}
       />
     </EuiFlexGroup>
   );

@@ -6,6 +6,7 @@
  */
 
 import type { CreateRuleData } from '@kbn/alerting-v2-schemas';
+import type { AlertEvent } from '../../../server/resources/datastreams/alert_events';
 import { LOOKBACK_WINDOW, SCHEDULE_INTERVAL } from './constants';
 
 /**
@@ -39,3 +40,25 @@ export const buildCreateRuleData = (input: BuildCreateRuleDataInput = {}): Creat
   ...DEFAULTS,
   ...input,
 });
+
+/**
+ * Defaults used by `buildAlertEvent` so the integration specs only have to
+ * spell out what makes each alert event unique.
+ */
+export type BuildAlertEventInput = Partial<AlertEvent>;
+
+export const buildAlertEvent = (input: BuildAlertEventInput = {}): AlertEvent => {
+  const now = new Date().toISOString();
+  return {
+    '@timestamp': now,
+    scheduled_timestamp: now,
+    rule: { id: 'scout-rule-id', version: 1 },
+    group_hash: 'scout-group-hash',
+    data: {},
+    status: 'breached',
+    source: 'scout-test',
+    type: 'alert',
+    space_id: 'default',
+    ...input,
+  };
+};

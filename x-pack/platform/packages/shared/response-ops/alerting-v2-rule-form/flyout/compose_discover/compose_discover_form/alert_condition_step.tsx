@@ -166,7 +166,13 @@ export function AlertConditionStep({
         </>
       ) : !isAlert ? (
         <>
-          <QuerySummary query={fullQuery} label="query" />
+          <QuerySummary
+            query={fullQuery}
+            emptyMessage={i18n.translate(
+              'xpack.alertingV2.composeDiscover.alertCondition.noQueryDefined',
+              { defaultMessage: 'No query defined' }
+            )}
+          />
           <EuiSpacer size="s" />
           <EuiButton
             size="s"
@@ -210,7 +216,13 @@ export function AlertConditionStep({
             </strong>
           </EuiText>
           <EuiSpacer size="xs" />
-          <QuerySummary query={baseQuery} label="base query" />
+          <QuerySummary
+            query={baseQuery}
+            emptyMessage={i18n.translate(
+              'xpack.alertingV2.composeDiscover.alertCondition.noBaseQueryDefined',
+              { defaultMessage: 'No base query defined' }
+            )}
+          />
           <EuiSpacer size="m" />
           <EuiText size="xs" color="subdued">
             <strong>
@@ -221,7 +233,13 @@ export function AlertConditionStep({
             </strong>
           </EuiText>
           <EuiSpacer size="xs" />
-          <QuerySummary query={alertBlock} label="alert condition" />
+          <QuerySummary
+            query={alertBlock}
+            emptyMessage={i18n.translate(
+              'xpack.alertingV2.composeDiscover.alertCondition.noAlertConditionDefined',
+              { defaultMessage: 'No alert condition defined' }
+            )}
+          />
           <EuiSpacer size="s" />
           <EuiButton
             size="s"
