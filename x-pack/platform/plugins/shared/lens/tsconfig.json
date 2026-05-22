@@ -147,7 +147,8 @@
     "@kbn/esql-language",
     "@kbn/as-code-shared-schemas",
     "@kbn/as-code-shared-telemetry",
-    "@kbn/core-http-browser"
+    "@kbn/core-http-browser",
+    "@kbn/use-observable"
   ],
   "exclude": ["target/**/*"]
 }

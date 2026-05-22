@@ -6,6 +6,7 @@
   "include": ["common/**/*", "public/**/*", "server/**/*", "packaging/**/*", "test/**/*"],
   "kbn_references": [
     "@kbn/scout",
+    "@kbn/test-es-server",
     "@kbn/core",
     "@kbn/dev-tools-plugin",
     "@kbn/es-ui-shared-plugin",

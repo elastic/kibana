@@ -18,7 +18,7 @@ import type { DashboardSavingOption, SaveModalDashboardProps } from './types';
 import { SaveModalDashboardSelector } from './saved_object_save_modal_dashboard_selector';
 import { getPresentationCapabilities } from '../utils/get_presentation_capabilities';
 
-function SavedObjectSaveModalDashboard<T = void>(props: SaveModalDashboardProps<T>) {
+export function SavedObjectSaveModalDashboard<T = void>(props: SaveModalDashboardProps<T>) {
   const {
     customModalTitle,
     documentInfo,
@@ -132,10 +132,22 @@ function SavedObjectSaveModalDashboard<T = void>(props: SaveModalDashboardProps<
 
   const isValid = !(dashboardOption === 'existing' && selectedDashboard === null);
 
+  const { hasLibraryItemWithTitle, lastSavedTitle } = props.canSaveByReference
+    ? {
+        hasLibraryItemWithTitle: props.hasLibraryItemWithTitle,
+        lastSavedTitle: props.lastSavedTitle,
+      }
+    : {
+        hasLibraryItemWithTitle: async () => false,
+        lastSavedTitle: '',
+      };
+
   return (
     <SavedObjectSaveModal
       customModalTitle={customModalTitle}
+      hasLibraryItemWithTitle={hasLibraryItemWithTitle}
       onSave={onModalSave}
+      lastSavedTitle={lastSavedTitle}
       title={documentInfo.title}
       showCopyOnSave={documentId ? true : false}
       options={
@@ -158,7 +170,3 @@ function SavedObjectSaveModalDashboard<T = void>(props: SaveModalDashboardProps<
     />
   );
 }
-
-// required for dynamic import using React.lazy()
-// eslint-disable-next-line import/no-default-export
-export default SavedObjectSaveModalDashboard;

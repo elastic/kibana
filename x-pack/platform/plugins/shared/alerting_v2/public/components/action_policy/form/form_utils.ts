@@ -8,18 +8,17 @@
 import type {
   CreateActionPolicyData,
   ActionPolicyResponse,
-  ThrottleStrategy,
   UpdateActionPolicyBody,
 } from '@kbn/alerting-v2-schemas';
+import { needsInterval } from '@kbn/alerting-v2-schemas';
 import { DEFAULT_STRATEGY_FOR_MODE } from './constants';
 import type { ActionPolicyFormState } from './types';
 
-export const needsInterval = (strategy: ThrottleStrategy): boolean =>
-  strategy === 'per_status_interval' || strategy === 'time_interval';
+export { needsInterval };
 
 const buildThrottle = (state: ActionPolicyFormState) => ({
   strategy: state.throttleStrategy,
-  ...(needsInterval(state.throttleStrategy) ? { interval: state.throttleInterval } : {}),
+  interval: needsInterval(state.throttleStrategy) ? state.throttleInterval : null,
 });
 
 export const toFormState = (response: ActionPolicyResponse): ActionPolicyFormState => {
@@ -42,6 +41,7 @@ export const toCreatePayload = (state: ActionPolicyFormState): CreateActionPolic
   return {
     name: state.name,
     description: state.description,
+    type: 'global',
     groupingMode: state.groupingMode,
     ...(state.tags.length > 0 ? { tags: state.tags } : {}),
     ...(state.matcher ? { matcher: state.matcher } : {}),

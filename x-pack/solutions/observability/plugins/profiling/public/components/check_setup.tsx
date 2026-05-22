@@ -6,7 +6,7 @@
  */
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { AsyncStatus, useAsync } from '../hooks/use_async';
 import { useAutoAbortedHttpClient } from '../hooks/use_auto_aborted_http_client';
@@ -39,15 +39,17 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
     [fetchHasSetup]
   );
 
-  if (status === AsyncStatus.Settled) {
-    setProfilingSetupStatus(data);
-  }
+  useEffect(() => {
+    if (status === AsyncStatus.Settled) {
+      setProfilingSetupStatus(data);
+    }
+  }, [data, status, setProfilingSetupStatus]);
 
   const http = useAutoAbortedHttpClient([]);
 
   if (!license?.hasAtLeast('enterprise')) {
     return (
-      <ProfilingAppPageTemplate hideSearchBar tabs={[]}>
+      <ProfilingAppPageTemplate hideSearchBar>
         <LicensePrompt />
       </ProfilingAppPageTemplate>
     );
@@ -57,7 +59,7 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
 
   if (displayLoadingScreen) {
     return (
-      <ProfilingAppPageTemplate hideSearchBar tabs={[]}>
+      <ProfilingAppPageTemplate hideSearchBar>
         <EuiFlexGroup alignItems="center" justifyContent="center">
           <EuiFlexItem grow={false}>
             <EuiLoadingSpinner size="xxl" />
@@ -84,7 +86,6 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
   if (displaySetupScreen) {
     return (
       <ProfilingAppPageTemplate
-        tabs={[]}
         noDataConfig={{
           action: {
             elasticAgent: {
@@ -102,7 +103,7 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
                 : i18n.translate('xpack.profiling.noDataConfig.action.buttonLabel', {
                     defaultMessage: 'Set up Universal Profiling',
                   }),
-              buttonIsDisabled: (postSetupLoading && true) || data?.has_required_role === false,
+              buttonIsDisabled: postSetupLoading || data?.has_required_role === false,
               disabledButtonTooltipText:
                 data?.has_required_role === false
                   ? i18n.translate('xpack.profiling.noDataConfig.action.permissionsTooltip', {

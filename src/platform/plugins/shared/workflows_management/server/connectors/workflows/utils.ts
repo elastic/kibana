@@ -7,14 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isAxiosError } from 'axios';
-
 export const createServiceError = (error: Error, message: string) => {
-  if (isAxiosError(error)) {
-    const responseData = error.response?.data;
-    const errorMessage = responseData?.message || error.message;
-    return new Error(`${message}. Error: ${errorMessage}`);
-  }
-
-  return new Error(`${message}. Error: ${error.message}`);
+  // Some HTTP clients attach the parsed response body on `error.response.data`;
+  // prefer the upstream `message` field if it is present.
+  const responseData = (error as { response?: { data?: { message?: string } } }).response?.data;
+  const errorMessage = responseData?.message || error.message;
+  return new Error(`${message}. Error: ${errorMessage}`);
 };

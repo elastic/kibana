@@ -104,7 +104,7 @@ fileGroups:
     - scripts/**/*.json
     - server/**/*
     - test/scout/**/*
-    - public/common/schemas/*/*.json
+    - common/schemas/*/*.json
     - '!target/**/*'
   jest-config:
     - jest.config.js

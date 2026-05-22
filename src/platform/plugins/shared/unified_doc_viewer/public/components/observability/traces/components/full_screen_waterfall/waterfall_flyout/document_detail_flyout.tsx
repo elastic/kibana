@@ -12,16 +12,11 @@ import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React from 'react';
 import { WaterfallFlyout } from '.';
 import type { TraceOverviewSections } from '../../../doc_viewer_overview/overview';
-import { spanFlyoutId, SpanFlyoutContent } from './span_flyout';
-import { LogFlyoutContent } from './logs_flyout';
-import {
-  useDocumentFlyoutData,
-  type DocumentType,
-  type DocumentFlyoutData,
-} from './use_document_flyout_data';
+import { SpanFlyoutContent } from './span_flyout';
 import { FlyoutContentId } from '../../../common/constants';
-
-export type { DocumentType } from './use_document_flyout_data';
+import type { TraceDocFlyoutType } from '../../../common/types';
+import { LogFlyoutContent } from './logs_flyout';
+import { useDocumentFlyoutData, type DocumentFlyoutData } from './use_document_flyout_data';
 
 interface FlyoutContentProps {
   data: DocumentFlyoutData;
@@ -34,8 +29,8 @@ interface FlyoutConfig {
   render: (params: FlyoutContentProps) => React.ReactNode;
 }
 
-const getFlyoutConfig = (type: DocumentType): FlyoutConfig => {
-  if (type === spanFlyoutId) {
+const getFlyoutConfig = (type: TraceDocFlyoutType): FlyoutConfig => {
+  if (type === 'span') {
     return {
       contentId: FlyoutContentId.SPAN_DETAIL,
       render: ({ data, dataView, activeSection }) => {
@@ -60,7 +55,7 @@ const getFlyoutConfig = (type: DocumentType): FlyoutConfig => {
 };
 
 export interface DocumentDetailFlyoutProps {
-  type: DocumentType;
+  type: TraceDocFlyoutType;
   docId: string;
   docIndex?: string;
   traceId: string;
@@ -70,6 +65,7 @@ export interface DocumentDetailFlyoutProps {
   onCloseFlyout: EuiFlyoutProps['onClose'];
   activeSection?: TraceOverviewSections;
   skipNextEventReport?: boolean;
+  size?: EuiFlyoutProps['size'];
 }
 
 export function DocumentDetailFlyout({
@@ -83,6 +79,7 @@ export function DocumentDetailFlyout({
   onCloseFlyout,
   activeSection,
   skipNextEventReport,
+  size,
 }: DocumentDetailFlyoutProps) {
   const data = useDocumentFlyoutData({ type, docId, traceId, docIndex });
 
@@ -99,6 +96,7 @@ export function DocumentDetailFlyout({
       hasAnimation={hasAnimation}
       flyoutContentId={flyoutConfig.contentId}
       skipNextEventReport={skipNextEventReport}
+      size={size}
     >
       {data.error && <EuiCallOut announceOnMount title={data.error} color="danger" />}
       {flyoutConfig.render({ data, dataView, activeSection })}

@@ -21,3 +21,9 @@ export {
   takeRandomLlmSample,
   type FtrGenAiLlmSampleSize,
 } from './src/random_llm_sample';
+export {
+  buildEisPreconfiguredConnectors,
+  getPreDiscoveredEisModels,
+  enableCcm,
+  type DiscoveredModel,
+} from './src/eis_helpers';

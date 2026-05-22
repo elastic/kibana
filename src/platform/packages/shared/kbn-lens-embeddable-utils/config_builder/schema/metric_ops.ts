@@ -338,6 +338,17 @@ export const fieldMetricOrFormulaOperationDefinitionSchema = schema.oneOf(
   }
 );
 
+export const fieldMetricOrStaticOrFormulaOperationDefinitionSchema = schema.oneOf(
+  [fieldMetricOperationsSchema, staticOperationDefinitionSchema, formulaOperationDefinitionSchema],
+  {
+    meta: {
+      title: 'Field Metric, Static Value, or Formula Operation',
+      description:
+        'Metric dimension using a field-based aggregation, a static value, or a mathematical formula.',
+    },
+  }
+);
+
 export type LensApiReferableMetricOperations =
   | LensApiCountMetricOperation
   | LensApiUniqueCountMetricOperation
@@ -364,6 +375,11 @@ export type LensApiStaticValueOperation = TypeOf<typeof staticOperationDefinitio
 
 export type LensApiFieldMetricOrFormulaOperation =
   | LensApiFieldMetricOperations
+  | LensApiFormulaOperation;
+
+export type LensApiFieldMetricOrStaticOrFormulaOperation =
+  | LensApiFieldMetricOperations
+  | LensApiStaticValueOperation
   | LensApiFormulaOperation;
 
 export type LensApiAllMetricOrFormulaOperations =

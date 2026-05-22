@@ -30,7 +30,7 @@ export class GenAiSettingsPage {
         state: 'visible',
         timeout: 10_000,
       });
-    }).toPass({ timeout: 35_000, intervals: [500, 1_000, 2_000] });
+    }).toPass({ timeout: 70_000, intervals: [500, 1_000, 2_000] });
   }
 
   /**

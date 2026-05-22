@@ -16,6 +16,7 @@ import {
   isDescendantOf,
   Streams,
   LOGS_ROOT_STREAM_NAME,
+  isDraftStream,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod/v4';
 import type { IScopedClusterClient } from '@kbn/core/server';
@@ -24,6 +25,8 @@ import type { StreamsMappingProperties } from '@kbn/streams-schema/src/fields';
 import type { DocumentWithIgnoredFields } from '@kbn/streams-schema/src/shared/record_types';
 import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { getRoot } from '@kbn/streams-schema/src/shared/hierarchy';
+import { Builder } from '@elastic/esql';
+import type { ESQLAstItem } from '@elastic/esql/types';
 import { MAX_PRIORITY } from '../../../../lib/streams/index_templates/generate_index_template';
 import { getProcessingPipelineName } from '../../../../lib/streams/ingest_pipelines/name';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
@@ -39,6 +42,10 @@ import {
   getUnmappedFields,
   UNMAPPED_SAMPLE_SIZE,
 } from '../../../../lib/streams/helpers/unmapped_fields';
+import {
+  getUnmappedFieldsFromView,
+  fetchDraftViewSamples,
+} from '../../../../lib/streams/helpers/draft_helpers';
 const FIELD_SIMULATION_TIMEOUT = '1s';
 
 const isFieldDefinitionType = (value: unknown): value is FieldDefinitionType =>
@@ -91,8 +98,20 @@ export const unmappedFieldsRoute = createServerRoute({
   handler: async ({ params, request, getScopedClients }): Promise<{ unmappedFields: string[] }> => {
     const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
 
-    const [definition, ancestors, sampleDocs] = await Promise.all([
-      streamsClient.getStream(params.path.name),
+    const definition = await streamsClient.getStream(params.path.name);
+    const isWiredDraft = Streams.WiredStream.Definition.is(definition) && isDraftStream(definition);
+
+    if (isWiredDraft) {
+      return {
+        unmappedFields: await getUnmappedFieldsFromView(
+          scopedClusterClient,
+          streamsClient,
+          definition
+        ),
+      };
+    }
+
+    const [ancestors, sampleDocs] = await Promise.all([
       streamsClient.getAncestors(params.path.name),
       scopedClusterClient.asCurrentUser.search({
         index: params.path.name,
@@ -150,60 +169,15 @@ export const schemaFieldsSimulationRoute = createServerRoute({
 
     const streamDefinition = await streamsClient.getStream(params.path.name);
 
+    const isWiredDraft =
+      Streams.WiredStream.Definition.is(streamDefinition) && isDraftStream(streamDefinition);
+
     // Only simulate mapping-affecting definitions; ignore doc-only overrides (`{ description }`)
     // and system fields.
     const userFieldDefinitions = getSimulatableFieldDefinitions(params.body.field_definitions);
     if (userFieldDefinitions.length === 0) {
       return {
         status: 'success',
-        simulationError: null,
-        documentsWithRuntimeFieldsApplied: null,
-      };
-    }
-
-    const propertiesForSample: Record<string, { type: 'keyword' }> = {};
-    userFieldDefinitions.forEach((field) => {
-      propertiesForSample[field.name] = { type: 'keyword' as const };
-
-      if (field.type === 'geo_point') {
-        propertiesForSample[`${field.name}.lat`] = { type: 'keyword' as const };
-        propertiesForSample[`${field.name}.lon`] = { type: 'keyword' as const };
-      }
-    });
-
-    const filterConditions = userFieldDefinitions.map((field) => {
-      if (field.type === 'geo_point') {
-        return buildGeoPointExistsQuery(field.name);
-      }
-
-      return { exists: { field: field.name } };
-    });
-
-    const documentSamplesSearchBody = {
-      query: {
-        bool: {
-          filter: filterConditions,
-        },
-      },
-      size: FIELD_SIMILATION_SAMPLE_SIZE,
-      track_total_hits: false,
-      terminate_after: FIELD_SIMILATION_SAMPLE_SIZE,
-      timeout: FIELD_SIMULATION_TIMEOUT,
-    };
-
-    const sampleResults: SearchResponse<
-      unknown,
-      Record<string, AggregationsAggregate>
-    > = await scopedClusterClient.asCurrentUser.search({
-      index: params.path.name,
-      // Add keyword runtime mappings so we can pair with exists, this is to attempt to "miss" less documents for the simulation.
-      runtime_mappings: propertiesForSample,
-      ...documentSamplesSearchBody,
-    });
-
-    if (sampleResults?.hits.hits.length === 0) {
-      return {
-        status: 'unknown',
         simulationError: null,
         documentsWithRuntimeFieldsApplied: null,
       };
@@ -219,28 +193,128 @@ export const schemaFieldsSimulationRoute = createServerRoute({
       userFieldDefinitions.filter((field) => field.type === 'geo_point').map((field) => field.name)
     );
 
-    const sampleResultsAsSimulationDocs = sampleResults.hits.hits.map((hit) => {
-      const normalized = normalizeGeoPointsInObject(hit._source as SampleDocument, geoPointFields);
-      const flattenedSource = getFlattenedObject(normalized);
+    let sampleResultsAsSimulationDocs: Array<SearchHit<unknown>>;
+    let dataStreamForSimulation: string;
 
-      const sourceWithGeoPoints = rebuildGeoPointsFromFlattened(
-        flattenedSource,
-        fieldDefinitionKeys,
-        geoPointFields
+    if (isWiredDraft) {
+      const isNotNullChecks: ESQLAstItem[] = userFieldDefinitions.map((field) => {
+        if (field.type === 'geo_point') {
+          return Builder.expression.func.binary('and', [
+            Builder.expression.func.postfix(
+              'is not null',
+              Builder.expression.column(`${field.name}.lat`)
+            ),
+            Builder.expression.func.postfix(
+              'is not null',
+              Builder.expression.column(`${field.name}.lon`)
+            ),
+          ]);
+        }
+        return Builder.expression.func.postfix(
+          'is not null',
+          Builder.expression.column(field.name)
+        );
+      });
+
+      const whereExpression =
+        isNotNullChecks.length === 1
+          ? isNotNullChecks[0]
+          : isNotNullChecks.reduce((acc, check) =>
+              Builder.expression.func.binary('and', [acc, check])
+            );
+
+      const { docs, ancestorDataStream } = await fetchDraftViewSamples(
+        scopedClusterClient,
+        streamsClient,
+        params.path.name,
+        { size: FIELD_SIMILATION_SAMPLE_SIZE, whereExpression }
       );
 
+      sampleResultsAsSimulationDocs = docs.map((doc) => {
+        const rawSource = (doc as { _source?: Record<string, unknown> })._source || {};
+        const normalized = normalizeGeoPointsInObject(rawSource, geoPointFields);
+        const flattenedSource = getFlattenedObject(normalized);
+        const filtered = rebuildGeoPointsFromFlattened(
+          flattenedSource,
+          fieldDefinitionKeys,
+          geoPointFields
+        );
+
+        return {
+          _index: doc._index,
+          _id: doc._id,
+          _source: filtered,
+        };
+      });
+      dataStreamForSimulation = ancestorDataStream;
+    } else {
+      const propertiesForSample: Record<string, { type: 'keyword' }> = {};
+      userFieldDefinitions.forEach((field) => {
+        propertiesForSample[field.name] = { type: 'keyword' as const };
+
+        if (field.type === 'geo_point') {
+          propertiesForSample[`${field.name}.lat`] = { type: 'keyword' as const };
+          propertiesForSample[`${field.name}.lon`] = { type: 'keyword' as const };
+        }
+      });
+
+      const fieldExistsFilters = userFieldDefinitions.map((field) => {
+        if (field.type === 'geo_point') {
+          return buildGeoPointExistsQuery(field.name);
+        }
+
+        return { exists: { field: field.name } };
+      });
+
+      const sampleResults: SearchResponse<
+        unknown,
+        Record<string, AggregationsAggregate>
+      > = await scopedClusterClient.asCurrentUser.search({
+        index: params.path.name,
+        runtime_mappings: propertiesForSample,
+        query: { bool: { filter: fieldExistsFilters } },
+        size: FIELD_SIMILATION_SAMPLE_SIZE,
+        track_total_hits: false,
+        terminate_after: FIELD_SIMILATION_SAMPLE_SIZE,
+        timeout: FIELD_SIMULATION_TIMEOUT,
+      });
+
+      sampleResultsAsSimulationDocs = sampleResults.hits.hits.map((hit) => {
+        const normalized = normalizeGeoPointsInObject(
+          hit._source as SampleDocument,
+          geoPointFields
+        );
+        const flattenedSource = getFlattenedObject(normalized);
+
+        const sourceWithGeoPoints = rebuildGeoPointsFromFlattened(
+          flattenedSource,
+          fieldDefinitionKeys,
+          geoPointFields
+        );
+
+        return {
+          _index: params.path.name.startsWith(`${LOGS_ROOT_STREAM_NAME}.`)
+            ? getRoot(params.path.name)
+            : params.path.name,
+          _id: hit._id,
+          _source: sourceWithGeoPoints,
+        };
+      });
+
+      dataStreamForSimulation = params.path.name;
+    }
+
+    if (sampleResultsAsSimulationDocs.length === 0) {
       return {
-        _index: params.path.name.startsWith(`${LOGS_ROOT_STREAM_NAME}.`)
-          ? getRoot(params.path.name)
-          : params.path.name,
-        _id: hit._id,
-        _source: sourceWithGeoPoints,
+        status: 'unknown',
+        simulationError: null,
+        documentsWithRuntimeFieldsApplied: null,
       };
-    });
+    }
 
     const simulation = await simulateIngest(
       sampleResultsAsSimulationDocs,
-      params.path.name,
+      dataStreamForSimulation,
       propertiesForSimulation,
       scopedClusterClient,
       streamDefinition

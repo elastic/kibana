@@ -81,6 +81,7 @@ const defaultProps: RulesListTableProps = {
   onBulkDelete: jest.fn(),
   onNavigateToDetails: jest.fn(),
   onExpand: jest.fn(),
+  onQuickEdit: jest.fn(),
   onEdit: jest.fn(),
   onClone: jest.fn(),
   onDelete: jest.fn(),

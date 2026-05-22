@@ -2101,7 +2101,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         expect(resp.status).to.eql(403);
         expect(resp.body.message).to.eql(
-          'You do not have sufficient permissions to update monitors in all required spaces.'
+          'This monitor is shared to spaces where you do not have update permissions. To save changes, either request access to those spaces or remove them from the monitor.'
         );
       } finally {
         await monitorTestService.deleteMonitorByJourney(
@@ -2161,7 +2161,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         expect(resp.status).to.eql(403);
         expect(resp.body.message).to.eql(
-          'You do not have sufficient permissions to update monitors in all required spaces.'
+          'This monitor is shared to spaces where you do not have update permissions. To save changes, either request access to those spaces or remove them from the monitor.'
         );
       } finally {
         await monitorTestService.deleteMonitorByJourney(
@@ -2182,19 +2182,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const SPACE_ID_2 = `test-space-2-${uuidv4()}`;
       const SPACE_NAME_1 = `test-space-name-1-${uuidv4()}`;
       const SPACE_NAME_2 = `test-space-name-2-${uuidv4()}`;
-      const spaceScopedPrivateLocation = await testPrivateLocationsService.addTestPrivateLocation(
-        SPACE_ID_1
-      );
 
       await kibanaServer.spaces.create({ id: SPACE_ID_1, name: SPACE_NAME_1 });
       await kibanaServer.spaces.create({ id: SPACE_ID_2, name: SPACE_NAME_2 });
+
+      const allSpacesPrivateLocation = await testPrivateLocationsService.addTestPrivateLocation([
+        '*',
+      ]);
 
       try {
         // Use a monitor with spaces: ['*']
         const monitorId = uuidv4();
         const monitor = {
           ...httpProjectMonitors.monitors[1],
-          privateLocations: [spaceScopedPrivateLocation.label],
+          privateLocations: [allSpacesPrivateLocation.label],
           id: monitorId,
           name: `All spaces Monitor ${monitorId}`,
           spaces: ['*'],

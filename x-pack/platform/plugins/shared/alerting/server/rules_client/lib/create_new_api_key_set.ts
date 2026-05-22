@@ -7,7 +7,8 @@
 
 import Boom from '@hapi/boom';
 import type { RawRule } from '../../types';
-import { generateAPIKeyName, apiKeyAsAlertAttributes } from '../common';
+import { generateAPIKeyName, apiKeyAsAlertAttributes, resolveRuleAPIKey } from '../common';
+import type { RuleApiKeyOwnership } from '../common';
 import type { RulesClientContext } from '../types';
 
 export async function createNewAPIKeySet(
@@ -18,24 +19,23 @@ export async function createNewAPIKeySet(
     username,
     shouldUpdateApiKey,
     errorMessage,
+    apiKeyOwnership,
   }: {
     id: string;
     ruleName: string;
     username: string | null;
     shouldUpdateApiKey: boolean;
     errorMessage?: string;
+    apiKeyOwnership?: RuleApiKeyOwnership;
   }
 ): Promise<Pick<RawRule, 'apiKey' | 'apiKeyOwner' | 'apiKeyCreatedByUser' | 'uiamApiKey'>> {
   let createdAPIKey = null;
   let isAuthTypeApiKey = false;
   try {
-    isAuthTypeApiKey = context.isAuthenticationTypeAPIKey();
     const name = generateAPIKeyName(id, ruleName);
-    createdAPIKey = shouldUpdateApiKey
-      ? isAuthTypeApiKey
-        ? context.getAuthenticationAPIKey(`${name}-user-created`)
-        : await context.createAPIKey(name)
-      : null;
+    const resolved = await resolveRuleAPIKey(context, name, shouldUpdateApiKey, apiKeyOwnership);
+    createdAPIKey = resolved.createdAPIKey;
+    isAuthTypeApiKey = resolved.isAuthTypeApiKey;
   } catch (error) {
     const message = errorMessage ? errorMessage : 'Error creating API key for rule';
     throw Boom.badRequest(`${message} - ${error.message}`);

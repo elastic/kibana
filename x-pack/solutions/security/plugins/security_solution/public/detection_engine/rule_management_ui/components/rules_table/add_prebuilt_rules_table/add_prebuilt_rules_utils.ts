@@ -9,23 +9,23 @@ import type { PrebuiltRulesStatusStats } from '../../../../../../common/api/dete
 
 interface UpgradeReviewEnabledProps {
   canEditRules: boolean | null;
-  isUpgradingSecurityPackages: boolean;
+  isInitializingPrebuiltRulesPackage: boolean;
   prebuiltRulesStatus?: PrebuiltRulesStatusStats;
 }
 
 export const isUpgradeReviewRequestEnabled = ({
   canEditRules,
-  isUpgradingSecurityPackages,
+  isInitializingPrebuiltRulesPackage,
   prebuiltRulesStatus,
 }: UpgradeReviewEnabledProps) => {
   // Wait until security package is updated
-  if (isUpgradingSecurityPackages) {
+  if (isInitializingPrebuiltRulesPackage) {
     return false;
   }
 
   // If user is read-only, allow request to proceed even though the Prebuilt
   // Rules might not be installed. For these users, the Fleet endpoint quickly
-  // fails with 403 so isUpgradingSecurityPackages is false
+  // fails with 403 so isInitializingPrebuiltRulesPackage is false
   if (canEditRules === false) {
     return true;
   }

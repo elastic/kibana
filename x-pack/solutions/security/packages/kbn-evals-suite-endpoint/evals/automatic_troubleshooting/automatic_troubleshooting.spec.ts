@@ -16,7 +16,7 @@ import {
 } from '../../src/data_generators/endpoint_data';
 import { cleanupSeededData } from '../../src/data_generators/cleanup';
 
-const SKILL_PATH = 'skills/security/endpoint/elastic_defend_configuration_troubleshooting/SKILL.md';
+const SKILL_PATH = 'skills/security/endpoint/elastic-defend-configuration-troubleshooting/SKILL.md';
 const UNITED_TRANSFORM_WILDCARD = `${METADATA_UNITED_TRANSFORM}*`;
 
 evaluate.describe('Automatic Troubleshooting', { tag: tags.stateful.classic }, () => {

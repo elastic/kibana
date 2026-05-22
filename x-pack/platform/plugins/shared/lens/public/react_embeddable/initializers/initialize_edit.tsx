@@ -133,11 +133,6 @@ export function initializeEditApi(
         setDisabledActionIds: noop,
       };
 
-  if (isTextBasedLanguage(initialState)) {
-    // do not expose the drilldown action for ES|QL
-    setDisabledActionIds(disabledActionIds$?.getValue()?.concat(['OPEN_FLYOUT_ADD_DRILLDOWN']));
-  }
-
   /**
    * Inline editing section
    */

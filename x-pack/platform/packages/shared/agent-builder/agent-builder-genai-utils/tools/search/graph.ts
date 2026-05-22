@@ -104,7 +104,6 @@ export const createSearchToolGraph = ({
         excludeIndicesRepresentedAsDatastream: true,
         excludeIndicesRepresentedAsAlias: false,
         esClient,
-        includeKibanaIndices: true,
       });
       const matchedResourceCount =
         sources.indices.length + sources.aliases.length + sources.data_streams.length;

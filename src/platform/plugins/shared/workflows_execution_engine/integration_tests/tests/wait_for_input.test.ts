@@ -237,4 +237,73 @@ steps:
       expect(step?.output).toEqual({ ticket: 'T-42', priority: 'high' });
     });
   });
+
+  describe('resume after workflow-level timeout has already fired', () => {
+    // Regression: an analyst responds to an Inbox entry whose parent workflow
+    // has sat paused long enough to exceed `settings.timeout`. On the resume
+    // iteration the workflow-level monitor fires concurrently with the
+    // waitForInput step, aborts the step runtime, and calls
+    // `failStep(TimeoutError)`. Before the fix, `WaitForInputStepImpl.run()`
+    // then re-entered `tryEnterWaitUntil` (which saw the in-memory status as
+    // FAILED, not WAITING_FOR_INPUT), and the subsequent upsert overwrote
+    // `status` back to `waiting_for_input` — leaving `error`/`finishedAt`
+    // in place and producing a zombie that the Inbox listing keeps
+    // resurfacing forever.
+    const timeoutYaml = `
+settings:
+  timeout: 200ms
+
+steps:
+  - name: ask
+    type: waitForInput
+    with:
+      message: "Approve?"
+  - name: log
+    type: console
+    with:
+      message: "done"
+`;
+
+    it('must not reset a timed-out step back to WAITING_FOR_INPUT on resume', async () => {
+      await fixture.runWorkflow({ workflowYaml: timeoutYaml });
+
+      const pausedExec = fixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+        'fake_workflow_execution_id'
+      );
+      expect(pausedExec?.status).toBe(ExecutionStatus.WAITING_FOR_INPUT);
+
+      // Push us comfortably past the 200ms workflow-level timeout so the
+      // monitor's first pass during the resume iteration fires
+      // synchronously, racing with the step's run().
+      await new Promise((resolve) => setTimeout(resolve, 350));
+
+      const exec = fixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+        'fake_workflow_execution_id'
+      )!;
+      exec.context = { ...exec.context, resumeInput: { approved: true } };
+      fixture.workflowExecutionRepositoryMock.workflowExecutions.set(exec.id, exec);
+
+      await fixture.resumeWorkflow();
+
+      const askStep = Array.from(fixture.stepExecutionRepositoryMock.stepExecutions.values()).find(
+        (s) => s.stepId === 'ask'
+      );
+
+      // The zombie shape we must never persist again: status=waiting_for_input
+      // alongside finishedAt+error. Either the step is FAILED/TIMED_OUT (the
+      // timeout won the race and the fix prevented re-entry), or the step is
+      // COMPLETED (the step ran first and the resume succeeded before the
+      // monitor noticed the deadline). Both are acceptable; the zombie is not.
+      expect(askStep).toBeDefined();
+      expect([
+        ExecutionStatus.FAILED,
+        ExecutionStatus.TIMED_OUT,
+        ExecutionStatus.COMPLETED,
+      ]).toContain(askStep!.status);
+      if (askStep!.status !== ExecutionStatus.COMPLETED) {
+        expect(askStep!.error?.message).toContain('Failed due to workflow timeout');
+        expect(askStep!.finishedAt).toBeDefined();
+      }
+    });
+  });
 });

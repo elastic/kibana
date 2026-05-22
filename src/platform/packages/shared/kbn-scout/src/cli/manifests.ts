@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { createFailError } from '@kbn/dev-cli-errors';
 import type { Command } from '@kbn/dev-cli-runner';
 import type { ToolingLog } from '@kbn/tooling-log';
 import CliTable3 from 'cli-table3';
@@ -28,12 +29,32 @@ const manifestUpdateReporter = path.join(
   '/src/platform/packages/private/kbn-scout-reporting/src/reporting/playwright/manifest_updater'
 );
 
-async function generateScoutConfigManifest(configPath: string, log?: ToolingLog) {
-  return await playwrightCLI.test(
-    { config: configPath, reporters: [manifestUpdateReporter], list: true, project: 'local' },
+export async function generateScoutConfigManifest(configPath: string, log?: ToolingLog) {
+  // passWithNoTests lets configs with zero tests exit cleanly (code 0) so we can
+  // unambiguously treat any non-zero exit as a real discovery failure (e.g. a syntax
+  // error during Playwright transpilation).
+  const result = await playwrightCLI.test(
+    {
+      config: configPath,
+      reporters: [manifestUpdateReporter],
+      list: true,
+      project: 'local',
+      passWithNoTests: true,
+    },
     {},
     log
   );
+
+  if (result.exitCode !== 0) {
+    throw createFailError(
+      `Failed to discover tests for Scout config at '${configPath}': ` +
+        `playwright --list exited with code ${result.exitCode}. ` +
+        `This usually means the config has a real error (e.g. a syntax/transpilation error) ` +
+        `rather than legitimately zero tests.`
+    );
+  }
+
+  return result;
 }
 
 async function updateScoutConfigManifests(

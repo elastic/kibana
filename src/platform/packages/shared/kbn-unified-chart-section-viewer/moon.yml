@@ -48,6 +48,7 @@ dependsOn:
   - '@kbn/inspector-plugin'
   - '@kbn/esql-language'
   - '@kbn/embeddable-plugin'
+  - '@kbn/discover-shared-plugin'
 tags:
   - shared-browser
   - package

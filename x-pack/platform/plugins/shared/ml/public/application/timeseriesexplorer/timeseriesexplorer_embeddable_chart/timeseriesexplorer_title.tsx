@@ -82,6 +82,47 @@ const FilterButton: FC<{
   );
 };
 
+export const EntityFieldNamesAndFilterButtons: FC<{
+  api?: SingleMetricViewerEmbeddableApi;
+  entityData: { entities: MlEntity[]; count: number };
+}> = ({ api, entityData }) => {
+  return (
+    <EuiFlexGroup alignItems="center">
+      {entityData.entities.map((entity, i) => {
+        return (
+          <EuiFlexItem grow={false} key={`${entity.fieldName}.${entity.fieldValue}`}>
+            <EuiFlexGroup gutterSize="none" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiTextColor color="accentSecondary" component="span">
+                  {`${entity.fieldName}: ${entity.fieldValue}`}
+                </EuiTextColor>
+              </EuiFlexItem>
+              {api !== undefined ? (
+                <>
+                  <EuiFlexItem grow={false}>
+                    <FilterButton
+                      api={api}
+                      entity={entity}
+                      operation={ML_ENTITY_FIELD_OPERATIONS.ADD}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <FilterButton
+                      api={api}
+                      entity={entity}
+                      operation={ML_ENTITY_FIELD_OPERATIONS.REMOVE}
+                    />
+                  </EuiFlexItem>
+                </>
+              ) : null}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        );
+      })}
+    </EuiFlexGroup>
+  );
+};
+
 interface SingleMetricViewerTitleProps {
   api?: SingleMetricViewerEmbeddableApi;
   entityData: { entities: MlEntity[]; count: number };
@@ -115,39 +156,7 @@ export const SingleMetricViewerTitle: FC<SingleMetricViewerTitleProps> = ({
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup alignItems="center">
-          {entityData.entities.map((entity, i) => {
-            return (
-              <EuiFlexItem grow={false} key={`${entity.fieldName}.${entity.fieldValue}`}>
-                <EuiFlexGroup gutterSize="none" alignItems="center">
-                  <EuiFlexItem grow={false}>
-                    <EuiTextColor color="accentSecondary" component="span">
-                      {`${entity.fieldName}: ${entity.fieldValue}`}
-                    </EuiTextColor>
-                  </EuiFlexItem>
-                  {api !== undefined ? (
-                    <>
-                      <EuiFlexItem grow={false}>
-                        <FilterButton
-                          api={api}
-                          entity={entity}
-                          operation={ML_ENTITY_FIELD_OPERATIONS.ADD}
-                        />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <FilterButton
-                          api={api}
-                          entity={entity}
-                          operation={ML_ENTITY_FIELD_OPERATIONS.REMOVE}
-                        />
-                      </EuiFlexItem>
-                    </>
-                  ) : null}
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            );
-          })}
-        </EuiFlexGroup>
+        <EntityFieldNamesAndFilterButtons api={api} entityData={entityData} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

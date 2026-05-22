@@ -8,7 +8,7 @@
 import React, { Fragment, useEffect, useState, useCallback, useMemo } from 'react';
 import { Redirect } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiTitle, EuiCallOut } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiCallOut } from '@elastic/eui';
 
 import { ExperimentalFeaturesService } from '../../../../../../../services';
 
@@ -18,6 +18,7 @@ import type {
   KibanaAssetReference,
   SimpleSOAssetType,
 } from '../../../../../../../../common';
+import { ElasticsearchAssetType } from '../../../../../../../../common';
 import { displayedAssetTypes } from '../../../../../../../../common/constants';
 
 import { Error, ExtensionWrapper, Loading } from '../../../../../components';
@@ -140,24 +141,28 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
       }
 
       try {
-        const assetIds: AssetSOObject[] = pkgAssets.map(({ id, type }) => ({
-          id,
-          type,
-        }));
+        const assetIds: AssetSOObject[] = pkgAssets
+          .filter(({ type }) => type !== ElasticsearchAssetType.knowledgeBase)
+          .map(({ id, type }) => ({
+            id,
+            type,
+          }));
 
-        const { data, error } = await sendGetBulkAssets({ assetIds });
-        if (error) {
-          setFetchError(error);
-        } else {
-          setAssetsSavedObjectsByType(
-            (data?.items || []).reduce((acc, asset) => {
-              if (!acc[asset.type]) {
-                acc[asset.type] = {};
-              }
-              acc[asset.type][asset.id] = asset;
-              return acc;
-            }, {} as typeof assetSavedObjectsByType)
-          );
+        if (assetIds.length > 0) {
+          const { data, error } = await sendGetBulkAssets({ assetIds });
+          if (error) {
+            setFetchError(error);
+          } else {
+            setAssetsSavedObjectsByType(
+              (data?.items || []).reduce((acc, asset) => {
+                if (!acc[asset.type]) {
+                  acc[asset.type] = {};
+                }
+                acc[asset.type][asset.id] = asset;
+                return acc;
+              }, {} as typeof assetSavedObjectsByType)
+            );
+          }
         }
       } catch (e) {
         setFetchError(e);
@@ -210,14 +215,17 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
       );
     } else {
       content = !hasDeferredInstallations ? (
-        <EuiTitle>
-          <h2>
+        <EuiCallOut
+          announceOnMount
+          iconType="info"
+          color="primary"
+          title={
             <FormattedMessage
               id="xpack.fleet.epm.packageDetails.assets.noAssetsFoundLabel"
-              defaultMessage="No assets found"
+              defaultMessage="No assets installed for this integration."
             />
-          </h2>
-        </EuiTitle>
+          }
+        />
       ) : null;
     }
   } else {
@@ -286,6 +294,12 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
         const soAssets = assetSavedObjectsByType[assetType] || {};
         const finalAssets = assets
           .map((asset) => {
+            if (asset.type === ElasticsearchAssetType.knowledgeBase) {
+              return {
+                ...asset,
+                attributes: { title: asset.id },
+              };
+            }
             return {
               ...asset,
               ...soAssets[asset.id],

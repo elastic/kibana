@@ -16,7 +16,6 @@ import { i18n } from '@kbn/i18n';
 import type { SideNavLogo } from '../../../types';
 import { MenuItem } from '../menu_item';
 import { NAVIGATION_SELECTOR_PREFIX } from '../../constants';
-import { useTooltip } from '../../hooks/use_tooltip';
 import { getHighContrastSeparator } from '../../hooks/use_high_contrast_mode_styles';
 
 export interface LogoProps extends Omit<HTMLAttributes<HTMLAnchorElement>, 'onClick'>, SideNavLogo {
@@ -36,7 +35,6 @@ export const Logo = ({
 }: LogoProps): JSX.Element => {
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
-  const { tooltipRef, handleMouseOut } = useTooltip();
 
   /**
    * **Icon size**
@@ -90,14 +88,7 @@ export const Logo = ({
 
   if (isCollapsed) {
     return (
-      <EuiToolTip
-        ref={tooltipRef}
-        content={label}
-        disableScreenReaderOutput
-        onMouseOut={handleMouseOut}
-        position="right"
-        repositionOnScroll
-      >
+      <EuiToolTip content={label} disableScreenReaderOutput position="right" repositionOnScroll>
         {menuItem}
       </EuiToolTip>
     );

@@ -7,17 +7,17 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const AI_ASSISTANT_FEATURE_NAME = i18n.translate(
-  'xpack.elasticAssistantPlugin.inferenceFeature.aiAssistant.featureName',
+export const SECURITY_FEATURE_NAME = i18n.translate(
+  'xpack.elasticAssistantPlugin.inferenceFeature.security.featureName',
   {
-    defaultMessage: 'AI Assistant',
+    defaultMessage: 'Security',
   }
 );
 
-export const AI_ASSISTANT_FEATURE_DESCRIPTION = i18n.translate(
-  'xpack.elasticAssistantPlugin.inferenceFeature.aiAssistant.featureDescription',
+export const SECURITY_FEATURE_DESCRIPTION = i18n.translate(
+  'xpack.elasticAssistantPlugin.inferenceFeature.security.featureDescription',
   {
-    defaultMessage: 'Inference endpoint settings for Elastic AI Assistant features.',
+    defaultMessage: 'Inference endpoint settings for Security features.',
   }
 );
 

@@ -190,7 +190,6 @@ export const gatherResourceDescriptors = async ({
     excludeIndicesRepresentedAsDatastream: true,
     excludeIndicesRepresentedAsAlias: false,
     esClient,
-    includeKibanaIndices: indexPattern !== '*',
   });
 
   return buildResourceDescriptors({ sources, includeAliases, includeDatastream, esClient });
@@ -222,7 +221,6 @@ export const indexExplorer = async ({
     excludeIndicesRepresentedAsDatastream: true,
     excludeIndicesRepresentedAsAlias: false,
     esClient,
-    includeKibanaIndices: indexPattern !== '*',
   });
 
   const indexCount = sources.indices.length;

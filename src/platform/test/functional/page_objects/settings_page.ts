@@ -979,6 +979,7 @@ export class SettingsPageObject extends FtrService {
     this.log.debug('toggling tow = ' + rowTestSubj);
     const row = await this.testSubjects.find(rowTestSubj);
     const rowToggle = (await row.findAllByCssSelector('[data-test-subj="toggle"]'))[0];
+    await rowToggle.scrollIntoViewIfNecessary();
     await rowToggle.click();
     return row;
   }
@@ -1108,7 +1109,9 @@ export class SettingsPageObject extends FtrService {
     await this.setFieldTypeFilter(fieldType);
     await this.testSubjects.click('editFieldFormat');
 
-    expect(await this.testSubjects.getVisibleText('flyoutTitle')).to.eql(`Edit field '${name}'`);
+    await this.retry.try(async () => {
+      expect(await this.testSubjects.getVisibleText('flyoutTitle')).to.eql(`Edit field '${name}'`);
+    });
 
     await this.retry.tryForTime(5000, async () => {
       const previewText = await this.testSubjects.getVisibleText('fieldPreviewItem > value');

@@ -277,7 +277,10 @@ export function getDashboardStateSchema(isDashboardAppRequest: boolean) {
         })
       ),
       time_range: schema.maybe(timeRangeSchema),
-      title: schema.string({ meta: { description: 'A human-readable title for the dashboard.' } }),
+      title: schema.string({
+        minLength: 1,
+        meta: { description: 'A human-readable title for the dashboard.' },
+      }),
       access_control: accessControlSchema,
     },
     {

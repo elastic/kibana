@@ -29,6 +29,7 @@ import {
 } from '@kbn/connector-schemas/http';
 import { z } from '@kbn/zod/v4';
 import { SecretsSchema } from '@kbn/connector-schemas/http/schemas/v1';
+import type { HttpFormDataField } from '@kbn/connector-schemas/http/types/v1';
 import { safeJsonStringify } from '@kbn/std';
 import type {
   HttpConnectorType,
@@ -140,6 +141,14 @@ function renderParameterTemplates(
     renderedParams.body = renderMustacheString(logger, params.body, variables, 'json');
   }
 
+  if (params.form_data) {
+    const renderedFormData: HttpFormDataField = {};
+    for (const [key, value] of Object.entries(params.form_data)) {
+      renderedFormData[key] = renderMustacheString(logger, value, variables, 'json');
+    }
+    renderedParams.form_data = renderedFormData;
+  }
+
   if (params.url) {
     renderedParams.url = renderMustacheString(logger, params.url, variables, 'json');
   }
@@ -168,20 +177,24 @@ function renderParameterTemplates(
 }
 
 function combineUrl(basePath: string, path?: string): string {
-  const basePathNormalized = basePath.endsWith('/') ? basePath.slice(0, -1) : basePath;
-  const pathNormalized = path?.startsWith('/') ? path : path ? `/${path}` : '';
-  return `${basePathNormalized}${pathNormalized}`;
+  if (!path) return basePath;
+  const url = new URL(basePath);
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  url.pathname = url.pathname.replace(/\/$/, '') + normalizedPath;
+  return url.toString();
 }
 
-function buildQueryString(query?: Record<string, string>): string {
+function appendQueryString(baseUrl: string, query?: Record<string, string>): string {
   if (!query || Object.keys(query).length === 0) {
-    return '';
+    return baseUrl;
   }
-  const params = new URLSearchParams();
+  const url = new URL(baseUrl);
   for (const [key, value] of Object.entries(query)) {
-    params.append(key, value);
+    if (!url.searchParams.has(key)) {
+      url.searchParams.set(key, value);
+    }
   }
-  return `?${params.toString()}`;
+  return url.toString();
 }
 
 function serializeHttpRequestBody(body: unknown): string {
@@ -193,6 +206,27 @@ function serializeHttpRequestBody(body: unknown): string {
   }) as string; // will return a string or throw an error if it fails
 }
 
+function buildFormData(formData: HttpFormDataField): FormData {
+  const form = new FormData();
+  for (const [fieldName, spec] of Object.entries(formData)) {
+    if (spec.filename !== undefined) {
+      // File field: include filename so the server gets Content-Disposition: form-data; filename="..."
+      const blob = new Blob([spec.content], {
+        type: spec.content_type ?? 'application/octet-stream',
+      });
+      form.append(fieldName, blob, spec.filename);
+    } else if (spec.content_type !== undefined) {
+      // Typed blob without a filename (e.g. application/json fragment)
+      const blob = new Blob([spec.content], { type: spec.content_type });
+      form.append(fieldName, blob);
+    } else {
+      // Plain text field — serialize as a string so Content-Disposition has no filename
+      form.append(fieldName, spec.content);
+    }
+  }
+  return form;
+}
+
 function processResponseHeaders(headers: object): Record<string, string> {
   return Object.entries(headers || {}).reduce<Record<string, string>>((acc, [key, value]) => {
     if (value != null) {
@@ -202,7 +236,11 @@ function processResponseHeaders(headers: object): Record<string, string> {
   }, {});
 }
 
-// action executor
+/*
+ * Action executor for the HTTP connector. Shared by the regular and system connector types.
+ * @param execOptions - The executor options
+ * @returns The HTTP connector execution response
+ */
 export async function executor(
   execOptions: HttpConnectorTypeExecutorOptions
 ): Promise<HttpConnectorTypeExecutorResult> {
@@ -237,9 +275,6 @@ export async function executor(
     return errorResultInvalid(actionId, 'Cannot set both body and form_data');
   }
 
-  // Combine base url and path
-  const url = combineUrl(baseUrl, path) + buildQueryString(query);
-
   const [axiosConfig, axiosConfigError] = await getAxiosConfig({
     connectorId: actionId,
     services,
@@ -261,26 +296,19 @@ export async function executor(
     );
   }
 
-  const { axiosInstance, headers: configHeaders, sslOverrides: baseSslOverrides } = axiosConfig;
+  const {
+    axiosInstance,
+    headers: configHeaders,
+    sslOverrides: baseSslOverrides,
+    secretQueryParams,
+  } = axiosConfig;
 
-  // Build the request body. For multipart/form-data we hand axios a native
-  // FormData instance and let it serialize the parts and set the Content-Type
-  // with the right boundary itself; for anything else, fall back to the
-  // existing JSON/string serialization.
+  const mergedQuery = { ...(secretQueryParams ?? {}), ...(query ?? {}) };
+  const url = appendQueryString(combineUrl(baseUrl, path), mergedQuery);
+
   let requestData: unknown;
   if (formData) {
-    const form = new FormData();
-    for (const [fieldName, spec] of Object.entries(formData)) {
-      if (spec.filename !== undefined) {
-        const blob = new Blob([spec.content], {
-          type: spec.content_type ?? 'application/octet-stream',
-        });
-        form.append(fieldName, blob, spec.filename);
-      } else {
-        form.append(fieldName, spec.content);
-      }
-    }
-    requestData = form;
+    requestData = buildFormData(formData);
   } else {
     requestData = serializeHttpRequestBody(body);
   }

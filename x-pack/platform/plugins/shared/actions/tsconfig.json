@@ -12,6 +12,7 @@
   ],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/human-readable-id",
     "@kbn/spaces-plugin",
     "@kbn/security-plugin",
     "@kbn/licensing-plugin",

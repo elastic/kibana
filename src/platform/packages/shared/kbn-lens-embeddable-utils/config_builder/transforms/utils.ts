@@ -133,9 +133,9 @@ function normalizeWhitespace(str: string): string {
   return str.replace(/\s+/g, ' ').trim().toLowerCase();
 }
 
-function generateAdHocDataViewId(
+export function generateAdHocDataViewId(
   dataView: Pick<APIAdHocDataView, 'index' | 'timeFieldName' | 'esqlQuery' | 'dataSourceType'>
-) {
+): string {
   const base = `${dataView.index}${dataView.timeFieldName ? `-${dataView.timeFieldName}` : ''}`;
   // When timeFieldName is not explicitly provided in the query, then it is not persisted during the transformations and
   // at runtime we fallback to @timestamp if it exists in the index.

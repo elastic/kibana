@@ -539,9 +539,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'agentContextLayer:experimentalFeatures': {
+  'agentBuilder:uiamOAuthClientManagement': {
     type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
+    _meta: {
+      description:
+        'Whether UIAM OAuth client management endpoints and the Agent Builder MCP Clients UI are enabled.',
+    },
   },
   'workflows:ui:enabled': {
     type: 'boolean',
@@ -624,10 +627,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Non-default value of setting.' },
   },
   'observability:apmEnableTransactionProfiling': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'observability:apmUseUnifiedTraceWaterfall': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -736,12 +735,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Enable Significant events discovery in Streams.',
     },
   },
-  'observability:streamsEnableAttachments': {
-    type: 'boolean',
-    _meta: {
-      description: 'Enable Streams attachments tab.',
-    },
-  },
   'observability:streamsEnableContentPacks': {
     type: 'boolean',
     _meta: {
@@ -758,12 +751,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: {
       description: 'Enable ES|QL views for wired streams',
-    },
-  },
-  'observability:streamsEnableOverviewPage': {
-    type: 'boolean',
-    _meta: {
-      description: 'Enable the Streams management Overview tab',
     },
   },
   'observability:streamsEnableDraftStreams': {

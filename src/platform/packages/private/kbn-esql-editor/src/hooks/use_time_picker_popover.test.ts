@@ -8,7 +8,7 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
-import type { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/code-editor';
 import { useTimePickerPopover } from './use_time_picker_popover';
 
 describe('useTimePickerPopover', () => {

@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { I18nProvider } from '@kbn/i18n-react';
 import { MemoryRouter } from 'react-router-dom';
@@ -24,6 +25,7 @@ const mockSnoozeActionPolicy = jest.fn();
 const mockUnsnoozeActionPolicy = jest.fn();
 const mockSettingsClientGet = jest.fn();
 const mockUseFetchWorkflow = jest.fn();
+const mockBulkGet = jest.fn();
 
 jest.mock('../../application/breadcrumb_context', () => ({
   useSetBreadcrumbs: () => jest.fn(),
@@ -46,6 +48,9 @@ jest.mock('@kbn/core-di-browser', () => ({
           get: mockSettingsClientGet,
         },
       };
+    }
+    if (token === 'userProfile') {
+      return { bulkGet: mockBulkGet };
     }
 
     return {};
@@ -139,6 +144,12 @@ jest.mock('./components/action_policy_actions_cell', () => ({
   ActionPolicyActionsCell: () => <span>Actions cell</span>,
 }));
 
+jest.mock('../../components/action_policy/details_flyout/action_policy_details_flyout', () => ({
+  ActionPolicyDetailsFlyout: ({ policy }: { policy: ActionPolicyResponse }) => (
+    <div data-test-subj="mockedDetailsFlyout">Details flyout for {policy.id}</div>
+  ),
+}));
+
 const createQueryClient = () =>
   new QueryClient({
     defaultOptions: { queries: { retry: false } },
@@ -149,23 +160,23 @@ const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPoli
   version: 'WzEsMV0=',
   name: 'Policy One',
   description: 'Policy description',
+  type: 'global',
+  ruleId: null,
   enabled: true,
   destinations: [{ type: 'workflow', id: 'workflow-1' }],
   matcher: null,
   groupBy: null,
   tags: null,
   groupingMode: null,
-  throttle: { strategy: undefined, interval: undefined },
+  throttle: { strategy: undefined, interval: null },
   snoozedUntil: null,
   auth: {
     owner: 'elastic',
     createdByUser: false,
   },
   createdBy: 'elastic_profile_uid',
-  createdByUsername: 'elastic',
   createdAt: '2026-01-01T00:00:00.000Z',
   updatedBy: 'elastic_profile_uid',
-  updatedByUsername: 'elastic',
   updatedAt: '2026-01-02T03:04:05.000Z',
   ...overrides,
 });
@@ -185,6 +196,7 @@ describe('ListActionPoliciesPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
+    mockBulkGet.mockResolvedValue([]);
     mockSettingsClientGet.mockReturnValue('[mock formatted date]');
     mockGetUrlForApp.mockImplementation((_appId: string, { path }: { path: string }) => {
       return `/app/workflows${path}`;
@@ -256,5 +268,24 @@ describe('ListActionPoliciesPage', () => {
       'Notify',
       'Actions',
     ]);
+  });
+
+  it('opens the details flyout when the policy name link is clicked', async () => {
+    const user = userEvent.setup();
+    renderPage();
+
+    expect(screen.queryByTestId('mockedDetailsFlyout')).toBeNull();
+
+    await user.click(screen.getByTestId('actionPolicyDetailsLink-policy-1'));
+
+    expect(screen.getByTestId('mockedDetailsFlyout')).toHaveTextContent(
+      'Details flyout for policy-1'
+    );
+  });
+
+  it('does not render the details flyout until a policy is selected', () => {
+    renderPage();
+
+    expect(screen.queryByTestId('mockedDetailsFlyout')).toBeNull();
   });
 });

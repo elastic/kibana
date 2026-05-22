@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
+import { debounceTime, Observable } from 'rxjs';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import type { UpdateOriginResponse } from '@kbn/agent-builder-common';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
 import {
@@ -17,7 +17,6 @@ import {
   DASHBOARD_ATTACHMENT_TYPE,
 } from '@kbn/dashboard-agent-common';
 import { createAgentLiveUpdatesSubscription } from './agent_live_updates_subscription';
-import { createManualChangesSubscription } from './manual_changes_subscription';
 import { createNewAttachmentIdRegenerationSubscription } from './new_attachment_id_regeneration_subscription';
 import { createOriginSyncSubscription } from './origin_sync_subscription';
 import type { IdGenerator } from '..';
@@ -133,10 +132,9 @@ export const registerDashboardAppIntegration = ({
     updateOrigin: (id: string, origin: string) => getUpdateOrigin(id)?.(origin),
   });
 
-  const manualChangesSubscription = createManualChangesSubscription({
-    api,
-    onManualChanges: addAttachmentFromDashboard,
-  });
+  const manualChangesSubscription = api.anyStateChange$
+    .pipe(debounceTime(150))
+    .subscribe(addAttachmentFromDashboard);
 
   return () => {
     agentLiveUpdatesSubscription.unsubscribe();
