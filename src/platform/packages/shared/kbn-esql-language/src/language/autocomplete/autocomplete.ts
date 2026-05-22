@@ -49,6 +49,13 @@ function isHeaderCommandSuggestion({ label }: { label: string }) {
   return label === 'SET';
 }
 
+function isFromSourceCommand(commands: ESQLAstAllCommands[]) {
+  const sourceCommandNames = new Set(esqlCommandRegistry.getSourceCommandNames());
+  const sourceCommand = commands.find(({ name }) => sourceCommandNames.has(name));
+
+  return sourceCommand?.name.toLowerCase() === 'from';
+}
+
 const orderingEngine = new SuggestionOrderingEngine();
 
 export async function suggest(
@@ -308,14 +315,18 @@ async function getSuggestionsWithinCommandExpression(
 
   const isInsideSubquery = astContext.isCursorInSubquery; // We only show resource browser suggestions in the main query
   const canSuggestResourceBrowser = (await callbacks?.canSuggestResourceBrowser?.()) ?? false;
+  const subquerySupport =
+    commandDefinition.metadata.subquerySupport === true && isFromSourceCommand(commands);
 
   const context = {
     ...references,
     ...additionalCommandContext,
     activeProduct: callbacks?.getActiveProduct?.(),
+    subquerySupport,
     isCursorInSubquery: astContext.isCursorInSubquery,
     isFieldsBrowserEnabled: canSuggestResourceBrowser && !isInsideSubquery,
     unmappedFieldsStrategy,
+    isTimeseriesSource: isTimeseriesSourceCommand(commands.filter((cmd) => cmd.type === 'command')),
   };
 
   // Wrap getColumnsByType so the fields browser option is injected from context;
