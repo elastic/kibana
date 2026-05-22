@@ -146,7 +146,7 @@ export const useMatchedAlertsCount = ({
   const dslCount = useMemo(() => {
     if (shouldSkipDsl || dslData == null) {
       // eslint-disable-next-line no-console
-      console.log('[kibana-dkv] useMatchedAlertsCount DSL: skipped or no data', {
+      console.log('useMatchedAlertsCount DSL: skipped or no data', {
         shouldSkipDsl,
         hasDslData: dslData != null,
         'settings.size': settings.size,
@@ -166,7 +166,7 @@ export const useMatchedAlertsCount = ({
 
     const capped = Math.min(totalHits, settings.size);
     // eslint-disable-next-line no-console
-    console.log('[kibana-dkv] useMatchedAlertsCount DSL count:', {
+    console.log('useMatchedAlertsCount DSL count:', {
       totalHits,
       'settings.size': settings.size,
       'debouncedSettings.size': debouncedSettings.size,
@@ -214,13 +214,13 @@ export const useMatchedAlertsCount = ({
           const total = rawResponse.values?.[0]?.[0];
           const count = typeof total === 'number' ? total : null;
           // eslint-disable-next-line no-console
-          console.log('[kibana-dkv] useMatchedAlertsCount ES|QL count:', { count, esqlCountQuery });
+          console.log('useMatchedAlertsCount ES|QL count:', { count, esqlCountQuery });
           setEsqlCount(count);
           setEsqlLoading(false);
         },
         error: (err: unknown) => {
           // eslint-disable-next-line no-console
-          console.error('[kibana-dkv] useMatchedAlertsCount ES|QL error:', err);
+          console.error('useMatchedAlertsCount ES|QL error:', err);
           setEsqlCount(null);
           setEsqlLoading(false);
         },

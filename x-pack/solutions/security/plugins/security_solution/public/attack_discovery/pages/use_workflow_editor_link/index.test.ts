@@ -195,6 +195,33 @@ describe('useWorkflowEditorLink', () => {
     });
   });
 
+  describe('when workflowId is a known alias but the API returns no results', () => {
+    const workflowId = 'attack-discovery-custom-validation-example';
+    const workflowRunId = null;
+
+    beforeEach(() => {
+      mockHttpFetch.mockResolvedValue({ results: [] });
+    });
+
+    it('returns null for editorUrl to prevent a broken link', async () => {
+      const { result } = renderHook(() => useWorkflowEditorLink({ workflowId, workflowRunId }));
+
+      await waitFor(() => {
+        expect(result.current.editorUrl).toBeNull();
+      });
+    });
+
+    it('does not call getUrlForApp', async () => {
+      const { result } = renderHook(() => useWorkflowEditorLink({ workflowId, workflowRunId }));
+
+      await waitFor(() => {
+        expect(result.current.resolvedWorkflowId).toBeNull();
+      });
+
+      expect(mockGetUrlForApp).not.toHaveBeenCalled();
+    });
+  });
+
   describe('when workflowId is a custom slug not in the alias map', () => {
     const workflowId = 'validation-with-transform';
     const workflowRunId = 'run-val-123';

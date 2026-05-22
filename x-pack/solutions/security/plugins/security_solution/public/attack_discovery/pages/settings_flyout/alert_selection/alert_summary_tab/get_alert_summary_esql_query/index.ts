@@ -41,7 +41,7 @@ ${getEsqlKeepStatement(tableStackBy0)}
 `;
 
   // eslint-disable-next-line no-console
-  console.log('[kibana-dkv] getAlertSummaryEsqlQuery:', {
+  console.log('getAlertSummaryEsqlQuery:', {
     esqlQueryProp: esqlQuery,
     maxAlerts,
     tableStackBy0,

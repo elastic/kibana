@@ -7,7 +7,10 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useKibana } from '../../../common/lib/kibana';
-import { resolveWorkflowIdFromAlias } from './helpers/resolve_workflow_id_from_alias';
+import {
+  WORKFLOW_ID_ALIASES_TO_TAGS,
+  resolveWorkflowIdFromAlias,
+} from './helpers/resolve_workflow_id_from_alias';
 
 export interface UseWorkflowEditorLinkParams {
   workflowId: string | null | undefined;
@@ -84,11 +87,17 @@ export const useWorkflowEditorLink = ({
     // effect runs (resolveWorkflowIdFromAlias returns null immediately for unknown slugs).
     // In that case, the workflowId itself is already the actual workflow slug — use it directly.
     // undefined means alias resolution is still in-flight; show no link until it resolves.
+    // If the workflowId IS a known alias but the workflow wasn't found in the database, return
+    // null rather than producing a broken URL with the alias string as the path segment.
     const effectiveWorkflowId = workflowId.startsWith('workflow-')
       ? workflowId
       : resolvedWorkflowId === undefined
       ? undefined
-      : resolvedWorkflowId ?? workflowId;
+      : resolvedWorkflowId !== null
+      ? resolvedWorkflowId
+      : workflowId in WORKFLOW_ID_ALIASES_TO_TAGS
+      ? null
+      : workflowId;
     if (effectiveWorkflowId == null) {
       return null;
     }

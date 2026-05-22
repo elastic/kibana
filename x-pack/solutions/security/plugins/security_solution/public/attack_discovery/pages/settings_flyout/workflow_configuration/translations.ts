@@ -223,13 +223,6 @@ export const VALIDATION_SECTION_TITLE = i18n.translate(
   }
 );
 
-export const VALIDATION_SECTION_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.attackDiscovery.workflowConfiguration.validationSectionDescription',
-  {
-    defaultMessage:
-      'Choose how discoveries are validated or enriched before they are saved as attacks.',
-  }
-);
 
 export const GENERATION_SECTION_TITLE = i18n.translate(
   'xpack.securitySolution.attackDiscovery.workflowConfiguration.generationSectionTitle',

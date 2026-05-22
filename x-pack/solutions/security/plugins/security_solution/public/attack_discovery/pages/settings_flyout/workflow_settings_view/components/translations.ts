@@ -14,14 +14,6 @@ export const GENERATION_SECTION_DESCRIPTION = i18n.translate(
   }
 );
 
-export const VALIDATION_SECTION_DESCRIPTION = i18n.translate(
-  'xpack.discoveries.components.validationSectionDescription',
-  {
-    defaultMessage:
-      'Choose how discoveries are validated or enriched before they are saved as attacks.',
-  }
-);
-
 export const VALIDATION_ERRORS_TITLE = i18n.translate(
   'xpack.discoveries.components.validationErrorsTitle',
   {

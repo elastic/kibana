@@ -29,6 +29,13 @@ const defaultValidation: WorkflowItem = {
   tags: ['Attack discovery', 'Security', 'attackDiscovery:validate'],
 };
 
+const customValidationExample: WorkflowItem = {
+  description: 'Custom validation example',
+  id: 'system-attack-discovery-custom-validation-example',
+  name: 'Attack discovery - Custom validation example',
+  tags: ['Attack discovery', 'Security', 'Example', 'attackDiscovery:custom_validation_example'],
+};
+
 const customWorkflow: WorkflowItem = {
   description: 'A user-created custom workflow',
   id: 'custom-workflow-id',
@@ -43,6 +50,7 @@ const workflowWithNoTags: WorkflowItem = {
 };
 
 const allWorkflows: WorkflowItem[] = [
+  customValidationExample,
   customWorkflow,
   defaultAlertRetrieval,
   defaultValidation,
@@ -67,6 +75,12 @@ describe('filterWorkflowsForAlertRetrieval', () => {
     const result = filterWorkflowsForAlertRetrieval(allWorkflows);
 
     expect(result.find((w) => w.id === defaultValidation.id)).toBeUndefined();
+  });
+
+  it('excludes the custom validation example workflow', () => {
+    const result = filterWorkflowsForAlertRetrieval(allWorkflows);
+
+    expect(result.find((w) => w.id === customValidationExample.id)).toBeUndefined();
   });
 
   it('includes custom (user-created) workflows', () => {
@@ -103,6 +117,12 @@ describe('filterWorkflowsForValidation', () => {
     const result = filterWorkflowsForValidation(allWorkflows);
 
     expect(result.find((w) => w.id === defaultValidation.id)).toBeDefined();
+  });
+
+  it('includes the custom validation example workflow', () => {
+    const result = filterWorkflowsForValidation(allWorkflows);
+
+    expect(result.find((w) => w.id === customValidationExample.id)).toBeDefined();
   });
 
   it('includes custom (user-created) workflows', () => {
