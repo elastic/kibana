@@ -374,19 +374,9 @@ export class StorageIndexAdapter<
    * Attempt to apply any pending mapping changes to the current write index via
    * `putMapping`. Additive changes succeed silently. Incompatible changes (type
    * change, field rename) cause ES to return 400, which is thrown to the caller.
-   * No-op when no write index exists yet.
+   * No-op when the schema is already current or no write index exists yet.
    */
-  async updateMappings(): Promise<void> {
-    await this.updateMappingsIfNeeded();
-  }
-
-  /**
-   * If a write index already exists and its mappings are stale,
-   * updates the index template and pushes the new mappings.
-   * No-op when no index exists yet (preserving lazy-write semantics)
-   * or when mappings are already up-to-date.
-   */
-  private async updateMappingsIfNeeded(): Promise<void> {
+  async updateMappingsIfNeeded(): Promise<void> {
     const expectedSchemaVersion = getSchemaVersion(this.storage);
 
     const writeIndex = await this.getCurrentWriteIndex();

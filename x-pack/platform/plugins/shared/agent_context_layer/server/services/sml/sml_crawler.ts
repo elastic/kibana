@@ -67,9 +67,9 @@ export class SmlCrawlerImpl implements SmlCrawler {
     this.logger.info(`SML crawler: starting crawl for type '${definition.id}' across all spaces`);
 
     // For additive schema changes putMapping succeeds in-place (no downtime).
-    // For incompatible changes ES returns 400: we drop and recreate the index
-    // here so the full re-crawl starts immediately in this task run rather than
-    // waiting for the next scheduled tick.
+    // For incompatible changes ES returns 400: we drop the index here so the
+    // full re-crawl starts immediately in this task run rather than waiting for
+    // the next scheduled tick. Recreation happens lazily on the first write.
     const indexRebuilt = await this.applyMappingsOrRebuild({ esClient });
 
     // Data integrity check: if the SML data index is empty for this type but
@@ -153,9 +153,12 @@ export class SmlCrawlerImpl implements SmlCrawler {
    * Attempt to apply pending schema changes in-place via putMapping.
    *
    * - Additive changes (new field): putMapping succeeds, returns false.
-   * - Incompatible changes (type change, field rename): ES returns 400.
-   *   The index is dropped here so the re-crawl begins immediately in this
-   *   task run rather than waiting for the next scheduled tick.
+   * - Incompatible changes (type change, field rename): ES returns 400 with
+   *   type `illegal_argument_exception`. The index is dropped here so the
+   *   re-crawl begins immediately in this task run rather than waiting for
+   *   the next scheduled tick. Recreation happens lazily on the first write.
+   * - Index deleted between existsIndex() and updateMappingsIfNeeded(): treated
+   *   as no-op (returns false); the crawl will recreate it on first write.
    *
    * Returns true when the index was dropped and a full re-crawl is needed.
    */
@@ -172,10 +175,19 @@ export class SmlCrawlerImpl implements SmlCrawler {
     }
 
     try {
-      await storage.updateMappings();
+      await storage.updateMappingsIfNeeded();
       return false;
     } catch (error) {
-      if (isResponseError(error) && error.statusCode === 400) {
+      if (!isResponseError(error)) {
+        throw error;
+      }
+      if (error.statusCode === 404) {
+        return false;
+      }
+      if (
+        error.statusCode === 400 &&
+        (error.body as { error?: { type?: string } })?.error?.type === 'illegal_argument_exception'
+      ) {
         this.logger.warn(
           `SML crawler: incompatible mapping change detected — dropping index '${smlIndexName}' and re-crawling immediately`
         );
