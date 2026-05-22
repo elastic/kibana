@@ -12,19 +12,19 @@
 import { readdirSync, readFileSync, existsSync, statSync } from 'fs';
 import { join } from 'path';
 
-export type KeywordType = 'functions' | 'operators' | 'commands' | 'settings';
-export type FileType = 'definition' | 'docs';
-export type Language = 'esql' | 'promql';
+export type ESDocsKeywordType = 'functions' | 'operators' | 'commands' | 'settings';
+type FileType = 'definition' | 'docs';
+type Language = 'esql' | 'promql';
 
 export interface ReadDefinitionsOptions {
   pathToElasticsearch: string;
   language: Language;
-  keywordType: KeywordType;
+  keywordType: ESDocsKeywordType;
 }
 
 export interface ListDefinitionDirectoriesOptions {
   pathToElasticsearch: string;
-  keywordType: KeywordType;
+  keywordType: ESDocsKeywordType;
   language: Language;
   fileType: FileType;
 }
@@ -73,7 +73,7 @@ export function readElasticsearchDefinitions<T extends ElasticsearchJsonDefiniti
  */
 export function mergeJsonDefinitionsFromFiles<T extends ElasticsearchJsonDefinition>(
   definitionFilePaths: string[],
-  definitionType: KeywordType
+  definitionType: ESDocsKeywordType
 ): T[] {
   const definitions: T[] = [];
 

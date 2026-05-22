@@ -4,5 +4,4 @@
   "owner": "@elastic/kibana-esql",
   "group": "platform",
   "visibility": "private",
-  "devOnly": true
 }

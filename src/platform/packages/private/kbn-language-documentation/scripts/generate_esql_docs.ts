@@ -11,7 +11,7 @@ import * as recast from 'recast';
 const n = recast.types.namedTypes;
 import fs from 'fs';
 import path from 'path';
-import type { KeywordType } from '@kbn/esql-scripts';
+import type { ESDocsKeywordType } from '@kbn/esql-scripts';
 import { listDocDefinitionFiles, readElasticsearchDefinitions } from '@kbn/esql-scripts';
 import { functions } from '../src/sections/generated/scalar_functions';
 import { getLicenseInfoForFunctions } from '../src/utils/get_license_info';
@@ -60,7 +60,7 @@ function loadFunctionDocs({
 }: {
   pathToElasticsearch: string;
   fnType: string;
-  keywordType: KeywordType;
+  keywordType: ESDocsKeywordType;
 }) {
   const fnDefinitions = readElasticsearchDefinitions<FunctionDefinition>({
     pathToElasticsearch,
