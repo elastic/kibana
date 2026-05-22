@@ -6,7 +6,6 @@
  */
 
 import type { AnalyticsServiceSetup, IRouter, Logger, CoreStart } from '@kbn/core/server';
-import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { DiscoveriesPluginStartDeps } from '../types';
@@ -17,26 +16,21 @@ import { registerGetExecutionTrackingRoute } from './get/execution_tracking/get_
 import { registerFindSchedulesRoute } from './get/schedules/find_schedules';
 import { registerGetScheduleRoute } from './get/schedules/get_schedule';
 import { registerGetPipelineDataRoute } from './get/pipeline_data/get_pipeline_data';
-import type { WorkflowInitializationService } from '../lib/workflow_initialization';
 import { registerCreateScheduleRoute } from './post/schedules/create_schedule';
 import { registerDisableScheduleRoute } from './post/schedules/disable_schedule';
 import { registerEnableScheduleRoute } from './post/schedules/enable_schedule';
-import { registerValidateRoute } from './post/validate/post_validate';
 import { registerUpdateScheduleRoute } from './put/schedules/update_schedule';
 
 export const registerRoutes = (
   router: IRouter,
   logger: Logger,
   {
-    adhocAttackDiscoveryDataClient,
     analytics,
     getEventLogIndex,
     getEventLogger,
     getStartServices,
-    workflowInitService,
     workflowsManagementApi,
   }: {
-    adhocAttackDiscoveryDataClient: IRuleDataClient;
     analytics: AnalyticsServiceSetup;
     getEventLogIndex: () => Promise<string>;
     getEventLogger: () => Promise<IEventLogger>;
@@ -44,7 +38,6 @@ export const registerRoutes = (
       coreStart: CoreStart;
       pluginsStart: DiscoveriesPluginStartDeps;
     }>;
-    workflowInitService: WorkflowInitializationService;
     workflowsManagementApi?: WorkflowsServerPluginSetup['management'];
   }
 ) => {
@@ -53,7 +46,6 @@ export const registerRoutes = (
     getEventLogIndex,
     getEventLogger,
     getStartServices,
-    workflowInitService,
     workflowsManagementApi,
   });
   registerGetDefaultEsqlQueryRoute(router, logger, {
@@ -66,15 +58,8 @@ export const registerRoutes = (
   registerGetPipelineDataRoute(router, logger, {
     getEventLogIndex,
     getStartServices,
-    workflowInitService,
     workflowsManagementApi,
   });
-  registerValidateRoute(router, logger, {
-    adhocAttackDiscoveryDataClient,
-    getStartServices,
-    workflowInitService,
-  });
-
   // Schedule routes
   registerCreateScheduleRoute(router, logger, {
     analytics,

@@ -29,3 +29,15 @@ export const hasNonIdempotentBulkErrors = (bulkResponse: BulkResponse): boolean 
 
     return error.type !== 'version_conflict_engine_exception';
   });
+
+export const getIndexedDocumentIds = (bulkResponse: BulkResponse): string[] =>
+  bulkResponse.items.flatMap((item) => {
+    const result = item.index?.result;
+    if (result === 'created' || result === 'updated') {
+      return item.index?._id ?? [];
+    }
+    return [];
+  });
+
+export const hasNonIdempotentBulkIndexErrors = (bulkResponse: BulkResponse): boolean =>
+  bulkResponse.items.some((item) => item.index?.error != null);
