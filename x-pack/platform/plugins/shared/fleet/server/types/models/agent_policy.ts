@@ -417,7 +417,7 @@ export const AgentPolicyResponseSchema = AgentPolicySchema.extends(
     is_protected: schema.boolean({
       meta: {
         description:
-          'Indicates whether the agent policy has tamper protection enabled. Default false.',
+          'Indicates whether the agent policy has tamper protection enabled. Defaults to `false`.',
       },
     }),
     version: schema.maybe(schema.string()),
@@ -443,7 +443,7 @@ export const AgentPolicyResponseSchema = AgentPolicySchema.extends(
         schema.arrayOf(PackagePolicyResponseSchema, {
           meta: {
             description:
-              'This field is present only when retrieving a single agent policy, or when retrieving a list of agent policies with the ?full=true parameter',
+              'This field is present only when retrieving a single agent policy, or when retrieving a list of agent policies with the `?full=true` parameter',
           },
           maxSize: 10000,
         }),

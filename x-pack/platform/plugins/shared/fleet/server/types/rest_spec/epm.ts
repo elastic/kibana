@@ -1129,7 +1129,7 @@ export const InstallKibanaAssetsRequestSchema = {
             maxSize: 100,
             meta: {
               description:
-                'When provided install assets in the specified spaces instead of the current space.',
+                'When provided, assets are installed in the specified spaces instead of the current space.',
             },
           })
         ),

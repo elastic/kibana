@@ -189,7 +189,7 @@ export const PackagePolicyBaseSchema = {
     schema.arrayOf(
       schema.string({
         meta: {
-          description: 'IDs of the agent policies which that package policy will be added to.',
+          description: 'IDs of the agent policies that the package policy will be added to.',
         },
       }),
       {
@@ -280,7 +280,7 @@ export const PackagePolicyBaseSchema = {
       schema.arrayOf(schema.string(), {
         validate: validateAdditionalDatastreamsPermissions,
         meta: {
-          description: 'Additional datastream permissions, that will be added to the agent policy.',
+          description: 'Additional data stream permissions that will be added to the agent policy.',
         },
         maxSize: 1000,
       }),
@@ -565,7 +565,7 @@ export const SimplifiedPackagePolicyBaseSchema = schema.object(
           validate: validateAdditionalDatastreamsPermissions,
           meta: {
             description:
-              'Additional datastream permissions, that will be added to the agent policy.',
+              'Additional data stream permissions that will be added to the agent policy.',
           },
           maxSize: 100,
         }),
@@ -607,7 +607,7 @@ export const SimplifiedCreatePackagePolicyRequestBodySchema =
       policy_ids: schema.maybe(
         schema.arrayOf(schema.string(), {
           meta: {
-            description: 'IDs of the agent policies which that package policy will be added to.',
+            description: 'IDs of the agent policies that the package policy will be added to.',
           },
           maxSize: MAX_REUSABLE_AGENT_POLICIES_PER_PACKAGE_POLICY,
         })
