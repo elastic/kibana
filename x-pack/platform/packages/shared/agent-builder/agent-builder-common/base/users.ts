@@ -13,10 +13,11 @@ export interface UserIdAndName {
 }
 
 /**
- * Identity used in authorization decisions. Adds the user's Kibana role names so ACL
- * role grants (`type: 'role'`) can be matched against the current request.
+ * Identity of the authenticated requester used in authorization decisions.
+ *
+ * Distinguished from {@link UserIdAndName} (which is a generic user reference, e.g. an
+ * agent's stored `created_by` snapshot) so call sites can document intent: a parameter
+ * typed `CurrentUser` carries the request's identity, not an arbitrary persisted reference.
  */
-export interface CurrentUser extends UserIdAndName {
-  /** Kibana role names assigned to this user. */
-  roles?: string[];
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface CurrentUser extends UserIdAndName {}

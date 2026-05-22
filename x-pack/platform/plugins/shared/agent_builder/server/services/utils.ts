@@ -39,7 +39,6 @@ export const getUserFromRequest = async ({
       return {
         id: authUser.profile_uid!,
         username: authUser.username,
-        roles: [...(authUser.roles ?? [])],
       };
     }
   }
@@ -48,7 +47,6 @@ export const getUserFromRequest = async ({
   const authResponse = await esClient.security.authenticate();
   return {
     username: authResponse.username,
-    roles: [...(authResponse.roles ?? [])],
   };
 };
 

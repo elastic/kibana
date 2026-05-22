@@ -160,13 +160,8 @@ describe('buildVisibilityReadFilter', () => {
     });
   });
 
-  it('does not add a role-ACL clause regardless of user.roles (V1)', () => {
-    // V1 only matches user-type ACL entries; role-type grants land in V2. The filter
-    // shape should be identical whether or not the current user holds Kibana roles.
-    const filter = buildVisibilityReadFilter({
-      user: { ...ownerUser, roles: ['analyst', 'viewer_role'] },
-    });
-    expect(filter.bool.should).toHaveLength(4);
+  it('only emits user-type nested ACL clauses (V1)', () => {
+    const filter = buildVisibilityReadFilter({ user: ownerUser });
     const types = (filter.bool.should as Array<Record<string, any>>)
       .flatMap((clause) => clause.nested?.query?.bool?.filter ?? [])
       .map((f) => f.term?.['acl.entries.type'])

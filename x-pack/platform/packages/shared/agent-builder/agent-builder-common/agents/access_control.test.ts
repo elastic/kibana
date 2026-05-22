@@ -380,9 +380,9 @@ describe('ACL-aware authorization', () => {
   // (e.g. when constructing a matching currentUser), so it can't reuse the
   // outer fixture as-is.
   const aliceOwner: UserIdAndName = { id: 'owner-id', username: 'alice' };
-  const bob: CurrentUser = { id: 'bob-id', username: 'bob', roles: ['analyst'] };
-  const carol: CurrentUser = { id: 'carol-id', username: 'carol', roles: ['viewer_role'] };
-  const noOne: CurrentUser = { id: 'no-id', username: 'no-one', roles: [] };
+  const bob: CurrentUser = { id: 'bob-id', username: 'bob' };
+  const carol: CurrentUser = { id: 'carol-id', username: 'carol' };
+  const noOne: CurrentUser = { id: 'no-id', username: 'no-one' };
 
   const aclWith = (...entries: AgentAcl['entries']): AgentAcl => ({ entries });
 
@@ -432,12 +432,11 @@ describe('ACL-aware authorization', () => {
       ).toBe(AgentAclRole.User);
     });
 
-    test('does not match a user-type ACL entry against the user roles list', () => {
+    test('does not match a user-type ACL entry by anything other than username', () => {
       expect(
         getEffectiveAgentRole({
           visibility: AgentVisibility.Private,
           owner: aliceOwner,
-          // type=user but the value is "analyst" — must not cross-match against bob.roles=['analyst'].
           acl: aclWith({ type: 'user', name: 'analyst', role: AgentAclRole.Manager }),
           currentUser: bob,
           isAdmin: false,
