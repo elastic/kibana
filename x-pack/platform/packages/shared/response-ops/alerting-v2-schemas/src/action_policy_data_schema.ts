@@ -8,6 +8,8 @@
 import { z } from '@kbn/zod/v4';
 import { durationSchema, tagsSchema } from './common';
 import {
+  ACTION_POLICY_MAX_DESTINATIONS,
+  ACTION_POLICY_VERSION_MAX_LENGTH,
   ID_MAX_LENGTH,
   MAX_BULK_ITEMS,
   MAX_DESCRIPTION_LENGTH,
@@ -16,9 +18,6 @@ import {
   MAX_KQL_LENGTH,
   MAX_NAME_LENGTH,
 } from './constants';
-
-/** Maximum number of destinations per action policy. */
-const MAX_DESTINATIONS = 10;
 
 /**
  * The set of supported action policy destination types. Single source of truth
@@ -238,7 +237,7 @@ const createActionPolicyDataBaseSchema = z.object({
   destinations: z
     .array(actionPolicyDestinationSchema)
     .min(1, 'At least one destination must be provided')
-    .max(MAX_DESTINATIONS)
+    .max(ACTION_POLICY_MAX_DESTINATIONS)
     .describe('The list of destinations. At least one is required.'),
   matcher: z
     .string()
@@ -290,7 +289,7 @@ export const updateActionPolicyDataSchema = z
     destinations: z
       .array(actionPolicyDestinationSchema)
       .min(1, 'At least one destination must be provided')
-      .max(MAX_DESTINATIONS)
+      .max(ACTION_POLICY_MAX_DESTINATIONS)
       .optional()
       .describe('The list of destinations. At least one is required.'),
     matcher: z
@@ -331,7 +330,7 @@ export const updateActionPolicyBodySchema = updateActionPolicyDataSchema.extend(
   version: z
     .string()
     .min(1)
-    .max(256)
+    .max(ACTION_POLICY_VERSION_MAX_LENGTH)
     .describe('The current version of the action policy, used for optimistic concurrency control.'),
 });
 
