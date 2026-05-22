@@ -17,7 +17,7 @@ import { resolveEsqlVariables } from './helpers/resolve_esql_variables';
 import { ACTION_EXPLORE_IN_DISCOVER_TAB, ACTION_INSPECT_PANEL } from '../../common/constants';
 import type { UnifiedMetricsGridProps } from '../../types';
 
-const DEFAULT_QUICK_ACTION_VIEW: ReadonlyArray<string> = [
+const DEFAULT_QUICK_ACTION_VIEW: QuickActionIds = [
   ACTION_EXPLORE_IN_DISCOVER_TAB,
   ACTION_INSPECT_PANEL,
 ];
@@ -33,7 +33,7 @@ export type LensWrapperProps = {
   abortController: AbortController | undefined;
   disabledActions?: string[];
   extraDisabledActions?: string[];
-  quickActionIds?: ReadonlyArray<string>;
+  quickActionIds?: QuickActionIds;
 } & Pick<UnifiedMetricsGridProps, 'services' | 'onBrushEnd' | 'onFilter'>;
 
 const DEFAULT_DISABLED_ACTIONS = ['ACTION_CUSTOMIZE_PANEL', 'ACTION_EXPORT_CSV', 'alertRule'];
@@ -119,7 +119,7 @@ export function LensWrapper({
   // EmbeddableRendererContext is the only way to configure the visible quick-action row because
   // Lens does not expose a first-class prop for it (tracked in https://github.com/elastic/kibana/issues/236787).
   const quickActionView = useMemo(
-    () => (quickActionIds ?? DEFAULT_QUICK_ACTION_VIEW) as QuickActionIds,
+    () => quickActionIds ?? DEFAULT_QUICK_ACTION_VIEW,
     [quickActionIds]
   );
 
