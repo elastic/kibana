@@ -208,7 +208,6 @@ export class StreamsPlugin
             esClient: scopedClusterClient.asCurrentUser,
             soClient,
             rulesClient,
-            space,
             config: tuningConfig,
           });
         })();

@@ -31,7 +31,6 @@ jest.mock('./bulk_with_inference_fallback', () => ({
 import { executeAndDecodeSource } from '../../sig_events/latest_source_query';
 
 const STREAM = 'logs-app';
-const SPACE = 'default';
 
 function createFeatureDoc(
   overrides: Partial<StoredFeatureKnowledgeIndicator> = {}
@@ -80,7 +79,6 @@ function makeClient(): {
     esClient: {} as KnowledgeIndicatorClientDeps['esClient'],
     rulesClient: {} as KnowledgeIndicatorClientDeps['rulesClient'],
     soClient: {} as KnowledgeIndicatorClientDeps['soClient'],
-    space: SPACE,
     logger,
   };
   const client = new KnowledgeIndicatorClient(deps);

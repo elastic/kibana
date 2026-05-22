@@ -39,13 +39,11 @@ export class KnowledgeIndicatorService {
     esClient,
     soClient,
     rulesClient,
-    space,
     config = DEFAULT_SIG_EVENTS_TUNING_CONFIG,
   }: {
     esClient: ElasticsearchClient;
     soClient: SavedObjectsClientContract;
     rulesClient: RulesClient;
-    space: string;
     config?: Pick<SigEventsTuningConfig, 'semantic_min_score' | 'rrf_rank_constant'>;
   }): Promise<KnowledgeIndicatorClient> {
     const [core] = await this.coreSetup.getStartServices();
@@ -68,7 +66,6 @@ export class KnowledgeIndicatorService {
         esClient,
         rulesClient,
         soClient,
-        space,
         logger: this.logger.get('knowledge_indicators'),
       },
       isSignificantEventsEnabled,

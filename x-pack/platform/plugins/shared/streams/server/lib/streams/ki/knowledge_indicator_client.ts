@@ -33,7 +33,6 @@ import {
 import { combineWhere, inPredicate, IS_NOT_DELETED, IS_NOT_EXPIRED } from './esql_helpers';
 import {
   executeAndDecodeSource,
-  latestSourceFrom,
   pickLatestPerGroup,
   withWhere,
   type LatestSourceWhereCondition,
@@ -246,7 +245,6 @@ export interface KnowledgeIndicatorClientDeps {
   esClient: ElasticsearchClient;
   rulesClient: RulesClient;
   soClient: SavedObjectsClientContract;
-  space: string;
   logger: Logger;
 }
 
@@ -353,7 +351,6 @@ export class KnowledgeIndicatorClient {
         docs.push(toTombstone(stream, { id: op.restore.id, type: KI_TYPE_FEATURE }));
       }
       return this.deps.dataStreamClient.create({
-        space: this.deps.space,
         refresh: 'wait_for',
         documents: docs as Array<StoredKnowledgeIndicator & Record<string, unknown>>,
       });
@@ -376,7 +373,6 @@ export class KnowledgeIndicatorClient {
     }
     const tombstones = latest.map((doc) => toTombstone(stream, doc));
     await this.deps.dataStreamClient.create({
-      space: this.deps.space,
       refresh: 'wait_for',
       documents: tombstones as Array<StoredKnowledgeIndicator & Record<string, unknown>>,
     });
@@ -713,7 +709,6 @@ export class KnowledgeIndicatorClient {
     }
 
     const response = await this.deps.dataStreamClient.search({
-      space: this.deps.space,
       size: limit,
       track_total_hits: true,
       retriever: retriever as never,
@@ -1129,7 +1124,7 @@ export class KnowledgeIndicatorClient {
     where?: LatestSourceWhereCondition,
     postGroupingWhere?: LatestSourceWhereCondition
   ): Promise<StoredKnowledgeIndicator[]> {
-    let query = latestSourceFrom(KNOWLEDGE_INDICATORS_DATA_STREAM, this.deps.space);
+    let query = esql.from([KNOWLEDGE_INDICATORS_DATA_STREAM], ['_id', '_source']);
     query = withWhere(query, where);
     query = pickLatestPerGroup(query, ['stream.name', 'type', 'id']);
     query = withWhere(query, postGroupingWhere);
