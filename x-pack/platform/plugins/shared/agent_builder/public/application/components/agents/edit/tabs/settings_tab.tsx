@@ -42,8 +42,8 @@ import {
 import { getEbtProps } from '@kbn/ebt-click';
 import type { Control, FormState } from 'react-hook-form';
 import { Controller, useWatch } from 'react-hook-form';
-import { AccessForm } from '../../access/access_form';
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
+import { AccessForm } from '../../access/access_form';
 import { labels } from '../../../../utils/i18n';
 import { useAgentLabels } from '../../../../hooks/agents/use_agent_labels';
 import { useAgentBuilderServices } from '../../../../hooks/use_agent_builder_service';
