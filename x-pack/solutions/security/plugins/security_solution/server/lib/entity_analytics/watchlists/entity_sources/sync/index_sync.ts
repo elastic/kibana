@@ -25,7 +25,7 @@ export const createIndexSyncService = ({
 }: {
   // Entity Store installer's credentials client, used for writes to internal watchlist indices
   writeEsClient: ElasticsearchClient;
-  // Client used to read from the source index. Scoped to the configuring user's API key for index sources; Entity Store installer's credentials for all others
+  // Client used to read from the source index. Scoped to the configuring user's API key for index sources
   indexReadEsClient: ElasticsearchClient;
   crudClient: CRUDClient;
   logger: Logger;

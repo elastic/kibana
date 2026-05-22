@@ -32,7 +32,7 @@ export const grantEntitySourceApiKey = async (
   };
 
   // The grant endpoint only supports password/access_token auth and throws on API key auth
-  // (the case in serverless FTR). Use cloneAsInternalUser when the request uses API key auth.
+  // (the case in serverless). Use cloneAsInternalUser when the request uses API key auth.
   if (isApiKeyAuthentication(security, request)) {
     const result = await security.authc.apiKeys.cloneAsInternalUser(request, {
       name: keyName,
