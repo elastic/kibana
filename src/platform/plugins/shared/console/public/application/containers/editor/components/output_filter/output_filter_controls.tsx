@@ -10,6 +10,7 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
+  EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
@@ -44,15 +45,43 @@ export const OutputFilterControls = () => {
   const {
     lastResult: { data },
   } = useRequestReadContext();
-  const { mode, expression } = useOutputFilterReadContext();
-  const { setMode } = useOutputFilterActionContext();
+  const { expression: appliedExpression, mode: appliedMode, invertMatch: appliedInvertMatch } = useOutputFilterReadContext();
+  const { setExpression, setMode, setInvertMatch } = useOutputFilterActionContext();
+
   const [isOpen, setIsOpen] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
+
+  // Draft state — only committed to context when Apply is clicked
+  const [draftMode, setDraftMode] = useState<FilterMode>(appliedMode);
+  const [draftExpression, setDraftExpression] = useState(appliedExpression);
+  const [draftInvertMatch, setDraftInvertMatch] = useState(appliedInvertMatch);
 
   // Only show for a single successful response
   if (!data || data.length !== 1 || data[0].response.statusCode !== 200) return null;
 
-  const isActive = expression.length > 0;
+  const isActive = appliedExpression.length > 0;
+
+  const handleModeChange = (newMode: FilterMode) => {
+    setDraftMode(newMode);
+    setDraftExpression('');
+    setDraftInvertMatch(false);
+  };
+
+  const handleApply = () => {
+    setMode(draftMode);
+    setExpression(draftExpression);
+    setInvertMatch(draftInvertMatch);
+    setIsOpen(false);
+  };
+
+  const handleClear = () => {
+    setDraftMode('regex');
+    setDraftExpression('');
+    setDraftInvertMatch(false);
+    setMode('regex');
+    setExpression('');
+    setInvertMatch(false);
+  };
 
   return (
     <EuiPopover
@@ -90,8 +119,8 @@ export const OutputFilterControls = () => {
               <EuiFlexItem>
                 <EuiSelect
                   options={modeOptions}
-                  value={mode}
-                  onChange={(e) => setMode(e.target.value as FilterMode)}
+                  value={draftMode}
+                  onChange={(e) => handleModeChange(e.target.value as FilterMode)}
                   fullWidth
                 />
               </EuiFlexItem>
@@ -108,13 +137,52 @@ export const OutputFilterControls = () => {
           </EuiFormRow>
         </EuiFlexItem>
 
-        {showHelp && <FilterHelpModal mode={mode} onClose={() => setShowHelp(false)} />}
+        <EuiFlexItem>
+          {draftMode === 'regex' ? (
+            <RegexExpressionInput
+              value={draftExpression}
+              onChange={setDraftExpression}
+              invertMatch={draftInvertMatch}
+              onInvertMatchChange={setDraftInvertMatch}
+            />
+          ) : (
+            <JqExpressionInput
+              value={draftExpression}
+              onChange={setDraftExpression}
+            />
+          )}
+        </EuiFlexItem>
 
         <EuiFlexItem>
           <EuiSpacer size="xs" />
-          {mode === 'regex' ? <RegexExpressionInput /> : <JqExpressionInput />}
+          <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" responsive={false}>
+            {isActive && (
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  size="s"
+                  color="danger"
+                  onClick={handleClear}
+                  data-test-subj="consoleOutputFilterClear"
+                >
+                  {i18n.translate('console.outputFilter.clearButton', { defaultMessage: 'Clear' })}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                size="s"
+                fill
+                onClick={handleApply}
+                data-test-subj="consoleOutputFilterApply"
+              >
+                {i18n.translate('console.outputFilter.applyButton', { defaultMessage: 'Apply' })}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
+
+      {showHelp && <FilterHelpModal mode={draftMode} onClose={() => setShowHelp(false)} />}
     </EuiPopover>
   );
 };

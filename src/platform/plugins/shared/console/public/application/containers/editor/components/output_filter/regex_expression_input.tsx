@@ -7,16 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
-import { debounce } from 'lodash';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiTextArea,
-  EuiFormRow,
-  EuiSpacer,
-  EuiSwitch,
-} from '@elastic/eui';
-import { useOutputFilterActionContext, useOutputFilterReadContext } from '../../../../contexts/output_filter_context';
+import { EuiTextArea, EuiFormRow, EuiSpacer, EuiSwitch } from '@elastic/eui';
 
 const isValidRegex = (expression: string): boolean => {
   if (!expression) return true;
@@ -28,23 +21,20 @@ const isValidRegex = (expression: string): boolean => {
   }
 };
 
-export const RegexExpressionInput = () => {
-  const { expression, invertMatch } = useOutputFilterReadContext();
-  const { setExpression, setInvertMatch } = useOutputFilterActionContext();
-  const [localValue, setLocalValue] = useState(expression);
+interface RegexExpressionInputProps {
+  value: string;
+  onChange: (value: string) => void;
+  invertMatch: boolean;
+  onInvertMatchChange: (checked: boolean) => void;
+}
 
-  const debouncedSetExpression = useMemo(() => debounce(setExpression, 50), [setExpression]);
-
-  const handleChange = useCallback(
-    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      const val = e.target.value;
-      setLocalValue(val);
-      debouncedSetExpression(val);
-    },
-    [debouncedSetExpression]
-  );
-
-  const isInvalid = !isValidRegex(localValue);
+export const RegexExpressionInput = ({
+  value,
+  onChange,
+  invertMatch,
+  onInvertMatchChange,
+}: RegexExpressionInputProps) => {
+  const isInvalid = !isValidRegex(value);
 
   return (
     <>
@@ -62,8 +52,8 @@ export const RegexExpressionInput = () => {
       >
         <EuiTextArea
           data-test-subj="filterRegex"
-          value={localValue}
-          onChange={handleChange}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
           isInvalid={isInvalid}
           placeholder={i18n.translate('console.outputFilter.regex.placeholder', {
             defaultMessage: 'Regular expression',
@@ -81,10 +71,9 @@ export const RegexExpressionInput = () => {
           defaultMessage: 'Invert match',
         })}
         checked={invertMatch}
-        onChange={(e) => setInvertMatch(e.target.checked)}
+        onChange={(e) => onInvertMatchChange(e.target.checked)}
         compressed
       />
-
     </>
   );
 };
