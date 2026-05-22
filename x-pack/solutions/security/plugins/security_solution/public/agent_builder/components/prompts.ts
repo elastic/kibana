@@ -131,4 +131,4 @@ When Suggesting Improvements:
 - If you need more context, ask concise follow-up questions
 `;
 
-export const BULK_ALERTS_ATTACHMENT_PROMPT = `I've added security alerts. Please triage and prioritize them — identify shared entities, patterns, and escalation indicators, then recommend actions.`;
+export const BULK_ALERTS_ATTACHMENT_PROMPT = `Triage and prioritize these security alerts`;
