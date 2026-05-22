@@ -248,7 +248,6 @@ export const runRelationshipMaintainer = async ({
   abortController,
 }: {
   esClient: ElasticsearchClient;
-  /** CPS-enabled client covering origin + linked projects. Falls back to `esClient` when absent. */
   cpsEsClient?: ElasticsearchClient;
   logger: Logger;
   namespace: string;
