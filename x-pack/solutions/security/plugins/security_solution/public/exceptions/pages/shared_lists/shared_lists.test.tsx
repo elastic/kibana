@@ -152,6 +152,34 @@ describe('SharedLists', () => {
     });
   });
 
+  it('does not render pagination when no lists exist', async () => {
+    (useExceptionLists as jest.Mock).mockReturnValue([
+      false,
+      [],
+      {
+        page: 1,
+        perPage: 20,
+        total: 0,
+      },
+      jest.fn(),
+    ]);
+
+    (useAllExceptionLists as jest.Mock).mockReturnValue([false, [], {}]);
+    const wrapper = render(
+      <TestProviders>
+        <SharedLists />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(wrapper.getByTestId('emptyViewerState')).toBeInTheDocument();
+    });
+
+    expect(
+      wrapper.queryByRole('navigation', { name: 'Custom pagination example' })
+    ).not.toBeInTheDocument();
+  });
+
   it('renders loading state when fetching lists', async () => {
     (useExceptionLists as jest.Mock).mockReturnValue([
       true,
