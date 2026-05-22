@@ -49,6 +49,7 @@ import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import type { RenderingService } from '@kbn/core-rendering-browser';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { ProjectRouting } from '@kbn/es-query';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui/src/components/datagrid/data_grid_types';
@@ -411,12 +412,24 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
    */
   configurationStorage?: IStorageWrapper | null;
   /**
+   * Show a CSV export button in the toolbar. The button exports all alerts matching
+   * the current filters using the reporting CSV endpoint.
+   * Note: `services.rendering` must also be provided, otherwise the button will not render.
+   * @default false
+   */
+  showCsvExportButton?: boolean;
+  /**
    * Dependencies
    */
   services: {
     data: DataPublicPluginStart;
     http: HttpStart;
     notifications: NotificationsStart;
+    /**
+     * Required to render the CSV export button (`showCsvExportButton`). The button will
+     * not appear if this is omitted, even when `showCsvExportButton` is true.
+     */
+    rendering?: RenderingService;
     fieldFormats: FieldFormatsStart;
     application: ApplicationStart;
     licensing: LicensingPluginStart;
@@ -450,6 +463,23 @@ export interface AdditionalContext {}
 export type RenderContext<AC extends AdditionalContext> = {
   tableId?: string;
   dataGridRef: MutableRefObject<EuiDataGridRefProps | null>;
+
+  /**
+   * The rule type IDs used to filter alerts
+   */
+  ruleTypeIds: string[];
+  /**
+   * The consumers used to filter alerts
+   */
+  consumers?: string[];
+  /**
+   * The ES query used to filter alerts
+   */
+  query: Pick<NonNullable<QueryDslQueryContainer>, 'bool' | 'ids'>;
+  /**
+   * The current sort configuration
+   */
+  sort: AlertsTableSortCombinations[];
 
   /**
    * Refetches all the queries, resetting the alerts pagination if necessary
@@ -593,6 +623,7 @@ export interface AlertsDataGridProps<AC extends AdditionalContext = AdditionalCo
   onColumnResize?: EuiDataGridOnColumnResizeHandler;
   query: Pick<NonNullable<QueryDslQueryContainer>, 'bool' | 'ids'>;
   showInspectButton?: boolean;
+  showCsvExportButton?: boolean;
   toolbarVisibility?: EuiDataGridToolBarVisibilityOptions;
   /**
    * Allows to consumers of the table to decide to highlight a row based on the current alert.

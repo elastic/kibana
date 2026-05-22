@@ -541,7 +541,7 @@ describe('generateOpenApiDocument', () => {
           versionedRouters: {},
         } as CreateTestRouterArgs,
         expectedPath: '/test-path/{id}/{path}',
-        expectedState: 'Technical Preview',
+        expectedState: 'Experimental',
       },
       {
         name: 'router with beta stability',
@@ -616,7 +616,7 @@ describe('generateOpenApiDocument', () => {
           },
         } as CreateTestRouterArgs,
         expectedPath: '/test-path',
-        expectedState: 'Technical Preview',
+        expectedState: 'Experimental',
       },
       {
         name: 'versioned router with beta stability',
