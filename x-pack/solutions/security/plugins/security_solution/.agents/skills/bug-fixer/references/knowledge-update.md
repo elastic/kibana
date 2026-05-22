@@ -17,14 +17,13 @@ Only add entries that would help future sessions:
 
 ## Format
 
-Append entries using this structure:
+Append entries using this structure (matches the existing entries in KNOWLEDGE.md):
 
 ```markdown
-### <Category>: <Short title>
-- **Issue**: #<number> (or "general")
+### <Short title>
 - **Date**: <today's date>
-- **Learning**: <what you learned>
-- **Context**: <why this matters for future sessions>
+- **Incident**: <what happened — what the agent did and what went wrong>
+- **Generic rule**: → <where the resulting rule lives, e.g. classification-guide.md Fix Strategies>
 ```
 
 ## Rules

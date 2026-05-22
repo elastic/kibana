@@ -18,10 +18,10 @@ auto-discovered — they must be invoked explicitly by path.
 **Claude Code and Cursor — ask the agent:**
 
 Step 1 (reproduce):
-> "Read and follow `x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-reproduce/SKILL.md` for issue #NUMBER"
+> `/bug-reproduce #NUMBER`
 
 Step 2 (fix) — after reviewing the reproduction report:
-> "Read and follow `x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-fix/SKILL.md`"
+> `/bug-fix`
 
 ## What each step does
 
@@ -43,11 +43,6 @@ implements a TDD fix, verifies in a clean environment, and optionally opens a dr
 
 **Scope:** Stateful (ECH) only — decline serverless bugs before starting either step.
 
-## Scope
-
-Stateful (ECH) environments only. If the ticket is a serverless bug, tell the user and
-stop — this workflow does not support serverless reproduction.
-
 ## Prerequisites
 
 - `gh` CLI installed and authenticated (`gh auth login`)
@@ -61,5 +56,4 @@ stop — this workflow does not support serverless reproduction.
 
 ## Agent instruction
 
-Tell the user the two invocation commands above. Do not read any other skill file.
-Do not start any work yourself.
+Tell the user the two invocation commands above (`/bug-reproduce #NUMBER`, then `/bug-fix`). Do not read any other skill file. Do not start any work yourself.
