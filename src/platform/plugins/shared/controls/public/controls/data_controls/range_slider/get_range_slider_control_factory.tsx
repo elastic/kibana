@@ -19,7 +19,7 @@ import {
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { DEFAULT_RANGE_SLIDER_STATE, RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import type { RangeSliderControlState } from '@kbn/controls-schemas';
 
 import { isCompressed } from '../../../control_group/utils/is_compressed';
@@ -35,13 +35,16 @@ import { RangeSliderStrings } from './range_slider_strings';
 import type { RangeSliderControlApi } from './types';
 import { editorComparators, initializeEditorStateManager } from './editor_state_manager';
 import { buildFilter } from './utils/filter_utils';
+import { getPlacementHints, LAYOUT_CONSTRAINTS } from '../../constants';
 
-export const getRangesliderControlFactory = (): EmbeddableFactory<
+export const getRangesliderControlFactory = (): EmbeddablePublicDefinition<
   RangeSliderControlState,
   RangeSliderControlApi
 > => {
   return {
     type: RANGE_SLIDER_CONTROL,
+    getPlacementHints,
+    layoutConstraints: LAYOUT_CONSTRAINTS,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const state = initialState;
       const loadingMinMax$ = new BehaviorSubject<boolean>(false);
@@ -82,9 +85,12 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
         serializeState,
         anyStateChange$: merge(
           dataControlManager.anyStateChange$,
-          selections.value$,
+          selections.value$.pipe(
+            skip(1),
+            map(() => undefined)
+          ),
           editorStateManager.anyStateChange$
-        ).pipe(map(() => undefined)),
+        ),
         getComparators: () => {
           return {
             ...editorComparators,
