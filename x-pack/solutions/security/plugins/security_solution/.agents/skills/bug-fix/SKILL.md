@@ -111,8 +111,11 @@ re-present it. No exceptions for bugs that seem obvious.
 **Removal fixes** — if the fix deletes or unwraps UI elements (e.g., removing `EuiToolTip` wrappers), ask before writing the test: *"Can I assert the behavior that was wrong, rather than the element's absence?"* A behavior assertion is **meaningful** if it asserts (a) an action that was incorrectly blocked now succeeds (e.g., a click fires, a mutation runs), or (b) a user-visible outcome is absent without using element-existence checks. `expect(wrapper.find(EuiToolTip)).toHaveLength(0)` is not meaningful — it is fragile (any future tooltip in the tree breaks it) and asserts presence, not behavior. If neither (a) nor (b) can be asserted, skip the unit test and add to the PR description: `"No unit test added — fix removes [element]; behavior verified in Phase 5 browser reproduction."` Do not force an existence check just to satisfy TDD.
 
 For Scout tests, use these skills before writing (REQUIRED):
-1. Invoke `scout-create-scaffold` to generate the test scaffold
-2. Invoke `security-scout-best-practices-reviewer` (Security Solution-specific) to review the test before committing
+1. Invoke `scout-create-scaffold`
+   (`Skill("scout-create-scaffold")` — skill at `.agents/skills/scout-create-scaffold/SKILL.md`)
+2. Invoke `security-scout-best-practices-reviewer`
+   (`Skill("security-scout-best-practices-reviewer")` — skill at `x-pack/solutions/security/plugins/security_solution/.agents/skills/scout-best-practices-reviewer/SKILL.md`)
+   This skill internally runs the general `scout-best-practices-reviewer` (`.agents/skills/scout-best-practices-reviewer/SKILL.md`) first — do not invoke it separately.
 
 Run the test and expect it to fail:
 ```bash
