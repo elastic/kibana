@@ -16,10 +16,13 @@ import {
   filter,
   map,
   pipe,
+  type OperatorFunction,
 } from 'rxjs';
 
 import { ControlsRenderer, type ControlsRendererParentApi } from '@kbn/controls-renderer';
+import type { TimeSlice } from '@kbn/controls-schemas';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   apiHasSerializableState,
@@ -154,17 +157,34 @@ export const ControlGroupRenderer = ({
      * the ControlGroupRenderer will render before the children are available and combineCompatibleChildrenApis
      * will default to the empty value; however, we shouldn't publish this until the value is real
      */
-    const ignoreWhileLoading = pipe(
-      combineLatestWith(parentApi.childrenLoading$),
-      filter(([, loading]) => !loading),
-      map(([result]) => result)
-    );
+    const ignoreWhileLoading = <T,>(): OperatorFunction<T, T> =>
+      pipe(
+        combineLatestWith(parentApi.childrenLoading$),
+        filter(([, loading]) => !loading),
+        map(([result]) => result)
+      );
+
+    // Pipe these parent subjects into fresh BehaviorSubjects so we can pipe them through `ignoreWhileLoading` without
+    // breaking the BehaviorSubject contract; some consumers use `.value` or `.getValue()` downstream
+    const esqlVariables$ = new BehaviorSubject<ESQLControlVariable[]>([]);
+    const appliedFilters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
+    const appliedTimeslice$ = new BehaviorSubject<TimeSlice | undefined>(undefined);
+
+    const esqlVariablesSubscription = parentApi.esqlVariables$
+      .pipe(ignoreWhileLoading())
+      .subscribe((value) => esqlVariables$.next(value));
+    const appliedFiltersSubscription = parentApi.appliedFilters$
+      .pipe(ignoreWhileLoading())
+      .subscribe((value) => appliedFilters$.next(value));
+    const appliedTimesliceSubscription = parentApi.appliedTimeslice$
+      .pipe(ignoreWhileLoading())
+      .subscribe((value) => appliedTimeslice$.next(value));
 
     const publicApi = {
       ...parentApi,
-      esqlVariables$: parentApi.esqlVariables$.pipe(ignoreWhileLoading),
-      appliedFilters$: parentApi.appliedFilters$.pipe(ignoreWhileLoading),
-      appliedTimeslice$: parentApi.appliedTimeslice$.pipe(ignoreWhileLoading),
+      esqlVariables$,
+      appliedFilters$,
+      appliedTimeslice$,
       getControls: parentApi.layout$.getValue().controls ?? {},
       reload: () => {
         parentApi.reload$.next();
@@ -207,6 +227,12 @@ export const ControlGroupRenderer = ({
       ...publicApi,
       openAddDataControlFlyout,
     } as unknown as ControlGroupRendererApi);
+
+    return () => {
+      esqlVariablesSubscription.unsubscribe();
+      appliedFiltersSubscription.unsubscribe();
+      appliedTimesliceSubscription.unsubscribe();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [parentApi, input$, uiActions]);
 
