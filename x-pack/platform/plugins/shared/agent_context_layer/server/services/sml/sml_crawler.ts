@@ -180,10 +180,13 @@ export class SmlCrawlerImpl implements SmlCrawler {
       if (error.statusCode === 404) {
         return false;
       }
-      if (
+      const esError = (error.body as { error?: { type?: string; caused_by?: { type?: string } } })
+        ?.error;
+      const isMappingConflict =
         error.statusCode === 400 &&
-        (error.body as { error?: { type?: string } })?.error?.type === 'illegal_argument_exception'
-      ) {
+        (esError?.type === 'illegal_argument_exception' ||
+          esError?.caused_by?.type === 'illegal_argument_exception');
+      if (isMappingConflict) {
         this.logger.warn(
           `SML crawler: incompatible mapping change detected — dropping index '${smlIndexName}' and re-crawling immediately`
         );
