@@ -7,6 +7,7 @@
 
 import { flattenObjectNestedLast } from '@kbn/object-utils';
 import type { DraftGrokExpression } from '@kbn/grok-ui';
+import { parseDissectPattern } from '@kbn/streamlang';
 import type { FlattenRecord, ProcessorMetrics, SampleDocument } from '@kbn/streams-schema';
 
 /**
@@ -19,21 +20,16 @@ export interface SampleWithDataSource {
 
 /**
  * Creates a WeakMap that maps from preview document objects to their original (pre-transformation)
- * grok field values. This is needed when the grok pattern extracts into the same field it reads from
- * (e.g., message → message).
+ * field values. This is needed when a processor (grok/dissect) extracts into the same field it
+ * reads from (e.g., message → message).
  *
  * We use a WeakMap keyed by the document object reference for O(1) lookup in renderCellValue,
  * since renderCellValue receives the document object but not the row index.
- *
- * @param previewDocuments - The transformed (post-simulation) documents
- * @param originalSamples - The original (pre-simulation) samples with their documents
- * @param grokField - The field name that the grok processor reads from
- * @returns A WeakMap mapping each preview document to its original grok field value
  */
-export function createOriginalGrokFieldValuesMap(
+export function createOriginalFieldValuesMap(
   previewDocuments: FlattenRecord[],
   originalSamples: SampleWithDataSource[],
-  grokField: string
+  sourceField: string
 ): WeakMap<FlattenRecord, string | undefined> {
   const map = new WeakMap<FlattenRecord, string | undefined>();
 
@@ -41,7 +37,7 @@ export function createOriginalGrokFieldValuesMap(
     const originalDoc = originalSamples[index]?.document;
     if (originalDoc) {
       const flattened = flattenObjectNestedLast(originalDoc) as FlattenRecord;
-      const value = flattened[grokField];
+      const value = flattened[sourceField];
       map.set(doc, typeof value === 'string' ? value : undefined);
     }
   });
@@ -50,56 +46,39 @@ export function createOriginalGrokFieldValuesMap(
 }
 
 /**
- * Gets the value to display for a grok field, preferring the original (pre-transformation) value
- * over the transformed value. This ensures highlighting works correctly even when the grok pattern
- * extracts into the same field it reads from.
- *
- * @param document - The document (may be flattened preview document or sample document)
- * @param columnId - The column/field ID being rendered
- * @param grokField - The grok processor's source field
- * @param originalGrokFieldValues - Map of original field values (if available)
- * @returns The value to display, or undefined if no valid string value exists
+ * Gets the value to display for a processor's source field, preferring the original
+ * (pre-transformation) value over the transformed value. This ensures highlighting works
+ * correctly even when the processor extracts into the same field it reads from.
  */
-export function getGrokFieldDisplayValue(
+export function getSourceFieldDisplayValue(
   document: SampleDocument | FlattenRecord,
   columnId: string,
-  grokField: string,
-  originalGrokFieldValues?: WeakMap<FlattenRecord, string | undefined>
+  sourceField: string,
+  originalFieldValues?: WeakMap<FlattenRecord, string | undefined>
 ): string | undefined {
-  if (columnId !== grokField) {
+  if (columnId !== sourceField) {
     return undefined;
   }
 
-  // Try to get the original value first (for overwriting grok patterns)
-  const originalValue = originalGrokFieldValues?.get(document as FlattenRecord);
+  const originalValue = originalFieldValues?.get(document as FlattenRecord);
   if (typeof originalValue === 'string') {
     return originalValue;
   }
 
-  // Fall back to the document's value
   const value = document[columnId];
   return typeof value === 'string' ? value : undefined;
 }
 
 /**
- * Checks if any processor preceding the current grok processor has modified the grok source field.
- * This is used to determine whether we should use the original (pre-transformation) value for
- * grok highlighting or not.
- *
- * When a preceding processor modifies the grok source field, using the original value would be
- * incorrect as it doesn't account for the transformations applied by those processors.
- *
- * @param stepIds - Array of step/processor IDs in order of execution
- * @param currentStepId - The ID of the current grok processor being edited
- * @param processorsMetrics - Map of processor ID to its metrics (includes detected_fields)
- * @param grokSourceField - The field that the grok processor reads from
- * @returns true if a preceding processor touched the grok source field, false otherwise
+ * Checks if any processor preceding the current one has modified the source field.
+ * Used to determine whether the original (pre-transformation) value is safe to use
+ * for highlighting.
  */
 export function hasPrecedingProcessorTouchedField(
   stepIds: string[],
   currentStepId: string | undefined,
   processorsMetrics: Partial<Record<string, ProcessorMetrics>> | undefined,
-  grokSourceField: string
+  sourceField: string
 ): boolean {
   if (!currentStepId || !processorsMetrics) {
     return false;
@@ -114,20 +93,12 @@ export function hasPrecedingProcessorTouchedField(
 
   return precedingStepIds.some((stepId) => {
     const metrics = processorsMetrics[stepId];
-    return metrics?.detected_fields?.includes(grokSourceField) ?? false;
+    return metrics?.detected_fields?.includes(sourceField) ?? false;
   });
 }
 
 /**
  * Checks if any of the grok expressions extract into the same field that they read from.
- * This indicates a "non-additive" grok pattern that overwrites the source field.
- *
- * For example, a pattern like `%{WORD:level} %{GREEDYDATA:message}` applied to the `message` field
- * would overwrite `message` with the extracted portion, which is a non-additive change.
- *
- * @param grokExpressions - Array of DraftGrokExpression instances
- * @param sourceField - The field that the grok processor reads from
- * @returns true if any expression extracts into the source field, false otherwise
  */
 export function grokExpressionOverwritesSourceField(
   grokExpressions: DraftGrokExpression[],
@@ -137,4 +108,12 @@ export function grokExpressionOverwritesSourceField(
     const fields = grokExpression.getFields();
     return Array.from(fields.values()).some((field) => field.name === sourceField);
   });
+}
+
+/**
+ * Checks if a dissect pattern extracts into the same field that it reads from.
+ */
+export function dissectPatternOverwritesSourceField(pattern: string, sourceField: string): boolean {
+  const fields = parseDissectPattern(pattern);
+  return fields.some((field) => field.name === sourceField);
 }

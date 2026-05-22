@@ -39,8 +39,8 @@ import {
   NoProcessingDataAvailableEmptyPrompt,
 } from './empty_prompts';
 import {
-  createOriginalGrokFieldValuesMap,
-  getGrokFieldDisplayValue,
+  createOriginalFieldValuesMap,
+  getSourceFieldDisplayValue,
   grokExpressionOverwritesSourceField,
   hasPrecedingProcessorTouchedField,
 } from './processor_outcome_preview_helpers';
@@ -554,7 +554,7 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     if (!grokMode || !validGrokField || !originalSamples) return undefined;
     if (!grokOverwritesSourceField) return undefined;
 
-    return createOriginalGrokFieldValuesMap(previewDocuments, originalSamples, validGrokField);
+    return createOriginalFieldValuesMap(previewDocuments, originalSamples, validGrokField);
   }, [grokMode, validGrokField, originalSamples, previewDocuments, grokOverwritesSourceField]);
 
   const previewColumns = grokColumns ?? availableColumns;
@@ -633,7 +633,7 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
         ? (document: SampleDocument, columnId: string) => {
             // Use the original (pre-transformation) value for the grok field.
             // This ensures highlighting works even when grok extracts into the same field it reads from.
-            const value = getGrokFieldDisplayValue(
+            const value = getSourceFieldDisplayValue(
               document,
               columnId,
               validGrokField,
