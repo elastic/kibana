@@ -84,6 +84,7 @@ function getFunctionDefinition(ESFunctionDefinition: Record<string, any>): Funct
     alias: aliasTable[ESFunctionDefinition.name],
     ignoreAsSuggestion: ESFunctionDefinition.snapshot_only,
     preview: ESFunctionDefinition.preview,
+    tsdbCompatible: ESFunctionDefinition.tsdb_compatible,
     signatures: _.uniqBy(
       ESFunctionDefinition.signatures.map((signature: any) => ({
         ...signature,
@@ -332,7 +333,9 @@ const ${getDefinitionName(name)}: FunctionDefinition = {
   name: EsqlFunctionNames.${name.toUpperCase()},
     description: i18n.translate('kbn-esql-language.esql.definitions.${name}', { defaultMessage: ${JSON.stringify(
     removeAsciiDocInternalCrossReferences(removeInlineAsciiDocLinks(description), functionNames)
-  )} }),${functionDefinition.ignoreAsSuggestion ? 'ignoreAsSuggestion: true,' : ''}
+  )} }),${functionDefinition.ignoreAsSuggestion ? 'ignoreAsSuggestion: true,' : ''}${
+    functionDefinition.tsdbCompatible === false ? '\n  tsdbCompatible: false,' : ''
+  }
   preview: ${functionDefinition.preview || 'false'},
   alias: ${alias ? `['${alias.join("', '")}']` : 'undefined'},
   signatures: ${JSON.stringify(signaturesWithLicenseLowerCase, null, 2)},
