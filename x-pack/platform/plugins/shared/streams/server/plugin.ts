@@ -76,6 +76,7 @@ import {
   createContinuousKiExtractionWorkflowService,
   type ContinuousKiExtractionWorkflowService,
 } from './lib/workflows/continuous_extraction_workflow';
+import { installMemoryWorkflows } from './lib/memory/install_managed_workflows';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
@@ -116,6 +117,8 @@ export class StreamsPlugin
       logger: this.logger,
       workflowsManagement: plugins.workflowsManagement,
     } as StreamsServer;
+
+    plugins.workflowsExtensions?.registerManagedWorkflowOwner('streams');
 
     this.patternExtractionService = new PatternExtractionService(
       this.config.workers.patternExtraction,
@@ -268,7 +271,6 @@ export class StreamsPlugin
         server: this.server,
         logger: this.logger,
         telemetry: telemetryClient,
-        workflowsManagement: plugins.workflowsManagement,
         isMemoryEnabled: async () => {
           try {
             const [coreStart] = await core.getStartServices();
@@ -520,6 +522,18 @@ export class StreamsPlugin
         }`
       );
     });
+
+    if (plugins.workflowsExtensions) {
+      installMemoryWorkflows({ workflowsExtensions: plugins.workflowsExtensions }).catch(
+        (error) => {
+          this.logger.error(
+            `streams: Failed to install memory managed workflows: ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
+        }
+      );
+    }
 
     if (this.server) {
       this.server.core = core;

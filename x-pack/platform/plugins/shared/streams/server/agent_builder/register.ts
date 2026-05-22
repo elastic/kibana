@@ -7,7 +7,6 @@
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
-import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { StreamsServer } from '../types';
 import type { GetScopedClients } from '../routes/types';
 import type { EbtTelemetryClient } from '../lib/telemetry/ebt';
@@ -57,7 +56,6 @@ export const registerStreamsAgentBuilder = async ({
   server,
   logger,
   telemetry,
-  workflowsManagement,
   isMemoryEnabled,
 }: {
   agentBuilder: AgentBuilderPluginSetup;
@@ -65,7 +63,6 @@ export const registerStreamsAgentBuilder = async ({
   server: StreamsServer;
   logger: Logger;
   telemetry: EbtTelemetryClient;
-  workflowsManagement?: WorkflowsServerPluginSetup;
   isMemoryEnabled: () => Promise<boolean>;
 }) => {
   const getMemoryService = (
@@ -90,7 +87,6 @@ export const registerStreamsAgentBuilder = async ({
     server,
     logger,
     telemetry,
-    workflowsManagement,
   });
   registerAgentBuilderSkills({ agentBuilder, getScopedClients, telemetry, memoryToolsOptions });
 

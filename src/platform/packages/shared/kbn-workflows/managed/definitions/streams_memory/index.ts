@@ -7,23 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  STREAMS_MEMORY_CONSOLIDATION_WORKFLOW,
-  STREAMS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW,
-  STREAMS_MEMORY_SYNTHESIS_WORKFLOW,
-} from './streams_memory';
-import { EXAMPLE_MANAGED_WORKFLOW } from './workflows_extensions_example';
-
-export { EXAMPLE_MANAGED_WORKFLOW_ID } from './workflows_extensions_example';
 export {
-  STREAMS_MEMORY_SYNTHESIS_WORKFLOW_ID,
-  STREAMS_MEMORY_CONSOLIDATION_WORKFLOW_ID,
-  STREAMS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
-} from './streams_memory';
-
-export const managedWorkflowDefinitions = [
-  EXAMPLE_MANAGED_WORKFLOW,
   STREAMS_MEMORY_SYNTHESIS_WORKFLOW,
+  STREAMS_MEMORY_SYNTHESIS_WORKFLOW_ID,
+} from './memory_synthesis';
+export {
   STREAMS_MEMORY_CONSOLIDATION_WORKFLOW,
+  STREAMS_MEMORY_CONSOLIDATION_WORKFLOW_ID,
+} from './memory_consolidation';
+export {
   STREAMS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW,
-] as const;
+  STREAMS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
+} from './conversation_scraper';

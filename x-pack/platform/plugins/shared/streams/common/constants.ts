@@ -80,11 +80,6 @@ export const MAX_SCHEDULED_STREAMS = 5;
 export const POLL_DELAY_SECONDS = 5;
 
 /**
- * Sigevents memory data stream and workflow IDs
+ * Sigevents memory data stream
  */
 export const MEMORIES_DATA_STREAM = '.significant_events-memories';
-export const WRITE_MEMORY_PAGE_WORKFLOW_NAME = 'Write Memory Page';
-export const CONVERSATION_SCRAPER_WORKFLOW_NAME = 'Conversation Scraper';
-export const MEMORY_CONSOLIDATION_WORKFLOW_NAME = 'Memory Consolidation';
-export const MEMORY_SYNTHESIS_WORKFLOW_NAME = 'Memory Synthesis';
-export const SIGEVENTS_MEMORY_WORKFLOW_ID = '.streams-sigevents-memory';

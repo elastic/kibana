@@ -9,13 +9,13 @@ import { z } from '@kbn/zod/v4';
 import type { IUiSettingsClient, Logger } from '@kbn/core/server';
 import { OBSERVABILITY_STREAMS_ENABLE_MEMORY } from '@kbn/management-settings-ids';
 import { notFound } from '@hapi/boom';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import {
-  STREAMS_API_PRIVILEGES,
-  CONVERSATION_SCRAPER_WORKFLOW_NAME,
-  MEMORY_CONSOLIDATION_WORKFLOW_NAME,
-  MEMORY_SYNTHESIS_WORKFLOW_NAME,
-} from '../../../../common/constants';
+  STREAMS_MEMORY_SYNTHESIS_WORKFLOW_ID,
+  STREAMS_MEMORY_CONSOLIDATION_WORKFLOW_ID,
+  STREAMS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
+} from '@kbn/workflows/managed';
+import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
+import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
 import type {
   MemoryEntry,
@@ -414,7 +414,7 @@ const recentChangesRoute = createServerRoute({
 
 const createWorkflowTriggerRoute = (
   endpoint: `POST ${string}`,
-  workflowName: string,
+  managedWorkflowId: string,
   summary: string
 ) =>
   createServerRoute({
@@ -438,48 +438,44 @@ const createWorkflowTriggerRoute = (
         );
       }
 
-      const { results } = await wfMgmt.management.getWorkflows(
-        { query: workflowName, size: 50, page: 1 },
-        DEFAULT_SPACE_ID
+      const workflow = await wfMgmt.management.getWorkflow(
+        managedWorkflowId,
+        GLOBAL_WORKFLOW_SPACE_ID
       );
-      const listItem = results.find((w) => w.name === workflowName);
-      if (!listItem) {
-        throw notFound(`Workflow "${workflowName}" not found. Deploy it via streams-program.`);
-      }
-
-      const workflow = await wfMgmt.management.getWorkflow(listItem.id, DEFAULT_SPACE_ID);
       if (!workflow) {
-        throw notFound(`Workflow "${workflowName}" (id=${listItem.id}) could not be loaded.`);
+        throw notFound(
+          `Managed workflow "${managedWorkflowId}" not found. Kibana may still be starting up.`
+        );
       }
 
       const executionId = await wfMgmt.management.runWorkflow(
         workflow as Parameters<typeof wfMgmt.management.runWorkflow>[0],
-        DEFAULT_SPACE_ID,
+        GLOBAL_WORKFLOW_SPACE_ID,
         {},
         request,
         'sigevents-memory-ui'
       );
 
-      logger.info(`Triggered workflow "${workflowName}", executionId=${executionId}`);
+      logger.info(`Triggered managed workflow "${managedWorkflowId}", executionId=${executionId}`);
       return { executionId };
     },
   });
 
 const scrapeConversationsRoute = createWorkflowTriggerRoute(
   'POST /internal/streams/memory/_scrape_conversations',
-  CONVERSATION_SCRAPER_WORKFLOW_NAME,
+  STREAMS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
   'Trigger conversation scraping for memory'
 );
 
 const consolidateMemoryRoute = createWorkflowTriggerRoute(
   'POST /internal/streams/memory/_consolidate',
-  MEMORY_CONSOLIDATION_WORKFLOW_NAME,
+  STREAMS_MEMORY_CONSOLIDATION_WORKFLOW_ID,
   'Trigger memory consolidation'
 );
 
 const synthesizeMemoryRoute = createWorkflowTriggerRoute(
   'POST /internal/streams/memory/_synthesize',
-  MEMORY_SYNTHESIS_WORKFLOW_NAME,
+  STREAMS_MEMORY_SYNTHESIS_WORKFLOW_ID,
   'Trigger memory synthesis from significant events'
 );
 
