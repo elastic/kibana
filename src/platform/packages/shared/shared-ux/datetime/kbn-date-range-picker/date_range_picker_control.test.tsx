@@ -8,6 +8,7 @@
  */
 
 import React, { useState } from 'react';
+import moment from 'moment-timezone';
 import { fireEvent, render, screen, waitFor, act, within } from '@testing-library/react';
 import { renderWithEuiTheme } from '@kbn/test-jest-helpers';
 import { EuiThemeProvider } from '@elastic/eui';
@@ -34,6 +35,15 @@ const waitForPopoverClose = () =>
   });
 
 describe('DateRangePickerControl', () => {
+  // Pin to UTC so date formatting is deterministic across local machines and CI agents.
+  beforeEach(() => {
+    moment.tz.setDefault('UTC');
+  });
+
+  afterEach(() => {
+    moment.tz.setDefault('Browser');
+  });
+
   describe('editing mode', () => {
     it('enters editing mode on control button click', async () => {
       renderWithEuiTheme(<DateRangePicker {...defaultProps} onChange={() => {}} />);
@@ -92,7 +102,8 @@ describe('DateRangePickerControl', () => {
           />
         );
 
-        const displayPart = screen.getByText('2024');
+        // Both sides of the range render "2024"; pick the start-side year, matching the selection assertion below.
+        const displayPart = screen.getAllByText('2024')[0];
         fireEvent.mouseDown(displayPart);
         fireEvent.click(displayPart);
 
