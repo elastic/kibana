@@ -9,6 +9,7 @@
 
 import type { ApplicationStart } from '@kbn/core/public';
 import type { DataViewsContract, MatchedItem } from '@kbn/data-views-plugin/public';
+import { INDEX_KIND } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { PropertySelectionHandler, SelectionOption } from '@kbn/workflows/types/latest';
 
@@ -41,15 +42,16 @@ const dataStreamLabel = i18n.translate('workflows.indexSelection.kindDataStream'
 });
 
 function getKindFromTags(item: MatchedItem): string {
-  // Tag keys produced by `responseToItemArray` in @kbn/data-views-plugin:
-  // 'index' | 'alias' | 'data_stream' (+ optional 'frozen', 'rollup').
   const primary = item.tags.find(
-    (tag) => tag.key === 'index' || tag.key === 'alias' || tag.key === 'data_stream'
+    (tag) =>
+      tag.key === INDEX_KIND.INDEX ||
+      tag.key === INDEX_KIND.ALIAS ||
+      tag.key === INDEX_KIND.DATA_STREAM
   );
   switch (primary?.key) {
-    case 'alias':
+    case INDEX_KIND.ALIAS:
       return aliasLabel;
-    case 'data_stream':
+    case INDEX_KIND.DATA_STREAM:
       return dataStreamLabel;
     default:
       return indexLabel;

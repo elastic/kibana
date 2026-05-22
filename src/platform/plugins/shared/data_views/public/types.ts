@@ -200,6 +200,11 @@ export interface ResolveIndexResponseItemIndex extends ResolveIndexResponseItem 
   data_stream?: string;
 }
 
+/**
+ * UI tag attached to each entry returned by `dataViews.getIndices()`.
+ *
+ * @see INDEX_KIND for the discriminator written to `key`.
+ */
 export interface Tag {
   name: string;
   key: INDEX_KIND;
