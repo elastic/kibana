@@ -2501,11 +2501,21 @@ packages/kbn-eslint-plugin-eslint/rules/no_unsafe_hash.js @elastic/kibana-securi
 /x-pack/platform/test/fixtures/es_archives/alerting/8_2_0 @elastic/response-ops
 /x-pack/solutions/**/test/serverless/**/test_suites/rules/ @elastic/response-ops
 
-# EARS
-/x-pack/platform/plugins/shared/actions/server/lib/ears @elastic/workchat-eng
+# Connectors auth
+## Client credentials with jwt
+src/platform/packages/shared/kbn-connector-specs/src/auth_types/oauth_client_credentials_private_key_jwt.ts @elastic/response-ops @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/auth_types/oauth_client_credentials_private_key_jwt.test.ts @elastic/response-ops @elastic/workchat-eng
+x-pack/platform/plugins/shared/actions/server/lib/axios_auth_strategies/oauth_client_credentials_private_key_jwt_strategy.ts @elastic/response-ops @elastic/workchat-eng
+x-pack/platform/plugins/shared/actions/server/lib/axios_auth_strategies/oauth_client_credentials_private_key_jwt_strategy.test.ts @elastic/response-ops @elastic/workchat-eng
+x-pack/platform/plugins/shared/actions/server/lib/build_client_assertion.ts @elastic/response-ops @elastic/workchat-eng
+x-pack/platform/plugins/shared/actions/server/lib/build_client_assertion.test.ts @elastic/response-ops @elastic/workchat-eng
+
+## EARS
+x-pack/platform/plugins/shared/actions/server/lib/ears @elastic/workchat-eng
 x-pack/platform/plugins/shared/actions/server/lib/axios_auth_strategies/ears_strategy.ts @elastic/workchat-eng @elastic/response-ops
 x-pack/platform/plugins/shared/actions/server/lib/axios_auth_strategies/ears_strategy.test.ts @elastic/workchat-eng @elastic/response-ops
-/src/platform/packages/shared/kbn-connector-specs/src/auth_types/ears.ts @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/auth_types/ears.ts @elastic/workchat-eng
+
 
 # Connector Specs
 src/platform/packages/shared/kbn-connector-specs/src/all_specs.ts
