@@ -82,7 +82,10 @@ export class SavedQueryManagementMenu {
     if (await this.isOpen()) return;
     await this.menuButton.click();
     await expect(this.menuButton).toHaveAttribute('aria-expanded', 'true');
-    await this.page.waitForTimeout(1000); // EUI popover open animation duration
+    // EUI popover open animation has no deterministic settled event; waiting on
+    // it directly is the only reliable way to avoid racing inner-panel clicks.
+    // eslint-disable-next-line playwright/no-wait-for-timeout
+    await this.page.waitForTimeout(1000);
   }
 
   async open(): Promise<void> {

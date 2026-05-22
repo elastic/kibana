@@ -48,7 +48,7 @@ spaceTest.describe(
 
         spaceTest
           .expect(affordances, `popover affordances for ${matrixCase.label}`)
-          .toEqual(matrixCase.expected);
+          .toStrictEqual(matrixCase.expected);
       });
     }
   }
