@@ -117,6 +117,7 @@ export const projectModeBackgroundStyles = (euiThemeContext: UseEuiTheme) => {
 // temporary hacks that need to be removed after better flyout and global sidenav customization support in EUI
 // https://github.com/elastic/eui/issues/8820
 const globalTempHackStyles = (_euiTheme: UseEuiTheme['euiTheme'], chromeStyle: ChromeStyle) => css`
+  body,
   .kbnBody {
     // adjust position of the classic side-navigation
     .euiFlyout.euiCollapsibleNav {
@@ -164,6 +165,7 @@ const globalTempHackStyles = (_euiTheme: UseEuiTheme['euiTheme'], chromeStyle: C
     // application area should have bottom padding when bottom bar is present
     ${logicalCSS('padding-bottom', `var(--euiBottomBarOffset, 0px)`)};
   }
+  body,
   .kbnBody {
     // this is a temporary hack to override EUI's body padding with push flyout
     ${logicalCSS('padding-right', `0px !important`)};
