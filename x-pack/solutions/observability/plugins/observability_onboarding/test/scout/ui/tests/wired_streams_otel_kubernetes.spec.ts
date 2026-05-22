@@ -29,6 +29,7 @@ test.describe(
       await test.step('navigate to OTel Kubernetes flow', async () => {
         await pageObjects.onboarding.selectKubernetesUseCase();
         await pageObjects.onboarding.clickIntegrationCard('integration-card:otel-kubernetes');
+        await pageObjects.onboarding.waitForIngestionModeSelector();
       });
 
       await test.step('ingestion selector is visible with both options', async () => {
