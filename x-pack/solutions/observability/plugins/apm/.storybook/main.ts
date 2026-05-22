@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { EuiThemeProviderDecorator } from '@kbn/kibana-react-plugin/common';
-import * as jest from 'jest-mock';
+import { defaultConfig } from '@kbn/storybook';
 
-window.jest = jest;
-export const decorators = [EuiThemeProviderDecorator];
+module.exports = defaultConfig;
