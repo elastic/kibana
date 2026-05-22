@@ -83,21 +83,81 @@ export interface MatrixCase {
  * `savedQueryManagement` privileges.
  */
 export const V1_MATRIX: MatrixCase[] = [
-  { label: 'feature:read + sqm:all', featurePriv: 'read', sqmPriv: 'all',  expected: { showQueries: true,  saveQuery: true  } },
-  { label: 'feature:read + sqm:read', featurePriv: 'read', sqmPriv: 'read', expected: { showQueries: true,  saveQuery: false } },
-  { label: 'feature:read + sqm:none', featurePriv: 'read', sqmPriv: 'none', expected: { showQueries: true,  saveQuery: false } },
-  { label: 'feature:all + sqm:all',   featurePriv: 'all',  sqmPriv: 'all',  expected: { showQueries: true,  saveQuery: true  } },
-  { label: 'feature:all + sqm:read',  featurePriv: 'all',  sqmPriv: 'read', expected: { showQueries: true,  saveQuery: true  } },
-  { label: 'feature:all + sqm:none',  featurePriv: 'all',  sqmPriv: 'none', expected: { showQueries: true,  saveQuery: true  } },
+  {
+    label: 'feature:read + sqm:all',
+    featurePriv: 'read',
+    sqmPriv: 'all',
+    expected: { showQueries: true, saveQuery: true },
+  },
+  {
+    label: 'feature:read + sqm:read',
+    featurePriv: 'read',
+    sqmPriv: 'read',
+    expected: { showQueries: true, saveQuery: false },
+  },
+  {
+    label: 'feature:read + sqm:none',
+    featurePriv: 'read',
+    sqmPriv: 'none',
+    expected: { showQueries: true, saveQuery: false },
+  },
+  {
+    label: 'feature:all + sqm:all',
+    featurePriv: 'all',
+    sqmPriv: 'all',
+    expected: { showQueries: true, saveQuery: true },
+  },
+  {
+    label: 'feature:all + sqm:read',
+    featurePriv: 'all',
+    sqmPriv: 'read',
+    expected: { showQueries: true, saveQuery: true },
+  },
+  {
+    label: 'feature:all + sqm:none',
+    featurePriv: 'all',
+    sqmPriv: 'none',
+    expected: { showQueries: true, saveQuery: true },
+  },
 ];
 
 export const V2_MATRIX: MatrixCase[] = [
-  { label: 'feature:read + sqm:all', featurePriv: 'read', sqmPriv: 'all',  expected: { showQueries: true,  saveQuery: true  } },
-  { label: 'feature:read + sqm:read', featurePriv: 'read', sqmPriv: 'read', expected: { showQueries: true,  saveQuery: false } },
-  { label: 'feature:read + sqm:none', featurePriv: 'read', sqmPriv: 'none', expected: { showQueries: false, saveQuery: false } },
-  { label: 'feature:all + sqm:all',   featurePriv: 'all',  sqmPriv: 'all',  expected: { showQueries: true,  saveQuery: true  } },
-  { label: 'feature:all + sqm:read',  featurePriv: 'all',  sqmPriv: 'read', expected: { showQueries: true,  saveQuery: false } },
-  { label: 'feature:all + sqm:none',  featurePriv: 'all',  sqmPriv: 'none', expected: { showQueries: false, saveQuery: false } },
+  {
+    label: 'feature:read + sqm:all',
+    featurePriv: 'read',
+    sqmPriv: 'all',
+    expected: { showQueries: true, saveQuery: true },
+  },
+  {
+    label: 'feature:read + sqm:read',
+    featurePriv: 'read',
+    sqmPriv: 'read',
+    expected: { showQueries: true, saveQuery: false },
+  },
+  {
+    label: 'feature:read + sqm:none',
+    featurePriv: 'read',
+    sqmPriv: 'none',
+    expected: { showQueries: false, saveQuery: false },
+  },
+  {
+    label: 'feature:all + sqm:all',
+    featurePriv: 'all',
+    sqmPriv: 'all',
+    expected: { showQueries: true, saveQuery: true },
+  },
+  {
+    label: 'feature:all + sqm:read',
+    featurePriv: 'all',
+    sqmPriv: 'read',
+    expected: { showQueries: true, saveQuery: false },
+  },
+  {
+    label: 'feature:all + sqm:none',
+    featurePriv: 'all',
+    sqmPriv: 'none',
+    expected: { showQueries: false, saveQuery: false },
+  },
 ];
 
 export interface CapabilitiesResponse {

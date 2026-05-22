@@ -247,8 +247,7 @@ export class SavedQueryManagementMenu {
     await this.openPopover();
     const loadVisible = await this.loadButton.isVisible();
     const saveVisible = await this.saveButton.isVisible();
-    const saveEnabled =
-      saveVisible && (await this.saveButton.getAttribute('disabled')) === null;
+    const saveEnabled = saveVisible && (await this.saveButton.getAttribute('disabled')) === null;
     await this.close();
     return { loadVisible, saveVisible, saveEnabled };
   }

@@ -29,7 +29,10 @@ import { QueryBarMenu } from './query_bar_menu';
  * (the helper changes, or `<QueryBarMenu>` stops gating on `showQueries`).
  */
 
-type SavedQueryCapabilities = { showQueries: boolean; saveQuery: boolean };
+interface SavedQueryCapabilities {
+  showQueries: boolean;
+  saveQuery: boolean;
+}
 
 interface AffordancesAssertion {
   loadButton: 'visible' | 'absent';
@@ -46,22 +49,26 @@ const KQL_QUERY: Query = { query: '', language: 'kuery' };
 
 const CASES: readonly PrivilegeCase[] = [
   {
-    label: 'savedQueryManagement.{showQueries:true, saveQuery:true} renders both buttons; save disabled until a query exists',
+    label:
+      'savedQueryManagement.{showQueries:true, saveQuery:true} renders both buttons; save disabled until a query exists',
     capabilities: { showQueries: true, saveQuery: true },
     expected: { loadButton: 'visible', saveButton: 'disabled' },
   },
   {
-    label: 'savedQueryManagement.{showQueries:true, saveQuery:false} renders load, renders save but disabled',
+    label:
+      'savedQueryManagement.{showQueries:true, saveQuery:false} renders load, renders save but disabled',
     capabilities: { showQueries: true, saveQuery: false },
     expected: { loadButton: 'visible', saveButton: 'disabled' },
   },
   {
-    label: 'savedQueryManagement.{showQueries:false, saveQuery:false} hides the entire saved-queries section',
+    label:
+      'savedQueryManagement.{showQueries:false, saveQuery:false} hides the entire saved-queries section',
     capabilities: { showQueries: false, saveQuery: false },
     expected: { loadButton: 'absent', saveButton: 'absent' },
   },
   {
-    label: 'savedQueryManagement.{showQueries:false, saveQuery:true} still hides the section — showQueries gates everything',
+    label:
+      'savedQueryManagement.{showQueries:false, saveQuery:true} still hides the section — showQueries gates everything',
     capabilities: { showQueries: false, saveQuery: true },
     expected: { loadButton: 'absent', saveButton: 'absent' },
   },
