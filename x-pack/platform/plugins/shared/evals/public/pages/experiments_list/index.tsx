@@ -235,19 +235,12 @@ export const ExperimentsListPage: React.FC = () => {
     if (!canCompare) return;
     const [a, b] = selectedExperiments;
     const isSuiteRun = !!a.suite_id || !!b.suite_id;
-    if (isSuiteRun) {
-      const idA = a.eval_run_id ?? a.experiment_id;
-      const idB = b.eval_run_id ?? b.experiment_id;
-      history.push(
-        `/compare?evalRunA=${encodeURIComponent(idA)}&evalRunB=${encodeURIComponent(idB)}`
-      );
-    } else {
-      history.push(
-        `/compare?experimentA=${encodeURIComponent(
-          a.experiment_id
-        )}&experimentB=${encodeURIComponent(b.experiment_id)}`
-      );
-    }
+    const type = isSuiteRun ? 'eval_run' : 'experiment';
+    const baselineId = isSuiteRun ? a.eval_run_id ?? a.experiment_id : a.experiment_id;
+    const targetId = isSuiteRun ? b.eval_run_id ?? b.experiment_id : b.experiment_id;
+    const params = new URLSearchParams({ type, baseline: baselineId, target: targetId });
+
+    history.push(`/compare?${params.toString()}`);
   }, [canCompare, selectedExperiments, history]);
 
   return (

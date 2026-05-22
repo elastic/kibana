@@ -91,11 +91,11 @@ describe('GET /internal/evals/experiments/compare', () => {
     return { handler, context, evaluationScoreService, logger };
   };
 
-  const makeRequest = (experimentIdA = 'experiment-a', experimentIdB = 'experiment-b') =>
+  const makeRequest = (baselineId = 'experiment-a', targetId = 'experiment-b') =>
     httpServerMock.createKibanaRequest({
       method: 'get',
       path: EVALS_EXPERIMENTS_COMPARE_URL,
-      query: { experiment_id_a: experimentIdA, experiment_id_b: experimentIdB },
+      query: { type: 'experiment', baseline_id: baselineId, target_id: targetId },
     });
 
   it('queries both experiments through evaluationScoreService.search', async () => {

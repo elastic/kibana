@@ -13,30 +13,26 @@ paths:
       tags:
         - Evals API
       parameters:
-        - name: experiment_id_a
+        - name: type
           in: query
           required: false
           schema:
             type: string
-          description: First experiment ID (use for individual experiment comparison)
-        - name: experiment_id_b
+            enum: [experiment, eval_run]
+            default: experiment
+          description: Comparison type — compare individual experiments or suite eval runs
+        - name: baseline_id
           in: query
-          required: false
+          required: true
           schema:
             type: string
-          description: Second experiment ID (use for individual experiment comparison)
-        - name: eval_run_id_a
+          description: Baseline experiment or eval run ID (depends on type)
+        - name: target_id
           in: query
-          required: false
+          required: true
           schema:
             type: string
-          description: First eval run ID (use for suite run comparison)
-        - name: eval_run_id_b
-          in: query
-          required: false
-          schema:
-            type: string
-          description: Second eval run ID (use for suite run comparison)
+          description: Target experiment or eval run ID (depends on type)
       responses:
         '200':
           description: Successful response

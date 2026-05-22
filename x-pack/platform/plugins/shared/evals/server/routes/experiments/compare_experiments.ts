@@ -52,25 +52,8 @@ export const registerCompareExperimentsRoute = ({ router, logger }: RouteDepende
       },
       async (context, request, response) => {
         try {
-          const {
-            experiment_id_a: experimentIdA,
-            experiment_id_b: experimentIdB,
-            eval_run_id_a: evalRunIdA,
-            eval_run_id_b: evalRunIdB,
-          } = request.query;
-
-          const idA = evalRunIdA ?? experimentIdA;
-          const idB = evalRunIdB ?? experimentIdB;
-          const filterField = evalRunIdA || evalRunIdB ? 'eval_run_id' : 'experiment_id';
-
-          if (!idA || !idB) {
-            return response.badRequest({
-              body: {
-                message:
-                  'Provide either experiment_id_a + experiment_id_b or eval_run_id_a + eval_run_id_b',
-              },
-            });
-          }
+          const { type, baseline_id: idA, target_id: idB } = request.query;
+          const filterField = type === 'eval_run' ? 'eval_run_id' : 'experiment_id';
 
           const evalsContext = await context.evals;
 

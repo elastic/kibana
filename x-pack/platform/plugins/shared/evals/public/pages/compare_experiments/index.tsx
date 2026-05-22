@@ -544,22 +544,20 @@ export const CompareExperimentsPage: React.FC = () => {
   const { euiTheme } = useEuiTheme();
 
   const params = useMemo(() => new URLSearchParams(search), [search]);
-  const evalRunIdA = params.get('evalRunA') ?? '';
-  const evalRunIdB = params.get('evalRunB') ?? '';
-  const experimentIdA = params.get('experimentA') ?? evalRunIdA;
-  const experimentIdB = params.get('experimentB') ?? evalRunIdB;
-  const isEvalRunCompare = Boolean(evalRunIdA && evalRunIdB);
+  const compareType = (params.get('type') as 'experiment' | 'eval_run') || 'experiment';
+  const baselineId = params.get('baseline') ?? '';
+  const targetId = params.get('target') ?? '';
+  const isEvalRunCompare = compareType === 'eval_run';
 
   const { data, isLoading, error, refetch } = useCompareExperiments(
-    experimentIdA,
-    experimentIdB,
-    isEvalRunCompare ? evalRunIdA : undefined,
-    isEvalRunCompare ? evalRunIdB : undefined
+    compareType,
+    baselineId,
+    targetId
   );
-  const detailQueryA = isEvalRunCompare ? evalRunIdA : undefined;
-  const detailQueryB = isEvalRunCompare ? evalRunIdB : undefined;
-  const { data: experimentDataA } = useEvaluationExperiment(experimentIdA, detailQueryA);
-  const { data: experimentDataB } = useEvaluationExperiment(experimentIdB, detailQueryB);
+  const evalRunIdForDetail = isEvalRunCompare ? baselineId : undefined;
+  const evalRunIdForDetailB = isEvalRunCompare ? targetId : undefined;
+  const { data: experimentDataA } = useEvaluationExperiment(baselineId, evalRunIdForDetail);
+  const { data: experimentDataB } = useEvaluationExperiment(targetId, evalRunIdForDetailB);
 
   const isNewerA = useMemo(() => {
     if (!experimentDataA?.timestamp || !experimentDataB?.timestamp) return undefined;
@@ -743,7 +741,7 @@ export const CompareExperimentsPage: React.FC = () => {
     [firstRowByDataset, isGroupedByDataset]
   );
 
-  if (!experimentIdA || !experimentIdB) {
+  if (!baselineId || !targetId) {
     return (
       <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
         <EuiEmptyPrompt
@@ -796,8 +794,8 @@ export const CompareExperimentsPage: React.FC = () => {
         <EuiFlexItem>
           <ExperimentHeader
             label={i18n.RUN_A_LABEL}
-            experimentId={experimentIdA}
-            evalRunId={isEvalRunCompare ? evalRunIdA : undefined}
+            experimentId={baselineId}
+            evalRunId={evalRunIdForDetail}
             isNewer={isNewerA}
           />
         </EuiFlexItem>
@@ -807,10 +805,12 @@ export const CompareExperimentsPage: React.FC = () => {
               iconType="merge"
               aria-label={i18n.SWAP_EXPERIMENTS_LABEL}
               onClick={() => {
-                const swapped: Record<string, string> = isEvalRunCompare
-                  ? { evalRunA: evalRunIdB, evalRunB: evalRunIdA }
-                  : { experimentA: experimentIdB, experimentB: experimentIdA };
-                history.replace({ search: new URLSearchParams(swapped).toString() });
+                const swapped = new URLSearchParams({
+                  type: compareType,
+                  baseline: targetId,
+                  target: baselineId,
+                });
+                history.replace({ search: swapped.toString() });
               }}
             />
           </EuiToolTip>
@@ -818,8 +818,8 @@ export const CompareExperimentsPage: React.FC = () => {
         <EuiFlexItem>
           <ExperimentHeader
             label={i18n.RUN_B_LABEL}
-            experimentId={experimentIdB}
-            evalRunId={isEvalRunCompare ? evalRunIdB : undefined}
+            experimentId={targetId}
+            evalRunId={evalRunIdForDetailB}
             isNewer={isNewerA !== undefined ? !isNewerA : undefined}
           />
         </EuiFlexItem>
@@ -941,13 +941,13 @@ export const CompareExperimentsPage: React.FC = () => {
 
       {flyoutState && (
         <ExampleDrilldownFlyout
-          experimentIdA={experimentIdA}
-          experimentIdB={experimentIdB}
+          experimentIdA={baselineId}
+          experimentIdB={targetId}
           datasetId={flyoutState.datasetId}
           datasetName={flyoutState.datasetName}
           evaluatorName={flyoutState.evaluatorName}
-          evalRunIdA={isEvalRunCompare ? evalRunIdA : undefined}
-          evalRunIdB={isEvalRunCompare ? evalRunIdB : undefined}
+          evalRunIdA={evalRunIdForDetail}
+          evalRunIdB={evalRunIdForDetailB}
           onClose={() => setFlyoutState(null)}
         />
       )}

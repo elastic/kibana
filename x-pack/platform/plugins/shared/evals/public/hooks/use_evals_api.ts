@@ -457,29 +457,21 @@ export const useEvaluationExperimentScores = (experimentId: string, evalRunId?: 
 };
 
 export const useCompareExperiments = (
-  experimentIdA: string,
-  experimentIdB: string,
-  evalRunIdA?: string,
-  evalRunIdB?: string
+  type: 'experiment' | 'eval_run',
+  baselineId: string,
+  targetId: string
 ) => {
   const { services } = useKibana();
 
   return useQuery({
-    queryKey: queryKeys.experiments.compare(
-      evalRunIdA ?? experimentIdA,
-      evalRunIdB ?? experimentIdB
-    ),
+    queryKey: queryKeys.experiments.compare(baselineId, targetId),
     queryFn: async (): Promise<CompareExperimentsResponse> => {
-      const query: Record<string, string> = evalRunIdA
-        ? { eval_run_id_a: evalRunIdA, eval_run_id_b: evalRunIdB! }
-        : { experiment_id_a: experimentIdA, experiment_id_b: experimentIdB };
       return services.http!.get<CompareExperimentsResponse>(EVALS_EXPERIMENTS_COMPARE_URL, {
-        query,
+        query: { type, baseline_id: baselineId, target_id: targetId },
         version: API_VERSIONS.internal.v1,
       });
     },
-    enabled:
-      (experimentIdA.length > 0 && experimentIdB.length > 0) || (!!evalRunIdA && !!evalRunIdB),
+    enabled: baselineId.length > 0 && targetId.length > 0,
     retry: (_failureCount, error) => {
       if (isHttpFetchError(error)) {
         return !error.response?.status || error.response.status >= 500;
