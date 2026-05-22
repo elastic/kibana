@@ -68,15 +68,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('delete option is not available on the detail page', async function () {
         await PageObjects.settings.clickKibanaIndexPatterns();
         await PageObjects.settings.clickIndexPatternLogstash();
-        await testSubjects.click('moreActionsButton');
-        const deleteButtonExists = await testSubjects.exists('deleteIndexPatternButton');
-        expect(deleteButtonExists).to.be(false);
+        await testSubjects.missingOrFail('moreActionsButton');
+        await testSubjects.missingOrFail('deleteIndexPatternButton');
       });
 
       it('delete action is disabled on the list page', async function () {
         await PageObjects.settings.clickKibanaIndexPatterns();
-        const isDisabled = await testSubjects.isEnabled('action-delete');
-        expect(isDisabled).to.be(false);
+        const isEnabled = await testSubjects.isEnabled('action-delete');
+        expect(isEnabled).to.be(false);
       });
     });
   });
