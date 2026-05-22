@@ -617,6 +617,109 @@ describe('QueryClient backward compatibility', () => {
     });
   });
 
+  describe('findQueries filter propagation across search modes', () => {
+    // Regression: keep the search-string path (`findQueries`) behaviourally aligned
+    // with the no-search path (`getQueryLinks`) — both must honour every field of
+    // `QueryLinkFilters` regardless of which retriever runs underneath.
+
+    describe('keyword (ES|QL) mode', () => {
+      it('renders an asset.id IN (...) clause when queryIds is provided', async () => {
+        const storageClient = createMockStorageClient();
+        storageClient.esql.mockResolvedValue(toEsqlSourceResponse([]));
+        const { client } = createQueryClient({ storageClient });
+
+        await client.findQueries(['logs.test'], 'SSH', { queryIds: ['q1', 'q2'] }, 'keyword');
+
+        const rendered = renderEsqlCallQuery(storageClient.esql.mock.calls[0][0]);
+        expect(rendered).toMatch(/asset\.id\s+IN\s*\(\s*"q1"\s*,\s*"q2"\s*\)/);
+      });
+
+      it('omits the asset.id clause when queryIds is empty', async () => {
+        const storageClient = createMockStorageClient();
+        storageClient.esql.mockResolvedValue(toEsqlSourceResponse([]));
+        const { client } = createQueryClient({ storageClient });
+
+        await client.findQueries(['logs.test'], 'SSH', { queryIds: [] }, 'keyword');
+
+        const rendered = renderEsqlCallQuery(storageClient.esql.mock.calls[0][0]);
+        expect(rendered).not.toMatch(/asset\.id\s+IN/);
+      });
+
+      it('renders a query.severity_score >= clause when minSeverityScore is provided', async () => {
+        const storageClient = createMockStorageClient();
+        storageClient.esql.mockResolvedValue(toEsqlSourceResponse([]));
+        const { client } = createQueryClient({ storageClient });
+
+        await client.findQueries(['logs.test'], 'SSH', { minSeverityScore: 70 }, 'keyword');
+
+        const rendered = renderEsqlCallQuery(storageClient.esql.mock.calls[0][0]);
+        expect(rendered).toMatch(/query\.severity_score\s*>=\s*70\b/);
+      });
+
+      it('renders both clauses when queryIds and minSeverityScore are both provided', async () => {
+        const storageClient = createMockStorageClient();
+        storageClient.esql.mockResolvedValue(toEsqlSourceResponse([]));
+        const { client } = createQueryClient({ storageClient });
+
+        await client.findQueries(
+          ['logs.test'],
+          'SSH',
+          { queryIds: ['q1'], minSeverityScore: 50 },
+          'keyword'
+        );
+
+        const rendered = renderEsqlCallQuery(storageClient.esql.mock.calls[0][0]);
+        expect(rendered).toMatch(/asset\.id\s+IN\s*\(\s*"q1"\s*\)/);
+        expect(rendered).toMatch(/query\.severity_score\s*>=\s*50\b/);
+      });
+    });
+
+    describe('semantic (DSL retriever) mode', () => {
+      it('forwards queryIds as a terms filter and minSeverityScore as a range filter', async () => {
+        const storageClient = createMockStorageClient();
+        storageClient.search.mockResolvedValue({ hits: { hits: [] } });
+        const { client } = createQueryClient({ storageClient });
+
+        await client.findQueries(
+          ['logs.test'],
+          'SSH',
+          { queryIds: ['q1', 'q2'], minSeverityScore: 80 },
+          'semantic'
+        );
+
+        const searchArgs = storageClient.search.mock.calls[0][0];
+        const filter: unknown[] =
+          searchArgs.retriever?.linear?.retrievers?.[0]?.retriever?.standard?.query?.filter?.bool
+            ?.filter ??
+          searchArgs.retriever?.linear?.retrievers?.[0]?.retriever?.standard?.filter?.bool
+            ?.filter ??
+          [];
+        expect(filter).toContainEqual({ terms: { [ASSET_ID]: ['q1', 'q2'] } });
+        expect(filter).toContainEqual({ range: { [QUERY_SEVERITY_SCORE]: { gte: 80 } } });
+      });
+    });
+
+    describe('hybrid (RRF retriever) mode', () => {
+      it('forwards queryIds and minSeverityScore into the RRF filter bool', async () => {
+        const storageClient = createMockStorageClient();
+        storageClient.search.mockResolvedValue({ hits: { hits: [] } });
+        const { client } = createQueryClient({ storageClient });
+
+        await client.findQueries(
+          ['logs.test'],
+          'SSH',
+          { queryIds: ['q1'], minSeverityScore: 40 },
+          'hybrid'
+        );
+
+        const searchArgs = storageClient.search.mock.calls[0][0];
+        const filter: unknown[] = searchArgs.retriever?.rrf?.filter?.bool?.filter ?? [];
+        expect(filter).toContainEqual({ terms: { [ASSET_ID]: ['q1'] } });
+        expect(filter).toContainEqual({ range: { [QUERY_SEVERITY_SCORE]: { gte: 40 } } });
+      });
+    });
+  });
+
   describe('severity filtering via minSeverityScore', () => {
     describe('getQueryLinks with minSeverityScore', () => {
       it('includes a range filter when minSeverityScore is provided', async () => {

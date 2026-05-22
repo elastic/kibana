@@ -677,14 +677,19 @@ export class QueryClient {
       const dslFilter = [
         ...termsQuery(STREAM_NAME, streamNames),
         ...termQuery(ASSET_TYPE, 'query'),
+        ...termsQuery(ASSET_ID, filters?.queryIds),
         ...ruleUnbackedFilter(filters?.ruleUnbacked),
+        ...rangeGteQuery(QUERY_SEVERITY_SCORE, filters?.minSeverityScore),
       ];
       return mode === 'hybrid'
         ? this.findQueriesByHybrid(dslFilter, query)
         : this.findQueriesBySemantic(dslFilter, query);
     }
 
-    // Build the base WHERE (stream filter + asset.type + optional rule-backed).
+    // Build the base WHERE (stream filter + asset.type + optional rule-backed +
+    // optional queryIds + optional minSeverityScore). Mirrors the filter set
+    // applied by `getQueryLinks` so the no-query and query-search paths stay
+    // behaviourally aligned for the same `QueryLinkFilters` input.
     let baseWhere: WhereCondition | undefined;
     // Omit the IN fragment when no streams are requested — bare `IN ()` is an ES|QL parse error.
     if (streamNames.length > 0) {
@@ -700,6 +705,19 @@ export class QueryClient {
     );
     const rb = ruleUnbackedWhere(filters?.ruleUnbacked);
     if (rb !== null) baseWhere = andWhere(baseWhere, rb);
+    if (filters?.queryIds && filters.queryIds.length > 0) {
+      const queryIdLiterals = filters.queryIds.map((id) => esql.str(id));
+      baseWhere = andWhere(
+        baseWhere,
+        esql.exp`${normalizeColumn(ASSET_ID)} IN (${queryIdLiterals})`
+      );
+    }
+    if (filters?.minSeverityScore !== undefined) {
+      baseWhere = andWhere(
+        baseWhere,
+        esql.exp`${normalizeColumn(QUERY_SEVERITY_SCORE)} >= ${esql.num(filters.minSeverityScore)}`
+      );
+    }
 
     return this.findQueriesByKeyword(baseWhere, query);
   }

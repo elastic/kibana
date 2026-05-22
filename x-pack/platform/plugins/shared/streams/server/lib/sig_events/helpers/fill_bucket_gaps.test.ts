@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { fillBucketGaps, parseBucketSize, ESQL_UNITS, MAX_FILL_BUCKETS } from './fill_bucket_gaps';
+import {
+  BUCKET_SIZE_PATTERN,
+  ESQL_UNITS,
+  MAX_FILL_BUCKETS,
+  fillBucketGaps,
+  parseBucketSize,
+} from './fill_bucket_gaps';
 
 describe('parseBucketSize', () => {
   it('parses seconds', () => {
@@ -34,6 +40,19 @@ describe('parseBucketSize', () => {
   it('falls back to 60s when value is zero', () => {
     expect(parseBucketSize('0m')).toEqual({ value: 60, unit: 's' });
   });
+});
+
+describe('BUCKET_SIZE_PATTERN', () => {
+  it.each(['1s', '30s', '1m', '5m', '2h', '1d', '24h', '1440m'])('accepts %s', (input) => {
+    expect(BUCKET_SIZE_PATTERN.test(input)).toBe(true);
+  });
+
+  it.each(['', '1', 'm', '1ms', '5min', '1minute', '1.5m', '1 m', ' 1m', '1m ', '1x', 'abc'])(
+    'rejects %j',
+    (input) => {
+      expect(BUCKET_SIZE_PATTERN.test(input)).toBe(false);
+    }
+  );
 });
 
 describe('ESQL_UNITS', () => {
