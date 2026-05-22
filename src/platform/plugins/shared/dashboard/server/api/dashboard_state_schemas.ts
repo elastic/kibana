@@ -124,7 +124,7 @@ export function getSectionSchema(isDashboardAppRequest: boolean) {
               {
                 unknowns: 'allow',
               }
-            ),
+            ) as unknown as ReturnType<typeof getPanelSchema>, // keeps derived types happy
             {
               maxSize: Number.MAX_SAFE_INTEGER,
             }
@@ -152,7 +152,7 @@ export function getSectionSchema(isDashboardAppRequest: boolean) {
 
 export function getPinnedPanelsSchema(isDashboardAppRequest: boolean = false) {
   return isDashboardAppRequest // looser route validation for dashboard application requestsd
-    ? schema.arrayOf(
+    ? (schema.arrayOf(
         schema.object(
           {},
           {
@@ -160,7 +160,7 @@ export function getPinnedPanelsSchema(isDashboardAppRequest: boolean = false) {
           }
         ),
         { maxSize: Number.MAX_SAFE_INTEGER }
-      )
+      ) as unknown as ReturnType<typeof getControlsGroupSchema>) // keeps derived types happy
     : getControlsGroupSchema();
 }
 
@@ -238,11 +238,7 @@ export const accessControlSchema = schema.maybe(
   )
 );
 
-export function getDashboardStateSchema(
-  isDashboardAppRequest: boolean,
-  isWriteRequest: boolean = false
-) {
-  console.log({ isDashboardAppRequest });
+export function getDashboardStateSchema(isDashboardAppRequest: boolean) {
   return schema.object(
     {
       pinned_panels: getPinnedPanelsSchema(isDashboardAppRequest),
@@ -260,12 +256,12 @@ export function getDashboardStateSchema(
       options: optionsSchema,
       panels: schema.arrayOf(
         isDashboardAppRequest // looser route validation for dashboard application requests
-          ? schema.object(
+          ? (schema.object(
               {},
               {
                 unknowns: 'allow',
               }
-            )
+            ) as unknown as ReturnType<typeof getPanelSchema>) // keeps derived types happy
           : schema.oneOf([getPanelSchema(), getSectionSchema(isDashboardAppRequest)]),
         {
           defaultValue: [],
