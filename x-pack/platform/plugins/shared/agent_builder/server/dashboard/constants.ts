@@ -12,12 +12,12 @@ export const AGENT_BUILDER_OVERVIEW_DASHBOARD_ID = 'agent-builder-token-usage';
  * Bump when panel layout or visualization definitions change so startup reinstall
  * overwrites the managed dashboard with the latest asset bundle.
  */
-export const AGENT_BUILDER_OVERVIEW_DASHBOARD_DEFINITION_VERSION = 1;
+export const AGENT_BUILDER_OVERVIEW_DASHBOARD_DEFINITION_VERSION = 2;
 
 export const AGENT_BUILDER_TRACE_INDEX = 'traces-agent_builder.otel-default';
 
 export const AGENT_BUILDER_DATASET_FILTER =
-  '| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == "agent_builder"';
+  '| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == "agent_builder.otel"';
 
 /** Pin SO versions past legacy Lens migrations (see inference dashboard installer). */
 export const AGENT_BUILDER_DASHBOARD_CORE_MIGRATION_VERSION = '8.8.0';

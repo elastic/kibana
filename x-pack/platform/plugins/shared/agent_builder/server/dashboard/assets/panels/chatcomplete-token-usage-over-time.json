@@ -11,7 +11,7 @@
               "area_stacked_0": {
                 "index": "traces-agent_builder.otel-default-@timestamp",
                 "query": {
-                  "esql": "FROM traces-agent_builder.otel-default\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder\"\n| WHERE name == \"ChatComplete\"\n| STATS `Total Tokens` = SUM(TO_LONG(attributes.gen_ai.usage.input_tokens)) + SUM(TO_LONG(attributes.gen_ai.usage.output_tokens)) BY `Time` = BUCKET(@timestamp, 75, ?_tstart, ?_tend), `Model` = attributes.gen_ai.request.model"
+                  "esql": "FROM traces-agent_builder.otel-default\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder.otel\"\n| WHERE name == \"ChatComplete\"\n| STATS `Total Tokens` = SUM(TO_LONG(attributes.gen_ai.usage.input_tokens)) + SUM(TO_LONG(attributes.gen_ai.usage.output_tokens)) BY `Time` = BUCKET(@timestamp, 75, ?_tstart, ?_tend), `Model` = attributes.gen_ai.request.model"
                 },
                 "timeField": "@timestamp",
                 "columns": [
@@ -92,7 +92,7 @@
           }
         },
         "query": {
-          "esql": "FROM traces-agent_builder.otel-default\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder\"\n| WHERE name == \"ChatComplete\"\n| STATS `Total Tokens` = SUM(TO_LONG(attributes.gen_ai.usage.input_tokens)) + SUM(TO_LONG(attributes.gen_ai.usage.output_tokens)) BY `Time` = BUCKET(@timestamp, 75, ?_tstart, ?_tend), `Model` = attributes.gen_ai.request.model"
+          "esql": "FROM traces-agent_builder.otel-default\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder.otel\"\n| WHERE name == \"ChatComplete\"\n| STATS `Total Tokens` = SUM(TO_LONG(attributes.gen_ai.usage.input_tokens)) + SUM(TO_LONG(attributes.gen_ai.usage.output_tokens)) BY `Time` = BUCKET(@timestamp, 75, ?_tstart, ?_tend), `Model` = attributes.gen_ai.request.model"
         },
         "filters": []
       },

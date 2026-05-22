@@ -12,7 +12,7 @@
               "layer_0": {
                 "index": "traces-agent_builder.otel-default-@timestamp",
                 "query": {
-                  "esql": "FROM traces-agent_builder.otel-default\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder\"\n| WHERE name == \"ExecuteAgent\"\n| STATS `ExecuteAgent Count` = COUNT(*)"
+                  "esql": "FROM traces-agent_builder.otel-default\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder.otel\"\n| WHERE name == \"ExecuteAgent\"\n| STATS `ExecuteAgent Count` = COUNT(*)"
                 },
                 "timeField": "@timestamp",
                 "columns": [
@@ -60,7 +60,7 @@
           }
         },
         "query": {
-          "esql": "FROM traces-agent_builder.otel-default\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder\"\n| WHERE name == \"ExecuteAgent\"\n| STATS `ExecuteAgent Count` = COUNT(*)"
+          "esql": "FROM traces-agent_builder.otel-default\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder.otel\"\n| WHERE name == \"ExecuteAgent\"\n| STATS `ExecuteAgent Count` = COUNT(*)"
         },
         "filters": []
       }

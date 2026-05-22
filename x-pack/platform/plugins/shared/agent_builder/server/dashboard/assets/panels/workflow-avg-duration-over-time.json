@@ -11,7 +11,7 @@
               "line_0": {
                 "index": "traces-agent_builder.otel-default-@timestamp",
                 "query": {
-                  "esql": "FROM traces-agent_builder.otel-default\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder\"\n| WHERE name == \"ExecuteWorkflow\"\n| EVAL duration_sec = duration / 1000000000.0\n| STATS `Avg Duration (s)` = ROUND(AVG(duration_sec), 2) BY `Time` = BUCKET(@timestamp, 75, ?_tstart, ?_tend)\n| SORT `Time`"
+                  "esql": "FROM traces-agent_builder.otel-default\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder.otel\"\n| WHERE name == \"ExecuteWorkflow\"\n| EVAL duration_sec = duration / 1000000000.0\n| STATS `Avg Duration (s)` = ROUND(AVG(duration_sec), 2) BY `Time` = BUCKET(@timestamp, 75, ?_tstart, ?_tend)\n| SORT `Time`"
                 },
                 "timeField": "@timestamp",
                 "columns": [
@@ -82,7 +82,7 @@
           }
         },
         "query": {
-          "esql": "FROM traces-agent_builder.otel-default\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder\"\n| WHERE name == \"ExecuteWorkflow\"\n| EVAL duration_sec = duration / 1000000000.0\n| STATS `Avg Duration (s)` = ROUND(AVG(duration_sec), 2) BY `Time` = BUCKET(@timestamp, 75, ?_tstart, ?_tend)\n| SORT `Time`"
+          "esql": "FROM traces-agent_builder.otel-default\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder.otel\"\n| WHERE name == \"ExecuteWorkflow\"\n| EVAL duration_sec = duration / 1000000000.0\n| STATS `Avg Duration (s)` = ROUND(AVG(duration_sec), 2) BY `Time` = BUCKET(@timestamp, 75, ?_tstart, ?_tend)\n| SORT `Time`"
         },
         "filters": []
       },
