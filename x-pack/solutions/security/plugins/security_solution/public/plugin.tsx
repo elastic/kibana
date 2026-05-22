@@ -81,13 +81,13 @@ import { defaultDeepLinks } from './app/links/default_deep_links';
 import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_report/locator';
 import {
   registerAttachmentUiDefinitions,
+  registerAiRuleCreationHandler,
   registerEntityAnalyticsDashboardAttachment,
   registerEntityAttachment,
   registerRuleAttachment,
 } from './agent_builder/attachment_types';
 import type { SecurityCanvasEmbeddedBundle } from './agent_builder/components/security_redux_embedded_provider';
 import { registerWorkflowSteps } from './workflows/step_types';
-import { createAiRuleCreationHandler } from './detection_engine/common/ai_rule_creation_handler';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private config: SecuritySolutionUiConfigType;
@@ -100,6 +100,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private appUpdater$ = new Subject<AppUpdater>();
   private storage = new Storage(localStorage);
   private saveRuleSub?: Subscription;
+  private saveRuleHandlerStopped = false;
 
   // Lazily instantiated dependencies
   private _subPlugins?: SubPlugins;
@@ -308,10 +309,17 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.registerFleetExtensions(core, plugins);
     this.registerPluginUpdates(core, plugins); // Not awaiting to prevent blocking start execution
 
-    this.saveRuleSub = createAiRuleCreationHandler({
+    registerAiRuleCreationHandler({
       aiRuleCreation: this.services.aiRuleCreation,
       notifications: core.notifications,
       agentBuilder: plugins.agentBuilder,
+      register: (subscription) => {
+        if (this.saveRuleHandlerStopped) {
+          subscription.unsubscribe();
+          return;
+        }
+        this.saveRuleSub = subscription;
+      },
     });
 
     if (plugins.agentBuilder?.attachments) {
@@ -353,6 +361,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   }
 
   public stop() {
+    this.saveRuleHandlerStopped = true;
     this.saveRuleSub?.unsubscribe();
     this.services.stop();
   }
