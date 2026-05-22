@@ -2,8 +2,8 @@
 name: bug-fix
 description: >
   Use when a Security Solution bug has been reproduced in the browser and the user has
-  reviewed the reproduction report. Requires .bug-fixer-session/analysis.json and
-  .bug-fixer-session/reproduction-report.md with status: reproduced and user_acknowledged: yes.
+  reviewed the reproduction report. Only applies when .bug-fixer-session/reproduction-report.md
+  exists with status: reproduced and user_acknowledged: yes.
 ---
 
 # Bug Fix

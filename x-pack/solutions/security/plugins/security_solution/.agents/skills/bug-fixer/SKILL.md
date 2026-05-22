@@ -42,8 +42,6 @@ implements a TDD fix, verifies in a clean environment, and optionally opens a dr
 | 1 | bug-reproduce | `.bug-fixer-session/analysis.json`, `reproduction-report.md`, `before.png` |
 | 2 | bug-fix | Fix + test + verified browser repro + optional draft PR with `after.png` |
 
-**Scope:** Stateful (ECH) only — decline serverless bugs before starting either step.
-
 ## Prerequisites
 
 - `gh` CLI installed and authenticated (`gh auth login`)
