@@ -46,15 +46,14 @@ export const buildCreateRuleData = (input: BuildCreateRuleDataInput = {}): Creat
  * spell out what makes each alert event unique.
  */
 export type BuildAlertEventInput = Partial<AlertEvent>;
-  group_hash: string;
-}
 
-export const buildAlertEvent = (input: BuildAlertEventInput): AlertEvent => {
+export const buildAlertEvent = (input: BuildAlertEventInput = {}): AlertEvent => {
   const now = new Date().toISOString();
   return {
     '@timestamp': now,
     scheduled_timestamp: now,
     rule: { id: 'scout-rule-id', version: 1 },
+    group_hash: 'scout-group-hash',
     data: {},
     status: 'breached',
     source: 'scout-test',
