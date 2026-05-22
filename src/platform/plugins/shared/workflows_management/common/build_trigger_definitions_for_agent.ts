@@ -144,20 +144,23 @@ function formatRegisteredTrigger(
   def: ServerTriggerDefinition,
   registeredTriggersById: Map<string, ServerTriggerDefinition>
 ): TriggerDefinitionForAgent {
-  return {
+  const formatted: TriggerDefinitionForAgent = {
     id: def.id,
-    label: humanizeTriggerId(def.id),
-    description: `Event-driven trigger (${def.id}). Use on.condition with KQL on event.* fields to filter when the workflow runs.`,
+    label: def.title ?? humanizeTriggerId(def.id),
+    description:
+      def.description ??
+      `Event-driven trigger (${def.id}). Use on.condition with KQL on event.* fields to filter when the workflow runs.`,
     jsonSchema: zodToJsonSchemaSafe(getCustomTriggerYamlSchema(def.id)),
     eventContextSchema: getEventContextSchema(def.id, registeredTriggersById),
     eventContextNote: EVENT_CONTEXT_NOTE,
-    examples: [
-      `triggers:
-  - type: ${def.id}
-    on:
-      condition: 'event.owner: "securitySolution"'`,
-    ],
   };
+
+  const examples = def.documentation?.examples;
+  if (examples && examples.length > 0) {
+    formatted.examples = examples;
+  }
+
+  return formatted;
 }
 
 /**

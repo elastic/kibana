@@ -8,6 +8,7 @@
  */
 
 import { builtInTriggerDefinitions } from '@kbn/workflows';
+import { commonWorkflowExecutionFailedTriggerDefinition } from '@kbn/workflows-extensions/common';
 import { z } from '@kbn/zod/v4';
 import {
   isTriggerDefinitionsLookupError,
@@ -21,6 +22,16 @@ const mockCasesTrigger = {
     owner: z.string(),
     updatedFields: z.array(z.string()).optional(),
   }),
+  title: 'Cases - Case updated',
+  description: 'Emitted when a case is updated.',
+  documentation: {
+    examples: [
+      `triggers:
+  - type: cases.caseUpdated
+    on:
+      condition: 'event.owner: "securitySolution"'`,
+    ],
+  },
 };
 
 describe('lookupTriggerDefinitionsForAgent', () => {
@@ -107,6 +118,45 @@ describe('lookupTriggerDefinitionsForAgent', () => {
     expect(result.error).toContain('not found');
     expect(result.availableTypes).toContain('manual');
     expect(result.availableTypes).toContain('cases.caseUpdated');
+  });
+
+  it('uses documentation.examples from registered trigger definitions', () => {
+    const result = lookupTriggerDefinitionsForAgent({
+      registeredTriggers: [commonWorkflowExecutionFailedTriggerDefinition],
+      triggerType: 'workflows.failed',
+    });
+
+    expect(isTriggerDefinitionsLookupError(result)).toBe(false);
+    if (isTriggerDefinitionsLookupError(result)) {
+      return;
+    }
+
+    const trigger = result.triggerTypes[0];
+    expect(trigger.examples?.length).toBeGreaterThan(0);
+    const examplesText = trigger.examples?.join('\n') ?? '';
+    expect(examplesText).toContain('event.workflow');
+    expect(examplesText).not.toContain('event.owner');
+    expect(trigger.label).toBe('Workflow failed');
+    expect(trigger.description).toContain('Emitted when any workflow');
+  });
+
+  it('omits examples when registered trigger has no documentation', () => {
+    const result = lookupTriggerDefinitionsForAgent({
+      registeredTriggers: [
+        {
+          id: 'example.minimal',
+          eventSchema: z.object({ value: z.string() }),
+        },
+      ],
+      triggerType: 'example.minimal',
+    });
+
+    expect(isTriggerDefinitionsLookupError(result)).toBe(false);
+    if (isTriggerDefinitionsLookupError(result)) {
+      return;
+    }
+
+    expect(result.triggerTypes[0].examples).toBeUndefined();
   });
 
   it('compacts large enums in scheduled trigger jsonSchema', () => {
