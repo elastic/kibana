@@ -1561,6 +1561,7 @@ describe('UIAM API Key Banner', () => {
   it('renders UIAM API key banner when isServerless is true and apiKeyType is uiam', async () => {
     useKibanaMock().services.isServerless = true;
     jest.mocked(fetchUiConfig).mockResolvedValue({
+      isUsingSecurity: true,
       minimumScheduleInterval: { value: '1m', enforce: false },
       apiKeyType: 'uiam',
     });
@@ -1573,6 +1574,7 @@ describe('UIAM API Key Banner', () => {
   it('does not render UIAM API key banner when isServerless is false', async () => {
     useKibanaMock().services.isServerless = false;
     jest.mocked(fetchUiConfig).mockResolvedValue({
+      isUsingSecurity: true,
       minimumScheduleInterval: { value: '1m', enforce: false },
       apiKeyType: 'uiam',
     });
@@ -1597,6 +1599,7 @@ describe('UIAM API Key Banner', () => {
   it('displays correct banner content when rendered', async () => {
     useKibanaMock().services.isServerless = true;
     jest.mocked(fetchUiConfig).mockResolvedValue({
+      isUsingSecurity: true,
       minimumScheduleInterval: { value: '1m', enforce: false },
       apiKeyType: 'uiam',
     });

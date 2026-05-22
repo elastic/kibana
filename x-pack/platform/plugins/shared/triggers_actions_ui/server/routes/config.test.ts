@@ -92,6 +92,7 @@ describe('createConfigRoute', () => {
         maxScheduledPerMinute: 10000,
         minimumScheduleInterval: { value: '1m', enforce: false },
         run: { alerts: { max: 1000 }, actions: { max: 100000 } },
+        apiKeyType: 'es' as const,
       }),
       getRulesClientWithRequest: async () => mockRulesClient,
     });
