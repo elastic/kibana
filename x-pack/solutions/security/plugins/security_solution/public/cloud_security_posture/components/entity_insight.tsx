@@ -43,9 +43,7 @@ export const EntityInsight = <T,>({
   openDetailsPanel,
   entityType,
   entityRecord,
-  hideAlertsHeaderIcon = false,
-  hideMisconfigurationsHeaderIcon = false,
-  hideVulnerabilitiesHeaderIcon = false,
+  hideHeaderIcons = false,
 }: {
   identityFields: IdentityFields;
   isPreviewMode: boolean;
@@ -53,12 +51,8 @@ export const EntityInsight = <T,>({
   /** Host or user when the flyout represents that entity; enables v2 alerts resolution by `entity.id`. */
   entityType?: string;
   entityRecord?: EntityStoreRecord | null;
-  /** When true, hides the icon in the Alerts preview header. Defaults to false. */
-  hideAlertsHeaderIcon?: boolean;
-  /** When true, hides the icon in the Misconfigurations preview header. Defaults to false. */
-  hideMisconfigurationsHeaderIcon?: boolean;
-  /** When true, hides the icon in the Vulnerabilities preview header. Defaults to false. */
-  hideVulnerabilitiesHeaderIcon?: boolean;
+  /** When true, hides the chevron icons in all insight section headers (Alerts, Misconfigurations, Vulnerabilities). */
+  hideHeaderIcons?: boolean;
 }) => {
   const { euiTheme } = useEuiTheme();
   const euidApi = useEntityStoreEuidApi();
@@ -66,7 +60,11 @@ export const EntityInsight = <T,>({
   const insightContent: React.ReactElement[] = [];
 
   const cspPreviewEntityType = inferEntityTypeFromIdentityFields(identityFields);
-  const { hasMisconfigurationFindings, passedFindings, failedFindings } = useHasMisconfigurations(
+  const {
+    hasMisconfigurationFindings: showMisconfigurationsPreview,
+    passedFindings,
+    failedFindings,
+  } = useHasMisconfigurations(
     buildEuidCspPreviewOptions(cspPreviewEntityType, entityRecord, euidApi, {
       entityStoreV2Enabled,
       legacyIdentityFields: identityFields,
@@ -80,7 +78,6 @@ export const EntityInsight = <T,>({
     })
   );
 
-  const showMisconfigurationsPreview = hasMisconfigurationFindings;
   const showVulnerabilitiesPreview =
     hasVulnerabilitiesFindings && Object.keys(identityFields).length > 0;
 
@@ -102,7 +99,7 @@ export const EntityInsight = <T,>({
           alertsData={filteredAlertsData}
           isPreviewMode={isPreviewMode}
           openDetailsPanel={openDetailsPanel}
-          hideHeaderIcon={hideAlertsHeaderIcon}
+          hideHeaderIcon={hideHeaderIcons}
         />
         <EuiSpacer size="s" />
       </>
@@ -116,7 +113,7 @@ export const EntityInsight = <T,>({
           passedFindings={passedFindings}
           failedFindings={failedFindings}
           openDetailsPanel={openDetailsPanel}
-          hideHeaderIcon={hideMisconfigurationsHeaderIcon}
+          hideHeaderIcon={hideHeaderIcons}
         />
         <EuiSpacer size="s" />
       </>
@@ -129,7 +126,7 @@ export const EntityInsight = <T,>({
           entityRecord={entityRecord}
           isPreviewMode={isPreviewMode}
           openDetailsPanel={openDetailsPanel}
-          hideHeaderIcon={hideVulnerabilitiesHeaderIcon}
+          hideHeaderIcon={hideHeaderIcons}
         />
         <EuiSpacer size="s" />
       </>

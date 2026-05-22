@@ -12,7 +12,7 @@ import { useHistory } from 'react-router-dom';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { getOrEmptyTagFromValue } from '../../common/components/empty_value';
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
-import { defaultToolsFlyoutProperties } from '../../flyout_v2/shared/hooks/use_default_flyout_properties';
+import { useDefaultDocumentFlyoutProperties } from '../../flyout_v2/shared/hooks/use_default_flyout_properties';
 import { DataViewManagerBootstrap } from '../alert_flyout_overview_tab_component/data_view_manager_bootstrap';
 import { Host } from '../../flyout_v2/entity/host/main';
 import type { StartServices } from '../../types';
@@ -35,6 +35,7 @@ export const HostCellRenderer = React.memo<HostCellRendererProps>(
     const history = useHistory();
     const isInSecurityApp = useIsInSecurityApp();
     const { overlays } = services;
+    const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
     const rawValue = props.row.flattened[props.columnId];
 
     const values: string[] = useMemo(() => {
@@ -60,14 +61,21 @@ export const HostCellRenderer = React.memo<HostCellRendererProps>(
             ),
           }),
           {
-            ...defaultToolsFlyoutProperties,
-            size: 's',
+            ...defaultDocumentFlyoutProperties,
             historyKey: DOC_VIEWER_FLYOUT_HISTORY_KEY,
             session: 'start',
           }
         );
       },
-      [overlays, services, store, history, isInSecurityApp, props.row]
+      [
+        overlays,
+        services,
+        store,
+        history,
+        isInSecurityApp,
+        props.row,
+        defaultDocumentFlyoutProperties,
+      ]
     );
 
     if (values.length === 0) {

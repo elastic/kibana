@@ -29,8 +29,6 @@ import { InputsModelId } from '../../../common/store/inputs/constants';
 
 /**
  * Syncs Kibana's global time filter to the Security Solution Redux store on mount.
- * This ensures flyouts opened from outside Security Solution (e.g., Discover) use
- * the correct time range for alert queries.
  */
 const TimeRangeSync: FC<{ children: ReactNode }> = ({ children }) => {
   const { services } = useKibana();
@@ -60,14 +58,10 @@ export const flyoutProviders = ({
   // TODO remove ExpandableFlyoutProvider when we're ready to drop the expandable flyout
   const flyoutContent = history ? (
     <Router history={history}>
-      <ExpandableFlyoutProvider>
-        <TimeRangeSync>{children}</TimeRangeSync>
-      </ExpandableFlyoutProvider>
+      <ExpandableFlyoutProvider>{children}</ExpandableFlyoutProvider>
     </Router>
   ) : (
-    <ExpandableFlyoutProvider>
-      <TimeRangeSync>{children}</TimeRangeSync>
-    </ExpandableFlyoutProvider>
+    <ExpandableFlyoutProvider>{children}</ExpandableFlyoutProvider>
   );
 
   return (
@@ -84,7 +78,9 @@ export const flyoutProviders = ({
                     <CaseProvider>
                       <EntityStoreEuidApiProvider>
                         <MlCapabilitiesProvider>
-                          <AssistantProvider>{flyoutContent}</AssistantProvider>
+                          <AssistantProvider>
+                            <TimeRangeSync>{flyoutContent}</TimeRangeSync>
+                          </AssistantProvider>
                         </MlCapabilitiesProvider>
                       </EntityStoreEuidApiProvider>
                     </CaseProvider>

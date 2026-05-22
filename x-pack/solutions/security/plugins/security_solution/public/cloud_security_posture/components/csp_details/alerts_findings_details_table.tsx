@@ -102,7 +102,6 @@ export const AlertsDetailsTable = memo(
     /** Canonical entity store id (`host.entity.id` / `user.entity.id`); when set with Entity Store v2, identity is loaded from the store for EUID DSL. */
     entityId?: string;
     entityType?: 'host' | 'user';
-    /** When provided, called instead of `openPreviewPanel` when the expand icon is clicked on an alert row. Use this in system-flyout contexts where the expandable flyout is not rendered. */
     onExpandAlert?: (eventId: string, indexName: string) => void;
   }) => {
     const { euiTheme } = useEuiTheme();

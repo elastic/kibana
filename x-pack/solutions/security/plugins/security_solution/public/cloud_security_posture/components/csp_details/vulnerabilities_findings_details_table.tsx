@@ -125,7 +125,6 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
     scopeId: string;
     entityId?: string;
     entityType?: string;
-    /** When provided, called instead of `openPreviewPanel` when the expand icon is clicked. Use this in system-flyout contexts. */
     onExpandVulnerability?: (params: {
       vulnerabilityId: string;
       resourceId: string;

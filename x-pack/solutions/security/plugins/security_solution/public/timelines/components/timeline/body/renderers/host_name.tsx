@@ -22,7 +22,7 @@ import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use
 import { useKibana } from '../../../../../common/lib/kibana';
 import { Host } from '../../../../../flyout_v2/entity/host/main';
 import { flyoutProviders } from '../../../../../flyout_v2/shared/components/flyout_provider';
-import { defaultToolsFlyoutProperties } from '../../../../../flyout_v2/shared/hooks/use_default_flyout_properties';
+import { useDefaultDocumentFlyoutProperties } from '../../../../../flyout_v2/shared/hooks/use_default_flyout_properties';
 import { documentFlyoutHistoryKey } from '../../../../../flyout_v2/shared/constants/flyout_history';
 
 interface Props {
@@ -50,6 +50,7 @@ const HostNameComponent: React.FC<Props> = ({
   const store = useStore();
   const history = useHistory();
   const newFlyoutSystemEnabled = useIsExperimentalFeatureEnabled('newFlyoutSystemEnabled');
+  const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
 
   const isInSecurityApp = useIsInSecurityApp();
 
@@ -80,7 +81,7 @@ const HostNameComponent: React.FC<Props> = ({
             children: <Host hostName={hostName} entityId={entityId} />,
           }),
           {
-            ...defaultToolsFlyoutProperties,
+            ...defaultDocumentFlyoutProperties,
             historyKey,
             session: 'start',
           }
@@ -114,6 +115,7 @@ const HostNameComponent: React.FC<Props> = ({
       store,
       history,
       historyKey,
+      defaultDocumentFlyoutProperties,
     ]
   );
 

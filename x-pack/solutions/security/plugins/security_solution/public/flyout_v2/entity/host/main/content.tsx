@@ -143,9 +143,7 @@ export const Content = ({
         isPreviewMode={isPreviewMode}
         openDetailsPanel={openDetailsPanel}
         entityType={EntityType.host}
-        hideAlertsHeaderIcon={hideHeaderIcons}
-        hideMisconfigurationsHeaderIcon={hideHeaderIcons}
-        hideVulnerabilitiesHeaderIcon={hideHeaderIcons}
+        hideHeaderIcons={hideHeaderIcons}
       />
       <ObservedDataSection
         observedHost={observedHost}

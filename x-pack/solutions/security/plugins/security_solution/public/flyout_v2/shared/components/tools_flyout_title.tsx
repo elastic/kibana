@@ -11,8 +11,17 @@ import { EuiButtonEmpty, EuiIcon, useEuiTheme } from '@elastic/eui';
 import { TOOLS_FLYOUT_HEADER_TITLE_TEST_ID } from './test_ids';
 
 export interface ToolsFlyoutTitleProps {
+  /**
+   * Callback invoked when the title is clicked.
+   */
   onTitleClick: () => void;
+  /**
+   * Text label displayed in the title.
+   */
   label: string;
+  /**
+   * EUI icon type rendered next to the label.
+   */
   iconType: string;
 }
 

@@ -65,7 +65,7 @@ import { useKibana } from '../../../../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../../../../common/hooks/is_in_security_app';
 import { flyoutProviders } from '../../../../../flyout_v2/shared/components/flyout_provider';
 import { DocumentFlyout } from '../../../../../flyout_v2/document/main';
-import { noopCellActionRenderer } from '../../../../../flyout_v2/shared/components/cell_actions';
+import { cellActionRenderer } from '../../../../../flyout_v2/shared/components/cell_actions';
 import { useDefaultDocumentFlyoutProperties } from '../../../../../flyout_v2/shared/hooks/use_default_flyout_properties';
 
 export interface RiskInputsTabProps<T extends EntityType> {
@@ -341,7 +341,7 @@ const RiskInputsTabContent = <T extends EntityType>({
             children: (
               <DocumentFlyout
                 hit={hit}
-                renderCellActions={noopCellActionRenderer}
+                renderCellActions={cellActionRenderer}
                 onAlertUpdated={noop}
               />
             ),
