@@ -4,7 +4,7 @@ Detailed checklists and templates for Phase 4 (Fix) and the Knowledge Update. Re
 
 ## SELF-CHECK #3 — Seven questions before designing any fix
 
-Answer all six using evidence gathered from your parallel research tasks:
+Answer all seven using evidence gathered from your parallel research tasks:
 
 1–4. Complete the **Pre-Fix Checklist** in `x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-fixer/references/classification-guide.md` — answer all four checks (existing patterns, hardcoded namespaces, plugin boundaries, feature lifecycle) using the gathered evidence.
 
