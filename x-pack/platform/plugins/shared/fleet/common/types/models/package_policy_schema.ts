@@ -377,9 +377,9 @@ export const PackagePolicySchemaV25 = PackagePolicySchemaV24.extends(
     package: schema.maybe(
       schema.object(
         {
-          name: schema.string(),
+          name: schema.maybe(schema.string()),
           title: schema.maybe(schema.string()),
-          version: schema.string(),
+          version: schema.maybe(schema.string()),
           requires_root: schema.maybe(schema.boolean()),
         },
         { unknowns: 'allow' }
