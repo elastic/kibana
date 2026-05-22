@@ -195,9 +195,9 @@ export const runPaginatedLatestSourceEsqlQuery = async <T>({
   const perPage = options.perPage ?? DEFAULT_PER_PAGE;
   const baseArgs = { space, index, options, where, groupBy };
 
-  const countQuery = buildLatestSourceBaseQuery(baseArgs)
-    .pipe`STATS total = COUNT(*)`
-    .keep('total');
+  const countQuery = buildLatestSourceBaseQuery(baseArgs).pipe`STATS total = COUNT(*)`.keep(
+    'total'
+  );
 
   const sortArgs = sort ?? [['@timestamp', 'DESC'] satisfies ComposerSortShorthand];
   const dataQuery = buildLatestSourceBaseQuery(baseArgs)
