@@ -291,3 +291,17 @@ After Phase 5 (or Phase 6), read `x-pack/solutions/security/plugins/security_sol
 Wait for user confirmation before writing to any file.
 
 If something goes wrong, read `x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-fixer/references/troubleshooting.md`.
+
+## Skill Improvement
+
+After every session, check for learnings worth capturing in the skill itself — not just in KNOWLEDGE.md. Suggest an update if ANY of the following is true:
+
+- **New rationalization** — you caught yourself reasoning toward a shortcut that has no counter in the Red Flags table
+- **Ambiguous rule** — a phase rule required interpretation; the current wording would let a future agent reach a different conclusion
+- **Missing fix strategy** — you applied a fix approach not covered in `classification-guide.md`
+- **Test layer gap** — the decision rules didn't clearly map your bug to a test layer and you had to guess
+- **Environment condition** — you hit a Scout/browser state not documented in Phase 5 Known environment conditions or `troubleshooting.md`
+
+Prompt the user: _"During this session I noticed [X]. Want me to update the skill so future sessions handle this correctly?"_
+
+Wait for confirmation before editing any skill file.

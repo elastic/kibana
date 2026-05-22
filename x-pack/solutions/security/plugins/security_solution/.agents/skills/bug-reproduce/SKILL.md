@@ -241,3 +241,17 @@ investigation turns into implementation.
   to the fix phase."_
 - Could not reproduce → set `status` to `not_reproduced`, tell the user what you tried
   and observed, ask how to proceed. Do not signal completion.
+
+## Skill Improvement
+
+After every session (reproduced or not), check for learnings worth capturing in the skill itself. Suggest an update if ANY of the following is true:
+
+- **New rationalization** — you caught yourself reasoning toward skipping a phase and the Red Flags table has no counter for it
+- **Ambiguous phase rule** — a phase gate required interpretation; the current wording would let a future agent reach a different conclusion
+- **New prerequisite pattern** — a prerequisite type (role, data, feature state) needed an approach not documented in Phase 2
+- **Environment condition** — you hit a Scout/browser state (redirect, modal, port issue) not covered in Phase 3 or `troubleshooting.md`
+- **Ticket validation gap** — the ticket was missing something the validation checklist doesn't ask for
+
+Prompt the user: _"During this session I noticed [X]. Want me to update the skill so future sessions handle this correctly?"_
+
+Wait for confirmation before editing any skill file.
