@@ -2496,6 +2496,163 @@ describe('subFeatures', () => {
       ]);
       expect(actual).toHaveProperty('space.read', [actions.login, actions.ui.get('foo', 'foo')]);
     });
+
+    test(`without replacedBy and without excludeFromBasePrivileges, sub-feature UI only appears in standalone feature privilege and no ALL/READ base privileges`, () => {
+      const features: KibanaFeature[] = [
+        new KibanaFeature({
+          id: 'foo',
+          name: 'Foo KibanaFeature',
+          app: [],
+          category: { id: 'foo', label: 'foo' },
+          privileges: {
+            all: {
+              savedObject: { all: [], read: [] },
+              ui: ['foo'],
+            },
+            read: {
+              savedObject: { all: [], read: [] },
+              ui: ['foo'],
+            },
+          },
+          subFeatures: [
+            {
+              name: 'subFeature1',
+              privilegeGroups: [
+                {
+                  groupType: 'independent',
+                  privileges: [
+                    {
+                      id: 'subFeaturePriv1',
+                      name: 'sub feature priv 1',
+                      includeIn: 'none',
+                      savedObject: { all: [], read: [] },
+                      ui: ['sub-feature-ui-foo'],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        }),
+      ];
+
+      const mockFeaturesPlugin = featuresPluginMock.createSetup();
+      mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
+      const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceGold);
+
+      const actual = privileges.get();
+
+      // The sub-feature privilege only contains its own UI action — no composition occurs.
+      expect(actual.features).toHaveProperty('foo.subFeaturePriv1', [
+        actions.login,
+        actions.ui.get('foo', 'sub-feature-ui-foo'),
+      ]);
+
+      // Without replacedBy there is no composable privilege, so the sub-feature UI action
+      // never reaches base privileges regardless of excludeFromBasePrivileges.
+      expect(actual).toHaveProperty('global.all', [
+        actions.login,
+        actions.api.get(ApiOperation.Read, 'decryptedTelemetry'),
+        actions.api.get(ApiOperation.Read, 'features'),
+        actions.api.get(ApiOperation.Manage, 'taskManager'),
+        actions.api.get(ApiOperation.Manage, 'spaces'),
+        actions.space.manage,
+        actions.ui.get('spaces', 'manage'),
+        actions.ui.get('management', 'kibana', 'spaces'),
+        actions.ui.get('catalogue', 'spaces'),
+        actions.ui.get('enterpriseSearch', 'all'),
+        actions.ui.get('globalSettings', 'save'),
+        actions.ui.get('globalSettings', 'show'),
+        actions.ui.get('foo', 'foo'),
+      ]);
+      expect(actual).toHaveProperty('space.all', [actions.login, actions.ui.get('foo', 'foo')]);
+      expect(actual).toHaveProperty('global.read', [
+        actions.login,
+        actions.api.get(ApiOperation.Read, 'decryptedTelemetry'),
+        actions.ui.get('globalSettings', 'show'),
+        actions.ui.get('foo', 'foo'),
+      ]);
+      expect(actual).toHaveProperty('space.read', [actions.login, actions.ui.get('foo', 'foo')]);
+    });
+
+    test(`with excludeFromBasePrivileges and without replacedBy, sub-feature UI only appears in standalone feature privilege and no ALL/READ base privileges`, () => {
+      const features: KibanaFeature[] = [
+        new KibanaFeature({
+          id: 'foo',
+          name: 'Foo KibanaFeature',
+          app: [],
+          category: { id: 'foo', label: 'foo' },
+          privileges: {
+            all: {
+              savedObject: { all: [], read: [] },
+              ui: ['foo'],
+            },
+            read: {
+              savedObject: { all: [], read: [] },
+              ui: ['foo'],
+            },
+          },
+          subFeatures: [
+            {
+              name: 'subFeature1',
+              privilegeGroups: [
+                {
+                  groupType: 'independent',
+                  privileges: [
+                    {
+                      id: 'subFeaturePriv1',
+                      name: 'sub feature priv 1',
+                      includeIn: 'none',
+                      excludeFromBasePrivileges: true,
+                      savedObject: { all: [], read: [] },
+                      ui: ['sub-feature-ui-foo'],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        }),
+      ];
+
+      const mockFeaturesPlugin = featuresPluginMock.createSetup();
+      mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
+      const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceGold);
+
+      const actual = privileges.get();
+
+      // excludeFromBasePrivileges does not strip actions from the standalone feature privilege.
+      expect(actual.features).toHaveProperty('foo.subFeaturePriv1', [
+        actions.login,
+        actions.ui.get('foo', 'sub-feature-ui-foo'),
+      ]);
+
+      // Without replacedBy, excludeFromBasePrivileges has no additional effect — the sub-feature
+      // UI action is absent from base privileges for the same reason as the non-excluded case.
+      expect(actual).toHaveProperty('global.all', [
+        actions.login,
+        actions.api.get(ApiOperation.Read, 'decryptedTelemetry'),
+        actions.api.get(ApiOperation.Read, 'features'),
+        actions.api.get(ApiOperation.Manage, 'taskManager'),
+        actions.api.get(ApiOperation.Manage, 'spaces'),
+        actions.space.manage,
+        actions.ui.get('spaces', 'manage'),
+        actions.ui.get('management', 'kibana', 'spaces'),
+        actions.ui.get('catalogue', 'spaces'),
+        actions.ui.get('enterpriseSearch', 'all'),
+        actions.ui.get('globalSettings', 'save'),
+        actions.ui.get('globalSettings', 'show'),
+        actions.ui.get('foo', 'foo'),
+      ]);
+      expect(actual).toHaveProperty('space.all', [actions.login, actions.ui.get('foo', 'foo')]);
+      expect(actual).toHaveProperty('global.read', [
+        actions.login,
+        actions.api.get(ApiOperation.Read, 'decryptedTelemetry'),
+        actions.ui.get('globalSettings', 'show'),
+        actions.ui.get('foo', 'foo'),
+      ]);
+      expect(actual).toHaveProperty('space.read', [actions.login, actions.ui.get('foo', 'foo')]);
+    });
   });
 
   describe(`with includeIn: 'read'`, () => {
