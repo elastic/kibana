@@ -1043,7 +1043,7 @@ export async function setupFieldMappingAtScale(kibanaServer: KibanaServer, log: 
 
 /**
  * Setup for the classic-stream field mapping journey at scale.
- * Creates one classic stream and sets 1,000 field_overrides via the public
+ * Creates one classic stream and sets 10,000 field_overrides via the public
  * Streams API (the same path the schema editor uses).
  */
 export async function setupClassicFieldMappingAtScale(kibanaServer: KibanaServer, log: ToolingLog) {
@@ -1052,7 +1052,7 @@ export async function setupClassicFieldMappingAtScale(kibanaServer: KibanaServer
   await enableStreams(kibanaServer, log);
   await createSingleClassicStream(kibanaServer, CLASSIC_MAPPING_STREAM);
 
-  const FIELD_COUNT = 1000;
+  const FIELD_COUNT = 10000;
   const FIELD_TYPES = ['keyword', 'long', 'double', 'boolean', 'ip', 'date'];
 
   log.info(`Mapping ${FIELD_COUNT} field_overrides on ${CLASSIC_MAPPING_STREAM}...`);
@@ -1060,7 +1060,7 @@ export async function setupClassicFieldMappingAtScale(kibanaServer: KibanaServer
   const fields: Record<string, { type: string }> = {};
   for (let i = 1; i <= FIELD_COUNT; i++) {
     const type = FIELD_TYPES[(i - 1) % FIELD_TYPES.length];
-    fields[`attributes.perf_classic_schema_${String(i).padStart(4, '0')}`] = { type };
+    fields[`attributes.perf_classic_schema_${String(i).padStart(5, '0')}`] = { type };
   }
 
   await getAndUpdateClassicIngestConfig(kibanaServer, CLASSIC_MAPPING_STREAM, (config) => {
