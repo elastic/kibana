@@ -15,6 +15,7 @@ import { transformTimeRangeOut, transformTitlesOut } from '@kbn/presentation-pub
 
 import type { SavedDashboardPanel, SavedDashboardSection } from '../../../dashboard_saved_object';
 import { embeddableService } from '../../../kibana_services';
+import type { getDashboardStateSchema } from '../../dashboard_state_schemas';
 import type { DashboardPanel, DashboardSection, DashboardState, Warnings } from '../../types';
 import { getPanelReferences } from './get_panel_references';
 import { panelBwc } from './panel_bwc';
@@ -23,7 +24,8 @@ export function transformPanelsOut(
   panelsJSON: string = '[]',
   sections: SavedDashboardSection[] = [],
   containerReferences: SavedObjectReference[] = [],
-  isDashboardAppRequest: boolean = false
+  isDashboardAppRequest: boolean = false,
+  dashboardSchema: ReturnType<typeof getDashboardStateSchema>
 ): { panels: DashboardState['panels']; warnings: Warnings } {
   const topLevelPanels: DashboardPanel[] = [];
   const warnings: Warnings = [];
@@ -79,8 +81,33 @@ export function transformPanelsOut(
     }
   });
 
+  // Validate against the array to ensure the number of elements is valid
+  let transformedPanels = [...topLevelPanels, ...Object.values(sectionsMap)];
+  try {
+    const result = dashboardSchema
+      .getSchema()
+      .extract('panels')
+      .options({ stripUnknown: { arrays: true } }) // allows all panel types through, since they have been validated above
+      .validate(transformedPanels);
+    if (result.error) throw result.error;
+  } catch (e) {
+    const max = dashboardSchema.getSchema().extract('panels').$_getRule('max')?.args?.limit;
+    if (typeof max === 'number') {
+      for (let i = max; i < transformedPanels.length; i++) {
+        const panel = transformedPanels[i];
+        warnings.push({
+          type: 'dropped_panel',
+          panel_type: panel.type,
+          panel_config: panel.config,
+          message: `Error: ${e.message}`, // the size error message is already descriptive enough
+        });
+      }
+      transformedPanels = transformedPanels.slice(0, max);
+    }
+  }
+
   return {
-    panels: [...topLevelPanels, ...Object.values(sectionsMap)],
+    panels: transformedPanels,
     warnings,
   };
 }

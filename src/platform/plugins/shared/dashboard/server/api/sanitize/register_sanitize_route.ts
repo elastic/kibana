@@ -56,6 +56,7 @@ export function registerSanitizeRoute(router: VersionedRouter<RequestHandlerCont
     },
     async (_ctx, req, res) => {
       try {
+        console.log({ test: req.body.panels.length });
         const result = await sanitize(getCachedDashboardStateSchema(), req.body);
         return res.ok({ body: result });
       } catch (e) {

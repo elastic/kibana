@@ -9,9 +9,9 @@
 
 import { flow } from 'lodash';
 
-import type { Type } from '@kbn/config-schema';
 import type { Reference } from '@kbn/content-management-utils';
 import {
+  getControlsSchemas,
   type LegacyIgnoreParentSettings,
   type LegacyStoredPinnedControlState,
 } from '@kbn/controls-schemas';
@@ -20,7 +20,8 @@ import { transformType } from '@kbn/embeddable-plugin/server';
 import type { DashboardPinnedPanel, DashboardPinnedPanelsState } from '../../../../common';
 import type { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object';
 import { embeddableService } from '../../../kibana_services';
-import type { DashboardState, Warnings } from '../../types';
+import type { getDashboardStateSchema } from '../../dashboard_state_schemas';
+import type { Warnings } from '../../types';
 
 type StoredPinnedPanels = Required<DashboardSavedObjectAttributes>['pinned_panels']['panels'];
 
@@ -28,33 +29,36 @@ export function transformPinnedPanelsOut(
   controlGroupInput: DashboardSavedObjectAttributes['controlGroupInput'], // legacy
   pinnedPanels: DashboardSavedObjectAttributes['pinned_panels'],
   containerReferences: Reference[] = [],
-  panelsStateSchema: Type<DashboardPinnedPanelsState>
-): { panels: DashboardState['pinned_panels']; warnings: Warnings } {
+  schema: ReturnType<typeof getDashboardStateSchema>
+): { panels: DashboardPinnedPanelsState; warnings: Warnings } {
+  const pinnedPanelSchema = getControlsSchemas();
+  let warnings: Warnings = [];
+  let transformedPanels: DashboardPinnedPanelsState = [];
   if (pinnedPanels) {
     /**
      * >=9.4, pinned panels are stored in the SO under the key `pinned_panels` without any JSON bucketing
      */
-    return transformPanel(
+    ({ warnings, panels: transformedPanels } = transformPanels(
       flow(transformPinnedPanelsObjectToArray, transformPinnedPanelProperties)(pinnedPanels.panels),
       containerReferences,
-      panelsStateSchema
-    );
+      pinnedPanelSchema
+    ));
   } else if (controlGroupInput) {
     /**
      * <9.4, pinned panels were stored in the SO under `controlGroupInput` with the JSON bucket `panelsJSON`
      * This was before pinned panels were transformed to be generic - they **only** stored controls
      */
-    const { warnings, panels: controls } = controlGroupInput.panelsJSON
-      ? transformPanel(
+    ({ warnings, panels: transformedPanels } = controlGroupInput.panelsJSON
+      ? transformPanels(
           flow(
             JSON.parse,
             transformPinnedPanelsObjectToArray,
             transformPinnedPanelProperties
           )(controlGroupInput.panelsJSON),
           containerReferences,
-          panelsStateSchema
+          pinnedPanelSchema
         )
-      : { warnings: [], panels: [] };
+      : { warnings: [], panels: [] });
     /** For legacy controls (<v9.2.0), pass relevant ignoreParentSettings into each individual control panel */
     const legacyControlGroupOptions: LegacyIgnoreParentSettings | undefined =
       controlGroupInput.ignoreParentSettingsJSON
@@ -68,7 +72,7 @@ export function transformPinnedPanelsOut(
         controlGroupInput.chainingSystem === 'NONE' ||
         legacyControlGroupOptions.ignoreFilters ||
         legacyControlGroupOptions.ignoreQuery;
-      controls.map(({ config, ...rest }) => ({
+      transformedPanels.map(({ config, ...rest }) => ({
         ...rest,
         config: {
           use_global_filters: !ignoreFilters,
@@ -77,9 +81,28 @@ export function transformPinnedPanelsOut(
         },
       }));
     }
-    return { warnings, panels: controls };
   }
-  return { warnings: [], panels: [] };
+
+  // Validate against the array to ensure the number of elements is valid
+  try {
+    transformedPanels = schema.validateKey('pinned_panels', transformedPanels);
+  } catch (e) {
+    const max = schema.getSchema().extract('pinned_panels').$_getRule('max')?.args?.limit;
+    if (typeof max === 'number') {
+      for (let i = max; i < transformedPanels.length; i++) {
+        const panel = transformedPanels[i];
+        warnings.push({
+          type: 'dropped_panel',
+          panel_type: panel.type,
+          panel_config: panel.config,
+          message: `Error: ${e.message}`, // the size error message is already descriptive enough
+        });
+      }
+      transformedPanels = transformedPanels.slice(0, max);
+    }
+  }
+  // console.log(schema.getPropSchemas().pinned_panels.getSchema().failover());
+  return { warnings, panels: transformedPanels };
 }
 
 /**
@@ -119,10 +142,10 @@ export function transformPinnedPanelProperties(
 /**
  * Inject references via the embeddable transforms
  */
-function transformPanel(
+function transformPanels(
   panels: DashboardPinnedPanelsState,
   containerReferences: Reference[],
-  panelsStateSchema: Type<DashboardPinnedPanelsState>
+  schema: ReturnType<typeof getControlsSchemas>
 ): { panels: DashboardPinnedPanelsState; warnings: Warnings } {
   const transformedPanels: DashboardPinnedPanelsState = [];
   const warnings: Warnings = [];
@@ -136,7 +159,8 @@ function transformPanel(
           ...rest,
           config: transforms.transformOut(config, [], containerReferences, panel.id),
         } as DashboardPinnedPanel;
-        transformedPanels.push(panelsStateSchema.validate([transformed])[0]);
+        // Validate individual panel; if invalid, it will be dropped from the pinned panel array
+        transformedPanels.push(schema.validate(transformed));
       } catch (e) {
         warnings.push({
           type: 'dropped_panel',

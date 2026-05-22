@@ -11,7 +11,6 @@ import { asCodeFilterSchema, type AsCodeFilter } from '@kbn/as-code-filters-sche
 import { fromStoredFilters } from '@kbn/as-code-filters-transforms';
 import type { AsCodeQuery } from '@kbn/as-code-shared-schemas';
 import { toAsCodeQuery } from '@kbn/as-code-shared-transforms';
-import type { Type, TypeOf } from '@kbn/config-schema';
 import type { SavedObjectReference } from '@kbn/core/server';
 import { injectReferences, parseSearchSourceJSON } from '@kbn/data-plugin/common';
 
@@ -24,10 +23,7 @@ import type { DashboardState, Warnings } from '../../types';
 export function transformSearchSourceOut(
   kibanaSavedObjectMeta: DashboardSavedObjectAttributes['kibanaSavedObjectMeta'] = {},
   references: SavedObjectReference[] = [],
-  schema: {
-    filters: Type<TypeOf<ReturnType<typeof getDashboardStateSchema>>['filters']>;
-    query: Type<TypeOf<ReturnType<typeof getDashboardStateSchema>>['query']>;
-  }
+  schema: ReturnType<typeof getDashboardStateSchema>
 ): Pick<DashboardState, 'filters' | 'query'> & { warnings: Warnings } {
   const warnings: Warnings = [];
 
@@ -57,7 +53,7 @@ export function transformSearchSourceOut(
   let filters: AsCodeFilter[] | undefined;
   try {
     filters = fromStoredFilters(searchSource.filter, logger) ?? [];
-    filters = schema.filters.validate(filters);
+    filters = schema.validateKey('filters', filters);
   } catch (error) {
     // drop all invalid filters
     const { valid, invalid } = (filters ?? []).reduce(
@@ -89,7 +85,7 @@ export function transformSearchSourceOut(
   let query: AsCodeQuery | undefined;
   try {
     const storedQuery = searchSource.query ? migrateLegacyQuery(searchSource.query) : undefined;
-    query = schema.query.validate(toAsCodeQuery(storedQuery));
+    query = schema.validateKey('query', toAsCodeQuery(storedQuery));
   } catch (error) {
     const warningMessage = `Unexpected error transforming query state on read. Error: ${error.message}`;
     logger.warn(warningMessage);

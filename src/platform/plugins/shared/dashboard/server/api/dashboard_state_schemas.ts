@@ -242,6 +242,7 @@ export function getDashboardStateSchema(
   isDashboardAppRequest: boolean,
   isWriteRequest: boolean = false
 ) {
+  console.log({ isDashboardAppRequest });
   return schema.object(
     {
       pinned_panels: getPinnedPanelsSchema(isDashboardAppRequest),

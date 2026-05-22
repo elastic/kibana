@@ -13,7 +13,7 @@ import type { DashboardReadResponseBody } from '../server';
 
 export const DEFAULT_DASHBOARD_STATE: DashboardState = {
   query: { expression: '', language: 'kql' },
-  description: '',
+  description: undefined,
   filters: [],
   panels: [],
   pinned_panels: [],

@@ -17,6 +17,7 @@ import { transformOptionsOut } from './transform_options_out';
 import { transformPanelsOut } from './transform_panels_out';
 import { transformPinnedPanelsOut } from './transform_pinned_panels_out';
 import { transformSearchSourceOut } from './transform_search_source_out';
+import { DEFAULT_DASHBOARD_STATE } from '../../../../common/default_dashboard_state';
 
 export function transformDashboardOut(
   attributes: DashboardSavedObjectAttributes | Partial<DashboardSavedObjectAttributes>,
@@ -53,7 +54,8 @@ export function transformDashboardOut(
     panelsJSON,
     sections,
     references,
-    isDashboardAppRequest
+    isDashboardAppRequest,
+    strictPropsSchemas
   );
 
   const { panels: pinnedPanels, warnings: pinnedPanelWarnings } = transformPinnedPanelsOut(
@@ -104,17 +106,17 @@ export function transformDashboardOut(
     title: title ?? '',
   };
   (Object.keys(validatedState) as Array<keyof typeof validatedState>).forEach((key) => {
-    const result = strictPropsSchemas
-      .getSchema()
-      .extract(key)
-      .failover(null) // fallback if validation fails; does not accept undefined, so using null instead
-      .empty(null) // treat null values as undefined
-      // validation will inject defaults for all undefined values
-      .validate(validatedState[key]).value;
-    validatedState = {
-      ...validatedState,
-      [key]: result,
-    };
+    try {
+      validatedState = {
+        ...validatedState,
+        [key]: strictPropsSchemas.validateKey(key, validatedState[key]),
+      };
+    } catch (e) {
+      validatedState = {
+        ...validatedState,
+        [key]: DEFAULT_DASHBOARD_STATE[key],
+      };
+    }
   });
 
   // try to maintain a consistent (alphabetical) order of keys
