@@ -18,6 +18,7 @@ import { DiscoverApp } from './discover_app';
 import { FilterBar } from './filter_bar';
 import { MapsPage } from './maps_page';
 import { RenderablePage } from './renderable_page';
+import { SavedQueryManagementMenu } from './saved_query_management_menu';
 import { Toasts } from './toasts';
 import { createLazyPageObject } from './utils';
 import { Inspector } from './inspector';
@@ -55,6 +56,7 @@ export interface PageObjects {
   home: HomePage;
   maps: MapsPage;
   renderable: RenderablePage;
+  savedQueryManagementMenu: SavedQueryManagementMenu;
   collapsibleNav: CollapsibleNav;
   toasts: Toasts;
   inspector: Inspector;
@@ -81,6 +83,7 @@ export function createCorePageObjects(fixtures: PageObjectsFixtures): PageObject
     home: createLazyPageObject(HomePage, fixtures.page),
     maps: createLazyPageObject(MapsPage, fixtures.page),
     renderable: createLazyPageObject(RenderablePage, fixtures.page),
+    savedQueryManagementMenu: createLazyPageObject(SavedQueryManagementMenu, fixtures.page),
     collapsibleNav: createLazyPageObject(CollapsibleNav, fixtures.page, fixtures.config),
     toasts: createLazyPageObject(Toasts, fixtures.page),
     inspector: createLazyPageObject(Inspector, fixtures.page),
