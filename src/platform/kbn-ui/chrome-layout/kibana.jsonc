@@ -1,6 +1,6 @@
 {
   "type": "shared-browser",
-  "id": "@kbn/core-chrome-layout-components",
+  "id": "@kbn/ui-chrome-layout",
   "owner": "@elastic/appex-sharedux",
   "group": "platform",
   "visibility": "private"

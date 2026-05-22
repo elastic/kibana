@@ -8,13 +8,13 @@
 import { i18n } from '@kbn/i18n';
 import type { SupportedLogo } from '../../shared/logo_icon';
 
-export interface MiniIntegrationTileDefinition {
+export interface IntegrationMiniTileData {
   id: string;
   title: string;
   logo: SupportedLogo;
 }
 
-export const MINI_INTEGRATION_TILES: readonly MiniIntegrationTileDefinition[] = [
+export const INTEGRATION_MINI_TILES: readonly IntegrationMiniTileData[] = [
   {
     id: 'confluence',
     title: i18n.translate(
