@@ -15,7 +15,7 @@ export class DataSetsPlugin
   implements Plugin<void, DataSetsPluginStart, SetupDependencies, StartDependencies>
 {
   public setup(core: CoreSetup<StartDependencies>, { management }: SetupDependencies): void {
-    management.sections.section.kibana.registerApp({
+    management.sections.section.data.registerApp({
       id: PLUGIN_ID,
       title: PLUGIN_NAME,
       order: 2,
