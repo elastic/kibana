@@ -18,7 +18,8 @@ const ecsMappingSchema = schema.oneOf([
     schema.object({
       key: schema.string(),
       value: schema.object({}, { unknowns: 'allow' }),
-    })
+    }),
+    { maxSize: 200 }
   ),
 ]);
 
