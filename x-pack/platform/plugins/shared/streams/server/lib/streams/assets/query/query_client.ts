@@ -57,7 +57,7 @@ import {
 import type { QueryStorageSettings } from '../storage_settings';
 import { bulkWithInferenceFallback } from '../../errors/bulk_with_inference_fallback';
 import { searchWithKeywordFallback } from '../../errors/search_with_keyword_fallback';
-import { col, getSourceColumnIndex, mapSourceRows } from '../../helpers/esql';
+import { normalizeColumn, getSourceColumnIndex, mapSourceRows } from '../../helpers/esql';
 import { computeRuleId } from './helpers/query';
 import {
   STREAMS_RULE_CONSUMER,
@@ -129,7 +129,7 @@ type WhereCondition = ESQLAstExpression & ComposerQueryTagHole;
 // ES|QL counterpart of `ruleUnbackedFilter`. The DSL helper is still used by
 // the semantic/hybrid paths which remain on the search API.
 function ruleUnbackedWhere(value: RuleUnbackedFilter = 'exclude'): WhereCondition | null {
-  const ruleBackedCol = col(RULE_BACKED);
+  const ruleBackedCol = normalizeColumn(RULE_BACKED);
   switch (value) {
     case 'include':
       return null;
@@ -222,11 +222,11 @@ function appendQueryKeywordEsqlPipeline(
   extraWhere?: WhereCondition
 ): ComposerQuery {
   const lowerWildcard = esql.str(`*${escapeWildcard(searchTerm.toLowerCase())}*`);
-  const titleCol = col(QUERY_TITLE);
-  const descCol = col(QUERY_DESCRIPTION);
-  const kqlCol = col(QUERY_KQL_BODY);
-  const featureNameCol = col(QUERY_FEATURE_NAME);
-  const featureFilterCol = col(QUERY_FEATURE_FILTER);
+  const titleCol = normalizeColumn(QUERY_TITLE);
+  const descCol = normalizeColumn(QUERY_DESCRIPTION);
+  const kqlCol = normalizeColumn(QUERY_KQL_BODY);
+  const featureNameCol = normalizeColumn(QUERY_FEATURE_NAME);
+  const featureFilterCol = normalizeColumn(QUERY_FEATURE_FILTER);
 
   const keywordWhere: WhereCondition = esql.exp`TO_LOWER(${titleCol}) LIKE ${lowerWildcard}
    OR TO_LOWER(${descCol}) LIKE ${lowerWildcard}
@@ -644,9 +644,9 @@ export class QueryClient {
     const response = await this.dependencies.storageClient.esql({
       metadata: ['_id', '_source'],
       buildPipeline: (q) =>
-        q.where`_id IN (${idLiterals}) AND ${col(STREAM_NAME)} == ${{ name }} AND ${col(
-          ASSET_TYPE
-        )} == ${esql.str('query')}`.limit(uuids.length),
+        q.where`_id IN (${idLiterals}) AND ${normalizeColumn(STREAM_NAME)} == ${{
+          name,
+        }} AND ${normalizeColumn(ASSET_TYPE)} == ${esql.str('query')}`.limit(uuids.length),
     });
 
     return mapSourceRows<StoredQueryLink, QueryLink>(response, fromStorage);
@@ -689,9 +689,15 @@ export class QueryClient {
     // Omit the IN fragment when no streams are requested — bare `IN ()` is an ES|QL parse error.
     if (streamNames.length > 0) {
       const streamLiterals = streamNames.map((sn) => esql.str(sn));
-      baseWhere = andWhere(baseWhere, esql.exp`${col(STREAM_NAME)} IN (${streamLiterals})`);
+      baseWhere = andWhere(
+        baseWhere,
+        esql.exp`${normalizeColumn(STREAM_NAME)} IN (${streamLiterals})`
+      );
     }
-    baseWhere = andWhere(baseWhere, esql.exp`${col(ASSET_TYPE)} == ${esql.str('query')}`);
+    baseWhere = andWhere(
+      baseWhere,
+      esql.exp`${normalizeColumn(ASSET_TYPE)} == ${esql.str('query')}`
+    );
     const rb = ruleUnbackedWhere(filters?.ruleUnbacked);
     if (rb !== null) baseWhere = andWhere(baseWhere, rb);
 

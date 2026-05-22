@@ -9,12 +9,19 @@ import type { EsqlQueryRequest } from '@elastic/elasticsearch/lib/api/types';
 import { esql, type ComposerQuery } from '@elastic/esql';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 
-/** Composer column helper that splits dotted names into the array shorthand. */
-export const col = (field: string) => esql.col(field.includes('.') ? field.split('.') : field);
+/** Normalises a field name into a Composer column ref, splitting dotted names into the array shorthand. */
+export const normalizeColumn = (field: string) =>
+  esql.col(field.includes('.') ? field.split('.') : field);
 
-/** Index of the `_source` column, or `-1` when absent. */
-export const getSourceColumnIndex = (response: ESQLSearchResponse): number =>
-  response.columns.findIndex((c) => c.name === '_source');
+/** Index of `name` in `response.columns`, or `-1` when absent. Structural type so it accepts both `ESQLSearchResponse` and the raw `esClient.esql.query` return. */
+export const getColumnIndex = (
+  response: { columns: Array<{ name: string }> },
+  name: string
+): number => response.columns.findIndex((c) => c.name === name);
+
+/** Convenience for the common `_source` lookup; equivalent to `getColumnIndex(response, '_source')`. */
+export const getSourceColumnIndex = (response: { columns: Array<{ name: string }> }): number =>
+  getColumnIndex(response, '_source');
 
 /** Bridges `ComposerQuery.toRequest()` to `EsqlQueryRequest` — strips the loose `filter` and casts through `unknown` for named params (typed as positional in the ES client). */
 export const toEsqlRequest = (query: ComposerQuery): EsqlQueryRequest => {

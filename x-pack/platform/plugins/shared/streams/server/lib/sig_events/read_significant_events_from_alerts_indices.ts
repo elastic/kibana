@@ -7,6 +7,7 @@
 
 import { esql } from '@elastic/esql';
 import type { IScopedClusterClient } from '@kbn/core/server';
+import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import type { StreamQuery, SignificantEventsGetResponse } from '@kbn/streams-schema';
 import { MS_PER_UNIT } from '@kbn/streams-schema';
 import { isEsqlUnknownIndexError } from '@kbn/storage-adapter';
@@ -15,10 +16,9 @@ import type { QueryLink, SearchMode } from '../../../common/queries';
 import type { QueryClient, QueryLinkFilters } from '../streams/assets/query/query_client';
 import { parseError } from '../streams/errors/parse_error';
 import { SecurityError } from '../streams/errors/security_error';
-import { toEsqlRequest } from '../streams/helpers/esql';
+import { getColumnIndex, toEsqlRequest } from '../streams/helpers/esql';
+import { ALERTS_DATA_STREAM } from './alerts_data_stream';
 import { ESQL_UNITS, fillBucketGaps, parseBucketSize } from './helpers/fill_bucket_gaps';
-
-const ALERTS_INDEX = '.alerts-streams.alerts-default';
 
 // `change_points` on the GET response is no longer populated by the server.
 // Kept as an empty stub until the consumer-side schema/usage is removed.
@@ -71,13 +71,13 @@ export async function readSignificantEventsFromAlertsIndices(
 
   // ES|QL `IN (?param)` does not expand array params — emit one literal per value.
   const ruleIdLiterals = ruleIds.map((id) => esql.str(id));
-  const ruleUuidCol = esql.col(['kibana', 'alert', 'rule', 'uuid']);
+  const ruleUuidCol = esql.col(ALERT_RULE_UUID.split('.'));
 
   let response: Awaited<ReturnType<typeof scopedClusterClient.asCurrentUser.esql.query>>;
   try {
     response = await scopedClusterClient.asCurrentUser.esql.query({
       ...toEsqlRequest(
-        esql.from([ALERTS_INDEX]).where`${ruleUuidCol} IN (${ruleIdLiterals})`
+        esql.from([ALERTS_DATA_STREAM]).where`${ruleUuidCol} IN (${ruleIdLiterals})`
           .pipe`STATS count = COUNT(*) BY rule_uuid = ${ruleUuidCol}, bucket = BUCKET(@timestamp, ${esql.num(
           value
         )} ${esql.kwd(esqlUnit)})`.pipe`SORT bucket ASC`
@@ -107,9 +107,9 @@ export async function readSignificantEventsFromAlertsIndices(
     throw err;
   }
 
-  const countIdx = response.columns.findIndex((col) => col.name === 'count');
-  const ruleIdx = response.columns.findIndex((col) => col.name === 'rule_uuid');
-  const bucketIdx = response.columns.findIndex((col) => col.name === 'bucket');
+  const countIdx = getColumnIndex(response, 'count');
+  const ruleIdx = getColumnIndex(response, 'rule_uuid');
+  const bucketIdx = getColumnIndex(response, 'bucket');
 
   if (countIdx === -1 || ruleIdx === -1 || bucketIdx === -1) {
     return buildEmptyResponse(queryLinks);
@@ -131,11 +131,13 @@ export async function readSignificantEventsFromAlertsIndices(
   // Sum per-rule counts into a single epoch-aligned series for the overall sparkline.
   const dateToTotal = new Map<string, number>();
   for (const [, sparse] of sparseByRule) {
-    for (const { date, count } of fillBucketGaps(sparse, from, to, intervalMs)) {
+    for (const { date, count } of fillBucketGaps(sparse, from, to, intervalMs).buckets) {
       dateToTotal.set(date, (dateToTotal.get(date) ?? 0) + count);
     }
   }
-  const aggregatedOccurrences = fillBucketGaps(
+  // Outer fill covers the all-zero-firings case (empty `sparseByRule` → empty
+  // `dateToTotal`); without it the histogram would render empty instead of flat.
+  const { buckets: aggregatedOccurrences } = fillBucketGaps(
     [...dateToTotal.entries()].map(([date, count]) => ({ date, count })),
     from,
     to,
@@ -148,7 +150,9 @@ export async function readSignificantEventsFromAlertsIndices(
     return {
       ...toStreamQuery(queryLink),
       stream_name: queryLink.stream_name,
-      occurrences: sparse ? fillBucketGaps(sparse, from, to, intervalMs) : EMPTY_OCCURRENCES,
+      occurrences: sparse
+        ? fillBucketGaps(sparse, from, to, intervalMs).buckets
+        : EMPTY_OCCURRENCES,
       change_points: EMPTY_CHANGE_POINTS,
       rule_backed: queryLink.rule_backed,
     };

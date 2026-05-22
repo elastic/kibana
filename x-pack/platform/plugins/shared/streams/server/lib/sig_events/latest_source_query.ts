@@ -9,7 +9,7 @@ import { esql, type ComposerQueryTagHole, type ComposerSortShorthand } from '@el
 import type { ESQLAstExpression } from '@elastic/esql/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import { toEsqlRequest } from '../streams/helpers/esql';
+import { getSourceColumnIndex, toEsqlRequest } from '../streams/helpers/esql';
 import { type CommonSearchOptions } from './query_utils';
 
 export type LatestSourceWhereCondition = ESQLAstExpression & ComposerQueryTagHole;
@@ -65,7 +65,7 @@ export const runLatestSourceEsqlQuery = async <T>({
 
   const response = (await esClient.esql.query(toEsqlRequest(query))) as ESQLSearchResponse;
 
-  const sourceIdx = response.columns.findIndex((c) => c.name === '_source');
+  const sourceIdx = getSourceColumnIndex(response);
   if (sourceIdx === -1) {
     return { hits: [] };
   }

@@ -11,7 +11,6 @@ import { esql, type ComposerQuery, type ComposerQueryTagHole } from '@elastic/es
 import type { ESQLAstExpression } from '@elastic/esql/types';
 import type { IStorageClient } from '@kbn/storage-adapter';
 import type { Logger } from '@kbn/core/server';
-import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { BaseFeature, Feature } from '@kbn/streams-schema';
 import { isDuplicateFeature, isComputedFeature } from '@kbn/streams-schema';
 import { isConditionComplete } from '@kbn/streamlang';
@@ -42,7 +41,12 @@ import type { StoredFeature } from './stored_feature';
 import { StatusError } from '../errors/status_error';
 import { bulkWithInferenceFallback } from '../errors/bulk_with_inference_fallback';
 import { searchWithKeywordFallback } from '../errors/search_with_keyword_fallback';
-import { col, getSourceColumnIndex, mapSourceRows } from '../helpers/esql';
+import {
+  normalizeColumn,
+  getColumnIndex,
+  getSourceColumnIndex,
+  mapSourceRows,
+} from '../helpers/esql';
 import type { SearchMode } from '../../../../common/queries';
 import {
   DEFAULT_SIG_EVENTS_TUNING_CONFIG,
@@ -117,11 +121,11 @@ function appendKeywordEsqlPipeline(
     .filter((t) => t.length > 3)
     .map((t) => esql.str(t.toLowerCase()));
 
-  const titleCol = col(FEATURE_TITLE);
-  const descCol = col(FEATURE_DESCRIPTION);
-  const typeCol = col(FEATURE_TYPE);
-  const subtypeCol = col(FEATURE_SUBTYPE);
-  const tagsCol = col(FEATURE_TAGS);
+  const titleCol = normalizeColumn(FEATURE_TITLE);
+  const descCol = normalizeColumn(FEATURE_DESCRIPTION);
+  const typeCol = normalizeColumn(FEATURE_TYPE);
+  const subtypeCol = normalizeColumn(FEATURE_SUBTYPE);
+  const tagsCol = normalizeColumn(FEATURE_TAGS);
 
   let tagOrExpr: WhereCondition | undefined;
   for (const tokenLit of tagTokens) {
@@ -151,10 +155,6 @@ function appendKeywordEsqlPipeline(
     .pipe`SORT _kw_score DESC, _id ASC`
     .keep('_id', '_source')
     .limit(size);
-}
-
-function getColumnIndex(response: ESQLSearchResponse, name: string): number {
-  return response.columns.findIndex((c) => c.name === name);
 }
 
 function buildBaseFilters({
@@ -326,7 +326,7 @@ export class FeatureClient {
     const size = options.limit ?? 10_000;
     const response = await this.clients.storageClient.esql({
       metadata: ['_id', '_source'],
-      buildPipeline: (q) => q.pipe`SORT ${col(sortField)} DESC`.limit(size),
+      buildPipeline: (q) => q.pipe`SORT ${normalizeColumn(sortField)} DESC`.limit(size),
       filter: { bool: { filter: filterClauses } },
     });
 
@@ -337,7 +337,7 @@ export class FeatureClient {
     const response = await this.clients.storageClient.esql({
       metadata: ['_id', '_source'],
       buildPipeline: (q) =>
-        q.where`_id == ${{ uuid }} AND ${col(STREAM_NAME)} == ${{ stream }}`.limit(1),
+        q.where`_id == ${{ uuid }} AND ${normalizeColumn(STREAM_NAME)} == ${{ stream }}`.limit(1),
     });
 
     const sourceIdx = getSourceColumnIndex(response);
@@ -399,8 +399,9 @@ export class FeatureClient {
     const response = await this.clients.storageClient.esql({
       metadata: ['_id', '_source'],
       buildPipeline: (q) =>
-        q.where`${col(STREAM_NAME)} == ${{ stream }} AND ${col(FEATURE_EXCLUDED_AT)} IS NOT NULL`
-          .pipe`SORT ${col(FEATURE_EXCLUDED_AT)} DESC`.limit(10_000),
+        q.where`${normalizeColumn(STREAM_NAME)} == ${{ stream }} AND ${normalizeColumn(
+          FEATURE_EXCLUDED_AT
+        )} IS NOT NULL`.pipe`SORT ${normalizeColumn(FEATURE_EXCLUDED_AT)} DESC`.limit(10_000),
     });
 
     return { hits: mapSourceRows<StoredFeature, Feature>(response, fromStorage) };
@@ -589,9 +590,9 @@ export class FeatureClient {
             const response = await this.clients.storageClient.esql({
               metadata: ['_id', '_source'],
               buildPipeline: (q) =>
-                q.where`_id IN (${idLiterals}) AND ${col(STREAM_NAME)} == ${{ stream }}`.limit(
-                  idsToValidate.length
-                ),
+                q.where`_id IN (${idLiterals}) AND ${normalizeColumn(STREAM_NAME)} == ${{
+                  stream,
+                }}`.limit(idsToValidate.length),
             });
             const idIdx = getColumnIndex(response, '_id');
             const sourceIdx = getSourceColumnIndex(response);

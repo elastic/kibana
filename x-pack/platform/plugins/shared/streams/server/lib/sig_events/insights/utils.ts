@@ -8,13 +8,15 @@
 import { esql } from '@elastic/esql';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
+import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { isEsqlUnknownIndexError } from '@kbn/storage-adapter';
 import { omit } from 'lodash';
 import type { InsightCore } from '@kbn/streams-schema';
 import type { Query } from '../../../../common/queries';
 import { parseError } from '../../streams/errors/parse_error';
 import { SecurityError } from '../../streams/errors/security_error';
-import { getSourceColumnIndex, toEsqlRequest } from '../../streams/helpers/esql';
+import { getColumnIndex, getSourceColumnIndex, toEsqlRequest } from '../../streams/helpers/esql';
+import { ALERTS_DATA_STREAM } from '../alerts_data_stream';
 import { SUBMIT_INSIGHTS_TOOL_NAME, parseInsightsWithErrors } from './client/insight_tool';
 
 export interface QueryData {
@@ -70,12 +72,11 @@ export async function collectQueryData({
   const now = new Date();
   const nowMinus15m = new Date(now.getTime() - CURRENT_WINDOW_MINUTES * 60 * 1000);
   const timestampCol = esql.col('@timestamp');
-  const ruleUuidCol = esql.col(['kibana', 'alert', 'rule', 'uuid']);
+  const ruleUuidCol = esql.col(ALERT_RULE_UUID.split('.'));
   const fromLit = esql.str(nowMinus15m.toISOString());
   const toLit = esql.str(now.toISOString());
   const ruleIdLit = esql.str(ruleId);
   const whereCondition = esql.exp`${timestampCol} >= ${fromLit} AND ${timestampCol} <= ${toLit} AND ${ruleUuidCol} == ${ruleIdLit}`;
-  const alertsIndex = '.alerts-streams.alerts-default';
 
   let q1Response: ESQLSearchResponse;
   let q2Response: ESQLSearchResponse;
@@ -83,14 +84,17 @@ export async function collectQueryData({
     [q1Response, q2Response] = await Promise.all([
       esClient.esql.query({
         ...toEsqlRequest(
-          esql.from([alertsIndex], ['_source']).where`${whereCondition}`.limit(SAMPLE_EVENTS_COUNT)
+          esql.from([ALERTS_DATA_STREAM], ['_source']).where`${whereCondition}`.limit(
+            SAMPLE_EVENTS_COUNT
+          )
         ),
         drop_null_columns: true,
         format: 'json',
       }) as unknown as ESQLSearchResponse,
       esClient.esql.query({
         ...toEsqlRequest(
-          esql.from([alertsIndex]).where`${whereCondition}`.pipe`STATS currentCount = COUNT(*)`
+          esql.from([ALERTS_DATA_STREAM]).where`${whereCondition}`
+            .pipe`STATS currentCount = COUNT(*)`
         ),
         format: 'json',
       }) as unknown as ESQLSearchResponse,
@@ -113,7 +117,7 @@ export async function collectQueryData({
     throw err;
   }
 
-  const countIdx = q2Response.columns.findIndex((col) => col.name === 'currentCount');
+  const countIdx = getColumnIndex(q2Response, 'currentCount');
   const currentCount = countIdx >= 0 ? (q2Response.values[0]?.[countIdx] as number) ?? 0 : 0;
 
   if (currentCount === 0) {

@@ -12,7 +12,11 @@ import type { Insight, InsightImpactLevel } from '@kbn/streams-schema';
 import { INSIGHT_IMPACT, INSIGHT_IMPACT_LEVEL, INSIGHT_GENERATED_AT } from './fields';
 import type { InsightStorageSettings } from './storage_settings';
 import { StatusError } from '../../../streams/errors/status_error';
-import { col, getSourceColumnIndex } from '../../../streams/helpers/esql';
+import {
+  normalizeColumn,
+  getColumnIndex,
+  getSourceColumnIndex,
+} from '../../../streams/helpers/esql';
 
 interface InsightBulkIndexOperation {
   index: Insight;
@@ -83,9 +87,9 @@ export class InsightClient {
     const response = await this.clients.storageClient.esql({
       metadata: ['_id', '_source'],
       buildPipeline: (q) =>
-        q.pipe`SORT ${col(INSIGHT_IMPACT_LEVEL)} ASC, ${col(INSIGHT_GENERATED_AT)} DESC`.limit(
-          10000
-        ),
+        q.pipe`SORT ${normalizeColumn(INSIGHT_IMPACT_LEVEL)} ASC, ${normalizeColumn(
+          INSIGHT_GENERATED_AT
+        )} DESC`.limit(10000),
       ...(filterClauses.length > 0 ? { filter: { bool: { filter: filterClauses } } } : {}),
     });
 
@@ -129,7 +133,7 @@ export class InsightClient {
         buildPipeline: (q) => q.where`_id IN (${idLiterals})`.limit(deleteIds.length),
       });
 
-      const idIdx = existingResponse.columns.findIndex((column) => column.name === '_id');
+      const idIdx = getColumnIndex(existingResponse, '_id');
       const existingIds = new Set(
         idIdx >= 0 ? existingResponse.values.map((row) => row[idIdx] as string) : []
       );

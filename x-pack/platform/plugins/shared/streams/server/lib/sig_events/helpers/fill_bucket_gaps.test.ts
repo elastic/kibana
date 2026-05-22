@@ -56,8 +56,9 @@ describe('fillBucketGaps', () => {
   it('returns an entry for every minute in [from, to] when sparse input is empty', () => {
     const from = new Date('2026-01-01T00:00:00.000Z');
     const to = new Date('2026-01-01T00:04:00.000Z');
-    const result = fillBucketGaps([], from, to, ONE_MINUTE_MS);
+    const { buckets: result, truncated } = fillBucketGaps([], from, to, ONE_MINUTE_MS);
 
+    expect(truncated).toBe(false);
     expect(result).toHaveLength(5); // 00:00, 00:01, 00:02, 00:03, 00:04
     expect(result.every((r) => r.count === 0)).toBe(true);
     expect(result[0].date).toBe('2026-01-01T00:00:00.000Z');
@@ -75,7 +76,7 @@ describe('fillBucketGaps', () => {
       { date: minuteAgo(3, base).toISOString(), count: 1 },
     ];
 
-    const result = fillBucketGaps(sparse, from, to, ONE_MINUTE_MS);
+    const { buckets: result } = fillBucketGaps(sparse, from, to, ONE_MINUTE_MS);
 
     expect(result).toHaveLength(5);
     expect(result[0].count).toBe(2); // minute 0 — has docs
@@ -90,7 +91,7 @@ describe('fillBucketGaps', () => {
     const from = new Date('2026-01-01T00:00:30.000Z');
     const to = new Date('2026-01-01T00:01:30.000Z');
 
-    const result = fillBucketGaps([], from, to, ONE_MINUTE_MS);
+    const { buckets: result } = fillBucketGaps([], from, to, ONE_MINUTE_MS);
 
     // Floor of 00:00:30 → 00:00:00; also covers 00:01:00
     expect(result[0].date).toBe('2026-01-01T00:00:00.000Z');
@@ -100,7 +101,7 @@ describe('fillBucketGaps', () => {
   it('handles hourly intervals', () => {
     const from = new Date('2026-01-01T00:00:00.000Z');
     const to = new Date('2026-01-01T02:00:00.000Z');
-    const result = fillBucketGaps([], from, to, ONE_HOUR_MS);
+    const { buckets: result } = fillBucketGaps([], from, to, ONE_HOUR_MS);
 
     expect(result).toHaveLength(3); // 00:00, 01:00, 02:00
     expect(result[2].date).toBe('2026-01-01T02:00:00.000Z');
@@ -119,7 +120,7 @@ describe('fillBucketGaps', () => {
       { date: minuteAgo(7, base).toISOString(), count: 1 },
     ];
 
-    const resultA = fillBucketGaps(sparseRuleA, from, to, ONE_MINUTE_MS);
+    const { buckets: resultA } = fillBucketGaps(sparseRuleA, from, to, ONE_MINUTE_MS);
 
     expect(resultA).toHaveLength(11); // minutes 0–10 inclusive
     expect(resultA[0].count).toBe(1);
@@ -134,7 +135,7 @@ describe('fillBucketGaps', () => {
       { date: base.toISOString(), count: 1 },
       { date: minuteAgo(9, base).toISOString(), count: 1 },
     ];
-    const resultB = fillBucketGaps(sparseRuleB, from, to, ONE_MINUTE_MS);
+    const { buckets: resultB } = fillBucketGaps(sparseRuleB, from, to, ONE_MINUTE_MS);
 
     expect(resultB).toHaveLength(11);
     expect(resultB[0].count).toBe(1);
@@ -144,15 +145,12 @@ describe('fillBucketGaps', () => {
     expect(gapBuckets.every((r) => r.count === 0)).toBe(true);
   });
 
-  it('caps the result at MAX_FILL_BUCKETS when the requested range exceeds the guardrail', () => {
-    // Request more buckets than the guardrail allows: MAX_FILL_BUCKETS + 1
-    // minutes at 1-minute intervals.
+  it('caps the result at MAX_FILL_BUCKETS and sets truncated when the range exceeds the guardrail', () => {
     const from = new Date('2026-01-01T00:00:00.000Z');
     const to = new Date(from.getTime() + (MAX_FILL_BUCKETS + 1) * ONE_MINUTE_MS);
-    const result = fillBucketGaps([], from, to, ONE_MINUTE_MS);
+    const { buckets, truncated } = fillBucketGaps([], from, to, ONE_MINUTE_MS);
 
-    // Output is truncated silently. Callers that need to surface truncation
-    // (e.g. `preview_significant_events.ts`) detect via `length >= MAX_FILL_BUCKETS`.
-    expect(result).toHaveLength(MAX_FILL_BUCKETS);
+    expect(buckets).toHaveLength(MAX_FILL_BUCKETS);
+    expect(truncated).toBe(true);
   });
 });

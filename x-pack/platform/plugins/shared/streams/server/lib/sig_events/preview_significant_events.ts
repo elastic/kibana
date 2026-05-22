@@ -18,6 +18,7 @@ import {
   extractStatsGroupColumns,
   MS_PER_UNIT,
 } from '@kbn/streams-schema';
+import { getColumnIndex } from '../streams/helpers/esql';
 import {
   ESQL_UNITS,
   fillBucketGaps,
@@ -199,8 +200,8 @@ async function previewMatchQuery(
     drop_null_columns: true,
   });
 
-  const countIdx = response.columns.findIndex((col) => col.name === 'count');
-  const bucketIdx = response.columns.findIndex((col) => col.name === 'bucket');
+  const countIdx = getColumnIndex(response, 'count');
+  const bucketIdx = getColumnIndex(response, 'bucket');
 
   if (countIdx === -1 || bucketIdx === -1) {
     return { esql: { query: esqlQuery }, change_points: { type: {} }, occurrences: [] };
@@ -213,15 +214,20 @@ async function previewMatchQuery(
 
   const { value: bsValue, unit: bsUnit } = parseBucketSize(bucketSize);
   const intervalMs = bsValue * (MS_PER_UNIT[bsUnit] ?? 1000);
-  const occurrences = fillBucketGaps(sparseOccurrences, from, to, intervalMs);
-  if (occurrences.length >= MAX_FILL_BUCKETS) {
+  const { buckets: occurrences, truncated } = fillBucketGaps(
+    sparseOccurrences,
+    from,
+    to,
+    intervalMs
+  );
+  if (truncated) {
     logger?.debug(
       `fillBucketGaps reached MAX_FILL_BUCKETS (${MAX_FILL_BUCKETS}); sparkline may be incomplete.`
     );
   }
 
-  const typeIdx = response.columns.findIndex((col) => col.name === 'type');
-  const pvalueIdx = response.columns.findIndex((col) => col.name === 'pvalue');
+  const typeIdx = getColumnIndex(response, 'type');
+  const pvalueIdx = getColumnIndex(response, 'pvalue');
   let changePoints: SignificantEventsPreviewResponse['change_points'] = { type: {} };
 
   if (typeIdx >= 0 && pvalueIdx >= 0) {
@@ -337,8 +343,13 @@ async function previewStatsQuery(
       date,
       count,
     }));
-    const occurrences = fillBucketGaps(sparseOccurrences, from, to, effectiveIntervalMs);
-    if (occurrences.length >= MAX_FILL_BUCKETS) {
+    const { buckets: occurrences, truncated: occurrencesTruncated } = fillBucketGaps(
+      sparseOccurrences,
+      from,
+      to,
+      effectiveIntervalMs
+    );
+    if (occurrencesTruncated) {
       logger?.debug(
         `fillBucketGaps reached MAX_FILL_BUCKETS (${MAX_FILL_BUCKETS}); sparkline may be incomplete.`
       );
