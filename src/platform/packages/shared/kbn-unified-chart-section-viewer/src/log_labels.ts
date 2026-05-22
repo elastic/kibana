@@ -13,13 +13,12 @@
  * and lets operators build dashboards or alerts without searching individual
  * source files.
  *
- * Label keys (e.g. `error_type`, `source_name`) use snake_case to match the
- * package's APM label vocabulary, so operators can query the same field name
- * across logs and APM.
+ * Label keys (e.g. `error_type`) use snake_case to match the package's APM
+ * label vocabulary, so operators can query the same field name across logs
+ * and APM.
  */
-
 export const ERROR_TYPE = {
-  METRIC_SOURCE_KIND_RESOLUTION_FAILURE: 'MetricSourceKindResolutionFailure',
+  APM_REPORTING_FAILURE: 'APMReportingFailure',
 } as const;
 
 export type ErrorType = (typeof ERROR_TYPE)[keyof typeof ERROR_TYPE];

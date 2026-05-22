@@ -10,17 +10,30 @@
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import type { DataViewsPublicPluginStart, MatchedItem } from '@kbn/data-views-plugin/public';
-import { loggerMock } from '@kbn/logging-mocks';
 import {
   ExternalServicesProvider,
   type ExternalServices,
 } from '../../../context/external_services';
-import { ERROR_TYPE } from '../../../log_labels';
+import { useReportChartSectionError } from '../../chart/utils/report_chart_section_error';
+import { useMetricsExperienceState } from '../../observability/metrics/context/metrics_experience_state_provider';
 import {
   METRIC_SOURCE_KIND,
   resetMetricSourceKindCache,
   useMetricSourceKind,
 } from './use_metric_source_kind';
+
+const mockReportError = jest.fn();
+jest.mock('../../chart/utils/report_chart_section_error', () => ({
+  useReportChartSectionError: jest.fn(() => mockReportError),
+}));
+
+jest.mock('../../observability/metrics/context/metrics_experience_state_provider', () => ({
+  useMetricsExperienceState: jest.fn(),
+}));
+
+const mockedUseMetricsExperienceState = useMetricsExperienceState as jest.Mock;
+const mockedUseReportChartSectionError = useReportChartSectionError as jest.Mock;
+const TEST_PROFILE_ID = 'metrics-data-source-profile';
 
 const matchedItem = (name: string, key: 'data_stream' | 'index'): MatchedItem =>
   ({
@@ -43,6 +56,9 @@ const buildWrapper = (externalServices: ExternalServices | undefined) => {
 
 describe('useMetricSourceKind', () => {
   beforeEach(() => {
+    jest.clearAllMocks();
+    mockedUseReportChartSectionError.mockReturnValue(mockReportError);
+    mockedUseMetricsExperienceState.mockReturnValue({ profileId: TEST_PROFILE_ID });
     // The hook caches in-flight promises in a module-level Map that persists
     // across tests within the same Jest worker. Clear it so each test starts
     // from a clean slate and tests can safely reuse source names.
@@ -202,33 +218,23 @@ describe('useMetricSourceKind', () => {
     expect(result.current.kind).toBe(METRIC_SOURCE_KIND.DATA_STREAM);
   });
 
-  it('logs error when getIndices throws and still returns the fallback', async () => {
+  it('reports to APM when getIndices throws and still returns the fallback', async () => {
     const error = new Error('network failure');
     const getIndices = jest.fn().mockRejectedValue(error);
-    const logger = loggerMock.create();
 
     const { result } = renderHook(
       () =>
         useMetricSourceKind({ name: 'failing-source', fallback: METRIC_SOURCE_KIND.DATA_STREAM }),
-      {
-        wrapper: buildWrapper({
-          dataViews: buildDataViews(getIndices),
-          logger,
-        }),
-      }
+      { wrapper: buildWrapper({ dataViews: buildDataViews(getIndices) }) }
     );
 
     await waitFor(() => expect(getIndices).toHaveBeenCalled());
     expect(result.current).toEqual({ kind: METRIC_SOURCE_KIND.DATA_STREAM });
-    expect(logger.error).toHaveBeenCalledTimes(1);
-    expect(logger.error).toHaveBeenCalledWith(
+    expect(mockReportError).toHaveBeenCalledTimes(1);
+    expect(mockReportError).toHaveBeenCalledWith({
       error,
-      expect.objectContaining({
-        labels: {
-          error_type: ERROR_TYPE.METRIC_SOURCE_KIND_RESOLUTION_FAILURE,
-          source_name: 'failing-source',
-        },
-      })
-    );
+      source: 'useMetricSourceKind',
+      labels: { profile_id: TEST_PROFILE_ID },
+    });
   });
 });

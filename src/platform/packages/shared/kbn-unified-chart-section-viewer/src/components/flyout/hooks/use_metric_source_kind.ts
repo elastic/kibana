@@ -8,11 +8,13 @@
  */
 
 import type { DataViewsPublicPluginStart, MatchedItem } from '@kbn/data-views-plugin/public';
-import type { Logger } from '@kbn/logging';
 import { useAbortableAsync } from '@kbn/react-hooks';
 import { useExternalServices } from '../../../context/external_services';
-import { ERROR_TYPE } from '../../../log_labels';
-import { toLoggable } from '../../../utils/logger_utils';
+import {
+  type ReportChartSectionErrorArgs,
+  useReportChartSectionError,
+} from '../../chart/utils/report_chart_section_error';
+import { useMetricsExperienceState } from '../../observability/metrics/context/metrics_experience_state_provider';
 
 // Tag key emitted by data_views.getIndices() / responseToItemArray for plain
 // indices (vs data streams). Coupled to that plugin's response shape.
@@ -50,14 +52,14 @@ export const useMetricSourceKind = ({
   name,
   fallback,
 }: UseMetricSourceKindParams): UseMetricSourceKindResult => {
-  const externalServices = useExternalServices();
-  const dataViewsService = externalServices?.dataViews;
-  const logger = externalServices?.logger;
+  const dataViewsService = useExternalServices()?.dataViews;
+  const { profileId } = useMetricsExperienceState();
+  const reportError = useReportChartSectionError();
 
   const { value } = useAbortableAsync<ClassifiedSource | undefined>(async () => {
     if (!dataViewsService || !name) return undefined;
-    return resolveSourceKind(dataViewsService, name, logger);
-  }, [dataViewsService, name, logger]);
+    return resolveSourceKind(dataViewsService, name, profileId, reportError);
+  }, [dataViewsService, name, profileId, reportError]);
 
   // Guard against stale results: `useAbortableAsync` keeps the previous value
   // while a new request is in flight, so without this check we could briefly
@@ -95,7 +97,8 @@ export const resetMetricSourceKindCache = () => {
 const resolveSourceKind = async (
   dataViewsService: DataViewsPublicPluginStart,
   name: string,
-  logger: Logger | undefined
+  profileId: string,
+  reportError: (args: ReportChartSectionErrorArgs) => void
 ): Promise<ClassifiedSource> => {
   let pending = cache.get(name);
   if (!pending) {
@@ -116,12 +119,7 @@ const resolveSourceKind = async (
   try {
     return { name, kind: await pending };
   } catch (error) {
-    logger?.error(toLoggable(error), {
-      labels: {
-        error_type: ERROR_TYPE.METRIC_SOURCE_KIND_RESOLUTION_FAILURE,
-        source_name: name,
-      },
-    });
+    reportError({ error, source: 'useMetricSourceKind', labels: { profile_id: profileId } });
     return { name, kind: undefined };
   }
 };

@@ -10,28 +10,28 @@
 import { toLoggable } from './logger_utils';
 
 describe('toLoggable', () => {
-  it('returns the same Error instance when given an Error', () => {
+  it('returns Error instances as-is', () => {
     const error = new Error('boom');
     expect(toLoggable(error)).toBe(error);
   });
 
-  it('returns the string form for a number', () => {
+  it('converts numbers to string', () => {
     expect(toLoggable(42)).toBe('42');
   });
 
-  it('returns the string form for a boolean', () => {
+  it('converts booleans to string', () => {
     expect(toLoggable(false)).toBe('false');
   });
 
-  it('returns the string form for null', () => {
+  it('converts null to string', () => {
     expect(toLoggable(null)).toBe('null');
   });
 
-  it('returns the string form for undefined', () => {
+  it('converts undefined to string', () => {
     expect(toLoggable(undefined)).toBe('undefined');
   });
 
-  it('returns String() for a plain object', () => {
+  it('converts plain objects to string', () => {
     expect(toLoggable({ foo: 'bar' })).toBe('[object Object]');
   });
 });

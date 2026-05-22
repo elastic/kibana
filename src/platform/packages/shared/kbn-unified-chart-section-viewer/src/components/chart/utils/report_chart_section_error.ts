@@ -8,11 +8,19 @@
  */
 
 import { apm } from '@elastic/apm-rum';
+import type { Logger } from '@kbn/logging';
+import { useCallback } from 'react';
+import { useExternalServices } from '../../../context/external_services';
+import { ERROR_TYPE } from '../../../log_labels';
+import { toLoggable } from '../../../utils/logger_utils';
 import { EsqlResponseError } from './esql_response_error';
 import { isSuppressedFetchError } from './is_suppressed_fetch_error';
 
 /** APM label identifying which chart-section call site produced an error. */
-export type ChartSectionErrorSource = 'useFetchMetricsData' | 'useLensProps';
+export type ChartSectionErrorSource =
+  | 'useFetchMetricsData'
+  | 'useLensProps'
+  | 'useMetricSourceKind';
 
 /** APM `error_type` label for non-render captures (vs. SectionFatalReactError). */
 export const CHART_SECTION_ERROR_TYPE_LABEL = 'ChartSectionNonRenderError';
@@ -31,7 +39,7 @@ interface ChartSectionErrorLabels {
   page?: string;
 }
 
-interface ReportChartSectionErrorArgs {
+export interface ReportChartSectionErrorArgs {
   error: unknown;
   source: ChartSectionErrorSource;
   labels: ChartSectionErrorLabels;
@@ -48,14 +56,18 @@ interface SpanWithOutcome {
 }
 
 /**
+ * @internal Prefer `useReportChartSectionError` from this module. It binds the
+ * package logger from `useExternalServices()` context, which is the only way to
+ * record APM-transport failures (the second arg below) without leaking that
+ * plumbing to call sites.
+ *
  * Reports a non-render chart-section error to APM.
  * No-ops on `AbortError` (per `isSuppressedFetchError`) and non-Error values.
  */
-export const reportChartSectionError = ({
-  error,
-  source,
-  labels: callerLabels,
-}: ReportChartSectionErrorArgs): void => {
+export const reportChartSectionError = (
+  { error, source, labels: callerLabels }: ReportChartSectionErrorArgs,
+  logger?: Logger
+): void => {
   if (isSuppressedFetchError(error)) {
     return;
   }
@@ -100,11 +112,28 @@ export const reportChartSectionError = ({
       span.end();
     }
   } catch (reportingError) {
-    // Best-effort: swallow so telemetry reporting failures never propagate to
-    // the host app. Log so the failure is at least observable in the browser
-    // console. Mirrors the precedent in `kbn-unified-doc-viewer`'s analytics
-    // catch block (`doc_viewer_viewed_event.ts`).
-    // eslint-disable-next-line no-console
-    console.error('Error reporting chart section error to APM:', reportingError);
+    // Best-effort: swallow and route through logger tagged
+    // `error_type=APMReportingFailure` for grep-ability. No-ops silently
+    // if no logger is wired.
+    logger?.error(toLoggable(reportingError), {
+      labels: {
+        error_type: ERROR_TYPE.APM_REPORTING_FAILURE,
+        chart_section_source: source,
+      },
+    });
   }
+};
+
+/**
+ * Returns a stable reporter bound to the package logger from
+ * `useExternalServices()` context. Callers must use this hook — the
+ * underlying `reportChartSectionError` is `@internal` because the logger
+ * must come from context, not from a call-site argument.
+ */
+export const useReportChartSectionError = (): ((args: ReportChartSectionErrorArgs) => void) => {
+  const logger = useExternalServices()?.logger;
+  return useCallback(
+    (args: ReportChartSectionErrorArgs) => reportChartSectionError(args, logger),
+    [logger]
+  );
 };

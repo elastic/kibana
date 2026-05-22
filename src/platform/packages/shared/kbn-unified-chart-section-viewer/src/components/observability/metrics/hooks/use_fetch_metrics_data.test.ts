@@ -47,8 +47,9 @@ jest.mock('../../../../context/chart_section_inspector', () => ({
     trackRequest: mockTrackRequest,
   }),
 }));
+const mockReportError = jest.fn();
 jest.mock('../../../chart/utils/report_chart_section_error', () => ({
-  reportChartSectionError: jest.fn(),
+  useReportChartSectionError: jest.fn(() => mockReportError),
 }));
 
 import { renderHook, waitFor, act } from '@testing-library/react';
@@ -59,15 +60,11 @@ import type { Dimension, ParsedMetricsWithTelemetry } from '../../../../types';
 import { useFetchMetricsData } from './use_fetch_metrics_data';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { parseMetricsWithTelemetry } from '../utils/parse_metrics_response_with_telemetry';
-import { reportChartSectionError } from '../../../chart/utils/report_chart_section_error';
 import { getFetchParamsMock } from '@kbn/unified-histogram/__mocks__/fetch_params';
 
 const mockExecuteEsqlQuery = executeEsqlQuery as jest.MockedFunction<typeof executeEsqlQuery>;
 const mockParseMetricsWithTelemetry = parseMetricsWithTelemetry as jest.MockedFunction<
   typeof parseMetricsWithTelemetry
->;
-const mockReportChartSectionError = reportChartSectionError as jest.MockedFunction<
-  typeof reportChartSectionError
 >;
 
 const createDimension = (name: string): Dimension => ({ name });
@@ -501,8 +498,8 @@ describe('useFetchMetricsData', () => {
         expect(result.current.error).toBeTruthy();
       });
 
-      expect(mockReportChartSectionError).toHaveBeenCalledTimes(1);
-      expect(mockReportChartSectionError).toHaveBeenCalledWith({
+      expect(mockReportError).toHaveBeenCalledTimes(1);
+      expect(mockReportError).toHaveBeenCalledWith({
         error: fetchError,
         source: 'useFetchMetricsData',
         labels: {
@@ -526,8 +523,8 @@ describe('useFetchMetricsData', () => {
       });
 
       // AbortError suppression lives in the reporter (see its own tests).
-      expect(mockReportChartSectionError).toHaveBeenCalledTimes(1);
-      expect(mockReportChartSectionError).toHaveBeenCalledWith({
+      expect(mockReportError).toHaveBeenCalledTimes(1);
+      expect(mockReportError).toHaveBeenCalledWith({
         error: abortError,
         source: 'useFetchMetricsData',
         labels: {
@@ -555,12 +552,12 @@ describe('useFetchMetricsData', () => {
         expect(result.current.error).toBeTruthy();
       });
 
-      expect(mockReportChartSectionError).toHaveBeenCalledTimes(1);
+      expect(mockReportError).toHaveBeenCalledTimes(1);
 
       rerender(params);
       rerender(params);
 
-      expect(mockReportChartSectionError).toHaveBeenCalledTimes(1);
+      expect(mockReportError).toHaveBeenCalledTimes(1);
     });
 
     it('re-reports when a subsequent fetch fails with a fresh error instance', async () => {
@@ -577,7 +574,7 @@ describe('useFetchMetricsData', () => {
       await waitFor(() => {
         expect(result.current.error).toBe(firstError);
       });
-      expect(mockReportChartSectionError).toHaveBeenCalledTimes(1);
+      expect(mockReportError).toHaveBeenCalledTimes(1);
 
       // Trigger a refetch by changing fetchParams.timeRange, then resolve the
       // next call with a different rejection so `error` references update.
@@ -590,8 +587,8 @@ describe('useFetchMetricsData', () => {
       await waitFor(() => {
         expect(result.current.error).toBe(secondError);
       });
-      expect(mockReportChartSectionError).toHaveBeenCalledTimes(2);
-      expect(mockReportChartSectionError).toHaveBeenLastCalledWith({
+      expect(mockReportError).toHaveBeenCalledTimes(2);
+      expect(mockReportError).toHaveBeenLastCalledWith({
         error: secondError,
         source: 'useFetchMetricsData',
         labels: {

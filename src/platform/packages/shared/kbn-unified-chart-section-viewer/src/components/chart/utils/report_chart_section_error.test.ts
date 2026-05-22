@@ -8,6 +8,8 @@
  */
 
 import { apm } from '@elastic/apm-rum';
+import { loggerMock } from '@kbn/logging-mocks';
+import { ERROR_TYPE } from '../../../log_labels';
 import { EsqlResponseError } from './esql_response_error';
 import {
   CHART_SECTION_ERROR_TYPE_LABEL,
@@ -212,8 +214,30 @@ describe('reportChartSectionError', () => {
     });
   });
 
-  it('swallows reporting failures and logs them via console.error', () => {
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+  it('swallows reporting failures and routes them through the provided logger', () => {
+    const logger = loggerMock.create();
+    const reportingFailure = new Error('apm transport down');
+    captureErrorMock.mockImplementationOnce(() => {
+      throw reportingFailure;
+    });
+
+    expect(() =>
+      reportChartSectionError(
+        { error: new Error('boom'), source: 'useFetchMetricsData', labels: { profile_id: PROFILE_ID } },
+        logger
+      )
+    ).not.toThrow();
+
+    expect(logger.error).toHaveBeenCalledTimes(1);
+    expect(logger.error).toHaveBeenCalledWith(reportingFailure, {
+      labels: {
+        error_type: ERROR_TYPE.APM_REPORTING_FAILURE,
+        chart_section_source: 'useFetchMetricsData',
+      },
+    });
+  });
+
+  it('swallows reporting failures silently when no logger is provided', () => {
     const reportingFailure = new Error('apm transport down');
     captureErrorMock.mockImplementationOnce(() => {
       throw reportingFailure;
@@ -226,14 +250,6 @@ describe('reportChartSectionError', () => {
         labels: { profile_id: PROFILE_ID },
       })
     ).not.toThrow();
-
-    expect(consoleErrorSpy).toHaveBeenCalledTimes(1);
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      'Error reporting chart section error to APM:',
-      reportingFailure
-    );
-
-    consoleErrorSpy.mockRestore();
   });
 
   describe('caller-supplied labels', () => {
