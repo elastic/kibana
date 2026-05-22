@@ -64,7 +64,7 @@ const columns: Array<EuiBasicTableColumn<SigEvent>> = [
     render: (streamNames: string[]) => (
       <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
         {(streamNames ?? []).slice(0, 3).map((name) => (
-          <EuiFlexItem key={name} grow={false}>
+          <EuiFlexItem key={name} grow={false} style={{ maxWidth: '200px' }}>
             <EuiBadge color="hollow">{name}</EuiBadge>
           </EuiFlexItem>
         ))}
@@ -84,7 +84,7 @@ const columns: Array<EuiBasicTableColumn<SigEvent>> = [
     render: (ruleNames: string[]) => (
       <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
         {(ruleNames ?? []).slice(0, 2).map((name) => (
-          <EuiFlexItem key={name} grow={false}>
+          <EuiFlexItem key={name} grow={false} style={{ maxWidth: '200px' }}>
             <EuiBadge color="hollow">{name}</EuiBadge>
           </EuiFlexItem>
         ))}

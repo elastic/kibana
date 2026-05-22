@@ -48,6 +48,8 @@ const parseSourceResponse = <T>(response: ESQLSearchResponse): T[] => {
     if (!isRecord(rawSource)) {
       return {} as T;
     }
+    // `kibana.space_ids` is added by IDataStreamClient on write; strip the
+    // whole `kibana` object so consumers only see the typed payload.
     const { kibana: _kibana, ...rest } = rawSource;
     return rest as T;
   });
@@ -125,9 +127,11 @@ const buildLatestSourceBaseQuery = ({
     query = query.where`${where}`;
   }
 
+  // pick the latest events by group
   query = query.pipe`INLINE STATS latest_ts = MAX(@timestamp) BY ${esql.col(groupBy)}`
     .where`@timestamp == latest_ts`;
 
+  // use _id as a tiebreak in case multiple events share the same timestamp
   query = query.pipe`INLINE STATS tiebreaker_id = MAX(_id) BY ${esql.col(groupBy)}`
     .where`_id == tiebreaker_id`;
 

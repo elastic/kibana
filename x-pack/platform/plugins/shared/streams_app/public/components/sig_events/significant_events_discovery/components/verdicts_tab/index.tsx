@@ -71,7 +71,7 @@ const columns: Array<EuiBasicTableColumn<Verdict>> = [
     render: (streamNames: string[]) => (
       <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
         {(streamNames ?? []).slice(0, 3).map((name) => (
-          <EuiFlexItem key={name} grow={false}>
+          <EuiFlexItem key={name} grow={false} style={{ maxWidth: '200px' }}>
             <EuiBadge color="hollow">{name}</EuiBadge>
           </EuiFlexItem>
         ))}
