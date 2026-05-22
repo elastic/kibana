@@ -103,10 +103,13 @@ apiTest.describe('Create unsnooze alert action API', { tag: '@local-stateful-cla
     async ({ apiClient, requestAuth }) => {
       const readerCredentials = await requestAuth.getApiKeyForCustomRole(READ_ROLE);
 
-      const response = await apiClient.post(getUnsnoozeAlertActionUrl('unsnooze-authz-read-group'), {
-        headers: { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader },
-        body: {},
-      });
+      const response = await apiClient.post(
+        getUnsnoozeAlertActionUrl('unsnooze-authz-read-group'),
+        {
+          headers: { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader },
+          body: {},
+        }
+      );
 
       expect(response).toHaveStatusCode(403);
     }
@@ -117,10 +120,13 @@ apiTest.describe('Create unsnooze alert action API', { tag: '@local-stateful-cla
     async ({ apiClient, requestAuth }) => {
       const noAccessCredentials = await requestAuth.getApiKeyForCustomRole(NO_ACCESS_ROLE);
 
-      const response = await apiClient.post(getUnsnoozeAlertActionUrl('unsnooze-authz-none-group'), {
-        headers: { ...testData.COMMON_HEADERS, ...noAccessCredentials.apiKeyHeader },
-        body: {},
-      });
+      const response = await apiClient.post(
+        getUnsnoozeAlertActionUrl('unsnooze-authz-none-group'),
+        {
+          headers: { ...testData.COMMON_HEADERS, ...noAccessCredentials.apiKeyHeader },
+          body: {},
+        }
+      );
 
       expect(response).toHaveStatusCode(403);
     }

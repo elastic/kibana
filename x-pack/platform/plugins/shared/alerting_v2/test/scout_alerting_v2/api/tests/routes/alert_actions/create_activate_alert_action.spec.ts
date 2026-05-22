@@ -121,10 +121,13 @@ apiTest.describe('Create activate alert action API', { tag: '@local-stateful-cla
     'authorization: returns 403 for a user with read-only alerting_v2 privileges',
     async ({ apiClient, requestAuth }) => {
       const readerCredentials = await requestAuth.getApiKeyForCustomRole(READ_ROLE);
-      const response = await apiClient.post(getActivateAlertActionUrl('activate-authz-read-group'), {
-        headers: { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader },
-        body: { reason: 'valid reason' },
-      });
+      const response = await apiClient.post(
+        getActivateAlertActionUrl('activate-authz-read-group'),
+        {
+          headers: { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader },
+          body: { reason: 'valid reason' },
+        }
+      );
       expect(response).toHaveStatusCode(403);
     }
   );
@@ -133,10 +136,13 @@ apiTest.describe('Create activate alert action API', { tag: '@local-stateful-cla
     'authorization: returns 403 for a user without alerting_v2 privileges',
     async ({ apiClient, requestAuth }) => {
       const noAccessCredentials = await requestAuth.getApiKeyForCustomRole(NO_ACCESS_ROLE);
-      const response = await apiClient.post(getActivateAlertActionUrl('activate-authz-none-group'), {
-        headers: { ...testData.COMMON_HEADERS, ...noAccessCredentials.apiKeyHeader },
-        body: { reason: 'valid reason' },
-      });
+      const response = await apiClient.post(
+        getActivateAlertActionUrl('activate-authz-none-group'),
+        {
+          headers: { ...testData.COMMON_HEADERS, ...noAccessCredentials.apiKeyHeader },
+          body: { reason: 'valid reason' },
+        }
+      );
       expect(response).toHaveStatusCode(403);
     }
   );
