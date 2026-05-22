@@ -19,12 +19,12 @@ import type { TracesExperiencePage } from './page_objects';
 async function waitForTracesProfileApplied(
   pageObjects: PageObjects & { tracesExperience: TracesExperiencePage }
 ) {
-  await pageObjects.discover.waitForDocTableRendered();
   const [firstProfileSpecificColumn] = pageObjects.tracesExperience.grid.profileSpecificColumns;
 
   await expect(pageObjects.discover.getColumnHeader(firstProfileSpecificColumn)).toBeVisible({
     timeout: 30_000,
   });
+  await pageObjects.discover.waitForDocTableRendered();
 }
 
 export async function expectTracesExperienceEnabled(
