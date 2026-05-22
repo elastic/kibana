@@ -5379,10 +5379,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-chrome-layout-components@link:src/core/packages/chrome/layout/core-chrome-layout-components":
-  version "0.0.0"
-  uid ""
-
 "@kbn/core-chrome-layout-constants@link:src/core/packages/chrome/layout/core-chrome-layout-constants":
   version "0.0.0"
   uid ""
@@ -9644,6 +9640,10 @@
   uid ""
 
 "@kbn/ui-actions-plugin@link:src/platform/plugins/shared/ui_actions":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ui-chrome-layout@link:src/platform/kbn-ui/chrome-layout":
   version "0.0.0"
   uid ""
 
