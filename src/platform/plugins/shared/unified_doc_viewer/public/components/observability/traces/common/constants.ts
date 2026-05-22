@@ -8,13 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-
-export const OPEN_IN_DISCOVER_LABEL = i18n.translate(
-  'unifiedDocViewer.observability.traces.openInADiscoverTabLinkLabel',
-  {
-    defaultMessage: 'Open in a Discover tab',
-  }
-);
+export { OPEN_IN_DISCOVER_TAB_LABEL as OPEN_IN_DISCOVER_LABEL } from '@kbn/unified-doc-viewer';
 
 export const OPEN_IN_DISCOVER_ARIA_LABEL = i18n.translate(
   'unifiedDocViewer.observability.traces.openInADiscoverTabAriaLabel',

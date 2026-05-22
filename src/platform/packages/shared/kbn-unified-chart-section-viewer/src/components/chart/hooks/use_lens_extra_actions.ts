@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
+import { OPEN_IN_DISCOVER_TAB_LABEL } from '@kbn/unified-doc-viewer';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { useMemo } from 'react';
 import {
@@ -14,16 +15,6 @@ import {
   ACTION_VIEW_DETAILS,
   ACTION_EXPLORE_IN_DISCOVER_TAB,
 } from '../../../common/constants';
-
-// Shared label for the "Open in a Discover tab" action. Defining this as a
-// module-level constant prevents the literal from drifting if the action is
-// referenced from additional sites in the future.
-const OPEN_IN_DISCOVER_TAB_LABEL = i18n.translate(
-  'metricsExperience.lens.actions.openInDiscoverTab',
-  {
-    defaultMessage: 'Open in a Discover tab',
-  }
-);
 
 interface ActionEventHandler {
   onClick: () => void;

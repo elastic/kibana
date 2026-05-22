@@ -10,6 +10,7 @@
 export {
   DocViewer,
   DOC_VIEWER_FLYOUT_HISTORY_KEY,
+  OPEN_IN_DISCOVER_TAB_LABEL,
   type DocViewerProps,
   type DocViewerApi,
   type DocViewerRestorableState,
