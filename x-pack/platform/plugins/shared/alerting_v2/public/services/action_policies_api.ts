@@ -65,6 +65,12 @@ export class ActionPoliciesApi {
     });
   }
 
+  public async upsertActionPolicy(id: string, data: CreateActionPolicyData) {
+    return this.http.put<ActionPolicyResponse>(`${ALERTING_V2_ACTION_POLICY_API_PATH}/${id}`, {
+      body: JSON.stringify(data),
+    });
+  }
+
   public async updateActionPolicy(id: string, data: UpdateActionPolicyBody) {
     return this.http.patch<ActionPolicyResponse>(`${ALERTING_V2_ACTION_POLICY_API_PATH}/${id}`, {
       body: JSON.stringify(data),
