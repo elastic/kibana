@@ -36,4 +36,16 @@ describe('fetchSpanLinks', () => {
       labels: { kibana_meta_operation_id: FETCH_SPAN_LINKS_OPERATION_ID },
     });
   });
+
+  it('does not capture AbortError as a RUM event but still re-throws it', async () => {
+    const abortError = new Error('aborted');
+    abortError.name = 'AbortError';
+    callApmApiSpy.mockRejectedValueOnce(abortError);
+
+    await expect(
+      fetchSpanLinks({ traceId: 'trace-1', docId: 'span-1', start: 'from', end: 'to' }, signal)
+    ).rejects.toThrow('aborted');
+
+    expect(apm.captureError).not.toHaveBeenCalled();
+  });
 });

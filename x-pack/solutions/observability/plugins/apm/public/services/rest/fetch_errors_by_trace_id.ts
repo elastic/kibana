@@ -40,9 +40,11 @@ export const fetchErrorsByTraceId = async (
       signal,
     });
   } catch (error) {
-    apm.captureError(error as Error, {
-      labels: { kibana_meta_operation_id: FETCH_TRACE_ERRORS_OPERATION_ID },
-    });
+    if (error instanceof Error && error.name !== 'AbortError') {
+      apm.captureError(error, {
+        labels: { kibana_meta_operation_id: FETCH_TRACE_ERRORS_OPERATION_ID },
+      });
+    }
     throw error;
   }
 };

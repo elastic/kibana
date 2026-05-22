@@ -39,4 +39,16 @@ describe('fetchRootSpanByTraceId', () => {
       labels: { kibana_meta_operation_id: FETCH_TRACE_ROOT_SPAN_OPERATION_ID },
     });
   });
+
+  it('does not capture AbortError as a RUM event but still re-throws it', async () => {
+    const abortError = new Error('aborted');
+    abortError.name = 'AbortError';
+    callApmApiSpy.mockRejectedValueOnce(abortError);
+
+    await expect(
+      fetchRootSpanByTraceId({ traceId: 'trace-1', start: 'from', end: 'to' }, signal)
+    ).rejects.toThrow('aborted');
+
+    expect(apm.captureError).not.toHaveBeenCalled();
+  });
 });
