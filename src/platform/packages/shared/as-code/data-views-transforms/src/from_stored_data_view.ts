@@ -61,9 +61,9 @@ export function fromStoredDataViewToAsCodeSavedSchema(index: DataViewSpec): AsCo
     time_field: index.timeFieldName,
     allow_hidden_indices: index.allowHidden,
     field_settings: fieldSettings,
-    field_filters:
-      index.sourceFilters && index.sourceFilters.length > 0
-        ? index.sourceFilters.map((sourceFilter) => sourceFilter.value)
-        : undefined,
+    ...(index.sourceFilters &&
+      index.sourceFilters.length > 0 && {
+        field_filters: index.sourceFilters.map((sourceFilter) => sourceFilter.value),
+      }),
   };
 }
