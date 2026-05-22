@@ -32,13 +32,15 @@
       "taskManager",
       "licensing",
       "triggersActionsUi",
+      "unifiedSearch",
       "esUiShared",
       "workflowsExtensions",
       "searchInferenceEndpoints"
     ],
     "requiredBundles": [
       "kibanaReact",
-      "usageCollection"
+      "usageCollection",
+      "security"
     ],
     "optionalPlugins": [
       "cloud",

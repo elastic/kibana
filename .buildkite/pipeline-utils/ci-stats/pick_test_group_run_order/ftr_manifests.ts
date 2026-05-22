@@ -12,7 +12,7 @@ import * as Fs from 'fs';
 import minimatch from 'minimatch';
 import { parse as loadYaml } from 'yaml';
 
-import { serverless, stateful } from '../../../ftr_configs_manifests.json';
+import { serverless, stateful } from '../../../ftr-manifests/ftr_configs_manifests.json';
 import type { FtrConfigsManifest } from './types';
 
 const ALL_FTR_MANIFEST_REL_PATHS = serverless.concat(stateful);
