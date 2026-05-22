@@ -105,11 +105,16 @@ spaceTest.describe(
 
         await spaceTest.step('Toggle off and verify disabled state', async () => {
           await managementPage.toggleEntityAnalytics();
-          // Toggle OFF stops the engines (status `stopped`) — it does not delete
-          // them. Full deletion to `not_installed` only happens in afterEach via
-          // deleteEntityStoreEngines. Wait for the post-stop backend state, then
-          // assert the UI flip.
-          await apiServices.entityAnalytics.waitForEntityStoreStatus('stopped', 60000);
+          // Toggle OFF fires risk-engine disable + entity-store stop in parallel
+          // (Promise.all in the toggle hook). The UI's deriveCombinedStatus
+          // requires BOTH to be off to return 'disabled' (= "Off"). Awaiting
+          // only entity store 'stopped' leaves a window where risk engine is
+          // still ENABLED in the React Query cache, yielding 'partially_enabled'
+          // = "On". Wait for both before asserting the UI.
+          await Promise.all([
+            apiServices.entityAnalytics.waitForEntityStoreStatus('stopped', 60000),
+            apiServices.entityAnalytics.waitForRiskEngineStatus('DISABLED', 60000),
+          ]);
           await managementPage.waitForStatusLoaded();
           await expect(managementPage.entityAnalyticsHealth).toContainText('Off', {
             timeout: 30000,
@@ -192,9 +197,12 @@ spaceTest.describe(
 
         await spaceTest.step('Toggle off and verify disabled state', async () => {
           await managementPage.toggleEntityAnalytics();
-          // v2 toggle OFF calls `/api/security/entity_store/stop` which leaves
-          // engines in `stopped` (uninstall happens in afterEach).
-          await apiServices.entityAnalytics.waitForEntityStoreStatusV2('stopped', 60000);
+          // Same combined-status race as v1: deriveCombinedStatus requires both
+          // risk engine and entity store to be off before rendering "Off".
+          await Promise.all([
+            apiServices.entityAnalytics.waitForEntityStoreStatusV2('stopped', 60000),
+            apiServices.entityAnalytics.waitForRiskEngineStatus('DISABLED', 60000),
+          ]);
           await managementPage.waitForStatusLoaded();
           await expect(managementPage.entityAnalyticsHealth).toContainText('Off', {
             timeout: 30000,

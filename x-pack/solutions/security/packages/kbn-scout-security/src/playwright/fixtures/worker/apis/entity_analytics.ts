@@ -8,6 +8,7 @@
 import type { EsClient, KbnClient, ScoutLogger, ScoutParallelWorkerFixtures } from '@kbn/scout';
 import { measurePerformanceAsync } from '@kbn/scout';
 import type {
+  RiskEngineStatus,
   RiskEngineStatusResponse,
   GetEntityStoreStatusResponse,
   StoreStatus,
@@ -46,6 +47,10 @@ export interface EntityAnalyticsApiService {
   waitForEntityStoreStatusToChange: (timeoutMs?: number) => Promise<GetEntityStoreStatusResponse>;
   waitForEntityStoreCleanup: (timeoutMs?: number) => Promise<GetEntityStoreStatusResponse>;
   waitForRiskEngineCleanup: (timeoutMs?: number) => Promise<RiskEngineStatusResponse>;
+  waitForRiskEngineStatus: (
+    expectedStatus: RiskEngineStatus,
+    timeoutMs?: number
+  ) => Promise<RiskEngineStatusResponse>;
   // v2 entity-store helpers (only relevant when `securitySolution:entityStoreEnableV2` is true)
   setEntityStoreV2Enabled: (enabled: boolean) => Promise<void>;
   getEntityStoreStatusV2: () => Promise<GetEntityStoreStatusResponse>;
@@ -87,16 +92,16 @@ export const getEntityAnalyticsApiService = ({
           // Wait for cleanup to complete - ensure server state is fully cleaned up
           await service.waitForEntityStoreCleanup();
 
-          // Belt-and-suspenders: ensure no entity-store transforms are left in
-          // this space. The production delete path can orphan transforms if the
-          // entity-definition SO lookup races with a partial install failure
-          // (saw the SO=0 / transforms=stopped pattern in 10x repeats). Without
-          // this cleanup, the next init fails with `resource_already_exists`.
-          // Uses the admin esClient — bypasses any role-cache issues affecting
-          // the test user.
+          // Belt-and-suspenders: ensure no entity-store transforms (both latest
+          // and history) are left in this space. The production delete path can
+          // orphan transforms if the entity-definition SO lookup races with a
+          // partial install failure (saw the SO=0 / transforms=stopped pattern
+          // in 10x repeats). Without this cleanup, the next init fails with
+          // `resource_already_exists`. Uses the admin esClient — bypasses any
+          // role-cache issues affecting the test user.
           try {
             const { transforms } = await esClient.transform.getTransform({
-              transform_id: `entities-v1-latest-security_*_${spaceId}`,
+              transform_id: `entities-v1-*-security_*_${spaceId}`,
               allow_no_match: true,
             });
             await Promise.all(
@@ -341,6 +346,41 @@ export const getEntityAnalyticsApiService = ({
       );
     },
 
+    waitForRiskEngineStatus: async (
+      expectedStatus: RiskEngineStatus,
+      timeoutMs: number = 60000
+    ) => {
+      return measurePerformanceAsync(
+        log,
+        `security.entityAnalytics.waitForRiskEngineStatus [${expectedStatus}]`,
+        async () => {
+          const startTime = Date.now();
+          let lastStatus: RiskEngineStatusResponse | undefined;
+
+          while (Date.now() - startTime < timeoutMs) {
+            try {
+              const status = await service.getRiskEngineStatus();
+              lastStatus = status;
+
+              if (status.risk_engine_status === expectedStatus) {
+                return status;
+              }
+            } catch (error) {
+              log.debug(`Error checking risk engine status: ${error}`);
+            }
+
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+          }
+
+          throw new Error(
+            `Timeout waiting for risk engine status '${expectedStatus}' after ${timeoutMs}ms. Last status: ${JSON.stringify(
+              lastStatus
+            )}`
+          );
+        }
+      );
+    },
+
     setEntityStoreV2Enabled: async (enabled: boolean) => {
       await kbnClient.request({
         method: 'POST',
@@ -411,10 +451,10 @@ export const getEntityAnalyticsApiService = ({
           });
 
           // Same belt-and-suspenders pattern as v1: clean any leaked transforms
-          // for this space directly via the admin esClient.
+          // (latest + history) for this space directly via the admin esClient.
           try {
             const { transforms } = await esClient.transform.getTransform({
-              transform_id: `entities-v1-latest-security_*_${spaceId}`,
+              transform_id: `entities-v1-*-security_*_${spaceId}`,
               allow_no_match: true,
             });
             await Promise.all(

@@ -15,6 +15,11 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { AssetManagerClient } from './asset_manager_client';
 import {
+  ENTITY_STORE_CLUSTER_PRIVILEGES,
+  ENTITY_STORE_SOURCE_INDICES_PRIVILEGES,
+} from '../constants';
+import { getEntitiesAlias, ENTITY_LATEST } from '../../../common/domain/entity_index';
+import {
   installSharedElasticsearchAssets,
   installIndicesAndDataStreams,
   uninstallElasticsearchAssets,
@@ -265,6 +270,81 @@ describe('AssetManagerClient', () => {
           }),
         })
       );
+    });
+  });
+
+  describe('getPrivileges', () => {
+    let mockCheckPrivileges: jest.Mock;
+    let mockGetLocalIndexPatterns: jest.Mock;
+
+    beforeEach(() => {
+      mockCheckPrivileges = jest.fn().mockResolvedValue({
+        hasAllRequested: true,
+        username: 'test',
+        privileges: { kibana: [], elasticsearch: { cluster: [], index: {} } },
+      });
+      mockGetLocalIndexPatterns = jest.fn();
+
+      client = new AssetManagerClient({
+        logger: loggerMock.create(),
+        esClient: {} as jest.Mocked<ElasticsearchClient>,
+        taskManager: {} as jest.Mocked<TaskManagerStartContract>,
+        engineDescriptorClient:
+          mockEngineDescriptorClient as unknown as import('../saved_objects').EngineDescriptorClient,
+        globalStateClient:
+          mockGlobalStateClient as unknown as import('../saved_objects').EntityStoreGlobalStateClient,
+        ccsLogExtractionStateClient: {
+          delete: jest.fn().mockResolvedValue(undefined),
+        } as unknown as import('../saved_objects/ccs_log_extraction_state').CcsLogExtractionStateClient,
+        namespace,
+        isServerless: false,
+        logsExtractionClient: {
+          getLocalIndexPatterns: mockGetLocalIndexPatterns,
+        } as unknown as import('../logs_extraction').LogsExtractionClient,
+        security: {
+          authz: {
+            checkPrivilegesDynamicallyWithRequest: jest.fn().mockReturnValue(mockCheckPrivileges),
+            actions: {
+              savedObject: {
+                get: jest.fn().mockReturnValue('mock:saved_object:create'),
+              },
+            },
+          },
+        } as unknown as SecurityPluginStart,
+        analytics: {
+          reportEvent: jest.fn(),
+        } as unknown as import('../../telemetry/events').TelemetryReporter,
+        savedObjectsClient: {} as SavedObjectsClientContract,
+      });
+    });
+
+    it('drops negation patterns before calling checkPrivileges', async () => {
+      mockGetLocalIndexPatterns.mockResolvedValue([
+        'logs-*',
+        '-*elastic-cloud-logs-*',
+        'filebeat-*',
+        '-*excluded*',
+      ]);
+
+      await client.getPrivileges({} as KibanaRequest);
+
+      const { elasticsearch } = mockCheckPrivileges.mock.calls[0][0];
+      expect(Object.keys(elasticsearch.index)).toContain('logs-*');
+      expect(Object.keys(elasticsearch.index)).toContain('filebeat-*');
+      expect(Object.keys(elasticsearch.index)).not.toContain('-*elastic-cloud-logs-*');
+      expect(Object.keys(elasticsearch.index)).not.toContain('-*excluded*');
+    });
+
+    it('preserves positive patterns and passes correct cluster privileges', async () => {
+      mockGetLocalIndexPatterns.mockResolvedValue(['logs-*', 'filebeat-*']);
+
+      await client.getPrivileges({} as KibanaRequest);
+
+      const { elasticsearch } = mockCheckPrivileges.mock.calls[0][0];
+      expect(elasticsearch.index['logs-*']).toEqual(ENTITY_STORE_SOURCE_INDICES_PRIVILEGES);
+      expect(elasticsearch.index['filebeat-*']).toEqual(ENTITY_STORE_SOURCE_INDICES_PRIVILEGES);
+      expect(elasticsearch.index[getEntitiesAlias(ENTITY_LATEST, namespace)]).toBeDefined();
+      expect(elasticsearch.cluster).toEqual(ENTITY_STORE_CLUSTER_PRIVILEGES);
     });
   });
 });
