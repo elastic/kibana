@@ -87,18 +87,24 @@ const createGraphEventsIndex = async (
   // (`user.target.entity.id`) identity fields — `useGraphPreview` requires both
   // to mark `hasGraphData=true`, which in turn renders the Graph tab button in
   // the alert flyout's Visualize section.
-  await esClient.bulk({
-    refresh: 'wait_for',
-    operations: [
-      { create: { _index: dataStream } },
-      {
-        '@timestamp': new Date(Date.now() - 5 * 60_000).toISOString(),
-        event: { id: `${runId}-${hostName}-event-0`, action: 'graph-cps-action', kind: 'event' },
-        host: { name: hostName, entity: { id: `host-${hostName}` } },
-        user: { target: { entity: { id: `user-target-${hostName}` } } },
-      },
-    ],
-  });
+  await esClient.bulk(
+    {
+      refresh: 'wait_for',
+      operations: [
+        { create: { _index: dataStream } },
+        {
+          '@timestamp': new Date(Date.now() - 5 * 60_000).toISOString(),
+          event: { id: `${runId}-${hostName}-event-0`, action: 'graph-cps-action', kind: 'event' },
+          host: { name: hostName, entity: { id: `host-${hostName}` } },
+          user: { target: { entity: { id: `user-target-${hostName}` } } },
+        },
+      ],
+    },
+    // Bulk implicitly creates the data stream + backing index on first write.
+    // On a resource-constrained host that can take longer than the ES JS
+    // client's 30s default; bump to 3 minutes.
+    { requestTimeout: 180_000 }
+  );
 };
 
 // ---------------------------------------------------------------------------
@@ -173,7 +179,10 @@ export const test = baseTest.extend<
       await esClient.indices.deleteDataStream({ name: testIndex }, { ignore: [404] });
       await linkedProject.esClient.indices.deleteDataStream({ name: testIndex }, { ignore: [404] });
     },
-    { scope: 'worker' },
+    // Default Playwright fixture timeout is 60s. Creating a data stream on a fresh
+    // stateless cluster (template instantiation + backing index creation) can take
+    // longer on a resource-constrained host; budget 4 minutes.
+    { scope: 'worker', timeout: 240_000 },
   ],
 
   cpsSpace: [
