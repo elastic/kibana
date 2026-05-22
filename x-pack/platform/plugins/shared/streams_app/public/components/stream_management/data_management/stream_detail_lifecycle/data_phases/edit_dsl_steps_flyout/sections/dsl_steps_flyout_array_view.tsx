@@ -322,7 +322,7 @@ export const DslStepsFlyoutArrayView = ({
             <EuiTitle size="m">
               <h2 id={flyoutTitleId}>
                 {i18n.translate('xpack.streams.editDslStepsFlyout.title', {
-                  defaultMessage: 'Edit downsampling steps',
+                  defaultMessage: 'Edit downsample steps',
                 })}
               </h2>
             </EuiTitle>

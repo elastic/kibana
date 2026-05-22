@@ -21,6 +21,7 @@ import { Observable, of } from 'rxjs';
 import { apmRouter } from '../../components/routing/apm_route_config';
 import type { ITelemetryClient } from '../../services/telemetry/types';
 import { createCallApmApi } from '../../services/rest/create_call_apm_api';
+import { storybookMockHttp } from '../../services/rest/storybook_mock_http';
 import type { APMServiceContextValue } from '../apm_service/apm_service_context';
 import { APMServiceContext } from '../apm_service/apm_service_context';
 import { MockTimeRangeContextProvider } from '../time_range_metadata/mock_time_range_metadata_context_provider';
@@ -82,13 +83,14 @@ const mockPlugin = {
   },
 };
 
-const mockCore = {
+export const mockCore = {
   application: {
     capabilities: {
       apm: {},
       ml: {},
       slo: { read: true },
       savedObjectsManagement: {},
+      dashboard_v2: { show: true },
     },
     currentAppId$: new Observable(),
     getUrlForApp: (appId: string) => '',
@@ -106,14 +108,10 @@ const mockCore = {
     links: {
       apm: {},
       observability: { guide: '' },
+      security: { apiKeyServiceSettings: '' },
     },
   },
-  http: {
-    basePath: {
-      prepend: (path: string) => `/basepath${path}`,
-      get: () => '/basepath',
-    },
-  },
+  http: storybookMockHttp,
   i18n: {
     Context: ({ children }: { children: ReactNode }) => children,
   },
@@ -157,7 +155,7 @@ const mockCore = {
 };
 
 /** Satisfies `useKibana` consumers (e.g. service map) that read `services.telemetry`. */
-const storybookTelemetry: ITelemetryClient = {
+export const storybookTelemetry: ITelemetryClient = {
   reportSearchQuerySubmitted: () => {},
   reportSloOverviewFlyoutViewed: () => {},
   reportSloOverviewFlyoutSearchQueried: () => {},
@@ -172,7 +170,7 @@ const mockUnifiedSearchBar = {
   },
 };
 
-const mockApmPluginContext = {
+export const mockApmPluginContext = {
   core: mockCore,
   plugins: mockPlugin,
   unifiedSearch: mockUnifiedSearchBar,
@@ -204,6 +202,18 @@ export function MockApmPluginStorybook({
   const KibanaReactContext = createKibanaReactContext(
     merge({}, contextMock.core, {
       telemetry: storybookTelemetry,
+      securityService: {
+        authc: {
+          getCurrentUser: async () => ({
+            username: 'storybook_user',
+            roles: ['superuser'],
+            enabled: true,
+            authentication_realm: { name: 'native', type: 'native' },
+            lookup_realm: { name: 'native', type: 'native' },
+            authentication_provider: { type: 'basic', name: 'basic' },
+          }),
+        },
+      },
       triggersActionsUi: {
         ruleTypeRegistry: { has: () => false, get: () => null, list: () => [] },
         actionTypeRegistry: { has: () => false, get: () => null, list: () => [] },
