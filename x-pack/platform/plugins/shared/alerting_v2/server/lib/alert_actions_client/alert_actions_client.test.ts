@@ -221,7 +221,6 @@ describe('AlertActionsClient', () => {
     });
   });
 
-
   describe('episode action domain events', () => {
     it('calls emitEpisodeActions with the persisted assign action document', async () => {
       queryServiceEsClient.esql.query.mockResolvedValueOnce(getAlertEventESQLResponse());
