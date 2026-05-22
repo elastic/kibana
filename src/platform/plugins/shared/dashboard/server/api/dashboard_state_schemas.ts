@@ -128,7 +128,10 @@ export function getSectionSchema(isDashboardAppRequest: boolean) {
         meta: { description: 'The title of the section.' },
       }),
       collapsed: schema.boolean({
-        meta: { description: 'The collapsed state of the section.' },
+        meta: {
+          description:
+            'When `true`, the section is collapsed and its panels are not rendered until expanded. Useful for improving initial load time on large dashboards. Defaults to `false`.',
+        },
         defaultValue: false,
       }),
       grid: sectionGridSchema,
@@ -260,7 +263,7 @@ export function getDashboardStateSchema(
           },
         }
       ),
-      roject_routing: schema.maybe(
+      project_routing: schema.maybe(
         schema.string({
           meta: {
             description:
