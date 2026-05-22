@@ -112,6 +112,7 @@ function createMockGlobalStateClient(
     lookbackPeriod: string;
     delay: string;
     maxTimeWindowSize: string;
+    maxLogsPerWindow: number;
     excludedIndexPatterns: string[];
     additionalIndexPatterns: string[];
   }>
@@ -125,6 +126,9 @@ function createMockGlobalStateClient(
     // Default to a very large cap so existing tests run as a single sub-window. The dedicated
     // sub-window cap describe block overrides this to exercise capping behavior.
     maxTimeWindowSize: logExtractionOverrides?.maxTimeWindowSize ?? '999d',
+    // Default to 0 (disabled) so volume-cap logic doesn't interfere with unrelated tests.
+    // The dedicated volume-cap describe block overrides this via setupVolCapTest.
+    maxLogsPerWindow: logExtractionOverrides?.maxLogsPerWindow ?? 0,
   });
   const state = { logsExtraction } as EntityStoreGlobalState;
   return {
