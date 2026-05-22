@@ -7,7 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parseBody, removeTrailingWhitespaces, parseUrl, parseLine } from './tokens_utils';
+import {
+  parseBody,
+  removeTrailingWhitespaces,
+  parseUrl,
+  parseLine,
+  isRequestLineStart,
+} from './tokens_utils';
 
 describe('tokens_utils', () => {
   describe('removeTrailingWhitespaces', () => {
@@ -269,6 +275,33 @@ describe('tokens_utils', () => {
       const result = parseUrl(url);
       expect(result.urlPathTokens).toEqual(['myindex', '"?literal"', '_search']);
       expect(result.urlParamsTokens[0]).toEqual(['q', 'type:organisation AND elastic']);
+    });
+  });
+
+  describe('isRequestLineStart', () => {
+    it('returns true for an empty line', () => {
+      expect(isRequestLineStart('')).toBe(true);
+    });
+    it('returns true for whitespace-only content', () => {
+      expect(isRequestLineStart('   ')).toBe(true);
+    });
+    it('returns true for partial method letters', () => {
+      expect(isRequestLineStart('G')).toBe(true);
+      expect(isRequestLineStart('  ge')).toBe(true);
+      expect(isRequestLineStart('POS')).toBe(true);
+    });
+    it('returns false for lines starting with a double quote', () => {
+      expect(isRequestLineStart('"')).toBe(false);
+      expect(isRequestLineStart('  "')).toBe(false);
+      expect(isRequestLineStart('"key"')).toBe(false);
+    });
+    it('returns false for body-like tokens', () => {
+      expect(isRequestLineStart('{')).toBe(false);
+      expect(isRequestLineStart('  [')).toBe(false);
+      expect(isRequestLineStart('}')).toBe(false);
+      expect(isRequestLineStart('  ]')).toBe(false);
+      expect(isRequestLineStart(',')).toBe(false);
+      expect(isRequestLineStart(':')).toBe(false);
     });
   });
 });
