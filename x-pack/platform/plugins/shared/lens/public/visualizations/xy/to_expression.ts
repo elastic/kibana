@@ -415,7 +415,6 @@ const yAxisConfigsToExpression = (yAxisConfigs: AxisConfig[]): Ast[] => {
         showGridLines: axis.showGridLines ?? true,
         labelsOrientation: axis.labelsOrientation,
         scaleType: axis.scaleType,
-        truncate: axis.truncate,
       }),
     ]).toAst()
   );
