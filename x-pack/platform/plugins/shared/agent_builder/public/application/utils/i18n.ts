@@ -1607,14 +1607,12 @@ export const labels = {
       'xpack.agentBuilder.agentConnectors.emptyStateLearnMoreSuffix',
       { defaultMessage: ' about connectors.' }
     ),
-    emptyStateAddButton: i18n.translate(
-      'xpack.agentBuilder.agentConnectors.emptyStateAddButton',
-      { defaultMessage: 'Add connector' }
-    ),
-    emptyStateManageAll: i18n.translate(
-      'xpack.agentBuilder.agentConnectors.emptyStateManageAll',
-      { defaultMessage: 'Manage all connectors' }
-    ),
+    emptyStateAddButton: i18n.translate('xpack.agentBuilder.agentConnectors.emptyStateAddButton', {
+      defaultMessage: 'Add connector',
+    }),
+    emptyStateManageAll: i18n.translate('xpack.agentBuilder.agentConnectors.emptyStateManageAll', {
+      defaultMessage: 'Manage all connectors',
+    }),
     addConnectorFromLibraryTitle: i18n.translate(
       'xpack.agentBuilder.agentConnectors.library.title',
       { defaultMessage: 'Add connector' }
@@ -2351,10 +2349,9 @@ export const labels = {
     addConnectorButton: i18n.translate('xpack.agentBuilder.agentConnectors.addConnectorButton', {
       defaultMessage: 'Add connector',
     }),
-    fromLibraryMenuItem: i18n.translate(
-      'xpack.agentBuilder.agentConnectors.fromLibraryMenuItem',
-      { defaultMessage: 'From library' }
-    ),
+    fromLibraryMenuItem: i18n.translate('xpack.agentBuilder.agentConnectors.fromLibraryMenuItem', {
+      defaultMessage: 'From library',
+    }),
     createNewMenuItem: i18n.translate('xpack.agentBuilder.agentConnectors.createNewMenuItem', {
       defaultMessage: 'Create new connector',
     }),
@@ -2364,9 +2361,12 @@ export const labels = {
     noMatchMessage: i18n.translate('xpack.agentBuilder.agentConnectors.noMatchMessage', {
       defaultMessage: 'No connectors match your search.',
     }),
-    noConnectorsMessage: i18n.translate('xpack.agentBuilder.agentConnectors.noConnectorsMessage', {
-      defaultMessage: 'No connectors assigned yet.',
-    }),
+    noConnectorsAssignedMessage: i18n.translate(
+      'xpack.agentBuilder.agentConnectors.noConnectorsAssignedMessage',
+      {
+        defaultMessage: 'No connectors assigned yet.',
+      }
+    ),
     noSelectionMessage: i18n.translate('xpack.agentBuilder.agentConnectors.noSelectionMessage', {
       defaultMessage: 'Select a connector to view details',
     }),

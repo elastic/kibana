@@ -239,7 +239,7 @@ export const AgentConnectors = ({ agentId }: AgentConnectorsProps) => {
                     <p>
                       {searchQuery.trim()
                         ? labels.connectors.noMatchMessage
-                        : labels.connectors.noConnectorsMessage}
+                        : labels.connectors.noConnectorsAssignedMessage}
                     </p>
                   </EuiText>
                 ) : (
