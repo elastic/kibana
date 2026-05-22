@@ -10,7 +10,7 @@ import type { SupportedLogo } from '../shared/logo_icon';
 
 export type IntegrationCategoryId = 'cloud' | 'containers' | 'host' | 'applications';
 
-export interface IntegrationTileDefinition {
+export interface IntegrationTileData {
   id: string;
   title: string;
   description: string;
@@ -18,13 +18,13 @@ export interface IntegrationTileDefinition {
   darkLogo?: SupportedLogo;
 }
 
-export interface IntegrationCategoryDefinition {
+export interface IntegrationCategory {
   id: IntegrationCategoryId;
   label: string;
-  tiles: readonly IntegrationTileDefinition[];
+  tiles: readonly IntegrationTileData[];
 }
 
-export const INTEGRATION_CATEGORIES: readonly IntegrationCategoryDefinition[] = [
+export const INTEGRATION_TILES: readonly IntegrationCategory[] = [
   {
     id: 'cloud',
     label: i18n.translate('xpack.observability_onboarding.integrationsGrid.category.cloudLabel', {
