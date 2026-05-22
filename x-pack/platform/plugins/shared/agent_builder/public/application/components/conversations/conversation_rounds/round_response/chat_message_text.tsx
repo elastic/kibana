@@ -52,6 +52,12 @@ interface Props {
   conversationAttachments?: VersionedAttachment[];
   attachmentRefs?: AttachmentVersionRef[];
   conversationId?: string;
+  /**
+   * True while this round is still streaming. Forwarded to `createRenderAttachmentRenderer`
+   * so `<render_attachment>` chips skeleton-render until the round completes — see the
+   * doc on `RenderAttachmentRendererProps.isStreaming` for why.
+   */
+  isStreaming?: boolean;
 }
 
 /**
@@ -64,6 +70,7 @@ export function ChatMessageText({
   conversationAttachments,
   attachmentRefs,
   conversationId,
+  isStreaming = false,
 }: Props) {
   const { euiTheme } = useEuiTheme();
 
@@ -196,6 +203,7 @@ export function ChatMessageText({
         conversationId,
         isSidebar,
         attachmentsService,
+        isStreaming,
       }),
     };
 
@@ -218,6 +226,7 @@ export function ChatMessageText({
     conversationId,
     isSidebar,
     attachmentsService,
+    isStreaming,
     handleLinkClick,
   ]);
 

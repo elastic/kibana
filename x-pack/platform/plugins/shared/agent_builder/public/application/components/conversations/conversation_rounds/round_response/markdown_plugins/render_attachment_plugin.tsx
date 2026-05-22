@@ -101,6 +101,16 @@ interface RenderAttachmentRendererProps {
   attachmentRefs?: AttachmentVersionRef[];
   conversationId?: string;
   isSidebar: boolean;
+  /**
+   * True while the round containing this tag is still streaming. We render a skeleton
+   * instead of the real card in that case because `conversation.attachments` is only
+   * refreshed to the canonical snapshot when `roundComplete` fires — if the agent emitted
+   * `<render_attachment>` mid-round and is still doing other work, the cached version data
+   * may be stale (the previous version of the attachment). Showing the real card lets the
+   * user click "Preview" and capture that stale data. The skeleton resolves to the real
+   * card once streaming ends, at which point the cache holds the latest snapshot.
+   */
+  isStreaming: boolean;
 }
 /**
  * Creates a renderer for <render_attachment> tags.
@@ -111,6 +121,7 @@ export const createRenderAttachmentRenderer = ({
   attachmentRefs,
   conversationId,
   isSidebar,
+  isStreaming,
 }: RenderAttachmentRendererProps) => {
   const screenContext = getScreenContext(conversationAttachments);
 
@@ -119,6 +130,12 @@ export const createRenderAttachmentRenderer = ({
 
     if (!attachmentId || !conversationId) {
       return null;
+    }
+
+    if (isStreaming) {
+      // See `isStreaming` doc on `RenderAttachmentRendererProps`: the cache can be stale
+      // mid-stream, so we gate the chip behind a skeleton until the round completes.
+      return <AttachmentLoadingSkeleton />;
     }
 
     const attachment = conversationAttachments?.find((att) => att.id === attachmentId);
