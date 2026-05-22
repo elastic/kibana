@@ -33,7 +33,7 @@ Always test at the **lowest layer** where the bug behavior can be exercised.
 | Pattern | Preferred Layer | What to Test |
 |---------|----------------|-------------|
 | `missing_permission_check` | API test | Call route with unprivileged user. Assert 403. |
-| `stale_data_after_mutation` | Unit test | Call mutation's `onSuccess`. Assert `invalidateQueries` called. |
+| `stale_data_after_mutation` | Unit test | Call mutation's `onSuccess`. Assert `setState` called with mutation return value (preferred), or `invalidateQueries` called if mutation returns nothing. Assert initialization/setup functions are NOT called in `onSuccess`. |
 | `hardcoded_size_limit` | Unit test | Pass >10,000 items. Assert pagination used. |
 | `ui_restriction_without_api_enforcement` | API test | Call API with restricted user. Assert 403. |
 | `event_propagation` | Scout UI test | Click inner button. Assert parent handler does NOT fire. |
