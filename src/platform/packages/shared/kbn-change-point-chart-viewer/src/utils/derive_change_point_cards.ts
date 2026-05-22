@@ -54,6 +54,12 @@ export interface ChangePointCardModel {
   readonly lineEsql: string;
   /** Lens XY series type. Defaults to area for change-point charts; bar is used for histogram fallback cards. */
   readonly seriesType?: 'area' | 'bar';
+  /**
+   * Entity column names to use as a Lens series breakdown for the BY all-null fallback card.
+   * Passing all entity columns avoids duplicate (entity, bucket) rows in a single unsplit series.
+   * Absent on normal change-point cards.
+   */
+  readonly breakdownColumns?: readonly string[];
   /** The BY grouping column names when the query uses `CHANGE_POINT ... BY col[, col]`. */
   readonly byColumns?: readonly string[];
   readonly annotationEvents: Array<{ name: string; datetime: string }>;
@@ -389,6 +395,8 @@ export const buildChangePointCards = (params: {
 
   // BY split query where no entity group produced a chartable change point. Return one aggregate
   // card using the full query so Lens renders the same result rows shown in the table.
+  // All entity columns are passed as breakdownColumns so Lens splits by entity, ensuring each
+  // (entity..., bucket) combination is unique, avoiding duplicate chart key warnings.
   if (!isByMode && isSplitQuery && cards.length === 0 && groups.size > 0) {
     cards.push({
       id: 'cp-card-all',
@@ -397,6 +405,7 @@ export const buildChangePointCards = (params: {
       }),
       lineEsql: esql,
       seriesType: 'bar',
+      breakdownColumns: [...entityColumnIds],
       annotationEvents: [],
       changePointTypes: [],
       entityValues: {},

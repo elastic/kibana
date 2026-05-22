@@ -110,6 +110,9 @@ export const ChangePointLensChart: React.FC<ChangePointLensChartProps> = ({
           label: valueColumn,
         },
       ],
+      // Split by all entity columns so each (entity..., bucket) combination is unique,
+      // avoiding duplicate chart key warnings when the full BY query data is used.
+      ...(card.breakdownColumns?.length ? { breakdown: [...card.breakdownColumns] } : {}),
     };
 
     if (!card.annotationEvents.length) {
@@ -128,7 +131,14 @@ export const ChangePointLensChart: React.FC<ChangePointLensChartProps> = ({
     };
 
     return [seriesLayer, annotationLayer];
-  }, [card.annotationEvents, card.seriesType, euiTheme.colors.danger, timeColumn, valueColumn]);
+  }, [
+    card.annotationEvents,
+    card.breakdownColumns,
+    card.seriesType,
+    euiTheme.colors.danger,
+    timeColumn,
+    valueColumn,
+  ]);
 
   // If any annotation falls before the Discover time range, extend `from` so Lens doesn't clip it.
   // fetchParams.timeRange is always resolved to absolute ISO by processFetchParams, so the

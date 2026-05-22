@@ -146,6 +146,8 @@ describe('derive_change_point_cards', () => {
       expect(cards![0].title).toBe('No change points detected');
       expect(cards![0].lineEsql).toContain('CHANGE_POINT');
       expect(cards![0].seriesType).toBe('bar');
+      // No entity split: non-BY results have one row per bucket, no breakdown needed.
+      expect(cards![0].breakdownColumns).toBeUndefined();
     });
 
     it('returns one aggregate card with full query titled "No change points detected" for CHANGE_POINT BY with no chartable changes', () => {
@@ -184,6 +186,8 @@ describe('derive_change_point_cards', () => {
       expect(cards![0].lineEsql).toContain('CHANGE_POINT');
       expect(cards![0].lineEsql).not.toContain('WHERE');
       expect(cards![0].seriesType).toBe('bar');
+      // Entity columns become breakdowns so (host, bucket) pairs are unique in the chart.
+      expect(cards![0].breakdownColumns).toEqual(['host']);
     });
 
     it('uses full query and "No change points detected" title when type is set but pvalue is null', () => {
