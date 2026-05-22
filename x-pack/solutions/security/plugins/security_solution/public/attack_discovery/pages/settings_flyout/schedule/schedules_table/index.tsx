@@ -20,10 +20,7 @@ import type { AttackDiscoverySchedule } from '@kbn/elastic-assistant-common';
 import * as i18n from './translations';
 
 import { useColumns } from './use_columns';
-import { useFindAttackDiscoverySchedules } from '../logic/use_find_schedules';
-import { useEnableAttackDiscoverySchedule } from '../logic/use_enable_schedule';
-import { useDisableAttackDiscoverySchedule } from '../logic/use_disable_schedule';
-import { useDeleteAttackDiscoverySchedule } from '../logic/use_delete_schedule';
+import { useScheduleApi } from '../logic/use_schedule_api';
 import { useBulkEnableAttackDiscoverySchedules } from '../logic/use_bulk_enable_schedules';
 import { useBulkDisableAttackDiscoverySchedules } from '../logic/use_bulk_disable_schedules';
 import { useBulkDeleteAttackDiscoverySchedules } from '../logic/use_bulk_delete_schedules';
@@ -50,11 +47,14 @@ export const SchedulesTable: React.FC = React.memo(() => {
   const [sortField, setSortField] = useState<keyof AttackDiscoverySchedule>(DEFAULT_SORT_FIELD);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(DEFAULT_SORT_DIRECTION);
 
+  const { useDeleteSchedule, useDisableSchedule, useEnableSchedule, useFindSchedules } =
+    useScheduleApi();
+
   const {
     data: { schedules, total } = { schedules: [], total: 0 },
     isLoading: isDataLoading,
     refetch,
-  } = useFindAttackDiscoverySchedules({
+  } = useFindSchedules({
     page: pageIndex,
     perPage: pageSize,
     sortField,
@@ -101,9 +101,9 @@ export const SchedulesTable: React.FC = React.memo(() => {
     prefix: 'bulkDeleteAttackDiscoverySchedulesModalTitle',
   });
 
-  const { mutateAsync: enableAttackDiscoverySchedule } = useEnableAttackDiscoverySchedule();
-  const { mutateAsync: disableAttackDiscoverySchedule } = useDisableAttackDiscoverySchedule();
-  const { mutateAsync: deleteAttackDiscoverySchedule } = useDeleteAttackDiscoverySchedule();
+  const { mutateAsync: enableAttackDiscoverySchedule } = useEnableSchedule();
+  const { mutateAsync: disableAttackDiscoverySchedule } = useDisableSchedule();
+  const { mutateAsync: deleteAttackDiscoverySchedule } = useDeleteSchedule();
   const { mutateAsync: bulkEnableAttackDiscoverySchedules } =
     useBulkEnableAttackDiscoverySchedules();
   const { mutateAsync: bulkDisableAttackDiscoverySchedules } =
