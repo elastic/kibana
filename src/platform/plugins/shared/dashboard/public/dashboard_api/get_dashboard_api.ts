@@ -10,7 +10,7 @@
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { BehaviorSubject, merge, Subject } from 'rxjs';
 import { v4 } from 'uuid';
-
+import type { EuiFlyoutProps } from '@elastic/eui';
 import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
 import type { DashboardState } from '../../common/types';
 import { initializeAccessControlManager } from './access_control_manager';
@@ -46,6 +46,7 @@ import { getDashboardBackupService } from '../services/dashboard_api_services';
 
 export function getDashboardApi({
   creationOptions,
+  panelFlyoutType,
   incomingEmbeddables,
   initialState,
   readResult,
@@ -54,6 +55,7 @@ export function getDashboardApi({
   isAccessControlEnabled,
 }: {
   creationOptions?: DashboardCreationOptions;
+  panelFlyoutType?: EuiFlyoutProps['type'];
   incomingEmbeddables: EmbeddablePackageState[] | undefined;
   initialState: DashboardState;
   readResult?: DashboardReadResponseBody;
@@ -188,6 +190,7 @@ export function getDashboardApi({
     ...unsavedChangesManager.api,
     ...projectRoutingManager?.api,
     ...trackOverlayApi,
+    panelFlyoutType,
     esqlVariables$: esqlVariablesManager.api.publishedEsqlVariables$,
     ...timesliceManager.api,
     ...pauseFetchManager.api,
@@ -323,6 +326,7 @@ export function getDashboardApi({
     } as DashboardApi,
     internalApi,
     cleanup: () => {
+      trackOverlayApi.clearOverlays();
       dataLoadingManager.cleanup();
       dataViewsManager.cleanup();
       searchSessionManager.cleanup();
