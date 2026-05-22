@@ -39,73 +39,47 @@ interface BuildableScore {
   score: IngestScore;
 }
 
-function toTaskModel(
-  model: InferenceModel,
-  modelId: string
-): IngestScoresRequestBodyInput['task_model'] {
-  return {
-    id: modelId,
-    ...(model.family && { family: model.family }),
-    ...(model.provider && { provider: model.provider }),
-  };
-}
-
-function toEvaluatorModel(
-  model: InferenceModel,
-  modelId: string
-): IngestScoresRequestBodyInput['evaluator_model'] {
-  return {
-    id: modelId,
-    ...(model.family && { family: model.family }),
-    ...(model.provider && { provider: model.provider }),
-  };
-}
-
-function toOutputObject(value: unknown): Record<string, unknown> | undefined {
-  if (value == null || typeof value !== 'object' || Array.isArray(value)) {
+function toModel(model: InferenceModel): IngestScoresRequestBodyInput['task_model'] | undefined {
+  if (!model.id) {
     return undefined;
   }
-
-  return value as Record<string, unknown>;
+  return {
+    id: model.id,
+    ...(model.family && { family: model.family }),
+    ...(model.provider && { provider: model.provider }),
+  };
 }
 
+const isPlainObject = (value: unknown): value is Record<string, unknown> =>
+  value != null && typeof value === 'object' && !Array.isArray(value);
+
 function buildScorePayload(event: EvaluationCompleteEvent): IngestScore {
-  const taskOutput = toOutputObject(event.taskRun.output);
+  const { taskRun, evaluationRun } = event;
+  const taskOutput = isPlainObject(taskRun.output) ? taskRun.output : undefined;
+  const result = evaluationRun.result;
 
   return {
     example: {
       id: event.exampleId,
-      index: event.taskRun.exampleIndex,
-      ...(event.taskRun.input != null &&
-        !Array.isArray(event.taskRun.input) && {
-          input: event.taskRun.input,
-        }),
+      index: taskRun.exampleIndex,
+      ...(isPlainObject(taskRun.input) && { input: taskRun.input }),
       dataset: {
         id: event.datasetId,
         name: event.datasetName,
       },
     },
     task: {
-      repetition_index: event.taskRun.repetition,
-      ...(event.taskRun.traceId != null && { trace_id: event.taskRun.traceId }),
+      repetition_index: taskRun.repetition,
+      ...(taskRun.traceId != null && { trace_id: taskRun.traceId }),
       ...(taskOutput && { output: taskOutput }),
     },
     evaluator: {
-      name: event.evaluationRun.name,
-      ...(event.evaluationRun.result?.score !== undefined && {
-        score: event.evaluationRun.result.score,
-      }),
-      ...(event.evaluationRun.result?.label !== undefined && {
-        label: event.evaluationRun.result.label,
-      }),
-      ...(event.evaluationRun.result?.explanation !== undefined && {
-        explanation: event.evaluationRun.result.explanation,
-      }),
-      ...(event.evaluationRun.result?.metadata != null &&
-        !Array.isArray(event.evaluationRun.result.metadata) && {
-          metadata: event.evaluationRun.result.metadata,
-        }),
-      ...(event.evaluationRun.traceId !== undefined && { trace_id: event.evaluationRun.traceId }),
+      name: evaluationRun.name,
+      ...(result?.score !== undefined && { score: result.score }),
+      ...(result?.label !== undefined && { label: result.label }),
+      ...(result?.explanation !== undefined && { explanation: result.explanation }),
+      ...(isPlainObject(result?.metadata) && { metadata: result.metadata }),
+      ...(evaluationRun.traceId !== undefined && { trace_id: evaluationRun.traceId }),
     },
   };
 }
@@ -168,20 +142,21 @@ export function buildIngestRequest({
   log,
   source,
 }: BuildIngestRequestArgs): IngestScoresRequestBodyInput[] {
+  const taskModelPayload = toModel(taskModel);
+  const evaluatorModelPayload = toModel(evaluatorModel);
   const scores = buildScores(source);
-  const requestsByExperiment = new Map<
-    string,
-    { experimentName?: string; scores: IngestScore[] }
-  >();
-  const taskModelId = taskModel.id;
-  const evaluatorModelId = evaluatorModel.id;
 
-  if (!taskModelId || !evaluatorModelId) {
+  if (!taskModelPayload || !evaluatorModelPayload) {
     if (scores.length > 0) {
       log?.warning?.(`Skipped ${scores.length} score(s) due to missing model id`);
     }
     return [];
   }
+
+  const requestsByExperiment = new Map<
+    string,
+    { experimentName?: string; scores: IngestScore[] }
+  >();
 
   for (const { experimentId, experimentName, score } of scores) {
     const existing = requestsByExperiment.get(experimentId) ?? { experimentName, scores: [] };
@@ -190,23 +165,17 @@ export function buildIngestRequest({
   }
 
   const requests: IngestScoresRequestBodyInput[] = [];
-  const ingestTaskModel = toTaskModel(taskModel, taskModelId);
-  const ingestEvaluatorModel = toEvaluatorModel(evaluatorModel, evaluatorModelId);
 
   for (const [experimentId, { experimentName, scores: experimentScores }] of requestsByExperiment) {
     for (let offset = 0; offset < experimentScores.length; offset += MAX_INGEST_BATCH_SIZE) {
       const chunk = experimentScores.slice(offset, offset + MAX_INGEST_BATCH_SIZE);
-      if (chunk.length === 0) {
-        continue;
-      }
-
       requests.push({
         experiment_id: experimentId,
         ...(experimentName != null && { experiment_name: experimentName }),
         eval_run_id: evalRunId ?? experimentId,
         ...(suiteId != null && { suite_id: suiteId }),
-        task_model: ingestTaskModel,
-        evaluator_model: ingestEvaluatorModel,
+        task_model: taskModelPayload,
+        evaluator_model: evaluatorModelPayload,
         experiment_metadata: {
           total_repetitions: repetitions,
           ...(gitMetadata.branch != null && { git_branch: gitMetadata.branch }),
