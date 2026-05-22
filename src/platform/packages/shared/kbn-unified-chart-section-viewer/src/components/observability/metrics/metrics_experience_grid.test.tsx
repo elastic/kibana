@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { EuiProvider } from '@elastic/eui';
 import { act, fireEvent, render } from '@testing-library/react';
 import { MetricsExperienceGrid } from './metrics_experience_grid';
 import * as hooks from './hooks';
@@ -82,6 +83,12 @@ const useMetricFieldsFilterMock = hooks.useMetricFieldsFilter as jest.MockedFunc
 const useDiscoverFieldForBreakdownMock = hooks.useDiscoverFieldForBreakdown as jest.MockedFunction<
   typeof hooks.useDiscoverFieldForBreakdown
 >;
+
+const TestWrapper = ({ children }: { children: React.ReactNode }) => (
+  <EuiProvider highContrastMode={false}>
+    <IntlProvider locale="en">{children}</IntlProvider>
+  </EuiProvider>
+);
 
 const dimensions: Dimension[] = [{ name: 'foo' }, { name: 'qux' }];
 const metricItems: ParsedMetricItem[] = [
@@ -197,7 +204,7 @@ describe('MetricsExperienceGrid', () => {
     expect(getByTestId('metricsExperienceToolbarFullScreen')).toBeInTheDocument();
   });
 
-  it('renders only the METRICS_INFO error state when fetch fails', () => {
+  it('renders Discover ErrorCallout when METRICS_INFO fetch fails', () => {
     useFetchMetricsDataMock.mockReturnValue({
       metricItems: [],
       allDimensions: [],
@@ -208,14 +215,13 @@ describe('MetricsExperienceGrid', () => {
     useMetricFieldsFilterMock.mockReturnValue({ filteredMetricItems: [] });
 
     const { getByTestId, queryByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
-      wrapper: IntlProvider,
+      wrapper: TestWrapper,
     });
 
-    expect(getByTestId('metricsInfoError')).toBeInTheDocument();
-    expect(getByTestId('metricsInfoErrorTitle')).toHaveTextContent('Unable to load visualization');
-    expect(getByTestId('metricsInfoErrorDescription')).toHaveTextContent(
-      'trouble retrieving the information needed for this visualization'
+    expect(getByTestId('discoverErrorCalloutTitle')).toHaveTextContent(
+      'Unable to retrieve search results'
     );
+    expect(getByTestId('discoverErrorCalloutMessage')).toHaveTextContent('METRICS_INFO failed');
     expect(queryByTestId('toggleActions')).not.toBeInTheDocument();
   });
 
@@ -236,7 +242,7 @@ describe('MetricsExperienceGrid', () => {
       wrapper: IntlProvider,
     });
 
-    expect(queryByTestId('metricsInfoError')).not.toBeInTheDocument();
+    expect(queryByTestId('discoverErrorCalloutTitle')).not.toBeInTheDocument();
     expect(getByTestId('toggleActions')).toBeInTheDocument();
   });
 
@@ -254,7 +260,7 @@ describe('MetricsExperienceGrid', () => {
       wrapper: IntlProvider,
     });
 
-    expect(queryByTestId('metricsInfoError')).not.toBeInTheDocument();
+    expect(queryByTestId('discoverErrorCalloutTitle')).not.toBeInTheDocument();
     expect(getByTestId('metricsExperienceProgressBar')).toBeInTheDocument();
   });
 

@@ -35,6 +35,10 @@ type UnifiedGridProps = ChartSectionProps & {
   breakdownField?: string;
   onBreakdownFieldChange?: (fieldName?: string) => void;
   externalServices?: { discoverShared?: unknown; dataViews?: unknown };
+  chartSectionSearchError?: {
+    showErrorDialog?: (args: { title: string; error: Error }) => void;
+    esqlReferenceHref?: string;
+  };
 };
 
 let unifiedGridProps: UnifiedGridProps | undefined;
@@ -57,11 +61,25 @@ jest.mock('../../../../../application/main/state_management/redux', () => ({
 
 const mockDiscoverShared = { __sentinel: 'discoverShared' };
 const mockDataViews = { __sentinel: 'dataViews' };
+const mockShowErrorDialog = jest.fn();
+const mockEsqlReferenceHref = 'https://www.elastic.co/docs/reference/esql';
 
 jest.mock('../../../../../hooks/use_discover_services', () => ({
   useDiscoverServices: jest.fn(() => ({
     discoverShared: mockDiscoverShared,
     dataViews: mockDataViews,
+    core: {
+      notifications: {
+        showErrorDialog: mockShowErrorDialog,
+      },
+    },
+    docLinks: {
+      links: {
+        query: {
+          queryESQL: mockEsqlReferenceHref,
+        },
+      },
+    },
   })),
 }));
 
@@ -159,5 +177,22 @@ describe('MetricsExperienceGridWrapper', () => {
       discoverShared: mockDiscoverShared,
       dataViews: mockDataViews,
     });
+  });
+
+  it('forwards chartSectionSearchError (showErrorDialog, esqlReferenceHref) to the metrics grid', () => {
+    renderChartSection();
+
+    expect(unifiedGridProps?.chartSectionSearchError?.esqlReferenceHref).toBe(mockEsqlReferenceHref);
+    expect(unifiedGridProps?.chartSectionSearchError?.showErrorDialog).toEqual(
+      expect.any(Function)
+    );
+
+    const error = new Error('test');
+    unifiedGridProps?.chartSectionSearchError?.showErrorDialog?.({
+      title: 'Error',
+      error,
+    });
+
+    expect(mockShowErrorDialog).toHaveBeenCalledWith({ title: 'Error', error });
   });
 });

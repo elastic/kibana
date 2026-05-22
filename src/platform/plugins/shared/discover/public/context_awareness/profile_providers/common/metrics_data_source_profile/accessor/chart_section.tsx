@@ -31,7 +31,7 @@ const MetricsExperienceGridWrapper = (
   const breakdownField = useAppStateSelector((state: DiscoverAppState) => state.breakdownField);
   const dispatch = useInternalStateDispatch();
   const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
-  const { discoverShared, dataViews } = useDiscoverServices();
+  const { discoverShared, dataViews, core, docLinks } = useDiscoverServices();
 
   const onBreakdownFieldChange = useCallback(
     (nextBreakdownField?: string) => {
@@ -45,6 +45,15 @@ const MetricsExperienceGridWrapper = (
     [discoverShared, dataViews]
   );
 
+  const chartSectionSearchError = useMemo(
+    () => ({
+      showErrorDialog: ({ title, error }: { title: string; error: Error }) =>
+        core.notifications.showErrorDialog({ title, error }),
+      esqlReferenceHref: docLinks.links.query.queryESQL,
+    }),
+    [core.notifications, docLinks.links.query.queryESQL]
+  );
+
   return (
     <UnifiedMetricsExperienceGrid
       {...props}
@@ -53,6 +62,7 @@ const MetricsExperienceGridWrapper = (
       breakdownField={breakdownField}
       onBreakdownFieldChange={onBreakdownFieldChange}
       externalServices={externalServices}
+      chartSectionSearchError={chartSectionSearchError}
     />
   );
 };

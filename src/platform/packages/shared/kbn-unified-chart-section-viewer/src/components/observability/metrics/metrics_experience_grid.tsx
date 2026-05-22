@@ -18,8 +18,9 @@ import { EmptyState } from '../../empty_state/empty_state';
 import { useToolbarActions } from '../../toolbar/hooks/use_toolbar_actions';
 import { SearchButton } from '../../toolbar/right_side_actions/search_button';
 import { MetricsExperienceGridContent } from './metrics_experience_grid_content';
-import { MetricsInfoError } from './metrics_info_error';
+import { ChartSectionSearchError } from '../../chart_section_search_error/chart_section_search_error';
 import type { Dimension, UnifiedMetricsGridProps } from '../../../types';
+import { i18n } from '@kbn/i18n';
 import { useDimensionsWipe, useDiscoverFieldForBreakdown, useMetricFieldsFilter } from './hooks';
 import { isSuppressedFetchError } from './utils/is_suppressed_fetch_error';
 
@@ -37,6 +38,7 @@ export const MetricsExperienceGrid = ({
   isTabSelected,
   breakdownField,
   onBreakdownFieldChange,
+  chartSectionSearchError,
 }: UnifiedMetricsGridProps) => {
   const {
     searchTerm,
@@ -138,7 +140,16 @@ export const MetricsExperienceGrid = ({
     metricsInfoError != null && !isDiscoverLoading && !isSuppressedFetchError(metricsInfoError);
 
   if (showMetricsInfoError) {
-    return <MetricsInfoError />;
+    return (
+      <ChartSectionSearchError
+        error={metricsInfoError}
+        title={i18n.translate('metricsExperience.chartSectionError.title', {
+          defaultMessage: 'Unable to retrieve search results',
+        })}
+        isEsqlMode
+        {...chartSectionSearchError}
+      />
+    );
   }
 
   return (

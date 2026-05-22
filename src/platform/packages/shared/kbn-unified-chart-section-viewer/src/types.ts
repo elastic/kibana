@@ -8,10 +8,16 @@
  */
 
 import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
+import type { ErrorCalloutProps } from '@kbn/discover-utils';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import type { MappingTimeSeriesMetricType } from '@elastic/elasticsearch/lib/api/types';
 import type { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { ExternalServices } from './context/external_services';
+
+export type ChartSectionSearchErrorHostProps = Pick<
+  ErrorCalloutProps,
+  'showErrorDialog' | 'esqlReferenceHref'
+>;
 interface ChartSectionActions {
   openInNewTab?: (params: {
     query?: Query | AggregateQuery;
@@ -41,6 +47,10 @@ export interface UnifiedMetricsGridProps extends ChartSectionProps {
    * cross-plugin features such as the Streams flyout field section.
    */
   externalServices?: ExternalServices;
+  /**
+   * Host-provided ErrorCallout dependencies (e.g. Discover core notifications and doc links).
+   */
+  chartSectionSearchError?: ChartSectionSearchErrorHostProps;
 }
 
 export interface Dimension {
