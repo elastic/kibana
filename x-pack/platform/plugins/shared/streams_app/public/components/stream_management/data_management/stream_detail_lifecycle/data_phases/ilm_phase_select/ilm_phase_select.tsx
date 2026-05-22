@@ -9,7 +9,6 @@ import React, { useMemo } from 'react';
 import useToggle from 'react-use/lib/useToggle';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiBadge,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFlexGroup,
@@ -20,7 +19,12 @@ import {
   type PopoverAnchorPosition,
   useEuiTheme,
 } from '@elastic/eui';
-import { PHASE_ORDER, PHASE_TITLES } from '@kbn/data-lifecycle-phases';
+import {
+  DefaultRepositoryRequiredBadge,
+  EnterpriseLicenseRequiredBadge,
+  PHASE_ORDER,
+  PHASE_TITLES,
+} from '@kbn/data-lifecycle-phases';
 import { useIlmPhasesColorAndDescription } from '../../hooks/use_ilm_phases_color_and_description';
 
 export type IlmPhaseSelectOption = (typeof PHASE_ORDER)[number];
@@ -86,23 +90,14 @@ export const IlmPhaseSelect = ({
 
           if (showEnterpriseLicenseRequiredBadge) {
             return {
-              iconType: 'lock',
-              text: i18n.translate('xpack.streams.ilmPhaseSelect.frozen.enterpriseRequired', {
-                defaultMessage: 'Enterprise required',
-              }),
+              kind: 'enterpriseRequired' as const,
               testSubj: `${dataTestSubj}Option-${option}-enterpriseRequiredBadge`,
             };
           }
 
           if (showDefaultRepositoryRequiredBadge) {
             return {
-              iconType: 'warning',
-              text: i18n.translate(
-                'xpack.streams.ilmPhaseSelect.frozen.defaultRepositoryRequired',
-                {
-                  defaultMessage: 'Default repository required',
-                }
-              ),
+              kind: 'defaultRepositoryRequired' as const,
               testSubj: `${dataTestSubj}Option-${option}-defaultRepositoryRequiredBadge`,
             };
           }
@@ -130,13 +125,11 @@ export const IlmPhaseSelect = ({
                   </EuiFlexItem>
                   {frozenBadge && (
                     <EuiFlexItem grow={false}>
-                      <EuiBadge
-                        color="hollow"
-                        iconType={frozenBadge.iconType}
-                        data-test-subj={frozenBadge.testSubj}
-                      >
-                        {frozenBadge.text}
-                      </EuiBadge>
+                      {frozenBadge.kind === 'enterpriseRequired' ? (
+                        <EnterpriseLicenseRequiredBadge data-test-subj={frozenBadge.testSubj} />
+                      ) : (
+                        <DefaultRepositoryRequiredBadge data-test-subj={frozenBadge.testSubj} />
+                      )}
                     </EuiFlexItem>
                   )}
                 </EuiFlexGroup>
