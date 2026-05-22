@@ -117,6 +117,8 @@ const mergeInputAttachmentsIntoAttachmentState = async (
         data: input.data,
         ...(input.origin !== undefined ? { origin: input.origin } : {}),
         ...(input.hidden !== undefined ? { hidden: input.hidden } : {}),
+        ...(input.description !== undefined ? { description: input.description } : {}),
+        ...(input.group_id !== undefined ? { group_id: input.group_id } : {}),
       },
       ATTACHMENT_REF_ACTOR.user,
       options?.resolveContext

@@ -51,6 +51,13 @@ export interface VersionedAttachment<
   /** The client-provided ID if this attachment was created with one (e.g., via flyout configuration) */
   client_id?: string;
   /**
+   * Stable identifier for the logical group this attachment belongs to.
+   * Attachments sharing the same group_id were submitted together as a single
+   * logical entity (e.g. multiple alert batches from one bulk-add action).
+   * Undefined for standalone attachments.
+   */
+  group_id?: string;
+  /**
    * Origin/reference info for attachments created from external sources.
    * For saved-object-backed types this is the saved object ID.
    * Undefined for by-value attachments.
@@ -153,6 +160,16 @@ export interface AttachmentInput<
   hidden?: boolean;
   /** Whether the attachment should be read-only */
   readonly?: boolean;
+  /**
+   * Stable identifier for the logical group this attachment belongs to.
+   * Attachments sharing the same group_id were submitted together as a single
+   * logical entity (e.g. multiple alert batches from one bulk-add action).
+   * Undefined for standalone attachments.
+   *
+   * When this input is part of an AttachmentGroup, flattenAttachments always
+   * stamps this field with the group's id, overriding any value set here.
+   */
+  group_id?: string;
 }
 
 // Zod schemas for validation
@@ -198,6 +215,7 @@ export const versionedAttachmentSchema = z.object({
   client_id: z.string().optional(),
   origin: z.string().optional(),
   origin_snapshot_at: z.string().optional(),
+  group_id: z.string().optional(),
 });
 
 export const attachmentInputSchema = z.object({
@@ -208,6 +226,7 @@ export const attachmentInputSchema = z.object({
   description: z.string().optional(),
   hidden: z.boolean().optional(),
   readonly: z.boolean().optional(),
+  group_id: z.string().optional(),
 });
 
 /**

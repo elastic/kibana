@@ -59,12 +59,13 @@ describe('alertsToAttachmentGroup', () => {
     expect(result.items[1].data).toEqual({ alertIds: items.slice(20).map((i) => i._id) });
   });
 
-  it('items do not have groupId or hidden fields', () => {
+  it('items do not pre-stamp group_id or description (stamped by flattenAttachments)', () => {
     const items = Array.from({ length: 25 }, (_, i) => makeItem(`id-${i}`));
     const result = alertsToAttachmentGroup(items);
 
     result.items.forEach((item) => {
-      expect(item).not.toHaveProperty('groupId');
+      expect(item).not.toHaveProperty('group_id');
+      expect(item).not.toHaveProperty('description');
       expect(item.hidden).toBeFalsy();
     });
   });
