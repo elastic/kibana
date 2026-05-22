@@ -23,6 +23,9 @@ export interface BulkOperationError {
 export type BulkDeleteRulesRequestBody = TypeOf<typeof bulkDeleteRulesRequestBodySchema>;
 
 export interface BulkDeleteRulesParams extends BulkDeleteRulesRequestBody {
+  // Rule deletion doesn't look to be ambiguous for consumers.
+  // Omitting "action" to avoid setting it accidentally to logically
+  // incompatible value.
   changeTracking?: Omit<RuleChangeTracking, 'action'>;
 }
 

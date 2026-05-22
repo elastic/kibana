@@ -32,8 +32,8 @@ export enum RuleChangeTrackingAction {
 }
 
 /**
- * Rule change tracking information.
- * Contains information to be logged when change tracking is active.
+ * Rule change tracking context.
+ * Contains information to be logged when change tracking functionality is active.
  */
 export interface RuleChangeTracking<ChangeAction extends string = string> {
   /**

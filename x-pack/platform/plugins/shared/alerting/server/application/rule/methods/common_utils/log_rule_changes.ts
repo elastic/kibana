@@ -36,10 +36,9 @@ interface LogRuleChanges {
       /**
        * Original number of rules affected by the bulk action.
        *
-       * Driving code should provide this number for bulk actions.
        * Due to OCC we can't capture this number deeper in the call stack.
+       * Consumer code should provide this number for bulk actions.
        *
-       * Default: ruleSOs.length when not provided
        */ bulkCount?: number;
     } & Record<string, number | boolean | string | undefined>;
   };
@@ -110,6 +109,12 @@ function getRuleType(
   }
 }
 
+/**
+ * Checks whether an object has non-undefined data.
+ *
+ * It could be solved via chaining lodash functions but this
+ * implementation is simpler and memory efficient.
+ */
 function isEmptyObject(obj: Record<string, unknown>): boolean {
   for (const key in obj) {
     if (obj[key] !== undefined) {
