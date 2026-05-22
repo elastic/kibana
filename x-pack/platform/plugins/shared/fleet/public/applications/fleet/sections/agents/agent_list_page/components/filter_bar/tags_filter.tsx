@@ -96,9 +96,9 @@ export const TagsFilter: React.FunctionComponent<Props> = ({
       >
         {(list, search) => (
           <>
-            <EuiPopoverTitle paddingSize="s">{search}</EuiPopoverTitle>
+            <EuiPopoverTitle>{search}</EuiPopoverTitle>
             {list}
-            <EuiPopoverFooter paddingSize="s">
+            <EuiPopoverFooter>
               <EuiButton
                 size="s"
                 fullWidth
