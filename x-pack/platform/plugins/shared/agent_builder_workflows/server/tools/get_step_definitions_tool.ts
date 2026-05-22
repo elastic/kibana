@@ -31,9 +31,22 @@ import {
 } from '@kbn/workflows-management-plugin/common/schema';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
+import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import { workflowTools } from '../../common/constants';
 
 type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
+
+/**
+ * Lazy accessor for the workflows-extensions start contract. The plugin
+ * declares workflows-extensions as an `optionalPlugin`; when it is not
+ * available (or not yet started — e.g. in unit tests), the getter resolves
+ * to `undefined` and the tool falls through to the built-in + connector
+ * sources only.
+ */
+export type WorkflowsExtensionsGetter = () =>
+  | Promise<WorkflowsExtensionsServerPluginStart | undefined>
+  | WorkflowsExtensionsServerPluginStart
+  | undefined;
 
 interface StepDefinitionForAgent {
   id: string;
@@ -164,22 +177,38 @@ function formatDeprecationMetadata(
 
 export function registerGetStepDefinitionsTool(
   agentBuilder: AgentBuilderPluginSetup,
-  api: WorkflowsManagementApi
+  api: WorkflowsManagementApi,
+  getWorkflowsExtensions: WorkflowsExtensionsGetter = () => undefined
 ): void {
+  // Cache the resolution promise so the start contract is fetched at most once
+  // per tool registration, regardless of how many handler invocations happen.
+  let workflowsExtensionsPromise:
+    | Promise<WorkflowsExtensionsServerPluginStart | undefined>
+    | undefined;
+  const resolveWorkflowsExtensions = (): Promise<
+    WorkflowsExtensionsServerPluginStart | undefined
+  > => {
+    if (!workflowsExtensionsPromise) {
+      workflowsExtensionsPromise = Promise.resolve(getWorkflowsExtensions()).catch(() => undefined);
+    }
+    return workflowsExtensionsPromise;
+  };
+
   agentBuilder.tools.register({
     id: workflowTools.getStepDefinitions,
     type: ToolType.builtin,
-    description: `Get available workflow step types, their parameters, and usage examples.
+    description: `Get available workflow step types, their parameters, and usage examples. Covers built-in primitives, plugin-registered extension steps (data.*, ai.*, security.*, …), and connector-backed steps in one call.
 
-**When to use:** Before generating step YAML, to discover available step types, their input params (\`with\` block), config params (step-level fields like \`connector-id\`), and usage examples.
+**When to use:** Before generating step YAML, to discover step types, their input params (\`with\` block), config params, and examples.
 **When NOT to use:** To find connector instances configured in the environment (use get_connectors instead).
 
-Supports filtering by exact step type, keyword search, or category.
-Deprecated steps are excluded from broad discovery by default, but exact step type lookups still return them.
-When a small number of results is returned, input/config parameter summaries and usage examples are included.
-Common step properties (name, type, if, timeout, on-failure) are NOT listed per step -- they apply to all steps (see skill prompt).
-Set includeOutputSummary=true to get a compact one-line summary of each step's output fields (useful for knowing what data is available via \`{{ steps.name.field }}\`).
-Set includeFullSchema=true to get the full JSON Schema for step input params (use sparingly -- only when examples are insufficient).`,
+Supports filtering by exact step type, keyword search, or category. Deprecated steps are excluded from broad discovery by default, but exact step type lookups still return them.
+
+**Exact \`stepType\` lookups (single match) automatically include the full JSON Schema for the step's \`with:\` block under \`stepSchema\`. Use it to construct a correct \`with:\` payload in one round-trip before calling \`${workflowTools.executeStep}\` — no need to set \`includeFullSchema\` for per-step retrievals.**
+
+Common step properties (name, type, if, timeout, on-failure) apply to every step and are NOT listed per step (see skill prompt).
+Set includeOutputSummary=true to get a one-line summary of each step's output fields (useful for \`{{ steps.name.field }}\` references).
+Set includeFullSchema=true to force-include the JSON Schema on multi-step results (use sparingly).`,
     schema: z.object({
       stepType: z
         .string()
@@ -220,15 +249,41 @@ Set includeFullSchema=true to get the full JSON Schema for step input params (us
       { stepType, search, category, includeDeprecated, includeOutputSummary, includeFullSchema },
       { spaceId, request }
     ) => {
-      const builtInTypes = new Set(builtInStepDefinitions.map((s) => s.id));
       const { all: allConnectors } = await resolveConnectors(api, spaceId, request);
 
-      const connectorDefinitions = allConnectors
-        .filter((connector) => !builtInTypes.has(connector.type))
-        .map(formatConnectorStep);
-      const builtInFormatted = builtInStepDefinitions.map(formatBuiltInStep);
+      // Source 1: static built-in flow-control + data-binding primitives.
+      const seenIds = new Set<string>();
+      const builtInFormatted = builtInStepDefinitions.map((step) => {
+        seenIds.add(step.id);
+        return formatBuiltInStep(step);
+      });
 
-      let allDefinitions: StepDefinitionForAgent[] = [...builtInFormatted, ...connectorDefinitions];
+      // Source 2: workflows-extensions registry — anything registered at runtime
+      // via workflowsExtensions.registerStepDefinition (data.*, ai.*, security.*,
+      // …). ServerStepDefinition extends BaseStepDefinition so formatBuiltInStep
+      // accepts it unchanged. Built-ins win on id collision (control-flow
+      // primitives' curated metadata is the canonical source).
+      const extensions = await resolveWorkflowsExtensions();
+      const extensionStepDefinitions = extensions?.getAllStepDefinitions() ?? [];
+      const extensionFormatted: StepDefinitionForAgent[] = [];
+      for (const step of extensionStepDefinitions) {
+        if (seenIds.has(step.id)) continue;
+        seenIds.add(step.id);
+        extensionFormatted.push(formatBuiltInStep(step));
+      }
+
+      // Source 3: connector-backed steps surfaced via workflows-management. Any
+      // id already claimed by sources 1-2 wins (extension step beats a
+      // connector with the same id).
+      const connectorDefinitions = allConnectors
+        .filter((connector) => !seenIds.has(connector.type))
+        .map(formatConnectorStep);
+
+      let allDefinitions: StepDefinitionForAgent[] = [
+        ...builtInFormatted,
+        ...extensionFormatted,
+        ...connectorDefinitions,
+      ];
 
       if (includeDeprecated !== true && !stepType) {
         allDefinitions = allDefinitions.filter((def) => !def.deprecated);
@@ -265,6 +320,15 @@ Set includeFullSchema=true to get the full JSON Schema for step input params (us
       }
 
       const includeDetails = allDefinitions.length <= 5;
+
+      // Exact-stepType single-match lookups always emit the full JSON Schema
+      // under `stepSchema`. This is the "I know which step I want, give me
+      // everything" signal: the LLM should be able to construct a valid `with:`
+      // payload in one round-trip, with no follow-up call. Multi-result and
+      // search/category browsing still gates the schema behind the explicit
+      // flag to keep the token cost contained.
+      const isSingleStepLookup = stepType !== undefined && allDefinitions.length === 1;
+      const effectiveIncludeFullSchema = includeFullSchema === true || isSingleStepLookup;
 
       const formattedResults = allDefinitions.map((def) => {
         if (!includeDetails) {
@@ -304,7 +368,7 @@ Set includeFullSchema=true to get the full JSON Schema for step input params (us
           result.outputSummary = def.outputSummary;
         }
 
-        if (includeFullSchema) {
+        if (effectiveIncludeFullSchema) {
           const fullStep = getFullSchemaForStep(def.id);
           if (fullStep) {
             result.stepSchema = fullStep.stepSchema;
@@ -331,6 +395,12 @@ Set includeFullSchema=true to get the full JSON Schema for step input params (us
         const builtIn = builtInStepDefinitions.find((s) => s.id === id);
         if (builtIn) {
           return { stepSchema: zodToJsonSchemaSafe(buildBuiltInStepSchema(builtIn)) };
+        }
+        // Extension-registered steps share the BaseStepDefinition shape; the
+        // same JSON-schema builder works for them.
+        const extension = extensionStepDefinitions.find((s) => s.id === id);
+        if (extension) {
+          return { stepSchema: zodToJsonSchemaSafe(buildBuiltInStepSchema(extension)) };
         }
         const connector = allConnectors.find((c) => c.type === id);
         if (connector) {

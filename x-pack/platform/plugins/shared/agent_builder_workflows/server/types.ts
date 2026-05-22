@@ -11,6 +11,7 @@ import type {
   AgentContextLayerPluginStart,
 } from '@kbn/agent-context-layer-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 
 export interface PluginSetupDependencies {
   agentBuilder: AgentBuilderPluginSetup;
@@ -21,6 +22,19 @@ export interface PluginSetupDependencies {
 export interface PluginStartDependencies {
   agentBuilder: AgentBuilderPluginStart;
   agentContextLayer: AgentContextLayerPluginStart;
+  /**
+   * Optional — workflow-side helpers query this start contract to enrich their
+   * behavior:
+   *  - `workflow_execute_step` pre-validates each step's `with:` block against
+   *    the registered Zod schema before invoking the execution engine.
+   *  - `get_step_definitions` merges the workflows-extensions registry into the
+   *    discovery surface (data.*, ai.*, security.*, …) so the model can find
+   *    plugin-registered steps and retrieve their JSON Schema in one round-trip.
+   *
+   * Falls through silently if unavailable (e.g. for unit tests or environments
+   * that don't load the workflows-extensions plugin).
+   */
+  workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

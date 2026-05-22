@@ -15,7 +15,12 @@ import type {
 } from '@kbn/agent-builder-server/tools';
 import { ExecutionStatus, type InternalConnectorContract } from '@kbn/workflows';
 import { WorkflowValidationError } from '@kbn/workflows-yaml';
+import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
+import { z } from '@kbn/zod/v4';
 import {
+  getKibanaRequestSignature,
+  isAllowedReadOnlyKibanaRequest,
+  preValidateStepWith,
   registerWorkflowExecuteStepTool,
   SAFE_STEP_TYPES,
   WORKFLOW_EXECUTE_STEP_TOOL_ID,
@@ -946,5 +951,601 @@ describe('SAFE_STEP_TYPES policy', () => {
     for (const [stepType, expectedMethods] of Object.entries(auditedSafeConnectorMethods)) {
       expect(internalConnectors.get(stepType)?.methods).toEqual(expectedMethods);
     }
+  });
+});
+
+describe('structured YAML parse errors', () => {
+  let registeredTool: BuiltinToolDefinition;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    const agentBuilder = {
+      tools: {
+        register: jest.fn((tool: BuiltinToolDefinition) => {
+          registeredTool = tool;
+        }),
+      },
+    } as any;
+    registerWorkflowExecuteStepTool(agentBuilder, {} as any);
+  });
+
+  it('returns a structured parseError with line, column, and snippet for malformed YAML', async () => {
+    const brokenYaml = `steps:
+  - name: log_step
+    type: console
+   with:
+      message: "oops"`; // misaligned `with:` (3-space indent) — triggers a YAML error
+    const context = createMockContext(brokenYaml);
+    const result = await invokeHandler(
+      registeredTool,
+      { stepName: 'log_step', yaml: brokenYaml },
+      context
+    );
+
+    const data = result.results[0].data as Record<string, unknown>;
+    expect(data.success).toBe(false);
+    expect(data.error).toMatch(/Invalid workflow YAML at line \d+/);
+    expect(data.parseError).toBeDefined();
+    const parseError = data.parseError as {
+      message: string;
+      line?: number;
+      column?: number;
+      snippet?: string;
+    };
+    expect(typeof parseError.message).toBe('string');
+    expect(parseError.line).toBeGreaterThan(0);
+    expect(parseError.column).toBeGreaterThan(0);
+    expect(parseError.snippet).toContain('^');
+  });
+
+  it('omits parseError when YAML parses cleanly', async () => {
+    const goodYaml = `steps:
+  - name: log_step
+    type: console
+    with:
+      message: "ok"`;
+    const context = createMockContext(goodYaml);
+    const result = await invokeHandler(
+      registeredTool,
+      { stepName: 'nonexistent', yaml: goodYaml },
+      context
+    );
+    const data = result.results[0].data as Record<string, unknown>;
+    expect(data.parseError).toBeUndefined();
+  });
+});
+
+describe('preValidateStepWith', () => {
+  const buildExtensions = (
+    stepType: string,
+    schema?: z.ZodTypeAny
+  ): WorkflowsExtensionsServerPluginStart =>
+    ({
+      getStepDefinition: jest.fn().mockReturnValue(
+        schema
+          ? {
+              id: stepType,
+              inputSchema: schema,
+              outputSchema: z.unknown(),
+              handler: jest.fn(),
+            }
+          : undefined
+      ),
+    } as any);
+
+  const yamlWithStep = (withBlock: Record<string, unknown>): string =>
+    `steps:
+  - name: my_step
+    type: data.search
+    with:
+      ${Object.entries(withBlock)
+        .map(([k, v]) => `${k}: ${JSON.stringify(v)}`)
+        .join('\n      ')}`;
+
+  it('returns null when the workflowsExtensions getter resolves to undefined', async () => {
+    const failure = await preValidateStepWith('steps: []', 'noop', 'data.search', undefined);
+    expect(failure).toBeNull();
+  });
+
+  it('returns null when the step type is not in the workflowsExtensions registry', async () => {
+    // `workflowsExtensions` only covers step types plugins explicitly
+    // registered (data.*, ai.*, plus skill-specific steps). The execution
+    // engine knows several hundred more (connector-derived steps like
+    // `kibana.request`, `cases.*`, `slack2.*`). Pre-validation should skip
+    // — not block — anything outside the workflowsExtensions registry so
+    // valid engine-known steps still execute.
+    const failure = await preValidateStepWith(
+      yamlWithStep({ index: 'logs-*' }),
+      'my_step',
+      'mystery.step',
+      buildExtensions('mystery.step')
+    );
+    expect(failure).toBeNull();
+  });
+
+  it('returns null when the step type has no inputSchema', async () => {
+    const definition = {
+      id: 'data.search',
+      outputSchema: z.unknown(),
+      handler: jest.fn(),
+    };
+    const extensions = {
+      getStepDefinition: jest.fn().mockReturnValue(definition),
+    } as any;
+    const failure = await preValidateStepWith(
+      yamlWithStep({ index: 'logs-*' }),
+      'my_step',
+      'data.search',
+      extensions
+    );
+    expect(failure).toBeNull();
+  });
+
+  it('returns schemaErrors for invalid `with:` payloads', async () => {
+    const schema = z.object({
+      index: z.string(),
+      size: z.number().int().positive(),
+    });
+    const failure = await preValidateStepWith(
+      yamlWithStep({ index: 'logs-*' }), // `size` missing
+      'my_step',
+      'data.search',
+      buildExtensions('data.search', schema)
+    );
+
+    expect(failure).not.toBeNull();
+    expect(failure!.reason).toBe('with_schema_invalid');
+    expect(failure!.schemaErrors).toBeDefined();
+    expect(failure!.schemaErrors!.length).toBeGreaterThan(0);
+    // The single missing field is `size`.
+    expect(failure!.schemaErrors!.some((issue) => issue.path === 'size')).toBe(true);
+    expect(failure!.message).toContain('my_step');
+    expect(failure!.message).toContain('data.search');
+  });
+
+  it('returns null when the `with:` block matches the schema', async () => {
+    const schema = z.object({
+      index: z.string(),
+      size: z.number().int().positive(),
+    });
+    const failure = await preValidateStepWith(
+      yamlWithStep({ index: 'logs-*', size: 10 }),
+      'my_step',
+      'data.search',
+      buildExtensions('data.search', schema)
+    );
+    expect(failure).toBeNull();
+  });
+
+  it('walks nested step containers (if/steps) to find the target step', async () => {
+    const schema = z.object({
+      message: z.string().min(1),
+    });
+    const yaml = `steps:
+  - name: outer_if
+    type: if
+    condition: "true"
+    steps:
+      - name: nested_step
+        type: data.search
+        with:
+          message: ""`;
+    const failure = await preValidateStepWith(
+      yaml,
+      'nested_step',
+      'data.search',
+      buildExtensions('data.search', schema)
+    );
+    expect(failure).not.toBeNull();
+    expect(failure!.reason).toBe('with_schema_invalid');
+    expect(failure!.schemaErrors!.some((issue) => issue.path === 'message')).toBe(true);
+  });
+
+  it('skips validation when a top-level `with:` value contains a Mustache template ref', async () => {
+    // `items` is typed as an array — without the skip Zod would reject the
+    // literal string `{{ steps.fetch.output.items }}` and short-circuit the
+    // dispatch. The execution engine resolves the template at runtime, so
+    // the right behavior is to defer validation entirely.
+    const schema = z.object({
+      items: z.array(z.unknown()),
+      predicate: z.string(),
+    });
+    const failure = await preValidateStepWith(
+      yamlWithStep({
+        items: '{{ steps.fetch.output.items }}',
+        predicate: 'matches',
+      }),
+      'my_step',
+      'data.search',
+      buildExtensions('data.search', schema)
+    );
+    expect(failure).toBeNull();
+  });
+
+  it('skips validation when a nested `with:` value contains a Mustache template ref', async () => {
+    const schema = z.object({
+      config: z.object({
+        url: z.string().url(),
+      }),
+    });
+    const failure = await preValidateStepWith(
+      yamlWithStep({ config: { url: '{{ inputs.endpoint_url }}' } }),
+      'my_step',
+      'data.search',
+      buildExtensions('data.search', schema)
+    );
+    expect(failure).toBeNull();
+  });
+
+  it('skips validation when an array element contains a Mustache template ref', async () => {
+    const schema = z.object({
+      ids: z.array(z.string().uuid()),
+    });
+    const failure = await preValidateStepWith(
+      yamlWithStep({ ids: ['a-real-uuid-here', '{{ steps.lookup.output.id }}'] }),
+      'my_step',
+      'data.search',
+      buildExtensions('data.search', schema)
+    );
+    expect(failure).toBeNull();
+  });
+
+  it('still runs pre-validation when `with:` has no Mustache template refs', async () => {
+    // Sanity guard for the skip rule above: literal-only payloads with real
+    // schema violations must still surface as `with_schema_invalid`.
+    const schema = z.object({
+      index: z.string(),
+      size: z.number().int().positive(),
+    });
+    const failure = await preValidateStepWith(
+      yamlWithStep({ index: 'logs-*' }), // `size` missing, no template refs
+      'my_step',
+      'data.search',
+      buildExtensions('data.search', schema)
+    );
+    expect(failure).not.toBeNull();
+    expect(failure!.reason).toBe('with_schema_invalid');
+    expect(failure!.schemaErrors!.some((issue) => issue.path === 'size')).toBe(true);
+  });
+});
+
+describe('handler pre-validation short-circuit', () => {
+  let registeredTool: BuiltinToolDefinition;
+  const mockApi = {
+    testStep: jest.fn(),
+    getWorkflowExecution: jest.fn(),
+    validateWorkflow: jest.fn(),
+  } as any;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    const agentBuilder = {
+      tools: {
+        register: jest.fn((tool: BuiltinToolDefinition) => {
+          registeredTool = tool;
+        }),
+      },
+    } as any;
+
+    // Register with a workflowsExtensions getter that rejects `data.search`
+    // unless it carries a non-empty `index` string.
+    const extensions: WorkflowsExtensionsServerPluginStart = {
+      getStepDefinition: jest.fn().mockReturnValue({
+        id: 'data.search',
+        inputSchema: z.object({ index: z.string().min(1) }),
+        outputSchema: z.unknown(),
+        handler: jest.fn(),
+      }),
+    } as any;
+    registerWorkflowExecuteStepTool(agentBuilder, mockApi, () => extensions);
+  });
+
+  it('short-circuits before executeAndPollStep when `with:` is invalid', async () => {
+    const yaml = `steps:
+  - name: bad_search
+    type: data.search
+    with:
+      index: ""`;
+    const context = createMockContext(yaml);
+    const result = await invokeHandler(registeredTool, { stepName: 'bad_search', yaml }, context);
+
+    const data = result.results[0].data as Record<string, unknown>;
+    expect(data.success).toBe(false);
+    expect(data.reason).toBe('with_schema_invalid');
+    expect(data.stepType).toBe('data.search');
+    expect(data.schemaErrors).toBeDefined();
+    // The step never reached the execution-engine round-trip.
+    expect(mockApi.testStep).not.toHaveBeenCalled();
+  });
+});
+
+describe('kibana.request allow-list helpers', () => {
+  describe('getKibanaRequestSignature', () => {
+    it('returns `${METHOD}:${path}` for a literal method/path pair', () => {
+      expect(getKibanaRequestSignature({ method: 'POST', path: '/internal/foo' })).toBe(
+        'POST:/internal/foo'
+      );
+    });
+
+    it('uppercases the method so allow-list matching is case-insensitive', () => {
+      expect(getKibanaRequestSignature({ method: 'get', path: '/api/foo' })).toBe('GET:/api/foo');
+    });
+
+    it('returns null when the with-block is missing or not an object', () => {
+      expect(getKibanaRequestSignature(undefined)).toBeNull();
+      expect(getKibanaRequestSignature(null)).toBeNull();
+      expect(getKibanaRequestSignature('not-an-object')).toBeNull();
+    });
+
+    it('returns null when method or path is not a literal string', () => {
+      expect(getKibanaRequestSignature({ method: 'GET' })).toBeNull();
+      expect(getKibanaRequestSignature({ path: '/foo' })).toBeNull();
+      expect(getKibanaRequestSignature({ method: 123, path: '/foo' })).toBeNull();
+    });
+
+    it('returns null when method or path contains a Mustache template ref', () => {
+      // We can't safely match a templated value against a static allow-list —
+      // the resolved value isn't known until the execution engine runs.
+      expect(
+        getKibanaRequestSignature({ method: 'POST', path: '/internal/{{ inputs.tenant }}/foo' })
+      ).toBeNull();
+      expect(getKibanaRequestSignature({ method: '{{ inputs.m }}', path: '/foo' })).toBeNull();
+    });
+  });
+
+  describe('isAllowedReadOnlyKibanaRequest', () => {
+    const safe = new Set([
+      'POST:/internal/security_solution/alert_analysis/related_alerts',
+      'GET:/api/cases/_find',
+    ]);
+
+    it('returns true when the (method, path) pair is in the allow-list', () => {
+      expect(
+        isAllowedReadOnlyKibanaRequest(
+          'kibana.request',
+          { method: 'POST', path: '/internal/security_solution/alert_analysis/related_alerts' },
+          safe
+        )
+      ).toBe(true);
+    });
+
+    it('returns true regardless of method case', () => {
+      expect(
+        isAllowedReadOnlyKibanaRequest(
+          'kibana.request',
+          { method: 'get', path: '/api/cases/_find' },
+          safe
+        )
+      ).toBe(true);
+    });
+
+    it('returns false when the path is not in the allow-list', () => {
+      expect(
+        isAllowedReadOnlyKibanaRequest(
+          'kibana.request',
+          { method: 'POST', path: '/internal/foo/bar' },
+          safe
+        )
+      ).toBe(false);
+    });
+
+    it('returns false when the step type is not kibana.request', () => {
+      expect(
+        isAllowedReadOnlyKibanaRequest('http', { method: 'GET', path: '/api/cases/_find' }, safe)
+      ).toBe(false);
+    });
+
+    it('returns false when the allow-list is empty or undefined', () => {
+      expect(
+        isAllowedReadOnlyKibanaRequest(
+          'kibana.request',
+          { method: 'GET', path: '/api/cases/_find' },
+          new Set<string>()
+        )
+      ).toBe(false);
+      expect(
+        isAllowedReadOnlyKibanaRequest(
+          'kibana.request',
+          { method: 'GET', path: '/api/cases/_find' },
+          undefined
+        )
+      ).toBe(false);
+    });
+  });
+});
+
+describe('kibana.request allow-list handler integration (Primitive A)', () => {
+  let registeredTool: BuiltinToolDefinition;
+  const mockApi = {
+    testStep: jest.fn(),
+    getWorkflowExecution: jest.fn(),
+    validateWorkflow: jest.fn(),
+  } as any;
+
+  const SAFE_PATH = '/internal/security_solution/alert_analysis/related_alerts';
+  const SAFE_PATHS: Iterable<string> = [`POST:${SAFE_PATH}`];
+
+  const ALLOWLISTED_YAML = `version: '1'
+name: allowlisted_kibana_request
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: get_related_alerts
+    type: kibana.request
+    with:
+      method: POST
+      path: ${SAFE_PATH}
+      body:
+        alertId: alert-1
+        timeWindowHours: 24
+`;
+
+  const UNREGISTERED_YAML = `version: '1'
+name: unregistered_kibana_request
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: arbitrary_call
+    type: kibana.request
+    with:
+      method: POST
+      path: /internal/some/unregistered/endpoint
+      body:
+        foo: bar
+`;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    const agentBuilder = {
+      tools: {
+        register: jest.fn((tool: BuiltinToolDefinition) => {
+          registeredTool = tool;
+        }),
+      },
+    } as any;
+
+    registerWorkflowExecuteStepTool(agentBuilder, mockApi, () => undefined, () => SAFE_PATHS);
+  });
+
+  it('executes an allow-listed kibana.request without HITL even in conversation mode', async () => {
+    jest.useRealTimers();
+    mockApi.testStep.mockResolvedValue('exec-allowlisted');
+    mockApi.getWorkflowExecution.mockResolvedValue({
+      status: ExecutionStatus.COMPLETED,
+      stepExecutions: [{ stepId: 'get_related_alerts', status: ExecutionStatus.COMPLETED }],
+      error: null,
+      duration: 42,
+    });
+
+    const context = createMockContext(ALLOWLISTED_YAML, {
+      executionMode: AgentExecutionMode.conversation,
+    });
+    const result = await invokeHandler(
+      registeredTool,
+      { stepName: 'get_related_alerts' },
+      context
+    );
+    const data = result.results[0].data as Record<string, unknown>;
+
+    expect(data.success).toBe(true);
+    expect(data.executionId).toBe('exec-allowlisted');
+    expect(context.prompts.askForConfirmation).not.toHaveBeenCalled();
+    expect(context.prompts.checkConfirmationStatus).not.toHaveBeenCalled();
+    expect(mockApi.testStep).toHaveBeenCalled();
+  });
+
+  it('executes an allow-listed kibana.request without preview in standalone mode', async () => {
+    jest.useRealTimers();
+    mockApi.testStep.mockResolvedValue('exec-allowlisted-standalone');
+    mockApi.getWorkflowExecution.mockResolvedValue({
+      status: ExecutionStatus.COMPLETED,
+      stepExecutions: [{ stepId: 'get_related_alerts', status: ExecutionStatus.COMPLETED }],
+      error: null,
+      duration: 35,
+    });
+
+    const context = createMockContext(ALLOWLISTED_YAML, {
+      executionMode: AgentExecutionMode.standalone,
+    });
+    const result = await invokeHandler(
+      registeredTool,
+      { stepName: 'get_related_alerts' },
+      context
+    );
+    const data = result.results[0].data as Record<string, unknown>;
+
+    expect(data.success).toBe(true);
+    expect(data.blocked).toBeUndefined();
+    expect(data.nextAction).toBeUndefined();
+    expect(mockApi.testStep).toHaveBeenCalled();
+  });
+
+  it('still prompts for confirmation when the kibana.request path is not in the allow-list', async () => {
+    const context = createMockContext(UNREGISTERED_YAML, {
+      executionMode: AgentExecutionMode.conversation,
+      promptStatus: ConfirmationStatus.unprompted,
+    });
+    const result = (await registeredTool.handler(
+      { stepName: 'arbitrary_call' } as never,
+      context as never
+    )) as ToolHandlerPromptReturn;
+
+    expect(result.prompt).toBeDefined();
+    expect(result.prompt.type).toBe(AgentPromptType.confirmation);
+    expect(mockApi.testStep).not.toHaveBeenCalled();
+  });
+
+  it('returns a discovery hint (Primitive B) when blocking an unregistered kibana.request in standalone mode', async () => {
+    mockApi.validateWorkflow.mockResolvedValue({ valid: true, diagnostics: [] });
+
+    const context = createMockContext(UNREGISTERED_YAML, {
+      executionMode: AgentExecutionMode.standalone,
+    });
+    const result = await invokeHandler(
+      registeredTool,
+      { stepName: 'arbitrary_call' },
+      context
+    );
+    const data = result.results[0].data as Record<string, unknown>;
+
+    expect(data.blocked).toBe(true);
+    expect(data.stepType).toBe('kibana.request');
+    expect(data.unsafeStepType).toBe('kibana.request');
+    expect(data.nextAction).toEqual({
+      tool_id: 'platform.workflows.get_step_definitions',
+      params: { step_types: ['kibana.request'] },
+    });
+    expect(String(data.hint)).toContain('get_step_definitions');
+    expect(mockApi.testStep).not.toHaveBeenCalled();
+  });
+
+  it('omits nextAction for non-kibana.request unsafe steps (regression check on Primitive B scope)', async () => {
+    mockApi.validateWorkflow.mockResolvedValue({ valid: true, diagnostics: [] });
+
+    const context = createMockContext(VALID_WORKFLOW_YAML, {
+      executionMode: AgentExecutionMode.standalone,
+    });
+    const result = await invokeHandler(registeredTool, { stepName: 'send_slack' }, context);
+    const data = result.results[0].data as Record<string, unknown>;
+
+    expect(data.blocked).toBe(true);
+    expect(data.unsafeStepType).toBe('slack');
+    expect(data.nextAction).toBeUndefined();
+    expect(String(data.hint)).toContain('Run step');
+  });
+
+  it('falls back to the default unsafe path when the kibana.request path is Mustache-templated', async () => {
+    const TEMPLATED_YAML = `version: '1'
+name: templated_kibana_request
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: templated_call
+    type: kibana.request
+    with:
+      method: POST
+      path: "/internal/{{ inputs.tenant }}${SAFE_PATH}"
+      body:
+        alertId: alert-1
+`;
+
+    const context = createMockContext(TEMPLATED_YAML, {
+      executionMode: AgentExecutionMode.conversation,
+      promptStatus: ConfirmationStatus.unprompted,
+    });
+    const result = (await registeredTool.handler(
+      { stepName: 'templated_call' } as never,
+      context as never
+    )) as ToolHandlerPromptReturn;
+
+    // Templated paths bypass the allow-list (resolved value isn't known),
+    // so the step still goes through HITL even though the literal suffix
+    // matches the allow-listed path.
+    expect(result.prompt).toBeDefined();
+    expect(result.prompt.type).toBe(AgentPromptType.confirmation);
+    expect(mockApi.testStep).not.toHaveBeenCalled();
   });
 });

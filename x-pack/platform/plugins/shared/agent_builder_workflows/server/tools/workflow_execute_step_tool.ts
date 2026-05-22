@@ -24,8 +24,47 @@ import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
+import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
+
+/**
+ * Lazy accessor for the workflows-extensions start contract. The plugin
+ * declares workflows-extensions as an `optionalPlugin`; when it is not
+ * available (or not yet started — e.g. in unit tests), the getter resolves
+ * to `undefined` and pre-validation falls through silently.
+ */
+export type WorkflowsExtensionsGetter = () =>
+  | Promise<WorkflowsExtensionsServerPluginStart | undefined>
+  | WorkflowsExtensionsServerPluginStart
+  | undefined;
+
+/**
+ * Lazy accessor for a set of `kibana.request` (method, path) pairs that callers
+ * have declared read-only and safe to execute without a HITL confirmation
+ * dialog. Each entry is the literal string `${METHOD}:${path}` — method is
+ * compared case-insensitively, path must match exactly.
+ *
+ * Returns `undefined` when no callers have registered any safe paths (the
+ * default in production setup and in every unit test that doesn't exercise
+ * the allow-list). The getter pattern mirrors `WorkflowsExtensionsGetter`
+ * so downstream plugins can register paths from their own plugin start
+ * without coupling this tool to any specific solution.
+ *
+ * Example entry: `'POST:/internal/security_solution/alert_analysis/related_alerts'`
+ */
+export type SafeKibanaRequestPathsGetter = () =>
+  | Promise<Iterable<string> | undefined>
+  | Iterable<string>
+  | undefined;
 
 export const WORKFLOW_EXECUTE_STEP_TOOL_ID = 'platform.workflows.workflow_execute_step';
+
+/**
+ * Stable tool id for the discovery hint returned alongside blocked
+ * `kibana.request` steps in standalone mode. Exposed as a constant so the
+ * suggestion stays in sync with the tool that actually surfaces the
+ * workflows-extensions step registry.
+ */
+const GET_STEP_DEFINITIONS_TOOL_ID = 'platform.workflows.get_step_definitions';
 
 export const SAFE_STEP_TYPES = new Set([
   'console',
@@ -105,15 +144,41 @@ const buildLookup = (yaml: string): WorkflowLookup => {
   return buildWorkflowLookup(doc, lineCounter);
 };
 
-const getYamlParseError = (yaml: string): string | null => {
+export interface YamlParseFailure {
+  /** Human-readable error message from the YAML parser. */
+  message: string;
+  /** 1-based line number of the offending token, when known. */
+  line?: number;
+  /** 1-based column of the offending token, when known. */
+  column?: number;
+  /** Source line plus a caret marker pointing at the column, when known. */
+  snippet?: string;
+}
+
+/**
+ * Returns a structured parse failure (line + column + snippet) so the LLM
+ * can do a surgical retry instead of re-emitting the whole YAML. Returns
+ * null if the document parses cleanly.
+ */
+const getYamlParseError = (yaml: string): YamlParseFailure | null => {
   try {
     const doc = parseDocument(yaml);
     if (doc.errors.length > 0) {
-      return doc.errors[0].message;
+      const err = doc.errors[0];
+      // YAMLError.linePos is `[start, end]`; both carry { line, col } (1-based).
+      const linePos = (err as { linePos?: Array<{ line: number; col: number }> }).linePos?.[0];
+      const lines = yaml.split('\n');
+      const line = linePos?.line;
+      const column = linePos?.col;
+      const snippet =
+        line !== undefined && line >= 1 && line <= lines.length
+          ? `${lines[line - 1]}\n${' '.repeat(Math.max(0, (column ?? 1) - 1))}^`
+          : undefined;
+      return { message: err.message, line, column, snippet };
     }
     return null;
   } catch (error) {
-    return error instanceof Error ? error.message : String(error);
+    return { message: error instanceof Error ? error.message : String(error) };
   }
 };
 
@@ -478,6 +543,24 @@ const createUnsafeStepResult = async ({
     ? `Step "${stepName}" contains child step "${unsafeStep.stepId}" (type "${unsafeStep.stepType}") which has external side effects`
     : `Step type "${unsafeStep.stepType}" has external side effects and cannot be auto-executed`;
 
+  // A blocked `kibana.request` in standalone mode (evals, A2A, background
+  // jobs) cannot be unblocked by re-prompting — there's no human in the
+  // loop. Surface a structured next-action pointing the caller at
+  // `get_step_definitions`, which is where the hosting plugin's registered
+  // safer alternatives live. Non-`kibana.request` blocks keep the original
+  // "ask the user" hint since they're typically connector-mediated side
+  // effects with no programmatic discovery path.
+  const isKibanaRequest = unsafeStep.stepType === 'kibana.request';
+  const hint = isKibanaRequest
+    ? 'No safe `kibana.request` path matched. Call `platform.workflows.get_step_definitions({ step_types: ["kibana.request"] })` to discover registered alternatives, or escalate to a human-mode invocation.'
+    : 'Ask the user to test this step manually using the "Run step" button in the editor.';
+  const nextAction = isKibanaRequest
+    ? {
+        tool_id: GET_STEP_DEFINITIONS_TOOL_ID,
+        params: { step_types: ['kibana.request'] },
+      }
+    : undefined;
+
   return createToolResult({
     blocked: true,
     reason,
@@ -485,7 +568,8 @@ const createUnsafeStepResult = async ({
     unsafeStepType: unsafeStep.stepType,
     ...(isChildUnsafe ? { unsafeChildStepId: unsafeStep.stepId } : {}),
     ...(validation ? { validation } : {}),
-    hint: 'Ask the user to test this step manually using the "Run step" button in the editor.',
+    hint,
+    ...(nextAction ? { nextAction } : {}),
   });
 };
 
@@ -533,16 +617,259 @@ const pollExecution = async (
   };
 };
 
+export interface StepSchemaIssue {
+  /** Dot/bracket path inside the step's `with:` block (e.g. `endpoint_id`, `query.bool.must[0]`). */
+  path: string;
+  /** Zod issue code (e.g. `invalid_type`, `unrecognized_keys`). */
+  code: string;
+  /** Human-readable message produced by Zod. */
+  message: string;
+  /** Expected type when known (Zod populates this for `invalid_type`). */
+  expected?: string;
+  /** Actual value's type when known. */
+  received?: string;
+}
+
+export interface StepValidationFailure {
+  /** The step type id the step claims to be (e.g. `data.search`). */
+  stepType: string;
+  /** Top-level failure reason — the registry might not know this step, or the schema rejected the `with:`. */
+  reason: 'unknown_step_type' | 'with_schema_invalid';
+  /** Schema issues populated when `reason === 'with_schema_invalid'`. */
+  schemaErrors?: StepSchemaIssue[];
+  /** Convenience message suitable for an LLM-facing `error` field. */
+  message: string;
+}
+
+/**
+ * Matches `{{ … }}` template references anywhere in a string. The execution
+ * engine resolves these at runtime via the workflow context manager.
+ */
+const MUSTACHE_REF_PATTERN = /\{\{[^}]+\}\}/;
+
+/**
+ * Recursively scans `value` for any string containing a Mustache template
+ * reference. Returns `true` as soon as one is found. Used by
+ * `preValidateStepWith` to decide whether to skip static Zod validation —
+ * pre-validation can't see through templates and would emit false-positive
+ * schema errors on chained workflows where downstream values come from
+ * earlier steps / inputs / context.
+ */
+function containsMustacheRef(value: unknown): boolean {
+  if (value === null || value === undefined) return false;
+  if (typeof value === 'string') return MUSTACHE_REF_PATTERN.test(value);
+  if (Array.isArray(value)) return value.some(containsMustacheRef);
+  if (typeof value === 'object') {
+    return Object.values(value as Record<string, unknown>).some(containsMustacheRef);
+  }
+  return false;
+}
+
+/**
+ * Builds the allow-list signature for a `kibana.request` step's `with:`
+ * block. Returns `null` when the with-block is missing, the method/path
+ * fields aren't both literal strings, or either value contains a Mustache
+ * template ref (we can't safely match a templated path against a static
+ * allow-list — the resolved value isn't known until execution).
+ */
+export function getKibanaRequestSignature(withBlock: unknown): string | null {
+  if (!withBlock || typeof withBlock !== 'object') return null;
+  const block = withBlock as Record<string, unknown>;
+  const { method, path } = block;
+  if (typeof method !== 'string' || typeof path !== 'string') return null;
+  if (containsMustacheRef(method) || containsMustacheRef(path)) return null;
+  return `${method.toUpperCase()}:${path}`;
+}
+
+/**
+ * Returns `true` when `stepType` is `kibana.request` AND the resolved
+ * (method, path) pair is present in the caller-supplied allow-list.
+ * Allow-listed calls skip the unsafe-step branch entirely — no HITL
+ * confirmation, no standalone preview short-circuit — and run straight
+ * through the executor.
+ *
+ * The allow-list lives outside this tool: callers register entries via the
+ * `getSafeKibanaRequestPaths` getter passed to `registerWorkflowExecuteStepTool`.
+ * The signature format is `${METHOD}:${path}` (method uppercased,
+ * path matched literally). See `SafeKibanaRequestPathsGetter` for details.
+ */
+export function isAllowedReadOnlyKibanaRequest(
+  stepType: string,
+  withBlock: unknown,
+  safePaths: ReadonlySet<string> | undefined
+): boolean {
+  if (stepType !== 'kibana.request') return false;
+  if (!safePaths || safePaths.size === 0) return false;
+  const signature = getKibanaRequestSignature(withBlock);
+  if (!signature) return false;
+  return safePaths.has(signature);
+}
+
+/**
+ * Best-effort pre-execution validation of a step's `with:` block. Returns
+ * `null` when:
+ *   - the workflows-extensions registry is unavailable (e.g. unit tests),
+ *   - the step type has no registered `inputSchema`,
+ *   - the `with:` block contains any Mustache template ref (`{{ … }}`) — the
+ *     execution engine resolves these at runtime; Zod can't see through them
+ *     and would emit false-positive schema errors on chained workflows, or
+ *   - the `with:` block parses cleanly.
+ *
+ * Returns a structured failure when the `with:` block fails Zod parsing on
+ * literal values. The caller is expected to short-circuit before the
+ * (expensive) execution-engine round-trip so the LLM gets the schema
+ * diagnosis cheaply.
+ *
+ * NOTE: This is intentionally a SOFT gate. The Mustache skip means a step
+ * that mixes literals and templates (`size: 10, query: "{{ inputs.q }}"`)
+ * loses pre-validation on the literal half too. The trade-off is correctness
+ * over coverage — false positives on chained workflows are far more painful
+ * than missed pre-validation on a templated step (the execution engine still
+ * validates the resolved values).
+ */
+export async function preValidateStepWith(
+  yaml: string,
+  stepName: string,
+  stepType: string,
+  workflowsExtensions: WorkflowsExtensionsServerPluginStart | undefined
+): Promise<StepValidationFailure | null> {
+  if (!workflowsExtensions) {
+    return null;
+  }
+
+  const definition = workflowsExtensions.getStepDefinition(stepType);
+  if (!definition) {
+    // The workflowsExtensions registry only covers step types plugins have
+    // explicitly registered (data.*, ai.*, plus skill-specific steps like
+    // renderAlertNarrative). The execution engine itself knows several
+    // hundred more (connector-derived steps such as `kibana.request`,
+    // `elasticsearch.search`, `cases.*`, `slack2.*`, etc.). Treating
+    // "missing from workflowsExtensions" as `unknown_step_type` produces
+    // false positives that block valid steps. Skip pre-validation in that
+    // case and let the execution engine surface any genuine errors.
+    return null;
+  }
+  if (!definition.inputSchema) {
+    return null;
+  }
+
+  let withBlock: unknown;
+  try {
+    const parsed = YAML.parse(yaml) as { steps?: unknown[] } | undefined;
+    withBlock = extractWithBlock(parsed?.steps, stepName);
+  } catch {
+    // YAML errors are reported separately via `getYamlParseError`; if we
+    // somehow reach this point with a malformed doc, just skip validation.
+    return null;
+  }
+
+  // Mustache template refs (`{{ steps.prev.output.id }}`, `{{ inputs.q }}`,
+  // `{{ consts.foo }}`, …) are resolved by the execution engine at run time.
+  // Zod can't see through them and would reject the literal string when the
+  // schema expects a non-string type (array, number, object, …). Skip
+  // pre-validation entirely when ANY templated value is present; the
+  // execution engine will validate the resolved payload.
+  if (containsMustacheRef(withBlock)) {
+    return null;
+  }
+
+  const result = definition.inputSchema.safeParse(withBlock ?? {});
+  if (result.success) {
+    return null;
+  }
+
+  const schemaErrors: StepSchemaIssue[] = result.error.issues.map((issue) => ({
+    path: issue.path.map(String).join('.') || '<root>',
+    code: issue.code,
+    message: issue.message,
+    expected: (issue as { expected?: string }).expected,
+    received: (issue as { received?: string }).received,
+  }));
+
+  return {
+    stepType,
+    reason: 'with_schema_invalid',
+    schemaErrors,
+    message: `Step "${stepName}" (${stepType}) has ${schemaErrors.length} schema error${
+      schemaErrors.length === 1 ? '' : 's'
+    } in \`with:\`. Fix only the listed paths.`,
+  };
+}
+
+/**
+ * Walks the parsed YAML steps tree to find a step by name and returns its
+ * `with:` value. Returns `undefined` if the step isn't found or the `with:`
+ * field is missing.
+ */
+function extractWithBlock(steps: unknown, stepName: string): unknown {
+  if (!Array.isArray(steps)) return undefined;
+  for (const step of steps) {
+    if (!step || typeof step !== 'object') continue;
+    const stepObj = step as Record<string, unknown>;
+    if (stepObj.name === stepName) {
+      return stepObj.with;
+    }
+    for (const nestedKey of NESTED_STEP_KEYS) {
+      if (isNestedStepKey(nestedKey)) {
+        const nested = stepObj[nestedKey];
+        const found = extractWithBlock(nested, stepName);
+        if (found !== undefined) {
+          return found;
+        }
+      }
+    }
+  }
+  return undefined;
+}
+
 export function registerWorkflowExecuteStepTool(
   agentBuilder: AgentBuilderPluginSetup,
-  api: WorkflowsManagementApi
+  api: WorkflowsManagementApi,
+  getWorkflowsExtensions: WorkflowsExtensionsGetter = () => undefined,
+  getSafeKibanaRequestPaths: SafeKibanaRequestPathsGetter = () => undefined
 ): void {
+  // Cache the resolution promise so the start contract is fetched at most once
+  // per tool registration, regardless of how many tool invocations happen.
+  let workflowsExtensionsPromise:
+    | Promise<WorkflowsExtensionsServerPluginStart | undefined>
+    | undefined;
+  const resolveWorkflowsExtensions = (): Promise<
+    WorkflowsExtensionsServerPluginStart | undefined
+  > => {
+    if (!workflowsExtensionsPromise) {
+      workflowsExtensionsPromise = Promise.resolve(getWorkflowsExtensions()).catch(() => undefined);
+    }
+    return workflowsExtensionsPromise;
+  };
+
+  // Cache the resolved allow-list as a Set for O(1) membership checks. The
+  // getter is invoked at most once per tool registration; resolution errors
+  // fall through to an empty allow-list (HITL behavior preserved).
+  let safeKibanaRequestPathsPromise: Promise<ReadonlySet<string> | undefined> | undefined;
+  const resolveSafeKibanaRequestPaths = (): Promise<ReadonlySet<string> | undefined> => {
+    if (!safeKibanaRequestPathsPromise) {
+      safeKibanaRequestPathsPromise = Promise.resolve(getSafeKibanaRequestPaths())
+        .then((paths) => (paths ? new Set(paths) : undefined))
+        .catch(() => undefined);
+    }
+    return safeKibanaRequestPathsPromise;
+  };
+
   agentBuilder.tools.register({
     id: WORKFLOW_EXECUTE_STEP_TOOL_ID,
     type: ToolType.builtin,
     description: `Execute a single workflow step against the real environment.
+
+Emit only the \`steps:\` block (and any anchored fragments it references). The envelope (\`version\`, \`name\`, \`enabled: false\`, \`triggers: [{ type: manual }]\`) is added automatically if you omit it — sending it just inflates tokens.
+
+YAML parse errors return a structured \`parseError\` carrying \`line\`, \`column\`, and a snippet with a caret marker. Use it to fix the exact offending token rather than re-emitting the whole document.
+
+Schema errors on the step's \`with:\` block are returned BEFORE execution, with \`schemaErrors\` listing each Zod issue (path, message, expected/received). Fix only the failing fields — do not regenerate untouched parts of the step.
+
 - Safe steps (data, ES reads, cases reads): executed and output returned with no prompt.
-- Unsafe steps (slack.sendMessage, elasticsearch.indices.delete, ES writes, kibana.request, http, …): execution is gated by a user confirmation dialog. ALWAYS populate \`confirmation_body\` with a Markdown preview describing: (1) resolved inputs (e.g. Slack channel + message text, ES index + operation + approximate doc count), (2) the side effect this step will produce, (3) whether the action is reversible. Without \`confirmation_body\` the dialog falls back to a flat key/value dump, which is a degraded UX.
+- Unsafe steps (slack.sendMessage, elasticsearch.indices.delete, ES writes, http, non-allow-listed kibana.request, …): execution is gated by a user confirmation dialog. WHEN the dialog fires, populate \`confirmation_body\` with a Markdown preview describing: (1) resolved inputs (e.g. Slack channel + message text, ES index + operation + approximate doc count), (2) the side effect this step will produce, (3) whether the action is reversible. Without \`confirmation_body\` the dialog falls back to a flat key/value dump, which is a degraded UX. NOTE: for allow-listed \`kibana.request\` paths (see next bullet) the dialog is skipped — \`confirmation_body\` is then harmless metadata, not a runtime gate.
+- \`kibana.request\` steps whose (method, path) pair has been registered as read-only by the hosting plugin run with no prompt — they're treated as safe data fetches and \`confirmation_body\` is OPTIONAL on those calls. Unregistered paths still go through the standard confirmation flow above.
+- If a \`kibana.request\` step is blocked in standalone mode, the result carries a \`nextAction\` hint pointing at \`get_step_definitions\`; use it to look up registered safer alternatives before retrying.
 - if/while steps containing unsafe children: children are auto-replaced with safe stubs so the condition can be tested — returns which branch was taken (no prompt).
 - Other safe-container steps with unsafe descendants (e.g. foreach with an unsafe child): conversation mode prompts once and authorizes the whole container; standalone mode returns a preview with validation (no prompt).
 
@@ -556,7 +883,7 @@ If the user declines a confirmation, do NOT retry the same step. Acknowledge the
         .string()
         .optional()
         .describe(
-          'Optional inline workflow YAML to execute from. If omitted, reads from the workflow.yaml attachment.'
+          'Optional inline workflow YAML. EMIT ONLY the `steps:` block — the workflow envelope (version/name/enabled/triggers) is auto-added if omitted. If omitted entirely, reads from the workflow.yaml attachment.'
         ),
       contextOverride: z
         .record(z.string(), z.unknown())
@@ -596,9 +923,16 @@ If the user declines a confirmation, do NOT retry the same step. Acknowledge the
 
       const yamlParseError = getYamlParseError(yaml);
       if (yamlParseError) {
+        const locator =
+          yamlParseError.line !== undefined
+            ? ` at line ${yamlParseError.line}${
+                yamlParseError.column !== undefined ? `, column ${yamlParseError.column}` : ''
+              }`
+            : '';
         return createToolResult({
           success: false,
-          error: `Invalid workflow YAML: ${yamlParseError}`,
+          error: `Invalid workflow YAML${locator}: ${yamlParseError.message}`,
+          parseError: yamlParseError,
         });
       }
 
@@ -614,8 +948,59 @@ If the user declines a confirmation, do NOT retry the same step. Acknowledge the
         });
       }
 
-      const isStepUnsafe = !SAFE_STEP_TYPES.has(stepInfo.stepType);
-      const unsafeStep = isStepUnsafe ? stepInfo : findUnsafeStep(stepName, lookup.steps);
+      // Pre-execution schema validation: catch invalid `with:` payloads
+      // before the (expensive) execution-engine round-trip and before
+      // prompting the user with a confirmation dialog.
+      const validationFailure = await preValidateStepWith(
+        yaml,
+        stepName,
+        stepInfo.stepType,
+        await resolveWorkflowsExtensions()
+      );
+      if (validationFailure) {
+        return createToolResult({
+          success: false,
+          error: validationFailure.message,
+          stepType: validationFailure.stepType,
+          reason: validationFailure.reason,
+          ...(validationFailure.schemaErrors
+            ? { schemaErrors: validationFailure.schemaErrors }
+            : {}),
+        });
+      }
+
+      // Allow-list lookup for `kibana.request` happens once, here, so the
+      // resolved with-block can be reused by both the unsafe-step gate and
+      // the standalone discovery hint below. Other step types skip the
+      // YAML re-parse — the with-block isn't needed for them.
+      let resolvedKibanaRequestWith: unknown;
+      let isAllowlistedKibanaRequest = false;
+      if (stepInfo.stepType === 'kibana.request') {
+        try {
+          const parsed = YAML.parse(yaml) as { steps?: unknown[] } | undefined;
+          resolvedKibanaRequestWith = extractWithBlock(parsed?.steps, stepName);
+        } catch {
+          resolvedKibanaRequestWith = undefined;
+        }
+        isAllowlistedKibanaRequest = isAllowedReadOnlyKibanaRequest(
+          stepInfo.stepType,
+          resolvedKibanaRequestWith,
+          await resolveSafeKibanaRequestPaths()
+        );
+      }
+
+      const isStepUnsafe =
+        !SAFE_STEP_TYPES.has(stepInfo.stepType) && !isAllowlistedKibanaRequest;
+      // When the top-level step is an allow-listed `kibana.request` we
+      // explicitly skip the descendant walk. `findUnsafeStep` is unaware of
+      // the allow-list and would re-flag the step itself via its self-check.
+      // `kibana.request` is always a leaf step (no children), so there are
+      // no descendants to legitimately surface here.
+      const unsafeStep = isAllowlistedKibanaRequest
+        ? null
+        : isStepUnsafe
+        ? stepInfo
+        : findUnsafeStep(stepName, lookup.steps);
       const isCondition = CONDITION_STEP_TYPES.has(stepInfo.stepType);
 
       // Conditions with unsafe descendants: stub the children and run the
