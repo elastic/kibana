@@ -8,9 +8,7 @@
 import type { ComponentType } from 'react';
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import type { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
-import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
 import { ApmIndexSettingsContext } from '../../../../context/apm_index_settings/apm_index_settings_context';
 import { OpenInDiscover } from './open_in_discover';
 
@@ -41,28 +39,27 @@ const defaultQueryParams = {
   sortDirection: 'DESC' as const,
 };
 
-const mockApmContext = {
-  share: {
-    url: {
-      locators: {
-        get: () => ({
-          getRedirectUrl: () => 'http://test-discover-url',
-        }),
-      },
-    },
-  },
-} as unknown as ApmPluginContextValue;
-
 export default {
   title: 'shared/links/OpenInDiscover',
   component: OpenInDiscover,
+  parameters: {
+    apmContext: {
+      share: {
+        url: {
+          locators: {
+            get: () => ({
+              getRedirectUrl: () => 'http://test-discover-url',
+            }),
+          },
+        },
+      },
+    },
+  },
   decorators: [
     (Story: ComponentType) => (
-      <MockApmPluginStorybook apmContext={mockApmContext}>
-        <ApmIndexSettingsContext.Provider value={mockIndexSettingsContext}>
-          <Story />
-        </ApmIndexSettingsContext.Provider>
-      </MockApmPluginStorybook>
+      <ApmIndexSettingsContext.Provider value={mockIndexSettingsContext}>
+        <Story />
+      </ApmIndexSettingsContext.Provider>
     ),
   ],
 };
