@@ -76,7 +76,7 @@ const ApmDecorator: Decorator = (Story, context) => {
           <ApmPluginContext.Provider value={contextMock}>
             <PerformanceContext.Provider value={mockPerformanceApi}>
               <APMServiceContext.Provider value={serviceContextValue}>
-                <RouterProvider router={apmRouter} history={history}>
+                <RouterProvider router={apmRouter as any} history={history}>
                   <MockTimeRangeContextProvider>
                     <ApmTimeRangeMetadataContextProvider>
                       <ChartPointerEventContextProvider>

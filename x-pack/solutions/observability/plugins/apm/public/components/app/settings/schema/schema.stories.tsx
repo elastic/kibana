@@ -7,7 +7,6 @@
 
 import type { CoreStart } from '@kbn/core/public';
 import type { StoryFn, Meta, StoryContext } from '@storybook/react';
-import type { ReactRenderer } from '@storybook/react';
 import type { ComponentType } from 'react';
 import React from 'react';
 import { merge } from 'lodash';
@@ -82,7 +81,7 @@ export default {
     },
   },
   decorators: [
-    (StoryComponent: ComponentType, { args }: StoryContext<ReactRenderer, Args>) => {
+    (StoryComponent: ComponentType, { args }: StoryContext<Args>) => {
       if (args?.isMigrating) {
         const expiryDate = new Date();
         expiryDate.setMinutes(expiryDate.getMinutes() + 5);
