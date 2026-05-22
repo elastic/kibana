@@ -25,8 +25,8 @@ const IMPACT_LEVEL_LABELS: Record<PvalueImpactLevel, string> = {
   moderate: i18n.translate('discover.contextAwareness.changePointPvalueCell.impactModerate', {
     defaultMessage: 'moderate',
   }),
-  minimal: i18n.translate('discover.contextAwareness.changePointPvalueCell.impactMinimal', {
-    defaultMessage: 'minimal',
+  low: i18n.translate('discover.contextAwareness.changePointPvalueCell.impactLow', {
+    defaultMessage: 'low',
   }),
 };
 

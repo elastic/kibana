@@ -180,7 +180,7 @@ export const ChangePointLensChart: React.FC<ChangePointLensChartProps> = ({
             type: 'actionButton',
             getDisplayName() {
               return i18n.translate('changePointChartViewer.lens.focusedView', {
-                defaultMessage: 'Open in Discover tab',
+                defaultMessage: 'Open in a new Discover tab',
               });
             },
             getIconType() {

@@ -23,6 +23,7 @@ import { CommandNames } from '@kbn/esql-language';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { CHANGE_POINT_TYPE_COLUMN, CHANGE_POINT_PVALUE_COLUMN } from '../constants';
+import { formatPvalueLabel } from './get_pvalue_impact';
 
 const isByOption = (a: ESQLAstItem): a is ESQLCommandOption =>
   (a as { type?: string; name?: string }).type === 'option' &&
@@ -77,18 +78,11 @@ export interface ChangePointCardModel {
 }
 
 const serializeCell = (value: unknown): string => {
-  if (value === null || value === undefined) return '';
+  if (value === undefined) return '';
+  // Matches the behavior of the result table in Discover
+  if (value === null) return '(null)';
   if (typeof value === 'object') return JSON.stringify(value);
   return String(value);
-};
-
-const formatPvalueLabel = (p: unknown): string => {
-  if (typeof p === 'number' && Number.isFinite(p)) {
-    if (p === 0) return '0';
-    if (p >= 0.01 && p < 1) return p.toFixed(5);
-    return p.toExponential(2);
-  }
-  return String(p ?? '');
 };
 
 const pickTimestampCell = (
