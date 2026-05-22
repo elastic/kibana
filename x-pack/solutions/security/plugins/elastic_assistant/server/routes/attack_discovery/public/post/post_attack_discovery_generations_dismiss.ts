@@ -17,9 +17,11 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 
-import { ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_DISMISSED } from '../../../../../common/constants';
+import {
+  ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_DISMISSED,
+  writeAttackDiscoveryEvent,
+} from '@kbn/discoveries';
 import { performChecks } from '../../../helpers';
-import { writeAttackDiscoveryEvent } from './helpers/write_attack_discovery_event';
 import { buildResponse } from '../../../../lib/build_response';
 import type { ElasticAssistantRequestHandlerContext } from '../../../../types';
 

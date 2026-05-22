@@ -1349,6 +1349,8 @@ x-pack/solutions/security/packages/index-adapter @elastic/security-threat-huntin
 x-pack/solutions/security/packages/kbn-cloud-security-posture/common @elastic/contextual-security-apps
 x-pack/solutions/security/packages/kbn-cloud-security-posture/graph @elastic/contextual-security-apps
 x-pack/solutions/security/packages/kbn-cloud-security-posture/public @elastic/contextual-security-apps
+x-pack/solutions/security/packages/kbn-discoveries @elastic/security-generative-ai
+x-pack/solutions/security/packages/kbn-discoveries-schemas @elastic/security-generative-ai
 x-pack/solutions/security/packages/kbn-evals-suite-alerts-rag @elastic/security-generative-ai
 x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery @elastic/security-threat-hunting
 x-pack/solutions/security/packages/kbn-evals-suite-endpoint @elastic/security-defend-workflows
@@ -2862,6 +2864,7 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 # GenAI in Security Solution
 /x-pack/solutions/security/plugins/security_solution/public/common/components/visualization_actions/lens_attributes/ai @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/assistant @elastic/security-threat-hunting
+/x-pack/solutions/security/plugins/discoveries @elastic/security-generative-ai
 /x-pack/solutions/security/plugins/security_solution/public/attack_discovery @elastic/security-threat-hunting
 /x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/ai_assistant @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution_ess/public/upselling/pages/attack_discovery @elastic/security-threat-hunting

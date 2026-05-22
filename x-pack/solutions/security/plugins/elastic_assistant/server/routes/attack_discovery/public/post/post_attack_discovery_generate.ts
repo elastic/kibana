@@ -23,10 +23,10 @@ import {
   ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_FAILED,
   ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_STARTED,
   ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_SUCCEEDED,
-} from '../../../../../common/constants';
-import { getDurationNanoseconds } from './get_duration_nanoseconds';
+  writeAttackDiscoveryEvent,
+  getDurationNanoseconds,
+} from '@kbn/discoveries';
 import { performChecks } from '../../../helpers';
-import { writeAttackDiscoveryEvent } from './helpers/write_attack_discovery_event';
 import { buildResponse } from '../../../../lib/build_response';
 import type { ElasticAssistantRequestHandlerContext } from '../../../../types';
 import { requestIsValid } from './helpers/request_is_valid';
@@ -161,11 +161,12 @@ export const postAttackDiscoveryGenerateRoute = (
             return privilegesCheckResponse.response;
           }
 
+          const spaceId = (await context.elasticAssistant).getSpaceId();
+
           const executionUuid = uuidv4();
 
           // event log details:
           const connectorId = apiConfig.connectorId;
-          const spaceId = (await context.elasticAssistant).getSpaceId();
           const generatedStarted = new Date();
           const loadingMessage = getAttackDiscoveryLoadingMessage({
             alertsCount: size,
@@ -190,15 +191,18 @@ export const postAttackDiscoveryGenerateRoute = (
           // Don't await the results of invoking the graph; (just the execution_uuid will be returned from the route handler):
           generateAndUpdateAttackDiscoveries({
             actionsClient,
-            enableFieldRendering: true, // the _generate API always pass true for this value. It's still possible for clients who read the generated discoveries to specify false when retrieving them.
-            executionUuid,
             authenticatedUser,
             config: { ...request.body, apiConfig },
             dataClient,
+            enableFieldRendering: true, // the _generate API always pass true for this value. It's still possible for clients who read the generated discoveries to specify false when retrieving them.
             esClient,
+            eventLogger,
+            eventLogIndex,
+            executionUuid,
             inferenceClient,
             logger,
             savedObjectsClient,
+            spaceId,
             telemetry,
             withReplacements: false, // the _generate API never applies replacements when generating discoveries
           })

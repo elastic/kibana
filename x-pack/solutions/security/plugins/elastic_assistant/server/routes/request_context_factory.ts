@@ -145,6 +145,7 @@ export class RequestContextFactory implements IRequestContextFactory {
       searchInferenceEndpoints: startPlugins.searchInferenceEndpoints,
       savedObjectsClient,
       telemetry: core.analytics,
+      workflowsManagement: startPlugins.workflowsManagement?.management,
 
       // Note: elserInferenceId is used here to enable setting up the KB using a different ELSER model, which
       // is necessary for testing purposes (`pt_tiny_elser`).
@@ -188,6 +189,7 @@ export class RequestContextFactory implements IRequestContextFactory {
       getAttackDiscoverySchedulingDataClient: memoize(async () => {
         return this.assistantService.createAttackDiscoverySchedulingDataClient({
           actionsClient,
+          filterTags: { excludeTags: ['attack-discovery-workflow', 'attack-discovery-schedule'] },
           logger: this.logger,
           rulesClient,
         });

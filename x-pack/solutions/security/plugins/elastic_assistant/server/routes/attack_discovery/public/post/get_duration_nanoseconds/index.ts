@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export const getDurationNanoseconds = ({ end, start }: { end: Date; start: Date }): number =>
-  (end.getTime() - start.getTime()) * 1_000_000; // Convert milliseconds to nanoseconds
+export { getDurationNanoseconds } from '@kbn/discoveries';

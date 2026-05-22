@@ -7,6 +7,7 @@
 
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 import { coreMock, elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import {
@@ -58,6 +59,12 @@ jest.mock('./telemetry', () => {
     reportAttackDiscoveryGenerationSuccess: jest.fn(actual.reportAttackDiscoveryGenerationSuccess),
   };
 });
+
+const mockWriteAttackDiscoveryEvent = jest.fn();
+jest.mock('@kbn/discoveries', () => ({
+  ...jest.requireActual('@kbn/discoveries'),
+  writeAttackDiscoveryEvent: (...args: unknown[]) => mockWriteAttackDiscoveryEvent(...args),
+}));
 
 const mockApiConfig = {
   connectorId: 'connector-id',
@@ -193,8 +200,9 @@ describe('generateAndUpdateAttackDiscoveries', () => {
           anonymizedAlerts: mockAnonymizedAlerts,
           apiConfig: mockConfig.apiConfig,
           attackDiscoveries: mockAttackDiscoveries,
-          hasFilter: false,
+          duplicatesDroppedCount: 0,
           end: mockConfig.end,
+          hasFilter: false,
           latestReplacements: mockConfig.replacements,
           size: mockConfig.size,
           start: mockConfig.start,
@@ -449,6 +457,51 @@ describe('generateAndUpdateAttackDiscoveries', () => {
         attackDiscoveries: createMockAttackDiscoveryAlerts(),
         replacements: mockConfig.replacements,
       });
+    });
+  });
+
+  describe('event logging', () => {
+    const mockEventLogger = {
+      logEvent: jest.fn(),
+      startTiming: jest.fn(),
+      stopTiming: jest.fn(),
+      updateEvents: jest.fn(),
+    } as unknown as IEventLogger;
+
+    const eventLoggingProps = {
+      actionsClient: mockActionsClient,
+      authenticatedUser: mockAuthenticatedUser,
+      config: mockConfig,
+      dataClient: mockDataClient,
+      enableFieldRendering: true,
+      esClient: mockEsClient,
+      eventLogger: mockEventLogger,
+      eventLogIndex: '.kibana-event-log-test',
+      executionUuid: 'test-event-logging',
+      logger: mockLogger,
+      savedObjectsClient: mockSavedObjectsClient,
+      spaceId: 'default',
+      telemetry: mockTelemetry,
+      withReplacements: false,
+    };
+
+    beforeEach(() => {
+      mockWriteAttackDiscoveryEvent.mockResolvedValue(undefined);
+    });
+
+    it('writes validation-succeeded event with newAlerts equal to the persisted discovery count', async () => {
+      const storedDiscoveries = createMockAttackDiscoveryAlerts();
+
+      await generateAndUpdateAttackDiscoveries(eventLoggingProps);
+
+      const validationSucceededCall = mockWriteAttackDiscoveryEvent.mock.calls.find(
+        (call: unknown[]) => (call[0] as Record<string, unknown>)?.action === 'validation-succeeded'
+      );
+
+      expect(validationSucceededCall).toBeDefined();
+      expect((validationSucceededCall![0] as Record<string, unknown>).newAlerts).toBe(
+        storedDiscoveries.length
+      );
     });
   });
 });

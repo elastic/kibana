@@ -80,6 +80,11 @@ export const findAttackDiscoveriesRoute = (
         try {
           const { query } = request;
 
+          logger.debug(
+            () =>
+              `[FIND_ROUTE] Received find request with params: ${JSON.stringify(query, null, 2)}`
+          );
+
           if (query.shared !== undefined && query.include_all_authors !== undefined) {
             return resp.error({
               body: 'The parameters "shared" and "include_all_authors" are mutually exclusive.',
@@ -97,6 +102,8 @@ export const findAttackDiscoveriesRoute = (
           }
 
           const currentUser = await checkResponse.currentUser;
+
+          logger.debug(() => `[FIND_ROUTE] Current user: ${currentUser.username}`);
 
           // get an Elasticsearch client for the authenticated user:
           const esClient = (await context.core).elasticsearch.client.asCurrentUser;
@@ -125,6 +132,15 @@ export const findAttackDiscoveriesRoute = (
             },
             logger,
           });
+
+          logger.debug(
+            () =>
+              `[FIND_ROUTE] Returning response: data.length=${result.data.length}, total=${
+                result.total
+              }, page=${result.page}, per_page=${
+                result.per_page
+              }, connector_names=[${result.connector_names.join(', ')}]`
+          );
 
           return response.ok({
             body: {
