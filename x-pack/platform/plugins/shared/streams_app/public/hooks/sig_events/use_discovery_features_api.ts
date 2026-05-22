@@ -37,7 +37,9 @@ export function useDiscoveryFeaturesApi(): DiscoveryFeaturesApi {
           'POST /internal/streams/features/_bulk',
           {
             signal: null,
-            params: { body: { operations: features.map((feature) => ({ delete: { id: feature.id } })) } },
+            params: {
+              body: { operations: features.map((feature) => ({ delete: { id: feature.id } })) },
+            },
           }
         );
         return { succeededCount: succeeded, failedCount: failed };

@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  bulkFeaturesBodySchema,
-  bulkFeaturesAcrossStreamsBodySchema,
-} from './route';
+import { bulkFeaturesBodySchema, bulkFeaturesAcrossStreamsBodySchema } from './route';
 
 describe('bulkFeaturesBodySchema', () => {
   it('accepts an exclude operation', () => {
@@ -34,11 +31,7 @@ describe('bulkFeaturesBodySchema', () => {
 
   it('accepts a mix of operations', () => {
     const result = bulkFeaturesBodySchema.safeParse({
-      operations: [
-        { exclude: { id: 'a' } },
-        { restore: { id: 'b' } },
-        { delete: { id: 'c' } },
-      ],
+      operations: [{ exclude: { id: 'a' } }, { restore: { id: 'b' } }, { delete: { id: 'c' } }],
     });
     expect(result.success).toBe(true);
   });
@@ -61,11 +54,7 @@ describe('bulkFeaturesBodySchema', () => {
 describe('bulkFeaturesAcrossStreamsBodySchema', () => {
   it('accepts exclude/restore/delete', () => {
     const result = bulkFeaturesAcrossStreamsBodySchema.safeParse({
-      operations: [
-        { exclude: { id: 'a' } },
-        { restore: { id: 'b' } },
-        { delete: { id: 'c' } },
-      ],
+      operations: [{ exclude: { id: 'a' } }, { restore: { id: 'b' } }, { delete: { id: 'c' } }],
     });
     expect(result.success).toBe(true);
   });

@@ -209,10 +209,7 @@ describe('KnowledgeIndicatorSelectableFilter', () => {
     });
 
     it('excludes KIs where getValue returns undefined', async () => {
-      const kis = [
-        makeFeatureKI({ type: 'entity', id: 'f1' }),
-        makeQueryKI({ id: 'q1' }),
-      ];
+      const kis = [makeFeatureKI({ type: 'entity', id: 'f1' }), makeQueryKI({ id: 'q1' })];
 
       await renderFilter({ knowledgeIndicators: kis });
 

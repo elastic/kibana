@@ -19,10 +19,7 @@ import { getFormattedError } from '../../../../../util/errors';
 import { KI_ROW_ACTION_MUTATION_KEY } from '../../../stream_detail_significant_events_view/hooks/use_knowledge_indicator_actions';
 import { getKnowledgeIndicatorItemId } from '../../../stream_detail_significant_events_view/utils/get_knowledge_indicator_item_id';
 import { matchesKnowledgeIndicatorFilters } from '../../../stream_detail_significant_events_view/utils/matches_knowledge_indicator_filters';
-import {
-  BULK_PROMOTE_SUCCESS_TOAST_TITLE,
-  BULK_PROMOTE_ERROR_TITLE,
-} from './translations';
+import { BULK_PROMOTE_SUCCESS_TOAST_TITLE, BULK_PROMOTE_ERROR_TITLE } from './translations';
 import { useKnowledgeIndicatorsUrlState } from './use_knowledge_indicators_url_state';
 
 export const getKnowledgeIndicatorTitle = (ki: KnowledgeIndicator): string =>
@@ -179,8 +176,7 @@ export function useKnowledgeIndicatorsTable() {
 
   const isBulkPromoteInProgress = bulkPromoteMutation.isLoading;
 
-  const isOperationInProgress =
-    isDeleting || isBulkPromoteInProgress || isRowActionInProgress;
+  const isOperationInProgress = isDeleting || isBulkPromoteInProgress || isRowActionInProgress;
 
   const { selectionContainsNonExcludable, isSelectionActionsDisabled, hasPromotableSelected } =
     useMemo(() => {
