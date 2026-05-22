@@ -299,7 +299,7 @@ export class Plugin
         title: i18n.translate('xpack.triggersActionsUI.rulesPage.title', {
           defaultMessage: 'Rules',
         }),
-        visibleIn: ['globalSearch'],
+        visibleIn: ['globalSearch', 'sideNav'],
         category: DEFAULT_APP_CATEGORIES.management,
         async mount(params: AppMountParameters) {
           const [coreStart, pluginsStart] = (await core.getStartServices()) as [

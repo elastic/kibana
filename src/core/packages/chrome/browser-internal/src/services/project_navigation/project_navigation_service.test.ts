@@ -42,7 +42,7 @@ const getNavLink = (partial: Partial<ChromeNavLink> = {}): ChromeNavLink => ({
   baseUrl: '/app',
   url: `/app/${partial.id ?? 'kibana'}`,
   href: `/app/${partial.id ?? 'kibana'}`,
-  visibleIn: ['globalSearch'],
+  visibleIn: ['globalSearch', 'sideNav'],
   ...partial,
 });
 
@@ -208,6 +208,48 @@ describe('initNavigation()', () => {
       expect(node.children?.[0].href).toBe('https://elastic.co');
     });
 
+    test('should filter out deepLinks that exclude sideNav from visibleIn', async () => {
+      const { projectNavigation: svc, navLinksService: nls } = setup({
+        navLinkIds: ['management:genAiSettings'],
+      });
+
+      // Add a second link that is registered but explicitly excludes sideNav
+      const evalsNoSideNav: ChromeNavLink = getNavLink({
+        id: 'management:evals',
+        title: 'MANAGEMENT:EVALS',
+        visibleIn: ['globalSearch'],
+      });
+      const existing = nls.getAll();
+      nls.getNavLinks$.mockReturnValue(of([...existing, evalsNoSideNav]));
+      nls.getAll.mockReturnValue([...existing, evalsNoSideNav]);
+
+      svc.initNavigation<any>(
+        'es',
+        of({
+          body: [
+            {
+              id: 'group1',
+              type: 'navGroup',
+              children: [
+                { link: 'management:genAiSettings' },
+                { link: 'management:evals' }, // registered but no sideNav → removed
+              ],
+            },
+          ],
+        })
+      );
+
+      const treeDefinition = await lastValueFrom(
+        svc.getNavigation$().pipe(
+          take(1),
+          map((nav) => nav.navigationTree)
+        )
+      );
+
+      const [node] = treeDefinition.body as [ChromeProjectNavigationNode];
+      expect(node.children?.map((c) => c.id)).toEqual(['management:genAiSettings']);
+    });
+
     test('should filter out missing deepLinks (e.g. evals) from the navigation tree', async () => {
       const { projectNavigation: projectNavigationService } = setup({
         navLinkIds: ['management:genAiSettings'],
@@ -289,7 +331,7 @@ describe('initNavigation()', () => {
                   id: 'foo',
                   title: 'FOO',
                   url: '/app/foo',
-                  visibleIn: ['globalSearch'],
+                  visibleIn: ['globalSearch', 'sideNav'],
                 },
                 href: '/app/foo',
                 id: 'foo',
@@ -838,7 +880,7 @@ describe('getNavigation$() active nodes', () => {
             baseUrl: '/app',
             url: '/app/item1',
             href: '/app/item1',
-            visibleIn: ['globalSearch'],
+            visibleIn: ['globalSearch', 'sideNav'],
           },
         },
       ],
@@ -892,7 +934,7 @@ describe('getNavigation$() active nodes', () => {
             baseUrl: '/app',
             url: '/app/item1',
             href: '/app/item1',
-            visibleIn: ['globalSearch'],
+            visibleIn: ['globalSearch', 'sideNav'],
           },
           getIsActive: expect.any(Function),
         },

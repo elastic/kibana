@@ -150,9 +150,9 @@ export interface App<HistoryLocationState = unknown> extends AppNavOptions {
    *
    *   start() {
    *      // later, when the navlink needs to be updated
-   *      appUpdater.next(() => {
+   *      appUpdater.next(() => ({
    *        visibleIn: ['globalSearch'],
-   *      })
+   *      }))
    *   }
    * ```
    */

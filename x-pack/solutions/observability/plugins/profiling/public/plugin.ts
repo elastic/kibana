@@ -47,6 +47,7 @@ export class ProfilingPlugin
           defaultMessage: 'Stacktraces',
         }),
         path: '/stacktraces',
+        visibleIn: ['globalSearch', 'sideNav'],
       },
       {
         id: 'flamegraphs',
@@ -54,6 +55,7 @@ export class ProfilingPlugin
           defaultMessage: 'Flamegraphs',
         }),
         path: '/flamegraphs',
+        visibleIn: ['globalSearch', 'sideNav'],
       },
       {
         id: 'functions',
@@ -61,6 +63,7 @@ export class ProfilingPlugin
           defaultMessage: 'Functions',
         }),
         path: '/functions',
+        visibleIn: ['globalSearch', 'sideNav'],
       },
     ];
 

@@ -40,7 +40,7 @@ export class SearchSynonymsPlugin
           id: 'synonyms',
           path: '/',
           title: PLUGIN_TITLE,
-          visibleIn: ['globalSearch'],
+          visibleIn: ['globalSearch', 'sideNav'],
         },
       ],
       async mount({ element, history }: AppMountParameters) {

@@ -83,7 +83,10 @@ export class ManagementPlugin
             title: mgmtApp.title,
             path: mgmtApp.basePath,
             keywords: mgmtApp.keywords,
-            ...(mgmtApp.visibleIn ? { visibleIn: mgmtApp.visibleIn } : {}),
+            // Default includes 'sideNav' so all management sections appear in solution nav.
+            // Sections that explicitly set visibleIn (e.g. to hide from globalSearch) must
+            // also include 'sideNav' if they want to remain visible in solution nav trees.
+            visibleIn: mgmtApp.visibleIn ?? ['globalSearch', 'sideNav'],
           })),
       }));
 

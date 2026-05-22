@@ -206,7 +206,12 @@ export class UptimePlugin
       keywords: appKeywords,
       deepLinks: [
         { id: 'Down monitors', title: 'Down monitors', path: '/?statusFilter=down' },
-        { id: 'Certificates', title: 'TLS Certificates', path: '/certificates' },
+        {
+          id: 'Certificates',
+          title: 'TLS Certificates',
+          path: '/certificates',
+          visibleIn: ['globalSearch', 'sideNav'],
+        },
         { id: 'Settings', title: 'Settings', path: '/settings' },
       ],
       mount: async (params: AppMountParameters) => {

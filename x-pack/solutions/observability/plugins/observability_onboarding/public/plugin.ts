@@ -123,7 +123,7 @@ export class ObservabilityOnboardingPlugin
           },
         });
       },
-      visibleIn: ['globalSearch'],
+      visibleIn: ['globalSearch', 'sideNav'],
     });
 
     this.locators = {
