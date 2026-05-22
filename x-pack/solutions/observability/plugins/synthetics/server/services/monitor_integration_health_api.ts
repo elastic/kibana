@@ -8,6 +8,7 @@
 import type { SavedObject } from '@kbn/core/server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import {
   ConfigKey,
   PrivateLocationHealthStatusValue,
@@ -94,7 +95,7 @@ export class MonitorIntegrationHealthApi {
           this.getExpectedPackagePolicyIds(foundMonitors, privateLocationAPI, allSpaces),
           allSpaces
         ),
-        this.getExistingAgentPoliciesMap(referencedAgentPolicyIds),
+        this.getExistingAgentPoliciesMap(referencedAgentPolicyIds, allSpaces),
         this.getAgentStatusMap(referencedAgentPolicyIds),
       ]);
 
@@ -286,18 +287,27 @@ export class MonitorIntegrationHealthApi {
     return new Map((existingPackagePolicies ?? []).map((policy) => [policy.id, policy]));
   }
 
-  private async getExistingAgentPoliciesMap(agentPolicyIds: string[]) {
+  private async getExistingAgentPoliciesMap(agentPolicyIds: string[], allSpaces: Set<string>) {
     if (agentPolicyIds.length === 0) {
       return new Map<string, AgentPolicy>();
     }
 
-    const internalSoClient = this.server.coreStart.savedObjects.createInternalRepository();
-    const existingAgentPolicies = await this.server.fleet.agentPolicyService.getByIds(
-      internalSoClient,
-      agentPolicyIds,
-      { ignoreMissing: true, withPackagePolicies: false }
+    // Agent policies can be scoped to a non-default space via space_ids. A plain
+    // createInternalRepository() defaults to the 'default' namespace and misses
+    // those policies. Query every relevant space with a namespace-scoped internal
+    // client (same pattern as PackagePolicyService.getByIds) — see issue #270477.
+    const spaces = new Set<string>([this.spaceId, DEFAULT_SPACE_ID, ...allSpaces]);
+    const unsafeClient = this.server.coreStart.savedObjects.getUnsafeInternalClient();
+    const results = await Promise.all(
+      [...spaces].map((space) =>
+        this.server.fleet.agentPolicyService.getByIds(
+          unsafeClient.asScopedToNamespace(space),
+          agentPolicyIds,
+          { ignoreMissing: true, withPackagePolicies: false }
+        )
+      )
     );
-    return new Map((existingAgentPolicies ?? []).map((policy) => [policy.id, policy]));
+    return new Map(results.flat().map((policy) => [policy.id, policy]));
   }
 
   private async getAgentStatusMap(
