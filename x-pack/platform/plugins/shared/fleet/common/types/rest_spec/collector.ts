@@ -20,13 +20,15 @@ export const GetCollectorGroupsRequestSchema = {
     ),
     perPage: schema.number({
       defaultValue: 20,
+      min: 1,
+      max: 1000,
       meta: { description: 'Number of groups per page' },
     }),
     afterKey: schema.maybe(
       schema.string({
         meta: {
           description:
-            'JSON-stringified composite aggregation after_key for cursor-based pagination',
+            'After key is used for cursor-based pagination, use it to get the next page of results',
         },
       })
     ),
@@ -46,6 +48,14 @@ export const CollectorGroupSchema = schema.object({
   signals: schema.arrayOf(schema.string(), {
     meta: { description: 'Signal types present in this group (e.g. logs, metrics, traces)' },
   }),
+  isMissingGroupKey: schema.maybe(
+    schema.boolean({
+      meta: {
+        description:
+          'True when the group key is missing on the underlying documents (missing_bucket)',
+      },
+    })
+  ),
 });
 
 export const GetCollectorGroupsResponseSchema = schema.object({

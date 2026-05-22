@@ -25,7 +25,7 @@ const createMockEsClient = (response: any) =>
 const mockSoClient = {} as SavedObjectsClientContract;
 
 describe('getCollectorGroups', () => {
-  it('returns groups from composite aggregation buckets', async () => {
+  it('returns groups and afterKey when more buckets exist', async () => {
     const esClient = createMockEsClient({
       hits: { hits: [] },
       aggregations: {
@@ -43,15 +43,21 @@ describe('getCollectorGroups', () => {
               group_name: { buckets: [{ key: 'Metrics Production' }] },
               signals: { buckets: [{ key: 'metrics' }] },
             },
+            {
+              key: { group: 'extra' },
+              doc_count: 1,
+              group_name: { buckets: [{ key: 'Extra' }] },
+              signals: { buckets: [] },
+            },
           ],
-          after_key: { group: 'metrics-prod' },
+          after_key: { group: 'extra' },
         },
       },
     });
 
     const result = await getCollectorGroups(esClient, mockSoClient, {
       groupBy: 'collector.group',
-      perPage: 20,
+      perPage: 2,
     });
 
     expect(result.items).toEqual([
@@ -69,6 +75,66 @@ describe('getCollectorGroups', () => {
       },
     ]);
     expect(result.afterKey).toBe(JSON.stringify({ group: 'metrics-prod' }));
+  });
+
+  it('suppresses afterKey when fewer buckets than perPage are returned', async () => {
+    const esClient = createMockEsClient({
+      hits: { hits: [] },
+      aggregations: {
+        groups: {
+          buckets: [
+            {
+              key: { group: 'web-logs' },
+              doc_count: 5,
+              group_name: { buckets: [{ key: 'Web Logs' }] },
+              signals: { buckets: [{ key: 'logs' }] },
+            },
+          ],
+          after_key: { group: 'web-logs' },
+        },
+      },
+    });
+
+    const result = await getCollectorGroups(esClient, mockSoClient, {
+      groupBy: 'collector.group',
+      perPage: 20,
+    });
+
+    expect(result.items).toHaveLength(1);
+    expect(result.afterKey).toBeUndefined();
+  });
+
+  it('sets isMissingGroupKey when group key is null', async () => {
+    const esClient = createMockEsClient({
+      hits: { hits: [] },
+      aggregations: {
+        groups: {
+          buckets: [
+            {
+              key: { group: null },
+              doc_count: 4,
+              group_name: { buckets: [] },
+              signals: { buckets: [{ key: 'logs' }] },
+            },
+          ],
+        },
+      },
+    });
+
+    const result = await getCollectorGroups(esClient, mockSoClient, {
+      groupBy: 'collector.group',
+      perPage: 20,
+    });
+
+    expect(result.items).toEqual([
+      {
+        group: 'others',
+        groupDisplayName: 'Others',
+        docCount: 4,
+        signals: ['logs'],
+        isMissingGroupKey: true,
+      },
+    ]);
   });
 
   it('falls back to group slug when group_name bucket is empty', async () => {
@@ -113,7 +179,7 @@ describe('getCollectorGroups', () => {
 
     const searchCall = (esClient.search as jest.Mock).mock.calls[0][0];
     expect(searchCall.aggs.groups.composite.after).toEqual({ group: 'prev-group' });
-    expect(searchCall.aggs.groups.composite.size).toBe(10);
+    expect(searchCall.aggs.groups.composite.size).toBe(11);
   });
 
   it('returns empty items when no aggregations', async () => {

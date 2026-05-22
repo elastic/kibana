@@ -107,6 +107,11 @@ const CollectorGroupRow: React.FC<{ group: CollectorGroup }> = ({ group }) => {
               </EuiFlexGroup>
             </EuiFlexItem>
 
+            <EuiFlexItem
+              grow={false}
+              css={{ width: 1, alignSelf: 'stretch', backgroundColor: euiTheme.colors.lightShade }}
+            />
+
             <EuiFlexItem grow={false}>
               <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
                 <EuiFlexItem grow={false}>
@@ -122,6 +127,11 @@ const CollectorGroupRow: React.FC<{ group: CollectorGroup }> = ({ group }) => {
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
+
+            <EuiFlexItem
+              grow={false}
+              css={{ width: 1, alignSelf: 'stretch', backgroundColor: euiTheme.colors.lightShade }}
+            />
 
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty size="s" iconType="arrowDown" iconSide="right" isDisabled>

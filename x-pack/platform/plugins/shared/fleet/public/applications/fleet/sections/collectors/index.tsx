@@ -74,34 +74,39 @@ const CollectorsListPage: React.FC = () => {
         >
           {error instanceof Error ? error.message : undefined}
         </EuiCallOut>
-      ) : !isInitialLoading && isEmpty ? (
-        <EuiEmptyPrompt
-          iconType="compute"
-          title={
-            <FormattedMessage
-              id="xpack.fleet.collectors.emptyTitle"
-              defaultMessage="No collectors enrolled"
-            />
-          }
-          body={
-            <FormattedMessage
-              id="xpack.fleet.collectors.emptyBody"
-              defaultMessage="There are no OTel collectors enrolled yet."
-            />
-          }
-        />
       ) : (
         <>
-          <CollectorsStatusBar
-            totalCount={totalCount}
-            dataUpdatedAt={dataUpdatedAt}
-            isAutoRefreshOn={isAutoRefreshOn}
-            onAutoRefreshChange={setIsAutoRefreshOn}
-            selectedGroupBy={groupBy}
-            onGroupByChange={handleGroupByChange}
-          />
+          {!isInitialLoading && (
+            <>
+              <CollectorsStatusBar
+                totalCount={totalCount}
+                dataUpdatedAt={dataUpdatedAt}
+                isAutoRefreshOn={isAutoRefreshOn}
+                onAutoRefreshChange={setIsAutoRefreshOn}
+                selectedGroupBy={groupBy}
+                onGroupByChange={handleGroupByChange}
+              />
+              <EuiSpacer size="m" />
+            </>
+          )}
           <EuiSpacer size="m" />
-          {isGrouped ? (
+          {!isInitialLoading && isEmpty ? (
+            <EuiEmptyPrompt
+              iconType="compute"
+              title={
+                <FormattedMessage
+                  id="xpack.fleet.collectors.emptyTitle"
+                  defaultMessage="No collectors enrolled"
+                />
+              }
+              body={
+                <FormattedMessage
+                  id="xpack.fleet.collectors.emptyBody"
+                  defaultMessage="There are no OTel collectors enrolled yet."
+                />
+              }
+            />
+          ) : isGrouped ? (
             <CollectorGroupsTable
               groups={collectorGroups.groups}
               isLoading={collectorGroups.isLoading}

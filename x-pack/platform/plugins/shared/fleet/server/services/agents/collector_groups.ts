@@ -60,18 +60,17 @@ export async function getCollectorGroups(
   const res = await esClient.search({
     index: AGENTS_INDEX,
     size: 0,
-    track_total_hits: false,
     runtime_mappings: SIGNALS_RUNTIME_FIELD,
     query: kueryNode ? toElasticsearchQuery(kueryNode) : undefined,
     aggs: {
       groups: {
         composite: {
-          size: perPage,
+          size: perPage + 1, // ask for one more than needed to determine if there is a next page
           ...(afterKey ? { after: afterKey } : {}),
           sources: [
             {
               group: {
-                terms: { field: valueField },
+                terms: { field: valueField, missing_bucket: true, missing_order: 'last' },
               },
             },
           ],
@@ -104,17 +103,26 @@ export async function getCollectorGroups(
 
   const buckets = aggs?.groups?.buckets ?? [];
 
-  const items: CollectorGroup[] = buckets.map((bucket) => ({
-    group: bucket.key.group,
-    groupDisplayName: bucket.group_name.buckets[0]?.key ?? bucket.key.group,
-    docCount: bucket.doc_count,
-    signals: bucket.signals.buckets.map((b) => b.key),
-  }));
+  const hasNextPage = buckets.length > perPage;
+  if (hasNextPage) {
+    // remove last item if we have more than requested, this means there is a next page but we don't want to return the extra item
+    buckets.pop();
+  }
+  const nextAfterKey = hasNextPage ? JSON.stringify(buckets[buckets.length - 1].key) : undefined;
 
-  const nextAfterKey = aggs?.groups?.after_key;
+  const items: CollectorGroup[] = buckets.map((bucket) => {
+    const isMissingGroupKey = bucket.key.group == null;
+    return {
+      group: bucket.key.group ?? 'others',
+      groupDisplayName: bucket.group_name.buckets[0]?.key ?? bucket.key.group ?? 'Others',
+      docCount: bucket.doc_count,
+      signals: bucket.signals.buckets.map((b) => b.key),
+      ...(isMissingGroupKey ? { isMissingGroupKey: true } : {}),
+    };
+  });
 
   return {
     items,
-    ...(nextAfterKey ? { afterKey: JSON.stringify(nextAfterKey) } : {}),
+    ...(nextAfterKey ? { afterKey: nextAfterKey } : {}),
   };
 }
