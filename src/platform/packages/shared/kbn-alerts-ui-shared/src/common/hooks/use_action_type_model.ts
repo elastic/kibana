@@ -10,7 +10,7 @@
 import { useMemo } from 'react';
 import { useQuery } from '@kbn/react-query';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
-import type { ActionType } from '@kbn/actions-types';
+import type { ActionTypeSource } from '@kbn/actions-types';
 import { fromConnectorSpecSchema } from '@kbn/connector-specs/src/lib/deserialize_connector_spec';
 import type { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import type { ActionTypeModel, ActionTypeRegistryContract } from '../types';
@@ -72,7 +72,7 @@ export function useActionTypeModel({
     error,
     refetch,
   } = useQuery<ConnectorSpecResponse, Error>({
-    queryKey: [CONNECTOR_SPEC_QUERY_KEY, actionType?.id],
+    queryKey: [CONNECTOR_SPEC_QUERY_KEY, actionTypeId],
     queryFn: async ({ signal }) => {
       const spec = await fetchConnectorSpec(http, actionTypeId!, signal);
       // Validate eagerly — fail fast before caching. The schema is re-parsed
