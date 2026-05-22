@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+
 import { ALL_SPACES_ID } from '../../../common/constants';
 import type { Agent } from '../../types';
 

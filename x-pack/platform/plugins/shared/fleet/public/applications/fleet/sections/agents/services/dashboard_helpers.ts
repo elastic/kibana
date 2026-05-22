@@ -6,6 +6,7 @@
  */
 
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+
 import type { GetInfoResponse } from '../../../../../../common';
 
 export function getDashboardIdForSpace(

@@ -35,6 +35,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+
 import {
   sendGetOneAgentPolicy,
   sendCreateAgentPolicyForRq,

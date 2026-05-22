@@ -7,6 +7,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+
 import type {
   FleetRequestHandler,
   PutSettingsRequestSchema,
