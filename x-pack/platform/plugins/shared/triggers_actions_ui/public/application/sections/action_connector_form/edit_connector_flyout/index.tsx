@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import type { ActionType, ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { isActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import type { Option } from 'fp-ts/Option';
 import { none, some } from 'fp-ts/Option';
@@ -40,7 +40,6 @@ import { EditConnectorTabs } from '../../../../types';
 import type { ConnectorFormState } from '../connector_form';
 import { ConnectorForm } from '../connector_form';
 import { useUpdateConnector } from '../../../hooks/use_edit_connector';
-import { loadActionTypes } from '../../../lib/action_connector_api';
 import { useKibana } from '../../../../common/lib/kibana';
 import { hasSaveActionsCapability } from '../../../lib/capabilities';
 import { TestConnectorForm } from '../test_connector_form';
@@ -142,64 +141,26 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   const { preSubmitValidator, submit, isValid: isFormValid, isSubmitting } = formState;
   const hasErrors = isFormValid === false;
   const isSaving = isUpdatingConnector || isSubmitting || isExecutingConnector;
-  const [resolvedActionType, setResolvedActionType] = useState<ActionType | null>(null);
-  const [actionTypesLoadError, setActionTypesLoadError] = useState<Error | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    const fallbackName = connector.name ?? '';
-    setActionTypesLoadError(null);
-    (async () => {
-      try {
-        const types = await loadActionTypes({ http });
-        if (cancelled) {
-          return;
-        }
-        const match = types.find((t) => t.id === connector.actionTypeId);
-        setResolvedActionType(
-          match ??
-            ({
-              id: connector.actionTypeId,
-              name: fallbackName,
-              enabled: true,
-              enabledInConfig: true,
-              enabledInLicense: true,
-              minimumLicenseRequired: 'basic',
-              supportedFeatureIds: [],
-              isSystemActionType: false,
-              isDeprecated: false,
-              source: connector.source ?? ACTION_TYPE_SOURCES.stack,
-            } as ActionType)
-        );
-      } catch (err) {
-        if (!cancelled) {
-          setResolvedActionType(null);
-          setActionTypesLoadError(err instanceof Error ? err : new Error(String(err)));
-        }
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-    // connector.name is only used as a display fallback in the synthetic ActionType object;
-    // it does not affect which type is loaded, so it must not be a dep.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [http, connector.actionTypeId]);
+  const source = connector.source ?? ACTION_TYPE_SOURCES.stack;
 
   const {
     actionTypeModel,
     isLoading: isLoadingActionTypeModel,
     error: actionTypeModelError,
     refetch: refetchConnectorSpec,
-  } = useActionTypeModel({ actionTypeRegistry, actionType: resolvedActionType, http, uiSettings });
+  } = useActionTypeModel({
+    actionTypeRegistry,
+    actionTypeId: connector.actionTypeId,
+    source,
+    http,
+    uiSettings,
+  });
 
   // Delay the spinner so quick spec loads don't flash a loading state.
   const [showLoadingSpinner, setShowLoadingSpinner] = useState(false);
   useDebounce(() => setShowLoadingSpinner(isLoadingActionTypeModel), 300, [
     isLoadingActionTypeModel,
   ]);
-
-  const isResolvingConnectorType = resolvedActionType === null && !actionTypesLoadError;
 
   const showButtons =
     canSave &&
@@ -356,34 +317,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
                   <EuiSpacer size="m" />
                 </>
               )}
-              {actionTypesLoadError && (
-                <>
-                  <EuiCallOut
-                    announceOnMount
-                    size="s"
-                    color="danger"
-                    iconType="error"
-                    data-test-subj="connector-action-types-load-error"
-                    title={i18n.translate(
-                      'xpack.triggersActionsUI.sections.editConnectorForm.actionTypesLoadError',
-                      { defaultMessage: 'Failed to load connector information' }
-                    )}
-                  >
-                    <p>
-                      {i18n.translate(
-                        'xpack.triggersActionsUI.sections.editConnectorForm.actionTypesLoadErrorDescription',
-                        {
-                          defaultMessage:
-                            'The connector form could not be loaded. Try again, or contact your administrator if the problem persists.',
-                        }
-                      )}
-                    </p>
-                  </EuiCallOut>
-                  <EuiSpacer size="m" />
-                </>
-              )}
-
-              {(showLoadingSpinner || isResolvingConnectorType) && (
+              {showLoadingSpinner && (
                 <EuiFlexGroup
                   direction="column"
                   justifyContent="center"
@@ -445,21 +379,18 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
                 </>
               )}
 
-              {actionTypeModel &&
-                !isLoadingActionTypeModel &&
-                !actionTypeModelError &&
-                !actionTypesLoadError && (
-                  <>
-                    <ConnectorForm
-                      actionTypeModel={actionTypeModel}
-                      connector={connectorWithoutSecrets}
-                      isEdit={isEdit}
-                      onChange={setFormState}
-                      onFormModifiedChange={onFormModifiedChange}
-                    />
-                    {!!preSubmitValidationErrorMessage && <p>{preSubmitValidationErrorMessage}</p>}
-                  </>
-                )}
+              {actionTypeModel && !isLoadingActionTypeModel && !actionTypeModelError && (
+                <>
+                  <ConnectorForm
+                    actionTypeModel={actionTypeModel}
+                    connector={connectorWithoutSecrets}
+                    isEdit={isEdit}
+                    onChange={setFormState}
+                    onFormModifiedChange={onFormModifiedChange}
+                  />
+                  {!!preSubmitValidationErrorMessage && <p>{preSubmitValidationErrorMessage}</p>}
+                </>
+              )}
             </>
           )}
         </>
@@ -480,8 +411,6 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
     docLinks.links.alerting.preconfiguredConnectors,
     actionTypeModel,
     actionTypeModelError,
-    actionTypesLoadError,
-    isResolvingConnectorType,
     isEdit,
     isLoadingActionTypeModel,
     showLoadingSpinner,
@@ -534,16 +463,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   const isTestable =
     isTestableProp ??
     (() => {
-      if (!resolvedActionType && !actionTypeModel) {
-        return false;
-      }
-      const source =
-        actionTypeModel?.source ??
-        resolvedActionType?.source ??
-        // Older API payloads / saved objects may omit `source`; treat as stack so the test tab
-        // stays available for legacy in-process connector types.
-        ACTION_TYPE_SOURCES.stack;
-      return source === ACTION_TYPE_SOURCES.stack;
+      return (actionTypeModel?.source ?? source) === ACTION_TYPE_SOURCES.stack;
     })();
 
   return (

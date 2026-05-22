@@ -123,7 +123,13 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     isLoading: isLoadingActionTypeModel,
     error: actionTypeModelError,
     refetch: refetchConnectorSpec,
-  } = useActionTypeModel({ actionTypeRegistry, actionType, http, uiSettings });
+  } = useActionTypeModel({
+    actionTypeRegistry,
+    actionTypeId: actionType?.id,
+    source: actionType?.source,
+    http,
+    uiSettings,
+  });
 
   // Delay the spinner so quick spec loads don't flash a loading state.
   const [showLoadingSpinner, setShowLoadingSpinner] = useState(false);
