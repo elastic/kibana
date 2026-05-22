@@ -131,6 +131,8 @@ export const servers: ScoutServerConfig = {
     },
     serverArgs: [
       ...defaultConfig.kbnTestServer.serverArgs,
+      // OTel snapshots: latency rules must query traces, not rollup metrics (histogram p95 is null).
+      '--xpack.apm.searchAggregatedTransactions=never',
       ...(preconfiguredEisConnectorsArg ? [preconfiguredEisConnectorsArg] : []),
       ...(shouldEnableTracing
         ? [
