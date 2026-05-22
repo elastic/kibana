@@ -112,7 +112,6 @@ re-present it. No exceptions for bugs that seem obvious.
 For Scout tests, use these skills before writing (REQUIRED):
 1. scout-create-scaffold
 2. scout-best-practices-reviewer
-3. Also read `x-pack/solutions/security/plugins/security_solution/.agents/skills/scout-best-practices-reviewer/SKILL.md` — Security Solution-specific Scout practices
 
 Run the test and expect it to fail:
 ```bash
