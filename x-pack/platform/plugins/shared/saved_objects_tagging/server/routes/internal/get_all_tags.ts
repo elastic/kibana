@@ -5,20 +5,12 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import type { TagsPluginRouter } from '../../types';
 
-export const registerGetTagRoute = (router: TagsPluginRouter) => {
+export const registerInternalGetAllTagsRoute = (router: TagsPluginRouter) => {
   router.get(
     {
-      path: '/api/saved_objects_tagging/tags/{id}',
-      options: {
-        deprecated: {
-          documentationUrl: 'https://www.elastic.co/docs/api/doc/kibana/group/endpoint-tags',
-          severity: 'warning',
-          reason: { type: 'migrate', newApiMethod: 'GET', newApiPath: '/api/tags/{id}' },
-        },
-      },
+      path: '/internal/saved_objects_tagging/tags/_all',
       security: {
         authz: {
           enabled: false,
@@ -26,19 +18,15 @@ export const registerGetTagRoute = (router: TagsPluginRouter) => {
             'This route is opted out from authorization because the tags client internals leverages the SO client',
         },
       },
-      validate: {
-        params: schema.object({
-          id: schema.string(),
-        }),
-      },
+      validate: {},
     },
     router.handleLegacyErrors(async (ctx, req, res) => {
-      const { id } = req.params;
-      const { tagsClient } = await ctx.tags;
-      const tag = await tagsClient.get(id);
+      const client = (await ctx.tags).tagsClient;
+      const tags = await client.getAll();
+
       return res.ok({
         body: {
-          tag,
+          tags,
         },
       });
     })
