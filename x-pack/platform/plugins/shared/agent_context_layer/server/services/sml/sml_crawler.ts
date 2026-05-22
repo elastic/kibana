@@ -157,8 +157,8 @@ export class SmlCrawlerImpl implements SmlCrawler {
    *   type `illegal_argument_exception`. The index is dropped here so the
    *   re-crawl begins immediately in this task run rather than waiting for
    *   the next scheduled tick. Recreation happens lazily on the first write.
-   * - Index deleted between existsIndex() and updateMappingsIfNeeded(): treated
-   *   as no-op (returns false); the crawl will recreate it on first write.
+   * - Index does not exist or is deleted concurrently: updateMappingsIfNeeded()
+   *   no-ops or throws 404, both treated as false; crawl recreates on first write.
    *
    * Returns true when the index was dropped and a full re-crawl is needed.
    */
@@ -169,10 +169,6 @@ export class SmlCrawlerImpl implements SmlCrawler {
   }): Promise<boolean> {
     const storage = createSmlStorage({ logger: this.logger, esClient });
     const smlClient = storage.getClient();
-
-    if (!(await smlClient.existsIndex())) {
-      return false;
-    }
 
     try {
       await storage.updateMappingsIfNeeded();

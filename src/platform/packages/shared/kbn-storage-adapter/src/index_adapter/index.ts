@@ -376,7 +376,7 @@ export class StorageIndexAdapter<
    * change, field rename) cause ES to return 400, which is thrown to the caller.
    * No-op when the schema is already current or no write index exists yet.
    */
-  async updateMappingsIfNeeded(): Promise<void> {
+  public async updateMappingsIfNeeded(): Promise<void> {
     const expectedSchemaVersion = getSchemaVersion(this.storage);
 
     const writeIndex = await this.getCurrentWriteIndex();
