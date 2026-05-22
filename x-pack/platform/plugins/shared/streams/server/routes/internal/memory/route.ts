@@ -14,7 +14,7 @@ import {
   STREAMS_MEMORY_CONSOLIDATION_WORKFLOW_ID,
   STREAMS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
-import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
 import type {
@@ -438,10 +438,10 @@ const createWorkflowTriggerRoute = (
         );
       }
 
-      const workflow = await wfMgmt.management.getWorkflow(
-        managedWorkflowId,
-        GLOBAL_WORKFLOW_SPACE_ID
-      );
+      // Use the user's current space so the execution appears in the Workflows UI.
+      const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+
+      const workflow = await wfMgmt.management.getWorkflow(managedWorkflowId, spaceId);
       if (!workflow) {
         throw notFound(
           `Managed workflow "${managedWorkflowId}" not found. Kibana may still be starting up.`
@@ -450,7 +450,7 @@ const createWorkflowTriggerRoute = (
 
       const executionId = await wfMgmt.management.runWorkflow(
         workflow as Parameters<typeof wfMgmt.management.runWorkflow>[0],
-        GLOBAL_WORKFLOW_SPACE_ID,
+        spaceId,
         {},
         request,
         'sigevents-memory-ui'

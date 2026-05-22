@@ -61,6 +61,7 @@ export interface StreamsServer {
   memoryTriggerRegistry?: MemoryTriggerRegistry;
   ensureMemorySkillRegistered?: () => void;
   workflowsManagement?: WorkflowsServerPluginSetup;
+  spaces?: SpacesPluginStart;
 }
 
 export interface ElasticsearchAccessorOptions {
