@@ -156,6 +156,7 @@ export const DashboardCanvasContent = ({
         {savedObjectStatus.status !== 'resolved' ? null : (
           <DashboardRenderer
             getCreationOptions={getCreationOptions}
+            panelFlyoutType="overlay"
             showPlainSpinner
             locator={dashboardLocator}
             savedObjectId={getExistingDashboardId()}

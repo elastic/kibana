@@ -28,7 +28,11 @@ import { useErrorFailedStep } from '../hooks/use_error_failed_step';
 import { formatTestDuration } from '../../../utils/monitor_test_result/test_time_formats';
 import { useDateFormat } from '../../../../../hooks/use_date_format';
 import { useMonitorLatestPing } from '../hooks/use_monitor_latest_ping';
+import { useUrlSpaceId } from '../../../hooks/use_url_space_id';
 import { useSyntheticsSettingsContext } from '../../../contexts';
+import { getErrorDetailsUrl } from './error_details_url';
+
+export { getErrorDetailsUrl };
 
 export function getNextUpStateForResolvedError(
   errorState: PingState,
@@ -96,6 +100,7 @@ export const ErrorsList = ({
 
   const formatter = useDateFormat();
   const selectedLocation = useSelectedLocation();
+  const spaceId = useUrlSpaceId();
 
   const { latestPing } = useMonitorLatestPing({
     monitorId: configId,
@@ -290,10 +295,15 @@ export const ErrorsList = ({
       const itemConfigId = item.config_id ?? configId;
       const locationId = item.observer?.name ?? selectedLocation?.id;
       const locationQuery = locationId ? `?locationId=${encodeURIComponent(locationId)}` : '';
+      const spaceIdQuery = spaceId
+        ? `${locationQuery ? '&' : '?'}spaceId=${encodeURIComponent(spaceId)}`
+        : '';
       return {
         'data-test-subj': `row-${state.id}`,
         onClick: (evt: MouseEvent) => {
-          history.push(`/monitor/${itemConfigId}/errors/${state.id}${locationQuery}`);
+          history.push(
+            `/monitor/${itemConfigId}/errors/${state.id}${locationQuery}${spaceIdQuery}`
+          );
         },
       };
     }
@@ -321,8 +331,6 @@ export const ErrorsList = ({
     </div>
   );
 };
-
-export { getErrorDetailsUrl } from '../../common/links/error_details_url';
 
 const ERRORS_LIST_LABEL = i18n.translate('xpack.synthetics.errorsList.label', {
   defaultMessage: 'Errors list',
