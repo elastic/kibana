@@ -42,7 +42,7 @@ describe('CustomizeNavigationModal', () => {
 
   it('should render the modal title', () => {
     renderWithI18n(<CustomizeNavigationModal {...defaultProps} />);
-    expect(screen.getByText('Customize Navigation')).toBeInTheDocument();
+    expect(screen.getByText('Customize navigation')).toBeInTheDocument();
   });
 
   it('should render visible items', () => {

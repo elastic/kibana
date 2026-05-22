@@ -122,7 +122,7 @@ export const CustomizeNavigationModal = ({
         <EuiModalHeaderTitle id={modalTitleId}>
           <FormattedMessage
             id="navigationCustomizationComponents.modalTitle"
-            defaultMessage="Customize Navigation"
+            defaultMessage="Customize navigation"
           />
         </EuiModalHeaderTitle>
       </EuiModalHeader>
