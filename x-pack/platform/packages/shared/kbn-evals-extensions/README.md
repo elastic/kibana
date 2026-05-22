@@ -137,7 +137,7 @@ import {
 evaluate('security test', async ({ executorClient }) => {
   // Mix core and extension evaluators
   await executorClient.runExperiment(
-    { dataset, task },
+    { datasets: [dataset], task },
     [
       ...createCorrectnessEvaluators(),     // core kbn/evals
       createToxicityEvaluator(),            // extension

@@ -96,11 +96,11 @@ export function withPhoenixExecutor<T extends { extend: (...args: any[]) => any 
 
         await use(phoenixClient);
 
-        const experiments = await phoenixClient.getRanExperiments();
+        const datasetRunResults = await phoenixClient.getDatasetRunResults();
 
-        for (const experiment of experiments) {
+        for (const result of datasetRunResults) {
           const ingestRequests = buildIngestRequest({
-            source: { kind: 'experiments', experiments: [experiment] },
+            source: { kind: 'experiments', experiments: [result] },
             taskModel: model,
             evaluatorModel,
             repetitions,
@@ -117,14 +117,14 @@ export function withPhoenixExecutor<T extends { extend: (...args: any[]) => any 
             );
           } catch (error) {
             log.error(
-              `Failed to ingest evaluation results for experiment "${experiment.experimentName}" (${
-                experiment.id
+              `Failed to ingest evaluation results for experiment "${result.experimentName}" (${
+                result.id
               }). ${String(error)}`
             );
             throw error;
           }
 
-          await reportModelScore(evalsClient, experiment.id, log, {
+          await reportModelScore(evalsClient, result.id, log, {
             taskModelId: model.id,
             suiteId,
           });

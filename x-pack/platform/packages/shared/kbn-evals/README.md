@@ -51,7 +51,7 @@ evaluate('the model should answer truthfully', async ({ inferenceClient, executo
 
   await executorClient.runExperiment(
     {
-      dataset,
+      datasets: [dataset],
       task: async ({ input }) => {
         const result = await inferenceClient.output({
           id: 'foo',
@@ -916,7 +916,7 @@ import { selectEvaluators } from '@kbn/evals';
 
 await executorClient.runExperiment(
   {
-    dataset,
+    datasets: [dataset],
     task: myTask,
   },
   selectEvaluators([

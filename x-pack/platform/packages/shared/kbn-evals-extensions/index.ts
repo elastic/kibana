@@ -26,7 +26,7 @@
  *
  * evaluate('test', async ({ executorClient }) => {
  *   await executorClient.runExperiment(
- *     { dataset, task },
+ *     { datasets: [dataset], task },
  *     [createToxicityEvaluator()]  // Extension evaluator
  *   );
  *   await costTracker.logRunCost(runId);  // Extension feature

@@ -10,7 +10,7 @@ import type { IngestScoresRequestBodyInput } from '@kbn/evals-common';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { BuildkiteCiMetadata } from './ci_metadata';
 import type { GitMetadata } from './git_metadata';
-import type { EvaluationCompleteEvent, RanExperiment } from '../types';
+import type { EvaluationCompleteEvent, DatasetRunResult } from '../types';
 
 const MAX_INGEST_BATCH_SIZE = 1000;
 
@@ -18,7 +18,7 @@ type IngestScore = IngestScoresRequestBodyInput['scores'][number];
 
 type BuildIngestRequestSource =
   | { kind: 'event'; event: EvaluationCompleteEvent }
-  | { kind: 'experiments'; experiments: RanExperiment[] };
+  | { kind: 'experiments'; experiments: DatasetRunResult[] };
 
 interface BuildIngestRequestArgs {
   taskModel: InferenceModel;
@@ -84,7 +84,7 @@ function buildScorePayload(event: EvaluationCompleteEvent): IngestScore {
   };
 }
 
-function getEventsFromExperiment(experiment: RanExperiment): EvaluationCompleteEvent[] {
+function getEventsFromExperiment(experiment: DatasetRunResult): EvaluationCompleteEvent[] {
   const events: EvaluationCompleteEvent[] = [];
   const runs = experiment.runs ?? {};
   const evaluationRuns = experiment.evaluationRuns ?? [];

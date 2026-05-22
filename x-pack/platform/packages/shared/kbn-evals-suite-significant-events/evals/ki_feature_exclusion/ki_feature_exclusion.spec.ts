@@ -108,14 +108,16 @@ evaluate.describe(
 
             await executorClient.runExperiment(
               {
-                dataset: {
-                  name: `sigevents: KI feature exclusion (${dataset.id})`,
-                  description: `[${dataset.id}] KI feature exclusion across scenarios`,
-                  examples: availableScenarios.map((scenario) => ({
-                    id: `${scenario.input.scenario_id}:exclude-${scenario.input.exclude_count}`,
-                    input: scenario.input,
-                  })),
-                },
+                datasets: [
+                  {
+                    name: `sigevents: KI feature exclusion (${dataset.id})`,
+                    description: `[${dataset.id}] KI feature exclusion across scenarios`,
+                    examples: availableScenarios.map((scenario) => ({
+                      id: `${scenario.input.scenario_id}:exclude-${scenario.input.exclude_count}`,
+                      input: scenario.input,
+                    })),
+                  },
+                ],
                 concurrency: 1,
                 task: async ({ input }: { input: KIFeatureExclusionScenario['input'] }) => {
                   const exampleId = `${input.scenario_id}:exclude-${input.exclude_count}`;

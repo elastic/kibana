@@ -20,7 +20,7 @@ import type {
   Evaluator,
   EvaluationDataset,
   ExperimentTask,
-  RanExperiment,
+  DatasetRunResult,
   TaskOutput,
 } from '@kbn/evals';
 import { upsertDataset } from './upsert_dataset';
@@ -34,7 +34,7 @@ export class KibanaPhoenixClient implements EvalsExecutorClient {
   private readonly phoenixClient: PhoenixClient;
   private readonly allowPhoenixDatasetDeleteRecreateFallback: boolean;
 
-  private readonly experiments: RanExperiment[] = [];
+  private readonly datasetRunResults: DatasetRunResult[] = [];
 
   constructor(
     private readonly options: {
@@ -165,18 +165,39 @@ export class KibanaPhoenixClient implements EvalsExecutorClient {
   async runExperiment<TEvaluationDataset extends EvaluationDataset, TTaskOutput extends TaskOutput>(
     options: {
       name?: string;
+      datasets: TEvaluationDataset[];
+      metadata?: Record<string, unknown>;
+      task: ExperimentTask<TEvaluationDataset['examples'][number], TTaskOutput>;
+      concurrency?: number;
+      trustUpstreamDataset?: boolean;
+    },
+    evaluators: Array<Evaluator<TEvaluationDataset['examples'][number], TTaskOutput>>
+  ): Promise<DatasetRunResult[]> {
+    const { datasets, ...rest } = options;
+    const experimentName = rest.name ?? datasets[0].name;
+    const results: DatasetRunResult[] = [];
+    for (const ds of datasets) {
+      results.push(
+        await this.runSingleDataset({ ...rest, name: experimentName, dataset: ds }, evaluators)
+      );
+    }
+    return results;
+  }
+
+  private async runSingleDataset<
+    TEvaluationDataset extends EvaluationDataset,
+    TTaskOutput extends TaskOutput
+  >(
+    options: {
+      name: string;
       dataset: TEvaluationDataset;
       metadata?: Record<string, unknown>;
       task: ExperimentTask<TEvaluationDataset['examples'][number], TTaskOutput>;
       concurrency?: number;
-      /**
-       * If true, the dataset is assumed to already exist in Phoenix and we will
-       * use its id (resolved by name) instead of creating/upserting it from code.
-       */
       trustUpstreamDataset?: boolean;
     },
     evaluators: Array<Evaluator<TEvaluationDataset['examples'][number], TTaskOutput>>
-  ): Promise<RanExperiment> {
+  ): Promise<DatasetRunResult> {
     return withInferenceContext(async () => {
       const {
         name,
@@ -186,7 +207,7 @@ export class KibanaPhoenixClient implements EvalsExecutorClient {
         concurrency,
         trustUpstreamDataset,
       } = options;
-      const experimentName = name ?? dataset.name;
+      const experimentName = name;
 
       const datasetId = trustUpstreamDataset
         ? (await this.getDatasetByName(dataset.name)).id
@@ -248,7 +269,7 @@ export class KibanaPhoenixClient implements EvalsExecutorClient {
       const exampleIdToIndex = new Map(exampleIds.map((id, index) => [id, index]));
 
       // Build TaskRun records
-      const runs: RanExperiment['runs'] = {};
+      const runs: DatasetRunResult['runs'] = {};
       for (const [exampleId, group] of runsByExampleId) {
         const exampleIndex = exampleIdToIndex.get(exampleId)!;
         const matchingExample = dataset.examples[exampleIndex] ?? {};
@@ -267,7 +288,7 @@ export class KibanaPhoenixClient implements EvalsExecutorClient {
       }
 
       // Map evaluation runs with their corresponding exampleId
-      const evaluationRuns: RanExperiment['evaluationRuns'] = (ran.evaluationRuns ?? []).map(
+      const evaluationRuns: DatasetRunResult['evaluationRuns'] = (ran.evaluationRuns ?? []).map(
         (evalRun: ExperimentEvaluationRun) => ({
           name: evalRun.name,
           result: evalRun.result ?? undefined,
@@ -277,7 +298,7 @@ export class KibanaPhoenixClient implements EvalsExecutorClient {
         })
       );
 
-      const ranExperiment: RanExperiment = {
+      const result: DatasetRunResult = {
         id: ran.id ?? '',
         experimentName,
         datasetId: ran.datasetId,
@@ -288,12 +309,12 @@ export class KibanaPhoenixClient implements EvalsExecutorClient {
         experimentMetadata: (ran as any).experimentMetadata as any,
       };
 
-      this.experiments.push(ranExperiment);
-      return ranExperiment;
+      this.datasetRunResults.push(result);
+      return result;
     });
   }
 
-  async getRanExperiments(): Promise<RanExperiment[]> {
-    return this.experiments;
+  async getDatasetRunResults(): Promise<DatasetRunResult[]> {
+    return this.datasetRunResults;
   }
 }

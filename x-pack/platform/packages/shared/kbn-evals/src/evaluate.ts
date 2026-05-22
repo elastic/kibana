@@ -330,9 +330,9 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
 
       await use(executorClient);
 
-      const experiments = await executorClient.getRanExperiments();
-      for (const experiment of experiments) {
-        await reportModelScore(evalsClient, experiment.id, log, {
+      const datasetRunResults = await executorClient.getDatasetRunResults();
+      for (const result of datasetRunResults) {
+        await reportModelScore(evalsClient, result.id, log, {
           taskModelId: model.id,
           suiteId,
         });

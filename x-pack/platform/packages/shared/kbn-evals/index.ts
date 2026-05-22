@@ -34,7 +34,7 @@ export type {
   ExperimentTask,
   Evaluator,
   EvaluationResult,
-  RanExperiment,
+  DatasetRunResult,
   EvalsExecutorClient,
   EvaluationCompleteEvent,
   OnEvaluationComplete,

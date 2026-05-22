@@ -7,7 +7,7 @@
 
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import { ModelFamily, ModelProvider } from '@kbn/inference-common';
-import type { EvaluationCompleteEvent, RanExperiment } from '../types';
+import type { EvaluationCompleteEvent, DatasetRunResult } from '../types';
 import { buildIngestRequest } from './build_ingest_request';
 
 const createLog = (): jest.Mocked<Pick<SomeDevLog, 'warning'>> => ({
@@ -97,7 +97,7 @@ describe('buildIngestRequest', () => {
   });
 
   it('builds one request per experiment', () => {
-    const experiments: RanExperiment[] = [
+    const experiments: DatasetRunResult[] = [
       {
         id: 'exp-1',
         experimentName: 'experiment-a',

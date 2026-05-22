@@ -278,6 +278,6 @@ export const createEvaluateAlertsRagDataset = ({
     const evalStack = buildAlertsRagEvaluators({ evaluators, traceEsClient, log });
     const task = buildTask({ chatClient, evaluators, log });
 
-    await executorClient.runExperiment({ dataset, task }, evalStack);
+    await executorClient.runExperiment({ datasets: [dataset], task }, evalStack);
   };
 };

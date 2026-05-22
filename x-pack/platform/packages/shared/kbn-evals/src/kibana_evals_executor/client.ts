@@ -20,7 +20,7 @@ import type {
   ExperimentTask,
   OnEvaluationComplete,
   OnExperimentStart,
-  RanExperiment,
+  DatasetRunResult,
   TaskOutput,
 } from '../types';
 import { getCurrentTraceId, withEvaluatorSpan, withTaskSpan } from '../utils/tracing';
@@ -46,7 +46,7 @@ function computeExperimentId(
 }
 
 export class KibanaEvalsClient implements EvalsExecutorClient {
-  private readonly experiments: RanExperiment[] = [];
+  private readonly datasetRunResults: DatasetRunResult[] = [];
 
   constructor(
     private readonly options: {
@@ -98,62 +98,40 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
   >(
     {
       name,
-      dataset,
+      datasets,
       task,
       metadata: experimentMetadata,
       concurrency,
       trustUpstreamDataset = false,
     }: {
       name?: string;
-      dataset: TEvaluationDataset | TEvaluationDataset[];
+      datasets: TEvaluationDataset[];
       metadata?: Record<string, unknown>;
       task: ExperimentTask<TEvaluationDataset['examples'][number], TTaskOutput>;
       concurrency?: number;
       trustUpstreamDataset?: boolean;
     },
     evaluators: Array<Evaluator<TEvaluationDataset['examples'][number], TTaskOutput>>
-  ): Promise<RanExperiment | RanExperiment[]> {
-    const datasets = Array.isArray(dataset) ? dataset : [dataset];
-
-    if (datasets.length > 1 && !name) {
-      throw new Error(
-        'Experiment name is required when passing multiple datasets. Provide a `name` option to runExperiment().'
-      );
-    }
-
+  ): Promise<DatasetRunResult[]> {
     const experimentName = name ?? datasets[0].name;
 
-    if (datasets.length > 1) {
-      const results: RanExperiment[] = [];
-      for (const ds of datasets) {
-        results.push(
-          await this.runSingleDatasetExperiment(
-            {
-              experimentName,
-              dataset: ds,
-              task,
-              metadata: experimentMetadata,
-              concurrency,
-              trustUpstreamDataset,
-            },
-            evaluators
-          )
-        );
-      }
-      return results;
+    const results: DatasetRunResult[] = [];
+    for (const ds of datasets) {
+      results.push(
+        await this.runSingleDatasetExperiment(
+          {
+            experimentName,
+            dataset: ds,
+            task,
+            metadata: experimentMetadata,
+            concurrency,
+            trustUpstreamDataset,
+          },
+          evaluators
+        )
+      );
     }
-
-    return this.runSingleDatasetExperiment(
-      {
-        experimentName,
-        dataset: datasets[0],
-        task,
-        metadata: experimentMetadata,
-        concurrency,
-        trustUpstreamDataset,
-      },
-      evaluators
-    );
+    return results;
   }
 
   private async runSingleDatasetExperiment<
@@ -176,7 +154,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
       trustUpstreamDataset?: boolean;
     },
     evaluators: Array<Evaluator<TEvaluationDataset['examples'][number], TTaskOutput>>
-  ): Promise<RanExperiment> {
+  ): Promise<DatasetRunResult> {
     return withInferenceContext(async () => {
       const resolvedDataset = await this.resolveDataset(dataset, trustUpstreamDataset);
       await this.options.upsertDataset?.(resolvedDataset);
@@ -192,8 +170,8 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
       const runConcurrency = Math.max(1, concurrency ?? 5);
       const limiter = pLimit(runConcurrency);
 
-      const evaluationRuns: RanExperiment['evaluationRuns'] = [];
-      const runs: RanExperiment['runs'] = {};
+      const evaluationRuns: DatasetRunResult['evaluationRuns'] = [];
+      const runs: DatasetRunResult['runs'] = {};
 
       const runJobs: Array<Promise<void>> = [];
 
@@ -308,7 +286,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
       await Promise.all(runJobs);
       this.options.log.info(`✅ Experiment ${experimentId} completed`);
 
-      const ranExperiment: RanExperiment = {
+      const result: DatasetRunResult = {
         id: experimentId,
         experimentName,
         datasetId,
@@ -323,12 +301,12 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
         },
       };
 
-      this.experiments.push(ranExperiment);
-      return ranExperiment;
+      this.datasetRunResults.push(result);
+      return result;
     });
   }
 
-  async getRanExperiments(): Promise<RanExperiment[]> {
-    return this.experiments;
+  async getDatasetRunResults(): Promise<DatasetRunResult[]> {
+    return this.datasetRunResults;
   }
 }

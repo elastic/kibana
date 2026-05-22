@@ -218,26 +218,28 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
 
             await executorClient.runExperiment(
               {
-                dataset: {
-                  name: `sigevents: KI query generation (${dataset.id}) (${kiSource})`,
-                  description: `[${dataset.id}] KI query generation across scenarios (${kiSource})`,
-                  examples: collectedExamples.map(({ scenario }) => ({
-                    id: scenario.input.scenario_id,
-                    input: {
-                      ...scenario.input,
-                      snapshot_source: scenario.snapshot_source,
-                    },
-                    output: {
-                      ...scenario.output,
-                      criteria: scenario.output.criteria,
-                      expected: scenario.output.expected_ground_truth,
-                    },
-                    metadata: {
-                      ...scenario.metadata,
-                      test_index: MANAGED_STREAM_SEARCH_PATTERN,
-                    },
-                  })),
-                },
+                datasets: [
+                  {
+                    name: `sigevents: KI query generation (${dataset.id}) (${kiSource})`,
+                    description: `[${dataset.id}] KI query generation across scenarios (${kiSource})`,
+                    examples: collectedExamples.map(({ scenario }) => ({
+                      id: scenario.input.scenario_id,
+                      input: {
+                        ...scenario.input,
+                        snapshot_source: scenario.snapshot_source,
+                      },
+                      output: {
+                        ...scenario.output,
+                        criteria: scenario.output.criteria,
+                        expected: scenario.output.expected_ground_truth,
+                      },
+                      metadata: {
+                        ...scenario.metadata,
+                        test_index: MANAGED_STREAM_SEARCH_PATTERN,
+                      },
+                    })),
+                  },
+                ],
                 concurrency: 1,
                 trustUpstreamDataset: TRUST_UPSTREAM,
                 task: async ({ input }: { input: KIQueryGenerationScenario['input'] }) => {
@@ -357,17 +359,19 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
 
         await executorClient.runExperiment(
           {
-            dataset: {
-              name: 'sigevents: KI query generation: empty datastream',
-              description: 'Significant events KI query generation with empty stream data',
-              examples: [
-                {
-                  input: {},
-                  output: {},
-                  metadata: {},
-                },
-              ],
-            },
+            datasets: [
+              {
+                name: 'sigevents: KI query generation: empty datastream',
+                description: 'Significant events KI query generation with empty stream data',
+                examples: [
+                  {
+                    input: {},
+                    output: {},
+                    metadata: {},
+                  },
+                ],
+              },
+            ],
             task: async () => {
               const { stream: streamFromApi } = await apiServices.streams.getStreamDefinition(
                 emptyDataStreamTestIndex!

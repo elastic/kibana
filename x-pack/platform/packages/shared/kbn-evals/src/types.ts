@@ -135,17 +135,15 @@ export interface EvalsExecutorClient {
   >(
     options: {
       /**
-       * Human-readable experiment name (e.g. the task name).
-       * Optional for single-dataset experiments (falls back to dataset.name).
-       * Required when passing an array of datasets.
+       * Human-readable experiment name (e.g. the task name)
        */
       name?: string;
       /**
-       * One or more datasets to run the experiment against.
-       * When an array is provided, each dataset is processed independently
-       * and a separate {@link RanExperiment} is returned per dataset.
+       * Datasets to run the experiment against.
+       * Each dataset is processed independently and a separate
+       * {@link DatasetRunResult} is returned per dataset.
        */
-      dataset: TEvaluationDataset | TEvaluationDataset[];
+      datasets: TEvaluationDataset[];
       metadata?: Record<string, unknown>;
       task: ExperimentTask<TEvaluationDataset['examples'][number], TTaskOutput>;
       concurrency?: number;
@@ -159,9 +157,9 @@ export interface EvalsExecutorClient {
       trustUpstreamDataset?: boolean;
     },
     evaluators: Array<Evaluator<TEvaluationDataset['examples'][number], TTaskOutput>>
-  ): Promise<RanExperiment | RanExperiment[]>;
+  ): Promise<DatasetRunResult[]>;
 
-  getRanExperiments(): Promise<RanExperiment[]>;
+  getDatasetRunResults(): Promise<DatasetRunResult[]>;
 }
 
 export interface ExampleWithId extends Example {
@@ -186,7 +184,7 @@ export interface EvaluationRun {
   exampleId?: string;
 }
 
-export interface RanExperiment {
+export interface DatasetRunResult {
   id: string;
   experimentName: string;
   datasetId: string;

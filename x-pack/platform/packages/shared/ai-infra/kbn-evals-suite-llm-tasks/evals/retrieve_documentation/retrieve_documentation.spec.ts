@@ -190,7 +190,7 @@ evaluate.describe(
 
         await executorClient.runExperiment(
           {
-            dataset,
+            datasets: [dataset],
             task: async (
               example: RetrieverTaskDatasetExample
             ): Promise<RetrieveDocumentationTaskOutput> => {
