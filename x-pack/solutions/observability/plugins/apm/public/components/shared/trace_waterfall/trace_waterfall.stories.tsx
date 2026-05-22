@@ -16,19 +16,11 @@ import {
   getSpanDurationUs,
 } from '../../../../common/utils/get_duration_us';
 import { getTimestampUs } from '../../../../common/utils/get_timestamp_us';
-import { MockApmPluginStorybook } from '../../../context/apm_plugin/mock_apm_plugin_storybook';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
 
 const stories: Meta = {
-  title: 'UnifiedTraceWaterfall',
+  title: 'shared/TraceWaterfall/UnifiedTraceWaterfall',
   component: TraceWaterfall,
-  decorators: [
-    (StoryComponent) => (
-      <MockApmPluginStorybook>
-        <StoryComponent />
-      </MockApmPluginStorybook>
-    ),
-  ],
 };
 
 export default stories;
