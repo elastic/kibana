@@ -1,0 +1,13 @@
+{
+  "name": "@kbn/discoveries-plugin",
+  "version": "1.0.0",
+  "private": true,
+  "license": "Elastic License 2.0",
+  "dependencies": {
+    "@kbn/security-ai-prompts": "link:../../packages/security-ai-prompts"
+  }
+}
+
+
+
+

@@ -1,0 +1,178 @@
+version: '1'
+name: Security - Attack discovery - [Test] Closed alerts ES|QL retrieval
+description: |
+  Test workflow that retrieves closed security alerts using ES|QL.
+
+  Unlike the main ES|QL example workflow (which retrieves open and acknowledged
+  alerts), this workflow filters for alerts with workflow_status == "closed".
+  It excludes building block alerts and sorts by risk score (highest first)
+  then timestamp (most recent first).
+
+  The KEEP clause returns security-relevant ECS fields from the
+  .alerts-security.alerts-default index.
+
+  NOTE: This is a TEST workflow. It is NOT registered at startup.
+enabled: true
+tags:
+  - Attack discovery
+  - Security
+  - Test
+  - attackDiscovery:closed_alerts_esql_retrieval
+
+triggers:
+  - type: manual
+
+inputs:
+  - name: alerts_index_pattern
+    type: string
+    required: false
+    description: >
+      Elasticsearch index pattern for security alerts. When not provided,
+      defaults to .alerts-security.alerts-<spaceId> using the current
+      Kibana space (via workflow.spaceId).
+  - name: size
+    type: number
+    default: 100
+    description: Maximum alerts to retrieve (1-10000)
+  - name: start
+    type: string
+    required: false
+    default: now-24h
+    description: Time range start (date math, e.g., now-24h, now-7d)
+  - name: end
+    type: string
+    required: false
+    default: now
+    description: Time range end (date math, e.g., now)
+
+steps:
+  - name: query_closed_alerts
+    type: elasticsearch.esql.query
+    timeout: '5m'
+    with:
+      query: |
+        {%- if inputs.alerts_index_pattern -%}
+        FROM {{ inputs.alerts_index_pattern }} METADATA _id
+        {%- else -%}
+        FROM .alerts-security.alerts-{{ workflow.spaceId }} METADATA _id
+        {%- endif %}
+        | WHERE @timestamp >= NOW() - 24 hours
+        | WHERE kibana.alert.workflow_status == "closed"
+        | WHERE kibana.alert.building_block_type IS NULL
+        | SORT kibana.alert.risk_score DESC, @timestamp DESC
+        | LIMIT {{ inputs.size }}
+        | KEEP
+            _id,
+            @timestamp,
+            agent.id,
+            cloud.account.name,
+            cloud.availability_zone,
+            cloud.provider,
+            cloud.region,
+            cloud.service.name,
+            destination.ip,
+            dns.question.name,
+            dns.question.type,
+            entity.id,
+            entity.name,
+            entity.sub_type,
+            entity.type,
+            event.category,
+            event.dataset,
+            event.module,
+            event.outcome,
+            file.hash.sha256,
+            file.name,
+            file.path,
+            group.id,
+            group.name,
+            host.architecture,
+            host.asset.criticality,
+            host.name,
+            host.os.name,
+            host.os.version,
+            host.risk.calculated_level,
+            host.risk.calculated_score_norm,
+            host.type,
+            kibana.alert.original_time,
+            kibana.alert.risk_score,
+            kibana.alert.rule.description,
+            kibana.alert.rule.name,
+            kibana.alert.rule.references,
+            kibana.alert.rule.threat.framework,
+            kibana.alert.rule.threat.tactic.id,
+            kibana.alert.rule.threat.tactic.name,
+            kibana.alert.rule.threat.tactic.reference,
+            kibana.alert.rule.threat.technique.id,
+            kibana.alert.rule.threat.technique.name,
+            kibana.alert.rule.threat.technique.reference,
+            kibana.alert.rule.threat.technique.subtechnique.id,
+            kibana.alert.rule.threat.technique.subtechnique.name,
+            kibana.alert.rule.threat.technique.subtechnique.reference,
+            kibana.alert.severity,
+            kibana.alert.workflow_status,
+            message,
+            network.protocol,
+            package.name,
+            package.version,
+            process.args,
+            process.code_signature.exists,
+            process.code_signature.signing_id,
+            process.code_signature.status,
+            process.code_signature.subject_name,
+            process.code_signature.trusted,
+            process.command_line,
+            process.executable,
+            process.exit_code,
+            process.hash.md5,
+            process.hash.sha1,
+            process.hash.sha256,
+            process.name,
+            process.parent.args,
+            process.parent.args_count,
+            process.parent.code_signature.exists,
+            process.parent.code_signature.status,
+            process.parent.code_signature.subject_name,
+            process.parent.code_signature.trusted,
+            process.parent.command_line,
+            process.parent.executable,
+            process.parent.name,
+            process.pe.original_file_name,
+            process.pid,
+            process.working_directory,
+            rule.description,
+            rule.name,
+            rule.reference,
+            source.ip,
+            threat.framework,
+            threat.tactic.id,
+            threat.tactic.name,
+            threat.tactic.reference,
+            threat.technique.id,
+            threat.technique.name,
+            threat.technique.reference,
+            threat.technique.subtechnique.id,
+            threat.technique.subtechnique.name,
+            threat.technique.subtechnique.reference,
+            user.asset.criticality,
+            user.domain,
+            user.name,
+            user.risk.calculated_level,
+            user.risk.calculated_score_norm,
+            user.target.name,
+            vulnerability.category,
+            vulnerability.classification,
+            vulnerability.description,
+            vulnerability.enumeration,
+            vulnerability.id,
+            vulnerability.report_id,
+            vulnerability.scanner.vendor,
+            vulnerability.score.base,
+            vulnerability.score.version,
+            vulnerability.severity
+      filter:
+        range:
+          '@timestamp':
+            gte: '${{ inputs.start }}'
+            lte: '${{ inputs.end }}'
+            format: strict_date_optional_time
