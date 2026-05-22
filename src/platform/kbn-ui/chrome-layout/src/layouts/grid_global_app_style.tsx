@@ -15,9 +15,10 @@ import {
   APP_MAIN_SCROLL_CONTAINER_ID,
   layoutVar,
 } from '@kbn/core-chrome-layout-constants';
-import { CommonGlobalAppStyles } from '../common/global_app_styles';
+import { CommonGlobalAppStyles } from './global_app_styles';
+import type { ChromeStyle } from '../layout.types';
 
-const globalLayoutStyles = (euiThemeContext: UseEuiTheme) => {
+export const globalLayoutStyles = (euiThemeContext: UseEuiTheme) => {
   return css`
     :root {
       // TODO: these variables are legacy and we keep them for backward compatibility
@@ -88,7 +89,7 @@ const globalLayoutStyles = (euiThemeContext: UseEuiTheme) => {
  * Project mode background styles with gradient.
  * Only applied when chromeStyle is 'project' to differentiate from classic mode.
  */
-const projectModeBackgroundStyles = (euiThemeContext: UseEuiTheme) => {
+export const projectModeBackgroundStyles = (euiThemeContext: UseEuiTheme) => {
   const { colorMode } = euiThemeContext;
   const isDarkMode = colorMode === 'DARK';
 
@@ -116,6 +117,7 @@ const projectModeBackgroundStyles = (euiThemeContext: UseEuiTheme) => {
 // temporary hacks that need to be removed after better flyout and global sidenav customization support in EUI
 // https://github.com/elastic/eui/issues/8820
 const globalTempHackStyles = (_euiTheme: UseEuiTheme['euiTheme'], chromeStyle: ChromeStyle) => css`
+  body,
   .kbnBody {
     // adjust position of the classic side-navigation
     .euiFlyout.euiCollapsibleNav {
@@ -163,6 +165,7 @@ const globalTempHackStyles = (_euiTheme: UseEuiTheme['euiTheme'], chromeStyle: C
     // application area should have bottom padding when bottom bar is present
     ${logicalCSS('padding-bottom', `var(--euiBottomBarOffset, 0px)`)};
   }
+  body,
   .kbnBody {
     // this is a temporary hack to override EUI's body padding with push flyout
     ${logicalCSS('padding-right', `0px !important`)};
@@ -185,10 +188,7 @@ const globalTempHackStyles = (_euiTheme: UseEuiTheme['euiTheme'], chromeStyle: C
   }
 `;
 
-// TODO: https://github.com/elastic/kibana/issues/251035
-type ChromeStyle = 'project' | 'classic';
-
-interface GridLayoutGlobalStylesProps {
+export interface GridLayoutGlobalStylesProps {
   chromeStyle?: ChromeStyle;
 }
 
