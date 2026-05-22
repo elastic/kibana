@@ -29,7 +29,13 @@ import { QueryBarMenu } from './query_bar_menu';
  * (the helper changes, or `<QueryBarMenu>` stops gating on `showQueries`).
  */
 
-type SavedQueryCapabilities = { showQueries: boolean; saveQuery: boolean };
+interface SavedQueryCapabilities {
+  showQueries: boolean;
+  saveQuery: boolean;
+  // CoreStart types capabilities as `Record<string, boolean | Record<string, boolean>>`
+  // so we need an index signature for this nested capability to be assignable.
+  [key: string]: boolean;
+}
 
 interface AffordancesAssertion {
   loadButton: 'visible' | 'absent';
