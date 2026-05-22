@@ -9,6 +9,7 @@ import { esql } from '@elastic/esql';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { StreamQuery, SignificantEventsGetResponse } from '@kbn/streams-schema';
 import { MS_PER_UNIT } from '@kbn/streams-schema';
+import { isEsqlUnknownIndexError } from '@kbn/storage-adapter';
 import { isEmpty, keyBy } from 'lodash';
 import type { QueryLink, SearchMode } from '../../../common/queries';
 import type { QueryClient, QueryLinkFilters } from '../streams/assets/query/query_client';
@@ -94,8 +95,10 @@ export async function readSignificantEventsFromAlertsIndices(
       );
     }
     // Alerts index missing (no rules have fired yet) → same empty shape as
-    // a per-rule "not found".
-    if (type === 'verification_exception') {
+    // a per-rule "not found". Other verification_exception flavours (unknown
+    // column, malformed query, mapping regression) rethrow so they surface
+    // instead of silently producing empty sparklines.
+    if (isEsqlUnknownIndexError(err)) {
       return buildEmptyResponse(queryLinks);
     }
     throw err;

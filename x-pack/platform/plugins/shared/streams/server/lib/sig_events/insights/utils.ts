@@ -8,6 +8,7 @@
 import { esql } from '@elastic/esql';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
+import { isEsqlUnknownIndexError } from '@kbn/storage-adapter';
 import { omit } from 'lodash';
 import type { InsightCore } from '@kbn/streams-schema';
 import type { Query } from '../../../../common/queries';
@@ -101,7 +102,11 @@ export async function collectQueryData({
         { cause: err instanceof Error ? err : new Error(String(err)) }
       );
     }
-    if (type === 'verification_exception') {
+    // Alerts index missing → skip this query (no events to summarise).
+    // Other verification_exception flavours (unknown column, malformed query,
+    // mapping regression) rethrow so they surface instead of silently
+    // producing no insight data.
+    if (isEsqlUnknownIndexError(err)) {
       return undefined;
     }
     throw err;

@@ -179,6 +179,24 @@ describe('readSignificantEventsFromAlertsIndices', () => {
     expect(result.aggregated_occurrences).toEqual([]);
   });
 
+  it('rethrows non-Unknown-index verification_exception (e.g. unknown column)', async () => {
+    const link = makeQueryLink({ 'asset.id': 'qa', rule_id: 'rule-a' });
+    const { queryClient, scopedClusterClient, esqlQuery } = createMocks([link]);
+
+    // Simulates an ES|QL regression — unknown column, malformed query, mapping
+    // mismatch. Must NOT be silently swallowed as "alerts index missing".
+    esqlQuery.mockRejectedValueOnce(
+      makeEsError(400, 'verification_exception', 'Unknown column [kibana.alert.rule.bogus_field]')
+    );
+
+    await expect(
+      readSignificantEventsFromAlertsIndices(
+        { from: FROM, to: TO, bucketSize: BUCKET },
+        { queryClient, scopedClusterClient }
+      )
+    ).rejects.toThrow(/verification_exception|Unknown column/);
+  });
+
   it('rethrows security_exception as SecurityError with the underlying cause attached', async () => {
     const link = makeQueryLink({ 'asset.id': 'qa', rule_id: 'rule-a' });
     const { queryClient, scopedClusterClient, esqlQuery } = createMocks([link]);

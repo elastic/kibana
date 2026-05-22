@@ -10,6 +10,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { TransportResult } from '@elastic/elasticsearch';
 import { errors } from '@elastic/elasticsearch';
+import { esql } from '@elastic/esql';
 import type { StorageTransportOptions } from '../..';
 import { StorageIndexAdapter, type StorageSettings } from '../..';
 
@@ -458,6 +459,20 @@ describe('StorageIndexAdapter - esql method', () => {
 
     const result = await client.esql({ buildPipeline: (q) => q.limit(1) });
     expect(result).toEqual({ columns: [], values: [] });
+  });
+
+  it('rejects a buildPipeline that returns a query targeting a different index', async () => {
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+    const client = adapter.getClient();
+
+    // Caller ignores the adapter-supplied ComposerQuery and returns a fresh
+    // one targeting another index — this must be caught before ES execution.
+    await expect(
+      client.esql({
+        buildPipeline: () => esql.from(['other_index'], ['_source']).limit(1),
+      })
+    ).rejects.toThrow(/must target storage index \[test_index\], got \[other_index\]/);
+    expect(esqlQuery).not.toHaveBeenCalled();
   });
 
   it('rethrows non-404 errors (verification_exception, etc.)', async () => {

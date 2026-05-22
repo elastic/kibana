@@ -224,7 +224,7 @@ export type StorageDocumentOf<TStorageSettings extends StorageSettings> = Partia
   }>
 >;
 
-export { StorageIndexAdapter } from './src/index_adapter';
+export { StorageIndexAdapter, isEsqlUnknownIndexError } from './src/index_adapter';
 
 export { BulkOperationError } from './src/errors';
 

@@ -23,7 +23,8 @@ import { last, mapValues, padStart } from 'lodash';
 import type { DiagnosticResult } from '@elastic/elasticsearch';
 import { errors } from '@elastic/elasticsearch';
 import type { TransportRequestOptions } from '@elastic/transport';
-import { esql } from '@elastic/esql';
+import { Parser, esql } from '@elastic/esql';
+import type { ESQLCommand, ESQLSource } from '@elastic/esql/types';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type {
   IndexStorageSettings,
@@ -90,7 +91,7 @@ function isNotFoundError(error: Error): error is errors.ResponseError & { status
 // ES|QL signals a missing index as a 400 `verification_exception` with
 // `"Unknown index [<name>]"` instead of 404 — match it explicitly so we
 // stay consistent with `search`/`get`'s missing-index handling.
-function isEsqlUnknownIndexError(error: unknown): boolean {
+export function isEsqlUnknownIndexError(error: unknown): boolean {
   if (!isResponseError(error as Error)) return false;
   const responseError = error as errors.ResponseError;
   if (responseError.statusCode !== 400) return false;
@@ -100,6 +101,37 @@ function isEsqlUnknownIndexError(error: unknown): boolean {
     typeof body?.error?.reason === 'string' &&
     body.error.reason.includes('Unknown index')
   );
+}
+
+// Guards the `storageClient.esql` callback boundary. The caller's
+// `buildPipeline` receives a `ComposerQuery` pinned to the storage index, but
+// nothing in the type system stops it from returning a new query targeting a
+// different index. Re-parse the final rendered string and reject anything
+// whose `FROM` sources don't match the expected storage index.
+function assertRenderedEsqlTargetsStorageIndex(query: string, expectedIndex: string): void {
+  const { root, errors: parseErrors } = Parser.parse(query);
+  if (parseErrors.length > 0) {
+    throw new Error(
+      `StorageClientEsql rendered query could not be parsed: ${parseErrors
+        .map((e) => e.message)
+        .join('; ')}`
+    );
+  }
+  const fromCommand = root.commands.find((c): c is ESQLCommand => c.name === 'from');
+  if (!fromCommand) {
+    throw new Error('StorageClientEsql buildPipeline must produce a FROM command');
+  }
+  const indexSources = fromCommand.args.filter(
+    (arg): arg is ESQLSource => 'type' in arg && arg.type === 'source'
+  );
+  const invalid = indexSources.filter((s) => s.name !== expectedIndex);
+  if (indexSources.length === 0 || invalid.length > 0) {
+    throw new Error(
+      `StorageClientEsql buildPipeline must target storage index [${expectedIndex}], got [${
+        indexSources.map((s) => s.name).join(', ') || 'none'
+      }]. The callback must derive from the adapter-supplied ComposerQuery — do not call esql.from() inside it.`
+    );
+  }
 }
 
 function isServerlessSettingsError(error: unknown): boolean {
@@ -748,6 +780,7 @@ export class StorageIndexAdapter<
           ? esql.from([this.getSearchIndexPattern()], metadata)
           : esql.from([this.getSearchIndexPattern()]);
       const rendered = buildPipeline(baseQuery).print('basic');
+      assertRenderedEsqlTargetsStorageIndex(rendered, this.getSearchIndexPattern());
 
       try {
         const response = (await wrapEsCall(

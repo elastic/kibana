@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { fillBucketGaps, parseBucketSize, ESQL_UNITS } from './fill_bucket_gaps';
+import { fillBucketGaps, parseBucketSize, ESQL_UNITS, MAX_FILL_BUCKETS } from './fill_bucket_gaps';
 
 describe('parseBucketSize', () => {
   it('parses seconds', () => {
@@ -142,5 +142,17 @@ describe('fillBucketGaps', () => {
     // All other buckets are zero
     const gapBuckets = resultB.filter((_, i) => i !== 0 && i !== 9);
     expect(gapBuckets.every((r) => r.count === 0)).toBe(true);
+  });
+
+  it('caps the result at MAX_FILL_BUCKETS when the requested range exceeds the guardrail', () => {
+    // Request more buckets than the guardrail allows: MAX_FILL_BUCKETS + 1
+    // minutes at 1-minute intervals.
+    const from = new Date('2026-01-01T00:00:00.000Z');
+    const to = new Date(from.getTime() + (MAX_FILL_BUCKETS + 1) * ONE_MINUTE_MS);
+    const result = fillBucketGaps([], from, to, ONE_MINUTE_MS);
+
+    // Output is truncated silently. Callers that need to surface truncation
+    // (e.g. `preview_significant_events.ts`) detect via `length >= MAX_FILL_BUCKETS`.
+    expect(result).toHaveLength(MAX_FILL_BUCKETS);
   });
 });
