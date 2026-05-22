@@ -14,11 +14,11 @@ import {
 } from '@kbn/agent-builder-browser/attachments';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
+import { WorkflowApi } from '@kbn/workflows-ui';
 import { ActionPolicyDefinitionList } from '../../components/action_policy/details_flyout/action_policy_definition_list';
 import { paths } from '../../constants';
 import { ActionPoliciesApi } from '../../services/action_policies_api';
 import { RulesApi } from '../../services/rules_api';
-import { WorkflowsApi } from '../../services/workflows_api';
 import { buildActionPolicyPayload } from '../../../common/agent_builder/action_policy_mappers';
 import type { ActionPolicyAttachment } from './action_policy_attachment_definition';
 
@@ -37,7 +37,7 @@ export const ActionPolicyCanvasContent = ({
 }: ActionPolicyCanvasContentProps) => {
   const actionPoliciesApi = useService(ActionPoliciesApi);
   const rulesApi = useService(RulesApi);
-  const workflowsApi = useService(WorkflowsApi);
+  const workflowApi = useService(WorkflowApi);
   const application = useService(CoreStart('application'));
   const basePath = useService(CoreStart('http')).basePath;
   const notifications = useService(CoreStart('notifications'));
@@ -57,8 +57,8 @@ export const ActionPolicyCanvasContent = ({
     const workflowDestinations = (data.destinations ?? []).filter((d) => d.type === 'workflow');
     for (const dest of workflowDestinations) {
       checks.push(
-        workflowsApi
-          .getWorkflow(dest.id, abortController.signal)
+        workflowApi
+          .getWorkflow(dest.id)
           .then(() => ({ workflow: true }))
           .catch(() => ({ workflow: false }))
       );
@@ -90,7 +90,7 @@ export const ActionPolicyCanvasContent = ({
     return () => {
       abortController.abort();
     };
-  }, [workflowsApi, rulesApi, data.destinations, data.matcher]);
+  }, [workflowApi, rulesApi, data.destinations, data.matcher]);
 
   const hasDraftDependencies = dependenciesReady !== true;
 
