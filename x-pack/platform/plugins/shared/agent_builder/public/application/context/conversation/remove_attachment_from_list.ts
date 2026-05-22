@@ -5,20 +5,9 @@
  * 2.0.
  */
 
-import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
 
-/**
- * Removes an attachment from a list by index.
- * If the target has a groupId, all attachments sharing that groupId are removed together.
- * This supports the bulk-alert pattern where one visible chip represents N hidden siblings.
- */
 export const removeAttachmentFromList = (
-  attachments: AttachmentInput[],
+  attachments: ConversationAttachment[],
   index: number
-): AttachmentInput[] => {
-  const target = attachments[index];
-  if (target?.groupId) {
-    return attachments.filter((a) => a.groupId !== target.groupId);
-  }
-  return attachments.filter((_, i) => i !== index);
-};
+): ConversationAttachment[] => attachments.filter((_, i) => i !== index);

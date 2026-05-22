@@ -45,25 +45,29 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 /**
+ * A single conversation attachment or a group of attachments.
+ * Defined structurally here to avoid a compile-time dependency on agent-builder packages.
+ */
+export type ConversationAttachmentInput =
+  | { type: string; data?: unknown; hidden?: boolean }
+  | { type: 'group'; id: string; label: string; items: Array<{ type: string; data?: unknown }> };
+
+/**
  * Minimal structural interface for the chat service required by the alerts table.
  * Using a local structural type avoids a compile-time dependency on agent-builder packages
  * from this shared platform package.
  */
 export interface OpenChatService {
   openChat(options?: {
-    attachments?: Array<{ type: string; data?: unknown; hidden?: boolean }>;
+    attachments?: ConversationAttachmentInput[];
     newConversation?: boolean;
     initialMessage?: string;
     autoSendInitialMessage?: boolean;
-  }): unknown;
+  }): void;
 }
 
 export interface BulkAddToChatConfig {
-  convertAlertToAttachment: (alerts: TimelineItem[]) => Array<{
-    type: string;
-    data?: unknown;
-    hidden?: boolean;
-  }>;
+  convertAlertToAttachment: (alerts: TimelineItem[]) => ConversationAttachmentInput[];
   initialMessage?: string;
 }
 import type { FieldBrowserOptions } from '@kbn/response-ops-alerts-fields-browser';

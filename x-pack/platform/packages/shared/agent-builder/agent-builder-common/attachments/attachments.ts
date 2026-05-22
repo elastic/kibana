@@ -28,12 +28,6 @@ export interface Attachment<
    * Undefined for by-value attachments.
    */
   origin?: string;
-  /**
-   * Groups this attachment with others that share the same groupId.
-   * When a visible attachment is removed, all hidden siblings with the same groupId
-   * are removed together.
-   */
-  groupId?: string;
 }
 
 /**

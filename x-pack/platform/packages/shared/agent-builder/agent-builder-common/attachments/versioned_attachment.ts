@@ -153,13 +153,6 @@ export interface AttachmentInput<
   hidden?: boolean;
   /** Whether the attachment should be read-only */
   readonly?: boolean;
-  /**
-   * Groups this attachment with others that share the same groupId.
-   * When a visible attachment is removed, all hidden siblings with the same groupId
-   * are removed together — used for multi-batch attachments (e.g. bulk alert sets)
-   * that show a single chip but consist of several underlying attachment objects.
-   */
-  groupId?: string;
 }
 
 // Zod schemas for validation
@@ -215,8 +208,39 @@ export const attachmentInputSchema = z.object({
   description: z.string().optional(),
   hidden: z.boolean().optional(),
   readonly: z.boolean().optional(),
-  groupId: z.string().optional(),
 });
+
+/**
+ * A named group of attachments that appears as a single chip in the UI.
+ * The group is a client-side-only concept — it is flattened to individual
+ * AttachmentInput items at the serialization boundary before being sent to the server.
+ */
+export interface AttachmentGroup {
+  type: 'group';
+  /** Stable identifier for the group */
+  id: string;
+  /** Display label shown on the chip, e.g. "5 Alerts" */
+  label: string;
+  /** The individual attachment items that make up this group */
+  items: AttachmentInput[];
+}
+
+export const attachmentGroupSchema = z.object({
+  type: z.literal('group'),
+  id: z.string(),
+  label: z.string(),
+  items: z.array(attachmentInputSchema),
+});
+
+export const isAttachmentGroup = (a: ConversationAttachment): a is AttachmentGroup =>
+  a.type === 'group';
+
+/**
+ * Union of a single attachment or a group of attachments.
+ * This is the type used in client-side conversation state.
+ * Groups are flattened to AttachmentInput[] before being sent to the server.
+ */
+export type ConversationAttachment = AttachmentInput | AttachmentGroup;
 
 export const attachmentDiffSchema = z.object({
   change_type: z.enum(['create', 'update', 'delete', 'restore']),

@@ -10,7 +10,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { agentBuilderDefaultAgentId, AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common';
-import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
 import type {
   EmbeddableConversationInternalProps,
   EmbeddableConversationProps,
@@ -192,7 +192,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     setCurrentProps((prevProps) => ({ ...prevProps, attachments: undefined }));
   }, []);
 
-  const upsertAttachments = useCallback((attachments: AttachmentInput[]) => {
+  const upsertAttachments = useCallback((attachments: ConversationAttachment[]) => {
     if (attachments.length === 0) {
       return;
     }

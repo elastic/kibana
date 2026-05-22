@@ -19,8 +19,12 @@ import {
   versionedAttachmentSchema,
   attachmentVersionRefSchema,
   attachmentDiffSchema,
+  attachmentGroupSchema,
+  isAttachmentGroup,
   type VersionedAttachment,
   type AttachmentVersion,
+  type AttachmentGroup,
+  type AttachmentInput,
   attachmentInputSchema,
 } from './versioned_attachment';
 
@@ -526,6 +530,76 @@ describe('versioned_attachment', () => {
         const result = attachmentDiffSchema.safeParse(invalid);
         expect(result.success).toBe(false);
       });
+    });
+
+    describe('attachmentGroupSchema', () => {
+      const validGroup = {
+        type: 'group',
+        id: 'g1',
+        label: '3 Alerts',
+        items: [
+          { type: 'security.alerts', data: { alertIds: ['a', 'b'] } },
+          { type: 'security.alerts', data: { alertIds: ['c'] } },
+        ],
+      };
+
+      it('validates a correct AttachmentGroup', () => {
+        expect(attachmentGroupSchema.safeParse(validGroup).success).toBe(true);
+      });
+
+      it('rejects when type is not "group"', () => {
+        const result = attachmentGroupSchema.safeParse({ ...validGroup, type: 'text' });
+        expect(result.success).toBe(false);
+      });
+
+      it('rejects when id is missing', () => {
+        const { id: _omit, ...rest } = validGroup;
+        expect(attachmentGroupSchema.safeParse(rest).success).toBe(false);
+      });
+
+      it('rejects when label is missing', () => {
+        const { label: _omit, ...rest } = validGroup;
+        expect(attachmentGroupSchema.safeParse(rest).success).toBe(false);
+      });
+
+      it('accepts an empty items array', () => {
+        expect(attachmentGroupSchema.safeParse({ ...validGroup, items: [] }).success).toBe(true);
+      });
+    });
+
+    describe('attachmentInputSchema — no groupId field', () => {
+      it('parses a minimal attachment input', () => {
+        const result = attachmentInputSchema.safeParse({ type: 'text' });
+        expect(result.success).toBe(true);
+      });
+
+      it('strips unknown fields including groupId', () => {
+        const parsed = attachmentInputSchema.safeParse({
+          type: 'text',
+          groupId: 'should-be-stripped',
+        });
+        expect(parsed.success).toBe(true);
+        if (parsed.success) {
+          expect(parsed.data).not.toHaveProperty('groupId');
+        }
+      });
+    });
+  });
+
+  describe('isAttachmentGroup', () => {
+    it('returns true for an AttachmentGroup', () => {
+      const g: AttachmentGroup = {
+        type: 'group',
+        id: 'g1',
+        label: '2 Alerts',
+        items: [{ type: 'security.alerts', data: {} }],
+      };
+      expect(isAttachmentGroup(g)).toBe(true);
+    });
+
+    it('returns false for an AttachmentInput', () => {
+      const a: AttachmentInput = { type: 'text', data: {} };
+      expect(isAttachmentGroup(a)).toBe(false);
     });
   });
 });

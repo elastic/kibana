@@ -5,50 +5,40 @@
  * 2.0.
  */
 
-import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import type { AttachmentInput, AttachmentGroup } from '@kbn/agent-builder-common/attachments';
 import { removeAttachmentFromList } from './remove_attachment_from_list';
 
-const attachment = (
-  id: string | undefined,
-  overrides: Partial<AttachmentInput> = {}
-): AttachmentInput => ({
+const attachment = (id: string | undefined): AttachmentInput => ({
   id,
   type: 'visualization',
   data: {},
-  ...overrides,
+});
+
+const group = (id: string): AttachmentGroup => ({
+  type: 'group',
+  id,
+  label: '3 Alerts',
+  items: [attachment('a'), attachment('b'), attachment('c')],
 });
 
 describe('removeAttachmentFromList', () => {
-  it('removes the item at the given index when there is no groupId', () => {
+  it('removes the item at the given index', () => {
     const list = [attachment('a'), attachment('b'), attachment('c')];
     expect(removeAttachmentFromList(list, 1)).toEqual([attachment('a'), attachment('c')]);
   });
 
-  it('removes all items sharing the same groupId when the target has one', () => {
-    const list = [
-      attachment('a', { groupId: 'g1' }),
-      attachment('b', { groupId: 'g1' }),
-      attachment('c'),
-    ];
-    expect(removeAttachmentFromList(list, 0)).toEqual([attachment('c')]);
+  it('removes an AttachmentGroup at the given index (entire group removed)', () => {
+    const g = group('g1');
+    const list = [attachment('a'), g, attachment('c')];
+    expect(removeAttachmentFromList(list, 1)).toEqual([attachment('a'), attachment('c')]);
   });
 
-  it('removes all groupId siblings regardless of which sibling index is targeted', () => {
-    const list = [
-      attachment('a'),
-      attachment('b', { groupId: 'g2' }),
-      attachment('c', { groupId: 'g2' }),
-      attachment('d', { groupId: 'g2' }),
-    ];
-    expect(removeAttachmentFromList(list, 2)).toEqual([attachment('a')]);
-  });
-
-  it('removes only the first item when targeted by index with no groupId', () => {
+  it('removes the first item', () => {
     const list = [attachment('a'), attachment('b'), attachment('c')];
     expect(removeAttachmentFromList(list, 0)).toEqual([attachment('b'), attachment('c')]);
   });
 
-  it('removes only the last item when targeted by index with no groupId', () => {
+  it('removes the last item', () => {
     const list = [attachment('a'), attachment('b'), attachment('c')];
     expect(removeAttachmentFromList(list, 2)).toEqual([attachment('a'), attachment('b')]);
   });
@@ -59,7 +49,7 @@ describe('removeAttachmentFromList', () => {
   });
 
   it('does not mutate the input array', () => {
-    const list = [attachment('a', { groupId: 'g' }), attachment('b', { groupId: 'g' })];
+    const list = [attachment('a'), attachment('b')];
     const snapshot = JSON.stringify(list);
     removeAttachmentFromList(list, 0);
     expect(JSON.stringify(list)).toBe(snapshot);
