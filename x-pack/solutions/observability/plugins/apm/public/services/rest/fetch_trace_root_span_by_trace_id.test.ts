@@ -1,0 +1,55 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { apm } from '@elastic/apm-rum';
+import {
+  fetchRootSpanByTraceId,
+  FETCH_TRACE_ROOT_SPAN_OPERATION_ID,
+} from './fetch_trace_root_span_by_trace_id';
+import * as createCallApmApi from './create_call_apm_api';
+
+jest.mock('@elastic/apm-rum', () => ({
+  apm: {
+    captureError: jest.fn(),
+  },
+}));
+
+const signal = new AbortController().signal;
+
+describe('fetchRootSpanByTraceId', () => {
+  const callApmApiSpy = jest.spyOn(createCallApmApi, 'callApmApi');
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('forwards the operation_id execution context to callApmApi', async () => {
+    callApmApiSpy.mockResolvedValueOnce({ duration: 1000 });
+
+    await fetchRootSpanByTraceId({ traceId: 'trace-1', start: 'from', end: 'to' }, signal);
+
+    expect(callApmApiSpy).toHaveBeenCalledWith(
+      'GET /internal/apm/unified_traces/{traceId}/root_span',
+      expect.objectContaining({
+        context: { meta: { operation_id: FETCH_TRACE_ROOT_SPAN_OPERATION_ID } },
+      })
+    );
+  });
+
+  it('captures APM error with kibana_meta_operation_id label and re-throws when callApmApi fails', async () => {
+    const error = new Error('boom');
+    callApmApiSpy.mockRejectedValueOnce(error);
+
+    await expect(
+      fetchRootSpanByTraceId({ traceId: 'trace-1', start: 'from', end: 'to' }, signal)
+    ).rejects.toThrow('boom');
+
+    expect(apm.captureError).toHaveBeenCalledWith(error, {
+      labels: { kibana_meta_operation_id: FETCH_TRACE_ROOT_SPAN_OPERATION_ID },
+    });
+  });
+});

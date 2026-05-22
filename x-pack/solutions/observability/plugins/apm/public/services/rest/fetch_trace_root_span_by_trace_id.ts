@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { apm } from '@elastic/apm-rum';
 import type { APIReturnType } from './create_call_apm_api';
 import { callApmApi } from './create_call_apm_api';
 
 type TraceRootSpan = APIReturnType<'GET /internal/apm/unified_traces/{traceId}/root_span'>;
 
-export const fetchRootSpanByTraceId = (
+export const FETCH_TRACE_ROOT_SPAN_OPERATION_ID = 'fetch-trace-root-span';
+
+export const fetchRootSpanByTraceId = async (
   {
     traceId,
     start,
@@ -21,14 +24,23 @@ export const fetchRootSpanByTraceId = (
     end: string;
   },
   signal: AbortSignal
-): Promise<TraceRootSpan | undefined> =>
-  callApmApi('GET /internal/apm/unified_traces/{traceId}/root_span', {
-    params: {
-      path: { traceId },
-      query: {
-        start,
-        end,
+): Promise<TraceRootSpan | undefined> => {
+  try {
+    return await callApmApi('GET /internal/apm/unified_traces/{traceId}/root_span', {
+      params: {
+        path: { traceId },
+        query: {
+          start,
+          end,
+        },
       },
-    },
-    signal,
-  });
+      signal,
+      context: { meta: { operation_id: FETCH_TRACE_ROOT_SPAN_OPERATION_ID } },
+    });
+  } catch (error) {
+    apm.captureError(error as Error, {
+      labels: { kibana_meta_operation_id: FETCH_TRACE_ROOT_SPAN_OPERATION_ID },
+    });
+    throw error;
+  }
+};

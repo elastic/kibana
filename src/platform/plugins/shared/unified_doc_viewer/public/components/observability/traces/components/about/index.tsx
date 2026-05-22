@@ -28,7 +28,8 @@ import {
   USER_AGENT_NAME,
   USER_AGENT_VERSION,
 } from '@kbn/apm-types';
-import { EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiPanel } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { Duration } from '@kbn/apm-ui-shared';
 import { ContentFrameworkTable } from '../../../../content_framework';
 import { isTransaction } from '../../helpers';
@@ -97,14 +98,39 @@ export const About = ({
   aboutFieldConfigurations[durationField] = {
     ...aboutFieldConfigurations[durationField],
     formatter: (value: unknown) => (
-      <Duration
-        duration={value as number}
-        size="xs"
-        parent={{
-          duration: traceRootSpan?.span?.duration,
-          type: 'trace',
-        }}
-      />
+      <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs" component="span">
+        <EuiFlexItem grow={false}>
+          <Duration
+            duration={value as number}
+            size="xs"
+            parent={{
+              duration: traceRootSpan?.span?.duration,
+              type: 'trace',
+            }}
+          />
+        </EuiFlexItem>
+        {traceRootSpan?.error ? (
+          <EuiFlexItem grow={false}>
+            <EuiIconTip
+              data-test-subj="unifiedDocViewerTraceRootSpanErrorIconTip"
+              type="warning"
+              color="warning"
+              size="s"
+              aria-label={i18n.translate(
+                'unifiedDocViewer.observability.traces.docViewerSpanOverview.traceRootSpan.error.ariaLabel',
+                { defaultMessage: 'Parent trace details unavailable' }
+              )}
+              content={i18n.translate(
+                'unifiedDocViewer.observability.traces.docViewerSpanOverview.traceRootSpan.error',
+                {
+                  defaultMessage:
+                    "Couldn't load the parent trace details, so the percentage of the full trace isn't available.",
+                }
+              )}
+            />
+          </EuiFlexItem>
+        ) : null}
+      </EuiFlexGroup>
     ),
   };
 
