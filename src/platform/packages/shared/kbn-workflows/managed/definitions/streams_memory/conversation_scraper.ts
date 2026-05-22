@@ -15,7 +15,7 @@ export const STREAMS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID =
 export const STREAMS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW = {
   id: STREAMS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
   pluginId: 'streams',
-  version: 1,
+  version: 2,
   yaml: `version: "1"
 
 name: Conversation Scraper
@@ -49,23 +49,31 @@ steps:
     type: elasticsearch.request
     with:
       method: POST
-      path: '/.kibana-observability-ai-assistant-conversations/_search'
+      path: '/.chat-conversations/_search'
       body:
         size: 50
         sort:
-          - "@timestamp":
+          - updated_at:
               order: desc
         _source:
-          - "@timestamp"
-          - conversation.id
-          - conversation.title
-          - messages
+          - id
+          - agent_id
+          - title
+          - created_at
+          - updated_at
+          - rounds
         query:
           bool:
             must:
               - range:
-                  "@timestamp":
+                  updated_at:
                     gte: '{{ consts.CONVERSATIONS_LOOKBACK }}'
+            must_not:
+              - terms:
+                  agent_id:
+                    - sigevents.memory.conversation-scraper
+                    - sigevents.memory.synthesizer
+                    - sigevents.memory.consolidator
     on-failure:
       continue: true
 
