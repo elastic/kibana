@@ -1003,7 +1003,7 @@ x-pack/platform/packages/shared/ai-infra/inference-langchain @elastic/search-kib
 x-pack/platform/packages/shared/ai-infra/kbn-evals-suite-llm-tasks @elastic/appex-ai-infra
 x-pack/platform/packages/shared/ai-infra/product-doc-common @elastic/appex-ai-infra
 x-pack/platform/packages/shared/alerting-rule-utils @elastic/actionable-obs-team
-x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common @elastic/appex-ai-infra
+x-pack/platform/packages/shared/agent-builder-dashboards/agent-builder-dashboards-common @elastic/appex-ai-infra
 x-pack/platform/packages/shared/file-upload @elastic/ml-ui
 x-pack/platform/packages/shared/file-upload-common @elastic/ml-ui
 x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared @elastic/kibana-management
@@ -1159,7 +1159,7 @@ x-pack/platform/plugins/shared/cases @elastic/kibana-cases
 x-pack/platform/plugins/shared/cloud @elastic/kibana-core
 x-pack/platform/plugins/shared/cloud_connect @elastic/kibana-management
 x-pack/platform/plugins/shared/content_connectors @elastic/search-kibana
-x-pack/platform/plugins/shared/dashboard_agent @elastic/appex-ai-infra
+x-pack/platform/plugins/shared/agent_builder_dashboards @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/data_quality @elastic/kibana-management
 x-pack/platform/plugins/shared/dataset_quality @elastic/kibana-management
 x-pack/platform/plugins/shared/elastic_console @elastic/obs-elastic-brain-team
