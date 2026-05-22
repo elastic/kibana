@@ -82,10 +82,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           false
         );
 
-        // Wait for the async search to be established on ES so that cancellation can retrieve
-        // partial results via the async search ID
-        await new Promise((resolve) => setTimeout(resolve, 5000));
+        // Wait for the async search to be established on ES before cancelling.
+        // The "send to background" secondary button (queryCancelButton-secondary-button) is
+        // enabled only after the session enters the Loading state (with a 500 ms built-in
+        // delay), which reliably follows the initial ES response that assigns the async
+        // search ID. When background search sessions are not available the button never
+        // appears, so we fall back to a generous fixed timeout.
         await testSubjects.existOrFail('queryCancelButton');
+        const backgroundButtonEnabled = await testSubjects
+          .waitForEnabled('queryCancelButton-secondary-button', 15000)
+          .catch(() => false);
+        if (!backgroundButtonEnabled) {
+          // Background search sessions not available – wait long enough for the async
+          // search ID to be established on ES before clicking cancel.
+          await new Promise((resolve) => setTimeout(resolve, 10000));
+        }
         await testSubjects.click('queryCancelButton');
         await header.waitUntilLoadingHasFinished();
 
@@ -126,10 +137,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   | STATS count = COUNT(*) BY buckets, delay`);
         await testSubjects.click('querySubmitButton');
 
-        // Wait for the async search to be established on ES so that cancellation can retrieve
-        // partial results via the async search ID
-        await new Promise((resolve) => setTimeout(resolve, 5000));
+        // Wait for the async search to be established on ES before cancelling.
+        // See the classic mode test for detailed reasoning.
         await testSubjects.existOrFail('queryCancelButton');
+        const esqlBackgroundButtonEnabled = await testSubjects
+          .waitForEnabled('queryCancelButton-secondary-button', 15000)
+          .catch(() => false);
+        if (!esqlBackgroundButtonEnabled) {
+          await new Promise((resolve) => setTimeout(resolve, 10000));
+        }
         await testSubjects.click('queryCancelButton');
         await header.waitUntilLoadingHasFinished();
 
