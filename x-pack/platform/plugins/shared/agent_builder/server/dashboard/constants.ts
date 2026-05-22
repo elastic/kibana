@@ -12,7 +12,7 @@ export const AGENT_BUILDER_OVERVIEW_DASHBOARD_ID = 'agent-builder-token-usage';
  * Bump when panel layout or visualization definitions change so startup reinstall
  * overwrites the managed dashboard with the latest asset bundle.
  */
-export const AGENT_BUILDER_OVERVIEW_DASHBOARD_DEFINITION_VERSION = 2;
+export const AGENT_BUILDER_OVERVIEW_DASHBOARD_DEFINITION_VERSION = 1;
 
 export const AGENT_BUILDER_TRACE_INDEX = 'traces-agent_builder.otel-default';
 
