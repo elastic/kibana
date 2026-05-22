@@ -227,7 +227,7 @@ export const EditAiPanelFlyout = ({
             color="primary"
             title={i18n.translate('aiSummaryPanel.editFlyout.timeRangeHint', {
               defaultMessage:
-                'Use ?_tstart and ?_tend as date placeholders — they resolve to the dashboard time range.',
+                'When a date field is found in your index, a time range filter is injected automatically to connect to the dashboard time picker.',
             })}
           />
 

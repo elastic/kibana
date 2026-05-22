@@ -7,12 +7,17 @@
 
 import { PassThrough } from 'stream';
 import { schema } from '@kbn/config-schema';
-import type { IRouter, CoreSetup } from '@kbn/core/server';
+import type { IRouter, CoreSetup, IUiSettingsClient, KibanaRequest } from '@kbn/core/server';
 import { ChatCompletionEventType, MessageRole } from '@kbn/inference-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import dateMath from '@kbn/datemath';
+import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { getCached, setCached, hashKey, L3_TTL_SECONDS, CACHE_SO_TYPE } from '../cache/html_cache';
 
 const SOCKET_TIMEOUT_MS = 5 * 60 * 1000;
+const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR';
+const MAX_HTML_BYTES = 500_000;
 
 const SYSTEM_PROMPT = `You are a data visualization assistant embedded in a Kibana dashboard panel.
 
@@ -41,6 +46,51 @@ CONTENT RULES:
 - For bar charts: use a div with a colored background and width set to the percentage value inline style. Example: <div style="width: 42%; background: #0077CC; height: 20px;"></div>
 - For status indicators: use colored badges/pills with CSS background-color.`;
 
+const SYSTEM_PROMPT_HASH = hashKey(SYSTEM_PROMPT.replace(/\s+/g, ' ').trim()).slice(0, 8);
+
+const CSP_META = `<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline';">`;
+
+function injectTimeFilter(query: string, timeField: string): string {
+  const clause = `| WHERE \`${timeField}\` >= ?_tstart AND \`${timeField}\` < ?_tend `;
+  const pipeIdx = query.indexOf('|');
+  return pipeIdx === -1
+    ? `${query.trimEnd()} ${clause}`
+    : `${query.slice(0, pipeIdx)}${clause}${query.slice(pipeIdx)}`;
+}
+
+const TIMESTAMP_CANDIDATES = ['@timestamp', 'timestamp', 'time', 'date', 'event.created'];
+const DATE_KEYWORDS = ['date', 'time', 'created', 'updated', 'modified', 'timestamp'];
+
+function pickDateFieldHeuristic(fields: string[]): string {
+  const nonNested = fields.filter((f) => !f.includes('.'));
+  const pool = nonNested.length > 0 ? nonNested : fields;
+  for (const kw of DATE_KEYWORDS) {
+    const match = pool.find((f) => f.toLowerCase().includes(kw));
+    if (match) return match;
+  }
+  return pool.slice().sort()[0];
+}
+
+function detectTimeFieldFromQuery(esqlQuery: string): string | null {
+  const sortMatch = esqlQuery.match(/\|\s*SORT\s+`?([\w.@]+)`?/i);
+  const sortField = sortMatch?.[1]?.trim();
+  if (!sortField) return null;
+  if (TIMESTAMP_CANDIDATES.includes(sortField)) return sortField;
+  for (const kw of DATE_KEYWORDS) {
+    if (sortField.toLowerCase().includes(kw)) return sortField;
+  }
+  return null;
+}
+
+function injectCsp(html: string): string {
+  const headMatch = html.match(/<head[^>]*>/i);
+  if (headMatch?.index !== undefined) {
+    const at = headMatch.index + headMatch[0].length;
+    return html.slice(0, at) + CSP_META + html.slice(at);
+  }
+  return CSP_META + html;
+}
+
 function sanitizeCellValue(v: unknown): string {
   return String(v ?? '')
     .replace(/[<>]/g, '')
@@ -61,8 +111,75 @@ function formatEsqlResultsAsTable(
   return `${header}\n${separator}\n${rows}`;
 }
 
+interface BucketedRange {
+  from: string;
+  to: string;
+  ttlSeconds: number;
+}
+
+function bucketTimeRange(from: string, to: string): BucketedRange {
+  const fromMs = dateMath.parse(from)?.valueOf() ?? Date.now();
+  const toMs = dateMath.parse(to, { roundUp: true })?.valueOf() ?? Date.now();
+  const durationMs = toMs - fromMs;
+
+  let bucketMs: number;
+  let ttlSeconds: number;
+
+  if (durationMs < 60 * 60 * 1000) {
+    bucketMs = 60 * 1000;
+    ttlSeconds = 2 * 60;
+  } else if (durationMs < 6 * 60 * 60 * 1000) {
+    bucketMs = 5 * 60 * 1000;
+    ttlSeconds = 10 * 60;
+  } else if (durationMs < 24 * 60 * 60 * 1000) {
+    bucketMs = 15 * 60 * 1000;
+    ttlSeconds = 30 * 60;
+  } else if (durationMs < 7 * 24 * 60 * 60 * 1000) {
+    bucketMs = 60 * 60 * 1000;
+    ttlSeconds = 2 * 60 * 60;
+  } else if (durationMs < 30 * 24 * 60 * 60 * 1000) {
+    bucketMs = 6 * 60 * 60 * 1000;
+    ttlSeconds = 12 * 60 * 60;
+  } else {
+    bucketMs = 24 * 60 * 60 * 1000;
+    ttlSeconds = 48 * 60 * 60;
+  }
+
+  return {
+    from: new Date(Math.floor(fromMs / bucketMs) * bucketMs).toISOString(),
+    to: new Date(Math.floor(toMs / bucketMs) * bucketMs).toISOString(),
+    ttlSeconds,
+  };
+}
+
 interface StartDeps {
   inference: InferenceServerStart;
+}
+
+async function resolveConnectorId({
+  uiSettingsClient,
+  inference,
+  request,
+}: {
+  uiSettingsClient: IUiSettingsClient;
+  inference: InferenceServerStart;
+  request: KibanaRequest;
+}): Promise<string | undefined> {
+  try {
+    const defaultSetting = await uiSettingsClient.get<string>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR);
+    if (defaultSetting && defaultSetting !== NO_DEFAULT_CONNECTOR) {
+      return defaultSetting;
+    }
+  } catch {
+    // UI setting may not be registered
+  }
+  try {
+    const connector = await inference.getDefaultConnector(request);
+    return connector?.connectorId;
+  } catch {
+    // no connectors available
+  }
+  return undefined;
 }
 
 export function registerGenerateRoute(
@@ -81,19 +198,22 @@ export function registerGenerateRoute(
       },
       validate: {
         body: schema.object({
-          prompt: schema.string(),
-          // remove it
-          connectorId: schema.maybe(schema.string()),
-          esqlQuery: schema.maybe(schema.string()),
+          prompt: schema.string({ minLength: 1, maxLength: 10_000 }),
+          esqlQuery: schema.maybe(schema.string({ maxLength: 10_000 })),
           timeRange: schema.maybe(schema.object({ from: schema.string(), to: schema.string() })),
         }),
       },
     },
     async (context, request, response) => {
-      const [, { inference }] = await getStartServices();
-      const { prompt, connectorId: connectorIdFromBody, esqlQuery, timeRange } = request.body;
-      const connectorId =
-        connectorIdFromBody || (await inference.getDefaultConnector(request))?.connectorId;
+      const [coreStart, { inference }] = await getStartServices();
+      const { prompt, esqlQuery, timeRange } = request.body;
+      const core = await context.core;
+
+      const connectorId = await resolveConnectorId({
+        uiSettingsClient: core.uiSettings.client,
+        inference,
+        request,
+      });
       if (!connectorId) {
         return response.badRequest({ body: 'No inference connector configured' });
       }
@@ -102,25 +222,69 @@ export function registerGenerateRoute(
       const abortController = new AbortController();
       request.events.aborted$.subscribe(() => abortController.abort());
 
+      const cacheRepo = coreStart.savedObjects.createInternalRepository([CACHE_SO_TYPE]);
+
       let userMessage = prompt;
+      let cacheKey: string;
+      let ttlSeconds: number;
 
       if (esqlQuery) {
+        const bucketed = timeRange ? bucketTimeRange(timeRange.from, timeRange.to) : null;
+        ttlSeconds = bucketed?.ttlSeconds ?? L3_TTL_SECONDS;
+
+        let detectedTimeField: string | null = null;
+        const queryAlreadyHasTimeParams =
+          esqlQuery.includes('?_tstart') || esqlQuery.includes('?_tend');
+        if (bucketed && !queryAlreadyHasTimeParams) {
+          detectedTimeField = detectTimeFieldFromQuery(esqlQuery);
+          if (!detectedTimeField) {
+            const indexPattern = getIndexPatternFromESQLQuery(esqlQuery) || null;
+            if (indexPattern) {
+              try {
+                const esClient = core.elasticsearch.client.asCurrentUser;
+                const candidateCaps = await esClient.fieldCaps({
+                  index: indexPattern,
+                  fields: TIMESTAMP_CANDIDATES,
+                });
+                for (const field of TIMESTAMP_CANDIDATES) {
+                  if (candidateCaps.fields[field] && 'date' in candidateCaps.fields[field]) {
+                    detectedTimeField = field;
+                    break;
+                  }
+                }
+                if (!detectedTimeField) {
+                  const allCaps = await esClient.fieldCaps({ index: indexPattern, fields: ['*'] });
+                  const dateFields = Object.entries(allCaps.fields)
+                    .filter(([, types]) => 'date' in types)
+                    .map(([name]) => name);
+                  if (dateFields.length > 0) detectedTimeField = pickDateFieldHeuristic(dateFields);
+                }
+              } catch { /* non-fatal — skip time injection */ }
+            }
+          }
+        }
+
+        const effectiveQuery = detectedTimeField
+          ? injectTimeFilter(esqlQuery, detectedTimeField)
+          : esqlQuery;
+
+        let esqlResultsHash = 'no-results';
         try {
-          const esClient = (await context.core).elasticsearch.client;
-          const esqlParams = timeRange
-            ? [
-                { _tstart: dateMath.parse(timeRange.from)?.toISOString() ?? timeRange.from },
-                {
-                  _tend:
-                    dateMath.parse(timeRange.to, { roundUp: true })?.toISOString() ?? timeRange.to,
-                },
-              ]
+          const esqlParams = bucketed
+            ? [{ _tstart: bucketed.from }, { _tend: bucketed.to }]
             : undefined;
-          const result = await esClient.asCurrentUser.esql.query({
-            query: esqlQuery,
-            ...(esqlParams ? { params: esqlParams } : {}),
-          });
+          const result = await core.elasticsearch.client.asCurrentUser.esql.query(
+            {
+              query: effectiveQuery,
+              ...(esqlParams ? { params: esqlParams } : {}),
+            },
+            { requestTimeout: 30_000 }
+          );
           const rows = result.values as unknown[][];
+          esqlResultsHash = hashKey(
+            JSON.stringify(result.columns) + JSON.stringify(rows.slice(0, 50))
+          );
+
           if (rows.length > 0) {
             const table = formatEsqlResultsAsTable(
               result.columns as Array<{ name: string; type: string }>,
@@ -134,8 +298,28 @@ export function registerGenerateRoute(
           const msg = err instanceof Error ? err.message : String(err);
           userMessage = `${prompt}\n\nNote: The ES|QL query failed (${msg}). Render a panel that clearly shows data is unavailable, with a brief explanation.`;
         }
+
+        cacheKey = hashKey(`${SYSTEM_PROMPT_HASH}:l2:${prompt}:${esqlResultsHash}`);
+      } else {
+        // L3: shared key — no user data in the output
+        ttlSeconds = L3_TTL_SECONDS;
+        cacheKey = hashKey(`${SYSTEM_PROMPT_HASH}:l3:${prompt}`);
       }
 
+      const cacheResult = await getCached(cacheRepo, cacheKey);
+      if (cacheResult) {
+        if (!cacheResult.stale) {
+          passThrough.write(JSON.stringify({ token: injectCsp(cacheResult.html) }) + '\n');
+          passThrough.end();
+          return response.ok({
+            headers: { 'Content-Type': 'application/x-ndjson' },
+            body: passThrough,
+          });
+        }
+        passThrough.write(JSON.stringify({ stale: injectCsp(cacheResult.html) }) + '\n');
+      }
+
+      passThrough.write(JSON.stringify({ token: CSP_META }) + '\n');
       const client = inference.getClient({ request });
       const events$ = client.chatComplete({
         connectorId,
@@ -145,17 +329,38 @@ export function registerGenerateRoute(
         abortSignal: abortController.signal,
       });
 
+      let accHtml = '';
+      let sizeLimitExceeded = false;
       events$.subscribe({
         next: (event) => {
+          if (sizeLimitExceeded) return;
           if (event.type === ChatCompletionEventType.ChatCompletionChunk && event.content) {
-            passThrough.write(JSON.stringify({ token: event.content }) + '\n');
+            accHtml += event.content;
+            if (accHtml.length > MAX_HTML_BYTES) {
+              sizeLimitExceeded = true;
+              abortController.abort();
+              if (!passThrough.destroyed) {
+                passThrough.write(JSON.stringify({ error: 'Generated content exceeded size limit' }) + '\n');
+                passThrough.end();
+              }
+              return;
+            }
+            if (!passThrough.destroyed) passThrough.write(JSON.stringify({ token: event.content }) + '\n');
           }
         },
         error: (err) => {
-          passThrough.write(JSON.stringify({ error: err.message }) + '\n');
-          passThrough.end();
+          if (!passThrough.destroyed) {
+            passThrough.write(JSON.stringify({ error: err.message }) + '\n');
+            passThrough.end();
+          }
         },
-        complete: () => passThrough.end(),
+        complete: () => {
+          if (sizeLimitExceeded) return;
+          if (!passThrough.destroyed) passThrough.end();
+          if (accHtml) {
+            setCached(cacheRepo, cacheKey, accHtml, ttlSeconds).catch(() => {});
+          }
+        },
       });
 
       return response.ok({

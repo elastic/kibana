@@ -11,7 +11,6 @@ import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 
 export const aiSummaryPanelStateSchema = schema.object({
   prompt: schema.string(),
-  content: schema.string({ defaultValue: '' }),
   esqlQuery: schema.maybe(schema.string()),
 });
 

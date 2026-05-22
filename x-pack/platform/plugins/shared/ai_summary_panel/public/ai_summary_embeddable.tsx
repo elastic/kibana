@@ -36,14 +36,12 @@ export const aiSummaryPanelEmbeddableFactory: EmbeddablePublicDefinition<
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
     const titleManager = initializeTitleManager(initialState);
     const prompt$ = new BehaviorSubject<string>(initialState.prompt ?? '');
-    const content$ = new BehaviorSubject<string>(initialState.content ?? '');
     const esqlQuery$ = new BehaviorSubject<string | undefined>(initialState.esqlQuery);
     const isEditFlyoutOpen$ = new BehaviorSubject<boolean>(false);
 
     const serializeState = (): AiSummaryPanelEmbeddableState => ({
       ...titleManager.getLatestState(),
       prompt: prompt$.getValue(),
-      content: content$.getValue(),
       esqlQuery: esqlQuery$.getValue(),
     });
 
@@ -53,10 +51,6 @@ export const aiSummaryPanelEmbeddableFactory: EmbeddablePublicDefinition<
       serializeState,
       anyStateChange$: merge(
         titleManager.anyStateChange$,
-        content$.pipe(
-          skip(1),
-          map(() => undefined)
-        ),
         prompt$.pipe(
           skip(1),
           map(() => undefined)
@@ -65,13 +59,11 @@ export const aiSummaryPanelEmbeddableFactory: EmbeddablePublicDefinition<
       getComparators: () => ({
         ...titleComparators,
         prompt: 'referenceEquality',
-        content: 'referenceEquality',
         esqlQuery: 'referenceEquality',
       }),
       onReset: (lastSaved) => {
         titleManager.reinitializeState(lastSaved ?? {});
         prompt$.next(lastSaved?.prompt ?? '');
-        content$.next(lastSaved?.content ?? '');
         esqlQuery$.next(lastSaved?.esqlQuery);
       },
     });
@@ -123,6 +115,7 @@ export const aiSummaryPanelEmbeddableFactory: EmbeddablePublicDefinition<
         return (
           <>
             <AiSummaryComponent
+              embeddableId={uuid}
               title={title}
               hideTitle={hideTitle}
               prompt={prompt}

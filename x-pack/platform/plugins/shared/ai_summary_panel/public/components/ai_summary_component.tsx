@@ -21,12 +21,51 @@ import { getServices } from '../services';
 import { streamGenerate } from '../utils/stream_generate';
 
 interface AiSummaryComponentProps {
+  embeddableId: string;
   title: string | undefined;
   hideTitle: boolean | undefined;
   prompt: string;
   esqlQuery: string | undefined;
   timeRange: { from: string; to: string } | undefined;
   generationVersion: number;
+}
+
+const L1_TTL_MS = 30 * 60 * 1000;
+
+interface L1Entry {
+  html: string;
+  ts: number;
+}
+
+function l1Hash(str: string): string {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) {
+    h = (Math.imul(31, h) + str.charCodeAt(i)) | 0;
+  }
+  return (h >>> 0).toString(36);
+}
+
+function l1Key(embeddableId: string, prompt: string, esqlQuery: string | undefined, timeRange: { from: string; to: string } | undefined): string {
+  return `ai_panel:${l1Hash(embeddableId + prompt + (esqlQuery ?? '') + (timeRange?.from ?? '') + (timeRange?.to ?? ''))}`;
+}
+
+function readL1(key: string): string | null {
+  try {
+    const raw = sessionStorage.getItem(key);
+    if (!raw) return null;
+    const entry = JSON.parse(raw) as L1Entry;
+    return Date.now() - entry.ts < L1_TTL_MS ? entry.html : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeL1(key: string, html: string): void {
+  try {
+    sessionStorage.setItem(key, JSON.stringify({ html, ts: Date.now() } satisfies L1Entry));
+  } catch {
+    // sessionStorage full — non-fatal
+  }
 }
 
 const iframeContainerCss = css({
@@ -45,6 +84,7 @@ const iframeCss = css({
 });
 
 export const AiSummaryComponent = ({
+  embeddableId,
   title,
   hideTitle,
   prompt,
@@ -60,9 +100,25 @@ export const AiSummaryComponent = ({
   const accRef = useRef('');
   const htmlRef = useRef('');
   htmlRef.current = html;
+  // Tracks whether this is the very first render — L1 cache only applies on initial mount,
+  // not when time range / prompt changes mid-session (user expects fresh data then).
+  const mountedRef = useRef(false);
 
   useEffect(() => {
     if (!prompt) return;
+
+    const isInitialMount = !mountedRef.current;
+    mountedRef.current = true;
+
+    const key = l1Key(embeddableId, prompt, esqlQuery, timeRange);
+    if (isInitialMount && generationVersion === 0) {
+      const cached = readL1(key);
+      if (cached) {
+        setHtml(cached);
+        setIsLoading(false);
+        return;
+      }
+    }
 
     abortRef.current?.abort();
     const controller = new AbortController();
@@ -74,15 +130,23 @@ export const AiSummaryComponent = ({
 
     let failed = false;
     let failedMessage = '';
+    let intervalRef: ReturnType<typeof setInterval> | undefined;
 
-    // Stream partial updates only on first load (no existing html).
-    // On regeneration the old html stays visible while the progress bar runs at the top.
+    const stopInterval = () => {
+      if (intervalRef) {
+        clearInterval(intervalRef);
+        intervalRef = undefined;
+      }
+    };
+
+    // Stream partial updates only on first load (no existing html) and not stale-while-revalidate.
+    // On regeneration / SWR the old html stays visible while the progress bar runs at the top.
     const hasExistingHtml = Boolean(htmlRef.current);
-    const interval = hasExistingHtml
-      ? undefined
-      : setInterval(() => {
-          if (accRef.current) setHtml(accRef.current);
-        }, 300);
+    if (!hasExistingHtml) {
+      intervalRef = setInterval(() => {
+        if (accRef.current) setHtml(accRef.current);
+      }, 300);
+    }
 
     streamGenerate(
       getServices().http,
@@ -90,7 +154,11 @@ export const AiSummaryComponent = ({
       (token) => {
         accRef.current += token;
       },
-      controller.signal
+      controller.signal,
+      (staleHtml) => {
+        stopInterval();
+        setHtml(staleHtml);
+      }
     )
       .catch((err) => {
         if (err.name !== 'AbortError') {
@@ -99,21 +167,25 @@ export const AiSummaryComponent = ({
         }
       })
       .finally(() => {
-        if (interval) clearInterval(interval);
+        stopInterval();
         if (controller.signal.aborted) return;
         setIsLoading(false);
         if (failed) {
           setError(failedMessage || 'Failed to generate panel content');
         } else {
-          setHtml(accRef.current);
+          const finalHtml = accRef.current;
+          if (finalHtml) {
+            setHtml(finalHtml);
+            writeL1(key, finalHtml);
+          }
         }
       });
 
     return () => {
-      if (interval) clearInterval(interval);
+      stopInterval();
       controller.abort();
     };
-  }, [prompt, esqlQuery, timeRange, generationVersion]);
+  }, [embeddableId, prompt, esqlQuery, timeRange, generationVersion]);
 
   const wrapperCss = css({
     position: 'relative',
