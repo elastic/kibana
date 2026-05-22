@@ -18,7 +18,7 @@ import {
 import { sourceCommandsIntro, sourceCommandsItems } from './resources/commands/source_data';
 import type { CommandDefinition, MultipleLicenseInfo } from '../src/types';
 import { getLicenseInfoForCommand } from '../src/utils/get_license_info';
-import { OUTPUT_DIR } from './scripts.constants';
+import { OUTPUT_DIR } from './constants';
 
 interface CommandItemMetadata {
   name: string;
