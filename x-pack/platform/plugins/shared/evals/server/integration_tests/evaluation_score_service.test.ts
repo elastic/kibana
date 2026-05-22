@@ -17,7 +17,6 @@ import { evaluationsDataStreamDefinition } from '../storage/scores_index_templat
 
 const getPayload = (experimentId: string): IngestScoresRequestBodyInput => ({
   experiment_id: experimentId,
-  suite_id: 'suite-1',
   task_model: {
     id: 'task-model-1',
     family: 'family-a',
@@ -28,13 +27,15 @@ const getPayload = (experimentId: string): IngestScoresRequestBodyInput => ({
     family: 'family-b',
     provider: 'provider-b',
   },
-  experiment_metadata: {
-    git_branch: 'main',
-    git_commit_sha: 'abc123',
+  metadata: {
+    execution_id: experimentId,
+    suite_id: 'suite-1',
     total_repetitions: 1,
-  },
-  environment: {
     hostname: 'localhost',
+    git: {
+      branch: 'main',
+      commit_sha: 'abc123',
+    },
   },
   scores: [
     {

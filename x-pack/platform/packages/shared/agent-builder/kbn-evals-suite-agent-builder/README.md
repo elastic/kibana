@@ -161,7 +161,7 @@ Notes:
 
 Use the evals CLI to compare two evaluation runs (persisted to the `.evaluation-scores` data stream) using paired t-tests.
 
-Run the suite twice and capture the two run IDs. Scout will generate a `TEST_RUN_ID` automatically, but it's easiest to set it explicitly. **Important:** run a **single** Playwright project (connector/model) per run (use `--project`), otherwise multiple models can collide under the same run id.
+Run the suite twice and capture the two execution IDs (via `TEST_RUN_ID`). Scout will generate a `TEST_RUN_ID` automatically, but it's easiest to set it explicitly. **Important:** run a **single** Playwright project (connector/model) per run (use `--project`), otherwise multiple models can collide under the same execution id.
 
 ```bash
 # This must point at the Kibana instance where eval scores are ingested/read.
@@ -179,7 +179,7 @@ TEST_RUN_ID=agent-builder-change \
   node scripts/evals run --suite agent-builder --project <task-connector-id>
 ```
 
-Tip: the run id is also printed at the end of the run in the export message containing `run_id:"..."`.
+Tip: the execution id is also printed at the end of the run in the export message containing `metadata.execution_id:"..."`.
 
 Then compare:
 

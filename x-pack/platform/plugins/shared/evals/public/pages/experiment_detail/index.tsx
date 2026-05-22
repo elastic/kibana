@@ -50,7 +50,7 @@ interface DatasetStatsGroup {
 
 interface DatasetStatsAccordionProps {
   experimentId: string;
-  evalRunId?: string;
+  executionId?: string;
   group: DatasetStatsGroup;
   totalRepetitions: number;
   statsColumns: Array<EuiBasicTableColumn<EvaluatorStats>>;
@@ -65,7 +65,7 @@ interface DatasetStatsAccordionProps {
 
 const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
   experimentId,
-  evalRunId,
+  executionId,
   group,
   totalRepetitions,
   statsColumns,
@@ -81,7 +81,7 @@ const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
     data: datasetExamples,
     isLoading: examplesLoading,
     error: examplesError,
-  } = useExperimentDatasetExamples(experimentId, isOpen ? group.datasetId : '', evalRunId);
+  } = useExperimentDatasetExamples(experimentId, isOpen ? group.datasetId : '', executionId);
 
   const scoreCount = group.stats[0]?.stats.count;
   const exampleCount = scoreCount != null ? Math.round(scoreCount / totalRepetitions) : undefined;
@@ -162,13 +162,13 @@ export const ExperimentDetailPage: React.FC = () => {
   const { euiTheme } = useEuiTheme();
 
   const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
-  const evalRunId = searchParams.get('eval_run_id') ?? undefined;
+  const executionId = searchParams.get('execution_id') ?? undefined;
 
   const {
     data: experimentDetail,
     isLoading: experimentLoading,
     error: experimentError,
-  } = useEvaluationExperiment(experimentId, evalRunId);
+  } = useEvaluationExperiment(experimentId, executionId);
 
   const openDatasetId = searchParams.get('dataset_id');
   const selectedExampleId = searchParams.get('example_id');
@@ -454,7 +454,7 @@ export const ExperimentDetailPage: React.FC = () => {
           <DatasetStatsAccordion
             key={datasetId}
             experimentId={experimentId}
-            evalRunId={evalRunId}
+            executionId={executionId}
             group={{ datasetId, datasetName, stats }}
             totalRepetitions={experimentDetail?.total_repetitions ?? 1}
             statsColumns={statsColumns}

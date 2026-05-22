@@ -41,7 +41,7 @@ export class KibanaPhoenixClient implements EvalsExecutorClient {
       config: PhoenixConfig;
       log: SomeDevLog;
       model: Model;
-      evalRunId?: string;
+      executionId?: string;
       repetitions?: number;
     }
   ) {
@@ -224,7 +224,7 @@ export class KibanaPhoenixClient implements EvalsExecutorClient {
         experimentMetadata: {
           ...experimentMetadata,
           model: this.options.model,
-          evalRunId: this.options.evalRunId,
+          executionId: this.options.executionId,
         },
         setGlobalTracerProvider: false,
         evaluators: evaluators.map((evaluator) => {

@@ -247,7 +247,7 @@ export interface WorkerExperimentIdRef {
   current: string | undefined;
 }
 
-export interface WorkerEvalRunIdRef {
+export interface WorkerExecutionIdRef {
   current: string | undefined;
 }
 
@@ -261,7 +261,7 @@ export interface EvaluationSpecificWorkerFixtures {
   evaluators: DefaultEvaluators;
   fetch: HttpHandler;
   workerExperimentId: WorkerExperimentIdRef;
-  workerEvalRunId: WorkerEvalRunIdRef;
+  workerExecutionId: WorkerExecutionIdRef;
   connector: AvailableConnectorWithId;
   evaluationConnector: AvailableConnectorWithId;
   repetitions: number;

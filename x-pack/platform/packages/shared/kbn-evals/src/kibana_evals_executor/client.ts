@@ -32,15 +32,15 @@ function computeDatasetId(name: string): string {
 }
 
 function computeExperimentId(
-  evalRunId: string | undefined,
+  executionId: string | undefined,
   experimentName: string,
   modelId: string | undefined
 ): string {
-  if (!evalRunId) {
+  if (!executionId) {
     return randomUUID();
   }
   return uuidv5(
-    `${evalRunId}::${experimentName}::${modelId ?? 'unknown'}`,
+    `${executionId}::${experimentName}::${modelId ?? 'unknown'}`,
     EXPERIMENT_UUID_NAMESPACE
   );
 }
@@ -52,7 +52,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
     private readonly options: {
       log: SomeDevLog;
       model: Model;
-      evalRunId?: string;
+      executionId?: string;
       repetitions?: number;
       upsertDataset?: (dataset: EvaluationDataset) => Promise<void>;
       getDatasetByName?: (
@@ -161,7 +161,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
 
       const datasetId = computeDatasetId(resolvedDataset.name);
       const experimentId = computeExperimentId(
-        this.options.evalRunId,
+        this.options.executionId,
         experimentName,
         this.options.model.id
       );
@@ -297,7 +297,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
         experimentMetadata: {
           ...experimentMetadata,
           model: this.options.model,
-          evalRunId: this.options.evalRunId,
+          executionId: this.options.executionId,
         },
       };
 

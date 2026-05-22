@@ -60,13 +60,10 @@ const createMockScore = ({
     trace_id: 'trace-eval-456',
     model: baseEvaluatorModel,
   },
-  experiment_metadata: {
-    git_branch: 'main',
-    git_commit_sha: 'abc123',
+  metadata: {
     total_repetitions: 1,
-  },
-  environment: {
     hostname: 'test-machine',
+    git: { branch: 'main', commit_sha: 'abc123' },
   },
 });
 

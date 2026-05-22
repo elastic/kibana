@@ -18,7 +18,6 @@ import {
 
 const getBaseRequest = (): IngestScoresRequestBody => ({
   experiment_id: 'exp-1',
-  suite_id: 'suite-1',
   task_model: {
     id: 'task-model',
     family: 'task-family',
@@ -29,16 +28,16 @@ const getBaseRequest = (): IngestScoresRequestBody => ({
     family: 'eval-family',
     provider: 'anthropic',
   },
-  experiment_metadata: {
-    git_branch: 'main',
-    git_commit_sha: 'abc123',
+  metadata: {
+    execution_id: 'exec-1',
+    suite_id: 'suite-1',
     total_repetitions: 2,
-  },
-  environment: {
     hostname: 'worker-01',
-  },
-  ci: {
-    buildkite: {
+    git: {
+      branch: 'main',
+      commit_sha: 'abc123',
+    },
+    ci: {
       build_id: 'build-1',
       job_id: 'job-1',
     },
@@ -123,7 +122,14 @@ describe('EvaluationScoreService', () => {
       '@timestamp': expect.any(String),
       _id: expect.any(String),
       experiment_id: request.experiment_id,
-      suite: { id: request.suite_id },
+      metadata: {
+        execution_id: request.metadata.execution_id,
+        suite_id: request.metadata.suite_id,
+        total_repetitions: request.metadata.total_repetitions,
+        hostname: request.metadata.hostname,
+        git: request.metadata.git,
+        ci: request.metadata.ci,
+      },
       task: { model: request.task_model, repetition_index: 0 },
       evaluator: { model: request.evaluator_model, name: 'correctness' },
     });

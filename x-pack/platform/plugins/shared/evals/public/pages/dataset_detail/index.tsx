@@ -375,12 +375,12 @@ export const DatasetDetailPage: React.FC = () => {
           const displayName = isSuiteRun
             ? row.suite_id ?? row.experiment_name ?? truncate(row.experiment_id, 12)
             : row.experiment_name ?? truncate(row.experiment_id, 12);
-          const evalRunId = row.eval_run_id ?? row.experiment_id;
+          const executionId = row.execution_id ?? row.experiment_id;
           const dsParam = encodeURIComponent(datasetId);
-          const query = `?eval_run_id=${encodeURIComponent(evalRunId)}&dataset_id=${dsParam}`;
+          const query = `?execution_id=${encodeURIComponent(executionId)}&dataset_id=${dsParam}`;
           const modelId = row.task_model?.id;
           return (
-            <EuiToolTip content={evalRunId}>
+            <EuiToolTip content={executionId}>
               <div tabIndex={0}>
                 <EuiLink onClick={() => history.push(`/experiments/${row.experiment_id}${query}`)}>
                   {displayName}

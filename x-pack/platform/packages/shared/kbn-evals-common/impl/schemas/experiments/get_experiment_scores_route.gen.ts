@@ -29,9 +29,9 @@ export const GetEvaluationExperimentScoresRequestQuery = lazySchema(() =>
      */
     model_id: z.string().optional(),
     /**
-     * When provided, fetches scores for all experiments in this suite run
+     * When provided, fetches scores for all experiments in this execution
      */
-    eval_run_id: z.string().optional(),
+    execution_id: z.string().optional(),
   })
 );
 export type GetEvaluationExperimentScoresRequestQuery = z.infer<

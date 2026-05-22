@@ -30,9 +30,9 @@ export type EvaluationExperimentDatasetExample = z.infer<typeof EvaluationExperi
 export const GetEvaluationExperimentDatasetExamplesRequestQuery = lazySchema(() =>
   z.object({
     /**
-     * When provided, fetches examples for all experiments in this suite run
+     * When provided, fetches examples for all experiments in this execution
      */
-    eval_run_id: z.string().optional(),
+    execution_id: z.string().optional(),
   })
 );
 export type GetEvaluationExperimentDatasetExamplesRequestQuery = z.infer<

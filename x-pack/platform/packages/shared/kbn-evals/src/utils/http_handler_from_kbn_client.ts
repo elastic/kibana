@@ -7,7 +7,7 @@
 import type { HttpFetchOptions, HttpFetchOptionsWithPath, HttpHandler } from '@kbn/core/public';
 import type { KbnClient, KbnClientRequesterError } from '@kbn/kbn-client';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { EVAL_RUN_ID_BAGGAGE_KEY, EVAL_EXPERIMENT_ID_BAGGAGE_KEY } from '@kbn/inference-tracing';
+import { EXECUTION_ID_BAGGAGE_KEY, EVAL_EXPERIMENT_ID_BAGGAGE_KEY } from '@kbn/inference-tracing';
 
 // redefine args type to make it easier to handle in a type-safe way
 type HttpHandlerArgs =
@@ -24,12 +24,12 @@ type HttpHandlerArgs =
 export function httpHandlerFromKbnClient({
   kbnClient,
   log,
-  getEvalRunId,
+  getExecutionId,
   getExperimentId,
 }: {
   kbnClient: KbnClient;
   log: ToolingLog;
-  getEvalRunId?: () => string | undefined;
+  getExecutionId?: () => string | undefined;
   getExperimentId?: () => string | undefined;
 }) {
   const fetch: HttpHandler = async (...args: HttpHandlerArgs) => {
@@ -39,14 +39,14 @@ export function httpHandlerFromKbnClient({
     const { method = 'GET', body, asResponse, rawResponse, query, signal, headers } = options;
 
     // Add a W3C baggage entry so Kibana can tag OTEL spans with the per-model build run ID.
-    const evalRunId = getEvalRunId?.() ?? process.env.TEST_RUN_ID;
+    const executionId = getExecutionId?.() ?? process.env.TEST_RUN_ID;
     const nextHeaders: Record<string, string> = headers
       ? ({ ...(headers as Record<string, unknown>) } as Record<string, string>)
       : {};
 
     const baggageEntries: string[] = [];
-    if (evalRunId) {
-      baggageEntries.push(`${EVAL_RUN_ID_BAGGAGE_KEY}=${encodeURIComponent(evalRunId)}`);
+    if (executionId) {
+      baggageEntries.push(`${EXECUTION_ID_BAGGAGE_KEY}=${encodeURIComponent(executionId)}`);
     }
     const experimentId = getExperimentId?.();
     if (experimentId) {

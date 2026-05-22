@@ -14,7 +14,7 @@ import { EvaluationIndices } from '@kbn/evals-common';
 const ES_URL = process.env.EVALUATIONS_ES_URL ?? 'http://elastic:changeme@localhost:9220';
 
 interface EvalDoc {
-  run_id: string;
+  metadata?: { execution_id?: string };
   example: {
     id: string;
     index: number;
@@ -55,7 +55,7 @@ async function main() {
 
   if (!runId || runId === '--help') {
     await listRecentRuns(client);
-    console.log('\nUsage: npx ts-node scripts/inspect_eval_run.ts <run_id> [mode]');
+    console.log('\nUsage: npx ts-node scripts/inspect_eval_run.ts <execution_id> [mode]');
     console.log('Modes: summary (default), failures, compare, conversations, efficiency');
     await client.close();
     return;
@@ -90,11 +90,11 @@ async function listRecentRuns(client: Client) {
     size: 0,
     aggs: {
       runs: {
-        terms: { field: 'run_id', size: 10, order: { latest: 'desc' } },
+        terms: { field: 'metadata.execution_id', size: 10, order: { latest: 'desc' } },
         aggs: {
           latest: { max: { field: '@timestamp' } },
           models: { terms: { field: 'task.model.id' } },
-          doc_count_agg: { value_count: { field: 'run_id' } },
+          doc_count_agg: { value_count: { field: 'metadata.execution_id' } },
         },
       },
     },
@@ -110,7 +110,7 @@ async function listRecentRuns(client: Client) {
 }
 
 async function fetchDocs(client: Client, runId: string, extraFilter?: object): Promise<EvalDoc[]> {
-  const must: object[] = [{ term: { run_id: runId } }];
+  const must: object[] = [{ term: { 'metadata.execution_id': runId } }];
   if (extraFilter) {
     must.push(extraFilter);
   }
@@ -132,7 +132,7 @@ async function fetchDocs(client: Client, runId: string, extraFilter?: object): P
 async function showSummary(client: Client, runId: string) {
   const docs = await fetchDocs(client, runId);
   if (docs.length === 0) {
-    console.log(`No results for run_id: ${runId}`);
+    console.log(`No results for execution_id: ${runId}`);
     return;
   }
 
@@ -183,7 +183,7 @@ async function showFailures(client: Client, runId: string) {
   });
 
   if (docs.length === 0) {
-    console.log(`No failures for run_id: ${runId}`);
+    console.log(`No failures for execution_id: ${runId}`);
     return;
   }
 

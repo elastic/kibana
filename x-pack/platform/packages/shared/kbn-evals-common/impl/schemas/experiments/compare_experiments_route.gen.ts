@@ -32,15 +32,15 @@ export type PairedTTestResult = z.infer<typeof PairedTTestResult>;
 export const CompareExperimentsRequestQuery = lazySchema(() =>
   z.object({
     /**
-     * Comparison type — compare individual experiments or suite eval runs
+     * Comparison type — compare individual experiments or suite executions
      */
-    type: z.enum(['experiment', 'eval_run']).default('experiment'),
+    type: z.enum(['experiment', 'execution']).default('experiment'),
     /**
-     * Baseline experiment or eval run ID (depends on type)
+     * Baseline experiment or execution ID (depends on type)
      */
     baseline_id: z.string(),
     /**
-     * Target experiment or eval run ID (depends on type)
+     * Target experiment or execution ID (depends on type)
      */
     target_id: z.string(),
   })

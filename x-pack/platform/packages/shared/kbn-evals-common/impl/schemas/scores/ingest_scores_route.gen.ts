@@ -22,23 +22,21 @@ export const IngestScoresRequestBody = lazySchema(() =>
   z.object({
     experiment_id: z.string(),
     experiment_name: z.string().optional(),
-    eval_run_id: z.string().optional(),
-    suite_id: z.string().optional(),
     task_model: Model,
     evaluator_model: Model,
-    experiment_metadata: z.object({
-      git_branch: z.string().optional(),
-      git_commit_sha: z.string().optional(),
+    metadata: z.object({
+      execution_id: z.string().optional(),
+      suite_id: z.string().optional(),
       total_repetitions: z.number().int(),
-    }),
-    environment: z.object({
       hostname: z.string(),
+      git: z
+        .object({
+          branch: z.string().optional(),
+          commit_sha: z.string().optional(),
+        })
+        .optional(),
+      ci: BuildkiteMetadata.optional(),
     }),
-    ci: z
-      .object({
-        buildkite: BuildkiteMetadata.optional(),
-      })
-      .optional(),
     scores: z
       .array(
         z.object({

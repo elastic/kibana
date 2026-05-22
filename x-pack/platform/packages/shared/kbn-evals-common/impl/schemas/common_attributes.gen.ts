@@ -74,38 +74,32 @@ export const EvaluatorInfo = lazySchema(() =>
 );
 export type EvaluatorInfo = z.infer<typeof EvaluatorInfo>;
 
-export const ExperimentMetadata = lazySchema(() =>
+export const ScoreMetadata = lazySchema(() =>
   z.object({
-    git_branch: z.string().nullable().optional(),
-    git_commit_sha: z.string().nullable().optional(),
+    execution_id: z.string().optional(),
+    suite_id: z.string().optional(),
     total_repetitions: z.number().int(),
+    hostname: z.string().optional(),
+    git: z
+      .object({
+        branch: z.string().nullable().optional(),
+        commit_sha: z.string().nullable().optional(),
+      })
+      .optional(),
+    ci: BuildkiteMetadata.optional(),
   })
 );
-export type ExperimentMetadata = z.infer<typeof ExperimentMetadata>;
+export type ScoreMetadata = z.infer<typeof ScoreMetadata>;
 
 export const EvaluationScoreDocument = lazySchema(() =>
   z.object({
     '@timestamp': z.string(),
     experiment_id: z.string(),
     experiment_name: z.string().optional(),
-    eval_run_id: z.string().optional(),
-    suite: z
-      .object({
-        id: z.string().optional(),
-      })
-      .optional(),
-    ci: z
-      .object({
-        buildkite: BuildkiteMetadata.optional(),
-      })
-      .optional(),
     example: ExampleInfo,
     task: TaskInfo,
     evaluator: EvaluatorInfo,
-    experiment_metadata: ExperimentMetadata,
-    environment: z.object({
-      hostname: z.string().optional(),
-    }),
+    metadata: ScoreMetadata,
   })
 );
 export type EvaluationScoreDocument = z.infer<typeof EvaluationScoreDocument>;

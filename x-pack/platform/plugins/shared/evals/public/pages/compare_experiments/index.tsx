@@ -136,11 +136,11 @@ const DiffValue: React.FC<{ diff: number; evaluatorName: string }> = ({ diff, ev
 const ExperimentHeader: React.FC<{
   label: string;
   experimentId: string;
-  evalRunId?: string;
+  executionId?: string;
   isNewer?: boolean;
-}> = ({ label, experimentId, evalRunId, isNewer }) => {
+}> = ({ label, experimentId, executionId, isNewer }) => {
   const history = useHistory();
-  const { data: experimentData, isLoading } = useEvaluationExperiment(experimentId, evalRunId);
+  const { data: experimentData, isLoading } = useEvaluationExperiment(experimentId, executionId);
 
   const branch = experimentData?.git_branch;
   const timestamp = experimentData?.timestamp;
@@ -240,8 +240,8 @@ const ExampleDrilldownFlyout: React.FC<{
   datasetId: string;
   datasetName: string;
   evaluatorName: string;
-  evalRunIdA?: string;
-  evalRunIdB?: string;
+  executionIdA?: string;
+  executionIdB?: string;
   onClose: () => void;
 }> = ({
   experimentIdA,
@@ -249,8 +249,8 @@ const ExampleDrilldownFlyout: React.FC<{
   datasetId,
   datasetName,
   evaluatorName,
-  evalRunIdA,
-  evalRunIdB,
+  executionIdA,
+  executionIdB,
   onClose,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -265,12 +265,12 @@ const ExampleDrilldownFlyout: React.FC<{
   const { data: examplesA, isLoading: loadingA } = useExperimentDatasetExamples(
     experimentIdA,
     datasetId,
-    evalRunIdA
+    executionIdA
   );
   const { data: examplesB, isLoading: loadingB } = useExperimentDatasetExamples(
     experimentIdB,
     datasetId,
-    evalRunIdB
+    executionIdB
   );
 
   const pairs: ExampleScorePair[] = useMemo(() => {
@@ -544,20 +544,20 @@ export const CompareExperimentsPage: React.FC = () => {
   const { euiTheme } = useEuiTheme();
 
   const params = useMemo(() => new URLSearchParams(search), [search]);
-  const compareType = (params.get('type') as 'experiment' | 'eval_run') || 'experiment';
+  const compareType = (params.get('type') as 'experiment' | 'execution') || 'experiment';
   const baselineId = params.get('baseline') ?? '';
   const targetId = params.get('target') ?? '';
-  const isEvalRunCompare = compareType === 'eval_run';
+  const isExecutionCompare = compareType === 'execution';
 
   const { data, isLoading, error, refetch } = useCompareExperiments(
     compareType,
     baselineId,
     targetId
   );
-  const evalRunIdForDetail = isEvalRunCompare ? baselineId : undefined;
-  const evalRunIdForDetailB = isEvalRunCompare ? targetId : undefined;
-  const { data: experimentDataA } = useEvaluationExperiment(baselineId, evalRunIdForDetail);
-  const { data: experimentDataB } = useEvaluationExperiment(targetId, evalRunIdForDetailB);
+  const executionIdForDetail = isExecutionCompare ? baselineId : undefined;
+  const executionIdForDetailB = isExecutionCompare ? targetId : undefined;
+  const { data: experimentDataA } = useEvaluationExperiment(baselineId, executionIdForDetail);
+  const { data: experimentDataB } = useEvaluationExperiment(targetId, executionIdForDetailB);
 
   const isNewerA = useMemo(() => {
     if (!experimentDataA?.timestamp || !experimentDataB?.timestamp) return undefined;
@@ -795,7 +795,7 @@ export const CompareExperimentsPage: React.FC = () => {
           <ExperimentHeader
             label={i18n.RUN_A_LABEL}
             experimentId={baselineId}
-            evalRunId={evalRunIdForDetail}
+            executionId={executionIdForDetail}
             isNewer={isNewerA}
           />
         </EuiFlexItem>
@@ -819,7 +819,7 @@ export const CompareExperimentsPage: React.FC = () => {
           <ExperimentHeader
             label={i18n.RUN_B_LABEL}
             experimentId={targetId}
-            evalRunId={evalRunIdForDetailB}
+            executionId={executionIdForDetailB}
             isNewer={isNewerA !== undefined ? !isNewerA : undefined}
           />
         </EuiFlexItem>
@@ -946,8 +946,8 @@ export const CompareExperimentsPage: React.FC = () => {
           datasetId={flyoutState.datasetId}
           datasetName={flyoutState.datasetName}
           evaluatorName={flyoutState.evaluatorName}
-          evalRunIdA={evalRunIdForDetail}
-          evalRunIdB={evalRunIdForDetailB}
+          executionIdA={executionIdForDetail}
+          executionIdB={executionIdForDetailB}
           onClose={() => setFlyoutState(null)}
         />
       )}

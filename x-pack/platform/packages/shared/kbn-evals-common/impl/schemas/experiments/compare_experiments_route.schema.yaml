@@ -18,21 +18,21 @@ paths:
           required: false
           schema:
             type: string
-            enum: [experiment, eval_run]
+            enum: [experiment, execution]
             default: experiment
-          description: Comparison type — compare individual experiments or suite eval runs
+          description: Comparison type — compare individual experiments or suite executions
         - name: baseline_id
           in: query
           required: true
           schema:
             type: string
-          description: Baseline experiment or eval run ID (depends on type)
+          description: Baseline experiment or execution ID (depends on type)
         - name: target_id
           in: query
           required: true
           schema:
             type: string
-          description: Target experiment or eval run ID (depends on type)
+          description: Target experiment or execution ID (depends on type)
       responses:
         '200':
           description: Successful response

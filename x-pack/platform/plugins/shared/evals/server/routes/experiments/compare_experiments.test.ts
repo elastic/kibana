@@ -52,12 +52,15 @@ const makeScoreDoc = ({
     trace_id: null,
     model: { id: 'claude-3', family: 'claude', provider: 'anthropic' },
   },
-  experiment_metadata: {
-    git_branch: 'main',
-    git_commit_sha: 'abc123',
+  metadata: {
+    execution_id: experimentId,
+    git: {
+      branch: 'main',
+      commit_sha: 'abc123',
+    },
     total_repetitions: 1,
+    hostname: 'test',
   },
-  environment: { hostname: 'test' },
 });
 
 describe('GET /internal/evals/experiments/compare', () => {

@@ -22,16 +22,17 @@ import type { RouteDependencies } from '../register_routes';
 
 interface EvalDocSource {
   experiment_name?: string;
-  suite?: { id?: string };
   task?: { model?: { id?: string; family?: string; provider?: string } };
   evaluator?: { model?: { id?: string; family?: string; provider?: string } };
-  experiment_metadata?: {
+  metadata?: {
+    execution_id?: string;
+    suite_id?: string;
     total_repetitions?: number;
-    git_branch?: string | null;
-    git_commit_sha?: string | null;
-  };
-  ci?: {
-    buildkite?: {
+    git?: {
+      branch?: string | null;
+      commit_sha?: string | null;
+    };
+    ci?: {
       build_url?: string;
       pull_request?: string;
       pipeline_slug?: string;
@@ -67,11 +68,11 @@ export const registerGetExperimentRoute = ({ router, logger }: RouteDependencies
       async (context, request, response) => {
         try {
           const { experimentId } = request.params;
-          const { suite_id: suiteId, model_id: modelId, eval_run_id: evalRunId } = request.query;
+          const { suite_id: suiteId, model_id: modelId, execution_id: executionId } = request.query;
           const evalsContext = await context.evals;
 
-          const filterId = evalRunId ?? experimentId;
-          const filterField = evalRunId ? 'eval_run_id' : 'experiment_id';
+          const filterId = executionId ?? experimentId;
+          const filterField = executionId ? 'metadata.execution_id' : 'experiment_id';
           const query = buildExperimentFilterQuery(filterId, {
             suiteId,
             modelId,
@@ -114,14 +115,15 @@ export const registerGetExperimentRoute = ({ router, logger }: RouteDependencies
             body: {
               experiment_id: experimentId,
               experiment_name: firstDoc.experiment_name ?? null,
-              suite_id: firstDoc.suite?.id ?? null,
+              execution_id: firstDoc.metadata?.execution_id,
+              suite_id: firstDoc.metadata?.suite_id ?? null,
               timestamp: firstDoc['@timestamp'],
               task_model: toModelDisplay(firstDoc.task?.model),
               evaluator_model: toModelDisplay(firstDoc.evaluator?.model),
-              git_branch: firstDoc.experiment_metadata?.git_branch ?? null,
-              git_commit_sha: firstDoc.experiment_metadata?.git_commit_sha ?? null,
-              ci: firstDoc.ci?.buildkite,
-              total_repetitions: firstDoc.experiment_metadata?.total_repetitions ?? 1,
+              git_branch: firstDoc.metadata?.git?.branch ?? null,
+              git_commit_sha: firstDoc.metadata?.git?.commit_sha ?? null,
+              ci: firstDoc.metadata?.ci,
+              total_repetitions: firstDoc.metadata?.total_repetitions ?? 1,
               stats,
             },
           });

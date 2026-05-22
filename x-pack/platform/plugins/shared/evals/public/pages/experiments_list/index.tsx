@@ -71,10 +71,10 @@ export const ExperimentsListPage: React.FC = () => {
 
   const navigateToDetail = useCallback(
     (item: EvaluationExperimentSummary) => {
-      const evalRunId = item.eval_run_id ?? item.experiment_id;
+      const executionId = item.execution_id ?? item.experiment_id;
       const expPath = encodeURIComponent(item.experiment_id);
-      const brParam = encodeURIComponent(evalRunId);
-      history.push(`/experiments/${expPath}?eval_run_id=${brParam}`);
+      const brParam = encodeURIComponent(executionId);
+      history.push(`/experiments/${expPath}?execution_id=${brParam}`);
     },
     [history]
   );
@@ -92,7 +92,7 @@ export const ExperimentsListPage: React.FC = () => {
           const displayName = isSuiteRun
             ? item.suite_id ?? item.experiment_name ?? item.experiment_id.slice(0, 12)
             : item.experiment_name ?? item.experiment_id.slice(0, 12);
-          const tooltipId = item.eval_run_id ?? item.experiment_id;
+          const tooltipId = item.execution_id ?? item.experiment_id;
           const link = <EuiLink onClick={() => navigateToDetail(item)}>{displayName}</EuiLink>;
           return <EuiToolTip content={tooltipId}>{link}</EuiToolTip>;
         },
@@ -200,8 +200,8 @@ export const ExperimentsListPage: React.FC = () => {
 
   const hasSelection = selectedExperiments.length > 0;
   const lockedSuiteId = hasSelection ? selectedExperiments[0].suite_id : undefined;
-  const selectedEvalRunIds = useMemo(
-    () => new Set(selectedExperiments.map((r) => r.eval_run_id ?? r.experiment_id)),
+  const selectedExecutionIds = useMemo(
+    () => new Set(selectedExperiments.map((r) => r.execution_id ?? r.experiment_id)),
     [selectedExperiments]
   );
   const selectionFull = selectedExperiments.length >= 2;
@@ -210,21 +210,21 @@ export const ExperimentsListPage: React.FC = () => {
     () => ({
       onSelectionChange: (items: EvaluationExperimentSummary[]) => setSelectedExperiments(items),
       selectable: (experiment: EvaluationExperimentSummary) => {
-        const evalRunId = experiment.eval_run_id ?? experiment.experiment_id;
-        if (selectedEvalRunIds.has(evalRunId)) return true;
+        const executionId = experiment.execution_id ?? experiment.experiment_id;
+        if (selectedExecutionIds.has(executionId)) return true;
         if (selectionFull) return false;
         if (!hasSelection) return true;
         return experiment.suite_id === lockedSuiteId;
       },
       selectableMessage: (selectable: boolean, experiment: EvaluationExperimentSummary) => {
         if (selectable) return '';
-        const evalRunId = experiment.eval_run_id ?? experiment.experiment_id;
-        if (selectionFull && !selectedEvalRunIds.has(evalRunId))
+        const executionId = experiment.execution_id ?? experiment.experiment_id;
+        if (selectionFull && !selectedExecutionIds.has(executionId))
           return i18n.COMPARE_MAX_SELECTED_HINT;
         return i18n.COMPARE_DIFFERENT_SUITE_HINT;
       },
     }),
-    [hasSelection, lockedSuiteId, selectedEvalRunIds, selectionFull]
+    [hasSelection, lockedSuiteId, selectedExecutionIds, selectionFull]
   );
 
   const totalExperiments = data?.total ?? 0;
@@ -235,9 +235,9 @@ export const ExperimentsListPage: React.FC = () => {
     if (!canCompare) return;
     const [a, b] = selectedExperiments;
     const isSuiteRun = !!a.suite_id || !!b.suite_id;
-    const type = isSuiteRun ? 'eval_run' : 'experiment';
-    const baselineId = isSuiteRun ? a.eval_run_id ?? a.experiment_id : a.experiment_id;
-    const targetId = isSuiteRun ? b.eval_run_id ?? b.experiment_id : b.experiment_id;
+    const type = isSuiteRun ? 'execution' : 'experiment';
+    const baselineId = isSuiteRun ? a.execution_id ?? a.experiment_id : a.experiment_id;
+    const targetId = isSuiteRun ? b.execution_id ?? b.experiment_id : b.experiment_id;
     const params = new URLSearchParams({ type, baseline: baselineId, target: targetId });
 
     history.push(`/compare?${params.toString()}`);
@@ -300,7 +300,7 @@ export const ExperimentsListPage: React.FC = () => {
         <EuiBasicTable<EvaluationExperimentSummary>
           tableCaption={i18n.TABLE_CAPTION}
           items={data?.experiments ?? []}
-          itemId="eval_run_id"
+          itemId="execution_id"
           columns={columns}
           loading={isLoading}
           pagination={pagination}

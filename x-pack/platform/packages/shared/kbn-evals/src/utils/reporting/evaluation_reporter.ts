@@ -36,7 +36,7 @@ export function createDefaultTerminalReporter(
     if (!experimentStats || experimentStats.stats.length === 0) {
       const filterSuffix = [
         filter?.taskModelId ? `task.model.id=${filter.taskModelId}` : null,
-        filter?.suiteId ? `suite.id=${filter.suiteId}` : null,
+        filter?.suiteId ? `metadata.suite_id=${filter.suiteId}` : null,
       ]
         .filter(Boolean)
         .join(', ');

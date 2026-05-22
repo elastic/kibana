@@ -29,9 +29,9 @@ export const GetEvaluationExperimentRequestQuery = lazySchema(() =>
      */
     model_id: z.string().optional(),
     /**
-     * When provided, fetches all experiments in this suite run instead of the single experiment from the path param
+     * When provided, fetches all experiments in this execution instead of the single experiment from the path param
      */
-    eval_run_id: z.string().optional(),
+    execution_id: z.string().optional(),
   })
 );
 export type GetEvaluationExperimentRequestQuery = z.infer<
@@ -60,11 +60,12 @@ export const GetEvaluationExperimentResponse = lazySchema(() =>
     timestamp: z.string().optional(),
     task_model: Model.optional(),
     evaluator_model: Model.optional(),
+    execution_id: z.string().optional(),
+    suite_id: z.string().nullable().optional(),
+    total_repetitions: z.number().int().optional(),
     git_branch: z.string().nullable().optional(),
     git_commit_sha: z.string().nullable().optional(),
     ci: BuildkiteMetadata.optional(),
-    suite_id: z.string().nullable().optional(),
-    total_repetitions: z.number().int().optional(),
     stats: z.array(EvaluatorStats),
   })
 );

@@ -30,12 +30,12 @@ paths:
           schema:
             type: string
           description: Filter stats by task model ID
-        - name: eval_run_id
+        - name: execution_id
           in: query
           required: false
           schema:
             type: string
-          description: When provided, fetches all experiments in this suite run instead of the single experiment from the path param
+          description: When provided, fetches all experiments in this execution instead of the single experiment from the path param
       responses:
         '200':
           description: Successful response
@@ -55,6 +55,14 @@ paths:
                     $ref: '../common_attributes.schema.yaml#/components/schemas/Model'
                   evaluator_model:
                     $ref: '../common_attributes.schema.yaml#/components/schemas/Model'
+                  execution_id:
+                    type: string
+                  suite_id:
+                    type: string
+                    nullable: true
+                    description: The suite ID when this experiment belongs to a suite run
+                  total_repetitions:
+                    type: integer
                   git_branch:
                     type: string
                     nullable: true
@@ -63,12 +71,6 @@ paths:
                     nullable: true
                   ci:
                     $ref: '../common_attributes.schema.yaml#/components/schemas/BuildkiteMetadata'
-                  suite_id:
-                    type: string
-                    nullable: true
-                    description: The suite ID when this experiment belongs to a suite run
-                  total_repetitions:
-                    type: integer
                   stats:
                     type: array
                     items:

@@ -42,7 +42,7 @@ paths:
           required: false
           schema:
             type: string
-          description: Filter by CI build ID (ci.buildkite.build_id)
+          description: Filter by CI build ID (metadata.ci.build_id)
         - name: page
           in: query
           required: false
@@ -81,7 +81,7 @@ components:
     EvaluationExperimentSummary:
       type: object
       properties:
-        eval_run_id:
+        execution_id:
           type: string
         experiment_id:
           type: string

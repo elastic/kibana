@@ -134,7 +134,7 @@ import {
   watchMode
 } from '@kbn/evals-extensions';
 
-evaluate('security test', async ({ executorClient }) => {
+evaluate('security test', async ({ executorClient, workerExecutionId }) => {
   // Mix core and extension evaluators
   await executorClient.runExperiment(
     { datasets: [dataset], task },
@@ -146,7 +146,7 @@ evaluate('security test', async ({ executorClient }) => {
   );
 
   // Use extension features
-  await costTracker.logRunCost(executorClient.getRunId());
+  await costTracker.logRunCost(workerExecutionId.current);
 });
 ```
 

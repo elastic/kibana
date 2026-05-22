@@ -27,7 +27,7 @@ interface BuildIngestRequestArgs {
   hostName: string;
   gitMetadata: GitMetadata;
   suiteId?: string;
-  evalRunId?: string;
+  executionId?: string;
   buildkiteMetadata?: BuildkiteCiMetadata;
   log?: Pick<SomeDevLog, 'warning'>;
   source: BuildIngestRequestSource;
@@ -137,7 +137,7 @@ export function buildIngestRequest({
   hostName,
   gitMetadata,
   suiteId,
-  evalRunId,
+  executionId,
   buildkiteMetadata,
   log,
   source,
@@ -167,24 +167,26 @@ export function buildIngestRequest({
   const requests: IngestScoresRequestBodyInput[] = [];
 
   for (const [experimentId, { experimentName, scores: experimentScores }] of requestsByExperiment) {
+    const gitInfo = {
+      ...(gitMetadata.branch != null && { branch: gitMetadata.branch }),
+      ...(gitMetadata.commitSha != null && { commit_sha: gitMetadata.commitSha }),
+    };
+
     for (let offset = 0; offset < experimentScores.length; offset += MAX_INGEST_BATCH_SIZE) {
       const chunk = experimentScores.slice(offset, offset + MAX_INGEST_BATCH_SIZE);
       requests.push({
         experiment_id: experimentId,
         ...(experimentName != null && { experiment_name: experimentName }),
-        eval_run_id: evalRunId ?? experimentId,
-        ...(suiteId != null && { suite_id: suiteId }),
         task_model: taskModelPayload,
         evaluator_model: evaluatorModelPayload,
-        experiment_metadata: {
+        metadata: {
+          execution_id: executionId ?? experimentId,
+          ...(suiteId != null && { suite_id: suiteId }),
           total_repetitions: repetitions,
-          ...(gitMetadata.branch != null && { git_branch: gitMetadata.branch }),
-          ...(gitMetadata.commitSha != null && { git_commit_sha: gitMetadata.commitSha }),
-        },
-        environment: {
           hostname: hostName,
+          ...(Object.keys(gitInfo).length > 0 && { git: gitInfo }),
+          ...(buildkiteMetadata != null && { ci: buildkiteMetadata }),
         },
-        ...(buildkiteMetadata != null && { ci: { buildkite: buildkiteMetadata } }),
         scores: chunk,
       });
     }

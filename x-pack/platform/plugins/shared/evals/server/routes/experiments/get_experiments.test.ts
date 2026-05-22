@@ -132,6 +132,7 @@ describe('GET /internal/evals/experiments', () => {
     expect(response.payload.total).toBe(1);
     expect(response.payload.experiments).toHaveLength(1);
     expect(response.payload.experiments[0].experiment_id).toBe('experiment-abc');
+    expect(response.payload.experiments[0].execution_id).toBe('experiment-abc');
     expect(response.payload.experiments[0].task_model.id).toBe('gpt-4');
   });
 

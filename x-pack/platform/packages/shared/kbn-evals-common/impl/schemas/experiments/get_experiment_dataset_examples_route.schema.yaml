@@ -23,12 +23,12 @@ paths:
           required: true
           schema:
             type: string
-        - name: eval_run_id
+        - name: execution_id
           in: query
           required: false
           schema:
             type: string
-          description: When provided, fetches examples for all experiments in this suite run
+          description: When provided, fetches examples for all experiments in this execution
       responses:
         '200':
           description: Successful response

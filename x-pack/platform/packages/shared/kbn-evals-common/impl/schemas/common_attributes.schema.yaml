@@ -26,39 +26,21 @@ components:
           type: string
         experiment_name:
           type: string
-        eval_run_id:
-          type: string
-        suite:
-          type: object
-          properties:
-            id:
-              type: string
-        ci:
-          type: object
-          properties:
-            buildkite:
-              $ref: '#/components/schemas/BuildkiteMetadata'
         example:
           $ref: '#/components/schemas/ExampleInfo'
         task:
           $ref: '#/components/schemas/TaskInfo'
         evaluator:
           $ref: '#/components/schemas/EvaluatorInfo'
-        experiment_metadata:
-          $ref: '#/components/schemas/ExperimentMetadata'
-        environment:
-          type: object
-          properties:
-            hostname:
-              type: string
+        metadata:
+          $ref: '#/components/schemas/ScoreMetadata'
       required:
         - '@timestamp'
         - experiment_id
         - example
         - task
         - evaluator
-        - experiment_metadata
-        - environment
+        - metadata
 
     BuildkiteMetadata:
       type: object
@@ -149,17 +131,28 @@ components:
         - name
         - model
 
-    ExperimentMetadata:
+    ScoreMetadata:
       type: object
       properties:
-        git_branch:
+        execution_id:
           type: string
-          nullable: true
-        git_commit_sha:
+        suite_id:
           type: string
-          nullable: true
         total_repetitions:
           type: integer
+        hostname:
+          type: string
+        git:
+          type: object
+          properties:
+            branch:
+              type: string
+              nullable: true
+            commit_sha:
+              type: string
+              nullable: true
+        ci:
+          $ref: '#/components/schemas/BuildkiteMetadata'
       required:
         - total_repetitions
 

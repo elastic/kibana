@@ -65,10 +65,9 @@ const buildScore = ({
       id: 'evaluator-model-1',
     },
   },
-  experiment_metadata: {
+  metadata: {
     total_repetitions: 1,
   },
-  environment: {},
 });
 
 describe('ExampleScoresTable', () => {

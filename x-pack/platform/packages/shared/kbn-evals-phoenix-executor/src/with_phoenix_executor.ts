@@ -77,7 +77,7 @@ export function withPhoenixExecutor<T extends { extend: (...args: any[]) => any 
         },
         use: (client: EvalsExecutorClient) => Promise<void>
       ) => {
-        const evalRunId = process.env.TEST_RUN_ID;
+        const executionId = process.env.TEST_RUN_ID;
 
         const model = buildModelFromConnector(connector);
         const evaluatorModel = buildModelFromConnector(evaluationConnector);
@@ -90,7 +90,7 @@ export function withPhoenixExecutor<T extends { extend: (...args: any[]) => any 
           config: getPhoenixConfig(),
           log,
           model,
-          evalRunId,
+          executionId,
           repetitions,
         });
 

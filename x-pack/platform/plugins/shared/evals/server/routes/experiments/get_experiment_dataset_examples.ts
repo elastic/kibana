@@ -65,11 +65,11 @@ export const registerGetExperimentDatasetExamplesRoute = ({
       async (context, request, response) => {
         try {
           const { experimentId, datasetId } = request.params;
-          const { eval_run_id: evalRunId } = request.query;
+          const { execution_id: executionId } = request.query;
           const evalsContext = await context.evals;
 
-          const filterId = evalRunId ?? experimentId;
-          const filterField = evalRunId ? 'eval_run_id' : 'experiment_id';
+          const filterId = executionId ?? experimentId;
+          const filterField = executionId ? 'metadata.execution_id' : 'experiment_id';
           const searchResponse = await evalsContext.evaluationScoreService.search({
             query: buildDatasetExampleScoresQuery(datasetId, filterId, { filterField }),
             sort: SCORES_SORT_ORDER,

@@ -27,7 +27,7 @@ const DEFAULT_SUITE_ID = 'unknown-suite';
 type DataStreamSearchResponse = Awaited<ReturnType<AnyIDataStreamClient['search']>>;
 
 export const computeScoreDocumentId = (document: EvaluationScoreDocument): string => {
-  const suiteId = document.suite?.id ?? DEFAULT_SUITE_ID;
+  const suiteId = document.metadata?.suite_id ?? DEFAULT_SUITE_ID;
   return [
     document.experiment_id,
     suiteId,
@@ -48,9 +48,6 @@ const toEvaluationScoreDocuments = (
       '@timestamp': timestamp,
       experiment_id: request.experiment_id,
       experiment_name: request.experiment_name,
-      eval_run_id: request.eval_run_id ?? request.experiment_id,
-      suite: request.suite_id ? { id: request.suite_id } : undefined,
-      ci: request.ci,
       example: {
         id: score.example.id,
         index: score.example.index,
@@ -72,13 +69,18 @@ const toEvaluationScoreDocuments = (
         trace_id: score.evaluator.trace_id,
         model: request.evaluator_model,
       },
-      experiment_metadata: {
-        git_branch: request.experiment_metadata.git_branch ?? null,
-        git_commit_sha: request.experiment_metadata.git_commit_sha ?? null,
-        total_repetitions: request.experiment_metadata.total_repetitions,
-      },
-      environment: {
-        hostname: request.environment.hostname,
+      metadata: {
+        execution_id: request.metadata.execution_id ?? request.experiment_id,
+        ...(request.metadata.suite_id != null && { suite_id: request.metadata.suite_id }),
+        total_repetitions: request.metadata.total_repetitions,
+        hostname: request.metadata.hostname,
+        ...(request.metadata.git != null && {
+          git: {
+            branch: request.metadata.git.branch ?? null,
+            commit_sha: request.metadata.git.commit_sha ?? null,
+          },
+        }),
+        ...(request.metadata.ci != null && { ci: request.metadata.ci }),
       },
     };
 

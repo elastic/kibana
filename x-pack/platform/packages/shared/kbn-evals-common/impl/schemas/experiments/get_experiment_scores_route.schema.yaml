@@ -30,12 +30,12 @@ paths:
           schema:
             type: string
           description: Filter by task model ID
-        - name: eval_run_id
+        - name: execution_id
           in: query
           required: false
           schema:
             type: string
-          description: When provided, fetches scores for all experiments in this suite run
+          description: When provided, fetches scores for all experiments in this execution
       responses:
         '200':
           description: Successful response

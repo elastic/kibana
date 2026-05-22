@@ -53,7 +53,7 @@ export const registerCompareExperimentsRoute = ({ router, logger }: RouteDepende
       async (context, request, response) => {
         try {
           const { type, baseline_id: idA, target_id: idB } = request.query;
-          const filterField = type === 'eval_run' ? 'eval_run_id' : 'experiment_id';
+          const filterField = type === 'execution' ? 'metadata.execution_id' : 'experiment_id';
 
           const evalsContext = await context.evals;
 

@@ -12,7 +12,7 @@
 interface ExperimentFilterOptions {
   suiteId?: string;
   modelId?: string;
-  filterField?: 'experiment_id' | 'eval_run_id';
+  filterField?: 'experiment_id' | 'metadata.execution_id';
 }
 
 interface ExperimentsListingFilterOptions {
@@ -62,7 +62,7 @@ interface ExperimentsListingAggregations {
 
 export interface ExperimentsListingResult {
   experiments: Array<{
-    eval_run_id: string;
+    execution_id: string;
     experiment_id: string;
     experiment_name: string | null;
     experiment_count: number;
@@ -95,7 +95,7 @@ export const buildExperimentFilterQuery = (
   const field = options?.filterField ?? 'experiment_id';
   const must: Array<Record<string, unknown>> = [{ term: { [field]: experimentId } }];
   if (options?.suiteId) {
-    must.push({ term: { 'suite.id': options.suiteId } });
+    must.push({ term: { 'metadata.suite_id': options.suiteId } });
   }
   if (options?.modelId) {
     must.push({ term: { 'task.model.id': options.modelId } });
@@ -116,12 +116,12 @@ export const buildExampleScoresQuery = (
 
 /**
  * Builds a bool/must query that filters evaluation score documents by
- * dataset ID and experiment ID (or eval_run_id when filterField is specified).
+ * dataset ID and experiment ID (or metadata.execution_id when filterField is specified).
  */
 export const buildDatasetExampleScoresQuery = (
   datasetId: string,
   experimentId: string,
-  options?: { filterField?: 'experiment_id' | 'eval_run_id' }
+  options?: { filterField?: 'experiment_id' | 'metadata.execution_id' }
 ): { bool: { must: Array<Record<string, unknown>> } } => {
   const field = options?.filterField ?? 'experiment_id';
   return {
@@ -185,7 +185,7 @@ export const buildExperimentsListingFilterQuery = (
   const filters: Array<Record<string, unknown>> = [];
 
   if (options?.suiteId) {
-    filters.push({ term: { 'suite.id': options.suiteId } });
+    filters.push({ term: { 'metadata.suite_id': options.suiteId } });
   }
   if (options?.modelId) {
     filters.push({ term: { 'task.model.id': options.modelId } });
@@ -193,7 +193,7 @@ export const buildExperimentsListingFilterQuery = (
   if (options?.branch) {
     filters.push({
       wildcard: {
-        'experiment_metadata.git_branch': {
+        'metadata.git.branch': {
           value: `*${options.branch}*`,
           case_insensitive: true,
         },
@@ -207,7 +207,7 @@ export const buildExperimentsListingFilterQuery = (
     filters.push({ term: { 'example.dataset.name': options.datasetName } });
   }
   if (options?.buildId) {
-    filters.push({ term: { 'ci.buildkite.build_id': options.buildId } });
+    filters.push({ term: { 'metadata.ci.build_id': options.buildId } });
   }
   return {
     bool: {
@@ -231,11 +231,11 @@ export const buildExperimentsListingAggregation = ({
   perPage,
 }: ExperimentsListingPaginationOptions) => ({
   total_experiments: {
-    cardinality: { field: 'eval_run_id' },
+    cardinality: { field: 'metadata.execution_id' },
   },
   experiments: {
     terms: {
-      field: 'eval_run_id',
+      field: 'metadata.execution_id',
       size: page * perPage,
       order: { latest_timestamp: 'desc' as const },
     },
@@ -243,7 +243,7 @@ export const buildExperimentsListingAggregation = ({
       latest_timestamp: { max: { field: '@timestamp' } },
       experiment_count: { cardinality: { field: 'experiment_id' } },
       experiment_name: { terms: { field: 'experiment_name', size: 1 } },
-      suite_id: { terms: { field: 'suite.id', size: 1 } },
+      suite_id: { terms: { field: 'metadata.suite_id', size: 1 } },
       dataset_id: { terms: { field: 'example.dataset.id', size: 50 } },
       dataset_name: { terms: { field: 'example.dataset.name', size: 50 } },
       task_model_id: { terms: { field: 'task.model.id', size: 1 } },
@@ -252,11 +252,11 @@ export const buildExperimentsListingAggregation = ({
       evaluator_model_id: { terms: { field: 'evaluator.model.id', size: 1 } },
       evaluator_model_family: { terms: { field: 'evaluator.model.family', size: 1 } },
       evaluator_model_provider: { terms: { field: 'evaluator.model.provider', size: 1 } },
-      git_branch: { terms: { field: 'experiment_metadata.git_branch', size: 1 } },
-      git_commit_sha: { terms: { field: 'experiment_metadata.git_commit_sha', size: 1 } },
-      total_repetitions: { max: { field: 'experiment_metadata.total_repetitions' } },
-      build_url: { terms: { field: 'ci.buildkite.build_url', size: 1 } },
-      pull_request: { terms: { field: 'ci.buildkite.pull_request', size: 1 } },
+      git_branch: { terms: { field: 'metadata.git.branch', size: 1 } },
+      git_commit_sha: { terms: { field: 'metadata.git.commit_sha', size: 1 } },
+      total_repetitions: { max: { field: 'metadata.total_repetitions' } },
+      build_url: { terms: { field: 'metadata.ci.build_url', size: 1 } },
+      pull_request: { terms: { field: 'metadata.ci.pull_request', size: 1 } },
     },
   },
 });
@@ -287,7 +287,7 @@ export const parseExperimentsListingResponse = (
     const evalProvider = firstBucket(bucket.evaluator_model_provider);
 
     return {
-      eval_run_id: bucket.key,
+      execution_id: bucket.key,
       experiment_id: bucket.key,
       experiment_name: firstBucket(bucket.experiment_name) ?? null,
       experiment_count: bucket.experiment_count?.value ?? 1,

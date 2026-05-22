@@ -11,7 +11,7 @@ const ENV_DOCS = [
   {
     name: 'TEST_RUN_ID',
     description:
-      'CI build identifier used as a seed for generating deterministic per-task experiment IDs. Not used as the experiment_id itself. In CI, typically set to bk-${BUILDKITE_BUILD_ID}. Optional for local runs.',
+      'CI build identifier used as a seed for generating deterministic per-task experiment IDs and stored as execution_id in score documents. In CI, typically set to bk-${BUILDKITE_BUILD_ID}. Optional for local runs.',
     example: 'TEST_RUN_ID=bk-abc123',
   },
   {

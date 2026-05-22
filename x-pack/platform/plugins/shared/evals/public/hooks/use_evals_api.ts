@@ -407,16 +407,16 @@ export const useEvaluationExperiments = (filters: ExperimentsListFilters = {}) =
   });
 };
 
-export const useEvaluationExperiment = (experimentId: string, evalRunId?: string) => {
+export const useEvaluationExperiment = (experimentId: string, executionId?: string) => {
   const { services } = useKibana();
 
   return useQuery({
-    queryKey: queryKeys.experiments.detail(evalRunId ?? experimentId),
+    queryKey: queryKeys.experiments.detail(executionId ?? experimentId),
     queryFn: async (): Promise<GetEvaluationExperimentResponse> => {
       const url = EVALS_EXPERIMENT_URL.replace('{experimentId}', encodeURIComponent(experimentId));
       const query: Record<string, string> = {};
-      if (evalRunId) {
-        query.eval_run_id = evalRunId;
+      if (executionId) {
+        query.execution_id = executionId;
       }
       return services.http!.get<GetEvaluationExperimentResponse>(url, {
         query,
@@ -434,19 +434,19 @@ export const useEvaluationExperiment = (experimentId: string, evalRunId?: string
   });
 };
 
-export const useEvaluationExperimentScores = (experimentId: string, evalRunId?: string) => {
+export const useEvaluationExperimentScores = (experimentId: string, executionId?: string) => {
   const { services } = useKibana();
 
   return useQuery({
-    queryKey: queryKeys.experiments.scores(evalRunId ?? experimentId),
+    queryKey: queryKeys.experiments.scores(executionId ?? experimentId),
     queryFn: async (): Promise<GetEvaluationExperimentScoresResponse> => {
       const url = EVALS_EXPERIMENT_SCORES_URL.replace(
         '{experimentId}',
         encodeURIComponent(experimentId)
       );
       const query: Record<string, string> = {};
-      if (evalRunId) {
-        query.eval_run_id = evalRunId;
+      if (executionId) {
+        query.execution_id = executionId;
       }
       return services.http!.get<GetEvaluationExperimentScoresResponse>(url, {
         query,
@@ -457,7 +457,7 @@ export const useEvaluationExperimentScores = (experimentId: string, evalRunId?: 
 };
 
 export const useCompareExperiments = (
-  type: 'experiment' | 'eval_run',
+  type: 'experiment' | 'execution',
   baselineId: string,
   targetId: string
 ) => {
@@ -485,20 +485,20 @@ export const useCompareExperiments = (
 export const useExperimentDatasetExamples = (
   experimentId: string,
   datasetId: string,
-  evalRunId?: string
+  executionId?: string
 ) => {
   const { services } = useKibana();
 
   return useQuery({
-    queryKey: queryKeys.experiments.datasetExamples(evalRunId ?? experimentId, datasetId),
+    queryKey: queryKeys.experiments.datasetExamples(executionId ?? experimentId, datasetId),
     queryFn: async (): Promise<GetEvaluationExperimentDatasetExamplesResponse> => {
       const url = EVALS_EXPERIMENT_DATASET_EXAMPLES_URL.replace(
         '{experimentId}',
         encodeURIComponent(experimentId)
       ).replace('{datasetId}', encodeURIComponent(datasetId));
       const query: Record<string, string> = {};
-      if (evalRunId) {
-        query.eval_run_id = evalRunId;
+      if (executionId) {
+        query.execution_id = executionId;
       }
       return services.http!.get<GetEvaluationExperimentDatasetExamplesResponse>(url, {
         query,

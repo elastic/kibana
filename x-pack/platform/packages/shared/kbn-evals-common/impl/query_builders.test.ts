@@ -41,15 +41,15 @@ describe('query_builders', () => {
       });
     });
 
-    it('filters by eval_run_id when filterField is specified', () => {
+    it('filters by metadata.execution_id when filterField is specified', () => {
       const query = buildDatasetExampleScoresQuery('dataset-123', 'run-abc', {
-        filterField: 'eval_run_id',
+        filterField: 'metadata.execution_id',
       });
       expect(query).toEqual({
         bool: {
           must: [
             { term: { 'example.dataset.id': 'dataset-123' } },
-            { term: { eval_run_id: 'run-abc' } },
+            { term: { 'metadata.execution_id': 'run-abc' } },
           ],
         },
       });
@@ -67,7 +67,7 @@ describe('query_builders', () => {
     it('adds suite filter when suiteId is provided', () => {
       const query = buildExperimentFilterQuery('experiment-123', { suiteId: 'suite-a' });
       expect(query.bool.must).toHaveLength(2);
-      expect(query.bool.must[1]).toEqual({ term: { 'suite.id': 'suite-a' } });
+      expect(query.bool.must[1]).toEqual({ term: { 'metadata.suite_id': 'suite-a' } });
     });
 
     it('adds model filter when modelId is provided', () => {
@@ -89,10 +89,10 @@ describe('query_builders', () => {
       expect(query.bool.must).toHaveLength(1);
     });
 
-    it('filters by eval_run_id when filterField is specified', () => {
-      const query = buildExperimentFilterQuery('run-abc', { filterField: 'eval_run_id' });
+    it('filters by metadata.execution_id when filterField is specified', () => {
+      const query = buildExperimentFilterQuery('run-abc', { filterField: 'metadata.execution_id' });
       expect(query).toEqual({
-        bool: { must: [{ term: { eval_run_id: 'run-abc' } }] },
+        bool: { must: [{ term: { 'metadata.execution_id': 'run-abc' } }] },
       });
     });
   });
@@ -142,7 +142,7 @@ describe('query_builders', () => {
       expect(query).toEqual({
         bool: {
           must_not: [preflightExclusion],
-          filter: [{ term: { 'suite.id': 'suite-a' } }],
+          filter: [{ term: { 'metadata.suite_id': 'suite-a' } }],
         },
       });
     });
@@ -165,7 +165,7 @@ describe('query_builders', () => {
           filter: [
             {
               wildcard: {
-                'experiment_metadata.git_branch': {
+                'metadata.git.branch': {
                   value: '*main*',
                   case_insensitive: true,
                 },
@@ -201,7 +201,7 @@ describe('query_builders', () => {
       expect(query).toEqual({
         bool: {
           must_not: [preflightExclusion],
-          filter: [{ term: { 'ci.buildkite.build_id': 'bk-abc123' } }],
+          filter: [{ term: { 'metadata.ci.build_id': 'bk-abc123' } }],
         },
       });
     });
@@ -226,14 +226,14 @@ describe('query_builders', () => {
       expect(agg.experiments.terms.size).toBe(75);
     });
 
-    it('includes cardinality aggregation for total_experiments by eval_run_id', () => {
+    it('includes cardinality aggregation for total_experiments by metadata.execution_id', () => {
       const agg = buildExperimentsListingAggregation({ page: 1, perPage: 10 });
-      expect(agg.total_experiments).toEqual({ cardinality: { field: 'eval_run_id' } });
+      expect(agg.total_experiments).toEqual({ cardinality: { field: 'metadata.execution_id' } });
     });
 
-    it('groups by eval_run_id', () => {
+    it('groups by metadata.execution_id', () => {
       const agg = buildExperimentsListingAggregation({ page: 1, perPage: 10 });
-      expect(agg.experiments.terms.field).toBe('eval_run_id');
+      expect(agg.experiments.terms.field).toBe('metadata.execution_id');
     });
 
     it('sorts by latest_timestamp descending', () => {
@@ -315,7 +315,7 @@ describe('query_builders', () => {
       expect(result.total).toBe(1);
       expect(result.experiments).toHaveLength(1);
       expect(result.experiments[0]).toEqual({
-        eval_run_id: 'build-run-1',
+        execution_id: 'build-run-1',
         experiment_id: 'build-run-1',
         experiment_name: 'My Experiment',
         experiment_count: 3,
@@ -339,13 +339,13 @@ describe('query_builders', () => {
       const aggs = { total_experiments: { value: 5 }, experiments: { buckets } };
 
       const page1 = parseExperimentsListingResponse(aggs, { page: 1, perPage: 2 });
-      expect(page1.experiments.map((e) => e.eval_run_id)).toEqual(['build-run-0', 'build-run-1']);
+      expect(page1.experiments.map((e) => e.execution_id)).toEqual(['build-run-0', 'build-run-1']);
 
       const page2 = parseExperimentsListingResponse(aggs, { page: 2, perPage: 2 });
-      expect(page2.experiments.map((e) => e.eval_run_id)).toEqual(['build-run-2', 'build-run-3']);
+      expect(page2.experiments.map((e) => e.execution_id)).toEqual(['build-run-2', 'build-run-3']);
 
       const page3 = parseExperimentsListingResponse(aggs, { page: 3, perPage: 2 });
-      expect(page3.experiments.map((e) => e.eval_run_id)).toEqual(['build-run-4']);
+      expect(page3.experiments.map((e) => e.execution_id)).toEqual(['build-run-4']);
     });
 
     it('returns empty experiments for a page beyond results', () => {

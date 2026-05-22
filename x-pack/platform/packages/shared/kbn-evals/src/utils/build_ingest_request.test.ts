@@ -75,19 +75,18 @@ describe('buildIngestRequest', () => {
     expect(requests[0]).toMatchObject({
       experiment_id: 'exp-1',
       experiment_name: 'test-experiment',
-      suite_id: 'suite-a',
       task_model: taskModel,
       evaluator_model: evaluatorModel,
-      experiment_metadata: {
+      metadata: {
+        execution_id: 'exp-1',
+        suite_id: 'suite-a',
         total_repetitions: 2,
-        git_branch: 'main',
-        git_commit_sha: 'abc123',
-      },
-      environment: {
         hostname: 'host-a',
-      },
-      ci: {
-        buildkite: {
+        git: {
+          branch: 'main',
+          commit_sha: 'abc123',
+        },
+        ci: {
           build_id: 'build-1',
           job_id: 'job-1',
         },

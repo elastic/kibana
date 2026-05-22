@@ -14,17 +14,21 @@ const evaluationsDataStreamMappings = {
     '@timestamp': { type: 'date' },
     experiment_id: { type: 'keyword' },
     experiment_name: { type: 'keyword' },
-    eval_run_id: { type: 'keyword' },
-    suite: {
+    metadata: {
       type: 'object',
       properties: {
-        id: { type: 'keyword' },
-      },
-    },
-    ci: {
-      type: 'object',
-      properties: {
-        buildkite: {
+        execution_id: { type: 'keyword' },
+        suite_id: { type: 'keyword' },
+        total_repetitions: { type: 'integer' },
+        hostname: { type: 'keyword' },
+        git: {
+          type: 'object',
+          properties: {
+            branch: { type: 'keyword' },
+            commit_sha: { type: 'keyword' },
+          },
+        },
+        ci: {
           type: 'object',
           properties: {
             build_id: { type: 'keyword' },
@@ -86,20 +90,6 @@ const evaluationsDataStreamMappings = {
             provider: { type: 'keyword' },
           },
         },
-      },
-    },
-    experiment_metadata: {
-      type: 'object',
-      properties: {
-        git_branch: { type: 'keyword' },
-        git_commit_sha: { type: 'keyword' },
-        total_repetitions: { type: 'integer' },
-      },
-    },
-    environment: {
-      type: 'object',
-      properties: {
-        hostname: { type: 'keyword' },
       },
     },
   },

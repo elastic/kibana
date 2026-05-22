@@ -100,7 +100,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
     },
     { scope: 'worker' },
   ],
-  workerEvalRunId: [
+  workerExecutionId: [
     async ({}, use) => {
       await use({ current: undefined as string | undefined });
     },
@@ -113,11 +113,11 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
     { scope: 'worker' },
   ],
   fetch: [
-    async ({ kbnClient, log, workerEvalRunId, workerExperimentId }, use) => {
+    async ({ kbnClient, log, workerExecutionId, workerExperimentId }, use) => {
       const fetch = httpHandlerFromKbnClient({
         kbnClient,
         log,
-        getEvalRunId: () => workerEvalRunId.current,
+        getExecutionId: () => workerExecutionId.current,
         getExperimentId: () => workerExperimentId.current,
       });
       await use(fetch);
@@ -240,7 +240,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
         evaluationConnector,
         repetitions,
         reportModelScore,
-        workerEvalRunId,
+        workerExecutionId,
         workerExperimentId,
       },
       use
@@ -272,10 +272,11 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
       const suiteId = process.env.EVAL_SUITE_ID;
       const buildkiteMetadata = getBuildkiteCiMetadataFromEnv();
 
-      const baseEvalRunId = process.env.TEST_RUN_ID;
-      const evalRunId = baseEvalRunId && model.id ? `${baseEvalRunId}::${model.id}` : baseEvalRunId;
+      const baseExecutionId = process.env.TEST_RUN_ID;
+      const executionId =
+        baseExecutionId && model.id ? `${baseExecutionId}::${model.id}` : baseExecutionId;
 
-      workerEvalRunId.current = evalRunId;
+      workerExecutionId.current = executionId;
 
       const gitMetadata = getGitMetadata();
       const hostName = osHostname();
@@ -283,7 +284,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
       const executorClient = new KibanaEvalsClient({
         log,
         model,
-        evalRunId,
+        executionId,
         repetitions,
         upsertDataset: async (dataset: EvaluationDataset) => {
           await evalsClient.upsertDataset({
@@ -305,7 +306,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
               hostName,
               gitMetadata,
               suiteId,
-              evalRunId,
+              executionId,
               buildkiteMetadata,
               source: { kind: 'event', event },
               log,

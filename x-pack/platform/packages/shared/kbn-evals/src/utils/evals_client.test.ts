@@ -44,13 +44,15 @@ const createLog = (): jest.Mocked<SomeDevLog> =>
 
 const createIngestRequest = (): IngestScoresRequestBodyInput => ({
   experiment_id: 'experiment-1',
-  suite_id: 'suite-a',
   task_model: { id: 'gpt-4', family: 'gpt', provider: 'openai' },
   evaluator_model: { id: 'gpt-4o-mini', family: 'gpt', provider: 'openai' },
-  experiment_metadata: { git_branch: 'main', git_commit_sha: 'abc123', total_repetitions: 2 },
-  environment: { hostname: 'ci-host' },
-  ci: {
-    buildkite: {
+  metadata: {
+    execution_id: 'execution-1',
+    suite_id: 'suite-a',
+    total_repetitions: 2,
+    hostname: 'ci-host',
+    git: { branch: 'main', commit_sha: 'abc123' },
+    ci: {
       build_id: 'bk-build',
       job_id: 'bk-job',
     },
@@ -86,7 +88,6 @@ const createIngestRequest = (): IngestScoresRequestBodyInput => ({
 const createScoreDocument = (id: string): EvaluationScoreDocument => ({
   '@timestamp': '2026-05-01T11:00:00.000Z',
   experiment_id: 'experiment-1',
-  suite: { id: 'suite-a' },
   example: {
     id,
     index: 0,
@@ -111,13 +112,12 @@ const createScoreDocument = (id: string): EvaluationScoreDocument => ({
     trace_id: null,
     model: { id: 'gpt-4o-mini', family: 'gpt', provider: 'openai' },
   },
-  experiment_metadata: {
-    git_branch: 'main',
-    git_commit_sha: 'abc123',
+  metadata: {
+    execution_id: 'execution-1',
+    suite_id: 'suite-a',
     total_repetitions: 2,
-  },
-  environment: {
     hostname: 'ci-host',
+    git: { branch: 'main', commit_sha: 'abc123' },
   },
 });
 

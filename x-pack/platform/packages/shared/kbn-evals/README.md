@@ -197,7 +197,7 @@ node scripts/evals scout                 # Start Scout with evals config (standa
 node scripts/evals run [--suite <id>]    # Run an eval suite (stack must be running)
 node scripts/evals list [--refresh]      # List eval suites
 node scripts/evals doctor                # Check prerequisites, offer auto-fixes
-node scripts/evals compare <a> <b>       # Compare two eval runs
+node scripts/evals compare <a> <b>       # Compare two executions
 node scripts/evals env                   # List environment variables
 node scripts/evals ci-map [--json]       # Output CI label mapping
 ```
@@ -813,22 +813,8 @@ The evaluation data is stored with the following structure:
   ```json
   {
     "@timestamp": "2025-08-28T14:21:35.886Z",
-    "run_id": "run_123",
     "experiment_id": "exp_456",
-    "suite": {
-      "id": "my-suite"
-    },
-    "ci": {
-      "buildkite": {
-        "build_id": "bk-build-1",
-        "job_id": "bk-job-1",
-        "build_url": "https://buildkite.example/builds/1",
-        "pipeline_slug": "my-pipeline",
-        "pull_request": "123",
-        "branch": "feature-branch",
-        "commit": "deadbeef"
-      }
-    },
+    "experiment_name": "my-experiment",
     "example": {
       "id": "example-1",
       "index": 0,
@@ -862,25 +848,36 @@ The evaluation data is stored with the following structure:
         "provider": "anthropic"
       }
     },
-    "run_metadata": {
-      "git_branch": "main",
-      "git_commit_sha": "abc123",
-      "total_repetitions": 1
-    },
-    "environment": {
-      "hostname": "your-hostname"
+    "metadata": {
+      "execution_id": "run_123",
+      "suite_id": "my-suite",
+      "total_repetitions": 1,
+      "hostname": "your-hostname",
+      "git": {
+        "branch": "main",
+        "commit_sha": "abc123"
+      },
+      "ci": {
+        "build_id": "bk-build-1",
+        "job_id": "bk-job-1",
+        "build_url": "https://buildkite.example/builds/1",
+        "pipeline_slug": "my-pipeline",
+        "pull_request": "123",
+        "branch": "feature-branch",
+        "commit": "deadbeef"
+      }
     }
   }
   ```
 
-Each document represents a single evaluator score for a single example (and repetition) within a `run_id`.
+Each document represents a single evaluator score for a single example (and repetition) within an `execution_id`.
 
 ### Querying Evaluation Data
 
 After running evaluations, you can query the results in Kibana using the query filter provided in the logs:
 
 ```kql
-environment.hostname:"your-hostname" AND task.model.id:"model-id" AND run_id:"run-id"
+metadata.hostname:"your-hostname" AND task.model.id:"model-id" AND metadata.execution_id:"execution-id"
 ```
 
 ### LLM-as-a-judge

@@ -71,7 +71,7 @@ describe('GET /internal/evals/experiments/{experimentId}', () => {
             _source: {
               task: { model: { id: 'gpt-4', family: 'gpt-4', provider: 'openai' } },
               evaluator: { model: { id: 'claude-3', family: 'claude-3', provider: 'anthropic' } },
-              experiment_metadata: { total_repetitions: 3 },
+              metadata: { total_repetitions: 3 },
             },
           },
         ],
