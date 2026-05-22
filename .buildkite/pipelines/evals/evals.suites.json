@@ -216,6 +216,18 @@
       "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-esql-generation-regression/playwright.config.ts",
       "tags": ["security", "esql-generation"],
       "ciLabels": ["evals:security-esql-generation-regression"]
+    },
+    {
+      "id": "agent-builder-dashboards",
+      "name": "Agent Builder Dashboards",
+      "configPath": "x-pack/platform/packages/shared/agent-builder-dashboards/kbn-evals-suite-agent-builder-dashboards/playwright.config.ts",
+      "tags": [
+        "platform",
+        "agent-builder-dashboards"
+      ],
+      "ciLabels": [
+        "evals:agent-builder-dashboards"
+      ]
     }
   ]
 }
