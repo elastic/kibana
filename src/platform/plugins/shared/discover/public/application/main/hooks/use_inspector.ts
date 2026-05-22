@@ -19,17 +19,18 @@ import {
   internalStateActions,
   useInternalStateSelector,
   useCurrentTabAction,
-  useCurrentTabDataStateContainer,
   useInternalStateDispatch,
-  useCurrentTabRuntimeState,
+  useCurrentTabSelector,
+  useRuntimeStateManager,
+  selectTabRuntimeState,
 } from '../state_management/redux';
-import { useActiveContexts } from '../../../context_awareness/hooks';
+import { createContextsAdapter } from '../../../context_awareness/hooks';
 
 /**
  * Builds an AggregateRequestAdapter from the data state container's inspector adapters
- * and the cascaded documents fetcher. Shared between useInspector and the tab menu inspector.
+ * and the cascaded documents fetcher.
  */
-export const getInspectorRequestAdapters = (
+const getInspectorRequestAdapters = (
   dataStateContainer: DiscoverDataStateContainer,
   cascadedDocumentsFetcher: CascadedDocumentsFetcher
 ): AggregateRequestAdapter => {
@@ -49,22 +50,28 @@ export function useInspector({ inspector }: { inspector: InspectorPublicPluginSt
   );
 
   const dispatch = useInternalStateDispatch();
+  const currentTabId = useCurrentTabSelector((state) => state.id);
+  const runtimeStateManager = useRuntimeStateManager();
   const setExpandedDoc = useCurrentTabAction(internalStateActions.setExpandedDoc);
 
   const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
 
-  const cascadedDocumentsFetcher = useCurrentTabRuntimeState(
-    (runtimeState) => runtimeState.cascadedDocumentsFetcher$
-  );
-
-  const dataStateContainer = useCurrentTabDataStateContainer();
-
-  const getContextsAdapter = useActiveContexts({
-    dataDocuments$: dataStateContainer.data$.documents$,
-  });
-
   const onOpenInspector = useCallback(
     (onClose?: () => void) => {
+      const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, currentTabId);
+      const dataStateContainer = tabRuntimeState?.dataStateContainer$.getValue();
+
+      if (!dataStateContainer || !tabRuntimeState) {
+        return;
+      }
+
+      const cascadedDocumentsFetcher = tabRuntimeState.cascadedDocumentsFetcher$.getValue();
+      const scopedProfilesManager = tabRuntimeState.scopedProfilesManager$.getValue();
+      const getContextsAdapter = createContextsAdapter({
+        scopedProfilesManager,
+        dataDocuments$: dataStateContainer.data$.documents$,
+      });
+
       // prevent overlapping
       dispatch(setExpandedDoc({ expandedDoc: undefined }));
 
@@ -90,13 +97,12 @@ export function useInspector({ inspector }: { inspector: InspectorPublicPluginSt
       }
     },
     [
+      currentTabId,
       dispatch,
-      setExpandedDoc,
-      cascadedDocumentsFetcher,
-      dataStateContainer,
       inspector,
-      getContextsAdapter,
       persistedDiscoverSession?.title,
+      runtimeStateManager,
+      setExpandedDoc,
     ]
   );
 
