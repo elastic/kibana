@@ -98,6 +98,11 @@ export const INGESTION_COLUMN_HEADER = i18n.translate(
   { defaultMessage: 'Ingestion' }
 );
 
+export const STORAGE_COLUMN_HEADER = i18n.translate(
+  'xpack.streams.streamsTreeTable.storageColumnName',
+  { defaultMessage: 'Storage' }
+);
+
 export const STREAM_TYPE_FILTER_LABEL = i18n.translate(
   'xpack.streams.streamsTreeTable.streamTypeFilter.label',
   { defaultMessage: 'Type' }

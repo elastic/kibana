@@ -21,7 +21,6 @@ import {
   EuiBadge,
   EuiToolTip,
   EuiLoadingSpinner,
-  formatNumber,
   EuiI18nNumber,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
@@ -60,7 +59,9 @@ import {
 } from '../../hooks/use_streams_doc_counts_fetch';
 import { useTimefilter } from '../../hooks/use_timefilter';
 import { useStreamsIngestionRates } from '../../hooks/use_streams_ingestion_rates';
+import { useStreamsStorageStats } from '../../hooks/use_streams_storage_stats';
 import { useTimeRange } from '../../hooks/use_time_range';
+import { formatBytes } from '../stream_management/data_management/stream_detail_lifecycle/helpers/format_bytes';
 import { RetentionColumn } from './retention_column';
 import { calculateDataQuality } from '../../util/calculate_data_quality';
 import {
@@ -75,6 +76,7 @@ import {
   DOCUMENTS_COLUMN_HEADER,
   FAILURE_STORE_PERMISSIONS_ERROR,
   INGESTION_COLUMN_HEADER,
+  STORAGE_COLUMN_HEADER,
   STREAM_TYPE_FILTER_LABEL,
   STREAM_TYPE_CLASSIC_LABEL,
   STREAM_TYPE_WIRED_LABEL,
@@ -218,6 +220,8 @@ export function StreamsTreeTable({
     timeEnd: timeState.end,
     getStreamHistogram,
   });
+
+  const { storageByStream, storageLoaded } = useStreamsStorageStats();
 
   // Sort order for data quality
   const qualityRank: Record<QualityIndicators, number> = {
@@ -574,7 +578,7 @@ export function StreamsTreeTable({
           align: 'right',
           dataType: 'number',
           render: (_: unknown, item: TableRow) => {
-            if (!item.data_stream) return null;
+            if (!item.data_stream) return '-';
             if (!ingestionLoaded) return <EuiLoadingSpinner size="s" />;
             const rate = ingestionByStream[item.stream.name] ?? 0;
             return (
@@ -584,6 +588,22 @@ export function StreamsTreeTable({
                 values={{ ingestionRate: <EuiI18nNumber value={rate} /> }}
               />
             );
+          },
+        },
+        {
+          field: 'storageBytes',
+          name: STORAGE_COLUMN_HEADER,
+          width: '120px',
+          sortable: storageLoaded
+            ? (row: TableRow) => storageByStream[row.stream.name] ?? 0
+            : false,
+          align: 'right',
+          dataType: 'number',
+          render: (_: unknown, item: TableRow) => {
+            if (!item.data_stream) return '-';
+            if (!storageLoaded) return <EuiLoadingSpinner size="s" />;
+            const bytes = storageByStream[item.stream.name] ?? 0;
+            return <span>{formatBytes(bytes)}</span>;
           },
         },
         {
@@ -753,10 +773,4 @@ export function StreamsTreeTable({
       tableCaption={STREAMS_TABLE_CAPTION_ARIA_LABEL}
     />
   );
-}
-
-function formatDocsPerSec(value: number): string {
-  if (value >= 100) return formatNumber(value, '0,0');
-  if (value >= 1) return formatNumber(value, '0.[0]');
-  return formatNumber(value, '0.00');
 }
