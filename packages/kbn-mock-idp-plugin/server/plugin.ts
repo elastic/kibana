@@ -751,7 +751,7 @@ export const plugin: PluginInitializer<
             }
 
             generatedRoles.push(roleName);
-            return response.ok({ body: { roleName, ...roleBody } });
+            return response.ok({ body: { roleName, ...roleBody, llmRole } });
           } catch (err) {
             roleLogger.error(`Failed to generate role from description: ${err}`);
             return response.customError({ statusCode: 500, body: err.message });

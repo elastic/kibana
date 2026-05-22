@@ -1,0 +1,7 @@
+{
+  "type": "functional-tests",
+  "id": "@kbn/evals-suite-mock-idp",
+  "owner": "@elastic/kibana-security",
+  "group": "platform",
+  "visibility": "private"
+}
