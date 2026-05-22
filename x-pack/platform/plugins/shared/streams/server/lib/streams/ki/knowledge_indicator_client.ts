@@ -13,6 +13,7 @@ import type { Feature, KnowledgeIndicator, QueryLink, StreamQuery } from '@kbn/s
 import { QUERY_TYPE_STATS, deriveQueryType, isComputedFeature } from '@kbn/streams-schema';
 import type { Streams } from '@kbn/streams-schema/src/models/streams';
 import { isConditionComplete } from '@kbn/streamlang';
+import type { ComposerSortShorthand } from '@elastic/esql';
 import {
   DEFAULT_SIG_EVENTS_TUNING_CONFIG,
   type SigEventsTuningConfig,
@@ -30,10 +31,11 @@ import {
   type StoredTombstone,
   type knowledgeIndicatorsMappings,
 } from './data_stream';
-import { combineWhere, inPredicate, IS_NOT_DELETED, IS_NOT_EXPIRED } from './esql_helpers';
+import { combineWhere, inPredicate, IS_NOT_DELETED, IS_NOT_EXCLUDED } from './esql_helpers';
 import {
   executeAndDecodeSource,
   pickLatestPerGroup,
+  withSort,
   withWhere,
   type LatestSourceWhereCondition,
 } from '../../sig_events/latest_source_query';
@@ -57,8 +59,6 @@ export type KnowledgeIndicatorDataStreamClient = IDataStreamClient<
   typeof knowledgeIndicatorsMappings,
   StoredKnowledgeIndicator & Record<string, unknown>
 >;
-
-// ===== Bulk operations =====
 
 interface KIBulkIndexFeatureOperation {
   index: { feature: Feature };
@@ -400,6 +400,10 @@ export class KnowledgeIndicatorClient {
         ? esql.exp`${esql.col('feature.confidence')} >= ${options.minConfidence}`
         : undefined;
 
+    const featureTypesFilter = options.type?.length
+      ? esql.exp`${esql.col('feature.type')} IN (${options.type.map((t) => esql.str(t))})`
+      : undefined;
+
     const where = combineWhere(
       inPredicate(TYPE, [KI_TYPE_FEATURE]),
       inPredicate(STREAM_NAME, streamNames),
@@ -408,7 +412,8 @@ export class KnowledgeIndicatorClient {
 
     const postGroupingWhere = combineWhere(
       IS_NOT_DELETED,
-      options.includeExcluded ? undefined : IS_NOT_EXPIRED,
+      options.includeExcluded ? undefined : IS_NOT_EXCLUDED,
+      featureTypesFilter,
       minConfidenceFilter
     );
 
@@ -423,11 +428,10 @@ export class KnowledgeIndicatorClient {
       inPredicate(TYPE, [KI_TYPE_FEATURE]),
       inPredicate(STREAM_NAME, [stream])
     );
-    const docs = await this.fetchLatestRevisions(where, esql.exp`${esql.col('excluded')} == true`);
-    const features = docs
-      .filter(isStoredFeatureKnowledgeIndicator)
-      .map(fromStoredFeature)
-      .sort((a, b) => (b.updated_at ?? '').localeCompare(a.updated_at ?? ''));
+    const docs = await this.fetchLatestRevisions(where, esql.exp`${esql.col('excluded')} == true`, [
+      ['@timestamp', 'DESC'],
+    ]);
+    const features = docs.filter(isStoredFeatureKnowledgeIndicator).map(fromStoredFeature);
     return { hits: features, total: features.length };
   }
 
@@ -441,18 +445,11 @@ export class KnowledgeIndicatorClient {
 
   /**
    * Pure ES|QL probe: returns the timestamp of the most recent **active**
-   * feature revision for a stream — i.e. neither tombstoned nor excluded
-   * (`combineWhere(IS_NOT_DELETED, IS_NOT_EXPIRED)` applied post-grouping).
+   * feature revision for a stream (neither tombstoned nor excluded).
    *
    * Only active revisions are counted on purpose. The throttle that
    * consumes this value (`shouldIdentifyFeatures`) must rerun
-   * identification whenever the active feature set has been wiped — both
-   * because the original gating rewrite (`ea464366a3c0`) explicitly fixed
-   * that case for the legacy `getFeatures`-based check, and because the
-   * identification loop itself never writes tombstones or excluded
-   * revisions (all such writes come from external actions: user
-   * delete/exclude/restore or stream deletion). Counting them as "the
-   * identifier ran recently" would silently re-introduce the bug.
+   * identification whenever the active feature set has been wiped.
    */
   async getLatestRevisionTimestamp(
     stream: string,
@@ -468,7 +465,7 @@ export class KnowledgeIndicatorClient {
 
     const docs = await this.fetchLatestRevisions(
       where,
-      combineWhere(IS_NOT_DELETED, IS_NOT_EXPIRED, featureTypesFilter)
+      combineWhere(IS_NOT_DELETED, IS_NOT_EXCLUDED, featureTypesFilter)
     );
     if (docs.length === 0) return null;
 
@@ -477,8 +474,6 @@ export class KnowledgeIndicatorClient {
     );
     return { '@timestamp': latest['@timestamp'] };
   }
-
-  // ==================== Query reads ====================
 
   async getQueryLinks(
     streamNames: string[],
@@ -630,7 +625,7 @@ export class KnowledgeIndicatorClient {
     // relaxes back to drop-tombstones-only.
     const postGroupingWhere = combineWhere(
       IS_NOT_DELETED,
-      options.includeExcluded ? undefined : IS_NOT_EXPIRED
+      options.includeExcluded ? undefined : IS_NOT_EXCLUDED
     );
     const docs = await this.fetchLatestRevisions(where, postGroupingWhere);
     const docById = new Map(docs.map((d) => [`${d['stream.name']}:${d.type}:${d.id}`, d]));
@@ -658,7 +653,7 @@ export class KnowledgeIndicatorClient {
     if (mode === 'keyword') {
       retriever = {
         standard: {
-          query: this.buildKeywordQuery(queryText, filter),
+          query: this.buildKeywordQuery(queryText, filter, options.types),
         },
       };
     } else if (mode === 'semantic') {
@@ -684,7 +679,7 @@ export class KnowledgeIndicatorClient {
       retriever = {
         rrf: {
           retrievers: [
-            { standard: { query: this.buildKeywordQuery(queryText, []) } },
+            { standard: { query: this.buildKeywordQuery(queryText, [], options.types) } },
             {
               linear: {
                 retrievers: [
@@ -741,7 +736,8 @@ export class KnowledgeIndicatorClient {
 
   private buildKeywordQuery(
     queryText: string,
-    filter: Array<Record<string, unknown>>
+    filter: Array<Record<string, unknown>>,
+    types: KnowledgeIndicatorType[] = []
   ): Record<string, unknown> {
     const escaped = queryText.replace(/[\\*?]/g, '\\$&');
     const wildcard = (field: string, boost?: number) => ({
@@ -753,10 +749,35 @@ export class KnowledgeIndicatorClient {
         },
       },
     });
+
+    const featureShould = [
+      wildcard('title', 3),
+      wildcard('description', 2),
+      wildcard('feature.type'),
+      wildcard('feature.subtype'),
+      wildcard('tags'),
+    ];
+
+    const queryShould = [
+      wildcard('title', 3),
+      wildcard('description', 2),
+      wildcard('query.esql'),
+      wildcard('query.features.id'),
+    ];
+
+    let should: Array<Record<string, unknown>>;
+    if (types.length === 0 || (types.includes(KI_TYPE_FEATURE) && types.includes(KI_TYPE_QUERY))) {
+      should = [...featureShould, ...queryShould];
+    } else if (types.includes(KI_TYPE_FEATURE)) {
+      should = featureShould;
+    } else {
+      should = queryShould;
+    }
+
     return {
       bool: {
         filter,
-        should: [wildcard('title', 3), wildcard('description', 2), wildcard('feature.subtype')],
+        should,
         minimum_should_match: 1,
       },
     };
@@ -764,7 +785,11 @@ export class KnowledgeIndicatorClient {
 
   // ==================== Rule lifecycle ====================
 
-  async syncQueries(definition: Streams.all.Definition, queries: StreamQuery[]): Promise<void> {
+  async syncQueries(
+    definition: Streams.all.Definition,
+    queries: StreamQuery[],
+    options?: { currentLinks?: QueryLink[] }
+  ): Promise<void> {
     const stream = definition.name;
     if (!this.isSignificantEventsEnabled) {
       this.deps.logger.debug(
@@ -773,7 +798,8 @@ export class KnowledgeIndicatorClient {
       return;
     }
 
-    const { [stream]: currentLinks } = await this.getStreamToQueryLinksMap([stream]);
+    const currentLinks =
+      options?.currentLinks ?? (await this.getStreamToQueryLinksMap([stream]))[stream];
     const currentByQueryId = new Map(currentLinks.map((link) => [link.query.id, link]));
     const nextIds = new Set(queries.map((q) => q.id));
 
@@ -1122,12 +1148,14 @@ export class KnowledgeIndicatorClient {
    */
   private async fetchLatestRevisions(
     where?: LatestSourceWhereCondition,
-    postGroupingWhere?: LatestSourceWhereCondition
+    postGroupingWhere?: LatestSourceWhereCondition,
+    sort?: ComposerSortShorthand[]
   ): Promise<StoredKnowledgeIndicator[]> {
     let query = esql.from([KNOWLEDGE_INDICATORS_DATA_STREAM], ['_id', '_source']);
     query = withWhere(query, where);
     query = pickLatestPerGroup(query, ['stream.name', 'type', 'id']);
     query = withWhere(query, postGroupingWhere);
+    query = withSort(query, sort);
     query = query.keep('_source');
 
     const { hits } = await executeAndDecodeSource<StoredKnowledgeIndicator>(

@@ -133,7 +133,7 @@ export async function persistQueries(
         merged.push(q);
       }
     }
-    await kiClient.syncQueries(definition, merged);
+    await kiClient.syncQueries(definition, merged, { currentLinks: existingLinks });
   }
 
   if (standardOps.length > 0) {

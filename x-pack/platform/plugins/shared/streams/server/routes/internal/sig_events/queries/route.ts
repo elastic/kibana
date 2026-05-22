@@ -212,14 +212,10 @@ export const bulkDeleteQueriesRoute = createServerRoute({
     const foundIds = new Set(queryLinks.map((link) => link.query.id));
     const skipped = params.body.queryIds.filter((id) => !foundIds.has(id)).length;
 
-    // Capture backed rule IDs per stream to log on mid-flight failure.
-    const byStream = new Map<string, { queryIds: string[]; backedRuleIds: string[] }>();
+    const byStream = new Map<string, { queryIds: string[] }>();
     for (const link of queryLinks) {
-      const bucket = byStream.get(link.stream_name) ?? { queryIds: [], backedRuleIds: [] };
+      const bucket = byStream.get(link.stream_name) ?? { queryIds: [] };
       bucket.queryIds.push(link.query.id);
-      if (link.rule_backed && link.rule_id) {
-        bucket.backedRuleIds.push(link.rule_id);
-      }
       byStream.set(link.stream_name, bucket);
     }
 
@@ -241,15 +237,17 @@ export const bulkDeleteQueriesRoute = createServerRoute({
       }
     });
 
-    // syncQueries uninstalls rules before writing storage, so a mid-flight
-    // throw can leave rules gone while stored links still reference them. Log
-    // the backed rule IDs on failure so ops can reconcile manually.
+    // Fetch the full current link state upfront so syncQueries can skip its
+    // internal re-read. Using syncQueries (rather than direct bulk delete)
+    // ensures backing Kibana rules are properly uninstalled for removed queries.
+    const currentLinksMap = await kiClient.getStreamToQueryLinksMap(streamNames);
+
     const sigEventsLogger = logger.get('significant_events');
 
     let succeeded = 0;
     let failed = 0;
 
-    for (const [streamName, { queryIds, backedRuleIds }] of byStream) {
+    for (const [streamName, { queryIds }] of byStream) {
       const definition = streamDefinitionsByName.get(streamName);
       if (!definition) {
         logger.warn(`Skipping bulk delete for missing stream ${streamName}`);
@@ -257,18 +255,18 @@ export const bulkDeleteQueriesRoute = createServerRoute({
         continue;
       }
       try {
-        await kiClient.bulk(
-          definition.name,
-          queryIds.map((id) => ({ delete: { type: 'query', id } }))
-        );
+        const currentLinks = currentLinksMap[streamName] ?? [];
+        const deletedIds = new Set(queryIds);
+        const nextQueries = currentLinks
+          .filter((l) => !deletedIds.has(l.query.id))
+          .map((l) => l.query);
+        await kiClient.syncQueries(definition, nextQueries, { currentLinks });
         succeeded += queryIds.length;
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        const orphanContext =
-          backedRuleIds.length > 0 ? ` candidateOrphanedRuleIds=[${backedRuleIds.join(',')}]` : '';
         sigEventsLogger.error(
           `Bulk delete failed for stream ${streamName}: ${errorMessage}. ` +
-            `queryIds=[${queryIds.join(',')}]${orphanContext}`
+            `queryIds=[${queryIds.join(',')}]`
         );
         failed += queryIds.length;
       }

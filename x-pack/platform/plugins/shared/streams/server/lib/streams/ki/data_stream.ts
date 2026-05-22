@@ -163,8 +163,7 @@ export const knowledgeIndicatorsDataStream: DataStreamDefinition<
   StoredKnowledgeIndicator & Record<string, unknown>
 > = {
   name: KNOWLEDGE_INDICATORS_DATA_STREAM,
-  // v2: add root-level `excluded` boolean (ES|QL filters in esql_helpers.ts).
-  version: 2,
+  version: 1,
   hidden: true,
   template: {
     priority: 500,
