@@ -26,7 +26,7 @@ describe('ALERT_ACTION_WORKFLOW_TRIGGERS', () => {
 
   it('namespaces every trigger id under `alerting_v2.`', () => {
     for (const binding of ALERT_ACTION_WORKFLOW_TRIGGERS) {
-      expect(binding.triggerId.startsWith('alerting_v2.')).toBe(true);
+      expect(binding.triggerId.startsWith('alertingV2.')).toBe(true);
     }
   });
 });
