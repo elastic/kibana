@@ -42,7 +42,8 @@ export type {
   Tag,
 } from './types';
 
-export { INDEX_PATTERN_TYPE, INDEX_KIND } from './types';
+export { INDEX_PATTERN_TYPE } from './types';
+export type { IndexKind } from './types';
 
 export type {
   DataViewsServicePublic,

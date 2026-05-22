@@ -9,10 +9,10 @@
 
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
-import {
-  INDEX_KIND,
-  type DataViewsPublicPluginStart,
-  type MatchedItem,
+import type {
+  DataViewsPublicPluginStart,
+  IndexKind,
+  MatchedItem,
 } from '@kbn/data-views-plugin/public';
 import {
   ExternalServicesProvider,
@@ -39,7 +39,7 @@ const mockedUseMetricsExperienceState = useMetricsExperienceState as jest.Mock;
 const mockedUseReportChartSectionError = useReportChartSectionError as jest.Mock;
 const TEST_PROFILE_ID = 'metrics-data-source-profile';
 
-const matchedItem = (name: string, key: INDEX_KIND): MatchedItem =>
+const matchedItem = (name: string, key: IndexKind): MatchedItem =>
   ({
     name,
     tags: [{ key, name: key, color: 'default' }],
@@ -97,9 +97,7 @@ describe('useMetricSourceKind', () => {
   });
 
   it('returns INDEX when getIndices matches a plain index by tag key', async () => {
-    const getIndices = jest
-      .fn()
-      .mockResolvedValue([matchedItem('metrics-plain-index', INDEX_KIND.INDEX)]);
+    const getIndices = jest.fn().mockResolvedValue([matchedItem('metrics-plain-index', 'index')]);
     const { result } = renderHook(
       () =>
         useMetricSourceKind({
@@ -118,9 +116,7 @@ describe('useMetricSourceKind', () => {
   });
 
   it('returns DATA_STREAM when getIndices matches a data stream', async () => {
-    const getIndices = jest
-      .fn()
-      .mockResolvedValue([matchedItem('logs-ds', INDEX_KIND.DATA_STREAM)]);
+    const getIndices = jest.fn().mockResolvedValue([matchedItem('logs-ds', 'data_stream')]);
     const { result } = renderHook(
       () => useMetricSourceKind({ name: 'logs-ds', fallback: METRIC_SOURCE_KIND.INDEX }),
       { wrapper: buildWrapper({ dataViews: buildDataViews(getIndices) }) }
@@ -130,9 +126,7 @@ describe('useMetricSourceKind', () => {
   });
 
   it('falls back to the provided fallback when the name is not in the response', async () => {
-    const getIndices = jest
-      .fn()
-      .mockResolvedValue([matchedItem('other-source', INDEX_KIND.INDEX)]);
+    const getIndices = jest.fn().mockResolvedValue([matchedItem('other-source', 'index')]);
     const { result } = renderHook(
       () =>
         useMetricSourceKind({ name: 'not-in-response', fallback: METRIC_SOURCE_KIND.DATA_STREAM }),
@@ -147,7 +141,7 @@ describe('useMetricSourceKind', () => {
     const getIndices = jest
       .fn()
       .mockRejectedValueOnce(new Error('boom'))
-      .mockResolvedValueOnce([matchedItem('retry-source', INDEX_KIND.INDEX)]);
+      .mockResolvedValueOnce([matchedItem('retry-source', 'index')]);
     const wrapper = buildWrapper({ dataViews: buildDataViews(getIndices) });
 
     const first = renderHook(
@@ -169,7 +163,7 @@ describe('useMetricSourceKind', () => {
     const getIndices = jest
       .fn()
       .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([matchedItem('eventually-found', INDEX_KIND.DATA_STREAM)]);
+      .mockResolvedValueOnce([matchedItem('eventually-found', 'data_stream')]);
     const wrapper = buildWrapper({ dataViews: buildDataViews(getIndices) });
 
     const first = renderHook(
@@ -188,9 +182,7 @@ describe('useMetricSourceKind', () => {
   });
 
   it('deduplicates concurrent requests for the same name (cache)', async () => {
-    const getIndices = jest
-      .fn()
-      .mockResolvedValue([matchedItem('dedup-source', INDEX_KIND.INDEX)]);
+    const getIndices = jest.fn().mockResolvedValue([matchedItem('dedup-source', 'index')]);
     const wrapper = buildWrapper({ dataViews: buildDataViews(getIndices) });
 
     const a = renderHook(
@@ -210,7 +202,7 @@ describe('useMetricSourceKind', () => {
   it('does not expose the previous source kind when the name changes (stale guard)', async () => {
     const getIndices = jest.fn(async (args: { pattern: string }) =>
       args.pattern === 'first-source'
-        ? [matchedItem('first-source', INDEX_KIND.INDEX)]
+        ? [matchedItem('first-source', 'index')]
         : new Promise(() => {})
     );
 

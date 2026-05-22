@@ -10,9 +10,7 @@
 import { sortBy } from 'lodash';
 import type { HttpStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import type { Tag } from '../types';
-import { INDEX_KIND } from '../types';
-import type { MatchedItem, ResolveIndexResponse } from '../types';
+import type { Tag, MatchedItem, ResolveIndexResponse } from '../types';
 import { ResolveIndexResponseItemIndexAttrs } from '../types';
 
 const aliasLabel = i18n.translate('dataViews.aliasLabel', { defaultMessage: 'Alias' });
@@ -32,16 +30,18 @@ const rollupLabel = i18n.translate('dataViews.rollupLabel', {
   defaultMessage: 'Rollup (deprecated)',
 });
 
-const getIndexTags = (isRollupIndex: (indexName: string) => boolean) => (indexName: string) =>
-  isRollupIndex(indexName)
-    ? [
-        {
-          key: INDEX_KIND.ROLLUP,
-          name: rollupLabel,
-          color: 'warning',
-        },
-      ]
-    : [];
+const getIndexTags =
+  (isRollupIndex: (indexName: string) => boolean) =>
+  (indexName: string): Tag[] =>
+    isRollupIndex(indexName)
+      ? [
+          {
+            key: 'rollup',
+            name: rollupLabel,
+            color: 'warning',
+          },
+        ]
+      : [];
 
 export const getIndicesViaResolve = async ({
   http,
@@ -129,9 +129,7 @@ export const responseToItemArray = (
   const source: MatchedItem[] = [];
 
   (response.indices || []).forEach((index) => {
-    const tags: MatchedItem['tags'] = [
-      { key: INDEX_KIND.INDEX, name: indexLabel, color: 'default' },
-    ];
+    const tags: MatchedItem['tags'] = [{ key: 'index', name: indexLabel, color: 'default' }];
     const isFrozen = (index.attributes || []).includes(ResolveIndexResponseItemIndexAttrs.FROZEN);
 
     tags.push(...getTags(index.name));
@@ -139,7 +137,7 @@ export const responseToItemArray = (
       tags.push(...getTags(alias));
     });
     if (isFrozen) {
-      tags.push({ name: frozenLabel, key: INDEX_KIND.FROZEN, color: 'danger' });
+      tags.push({ name: frozenLabel, key: 'frozen', color: 'danger' });
     }
 
     source.push({
@@ -149,9 +147,9 @@ export const responseToItemArray = (
     });
   });
   (response.aliases || []).forEach((alias) => {
-    const item = {
+    const item: MatchedItem = {
       name: alias.name,
-      tags: [{ key: INDEX_KIND.ALIAS, name: aliasLabel, color: 'default' }],
+      tags: [{ key: 'alias', name: aliasLabel, color: 'default' }],
       item: alias,
     };
     // we only need to check the first index to see if its a rollup since there can only be one alias match
@@ -162,7 +160,7 @@ export const responseToItemArray = (
   (response.data_streams || []).forEach((dataStream) => {
     source.push({
       name: dataStream.name,
-      tags: [{ key: INDEX_KIND.DATA_STREAM, name: dataStreamLabel, color: 'primary' }],
+      tags: [{ key: 'data_stream', name: dataStreamLabel, color: 'primary' }],
       item: dataStream,
     });
   });

@@ -8,7 +8,6 @@
  */
 
 import type { DataViewsPublicPluginStart, MatchedItem } from '@kbn/data-views-plugin/public';
-import { INDEX_KIND } from '@kbn/data-views-plugin/public';
 import { useAbortableAsync } from '@kbn/react-hooks';
 import { useExternalServices } from '../../../context/external_services';
 import { useReportChartSectionError } from '../../chart/hooks/use_report_chart_section_error';
@@ -125,7 +124,7 @@ const fetchSourceKind = async (
   });
   const item = matched.find((m) => m.name === name);
   if (!item) return undefined;
-  return item.tags.some((t) => t.key === INDEX_KIND.INDEX)
+  return item.tags.some((t) => t.key === 'index')
     ? METRIC_SOURCE_KIND.INDEX
     : METRIC_SOURCE_KIND.DATA_STREAM;
 };

@@ -7,23 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { MatchedItem } from '@kbn/data-views-plugin/public';
-import { INDEX_KIND } from '@kbn/data-views-plugin/public';
+import type { IndexKind, MatchedItem } from '@kbn/data-views-plugin/public';
 import type { SelectionContext } from '@kbn/workflows/types/latest';
 import {
   getIndexSelectionHandler,
   type IndexSelectionHandlerServices,
 } from './index_selection_handler';
 
-type SelectableKind = INDEX_KIND.INDEX | INDEX_KIND.ALIAS | INDEX_KIND.DATA_STREAM;
+type SelectableKind = Extract<IndexKind, 'index' | 'alias' | 'data_stream'>;
 
 const TAG_LABELS: Record<SelectableKind, string> = {
-  [INDEX_KIND.INDEX]: 'Index',
-  [INDEX_KIND.ALIAS]: 'Alias',
-  [INDEX_KIND.DATA_STREAM]: 'Data stream',
+  index: 'Index',
+  alias: 'Alias',
+  data_stream: 'Data stream',
 };
 
-function buildMatchedItem(name: string, kind: SelectableKind = INDEX_KIND.INDEX): MatchedItem {
+function buildMatchedItem(name: string, kind: SelectableKind = 'index'): MatchedItem {
   return {
     name,
     tags: [{ key: kind, name: TAG_LABELS[kind], color: 'default' }],
@@ -102,9 +101,9 @@ describe('getIndexSelectionHandler', () => {
     it('maps tag kinds to readable descriptions', async () => {
       const { services, dataViews } = createServices();
       dataViews.getIndices.mockResolvedValue([
-        buildMatchedItem('metrics-index', INDEX_KIND.INDEX),
-        buildMatchedItem('metrics-alias', INDEX_KIND.ALIAS),
-        buildMatchedItem('metrics-stream', INDEX_KIND.DATA_STREAM),
+        buildMatchedItem('metrics-index', 'index'),
+        buildMatchedItem('metrics-alias', 'alias'),
+        buildMatchedItem('metrics-stream', 'data_stream'),
       ]);
 
       const handler = getIndexSelectionHandler(services);
@@ -268,9 +267,7 @@ describe('getIndexSelectionHandler', () => {
 
     it('returns the matched item when exactly one source matches the value', async () => {
       const { services, dataViews } = createServices();
-      dataViews.getIndices.mockResolvedValue([
-        buildMatchedItem('.alerts-default', INDEX_KIND.INDEX),
-      ]);
+      dataViews.getIndices.mockResolvedValue([buildMatchedItem('.alerts-default', 'index')]);
 
       const handler = getIndexSelectionHandler(services);
       const result = await handler.resolve('.alerts-default', EMPTY_CONTEXT);
@@ -325,7 +322,7 @@ describe('getIndexSelectionHandler', () => {
 
       it('still returns a single matched item when allowWildcard is true and only one source matches', async () => {
         const { services, dataViews } = createServices();
-        dataViews.getIndices.mockResolvedValue([buildMatchedItem('logs-app-1', INDEX_KIND.INDEX)]);
+        dataViews.getIndices.mockResolvedValue([buildMatchedItem('logs-app-1', 'index')]);
 
         const handler = getIndexSelectionHandler(services, { allowWildcard: true });
         const result = await handler.resolve('logs-*', EMPTY_CONTEXT);
