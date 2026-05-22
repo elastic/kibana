@@ -76,33 +76,38 @@ export function getContextSchemaForPath(
   workflowGraph: WorkflowGraph,
   path: Array<string | number>,
   yamlDocument?: Document | null,
-  offset?: number
+  offset?: number,
+  yamlSource?: string
 ): typeof DynamicStepContextSchema {
-  let schema: typeof DynamicStepContextSchema = DynamicStepContextSchema.merge(
+  const schema: typeof DynamicStepContextSchema = DynamicStepContextSchema.merge(
     getWorkflowContextSchema(definition as WorkflowYaml, yamlDocument)
   ) as typeof DynamicStepContextSchema;
 
   const nearestStepPath = getNearestStepPath(path);
   if (!nearestStepPath) {
-    return maybeExtendWithTemplateLocals(schema, yamlDocument, offset);
+    return maybeExtendWithTemplateLocals(schema, yamlDocument, offset, yamlSource);
   }
   const nearestStep = _.get(definition, nearestStepPath);
   if (!nearestStep) {
-    return maybeExtendWithTemplateLocals(schema, yamlDocument, offset);
+    return maybeExtendWithTemplateLocals(schema, yamlDocument, offset, yamlSource);
   }
 
-  schema = getContextSchemaForStep(schema, workflowGraph, nearestStep.name);
-
-  return maybeExtendWithTemplateLocals(schema, yamlDocument, offset);
+  return maybeExtendWithTemplateLocals(
+    getContextSchemaForStep(schema, workflowGraph, nearestStep.name),
+    yamlDocument,
+    offset,
+    yamlSource
+  );
 }
 
 function maybeExtendWithTemplateLocals(
   schema: typeof DynamicStepContextSchema,
   yamlDocument?: Document | null,
-  offset?: number
+  offset?: number,
+  yamlSource?: string
 ): typeof DynamicStepContextSchema {
   if (yamlDocument != null && offset !== undefined) {
-    return getContextSchemaWithTemplateLocals(yamlDocument, offset, schema);
+    return getContextSchemaWithTemplateLocals(yamlDocument, offset, schema, yamlSource);
   }
   return schema;
 }

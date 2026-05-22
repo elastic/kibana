@@ -34,6 +34,10 @@ export interface ForLoopScope {
   bodyEnd: number;
   /** Resolved path of the collection (e.g. "steps.x.outputs.items") for schema lookup. */
   collectionPath?: string;
+  /** Start offset of the collection expression in the template string (from Liquid token). */
+  collectionStart?: number;
+  /** End offset of the collection expression in the template string (from Liquid token). */
+  collectionEnd?: number;
 }
 
 export interface TemplateLocalContext {
@@ -127,6 +131,73 @@ function resolveChildren(tpl: Template): Template[] {
   return result.value ?? [];
 }
 
+interface LiquidExpressionTokenRange {
+  readonly start: number;
+  readonly end: number;
+}
+
+function hasNumericBeginEnd(value: object): value is { begin: number; end: number } {
+  return (
+    'begin' in value &&
+    'end' in value &&
+    typeof value.begin === 'number' &&
+    typeof value.end === 'number'
+  );
+}
+
+function getExpressionTokenRange(expression: unknown): LiquidExpressionTokenRange | undefined {
+  if (expression != null && typeof expression === 'object' && hasNumericBeginEnd(expression)) {
+    return { start: expression.begin, end: expression.end };
+  }
+  return undefined;
+}
+
+/** Uses the shared LRU cache in @kbn/workflows-yaml `parseTemplateString`. */
+function safeParseTemplate(templateString: string): Template[] | null {
+  try {
+    return parseTemplateString(templateString);
+  } catch {
+    return null;
+  }
+}
+
+function templateHasLiquidTagNodes(templates: Template[]): boolean {
+  for (const tpl of templates) {
+    if (isTag(tpl)) {
+      return true;
+    }
+    if (tpl.children) {
+      const children = resolveChildren(tpl);
+      if (children.length > 0 && templateHasLiquidTagNodes(children)) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+function pushForLoopScope(
+  acc: WalkAccumulator,
+  variableName: string,
+  token: { end: number },
+  bodyTemplates: Template[],
+  collectionPath: string,
+  collectionRange: LiquidExpressionTokenRange | undefined
+): void {
+  const bodyStart = token.end;
+  const bodyEnd = getMaxTokenEnd(bodyTemplates);
+  if (variableName && bodyEnd >= bodyStart) {
+    acc.forLoopScopes.push({
+      variableName,
+      bodyStart,
+      bodyEnd,
+      collectionPath: collectionPath !== '' ? collectionPath : undefined,
+      collectionStart: collectionRange?.start,
+      collectionEnd: collectionRange?.end,
+    });
+  }
+}
+
 // ---------------------------------------------------------------------------
 // AST walk
 // ---------------------------------------------------------------------------
@@ -137,7 +208,12 @@ interface WalkAccumulator {
   forLoopScopes: ForLoopScope[];
 }
 
-function walkTemplates(templates: Template[], beforeOffset: number, acc: WalkAccumulator): void {
+/** `null` collects every tag without cursor filtering (used by {@link getAllForLoopScopes}). */
+function walkTemplates(
+  templates: Template[],
+  beforeOffset: number | null,
+  acc: WalkAccumulator
+): void {
   for (const tpl of templates) {
     const { token } = tpl;
     const children = tpl.children ? resolveChildren(tpl) : [];
@@ -147,27 +223,24 @@ function walkTemplates(templates: Template[], beforeOffset: number, acc: WalkAcc
         const firstId = tpl.localScope()[Symbol.iterator]().next();
         const varName = firstId.done ? null : firstId.value.content;
         const rhs = parseAssignRhs(tpl.token.args);
-        if (varName && token.end <= beforeOffset) {
+        if (varName && (beforeOffset === null || token.end <= beforeOffset)) {
           acc.assignVars.push({ name: varName, rhs: rhs ?? '' });
         }
       } else if (isCaptureTagType(tpl)) {
         const captureBodyEnd = getMaxTokenEnd(tpl.templates);
-        if (captureBodyEnd <= beforeOffset) {
+        if (beforeOffset === null || captureBodyEnd <= beforeOffset) {
           acc.captureNames.add(tpl.variable);
         }
       } else if (isForTagType(tpl)) {
         const { variable: variableName, collection, templates: bodyTemplates } = tpl;
-        const collectionPath = collection.getText();
-        const bodyStart = token.end;
-        const bodyEnd = getMaxTokenEnd(bodyTemplates);
-        if (variableName && bodyEnd >= bodyStart) {
-          acc.forLoopScopes.push({
-            variableName,
-            bodyStart,
-            bodyEnd,
-            collectionPath: collectionPath !== '' ? collectionPath : undefined,
-          });
-        }
+        pushForLoopScope(
+          acc,
+          variableName,
+          token,
+          bodyTemplates,
+          collection.getText(),
+          getExpressionTokenRange(collection)
+        );
       }
     }
 
@@ -200,6 +273,24 @@ function walkTemplates(templates: Template[], beforeOffset: number, acc: WalkAcc
  * @param templateString - Full content of the scalar (e.g. a step's message field)
  * @param offsetInTemplate - Character offset inside the template (cursor position)
  */
+/**
+ * Returns every `{% for %}` scope in the template (not filtered by cursor offset).
+ * Used to validate collection paths across the full template string.
+ */
+export function getAllForLoopScopes(templateString: string): ForLoopScope[] {
+  const templates = safeParseTemplate(templateString);
+  if (!templates) {
+    return [];
+  }
+  const acc: WalkAccumulator = {
+    assignVars: [],
+    captureNames: new Set<string>(),
+    forLoopScopes: [],
+  };
+  walkTemplates(templates, null, acc);
+  return acc.forLoopScopes;
+}
+
 export function getTemplateLocalContext(
   templateString: string,
   offsetInTemplate: number
@@ -207,22 +298,21 @@ export function getTemplateLocalContext(
   if (!templateString.includes('{%')) {
     return EMPTY_CONTEXT;
   }
-  try {
-    const templates = parseTemplateString(templateString);
-    const acc: WalkAccumulator = {
-      assignVars: [],
-      captureNames: new Set<string>(),
-      forLoopScopes: [],
-    };
-
-    walkTemplates(templates, offsetInTemplate, acc);
-
-    return {
-      assignVars: acc.assignVars,
-      captureNames: Array.from(acc.captureNames),
-      forLoopScopes: acc.forLoopScopes,
-    };
-  } catch {
+  const templates = safeParseTemplate(templateString);
+  if (!templates || !templateHasLiquidTagNodes(templates)) {
     return EMPTY_CONTEXT;
   }
+  const acc: WalkAccumulator = {
+    assignVars: [],
+    captureNames: new Set<string>(),
+    forLoopScopes: [],
+  };
+
+  walkTemplates(templates, offsetInTemplate, acc);
+
+  return {
+    assignVars: acc.assignVars,
+    captureNames: Array.from(acc.captureNames),
+    forLoopScopes: acc.forLoopScopes,
+  };
 }
