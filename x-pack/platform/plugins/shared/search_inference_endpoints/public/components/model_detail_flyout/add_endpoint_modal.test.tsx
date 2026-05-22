@@ -169,4 +169,100 @@ describe('AddEndpointModal', () => {
       expect(onCancel).toHaveBeenCalled();
     });
   });
+
+  describe('Reasoning section', () => {
+    it('shows the reasoning toggle when chat_completion is selected', () => {
+      renderModal();
+      expect(screen.getByTestId('addEndpointReasoningToggle')).toBeInTheDocument();
+    });
+
+    it('does not show the reasoning toggle when a non-chat_completion task type is selected', () => {
+      renderModal({
+        taskTypes: [{ value: 'completion', label: 'Completion', description: 'Text completion.' }],
+      });
+      expect(screen.queryByTestId('addEndpointReasoningToggle')).not.toBeInTheDocument();
+    });
+
+    it('hides the effort level button group when the toggle is off', () => {
+      renderModal();
+      expect(screen.queryByTestId('addEndpointReasoningButtonGroup')).not.toBeInTheDocument();
+    });
+
+    it('shows the effort level button group and token usage note when the toggle is enabled', () => {
+      renderModal();
+      fireEvent.click(screen.getByTestId('addEndpointReasoningToggle'));
+      expect(screen.getByTestId('addEndpointReasoningButtonGroup')).toBeInTheDocument();
+      expect(screen.getByTestId('addEndpointReasoningTokenUsageNote')).toBeInTheDocument();
+    });
+
+    it('defaults to Medium effort when toggle is first enabled', () => {
+      renderModal();
+      fireEvent.click(screen.getByTestId('addEndpointReasoningToggle'));
+      const buttonGroup = screen.getByTestId('addEndpointReasoningButtonGroup');
+      const mediumButton = buttonGroup.querySelector('[id="medium"]') as HTMLButtonElement;
+      expect(mediumButton).toBeInTheDocument();
+      expect(mediumButton.getAttribute('aria-pressed')).toBe('true');
+    });
+
+    it('changes effort level when a different option is clicked', () => {
+      renderModal();
+      fireEvent.click(screen.getByTestId('addEndpointReasoningToggle'));
+      const buttonGroup = screen.getByTestId('addEndpointReasoningButtonGroup');
+      const highButton = buttonGroup.querySelector('[id="high"]') as HTMLButtonElement;
+      fireEvent.click(highButton);
+      expect(highButton.getAttribute('aria-pressed')).toBe('true');
+    });
+
+    it('hides reasoning section when task type is switched away from chat_completion', () => {
+      renderModal();
+      fireEvent.click(screen.getByTestId('addEndpointReasoningToggle'));
+      expect(screen.getByTestId('addEndpointReasoningButtonGroup')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByLabelText('Completion'));
+      expect(screen.queryByTestId('addEndpointReasoningToggle')).not.toBeInTheDocument();
+    });
+
+    it('resets the toggle to off when switching back to chat_completion', () => {
+      renderModal();
+      fireEvent.click(screen.getByTestId('addEndpointReasoningToggle'));
+      fireEvent.click(screen.getByLabelText('Completion'));
+      fireEvent.click(screen.getByLabelText('Chat completion'));
+
+      expect(screen.getByTestId('addEndpointReasoningToggle')).toBeInTheDocument();
+      expect(screen.queryByTestId('addEndpointReasoningButtonGroup')).not.toBeInTheDocument();
+    });
+
+    it('disables the reasoning toggle in view mode', () => {
+      renderModal({ mode: 'view', initialEndpointId: 'my-ep', initialTaskType: 'chat_completion' });
+      const toggle = screen.getByTestId('addEndpointReasoningToggle');
+      expect(toggle).toBeDisabled();
+    });
+
+    it('does not include taskTypeConfig in the save payload (pending backend support)', () => {
+      renderModal();
+      fireEvent.click(screen.getByTestId('addEndpointReasoningToggle'));
+      const buttonGroup = screen.getByTestId('addEndpointReasoningButtonGroup');
+      fireEvent.click(buttonGroup.querySelector('[id="high"]') as HTMLButtonElement);
+
+      fireEvent.click(screen.getByTestId('addEndpointModalSaveButton'));
+      expect(mockMutate).toHaveBeenCalledWith(
+        {
+          config: {
+            inferenceId: expect.stringMatching(/^anthropic-claude-4_6-opus-chat_completion-/),
+            taskType: 'chat_completion',
+            provider: 'elastic',
+            providerConfig: { model_id: 'anthropic-claude-4.6-opus' },
+          },
+          secrets: { providerSecrets: {} },
+        },
+        false
+      );
+      expect(mockMutate).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          config: expect.objectContaining({ taskTypeConfig: expect.anything() }),
+        }),
+        expect.anything()
+      );
+    });
+  });
 });

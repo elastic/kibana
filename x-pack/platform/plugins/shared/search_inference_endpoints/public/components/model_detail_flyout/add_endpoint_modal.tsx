@@ -10,6 +10,7 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonGroup,
   EuiButtonIcon,
   EuiCheckableCard,
   EuiFieldText,
@@ -17,12 +18,14 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiHorizontalRule,
+  EuiIcon,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiSpacer,
+  EuiSwitch,
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -50,6 +53,30 @@ export interface AddEndpointModalProps {
 }
 
 const ENDPOINT_ID_PATTERN = /^[a-z0-9][a-z0-9_-]*[a-z0-9]$/;
+const CHAT_COMPLETION_TASK_TYPE = 'chat_completion';
+
+type ReasoningEffortLevel = 'low' | 'medium' | 'high';
+
+const REASONING_EFFORT_OPTIONS: Array<{ id: ReasoningEffortLevel; label: string }> = [
+  {
+    id: 'low',
+    label: i18n.translate('xpack.searchInferenceEndpoints.addEndpointModal.reasoningEffortLow', {
+      defaultMessage: 'Low',
+    }),
+  },
+  {
+    id: 'medium',
+    label: i18n.translate('xpack.searchInferenceEndpoints.addEndpointModal.reasoningEffortMedium', {
+      defaultMessage: 'Medium',
+    }),
+  },
+  {
+    id: 'high',
+    label: i18n.translate('xpack.searchInferenceEndpoints.addEndpointModal.reasoningEffortHigh', {
+      defaultMessage: 'High',
+    }),
+  },
+];
 
 function generateEndpointId(modelId: string, taskType: string): string {
   const sanitizedModelId = modelId.toLowerCase().replace(/\./g, '_').replace(/^_+/, '');
@@ -96,12 +123,20 @@ export const AddEndpointModal: React.FC<AddEndpointModalProps> = ({
     () => initialEndpointId ?? generateEndpointId(modelId, defaultTaskType)
   );
   const [endpointIdTouched, setEndpointIdTouched] = useState(isView);
+  const [reasoningEnabled, setReasoningEnabled] = useState(false);
+  const [effortLevel, setEffortLevel] = useState<ReasoningEffortLevel>('medium');
 
   useEffect(() => {
     if (!endpointIdTouched) {
       setEndpointId(generateEndpointId(modelId, selectedTaskType));
     }
   }, [modelId, selectedTaskType, endpointIdTouched]);
+
+  useEffect(() => {
+    if (selectedTaskType !== CHAT_COMPLETION_TASK_TYPE) {
+      setReasoningEnabled(false);
+    }
+  }, [selectedTaskType]);
 
   const handleTaskTypeChange = useCallback((value: string) => {
     setSelectedTaskType(value);
@@ -244,6 +279,61 @@ export const AddEndpointModal: React.FC<AddEndpointModalProps> = ({
             ))}
           </EuiFlexGroup>
         </EuiFormRow>
+
+        {selectedTaskType === CHAT_COMPLETION_TASK_TYPE && (
+          <>
+            <EuiSpacer size="m" />
+            <EuiFormRow
+              label={i18n.translate(
+                'xpack.searchInferenceEndpoints.addEndpointModal.reasoningLabel',
+                { defaultMessage: 'Reasoning' }
+              )}
+              fullWidth
+            >
+              <EuiFlexGroup direction="column" gutterSize="s">
+                <EuiSwitch
+                  label={i18n.translate(
+                    'xpack.searchInferenceEndpoints.addEndpointModal.reasoningSwitchLabel',
+                    { defaultMessage: 'Customize reasoning effort' }
+                  )}
+                  checked={reasoningEnabled}
+                  onChange={(e) => setReasoningEnabled(e.target.checked)}
+                  disabled={isView}
+                  data-test-subj="addEndpointReasoningToggle"
+                />
+                {reasoningEnabled && (
+                  <>
+                    <EuiButtonGroup
+                      legend={i18n.translate(
+                        'xpack.searchInferenceEndpoints.addEndpointModal.reasoningEffortLegend',
+                        { defaultMessage: 'Reasoning effort level' }
+                      )}
+                      type="single"
+                      isFullWidth
+                      buttonSize="compressed"
+                      idSelected={effortLevel}
+                      onChange={(id) => setEffortLevel(id as ReasoningEffortLevel)}
+                      isDisabled={isView}
+                      options={REASONING_EFFORT_OPTIONS}
+                      data-test-subj="addEndpointReasoningButtonGroup"
+                    />
+                    <EuiText
+                      size="xs"
+                      color="subdued"
+                      data-test-subj="addEndpointReasoningTokenUsageNote"
+                    >
+                      <EuiIcon type="iInCircle" size="s" aria-hidden />{' '}
+                      {i18n.translate(
+                        'xpack.searchInferenceEndpoints.addEndpointModal.reasoningTokenUsageNote',
+                        { defaultMessage: 'These settings will effect token usage.' }
+                      )}
+                    </EuiText>
+                  </>
+                )}
+              </EuiFlexGroup>
+            </EuiFormRow>
+          </>
+        )}
 
         <EuiSpacer size="m" />
         <EuiHorizontalRule margin="l" />
