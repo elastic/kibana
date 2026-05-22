@@ -8,9 +8,9 @@
  */
 
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, merge, Subject } from 'rxjs';
 import { v4 } from 'uuid';
-
+import type { EuiFlyoutProps } from '@elastic/eui';
 import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
 import type { DashboardState } from '../../common/types';
 import { initializeAccessControlManager } from './access_control_manager';
@@ -47,6 +47,7 @@ import { initializeRelatedPanelsManager } from './related_panels_manager';
 
 export function getDashboardApi({
   creationOptions,
+  panelFlyoutType,
   incomingEmbeddables,
   initialState,
   readResult,
@@ -55,6 +56,7 @@ export function getDashboardApi({
   isAccessControlEnabled,
 }: {
   creationOptions?: DashboardCreationOptions;
+  panelFlyoutType?: EuiFlyoutProps['type'];
   incomingEmbeddables: EmbeddablePackageState[] | undefined;
   initialState: DashboardState;
   readResult?: DashboardReadResponseBody;
@@ -188,10 +190,17 @@ export function getDashboardApi({
     ...unsavedChangesManager.api,
     ...projectRoutingManager?.api,
     ...trackOverlayApi,
+    panelFlyoutType,
     esqlVariables$: esqlVariablesManager.api.publishedEsqlVariables$,
     ...timesliceManager.api,
     ...pauseFetchManager.api,
     ...initializeTrackContentfulRender(),
+    anyStateChange$: merge(
+      settingsManager.internalApi.anyStateChange$,
+      unifiedSearchManager.internalApi.anyStateChange$,
+      layoutManager.internalApi.anyStateChange$,
+      ...(projectRoutingManager ? [projectRoutingManager.internalApi.anyStateChange$] : [])
+    ),
     executionContext: {
       type: 'dashboard',
       description: settingsManager.api.title$.value,
@@ -319,6 +328,7 @@ export function getDashboardApi({
     } as DashboardApi,
     internalApi,
     cleanup: () => {
+      trackOverlayApi.clearOverlays();
       dataLoadingManager.cleanup();
       dataViewsManager.cleanup();
       searchSessionManager.cleanup();

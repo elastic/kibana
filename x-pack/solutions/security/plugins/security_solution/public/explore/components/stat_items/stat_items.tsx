@@ -42,7 +42,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(({ statItems, from,
   const { isToggleExpanded, onToggle } = useToggleStatus({ id });
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const spaceId = useSpaceId();
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false) === true;
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2) === true;
 
   const kpiLensExtraOptions = useMemo(
     () => (entityStoreV2Enabled ? { entityStoreV2Enabled: true, spaceId } : undefined),
