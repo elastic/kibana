@@ -7,7 +7,7 @@
 
 import React, { memo, useCallback, useEffect, useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import styled from '@emotion/styled';
+import styled from 'styled-components';
 import { ConsoleFooter } from './components/console_footer';
 import { ConsoleHeader } from './components/console_header';
 import type { CommandInputProps } from './components/command_input';
@@ -21,9 +21,9 @@ import { SidePanelFlexItem } from './components/side_panel/side_panel_flex_item'
 
 const ConsoleWindow = styled.div`
   height: 100%;
-  background-color: ${({ theme }) => theme.euiTheme.colors.backgroundBasePlain};
-  border: ${({ theme }) => theme.euiTheme.border.thin};
-  border-radius: ${({ theme }) => theme.euiTheme.border.radius.small};
+  background-color: ${({ theme: { eui } }) => eui.euiPageBackgroundColor};
+  border: ${({ theme: { eui } }) => eui.euiBorderThin};
+  border-radius: ${({ theme: { eui } }) => eui.euiBorderRadiusSmall};
 
   .layout {
     height: 100%;
@@ -37,36 +37,37 @@ const ConsoleWindow = styled.div`
     }
 
     &-bottomBorder {
-      border-bottom: ${({ theme }) => theme.euiTheme.size.s} solid
-        ${({ theme }) => theme.euiTheme.colors.backgroundBasePlain};
+      border-bottom: ${({ theme: { eui } }) => eui.euiSizeS} solid
+        ${({ theme: { eui } }) => eui.euiPageBackgroundColor};
     }
 
     &-container {
-      padding: ${({ theme }) => theme.euiTheme.size.base};
+      padding: ${({ theme: { eui } }) => eui.euiPanelPaddingModifiers.paddingMedium};
     }
 
     &-header {
-      background-color: ${({ theme }) => theme.euiTheme.colors.emptyShade};
-      border-bottom: 1px solid ${({ theme }) => theme.euiTheme.colors.lightShade};
-      border-top-left-radius: ${({ theme }) => theme.euiTheme.border.radius.small};
-      border-top-right-radius: ${({ theme }) => theme.euiTheme.border.radius.small};
-      padding: ${({ theme }) => theme.euiTheme.size.base};
+      background-color: ${({ theme: { eui } }) => eui.euiColorEmptyShade};
+      border-bottom: 1px solid ${({ theme: { eui } }) => eui.euiColorLightShade};
+      border-top-left-radius: ${({ theme: { eui } }) => eui.euiBorderRadiusSmall};
+      border-top-right-radius: ${({ theme: { eui } }) => eui.euiBorderRadiusSmall};
+      padding: ${({ theme: { eui } }) => eui.euiSize} ${({ theme: { eui } }) => eui.euiSize}
+        ${({ theme: { eui } }) => eui.euiSize} ${({ theme: { eui } }) => eui.euiSize};
     }
 
     &-commandInput {
-      padding-top: ${({ theme }) => theme.euiTheme.size.xs};
-      padding-bottom: ${({ theme }) => theme.euiTheme.size.xs};
+      padding-top: ${({ theme: { eui } }) => eui.euiSizeXS};
+      padding-bottom: ${({ theme: { eui } }) => eui.euiSizeXS};
     }
 
     &-footer {
       padding-top: 0;
-      padding-bottom: ${({ theme }) => theme.euiTheme.size.xs};
+      padding-bottom: ${({ theme: { eui } }) => eui.euiSizeXS};
     }
 
     &-rightPanel {
       width: 35%;
-      background-color: ${({ theme }) => theme.euiTheme.colors.body};
-      border-left: ${({ theme }) => theme.euiTheme.border.thin};
+      background-color: ${({ theme: { eui } }) => eui.euiFormBackgroundColor};
+      border-left: ${({ theme: { eui } }) => eui.euiBorderThin};
     }
 
     &-historyOutput {
@@ -95,7 +96,7 @@ const ConsoleWindow = styled.div`
   //-----------------------------------------------------------
 
   .font-family-code {
-    font-family: ${({ theme }) => theme.euiTheme.font.familyCode};
+    font-family: ${({ theme: { eui } }) => eui.euiCodeFontFamily};
   }
 
   .font-style-italic {

@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useMemo, useCallback } from 'react';
-import styled from '@emotion/styled';
+import styled from 'styled-components';
 import {
   EuiBadge,
   EuiBasicTable,
@@ -50,32 +50,32 @@ export const convertToTestId = (value: string): string => {
 
 // @ts-expect-error TS2769
 const StyledEuiBasicTable = styled(EuiBasicTable)`
-  margin-top: ${({ theme }) => theme.euiTheme.size.s};
+  margin-top: ${({ theme: { eui } }) => eui.euiSizeS};
   .euiTableHeaderCell {
     .euiTableCellContent__text {
-      color: ${({ theme }) => theme.euiTheme.colors.text};
-      font-size: ${({ theme }) => theme.euiTheme.font.scale[theme.euiTheme.font.body.scale]}rem;
-      padding-bottom: ${({ theme }) => theme.euiTheme.size.s};
-      padding-left: ${({ theme }) => theme.euiTheme.size.s};
+      color: ${({ theme: { eui } }) => eui.euiTextColor};
+      font-size: ${({ theme: { eui } }) => eui.euiFontSize};
+      padding-bottom: ${({ theme: { eui } }) => eui.euiSizeS};
+      padding-left: ${({ theme: { eui } }) => eui.euiSizeS};
     }
   }
 `;
 
 const StyledEuiCallOut = styled(EuiCallOut)`
-  margin: ${({ theme }) => theme.euiTheme.size.base};
-  padding: ${({ theme }) => theme.euiTheme.size.base};
-  border-radius: ${({ theme }) => theme.euiTheme.size.xs};
+  margin: ${({ theme: { eui } }) => eui.euiSize};
+  padding: ${({ theme: { eui } }) => eui.euiSize};
+  border-radius: ${({ theme: { eui } }) => eui.euiSizeXS};
 `;
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
-  padding-left: ${({ theme }) => theme.euiTheme.size.s};
+  padding-left: ${({ theme: { eui } }) => eui.euiSizeS};
 `;
 
 const StyledEuiFlexGrid = styled(EuiFlexGrid)`
-  @media only screen and (min-width: ${(props) => props.theme.euiTheme.breakpoint.l}px) {
+  @media only screen and (min-width: ${(props) => props.theme.eui.euiBreakpoints.l}) {
     max-width: 75%;
   }
-  @media only screen and (min-width: ${(props) => props.theme.euiTheme.breakpoint.xl}px) {
+  @media only screen and (min-width: ${(props) => props.theme.eui.euiBreakpoints.xl}) {
     max-width: 50%;
   }
 `;
@@ -83,7 +83,7 @@ const StyledEuiFlexGrid = styled(EuiFlexGrid)`
 const StyledEuiBadge = styled(EuiBadge)`
   font-size: 10px !important;
   span {
-    color: ${({ theme }) => theme.euiTheme.colors.text} !important;
+    color: ${({ theme: { eui } }) => eui.euiShadowColor} !important;
   }
 `;
 

@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import type { ComponentProps } from 'react';
 import React, { memo, useMemo } from 'react';
 import { EuiCodeBlock, EuiDescriptionList, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { Theme } from '@emotion/react';
-import styled from '@emotion/styled';
+import { css, euiStyled } from '@kbn/kibana-react-plugin/common';
 import { reduce } from 'lodash';
 import { ActionResponseOutputs } from './action_response_outputs';
 import { getAgentTypeName } from '../../../../common/translations';
@@ -21,24 +19,26 @@ import { type ActionDetails, type MaybeImmutable } from '../../../../../common/e
 
 const emptyValue = getEmptyValue();
 
-const customDescriptionListCss = ({ theme }: { theme: Theme }) => `
+const customDescriptionListCss = css`
   &.euiDescriptionList {
     > .euiDescriptionList__title {
-      color: ${theme.euiTheme.colors.darkShade};
-      font-size: ${theme.euiTheme.size.xs};
+      color: ${(props) => props.theme.eui.euiColorDarkShade};
+      font-size: ${(props) => props.theme.eui.euiFontSizeXS};
     }
 
     > .euiDescriptionList__title,
     > .euiDescriptionList__description {
-      font-weight: ${theme.euiTheme.font.weight.regular};
+      font-weight: ${(props) => props.theme.eui.euiFontWeightRegular};
     }
   }
 `;
-const topSpacingCss = ({ theme }: { theme: Theme }) => `${theme.euiTheme.size.base} 0`;
-const dashedBorderCss = ({ theme }: { theme: Theme }) =>
-  `1px dashed ${theme.euiTheme.colors.disabled}`;
-
-const StyledDescriptionListOutputBase = styled(EuiDescriptionList)`
+const topSpacingCss = css`
+  ${(props) => `${props.theme.eui.euiSize} 0`}
+`;
+const dashedBorderCss = css`
+  ${(props) => `1px dashed ${props.theme.eui.euiColorDisabled}`};
+`;
+const StyledDescriptionListOutput = euiStyled(EuiDescriptionList).attrs({ compressed: true })`
   ${customDescriptionListCss}
   dd {
     margin: ${topSpacingCss};
@@ -47,40 +47,33 @@ const StyledDescriptionListOutputBase = styled(EuiDescriptionList)`
     border-bottom: ${dashedBorderCss};
   }
 `;
-const StyledDescriptionListOutput = (props: ComponentProps<typeof EuiDescriptionList>) => (
-  <StyledDescriptionListOutputBase compressed {...props} />
-);
 
-const StyledDescriptionListBase = styled(EuiDescriptionList)`
+const StyledDescriptionList = euiStyled(EuiDescriptionList).attrs({
+  compressed: true,
+  type: 'column',
+})`
   ${customDescriptionListCss}
 `;
-const StyledDescriptionList = (props: ComponentProps<typeof EuiDescriptionList>) => (
-  <StyledDescriptionListBase compressed type="column" {...props} />
-);
 
-const StyledEuiCodeBlockBase = styled(EuiCodeBlock)`
+const StyledEuiCodeBlock = euiStyled(EuiCodeBlock).attrs({
+  transparentBackground: true,
+  paddingSize: 'none',
+})`
   code {
-    color: ${({ theme }) => theme.euiTheme.colors.darkShade} !important;
+    color: ${(props) => props.theme.eui.euiColorDarkShade} !important;
   }
 `;
-const StyledEuiCodeBlock = (props: ComponentProps<typeof EuiCodeBlock>) => (
-  <StyledEuiCodeBlockBase transparentBackground paddingSize="none" {...props} />
-);
 
-const StyledEuiFlexGroupBase = styled(EuiFlexGroup)`
+const StyledEuiFlexGroup = euiStyled(EuiFlexGroup).attrs({
+  direction: 'column',
+  className: 'eui-yScrollWithShadows',
+  gutterSize: 's',
+  tabIndex: 0,
+})`
   max-height: 40vh;
   min-height: 270px;
   overflow-y: auto;
 `;
-const StyledEuiFlexGroup = (props: ComponentProps<typeof EuiFlexGroup>) => (
-  <StyledEuiFlexGroupBase
-    direction="column"
-    className="eui-yScrollWithShadows"
-    gutterSize="s"
-    tabIndex={0}
-    {...props}
-  />
-);
 
 export const ActionsLogExpandedTray = memo<{
   action: MaybeImmutable<ActionDetails>;

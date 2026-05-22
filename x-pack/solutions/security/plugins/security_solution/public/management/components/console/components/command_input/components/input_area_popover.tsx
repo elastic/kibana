@@ -68,7 +68,7 @@ export const InputAreaPopover = memo<InputAreaPopoverProps>(({ children, width =
       data-test-subj={getTestId('inputPopover')}
     >
       {show && (
-        <EuiFocusTrap clickOutsideDisables={true} preventScrollOnFocus={true}>
+        <EuiFocusTrap clickOutsideDisables={true}>
           {show === 'input-history' && <CommandInputHistory />}
         </EuiFocusTrap>
       )}

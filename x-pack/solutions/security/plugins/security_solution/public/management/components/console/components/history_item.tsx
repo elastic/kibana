@@ -8,15 +8,20 @@
 import type { PropsWithChildren } from 'react';
 import React, { memo } from 'react';
 import { EuiFlexItem } from '@elastic/eui';
-import styled from '@emotion/styled';
+import styled from 'styled-components';
+import { css } from '@kbn/kibana-react-plugin/common';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
 
+const verticalSpacing = css`
+  ${({ theme: { eui } }) => eui.euiSizeL}
+`;
+
 const StyledEuiFlexItemHistoryItem = styled(EuiFlexItem)`
-  border-bottom: ${({ theme }) => theme.euiTheme.border.width.thin} dashed
-    ${({ theme }) => theme.euiTheme.border.color};
-  margin-bottom: ${({ theme }) => theme.euiTheme.size.l};
-  padding-bottom: ${({ theme }) => theme.euiTheme.size.l};
+  border-bottom: ${({ theme: { eui } }) => eui.euiBorderWidthThin} dashed
+    ${({ theme: { eui } }) => eui.euiBorderColor};
+  margin-bottom: ${verticalSpacing};
+  padding-bottom: ${verticalSpacing};
 `;
 
 export type HistoryItemProps = PropsWithChildren<{}>;
