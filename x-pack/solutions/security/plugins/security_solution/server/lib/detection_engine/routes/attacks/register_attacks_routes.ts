@@ -6,8 +6,14 @@
  */
 
 import type { SecuritySolutionPluginRouter } from '../../../../types';
+import { searchAttacksRoute } from './search_attacks_route';
+import { setAttacksAssigneesRoute } from './set_attacks_assignees_route';
+import { setAttacksStatusRoute } from './set_attacks_status_route';
+import { setAttacksTagsRoute } from './set_attacks_tags_route';
 
-export const registerAttacksRoutes = (_router: SecuritySolutionPluginRouter) => {
-  // TODO: Implement attack routes on this register
-  // follow up issue here: https://github.com/elastic/security-team/issues/17472
+export const registerAttacksRoutes = (router: SecuritySolutionPluginRouter) => {
+  searchAttacksRoute(router);
+  setAttacksStatusRoute(router);
+  setAttacksTagsRoute(router);
+  setAttacksAssigneesRoute(router);
 };
