@@ -6,7 +6,7 @@
  */
 
 import type { CoreSetup, IRouter } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import Boom from '@hapi/boom';
 import type { AlertingPluginsStart } from '../../../../plugin';
 import { hasRequiredPrivilegeGrantedInAllSpaces } from '../../../../lib/has_required_privilege_granted_in_all_spaces';

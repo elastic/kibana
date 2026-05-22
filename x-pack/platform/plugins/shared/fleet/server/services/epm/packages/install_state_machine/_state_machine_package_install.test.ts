@@ -12,8 +12,7 @@ import type {
 } from '@kbn/core/server';
 import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
-
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { PackageSavedObjectConflictError } from '../../../../errors';
 
 import type { Installation } from '../../../../../common';

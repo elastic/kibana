@@ -7,7 +7,7 @@
 
 import type { Installation } from '@kbn/fleet-plugin/common';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { upgradeIntegration } from './upgrade_integration';
 import { installPackage } from '@kbn/fleet-plugin/server/services/epm/packages';
 import { pkgToPkgKey } from '@kbn/fleet-plugin/server/services/epm/registry';
@@ -41,7 +41,7 @@ describe('upgradeIntegration', () => {
       name: 'osquery_manager',
       version: '1.6.0',
       installed_kibana_space_id: DEFAULT_SPACE_ID,
-    } as Installation;
+    } as unknown as Installation;
 
     await upgradeIntegration({ packageInfo, client, esClient, logger });
 
@@ -53,7 +53,7 @@ describe('upgradeIntegration', () => {
       name: 'osquery_manager',
       version: '1.5.0',
       installed_kibana_space_id: DEFAULT_SPACE_ID,
-    } as Installation;
+    } as unknown as Installation;
 
     await upgradeIntegration({ packageInfo, client, esClient, logger });
 

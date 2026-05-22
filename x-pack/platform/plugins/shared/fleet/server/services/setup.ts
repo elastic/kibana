@@ -15,7 +15,7 @@ import { compact } from 'lodash';
 import pRetry from 'p-retry';
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { LockAcquisitionError } from '@kbn/lock-manager';
 
 import { MessageSigningError } from '../../common/errors';

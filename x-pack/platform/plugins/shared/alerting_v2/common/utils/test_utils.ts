@@ -13,7 +13,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 
 export const createMockSpaces = (): jest.Mocked<SpacesPluginStart> => {
   const spaces = spacesPluginMock.createStartContract();
-  const activeSpace = { id: DEFAULT_SPACE_ID } as Space;
+  const activeSpace: Space = { id: DEFAULT_SPACE_ID, name: DEFAULT_SPACE_ID, disabledFeatures: [] };
   spaces.getActiveSpace.mockResolvedValue(activeSpace);
   spaces.getActiveSpace$.mockReturnValue(of(activeSpace));
   return spaces;

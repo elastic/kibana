@@ -18,7 +18,10 @@ export const useKibanaSpace = () => {
     loading,
     error,
   } = useFetcher<Promise<Space>>(() => {
-    return services.spaces?.getActiveSpace() ?? Promise.resolve({ id: DEFAULT_SPACE_ID } as Space);
+    return (
+      services.spaces?.getActiveSpace() ??
+      Promise.resolve<Space>({ id: DEFAULT_SPACE_ID, name: DEFAULT_SPACE_ID, disabledFeatures: [] })
+    );
   }, [services.spaces]);
 
   return {
