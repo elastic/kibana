@@ -99,7 +99,7 @@ Then use helpers like `selectEvaluators<MyExample, MyTaskOutput>(...)` so your e
 | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `inferenceClient`  | Bound to the connector declared by the active Playwright project.                                                                                                                                        |
 | `executorClient`   | **Executor client** (implements `EvalsExecutorClient`) used to run experiments. Defaults to the **in-Kibana executor**; can be switched to the Phoenix-backed executor via `KBN_EVALS_EXECUTOR=phoenix`. |
-| `phoenixClient`    | Alias for `executorClient` (kept for backwards compatibility).                                                                                                                                           |
+| `evalsClient`      | Client for the evals plugin APIs (score ingestion, experiment stats, dataset operations).                                                                                                                |
 | `reportModelScore` | Function that displays evaluation results (can be overridden for custom reporting)                                                                                                                       |
 | `traceEsClient`    | Dedicated ES client for querying traces. Defaults to `esClient` Scout fixture. See [Trace-Based Evaluators](#trace-based-evaluators-optional)                                                            |
 
@@ -723,29 +723,24 @@ By default, evaluation results are displayed in the terminal as a formatted tabl
 
 ```ts
 // my_eval.test.ts
-import { evaluate as base, type EvalsClient, type EvaluationScoreDocument } from '@kbn/evals';
+import { evaluate as base, type EvalsClient } from '@kbn/evals';
 
 export const evaluate = base.extend({
   reportModelScore: async ({}, use) => {
-    // Custom reporter implementation
-    await use(async (evalsClient: EvalsClient, runId, log) => {
-      // Fetch persisted scores through the evals plugin APIs
-      const docs = await evalsClient.getRunScores(runId);
+    await use(async (evalsClient: EvalsClient, experimentId, log) => {
+      const experimentStats = await evalsClient.getExperimentStats(experimentId);
 
-      if (docs.length === 0) {
-        log.error(`No results found for run: ${runId}`);
+      if (!experimentStats || experimentStats.stats.length === 0) {
+        log.error(`No results found for experiment: ${experimentId}`);
         return;
       }
 
-      // Build your custom report
       log.info('=== CUSTOM REPORT ===');
-      log.info(`Model: ${docs[0].model.id}`);
-      log.info(`Run ID: ${runId}`);
-      log.info(`Total evaluations: ${docs.length}`);
+      log.info(`Model: ${experimentStats.taskModel.id}`);
+      log.info(`Experiment ID: ${experimentId}`);
+      log.info(`Total evaluator stats: ${experimentStats.stats.length}`);
 
       // Group by dataset, calculate aggregates, write to file, etc.
-      const datasetResults = groupByDataset(docs);
-      writeToFile(`report-${runId}.json`, datasetResults);
     });
   },
 });
@@ -886,18 +881,6 @@ After running evaluations, you can query the results in Kibana using the query f
 
 ```kql
 environment.hostname:"your-hostname" AND task.model.id:"model-id" AND run_id:"run-id"
-```
-
-### Using the Evaluation Analysis Service
-
-The `evaluationAnalysisService` fixture provides methods to analyze and compare evaluation results:
-
-```ts
-evaluate('compare model performance', async ({ evaluationAnalysisService }) => {
-  // The service automatically retrieves scores from Elasticsearch
-  // and provides statistical analysis capabilities
-  // Analysis happens automatically after experiments complete
-});
 ```
 
 ### LLM-as-a-judge
