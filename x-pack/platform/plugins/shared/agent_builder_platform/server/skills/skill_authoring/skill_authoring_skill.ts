@@ -141,7 +141,7 @@ User said: "Build me a skill that helps investigate slow ES|QL queries on logs i
 \`\`\`json
 {
   "id": "esql-query-debug",
-  "name": "ES|QL query debug",
+  "name": "esql-query-debug",
   "description": "Use when a user reports that an ES|QL query against a logs-* index is slow, returning unexpected rows, or erroring. Walks through the standard debug checklist using execute_esql and the index mapping tools.",
   "content": "## When to Use This Skill\\n\\nUse this skill when:\\n- A user shares an ES|QL query that runs slowly on a logs-* index.\\n- A user reports that an ES|QL query returns wrong row counts or unexpected nulls.\\n- A user wants help interpreting an ES|QL error message against a known index.\\n\\nDo not use this skill when:\\n- The user wants a *new* visualization (use visualization-creation).\\n- The user wants to schedule a query (use workflows).\\n\\n## Available Tools\\n\\n- **platform.core.execute_esql**: Run a candidate query and inspect the result shape and timings.\\n- **platform.core.get_index_mapping**: Confirm field names and types when the model isn't sure they exist.\\n- **platform.core.generate_esql**: Rewrite a natural-language description into ES|QL when the user shares prose, not query.\\n\\n## Workflow\\n\\n1. Read the user's query (or generate one with platform.core.generate_esql).\\n2. Confirm the target index exists and grab its mapping with platform.core.get_index_mapping. Flag any missing fields immediately.\\n3. Run a LIMIT 100 version of the query with platform.core.execute_esql to see the result shape and runtime.\\n4. If slow, suggest specific changes: add a time filter, drop large fields with KEEP, replace MV functions with simpler equivalents.\\n5. Re-run after each suggested change and report the runtime delta.\\n\\n## Examples\\n\\n- 'Why is this query slow?' on logs-app-*: confirmed mapping had keyword 'host.name' (not text), suggested adding @timestamp >= NOW() - 24h, runtime dropped from 8s to 600ms.\\n",
   "tool_ids": [
@@ -216,7 +216,7 @@ Dropped generate_esql and added a Histogram Pitfalls section. Updated card:
 <render_attachment id="att-abc123" />
 \`\`\`
 
-## Example 3: when to add a referenced file
+## Example 3: Add a referenced file
 
 If the skill includes long, copy-pasteable templates (a 60-line ES|QL query template, a JSON config snippet, a prompt fragment), put them in \`referenced_content\` instead of inline:
 
@@ -231,9 +231,7 @@ If the skill includes long, copy-pasteable templates (a 60-line ES|QL query temp
   ]
 }
 \`\`\`
-
-The model can then use the filestore tools to read \`./examples/slow-query-checklist.md\` lazily, keeping SKILL.md compact.
-      `),
+`),
     },
   ],
   getInlineTools: () => [createListToolsTool(), createProposeSkillTool(), createPatchSkillTool()],
