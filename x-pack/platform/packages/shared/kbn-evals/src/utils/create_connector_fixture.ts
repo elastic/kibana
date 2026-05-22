@@ -47,6 +47,8 @@ function isAlreadyExistsConnectorError(error: unknown): boolean {
   const message =
     typeof data === 'object' && data !== null && 'message' in data
       ? String((data as { message: unknown }).message)
+      : error instanceof Error
+      ? error.message
       : '';
   return /already exists/i.test(message);
 }

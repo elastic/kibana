@@ -7,6 +7,7 @@
 import type { HttpFetchOptions, HttpFetchOptionsWithPath, HttpHandler } from '@kbn/core/public';
 import type { KbnClient, KbnClientRequesterError } from '@kbn/kbn-client';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { EVAL_RUN_ID_BAGGAGE_KEY, EVAL_EXPERIMENT_ID_BAGGAGE_KEY } from '@kbn/inference-tracing';
 
 // redefine args type to make it easier to handle in a type-safe way
 type HttpHandlerArgs =
@@ -45,11 +46,11 @@ export function httpHandlerFromKbnClient({
 
     const baggageEntries: string[] = [];
     if (evalRunId) {
-      baggageEntries.push(`kibana.evals.eval_run_id=${encodeURIComponent(evalRunId)}`);
+      baggageEntries.push(`${EVAL_RUN_ID_BAGGAGE_KEY}=${encodeURIComponent(evalRunId)}`);
     }
     const experimentId = getExperimentId?.();
     if (experimentId) {
-      baggageEntries.push(`kibana.evals.experiment_id=${encodeURIComponent(experimentId)}`);
+      baggageEntries.push(`${EVAL_EXPERIMENT_ID_BAGGAGE_KEY}=${encodeURIComponent(experimentId)}`);
     }
     if (baggageEntries.length > 0) {
       const existingKey = Object.keys(nextHeaders).find((k) => k.toLowerCase() === 'baggage');
