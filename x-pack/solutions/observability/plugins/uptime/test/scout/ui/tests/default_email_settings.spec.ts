@@ -15,6 +15,7 @@ const queryParams = {
 
 test.describe('DefaultEmailSettings', { tag: '@local-stateful-classic' }, () => {
   const name = `Test connector ${Date.now()}`;
+
   test('configures email connector and validates settings', async ({
     pageObjects,
     browserAuth,
