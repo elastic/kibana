@@ -22,7 +22,7 @@ export type JwtAlgorithm = (typeof JWT_ALGORITHMS)[number];
 export const CERTIFICATE_BINDING_KINDS = ['x5t#S256', 'x5c', 'kid'] as const;
 export type CertificateBindingKind = (typeof CERTIFICATE_BINDING_KINDS)[number];
 
-const CERTIFICATE_MARKER = /-----BEGIN CERTIFICATE-----/;
+const CERTIFICATE_MARKER = /^$|-----BEGIN CERTIFICATE-----/;
 const PRIVATE_KEY_MARKER = /-----BEGIN (?:RSA |ENCRYPTED )?PRIVATE KEY-----/;
 
 const authSchema = lazySchema(() =>
@@ -44,7 +44,7 @@ const authSchema = lazySchema(() =>
         .meta({ label: i18n.OAUTH_CLIENT_CREDENTIALS_PRIVATE_KEY_JWT_BINDING_LABEL }),
       certificate: z
         .string()
-        .refine((v) => v === '' || CERTIFICATE_MARKER.test(v), {
+        .regex(CERTIFICATE_MARKER, {
           message: i18n.OAUTH_CLIENT_CREDENTIALS_PRIVATE_KEY_JWT_CERTIFICATE_INVALID_PEM_MESSAGE,
         })
         .optional()
@@ -62,7 +62,7 @@ const authSchema = lazySchema(() =>
         .min(1, {
           message: i18n.OAUTH_CLIENT_CREDENTIALS_PRIVATE_KEY_JWT_PRIVATE_KEY_REQUIRED_MESSAGE,
         })
-        .refine((v) => PRIVATE_KEY_MARKER.test(v), {
+        .regex(PRIVATE_KEY_MARKER, {
           message: i18n.OAUTH_CLIENT_CREDENTIALS_PRIVATE_KEY_JWT_PRIVATE_KEY_INVALID_PEM_MESSAGE,
         })
         .meta({
