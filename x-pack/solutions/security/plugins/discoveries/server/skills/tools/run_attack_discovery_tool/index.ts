@@ -17,7 +17,7 @@ import { z } from '@kbn/zod/v4';
 import { v4 as uuidv4 } from 'uuid';
 
 import type { DiscoveriesPluginStartDeps } from '../../../types';
-import type { WorkflowInitializationService } from '../../../lib/workflow_initialization';
+import { checkManagedWorkflowIntegrity } from '../../../managed_workflows/check_managed_workflow_integrity';
 import { resolveConnectorDetails } from '../../../workflows/helpers/resolve_connector_details';
 import { ATTACK_DISCOVERY_RUN_SOFT_DEADLINE_MS } from '../../../workflows/steps/run_step/constants';
 
@@ -35,7 +35,6 @@ export interface RunAttackDiscoveryToolDeps {
     pluginsStart: DiscoveriesPluginStartDeps;
   }>;
   logger: Logger;
-  workflowInitService: WorkflowInitializationService;
   workflowsManagementApi?: WorkflowsServerPluginSetup['management'];
 }
 
@@ -131,7 +130,6 @@ export const getRunAttackDiscoveryTool = ({
   getEventLogger,
   getStartServices,
   logger,
-  workflowInitService,
   workflowsManagementApi,
 }: RunAttackDiscoveryToolDeps): BuiltinSkillBoundedTool<typeof inputSchema> => ({
   description: `Run the canonical Attack Discovery generation pipeline (alert retrieval → generation → validation → persistence) inside the audited Anonymization Boundary. Prefer "provided" mode (pass curated \`alerts\`) when you have already gathered evidence; otherwise use "esql" with \`esql_query\`, "custom_only" with \`alert_retrieval_workflow_ids\`, or "custom_query" with explicit \`size\`/\`start\`/\`end\`. Returns inline discoveries when sync-mode finishes within the soft deadline; otherwise returns \`execution_uuid\` for slow-path resume via \`security.attack-discovery.get_status\`. The LLM connector is resolved from the agent execution; pass \`connector_id\` only to override.`,
@@ -197,6 +195,19 @@ export const getRunAttackDiscoveryTool = ({
         alertsIndexPattern: '.alerts-security.alerts-default',
         analytics,
         apiConfig,
+        checkIntegrity:
+          workflowsManagementApi != null
+            ? async ({ logger: checkLogger, spaceId }: { logger: Logger; spaceId: string }) => {
+                const { pluginsStart: startDeps } = await getStartServices();
+                return checkManagedWorkflowIntegrity({
+                  analytics,
+                  logger: checkLogger,
+                  spaceId,
+                  workflowsExtensions: startDeps.workflowsExtensions,
+                  workflowsManagementApi,
+                });
+              }
+            : undefined,
         end,
         executionUuid,
         filter,
@@ -216,7 +227,6 @@ export const getRunAttackDiscoveryTool = ({
         trigger: 'agent_builder',
         type: 'attack_discovery',
         workflowConfig,
-        workflowInitService,
         workflowsManagementApi,
       };
 
