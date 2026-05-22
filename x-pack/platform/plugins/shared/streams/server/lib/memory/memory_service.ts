@@ -9,6 +9,13 @@ import { v4 as uuidV4 } from 'uuid';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { badRequest, notFound } from '@hapi/boom';
+
+const isIndexNotFoundError = (err: unknown): boolean => {
+  const statusCode = (err as { statusCode?: number }).statusCode;
+  if (statusCode === 404) return true;
+  const message = err instanceof Error ? err.message : String(err);
+  return message.includes('index_not_found_exception');
+};
 import { createMemoryHistoryStorage } from './history_storage';
 import { MEMORIES_DATA_STREAM } from '../../../common/constants';
 import type {
@@ -61,15 +68,20 @@ export class MemoryServiceImpl implements MemoryService {
     query: QueryDslQueryContainer,
     size = 1
   ): Promise<Array<{ _source: MemoryEntry }>> {
-    const response = await this.esClient.search({
-      index: MEMORIES_DATA_STREAM,
-      track_total_hits: false,
-      size,
-      query,
-      collapse: { field: 'name' },
-      sort: [{ version: { order: 'desc' } }, { '@timestamp': { order: 'desc' } }],
-    });
-    return response.hits.hits as Array<{ _source: MemoryEntry }>;
+    try {
+      const response = await this.esClient.search({
+        index: MEMORIES_DATA_STREAM,
+        track_total_hits: false,
+        size,
+        query,
+        collapse: { field: 'name' },
+        sort: [{ version: { order: 'desc' } }, { '@timestamp': { order: 'desc' } }],
+      });
+      return response.hits.hits as Array<{ _source: MemoryEntry }>;
+    } catch (err) {
+      if (isIndexNotFoundError(err)) return [];
+      throw err;
+    }
   }
 
   private async _getByName(name: string): Promise<MemoryEntry | undefined> {
@@ -313,39 +325,47 @@ export class MemoryServiceImpl implements MemoryService {
     if (categories?.length) filters.push({ terms: { categories } });
     if (references?.length) filters.push({ terms: { references } });
 
-    const response = await this.esClient.search({
-      index: MEMORIES_DATA_STREAM,
-      track_total_hits: false,
-      collapse: { field: 'name' },
-      sort: [{ version: { order: 'desc' } }, { '@timestamp': { order: 'desc' } }],
-      query: {
-        bool: {
-          filter: filters,
-          must: [
-            {
-              bool: {
-                should: [
-                  {
-                    multi_match: {
-                      query,
-                      fields: ['title^3', 'content'],
-                      type: 'best_fields',
-                      fuzziness: 'AUTO',
+    let response;
+    try {
+      response = await this.esClient.search({
+        index: MEMORIES_DATA_STREAM,
+        track_total_hits: false,
+        collapse: { field: 'name' },
+        sort: [{ version: { order: 'desc' } }, { '@timestamp': { order: 'desc' } }],
+        query: {
+          bool: {
+            filter: filters,
+            must: [
+              {
+                bool: {
+                  should: [
+                    {
+                      multi_match: {
+                        query,
+                        fields: ['title^3', 'content'],
+                        type: 'best_fields',
+                        fuzziness: 'AUTO',
+                      },
                     },
-                  },
-                  { wildcard: { name: { value: `*${escapedQuery}*`, boost: 2 } } },
-                  { wildcard: { categories: { value: `*${escapedQuery}*`, boost: 2 } } },
-                  { wildcard: { tags: { value: `*${escapedQuery}*`, boost: 2 } } },
-                ],
-                minimum_should_match: 1,
+                    { wildcard: { name: { value: `*${escapedQuery}*`, boost: 2 } } },
+                    { wildcard: { categories: { value: `*${escapedQuery}*`, boost: 2 } } },
+                    { wildcard: { tags: { value: `*${escapedQuery}*`, boost: 2 } } },
+                  ],
+                  minimum_should_match: 1,
+                },
               },
-            },
-          ],
+            ],
+          },
         },
-      },
-      size,
-      highlight: { fields: { content: { fragment_size: 200, number_of_fragments: 1 }, title: {} } },
-    });
+        size,
+        highlight: {
+          fields: { content: { fragment_size: 200, number_of_fragments: 1 }, title: {} },
+        },
+      });
+    } catch (err) {
+      if (isIndexNotFoundError(err)) return [];
+      throw err;
+    }
 
     return response.hits.hits.map((hit) => {
       const source = hit._source as MemoryEntry;
@@ -365,36 +385,46 @@ export class MemoryServiceImpl implements MemoryService {
   }
 
   async listAll(): Promise<MemoryEntry[]> {
-    const response = await this.esClient.search({
-      index: MEMORIES_DATA_STREAM,
-      track_total_hits: true,
-      query: { bool: { filter: [{ term: { is_deleted: false } }] } },
-      collapse: { field: 'name' },
-      sort: [{ version: { order: 'desc' } }, { '@timestamp': { order: 'desc' } }],
-      size: 10000,
-    });
+    try {
+      const response = await this.esClient.search({
+        index: MEMORIES_DATA_STREAM,
+        track_total_hits: true,
+        query: { bool: { filter: [{ term: { is_deleted: false } }] } },
+        collapse: { field: 'name' },
+        sort: [{ version: { order: 'desc' } }, { '@timestamp': { order: 'desc' } }],
+        size: 10000,
+      });
 
-    const total = response.hits.total as { value: number } | undefined;
-    if (total && total.value > 10000) {
-      this.logger.warn(
-        `Memory listAll: total ${total.value} exceeds 10000, some entries may be missing`
-      );
+      const total = response.hits.total as { value: number } | undefined;
+      if (total && total.value > 10000) {
+        this.logger.warn(
+          `Memory listAll: total ${total.value} exceeds 10000, some entries may be missing`
+        );
+      }
+      return response.hits.hits.map((h) => h._source as MemoryEntry);
+    } catch (err) {
+      if (isIndexNotFoundError(err)) return [];
+      throw err;
     }
-    return response.hits.hits.map((h) => h._source as MemoryEntry);
   }
 
   async listByCategory({ category }: { category: string }): Promise<MemoryEntry[]> {
-    const response = await this.esClient.search({
-      index: MEMORIES_DATA_STREAM,
-      track_total_hits: false,
-      query: {
-        bool: { filter: [{ term: { categories: category } }, { term: { is_deleted: false } }] },
-      },
-      collapse: { field: 'name' },
-      sort: [{ version: { order: 'desc' } }, { '@timestamp': { order: 'desc' } }],
-      size: 1000,
-    });
-    return response.hits.hits.map((h) => h._source as MemoryEntry);
+    try {
+      const response = await this.esClient.search({
+        index: MEMORIES_DATA_STREAM,
+        track_total_hits: false,
+        query: {
+          bool: { filter: [{ term: { categories: category } }, { term: { is_deleted: false } }] },
+        },
+        collapse: { field: 'name' },
+        sort: [{ version: { order: 'desc' } }, { '@timestamp': { order: 'desc' } }],
+        size: 1000,
+      });
+      return response.hits.hits.map((h) => h._source as MemoryEntry);
+    } catch (err) {
+      if (isIndexNotFoundError(err)) return [];
+      throw err;
+    }
   }
 
   // ── History ──
@@ -406,13 +436,18 @@ export class MemoryServiceImpl implements MemoryService {
     entryId: string;
     size?: number;
   }): Promise<MemoryVersionRecord[]> {
-    const response = await this.historyStorage.getClient().search({
-      track_total_hits: false,
-      query: { bool: { filter: [{ term: { entry_id: entryId } }] } },
-      size,
-      sort: [{ version: { order: 'desc' } }],
-    });
-    return response.hits.hits.map((h) => h._source);
+    try {
+      const response = await this.historyStorage.getClient().search({
+        track_total_hits: false,
+        query: { bool: { filter: [{ term: { entry_id: entryId } }] } },
+        size,
+        sort: [{ version: { order: 'desc' } }],
+      });
+      return response.hits.hits.map((h) => h._source);
+    } catch (err) {
+      if (isIndexNotFoundError(err)) return [];
+      throw err;
+    }
   }
 
   async getVersion({
@@ -422,26 +457,38 @@ export class MemoryServiceImpl implements MemoryService {
     entryId: string;
     version: number;
   }): Promise<MemoryVersionRecord> {
-    const response = await this.historyStorage.getClient().search({
-      track_total_hits: false,
-      query: { bool: { filter: [{ term: { entry_id: entryId } }, { term: { version } }] } },
-      size: 1,
-      terminate_after: 1,
-    });
-    if (response.hits.hits.length === 0) {
-      throw notFound(`Version ${version} not found for entry '${entryId}'`);
+    try {
+      const response = await this.historyStorage.getClient().search({
+        track_total_hits: false,
+        query: { bool: { filter: [{ term: { entry_id: entryId } }, { term: { version } }] } },
+        size: 1,
+        terminate_after: 1,
+      });
+      if (response.hits.hits.length === 0) {
+        throw notFound(`Version ${version} not found for entry '${entryId}'`);
+      }
+      return response.hits.hits[0]._source;
+    } catch (err) {
+      if (isIndexNotFoundError(err)) {
+        throw notFound(`Version ${version} not found for entry '${entryId}'`);
+      }
+      throw err;
     }
-    return response.hits.hits[0]._source;
   }
 
   async getRecentChanges({ size = 20 }: { size?: number } = {}): Promise<MemoryVersionRecord[]> {
-    const response = await this.historyStorage.getClient().search({
-      track_total_hits: false,
-      query: { match_all: {} },
-      size,
-      sort: [{ created_at: { order: 'desc' } }],
-    });
-    return response.hits.hits.map((h) => h._source);
+    try {
+      const response = await this.historyStorage.getClient().search({
+        track_total_hits: false,
+        query: { match_all: {} },
+        size,
+        sort: [{ created_at: { order: 'desc' } }],
+      });
+      return response.hits.hits.map((h) => h._source);
+    } catch (err) {
+      if (isIndexNotFoundError(err)) return [];
+      throw err;
+    }
   }
 
   // ── Private helpers ──
