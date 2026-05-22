@@ -13,7 +13,13 @@ import {
   getMockCallbacks,
 } from '../../../__tests__/commands/context_fixtures';
 import { esqlCommandRegistry } from '..';
-import { getCommandAutocompleteDefinitions } from '../complete_items';
+import {
+  getCommandAutocompleteDefinitions,
+  byCompleteItem,
+  pipeCompleteItem,
+  onCompleteItem,
+  asCompletionItem,
+} from '../complete_items';
 import { Location } from '../types';
 import { autocomplete } from './autocomplete';
 import {
@@ -276,7 +282,12 @@ describe('FORK Autocomplete', () => {
           );
           await forkExpectSuggestions(
             `FROM a | FORK (CHANGE_POINT value `,
-            ['ON ', 'AS ', '| '],
+            [
+              onCompleteItem.text,
+              asCompletionItem.text,
+              byCompleteItem.text,
+              pipeCompleteItem.text,
+            ],
             mockCallbacks
           );
           const expectedFieldsAny = getFieldNamesByType('any');

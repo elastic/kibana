@@ -39,7 +39,8 @@ export function NextExecutionTime({ triggers, history, children }: NextExecution
       }
       anchorProps={{
         css: css`
-          max-width: 100%;
+          display: block;
+          width: 100%;
         `,
       }}
     >

@@ -18,3 +18,8 @@ export {
 export { isInferenceSpan } from './src/is_inference_span';
 export { LangfuseSpanProcessor } from './src/langfuse/langfuse_span_processor';
 export { PhoenixSpanProcessor } from './src/phoenix/phoenix_span_processor';
+export {
+  initInferenceTracerProvider,
+  getInferenceTracer,
+  shutdownInferenceTracerProvider,
+} from './src/inference_tracer_provider';

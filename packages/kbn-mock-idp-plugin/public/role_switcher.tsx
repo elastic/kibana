@@ -33,16 +33,16 @@ export const useAuthenticator = (reloadPage = false) => {
       body: JSON.stringify(params),
     });
 
-    const { acsUrl, ...samlPayload } = response;
-    const callbackUrl = acsUrl ?? '/api/security/saml/callback';
-
-    if (reloadPage || acsUrl) {
-      const form = createForm(callbackUrl, samlPayload);
+    if (reloadPage) {
+      const form = createForm(
+        services.http.basePath.prepend('/api/security/saml/callback'),
+        response
+      );
       form.submit();
       await new Promise(() => {});
     } else {
       await services.http.post('/api/security/saml/callback', {
-        body: JSON.stringify(samlPayload),
+        body: JSON.stringify(response),
         asResponse: true,
         rawResponse: true,
       });
