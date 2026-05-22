@@ -1,5 +1,5 @@
 {
-  "sha1": "8282f79522979b4392bbbc411722354767daf2e6",
+  "sha1": "b9110693532955e815162f28ffb815e375f2f20f",
   "tests": [
     {
       "id": "6393a5cc96ae333-5ac88d9d8aa60c3",
@@ -23,7 +23,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/certificates.spec.ts",
-        "line": 120,
+        "line": 119,
         "column": 7
       }
     },
@@ -36,7 +36,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/certificates.spec.ts",
-        "line": 143,
+        "line": 142,
         "column": 7
       }
     },
@@ -49,7 +49,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/certificates.spec.ts",
-        "line": 161,
+        "line": 160,
         "column": 7
       }
     },
@@ -62,7 +62,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/missing_mappings.spec.ts",
-        "line": 43,
+        "line": 44,
         "column": 7
       }
     },
