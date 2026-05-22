@@ -213,6 +213,24 @@ describe('SOR - esql API', () => {
     expect(result.values[0][0]).toBe('charlie.brown@example.com');
   });
 
+  it('should reject pipelines starting with a source command', async () => {
+    await expect(
+      savedObjectsRepository.esql({
+        type: 'esql-test-type',
+        namespaces: ['default'],
+        pipeline: esql`FROM .kibana | LIMIT 10`,
+      })
+    ).rejects.toThrow('options.pipeline must not start with a source command');
+
+    await expect(
+      savedObjectsRepository.esql({
+        type: 'esql-test-type',
+        namespaces: ['default'],
+        pipeline: esql`ROW x = 1`,
+      })
+    ).rejects.toThrow('options.pipeline must not start with a source command');
+  });
+
   it('should return empty response for unknown types', async () => {
     const result = await savedObjectsRepository.esql({
       type: 'unknown-type',

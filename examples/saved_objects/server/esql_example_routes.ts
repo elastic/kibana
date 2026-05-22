@@ -43,7 +43,11 @@ export function registerEsqlExampleRoutes(router: IRouter, log: Logger) {
           const result = await savedObjectsClient.esql({
             type: [TYPE_A, TYPE_B],
             namespaces: ['default'],
-            pipeline: esql`KEEP type, \`type-a.myField\`, \`type-b.anotherField\` | SORT type | LIMIT 100`,
+            pipeline: esql`
+              KEEP type, \`type-a.myField\`, \`type-b.anotherField\`
+              | SORT type
+              | LIMIT 100
+            `,
           });
           return res.ok({
             body: {
@@ -89,7 +93,10 @@ export function registerEsqlExampleRoutes(router: IRouter, log: Logger) {
           const result = await savedObjectsClient.esql({
             type: TYPE_A,
             namespaces: ['default'],
-            pipeline: esql`WHERE ${esql.exp(`${TYPE_A}.myField`)} == ${{ searchTerm }} | LIMIT 10`,
+            pipeline: esql`
+              WHERE ${esql.exp(`${TYPE_A}.myField`)} == ${{ searchTerm }}
+              | LIMIT 10
+            `,
           });
           return res.ok({
             body: {

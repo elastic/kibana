@@ -24,7 +24,8 @@ import type { ComposerQuery } from '@elastic/esql';
  * @remarks
  * **Security:** Template holes (`${{ name: value }}`) in the `esql` tag are automatically
  * promoted to ES|QL named parameters — values are forwarded to Elasticsearch at the protocol
- * level and never appear in the query string.
+ * level and never appear in the query string. Never pass user input via `esql.exp(userInput)`,
+ * which injects a raw expression and bypasses parameterization entirely.
  *
  * Standalone encrypted scalar columns are always replaced with `null`. When `_source` is
  * present (via `metadata: ['_id', '_source']`), encrypted attributes within `_source` are
@@ -52,7 +53,10 @@ export interface SavedObjectsEsqlOptions
    * ```ts
    * import { esql } from '@elastic/esql';
    *
-   * pipeline: esql`WHERE dashboard.title LIKE ${{ title: searchTerm }} | LIMIT 100`,
+   * pipeline: esql`
+   *   WHERE dashboard.title LIKE ${{ title: searchTerm }}
+   *   | LIMIT 100
+   * `,
    * ```
    */
   pipeline: ComposerQuery;

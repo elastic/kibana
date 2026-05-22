@@ -136,6 +136,22 @@ describe('esql', () => {
     expect(request.query).toMatch(/^FROM .+ METADATA _id, _source \| LIMIT 10$/);
   });
 
+  it('should throw if pipeline starts with a source command', async () => {
+    await expect(
+      repository.esql({ ...options, pipeline: esql`FROM .kibana | LIMIT 10` })
+    ).rejects.toThrowError('options.pipeline must not start with a source command');
+
+    await expect(repository.esql({ ...options, pipeline: esql`ROW x = 1` })).rejects.toThrowError(
+      'options.pipeline must not start with a source command'
+    );
+
+    await expect(repository.esql({ ...options, pipeline: esql`SHOW INFO` })).rejects.toThrowError(
+      'options.pipeline must not start with a source command'
+    );
+
+    expect(client.esql.query).not.toHaveBeenCalled();
+  });
+
   it('should merge user-provided filter with namespace filter', async () => {
     const userFilter = { term: { 'index-pattern.title': 'my-pattern' } };
     await repository.esql({ ...options, filter: userFilter });

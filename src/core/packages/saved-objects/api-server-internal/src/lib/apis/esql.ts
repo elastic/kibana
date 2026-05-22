@@ -104,6 +104,15 @@ export async function performEsql(
       : esql.from(indices).print();
 
   const req = pipeline.toRequest();
+
+  if (/^\s*(FROM|ROW|SHOW|METRICS|TS|EXPLAIN|PROMQL)\b/i.test(req.query)) {
+    throw SavedObjectsErrorHelpers.createBadRequestError(
+      'options.pipeline must not start with a source command ' +
+        '(FROM, ROW, SHOW, METRICS, TS, EXPLAIN, PROMQL). ' +
+        'The FROM clause is auto-generated from the type parameter.'
+    );
+  }
+
   // toRequest() prints pipeline-only queries without a leading '|';
   // we supply the separator when joining with the FROM clause.
   const query = `${fromClause} | ${req.query}`;
