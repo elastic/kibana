@@ -94,7 +94,7 @@ Object {
         "order": Object {
           "_count": "desc",
         },
-        "size": 3,
+        "size": 4,
       },
     },
   },
@@ -140,13 +140,6 @@ Object {
             "_tier": Array [
               "data_cold",
               "data_frozen",
-            ],
-          },
-        },
-        Object {
-          "terms": Object {
-            "source.ip": Array [
-              "evil-ip",
             ],
           },
         },

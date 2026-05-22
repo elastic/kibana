@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { trim } from 'lodash';
+import { first, trim } from 'lodash';
 import moment from 'moment';
 import type { AnomalySummaryEntry, EntityType } from '../../../../common/api/entity_analytics';
 
@@ -218,10 +218,22 @@ const magnitudeAnomalyToDisplayDetails = (anomaly: AnomalySummaryEntry) => {
 };
 
 const rareAnomalyToDisplayDetails = (anomaly: AnomalySummaryEntry) => {
+  const topBaselineValue = first(
+    (anomaly.baseline ?? [])
+      .filter((b) => b.value !== anomaly.byFieldValue)
+      .map((b) => ({
+        value: b.value,
+        count: b.docCount,
+      }))
+  );
+  const observedCount = (anomaly.baseline ?? [])
+    .filter((b) => b.value === anomaly.byFieldValue)
+    .map((b) => b.docCount);
   return {
-    cardType: GEO_BY_FIELD_NAMES.has(anomaly.byFieldName ?? '') ? 'geo' : 'unknown',
-    expectedHeader: anomaly.baseline?.[0]?.value ?? '',
+    cardType: GEO_BY_FIELD_NAMES.has(anomaly.byFieldName ?? '') ? 'geo' : 'rare',
+    expectedHeader: topBaselineValue?.value ?? '',
     observedHeader: anomaly.byFieldValue ?? '',
+    observedSubtitle: observedCount ? `${observedCount[0]} occurrences` : '',
   };
 };
 
@@ -255,6 +267,7 @@ interface AnomalyDisplayDetails {
   expectedHeader?: string;
   expectedSubtitle?: string;
   observedHeader?: string;
+  observedSubtitle?: string;
 }
 
 export const anomalyToDisplayDetails = (

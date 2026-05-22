@@ -28,10 +28,13 @@ interface AnomalyDetailProps {
 
 export const AnomalyDetail: React.FC<AnomalyDetailProps> = ({ entityType, anomaly }) => {
   const { euiTheme } = useEuiTheme();
-  const { cardType, expectedHeader, expectedSubtitle, observedHeader } = anomalyToDisplayDetails(
-    entityType,
-    anomaly
-  );
+  const {
+    cardType,
+    expectedHeader,
+    expectedSubtitle,
+    observedHeader,
+    observedSubtitle: _observedSubtitle,
+  } = anomalyToDisplayDetails(entityType, anomaly);
 
   const iconElement = useMemo(() => {
     let icon = '';
@@ -112,9 +115,9 @@ export const AnomalyDetail: React.FC<AnomalyDetailProps> = ({ entityType, anomal
                 </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
-            {observedSubtitle && (
+            {(observedSubtitle || _observedSubtitle) && (
               <EuiText size="xs" color="subdued">
-                {observedSubtitle}
+                {_observedSubtitle ?? observedSubtitle}
               </EuiText>
             )}
           </ObservedPanel>

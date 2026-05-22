@@ -626,4 +626,42 @@ describe('anomalyToDisplayDetails', () => {
       observedHeader: 'RU',
     });
   });
+
+  it('should return correct display details for rare non-geo anomaly', () => {
+    expect(
+      anomalyToDisplayDetails(
+        'generic',
+        makeAnomalySummary({
+          detectorFunction: 'rare',
+          byFieldName: 'process.name',
+          byFieldValue: 'mshta.exe',
+          baseline: [{ value: 'chrome.exe', docCount: 42 }],
+          partitionFieldName: 'host.name',
+          partitionFieldValue: 'WORKSTATION-005',
+        })
+      )
+    ).toEqual({
+      cardType: 'rare',
+      expectedHeader: 'chrome.exe',
+      expectedSubtitle: 'where host.name is WORKSTATION-005',
+      observedHeader: 'mshta.exe',
+    });
+
+    expect(
+      anomalyToDisplayDetails(
+        'generic',
+        makeAnomalySummary({
+          detectorFunction: 'rare',
+          byFieldName: 'user.name',
+          byFieldValue: 'svc_backup',
+          baseline: [],
+        })
+      )
+    ).toEqual({
+      cardType: 'rare',
+      expectedHeader: '',
+      expectedSubtitle: '',
+      observedHeader: 'svc_backup',
+    });
+  });
 });

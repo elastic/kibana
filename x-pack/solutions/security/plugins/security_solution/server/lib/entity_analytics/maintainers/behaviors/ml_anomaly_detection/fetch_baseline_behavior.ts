@@ -292,11 +292,6 @@ const fetchRareBaseline = async ({
     // Exclude cold and frozen tiers for query performance
     const mustNot: QueryDslQueryContainer[] = [{ terms: { _tier: ['data_cold', 'data_frozen'] } }];
 
-    // Exclude the anomalous values from the baseline aggregation
-    if (config.exclusionValues.length > 0) {
-      mustNot.push({ terms: { [targetField]: config.exclusionValues } });
-    }
-
     const resp = await esClient.search<unknown, { baseline: { buckets: RareBucket[] } }>(
       {
         index: jobConfig.sourceIndex,
@@ -319,7 +314,6 @@ const fetchRareBaseline = async ({
               {
                 range: {
                   '@timestamp': {
-                    lt: anomalyLatest.timestamp,
                     gte: `now-${ML_AD_LOOKBACK}`,
                   },
                 },
@@ -464,7 +458,8 @@ export const fetchBaselineBehavior = async ({
     entity_id: euid.painless.getEuidRuntimeMapping(entityType),
   };
 
-  const sourceIncludes = jobConfig.influencers.length > 0 ? jobConfig.influencers : undefined;
+  const sourceIncludes =
+    jobConfig.influencers.length > 0 ? [...jobConfig.influencers, '@timestamp'] : undefined;
   const sharedOpts = {
     abortSignal,
     entityId,

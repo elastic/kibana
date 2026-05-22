@@ -7,7 +7,7 @@
 
 import type { AnomalySummaryEntry } from '../../../../common/api/entity_analytics';
 
-export const SHOW_MOCK_ANOMALIES = true;
+export const SHOW_MOCK_ANOMALIES = false;
 
 // One entry per distinct count-based (magnitude) detector combination from the EA ML job catalog.
 export const MOCK_ANOMALIES: AnomalySummaryEntry[] = [
@@ -967,7 +967,7 @@ export const MOCK_ANOMALIES: AnomalySummaryEntry[] = [
     timestamp: '2026-05-21T08:30:00.000Z',
     actual: [1],
     typical: [0.009],
-    baseline: [],
+    baseline: [{ value: 'xcopy.exe', docCount: 38 }],
   },
 
   // rare | no field | file.extension by | no over | host.name partition
@@ -986,7 +986,7 @@ export const MOCK_ANOMALIES: AnomalySummaryEntry[] = [
     timestamp: '2026-05-21T09:15:00.000Z',
     actual: [1],
     typical: [0.014],
-    baseline: [],
+    baseline: [{ value: 'docx', docCount: 94 }],
   },
 
   // rare | no field | file_directory by | no over | host.name partition
@@ -1005,7 +1005,7 @@ export const MOCK_ANOMALIES: AnomalySummaryEntry[] = [
     timestamp: '2026-05-21T09:45:00.000Z',
     actual: [1],
     typical: [0.008],
-    baseline: [],
+    baseline: [{ value: 'D:\\Shares\\Documents', docCount: 67 }],
   },
 
   // rare | no field | process.name by | no over | host.name partition
@@ -1024,7 +1024,7 @@ export const MOCK_ANOMALIES: AnomalySummaryEntry[] = [
     timestamp: '2026-05-21T10:00:00.000Z',
     actual: [1],
     typical: [0.011],
-    baseline: [],
+    baseline: [{ value: 'explorer.exe', docCount: 52 }],
   },
 
   // rare | no field | process.name by | no over | user.name partition
@@ -1043,7 +1043,7 @@ export const MOCK_ANOMALIES: AnomalySummaryEntry[] = [
     timestamp: '2026-05-21T10:30:00.000Z',
     actual: [1],
     typical: [0.007],
-    baseline: [],
+    baseline: [{ value: 'cmd.exe', docCount: 41 }],
   },
 
   // rare | no field | process.name by | no over | process.parent.name partition
@@ -1062,7 +1062,7 @@ export const MOCK_ANOMALIES: AnomalySummaryEntry[] = [
     timestamp: '2026-05-21T11:00:00.000Z',
     actual: [1],
     typical: [0.003],
-    baseline: [],
+    baseline: [{ value: 'EXCEL.EXE', docCount: 29 }],
   },
 
   // rare | no field | privilege by | no over | user.name partition
@@ -1081,7 +1081,7 @@ export const MOCK_ANOMALIES: AnomalySummaryEntry[] = [
     timestamp: '2026-05-21T11:30:00.000Z',
     actual: [1],
     typical: [0.016],
-    baseline: [],
+    baseline: [{ value: 'SeChangeNotifyPrivilege', docCount: 83 }],
   },
 
   // rare | no field | group.name by | no over | user.name partition
@@ -1100,7 +1100,7 @@ export const MOCK_ANOMALIES: AnomalySummaryEntry[] = [
     timestamp: '2026-05-21T12:00:00.000Z',
     actual: [1],
     typical: [0.02],
-    baseline: [],
+    baseline: [{ value: 'Domain Users', docCount: 110 }],
   },
 
   // rare | no field | device by | no over | user.name partition
@@ -1119,7 +1119,7 @@ export const MOCK_ANOMALIES: AnomalySummaryEntry[] = [
     timestamp: '2026-05-21T12:30:00.000Z',
     actual: [1],
     typical: [0.025],
-    baseline: [],
+    baseline: [{ value: 'Standard PS/2 Keyboard', docCount: 47 }],
   },
 
   // rare | no field | source.ip by | no over | user.name partition
@@ -1138,7 +1138,7 @@ export const MOCK_ANOMALIES: AnomalySummaryEntry[] = [
     timestamp: '2026-05-21T13:00:00.000Z',
     actual: [1],
     typical: [0.018],
-    baseline: [],
+    baseline: [{ value: '10.0.1.15', docCount: 76 }],
   },
 
   // rare | no field | process.name by | no over | user.name partition
@@ -1157,7 +1157,7 @@ export const MOCK_ANOMALIES: AnomalySummaryEntry[] = [
     timestamp: '2026-05-21T13:30:00.000Z',
     actual: [1],
     typical: [0.006],
-    baseline: [],
+    baseline: [{ value: 'php-fpm', docCount: 33 }],
   },
 
   // rare | no field | source.ip by | no over | user.name partition
@@ -1176,7 +1176,7 @@ export const MOCK_ANOMALIES: AnomalySummaryEntry[] = [
     timestamp: '2026-05-21T14:00:00.000Z',
     actual: [1],
     typical: [0.01],
-    baseline: [],
+    baseline: [{ value: '192.168.1.100', docCount: 58 }],
   },
 
   // rare | no field | source.geo.region_name by (geo) | no over | user.name partition
@@ -1214,7 +1214,7 @@ export const MOCK_ANOMALIES: AnomalySummaryEntry[] = [
     timestamp: '2026-05-21T15:00:00.000Z',
     actual: [1],
     typical: [0.009],
-    baseline: [],
+    baseline: [{ value: 'MacBook-Pro-jane', docCount: 44 }],
   },
 
   // rare | no field | source.ip by | no over | user.name partition
@@ -1233,7 +1233,7 @@ export const MOCK_ANOMALIES: AnomalySummaryEntry[] = [
     timestamp: '2026-05-21T15:30:00.000Z',
     actual: [1],
     typical: [0.005],
-    baseline: [],
+    baseline: [{ value: '10.0.0.42', docCount: 89 }],
   },
 
   // rare | no field | user.name by | no over | no partition
@@ -1252,7 +1252,7 @@ export const MOCK_ANOMALIES: AnomalySummaryEntry[] = [
     timestamp: '2026-05-21T16:00:00.000Z',
     actual: [1],
     typical: [0.015],
-    baseline: [],
+    baseline: [{ value: 'john.doe', docCount: 120 }],
   },
 
   // rare | no field | event.action by | no over | source.geo.city_name partition
@@ -1271,7 +1271,7 @@ export const MOCK_ANOMALIES: AnomalySummaryEntry[] = [
     timestamp: '2026-05-21T16:30:00.000Z',
     actual: [1],
     typical: [0.008],
-    baseline: [],
+    baseline: [{ value: 'Microsoft.Resources/deployments/write', docCount: 62 }],
   },
 
   // rare | no field | event.action by | no over | destination.geo.country_iso_code partition
@@ -1290,7 +1290,7 @@ export const MOCK_ANOMALIES: AnomalySummaryEntry[] = [
     timestamp: '2026-05-21T17:00:00.000Z',
     actual: [1],
     typical: [0.007],
-    baseline: [],
+    baseline: [{ value: 'Microsoft.Storage/storageAccounts/write', docCount: 55 }],
   },
 
   // rare | no field | event.action by | no over | user.email partition
@@ -1309,7 +1309,7 @@ export const MOCK_ANOMALIES: AnomalySummaryEntry[] = [
     timestamp: '2026-05-21T17:30:00.000Z',
     actual: [1],
     typical: [0.004],
-    baseline: [],
+    baseline: [{ value: 'Microsoft.Compute/virtualMachines/read', docCount: 78 }],
   },
 
   // rare | no field | event.action by | no over | no partition
@@ -1328,7 +1328,7 @@ export const MOCK_ANOMALIES: AnomalySummaryEntry[] = [
     timestamp: '2026-05-21T18:00:00.000Z',
     actual: [1],
     typical: [0.019],
-    baseline: [],
+    baseline: [{ value: 'Microsoft.Network/networkInterfaces/read', docCount: 91 }],
   },
 
   // rare | no field | event.action by | no over | user.id partition
@@ -1347,7 +1347,7 @@ export const MOCK_ANOMALIES: AnomalySummaryEntry[] = [
     timestamp: '2026-05-21T18:30:00.000Z',
     actual: [1],
     typical: [0.012],
-    baseline: [],
+    baseline: [{ value: 'GetUser', docCount: 104 }],
   },
 
   // rare | no field | gcp.audit.status.message by | no over | no partition
@@ -1366,7 +1366,7 @@ export const MOCK_ANOMALIES: AnomalySummaryEntry[] = [
     timestamp: '2026-05-21T19:00:00.000Z',
     actual: [1],
     typical: [0.017],
-    baseline: [],
+    baseline: [{ value: 'OK', docCount: 213 }],
   },
 
   // rare | no field | event.action by | no over | source.geo.city_name partition
@@ -1385,7 +1385,7 @@ export const MOCK_ANOMALIES: AnomalySummaryEntry[] = [
     timestamp: '2026-05-21T19:30:00.000Z',
     actual: [1],
     typical: [0.006],
-    baseline: [],
+    baseline: [{ value: 'storage.objects.get', docCount: 87 }],
   },
 
   // rare | no field | event.action by | no over | destination.geo.country_iso_code partition
@@ -1404,7 +1404,7 @@ export const MOCK_ANOMALIES: AnomalySummaryEntry[] = [
     timestamp: '2026-05-21T20:00:00.000Z',
     actual: [1],
     typical: [0.005],
-    baseline: [],
+    baseline: [{ value: 'storage.buckets.get', docCount: 73 }],
   },
 
   // rare | no field | event.action by | no over | user.email partition
@@ -1423,7 +1423,7 @@ export const MOCK_ANOMALIES: AnomalySummaryEntry[] = [
     timestamp: '2026-05-21T20:30:00.000Z',
     actual: [1],
     typical: [0.009],
-    baseline: [],
+    baseline: [{ value: 'storage.objects.get', docCount: 96 }],
   },
 
   // rare | no field | destination.ip by | no over | host.name partition
@@ -1442,7 +1442,7 @@ export const MOCK_ANOMALIES: AnomalySummaryEntry[] = [
     timestamp: '2026-05-22T00:00:00.000Z',
     actual: [1],
     typical: [0.004],
-    baseline: [],
+    baseline: [{ value: '10.0.0.1', docCount: 156 }],
   },
 
   // rare | no field | destination.port by | no over | host.name partition
@@ -1461,7 +1461,7 @@ export const MOCK_ANOMALIES: AnomalySummaryEntry[] = [
     timestamp: '2026-05-22T00:30:00.000Z',
     actual: [1],
     typical: [0.003],
-    baseline: [],
+    baseline: [{ value: '443', docCount: 201 }],
   },
 
   // rare | no field | process.name by | no over | host.name partition
@@ -1480,7 +1480,7 @@ export const MOCK_ANOMALIES: AnomalySummaryEntry[] = [
     timestamp: '2026-05-22T01:00:00.000Z',
     actual: [1],
     typical: [0.001],
-    baseline: [],
+    baseline: [{ value: 'bash', docCount: 340 }],
   },
 
   // rare | no field | user.name by | no over | host.name partition
@@ -1499,7 +1499,7 @@ export const MOCK_ANOMALIES: AnomalySummaryEntry[] = [
     timestamp: '2026-05-22T01:30:00.000Z',
     actual: [1],
     typical: [0.007],
-    baseline: [],
+    baseline: [{ value: 'ubuntu', docCount: 88 }],
   },
 
   // rare | no field | process.name by | no over | host.name partition
@@ -1518,7 +1518,7 @@ export const MOCK_ANOMALIES: AnomalySummaryEntry[] = [
     timestamp: '2026-05-22T02:00:00.000Z',
     actual: [1],
     typical: [0.014],
-    baseline: [],
+    baseline: [{ value: 'ip', docCount: 72 }],
   },
 
   // rare | no field | process.name by | no over | host.name partition
@@ -1537,7 +1537,7 @@ export const MOCK_ANOMALIES: AnomalySummaryEntry[] = [
     timestamp: '2026-05-22T02:30:00.000Z',
     actual: [1],
     typical: [0.011],
-    baseline: [],
+    baseline: [{ value: 'netstat', docCount: 65 }],
   },
 
   // rare | no field | process.name by | no over | host.name partition
@@ -1556,7 +1556,7 @@ export const MOCK_ANOMALIES: AnomalySummaryEntry[] = [
     timestamp: '2026-05-22T03:00:00.000Z',
     actual: [1],
     typical: [0.005],
-    baseline: [],
+    baseline: [{ value: 'systemd', docCount: 429 }],
   },
 
   // rare | no field | user.name by | no over | host.name partition
@@ -1575,7 +1575,7 @@ export const MOCK_ANOMALIES: AnomalySummaryEntry[] = [
     timestamp: '2026-05-22T03:30:00.000Z',
     actual: [1],
     typical: [0.01],
-    baseline: [],
+    baseline: [{ value: 'root', docCount: 312 }],
   },
 
   // rare | no field | user.name by | no over | host.name partition
@@ -1594,7 +1594,7 @@ export const MOCK_ANOMALIES: AnomalySummaryEntry[] = [
     timestamp: '2026-05-22T04:00:00.000Z',
     actual: [1],
     typical: [0.016],
-    baseline: [],
+    baseline: [{ value: 'deploy', docCount: 57 }],
   },
 
   // rare | no field | user.name by | no over | host.name partition
@@ -1613,7 +1613,7 @@ export const MOCK_ANOMALIES: AnomalySummaryEntry[] = [
     timestamp: '2026-05-22T04:30:00.000Z',
     actual: [1],
     typical: [0.008],
-    baseline: [],
+    baseline: [{ value: 'build', docCount: 43 }],
   },
 
   // rare | no field | process.name by | no over | host.name partition
@@ -1632,7 +1632,7 @@ export const MOCK_ANOMALIES: AnomalySummaryEntry[] = [
     timestamp: '2026-05-22T05:00:00.000Z',
     actual: [1],
     typical: [0.013],
-    baseline: [],
+    baseline: [{ value: 'uname', docCount: 81 }],
   },
 
   // rare | no field | process.name by | no over | host.name partition
@@ -1651,7 +1651,7 @@ export const MOCK_ANOMALIES: AnomalySummaryEntry[] = [
     timestamp: '2026-05-22T05:30:00.000Z',
     actual: [1],
     typical: [0.019],
-    baseline: [],
+    baseline: [{ value: 'ps', docCount: 197 }],
   },
 
   // rare | no field | process.name by | no over | host.name partition
@@ -1670,7 +1670,7 @@ export const MOCK_ANOMALIES: AnomalySummaryEntry[] = [
     timestamp: '2026-05-22T06:00:00.000Z',
     actual: [1],
     typical: [0.022],
-    baseline: [],
+    baseline: [{ value: 'whoami', docCount: 134 }],
   },
 
   // rare | no field | process.name by | no over | host.name partition
@@ -1689,7 +1689,7 @@ export const MOCK_ANOMALIES: AnomalySummaryEntry[] = [
     timestamp: '2026-05-22T06:30:00.000Z',
     actual: [1],
     typical: [0.01],
-    baseline: [],
+    baseline: [{ value: 'bash', docCount: 285 }],
   },
 
   // rare | no field | dns.question.name by | no over | host.name partition
@@ -1708,7 +1708,7 @@ export const MOCK_ANOMALIES: AnomalySummaryEntry[] = [
     timestamp: '2026-05-22T07:00:00.000Z',
     actual: [1],
     typical: [0.002],
-    baseline: [],
+    baseline: [{ value: 'api.microsoft.com', docCount: 148 }],
   },
 
   // rare | no field | destination.domain by | no over | host.name partition
@@ -1727,7 +1727,7 @@ export const MOCK_ANOMALIES: AnomalySummaryEntry[] = [
     timestamp: '2026-05-22T07:30:00.000Z',
     actual: [1],
     typical: [0.003],
-    baseline: [],
+    baseline: [{ value: 'microsoft.com', docCount: 193 }],
   },
 
   // rare | no field | url.full by | no over | host.name partition
@@ -1746,7 +1746,7 @@ export const MOCK_ANOMALIES: AnomalySummaryEntry[] = [
     timestamp: '2026-05-22T08:00:00.000Z',
     actual: [1],
     typical: [0.004],
-    baseline: [],
+    baseline: [{ value: 'https://update.microsoft.com/', docCount: 167 }],
   },
 
   // rare | no field | user_agent.original by | no over | host.name partition
@@ -1765,7 +1765,7 @@ export const MOCK_ANOMALIES: AnomalySummaryEntry[] = [
     timestamp: '2026-05-22T08:30:00.000Z',
     actual: [1],
     typical: [0.006],
-    baseline: [],
+    baseline: [{ value: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36', docCount: 82 }],
   },
 
   // rare | no field | process.name by | no over | host.name partition
@@ -1784,7 +1784,7 @@ export const MOCK_ANOMALIES: AnomalySummaryEntry[] = [
     timestamp: '2026-05-22T09:00:00.000Z',
     actual: [1],
     typical: [0.005],
-    baseline: [],
+    baseline: [{ value: 'chrome.exe', docCount: 118 }],
   },
 
   // rare | no field | destination.ip by | no over | host.name partition
@@ -1803,7 +1803,7 @@ export const MOCK_ANOMALIES: AnomalySummaryEntry[] = [
     timestamp: '2026-05-22T09:30:00.000Z',
     actual: [1],
     typical: [0.003],
-    baseline: [],
+    baseline: [{ value: '10.0.0.1', docCount: 144 }],
   },
 
   // rare | no field | process.executable by | no over | host.name partition
@@ -1822,7 +1822,7 @@ export const MOCK_ANOMALIES: AnomalySummaryEntry[] = [
     timestamp: '2026-05-22T10:00:00.000Z',
     actual: [1],
     typical: [0.001],
-    baseline: [],
+    baseline: [{ value: 'C:\\Windows\\System32\\svchost.exe', docCount: 376 }],
   },
 
   // rare | no field | process.name by | no over | host.name partition
@@ -1841,7 +1841,7 @@ export const MOCK_ANOMALIES: AnomalySummaryEntry[] = [
     timestamp: '2026-05-22T10:30:00.000Z',
     actual: [1],
     typical: [0.007],
-    baseline: [],
+    baseline: [{ value: 'svchost.exe', docCount: 289 }],
   },
 
   // rare | no field | process.name by | no over | host.name partition
@@ -1860,7 +1860,7 @@ export const MOCK_ANOMALIES: AnomalySummaryEntry[] = [
     timestamp: '2026-05-22T11:00:00.000Z',
     actual: [1],
     typical: [0.013],
-    baseline: [],
+    baseline: [{ value: 'cmd.exe', docCount: 93 }],
   },
 
   // rare | no field | service.name by | no over | host.name partition
@@ -1879,7 +1879,7 @@ export const MOCK_ANOMALIES: AnomalySummaryEntry[] = [
     timestamp: '2026-05-22T11:30:00.000Z',
     actual: [1],
     typical: [0.001],
-    baseline: [],
+    baseline: [{ value: 'wuauserv', docCount: 214 }],
   },
 
   // rare | no field | user.name by | no over | host.name partition
@@ -1898,7 +1898,7 @@ export const MOCK_ANOMALIES: AnomalySummaryEntry[] = [
     timestamp: '2026-05-22T12:00:00.000Z',
     actual: [1],
     typical: [0.009],
-    baseline: [],
+    baseline: [{ value: 'john.doe', docCount: 67 }],
   },
 
   // rare | no field | process.name by | no over | host.name partition
@@ -1917,7 +1917,7 @@ export const MOCK_ANOMALIES: AnomalySummaryEntry[] = [
     timestamp: '2026-05-22T12:30:00.000Z',
     actual: [1],
     typical: [0.006],
-    baseline: [],
+    baseline: [{ value: 'EC2Launch.exe', docCount: 98 }],
   },
 
   // rare | no field | user.name by | no over | host.name partition
@@ -1936,7 +1936,7 @@ export const MOCK_ANOMALIES: AnomalySummaryEntry[] = [
     timestamp: '2026-05-22T13:00:00.000Z',
     actual: [1],
     typical: [0.014],
-    baseline: [],
+    baseline: [{ value: 'Administrator', docCount: 155 }],
   },
 
   // rare | no field | powershell.file.script_block_text by | no over | host.name partition
@@ -1955,7 +1955,7 @@ export const MOCK_ANOMALIES: AnomalySummaryEntry[] = [
     timestamp: '2026-05-22T13:30:00.000Z',
     actual: [1],
     typical: [0.002],
-    baseline: [],
+    baseline: [{ value: 'Set-ExecutionPolicy RemoteSigned', docCount: 49 }],
   },
 
   // rare | no field | user.name by | no over | host.name partition
@@ -1974,7 +1974,7 @@ export const MOCK_ANOMALIES: AnomalySummaryEntry[] = [
     timestamp: '2026-05-22T14:00:00.000Z',
     actual: [1],
     typical: [0.018],
-    baseline: [],
+    baseline: [{ value: 'jane.doe', docCount: 72 }],
   },
 
   // rare | no field | user.name by | no over | host.name partition
@@ -1993,6 +1993,6 @@ export const MOCK_ANOMALIES: AnomalySummaryEntry[] = [
     timestamp: '2026-05-22T14:30:00.000Z',
     actual: [1],
     typical: [0.011],
-    baseline: [],
+    baseline: [{ value: 'SYSTEM', docCount: 183 }],
   },
 ];

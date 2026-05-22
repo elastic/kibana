@@ -641,32 +641,7 @@ describe('fetchBaselineBehavior', () => {
       expect(searchBody).toMatchSnapshot();
     });
 
-    it('issues a terms agg query with must_not exclusion for anomalous values', async () => {
-      await fetchBaselineBehavior({
-        ...defaultOpts,
-        anomalies: [makeAnomaly({ byFieldValue: 'evil-ip', timestamp: 1_000_000 })],
-        esClient,
-        logger,
-        ml: mockMl,
-        soClient,
-      });
-
-      const [searchBody] = mockEsSearch.mock.calls[0];
-      expect(searchBody.aggs.baseline.terms.field).toBe('source.ip');
-      expect(searchBody.query.bool.must_not).toEqual([
-        { terms: { _tier: ['data_cold', 'data_frozen'] } },
-        { terms: { 'source.ip': ['evil-ip'] } },
-      ]);
-      expect(searchBody.query.bool.filter).toContainEqual(
-        expect.objectContaining({
-          range: expect.objectContaining({
-            '@timestamp': expect.objectContaining({ lt: 1_000_000 }),
-          }),
-        })
-      );
-    });
-
-    it('still includes tier exclusion in must_not when there are no anomalous values', async () => {
+    it('still includes tier exclusion in must_not', async () => {
       await fetchBaselineBehavior({
         ...defaultOpts,
         anomalies: [makeAnomaly({ byFieldValue: undefined })],
