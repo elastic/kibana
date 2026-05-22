@@ -36,6 +36,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid';
 import { createPortal } from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
+import usePrevious from 'react-use/lib/usePrevious';
 import { QuerySource } from '@kbn/esql-types';
 import { isMac } from '@kbn/shared-ux-utility';
 import { useLookupIndexCommand } from './lookup_join';
@@ -197,6 +198,19 @@ const ESQLEditorInternal = function ESQLEditor({
   const [code, setCode] = useState<string>(fixedQuery ?? '');
   // To make server side errors less "sticky", register the state of the code when submitting
   const [codeWhenSubmitted, setCodeStateOnSubmission] = useState(code);
+
+  // External submits (e.g. query bar Search / time picker) do not call onQuerySubmit. When a fetch
+  // starts (loading moves from false to true),
+  // record the parent `query` prop as the last executed query so server errors match that query.
+  // `fixedQuery` is omitted from deps so typing after a run does not re-sync.
+  const prevIsLoading = usePrevious(isLoading);
+  useEffect(() => {
+    if (!prevIsLoading && isLoading) {
+      setCodeStateOnSubmission(fixedQuery);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoading, prevIsLoading]);
+
   const [editorHeight, setEditorHeight] = useRestorableState(
     'editorHeight',
     editorIsInline ? EDITOR_INITIAL_HEIGHT_INLINE_EDITING : EDITOR_INITIAL_HEIGHT
