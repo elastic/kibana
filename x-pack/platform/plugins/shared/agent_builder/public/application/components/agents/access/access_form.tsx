@@ -50,11 +50,12 @@ const emptyStateStyles = (euiTheme: EuiThemeComputed) => css`
   padding: ${euiTheme.size.m} 0;
 `;
 
-const ownerRowStyles = css`
-  min-height: 48px;
+const ownerRowStyles = (euiTheme: EuiThemeComputed) => css`
+  min-height: ${euiTheme.size.xxxl};
   display: flex;
   align-items: center;
-  padding: 0 8px;
+  padding-block: 0;
+  padding-inline: ${euiTheme.size.s};
 `;
 
 interface SectionProps {
@@ -126,7 +127,7 @@ export const AccessForm: React.FC<AccessFormProps> = ({
           <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false} color="subdued">
             <EuiPanel paddingSize="none" hasBorder={true} hasShadow={false}>
               {ownerName && (
-                <div css={ownerRowStyles}>
+                <div css={ownerRowStyles(euiTheme)}>
                   <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
                     <EuiFlexItem grow={false}>
                       <EuiAvatar size="s" name={ownerName} />
