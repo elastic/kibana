@@ -9,6 +9,6 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   // Config is disabled due to empty test suite
-  // Please enable the related config in .buildkite/ftr_security_serverless_configs.yml after adding tests here
+  // Please enable the related config in .buildkite/ftr-manifests/ftr_security_serverless_configs.yml after adding tests here
   describe('Serverless security API - feature flags', function () {});
 }

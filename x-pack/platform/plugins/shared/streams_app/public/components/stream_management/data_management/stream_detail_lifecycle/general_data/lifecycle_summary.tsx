@@ -7,21 +7,28 @@
 
 import React, { useEffect } from 'react';
 import type { Streams, IngestStreamLifecycleILM } from '@kbn/streams-schema';
-import { isDslLifecycle, isIlmLifecycle } from '@kbn/streams-schema';
+import {
+  Streams as StreamsSchema,
+  isDslLifecycle,
+  isIlmLifecycle,
+  isInheritLifecycle,
+  isRoot,
+} from '@kbn/streams-schema';
 import type { PhaseName } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiCallOut, EuiSpacer, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiButton, EuiCallOut, EuiSpacer, EuiToolTip } from '@elastic/eui';
 import type { DataStreamStats } from '../hooks/use_data_stream_stats';
 import { DataLifecycleSummary } from '../common/data_lifecycle/data_lifecycle_summary';
 import { useUpdateStreamLifecycle } from '../hooks/use_update_stream_lifecycle';
 import { useIlmLifecycleSummary } from '../hooks/use_ilm_lifecycle_summary';
 import { useDslLifecycleSummary } from '../hooks/use_dsl_lifecycle_summary';
-import { MAX_DOWNSAMPLE_STEPS } from '../downsampling/edit_dsl_steps_flyout/form';
+import { MAX_DOWNSAMPLE_STEPS } from '../data_phases/edit_dsl_steps_flyout/form';
+import { useLifecyclePreview } from '../common/hooks/lifecycle_preview';
 import type {
   IlmPhaseSelectOption,
   IlmPhaseSelectRenderButtonProps,
-} from '../downsampling/ilm_phase_select/ilm_phase_select';
-import { IlmPhaseSelect } from '../downsampling/ilm_phase_select/ilm_phase_select';
+} from '../data_phases/ilm_phase_select/ilm_phase_select';
+import { IlmPhaseSelect } from '../data_phases/ilm_phase_select/ilm_phase_select';
 
 const addPhaseButtonLabel = i18n.translate(
   'xpack.streams.dataLifecycleSummary.addPhaseButtonLabel',
@@ -78,18 +85,54 @@ interface LifecycleSummaryProps {
   isMetricsStream: boolean;
   stats?: DataStreamStats;
   refreshDefinition?: () => void;
-  onFlyoutOpenChange?: (isOpen: boolean) => void;
-  onFlyoutUnsavedChangesChange?: (hasUnsavedChanges: boolean) => void;
 }
+
+const dataStreamLifecycleTitle = i18n.translate('xpack.streams.dataLifecycleSummary.title.dlm', {
+  defaultMessage: 'Data stream lifecycle',
+});
+
+const getIlmTitle = (policyName: string) =>
+  i18n.translate('xpack.streams.dataLifecycleSummary.title.ilm', {
+    defaultMessage: 'ILM: {policyName}',
+    values: { policyName },
+  });
+
+const inheritedBadgeLabel = i18n.translate('xpack.streams.dataLifecycleSummary.inheritedBadge', {
+  defaultMessage: 'Inherited',
+});
+
+const shouldShowLifecycleInheritedBadge = (definition: Streams.ingest.all.GetResponse): boolean => {
+  const isClassicStream = StreamsSchema.ClassicStream.GetResponse.is(definition);
+  const isWiredStream = StreamsSchema.WiredStream.GetResponse.is(definition);
+  const isInheritingFromIndexTemplate =
+    isClassicStream && isInheritLifecycle(definition.stream.ingest.lifecycle);
+  const isInheritingFromParent =
+    isWiredStream &&
+    !isRoot(definition.stream.name) &&
+    isInheritLifecycle(definition.stream.ingest.lifecycle);
+  return isInheritingFromIndexTemplate || isInheritingFromParent;
+};
 
 const IlmLifecycleSummary = ({
   definition,
   isMetricsStream,
   stats,
   refreshDefinition,
-  onFlyoutOpenChange,
-  onFlyoutUnsavedChangesChange,
 }: LifecycleSummaryProps) => {
+  const {
+    isActive: isPreviewActive,
+    timelineDownsampleSteps: previewTimelineDownsampleSteps,
+    timelinePhases: previewTimelinePhases,
+    clearPreview,
+    setDataPhasesCount,
+    setDownsampleStepsCount,
+    setHasUnsavedChanges,
+    setIsActive,
+    setRetentionPeriod,
+    setTimelineModel,
+  } = useLifecyclePreview();
+  const shouldShowInheritedBadge = shouldShowLifecycleInheritedBadge(definition);
+
   const { updateStreamLifecycle } = useUpdateStreamLifecycle(definition);
   const ilmSummary = useIlmLifecycleSummary({
     definition,
@@ -104,12 +147,53 @@ const IlmLifecycleSummary = ({
   const invalidPhases = ilmSummary.flyoutInvalidPhases;
 
   useEffect(() => {
-    onFlyoutOpenChange?.(isEditLifecycleFlyoutOpen);
-  }, [isEditLifecycleFlyoutOpen, onFlyoutOpenChange]);
+    if (!isEditLifecycleFlyoutOpen) {
+      clearPreview();
+      return;
+    }
+
+    setIsActive(true);
+  }, [clearPreview, isEditLifecycleFlyoutOpen, setIsActive]);
 
   useEffect(() => {
-    onFlyoutUnsavedChangesChange?.(hasUnsavedChangesInFlyout);
-  }, [hasUnsavedChangesInFlyout, onFlyoutUnsavedChangesChange]);
+    if (!isEditLifecycleFlyoutOpen) {
+      return;
+    }
+
+    setHasUnsavedChanges(hasUnsavedChangesInFlyout);
+  }, [hasUnsavedChangesInFlyout, isEditLifecycleFlyoutOpen, setHasUnsavedChanges]);
+
+  useEffect(() => {
+    if (!isEditLifecycleFlyoutOpen) {
+      return;
+    }
+
+    const retentionPeriod =
+      ilmSummary.phases.find((phase) => Boolean(phase.isDelete))?.min_age ?? null;
+
+    setTimelineModel({ phases: ilmSummary.phases, downsampleSteps: null });
+    setRetentionPeriod(retentionPeriod);
+    setDataPhasesCount(ilmSummary.phases.length);
+  }, [
+    ilmSummary.phases,
+    isEditLifecycleFlyoutOpen,
+    setDataPhasesCount,
+    setRetentionPeriod,
+    setTimelineModel,
+  ]);
+
+  useEffect(() => {
+    if (!isEditLifecycleFlyoutOpen) {
+      return;
+    }
+
+    if (!isMetricsStream) {
+      setDownsampleStepsCount(null);
+      return;
+    }
+
+    setDownsampleStepsCount(ilmSummary.phases.filter((phase) => Boolean(phase.downsample)).length);
+  }, [ilmSummary.phases, isEditLifecycleFlyoutOpen, isMetricsStream, setDownsampleStepsCount]);
 
   const headerActions =
     definition.privileges.lifecycle &&
@@ -154,9 +238,18 @@ const IlmLifecycleSummary = ({
       {!ilmSummary.policyMissing && (
         <DataLifecycleSummary
           model={{
-            phases: ilmSummary.phases,
+            phases: (isPreviewActive && previewTimelinePhases) || ilmSummary.phases,
             loading: ilmSummary.loading,
+            downsampleSteps: previewTimelineDownsampleSteps ?? undefined,
           }}
+          title={
+            isIlmLifecycle(definition.effective_lifecycle)
+              ? getIlmTitle(definition.effective_lifecycle.ilm.policy)
+              : dataStreamLifecycleTitle
+          }
+          titleBadge={
+            shouldShowInheritedBadge ? <EuiBadge>{inheritedBadgeLabel}</EuiBadge> : undefined
+          }
           showDownsampling={isMetricsStream}
           capabilities={{ canManageLifecycle: definition.privileges.lifecycle }}
           headerActions={headerActions}
@@ -187,10 +280,22 @@ const NonIlmLifecycleSummary = ({
   definition,
   isMetricsStream,
   stats,
-  onFlyoutOpenChange,
-  onFlyoutUnsavedChangesChange,
   refreshDefinition,
 }: LifecycleSummaryProps) => {
+  const {
+    isActive: isPreviewActive,
+    timelineDownsampleSteps: previewTimelineDownsampleSteps,
+    timelinePhases: previewTimelinePhases,
+    clearPreview,
+    setDataPhasesCount,
+    setDownsampleStepsCount,
+    setHasUnsavedChanges,
+    setIsActive,
+    setRetentionPeriod,
+    setTimelineModel,
+  } = useLifecyclePreview();
+  const shouldShowInheritedBadge = shouldShowLifecycleInheritedBadge(definition);
+
   const isDsl = isDslLifecycle(definition.effective_lifecycle);
   const { updateStreamLifecycle } = useUpdateStreamLifecycle(definition);
   const dslSummary = useDslLifecycleSummary({
@@ -201,10 +306,57 @@ const NonIlmLifecycleSummary = ({
   });
 
   useEffect(() => {
-    onFlyoutOpenChange?.(dslSummary.isEditLifecycleFlyoutOpen);
+    if (!dslSummary.isEditLifecycleFlyoutOpen) {
+      clearPreview();
+      return;
+    }
+
+    setIsActive(true);
     // For now DSL downsampling edits don't surface an external "unsaved changes" indicator.
-    onFlyoutUnsavedChangesChange?.(false);
-  }, [dslSummary.isEditLifecycleFlyoutOpen, onFlyoutOpenChange, onFlyoutUnsavedChangesChange]);
+    setHasUnsavedChanges(false);
+  }, [clearPreview, dslSummary.isEditLifecycleFlyoutOpen, setHasUnsavedChanges, setIsActive]);
+
+  useEffect(() => {
+    if (!dslSummary.isEditLifecycleFlyoutOpen) {
+      return;
+    }
+
+    const retentionPeriod =
+      dslSummary.phases.find((phase) => Boolean(phase.isDelete))?.min_age ?? null;
+
+    setTimelineModel({
+      phases: dslSummary.phases,
+      downsampleSteps: isDsl ? dslSummary.downsampleSteps ?? null : null,
+    });
+    setRetentionPeriod(retentionPeriod);
+    setDataPhasesCount(dslSummary.phases.length);
+  }, [
+    dslSummary.downsampleSteps,
+    dslSummary.isEditLifecycleFlyoutOpen,
+    dslSummary.phases,
+    isDsl,
+    setDataPhasesCount,
+    setRetentionPeriod,
+    setTimelineModel,
+  ]);
+
+  useEffect(() => {
+    if (!dslSummary.isEditLifecycleFlyoutOpen) {
+      return;
+    }
+
+    if (!isMetricsStream) {
+      setDownsampleStepsCount(null);
+      return;
+    }
+
+    setDownsampleStepsCount(dslSummary.downsampleSteps?.length ?? 0);
+  }, [
+    dslSummary.downsampleSteps,
+    dslSummary.isEditLifecycleFlyoutOpen,
+    isMetricsStream,
+    setDownsampleStepsCount,
+  ]);
 
   const currentDslStepsCount = dslSummary.downsampleSteps?.length ?? 0;
   const isAddDownsampleStepDisabled = currentDslStepsCount >= MAX_DOWNSAMPLE_STEPS;
@@ -240,10 +392,18 @@ const NonIlmLifecycleSummary = ({
     <>
       <DataLifecycleSummary
         model={{
-          phases: dslSummary.phases,
+          phases: (isPreviewActive && previewTimelinePhases) || dslSummary.phases,
           loading: false,
-          downsampleSteps: isDsl ? dslSummary.downsampleSteps : undefined,
+          downsampleSteps: isPreviewActive
+            ? previewTimelineDownsampleSteps ?? undefined
+            : isDsl
+            ? dslSummary.downsampleSteps
+            : undefined,
         }}
+        title={dataStreamLifecycleTitle}
+        titleBadge={
+          shouldShowInheritedBadge ? <EuiBadge>{inheritedBadgeLabel}</EuiBadge> : undefined
+        }
         showDownsampling={isMetricsStream}
         downsamplingActions={{
           onRemoveDownsampleStep: dslSummary.onRemoveDownsampleStep,

@@ -13,3 +13,4 @@ export * from './fleet_index_debugger';
 export * from './orphaned_integration_policy_debugger';
 export * from './health_check_panel';
 export * from './agentless_resources_toggle';
+export { CloudOnboardingDeploymentDebugger } from './cloud_onboarding_deployment_debugger';
