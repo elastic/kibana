@@ -428,6 +428,7 @@ export function StreamsTreeTable({
                 responsive={false}
                 className={css`
                   margin-left: ${item.level * parseInt(euiTheme.size.xl, 10)}px;
+                  min-width: 0;
                 `}
               >
                 {treeMode && item.children && hasChildren && (
@@ -473,7 +474,13 @@ export function StreamsTreeTable({
                     <EuiIcon type="empty" color="text" size="m" aria-hidden="true" />
                   </EuiFlexItem>
                 )}
-                <EuiFlexGroup alignItems="center" gutterSize="s" responsive wrap>
+                <EuiFlexGroup
+                  alignItems="center"
+                  gutterSize="s"
+                  className={css`
+                    min-width: 0;
+                  `}
+                >
                   {Streams.QueryStream.Definition.is(item.stream) && <QueryStreamBadge />}
                   {isDraftStream(item.stream) && <DraftStreamBadge />}
                   <EuiLink
@@ -482,6 +489,12 @@ export function StreamsTreeTable({
                       path: { key: item.stream.name },
                       query: { rangeFrom, rangeTo },
                     })}
+                    className={css`
+                      overflow: hidden;
+                      text-overflow: ellipsis;
+                      white-space: nowrap;
+                      min-width: 0;
+                    `}
                     onClick={(e: React.MouseEvent) => {
                       e.preventDefault();
                       router.push('/{key}', {
@@ -619,7 +632,7 @@ export function StreamsTreeTable({
               )}
             </EuiFlexGroup>
           ),
-          width: '150px',
+          width: '112px',
           sortable: qualityLoaded
             ? (item: TableRow) => qualityRank[item.dataQuality as QualityIndicators]
             : false,
