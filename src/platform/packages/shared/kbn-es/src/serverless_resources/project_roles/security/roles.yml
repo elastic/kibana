@@ -424,8 +424,8 @@ threat_intelligence_analyst:
   metadata:
     public: true
     reserved: true
-    deprecated: true
-    deprecated_reason: 'Please use the [threat_intelligence_analyst_v2] role instead'
+    _deprecated: true
+    _deprecated_reason: 'Please use the [threat_intelligence_analyst_v2] role instead'
   cluster:
     - 'read_project_routing'
   indices:
@@ -586,8 +586,8 @@ rule_author:
   metadata:
     public: true
     reserved: true
-    deprecated: true
-    deprecated_reason: 'Please use the [rule_author_v2] role instead'
+    _deprecated: true
+    _deprecated_reason: 'Please use the [rule_author_v2] role instead'
   cluster:
     - 'read_project_routing'
   indices:
@@ -772,8 +772,8 @@ soc_manager:
   metadata:
     public: true
     reserved: true
-    deprecated: true
-    deprecated_reason: 'Please use the [soc_manager_v2] role instead'
+    _deprecated: true
+    _deprecated_reason: 'Please use the [soc_manager_v2] role instead'
   cluster:
     - 'read_project_routing'
   indices:
