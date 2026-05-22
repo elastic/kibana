@@ -40,7 +40,12 @@ export interface EntityAnalyticsApiService {
   initRiskEngine: () => Promise<void>;
   getRiskEngineStatus: () => Promise<RiskEngineStatusResponse>;
   getEntityStoreStatus: () => Promise<GetEntityStoreStatusResponse>;
+  getEntityStoreStatusV2: () => Promise<GetEntityStoreStatusResponse>;
   waitForEntityStoreStatus: (
+    expectedStatus: StoreStatus,
+    timeoutMs?: number
+  ) => Promise<GetEntityStoreStatusResponse>;
+  waitForEntityStoreStatusV2: (
     expectedStatus: StoreStatus,
     timeoutMs?: number
   ) => Promise<GetEntityStoreStatusResponse>;
@@ -53,11 +58,6 @@ export interface EntityAnalyticsApiService {
   ) => Promise<RiskEngineStatusResponse>;
   // v2 entity-store helpers (only relevant when `securitySolution:entityStoreEnableV2` is true)
   setEntityStoreV2Enabled: (enabled: boolean) => Promise<void>;
-  getEntityStoreStatusV2: () => Promise<GetEntityStoreStatusResponse>;
-  waitForEntityStoreStatusV2: (
-    expectedStatus: StoreStatus,
-    timeoutMs?: number
-  ) => Promise<GetEntityStoreStatusResponse>;
   uninstallEntityStoreV2: () => Promise<void>;
 }
 
@@ -203,6 +203,23 @@ export const getEntityAnalyticsApiService = ({
       );
     },
 
+    getEntityStoreStatusV2: async () => {
+      return measurePerformanceAsync(
+        log,
+        'security.entityAnalytics.getEntityStoreStatusV2',
+        async () => {
+          const response = await kbnClient.request<GetEntityStoreStatusResponse>({
+            method: 'GET',
+            path: `${basePath}${ENTITY_STORE_V2_STATUS_URL}`,
+            headers: {
+              'elastic-api-version': API_VERSIONS.public.v1,
+            },
+          });
+          return response.data;
+        }
+      );
+    },
+
     waitForEntityStoreStatus: async (expectedStatus: StoreStatus, timeoutMs: number = 60000) => {
       return measurePerformanceAsync(
         log,
@@ -214,6 +231,38 @@ export const getEntityAnalyticsApiService = ({
           while (Date.now() - startTime < timeoutMs) {
             try {
               const status = await service.getEntityStoreStatus();
+              lastStatus = status;
+
+              if (status.status === expectedStatus) {
+                return status;
+              }
+            } catch (error) {
+              log.debug(`Error checking entity store status: ${error}`);
+            }
+
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+          }
+
+          throw new Error(
+            `Timeout waiting for entity store status '${expectedStatus}' after ${timeoutMs}ms. Last status: ${JSON.stringify(
+              lastStatus
+            )}`
+          );
+        }
+      );
+    },
+
+    waitForEntityStoreStatusV2: async (expectedStatus: StoreStatus, timeoutMs: number = 60000) => {
+      return measurePerformanceAsync(
+        log,
+        `security.entityAnalytics.waitForEntityStoreStatusV2 [${expectedStatus}]`,
+        async () => {
+          const startTime = Date.now();
+          let lastStatus: GetEntityStoreStatusResponse | undefined;
+
+          while (Date.now() - startTime < timeoutMs) {
+            try {
+              const status = await service.getEntityStoreStatusV2();
               lastStatus = status;
 
               if (status.status === expectedStatus) {
@@ -388,53 +437,6 @@ export const getEntityAnalyticsApiService = ({
         body: { value: enabled },
         headers: { 'elastic-api-version': API_VERSIONS.internal.v1 },
       });
-    },
-
-    getEntityStoreStatusV2: async () => {
-      return measurePerformanceAsync(
-        log,
-        'security.entityAnalytics.getEntityStoreStatusV2',
-        async () => {
-          const response = await kbnClient.request<GetEntityStoreStatusResponse>({
-            method: 'GET',
-            path: `${basePath}${ENTITY_STORE_V2_STATUS_URL}`,
-            headers: { 'elastic-api-version': API_VERSIONS.public.v1 },
-          });
-          return response.data;
-        }
-      );
-    },
-
-    waitForEntityStoreStatusV2: async (expectedStatus: StoreStatus, timeoutMs: number = 60000) => {
-      return measurePerformanceAsync(
-        log,
-        `security.entityAnalytics.waitForEntityStoreStatusV2 [${expectedStatus}]`,
-        async () => {
-          const startTime = Date.now();
-          let lastStatus: GetEntityStoreStatusResponse | undefined;
-
-          while (Date.now() - startTime < timeoutMs) {
-            try {
-              const status = await service.getEntityStoreStatusV2();
-              lastStatus = status;
-
-              if (status.status === expectedStatus) {
-                return status;
-              }
-            } catch (error) {
-              log.debug(`Error checking entity store v2 status: ${error}`);
-            }
-
-            await new Promise((resolve) => setTimeout(resolve, 1000));
-          }
-
-          throw new Error(
-            `Timeout waiting for entity store v2 status '${expectedStatus}' after ${timeoutMs}ms. Last status: ${JSON.stringify(
-              lastStatus
-            )}`
-          );
-        }
-      );
     },
 
     uninstallEntityStoreV2: async () => {

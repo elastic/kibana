@@ -220,7 +220,7 @@ spaceTest.describe(
 
       await expect(managementPage.entityAnalyticsHealth).toContainText('Off');
 
-      await page.route('**/internal/risk_score/engine/init', (route) =>
+      await page.route('**/api/security/entity_store/start', (route) =>
         route.fulfill({
           status: 500,
           contentType: 'application/json',
@@ -234,7 +234,7 @@ spaceTest.describe(
         timeout: 30000,
       });
 
-      await page.unroute('**/internal/risk_score/engine/init');
+      await page.unroute('**/api/security/entity_store/start');
     });
   }
 );
