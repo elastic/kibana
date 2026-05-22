@@ -58,5 +58,6 @@ function getSavedDataViewFields(dataView: AsCodeSavedDataView): Partial<DataView
     id: dataView.id,
     name: dataView.name,
     allowHidden: dataView.allow_hidden_indices,
+    sourceFilters: dataView.field_filters?.map((filter) => ({ value: filter })),
   };
 }

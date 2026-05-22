@@ -62,6 +62,15 @@ export const savedDataViewSpecSchema = schema.object(
         },
       })
     ),
+    field_filters: schema.maybe(
+      schema.arrayOf(schema.string(), {
+        meta: {
+          title: 'Field filters',
+          description:
+            'Field filters can be used to exclude one or more fields when fetching a document.',
+        },
+      })
+    ),
     index_pattern: indexPatternSchema,
     time_field: timeFieldSchema,
     field_settings: schema.maybe(
