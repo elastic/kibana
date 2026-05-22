@@ -337,6 +337,7 @@ describe('updatePackRoute', () => {
       const mockClient = {
         get: jest.fn().mockImplementation(() => {
           getCallCount += 1;
+
           return Promise.resolve(getCallCount === 1 ? currentSO : updatedSO);
         }),
         find: jest.fn().mockResolvedValue({ saved_objects: [] }),
