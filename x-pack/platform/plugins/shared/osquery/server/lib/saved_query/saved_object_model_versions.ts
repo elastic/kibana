@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import type { SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
 import { savedQuerySchemaV2, packSchemaV2, packSchemaV3 } from './schemas';
 
@@ -91,12 +90,12 @@ export const packSavedObjectModelVersion3: SavedObjectsModelVersion = {
   schemas: {
     forwardCompatibility: packSchemaV3.extends({}, { unknowns: 'ignore' }),
     // `create` is required for new model versions per #240919 (rollback support
-    // soft-enforced 2025-11-05). V1/V2 above predate that enforcement and are
-    // grandfathered. Intentionally permissive here: the pack root mapping is
-    // NOT `dynamic: false`, V3 is additive-only, and validation of the new
-    // fields happens at the input boundary (route validators, conversion
-    // utilities) — not at this SO schema.
-    create: schema.object({}, { unknowns: 'allow' }),
+    // soft-enforced 2025-11-05). The pack SO root is NOT `dynamic: false`,
+    // so the SO-types lint requires every mapping field be declared here.
+    // Reuse `packSchemaV3` (which already declares V1+V2+V3 fields) and accept
+    // unknown sub-keys so per-query RRULE overrides / unknown rrule parts
+    // round-trip. See `design.md` D35.
+    create: packSchemaV3.extends({}, { unknowns: 'allow' }),
   },
 };
 
