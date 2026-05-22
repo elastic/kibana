@@ -8,7 +8,7 @@
 /* eslint-disable require-atomic-updates */
 
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { UpdateExceptionListItemOptions } from '@kbn/lists-plugin/server';
 import pMap from 'p-map';
 import { type Logger } from '@kbn/core/server';

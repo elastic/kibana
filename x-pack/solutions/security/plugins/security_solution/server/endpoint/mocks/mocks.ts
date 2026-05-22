@@ -49,7 +49,7 @@ import type { PluginStartContract as ActionPluginStartContract } from '@kbn/acti
 import type { Mutable } from 'utility-types';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { ScriptsLibraryMock } from '../services/scripts_library/mocks';
 import { referenceDataMocks } from '../lib/reference_data/mocks';

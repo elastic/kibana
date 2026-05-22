@@ -111,6 +111,7 @@ dependsOn:
   - '@kbn/agent-context-layer-plugin'
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/core-elasticsearch-server'
+  - '@kbn/core-spaces-common'
 tags:
   - plugin
   - prod

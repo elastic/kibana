@@ -33,7 +33,7 @@ import type {
 } from '@kbn/rule-registry-plugin/server';
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { spaceIdToNamespace } from '@kbn/spaces-plugin/server/lib/utils/namespace';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import type { FilesStart } from '@kbn/files-plugin/server';

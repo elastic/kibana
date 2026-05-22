@@ -8,7 +8,7 @@
 import React, { useCallback, useState, useEffect, useMemo, useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiButtonEmpty, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { i18n } from '@kbn/i18n';
 
 import { useConfirmForceInstall } from '../../../../../../../integrations/hooks';

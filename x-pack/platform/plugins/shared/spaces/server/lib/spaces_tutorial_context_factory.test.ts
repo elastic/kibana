@@ -6,9 +6,9 @@
  */
 
 import { httpServerMock } from '@kbn/core/server/mocks';
+import { asSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import { createSpacesTutorialContextFactory } from './spaces_tutorial_context_factory';
-import { DEFAULT_SPACE_ID } from '../../common/constants';
 import { spacesClientServiceMock } from '../spaces_client/spaces_client_service.mock';
 import { SpacesService } from '../spaces_service';
 import { spacesServiceMock } from '../spaces_service/spaces_service.mock';
@@ -22,7 +22,7 @@ describe('createSpacesTutorialContextFactory', () => {
   });
 
   it('should create context with the current space id for space my-space-id', async () => {
-    const spacesService = spacesServiceMock.createStartContract('my-space-id');
+    const spacesService = spacesServiceMock.createStartContract(asSpaceId('my-space-id'));
     const contextFactory = createSpacesTutorialContextFactory(() => spacesService);
 
     const request = httpServerMock.createKibanaRequest();

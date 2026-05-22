@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { withApmSpan } from '@kbn/apm-data-access-plugin/server/utils/with_apm_span';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { isEmpty } from 'lodash';
 import { isKibanaResponse } from '@kbn/core-http-server';
 import { MonitorConfigRepository } from './services/monitor_config_repository';

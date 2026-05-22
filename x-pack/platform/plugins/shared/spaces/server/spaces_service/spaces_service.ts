@@ -6,9 +6,9 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import type { Space } from '../../common';
-import { DEFAULT_SPACE_ID } from '../../common/constants';
 import { namespaceToSpaceId, spaceIdToNamespace } from '../lib/utils/namespace';
 import type { ISpacesClient, SpacesClientServiceStart } from '../spaces_client';
 

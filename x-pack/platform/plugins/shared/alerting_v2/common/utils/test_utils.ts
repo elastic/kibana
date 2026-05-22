@@ -6,7 +6,8 @@
  */
 
 import { of } from 'rxjs';
-import { DEFAULT_SPACE_ID, type Space } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { type Space } from '@kbn/spaces-plugin/common';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 

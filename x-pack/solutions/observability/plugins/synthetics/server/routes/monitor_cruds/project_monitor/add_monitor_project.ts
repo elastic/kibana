@@ -7,7 +7,7 @@
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import pMap from 'p-map';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import {
   legacySyntheticsMonitorTypeSingle,

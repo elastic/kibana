@@ -11,7 +11,7 @@ import { ResponseActionTypesEnum } from '../../../../common/api/detection_engine
 import { ALERT_RULE_NAME, ALERT_RULE_UUID, SPACE_IDS } from '@kbn/rule-data-utils';
 import { createMockEndpointAppContextService } from '../../../endpoint/mocks';
 import { responseActionsClientMock } from '../../../endpoint/services/actions/clients/mocks';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { Logger } from '@kbn/logging';
 describe('ScheduleNotificationResponseActions', () => {
   const getSignals = () => [

@@ -23,7 +23,7 @@ import type { AttachmentsSubClient } from '@kbn/cases-plugin/server/client/attac
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { ScriptsLibraryMock } from '../../scripts_library/mocks';
 import type { MemoryDumpActionRequestBody } from '../../../../../common/api/endpoint/actions/response_actions/memory_dump';
 import { getPackagePolicyInfoFromFleetKuery } from '../../../mocks/utils.mock';
