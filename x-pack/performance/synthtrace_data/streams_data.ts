@@ -819,6 +819,7 @@ export async function setupLargeWiredHierarchy(
 }
 
 const CHILD_STREAM = `${WIRED_ROOT_STREAM}.child1`;
+const CLASSIC_MAPPING_STREAM = 'logs-perf-classic-mapping';
 
 /** Skip heavy setup during performance TEST phase. */
 function shouldRunSetup(log: ToolingLog): boolean {
@@ -835,6 +836,14 @@ interface IngestConfig {
   processing: { steps: unknown[] };
   settings: Record<string, unknown>;
   wired: { fields: Record<string, unknown>; routing: unknown[] };
+  lifecycle: Record<string, unknown>;
+  failure_store: Record<string, unknown>;
+}
+
+interface ClassicIngestConfig {
+  processing: { steps: unknown[] };
+  settings: Record<string, unknown>;
+  classic: { field_overrides: Record<string, { type: string }> };
   lifecycle: Record<string, unknown>;
   failure_store: Record<string, unknown>;
 }
@@ -856,6 +865,34 @@ async function getAndUpdateIngestConfig(
   const config = response.data.ingest;
   const { updated_at: _updatedAt, ...processingWithoutTimestamp } = config.processing;
   config.processing = processingWithoutTimestamp as IngestConfig['processing'];
+
+  mutate(config);
+
+  await kibanaServer.request({
+    path: `/api/streams/${streamName}/_ingest`,
+    method: 'PUT',
+    headers: PUBLIC_API_HEADERS,
+    body: { ingest: config },
+  });
+}
+
+/** Classic-stream equivalent: GET ingest, mutate field_overrides, PUT back. */
+async function getAndUpdateClassicIngestConfig(
+  kibanaServer: KibanaServer,
+  streamName: string,
+  mutate: (config: ClassicIngestConfig) => void
+) {
+  const response = await kibanaServer.request<{
+    ingest: ClassicIngestConfig & { processing: { updated_at?: string } };
+  }>({
+    path: `/api/streams/${streamName}/_ingest`,
+    method: 'GET',
+    headers: PUBLIC_API_HEADERS,
+  });
+
+  const config = response.data.ingest;
+  const { updated_at: _updatedAt, ...processingWithoutTimestamp } = config.processing;
+  config.processing = processingWithoutTimestamp as ClassicIngestConfig['processing'];
 
   mutate(config);
 
@@ -1002,6 +1039,35 @@ export async function setupFieldMappingAtScale(kibanaServer: KibanaServer, log: 
   });
 
   log.info(`${FIELD_COUNT} fields mapped on ${CHILD_STREAM}`);
+}
+
+/**
+ * Setup for the classic-stream field mapping journey at scale.
+ * Creates one classic stream and sets 1,000 field_overrides via the public
+ * Streams API (the same path the schema editor uses).
+ */
+export async function setupClassicFieldMappingAtScale(kibanaServer: KibanaServer, log: ToolingLog) {
+  if (!shouldRunSetup(log)) return;
+
+  await enableStreams(kibanaServer, log);
+  await createSingleClassicStream(kibanaServer, CLASSIC_MAPPING_STREAM);
+
+  const FIELD_COUNT = 1000;
+  const FIELD_TYPES = ['keyword', 'long', 'double', 'boolean', 'ip', 'date'];
+
+  log.info(`Mapping ${FIELD_COUNT} field_overrides on ${CLASSIC_MAPPING_STREAM}...`);
+
+  const fields: Record<string, { type: string }> = {};
+  for (let i = 1; i <= FIELD_COUNT; i++) {
+    const type = FIELD_TYPES[(i - 1) % FIELD_TYPES.length];
+    fields[`attributes.perf_classic_schema_${String(i).padStart(4, '0')}`] = { type };
+  }
+
+  await getAndUpdateClassicIngestConfig(kibanaServer, CLASSIC_MAPPING_STREAM, (config) => {
+    config.classic.field_overrides = { ...config.classic.field_overrides, ...fields };
+  });
+
+  log.info(`${FIELD_COUNT} field_overrides set on ${CLASSIC_MAPPING_STREAM}`);
 }
 
 /** Setup for the retention journey at scale. */
