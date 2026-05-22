@@ -291,20 +291,22 @@ describe('Discover documents layout', () => {
         })
       );
 
-      toolkit.internalState.dispatch(
-        internalStateActions.setCascadedDocumentsState({
-          tabId,
-          cascadedDocumentsState: {
-            ...toolkit.getCurrentTab().cascadedDocumentsState,
-            columnsMeta: cascadedColumnsMeta,
-          },
-        })
-      );
-
       await mountComponent({
         fetchStatus: FetchStatus.COMPLETE,
         hits: esHitsMock,
         toolkit,
+      });
+
+      act(() => {
+        toolkit.internalState.dispatch(
+          internalStateActions.setCascadedDocumentsState({
+            tabId,
+            cascadedDocumentsState: {
+              ...toolkit.getCurrentTab().cascadedDocumentsState,
+              columnsMeta: cascadedColumnsMeta,
+            },
+          })
+        );
       });
 
       const discoverGridProps = discoverGridMock.mock.lastCall?.[0]!;
