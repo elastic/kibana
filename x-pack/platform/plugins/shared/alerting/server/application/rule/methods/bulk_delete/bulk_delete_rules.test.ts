@@ -793,4 +793,324 @@ describe('bulkDelete', () => {
       );
     });
   });
+
+  describe('change tracking', () => {
+    const createChangeTrackingService = () => ({
+      log: jest.fn().mockResolvedValue(undefined),
+      logBulk: jest.fn().mockResolvedValue(undefined),
+      getHistory: jest.fn().mockResolvedValue({ items: [], total: 0 }),
+    });
+
+    const setRuleType = (overrides: { trackChanges?: boolean } = {}) => {
+      ruleTypeRegistry.get.mockReturnValue({
+        id: 'myType',
+        name: 'Test',
+        actionGroups: [{ id: 'default', name: 'Default' }],
+        defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
+        isExportable: true,
+        recoveryActionGroup: RecoveredActionGroup,
+        async executor() {
+          return { state: {} };
+        },
+        category: 'test',
+        producer: 'alerts',
+        solution: 'stack' as const,
+        validate: { params: schema.any() },
+        validLegacyConsumers: [],
+        trackChanges: true,
+        ...overrides,
+      });
+    };
+
+    test('logs every successfully deleted rule in a single bulk call', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType();
+
+      await trackingClient.bulkDeleteRules({ filter: 'fake_filter' });
+
+      expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
+      expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({ objectId: 'id1' }),
+          expect.objectContaining({ objectId: 'id2' }),
+        ],
+        {
+          action: 'rule_delete',
+          spaceId: 'default',
+          data: { metadata: { bulkCount: 2 } },
+        }
+      );
+    });
+
+    test('captures the full pre-deletion attributes and references of each rule', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType();
+
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [enabledRuleForBulkOpsWithActions1, enabledRuleForBulkOpsWithActions2],
+      });
+      unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+        statuses: [
+          { id: 'id1', type: RULE_SAVED_OBJECT_TYPE, success: true },
+          { id: 'id2', type: RULE_SAVED_OBJECT_TYPE, success: true },
+        ],
+      });
+
+      await trackingClient.bulkDeleteRules({ filter: 'fake_filter' });
+
+      expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
+        [
+          {
+            // setGlobalDate pins Date.now() to mockedDateString.
+            timestamp: '2019-02-12T21:01:22.479Z',
+            objectId: enabledRuleForBulkOpsWithActions1.id,
+            objectType: RULE_SAVED_OBJECT_TYPE,
+            module: 'stack',
+            snapshot: {
+              attributes: enabledRuleForBulkOpsWithActions1.attributes,
+              references: enabledRuleForBulkOpsWithActions1.references,
+            },
+          },
+          {
+            timestamp: '2019-02-12T21:01:22.479Z',
+            objectId: enabledRuleForBulkOpsWithActions2.id,
+            objectType: RULE_SAVED_OBJECT_TYPE,
+            module: 'stack',
+            snapshot: {
+              attributes: enabledRuleForBulkOpsWithActions2.attributes,
+              references: enabledRuleForBulkOpsWithActions2.references,
+            },
+          },
+        ],
+        expect.any(Object)
+      );
+    });
+
+    test('stamps every change with the time captured immediately before the bulkDelete', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType();
+
+      const startTimeMs = Date.parse('2030-06-01T08:00:00.000Z');
+      const dateNowSpy = jest.spyOn(Date, 'now').mockReturnValue(startTimeMs);
+
+      try {
+        await trackingClient.bulkDeleteRules({ filter: 'fake_filter' });
+
+        expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
+        const [changes] = changeTrackingService.logBulk.mock.calls[0];
+        // All rules share the same operation timestamp.
+        expect(changes.map((c: { timestamp: string }) => c.timestamp)).toEqual([
+          '2030-06-01T08:00:00.000Z',
+          '2030-06-01T08:00:00.000Z',
+        ]);
+      } finally {
+        dateNowSpy.mockRestore();
+      }
+    });
+
+    test('only logs successfully deleted rules when bulk delete has partial failures', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType();
+
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [enabledRuleForBulkOps1, enabledRuleForBulkOps2, enabledRuleForBulkOps3],
+      });
+      unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+        statuses: [
+          { id: 'id1', type: RULE_SAVED_OBJECT_TYPE, success: true },
+          getBulkOperationStatusErrorResponse(500),
+          { id: 'id3', type: RULE_SAVED_OBJECT_TYPE, success: true },
+        ],
+      });
+
+      await trackingClient.bulkDeleteRules({ filter: 'fake_filter' });
+
+      expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
+      expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({ objectId: 'id1' }),
+          expect.objectContaining({ objectId: 'id3' }),
+        ],
+        expect.any(Object)
+      );
+    });
+
+    test('does not call logBulk when every delete fails (OCC retries exhausted)', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType();
+
+      // 4 = initial + RETRY_IF_CONFLICTS_ATTEMPTS retries; all return 409 conflicts.
+      unsecuredSavedObjectsClient.bulkDelete
+        .mockResolvedValueOnce({ statuses: [getBulkOperationStatusErrorResponse(409)] })
+        .mockResolvedValueOnce({ statuses: [getBulkOperationStatusErrorResponse(409)] })
+        .mockResolvedValueOnce({ statuses: [getBulkOperationStatusErrorResponse(409)] })
+        .mockResolvedValueOnce({ statuses: [getBulkOperationStatusErrorResponse(409)] });
+
+      encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
+        .fn()
+        .mockResolvedValueOnce({
+          close: jest.fn(),
+          find: function* asyncGenerator() {
+            yield { saved_objects: [enabledRuleForBulkOps2] };
+          },
+        })
+        .mockResolvedValueOnce({
+          close: jest.fn(),
+          find: function* asyncGenerator() {
+            yield { saved_objects: [enabledRuleForBulkOps2] };
+          },
+        })
+        .mockResolvedValueOnce({
+          close: jest.fn(),
+          find: function* asyncGenerator() {
+            yield { saved_objects: [enabledRuleForBulkOps2] };
+          },
+        })
+        .mockResolvedValueOnce({
+          close: jest.fn(),
+          find: function* asyncGenerator() {
+            yield { saved_objects: [enabledRuleForBulkOps2] };
+          },
+        });
+
+      await trackingClient.bulkDeleteRules({ ids: ['id2'] });
+
+      expect(changeTrackingService.logBulk).not.toHaveBeenCalled();
+    });
+
+    test('logs only the rules that succeed across OCC retry attempts', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType();
+
+      // First attempt: id1 succeeds, id2 fails with 409.
+      // Retry: id2 succeeds.
+      unsecuredSavedObjectsClient.bulkDelete
+        .mockResolvedValueOnce({
+          statuses: [
+            { id: 'id1', type: RULE_SAVED_OBJECT_TYPE, success: true },
+            getBulkOperationStatusErrorResponse(409),
+          ],
+        })
+        .mockResolvedValueOnce({
+          statuses: [{ id: 'id2', type: RULE_SAVED_OBJECT_TYPE, success: true }],
+        });
+
+      encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
+        .fn()
+        .mockResolvedValueOnce({
+          close: jest.fn(),
+          find: function* asyncGenerator() {
+            yield { saved_objects: [enabledRuleForBulkOps1, enabledRuleForBulkOps2] };
+          },
+        })
+        .mockResolvedValueOnce({
+          close: jest.fn(),
+          find: function* asyncGenerator() {
+            yield { saved_objects: [enabledRuleForBulkOps2] };
+          },
+        });
+
+      await trackingClient.bulkDeleteRules({ ids: ['id1', 'id2'] });
+
+      expect(changeTrackingService.logBulk).toHaveBeenNthCalledWith(
+        1,
+        [
+          expect.objectContaining({
+            objectId: 'id1',
+          }),
+        ],
+        expect.any(Object)
+      );
+
+      expect(changeTrackingService.logBulk).toHaveBeenNthCalledWith(
+        2,
+        [
+          expect.objectContaining({
+            objectId: 'id2',
+          }),
+        ],
+        expect.any(Object)
+      );
+    });
+
+    test('reports bulkCount as the original `find` total even when OCC retries shrink the batch', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType();
+
+      // Original operation targets 5 rules; bulkCount must reflect this even though
+      // each OCC pass operates on a smaller subset.
+      unsecuredSavedObjectsClient.find.mockResolvedValue({
+        aggregations: {
+          alertTypeId: {
+            buckets: [{ key: ['myType', 'myApp'], key_as_string: 'myType|myApp', doc_count: 5 }],
+          },
+        },
+        saved_objects: [],
+        per_page: 0,
+        page: 0,
+        total: 5,
+      });
+
+      // First pass: id1 succeeds, id2 fails with a 409 conflict.
+      // Retry pass: id2 succeeds.
+      unsecuredSavedObjectsClient.bulkDelete
+        .mockResolvedValueOnce({
+          statuses: [
+            { id: 'id1', type: RULE_SAVED_OBJECT_TYPE, success: true },
+            getBulkOperationStatusErrorResponse(409),
+          ],
+        })
+        .mockResolvedValueOnce({
+          statuses: [{ id: 'id2', type: RULE_SAVED_OBJECT_TYPE, success: true }],
+        });
+
+      encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
+        .fn()
+        .mockResolvedValueOnce({
+          close: jest.fn(),
+          find: function* asyncGenerator() {
+            yield { saved_objects: [enabledRuleForBulkOps1, enabledRuleForBulkOps2] };
+          },
+        })
+        .mockResolvedValueOnce({
+          close: jest.fn(),
+          find: function* asyncGenerator() {
+            yield { saved_objects: [enabledRuleForBulkOps2] };
+          },
+        });
+
+      await trackingClient.bulkDeleteRules({ ids: ['id1', 'id2'] });
+
+      // Both OCC passes log with bulkCount = 5 (the original `find` total),
+      // not the per-pass batch size (2 then 1).
+      expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(2);
+      for (const [, opts] of changeTrackingService.logBulk.mock.calls) {
+        expect(opts.data).toEqual({ metadata: { bulkCount: 5 } });
+      }
+    });
+
+    test('does not log when rule type opts out of tracking', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType({ trackChanges: false });
+
+      await trackingClient.bulkDeleteRules({ filter: 'fake_filter' });
+
+      expect(changeTrackingService.logBulk).not.toHaveBeenCalled();
+    });
+
+    test('does not log when no change tracking service is configured', async () => {
+      // Default rulesClient has no changeTrackingService; verify the call simply did not throw.
+      await rulesClient.bulkDeleteRules({ filter: 'fake_filter' });
+      expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalled();
+    });
+  });
 });

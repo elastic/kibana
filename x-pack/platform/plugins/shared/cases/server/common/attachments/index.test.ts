@@ -12,8 +12,11 @@ import {
   LEGACY_LENS_ATTACHMENT_TYPE,
   LENS_ATTACHMENT_TYPE,
 } from '../../../common/constants/attachments';
+import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { getAttachmentTypeFromAttributes, getAttachmentTypeTransformers } from '.';
 import { commentAttachmentTransformer } from './comment';
+import { alertAttachmentTransformer } from './alert';
+import { passThroughTransformer } from './base';
 import { externalReferenceAttachmentTransformer } from './external_reference';
 
 const owner = 'cases';
@@ -122,11 +125,46 @@ describe('common/attachments', () => {
       expect(transformer).toBe(externalReferenceAttachmentTransformer);
     });
 
-    it('returns pass-through transformer for other types', () => {
-      const transformer = getAttachmentTypeTransformers(AttachmentType.alert, owner);
-      expect(transformer).not.toBe(commentAttachmentTransformer);
+    it('returns alert transformer for legacy and unified alert types', () => {
+      const legacyAlertTransformer = getAttachmentTypeTransformers(AttachmentType.alert, owner);
+      expect(legacyAlertTransformer).toBe(alertAttachmentTransformer);
+
+      const unifiedAlertTransformer = getAttachmentTypeTransformers('stack.alert', owner);
+      expect(unifiedAlertTransformer).toBe(alertAttachmentTransformer);
+    });
+
+    it('returns event transformer for legacy and unified event types', () => {
+      const transformer = getAttachmentTypeTransformers(
+        AttachmentType.event,
+        SECURITY_SOLUTION_OWNER
+      );
       expect(transformer).not.toBe(externalReferenceAttachmentTransformer);
-      expect(transformer.isType({ type: AttachmentType.alert } as never)).toBe(false);
+      expect(
+        transformer.isType({
+          type: AttachmentType.event,
+          eventId: 'event-1',
+          index: 'index-1',
+          owner: SECURITY_SOLUTION_OWNER,
+        } as never)
+      ).toBe(true);
+
+      const unifiedEventTransformer = getAttachmentTypeTransformers(
+        'security.event',
+        SECURITY_SOLUTION_OWNER
+      );
+      expect(
+        unifiedEventTransformer.isType({
+          type: 'security.event',
+          attachmentId: 'event-1',
+          metadata: { index: 'index-1' },
+          owner: SECURITY_SOLUTION_OWNER,
+        } as never)
+      ).toBe(true);
+    });
+
+    it('returns pass-through transformer for unrecognized types', () => {
+      const transformer = getAttachmentTypeTransformers('unknown.type', owner);
+      expect(transformer).toBe(passThroughTransformer);
     });
 
     it('returns configured persistable state transformer for known visualization types', () => {

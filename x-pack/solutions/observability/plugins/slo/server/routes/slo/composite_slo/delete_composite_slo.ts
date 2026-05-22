@@ -8,7 +8,8 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { deleteCompositeSLOParamsSchema } from '@kbn/slo-schema';
 import { COMPOSITE_SUMMARY_INDEX_NAME } from '../../../../common/constants';
-import { DefaultCompositeSLORepository } from '../../../services/composite_slo_repository';
+import { buildCompositeSloSummaryDocId } from '../../../services/composites/composite_slo_summary_index';
+import { retryTransientEsErrors } from '../../../utils/retry';
 import { createSloServerRoute } from '../../create_slo_server_route';
 import { assertPlatinumLicense } from '../utils/assert_platinum_license';
 
@@ -19,12 +20,21 @@ export const deleteCompositeSummaryDoc = async (
   id: string,
   logger: Logger
 ): Promise<void> => {
+  const docId = buildCompositeSloSummaryDocId(spaceId, id);
   try {
-    await esClient.delete({ index: COMPOSITE_SUMMARY_INDEX_NAME, id: `${spaceId}:${id}` });
+    await retryTransientEsErrors(
+      () =>
+        esClient.delete({
+          index: COMPOSITE_SUMMARY_INDEX_NAME,
+          id: docId,
+          refresh: true,
+        }),
+      { logger }
+    );
   } catch (err) {
     // 404 means the summary doc was never written (e.g. task hasn't run yet) — not an error
     if (err?.statusCode !== 404) {
-      logger.error(`Failed to delete composite summary doc [${spaceId}:${id}]: ${err}`);
+      logger.debug(`Failed to delete composite summary doc [${docId}]: ${err}`);
     }
   }
 };
@@ -41,10 +51,12 @@ export const deleteCompositeSLORoute = createSloServerRoute({
   handler: async ({ response, params, logger, request, plugins, getScopedClients }) => {
     await assertPlatinumLicense(plugins);
 
-    const { soClient, scopedClusterClient, spaceId } = await getScopedClients({ request, logger });
-    const repository = new DefaultCompositeSLORepository(soClient, logger);
+    const { scopedClusterClient, compositeSloRepository, spaceId } = await getScopedClients({
+      request,
+      logger,
+    });
 
-    await repository.deleteById(params.path.id);
+    await compositeSloRepository.deleteById(params.path.id);
     await deleteCompositeSummaryDoc(
       scopedClusterClient.asCurrentUser,
       spaceId,

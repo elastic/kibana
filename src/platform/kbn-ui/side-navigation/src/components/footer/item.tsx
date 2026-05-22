@@ -18,7 +18,6 @@ import { BetaBadge } from '../beta_badge';
 import { NAVIGATION_SELECTOR_PREFIX, TOOLTIP_OFFSET } from '../../constants';
 import { focusMainContent } from '../../utils/focus_main_content';
 import { useHighContrastModeStyles } from '../../hooks/use_high_contrast_mode_styles';
-import { useTooltip } from '../../hooks/use_tooltip';
 import { NewItemIndicator } from '../new_item_indicator';
 
 export interface FooterItemProps extends Omit<EuiButtonIconProps, 'iconType'>, MenuItem {
@@ -43,7 +42,6 @@ export const FooterItem = forwardRef<HTMLAnchorElement, FooterItemProps>(
     ref: ForwardedRef<HTMLAnchorElement>
   ) => {
     const { euiTheme } = useEuiTheme();
-    const { tooltipRef, handleMouseOut } = useTooltip();
     const highContrastModeStyles = useHighContrastModeStyles();
 
     const handleFooterItemKeyDown = (e: KeyboardEvent) => {
@@ -125,9 +123,7 @@ export const FooterItem = forwardRef<HTMLAnchorElement, FooterItemProps>(
           }}
           content={tooltipContent}
           disableScreenReaderOutput
-          onMouseOut={handleMouseOut}
           position="right"
-          ref={tooltipRef}
           repositionOnScroll
           offset={TOOLTIP_OFFSET}
         >

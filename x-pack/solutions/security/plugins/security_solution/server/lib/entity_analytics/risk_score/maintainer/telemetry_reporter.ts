@@ -9,11 +9,11 @@ import type { AnalyticsServiceSetup } from '@kbn/core/server';
 import {
   RISK_SCORE_MAINTAINER_RUN_SUMMARY_EVENT,
   RISK_SCORE_MAINTAINER_STAGE_SUMMARY_EVENT,
+  type RiskScoreMaintainerStageSummaryEvent,
 } from '../../../telemetry/event_based/events';
 
 const ERROR_MESSAGE_MAX_LENGTH = 500;
 
-type MaintainerStatus = 'success' | 'error' | 'skipped' | 'aborted';
 type GlobalSkipReason = 'feature_disabled' | 'license_insufficient';
 type StageSkipReason = 'reset_to_zero_disabled' | 'lookup_empty' | 'resolution_disabled';
 export type MaintainerErrorKind =
@@ -35,6 +35,22 @@ interface GlobalSkipInput {
   idBasedRiskScoringEnabled: boolean;
 }
 
+type StageContextFields = 'namespace' | 'entityType' | 'idBasedRiskScoringEnabled';
+
+type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
+
+type LocalStageSummaryEvent<TStage extends RiskScoreMaintainerStageSummaryEvent['stage']> =
+  DistributiveOmit<
+    Extract<RiskScoreMaintainerStageSummaryEvent, { stage: TStage }>,
+    StageContextFields
+  >;
+
+type RunStageSummaryEvent = LocalStageSummaryEvent<
+  'phase1_base_scoring' | 'phase2_resolution_scoring' | 'reset_to_zero'
+>;
+
+type Phase0StageSummaryEvent = LocalStageSummaryEvent<'phase0_lookup_build'>;
+
 export const createRiskScoreMaintainerTelemetryReporter = ({
   telemetry,
 }: {
@@ -50,98 +66,29 @@ export const createRiskScoreMaintainerTelemetryReporter = ({
     const runStartedAtMs = Date.now();
     const getRunDurationMs = () => Date.now() - runStartedAtMs;
 
-    const reportStageSummary = ({
-      stage,
-      status,
-      durationMs,
-      skipReason,
-      errorKind,
-      pagesProcessed,
-      scoresWritten,
-      deferToPhase2Count,
-      notInStoreCount,
-      lookupDocsUpserted,
-      lookupDocsDeleted,
-      resetBatchLimitHit,
-    }: {
-      stage:
-        | 'phase1_base_scoring'
-        | 'phase1_lookup_sync'
-        | 'phase2_resolution_scoring'
-        | 'reset_to_zero';
-      status: MaintainerStatus;
-      durationMs: number;
-      skipReason?: StageSkipReason;
-      errorKind?: MaintainerErrorKind;
-      pagesProcessed?: number;
-      scoresWritten?: number;
-      deferToPhase2Count?: number;
-      notInStoreCount?: number;
-      lookupDocsUpserted?: number;
-      lookupDocsDeleted?: number;
-      resetBatchLimitHit?: boolean;
-    }) => {
+    const reportRunStageSummary = (input: RunStageSummaryEvent) => {
       reportEvent(RISK_SCORE_MAINTAINER_STAGE_SUMMARY_EVENT.eventType, {
         namespace: runContext.namespace,
         entityType: runContext.entityType,
-        stage,
-        status,
-        durationMs,
-        skipReason,
-        errorKind,
-        pagesProcessed,
-        scoresWritten,
-        deferToPhase2Count,
-        notInStoreCount,
-        lookupDocsUpserted,
-        lookupDocsDeleted,
-        resetBatchLimitHit,
         idBasedRiskScoringEnabled: runContext.idBasedRiskScoringEnabled,
+        ...input,
       });
     };
 
     const startBaseStage = () => {
       const stageStartedAtMs = Date.now();
       return {
-        success: (input: {
-          pagesProcessed: number;
-          scoresWritten: number;
-          deferToPhase2Count: number;
-          notInStoreCount: number;
-        }) =>
-          reportStageSummary({
+        success: (input: { pagesProcessed: number; scoresWritten: number }) =>
+          reportRunStageSummary({
             stage: 'phase1_base_scoring',
             status: 'success',
             durationMs: Date.now() - stageStartedAtMs,
             pagesProcessed: input.pagesProcessed,
             scoresWritten: input.scoresWritten,
-            deferToPhase2Count: input.deferToPhase2Count,
-            notInStoreCount: input.notInStoreCount,
           }),
         error: (input: { errorKind: MaintainerErrorKind }) =>
-          reportStageSummary({
+          reportRunStageSummary({
             stage: 'phase1_base_scoring',
-            status: 'error',
-            durationMs: Date.now() - stageStartedAtMs,
-            errorKind: input.errorKind,
-          }),
-      };
-    };
-
-    const startLookupSyncStage = () => {
-      const stageStartedAtMs = Date.now();
-      return {
-        success: (input: { lookupDocsUpserted: number; lookupDocsDeleted: number }) =>
-          reportStageSummary({
-            stage: 'phase1_lookup_sync',
-            status: 'success',
-            durationMs: Date.now() - stageStartedAtMs,
-            lookupDocsUpserted: input.lookupDocsUpserted,
-            lookupDocsDeleted: input.lookupDocsDeleted,
-          }),
-        error: (input: { errorKind: MaintainerErrorKind }) =>
-          reportStageSummary({
-            stage: 'phase1_lookup_sync',
             status: 'error',
             durationMs: Date.now() - stageStartedAtMs,
             errorKind: input.errorKind,
@@ -153,7 +100,7 @@ export const createRiskScoreMaintainerTelemetryReporter = ({
       const stageStartedAtMs = Date.now();
       return {
         success: (input: { pagesProcessed: number; scoresWritten: number }) =>
-          reportStageSummary({
+          reportRunStageSummary({
             stage: 'phase2_resolution_scoring',
             status: 'success',
             durationMs: Date.now() - stageStartedAtMs,
@@ -161,14 +108,14 @@ export const createRiskScoreMaintainerTelemetryReporter = ({
             scoresWritten: input.scoresWritten,
           }),
         error: (input: { errorKind: MaintainerErrorKind }) =>
-          reportStageSummary({
+          reportRunStageSummary({
             stage: 'phase2_resolution_scoring',
             status: 'error',
             durationMs: Date.now() - stageStartedAtMs,
             errorKind: input.errorKind,
           }),
         skipped: (skipReason: Exclude<StageSkipReason, 'reset_to_zero_disabled'>) =>
-          reportStageSummary({
+          reportRunStageSummary({
             stage: 'phase2_resolution_scoring',
             status: 'skipped',
             durationMs: Date.now() - stageStartedAtMs,
@@ -181,7 +128,7 @@ export const createRiskScoreMaintainerTelemetryReporter = ({
       const stageStartedAtMs = Date.now();
       return {
         success: (input: { scoresWritten: number; resetBatchLimitHit: boolean }) =>
-          reportStageSummary({
+          reportRunStageSummary({
             stage: 'reset_to_zero',
             status: 'success',
             durationMs: Date.now() - stageStartedAtMs,
@@ -189,14 +136,14 @@ export const createRiskScoreMaintainerTelemetryReporter = ({
             resetBatchLimitHit: input.resetBatchLimitHit,
           }),
         error: (input: { errorKind: MaintainerErrorKind }) =>
-          reportStageSummary({
+          reportRunStageSummary({
             stage: 'reset_to_zero',
             status: 'error',
             durationMs: Date.now() - stageStartedAtMs,
             errorKind: input.errorKind,
           }),
         skipped: () =>
-          reportStageSummary({
+          reportRunStageSummary({
             stage: 'reset_to_zero',
             status: 'skipped',
             durationMs: 0,
@@ -207,7 +154,6 @@ export const createRiskScoreMaintainerTelemetryReporter = ({
 
     return {
       startBaseStage,
-      startLookupSyncStage,
       startResolutionStage,
       startResetStage,
       errorSummary: (input: { errorKind: MaintainerErrorKind }) => {
@@ -222,10 +168,6 @@ export const createRiskScoreMaintainerTelemetryReporter = ({
           scoresWrittenResolution: 0,
           scoresWrittenResetToZero: 0,
           pagesProcessed: 0,
-          deferToPhase2Count: 0,
-          notInStoreCount: 0,
-          lookupDocsUpserted: 0,
-          lookupDocsDeleted: 0,
           lookupPrunedDocs: 0,
           idBasedRiskScoringEnabled: runContext.idBasedRiskScoringEnabled,
         });
@@ -237,10 +179,6 @@ export const createRiskScoreMaintainerTelemetryReporter = ({
         scoresWrittenResolution: number;
         scoresWrittenResetToZero: number;
         pagesProcessed: number;
-        deferToPhase2Count: number;
-        notInStoreCount: number;
-        lookupDocsUpserted: number;
-        lookupDocsDeleted: number;
         lookupPrunedDocs: number;
       }) => {
         reportEvent(RISK_SCORE_MAINTAINER_RUN_SUMMARY_EVENT.eventType, {
@@ -257,10 +195,6 @@ export const createRiskScoreMaintainerTelemetryReporter = ({
           scoresWrittenResolution: input.scoresWrittenResolution,
           scoresWrittenResetToZero: input.scoresWrittenResetToZero,
           pagesProcessed: input.pagesProcessed,
-          deferToPhase2Count: input.deferToPhase2Count,
-          notInStoreCount: input.notInStoreCount,
-          lookupDocsUpserted: input.lookupDocsUpserted,
-          lookupDocsDeleted: input.lookupDocsDeleted,
           lookupPrunedDocs: input.lookupPrunedDocs,
           idBasedRiskScoringEnabled: runContext.idBasedRiskScoringEnabled,
         });
@@ -269,6 +203,50 @@ export const createRiskScoreMaintainerTelemetryReporter = ({
   };
 
   return {
+    startPhase0LookupBuildStage: ({
+      namespace,
+      idBasedRiskScoringEnabled,
+    }: {
+      namespace: string;
+      idBasedRiskScoringEnabled: boolean;
+    }) => {
+      const stageStartedAtMs = Date.now();
+      const reportPhase0 = (input: Phase0StageSummaryEvent) => {
+        reportEvent(RISK_SCORE_MAINTAINER_STAGE_SUMMARY_EVENT.eventType, {
+          namespace,
+          entityType: 'all',
+          idBasedRiskScoringEnabled,
+          ...input,
+        });
+      };
+
+      return {
+        success: (input: {
+          entitiesIterated: number;
+          lookupRowsWritten: number;
+          pagesProcessed?: number;
+          bulkBatches?: number;
+          lookupRowsFailed?: number;
+        }) =>
+          reportPhase0({
+            stage: 'phase0_lookup_build',
+            status: 'success',
+            durationMs: Date.now() - stageStartedAtMs,
+            entitiesIterated: input.entitiesIterated,
+            lookupRowsWritten: input.lookupRowsWritten,
+            pagesProcessed: input.pagesProcessed,
+            bulkBatches: input.bulkBatches,
+            lookupRowsFailed: input.lookupRowsFailed,
+          }),
+        error: (input: { errorKind: MaintainerErrorKind }) =>
+          reportPhase0({
+            stage: 'phase0_lookup_build',
+            status: 'error',
+            durationMs: Date.now() - stageStartedAtMs,
+            errorKind: input.errorKind,
+          }),
+      };
+    },
     reportGlobalSkipIfChanged: ({
       namespace,
       skipReason,
@@ -289,10 +267,6 @@ export const createRiskScoreMaintainerTelemetryReporter = ({
         scoresWrittenResolution: 0,
         scoresWrittenResetToZero: 0,
         pagesProcessed: 0,
-        deferToPhase2Count: 0,
-        notInStoreCount: 0,
-        lookupDocsUpserted: 0,
-        lookupDocsDeleted: 0,
         lookupPrunedDocs: 0,
         idBasedRiskScoringEnabled,
       });

@@ -9,7 +9,7 @@
 
 import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { JSONSchema7 } from 'json-schema';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -19,11 +19,15 @@ import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json
 import { useWorkflowsApi, useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { ResumeExecutionModal } from './resume_execution_modal';
 import { generateSampleFromJsonSchema } from '../../../../common/lib/generate_sample_from_json_schema';
+import { useTelemetry } from '../../../hooks/use_telemetry';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import type { ContextOverrideData } from '../../../shared/utils/build_step_context_override/build_step_context_override';
 
 interface ResumeExecutionButtonProps {
   executionId: string;
+  workflowId?: string;
+  /** Step execution `startedAt` (ISO) for telemetry: approximate human-wait duration vs time in modal */
+  stepStartedAt?: string;
   resumeMessage?: string;
   resumeSchema?: JsonModelSchemaType;
   /** When true, opens the input modal immediately on mount */
@@ -34,6 +38,8 @@ interface ResumeExecutionButtonProps {
 
 export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
   executionId,
+  workflowId,
+  stepStartedAt,
   resumeMessage,
   resumeSchema,
   autoOpen = false,
@@ -43,13 +49,18 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
   const workflowsApi = useWorkflowsApi();
   const { canExecuteWorkflow } = useWorkflowsCapabilities();
   const { clearResumeParam } = useWorkflowUrlState();
+  const telemetry = useTelemetry();
   const [isModalOpen, setIsModalOpen] = useState(autoOpen);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const modalOpenedAtRef = useRef<number | null>(null);
 
   // Honour autoOpen changes (e.g. when navigated to with ?resume=true)
   useEffect(() => {
-    if (autoOpen) setIsModalOpen(true);
+    if (autoOpen) {
+      modalOpenedAtRef.current = Date.now();
+      setIsModalOpen(true);
+    }
   }, [autoOpen]);
 
   useEffect(() => {
@@ -74,7 +85,11 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
     }
   }, [resumeSchema]);
 
-  const openModal = useCallback(() => setIsModalOpen(true), []);
+  const openModal = useCallback(() => {
+    modalOpenedAtRef.current = Date.now();
+    setIsModalOpen(true);
+  }, []);
+
   const closeModal = useCallback(() => {
     clearResumeParam();
     setIsModalOpen(false);
@@ -83,6 +98,13 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
   const handleSubmit = useCallback(
     async ({ stepInputs }: { stepInputs: Record<string, unknown> }) => {
       setIsSubmitting(true);
+      const submittedAt = Date.now();
+      const timeInModalMs =
+        modalOpenedAtRef.current != null ? submittedAt - modalOpenedAtRef.current : undefined;
+      const stepStartMs = stepStartedAt != null ? Date.parse(stepStartedAt) : NaN;
+      const timeSinceStepStartedMs = !Number.isNaN(stepStartMs)
+        ? Math.max(0, submittedAt - stepStartMs)
+        : undefined;
       try {
         await workflowsApi.resumeExecution(executionId, { input: stepInputs });
         notifications?.toasts.addSuccess({
@@ -91,20 +113,34 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
             { defaultMessage: 'Workflow resumed' }
           ),
         });
+        telemetry.reportWorkflowRunResumed({
+          workflowExecutionId: executionId,
+          workflowId,
+          timeInModalMs,
+          timeSinceStepStartedMs,
+        });
         setIsSubmitted(true);
         closeModal();
       } catch (error) {
-        notifications?.toasts.addError?.(error, {
+        const errorObj = error instanceof Error ? error : new Error(String(error));
+        notifications?.toasts.addError?.(errorObj, {
           title: i18n.translate(
             'workflowsManagement.executionDetail.resumeButton.errorNotificationTitle',
             { defaultMessage: 'Error resuming workflow' }
           ),
         });
+        telemetry.reportWorkflowRunResumed({
+          workflowExecutionId: executionId,
+          workflowId,
+          timeInModalMs,
+          timeSinceStepStartedMs,
+          error: errorObj,
+        });
       } finally {
         setIsSubmitting(false);
       }
     },
-    [executionId, workflowsApi, notifications, closeModal]
+    [executionId, workflowId, stepStartedAt, workflowsApi, notifications, telemetry, closeModal]
   );
 
   return (

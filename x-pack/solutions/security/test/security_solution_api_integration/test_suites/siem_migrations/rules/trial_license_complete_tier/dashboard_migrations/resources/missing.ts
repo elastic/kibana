@@ -63,7 +63,7 @@ export default ({ getService }: FtrProviderContext) => {
         migrationId,
       });
 
-      expect(missingResourcesResponse.body).toMatchObject([
+      const expectedMissingResources = [
         { name: 'system_metric_search', type: 'macro' },
         { name: 'macro_one(2)', type: 'macro' },
         { name: 'macro_two(1)', type: 'macro' },
@@ -71,7 +71,17 @@ export default ({ getService }: FtrProviderContext) => {
         { name: 'my_lookup_table', type: 'lookup' },
         { name: 'other_lookup_list', type: 'lookup' },
         { name: 'third', type: 'lookup' },
-      ]);
+      ];
+
+      // The endpoint does not guarantee a stable order, so verify set
+      // membership and exact cardinality independently rather than relying
+      // on positional matching.
+      expect(missingResourcesResponse.body).toEqual(
+        expect.arrayContaining(
+          expectedMissingResources.map((resource) => expect.objectContaining(resource))
+        )
+      );
+      expect(missingResourcesResponse.body).toHaveLength(expectedMissingResources.length);
     });
   });
 };

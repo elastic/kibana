@@ -201,15 +201,17 @@ describe('createRuleAttachmentType', () => {
 
   describe('format', () => {
     const buildAttachment = (
-      data: RuleAttachmentData
+      data: RuleAttachmentData,
+      origin?: string
     ): Attachment<typeof RULE_ATTACHMENT_TYPE, RuleAttachmentData> => ({
       id: 'attach-1',
       type: RULE_ATTACHMENT_TYPE,
       data,
+      ...(origin ? { origin } : {}),
     });
 
-    const formatValue = async (data: RuleAttachmentData): Promise<string> => {
-      const formatted = await definition.format(buildAttachment(data), {
+    const formatValue = async (data: RuleAttachmentData, origin?: string): Promise<string> => {
+      const formatted = await definition.format(buildAttachment(data, origin), {
         request: {} as KibanaRequest,
         spaceId: 'default',
       });
@@ -221,7 +223,7 @@ describe('createRuleAttachmentType', () => {
     };
 
     it('reports enabled saved rule', async () => {
-      const value = await formatValue(baseRuleData);
+      const value = await formatValue(baseRuleData, 'rule-1');
       expect(value).toContain('Status: enabled');
       expect(value).toContain('"High CPU"');
       expect(value).toContain('Schedule: every 5m');
@@ -231,21 +233,22 @@ describe('createRuleAttachmentType', () => {
     });
 
     it('reports disabled saved rule', async () => {
-      const value = await formatValue({ ...baseRuleData, enabled: false });
+      const value = await formatValue({ ...baseRuleData, enabled: false }, 'rule-1');
       expect(value).toContain('Status: disabled');
     });
 
-    it('reports proposed rule when id is missing', async () => {
-      const proposed: RuleAttachmentData = {
-        ...baseRuleData,
-        id: undefined,
-        enabled: undefined,
-        createdBy: undefined,
-        createdAt: undefined,
-        updatedBy: undefined,
-        updatedAt: undefined,
-      };
-      const value = await formatValue(proposed);
+    it('includes Rule ID when origin is set', async () => {
+      const value = await formatValue(baseRuleData, 'rule-1');
+      expect(value).toContain('Rule ID: rule-1');
+    });
+
+    it('omits Rule ID when origin is not set', async () => {
+      const value = await formatValue(baseRuleData);
+      expect(value).not.toContain('Rule ID:');
+    });
+
+    it('reports proposed rule when origin is not set', async () => {
+      const value = await formatValue(baseRuleData);
       expect(value).toContain('Status: proposed (not yet saved)');
     });
 

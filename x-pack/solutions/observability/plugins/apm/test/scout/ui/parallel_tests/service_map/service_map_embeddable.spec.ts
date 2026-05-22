@@ -61,7 +61,13 @@ test.describe(
         await pageObjects.dashboard.openAddPanelFlyout();
       });
 
-      await test.step('add Service map panel with filters', async () => {
+      await test.step('add Service map panel without filters', async () => {
+        // Add the panel first with no filters. The Service Map embeddable
+        // factory always initializes panels with a custom
+        // `time_range: { from: 'now-15m', to: 'now' }` and that range cannot
+        // be configured from the editor flyout, so we need the panel to
+        // exist before we can widen its time range via the Customize panel
+        // flow below.
         await expect(page.getByRole('heading', { name: 'Add to Dashboard' })).toBeVisible();
         const serviceMapMenuItem = page.getByRole('menuitem', {
           name: 'Service map',
@@ -73,6 +79,41 @@ test.describe(
         await expect(
           page.getByRole('heading', { name: 'Create service map panel', level: 2 })
         ).toBeVisible();
+        await page.testSubj.locator('apmServiceMapEditorSaveButton').click();
+      });
+
+      await test.step('verify panel was added with the default custom time range', async () => {
+        await pageObjects.dashboard.waitForPanelsToLoad(1);
+        expect(await pageObjects.dashboard.getPanelCount()).toBe(1);
+        await expect(page.testSubj.locator('apmServiceMapEmbeddable')).toBeVisible();
+        await pageObjects.dashboard.expectTimeRangeBadgeExists();
+      });
+
+      await test.step('widen the panel custom time range to last 24 hours', async () => {
+        // Bump the panel's custom time range from the default 15 minutes to
+        // 24 hours so it (and the suggestions endpoint when we re-open the
+        // editor below) covers the synth window even with significant delay
+        // between global setup and this test running.
+        await pageObjects.dashboard.openCustomizePanel();
+        await pageObjects.dashboard.enableCustomTimeRange();
+        await page.testSubj
+          .locator('customizePanelTimeRangeDatePicker > superDatePickerToggleQuickMenuButton')
+          .click();
+        await pageObjects.dashboard.clickCommonlyUsedTimeRange('Last_24 hours');
+        await pageObjects.dashboard.saveCustomizePanel();
+        await pageObjects.dashboard.expectTimeRangeBadgeExists();
+      });
+
+      await test.step('edit Service map panel and apply filters', async () => {
+        // Re-open the editor in edit mode. The factory passes the panel's
+        // current `time_range` (now 24 hours) into the suggestions endpoint
+        // so the service / environment combo boxes can resolve
+        // `service-map-test` reliably.
+        await pageObjects.dashboard.clickPanelAction('embeddablePanelAction-editPanel');
+        await expect(
+          page.getByRole('heading', { name: 'Edit service map', level: 2 })
+        ).toBeVisible();
+
         // wait for combobox `isLoading` to finish
         // before interaction (see `euiLoadingSpinner` + `state: 'hidden'`).
         const serviceNameCombo = page.testSubj.locator('apmServiceMapEditorServiceNameComboBox');
@@ -114,9 +155,6 @@ test.describe(
       });
 
       await test.step('verify embeddable panel renders service map with connected nodes', async () => {
-        await pageObjects.dashboard.waitForPanelsToLoad(1);
-        expect(await pageObjects.dashboard.getPanelCount()).toBe(1);
-        await expect(page.testSubj.locator('apmServiceMapEmbeddable')).toBeVisible();
         await expect(
           page.testSubj.locator(
             `serviceMapNodeContextHighlightFrame > serviceMapNode-service-${SERVICE_MAP_TEST_SERVICE}`

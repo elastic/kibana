@@ -31,8 +31,9 @@ import {
   LENS_LAYER_TYPES as layerTypes,
   LENS_METRIC_ID,
   LENS_METRIC_GROUP_ID,
+  LENS_METRIC_DEFAULT_STYLE_TEMPLATE_CONFIG,
 } from '@kbn/lens-common';
-import { getUpdatedMetricState as getUpdatedMetricStateV1 } from '../../../common/content_management/v1/transforms/metric';
+import { convertToRuntimeState } from './runtime_state';
 import { isNumericFieldForDatatable } from '../../../common/expressions/impl/datatable/utils';
 import { getSuggestions } from './suggestions';
 import {
@@ -80,18 +81,6 @@ export const metricLabel = i18n.translate('xpack.lens.metric.label', {
   defaultMessage: 'Metric',
 });
 
-type MetricVisualizationStateWithLegacyTitleWeight = MetricVisualizationState & {
-  titleWeight?: unknown;
-};
-
-const removeLegacyTitleWeight = (
-  state: MetricVisualizationStateWithLegacyTitleWeight
-): MetricVisualizationState => {
-  const { titleWeight: _titleWeight, ...updatedState } = state;
-
-  return updatedState;
-};
-
 const getMetricLayerConfiguration = (
   paletteService: PaletteRegistry,
   theme: ThemeServiceStart,
@@ -111,6 +100,12 @@ const getMetricLayerConfiguration = (
   );
 
   const getPrimaryAccessorDisplayConfig = (): Partial<AccessorConfig> => {
+    if (props.state.applyColorTo === undefined) {
+      return {
+        triggerIconType: 'none',
+      };
+    }
+
     const hasDynamicColoring = Boolean(isPrimaryMetricNumeric && props.state.palette);
 
     if (hasDynamicColoring) {
@@ -463,13 +458,18 @@ export const getMetricVisualization = ({
   getSuggestions,
 
   initialize(addNewLayer, state, mainPalette) {
-    if (state) return removeLegacyTitleWeight(getUpdatedMetricStateV1(state));
+    if (state) return convertToRuntimeState(state);
 
     return {
       layerId: addNewLayer(),
       layerType: layerTypes.DATA,
+      ...LENS_METRIC_DEFAULT_STYLE_TEMPLATE_CONFIG,
       palette: mainPalette?.type === 'legacyPalette' ? mainPalette.value : undefined,
     };
+  },
+
+  convertToRuntimeState(state) {
+    return convertToRuntimeState(state);
   },
 
   triggers: [VIS_EVENT_TO_TRIGGER.filter],

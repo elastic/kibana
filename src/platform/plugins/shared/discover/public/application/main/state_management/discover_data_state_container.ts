@@ -363,6 +363,7 @@ export function getDataStateContainer({
             injectCurrentTab(internalStateActions.setCascadedDocumentsState)({
               cascadedDocumentsState: {
                 ...getCurrentTab().cascadedDocumentsState,
+                columnsMeta: {},
                 cascadedDocumentsMap: {},
               },
             })

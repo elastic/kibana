@@ -34,7 +34,11 @@ describe('workflowExecutionLoop', () => {
     },
     workflowExecutionState: {
       updateWorkflowExecution: jest.fn(),
+    },
+    stepIoService: {
       flush: jest.fn().mockResolvedValue(undefined),
+      // Workflow-end safety release added with the deferred-release pattern.
+      releaseTransientlyRehydratedOutputs: jest.fn(),
     },
     workflowLogger: {
       flushEvents: jest.fn().mockResolvedValue(undefined),
@@ -59,7 +63,9 @@ describe('workflowExecutionLoop', () => {
     expect(persistenceLoop).toHaveBeenCalled();
     expect(flushState).toHaveBeenCalled();
     expect(params.workflowRuntime.saveState).toHaveBeenCalled();
-    expect(params.workflowExecutionState.flush).toHaveBeenCalled();
+    expect(params.stepIoService.flush).toHaveBeenCalled();
+    // Workflow-end cleanup for transient rehydrations (deferred-release pattern).
+    expect(params.stepIoService.releaseTransientlyRehydratedOutputs).toHaveBeenCalled();
     expect(params.workflowLogger.flushEvents).toHaveBeenCalled();
   });
 

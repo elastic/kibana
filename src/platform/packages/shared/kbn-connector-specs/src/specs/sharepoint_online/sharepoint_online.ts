@@ -66,7 +66,7 @@ export const SharepointOnline: ConnectorSpec = {
                 'core.kibanaConnectorSpecs.sharepointOnline.auth.oauth.tokenUrl.helpText',
                 {
                   defaultMessage:
-                    "Replace ''{tenantId}'' with your Azure AD tenant ID. For example: https://login.microsoftonline.com/your-tenant-id/oauth2/v2.0/token",
+                    "Replace '{tenantId}' with your Azure AD tenant ID. For example: https://login.microsoftonline.com/your-tenant-id/oauth2/v2.0/token",
                   values: { tenantId: '{tenant-id}' },
                 }
               ),

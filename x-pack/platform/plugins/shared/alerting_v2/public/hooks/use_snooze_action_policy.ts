@@ -19,8 +19,9 @@ export const useSnoozeActionPolicy = () => {
 
   return useMutation<ActionPolicyResponse, Error, { id: string; snoozedUntil: string }>({
     mutationFn: ({ id, snoozedUntil }) => actionPoliciesApi.snoozeActionPolicy(id, snoozedUntil),
-    onSuccess: () => {
+    onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: actionPolicyKeys.lists(), exact: false });
+      queryClient.invalidateQueries({ queryKey: actionPolicyKeys.detail(id) });
       toasts.addSuccess(
         i18n.translate('xpack.alertingV2.actionPolicy.snoozeSuccess', {
           defaultMessage: 'Action policy snoozed',
