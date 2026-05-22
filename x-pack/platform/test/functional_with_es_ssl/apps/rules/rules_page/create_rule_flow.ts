@@ -27,7 +27,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     };
 
     before(async () => {
-      await pageObjects.common.navigateToApp('management', { path: 'insightsAndAlerting/triggersActions' });
+      await pageObjects.common.navigateToApp('management', {
+        path: 'insightsAndAlerting/triggersActions',
+      });
       await pageObjects.header.waitUntilLoadingHasFinished();
     });
 
@@ -81,7 +83,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.header.waitUntilLoadingHasFinished();
 
       // Navigate back to rules page to verify the rule appears
-      await pageObjects.common.navigateToApp('management', { path: 'insightsAndAlerting/triggersActions' });
+      await pageObjects.common.navigateToApp('management', {
+        path: 'insightsAndAlerting/triggersActions',
+      });
       await pageObjects.header.waitUntilLoadingHasFinished();
 
       // Search for the created rule
@@ -102,7 +106,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('return path is set correctly after rule creation', async () => {
       // Start on the rules page
-      await pageObjects.common.navigateToApp('management', { path: 'insightsAndAlerting/triggersActions' });
+      await pageObjects.common.navigateToApp('management', {
+        path: 'insightsAndAlerting/triggersActions',
+      });
       await pageObjects.header.waitUntilLoadingHasFinished();
 
       // Create a new rule

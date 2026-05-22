@@ -61,7 +61,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     describe('Edit from rules list', () => {
       it('navigates to edit page when clicking edit button', async () => {
         // Navigate to rules page
-        await pageObjects.common.navigateToApp('management', { path: 'insightsAndAlerting/triggersActions' });
+        await pageObjects.common.navigateToApp('management', {
+          path: 'insightsAndAlerting/triggersActions',
+        });
         await pageObjects.header.waitUntilLoadingHasFinished();
 
         // Search for our test rule
@@ -158,7 +160,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('returns to rules list after clicking cancel', async () => {
         // Navigate to rules page
-        await pageObjects.common.navigateToApp('management', { path: 'insightsAndAlerting/triggersActions' });
+        await pageObjects.common.navigateToApp('management', {
+          path: 'insightsAndAlerting/triggersActions',
+        });
         await pageObjects.header.waitUntilLoadingHasFinished();
 
         // Search for our test rule
