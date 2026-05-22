@@ -5,29 +5,17 @@
  * 2.0.
  */
 
-import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
-import { coreMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import {
+  buildMockContext,
+  createMockSmlService,
+  createTestCoreSetup,
+  createTestCoreSetupNoSpaces,
+  httpServerMock,
+  httpServiceMock,
+} from './test_helpers';
 import type { SmlSearchResult } from '../services/sml/types';
 import { registerSearchRoute } from './search';
-
-const createMockSmlService = () => ({
-  search: jest.fn(),
-  checkItemsAccess: jest.fn(),
-  indexAttachment: jest.fn(),
-  getDocuments: jest.fn(),
-  getTypeDefinition: jest.fn(),
-  listTypeDefinitions: jest.fn(),
-  getCrawler: jest.fn(),
-});
-
-const createMockUiSettingsClient = (enabled = true) => ({
-  get: jest.fn().mockImplementation(async (key: string) => {
-    if (key === AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID) return enabled;
-    return undefined;
-  }),
-});
 
 describe('registerSearchRoute', () => {
   let router: ReturnType<typeof httpServiceMock.createRouter>;
@@ -39,16 +27,9 @@ describe('registerSearchRoute', () => {
     router = httpServiceMock.createRouter();
     mockSmlService = createMockSmlService();
 
-    const coreSetup = coreMock.createSetup();
-    (coreSetup.getStartServices as jest.Mock).mockResolvedValue([
-      {},
-      { spaces: { spacesService: { getSpaceId: jest.fn().mockReturnValue('test-space') } } },
-      {},
-    ]);
-
     registerSearchRoute({
       router: router as any,
-      coreSetup: coreSetup as any,
+      coreSetup: createTestCoreSetup() as any,
       logger,
       getSmlService: () => mockSmlService as any,
     });
@@ -60,14 +41,7 @@ describe('registerSearchRoute', () => {
   const callHandler = async (body: Record<string, unknown>, uiSettingsEnabled = true) => {
     const request = httpServerMock.createKibanaRequest({ body });
     const response = httpServerMock.createResponseFactory();
-    const mockUiSettings = createMockUiSettingsClient(uiSettingsEnabled);
-    const ctx = {
-      core: Promise.resolve({
-        uiSettings: { client: mockUiSettings },
-        elasticsearch: { client: { asInternalUser: {}, asCurrentUser: {} } },
-      }),
-    };
-    await handler(ctx, request, response);
+    await handler(buildMockContext(uiSettingsEnabled), request, response);
     return response;
   };
 
@@ -143,13 +117,10 @@ describe('registerSearchRoute', () => {
   });
 
   it('falls back to default space when spaces plugin is unavailable', async () => {
-    const coreSetup = coreMock.createSetup();
-    (coreSetup.getStartServices as jest.Mock).mockResolvedValue([{}, {}, {}]);
-
     const localRouter = httpServiceMock.createRouter();
     registerSearchRoute({
       router: localRouter as any,
-      coreSetup: coreSetup as any,
+      coreSetup: createTestCoreSetupNoSpaces() as any,
       logger,
       getSmlService: () => mockSmlService as any,
     });
@@ -157,15 +128,9 @@ describe('registerSearchRoute', () => {
     const [, localHandler] = localRouter.post.mock.calls[0];
     const request = httpServerMock.createKibanaRequest({ body: { query: 'test' } });
     const response = httpServerMock.createResponseFactory();
-    const ctx = {
-      core: Promise.resolve({
-        uiSettings: { client: createMockUiSettingsClient(true) },
-        elasticsearch: { client: {} },
-      }),
-    };
 
     mockSmlService.search.mockResolvedValue({ results: [], total: 0 });
-    await localHandler(ctx, request, response);
+    await localHandler(buildMockContext(true), request, response);
     expect(mockSmlService.search).toHaveBeenCalledWith(
       expect.objectContaining({ spaceId: 'default' })
     );
