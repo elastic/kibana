@@ -25,15 +25,6 @@ export type DetectionDataStreamClient = IDataStreamClient<
 export interface DetectionsSearchOptions extends CommonSearchOptions {
   rule_uuid?: string[];
   rule_name?: string;
-  stream_name?: string;
-  silent?: boolean;
-  superseded?: boolean;
-  superseded_at?: {
-    /** ISO 8601 formatted datetime */
-    from?: string;
-    /** ISO 8601 formatted datetime */
-    to?: string;
-  };
 }
 
 const andWhere = (
@@ -60,43 +51,15 @@ export class DetectionClient {
   }
 
   async findLatest(options: DetectionsSearchOptions = {}): Promise<{ hits: Detection[] }> {
-    const ruleUuidLiterals = options.rule_uuid?.map((ruleUuid) => esql.str(ruleUuid));
     let where: LatestSourceWhereCondition | undefined;
 
+    const ruleUuidLiterals = options.rule_uuid?.map((ruleUuid) => esql.str(ruleUuid));
     if (ruleUuidLiterals?.length) {
       where = andWhere(where, esql.exp`${esql.col('rule_uuid')} IN (${ruleUuidLiterals})`);
     }
 
     if (options.rule_name) {
       where = andWhere(where, esql.exp`${esql.col('rule_name')} == ${esql.str(options.rule_name)}`);
-    }
-
-    if (options.stream_name) {
-      where = andWhere(where, esql.exp`${esql.col('stream')} == ${esql.str(options.stream_name)}`);
-    }
-
-    if (options.silent !== undefined) {
-      where = andWhere(where, esql.exp`${esql.col('silent')} == ${options.silent}`);
-    }
-
-    if (options.superseded !== undefined) {
-      where = andWhere(where, esql.exp`${esql.col('superseded')} == ${options.superseded}`);
-    }
-
-    if (options.superseded_at?.from) {
-      where = andWhere(
-        where,
-        esql.exp`${esql.col('superseded_at')} >= TO_DATETIME(${esql.str(
-          options.superseded_at.from
-        )})`
-      );
-    }
-
-    if (options.superseded_at?.to) {
-      where = andWhere(
-        where,
-        esql.exp`${esql.col('superseded_at')} <= TO_DATETIME(${esql.str(options.superseded_at.to)})`
-      );
     }
 
     return runLatestSourceEsqlQuery<Detection>({

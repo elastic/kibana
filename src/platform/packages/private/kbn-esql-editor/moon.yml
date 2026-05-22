@@ -48,6 +48,7 @@ dependsOn:
   - '@kbn/esql-resource-browser'
   - '@kbn/data-views-plugin'
   - '@kbn/cps'
+  - '@kbn/es-types'
 tags:
   - shared-browser
   - package

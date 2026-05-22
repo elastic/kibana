@@ -10,6 +10,18 @@ import { expect } from '@kbn/scout/ui';
 import { test, testData } from '../fixtures';
 
 test.describe('Ingest pipelines Manage Processors', { tag: tags.stateful.classic }, () => {
+  test.beforeAll(async ({ esClient, log }) => {
+    for (const databaseId of [testData.MAXMIND_DATABASE_ID, testData.IPINFO_DATABASE_ID]) {
+      try {
+        await esClient.ingest.deleteGeoipDatabase({ id: databaseId });
+      } catch (error) {
+        log.debug(
+          `GeoIP database pre-cleanup skipped for ${databaseId}: ${(error as Error).message}`
+        );
+      }
+    }
+  });
+
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsManageProcessorsUser();
     await pageObjects.ingestPipelines.goto();

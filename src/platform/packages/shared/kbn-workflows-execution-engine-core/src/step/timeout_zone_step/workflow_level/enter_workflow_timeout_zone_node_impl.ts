@@ -18,6 +18,7 @@ import type { IStepExecutionRuntime } from '../../../collaborators/step_executio
 import type { IStepExecutionRuntimeFactory } from '../../../collaborators/step_execution_runtime_factory';
 import type { IWorkflowExecutionRuntimeManager } from '../../../collaborators/workflow_execution_runtime_manager';
 
+/** Workflow-level timeout zone; idle resume is scheduled from handleExecutionDelay, not here. */
 export class EnterWorkflowTimeoutZoneNodeImpl implements INodeImplementation, IMonitorableNode {
   constructor(
     private node: EnterTimeoutZoneNode,
@@ -61,7 +62,7 @@ export class EnterWorkflowTimeoutZoneNodeImpl implements INodeImplementation, IM
         }
       }
 
-      // Errase error because otherwise execution will be marked "failed"
+      // Clear error so the run is not left in a generic failed state after timeout handling
       this.wfExecutionRuntimeManager.setWorkflowError(undefined);
       this.wfExecutionRuntimeManager.markWorkflowTimeouted();
     }
