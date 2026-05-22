@@ -76,15 +76,7 @@ export interface CreateTestEsClusterOptions {
   esFrom?: string;
   esServerlessOptions?: Pick<
     ServerlessOptions,
-    | 'image'
-    | 'tag'
-    | 'resources'
-    | 'host'
-    | 'kibanaUrl'
-    | 'projectType'
-    | 'dataPath'
-    | 'uiam'
-    | 'uiamOAuth'
+    'image' | 'tag' | 'resources' | 'host' | 'projectType' | 'dataPath' | 'uiam' | 'uiamOAuth'
   >;
   esJavaOpts?: string;
   /**

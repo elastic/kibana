@@ -44,6 +44,7 @@ export const SecretsSchema = lazySchema(() =>
       ...SecretConfiguration,
       proxyUsername: z.string().nullable().default(null),
       proxyPassword: z.string().nullable().default(null),
+      secretQueryParams: z.record(z.string(), z.string()).nullable().default(null),
     })
     .strict()
     .superRefine((secrets, ctx) => {
