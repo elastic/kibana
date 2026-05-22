@@ -11,6 +11,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiSearchBar } from '@elastic/eui
 import { i18n } from '@kbn/i18n';
 import { countBy } from 'lodash';
 import type { ToolDefinition } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { labels } from '../../../utils/i18n';
 import { FilterOptionWithMatchesBadge } from '../../common/filter_option_with_matches_badge';
 
@@ -93,6 +95,11 @@ export const ToolsSearchControls: React.FC<ToolsSearchControlsProps> = ({
                 onChange={(e) => onShowActiveOnlyChange(e.target.checked)}
                 disabled={disabled}
                 compressed
+                {...getEbtProps({
+                  element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                  action: AGENT_BUILDER_UI_EBT.action.agentEdit.SHOW_ACTIVE_ONLY,
+                  detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
+                })}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

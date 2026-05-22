@@ -21,6 +21,16 @@ describe(
   'Asset Criticality Upload page',
   {
     tags: ['@ess'],
+    env: {
+      ftrConfig: {
+        kbnServerArgs: [
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'disable:entityAnalyticsEntityStoreV2',
+          ])}`,
+          '--uiSettings.overrides.securitySolution:entityStoreEnableV2=false',
+        ],
+      },
+    },
   },
   () => {
     beforeEach(() => {
