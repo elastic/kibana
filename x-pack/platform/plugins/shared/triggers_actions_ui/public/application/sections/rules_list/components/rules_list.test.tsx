@@ -6,6 +6,7 @@
  */
 
 import { parseDuration } from '@kbn/alerting-plugin/common';
+import { fetchUiConfig } from '@kbn/response-ops-rule-form/src/common/apis/fetch_ui_config';
 import { MAINTENANCE_WINDOW_FEATURE_ID } from '@kbn/maintenance-windows-plugin/common';
 import { fetchActiveMaintenanceWindows } from '@kbn/alerts-ui-shared/src/maintenance_window_callout/api';
 import { RUNNING_MAINTENANCE_WINDOW_1 } from '@kbn/alerts-ui-shared/src/maintenance_window_callout/mock';
@@ -1557,29 +1558,18 @@ describe('UIAM API Key Banner', () => {
     cleanup();
   });
 
-  it('renders UIAM API key banner when isServerless is true and feature flag is enabled', async () => {
-    useKibanaMock().services.isServerless = true;
-    jest.mocked(useKibanaMock().services.featureFlags.getBooleanValue).mockReturnValue(true);
+  it('renders UIAM API key banner when apiKeyType is uiam', async () => {
+    jest.mocked(fetchUiConfig).mockResolvedValue({
+      minimumScheduleInterval: { value: '1m', enforce: false },
+      apiKeyType: 'uiam',
+    });
 
     renderWithProviders(<RulesList />);
 
     expect(await screen.findByTestId('rulesListUiamApiKeyBanner')).toBeInTheDocument();
   });
 
-  it('does not render UIAM API key banner when isServerless is false', async () => {
-    useKibanaMock().services.isServerless = false;
-
-    renderWithProviders(<RulesList />);
-
-    await waitFor(() => {
-      expect(screen.queryByTestId('rulesListUiamApiKeyBanner')).not.toBeInTheDocument();
-    });
-  });
-
-  it('does not render UIAM API key banner when isServerless is true but feature flag is disabled', async () => {
-    useKibanaMock().services.isServerless = true;
-    jest.mocked(useKibanaMock().services.featureFlags.getBooleanValue).mockReturnValue(false);
-
+  it('does not render UIAM API key banner when apiKeyType is not uiam', async () => {
     renderWithProviders(<RulesList />);
 
     await waitFor(() => {
@@ -1588,8 +1578,10 @@ describe('UIAM API Key Banner', () => {
   });
 
   it('displays correct banner content when rendered', async () => {
-    useKibanaMock().services.isServerless = true;
-    jest.mocked(useKibanaMock().services.featureFlags.getBooleanValue).mockReturnValue(true);
+    jest.mocked(fetchUiConfig).mockResolvedValue({
+      minimumScheduleInterval: { value: '1m', enforce: false },
+      apiKeyType: 'uiam',
+    });
 
     renderWithProviders(<RulesList />);
 

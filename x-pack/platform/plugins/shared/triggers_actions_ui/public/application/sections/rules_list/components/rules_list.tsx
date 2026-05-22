@@ -23,7 +23,6 @@ import { useHistory } from 'react-router-dom';
 
 import type { RuleExecutionStatus } from '@kbn/alerting-plugin/common';
 import {
-  PROVISION_UIAM_API_KEYS_FEATURE_FLAG,
   RuleExecutionStatusErrorReasons,
   RuleLastRunOutcomeValues,
 } from '@kbn/alerting-plugin/common';
@@ -758,10 +757,7 @@ export const RulesList = ({
 
   return (
     <>
-      {kibanaServices.isServerless &&
-      kibanaServices.featureFlags.getBooleanValue(PROVISION_UIAM_API_KEYS_FEATURE_FLAG, false) ? (
-        <RulesListUiamApiKeyBanner />
-      ) : null}
+      {config.apiKeyType === 'uiam' ? <RulesListUiamApiKeyBanner /> : null}
       {showSearchBar && !isEmpty(filters.ruleParams) ? (
         <RulesListClearRuleFilterBanner onClickClearFilter={handleClearRuleParamFilter} />
       ) : null}
