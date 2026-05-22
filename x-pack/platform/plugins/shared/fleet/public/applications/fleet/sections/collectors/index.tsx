@@ -18,6 +18,7 @@ import { CollectorGroupsTable } from './components/collector_groups_table';
 import { CollectorsTable } from './components/collectors_table';
 import { CollectorsStatusBar } from './components/collectors_status_bar';
 import { useCollectorGroups, useCollectorsList } from './hooks';
+import { useCollectorsUrlFilters, useSetCollectorsUrlFilters } from './hooks/use_url_filters';
 
 const REFRESH_INTERVAL_MS = 30000;
 
@@ -25,7 +26,8 @@ const CollectorsListPage: React.FC = () => {
   useBreadcrumbs('collectors');
 
   const [isAutoRefreshOn, setIsAutoRefreshOn] = useState(true);
-  const [groupBy, setGroupBy] = useState('none');
+  const { groupBy, expandedGroups } = useCollectorsUrlFilters();
+  const setUrlFilters = useSetCollectorsUrlFilters();
 
   const isGrouped = groupBy !== 'none';
   const refetchInterval = isAutoRefreshOn ? REFRESH_INTERVAL_MS : false;
@@ -37,13 +39,27 @@ const CollectorsListPage: React.FC = () => {
     enabled: isGrouped,
   });
 
-  const { resetPagination } = collectorGroups;
   const handleGroupByChange = useCallback(
     (value: string) => {
-      setGroupBy(value);
-      resetPagination();
+      setUrlFilters({
+        groupBy: value,
+        pageIndex: 0,
+        groupPage: 0,
+        groupAfterKey: undefined,
+        expandedGroups: [],
+      });
     },
-    [resetPagination]
+    [setUrlFilters]
+  );
+
+  const handleToggleGroup = useCallback(
+    (groupKey: string) => {
+      const next = expandedGroups.includes(groupKey)
+        ? expandedGroups.filter((k) => k !== groupKey)
+        : [...expandedGroups, groupKey];
+      setUrlFilters({ expandedGroups: next }, { replace: true });
+    },
+    [expandedGroups, setUrlFilters]
   );
 
   const isInitialLoading = isGrouped
@@ -109,6 +125,9 @@ const CollectorsListPage: React.FC = () => {
           ) : isGrouped ? (
             <CollectorGroupsTable
               groups={collectorGroups.groups}
+              groupBy={groupBy}
+              expandedGroups={expandedGroups}
+              onToggleGroup={handleToggleGroup}
               isLoading={collectorGroups.isLoading}
               pageIndex={collectorGroups.pageIndex}
               hasNextPage={collectorGroups.hasNextPage}

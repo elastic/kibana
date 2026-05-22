@@ -16,8 +16,10 @@ export const getCollectorGroupsHandler: FleetRequestHandler<
   TypeOf<typeof GetCollectorGroupsRequestSchema.query>
 > = async (context, request, response) => {
   const coreContext = await context.core;
+  const fleetContext = await context.fleet;
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const spaceId = fleetContext.spaceId;
 
   const { groupBy, kuery, perPage, afterKey } = request.query;
 
@@ -35,6 +37,7 @@ export const getCollectorGroupsHandler: FleetRequestHandler<
     kuery,
     perPage,
     afterKey: parsedAfterKey,
+    spaceId,
   });
 
   return response.ok({ body });

@@ -57,7 +57,20 @@ export async function getCollectorGroups(
 
   const kueryNode = _joinFilters(filters);
 
-  const res = await esClient.search({
+  const res = await esClient.search<
+    {},
+    {
+      groups: {
+        buckets: Array<{
+          key: { group: string | null };
+          doc_count: number;
+          group_name: { buckets: Array<{ key: string }> };
+          signals: { buckets: Array<{ key: string }> };
+        }>;
+        after_key?: { group: string | null };
+      };
+    }
+  >({
     index: AGENTS_INDEX,
     size: 0,
     runtime_mappings: SIGNALS_RUNTIME_FIELD,
@@ -87,21 +100,7 @@ export async function getCollectorGroups(
     },
   });
 
-  const aggs = res.aggregations as
-    | {
-        groups: {
-          buckets: Array<{
-            key: { group: string };
-            doc_count: number;
-            group_name: { buckets: Array<{ key: string }> };
-            signals: { buckets: Array<{ key: string }> };
-          }>;
-          after_key?: { group: string };
-        };
-      }
-    | undefined;
-
-  const buckets = aggs?.groups?.buckets ?? [];
+  const buckets = res.aggregations?.groups?.buckets ?? [];
 
   const hasNextPage = buckets.length > perPage;
   if (hasNextPage) {

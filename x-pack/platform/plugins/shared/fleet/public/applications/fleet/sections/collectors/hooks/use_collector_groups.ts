@@ -9,7 +9,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useGetCollectorGroupsQuery } from '../../../../../hooks/use_request/agents';
 
-import { useCollectorsUrlFilters } from './use_url_filters';
+import { useCollectorsUrlFilters, useSetCollectorsUrlFilters } from './use_url_filters';
 import { useCollectorsSessionState } from './use_session_state';
 
 interface UseCollectorGroupsOptions {
@@ -23,22 +23,28 @@ export const useCollectorGroups = ({
   refetchInterval,
   enabled = true,
 }: UseCollectorGroupsOptions) => {
-  const { kuery } = useCollectorsUrlFilters();
+  const { kuery, groupPage, groupAfterKey: urlAfterKey } = useCollectorsUrlFilters();
+  const setUrlFilters = useSetCollectorsUrlFilters();
   const { pageSize } = useCollectorsSessionState();
 
-  const [afterKeys, setAfterKeys] = useState<Array<string | undefined>>([undefined]);
-  const [pageIndex, setPageIndex] = useState(0);
+  const [afterKeys, setAfterKeys] = useState<Array<string | undefined>>(() => {
+    const initial: Array<string | undefined> = [undefined];
+    if (groupPage > 0 && urlAfterKey) {
+      initial[groupPage] = urlAfterKey;
+    }
+    return initial;
+  });
+
+  const currentAfterKey = afterKeys[groupPage] ?? urlAfterKey;
 
   const prevKueryRef = useRef(kuery);
   useEffect(() => {
     if (prevKueryRef.current !== kuery) {
       prevKueryRef.current = kuery;
       setAfterKeys([undefined]);
-      setPageIndex(0);
+      setUrlFilters({ groupPage: 0, groupAfterKey: undefined }, { replace: true });
     }
-  }, [kuery]);
-
-  const currentAfterKey = afterKeys[pageIndex];
+  }, [kuery, setUrlFilters]);
 
   const { data, isLoading, isInitialLoading, isError, error, dataUpdatedAt } =
     useGetCollectorGroupsQuery(
@@ -56,23 +62,31 @@ export const useCollectorGroups = ({
 
   const onNextPage = useCallback(() => {
     if (nextAfterKey) {
+      const nextPage = groupPage + 1;
       setAfterKeys((prev) => {
         const next = [...prev];
-        next[pageIndex + 1] = nextAfterKey;
+        next[nextPage] = nextAfterKey;
         return next;
       });
-      setPageIndex((prev) => prev + 1);
+      setUrlFilters(
+        { groupPage: nextPage, groupAfterKey: nextAfterKey, expandedGroups: [] },
+        { replace: true }
+      );
     }
-  }, [nextAfterKey, pageIndex]);
+  }, [nextAfterKey, groupPage, setUrlFilters]);
 
   const onPreviousPage = useCallback(() => {
-    setPageIndex((prev) => Math.max(0, prev - 1));
-  }, []);
+    const prevPage = Math.max(0, groupPage - 1);
+    setUrlFilters(
+      { groupPage: prevPage, groupAfterKey: afterKeys[prevPage], expandedGroups: [] },
+      { replace: true }
+    );
+  }, [groupPage, afterKeys, setUrlFilters]);
 
   const resetPagination = useCallback(() => {
     setAfterKeys([undefined]);
-    setPageIndex(0);
-  }, []);
+    setUrlFilters({ groupPage: 0, groupAfterKey: undefined }, { replace: true });
+  }, [setUrlFilters]);
 
   return {
     groups,
@@ -81,7 +95,7 @@ export const useCollectorGroups = ({
     isError,
     error,
     dataUpdatedAt,
-    pageIndex,
+    pageIndex: groupPage,
     hasNextPage: !!nextAfterKey,
     onNextPage,
     onPreviousPage,
