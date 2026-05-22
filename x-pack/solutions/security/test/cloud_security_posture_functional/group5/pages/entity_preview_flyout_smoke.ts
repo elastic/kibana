@@ -30,24 +30,39 @@
  *
  * Replaces the previous `describe.skip`-ed `entity_preview_flyout.ts` (4
  * cases, failing under https://github.com/elastic/kibana/issues/261460).
- * Three of those four assertions reduced to engine_type dispatch — moved to
- * L1. The remaining cross-system signal is preserved here as one canonical
- * happy path. The block this replaces was failing because it ran the v2
- * LOOKUP JOIN scenario with the v1 entity-engine setup
- * (`initEntityEnginesWithRetry` + missing `securitySolution:entityStoreEnableV2`
- * UI setting); this smoke mirrors the v2 setup that `events_flyout.ts` runs
- * green against on `main` (`installEntityStoreV2` + `waitForEntityStoreV2Running`
- * + the v2 UI setting).
+ * Three of those four assertions reduced to engine_type dispatch — moved
+ * to L1. The remaining cross-system signal is preserved here as one
+ * canonical happy path. Single-generic path
+ * (`mv-expand-target-storage` → `'generic-entity-panel'` with header
+ * containing `MvExpandTargetStorage`) is the simplest reliable path
+ * through the cross-package contract.
+ *
+ * #261460 root cause (diagnosed during this split, fixed below): the v2
+ * entity-store archive (`entity_store_v2`) ships only the
+ * `entities-generic-latest` alias on `.entities.v2.latest.security_default-00001`,
+ * but the `GenericEntityPanel` resolves entities by querying
+ * `ASSET_INVENTORY_INDEX_PATTERN === 'entities-latest-*'`. Without a
+ * matching alias the panel's data fetch returns an empty hit set, the
+ * panel renders the "Unable to load entity" error prompt
+ * (`generic-right-flyout-error-prompt`) instead of `generic-panel-header`,
+ * and every assertion that checks for the panel header fails. The v1
+ * `initEntityEnginesWithRetry` call in the original setup would create
+ * the `entities-latest-default` alias on its own, but `esArchiver.load`
+ * deletes-and-recreates the index on load and drops engine-managed
+ * aliases. Restoring `entities-latest-default` on the archive's index
+ * after load resolves the data path. (The orthogonal name-rendering
+ * mismatch in the host preview — `HostInstance1` vs `host-instance-1` —
+ * remains a real product bug for the host case; out of scope here, the
+ * smoke deliberately stays on the generic path.)
  */
 
 import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
 import {
   waitForPluginInitialized,
+  cleanupEntityStore,
   waitForEntityDataIndexed,
   dataViewRouteHelpersFactory,
-  installEntityStoreV2,
-  uninstallEntityStoreV2,
-  waitForEntityStoreV2Running,
+  initEntityEnginesWithRetry,
 } from '../../../cloud_security_posture_api/utils';
 import type { SecurityTelemetryFtrProviderContext } from '../../config.base';
 
@@ -75,18 +90,8 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
     this.tags(['cloud_security_posture_graph_viz']);
 
     before(async () => {
-      // Clean up any leftover alerts indices from previous failed runs
-      for (const suffix of ['000001', '000002']) {
-        try {
-          await es.indices.delete({
-            index: `.internal.alerts-security.alerts-default-${suffix}`,
-          });
-        } catch (e) {
-          // Ignore if index doesn't exist
-        }
-      }
+      await cleanupEntityStore({ supertest, logger });
 
-      // Clean up any leftover entities-latest index from a v1 run
       try {
         await es.indices.delete({
           index: getEntitiesLatestIndexName(),
@@ -95,6 +100,21 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       } catch (e) {
         // Ignore if index doesn't exist
       }
+
+      // Enable asset inventory setting
+      await kibanaServer.uiSettings.update({ 'securitySolution:enableAssetInventory': true });
+
+      // Initialize security-solution-default data-view (required by entity store)
+      const dataView = dataViewRouteHelpersFactory(supertest);
+      await dataView.create('security-solution');
+
+      // Initialize entity engine for 'generic' type
+      await initEntityEnginesWithRetry({
+        supertest,
+        retry,
+        logger,
+        entityTypes: ['generic'],
+      });
 
       // security_alerts_modified_mappings - contains mappings for actor and target
       await esArchiver.load(
@@ -107,26 +127,35 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await waitForPluginInitialized({ retry, supertest, logger });
       await ebtUIHelper.setOptIn(true);
 
-      // Both settings are required for the v2 LOOKUP JOIN path that this
-      // smoke exercises. Missing `entityStoreEnableV2` was part of the
-      // root cause of the original FTR's failure under #261460.
-      await kibanaServer.uiSettings.update({
-        'securitySolution:enableAssetInventory': true,
-        'securitySolution:entityStoreEnableV2': true,
-      });
+      // Delete v2 latest manually since cleanupEntityStore doesn't touch it
+      try {
+        await es.indices.delete({
+          index: getEntitiesLatestIndexName(),
+          ignore_unavailable: true,
+        });
+      } catch (e) {
+        // Ignore if index doesn't exist
+      }
 
-      // Initialize security-solution-default data-view (required by entity store)
-      const dataView = dataViewRouteHelpersFactory(supertest);
-      await dataView.create('security-solution');
-
-      // Install Entity Store V2 (required for graph visualization with LOOKUP JOIN)
-      await installEntityStoreV2({ supertest, logger });
-      await waitForEntityStoreV2Running({ supertest, retry, logger });
-
-      // Load v2 entity data and wait for it to be indexed
+      // Load v2 entity data
       await esArchiver.load(
         'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/entity_store_v2'
       );
+
+      // The archive creates `.entities.v2.latest.security_default-00001` with only
+      // the `entities-generic-latest` alias, but the GenericEntityPanel queries
+      // `ASSET_INVENTORY_INDEX_PATTERN === 'entities-latest-*'` to resolve the
+      // entity it should render. Without this alias the panel falls into its
+      // "Unable to load entity" error state and the `generic-panel-header` test
+      // subject never renders. v1 `initEntityEnginesWithRetry` would have added
+      // this alias on its own, but esArchiver replaces the index on load and
+      // drops the engine-managed aliases — root cause of #261460 for cases 1-3.
+      await es.indices.putAlias({
+        index: '.entities.v2.latest.security_default-00001',
+        name: 'entities-latest-default',
+      });
+
+      // Wait for entity data to be fully indexed
       await waitForEntityDataIndexed({
         es,
         logger,
@@ -137,15 +166,14 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
     });
 
     after(async () => {
-      await uninstallEntityStoreV2({ supertest, logger });
+      // Clean up entity store resources
+      await cleanupEntityStore({ supertest, logger });
 
-      await kibanaServer.uiSettings.update({
-        'securitySolution:enableAssetInventory': false,
-        'securitySolution:entityStoreEnableV2': false,
-      });
+      // Disable asset inventory setting
+      await kibanaServer.uiSettings.update({ 'securitySolution:enableAssetInventory': false });
 
-      // Using unload destroys the .alerts-security.alerts-default index alias which
-      // breaks subsequent tests in the same FTR run. Delete docs by query instead.
+      // Delete alerts (using unload destroys the .alerts index alias which breaks
+      // subsequent FTR runs in the same group; delete by query instead)
       await es.deleteByQuery({
         index: '.internal.alerts-*',
         query: { match_all: {} },
@@ -161,7 +189,6 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
     });
 
     it('shows the entity details preview panel when an entity node is selected from the network-events graph', async () => {
-      // Open the network events flyout for an event with multi-target entities
       await networkEventsPage.navigateToNetworkEventsPage(
         `${networkEventsPage.getAbsoluteTimerangeFilter(
           '2024-09-01T00:00:00.000Z',
@@ -178,10 +205,9 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await expandedFlyoutGraph.waitGraphIsLoaded();
       await expandedFlyoutGraph.assertGraphNodesNumber(4);
 
-      // Click the entity node and open its details. `mv-expand-target-storage`
-      // has no engine_type prefix, so the dispatch falls through to
-      // `generic-entity-panel` — which is what the cross-package contract
-      // this smoke is here to validate.
+      // `mv-expand-target-storage` has no engine_type prefix, so the
+      // dispatch falls through to `generic-entity-panel` — which is what
+      // the cross-package contract this smoke is here to validate.
       await expandedFlyoutGraph.showEntityDetails('mv-expand-target-storage');
 
       await entityFlyout.assertEntityPanelIsOpen('generic');
