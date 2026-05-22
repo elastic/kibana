@@ -9,6 +9,8 @@
 
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
+import type { PanelLimitState } from '../dashboard_api/panel_limit_validator';
+import type { DashboardInternalApi } from '../dashboard_api/types';
 
 import type { ViewMode } from '@kbn/presentation-publishing';
 import { setMockedPresentationUtilServices } from '@kbn/presentation-util-plugin/public/mocks';
@@ -108,6 +110,34 @@ describe('Internal dashboard top nav', () => {
         {}
       );
     });
+  });
+
+  it('renders panel limit warning when panel limits are exceeded', () => {
+    const { api, internalApi } = buildMockDashboardApi();
+
+    const invalidPanelLimitState: PanelLimitState = {
+      isValid: false,
+      topLevel: { count: 101, max: 100, exceeded: true },
+      pinnedPanels: { count: 0, max: 100, exceeded: false },
+      sectionViolations: [],
+    };
+
+    renderWithI18n(
+      <DashboardContext.Provider value={api}>
+        <DashboardInternalContext.Provider
+          value={
+            {
+              ...internalApi,
+              panelLimitState$: new BehaviorSubject<PanelLimitState>(invalidPanelLimitState),
+            } as unknown as DashboardInternalApi
+          }
+        >
+          <InternalDashboardTopNav redirectTo={jest.fn()} />
+        </DashboardInternalContext.Provider>
+      </DashboardContext.Provider>
+    );
+
+    expect(document.querySelector('[data-test-subj="dashboardPanelLimitWarning"]')).not.toBeNull();
   });
 
   it('should disable filter bar when forceHideFilterBar is true', async () => {

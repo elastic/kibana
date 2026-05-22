@@ -58,6 +58,7 @@ import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { getFullEditPath } from '../utils/urls';
 import { DashboardFavoriteButton } from './dashboard_favorite_button';
 import { DashboardControlsRenderer } from '../dashboard_controls_renderer';
+import { PanelLimitWarning } from './panel_limit_warning';
 
 export interface InternalDashboardTopNavProps {
   customLeadingBreadCrumbs?: EuiBreadcrumb[];
@@ -426,6 +427,8 @@ export function InternalDashboardTopNav({
       {viewMode !== 'print' && isLabsEnabled && isLabsShown ? (
         <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />
       ) : null}
+
+      {viewMode !== 'print' ? <PanelLimitWarning /> : null}
 
       {viewMode !== 'print' ? <DashboardControlsRenderer /> : null}
 

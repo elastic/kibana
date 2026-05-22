@@ -24,9 +24,8 @@ import {
   DEFAULT_PANEL_HEIGHT,
   DEFAULT_PANEL_WIDTH,
   DEFAULT_DASHBOARD_OPTIONS,
+  MAX_PANELS,
 } from '../../common/constants';
-
-const MAX_PANELS = 100;
 
 export const panelGridSchema = schema.object(
   {

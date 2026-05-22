@@ -49,6 +49,7 @@ import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { BehaviorSubject, Observable, Subject } from 'rxjs';
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import type { Reference } from '@kbn/content-management-utils';
+import type { PanelLimitState } from './panel_limit_validator';
 import type { DashboardLocatorParams } from '../../common';
 import type { DashboardState, GridData } from '../../server';
 import type { SaveDashboardReturn } from './save_modal/types';
@@ -243,6 +244,7 @@ export type DashboardApi = CanExpandPanels &
 export interface DashboardInternalApi {
   gridLayout$: BehaviorSubject<GridLayoutData>;
   serializeLayout: () => Pick<DashboardState, 'panels' | 'pinned_panels'>;
+  panelLimitState$: BehaviorSubject<PanelLimitState>;
   isSectionCollapsed: (sectionId?: string) => boolean;
   dashboardContainerRef$: BehaviorSubject<HTMLElement | null>;
   setDashboardContainerRef: (ref: HTMLElement | null) => void;

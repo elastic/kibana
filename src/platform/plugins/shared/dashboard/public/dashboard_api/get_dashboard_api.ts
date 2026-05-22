@@ -11,6 +11,7 @@ import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { BehaviorSubject, merge, Subject } from 'rxjs';
 import { v4 } from 'uuid';
 import type { EuiFlyoutProps } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
 import type { DashboardState } from '../../common/types';
 import { initializeAccessControlManager } from './access_control_manager';
@@ -43,6 +44,10 @@ import { initializeViewModeManager } from './view_mode_manager';
 import type { DashboardReadResponseBody } from '../../server';
 import { initializePauseFetchManager } from './pause_fetch_manager';
 import { initializeRelatedPanelsManager } from './related_panels_manager';
+import { initializePanelLimitManager } from './panel_limit_manager';
+import { validatePanelLimits } from './panel_limit_validator';
+import type { PanelLimitState } from './panel_limit_validator';
+import { coreServices } from '../services/kibana_services';
 
 export function getDashboardApi({
   creationOptions,
@@ -175,6 +180,67 @@ export function getDashboardApi({
 
   const relatedPanelsManager = initializeRelatedPanelsManager(trackPanel, layoutManager);
 
+  const panelLimitManager = initializePanelLimitManager({
+    dashboardInternalApi: layoutManager.internalApi,
+  });
+
+  const getPanelLimitSaveErrorMessage = (panelLimitState: PanelLimitState): string | undefined => {
+    if (panelLimitState.topLevel.exceeded) {
+      return i18n.translate('dashboard.panelLimit.saveError.topLevel', {
+        defaultMessage:
+          'This dashboard has {count} top-level panels or sections. Dashboards can contain at most {max} panels or sections.',
+        values: {
+          count: panelLimitState.topLevel.count,
+          max: panelLimitState.topLevel.max,
+        },
+      });
+    }
+
+    if (panelLimitState.pinnedPanels.exceeded) {
+      return i18n.translate('dashboard.panelLimit.saveError.pinnedPanels', {
+        defaultMessage:
+          'This dashboard has {count} controls. Dashboards can contain at most {max} controls.',
+        values: {
+          count: panelLimitState.pinnedPanels.count,
+          max: panelLimitState.pinnedPanels.max,
+        },
+      });
+    }
+
+    const firstSectionViolation = panelLimitState.sectionViolations[0];
+    if (firstSectionViolation) {
+      return i18n.translate('dashboard.panelLimit.saveError.section', {
+        defaultMessage:
+          'The section "{title}" contains {count} panels. Each section can contain at most {max} panels.',
+        values: {
+          title: firstSectionViolation.title,
+          count: firstSectionViolation.count,
+          max: firstSectionViolation.max,
+        },
+      });
+    }
+  };
+
+  const validatePanelLimitsForSave = (): PanelLimitState => {
+    const { panels, pinned_panels } = layoutManager.internalApi.serializeLayout();
+    return validatePanelLimits({
+      panels,
+      pinned_panels,
+    });
+  };
+
+  const blockSaveIfPanelLimitsExceeded = (): boolean => {
+    const panelLimitState = validatePanelLimitsForSave();
+    if (panelLimitState.isValid) return false;
+
+    const message = getPanelLimitSaveErrorMessage(panelLimitState);
+    if (message) {
+      coreServices.notifications.toasts.addDanger(message);
+    }
+
+    return true;
+  };
+
   const dashboardApi = {
     ...viewModeManager.api,
     ...dataLoadingManager.api,
@@ -220,6 +286,8 @@ export function getDashboardApi({
     runInteractiveSave: async () => {
       trackOverlayApi.clearOverlays();
       const previousDashboardId = savedObjectId$.value;
+
+      if (blockSaveIfPanelLimitsExceeded()) return;
 
       const {
         description,
@@ -268,6 +336,7 @@ export function getDashboardApi({
     },
     runQuickSave: async () => {
       if (isManaged) return;
+      if (blockSaveIfPanelLimitsExceeded()) return;
       const dashboardState = getState();
       const previousDashboardId = savedObjectId$.value;
       const saveResult = await saveDashboard({
@@ -306,6 +375,7 @@ export function getDashboardApi({
     ...unifiedSearchManager.internalApi,
     ...esqlVariablesManager.api,
     ...relatedPanelsManager.api,
+    panelLimitState$: panelLimitManager.panelLimitState$,
     dashboardContainerRef$,
     setDashboardContainerRef: (ref: HTMLElement | null) => dashboardContainerRef$.next(ref),
   };
@@ -336,6 +406,7 @@ export function getDashboardApi({
       timesliceManager.cleanup();
       projectRoutingManager?.cleanup();
       pauseFetchManager.cleanup();
+      panelLimitManager.cleanup();
     },
   };
 }

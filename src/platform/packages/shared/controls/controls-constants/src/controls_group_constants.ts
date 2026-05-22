@@ -12,6 +12,9 @@ export const CONTROLS_GROUP_TYPE = 'control_group';
 
 export const DEFAULT_AUTO_APPLY_SELECTIONS = true;
 
+/** Maximum number of pinned panels (controls) allowed in a controls group. */
+export const MAX_CONTROLS_GROUP_SIZE = 100;
+
 /** This state is only relevant for sticky controls */
 export const CONTROL_WIDTH_SMALL = 'small';
 export const CONTROL_WIDTH_MEDIUM = 'medium';
