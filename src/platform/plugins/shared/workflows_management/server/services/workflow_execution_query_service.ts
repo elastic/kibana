@@ -28,6 +28,7 @@ import {
   WORKFLOWS_INDEX,
   WORKFLOWS_STEP_EXECUTIONS_INDEX,
 } from '../../common';
+import { buildTimeRangeFilter } from '../api/lib/build_time_range_filter';
 import { isIndexNotFoundError } from '../api/lib/es_error_helpers';
 import { getChildWorkflowExecutions } from '../api/lib/get_child_workflow_executions';
 import { getWorkflowExecution } from '../api/lib/get_workflow_execution';
@@ -131,15 +132,22 @@ export class WorkflowExecutionQueryService {
       must.push({ bool: { must_not: { exists: { field: 'stepId' } } } });
     }
 
-    if (params.finishedAfter || params.finishedBefore) {
-      must.push({
-        range: {
-          finishedAt: {
-            ...(params.finishedAfter ? { gte: params.finishedAfter } : {}),
-            ...(params.finishedBefore ? { lte: params.finishedBefore } : {}),
-          },
-        },
-      });
+    const startedAtRange = buildTimeRangeFilter(
+      'startedAt',
+      params.startedAfter,
+      params.startedBefore
+    );
+    if (startedAtRange) {
+      must.push(startedAtRange);
+    }
+
+    const finishedAtRange = buildTimeRangeFilter(
+      'finishedAt',
+      params.finishedAfter,
+      params.finishedBefore
+    );
+    if (finishedAtRange) {
+      must.push(finishedAtRange);
     }
 
     const page = params.page ?? 1;
@@ -226,6 +234,8 @@ export class WorkflowExecutionQueryService {
       sourceExcludes: sourceExcludes.length > 0 ? sourceExcludes : undefined,
       page: params.page,
       size: params.size,
+      startedAfter: params.startedAfter,
+      startedBefore: params.startedBefore,
     });
   }
 
