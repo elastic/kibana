@@ -25,6 +25,7 @@ import { useTimefilter } from '../../../../../hooks/use_timefilter';
 import { useTimeRange } from '../../../../../hooks/use_time_range';
 import { useTimeRangeUpdate } from '../../../../../hooks/use_time_range_update';
 import { EntityDetailFlyout } from '../entity_detail_flyout';
+import { formatTimestamp } from '../../../../../util/formatters';
 
 const columns: Array<EuiBasicTableColumn<Discovery>> = [
   {
@@ -33,7 +34,7 @@ const columns: Array<EuiBasicTableColumn<Discovery>> = [
       defaultMessage: 'Timestamp',
     }),
     sortable: true,
-    render: (timestamp: string) => new Date(timestamp).toLocaleString(),
+    render: (timestamp: string) => formatTimestamp(timestamp),
   },
   {
     field: 'title',
@@ -167,7 +168,7 @@ export const DiscoveriesTab = () => {
   const historyEntries = useMemo(
     () =>
       (historyData?.hits ?? []).map((entry) => ({
-        timestamp: new Date(entry['@timestamp']).toLocaleString(),
+        timestamp: formatTimestamp(entry['@timestamp']),
         summary: entry.criticality
           ? i18n.translate('xpack.streams.discoveriesTab.historySummaryWithCriticality', {
               defaultMessage: '{title} (criticality: {criticality})',

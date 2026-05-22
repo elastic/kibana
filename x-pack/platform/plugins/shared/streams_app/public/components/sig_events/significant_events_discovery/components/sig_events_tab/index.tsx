@@ -25,6 +25,7 @@ import { useTimefilter } from '../../../../../hooks/use_timefilter';
 import { useTimeRange } from '../../../../../hooks/use_time_range';
 import { useTimeRangeUpdate } from '../../../../../hooks/use_time_range_update';
 import { EntityDetailFlyout } from '../entity_detail_flyout';
+import { formatTimestamp } from '../../../../../util/formatters';
 
 const columns: Array<EuiBasicTableColumn<SigEvent>> = [
   {
@@ -33,7 +34,7 @@ const columns: Array<EuiBasicTableColumn<SigEvent>> = [
       defaultMessage: 'Timestamp',
     }),
     sortable: true,
-    render: (timestamp: string) => new Date(timestamp).toLocaleString(),
+    render: (timestamp: string) => formatTimestamp(timestamp),
   },
   {
     field: 'title',
@@ -199,7 +200,7 @@ export const SigEventsTab = () => {
   const historyEntries = useMemo(
     () =>
       (historyData?.hits ?? []).map((entry) => ({
-        timestamp: new Date(entry['@timestamp']).toLocaleString(),
+        timestamp: formatTimestamp(entry['@timestamp']),
         summary: entry.criticality
           ? i18n.translate('xpack.streams.sigEventsTab.historySummaryWithCriticality', {
               defaultMessage: '{verdict}: {title} (criticality: {criticality})',
