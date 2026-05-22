@@ -74,6 +74,7 @@ export async function stepSaveSystemObject(context: InstallContext) {
         soClient: savedObjectsClient,
         esClient,
         packageName: pkgName,
+        packageInfo,
         dataStreams: packageInfo.data_streams ?? [],
       });
     } catch (err: any) {
