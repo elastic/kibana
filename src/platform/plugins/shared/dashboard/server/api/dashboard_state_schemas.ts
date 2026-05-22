@@ -97,7 +97,7 @@ export function getPanelSchema(isDashboardAppRequest: boolean) {
         {
           meta: {
             id: `kbn-dashboard-panel-type-${type}`,
-            title: type,
+            title,
           },
         }
       )
