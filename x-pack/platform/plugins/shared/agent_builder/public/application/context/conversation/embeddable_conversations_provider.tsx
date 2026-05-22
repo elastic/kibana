@@ -17,6 +17,7 @@ import type {
 } from '../../../embeddable/types';
 import { ConversationContext } from './conversation_context';
 import { upsertAttachmentsIntoList } from './upsert_attachments_into_list';
+import { removeAttachmentFromList } from './remove_attachment_from_list';
 import { AgentBuilderServicesContext } from '../agent_builder_services_context';
 import { StreamingProvider } from '../streaming/streaming_context';
 import { useConversationActions } from './use_conversation_actions';
@@ -203,13 +204,11 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
 
   const removeAttachment = useCallback((attachmentIndex: number) => {
     setCurrentProps((prevProps) => {
-      const prev = prevProps.attachments;
-      if (!prev) return prevProps;
-      const target = prev[attachmentIndex];
-      const next = target?.groupId
-        ? prev.filter((a) => a.groupId !== target.groupId)
-        : prev.filter((_, index) => index !== attachmentIndex);
-      return { ...prevProps, attachments: next };
+      if (!prevProps.attachments) return prevProps;
+      return {
+        ...prevProps,
+        attachments: removeAttachmentFromList(prevProps.attachments, attachmentIndex),
+      };
     });
   }, []);
 

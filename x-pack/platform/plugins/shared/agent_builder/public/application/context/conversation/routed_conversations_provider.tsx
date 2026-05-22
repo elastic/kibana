@@ -18,6 +18,7 @@ import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
 import { useKibana } from '../../hooks/use_kibana';
 import { useConversationActions } from './use_conversation_actions';
 import { upsertAttachmentsIntoList } from './upsert_attachments_into_list';
+import { removeAttachmentFromList } from './remove_attachment_from_list';
 import { ConversationChangeNotifier } from './conversation_change_notifier';
 
 interface RoutedConversationsProviderProps {
@@ -93,13 +94,9 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
   }, []);
 
   const removeAttachment = useCallback((attachmentIndex: number) => {
-    setAttachments((prevAttachments) => {
-      if (!prevAttachments) return prevAttachments;
-      const target = prevAttachments[attachmentIndex];
-      if (target?.groupId) {
-        return prevAttachments.filter((a) => a.groupId !== target.groupId);
-      }
-      return prevAttachments.filter((_, index) => index !== attachmentIndex);
+    setAttachments((prev) => {
+      if (!prev) return prev;
+      return removeAttachmentFromList(prev, attachmentIndex);
     });
   }, []);
 

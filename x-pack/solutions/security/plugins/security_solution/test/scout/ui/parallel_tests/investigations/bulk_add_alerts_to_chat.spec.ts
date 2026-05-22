@@ -75,6 +75,42 @@ spaceTest.describe('Bulk add alerts to chat', { tag: [...tags.stateful.classic] 
   });
 
   spaceTest(
+    'should disable the "Add to chat" bulk action when all alerts are selected via the query button',
+    // _llmProxy is declared so the worker fixture provisions the AI connector in the test space;
+    // without it the bulk action would not appear at all.
+    async ({ pageObjects, llmProxy: _llmProxy }) => {
+      const { alertsTablePage } = pageObjects;
+
+      await alertsTablePage.navigate();
+
+      const firstRuleNameCell = alertsTablePage.alertsTable
+        .getByTestId('ruleName')
+        .filter({ hasText: ruleNames[0] });
+      await expect(firstRuleNameCell).toBeVisible({ timeout: 60_000 });
+
+      await spaceTest.step('check one row to activate the bulk toolbar', async () => {
+        const alertCheckbox = firstRuleNameCell
+          .locator('xpath=ancestor::div[contains(@class,"euiDataGridRow")]')
+          .locator('.euiCheckbox__input');
+        await alertCheckbox.check();
+      });
+
+      await spaceTest.step('click "Select all" to switch to query-based selection', async () => {
+        await alertsTablePage.selectAllAlertsButton.click();
+      });
+
+      await spaceTest.step(
+        'verify "Add to chat" is present but disabled in the bulk actions menu',
+        async () => {
+          await alertsTablePage.selectedShowBulkActionsButton.click();
+          await expect(alertsTablePage.bulkAddToChatMenuItem).toBeVisible();
+          await expect(alertsTablePage.bulkAddToChatMenuItem).toBeDisabled();
+        }
+      );
+    }
+  );
+
+  spaceTest(
     'should open agent builder conversation with attachment chip and pre-filled prompt, and send multiple alerts to the LLM',
     async ({ pageObjects, page, llmProxy }) => {
       const { alertsTablePage } = pageObjects;
