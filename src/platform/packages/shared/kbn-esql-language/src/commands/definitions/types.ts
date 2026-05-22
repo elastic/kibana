@@ -494,7 +494,7 @@ export interface ValidationErrors {
   };
   tsdbIncompatibleFunction: {
     message: string;
-    type: { name: string };
+    type: { fnName: string };
   };
 }
 

@@ -710,7 +710,7 @@ export const errors = {
     }),
 
   tsdbIncompatibleFunction: (fn: ESQLFunction): ESQLMessage =>
-    errors.byId('tsdbIncompatibleFunction', fn.location, { name: fn.name }),
+    errors.byId('tsdbIncompatibleFunction', fn.location, { fnName: fn.name }),
 
   wrongNumberArgs: (fn: ESQLFunction, definition: FunctionDefinition): ESQLMessage => {
     const validArgCounts = new Set<number>();
