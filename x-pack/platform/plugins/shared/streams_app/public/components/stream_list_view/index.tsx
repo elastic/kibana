@@ -212,23 +212,31 @@ export function StreamListView() {
 
     if (showQueryStreams) {
       items.push({
-        id: 'createQueryStream',
-        order: 3,
-        label: createQueryStreamLabel,
-        iconType: 'plus',
-        run: () => setIsQueryStreamCreationFlyoutOpen(true),
-        testId: 'streamsAppCreateQueryStreamButton',
-      });
-    }
-
-    return {
-      primaryActionItem: {
         id: 'createClassicStream',
+        order: 3,
         label: createClassicStreamLabel,
         iconType: 'plus',
         run: () => setIsClassicStreamCreationFlyoutOpen(true),
         disableButton: !(canManageStreamsKibana && canManageClassicElasticsearch),
-      },
+      });
+    }
+
+    return {
+      primaryActionItem: showQueryStreams
+        ? {
+            id: 'createQueryStream',
+            label: createQueryStreamLabel,
+            iconType: 'plus',
+            run: () => setIsQueryStreamCreationFlyoutOpen(true),
+            testId: 'streamsAppCreateQueryStreamButton',
+          }
+        : {
+            id: 'createClassicStream',
+            label: createClassicStreamLabel,
+            iconType: 'plus',
+            run: () => setIsClassicStreamCreationFlyoutOpen(true),
+            disableButton: !(canManageStreamsKibana && canManageClassicElasticsearch),
+          },
       items,
     };
   }, [
