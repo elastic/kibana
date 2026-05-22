@@ -69,6 +69,35 @@ const result = await savedObjectsClient.esql({
 
 See the full example in the Kibana repository at `examples/saved_objects`.
 
+## Safe pipeline construction with the `esql` composer
+
+Instead of a raw pipeline string, you can pass a `ComposerQuery` built with the `esql` tagged
+template from `@elastic/esql`. Template holes (`${{ name: value }}`) are automatically promoted
+to ES|QL named parameters — values are passed to Elasticsearch at the protocol level and never
+appear in the query string.
+
+```ts
+import { esql } from '@elastic/esql';
+
+const searchTerm = req.body.title; // user-supplied input
+
+const result = await savedObjectsClient.esql({
+  type: [MY_TYPE],
+  namespaces: ['default'],
+  // ${{ title }} → ?title param; value sent separately over the wire
+  // The esql tag does not take a leading '|' — the pipe is added when joining with FROM.
+  pipeline: esql`WHERE my_type.title LIKE ${{ title: searchTerm }} | LIMIT 100`,
+});
+```
+
+The `esql` tag accepts a pipeline-only template (no `FROM` required). It temporarily wraps the
+template in `FROM a | …` to satisfy the parser, then strips the source command, leaving a
+`ComposerQuery` whose `.toRequest()` returns the `?param` placeholder string alongside a
+`params` array. The SO client calls `.toRequest()` internally.
+
+You can also mix composer params with a raw `params` array — they are merged before the request
+is sent, with composer params first.
+
 ## Safe pipeline construction with ES|QL params
 
 When interpolating user input into ES|QL pipelines, **never** use string concatenation. Instead, use ES|QL's native parameterization — named params (`?paramName`) or positional params (`?`) — to separate code from data at the protocol level.

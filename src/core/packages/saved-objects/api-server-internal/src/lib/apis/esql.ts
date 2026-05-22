@@ -33,8 +33,6 @@ const EMPTY_ESQL_RESPONSE: SavedObjectsEsqlResponse = {
   values: [],
 };
 
-const SOURCE_COMMAND_PATTERN = /^\s*(FROM|ROW|SHOW|METRICS|TS)\b/i;
-
 export async function performEsql(
   { options, rawClient }: PerformEsqlParams,
   { registry, helpers, allowedTypes, extensions = {} }: ApiExecutionContext
@@ -45,13 +43,6 @@ export async function performEsql(
   if (requestedNamespaces.length === 0) {
     throw SavedObjectsErrorHelpers.createBadRequestError(
       'options.namespaces cannot be an empty array'
-    );
-  }
-
-  if (SOURCE_COMMAND_PATTERN.test(pipeline)) {
-    throw SavedObjectsErrorHelpers.createBadRequestError(
-      'options.pipeline must not start with a source command (FROM, ROW, SHOW, METRICS, TS). ' +
-        'The FROM clause is auto-generated from the type parameter.'
     );
   }
 
@@ -111,10 +102,27 @@ export async function performEsql(
     metadata && metadata.length > 0
       ? esql.from(indices, metadata).print()
       : esql.from(indices).print();
-  const query = `${fromClause} ${pipeline}`;
+
+  const req = pipeline.toRequest();
+  // toRequest() prints pipeline-only queries without a leading '|';
+  // we supply the separator when joining with the FROM clause.
+  const query = `${fromClause} | ${req.query}`;
+
+  // @elastic/esql types params as Record<string, unknown> for named entries;
+  // the ES client expects Partial<Record<string, EsqlSingleOrMultiValue>>.
+  // The shapes are equivalent at runtime.
+  const composerParams = req.params as unknown as estypes.EsqlESQLParams | undefined;
+
+  // Merge ComposerQuery params with any explicitly provided params.
+  // ComposerQuery params take precedence on name collisions.
+  const mergedParams: estypes.EsqlESQLParams | undefined =
+    composerParams || esqlOptions.params
+      ? ([...(composerParams ?? []), ...(esqlOptions.params ?? [])] as estypes.EsqlESQLParams)
+      : undefined;
 
   const result = await rawClient.esql.query({
     ...esqlOptions,
+    ...(mergedParams ? { params: mergedParams } : {}),
     query,
     filter,
   });
