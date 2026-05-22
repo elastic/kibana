@@ -30,5 +30,8 @@ Append entries using this structure (matches the existing entries in KNOWLEDGE.m
 
 - **Append-only** — never delete existing entries
 - **No duplication** — don't repeat what's in Scout best practices skills or the classification guide
-- **Non-obvious only** — capture things that were surprising or took multiple attempts
+- **Non-obvious only** — add an entry only if ALL three conditions are true:
+  1. The learning is not already described in `classification-guide.md` or `fix-workflow.md`
+  2. The agent made at least one incorrect assumption this learning would have prevented (it took multiple attempts to reach the correct action)
+  3. The learning is reproducible — it would apply to a different bug in the same area, not just this specific issue
 - **User confirmation required** — ask before writing: _"I learned [X]. Should I add it to the knowledge base?"_

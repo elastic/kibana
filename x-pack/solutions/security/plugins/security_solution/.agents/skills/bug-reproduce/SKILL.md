@@ -64,13 +64,16 @@ gh issue view <NUMBER> --repo elastic/kibana \
 Create `.bug-fixer-session/` if it doesn't exist (`mkdir -p .bug-fixer-session`), then write
 `.bug-fixer-session/analysis.json` with these fields:
 - `classification` — bug pattern (see `x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-fixer/references/classification-guide.md`)
-- `confidence` — high / medium / low
+- `confidence` — assign using this rubric:
+  - `high`: reproduction steps are specific (exact nav path + user actions) AND current behavior includes a concrete error/value AND affected_paths are identifiable from the ticket alone
+  - `medium`: reproduction steps exist but are partially ambiguous, OR affected_paths require non-trivial source search to confirm
+  - `low`: reproduction steps are missing or vague, OR current behavior is described only as "broken" / "not working", OR no affected_paths can be identified without Phase 3 results
 - `prerequisites` — roles, permissions, prior state required
 - `reproduction_steps` — exact steps from the issue
 - `affected_paths` — source paths identified from the issue
 - `similar_issues` — numbers of related issues found
 - `related_prs` — numbers of related PRs found
-- `possibly_fixed` — true if evidence suggests already fixed
+- `possibly_fixed` — set to `true` if ANY of the following: a related PR is merged and its title/body contains "fix #<number>" or "closes #<number>"; the issue state is "closed" with a closing commit reference; a comment on the issue says "resolved in" or "fixed in". Otherwise `false`.
 - `server_args` — feature flags or config overrides mentioned in the issue
 - `screenshots` / `video_urls` — media URLs from the issue body
 
@@ -96,7 +99,9 @@ Dispatch these as subagents — PR diffs, issue threads, and source files are la
 running them in parallel uses the server boot time productively:
 - Read each `similar_issue` (`gh issue view <number> --repo elastic/kibana`)
 - Review each `related_pr` diff (`gh pr diff <number> --repo elastic/kibana`)
-- Search closed issues: `gh search issues "<key symptom>" --repo elastic/kibana --state closed --limit 5`
+- Search closed issues — run exactly these two queries, no more:
+  1. `gh search issues "<exact issue title>" --repo elastic/kibana --state closed --limit 5`
+  2. `gh search issues "<primary symptom from current_behavior field>" --repo elastic/kibana --state closed --limit 5`
 - Read `affected_paths` from `analysis.json` and study the relevant source code
 - Read `x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-fixer/references/classification-guide.md`
 - Read `x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-fixer/KNOWLEDGE.md`

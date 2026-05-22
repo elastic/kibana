@@ -26,7 +26,7 @@ Always test at the **lowest layer** where the bug behavior can be exercised.
 2. Missing permission check on API route → **API test**
 3. Stale cache, size limit, data transformation → **unit test** or **API test**
 4. UI rendering, component interaction, event handling → **Scout UI test**
-5. When in doubt, prefer the lower layer
+5. Bug manifests in the browser but root cause is in a route handler or shared utility → **API test** (not Scout UI). Reserve Scout UI exclusively for defects that live entirely in JSX rendering, user interaction flow, or cannot be exercised without a real browser (event propagation, tooltip behaviour, drag-and-drop).
 
 ## Pattern-to-Layer Mapping
 

@@ -108,7 +108,7 @@ re-present it. No exceptions for bugs that seem obvious.
 
 **For component bugs** — before writing any test, map the component's state machine: list every state value and the transitions between them (e.g., `SEARCHING → LOADING → null`). Internal state that isn't documented must be read from the source before you write a test that depends on it — otherwise each failed run is just blind trial-and-error until you happen to reach the right state.
 
-**Removal fixes** — if the fix deletes or unwraps UI elements (e.g., removing `EuiToolTip` wrappers), ask before writing the test: *"Can I assert the behavior that was wrong, rather than the element's absence?"* `expect(wrapper.find(EuiToolTip)).toHaveLength(0)` is fragile (any future tooltip in the tree breaks it) and misrepresentative (the bug was about behavior, not existence). For removal fixes where no meaningful behavior assertion exists, it is acceptable to skip the unit test and document the decision in the PR description. Do not force an existence check just to satisfy TDD.
+**Removal fixes** — if the fix deletes or unwraps UI elements (e.g., removing `EuiToolTip` wrappers), ask before writing the test: *"Can I assert the behavior that was wrong, rather than the element's absence?"* A behavior assertion is **meaningful** if it asserts (a) an action that was incorrectly blocked now succeeds (e.g., a click fires, a mutation runs), or (b) a user-visible outcome is absent without using element-existence checks. `expect(wrapper.find(EuiToolTip)).toHaveLength(0)` is not meaningful — it is fragile (any future tooltip in the tree breaks it) and asserts presence, not behavior. If neither (a) nor (b) can be asserted, skip the unit test and add to the PR description: `"No unit test added — fix removes [element]; behavior verified in Phase 5 browser reproduction."` Do not force an existence check just to satisfy TDD.
 
 For Scout tests, use these skills before writing (REQUIRED):
 1. scout-create-scaffold
@@ -125,8 +125,12 @@ For Scout API/UI tests: `node scripts/scout run-tests --config <config-path>`
 
 ### Step 3: Green — implement fix
 
-Keep fixes simple — prefer the smallest change that resolves the bug. More than 2–3 files
-or architectural changes means stop and ask the user before continuing.
+Keep fixes simple — prefer the smallest change that resolves the bug. Stop and ask the user before continuing if the fix requires ANY of:
+- Changes to more than 3 files (test files count separately and do not contribute to this limit)
+- Adding or removing a route registration
+- Changing a plugin's public contract (`kibana.jsonc` exports)
+- Moving code between plugins
+- Changing a Saved Object type schema
 
 1. Consult prior fixes or `x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-fixer/references/classification-guide.md`
 2. Match surrounding codebase patterns
