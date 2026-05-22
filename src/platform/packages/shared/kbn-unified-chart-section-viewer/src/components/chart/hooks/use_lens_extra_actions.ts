@@ -15,6 +15,16 @@ import {
   ACTION_EXPLORE_IN_DISCOVER_TAB,
 } from '../../../common/constants';
 
+// Shared label for the "Open in a Discover tab" action. Defining this as a
+// module-level constant prevents the literal from drifting if the action is
+// referenced from additional sites in the future.
+const OPEN_IN_DISCOVER_TAB_LABEL = i18n.translate(
+  'metricsExperience.lens.actions.openInDiscoverTab',
+  {
+    defaultMessage: 'Open in a Discover tab',
+  }
+);
+
 interface ActionEventHandler {
   onClick: () => void;
 }
@@ -80,9 +90,7 @@ const getExploreInDiscoverTabAction = (onExecute: () => void): Action => {
     order: 20, // same position as ACTION_OPEN_IN_DISCOVER action
     type: 'actionButton',
     getDisplayName() {
-      return i18n.translate('metricsExperience.lens.actions.openInDiscoverTab', {
-        defaultMessage: 'Open in a Discover tab',
-      });
+      return OPEN_IN_DISCOVER_TAB_LABEL;
     },
     getIconType() {
       return 'discoverApp';
