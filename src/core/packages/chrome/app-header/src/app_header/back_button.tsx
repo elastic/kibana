@@ -81,11 +81,7 @@ export const BackButton = React.memo<BackButtonProps>(({ targets }) => {
     return (
       <EuiPopover
         aria-label={tooltip}
-        button={
-          <EuiToolTip content={tooltip}>
-            {buttonIcon}
-          </EuiToolTip>
-        }
+        button={<EuiToolTip content={tooltip}>{buttonIcon}</EuiToolTip>}
         isOpen={isPopoverOpen}
         closePopover={closePopover}
         panelPaddingSize="none"
@@ -93,26 +89,16 @@ export const BackButton = React.memo<BackButtonProps>(({ targets }) => {
       >
         <EuiContextMenuPanel
           items={targets.map((target, idx) => (
-            <EuiContextMenuItem
-              key={idx}
-              href={target.backHref}
-              onClick={target.backOnClick}
-              size="s"
-            >
+            <EuiContextMenuItem key={idx} href={target.backHref} onClick={target.backOnClick}>
               {target.backDestinationLabel ?? target.backHref}
             </EuiContextMenuItem>
           ))}
-          size="s"
         />
       </EuiPopover>
     );
   }
 
-  return (
-    <EuiToolTip content={tooltip}>
-      {buttonIcon}
-    </EuiToolTip>
-  );
+  return <EuiToolTip content={tooltip}>{buttonIcon}</EuiToolTip>;
 });
 
 BackButton.displayName = 'BackButton';

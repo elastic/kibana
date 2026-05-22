@@ -36,7 +36,7 @@ export const ContextMenuView = ({
 }: ContextMenuViewProps) => {
   return (
     <>
-      <EuiListGroup gutterSize="none" flush>
+      <EuiListGroup>
         <ContextRow row={environmentRow} onClick={onClickEnvironmentRow} />
         <ContextRow row={spacesRow} onClick={onClickSpacesRow} />
       </EuiListGroup>

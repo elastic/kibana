@@ -20,7 +20,7 @@ import type {
   ChromeBreadcrumbsBadge,
   ChromeNext,
   ChromeNextAiButton,
-  ChromeNextGlobalSearchConfig,
+  GlobalSearchConfig,
   ChromeProjectNavigationNode,
   ChromeSetProjectBreadcrumbsParams,
   ChromeUserBanner,
@@ -132,7 +132,7 @@ export interface InternalChromeNext extends ChromeNext {
     get$(): Observable<ChromeNextAiButton[]>;
   };
   globalSearch: ChromeNext['globalSearch'] & {
-    get$(): Observable<ChromeNextGlobalSearchConfig | undefined>;
+    get$(): Observable<GlobalSearchConfig | undefined>;
   };
   userMenu: ChromeNext['userMenu'] & {
     get$(): Observable<ReactNode>;

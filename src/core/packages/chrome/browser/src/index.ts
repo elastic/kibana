@@ -37,7 +37,6 @@ export type {
   AppHeaderTab,
   ChromeNext,
   ChromeNextAiButton,
-  ChromeNextGlobalSearchConfig,
 } from './chrome_next';
 
 export type {
