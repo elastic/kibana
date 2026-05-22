@@ -126,8 +126,6 @@ describe('helpers', function () {
     });
 
     it('should return a string message when error.message is a non-string (e.g. DOMException from aborted fetch)', function () {
-      // Reproduces the bug from poll_search.ts passing signal.reason (a DOMException) directly
-      // to new AbortError(reason), causing AbortError.message to be a DOMException object.
       const domException = new DOMException('signal is aborted without reason', 'AbortError');
       const error = new Error('placeholder');
       (error as unknown as { message: unknown }).message = domException;
