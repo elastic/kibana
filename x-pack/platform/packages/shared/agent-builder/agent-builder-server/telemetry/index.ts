@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export { UptimeOverviewPage } from './uptime_overview';
-export { MonitorDetailsPage } from './monitor_details';
-export { UptimeSettingsPage } from './uptime_settings';
+export type { AgentBuilderAnalytics, AgentBuilderTracking, SkillInvokedEvent } from './skills';

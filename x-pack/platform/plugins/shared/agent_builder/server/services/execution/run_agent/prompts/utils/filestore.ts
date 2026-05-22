@@ -6,11 +6,9 @@
  */
 
 import { filestoreTools } from '@kbn/agent-builder-common/tools';
-import type { IFileStore } from '@kbn/agent-builder-server/runner/filestore';
 import { FileEntryType } from '@kbn/agent-builder-server/runner/filestore';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
 import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
-import { buildFolderTree } from './utils/folder_tree';
 
 const tools = {
   read: sanitizeToolId(filestoreTools.read),
@@ -19,13 +17,7 @@ const tools = {
   grep: sanitizeToolId(filestoreTools.grep),
 };
 
-export const getFileSystemInstructions = async ({
-  filesystem,
-}: {
-  filesystem: IFileStore;
-}): Promise<string> => {
-  const treeRepresentation = await buildFolderTree(filesystem, { maxFilesPerFolder: 3 });
-
+export const getFileSystemInstructions = (): string => {
   return cleanPrompt(`
   ## FILESTORE
 
@@ -60,19 +52,7 @@ export const getFileSystemInstructions = async ({
 
   #### Skills
 
-  File type: "${FileEntryType.skill}"
+  File type: "${FileEntryType.skill}" for main skill files (SKILL.md) and "${FileEntryType.skillReferenceContent}" for additional skill files.
 
-  Skills contained detailed instructions for a specific task.
-
-  - They are all stored under the "/skills" folder
-
-  ### Filesystem representation
-
-  Here is a representation of what the filesystem currently contains:
-
-  """
-  ${treeRepresentation}
-  """
-
-  `);
+  Skills contained detailed instructions for a specific task. They are all stored under the "/skills" folder.`);
 };

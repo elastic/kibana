@@ -7,16 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ScoutServerConfig } from '../../../../../types';
-import { defaultConfig } from '../../default/stateful/base.config';
-
-export const servers: ScoutServerConfig = {
-  ...defaultConfig,
-  kbnTestServer: {
-    ...defaultConfig.kbnTestServer,
-    serverArgs: [
-      ...defaultConfig.kbnTestServer.serverArgs,
-      '--uiSettings.overrides.observability:enableLegacyUptimeApp=true',
-    ],
-  },
-};
+export * from './src/elasticsearch_definitions';
+export { clearDocumentationDirectives } from './src/docs';
