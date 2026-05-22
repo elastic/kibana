@@ -49,7 +49,12 @@ export function toStoredDataView(
 function isSavedDataView(
   dataView: AsCodeDataView | AsCodeSavedDataView
 ): dataView is AsCodeSavedDataView {
-  return 'id' in dataView || 'name' in dataView || 'allow_hidden_indices' in dataView;
+  return (
+    'id' in dataView ||
+    'name' in dataView ||
+    'allow_hidden_indices' in dataView ||
+    'field_filters' in dataView
+  );
 }
 
 function getSavedDataViewFields(dataView: AsCodeSavedDataView): Partial<DataViewSpec> {

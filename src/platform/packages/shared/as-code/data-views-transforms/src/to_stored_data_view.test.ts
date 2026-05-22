@@ -15,6 +15,7 @@ import {
   type AsCodeSavedDataView,
 } from '@kbn/as-code-data-views-schema';
 import { toStoredDataView } from './to_stored_data_view';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 
 describe('toStoredDataView', () => {
   it('converts data_view_reference data_source to string id', () => {
@@ -182,7 +183,7 @@ describe('toStoredDataView', () => {
           title: 'logs-*',
         })
       );
-      expect((result as Record<string, unknown>).sourceFilters).toBeUndefined();
+      expect((result as DataViewSpec).sourceFilters).toBeUndefined();
     });
   });
 });
