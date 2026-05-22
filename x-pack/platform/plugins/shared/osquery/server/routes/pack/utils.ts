@@ -24,13 +24,14 @@ import { satisfies } from 'semver';
 import type { AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { Shard } from '../../../common/utils/converters';
 import { DEFAULT_PLATFORM } from '../../../common/constants';
+import type { RRuleScheduleConfig, ScheduleType } from '../../../common';
 import { removeMultilines } from '../../../common/utils/build_query/remove_multilines';
 import { convertECSMappingToArray, convertECSMappingToObject } from '../utils';
 
 export interface PackQueryInput {
   name?: string;
   query: string;
-  interval: number;
+  interval?: number;
   platform?: string;
   version?: string;
   snapshot?: boolean;
@@ -39,12 +40,49 @@ export interface PackQueryInput {
   schedule_id?: string;
   start_date?: string;
   ecs_mapping?: Record<string, unknown>;
+  /** Per-query schedule type override. */
+  schedule_type?: ScheduleType;
+  /** Per-query RRULE override (only present when `schedule_type === 'rrule'`). */
+  rrule_schedule?: RRuleScheduleConfig;
 }
 
 export interface SOPackQuery extends Omit<PackQueryInput, 'name'> {
   id: string;
   name: string;
 }
+
+// Default pick list for pack query SOs — byte-identical to the pre-rrule
+// shape. Used when `schedule_type` is unset (the only path under
+// `rruleScheduling: false`) and when a query inherits the pack's schedule in
+// interval mode.
+const INTERVAL_MODE_PICK = [
+  'name',
+  'query',
+  'interval',
+  'platform',
+  'version',
+  'snapshot',
+  'removed',
+  'timeout',
+  'schedule_id',
+  'start_date',
+] as const;
+
+// Same fields minus `interval` — used when a query opts into rrule mode. The
+// SO never carries both `interval` and `rrule_schedule` for one query (mutual
+// exclusivity is enforced by building two disjoint pick lists rather than
+// mutating one).
+const RRULE_MODE_PICK = [
+  'name',
+  'query',
+  'platform',
+  'version',
+  'snapshot',
+  'removed',
+  'timeout',
+  'schedule_id',
+  'start_date',
+] as const;
 
 export const convertPackQueriesToSO = (queries: Record<string, PackQueryInput>): SOPackQuery[] =>
   reduce(
@@ -53,20 +91,23 @@ export const convertPackQueriesToSO = (queries: Record<string, PackQueryInput>):
       const ecsMapping = value.ecs_mapping
         ? convertECSMappingToArray(value.ecs_mapping as Record<string, object>)
         : undefined;
+
+      const baseFields = pick(
+        value,
+        value.schedule_type === 'rrule' ? RRULE_MODE_PICK : INTERVAL_MODE_PICK
+      );
+
+      let scheduleOverride: Partial<SOPackQuery> = {};
+      if (value.schedule_type === 'rrule') {
+        scheduleOverride = pick(value, ['schedule_type', 'rrule_schedule']);
+      } else if (value.schedule_type === 'interval') {
+        scheduleOverride = pick(value, ['schedule_type']);
+      }
+
       acc.push({
         id: key,
-        ...pick(value, [
-          'name',
-          'query',
-          'interval',
-          'platform',
-          'version',
-          'snapshot',
-          'removed',
-          'timeout',
-          'schedule_id',
-          'start_date',
-        ]),
+        ...baseFields,
+        ...scheduleOverride,
         ...(ecsMapping ? { ecs_mapping: ecsMapping } : {}),
       } as SOPackQuery);
 
