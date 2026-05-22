@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { performance } from 'perf_hooks';
 import type { IncomingHttpHeaders } from 'http';
 import { Buffer } from 'buffer';
 import { stringify } from 'querystring';
@@ -118,11 +119,12 @@ function getContentLength(headers?: IncomingHttpHeaders): number | undefined {
 function getResponseMessage(
   event: DiagnosticResult,
   bytesMsg: string,
-  apisToRedactInLogs: ElasticsearchApiToRedactInLogs[]
+  apisToRedactInLogs: ElasticsearchApiToRedactInLogs[],
+  durationMsg: string
 ): string {
   const debugMeta = getRequestDebugMeta(event, apisToRedactInLogs);
   const body = debugMeta.body ? `\n${debugMeta.body}` : '';
-  return `${debugMeta.statusCode}${bytesMsg}\n${debugMeta.method} ${debugMeta.url}${body}`;
+  return `${debugMeta.statusCode}${bytesMsg}${durationMsg}\n${debugMeta.method} ${debugMeta.url}${body}`;
 }
 
 /**
@@ -160,17 +162,24 @@ function getQueryMessage(
   bytes: number | undefined,
   error: errors.ElasticsearchClientError | errors.ResponseError | null,
   event: DiagnosticResult<unknown, unknown>,
-  apisToRedactInLogs: ElasticsearchApiToRedactInLogs[]
+  apisToRedactInLogs: ElasticsearchApiToRedactInLogs[],
+  duration?: number
 ) {
   const bytesMsg = bytes ? ` - ${numeral(bytes).format('0.0b')}` : '';
+  const durationMsg = duration !== undefined ? ` - ${duration}ms` : '';
   if (error) {
     if (error instanceof errors.ResponseError) {
-      return `${getResponseMessage(event, bytesMsg, apisToRedactInLogs)} ${getErrorMessage(error)}`;
+      return `${getResponseMessage(
+        event,
+        bytesMsg,
+        apisToRedactInLogs,
+        durationMsg
+      )} ${getErrorMessage(error)}`;
     } else {
       return getErrorMessage(error);
     }
   } else {
-    return getResponseMessage(event, bytesMsg, apisToRedactInLogs);
+    return getResponseMessage(event, bytesMsg, apisToRedactInLogs, durationMsg);
   }
 }
 
@@ -199,6 +208,14 @@ export const instrumentEsQueryAndDeprecationLogger = ({
   const deprecationLogger = logger.get('deprecation');
   const warningLogger = logger.get('warnings'); // elasticsearch.warnings
 
+  const requestStartTimes = new Map<string | number, number>();
+
+  client.diagnostic.on('request', (_error, event) => {
+    if (event?.meta?.request?.id != null) {
+      requestStartTimes.set(event.meta.request.id, performance.now());
+    }
+  });
+
   client.diagnostic.on('response', (error, event) => {
     const requestLoggingOptions = event?.meta?.request?.options?.context?.loggingOptions as
       | ElasticsearchRequestLoggingOptions
@@ -216,9 +233,19 @@ export const instrumentEsQueryAndDeprecationLogger = ({
       warningLogger.warn(getResponseSizeExceededErrorMessage(error));
     }
 
+    let duration: number | undefined;
+    const requestId = event?.meta?.request?.id;
+    if (requestId != null) {
+      const startTime = requestStartTimes.get(requestId);
+      if (startTime !== undefined) {
+        duration = Math.round(performance.now() - startTime);
+        requestStartTimes.delete(requestId);
+      }
+    }
+
     if (event && (logQuery || logDeprecation)) {
       const bytes = getContentLength(event.headers);
-      const queryMsg = getQueryMessage(bytes, error, event, apisToRedactInLogs);
+      const queryMsg = getQueryMessage(bytes, error, event, apisToRedactInLogs, duration);
 
       if (logQuery) {
         const meta = getEcsResponseLog(event, bytes);
