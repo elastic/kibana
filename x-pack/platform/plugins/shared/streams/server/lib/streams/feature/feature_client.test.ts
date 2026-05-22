@@ -56,12 +56,18 @@ const createMockStorageClient = () => ({
 const renderEsqlCallQuery = (call: {
   metadata?: string[];
   buildPipeline: (q: ReturnType<typeof esql.from>) => unknown;
-}): string => {
+}): string => renderEsqlCall(call).query;
+
+/** Renders the full ES|QL request (query + params) from a mocked `storageClient.esql` call. */
+const renderEsqlCall = (call: {
+  metadata?: string[];
+  buildPipeline: (q: ReturnType<typeof esql.from>) => unknown;
+}): ReturnType<ReturnType<typeof esql.from>['toRequest']> => {
   const base =
     call.metadata && call.metadata.length > 0
       ? esql.from(['test_index'], call.metadata)
       : esql.from(['test_index']);
-  return (call.buildPipeline(base) as ReturnType<typeof esql.from>).print('basic');
+  return (call.buildPipeline(base) as ReturnType<typeof esql.from>).toRequest();
 };
 
 const createFeatureClient = ({
@@ -348,9 +354,10 @@ describe('FeatureClient', () => {
       const { client, storageClient } = createFeatureClient();
       await client.getExcludedFeatures('logs.test');
 
-      const query = renderEsqlCallQuery(storageClient.esql.mock.calls[0][0]);
+      const { query, params } = renderEsqlCall(storageClient.esql.mock.calls[0][0]);
       expect(query).toContain('IS NOT NULL');
-      expect(query).toContain('"logs.test"');
+      // Stream name is now passed via a named param hole rather than baked into the query string.
+      expect(params).toContainEqual({ stream: 'logs.test' });
     });
 
     it('sorts by excluded_at descending', async () => {

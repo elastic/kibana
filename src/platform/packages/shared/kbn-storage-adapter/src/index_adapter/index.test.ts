@@ -411,17 +411,21 @@ describe('StorageIndexAdapter - esql method', () => {
     );
   });
 
-  it('forwards params to esClient.esql.query', async () => {
+  it('forwards param-hole values from the rendered ComposerQuery to esClient.esql.query', async () => {
     const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
     const client = adapter.getClient();
 
-    const params = [{ p: '*foo*' }];
+    const searchTerm = '*foo*';
     await client.esql({
-      buildPipeline: (q) => q.pipe`WHERE foo LIKE ?p`.limit(5),
-      params,
+      buildPipeline: (q) => q.where`foo LIKE ${{ searchTerm }}`.limit(5),
     });
 
-    expect(esqlQuery).toHaveBeenCalledWith(expect.objectContaining({ params }));
+    expect(esqlQuery).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: expect.stringContaining('?searchTerm'),
+        params: expect.arrayContaining([{ searchTerm: '*foo*' }]),
+      })
+    );
   });
 
   it('returns empty response when the storage index does not exist (404 path)', async () => {

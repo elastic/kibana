@@ -14,7 +14,7 @@ import type { InsightCore } from '@kbn/streams-schema';
 import type { Query } from '../../../../common/queries';
 import { parseError } from '../../streams/errors/parse_error';
 import { SecurityError } from '../../streams/errors/security_error';
-import { getSourceColumnIndex } from '../../streams/helpers/esql';
+import { getSourceColumnIndex, toEsqlRequest } from '../../streams/helpers/esql';
 import { SUBMIT_INSIGHTS_TOOL_NAME, parseInsightsWithErrors } from './client/insight_tool';
 
 export interface QueryData {
@@ -82,15 +82,16 @@ export async function collectQueryData({
   try {
     [q1Response, q2Response] = await Promise.all([
       esClient.esql.query({
-        query: esql.from([alertsIndex], ['_source']).where`${whereCondition}`
-          .limit(SAMPLE_EVENTS_COUNT)
-          .print('basic'),
+        ...toEsqlRequest(
+          esql.from([alertsIndex], ['_source']).where`${whereCondition}`.limit(SAMPLE_EVENTS_COUNT)
+        ),
         drop_null_columns: true,
         format: 'json',
       }) as unknown as ESQLSearchResponse,
       esClient.esql.query({
-        query: esql.from([alertsIndex]).where`${whereCondition}`
-          .pipe`STATS currentCount = COUNT(*)`.print('basic'),
+        ...toEsqlRequest(
+          esql.from([alertsIndex]).where`${whereCondition}`.pipe`STATS currentCount = COUNT(*)`
+        ),
         format: 'json',
       }) as unknown as ESQLSearchResponse,
     ]);

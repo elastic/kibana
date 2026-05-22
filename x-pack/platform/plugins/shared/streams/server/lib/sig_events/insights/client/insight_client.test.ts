@@ -25,12 +25,17 @@ import { StatusError } from '../../../streams/errors/status_error';
 const renderEsqlCallQuery = (call: {
   metadata?: string[];
   buildPipeline: (q: ReturnType<typeof esql.from>) => unknown;
-}): string => {
+}): string => renderEsqlCall(call).query;
+
+const renderEsqlCall = (call: {
+  metadata?: string[];
+  buildPipeline: (q: ReturnType<typeof esql.from>) => unknown;
+}): ReturnType<ReturnType<typeof esql.from>['toRequest']> => {
   const base =
     call.metadata && call.metadata.length > 0
       ? esql.from(['test_index'], call.metadata)
       : esql.from(['test_index']);
-  return (call.buildPipeline(base) as ReturnType<typeof esql.from>).print('basic');
+  return (call.buildPipeline(base) as ReturnType<typeof esql.from>).toRequest();
 };
 
 describe('InsightClient', () => {
@@ -103,8 +108,10 @@ describe('InsightClient', () => {
 
       const result = await client.get('test-id');
 
-      const rendered = renderEsqlCallQuery(mockStorageClient.esql.mock.calls[0][0]);
-      expect(rendered).toContain('"test-id"');
+      const { query, params } = renderEsqlCall(mockStorageClient.esql.mock.calls[0][0]);
+      // ID is passed via a named param hole rather than baked into the query string.
+      expect(query).toContain('?id');
+      expect(params).toContainEqual({ id: 'test-id' });
       expect(result.id).toEqual('test-id');
       expect(result.title).toEqual('Test Insight');
     });
@@ -177,8 +184,9 @@ describe('InsightClient', () => {
 
       const result = await client.delete('test-id');
 
-      const rendered = renderEsqlCallQuery(mockStorageClient.esql.mock.calls[0][0]);
-      expect(rendered).toContain('"test-id"');
+      const { query, params } = renderEsqlCall(mockStorageClient.esql.mock.calls[0][0]);
+      expect(query).toContain('?id');
+      expect(params).toContainEqual({ id: 'test-id' });
       expect(mockStorageClient.delete).toHaveBeenCalledWith({ id: 'test-id' });
       expect(result).toEqual({ acknowledged: true });
     });

@@ -337,7 +337,7 @@ export class FeatureClient {
     const response = await this.clients.storageClient.esql({
       metadata: ['_id', '_source'],
       buildPipeline: (q) =>
-        q.where`_id == ${esql.str(uuid)} AND ${col(STREAM_NAME)} == ${esql.str(stream)}`.limit(1),
+        q.where`_id == ${{ uuid }} AND ${col(STREAM_NAME)} == ${{ stream }}`.limit(1),
     });
 
     const sourceIdx = getSourceColumnIndex(response);
@@ -399,9 +399,8 @@ export class FeatureClient {
     const response = await this.clients.storageClient.esql({
       metadata: ['_id', '_source'],
       buildPipeline: (q) =>
-        q.where`${col(STREAM_NAME)} == ${esql.str(stream)} AND ${col(
-          FEATURE_EXCLUDED_AT
-        )} IS NOT NULL`.pipe`SORT ${col(FEATURE_EXCLUDED_AT)} DESC`.limit(10_000),
+        q.where`${col(STREAM_NAME)} == ${{ stream }} AND ${col(FEATURE_EXCLUDED_AT)} IS NOT NULL`
+          .pipe`SORT ${col(FEATURE_EXCLUDED_AT)} DESC`.limit(10_000),
     });
 
     return { hits: mapSourceRows<StoredFeature, Feature>(response, fromStorage) };
@@ -590,9 +589,9 @@ export class FeatureClient {
             const response = await this.clients.storageClient.esql({
               metadata: ['_id', '_source'],
               buildPipeline: (q) =>
-                q.where`_id IN (${idLiterals}) AND ${col(STREAM_NAME)} == ${esql.str(
-                  stream
-                )}`.limit(idsToValidate.length),
+                q.where`_id IN (${idLiterals}) AND ${col(STREAM_NAME)} == ${{ stream }}`.limit(
+                  idsToValidate.length
+                ),
             });
             const idIdx = getColumnIndex(response, '_id');
             const sourceIdx = getSourceColumnIndex(response);

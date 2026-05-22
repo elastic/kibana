@@ -10,6 +10,7 @@
 import type {
   BulkOperationContainer,
   BulkOperationType,
+  EsqlQueryRequest,
   IndexResponse,
   IndicesIndexState,
   IndicesIndexTemplate,
@@ -103,11 +104,8 @@ export function isEsqlUnknownIndexError(error: unknown): boolean {
   );
 }
 
-// Guards the `storageClient.esql` callback boundary. The caller's
-// `buildPipeline` receives a `ComposerQuery` pinned to the storage index, but
-// nothing in the type system stops it from returning a new query targeting a
-// different index. Re-parse the final rendered string and reject anything
-// whose `FROM` sources don't match the expected storage index.
+// Runtime guard — `buildPipeline` returns a `ComposerQuery` typed but not
+// pinned to our index; callers could call `esql.from(otherIndex)` instead.
 function assertRenderedEsqlTargetsStorageIndex(query: string, expectedIndex: string): void {
   const { root, errors: parseErrors } = Parser.parse(query);
   if (parseErrors.length > 0) {
@@ -770,7 +768,7 @@ export class StorageIndexAdapter<
    */
 
   private esql: StorageClientEsql = (
-    { buildPipeline, metadata, params, filter, drop_null_columns = true, migrateSource = true },
+    { buildPipeline, metadata, filter, drop_null_columns = true, migrateSource = true },
     transportOptions
   ) =>
     this.ensureMappingsBeforeReading(async () => {
@@ -779,21 +777,19 @@ export class StorageIndexAdapter<
         metadata && metadata.length > 0
           ? esql.from([this.getSearchIndexPattern()], metadata)
           : esql.from([this.getSearchIndexPattern()]);
-      const rendered = buildPipeline(baseQuery).print('basic');
-      assertRenderedEsqlTargetsStorageIndex(rendered, this.getSearchIndexPattern());
+      // Drop Composer's loose `filter` (caller supplies a typed one below).
+      const { filter: _composerFilter, ...request } = buildPipeline(baseQuery).toRequest();
+      assertRenderedEsqlTargetsStorageIndex(request.query, this.getSearchIndexPattern());
 
       try {
+        const esqlRequest = {
+          ...request,
+          ...(filter !== undefined ? { filter } : {}),
+          drop_null_columns,
+          format: 'json' as const,
+        } as unknown as EsqlQueryRequest;
         const response = (await wrapEsCall(
-          this.esClient.esql.query(
-            {
-              query: rendered,
-              ...(params !== undefined ? { params } : {}),
-              ...(filter !== undefined ? { filter } : {}),
-              drop_null_columns,
-              format: 'json',
-            },
-            ...optionalTransportArgs(transportOptions)
-          )
+          this.esClient.esql.query(esqlRequest, ...optionalTransportArgs(transportOptions))
         )) as unknown as ESQLSearchResponse;
 
         if (migrateSource && this.options.migrateSource && metadata?.includes('_source')) {

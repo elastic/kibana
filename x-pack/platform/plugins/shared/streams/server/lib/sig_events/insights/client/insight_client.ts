@@ -52,7 +52,7 @@ export class InsightClient {
   async get(id: string): Promise<Insight> {
     const response = await this.clients.storageClient.esql({
       metadata: ['_id', '_source'],
-      buildPipeline: (q) => q.where`_id == ${esql.str(id)}`.limit(1),
+      buildPipeline: (q) => q.where`_id == ${{ id }}`.limit(1),
     });
 
     const sourceIdx = getSourceColumnIndex(response);

@@ -19,7 +19,6 @@ import type {
   Result,
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { EsqlQueryRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { TransportRequestOptions } from '@elastic/transport';
 import type { ComposerQuery } from '@elastic/esql';
 import type { ESQLSearchResponse, InferSearchResponseOf } from '@kbn/es-types';
@@ -168,8 +167,6 @@ export interface StorageClientEsqlRequest {
   buildPipeline: (query: ComposerQuery) => ComposerQuery;
   /** METADATA fields for the auto-generated `FROM` clause (e.g. `['_id', '_source']`). */
   metadata?: string[];
-  /** Named ES|QL params (use for user-derived values and `LIKE` patterns). */
-  params?: EsqlQueryRequest['params'];
   /** DSL query ANDed with the pipeline. */
   filter?: QueryDslQueryContainer;
   drop_null_columns?: boolean;

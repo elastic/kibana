@@ -9,6 +9,7 @@ import { esql, type ComposerQueryTagHole, type ComposerSortShorthand } from '@el
 import type { ESQLAstExpression } from '@elastic/esql/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
+import { toEsqlRequest } from '../streams/helpers/esql';
 import { type CommonSearchOptions } from './query_utils';
 
 export type LatestSourceWhereCondition = ESQLAstExpression & ComposerQueryTagHole;
@@ -32,14 +33,16 @@ export const runLatestSourceEsqlQuery = async <T>({
   sort,
   groupBy,
 }: RunLatestSourceEsqlQueryArgs): Promise<{ hits: T[] }> => {
-  let query = esql.from([index], ['_id', '_source']).where`\`kibana.space_ids\` == ${space}`;
+  let query = esql.from([index], ['_id', '_source']).where`\`kibana.space_ids\` == ${{ space }}`;
 
   if (options.from !== undefined) {
-    query = query.where`@timestamp >= TO_DATETIME(${esql.str(options.from)})`;
+    const fromIso = options.from;
+    query = query.where`@timestamp >= TO_DATETIME(${{ fromIso }})`;
   }
 
   if (options.to !== undefined) {
-    query = query.where`@timestamp <= TO_DATETIME(${esql.str(options.to)})`;
+    const toIso = options.to;
+    query = query.where`@timestamp <= TO_DATETIME(${{ toIso }})`;
   }
 
   if (where) {
@@ -60,9 +63,7 @@ export const runLatestSourceEsqlQuery = async <T>({
 
   query = query.keep('_source');
 
-  const response = (await esClient.esql.query({
-    query: query.print(),
-  })) as ESQLSearchResponse;
+  const response = (await esClient.esql.query(toEsqlRequest(query))) as ESQLSearchResponse;
 
   const sourceIdx = response.columns.findIndex((c) => c.name === '_source');
   if (sourceIdx === -1) {

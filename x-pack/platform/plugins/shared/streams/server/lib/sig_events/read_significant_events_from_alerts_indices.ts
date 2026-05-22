@@ -15,6 +15,7 @@ import type { QueryLink, SearchMode } from '../../../common/queries';
 import type { QueryClient, QueryLinkFilters } from '../streams/assets/query/query_client';
 import { parseError } from '../streams/errors/parse_error';
 import { SecurityError } from '../streams/errors/security_error';
+import { toEsqlRequest } from '../streams/helpers/esql';
 import { ESQL_UNITS, fillBucketGaps, parseBucketSize } from './helpers/fill_bucket_gaps';
 
 const ALERTS_INDEX = '.alerts-streams.alerts-default';
@@ -75,10 +76,12 @@ export async function readSignificantEventsFromAlertsIndices(
   let response: Awaited<ReturnType<typeof scopedClusterClient.asCurrentUser.esql.query>>;
   try {
     response = await scopedClusterClient.asCurrentUser.esql.query({
-      query: esql.from([ALERTS_INDEX]).where`${ruleUuidCol} IN (${ruleIdLiterals})`
-        .pipe`STATS count = COUNT(*) BY rule_uuid = ${ruleUuidCol}, bucket = BUCKET(@timestamp, ${esql.num(
-        value
-      )} ${esql.kwd(esqlUnit)})`.pipe`SORT bucket ASC`.print('basic'),
+      ...toEsqlRequest(
+        esql.from([ALERTS_INDEX]).where`${ruleUuidCol} IN (${ruleIdLiterals})`
+          .pipe`STATS count = COUNT(*) BY rule_uuid = ${ruleUuidCol}, bucket = BUCKET(@timestamp, ${esql.num(
+          value
+        )} ${esql.kwd(esqlUnit)})`.pipe`SORT bucket ASC`
+      ),
       filter: {
         bool: {
           filter: [{ range: { '@timestamp': { gte: from.toISOString(), lte: to.toISOString() } } }],

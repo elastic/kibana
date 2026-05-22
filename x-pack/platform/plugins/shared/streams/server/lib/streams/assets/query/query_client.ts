@@ -644,7 +644,7 @@ export class QueryClient {
     const response = await this.dependencies.storageClient.esql({
       metadata: ['_id', '_source'],
       buildPipeline: (q) =>
-        q.where`_id IN (${idLiterals}) AND ${col(STREAM_NAME)} == ${esql.str(name)} AND ${col(
+        q.where`_id IN (${idLiterals}) AND ${col(STREAM_NAME)} == ${{ name }} AND ${col(
           ASSET_TYPE
         )} == ${esql.str('query')}`.limit(uuids.length),
     });
