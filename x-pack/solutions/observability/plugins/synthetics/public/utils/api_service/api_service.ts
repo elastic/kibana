@@ -73,11 +73,26 @@ class ApiService {
   }
 
   private parseApiUrl(apiUrl: string, spaceId?: string) {
-    if (spaceId && spaceId !== 'default' && spaceId !== '*') {
+    // `*` is the all-spaces marker used by saved object `namespaces`; it is not
+    // a real space ID we can route to, so callers should fall back to the
+    // active space rather than rewriting the URL.
+    if (spaceId && spaceId !== '*') {
       const basePath = kibanaService.coreSetup.http.basePath;
+      // `addSpaceIdToPath` already produces a basePath-only URL (no `/s/<id>`
+      // segment) for the default space, so it works for both default and
+      // named spaces. Returning here lets us drop the basePath prefix Kibana
+      // would otherwise add for the active space, which would mis-route a
+      // cross-space request.
       return addSpaceIdToPath(basePath.serverBasePath, spaceId, apiUrl);
     }
     return apiUrl;
+  }
+
+  private shouldSkipBasePath(spaceId?: string) {
+    // Only opt out of the http client's basePath logic when we have actually
+    // rewritten the URL ourselves (i.e. `parseApiUrl` produced a fully
+    // qualified path including the basePath).
+    return Boolean(spaceId && spaceId !== '*');
   }
 
   public async get<T>(
@@ -92,7 +107,7 @@ class ApiService {
       query: queryParams,
       version,
       ...(options ?? {}),
-      ...(spaceId ? { prependBasePath: false } : {}),
+      ...(this.shouldSkipBasePath(spaceId) ? { prependBasePath: false } : {}),
     });
 
     this.addInspectorRequest?.({
@@ -112,7 +127,7 @@ class ApiService {
       body: JSON.stringify(data),
       query: queryParams,
       version,
-      ...(spaceId ? { prependBasePath: false } : {}),
+      ...(this.shouldSkipBasePath(spaceId) ? { prependBasePath: false } : {}),
     });
 
     this.addInspectorRequest?.({
@@ -139,7 +154,7 @@ class ApiService {
       query: queryParams,
       version,
       ...(options ?? {}),
-      ...(spaceId ? { prependBasePath: false } : {}),
+      ...(this.shouldSkipBasePath(spaceId) ? { prependBasePath: false } : {}),
     });
 
     return this.parseResponse(response, apiUrl, decodeType);
@@ -154,7 +169,7 @@ class ApiService {
       body: JSON.stringify(data),
       version,
       ...(options ?? {}),
-      ...(spaceId ? { prependBasePath: false } : {}),
+      ...(this.shouldSkipBasePath(spaceId) ? { prependBasePath: false } : {}),
     });
 
     if (response instanceof Error) {

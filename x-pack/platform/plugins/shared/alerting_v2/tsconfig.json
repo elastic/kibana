@@ -5,6 +5,7 @@
     "outDir": "target/types"
   },
   "include": [
+    ".storybook/**/*",
     "common/**/*",
     "server/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
@@ -107,7 +108,10 @@
     "@kbn/agent-context-layer-plugin",
     "@kbn/core-saved-objects-api-server",
     "@kbn/core-elasticsearch-server",
+    "@kbn/code-editor",
+    "@kbn/workflows-yaml",
+    "@kbn/workflows-ui",
     "@kbn/core-spaces-common"
   ],
-  "exclude": ["target/**/*"]
+  "exclude": ["target/**/*", ".storybook/**/*.js"]
 }

@@ -53,21 +53,19 @@ export const mountApp = async ({
           <I18nProvider>
             <QueryClientProvider client={queryClient}>
               <AgentBuilderServicesContext.Provider value={services}>
-                <AgentBuilderUiClickTelemetry>
-                  <ActiveSpaceProvider spaceId={activeSpaceId}>
-                    <AppLeaveContext.Provider value={onAppLeave}>
-                      <RedirectAppLinks coreStart={core}>
-                        <PageWrapper>
-                          <Router history={history}>
-                            <StreamingProvider>
-                              <AgentBuilderRoutes />
-                            </StreamingProvider>
-                          </Router>
-                        </PageWrapper>
-                      </RedirectAppLinks>
-                    </AppLeaveContext.Provider>
-                  </ActiveSpaceProvider>
-                </AgentBuilderUiClickTelemetry>
+                <ActiveSpaceProvider spaceId={activeSpaceId}>
+                  <AppLeaveContext.Provider value={onAppLeave}>
+                    <RedirectAppLinks coreStart={core}>
+                      <PageWrapper>
+                        <Router history={history}>
+                          <StreamingProvider>
+                            <AgentBuilderRoutes />
+                          </StreamingProvider>
+                        </Router>
+                      </PageWrapper>
+                    </RedirectAppLinks>
+                  </AppLeaveContext.Provider>
+                </ActiveSpaceProvider>
               </AgentBuilderServicesContext.Provider>
             </QueryClientProvider>
           </I18nProvider>
