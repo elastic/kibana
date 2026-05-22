@@ -19,7 +19,6 @@ import {
   useEuiTheme,
   EuiLink,
 } from '@elastic/eui';
-import type { EuiThemeComputed } from '@elastic/eui-theme-common';
 import { i18n } from '@kbn/i18n';
 import { FormattedDate, FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 
@@ -32,7 +31,7 @@ import { FLEET_PAGE_SIZE_OPTIONS } from '../../../../../constants';
 import { useLink } from '../../../hooks';
 import { Tags } from '../../agents/components/tags';
 
-type VisColorKey = keyof EuiThemeComputed['colors']['vis'];
+import { getSignalBadgeColor } from './signal_colors';
 
 interface CollectorsTableProps {
   collectors: Agent[];
@@ -44,12 +43,6 @@ interface CollectorsTableProps {
 }
 
 const PAGE_SIZE_OPTIONS = [...FLEET_PAGE_SIZE_OPTIONS];
-
-const SIGNAL_VIS_COLOR_KEYS: Record<string, [VisColorKey, VisColorKey]> = {
-  logs: ['euiColorVisBehindText9', 'euiColorVisText9'],
-  metrics: ['euiColorVisBehindText1', 'euiColorVisText1'],
-  traces: ['euiColorVisBehindText3', 'euiColorVisText3'],
-};
 
 export const CollectorsTable: React.FC<CollectorsTableProps> = ({
   collectors,
@@ -63,12 +56,6 @@ export const CollectorsTable: React.FC<CollectorsTableProps> = ({
   const { euiTheme } = useEuiTheme();
 
   const columns: Array<EuiBasicTableColumn<Agent>> = useMemo(() => {
-    const getSignalBadgeColor = (signal: string): [string, string] => {
-      const entry = SIGNAL_VIS_COLOR_KEYS[signal];
-      if (!entry) return ['hollow', 'default'];
-      return [euiTheme.colors.vis[entry[0]], euiTheme.colors.vis[entry[1]]];
-    };
-
     return [
       {
         field: 'id',
@@ -117,7 +104,7 @@ export const CollectorsTable: React.FC<CollectorsTableProps> = ({
           return (
             <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
               {signals.map((signal) => {
-                const color = getSignalBadgeColor(signal);
+                const color = getSignalBadgeColor(euiTheme.colors.vis, signal);
 
                 return (
                   <EuiFlexItem grow={false} key={signal}>

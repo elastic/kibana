@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { EuiCallOut, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -14,9 +14,10 @@ import { FLEET_ROUTING_PATHS } from '../../constants';
 import { DefaultLayout } from '../../layouts';
 import { useBreadcrumbs } from '../../hooks';
 
+import { CollectorGroupsTable } from './components/collector_groups_table';
 import { CollectorsTable } from './components/collectors_table';
 import { CollectorsStatusBar } from './components/collectors_status_bar';
-import { useCollectorsList } from './hooks';
+import { useCollectorGroups, useCollectorsList } from './hooks';
 
 const REFRESH_INTERVAL_MS = 30000;
 
@@ -24,21 +25,37 @@ const CollectorsListPage: React.FC = () => {
   useBreadcrumbs('collectors');
 
   const [isAutoRefreshOn, setIsAutoRefreshOn] = useState(true);
+  const [groupBy, setGroupBy] = useState('none');
 
-  const {
-    collectors,
-    totalCount,
-    isLoading,
-    isInitialLoading,
-    isError,
-    error,
-    dataUpdatedAt,
-    pageIndex,
-    pageSize,
-    onTableChange,
-  } = useCollectorsList({
-    refetchInterval: isAutoRefreshOn ? REFRESH_INTERVAL_MS : false,
+  const isGrouped = groupBy !== 'none';
+  const refetchInterval = isAutoRefreshOn ? REFRESH_INTERVAL_MS : false;
+
+  const collectorsList = useCollectorsList({ refetchInterval, enabled: !isGrouped });
+  const collectorGroups = useCollectorGroups({
+    groupBy,
+    refetchInterval,
+    enabled: isGrouped,
   });
+
+  const { resetPagination } = collectorGroups;
+  const handleGroupByChange = useCallback(
+    (value: string) => {
+      setGroupBy(value);
+      resetPagination();
+    },
+    [resetPagination]
+  );
+
+  const isInitialLoading = isGrouped
+    ? collectorGroups.isInitialLoading
+    : collectorsList.isInitialLoading;
+  const isError = isGrouped ? collectorGroups.isError : collectorsList.isError;
+  const error = isGrouped ? collectorGroups.error : collectorsList.error;
+  const dataUpdatedAt = isGrouped ? collectorGroups.dataUpdatedAt : collectorsList.dataUpdatedAt;
+  const isEmpty = isGrouped
+    ? collectorGroups.groups.length === 0
+    : collectorsList.collectors.length === 0;
+  const totalCount = isGrouped ? collectorGroups.groups.length : collectorsList.totalCount;
 
   return (
     <DefaultLayout section="collectors">
@@ -57,7 +74,7 @@ const CollectorsListPage: React.FC = () => {
         >
           {error instanceof Error ? error.message : undefined}
         </EuiCallOut>
-      ) : !isInitialLoading && collectors.length === 0 ? (
+      ) : !isInitialLoading && isEmpty ? (
         <EuiEmptyPrompt
           iconType="compute"
           title={
@@ -80,16 +97,29 @@ const CollectorsListPage: React.FC = () => {
             dataUpdatedAt={dataUpdatedAt}
             isAutoRefreshOn={isAutoRefreshOn}
             onAutoRefreshChange={setIsAutoRefreshOn}
+            selectedGroupBy={groupBy}
+            onGroupByChange={handleGroupByChange}
           />
           <EuiSpacer size="m" />
-          <CollectorsTable
-            collectors={collectors}
-            isLoading={isLoading}
-            totalCount={totalCount}
-            pageIndex={pageIndex}
-            pageSize={pageSize}
-            onTableChange={onTableChange}
-          />
+          {isGrouped ? (
+            <CollectorGroupsTable
+              groups={collectorGroups.groups}
+              isLoading={collectorGroups.isLoading}
+              pageIndex={collectorGroups.pageIndex}
+              hasNextPage={collectorGroups.hasNextPage}
+              onNextPage={collectorGroups.onNextPage}
+              onPreviousPage={collectorGroups.onPreviousPage}
+            />
+          ) : (
+            <CollectorsTable
+              collectors={collectorsList.collectors}
+              isLoading={collectorsList.isLoading}
+              totalCount={collectorsList.totalCount}
+              pageIndex={collectorsList.pageIndex}
+              pageSize={collectorsList.pageSize}
+              onTableChange={collectorsList.onTableChange}
+            />
+          )}
         </>
       )}
     </DefaultLayout>

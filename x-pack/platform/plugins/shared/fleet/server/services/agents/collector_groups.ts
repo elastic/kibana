@@ -1,0 +1,120 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import { toElasticsearchQuery } from '@kbn/es-query';
+
+import { AGENTS_INDEX, AGENT_TYPE_OPAMP } from '../../../common/constants';
+import type { CollectorGroup } from '../../../common/types';
+
+import { SIGNALS_RUNTIME_FIELD } from './build_signals_runtime_field';
+import { _joinFilters, getSpaceAwarenessFilterForAgents } from './crud';
+
+const ACTIVE_AGENT_CONDITION = 'NOT (status:inactive)';
+const ENROLLED_AGENT_CONDITION = 'NOT status:unenrolled';
+
+const GROUP_BY_FIELDS: Record<string, { valueField: string; nameField: string }> = {
+  'collector.group': {
+    valueField: 'non_identifying_attributes.elastic.collector.group',
+    nameField: 'non_identifying_attributes.elastic.collector.group_name',
+  },
+  'config.name': {
+    valueField: 'non_identifying_attributes.config.name',
+    nameField: 'non_identifying_attributes.config.description',
+  },
+};
+
+export type CollectorGroupByField = keyof typeof GROUP_BY_FIELDS;
+
+interface GetCollectorGroupsOptions {
+  groupBy: CollectorGroupByField;
+  kuery?: string;
+  perPage: number;
+  afterKey?: Record<string, string>;
+  spaceId?: string;
+}
+
+export async function getCollectorGroups(
+  esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract,
+  options: GetCollectorGroupsOptions
+): Promise<{ items: CollectorGroup[]; afterKey?: string }> {
+  const { groupBy, kuery, perPage, afterKey, spaceId } = options;
+  const { valueField, nameField } = GROUP_BY_FIELDS[groupBy];
+
+  const filters = await getSpaceAwarenessFilterForAgents(spaceId);
+  filters.push(`type:${AGENT_TYPE_OPAMP}`);
+  filters.push(ACTIVE_AGENT_CONDITION);
+  filters.push(ENROLLED_AGENT_CONDITION);
+
+  if (kuery) {
+    filters.push(kuery);
+  }
+
+  const kueryNode = _joinFilters(filters);
+
+  const res = await esClient.search({
+    index: AGENTS_INDEX,
+    size: 0,
+    track_total_hits: false,
+    runtime_mappings: SIGNALS_RUNTIME_FIELD,
+    query: kueryNode ? toElasticsearchQuery(kueryNode) : undefined,
+    aggs: {
+      groups: {
+        composite: {
+          size: perPage,
+          ...(afterKey ? { after: afterKey } : {}),
+          sources: [
+            {
+              group: {
+                terms: { field: valueField },
+              },
+            },
+          ],
+        },
+        aggs: {
+          group_name: {
+            terms: { field: nameField, size: 1 },
+          },
+          signals: {
+            terms: { field: 'signals', size: 10 },
+          },
+        },
+      },
+    },
+  });
+
+  const aggs = res.aggregations as
+    | {
+        groups: {
+          buckets: Array<{
+            key: { group: string };
+            doc_count: number;
+            group_name: { buckets: Array<{ key: string }> };
+            signals: { buckets: Array<{ key: string }> };
+          }>;
+          after_key?: { group: string };
+        };
+      }
+    | undefined;
+
+  const buckets = aggs?.groups?.buckets ?? [];
+
+  const items: CollectorGroup[] = buckets.map((bucket) => ({
+    group: bucket.key.group,
+    groupDisplayName: bucket.group_name.buckets[0]?.key ?? bucket.key.group,
+    docCount: bucket.doc_count,
+    signals: bucket.signals.buckets.map((b) => b.key),
+  }));
+
+  const nextAfterKey = aggs?.groups?.after_key;
+
+  return {
+    items,
+    ...(nextAfterKey ? { afterKey: JSON.stringify(nextAfterKey) } : {}),
+  };
+}
