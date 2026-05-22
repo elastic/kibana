@@ -34,7 +34,12 @@ export function RelatedIntegrationsHelpInfo(): JSX.Element {
   );
 
   return (
-    <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={togglePopover} aria-label={RELATED_INTEGRATIONS_HELP_ARIA_LABEL}>
+    <EuiPopover
+      button={button}
+      isOpen={isPopoverOpen}
+      closePopover={togglePopover}
+      aria-label={RELATED_INTEGRATIONS_HELP_ARIA_LABEL}
+    >
       <EuiText css={{ width: POPOVER_WIDTH }} size="s">
         <FormattedMessage
           id="xpack.securitySolution.detectionEngine.ruleDescription.relatedIntegrations.fieldRelatedIntegrationsHelpText"

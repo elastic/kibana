@@ -36,10 +36,9 @@ export const EndpointDetailsFlyout = memo(() => {
       size="m"
       paddingSize="l"
       ownFocus={false}
-      aria-label={i18n.translate(
-        'xpack.securitySolution.endpoint.details.flyout.ariaLabel',
-        { defaultMessage: 'Endpoint details' }
-      )}
+      aria-label={i18n.translate('xpack.securitySolution.endpoint.details.flyout.ariaLabel', {
+        defaultMessage: 'Endpoint details',
+      })}
     >
       <EndpointDetails />
     </EuiFlyout>

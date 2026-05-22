@@ -33,7 +33,12 @@ export function RequiredFieldsHelpInfo(): JSX.Element {
   );
 
   return (
-    <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={togglePopover} aria-label={i18n.OPEN_HELP_POPOVER_ARIA_LABEL}>
+    <EuiPopover
+      button={button}
+      isOpen={isPopoverOpen}
+      closePopover={togglePopover}
+      aria-label={i18n.OPEN_HELP_POPOVER_ARIA_LABEL}
+    >
       <EuiText css={{ width: POPOVER_WIDTH }} size="s">
         <FormattedMessage
           id="xpack.securitySolution.detectionEngine.ruleDescription.requiredFields.fieldRequiredFieldsHelpText"

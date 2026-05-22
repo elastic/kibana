@@ -249,7 +249,9 @@ export const EqlQueryBarFooter: FC<EqlQueryBarFooterProps> = ({
                     ownFocus={false}
                     aria-labelledby={eqlSettingsTitleId}
                   >
-                    <EuiPopoverTitle id={eqlSettingsTitleId}>{i18n.EQL_SETTINGS_TITLE}</EuiPopoverTitle>
+                    <EuiPopoverTitle id={eqlSettingsTitleId}>
+                      {i18n.EQL_SETTINGS_TITLE}
+                    </EuiPopoverTitle>
                     <div css={{ width: '300px' }}>
                       {!isSizeOptionDisabled && (
                         <EuiFormRow

@@ -67,10 +67,9 @@ export const InputAreaPopover = memo<InputAreaPopoverProps>(({ children, width =
       focusTrapProps={focusTrapProps}
       ownFocus={false}
       data-test-subj={getTestId('inputPopover')}
-      aria-label={i18n.translate(
-        'xpack.securitySolution.console.inputAreaPopover.ariaLabel',
-        { defaultMessage: 'Command input history' }
-      )}
+      aria-label={i18n.translate('xpack.securitySolution.console.inputAreaPopover.ariaLabel', {
+        defaultMessage: 'Command input history',
+      })}
     >
       {show && (
         <EuiFocusTrap clickOutsideDisables={true}>

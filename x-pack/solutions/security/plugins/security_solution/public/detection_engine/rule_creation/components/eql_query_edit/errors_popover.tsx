@@ -7,7 +7,13 @@
 
 import type { FC } from 'react';
 import React, { useCallback, useState } from 'react';
-import { EuiButtonEmpty, EuiPopover, EuiPopoverTitle, EuiText, useGeneratedHtmlId } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiText,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 
 import * as i18n from './translations';
 

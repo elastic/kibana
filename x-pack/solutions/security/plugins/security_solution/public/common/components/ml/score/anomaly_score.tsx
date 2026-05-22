@@ -47,10 +47,9 @@ export const AnomalyScoreComponent = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiPopover
-          aria-label={i18n.translate(
-            'xpack.securitySolution.anomalyScore.popover.ariaLabel',
-            { defaultMessage: 'Anomaly score details' }
-          )}
+          aria-label={i18n.translate('xpack.securitySolution.anomalyScore.popover.ariaLabel', {
+            defaultMessage: 'Anomaly score details',
+          })}
           data-test-subj="anomaly-score-popover"
           id="anomaly-score-popover"
           isOpen={isOpen}

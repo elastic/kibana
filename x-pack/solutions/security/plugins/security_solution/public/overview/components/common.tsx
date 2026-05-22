@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiPopover, EuiPopoverTitle, EuiText, useGeneratedHtmlId } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiText,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import * as i18n from './translations';
 import { EntityAnalyticsLearnMoreLink } from '../../entity_analytics/components/entity_analytics_learn_more_link';

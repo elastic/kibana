@@ -52,10 +52,9 @@ export const TopValuesPopover = React.memo(() => {
       repositionOnScroll
       ownFocus
       attachToAnchor={false}
-      aria-label={i18n.translate(
-        'xpack.securitySolution.topValuesPopover.ariaLabel',
-        { defaultMessage: 'Top values' }
-      )}
+      aria-label={i18n.translate('xpack.securitySolution.topValuesPopover.ariaLabel', {
+        defaultMessage: 'Top values',
+      })}
     >
       <StatefulTopN
         field={data.fieldName}

@@ -103,7 +103,9 @@ export const AlertsProgressBar: React.FC<AlertsProcessBarProps> = ({
 
   const dataStatsMessage = (
     <DataStatsWrapper>
-      <EuiPopoverTitle id={dataStatsTitleId}>{i18n.DATA_STATISTICS_TITLE(formattedNonEmptyPercent)}</EuiPopoverTitle>
+      <EuiPopoverTitle id={dataStatsTitleId}>
+        {i18n.DATA_STATISTICS_TITLE(formattedNonEmptyPercent)}
+      </EuiPopoverTitle>
       <EuiText size="s">
         {i18n.DATA_STATISTICS_MESSAGE(groupBySelection)}
         <EuiLink

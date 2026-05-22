@@ -24,7 +24,12 @@ export const EsqlInfoIcon = memo(function EsqlInfoIcon(): JSX.Element {
   );
 
   return (
-    <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={closePopover} aria-label={i18n.ARIA_LABEL}>
+    <EuiPopover
+      button={button}
+      isOpen={isPopoverOpen}
+      closePopover={closePopover}
+      aria-label={i18n.ARIA_LABEL}
+    >
       <EuiText size="s">
         <FormattedMessage
           id="xpack.securitySolution.ruleManagement.esqlQuery.esqlInfoTooltipContent"
