@@ -8,7 +8,7 @@
 import { DefendInsightType } from '@kbn/elastic-assistant-common';
 
 import type { DefendInsightsGenerationPrompts } from '../prompts';
-import { InvalidDefendInsightTypeError } from '../../../errors';
+import { InvalidDefendInsightTypeError } from '../../../../lib/errors';
 import { getDefendInsightsIncompatibleAntiVirusGenerationSchema } from './incompatible_antivirus';
 import { getDefendInsightsPolicyResponseFailureGenerationSchema } from './policy_response_failure';
 

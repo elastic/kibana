@@ -6,7 +6,7 @@
  */
 
 import { getCombinedDefendInsightsPrompt } from '.';
-import { DEFEND_INSIGHTS } from '../../../../../prompt/prompts';
+import { DEFEND_INSIGHTS } from '../../../../../__mocks__/mock_prompts';
 
 describe('getCombinedDefendInsightsPrompt', () => {
   it('returns the initial query when there are no partial results', () => {

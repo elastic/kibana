@@ -12,8 +12,8 @@ import type { DefendInsightType, Replacements } from '@kbn/elastic-assistant-com
 import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 import { END, START, StateGraph } from '@langchain/langgraph';
 
-import type { AIAssistantKnowledgeBaseDataClient } from '../../../../ai_assistant_data_clients/knowledge_base';
-import type { DefendInsightsGraphState } from '../../../langchain/graphs';
+import type { IKnowledgeBaseDataClient } from '../types';
+import type { DefendInsightsGraphState } from '../../../lib/types/graph_types';
 import type { DefendInsightsCombinedPrompts } from './prompts';
 import {
   getGenerateNode,
@@ -22,8 +22,8 @@ import {
   getRefineNode,
   getRefineOrEndEdge,
   getRetrieveAnonymizedDocsOrGenerateEdge,
-} from '../../../langchain/output_chunking';
-import { NodeType } from '../../../langchain/graphs/constants';
+} from '../../../lib/langchain/output_chunking';
+import { NodeType } from '../../../lib/langchain/constants';
 import { getCombinedDefendInsightsPrompt } from './prompts/get_combined_prompt';
 import { responseIsHallucinated } from './helpers/response_is_hallucinated';
 import { getRetrieveAnonymizedEventsNode } from './nodes/retriever';
@@ -35,7 +35,7 @@ export interface GetDefaultDefendInsightsGraphParams {
   endpointIds: string[];
   anonymizationFields: AnonymizationFieldResponse[];
   esClient: ElasticsearchClient;
-  kbDataClient: AIAssistantKnowledgeBaseDataClient | null;
+  kbDataClient: IKnowledgeBaseDataClient | null;
   llm: ActionsClientLlm;
   logger?: Logger;
   onNewReplacements?: (replacements: Replacements) => void;

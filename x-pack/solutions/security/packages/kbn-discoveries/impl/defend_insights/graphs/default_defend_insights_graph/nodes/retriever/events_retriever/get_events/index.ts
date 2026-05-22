@@ -15,7 +15,7 @@ import {
   transformRawData,
 } from '@kbn/elastic-assistant-common';
 
-import type { AIAssistantKnowledgeBaseDataClient } from '../../../../../../../../ai_assistant_data_clients/knowledge_base';
+import type { IKnowledgeBaseDataClient } from '../../../../../types';
 import { getEventsForInsightType } from './retrievers';
 import { enrichEvents } from './enrichers';
 
@@ -35,7 +35,7 @@ export const getAnonymizedEvents = async ({
   endpointIds: string[];
   anonymizationFields?: AnonymizationFieldResponse[];
   esClient: ElasticsearchClient;
-  kbDataClient: AIAssistantKnowledgeBaseDataClient | null;
+  kbDataClient: IKnowledgeBaseDataClient | null;
   onNewReplacements?: (replacements: Replacements) => void;
   replacements?: Replacements;
   size?: number;

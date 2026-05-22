@@ -7,8 +7,8 @@
 
 import pMap from 'p-map';
 
-import type { AIAssistantKnowledgeBaseDataClient } from '../../../../../../../../../ai_assistant_data_clients/knowledge_base';
-import { DEFEND_INSIGHTS_POLICY_RESPONSE_FAILURE } from '../../../../../../../../../routes/knowledge_base/constants';
+import type { IKnowledgeBaseDataClient } from '../../../../../../types';
+import { DEFEND_INSIGHTS_POLICY_RESPONSE_FAILURE } from '../../../../../../constants';
 
 const splitKey = ':::';
 
@@ -51,7 +51,7 @@ export async function enrichPolicyResponseFailureEvents(
     'actions.message': string[];
     'actions.status': string[];
   }[],
-  kbDataClient: AIAssistantKnowledgeBaseDataClient | null
+  kbDataClient: IKnowledgeBaseDataClient | null
 ): Promise<
   {
     _id: string[];

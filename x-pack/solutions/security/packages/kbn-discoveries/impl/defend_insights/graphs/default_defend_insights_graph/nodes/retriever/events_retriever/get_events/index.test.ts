@@ -72,16 +72,25 @@ describe('getAnonymizedEvents', () => {
     mockedTransformRawData.mockReturnValue('transformed data');
   });
 
-  it('should return an empty array when insightType is null', async () => {
-    const result = await getAnonymizedEvents({
-      insightType: null as unknown as DefendInsightType,
-      endpointIds: ['test-endpoint'],
-      esClient: mockEsClient,
-      kbDataClient: null,
+  describe('when insightType is null', () => {
+    let result: string[];
+
+    beforeEach(async () => {
+      result = await getAnonymizedEvents({
+        insightType: null as unknown as DefendInsightType,
+        endpointIds: ['test-endpoint'],
+        esClient: mockEsClient,
+        kbDataClient: null,
+      });
     });
 
-    expect(result).toEqual([]);
-    expect(mockEsClient.search).not.toHaveBeenCalled();
+    it('returns an empty array', () => {
+      expect(result).toEqual([]);
+    });
+
+    it('does not call esClient.search', () => {
+      expect(mockEsClient.search).not.toHaveBeenCalled();
+    });
   });
 
   it('should properly handle missing aggregations in response', async () => {
@@ -97,17 +106,29 @@ describe('getAnonymizedEvents', () => {
     expect(result).toEqual([]);
   });
 
-  it('should properly handle required parameters', async () => {
-    const result = await getAnonymizedEvents({
-      insightType: DefendInsightType.enum.incompatible_antivirus,
-      endpointIds: ['test-endpoint'],
-      esClient: mockEsClient,
-      kbDataClient: null,
+  describe('with required parameters', () => {
+    let result: string[];
+
+    beforeEach(async () => {
+      result = await getAnonymizedEvents({
+        insightType: DefendInsightType.enum.incompatible_antivirus,
+        endpointIds: ['test-endpoint'],
+        esClient: mockEsClient,
+        kbDataClient: null,
+      });
     });
 
-    expect(mockEsClient.search).toHaveBeenCalled();
-    expect(result).toBeDefined();
-    expect(Array.isArray(result)).toBe(true);
+    it('calls esClient.search', () => {
+      expect(mockEsClient.search).toHaveBeenCalled();
+    });
+
+    it('returns a defined result', () => {
+      expect(result).toBeDefined();
+    });
+
+    it('returns an array', () => {
+      expect(Array.isArray(result)).toBe(true);
+    });
   });
 
   it('should call getRawDataOrDefault with correct fields', async () => {
