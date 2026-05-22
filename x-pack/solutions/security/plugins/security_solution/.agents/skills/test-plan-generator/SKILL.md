@@ -12,6 +12,8 @@ metadata:
 
 Generates comprehensive test plans from GitHub issues and posts them as comments. Navigates the full issue context: parent epics, sub-issues, linked PRs, Figma designs, and images.
 
+> **End-user setup** (GitHub token, Figma MCP, `gh` CLI, daily usage) lives in [`docs/testing/test_plans/test_plan_generator.md`](../../../docs/testing/test_plans/test_plan_generator.md). This SKILL.md contains the agent-only instructions.
+
 ---
 
 ## Core rule — never assume, always ask
