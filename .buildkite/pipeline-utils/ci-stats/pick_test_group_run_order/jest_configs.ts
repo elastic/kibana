@@ -18,10 +18,7 @@ export function discoverJestUnitConfigs(limitSolutions: string[] | undefined): s
 
 /** Discover Jest integration configs honoring LIMIT_SOLUTIONS and the disabled list. */
 export function discoverJestIntegrationConfigs(limitSolutions: string[] | undefined): string[] {
-  return globJestConfigs(
-    ['**/jest.integration.config.js', '!**/__fixtures__/**'],
-    limitSolutions
-  );
+  return globJestConfigs(['**/jest.integration.config.js', '!**/__fixtures__/**'], limitSolutions);
 }
 
 function globJestConfigs(patterns: string[], limitSolutions: string[] | undefined): string[] {
