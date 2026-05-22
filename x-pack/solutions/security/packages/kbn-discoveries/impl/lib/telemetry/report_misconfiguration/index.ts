@@ -7,29 +7,33 @@
 
 import type { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
 
-// Stub: real implementation (with full event-based-telemetry wiring) is added
-// by a later PR in the stack. This minimal version forwards to analytics so
-// PR2's discoveries plugin scaffold tests can exercise the call path; FF-off
-// prod safety is preserved because no caller is reached unless the FF is on.
+import {
+  ATTACK_DISCOVERY_MISCONFIGURATION_EVENT,
+  type MisconfigurationType,
+} from '../event_based_telemetry';
+
 interface ReportMisconfigurationParams {
-  analytics?: AnalyticsServiceSetup;
-  logger: Logger;
-  // space_id / workflow_id are filled in by the real telemetry-event impl
-  // (later PR in the stack). PR3 callers (plugin startup misconfiguration
-  // reports) only have detail + misconfiguration_type at hand, so the
-  // optional fields keep the stub forward-compatible. FF-off prod safety
-  // is preserved because no caller is reached unless the FF is on.
-  params: {
-    detail: string;
-    misconfiguration_type: string;
-    space_id?: string;
-    workflow_id?: string;
-  };
+  detail?: string;
+  misconfiguration_type: MisconfigurationType;
+  space_id?: string;
+  workflow_id?: string;
 }
 
 export const reportMisconfiguration = ({
   analytics,
+  logger,
   params,
-}: ReportMisconfigurationParams): void => {
-  analytics?.reportEvent('attack_discovery_misconfiguration', params);
+}: {
+  analytics: AnalyticsServiceSetup;
+  logger: Logger;
+  params: ReportMisconfigurationParams;
+}): void => {
+  try {
+    analytics.reportEvent(ATTACK_DISCOVERY_MISCONFIGURATION_EVENT.eventType, params);
+  } catch (error) {
+    logger.debug(
+      () =>
+        `Failed to report ${ATTACK_DISCOVERY_MISCONFIGURATION_EVENT.eventType} telemetry: ${error.message}`
+    );
+  }
 };
