@@ -11,14 +11,12 @@ import {
   getActionPoliciesApiService,
   getAlertActionsApiService,
   getDispatcherApiService,
-  getInsightsApiService,
   getMaintenanceWindowsApiService,
   getRuleExecutionsApiService,
   getRulesApiService,
   type ActionPoliciesApiService,
   type AlertActionsApiService,
   type DispatcherApiService,
-  type InsightsApiService,
   type MaintenanceWindowsApiService,
   type RuleExecutionsApiService,
   type RulesApiService,
@@ -34,7 +32,6 @@ export interface AlertingApiServices {
   alertActions: AlertActionsApiService;
   actionPolicies: ActionPoliciesApiService;
   maintenanceWindows: MaintenanceWindowsApiService;
-  insights: InsightsApiService;
   sourceIndex: SourceIndexApiService;
   ruleExecutions: RuleExecutionsApiService;
   dispatcher: DispatcherApiService;
@@ -63,7 +60,6 @@ export const buildAlertingApiServices = ({
   alertActions: getAlertActionsApiService({ esClient, log }),
   actionPolicies: getActionPoliciesApiService({ kbnClient, log }),
   maintenanceWindows: getMaintenanceWindowsApiService({ kbnClient, log }),
-  insights: getInsightsApiService({ esClient, log }),
   sourceIndex: getSourceIndexApiService({ esClient, log }),
   ruleExecutions: getRuleExecutionsApiService({ esClient, log }),
   dispatcher: getDispatcherApiService({ esClient, log }),
@@ -86,7 +82,18 @@ export const apiTest = baseApiTest.extend<{}, { apiServices: AlertingApiServices
 });
 
 export { ALL_ROLE, NO_ACCESS_ROLE, READ_ROLE } from '../../common/roles';
-export { buildCreateRuleData } from '../../common/builders';
-export { getRuleUrl } from '../../common/urls';
+export { buildAlertEvent, buildCreateRuleData } from '../../common/builders';
+export {
+  getRuleUrl,
+  getAckAlertActionUrl,
+  getUnackAlertActionUrl,
+  getAssignAlertActionUrl,
+  getTagAlertActionUrl,
+  getSnoozeAlertActionUrl,
+  getUnsnoozeAlertActionUrl,
+  getActivateAlertActionUrl,
+  getDeactivateAlertActionUrl,
+  BULK_ALERT_ACTION_URL,
+} from '../../common/urls';
 export { expectNoBulkTruncationMetadata } from '../../common/assertions';
 export * as testData from '../../common/constants';

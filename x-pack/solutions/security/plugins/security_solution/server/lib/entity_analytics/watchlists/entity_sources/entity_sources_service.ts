@@ -134,13 +134,10 @@ export const createEntitySourcesService = ({
       return coreElasticsearchClient.asScoped(apiKeyFakeRequest).asCurrentUser;
     } catch (err) {
       logger.warn(
-        `[WatchlistSync] Failed to get scoped client for source ${
-          source.id
-        }, falling back to task executor credentials: ${
+        `[WatchlistSync] Failed to get scoped client for source ${source.id}: ${
           err instanceof Error ? err.message : String(err)
         }`
       );
-      return undefined;
     }
   };
 

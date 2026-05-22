@@ -48,6 +48,7 @@ export {
   ContentListWrapper,
   buildContentListSearch,
   buildContentListUrlRegex,
+  ListingTable,
 } from './src/playwright/page_objects';
 export type { ContentListUrlState } from './src/playwright/page_objects';
 
