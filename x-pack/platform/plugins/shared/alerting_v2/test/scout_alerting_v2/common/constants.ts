@@ -34,10 +34,7 @@ export const ACTION_POLICY_CREATED_BY_MAX_LENGTH = 256;
 
 export {
   ALERTING_V2_RULE_API_PATH as RULE_API_PATH,
-  ALERTING_V2_RULE_DOCTOR_INSIGHTS_API_PATH as INSIGHTS_API_PATH,
   ALERTING_V2_ACTION_POLICY_API_PATH as ACTION_POLICY_API_PATH,
 } from '@kbn/alerting-v2-constants';
 export { ALERT_EVENTS_DATA_STREAM } from '../../../server/resources/datastreams/alert_events';
 export { ALERT_ACTIONS_DATA_STREAM } from '../../../server/resources/datastreams/alert_actions';
-export { RULE_DOCTOR_INSIGHTS_INDEX } from '../../../server/resources/indices/rule_doctor_insights';
-export { ACTION_POLICY_SAVED_OBJECT_TYPE } from '../../../server/saved_objects';

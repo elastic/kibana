@@ -16,6 +16,7 @@ import { UnifiedSearchBar } from '../../shared/unified_search_bar';
 interface Props {
   hidden?: boolean;
   showUnifiedSearchBar?: boolean;
+  showFilterBar?: boolean;
   showTimeComparison?: boolean;
   showTransactionTypeSelector?: boolean;
   showQueryInput?: boolean;
@@ -26,6 +27,7 @@ interface Props {
 export function MobileSearchBar({
   hidden = false,
   showUnifiedSearchBar = true,
+  showFilterBar = false,
   showTimeComparison = false,
   showTransactionTypeSelector = false,
   showQueryInput = true,
@@ -54,6 +56,7 @@ export function MobileSearchBar({
               <UnifiedSearchBar
                 placeholder={searchBarPlaceholder}
                 showQueryInput={showQueryInput}
+                showFilterBar={showFilterBar}
               />
             </EuiFlexItem>
           )}
