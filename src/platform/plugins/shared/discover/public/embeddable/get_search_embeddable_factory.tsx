@@ -90,10 +90,10 @@ export const getSearchEmbeddableFactory = ({
       const solutionNavId =
         runtimeState.nonPersistedDisplayOptions?.solutionNavIdOverride ??
         (await firstValueFrom(discoverServices.core.chrome.getActiveSolutionNavId$()));
+
       await discoverServices.profilesManager.resolveRootProfile({
         solutionNavId,
       });
-      const scopedEbtManager = discoverServices.ebtManager.createScopedEBTManager();
 
       /** Specific by-reference state */
       const savedObjectId$ = new BehaviorSubject<string | undefined>(runtimeState?.savedObjectId);
@@ -302,10 +302,9 @@ export const getSearchEmbeddableFactory = ({
         });
       };
 
+      const enableFilters = runtimeState.nonPersistedDisplayOptions?.enableFilters !== false;
       const enableDocumentViewer =
-        runtimeState.nonPersistedDisplayOptions?.enableDocumentViewer !== undefined
-          ? runtimeState.nonPersistedDisplayOptions?.enableDocumentViewer
-          : true;
+        runtimeState.nonPersistedDisplayOptions?.enableDocumentViewer !== false;
 
       const expandedDoc$ = new BehaviorSubject<DataTableRecord | undefined>(undefined);
       const initialDocViewerTabId$ = new BehaviorSubject<string | undefined>(undefined);
@@ -320,12 +319,13 @@ export const getSearchEmbeddableFactory = ({
 
       const toolkit: ContextAwarenessToolkit = {
         actions: {
-          addFilter,
+          addFilter: enableFilters ? addFilter : undefined,
           refreshData: () => refreshTrigger$.next(undefined),
           setExpandedDoc: enableDocumentViewer ? setExpandedDoc : undefined,
         },
       };
 
+      const scopedEbtManager = discoverServices.ebtManager.createScopedEBTManager();
       const scopedProfilesManager = discoverServices.profilesManager.createScopedProfilesManager({
         scopedEbtManager,
         toolkit,
@@ -461,7 +461,9 @@ export const getSearchEmbeddableFactory = ({
                         fetchContext$,
                       }}
                       dataView={dataView!}
-                      onAddFilter={isEsqlMode(savedSearch) ? undefined : addFilter}
+                      onAddFilter={
+                        isEsqlMode(savedSearch) || !enableFilters ? undefined : addFilter
+                      }
                       stateManager={searchEmbeddable.stateManager}
                     />
                   ) : (
@@ -473,11 +475,7 @@ export const getSearchEmbeddableFactory = ({
                       <SearchEmbeddableGridComponent
                         api={{ ...api, fetchWarnings$, fetchContext$ }}
                         dataView={dataView!}
-                        onAddFilter={
-                          runtimeState.nonPersistedDisplayOptions?.enableFilters === false
-                            ? undefined
-                            : addFilter
-                        }
+                        onAddFilter={enableFilters ? addFilter : undefined}
                         enableDocumentViewer={enableDocumentViewer}
                         expandedDoc={enableDocumentViewer ? expandedDoc : undefined}
                         initialDocViewerTabId={

@@ -31,7 +31,11 @@ import type {
   SearchEmbeddablePanelApiState,
   SearchEmbeddableRuntimeState,
 } from './types';
-import { EMPTY_CONTEXT_AWARENESS_TOOLKIT, SolutionType } from '../context_awareness';
+import {
+  EMPTY_CONTEXT_AWARENESS_TOOLKIT,
+  SolutionType,
+  type ContextAwarenessToolkit,
+} from '../context_awareness';
 import { mockInitializeDrilldownsManager } from '@kbn/embeddable-plugin/public/mocks';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { initializeDrilldownsManager } from '@kbn/embeddable-plugin/public/drilldowns/drilldowns_manager';
@@ -622,6 +626,40 @@ describe('saved search embeddable', () => {
         expect(discoverGridComponent).toBeInTheDocument();
         expect(discoverComponent.queryByText('data-source-profile')).toBeInTheDocument();
       });
+    });
+
+    it('should not expose addFilter through the toolkit when filters are disabled', async () => {
+      let capturedToolkit: ContextAwarenessToolkit | undefined;
+      const originalCreateScopedProfilesManager =
+        discoverServiceMock.profilesManager.createScopedProfilesManager.bind(
+          discoverServiceMock.profilesManager
+        );
+
+      jest
+        .spyOn(discoverServiceMock.profilesManager, 'createScopedProfilesManager')
+        .mockImplementationOnce((args) => {
+          capturedToolkit = args.toolkit;
+          return originalCreateScopedProfilesManager(args);
+        });
+
+      runtimeState = getInitialRuntimeState({
+        partialState: {
+          nonPersistedDisplayOptions: {
+            enableFilters: false,
+          },
+        },
+      });
+
+      await factory.buildEmbeddable({
+        initializeDrilldownsManager: mockInitializeDrilldownsManager,
+        initialState: { ref_id: 'id', overrides: {} },
+        finalizeApi: finalizeApiMock,
+        uuid,
+        parentApi: mockedDashboardApi,
+      });
+      await waitOneTick();
+
+      expect(capturedToolkit?.actions.addFilter).toBeUndefined();
     });
   });
 });
