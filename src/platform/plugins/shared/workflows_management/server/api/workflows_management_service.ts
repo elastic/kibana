@@ -87,6 +87,10 @@ export interface SearchWorkflowExecutionsParams {
   sortOrder?: WorkflowExecutionSortOrder;
   page?: number;
   size?: number;
+  /** Datemath lower bound for filtering by startedAt. */
+  startedAfter?: string;
+  /** Datemath upper bound for filtering by startedAt. */
+  startedBefore?: string;
 }
 
 export class WorkflowsService {
