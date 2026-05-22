@@ -18,6 +18,8 @@ import {
 import type { EuiButtonProps, UseEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { defer } from 'lodash';
 import { FormProvider, useForm, useWatch } from 'react-hook-form';
@@ -156,6 +158,10 @@ export const BulkImportMcpTools: React.FC = () => {
         isLoading={isSubmitting}
         disabled={isSubmitDisabled}
         data-test-subj={testSubj}
+        {...getEbtProps({
+          element: AGENT_BUILDER_UI_EBT.element.pageContent,
+          action: AGENT_BUILDER_UI_EBT.action.globalManagement.BULK_IMPORT_SUBMIT,
+        })}
       >
         {labels.tools.bulkImportMcp.importToolsButton}
       </EuiButton>
@@ -204,6 +210,10 @@ export const BulkImportMcpTools: React.FC = () => {
                 color="text"
                 onClick={handleCancel}
                 data-test-subj="bulkImportMcpToolsCancelButton"
+                {...getEbtProps({
+                  element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                  action: AGENT_BUILDER_UI_EBT.action.globalManagement.BULK_IMPORT_CANCEL,
+                })}
               >
                 {labels.tools.bulkImportMcp.cancelButton}
               </EuiButtonEmpty>

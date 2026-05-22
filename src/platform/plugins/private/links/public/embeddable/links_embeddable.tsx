@@ -9,7 +9,7 @@
 
 import React, { createContext, useMemo } from 'react';
 import { isUndefined, omitBy } from 'lodash';
-import { BehaviorSubject, map, merge } from 'rxjs';
+import { BehaviorSubject, map, merge, skip } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiListGroup, EuiPanel } from '@elastic/eui';
@@ -95,8 +95,14 @@ export const getLinksEmbeddableFactory = () => {
         serializeState,
         anyStateChange$: merge(
           titleManager.anyStateChange$,
-          layout$.pipe(map(() => undefined)),
-          resolvedLinks$.pipe(map(() => undefined))
+          layout$.pipe(
+            skip(1),
+            map(() => undefined)
+          ),
+          resolvedLinks$.pipe(
+            skip(1),
+            map(() => undefined)
+          )
         ),
         getComparators: () => {
           return {
@@ -279,12 +285,19 @@ const styles = ({ euiTheme }: UseEuiTheme) =>
     },
     '&.verticalLayoutWrapper': {
       gap: euiTheme.size.xs,
+      paddingBlock: euiTheme.size.xs,
     },
     '&.horizontalLayoutWrapper': {
-      height: '100%',
+      inlineSize: 'max-content',
+      blockSize: '100%',
       display: 'flex',
       flexWrap: 'nowrap',
       alignItems: 'center',
       flexDirection: 'row',
+    },
+    // The internal list item wrapper has `width: 100%` which needs to be overridden
+    // for the horizontal layout to look as expected
+    '&.horizontalLayoutWrapper .euiListItemLayout__wrapper': {
+      inlineSize: 'auto',
     },
   });
