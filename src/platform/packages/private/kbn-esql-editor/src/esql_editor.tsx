@@ -127,7 +127,6 @@ const ESQLEditorInternal = function ESQLEditor({
   queryStats,
   enableResourceBrowser = false,
 }: ESQLEditorPropsInternal) {
-  console.log(serverErrors);
   const popoverRef = useRef<HTMLDivElement>(null);
   const editorModel = useRef<monaco.editor.ITextModel>();
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor>();
