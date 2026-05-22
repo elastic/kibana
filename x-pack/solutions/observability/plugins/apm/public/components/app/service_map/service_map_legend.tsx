@@ -180,7 +180,7 @@ export function ServiceMapLegend({ controlIconCss }: ServiceMapLegendProps) {
           <EuiFlexItem>
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
               <EuiFlexItem grow={false}>
-                {/* TODO: Use new EuiIcon component when available */}
+                {/* TODO: Use new EuiIcon component when available, details in https://github.com/elastic/kibana/issues/270399 */}
                 <div css={styles.shapeIcon} aria-hidden={true}>
                   <svg viewBox="0 0 12 12" fill="none">
                     <path
@@ -204,7 +204,7 @@ export function ServiceMapLegend({ controlIconCss }: ServiceMapLegendProps) {
           <EuiFlexItem>
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
               <EuiFlexItem grow={false}>
-                {/* TODO: Use new EuiIcon component when available */}
+                {/* TODO: Use new EuiIcon component when available, details in https://github.com/elastic/kibana/issues/270399 */}
                 <div css={styles.shapeIcon} aria-hidden={true}>
                   <svg viewBox="0 0 12 12" fill="none">
                     <path
@@ -227,7 +227,7 @@ export function ServiceMapLegend({ controlIconCss }: ServiceMapLegendProps) {
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
               <EuiFlexItem grow={false}>
                 <div css={styles.groupedContainer}>
-                  {/* TODO: Use new EuiIcon component when available */}
+                  {/* TODO: Use new EuiIcon component when available, details in https://github.com/elastic/kibana/issues/270399 */}
                   <div css={styles.shapeIcon} aria-hidden={true}>
                     <svg viewBox="0 0 12 12" fill="none">
                       <path
