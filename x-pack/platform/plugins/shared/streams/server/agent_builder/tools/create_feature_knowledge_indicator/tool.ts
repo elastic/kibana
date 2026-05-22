@@ -71,7 +71,7 @@ export function createFeatureKnowledgeIndicatorTool({
       },
     },
     availability: {
-      cacheMode: 'space',
+      cacheMode: 'global',
       handler: async ({ uiSettings }): Promise<ToolAvailabilityResult> => {
         try {
           await assertSignificantEventsAccess({

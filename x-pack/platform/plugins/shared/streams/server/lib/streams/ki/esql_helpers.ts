@@ -70,14 +70,12 @@ export const IS_NOT_EXPIRED: LatestSourceWhereCondition = esql.exp`${esql.col(
  */
 export async function runLatestIdsEsqlQuery({
   esClient,
-  space,
   streamNames,
   type,
   extraWhere,
   postGroupingWhere = IS_NOT_DELETED,
 }: {
   esClient: ElasticsearchClient;
-  space: string;
   streamNames: string[];
   type?: 'feature' | 'query';
   extraWhere?: LatestSourceWhereCondition;
@@ -87,8 +85,7 @@ export async function runLatestIdsEsqlQuery({
     return [];
   }
 
-  let query = esql.from([KNOWLEDGE_INDICATORS_DATA_STREAM], ['_id'])
-    .where`\`kibana.space_ids\` == ${space}`;
+  let query = esql.from([KNOWLEDGE_INDICATORS_DATA_STREAM], ['_id']);
 
   const streamLiterals = streamNames.map((name) => esql.str(name));
   query = query.where`${esql.col('stream.name')} IN (${streamLiterals})`;
