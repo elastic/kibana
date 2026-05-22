@@ -43,13 +43,9 @@ test.describe('Cloud Links integration', { tag: tags.stateful.classic }, () => {
     await browserAuth.loginAsViewer();
     await page.gotoApp('home');
     const welcomeInterstitial = page.testSubj.locator('homeWelcomeInterstitial');
-    try {
-      await welcomeInterstitial.waitFor({ state: 'visible', timeout: 5000 });
-      await page.testSubj.click('skipWelcomeScreen');
-      await welcomeInterstitial.waitFor({ state: 'hidden' });
-    } catch {
-      // welcome screen not present
-    }
+    await welcomeInterstitial.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
+    await page.keyboard.press('Escape');
+    await welcomeInterstitial.waitFor({ state: 'hidden' });
 
     const { connectionDetails } = pageObjects;
 
@@ -73,13 +69,9 @@ test.describe('Cloud Links integration', { tag: tags.stateful.classic }, () => {
     await browserAuth.loginAsAdmin();
     await page.gotoApp('home');
     const welcomeInterstitial = page.testSubj.locator('homeWelcomeInterstitial');
-    try {
-      await welcomeInterstitial.waitFor({ state: 'visible', timeout: 5000 });
-      await page.testSubj.click('skipWelcomeScreen');
-      await welcomeInterstitial.waitFor({ state: 'hidden' });
-    } catch {
-      // welcome screen not present
-    }
+    await welcomeInterstitial.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
+    await page.keyboard.press('Escape');
+    await welcomeInterstitial.waitFor({ state: 'hidden' });
 
     const { connectionDetails } = pageObjects;
     const keyName = `test-api-key-${Date.now().toString(36)}`;
@@ -96,13 +88,9 @@ test.describe('Cloud Links integration', { tag: tags.stateful.classic }, () => {
     await browserAuth.loginAsViewer();
     await page.gotoApp('home');
     const welcomeInterstitial = page.testSubj.locator('homeWelcomeInterstitial');
-    try {
-      await welcomeInterstitial.waitFor({ state: 'visible', timeout: 5000 });
-      await page.testSubj.click('skipWelcomeScreen');
-      await welcomeInterstitial.waitFor({ state: 'hidden' });
-    } catch {
-      // welcome screen not present
-    }
+    await welcomeInterstitial.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
+    await page.keyboard.press('Escape');
+    await welcomeInterstitial.waitFor({ state: 'hidden' });
 
     await pageObjects.cloudLinks.openNav();
     expect(await pageObjects.cloudLinks.isManageDeploymentLinkVisible()).toBe(true);
@@ -112,13 +100,9 @@ test.describe('Cloud Links integration', { tag: tags.stateful.classic }, () => {
     await browserAuth.loginAsAdmin();
     await page.gotoApp('home');
     const welcomeInterstitial = page.testSubj.locator('homeWelcomeInterstitial');
-    try {
-      await welcomeInterstitial.waitFor({ state: 'visible', timeout: 5000 });
-      await page.testSubj.click('skipWelcomeScreen');
-      await welcomeInterstitial.waitFor({ state: 'hidden' });
-    } catch {
-      // welcome screen not present
-    }
+    await welcomeInterstitial.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
+    await page.keyboard.press('Escape');
+    await welcomeInterstitial.waitFor({ state: 'hidden' });
 
     const { cloudLinks } = pageObjects;
     await cloudLinks.openUserMenu();

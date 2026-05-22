@@ -14,13 +14,9 @@ test.describe('Appearance selector modal', { tag: tags.stateful.classic }, () =>
     await browserAuth.loginAsViewer();
     await page.gotoApp('home');
     const welcomeInterstitial = page.testSubj.locator('homeWelcomeInterstitial');
-    try {
-      await welcomeInterstitial.waitFor({ state: 'visible', timeout: 5000 });
-      await page.testSubj.click('skipWelcomeScreen');
-      await welcomeInterstitial.waitFor({ state: 'hidden' });
-    } catch {
-      // welcome screen not present
-    }
+    await welcomeInterstitial.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
+    await page.keyboard.press('Escape');
+    await welcomeInterstitial.waitFor({ state: 'hidden' });
   });
 
   test.afterAll(async ({ uiSettings }) => {
