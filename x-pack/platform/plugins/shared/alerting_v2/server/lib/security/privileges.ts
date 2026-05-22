@@ -27,10 +27,6 @@ export const ALERTING_V2_API_PRIVILEGES = {
     read: 'read-alerting-v2-action-policies',
     write: 'write-alerting-v2-action-policies',
   },
-  ruleDoctor: {
-    read: 'read-alerting-v2-rule-doctor',
-    write: 'write-alerting-v2-rule-doctor',
-  },
 } as const;
 
 const ALERTING_V2_SAVED_OBJECT_TYPES = [
@@ -53,8 +49,6 @@ const getPrivileges = () => ({
       ALERTING_V2_API_PRIVILEGES.alerts.write,
       ALERTING_V2_API_PRIVILEGES.actionPolicies.read,
       ALERTING_V2_API_PRIVILEGES.actionPolicies.write,
-      ALERTING_V2_API_PRIVILEGES.ruleDoctor.read,
-      ALERTING_V2_API_PRIVILEGES.ruleDoctor.write,
     ],
   },
   read: {
@@ -68,7 +62,6 @@ const getPrivileges = () => ({
       ALERTING_V2_API_PRIVILEGES.rules.read,
       ALERTING_V2_API_PRIVILEGES.alerts.read,
       ALERTING_V2_API_PRIVILEGES.actionPolicies.read,
-      ALERTING_V2_API_PRIVILEGES.ruleDoctor.read,
     ],
   },
 });
