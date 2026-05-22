@@ -236,11 +236,12 @@ export const init = (formulas: FormulasCatalog<HostFormulas>) => {
     ...DEFAULT_XY_HIDDEN_AXIS_TITLE,
   };
 
+  // KPI tile renders without a trend line — see the same note in
+  // `host/metrics/charts/cpu.ts` for the rationale (P15a).
   const diskUsageMetric: LensConfigWithId = {
     id: 'diskUsage',
     chartType: 'metric',
     title: formulas.get('diskUsage').label ?? '',
-    trendLine: true,
     ...formulas.get('diskUsage'),
   };
 

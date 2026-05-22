@@ -125,11 +125,19 @@ export const init = (formulas: FormulasCatalog<HostFormulas>) => {
     ...DEFAULT_XY_HIDDEN_AXIS_TITLE,
   };
 
+  // KPI tiles deliberately render *without* a trend line (P15a). Setting
+  // `trendLine: true` makes Lens issue a second aggregation per tile with a
+  // `date_histogram` sub-aggregation, which scales with
+  // `host_count × bucket_count × per-state slices` — the dominant cost on the
+  // 500-host / 24h workload (see PROPOSALS.md §P15). The faint line behind the
+  // headline number is the only thing it produces visually, and at typical
+  // fleet-average values it is near-flat and barely perceptible. If product
+  // signals the trend line is genuinely missed, P15c covers the range-aware
+  // ES|QL re-introduction with a ≤ 100-bucket policy.
   const cpuUsageMetric: LensConfigWithId = {
     id: 'cpuUsage',
     chartType: 'metric',
     title: formulas.get('cpuUsage').label ?? '',
-    trendLine: true,
     ...formulas.get('cpuUsage'),
   };
 
@@ -137,7 +145,6 @@ export const init = (formulas: FormulasCatalog<HostFormulas>) => {
     id: 'normalizedLoad1m',
     chartType: 'metric',
     title: formulas.get('normalizedLoad1m').label ?? '',
-    trendLine: true,
     ...formulas.get('normalizedLoad1m'),
   };
 

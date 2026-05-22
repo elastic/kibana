@@ -116,11 +116,12 @@ export const init = (formulas: FormulasCatalog<HostFormulas>) => {
     ...DEFAULT_XY_HIDDEN_AXIS_TITLE,
   };
 
+  // KPI tile renders without a trend line — see the same note in
+  // `host/metrics/charts/cpu.ts` for the rationale (P15a).
   const memoryUsageMetric: LensConfigWithId = {
     id: 'memoryUsage',
     chartType: 'metric',
     title: formulas.get('memoryUsage').label ?? '',
-    trendLine: true,
     ...formulas.get('memoryUsage'),
   };
 
