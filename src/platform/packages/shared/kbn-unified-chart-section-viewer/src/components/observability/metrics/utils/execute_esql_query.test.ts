@@ -201,7 +201,10 @@ describe('executeEsqlQuery', () => {
         dataView: dataViewWithAtTimefieldMock,
         uiSettings: mockUiSettings,
       })
-    ).rejects.toThrow(EsqlResponseError);
+    ).rejects.toMatchObject({
+      name: 'EsqlResponseError',
+      message: 'remote_transport_exception: ccs query failed',
+    });
   });
 
   it('sets status on EsqlResponseError when response includes top-level status', async () => {
