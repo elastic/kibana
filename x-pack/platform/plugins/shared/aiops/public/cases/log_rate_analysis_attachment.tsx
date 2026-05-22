@@ -40,7 +40,7 @@ export const initComponent = memoize(
       const normalized = normalizeLogRateAnalysisLegacyFields(rawState);
       const inputProps = {
         dataViewId: normalized.data_view_id,
-        timeRange: (rawState.time_range ?? rawState.timeRange) as TimeRange,
+        timeRange: rawState.time_range ?? rawState.timeRange,
         windowParameters: rawState.windowParameters,
         embeddingOrigin: 'cases',
       } as LogRateAnalysisEmbeddableWrapperProps;
