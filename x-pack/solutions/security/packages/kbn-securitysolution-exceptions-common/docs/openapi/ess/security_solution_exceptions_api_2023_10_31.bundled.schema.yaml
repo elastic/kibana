@@ -930,7 +930,7 @@ paths:
                     proxy","entries":[{"type":"match","field":"source.ip","value":"10.0.0.5","operator":"included"}],"id":"a4d3e1c2-1234-4567-89ab-cdef01234567","item_id":"network_indicators_list_item","list_id":"network_indicators_list","name":"Corporate
                     Proxy","namespace_type":"single","os_types":[],"tags":["network","known-good"],"tie_breaker_id":"b5e4f3d2-1111-2222-3333-444455556666","type":"simple","updated_at":"2025-01-09T16:21:15.118Z","updated_by":"elastic"}
 
-                    {"exported_exception_list_count":2,"exported_exception_list_item_count":2,"missing_exception_list_item_count":0,"missing_exception_list_items":[],"missing_exception_lists":[],"missing_exception_lists_count":0}
+                    {"exported_exception_list_count":2,"exported_exception_list_item_count":2}
               schema:
                 description: >-
                   A `.ndjson` file containing the specified exception lists and
