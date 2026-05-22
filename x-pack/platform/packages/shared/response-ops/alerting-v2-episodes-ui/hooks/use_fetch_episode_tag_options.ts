@@ -7,24 +7,28 @@
 
 import { useQuery } from '@kbn/react-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { fetchEpisodeTagOptions } from '../apis/fetch_episode_tag_options';
 import type { EpisodeTagOptionRow } from '../queries/episode_tag_options_query';
 import { queryKeys } from '../query_keys';
+import { useSpaceId } from './use_space_id';
 
 export interface UseFetchEpisodeTagOptionsParams {
-  services: { expressions: ExpressionsStart };
+  services: { expressions: ExpressionsStart; spaces: SpacesPluginStart };
   timeRange?: TimeRange | null;
 }
 
 export const useFetchEpisodeTagOptions = ({
   services,
   timeRange,
-}: UseFetchEpisodeTagOptionsParams) =>
-  useQuery({
-    queryKey: queryKeys.tagOptions(timeRange ?? undefined),
+}: UseFetchEpisodeTagOptionsParams) => {
+  const spaceId = useSpaceId(services.spaces);
+  return useQuery({
+    queryKey: queryKeys.tagOptions(spaceId, timeRange ?? undefined),
     queryFn: ({ signal }) =>
       fetchEpisodeTagOptions({
+        spaceId,
         services,
         timeRange,
         abortSignal: signal,
@@ -42,3 +46,4 @@ export const useFetchEpisodeTagOptions = ({
       return out;
     },
   });
+};
