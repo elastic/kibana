@@ -51,15 +51,18 @@ function getOverallFilters({
   start,
   end,
   kqlFilter: kqlFilterValue,
+  requireDurationField,
 }: {
   start: number;
   end: number;
   kqlFilter?: string;
+  requireDurationField?: boolean;
 }): QueryDslQueryContainer[] {
   return [
     ...timeRangeFilter(APM_TIME_FIELD, { start, end }),
     ...kqlFilter(kqlFilterValue),
     { term: { [PROCESSOR_EVENT]: PROCESSOR_EVENT_TRANSACTION } },
+    ...(requireDurationField ? [{ exists: { field: TRANSACTION_DURATION } }] : []),
   ];
 }
 
@@ -173,6 +176,7 @@ export async function getToolHandler({
     start: startTime,
     end: endTime,
     kqlFilter: kqlFilterValue,
+    requireDurationField: metric === 'latency',
   });
 
   const overallCountResp = await esClient.asCurrentUser.search({
@@ -234,9 +238,20 @@ export async function getToolHandler({
     const durationThresholdUs = durationPercentiles?.[percentileKey];
 
     if (durationThresholdUs == null || !Number.isFinite(durationThresholdUs)) {
-      throw new Error(
-        `Could not compute duration percentile (p${percentileThreshold}) for field "${TRANSACTION_DURATION}".`
+      logger.warn(
+        `Could not compute duration percentile (p${percentileThreshold}) for field "${TRANSACTION_DURATION}". Returning empty correlations.`
       );
+      return {
+        metric,
+        timeRange: { start, end },
+        kqlFilter: kqlFilterValue,
+        totalTransactions: overallTotalHits,
+        subset: {
+          totalTransactions: 0,
+          definition: { metric: 'latency', percentileThreshold, durationThresholdUs: undefined },
+        },
+        correlations: [],
+      };
     }
 
     subsetFilters = [
