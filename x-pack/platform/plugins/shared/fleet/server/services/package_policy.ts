@@ -941,6 +941,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       bumpRevision?: boolean;
       force?: true;
       asyncDeploy?: boolean;
+      overwrite?: boolean;
     },
     request?: KibanaRequest
   ): Promise<{
@@ -1092,7 +1093,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     });
 
     const { saved_objects: createdObjects } = await soClient
-      .bulkCreate<PackagePolicySOAttributes>(policiesToCreate)
+      .bulkCreate<PackagePolicySOAttributes>(policiesToCreate, { overwrite: options?.overwrite })
       .catch(catchAndSetErrorStackTrace.withMessage('failed to bulk create package policies'));
 
     // Filter out invalid SOs
