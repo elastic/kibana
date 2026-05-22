@@ -364,6 +364,43 @@ export const PackagePolicySchemaV24 = PackagePolicySchemaV23.extends(
   { unknowns: 'ignore', meta: { id: 'package_policy_v24' } }
 );
 
+/**
+ * Snapshot of the package policy SO schema as of model version 10.25.0.
+ * Adds all indexed mapping fields that are absent from the create/new schema but present
+ * in the SO mappings (internal fields: revision, timestamps, secret_references, etc.) and
+ * restores explicit package sub-fields so the SO validation check can verify them.
+ */
+export const PackagePolicySchemaV25 = PackagePolicySchemaV24.extends(
+  {
+    // Restore explicit package sub-fields; V22 overrode this with schema.any() for permissiveness,
+    // but that hides the sub-paths from the SO mapping validation check.
+    package: schema.maybe(
+      schema.object(
+        {
+          name: schema.string(),
+          title: schema.maybe(schema.string()),
+          version: schema.string(),
+          requires_root: schema.maybe(schema.boolean()),
+        },
+        { unknowns: 'allow' }
+      )
+    ),
+    // Internal SO fields persisted in the mapping but not part of the create/new API schema.
+    revision: schema.maybe(schema.number()),
+    created_at: schema.maybe(schema.string()),
+    created_by: schema.maybe(schema.string()),
+    updated_at: schema.maybe(schema.string()),
+    updated_by: schema.maybe(schema.string()),
+    bump_agent_policy_revision: schema.maybe(schema.boolean()),
+    latest_revision: schema.maybe(schema.boolean()),
+    elasticsearch: schema.maybe(schema.any()),
+    secret_references: schema.maybe(
+      schema.arrayOf(schema.object({ id: schema.string() }), { maxSize: 1000 })
+    ),
+  },
+  { unknowns: 'ignore' }
+);
+
 const CreatePackagePolicyProps = {
   ...PackagePolicyBaseSchema,
   enabled: schema.maybe(schema.boolean()),
