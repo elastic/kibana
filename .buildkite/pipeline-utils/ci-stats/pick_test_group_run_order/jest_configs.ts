@@ -10,56 +10,18 @@
 import * as globby from 'globby';
 
 import DISABLED_JEST_CONFIGS from '../../../disabled_jest_configs.json';
-import SHARDED_JEST_CONFIGS from '../../../sharded_jest_configs.json';
-import { filterEmptyJestConfigs } from '../get_tests_from_config';
 
-export const SHARD_ANNOTATION_SEP = '||shard=';
-
-/**
- * Discover Jest unit configs honoring LIMIT_SOLUTIONS, the disabled list,
- * the empty-config filter, and the shard map.
- */
+/** Discover Jest unit configs honoring LIMIT_SOLUTIONS and the disabled list. */
 export function discoverJestUnitConfigs(limitSolutions: string[] | undefined): string[] {
-  const raw = globJestConfigs(['**/jest.config.js', '!**/__fixtures__/**'], limitSolutions);
-  return expandShardedJestConfigs(filterEmptyJestConfigs(raw));
+  return globJestConfigs(['**/jest.config.js', '!**/__fixtures__/**'], limitSolutions);
 }
 
-/**
- * Discover Jest integration configs honoring LIMIT_SOLUTIONS, the disabled list,
- * and the shard map. Integration configs are intentionally not filtered for
- * emptiness (matches historical behavior).
- */
+/** Discover Jest integration configs honoring LIMIT_SOLUTIONS and the disabled list. */
 export function discoverJestIntegrationConfigs(limitSolutions: string[] | undefined): string[] {
-  const raw = globJestConfigs(
+  return globJestConfigs(
     ['**/jest.integration.config.js', '!**/__fixtures__/**'],
     limitSolutions
   );
-  return expandShardedJestConfigs(raw);
-}
-
-/**
- * Expand configs that appear in the shard map into N shard-annotated entries.
- * For example, if `fleet/jest.integration.config.js` has 2 shards, it becomes:
- *   - `fleet/jest.integration.config.js||shard=1/2`
- *   - `fleet/jest.integration.config.js||shard=2/2`
- * Configs not in the shard map are passed through unchanged.
- */
-export function expandShardedJestConfigs(configs: string[]): string[] {
-  const shardMap = SHARDED_JEST_CONFIGS as Record<string, number>;
-  const expanded: string[] = [];
-
-  for (const config of configs) {
-    const shardCount = shardMap[config];
-    if (shardCount && shardCount > 1) {
-      for (let i = 1; i <= shardCount; i++) {
-        expanded.push(`${config}${SHARD_ANNOTATION_SEP}${i}/${shardCount}`);
-      }
-    } else {
-      expanded.push(config);
-    }
-  }
-
-  return expanded;
 }
 
 function globJestConfigs(patterns: string[], limitSolutions: string[] | undefined): string[] {
