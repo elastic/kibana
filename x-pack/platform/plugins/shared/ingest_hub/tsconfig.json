@@ -6,8 +6,7 @@
   "include": [
     "common/**/*",
     "public/**/*",
-    "test/scout/**/*",
-    "test/scout_ingest_hub/**/*"
+    "test/scout/**/*"
   ],
   "exclude": [
     "target/**/*"

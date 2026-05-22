@@ -10,6 +10,22 @@ import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 
 test.describe('Onboarding app — FF enabled', { tag: tags.stateful.classic }, () => {
+  test.beforeAll(async ({ apiServices }) => {
+    await apiServices.core.settings({
+      'feature_flags.overrides': {
+        'ingestHub.onboardingEnabled': 'true',
+      },
+    });
+  });
+
+  test.afterAll(async ({ apiServices }) => {
+    await apiServices.core.settings({
+      'feature_flags.overrides': {
+        'ingestHub.onboardingEnabled': false,
+      },
+    });
+  });
+
   test('renders the onboarding shell and navigates between steps', async ({
     browserAuth,
     page,
