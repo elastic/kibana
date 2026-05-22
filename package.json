@@ -1355,7 +1355,6 @@
     "@xyflow/react": "12.10.2",
     "adm-zip": "0.5.16",
     "ai": "5.0.190",
-    "ajv": "8.18.0",
     "ajv-formats": "3.0.1",
     "antlr4": "4.13.2",
     "apache-arrow": "21.1.0",
