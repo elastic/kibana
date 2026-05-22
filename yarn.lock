@@ -4523,6 +4523,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/agent-builder-dashboards-common@link:x-pack/platform/packages/shared/agent-builder-dashboards/agent-builder-dashboards-common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/agent-builder-dashboards-plugin@link:x-pack/platform/plugins/shared/agent_builder_dashboards":
+  version "0.0.0"
+  uid ""
+
 "@kbn/agent-builder-genai-utils@link:x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils":
   version "0.0.0"
   uid ""
@@ -5368,10 +5376,6 @@
   uid ""
 
 "@kbn/core-chrome-feature-flags@link:src/core/packages/chrome/feature-flags":
-  version "0.0.0"
-  uid ""
-
-"@kbn/core-chrome-layout-components@link:src/core/packages/chrome/layout/core-chrome-layout-components":
   version "0.0.0"
   uid ""
 
@@ -6331,14 +6335,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/dashboard-agent-common@link:x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common":
-  version "0.0.0"
-  uid ""
-
-"@kbn/dashboard-agent-plugin@link:x-pack/platform/plugins/shared/dashboard_agent":
-  version "0.0.0"
-  uid ""
-
 "@kbn/dashboard-markdown@link:src/platform/plugins/shared/dashboard_markdown":
   version "0.0.0"
   uid ""
@@ -6828,6 +6824,10 @@
   uid ""
 
 "@kbn/esql-resource-browser@link:src/platform/packages/shared/kbn-esql-resource-browser":
+  version "0.0.0"
+  uid ""
+
+"@kbn/esql-scripts@link:src/platform/packages/private/kbn-esql-scripts":
   version "0.0.0"
   uid ""
 
@@ -9640,6 +9640,10 @@
   uid ""
 
 "@kbn/ui-actions-plugin@link:src/platform/plugins/shared/ui_actions":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ui-chrome-layout@link:src/platform/kbn-ui/chrome-layout":
   version "0.0.0"
   uid ""
 
