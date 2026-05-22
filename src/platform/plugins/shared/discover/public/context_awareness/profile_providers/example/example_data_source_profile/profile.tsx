@@ -226,9 +226,9 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
       ],
       rowHeight: 5,
     }),
-    getAdditionalCellActions: (prev) => (params) =>
+    getAdditionalCellActions: (prev) => () =>
       [
-        ...prev(params),
+        ...prev(),
         {
           id: 'example-data-source-action',
           getDisplayName: () => 'Example data source action',

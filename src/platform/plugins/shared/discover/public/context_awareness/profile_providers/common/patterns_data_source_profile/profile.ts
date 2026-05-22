@@ -72,9 +72,9 @@ export const createPatternsDataSourceProfileProvider = (
       },
     getAdditionalCellActions:
       (prev, { context, toolkit }) =>
-      (params) => {
+      () => {
         return [
-          ...prev(params),
+          ...prev(),
           {
             id: 'patterns-action-view-docs-in-discover',
             getDisplayName: () =>

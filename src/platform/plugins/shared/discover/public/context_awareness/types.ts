@@ -167,11 +167,6 @@ export interface DocViewerExtension {
 }
 
 /**
- * Parameters passed to the additional cell actions extension
- */
-export type AdditionalCellActionsParams = Record<string, never>;
-
-/**
  * Parameters passed to the doc viewer extension
  */
 export interface DocViewerExtensionParams {
@@ -509,7 +504,7 @@ export interface Profile {
    * Gets additional cell actions to show within expanded cell popovers in the data grid
    * @returns The additional cell actions to show in the data grid
    */
-  getAdditionalCellActions: (params: AdditionalCellActionsParams) => AdditionalCellAction[];
+  getAdditionalCellActions: () => AdditionalCellAction[];
 
   /**
    * Allows setting the pagination mode and its configuration

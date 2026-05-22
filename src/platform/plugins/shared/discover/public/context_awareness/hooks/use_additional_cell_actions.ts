@@ -39,7 +39,7 @@ export const useAdditionalCellActions = ({
   const [instanceId, setInstanceId] = useState<string | undefined>();
   const getAdditionalCellActionsAccessor = useProfileAccessor('getAdditionalCellActions');
   const additionalCellActions = useMemo(
-    () => getAdditionalCellActionsAccessor(() => [])({}),
+    () => getAdditionalCellActionsAccessor(() => [])(),
     [getAdditionalCellActionsAccessor]
   );
 
