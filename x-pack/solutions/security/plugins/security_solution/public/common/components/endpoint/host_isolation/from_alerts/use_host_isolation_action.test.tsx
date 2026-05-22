@@ -56,7 +56,6 @@ describe('useHostIsolationAction', () => {
     hookProps = {
       closePopover: jest.fn(),
       detailsData: endpointAlertDataMock.generateEndpointAlertDetailsItemData(),
-      isHostIsolationPanelOpen: false,
       onAddIsolationStatusClick: jest.fn(),
     };
     apiMock = agentStatusGetHttpMock(appContextMock.coreStart.http);

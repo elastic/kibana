@@ -92,6 +92,7 @@ export class GetCompositeSLO {
       summary: {
         sliValue: summaryResults[i].summary.sliValue,
         status: summaryResults[i].summary.status,
+        errorBudget: summaryResults[i].summary.errorBudget,
         fiveMinuteBurnRate: summaryResults[i].summary.fiveMinuteBurnRate,
         oneHourBurnRate: summaryResults[i].summary.oneHourBurnRate,
         oneDayBurnRate: summaryResults[i].summary.oneDayBurnRate,
