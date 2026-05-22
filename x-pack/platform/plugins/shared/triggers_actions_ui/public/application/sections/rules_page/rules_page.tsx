@@ -214,7 +214,7 @@ const RulesPage = () => {
           }}
           http={http}
           toasts={toasts}
-          registeredRuleTypes={ruleTypeRegistry.list()}
+          ruleTypeRegistry={ruleTypeRegistry}
           filteredRuleTypes={[]}
           cps={cps}
         />

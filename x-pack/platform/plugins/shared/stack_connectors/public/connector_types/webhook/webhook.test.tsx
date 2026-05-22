@@ -15,11 +15,11 @@ import { WebhookMethods } from '@kbn/connector-schemas/common/auth/constants';
 const CONNECTOR_TYPE_ID = '.webhook';
 let connectorTypeModel: ConnectorTypeModel;
 
-beforeAll(() => {
+beforeAll(async () => {
   const connectorTypeRegistry = new TypeRegistry<ConnectorTypeModel>();
   ExperimentalFeaturesService.init({ experimentalFeatures: experimentalFeaturesMock });
   registerConnectorTypes({ connectorTypeRegistry, services: registrationServicesMock });
-  const getResult = connectorTypeRegistry.get(CONNECTOR_TYPE_ID);
+  const getResult = await connectorTypeRegistry.get(CONNECTOR_TYPE_ID);
   if (getResult !== null) {
     connectorTypeModel = getResult;
   }

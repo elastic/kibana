@@ -275,8 +275,8 @@ describe('rules_list component empty', () => {
     const actionTypeRegistry = actionTypeRegistryMock.create();
     const ruleTypeRegistry = ruleTypeRegistryMock.create();
 
-    ruleTypeRegistry.list.mockReturnValue([ruleType]);
-    actionTypeRegistry.list.mockReturnValue([]);
+    ruleTypeRegistry.list.mockResolvedValue([ruleType]);
+    actionTypeRegistry.list.mockResolvedValue([]);
     useKibanaMock().services.application.capabilities = {
       ...useKibanaMock().services.application.capabilities,
       [MAINTENANCE_WINDOW_FEATURE_ID]: {
@@ -369,7 +369,7 @@ describe('rules_list ', () => {
     ruleTypeRegistry = ruleTypeRegistryMock.create();
 
     ruleTypeRegistry.has.mockReturnValue(true);
-    ruleTypeRegistry.get.mockReturnValue(ruleTypeMock);
+    ruleTypeRegistry.get.mockResolvedValue(ruleTypeMock);
     useKibanaMock().services.ruleTypeRegistry = ruleTypeRegistry;
     useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
   });
@@ -801,7 +801,7 @@ describe('rules_list ', () => {
         requiresAppContext: true,
       };
 
-      ruleTypeRegistry.get.mockReturnValue(ruleTypeMock);
+      ruleTypeRegistry.get.mockResolvedValue(ruleTypeMock);
       renderWithProviders(<RulesList />);
       await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
       expect(screen.queryByTestId('ruleSidebarEditAction')).not.toBeInTheDocument();
@@ -965,7 +965,7 @@ describe('internally managed rule', () => {
     ruleTypeRegistry = ruleTypeRegistryMock.create();
 
     ruleTypeRegistry.has.mockReturnValue(true);
-    ruleTypeRegistry.get.mockReturnValue(ruleTypeMock);
+    ruleTypeRegistry.get.mockResolvedValue(ruleTypeMock);
     useKibanaMock().services.ruleTypeRegistry = ruleTypeRegistry;
     useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
   });
@@ -1171,7 +1171,7 @@ describe('rule list with different rule types', () => {
     actionTypeRegistry = actionTypeRegistryMock.create();
     ruleTypeRegistry = ruleTypeRegistryMock.create();
     ruleTypeRegistry.has.mockReturnValue(true);
-    ruleTypeRegistry.get.mockReturnValue(ruleTypeMock);
+    ruleTypeRegistry.get.mockResolvedValue(ruleTypeMock);
     useKibanaMock().services.ruleTypeRegistry = ruleTypeRegistry;
     useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
   });
@@ -1293,7 +1293,7 @@ describe('rules_list with show only capability', () => {
       const actionTypeRegistry = actionTypeRegistryMock.create();
       const ruleTypeRegistry = ruleTypeRegistryMock.create();
       ruleTypeRegistry.has.mockReturnValue(true);
-      ruleTypeRegistry.get.mockReturnValue(ruleTypeMock);
+      ruleTypeRegistry.get.mockResolvedValue(ruleTypeMock);
       useKibanaMock().services.ruleTypeRegistry = ruleTypeRegistry;
       useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
     });
@@ -1452,8 +1452,8 @@ describe('MaintenanceWindowsMock', () => {
     const actionTypeRegistry = actionTypeRegistryMock.create();
     const ruleTypeRegistry = ruleTypeRegistryMock.create();
 
-    ruleTypeRegistry.list.mockReturnValue([ruleType]);
-    actionTypeRegistry.list.mockReturnValue([]);
+    ruleTypeRegistry.list.mockResolvedValue([ruleType]);
+    actionTypeRegistry.list.mockResolvedValue([]);
     useKibanaMock().services.application.capabilities = {
       ...useKibanaMock().services.application.capabilities,
       [MAINTENANCE_WINDOW_FEATURE_ID]: {

@@ -123,7 +123,7 @@ const maintenanceWindowsMap = getMaintenanceWindowsMock();
 
 beforeAll(async () => {
   jest.clearAllMocks();
-  ruleTypeRegistry.get.mockReturnValue(ruleTypeR);
+  ruleTypeRegistry.get.mockResolvedValue(ruleTypeR);
   useKibanaMock().services.ruleTypeRegistry = ruleTypeRegistry;
   useKibanaMock().services.chrome.getActiveSolutionNavId$ = jest
     .fn()

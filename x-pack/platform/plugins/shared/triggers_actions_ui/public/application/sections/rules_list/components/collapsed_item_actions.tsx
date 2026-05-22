@@ -123,8 +123,10 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
     [onLoading, unsnoozeRule, item, onRuleChanged, toasts, onClose]
   );
 
+  // TODO use async get
   const isRuleTypeEditableInContext = ruleTypeRegistry.has(item.ruleTypeId)
-    ? !ruleTypeRegistry.get(item.ruleTypeId).requiresAppContext
+    // ? !ruleTypeRegistry.get(item.ruleTypeId).requiresAppContext
+    ? false
     : false;
 
   const isSnoozed = useMemo(() => {

@@ -43,11 +43,11 @@ beforeEach(() => {
   jest.resetAllMocks();
 });
 
-beforeAll(() => {
+beforeAll(async () => {
   ExperimentalFeaturesService.init({ experimentalFeatures: experimentalFeaturesMock });
   const connectorTypeRegistry = new TypeRegistry<ConnectorTypeModel>();
   registerConnectorTypes({ connectorTypeRegistry, services: RegistrationServices });
-  const getResult = connectorTypeRegistry.get(CONNECTOR_TYPE_ID);
+  const getResult = await connectorTypeRegistry.get(CONNECTOR_TYPE_ID);
   if (getResult !== null) {
     connectorTypeModel = getResult;
   }

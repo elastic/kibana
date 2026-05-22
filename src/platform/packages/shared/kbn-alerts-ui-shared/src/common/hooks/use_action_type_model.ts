@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useMemo } from 'react';
 import { useQuery } from '@kbn/react-query';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import type { ActionType } from '@kbn/actions-types';
@@ -19,6 +18,7 @@ import {
   transformSpecToActionTypeModel,
   type ConnectorSpecResponse,
 } from '../utils/action_type_model_utils';
+import useAsync from 'react-use/lib/useAsync';
 
 const CONNECTOR_SPEC_QUERY_KEY = 'connectorSpec';
 
@@ -37,9 +37,6 @@ export interface UseActionTypeModelResult {
 
 /**
  * Hook to get an ActionTypeModel for a given ActionType.
- *
- * For stack connectors (registered in the actionTypeRegistry), returns the model synchronously.
- * For spec-based connectors, fetches the spec from the API and transforms it into an ActionTypeModel.
  */
 export function useActionTypeModel({
   actionTypeRegistry,
@@ -52,21 +49,17 @@ export function useActionTypeModel({
   http: HttpSetup;
   uiSettings?: IUiSettingsClient;
 }): UseActionTypeModelResult {
-  const registeredModel = useMemo(() => {
-    if (actionType == null) {
-      return null;
-    }
-    if (actionTypeRegistry.has(actionType.id)) {
-      return actionTypeRegistry.get(actionType.id);
-    }
-    return null;
+  const { loading: isLoadingModal, value: registeredModel = null } = useAsync(async () => {
+    return actionType && actionTypeRegistry.has(actionType.id)
+      ? actionTypeRegistry.get(actionType.id)
+      : null;
   }, [actionType, actionTypeRegistry]);
 
   const shouldFetchSpec = actionType != null && actionType.source === ACTION_TYPE_SOURCES.spec;
 
   const {
     data: specBasedModel = null,
-    isLoading,
+    isLoading: isLoadingSpec,
     error,
     refetch,
   } = useQuery<ConnectorSpecResponse, Error, ActionTypeModel | null>({
@@ -88,7 +81,7 @@ export function useActionTypeModel({
 
   return {
     actionTypeModel: shouldFetchSpec ? specBasedModel : registeredModel,
-    isLoading: shouldFetchSpec && isLoading,
+    isLoading: isLoadingSpec || isLoadingModal,
     error,
     isFromSpec: shouldFetchSpec && specBasedModel != null,
     refetch: () => {

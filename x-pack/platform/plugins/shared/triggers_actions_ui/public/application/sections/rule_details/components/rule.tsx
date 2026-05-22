@@ -42,9 +42,9 @@ import { RuleAlertActionsCell } from './rule_alert_actions_cell';
 import { RuleAlertSearchBar } from './rule_alert_search_bar';
 import { RULE_DETAILS_FILTER_CONTROLS } from '../../alerts_search_bar/constants';
 import { AlertSummaryWidget } from '../../alert_summary_widget';
+import { LazyRuleDefinition } from './lazy_rule_definition';
 
 const RuleEventLogList = lazy(() => import('./rule_event_log_list'));
-const RuleDefinition = lazy(() => import('./rule_definition'));
 const AlertsTable = lazy(() => import('@kbn/response-ops-alerts-table')) as AlertsTableType;
 
 export type RuleComponentProps = {
@@ -115,11 +115,11 @@ export function RuleComponent({
   }, [getCasesPlugin]);
 
   const getAlertFormatter = useCallback(
-    (ruleTypeId: string) => {
+    async (ruleTypeId: string) => {
       if (!ruleTypeRegistry.has(ruleTypeId)) {
         return undefined;
       }
-      return ruleTypeRegistry.get(ruleTypeId).format;
+      return (await ruleTypeRegistry.get(ruleTypeId)).format;
     },
     [ruleTypeRegistry]
   );
@@ -384,16 +384,14 @@ export function RuleComponent({
             dependencies={{ charts, uiSettings }}
           />
         </EuiFlexItem>
-        {suspendedComponentWithProps(
-          RuleDefinition,
-          'xl'
-        )({
-          rule,
-          actionTypeRegistry,
-          ruleTypeRegistry,
-          hideEditButton: true,
-          onEditRule: requestRefresh,
-        })}
+        <LazyRuleDefinition
+          rule={rule}
+          actionTypeRegistry={actionTypeRegistry}
+          ruleTypeRegistry={ruleTypeRegistry}
+          hideEditButton
+          onEditRule={requestRefresh}
+          size="xl"
+        />
       </EuiFlexGroup>
 
       <EuiSpacer size="xl" />
