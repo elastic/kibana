@@ -88,7 +88,7 @@ export const bulkDeleteRules = async <Params extends RuleParams>(
         bulkOperation: (filterKueryNode: KueryNode | null) =>
           bulkDeleteWithOCC(context, {
             filter: filterKueryNode,
-            changeTracking: { bulkCount: options.changeTracking?.bulkCount ?? total },
+            changeTracking: { bulkCount: total, ...options.changeTracking },
           }),
         filter: finalFilter,
       })
