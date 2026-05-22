@@ -19,6 +19,7 @@ project:
 dependsOn:
   - '@kbn/config'
   - '@kbn/shared-ux-utility'
+  - '@kbn/core-hotkeys-browser'
 tags:
   - shared-browser
   - package

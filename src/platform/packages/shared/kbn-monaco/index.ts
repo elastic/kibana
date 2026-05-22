@@ -10,7 +10,15 @@
 import './src/register_globals';
 
 export { monaco } from './src/monaco_imports';
-
+export {
+  type KeyCodeChord,
+  type Keybinding,
+  KeyCodeUtils,
+  decodeKeybinding,
+  OS,
+  OperatingSystem,
+  ContextKeyExpr,
+} from './src/monaco_internals_exports';
 /* eslint-disable-next-line @kbn/eslint/module_migration */
 import * as BarePluginApi from 'monaco-editor/esm/vs/editor/editor.api';
 

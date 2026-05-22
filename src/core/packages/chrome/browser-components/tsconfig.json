@@ -47,5 +47,6 @@
     "@kbn/test-jest-helpers",
     "@kbn/use-observable",
     "@kbn/shared-ux-utility",
+    "@kbn/core-hotkeys-browser-mocks",
   ]
 }

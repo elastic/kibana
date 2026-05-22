@@ -47,6 +47,7 @@ dependsOn:
   - '@kbn/core-di-browser'
   - '@kbn/core-di-internal'
   - '@kbn/core-di-mocks'
+  - '@kbn/core-hotkeys-browser-mocks'
 tags:
   - shared-browser
   - package

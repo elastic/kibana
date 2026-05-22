@@ -209,6 +209,9 @@ src/core/packages/feature-flags/browser-mocks @elastic/kibana-core
 src/core/packages/feature-flags/server @elastic/kibana-core
 src/core/packages/feature-flags/server-internal @elastic/kibana-core
 src/core/packages/feature-flags/server-mocks @elastic/kibana-core
+src/core/packages/hotkeys/browser @elastic/appex-sharedux
+src/core/packages/hotkeys/browser-internal @elastic/appex-sharedux
+src/core/packages/hotkeys/browser-mocks @elastic/appex-sharedux
 src/core/packages/http/browser @elastic/kibana-core
 src/core/packages/http/browser-internal @elastic/kibana-core
 src/core/packages/http/browser-mocks @elastic/kibana-core

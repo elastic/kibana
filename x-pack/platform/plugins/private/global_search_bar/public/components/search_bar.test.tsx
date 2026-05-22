@@ -7,6 +7,7 @@
 
 import type { ChromeStyle } from '@kbn/core-chrome-browser';
 import { applicationServiceMock, coreMock } from '@kbn/core/public/mocks';
+import { hotkeysServiceMock } from '@kbn/core-hotkeys-browser-mocks';
 import type {
   GlobalSearchBatchedResults,
   GlobalSearchResult,
@@ -61,11 +62,25 @@ describe('SearchBar', () => {
   const eventReporter = new EventReporter({ analytics: core.analytics, usageCollection });
   let searchService: ReturnType<typeof globalSearchPluginMock.createStartContract>;
   let applications: ReturnType<typeof applicationServiceMock.createStartContract>;
+  let hotkeys: ReturnType<typeof hotkeysServiceMock.createStartContract>;
+  let lastRegisteredHandler: ((event: KeyboardEvent) => void) | undefined;
 
   beforeEach(() => {
     applications = applicationServiceMock.createStartContract();
     searchService = globalSearchPluginMock.createStartContract();
+    lastRegisteredHandler = undefined;
+    hotkeys = hotkeysServiceMock.createStartContract();
+    hotkeys.register.mockImplementation((_def, handler) => {
+      lastRegisteredHandler = handler;
+      return { id: 'platform:globalSearch.open', update: jest.fn(), unregister: jest.fn() };
+    });
   });
+
+  const triggerSearchHotkey = () => {
+    act(() => {
+      lastRegisteredHandler?.(new KeyboardEvent('keydown'));
+    });
+  };
 
   const update = () => {
     act(() => {
@@ -109,6 +124,7 @@ describe('SearchBar', () => {
             basePathUrl={basePathUrl}
             chromeStyle$={chromeStyle$}
             reportEvent={eventReporter}
+            hotkeys={hotkeys}
           />
         </IntlProvider>
       );
@@ -149,6 +165,7 @@ describe('SearchBar', () => {
             basePathUrl={basePathUrl}
             chromeStyle$={chromeStyle$}
             reportEvent={eventReporter}
+            hotkeys={hotkeys}
           />
         </IntlProvider>
       );
@@ -177,12 +194,20 @@ describe('SearchBar', () => {
             basePathUrl={basePathUrl}
             chromeStyle$={chromeStyle$}
             reportEvent={eventReporter}
+            hotkeys={hotkeys}
           />
         </IntlProvider>
       );
-      act(() => {
-        fireEvent.keyDown(window, { key: '/', ctrlKey: true, metaKey: true });
+
+      expect(hotkeys.register).toHaveBeenCalled();
+      const [definition] = hotkeys.register.mock.calls[0];
+      expect(definition).toMatchObject({
+        id: 'platform:globalSearch.open',
+        keys: 'Mod+/',
+        scope: 'global',
       });
+
+      triggerSearchHotkey();
 
       const inputElement = await screen.findByTestId('nav-search-input');
 
@@ -209,6 +234,7 @@ describe('SearchBar', () => {
             basePathUrl={basePathUrl}
             chromeStyle$={chromeStyle$}
             reportEvent={eventReporter}
+            hotkeys={hotkeys}
           />
         </IntlProvider>
       );
@@ -240,13 +266,12 @@ describe('SearchBar', () => {
             basePathUrl={basePathUrl}
             chromeStyle$={chromeStyle$}
             reportEvent={eventReporter}
+            hotkeys={hotkeys}
           />
         </IntlProvider>
       );
 
-      act(() => {
-        fireEvent.keyDown(window, { key: '/', ctrlKey: true, metaKey: true });
-      });
+      triggerSearchHotkey();
 
       expect(await screen.findByTestId('nav-search-input')).toEqual(document.activeElement);
 
@@ -263,6 +288,7 @@ describe('SearchBar', () => {
             basePathUrl={basePathUrl}
             chromeStyle$={chromeStyle$}
             reportEvent={eventReporter}
+            hotkeys={hotkeys}
           />
         </IntlProvider>
       );

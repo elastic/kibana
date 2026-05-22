@@ -17,11 +17,11 @@ import {
   EuiPanel,
   EuiThemeProvider,
   EuiToolTip,
-  EuiWindowEvent,
   useEuiTheme,
 } from '@elastic/eui';
 import { css, keyframes } from '@emotion/react';
 import { isMac } from '@kbn/shared-ux-utility';
+import type { HotkeysStart } from '@kbn/core-hotkeys-browser';
 import { ConsoleErrorIndicator } from '../toolbar_items/console_error/console_error_indicator';
 import type { ConsoleErrorInfo } from '../toolbar_items/console_error/console_monitor';
 import { useConsoleErrorMonitor } from '../toolbar_items/console_error/use_console_error_monitor';
@@ -44,7 +44,16 @@ import { useToolbarState } from '../hooks/use_toolbar_state';
 export interface DeveloperToolbarProps {
   envInfo?: EnvironmentInfo;
   onHeightChange?: (height: number) => void;
+  /** Core hotkeys service used to register the toolbar toggle shortcut. */
+  hotkeys: HotkeysStart;
 }
+
+/**
+ * Platform chord that toggles the developer toolbar. Declared as a
+ * {@link HotkeyDefinition.keys} value so the Chrome cheat sheet formats
+ * it consistently with every other shortcut (no bespoke `isMac` branches).
+ */
+const TOGGLE_HOTKEY_KEYS = 'Mod+\\';
 
 const HEIGHT = 32;
 const TOOLBAR_BACKGROUND_COLOR = 'rgb(11, 100, 221)'; // punchy blue
@@ -234,7 +243,11 @@ export const DeveloperToolbar: React.FC<DeveloperToolbarProps> = (props) => {
   );
 };
 
-const DeveloperToolbarInternal: React.FC<DeveloperToolbarProps> = ({ envInfo, onHeightChange }) => {
+const DeveloperToolbarInternal: React.FC<DeveloperToolbarProps> = ({
+  envInfo,
+  onHeightChange,
+  hotkeys,
+}) => {
   const { euiTheme } = useEuiTheme();
   const { isMinimized, toggleMinimized } = useMinimized();
   const [isHidden, setIsHidden] = useState(false);
@@ -259,40 +272,42 @@ const DeveloperToolbarInternal: React.FC<DeveloperToolbarProps> = ({ envInfo, on
     }
   }, [onHeightChange, isMinimized]);
 
-  const handleShortcut = (
-    <EuiWindowEvent
-      event="keydown"
-      handler={(e) => {
-        if (isToggleShortcut(e)) {
-          e.preventDefault();
-          setIsHidden(false);
-          toggleMinimized();
-        }
-      }}
-    />
-  );
+  useEffect(() => {
+    const handle = hotkeys.register(
+      {
+        id: 'platform:developerToolbar.toggle',
+        keys: TOGGLE_HOTKEY_KEYS,
+        scope: 'global',
+        group: 'Developer tools',
+        label: 'Toggle developer toolbar',
+        description: 'Expand the developer toolbar, or minimize it back to the footer button.',
+      },
+      (event) => {
+        event.preventDefault();
+        setIsHidden(false);
+        toggleMinimized();
+      }
+    );
+    return handle.unregister;
+  }, [hotkeys, toggleMinimized]);
 
-  if (isHidden) return <>{handleShortcut}</>;
+  if (isHidden) return null;
 
   if (isMinimized) {
     return ReactDOM.createPortal(
-      <>
-        {handleShortcut}
-        <MinimizedDeveloperToolbarButton
-          keyboardShortcutLabel={keyboardShortcutLabel}
-          isErrorsMonitorEnabled={isErrorsMonitorEnabled}
-          consoleError={consoleError}
-          onExpand={toggleMinimized}
-          onHide={() => setIsHidden(true)}
-        />
-      </>,
+      <MinimizedDeveloperToolbarButton
+        keyboardShortcutLabel={keyboardShortcutLabel}
+        isErrorsMonitorEnabled={isErrorsMonitorEnabled}
+        consoleError={consoleError}
+        onExpand={toggleMinimized}
+        onHide={() => setIsHidden(true)}
+      />,
       document.body
     );
   }
 
   return (
     <div id="developerToolbar" css={getToolbarContainerStyles()}>
-      <>{handleShortcut}</>
       {state.isEnabled('errorsMonitor') && (
         <EuiThemeProvider colorMode="light">
           <ConsoleErrorIndicator
@@ -404,7 +419,3 @@ const DeveloperToolbarInternal: React.FC<DeveloperToolbarProps> = ({ envInfo, on
     </div>
   );
 };
-
-// CMD + \ or CTRL + \ keyboard shortcut to toggle the developer toolbar
-const isToggleShortcut = (event: KeyboardEvent) =>
-  (event.metaKey || event.ctrlKey) && event.key === '\\';

@@ -23,7 +23,9 @@ import {
   euiYScroll,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { isMac } from '@kbn/shared-ux-utility';
+import type { ESQLEditorDeps } from '../types';
 
 const COMMAND_KEY = isMac ? '⌘' : 'CTRL';
 
@@ -82,6 +84,8 @@ const listItems = [
 
 export function KeyboardShortcuts() {
   const euiThemeContext = useEuiTheme();
+  const kibana = useKibana<ESQLEditorDeps>();
+  const { hotkeys } = kibana.services;
   const { euiTheme } = euiThemeContext;
 
   const [isOpen, setIsOpen] = useState(false);
@@ -119,7 +123,7 @@ export function KeyboardShortcuts() {
               size="xs"
               iconType="keyboard"
               data-test-subj="editorKeyboardShortcutsButton"
-              onClick={() => setIsOpen(!isOpen)}
+              onClick={() => hotkeys?.cheatSheet?.actions?.openToFeature('esql:editor')}
               aria-label={label}
               color="text"
             />

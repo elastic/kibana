@@ -26,6 +26,7 @@ import {
   mathWithUnits,
 } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { useKbnFullScreenBgCss } from '@kbn/css-utils/public/full_screen_bg_css';
@@ -61,19 +62,23 @@ export const Welcome: React.FC<WelcomeProps> = ({ urlBasePath, onSkip }: Welcome
   };
 
   useEffect(() => {
-    const hideOnEsc = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onSkip();
-      }
-    };
-    const { welcomeService } = services;
+    const { welcomeService, hotkeys } = services;
     services.trackUiMetric(METRIC_TYPE.LOADED, 'welcomeScreenMount');
-    document.addEventListener('keydown', hideOnEsc);
     welcomeService.onRendered();
 
-    return () => {
-      document.removeEventListener('keydown', hideOnEsc);
-    };
+    const handle = hotkeys.register(
+      {
+        id: 'home:welcomeScreen.dismiss',
+        keys: 'Escape',
+        scope: 'context',
+        label: i18n.translate('home.welcomeScreen.keyboardShortcut.dismissLabel', {
+          defaultMessage: 'Dismiss welcome screen',
+        }),
+      },
+      () => onSkip()
+    );
+
+    return handle.unregister;
   }, [onSkip, services]);
 
   const { welcomeService } = services;

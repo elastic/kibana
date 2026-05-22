@@ -16,6 +16,7 @@ import { fatalErrorsServiceMock } from '@kbn/core-fatal-errors-browser-mocks';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { uiSettingsServiceMock, settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { deprecationsServiceMock } from '@kbn/core-deprecations-browser-mocks';
+import { hotkeysServiceMock } from '@kbn/core-hotkeys-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-mocks';
@@ -47,6 +48,7 @@ export function createCoreSetupMock({
     getStartServices: jest.fn<Promise<[ReturnType<typeof createCoreStartMock>, any, any]>, []>(() =>
       Promise.resolve([createCoreStartMock({ basePath }), pluginStartDeps, pluginStartContract])
     ),
+    hotkeys: hotkeysServiceMock.createSetupContract(),
     http: httpServiceMock.createSetupContract({ basePath }),
     injection: injectionServiceMock.createSetupContract(),
     notifications: notificationServiceMock.createSetupContract(),

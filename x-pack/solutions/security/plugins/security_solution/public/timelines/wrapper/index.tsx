@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { EuiFocusTrap, EuiWindowEvent, keys } from '@elastic/eui';
-import React, { useMemo, useCallback, useRef } from 'react';
+import { EuiFocusTrap } from '@elastic/eui';
+import React, { useMemo, useCallback, useRef, useEffect } from 'react';
 import type { AppLeaveHandler } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import { useDispatch } from 'react-redux';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useKibana } from '../../common/lib/kibana/use_kibana';
 import { TimelineModal } from '../components/modal';
 import type { TimelineId } from '../../../common/types';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
@@ -45,11 +47,23 @@ export const TimelineWrapper: React.FC<TimelineWrapperProps> = React.memo(
       dispatch(timelineActions.showTimeline({ id: timelineId, show: false }));
     }, [dispatch, timelineId]);
     const { closeFlyout } = useExpandableFlyoutApi();
+    const {
+      services: { hotkeys },
+    } = useKibana();
 
     // pressing the ESC key closes the timeline portal unless a flyout is opened on top of it
-    const onKeyDown = useCallback(
-      (ev: KeyboardEvent) => {
-        if (ev.key === keys.ESCAPE) {
+    useEffect(() => {
+      if (!show) return;
+      const handle = hotkeys.register(
+        {
+          id: 'securitySolution:closeTimeline',
+          keys: 'Escape',
+          scope: 'context',
+          label: i18n.translate('xpack.securitySolution.timeline.closeShortcutLabel', {
+            defaultMessage: 'Close timeline',
+          }),
+        },
+        () => {
           const query = new URLSearchParams(window.location.search);
           const timelineFlyoutOpen = isTimelineFlyoutOpen(query);
 
@@ -59,9 +73,9 @@ export const TimelineWrapper: React.FC<TimelineWrapperProps> = React.memo(
           }
           handleClose();
         }
-      },
-      [closeFlyout, handleClose]
-    );
+      );
+      return handle.unregister;
+    }, [hotkeys, show, closeFlyout, handleClose]);
 
     useTimelineSavePrompt(timelineId, onAppLeave);
 
@@ -71,7 +85,6 @@ export const TimelineWrapper: React.FC<TimelineWrapperProps> = React.memo(
           <TimelineModal timelineId={timelineId} visible={show} openToggleRef={openToggleRef} />
         </EuiFocusTrap>
         <TimelineBottomBar show={show} timelineId={timelineId} openToggleRef={openToggleRef} />
-        <EuiWindowEvent event="keydown" handler={onKeyDown} />
       </>
     );
   }

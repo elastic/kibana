@@ -38,6 +38,7 @@ dependsOn:
   - '@kbn/core-pricing-browser-mocks'
   - '@kbn/core-di-mocks'
   - '@kbn/lazy-object'
+  - '@kbn/core-hotkeys-browser-mocks'
 tags:
   - shared-browser
   - package

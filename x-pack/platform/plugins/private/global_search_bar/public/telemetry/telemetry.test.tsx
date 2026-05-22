@@ -7,6 +7,7 @@
 
 import type { ChromeStyle } from '@kbn/core-chrome-browser';
 import { applicationServiceMock, coreMock } from '@kbn/core/public/mocks';
+import { hotkeysServiceMock } from '@kbn/core-hotkeys-browser-mocks';
 import type {
   GlobalSearchBatchedResults,
   GlobalSearchResult,
@@ -61,6 +62,8 @@ describe('SearchBar', () => {
   let user: UserEvent;
   let searchService: ReturnType<typeof globalSearchPluginMock.createStartContract>;
   let applications: ReturnType<typeof applicationServiceMock.createStartContract>;
+  let hotkeys: ReturnType<typeof hotkeysServiceMock.createStartContract>;
+  let lastRegisteredHandler: ((event: KeyboardEvent) => void) | undefined;
   let mockReportUiCounter: typeof usageCollection.reportUiCounter;
   let mockReportEvent: typeof core.analytics.reportEvent;
   let eventReporter: EventReporter;
@@ -79,6 +82,12 @@ describe('SearchBar', () => {
     user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     applications = applicationServiceMock.createStartContract();
     searchService = globalSearchPluginMock.createStartContract();
+    lastRegisteredHandler = undefined;
+    hotkeys = hotkeysServiceMock.createStartContract();
+    hotkeys.register.mockImplementation((_def, handler) => {
+      lastRegisteredHandler = handler;
+      return { id: 'platform:globalSearch.open', update: jest.fn(), unregister: jest.fn() };
+    });
 
     mockReportUiCounter = jest.fn();
     usageCollection.reportUiCounter = mockReportUiCounter;
@@ -107,6 +116,12 @@ describe('SearchBar', () => {
     });
   };
 
+  const triggerSearchHotkey = () => {
+    act(() => {
+      lastRegisteredHandler?.(new KeyboardEvent('keydown'));
+    });
+  };
+
   describe('chromeStyle: classic', () => {
     it('calling results', async () => {
       searchService.find
@@ -126,6 +141,7 @@ describe('SearchBar', () => {
             basePathUrl={basePathUrl}
             chromeStyle$={chromeStyle$}
             reportEvent={eventReporter}
+            hotkeys={hotkeys}
           />
         </IntlProvider>
       );
@@ -148,14 +164,13 @@ describe('SearchBar', () => {
             basePathUrl={basePathUrl}
             chromeStyle$={chromeStyle$}
             reportEvent={eventReporter}
+            hotkeys={hotkeys}
           />
         </IntlProvider>
       );
 
-      await act(async () => {
-        fireEvent.keyDown(window, { key: '/', ctrlKey: true, metaKey: true });
-        expect(await screen.findByTestId('nav-search-input')).toEqual(document.activeElement);
-      });
+      triggerSearchHotkey();
+      expect(await screen.findByTestId('nav-search-input')).toEqual(document.activeElement);
 
       expect(mockReportUiCounter).nthCalledWith(1, 'global_search_bar', 'count', 'shortcut_used');
       expect(mockReportUiCounter).nthCalledWith(2, 'global_search_bar', 'count', 'search_focus');
@@ -175,6 +190,7 @@ describe('SearchBar', () => {
             basePathUrl={basePathUrl}
             chromeStyle$={chromeStyle$}
             reportEvent={eventReporter}
+            hotkeys={hotkeys}
           />
         </IntlProvider>
       );
@@ -210,6 +226,7 @@ describe('SearchBar', () => {
             basePathUrl={basePathUrl}
             chromeStyle$={chromeStyle$}
             reportEvent={eventReporter}
+            hotkeys={hotkeys}
           />
         </IntlProvider>
       );
@@ -246,6 +263,7 @@ describe('SearchBar', () => {
             basePathUrl={basePathUrl}
             chromeStyle$={chromeStyle$}
             reportEvent={eventReporter}
+            hotkeys={hotkeys}
           />
         </IntlProvider>
       );
@@ -283,13 +301,12 @@ describe('SearchBar', () => {
               basePathUrl={basePathUrl}
               chromeStyle$={chromeStyle$}
               reportEvent={eventReporter}
+              hotkeys={hotkeys}
             />
           </IntlProvider>
         );
 
-        act(() => {
-          fireEvent.keyDown(window, { key: '/', ctrlKey: true, metaKey: true });
-        });
+        triggerSearchHotkey();
 
         const inputElement = await screen.findByTestId('nav-search-input');
 
@@ -312,6 +329,7 @@ describe('SearchBar', () => {
               basePathUrl={basePathUrl}
               chromeStyle$={chromeStyle$}
               reportEvent={eventReporter}
+              hotkeys={hotkeys}
             />
           </IntlProvider>
         );

@@ -6,9 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { useCallback, useState } from 'react';
-// @ts-expect-error no @types definition
-import { Shortcuts } from 'react-shortcuts';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -26,6 +24,11 @@ import { ShareMenu } from './share_menu';
 import { ViewMenu } from './view_menu';
 import { LabsControl } from './labs_control';
 import { EditorMenu } from './editor_menu';
+import { coreServices } from '../../services/kibana_services';
+import { ShortcutStrings } from '../../../i18n/shortcuts';
+
+const shortcutHelp = ShortcutStrings.getShortcutHelp();
+const namespaceDisplayNames = ShortcutStrings.getNamespaceDisplayNames();
 
 const strings = {
   getQuickCreateButtonGroupLegend: () =>
@@ -78,13 +81,29 @@ export const WorkpadHeader: FC<Props> = ({
   const [isEmbedPanelVisible, setEmbedPanelVisible] = useState(false);
   const hideEmbedPanel = () => setEmbedPanelVisible(false);
   const showEmbedPanel = () => setEmbedPanelVisible(true);
-  const toggleWriteable = () => onSetWriteable(!isWriteable);
+  const toggleWriteable = useCallback(
+    () => onSetWriteable(!isWriteable),
+    [onSetWriteable, isWriteable]
+  );
+  const toggleWriteableRef = useRef(toggleWriteable);
+  toggleWriteableRef.current = toggleWriteable;
 
-  const keyHandler = (action: string) => {
-    if (action === 'EDITING') {
-      toggleWriteable();
-    }
-  };
+  useEffect(() => {
+    if (!canUserWrite) return;
+    return coreServices.hotkeys.forApp('canvas').registerMany([
+      {
+        def: {
+          id: 'canvas:toggleEditing',
+          keys: 'Alt+E',
+          label: shortcutHelp.EDITING,
+          group: namespaceDisplayNames.EDITOR,
+        },
+        handler: () => {
+          toggleWriteableRef.current();
+        },
+      },
+    ]);
+  }, [canUserWrite]);
 
   const fullscreenButton = ({ toggleFullscreen }: { toggleFullscreen: () => void }) => (
     <EuiToolTip
@@ -205,15 +224,6 @@ export const WorkpadHeader: FC<Props> = ({
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
-              {canUserWrite && (
-                <Shortcuts
-                  name="EDITOR"
-                  handler={keyHandler}
-                  targetNodeSelector="body"
-                  global
-                  isolate
-                />
-              )}
               <EuiToolTip position="bottom" content={getEditToggleToolTip()}>
                 <EuiButtonIcon
                   iconType={isWriteable ? 'eyeSlash' : 'eye'}

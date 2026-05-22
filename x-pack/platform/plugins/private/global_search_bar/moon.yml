@@ -28,6 +28,8 @@ dependsOn:
   - '@kbn/core-chrome-browser'
   - '@kbn/config-schema'
   - '@kbn/shared-ux-utility'
+  - '@kbn/core-hotkeys-browser'
+  - '@kbn/core-hotkeys-browser-mocks'
 tags:
   - plugin
   - prod

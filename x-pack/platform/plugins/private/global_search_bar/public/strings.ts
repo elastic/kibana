@@ -20,6 +20,15 @@ export const i18nStrings = {
   closeSearchAriaText: i18n.translate('xpack.globalSearchBar.searchBar.closeSearchAriaText', {
     defaultMessage: 'Close search bar',
   }),
+  keyboardShortcutLabel: i18n.translate('xpack.globalSearchBar.searchBar.keyboardShortcutLabel', {
+    defaultMessage: 'Global search bar',
+  }),
+  keyboardShortcutDescription: i18n.translate(
+    'xpack.globalSearchBar.searchBar.keyboardShortcutDescription',
+    {
+      defaultMessage: 'Toggles the global search bar',
+    }
+  ),
   keyboardShortcutTooltip: {
     prefix: i18n.translate('xpack.globalSearchBar.searchBar.shortcutTooltip.description', {
       defaultMessage: 'Keyboard shortcut',

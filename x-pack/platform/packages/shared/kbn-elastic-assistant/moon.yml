@@ -34,6 +34,7 @@ dependsOn:
   - '@kbn/data-views-plugin'
   - '@kbn/user-profile-components'
   - '@kbn/core-chrome-browser-mocks'
+  - '@kbn/core-hotkeys-browser'
   - '@kbn/ai-assistant-icon'
   - '@kbn/product-doc-base-plugin'
   - '@kbn/spaces-plugin'
@@ -54,6 +55,7 @@ dependsOn:
   - '@kbn/shared-ux-utility'
   - '@kbn/inference-connectors'
   - '@kbn/shared-ux-ai-components'
+  - '@kbn/core-hotkeys-browser-mocks'
 tags:
   - shared-browser
   - package

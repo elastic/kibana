@@ -18,6 +18,7 @@ import type { FatalErrorsStart } from '@kbn/core-fatal-errors-browser';
 import type { IUiSettingsClient, SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { DeprecationsServiceStart } from '@kbn/core-deprecations-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
+import type { HotkeysStart } from '@kbn/core-hotkeys-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { ChromeStart } from '@kbn/core-chrome-browser';
@@ -53,6 +54,8 @@ export interface CoreStart {
   executionContext: ExecutionContextStart;
   /** {@link FeatureFlagsStart} */
   featureFlags: FeatureFlagsStart;
+  /** {@link HotkeysStart} */
+  hotkeys: HotkeysStart;
   /** {@link HttpStart} */
   http: HttpStart;
   /** {@link CoreDiServiceStart} */

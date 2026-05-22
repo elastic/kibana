@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreStart } from '@kbn/core/public';
+import type { ChromeStart, CoreStart } from '@kbn/core/public';
 import type { AggregateQuery } from '@kbn/es-query';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { ILicense } from '@kbn/licensing-types';
@@ -111,6 +111,7 @@ export interface EsqlPluginStartBase {
 
 export interface ESQLEditorDeps {
   core: CoreStart;
+  chrome: ChromeStart;
   data: DataPublicPluginStart;
   storage: Storage;
   uiActions: UiActionsStart;
@@ -119,6 +120,7 @@ export interface ESQLEditorDeps {
   usageCollection?: UsageCollectionStart;
   cps?: CPSPluginStart;
   esql?: EsqlPluginStartBase;
+  hotkeys?: CoreStart['hotkeys'];
 }
 
 export enum HistoryTabId {
