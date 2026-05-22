@@ -7,8 +7,11 @@
 
 import React from 'react';
 import type { EuiPageSectionProps } from '@elastic/eui';
-import { EuiPageTemplate } from '@elastic/eui';
+import { EuiPageTemplate, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
+import { css as emotionCss } from '@emotion/react';
+import type { AppHeaderProps } from '@kbn/app-header';
+import { AppHeader } from '@kbn/app-header';
 
 export function StreamsAppPageTemplate({ children }: { children: React.ReactNode }) {
   return (
@@ -24,6 +27,30 @@ export function StreamsAppPageTemplate({ children }: { children: React.ReactNode
     </EuiPageTemplate>
   );
 }
+
+export const StreamsAppHeader = ({ fallback, ...props }: AppHeaderProps) => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <AppHeader
+      fallback={
+        fallback === null
+          ? null
+          : {
+              paddingSize: 'l',
+              restrictWidth: false,
+              bottomBorder: 'extended',
+              color: 'plain',
+              css: emotionCss`
+                background: ${euiTheme.colors.backgroundBasePlain};
+              `,
+              ...fallback,
+            }
+      }
+      {...props}
+    />
+  );
+};
 
 StreamsAppPageTemplate.Header = EuiPageTemplate.Header;
 StreamsAppPageTemplate.EmptyPrompt = EuiPageTemplate.EmptyPrompt;
