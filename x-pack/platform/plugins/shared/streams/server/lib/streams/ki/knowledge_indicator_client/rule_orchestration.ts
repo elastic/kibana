@@ -11,7 +11,7 @@ import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { QueryLink } from '@kbn/streams-schema';
 import type { Streams } from '@kbn/streams-schema/src/models/streams';
 import pLimit from 'p-limit';
-import type { EsqlRuleParams } from '../../sig_events/rules/esql/types';
+import type { EsqlRuleParams } from '../../../sig_events/rules/esql/types';
 
 const RULE_INSTALL_CONCURRENCY = 10;
 

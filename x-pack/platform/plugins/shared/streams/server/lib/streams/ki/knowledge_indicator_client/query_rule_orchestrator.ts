@@ -1,0 +1,375 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { Logger } from '@kbn/core/server';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { QueryLink, StreamQuery } from '@kbn/streams-schema';
+import { QUERY_TYPE_STATS, deriveQueryType } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema/src/models/streams';
+import { computeRuleId } from '../helpers/compute_rule_id';
+import { installQueries, uninstallQueries } from './rule_orchestration';
+import { KI_TYPE_QUERY } from '../fields';
+import type { KIBulkOperation } from './types';
+import type { IndicatorWriter } from './indicator_writer';
+import type { IndicatorReader } from './indicator_reader';
+
+export class QueryRuleOrchestrator {
+  constructor(
+    private readonly rulesClient: RulesClient,
+    private readonly logger: Logger,
+    private readonly isSignificantEventsEnabled: boolean,
+    private readonly writer: IndicatorWriter,
+    private readonly reader: IndicatorReader
+  ) {}
+
+  async syncQueries(
+    definition: Streams.all.Definition,
+    queries: StreamQuery[],
+    options?: { currentLinks?: QueryLink[] }
+  ): Promise<void> {
+    const stream = definition.name;
+    if (!this.isSignificantEventsEnabled) {
+      this.logger.debug(
+        `Skipping syncQueries for stream "${stream}" because significant events feature is disabled.`
+      );
+      return;
+    }
+
+    const currentLinks =
+      options?.currentLinks ??
+      (await this.reader.getStreamToQueryLinksMap([stream]))[stream];
+    const currentByQueryId = new Map(currentLinks.map((link) => [link.query.id, link]));
+    const nextIds = new Set(queries.map((q) => q.id));
+
+    const toCreate: QueryLink[] = [];
+    const toUpdate: QueryLink[] = [];
+    const demotedToStats: QueryLink[] = [];
+    const allNext: Array<{ query: StreamQuery; rule_backed: boolean; rule_id: string }> = [];
+
+    for (const query of queries) {
+      const current = currentByQueryId.get(query.id);
+      const isStats = deriveQueryType(query.esql.query) === QUERY_TYPE_STATS;
+      const ruleId = computeRuleId(stream, query.id, query.esql.query);
+      if (!current) {
+        const ruleBacked = !isStats;
+        const link: QueryLink = {
+          stream_name: stream,
+          rule_backed: ruleBacked,
+          rule_id: ruleId,
+          query: { ...query, type: deriveQueryType(query.esql.query) },
+        };
+        if (ruleBacked) toCreate.push(link);
+        allNext.push({ query: link.query, rule_backed: ruleBacked, rule_id: ruleId });
+      } else if (!current.rule_backed || isStats) {
+        if (current.rule_backed && isStats) {
+          demotedToStats.push(current);
+        }
+        allNext.push({ query, rule_backed: false, rule_id: current.rule_id });
+      } else if (current.query.esql.query !== query.esql.query) {
+        const link: QueryLink = {
+          stream_name: stream,
+          rule_backed: true,
+          rule_id: ruleId,
+          query: { ...query, type: deriveQueryType(query.esql.query) },
+        };
+        toCreate.push(link); // breaking change → recreate
+        allNext.push({ query: link.query, rule_backed: true, rule_id: ruleId });
+      } else {
+        const link: QueryLink = { ...current, query };
+        toUpdate.push(link);
+        allNext.push({ query, rule_backed: true, rule_id: current.rule_id });
+      }
+    }
+
+    const toUninstall = currentLinks.filter(
+      (link) =>
+        (link.rule_backed && !nextIds.has(link.query.id)) ||
+        toCreate.some((c) => c.query.id === link.query.id && link.rule_backed) ||
+        demotedToStats.some((d) => d.query.id === link.query.id)
+    );
+
+    await uninstallQueries(this.rulesClient, this.logger, toUninstall);
+
+    try {
+      await installQueries(this.rulesClient, toCreate, toUpdate, definition);
+    } catch (installError) {
+      this.logger.error(
+        `installQueries failed during syncQueries for stream "${stream}". Compensating by uninstalling created rules.`
+      );
+      await uninstallQueries(this.rulesClient, this.logger, toCreate).catch((compensateError) => {
+        this.logger.error(
+          `Failed to compensate after installQueries failure for stream "${stream}": ${
+            compensateError instanceof Error ? compensateError.message : String(compensateError)
+          }`
+        );
+      });
+      throw installError;
+    }
+
+    // Append revisions for every next query and a tombstone for every
+    // current link that's no longer in the input set.
+    const operations: KIBulkOperation[] = [];
+    for (const next of allNext) {
+      operations.push({
+        index: {
+          query: {
+            ...next.query,
+            rule_backed: next.rule_backed,
+            rule_id: next.rule_id,
+          } as StreamQuery & { rule_backed?: boolean; rule_id?: string },
+        },
+      });
+    }
+    for (const link of currentLinks) {
+      if (!nextIds.has(link.query.id)) {
+        operations.push({ delete: { type: KI_TYPE_QUERY, id: link.query.id } });
+      }
+    }
+
+    try {
+      await this.writer.bulk(stream, operations);
+    } catch (storageError) {
+      this.logger.error(
+        `Storage append failed after rule install for stream "${stream}". Compensating by uninstalling new rules.`
+      );
+      await uninstallQueries(this.rulesClient, this.logger, toCreate).catch((compensateError) => {
+        this.logger.error(
+          `Failed to compensate after bulk failure for stream "${stream}": ${
+            compensateError instanceof Error ? compensateError.message : String(compensateError)
+          }`
+        );
+      });
+      throw storageError;
+    }
+  }
+
+  async upsertQuery(definition: Streams.all.Definition, query: StreamQuery): Promise<void> {
+    const stream = definition.name;
+    if (!this.isSignificantEventsEnabled) {
+      this.logger.debug(
+        `Skipping upsertQuery for stream "${stream}" because significant events feature is disabled.`
+      );
+      return;
+    }
+
+    const { [stream]: currentLinks } = await this.reader.getStreamToQueryLinksMap([stream]);
+    const currentByQueryId = new Map(currentLinks.map((link) => [link.query.id, link]));
+    const existing = currentByQueryId.get(query.id);
+
+    if (!existing) {
+      // First write: include in syncQueries so the rule is created when eligible.
+      await this.syncQueries(definition, [...currentLinks.map((l) => l.query), query]);
+      return;
+    }
+    // Update path: route through syncQueries so breaking-change handling is
+    // unified.
+    await this.syncQueries(
+      definition,
+      currentLinks.map((l) => (l.query.id === query.id ? query : l.query))
+    );
+  }
+
+  async deleteQuery(definition: Streams.all.Definition, queryId: string): Promise<void> {
+    const stream = definition.name;
+    if (!this.isSignificantEventsEnabled) {
+      this.logger.debug(
+        `Skipping deleteQuery for stream "${stream}" because significant events feature is disabled.`
+      );
+      return;
+    }
+
+    const { [stream]: currentLinks } = await this.reader.getStreamToQueryLinksMap([stream]);
+    const target = currentLinks.find((link) => link.query.id === queryId);
+    if (!target) {
+      return;
+    }
+
+    if (target.rule_backed) {
+      await uninstallQueries(this.rulesClient, this.logger, [target]);
+    }
+    await this.writer.bulk(stream, [{ delete: { type: KI_TYPE_QUERY, id: queryId } }]);
+  }
+
+  async deleteAllQueries(definition: Streams.all.Definition): Promise<void> {
+    const stream = definition.name;
+    if (!this.isSignificantEventsEnabled) {
+      this.logger.debug(
+        `Skipping deleteAllQueries for stream "${stream}" because significant events feature is disabled.`
+      );
+      return;
+    }
+
+    const { [stream]: currentLinks } = await this.reader.getStreamToQueryLinksMap([stream]);
+    const ruleBacked = currentLinks.filter((link) => link.rule_backed);
+    if (ruleBacked.length > 0) {
+      await uninstallQueries(this.rulesClient, this.logger, ruleBacked);
+    }
+    if (currentLinks.length === 0) {
+      return;
+    }
+    await this.writer.bulk(
+      stream,
+      currentLinks.map((link) => ({
+        delete: { type: KI_TYPE_QUERY, id: link.query.id },
+      }))
+    );
+  }
+
+  async promoteQueries(
+    definition: Streams.all.Definition,
+    queryIds: string[]
+  ): Promise<{ promoted: number; skipped_stats: number }> {
+    const streamName = definition.name;
+    if (!this.isSignificantEventsEnabled) {
+      this.logger.debug(
+        `Skipping promoteQueries because significant events feature is disabled.`
+      );
+      return { promoted: 0, skipped_stats: 0 };
+    }
+
+    const { [streamName]: links } = await this.reader.getStreamToQueryLinksMap([streamName]);
+    const idSet = new Set(queryIds);
+    const candidates = links.filter((link) => idSet.has(link.query.id) && !link.rule_backed);
+
+    const skippedStats = candidates.filter((link) => link.query.type === QUERY_TYPE_STATS);
+    if (skippedStats.length > 0) {
+      this.logger.info(
+        `Skipping ${skippedStats.length} STATS queries from promotion for stream "${streamName}" (not yet supported as rules).`
+      );
+    }
+
+    const toPromote = candidates
+      .filter((link) => link.query.type !== QUERY_TYPE_STATS)
+      .map((link) => ({
+        ...link,
+        rule_backed: true,
+        rule_id: computeRuleId(streamName, link.query.id, link.query.esql.query),
+      }));
+
+    if (toPromote.length === 0) {
+      return { promoted: 0, skipped_stats: skippedStats.length };
+    }
+
+    await installQueries(this.rulesClient, toPromote, [], definition);
+
+    try {
+      await this.writer.bulk(
+        streamName,
+        toPromote.map((link) => ({
+          index: {
+            query: {
+              ...link.query,
+              rule_backed: true,
+              rule_id: link.rule_id,
+            } as StreamQuery & { rule_backed?: boolean; rule_id?: string },
+          },
+        }))
+      );
+    } catch (storageError) {
+      this.logger.error(
+        `Storage append failed after installing rules for stream "${streamName}". Compensating by uninstalling.`
+      );
+      await uninstallQueries(this.rulesClient, this.logger, toPromote).catch((uninstallError) => {
+        this.logger.error(
+          `Failed to compensate — orphaned rules may remain for stream "${streamName}": ${
+            uninstallError instanceof Error ? uninstallError.message : String(uninstallError)
+          }`
+        );
+      });
+      throw storageError;
+    }
+
+    return { promoted: toPromote.length, skipped_stats: skippedStats.length };
+  }
+
+  async promoteUnbackedQueries({
+    queryIds,
+    minSeverityScore,
+    streamDefinitions,
+  }: {
+    queryIds?: string[];
+    minSeverityScore?: number;
+    streamDefinitions: Map<string, Streams.all.Definition>;
+  }): Promise<{ promoted: number; skipped_stats: number }> {
+    if (!this.isSignificantEventsEnabled) {
+      this.logger.debug(
+        `Skipping promoteUnbackedQueries because significant events feature is disabled.`
+      );
+      return { promoted: 0, skipped_stats: 0 };
+    }
+
+    const candidates = await this.reader.getPromotableUnbackedQueries({ minSeverityScore });
+
+    let toPromote = candidates;
+    if (queryIds && queryIds.length > 0) {
+      const requestedIds = new Set(queryIds);
+      toPromote = candidates.filter((link) => requestedIds.has(link.query.id));
+    }
+
+    const byStream = new Map<string, string[]>();
+    for (const link of toPromote) {
+      const group = byStream.get(link.stream_name) ?? [];
+      group.push(link.query.id);
+      byStream.set(link.stream_name, group);
+    }
+
+    let promoted = 0;
+    let skippedStats = 0;
+    for (const [streamName, ids] of byStream) {
+      const definition = streamDefinitions.get(streamName);
+      if (!definition) {
+        this.logger.warn(`Skipping promotion for missing stream ${streamName}`);
+        continue;
+      }
+      const result = await this.promoteQueries(definition, ids);
+      promoted += result.promoted;
+      skippedStats += result.skipped_stats;
+    }
+
+    return { promoted, skipped_stats: skippedStats };
+  }
+
+  async demoteQueries(
+    definition: Streams.all.Definition,
+    queryIds: string[]
+  ): Promise<{ demoted: number }> {
+    const streamName = definition.name;
+    if (!this.isSignificantEventsEnabled) {
+      this.logger.debug(
+        `Skipping demoteQueries because significant events feature is disabled.`
+      );
+      return { demoted: 0 };
+    }
+
+    const { [streamName]: links } = await this.reader.getStreamToQueryLinksMap([streamName]);
+    const idSet = new Set(queryIds);
+    const toDemote = links.filter((link) => link.rule_backed && idSet.has(link.query.id));
+
+    if (toDemote.length === 0) {
+      return { demoted: 0 };
+    }
+
+    // Append demoted revisions, then uninstall rules. Order matches the
+    // legacy semantics: storage first, then rule cleanup.
+    await this.writer.bulk(
+      streamName,
+      toDemote.map((link) => ({
+        index: {
+          query: {
+            ...link.query,
+            rule_backed: false,
+            rule_id: link.rule_id,
+          } as StreamQuery & { rule_backed?: boolean; rule_id?: string },
+        },
+      }))
+    );
+
+    await uninstallQueries(this.rulesClient, this.logger, toDemote);
+
+    return { demoted: toDemote.length };
+  }
+}
