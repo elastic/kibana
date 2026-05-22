@@ -104,9 +104,11 @@ export function runCheckSavedObjectsCli() {
       globalTask = new Listr(
         [
           {
-            title: 'Start ES',
+            title: 'Start ES asynchronously',
             // we launch the ES server in the background and store a promise that resolves when the server is ready
-            task: (ctx) => (ctx.esServer = startElasticsearch()),
+            task: (ctx) => {
+              ctx.esServer = startElasticsearch();
+            },
             enabled: !client, // we skip this step if '--client' is passed
           },
           {
