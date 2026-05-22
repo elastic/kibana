@@ -7,14 +7,14 @@ The **Evals plugin** provides an in-Kibana UI for browsing LLM evaluation run re
 The evaluation system spans three packages:
 
 - `@kbn/evals-common` — shared schemas (OpenAPI-generated Zod types), constants, and Elasticsearch query builders. Used by both the plugin server routes and the CLI tooling in `@kbn/evals`.
-- `@kbn/evals` — dev-only CLI tooling for running offline evaluation suites against LLM-based workflows. Writes evaluation score documents to the `.kibana-evaluation-scores` datastream and traces via OpenTelemetry.
+- `@kbn/evals` — dev-only CLI tooling for running offline evaluation suites against LLM-based workflows. Writes evaluation score documents to the `.evaluation-scores` datastream and traces via OpenTelemetry.
 - `evals` plugin (this package) — Kibana server routes that read from those indices, plus a React UI for browsing results.
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
 │  @kbn/evals  (CLI / dev-only)                                │
 │  - runs evaluation suites                                    │
-│  - writes scores to  .kibana-evaluation-scores  datastream   │
+│  - writes scores to  .evaluation-scores  datastream   │
 │  - emits traces via OTLP                                     │
 └──────────────────┬───────────────────────────────────────────┘
                    │ imports shared query builders & types
@@ -59,7 +59,7 @@ telemetry.tracing.enabled: true
 telemetry.tracing.sample_rate: 1
 telemetry.tracing.exporters:
   - http:
-      url: "http://localhost:4318/v1/traces"
+      url: 'http://localhost:4318/v1/traces'
 ```
 
 Then start the EDOT collector in a separate terminal:
@@ -72,10 +72,10 @@ node scripts/edot_collector
 
 The plugin reads from two index patterns:
 
-| Index pattern | Source | Contents |
-|---|---|---|
-| `.kibana-evaluation-scores*` | `@kbn/evals` score export | Evaluation score documents (one per example × evaluator × repetition) |
-| `traces-*` | OTLP / EDOT collector | OpenTelemetry trace spans from evaluation task and evaluator runs |
+| Index pattern         | Source                    | Contents                                                              |
+| --------------------- | ------------------------- | --------------------------------------------------------------------- |
+| `.evaluation-scores*` | `@kbn/evals` score export | Evaluation score documents (one per example × evaluator × repetition) |
+| `traces-*`            | OTLP / EDOT collector     | OpenTelemetry trace spans from evaluation task and evaluator runs     |
 
 Run evaluation suites via the `@kbn/evals` CLI to populate these indices. See the [`@kbn/evals` README](../../packages/shared/kbn-evals/README.md) for details.
 
@@ -83,25 +83,25 @@ Run evaluation suites via the `@kbn/evals` CLI to populate these indices. See th
 
 All routes are internal, versioned (`v1`), and require the `evals` privilege.
 
-| Method | Path | Description |
-|---|---|---|
-| `GET` | `/internal/evals/runs` | List evaluation runs with summary metadata (paginated, filterable by suite, model, branch) |
-| `GET` | `/internal/evals/runs/{runId}` | Get run detail with per-evaluator, per-dataset statistics |
-| `GET` | `/internal/evals/runs/{runId}/scores` | Get individual score documents for a run |
-| `GET` | `/internal/evals/traces/{traceId}` | Get trace spans for a given trace ID |
+| Method | Path                                  | Description                                                                                |
+| ------ | ------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `GET`  | `/internal/evals/runs`                | List evaluation runs with summary metadata (paginated, filterable by suite, model, branch) |
+| `GET`  | `/internal/evals/runs/{runId}`        | Get run detail with per-evaluator, per-dataset statistics                                  |
+| `GET`  | `/internal/evals/runs/{runId}/scores` | Get individual score documents for a run                                                   |
+| `GET`  | `/internal/evals/traces/{traceId}`    | Get trace spans for a given trace ID                                                       |
 
 ## UI pages
 
-| Page | Route | Description |
-|---|---|---|
-| Runs list | `/app/evals` | Paginated table of evaluation runs with branch filter, model badges, CI links |
+| Page       | Route                    | Description                                                                   |
+| ---------- | ------------------------ | ----------------------------------------------------------------------------- |
+| Runs list  | `/app/evals`             | Paginated table of evaluation runs with branch filter, model badges, CI links |
 | Run detail | `/app/evals/runs/:runId` | Run metadata, evaluator statistics table, trace links, trace waterfall flyout |
 
 The `TraceWaterfall` component is also exported from the plugin's public start contract for use by other plugins:
 
 ```ts
 const { TraceWaterfall } = plugins.evals;
-<TraceWaterfall traceId="abc123" />
+<TraceWaterfall traceId="abc123" />;
 ```
 
 ## Development

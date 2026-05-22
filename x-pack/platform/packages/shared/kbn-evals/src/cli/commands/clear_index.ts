@@ -50,7 +50,7 @@ export const clearIndexCmd: Command<void> = {
 
   Examples:
     node scripts/evals clear-index
-    node scripts/evals clear-index --pattern .kibana-evaluation-scores* --force
+    node scripts/evals clear-index --pattern .evaluation-scores* --force
     node scripts/evals clear-index --es-url http://elastic:changeme@localhost:9201 --force
   `,
   flags: {
@@ -64,7 +64,7 @@ export const clearIndexCmd: Command<void> = {
       throw createFlagError(
         [
           'No Elasticsearch URL configured for clearing indices.',
-          'Provide --es-url to target the Elasticsearch cluster backing .kibana-evaluation-scores.',
+          'Provide --es-url to target the Elasticsearch cluster backing .evaluation-scores.',
         ].join('\n')
       );
     }
