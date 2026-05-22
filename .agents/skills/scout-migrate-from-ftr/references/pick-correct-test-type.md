@@ -13,6 +13,21 @@ The authoritative decision matrix lives in the Scout best practices doc — do n
 
 That section covers when to choose a Scout UI test, Scout API test, Jest integration test, or Jest unit test, with concrete code examples for each.
 
+### Default to API, not UI
+
+UI is the most expensive Scout fixture. Only choose it when the test actually validates rendering, interaction, or cross-page navigation. For everything else, downgrade — even if FTR used the browser, that was usually because the browser was already open, not because rendering mattered.
+
+Strongest downgrade signals (each maps to a known backing endpoint):
+
+| FTR pattern | Backing API | Migration target |
+|-------------|-------------|------------------|
+| Role/feature-control visibility (navlinks, badges, enabled/disabled buttons per role); space-scoped permission gating; app-not-found redirects on disabled features | `POST /api/core/capabilities` (and `/s/<space>/...` for space-scoped) | API spec asserting the resolved capabilities object; create spaces via `apiServices.spaces.create(...)` |
+| Data correctness — counts, exact values, aggregation results read from the rendered UI | The `/internal/<plugin>/...` route the page calls (check `server/routes` or the network panel) | API spec hitting the endpoint directly |
+| Saved-object CRUD verification ("after delete the listing has N items"; "the new item exists") | `/api/saved_objects/*` or `POST /api/content_management/rpc/{search,delete}` | API spec, or hybrid: keep the UI flow but move count/state assertions to an API helper in `afterAll` |
+| Server-side response shape that happens to flow through the UI | The relevant API directly | API spec |
+
+For the auth strategy used in the downgraded test, see `execute-plan.md` step 4.
+
 ## Where RTL/Jest tests live
 
 When the plan classifies an FTR test as a unit/component test, place the new test next to the component under test (not in `test/scout`):

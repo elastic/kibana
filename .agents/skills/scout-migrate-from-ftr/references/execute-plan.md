@@ -66,7 +66,7 @@ API and UI specs should both carry tags that match the intended `run-tests` / CI
 - `beforeEach/afterEach` -> `test.beforeEach/test.afterEach`.
 - Keep **one suite per file** and a flat hierarchy (avoid nested `describe`; use `test.step()` inside a test for structure).
 - If a single FTR file contains multiple top-level `describe` blocks, split into multiple Scout specs (one describe per file).
-- **Nested `describe` blocks**: if the FTR file has nested describes, prefer splitting into separate Scout spec files. However, if the file is small and the nested describes are lightweight, flatten them into a single `test.describe` with individual `test(...)` blocks using `test.step(...)` for sub-structure instead of creating many tiny spec files.
+- **Nested `describe` blocks**: large (own setup, role, or scenario per describe) → split into separate spec files. Small/lightweight → flatten into one `test.describe` with `test.step(...)` for sub-structure. Scout balances work at the spec-file level, and target file size is 4–5 short or 2–3 long scenarios.
 
 #### Combine duplicate stateful / serverless FTR tests
 
@@ -79,8 +79,8 @@ In Scout (Playwright), each `test(...)` runs with a fresh browser context, so yo
 
 Guideline:
 
-- If the FTR suite uses multiple `it(...)` blocks as sequential steps of one flow, combine them into a single `test(...)` and convert the step boundaries into `test.step(...)`.
-- If an `it(...)` block is already an independent test case, keep it as its own `test(...)` and ensure it sets up its own preconditions.
+- **Combine sequence-like `it` blocks into one `test()` + `test.step()`s** — both when they share browser state (the classic FTR journey) and when they only share expensive setup (login, archive load, navigation). Scout's fresh-context model penalizes `it`-per-assertion: 5 thin `test()`s with the same `beforeEach` is slower and flakier than 1 `test()` with 5 `test.step()`s. If an `it()` is genuinely independent, keep it as its own `test()` with its own preconditions.
+- **Skip UI navigation when the URL can do it.** Use `page.gotoApp(...)`, `kbnUrl.app(...)`, or a deep-link hash to land directly on the screen under test instead of clicking through breadcrumbs/sidebars. Only keep UI navigation when the navigation itself is what the test verifies. Load the right URL once, then exercise the feature.
 
 Minimal sketch:
 
@@ -96,15 +96,25 @@ test('create and edit entity', async () => {
 });
 ```
 
+#### Assert what the test changes, not the global state
+
+FTR suites often use global state as a side-effect proxy ("the listing is empty", "the empty-prompt is back", "no toasts visible"). These are false in any environment that isn't a freshly-wiped cluster and couple the test to unrelated state. Scope assertions to the resource the test just mutated:
+
+- After delete → assert *that specific row/item* is hidden (e.g. `await rowLink.waitFor({ state: 'hidden' })`). Don't assert table-is-empty.
+- After create → assert the new item appears. Don't assert count went 0 → 1.
+- Empty-prompt assertions only make sense when the test's purpose **is** the empty state — and then isolate via a unique space.
+- Move "did the resource really go away?" final-state confirmation into `afterAll` API cleanup, not a trailing UI assertion.
+
 ### 4) Replace FTR dependencies
 
 - Replace `supertest` calls with Scout `apiClient` (endpoint under test) + `requestAuth`/`samlAuth` (auth). FTR stateful tests often use `supertest` with an implicit **admin** role—don't carry that over blindly. Research whether a lower default role like `editor` or `viewer` is sufficient; comparing the roles used in the **serverless** version of the same test (if one exists) is a good starting point.
-- Replace other FTR services with Scout fixtures (`pageObjects`, `browserAuth`, `apiServices`, `kbnClient`, `esArchiver`).
+- Replace other FTR services with Scout fixtures (`pageObjects`, `browserAuth`, `apiServices`, `kbnClient`, `esArchiver` — note `esArchiver` is ingest-only, see below).
 - Use `apiServices`/`kbnClient` for setup/teardown and verifying side effects.
-- **Audit FTR before/after hooks carefully**—don't copy them verbatim. Review every call in `before`/`beforeEach`/`after`/`afterEach` and verify it is still correct for Scout: replace FTR-specific APIs with their Scout equivalents, remove unnecessary calls (e.g. FTR service initialization that Scout fixtures handle automatically), and add any missing setup or cleanup that the FTR suite neglected. Ensure every resource created in `beforeAll`/`beforeEach` has matching cleanup in `afterAll`/`afterEach`—FTR suites frequently lack proper teardown. Place `kbnClient.savedObjects.cleanStandardList()` (or `scoutSpace.savedObjects.cleanStandardList()`) in **`afterAll`**, not `beforeAll`; `beforeAll` cleanup masks missing teardown and hides leaked state from previous runs.
+- **Audit FTR before/after hooks carefully** — don't copy them verbatim. For each call: (a) replace FTR-specific APIs with Scout equivalents, (b) drop calls that Scout fixtures handle automatically, (c) **rewrite UI-driven setup as API calls** (see next bullet), and (d) add missing cleanup — FTR suites frequently lack proper teardown. Every resource created in `beforeAll`/`beforeEach` needs matching cleanup in `afterAll`/`afterEach`. Put `kbnClient.savedObjects.cleanStandardList()` (or `scoutSpace.savedObjects.cleanStandardList()`) in **`afterAll`**, not `beforeAll` — `beforeAll` cleanup hides leaked state from previous runs.
+- **Replace UI-driven setup with API calls.** FTR hooks routinely click through the UI to seed data (`navigateToApp('settings')` + `settings.createIndexPattern(...)`, "Create dashboard" button clicks, etc.). In Scout, do this via `apiServices` instead: `apiServices.dataViews.create(...)`, `apiServices.spaces.create(...)`, saved-object APIs, or content-management RPCs. If no helper covers the resource type, add a plugin-local API service at `test/scout*/<ui|api>/services/<resource>_api_service.ts` and merge it into the fixtures `index.ts` (extend `apiServices` on the test fixture). UI in hooks is slow, flaky, and forces serialization where the API call would be parallel-safe.
+- **`esArchiver` is ingest-only.** Scout's `esArchiver` fixture exposes `loadIfNeeded` (and friends) but intentionally **no `unload` / no `clean`** — `loadIfNeeded` is idempotent across runs, so unload is unnecessary. Drop any FTR `after` / `afterAll` calls to `esArchiver.unload(...)` outright; do not look for a replacement. If a specific test genuinely needs the index gone (rare), use `esClient.indices.delete(...)` in a scoped helper, not in a generic teardown.
 - Replace webdriver waits with Playwright/page object methods.
 - Move UI selectors/actions into Scout page objects; register new page objects in the plugin fixtures index.
-- If the test needs API setup/cleanup, add a scoped API service and use it in `beforeAll/afterAll`.
 - Replace per-suite FTR config flags with `uiSettings` / `scoutSpace.uiSettings`, and (when needed) `apiServices.core.settings(...)`.
 - Use the correct Scout package for the test location (`@kbn/scout` vs `@kbn/scout-<solution>`), and import `expect` from `/ui` or `/api`.
 - If the test needs rison-encoded query params, use `@kbn/rison` and add it to `test/scout*/ui/tsconfig.json` `kbn_references`.
@@ -206,7 +216,10 @@ Once the new specs typecheck and run, control returns to the parent skill. Step 
 
 ## Common mistakes
 
-- Migrating data validation UI tests instead of converting to API tests.
+- Migrating UI tests that should be API tests — data validation, capabilities/feature-controls, server-shape assertions. See [`pick-correct-test-type.md`](pick-correct-test-type.md).
+- Asserting **global state** to verify a local change (empty-listing prompts, "no toasts visible", whole-table counts). Scope to the mutated resource; move final-state confirmation to API-driven `afterAll`. See step 3.
+- Carrying FTR's **UI-driven setup** into Scout hooks (navigating + clicking to create data views, dashboards, etc.). Use `apiServices.*` instead, or write a plugin-local API service when no helper exists. See step 4.
+- Calling `esArchiver.unload(...)` in Scout teardown — the fixture is ingest-only by design; the method does not exist and `loadIfNeeded` is already idempotent. Drop the call.
 - Forgetting to split `loadTestFile` suites into separate Scout specs.
 - Forgetting UI tags (required; Scout validates UI tags at runtime). API tests should also be tagged so CI/discovery can select the right deployment target.
 - Placing Scout tests outside `test/scout*/{ui,api}/{tests,parallel_tests}`.
@@ -217,7 +230,7 @@ Once the new specs typecheck and run, control returns to the parent skill. Step 
 - Using `esArchiver` in `parallel_tests/` spec files (ingest in `parallel_tests/global.setup.ts` instead).
 - Using nested `describe` blocks or `*.describe.configure()` (split into separate specs, or flatten small files into `test` + `test.step`—see step 3).
 - Migrating near-identical stateful and serverless FTR files as two separate Scout specs instead of combining them into one spec with appropriate tags (see step 3).
-- Spreading one user journey across multiple Scout `test(...)` blocks (fresh browser context per test).
+- Spreading one user journey — or multiple `it`s that share expensive setup — across separate Scout `test(...)` blocks. Fresh browser context per test makes this slower and flakier than a single `test()` with `test.step()`s.
 - Hiding assertions inside page objects (ESLint `expect-expect` requires assertions in the test body; page objects should return state, not assert).
 - Packing too many `test(...)` blocks into a single spec file. Keep specs focused: 4–5 short scenarios or 2–3 long scenarios per file. Oversized specs create bottlenecks in parallel execution.
 - Using **`requestAuth.getApiKey('admin')`** for **internal** routes whose handlers **create nested API keys**—often **HTTP 500**; use **`samlAuth.asInteractiveUser`** and merge **`cookieHeader`** (see step 4).
