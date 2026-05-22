@@ -13,10 +13,10 @@ import { getDuplicateMetricNames } from './get_duplicate_metric_names';
 
 const buildMetricItem = (
   metricName: string,
-  dataStream: string = 'metrics-*'
+  sourceName: string = 'metrics-*'
 ): ParsedMetricItem => ({
   metricName,
-  dataStream,
+  sourceName,
   units: [null],
   metricTypes: ['gauge'],
   fieldTypes: [ES_FIELD_TYPES.DOUBLE],

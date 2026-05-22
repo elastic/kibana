@@ -13,7 +13,7 @@ import { getMetricUniqueKey } from './get_metric_unique_key';
 
 const buildItem = (overrides: Partial<ParsedMetricItem> = {}): ParsedMetricItem => ({
   metricName: 'system.cpu.utilization',
-  dataStream: 'metrics-system.cpu-default',
+  sourceName: 'metrics-system.cpu-default',
   units: ['percent'],
   metricTypes: ['gauge'],
   fieldTypes: [ES_FIELD_TYPES.DOUBLE],
@@ -22,7 +22,7 @@ const buildItem = (overrides: Partial<ParsedMetricItem> = {}): ParsedMetricItem 
 });
 
 describe('getMetricUniqueKey', () => {
-  it('joins dataStream and metricName with the "::" separator', () => {
+  it('joins sourceName and metricName with the "::" separator', () => {
     expect(getMetricUniqueKey(buildItem())).toBe(
       'metrics-system.cpu-default::system.cpu.utilization'
     );
@@ -39,15 +39,15 @@ describe('getMetricUniqueKey', () => {
     );
   });
 
-  it('produces different keys when dataStream differs', () => {
-    expect(getMetricUniqueKey(buildItem({ dataStream: 'a' }))).not.toBe(
-      getMetricUniqueKey(buildItem({ dataStream: 'b' }))
+  it('produces different keys when sourceName differs', () => {
+    expect(getMetricUniqueKey(buildItem({ sourceName: 'a' }))).not.toBe(
+      getMetricUniqueKey(buildItem({ sourceName: 'b' }))
     );
   });
 
-  it('distinguishes metrics that share metricName across data streams', () => {
-    const a = buildItem({ dataStream: 'metrics-host-default', metricName: 'cpu.usage' });
-    const b = buildItem({ dataStream: 'metrics-container-default', metricName: 'cpu.usage' });
+  it('distinguishes metrics that share metricName across sources', () => {
+    const a = buildItem({ sourceName: 'metrics-host-default', metricName: 'cpu.usage' });
+    const b = buildItem({ sourceName: 'metrics-container-default', metricName: 'cpu.usage' });
     expect(getMetricUniqueKey(a)).not.toBe(getMetricUniqueKey(b));
   });
 
@@ -57,26 +57,27 @@ describe('getMetricUniqueKey', () => {
     expect(getMetricUniqueKey(a)).toBe(getMetricUniqueKey(b));
   });
 
-  // Elasticsearch caps both data stream names and field names at 255 characters,
-  // so the maximum key size is bounded at ~513 bytes (255 + 2 for "::" + 255).
+  // Elasticsearch caps both source names (index/data stream) and field names at
+  // 255 characters, so the maximum key size is bounded at ~513 bytes
+  // (255 + 2 for "::" + 255).
   it('handles maximum-length inputs without truncation', () => {
-    const longDataStream = 'd'.repeat(255);
+    const longSourceName = 'd'.repeat(255);
     const longMetricName = 'm'.repeat(255);
     const key = getMetricUniqueKey(
-      buildItem({ dataStream: longDataStream, metricName: longMetricName })
+      buildItem({ sourceName: longSourceName, metricName: longMetricName })
     );
 
-    expect(key).toBe(`${longDataStream}::${longMetricName}`);
+    expect(key).toBe(`${longSourceName}::${longMetricName}`);
     expect(key.length).toBe(255 + 2 + 255);
   });
 
-  // ES forbids ":" in dataStream, so the first "::" is always the delimiter
+  // ES forbids ":" in source names, so the first "::" is always the delimiter
   // and the encoding stays injective even if metricName contains "::".
   it('stays injective when metricName contains "::"', () => {
-    const a = buildItem({ dataStream: 'metrics-system', metricName: 'a::b' });
-    const b = buildItem({ dataStream: 'metrics-system', metricName: 'a::c' });
-    const c = buildItem({ dataStream: 'metrics-system', metricName: 'a::b::c' });
-    const d = buildItem({ dataStream: 'metrics-other', metricName: 'a::b' });
+    const a = buildItem({ sourceName: 'metrics-system', metricName: 'a::b' });
+    const b = buildItem({ sourceName: 'metrics-system', metricName: 'a::c' });
+    const c = buildItem({ sourceName: 'metrics-system', metricName: 'a::b::c' });
+    const d = buildItem({ sourceName: 'metrics-other', metricName: 'a::b' });
 
     const keys = [a, b, c, d].map(getMetricUniqueKey);
     expect(new Set(keys).size).toBe(keys.length);
