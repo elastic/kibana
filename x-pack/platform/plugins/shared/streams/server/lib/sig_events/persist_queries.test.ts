@@ -172,9 +172,14 @@ describe('persistQueries', () => {
     await persistQueries('logs.test', [replacement], { kiClient, streamsClient });
 
     expect(kiClient.bulk).not.toHaveBeenCalled();
-    expect(kiClient.syncQueries).toHaveBeenCalledWith(definition, [
-      expect.objectContaining({ id: 'q1', esql: replacement.esql }),
-    ]);
+    expect(kiClient.syncQueries).toHaveBeenCalledWith(
+      definition,
+      [expect.objectContaining({ id: 'q1', esql: replacement.esql })],
+      { currentLinks: [existing] }
+    );
+    // getStreamToQueryLinksMap is called once by persistQueries; syncQueries
+    // must not re-read it (currentLinks passed through).
+    expect(kiClient.getStreamToQueryLinksMap).toHaveBeenCalledTimes(1);
   });
 
   it('creates backing rules for high-severity non-STATS queries', async () => {
@@ -184,9 +189,12 @@ describe('persistQueries', () => {
     await persistQueries('logs.test', [query], { kiClient, streamsClient });
 
     expect(kiClient.bulk).not.toHaveBeenCalled();
-    expect(kiClient.syncQueries).toHaveBeenCalledWith(definition, [
-      expect.objectContaining({ id: 'generated-uuid', type: QUERY_TYPE_MATCH }),
-    ]);
+    expect(kiClient.syncQueries).toHaveBeenCalledWith(
+      definition,
+      [expect.objectContaining({ id: 'generated-uuid', type: QUERY_TYPE_MATCH })],
+      { currentLinks: [] }
+    );
+    expect(kiClient.getStreamToQueryLinksMap).toHaveBeenCalledTimes(1);
   });
 
   it('does not create backing rules for high-severity STATS queries', async () => {
@@ -218,9 +226,11 @@ describe('persistQueries', () => {
     await persistQueries('logs.test', [query], { kiClient, streamsClient });
 
     expect(kiClient.bulk).not.toHaveBeenCalled();
-    expect(kiClient.syncQueries).toHaveBeenCalledWith(definition, [
-      expect.objectContaining({ id: 'generated-uuid', type: QUERY_TYPE_MATCH }),
-    ]);
+    expect(kiClient.syncQueries).toHaveBeenCalledWith(
+      definition,
+      [expect.objectContaining({ id: 'generated-uuid', type: QUERY_TYPE_MATCH })],
+      { currentLinks: [] }
+    );
   });
 
   it('syncs rule-backed changes before appending standard writes in mixed batches', async () => {
@@ -251,10 +261,11 @@ describe('persistQueries', () => {
       streamsClient,
     });
 
-    expect(kiClient.syncQueries).toHaveBeenCalledWith(definition, [
-      expect.objectContaining({ id: 'q1' }),
-      expect.objectContaining({ id: 'high-id' }),
-    ]);
+    expect(kiClient.syncQueries).toHaveBeenCalledWith(
+      definition,
+      [expect.objectContaining({ id: 'q1' }), expect.objectContaining({ id: 'high-id' })],
+      { currentLinks: [existingRuleBacked] }
+    );
     expect(kiClient.bulk).toHaveBeenCalledWith('logs.test', [
       { index: { query: expect.objectContaining({ id: 'low-id' }) } },
     ]);

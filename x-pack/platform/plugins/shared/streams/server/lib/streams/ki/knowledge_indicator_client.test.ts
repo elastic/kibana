@@ -12,7 +12,7 @@ import {
   type KnowledgeIndicatorClientDeps,
 } from './knowledge_indicator_client';
 import { type StoredFeatureKnowledgeIndicator, type StoredTombstone } from './data_stream';
-import { KI_TYPE_FEATURE } from './fields';
+import { KI_TYPE_FEATURE, KI_TYPE_QUERY } from './fields';
 
 jest.mock('../../sig_events/latest_source_query', () => {
   const actual = jest.requireActual('../../sig_events/latest_source_query');
@@ -214,6 +214,25 @@ describe('KnowledgeIndicatorClient.getFeatures', () => {
     expect(printedQueryFor(runEsql)).not.toContain('excluded');
     expect(hits.find((h) => h.id === 'b')?.excluded).toBe(true);
   });
+
+  it('applies feature.type filter when options.type is provided', async () => {
+    const { client, runEsql } = makeClient();
+    runEsql.mockResolvedValueOnce({ hits: [] });
+
+    await client.getFeatures(STREAM, { type: ['entity'] });
+
+    expect(runEsql).toHaveBeenCalledTimes(1);
+    expect(printedQueryFor(runEsql)).toContain('feature.type');
+  });
+
+  it('returns empty without an ES|QL call when options.id is an empty array', async () => {
+    const { client, runEsql } = makeClient();
+
+    const result = await client.getFeatures(STREAM, { id: [] });
+
+    expect(result).toEqual({ hits: [], total: 0 });
+    expect(runEsql).not.toHaveBeenCalled();
+  });
 });
 
 describe('KnowledgeIndicatorClient.getLatestRevisionTimestamp', () => {
@@ -272,8 +291,24 @@ describe('KnowledgeIndicatorClient.getLatestRevisionTimestamp', () => {
   });
 });
 
+describe('KnowledgeIndicatorClient.getQueryLinks', () => {
+  it('returns empty without an ES|QL call when queryIds is an empty array', async () => {
+    const { client, runEsql } = makeClient();
+
+    const result = await client.getQueryLinks([STREAM], { queryIds: [] });
+
+    expect(result).toEqual([]);
+    expect(runEsql).not.toHaveBeenCalled();
+  });
+});
+
 describe('KnowledgeIndicatorClient.getExcludedFeatures', () => {
-  it('returns only excluded features sorted by updated_at desc', async () => {
+  const printedQueryFor = (runEsql: jest.Mock): string => {
+    const query = runEsql.mock.calls[0][1] as { print: () => string };
+    return query.print();
+  };
+
+  it('returns excluded features in the order returned by ES|QL (sort pushed into query)', async () => {
     const { client, runEsql } = makeClient();
     const older = createFeatureDoc({
       id: 'old',
@@ -285,11 +320,116 @@ describe('KnowledgeIndicatorClient.getExcludedFeatures', () => {
       excluded: true,
       '@timestamp': '2026-02-01T00:00:00.000Z',
     });
-    runEsql.mockResolvedValueOnce({ hits: [older, newer] });
+    // ES|QL returns newest-first (DESC); the client preserves that order.
+    runEsql.mockResolvedValueOnce({ hits: [newer, older] });
 
     const { hits } = await client.getExcludedFeatures(STREAM);
 
     expect(hits.map((h) => h.id)).toEqual(['new', 'old']);
     expect(hits.every((h) => h.excluded === true)).toBe(true);
+  });
+
+  it('includes a @timestamp DESC sort in the ES|QL query', async () => {
+    const { client, runEsql } = makeClient();
+    runEsql.mockResolvedValueOnce({ hits: [] });
+
+    await client.getExcludedFeatures(STREAM);
+
+    expect(runEsql).toHaveBeenCalledTimes(1);
+    const printed = printedQueryFor(runEsql);
+    expect(printed).toContain('@timestamp');
+    expect(printed.toUpperCase()).toContain('SORT');
+    expect(printed.toUpperCase()).toContain('DESC');
+  });
+});
+
+describe('KnowledgeIndicatorClient.findIndicators keyword search', () => {
+  function makeClientWithSearch(): {
+    client: KnowledgeIndicatorClient;
+    runEsql: jest.Mock;
+    search: jest.Mock;
+  } {
+    const create = jest.fn().mockResolvedValue({ errors: false, items: [] });
+    const search = jest.fn().mockResolvedValue({
+      hits: { hits: [], total: { value: 0 } },
+    });
+    const dataStreamClient = {
+      create,
+      search,
+    } as unknown as KnowledgeIndicatorClientDeps['dataStreamClient'];
+    const logger = loggerMock.create() as unknown as Logger;
+    const deps: KnowledgeIndicatorClientDeps = {
+      dataStreamClient,
+      esClient: {} as KnowledgeIndicatorClientDeps['esClient'],
+      rulesClient: {} as KnowledgeIndicatorClientDeps['rulesClient'],
+      soClient: {} as KnowledgeIndicatorClientDeps['soClient'],
+      logger,
+    };
+    const client = new KnowledgeIndicatorClient(deps);
+    return { client, runEsql: executeAndDecodeSource as jest.Mock, search };
+  }
+
+  it('uses only feature fields when type is [feature]', async () => {
+    const { client, runEsql, search } = makeClientWithSearch();
+    runEsql.mockResolvedValueOnce({ hits: [createFeatureDoc()] });
+
+    await client.findIndicators(STREAM, 'checkout', {
+      types: [KI_TYPE_FEATURE],
+      searchMode: 'keyword',
+    });
+
+    expect(search).toHaveBeenCalledTimes(1);
+    const { retriever } = search.mock.calls[0][0] as { retriever: { standard: { query: { bool: { should: Array<{ wildcard: Record<string, unknown> }> } } } } };
+    const fields = retriever.standard.query.bool.should.map((c) => Object.keys(c.wildcard)[0]);
+    expect(fields).toContain('feature.type');
+    expect(fields).toContain('feature.subtype');
+    expect(fields).toContain('tags');
+    expect(fields).not.toContain('query.esql');
+    expect(fields).not.toContain('query.features.id');
+  });
+
+  it('uses only query fields when type is [query]', async () => {
+    const { client, runEsql, search } = makeClientWithSearch();
+    runEsql.mockResolvedValueOnce({ hits: [] });
+
+    await client.findIndicators(STREAM, 'SELECT', {
+      types: [KI_TYPE_QUERY],
+      searchMode: 'keyword',
+    });
+
+    // No hits from ES|QL phase → search is not called (early return).
+    // Test the field set by calling with a doc present.
+    (executeAndDecodeSource as jest.Mock).mockReset();
+    const fakeQuery = {
+      '@timestamp': '2026-01-01T00:00:00.000Z',
+      id: 'q-1',
+      type: KI_TYPE_QUERY,
+      'stream.name': STREAM,
+      title: 'Error query',
+      description: 'desc',
+      query: {
+        esql: 'FROM logs | WHERE body.text:"error"',
+        query_type: 'match',
+        rule_backed: false,
+        rule_id: 'r1',
+      },
+    };
+    runEsql.mockResolvedValueOnce({ hits: [fakeQuery] });
+    search.mockClear();
+    search.mockResolvedValueOnce({ hits: { hits: [], total: { value: 0 } } });
+
+    await client.findIndicators(STREAM, 'SELECT', {
+      types: [KI_TYPE_QUERY],
+      searchMode: 'keyword',
+    });
+
+    expect(search).toHaveBeenCalledTimes(1);
+    const { retriever } = search.mock.calls[0][0] as { retriever: { standard: { query: { bool: { should: Array<{ wildcard: Record<string, unknown> }> } } } } };
+    const fields = retriever.standard.query.bool.should.map((c) => Object.keys(c.wildcard)[0]);
+    expect(fields).toContain('query.esql');
+    expect(fields).toContain('query.features.id');
+    expect(fields).not.toContain('feature.type');
+    expect(fields).not.toContain('feature.subtype');
+    expect(fields).not.toContain('tags');
   });
 });
