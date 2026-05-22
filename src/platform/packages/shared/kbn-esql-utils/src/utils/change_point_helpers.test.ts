@@ -92,15 +92,12 @@ describe('getChangePointSeriesColumns', () => {
     });
   });
 
-  it('reads first CHANGE_POINT inside FORK', () => {
+  it('returns undefined when CHANGE_POINT only appears inside FORK branches', () => {
     const forkQuery = `FROM gallery-*
 | FORK
   ( WHERE referer == "http://a.com" | STATS avg_bytes = AVG(bytes) BY bucket = BUCKET(@timestamp, 1 day) | CHANGE_POINT avg_bytes ON bucket )
 | WHERE type IS NOT NULL`;
-    expect(getChangePointSeriesColumns(forkQuery)).toEqual({
-      valueColumn: 'avg_bytes',
-      timeColumn: 'bucket',
-    });
+    expect(getChangePointSeriesColumns(forkQuery)).toBeUndefined();
   });
 });
 
@@ -136,133 +133,102 @@ describe('buildChangePointLineDataQuery', () => {
   });
 });
 
+describe('formatEsqlIdentifier', () => {
+  it('leaves simple identifiers unquoted', () => {
+    expect(formatEsqlIdentifier('host')).toBe('host');
+  });
+
+  it('backticks identifiers with dots', () => {
+    expect(formatEsqlIdentifier('k8s.pod.name')).toBe('`k8s.pod.name`');
+  });
+
+  it('escapes backticks in identifiers', () => {
+    expect(formatEsqlIdentifier('weird`id')).toBe('`weird``id`');
+  });
+});
+
+describe('formatEsqlLiteral', () => {
+  it('formats empty string as an empty ES|QL string literal', () => {
+    expect(formatEsqlLiteral('')).toBe('""');
+  });
+
+  it('quotes strings', () => {
+    expect(formatEsqlLiteral('a"b')).toBe('"a\\"b"');
+  });
+
+  it('escapes control characters in strings', () => {
+    expect(formatEsqlLiteral('a\nb\rc\td')).toBe('"a\\nb\\rc\\td"');
+  });
+
+  it('formats finite numbers', () => {
+    expect(formatEsqlLiteral(3.5)).toBe('3.5');
+  });
+
+  it('formats booleans', () => {
+    expect(formatEsqlLiteral(false)).toBe('false');
+  });
+
+  it('formats Date as ISO string literal', () => {
+    const d = new Date('2023-11-14T22:13:20.000Z');
+    expect(formatEsqlLiteral(d)).toBe('"2023-11-14T22:13:20.000Z"');
+  });
+
+  it('returns undefined for null and undefined', () => {
+    expect(formatEsqlLiteral(null)).toBeUndefined();
+    expect(formatEsqlLiteral(undefined)).toBeUndefined();
+  });
+
+  it('formats bigint as unquoted literal', () => {
+    expect(formatEsqlLiteral(BigInt(42))).toBe('42');
+  });
+
+  it('formats non-finite numbers as quoted strings', () => {
+    expect(formatEsqlLiteral(NaN)).toBe('"NaN"');
+    expect(formatEsqlLiteral(Infinity)).toBe('"Infinity"');
+  });
+});
+
 describe('appendEntityFiltersToChangePointLineEsql', () => {
-  describe('formatEsqlIdentifier', () => {
-    it('leaves simple identifiers unquoted', () => {
-      expect(formatEsqlIdentifier('host')).toBe('host');
-    });
-
-    it('backticks identifiers with dots', () => {
-      expect(formatEsqlIdentifier('k8s.pod.name')).toBe('`k8s.pod.name`');
-    });
-
-    it('escapes backticks in identifiers', () => {
-      expect(formatEsqlIdentifier('weird`id')).toBe('`weird``id`');
-    });
+  it('returns the query unchanged when there are no entity columns', () => {
+    const q = 'FROM idx | STATS m = AVG(x) BY t';
+    expect(appendEntityFiltersToChangePointLineEsql(q, { host: 'a' }, [])).toBe(q);
   });
 
-  describe('formatEsqlLiteral', () => {
-    it('formats empty string as an empty ES|QL string literal', () => {
-      expect(formatEsqlLiteral('')).toBe('""');
-    });
-
-    it('quotes strings', () => {
-      expect(formatEsqlLiteral('a"b')).toBe('"a\\"b"');
-    });
-
-    it('escapes control characters in strings', () => {
-      expect(formatEsqlLiteral('a\nb\rc\td')).toBe('"a\\nb\\rc\\td"');
-    });
-
-    it('formats finite numbers', () => {
-      expect(formatEsqlLiteral(3.5)).toBe('3.5');
-    });
-
-    it('formats booleans', () => {
-      expect(formatEsqlLiteral(false)).toBe('false');
-    });
-
-    it('formats Date as ISO string literal', () => {
-      const d = new Date('2023-11-14T22:13:20.000Z');
-      expect(formatEsqlLiteral(d)).toBe('"2023-11-14T22:13:20.000Z"');
-    });
-
-    it('returns undefined for null and undefined', () => {
-      expect(formatEsqlLiteral(null)).toBeUndefined();
-      expect(formatEsqlLiteral(undefined)).toBeUndefined();
-    });
-
-    it('formats bigint as unquoted literal', () => {
-      expect(formatEsqlLiteral(BigInt(42))).toBe('42');
-    });
-
-    it('formats non-finite numbers as quoted strings', () => {
-      expect(formatEsqlLiteral(NaN)).toBe('"NaN"');
-      expect(formatEsqlLiteral(Infinity)).toBe('"Infinity"');
-    });
+  it('appends WHERE for entity columns', () => {
+    const q = 'FROM idx | STATS m = AVG(x) BY host, t';
+    expect(appendEntityFiltersToChangePointLineEsql(q, { host: 'pod-a' }, ['host'])).toBe(
+      'FROM idx | STATS m = AVG(x) BY host, t | WHERE host == "pod-a"'
+    );
   });
 
-  describe('appendEntityFiltersToChangePointLineEsql behavior', () => {
-    it('returns the query unchanged when there are no entity columns', () => {
-      const q = 'FROM idx | STATS m = AVG(x) BY t';
-      expect(appendEntityFiltersToChangePointLineEsql(q, { host: 'a' }, [])).toBe(q);
-    });
+  it('combines multiple predicates with AND', () => {
+    const q = 'FROM idx | STATS m = AVG(x) BY a, b, t';
+    expect(appendEntityFiltersToChangePointLineEsql(q, { a: 1, b: 'x' }, ['a', 'b'])).toBe(
+      'FROM idx | STATS m = AVG(x) BY a, b, t | WHERE a == 1 AND b == "x"'
+    );
+  });
 
-    it('appends WHERE for entity columns', () => {
-      const q = 'FROM idx | STATS m = AVG(x) BY host, t';
-      expect(appendEntityFiltersToChangePointLineEsql(q, { host: 'pod-a' }, ['host'])).toBe(
-        'FROM idx | STATS m = AVG(x) BY host, t | WHERE host == "pod-a"'
-      );
-    });
+  it('skips columns with no literal (null / undefined)', () => {
+    const q = 'FROM idx | STATS m = AVG(x) BY host, t';
+    expect(
+      appendEntityFiltersToChangePointLineEsql(q, { host: null, other: 'ok' }, ['host', 'other'])
+    ).toBe('FROM idx | STATS m = AVG(x) BY host, t | WHERE other == "ok"');
+  });
 
-    it('combines multiple predicates with AND', () => {
-      const q = 'FROM idx | STATS m = AVG(x) BY a, b, t';
-      expect(appendEntityFiltersToChangePointLineEsql(q, { a: 1, b: 'x' }, ['a', 'b'])).toBe(
-        'FROM idx | STATS m = AVG(x) BY a, b, t | WHERE a == 1 AND b == "x"'
-      );
-    });
+  it('appends WHERE for entity columns with empty string values', () => {
+    // Regression: formatEsqlLiteral("") previously returned undefined, silently dropping the
+    // filter. Empty strings are valid ES|QL literals and must produce host == "".
+    const q = 'FROM idx | STATS m = AVG(x) BY host, t';
+    expect(
+      appendEntityFiltersToChangePointLineEsql(q, { host: '', other: 'ok' }, ['host', 'other'])
+    ).toBe('FROM idx | STATS m = AVG(x) BY host, t | WHERE host == "" AND other == "ok"');
+  });
 
-    it('skips columns with no literal (null / undefined)', () => {
-      const q = 'FROM idx | STATS m = AVG(x) BY host, t';
-      expect(
-        appendEntityFiltersToChangePointLineEsql(q, { host: null, other: 'ok' }, ['host', 'other'])
-      ).toBe('FROM idx | STATS m = AVG(x) BY host, t | WHERE other == "ok"');
-    });
-
-    it('appends WHERE for entity columns with empty string values', () => {
-      // Regression: formatEsqlLiteral("") previously returned undefined, silently dropping the
-      // filter. Empty strings are valid ES|QL literals and must produce host == "".
-      const q = 'FROM idx | STATS m = AVG(x) BY host, t';
-      expect(
-        appendEntityFiltersToChangePointLineEsql(q, { host: '', other: 'ok' }, ['host', 'other'])
-      ).toBe('FROM idx | STATS m = AVG(x) BY host, t | WHERE host == "" AND other == "ok"');
-    });
-
-    it('does not duplicate WHERE when pipeline already constrains the entity via WHERE', () => {
-      const line =
-        'FROM gallery-* | WHERE clientip == "5.255.253.75" | STATS avg_bytes = AVG(bytes) BY bucket = BUCKET(@timestamp, 1 day)';
-      expect(
-        appendEntityFiltersToChangePointLineEsql(line, { clientip: '5.255.253.75' }, ['clientip'])
-      ).toBe(line);
-    });
-
-    it('does not duplicate WHERE when EVAL already sets the entity column to the same literal', () => {
-      const line =
-        'FROM gallery-* | STATS avg_bytes = AVG(bytes) BY bucket = BUCKET(@timestamp, 1 day) | EVAL clientip = "5.255.253.75"';
-      expect(
-        appendEntityFiltersToChangePointLineEsql(line, { clientip: '5.255.253.75' }, ['clientip'])
-      ).toBe(line);
-    });
-
-    it('skips all columns when WHERE constrains multiple entity columns via AND', () => {
-      const line = 'FROM idx | WHERE host == "pod-a" AND region == "us" | STATS m = AVG(x) BY t';
-      expect(
-        appendEntityFiltersToChangePointLineEsql(line, { host: 'pod-a', region: 'us' }, [
-          'host',
-          'region',
-        ])
-      ).toBe(line);
-    });
-
-    it('still appends filters for entity columns not already constrained in the pipeline', () => {
-      const line =
-        'FROM gallery-* | WHERE clientip == "5.255.253.75" | STATS avg_bytes = AVG(bytes) BY bucket = BUCKET(@timestamp, 1 day)';
-      expect(
-        appendEntityFiltersToChangePointLineEsql(line, { clientip: '5.255.253.75', region: 'us' }, [
-          'clientip',
-          'region',
-        ])
-      ).toBe(`${line} | WHERE region == "us"`);
-    });
+  it('always appends WHERE for all entity columns regardless of existing pipeline constraints', () => {
+    const line =
+      'FROM gallery-* | WHERE clientip == "5.255.253.75" | STATS avg_bytes = AVG(bytes) BY clientip, bucket = BUCKET(@timestamp, 1 day)';
+    expect(
+      appendEntityFiltersToChangePointLineEsql(line, { clientip: '5.255.253.75' }, ['clientip'])
+    ).toBe(`${line} | WHERE clientip == "5.255.253.75"`);
   });
 });
