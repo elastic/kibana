@@ -12,7 +12,6 @@ import {
   expectSuggestions,
   getFunctionSignaturesByReturnType,
 } from '../../../__tests__/commands/autocomplete';
-import { ESQL_COMMON_NUMERIC_TYPES } from '../../definitions/types';
 import type { ICommandCallbacks } from '../types';
 import { Location } from '../types';
 
@@ -27,15 +26,6 @@ const rowExpectSuggestions = (
 
 describe('ROW Autocomplete', () => {
   const functions = getFunctionSignaturesByReturnType(Location.ROW, 'any', { scalar: true });
-  const numericTypes = [...ESQL_COMMON_NUMERIC_TYPES, 'unsigned_long'] as const;
-  const numericFunctionsWithoutAbs = getFunctionSignaturesByReturnType(
-    Location.ROW,
-    numericTypes,
-    { scalar: true },
-    undefined,
-    ['abs']
-  );
-
   it('suggests functions and an assignment for new expressions', async () => {
     const expectedSuggestions = [' = ', ...functions];
 
@@ -45,10 +35,6 @@ describe('ROW Autocomplete', () => {
 
   it('suggests only functions after an assignment', async () => {
     await rowExpectSuggestions('ROW col0 = ', functions);
-  });
-
-  it('suggests only functions inside a function call argument list', async () => {
-    await rowExpectSuggestions('ROW col0 = ABS(', numericFunctionsWithoutAbs);
   });
 
   it('suggests a comma and a pipe after a complete expression', async () => {

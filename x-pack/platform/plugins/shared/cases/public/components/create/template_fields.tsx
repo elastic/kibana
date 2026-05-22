@@ -9,9 +9,11 @@ import React, { useContext, useEffect, useMemo } from 'react';
 import { EuiCallOut, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormProvider, useForm } from 'react-hook-form';
 import {
+  UseField,
   useFormContext as useParentFormContext,
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { HiddenField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { CASE_EXTENDED_FIELDS } from '../../../common/constants';
 import { useTemplateFormSync } from './use_template_form_sync';
 import * as i18n from './translations';
@@ -65,12 +67,13 @@ export const CreateCaseTemplateFields: React.FC = () => {
   }, [resolvedFields]);
 
   if (isLoading || isLoadingFields) {
-    return null;
+    return <UseField path={CASE_EXTENDED_FIELDS} component={HiddenField} />;
   }
 
   if (!templateId || template?.definition?.fields === undefined) {
     return (
       <>
+        <UseField path={CASE_EXTENDED_FIELDS} component={HiddenField} />
         <EuiSpacer />
         <EuiCallOut announceOnMount title={i18n.TEMPLATE_NOT_SELECTED_TITLE} size="s">
           <p>{i18n.TEMPLATE_NOT_SELECTED_DESCRIPTION}</p>
@@ -81,6 +84,7 @@ export const CreateCaseTemplateFields: React.FC = () => {
 
   return (
     <>
+      <UseField path={CASE_EXTENDED_FIELDS} component={HiddenField} />
       <EuiSpacer />
       <EuiTitle size="s">
         <h4>{i18n.EXTENDED_FIELDS_TITLE}</h4>
