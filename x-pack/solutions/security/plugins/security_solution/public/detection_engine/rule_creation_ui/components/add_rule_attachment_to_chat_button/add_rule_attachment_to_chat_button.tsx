@@ -71,7 +71,7 @@ export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButt
   const { services } = useKibana();
   const { aiRuleCreation } = services;
 
-  // Tell save_rule_handler which rule this page is about. Stable for the page lifetime —
+  // Tell ai_rule_creation_handler which rule this page is about. Stable for the page lifetime —
   // not reset on conversation switches (unlike lastSavedRuleId).
   const ruleId = rule?.id;
   useEffect(() => {

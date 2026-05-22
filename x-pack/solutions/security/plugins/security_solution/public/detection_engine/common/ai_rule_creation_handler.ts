@@ -10,7 +10,7 @@ import { pairwise } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
-import { isRoundCompleteEvent } from '@kbn/agent-builder-common/chat/events';
+import { ChatEventType, isRoundCompleteEvent } from '@kbn/agent-builder-common/chat/events';
 import type {
   RuleResponse,
   RuleUpdateProps,
@@ -27,6 +27,19 @@ import { transformInput, transformOutput } from './transforms';
 import { securitySolutionQueryClient } from '../../common/containers/query_client/query_client_provider';
 import { RULE_MANAGEMENT_FILTERS_QUERY_KEY } from '../rule_management/api/hooks/use_fetch_rule_management_filters_query';
 import type { AiRuleCreationService } from './ai_rule_creation_store';
+
+const AGENT_ACTIVITY_EVENT_TYPES = new Set<string>([
+  ChatEventType.reasoning,
+  ChatEventType.messageChunk,
+  ChatEventType.messageComplete,
+  ChatEventType.toolCall,
+  ChatEventType.browserToolCall,
+  ChatEventType.toolProgress,
+  ChatEventType.toolResult,
+  ChatEventType.toolUi,
+  ChatEventType.thinkingComplete,
+  ChatEventType.promptRequest,
+]);
 
 const READ_ONLY_FIELDS: Array<keyof RuleResponse> = [
   'revision',
@@ -52,7 +65,7 @@ const stripRuleId = (rule: RuleUpdateProps): RuleUpdateProps => {
   return rest as RuleUpdateProps;
 };
 
-export const createSaveRuleHandler = ({
+export const createAiRuleCreationHandler = ({
   aiRuleCreation,
   notifications,
   agentBuilder,
@@ -184,8 +197,20 @@ export const createSaveRuleHandler = ({
       }
     });
 
+  // Track whether the agent is mid-round so attachment cards can hide their action buttons
+  // during reasoning/streaming. Runs globally (not per-page) so standalone chat-first
+  // surfaces get the same button gating as the rule create/edit form pages.
+  const agentBusySub = agentBuilder?.events.chat$.subscribe((event) => {
+    if (isRoundCompleteEvent(event)) {
+      aiRuleCreation.setAgentBusy(false);
+    } else if (AGENT_ACTIVITY_EVENT_TYPES.has(event.type)) {
+      aiRuleCreation.setAgentBusy(true);
+    }
+  });
+
   // Return a combined subscription so all are cleaned up on unsubscribe
   saveSub.add(dirtySub);
   saveSub.add(conversationSub);
+  saveSub.add(agentBusySub);
   return saveSub;
 };

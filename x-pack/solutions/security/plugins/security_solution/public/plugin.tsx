@@ -87,7 +87,7 @@ import {
 } from './agent_builder/attachment_types';
 import type { SecurityCanvasEmbeddedBundle } from './agent_builder/components/security_redux_embedded_provider';
 import { registerWorkflowSteps } from './workflows/step_types';
-import { createSaveRuleHandler } from './detection_engine/common/save_rule_handler';
+import { createAiRuleCreationHandler } from './detection_engine/common/ai_rule_creation_handler';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private config: SecuritySolutionUiConfigType;
@@ -308,7 +308,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.registerFleetExtensions(core, plugins);
     this.registerPluginUpdates(core, plugins); // Not awaiting to prevent blocking start execution
 
-    this.saveRuleSub = createSaveRuleHandler({
+    this.saveRuleSub = createAiRuleCreationHandler({
       aiRuleCreation: this.services.aiRuleCreation,
       notifications: core.notifications,
       agentBuilder: plugins.agentBuilder,

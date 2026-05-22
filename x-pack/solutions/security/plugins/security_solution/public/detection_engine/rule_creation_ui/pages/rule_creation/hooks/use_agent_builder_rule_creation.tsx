@@ -9,7 +9,7 @@ import { useEffect, useCallback, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
-import { ChatEventType, isRoundCompleteEvent } from '@kbn/agent-builder-common/chat/events';
+import { isRoundCompleteEvent } from '@kbn/agent-builder-common/chat/events';
 import type { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
@@ -46,21 +46,6 @@ const ruleDefaultMetadataFields = {
 };
 
 const SYNC_DEBOUNCE_MS = 500;
-
-// Event types that signal the agent is actively processing a round. Used to drive the
-// "agentBusy" flag so attachment action buttons can be suppressed during reasoning/streaming.
-const AGENT_ACTIVITY_EVENT_TYPES = new Set<string>([
-  ChatEventType.reasoning,
-  ChatEventType.messageChunk,
-  ChatEventType.messageComplete,
-  ChatEventType.toolCall,
-  ChatEventType.browserToolCall,
-  ChatEventType.toolProgress,
-  ChatEventType.toolResult,
-  ChatEventType.toolUi,
-  ChatEventType.thinkingComplete,
-  ChatEventType.promptRequest,
-]);
 
 interface UseAgentBuilderRuleCreationParams {
   defineStepForm: FormHook<DefineStepRule, DefineStepRule>;
@@ -111,29 +96,12 @@ export const useAgentBuilderRuleCreation = ({
     return () => subscription.unsubscribe();
   }, [aiRuleCreation]);
 
-  // Tell save_rule_handler which rule this page is editing. Unlike lastSavedRuleId, this
+  // Tell ai_rule_creation_handler which rule this page is editing. Unlike lastSavedRuleId, this
   // is not reset on conversation switches — it's stable for the lifetime of the page.
   useEffect(() => {
     aiRuleCreation.setExistingRuleId(existingRuleId ?? null);
     return () => aiRuleCreation.setExistingRuleId(null);
   }, [existingRuleId, aiRuleCreation]);
-
-  // Track whether the agent is mid-round so attachment cards can hide their action buttons
-  // during reasoning/streaming. Any agent-activity event marks busy; roundComplete clears it.
-  useEffect(() => {
-    if (!agentBuilder?.events?.chat$) return;
-    const subscription = agentBuilder.events.chat$.subscribe((event) => {
-      if (isRoundCompleteEvent(event)) {
-        aiRuleCreation.setAgentBusy(false);
-      } else if (AGENT_ACTIVITY_EVENT_TYPES.has(event.type)) {
-        aiRuleCreation.setAgentBusy(true);
-      }
-    });
-    return () => {
-      subscription.unsubscribe();
-      aiRuleCreation.setAgentBusy(false);
-    };
-  }, [agentBuilder, aiRuleCreation]);
 
   const addRuleAttachment = useCallback(
     (ruleData: unknown, label: string) => {
@@ -293,7 +261,7 @@ export const useAgentBuilderRuleCreation = ({
         // data objects). Mark dirty so the chat's "Save changes" button becomes enabled —
         // user-initiated form edits should be just as savable from chat as agent edits.
         // This is redundant when the change originated from updateFormFromChat (which
-        // already fires markDirty via save_rule_handler's roundComplete subscriber), but
+        // already fires markDirty via ai_rule_creation_handler's roundComplete subscriber), but
         // that's fine — markDirty is idempotent.
         aiRuleCreation.markDirty();
       } catch {
