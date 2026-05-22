@@ -66,15 +66,8 @@ export class SmlCrawlerImpl implements SmlCrawler {
     const crawlStartTime = new Date().toISOString();
     this.logger.info(`SML crawler: starting crawl for type '${definition.id}' across all spaces`);
 
-    // For additive schema changes putMapping succeeds in-place (no downtime).
-    // For incompatible changes ES returns 400: we drop the index here so the
-    // full re-crawl starts immediately in this task run rather than waiting for
-    // the next scheduled tick. Recreation happens lazily on the first write.
     const indexRebuilt = await this.applyMappingsOrRebuild({ esClient });
 
-    // Data integrity check: if the SML data index is empty for this type but
-    // state docs exist, clear state to force a full re-index.
-    // Also triggered when the index was just rebuilt due to an incompatible change.
     const integrityResetNeeded =
       indexRebuilt ||
       (await this.checkDataIntegrity({
@@ -149,19 +142,7 @@ export class SmlCrawlerImpl implements SmlCrawler {
     });
   }
 
-  /**
-   * Attempt to apply pending schema changes in-place via putMapping.
-   *
-   * - Additive changes (new field): putMapping succeeds, returns false.
-   * - Incompatible changes (type change, field rename): ES returns 400 with
-   *   type `illegal_argument_exception`. The index is dropped here so the
-   *   re-crawl begins immediately in this task run rather than waiting for
-   *   the next scheduled tick. Recreation happens lazily on the first write.
-   * - Index does not exist or is deleted concurrently: updateMappingsIfNeeded()
-   *   no-ops or throws 404, both treated as false; crawl recreates on first write.
-   *
-   * Returns true when the index was dropped and a full re-crawl is needed.
-   */
+  /** Returns true when the index was dropped due to an incompatible mapping change. */
   private async applyMappingsOrRebuild({
     esClient,
   }: {
@@ -190,7 +171,13 @@ export class SmlCrawlerImpl implements SmlCrawler {
         this.logger.warn(
           `SML crawler: incompatible mapping change detected — dropping index '${smlIndexName}' and re-crawling immediately`
         );
-        await smlClient.clean();
+        try {
+          await smlClient.clean();
+        } catch (cleanError) {
+          if (!isResponseError(cleanError) || cleanError.statusCode !== 404) {
+            throw cleanError;
+          }
+        }
         return true;
       }
       throw error;

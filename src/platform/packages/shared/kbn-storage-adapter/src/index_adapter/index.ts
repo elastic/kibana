@@ -370,19 +370,7 @@ export class StorageIndexAdapter<
     }
   }
 
-  /**
-   * Attempt to apply any pending mapping changes to the current write index via
-   * `putMapping`. No-op when the schema is already current or no write index
-   * exists yet.
-   *
-   * Throws:
-   * - 400 `ResponseError` (`illegal_argument_exception`) when the change is
-   *   incompatible (type change, field rename). Callers should drop and recreate
-   *   the index.
-   * - 404 `ResponseError` when the write index is deleted concurrently between
-   *   resolving it and calling `putMapping`. Callers may treat this as a no-op.
-   * - Other `ResponseError`s / transport errors are rethrown as-is.
-   */
+  /** Applies any pending mapping changes to the current write index via putMapping. */
   public async updateMappingsIfNeeded(): Promise<void> {
     const expectedSchemaVersion = getSchemaVersion(this.storage);
 
