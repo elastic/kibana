@@ -34,11 +34,7 @@ const proposeSkillSchema = z.object({
     .describe(
       'Stable slug identifier for the skill. Lowercase letters, numbers, hyphens, and underscores; must start and end with a letter or number. Max 64 characters.'
     ),
-  name: z
-    .string()
-    .describe(
-      'Human-readable name. Letters, numbers, spaces, hyphens, and underscores; must start and end with a letter or number. Max 64 characters.'
-    ),
+  name: z.string().describe('Skill name. Use the same value as `id`. Max 64 characters.'),
   description: z
     .string()
     .describe(
