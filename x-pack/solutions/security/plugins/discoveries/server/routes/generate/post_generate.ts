@@ -20,7 +20,7 @@ import { validateRequest } from '@kbn/discoveries/impl/attack_discovery/generati
 import type { DiscoveriesPluginStartDeps } from '../../types';
 import { DEFAULT_ROUTE_HANDLER_TIMEOUT_MS } from '../constants';
 import { assertWorkflowsEnabled } from '../../lib/assert_workflows_enabled';
-import type { WorkflowInitializationService } from '../../lib/workflow_initialization';
+import { checkManagedWorkflowIntegrity } from '../../managed_workflows/check_managed_workflow_integrity';
 import {
   executeGenerationWorkflow,
   getInferredPrebuiltStepTypes,
@@ -37,7 +37,6 @@ export const registerGenerateRoute = (
     getEventLogIndex,
     getEventLogger,
     getStartServices,
-    workflowInitService,
     workflowsManagementApi,
   }: {
     analytics: AnalyticsServiceSetup;
@@ -47,7 +46,6 @@ export const registerGenerateRoute = (
       coreStart: CoreStart;
       pluginsStart: DiscoveriesPluginStartDeps;
     }>;
-    workflowInitService: WorkflowInitializationService;
     workflowsManagementApi?: WorkflowsServerPluginSetup['management'];
   }
 ) => {
@@ -144,6 +142,19 @@ export const registerGenerateRoute = (
             alertsIndexPattern,
             analytics,
             apiConfig: resolvedApiConfig,
+            checkIntegrity:
+              workflowsManagementApi != null
+                ? async ({ logger: checkLogger, spaceId }) => {
+                    const { pluginsStart } = await getStartServices();
+                    return checkManagedWorkflowIntegrity({
+                      analytics,
+                      logger: checkLogger,
+                      spaceId,
+                      workflowsExtensions: pluginsStart.workflowsExtensions,
+                      workflowsManagementApi,
+                    });
+                  }
+                : undefined,
             end,
             executionUuid,
             filter,
@@ -160,7 +171,6 @@ export const registerGenerateRoute = (
             trigger: 'manual',
             type,
             workflowConfig,
-            workflowInitService,
             workflowsManagementApi,
           }).catch((err) => {
             tracedLogger.error(`Generation workflow failed: ${err.message}`);

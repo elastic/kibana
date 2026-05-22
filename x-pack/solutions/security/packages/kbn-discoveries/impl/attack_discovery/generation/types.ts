@@ -46,21 +46,6 @@ export interface WorkflowIntegrityResult {
   }>;
 }
 
-export interface WorkflowInitializationService {
-  ensureWorkflowsForSpace(params: {
-    logger: Logger;
-    request: KibanaRequest;
-    spaceId: string;
-  }): Promise<DefaultWorkflowIds | null>;
-
-  verifyAndRepairWorkflows(params: {
-    defaultWorkflowIds: DefaultWorkflowIds;
-    logger: Logger;
-    request: KibanaRequest;
-    spaceId: string;
-  }): Promise<WorkflowIntegrityResult>;
-}
-
 export type GetEventLogIndex = () => Promise<string>;
 
 export type GetEventLogger = () => Promise<IEventLogger>;
@@ -125,6 +110,15 @@ export interface ExecuteGenerationWorkflowParams {
   alertsIndexPattern: string;
   analytics?: AnalyticsServiceSetup;
   apiConfig: unknown;
+  /**
+   * Injectable integrity check function. When provided, verifyWorkflowIntegrity calls this to
+   * verify managed workflow integrity. The plugin binds checkManagedWorkflowIntegrity to the
+   * workflowsManagementApi and spaceId before passing.
+   */
+  checkIntegrity?: (params: {
+    logger: Logger;
+    spaceId: string;
+  }) => Promise<WorkflowIntegrityResult>;
   end?: string;
   getInferredPrebuiltStepTypes?: (params: {
     defaultValidationWorkflowId: string;
@@ -157,7 +151,6 @@ export interface ExecuteGenerationWorkflowParams {
   trigger?: string;
   type: string;
   workflowConfig: WorkflowConfig;
-  workflowInitService: WorkflowInitializationService;
   /**
    * Workflows management API (setup contract) used to invoke workflows.
    *

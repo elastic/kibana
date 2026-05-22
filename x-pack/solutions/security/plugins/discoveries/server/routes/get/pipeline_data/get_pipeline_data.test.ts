@@ -125,11 +125,6 @@ describe('registerGetPipelineDataRoute', () => {
     mockGetSpaceId.mockReturnValue('default');
   });
 
-  const mockWorkflowInitService = {
-    ensureWorkflowsForSpace: jest.fn().mockResolvedValue(null),
-    verifyAndRepairWorkflows: jest.fn(),
-  };
-
   const registerAndGetHandler = (workflowsManagement: unknown = mockWorkflowsManagementApi) => {
     const router = httpServiceMock.createRouter();
     const addVersionMock = jest.fn();
@@ -140,7 +135,6 @@ describe('registerGetPipelineDataRoute', () => {
     registerGetPipelineDataRoute(router, logger, {
       getEventLogIndex,
       getStartServices,
-      workflowInitService: mockWorkflowInitService,
       workflowsManagementApi: workflowsManagement as Parameters<
         typeof registerGetPipelineDataRoute
       >[2]['workflowsManagementApi'],
@@ -702,7 +696,6 @@ describe('registerGetPipelineDataRoute', () => {
     registerGetPipelineDataRoute(router, logger, {
       getEventLogIndex,
       getStartServices,
-      workflowInitService: mockWorkflowInitService,
       workflowsManagementApi: mockWorkflowsManagementApi as unknown as Parameters<
         typeof registerGetPipelineDataRoute
       >[2]['workflowsManagementApi'],
@@ -729,7 +722,6 @@ describe('registerGetPipelineDataRoute', () => {
     registerGetPipelineDataRoute(router, logger, {
       getEventLogIndex,
       getStartServices,
-      workflowInitService: mockWorkflowInitService,
       workflowsManagementApi: mockWorkflowsManagementApi as unknown as Parameters<
         typeof registerGetPipelineDataRoute
       >[2]['workflowsManagementApi'],

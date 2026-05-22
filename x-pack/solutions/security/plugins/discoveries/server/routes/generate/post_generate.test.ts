@@ -37,11 +37,6 @@ jest.mock('./helpers', () => ({
   resolveApiConfig: (...args: unknown[]) => mockResolveApiConfig(...args),
 }));
 
-const mockWorkflowInitService = {
-  ensureWorkflowsForSpace: jest.fn().mockResolvedValue(null),
-  verifyAndRepairWorkflows: jest.fn(),
-};
-
 describe('registerGenerateRoute', () => {
   let mockRouter: jest.Mocked<IRouter>;
   let mockLogger: ReturnType<typeof loggingSystemMock.createLogger>;
@@ -131,7 +126,6 @@ describe('registerGenerateRoute', () => {
       getEventLogIndex: mockGetEventLogIndex,
       getEventLogger: mockGetEventLogger,
       getStartServices: mockGetStartServices,
-      workflowInitService: mockWorkflowInitService,
     });
 
     expect(mockRouter.versioned.post).toHaveBeenCalledWith({
@@ -156,7 +150,6 @@ describe('registerGenerateRoute', () => {
       getEventLogIndex: mockGetEventLogIndex,
       getEventLogger: mockGetEventLogger,
       getStartServices: mockGetStartServices,
-      workflowInitService: mockWorkflowInitService,
     });
 
     expect(mockRouter.versioned.post).toHaveBeenCalledWith(
@@ -203,7 +196,6 @@ describe('registerGenerateRoute', () => {
       getEventLogIndex: mockGetEventLogIndex,
       getEventLogger: mockGetEventLogger,
       getStartServices: mockGetStartServices,
-      workflowInitService: mockWorkflowInitService,
     });
 
     const handler = getVersionHandler(versionHandler);
@@ -248,7 +240,6 @@ describe('registerGenerateRoute', () => {
       getEventLogIndex: mockGetEventLogIndex,
       getEventLogger: mockGetEventLogger,
       getStartServices: mockGetStartServices,
-      workflowInitService: mockWorkflowInitService,
     });
 
     const handler = getVersionHandler(versionHandler);
@@ -296,7 +287,6 @@ describe('registerGenerateRoute', () => {
       getEventLogIndex: mockGetEventLogIndex,
       getEventLogger: mockGetEventLogger,
       getStartServices: mockGetStartServices,
-      workflowInitService: mockWorkflowInitService,
     });
 
     const handler = getVersionHandler(versionHandler);
@@ -340,7 +330,6 @@ describe('registerGenerateRoute', () => {
       getEventLogIndex: mockGetEventLogIndex,
       getEventLogger: mockGetEventLogger,
       getStartServices: mockGetStartServices,
-      workflowInitService: mockWorkflowInitService,
     });
 
     const handler = getVersionHandler(versionHandler);
@@ -394,7 +383,6 @@ describe('registerGenerateRoute', () => {
         getEventLogIndex: mockGetEventLogIndex,
         getEventLogger: mockGetEventLogger,
         getStartServices: mockGetStartServices,
-        workflowInitService: mockWorkflowInitService,
       });
 
       const handler = getVersionHandler(versionHandler);
@@ -448,7 +436,6 @@ describe('registerGenerateRoute', () => {
         getEventLogIndex: mockGetEventLogIndex,
         getEventLogger: mockGetEventLogger,
         getStartServices: mockGetStartServices,
-        workflowInitService: mockWorkflowInitService,
       });
 
       const handler = getVersionHandler(versionHandler);
@@ -501,7 +488,6 @@ describe('registerGenerateRoute', () => {
         getEventLogIndex: mockGetEventLogIndex,
         getEventLogger: mockGetEventLogger,
         getStartServices: mockGetStartServices,
-        workflowInitService: mockWorkflowInitService,
       });
 
       const handler = getVersionHandler(versionHandler);
@@ -554,7 +540,6 @@ describe('registerGenerateRoute', () => {
         getEventLogIndex: mockGetEventLogIndex,
         getEventLogger: mockGetEventLogger,
         getStartServices: mockGetStartServices,
-        workflowInitService: mockWorkflowInitService,
       });
 
       const handler = getVersionHandler(versionHandler);
@@ -603,7 +588,6 @@ describe('registerGenerateRoute', () => {
         getEventLogIndex: mockGetEventLogIndex,
         getEventLogger: mockGetEventLogger,
         getStartServices: mockGetStartServices,
-        workflowInitService: mockWorkflowInitService,
       });
 
       const handler = getVersionHandler(versionHandler);
@@ -657,7 +641,6 @@ describe('registerGenerateRoute', () => {
         getEventLogIndex: mockGetEventLogIndex,
         getEventLogger: mockGetEventLogger,
         getStartServices: mockGetStartServices,
-        workflowInitService: mockWorkflowInitService,
       });
 
       await getHandler()(mockContext, mockRequest, mockResponse);
@@ -706,7 +689,6 @@ describe('registerGenerateRoute', () => {
         getEventLogIndex: mockGetEventLogIndex,
         getEventLogger: mockGetEventLogger,
         getStartServices: mockGetStartServices,
-        workflowInitService: mockWorkflowInitService,
       });
 
       await getHandler()(mockContext, mockRequest, mockResponse);
@@ -749,7 +731,6 @@ describe('registerGenerateRoute', () => {
         getEventLogIndex: mockGetEventLogIndex,
         getEventLogger: mockGetEventLogger,
         getStartServices: mockGetStartServices,
-        workflowInitService: mockWorkflowInitService,
       });
 
       await getHandler()(mockContext, mockRequest, mockResponse);
@@ -805,7 +786,6 @@ describe('registerGenerateRoute', () => {
         getEventLogIndex: mockGetEventLogIndex,
         getEventLogger: mockGetEventLogger,
         getStartServices: mockGetStartServices,
-        workflowInitService: mockWorkflowInitService,
       });
 
       await getHandler()(mockContext, mockRequest, mockResponse);
@@ -845,7 +825,6 @@ describe('registerGenerateRoute', () => {
         getEventLogIndex: mockGetEventLogIndex,
         getEventLogger: mockGetEventLogger,
         getStartServices: mockGetStartServices,
-        workflowInitService: mockWorkflowInitService,
       });
 
       await getHandler()(mockContext, mockRequest, mockResponse);
@@ -892,7 +871,6 @@ describe('registerGenerateRoute', () => {
         getEventLogIndex: mockGetEventLogIndex,
         getEventLogger: mockGetEventLogger,
         getStartServices: mockGetStartServices,
-        workflowInitService: mockWorkflowInitService,
       });
 
       await getHandler()(mockContext, mockRequest, mockResponse);

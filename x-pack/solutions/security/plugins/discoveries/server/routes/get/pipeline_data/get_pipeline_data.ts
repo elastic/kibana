@@ -20,7 +20,6 @@ import { getSpaceId } from '@kbn/discoveries/impl/lib/helpers/get_space_id';
 import type { WorkflowsManagementApi } from '@kbn/discoveries/impl/attack_discovery/generation/types';
 import { assertWorkflowsEnabled } from '../../../lib/assert_workflows_enabled';
 import type { DiscoveriesPluginStartDeps } from '../../../types';
-import type { WorkflowInitializationService } from '../../../lib/workflow_initialization';
 import { computeCombinedAlerts, type CombinedAlerts } from './helpers/compute_combined_alerts';
 import {
   extractPipelineAlertData,
@@ -117,7 +116,6 @@ export const registerGetPipelineDataRoute = (
   {
     getEventLogIndex,
     getStartServices,
-    workflowInitService,
     workflowsManagementApi,
   }: {
     getEventLogIndex: () => Promise<string>;
@@ -125,7 +123,6 @@ export const registerGetPipelineDataRoute = (
       coreStart: CoreStart;
       pluginsStart: DiscoveriesPluginStartDeps;
     }>;
-    workflowInitService: WorkflowInitializationService;
     workflowsManagementApi?: WorkflowsManagementApi;
   }
 ) => {
@@ -166,13 +163,6 @@ export const registerGetPipelineDataRoute = (
           const spaceId = getSpaceId({
             request,
             spaces: pluginsStart.spaces?.spacesService,
-          });
-
-          workflowInitService.ensureWorkflowsForSpace({ logger, request, spaceId }).catch((err) => {
-            logger.debug(
-              () =>
-                `Background workflow initialization failed for space '${spaceId}': ${err.message}`
-            );
           });
 
           // Step 1: Reconstruct WorkflowExecutionsTracking from event log
@@ -293,7 +283,7 @@ export const registerGetPipelineDataRoute = (
 
                       logger.debug(
                         () =>
-                          `[kibana-dkv] Step 2.5: found generate_discoveries step=${
+                          `Step 2.5: found generate_discoveries step=${
                             generateStep != null
                           }, alertsCount=${Array.isArray(alerts) ? alerts.length : 'N/A'}`
                       );
