@@ -37,7 +37,7 @@ import { evaluateDefendInsights } from '../../lib/defend_insights/evaluation';
 import { localToolPrompts, promptGroupId as toolsGroupId } from '../../lib/prompt/tool_prompts';
 import { promptGroupId } from '../../lib/prompt/local_prompt_object';
 import { getFormattedTime, getModelOrOss } from '../../lib/prompt/helpers';
-import { getAttackDiscoveryPrompts } from '../../lib/attack_discovery/graphs/default_attack_discovery_graph/prompts';
+import { getAttackDiscoveryPrompts } from '../../lib/attack_discovery/prompts';
 import {
   DEFAULT_ASSISTANT_GRAPH_PROMPT_TEMPLATE,
   chatPromptFactory,

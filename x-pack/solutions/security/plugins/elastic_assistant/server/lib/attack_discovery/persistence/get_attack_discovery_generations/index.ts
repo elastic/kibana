@@ -78,10 +78,41 @@ export const getAttackDiscoveryGenerations = async ({
     ignore_unavailable: true,
   };
 
+  logger.debug(
+    () =>
+      `Executing msearch for generations with query: ${JSON.stringify({
+        generationsQuery: generationsQuery.query,
+        index: eventLogIndex,
+        size: generationsQuery.size,
+      })}`
+  );
+
   const msearchResults = await esClient.msearch(mSearchQueryBody);
 
   const generationsResponse = msearchResults.responses[0];
   const successfulGenerationsResponse = msearchResults.responses[1];
+
+  logger.debug(
+    () =>
+      `Msearch results: ${JSON.stringify({
+        generationsAggregations:
+          'aggregations' in generationsResponse ? generationsResponse.aggregations : undefined,
+        generationsHits:
+          'hits' in generationsResponse ? generationsResponse.hits?.total : undefined,
+        successfulGenerationsHits:
+          'hits' in successfulGenerationsResponse
+            ? successfulGenerationsResponse.hits?.total
+            : undefined,
+      })}`
+  );
+
+  if (!('aggregations' in generationsResponse)) {
+    throw new Error('Generations response does not contain aggregations');
+  }
+
+  if (!('aggregations' in successfulGenerationsResponse)) {
+    throw new Error('Successful generations response does not contain aggregations');
+  }
 
   // transform the generations response:
   const rawGenerationsResponse = {

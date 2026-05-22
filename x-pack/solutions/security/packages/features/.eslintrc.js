@@ -81,9 +81,16 @@ const RESTRICTED_IMPORTS_PATHS = [
   },
 ];
 
+// Unset GIT_DIR so `git rev-parse --show-toplevel` works correctly in git worktrees.
+// When git runs a pre-commit hook, it sets GIT_DIR to the worktree git metadata dir,
+// which causes `git rev-parse --show-toplevel` to return the cwd instead of the repo root.
+const envWithoutGitDir = Object.fromEntries(
+  Object.entries(process.env).filter(([key]) => key !== 'GIT_DIR')
+);
 const ROOT_DIR = execSync('git rev-parse --show-toplevel', {
   encoding: 'utf8',
   cwd: __dirname,
+  env: envWithoutGitDir,
 }).trim();
 
 const ROOT_CLIMB_STRING = path.relative(__dirname, ROOT_DIR); // i.e. '../../..'

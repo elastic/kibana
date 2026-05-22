@@ -23,16 +23,23 @@ export const ANONYMIZATION_FIELDS_TABLE_MAX_PAGE_SIZE = 100;
 export const PROMPTS_TABLE_MAX_PAGE_SIZE = 100;
 
 // Event log
+// @deprecated Import from @kbn/discoveries instead
 export const ATTACK_DISCOVERY_EVENT_PROVIDER = 'securitySolution.attackDiscovery' as const;
 
+// @deprecated Import from @kbn/discoveries instead
 export const ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_STARTED = 'generation-started' as const;
+// @deprecated Import from @kbn/discoveries instead
 export const ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_SUCCEEDED =
   'generation-succeeded' as const;
+// @deprecated Import from @kbn/discoveries instead
 export const ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_FAILED = 'generation-failed' as const;
+// @deprecated Import from @kbn/discoveries instead
 export const ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_CANCELED = 'generation-canceled' as const;
+// @deprecated Import from @kbn/discoveries instead
 export const ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_DISMISSED =
   'generation-dismissed' as const;
 
+// @deprecated Import from @kbn/discoveries instead
 export const ATTACK_DISCOVERY_EVENT_ACTIONS = [
   ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_STARTED,
   ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_SUCCEEDED,
