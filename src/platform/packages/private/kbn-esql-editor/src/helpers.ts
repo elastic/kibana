@@ -117,12 +117,13 @@ export const parseWarning = (warning: string): MonacoMessage[] => {
 };
 
 export const parseErrors = (errors: Error[], code: string): MonacoMessage[] => {
-  return errors.map((error) => {
+  return errors.flatMap((error): MonacoMessage[] => {
+    const errorMessage = typeof error.message === 'string' ? error.message : String(error.message);
     try {
       if (
         // Found while testing random commands (as inlinestats)
-        !error.message.includes('esql_illegal_argument_exception') &&
-        error.message.includes('line')
+        !errorMessage.includes('esql_illegal_argument_exception') &&
+        errorMessage.includes('line')
       ) {
         const text = error.message.split('line')[1];
         const [lineNumber, startPosition, errorMessage] = text.split(':');
