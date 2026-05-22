@@ -11,7 +11,7 @@ import { apm } from '@elastic/apm-rum';
 import type { Logger } from '@kbn/logging';
 import { useCallback } from 'react';
 import { useExternalServices } from '../../../context/external_services';
-import { ERROR_TYPE } from '../../../log_labels';
+import { ERROR_TYPE } from '../../../utils/log_labels';
 import { toLoggable } from '../../../utils/logger_utils';
 import { EsqlResponseError } from './esql_response_error';
 import { isSuppressedFetchError } from './is_suppressed_fetch_error';

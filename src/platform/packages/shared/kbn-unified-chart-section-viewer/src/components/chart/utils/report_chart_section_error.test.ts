@@ -9,7 +9,7 @@
 
 import { apm } from '@elastic/apm-rum';
 import { loggerMock } from '@kbn/logging-mocks';
-import { ERROR_TYPE } from '../../../log_labels';
+import { ERROR_TYPE } from '../../../utils/log_labels';
 import { EsqlResponseError } from './esql_response_error';
 import {
   CHART_SECTION_ERROR_TYPE_LABEL,
@@ -223,7 +223,11 @@ describe('reportChartSectionError', () => {
 
     expect(() =>
       reportChartSectionError(
-        { error: new Error('boom'), source: 'useFetchMetricsData', labels: { profile_id: PROFILE_ID } },
+        {
+          error: new Error('boom'),
+          source: 'useFetchMetricsData',
+          labels: { profile_id: PROFILE_ID },
+        },
         logger
       )
     ).not.toThrow();

@@ -20,5 +20,3 @@
 export const ERROR_TYPE = {
   APM_REPORTING_FAILURE: 'APMReportingFailure',
 } as const;
-
-export type ErrorType = (typeof ERROR_TYPE)[keyof typeof ERROR_TYPE];

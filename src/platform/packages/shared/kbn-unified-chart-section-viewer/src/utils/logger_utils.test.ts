@@ -31,7 +31,32 @@ describe('toLoggable', () => {
     expect(toLoggable(undefined)).toBe('undefined');
   });
 
-  it('converts plain objects to string', () => {
-    expect(toLoggable({ foo: 'bar' })).toBe('[object Object]');
+  it('serializes plain objects as JSON', () => {
+    expect(toLoggable({ foo: 'bar' })).toBe('{"foo":"bar"}');
+  });
+
+  it('serializes nested objects as JSON', () => {
+    expect(toLoggable({ code: 401, body: { reason: 'unauthorized' } })).toBe(
+      '{"code":401,"body":{"reason":"unauthorized"}}'
+    );
+  });
+
+  it('falls back to String() for cyclic refs', () => {
+    const cyclic: Record<string, unknown> = {};
+    cyclic.self = cyclic;
+    expect(toLoggable(cyclic)).toBe('[object Object]');
+  });
+
+  it('falls back to String() for BigInt (JSON.stringify throws TypeError)', () => {
+    expect(toLoggable(BigInt(42))).toBe('42');
+  });
+
+  it('falls back to String() when toJSON throws', () => {
+    const value = {
+      toJSON() {
+        throw new Error('toJSON failed');
+      },
+    };
+    expect(toLoggable(value)).toBe('[object Object]');
   });
 });
