@@ -8,7 +8,11 @@
  */
 
 import { createPreviewClone } from './create_preview_clone';
-import { DEVTOOL_HIDDEN_ATTR, DEVTOOL_MANAGED_ATTR } from '../lib/constants';
+import {
+  DEVTOOL_HIDDEN_ATTR,
+  DEVTOOL_MANAGED_ATTR,
+  DEVTOOL_CLONE_HIDDEN_ATTR,
+} from '../lib/constants';
 import '../lib/tests/mocks';
 
 const mockRect = (x = 0, y = 0, w = 100, h = 50): DOMRect => new DOMRect(x, y, w, h) as DOMRect;
@@ -108,6 +112,22 @@ describe('createPreviewClone', () => {
     const clonedSpan = inner.querySelector('span')!;
 
     expect(clonedSpan.hasAttribute(DEVTOOL_HIDDEN_ATTR)).toBe(false);
+  });
+
+  it('should keep managed clone hidden descendants marked with data-clone-hidden hidden', () => {
+    target.setAttribute(DEVTOOL_MANAGED_ATTR, '');
+    const hidden = document.createElement('span');
+    hidden.setAttribute(DEVTOOL_CLONE_HIDDEN_ATTR, 'true');
+    hidden.style.visibility = 'hidden';
+    hidden.textContent = 'deleted';
+    target.appendChild(hidden);
+
+    const { clone } = createPreviewClone(target);
+    const inner = clone.firstElementChild as HTMLElement;
+    const clonedSpan = inner.querySelector('span')!;
+
+    expect(clonedSpan.style.visibility).toBe('hidden');
+    expect(clonedSpan.hasAttribute(DEVTOOL_CLONE_HIDDEN_ATTR)).toBe(false);
   });
 
   it('should strip translate from transform while keeping scale', () => {
