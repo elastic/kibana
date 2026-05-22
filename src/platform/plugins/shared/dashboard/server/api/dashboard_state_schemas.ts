@@ -209,7 +209,7 @@ export function getDashboardStateSchema(isDashboardAppRequest: boolean) {
         ]),
         {
           defaultValue: [],
-          maxSize: MAX_PANELS,
+          maxSize: isDashboardAppRequest ? Number.MAX_SAFE_INTEGER : MAX_PANELS,
         }
       ),
       project_routing: schema.maybe(schema.string()),
