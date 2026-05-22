@@ -79,4 +79,42 @@ describe('UserStorageService.register()', () => {
       register({ 'test:key': { schema: z.string(), defaultValue: '', scope: 'global' } })
     ).not.toThrow();
   });
+
+  it('throws when the schema accepts undefined (reserved for uncached reads)', () => {
+    const register = buildRegister();
+    expect(() =>
+      register({
+        'test:key': {
+          schema: z.string().optional(),
+          defaultValue: 'fallback',
+          scope: 'space',
+        },
+      })
+    ).toThrow(/must not accept undefined/);
+  });
+
+  it('throws when a z.undefined() schema is registered', () => {
+    const register = buildRegister();
+    expect(() =>
+      register({
+        'test:key': { schema: z.undefined(), defaultValue: undefined as any, scope: 'space' },
+      })
+    ).toThrow(/must not accept undefined/);
+  });
+
+  it('throws when a z.unknown() schema is registered (accepts undefined)', () => {
+    const register = buildRegister();
+    expect(() =>
+      register({
+        'test:key': { schema: z.unknown(), defaultValue: 0 as any, scope: 'space' },
+      })
+    ).toThrow(/must not accept undefined/);
+  });
+
+  it('accepts a schema that explicitly rejects undefined (z.string() is required by default)', () => {
+    const register = buildRegister();
+    expect(() =>
+      register({ 'test:key': { schema: z.string(), defaultValue: 'x', scope: 'global' } })
+    ).not.toThrow();
+  });
 });
