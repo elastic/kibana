@@ -441,15 +441,10 @@ describe('Pack utils', () => {
 
     // 3.2.14 — defense in depth: query carries rrule_schedule without
     // schedule_type. Route validator rejects earlier; here we ensure the
-    // utility logs a dev warning and drops the field.
+    // utility drops the field so no RRULE state lands on the SO without
+    // its discriminator.
     describe('defense in depth (3.2.14)', () => {
-      const origEnv = process.env.NODE_ENV;
-      afterEach(() => {
-        process.env.NODE_ENV = origEnv;
-      });
-      test('logs and drops rrule_schedule when schedule_type is missing', () => {
-        process.env.NODE_ENV = 'development';
-        const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+      test('drops rrule_schedule when schedule_type is missing', () => {
         const result = convertPackQueriesToSO({
           q1: {
             query: 'SELECT 1;',
@@ -460,10 +455,7 @@ describe('Pack utils', () => {
           } as never,
         });
         expect(result[0]).not.toHaveProperty('rrule_schedule');
-        expect(warn).toHaveBeenCalledWith(
-          expect.stringContaining('rrule_schedule without schedule_type')
-        );
-        warn.mockRestore();
+        expect(result[0]).not.toHaveProperty('schedule_type');
       });
     });
   });

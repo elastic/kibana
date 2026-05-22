@@ -53,6 +53,7 @@ import {
   makePackKey,
   validatePackScheduleFields,
   resolvePackScheduleForUpdate,
+  buildScheduleResponseSlice,
 } from './utils';
 
 import { convertShardsToArray } from '../utils';
@@ -422,7 +423,11 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
             );
           }
         } else {
-          // TODO double check if policiesList shouldnt be changed into policyIds
+          // `policiesList` is the post-validation set returned by
+          // `getInitialPolicies` (only ids that map to a real Fleet package
+          // policy). Diff against `currentAgentPolicyIds` to compute the
+          // remove / keep-and-update / add buckets. Validated empirically by
+          // the multi-policy fan-out probe.
           const agentPolicyIdsToRemove = uniq(difference(currentAgentPolicyIds, policiesList));
           const agentPolicyIdsToUpdate = uniq(
             difference(currentAgentPolicyIds, agentPolicyIdsToRemove)
@@ -530,19 +535,8 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           policy_ids: attributes.policy_ids,
           shards: attributes.shards,
           saved_object_id: updatedPackSO.id,
-          // Discriminated response (D14) — only surface the active-mode
-          // pack-level schedule fields. Gated by the feature flag.
-          ...(isRruleFeatureEnabled &&
-          attributes.schedule_type === 'rrule' &&
-          attributes.rrule_schedule
-            ? { schedule_type: 'rrule' as const, rrule_schedule: attributes.rrule_schedule }
-            : {}),
-          ...(isRruleFeatureEnabled &&
-          attributes.schedule_type === 'interval' &&
-          attributes.interval !== undefined &&
-          attributes.interval !== null
-            ? { schedule_type: 'interval' as const, interval: attributes.interval }
-            : {}),
+          // Discriminated response (D14) — see buildScheduleResponseSlice.
+          ...buildScheduleResponseSlice(attributes, isRruleFeatureEnabled),
         };
 
         return response.ok({

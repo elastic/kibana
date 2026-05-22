@@ -34,6 +34,7 @@ import {
   getInitialPolicies,
   makePackKey,
   validatePackScheduleFields,
+  buildScheduleResponseSlice,
 } from './utils';
 import { convertShardsToArray } from '../utils';
 import type { PackSavedObject } from '../../common/types';
@@ -281,20 +282,11 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           policy_ids: attributes.policy_ids,
           shards: attributes.shards,
           saved_object_id: packSO.id,
-          // Discriminated response (D14): only the active-mode pack-level
-          // schedule fields are surfaced. Stale fields on the SO MUST NOT
-          // leak. Gated by the feature flag on the response boundary too.
-          ...(isRruleFeatureEnabled && scheduleType
-            ? {
-                schedule_type: scheduleType,
-                ...(scheduleType === 'interval' && packInterval !== undefined
-                  ? { interval: packInterval }
-                  : {}),
-                ...(scheduleType === 'rrule' && rruleSchedule
-                  ? { rrule_schedule: rruleSchedule }
-                  : {}),
-              }
-            : {}),
+          // Discriminated response (D14) — see buildScheduleResponseSlice.
+          ...buildScheduleResponseSlice(
+            { schedule_type: scheduleType, interval: packInterval, rrule_schedule: rruleSchedule },
+            isRruleFeatureEnabled
+          ),
         };
 
         return response.ok({

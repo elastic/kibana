@@ -109,19 +109,11 @@ export const convertPackQueriesToSO = (queries: Record<string, PackQueryInput>):
         scheduleOverride = pick(value, ['schedule_type', 'rrule_schedule']);
       } else if (value.schedule_type === 'interval') {
         scheduleOverride = pick(value, ['schedule_type']);
-      } else if (value.rrule_schedule) {
-        // Defense in depth (3.2.14): a query carries `rrule_schedule` without
-        // `schedule_type`. The route validator rejects this earlier; we log so
-        // any future code path that bypasses the validator is loud rather than
-        // silently emitting RRULE-on-SO without the discriminator.
-
-        if (process.env.NODE_ENV !== 'production') {
-          // eslint-disable-next-line no-console
-          console.warn(
-            `convertPackQueriesToSO: query "${key}" carries rrule_schedule without schedule_type; dropping rrule_schedule.`
-          );
-        }
       }
+      // Defense in depth (3.2.14): if a query carries `rrule_schedule` without
+      // `schedule_type`, drop it. The route validator rejects this earlier;
+      // this branch is the belt-and-braces layer for code paths that bypass
+      // the validator. Covered by test in `utils.test.ts`.
 
       acc.push({
         id: key,
@@ -169,6 +161,31 @@ export interface PackScheduleInput {
   interval?: number | null;
   rrule_schedule?: RRuleScheduleConfig | null;
 }
+
+/**
+ * Build the discriminated pack-level schedule slice for a route response (D14).
+ * Returns the active-mode field(s) only, gated by the feature flag. When the
+ * flag is off, returns an empty object — `schedule_type` and the active-mode
+ * field are both hidden, symmetric with the D25 wire-boundary gate.
+ */
+export const buildScheduleResponseSlice = (
+  attributes: Pick<PackScheduleInput, 'schedule_type' | 'interval' | 'rrule_schedule'>,
+  isRruleFeatureEnabled: boolean
+):
+  | { schedule_type: 'rrule'; rrule_schedule: RRuleScheduleConfig }
+  | { schedule_type: 'interval'; interval: number }
+  | {} => {
+  if (!isRruleFeatureEnabled) return {};
+  if (attributes.schedule_type === 'rrule' && attributes.rrule_schedule) {
+    return { schedule_type: 'rrule', rrule_schedule: attributes.rrule_schedule };
+  }
+
+  if (attributes.schedule_type === 'interval' && attributes.interval != null) {
+    return { schedule_type: 'interval', interval: attributes.interval };
+  }
+
+  return {};
+};
 
 export interface ConvertSOQueriesToPackConfigOptions {
   spaceId?: string;
@@ -281,19 +298,15 @@ export const convertSOQueriesToPackConfig = (
         // Pack runs interval. Inherit by default; per-query interval
         // override only when the query's `interval` differs from the pack
         // default. Any per-query `rrule_schedule` on the SO is stale.
+        // Covers both explicit `schedule_type: 'interval'` overrides and
+        // legacy queries without `schedule_type`; rrule overrides on an
+        // interval pack are rejected at the validator (D11) but defensively
+        // ignored here too.
         if (
-          querySchedType === 'interval' &&
-          interval !== undefined &&
-          interval !== packSchedule?.interval
-        ) {
-          scheduleFields = { interval };
-        } else if (
           querySchedType !== 'rrule' &&
           interval !== undefined &&
           interval !== packSchedule?.interval
         ) {
-          // Legacy queries without explicit schedule_type but with an
-          // interval different from the pack default still override.
           scheduleFields = { interval };
         }
       } else {
@@ -326,11 +339,7 @@ export const convertSOQueriesToPackConfig = (
 
   if (isRruleFeatureEnabled && packMode === 'rrule' && packSchedule?.rrule_schedule) {
     output.default_rrule_schedule = packSchedule.rrule_schedule;
-  } else if (
-    packMode === 'interval' &&
-    packSchedule?.interval !== undefined &&
-    packSchedule?.interval !== null
-  ) {
+  } else if (packMode === 'interval' && packSchedule?.interval != null) {
     output.default_native_schedule = { interval: packSchedule.interval };
   }
 
@@ -343,9 +352,9 @@ export const convertSOQueriesToPackConfig = (
 
 /**
  * Best-effort seconds extractor for compound Go duration strings (e.g. `"1h30m"`).
- * Only used by the splay 12h-cap check on compound values that `parseSplayPermissive`
- * accepts but does not decompose. Supports `h`, `m`, `s` (sub-second units like
- * `ms`/`us`/`ns` contribute 0 — they are not meaningful at pack-scheduler resolution).
+ * Used by the splay 12h-cap check on compound values that `parseSplayPermissive`
+ * accepts but does not decompose. Mirrors beats's `time.ParseDuration` so a value
+ * Kibana accepts is one beats will also accept.
  */
 const GO_DURATION_SEGMENT = /(\d+(?:\.\d+)?)(ms|us|µs|ns|h|m|s)/g;
 const goDurationToSeconds = (raw: string): number => {
@@ -362,8 +371,16 @@ const goDurationToSeconds = (raw: string): number => {
       case 's':
         total += n;
         break;
-      // ms/us/µs/ns: drop — they cannot push past MAX_SPLAY_SECONDS on
-      // practical inputs and we are only checking the 12-hour ceiling.
+      case 'ms':
+        total += n / 1_000;
+        break;
+      case 'us':
+      case 'µs':
+        total += n / 1_000_000;
+        break;
+      case 'ns':
+        total += n / 1_000_000_000;
+        break;
     }
   }
 
@@ -593,7 +610,7 @@ export const validatePackScheduleFields = ({
   queries?: Record<string, Pick<PackQueryInput, 'interval' | 'schedule_type' | 'rrule_schedule'>>;
 }): string | null => {
   // Pack-level mutual exclusivity.
-  if (packInterval !== undefined && packInterval !== null && packRrule) {
+  if (packInterval != null && packRrule) {
     return 'Pack cannot specify both pack-level interval and rrule_schedule';
   }
 
@@ -608,7 +625,7 @@ export const validatePackScheduleFields = ({
     const err = validateRruleConfig(packRrule, packPeriodSeconds);
     if (err) return err;
   } else if (packScheduleType === 'interval') {
-    if (packInterval === undefined || packInterval === null) {
+    if (packInterval == null) {
       return 'Pack schedule_type "interval" requires pack-level interval';
     }
 
@@ -622,7 +639,7 @@ export const validatePackScheduleFields = ({
       return 'Pack rrule_schedule requires schedule_type "rrule"';
     }
 
-    if (packInterval !== undefined && packInterval !== null) {
+    if (packInterval != null) {
       return 'Pack interval requires schedule_type "interval"';
     }
   }

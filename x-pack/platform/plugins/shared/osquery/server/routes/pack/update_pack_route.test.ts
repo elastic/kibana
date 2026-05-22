@@ -320,7 +320,7 @@ describe('updatePackRoute', () => {
           interval: 60,
           rrule_schedule: null,
         },
-      } as typeof basePackSO;
+      };
       const rruleValue = { rrule: 'FREQ=MINUTELY;INTERVAL=2', start_date: '2026-05-22T14:00:00Z' };
       const updatedSO = {
         ...currentSO,
@@ -330,13 +330,14 @@ describe('updatePackRoute', () => {
           interval: null,
           rrule_schedule: rruleValue,
         },
-      } as typeof basePackSO;
+      };
       // Two-stage get: route reads current SO first, then re-reads the
       // updated SO after writing. Mirror that here.
       let getCallCount = 0;
       const mockClient = {
         get: jest.fn().mockImplementation(() => {
           getCallCount += 1;
+
           return Promise.resolve(getCallCount === 1 ? currentSO : updatedSO);
         }),
         find: jest.fn().mockResolvedValue({ saved_objects: [] }),

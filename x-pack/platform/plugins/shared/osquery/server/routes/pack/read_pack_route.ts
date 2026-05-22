@@ -17,7 +17,7 @@ import type { PackSavedObject } from '../../common/types';
 import { PLUGIN_ID } from '../../../common';
 
 import { packSavedObjectType } from '../../../common/types';
-import { convertSOQueriesToPack } from './utils';
+import { convertSOQueriesToPack, buildScheduleResponseSlice } from './utils';
 import { convertShardsToObject } from '../utils';
 import type { ReadPackResponseData } from './types';
 import { readPacksRequestParamsSchema } from '../../../common/api';
@@ -110,22 +110,8 @@ export const readPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
           shards: convertShardsToObject(attributes.shards),
           policy_ids: policyIds,
           read_only: attributes.version !== undefined && osqueryPackAssetReference,
-          // Discriminated read response (D14): only the active-mode pack-level
-          // schedule field is surfaced. Stale fields on the SO MUST NOT leak.
-          // Gated by the feature flag — when the flag is off, RRULE state on
-          // the SO is invisible to the API (the wire-boundary gate (D25) makes
-          // it invisible to Fleet too).
-          ...(isRruleFeatureEnabled &&
-          attributes.schedule_type === 'rrule' &&
-          attributes.rrule_schedule
-            ? { schedule_type: 'rrule' as const, rrule_schedule: attributes.rrule_schedule }
-            : {}),
-          ...(isRruleFeatureEnabled &&
-          attributes.schedule_type === 'interval' &&
-          attributes.interval !== undefined &&
-          attributes.interval !== null
-            ? { schedule_type: 'interval' as const, interval: attributes.interval }
-            : {}),
+          // Discriminated read response (D14) — see buildScheduleResponseSlice.
+          ...buildScheduleResponseSlice(attributes, isRruleFeatureEnabled),
         };
 
         return response.ok({

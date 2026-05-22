@@ -18,6 +18,7 @@ import type { ReadPacksRequestParamsSchema } from '../../../common/api';
 import { readPacksRequestParamsSchema } from '../../../common/api';
 import { prepareSavedObjectCopy } from '../utils/copy_saved_object';
 import type { PackResponseData } from './types';
+import { buildScheduleResponseSlice } from './utils';
 import { copyPackResponseSchema } from './response_schemas';
 
 // Fields that are intentionally NOT copied — they are pack-instance metadata
@@ -75,6 +76,7 @@ export const copyPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
           }
 
           const { client, sourceAttributes, newName, username, profileUid, now } = copyContext;
+          const isRruleFeatureEnabled = osqueryContext.experimentalFeatures.rruleScheduling;
 
           const {
             name: _name,
@@ -86,14 +88,25 @@ export const copyPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
             updated_by: _updatedBy,
             policy_ids: _policyIds,
             shards: _shards,
+            // Strip pack-level schedule fields when the flag is off so a copy
+            // operation cannot smuggle RRULE state from a flag-on era onto a
+            // fresh SO. Symmetric with create_pack_route's request-boundary gate.
+            schedule_type: srcScheduleType,
+            interval: srcInterval,
+            rrule_schedule: srcRruleSchedule,
             ...restAttributes
           } = sourceAttributes;
 
-          const copiedQueries = restAttributes.queries?.map((q) => ({
-            ...q,
-            schedule_id: uuidv4(),
-            start_date: moment().toISOString(),
-          }));
+          const copiedQueries = restAttributes.queries?.map((q) => {
+            const base = { ...q, schedule_id: uuidv4(), start_date: moment().toISOString() };
+            if (!isRruleFeatureEnabled) {
+              const { schedule_type: _st, rrule_schedule: _rr, ...rest } = base;
+
+              return rest;
+            }
+
+            return base;
+          });
 
           const newPackSO = await client.create<
             Omit<PackSavedObject, 'saved_object_id' | 'references'>
@@ -111,6 +124,13 @@ export const copyPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
               updated_by: username,
               updated_by_profile_uid: profileUid,
               updated_at: now,
+              ...(isRruleFeatureEnabled
+                ? {
+                    schedule_type: srcScheduleType,
+                    interval: srcInterval,
+                    rrule_schedule: srcRruleSchedule,
+                  }
+                : {}),
             },
             {
               // No references — agent policy refs and prebuilt asset refs are both stripped.
@@ -121,7 +141,6 @@ export const copyPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
           );
 
           const { attributes } = newPackSO;
-          const isRruleFeatureEnabled = osqueryContext.experimentalFeatures.rruleScheduling;
 
           const data: PackResponseData = {
             name: attributes.name,
@@ -138,19 +157,8 @@ export const copyPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
             policy_ids: [], // No policy assignments — references are empty
             shards: attributes.shards,
             saved_object_id: newPackSO.id,
-            // Discriminated response (D14) — surface the copied pack's
-            // schedule_type + matching field only. Gated by the feature flag.
-            ...(isRruleFeatureEnabled &&
-            attributes.schedule_type === 'rrule' &&
-            attributes.rrule_schedule
-              ? { schedule_type: 'rrule' as const, rrule_schedule: attributes.rrule_schedule }
-              : {}),
-            ...(isRruleFeatureEnabled &&
-            attributes.schedule_type === 'interval' &&
-            attributes.interval !== undefined &&
-            attributes.interval !== null
-              ? { schedule_type: 'interval' as const, interval: attributes.interval }
-              : {}),
+            // Discriminated response (D14) — see buildScheduleResponseSlice.
+            ...buildScheduleResponseSlice(attributes, isRruleFeatureEnabled),
           };
 
           return response.ok({

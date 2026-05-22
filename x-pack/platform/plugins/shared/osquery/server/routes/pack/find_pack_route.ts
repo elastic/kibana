@@ -21,6 +21,7 @@ import type { PackSavedObject } from '../../common/types';
 import type { PackResponseData } from './types';
 import { findPacksRequestQuerySchema } from '../../../common/api';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { buildScheduleResponseSlice } from './utils';
 import { findPackResponseSchema } from './response_schemas';
 
 export const findPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
@@ -114,18 +115,8 @@ export const findPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
             saved_object_id: pack.id,
             policy_ids: policyIds,
             read_only: attributes.version !== undefined && osqueryPackAssetReference,
-            // Discriminated find response (D14) — see read_pack_route.ts.
-            ...(isRruleFeatureEnabled &&
-            attributes.schedule_type === 'rrule' &&
-            attributes.rrule_schedule
-              ? { schedule_type: 'rrule' as const, rrule_schedule: attributes.rrule_schedule }
-              : {}),
-            ...(isRruleFeatureEnabled &&
-            attributes.schedule_type === 'interval' &&
-            attributes.interval !== undefined &&
-            attributes.interval !== null
-              ? { schedule_type: 'interval' as const, interval: attributes.interval }
-              : {}),
+            // Discriminated find response (D14) — see buildScheduleResponseSlice.
+            ...buildScheduleResponseSlice(attributes, isRruleFeatureEnabled),
           };
         });
 

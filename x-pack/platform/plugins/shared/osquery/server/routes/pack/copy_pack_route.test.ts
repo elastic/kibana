@@ -319,4 +319,122 @@ describe('copyPackRoute', () => {
     expect(createArgs.version).toBeUndefined();
     expect(createArgs.read_only).toBeUndefined();
   });
+
+  it('flag off — strips RRULE state from source SO before persisting the copy', async () => {
+    // Regression: copy MUST NOT smuggle RRULE state from a flag-on era onto a
+    // fresh SO when the feature flag is off. Symmetric with create_pack_route
+    // and update_pack_route's request-boundary gate (D14 / D25).
+    const rrulePackSO = {
+      ...sourcePackSO,
+      attributes: {
+        ...sourcePackSO.attributes,
+        schedule_type: 'rrule' as const,
+        rrule_schedule: { rrule: 'FREQ=DAILY', start_date: '2026-01-01T00:00:00Z' },
+        queries: [
+          {
+            id: 'q1',
+            name: 'query-1',
+            query: 'select 1;',
+            schedule_type: 'rrule',
+            rrule_schedule: { rrule: 'FREQ=DAILY', start_date: '2026-01-01T00:00:00Z' },
+          },
+        ],
+      },
+    };
+
+    const mockSavedObjectsClient = {
+      get: jest.fn().mockResolvedValue(rrulePackSO),
+      find: jest.fn().mockResolvedValue({ saved_objects: [] }),
+      create: jest.fn().mockResolvedValue({
+        id: 'new-pack-id',
+        attributes: {
+          name: 'my-pack_copy',
+          enabled: false,
+          created_at: '2025-06-01T00:00:00.000Z',
+          created_by: 'tester',
+          updated_at: '2025-06-01T00:00:00.000Z',
+          updated_by: 'tester',
+        },
+      }),
+    };
+
+    (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(
+      mockSavedObjectsClient
+    );
+    (getUserInfo as jest.Mock).mockResolvedValue({ username: 'tester' });
+
+    setupRoute();
+
+    const mockRequest = httpServerMock.createKibanaRequest({
+      params: { id: 'source-pack-id' },
+    });
+    const mockResponse = httpServerMock.createResponseFactory();
+
+    await routeHandler({} as any, mockRequest, mockResponse);
+
+    const createArgs = mockSavedObjectsClient.create.mock.calls[0][1];
+    expect(createArgs.schedule_type).toBeUndefined();
+    expect(createArgs.rrule_schedule).toBeUndefined();
+    // Per-query RRULE state also stripped.
+    expect(createArgs.queries[0].schedule_type).toBeUndefined();
+    expect(createArgs.queries[0].rrule_schedule).toBeUndefined();
+
+    // Response also omits the discriminator (D14 flag-off contract).
+    const responseBody = mockResponse.ok.mock.calls[0][0]?.body as any;
+    expect(responseBody.data.schedule_type).toBeUndefined();
+    expect(responseBody.data.rrule_schedule).toBeUndefined();
+  });
+
+  it('flag on — preserves RRULE state from source SO', async () => {
+    const rruleValue = { rrule: 'FREQ=DAILY', start_date: '2026-01-01T00:00:00Z' };
+    const rrulePackSO = {
+      ...sourcePackSO,
+      attributes: {
+        ...sourcePackSO.attributes,
+        schedule_type: 'rrule' as const,
+        rrule_schedule: rruleValue,
+      },
+    };
+
+    const mockSavedObjectsClient = {
+      get: jest.fn().mockResolvedValue(rrulePackSO),
+      find: jest.fn().mockResolvedValue({ saved_objects: [] }),
+      create: jest.fn().mockResolvedValue({
+        id: 'new-pack-id',
+        attributes: {
+          name: 'my-pack_copy',
+          enabled: false,
+          schedule_type: 'rrule',
+          rrule_schedule: rruleValue,
+          created_at: '2025-06-01T00:00:00.000Z',
+          created_by: 'tester',
+          updated_at: '2025-06-01T00:00:00.000Z',
+          updated_by: 'tester',
+        },
+      }),
+    };
+
+    (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(
+      mockSavedObjectsClient
+    );
+    (getUserInfo as jest.Mock).mockResolvedValue({ username: 'tester' });
+
+    mockOsqueryContext = {
+      ...mockOsqueryContext,
+      experimentalFeatures: { rruleScheduling: true },
+    } as unknown as OsqueryAppContext;
+
+    setupRoute();
+
+    const mockRequest = httpServerMock.createKibanaRequest({
+      params: { id: 'source-pack-id' },
+    });
+    const mockResponse = httpServerMock.createResponseFactory();
+
+    await routeHandler({} as any, mockRequest, mockResponse);
+
+    const createArgs = mockSavedObjectsClient.create.mock.calls[0][1];
+    expect(createArgs.schedule_type).toBe('rrule');
+    expect(createArgs.rrule_schedule).toEqual(rruleValue);
+  });
 });

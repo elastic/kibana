@@ -291,4 +291,71 @@ describe('findPackRoute', () => {
     const findArgs = mockSavedObjectsClient.find.mock.calls[0][0];
     expect(findArgs.filter).toBeUndefined();
   });
+
+  describe('flag-off response contract (D14 / D25)', () => {
+    it('flag off + interval-mode SO: response omits schedule_type and pack-level interval', async () => {
+      mockSavedObjectsClient.find.mockResolvedValue({
+        saved_objects: [makePack({ schedule_type: 'interval', interval: 60 })],
+        total: 1,
+        page: 1,
+        per_page: 20,
+      });
+
+      setupRoute();
+
+      const mockRequest = httpServerMock.createKibanaRequest({ query: {} });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler({} as any, mockRequest, mockResponse);
+
+      const body = mockResponse.ok.mock.calls[0][0]?.body as any;
+      expect(body.data[0]).not.toHaveProperty('schedule_type');
+      expect(body.data[0]).not.toHaveProperty('interval');
+    });
+
+    it('flag off + rrule-mode SO: response omits schedule_type and rrule_schedule', async () => {
+      const rruleValue = { rrule: 'FREQ=DAILY', start_date: '2026-01-01T00:00:00Z' };
+      mockSavedObjectsClient.find.mockResolvedValue({
+        saved_objects: [makePack({ schedule_type: 'rrule', rrule_schedule: rruleValue })],
+        total: 1,
+        page: 1,
+        per_page: 20,
+      });
+
+      setupRoute();
+
+      const mockRequest = httpServerMock.createKibanaRequest({ query: {} });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler({} as any, mockRequest, mockResponse);
+
+      const body = mockResponse.ok.mock.calls[0][0]?.body as any;
+      expect(body.data[0]).not.toHaveProperty('schedule_type');
+      expect(body.data[0]).not.toHaveProperty('rrule_schedule');
+    });
+
+    it('flag on + interval-mode SO: response surfaces schedule_type and pack-level interval', async () => {
+      mockOsqueryContext = {
+        ...mockOsqueryContext,
+        experimentalFeatures: { rruleScheduling: true },
+      } as unknown as OsqueryAppContext;
+      mockSavedObjectsClient.find.mockResolvedValue({
+        saved_objects: [makePack({ schedule_type: 'interval', interval: 60 })],
+        total: 1,
+        page: 1,
+        per_page: 20,
+      });
+
+      setupRoute();
+
+      const mockRequest = httpServerMock.createKibanaRequest({ query: {} });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler({} as any, mockRequest, mockResponse);
+
+      const body = mockResponse.ok.mock.calls[0][0]?.body as any;
+      expect(body.data[0].schedule_type).toBe('interval');
+      expect(body.data[0].interval).toBe(60);
+    });
+  });
 });
