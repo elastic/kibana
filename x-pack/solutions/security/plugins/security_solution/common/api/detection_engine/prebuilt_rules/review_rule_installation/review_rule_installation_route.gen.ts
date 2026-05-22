@@ -21,7 +21,6 @@ import {
   GranularRulesSearch,
   FacetCounts,
 } from '../../rule_management/granular_rules/granular_rules_contract.gen';
-
 import { SortOrder } from '../../model/sorting.gen';
 import { RuleTagArray } from '../../model/rule_schema/common_attributes.gen';
 import { RuleResponse } from '../../model/rule_schema/rule_schemas.gen';
