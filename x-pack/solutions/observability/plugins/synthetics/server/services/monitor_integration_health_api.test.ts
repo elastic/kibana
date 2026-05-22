@@ -23,9 +23,7 @@ jest.mock('../synthetics_service/get_private_locations');
 jest.mock('../synthetics_service/private_location/synthetics_private_location');
 jest.mock('../synthetics_service/private_location/package_policy_service');
 
-import {
-  getPrivateLocationsForNamespaces,
-} from '../synthetics_service/get_private_locations';
+import { getPrivateLocationsForNamespaces } from '../synthetics_service/get_private_locations';
 import { SyntheticsPrivateLocation } from '../synthetics_service/private_location/synthetics_private_location';
 import { PackagePolicyService } from '../synthetics_service/private_location/package_policy_service';
 

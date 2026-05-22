@@ -20,9 +20,7 @@ import {
 } from '../../common/runtime_types';
 import { SyntheticsPrivateLocation } from '../synthetics_service/private_location/synthetics_private_location';
 import { PackagePolicyService } from '../synthetics_service/private_location/package_policy_service';
-import {
-  getPrivateLocationsForNamespaces,
-} from '../synthetics_service/get_private_locations';
+import { getPrivateLocationsForNamespaces } from '../synthetics_service/get_private_locations';
 import type { PrivateLocationAttributes } from '../runtime_types/private_locations';
 import type { SyntheticsServerSetup } from '../types';
 import type { MonitorConfigRepository } from './monitor_config_repository';
@@ -83,10 +81,9 @@ export class MonitorIntegrationHealthApi {
       return { monitors: [], errors };
     }
 
-    const allPrivateLocations = await getPrivateLocationsForNamespaces(
-      this.savedObjectsClient,
-      [...allSpaces]
-    );
+    const allPrivateLocations = await getPrivateLocationsForNamespaces(this.savedObjectsClient, [
+      ...allSpaces,
+    ]);
     const allPrivateLocationsMap = new Map<string, PrivateLocationAttributes>(
       allPrivateLocations.map((loc) => [loc.id, loc])
     );
