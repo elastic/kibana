@@ -475,7 +475,8 @@ export const streamRoutingMachine = setup({
                   invoke: {
                     id: 'forkStreamActor',
                     src: 'forkStream',
-                    input: ({ context }) => {
+                    input: ({ context, event }) => {
+                      assertEvent(event, 'routingRule.fork');
                       const currentRoutingRule = selectCurrentRule(context);
 
                       return {
@@ -483,6 +484,7 @@ export const streamRoutingMachine = setup({
                         where: currentRoutingRule.where,
                         destination: currentRoutingRule.destination,
                         status: currentRoutingRule.status,
+                        draft: event.draft,
                       };
                     },
                     onDone: {

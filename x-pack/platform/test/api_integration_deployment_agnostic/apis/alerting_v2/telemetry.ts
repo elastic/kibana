@@ -82,7 +82,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       ]);
 
       for (const result of ruleResults) {
-        expect(result.status).to.be(200);
+        expect(result.status).to.be(201);
       }
 
       // Disable rule 3
@@ -123,7 +123,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       ]);
 
       for (const result of policyResults) {
-        expect(result.status).to.be(200);
+        expect(result.status).to.be(201);
       }
     });
 

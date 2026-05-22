@@ -11,6 +11,7 @@ import {
   apmSystem,
   fatalErrorMock,
   i18nLoad,
+  i18nGetIsInitialized,
   setAvailableLocalesMock,
 } from './kbn_bootstrap.test.mocks';
 import { __kbnBootstrap__ } from '.';
@@ -51,6 +52,15 @@ describe('kbn_bootstrap', () => {
     await __kbnBootstrap__();
 
     expect(fatalErrorMock.add).toHaveBeenCalledTimes(1);
+  });
+
+  it('skips i18n.load and does not report a fatal error when i18n is already initialized', async () => {
+    i18nGetIsInitialized.mockReturnValueOnce(true);
+
+    await __kbnBootstrap__();
+
+    expect(i18nLoad).not.toHaveBeenCalled();
+    expect(fatalErrorMock.add).not.toHaveBeenCalled();
   });
 
   it('loads the translationsUrl verbatim from injected metadata', async () => {

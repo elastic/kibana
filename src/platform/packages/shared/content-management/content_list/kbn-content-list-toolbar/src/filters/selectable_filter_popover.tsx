@@ -197,13 +197,20 @@ export const SelectableFilterPopover = <T extends object = Record<string, unknow
     lastModifierRef.current = isExcludeModifier(e);
   }, []);
 
-  // Only count values that match an available option so the badge doesn't
-  // reflect unresolved or stale query clauses (e.g. `tag:NonExistent`).
+  // The badge count is derived from the parsed query (`selection`), so it must
+  // be available before `options` resolves — facets are typically fetched
+  // lazily on first popover open. Until that happens, show the raw count of
+  // active clauses so URL-hydrated filters render immediately on page load.
+  // Once `options` is non-empty, drop unresolved or stale clauses (e.g.
+  // `tag:NonExistent`) so the badge matches what the popover actually shows.
   const validOptionValues = useMemo(() => new Set(options.map((o) => o.value ?? o.key)), [options]);
-  const activeCount = useMemo(
-    () => Object.keys(selection).filter((value) => validOptionValues.has(value)).length,
-    [selection, validOptionValues]
-  );
+  const activeCount = useMemo(() => {
+    const selectedKeys = Object.keys(selection);
+    if (options.length === 0) {
+      return selectedKeys.length;
+    }
+    return selectedKeys.filter((value) => validOptionValues.has(value)).length;
+  }, [selection, validOptionValues, options.length]);
 
   // Build selectable options with view rendering.
   const selectableOptions = useMemo((): Array<InternalSelectableOption<T>> => {

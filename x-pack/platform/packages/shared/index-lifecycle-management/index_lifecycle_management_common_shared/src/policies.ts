@@ -85,7 +85,8 @@ export interface RolloverAction {
   max_primary_shard_docs?: number;
 
   /**
-   * @deprecated This will be removed in versions 8+ of the stack
+   * @deprecated Deprecated as of Elasticsearch 9.3. Use `max_primary_shard_size` instead.
+   * Not yet removed; existing policies may still carry this value.
    */
   max_size?: string;
 

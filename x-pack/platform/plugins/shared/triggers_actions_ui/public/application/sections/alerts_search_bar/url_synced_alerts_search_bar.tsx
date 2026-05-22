@@ -7,8 +7,10 @@
 
 import React, { useCallback, useEffect, useState, useMemo, memo } from 'react';
 import type { BoolQuery, Filter } from '@kbn/es-query';
+import { FILTERS } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { AlertFilterControls } from '@kbn/alerts-ui-shared/src/alert_filter_controls';
+import { SPACE_IDS } from '@kbn/rule-data-utils';
 import type { FilterControlConfig } from '@kbn/alerts-ui-shared/src/alert_filter_controls/types';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
@@ -188,6 +190,27 @@ export const UrlSyncedAlertsSearchBar = ({
     window.location.reload();
   }, [filterControlsStorageKey]);
 
+  const spaceFilter = useMemo<Filter[]>(() => {
+    if (!spaceId) return [];
+    return [
+      {
+        meta: {
+          type: FILTERS.PHRASE,
+          key: SPACE_IDS,
+          params: { query: spaceId },
+          disabled: false,
+          negate: false,
+        },
+        query: { match_phrase: { [SPACE_IDS]: spaceId } },
+      },
+    ];
+  }, [spaceId]);
+
+  const controlFiltersWithSpace = useMemo(
+    () => [...controlFilters, ...spaceFilter],
+    [controlFilters, spaceFilter]
+  );
+
   return (
     <>
       <AlertsSearchBar
@@ -213,7 +236,7 @@ export const UrlSyncedAlertsSearchBar = ({
             }}
             spaceId={spaceId}
             controlsUrlState={filterControls}
-            filters={controlFilters}
+            filters={controlFiltersWithSpace}
             onFiltersChange={onControlFiltersChange}
             storageKey={filterControlsStorageKey}
             defaultControls={defaultFilterControls}

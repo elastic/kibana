@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { errors } from '@elastic/elasticsearch';
+import { isResponseError } from '@kbn/es-errors';
 import Boom from '@hapi/boom';
 import type { CoreSetup, Logger, RouteRegistrar, RouteSecurity } from '@kbn/core/server';
 import type { IoTsParamsObject, ServerRouteRepository } from '@kbn/server-route-repository';
@@ -81,44 +82,65 @@ export function registerRoutes({
           return response.ok({ body: data });
         } catch (error) {
           if (Boom.isBoom(error)) {
-            logRouteError(logger, error);
+            logRouteError(logger, {
+              statusCode: error.output.statusCode,
+              message: error.output.payload.message,
+              cause: error,
+            });
             return response.customError({
               statusCode: error.output.statusCode,
               body: { message: error.output.payload.message },
             });
           }
 
-          const opts = {
-            statusCode: 500,
-            body: {
-              message: error.message,
-            },
-          };
+          let statusCode = 500;
+          let message: string = error.message;
 
           if (error instanceof errors.RequestAbortedError) {
-            opts.statusCode = 499;
-            opts.body.message = 'Client closed request';
+            statusCode = 499;
+            message = 'Client closed request';
+          } else if (isResponseError(error)) {
+            statusCode = error.statusCode ?? 500;
+            message =
+              extractEsReason(error.body) ?? `Elasticsearch responded with status ${statusCode}`;
           }
 
-          logRouteError(logger, opts);
+          logRouteError(logger, { statusCode, message, cause: error });
 
-          return response.customError(opts);
+          return response.customError({ statusCode, body: { message } });
         }
       }
     );
   });
 }
 
+interface EsErrorBody {
+  error?: {
+    reason?: string;
+    caused_by?: { reason?: string };
+    root_cause?: Array<{ reason?: string }>;
+  };
+}
+
+function extractEsReason(body: unknown): string | undefined {
+  if (typeof body !== 'object' || body === null) return undefined;
+  const error = (body as EsErrorBody).error;
+  return error?.reason ?? error?.caused_by?.reason ?? error?.root_cause?.[0]?.reason;
+}
+
 function logRouteError(
   logger: Logger,
-  error: { statusCode: number; body: { message: string } } | Boom.Boom
+  failure: { statusCode: number; message: string; cause?: Error }
 ) {
-  const errorStatusCode = 'statusCode' in error ? error.statusCode : error.output.statusCode;
-  const errorMessage = Boom.isBoom(error) ? error.output.payload.message : error.body.message;
+  const { statusCode, message, cause } = failure;
 
-  if (errorStatusCode >= 500) {
-    logger.error(errorMessage);
+  if (statusCode >= 500) {
+    // Forward the Error so BaseLogger emits ECS error.stack_trace / error.type.
+    logger.error(cause ?? message);
+  } else if (statusCode === 429) {
+    // Capacity / circuit-breaker signal
+    logger.warn(cause ?? message);
   } else {
-    logger.debug(errorMessage);
+    logger.debug(message);
   }
 }

@@ -41,9 +41,8 @@ import { KnowledgeIndicatorsStatusFilter } from './knowledge_indicators_status_f
 import { KnowledgeIndicatorsTypeFilter } from './knowledge_indicators_type_filter';
 import { RulesTable } from './rules_table';
 import { LoadingPanel } from '../../loading_panel';
-import { PromotionCallout } from './promotion_callout/promotion_callout';
-import { SuggestedRulesFlyout } from './suggested_rules_flyout/suggested_rules_flyout';
 import { getKnowledgeIndicatorItemId } from './utils/get_knowledge_indicator_item_id';
+import { getFeaturesFromKIs } from './utils/get_features_from_kis';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
@@ -92,14 +91,19 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     (
       completedTaskState: Extract<TaskResult<OnboardingResult>, { status: TaskStatus.Completed }>
     ) => {
-      const queriesTaskResult = completedTaskState.queriesTaskResult;
-      const featuresTaskResult = completedTaskState.featuresTaskResult;
+      const { queriesTaskResult, featuresTaskResult } = completedTaskState;
+      const featuresSkipped = !featuresTaskResult;
       const generatedFeaturesCount =
         featuresTaskResult?.status === TaskStatus.Completed
-          ? featuresTaskResult.features.length
+          ? (featuresTaskResult.iterations ?? []).reduce(
+              (sum, iteration) => sum + iteration.newFeatures.length,
+              0
+            )
           : 0;
       const generatedQueriesCount =
         queriesTaskResult?.status === TaskStatus.Completed ? queriesTaskResult.queries.length : 0;
+
+      const count = generatedFeaturesCount + generatedQueriesCount;
 
       toasts.addSuccess({
         title: i18n.translate(
@@ -107,11 +111,14 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
           {
             defaultMessage:
               '{count, plural, one {Generated # knowledge indicator} other {Generated # knowledge indicators}}',
-            values: {
-              count: generatedFeaturesCount + generatedQueriesCount,
-            },
+            values: { count },
           }
         ),
+        text: featuresSkipped
+          ? i18n.translate('xpack.streams.significantEventsTable.featuresSkippedToastText', {
+              defaultMessage: 'Feature identification was skipped.',
+            })
+          : undefined,
       });
 
       void Promise.all([
@@ -159,7 +166,9 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
       ),
     [knowledgeIndicators]
   );
-  const [isSuggestedRulesFlyoutOpen, setIsSuggestedRulesFlyoutOpen] = useState(false);
+
+  const features = useMemo(() => getFeaturesFromKIs(knowledgeIndicators), [knowledgeIndicators]);
+
   const selectedKnowledgeIndicatorId = selectedKnowledgeIndicator
     ? getKnowledgeIndicatorItemId(selectedKnowledgeIndicator)
     : undefined;
@@ -209,13 +218,6 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   return (
     <>
       <EuiFlexGroup direction="column" gutterSize="l">
-        <EuiFlexItem grow={false}>
-          <PromotionCallout
-            streamName={definition.stream.name}
-            onReviewClick={() => setIsSuggestedRulesFlyoutOpen(true)}
-          />
-        </EuiFlexItem>
-
         <EuiFlexItem grow={false}>
           <EuiPanel hasBorder={false} hasShadow={true}>
             <EuiFlexGroup
@@ -313,15 +315,9 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
           knowledgeIndicator={selectedKnowledgeIndicator}
           occurrencesByQueryId={occurrencesByQueryId}
           onClose={closeFlyout}
+          features={features}
         />
       ) : null}
-
-      {isSuggestedRulesFlyoutOpen && (
-        <SuggestedRulesFlyout
-          streamName={definition.stream.name}
-          onClose={() => setIsSuggestedRulesFlyoutOpen(false)}
-        />
-      )}
     </>
   );
 }

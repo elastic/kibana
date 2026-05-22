@@ -357,7 +357,7 @@ export function ChangeDataView({
               css={{ inlineSize: '100%' }}
             >
               <div css={styles.popoverContent}>
-                <EuiContextMenuPanel size="s" items={items} />
+                <EuiContextMenuPanel items={items} />
               </div>
             </EuiPopover>
           </EuiFormControlLayout>

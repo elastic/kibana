@@ -21,6 +21,13 @@ export const PARAM_TYPES_THAT_SUPPORT_IMPLICIT_STRING_CASTING: FunctionParameter
   'boolean',
 ];
 
+/** Types that are always compatible with other types in repeating signatures. */
+const REPEATING_SIGNATURE_ALWAYS_COMPATIBLE_TYPES: SupportedDataType[] = [
+  'null',
+  'unknown',
+  'param',
+];
+
 /** Checks whether one argument type can be used for one parameter type. */
 export function argMatchesParamType(
   givenType: SupportedDataType | 'unknown',
@@ -151,17 +158,18 @@ function areRepeatingValuesCompatible(givenTypes: Array<SupportedDataType | 'unk
   const { length } = givenTypes;
   const isValuePosition = (index: number) =>
     index % 2 === 1 || (length % 2 === 1 && index === length - 1);
-  const valueTypes = givenTypes.filter((_, index) => isValuePosition(index));
+  const valueTypes = givenTypes.filter(
+    (type, index) =>
+      isValuePosition(index) && !REPEATING_SIGNATURE_ALWAYS_COMPATIBLE_TYPES.includes(type)
+  );
   const [first, ...rest] = valueTypes;
 
-  if (!first || first === 'unknown' || first === 'param') {
+  if (!first) {
     return true;
   }
 
   return rest.every(
     (type) =>
-      type === 'unknown' ||
-      type === 'param' ||
       type === first ||
       areCompatibleStringTypes(first, type) ||
       (first === 'long' && type === 'integer')

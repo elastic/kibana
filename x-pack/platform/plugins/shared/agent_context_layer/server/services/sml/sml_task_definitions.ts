@@ -14,7 +14,7 @@ import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { Logger } from '@kbn/logging';
-import { AGENT_CONTEXT_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { SmlService } from './types';
 
 /**
@@ -86,7 +86,7 @@ export const registerSmlCrawlerTaskDefinition = ({
             const soClient = savedObjects.createInternalRepository();
             const uiSettingsClient = uiSettings.asScopedToClient(soClient);
             const experimentalEnabled = await uiSettingsClient.get<boolean>(
-              AGENT_CONTEXT_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID
+              AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
             );
             if (!experimentalEnabled) {
               logger.debug(

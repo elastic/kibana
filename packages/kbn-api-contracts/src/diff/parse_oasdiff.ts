@@ -28,6 +28,7 @@ const ID_TO_TYPE: Readonly<Record<string, BreakingChange['type']>> = {
   'request-parameter-removed': 'parameter_removed',
   'response-required-property-removed': 'response_property_removed',
   'response-optional-property-removed': 'response_property_removed',
+  'kbn:request-additional-properties-tightened': 'request_body_tightened',
 };
 
 // These oasdiff warning-level (level 2) checks are promoted to blocking because

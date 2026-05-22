@@ -31,6 +31,7 @@ export function validateSources(
   const sourcesMap = new Set<string>([
     ...(context?.sources?.map((source) => source.name) ?? []),
     ...(context?.views?.map((view) => view.name) ?? []),
+    ...(context?.datasets?.map((dataset) => dataset.name) ?? []),
   ]);
   const useGenericDataSourceError = options?.useGenericDataSourceError ?? false;
 

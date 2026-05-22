@@ -107,6 +107,7 @@ import {
   BULK_UPDATE_LEADS_URL,
   ENABLE_LEAD_GENERATION_URL,
   DISABLE_LEAD_GENERATION_URL,
+  LEAD_GENERATION_PRIVILEGES_URL,
 } from '../../../common/entity_analytics/lead_generation/constants';
 import type {
   FindLeadsResponse,
@@ -136,7 +137,7 @@ const getMaintainerRouteWithId = (route: string, id: string): string =>
 export const useEntityAnalyticsRoutes = () => {
   const { http, uiSettings } = useKibana().services;
   const isEntityStoreV2UiSettingEnabled =
-    uiSettings?.get<boolean>(FF_ENABLE_ENTITY_STORE_V2, false) ?? false;
+    uiSettings?.get<boolean>(FF_ENABLE_ENTITY_STORE_V2) ?? false;
   const isEntityAnalyticsEntityStoreV2Enabled = useIsExperimentalFeatureEnabled(
     'entityAnalyticsEntityStoreV2'
   );
@@ -908,6 +909,12 @@ export const useEntityAnalyticsRoutes = () => {
         method: 'POST',
       });
 
+    const fetchLeadGenerationPrivileges = () =>
+      http.fetch<EntityAnalyticsPrivileges>(LEAD_GENERATION_PRIVILEGES_URL, {
+        version: API_VERSIONS.internal.v1,
+        method: 'GET',
+      });
+
     return {
       fetchRiskScorePreview,
       fetchRiskEngineStatus,
@@ -959,6 +966,7 @@ export const useEntityAnalyticsRoutes = () => {
       bulkUpdateLeads,
       enableLeadGeneration,
       disableLeadGeneration,
+      fetchLeadGenerationPrivileges,
     };
   }, [
     http,

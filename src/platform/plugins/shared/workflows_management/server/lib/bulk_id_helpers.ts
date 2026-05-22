@@ -23,6 +23,13 @@ export interface BulkWorkflowEntry {
   idx: number;
   id: string;
   idSource: IdSource;
+  /**
+   * Original base ID before the resolver appended any `-N` collision suffix.
+   * Set for `server-generated` entries so the bulk write path can re-resolve
+   * after a TOCTOU 409 without losing the original human-readable stem.
+   * Equal to `id` for `user-supplied` entries.
+   */
+  baseId: string;
   workflowData: WorkflowProperties;
   definition?: WorkflowYaml;
 }

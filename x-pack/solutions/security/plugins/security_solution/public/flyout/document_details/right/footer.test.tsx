@@ -16,10 +16,10 @@ import { useKibana } from '../../../common/lib/kibana';
 import { useAlertExceptionActions } from '../../../detections/components/alerts_table/timeline_actions/use_add_exception_actions';
 import { useInvestigateInTimeline } from '../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
 import { useAddToCaseActions } from '../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions';
-import { FooterAiActions } from '../../../flyout_v2/document/components/footer_ai_actions';
+import { FooterAiActions } from '../../../flyout_v2/document/main/components/footer_ai_actions';
 
 jest.mock('../../../common/lib/kibana');
-jest.mock('../../../flyout_v2/document/components/footer_ai_actions', () => ({
+jest.mock('../../../flyout_v2/document/main/components/footer_ai_actions', () => ({
   FooterAiActions: jest.fn(() => <div data-test-subj="footerAiActions" />),
 }));
 jest.mock('react-router-dom', () => {

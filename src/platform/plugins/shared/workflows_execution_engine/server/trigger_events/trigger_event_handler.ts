@@ -203,7 +203,7 @@ export class TriggerEventHandler {
       eventChainDepth: nextScheduledEventChainDepth(eventChainContext),
     };
 
-    this.validateTrigger(triggerId, spaceId, eventContextForResolution);
+    this.validateTrigger(triggerId, spaceId, payload);
 
     const resolutionStartMs = Date.now();
     const { workflows, stats: resolutionStats } = await this.resolveMatchingWorkflowSubscriptions(
@@ -510,6 +510,11 @@ export class TriggerEventHandler {
               enabled: workflow.enabled,
               definition: workflow.definition,
               yaml: workflow.yaml,
+              ...(workflow.managed === true ? { managed: true } : {}),
+              ...(typeof workflow.managedBy === 'string' ? { managedBy: workflow.managedBy } : {}),
+              ...(typeof workflow.originManagedWorkflowId === 'string'
+                ? { originManagedWorkflowId: workflow.originManagedWorkflowId }
+                : {}),
             };
             const context: Record<string, unknown> = {
               event: scheduleResult.event,

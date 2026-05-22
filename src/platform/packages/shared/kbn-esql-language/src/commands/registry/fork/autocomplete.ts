@@ -41,7 +41,7 @@ export async function autocomplete(
 
   if (!withinActiveBranch && /\)\s+$/i.test(innerText)) {
     const suggestions = [newBranchSuggestion];
-    if (forkCommand.args.length > 1) {
+    if (forkCommand.args.length > 0) {
       suggestions.push(pipeCompleteItem);
     }
     return suggestions;

@@ -97,6 +97,30 @@ describe('Unified data table source document cell rendering', function () {
     expect(component.html()).toContain('my bar value');
   });
 
+  it('renders a dash in ES|QL mode when all field values are null', () => {
+    const row = build({
+      _id: '1',
+      _index: 'test',
+      _score: null,
+      _source: { bytes: null, extension: null },
+    });
+
+    const { container } = render(
+      <SourceDocument
+        useTopLevelObjectColumns={false}
+        row={row}
+        dataView={dataViewMock}
+        columnId="_source"
+        fieldFormats={mockServices.fieldFormats as unknown as FieldFormatsStart}
+        shouldShowFieldHandler={() => false}
+        maxEntries={100}
+        isPlainRecord={true}
+        columnsMeta={undefined}
+      />
+    );
+    expect(container.textContent).toBe('—');
+  });
+
   describe('with columnsMeta', () => {
     it('should use data view field type when columnsMeta is undefined', () => {
       const formatFieldValueReactSpy = createFormatFieldValueReactSpy();

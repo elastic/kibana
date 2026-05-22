@@ -1,5 +1,5 @@
 {
-  "sha1": "bf21dbb038d8102155c251443b318bff09967812",
+  "sha1": "74482de9955004a0972ffe3a0a43ce042edc2dee",
   "tests": [
     {
       "id": "dc6084aa7695e8a-26220f9b20676c1",
@@ -282,6 +282,90 @@
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events/search_knowledge_indicators_tool.spec.ts",
         "line": 217,
         "column": 12
+      }
+    },
+    {
+      "id": "53fcb18bfdd8ffe-9ee0f0d7f22c74a",
+      "title": "Draft stream simulation should simulate a set processor on a draft stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/draft_stream_simulate.spec.ts",
+        "line": 57,
+        "column": 10
+      }
+    },
+    {
+      "id": "53fcb18bfdd8ffe-613a376a423c275",
+      "title": "Draft stream simulation should simulate grok processing on a draft stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/draft_stream_simulate.spec.ts",
+        "line": 85,
+        "column": 10
+      }
+    },
+    {
+      "id": "53fcb18bfdd8ffe-13442199fc239a6",
+      "title": "Draft stream simulation should detect mapping errors for draft stream detected_fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/draft_stream_simulate.spec.ts",
+        "line": 122,
+        "column": 10
+      }
+    },
+    {
+      "id": "53fcb18bfdd8ffe-8021a5e1c328229",
+      "title": "Draft stream simulation should report processor failures correctly on a draft stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/draft_stream_simulate.spec.ts",
+        "line": 162,
+        "column": 10
+      }
+    },
+    {
+      "id": "53fcb18bfdd8ffe-8814c3f8c6c4449",
+      "title": "Draft stream simulation should simulate processing on a nested draft (draft child of draft)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/draft_stream_simulate.spec.ts",
+        "line": 194,
+        "column": 10
+      }
+    },
+    {
+      "id": "53fcb18bfdd8ffe-eca05f32c585194",
+      "title": "Draft stream simulation should simulate multiple sequential processors on a draft stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/draft_stream_simulate.spec.ts",
+        "line": 230,
+        "column": 10
       }
     },
     {

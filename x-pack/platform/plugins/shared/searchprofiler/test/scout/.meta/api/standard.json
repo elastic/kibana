@@ -1,0 +1,41 @@
+{
+  "sha1": "179cba27417de831dea95a4014b47ceeb551773d",
+  "tests": [
+    {
+      "id": "bc1b4b6c83e365a-ac00700134ab2e2",
+      "title": "POST api/searchprofiler/profile profiles a valid query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/searchprofiler/test/scout/api/tests/profile_api.spec.ts",
+        "line": 46,
+        "column": 12
+      }
+    },
+    {
+      "id": "bc1b4b6c83e365a-7ff0f747648ac4f",
+      "title": "POST api/searchprofiler/profile returns an error for an invalid index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/searchprofiler/test/scout/api/tests/profile_api.spec.ts",
+        "line": 64,
+        "column": 12
+      }
+    }
+  ]
+}

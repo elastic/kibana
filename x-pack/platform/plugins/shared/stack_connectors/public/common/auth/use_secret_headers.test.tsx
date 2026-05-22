@@ -8,7 +8,7 @@
 /* eslint-disable no-console */
 
 import React from 'react';
-import { renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useSecretHeaders } from './use_secret_headers';
@@ -98,5 +98,30 @@ describe('useSecretHeaders', () => {
         })
       );
     });
+  });
+
+  it('does not refetch secret headers on window focus', async () => {
+    getMock.mockResolvedValue(['secret-key']);
+    const { result } = renderHook(() => useSecretHeaders('connector1', true), {
+      wrapper: customWrapper(),
+    });
+
+    await waitFor(() => {
+      expect(result.current.data).toEqual(['secret-key']);
+    });
+    expect(getMock).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      window.dispatchEvent(new Event('focus'));
+      Object.defineProperty(document, 'visibilityState', {
+        configurable: true,
+        writable: true,
+        value: 'visible',
+      });
+      document.dispatchEvent(new Event('visibilitychange'));
+    });
+
+    expect(getMock).toHaveBeenCalledTimes(1);
+    expect(result.current.data).toEqual(['secret-key']);
   });
 });

@@ -38,6 +38,11 @@ const defaultProps = {
   rangeFrom: '2025-01-01T00:00:00.000Z',
   rangeTo: '2025-01-01T01:00:00.000Z',
   core: {} as any,
+  ebt: {
+    row: { element: 'row' },
+    errorBadge: { element: 'errorBadge' },
+    serviceBadge: { element: 'serviceBadge' },
+  },
 };
 
 const renderComponent = (props = {}) =>

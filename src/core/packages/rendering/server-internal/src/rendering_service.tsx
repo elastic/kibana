@@ -37,7 +37,7 @@ import type {
   RenderingMetadata,
   RenderingStartDeps,
 } from './types';
-import { registerBootstrapRoute, bootstrapRendererFactory } from './bootstrap';
+import { registerBootstrapRoute, bootstrapRendererFactory, isRspackModeEnabled } from './bootstrap';
 import {
   getSettingValue,
   getCommonStylesheetPaths,
@@ -71,7 +71,6 @@ export class RenderingService {
   private readonly themeName$ = new BehaviorSubject<ThemeName>(DEFAULT_THEME_NAME);
   private airgapped: boolean = false;
   private isCoreRenderingInReactConcurrentMode: boolean = true;
-
   constructor(private readonly coreContext: CoreContext) {}
 
   public async preboot({
@@ -190,18 +189,19 @@ export class RenderingService {
     const { serverBasePath, publicBaseUrl } = http.basePath;
 
     // Grouping all async HTTP requests to run them concurrently for performance reasons.
+    // Anonymous pages skip user-scoped values and async default values (the latter typically
+    // call ES via `asCurrentUser`, which would 401 on an unauthenticated request).
     const [
       defaultSettings,
       settingsUserValues = {},
       globalSettingsUserValues = {},
       userSettingDarkMode,
       userSettingLocale,
-    ] = await Promise.all([
-      // All sites
-      withAsyncDefaultValues(request, uiSettings.client?.getRegistered()),
-      // Only non-anonymous pages
-      ...(!isAnonymousPage
-        ? ([
+    ] = await Promise.all(
+      isAnonymousPage
+        ? [uiSettings.client?.getRegistered() ?? {}]
+        : ([
+            withAsyncDefaultValues(request, uiSettings.client?.getRegistered()),
             uiSettings.client?.getUserProvided(true),
             uiSettings.globalClient?.getUserProvided(true),
             // dark mode
@@ -209,13 +209,13 @@ export class RenderingService {
             // locale
             userSettings?.getUserSettingLocale(request),
           ] as [
+            ReturnType<typeof withAsyncDefaultValues>,
             Promise<Record<string, UserProvidedValues>>,
             Promise<Record<string, UserProvidedValues>>,
             Promise<DarkModeValue> | undefined,
             Promise<string> | undefined
           ])
-        : []),
-    ]);
+    );
 
     const settings = {
       defaults: defaultSettings,
@@ -294,16 +294,39 @@ export class RenderingService {
 
     const filteredPlugins = filterUiPlugins({ uiPlugins, isAnonymousPage });
     const bootstrapScript = isAnonymousPage ? 'bootstrap-anonymous.js' : 'bootstrap.js';
+
+    const useRspack = isRspackModeEnabled();
+    const uiPublicUrl = `${staticAssetsHrefBase}/ui`;
+
+    // Script preloads are intentionally removed for Rspack mode. Under HTTP/1.1
+    // (dev mode), <link rel="preload" as="script"> tags saturate the 6-connection
+    // limit and delay critical CSS, regressing FCP by ~4x. The bootstrap load()
+    // array already ensures all scripts are fetched with "High" priority via
+    // dynamic <script async=false> tags, so preloads provide no benefit and
+    // actively harm performance.
+    //
+    // Font preloads are kept: they are small, high-priority, and give the browser
+    // a head start on WOFF2 downloads during HTML parsing.
+    const preloadFonts = useRspack
+      ? [
+          `${uiPublicUrl}/fonts/inter/Inter-Regular.woff2`,
+          `${uiPublicUrl}/fonts/inter/Inter-Medium.woff2`,
+          `${uiPublicUrl}/fonts/inter/Inter-SemiBold.woff2`,
+        ]
+      : undefined;
+
     const metadata: RenderingMetadata = {
       strictCsp: http.csp.strict,
       hardenPrototypes: http.prototypeHardening,
-      uiPublicUrl: `${staticAssetsHrefBase}/ui`,
+      uiPublicUrl,
       bootstrapScriptUrl: `${basePath}/${bootstrapScript}`,
       locale: effectiveLocale,
       themeVersion,
       darkMode,
       stylesheetPaths: commonStylesheetPaths,
       scriptPaths,
+      preloadFonts,
+      optimizeFontLoading: useRspack || undefined,
       customBranding: {
         faviconSVG: branding?.faviconSVG,
         faviconPNG: branding?.faviconPNG,

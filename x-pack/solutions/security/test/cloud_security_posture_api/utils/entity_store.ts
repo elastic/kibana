@@ -74,24 +74,6 @@ export const waitForEntityDataIndexed = async ({
 };
 
 /**
- * Helper to enable asset inventory for a given space
- */
-export const enableAssetInventory = async ({
-  supertest,
-  logger,
-  spaceId,
-}: Pick<EntityStoreHelpersDeps, 'supertest' | 'logger'> & { spaceId?: string }) => {
-  const spacePath = spaceId ? `/s/${spaceId}` : '';
-  logger.debug(`Enabling asset inventory for space: ${spaceId || 'default'}`);
-  await supertest
-    .post(`${spacePath}/api/asset_inventory/enable`)
-    .set('kbn-xsrf', 'xxxx')
-    .send({})
-    .expect(200);
-  logger.debug(`Asset inventory enabled for space: ${spaceId || 'default'}`);
-};
-
-/**
  * Entity type for entity store engines
  */
 export type EntityType = 'user' | 'host' | 'service' | 'generic';

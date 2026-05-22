@@ -55,6 +55,9 @@ export const openLazyFlyout = (params: OpenLazyFlyoutParams) => {
 
   const ariaLabelledBy = flyoutProps?.['aria-labelledby'] ?? htmlId();
   const overlayTracker = tracksOverlays(parentApi) ? parentApi : undefined;
+  const panelFlyoutTypeFromParent = overlayTracker?.panelFlyoutType;
+  const type = flyoutProps?.type ?? panelFlyoutTypeFromParent ?? 'push';
+  const ownFocus = flyoutProps?.ownFocus ?? panelFlyoutTypeFromParent !== 'overlay';
 
   const onClose = () => {
     overlayTracker?.clearOverlays();
@@ -76,10 +79,10 @@ export const openLazyFlyout = (params: OpenLazyFlyoutParams) => {
     ),
     {
       size: 500,
-      type: 'push',
+      type,
       paddingSize: 'm',
       maxWidth: 800,
-      ownFocus: true,
+      ownFocus,
       isResizable: true,
       outsideClickCloses: true,
       className: 'kbnPresentationLazyFlyout',

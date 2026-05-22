@@ -103,7 +103,7 @@ export const IndicatorBarchartLegendAction: FC<IndicatorBarchartLegendActionProp
       anchorPosition="downLeft"
     >
       <ReduxProvider store={store}>
-        <EuiContextMenuPanel size="s" items={popoverItems} />
+        <EuiContextMenuPanel items={popoverItems} />
       </ReduxProvider>
     </EuiPopover>
   );

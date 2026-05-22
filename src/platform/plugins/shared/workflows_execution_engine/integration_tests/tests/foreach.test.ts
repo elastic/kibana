@@ -340,15 +340,17 @@ steps:
 
     it('should resolve foreach.item correctly with a native array using context variables', async () => {
       const yaml = `
-inputs:
-  type: object
-  properties:
-    James:
-      type: string
-      default: "foo"
-    Laura:
-      type: string
-      default: "bar" 
+triggers:
+  - type: manual
+    inputs:
+      type: object
+      properties:
+        James:
+          type: string
+          default: "foo"
+        Laura:
+          type: string
+          default: "bar" 
 steps:
   - name: process_items
     type: foreach

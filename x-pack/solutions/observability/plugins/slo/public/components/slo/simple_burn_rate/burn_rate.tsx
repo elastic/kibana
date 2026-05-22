@@ -49,7 +49,7 @@ export function SimpleBurnRate({ slo, duration, lastRefreshTime }: Props) {
         description={
           <EuiTextColor color="subdued">
             <span>
-              <EuiIcon type="clock" color={'subdued'} /> {durationLabel}
+              <EuiIcon type="clock" color={'subdued'} aria-hidden={true} /> {durationLabel}
             </span>
           </EuiTextColor>
         }
@@ -84,14 +84,14 @@ export function SimpleBurnRate({ slo, duration, lastRefreshTime }: Props) {
           <EuiToolTip position="top" content={timeToExhaustLabel}>
             <EuiTextColor color={color}>
               <span>
-                <EuiIcon type="clock" color={color} /> {durationLabel}
+                <EuiIcon type="clock" color={color} aria-hidden={true} /> {durationLabel}
               </span>
             </EuiTextColor>
           </EuiToolTip>
         ) : (
           <EuiTextColor color={color}>
             <span>
-              <EuiIcon type="clock" color={color} /> {durationLabel}
+              <EuiIcon type="clock" color={color} aria-hidden={true} /> {durationLabel}
             </span>
           </EuiTextColor>
         )

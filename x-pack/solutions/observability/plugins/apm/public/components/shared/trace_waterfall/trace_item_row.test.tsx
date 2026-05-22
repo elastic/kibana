@@ -142,6 +142,31 @@ describe('TraceItemRow', () => {
     expect(onToggle).toHaveBeenCalledWith('span-1');
   });
 
+  it('does not call onClick when clicking a data-prevent-row-click element', () => {
+    const onClick = jest.fn();
+    mockUseTraceWaterfallContext.mockReturnValue({
+      duration: 100,
+      margin: { left: 20, right: 10 },
+      showAccordion: false,
+      onClick,
+      contextSpanIds: [],
+      criticalPathSegmentsById: {},
+      showCriticalPath: false,
+    } as unknown as TraceWaterfallContextProps);
+
+    const { getByTestId } = render(
+      <TraceItemRow item={baseItem} childrenCount={0} state="closed" onToggle={jest.fn()} />
+    );
+
+    const badge = document.createElement('button');
+    badge.setAttribute('data-prevent-row-click', 'true');
+    getByTestId('bar-details').appendChild(badge);
+
+    fireEvent.click(badge);
+
+    expect(onClick).not.toHaveBeenCalled();
+  });
+
   it('renders EuiAccordion when showAccordion is true', () => {
     const { container } = render(
       <TraceItemRow item={baseItem} childrenCount={2} state="open" onToggle={jest.fn()} />

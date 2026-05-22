@@ -48,6 +48,7 @@
     "@kbn/core-feature-flags-server-internal",
     "@kbn/core-feature-flags-server-mocks",
     "@kbn/core-feature-flags-server",
+    "@kbn/repo-info",
   ],
   "exclude": [
     "target/**/*",

@@ -6,12 +6,17 @@
  */
 
 import React from 'react';
+import type { EuiThemeComputed } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { FILE_SO_TYPE } from '@kbn/files-plugin/common/constants';
 
 import { FileThumbnail } from './file_thumbnail';
-import { basicFileMock } from '../../../containers/mock';
-import type { ExternalReferenceAttachmentViewProps } from '../../../client/attachment_framework/types';
+import { basicCase, basicFileMock } from '../../../containers/mock';
+import type { UnifiedReferenceAttachmentViewProps } from '../../../client/attachment_framework/types';
+import type { FileAttachmentMetadata } from '../../../../common/types/domain_zod/attachment/file/v2';
+
+type FileViewProps = UnifiedReferenceAttachmentViewProps<FileAttachmentMetadata>;
 
 jest.mock('@kbn/shared-ux-file-context', () => ({
   useFilesContext: () => ({
@@ -27,10 +32,30 @@ jest.mock('../../cases_context/use_cases_context', () => ({
   }),
 }));
 
-const attachmentProps = {
-  externalReferenceId: basicFileMock.id,
-  externalReferenceMetadata: { files: [basicFileMock] },
-} as unknown as ExternalReferenceAttachmentViewProps;
+const validFileEntry = {
+  name: basicFileMock.name,
+  extension: basicFileMock.extension ?? 'png',
+  mimeType: basicFileMock.mimeType ?? 'image/png',
+  created: basicFileMock.created,
+};
+
+const euiTheme = {} as unknown as EuiThemeComputed<{}>;
+
+const attachmentProps: FileViewProps = {
+  savedObjectId: 'test-so-id',
+  attachmentId: basicFileMock.id,
+  metadata: { files: [validFileEntry], soType: FILE_SO_TYPE },
+  createdBy: { username: 'elastic', fullName: null, email: null, profileUid: undefined },
+  version: '1',
+  caseData: { title: basicCase.title, id: basicCase.id },
+  rowContext: {
+    appId: 'cases',
+    manageMarkdownEditIds: [],
+    selectedOutlineCommentId: '',
+    loadingCommentIds: [],
+    euiTheme,
+  },
+};
 
 describe('FileThumbnail', () => {
   it('renders the image', async () => {

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiHideForProps, IconType } from '@elastic/eui';
-import type { SplitButtonWithNotificationProps } from '@kbn/split-button';
+import type { EuiHideForProps, EuiSwitchProps, IconType } from '@elastic/eui';
+import type { SplitButtonWithNotificationProps } from './components/split_button_with_notification';
 
 /**
  * Parameters passed to AppMenuRunAction
@@ -43,15 +43,11 @@ export type AppMenuRunAction = (params?: AppMenuRunActionParams) => void;
 type BaseSplitProps = Pick<
   SplitButtonWithNotificationProps,
   | 'isMainButtonLoading'
-  | 'isMainButtonDisabled'
-  | 'isSecondaryButtonLoading'
   | 'isSecondaryButtonDisabled'
   | 'secondaryButtonAriaLabel'
-  | 'secondaryButtonTitle'
-  | 'secondaryButtonIcon'
   | 'iconType'
   | 'showNotificationIndicator'
-  | 'notifcationIndicatorTooltipContent'
+  | 'notificationIndicatorTooltipContent'
 >;
 
 type AppMenuSecondarySplitButton = BaseSplitProps & {
@@ -233,6 +229,14 @@ export type AppMenuItemType = AppMenuItemCommon & {
   separator?: 'above' | 'below';
 };
 
+export type AppMenuStaticItem = AppMenuItemType & {
+  /**
+   * Global static items are singleton items that are registered once
+   * and are shared across all app menus.
+   */
+  global?: boolean;
+};
+
 /**
  * Popover item type for use in `items` arrays.
  */
@@ -250,6 +254,15 @@ export type AppMenuPopoverItem = Omit<
    */
   labelBadgeText?: string;
 };
+
+export interface AppMenuSwitch {
+  id: string;
+  label: string;
+  labelProps: EuiSwitchProps['labelProps'];
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  'data-test-subj'?: string;
+}
 
 /**
  * Primary action button type. Can be either a simple button or a split button.
@@ -281,4 +294,9 @@ export interface AppMenuConfig {
    * Primary action button to display in the app menu.
    */
   primaryActionItem?: AppMenuPrimaryActionItem;
+  /**
+   * App menu switch. Only one switch is available per app menu
+   * and it is rendered to the left of the menu items.
+   */
+  switch?: AppMenuSwitch;
 }
