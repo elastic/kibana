@@ -8,6 +8,7 @@
  */
 
 import type { AggregateQuery, Query } from '@kbn/es-query';
+import { EMPTY } from 'rxjs';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import { EsqlControlType, ESQLVariableType } from '@kbn/esql-types';
 import type { PresentationContainer } from '@kbn/presentation-publishing';
@@ -42,6 +43,7 @@ const createControlApi = (
   type,
   serializeState: () => state,
   applySerializedState: () => undefined,
+  anyStateChange$: EMPTY,
 });
 
 describe('getAllEsqlControls', () => {
