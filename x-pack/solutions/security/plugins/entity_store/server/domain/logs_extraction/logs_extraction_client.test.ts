@@ -975,9 +975,6 @@ describe('LogsExtractionClient', () => {
             ['2025-01-15T11:00:01.000Z', 'hash2', '2025-01-15T11:00:01.000Z', 'entity2'],
           ],
         };
-        // effectiveMaxLogsPerPage = min(40000, maxLogsPerWindow=1) = 1.
-        // Probe LIMIT 1 → total_logs = 1 → sliceLogCount = 1.
-        // totalLogs = 1 >= maxLogsPerWindow=1 → cap fires.
         setupVolCapTest({ maxLogsPerWindow: 1, maxLogsPerWindowCapBehavior: 'defer' });
         mockExtractSuccessSequence(mainExtractionResponse, 1);
         mockIngestEntities.mockResolvedValue(undefined);
@@ -1014,9 +1011,6 @@ describe('LogsExtractionClient', () => {
             ['2025-01-15T11:00:01.000Z', 'hash2', '2025-01-15T11:00:01.000Z', 'entity2'],
           ],
         };
-        // effectiveMaxLogsPerPage = min(40000, maxLogsPerWindow=1) = 1.
-        // Probe LIMIT 1 → total_logs = 1 → sliceLogCount = 1.
-        // totalLogs = 1 >= maxLogsPerWindow=1 → cap fires.
         setupVolCapTest({ maxLogsPerWindow: 1, maxLogsPerWindowCapBehavior: 'drop' });
         mockExtractSuccessSequence(mainExtractionResponse, 1);
         mockIngestEntities.mockResolvedValue(undefined);
@@ -1108,7 +1102,6 @@ describe('LogsExtractionClient', () => {
         expect(result.success).toBe(true);
         if (!result.success) return;
         expect(result.logsCapApplied).toBe(true);
-        // effectiveMaxLogsPerPage = min(40000, maxLogsPerWindow=1) = 1 → sliceLogCount = 1
         expect(result.logsProcessed).toBe(1);
         // defer: lastSearchTimestamp is where the loop stopped, NOT the window end
         expect(result.lastSearchTimestamp).toBe(lastPageTimestamp);
@@ -1142,7 +1135,6 @@ describe('LogsExtractionClient', () => {
         expect(result.success).toBe(true);
         if (!result.success) return;
         expect(result.logsCapApplied).toBe(true);
-        // effectiveMaxLogsPerPage = min(40000, maxLogsPerWindow=1) = 1 → sliceLogCount = 1
         expect(result.logsProcessed).toBe(1);
         // drop: lastSearchTimestamp is advanced to the window end
         expect(result.lastSearchTimestamp).toBe(toDateISO);
