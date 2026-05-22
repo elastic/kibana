@@ -10,22 +10,28 @@
 /**
  * Quick-action placement contract for the metrics-grid card.
  *
+ * Scope: this spec is intentionally narrow and only covers the popover side of
+ * the contract — that "Add to case" stays inside the 3-dot overflow menu and
+ * is NOT promoted to the visible quick-action row. The visible-row side of
+ * the contract (Explore, View details, Copy to dashboard rendered without
+ * opening the popover) is already covered by `grid.spec.ts`'s
+ * "should show chart actions menu on metric card" test, so re-asserting it
+ * here would be duplicate coverage.
+ *
  * IMPORTANT: This spec logs in via `loginAsPrivilegedUser()` (see `beforeEach`
- * below). The reason is the second test ("should keep Add to case in the 3-dot
- * popover"), which asserts that the `addToCase` action is visible in the
- * overflow context menu. The "Add to case" action is gated on the `cases`
- * feature's `create`/`update` capabilities and is filtered out for users
- * without them. A regular (non-privileged) user would therefore never see
- * `addToCase`, the assertion would fail, and the contract this spec exists to
- * protect would be silently un-tested. The privileged login is required, not
- * incidental — do not weaken it to a regular user.
+ * below). The "Add to case" action is gated on the `cases` feature's
+ * `create`/`update` capabilities and is filtered out for users without them.
+ * A regular (non-privileged) user would therefore never see `addToCase`, the
+ * assertion would fail, and the contract this spec exists to protect would be
+ * silently un-tested. The privileged login is required, not incidental — do
+ * not weaken it to a regular user.
  */
 
 import { expect } from '@kbn/scout/ui';
 import { spaceTest, testData, DEFAULT_TIME_RANGE } from '../../fixtures/metrics_experience';
 
 spaceTest.describe(
-  'Metrics in Discover - Quick action placement',
+  'Metrics in Discover - Quick action placement (popover)',
   {
     tag: testData.METRICS_EXPERIENCE_TAGS,
   },
@@ -45,36 +51,6 @@ spaceTest.describe(
       await scoutSpace.uiSettings.unset('defaultIndex', 'timepicker:timeDefaults');
       await scoutSpace.savedObjects.cleanStandardList();
     });
-
-    spaceTest(
-      'should expose Explore, View details, Copy to dashboard on the visible quick-action row',
-      async ({ pageObjects }) => {
-        await pageObjects.discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
-        const { metricsExperience } = pageObjects;
-        await expect(metricsExperience.grid).toBeVisible();
-
-        await spaceTest.step('hover the card to reveal the visible quick-action row', async () => {
-          await metricsExperience.getCardByIndex(0).hover();
-        });
-
-        const actions = metricsExperience.chartActionsFor(0);
-
-        await spaceTest.step('Explore is visible without opening the popover', async () => {
-          await expect(actions.explore).toBeVisible();
-        });
-
-        await spaceTest.step('View details is visible without opening the popover', async () => {
-          await expect(actions.viewDetails).toBeVisible();
-        });
-
-        await spaceTest.step(
-          'Copy to dashboard is visible without opening the popover',
-          async () => {
-            await expect(actions.copyToDashboard).toBeVisible();
-          }
-        );
-      }
-    );
 
     spaceTest('should keep Add to case in the 3-dot popover', async ({ pageObjects }) => {
       await pageObjects.discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
