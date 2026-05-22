@@ -189,7 +189,7 @@ describe('EditConnectorFlyout', () => {
   });
 
   it('shows the buttons', async () => {
-    const { getByTestId } = appMockRenderer.render(
+    appMockRenderer.render(
       <EditConnectorFlyout
         actionTypeRegistry={actionTypeRegistry}
         onClose={onClose}
@@ -259,7 +259,7 @@ describe('EditConnectorFlyout', () => {
 
   describe('Header', () => {
     it('shows the icon', async () => {
-      const { getByTestId } = appMockRenderer.render(
+      appMockRenderer.render(
         <EditConnectorFlyout
           actionTypeRegistry={actionTypeRegistry}
           onClose={onClose}
@@ -402,7 +402,7 @@ describe('EditConnectorFlyout', () => {
     });
 
     it('opens the provided tab', async () => {
-      const { getByTestId } = appMockRenderer.render(
+      appMockRenderer.render(
         <EditConnectorFlyout
           actionTypeRegistry={actionTypeRegistry}
           onClose={onClose}
