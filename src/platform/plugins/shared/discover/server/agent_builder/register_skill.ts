@@ -99,10 +99,24 @@ When responding to an on-demand request, return ONLY the requested analysis. Do 
 - Report only meaningful correlations.
 
 #### Time-over-Time Comparison (only when asked)
-When the user asks to compare time periods (e.g. "compare with last week", "how does today compare to yesterday"):
-1. Use generateEsql to produce a SINGLE query that buckets by week (or appropriate period) so both time periods appear in one result. For example: STATS count = COUNT(*) BY BUCKET(@timestamp, 1 week), SORT bucket, LIMIT 10. This avoids running two separate queries.
-2. Execute it and compare the buckets: highlight absolute values, differences, and what grew or shrank.
-3. Calculate percentage changes yourself in the response text.
+1. Read the current time range from the attached ES|QL query results (the "from" and "to" values as ISO-8601 strings). Compute:
+   - current_start_ms and current_end_ms (epoch milliseconds of the current period boundaries)
+   - shift_ms = current_start_ms - previous_start_ms = duration of the period in milliseconds (current_end_ms - current_start_ms)
+   - previous_start = ISO string of (current_start_ms - shift_ms)
+   - previous_end = ISO string of (current_end_ms - shift_ms)
+2. Build the FORK query yourself using this exact structure (do NOT use generateEsql for the structure, only use the correct field names and computed values):
+   \`\`\`esql
+   FROM <index>
+   | FORK
+     (WHERE <timeField> >= "<current_start>" AND <timeField> < "<current_end>" | EVAL period = "Current period")
+     (WHERE <timeField> >= "<previous_start>" AND <timeField> < "<previous_end>" | EVAL period = "Previous period" | EVAL <timeField> = <timeField> + <shift_ms> milliseconds)
+   | STATS count = COUNT(*) BY timestamp = BUCKET(<timeField>, <interval>), period
+   | SORT timestamp ASC
+   \`\`\`
+   The EVAL <timeField> = <timeField> + <shift_ms> milliseconds line is critical — it shifts the previous period timestamps forward so both series land on the same time axis positions and can be overlaid for comparison. Use an interval appropriate to the time span (e.g. 5 minutes for a 30 min window, 1 hour for a 24 h window, 1 day for a week).
+3. Execute the FORK query with executeEsql and compare the two periods: highlight absolute values, differences, and what grew or shrank. Calculate percentage changes yourself in the response text.
+4. IMPORTANT: Immediately after the analysis, call createVisualization with the FORK query as the esql parameter, chartType "xy", and query "line chart with timestamp on the x-axis and period as the series breakdown, comparing Current period vs Previous period". This renders both periods as separate lines overlaid on the same time axis — do NOT skip this step.
+
 
 #### Field Statistics (only when asked)
 When the user asks about field statistics, field distributions, or cardinality (e.g. "show field stats", "what are the top values?"):

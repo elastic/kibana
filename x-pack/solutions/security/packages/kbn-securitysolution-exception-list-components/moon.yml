@@ -22,6 +22,7 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/i18n-react'
   - '@kbn/kibana-react-plugin'
+  - '@kbn/securitysolution-list-utils'
 tags:
   - shared-browser
   - package

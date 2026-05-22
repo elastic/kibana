@@ -203,7 +203,7 @@ export function createChromeApi({
       },
       globalSearch: {
         get$: () => state.globalSearch.$,
-        set: state.globalSearch.set,
+        set: (config) => state.globalSearch.set(config),
       },
       userMenu: {
         get$: () => state.userMenu.$,

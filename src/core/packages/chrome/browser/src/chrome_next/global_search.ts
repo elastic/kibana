@@ -8,11 +8,12 @@
  */
 
 /**
- * Configuration for the global search button in the Chrome-Next sidenav.
+ * Configuration for the global search button in the global header.
+ * @public
  */
-export interface ChromeNextGlobalSearchConfig {
-  /** Called when the search icon button in the sidenav is clicked. */
+export interface GlobalSearchConfig {
+  /** Called when the search button in the global header is clicked. */
   onClick: () => void;
-  /** The keyboard shortcut key to trigger the global search modal. */
+  /** The keyboard shortcut key (combined with Cmd/Ctrl) to trigger global search. */
   shortcutKey?: string;
 }

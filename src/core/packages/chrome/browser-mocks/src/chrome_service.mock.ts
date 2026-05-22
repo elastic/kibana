@@ -15,8 +15,8 @@ import type { ReactNode } from 'react';
 import type {
   ChromeBadge,
   ChromeBreadcrumb,
-  ChromeNextGlobalSearchConfig,
   AppHeaderConfig,
+  GlobalSearchConfig,
 } from '@kbn/core-chrome-browser';
 import type {
   InternalChromeSetup,
@@ -32,9 +32,7 @@ const createSetupContractMock = (): DeeplyMockedKeys<InternalChromeSetup> => {
 };
 
 const createStartContractMock = () => {
-  const nextGlobalSearchState$ = new BehaviorSubject<ChromeNextGlobalSearchConfig | undefined>(
-    undefined
-  );
+  const nextGlobalSearchState$ = new BehaviorSubject<GlobalSearchConfig | undefined>(undefined);
   const nextUserMenuState$ = new BehaviorSubject<ReactNode>(null);
   const nextContextSwitcherState$ = new BehaviorSubject<ReactNode>(null);
   const nextAppHeaderState$ = new BehaviorSubject<AppHeaderConfig | undefined>(undefined);
@@ -133,10 +131,8 @@ const createStartContractMock = () => {
         register: jest.fn().mockReturnValue(() => {}),
       }),
       globalSearch: lazyObject({
+        set: jest.fn(),
         get$: jest.fn().mockReturnValue(nextGlobalSearchState$),
-        set: jest.fn((config?: ChromeNextGlobalSearchConfig) => {
-          nextGlobalSearchState$.next(config);
-        }),
       }),
       userMenu: lazyObject({
         get$: jest.fn().mockReturnValue(nextUserMenuState$),

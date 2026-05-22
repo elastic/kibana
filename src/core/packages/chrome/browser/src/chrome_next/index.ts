@@ -16,4 +16,4 @@ export type {
   AppHeaderBadgeItem,
   AppHeaderTab,
 } from './chrome_next';
-export type { ChromeNextGlobalSearchConfig } from './global_search';
+export type { GlobalSearchConfig } from './global_search';

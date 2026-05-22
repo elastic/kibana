@@ -8,12 +8,12 @@
  */
 
 import React from 'react';
-import { ChromeNextGlobalHeaderShell } from './global_header_shell';
 import { ChromeNextGlobalHeaderLogo } from './global_header_logo';
 import { AiButtonSlot } from './ai_button_slot';
 import { SearchButton } from './search_button';
 import { HelpButton } from './help_button';
 import { useContextSwitcher, useUserMenu } from '../../shared/chrome_hooks';
+import { ChromeNextGlobalHeaderShell } from './global_header_shell';
 
 export const ChromeNextGlobalHeader = React.memo(() => (
   <ChromeNextGlobalHeaderShell

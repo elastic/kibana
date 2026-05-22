@@ -98,7 +98,8 @@
     "@kbn/mock-idp-utils",
     "@kbn/core-user-activity-server",
     "@kbn/core-user-activity-server-mocks",
-    "@kbn/core-chrome-browser-components"
+    "@kbn/core-chrome-browser-components",
+    "@kbn/management-settings-ids"
   ],
   "exclude": ["target/**/*"]
 }

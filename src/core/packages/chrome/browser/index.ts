@@ -62,4 +62,5 @@ export type {
   SidebarAppDefinition,
   SidebarSetup,
   SidebarStart,
+  GlobalSearchConfig,
 } from './src';

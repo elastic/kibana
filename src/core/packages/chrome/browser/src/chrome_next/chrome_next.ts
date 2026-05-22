@@ -9,8 +9,9 @@
 
 import type { ReactElement, ReactNode, MouseEventHandler } from 'react';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import type { Observable } from 'rxjs';
 import type { ChromeNextAiButton } from './ai_button';
-import type { ChromeNextGlobalSearchConfig } from './global_search';
+import type { GlobalSearchConfig } from './global_search';
 
 /** @public */
 export interface AppHeaderBack {
@@ -94,13 +95,16 @@ export interface ChromeNext {
      */
     register(button: ChromeNextAiButton): () => void;
   };
+  /** Global search configuration. */
   globalSearch: {
     /**
-     * Set the global search configuration for the Chrome-Next sidenav.
-     * Chrome renders a search icon button in the sidenav header items; clicking it fires `onClick`.
-     * Pass `undefined` to remove the button. Global — persists across app changes.
+     * Set the global search configuration for the Chrome-Next header.
+     * Chrome renders a search button; clicking it fires `onClick`.
+     * Pass `undefined` to remove. Global — persists across app changes.
      */
-    set(config?: ChromeNextGlobalSearchConfig): void;
+    set(config?: GlobalSearchConfig): void;
+    /** Observable of the current global search config. */
+    get$(): Observable<GlobalSearchConfig | undefined>;
   };
   userMenu: {
     /**

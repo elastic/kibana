@@ -12,11 +12,14 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 
+export const HEADER_BUTTON_HEIGHT_PX = 32;
+export const HEADER_BUTTON_SQUARE_WIDTH_PX = 32;
+
 export const headerButtonBaseStyles = css({
   display: 'inline-flex',
   alignItems: 'center',
   boxSizing: 'border-box',
-  height: 32,
+  height: `${HEADER_BUTTON_HEIGHT_PX}px`,
   background: 'transparent',
   cursor: 'pointer',
   '&:hover': { background: 'var(--header-btn-hover)' },
@@ -35,7 +38,7 @@ const plainStyles = css({
 });
 
 const squareStyles = css({
-  width: 32,
+  width: `${HEADER_BUTTON_SQUARE_WIDTH_PX}px`,
   padding: 0,
   justifyContent: 'center',
 });
