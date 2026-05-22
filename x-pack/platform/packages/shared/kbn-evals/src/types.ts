@@ -9,7 +9,6 @@ import type { BoundInferenceClient, Model } from '@kbn/inference-common';
 import type { HttpHandler } from '@kbn/core/public';
 import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
 import type { EsClient, ScoutWorkerFixtures } from '@kbn/scout';
-import type { KbnClient } from '@kbn/kbn-client';
 import type { EvaluationCriterion } from './evaluators/criteria';
 import { type EvaluationReporter } from './utils/reporting/evaluation_reporter';
 import type {
@@ -248,7 +247,6 @@ export interface WorkerEvalRunIdRef {
 export interface EvaluationSpecificWorkerFixtures {
   inferenceClient: BoundInferenceClient;
   evalsClient: EvalsClient;
-  evaluationsKbnClient: KbnClient;
   /**
    * Executor client used to run experiments.
    */

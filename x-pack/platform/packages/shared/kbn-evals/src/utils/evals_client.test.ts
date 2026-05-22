@@ -8,6 +8,8 @@
 import type { KbnClient } from '@kbn/kbn-client';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import {
+  EVALS_DATASET_UPSERT_URL,
+  EVALS_DATASET_URL,
   EVALS_EXPERIMENT_SCORES_URL,
   EVALS_EXPERIMENT_URL,
   EVALS_SCORES_URL,
@@ -15,7 +17,7 @@ import {
   type EvaluationScoreDocument,
   type IngestScoresRequestBodyInput,
 } from '@kbn/evals-common';
-import type { IngestScoresError } from './evals_client';
+import type { IngestScoresError, UpsertDatasetInput } from './evals_client';
 import { EvalsClient } from './evals_client';
 
 const createMockKbnClient = (): jest.Mocked<KbnClient> =>
@@ -290,6 +292,112 @@ describe('EvalsClient', () => {
         message: expect.stringContaining('exceeds MAX_SCORES_PER_QUERY'),
       })
     );
+  });
+
+  it('upsertDataset posts to the upsert route', async () => {
+    const kbnClient = createMockKbnClient();
+    const log = createLog();
+    kbnClient.request.mockResolvedValue(
+      asKbnResponse({ dataset_id: 'ds-1', added: 2, removed: 0, unchanged: 0 })
+    );
+    const client = new EvalsClient(kbnClient, log);
+
+    const dataset: UpsertDatasetInput = {
+      name: 'My Dataset',
+      description: 'Test dataset',
+      examples: [
+        { input: { question: 'What?' }, output: { answer: '42' } },
+        { input: { question: 'Why?' } },
+      ],
+    };
+
+    await expect(client.upsertDataset(dataset)).resolves.toBeUndefined();
+    expect(kbnClient.request).toHaveBeenCalledWith(
+      expect.objectContaining({
+        path: EVALS_DATASET_UPSERT_URL,
+        method: 'POST',
+        body: {
+          name: 'My Dataset',
+          description: 'Test dataset',
+          examples: dataset.examples,
+        },
+        retries: 0,
+      })
+    );
+  });
+
+  it('upsertDataset propagates errors', async () => {
+    const kbnClient = createMockKbnClient();
+    const log = createLog();
+    kbnClient.request.mockRejectedValue(new Error('Server error'));
+    const client = new EvalsClient(kbnClient, log);
+
+    await expect(
+      client.upsertDataset({ name: 'ds', description: '', examples: [] })
+    ).rejects.toThrow('Server error');
+  });
+
+  it('getDatasetByName returns parsed dataset', async () => {
+    const kbnClient = createMockKbnClient();
+    const log = createLog();
+    kbnClient.request.mockResolvedValue(
+      asKbnResponse({
+        id: 'ds-uuid',
+        name: 'My Dataset',
+        description: 'Test dataset',
+        examples: [
+          {
+            id: 'ex-1',
+            input: { question: 'What?' },
+            output: { answer: '42' },
+            metadata: {},
+            created_at: '2026-01-01T00:00:00.000Z',
+            updated_at: '2026-01-01T00:00:00.000Z',
+          },
+        ],
+        created_at: '2026-01-01T00:00:00.000Z',
+        updated_at: '2026-01-01T00:00:00.000Z',
+      })
+    );
+    const client = new EvalsClient(kbnClient, log);
+
+    const result = await client.getDatasetByName('My Dataset');
+
+    expect(kbnClient.request).toHaveBeenCalledWith(
+      expect.objectContaining({
+        path: expect.stringContaining(EVALS_DATASET_URL.split('{')[0]),
+        method: 'GET',
+        retries: 0,
+      })
+    );
+    expect(result).toEqual({
+      id: 'ds-uuid',
+      name: 'My Dataset',
+      description: 'Test dataset',
+      examples: [
+        { id: 'ex-1', input: { question: 'What?' }, output: { answer: '42' }, metadata: {} },
+      ],
+    });
+  });
+
+  it('getDatasetByName returns null on 404', async () => {
+    const kbnClient = createMockKbnClient();
+    const log = createLog();
+    kbnClient.request.mockRejectedValue(Object.assign(new Error('Not Found'), { status: 404 }));
+    const client = new EvalsClient(kbnClient, log);
+
+    await expect(client.getDatasetByName('Nonexistent')).resolves.toBeNull();
+  });
+
+  it('getDatasetByName propagates non-404 errors', async () => {
+    const kbnClient = createMockKbnClient();
+    const log = createLog();
+    kbnClient.request.mockRejectedValue(
+      Object.assign(new Error('Internal Server Error'), { status: 500 })
+    );
+    const client = new EvalsClient(kbnClient, log);
+
+    await expect(client.getDatasetByName('Some Dataset')).rejects.toThrow('Internal Server Error');
   });
 
   it('assertPluginEnabled throws an error when plugin is disabled', async () => {

@@ -9,10 +9,14 @@ import type { KbnClient } from '@kbn/kbn-client';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import {
   API_VERSIONS,
+  DATASET_UUID_NAMESPACE,
   EVALS_DATASETS_URL,
+  EVALS_DATASET_UPSERT_URL,
+  EVALS_DATASET_URL,
   EVALS_EXPERIMENT_SCORES_URL,
   EVALS_EXPERIMENT_URL,
   EVALS_SCORES_URL,
+  GetEvaluationDatasetResponse,
   GetEvaluationExperimentResponse,
   GetEvaluationExperimentScoresResponse,
   IngestScoresRequestBody,
@@ -22,6 +26,7 @@ import {
   type IngestScoresRequestBodyInput,
   type Model as EvalsModel,
 } from '@kbn/evals-common';
+import { v5 as uuidv5 } from 'uuid';
 import { getStatusCode } from './retry_utils';
 
 export interface EvaluatorStats {
@@ -48,6 +53,28 @@ export interface ExperimentStats {
 interface GetExperimentFilters {
   taskModelId?: string;
   suiteId?: string;
+}
+
+export interface UpsertDatasetInput {
+  name: string;
+  description: string;
+  examples: Array<{
+    input?: Record<string, unknown>;
+    output?: Record<string, unknown>;
+    metadata?: Record<string, unknown>;
+  }>;
+}
+
+export interface DatasetWithId {
+  id: string;
+  name: string;
+  description: string;
+  examples: Array<{
+    id: string;
+    input?: Record<string, unknown>;
+    output?: Record<string, unknown>;
+    metadata?: Record<string, unknown>;
+  }>;
 }
 
 interface IngestScoresResult {
@@ -205,6 +232,51 @@ export class EvalsClient {
     } catch (error: unknown) {
       this.log.error(`Failed to retrieve scores for experiment ID ${experimentId}:`, error);
       return [];
+    }
+  }
+
+  async upsertDataset(dataset: UpsertDatasetInput): Promise<void> {
+    await this.kbnClient.request({
+      path: EVALS_DATASET_UPSERT_URL,
+      method: 'POST',
+      body: {
+        name: dataset.name,
+        description: dataset.description,
+        examples: dataset.examples,
+      },
+      headers: VERSIONED_HEADERS,
+      retries: 0,
+    });
+  }
+
+  async getDatasetByName(datasetName: string): Promise<DatasetWithId | null> {
+    try {
+      const datasetId = uuidv5(datasetName, DATASET_UUID_NAMESPACE);
+      const response = await this.kbnClient.request({
+        path: EVALS_DATASET_URL.replace('{datasetId}', encodeURIComponent(datasetId)),
+        method: 'GET',
+        headers: VERSIONED_HEADERS,
+        retries: 0,
+      });
+
+      const parsed = GetEvaluationDatasetResponse.parse(getResponseData(response));
+
+      return {
+        id: parsed.id,
+        name: parsed.name,
+        description: parsed.description,
+        examples: parsed.examples.map(({ id, input, output, metadata }) => ({
+          id,
+          input,
+          output,
+          metadata,
+        })),
+      };
+    } catch (error: unknown) {
+      if (getStatusCode(error) === 404) {
+        return null;
+      }
+      throw error;
     }
   }
 

@@ -9,15 +9,9 @@ import { hostname as osHostname } from 'os';
 import type { InferenceConnector, InferenceConnectorType, Model } from '@kbn/inference-common';
 import { getConnectorFamily, getConnectorModel, getConnectorProvider } from '@kbn/inference-common';
 import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
-import type { KbnClient } from '@kbn/scout';
 import type { SomeDevLog } from '@kbn/some-dev-log';
-import type { EvaluationReporter, EvalsExecutorClient } from '@kbn/evals';
-import {
-  buildIngestRequest,
-  EvalsClient,
-  getGitMetadata,
-  getBuildkiteCiMetadataFromEnv,
-} from '@kbn/evals';
+import type { EvalsClient, EvaluationReporter, EvalsExecutorClient } from '@kbn/evals';
+import { buildIngestRequest, getGitMetadata, getBuildkiteCiMetadataFromEnv } from '@kbn/evals';
 import { KibanaPhoenixClient } from './client';
 import { getPhoenixConfig } from './get_phoenix_config';
 
@@ -71,14 +65,14 @@ export function withPhoenixExecutor<T extends { extend: (...args: any[]) => any 
           connector,
           evaluationConnector,
           repetitions,
-          evaluationsKbnClient,
+          evalsClient,
           reportModelScore,
         }: {
           log: SomeDevLog;
           connector: AvailableConnectorWithId;
           evaluationConnector: AvailableConnectorWithId;
           repetitions: number;
-          evaluationsKbnClient: KbnClient;
+          evalsClient: EvalsClient;
           reportModelScore: EvaluationReporter;
         },
         use: (client: EvalsExecutorClient) => Promise<void>
@@ -87,7 +81,6 @@ export function withPhoenixExecutor<T extends { extend: (...args: any[]) => any 
 
         const model = buildModelFromConnector(connector);
         const evaluatorModel = buildModelFromConnector(evaluationConnector);
-        const evalsKbnClient = new EvalsClient(evaluationsKbnClient, log);
         const suiteId = process.env.EVAL_SUITE_ID;
         const buildkiteMetadata = getBuildkiteCiMetadataFromEnv();
         const gitMetadata = getGitMetadata();
@@ -120,7 +113,7 @@ export function withPhoenixExecutor<T extends { extend: (...args: any[]) => any 
 
           try {
             await Promise.all(
-              ingestRequests.map((ingestRequest) => evalsKbnClient.ingestScores(ingestRequest))
+              ingestRequests.map((ingestRequest) => evalsClient.ingestScores(ingestRequest))
             );
           } catch (error) {
             log.error(
@@ -131,7 +124,7 @@ export function withPhoenixExecutor<T extends { extend: (...args: any[]) => any 
             throw error;
           }
 
-          await reportModelScore(evalsKbnClient, experiment.id, log, {
+          await reportModelScore(evalsClient, experiment.id, log, {
             taskModelId: model.id,
             suiteId,
           });

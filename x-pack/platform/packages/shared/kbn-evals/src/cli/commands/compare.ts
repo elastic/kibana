@@ -52,10 +52,10 @@ export const compareCmd: Command<void> = {
       evaluationsKbnUrl,
       evaluationsKbnApiKey: process.env.EVALUATIONS_KBN_API_KEY,
     });
-    const evalsKbnClient = new EvalsClient(kbnClient, log);
+    const evalsClient = new EvalsClient(kbnClient, log);
 
     try {
-      await evalsKbnClient.assertPluginEnabled();
+      await evalsClient.assertPluginEnabled();
     } catch (error) {
       throw createFlagError(
         [
@@ -67,8 +67,8 @@ export const compareCmd: Command<void> = {
     }
 
     const [firstExperimentScores, secondExperimentScores] = await Promise.all([
-      evalsKbnClient.getExperimentScores(firstExperimentId),
-      evalsKbnClient.getExperimentScores(secondExperimentId),
+      evalsClient.getExperimentScores(firstExperimentId),
+      evalsClient.getExperimentScores(secondExperimentId),
     ]);
 
     if (firstExperimentScores.length === 0) {

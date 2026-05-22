@@ -9,14 +9,6 @@ import { hostname as osHostname } from 'os';
 import type { InferenceConnectorType, InferenceConnector, Model } from '@kbn/inference-common';
 import { getConnectorModel, getConnectorFamily, getConnectorProvider } from '@kbn/inference-common';
 import { createRestClient } from '@kbn/inference-plugin/common';
-import {
-  API_VERSIONS,
-  DATASET_UUID_NAMESPACE,
-  EVALS_DATASET_UPSERT_URL,
-  EVALS_DATASET_URL,
-  GetEvaluationDatasetResponse,
-} from '@kbn/evals-common';
-import { v5 as uuidv5 } from 'uuid';
 import { test as base } from '@kbn/scout';
 import { createEsClientForTesting } from '@kbn/test-es-server';
 import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
@@ -46,7 +38,6 @@ import { buildIngestRequest } from './utils/build_ingest_request';
 import type {
   DefaultEvaluators,
   EvaluationDataset,
-  EvaluationDatasetWithId,
   EvaluationSpecificWorkerFixtures,
   Example,
 } from './types';
@@ -100,14 +91,9 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
     },
     { scope: 'worker' },
   ],
-  evaluationsKbnClient: [
-    async ({ kbnClient, log }, use) => {
-      await use(getEvaluationsKbnClient({ kbnClient, log }));
-    },
-    { scope: 'worker' },
-  ],
   evalsClient: [
-    async ({ evaluationsKbnClient, log }, use) => {
+    async ({ kbnClient, log }, use) => {
+      const evaluationsKbnClient = getEvaluationsKbnClient({ kbnClient, log });
       const evalsClient = new EvalsClient(evaluationsKbnClient, log);
       await evalsClient.assertPluginEnabled();
       await use(evalsClient);
@@ -249,7 +235,6 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
     async (
       {
         log,
-        evaluationsKbnClient,
         evalsClient,
         connector,
         evaluationConnector,
@@ -292,45 +277,6 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
 
       workerEvalRunId.current = evalRunId;
 
-      const upsertDataset = async (dataset: EvaluationDataset) => {
-        await evaluationsKbnClient.request({
-          path: EVALS_DATASET_UPSERT_URL,
-          method: 'POST',
-          body: {
-            name: dataset.name,
-            description: dataset.description,
-            examples: dataset.examples.map(toDatasetRouteExample),
-          },
-          headers: { 'elastic-api-version': API_VERSIONS.internal.v1 },
-          retries: 0,
-        });
-      };
-
-      const getDatasetByName = async (
-        datasetName: string
-      ): Promise<EvaluationDatasetWithId | null> => {
-        const datasetId = uuidv5(datasetName, DATASET_UUID_NAMESPACE);
-        const response = await evaluationsKbnClient.request({
-          path: EVALS_DATASET_URL.replace('{datasetId}', encodeURIComponent(datasetId)),
-          method: 'GET',
-          headers: { 'elastic-api-version': API_VERSIONS.internal.v1 },
-          retries: 0,
-        });
-        const datasetResponse = GetEvaluationDatasetResponse.parse(response.data);
-
-        return {
-          id: datasetResponse.id,
-          name: datasetResponse.name,
-          description: datasetResponse.description,
-          examples: datasetResponse.examples.map(({ id, input, output, metadata }) => ({
-            id,
-            input,
-            output,
-            metadata,
-          })),
-        };
-      };
-
       const gitMetadata = getGitMetadata();
       const hostName = osHostname();
 
@@ -339,8 +285,14 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
         model,
         evalRunId,
         repetitions,
-        upsertDataset,
-        getDatasetByName,
+        upsertDataset: async (dataset: EvaluationDataset) => {
+          await evalsClient.upsertDataset({
+            name: dataset.name,
+            description: dataset.description,
+            examples: dataset.examples.map(toDatasetRouteExample),
+          });
+        },
+        getDatasetByName: (datasetName: string) => evalsClient.getDatasetByName(datasetName),
         onExperimentStart: (experimentId) => {
           workerExperimentId.current = experimentId;
         },
