@@ -20,7 +20,7 @@ import {
   attachOpikDistributedTrace,
   type OpikDistributedTraceHeaders,
 } from './opik_distributed_tracing';
-import { withAgentBuilderContext } from './with_agent_builder_context';
+import { withAgentBuilderContext } from './agent_builder_context';
 
 interface WithConverseSpanOptions {
   agentId: string;
