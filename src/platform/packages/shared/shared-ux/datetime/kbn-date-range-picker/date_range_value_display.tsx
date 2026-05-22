@@ -9,15 +9,16 @@
 
 import React, { Fragment, type ReactNode } from 'react';
 
-import { css } from '@emotion/react';
-import { useEuiTheme } from '@elastic/eui';
-
-import type { RangePart } from '../parse/parse_range_parts';
-import { parseDisplayParts } from '../parse/parse_range_parts';
+import type { RangePart } from './parse/parse_range_parts';
+import { parseDisplayParts } from './parse/parse_range_parts';
+import * as styles from './date_range_value_display.styles';
 
 interface DateRangeValueDisplayProps {
+  /** The full display text to render, e.g. "Last 15 minutes". */
   displayText: string;
+  /** Invoked when the user clicks a navigable part of the display text. */
   onPartClick: (part: RangePart) => void;
+  /** When true, parts are rendered as plain text and click handlers are not attached. */
   disabled?: boolean;
 }
 
@@ -29,27 +30,9 @@ export function DateRangeValueDisplay({
   onPartClick,
   disabled = false,
 }: DateRangeValueDisplayProps) {
-  const { euiTheme } = useEuiTheme();
   const parts = parseDisplayParts(displayText);
   const chunks: ReactNode[] = [];
   let cursor = 0;
-
-  const containerStyles = css`
-    white-space: nowrap;
-  `;
-  const hoverablePartStyles = css`
-    border-radius: 2px;
-    /*cursor: ${disabled ? 'default' : 'text'};*/
-    padding: 0.125ch 0;
-
-    ${!disabled &&
-    `
-      &:hover {
-        color: ${euiTheme.colors.textPrimary};
-        background-color: ${euiTheme.colors.backgroundLightPrimary};
-      }
-    `}
-  `;
 
   parts.forEach((part, index) => {
     if (part.start > cursor) {
@@ -62,7 +45,7 @@ export function DateRangeValueDisplay({
       chunks.push(
         <span
           key={`part-${index}`}
-          css={hoverablePartStyles}
+          css={!disabled && styles.part}
           data-test-subj="dateRangePickerDisplayPart"
           onMouseDown={disabled ? undefined : () => onPartClick(part)}
         >
@@ -81,7 +64,11 @@ export function DateRangeValueDisplay({
   }
 
   return (
-    <span css={containerStyles} data-test-subj="dateRangePickerValueDisplay">
+    <span
+      className="eui-textTruncate"
+      css={styles.root}
+      data-test-subj="dateRangePickerValueDisplay"
+    >
       {chunks}
     </span>
   );

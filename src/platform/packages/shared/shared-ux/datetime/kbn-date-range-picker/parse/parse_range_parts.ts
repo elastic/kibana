@@ -38,6 +38,7 @@ interface DelimiterSplit {
   separator: RangePart;
 }
 
+// TODO some of these target English words, we need to account for translations very soon
 const INPUT_DELIMITERS = [...PARSER_DELIMITERS, '-'];
 const SHORTHAND_RELATIVE_RE = /^(now)?([+-])(\d+)([a-zA-Z]+)(\/[smhdwMy])?$/;
 const LONG_RELATIVE_RE = /^(last|next)\s+(\d+)\s+(\w+)$/i;

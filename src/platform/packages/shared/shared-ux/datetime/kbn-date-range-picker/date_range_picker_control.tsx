@@ -21,13 +21,18 @@ import {
 } from '@elastic/eui';
 
 import { FOCUSABLE_SELECTOR } from './constants';
-import { isRelativeToNow, resolveInitialFocus } from './utils';
+import {
+  findCorrespondingInputPart,
+  getInputScrollLeftToCenter,
+  isRelativeToNow,
+  resolveInitialFocus,
+} from './utils';
 import { DateRangePickerAutoRefreshButton } from './date_range_picker_auto_refresh_button';
 import { useDateRangePickerContext } from './date_range_picker_context';
 import { useSelectTextPartsWithArrowKeys } from './hooks/use_select_text_parts_with_arrow_keys';
 import { useInputHintText } from './hooks/use_input_hint_text';
 import { inputControlTexts } from './translations';
-import { DateRangeValueDisplay } from './components/date_range_value_display';
+import { DateRangeValueDisplay } from './date_range_value_display';
 import type { RangePart } from './parse/parse_range_parts';
 import { parseDisplayParts, parseInputParts } from './parse/parse_range_parts';
 
@@ -109,6 +114,7 @@ export function DateRangePickerControl() {
     clickedDisplayPartRef.current = part;
   };
 
+  /** Handle selecting specific parts when focusing the input */
   useEffect(() => {
     if (!isEditing || !inputRef.current) return;
 
@@ -123,12 +129,13 @@ export function DateRangePickerControl() {
 
     if (target) {
       const input = inputRef.current;
-      input.setSelectionRange(target.end, target.end);
-      const animationFrame = requestAnimationFrame(() => {
-        input.setSelectionRange(target.end, target.end);
-        scrollInputToPart(input, target);
+      // Optimistic `setSelectionRange` call, might remove after testing is not needed
+      input.setSelectionRange(target.start, target.end);
+      const requestId = requestAnimationFrame(() => {
+        input.setSelectionRange(target.start, target.end);
+        input.scrollLeft = getInputScrollLeftToCenter(input, target.start, target.end);
       });
-      return () => cancelAnimationFrame(animationFrame);
+      return () => cancelAnimationFrame(requestId);
     }
   }, [displayText, inputRef, isEditing, text]);
 
@@ -201,6 +208,12 @@ export function DateRangePickerControl() {
   const tooltipStyles = css`
     max-inline-size: min(58ch, 90vw);
   `;
+  const inputStyles = css`
+    &::selection {
+      color: ${euiTheme.colors.textPrimary};
+      background-color: ${euiTheme.colors.backgroundLightPrimary};
+    }
+  `;
 
   return (
     <div
@@ -253,6 +266,7 @@ export function DateRangePickerControl() {
             onKeyDown={onInputKeyDown}
             compressed={compressed}
             placeholder={`${hintTextPrefix} "${hintText}"`}
+            css={inputStyles}
           />
         ) : (
           <EuiToolTip
@@ -266,6 +280,18 @@ export function DateRangePickerControl() {
             offset={euiTheme.base * 0.75}
           >
             <EuiFormControlButton
+              css={css`
+                /* TODO super fragile selector, we need to find out why
+                   is this <span> there at all in EuiFormControlButton */
+                .euiButtonEmpty__content > span {
+                  display: flex;
+                  flex-grow: 1;
+                  align-items: center;
+                  justify-content: space-between;
+                  gap: ${euiTheme.size.s};
+                  max-inline-size: 100%;
+                }
+              `}
               data-test-subj="dateRangePickerControlButton"
               data-date-range={`${timeRange.start} to ${timeRange.end}`}
               buttonRef={buttonRef}
@@ -293,58 +319,4 @@ export function DateRangePickerControl() {
       </EuiFormControlLayout>
     </div>
   );
-}
-
-const getRangePartMatchIndex = (part: RangePart): 0 | 1 => part.rangeIndex ?? 0;
-
-/**
- * Finds the edit-input part that corresponds to a clicked idle-display part.
- */
-function findCorrespondingInputPart(
-  inputParts: RangePart[],
-  displayPart: RangePart,
-  displayParts: RangePart[]
-): RangePart | undefined {
-  const displayRangeIndex = getRangePartMatchIndex(displayPart);
-  const displayOrdinal = displayParts.filter(
-    (part) =>
-      part.navigable &&
-      part.kind === displayPart.kind &&
-      getRangePartMatchIndex(part) === displayRangeIndex &&
-      part.start < displayPart.start
-  ).length;
-
-  const candidates = inputParts.filter(
-    (part) => part.kind === displayPart.kind && getRangePartMatchIndex(part) === displayRangeIndex
-  );
-
-  return candidates[displayOrdinal];
-}
-
-/**
- * Scrolls the input horizontally so the target part is visible after browser autofocus settles.
- */
-function scrollInputToPart(input: HTMLInputElement, part: RangePart) {
-  if (input.scrollWidth <= input.clientWidth) return;
-
-  const maxScrollLeft = input.scrollWidth - input.clientWidth;
-  const clampScrollLeft = (value: number) => Math.max(0, Math.min(value, maxScrollLeft));
-  const style = window.getComputedStyle(input);
-  const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d');
-
-  if (!ctx) {
-    const partRatio = part.start / Math.max(input.value.length, 1);
-    input.scrollLeft = clampScrollLeft(input.scrollWidth * partRatio - input.clientWidth / 2);
-    return;
-  }
-
-  ctx.font = style.font;
-  const leftInset = (parseFloat(style.paddingLeft) || 0) + (parseFloat(style.borderLeftWidth) || 0);
-  const textBeforePart = input.value.substring(0, part.start);
-  const partText = input.value.substring(part.start, part.end);
-  const partStart = leftInset + ctx.measureText(textBeforePart).width;
-  const partMiddle = partStart + ctx.measureText(partText).width / 2;
-
-  input.scrollLeft = clampScrollLeft(partMiddle - input.clientWidth / 2);
 }

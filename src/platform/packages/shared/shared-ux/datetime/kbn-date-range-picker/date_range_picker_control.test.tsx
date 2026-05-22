@@ -50,7 +50,7 @@ describe('DateRangePickerControl', () => {
       await waitForPopoverClose();
     });
 
-    it('places the input cursor on the clicked display part', async () => {
+    it('selects the clicked display part in the input', async () => {
       renderWithEuiTheme(<DateRangePicker {...defaultProps} onChange={() => {}} />);
 
       const displayPart = screen.getByText('20');
@@ -60,7 +60,7 @@ describe('DateRangePickerControl', () => {
       const input = await screen.findByTestId('dateRangePickerInput');
       await waitFor(() => {
         expect(input).toHaveFocus();
-        expect((input as HTMLInputElement).selectionStart).toBe(7);
+        expect((input as HTMLInputElement).selectionStart).toBe(5);
         expect((input as HTMLInputElement).selectionEnd).toBe(7);
       });
 
@@ -98,7 +98,8 @@ describe('DateRangePickerControl', () => {
 
         const input = (await screen.findByTestId('dateRangePickerInput')) as HTMLInputElement;
         await waitFor(() => {
-          expect(input.selectionStart).toBe(11);
+          expect(input.selectionStart).toBe(7);
+          expect(input.selectionEnd).toBe(11);
         });
         Object.defineProperty(input, 'clientWidth', { configurable: true, value: 80 });
         Object.defineProperty(input, 'scrollWidth', { configurable: true, value: 800 });
@@ -374,7 +375,11 @@ describe('DateRangePickerControl', () => {
         'Last 20 minutes'
       );
 
-      rerender(<DateRangePicker value="last 1 hour" onChange={() => {}} {...controlledDefaults} />);
+      rerender(
+        <EuiThemeProvider>
+          <DateRangePicker value="last 1 hour" onChange={() => {}} {...controlledDefaults} />
+        </EuiThemeProvider>
+      );
       await waitFor(() => {
         expect(screen.getByTestId('dateRangePickerControlButton')).toHaveTextContent('Last 1 hour');
       });
@@ -390,7 +395,11 @@ describe('DateRangePickerControl', () => {
       fireEvent.change(input, { target: { value: 'last 5 minutes' } });
       expect(input).toHaveValue('last 5 minutes');
 
-      rerender(<DateRangePicker value="last 1 hour" onChange={() => {}} {...controlledDefaults} />);
+      rerender(
+        <EuiThemeProvider>
+          <DateRangePicker value="last 1 hour" onChange={() => {}} {...controlledDefaults} />
+        </EuiThemeProvider>
+      );
       await waitFor(() => {
         expect(input).toHaveValue('last 5 minutes');
       });
@@ -410,7 +419,9 @@ describe('DateRangePickerControl', () => {
 
       await act(async () =>
         rerender(
-          <DateRangePicker value="last 1 hour" onChange={() => {}} {...controlledDefaults} />
+          <EuiThemeProvider>
+            <DateRangePicker value="last 1 hour" onChange={() => {}} {...controlledDefaults} />
+          </EuiThemeProvider>
         )
       );
       fireEvent.keyDown(input, { key: 'Escape' });

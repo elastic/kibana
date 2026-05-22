@@ -21,6 +21,7 @@ import type {
 } from './types';
 import { DATE_RANGE_INPUT_DELIMITER, DEFAULT_DATE_FORMAT, UNIT_DISPLAY_ABBREV } from './constants';
 import { textToTimeRange, getNamedRangeAlias } from './parse';
+import type { RangePart } from './parse/parse_range_parts';
 import { dateMathToRelativeParts, timeRangeToDisplayText, applyTimePrecision } from './format';
 import { MS_PER } from './format/format_duration';
 
@@ -335,4 +336,64 @@ function boundToInputFragment(bound: string): { text: string; isNow: boolean } {
   if (shorthand === 'now') return { text: '', isNow: true };
   if (shorthand !== null) return { text: shorthand, isNow: false };
   return { text: bound, isNow: false };
+}
+
+const getRangePartMatchIndex = (part: RangePart): 0 | 1 => part.rangeIndex ?? 0;
+
+/**
+ * Finds the edit-input part that corresponds to a clicked idle-display part by
+ * matching on `kind` and `rangeIndex` and preserving the part's ordinal position
+ * within its peers.
+ */
+export function findCorrespondingInputPart(
+  inputParts: RangePart[],
+  displayPart: RangePart,
+  displayParts: RangePart[]
+): RangePart | undefined {
+  const displayRangeIndex = getRangePartMatchIndex(displayPart);
+  const displayOrdinal = displayParts.filter(
+    (part) =>
+      part.navigable &&
+      part.kind === displayPart.kind &&
+      getRangePartMatchIndex(part) === displayRangeIndex &&
+      part.start < displayPart.start
+  ).length;
+
+  const candidates = inputParts.filter(
+    (part) => part.kind === displayPart.kind && getRangePartMatchIndex(part) === displayRangeIndex
+  );
+
+  return candidates[displayOrdinal];
+}
+
+/**
+ * Computes the `scrollLeft` value that centers a character range within a single-line input.
+ * Pass one offset to center on a caret position, or both to center on the midpoint of a range.
+ * Uses canvas text measurement; falls back to a proportional estimate when 2d context is unavailable.
+ */
+export function getInputScrollLeftToCenter(
+  input: HTMLInputElement,
+  startOffset: number,
+  endOffset: number = startOffset
+): number {
+  if (input.scrollWidth <= input.clientWidth) return 0;
+
+  const maxScrollLeft = input.scrollWidth - input.clientWidth;
+  const clamp = (value: number) => Math.max(0, Math.min(value, maxScrollLeft));
+  const style = window.getComputedStyle(input);
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+
+  if (!ctx) {
+    const ratio = startOffset / Math.max(input.value.length, 1);
+    return clamp(input.scrollWidth * ratio - input.clientWidth / 2);
+  }
+
+  ctx.font = style.font;
+  const leftInset = (parseFloat(style.paddingLeft) || 0) + (parseFloat(style.borderLeftWidth) || 0);
+  const startX = leftInset + ctx.measureText(input.value.substring(0, startOffset)).width;
+  const rangeWidth = ctx.measureText(input.value.substring(startOffset, endOffset)).width;
+  const midX = startX + rangeWidth / 2;
+
+  return clamp(midX - input.clientWidth / 2);
 }
