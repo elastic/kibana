@@ -25,7 +25,8 @@ export class CloudOnboardingPageObject {
     if (resourceData) params.set('resource_data', resourceData);
     if (next) params.set('next', next);
 
-    let path = `/app/cloud/onboarding?${params.toString()}`;
+    const paramStr = params.toString();
+    let path = paramStr ? `/app/cloud/onboarding?${paramStr}` : '/app/cloud/onboarding';
     if (hash) path += hash;
 
     await this.page.goto(this.kbnUrl.get(path));

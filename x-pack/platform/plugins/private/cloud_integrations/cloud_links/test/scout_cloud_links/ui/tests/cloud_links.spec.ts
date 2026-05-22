@@ -5,15 +5,33 @@
  * 2.0.
  */
 
+import type { ScoutPage } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 import { EXPECTED_CLOUD_ID, EXPECTED_ES_URL } from '../fixtures/constants';
 
+async function dismissWelcomeInterstitial(page: ScoutPage) {
+  const welcomeInterstitial = page.testSubj.locator('homeWelcomeInterstitial');
+  await welcomeInterstitial.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
+  await page.keyboard.press('Escape');
+  await welcomeInterstitial.waitFor({ state: 'hidden' });
+}
+
 test.describe('Cloud Links integration', { tag: tags.stateful.classic }, () => {
   // The billing link requires _ec_billing_admin. Mirror the FTR setup: map the SAML realm to
   // include the role for the duration of this suite, then restore it afterwards.
+  let originalRoles: string[] = [];
+
   test.beforeAll(async ({ esClient }) => {
+    try {
+      const { 'cloud-saml-kibana': mapping } = await esClient.security.getRoleMapping({
+        name: 'cloud-saml-kibana',
+      });
+      originalRoles = mapping?.roles ?? [];
+    } catch {
+      // mapping may not exist yet
+    }
     await esClient.security.putRoleMapping({
       name: 'cloud-saml-kibana',
       roles: ['superuser', '_ec_billing_admin'],
@@ -29,7 +47,7 @@ test.describe('Cloud Links integration', { tag: tags.stateful.classic }, () => {
   test.afterAll(async ({ esClient }) => {
     await esClient.security.putRoleMapping({
       name: 'cloud-saml-kibana',
-      roles: ['superuser'],
+      roles: originalRoles,
       enabled: true,
       rules: { field: { 'realm.name': 'cloud-saml-kibana' } },
     });
@@ -42,10 +60,7 @@ test.describe('Cloud Links integration', { tag: tags.stateful.classic }, () => {
   }) => {
     await browserAuth.loginAsViewer();
     await page.gotoApp('home');
-    const welcomeInterstitial = page.testSubj.locator('homeWelcomeInterstitial');
-    await welcomeInterstitial.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
-    await page.keyboard.press('Escape');
-    await welcomeInterstitial.waitFor({ state: 'hidden' });
+    await dismissWelcomeInterstitial(page);
 
     const { connectionDetails } = pageObjects;
 
@@ -68,10 +83,7 @@ test.describe('Cloud Links integration', { tag: tags.stateful.classic }, () => {
   test('connection details API key can be created', async ({ browserAuth, page, pageObjects }) => {
     await browserAuth.loginAsAdmin();
     await page.gotoApp('home');
-    const welcomeInterstitial = page.testSubj.locator('homeWelcomeInterstitial');
-    await welcomeInterstitial.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
-    await page.keyboard.press('Escape');
-    await welcomeInterstitial.waitFor({ state: 'hidden' });
+    await dismissWelcomeInterstitial(page);
 
     const { connectionDetails } = pageObjects;
     const keyName = `test-api-key-${Date.now().toString(36)}`;
@@ -87,10 +99,7 @@ test.describe('Cloud Links integration', { tag: tags.stateful.classic }, () => {
   test('nav shows "Manage this deployment" link', async ({ browserAuth, page, pageObjects }) => {
     await browserAuth.loginAsViewer();
     await page.gotoApp('home');
-    const welcomeInterstitial = page.testSubj.locator('homeWelcomeInterstitial');
-    await welcomeInterstitial.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
-    await page.keyboard.press('Escape');
-    await welcomeInterstitial.waitFor({ state: 'hidden' });
+    await dismissWelcomeInterstitial(page);
 
     await pageObjects.cloudLinks.openNav();
     expect(await pageObjects.cloudLinks.isManageDeploymentLinkVisible()).toBe(true);
@@ -99,10 +108,7 @@ test.describe('Cloud Links integration', { tag: tags.stateful.classic }, () => {
   test('user menu shows cloud profile links', async ({ browserAuth, page, pageObjects }) => {
     await browserAuth.loginAsAdmin();
     await page.gotoApp('home');
-    const welcomeInterstitial = page.testSubj.locator('homeWelcomeInterstitial');
-    await welcomeInterstitial.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
-    await page.keyboard.press('Escape');
-    await welcomeInterstitial.waitFor({ state: 'hidden' });
+    await dismissWelcomeInterstitial(page);
 
     const { cloudLinks } = pageObjects;
     await cloudLinks.openUserMenu();
