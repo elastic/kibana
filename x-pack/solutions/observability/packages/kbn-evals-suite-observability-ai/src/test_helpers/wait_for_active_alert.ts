@@ -18,6 +18,8 @@ export interface WaitForActiveAlertOptions {
   log: ToolingLog;
   maxWaitMs?: number;
   pollIntervalMs?: number;
+  /** Called on the first poll and again before throwing when no active alert is found. */
+  onDiagnostics?: () => Promise<void>;
 }
 
 export async function waitForActiveAlert({
@@ -27,12 +29,19 @@ export async function waitForActiveAlert({
   log,
   maxWaitMs = DEFAULT_MAX_WAIT_MS,
   pollIntervalMs = DEFAULT_POLL_INTERVAL_MS,
+  onDiagnostics,
 }: WaitForActiveAlertOptions): Promise<string> {
   const deadline = Date.now() + maxWaitMs;
   let attempt = 0;
 
   while (Date.now() < deadline) {
     attempt += 1;
+
+    if (onDiagnostics && (attempt === 1 || Date.now() + pollIntervalMs >= deadline)) {
+      log.info(`Running alert prerequisites diagnostics (attempt ${attempt})`);
+      await onDiagnostics();
+    }
+
     await esClient.indices.refresh({ index: alertsIndex });
 
     const response = await esClient.search({
@@ -64,6 +73,11 @@ export async function waitForActiveAlert({
     );
 
     await new Promise((resolve) => setTimeout(resolve, pollIntervalMs));
+  }
+
+  if (onDiagnostics) {
+    log.info('Running final alert prerequisites diagnostics before failure');
+    await onDiagnostics();
   }
 
   throw new Error(

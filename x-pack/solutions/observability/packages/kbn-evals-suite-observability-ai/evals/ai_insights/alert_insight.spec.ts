@@ -8,12 +8,14 @@
 import { tags } from '@kbn/scout';
 import type { RuleResponse } from '@kbn/alerting-plugin/common/routes/rule/response/types/v1';
 import type { LoadResult } from '@kbn/es-snapshot-loader';
+import type { TransactionDurationRuleParams } from '@kbn/response-ops-rule-params/transaction_duration';
 import type { AlertInsightParams } from '../../src/clients/ai_insight_client';
 import {
   replayObservabilityDataStreams,
   cleanObservabilityDataStreams,
 } from '../../src/data_generators/replay';
 import { getAlertScenarios, type AlertScenario } from '../../src/scenarios/alert_scenarios';
+import { logTransactionDurationAlertPrerequisites } from '../../src/test_helpers/log_alert_rule_prerequisites';
 import { waitForActiveAlert } from '../../src/test_helpers/wait_for_active_alert';
 import { evaluate } from './evaluate_ai_insights';
 
@@ -48,6 +50,25 @@ function createScenarioTest(scenario: AlertScenario) {
       });
       ruleId = ruleResponse.data.id;
 
+      if (scenario.alertRule.ruleParams.rule_type_id !== 'apm.transaction_duration') {
+        throw new Error(
+          `Alert prerequisites logging only supports apm.transaction_duration (got ${scenario.alertRule.ruleParams.rule_type_id})`
+        );
+      }
+      const ruleParams = scenario.alertRule.ruleParams.params as TransactionDurationRuleParams;
+
+      const runAlertPrerequisitesDiagnostics = () =>
+        logTransactionDurationAlertPrerequisites({
+          esClient,
+          log,
+          ruleParams,
+          ruleId,
+          alertsIndex: scenario.alertRule.alertsIndex,
+          replayedIndices: replayResult.reindexedIndices,
+        });
+
+      await runAlertPrerequisitesDiagnostics();
+
       log.info('Triggering rule run');
       await kbnClient.request<void>({
         method: 'POST',
@@ -60,6 +81,7 @@ function createScenarioTest(scenario: AlertScenario) {
         alertsIndex: scenario.alertRule.alertsIndex,
         ruleId,
         log,
+        onDiagnostics: runAlertPrerequisitesDiagnostics,
       });
     });
 
