@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -73,15 +73,14 @@ export function ContextAppRoute() {
   const [initialDocViewerTabId, setInitialDocViewerTabId] = useState<string | undefined>(undefined);
   const docViewerRef = useRef<DocViewerApi>(null);
 
-  const setExpandedDoc = useCallback(
+  const setExpandedDoc = useStableCallback(
     (doc: DataTableRecord | undefined, options?: { initialTabId?: string }) => {
       setExpandedDocState(doc);
       setInitialDocViewerTabId(options?.initialTabId);
       if (options?.initialTabId) {
         docViewerRef.current?.setSelectedTabId(options.initialTabId);
       }
-    },
-    []
+    }
   );
 
   const addFilter = useStableCallback<DocViewFilterFn>((mapping, values, operation) => {
