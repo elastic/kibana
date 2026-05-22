@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { QuerySandbox } from './query_sandbox';
 import type { QuerySandboxProps } from './query_sandbox';
 import type { QueryExecutionResult } from './use_query_execution';
@@ -72,9 +72,9 @@ const defaultProps: QuerySandboxProps = {
 
 const renderSandbox = (overrides: Partial<QuerySandboxProps> = {}) =>
   render(
-    <IntlProvider locale="en">
+    <I18nProvider>
       <QuerySandbox {...defaultProps} {...overrides} />
-    </IntlProvider>
+    </I18nProvider>
   );
 
 describe('QuerySandbox', () => {

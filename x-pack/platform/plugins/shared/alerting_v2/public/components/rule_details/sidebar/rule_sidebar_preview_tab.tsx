@@ -16,8 +16,12 @@ import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { QuerySandbox, RuleFormProvider } from '@kbn/alerting-v2-rule-form';
 import { useRule } from '../rule_context';
 
+const queryClient = new QueryClient();
+
 const RuleSidebarPreviewTabInner: React.FC = () => {
   const rule = useRule();
+  // The persisted rule only stores `evaluation.query.base`; split alert/recovery
+  // blocks are a compose-time concern and aren't saved on the rule object.
   const query = rule.evaluation?.query?.base ?? '';
   const timeField = rule.time_field ?? '@timestamp';
 
@@ -54,12 +58,8 @@ const RuleSidebarPreviewTabInner: React.FC = () => {
   );
 };
 
-export const RuleSidebarPreviewTab: React.FC = () => {
-  const queryClient = useMemo(() => new QueryClient(), []);
-
-  return (
-    <QueryClientProvider client={queryClient}>
-      <RuleSidebarPreviewTabInner />
-    </QueryClientProvider>
-  );
-};
+export const RuleSidebarPreviewTab: React.FC = () => (
+  <QueryClientProvider client={queryClient}>
+    <RuleSidebarPreviewTabInner />
+  </QueryClientProvider>
+);

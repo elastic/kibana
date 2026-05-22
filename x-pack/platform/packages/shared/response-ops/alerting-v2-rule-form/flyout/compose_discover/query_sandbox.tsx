@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiCallOut,
@@ -190,13 +190,8 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
 
   const [visibleColumns, setVisibleColumns] = useState<string[]>([]);
 
-  const prevColumnIdsRef = useRef('');
   useEffect(() => {
-    const ids = columns.map((c) => c.id).join(',');
-    if (ids !== prevColumnIdsRef.current) {
-      prevColumnIdsRef.current = ids;
-      setVisibleColumns(columns.map((c) => c.id));
-    }
+    setVisibleColumns(columns.map((c) => c.id));
   }, [columns]);
 
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: VISIBLE_ROWS });
@@ -283,14 +278,14 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
       </EuiFlexGroup>
       <EuiSpacer size="s" />
 
-      {splitTabs.length > 0 && (
+      {splitTabs.length > 0 && tabProps && (
         <>
           <EuiTabs>
             {splitTabs.map((tab) => (
               <EuiTab
                 key={tab.id}
-                isSelected={tabProps!.activeTab === tab.id}
-                onClick={() => tabProps!.onTabChange(tab.id)}
+                isSelected={tabProps.activeTab === tab.id}
+                onClick={() => tabProps.onTabChange(tab.id)}
                 data-test-subj={`querySandboxTab-${tab.id}`}
               >
                 {tab.label}
@@ -302,20 +297,20 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
       )}
 
       <EuiPanel hasBorder paddingSize="s" style={{ ...editorPanelStyles }}>
-        {hasTabs ? (
+        {tabProps && hasTabs ? (
           <ComposeDiscoverTabs
-            baseQuery={tabProps!.baseQuery}
-            alertBlock={tabProps!.alertBlock}
-            recoveryBlock={tabProps!.recoveryBlock}
-            onBaseQueryChange={tabProps!.onBaseQueryChange}
-            onAlertBlockChange={tabProps!.onAlertBlockChange}
-            onRecoveryBlockChange={tabProps!.onRecoveryBlockChange}
-            activeTab={tabProps!.activeTab}
-            onTabChange={tabProps!.onTabChange}
-            tabs={tabProps!.tabs}
-            onAlertEditorMount={tabProps!.onAlertEditorMount}
-            onRecoveryEditorMount={tabProps!.onRecoveryEditorMount}
-            readOnly={tabProps!.readOnly}
+            baseQuery={tabProps.baseQuery}
+            alertBlock={tabProps.alertBlock}
+            recoveryBlock={tabProps.recoveryBlock}
+            onBaseQueryChange={tabProps.onBaseQueryChange}
+            onAlertBlockChange={tabProps.onAlertBlockChange}
+            onRecoveryBlockChange={tabProps.onRecoveryBlockChange}
+            activeTab={tabProps.activeTab}
+            onTabChange={tabProps.onTabChange}
+            tabs={tabProps.tabs}
+            onAlertEditorMount={tabProps.onAlertEditorMount}
+            onRecoveryEditorMount={tabProps.onRecoveryEditorMount}
+            readOnly={tabProps.readOnly}
             hideTabBar
           />
         ) : (
@@ -346,7 +341,6 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
         </EuiText>
       )}
 
-      <EuiSpacer size="s" />
       <EuiSpacer size="m" />
 
       {!hasRun && (
