@@ -12,7 +12,7 @@ import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import { AlertEpisodeDetailsHeader } from './details_header';
 
 describe('AlertEpisodeDetailsHeader', () => {
-  it('renders title, description, and status badges', () => {
+  it('renders title, description, status badges, and tags', () => {
     render(
       <I18nProvider>
         <AlertEpisodeDetailsHeader
@@ -28,6 +28,7 @@ describe('AlertEpisodeDetailsHeader', () => {
     expect(screen.getByRole('heading', { name: 'Rule 1' })).toBeInTheDocument();
     expect(screen.getByText('Some description')).toBeInTheDocument();
     expect(screen.getByTestId('alertingV2EpisodeDetailsHeaderTags')).toBeInTheDocument();
+    expect(screen.getByText('t1')).toBeInTheDocument();
   });
 
   it('renders the loading title fallback when title is undefined', () => {

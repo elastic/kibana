@@ -67,5 +67,5 @@ export const queryKeys = {
   assigneeSuggestions: (searchTerm: string) =>
     [...queryKeys.all, 'assignee-suggestions', searchTerm] as const,
   bulkGetProfiles: (uids: string[]) => [...queryKeys.all, 'bulk-get-profiles', ...uids] as const,
-  rule: (id: string) => [...queryKeys.all, 'rule', id] as const,
+  fetchRule: (id: string) => [...queryKeys.all, 'fetch-rule', id] as const,
 };

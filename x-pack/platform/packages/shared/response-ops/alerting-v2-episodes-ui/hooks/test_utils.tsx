@@ -12,6 +12,7 @@ import { of } from 'rxjs';
 import { DEFAULT_SPACE_ID, type Space } from '@kbn/spaces-plugin/common';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 
 export const createMockSpaces = (): jest.Mocked<SpacesPluginStart> => {
   const spaces = spacesPluginMock.createStartContract();
@@ -38,3 +39,13 @@ export const createQueryClientWrapper = (client: QueryClient) => {
   );
   return Wrapper;
 };
+
+export const createMockRule = (overrides: Partial<RuleResponse> = {}): RuleResponse =>
+  ({
+    id: 'rule-1',
+    enabled: true,
+    kind: 'alerting',
+    metadata: { name: 'Rule 1' },
+    evaluation: { query: { base: 'FROM logs' } },
+    ...overrides,
+  } as unknown as RuleResponse);

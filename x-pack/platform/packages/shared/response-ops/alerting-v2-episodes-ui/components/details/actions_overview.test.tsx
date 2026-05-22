@@ -56,4 +56,53 @@ describe('AlertEpisodeActionsOverview', () => {
     expect(screen.getByText('Acknowledged by')).toBeInTheDocument();
     expect(screen.getByTestId('mockAssigneeCell')).toHaveTextContent('user-acker');
   });
+
+  it('renders the resolved-by row when the group is resolved', () => {
+    render(
+      <I18nProvider>
+        <AlertEpisodeActionsOverview
+          episodeAction={undefined}
+          groupAction={{
+            groupHash: 'gh-1',
+            ruleId: 'rule-1',
+            lastDeactivateAction: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
+            lastDeactivateActor: 'user-resolver',
+            lastSnoozeAction: null,
+            snoozeExpiry: null,
+            tags: [],
+            lastSnoozeActor: null,
+          }}
+          userProfile={mockUserProfile}
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.getByText('Resolved by')).toBeInTheDocument();
+    expect(screen.getByTestId('mockAssigneeCell')).toHaveTextContent('user-resolver');
+  });
+
+  it('renders the snoozed-by and snoozed-until rows when the group is snoozed', () => {
+    render(
+      <I18nProvider>
+        <AlertEpisodeActionsOverview
+          episodeAction={undefined}
+          groupAction={{
+            groupHash: 'gh-1',
+            ruleId: 'rule-1',
+            lastSnoozeAction: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
+            lastSnoozeActor: 'user-snoozer',
+            snoozeExpiry: '2030-01-01T00:00:00.000Z',
+            lastDeactivateAction: null,
+            lastDeactivateActor: null,
+            tags: [],
+          }}
+          userProfile={mockUserProfile}
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.getByText('Snoozed by')).toBeInTheDocument();
+    expect(screen.getByText('Snoozed until')).toBeInTheDocument();
+    expect(screen.getByTestId('mockAssigneeCell')).toHaveTextContent('user-snoozer');
+  });
 });

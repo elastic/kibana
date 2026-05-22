@@ -7,26 +7,11 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { useQuery } from '@kbn/react-query';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { UserAvatar, UserToolTip } from '@kbn/user-profile-components';
-
-const EMPTY_LABEL = i18n.translate('xpack.alertingV2EpisodesUi.assigneeCell.empty', {
-  defaultMessage: '—',
-});
-
-const PROFILE_LOAD_ERROR_LABEL = i18n.translate(
-  'xpack.alertingV2EpisodesUi.assigneeCell.profileLoadError',
-  {
-    defaultMessage: 'Could not load profile',
-  }
-);
-
-const UNKNOWN_USER_LABEL = i18n.translate('xpack.alertingV2EpisodesUi.assigneeCell.unknownUser', {
-  defaultMessage: 'Unknown user',
-});
+import * as i18n from './translations';
 
 export interface AlertEpisodeAssigneeCellProps {
   assigneeUid: string | null | undefined;
@@ -52,7 +37,7 @@ export const AlertEpisodeAssigneeCell = ({
   if (!assigneeUid) {
     return (
       <EuiText color="subdued" size="s">
-        {EMPTY_LABEL}
+        {i18n.ASSIGNEE_CELL_EMPTY}
       </EuiText>
     );
   }
@@ -64,7 +49,7 @@ export const AlertEpisodeAssigneeCell = ({
   if (isError) {
     return (
       <EuiText color="danger" size="s" title={assigneeUid}>
-        {PROFILE_LOAD_ERROR_LABEL}
+        {i18n.ASSIGNEE_CELL_PROFILE_LOAD_ERROR}
       </EuiText>
     );
   }
@@ -74,7 +59,7 @@ export const AlertEpisodeAssigneeCell = ({
   if (!profile) {
     return (
       <EuiText color="subdued" size="s" title={assigneeUid}>
-        {UNKNOWN_USER_LABEL}
+        {i18n.ASSIGNEE_CELL_UNKNOWN_USER}
       </EuiText>
     );
   }

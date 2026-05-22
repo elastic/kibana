@@ -6,16 +6,16 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
-import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import { runEsqlAsyncSearch } from '../../utils/run_esql_async_search';
 import {
+  createMockRule,
   createMockSpaces,
   createQueryClientWrapper,
   createTestQueryClient,
@@ -41,13 +41,7 @@ const mockServices: AlertEpisodeDetailsServices = {
   spaces: mockSpaces,
 };
 
-const mockRule = {
-  id: 'rule-1',
-  enabled: true,
-  kind: 'alerting',
-  metadata: { name: 'Rule 1' },
-  evaluation: { query: { base: 'FROM logs' } },
-} as unknown as RuleResponse;
+const mockRule = createMockRule();
 
 const queryClient = createTestQueryClient();
 const wrapper = createQueryClientWrapper(queryClient);
@@ -82,9 +76,9 @@ describe('AlertEpisodeRuleOverviewPanelSection', () => {
       { wrapper }
     );
 
-    await waitFor(() =>
-      expect(screen.getByTestId('alertingV2EpisodeDetailsRuleOverviewPanel')).toBeInTheDocument()
-    );
+    expect(
+      await screen.findByTestId('alertingV2EpisodeDetailsRuleOverviewPanel')
+    ).toBeInTheDocument();
   });
 
   it('renders a loading spinner while data is loading', () => {
@@ -129,10 +123,8 @@ describe('AlertEpisodeRuleOverviewPanelSection', () => {
       { wrapper }
     );
 
-    await waitFor(() =>
-      expect(
-        screen.getByTestId('alertingV2EpisodeRuleOverviewPanelSectionError')
-      ).toBeInTheDocument()
-    );
+    expect(
+      await screen.findByTestId('alertingV2EpisodeRuleOverviewPanelSectionError')
+    ).toBeInTheDocument();
   });
 });

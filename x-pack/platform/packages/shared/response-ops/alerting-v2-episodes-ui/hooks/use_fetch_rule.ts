@@ -19,7 +19,7 @@ export interface UseFetchRuleOptions {
 
 export const useFetchRule = ({ id, http }: UseFetchRuleOptions) =>
   useQuery({
-    queryKey: queryKeys.rule(id ?? ''),
+    queryKey: queryKeys.fetchRule(id ?? ''),
     queryFn: ({ signal }) =>
       http.get<RuleResponse>(buildPath(`${ALERTING_V2_RULE_API_PATH}/{id}`, { id }), { signal }),
     enabled: Boolean(id),
