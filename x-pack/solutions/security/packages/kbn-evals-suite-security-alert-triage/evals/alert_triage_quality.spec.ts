@@ -39,6 +39,18 @@ import {
 // ── Constants ─────────────────────────────────────────────────────────────────
 
 const ALERTS_INDEX = '.alerts-security.alerts-default';
+const ALERTS_BATCH_MAX_SIZE = 20;
+
+const toAlertAttachments = (ids: string[]) => {
+  const batches = [];
+  for (let i = 0; i < ids.length; i += ALERTS_BATCH_MAX_SIZE) {
+    batches.push({
+      type: 'security.alerts',
+      data: { alertIds: ids.slice(i, i + ALERTS_BATCH_MAX_SIZE) },
+    });
+  }
+  return batches;
+};
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -198,9 +210,7 @@ evaluate.describe(
                     'list the affected host names, and provide specific remediation steps for each.',
                 },
                 metadata: {
-                  attachments: [
-                    { type: 'security.alerts', data: { alertIds: PRIORITY_TRIAGE_IDS } },
-                  ],
+                  attachments: toAlertAttachments(PRIORITY_TRIAGE_IDS),
                 },
               },
             ],
@@ -239,9 +249,7 @@ evaluate.describe(
                     'progression on that host, recommending immediate investigation or containment.',
                 },
                 metadata: {
-                  attachments: [
-                    { type: 'security.alerts', data: { alertIds: ENTITY_CORRELATION_IDS } },
-                  ],
+                  attachments: toAlertAttachments(ENTITY_CORRELATION_IDS),
                 },
               },
             ],
