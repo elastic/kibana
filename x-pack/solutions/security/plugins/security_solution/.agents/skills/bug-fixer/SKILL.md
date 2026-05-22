@@ -5,10 +5,11 @@ description: >
   debug anything in Kibana Security Solution — even just "look into #NNN",
   "something's broken with X", or "can you fix this". Any GitHub issue number in a
   Security Solution context triggers this skill.
-  Stateful (ECH) only — decline serverless bugs before starting.
 ---
 
 # Bug Fixer
+
+**Scope:** Stateful (ECH) environments only. Decline serverless bugs before starting either step.
 
 Fixing a Security Solution bug is a two-step process. These skills are not
 auto-discovered — they must be invoked explicitly by path.

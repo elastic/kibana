@@ -123,6 +123,20 @@ Each entry documents: what the agent did, what rationalization it used, and whic
 
 ---
 
+### Failure 10 — EuiToolTip existence check written instead of behavior assertion
+
+**What the agent did:** Fixed a bug that involved removing an `EuiToolTip` wrapper from a button. Wrote `expect(wrapper.find(EuiToolTip)).toHaveLength(0)` as the regression test.
+
+**Rationalization used:** The fix removed an element; the natural test is to assert the element is gone.
+
+**Why it was wrong:** Existence checks for removed elements are fragile — any future tooltip anywhere in the component tree will break the test — and misrepresentative — they assert presence, not the behavior the bug was about. The correct assertion is behavioral: either (a) the action that was incorrectly blocked now succeeds (e.g., a click fires, a mutation runs), or (b) a user-visible outcome changed. If neither can be asserted, skip the unit test and document the reason in the PR.
+
+**Rules added:**
+- `bug-fix` Phase 4 Step 2 Red Flags: "`My test is expect(component.find(X)).toHaveLength(0) — that covers the removal`"
+- `bug-fix` Phase 4 Step 2 Removal fixes: ask whether behavior can be asserted instead; skip unit test if not and note in PR.
+
+---
+
 ## Session: Exception list mutation bug (PR: #269186, Date: 2026-05-19)
 
 ### Failure 9 — Initialization function called in onSuccess instead of using mutation return value

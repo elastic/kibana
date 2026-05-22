@@ -2,10 +2,12 @@
 name: bug-reproduce
 description: >
   Use when the user mentions a bug number or asks to reproduce, investigate, or debug
-  anything in Kibana Security Solution. Stateful (ECH) only — decline serverless bugs.
+  anything in Kibana Security Solution.
 ---
 
 # Bug Reproduce
+
+**Scope:** Stateful (ECH) environments only. If the ticket is for a serverless environment, stop immediately and tell the user: this skill only supports stateful (ECH) environments.
 
 Investigate and reproduce a Security Solution bug. Produces `.bug-fixer-session/analysis.json`
 and `.bug-fixer-session/reproduction-report.md` (gitignored, never committed).
