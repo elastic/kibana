@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-module.exports = require('@kbn/storybook').defaultConfig;
+export const SPAN_FLYOUT_EBT_ELEMENTS = {
+  HEADER: 'spanFlyoutHeader',
+} as const;

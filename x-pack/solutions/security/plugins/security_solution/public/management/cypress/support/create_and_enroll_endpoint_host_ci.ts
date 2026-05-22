@@ -9,6 +9,7 @@ import type { Client } from '@elastic/elasticsearch';
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/kbn-client';
+import { kibanaPackageJson } from '@kbn/repo-info';
 import { isServerlessKibanaFlavor } from '../../../../common/endpoint/utils/kibana_status';
 import { fetchFleetLatestAvailableAgentVersion } from '../../../../common/endpoint/utils/fetch_fleet_version';
 import { isFleetServerRunning } from '../../../../scripts/endpoint/common/fleet_server/fleet_server_services';
@@ -64,14 +65,7 @@ export const createAndEnrollEndpointHostCI = async ({
   disk,
   memory,
   hostname,
-  // Temporarily pinned to 9.4.1 as a workaround for a Fleet Server regression in 9.5.0-SNAPSHOT.
-  // Elastic Agent main bumped elastic-agent-libs to v0.43.0 on 2026-05-19, which wires
-  // CertReloader into LoadTLSServerConfig and rejects the inline PEM that Fleet Server's
-  // managed bootstrap path auto-generates. Also, `kibanaPackageJson.version` is `9.5.0` on
-  // main, which is not a published artifact tag (snapshot is `9.5.0-SNAPSHOT`).
-  // Unpin once Agent vendors elastic-agent-libs v0.43.1+ and the snapshot rolls forward.
-  // Slack: https://elastic.slack.com/archives/C06TGC6D343/p1779259445336199
-  version = '9.4.1',
+  version = kibanaPackageJson.version,
   useClosestVersionMatch = true,
   forceVersion = false,
 }: CreateAndEnrollEndpointHostCIOptions): Promise<CreateAndEnrollEndpointHostCIResponse> => {
