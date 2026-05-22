@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export { InvalidDefendInsightTypeError } from '@kbn/discoveries';
+export const DEFEND_INSIGHTS_RESOURCE = 'defend_insights';
+export const DEFEND_INSIGHTS_RESOURCES = `${DEFEND_INSIGHTS_RESOURCE}:`;
+export const DEFEND_INSIGHTS_POLICY_RESPONSE_FAILURE = `${DEFEND_INSIGHTS_RESOURCE}:policy_response_failure`;

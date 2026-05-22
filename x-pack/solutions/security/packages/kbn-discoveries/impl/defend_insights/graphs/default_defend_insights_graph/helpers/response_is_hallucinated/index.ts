@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { InvalidDefendInsightTypeError } from '@kbn/discoveries';
+export const responseIsHallucinated = (result: string): boolean =>
+  result.includes('{{ host.name hostNameValue }}');

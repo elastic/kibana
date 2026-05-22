@@ -10,8 +10,8 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import type { Replacements } from '@kbn/elastic-assistant-common';
 import { DefendInsightType } from '@kbn/elastic-assistant-common';
 
-import type { DefendInsightsGraphState } from '../../../../../langchain/graphs';
-import { DEFEND_INSIGHTS } from '../../../../../prompt/prompts';
+import type { DefendInsightsGraphState } from '../../../../../lib/types/graph_types';
+import { DEFEND_INSIGHTS } from '../../../../../__mocks__/mock_prompts';
 import { mockAnonymizedEvents } from '../../mock/mock_anonymized_events';
 import { getRetrieveAnonymizedEventsNode } from '.';
 

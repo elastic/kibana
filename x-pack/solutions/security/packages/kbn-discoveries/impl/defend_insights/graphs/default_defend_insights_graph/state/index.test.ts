@@ -11,7 +11,7 @@ import {
   DEFAULT_MAX_REPEATED_GENERATIONS,
 } from '../constants';
 import { getDefaultGraphState } from '.';
-import { DEFEND_INSIGHTS } from '../../../../prompt/prompts';
+import { DEFEND_INSIGHTS } from '../../../../__mocks__/mock_prompts';
 
 const defaultDefendInsightsPrompt = DEFEND_INSIGHTS.INCOMPATIBLE_ANTIVIRUS.DEFAULT;
 const defaultRefinePrompt = DEFEND_INSIGHTS.INCOMPATIBLE_ANTIVIRUS.REFINE;

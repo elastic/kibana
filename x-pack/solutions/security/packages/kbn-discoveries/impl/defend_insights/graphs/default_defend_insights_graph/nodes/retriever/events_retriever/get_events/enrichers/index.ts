@@ -7,14 +7,14 @@
 
 import { DefendInsightType } from '@kbn/elastic-assistant-common';
 
-import type { AIAssistantKnowledgeBaseDataClient } from '../../../../../../../../../ai_assistant_data_clients/knowledge_base';
+import type { IKnowledgeBaseDataClient } from '../../../../../../types';
 import type { getEventsForInsightType } from '../retrievers';
 import { enrichPolicyResponseFailureEvents } from './policy_response_failure';
 
 export function enrichEvents(
   insightType: DefendInsightType,
   events: Awaited<ReturnType<typeof getEventsForInsightType>>,
-  params: { kbDataClient: AIAssistantKnowledgeBaseDataClient | null }
+  params: { kbDataClient: IKnowledgeBaseDataClient | null }
 ): Promise<typeof events> | ReturnType<typeof enrichPolicyResponseFailureEvents> {
   switch (insightType) {
     case DefendInsightType.enum.policy_response_failure:

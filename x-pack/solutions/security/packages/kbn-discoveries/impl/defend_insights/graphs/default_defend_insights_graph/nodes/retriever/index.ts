@@ -9,8 +9,8 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { DefendInsightType, Replacements } from '@kbn/elastic-assistant-common';
 import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 
-import type { DefendInsightsGraphState } from '../../../../../langchain/graphs';
-import type { AIAssistantKnowledgeBaseDataClient } from '../../../../../../ai_assistant_data_clients/knowledge_base';
+import type { DefendInsightsGraphState } from '../../../../../lib/types/graph_types';
+import type { IKnowledgeBaseDataClient } from '../../../types';
 import { AnonymizedEventsRetriever } from './events_retriever';
 
 export const getRetrieveAnonymizedEventsNode = ({
@@ -28,7 +28,7 @@ export const getRetrieveAnonymizedEventsNode = ({
   endpointIds: string[];
   anonymizationFields?: AnonymizationFieldResponse[];
   esClient: ElasticsearchClient;
-  kbDataClient: AIAssistantKnowledgeBaseDataClient | null;
+  kbDataClient: IKnowledgeBaseDataClient | null;
   logger?: Logger;
   onNewReplacements?: (replacements: Replacements) => void;
   replacements?: Replacements;

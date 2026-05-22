@@ -10,7 +10,7 @@ import type { StateGraphArgs } from '@langchain/langgraph';
 import type { DateMath } from '@elastic/elasticsearch/lib/api/types';
 import type { DefendInsight, Replacements } from '@kbn/elastic-assistant-common';
 
-import type { DefendInsightsGraphState } from '../../../../langchain/graphs';
+import type { DefendInsightsGraphState } from '../../../../lib/types/graph_types';
 import type { DefendInsightsPrompts } from '../prompts';
 import {
   DEFAULT_MAX_GENERATION_ATTEMPTS,

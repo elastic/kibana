@@ -13,7 +13,7 @@ import { BaseRetriever, type BaseRetrieverInput } from '@langchain/core/retrieve
 import type { DefendInsightType, Replacements } from '@kbn/elastic-assistant-common';
 import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 
-import type { AIAssistantKnowledgeBaseDataClient } from '../../../../../../../ai_assistant_data_clients/knowledge_base';
+import type { IKnowledgeBaseDataClient } from '../../../../types';
 import { getAnonymizedEvents } from './get_events';
 
 export type CustomRetrieverInput = BaseRetrieverInput;
@@ -25,7 +25,7 @@ export class AnonymizedEventsRetriever extends BaseRetriever {
   private readonly endpointIds: string[];
   private readonly anonymizationFields?: AnonymizationFieldResponse[];
   private readonly esClient: ElasticsearchClient;
-  private readonly kbDataClient: AIAssistantKnowledgeBaseDataClient | null;
+  private readonly kbDataClient: IKnowledgeBaseDataClient | null;
   private readonly onNewReplacements?: (newReplacements: Replacements) => void;
   private readonly replacements?: Replacements;
   private readonly size?: number;
@@ -49,7 +49,7 @@ export class AnonymizedEventsRetriever extends BaseRetriever {
     endpointIds: string[];
     anonymizationFields?: AnonymizationFieldResponse[];
     esClient: ElasticsearchClient;
-    kbDataClient: AIAssistantKnowledgeBaseDataClient | null;
+    kbDataClient: IKnowledgeBaseDataClient | null;
     fields?: CustomRetrieverInput;
     onNewReplacements?: (newReplacements: Replacements) => void;
     replacements?: Replacements;
