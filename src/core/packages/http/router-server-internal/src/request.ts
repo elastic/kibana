@@ -469,9 +469,9 @@ function sanitizeRequest(req: Request): { query: unknown; params: unknown; body:
   // `schema.object` routes can run handler-level validation (e.g. saved_objects export).
   // Explicit JSON `null` and `schema.nullable(...)` still receive `null`.
   const method = String(req.method ?? 'get').toLowerCase();
-  let body = req.payload;
+  let body: unknown = req.payload;
   if (body === undefined) {
-    body = method === 'post' || method === 'put' || method === 'patch' ? ({} as typeof body) : null;
+    body = method === 'post' || method === 'put' || method === 'patch' ? {} : null;
   }
 
   return {
