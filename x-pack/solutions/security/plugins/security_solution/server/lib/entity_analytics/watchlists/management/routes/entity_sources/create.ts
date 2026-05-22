@@ -93,8 +93,7 @@ export const createEntitySourceRoute = (
                   `[WatchlistEntitySourceCreate] Background sync completed for watchlist ${request.params.watchlist_id}`
                 );
               } catch (syncError) {
-                const errorMsg =
-                  syncError instanceof Error ? syncError.message : String(syncError);
+                const errorMsg = syncError instanceof Error ? syncError.message : String(syncError);
                 logger.warn(
                   `[WatchlistEntitySourceCreate] Background sync failed for watchlist ${request.params.watchlist_id}: ${errorMsg}`
                 );

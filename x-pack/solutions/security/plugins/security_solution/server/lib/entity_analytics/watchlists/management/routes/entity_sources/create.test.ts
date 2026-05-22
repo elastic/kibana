@@ -29,8 +29,8 @@ jest.mock('../../../entity_sources/infra', () => ({
   })),
   getStreamPatternFor: jest.fn((integration: string) => `stream-${integration}`),
   INTEGRATION_TYPES: ['entityanalytics_ad', 'okta'],
-  integrationsSourceIndex: jest.fn((ns: string, integration: string) =>
-    `integration-${ns}-${integration}`
+  integrationsSourceIndex: jest.fn(
+    (ns: string, integration: string) => `integration-${ns}-${integration}`
   ),
   oktaLastFullSyncMarkersIndex: jest.fn((ns: string) => `okta-markers-${ns}`),
 }));
