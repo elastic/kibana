@@ -122,10 +122,7 @@ export async function triggerMaintainerRun(
   maintainerId: string,
   { maxRetries = 5, retryDelayMs = 2000 } = {}
 ): Promise<void> {
-  const runPath = ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_RUN.replace(
-    '{id}',
-    maintainerId
-  );
+  const runPath = ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_RUN.replace('{id}', maintainerId);
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     const response = await apiClient.post(runPath, {
       headers,
