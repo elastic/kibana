@@ -7,8 +7,10 @@
 
 import React, { useEffect, useMemo } from 'react';
 import { EuiTab, EuiTabs, EuiSpacer, EuiPanel, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { CodeEditor, ESQL_LANG_ID, type monaco } from '@kbn/code-editor';
-import type { QueryTab, SandboxTabConfig } from './types';
+import type { QueryTab } from './types';
 
 type IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
 type LineNumbersType = monaco.editor.LineNumbersType;
@@ -22,7 +24,7 @@ interface ComposeDiscoverTabsProps {
   onRecoveryBlockChange: (val: string) => void;
   activeTab: QueryTab;
   onTabChange: (tab: QueryTab) => void;
-  tabConfig: SandboxTabConfig;
+  tabs: QueryTab[];
   onAlertEditorMount?: (editor: IStandaloneCodeEditor) => void;
   onRecoveryEditorMount?: (editor: IStandaloneCodeEditor) => void;
   /**
@@ -30,6 +32,8 @@ interface ComposeDiscoverTabsProps {
    * Used when the parent renders tabs in the flyout header instead.
    */
   hideTabBar?: boolean;
+  /** When true, all editable query blocks are read-only. Used by Rule Builder preview mode. */
+  readOnly?: boolean;
 }
 
 const LOCKED_EDITOR_STYLES: React.CSSProperties = {
@@ -73,6 +77,7 @@ interface BlockEditorProps {
   /** Line number offset — makes the block editor's line numbers continue from the base. */
   lineNumberOffset: number;
   onEditorMount?: (editor: IStandaloneCodeEditor) => void;
+  readOnly?: boolean;
 }
 
 const BlockEditor: React.FC<BlockEditorProps> = ({
@@ -80,6 +85,7 @@ const BlockEditor: React.FC<BlockEditorProps> = ({
   onChange,
   lineNumberOffset,
   onEditorMount,
+  readOnly = false,
 }) => {
   const options = useMemo(() => {
     const lineNumbers: LineNumbersType | undefined =
@@ -89,9 +95,11 @@ const BlockEditor: React.FC<BlockEditorProps> = ({
       automaticLayout: true,
       scrollBeyondLastLine: false,
       fontSize: 13,
+      readOnly,
+      domReadOnly: readOnly,
       ...(lineNumbers && { lineNumbers }),
     };
-  }, [lineNumberOffset]);
+  }, [lineNumberOffset, readOnly]);
 
   return (
     <CodeEditor
@@ -106,22 +114,25 @@ const BlockEditor: React.FC<BlockEditorProps> = ({
 };
 
 export const TAB_DEFINITIONS: Array<{ id: QueryTab; label: string }> = [
-  { id: 'base', label: 'Base query' },
-  { id: 'alert', label: 'Alert query' },
-  { id: 'recovery', label: 'Recovery query' },
+  {
+    id: 'base',
+    label: i18n.translate('xpack.alertingV2.composeDiscover.tabs.baseQueryLabel', {
+      defaultMessage: 'Base query',
+    }),
+  },
+  {
+    id: 'alert',
+    label: i18n.translate('xpack.alertingV2.composeDiscover.tabs.alertQueryLabel', {
+      defaultMessage: 'Alert query',
+    }),
+  },
+  {
+    id: 'recovery',
+    label: i18n.translate('xpack.alertingV2.composeDiscover.tabs.recoveryQueryLabel', {
+      defaultMessage: 'Recovery query',
+    }),
+  },
 ];
-
-export function visibleTabIds(tabConfig: SandboxTabConfig): QueryTab[] {
-  switch (tabConfig.type) {
-    case 'base-alert':
-      return ['base', 'alert'];
-    case 'base-recovery':
-      return ['recovery'];
-    case 'single':
-    default:
-      return [];
-  }
-}
 
 export const ComposeDiscoverTabs: React.FC<ComposeDiscoverTabsProps> = ({
   baseQuery,
@@ -132,16 +143,16 @@ export const ComposeDiscoverTabs: React.FC<ComposeDiscoverTabsProps> = ({
   onRecoveryBlockChange,
   activeTab,
   onTabChange,
-  tabConfig,
+  tabs,
   onAlertEditorMount,
   onRecoveryEditorMount,
   hideTabBar = false,
+  readOnly = false,
 }) => {
-  const tabIds = visibleTabIds(tabConfig);
-  const visibleTabs = TAB_DEFINITIONS.filter((t) => tabIds.includes(t.id));
+  const visibleTabs = TAB_DEFINITIONS.filter((t) => tabs.includes(t.id));
 
   const safeActiveTab: QueryTab =
-    tabIds.length > 0 && tabIds.includes(activeTab) ? activeTab : tabIds[0] ?? 'alert';
+    tabs.length > 0 && tabs.includes(activeTab) ? activeTab : tabs[0] ?? 'alert';
 
   useEffect(() => {
     if (safeActiveTab !== activeTab) {
@@ -154,7 +165,14 @@ export const ComposeDiscoverTabs: React.FC<ComposeDiscoverTabsProps> = ({
   const renderEditor = () => {
     switch (safeActiveTab) {
       case 'base':
-        return <BlockEditor value={baseQuery} onChange={onBaseQueryChange} lineNumberOffset={0} />;
+        return (
+          <BlockEditor
+            value={baseQuery}
+            onChange={onBaseQueryChange}
+            lineNumberOffset={0}
+            readOnly={readOnly}
+          />
+        );
       case 'alert':
         return (
           <>
@@ -164,6 +182,7 @@ export const ComposeDiscoverTabs: React.FC<ComposeDiscoverTabsProps> = ({
               onChange={onAlertBlockChange}
               lineNumberOffset={baseLineCount}
               onEditorMount={onAlertEditorMount}
+              readOnly={readOnly}
             />
           </>
         );
@@ -176,6 +195,7 @@ export const ComposeDiscoverTabs: React.FC<ComposeDiscoverTabsProps> = ({
               onChange={onRecoveryBlockChange}
               lineNumberOffset={baseLineCount}
               onEditorMount={onRecoveryEditorMount}
+              readOnly={readOnly}
             />
           </>
         );
@@ -183,7 +203,10 @@ export const ComposeDiscoverTabs: React.FC<ComposeDiscoverTabsProps> = ({
         return (
           <EuiPanel color="subdued" paddingSize="l">
             <EuiText size="s" color="subdued" textAlign="center">
-              No editor available for this tab.
+              <FormattedMessage
+                id="xpack.alertingV2.composeDiscover.tabs.noEditorDescription"
+                defaultMessage="No editor available for this tab."
+              />
             </EuiText>
           </EuiPanel>
         );

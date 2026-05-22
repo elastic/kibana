@@ -23,6 +23,8 @@ import { css } from '@emotion/react';
 import type { ActionButton, HeaderBadge } from '@kbn/agent-builder-browser/attachments';
 import { i18n } from '@kbn/i18n';
 import type { IconType } from '@elastic/eui';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { AttachmentActions } from './attachment_actions';
 
 const PREVIEW_ONLY_LABEL = i18n.translate('xpack.agentBuilder.attachmentHeader.previewOnly', {
@@ -219,6 +221,11 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
                     onClick={onClose}
                     size="s"
                     color="text"
+                    {...getEbtProps({
+                      element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                      action: AGENT_BUILDER_UI_EBT.action.conversation.ATTACHMENT_CLOSE,
+                      detail: 'attachment',
+                    })}
                   />
                 </EuiFlexItem>
               )}

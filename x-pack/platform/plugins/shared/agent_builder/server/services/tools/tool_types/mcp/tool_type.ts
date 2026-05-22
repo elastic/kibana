@@ -145,7 +145,7 @@ async function executeMcpTool({
   if (result.status === 'error') {
     return {
       isError: true,
-      content: result.message || 'MCP tool execution failed',
+      content: result.serviceMessage ?? result.message ?? 'MCP tool execution failed',
     };
   }
 
