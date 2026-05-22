@@ -12,11 +12,13 @@ import {
   EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiCode,
   EuiIcon,
   EuiPanel,
   EuiText,
   EuiToolTip,
   useEuiTheme,
+  EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import * as i18n from './translations';
@@ -51,7 +53,21 @@ export const MissingLookupsList = React.memo<MissingLookupsListProps>(
             {migrationSource === MigrationSource.QRADAR ? (
               i18n.REFERENCE_SETS_QRADAR_APP
             ) : migrationSource === MigrationSource.SENTINEL ? (
-              i18n.WATCHLISTS_SENTINEL_APP
+              <FormattedMessage
+                id="xpack.securitySolution.siemMigrations.common.dataInputFlyout.lookups.missingWatchlistsList.sentinelAppSection"
+                defaultMessage="Below are the watchlists found in your rules. Export them from Microsoft Sentinel and upload here. Exported Watchlist must be in <armlink>ARM Resource format</armlink>. CSV content should be included in the <code>rawContent</code> property of the watchlist."
+                values={{
+                  armlink: (child) => (
+                    <EuiLink
+                      href="https://learn.microsoft.com/en-us/azure/templates/microsoft.securityinsights/watchlists?pivots=deployment-language-arm-template#resource-format-1"
+                      target="_blank"
+                    >
+                      {child}
+                    </EuiLink>
+                  ),
+                  code: (child) => <EuiCode>{child}</EuiCode>,
+                }}
+              />
             ) : (
               <FormattedMessage
                 id="xpack.securitySolution.siemMigrations.common.dataInputFlyout.lookups.copyExportQuery.splunk.description"

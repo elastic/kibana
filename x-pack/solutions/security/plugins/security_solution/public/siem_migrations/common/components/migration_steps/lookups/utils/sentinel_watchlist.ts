@@ -57,8 +57,7 @@ const parseSentinelWatchlist = (fileContent: string): SentinelWatchlistResource 
     i18n.translate(
       'xpack.securitySolution.siemMigrations.common.dataInputFlyout.fileUploadError.sentinelWatchlistInvalidSchemaErrorMessage',
       {
-        defaultMessage:
-          'Sentinel watchlist must be an ARM watchlist resource or template with watchlistAlias and rawContent.',
+        defaultMessage: `Sentinel watchlist must be an ARM watchlist resource or template with watchlistAlias and rawContent.`,
       }
     )
   );

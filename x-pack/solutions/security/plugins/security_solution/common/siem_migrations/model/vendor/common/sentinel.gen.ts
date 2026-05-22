@@ -38,7 +38,7 @@ export const SentinelWatchlistResource = lazySchema(() =>
     /**
      * The ARM resource type
      */
-    type: z.literal('Microsoft.OperationalInsights/workspaces/providers/Watchlists'),
+    type: z.string().optional(),
     /**
      * The Sentinel watchlist properties
      */

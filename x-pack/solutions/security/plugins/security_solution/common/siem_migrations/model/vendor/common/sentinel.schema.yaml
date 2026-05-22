@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Sentinel components for both dashboards and rules
-  version: 'not applicable'
+  version: "not applicable"
 paths: {}
 components:
   x-codegen-enabled: true
@@ -16,7 +16,6 @@ components:
       type: object
       description: A Microsoft Sentinel watchlist ARM template resource
       required:
-        - type
         - properties
       properties:
         id:
@@ -28,8 +27,7 @@ components:
         type:
           type: string
           description: The ARM resource type
-          enum:
-            - Microsoft.OperationalInsights/workspaces/providers/Watchlists
+          example: Microsoft.OperationalInsights/workspaces/providers/Watchlists
         properties:
           type: object
           description: The Sentinel watchlist properties
@@ -78,4 +76,4 @@ components:
           minItems: 1
           maxItems: 1
           items:
-            $ref: '#/components/schemas/SentinelWatchlistResource'
+            $ref: "#/components/schemas/SentinelWatchlistResource"
