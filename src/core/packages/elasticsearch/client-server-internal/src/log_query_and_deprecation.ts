@@ -210,11 +210,13 @@ export const instrumentEsQueryAndDeprecationLogger = ({
 
   const requestStartTimes = new Map<string | number, number>();
 
-  client.diagnostic.on('request', (_error, event) => {
-    if (event?.meta?.request?.id != null) {
-      requestStartTimes.set(event.meta.request.id, performance.now());
-    }
-  });
+  if (queryLogger.isLevelEnabled('debug') || deprecationLogger.isLevelEnabled('debug')) {
+    client.diagnostic.on('request', (_error, event) => {
+      if (event?.meta?.request?.id != null) {
+        requestStartTimes.set(event.meta.request.id, performance.now());
+      }
+    });
+  }
 
   client.diagnostic.on('response', (error, event) => {
     const requestLoggingOptions = event?.meta?.request?.options?.context?.loggingOptions as
