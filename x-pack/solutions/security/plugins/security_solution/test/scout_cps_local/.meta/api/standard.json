@@ -1,0 +1,33 @@
+{
+  "sha1": "",
+  "tests": [
+    {
+      "id": "d50399edb526a93-e1ab797843d3103",
+      "title": "CPS relationship maintainer — accesses from linked serverless project writes accesses_frequently relationship to origin entity when 5 SSH events ingested on linked project",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/tests/maintainers/accesses.spec.ts",
+        "line": 92,
+        "column": 12
+      }
+    },
+    {
+      "id": "dd1d9b329962437-f244caf87571b20",
+      "title": "CPS relationship maintainer — communicates_with from linked serverless project writes communicates_with relationship to origin entity when a CloudTrail event is ingested on linked project",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/tests/maintainers/communicates_with.spec.ts",
+        "line": 94,
+        "column": 12
+      }
+    }
+  ]
+}
