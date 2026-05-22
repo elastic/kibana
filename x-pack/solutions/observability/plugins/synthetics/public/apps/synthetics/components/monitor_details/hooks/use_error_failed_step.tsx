@@ -14,15 +14,24 @@ import { asMutableArray } from '../../../../../../common/utils/as_mutable_array'
 import type { Ping } from '../../../../../../common/runtime_types';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 import { useSyntheticsRefreshContext } from '../../../contexts';
+import { useGetUrlParams } from '../../../hooks';
 
 export function useErrorFailedStep(checkGroups: string[]) {
   const { lastRefresh } = useSyntheticsRefreshContext();
 
   const { monitorId } = useParams<{ monitorId: string }>();
 
+  const { remoteName } = useGetUrlParams();
+
+  // For remote monitors the heartbeat docs live on the source cluster, so
+  // query `${remoteName}:synthetics-*` via CCS instead of the local index.
+  const indexPattern = remoteName
+    ? `${remoteName}:${SYNTHETICS_INDEX_PATTERN}`
+    : SYNTHETICS_INDEX_PATTERN;
+
   const { data, loading } = useEsSearch(
     {
-      index: checkGroups?.length > 0 ? SYNTHETICS_INDEX_PATTERN : '',
+      index: checkGroups?.length > 0 ? indexPattern : '',
       size: checkGroups.length,
       query: {
         bool: {
@@ -47,7 +56,7 @@ export function useErrorFailedStep(checkGroups: string[]) {
       ] as const),
       _source: ['synthetics.step', 'synthetics.error', 'monitor.check_group'],
     },
-    [lastRefresh, monitorId, checkGroups],
+    [lastRefresh, monitorId, checkGroups, remoteName],
     { name: 'getMonitorErrorFailedStep' }
   );
 

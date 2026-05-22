@@ -23,7 +23,7 @@ export function useMonitorErrors(monitorIdArg?: string) {
 
   const { monitorId } = useParams<{ monitorId: string }>();
 
-  const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
+  const { dateRangeStart, dateRangeEnd, remoteName } = useGetUrlParams();
 
   const selectedLocation = useSelectedLocation();
 
@@ -31,7 +31,9 @@ export function useMonitorErrors(monitorIdArg?: string) {
 
   const { data, loading } = useReduxEsSearch(
     {
-      index: SYNTHETICS_INDEX_PATTERN,
+      // For remote monitors the heartbeat docs live on the source cluster, so
+      // query `${remoteName}:synthetics-*` via CCS instead of the local index.
+      index: remoteName ? `${remoteName}:${SYNTHETICS_INDEX_PATTERN}` : SYNTHETICS_INDEX_PATTERN,
       size: 0,
       query: {
         bool: {
@@ -94,7 +96,15 @@ export function useMonitorErrors(monitorIdArg?: string) {
         },
       },
     },
-    [lastRefresh, monitorId, monitorIdArg, dateRangeStart, dateRangeEnd, selectedLocation?.label],
+    [
+      lastRefresh,
+      monitorId,
+      monitorIdArg,
+      dateRangeStart,
+      dateRangeEnd,
+      selectedLocation?.label,
+      remoteName,
+    ],
     {
       name: `getMonitorErrors/${dateRangeStart}/${dateRangeEnd}`,
       isRequestReady: Boolean(selectedLocation?.label),
