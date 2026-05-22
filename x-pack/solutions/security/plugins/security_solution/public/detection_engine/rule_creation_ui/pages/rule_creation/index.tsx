@@ -338,13 +338,13 @@ const CreateRulePageComponent: React.FC<{}> = () => {
     isAiRuleAppliedRef.current = true;
     const o = openStepsRef.current;
     if (o[RuleStep.defineRule]) {
-      toggleStepAccordionRef.current(RuleStep.defineRule);
+      handleAccordionToggle(RuleStep.defineRule, false);
     }
     if (o[RuleStep.aboutRule]) {
-      toggleStepAccordionRef.current(RuleStep.aboutRule);
+      handleAccordionToggle(RuleStep.aboutRule, false);
     }
     if (o[RuleStep.scheduleRule]) {
-      toggleStepAccordionRef.current(RuleStep.scheduleRule);
+      handleAccordionToggle(RuleStep.scheduleRule, false);
     }
 
     await Promise.all([
