@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as z from '@kbn/zod/v4';
+import * as z from '@kbn/zod/v4';
 import {
   PrebuiltAssetBaseProps,
   PrebuiltRuleAssetIdentityFields,

@@ -21,6 +21,7 @@ import {
   GranularRulesSearch,
   FacetCounts,
 } from '../../rule_management/granular_rules/granular_rules_contract.gen';
+import { RuleResponseField } from '../common/rule_response_field.gen';
 import { SortOrder } from '../../model/sorting.gen';
 import { RuleTagArray } from '../../model/rule_schema/common_attributes.gen';
 import { RuleResponse } from '../../model/rule_schema/rule_schemas.gen';
@@ -174,7 +175,7 @@ installable rules.
       * Subset of top-level `RuleResponse` keys used to narrow rule response payloads.
 
       */
-      fields: z.array(z.string().max(256)).optional(),
+      fields: z.array(RuleResponseField).optional(),
     })
     .strict()
 );

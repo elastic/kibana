@@ -51,8 +51,7 @@ paths:
                   description: |
                     Subset of top-level `RuleResponse` keys used to narrow rule response payloads.
                   items:
-                    type: string
-                    maxLength: 256
+                    $ref: '../common/rule_response_field.schema.yaml#/components/schemas/RuleResponseField'
       responses:
         '200':
           description: Indicates a successful call

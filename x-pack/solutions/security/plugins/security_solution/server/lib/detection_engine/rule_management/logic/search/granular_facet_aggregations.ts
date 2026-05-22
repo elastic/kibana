@@ -6,26 +6,22 @@
  */
 
 import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { SavedObjectsClientContract, SavedObjectsRawDocSource } from '@kbn/core/server';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../rule_monitoring/logic/event_log/event_log_constants';
 
 import { RULES_FACET_CATEGORY_TO_ATTRIBUTE } from '../../../../../../common/api/detection_engine/rule_management/granular_rules/granular_rules_facet_dimensions';
 import type {
   FacetCounts,
   GranularRulesFacetCategory,
 } from '../../../../../../common/api/detection_engine/rule_management/granular_rules/granular_rules_contract.gen';
-import { findRules } from './find_rules';
 
 const DEFAULT_AGGREGATION_MAX_SIZE = 200;
 
-const FACET_AGG_ID_CHUNK_SIZE = 1024;
-export interface TermsAggBuckets {
-  buckets: Array<{
-    key: string | number | boolean;
-    doc_count: number;
-  }>;
+interface TermsAggregateLike {
+  buckets: ReadonlyArray<{ key: string | number | boolean; doc_count: number }>;
 }
 
-const bucketsToFacetMap = (buckets: TermsAggBuckets['buckets']): Record<string, number> => {
+const bucketsToFacetMap = (buckets: TermsAggregateLike['buckets']): Record<string, number> => {
   const facetCounts: Record<string, number> = {};
   for (const bucket of buckets) {
     const filterValue = String(bucket.key);
@@ -58,7 +54,7 @@ export const expandRawAggregationResult = (
 ): FacetCounts => {
   const counts: FacetCounts = {};
   for (const category of categories) {
-    const aggResult = raw[`facet_${category}`] as TermsAggBuckets | undefined;
+    const aggResult = raw[`facet_${category}`] as TermsAggregateLike | undefined;
     if (aggResult?.buckets) {
       counts[category] = bucketsToFacetMap(aggResult.buckets);
     }
@@ -66,62 +62,40 @@ export const expandRawAggregationResult = (
   return counts;
 };
 
-interface FetchGranularFacetCountsChunkedArgs {
-  rulesClient: RulesClient;
+interface FetchGranularFacetCountsArgs {
+  savedObjectsClient: SavedObjectsClientContract;
   ruleIds: string[];
   categories: GranularRulesFacetCategory[];
-  chunkSize?: number;
 }
 
 /**
- * Run the same terms aggregations as `buildAggregations` over a (potentially
- * large) set of alerting saved-object ids without OR-ing every id into one
- * KQL clause. Splits `ruleIds` into chunks, runs an aggs-only `findRules`
- * call per chunk, and merges the per-chunk terms buckets by summing
- * `doc_count` per `(category, key)`.
+ * Run terms aggregations over a set of alerting saved-object IDs in a single
+ * ES round trip.
  */
-export const fetchGranularFacetCountsChunked = async ({
-  rulesClient,
+export const fetchGranularFacetCounts = async ({
+  savedObjectsClient,
   ruleIds,
   categories,
-  chunkSize = FACET_AGG_ID_CHUNK_SIZE,
-}: FetchGranularFacetCountsChunkedArgs): Promise<FacetCounts> => {
+}: FetchGranularFacetCountsArgs): Promise<FacetCounts> => {
   if (ruleIds.length === 0 || categories.length === 0) {
     return {};
   }
 
+  const prefixedIds = ruleIds.map((id) => `${RULE_SAVED_OBJECT_TYPE}:${id}`);
   const aggs = buildAggregations({ categories });
-  const merged: FacetCounts = Object.fromEntries(categories.map((c) => [c, {}]));
 
-  for (let start = 0; start < ruleIds.length; start += chunkSize) {
-    const chunk = ruleIds.slice(start, start + chunkSize);
-    const result = await findRules({
-      rulesClient,
-      filter: undefined,
-      ruleIds: chunk,
-      page: 1,
-      perPage: 0,
-      sortField: undefined,
-      sortOrder: undefined,
-      fields: undefined,
-      aggregations: aggs,
-    });
+  const searchResult = await savedObjectsClient.search<
+    SavedObjectsRawDocSource,
+    Record<string, unknown>
+  >({
+    type: RULE_SAVED_OBJECT_TYPE,
+    namespaces: [savedObjectsClient.getCurrentNamespace() ?? 'default'],
+    query: { terms: { _id: prefixedIds } },
+    size: 0,
+    aggs,
+  });
 
-    if (result.aggregations) {
-      const partial = expandRawAggregationResult(
-        result.aggregations as Record<string, unknown>,
-        categories
-      );
-      for (const category of categories) {
-        const bucket = partial[category] ?? {};
-        const accum = merged[category] ?? {};
-        for (const [key, count] of Object.entries(bucket)) {
-          accum[key] = (accum[key] ?? 0) + count;
-        }
-        merged[category] = accum;
-      }
-    }
-  }
-
-  return merged;
+  return searchResult.aggregations
+    ? expandRawAggregationResult(searchResult.aggregations, categories)
+    : {};
 };

@@ -10,6 +10,7 @@ import type {
   ReviewRuleUpgradeResponseBody,
   ReviewRuleUpgradeSortItem,
 } from '../../../../../common/api/detection_engine/prebuilt_rules';
+import type { RuleResponseField } from '../../../../../common/api/detection_engine/prebuilt_rules/common/rule_response_field.gen';
 import type { SearchRulesAggregations } from '../../../../../common/api/detection_engine/rule_management';
 import type { GranularRulesSearch } from '../../../../../common/api/detection_engine/rule_management/granular_rules/granular_rules_contract.gen';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
@@ -29,7 +30,7 @@ interface UsePrebuiltRulesUpgradeReviewParams {
   searchTerm?: string;
   sortingOptions?: ReviewRuleUpgradeSortItem;
   aggregations?: SearchRulesAggregations;
-  fields?: string[];
+  fields?: RuleResponseField[];
 }
 
 /**
