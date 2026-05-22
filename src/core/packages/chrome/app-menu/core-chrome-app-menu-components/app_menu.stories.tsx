@@ -463,7 +463,7 @@ export const PrimaryActionWithPopover: Story = {
         label: 'Create',
         testId: 'createPopoverButton',
         iconType: 'plus',
-        popoverWidth: 200,
+        popoverWidth: 120,
         items: [
           {
             run: () => action('create-dashboard-clicked'),

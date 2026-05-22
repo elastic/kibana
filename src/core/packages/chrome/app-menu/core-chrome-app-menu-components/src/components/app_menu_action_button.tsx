@@ -176,6 +176,7 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
         isOpen={isPopoverOpen}
         popoverWidth={popoverWidth}
         popoverTestId={popoverTestId}
+        anchorPosition="downRight"
         onClose={onPopoverClose}
         onCloseOverflowButton={onCloseOverflowButton}
       />
@@ -193,6 +194,7 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
         isOpen={isPopoverOpen}
         popoverWidth={popoverWidth}
         popoverTestId={popoverTestId}
+        anchorPosition="downRight"
         onClose={onPopoverClose}
         onCloseOverflowButton={onCloseOverflowButton}
       />
