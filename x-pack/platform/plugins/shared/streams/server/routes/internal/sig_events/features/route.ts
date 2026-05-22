@@ -191,8 +191,11 @@ export const listFeaturesRoute = createServerRoute({
     await streamsClient.ensureStream(params.path.name);
 
     const kiClient = await getKnowledgeIndicatorClient();
-    const { query, search_mode: searchMode, include_excluded: includeExcludedRaw } =
-      params.query ?? {};
+    const {
+      query,
+      search_mode: searchMode,
+      include_excluded: includeExcludedRaw,
+    } = params.query ?? {};
     const includeExcluded = parseIncludeExcluded(includeExcludedRaw);
     const { hits: features } = query
       ? await kiClient.findFeatures(params.path.name, query, { searchMode, includeExcluded })
@@ -240,8 +243,11 @@ export const listAllFeaturesRoute = createServerRoute({
     const streamNames = streams.map((stream) => stream.name);
 
     const kiClient = await getKnowledgeIndicatorClient();
-    const { query, search_mode: searchMode, include_excluded: includeExcludedRaw } =
-      params?.query ?? {};
+    const {
+      query,
+      search_mode: searchMode,
+      include_excluded: includeExcludedRaw,
+    } = params?.query ?? {};
     const includeExcluded = parseIncludeExcluded(includeExcludedRaw);
     const { hits: features } = query
       ? await kiClient.findFeatures(streamNames, query, { searchMode, includeExcluded })

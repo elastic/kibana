@@ -381,12 +381,15 @@ export async function identifyInferredFeatures({
   diverseOffset = 0,
   trackFeaturesIdentified,
 }: IdentifyInferredFeaturesOptions): Promise<IdentifyInferredFeaturesResult> {
-  const [{ hits: allFeatures }, { hits: excludedFeatures }, { featurePromptOverride: systemPrompt }] =
-    await Promise.all([
-      kiClient.getFeatures(streamName),
-      kiClient.getExcludedFeatures(streamName),
-      new PromptsConfigService({ soClient, logger }).getPrompt(),
-    ]);
+  const [
+    { hits: allFeatures },
+    { hits: excludedFeatures },
+    { featurePromptOverride: systemPrompt },
+  ] = await Promise.all([
+    kiClient.getFeatures(streamName),
+    kiClient.getExcludedFeatures(streamName),
+    new PromptsConfigService({ soClient, logger }).getPrompt(),
+  ]);
 
   const discoveredFeatures = allFeatures.filter((f) => !isComputedFeature(f) && f.run_id === runId);
 

@@ -73,8 +73,7 @@ export function KnowledgeIndicatorsTable({
       const matchesStatusFilter =
         statusFilter === 'active'
           ? knowledgeIndicator.kind === 'query' || !isFeatureExcluded(knowledgeIndicator.feature)
-          : knowledgeIndicator.kind === 'feature' &&
-            isFeatureExcluded(knowledgeIndicator.feature);
+          : knowledgeIndicator.kind === 'feature' && isFeatureExcluded(knowledgeIndicator.feature);
 
       if (!matchesStatusFilter) {
         return false;
