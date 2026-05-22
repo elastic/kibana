@@ -10,9 +10,5 @@ export * from './datavisualizer/data_drift';
 export * from './datavisualizer/data_comparison';
 export * from './datavisualizer/datavisualizer';
 export * from './datavisualizer/file_based';
-export {
-  indexBasedManagementRouteFactory,
-  indexESQLBasedManagementRouteFactory,
-} from './datavisualizer/index_based';
 export * from './jobs_list';
 export * from './supplied_configurations';

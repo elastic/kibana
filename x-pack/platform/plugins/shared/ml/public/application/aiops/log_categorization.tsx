@@ -18,7 +18,7 @@ import { MlDataSourcePicker } from '@kbn/aiops-components';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import { useDataSource } from '../contexts/ml/data_source_context';
-import { useMlKibana, useNavigateToPath } from '../contexts/kibana';
+import { useMlKibana } from '../contexts/kibana';
 import { useEnabledFeatures } from '../contexts/ml';
 import { HelpMenu } from '../components/help_menu';
 import { MlPageHeader } from '../components/page_header';
@@ -26,7 +26,6 @@ import { PageTitle } from '../components/page_title';
 
 export const LogCategorizationPage: FC = () => {
   const { services } = useMlKibana();
-  const navigateToPath = useNavigateToPath();
   const { showNodeInfo } = useEnabledFeatures();
 
   const { selectedDataView: dataView, selectedSavedSearch: savedSearch } = useDataSource();
@@ -42,7 +41,6 @@ export const LogCategorizationPage: FC = () => {
     <MlDataSourcePicker
       currentDataView={dataView ?? null}
       services={services}
-      navigateToPath={navigateToPath}
       DataViewPickerComponent={DataViewPicker}
       SavedObjectFinderComponent={SavedObjectFinder}
     />

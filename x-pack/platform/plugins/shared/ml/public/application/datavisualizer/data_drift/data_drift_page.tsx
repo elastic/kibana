@@ -14,7 +14,7 @@ import type { DataDriftSpec } from '@kbn/data-visualizer-plugin/public';
 import { MlDataSourcePicker } from '@kbn/aiops-components';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
-import { useMlKibana, useNavigateToPath } from '../../contexts/kibana';
+import { useMlKibana } from '../../contexts/kibana';
 import { useDataSource } from '../../contexts/ml';
 import { MlPageHeader } from '../../components/page_header';
 import { PageTitle } from '../../components/page_title';
@@ -22,7 +22,6 @@ import { PageTitle } from '../../components/page_title';
 export const DataDriftPage: FC = () => {
   const { services } = useMlKibana();
   const { dataVisualizer } = services;
-  const navigateToPath = useNavigateToPath();
 
   const [DataDriftView, setDataDriftView] = useState<DataDriftSpec | null>(null);
 
@@ -39,7 +38,6 @@ export const DataDriftPage: FC = () => {
     <MlDataSourcePicker
       currentDataView={dataView ?? null}
       services={services}
-      navigateToPath={navigateToPath}
       DataViewPickerComponent={DataViewPicker}
       SavedObjectFinderComponent={SavedObjectFinder}
     />

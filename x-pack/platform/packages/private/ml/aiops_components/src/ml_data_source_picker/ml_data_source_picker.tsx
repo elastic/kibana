@@ -7,7 +7,9 @@
 
 import type { ComponentType, FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
+import { parse, stringify } from 'query-string';
+import { css } from '@emotion/react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/public';
@@ -38,7 +40,6 @@ export interface MlDataSourcePickerServices extends MlOpenSessionFlyoutServices 
 export interface MlDataSourcePickerProps {
   currentDataView: DataView | null;
   services: MlDataSourcePickerServices;
-  navigateToPath: (path: string) => void | Promise<void>;
   DataViewPickerComponent: ComponentType<DataViewPickerProps>;
   SavedObjectFinderComponent: MlOpenSessionFlyoutProps['SavedObjectFinderComponent'];
   /** When true, ES|QL-based sessions are hidden from the session picker */
@@ -47,10 +48,11 @@ export interface MlDataSourcePickerProps {
   onFieldSaved?: () => void;
 }
 
+const dataViewPickerStyles = css({ minWidth: 180 });
+
 export const MlDataSourcePicker: FC<MlDataSourcePickerProps> = ({
   currentDataView,
   services,
-  navigateToPath,
   DataViewPickerComponent,
   SavedObjectFinderComponent,
   filterEsql = false,
@@ -58,6 +60,7 @@ export const MlDataSourcePicker: FC<MlDataSourcePickerProps> = ({
 }) => {
   const [savedDataViews, setSavedDataViews] = useState<DataViewListItem[]>([]);
   const [isOpenSessionPanelVisible, setOpenSessionPanelVisible] = useState(false);
+  const history = useHistory();
   const location = useLocation();
   const { dataViews, dataViewEditor, dataViewFieldEditor } = services;
   const closeFieldEditorRef = useRef<() => void | undefined>();
@@ -72,29 +75,37 @@ export const MlDataSourcePicker: FC<MlDataSourcePickerProps> = ({
     dataViews.getIdsWithTitle().then(setSavedDataViews);
   }, [dataViews]);
 
+  const updateDataSource = useCallback(
+    (param: 'index' | 'savedSearchId', value: string) => {
+      const { index: _i, savedSearchId: _s, ...rest } = parse(location.search, { sort: false });
+      history.replace({ search: '?' + stringify({ ...rest, [param]: value }) });
+    },
+    [history, location.search]
+  );
+
   const onChangeDataView = useCallback(
     (id: string) => {
-      navigateToPath(`${location.pathname}?index=${encodeURIComponent(id)}`);
+      updateDataSource('index', id);
     },
-    [navigateToPath, location.pathname]
+    [updateDataSource]
   );
 
   const onDataViewCreated = useCallback(
     (created: DataView) => {
       if (created.id) {
         dataViews.getIdsWithTitle().then(setSavedDataViews);
-        navigateToPath(`${location.pathname}?index=${encodeURIComponent(created.id)}`);
+        updateDataSource('index', created.id);
       }
     },
-    [dataViews, navigateToPath, location.pathname]
+    [dataViews, updateDataSource]
   );
 
   const onOpenSavedSearch = useCallback(
     (id: string) => {
       setOpenSessionPanelVisible(false);
-      navigateToPath(`${location.pathname}?savedSearchId=${encodeURIComponent(id)}`);
+      updateDataSource('savedSearchId', id);
     },
-    [navigateToPath, location.pathname]
+    [updateDataSource]
   );
 
   const canEditDataView = useMemo(
@@ -133,7 +144,7 @@ export const MlDataSourcePicker: FC<MlDataSourcePickerProps> = ({
 
   const dataViewPickerContent = (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={false} css={dataViewPickerStyles}>
         <DataViewPickerComponent
           currentDataViewId={currentDataView?.id}
           savedDataViews={savedDataViews}

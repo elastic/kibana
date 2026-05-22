@@ -6,12 +6,12 @@
  */
 
 import type { FC } from 'react';
-import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { IndexDataVisualizerSpec } from '@kbn/data-visualizer-plugin/public';
 import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
-import { EuiEmptyPrompt, EuiHorizontalRule } from '@elastic/eui';
+import { EuiEmptyPrompt } from '@elastic/eui';
 import useMountedState from 'react-use/lib/useMountedState';
 import type {
   GetAdditionalLinksParams,
@@ -22,7 +22,7 @@ import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { MlDataSourcePicker } from '@kbn/aiops-components';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
-import { useMlApi, useMlKibana, useMlLocator, useNavigateToPath } from '../../contexts/kibana';
+import { useMlApi, useMlKibana, useMlLocator } from '../../contexts/kibana';
 import { HelpMenu } from '../../components/help_menu';
 import { isFullLicense } from '../../license';
 import { mlNodesAvailable, getMlNodeCount } from '../../ml_nodes_check/check_ml_nodes';
@@ -33,10 +33,7 @@ import { useDataSource } from '../../contexts/ml/data_source_context';
 import { useMlManagementLocator } from '../../contexts/kibana/use_create_url';
 import { PageTitle } from '../../components/page_title';
 
-export const IndexDataVisualizerPage: FC<{ esql: boolean; isManagementContext: boolean }> = ({
-  esql = false,
-  isManagementContext,
-}) => {
+export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false }) => {
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
   const { services } = useMlKibana();
   const {
@@ -49,27 +46,12 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean; isManagementContext: b
       mlApi: { recognizeIndex },
     },
   } = services;
-  const navigateToPath = useNavigateToPath();
   const mlApi = useMlApi();
   const { showNodeInfo } = useEnabledFeatures();
   const { selectedDataView: dataView } = useDataSource();
   const mlLocator = useMlLocator()!;
   const mlManagementLocator = useMlManagementLocator();
   const mlFeaturesDisabled = !isFullLicense();
-
-  const dataSourceNavigate = useCallback(
-    async (path: string) => {
-      if (isManagementContext && mlManagementLocator) {
-        await mlManagementLocator.navigate({
-          sectionId: 'ml',
-          appId: `anomaly_detection${path}`,
-        });
-      } else {
-        await navigateToPath(path);
-      }
-    },
-    [isManagementContext, navigateToPath, mlManagementLocator]
-  );
 
   useEffect(() => {
     getMlNodeCount(mlApi);
@@ -220,7 +202,6 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean; isManagementContext: b
     <MlDataSourcePicker
       currentDataView={dataView ?? null}
       services={services}
-      navigateToPath={dataSourceNavigate}
       DataViewPickerComponent={DataViewPicker}
       SavedObjectFinderComponent={SavedObjectFinder}
       filterEsql
@@ -249,7 +230,6 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean; isManagementContext: b
               }
             />
           </MlPageHeader>
-          {isManagementContext && <EuiHorizontalRule margin="l" />}
           {!dataView && !esql ? (
             <>
               {dataSourcePicker}
@@ -278,7 +258,6 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean; isManagementContext: b
               showFrozenDataTierChoice={showNodeInfo}
               esql={esql}
               headerContent={dataSourcePicker}
-              disableSearchSession={isManagementContext}
             />
           )}
         </>

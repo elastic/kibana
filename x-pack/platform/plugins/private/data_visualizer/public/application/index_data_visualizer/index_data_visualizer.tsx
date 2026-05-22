@@ -53,7 +53,6 @@ export interface DataVisualizerStateContextProviderProps {
   IndexDataVisualizerComponent: FC<IndexDataVisualizerViewProps>;
   getAdditionalLinks?: GetAdditionalLinks;
   headerContent?: ReactNode;
-  disableSearchSession?: boolean;
 }
 export type IndexDataVisualizerSpec = typeof IndexDataVisualizer;
 
@@ -116,7 +115,6 @@ const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextProviderP
   IndexDataVisualizerComponent,
   getAdditionalLinks,
   headerContent,
-  disableSearchSession = false,
 }) => {
   const { services } = useDataVisualizerKibana();
   const {
@@ -134,8 +132,6 @@ const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextProviderP
   const [currentSessionId, setCurrentSessionId] = useState<string | undefined>(undefined);
 
   useEffect(() => {
-    if (disableSearchSession) return;
-
     const urlState = parseUrlState(urlSearchString);
 
     if (search.session) {
@@ -180,7 +176,7 @@ const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextProviderP
     };
     // urlSearchString already includes all the other dependencies
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [disableSearchSession, search.session, urlSearchString]);
+  }, [search.session, urlSearchString]);
 
   useEffect(() => {
     const prevSearchString = urlSearchString;
@@ -310,7 +306,6 @@ export interface Props {
   showFrozenDataTierChoice?: boolean;
   esql?: boolean;
   headerContent?: ReactNode;
-  disableSearchSession?: boolean;
 }
 
 export const IndexDataVisualizer: FC<Props> = ({
@@ -318,7 +313,6 @@ export const IndexDataVisualizer: FC<Props> = ({
   showFrozenDataTierChoice = true,
   esql,
   headerContent,
-  disableSearchSession,
 }) => {
   const coreStart = getCoreStart();
   const {
@@ -372,7 +366,6 @@ export const IndexDataVisualizer: FC<Props> = ({
                 IndexDataVisualizerComponent={IndexDataVisualizerView}
                 getAdditionalLinks={getAdditionalLinks}
                 headerContent={headerContent}
-                disableSearchSession={disableSearchSession}
               />
             ) : (
               <DataVisualizerESQLStateContextProvider />
