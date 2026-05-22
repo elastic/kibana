@@ -59,6 +59,17 @@ const toIdRemapping = (remapping: DatatableRemapping): IdRemapping =>
   remapping.map(({ oldId, newId }) => [oldId, newId]);
 
 /**
+ * Ranks for sorting the `visualization.columns` array by semantic type.
+ * Only rows, split_metrics_by, and metrics are valid here — refs are
+ * datasource-only and never appear in `visualization.columns`.
+ */
+const VIZ_COLUMN_RANK = {
+  row: 0,
+  split_metric_by: 1,
+  metric: 2,
+} as const;
+
+/**
  * Sort visualization columns by semantic type: rows first, then split_metrics_by, then metrics.
  * Within each group, sort by columnId for stable ordering.
  * This is the sorting logic used by the transform.
@@ -66,16 +77,59 @@ const toIdRemapping = (remapping: DatatableRemapping): IdRemapping =>
 function sortByColumnType(a: DatatableColumn, b: DatatableColumn): number {
   const rank = (col: DatatableColumn) => {
     if (col.isMetric) {
-      return 2; // metric
+      return VIZ_COLUMN_RANK.metric;
     }
     if (col.isTransposed) {
-      return 1; // split_metrics_by
+      return VIZ_COLUMN_RANK.split_metric_by;
     }
-    return 0; // row
+    return VIZ_COLUMN_RANK.row;
   };
   const diff = rank(a) - rank(b);
   return diff !== 0 ? diff : a.columnId.localeCompare(b.columnId, undefined, { numeric: true });
 }
+
+const ROW_PREFIX = `${getAccessorName('row')}_`;
+const SPLIT_PREFIX = `${getAccessorName('split_metric_by')}_`;
+const METRIC_PREFIX = `${getAccessorName('metric')}_`;
+const METRIC_REF_PREFIX = `${getAccessorName('metric_ref')}_`;
+
+/**
+ * A column id belongs to the visualization state (i.e. is rendered) when it
+ * is a row, a split_metric_by, or a top-level metric.
+ * References (`metric_ref_*`) and any unknowns are non-visualization-state: they exist
+ * only in the datasource layer and are hidden at render time.
+ */
+const isVisualizationStateColumnId = (id: string): boolean =>
+  id.startsWith(ROW_PREFIX) ||
+  id.startsWith(SPLIT_PREFIX) ||
+  (id.startsWith(METRIC_PREFIX) && !id.startsWith(METRIC_REF_PREFIX));
+
+/**
+ * Canonical order for the original side: rows → split_metrics_by → metrics
+ * → everything else (refs and any unknowns).
+ */
+const sortVisualizationStateColumnsToCanonicalOrder = (ids: string[]): string[] => [
+  ...ids.filter((id) => id.startsWith(ROW_PREFIX)),
+  ...ids.filter((id) => id.startsWith(SPLIT_PREFIX)),
+  ...ids.filter((id) => id.startsWith(METRIC_PREFIX) && !id.startsWith(METRIC_REF_PREFIX)),
+  ...ids.filter((id) => !isVisualizationStateColumnId(id)),
+];
+
+/**
+ * Stable partition for the transformed side: move non-visualization-state
+ * columns (refs and any unknowns) to the end while preserving the relative
+ * order of everything else.
+ *
+ * Refs (e.g. the `max` referenced by a `counter_rate`) are hidden at render
+ * time (`getTableSpec` filters via `isReferenced`), so their position inside
+ * `columnOrder` does not affect the rendering. The transform interleaves
+ * them with their owning metric via `processMetricColumnsWithReferences`.
+ * We normalize that purely cosmetic placement to ease testing.
+ */
+const moveNonVisualizationStateColumnsToEnd = (ids: readonly string[]): string[] => [
+  ...ids.filter(isVisualizationStateColumnId),
+  ...ids.filter((id) => !isVisualizationStateColumnId(id)),
+];
 
 /**
  * Classify a visualization column as a metric, split_metric_by, or row.
@@ -408,6 +462,55 @@ export const normalizeDatatable: AttributesNormalizer<DatatableAttributes> = (at
     },
   };
 
+  // Align datasource column order for round-trip comparison.
+  //
+  // - `original`: full canonical sort (rows → splits → metrics → refs).
+  //   The API model has three separate arrays (`rows`, `split_metrics_by`,
+  //   `metrics`) and cannot represent arbitrary cross-group orderings, so any
+  //   non-canonical original must be normalized to canonical form before
+  //   comparison (lossy by design).
+  //
+  // - `transformed`: only push refs to the end (stable). Non-ref ordering is
+  //   the transform's emit order and stays untouched.
+  //   We only move the metric_ref columns to the end, because they
+  //   don't affect the rendering column order.
+  const sortDatasourceColumns: NormalizerConfig<DatatableAttributes> = {
+    original: (attrs) => {
+      const formBasedLayer = Object.values(
+        getFormBasedDatasourceState(attrs.state.datasourceStates)?.layers ?? {}
+      )[0];
+      if (formBasedLayer) {
+        formBasedLayer.columnOrder = sortVisualizationStateColumnsToCanonicalOrder(
+          formBasedLayer.columnOrder
+        );
+      }
+
+      const textBasedLayer = Object.values(attrs.state.datasourceStates.textBased?.layers ?? {})[0];
+      if (textBasedLayer) {
+        const byId = new Map(textBasedLayer.columns.map((c) => [c.columnId, c]));
+        const orderedIds = sortVisualizationStateColumnsToCanonicalOrder(
+          textBasedLayer.columns.map((c) => c.columnId)
+        );
+        textBasedLayer.columns = orderedIds.map((id) => byId.get(id)!);
+      }
+
+      return attrs;
+    },
+    transformed: (attrs) => {
+      const formBasedLayer = Object.values(
+        getFormBasedDatasourceState(attrs.state.datasourceStates)?.layers ?? {}
+      )[0];
+      if (formBasedLayer) {
+        formBasedLayer.columnOrder = moveNonVisualizationStateColumnsToEnd(
+          formBasedLayer.columnOrder
+        );
+      }
+
+      // ESQL has no refs, so the transform's emit order is already canonical.
+      return attrs;
+    },
+  };
+
   return mergeNormalizers<DatatableAttributes>([
     getCommonNormalizer<DatatableAttributes>(() => ({
       layerRemapping,
@@ -418,6 +521,7 @@ export const normalizeDatatable: AttributesNormalizer<DatatableAttributes> = (at
     alignId,
     deduplicateColumns,
     sortColumns,
+    sortDatasourceColumns,
     alignLegacyTypes,
     getPaletteNormalizer<DatatableAttributes>('state.visualization.columns.*.palette'),
   ])(attributes);
