@@ -14,6 +14,7 @@ import type {
 } from './types';
 import {
   createAlertAIInsight,
+  createAlertAskAiAssistantButton,
   createErrorSampleAIInsight,
   createLogAIInsight,
   createLogsAIInsightRenderer,
@@ -60,6 +61,7 @@ export class ObservabilityAgentBuilderPlugin
 
     return {
       getAlertAIInsight: () => createAlertAIInsight(core, plugins),
+      getAlertAskAiAssistantButton: () => createAlertAskAiAssistantButton(core, plugins),
       getErrorSampleAIInsight: () => createErrorSampleAIInsight(core, plugins),
     };
   }
