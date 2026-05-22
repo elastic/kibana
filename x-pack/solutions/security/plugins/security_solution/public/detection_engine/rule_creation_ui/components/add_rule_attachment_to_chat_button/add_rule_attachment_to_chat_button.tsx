@@ -73,7 +73,8 @@ export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButt
   // For rule-response usage: register the rule id with the handler so saves know to PATCH not POST.
   const ruleId = rule?.id;
   useEffect(() => {
-    aiRuleCreation.setExistingRuleId(ruleId ?? null);
+    if (!ruleId) return;
+    aiRuleCreation.setExistingRuleId(ruleId);
     return () => aiRuleCreation.setExistingRuleId(null);
   }, [ruleId, aiRuleCreation]);
 

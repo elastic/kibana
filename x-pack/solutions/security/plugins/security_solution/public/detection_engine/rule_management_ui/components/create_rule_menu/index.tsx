@@ -125,7 +125,10 @@ export const CreateRuleMenu: React.FC<CreateRuleContextMenuProps> = ({ loading, 
     const emptyRuleAttachment: AttachmentInput = {
       id: SECURITY_RULE_ATTACHMENT_ID,
       type: SecurityAgentBuilderAttachments.rule,
-      description: 'New Rule',
+      description: i18n.translate(
+        'xpack.securitySolution.detectionEngine.createRule.aiRuleCreationAttachmentLabel',
+        { defaultMessage: 'New Rule' }
+      ),
       data: {
         text: JSON.stringify({}),
         attachmentLabel: 'New Rule',

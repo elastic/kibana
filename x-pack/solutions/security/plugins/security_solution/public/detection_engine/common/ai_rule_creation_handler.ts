@@ -152,7 +152,9 @@ export const createAiRuleCreationHandler = ({
       const message =
         (err as { body?: { message?: string } })?.body?.message ??
         (err as Error)?.message ??
-        'Unknown error';
+        i18n.translate('xpack.securitySolution.saveRuleHandler.unknownErrorMessage', {
+          defaultMessage: 'Unknown error',
+        });
       notifications.toasts.addDanger({
         title: i18n.translate('xpack.securitySolution.saveRuleHandler.saveFailedTitle', {
           defaultMessage: 'Failed to save rule',
