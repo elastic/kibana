@@ -4523,6 +4523,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/agent-builder-dashboards-common@link:x-pack/platform/packages/shared/agent-builder-dashboards/agent-builder-dashboards-common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/agent-builder-dashboards-plugin@link:x-pack/platform/plugins/shared/agent_builder_dashboards":
+  version "0.0.0"
+  uid ""
+
 "@kbn/agent-builder-genai-utils@link:x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils":
   version "0.0.0"
   uid ""
@@ -6328,14 +6336,6 @@
   uid ""
 
 "@kbn/cypress-test-helper@link:src/platform/packages/shared/kbn-cypress-test-helper":
-  version "0.0.0"
-  uid ""
-
-"@kbn/dashboard-agent-common@link:x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common":
-  version "0.0.0"
-  uid ""
-
-"@kbn/dashboard-agent-plugin@link:x-pack/platform/plugins/shared/dashboard_agent":
   version "0.0.0"
   uid ""
 
