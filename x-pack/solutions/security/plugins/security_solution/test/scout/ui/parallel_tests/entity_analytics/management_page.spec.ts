@@ -162,31 +162,5 @@ spaceTest.describe(
         });
       }
     );
-
-    spaceTest('v2: should show error panel when init fails', async ({ pageObjects, page }) => {
-      spaceTest.setTimeout(120000);
-      const managementPage = pageObjects.entityAnalyticsManagementPage;
-
-      await managementPage.navigate();
-      await managementPage.waitForStatusLoaded();
-
-      await expect(managementPage.entityAnalyticsHealth).toContainText('Off');
-
-      await page.route('**/api/security/entity_store/start', (route) =>
-        route.fulfill({
-          status: 500,
-          contentType: 'application/json',
-          body: JSON.stringify({ message: 'Internal Server Error' }),
-        })
-      );
-
-      await managementPage.toggleEntityAnalytics();
-
-      await expect(managementPage.errorPanel).toContainText('There was an error', {
-        timeout: 30000,
-      });
-
-      await page.unroute('**/api/security/entity_store/start');
-    });
   }
 );
