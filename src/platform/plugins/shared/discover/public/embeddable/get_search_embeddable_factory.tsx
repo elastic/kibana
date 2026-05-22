@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject, firstValueFrom, map, merge, skip } from 'rxjs';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { generateFilters } from '@kbn/data-plugin/public';
@@ -380,10 +380,6 @@ export const getSearchEmbeddableFactory = ({
           );
           const docViewerRef = useRef<DocViewerApi>(null);
 
-          const onUpdateSelectedTabId = useCallback((tabId: string | undefined) => {
-            initialDocViewerTabId$.next(tabId);
-          }, []);
-
           useEffect(() => {
             if (initialDocViewerTabId) {
               docViewerRef.current?.setSelectedTabId(initialDocViewerTabId);
@@ -480,9 +476,6 @@ export const getSearchEmbeddableFactory = ({
                         expandedDoc={enableDocumentViewer ? expandedDoc : undefined}
                         initialDocViewerTabId={
                           enableDocumentViewer ? initialDocViewerTabId : undefined
-                        }
-                        onUpdateSelectedTabId={
-                          enableDocumentViewer ? onUpdateSelectedTabId : undefined
                         }
                         docViewerRef={docViewerRef}
                         setExpandedDoc={enableDocumentViewer ? setExpandedDoc : undefined}

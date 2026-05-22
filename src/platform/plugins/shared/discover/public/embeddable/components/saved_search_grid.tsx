@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { AggregateQuery, Query, Filter } from '@kbn/es-query';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import { MAX_DOC_FIELDS_DISPLAYED, SHOW_MULTIFIELDS } from '@kbn/discover-utils';
 import {
-  type RenderDocumentViewMeta,
+  type DataTableColumnsMeta,
   type UnifiedDataTableProps,
   DataLoadingState as DiscoverGridLoadingState,
   getRenderCustomToolbarWithElements,
@@ -48,16 +48,57 @@ interface DiscoverGridEmbeddableProps extends Omit<UnifiedDataTableProps, 'sampl
   inlineEditing: InlineEditing;
   expandedDoc: DataTableRecord | undefined;
   initialDocViewerTabId: string | undefined;
-  onUpdateSelectedTabId?: (tabId: string | undefined) => void;
   docViewerRef: React.RefObject<DocViewerApi>;
   setExpandedDoc?: (doc: DataTableRecord | undefined, options?: { initialTabId?: string }) => void;
 }
 
+const noopSetExpandedDoc: NonNullable<UnifiedDataTableProps['setExpandedDoc']> = () => undefined;
+
 export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
   const { enableDocumentViewer, inlineEditing, interceptedWarnings, ...gridProps } = props;
-
   const { euiTheme } = useEuiTheme();
-  const [renderDocumentViewMeta, setRenderDocumentViewMeta] = useState<RenderDocumentViewMeta>();
+  const setExpandedDoc = props.setExpandedDoc ?? noopSetExpandedDoc;
+
+  const renderDocumentView = useCallback(
+    (
+      hit: DataTableRecord,
+      displayedRows: DataTableRecord[],
+      displayedColumns: string[],
+      columnsMeta?: DataTableColumnsMeta
+    ) => (
+      <DiscoverGridFlyout
+        dataView={props.dataView}
+        hit={hit}
+        hits={displayedRows}
+        // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them
+        columns={displayedColumns}
+        columnsMeta={columnsMeta}
+        savedSearchId={props.savedSearchId}
+        onFilter={props.onFilter}
+        onRemoveColumn={props.onRemoveColumn}
+        onAddColumn={props.onAddColumn}
+        onClose={() => setExpandedDoc(undefined)}
+        setExpandedDoc={setExpandedDoc}
+        initialTabId={props.initialDocViewerTabId}
+        query={props.query}
+        filters={props.filters}
+        docViewerRef={props.docViewerRef}
+        hideFilteringOnComputedColumns={true}
+      />
+    ),
+    [
+      setExpandedDoc,
+      props.dataView,
+      props.docViewerRef,
+      props.filters,
+      props.initialDocViewerTabId,
+      props.onAddColumn,
+      props.onFilter,
+      props.onRemoveColumn,
+      props.query,
+      props.savedSearchId,
+    ]
+  );
 
   const renderCustomToolbarWithElements = useMemo(
     () =>
@@ -109,8 +150,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         showMultiFields={props.services.uiSettings.get(SHOW_MULTIFIELDS)}
         hideFilteringOnComputedColumns={true}
         maxDocFieldsDisplayed={props.services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
-        renderDocumentView={enableDocumentViewer ? 'external' : undefined}
-        setRenderDocumentViewMeta={enableDocumentViewer ? setRenderDocumentViewMeta : undefined}
+        renderDocumentView={enableDocumentViewer ? renderDocumentView : undefined}
         renderCustomToolbar={renderCustomToolbarWithElements}
         externalCustomRenderers={cellRenderers}
         enableComparisonMode
@@ -119,31 +159,6 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         className="unifiedDataTable"
         css={{ '.unifiedDataTableToolbar': { paddingBlockStart: euiTheme.size.xs } }}
       />
-      {enableDocumentViewer &&
-        props.expandedDoc &&
-        props.setExpandedDoc &&
-        renderDocumentViewMeta && (
-          <DiscoverGridFlyout
-            dataView={props.dataView}
-            hit={props.expandedDoc}
-            hits={renderDocumentViewMeta.displayedRows}
-            // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them
-            columns={renderDocumentViewMeta.displayedColumns}
-            columnsMeta={props.columnsMeta}
-            savedSearchId={props.savedSearchId}
-            onFilter={props.onFilter}
-            onRemoveColumn={props.onRemoveColumn}
-            onAddColumn={props.onAddColumn}
-            onClose={() => props.setExpandedDoc?.(undefined)}
-            setExpandedDoc={props.setExpandedDoc}
-            initialTabId={props.initialDocViewerTabId}
-            onUpdateSelectedTabId={props.onUpdateSelectedTabId}
-            query={props.query}
-            filters={props.filters}
-            docViewerRef={props.docViewerRef}
-            hideFilteringOnComputedColumns={true}
-          />
-        )}
     </SavedSearchEmbeddableBase>
   );
 }
