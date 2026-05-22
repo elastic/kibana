@@ -8,6 +8,7 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
+import { createWorkflowsClientMock } from '@kbn/workflows-extensions/server/mocks';
 import type { LoggerService } from '../../services/logger_service/logger_service';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import type { WorkflowService } from '../../services/workflow_service/workflow_service';
@@ -53,10 +54,9 @@ describe('AlertActionWorkflowSubscriber', () => {
 
     ({ workflowService, workflowsExtensions } = createWorkflowService());
     mockEmitEvent = jest.fn().mockResolvedValue(undefined);
-    workflowsExtensions.getClient.mockResolvedValue({
-      isWorkflowsAvailable: true,
-      emitEvent: mockEmitEvent,
-    });
+    workflowsExtensions.getClient.mockResolvedValue(
+      createWorkflowsClientMock({ emitEvent: mockEmitEvent })
+    );
 
     ({ loggerService, mockLogger } = createLoggerService());
     subscriber = new AlertActionWorkflowSubscriber(bus, workflowService, loggerService);

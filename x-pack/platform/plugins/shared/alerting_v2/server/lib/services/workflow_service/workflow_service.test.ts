@@ -6,7 +6,10 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { workflowsExtensionsMock } from '@kbn/workflows-extensions/server/mocks';
+import {
+  createWorkflowsClientMock,
+  workflowsExtensionsMock,
+} from '@kbn/workflows-extensions/server/mocks';
 import type { LoggerService } from '../logger_service/logger_service';
 import { createLoggerService } from '../logger_service/logger_service.mock';
 import { WorkflowService } from './workflow_service';
@@ -25,10 +28,9 @@ describe('WorkflowService', () => {
   beforeEach(() => {
     workflowsExtensions = workflowsExtensionsMock.createStart();
     mockEmitEvent = jest.fn().mockResolvedValue(undefined);
-    workflowsExtensions.getClient.mockResolvedValue({
-      isWorkflowsAvailable: true,
-      emitEvent: mockEmitEvent,
-    });
+    workflowsExtensions.getClient.mockResolvedValue(
+      createWorkflowsClientMock({ emitEvent: mockEmitEvent })
+    );
 
     ({ loggerService } = createLoggerService());
 
@@ -51,10 +53,9 @@ describe('WorkflowService', () => {
     });
 
     it('skips emission when workflows is not available', async () => {
-      workflowsExtensions.getClient.mockResolvedValue({
-        isWorkflowsAvailable: false,
-        emitEvent: mockEmitEvent,
-      });
+      workflowsExtensions.getClient.mockResolvedValue(
+        createWorkflowsClientMock({ isWorkflowsAvailable: false, emitEvent: mockEmitEvent })
+      );
 
       const request = httpServerMock.createKibanaRequest();
 

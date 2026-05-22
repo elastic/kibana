@@ -6,7 +6,10 @@
  */
 
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
-import { workflowsExtensionsMock } from '@kbn/workflows-extensions/server/mocks';
+import {
+  createWorkflowsClientMock,
+  workflowsExtensionsMock,
+} from '@kbn/workflows-extensions/server/mocks';
 import { createLoggerService } from '../logger_service/logger_service.mock';
 import { WorkflowService } from './workflow_service';
 
@@ -15,10 +18,7 @@ export function createWorkflowService(): {
   workflowsExtensions: jest.Mocked<WorkflowsExtensionsServerPluginStart>;
 } {
   const workflowsExtensions = workflowsExtensionsMock.createStart();
-  workflowsExtensions.getClient.mockResolvedValue({
-    isWorkflowsAvailable: true,
-    emitEvent: jest.fn().mockResolvedValue(undefined),
-  });
+  workflowsExtensions.getClient.mockResolvedValue(createWorkflowsClientMock());
 
   const { loggerService } = createLoggerService();
   const workflowService = new WorkflowService(workflowsExtensions, loggerService);
