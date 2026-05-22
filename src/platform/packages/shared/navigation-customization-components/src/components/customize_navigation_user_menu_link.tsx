@@ -35,6 +35,9 @@ export const CustomizeNavigationUserMenuLink = ({ closePopover, onClick }: Props
         onClick();
       }}
       data-test-subj="customizeNavigationUserMenuLink"
+      css={css`
+        min-inline-size: 22em;
+      `}
     >
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
