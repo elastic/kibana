@@ -15,7 +15,7 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { publicApiPath } from '../../../../common/constants';
 import { apiTest } from '../fixtures';
-import { COMMON_HEADERS, ELASTIC_API_VERSION } from '../fixtures/constants';
+import { COMMON_HEADERS, ELASTIC_API_VERSION, INTERNAL_AGENT_BUILDER } from '../fixtures/constants';
 import { spaceUrl } from '../fixtures/space_paths';
 
 const ACL_TEST_PREFIX = 'acl-test';
@@ -64,6 +64,7 @@ apiTest.describe('Agent Builder — agents ACL API', { tag: [...tags.stateful.cl
   const testRunId = randomUUID();
   const aclSpaceId = `${ACL_TEST_PREFIX}-space-${testRunId}`;
   const aclApiBase = spaceUrl(publicApiPath, aclSpaceId);
+  const aclInternalBase = spaceUrl(INTERNAL_AGENT_BUILDER, aclSpaceId);
 
   // Three native Kibana users, all with `manageAgents`, distinct usernames.
   // Lets us exercise owner-vs-grantee scenarios against a real authn identity.
@@ -385,14 +386,14 @@ apiTest.describe('Agent Builder — agents ACL API', { tag: [...tags.stateful.cl
   apiTest(
     '/_suggest_user_profiles requires manageAgents (reader gets 403)',
     async ({ apiClient }) => {
-      const denied = await apiClient.post(`/internal/agent_builder/_suggest_user_profiles`, {
+      const denied = await apiClient.post(`${aclInternalBase}/_suggest_user_profiles`, {
         headers: headersFor(reader),
         body: { name: '' },
         responseType: 'json',
       });
       expect(denied).toHaveStatusCode(403);
 
-      const allowed = await apiClient.post(`/internal/agent_builder/_suggest_user_profiles`, {
+      const allowed = await apiClient.post(`${aclInternalBase}/_suggest_user_profiles`, {
         headers: headersFor(eve),
         body: { name: '' },
         responseType: 'json',
