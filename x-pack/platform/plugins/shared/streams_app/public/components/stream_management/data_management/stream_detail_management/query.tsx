@@ -96,21 +96,21 @@ export function QueryStreamDetailManagement({
     tabs.significantEvents = significantEvents;
   }
 
+  const advancedTabLabel = i18n.translate('xpack.streams.queryStreamDetailManagement.advancedTab', {
+    defaultMessage: 'Advanced',
+  });
   tabs.advanced = {
     content: (
       <QueryStreamsAdvancedView definition={definition} refreshDefinition={refreshDefinition} />
     ),
-    label: (
+    label: advancedTabLabel,
+    fallbackLabel: (
       <EuiToolTip
         content={i18n.translate('xpack.streams.queryStreamDetailManagement.advanced.tooltip', {
           defaultMessage: 'View technical details about this query stream’s underlying setup',
         })}
       >
-        <span tabIndex={0}>
-          {i18n.translate('xpack.streams.queryStreamDetailManagement.advancedTab', {
-            defaultMessage: 'Advanced',
-          })}
-        </span>
+        <span tabIndex={0}>{advancedTabLabel}</span>
       </EuiToolTip>
     ),
   };
@@ -138,8 +138,8 @@ export function QueryStreamDetailManagement({
             <DiscoverBadgeButton stream={definition.stream} hasDataStream spellOut />
           </EuiFlexGroup>
         }
-        tabs={Object.entries(tabs).map(([tabKey, { label }]) => ({
-          label,
+        tabs={Object.entries(tabs).map(([tabKey, { label, fallbackLabel }]) => ({
+          label: fallbackLabel ?? label,
           href: router.link('/{key}/management/{tab}', {
             path: { key, tab: tabKey },
             query: { rangeFrom, rangeTo },
