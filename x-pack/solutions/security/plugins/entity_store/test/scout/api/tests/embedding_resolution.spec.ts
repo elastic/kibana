@@ -17,11 +17,7 @@ import {
   UPDATES_INDEX,
 } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
-import {
-  clearEntityStoreIndices,
-  seedUserEntity,
-  triggerMaintainerRun,
-} from '../fixtures/helpers';
+import { clearEntityStoreIndices, seedUserEntity, triggerMaintainerRun } from '../fixtures/helpers';
 
 /**
  * TODO(embedding-resolution): This suite is `.skip()` until BOTH preconditions land:
@@ -69,255 +65,260 @@ import {
  * so the conversion from `.skip()` to running is mechanical (flip `.skip` →
  * `.serial`, drop the precondition block).
  */
-apiTest.describe.skip(
-  'Embedding-resolution integration tests',
-  { tag: ENTITY_STORE_TAGS },
-  () => {
-    let defaultHeaders: Record<string, string>;
-    let internalHeaders: Record<string, string>;
+apiTest.describe.skip('Embedding-resolution integration tests', { tag: ENTITY_STORE_TAGS }, () => {
+  let defaultHeaders: Record<string, string>;
+  let internalHeaders: Record<string, string>;
 
-    apiTest.beforeAll(async ({ apiClient, esClient, kbnClient, samlAuth }) => {
-      const credentials = await samlAuth.asInteractiveUser('admin');
-      defaultHeaders = {
-        ...credentials.cookieHeader,
-        ...PUBLIC_HEADERS,
-      };
-      internalHeaders = {
-        ...credentials.cookieHeader,
-        ...INTERNAL_HEADERS,
-      };
+  apiTest.beforeAll(async ({ apiClient, esClient, kbnClient, samlAuth }) => {
+    const credentials = await samlAuth.asInteractiveUser('admin');
+    defaultHeaders = {
+      ...credentials.cookieHeader,
+      ...PUBLIC_HEADERS,
+    };
+    internalHeaders = {
+      ...credentials.cookieHeader,
+      ...INTERNAL_HEADERS,
+    };
 
-      await kbnClient.uiSettings.update({
-        [FF_ENABLE_ENTITY_STORE_V2]: true,
-      });
+    await kbnClient.uiSettings.update({
+      [FF_ENABLE_ENTITY_STORE_V2]: true,
+    });
 
-      await esClient.indices.delete({
-        index: [LATEST_INDEX, UPDATES_INDEX],
-        ignore_unavailable: true,
-      });
+    await esClient.indices.delete({
+      index: [LATEST_INDEX, UPDATES_INDEX],
+      ignore_unavailable: true,
+    });
 
-      const installResponse = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
-        headers: defaultHeaders,
+    const installResponse = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: {},
+    });
+    expect([200, 201]).toContain(installResponse.statusCode);
+
+    const initResponse = await apiClient.post(
+      ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_INIT,
+      {
+        headers: internalHeaders,
         responseType: 'json',
         body: {},
-      });
-      expect([200, 201]).toContain(installResponse.statusCode);
+      }
+    );
+    expect([200, 201]).toContain(initResponse.statusCode);
+  });
 
-      const initResponse = await apiClient.post(
-        ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_INIT,
-        {
-          headers: internalHeaders,
-          responseType: 'json',
-          body: {},
-        }
+  apiTest.beforeEach(async ({ esClient }) => {
+    await esClient.deleteByQuery({
+      index: LATEST_ALIAS,
+      refresh: true,
+      query: { match_all: {} },
+      ignore_unavailable: true,
+    });
+  });
+
+  apiTest.afterAll(async ({ apiClient, esClient }) => {
+    const response = await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: {},
+    });
+    expect(response.statusCode).toBe(200);
+    await clearEntityStoreIndices(esClient);
+  });
+
+  apiTest(
+    'embeds an unresolved user entity and stamps embedding_source + embedded_at',
+    async ({ apiClient, esClient }) => {
+      const entityId = 'embed-1-alice';
+      await seedUserEntity(esClient, {
+        entityId,
+        namespace: 'okta',
+        email: 'alice@corp.com',
+        userName: 'alice',
+        fullName: 'Alice Patterson',
+      });
+
+      await triggerMaintainerRun(apiClient, internalHeaders, 'embedding-resolution');
+
+      const embedded = await waitForEmbedding(esClient, entityId);
+      expect(embedded.entity.resolution.embedding).toHaveLength(1024);
+      expect(typeof embedded.entity.resolution.embedded_at).toBe('string');
+      expect(embedded.entity.resolution.embedding_source).toMatch(/^v1:name,full_name,email\|/);
+    }
+  );
+
+  apiTest('does NOT embed entities that are already resolved', async ({ apiClient, esClient }) => {
+    const targetId = 'embed-2-target';
+    const aliasId = 'embed-2-alias';
+    await seedUserEntity(esClient, { entityId: targetId, namespace: 'okta', email: 'b@corp.com' });
+    await seedUserEntity(esClient, {
+      entityId: aliasId,
+      namespace: 'entra_id',
+      email: 'b@corp.com',
+    });
+
+    // First let the rules-based resolver link them so aliasId has resolved_to.
+    await triggerMaintainerRun(apiClient, internalHeaders, 'automated-resolution');
+    await waitForResolvedTo(esClient, aliasId);
+
+    // Then run the embedding maintainer. The alias should not gain an embedding.
+    await triggerMaintainerRun(apiClient, internalHeaders, 'embedding-resolution');
+    await waitForEmbedding(esClient, targetId);
+
+    const aliasDoc = await getEntity(esClient, aliasId);
+    expect(aliasDoc.entity.resolution?.embedding).toBeUndefined();
+  });
+
+  /**
+   * Phase 3 — auto-link cases that the rules engine cannot resolve. These
+   * are the documented `er-v2-9.4-test-data.md` gaps (#13/#14/#18) that
+   * Phase 3's kNN + threshold pipeline closes. Each test:
+   *   1. Seeds the two-or-more variants of one fixture.
+   *   2. Runs the rules engine FIRST (must leave them split — that's the gap).
+   *   3. Runs the embedding maintainer (must link them via embeddings).
+   *   4. Asserts BOTH `resolved_to` AND `resolved_by === 'embedding'` so we
+   *      never accidentally pass on a rules-engine link.
+   *
+   * Pre-req: Phase 3 flag (`entityAnalyticsEmbeddingResolutionEnabled`) is
+   * enabled in the Scout Kibana boot config. The whole suite is `.skip()`'d
+   * above until that AND a real 1024-dim Jina endpoint land — see the
+   * top-of-file TODO.
+   */
+  apiTest(
+    'er-13: case-mismatched emails (Alice@Corp.com vs alice@corp.com) are linked via embedding',
+    async ({ apiClient, esClient }) => {
+      await seedUserEntity(esClient, {
+        entityId: 'er-13-okta',
+        namespace: 'okta',
+        email: 'Alice@Corp.com',
+        userName: 'alice',
+      });
+      await seedUserEntity(esClient, {
+        entityId: 'er-13-entra',
+        namespace: 'entra_id',
+        email: 'alice@corp.com',
+        userName: 'alice',
+      });
+
+      // Rules engine: must NOT link (case-sensitive `keyword` term query).
+      await triggerMaintainerRun(apiClient, internalHeaders, 'automated-resolution');
+      await sleep(2_000);
+      expect(
+        (await getEntity(esClient, 'er-13-entra')).entity?.relationships?.resolution?.resolved_to
+      ).toBeUndefined();
+
+      // Embedding maintainer: links them. Either entity may be picked as
+      // target depending on which embeds first; assert "any link with
+      // resolved_by='embedding' between the two".
+      await triggerMaintainerRun(apiClient, internalHeaders, 'embedding-resolution');
+      const linkedId = await waitForEitherResolvedToVia(
+        esClient,
+        ['er-13-okta', 'er-13-entra'],
+        'embedding'
       );
-      expect([200, 201]).toContain(initResponse.statusCode);
-    });
+      expect(['er-13-okta', 'er-13-entra']).toContain(linkedId);
+    }
+  );
 
-    apiTest.beforeEach(async ({ esClient }) => {
-      await esClient.deleteByQuery({
-        index: LATEST_ALIAS,
-        refresh: true,
-        query: { match_all: {} },
-        ignore_unavailable: true,
+  apiTest(
+    'er-14: plus-aliased emails (bob+work@… vs bob@…) are linked via embedding',
+    async ({ apiClient, esClient }) => {
+      await seedUserEntity(esClient, {
+        entityId: 'er-14-okta',
+        namespace: 'okta',
+        email: 'bob+work@corp.com',
+        userName: 'bob',
       });
-    });
-
-    apiTest.afterAll(async ({ apiClient, esClient }) => {
-      const response = await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
-        headers: defaultHeaders,
-        responseType: 'json',
-        body: {},
+      await seedUserEntity(esClient, {
+        entityId: 'er-14-entra',
+        namespace: 'entra_id',
+        email: 'bob@corp.com',
+        userName: 'bob',
       });
-      expect(response.statusCode).toBe(200);
-      await clearEntityStoreIndices(esClient);
-    });
 
-    apiTest(
-      'embeds an unresolved user entity and stamps embedding_source + embedded_at',
-      async ({ apiClient, esClient }) => {
-        const entityId = 'embed-1-alice';
+      await triggerMaintainerRun(apiClient, internalHeaders, 'automated-resolution');
+      await sleep(2_000);
+      expect(
+        (await getEntity(esClient, 'er-14-entra')).entity?.relationships?.resolution?.resolved_to
+      ).toBeUndefined();
+
+      await triggerMaintainerRun(apiClient, internalHeaders, 'embedding-resolution');
+      const linkedId = await waitForEitherResolvedToVia(
+        esClient,
+        ['er-14-okta', 'er-14-entra'],
+        'embedding'
+      );
+      expect(['er-14-okta', 'er-14-entra']).toContain(linkedId);
+    }
+  );
+
+  apiTest(
+    'er-18: name-only entities (no email, security-ml#417) are linked via embedding',
+    async ({ apiClient, esClient }) => {
+      await seedUserEntity(esClient, {
+        entityId: 'er-18-a',
+        namespace: 'ad',
+        userName: 'npatterson',
+        fullName: 'Nora Patterson',
+      });
+      await seedUserEntity(esClient, {
+        entityId: 'er-18-b',
+        namespace: 'okta',
+        userName: 'nora.patterson',
+        fullName: 'Nora Patterson',
+      });
+
+      await triggerMaintainerRun(apiClient, internalHeaders, 'automated-resolution');
+      await sleep(2_000);
+      // Rules engine is name-blind — both stay unresolved (this is the gap).
+      expect(
+        (await getEntity(esClient, 'er-18-a')).entity?.relationships?.resolution?.resolved_to
+      ).toBeUndefined();
+      expect(
+        (await getEntity(esClient, 'er-18-b')).entity?.relationships?.resolution?.resolved_to
+      ).toBeUndefined();
+
+      await triggerMaintainerRun(apiClient, internalHeaders, 'embedding-resolution');
+      const linkedId = await waitForEitherResolvedToVia(
+        esClient,
+        ['er-18-a', 'er-18-b'],
+        'embedding'
+      );
+      expect(['er-18-a', 'er-18-b']).toContain(linkedId);
+    }
+  );
+
+  apiTest(
+    'er-15: role-account false positive — three svc accounts + one admin sharing noreply@… stay split',
+    async ({ apiClient, esClient }) => {
+      const ids = ['er-15-svc-1', 'er-15-svc-2', 'er-15-svc-3', 'er-15-admin'];
+      for (const id of ids) {
         await seedUserEntity(esClient, {
-          entityId,
-          namespace: 'okta',
-          email: 'alice@corp.com',
-          userName: 'alice',
-          fullName: 'Alice Patterson',
+          entityId: id,
+          namespace: id === 'er-15-admin' ? 'entra_id' : 'okta',
+          email: 'noreply@corp.com',
+          userName: id,
         });
-
-        await triggerMaintainerRun(apiClient, internalHeaders, 'embedding-resolution');
-
-        const embedded = await waitForEmbedding(esClient, entityId);
-        expect(embedded.entity.resolution.embedding).toHaveLength(1024);
-        expect(typeof embedded.entity.resolution.embedded_at).toBe('string');
-        expect(embedded.entity.resolution.embedding_source).toMatch(/^v1:name,full_name,email\|/);
       }
-    );
 
-    apiTest(
-      'does NOT embed entities that are already resolved',
-      async ({ apiClient, esClient }) => {
-        const targetId = 'embed-2-target';
-        const aliasId = 'embed-2-alias';
-        await seedUserEntity(esClient, { entityId: targetId, namespace: 'okta', email: 'b@corp.com' });
-        await seedUserEntity(esClient, { entityId: aliasId, namespace: 'entra_id', email: 'b@corp.com' });
+      await triggerMaintainerRun(apiClient, internalHeaders, 'embedding-resolution');
+      // Give the maintainer a generous window to finish — 4 entities to
+      // process, plus the no-op for role-account skip.
+      await sleep(5_000);
+      await esClient.indices.refresh({ index: LATEST_ALIAS });
 
-        // First let the rules-based resolver link them so aliasId has resolved_to.
-        await triggerMaintainerRun(apiClient, internalHeaders, 'automated-resolution');
-        await waitForResolvedTo(esClient, aliasId);
-
-        // Then run the embedding maintainer. The alias should not gain an embedding.
-        await triggerMaintainerRun(apiClient, internalHeaders, 'embedding-resolution');
-        await waitForEmbedding(esClient, targetId);
-
-        const aliasDoc = await getEntity(esClient, aliasId);
-        expect(aliasDoc.entity.resolution?.embedding).toBeUndefined();
+      for (const id of ids) {
+        const doc = await getEntity(esClient, id);
+        const resolvedTo = doc.entity?.relationships?.resolution?.resolved_to;
+        const resolvedBy = doc.entity?.relationships?.resolution?.resolved_by;
+        expect(
+          resolvedTo,
+          `er-15 entity '${id}' must NOT be linked — role-account guard should have kept it split (got resolved_to=${resolvedTo}, resolved_by=${resolvedBy})`
+        ).toBeUndefined();
       }
-    );
-
-    /**
-     * Phase 3 — auto-link cases that the rules engine cannot resolve. These
-     * are the documented `er-v2-9.4-test-data.md` gaps (#13/#14/#18) that
-     * Phase 3's kNN + threshold pipeline closes. Each test:
-     *   1. Seeds the two-or-more variants of one fixture.
-     *   2. Runs the rules engine FIRST (must leave them split — that's the gap).
-     *   3. Runs the embedding maintainer (must link them via embeddings).
-     *   4. Asserts BOTH `resolved_to` AND `resolved_by === 'embedding'` so we
-     *      never accidentally pass on a rules-engine link.
-     *
-     * Pre-req: Phase 3 flag (`entityAnalyticsEmbeddingResolutionEnabled`) is
-     * enabled in the Scout Kibana boot config. The whole suite is `.skip()`'d
-     * above until that AND a real 1024-dim Jina endpoint land — see the
-     * top-of-file TODO.
-     */
-    apiTest(
-      'er-13: case-mismatched emails (Alice@Corp.com vs alice@corp.com) are linked via embedding',
-      async ({ apiClient, esClient }) => {
-        await seedUserEntity(esClient, {
-          entityId: 'er-13-okta',
-          namespace: 'okta',
-          email: 'Alice@Corp.com',
-          userName: 'alice',
-        });
-        await seedUserEntity(esClient, {
-          entityId: 'er-13-entra',
-          namespace: 'entra_id',
-          email: 'alice@corp.com',
-          userName: 'alice',
-        });
-
-        // Rules engine: must NOT link (case-sensitive `keyword` term query).
-        await triggerMaintainerRun(apiClient, internalHeaders, 'automated-resolution');
-        await sleep(2_000);
-        expect((await getEntity(esClient, 'er-13-entra')).entity?.relationships?.resolution?.resolved_to).toBeUndefined();
-
-        // Embedding maintainer: links them. Either entity may be picked as
-        // target depending on which embeds first; assert "any link with
-        // resolved_by='embedding' between the two".
-        await triggerMaintainerRun(apiClient, internalHeaders, 'embedding-resolution');
-        const linkedId = await waitForEitherResolvedToVia(
-          esClient,
-          ['er-13-okta', 'er-13-entra'],
-          'embedding'
-        );
-        expect(['er-13-okta', 'er-13-entra']).toContain(linkedId);
-      }
-    );
-
-    apiTest(
-      'er-14: plus-aliased emails (bob+work@… vs bob@…) are linked via embedding',
-      async ({ apiClient, esClient }) => {
-        await seedUserEntity(esClient, {
-          entityId: 'er-14-okta',
-          namespace: 'okta',
-          email: 'bob+work@corp.com',
-          userName: 'bob',
-        });
-        await seedUserEntity(esClient, {
-          entityId: 'er-14-entra',
-          namespace: 'entra_id',
-          email: 'bob@corp.com',
-          userName: 'bob',
-        });
-
-        await triggerMaintainerRun(apiClient, internalHeaders, 'automated-resolution');
-        await sleep(2_000);
-        expect((await getEntity(esClient, 'er-14-entra')).entity?.relationships?.resolution?.resolved_to).toBeUndefined();
-
-        await triggerMaintainerRun(apiClient, internalHeaders, 'embedding-resolution');
-        const linkedId = await waitForEitherResolvedToVia(
-          esClient,
-          ['er-14-okta', 'er-14-entra'],
-          'embedding'
-        );
-        expect(['er-14-okta', 'er-14-entra']).toContain(linkedId);
-      }
-    );
-
-    apiTest(
-      'er-18: name-only entities (no email, security-ml#417) are linked via embedding',
-      async ({ apiClient, esClient }) => {
-        await seedUserEntity(esClient, {
-          entityId: 'er-18-a',
-          namespace: 'ad',
-          userName: 'npatterson',
-          fullName: 'Nora Patterson',
-        });
-        await seedUserEntity(esClient, {
-          entityId: 'er-18-b',
-          namespace: 'okta',
-          userName: 'nora.patterson',
-          fullName: 'Nora Patterson',
-        });
-
-        await triggerMaintainerRun(apiClient, internalHeaders, 'automated-resolution');
-        await sleep(2_000);
-        // Rules engine is name-blind — both stay unresolved (this is the gap).
-        expect((await getEntity(esClient, 'er-18-a')).entity?.relationships?.resolution?.resolved_to).toBeUndefined();
-        expect((await getEntity(esClient, 'er-18-b')).entity?.relationships?.resolution?.resolved_to).toBeUndefined();
-
-        await triggerMaintainerRun(apiClient, internalHeaders, 'embedding-resolution');
-        const linkedId = await waitForEitherResolvedToVia(
-          esClient,
-          ['er-18-a', 'er-18-b'],
-          'embedding'
-        );
-        expect(['er-18-a', 'er-18-b']).toContain(linkedId);
-      }
-    );
-
-    apiTest(
-      'er-15: role-account false positive — three svc accounts + one admin sharing noreply@… stay split',
-      async ({ apiClient, esClient }) => {
-        const ids = ['er-15-svc-1', 'er-15-svc-2', 'er-15-svc-3', 'er-15-admin'];
-        for (const id of ids) {
-          await seedUserEntity(esClient, {
-            entityId: id,
-            namespace: id === 'er-15-admin' ? 'entra_id' : 'okta',
-            email: 'noreply@corp.com',
-            userName: id,
-          });
-        }
-
-        await triggerMaintainerRun(apiClient, internalHeaders, 'embedding-resolution');
-        // Give the maintainer a generous window to finish — 4 entities to
-        // process, plus the no-op for role-account skip.
-        await sleep(5_000);
-        await esClient.indices.refresh({ index: LATEST_ALIAS });
-
-        for (const id of ids) {
-          const doc = await getEntity(esClient, id);
-          const resolvedTo = doc.entity?.relationships?.resolution?.resolved_to;
-          const resolvedBy = doc.entity?.relationships?.resolution?.resolved_by;
-          expect(
-            resolvedTo,
-            `er-15 entity '${id}' must NOT be linked — role-account guard should have kept it split (got resolved_to=${resolvedTo}, resolved_by=${resolvedBy})`
-          ).toBeUndefined();
-        }
-      }
-    );
-  }
-);
+    }
+  );
+});
 
 const EMBEDDING_PATH = 'entity.resolution.embedding';
 const RESOLVED_TO_PATH = 'entity.relationships.resolution.resolved_to';
@@ -345,9 +346,7 @@ async function waitForEmbedding(
     }
     await new Promise((resolve) => setTimeout(resolve, 200));
   }
-  throw new Error(
-    `Timed out waiting for entity '${entityId}' to be embedded after ${timeoutMs}ms`
-  );
+  throw new Error(`Timed out waiting for entity '${entityId}' to be embedded after ${timeoutMs}ms`);
 }
 
 async function waitForResolvedTo(
@@ -467,7 +466,9 @@ async function waitForEitherResolvedToVia(
     await sleep(200);
   }
   throw new Error(
-    `Timed out waiting for any of [${entityIds.join(', ')}] to gain resolved_to with resolved_by='${expectedSourceTag}'`
+    `Timed out waiting for any of [${entityIds.join(
+      ', '
+    )}] to gain resolved_to with resolved_by='${expectedSourceTag}'`
   );
 }
 

@@ -5,7 +5,31 @@
  * 2.0.
  */
 
-import { computeParallelMerge } from './parallel_resolution';
+import { computeParallelMerge, perSourceResolvedToField } from './parallel_resolution';
+
+describe('perSourceResolvedToField', () => {
+  // Regression lockdown for the per-source slot paths. The automated_resolution
+  // and embedding_resolution maintainers both compute their "already resolved"
+  // filter field via this helper; pinning the exact strings here prevents an
+  // accidental rename from silently breaking pagination on existing indices.
+  it('returns the by_rule path', () => {
+    expect(perSourceResolvedToField('rule')).toBe(
+      'entity.relationships.resolution.by_rule.resolved_to'
+    );
+  });
+
+  it('returns the by_embedding path', () => {
+    expect(perSourceResolvedToField('embedding')).toBe(
+      'entity.relationships.resolution.by_embedding.resolved_to'
+    );
+  });
+
+  it('returns the by_manual path', () => {
+    expect(perSourceResolvedToField('manual')).toBe(
+      'entity.relationships.resolution.by_manual.resolved_to'
+    );
+  });
+});
 
 describe('computeParallelMerge', () => {
   it('returns null effectiveTo and not divergent when no source has an opinion', () => {

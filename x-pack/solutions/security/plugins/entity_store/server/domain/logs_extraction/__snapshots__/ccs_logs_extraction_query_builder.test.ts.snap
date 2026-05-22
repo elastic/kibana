@@ -184,7 +184,9 @@ data_stream*,
 | LIMIT 5000"
 `;
 
-exports[`buildCcsLogsExtractionEsqlQuery generates expected query with log-slice cursor bounds 1`] = `
+exports[
+  `buildCcsLogsExtractionEsqlQuery generates expected query with log-slice cursor bounds 1`
+] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM remote:logs-*
   | WHERE

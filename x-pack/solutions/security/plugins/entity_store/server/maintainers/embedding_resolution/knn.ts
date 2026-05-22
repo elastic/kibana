@@ -6,15 +6,13 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { ENTITY_ID_FIELD } from '../../../common/domain/definitions/common_fields';
 import { getFieldValue } from '../../../common/domain/euid/commons';
+import { ENGINE_METADATA_TYPE_FIELD } from '../../domain/logs_extraction/query_builder_commons';
 import { DEFAULT_EMBEDDING_FIELD, type IdentityFields } from './embed';
+import { USER_IDENTITY_SOURCE_FIELDS, extractUserIdentity } from './identity_fields';
 
-const ENTITY_ID_FIELD = 'entity.id';
-const ENGINE_METADATA_TYPE_FIELD = 'entity.EngineMetadata.Type';
 const RESOLVED_TO_FIELD = 'entity.relationships.resolution.resolved_to';
-const NAME_FIELD = 'user.name';
-const FULL_NAME_FIELD = 'user.full_name';
-const EMAIL_FIELD = 'user.email';
 
 /**
  * One kNN neighbor of a source entity.
@@ -97,7 +95,7 @@ export async function collectKnnCandidates({
         { bool: { must_not: { term: { [ENTITY_ID_FIELD]: entityId } } } },
       ],
     },
-    _source: [ENTITY_ID_FIELD, RESOLVED_TO_FIELD, NAME_FIELD, FULL_NAME_FIELD, EMAIL_FIELD],
+    _source: [ENTITY_ID_FIELD, RESOLVED_TO_FIELD, ...USER_IDENTITY_SOURCE_FIELDS],
   });
 
   const hits = response.hits?.hits ?? [];
@@ -112,11 +110,7 @@ export async function collectKnnCandidates({
     const candidateId = getFieldValue(source, ENTITY_ID_FIELD);
     if (!candidateId) continue;
     const resolvedTo = getFieldValue(source, RESOLVED_TO_FIELD) ?? null;
-    const identity: IdentityFields = {
-      name: getFieldValue(source, NAME_FIELD) ?? undefined,
-      full_name: getFieldValue(source, FULL_NAME_FIELD) ?? undefined,
-      email: getFieldValue(source, EMAIL_FIELD) ?? undefined,
-    };
+    const identity: IdentityFields = extractUserIdentity(source);
 
     candidates.push({ candidateId, score, resolvedTo, identity });
   }
