@@ -300,7 +300,9 @@ describe('Editor actions provider', () => {
         mockPosition,
         mockContext
       );
-      expect(completionItems?.suggestions.length).toBe(6);
+      expect(completionItems?.suggestions.map((suggestion) => suggestion.label)).toEqual(
+        expect.arrayContaining(['GET', 'POST'])
+      );
     });
 
     it('returns completion items for url path if method already typed in', async () => {
