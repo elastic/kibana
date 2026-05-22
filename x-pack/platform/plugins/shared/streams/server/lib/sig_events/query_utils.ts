@@ -11,3 +11,15 @@ export interface CommonSearchOptions {
   /** ISO 8601 formatted datetime */
   to?: string;
 }
+
+export interface PaginatedSearchOptions extends CommonSearchOptions {
+  page?: number;
+  perPage?: number;
+}
+
+export interface PaginatedResponse<T> {
+  hits: T[];
+  page: number;
+  perPage: number;
+  total: number;
+}
