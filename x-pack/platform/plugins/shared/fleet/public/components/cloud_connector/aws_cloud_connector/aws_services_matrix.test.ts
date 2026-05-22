@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { AwsServiceMatrixEntry, DeliveryMethod, SignalType, ServiceCategory } from './aws_services_matrix';
+import type {
+  AwsServiceMatrixEntry,
+  DeliveryMethod,
+  SignalType,
+  ServiceCategory,
+} from './aws_services_matrix';
 import { AWS_SERVICES_MATRIX } from './aws_services_matrix';
 
 const VALID_SIGNAL_TYPES: SignalType[] = ['logs', 'metrics'];
