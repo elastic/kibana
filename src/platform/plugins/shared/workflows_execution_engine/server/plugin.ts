@@ -451,7 +451,9 @@ export class WorkflowsExecutionEnginePlugin
               const workflowRepository = new WorkflowRepository({ esClient, logger });
               const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
 
-              const workflow = await workflowRepository.getWorkflow(workflowId, spaceId);
+              const workflow = await workflowRepository.getWorkflow(workflowId, spaceId, {
+                includeGlobal: true,
+              });
               if (!workflow) {
                 logger.error(`Workflow ${workflowId} not found`);
                 return;
@@ -512,6 +514,7 @@ export class WorkflowsExecutionEnginePlugin
                 id: generateUuid(),
                 spaceId,
                 workflowId: workflow.id,
+                ...this.buildManagedWorkflowExecutionMetadata(workflow),
                 isTestRun: false,
                 workflowDefinition: workflow.definition,
                 yaml: workflow.yaml,
@@ -635,7 +638,9 @@ export class WorkflowsExecutionEnginePlugin
       if (workflow.isTestRun) {
         return;
       }
-      const stillEnabled = await workflowRepository.isWorkflowEnabled(workflow.id, spaceId);
+      const stillEnabled = await workflowRepository.isWorkflowEnabled(workflow.id, spaceId, {
+        includeGlobal: true,
+      });
       if (!stillEnabled) {
         throw new Error(`Workflow is disabled: ${workflow.id}. Enable the workflow to run it.`);
       }
@@ -677,6 +682,7 @@ export class WorkflowsExecutionEnginePlugin
         id: generateUuid(),
         spaceId,
         workflowId: workflow.id,
+        ...this.buildManagedWorkflowExecutionMetadata(workflow),
         isTestRun: workflow.isTestRun,
         workflowDefinition: workflow.definition,
         yaml: workflow.yaml,
@@ -936,7 +942,9 @@ export class WorkflowsExecutionEnginePlugin
       const enabledMap =
         enabledRefs.length === 0
           ? new Map<string, boolean>()
-          : await workflowRepository.areWorkflowsEnabled(enabledRefs);
+          : await workflowRepository.areWorkflowsEnabled(enabledRefs, {
+              includeGlobal: true,
+            });
 
       interface PreparedItem {
         idx: number;
@@ -1093,6 +1101,7 @@ export class WorkflowsExecutionEnginePlugin
         spaceId: workflow.spaceId,
         stepId,
         workflowId: workflow.id,
+        ...this.buildManagedWorkflowExecutionMetadata(workflow),
         isTestRun: workflow.isTestRun,
         workflowDefinition: workflow.definition,
         yaml: workflow.yaml,
@@ -1373,6 +1382,31 @@ export class WorkflowsExecutionEnginePlugin
       concurrencySettings,
       buildWorkflowContext(normalizedWorkflowExecution, coreStart, dependencies)
     );
+  }
+
+  private buildManagedWorkflowExecutionMetadata(
+    workflow: Pick<
+      WorkflowExecutionEngineModel,
+      'managed' | 'managedBy' | 'originManagedWorkflowId'
+    >
+  ): Partial<Pick<EsWorkflowExecution, 'managed' | 'managedBy' | 'originManagedWorkflowId'>> {
+    const managedMetadata: Partial<
+      Pick<EsWorkflowExecution, 'managed' | 'managedBy' | 'originManagedWorkflowId'>
+    > = {};
+
+    if (workflow.managed === true) {
+      managedMetadata.managed = true;
+    }
+
+    if (typeof workflow.managedBy === 'string') {
+      managedMetadata.managedBy = workflow.managedBy;
+    }
+
+    if (typeof workflow.originManagedWorkflowId === 'string') {
+      managedMetadata.originManagedWorkflowId = workflow.originManagedWorkflowId;
+    }
+
+    return managedMetadata;
   }
 
   /**

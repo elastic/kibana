@@ -77,21 +77,6 @@ describe('AlertActionsClient', () => {
       expect(docs[0]).toHaveProperty('@timestamp');
     });
 
-    it('should throw when alert event is not found', async () => {
-      queryServiceEsClient.esql.query.mockResolvedValueOnce(getEmptyESQLResponse());
-
-      await expect(
-        client.createAction({
-          groupHash: 'unknown-group-hash',
-          action: actionData,
-        })
-      ).rejects.toThrow(
-        'Alert event with group_hash [unknown-group-hash] and episode_id [episode-1] not found'
-      );
-
-      expect(storageServiceEsClient.bulk).not.toHaveBeenCalled();
-    });
-
     it('should handle action with episode_id', async () => {
       const actionWithEpisode: CreateAlertActionBody = {
         action_type: ALERT_EPISODE_ACTION_TYPE.ACK,
@@ -236,6 +221,7 @@ describe('AlertActionsClient', () => {
     });
   });
 
+
   describe('episode action domain events', () => {
     it('calls emitEpisodeActions with the persisted assign action document', async () => {
       queryServiceEsClient.esql.query.mockResolvedValueOnce(getAlertEventESQLResponse());
@@ -310,6 +296,33 @@ describe('AlertActionsClient', () => {
       expect(emitEpisodeActionsSpy.mock.calls[0][1][1]).toMatchObject({
         action_type: ALERT_EPISODE_ACTION_TYPE.ACK,
       });
+    });
+  });
+
+  describe('error codes and details', () => {
+    it('attaches ALERT_EVENT_NOT_FOUND code with group_hash and episode_id details on createAction', async () => {
+      queryServiceEsClient.esql.query.mockResolvedValueOnce(getEmptyESQLResponse());
+
+      await expect(
+        client.createAction({
+          groupHash: 'unknown-group-hash',
+          action: {
+            action_type: ALERT_EPISODE_ACTION_TYPE.ACK,
+            episode_id: 'episode-1',
+          },
+        })
+      ).rejects.toMatchObject({
+        output: { statusCode: 404 },
+        data: {
+          code: 'ALERT_EVENT_NOT_FOUND',
+          details: {
+            group_hash: 'unknown-group-hash',
+            episode_id: 'episode-1',
+          },
+        },
+      });
+
+      expect(storageServiceEsClient.bulk).not.toHaveBeenCalled();
     });
   });
 });

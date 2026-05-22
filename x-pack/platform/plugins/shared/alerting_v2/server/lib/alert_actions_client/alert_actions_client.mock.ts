@@ -37,6 +37,7 @@ export function createAlertActionsClient(): {
     storageService,
     userService,
     request,
+    'default',
     alertActionEventPublisher
   );
 
