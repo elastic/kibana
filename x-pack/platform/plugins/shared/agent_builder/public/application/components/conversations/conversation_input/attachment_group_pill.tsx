@@ -70,7 +70,7 @@ export const AttachmentGroupPill: React.FC<AttachmentGroupPillProps> = ({ group,
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
           <div className={iconContainerStyles}>
-            <EuiIcon type={DEFAULT_ICON} size="m" color="primary" />
+            <EuiIcon type={DEFAULT_ICON} size="m" color="primary" aria-hidden={true} />
           </div>
         </EuiFlexItem>
         <EuiFlexItem style={{ minWidth: 0 }}>
