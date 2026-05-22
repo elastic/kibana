@@ -378,7 +378,7 @@ export const createSkillAttachmentDefinition = ({
             href: application.getUrlForApp(AGENTBUILDER_APP_ID, {
               path: `${SKILLS_MANAGE_PATH}/${skillId}`,
             }),
-            target: '_blank',
+            openInNewTab: true,
             handler: () => {
               // Do nothing. navigation handled by href
             },

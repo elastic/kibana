@@ -112,11 +112,10 @@ export interface ActionButton {
    */
   href?: string;
   /**
-   * Optional anchor target. Use `'_blank'` to open in a new tab. Only applies
-   * when `href` is set; `rel="noopener noreferrer"` is added automatically for
-   * `_blank` targets.
+   * When true, the link opens in a new browser tab. Only applies when `href`
+   * is set; `rel="noopener noreferrer"` is added automatically.
    */
-  target?: '_self' | '_blank' | '_parent' | '_top';
+  openInNewTab?: boolean;
   /**
    * Handler function called when the button is clicked.
    */
