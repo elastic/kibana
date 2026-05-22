@@ -68,7 +68,9 @@ interface KibanaRawConfig {
 }
 
 export class ApmConfiguration {
-  private baseConfig?: AgentConfigOptions;
+  private baseConfig?: AgentConfigOptions & {
+    servicesOverrides?: Record<string, AgentConfigOptions>;
+  };
   private kibanaVersion: string;
   private pkgBuild: Record<string, any>;
 
@@ -92,7 +94,10 @@ export class ApmConfiguration {
       serviceName,
     };
 
-    const serviceOverride = servicesOverrides[serviceName];
+    const serviceOverride = merge(
+      baseConfig.servicesOverrides?.[serviceName] ?? {},
+      servicesOverrides[serviceName] ?? {}
+    );
     if (serviceOverride) {
       baseConfig = merge({}, baseConfig, serviceOverride);
     }
@@ -123,6 +128,7 @@ export class ApmConfiguration {
           serviceVersion: this.kibanaVersion,
         },
         DEFAULT_CONFIG,
+        this.getElasticAPMConfigDerivedFromOTelConfig(),
         this.getUuidConfig(),
         this.getGitConfig(),
         this.getCiConfig(),
@@ -156,6 +162,32 @@ export class ApmConfiguration {
     }
 
     return this.baseConfig;
+  }
+
+  /**
+   * Retrieve the default Elastic APM config derived from the OTel config.
+   * @returns The default Elastic APM config derived from the OTel config.
+   */
+  private getElasticAPMConfigDerivedFromOTelConfig(): AgentConfigOptions & {
+    servicesOverrides?: Record<string, AgentConfigOptions>;
+  } {
+    const telemetryConfig = this.getTelemetryConfig();
+    if (telemetryConfig.tracing.enabled) {
+      // We want to disable Elastic APM if OTel tracing is enabled.
+      // Note that this is only used for calculating our default config. The user can still override these.
+      return {
+        active: false,
+        contextPropagationOnly: false,
+        servicesOverrides: {
+          // Keep RUM active by default
+          'kibana-frontend': {
+            active: true,
+          },
+        },
+      };
+    }
+
+    return {};
   }
 
   /**

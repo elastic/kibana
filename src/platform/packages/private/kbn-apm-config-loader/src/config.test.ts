@@ -476,4 +476,40 @@ describe('ApmConfiguration', () => {
       expect(config.isUsersRedactionEnabled()).toEqual(false);
     });
   });
+
+  describe('OTel tracing affects the default config', () => {
+    let config: ApmConfiguration;
+
+    beforeAll(() => {
+      const kibanaConfig = {
+        telemetry: {
+          enabled: true,
+          tracing: {
+            enabled: true,
+            sample_rate: 1,
+            exporters: [],
+          },
+        },
+      };
+      config = new ApmConfiguration(mockedRootDir, kibanaConfig, false);
+    });
+
+    it('sets "active: false" globally but "active: true" for "kibana-frontend" service', () => {
+      const globalConfig = config.getConfig('serviceName');
+      expect(globalConfig.active).toBe(false);
+      expect(
+        (globalConfig as { servicesOverrides?: Record<string, AgentConfigOptions> })
+          .servicesOverrides
+      ).toEqual({
+        'kibana-frontend': {
+          active: true,
+        },
+      });
+    });
+
+    it('sets "active: true" to the "kibana-frontend" service', () => {
+      const frontendConfig = config.getConfig('kibana-frontend');
+      expect(frontendConfig.active).toBe(true);
+    });
+  });
 });
