@@ -7,15 +7,31 @@
 
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import type { DefaultWorkflowIds } from '../types';
+import type { WorkflowIntegrityResult } from '../types';
 
 import { validatePreExecution } from '.';
 
-const mockDefaultWorkflowIds: DefaultWorkflowIds = {
-  default_alert_retrieval: 'workflow-default-alert-retrieval',
-  generation: 'workflow-generation',
-  validate: 'workflow-validate',
-};
+const makeIntactResult = (): WorkflowIntegrityResult => ({
+  optionalRepaired: [],
+  optionalWarnings: [],
+  repaired: [],
+  status: 'all_intact' as const,
+  unrepairableErrors: [],
+});
+
+const makeRepairFailedResult = (): WorkflowIntegrityResult => ({
+  optionalRepaired: [],
+  optionalWarnings: [],
+  repaired: [],
+  status: 'repair_failed' as const,
+  unrepairableErrors: [
+    {
+      error: 'Workflow is disabled',
+      key: 'generation',
+      workflowId: 'system-attack-discovery-generation',
+    },
+  ],
+});
 
 describe('validatePreExecution', () => {
   let mockLogger: MockedLogger;
@@ -36,10 +52,10 @@ describe('validatePreExecution', () => {
     const result = await validatePreExecution({
       alertsIndexPattern: '.alerts-security.alerts-default',
       connectorId: 'test-connector-id',
-      defaultWorkflowIds: mockDefaultWorkflowIds,
       esClient: mockEsClient,
       logger: mockLogger,
       resolveConnector: mockResolveConnector,
+      workflowIntegrityResult: makeIntactResult(),
       workflowsManagementApi: mockWorkflowsManagementApi,
     });
 
@@ -51,10 +67,10 @@ describe('validatePreExecution', () => {
     await validatePreExecution({
       alertsIndexPattern: '.alerts-security.alerts-default',
       connectorId: 'test-connector-id',
-      defaultWorkflowIds: mockDefaultWorkflowIds,
       esClient: mockEsClient,
       logger: mockLogger,
       resolveConnector: mockResolveConnector,
+      workflowIntegrityResult: makeIntactResult(),
       workflowsManagementApi: mockWorkflowsManagementApi,
     });
 
@@ -65,10 +81,10 @@ describe('validatePreExecution', () => {
     const result = await validatePreExecution({
       alertsIndexPattern: '.alerts-security.alerts-default',
       connectorId: 'test-connector-id',
-      defaultWorkflowIds: mockDefaultWorkflowIds,
       esClient: mockEsClient,
       logger: mockLogger,
       resolveConnector: mockResolveConnector,
+      workflowIntegrityResult: null,
       workflowsManagementApi: undefined,
     });
 
@@ -81,23 +97,73 @@ describe('validatePreExecution', () => {
     );
   });
 
-  it('returns critical issue when defaultWorkflowIds is null', async () => {
+  it('returns critical issue when workflowIntegrityResult.status is repair_failed', async () => {
     const result = await validatePreExecution({
       alertsIndexPattern: '.alerts-security.alerts-default',
       connectorId: 'test-connector-id',
-      defaultWorkflowIds: null,
       esClient: mockEsClient,
       logger: mockLogger,
       resolveConnector: mockResolveConnector,
+      workflowIntegrityResult: makeRepairFailedResult(),
       workflowsManagementApi: mockWorkflowsManagementApi,
     });
 
     expect(result.valid).toBe(false);
     expect(result.issues).toContainEqual(
       expect.objectContaining({
-        check: 'defaultWorkflowIds',
+        check: 'managedWorkflowEnabled',
         severity: 'critical',
       })
+    );
+  });
+
+  it('returns critical issue with check managedWorkflowEnabled when a managed workflow is disabled', async () => {
+    const disabledResult: WorkflowIntegrityResult = {
+      optionalRepaired: [],
+      optionalWarnings: [],
+      repaired: [],
+      status: 'repair_failed' as const,
+      unrepairableErrors: [
+        {
+          error: 'Workflow is disabled',
+          key: 'default_alert_retrieval',
+          workflowId: 'system-attack-discovery-alert-retrieval',
+        },
+      ],
+    };
+
+    const result = await validatePreExecution({
+      alertsIndexPattern: '.alerts-security.alerts-default',
+      connectorId: 'test-connector-id',
+      esClient: mockEsClient,
+      logger: mockLogger,
+      resolveConnector: mockResolveConnector,
+      workflowIntegrityResult: disabledResult,
+      workflowsManagementApi: mockWorkflowsManagementApi,
+    });
+
+    expect(result.valid).toBe(false);
+    expect(result.issues).toContainEqual(
+      expect.objectContaining({
+        check: 'managedWorkflowEnabled',
+        severity: 'critical',
+      })
+    );
+  });
+
+  it('returns valid with no workflow issue when workflowIntegrityResult is null but workflowsManagementApi is absent', async () => {
+    const result = await validatePreExecution({
+      alertsIndexPattern: '.alerts-security.alerts-default',
+      connectorId: 'test-connector-id',
+      esClient: mockEsClient,
+      logger: mockLogger,
+      resolveConnector: mockResolveConnector,
+      workflowIntegrityResult: null,
+      workflowsManagementApi: mockWorkflowsManagementApi,
+    });
+
+    expect(result.issues).not.toContainEqual(
+      expect.objectContaining({ check: 'managedWorkflowEnabled' })
     );
   });
 
@@ -107,10 +173,10 @@ describe('validatePreExecution', () => {
     const result = await validatePreExecution({
       alertsIndexPattern: '.alerts-security.alerts-default',
       connectorId: 'test-connector-id',
-      defaultWorkflowIds: mockDefaultWorkflowIds,
       esClient: mockEsClient,
       logger: mockLogger,
       resolveConnector: mockResolveConnector,
+      workflowIntegrityResult: makeIntactResult(),
       workflowsManagementApi: mockWorkflowsManagementApi,
     });
 
@@ -129,10 +195,10 @@ describe('validatePreExecution', () => {
     const result = await validatePreExecution({
       alertsIndexPattern: '.alerts-security.alerts-default',
       connectorId: 'test-connector-id',
-      defaultWorkflowIds: mockDefaultWorkflowIds,
       esClient: mockEsClient,
       logger: mockLogger,
       resolveConnector: mockResolveConnector,
+      workflowIntegrityResult: makeIntactResult(),
       workflowsManagementApi: mockWorkflowsManagementApi,
     });
 
@@ -151,10 +217,10 @@ describe('validatePreExecution', () => {
     const result = await validatePreExecution({
       alertsIndexPattern: '.alerts-security.alerts-default',
       connectorId: 'test-connector-id',
-      defaultWorkflowIds: mockDefaultWorkflowIds,
       esClient: mockEsClient,
       logger: mockLogger,
       resolveConnector: mockResolveConnector,
+      workflowIntegrityResult: makeIntactResult(),
       workflowsManagementApi: mockWorkflowsManagementApi,
     });
 
@@ -171,10 +237,10 @@ describe('validatePreExecution', () => {
     const result = await validatePreExecution({
       alertsIndexPattern: '.alerts-security.alerts-default',
       connectorId: '',
-      defaultWorkflowIds: mockDefaultWorkflowIds,
       esClient: mockEsClient,
       logger: mockLogger,
       resolveConnector: mockResolveConnector,
+      workflowIntegrityResult: makeIntactResult(),
       workflowsManagementApi: mockWorkflowsManagementApi,
     });
 
@@ -191,10 +257,10 @@ describe('validatePreExecution', () => {
     await validatePreExecution({
       alertsIndexPattern: '.alerts-security.alerts-default',
       connectorId: 'test-connector-id',
-      defaultWorkflowIds: null,
       esClient: mockEsClient,
       logger: mockLogger,
       resolveConnector: mockResolveConnector,
+      workflowIntegrityResult: makeRepairFailedResult(),
       workflowsManagementApi: undefined,
     });
 
@@ -207,10 +273,10 @@ describe('validatePreExecution', () => {
     await validatePreExecution({
       alertsIndexPattern: '.alerts-security.alerts-default',
       connectorId: 'test-connector-id',
-      defaultWorkflowIds: mockDefaultWorkflowIds,
       esClient: mockEsClient,
       logger: mockLogger,
       resolveConnector: mockResolveConnector,
+      workflowIntegrityResult: makeIntactResult(),
       workflowsManagementApi: mockWorkflowsManagementApi,
     });
 
@@ -224,10 +290,10 @@ describe('validatePreExecution', () => {
     const result = await validatePreExecution({
       alertsIndexPattern: '.alerts-security.alerts-default',
       connectorId: 'test-connector-id',
-      defaultWorkflowIds: null,
       esClient: mockEsClient,
       logger: mockLogger,
       resolveConnector: mockResolveConnector,
+      workflowIntegrityResult: makeRepairFailedResult(),
       workflowsManagementApi: undefined,
     });
 
@@ -239,10 +305,10 @@ describe('validatePreExecution', () => {
     await validatePreExecution({
       alertsIndexPattern: '.alerts-security.alerts-default',
       connectorId: '',
-      defaultWorkflowIds: mockDefaultWorkflowIds,
       esClient: mockEsClient,
       logger: mockLogger,
       resolveConnector: mockResolveConnector,
+      workflowIntegrityResult: makeIntactResult(),
       workflowsManagementApi: mockWorkflowsManagementApi,
     });
 

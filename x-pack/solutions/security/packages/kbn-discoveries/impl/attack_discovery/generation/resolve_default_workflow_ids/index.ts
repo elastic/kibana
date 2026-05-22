@@ -5,24 +5,16 @@
  * 2.0.
  */
 
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import {
+  ATTACK_DISCOVERY_ALERT_RETRIEVAL_WORKFLOW_ID,
+  ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID,
+  ATTACK_DISCOVERY_VALIDATE_WORKFLOW_ID,
+} from '@kbn/workflows/managed';
 
-import type { DefaultWorkflowIds, WorkflowInitializationService } from '../types';
+import type { DefaultWorkflowIds } from '../types';
 
-export const resolveDefaultWorkflowIds = async ({
-  logger,
-  request,
-  spaceId,
-  workflowInitService,
-}: {
-  logger: Logger;
-  request: KibanaRequest;
-  spaceId: string;
-  workflowInitService?: WorkflowInitializationService;
-}): Promise<DefaultWorkflowIds | null> => {
-  if (workflowInitService == null) {
-    return null;
-  }
-
-  return workflowInitService.ensureWorkflowsForSpace({ logger, request, spaceId });
-};
+export const resolveDefaultWorkflowIds = (): DefaultWorkflowIds => ({
+  default_alert_retrieval: ATTACK_DISCOVERY_ALERT_RETRIEVAL_WORKFLOW_ID,
+  generation: ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID,
+  validate: ATTACK_DISCOVERY_VALIDATE_WORKFLOW_ID,
+});

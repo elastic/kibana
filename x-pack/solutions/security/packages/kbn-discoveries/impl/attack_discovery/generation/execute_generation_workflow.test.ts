@@ -54,21 +54,6 @@ jest.mock('../../lib/telemetry/report_workflow_telemetry', () => ({
   reportWorkflowSuccess: (...args: unknown[]) => mockReportWorkflowSuccess(...args),
 }));
 
-const mockWorkflowInitService = {
-  ensureWorkflowsForSpace: jest.fn().mockResolvedValue({
-    default_alert_retrieval: 'workflow-default-alert-retrieval',
-    generation: 'workflow-generation',
-    validate: 'workflow-validate',
-  }),
-  verifyAndRepairWorkflows: jest.fn().mockResolvedValue({
-    optionalRepaired: [],
-    optionalWarnings: [],
-    repaired: [],
-    status: 'all_intact',
-    unrepairableErrors: [],
-  }),
-};
-
 const mockAnonymizationFields = [
   {
     allowed: true,
@@ -146,7 +131,6 @@ describe('executeGenerationWorkflow', () => {
         alert_retrieval_mode: 'custom_query' as const,
         validation_workflow_id: 'default',
       },
-      workflowInitService: mockWorkflowInitService,
       workflowsManagementApi: {
         createWorkflow: jest.fn(),
         getWorkflow: jest.fn(),
@@ -221,7 +205,6 @@ describe('executeGenerationWorkflow', () => {
         alert_retrieval_mode: 'custom_query' as const,
         validation_workflow_id: 'default',
       },
-      workflowInitService: mockWorkflowInitService,
       workflowsManagementApi: {
         createWorkflow: jest.fn(),
         getWorkflow: jest.fn(),
@@ -315,7 +298,6 @@ describe('executeGenerationWorkflow', () => {
         alert_retrieval_mode: 'custom_query' as const,
         validation_workflow_id: 'default',
       },
-      workflowInitService: mockWorkflowInitService,
       workflowsManagementApi: {
         createWorkflow: jest.fn(),
         getWorkflow: jest.fn(),
@@ -402,7 +384,6 @@ describe('executeGenerationWorkflow', () => {
         alert_retrieval_mode: 'custom_query' as const,
         validation_workflow_id: 'default',
       },
-      workflowInitService: mockWorkflowInitService,
       workflowsManagementApi: {
         createWorkflow: jest.fn(),
         getWorkflow: jest.fn(),
@@ -489,7 +470,6 @@ describe('executeGenerationWorkflow', () => {
         alert_retrieval_mode: 'custom_query' as const,
         validation_workflow_id: 'default',
       },
-      workflowInitService: mockWorkflowInitService,
       workflowsManagementApi: {
         createWorkflow: jest.fn(),
         getWorkflow: jest.fn(),
@@ -576,7 +556,6 @@ describe('executeGenerationWorkflow', () => {
         alert_retrieval_mode: 'custom_query' as const,
         validation_workflow_id: 'default',
       },
-      workflowInitService: mockWorkflowInitService,
       workflowsManagementApi: {
         createWorkflow: jest.fn(),
         getWorkflow: jest.fn(),
@@ -662,7 +641,6 @@ describe('executeGenerationWorkflow', () => {
         alert_retrieval_mode: 'custom_query' as const,
         validation_workflow_id: 'default',
       },
-      workflowInitService: mockWorkflowInitService,
       workflowsManagementApi: {
         createWorkflow: jest.fn(),
         getWorkflow: jest.fn(),
@@ -679,13 +657,6 @@ describe('executeGenerationWorkflow', () => {
   });
 
   it('passes repaired workflow IDs (not original stale IDs) to runManualOrchestration', async () => {
-    mockWorkflowInitService.verifyAndRepairWorkflows.mockResolvedValue({
-      optionalRepaired: [],
-      optionalWarnings: [],
-      repaired: [{ key: 'generation', workflowId: 'new-generation-id-after-repair' }],
-      status: 'repaired',
-    });
-
     const mockEventLogger: jest.Mocked<IEventLogger> = {
       logEvent: jest.fn(),
     } as unknown as jest.Mocked<IEventLogger>;
@@ -711,6 +682,13 @@ describe('executeGenerationWorkflow', () => {
         connector_id: 'test-connector-id',
         model: 'gpt-4',
       },
+      checkIntegrity: async () => ({
+        optionalRepaired: [],
+        optionalWarnings: [],
+        repaired: [{ key: 'generation', workflowId: 'new-generation-id-after-repair' }],
+        status: 'repaired',
+        unrepairableErrors: [],
+      }),
       executionUuid: 'test-execution-uuid',
       getEventLogIndex: async () => '.kibana-event-log-test',
       getEventLogger: async () => mockEventLogger,
@@ -728,7 +706,6 @@ describe('executeGenerationWorkflow', () => {
         alert_retrieval_mode: 'custom_query' as const,
         validation_workflow_id: 'default',
       },
-      workflowInitService: mockWorkflowInitService,
       workflowsManagementApi: {
         createWorkflow: jest.fn(),
         getWorkflow: jest.fn(),
@@ -806,7 +783,6 @@ describe('executeGenerationWorkflow', () => {
           alert_retrieval_mode: 'custom_query' as const,
           validation_workflow_id: 'default',
         },
-        workflowInitService: mockWorkflowInitService,
         workflowsManagementApi: {
           createWorkflow: jest.fn(),
           getWorkflow: jest.fn(),
@@ -892,7 +868,6 @@ describe('executeGenerationWorkflow', () => {
         alert_retrieval_mode: 'custom_query' as const,
         validation_workflow_id: 'default',
       },
-      workflowInitService: mockWorkflowInitService,
       workflowsManagementApi: {
         createWorkflow: jest.fn(),
         getWorkflow: jest.fn(),
@@ -963,7 +938,6 @@ describe('executeGenerationWorkflow', () => {
           alert_retrieval_mode: 'custom_query' as const,
           validation_workflow_id: 'default',
         },
-        workflowInitService: mockWorkflowInitService,
         workflowsManagementApi: {
           createWorkflow: jest.fn(),
           getWorkflow: jest.fn(),
@@ -1045,7 +1019,6 @@ describe('executeGenerationWorkflow', () => {
         alert_retrieval_mode: 'custom_query' as const,
         validation_workflow_id: 'default',
       },
-      workflowInitService: mockWorkflowInitService,
       workflowsManagementApi: {
         createWorkflow: jest.fn(),
         getWorkflow: jest.fn(),
@@ -1118,7 +1091,6 @@ describe('executeGenerationWorkflow', () => {
           alert_retrieval_mode: 'custom_query' as const,
           validation_workflow_id: 'default',
         },
-        workflowInitService: mockWorkflowInitService,
         workflowsManagementApi: {
           createWorkflow: jest.fn(),
           getWorkflow: jest.fn(),
