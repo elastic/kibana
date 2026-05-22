@@ -20,7 +20,7 @@ dependsOn: []
 tags:
   - shared-common
   - package
-  - dev
+  - prod
   - group-platform
   - private
   - jest-unit-tests
