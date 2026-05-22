@@ -9,7 +9,8 @@ import type { RoleApiCredentials } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import { apiTest, testData } from '../../fixtures';
 
-apiTest.describe('pingList query', { tag: '@local-stateful-classic' }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/270340
+apiTest.describe.skip('pingList query', { tag: '@local-stateful-classic' }, () => {
   let adminCredentials: RoleApiCredentials;
 
   const from = '2019-01-28T17:40:08.078Z';
