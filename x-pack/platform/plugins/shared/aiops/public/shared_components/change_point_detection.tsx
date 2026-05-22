@@ -7,6 +7,7 @@
 import { css } from '@emotion/react';
 import type { ChangePointDetectionViewType } from '@kbn/aiops-change-point-detection/constants';
 import { AIOPS_EMBEDDABLE_ORIGIN } from '@kbn/aiops-common/constants';
+import type { ChangePointAggregationFunction } from '@kbn/aiops-server-schemas/embeddables/change_point_chart';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { UI_SETTINGS } from '@kbn/data-service';
 import type { TimeRange } from '@kbn/es-query';
@@ -41,7 +42,7 @@ export interface ChangePointDetectionProps {
   viewType?: ChangePointDetectionViewType;
   dataViewId: string;
   timeRange: TimeRange;
-  fn: 'avg' | 'sum' | 'min' | 'max' | string;
+  fn: ChangePointAggregationFunction;
   metricField: string;
   splitField?: string;
   partitions?: string[];
