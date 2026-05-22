@@ -17,6 +17,7 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiRadio,
+  EuiScreenReaderOnly,
   EuiText,
   EuiToolTip,
   useEuiTheme,
@@ -62,6 +63,9 @@ export interface WorkflowExecuteModalProps {
 export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
   ({ definition, workflowId, onClose, onSubmit, isTestRun, yamlString, initialExecutionId }) => {
     const modalTitleId = useGeneratedHtmlId();
+    const runExecuteForbiddenTooltipDescriptionId = useGeneratedHtmlId({
+      prefix: 'workflowExecuteModalRunForbidden',
+    });
     const { services } = useKibana();
     const { http } = services;
     const { canReadWorkflowExecution, canExecuteWorkflow } = useWorkflowsCapabilities();
@@ -668,16 +672,25 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
           </EuiModalBody>
           <EuiModalFooter>
             {!canExecuteWorkflow ? (
-              <EuiToolTip content={runExecuteForbiddenTooltip} position="top" display="block">
-                <span
-                  tabIndex={0}
-                  css={css`
-                    display: inline-block;
-                  `}
-                >
-                  {renderRunWorkflowButton()}
-                </span>
-              </EuiToolTip>
+              <>
+                <EuiScreenReaderOnly>
+                  <span id={runExecuteForbiddenTooltipDescriptionId}>
+                    {runExecuteForbiddenTooltip}
+                  </span>
+                </EuiScreenReaderOnly>
+                <EuiToolTip content={runExecuteForbiddenTooltip} position="top" display="block">
+                  <span
+                    tabIndex={0}
+                    aria-disabled={true}
+                    aria-describedby={runExecuteForbiddenTooltipDescriptionId}
+                    css={css`
+                      display: inline-block;
+                    `}
+                  >
+                    {renderRunWorkflowButton()}
+                  </span>
+                </EuiToolTip>
+              </>
             ) : (
               renderRunWorkflowButton()
             )}

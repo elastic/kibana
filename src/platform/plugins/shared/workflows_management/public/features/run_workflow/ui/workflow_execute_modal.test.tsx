@@ -643,6 +643,35 @@ describe('WorkflowExecuteModal', () => {
       expect(getByTestId('executeWorkflowButton')).toBeDisabled();
     });
 
+    it('associates execute-forbidden tooltip with the Run button wrapper for screen readers', () => {
+      mockUseWorkflowsCapabilities.mockReturnValue({
+        ...defaultWorkflowsCapabilities,
+        canExecuteWorkflow: false,
+      });
+      const { getByTestId, getByText } = renderWithProviders(
+        <WorkflowExecuteModal
+          isTestRun={false}
+          definition={null}
+          onClose={mockOnClose}
+          onSubmit={mockOnSubmit}
+        />
+      );
+
+      const executeButton = getByTestId('executeWorkflowButton');
+      const tooltipWrapper = executeButton.parentElement;
+
+      expect(tooltipWrapper).toHaveAttribute('aria-disabled', 'true');
+      expect(tooltipWrapper).toHaveAttribute('tabIndex', '0');
+
+      const tooltipDescription = getByText(
+        'You need the Workflows Execute privilege to run this workflow.'
+      );
+      expect(tooltipWrapper).toHaveAttribute(
+        'aria-describedby',
+        tooltipDescription.getAttribute('id')
+      );
+    });
+
     it('disables execute for test runs when the user cannot execute workflows', () => {
       mockUseWorkflowsCapabilities.mockReturnValue({
         ...defaultWorkflowsCapabilities,
