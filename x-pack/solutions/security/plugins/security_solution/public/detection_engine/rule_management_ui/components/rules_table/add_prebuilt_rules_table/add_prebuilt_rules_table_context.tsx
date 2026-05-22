@@ -307,8 +307,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
 
   const ruleActionsFactory = useCallback(
     (rule: RuleResponse, closeRulePreview: () => void) => {
-      const isPreviewRuleAlreadyInstalled =
-        installedFallbackRule?.rule_id === rule.rule_id;
+      const isPreviewRuleAlreadyInstalled = installedFallbackRule?.rule_id === rule.rule_id;
       const isPreviewRuleLoading = loadingRules.includes(rule.rule_id);
       const canPreviewedRuleBeInstalled =
         canEditRules &&
@@ -406,7 +405,10 @@ export const AddPrebuiltRulesTableContextProvider = ({
     }
     if (autoOpenedRuleIdRef.current === ruleIdFromUrl) return;
     if (!isFetched || isFetching) return;
-    if (shouldLookupInstalledFallback && (!isFetchedInstalledFallback || isFetchingInstalledFallback)) {
+    if (
+      shouldLookupInstalledFallback &&
+      (!isFetchedInstalledFallback || isFetchingInstalledFallback)
+    ) {
       return;
     }
     const found = flyoutRules.find((r) => r.rule_id === ruleIdFromUrl);

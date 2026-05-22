@@ -320,9 +320,7 @@ export const recommendRulesToInstallTool = (
       const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
 
       const installedRules = await ruleObjectsClient.fetchInstalledRules();
-      const installedRuleVersionsMap = new Map(
-        installedRules.map((rule) => [rule.rule_id, rule])
-      );
+      const installedRuleVersionsMap = new Map(installedRules.map((rule) => [rule.rule_id, rule]));
 
       const installedCoverageByTactic: Record<string, { name: string; installed_count: number }> =
         {};
