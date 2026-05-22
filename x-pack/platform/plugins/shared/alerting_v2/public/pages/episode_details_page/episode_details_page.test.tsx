@@ -11,7 +11,6 @@ import { useParams } from 'react-router-dom';
 import { useFetchEpisodeEventsQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_events_query';
 import { useFetchEpisodeActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_actions';
 import { useFetchGroupActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_group_actions';
-import { useFetchEpisodeEventDataQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_event_data_query';
 import { useFetchRule } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_rule';
 import { TestProviders } from '../../test_utils/test_providers';
 import { EpisodeDetailsPage } from './episode_details_page';
@@ -34,12 +33,15 @@ jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_fetch_group_actions', () => ({
   useFetchGroupActions: jest.fn(),
 }));
 
-jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_event_data_query', () => ({
-  useFetchEpisodeEventDataQuery: jest.fn(),
-}));
-
 jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_fetch_rule', () => ({
   useFetchRule: jest.fn(),
+}));
+
+// The related section pulls in subsections that depend on `services.spaces` /
+// `services.expressions` to run ES|QL queries. They are out of scope for the
+// sidebar assertions here, so stub the section entirely.
+jest.mock('@kbn/alerting-v2-episodes-ui/components/details/related_section', () => ({
+  AlertEpisodesRelatedSection: () => null,
 }));
 
 jest.mock('../../hooks/use_breadcrumbs', () => ({
@@ -50,13 +52,11 @@ const mockUseParams = jest.mocked(useParams);
 const mockUseFetchEpisodeEventsQuery = jest.mocked(useFetchEpisodeEventsQuery);
 const mockUseFetchEpisodeActions = jest.mocked(useFetchEpisodeActions);
 const mockUseFetchGroupActions = jest.mocked(useFetchGroupActions);
-const mockUseFetchEpisodeEventDataQuery = jest.mocked(useFetchEpisodeEventDataQuery);
 const mockUseFetchRule = jest.mocked(useFetchRule);
 
 type EpisodeEventsQueryResult = ReturnType<typeof useFetchEpisodeEventsQuery>;
 type EpisodeActionsQueryResult = ReturnType<typeof useFetchEpisodeActions>;
 type GroupActionsQueryResult = ReturnType<typeof useFetchGroupActions>;
-type EpisodeEventDataQueryResult = ReturnType<typeof useFetchEpisodeEventDataQuery>;
 type FetchRuleResult = ReturnType<typeof useFetchRule>;
 
 const eventsQuery = {
@@ -86,11 +86,6 @@ const groupActionsQuery = {
   refetch: jest.fn(),
 } as unknown as GroupActionsQueryResult;
 
-const eventDataQuery = {
-  data: { data: { 'host.name': 'host-1' } },
-  refetch: jest.fn(),
-} as unknown as EpisodeEventDataQueryResult;
-
 const fetchRuleResult = {
   data: {
     id: 'rule-1',
@@ -109,7 +104,6 @@ mockUseParams.mockReturnValue({ episodeId });
 mockUseFetchEpisodeEventsQuery.mockReturnValue(eventsQuery);
 mockUseFetchEpisodeActions.mockReturnValue(episodeActionsQuery);
 mockUseFetchGroupActions.mockReturnValue(groupActionsQuery);
-mockUseFetchEpisodeEventDataQuery.mockReturnValue(eventDataQuery);
 mockUseFetchRule.mockReturnValue(fetchRuleResult);
 
 beforeEach(() => {
