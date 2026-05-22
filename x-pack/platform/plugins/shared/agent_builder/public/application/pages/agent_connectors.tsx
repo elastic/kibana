@@ -13,7 +13,6 @@ import { useAgentBuilderAgentById } from '../hooks/agents/use_agent_by_id';
 import { useAgentConnectors } from '../hooks/connectors/use_agent_connectors';
 import { useBreadcrumb } from '../hooks/use_breadcrumbs';
 import { appPaths } from '../utils/app_paths';
-import { labels } from '../utils/i18n';
 
 export const AgentBuilderAgentConnectorsPage: React.FC = () => {
   const { agentId } = useParams<{ agentId: string }>();
@@ -21,10 +20,7 @@ export const AgentBuilderAgentConnectorsPage: React.FC = () => {
   const { assign } = useAgentConnectors({ agentId });
 
   const breadcrumbs = useMemo(
-    () => [
-      { text: agent?.name ?? agentId, path: appPaths.agent.overview({ agentId }) },
-      { text: labels.connectors.libraryTitle },
-    ],
+    () => [{ text: agent?.name ?? agentId, path: appPaths.agent.overview({ agentId }) }],
     [agent?.name, agentId]
   );
 

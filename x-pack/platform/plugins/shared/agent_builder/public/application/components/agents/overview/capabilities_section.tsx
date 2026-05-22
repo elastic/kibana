@@ -26,7 +26,6 @@ export interface CapabilitiesSectionProps {
   toolsCountLoading: boolean;
   enableElasticCapabilities: boolean;
   isExperimentalFeaturesEnabled: boolean;
-  hasConnectorsPrivileges: boolean;
   skillsHref: string;
   pluginsHref: string;
   connectorsHref: string;
@@ -46,7 +45,6 @@ export const CapabilitiesSection: React.FC<CapabilitiesSectionProps> = ({
   pluginsCountLoading,
   toolsCountLoading,
   isExperimentalFeaturesEnabled,
-  hasConnectorsPrivileges,
   skillsHref,
   pluginsHref,
   connectorsHref,
@@ -98,8 +96,8 @@ export const CapabilitiesSection: React.FC<CapabilitiesSectionProps> = ({
             description={overviewLabels.connectorsDescription}
             emptyDescription={overviewLabels.connectorsOnboardingDescription}
             image={connectorsImage}
-            href={hasConnectorsPrivileges ? connectorsHref : undefined}
-            onClick={hasConnectorsPrivileges ? onNavigateToConnectors : undefined}
+            href={connectorsHref}
+            onClick={onNavigateToConnectors}
           />
         </EuiFlexItem>
       )}
