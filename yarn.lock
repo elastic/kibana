@@ -6831,6 +6831,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/esql-scripts@link:src/platform/packages/private/kbn-esql-scripts":
+  version "0.0.0"
+  uid ""
+
 "@kbn/esql-server-utils@link:src/platform/packages/shared/kbn-esql-server-utils":
   version "0.0.0"
   uid ""
