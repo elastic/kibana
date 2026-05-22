@@ -20,6 +20,7 @@ import type {
 } from '../../../shared/links/discover_links/get_esql_query';
 import { getESQLQuery } from '../../../shared/links/discover_links/get_esql_query';
 import { APM_APP_LOCATOR_ID } from '../../../../locator/service_detail_locator';
+import type { APM_CHART_EBT_ELEMENTS } from '../../../shared/charts/ebt_constants';
 
 const openLabel = i18n.translate('xpack.apm.alertDetails.chartActions.open', {
   defaultMessage: 'Open',
@@ -43,19 +44,8 @@ const errorsInDiscoverLabel = i18n.translate(
   }
 );
 
-/**
- * Chart names used as the `data-ebt-element` value for click telemetry
- * on the alert details RED metrics and error count charts actions.
- */
-export const RED_METRICS_CHART_ELEMENT = {
-  LATENCY: 'latencyChart',
-  THROUGHPUT: 'throughputChart',
-  FAILED_TRANSACTION_RATE: 'failedTransactionRateChart',
-  ERROR_COUNT: 'errorCountChart',
-} as const;
-
 export type RedMetricsChartElement =
-  (typeof RED_METRICS_CHART_ELEMENT)[keyof typeof RED_METRICS_CHART_ELEMENT];
+  (typeof APM_CHART_EBT_ELEMENTS)[keyof typeof APM_CHART_EBT_ELEMENTS];
 
 interface RedMetricsChartActionsProps {
   queryParams: Pick<
