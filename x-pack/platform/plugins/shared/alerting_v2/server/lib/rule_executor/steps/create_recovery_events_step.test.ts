@@ -6,6 +6,8 @@
  */
 
 import { CreateRecoveryEventsStep } from './create_recovery_events_step';
+import { TaskErrorSource } from '@kbn/task-manager-plugin/server';
+import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import {
   collectStreamResults,
   createPipelineStream,
@@ -330,6 +332,34 @@ describe('CreateRecoveryEventsStep', () => {
       expect(result.type).toBe('continue');
       expect(result.state.alertEventsBatch![0].status).toBe('breached');
       expect(result.state.alertEventsBatch![0].group_hash).toBe('hash-new');
+    });
+
+    it('marks recovery query errors as TaskErrorSource.USER', async () => {
+      const { step, internalEsClient, scopedEsClient } = createStep();
+
+      internalEsClient.esql.query.mockResolvedValue(createActiveGroupHashesResponse(['hash-1']));
+      scopedEsClient.esql.query.mockRejectedValue(new Error('ES|QL syntax error'));
+
+      const state = createRulePipelineState({
+        rule: createRuleResponse({
+          kind: 'alert',
+          recovery_policy: {
+            type: 'query',
+            query: { base: 'FROM logs-* | WHERE invalid syntax' },
+          },
+        }),
+        alertEventsBatch: [],
+      });
+
+      let caughtError: unknown;
+      try {
+        await collectStreamResults(step.executeStream(createPipelineStream([state])));
+      } catch (error) {
+        caughtError = error;
+      }
+
+      expect(caughtError).toBeInstanceOf(Error);
+      expect(getErrorSource(caughtError as Error)).toBe(TaskErrorSource.USER);
     });
   });
 

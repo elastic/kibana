@@ -8,6 +8,8 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mocks';
+import { TaskErrorSource } from '@kbn/task-manager-plugin/server';
+import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import type { QueryService } from './query_service';
 import { createQueryService } from './query_service.mock';
 import {
@@ -404,6 +406,45 @@ describe('QueryService', () => {
 
       expect(mockLogger.debug).toHaveBeenCalled();
       expect(mockLogger.error).not.toHaveBeenCalled();
+    });
+
+    it('decorates non-cancellation errors with TaskErrorSource.USER', async () => {
+      mockHelpersEsqlToArrowReader(
+        mockEsClient,
+        jest.fn().mockRejectedValue(new Error('ES query failed'))
+      );
+
+      let caughtError: unknown;
+      try {
+        for await (const _batch of queryService.executeQueryStream({ query: mockQuery })) {
+          // consume
+        }
+      } catch (error) {
+        caughtError = error;
+      }
+
+      expect(caughtError).toBeInstanceOf(Error);
+      expect(getErrorSource(caughtError as Error)).toBe(TaskErrorSource.USER);
+    });
+
+    it('does not decorate cancellation errors with TaskErrorSource.USER', async () => {
+      const { RuleExecutionCancellationError } = jest.requireActual('../../execution_context');
+      mockHelpersEsqlToArrowReader(
+        mockEsClient,
+        jest.fn().mockRejectedValue(new RuleExecutionCancellationError('Streaming query aborted'))
+      );
+
+      let caughtError: unknown;
+      try {
+        for await (const _batch of queryService.executeQueryStream({ query: mockQuery })) {
+          // consume
+        }
+      } catch (error) {
+        caughtError = error;
+      }
+
+      expect(caughtError).toBeInstanceOf(Error);
+      expect(getErrorSource(caughtError as Error)).toBeUndefined();
     });
 
     it('does not call cancel on the reader after a successful iteration', async () => {

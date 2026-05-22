@@ -7,6 +7,7 @@
 
 import type { EsqlQueryRequest, EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { inject, injectable } from 'inversify';
 import type { AsyncRecordBatchStreamReader } from 'apache-arrow/Arrow.node';
 import type { LoggerServiceContract } from '../logger_service/logger_service';
@@ -123,7 +124,9 @@ export class QueryService implements QueryServiceContract {
         });
       }
 
-      throw error;
+      throw isRuleExecutionCancellationError(error)
+        ? error
+        : createTaskRunError(error as Error, TaskErrorSource.USER);
     } finally {
       await this.closeReader(reader);
     }

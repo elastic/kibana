@@ -6,6 +6,7 @@
  */
 
 import { inject, injectable } from 'inversify';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { stableStringify } from '@kbn/std';
 import { recoveryPolicyType } from '@kbn/alerting-v2-schemas';
 import type { PipelineStateStream, RuleExecutionStep, RulePipelineState } from '../types';
@@ -126,22 +127,26 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
         })}`,
     });
 
-    const esqlResponse = await this.scopedQueryService.executeQuery({
-      query: effectiveQuery,
-      filter: queryPayload.filter,
-      params: queryPayload.params,
-      abortSignal: input.executionContext.signal,
-    });
+    try {
+      const esqlResponse = await this.scopedQueryService.executeQuery({
+        query: effectiveQuery,
+        filter: queryPayload.filter,
+        params: queryPayload.params,
+        abortSignal: input.executionContext.signal,
+      });
 
-    return buildQueryRecoveryAlertEvents({
-      ruleId: rule.id,
-      ruleVersion: 1,
-      spaceId: input.spaceId,
-      ruleAttributes: rule,
-      activeGroupHashes,
-      esqlResponse,
-      scheduledTimestamp: input.scheduledAt,
-    });
+      return buildQueryRecoveryAlertEvents({
+        ruleId: rule.id,
+        ruleVersion: 1,
+        spaceId: input.spaceId,
+        ruleAttributes: rule,
+        activeGroupHashes,
+        esqlResponse,
+        scheduledTimestamp: input.scheduledAt,
+      });
+    } catch (error) {
+      throw createTaskRunError(error as Error, TaskErrorSource.USER);
+    }
   }
 
   private async fetchActiveAlertGroupHashes(
