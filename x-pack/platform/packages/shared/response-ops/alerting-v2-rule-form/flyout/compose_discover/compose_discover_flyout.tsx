@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { FormProvider, useForm, useWatch } from 'react-hook-form';
 import {
   EuiBadge,
@@ -27,7 +27,7 @@ import type { FormValues } from '../../form/types';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
 import { RuleFormProvider } from '../../form/contexts/rule_form_context';
 import { serializeFormToYaml, parseYamlToFormValues } from '../../form/utils/yaml_form_utils';
-import type { ComposeFormValues } from './compose_form_types';
+import type { ComposeFormValues, RuleQuery } from './compose_form_types';
 import { getBreachQuery } from './compose_form_types';
 import {
   mapRuleToComposeFormValues,
@@ -36,14 +36,13 @@ import {
   transformQueryIn,
   transformQueryOut,
 } from './compose_mappers';
-import type { ComposeDiscoverMode, RecoveryType } from './types';
-import { useComposeDiscoverState, getSandboxTabConfig } from './use_compose_discover_state';
+import type { ComposeDiscoverMode, QueryTab, RecoveryType } from './types';
+import { useComposeDiscoverState, getSandboxTabs } from './use_compose_discover_state';
 import { ComposeDiscoverForm, getSteps } from './compose_discover_form';
 import { HorizontalMinimalStepper, type MinimalStep } from './horizontal_minimal_stepper';
 import { QuerySandboxFlyout } from './query_sandbox_flyout';
 import { useEsqlAutocomplete } from './use_esql_providers';
 import { useSplitQueryCompletion } from './use_split_query_completion';
-import { useSandboxDraft, draftToRuleQuery } from './use_sandbox_draft';
 import { splitQuery, guessRecoveryBlock } from './use_heuristic_split';
 
 const LazyYamlRuleForm = React.lazy(() =>
@@ -261,74 +260,105 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
 
   const methods = useForm<ComposeFormValues>({ mode: 'onBlur', defaultValues });
 
-  const { draft, setDraft, syncForm } = useSandboxDraft(methods);
+  const [sandboxQuery, setSandboxQuery] = useState<RuleQuery>(() => methods.getValues('query'));
+  const [sandboxTimeField, setSandboxTimeField] = useState<string>(() =>
+    methods.getValues('timeField')
+  );
+  const [dateRange, setDateRange] = useState({ dateStart: 'now-15m', dateEnd: 'now' });
+
+  const syncSandbox = useCallback(() => {
+    setSandboxQuery(methods.getValues('query'));
+    setSandboxTimeField(methods.getValues('timeField'));
+  }, [methods]);
 
   /*
    * Split-query completion for alert and recovery block editors. Registered at
    * the flyout level so providers survive Sandbox (child) open/close cycles and
    * are immune to React Strict Mode double-mount disposal.
    */
+  const sandboxBase = sandboxQuery.format === 'composed' ? sandboxQuery.base : '';
   const { onEditorMount: onAlertEditorMount } = useSplitQueryCompletion({
-    baseQuery: draft.base,
+    baseQuery: sandboxBase,
     search: services.data.search.search,
   });
   const { onEditorMount: onRecoveryEditorMount } = useSplitQueryCompletion({
-    baseQuery: draft.base,
+    baseQuery: sandboxBase,
     search: services.data.search.search,
   });
 
-  // `kind` is the source of truth for tracking. Guard on divergence from uiState.tracking
-  // so this effect is a no-op on mount (both sides are seeded from the same initial kind).
   const isAlert = useWatch({ control: methods.control, name: 'kind' }) === 'alert';
-  useEffect(() => {
-    if (isAlert === uiState.tracking) return;
-    if (uiState.yamlMode) return;
-    if (isAlert) {
-      const full = getBreachQuery(methods.getValues('query'));
-      const { base, alertBlock } = splitQuery(full);
-      setDraft((d) => ({ ...d, base, breach: alertBlock }));
-      methods.setValue('query', { format: 'composed', base, blocks: { breach: alertBlock } });
-      dispatch({ type: 'ENABLE_TRACKING' });
-    } else {
-      // Assemble from the last committed RHF query — not from draft — so
-      // any unapplied sandbox edits are discarded cleanly on tracking disable.
-      const assembled = getBreachQuery(methods.getValues('query'));
-      setDraft((d) => ({ ...d, base: '', breach: assembled, recover: '' }));
-      methods.setValue('query', { format: 'standalone', breach: assembled });
-      dispatch({ type: 'DISABLE_TRACKING' });
-    }
-  }, [isAlert, uiState.tracking, uiState.yamlMode, methods, setDraft, dispatch]);
+
+  const handleKindChange = useCallback(
+    (kind: 'signal' | 'alert') => {
+      if (kind === 'alert') {
+        const full = getBreachQuery(methods.getValues('query'));
+        const { base, alertBlock } = splitQuery(full);
+        const composed: RuleQuery = { format: 'composed', base, blocks: { breach: alertBlock } };
+        setSandboxQuery(composed);
+        methods.setValue('query', composed);
+      } else {
+        // Assemble from committed query — discards any unapplied sandbox edits cleanly.
+        const assembled = getBreachQuery(methods.getValues('query'));
+        const standalone: RuleQuery = { format: 'standalone', breach: assembled };
+        setSandboxQuery(standalone);
+        methods.setValue('query', standalone);
+      }
+      methods.setValue('kind', kind);
+      dispatch({ type: 'KIND_CHANGE', kind });
+    },
+    [methods, dispatch]
+  );
 
   const handleRecoveryTypeChange = useCallback(
     (type: RecoveryType) => {
       if (type === 'custom') {
-        setDraft((d) => ({
-          ...d,
-          recover: d.recover.trim() ? d.recover : guessRecoveryBlock(d.breach),
-        }));
+        setSandboxQuery((q) => {
+          if (q.format !== 'composed') return q;
+          const current = q.blocks.recover ?? '';
+          return {
+            ...q,
+            blocks: {
+              ...q.blocks,
+              recover: current.trim() ? current : guessRecoveryBlock(q.blocks.breach),
+            },
+          };
+        });
+      } else {
+        // (a) Clear recover from sandbox regardless of mode — prevents stale recovery
+        // query from surviving a type change even when the sandbox is still open.
+        setSandboxQuery((q) =>
+          q.format === 'composed'
+            ? { ...q, blocks: { breach: q.blocks.breach } }
+            : { ...q, recover: undefined }
+        );
+        // Clear recover from committed RHF state too.
+        if (uiState.queryCommitted) {
+          const current = methods.getValues('query');
+          if (current.format === 'composed' && current.blocks.recover) {
+            methods.setValue('query', { ...current, blocks: { breach: current.blocks.breach } });
+          } else if (current.format === 'standalone' && current.recover) {
+            methods.setValue('query', { format: 'standalone', breach: current.breach });
+          }
+        }
+        // (b) Close sandbox in non-YAML mode — prevents a pending Apply from
+        // overwriting the recovery type change by writing the stale sandboxQuery back.
+        // Skip syncSandbox here: (a) already set the clean state directly, and
+        // calling syncSandbox when !queryCommitted could re-introduce a stale recover.
+        if (uiState.childOpen && !uiState.yamlMode) {
+          dispatch({ type: 'CLOSE_CHILD' });
+        }
       }
       dispatch({ type: 'SET_RECOVERY_TYPE', recoveryType: type });
     },
-    [setDraft, dispatch]
+    [dispatch, methods, uiState.queryCommitted, uiState.childOpen, uiState.yamlMode]
   );
 
   const isCreate = mode === 'create' || mode === 'clone';
   const title = getFlyoutTitle(mode);
 
-  const steps = getSteps(uiState.tracking);
+  const steps = getSteps(isAlert);
   const currentStep = steps[uiState.step];
   const isLastStep = uiState.step === steps.length - 1;
-
-  // When recovery type switches to 'default', strip recover from committed RHF query.
-  useEffect(() => {
-    if (!uiState.queryCommitted || uiState.recoveryType !== 'default') return;
-    const current = methods.getValues('query');
-    if (current.format === 'composed' && current.blocks.recover) {
-      methods.setValue('query', { ...current, blocks: { breach: current.blocks.breach } });
-    } else if (current.format === 'standalone' && current.recover) {
-      methods.setValue('query', { format: 'standalone', breach: current.breach });
-    }
-  }, [uiState.recoveryType, uiState.queryCommitted, methods]);
 
   // ── YAML mode state ──────────────────────────────────────────────────────
   const [yamlText, setYamlText] = useState('');
@@ -339,7 +369,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
     const result = parseYamlToFormValues(yaml);
     if (result.values) {
       methods.reset(formValuesFromYamlToCompose(result.values));
-      syncForm();
+      syncSandbox();
     }
   }, YAML_PARSE_DEBOUNCE_OPTIONS);
 
@@ -361,35 +391,29 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
         if (result.values) {
           const compose = formValuesFromYamlToCompose(result.values);
           methods.reset(compose);
-          syncForm();
-          dispatch({ type: 'COMMIT_QUERY' });
+          syncSandbox();
+          if (getBreachQuery(compose.query).trim()) {
+            dispatch({ type: 'COMMIT_QUERY' });
+          }
         }
-        // No syncForm() on parse-failure path: the debounced parse always calls
-        // methods.reset() + syncForm() together, so RHF and draft are already in
+        // No syncSandbox() on parse-failure path: the debounced parse always calls
+        // methods.reset() + syncSandbox() together, so RHF and sandbox state are already in
         // sync at the last valid parse state. The current yamlText simply can't be applied.
       }
       dispatch({ type: 'SET_YAML_MODE', enabled });
     },
-    [cancelYamlParse, methods, yamlText, syncForm, dispatch]
+    [cancelYamlParse, methods, yamlText, syncSandbox, dispatch]
   );
 
   const handleSandboxApply = useCallback(() => {
-    const updatedQuery = draftToRuleQuery(draft, uiState.tracking);
-    methods.setValue('query', updatedQuery);
-    methods.setValue('timeField', draft.timeField);
+    methods.setValue('query', sandboxQuery);
+    methods.setValue('timeField', sandboxTimeField);
     if (uiState.yamlMode) {
-      const current = { ...methods.getValues(), query: updatedQuery, timeField: draft.timeField };
+      const current = { ...methods.getValues(), query: sandboxQuery, timeField: sandboxTimeField };
       setYamlText(serializeFormToYaml(composeFormValuesForYamlSerialize(current)));
     }
     dispatch({ type: 'COMMIT_QUERY' });
-  }, [draft, uiState.tracking, uiState.yamlMode, methods, dispatch]);
-
-  const handleDraftChange = useCallback(
-    (update: Partial<typeof draft>) => {
-      setDraft((d) => ({ ...d, ...update }));
-    },
-    [setDraft]
-  );
+  }, [sandboxQuery, sandboxTimeField, uiState.yamlMode, methods, dispatch]);
 
   const handleSubmit = methods.handleSubmit((values) => {
     if (isCreate) {
@@ -418,8 +442,18 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
       const valid = await currentStep.validate(methods, uiState);
       if (!valid) return;
     }
-    dispatch({ type: 'GO_NEXT' });
-  }, [currentStep, methods, uiState, dispatch]);
+    dispatch({ type: 'GO_NEXT', isAlert });
+  }, [currentStep, methods, uiState, isAlert, dispatch]);
+
+  // TODO: recoveryType drives whether the recovery tab appears in YAML mode.
+  // Follow schema decisions in #268984 — if recoveryType is superseded by a
+  // field on RuleQuery itself, gate this on query shape instead.
+  const sandboxTabs: QueryTab[] | undefined =
+    uiState.yamlMode && sandboxQuery.format === 'composed'
+      ? uiState.recoveryType === 'custom'
+        ? ['base', 'alert', 'recovery']
+        : ['base', 'alert']
+      : getSandboxTabs(isAlert, uiState);
 
   return (
     <RuleFormProvider services={services} meta={{ layout: 'flyout' }}>
@@ -489,6 +523,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
                 dispatch={dispatch}
                 services={services}
                 onRecoveryTypeChange={handleRecoveryTypeChange}
+                onKindChange={handleKindChange}
               />
             )}
           </EuiFlyoutBody>
@@ -510,7 +545,9 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
             ) : (
               <EuiFlexGroup justifyContent="spaceBetween">
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty onClick={onClose}>{CANCEL_BUTTON_LABEL}</EuiButtonEmpty>
+                  <EuiButtonEmpty onClick={onClose} data-test-subj="composeDiscoverCancel">
+                    {CANCEL_BUTTON_LABEL}
+                  </EuiButtonEmpty>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiFlexGroup gutterSize="s" responsive={false}>
@@ -568,14 +605,21 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
 
           {uiState.childOpen && (
             <QuerySandboxFlyout
-              draft={draft}
-              onDraftChange={handleDraftChange}
-              tabConfig={getSandboxTabConfig(uiState)}
+              query={sandboxQuery}
+              onQueryChange={setSandboxQuery}
+              tabs={sandboxTabs}
+              timeField={sandboxTimeField}
+              onTimeFieldChange={setSandboxTimeField}
+              dateRange={dateRange}
+              onDateRangeChange={setDateRange}
               activeTab={uiState.activeTab}
               onTabChange={(tab) => dispatch({ type: 'SET_TAB', tab })}
               onAlertEditorMount={onAlertEditorMount}
               onRecoveryEditorMount={onRecoveryEditorMount}
-              onClose={() => dispatch({ type: 'CLOSE_CHILD' })}
+              onClose={() => {
+                syncSandbox();
+                dispatch({ type: 'CLOSE_CHILD' });
+              }}
               onApply={handleSandboxApply}
             />
           )}

@@ -29,6 +29,7 @@ import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+import { renderingServiceMock } from '@kbn/core-rendering-browser-mocks';
 import { createPartialObjectMock } from '../utils/test';
 
 export const mockFieldFormatsRegistry = {
@@ -173,6 +174,7 @@ export const mockRenderContext = createPartialObjectMock<RenderContext<Additiona
     data: dataPluginMock.createStartContract(),
     fieldFormats: mockFieldFormatsRegistry,
     notifications: notificationServiceMock.createStartContract(),
+    rendering: renderingServiceMock.create(),
     application: applicationServiceMock.createStartContract(),
     settings: settingsServiceMock.createStartContract(),
     licensing: licensingMock.createStart(),
