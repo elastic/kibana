@@ -198,6 +198,15 @@ export interface RanExperiment {
 }
 
 /**
+ * Emitted by the executor client when an experiment starts.
+ */
+export interface ExperimentStartEvent {
+  experimentId: string;
+}
+
+export type OnExperimentStart = (event: ExperimentStartEvent) => Promise<void>;
+
+/**
  * Emitted by the executor client after each evaluator completes for a single
  * example+repetition. Consumers (e.g. the Playwright fixture) can use this to
  * incrementally export score documents to Elasticsearch so that results survive

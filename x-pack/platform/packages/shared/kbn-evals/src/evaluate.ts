@@ -293,7 +293,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
           });
         },
         getDatasetByName: (datasetName: string) => evalsClient.getDatasetByName(datasetName),
-        onExperimentStart: (experimentId) => {
+        onExperimentStart: async ({ experimentId }) => {
           workerExperimentId.current = experimentId;
         },
         onEvaluationComplete: async (event) => {

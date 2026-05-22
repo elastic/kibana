@@ -19,6 +19,7 @@ import type {
   EvaluationDatasetWithId,
   ExperimentTask,
   OnEvaluationComplete,
+  OnExperimentStart,
   RanExperiment,
   TaskOutput,
 } from '../types';
@@ -58,7 +59,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
         datasetName: string
       ) => Promise<EvaluationDataset | EvaluationDatasetWithId | null>;
       onEvaluationComplete?: OnEvaluationComplete;
-      onExperimentStart?: (experimentId: string) => void;
+      onExperimentStart?: OnExperimentStart;
     }
   ) {}
 
@@ -186,7 +187,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
         experimentName,
         this.options.model.id
       );
-      this.options.onExperimentStart?.(experimentId);
+      await this.options.onExperimentStart?.({ experimentId });
       const repetitions = this.options.repetitions ?? 3;
       const runConcurrency = Math.max(1, concurrency ?? 5);
       const limiter = pLimit(runConcurrency);
