@@ -28,7 +28,7 @@ export interface RoleGenerationMetadata extends Record<string, unknown> {
 }
 
 export type RoleGenerationExample = Example<
-  RoleGenerationInput,
+  Record<string, unknown>,
   RoleGenerationOutput,
   RoleGenerationMetadata
 >;

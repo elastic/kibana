@@ -26,7 +26,8 @@ evaluate.describe('Mock IdP Role Generation', { tag: tags.stateful.classic }, ()
           description: ROLE_GENERATION_DATASET_DESCRIPTION,
           examples: roleGenerationExamples,
         },
-        task: async ({ input }) => generateRole({ input, kbnClient, log }),
+        task: async ({ input }: { input: RoleGenerationInput }) =>
+          generateRole({ input, kbnClient, log }),
       },
       [
         createRoleSchemaEvaluator(),
@@ -37,7 +38,11 @@ evaluate.describe('Mock IdP Role Generation', { tag: tags.stateful.classic }, ()
             if (output?.error || !output?.roleName) {
               return { score: 0, label: 'task_error' };
             }
-            if (!metadata?.criteria?.length) {
+            if (
+              !metadata?.criteria ||
+              !Array.isArray(metadata.criteria) ||
+              metadata.criteria.length === 0
+            ) {
               return { score: null, label: 'no_criteria' };
             }
             return evaluators.criteria(metadata.criteria).evaluate({

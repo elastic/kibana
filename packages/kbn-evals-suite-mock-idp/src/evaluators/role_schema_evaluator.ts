@@ -8,14 +8,14 @@
  */
 
 import type { Evaluator } from '@kbn/evals';
-import type { RoleGenerationExample, RoleGenerationOutput } from '../types';
+import type { RoleGenerationOutput, RoleGenerationInput } from '../types';
 
 /**
  * CODE evaluator — deterministic shape and value checks.
  * Fast, free, always runs first.
  */
 export const createRoleSchemaEvaluator = (): Evaluator<
-  RoleGenerationExample,
+  Example<RoleGenerationInput, RoleGenerationOutput, RoleGenerationMetadata>,
   RoleGenerationOutput
 > => ({
   name: 'RoleSchema',
