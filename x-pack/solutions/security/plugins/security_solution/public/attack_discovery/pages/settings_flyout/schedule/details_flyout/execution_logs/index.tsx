@@ -5,115 +5,27 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import type { Criteria } from '@elastic/eui';
-import {
-  EuiBasicTable,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiTitle,
-} from '@elastic/eui';
-import { useAssistantContext } from '@kbn/elastic-assistant';
-import type {
-  AttackDiscoveryGeneration,
-  AttackDiscoverySchedule,
-} from '@kbn/elastic-assistant-common';
+import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiTitle } from '@elastic/eui';
+import { type AttackDiscoverySchedule } from '@kbn/elastic-assistant-common';
 
-import { getColumns } from './columns';
-import { WorkflowExecutionDetailsFlyout } from '../../../../loading_callout/workflow_execution_details_flyout';
-import { useGetAttackDiscoveryGenerations } from '../../../../use_get_attack_discovery_generations';
 import * as i18n from './translations';
 
-const DEFAULT_PAGE_SIZE = 20;
-// Fetch enough runs to cover typical schedule usage; client-side filtered by rule_id
-const FETCH_SIZE = 100;
+import { useKibana } from '../../../../../../common/lib/kibana';
+import { useFetchScheduleRuleType } from '../../logic/use_fetch_schedule_rule_type';
 
-const STATUS_TO_GENERATION_STATUS: Record<string, 'started' | 'succeeded' | 'failed'> = {
-  failed: 'failed',
-  started: 'started',
-  succeeded: 'succeeded',
-};
+const css = { minHeight: 600 };
 
 interface Props {
   schedule: AttackDiscoverySchedule;
 }
 
 export const ScheduleExecutionLogs: React.FC<Props> = React.memo(({ schedule }) => {
-  const { assistantAvailability, http } = useAssistantContext();
+  const {
+    triggersActionsUi: { getRuleEventLogList: RuleEventLogList },
+  } = useKibana().services;
 
-  const [pageIndex, setPageIndex] = useState(0);
-  // Store only the stable execution UUID instead of the full item so the flyout
-  // always reads live data rather than a frozen snapshot.
-  const [selectedExecutionUuid, setSelectedExecutionUuid] = useState<string | null>(null);
-
-  const { data, isLoading, refetch } = useGetAttackDiscoveryGenerations({
-    http,
-    isAssistantEnabled: assistantAvailability.isAssistantEnabled,
-    scheduled: true,
-    size: FETCH_SIZE,
-  });
-
-  // Filter client-side to only show runs for this specific schedule
-  const filteredItems = useMemo(() => {
-    if (data == null) {
-      return [];
-    }
-
-    return data.generations.filter((item) => item.source_metadata?.rule_id === schedule.id);
-  }, [data, schedule.id]);
-
-  // Resolve the selected item from live data so that status updates (e.g.
-  // started → succeeded) are reflected in the flyout header without requiring
-  // the user to close and reopen the flyout.
-  const selectedItem = useMemo((): AttackDiscoveryGeneration | null => {
-    if (selectedExecutionUuid == null || data == null) {
-      return null;
-    }
-
-    return data.generations.find((g) => g.execution_uuid === selectedExecutionUuid) ?? null;
-  }, [data, selectedExecutionUuid]);
-
-  // Poll the generations list while the selected execution is still in progress
-  // so that the flyout header reflects the latest status without a manual refresh.
-  const isSelectedInProgress = selectedItem?.status === 'started';
-  useEffect(() => {
-    if (!isSelectedInProgress) {
-      return;
-    }
-
-    const POLL_INTERVAL_MS = 10000;
-    const interval = setInterval(() => {
-      refetch();
-    }, POLL_INTERVAL_MS);
-
-    return () => clearInterval(interval);
-  }, [isSelectedInProgress, refetch]);
-
-  const paginatedItems = useMemo(() => {
-    const start = pageIndex * DEFAULT_PAGE_SIZE;
-    return filteredItems.slice(start, start + DEFAULT_PAGE_SIZE);
-  }, [filteredItems, pageIndex]);
-
-  const handlePageChange = useCallback(({ page }: Criteria<AttackDiscoveryGeneration>) => {
-    if (page != null) {
-      setPageIndex(page.index);
-    }
-  }, []);
-
-  const handleViewDetails = useCallback((item: AttackDiscoveryGeneration) => {
-    setSelectedExecutionUuid(item.execution_uuid);
-  }, []);
-
-  const handleCloseFlyout = useCallback(() => {
-    setSelectedExecutionUuid(null);
-  }, []);
-
-  const workflowId = selectedItem?.workflow_id ?? null;
-  const workflowRunId = selectedItem?.workflow_run_id ?? null;
-  const workflowExecutions = selectedItem?.workflow_executions ?? null;
-
-  const columns = useMemo(() => getColumns(handleViewDetails), [handleViewDetails]);
+  const { data: scheduleRuleType } = useFetchScheduleRuleType();
 
   return (
     <>
@@ -121,45 +33,14 @@ export const ScheduleExecutionLogs: React.FC<Props> = React.memo(({ schedule }) 
         <h3>{i18n.EXECUTION_LOGS_TITLE}</h3>
       </EuiTitle>
       <EuiHorizontalRule />
-      <EuiFlexGroup data-test-subj="executionEventLogs" direction="column">
+      <EuiFlexGroup css={css} direction={'column'} data-test-subj={'executionEventLogs'}>
         <EuiFlexItem>
-          <EuiBasicTable
-            data-test-subj="scheduleExecutionLogsTable"
-            columns={columns}
-            itemId="execution_uuid"
-            items={paginatedItems}
-            loading={isLoading}
-            noItemsMessage={i18n.EXECUTION_LOGS_NO_ITEMS}
-            pagination={{
-              pageIndex,
-              pageSize: DEFAULT_PAGE_SIZE,
-              totalItemCount: filteredItems.length,
-            }}
-            onChange={handlePageChange}
-          />
+          {scheduleRuleType && (
+            <RuleEventLogList ruleId={schedule.id} ruleType={scheduleRuleType} />
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
-
-      {!isLoading && selectedItem != null && (
-        <WorkflowExecutionDetailsFlyout
-          alertsContextCount={selectedItem.alerts_context_count}
-          discoveriesCount={selectedItem.discoveries}
-          duplicatesDroppedCount={selectedItem.duplicates_dropped_count}
-          executionUuid={selectedItem.execution_uuid}
-          generatedCount={selectedItem.generated_count}
-          generationEndTime={selectedItem.end}
-          generationStatus={STATUS_TO_GENERATION_STATUS[selectedItem.status] ?? 'started'}
-          hallucinationsFilteredCount={selectedItem.hallucinations_filtered_count}
-          http={http}
-          onClose={handleCloseFlyout}
-          persistedCount={selectedItem.persisted_count}
-          workflowExecutions={workflowExecutions}
-          workflowId={workflowId}
-          workflowRunId={workflowRunId}
-        />
-      )}
     </>
   );
 });
-
 ScheduleExecutionLogs.displayName = 'ScheduleExecutionLogs';
