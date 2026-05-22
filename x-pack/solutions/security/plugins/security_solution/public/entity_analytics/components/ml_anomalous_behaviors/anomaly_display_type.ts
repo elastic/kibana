@@ -6,7 +6,8 @@
  */
 
 import { trim } from 'lodash';
-import type { AnomalySummaryEntry } from '../../../../common/api/entity_analytics';
+import moment from 'moment';
+import type { AnomalySummaryEntry, EntityType } from '../../../../common/api/entity_analytics';
 
 const ENTROPY_FIELD_NAMES = new Set([
   'powershell.file.script_block_text',
@@ -14,9 +15,23 @@ const ENTROPY_FIELD_NAMES = new Set([
   'process.command_line_entropy',
 ]);
 
+const GEO_BY_FIELD_NAMES = new Set([
+  'source.geo.region_name',
+  'source.geo.city_name',
+  'source.geo.country_iso_code',
+  'client.geo.region_name',
+]);
+
 const BYTES_FIELD_NAMES = new Set(['source.bytes', 'destination.bytes', 'file.size']);
 
-export const getDetectorFunctionCategory = (detectorFunction: string) => {
+const formatBytes = (bytes: number): string => {
+  if (bytes >= 1e9) return `${(bytes / 1e9).toFixed(1)} GB`;
+  if (bytes >= 1e6) return `${(bytes / 1e6).toFixed(1)} MB`;
+  if (bytes >= 1e3) return `${Math.round(bytes / 1e3)} KB`;
+  return `${bytes} B`;
+};
+
+const getDetectorFunctionCategory = (detectorFunction: string) => {
   switch (detectorFunction) {
     case 'time_of_day':
     case 'time_of_week':
@@ -146,15 +161,22 @@ const getModifierForDetectorFunction = (detectorFunction: string): string => {
 const getComparatorForDetectorFunction = (detectorFunction: string): string =>
   detectorFunction.startsWith('high') ? '≤ ' : '≥ ';
 
-const getByClause = (byFieldName: string | null, byFieldValue: string | null): string =>
-  byFieldName ? ` where ${byFieldName}${byFieldValue ? ` is ${byFieldValue}` : ' exists'}` : '';
+const getByClause = (
+  entityType: EntityType,
+  byFieldName: string | null,
+  byFieldValue: string | null
+): string =>
+  byFieldName && !byFieldName.startsWith(`${entityType}.`)
+    ? ` where ${byFieldName}${byFieldValue ? ` is ${byFieldValue}` : ' exists'}`
+    : '';
 
 const getOverClause = (
+  entityType: EntityType,
   detectorFunction: string,
   overFieldName: string | null,
   overFieldValue: string | null
 ): string =>
-  overFieldName
+  overFieldName && !overFieldName.startsWith(`${entityType}.`)
     ? ` for ${overFieldValue ? `${overFieldValue} ` : ''}${toHumanReadableFieldName(
         detectorFunction,
         overFieldName
@@ -162,26 +184,18 @@ const getOverClause = (
     : '';
 
 const getPartitionClause = (
+  entityType: EntityType,
   partitionFieldName: string | null,
   partitionFieldValue: string | null
 ): string =>
-  partitionFieldName
+  partitionFieldName && !partitionFieldName.startsWith(`${entityType}.`)
     ? ` where ${partitionFieldName}${
         partitionFieldValue ? ` is ${partitionFieldValue}` : ' exists'
       }`
     : '';
 
 const magnitudeAnomalyToDisplayDetails = (anomaly: AnomalySummaryEntry) => {
-  const {
-    detectorFunction,
-    fieldName,
-    byFieldName,
-    byFieldValue,
-    overFieldName,
-    overFieldValue,
-    partitionFieldName,
-    partitionFieldValue,
-  } = anomaly;
+  const { detectorFunction, fieldName } = anomaly;
   const observed = anomaly.actual[0] ?? 0;
   const expected = anomaly.typical[0] ?? 0;
 
@@ -192,9 +206,6 @@ const magnitudeAnomalyToDisplayDetails = (anomaly: AnomalySummaryEntry) => {
   const modifier = getModifierForDetectorFunction(detectorFunction);
   const comparator = getComparatorForDetectorFunction(detectorFunction);
   const fieldClause = toHumanReadableFieldName(detectorFunction, fieldName ?? '');
-  const byClause = getByClause(byFieldName, byFieldValue);
-  const overClause = getOverClause(detectorFunction, overFieldName, overFieldValue);
-  const partitionClause = getPartitionClause(partitionFieldName, partitionFieldValue);
 
   return {
     expectedHeader: `${
@@ -202,43 +213,88 @@ const magnitudeAnomalyToDisplayDetails = (anomaly: AnomalySummaryEntry) => {
         ? `${modifier}${fieldClause} ${comparator}${formattedExpected}`
         : `${modifier}${comparator}${formattedExpected} ${fieldClause}`
     }`,
-    expectedSubtitle: trim(`${byClause}${overClause}${partitionClause}`),
     observedHeader: `${formattedObserved}`,
   };
 };
 
 const rareAnomalyToDisplayDetails = (anomaly: AnomalySummaryEntry) => {
   return {
-    expectedHeader: '',
-    expectedSubtitle: '',
-    observedHeader: '',
+    cardType: GEO_BY_FIELD_NAMES.has(anomaly.byFieldName ?? '') ? 'geo' : 'unknown',
+    expectedHeader: anomaly.baseline?.[0]?.value ?? '',
+    observedHeader: anomaly.byFieldValue ?? '',
+  };
+};
+
+const timeAnomalyToDisplayDetails = (anomaly: AnomalySummaryEntry) => {
+  const observed = anomaly.actual[0] ?? 0;
+  const expected = anomaly.typical[0] ?? 0;
+
+  if (anomaly.detectorFunction === 'time_of_day') {
+    return {
+      expectedHeader: `Activity around ${moment.utc(expected * 1000).format('HH:mm')}`,
+      observedHeader: `Activity at ${moment.utc(observed * 1000).format('HH:mm')}`,
+    };
+  }
+
+  // seconds since the start of the week must be normalized to the start of the week
+  // a Monday 00:00:00 timestamp is used as the reference point for formatting
+  return {
+    expectedHeader: `Activity around ${moment
+      .utc('2018-01-01') // known Monday
+      .add(expected, 'seconds')
+      .format('ddd HH:mm')}`,
+    observedHeader: `Activity at ${moment
+      .utc('2018-01-01') // known Monday
+      .add(observed, 'seconds')
+      .format('ddd HH:mm')}`,
   };
 };
 
 interface AnomalyDisplayDetails {
+  cardType: string;
   expectedHeader?: string;
   expectedSubtitle?: string;
   observedHeader?: string;
 }
 
-export const anomalyToDisplayDetails = (anomaly: AnomalySummaryEntry): AnomalyDisplayDetails => {
-  const category = getDetectorFunctionCategory(anomaly.detectorFunction);
+export const anomalyToDisplayDetails = (
+  entityType: EntityType,
+  anomaly: AnomalySummaryEntry
+): AnomalyDisplayDetails => {
+  const {
+    detectorFunction,
+    byFieldName,
+    byFieldValue,
+    overFieldName,
+    overFieldValue,
+    partitionFieldName,
+    partitionFieldValue,
+  } = anomaly;
+  const category = getDetectorFunctionCategory(detectorFunction);
+  const byClause = getByClause(entityType, byFieldName, byFieldValue);
+  const overClause = getOverClause(entityType, detectorFunction, overFieldName, overFieldValue);
+  const partitionClause = getPartitionClause(entityType, partitionFieldName, partitionFieldValue);
+
+  const expectedSubtitle = trim(`${byClause}${overClause}${partitionClause}`);
 
   switch (category) {
     case 'magnitude':
-      return magnitudeAnomalyToDisplayDetails(anomaly);
+      return {
+        cardType: 'magnitude',
+        expectedSubtitle,
+        ...magnitudeAnomalyToDisplayDetails(anomaly),
+      };
 
     case 'rare':
-      return rareAnomalyToDisplayDetails(anomaly);
+      return {
+        expectedSubtitle: trim(`${overClause}${partitionClause}`),
+        ...rareAnomalyToDisplayDetails(anomaly),
+      };
+
+    case 'time':
+      return { cardType: 'calendar', expectedSubtitle, ...timeAnomalyToDisplayDetails(anomaly) };
 
     default:
-      return {};
+      return { cardType: 'unknown' };
   }
-};
-
-export const formatBytes = (bytes: number): string => {
-  if (bytes >= 1e9) return `${(bytes / 1e9).toFixed(1)} GB`;
-  if (bytes >= 1e6) return `${(bytes / 1e6).toFixed(1)} MB`;
-  if (bytes >= 1e3) return `${Math.round(bytes / 1e3)} KB`;
-  return `${bytes} B`;
 };

@@ -20,9 +20,10 @@ import {
 import { css } from '@emotion/react';
 import { FormattedDate, FormattedMessage } from '@kbn/i18n-react';
 import { AnomalyDetail } from './anomaly_detail';
-import type { AnomalySummaryEntry } from '../../../../common/api/entity_analytics';
+import type { AnomalySummaryEntry, EntityType } from '../../../../common/api/entity_analytics';
 import type { AnomalyBand } from '../recent_anomalies';
 import { useAnomalyBands } from '../recent_anomalies';
+import { SHOW_MOCK_ANOMALIES } from './anomalies';
 
 const getColorFromBands = (bands: AnomalyBand[], score: number): string => {
   const band = [...bands].reverse().find((b) => score >= b.start);
@@ -31,9 +32,10 @@ const getColorFromBands = (bands: AnomalyBand[], score: number): string => {
 
 interface AnomalyRowProps {
   anomaly: AnomalySummaryEntry;
+  entityType: EntityType;
 }
 
-export const AnomalyRow: React.FC<AnomalyRowProps> = ({ anomaly }) => {
+export const AnomalyRow: React.FC<AnomalyRowProps> = ({ anomaly, entityType }) => {
   const rowAccordionId = useGeneratedHtmlId({ prefix: `anomaly_row_${anomaly.jobId}` });
   const { euiTheme } = useEuiTheme();
   const { bands } = useAnomalyBands();
@@ -86,6 +88,7 @@ export const AnomalyRow: React.FC<AnomalyRowProps> = ({ anomaly }) => {
 
   return (
     <EuiAccordion
+      initialIsOpen={SHOW_MOCK_ANOMALIES ? true : false}
       id={rowAccordionId}
       buttonContent={buttonContent}
       buttonProps={{ style: { width: '100%' } }}
@@ -108,7 +111,7 @@ export const AnomalyRow: React.FC<AnomalyRowProps> = ({ anomaly }) => {
       `}
     >
       <EuiSpacer size="s" />
-      <AnomalyDetail anomaly={anomaly} />
+      <AnomalyDetail anomaly={anomaly} entityType={entityType} />
     </EuiAccordion>
   );
 };

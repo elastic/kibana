@@ -7,7 +7,6 @@
 
 import React from 'react';
 import {
-  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -55,15 +54,6 @@ export const ObservedHeader: React.FC = () => (
   </EuiFlexGroup>
 );
 
-export const BaselineFooter: React.FC = () => (
-  <EuiText size="xs" color="subdued">
-    <FormattedMessage
-      id="xpack.securitySolution.entityAnalytics.components.mlAnomalousBehaviors.shared.baselineWindow"
-      defaultMessage="90d learned baseline"
-    />
-  </EuiText>
-);
-
 export const ExpectedPanel: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <EuiFlexItem>
     <EuiPanel paddingSize="s" color="subdued" hasBorder={false} hasShadow={false}>
@@ -71,7 +61,6 @@ export const ExpectedPanel: React.FC<{ children: React.ReactNode }> = ({ childre
       <EuiSpacer size="xs" />
       {children}
       <EuiSpacer size="xs" />
-      <BaselineFooter />
     </EuiPanel>
   </EuiFlexItem>
 );
@@ -93,27 +82,5 @@ export const ObservedPanel: React.FC<{ children: React.ReactNode }> = ({ childre
         {children}
       </EuiPanel>
     </EuiFlexItem>
-  );
-};
-
-interface MultiplierBadgeProps {
-  actual: number | null;
-  typical: number | null;
-}
-
-export const MultiplierBadge: React.FC<MultiplierBadgeProps> = ({ actual, typical }) => {
-  const { euiTheme } = useEuiTheme();
-  if (actual === null || typical === null || typical <= 0) return null;
-  const multiplier = Math.round(actual / typical);
-  if (multiplier <= 1) return null;
-  return (
-    <EuiBadge
-      css={css`
-        background-color: ${euiTheme.colors.danger}22;
-        color: color-mix(in srgb, ${euiTheme.colors.danger}, black 30%);
-      `}
-    >
-      {`${multiplier}× above baseline`}
-    </EuiBadge>
   );
 };

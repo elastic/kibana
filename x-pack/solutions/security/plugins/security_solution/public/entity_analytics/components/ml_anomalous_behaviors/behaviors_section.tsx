@@ -17,16 +17,16 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { EntityType } from '../../../../common/api/entity_analytics';
 import { AnomalyRow } from './anomaly_row';
 import { useBehavioralSummary } from '../../api/hooks/use_behavioral_summary';
-import { MOCK_ANOMALIES } from './anomalies';
-
-const SHOW_MOCK_ANOMALIES = true;
+import { SHOW_MOCK_ANOMALIES, MOCK_ANOMALIES } from './anomalies';
 interface BehaviorsSectionProps {
   entityId: string;
+  entityType: EntityType;
 }
 
-export const BehaviorsSection: React.FC<BehaviorsSectionProps> = ({ entityId }) => {
+export const BehaviorsSection: React.FC<BehaviorsSectionProps> = ({ entityType, entityId }) => {
   const xxsFontSize = useEuiFontSize('xxs').fontSize;
   const { data } = useBehavioralSummary(entityId);
   const anomalies = SHOW_MOCK_ANOMALIES ? MOCK_ANOMALIES : data?.anomalies ?? [];
@@ -35,6 +35,7 @@ export const BehaviorsSection: React.FC<BehaviorsSectionProps> = ({ entityId }) 
 
   return (
     <EuiAccordion
+      initialIsOpen={SHOW_MOCK_ANOMALIES ? true : false}
       id={'entity_behaviors'}
       buttonContent={
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
@@ -75,7 +76,7 @@ export const BehaviorsSection: React.FC<BehaviorsSectionProps> = ({ entityId }) 
     >
       <EuiSpacer size="m" />
       {anomalies.map((anomaly, idx) => (
-        <AnomalyRow key={`${anomaly.jobId}-${idx}`} anomaly={anomaly} />
+        <AnomalyRow key={`${anomaly.jobId}-${idx}`} entityType={entityType} anomaly={anomaly} />
       ))}
     </EuiAccordion>
   );

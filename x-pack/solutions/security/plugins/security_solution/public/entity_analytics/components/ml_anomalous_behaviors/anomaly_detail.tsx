@@ -5,26 +5,64 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiFlexGroup, EuiPanel, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { AnomalySummaryEntry } from '../../../../common/api/entity_analytics';
+import type { AnomalySummaryEntry, EntityType } from '../../../../common/api/entity_analytics';
 import { anomalyToDisplayDetails } from './anomaly_display_type';
 import { ExpectedPanel, ObservedPanel } from './display_types/shared';
 
 interface AnomalyDetailProps {
   anomaly: AnomalySummaryEntry;
+  entityType: EntityType;
 }
 
-export const AnomalyDetail: React.FC<AnomalyDetailProps> = ({ anomaly }) => {
+export const AnomalyDetail: React.FC<AnomalyDetailProps> = ({ entityType, anomaly }) => {
   const { euiTheme } = useEuiTheme();
-  const { expectedHeader, expectedSubtitle, observedHeader } = anomalyToDisplayDetails(anomaly);
+  const { cardType, expectedHeader, expectedSubtitle, observedHeader } = anomalyToDisplayDetails(
+    entityType,
+    anomaly
+  );
 
-  const actual = anomaly.actual[0] ?? null;
-  const typical = anomaly.typical[0] ?? null;
-  const multiplier =
-    actual !== null && typical !== null && typical > 0 ? Math.round(actual / typical) : null;
+  const iconElement = useMemo(() => {
+    let icon = '';
+    switch (cardType) {
+      case 'calendar':
+        icon = 'clock';
+        break;
+      case 'geo':
+        icon = 'globe';
+        break;
+    }
+
+    return icon ? (
+      <EuiFlexItem grow={false}>
+        <EuiIcon type={icon} size="s" aria-hidden={true} />
+      </EuiFlexItem>
+    ) : null;
+  }, [cardType]);
+
+  const multiplier = useMemo(() => {
+    if (cardType === 'magnitude') {
+      const actual = anomaly.actual[0] ?? null;
+      const typical = anomaly.typical[0] ?? null;
+      return actual !== null && typical !== null && typical > 0
+        ? Math.round(actual / typical)
+        : null;
+    }
+
+    return null;
+  }, [anomaly, cardType]);
+
   const observedSubtitle =
     multiplier !== null && multiplier > 1 ? `${multiplier}x greater than baseline` : null;
 
@@ -51,9 +89,14 @@ export const AnomalyDetail: React.FC<AnomalyDetailProps> = ({ anomaly }) => {
         <EuiSpacer size="s" />
         <EuiFlexGroup gutterSize="s" responsive={false}>
           <ExpectedPanel>
-            <EuiText size="s">
-              <strong>{expectedHeader}</strong>
-            </EuiText>
+            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+              {iconElement}
+              <EuiFlexItem>
+                <EuiText size="s">
+                  <strong>{expectedHeader}</strong>
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
             {expectedSubtitle && (
               <EuiText size="xs" color="subdued">
                 {expectedSubtitle}
@@ -61,9 +104,14 @@ export const AnomalyDetail: React.FC<AnomalyDetailProps> = ({ anomaly }) => {
             )}
           </ExpectedPanel>
           <ObservedPanel>
-            <EuiText size="s">
-              <strong>{observedHeader}</strong>
-            </EuiText>
+            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+              {iconElement}
+              <EuiFlexItem>
+                <EuiText size="s">
+                  <strong>{observedHeader}</strong>
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
             {observedSubtitle && (
               <EuiText size="xs" color="subdued">
                 {observedSubtitle}

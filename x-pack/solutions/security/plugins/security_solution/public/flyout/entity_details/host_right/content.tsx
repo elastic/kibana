@@ -104,7 +104,7 @@ export const HostPanelContent = ({
         )}
       {entityStoreEntityId && hasBehavioralData && (
         <>
-          <BehaviorsSection entityId={entityStoreEntityId} />
+          <BehaviorsSection entityType={'host'} entityId={entityStoreEntityId} />
           <EuiHorizontalRule margin="m" />
         </>
       )}

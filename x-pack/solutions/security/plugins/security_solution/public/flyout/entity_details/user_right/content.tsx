@@ -107,7 +107,7 @@ export const UserPanelContent = ({
         )}
       {entityStoreEntityId && hasBehavioralData && (
         <>
-          <BehaviorsSection entityId={entityStoreEntityId} />
+          <BehaviorsSection entityType={'user'} entityId={entityStoreEntityId} />
           <EuiHorizontalRule margin="m" />
         </>
       )}
