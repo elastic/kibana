@@ -158,9 +158,7 @@ describe('spec connector with API fetch', () => {
     resolveSpec!(mockSpecResponse);
 
     // After spec loads, the form should render
-    await waitFor(() => {
-      expect(screen.getByTestId('nameInput')).toBeInTheDocument();
-    });
+    expect(await screen.findByTestId('nameInput')).toBeInTheDocument();
   });
 
   it('shows error state when spec fetch fails', async () => {
@@ -186,9 +184,7 @@ describe('spec connector with API fetch', () => {
     });
 
     // Verify error message is displayed
-    await waitFor(() => {
-      expect(screen.getByTestId('connector-spec-load-error')).toBeInTheDocument();
-    });
+    expect(await screen.findByTestId('connector-spec-load-error')).toBeInTheDocument();
   });
 
   it('does not show save and test button for spec connectors', async () => {
@@ -203,9 +199,7 @@ describe('spec connector with API fetch', () => {
 
     await userEvent.click(await screen.findByTestId('spec-connector-test-card'));
 
-    await waitFor(() => {
-      expect(screen.getByTestId('nameInput')).toBeInTheDocument();
-    });
+    expect(await screen.findByTestId('nameInput')).toBeInTheDocument();
 
     // Spec connectors should not show save and test button
     expect(screen.queryByTestId('create-connector-flyout-save-test-btn')).not.toBeInTheDocument();
@@ -224,9 +218,7 @@ describe('spec connector with API fetch', () => {
 
     await userEvent.click(await screen.findByTestId('spec-connector-test-card'));
 
-    await waitFor(() => {
-      expect(screen.getByTestId('create-connector-flyout-back-btn')).toBeInTheDocument();
-    });
+    expect(await screen.findByTestId('create-connector-flyout-back-btn')).toBeInTheDocument();
 
     await userEvent.click(screen.getByTestId('create-connector-flyout-back-btn'));
 
