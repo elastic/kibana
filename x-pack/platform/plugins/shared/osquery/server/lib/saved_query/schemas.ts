@@ -7,6 +7,21 @@
 
 import { schema } from '@kbn/config-schema';
 
+// `ecs_mapping` lives in two shapes:
+// - HTTP request bodies use the record form `{ [field]: { value/field } }`
+// - The SO is written via `convertECSMappingToArray`, producing
+//   `Array<{ key, value }>` — the canonical on-disk shape since Oct 2021.
+// Forward-compat schemas must accept both so they validate on-disk data.
+const ecsMappingSchema = schema.oneOf([
+  schema.recordOf(schema.string(), schema.object({}, { unknowns: 'allow' })),
+  schema.arrayOf(
+    schema.object({
+      key: schema.string(),
+      value: schema.object({}, { unknowns: 'allow' }),
+    })
+  ),
+]);
+
 const savedQuerySchemaV1 = schema.object({
   id: schema.string(),
   description: schema.maybe(schema.string()),
@@ -46,9 +61,7 @@ const packQuerySchema = schema.object(
     timeout: schema.maybe(schema.number()),
     platform: schema.maybe(schema.string()),
     version: schema.maybe(schema.string()),
-    ecs_mapping: schema.maybe(
-      schema.recordOf(schema.string(), schema.object({}, { unknowns: 'allow' }))
-    ),
+    ecs_mapping: schema.maybe(ecsMappingSchema),
     snapshot: schema.maybe(schema.boolean()),
     removed: schema.maybe(schema.boolean()),
   },
