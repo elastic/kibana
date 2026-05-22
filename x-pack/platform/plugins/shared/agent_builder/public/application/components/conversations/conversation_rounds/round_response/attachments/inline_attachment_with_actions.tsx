@@ -25,10 +25,6 @@ interface InlineAttachmentWithActionsProps {
   isSidebar: boolean;
   conversationId: string;
   screenContext?: ScreenContextAttachmentData;
-  /** Version number of the attachment being rendered, used for canvas preview comparison */
-  version?: number;
-  /** Total number of versions for this attachment in the conversation. */
-  versionCount?: number;
   /**
    * Shared preview state for header actions/badges.
    */
@@ -44,8 +40,6 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
   isSidebar,
   conversationId,
   screenContext,
-  version,
-  versionCount,
   previewBadgeState,
 }) => {
   const {
@@ -58,8 +52,8 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
   const { openSidebarConversation: openSidebarConversationInternal } = useAgentBuilderServices();
 
   const openCanvas = useCallback(() => {
-    openCanvasContext(attachment, isSidebar, version, versionCount);
-  }, [openCanvasContext, attachment, isSidebar, version, versionCount]);
+    openCanvasContext(attachment, isSidebar);
+  }, [openCanvasContext, attachment, isSidebar]);
 
   const updateOrigin = useCallback(
     async (origin: string) => {
@@ -75,7 +69,7 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
   }, [conversationId, openSidebarConversationInternal]);
 
   const uiDefinition = attachmentsService.getAttachmentUiDefinition(attachment.type);
-  const attachmentPreviewKey = getAttachmentPreviewKey(attachment.id, version);
+  const attachmentPreviewKey = getAttachmentPreviewKey(attachment.id, attachment.version);
   const [dynamicButtonsState, setDynamicButtonsState] = useState<{
     key: string;
     buttons: ActionButton[];
@@ -102,8 +96,6 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
             nextPreviewState === 'previewing' ? attachmentPreviewKey : null
           );
         },
-        version,
-        versionCount,
       }) ?? [],
     [
       uiDefinition,
@@ -114,8 +106,6 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
       setPreviewedAttachmentKey,
       attachmentPreviewKey,
       openSidebarConversation,
-      version,
-      versionCount,
     ]
   );
 
@@ -137,7 +127,7 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
   }
 
   const title = uiDefinition?.getLabel?.(attachment) ?? attachment.type.toUpperCase();
-  const header = uiDefinition?.getHeader?.({ attachment, version, versionCount });
+  const header = uiDefinition?.getHeader?.({ attachment });
 
   return (
     <EuiSplitPanel.Outer
@@ -164,8 +154,6 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
             isSidebar,
             screenContext,
             openSidebarConversation: isSidebar ? undefined : openSidebarConversation,
-            version,
-            versionCount,
           },
           {
             registerActionButtons,

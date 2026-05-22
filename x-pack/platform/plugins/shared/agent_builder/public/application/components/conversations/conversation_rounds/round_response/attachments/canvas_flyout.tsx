@@ -88,7 +88,7 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
   // Clear dynamic buttons when the canvas attachment changes
   useEffect(() => {
     setDynamicButtons([]);
-  }, [canvasState?.attachment.id, canvasState?.version]);
+  }, [canvasState?.attachment.id, canvasState?.attachment.version]);
 
   const registerActionButtons = useCallback((buttons: ActionButton[]) => {
     setDynamicButtons(buttons);
@@ -105,8 +105,6 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
         updateOrigin,
         openSidebarConversation: canvasState.isSidebar ? undefined : openSidebarConversation,
         isCanvas: true,
-        version: canvasState.version,
-        versionCount: canvasState.versionCount,
       }) ?? [];
     return [...staticButtons, ...dynamicButtons];
   }, [canvasState, uiDefinition, updateOrigin, openSidebarConversation, dynamicButtons]);
@@ -117,11 +115,7 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
 
   const { attachment, isSidebar } = canvasState;
   const title = uiDefinition?.getLabel?.(attachment) ?? attachment.type.toUpperCase();
-  const header = uiDefinition?.getHeader?.({
-    attachment,
-    version: canvasState.version,
-    versionCount: canvasState.versionCount,
-  });
+  const header = uiDefinition?.getHeader?.({ attachment });
 
   const flyoutType = isSidebar || isNarrowViewport ? 'overlay' : 'push';
   const width = uiDefinition.canvasWidth ?? DEFAULT_CANVAS_WIDTH;
@@ -163,14 +157,12 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
         previewBadgeState="preview_available"
       />
       <EuiFlyoutBody css={flyoutBodyStyles}>
-        <React.Fragment key={`${attachment.id}:${canvasState.version ?? 'latest'}`}>
+        <React.Fragment key={`${attachment.id}:${attachment.version ?? 'latest'}`}>
           {uiDefinition.renderCanvasContent(
             {
               attachment,
               isSidebar,
               openSidebarConversation: isSidebar ? undefined : openSidebarConversation,
-              version: canvasState.version,
-              versionCount: canvasState.versionCount,
             },
             {
               registerActionButtons,

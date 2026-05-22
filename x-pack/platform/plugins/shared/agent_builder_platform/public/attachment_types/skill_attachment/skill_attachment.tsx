@@ -280,7 +280,8 @@ export const createSkillAttachmentDefinition = ({
       i18n.translate('xpack.agentBuilderPlatform.attachments.skill.label', {
         defaultMessage: 'Skill draft',
       }),
-    getHeader: ({ attachment, version, versionCount }) => {
+    getHeader: ({ attachment }) => {
+      const { version, versionCount } = attachment;
       const badges: HeaderBadge[] = [];
       const isCreated = Boolean(attachment.origin);
 
@@ -318,14 +319,8 @@ export const createSkillAttachmentDefinition = ({
     },
     renderInlineContent: (props) => <SkillInlineContent {...props} />,
     renderCanvasContent: (props) => <SkillCanvasContent {...props} />,
-    getActionButtons: ({
-      attachment,
-      updateOrigin,
-      openCanvas,
-      isCanvas,
-      version,
-      versionCount,
-    }) => {
+    getActionButtons: ({ attachment, updateOrigin, openCanvas, isCanvas }) => {
+      const { version, versionCount } = attachment;
       const isCreated = Boolean(attachment.origin);
 
       const actionButtons: ActionButton[] = [];
