@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import {
   SavedQueryId,
@@ -28,18 +28,20 @@ import {
   RemovedOrUndefined,
 } from '../model/schema/common_attributes.gen';
 
+export const CreateSavedQueryRequestBody = lazySchema(() =>
+  z.object({
+    id: SavedQueryId.optional(),
+    description: SavedQueryDescriptionOrUndefined.optional(),
+    query: QueryOrUndefined.optional(),
+    ecs_mapping: ECSMappingOrUndefined.optional(),
+    version: VersionOrUndefined.optional(),
+    platform: PlatformOrUndefined.optional(),
+    interval: Interval.optional(),
+    snapshot: SnapshotOrUndefined.optional(),
+    removed: RemovedOrUndefined.optional(),
+  })
+);
 export type CreateSavedQueryRequestBody = z.infer<typeof CreateSavedQueryRequestBody>;
-export const CreateSavedQueryRequestBody = z.object({
-  id: SavedQueryId.optional(),
-  description: SavedQueryDescriptionOrUndefined.optional(),
-  query: QueryOrUndefined.optional(),
-  ecs_mapping: ECSMappingOrUndefined.optional(),
-  version: VersionOrUndefined.optional(),
-  platform: PlatformOrUndefined.optional(),
-  interval: Interval.optional(),
-  snapshot: SnapshotOrUndefined.optional(),
-  removed: RemovedOrUndefined.optional(),
-});
 
+export const CreateSavedQueryResponse = lazySchema(() => z.object({}));
 export type CreateSavedQueryResponse = z.infer<typeof CreateSavedQueryResponse>;
-export const CreateSavedQueryResponse = z.object({});

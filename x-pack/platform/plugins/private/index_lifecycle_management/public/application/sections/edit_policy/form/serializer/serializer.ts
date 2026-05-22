@@ -14,6 +14,7 @@ import { defaultPolicy, defaultRolloverAction } from '../../../../constants';
 import type { FormInternal } from '../../types';
 
 import { serializeMigrateAndAllocateActions } from './serialize_migrate_and_allocate_actions';
+import { excludeControlledRolloverThresholds } from './utils';
 
 export const createSerializer =
   (originalPolicy?: SerializedPolicy) =>
@@ -70,7 +71,13 @@ export const createSerializer =
          */
         if (isUsingRollover) {
           if (_meta.hot?.isUsingDefaultRollover) {
+            const existingRollover = hotPhaseActions.rollover;
+            const preservedRolloverFields = excludeControlledRolloverThresholds(
+              existingRollover ?? {}
+            );
+
             hotPhaseActions.rollover = cloneDeep(defaultRolloverAction);
+            Object.assign(hotPhaseActions.rollover, preservedRolloverFields);
           } else {
             // Rollover may not exist if editing an existing policy with initially no rollover configured
             if (!hotPhaseActions.rollover) {

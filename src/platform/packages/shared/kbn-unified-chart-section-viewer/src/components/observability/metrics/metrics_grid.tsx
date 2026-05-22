@@ -24,6 +24,7 @@ import { FieldsMetadataProvider } from '../../../context/fields_metadata';
 import { createESQLQuery, firstNonNullable } from '../../../common/utils';
 import { ACTION_OPEN_IN_DISCOVER } from '../../../common/constants';
 import { useChartLayers } from '../../chart/hooks/use_chart_layers';
+import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
 
 export type MetricsGridProps = Pick<
   UnifiedMetricsGridProps,
@@ -218,10 +219,17 @@ const ChartItem = React.memo(
     onViewDetails,
     userMessages,
   }: ChartItemProps) => {
+    const { profileId } = useMetricsExperienceState();
     const { euiTheme } = useEuiTheme();
     const colorPalette = useMemo(
       () => Object.values(euiTheme.colors.vis).slice(0, 10),
       [euiTheme.colors.vis]
+    );
+
+    const applicableDimensions = useMemo(
+      () =>
+        dimensions.filter((dim) => metricItem.dimensionFields.some((df) => df.name === dim.name)),
+      [dimensions, metricItem.dimensionFields]
     );
 
     const esqlQuery = useMemo(() => {
@@ -230,14 +238,14 @@ const ChartItem = React.memo(
       return isSupported
         ? createESQLQuery({
             metricItem,
-            splitAccessors: dimensions.map((dim) => dim.name),
+            splitAccessors: applicableDimensions.map((dim) => dim.name),
             whereStatements,
           })
         : '';
-    }, [metricItem, dimensions, whereStatements]);
+    }, [metricItem, applicableDimensions, whereStatements]);
 
     const color = useMemo(() => colorPalette[index % colorPalette.length], [index, colorPalette]);
-    const chartLayers = useChartLayers({ dimensions, metricItem, color });
+    const chartLayers = useChartLayers({ dimensions: applicableDimensions, metricItem, color });
     const handleViewDetailsCallback = useCallback(
       () => onViewDetails(index, esqlQuery, metricItem),
       [index, esqlQuery, metricItem, onViewDetails]
@@ -253,6 +261,7 @@ const ChartItem = React.memo(
         onFocus={onFocusCell}
       >
         <Chart
+          id={metricItem.metricName}
           esqlQuery={esqlQuery}
           size={size}
           discoverFetch$={discoverFetch$}
@@ -267,6 +276,7 @@ const ChartItem = React.memo(
           titleHighlight={searchTerm}
           extraDisabledActions={[ACTION_OPEN_IN_DISCOVER]}
           userMessages={userMessages}
+          profileId={profileId}
         />
       </A11yGridCell>
     );

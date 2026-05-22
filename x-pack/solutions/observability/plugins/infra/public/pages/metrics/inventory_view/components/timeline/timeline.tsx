@@ -230,7 +230,11 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize={'s'} alignItems={'center'} responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <EuiIcon color={colorTransformer(chartMetric.color)} type={'dot'} />
+                  <EuiIcon
+                    color={colorTransformer(chartMetric.color)}
+                    type={'dot'}
+                    aria-hidden={true}
+                  />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiText size={'xs'}>

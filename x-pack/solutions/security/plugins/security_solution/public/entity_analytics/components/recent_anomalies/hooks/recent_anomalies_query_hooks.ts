@@ -7,10 +7,14 @@
 
 import { useQuery } from '@kbn/react-query';
 import { getESQLResults, prettifyQuery } from '@kbn/esql-utils';
+import type { ESQLSearchResponse } from '@kbn/es-types';
 import { i18n } from '@kbn/i18n';
 import { useMemo } from 'react';
 import { ML_ANOMALIES_INDEX } from '../../../../../common/constants';
-import { useEsqlGlobalFilterQuery } from '../../../../common/hooks/esql/use_esql_global_filter';
+import {
+  useEsqlFixedRangeFilterQuery,
+  useEsqlGlobalFilterQuery,
+} from '../../../../common/hooks/esql/use_esql_global_filter';
 import { esqlResponseToRecords } from '../../../../common/utils/esql';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useErrorToast } from '../../../../common/hooks/use_error_toast';
@@ -27,14 +31,38 @@ export interface EntityMetadata {
   entityType: string;
 }
 
+interface FixedTimeRange {
+  from: string;
+  to: string;
+}
+
+/**
+ * Internal helper: pick between the global-date-picker filter and a fixed
+ * range filter. Both underlying hooks must be called unconditionally to obey
+ * the rules of hooks; only the selected value is returned.
+ */
+const useRecentAnomaliesFilterQuery = (timeRange?: FixedTimeRange) => {
+  const globalFilterQuery = useEsqlGlobalFilterQuery();
+  const fixedFilterQuery = useEsqlFixedRangeFilterQuery(
+    timeRange?.from ?? 'now-15m',
+    timeRange?.to ?? 'now'
+  );
+  return timeRange ? fixedFilterQuery : globalFilterQuery;
+};
+
 const useRecentAnomaliesTopRowsQuery = (params: {
   anomalyBands: AnomalyBand[];
   viewBy: ViewByMode;
   watchlistId?: string;
   spaceId?: string;
+  /**
+   * When provided, this time range is used for filtering instead of the
+   * global date picker's range. Used on surfaces that hide the picker.
+   */
+  timeRange?: FixedTimeRange;
 }) => {
   const search = useKibana().services.data.search.search;
-  const filterQuery = useEsqlGlobalFilterQuery();
+  const filterQuery = useRecentAnomaliesFilterQuery(params.timeRange);
   const rowField = params.viewBy === 'jobId' ? 'job_id' : 'entity_id';
 
   const topRowsEsqlSource = useRecentAnomaliesTopRowsEsqlSource({
@@ -45,38 +73,42 @@ const useRecentAnomaliesTopRowsQuery = (params: {
   const { isLoading, data, isError } = useQuery(
     [filterQuery, topRowsEsqlSource],
     async ({ signal }) => {
-      if (!topRowsEsqlSource) return [];
-      return esqlResponseToRecords<Record<string, string>>(
-        (
-          await getESQLResults({
-            esqlQuery: topRowsEsqlSource,
-            search,
-            signal,
-            filter: filterQuery,
-          })
-        )?.response
-      );
+      if (!topRowsEsqlSource) return { records: [], rawResponse: undefined };
+      const esqlResult = await getESQLResults({
+        esqlQuery: topRowsEsqlSource,
+        search,
+        signal,
+        filter: filterQuery,
+      });
+      return {
+        records: esqlResponseToRecords<Record<string, string>>(esqlResult?.response),
+        rawResponse: esqlResult?.response,
+      };
     },
     { enabled: !!topRowsEsqlSource }
   );
 
+  const records = data?.records;
+
   const entityMetadata: EntityMetadata[] | undefined = useMemo(
     () =>
       params.viewBy === 'entity'
-        ? data?.map((record) => ({
+        ? records?.map((record) => ({
             entityId: record.entity_id,
             entityName: record.entity_name,
             entityType: record.entity_type,
           }))
         : undefined,
-    [data, params.viewBy]
+    [records, params.viewBy]
   );
 
   return {
     isLoading,
-    rowLabels: data?.map((each) => each[rowField]),
+    rowLabels: records?.map((each) => each[rowField]),
     entityMetadata,
     isError,
+    rawResponse: data?.rawResponse,
+    esqlSource: topRowsEsqlSource,
   };
 };
 
@@ -85,21 +117,31 @@ export const useRecentAnomaliesQuery = (params: {
   viewBy: ViewByMode;
   watchlistId?: string;
   spaceId?: string;
+  /**
+   * When provided, this time range is used for filtering instead of the
+   * global date picker's range. Used on surfaces that hide the picker.
+   */
+  timeRange?: FixedTimeRange;
 }) => {
   const search = useKibana().services.data.search.search;
-  const filterQuery = useEsqlGlobalFilterQuery();
+  const filterQuery = useRecentAnomaliesFilterQuery(params.timeRange);
 
   const {
     rowLabels,
     entityMetadata,
     isError: isTopRowsError,
     isLoading: isTopRowsLoading,
+    rawResponse: topRowsRawResponse,
+    esqlSource: topRowsEsqlSource,
   } = useRecentAnomaliesTopRowsQuery(params);
 
   const anomalyDataEsqlSource = useRecentAnomaliesDataEsqlSource({
     ...params,
     rowLabels,
+    timeRange: params.timeRange,
   });
+
+  const hasAnomaliesData = rowLabels && rowLabels.length > 0;
 
   const {
     isLoading: isAnomaliesLoading,
@@ -110,21 +152,21 @@ export const useRecentAnomaliesQuery = (params: {
   } = useQuery<{
     anomalyRecords: Array<Record<string, unknown>>;
     rowLabels: string[];
+    rawResponse?: ESQLSearchResponse;
   }>(
     [filterQuery, anomalyDataEsqlSource, rowLabels],
     async ({ signal }) => {
-      if (!anomalyDataEsqlSource || !rowLabels || rowLabels.length === 0) {
+      if (!anomalyDataEsqlSource || !hasAnomaliesData) {
         return { anomalyRecords: [], rowLabels: [] };
       }
+      const esqlResult = await getESQLResults({
+        esqlQuery: anomalyDataEsqlSource,
+        search,
+        signal,
+        filter: filterQuery,
+      });
       const anomalyRecords = esqlResponseToRecords<Record<string, string | number>>(
-        (
-          await getESQLResults({
-            esqlQuery: anomalyDataEsqlSource,
-            search,
-            signal,
-            filter: filterQuery,
-          })
-        ).response
+        esqlResult.response
       ).map((eachRawRecord) => ({
         ...eachRawRecord,
         '@timestamp': new Date(eachRawRecord['@timestamp']).getTime(),
@@ -132,6 +174,7 @@ export const useRecentAnomaliesQuery = (params: {
       return {
         anomalyRecords: anomalyRecords ?? [],
         rowLabels: rowLabels ?? [],
+        rawResponse: esqlResult.response,
       };
     },
     {
@@ -141,20 +184,30 @@ export const useRecentAnomaliesQuery = (params: {
   );
 
   const inspect = useMemo(() => {
+    // when there are no anomalies, rowLabels comes back empty from the top-rows query,
+    // so the main query never actually runs. In that case, we use the top-rows query's esql source and raw response.
+    const esqlSource = hasAnomaliesData ? anomalyDataEsqlSource : topRowsEsqlSource;
+    const rawResponse = hasAnomaliesData ? data?.rawResponse : topRowsRawResponse;
     return {
       dsl: [
         JSON.stringify(
           {
             index: [ML_ANOMALIES_INDEX],
-            body: prettifyQuery(anomalyDataEsqlSource ?? ''),
+            body: prettifyQuery(esqlSource ?? ''),
           },
           null,
           2
         ),
       ],
-      response: data ? [JSON.stringify(data, null, 2)] : [],
+      response: rawResponse ? [JSON.stringify(rawResponse, null, 2)] : [],
     };
-  }, [data, anomalyDataEsqlSource]);
+  }, [
+    data?.rawResponse,
+    anomalyDataEsqlSource,
+    topRowsRawResponse,
+    topRowsEsqlSource,
+    hasAnomaliesData,
+  ]);
 
   useErrorToast(
     i18n.translate('xpack.securitySolution.entityAnalytics.recentAnomalies.queryError', {

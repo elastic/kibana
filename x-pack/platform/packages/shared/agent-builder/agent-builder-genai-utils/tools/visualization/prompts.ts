@@ -100,13 +100,27 @@ export const esqlAdditionalInstructions = `
 
 Use human-readable column aliases in STATS/EVAL (e.g. \`Unique Visitors\` not \`unique_visitors\`). Wrap multi-word aliases in backticks.
 
+## Time picker compatibility
+
+Visualization ES|QL must respond to the Lens time picker. If a time field exists, use the event-time field, typically \`@timestamp\`, \`timestamp\`, or another event date. Reference \`?_tstart\` and \`?_tend\` in the query.
+For time-series charts, pass \`?_tstart\` and \`?_tend\` to the bucket function.
+For categorical, metric, or any other charts that do not group by time, add a filter such as \`WHERE <time field> >= ?_tstart AND <time field> < ?_tend\`.
+Do not hardcode absolute times or now()-based ranges.
+
 ## Time Bucketing
 
-For time series charts, use the \`BUCKET\` function to create "auto" buckets that automatically scale with the time range.
-Always use \`BUCKET(@timestamp, 75, ?_tstart, ?_tend)\` instead of hardcoded intervals like
-\`DATE_TRUNC(1 hour, @timestamp)\`:
+For time series charts, use auto buckets: \`BUCKET(<time field>, 75, ?_tstart, ?_tend)\` or \`TBUCKET(75, ?_tstart, ?_tend)\`, not hardcoded intervals like \`DATE_TRUNC(1 hour, <time field>)\`.
+Omit \`LIMIT\`; the bucket range already bounds the results.
 
-FROM logs | STATS count = COUNT() BY bucket = BUCKET(@timestamp, 75, ?_tstart, ?_tend)
+e.g. with for a normal index with FROM and BUCKET:
 
-When generating or passing "esql" for time-based XY charts, prefer this pattern (adjust the aggregation and timestamp field as needed) so the chart responds correctly to the dashboard or lens time range.
+\`\`\`esql
+FROM logs | STATS count = COUNT() BY bucket = BUCKET(timestamp, 75, ?_tstart, ?_tend)
+\`\`\`
+
+or for a time-series datastream with TS and TBUCKET:
+
+\`\`\`esql
+TS logs-tsds | STATS count = COUNT() BY bucket = TBUCKET(75, ?_tstart, ?_tend)
+\`\`\`
 `;

@@ -21,13 +21,20 @@ export const AGENT_BUILDER_EVENT_TYPES = {
   SkillCreated: `${TELEMETRY_PREFIX}_skill_created`,
   SkillUpdated: `${TELEMETRY_PREFIX}_skill_updated`,
   SkillDeleted: `${TELEMETRY_PREFIX}_skill_deleted`,
+  SkillInvoked: `${TELEMETRY_PREFIX}_skill_invoked`,
+  PluginImported: `${TELEMETRY_PREFIX}_plugin_imported`,
   RoundComplete: `${TELEMETRY_PREFIX}_round_complete`,
   RoundError: `${TELEMETRY_PREFIX}_round_error`,
   ToolCallSuccess: `${TELEMETRY_PREFIX}_tool_call_success`,
   ToolCallError: `${TELEMETRY_PREFIX}_tool_call_error`,
 } as const;
 
-export type OptInSource = 'security_settings_menu' | 'stack_management' | 'security_ab_tour';
+export type OptInSource =
+  | 'security_settings_menu'
+  | 'stack_management'
+  | 'security_ab_tour'
+  | 'agent_builder_nav_control';
+
 export type OptInAction =
   | 'step_reached'
   | 'confirmation_shown'
@@ -38,10 +45,16 @@ export type OptInAction =
 export interface ReportOptInActionParams {
   action: OptInAction;
   source: OptInSource;
+  /** Announcement modal design variant when the event originates from that flow. */
+  announcement_variant?: '1a' | '1b' | '2a';
+  /** Whether the user had prior Observability or Security AI Assistant conversations (current space). */
+  had_prior_ai_assistant_usage?: boolean;
 }
 
 export interface ReportOptOutParams {
-  source: 'security_settings_menu' | 'stack_management';
+  source: 'security_settings_menu' | 'stack_management' | 'agent_builder_nav_control';
+  announcement_variant?: '1a' | '1b' | '2a';
+  had_prior_ai_assistant_usage?: boolean;
 }
 
 export interface ReportAddToChatClickedParams {
@@ -97,22 +110,94 @@ export interface ReportToolCreatedParams {
   tool_type: string;
 }
 
+/** Origin of a skill: `custom` for user-created via the public API, `plugin` for plugin-bundled. */
+export type SkillCreationOrigin = 'custom' | 'plugin';
+
+/** Origin of a skill at invocation time: `builtin`, `custom` (user-created), or `plugin` (plugin-installed). */
+export type SkillInvocationOrigin = 'builtin' | 'custom' | 'plugin';
+
+/**
+ * Solution area a skill belongs to. Built-in skills are classified by their `basePath`.
+ * Custom (user-created) skills are reported as `custom`. Plugin-backed skills are
+ * reported as `plugin`. `unknown` is reserved for built-ins whose `basePath` does not
+ * match any known prefix.
+ */
+export type SkillSolutionArea =
+  | 'security'
+  | 'observability'
+  | 'search'
+  | 'platform'
+  | 'custom'
+  | 'plugin'
+  | 'unknown';
+
 /** Telemetry params reported when a user-created skill is created. */
 export interface ReportSkillCreatedParams {
-  /** Identifier of the created skill. */
+  /**
+   * Identifier of the created skill, normalized for privacy. Custom skills are
+   * reported as `custom-<sha256_prefix>`; plugin-bundled creates as
+   * `plugin-<plugin_id_hash>-<sha256_prefix>`.
+   */
   skill_id: string;
+  /** Optional origin (`custom` for direct API creates, `plugin` for plugin-bundled creates). */
+  origin?: SkillCreationOrigin;
 }
 
 /** Telemetry params reported when a user-created skill is updated. */
 export interface ReportSkillUpdatedParams {
-  /** Identifier of the updated skill. */
+  /**
+   * Identifier of the updated skill, normalized for privacy. Custom skills are
+   * reported as `custom-<sha256_prefix>`; plugin-bundled updates as
+   * `plugin-<plugin_id_hash>-<sha256_prefix>`.
+   */
   skill_id: string;
+  /** Optional origin (`custom` for direct API updates, `plugin` for plugin-bundled updates). */
+  origin?: SkillCreationOrigin;
 }
 
 /** Telemetry params reported when a user-created skill is deleted. */
 export interface ReportSkillDeletedParams {
-  /** Identifier of the deleted skill. */
+  /**
+   * Identifier of the deleted skill, normalized for privacy. Custom skills are
+   * reported as `custom-<sha256_prefix>`; plugin-bundled deletes as
+   * `plugin-<plugin_id_hash>-<sha256_prefix>`.
+   */
   skill_id: string;
+  /** Optional origin (`custom` for direct API deletes, `plugin` for plugin-bundled deletes). */
+  origin?: SkillCreationOrigin;
+}
+
+/** Telemetry params reported when a skill is invoked (loaded into the active tool set). */
+export interface ReportSkillInvokedParams {
+  /**
+   * ID of the invoked skill. Built-in skills keep their ID; custom skills are reported as
+   * `custom-<sha256_prefix>`; plugin-backed skills as `plugin-<plugin_id_hash>-<sha256_prefix>`.
+   */
+  skill_id: string;
+  /** Where this skill came from. */
+  origin: SkillInvocationOrigin;
+  /** Solution area derived from the skill's `basePath` (built-ins) or origin. */
+  solution_area: SkillSolutionArea;
+  /** Normalized plugin ID. Present when `origin === 'plugin'`. */
+  plugin_id?: string;
+  /** Normalized agent ID running this skill, when known. */
+  agent_id?: string;
+  /** Conversation ID, when known. */
+  conversation_id?: string;
+  /** Agent execution ID, when known. */
+  execution_id?: string;
+  /** Number of tools dynamically registered by this skill load. */
+  tool_count: number;
+}
+
+/** Telemetry params reported when a custom plugin is imported (URL or upload). */
+export interface ReportPluginImportedParams {
+  /** Normalized plugin ID. */
+  plugin_id: string;
+  /** Where the plugin came from. */
+  source_type: 'url' | 'upload';
+  /** Number of persisted skills bundled with the plugin. */
+  skill_count: number;
 }
 
 export interface ReportToolCallSuccessParams {
@@ -153,6 +238,10 @@ export interface AgentBuilderTelemetryEventsMap {
   [AGENT_BUILDER_EVENT_TYPES.SkillUpdated]: ReportSkillUpdatedParams;
   /** Fired when a user-created skill is deleted. */
   [AGENT_BUILDER_EVENT_TYPES.SkillDeleted]: ReportSkillDeletedParams;
+  /** Fired when a skill is invoked (its tools are dynamically registered for the agent). */
+  [AGENT_BUILDER_EVENT_TYPES.SkillInvoked]: ReportSkillInvokedParams;
+  /** Fired when a custom plugin is imported. */
+  [AGENT_BUILDER_EVENT_TYPES.PluginImported]: ReportPluginImportedParams;
   [AGENT_BUILDER_EVENT_TYPES.RoundComplete]: ReportRoundCompleteParams;
   [AGENT_BUILDER_EVENT_TYPES.RoundError]: ReportRoundErrorParams;
   [AGENT_BUILDER_EVENT_TYPES.ToolCallSuccess]: ReportToolCallSuccessParams;
@@ -169,6 +258,8 @@ export type AgentBuilderTelemetryEvent =
   | EventTypeOpts<ReportSkillCreatedParams>
   | EventTypeOpts<ReportSkillUpdatedParams>
   | EventTypeOpts<ReportSkillDeletedParams>
+  | EventTypeOpts<ReportSkillInvokedParams>
+  | EventTypeOpts<ReportPluginImportedParams>
   | EventTypeOpts<ReportRoundCompleteParams>
   | EventTypeOpts<ReportRoundErrorParams>
   | EventTypeOpts<ReportToolCallSuccessParams>
@@ -184,6 +275,8 @@ export type AgentBuilderEventTypes =
   | typeof AGENT_BUILDER_EVENT_TYPES.SkillCreated
   | typeof AGENT_BUILDER_EVENT_TYPES.SkillUpdated
   | typeof AGENT_BUILDER_EVENT_TYPES.SkillDeleted
+  | typeof AGENT_BUILDER_EVENT_TYPES.SkillInvoked
+  | typeof AGENT_BUILDER_EVENT_TYPES.PluginImported
   | typeof AGENT_BUILDER_EVENT_TYPES.RoundComplete
   | typeof AGENT_BUILDER_EVENT_TYPES.RoundError
   | typeof AGENT_BUILDER_EVENT_TYPES.ToolCallSuccess
@@ -204,8 +297,22 @@ const OPT_IN_EVENT: AgentBuilderTelemetryEvent = {
       type: 'keyword',
       _meta: {
         description:
-          'Source of the opt-in action (security_settings_menu|stack_management|security_ab_tour)',
+          'Source of the opt-in action (security_settings_menu|stack_management|security_ab_tour|agent_builder_nav_control)',
         optional: false,
+      },
+    },
+    announcement_variant: {
+      type: 'keyword',
+      _meta: {
+        description: 'Agent Builder announcement modal variant (1a|1b|2a)',
+        optional: true,
+      },
+    },
+    had_prior_ai_assistant_usage: {
+      type: 'boolean',
+      _meta: {
+        description: 'Whether the user had prior AI Assistant conversations in the current space',
+        optional: true,
       },
     },
   },
@@ -217,8 +324,23 @@ const OPT_OUT_EVENT: AgentBuilderTelemetryEvent = {
     source: {
       type: 'keyword',
       _meta: {
-        description: 'Source of the opt-out action (security_settings_menu|stack_management)',
+        description:
+          'Source of the opt-out action (security_settings_menu|stack_management|agent_builder_nav_control)',
         optional: false,
+      },
+    },
+    announcement_variant: {
+      type: 'keyword',
+      _meta: {
+        description: 'Agent Builder announcement modal variant (1a|1b|2a)',
+        optional: true,
+      },
+    },
+    had_prior_ai_assistant_usage: {
+      type: 'boolean',
+      _meta: {
+        description: 'Whether the user had prior AI Assistant conversations in the current space',
+        optional: true,
       },
     },
   },
@@ -337,8 +459,16 @@ const SKILL_CREATED_EVENT: AgentBuilderTelemetryEvent = {
       type: 'keyword',
       _meta: {
         description:
-          'ID of the created skill (normalized: built-in skills keep ID, custom skills become "custom-<sha256_prefix>")',
+          'ID of the created skill (normalized: custom skills become "custom-<sha256_prefix>", plugin-bundled creates become "plugin-<plugin_id_hash>-<sha256_prefix>")',
         optional: false,
+      },
+    },
+    origin: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'Origin of the created skill (custom for direct API creates, plugin for plugin-bundled creates)',
+        optional: true,
       },
     },
   },
@@ -351,8 +481,16 @@ const SKILL_UPDATED_EVENT: AgentBuilderTelemetryEvent = {
       type: 'keyword',
       _meta: {
         description:
-          'ID of the updated skill (normalized: built-in skills keep ID, custom skills become "custom-<sha256_prefix>")',
+          'ID of the updated skill (normalized: custom skills become "custom-<sha256_prefix>", plugin-bundled updates become "plugin-<plugin_id_hash>-<sha256_prefix>")',
         optional: false,
+      },
+    },
+    origin: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'Origin of the updated skill (custom for direct API updates, plugin for plugin-bundled updates)',
+        optional: true,
       },
     },
   },
@@ -365,7 +503,107 @@ const SKILL_DELETED_EVENT: AgentBuilderTelemetryEvent = {
       type: 'keyword',
       _meta: {
         description:
-          'ID of the deleted skill (normalized: built-in skills keep ID, custom skills become "custom-<sha256_prefix>")',
+          'ID of the deleted skill (normalized: custom skills become "custom-<sha256_prefix>", plugin-bundled deletes become "plugin-<plugin_id_hash>-<sha256_prefix>")',
+        optional: false,
+      },
+    },
+    origin: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'Origin of the deleted skill (custom for direct API deletes, plugin for plugin-bundled deletes)',
+        optional: true,
+      },
+    },
+  },
+};
+
+const SKILL_INVOKED_EVENT: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.SkillInvoked,
+  schema: {
+    skill_id: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'ID of the invoked skill (normalized: built-in skills keep ID, custom skills become "custom-<sha256_prefix>", plugin-backed skills become "plugin-<plugin_id_hash>-<sha256_prefix>")',
+        optional: false,
+      },
+    },
+    origin: {
+      type: 'keyword',
+      _meta: {
+        description: 'Origin of the invoked skill (builtin|custom|plugin)',
+        optional: false,
+      },
+    },
+    solution_area: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'Solution area the skill belongs to (security|observability|search|platform|custom|plugin|unknown)',
+        optional: false,
+      },
+    },
+    plugin_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'Normalized plugin ID, present when origin is "plugin"',
+        optional: true,
+      },
+    },
+    agent_id: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'ID of the agent invoking the skill (normalized: built-in agents keep ID, custom agents become "custom-<sha256_prefix>")',
+        optional: true,
+      },
+    },
+    conversation_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'Conversation ID',
+        optional: true,
+      },
+    },
+    execution_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'Agent execution ID',
+        optional: true,
+      },
+    },
+    tool_count: {
+      type: 'integer',
+      _meta: {
+        description: 'Number of tools dynamically registered by this skill load',
+        optional: false,
+      },
+    },
+  },
+};
+
+const PLUGIN_IMPORTED_EVENT: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.PluginImported,
+  schema: {
+    plugin_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'Normalized plugin ID (custom-<sha256_prefix>)',
+        optional: false,
+      },
+    },
+    source_type: {
+      type: 'keyword',
+      _meta: {
+        description: 'Where the plugin came from (url|upload)',
+        optional: false,
+      },
+    },
+    skill_count: {
+      type: 'integer',
+      _meta: {
+        description: 'Number of persisted skills bundled with the plugin',
         optional: false,
       },
     },
@@ -598,7 +836,7 @@ const TOOL_CALL_SUCCESS_EVENT: AgentBuilderTelemetryEvent = {
       _meta: {
         description:
           'ID of the agent (normalized: built-in agents keep ID, custom agents become "custom-<sha256_prefix>")',
-        optional: false,
+        optional: true,
       },
     },
     conversation_id: {
@@ -675,7 +913,7 @@ const TOOL_CALL_ERROR_EVENT: AgentBuilderTelemetryEvent = {
       _meta: {
         description:
           'ID of the agent (normalized: built-in agents keep ID, custom agents become "custom-<sha256_prefix>")',
-        optional: false,
+        optional: true,
       },
     },
     conversation_id: {
@@ -758,6 +996,8 @@ export const agentBuilderServerEbtEvents: Array<EventTypeOpts<Record<string, unk
   SKILL_CREATED_EVENT,
   SKILL_UPDATED_EVENT,
   SKILL_DELETED_EVENT,
+  SKILL_INVOKED_EVENT,
+  PLUGIN_IMPORTED_EVENT,
   ROUND_COMPLETE_EVENT,
   ROUND_ERROR_EVENT,
   TOOL_CALL_SUCCESS_EVENT,

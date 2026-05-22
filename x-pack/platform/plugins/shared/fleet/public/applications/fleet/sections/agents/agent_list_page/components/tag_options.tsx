@@ -140,7 +140,7 @@ export const TagOptions: React.FC<Props> = ({ tagName, isTagHovered, onTagsUpdat
                   closePopover(true);
                 }}
               >
-                <EuiIcon type="trash" />{' '}
+                <EuiIcon type="trash" aria-hidden={true} />{' '}
                 <FormattedMessage
                   id="xpack.fleet.tagOptions.deleteText"
                   defaultMessage="Delete tag"

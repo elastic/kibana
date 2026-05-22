@@ -102,4 +102,30 @@ describe('EndpointAgentStatusClient', () => {
       },
     });
   });
+
+  it('should log errors and still return expected data structure', async () => {
+    constructorOptions.esClient.search = jest.fn().mockRejectedValue(new Error('foo error'));
+
+    await expect(
+      statusClient.getAgentStatuses([dataMocks.unitedMetadata.agent.id])
+    ).resolves.toEqual({
+      '0dc3661d-6e67-46b0-af39-6f12b025fcb0': {
+        agentId: '0dc3661d-6e67-46b0-af39-6f12b025fcb0',
+        agentType: 'endpoint',
+        error: 'foo error',
+        found: false,
+        isolated: false,
+        lastSeen: '',
+        pendingActions: {},
+        status: 'offline',
+      },
+    });
+
+    expect(constructorOptions.endpointService.createLogger().error).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message:
+          'Failed to fetch agent status for [endpoint] agentIds: [0dc3661d-6e67-46b0-af39-6f12b025fcb0]: foo error',
+      })
+    );
+  });
 });

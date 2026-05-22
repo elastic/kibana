@@ -2,12 +2,7 @@
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": [
-      "node",
-      "cheerio",
-      "@kbn/ambient-ui-types",
-      "@kbn/ambient-ftr-types"
-    ],
+    "types": ["node", "cheerio", "@kbn/ambient-ui-types", "@kbn/ambient-ftr-types"],
     // there is still a decent amount of JS in this plugin and we are taking
     // advantage of the fact that TS doesn't know the types of that code and
     // gives us `any`. Once that code is converted to .ts we can remove this
@@ -20,8 +15,6 @@
     "../../../typings/**/*",
     "../../../src/platform/packages/shared/kbn-test/types/ftr_globals/**/*",
     "../../*.json",
-    "./api_integration/apis/logstash/pipeline/fixtures/*.json",
-    "./api_integration/apis/logstash/pipelines/fixtures/*.json",
     "./api_integration/apis/telemetry/fixtures/*.json",
     "./monitoring_api_integration/fixtures/**/*.json"
   ],
@@ -39,7 +32,6 @@
     "@kbn/security-api-integration-helpers",
     "@kbn/security-plugin",
     "@kbn/telemetry-plugin",
-    "@kbn/maps-vector-tile-utils",
     "@kbn/data-views-plugin",
     "@kbn/core-saved-objects-server",
     "@kbn/security-plugin-types-common",
@@ -182,7 +174,6 @@
     "@kbn/dev-cli-runner",
     "@kbn/ui-actions-plugin",
     "@kbn/product-doc-common",
-    "@kbn/lens-common",
     "@kbn/alerting-v2-episodes-ui"
   ]
 }

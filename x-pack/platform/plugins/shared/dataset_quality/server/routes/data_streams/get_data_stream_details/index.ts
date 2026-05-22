@@ -104,8 +104,13 @@ export async function getDataStreamDetails({
       defaultRetentionPeriod: esDataStream?.defaultRetentionPeriod,
     };
   } catch (e) {
-    // Respond with empty object if data stream does not exist
-    if (e.statusCode === 404 || e.body?.error?.type === 'index_closed_exception') {
+    // ES surfaces `index_not_found_exception` as a 500 when triggered
+    // mid-search (e.g. a missing backing index), so check the error type too.
+    if (
+      e.statusCode === 404 ||
+      e.body?.error?.type === 'index_closed_exception' ||
+      e.body?.error?.type === 'index_not_found_exception'
+    ) {
       return {};
     }
     throw e;
@@ -156,7 +161,7 @@ async function getDataStreamSummaryStats(
 }> {
   const datasetQualityESClient = createDatasetQualityESClient(esClient);
 
-  const fieldCapsResponse = await esClient.fieldCaps({
+  const fieldCapsResponse = await datasetQualityESClient.fieldCaps({
     index: dataStream,
     fields: ['*'],
     include_unmapped: false,
@@ -218,7 +223,20 @@ async function getMeteringAvgDocSizeInBytes(esClient: ElasticsearchClient, index
 }
 
 async function getAvgDocSizeInBytes(esClient: ElasticsearchClient, index: string) {
-  const indexStats = await esClient.indices.stats({ index, forbid_closed_indices: false });
+  // `indices.stats` does not support `ignore_unavailable`, so if any backing
+  // index of the data stream is missing (e.g. a `partial-` index from a
+  // partial snapshot restore, or a legacy time-based index deleted by ILM)
+  // it throws `index_not_found_exception`. Treat that as "no size info" so we
+  // do not lose the rest of the details payload.
+  let indexStats: Awaited<ReturnType<ElasticsearchClient['indices']['stats']>>;
+  try {
+    indexStats = await esClient.indices.stats({ index, forbid_closed_indices: false });
+  } catch (e) {
+    if (e.body?.error?.type === 'index_not_found_exception' || e.statusCode === 404) {
+      return 0;
+    }
+    throw e;
+  }
   const docCount = indexStats._all.total?.docs?.count ?? 0;
   const sizeInBytes = indexStats._all.total?.store?.size_in_bytes ?? 0;
 

@@ -40,7 +40,7 @@ export function AsyncComponent({
         {error && status === AsyncStatus.Settled ? (
           <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
             <EuiFlexItem>
-              <EuiIcon type="warning" color="warning" />
+              <EuiIcon type="warning" color="warning" aria-hidden={true} />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText style={{ whiteSpace: 'nowrap' }}>

@@ -56,7 +56,7 @@ export function registerSanitizeRoute(router: VersionedRouter<RequestHandlerCont
     },
     async (_ctx, req, res) => {
       try {
-        const result = await sanitize(_ctx, getCachedDashboardStateSchema(), req.body);
+        const result = await sanitize(getCachedDashboardStateSchema(), req.body);
         return res.ok({ body: result });
       } catch (e) {
         const message = e instanceof Error ? e.message : 'Unknown error';

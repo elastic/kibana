@@ -44,11 +44,11 @@ describe('DefaultModelSection', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseConnectors.mockReturnValue({
-      connectors: [
+      data: [
         { connectorId: 'pre-1', name: 'Elastic Model', isPreconfigured: true },
         { connectorId: 'custom-1', name: 'My Connector', isPreconfigured: false },
       ],
-      loading: false,
+      isLoading: false,
     });
     mockUseConnectorExists.mockReturnValue({ exists: true, loading: false });
   });
@@ -121,7 +121,7 @@ describe('DefaultModelSection', () => {
   });
 
   it('shows loading state when connectors are loading', () => {
-    mockUseConnectors.mockReturnValue({ connectors: undefined, loading: true });
+    mockUseConnectors.mockReturnValue({ data: undefined, isLoading: true });
 
     render(
       <Wrapper>
@@ -178,7 +178,7 @@ describe('DefaultModelSection', () => {
     );
 
     expect(
-      screen.getByText('Features can allow users to select other models than the default.')
+      screen.getByText('Users can choose between multiple models for each feature.')
     ).toBeInTheDocument();
   });
 

@@ -1,5 +1,5 @@
 {
-  "sha1": "cf010439c83db50692933ba6098b3391002b9d71",
+  "sha1": "8add3c9af17b0d7160267fb2f327f9f439851aff",
   "tests": [
     {
       "id": "71242d88739937b-70753e6cedbcd4d",
@@ -8,7 +8,7 @@
       "tags": [],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 21,
+        "line": 24,
         "column": 16
       }
     },
@@ -75,6 +75,50 @@
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/brush_to_zoom.spec.ts",
         "line": 47,
+        "column": 14
+      }
+    },
+    {
+      "id": "c87148d6c664208-70bc8f10babd4cc",
+      "title": "Metrics in Discover - Dimensions wipe on stream switch drops a selected dimension when switching to a stream that does not emit it, and keeps the chart rendered",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-security_complete",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/dimensions_wipe.spec.ts",
+        "line": 35,
+        "column": 14
+      }
+    },
+    {
+      "id": "c87148d6c664208-fd7c0486ff4d467",
+      "title": "Metrics in Discover - Dimensions wipe on stream switch preserves the breakdown when the dimension is shared across streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-security_complete",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/dimensions_wipe.spec.ts",
+        "line": 82,
         "column": 14
       }
     },
@@ -664,7 +708,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/explore_from_apm.spec.ts",
-        "line": 54,
+        "line": 60,
         "column": 14
       }
     },
@@ -686,7 +730,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/explore_from_apm.spec.ts",
-        "line": 83,
+        "line": 89,
         "column": 14
       }
     },
@@ -708,7 +752,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/explore_from_apm.spec.ts",
-        "line": 124,
+        "line": 130,
         "column": 14
       }
     },
@@ -730,7 +774,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/explore_from_apm.spec.ts",
-        "line": 163,
+        "line": 169,
         "column": 14
       }
     },
@@ -752,7 +796,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/explore_from_apm.spec.ts",
-        "line": 230,
+        "line": 236,
         "column": 14
       }
     },
@@ -774,7 +818,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/explore_from_apm.spec.ts",
-        "line": 256,
+        "line": 262,
         "column": 14
       }
     },
@@ -796,7 +840,73 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/explore_from_apm.spec.ts",
-        "line": 300,
+        "line": 314,
+        "column": 14
+      }
+    },
+    {
+      "id": "d324c688bbf2d2c-1ce6bad00704af7",
+      "title": "Traces in Discover - Explore from SLO APM latency SLO - \"View events\" link opens traces experience with event type control",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/explore_from_slo.spec.ts",
+        "line": 51,
+        "column": 14
+      }
+    },
+    {
+      "id": "d324c688bbf2d2c-653af4edc022ca5",
+      "title": "Traces in Discover - Explore from SLO APM availability SLO - \"View events\" link opens traces experience with event type control",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/explore_from_slo.spec.ts",
+        "line": 75,
+        "column": 14
+      }
+    },
+    {
+      "id": "d324c688bbf2d2c-50739ac2f72fa7b",
+      "title": "Traces in Discover - Explore from SLO APM latency SLO - \"Traces in Discover\" from SLI chart opens traces experience",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/explore_from_slo.spec.ts",
+        "line": 99,
         "column": 14
       }
     },

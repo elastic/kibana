@@ -14,6 +14,7 @@ import {
 import type { PackagePolicy, PackagePolicyInput } from '../../types';
 
 import {
+  getInputId,
   storedPackagePoliciesToAgentInputs,
   storedPackagePolicyToAgentInputs,
 } from './package_policies_to_agent_inputs';
@@ -1233,6 +1234,180 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
       },
     ]);
   });
+  it('merges package policy global_data_tags into the add_fields processor', async () => {
+    expect(
+      await storedPackagePoliciesToAgentInputs(
+        [
+          {
+            ...mockPackagePolicy,
+            package: {
+              name: 'mock_package',
+              title: 'Mock package',
+              version: '0.0.0',
+            },
+            supports_agentless: true,
+            global_data_tags: [
+              { name: 'client_id', value: 'acme' },
+              { name: 'env', value: 'prod' },
+            ],
+            inputs: [
+              {
+                ...mockInput,
+                compiled_input: {
+                  inputVar: 'input-value',
+                },
+                streams: [],
+              },
+            ],
+          },
+        ],
+        packageInfoCache,
+        undefined,
+        undefined,
+        undefined
+      )
+    ).toEqual([
+      {
+        id: 'test-logs-some-uuid',
+        name: 'mock_package-policy',
+        package_policy_id: 'some-uuid',
+        processors: [
+          {
+            add_fields: {
+              fields: {
+                client_id: 'acme',
+                env: 'prod',
+              },
+              target: '',
+            },
+          },
+        ],
+        revision: 1,
+        type: 'test-logs',
+        data_stream: { namespace: 'default' },
+        use_output: 'default',
+        meta: {
+          package: {
+            name: 'mock_package',
+            version: '0.0.0',
+            release: 'beta',
+          },
+        },
+        inputVar: 'input-value',
+      },
+    ]);
+  });
+
+  it('merges agent policy global_data_tags and package policy global_data_tags together', async () => {
+    expect(
+      await storedPackagePoliciesToAgentInputs(
+        [
+          {
+            ...mockPackagePolicy,
+            package: {
+              name: 'mock_package',
+              title: 'Mock package',
+              version: '0.0.0',
+            },
+            supports_agentless: true,
+            global_data_tags: [{ name: 'client_id', value: 'acme' }],
+            inputs: [
+              {
+                ...mockInput,
+                compiled_input: {
+                  inputVar: 'input-value',
+                },
+                streams: [],
+              },
+            ],
+          },
+        ],
+        packageInfoCache,
+        undefined,
+        undefined,
+        [{ name: 'organization', value: 'elastic' }]
+      )
+    ).toEqual([
+      {
+        id: 'test-logs-some-uuid',
+        name: 'mock_package-policy',
+        package_policy_id: 'some-uuid',
+        processors: [
+          {
+            add_fields: {
+              fields: {
+                organization: 'elastic',
+                client_id: 'acme',
+              },
+              target: '',
+            },
+          },
+        ],
+        revision: 1,
+        type: 'test-logs',
+        data_stream: { namespace: 'default' },
+        use_output: 'default',
+        meta: {
+          package: {
+            name: 'mock_package',
+            version: '0.0.0',
+            release: 'beta',
+          },
+        },
+        inputVar: 'input-value',
+      },
+    ]);
+  });
+
+  it('does not add processor when package policy global_data_tags is empty', async () => {
+    expect(
+      await storedPackagePoliciesToAgentInputs(
+        [
+          {
+            ...mockPackagePolicy,
+            package: {
+              name: 'mock_package',
+              title: 'Mock package',
+              version: '0.0.0',
+            },
+            supports_agentless: true,
+            global_data_tags: [],
+            inputs: [
+              {
+                ...mockInput,
+                compiled_input: {
+                  inputVar: 'input-value',
+                },
+                streams: [],
+              },
+            ],
+          },
+        ],
+        packageInfoCache,
+        undefined,
+        undefined,
+        undefined
+      )
+    ).toEqual([
+      {
+        id: 'test-logs-some-uuid',
+        name: 'mock_package-policy',
+        package_policy_id: 'some-uuid',
+        revision: 1,
+        type: 'test-logs',
+        data_stream: { namespace: 'default' },
+        use_output: 'default',
+        meta: {
+          package: {
+            name: 'mock_package',
+            version: '0.0.0',
+            release: 'beta',
+          },
+        },
+        inputVar: 'input-value',
+      },
+    ]);
+  });
 });
 
 describe('storedPackagePolicyToAgentInputs - dynamic_signal_types handling', () => {
@@ -1349,5 +1524,61 @@ describe('storedPackagePolicyToAgentInputs - dynamic_signal_types handling', () 
     expect(() => storedPackagePolicyToAgentInputs(policy, nonDynamicPackageInfo)).toThrowError(
       '[data_stream.type]: unexpected undefined stream type for non-dynamic package'
     );
+  });
+});
+
+describe('getInputId', () => {
+  it('should use name instead of type when name is present', () => {
+    const id = getInputId(
+      {
+        type: 'otelcol',
+        name: 'filelog_otel',
+        policy_template: 'nginx',
+        enabled: true,
+        streams: [],
+      },
+      'pkg-policy-123'
+    );
+
+    expect(id).toBe('filelog_otel-nginx-pkg-policy-123');
+  });
+
+  it('should fall back to type when name is not present', () => {
+    const id = getInputId(
+      {
+        type: 'logfile',
+        policy_template: 'nginx',
+        enabled: true,
+        streams: [],
+      },
+      'pkg-policy-123'
+    );
+
+    expect(id).toBe('logfile-nginx-pkg-policy-123');
+  });
+
+  it('should produce unique ids for same-type inputs with different names', () => {
+    const id1 = getInputId(
+      {
+        type: 'otelcol',
+        name: 'filelog_otel',
+        policy_template: 'nginx',
+        enabled: true,
+        streams: [],
+      },
+      'pkg-policy-123'
+    );
+    const id2 = getInputId(
+      {
+        type: 'otelcol',
+        name: 'nginx_otel',
+        policy_template: 'nginx',
+        enabled: true,
+        streams: [],
+      },
+      'pkg-policy-123'
+    );
+
+    expect(id1).not.toBe(id2);
   });
 });

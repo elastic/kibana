@@ -95,6 +95,15 @@ export interface StreamlangDSL {
 }
 
 /**
+ * Streamlang as stored on stream `ingest.processing`: the DSL plus the server-managed
+ * `updated_at` cursor. Use {@link StreamlangDSL} anywhere you need the pipeline document only
+ * (YAML, simulation body, DeepStrict validation).
+ */
+export type StreamlangDSLWithUpdatedAt = StreamlangDSL & {
+  updated_at: string;
+};
+
+/**
  * Zod schema for the Streamlang DSL root
  */
 export const streamlangDSLSchema = z.object({

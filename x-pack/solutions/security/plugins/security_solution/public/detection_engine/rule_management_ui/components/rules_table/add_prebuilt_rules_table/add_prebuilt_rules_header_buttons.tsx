@@ -26,7 +26,7 @@ export const AddPrebuiltRulesHeaderButtons = () => {
     state: {
       selectedRules,
       isRefetching,
-      isUpgradingSecurityPackages,
+      isInitializingPrebuiltRulesPackage,
       isAnyRuleInstalling,
       hasRulesToInstall,
     },
@@ -37,7 +37,8 @@ export const AddPrebuiltRulesHeaderButtons = () => {
   const numberOfSelectedRules = selectedRules.length ?? 0;
   const shouldDisplayInstallSelectedRulesButton = numberOfSelectedRules > 0;
 
-  const isRequestInProgress = isAnyRuleInstalling || isRefetching || isUpgradingSecurityPackages;
+  const isRequestInProgress =
+    isAnyRuleInstalling || isRefetching || isInitializingPrebuiltRulesPackage;
 
   const [isOverflowPopoverOpen, setOverflowPopover] = useBoolean(false);
 

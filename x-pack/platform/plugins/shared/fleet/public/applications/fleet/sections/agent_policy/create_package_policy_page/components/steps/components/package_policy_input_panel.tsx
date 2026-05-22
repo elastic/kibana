@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, Fragment, memo, useMemo, useCallback } from 'react';
+import React, { useState, memo, useMemo, useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -40,7 +40,9 @@ import {
   DATA_STREAM_USE_APM_VAR,
   shouldIncludeUseAPMVar,
   hasDynamicSignalTypes,
+  mapPackageReleaseToIntegrationCardRelease,
 } from '../../../../../../../../../common/services';
+import { InlineReleaseBadge } from '../../../../../../components';
 import {
   DATA_STREAM_TYPE_VAR_NAME,
   USE_APM_VAR_NAME,
@@ -234,11 +236,6 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
     const errorCount = inputValidationResults && countValidationErrors(inputValidationResults);
     const hasErrors = forceShowErrors && errorCount;
 
-    const hasInputStreams = useMemo(
-      () => packageInputStreams.length > 0,
-      [packageInputStreams.length]
-    );
-
     const inputStreams = useMemo(
       () =>
         packageInputStreams
@@ -254,6 +251,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
           .filter((stream) => Boolean(stream.packagePolicyInputStream)),
       [packageInputStreamShouldBeVisible, packageInputStreams, packagePolicyInput.streams]
     );
+    const hasInputStreams = useMemo(() => inputStreams.length > 0, [inputStreams.length]);
     const showTopLevelDescription = inputStreams.length === 1;
 
     const dynamicSignalTypes = useMemo(
@@ -345,6 +343,27 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
           defaultMessage: 'This input is deprecated.',
         });
 
+    // Whether the individual stream rows will render their own toggle switch.
+    // When they won't (input-type package or single visible stream), we hoist
+    // the non-GA release badge up to the input header so it doesn't float alone.
+    const hasStreamToggle = packageInfo.type !== 'input' && inputStreams.length > 1;
+
+    const inputReleaseBadge = useMemo(() => {
+      if (hasStreamToggle) return null;
+      const preReleaseStream = inputStreams.find(
+        ({ packageInputStream }) =>
+          packageInputStream.data_stream.release && packageInputStream.data_stream.release !== 'ga'
+      );
+      if (!preReleaseStream?.packageInputStream.data_stream.release) return null;
+      return (
+        <InlineReleaseBadge
+          release={mapPackageReleaseToIntegrationCardRelease(
+            preReleaseStream.packageInputStream.data_stream.release
+          )}
+        />
+      );
+    }, [hasStreamToggle, inputStreams]);
+
     // Check if any vars or streams in this input are deprecated
     const hasDeprecatedFeatures = useMemo(() => {
       const inputVarsDeprecated = (packageInput.vars || []).some((v) => !!v.deprecated);
@@ -367,27 +386,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
       <>
         {/* Header / input-level toggle */}
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-          {isSingleInputAndStreams ? (
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup alignItems="center" gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <EuiTitle size="xs">
-                    <h3
-                      data-test-subj="PackagePolicy.InputStreamConfig.title"
-                      style={
-                        isDeprecatedInput ? { color: theme.euiTheme.colors.textSubdued } : undefined
-                      }
-                    >
-                      {packageInput.title || packageInput.type}
-                    </h3>
-                  </EuiTitle>
-                </EuiFlexItem>
-                {migrationTooltip}
-              </EuiFlexGroup>
-              <EuiSpacer size="s" />
-              {showTopLevelDescription && topLevelDescription}
-            </EuiFlexItem>
-          ) : (
+          {
             <EuiFlexItem grow={false}>
               <EuiSwitch
                 data-test-subj="PackagePolicy.InputStreamConfig.Switch"
@@ -407,6 +406,9 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                         </h3>
                       </EuiTitle>
                     </EuiFlexItem>
+                    {inputReleaseBadge && (
+                      <EuiFlexItem grow={false}>{inputReleaseBadge}</EuiFlexItem>
+                    )}
                     {migrationTooltip}
                     {isDeprecatedInput && (
                       <EuiFlexItem grow={false}>
@@ -441,7 +443,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
               <EuiSpacer size="s" />
               {showTopLevelDescription && topLevelDescription}
             </EuiFlexItem>
-          )}
+          }
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s" alignItems="center">
               {/* Bubble up deprecation warning when collapsed and input has deprecated features */}
@@ -474,7 +476,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                   </EuiText>
                 </EuiFlexItem>
               ) : null}
-              {(!isSingleInputAndStreams || packageInfo.type === 'input') && (
+              {
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
                     color={hasErrors ? 'danger' : 'primary'}
@@ -500,16 +502,21 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                     }
                   </EuiButtonEmpty>
                 </EuiFlexItem>
-              )}
+              }
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
 
-        {/* Header rule break */}
-        {isShowingStreams ? <EuiSpacer size="l" /> : null}
+        {/* Spacing if we are showing rest of content */}
+        {isShowingStreams &&
+        hasInputStreams &&
+        ((packageInput.vars && packageInput.vars.length) || !shouldConsolidateAdvancedSections) ? (
+          <EuiSpacer size="m" />
+        ) : null}
+
         {/* Input level policy */}
         {isShowingStreams && packageInput.vars && packageInput.vars.length ? (
-          <Fragment>
+          <>
             <PackagePolicyInputConfig
               data-test-subj="PackagePolicy.InputConfig"
               hasInputStreams={hasInputStreams}
@@ -522,19 +529,21 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
               varGroups={inputVarGroups}
               varGroupSelections={inputVarGroupSelections}
               onVarGroupSelectionChange={handleInputVarGroupSelectionChange}
-              showDescriptionColumn={!isSingleInputAndStreams}
               streamAdvancedVars={consolidatedStreamAdvancedVars}
+              sections={packageInput.sections}
             />
-            {hasInputStreams && !shouldConsolidateAdvancedSections ? (
+            {hasInputStreams &&
+            !shouldConsolidateAdvancedSections &&
+            packageInput.show_divider !== false ? (
               <ShortenedHorizontalRule margin="m" />
             ) : (
-              <EuiSpacer size="l" />
+              <EuiSpacer size="m" />
             )}
-          </Fragment>
+          </>
         ) : null}
 
         {/* Per-stream policy */}
-        {isShowingStreams && !shouldConsolidateAdvancedSections ? (
+        {isShowingStreams && hasInputStreams && !shouldConsolidateAdvancedSections ? (
           <EuiFlexGroup direction="column" data-test-subj="PackagePolicy.InputConfig.streams">
             {inputStreams.map(({ packageInputStream, packagePolicyInputStream }, index) => {
               return (
@@ -543,10 +552,9 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                     data-test-subj="PackagePolicy.InputStreamConfig"
                     packageInfo={packageInfo}
                     packageInputStream={packageInputStream}
-                    totalStreams={inputStreams.length}
+                    hasStreamToggle={hasStreamToggle}
                     packagePolicyInputStream={packagePolicyInputStream!}
                     inputPolicyTemplate={packagePolicyInput.policy_template}
-                    showDescriptionColumn={!isSingleInputAndStreams}
                     isUpgrade={isUpgrade}
                     updatePackagePolicyInputStream={(
                       updatedStream: Partial<PackagePolicyInputStream>

@@ -7,8 +7,9 @@
 
 import React, { useMemo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
-
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { EuiFilterGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { HostPanelKey } from '../../../flyout/entity_details/shared/constants';
 import type {
   Columns,
   Criteria,
@@ -82,6 +83,7 @@ const HostRiskScoreTableComponent: React.FC<HostRiskScoreTableProps> = ({
   type,
 }) => {
   const dispatch = useDispatch();
+  const { openFlyout } = useExpandableFlyoutApi();
   const getHostRiskScoreSelector = useMemo(() => hostsSelectors.hostRiskScoreSelector(), []);
   const { activePage, limit, sort } = useDeepEqualSelector((state: State) =>
     getHostRiskScoreSelector(state, hostsModel.HostsType.page)
@@ -137,9 +139,26 @@ const HostRiskScoreTableComponent: React.FC<HostRiskScoreTableProps> = ({
     },
     [dispatch, type]
   );
+  const openHostFlyout = useCallback(
+    (hostName: string) => {
+      openFlyout({
+        right: {
+          id: HostPanelKey,
+          params: {
+            hostName,
+            contextID: tableType,
+            scopeId: tableType,
+            isPreviewMode: false,
+          },
+        },
+      });
+    },
+    [openFlyout]
+  );
+
   const columns = useMemo(
-    () => getHostRiskScoreColumns({ dispatchSeverityUpdate }),
-    [dispatchSeverityUpdate]
+    () => getHostRiskScoreColumns({ dispatchSeverityUpdate, openHostFlyout }),
+    [dispatchSeverityUpdate, openHostFlyout]
   );
 
   const risk = (

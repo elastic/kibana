@@ -9,7 +9,7 @@
 
 export * from './kbn_client';
 export { uriencode } from './kbn_client_requester';
-export type { ReqOptions } from './kbn_client_requester';
+export type { KbnClientResponse, ReqOptions } from './kbn_client_requester';
 export { KbnClientRequesterError } from './kbn_client_requester_error';
 export { KbnClientSavedObjects } from './kbn_client_saved_objects';
 export type { UiSettingValues } from './kbn_client_ui_settings';

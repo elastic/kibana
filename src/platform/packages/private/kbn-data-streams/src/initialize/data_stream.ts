@@ -60,21 +60,25 @@ async function applyDataStreamLifecycle({
 
   if (lifecycle) {
     logger.debug(`Updating lifecycle on existing data stream: ${dataStream.name}`);
-    await retryEs(() =>
-      elasticsearchClient.indices.putDataLifecycle({
-        name: dataStream.name,
-        ...normalizeLifecycle(lifecycle),
-      })
+    await retryEs(
+      () =>
+        elasticsearchClient.indices.putDataLifecycle({
+          name: dataStream.name,
+          ...normalizeLifecycle(lifecycle),
+        }),
+      { logger, dataStreamName: dataStream.name }
     );
     return;
   }
 
   logger.debug(`Removing lifecycle from existing data stream: ${dataStream.name}`);
   try {
-    await retryEs(() =>
-      elasticsearchClient.indices.deleteDataLifecycle({
-        name: dataStream.name,
-      })
+    await retryEs(
+      () =>
+        elasticsearchClient.indices.deleteDataLifecycle({
+          name: dataStream.name,
+        }),
+      { logger, dataStreamName: dataStream.name }
     );
   } catch (error) {
     if (error instanceof EsErrors.ResponseError && error.statusCode === 404) {
@@ -146,16 +150,19 @@ export async function initializeDataStream({
     } else {
       const {
         template: { mappings },
-      } = await retryEs(() =>
-        elasticsearchClient.indices.simulateIndexTemplate({ name: dataStream.name })
+      } = await retryEs(
+        () => elasticsearchClient.indices.simulateIndexTemplate({ name: dataStream.name }),
+        { logger, dataStreamName: dataStream.name }
       );
 
       logger.debug(`Applying mappings to write index: ${writeIndex.index_name}`);
-      await retryEs(() =>
-        elasticsearchClient.indices.putMapping({
-          index: writeIndex.index_name,
-          ...mappings,
-        })
+      await retryEs(
+        () =>
+          elasticsearchClient.indices.putMapping({
+            index: writeIndex.index_name,
+            ...mappings,
+          }),
+        { logger, dataStreamName: dataStream.name }
       );
     }
 
@@ -178,10 +185,12 @@ export async function initializeDataStream({
 
   logger.debug(`Creating data stream: ${dataStream.name}.`);
   try {
-    await retryEs(() =>
-      elasticsearchClient.indices.createDataStream({
-        name: dataStream.name,
-      })
+    await retryEs(
+      () =>
+        elasticsearchClient.indices.createDataStream({
+          name: dataStream.name,
+        }),
+      { logger, dataStreamName: dataStream.name }
     );
   } catch (error) {
     if (

@@ -6,9 +6,9 @@
  */
 
 import type { PluginInitializerContext } from '@kbn/core/server';
-import { QueryActivityPlugin } from './plugin';
 
-export function plugin(initializerContext: PluginInitializerContext) {
+export async function plugin(initializerContext: PluginInitializerContext) {
+  const { QueryActivityPlugin } = await import('./plugin');
   return new QueryActivityPlugin(initializerContext);
 }
 

@@ -377,6 +377,10 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiPopover
+                    aria-label={i18n.translate(
+                      'xpack.queryRules.queryRulesetDetail.actionsPopover.ariaLabel',
+                      { defaultMessage: 'Ruleset actions' }
+                    )}
                     id={splitButtonPopoverActionsId}
                     button={
                       <EuiButtonIcon

@@ -25,14 +25,13 @@ export function useBrowseIntegrationHook({
   const {
     initialSelectedCategory,
     allCategories,
-    mainCategories,
     isLoading,
     isLoadingCategories,
     isLoadingAllPackages,
     isLoadingAppendCustomIntegrations,
     eprPackageLoadingError,
     eprCategoryLoadingError,
-    filteredCards: originalFilteredCards,
+    allCards: originalFilteredCards,
   } = useAvailablePackages({ prereleaseIntegrationsEnabled });
 
   const urlFilters = useUrlFilters();
@@ -45,25 +44,21 @@ export function useBrowseIntegrationHook({
 
     if (sortKey === 'a-z') {
       return [...originalFilteredCards].sort((a, b) => {
-        return a.name.localeCompare(b.name);
+        return a.title.localeCompare(b.title);
       });
     } else if (sortKey === 'z-a') {
       return [...originalFilteredCards].sort((a, b) => {
-        return b.name.localeCompare(a.name);
+        return b.title.localeCompare(a.title);
       });
     } else {
       // TODO implement recent-old and old-recent sorting when we have a date field
       return originalFilteredCards;
     }
-
-    return sortedCards;
   }, [originalFilteredCards, urlFilters.sort]);
 
-  const availableSubCategories = useMemo(() => {
-    return allCategories?.filter((c) => c.parent_id === selectedCategory);
-  }, [allCategories, selectedCategory]);
-
-  const filteredCards = useMemo(() => {
+  // Cards filtered by non-category filters (search, status, setup method, signal).
+  // Used to compute accurate category counts in the sidebar.
+  const nonCategoryFilteredCards = useMemo(() => {
     const searchResults = searchTerm
       ? (localSearch?.search(searchTerm) as IntegrationCardItem[])?.map(
           (match) => match[searchIdField]
@@ -73,17 +68,6 @@ export function useBrowseIntegrationHook({
     let cards = searchTerm
       ? sortedCards.filter((item) => searchResults.includes(item[searchIdField]) ?? [])
       : sortedCards;
-
-    if (selectedCategory || selectedSubCategory) {
-      cards = cards.filter((c) => {
-        if (selectedCategory === '') {
-          return true;
-        }
-        if (!selectedSubCategory) return c.categories.includes(selectedCategory);
-
-        return c.categories.includes(selectedSubCategory);
-      });
-    }
 
     // Apply status filters
     const statusFilters = urlFilters.status;
@@ -122,8 +106,6 @@ export function useBrowseIntegrationHook({
 
     return cards;
   }, [
-    selectedCategory,
-    selectedSubCategory,
     localSearch,
     searchTerm,
     sortedCards,
@@ -131,6 +113,44 @@ export function useBrowseIntegrationHook({
     urlFilters.setupMethod,
     urlFilters.signal,
   ]);
+
+  // Apply category filter on top of non-category filters
+  const filteredCards = useMemo(() => {
+    if (selectedCategory || selectedSubCategory) {
+      return nonCategoryFilteredCards.filter((c) => {
+        if (selectedCategory === '') {
+          return true;
+        }
+        if (!selectedSubCategory) return c.categories.includes(selectedCategory);
+
+        return c.categories.includes(selectedSubCategory);
+      });
+    }
+
+    return nonCategoryFilteredCards;
+  }, [nonCategoryFilteredCards, selectedCategory, selectedSubCategory]);
+
+  // Recompute category counts based on non-category filtered cards so
+  // sidebar counts reflect active filters (e.g. agentless, search, signal).
+  const filteredAllCategories = useMemo(() => {
+    return allCategories.map((category) => {
+      if (category.id === '') {
+        return { ...category, count: nonCategoryFilteredCards.length };
+      }
+      const count = nonCategoryFilteredCards.filter((card) =>
+        card.categories.includes(category.id)
+      ).length;
+      return { ...category, count };
+    });
+  }, [allCategories, nonCategoryFilteredCards]);
+
+  const filteredMainCategories = useMemo(() => {
+    return filteredAllCategories.filter((category) => category.parent_id === undefined);
+  }, [filteredAllCategories]);
+
+  const availableSubCategories = useMemo(() => {
+    return filteredAllCategories?.filter((c) => c.parent_id === selectedCategory);
+  }, [filteredAllCategories, selectedCategory]);
 
   const onCategoryChange = useCallback(
     ({ id }: { id: string }) => {
@@ -144,8 +164,8 @@ export function useBrowseIntegrationHook({
   return {
     initialSelectedCategory,
     selectedCategory,
-    allCategories,
-    mainCategories,
+    allCategories: filteredAllCategories,
+    mainCategories: filteredMainCategories,
     isLoading,
     isLoadingCategories,
     isLoadingAllPackages,

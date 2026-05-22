@@ -16,6 +16,9 @@ jest.mock('../../../../../hooks', () => {
     ...jest.requireActual('../../../../../hooks'),
     useGetPackagePoliciesQuery: jest.fn().mockReturnValue({ data: { items: [] } }),
     useGetPackageInstallStatus: jest.fn(),
+    useGetSettingsQuery: jest.fn().mockReturnValue({
+      data: { item: { integration_knowledge_enabled: true } },
+    }),
     useLink: jest.fn().mockReturnValue({ getHref: jest.fn() }),
     useStartServices: jest.fn().mockReturnValue({
       notifications: {
@@ -116,6 +119,7 @@ describe('SettingsPage', () => {
 
     it('should display the install section with install description when user has install permission', () => {
       mockUseAuthz.mockReturnValue({
+        fleet: { readSettings: true },
         integrations: {
           installPackages: true,
           writePackageSettings: true,
@@ -138,6 +142,7 @@ describe('SettingsPage', () => {
 
     it('should display permission callout when user does not have install permission', () => {
       mockUseAuthz.mockReturnValue({
+        fleet: { readSettings: true },
         integrations: {
           installPackages: false,
           writePackageSettings: false,
@@ -175,6 +180,7 @@ describe('SettingsPage', () => {
 
     it('should not display the install section or permission callout', () => {
       mockUseAuthz.mockReturnValue({
+        fleet: { readSettings: true },
         integrations: {
           installPackages: false,
           writePackageSettings: false,
@@ -214,6 +220,7 @@ describe('SettingsPage', () => {
 
     beforeEach(() => {
       mockUseAuthz.mockReturnValue({
+        fleet: { readSettings: true },
         integrations: {
           installPackages: true,
           writePackageSettings: true,

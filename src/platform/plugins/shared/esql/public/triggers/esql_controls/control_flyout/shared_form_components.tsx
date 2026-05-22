@@ -356,6 +356,7 @@ export function ControlSelectionType({
     services: { docLinks },
   } = useKibana<ServiceDeps>();
   const multiValuesGuideLink = docLinks?.links.query.queryESQLMultiValueControls ?? '';
+  const mvIntersectsLink = docLinks?.links.query.queryESQLMvIntersects ?? '';
   return (
     <>
       <EuiSpacer size="m" />
@@ -394,11 +395,16 @@ export function ControlSelectionType({
             <EuiText size="s">
               <FormattedMessage
                 id="esql.flyout.selectionType.callout"
-                defaultMessage="You must use {mvContainsLink} in your ES|QL query for multi-select controls to work."
+                defaultMessage="You must use {mvContainsLink} or {mvIntersectsLink} in your ES|QL query for multi-select controls to work."
                 values={{
                   mvContainsLink: (
                     <EuiLink href={multiValuesGuideLink} target="_blank">
                       MV_CONTAINS
+                    </EuiLink>
+                  ),
+                  mvIntersectsLink: (
+                    <EuiLink href={mvIntersectsLink} target="_blank">
+                      MV_INTERSECTS
                     </EuiLink>
                   ),
                 }}

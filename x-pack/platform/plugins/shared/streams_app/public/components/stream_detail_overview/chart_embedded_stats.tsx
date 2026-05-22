@@ -82,6 +82,7 @@ export function ChartEmbeddedQueryDocStats({
   docCountInRange: number;
 }) {
   const {
+    core: { uiSettings },
     dependencies: {
       start: { data },
     },
@@ -89,9 +90,9 @@ export function ChartEmbeddedQueryDocStats({
 
   const totalDocsResult = useStreamsAppFetch(
     async ({ signal }) => {
-      return fetchEsqlTotalDocCount(esqlSource, data.search.search, signal);
+      return fetchEsqlTotalDocCount(esqlSource, data.search.search, signal, uiSettings);
     },
-    [esqlSource, data.search.search],
+    [esqlSource, data.search.search, uiSettings],
     { withRefresh: true }
   );
 

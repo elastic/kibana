@@ -21,7 +21,7 @@ test.describe(
       await generateLogsData(logsSynthtraceEsClient)({ index: 'logs-generic-default' });
     });
 
-    test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
+    test.beforeEach(async ({ browserAuth, apiServices, pageObjects }) => {
       await browserAuth.loginAsAdmin();
       // Clear existing processors before each test
       await apiServices.streams.clearStreamProcessors('logs-generic-default');
@@ -44,7 +44,7 @@ test.describe(
       await page.route('**/internal/search_inference_endpoints/connectors*', async (route) => {
         await route.fulfill({
           status: 200,
-          body: JSON.stringify({ connectors: [], allConnectors: [], soEntryFound: false }),
+          body: JSON.stringify({ connectors: [], soEntryFound: false }),
         });
       });
       await page.reload();

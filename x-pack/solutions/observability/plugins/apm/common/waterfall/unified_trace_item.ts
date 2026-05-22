@@ -45,4 +45,5 @@ export interface TraceItem {
   coldstart?: boolean;
   composite?: TraceItemComposite;
   docType: TraceItemDocType;
+  missingDestination?: boolean;
 }

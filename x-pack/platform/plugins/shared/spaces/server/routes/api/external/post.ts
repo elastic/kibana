@@ -12,11 +12,12 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { ExternalRouteDeps } from '.';
 import { API_VERSIONS } from '../../../../common';
 import { wrapError } from '../../../lib/errors';
+import { seedAgentChatExperienceForSolutionSpace } from '../../../lib/seed_agent_chat_experience_for_solution_space';
 import { getSpaceSchema } from '../../../lib/space_schema';
 import { createLicensedRouteHandler } from '../../lib';
 
 export function initPostSpacesApi(deps: ExternalRouteDeps) {
-  const { router, log, getSpacesService, isServerless } = deps;
+  const { router, log, getSpacesService, getStartServices, isServerless, packageInfo } = deps;
 
   router.versioned
     .post({
@@ -49,12 +50,22 @@ export function initPostSpacesApi(deps: ExternalRouteDeps) {
         },
       },
       createLicensedRouteHandler(async (context, request, response) => {
-        log.debug(`Inside POST /api/spaces/space`);
         const spacesClient = getSpacesService().createSpacesClient(request);
         const space = request.body;
         try {
-          log.debug(`Attempting to create space`);
           const createdSpace = await spacesClient.create(space);
+
+          if (!isServerless && packageInfo) {
+            const [coreStart] = await getStartServices();
+            await seedAgentChatExperienceForSolutionSpace({
+              coreStart,
+              log,
+              spaceId: createdSpace.id,
+              solution: createdSpace.solution,
+              packageInfo,
+            });
+          }
+
           return response.ok({ body: createdSpace });
         } catch (error) {
           if (SavedObjectsErrorHelpers.isConflictError(error)) {
@@ -63,7 +74,6 @@ export function initPostSpacesApi(deps: ExternalRouteDeps) {
             );
             return response.conflict({ body });
           }
-          log.debug(`Error creating space: ${error}`);
           return response.customError(wrapError(error));
         }
       })

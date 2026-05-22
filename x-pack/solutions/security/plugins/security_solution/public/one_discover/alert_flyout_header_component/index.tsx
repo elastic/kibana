@@ -12,6 +12,7 @@ import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { defaultToolsFlyoutProperties } from '../../flyout_v2/shared/hooks/use_default_flyout_properties';
+import { RemoteDocumentCallout } from '../../flyout_v2/document/components/remote_document_callout';
 import type { SecurityAppStore } from '../../common/store/types';
 import type { StartServices } from '../../types';
 import { Header } from '../../flyout_v2/document/header';
@@ -103,31 +104,35 @@ export const AlertFlyoutHeader = ({
     };
   }, [servicesPromise, storePromise]);
 
-  const isMissingMetadata = !hit.raw._id || !hit.raw._index;
-  const metadataCallout = isMissingMetadata ? (
-    <>
-      <EuiCallOut announceOnMount size="s" title={MISSING_METADATA_CALLOUT} />
-      <EuiSpacer size="s" />
-    </>
-  ) : null;
-
   if (!services || !store) {
-    return metadataCallout;
+    return null;
   }
+
+  const isMissingMetadata = !hit.raw._id || !hit.raw._index;
 
   return (
     <>
-      {metadataCallout}
+      {isMissingMetadata ? (
+        <>
+          <EuiCallOut announceOnMount size="s" title={MISSING_METADATA_CALLOUT} />
+          <EuiSpacer size="s" />
+        </>
+      ) : null}
       {flyoutProviders({
         services,
         store,
         children: (
-          <Header
-            hit={hit}
-            renderCellActions={noopCellActionRenderer}
-            onAlertUpdated={onAlertUpdated}
-            onShowNotes={openNotesFlyout}
-          />
+          <>
+            <RemoteDocumentCallout hit={hit}>
+              <EuiSpacer size="s" />
+            </RemoteDocumentCallout>
+            <Header
+              hit={hit}
+              renderCellActions={noopCellActionRenderer}
+              onAlertUpdated={onAlertUpdated}
+              onShowNotes={openNotesFlyout}
+            />
+          </>
         ),
       })}
     </>

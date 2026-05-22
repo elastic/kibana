@@ -34,7 +34,7 @@ import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { EXCLUDED_GAP_REASONS_KEY } from '../../../../../common/constants';
 import * as i18n from './translations';
 import type { Gap, GapReasonType, GapStatus } from '../../types';
-import { getStatusLabel, getReasonLabel } from './utils';
+import { getStatusLabel, getReasonLabel, getExcludedReasons } from './utils';
 import { GapStatusFilter } from './status_filter';
 import { GapReasonFilter, GAP_REASON_FILTER_ITEMS } from './reason_filter';
 import { useFindGapsForRule } from '../../api/hooks/use_find_gaps_for_rule';
@@ -234,9 +234,7 @@ export const RuleGaps = ({ ruleId, enabled }: { ruleId: string; enabled: boolean
     field: '@timestamp',
     direction: 'desc',
   });
-  const excludedReasons = GAP_REASON_FILTER_ITEMS.filter(
-    (reason) => !selectedReasonTypes.includes(reason)
-  );
+  const excludedReasons = getExcludedReasons(selectedReasonTypes, GAP_REASON_FILTER_ITEMS);
 
   const getSortField = (field: keyof Gap) => {
     if (field === '@timestamp' || !field) {

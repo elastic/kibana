@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { DatatableVisualizationState, TypedLensSerializedState } from '@kbn/lens-common';
-import type { DatatableState, DatatableStateNoESQL } from '../../schema';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
+import type { DatatableConfig, DatatableConfigNoESQL } from '../../schema';
 import type { LensAttributes } from '../../types';
 import { DEFAULT_LAYER_ID } from '../../constants';
 import { buildDatasourceStates, buildReferences, getAdhocDataviews } from '../utils';
@@ -34,10 +35,10 @@ type DatatableAttributesWithoutFiltersAndQuery = Omit<DatatableAttributes, 'stat
 };
 
 export function fromAPItoLensState(
-  config: DatatableState
+  config: DatatableConfig
 ): DatatableAttributesWithoutFiltersAndQuery {
   const _buildDataLayer = (cfg: unknown, i: number) =>
-    buildFormBasedLayer(cfg as DatatableStateNoESQL);
+    buildFormBasedLayer(cfg as DatatableConfigNoESQL);
 
   const { layers, usedDataviews } = buildDatasourceStates(config, _buildDataLayer, getValueColumns);
 
@@ -55,6 +56,7 @@ export function fromAPItoLensState(
     visualizationType: 'lnsDatatable',
     ...getSharedChartAPIToLensState(config),
     references,
+    version: LENS_ITEM_LATEST_VERSION,
     state: {
       datasourceStates: layers,
       internalReferences,
@@ -64,7 +66,7 @@ export function fromAPItoLensState(
   };
 }
 
-export function fromLensStateToAPI(config: LensAttributes): DatatableState {
+export function fromLensStateToAPI(config: LensAttributes): DatatableConfig {
   const { state } = config;
   const visualization = state.visualization as DatatableVisualizationState;
   const layers = getDatasourceLayers(state);

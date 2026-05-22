@@ -177,8 +177,8 @@ export const getRecommendedQueriesTemplates = ({
               }
             ),
             queryString: timeField
-              ? `${fromCommand} | WHERE ${timeField} <=?_tend and ${timeField} >?_tstart | SAMPLE .001 | STATS Count=COUNT(*)/.001, Sparkline=SPARKLINE(COUNT(*), ${timeField}, 40, ?_tstart, ?_tend) BY Pattern=CATEGORIZE(${categorizationField})| SORT Count DESC`
-              : `${fromCommand} | SAMPLE .001 | STATS Count=COUNT(*)/.001, Sparkline=SPARKLINE(COUNT(*), ${timeField}, 40, ?_tstart, ?_tend) BY Pattern=CATEGORIZE(${categorizationField})| SORT Count DESC`,
+              ? `${fromCommand} | WHERE ${timeField} <=?_tend and ${timeField} >?_tstart | SAMPLE .001 | STATS Count=COUNT(*)/.001 BY Pattern=CATEGORIZE(${categorizationField})| SORT Count DESC`
+              : `${fromCommand} | SAMPLE .001 | STATS Count=COUNT(*)/.001 BY Pattern=CATEGORIZE(${categorizationField})| SORT Count DESC`,
           },
         ]
       : []),

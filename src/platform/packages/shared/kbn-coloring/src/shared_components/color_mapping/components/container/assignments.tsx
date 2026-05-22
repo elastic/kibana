@@ -234,6 +234,12 @@ export function Assignments({
             </EuiButton>
             {data.type === 'categories' && (
               <EuiPopover
+                aria-label={i18n.translate(
+                  'coloring.colorMapping.container.additionalActionsPopoverAriaLabel',
+                  {
+                    defaultMessage: 'Additional assignments actions',
+                  }
+                )}
                 button={
                   <EuiButtonIcon
                     iconType="boxesVertical"
@@ -290,7 +296,7 @@ export function Assignments({
                     <EuiContextMenuItem
                       data-test-subj="lns-colorMapping-clearAllAssignments"
                       size="s"
-                      icon={<EuiIcon type="eraser" size="m" color="danger" />}
+                      icon={<EuiIcon type="eraser" size="m" color="danger" aria-hidden={true} />}
                       onClick={() => {
                         setShowOtherActions(false);
                         dispatch(removeAllAssignments());

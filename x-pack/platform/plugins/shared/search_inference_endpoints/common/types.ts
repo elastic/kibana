@@ -50,6 +50,7 @@ export interface InferenceSettingsResponse {
     updatedAt?: string;
   };
   data: InferenceSettingsAttributes;
+  invalidEndpoints?: string[];
 }
 
 export interface InferenceFeaturesResponse {
@@ -66,6 +67,10 @@ export interface InferenceFeatureResponse {
   recommendedEndpoints: string[];
   isBeta?: boolean;
   isTechPreview?: boolean;
+  visibilityCondition?: {
+    key: string;
+    value: string | number | boolean | null;
+  };
 }
 
 export type InferenceEndpointWithMetadata = InferenceAPIConfigResponse & {

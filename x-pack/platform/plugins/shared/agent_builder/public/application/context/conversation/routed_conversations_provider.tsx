@@ -18,6 +18,7 @@ import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
 import { useConversationActions } from './use_conversation_actions';
 import { queryKeys } from '../../query_keys';
 import { upsertAttachmentsIntoList } from './upsert_attachments_into_list';
+import { ConversationChangeNotifier } from './conversation_change_notifier';
 
 interface RoutedConversationsProviderProps {
   children: React.ReactNode;
@@ -147,6 +148,9 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
   );
 
   return (
-    <ConversationContext.Provider value={contextValue}>{children}</ConversationContext.Provider>
+    <ConversationContext.Provider value={contextValue}>
+      <ConversationChangeNotifier />
+      {children}
+    </ConversationContext.Provider>
   );
 };

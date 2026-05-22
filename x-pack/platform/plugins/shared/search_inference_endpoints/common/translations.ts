@@ -15,7 +15,7 @@ export const MANAGE_INFERENCE_ENDPOINTS_LABEL = i18n.translate(
   'xpack.searchInferenceEndpoints.allInferenceEndpoints.description',
   {
     defaultMessage:
-      'Inference endpoints streamline the deployment and management of machine\nlearning models in Elasticsearch. Set up and manage NLP tasks using unique\nendpoints, to build AI-powered search.',
+      'Inference endpoints streamline the deployment and management of machine\nlearning models in Elasticsearch. Set up and manage NLP tasks using unique\nendpoints to build AI-powered search.',
   }
 );
 
@@ -279,7 +279,7 @@ export const DISALLOW_OTHER_MODELS_DESCRIPTION = i18n.translate(
 export const ALLOW_OTHER_MODELS_DESCRIPTION = i18n.translate(
   'xpack.searchInferenceEndpoints.settings.defaultModel.allowOtherModels.description',
   {
-    defaultMessage: 'Features can allow users to select other models than the default.',
+    defaultMessage: 'Users can choose between multiple models for each feature.',
   }
 );
 

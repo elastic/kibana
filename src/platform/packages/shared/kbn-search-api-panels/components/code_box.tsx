@@ -144,6 +144,7 @@ export const CodeBox: React.FC<CodeBoxProps> = ({
                 <EuiFlexItem>
                   <EuiThemeProvider colorMode="light">
                     <EuiPopover
+                      aria-label={selectLanguageDescription}
                       button={button}
                       isOpen={isPopoverOpen}
                       closePopover={() => setIsPopoverOpen(false)}

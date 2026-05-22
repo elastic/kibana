@@ -14,7 +14,7 @@ import type { Note } from '../../../common/api/timeline';
 import { useUserPrivileges } from '../../common/components/user_privileges';
 
 const OPEN_TIMELINE = i18n.translate('xpack.securitySolution.notes.management.openTimelineButton', {
-  defaultMessage: 'Open saved timeline',
+  defaultMessage: 'Open saved Timeline',
 });
 
 export interface OpenTimelineButtonIconProps {

@@ -14,7 +14,7 @@ import { expect } from '..';
 import { KibanaCodeEditorWrapper } from '../ui_components';
 
 export class DiscoverApp {
-  private readonly codeEditor: KibanaCodeEditorWrapper;
+  public readonly codeEditor: KibanaCodeEditorWrapper;
 
   constructor(private readonly page: ScoutPage) {
     this.codeEditor = new KibanaCodeEditorWrapper(page);
@@ -129,10 +129,44 @@ export class DiscoverApp {
     await this.page.testSubj.waitForSelector('savedObjectSaveModal', { state: 'hidden' });
   }
 
+  /**
+   * Save the currently rendered inline visualization (e.g. an ES|QL chart) to a
+   * brand-new dashboard via the "Save visualization" flow in the unified
+   * histogram. Returns once the save modal has closed.
+   */
+  async saveVisualizationToNewDashboard(visName: string) {
+    await this.page.testSubj.click('unifiedHistogramSaveVisualization');
+    await expect(this.page.testSubj.locator('savedObjectSaveModal')).toBeVisible();
+    await this.page.testSubj.fill('savedObjectTitle', visName);
+    // Clicking the EuiRadio wrapper does not toggle the underlying input
+    // reliably; clicking the associated label does.
+    await this.page.locator('label[for="new-dashboard-option"]').click();
+    await this.page.testSubj.click('confirmSaveSavedObjectButton');
+    await expect(this.page.testSubj.locator('savedObjectSaveModal')).toBeHidden();
+  }
+
   async waitUntilFieldListHasCountOfFields() {
     await this.page.testSubj.waitForSelector('fieldListGroupedAvailableFields-countLoading', {
       state: 'hidden',
     });
+  }
+
+  /**
+   * Assert that the "Selected fields" sidebar group contains exactly the
+   * fields named in `expected` — no more, no less. Useful for verifying ES|QL
+   * `KEEP` clauses or any explicit column-selection flow.
+   */
+  async expectSelectedSidebarFieldsToEqual(expected: readonly string[]) {
+    await this.waitUntilFieldListHasCountOfFields();
+    const selectedFields = this.page.testSubj.locator('fieldListGroupedSelectedFields');
+    await expect(selectedFields).toBeVisible();
+
+    const entries = selectedFields.getByTestId(/^dscFieldListPanelField-/);
+    await expect(entries).toHaveCount(expected.length);
+
+    for (const field of expected) {
+      await expect(selectedFields.getByTestId(`dscFieldListPanelField-${field}`)).toBeVisible();
+    }
   }
 
   async waitForHistogramRendered() {
@@ -288,6 +322,13 @@ export class DiscoverApp {
     return this.page.testSubj.locator(`dataGridHeaderCell-${name}`);
   }
 
+  public readonly controls = {
+    getControlFrame: (controlId: string): Locator =>
+      this.page.locator(`[data-test-subj='control-frame']:has([data-control-id='${controlId}'])`),
+    getControlFrameSelectedValue: (controlId: string, value: string): Locator =>
+      this.controls.getControlFrame(controlId).getByText(value),
+  };
+
   async clickFieldSort(field: string, sortOption: string) {
     const header = this.getColumnHeader(field);
     await header.click();
@@ -310,6 +351,10 @@ export class DiscoverApp {
 
   async hideChart() {
     await this.page.testSubj.click('dscHideHistogramButton');
+  }
+
+  async expectXYVisChartVisible() {
+    await expect(this.page.testSubj.locator('xyVisChart')).toBeVisible();
   }
 
   async navigateToLensEditor() {

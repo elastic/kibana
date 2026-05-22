@@ -78,6 +78,7 @@ import {
   getColorAssignments,
   getLayerPaletteName,
 } from './color_assignment';
+import { getDefaultPalette } from './default_palette';
 import {
   getAnnotationLayerErrors,
   isHorizontalChart,
@@ -494,7 +495,9 @@ export const getXyVisualization = ({
         })
         .unsubscribe();
     } else {
-      const palette = paletteService.get(dataLayer.palette?.name || 'default');
+      const palette = paletteService.get(
+        dataLayer.palette?.name || getDefaultPalette(dataLayer.seriesType)
+      );
       colors = palette.getCategoricalColors(10, dataLayer.palette?.params);
     }
 
@@ -731,8 +734,9 @@ export const getXyVisualization = ({
         newLayer.splitAccessors = newLayer.splitAccessors.filter((a) => a !== columnId);
         if (newLayer.splitAccessors.length === 0) {
           delete newLayer.splitAccessors;
-          // as the palette is associated with the break down by dimension, remove it together with the dimension
+          // as palette and colorMapping are associated with the breakdown dimension, remove them together with the breakdown dimension
           delete newLayer.palette;
+          delete newLayer.colorMapping;
         }
       }
     }
@@ -1545,6 +1549,9 @@ const SubtypeSwitch = ({
   return (
     <>
       <EuiPopover
+        aria-label={i18n.translate('xpack.lens.xyChart.stackingOptionsPopoverAriaLabel', {
+          defaultMessage: 'Stacking options',
+        })}
         ownFocus
         panelPaddingSize="none"
         button={

@@ -6,8 +6,10 @@
  */
 
 import { useQuery } from '@kbn/react-query';
+
 import { useKibana } from '../use_kibana';
 import { useGetLicenseInfo } from '../use_get_license_info';
+import { getErrorCode } from '../../utils/get_error_message';
 
 export const useAgentCount = () => {
   const {
@@ -16,25 +18,35 @@ export const useAgentCount = () => {
 
   const { hasEnterpriseLicense } = useGetLicenseInfo();
 
+  const isAvailable = hasEnterpriseLicense && !!agentBuilder;
+
   const { data, isLoading, isError } = useQuery({
     queryKey: ['fetchAgentCount'],
+    retry: false,
     queryFn: async () => {
-      const [agents, tools] = await Promise.all([
-        agentBuilder?.agents.list(),
-        agentBuilder?.tools.list(),
-      ]);
-      return {
-        agents: agents?.length ?? 0,
-        tools: tools?.length ?? 0,
-      };
+      try {
+        const [agents, tools] = await Promise.all([
+          agentBuilder?.agents.list(),
+          agentBuilder?.tools.list(),
+        ]);
+        return {
+          agents: agents?.length,
+          tools: tools?.length,
+        };
+      } catch (error) {
+        if (getErrorCode(error) === 403) {
+          return null;
+        }
+        throw error;
+      }
     },
-    enabled: hasEnterpriseLicense && !!agentBuilder,
+    enabled: isAvailable,
   });
 
   return {
-    tools: data?.tools ?? 0,
-    agents: data?.agents ?? 0,
-    isLoading: hasEnterpriseLicense ? isLoading : false,
-    isError: isError || !hasEnterpriseLicense,
+    tools: data?.tools,
+    agents: data?.agents,
+    isLoading,
+    isError,
   };
 };

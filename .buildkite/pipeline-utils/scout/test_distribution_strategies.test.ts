@@ -259,11 +259,11 @@ describe('scoutTestDistributionStrategies', () => {
 
       await scoutTestDistributionStrategies.lanes();
 
-      expect(mockSetMetadata.mock.calls).toEqual([
-        ['cancel_on_gate_failure:scout_test_lane_1', 'true'],
-        ['cancel_on_gate_failure:scout_test_lane_2', 'true'],
-      ]);
-      expect(mockSetMetadata.mock.invocationCallOrder[1]).toBeLessThan(
+      expect(mockSetMetadata).toHaveBeenCalledWith(
+        'cancel_on_gate_failure_batch:scout_lanes',
+        JSON.stringify(['scout_test_lane_1', 'scout_test_lane_2'])
+      );
+      expect(mockSetMetadata.mock.invocationCallOrder[0]).toBeLessThan(
         mockUploadSteps.mock.invocationCallOrder[0]
       );
     });

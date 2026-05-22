@@ -10,6 +10,7 @@
 import { z } from '@kbn/zod/v4';
 import type { AxiosInstance } from 'axios';
 import type { AuthContext, AuthTypeSpec } from '../connector_spec';
+import { normalizeAuthorizationHeaderValue } from './oauth_authz_code_and_ears_helpers';
 import * as i18n from './translations';
 
 const authSchema = z
@@ -23,11 +24,11 @@ const authSchema = z
       .string()
       .min(1, { message: i18n.OAUTH_CLIENT_ID_REQUIRED_MESSAGE })
       .meta({ label: i18n.OAUTH_CLIENT_ID_LABEL }),
-    scope: z.string().meta({ label: i18n.OAUTH_SCOPE_LABEL }).optional(),
     clientSecret: z
       .string()
       .min(1, { message: i18n.OAUTH_CLIENT_SECRET_REQUIRED_MESSAGE })
       .meta({ label: i18n.OAUTH_CLIENT_SECRET_LABEL, sensitive: true }),
+    scope: z.string().meta({ label: i18n.OAUTH_SCOPE_LABEL }).optional(),
     useBasicAuth: z.boolean().default(true).optional().meta({
       hidden: true, // Hidden from UI - uses connector spec defaults
     }),
@@ -114,7 +115,7 @@ export const OAuthAuthorizationCode: AuthTypeSpec<AuthSchemaType> = {
     }
 
     // set global defaults
-    axiosInstance.defaults.headers.common.Authorization = token;
+    axiosInstance.defaults.headers.common.Authorization = normalizeAuthorizationHeaderValue(token);
 
     return axiosInstance;
   },

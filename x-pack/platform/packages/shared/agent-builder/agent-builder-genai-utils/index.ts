@@ -16,6 +16,7 @@ export {
   getFieldsFromFieldCaps,
   getIndexFields,
   type IndexFieldsResult,
+  type IndexFieldType,
   type MappingField,
 } from './tools/utils';
 export {
@@ -48,3 +49,9 @@ export {
   getChartTypeSelectionPromptContent,
   type VisualizationConfig,
 } from './tools/visualization';
+export {
+  resolveResourceForEsqlWithSamplingStats,
+  type ResolvedResourceWithSampling,
+  formatResourceWithSampledValues,
+} from './tools/utils/resources';
+export { type MappingFieldWithStats } from './tools/utils/sampling';

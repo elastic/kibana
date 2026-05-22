@@ -178,6 +178,7 @@ const AlertsTableContent = typedForwardRef(
       id,
       ruleTypeIds,
       consumers,
+      projectRouting,
       query,
       minScore,
       trackScores = false,
@@ -361,6 +362,7 @@ const AlertsTableContent = typedForwardRef(
     const queryParams = useAlertsTableQueryParams({
       ruleTypeIds,
       consumers,
+      projectRouting,
       fields,
       query,
       sort,

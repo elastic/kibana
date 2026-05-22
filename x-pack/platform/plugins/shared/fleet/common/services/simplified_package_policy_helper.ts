@@ -19,7 +19,7 @@ import { DATASET_VAR_NAME } from '../constants';
 
 import { PackagePolicyValidationError } from '../errors';
 
-import { packageToPackagePolicy } from '.';
+import { packageToPackagePolicy, getInputEffectiveName } from '.';
 import { isInputAllowedForDeploymentMode } from './agentless_policy_helper';
 
 export type SimplifiedVars = Record<
@@ -68,6 +68,9 @@ export interface SimplifiedPackagePolicy {
   supports_agentless?: boolean | null;
   supports_cloud_connector?: boolean | null;
   additional_datastreams_permissions?: string[] | null;
+  // Only available for agentless integration policies.
+  // On standard package policies this field is rejected by server-side validation.
+  global_data_tags?: Array<{ name: string; value: string | number }> | null;
 }
 
 export interface FormattedPackagePolicy extends Omit<PackagePolicy, 'inputs' | 'vars'> {
@@ -93,7 +96,9 @@ export function packagePolicyToSimplifiedPackagePolicy(packagePolicy: PackagePol
 }
 
 export function generateInputId(input: NewPackagePolicyInput) {
-  return `${input.policy_template ? `${input.policy_template}-` : ''}${input.type}`;
+  return `${input.policy_template ? `${input.policy_template}-` : ''}${getInputEffectiveName(
+    input
+  )}`;
 }
 
 export function formatInputs(
@@ -193,6 +198,7 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
     supports_cloud_connector: supportsCloudConnector,
     cloud_connector_id: cloudConnectorId,
     additional_datastreams_permissions: additionalDatastreamsPermissions,
+    global_data_tags: globalDataTags,
   } = data;
   const packagePolicy = {
     ...packageToPackagePolicy(
@@ -214,9 +220,25 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
     packagePolicy.additional_datastreams_permissions = additionalDatastreamsPermissions;
   }
 
+  if (globalDataTags) {
+    packagePolicy.global_data_tags = globalDataTags;
+  }
+
   if (packagePolicy.package && options?.experimental_data_stream_features) {
     packagePolicy.package.experimental_data_stream_features =
       options.experimental_data_stream_features;
+  }
+
+  // Disable agentless-only inputs for non-agentless policies; the reverse is unnecessary as the agentless API always passes an explicit policy_template.
+  if (!supportsAgentless) {
+    packagePolicy.inputs.forEach((input) => {
+      if (!isInputAllowedForDeploymentMode(input, 'default', packageInfo)) {
+        input.enabled = false;
+        input.streams.forEach((stream) => {
+          stream.enabled = false;
+        });
+      }
+    });
   }
 
   // Build a input and streams Map to easily find package policy stream

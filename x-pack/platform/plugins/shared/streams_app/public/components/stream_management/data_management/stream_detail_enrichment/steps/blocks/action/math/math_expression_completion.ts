@@ -82,6 +82,10 @@ export function registerMathCompletionProvider(
       model: monaco.editor.ITextModel,
       position: monaco.Position
     ): monaco.languages.ProviderResult<monaco.languages.CompletionList> {
+      if (model.isDisposed()) {
+        return { suggestions: [], incomplete: false };
+      }
+
       const wordInfo = model.getWordUntilPosition(position);
 
       const range: monaco.IRange = {
@@ -174,6 +178,10 @@ export function registerMathSignatureHelpProvider(): monaco.IDisposable {
       model: monaco.editor.ITextModel,
       position: monaco.Position
     ): monaco.languages.ProviderResult<monaco.languages.SignatureHelpResult> {
+      if (model.isDisposed()) {
+        return null;
+      }
+
       const text = model.getValue();
       const offset = model.getOffsetAt(position);
 

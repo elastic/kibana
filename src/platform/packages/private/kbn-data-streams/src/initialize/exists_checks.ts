@@ -10,18 +10,21 @@
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import type api from '@elastic/elasticsearch/lib/api/types';
+import type { Logger } from '@kbn/logging';
 import { retryEs } from '../retry_es';
 
 export const getExistingIndexTemplate = async (
   elasticsearchClient: ElasticsearchClient,
-  dataStreamName: string
+  dataStreamName: string,
+  logger: Logger
 ) => {
   let existingIndexTemplate: api.IndicesGetIndexTemplateIndexTemplateItem | undefined;
   try {
     ({
       index_templates: [existingIndexTemplate],
-    } = await retryEs(() =>
-      elasticsearchClient.indices.getIndexTemplate({ name: dataStreamName })
+    } = await retryEs(
+      () => elasticsearchClient.indices.getIndexTemplate({ name: dataStreamName }),
+      { logger, dataStreamName }
     ));
   } catch (error) {
     if (error instanceof EsErrors.ResponseError && error.statusCode === 404) {
@@ -36,13 +39,17 @@ export const getExistingIndexTemplate = async (
 
 export const getExistingDataStream = async (
   elasticsearchClient: ElasticsearchClient,
-  dataStreamName: string
+  dataStreamName: string,
+  logger: Logger
 ) => {
   let existingDataStream: api.IndicesDataStream | undefined;
   try {
     ({
       data_streams: [existingDataStream],
-    } = await retryEs(() => elasticsearchClient.indices.getDataStream({ name: dataStreamName })));
+    } = await retryEs(() => elasticsearchClient.indices.getDataStream({ name: dataStreamName }), {
+      logger,
+      dataStreamName,
+    }));
   } catch (error) {
     if (error instanceof EsErrors.ResponseError && error.statusCode === 404) {
       // Data stream does not exist, we will create it

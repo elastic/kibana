@@ -202,7 +202,13 @@ export function ServicesTable({ summaryStatsData, loadingSummaryStats }: Props) 
             {i18n.translate('xpack.apm.storageExplorer.table.samplingColumnName', {
               defaultMessage: 'Sampling rate',
             })}{' '}
-            <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
+            <EuiIcon
+              size="s"
+              color="subdued"
+              type="question"
+              className="eui-alignTop"
+              aria-hidden={true}
+            />
           </>
         </EuiToolTip>
       ),

@@ -139,7 +139,8 @@ export async function readSignificantEventsFromAlertsIndices(
       throw err;
     });
 
-  if (!response.aggregations || !isArray(response.aggregations.by_rule.buckets)) {
+  const byRuleBuckets = response.aggregations?.by_rule?.buckets;
+  if (!byRuleBuckets || !isArray(byRuleBuckets)) {
     return {
       significant_events: queryLinks.map((queryLink) => ({
         ...toStreamQuery(queryLink),
@@ -156,30 +157,32 @@ export async function readSignificantEventsFromAlertsIndices(
     };
   }
 
-  const aggregatedBuckets = response.aggregations.aggregated_occurrences.buckets;
+  const aggregatedBuckets = response.aggregations?.aggregated_occurrences?.buckets;
   const aggregatedOccurrences = isArray(aggregatedBuckets)
     ? aggregatedBuckets.map((bucket) => ({ date: bucket.key_as_string, count: bucket.doc_count }))
     : [];
 
-  const significantEvents = response.aggregations.by_rule.buckets.map((bucket) => {
-    const ruleId = bucket.key;
-    const queryLink = queryLinkByRuleId[ruleId];
-    const occurrences = get(bucket, 'occurrences.buckets');
-    const changePoints = get(bucket, 'change_points') ?? {};
+  const significantEvents = byRuleBuckets
+    .filter((bucket) => queryLinkByRuleId[bucket.key] !== undefined)
+    .map((bucket) => {
+      const ruleId = bucket.key;
+      const queryLink = queryLinkByRuleId[ruleId];
+      const occurrences = get(bucket, 'occurrences.buckets');
+      const changePoints = get(bucket, 'change_points') ?? {};
 
-    return {
-      ...toStreamQuery(queryLink),
-      stream_name: queryLink.stream_name,
-      occurrences: isArray(occurrences)
-        ? occurrences.map((occurrence) => ({
-            date: occurrence.key_as_string,
-            count: occurrence.doc_count,
-          }))
-        : [],
-      rule_backed: queryLink.rule_backed,
-      change_points: changePoints,
-    };
-  });
+      return {
+        ...toStreamQuery(queryLink),
+        stream_name: queryLink.stream_name,
+        occurrences: isArray(occurrences)
+          ? occurrences.map((occurrence) => ({
+              date: occurrence.key_as_string,
+              count: occurrence.doc_count,
+            }))
+          : [],
+        rule_backed: queryLink.rule_backed,
+        change_points: changePoints,
+      };
+    });
 
   const foundSignificantEventsIds = significantEvents.map((event) => event.id);
   const notFoundSignificantEvents = queryLinks

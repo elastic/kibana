@@ -17,7 +17,9 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 
 ### Connector configuration [sharepoint-online-connector-configuration]
 
-SharePoint Online connectors have the following configuration properties:
+SharePoint Online connectors support two authentication methods:
+
+#### OAuth client credentials (app-only auth)
 
 Token URL
 :   The OAuth 2.0 token endpoint URL. Use the format: `https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token`.
@@ -27,6 +29,14 @@ Client ID
 
 Client Secret
 :   The client secret generated for your Microsoft Entra application.
+
+#### OAuth authorization code (delegated auth)
+
+Authorization URL
+:   The Microsoft Entra ID authorization endpoint. Use the format: `https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/authorize`. Replace `{tenant-id}` with your Azure AD tenant ID.
+
+Token URL
+:   The Microsoft Entra ID token endpoint. Use the format: `https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token`. Replace `{tenant-id}` with your Azure AD tenant ID.
 
 ## Test connectors [sharepoint-online-action-configuration]
 
@@ -38,12 +48,13 @@ Search
 :   Search for content across SharePoint sites, lists, and drives using the Microsoft Graph Search API.
     - `query` (required): The search query string.
     - `entityTypes` (optional): Array of entity types to search. Valid values: `site`, `list`, `listItem`, `drive`, `driveItem`. Defaults to `site`.
-    - `region` (optional): Search region (`NAM`, `EUR`, `APC`, `LAM`, `MEA`). Defaults to `NAM`.
+    - `region` (optional): Search region (`NAM`, `EUR`, `APC`, `LAM`, `MEA`). Only used with app-only (client credentials) auth; omit when using delegated (authorization code) auth to avoid errors.
     - `from` (optional): Offset for pagination.
     - `size` (optional): Number of results to return.
 
 Get all sites
-:   List all SharePoint sites.
+:   List all SharePoint sites. With app-only (client credentials) auth, returns all sites the app can access. With delegated (authorization code) auth, searches accessible sites — pass a keyword or omit for a wildcard search.
+    - `search` (optional): Keyword to filter sites by name. Only used with delegated auth; ignored with app-only auth.
 
 Get site
 :   Get a single site by ID or relative URL.
@@ -103,7 +114,9 @@ Use the [Action configuration settings](/reference/configuration-reference/alert
 
 ## Get API credentials [sharepoint-online-api-credentials]
 
-To use the SharePoint Online connector, register an application in Microsoft Entra (formerly Azure Active Directory):
+### OAuth client credentials (app-only auth)
+
+To use app-only authentication, register an application in Microsoft Entra (formerly Azure Active Directory):
 
 1. Go to the [Azure Portal](https://portal.azure.com/).
 2. Go to **Microsoft Entra ID** > **App registrations**.
@@ -115,7 +128,7 @@ To use the SharePoint Online connector, register an application in Microsoft Ent
 8. Select **Add a permission** > **Microsoft Graph** > **Application permissions**.
 9. Add the following permissions:
    - `Sites.Read.All` — Read items in all site collections.
-   - `Sites.ReadWrite.All` — Read and write items in all site collections (if write operations are needed).
+   - `Files.Read.All` — Read all files the user can access.
 10. Select **Grant admin consent** for your organization.
 11. In your app registration, go to **Certificates & secrets**.
 12. Select **New client secret**.
@@ -126,3 +139,35 @@ To use the SharePoint Online connector, register an application in Microsoft Ent
     - **Token URL**: `https://login.microsoftonline.com/{your-tenant-id}/oauth2/v2.0/token` (find your tenant ID in the **Overview** section of your app registration).
     - **Client ID**: Found in the **Overview** section (also called Application ID).
     - **Client Secret**: The value you copied in step 15.
+
+### OAuth authorization code (delegated auth)
+
+To use delegated (per-user) authentication, register an application and configure the Authorization Code flow:
+
+1. Go to the [Azure Portal](https://portal.azure.com/).
+2. Go to **Microsoft Entra ID** > **App registrations**.
+3. Select **New registration**.
+4. Enter a name for your application.
+5. Select **Accounts in this organizational directory only**.
+6. Under **Redirect URI**, select **Web** and enter your {{kib}} redirect URI (for example, `https://your-kibana-url/api/actions/connector/_oauth_callback`).
+7. Select **Register**.
+8. In your app registration, go to **API permissions**.
+9. Select **Add a permission** > **Microsoft Graph** > **Delegated permissions**.
+10. Add the following permissions:
+    - `Sites.Selected` — Read items in selected site collections.
+    - `Files.Read.All` — Read all files the user can access.
+    - `offline_access` — Maintain access through refresh tokens.
+11. In your app registration, go to **Certificates & secrets**.
+12. Select **New client secret**.
+13. Enter a description and select an expiration period.
+14. Select **Add**.
+15. Copy the secret value immediately.
+16. Enter the following values when configuring the connector in {{kib}}:
+    - **Authorization URL**: `https://login.microsoftonline.com/{your-tenant-id}/oauth2/v2.0/authorize`
+    - **Token URL**: `https://login.microsoftonline.com/{your-tenant-id}/oauth2/v2.0/token`
+    - **Client ID**: Found in the **Overview** section (also called Application ID).
+    - **Client Secret**: The value you copied in step 15.
+
+::::{note}
+With delegated auth, the connector operates on behalf of the user who completes the authorization flow. The `getAllSites` action uses a search-based fallback (instead of `/sites/getAllSites`) and the `search` action does not support the `region` parameter.
+::::

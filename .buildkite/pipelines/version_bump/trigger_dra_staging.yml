@@ -1,0 +1,8 @@
+steps:
+  - name: Trigger DRA Staging Build
+    key: trigger-dra-staging
+    trigger: kibana-artifacts-staging
+    if: build.env("DRY_RUN") != "true"
+    async: false
+    build:
+      branch: '${BRANCH}'

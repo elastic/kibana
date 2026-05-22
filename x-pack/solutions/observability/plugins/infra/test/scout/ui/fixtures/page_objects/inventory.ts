@@ -28,6 +28,8 @@ export class InventoryPage {
   public readonly metricSwitcherButton: Locator;
   public readonly metricsContextMenu: Locator;
 
+  public readonly schemaSelect: Locator;
+
   public readonly k8sTourText: Locator;
   public readonly k8sTourDismissButton: Locator;
 
@@ -80,6 +82,8 @@ export class InventoryPage {
     this.metricSwitcherButton = this.page.getByTestId('infraInventoryMetricDropdown');
     this.metricsContextMenu = this.page.getByTestId('infraInventoryMetricsContextMenu');
 
+    this.schemaSelect = this.page.getByTestId('infraSchemaSelect');
+
     this.k8sTourText = this.page.getByTestId('infra-kubernetesTour-text');
     this.k8sTourDismissButton = this.page.getByTestId('infra-kubernetesTour-dismiss');
 
@@ -129,6 +133,15 @@ export class InventoryPage {
     await this.page
       .getByTestId('infraNodesOverviewLoadingPanel')
       .waitFor({ state: 'hidden', timeout: EXTENDED_TIMEOUT });
+  }
+
+  /**
+   * Waits for the snapshot "Loading data" panel (`infraNodesOverviewLoadingPanel`) to finish,
+   * then for the onboarding empty state (`kbnNoDataPage`).
+   */
+  public async waitForOnboardingNoDataPage() {
+    await this.waitForNodesToLoad();
+    await this.noDataPage.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
   }
 
   private async waitForPageToLoad() {

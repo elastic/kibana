@@ -21,6 +21,16 @@ describe(
   'Privileged User Monitoring - Integrations onboarding',
   {
     tags: ['@ess', '@serverless'],
+    env: {
+      ftrConfig: {
+        kbnServerArgs: [
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'disable:entityAnalyticsEntityStoreV2',
+            'disable:entityAnalyticsNewHomePageEnabled',
+          ])}`,
+        ],
+      },
+    },
   },
   () => {
     before(() => {

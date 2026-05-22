@@ -53,19 +53,19 @@ export const allowedExperimentalValues = Object.freeze({
    * `runscript` response action for Elastic Defend Endpoint
    * Release: 9.4
    */
-  responseActionsEndpointRunScript: false,
+  responseActionsEndpointRunScript: true,
 
   /**
    * Support for Automated Endpoint `runscript` (from rules)
    * Release: 9.4
    */
-  responseActionsEndpointAutomatedRunScript: false,
+  responseActionsEndpointAutomatedRunScript: true,
 
   /**
    * Scripts library in support of `runscript`/upload-execute` new command for elastic defend
    * Release: 9.4
    */
-  responseActionsScriptLibraryManagement: false,
+  responseActionsScriptLibraryManagement: true,
 
   /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
@@ -86,30 +86,17 @@ export const allowedExperimentalValues = Object.freeze({
    * Entity Analytics: Disables the Risk Score AI Assistant tool.
    */
   riskScoreAssistantToolDisabled: false,
-
-  /**
-   * Entity Analytics: Disables the Risk Score AI Assistant tool.
-   */
-  entityDetailsHighlightsEnabled: true,
-
   /**
    * Enables the new Entity Analytics home page experience.
    */
-  entityAnalyticsNewHomePageEnabled: false,
+  entityAnalyticsNewHomePageEnabled: true,
 
   /**
    * Enables the lead generation pipeline for Entity Analytics.
    * When enabled, the lead generation engine, observation modules,
    * API routes, and persistence indices are activated.
    */
-  leadGenerationEnabled: false,
-
-  /**
-   * Enables lead generation details: the "i" icon on lead cards/list items
-   * and the "How this lead was generated" flyout.
-   * Requires `leadGenerationEnabled` to also be true.
-   */
-  leadGenerationDetailsEnabled: false,
+  leadGenerationEnabled: true,
 
   /**
    * disables ES|QL rules
@@ -119,7 +106,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables gap reason display in the gaps table and reason-based filtering.
    */
-  gapReasonDetectionEnabled: false,
+  gapReasonDetectionEnabled: true,
 
   /**
    * Adds a new option to filter descendants of a process for Management / Trusted Apps
@@ -135,7 +122,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables AI rule creation feature
    */
-  aiRuleCreationEnabled: false,
+  aiRuleCreationEnabled: true,
 
   /**
    * Disables the siem migrations feature
@@ -149,8 +136,9 @@ export const allowedExperimentalValues = Object.freeze({
 
   /**
    * Removes Endpoint Exceptions from Rules/Alerts pages, and shows it instead in Manage/Assets.
+   * Additionally: enables import/export for all Endpoint artifacts.
    */
-  endpointExceptionsMovedUnderManagement: false,
+  endpointExceptionsMovedUnderManagement: true,
 
   /**
    * Enables CrowdStrike's RunScript RTR command
@@ -191,7 +179,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Protects all the work related to the attacks and alerts alignment effort
    */
-  enableAlertsAndAttacksAlignment: false,
+  enableAlertsAndAttacksAlignment: true,
   /**
    *  Enables the QRadar rules import feature
    */
@@ -204,7 +192,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the Entity Analytics Watchlist feature.
    */
-  entityAnalyticsWatchlistEnabled: false,
+  entityAnalyticsWatchlistEnabled: true,
 
   /**
    * Enables the Trial Companion feature.
@@ -245,18 +233,13 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Uses entity store v2 for entity analytics skill
    */
-  entityAnalyticsEntityStoreV2: false,
+  entityAnalyticsEntityStoreV2: true,
 
   /**
    * Enables the deprecated prebuilt rules UI
    * Release: 9.4
    */
-  prebuiltRulesDeprecationUIEnabled: false,
-
-  /**
-   * Classic chrome only: refreshed Security side nav (Launchpad, Manage footer; unified row + panel behavior).
-   */
-  securityClassicNavUpdate: false,
+  prebuiltRulesDeprecationUIEnabled: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

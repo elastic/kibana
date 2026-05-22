@@ -40,7 +40,8 @@ import {
   STREAM_NAME,
 } from '../fields';
 import type { QueryStorageSettings } from '../storage_settings';
-import { parseError } from '../../errors/parse_error';
+import { bulkWithInferenceFallback } from '../../errors/bulk_with_inference_fallback';
+import { searchWithKeywordFallback } from '../../errors/search_with_keyword_fallback';
 import { computeRuleId } from './helpers/query';
 
 type TermQueryFieldValue = string | boolean | number | null;
@@ -48,20 +49,12 @@ type TermQueryFieldValue = string | boolean | number | null;
 export type RuleUnbackedFilter = 'exclude' | 'include' | 'only';
 
 /**
- * Minimum raw ELSER score threshold for semantic search results.
- *
- * We apply min_score directly on the raw ELSER scores rather than using
- * `minmax` normalization because minmax is relative to the current result set:
- * the top result always normalizes to 1.0, so irrelevant queries (e.g.,
- * "test-keyword" against security documents) still return hits. A raw score
- * threshold avoids this — ELSER produces very low scores (typically < 1.0)
- * for nonsensical or completely unrelated queries, while genuinely relevant
- * matches score much higher (5–30+).
+ * The default min_score is now normalized to 0-1 range, as different inference models could have different scales (ELSER, Jina,...).
  *
  * This threshold may need tuning as the dataset evolves. If legitimate
  * matches are being excluded, lower it; if noise creeps back in, raise it.
  */
-const SEMANTIC_MIN_SCORE = 10;
+const SEMANTIC_MIN_SCORE = 0.15;
 
 const SEARCH_SIZE_LIMIT = 10_000;
 
@@ -256,10 +249,11 @@ export function buildSearchEmbeddingText(
 function toStorage(
   definition: Streams.all.Definition,
   request: QueryLinkRequest,
-  inferenceAvailable: boolean
+  includeEmbedding: boolean
 ): StoredQueryLink {
   const link = toQueryLink(definition, request);
   const { query, stream_name, ...rest } = link;
+  const embeddingText = buildSearchEmbeddingText(query, definition.name);
   return {
     ...rest,
     [STREAM_NAME]: definition.name,
@@ -270,9 +264,7 @@ function toStorage(
     [QUERY_EVIDENCE]: query.evidence,
     [RULE_BACKED]: request.rule_backed,
     [RULE_ID]: link.rule_id,
-    ...(inferenceAvailable
-      ? { [QUERY_SEARCH_EMBEDDING]: buildSearchEmbeddingText(query, definition.name) }
-      : {}),
+    ...(includeEmbedding && embeddingText ? { [QUERY_SEARCH_EMBEDDING]: embeddingText } : {}),
   } as StoredQueryLink;
 }
 
@@ -309,8 +301,7 @@ export class QueryClient {
       rulesClient: RulesClient;
       logger: Logger;
     },
-    private readonly isSignificantEventsEnabled: boolean = false,
-    private readonly inferenceAvailable: boolean = false
+    private readonly isSignificantEventsEnabled: boolean = false
   ) {}
 
   // ==================== Storage Operations ====================
@@ -481,36 +472,11 @@ export class QueryClient {
     filters?: QueryLinkFilters,
     searchMode?: SearchMode
   ): Promise<QueryLink[]> {
-    const effectiveMode = this.resolveSearchMode(searchMode);
-
-    try {
-      return await this.executeFindQueries(effectiveMode, streamNames, query, filters);
-    } catch (error) {
-      // Only fall back silently when the mode was auto-resolved (no explicit
-      // searchMode from the caller). If the caller explicitly requested a
-      // non-keyword mode, propagate the error so they know their request failed.
-      if (effectiveMode !== 'keyword' && !searchMode) {
-        const { message } = parseError(error);
-        this.dependencies.logger.warn(
-          `Search mode "${effectiveMode}" failed, falling back to keyword: ${message}`
-        );
-        return await this.executeFindQueries('keyword', streamNames, query, filters);
-      }
-      throw error;
-    }
-  }
-
-  private resolveSearchMode(searchMode?: SearchMode): SearchMode {
-    if (searchMode) {
-      if (searchMode !== 'keyword' && !this.inferenceAvailable) {
-        this.dependencies.logger.debug(
-          `Search mode "${searchMode}" requested but inference is unavailable, falling back to keyword`
-        );
-        return 'keyword';
-      }
-      return searchMode;
-    }
-    return this.inferenceAvailable ? 'hybrid' : 'keyword';
+    return searchWithKeywordFallback(
+      this.dependencies.logger,
+      { searchMode, label: 'Query', streamNames },
+      (mode) => this.executeFindQueries(mode, streamNames, query, filters)
+    );
   }
 
   private async executeFindQueries(
@@ -558,11 +524,22 @@ export class QueryClient {
       size: SEARCH_SIZE_LIMIT,
       track_total_hits: false,
       retriever: {
-        standard: {
-          query: {
-            match: { [QUERY_SEARCH_EMBEDDING]: query },
-          },
-          filter: { bool: { filter } },
+        linear: {
+          retrievers: [
+            {
+              retriever: {
+                standard: {
+                  query: {
+                    match: { [QUERY_SEARCH_EMBEDDING]: query },
+                  },
+                  filter: { bool: { filter } },
+                },
+              },
+              weight: 1,
+              normalizer: 'minmax',
+            },
+          ],
+          rank_window_size: SEARCH_SIZE_LIMIT,
           min_score: SEMANTIC_MIN_SCORE,
         },
       },
@@ -590,11 +567,21 @@ export class QueryClient {
               },
             },
             {
-              standard: {
-                query: {
-                  match: { [QUERY_SEARCH_EMBEDDING]: query },
-                },
-                // See SEMANTIC_MIN_SCORE for rationale.
+              linear: {
+                retrievers: [
+                  {
+                    retriever: {
+                      standard: {
+                        query: {
+                          match: { [QUERY_SEARCH_EMBEDDING]: query },
+                        },
+                      },
+                    },
+                    weight: 1,
+                    normalizer: 'minmax',
+                  },
+                ],
+                rank_window_size: SEARCH_SIZE_LIMIT,
                 min_score: SEMANTIC_MIN_SCORE,
               },
             },
@@ -616,27 +603,29 @@ export class QueryClient {
   }
 
   private async bulkStorage(definition: Streams.all.Definition, operations: QueryBulkOperation[]) {
-    return await this.dependencies.storageClient.bulk({
-      operations: operations.map((operation) => {
-        if ('index' in operation) {
-          const document = toStorage(definition, operation.index.asset, this.inferenceAvailable);
+    return await bulkWithInferenceFallback(this.dependencies.logger, ({ includeEmbedding }) =>
+      this.dependencies.storageClient.bulk({
+        operations: operations.map((operation) => {
+          if ('index' in operation) {
+            const document = toStorage(definition, operation.index.asset, includeEmbedding);
+            return {
+              index: {
+                document,
+                _id: document[ASSET_UUID],
+              },
+            };
+          }
+
+          const id = getQueryLinkUuid(definition.name, operation.delete.asset);
           return {
-            index: {
-              document,
-              _id: document[ASSET_UUID],
+            delete: {
+              _id: id,
             },
           };
-        }
-
-        const id = getQueryLinkUuid(definition.name, operation.delete.asset);
-        return {
-          delete: {
-            _id: id,
-          },
-        };
-      }),
-      throwOnFail: true,
-    });
+        }),
+        throwOnFail: true,
+      })
+    );
   }
 
   async getAssets(name: string): Promise<Query[]> {

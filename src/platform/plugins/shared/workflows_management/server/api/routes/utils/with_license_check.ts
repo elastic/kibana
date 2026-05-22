@@ -10,29 +10,34 @@
 import type { RequestHandler, RouteMethod } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { type CheckLicense, wrapRouteWithLicenseCheck } from '@kbn/licensing-plugin/server';
-import type { LicenseType } from '@kbn/licensing-types';
+import { isLicenseValid, REQUIRED_LICENSE_TYPE } from '../../../availability/is_license_valid';
 import type { WorkflowsRequestHandlerContext } from '../../../types';
 
-const RequiredLicenseType: LicenseType = 'enterprise';
-
 const checkLicense: CheckLicense = (license) => {
-  if (!license.isAvailable || !license.isActive) {
+  if (!license.isAvailable) {
     return {
       valid: false,
-      message: i18n.translate(
-        'plugins.workflowsManagement.checkLicense.unavailableOrInactiveLicense',
-        { defaultMessage: 'License information is not available or license is inactive.' }
-      ),
+      message: i18n.translate('plugins.workflowsManagement.checkLicense.unavailable', {
+        defaultMessage: 'License information is not available.',
+      }),
+    };
+  }
+  if (!license.isActive) {
+    return {
+      valid: false,
+      message: i18n.translate('plugins.workflowsManagement.checkLicense.inactive', {
+        defaultMessage: 'License is expired. Please renew your license.',
+      }),
     };
   }
 
-  if (!license.hasAtLeast(RequiredLicenseType)) {
+  if (!isLicenseValid(license)) {
     return {
       valid: false,
       message: i18n.translate('plugins.workflowsManagement.checkLicense.invalidLicense', {
         defaultMessage:
           'Your {licenseType} license does not support Workflows. Please upgrade to an {requiredLicenseType} license.',
-        values: { licenseType: license.type, requiredLicenseType: RequiredLicenseType },
+        values: { licenseType: license.type, requiredLicenseType: REQUIRED_LICENSE_TYPE },
       }),
     };
   }

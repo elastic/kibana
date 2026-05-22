@@ -6,7 +6,11 @@
  */
 
 import objectHash from 'object-hash';
-import type { StreamlangDSL, StreamlangStep } from '../../types/streamlang';
+import type {
+  StreamlangDSL,
+  StreamlangDSLWithUpdatedAt,
+  StreamlangStep,
+} from '../../types/streamlang';
 import { isActionBlock, isConditionBlock } from '../../types/streamlang';
 
 /**
@@ -36,20 +40,46 @@ export function stripCustomIdentifiers(dsl: StreamlangDSL): StreamlangDSL {
   };
 
   return {
-    ...dsl,
-    steps: stripFromSteps(dsl.steps),
+    steps: stripFromSteps(dsl.steps ?? []),
   };
 }
 
+/**
+ * Drops ingest-only fields and returns a plain {@link StreamlangDSL} (`steps` only).
+ */
+export function streamlangDSLFromIngestProcessing(
+  processing: StreamlangDSLWithUpdatedAt
+): StreamlangDSL {
+  return {
+    steps: Array.isArray(processing.steps) ? processing.steps : [],
+  };
+}
+
+/**
+ * Adds deterministic `customIdentifier` values on every step. Input must be a pure
+ * {@link StreamlangDSL}; use {@link addDeterministicCustomIdentifiersFromIngestProcessing} for
+ * `ingest.processing` values that include `updated_at`.
+ */
 export const addDeterministicCustomIdentifiers = (dsl: StreamlangDSL): StreamlangDSL => {
   // Deep clone the DSL to avoid mutating the original (we can get away with parse / stringify at
   // the moment due to basic primitives in the DSL structure)
-  const clonedDSL = JSON.parse(JSON.stringify(dsl)) as StreamlangDSL;
-  // Strip all existing identifiers first to ensure deterministic hashing
-  const cleanedDSL = stripCustomIdentifiers(clonedDSL);
+  const raw = JSON.parse(JSON.stringify(dsl)) as { steps?: StreamlangStep[] };
+  const normalized: StreamlangDSL = {
+    steps: Array.isArray(raw.steps) ? raw.steps : [],
+  };
+  const cleanedDSL = stripCustomIdentifiers(normalized);
   addStepIdentifiers(cleanedDSL.steps);
   return cleanedDSL;
 };
+
+/**
+ * Same as {@link addDeterministicCustomIdentifiers} after normalizing ingest `processing`.
+ */
+export function addDeterministicCustomIdentifiersFromIngestProcessing(
+  processing: StreamlangDSLWithUpdatedAt
+): StreamlangDSL {
+  return addDeterministicCustomIdentifiers(streamlangDSLFromIngestProcessing(processing));
+}
 /**
  * Adds a generated customIdentifier to each step
  * This is a combination of a hash of the step's content and the step's path within the DSL.

@@ -13,6 +13,7 @@ import type {
   DashboardAgentPluginPublicSetupDependencies,
   DashboardAgentPluginPublicStartDependencies,
 } from './types';
+import { registerDashboardAttachmentUiDefinition } from './attachment_types';
 
 export class DashboardAgentPlugin
   implements
@@ -35,19 +36,17 @@ export class DashboardAgentPlugin
   }
 
   public start(
-    _core: CoreStart,
+    core: CoreStart,
     plugins: DashboardAgentPluginPublicStartDependencies
   ): DashboardAgentPluginPublicStart {
-    // TODO this causes async imports when plugin starts
-    // Please avoid this practice as it hides plugin size but impacts kibana load performance
-    // Please remove async import.
-    import('./attachment_types').then(({ registerDashboardAttachmentUiDefinition }) => {
-      this.cleanupAttachmentUi = registerDashboardAttachmentUiDefinition({
-        agentBuilder: plugins.agentBuilder,
-        dashboardLocator: plugins.share.url.locators.get(DASHBOARD_APP_LOCATOR),
-        unifiedSearch: plugins.unifiedSearch,
-        dashboardPlugin: plugins.dashboard,
-      });
+    this.cleanupAttachmentUi = registerDashboardAttachmentUiDefinition({
+      agentBuilder: plugins.agentBuilder,
+      chrome: core.chrome,
+      canWriteDashboards: core.application.capabilities.dashboard_v2?.showWriteControls === true,
+      dashboardLocator: plugins.share.url.locators.get(DASHBOARD_APP_LOCATOR),
+      unifiedSearch: plugins.unifiedSearch,
+      data: plugins.data,
+      dashboardPlugin: plugins.dashboard,
     });
 
     return {};

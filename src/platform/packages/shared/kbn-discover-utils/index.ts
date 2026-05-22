@@ -45,6 +45,10 @@ export {
   getFlattenedTraceDocumentOverview,
   getIgnoredReason,
   getMessageFieldWithFallbacks,
+  getChartHidden,
+  getTableHidden,
+  getTopPanelHeight,
+  getBreakdownField,
   getAvailableResourceFields,
   getAvailableTraceFields,
   getLogLevelFieldWithFallback,
@@ -67,6 +71,10 @@ export {
   dismissFlyouts,
   prepareDataViewForEditing,
   getEsqlDataView,
+  setChartHidden,
+  setTableHidden,
+  setTopPanelHeight,
+  setBreakdownField,
   LogLevelBadge,
   getDefaultSort,
   getSort,
@@ -77,6 +85,10 @@ export {
   escapeAndPreserveHighlightTags,
   getHighlightedFieldValue,
   severityOrder,
+  CHART_HIDDEN_KEY,
+  TABLE_HIDDEN_KEY,
+  HISTOGRAM_HEIGHT_KEY,
+  HISTOGRAM_BREAKDOWN_FIELD_KEY,
 } from './src';
 
 export type { LogsContextService, ApmContextService, SortOrder, SortInput, SortPair } from './src';

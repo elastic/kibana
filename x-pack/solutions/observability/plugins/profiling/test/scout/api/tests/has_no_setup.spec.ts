@@ -11,12 +11,14 @@ import type { RoleApiCredentials } from '@kbn/scout-oblt';
 import { apiTest } from '../../common/fixtures';
 import { esResourcesEndpoint } from '../../common/fixtures/constants';
 
-apiTest.describe(
+// Failing: See https://github.com/elastic/kibana/issues/268400
+apiTest.describe.skip(
   'Profiling is not setup and no data is loaded',
   { tag: tags.stateful.classic },
   () => {
     let viewerApiCreditials: RoleApiCredentials;
     let adminApiCreditials: RoleApiCredentials;
+
     apiTest.beforeAll(async ({ profilingHelper, profilingSetup, requestAuth }) => {
       await profilingHelper.cleanupPolicies();
       await profilingHelper.installPolicies();

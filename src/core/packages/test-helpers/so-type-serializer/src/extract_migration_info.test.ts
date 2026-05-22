@@ -338,7 +338,7 @@ describe('extractMigrationInfo', () => {
       const output = extractMigrationInfo(type);
       expect(output.modelVersions[0].schemas).toEqual({
         forwardCompatibility: 'c7c71ae951f0ac343cea0403bc34144ede93afec1bfe0ae6bd3279dd28ddf696',
-        create: '7457866b52ceea9e20767b3337518de452b7790243891d81737d48eb8b3afd18',
+        create: '2add2812ed88fd4d761351d7f9ee75f7c75a06988e674a2707da8da4fdf6a22f',
       });
       expect(output.modelVersions[1].schemas).toEqual({
         forwardCompatibility: false,

@@ -2228,6 +2228,10 @@ export const addCrowdStrikeIntegrationToAgentPolicy = async ({
                 value: false,
                 type: 'bool',
               },
+              gov_cloud: {
+                value: false,
+                type: 'bool',
+              },
               processors: {
                 type: 'yaml',
               },

@@ -29,40 +29,37 @@ export const AnomalySeverityFilter: React.FC<SeverityFilterProps> = ({
   const { euiTheme } = useEuiTheme();
 
   return (
-    <EuiFlexGroup>
-      <EuiPanel paddingSize="s" grow={false} hasBorder hasShadow={false}>
-        <EuiFlexGroup alignItems={'center'}>
-          <p css={{ fontWeight: euiTheme.font.weight.bold }}>{'Anomaly score'}</p>
-          {anomalyBands.map((band) => {
-            if (band.hidden) {
-              return (
-                <EuiFlexItem
-                  key={`${band.start}-${band.end}`}
-                  css={{ cursor: 'pointer' }}
-                  onClick={() => toggleHiddenBand(band)}
-                  grow={false}
-                >
-                  <EuiFlexGroup alignItems={'center'} gutterSize={'xs'}>
-                    <EuiIcon type={'eyeSlash'} aria-hidden={true} />
-                    <EuiText size={'s'} color={euiTheme.colors.textSubdued}>
-                      <p>{`${band.start}-${band.end}`}</p>
-                    </EuiText>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              );
-            }
+    <EuiPanel paddingSize="s" grow={false} hasBorder hasShadow={false}>
+      <EuiFlexGroup alignItems={'center'} responsive={false} wrap>
+        <p css={{ fontWeight: euiTheme.font.weight.bold }}>{'Anomaly score'}</p>
+        {anomalyBands.map((band) => {
+          if (band.hidden) {
             return (
-              <EuiHealth
+              <EuiFlexItem
                 key={`${band.start}-${band.end}`}
                 css={{ cursor: 'pointer' }}
                 onClick={() => toggleHiddenBand(band)}
-                color={band.color}
-              >{`${band.start}-${band.end}`}</EuiHealth>
+                grow={false}
+              >
+                <EuiFlexGroup alignItems={'center'} gutterSize={'xs'} responsive={false}>
+                  <EuiIcon type={'eyeSlash'} aria-hidden={true} />
+                  <EuiText size={'s'} color={euiTheme.colors.textSubdued}>
+                    <p>{`${band.start}-${band.end}`}</p>
+                  </EuiText>
+                </EuiFlexGroup>
+              </EuiFlexItem>
             );
-          })}
-        </EuiFlexGroup>
-      </EuiPanel>
-      <EuiFlexItem />
-    </EuiFlexGroup>
+          }
+          return (
+            <EuiHealth
+              key={`${band.start}-${band.end}`}
+              css={{ cursor: 'pointer' }}
+              onClick={() => toggleHiddenBand(band)}
+              color={band.color}
+            >{`${band.start}-${band.end}`}</EuiHealth>
+          );
+        })}
+      </EuiFlexGroup>
+    </EuiPanel>
   );
 };

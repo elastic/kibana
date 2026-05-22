@@ -14,8 +14,7 @@ import { generateLogsData } from '../../../fixtures/generators';
 // lowercase, trim, convert, etc.) is covered by API tests in
 // test/scout/api/tests/processing_simulate.spec.ts
 // These UI tests focus on preview table behavior, auto-update, and UI-specific features
-// Failing: See https://github.com/elastic/kibana/issues/260710
-test.describe.skip(
+test.describe(
   'Stream data processing - simulation preview',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
@@ -23,7 +22,7 @@ test.describe.skip(
       await generateLogsData(logsSynthtraceEsClient)({ index: 'logs-generic-default' });
     });
 
-    test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
+    test.beforeEach(async ({ browserAuth, apiServices, pageObjects }) => {
       await browserAuth.loginAsAdmin();
       // Clear existing processors before each test
       await apiServices.streams.clearStreamProcessors('logs-generic-default');

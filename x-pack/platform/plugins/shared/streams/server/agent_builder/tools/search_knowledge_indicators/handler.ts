@@ -46,11 +46,15 @@ export async function searchKnowledgeIndicatorsToolHandler({
       return result.hits;
     },
     getQueries: async (streamNames, search_text) => {
-      // findQueries uses the default search mode (hybrid when ELSER is available,
-      // keyword otherwise), giving the agent the best-available ranking.
+      // Include all queries regardless of rule-backing status so the agent
+      // sees freshly generated and STATS queries that haven't been promoted.
+      const filters = { ruleUnbacked: 'include' as const };
+
+      // findQueries uses the default search mode (hybrid with silent keyword
+      // fallback), giving the agent the best-available ranking.
       const links = search_text
-        ? await queryClient.findQueries(streamNames, search_text)
-        : await queryClient.getQueryLinks(streamNames);
+        ? await queryClient.findQueries(streamNames, search_text, filters)
+        : await queryClient.getQueryLinks(streamNames, filters);
 
       return links;
     },

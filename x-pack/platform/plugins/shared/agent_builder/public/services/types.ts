@@ -8,7 +8,7 @@
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { AgentBuilderAccessChecker } from './access/access';
 import type { AgentBuilderStartDependencies, OpenConversationSidebarReturn } from '../types';
-import type { OpenConversationSidebarOptions } from '../sidebar/types';
+import type { OpenSidebarInternalOptions } from '../sidebar/types';
 import type { AgentService } from './agents';
 import type { AttachmentsService } from './attachments';
 import type { ChatService } from './chat';
@@ -36,7 +36,6 @@ export interface AgentBuilderInternalService {
   usageCollection?: UsageCollectionSetup;
   accessChecker: AgentBuilderAccessChecker;
   eventsService: EventsService;
-  openSidebarConversation: (
-    options?: OpenConversationSidebarOptions
-  ) => OpenConversationSidebarReturn;
+  isEarsEnabled: boolean;
+  openSidebarConversation: (options?: OpenSidebarInternalOptions) => OpenConversationSidebarReturn;
 }

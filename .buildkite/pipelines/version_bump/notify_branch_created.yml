@@ -1,0 +1,4 @@
+steps:
+  - name: 'Notify Slack: branch created'
+    key: notify-branch-created
+    command: .buildkite/scripts/steps/version_bump/notify_branch_created.sh

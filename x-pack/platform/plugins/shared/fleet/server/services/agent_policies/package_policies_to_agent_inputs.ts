@@ -24,7 +24,6 @@ import type {
 import { DEFAULT_OUTPUT } from '../../constants';
 import { pkgToPkgKey } from '../epm/registry';
 import {
-  DATASET_VAR_NAME,
   DATA_STREAM_TYPE_VAR_NAME,
   FLEET_ENDPOINT_PACKAGE,
   GLOBAL_DATA_TAG_EXCLUDED_INPUTS,
@@ -35,7 +34,12 @@ import { _compilePackagePolicyInputs, getPackagePolicySavedObjectType } from '..
 import { getAgentTemplateAssetsMap } from '../epm/packages/get';
 import { appContextService } from '../app_context';
 import { FleetError, PackagePolicyValidationError } from '../../errors';
-import { packagePolicyInputAllowsUndefinedDataStreamType } from '../../../common/services';
+import {
+  packagePolicyInputAllowsUndefinedDataStreamType,
+  getInputEffectiveName,
+} from '../../../common/services';
+
+import { getEffectiveOtelStreamDataset } from './get_effective_otel_stream_dataset';
 
 const isPolicyEnabled = (packagePolicy: PackagePolicy) => {
   return packagePolicy.enabled && packagePolicy.inputs && packagePolicy.inputs.length;
@@ -52,7 +56,7 @@ export function getInputId(
 
   return useSimplifiedId
     ? packagePolicyId || 'default'
-    : `${input.type}${input.policy_template ? `-${input.policy_template}` : ''}${
+    : `${getInputEffectiveName(input)}${input.policy_template ? `-${input.policy_template}` : ''}${
         packagePolicyId ? `-${packagePolicyId}` : ''
       }`;
 }
@@ -194,13 +198,11 @@ export const getFullInputStreams = (
               }
 
               if (input.type === OTEL_COLLECTOR_INPUT_TYPE) {
-                const datasetVar = stream.vars?.[DATASET_VAR_NAME]?.value;
-                if (datasetVar) {
-                  fullStream.data_stream = {
-                    ...fullStream.data_stream,
-                    dataset: datasetVar,
-                  };
-                }
+                // Replace policy output dataset verbatim (no .otel append); EPM templates use registry dataset + isOtelInputType separately.
+                fullStream.data_stream = {
+                  ...fullStream.data_stream,
+                  dataset: getEffectiveOtelStreamDataset(stream),
+                };
 
                 const useAPMVar = stream.vars?.[USE_APM_VAR_NAME]?.value;
                 if (useAPMVar !== undefined) {
@@ -262,10 +264,10 @@ export const storedPackagePoliciesToAgentInputs = async (
       : undefined;
 
     const filteredGlobalDataTags = filterGlobalDataTags(globalDataTags, packageInfo);
-    const addFields =
-      filteredGlobalDataTags && filteredGlobalDataTags.length > 0
-        ? globalDataTagsToAddFields(filteredGlobalDataTags)
-        : undefined;
+    const packagePolicyTags =
+      filterGlobalDataTags(packagePolicy.global_data_tags ?? [], packageInfo) ?? [];
+    const allTags = [...(filteredGlobalDataTags ?? []), ...packagePolicyTags];
+    const addFields = allTags.length > 0 ? globalDataTagsToAddFields(allTags) : undefined;
 
     let packagePolicyWithUpdatedInputs = packagePolicy;
     // recompile inputs to apply agent version conditions
