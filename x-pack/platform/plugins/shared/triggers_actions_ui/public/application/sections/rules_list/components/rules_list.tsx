@@ -757,7 +757,9 @@ export const RulesList = ({
 
   return (
     <>
-      {config.apiKeyType === 'uiam' ? <RulesListUiamApiKeyBanner /> : null}
+      {kibanaServices.isServerless && config.apiKeyType === 'uiam' ? (
+        <RulesListUiamApiKeyBanner />
+      ) : null}
       {showSearchBar && !isEmpty(filters.ruleParams) ? (
         <RulesListClearRuleFilterBanner onClickClearFilter={handleClearRuleParamFilter} />
       ) : null}
