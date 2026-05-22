@@ -31,10 +31,10 @@ export class FindingsCollector {
    */
   ingestErrors(errors: ReadonlyArray<unknown>): void {
     for (const err of errors) {
-      const cause = err instanceof ListrError ? err.error : err;
+      const unwrappedError = err instanceof ListrError ? err.error : err;
 
-      if (isSavedObjectsCheckError(cause)) {
-        this.findings.push(...cause.findings);
+      if (isSavedObjectsCheckError(unwrappedError)) {
+        this.findings.push(...unwrappedError.findings);
         continue;
       }
 

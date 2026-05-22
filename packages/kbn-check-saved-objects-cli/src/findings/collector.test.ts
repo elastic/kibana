@@ -7,13 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ListrTaskObject } from 'listr2';
 import { ListrError, ListrErrorTypes } from 'listr2';
 import { FindingsCollector } from './collector';
 import { RULE_IDS } from './types';
 import { SavedObjectsCheckError } from './error';
+import type { TaskContext } from '../commands/types';
 
-/** Minimal Listr task stub sufficient to construct a ListrError in tests. */
-const stubTask = { path: [], options: {} } as any;
+/**
+ * Minimal stub satisfying the ListrError constructor at runtime.
+ * ListrError only reads `task.path` and `task.ctx`; a full Task instance
+ * is not constructable in unit tests without a live Listr runner.
+ */
+const stubTask = { path: [] } as Partial<
+  ListrTaskObject<TaskContext>
+> as ListrTaskObject<TaskContext>;
 
 describe('FindingsCollector', () => {
   it('collects added findings in order', () => {
