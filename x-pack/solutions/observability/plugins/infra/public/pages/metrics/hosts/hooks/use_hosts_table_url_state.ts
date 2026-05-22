@@ -90,11 +90,15 @@ export const useHostsTableUrlState = (): [TableProperties, TablePropertiesUpdate
       setUrlState((prev) => {
         const seed: TableProperties = {
           ...GET_DEFAULT_TABLE_PROPERTIES,
-          pagination: {
+          ...(prev ?? {}),
+          // `pagination` deserves its own pick because the localStorage
+          // page size only seeds the *first* write (when `prev.pagination`
+          // is missing); once the URL carries a real pagination block we
+          // must preserve it verbatim so the user's page index survives.
+          pagination: prev?.pagination ?? {
             ...GET_DEFAULT_TABLE_PROPERTIES.pagination,
             pageSize: localStoragePageSize ?? DEFAULT_PAGE_SIZE,
           },
-          ...(prev ?? {}),
         };
         return reducer(seed, patch);
       });
