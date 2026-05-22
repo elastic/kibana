@@ -149,7 +149,6 @@ export class SmlCrawlerImpl implements SmlCrawler {
     esClient: ElasticsearchClient;
   }): Promise<boolean> {
     const storage = createSmlStorage({ logger: this.logger, esClient });
-    const smlClient = storage.getClient();
 
     try {
       await storage.updateMappingsIfNeeded();
@@ -172,7 +171,7 @@ export class SmlCrawlerImpl implements SmlCrawler {
           `SML crawler: incompatible mapping change detected — dropping index '${smlIndexName}' and re-crawling immediately`
         );
         try {
-          await smlClient.clean();
+          await storage.getClient().clean();
         } catch (cleanError) {
           if (!isResponseError(cleanError) || cleanError.statusCode !== 404) {
             throw cleanError;
