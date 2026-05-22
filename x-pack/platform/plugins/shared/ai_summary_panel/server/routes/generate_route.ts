@@ -259,7 +259,9 @@ export function registerGenerateRoute(
                     .map(([name]) => name);
                   if (dateFields.length > 0) detectedTimeField = pickDateFieldHeuristic(dateFields);
                 }
-              } catch { /* non-fatal — skip time injection */ }
+              } catch {
+                /* non-fatal — skip time injection */
+              }
             }
           }
         }
@@ -340,12 +342,15 @@ export function registerGenerateRoute(
               sizeLimitExceeded = true;
               abortController.abort();
               if (!passThrough.destroyed) {
-                passThrough.write(JSON.stringify({ error: 'Generated content exceeded size limit' }) + '\n');
+                passThrough.write(
+                  JSON.stringify({ error: 'Generated content exceeded size limit' }) + '\n'
+                );
                 passThrough.end();
               }
               return;
             }
-            if (!passThrough.destroyed) passThrough.write(JSON.stringify({ token: event.content }) + '\n');
+            if (!passThrough.destroyed)
+              passThrough.write(JSON.stringify({ token: event.content }) + '\n');
           }
         },
         error: (err) => {
