@@ -153,16 +153,31 @@ export default function (providerContext: FtrProviderContext) {
 
       const installation = pkgBody.item.savedObject?.attributes ?? pkgBody.item.installationInfo;
 
-      // `installation.install_status` and `install_started_at` are read by the
-      // status route to determine `not-installed` / `index-timeout` /
-      // `waiting_for_results` branches.
+      // `installation` may resolve from either `savedObject.attributes`
+      // (typed as the full `Installation`, but deprecated) or
+      // `installationInfo` (typed as `InstallationInfo`, which *omits*
+      // `install_version` and `install_started_at` from `Installation` by
+      // design — see `x-pack/platform/plugins/shared/fleet/common/types/
+      // models/epm.ts`). `getCspStatus` reads both of those fields through
+      // optional chaining + a `MIN_DATE` / undefined fallback
+      // (`installation?.install_started_at || MIN_DATE` and
+      // `installation?.install_version`), so the consumed contract is
+      // "may be undefined, must be string when present" — not
+      // "must be present and string". Asserting the strict shape would
+      // generate noise on benign Fleet changes and fail for the wrong
+      // reason. `install_status` is not read by `getCspStatus` at all and
+      // is therefore not part of the consumed contract.
       expect(installation).to.not.be(undefined);
-      expect(typeof installation.install_status).to.eql('string');
-      expect(typeof installation.install_started_at).to.eql('string');
-      expect(typeof installation.install_version).to.eql('string');
 
-      // `latestVersion` (or `version`) feeds `fetchFindLatestPackage(...)`
-      // surface used by `latestPackageVersion` in the response.
+      if (installation.install_started_at !== undefined) {
+        expect(typeof installation.install_started_at).to.eql('string');
+      }
+      if (installation.install_version !== undefined) {
+        expect(typeof installation.install_version).to.eql('string');
+      }
+
+      // `latestVersion ?? version` is *not* read through `?.` at the call
+      // site, so it remains a hard required-string contract.
       expect(typeof (pkgBody.item.latestVersion ?? pkgBody.item.version)).to.eql('string');
     });
   });
