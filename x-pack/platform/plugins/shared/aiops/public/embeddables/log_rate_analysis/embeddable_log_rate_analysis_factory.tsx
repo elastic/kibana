@@ -28,6 +28,7 @@ import fastIsEqual from 'fast-deep-equal';
 import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject, distinctUntilChanged, map, merge, skip, skipWhile } from 'rxjs';
+import type { LogRateAnalysisEmbeddableState } from '@kbn/aiops-server-schemas/embeddables/log_rate_analysis';
 import { getLogRateAnalysisEmbeddableWrapperComponent } from '../../shared_components';
 import type { AiopsPluginStart, AiopsPluginStartDeps } from '../../types';
 import { initializeLogRateAnalysisControls } from './initialize_log_rate_analysis_analysis_controls';
