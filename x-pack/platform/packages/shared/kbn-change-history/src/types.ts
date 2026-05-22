@@ -58,7 +58,11 @@ export interface ChangeHistoryDocument {
     type: string;
     /** SHA256 hash of the entity.raw to identify changes in the payload. */
     hash: string;
-    /** Version identifier used for ordering. Increases with each version. */
+    /** Elasticsearch `_seq_no` from the successful primary write (canonical OCC ordering). */
+    seqNo: number;
+    /** Elasticsearch `_primary_term` from the successful primary write (canonical OCC ordering). */
+    primaryTerm: number;
+    /** Optional caller-supplied version/sequence. */
     sequence?: number;
     fields: {
       /** Full paths of fields stored as hashes (sensitive fields or blob binaries). */
@@ -88,7 +92,18 @@ export interface ObjectChange {
   objectType: string;
   /** The `object.id`. Uniquely identifies this object in Kibana within its `type` */
   objectId: string;
-  /** A sequentially increasing version for ordering changes. Please avoid ES _seq_no or _version as these are not reliable */
+  /**
+   * Saved Objects path: opaque `SavedObject.version` string **after** a successful write.
+   * Mutually exclusive with `seqNo` / `primaryTerm`.
+   */
+  primaryStoreVersion?: string;
+  /**
+   * Raw Elasticsearch path: `_seq_no` and `_primary_term` from the successful primary write response.
+   * Mutually exclusive with `primaryStoreVersion`.
+   */
+  seqNo?: number;
+  primaryTerm?: number;
+  /** Optional caller-supplied version/sequence. */
   sequence?: number;
   /**
    * Full snapshot of the object **after** the change (post-write state). Persisted as

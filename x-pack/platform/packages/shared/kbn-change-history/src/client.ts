@@ -33,6 +33,7 @@ import type {
   ObjectChange,
 } from './types';
 import { sha256, hashFields } from './utils';
+import { resolveOccFields } from './resolve_occ_fields';
 
 export { DATA_STREAM_NAME } from './constants';
 
@@ -127,7 +128,7 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
     const definition: DataStreamDefinition<typeof changeHistoryMappings.v1, ChangeHistoryDocument> =
       {
         name: DATA_STREAM_NAME,
-        version: 1,
+        version: 2,
         hidden: true,
         template: {
           priority: 100,
@@ -202,6 +203,7 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
     for (const change of changes) {
       // Create document and populate
       const { objectType, objectId, timestamp, sequence } = change;
+      const { seqNo, primaryTerm } = resolveOccFields(change);
       const hash = sha256(JSON.stringify(change.snapshot));
       const hashed = hashFields(change.snapshot, opts.fieldsToHash);
       const { event, metadata, tags } = opts.data ?? {};
@@ -223,6 +225,8 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
           id: objectId,
           type: objectType,
           hash,
+          seqNo,
+          primaryTerm,
           sequence,
           fields: { hashed: hashed.fields },
           snapshot: hashed.snapshot,
@@ -282,9 +286,8 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
       filter.push(...opts.additionalFilters);
     }
     const defaultSort: SortCombinations[] = [
-      { 'object.sequence': { order: 'desc', missing: 0 } }, // <-- If available, `sequence` ordering overrides timestamps.
-      { '@timestamp': { order: 'desc' } },
-      { 'event.id': { order: 'desc' } },
+      { 'object.primaryTerm': { order: 'desc' } },
+      { 'object.seqNo': { order: 'desc' } },
     ];
     const history = await client.search({
       space: spaceId,

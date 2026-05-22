@@ -15,6 +15,11 @@ import { ChangeHistoryClient, ILM_POLICY_NAME } from '..';
 import { DATA_STREAM_NAME } from '../src/client';
 import type { ObjectChange } from '..';
 import { sha256 } from '../src/utils';
+import { encodePrimaryStoreVersion, occNumeric } from '../test_utils_occ';
+import {
+  ChangeHistoryInvalidOccError,
+  ChangeHistoryInvalidPrimaryStoreVersionError,
+} from '../src/errors';
 
 const KIBANA_SPACE = 'default';
 const TEST_MODULE = 'test-module';
@@ -178,6 +183,7 @@ describe('ChangeHistoryClient', () => {
         objectType: 'rule',
         objectId: 'id-1',
         snapshot: { name: 'Rule 1' },
+        ...occNumeric(1),
       };
       await expect(() =>
         client.log(change, { ...defaultLogOpts, spaceId: 'default' })
@@ -189,6 +195,19 @@ describe('ChangeHistoryClient', () => {
       await expect(() => client.getHistory(KIBANA_SPACE, 'rule', 'id-1')).rejects.toThrow(
         'Change history data stream not initialized'
       );
+    });
+
+    it('should throw when log is called without OCC fields', async () => {
+      const client = new ChangeHistoryClient(defaultCostructorOpts);
+      await client.initialize(esServer.getClient());
+      const change: ObjectChange = {
+        objectType: 'rule',
+        objectId: 'id-1',
+        snapshot: { name: 'Rule 1' },
+      };
+      await expect(() =>
+        client.log(change, { ...defaultLogOpts, spaceId: 'default' })
+      ).rejects.toThrow(ChangeHistoryInvalidOccError);
     });
   });
 
@@ -207,6 +226,7 @@ describe('ChangeHistoryClient', () => {
         objectType: 'rule',
         objectId: 'id-1',
         sequence: 1,
+        ...occNumeric(1),
         snapshot: { name: 'Rule 1', enabled: true },
       };
       const hash = sha256(JSON.stringify(change.snapshot));
@@ -232,6 +252,8 @@ describe('ChangeHistoryClient', () => {
           type: 'rule',
           id: 'id-1',
           hash,
+          seqNo: 1,
+          primaryTerm: 1,
           sequence: 1,
           fields: { hashed: [] },
           snapshot: { name: 'Rule 1', enabled: true },
@@ -242,6 +264,22 @@ describe('ChangeHistoryClient', () => {
         },
       });
       expect(doc).not.toHaveProperty('kibana');
+    });
+
+    it('should persist seqNo and primaryTerm from primaryStoreVersion', async () => {
+      const change: ObjectChange = {
+        objectType: 'rule',
+        objectId: 'id-so',
+        primaryStoreVersion: encodePrimaryStoreVersion(7, 2),
+        snapshot: { name: 'Rule SO path' },
+      };
+      await client.log(change, { ...defaultLogOpts, spaceId: 'default' });
+
+      const result = await client.getHistory(KIBANA_SPACE, 'rule', 'id-so');
+      expect(result.items[0].object).toMatchObject({
+        seqNo: 7,
+        primaryTerm: 2,
+      });
     });
   });
 
@@ -256,34 +294,74 @@ describe('ChangeHistoryClient', () => {
     it('should log multiple changes and return them via getHistory with correct count and ordering', async () => {
       const timestamp = new Date(Date.now() - 1).toISOString();
       const changes: ObjectChange[] = [
-        { objectType: 'rule', objectId: 'id-a', snapshot: { name: 'Rule A update 1' } },
-        { objectType: 'rule', objectId: 'id-c', snapshot: { name: 'Rule C update 3' } },
+        {
+          objectType: 'rule',
+          objectId: 'id-a',
+          snapshot: { name: 'Rule A update 1' },
+          ...occNumeric(1),
+        },
+        {
+          objectType: 'rule',
+          objectId: 'id-c',
+          snapshot: { name: 'Rule C update 3' },
+          ...occNumeric(3),
+        },
         {
           objectType: 'rule',
           objectId: 'id-b',
           snapshot: { name: 'Rule B update 3' },
           sequence: 3,
-        }, // <-- higher sequence, happened later
-        { objectType: 'rule', objectId: 'id-a', snapshot: { name: 'Rule A update 2' } },
+          ...occNumeric(3),
+        },
+        {
+          objectType: 'rule',
+          objectId: 'id-a',
+          snapshot: { name: 'Rule A update 2' },
+          ...occNumeric(2),
+        },
       ];
       await client.logBulk(changes, { ...defaultLogOpts, spaceId: 'default' });
       const changes2: ObjectChange[] = [
-        { objectType: 'rule', objectId: 'id-a', snapshot: { name: 'Rule A update 3' } },
-        { objectType: 'rule', objectId: 'id-c', snapshot: { name: 'Rule C update 1' }, timestamp }, // <-- older timestamp, happened first
+        {
+          objectType: 'rule',
+          objectId: 'id-a',
+          snapshot: { name: 'Rule A update 3' },
+          ...occNumeric(3),
+        },
+        {
+          objectType: 'rule',
+          objectId: 'id-c',
+          snapshot: { name: 'Rule C update 1' },
+          timestamp,
+          ...occNumeric(1),
+        },
         {
           objectType: 'rule',
           objectId: 'id-b',
           snapshot: { name: 'Rule B update 1' },
           sequence: 1,
+          ...occNumeric(1),
         },
         {
           objectType: 'rule',
           objectId: 'id-b',
           snapshot: { name: 'Rule B update 2' },
           sequence: 2,
+          ...occNumeric(2),
         },
-        { objectType: 'rule', objectId: 'id-c', snapshot: { name: 'Rule C update 2' }, timestamp }, // <-- older timestamp, happened first
-        { objectType: 'rule', objectId: 'id-c', snapshot: { name: 'Rule C update 4' } },
+        {
+          objectType: 'rule',
+          objectId: 'id-c',
+          snapshot: { name: 'Rule C update 2' },
+          timestamp,
+          ...occNumeric(2),
+        },
+        {
+          objectType: 'rule',
+          objectId: 'id-c',
+          snapshot: { name: 'Rule C update 4' },
+          ...occNumeric(4),
+        },
       ];
       await client.logBulk(changes2, { ...defaultLogOpts, spaceId: 'default' });
 
@@ -323,13 +401,13 @@ describe('ChangeHistoryClient', () => {
       const eventIds = resultA.items.map((i) => i.event.id);
       expect(eventIds).toEqual(eventIds.slice().sort().reverse());
 
-      // Check decreasing sequence
-      const sequence = resultB.items.map((i) => i.object.sequence);
-      expect(sequence).toEqual(sequence.slice().sort().reverse());
+      // Check decreasing OCC seqNo
+      const seqNosB = resultB.items.map((i) => i.object.seqNo);
+      expect(seqNosB).toEqual(seqNosB.slice().sort().reverse());
 
-      // Check decreasing timestamps
-      const timestamps = resultC.items.map((i) => i['@timestamp']);
-      expect(timestamps).toEqual(timestamps.slice().sort().reverse());
+      // Check decreasing OCC seqNo (Rule C ordering is by OCC, not @timestamp)
+      const seqNosC = resultC.items.map((i) => i.object.seqNo);
+      expect(seqNosC).toEqual(seqNosC.slice().sort().reverse());
     });
 
     it('should not throw on partial success when some bulk items fail', async () => {
@@ -338,11 +416,13 @@ describe('ChangeHistoryClient', () => {
           objectType: 'rule',
           objectId: 'rule-id',
           snapshot: { name: 'First Rule' },
+          ...occNumeric(1),
         },
         {
           objectType: 'rule',
           objectId: 'rule-id',
           snapshot: { name: 'Unindexable — bad sequence type' },
+          ...occNumeric(2),
           // Intentionally wrong runtime type for ES (integration test only).
           sequence: 'not-an-integer' as unknown as number,
         },
@@ -350,12 +430,14 @@ describe('ChangeHistoryClient', () => {
           objectType: 'rule',
           objectId: 'rule-id',
           snapshot: { name: 'Also unindexable — bad sequence type' },
+          ...occNumeric(3),
           sequence: {} as unknown as number,
         },
         {
           objectType: 'rule',
           objectId: 'rule-id',
           snapshot: { name: 'Last Rule' },
+          ...occNumeric(4),
         },
       ];
       await expect(
@@ -367,6 +449,151 @@ describe('ChangeHistoryClient', () => {
       const snapshots = result.items.map((i) => i.object.snapshot);
       expect(snapshots[0]).toEqual({ name: 'Last Rule' });
       expect(snapshots[1]).toEqual({ name: 'First Rule' });
+    });
+  });
+
+  describe('OCC scenarios', () => {
+    let client: ChangeHistoryClient;
+
+    beforeEach(async () => {
+      client = new ChangeHistoryClient(defaultCostructorOpts);
+      await client.initialize(esServer.getClient());
+    });
+
+    it('sorts by primaryTerm before seqNo (newer term wins despite lower seqNo)', async () => {
+      const objectId = 'occ-term-order';
+      await client.logBulk(
+        [
+          {
+            objectType: 'rule',
+            objectId,
+            snapshot: { name: 'older term, high seq' },
+            ...occNumeric(99, 3),
+          },
+          {
+            objectType: 'rule',
+            objectId,
+            snapshot: { name: 'newer term, low seq' },
+            ...occNumeric(1, 4),
+          },
+        ],
+        { ...defaultLogOpts, spaceId: 'default' }
+      );
+
+      const result = await client.getHistory(KIBANA_SPACE, 'rule', objectId);
+      expect(result.items.map((i) => i.object.snapshot)).toEqual([
+        { name: 'newer term, low seq' },
+        { name: 'older term, high seq' },
+      ]);
+      expect(result.items[0].object).toMatchObject({ seqNo: 1, primaryTerm: 4 });
+      expect(result.items[1].object).toMatchObject({ seqNo: 99, primaryTerm: 3 });
+    });
+
+    it('orders by seqNo within the same primaryTerm', async () => {
+      const objectId = 'occ-seq-order';
+      await client.logBulk(
+        [
+          {
+            objectType: 'rule',
+            objectId,
+            snapshot: { name: 'revision 5' },
+            ...occNumeric(5, 1),
+          },
+          {
+            objectType: 'rule',
+            objectId,
+            snapshot: { name: 'revision 10' },
+            ...occNumeric(10, 1),
+          },
+        ],
+        { ...defaultLogOpts, spaceId: 'default' }
+      );
+
+      const result = await client.getHistory(KIBANA_SPACE, 'rule', objectId);
+      expect(result.items.map((i) => i.object.seqNo)).toEqual([10, 5]);
+    });
+
+    it('does not persist primaryStoreVersion on the indexed document', async () => {
+      const change: ObjectChange = {
+        objectType: 'rule',
+        objectId: 'occ-no-opaque-on-index',
+        primaryStoreVersion: encodePrimaryStoreVersion(2, 1),
+        snapshot: { name: 'indexed' },
+      };
+      await client.log(change, { ...defaultLogOpts, spaceId: 'default' });
+
+      const result = await client.getHistory(KIBANA_SPACE, 'rule', 'occ-no-opaque-on-index');
+      const doc = result.items[0];
+      expect(doc.object).toMatchObject({ seqNo: 2, primaryTerm: 1 });
+      expect(doc.object).not.toHaveProperty('primaryStoreVersion');
+    });
+
+    it('rejects logBulk when both OCC wire shapes are set', async () => {
+      await expect(
+        client.logBulk(
+          [
+            {
+              objectType: 'rule',
+              objectId: 'xor-both',
+              primaryStoreVersion: encodePrimaryStoreVersion(1, 1),
+              ...occNumeric(1, 1),
+              snapshot: { name: 'invalid' },
+            },
+          ],
+          { ...defaultLogOpts, spaceId: 'default' }
+        )
+      ).rejects.toThrow(ChangeHistoryInvalidOccError);
+
+      const result = await client.getHistory(KIBANA_SPACE, 'rule', 'xor-both');
+      expect(result.total).toBe(0);
+    });
+
+    it('rejects logBulk with invalid primaryStoreVersion before indexing', async () => {
+      await expect(
+        client.logBulk(
+          [
+            {
+              objectType: 'rule',
+              objectId: 'bad-opaque',
+              primaryStoreVersion: 'not-base64-json',
+              snapshot: { name: 'invalid' },
+            },
+          ],
+          { ...defaultLogOpts, spaceId: 'default' }
+        )
+      ).rejects.toThrow(ChangeHistoryInvalidPrimaryStoreVersionError);
+
+      const result = await client.getHistory(KIBANA_SPACE, 'rule', 'bad-opaque');
+      expect(result.total).toBe(0);
+    });
+
+    it('ignores optional sequence when OCC differs (sequence does not override sort)', async () => {
+      const objectId = 'occ-over-sequence';
+      await client.logBulk(
+        [
+          {
+            objectType: 'rule',
+            objectId,
+            snapshot: { name: 'low OCC, high sequence' },
+            sequence: 999,
+            ...occNumeric(1, 1),
+          },
+          {
+            objectType: 'rule',
+            objectId,
+            snapshot: { name: 'high OCC, low sequence' },
+            sequence: 1,
+            ...occNumeric(50, 1),
+          },
+        ],
+        { ...defaultLogOpts, spaceId: 'default' }
+      );
+
+      const result = await client.getHistory(KIBANA_SPACE, 'rule', objectId);
+      expect(result.items.map((i) => i.object.snapshot)).toEqual([
+        { name: 'high OCC, low sequence' },
+        { name: 'low OCC, high sequence' },
+      ]);
     });
   });
 
@@ -382,6 +609,7 @@ describe('ChangeHistoryClient', () => {
       const change: ObjectChange = {
         objectType: 'rule',
         objectId: 'masked-id',
+        ...occNumeric(1),
         snapshot: {
           name: 'My Rule',
           user: { email: 'secret@example.com', name: 'Alice' },

@@ -564,6 +564,7 @@ describe('updateRuleApiKey()', () => {
     const updatedRuleSO = {
       id: '1',
       type: RULE_SAVED_OBJECT_TYPE,
+      version: 'WzQsMV0=',
       attributes: {
         name: ruleName,
         alertTypeId: 'myType',
@@ -654,6 +655,7 @@ describe('updateRuleApiKey()', () => {
             objectId: '1',
             objectType: RULE_SAVED_OBJECT_TYPE,
             module: 'stack',
+            primaryStoreVersion: 'WzQsMV0=',
             snapshot: {
               attributes: updatedRuleSO.attributes,
               references: updatedRuleSO.references,

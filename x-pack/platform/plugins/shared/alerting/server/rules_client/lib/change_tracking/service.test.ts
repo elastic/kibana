@@ -159,12 +159,11 @@ describe('ChangeTrackingService', () => {
         expect(client.logBulk).toHaveBeenCalledTimes(1);
         expect(client.logBulk).toHaveBeenCalledWith(
           [
-            {
+            expect.objectContaining({
               objectType: RULE_SAVED_OBJECT_TYPE,
               objectId: 'rule-1',
-              before: undefined,
-              snapshot: ruleSnapshot('after'),
-            },
+              snapshot: change.snapshot,
+            }),
           ],
           expect.objectContaining({
             action: 'rule_update',
@@ -255,18 +254,16 @@ describe('ChangeTrackingService', () => {
         expect(client.logBulk).toHaveBeenCalledTimes(1);
         expect(client.logBulk).toHaveBeenCalledWith(
           [
-            {
+            expect.objectContaining({
               objectType: RULE_SAVED_OBJECT_TYPE,
               objectId: 'rule-1',
-              before: undefined,
               snapshot: ruleSnapshot('a'),
-            },
-            {
+            }),
+            expect.objectContaining({
               objectType: RULE_SAVED_OBJECT_TYPE,
               objectId: 'rule-2',
-              before: undefined,
               snapshot: ruleSnapshot('b'),
-            },
+            }),
           ],
           expect.objectContaining({
             action: 'rule_update',

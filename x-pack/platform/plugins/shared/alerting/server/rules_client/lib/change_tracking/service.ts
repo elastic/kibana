@@ -124,12 +124,31 @@ export class ChangeTrackingService implements IChangeTrackingService {
     // Group rule changes per solution
     const correlationId = crypto.randomBytes(16).toString('hex');
     const groups = changes.reduce((result, change) => {
-      const { objectId, objectType, snapshot, module } = change;
+      const {
+        objectId,
+        objectType,
+        snapshot,
+        module,
+        timestamp,
+        sequence,
+        primaryStoreVersion,
+        seqNo,
+        primaryTerm,
+      } = change;
       let objects = result.get(module);
       if (!objects) {
         result.set(module, (objects = []));
       }
-      objects.push({ objectType, objectId, snapshot });
+      objects.push({
+        objectType,
+        objectId,
+        snapshot,
+        timestamp,
+        sequence,
+        primaryStoreVersion,
+        seqNo,
+        primaryTerm,
+      });
       return result;
     }, new Map<RuleTypeSolution, ObjectChange[]>());
 

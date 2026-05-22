@@ -72,6 +72,7 @@ export async function logRuleChanges({
       objectId: ruleSO.id,
       objectType: RULE_SAVED_OBJECT_TYPE,
       module: ruleType.solution,
+      primaryStoreVersion: ruleSO.version,
       snapshot: {
         attributes: ruleSO.attributes,
         references: ruleSO.references ?? [],

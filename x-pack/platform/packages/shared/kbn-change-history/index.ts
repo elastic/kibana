@@ -7,6 +7,12 @@
 
 export type * from './src/types';
 export * from './src/client';
+export {
+  ChangeHistoryInvalidOccError,
+  ChangeHistoryInvalidPrimaryStoreVersionError,
+} from './src/errors';
+export { decodePrimaryStoreVersion } from './src/decode_primary_store_version';
+export { resolveOccFields } from './src/resolve_occ_fields';
 export { ILM_POLICY_NAME } from './src/constants';
 /**
  * @internal exported for test use only — do NOT use in production code,
