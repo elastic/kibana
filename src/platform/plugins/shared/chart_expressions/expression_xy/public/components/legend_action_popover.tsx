@@ -9,17 +9,16 @@
 
 import React, { useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FILTER_CELL_ACTION_TYPE } from '@kbn/cell-actions/constants';
 import type { EuiContextMenuPanelDescriptor, UseEuiTheme } from '@elastic/eui';
-import { EuiIcon, EuiPopover, EuiContextMenu, useEuiTheme } from '@elastic/eui';
+import { EuiIcon, EuiPopover, EuiContextMenu } from '@elastic/eui';
 import { useLegendAction } from '@elastic/charts';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { FILTER_CELL_ACTION_TYPE } from '@kbn/cell-actions/constants';
 import type { CellValueAction } from '../types';
 
-const hasFilterCellAction = (actions: CellValueAction[]) => {
-  return actions.some(({ type }) => type === FILTER_CELL_ACTION_TYPE);
-};
+const hasFilterCellAction = (actions: CellValueAction[]) =>
+  actions.some(({ type }) => type === FILTER_CELL_ACTION_TYPE);
 
 const getEsqlComputedColumnFilterDisabledMessage = (
   panelHasConfiguredDrilldowns: boolean = false
@@ -67,14 +66,14 @@ export const LegendActionPopover: React.FunctionComponent<{
   /** Compatible actions to be added to the popover actions. */
   legendCellValueActions?: LegendCellValueActions;
   /** When true, built-in Filter for / Filter out items are shown disabled. */
-  isComputedColumn?: boolean;
+  hasComputedColumn?: boolean;
   /** When true, the disabled filter message also mentions that drill downs are unavailable. */
   panelHasConfiguredDrilldowns?: boolean;
 }> = ({
   label,
   onFilter,
   legendCellValueActions = [],
-  isComputedColumn = false,
+  hasComputedColumn = false,
   panelHasConfiguredDrilldowns = false,
 }) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
@@ -106,34 +105,7 @@ export const LegendActionPopover: React.FunctionComponent<{
       },
     ];
 
-    const allActions = [
-      ...(!hasFilterCellAction(legendCellValueActions)
-        ? isComputedColumn
-          ? defaultFilterActions.map((action) => ({
-              ...action,
-              disabled: true,
-              execute: () => {},
-            }))
-          : defaultFilterActions
-        : []),
-      ...legendCellValueActions,
-    ];
-
-    const filterDisabledMessageItem =
-      !hasFilterCellAction(legendCellValueActions) && isComputedColumn
-        ? [
-            {
-              renderItem: () => (
-                <LegendFilterDisabledMessage
-                  key="legend-filter-disabled-message"
-                  message={getEsqlComputedColumnFilterDisabledMessage(panelHasConfiguredDrilldowns)}
-                />
-              ),
-            },
-          ]
-        : [];
-
-    const legendCellValueActionPanelItems = allActions.map((action) => ({
+    const toMenuItem = (action: LegendCellValueActions[number]) => ({
       name: action.displayName,
       'data-test-subj': `legend-${label}-${action.id}`,
       icon: <EuiIcon type={action.iconType} size="m" aria-hidden={true} />,
@@ -142,16 +114,45 @@ export const LegendActionPopover: React.FunctionComponent<{
         action.execute();
         setPopoverOpen(false);
       },
-    }));
+    });
+
+    // Always show the built-in filter actions when the column is computed (so the user
+    // can see they exist but are disabled). Otherwise, only show them when no cell value
+    // action already provides a filter — to avoid duplicating it in the menu.
+    const showDefaultFilterActions =
+      hasComputedColumn || !hasFilterCellAction(legendCellValueActions);
+
+    const filterPanelItems = (
+      showDefaultFilterActions
+        ? hasComputedColumn
+          ? defaultFilterActions.map((action) => ({ ...action, disabled: true, execute: () => {} }))
+          : defaultFilterActions
+        : []
+    ).map(toMenuItem);
+
+    const cellValuePanelItems = legendCellValueActions.map(toMenuItem);
+
+    const filterDisabledMessageItem = hasComputedColumn
+      ? [
+          {
+            renderItem: () => (
+              <LegendFilterDisabledMessage
+                key="legend-filter-disabled-message"
+                message={getEsqlComputedColumnFilterDisabledMessage(panelHasConfiguredDrilldowns)}
+              />
+            ),
+          },
+        ]
+      : [];
 
     return [
       {
         id: 'main',
         title: label,
-        items: [...legendCellValueActionPanelItems, ...filterDisabledMessageItem],
+        items: [...filterPanelItems, ...filterDisabledMessageItem, ...cellValuePanelItems],
       },
     ];
-  }, [label, legendCellValueActions, onFilter, isComputedColumn, panelHasConfiguredDrilldowns]);
+  }, [label, legendCellValueActions, onFilter, hasComputedColumn, panelHasConfiguredDrilldowns]);
 
   const Button = (
     <div

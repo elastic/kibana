@@ -82,16 +82,15 @@ export const getLegendAction = (
       return null;
     }
 
-    const isComputedColumn = filterActionData.some((data) => {
+    const hasComputedColumn = filterActionData.some((data) => {
       const column = data.table.columns[data.column];
       return column?.isComputedColumn === true;
     });
 
     const filterHandler = ({ negate }: { negate?: boolean } = {}) => {
-      if (isComputedColumn) {
-        return;
+      if (!hasComputedColumn) {
+        onFilter({ data: filterActionData, negate });
       }
-      onFilter({ data: filterActionData, negate });
     };
 
     const legendCellValueActions: LegendCellValueActions =
@@ -100,26 +99,27 @@ export const getLegendAction = (
         execute: () => action.execute(cellValueActionData),
       })) ?? [];
 
+    const label =
+      getSeriesName(
+        series,
+        {
+          splitAccessors: layer.splitAccessors,
+          accessorsCount: singleTable ? allYAccessors.length : layer.accessors.length,
+          columns: table.columns,
+          splitAccessorsFormats: fieldFormats[layer.layerId].splitSeriesAccessors,
+          alreadyFormattedColumns: formattedDatatables[layer.layerId].formattedColumns,
+          columnToLabelMap: layer.columnToLabel ? JSON.parse(layer.columnToLabel) : {},
+          multipleLayersWithSplits: hasMultipleLayersWithSplits(dataLayers),
+        },
+        titles
+      )?.toString() ?? '';
+
     return (
       <LegendActionPopover
-        label={
-          getSeriesName(
-            series,
-            {
-              splitAccessors: layer.splitAccessors,
-              accessorsCount: singleTable ? allYAccessors.length : layer.accessors.length,
-              columns: table.columns,
-              splitAccessorsFormats: fieldFormats[layer.layerId].splitSeriesAccessors,
-              alreadyFormattedColumns: formattedDatatables[layer.layerId].formattedColumns,
-              columnToLabelMap: layer.columnToLabel ? JSON.parse(layer.columnToLabel) : {},
-              multipleLayersWithSplits: hasMultipleLayersWithSplits(dataLayers),
-            },
-            titles
-          )?.toString() || ''
-        }
+        label={label}
         onFilter={filterHandler}
         legendCellValueActions={legendCellValueActions}
-        isComputedColumn={isComputedColumn}
+        hasComputedColumn={hasComputedColumn}
         panelHasConfiguredDrilldowns={panelHasConfiguredDrilldowns}
       />
     );
