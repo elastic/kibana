@@ -12,11 +12,9 @@ import { Filters } from './filters';
 import { useCreateDataView } from '../../../../../../common/hooks/use_create_data_view';
 import { TestProviders } from '../../../../../../common/mock';
 import { useIsExperimentalFeatureEnabled } from '../../../../../../common/hooks/use_experimental_features';
-import { useDataView } from '../../../../../../data_view_manager/hooks/use_data_view';
 
 jest.mock('../../../../../../common/hooks/use_create_data_view');
 jest.mock('../../../../../../common/hooks/use_experimental_features');
-jest.mock('../../../../../../data_view_manager/hooks/use_data_view');
 
 const mockUseCreateDataView = useCreateDataView as jest.MockedFunction<typeof useCreateDataView>;
 
@@ -41,7 +39,6 @@ describe.skip('Filters', () => {
     jest.clearAllMocks();
 
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
-    (useDataView as jest.Mock).mockReturnValue({ dataView: undefined });
     mockUseCreateDataView.mockReturnValue({
       dataView: {
         getIndexPattern: () => 'logstash-*',
