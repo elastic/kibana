@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { useEuiTheme } from '@elastic/eui';
+import { EuiBadge, useEuiTheme } from '@elastic/eui';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import type { EnhancedFailureStoreStats } from '../hooks/use_data_stream_stats';
 import type { useFailureStoreConfig } from '../hooks/use_failure_store_config';
@@ -33,6 +33,10 @@ export const FailureStoreSummary = ({
   const { isServerless } = useKibana();
   const { euiTheme } = useEuiTheme();
   const { ilmPhases } = useIlmPhasesColorAndDescription();
+
+  const shouldShowInheritedBadge =
+    failureStoreConfig.inheritOptions.canShowInherit &&
+    failureStoreConfig.inheritOptions.isCurrentlyInherited;
 
   const storageSize = stats?.size ? formatBytes(stats.size) : undefined;
 
@@ -62,6 +66,18 @@ export const FailureStoreSummary = ({
     <DataLifecycleSummary
       model={{ phases, testSubjPrefix: 'failureStore' }}
       capabilities={{ canManageLifecycle }}
+      title={i18n.translate('xpack.streams.dataLifecycleSummary.title.dlm', {
+        defaultMessage: 'Data stream lifecycle',
+      })}
+      titleBadge={
+        shouldShowInheritedBadge ? (
+          <EuiBadge>
+            {i18n.translate('xpack.streams.dataLifecycleSummary.inheritedBadge', {
+              defaultMessage: 'Inherited',
+            })}
+          </EuiBadge>
+        ) : undefined
+      }
       showDownsampling={false}
     />
   );
