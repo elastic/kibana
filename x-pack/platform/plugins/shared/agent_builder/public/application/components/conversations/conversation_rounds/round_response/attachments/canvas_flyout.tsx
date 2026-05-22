@@ -117,17 +117,7 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
 
   const { attachment, isSidebar } = canvasState;
   const title = uiDefinition?.getLabel?.(attachment) ?? attachment.type.toUpperCase();
-  const headerIcon = uiDefinition?.getHeaderIcon?.({
-    attachment,
-    version: canvasState.version,
-    versionCount: canvasState.versionCount,
-  });
-  const headerSubtitle = uiDefinition?.getHeaderSubtitle?.({
-    attachment,
-    version: canvasState.version,
-    versionCount: canvasState.versionCount,
-  });
-  const headerBadges = uiDefinition?.getHeaderBadges?.({
+  const header = uiDefinition?.getHeader?.({
     attachment,
     version: canvasState.version,
     versionCount: canvasState.versionCount,
@@ -164,10 +154,10 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
       paddingSize="none"
     >
       <AttachmentHeader
-        icon={headerIcon}
+        icon={header?.icon}
         title={title}
-        subtitle={headerSubtitle}
-        badges={headerBadges}
+        subtitle={header?.subtitle}
+        badges={header?.badges}
         actionButtons={canvasHeaderActionButtons}
         onClose={closeCanvas}
         previewBadgeState="preview_available"
