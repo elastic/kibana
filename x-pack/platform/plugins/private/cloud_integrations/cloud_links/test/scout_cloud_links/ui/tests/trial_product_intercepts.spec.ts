@@ -42,9 +42,13 @@ test.describe('Trial Product Intercept', { tag: tags.stateful.classic }, () => {
 
     // Dismiss the welcome interstitial on first visit; it won't reappear after reload.
     const welcomeInterstitial = page.testSubj.locator('homeWelcomeInterstitial');
-    await welcomeInterstitial.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
-    await page.keyboard.press('Escape');
-    await welcomeInterstitial.waitFor({ state: 'detached' });
+    const homeApp = page.testSubj.locator('homeApp');
+    await homeApp.or(welcomeInterstitial).waitFor({ state: 'visible' });
+    if (await welcomeInterstitial.isVisible()) {
+      await page.keyboard.press('Escape');
+      await welcomeInterstitial.waitFor({ state: 'detached' });
+      await homeApp.waitFor({ state: 'visible' });
+    }
 
     // Backdate the intercept timer in localStorage so the prompter fires on reload,
     // without needing a short trialInterceptInterval server arg.

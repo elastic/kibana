@@ -14,9 +14,13 @@ test.describe('Appearance selector modal', { tag: tags.stateful.classic }, () =>
     await browserAuth.loginAsViewer();
     await page.gotoApp('home');
     const welcomeInterstitial = page.testSubj.locator('homeWelcomeInterstitial');
-    await welcomeInterstitial.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
-    await page.keyboard.press('Escape');
-    await welcomeInterstitial.waitFor({ state: 'detached' });
+    const homeApp = page.testSubj.locator('homeApp');
+    await homeApp.or(welcomeInterstitial).waitFor({ state: 'visible' });
+    if (await welcomeInterstitial.isVisible()) {
+      await page.keyboard.press('Escape');
+      await welcomeInterstitial.waitFor({ state: 'detached' });
+      await homeApp.waitFor({ state: 'visible' });
+    }
   });
 
   test.afterAll(async ({ uiSettings }) => {

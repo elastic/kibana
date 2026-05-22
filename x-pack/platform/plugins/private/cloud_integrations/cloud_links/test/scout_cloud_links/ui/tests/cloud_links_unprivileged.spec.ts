@@ -14,9 +14,13 @@ test.describe('Cloud Links integration: Unprivileged User', { tag: tags.stateful
     await browserAuth.loginAsViewer();
     await page.gotoApp('home');
     const welcomeInterstitial = page.testSubj.locator('homeWelcomeInterstitial');
-    await welcomeInterstitial.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
-    await page.keyboard.press('Escape');
-    await welcomeInterstitial.waitFor({ state: 'detached' });
+    const homeApp = page.testSubj.locator('homeApp');
+    await homeApp.or(welcomeInterstitial).waitFor({ state: 'visible' });
+    if (await welcomeInterstitial.isVisible()) {
+      await page.keyboard.press('Escape');
+      await welcomeInterstitial.waitFor({ state: 'detached' });
+      await homeApp.waitFor({ state: 'visible' });
+    }
   });
 
   test('viewer sees nav and org/profile links but not billing', async ({ pageObjects }) => {

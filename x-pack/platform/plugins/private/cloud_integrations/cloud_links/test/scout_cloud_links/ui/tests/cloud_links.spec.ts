@@ -13,9 +13,13 @@ import { EXPECTED_CLOUD_ID, EXPECTED_ES_URL } from '../fixtures/constants';
 
 async function dismissWelcomeInterstitial(page: ScoutPage) {
   const welcomeInterstitial = page.testSubj.locator('homeWelcomeInterstitial');
-  await welcomeInterstitial.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
-  await page.keyboard.press('Escape');
-  await welcomeInterstitial.waitFor({ state: 'detached' });
+  const homeApp = page.testSubj.locator('homeApp');
+  await homeApp.or(welcomeInterstitial).waitFor({ state: 'visible' });
+  if (await welcomeInterstitial.isVisible()) {
+    await page.keyboard.press('Escape');
+    await welcomeInterstitial.waitFor({ state: 'detached' });
+    await homeApp.waitFor({ state: 'visible' });
+  }
 }
 
 test.describe('Cloud Links integration', { tag: tags.stateful.classic }, () => {
