@@ -26,9 +26,8 @@ export interface PackSavedObject {
      * Per-query interval (seconds) for interval-mode queries. Optional because
      * queries that opt into `schedule_type: 'rrule'` intentionally omit
      * `interval` per `convertPackQueriesToSO`'s mutual-exclusivity logic.
-     * Nullable so update routes can clear a previously-set override.
      */
-    interval?: number | null;
+    interval?: number;
     timeout?: number;
     snapshot?: boolean;
     removed?: boolean;

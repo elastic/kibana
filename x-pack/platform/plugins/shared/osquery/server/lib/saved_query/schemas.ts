@@ -42,7 +42,7 @@ const packQuerySchema = schema.object(
   {
     id: schema.maybe(schema.string()),
     query: schema.maybe(schema.string()),
-    interval: schema.maybe(schema.nullable(schema.oneOf([schema.string(), schema.number()]))),
+    interval: schema.maybe(schema.oneOf([schema.string(), schema.number()])),
     timeout: schema.maybe(schema.number()),
     platform: schema.maybe(schema.string()),
     version: schema.maybe(schema.string()),
