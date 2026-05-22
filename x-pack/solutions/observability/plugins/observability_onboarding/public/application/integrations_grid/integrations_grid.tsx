@@ -34,18 +34,19 @@ export const IntegrationsGrid = () => {
 
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchInput, setSearchInput] = useState<string>(searchParams.get('search') ?? '');
+  const searchTerm = searchInput.trim();
 
   useEffect(() => {
     const currentSearchParam = searchParams.get('search') ?? '';
-    if (searchInput === currentSearchParam) return;
+    if (searchTerm === currentSearchParam) return;
     const entries: Record<string, string> = Object.fromEntries(searchParams.entries());
-    if (searchInput) {
-      entries.search = searchInput;
+    if (searchTerm) {
+      entries.search = searchTerm;
     } else {
       delete entries.search;
     }
     setSearchParams(entries, { replace: true });
-  }, [searchInput, searchParams, setSearchParams]);
+  }, [searchTerm, searchParams, setSearchParams]);
 
   return (
     <section aria-labelledby={titleId}>
@@ -69,7 +70,7 @@ export const IntegrationsGrid = () => {
       <EuiPanel color="subdued" hasShadow={false} paddingSize="l">
         <IntegrationsSearch searchInput={searchInput} setSearchInput={setSearchInput} />
         <EuiSpacer size="l" />
-        {searchInput === '' ? (
+        {searchTerm === '' ? (
           <EuiFlexGroup direction="column" gutterSize="xl">
             {INTEGRATION_TILES.map((category) => (
               <EuiFlexItem key={category.id} grow={false}>
@@ -110,7 +111,7 @@ export const IntegrationsGrid = () => {
             </EuiFlexItem>
           </EuiFlexGroup>
         ) : (
-          <IntegrationsSearchResults searchInput={searchInput} />
+          <IntegrationsSearchResults searchTerm={searchTerm} />
         )}
       </EuiPanel>
     </section>

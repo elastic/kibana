@@ -16,7 +16,7 @@ import { useCardUrlRewrite } from '../package_list_search_form/use_card_url_rewr
 import { useIntegrationTiles } from './use_integration_tiles';
 
 interface Props {
-  searchInput: string;
+  searchTerm: string;
 }
 
 const ALLOWED_CATEGORIES = new Set(['observability', 'os_system']);
@@ -30,15 +30,15 @@ const Loading = () => <EuiSkeletonText isLoading={true} lines={5} />;
 
 interface ResultsGridProps {
   useAvailablePackages: AvailablePackagesHookType;
-  searchInput: string;
+  searchTerm: string;
   customCards: IntegrationCardItem[];
 }
 
-const ResultsGrid = ({ useAvailablePackages, searchInput, customCards }: ResultsGridProps) => {
+const ResultsGrid = ({ useAvailablePackages, searchTerm, customCards }: ResultsGridProps) => {
   const { filteredCards, isLoading } = useAvailablePackages({
     prereleaseIntegrationsEnabled: true,
   });
-  const rewriteUrl = useCardUrlRewrite({ category: null, search: searchInput });
+  const rewriteUrl = useCardUrlRewrite({ category: null, search: searchTerm });
 
   const filteredList = useMemo(
     () =>
@@ -58,14 +58,14 @@ const ResultsGrid = ({ useAvailablePackages, searchInput, customCards }: Results
   return (
     <PackageList
       list={list}
-      searchTerm={searchInput}
+      searchTerm={searchTerm}
       showCardLabels={false}
       backgroundColor="transparent"
     />
   );
 };
 
-export const IntegrationsSearchResults = ({ searchInput }: Props) => {
+export const IntegrationsSearchResults = ({ searchTerm }: Props) => {
   const customCards = useIntegrationTiles();
   const hookRef = useRef<AvailablePackagesHookType | null>(null);
 
@@ -115,7 +115,7 @@ export const IntegrationsSearchResults = ({ searchInput }: Props) => {
   return (
     <ResultsGrid
       useAvailablePackages={hookRef.current}
-      searchInput={searchInput}
+      searchTerm={searchTerm}
       customCards={customCards}
     />
   );
