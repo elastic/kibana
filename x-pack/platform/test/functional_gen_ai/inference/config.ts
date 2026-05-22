@@ -6,7 +6,10 @@
  */
 
 import type { FtrConfigProviderContext } from '@kbn/test';
-import { getPreconfiguredConnectorConfig } from '@kbn/gen-ai-functional-testing';
+import {
+  getPreconfiguredConnectorConfig,
+  omitFtrExcludedConnectorsFromRecord,
+} from '@kbn/gen-ai-functional-testing';
 import { services } from './ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -15,7 +18,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     require.resolve('../../functional/config.base.ts')
   );
 
-  const preconfiguredConnectors = getPreconfiguredConnectorConfig();
+  const preconfiguredConnectors = omitFtrExcludedConnectorsFromRecord(
+    getPreconfiguredConnectorConfig()
+  );
 
   return {
     ...xpackFunctionalConfig.getAll(),

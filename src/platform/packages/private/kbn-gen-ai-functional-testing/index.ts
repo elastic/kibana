@@ -15,6 +15,11 @@ export {
   type AvailableConnectorWithId,
 } from './src/connectors';
 export {
+  FTR_EXCLUDED_CONNECTOR_IDS,
+  omitFtrExcludedConnectors,
+  omitFtrExcludedConnectorsFromRecord,
+} from './src/excluded_connectors';
+export {
   DEFAULT_FTR_GEN_AI_LLM_SAMPLE_SIZE,
   FTR_GEN_AI_LLM_SAMPLE_SIZE_ENV,
   parseFtrGenAiLlmSampleSize,

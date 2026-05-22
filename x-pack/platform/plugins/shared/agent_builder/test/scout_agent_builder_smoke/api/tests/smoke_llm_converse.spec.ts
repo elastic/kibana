@@ -7,7 +7,11 @@
 
 import { isToolCallStep, platformCoreTools } from '@kbn/agent-builder-common';
 import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
-import { getAvailableConnectors, takeRandomLlmSample } from '@kbn/gen-ai-functional-testing';
+import {
+  getAvailableConnectors,
+  omitFtrExcludedConnectors,
+  takeRandomLlmSample,
+} from '@kbn/gen-ai-functional-testing';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { ChatRequestBodyPayload, ChatResponse } from '../../../../common/http_api/chat';
@@ -24,19 +28,15 @@ const EIS_CCM_API_KEY_ENV = 'KIBANA_EIS_CCM_API_KEY';
 
 const eisCcmKeyMissingReason = `${EIS_CCM_API_KEY_ENV} not set. For local dev: export ${EIS_CCM_API_KEY_ENV}="$(vault read -field key secret/kibana-issues/dev/inference/kibana-eis-ccm)"`;
 
-const EXCLUDED_STATIC_CONNECTOR_IDS = new Set<string>(['bedrock-claude-sonnet-3-7']);
-
 const safeGetAvailableConnectors = (): AvailableConnectorWithId[] => {
   try {
-    return getAvailableConnectors();
+    return omitFtrExcludedConnectors(getAvailableConnectors());
   } catch {
     return [];
   }
 };
 
-const allStaticConnectors: AvailableConnectorWithId[] = safeGetAvailableConnectors().filter(
-  (c) => !EXCLUDED_STATIC_CONNECTOR_IDS.has(c.id)
-);
+const allStaticConnectors: AvailableConnectorWithId[] = safeGetAvailableConnectors();
 const allEisModels: DiscoveredEisModel[] = getPreDiscoveredEisModelsForScout();
 
 let eisCcmConfigured = false;

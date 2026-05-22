@@ -9,6 +9,7 @@ import type { FtrConfigProviderContext } from '@kbn/test';
 import {
   getPreconfiguredConnectorConfig,
   buildEisPreconfiguredConnectors,
+  omitFtrExcludedConnectorsFromRecord,
 } from '@kbn/gen-ai-functional-testing';
 import { services } from './ftr_provider_context';
 
@@ -22,7 +23,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   );
 
   const preconfiguredConnectors = {
-    ...getPreconfiguredConnectorConfig(),
+    ...omitFtrExcludedConnectorsFromRecord(getPreconfiguredConnectorConfig()),
     ...buildEisPreconfiguredConnectors(),
   };
 
