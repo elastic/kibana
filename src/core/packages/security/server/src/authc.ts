@@ -38,10 +38,13 @@ export interface CoreAuthenticationService {
 /**
  * Binds a `profile_uid` to a fake request so
  * `security.authc.getCurrentUser(request)` resolves to a synthetic
- * {@link AuthenticatedUser} exposing only that `profile_uid`. Obtained via
- * {@link SecurityServiceSetup.getFakeRequestEnricher}; see that method for
- * the security boundary. Throws on non-fake requests; calling twice on the
- * same fake request is a no-op (first-wins) and emits a warning.
+ * {@link AuthenticatedUser} exposing only that `profile_uid`. The enriched
+ * request is a synthetic request created for a user as a compatibility
+ * bridge for user-related APIs that require a request instance in scenarios
+ * where one isn't available. Obtained via
+ * {@link SecurityServiceSetup.acquireFakeRequestEnricher}; see that method
+ * for the security boundary. Throws on non-fake requests; calling twice on
+ * the same fake request is a no-op (first-wins) and emits a warning.
  *
  * @internal Intended for trusted orchestrators that own the fake request
  *   lifecycle (e.g. Task Manager).

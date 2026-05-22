@@ -430,9 +430,8 @@ export class AuthenticationService {
       return `${serverConfig.protocol}://${serverConfig.hostname}:${serverConfig.port}`;
     };
 
-    const getCurrentUser = (request: KibanaRequest) => {
-      return http.auth.get<AuthenticatedUser>(request).state ?? null;
-    };
+    const getCurrentUser = (request: KibanaRequest) =>
+      http.auth.get<AuthenticatedUser>(request).state ?? null;
 
     this.session = session;
     const authenticator = (this.authenticator = new Authenticator({

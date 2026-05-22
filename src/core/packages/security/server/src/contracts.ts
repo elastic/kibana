@@ -28,10 +28,11 @@ export interface SecurityServiceSetup {
    * Returns a function that binds a `profile_uid` to a fake request so that
    * `security.authc.getCurrentUser(request)` resolves to a synthetic
    * {@link AuthenticatedUser} exposing only that `profile_uid`. Reading any
-   * other identity field on the returned user throws — the enriched
-   * request represents "a background task acting on behalf of a user", not
-   * the user themselves, and must not be used for authorization, display,
-   * or auditing.
+   * other identity field on the returned user throws — the enriched request
+   * is a synthetic request created for a user as a compatibility bridge for
+   * user-related APIs that require a request instance in scenarios where one
+   * isn't available, and must not be used for authorization, display, or
+   * auditing.
    *
    * One-shot: calling it more than once throws. Reserved for Task Manager,
    * which re-exposes it as `TaskManagerSetupContract.enrichFakeRequest`.
@@ -40,7 +41,7 @@ export interface SecurityServiceSetup {
    *
    * @internal
    */
-  getFakeRequestEnricher(): FakeRequestEnricher;
+  acquireFakeRequestEnricher(): FakeRequestEnricher;
 
   /**
    * The {@link CoreFipsService | FIPS service}

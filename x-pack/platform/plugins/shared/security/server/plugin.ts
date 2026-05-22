@@ -337,6 +337,7 @@ export class SecurityPlugin
         getSession: this.getSession,
         audit: this.auditSetup,
         config,
+        logger: this.logger,
       })
     );
     core.userProfile.registerUserProfileDelegate(

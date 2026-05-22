@@ -74,11 +74,11 @@ describe('SecurityService', function () {
       });
     });
 
-    describe('#getFakeRequestEnricher', () => {
+    describe('#acquireFakeRequestEnricher', () => {
       it('returns a function on the first call', () => {
         const setup = service.setup();
 
-        const enricher = setup.getFakeRequestEnricher();
+        const enricher = setup.acquireFakeRequestEnricher();
 
         expect(typeof enricher).toBe('function');
       });
@@ -86,11 +86,37 @@ describe('SecurityService', function () {
       it('throws if called more than once (one-shot, reserved for Task Manager)', () => {
         const setup = service.setup();
 
-        setup.getFakeRequestEnricher();
+        setup.acquireFakeRequestEnricher();
 
-        expect(() => setup.getFakeRequestEnricher()).toThrow(
+        expect(() => setup.acquireFakeRequestEnricher()).toThrow(
           /can only be called once and is reserved for Task Manager/
         );
+      });
+
+      it('throws when the returned enricher is invoked before the security delegate is registered', () => {
+        const setup = service.setup();
+        const enricher = setup.acquireFakeRequestEnricher();
+
+        const request = { isFakeRequest: true } as any;
+        expect(() => enricher(request, 'u_test_profile_123')).toThrow(
+          /Cannot enrich a fake request before the security delegate has been registered/
+        );
+      });
+
+      it('delegates to the registered security delegate when invoked', () => {
+        const setup = service.setup();
+        const enricher = setup.acquireFakeRequestEnricher();
+
+        const fakeRequestEnricher = jest.fn();
+        setup.registerSecurityDelegate({
+          fakeRequestEnricher,
+        } as unknown as CoreSecurityDelegateContract);
+
+        const request = { isFakeRequest: true } as any;
+        enricher(request, 'u_test_profile_123');
+
+        expect(fakeRequestEnricher).toHaveBeenCalledTimes(1);
+        expect(fakeRequestEnricher).toHaveBeenCalledWith(request, 'u_test_profile_123');
       });
     });
 
@@ -151,7 +177,7 @@ describe('SecurityService', function () {
       `);
     });
 
-    it('calls convertSecurityApi with the registered API and the fake request enrichment', () => {
+    it('calls convertSecurityApi with the registered API', () => {
       const { registerSecurityDelegate } = service.setup();
 
       const contract = createStubInternalContract();
@@ -160,13 +186,7 @@ describe('SecurityService', function () {
       service.start();
 
       expect(convertSecurityApiMock).toHaveBeenCalledTimes(1);
-      expect(convertSecurityApiMock).toHaveBeenCalledWith(
-        contract,
-        expect.objectContaining({
-          enrichRequestWithUserProfile: expect.any(Function),
-          getOverride: expect.any(Function),
-        })
-      );
+      expect(convertSecurityApiMock).toHaveBeenCalledWith(contract);
     });
 
     it('calls convertSecurityApi with the default implementation when no API was registered', () => {
@@ -177,13 +197,7 @@ describe('SecurityService', function () {
       service.start();
 
       expect(convertSecurityApiMock).toHaveBeenCalledTimes(1);
-      expect(convertSecurityApiMock).toHaveBeenCalledWith(
-        contract,
-        expect.objectContaining({
-          enrichRequestWithUserProfile: expect.any(Function),
-          getOverride: expect.any(Function),
-        })
-      );
+      expect(convertSecurityApiMock).toHaveBeenCalledWith(contract);
     });
 
     it('returns the result of convertSecurityApi as contract', () => {

@@ -25,7 +25,7 @@ import { lazyObject } from '@kbn/lazy-object';
 const createSetupMock = () => {
   const mock: jest.Mocked<SecurityServiceSetup> = lazyObject({
     registerSecurityDelegate: jest.fn(),
-    getFakeRequestEnricher: jest.fn().mockReturnValue(jest.fn()),
+    acquireFakeRequestEnricher: jest.fn().mockReturnValue(jest.fn()),
     fips: { isEnabled: jest.fn() },
   });
 
@@ -52,7 +52,7 @@ const createStartMock = (): SecurityStartMock => {
 const createInternalSetupMock = () => {
   const mock: jest.Mocked<InternalSecurityServiceSetup> = lazyObject({
     registerSecurityDelegate: jest.fn(),
-    getFakeRequestEnricher: jest.fn().mockReturnValue(jest.fn()),
+    acquireFakeRequestEnricher: jest.fn().mockReturnValue(jest.fn()),
     fips: { isEnabled: jest.fn() },
     uiam: { sharedSecret: 'some-shared-secret' },
   });

@@ -9,7 +9,7 @@
 
 import type { Logger } from '@kbn/logging';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
-import type { CoreSecurityDelegateContract } from '@kbn/core-security-server';
+import type { CoreSecurityDelegateContract, FakeRequestEnricher } from '@kbn/core-security-server';
 import type { Observable, Subscription } from 'rxjs';
 import type { Config } from '@kbn/config';
 import { isFipsEnabled, checkFipsConfig } from './fips/fips';
@@ -17,24 +17,15 @@ import type {
   InternalSecurityServiceSetup,
   InternalSecurityServiceStart,
 } from './internal_contracts';
-import type {
-  CoreFakeRequestEnrichment,
-  SecurityServiceConfigType,
-  PKCS12ConfigType,
-} from './utils';
-import {
-  createFakeRequestEnrichment,
-  getDefaultSecurityImplementation,
-  convertSecurityApi,
-} from './utils';
+import type { SecurityServiceConfigType, PKCS12ConfigType } from './utils';
+import { getDefaultSecurityImplementation, convertSecurityApi } from './utils';
 
 export class SecurityService
   implements CoreService<InternalSecurityServiceSetup, InternalSecurityServiceStart>
 {
   private readonly log: Logger;
   private securityApi?: CoreSecurityDelegateContract;
-  private fakeRequestEnrichment?: CoreFakeRequestEnrichment;
-  private fakeRequestEnricherRetrieved = false;
+  private fakeRequestEnricherAcquired = false;
   private config$: Observable<Config>;
   private configSubscription?: Subscription;
   private config: Config | undefined;
@@ -62,8 +53,6 @@ export class SecurityService
 
     checkFipsConfig(securityConfig, elasticsearchConfig, serverConfig, this.log);
 
-    this.fakeRequestEnrichment = createFakeRequestEnrichment(this.log);
-
     return {
       registerSecurityDelegate: (api) => {
         if (this.securityApi) {
@@ -71,14 +60,24 @@ export class SecurityService
         }
         this.securityApi = api;
       },
-      getFakeRequestEnricher: () => {
-        if (this.fakeRequestEnricherRetrieved) {
+      acquireFakeRequestEnricher: (): FakeRequestEnricher => {
+        if (this.fakeRequestEnricherAcquired) {
           throw new Error(
-            'getFakeRequestEnricher() can only be called once and is reserved for Task Manager.'
+            'acquireFakeRequestEnricher() can only be called once and is reserved for Task Manager.'
           );
         }
-        this.fakeRequestEnricherRetrieved = true;
-        return this.fakeRequestEnrichment!.enrichRequestWithUserProfile;
+        this.fakeRequestEnricherAcquired = true;
+
+        // Returned eagerly at setup but invoked at task-run time, by which point
+        // the security delegate has been registered.
+        return (request, userProfileId) => {
+          if (!this.securityApi) {
+            throw new Error(
+              'Cannot enrich a fake request before the security delegate has been registered.'
+            );
+          }
+          this.securityApi.fakeRequestEnricher(request, userProfileId);
+        };
       },
       fips: {
         isEnabled: () => isFipsEnabled(securityConfig),
@@ -94,7 +93,7 @@ export class SecurityService
       this.log.warn('Security API was not registered, using default implementation');
     }
     const apiContract = this.securityApi ?? getDefaultSecurityImplementation();
-    return convertSecurityApi(apiContract, this.fakeRequestEnrichment!);
+    return convertSecurityApi(apiContract);
   }
 
   public stop() {

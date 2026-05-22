@@ -176,7 +176,7 @@ describe('TaskManagerPlugin', () => {
 
       const coreSetup = coreMock.createSetup();
       const enricher = jest.fn();
-      (coreSetup.security.getFakeRequestEnricher as jest.Mock).mockReturnValue(enricher);
+      (coreSetup.security.acquireFakeRequestEnricher as jest.Mock).mockReturnValue(enricher);
 
       const taskManagerPlugin = new TaskManagerPlugin(pluginInitializerContext);
       taskManagerPlugin.setup(coreSetup, { usageCollection: undefined });
@@ -185,7 +185,7 @@ describe('TaskManagerPlugin', () => {
         licensing: licensingMock.createStart(),
       });
 
-      expect(coreSetup.security.getFakeRequestEnricher).toHaveBeenCalledTimes(1);
+      expect(coreSetup.security.acquireFakeRequestEnricher).toHaveBeenCalledTimes(1);
       const pollingLifecycleOpts = (TaskPollingLifecycle as jest.Mock).mock.calls[0][0];
       expect(pollingLifecycleOpts.enrichFakeRequest).toBe(enricher);
     });
@@ -198,7 +198,7 @@ describe('TaskManagerPlugin', () => {
 
       const coreSetup = coreMock.createSetup();
       const enricher = jest.fn();
-      (coreSetup.security.getFakeRequestEnricher as jest.Mock).mockReturnValue(enricher);
+      (coreSetup.security.acquireFakeRequestEnricher as jest.Mock).mockReturnValue(enricher);
 
       const taskManagerPlugin = new TaskManagerPlugin(pluginInitializerContext);
       const setupContract = taskManagerPlugin.setup(coreSetup, { usageCollection: undefined });
