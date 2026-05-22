@@ -153,7 +153,7 @@ Restart services for a clean environment — stale reproduction state produces f
 
    **Known environment conditions** (expected — not failures):
    - After server restart the browser may redirect to the SAML mock IDP. Always navigate explicitly to `http://localhost:5620/login?auth_provider_hint=cloud-basic`.
-   - An "AI Agent" modal overlay may intercept Playwright clicks on first page load. Take a `browser_snapshot` to locate the modal's selector, then close it with `browser_evaluate('document.querySelector(\'[YOUR_SELECTOR]\')?.remove()')` .
+   - An "AI Agent" modal overlay may intercept Playwright clicks on first page load. Take a `browser_snapshot` to locate the modal's selector, then close it with `browser_evaluate('document.querySelector(\'[YOUR_SELECTOR]\')?.remove()')`.
 4. `browser_console_messages` + `browser_network_requests` — Phase 3 errors gone, no new errors
 5. **Lifecycle edge case** — if the fix involves startup or boot-time seeding, create a new
    space/resource *after* services are running and verify it works
