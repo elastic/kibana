@@ -12,6 +12,7 @@ import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import { registerTranslationsRoute } from './translations';
 
 jest.mock('fs', () => ({
+  ...jest.requireActual('fs'),
   createReadStream: jest.fn(),
 }));
 
