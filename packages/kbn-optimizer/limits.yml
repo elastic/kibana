@@ -1,7 +1,7 @@
 pageLoadAssetSize:
   actions: 20500
   advancedSettings: 6196
-  agentBuilder: 52831
+  agentBuilder: 58540
   agentBuilderPlatform: 8737
   agentBuilderWorkflows: 25000
   agentContextLayer: 1883
@@ -92,7 +92,7 @@ pageLoadAssetSize:
   indexManagement: 39694
   inference: 10368
   infra: 56302
-  ingestHub: 6112
+  ingestHub: 12728
   ingestPipelines: 17866
   inputControlVis: 7660
   inspectComponent: 4590
