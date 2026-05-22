@@ -129,12 +129,10 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
 
   const visibleAttachments = useMemo(() => {
     if (!attachments || shouldHideAttachments) return [];
-    return attachments
-      .filter((attachment) => !attachment.hidden)
-      .map((attachment, idx) => ({
-        ...attachment,
-        id: attachment.id ?? `attachment-${idx}`,
-      }));
+    return attachments.filter((attachment) => {
+      if ('items' in attachment) return true; // AttachmentGroup — always visible
+      return !attachment.hidden;
+    });
   }, [attachments, shouldHideAttachments]);
 
   const isNewConversation = !conversationId;
