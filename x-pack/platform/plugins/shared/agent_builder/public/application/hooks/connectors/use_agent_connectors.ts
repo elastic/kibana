@@ -113,6 +113,7 @@ export const useAgentConnectors = ({ agentId }: { agentId: string }) => {
     allConnectors,
     activeConnectorIdSet,
     isLoading,
+    isAssigning: updateConnectorsMutation.isLoading,
     assign,
     unassign,
   };
