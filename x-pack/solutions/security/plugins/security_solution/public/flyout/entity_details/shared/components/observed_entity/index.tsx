@@ -8,10 +8,9 @@
 import { EuiSpacer } from '@elastic/eui';
 
 import React from 'react';
-import type { ComponentType, ReactNode } from 'react';
 import { EntityTable } from '../entity_table';
 import { InspectButtonContainer } from '../../../../../common/components/inspect';
-import type { EntityTableRows } from '../entity_table/types';
+import type { EntityTableLinkRenderer, EntityTableRows } from '../entity_table/types';
 import type { ObservedEntityData } from './types';
 
 export const ObservedEntity = <T,>({
@@ -25,7 +24,7 @@ export const ObservedEntity = <T,>({
   contextID: string;
   scopeId: string;
   observedFields: EntityTableRows<ObservedEntityData<T>>;
-  linkRenderer?: ComponentType<{ field: string; value: string; children?: ReactNode }>;
+  linkRenderer?: EntityTableLinkRenderer;
 }) => {
   return (
     <InspectButtonContainer>

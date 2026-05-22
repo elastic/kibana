@@ -7,7 +7,6 @@
 
 import { css } from '@emotion/react';
 import React from 'react';
-import type { ComponentType, ReactNode } from 'react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -15,7 +14,7 @@ import {
   toFieldRendererItems,
 } from '../../../../../timelines/components/field_renderers/default_renderer';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
-import type { BasicEntityData, EntityTableColumns } from './types';
+import type { BasicEntityData, EntityTableColumns, EntityTableLinkRenderer } from './types';
 import { isFlyoutLink } from '../../../../shared/utils/link_utils';
 import { PreviewLink } from '../../../../shared/components/preview_link';
 
@@ -23,7 +22,7 @@ export const getEntityTableColumns = <T extends BasicEntityData>(
   contextID: string,
   scopeId: string,
   data: T,
-  linkRenderer?: ComponentType<{ field: string; value: string; children?: ReactNode }>
+  linkRenderer?: EntityTableLinkRenderer
 ): EntityTableColumns<T> => [
   {
     name: (

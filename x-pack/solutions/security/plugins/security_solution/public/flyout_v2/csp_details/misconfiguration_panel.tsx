@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { memo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -39,7 +39,7 @@ export interface MisconfigurationPanelProps {
  * V2 system-flyout compatible misconfiguration finding panel.
  * This is a simplified version that doesn't use expandable flyout components.
  */
-export const MisconfigurationPanel = ({ resourceId, ruleId }: MisconfigurationPanelProps) => {
+export const MisconfigurationPanel = memo(({ resourceId, ruleId }: MisconfigurationPanelProps) => {
   const { cloudSecurityPosture } = useKibana().services;
   const CspFlyout = cloudSecurityPosture.getCloudSecurityPostureMisconfigurationFlyout();
 
@@ -90,6 +90,6 @@ export const MisconfigurationPanel = ({ resourceId, ruleId }: MisconfigurationPa
       </EuiFlyoutBody>
     </>
   );
-};
+});
 
 MisconfigurationPanel.displayName = 'MisconfigurationPanel';

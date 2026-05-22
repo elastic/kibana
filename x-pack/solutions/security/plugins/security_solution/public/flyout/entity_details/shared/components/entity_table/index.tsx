@@ -6,17 +6,16 @@
  */
 
 import React, { useMemo } from 'react';
-import type { ComponentType, ReactNode } from 'react';
 import { BasicTable } from '../../../../../common/components/ml/tables/basic_table';
 import { getEntityTableColumns } from './columns';
-import type { BasicEntityData, EntityTableRows } from './types';
+import type { BasicEntityData, EntityTableLinkRenderer, EntityTableRows } from './types';
 
 interface EntityTableProps<T extends BasicEntityData> {
   contextID: string;
   scopeId: string;
   data: T;
   entityFields: EntityTableRows<T>;
-  linkRenderer?: ComponentType<{ field: string; value: string; children?: ReactNode }>;
+  linkRenderer?: EntityTableLinkRenderer;
 }
 
 export const EntityTable = <T extends BasicEntityData>({

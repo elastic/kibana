@@ -75,12 +75,13 @@ export interface HostProps {
   hostName: string;
   /**
    * The source document record. When provided, entityId is computed from the document's
-   * host identity fields using the EUID API. This takes precedence over the `entityId` prop.
+   * host identity fields using the EUID API. Falls back to the `entityId` prop if the
+   * EUID API returns no value.
    */
   hit?: DataTableRecord;
   /**
    * Canonical Entity Store v2 id (`entity.id`) when already resolved (e.g. from alerts/events table).
-   * Ignored when `hit` is provided (entityId is computed from hit instead).
+   * Used directly when `hit` is not provided, or as a fallback when EUID resolution from `hit` yields no value.
    */
   entityId?: string;
   /**
@@ -315,7 +316,7 @@ export const Host: FC<HostProps> = memo(function Host({
                   onOpenHost={onOpenHost}
                 />
               );
-            default:
+            case CspInsightLeftPanelSubTab.MISCONFIGURATIONS:
               return wrap(
                 <MisconfigurationInsights
                   value={hostName}
