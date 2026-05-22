@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-export const ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID =
-  'observability:alerting:experimentalFeatures';
-
-export const ALERTING_V2_RULE_DOCTOR_INTERVAL_SETTING_ID =
-  'observability:alerting:ruleDoctorInterval';
+export default function loadTests({ loadTestFile }) {
+  describe('Cloud Onboarding Deployments', () => {
+    loadTestFile(require.resolve('./cloud_onboarding_deployment'));
+  });
+}
