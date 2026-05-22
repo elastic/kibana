@@ -177,7 +177,7 @@ describe('ActionPolicyDetailsFlyout', () => {
       });
 
       expect(screen.getByText('Single rule')).toBeInTheDocument();
-      const link = screen.getByTestId('actionPolicyDetailsFlyoutLinkedRuleLink');
+      const link = screen.getByTestId('actionPolicyDefinitionLinkedRuleLink');
       expect(link).toHaveAttribute('href', expect.stringContaining('rule-42'));
     });
   });

@@ -16,6 +16,7 @@ export {
   varsReducer,
   getInputEffectiveName,
   buildInputKey,
+  dataStreamUsesOtelInput,
 } from './package_to_package_policy';
 export type {
   DocumentationPageInput,
@@ -26,8 +27,10 @@ export { fullAgentPolicyToYaml } from './full_agent_policy_to_yaml';
 export { isPackageLimited, doesAgentPolicyAlreadyIncludePackage } from './limited_package';
 export {
   isValidDataset,
+  isValidDataStreamType,
   isValidNamespace,
   INVALID_NAMESPACE_CHARACTERS,
+  VALID_DATA_STREAM_TYPES,
 } from './is_valid_namespace';
 export { isDiffPathProtocol } from './is_diff_path_protocol';
 export { LicenseService } from './license';
@@ -46,10 +49,14 @@ export {
   MINIMUM_PRIVILEGE_LEVEL_CHANGE_AGENT_VERSION,
   isAgentEligibleForPrivilegeLevelChange,
 } from './agent_privilege_level_change_helpers';
+export { syncDataStreamTypeFromVar } from './simplified_package_policy_helper';
 export {
   addUseAPMVarIfNotPresent,
   DATA_STREAM_USE_APM_VAR,
   shouldIncludeUseAPMVar,
+  addDataStreamTypeVarIfNotPresent,
+  DATA_STREAM_TYPE_VAR,
+  shouldIncludeDataStreamTypeVar,
   isInputOnlyPolicyTemplate,
   isIntegrationPolicyTemplate,
   getNormalizedInputs,
@@ -137,6 +144,7 @@ export {
 export * from './cloud_connectors';
 
 export { validateSslCertPath } from './ssl_validators';
+export { getOtelCollectorDisplayName, getOtelCollectorConfigName } from './otel_collector';
 
 export { isNamespaceAllowedByPrefixes } from './namespace_prefixes';
 
