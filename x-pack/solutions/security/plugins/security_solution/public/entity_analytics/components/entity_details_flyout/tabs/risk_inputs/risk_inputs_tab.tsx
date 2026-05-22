@@ -27,6 +27,7 @@ import { useStore } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
+import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { get, noop } from 'lodash/fp';
 import {
   EntityDetailsLeftPanelTab,
@@ -67,6 +68,7 @@ import { flyoutProviders } from '../../../../../flyout_v2/shared/components/flyo
 import { DocumentFlyout } from '../../../../../flyout_v2/document/main';
 import { cellActionRenderer } from '../../../../../flyout_v2/shared/components/cell_actions';
 import { useDefaultDocumentFlyoutProperties } from '../../../../../flyout_v2/shared/hooks/use_default_flyout_properties';
+import { documentFlyoutHistoryKey } from '../../../../../flyout_v2/shared/constants/flyout_history';
 
 export interface RiskInputsTabProps<T extends EntityType> {
   entityType: T;
@@ -301,6 +303,7 @@ const RiskInputsTabContent = <T extends EntityType>({
   const store = useStore();
   const history = useHistory();
   const isInSecurityApp = useIsInSecurityApp();
+  const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
   const [selectedItems, setSelectedItems] = useState<InputAlert[]>([]);
   const [userSelectedView, setUserSelectedView] = useState(subTab);
@@ -346,7 +349,7 @@ const RiskInputsTabContent = <T extends EntityType>({
               />
             ),
           }),
-          { ...defaultDocumentFlyoutProperties, session: 'inherit' }
+          { ...defaultDocumentFlyoutProperties, historyKey, session: 'inherit' }
         );
       }
     },
@@ -358,6 +361,7 @@ const RiskInputsTabContent = <T extends EntityType>({
       services,
       store,
       history,
+      historyKey,
       defaultDocumentFlyoutProperties,
     ]
   );
