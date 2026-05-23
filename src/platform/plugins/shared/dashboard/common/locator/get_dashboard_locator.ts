@@ -8,12 +8,10 @@
  */
 
 import type { Filter } from '@kbn/es-query';
-import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
+import type { LocatorDefinition } from '@kbn/share-plugin/public';
 
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { DashboardLocatorParams } from '../types';
-
-export type DashboardAppLocator = LocatorPublic<DashboardLocatorParams>;
 
 export function getDashboardLocator({
   useHashedUrl,
