@@ -11,19 +11,15 @@ import type { DataSource, DataSourceWithSecrets } from '../common';
 
 /**
  * Server-side Elasticsearch client for data source management.
- * Pass a scoped cluster client (`asCurrentUser`, `asInternalUser`, etc.) appropriate
- * to the request context.
+ * Pass a scoped cluster client (`asCurrentUser`, `asInternalUser`, etc.) to the request context.
  */
 export class DataSourcesClient {
   constructor(private readonly esClient: ElasticsearchClient) {}
 
   /**
    * Calls Elasticsearch `GET /_query/datasource`.
-   *
-   * **Not implemented yet:** this route does not exist on Elasticsearch; the
-   * request will fail until the API is added.
    */
-  public async getAll(): Promise<Omit<DataSource, 'settings'>[]> {
+  public async getAll(): Promise<DataSource[]> {
     return await this.esClient.transport.request({
       method: 'GET',
       path: '/_query/data_source',
@@ -32,9 +28,6 @@ export class DataSourcesClient {
 
   /**
    * Calls Elasticsearch `GET /_query/datasource/{id}`.
-   *
-   * **Not implemented yet:** this route does not exist on Elasticsearch; the
-   * request will fail until the API is added.
    */
   public async get(id: string): Promise<DataSource> {
     const encoded = encodeURIComponent(id);
@@ -46,26 +39,18 @@ export class DataSourcesClient {
 
   /**
    * Calls Elasticsearch `PUT /_query/datasource/{id}` (create data source).
-   *
-   * **Not implemented yet:** this route does not exist on Elasticsearch; the
-   * request will fail until the API is added.
    */
-  public async put(id: string, body: Omit<DataSourceWithSecrets, 'name'>): Promise<unknown> {
+  public async put(id: string, body: Omit<DataSourceWithSecrets, 'name'>): Promise<void> {
     const encoded = encodeURIComponent(id);
-    const response = await this.esClient.transport.request({
+    return await this.esClient.transport.request({
       method: 'PUT',
       path: `/_query/data_source/${encoded}`,
       body,
     });
-    console.log('response', response);
-    return response;
   }
 
   /**
    * Calls Elasticsearch `DELETE /_query/datasource/{id}`.
-   *
-   * **Not implemented yet:** this route does not exist on Elasticsearch; the
-   * request will fail until the API is added.
    */
   public async delete(id: string): Promise<void> {
     const encoded = encodeURIComponent(id);

@@ -12,15 +12,14 @@ import { DATA_SOURCE_BY_ID_ROUTE_PATH } from '../../../common';
 import { DataSourcesClient } from '../../data_sources_client';
 import { getRouteErrorMessage } from '../../get_route_error_message';
 
-export function registerDeleteDataSourceRoute(router: IRouter): void {
+export function registerDeleteDataSource(router: IRouter): void {
   router.delete(
     {
       path: DATA_SOURCE_BY_ID_ROUTE_PATH,
       security: {
         authz: {
           enabled: false,
-          reason:
-            'This route is opted out from authorization because permissions will be checked by elasticsearch',
+          reason: 'This route delegates authorization to the scoped ES client',
         },
       },
       options: {
@@ -40,7 +39,6 @@ export function registerDeleteDataSourceRoute(router: IRouter): void {
         await dataSourcesClient.delete(id);
         return response.ok();
       } catch (error) {
-        console.log(error);
         return response.badRequest({
           body: {
             message: getRouteErrorMessage(error),

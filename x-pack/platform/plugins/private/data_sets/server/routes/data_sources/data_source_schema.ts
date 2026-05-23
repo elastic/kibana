@@ -107,3 +107,4 @@ export const putDataSourceBodySchema = schema.oneOf([
     settings: flightSettingsSchema,
   }),
 ]);
+

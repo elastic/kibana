@@ -7,22 +7,22 @@
 
 import type { IRouter } from '@kbn/core/server';
 
-import { registerDeleteDataSetRoute } from './data_sets/delete_data_set_route';
-import { registerGetDataSetRoute } from './data_sets/get_data_set_route';
-import { registerListDataSetsRoute } from './data_sets/list_data_sets_route';
-import { registerPutDataSetRoute } from './data_sets/put_data_set_route';
-import { registerDeleteDataSourceRoute } from './data_sources/delete_data_source_route';
-import { registerGetDataSourceRoute } from './data_sources/get_data_source_route';
-import { registerListDataSourcesRoute } from './data_sources/list_data_sources_route';
-import { registerPutDataSourceRoute } from './data_sources/put_data_source_route';
+import { registerDeleteDataSet } from './data_sets/delete_dataset';
+import { registerCreateDataset } from './data_sets/create_dataset';
+import { registerGetDataset } from './data_sets/get_dataset';
+import { registerGetAllDatasets } from './data_sets/get_all_datasets';
+import { registerDeleteDataSource } from './data_sources/delete_data_source';
+import { registerGetDataSourceRoute } from './data_sources/get_data_source';
+import { registerGetAllDataSources } from './data_sources/get_all_data_sources';
+import { registerCreateDataSource } from './data_sources/create_data_source';
 
 export function registerDataSetsRoutes(router: IRouter): void {
-  registerListDataSourcesRoute(router);
+  registerGetAllDataSources(router);
   registerGetDataSourceRoute(router);
-  registerPutDataSourceRoute(router);
-  registerDeleteDataSourceRoute(router);
-  registerListDataSetsRoute(router);
-  registerGetDataSetRoute(router);
-  registerPutDataSetRoute(router);
-  registerDeleteDataSetRoute(router);
+  registerCreateDataSource(router);
+  registerDeleteDataSource(router);
+  registerGetAllDatasets(router);
+  registerGetDataset(router);
+  registerCreateDataset(router);
+  registerDeleteDataSet(router);
 }

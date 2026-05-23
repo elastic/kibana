@@ -11,19 +11,15 @@ import type { DataSetWithName, Dataset } from '../common';
 
 /**
  * Server-side Elasticsearch client for data set management.
- * Pass a scoped cluster client (`asCurrentUser`, `asInternalUser`, etc.) appropriate
- * to the request context.
+ * Pass a scoped cluster client to the request context.
  */
 export class DataSetsClient {
   constructor(private readonly esClient: ElasticsearchClient) {}
 
   /**
    * Calls Elasticsearch `GET /_query/data_set`.
-   *
-   * **Not implemented yet:** this route may not exist on Elasticsearch; the
-   * request can fail until the API is available.
    */
-  public async getAll(): Promise<unknown> {
+  public async getAll(): Promise<DataSetWithName[]> {
     return await this.esClient.transport.request({
       method: 'GET',
       path: '/_query/dataset',
@@ -44,7 +40,7 @@ export class DataSetsClient {
   /**
    * Calls Elasticsearch `PUT /_query/data_set/{id}` (create data set).
    */
-  public async put(id: string, body: Dataset): Promise<unknown> {
+  public async put(id: string, body: Dataset): Promise<void> {
     const encoded = encodeURIComponent(id);
     return await this.esClient.transport.request({
       method: 'PUT',

@@ -10,15 +10,14 @@ import type { IRouter } from '@kbn/core/server';
 import { DATA_SETS_LIST_ROUTE_PATH, type DataSetWithName } from '../../../common';
 import { DataSetsClient } from '../../data_sets_client';
 
-export function registerListDataSetsRoute(router: IRouter): void {
+export function registerGetAllDatasets(router: IRouter): void {
   router.get(
     {
       path: DATA_SETS_LIST_ROUTE_PATH,
       security: {
         authz: {
           enabled: false,
-          reason:
-            'This route is opted out from authorization because permissions will be checked by elasticsearch',
+          reason: 'This route delegates authorization to the scoped ES client',
         },
       },
       options: {
@@ -27,17 +26,15 @@ export function registerListDataSetsRoute(router: IRouter): void {
       validate: false,
     },
     router.handleLegacyErrors(async (context, _request, response) => {
-      console.log('list_data_sets_route');
       const { client } = (await context.core).elasticsearch;
       const dataSetsClient = new DataSetsClient(client.asCurrentUser);
       const raw = await dataSetsClient.getAll();
-      console.log('raw', raw);
-      let data_sets: DataSetWithName[] = [];
+      let dataSets: DataSetWithName[] = [];
       if (raw && typeof raw === 'object' && 'datasets' in raw) {
         const candidate = (raw as { datasets?: unknown }).datasets;
-        data_sets = Array.isArray(candidate) ? (candidate as DataSetWithName[]) : [];
+        dataSets = Array.isArray(candidate) ? (candidate as DataSetWithName[]) : [];
       }
-      return response.ok({ body: { data_sets } });
+      return response.ok({ body: { data_sets: dataSets } });
     })
   );
 }

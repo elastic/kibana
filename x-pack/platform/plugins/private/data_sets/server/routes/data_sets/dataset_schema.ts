@@ -13,7 +13,7 @@ const optionalString = schema.maybe(schema.string());
  * Request body for `PUT .../data_sets/{id}`: {@link Dataset} (no top-level `name`;
  * the path supplies the id).
  */
-export const putDataSetBodySchema = schema.object({
+export const datasetSchema = schema.object({
   data_source: schema.string(),
   resource: schema.string(),
   description: optionalString,

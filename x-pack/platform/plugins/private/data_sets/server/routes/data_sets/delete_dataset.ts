@@ -12,15 +12,14 @@ import { DATA_SET_BY_ID_ROUTE_PATH } from '../../../common';
 import { DataSetsClient } from '../../data_sets_client';
 import { getRouteErrorMessage } from '../../get_route_error_message';
 
-export function registerDeleteDataSetRoute(router: IRouter): void {
+export function registerDeleteDataSet(router: IRouter): void {
   router.delete(
     {
       path: DATA_SET_BY_ID_ROUTE_PATH,
       security: {
         authz: {
           enabled: false,
-          reason:
-            'This route is opted out from authorization because permissions will be checked by elasticsearch',
+          reason: 'This route delegates authorization to the scoped ES client',
         },
       },
       options: {

@@ -8,18 +8,17 @@
 import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
 
-import { DATA_SOURCE_BY_ID_ROUTE_PATH } from '../../../common';
-import { DataSourcesClient } from '../../data_sources_client';
+import { DATA_SET_BY_ID_ROUTE_PATH } from '../../../common';
+import { DataSetsClient } from '../../data_sets_client';
 
-export function registerGetDataSourceRoute(router: IRouter): void {
+export function registerGetDataset(router: IRouter): void {
   router.get(
     {
-      path: DATA_SOURCE_BY_ID_ROUTE_PATH,
+      path: DATA_SET_BY_ID_ROUTE_PATH,
       security: {
         authz: {
           enabled: false,
-          reason:
-            'This route is opted out from authorization because permissions will be checked by elasticsearch',
+          reason: 'This route delegates authorization to the scoped ES client',
         },
       },
       options: {
@@ -34,8 +33,8 @@ export function registerGetDataSourceRoute(router: IRouter): void {
     router.handleLegacyErrors(async (context, request, response) => {
       const { id } = request.params;
       const { client } = (await context.core).elasticsearch;
-      const dataSourcesClient = new DataSourcesClient(client.asCurrentUser);
-      const body = await dataSourcesClient.get(id);
+      const dataSetsClient = new DataSetsClient(client.asCurrentUser);
+      const body = await dataSetsClient.get(id);
       return response.ok({ body });
     })
   );

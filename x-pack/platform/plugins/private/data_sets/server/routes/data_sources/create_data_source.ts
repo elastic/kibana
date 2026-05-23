@@ -8,21 +8,20 @@
 import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
 
-import { DATA_SET_BY_ID_ROUTE_PATH } from '../../../common';
-import { DataSetsClient } from '../../data_sets_client';
+import { DATA_SOURCE_BY_ID_ROUTE_PATH } from '../../../common';
+import { DataSourcesClient } from '../../data_sources_client';
 import { getRouteErrorMessage } from '../../get_route_error_message';
 
-import { putDataSetBodySchema } from './put_data_set_body_schema';
+import { putDataSourceBodySchema } from './data_source_schema';
 
-export function registerPutDataSetRoute(router: IRouter): void {
+export function registerCreateDataSource(router: IRouter): void {
   router.put(
     {
-      path: DATA_SET_BY_ID_ROUTE_PATH,
+      path: DATA_SOURCE_BY_ID_ROUTE_PATH,
       security: {
         authz: {
           enabled: false,
-          reason:
-            'This route is opted out from authorization because permissions will be checked by elasticsearch',
+          reason: 'This route delegates authorization to the scoped ES client',
         },
       },
       options: {
@@ -32,15 +31,15 @@ export function registerPutDataSetRoute(router: IRouter): void {
         params: schema.object({
           id: schema.string(),
         }),
-        body: putDataSetBodySchema,
+        body: putDataSourceBodySchema,
       },
     },
     router.handleLegacyErrors(async (context, request, response) => {
       const { id } = request.params;
       const { client } = (await context.core).elasticsearch;
-      const dataSetsClient = new DataSetsClient(client.asCurrentUser);
+      const dataSourcesClient = new DataSourcesClient(client.asCurrentUser);
       try {
-        await dataSetsClient.put(id, request.body);
+        await dataSourcesClient.put(id, request.body);
         return response.ok();
       } catch (error) {
         return response.badRequest({

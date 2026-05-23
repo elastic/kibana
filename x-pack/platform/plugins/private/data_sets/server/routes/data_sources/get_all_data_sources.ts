@@ -10,15 +10,14 @@ import type { IRouter } from '@kbn/core/server';
 import { DATA_SOURCES_LIST_ROUTE_PATH } from '../../../common';
 import { DataSourcesClient } from '../../data_sources_client';
 
-export function registerListDataSourcesRoute(router: IRouter): void {
+export function registerGetAllDataSources(router: IRouter): void {
   router.get(
     {
       path: DATA_SOURCES_LIST_ROUTE_PATH,
       security: {
         authz: {
           enabled: false,
-          reason:
-            'This route is opted out from authorization because permissions will be checked by elasticsearch',
+          reason: 'This route delegates authorization to the scoped ES client',
         },
       },
       options: {
