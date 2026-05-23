@@ -10,6 +10,7 @@
 import { ContentInsightsClient } from '@kbn/content-management-content-insights-public';
 import { i18n } from '@kbn/i18n';
 import { asyncForEach } from '@kbn/std';
+import type { EuiFlyoutProps } from '@elastic/eui';
 import { dashboardClient } from '../../dashboard_client';
 import { getPlacementHints } from '../../panel_placement/get_placement_hints';
 import { getAccessControlClient } from '../../services/access_control_service';
@@ -31,10 +32,12 @@ export async function loadDashboardApi({
   getCreationOptions,
   onApiCleanup,
   savedObjectId,
+  panelFlyoutType,
 }: {
   getCreationOptions?: () => Promise<DashboardCreationOptions>;
   onApiCleanup?: () => void;
   savedObjectId?: string;
+  panelFlyoutType?: EuiFlyoutProps['type'];
 }) {
   const creationOptions = await getCreationOptions?.();
 
@@ -97,6 +100,7 @@ export async function loadDashboardApi({
 
   const { api, cleanup, internalApi } = getDashboardApi({
     creationOptions,
+    panelFlyoutType,
     incomingEmbeddables,
     initialState: {
       ...getLastSavedState(readResult),

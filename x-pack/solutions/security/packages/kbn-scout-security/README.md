@@ -158,7 +158,7 @@ If the servers are already running, you can execute tests independently using ei
 - Command Line: Use the following command to run tests:
 
 ```bash
-npx playwright test --config <plugin-path>/test/scout/ui/[playwright.config.ts|parallel.playwright.config.ts] --project local
+node scripts/playwright test --config <plugin-path>/test/scout/ui/[playwright.config.ts|parallel.playwright.config.ts] --project local
 ```
 
 We use `project` flag to define test target, where tests to be run: local servers or Elastic Cloud. Currently we only support local servers.
