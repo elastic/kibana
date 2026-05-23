@@ -54,14 +54,15 @@ export class GraphFlyoutPage {
   }
 
   /**
-   * Waits until the GraphInvestigation root + at least one entity node is rendered.
-   * Uses a generous timeout because the underlying graph API call traverses logs +
-   * alerts + entity-store enrichment.
+   * Waits until the GraphInvestigation root is rendered.
+   *
+   * Doesn't wait for entity nodes: rendered nodes depend on whether the Graph API
+   * found matching events for the originEventIds and whether entity-store enrichment
+   * has run — both environment-sensitive. Tests that need DOM-level node assertions
+   * should target `entityNodes` / `entityNodeByLabel(...)` themselves.
    */
   async waitForGraphReady(timeout = 30_000): Promise<void> {
     await this.graphInvestigation.waitFor({ state: 'visible', timeout });
-    // `waitFor` on a multi-match locator waits for any matching element to be visible.
-    await this.entityNodes.waitFor({ state: 'visible', timeout });
   }
 
   /**

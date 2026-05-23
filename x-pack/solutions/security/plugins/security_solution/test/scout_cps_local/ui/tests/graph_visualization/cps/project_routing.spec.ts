@@ -79,20 +79,14 @@ const createSpaceScopedRule = async (params: {
  * engines to reach `running` before opening the flyout.
  *
  * The install endpoint is gated by the `securitySolution:entityStoreEnableV2`
- * UI setting (per-space), which we flip on before calling `/install`.
+ * UI setting, which the cps_local Scout config pre-enables via
+ * `--uiSettings.overrides.securitySolution:entityStoreEnableV2=true`.
  */
 const installEntityStoreInSpace = async (params: {
   kbnClient: KbnClient;
   spaceId: string;
 }): Promise<void> => {
   const { kbnClient, spaceId } = params;
-
-  await kbnClient.request({
-    method: 'POST',
-    path: `/s/${spaceId}/api/kibana/settings`,
-    body: { changes: { 'securitySolution:entityStoreEnableV2': true } },
-    retries: 0,
-  });
 
   await kbnClient.request({
     method: 'POST',
