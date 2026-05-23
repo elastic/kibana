@@ -28,7 +28,6 @@ dependsOn:
   - '@kbn/core-saved-objects-server'
   - '@kbn/core-http-server'
   - '@kbn/logging'
-  - '@kbn/spaces-utils'
   - '@kbn/core-di'
   - '@kbn/core-di-browser'
   - '@kbn/core-di-server'
@@ -111,6 +110,9 @@ dependsOn:
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/core-elasticsearch-server'
   - '@kbn/core-user-profile-browser'
+  - '@kbn/code-editor'
+  - '@kbn/workflows-yaml'
+  - '@kbn/workflows-ui'
 tags:
   - plugin
   - prod
@@ -119,12 +121,14 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
+    - .storybook/**/*
     - common/**/*
     - server/**/*
     - server/**/*.json
     - public/**/*
     - test/scout_alerting_v2/**/*
     - '!target/**/*'
+    - '!.storybook/**/*.js'
   jest-config:
     - jest.config.js
 tasks: {}

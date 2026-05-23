@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { CreateRuleData } from '@kbn/alerting-v2-schemas';
+import type { CreateActionPolicyDataInput, CreateRuleData } from '@kbn/alerting-v2-schemas';
+import type { AlertEvent } from '../../../server/resources/datastreams/alert_events';
 import { LOOKBACK_WINDOW, SCHEDULE_INTERVAL } from './constants';
 
 /**
@@ -33,9 +34,51 @@ const DEFAULTS: CreateRuleData = {
   state_transition: { pending_count: 0, recovering_count: 0 },
 };
 
+const ACTION_POLICY_DEFAULTS: CreateActionPolicyDataInput = {
+  name: 'scout-action-policy',
+  description: 'Scout action policy',
+  destinations: [{ type: 'workflow', id: 'scout-workflow-id' }],
+};
+
 export type BuildCreateRuleDataInput = Partial<CreateRuleData>;
 
 export const buildCreateRuleData = (input: BuildCreateRuleDataInput = {}): CreateRuleData => ({
   ...DEFAULTS,
   ...input,
 });
+
+export type BuildCreateActionPolicyDataInput = Partial<CreateActionPolicyDataInput>;
+
+export const buildCreateActionPolicyData = (
+  input: BuildCreateActionPolicyDataInput = {}
+): CreateActionPolicyDataInput => ({
+  ...ACTION_POLICY_DEFAULTS,
+  ...input,
+});
+
+export const buildActionPolicyDestinations = (count: number) =>
+  Array.from({ length: count }, (_, i) => ({
+    type: 'workflow' as const,
+    id: `wf-${i}`,
+  }));
+/**
+ * Defaults used by `buildAlertEvent` so the integration specs only have to
+ * spell out what makes each alert event unique.
+ */
+export type BuildAlertEventInput = Partial<AlertEvent>;
+
+export const buildAlertEvent = (input: BuildAlertEventInput = {}): AlertEvent => {
+  const now = new Date().toISOString();
+  return {
+    '@timestamp': now,
+    scheduled_timestamp: now,
+    rule: { id: 'scout-rule-id', version: 1 },
+    group_hash: 'scout-group-hash',
+    data: {},
+    status: 'breached',
+    source: 'scout-test',
+    type: 'alert',
+    space_id: 'default',
+    ...input,
+  };
+};

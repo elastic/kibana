@@ -18,6 +18,10 @@ import { useChartSectionInspector } from '../../../../context/chart_section_insp
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { parseMetricsWithTelemetry } from '../utils/parse_metrics_response_with_telemetry';
 import { getEsqlQuery } from '../utils/get_esql_query';
+import {
+  MetricsExecutionContextAction,
+  MetricsExecutionContextName,
+} from '../utils/execution_context_enums';
 import { reportChartSectionError } from '../../../chart/utils/report_chart_section_error';
 
 /**
@@ -91,6 +95,7 @@ export function useFetchMetricsData({
             filters: fetchParams.filters ?? [],
             variables: fetchParams.esqlVariables,
             uiSettings: services.uiSettings,
+            profileId,
           });
 
           return {
@@ -135,6 +140,7 @@ export function useFetchMetricsData({
       services.uiSettings,
       trackMetricsInfo,
       appliedDimensions,
+      profileId,
     ]
   );
 
@@ -170,6 +176,7 @@ export function useFetchMetricsData({
       error,
       source: 'useFetchMetricsData',
       labels: {
+        page: `metrics_${MetricsExecutionContextAction.FETCH}_${MetricsExecutionContextName.METRICS_INFO}`,
         profile_id: profileId,
       },
     });
