@@ -17,8 +17,10 @@ import { getNormalizeCommonFields, getValueInSeconds } from './common_fields';
  *
  * Structurally identical to the browser normalizer, but:
  *  - emits MONITOR_TYPE === 'api' (Heartbeat routes to the api plugin, no Chromium)
- *  - skips `screenshot` and `throttling` (Heartbeat's api plugin ignores them;
- *    we don't surface them in the API form either)
+ *  - inherits API-correct defaults for `screenshots` (OFF) and `throttling`
+ *    (NO_THROTTLING) via DEFAULT_FIELDS[MonitorTypeEnum.API]; both are stripped
+ *    from the CLI invocation by Heartbeat's api plugin (elastic/beats#50802),
+ *    and neither is surfaced in the API form.
  *  - keeps `ignoreHTTPSErrors` and `playwrightOptions` (both apply to
  *    Playwright's APIRequestContext)
  */

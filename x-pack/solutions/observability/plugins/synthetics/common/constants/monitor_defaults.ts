@@ -196,11 +196,22 @@ export const DEFAULT_BROWSER_SIMPLE_FIELDS: BrowserSimpleFields = {
   [ConfigKey.TIMEOUT]: null,
 };
 
-// API monitor defaults — same shape as Browser (see APIFields docs in
-// runtime_types/monitor_management/monitor_types.ts), distinguished only by
-// MONITOR_TYPE / FORM_MONITOR_TYPE. SCREENSHOTS / THROTTLING_CONFIG values
-// from DEFAULT_BROWSER_ADVANCED_FIELDS are intentionally kept so the SO shape
-// matches; Heartbeat's `api` plugin ignores them at runtime.
+// API monitor defaults — same SO shape as Browser (APIFields in
+// runtime_types/monitor_management/monitor_types.ts is structurally identical
+// to BrowserFields), distinguished by MONITOR_TYPE / FORM_MONITOR_TYPE.
+//
+// Browser-only advanced defaults are explicitly overridden to no-op values so
+// the SO doesn't carry semantically wrong defaults — the values still flow to
+// the UI form, list filters, and telemetry even though Heartbeat's `api`
+// plugin (elastic/beats#50802) strips `--screenshots` and `--throttling` from
+// the CLI invocation:
+//   - SCREENSHOTS:       OFF             — no browser launched, nothing to capture
+//   - THROTTLING_CONFIG: NO_THROTTLING   — raw HTTP doesn't go through CDP throttling
+//
+// Other browser advanced fields (SYNTHETICS_ARGS, JOURNEY_FILTERS_*,
+// IGNORE_HTTPS_ERRORS) apply to API journeys too and inherit cleanly.
+// Likewise PLAYWRIGHT_OPTIONS in simple fields applies to APIRequestContext
+// per elastic/synthetics#997 + elastic/beats#50802.
 export const DEFAULT_API_SIMPLE_FIELDS: APISimpleFields = {
   ...DEFAULT_BROWSER_SIMPLE_FIELDS,
   [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.API,
@@ -209,6 +220,8 @@ export const DEFAULT_API_SIMPLE_FIELDS: APISimpleFields = {
 
 export const DEFAULT_API_ADVANCED_FIELDS: APIAdvancedFields = {
   ...DEFAULT_BROWSER_ADVANCED_FIELDS,
+  [ConfigKey.SCREENSHOTS]: ScreenshotOption.OFF,
+  [ConfigKey.THROTTLING_CONFIG]: PROFILES_MAP[PROFILE_VALUES_ENUM.NO_THROTTLING],
 };
 
 export const DEFAULT_HTTP_SIMPLE_FIELDS: HTTPSimpleFields = {
