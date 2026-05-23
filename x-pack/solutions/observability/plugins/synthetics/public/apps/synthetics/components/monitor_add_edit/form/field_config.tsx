@@ -146,6 +146,24 @@ const getSchedules = (monitorType?: MonitorTypeEnum) => {
 };
 
 export const MONITOR_TYPE_CONFIG = {
+  [FormMonitorType.API]: {
+    id: 'syntheticsMonitorTypeAPI',
+    'data-test-subj': 'syntheticsMonitorTypeAPI',
+    label: i18n.translate('xpack.synthetics.monitorConfig.monitorType.api.label', {
+      defaultMessage: 'API Journey',
+    }),
+    value: FormMonitorType.API,
+    descriptionTitle: i18n.translate('xpack.synthetics.monitorConfig.monitorType.api.title', {
+      defaultMessage: 'API Journey',
+    }),
+    description: i18n.translate('xpack.synthetics.monitorConfig.monitorType.api.description', {
+      defaultMessage:
+        'Run a multistep API check via Playwright APIRequestContext without launching a browser.',
+    }),
+    link: 'https://www.elastic.co/guide/en/observability/current/synthetics-journeys.html',
+    icon: 'apmTrace',
+    beta: true,
+  },
   [FormMonitorType.MULTISTEP]: {
     id: 'syntheticsMonitorTypeMultistep',
     'data-test-subj': 'syntheticsMonitorTypeMultistep',

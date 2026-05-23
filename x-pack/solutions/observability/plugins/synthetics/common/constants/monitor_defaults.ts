@@ -6,6 +6,8 @@
  */
 import { i18n } from '@kbn/i18n';
 import type {
+  APIAdvancedFields,
+  APISimpleFields,
   BrowserAdvancedFields,
   BrowserSimpleFields,
   CommonFields,
@@ -194,6 +196,21 @@ export const DEFAULT_BROWSER_SIMPLE_FIELDS: BrowserSimpleFields = {
   [ConfigKey.TIMEOUT]: null,
 };
 
+// API monitor defaults — same shape as Browser (see APIFields docs in
+// runtime_types/monitor_management/monitor_types.ts), distinguished only by
+// MONITOR_TYPE / FORM_MONITOR_TYPE. SCREENSHOTS / THROTTLING_CONFIG values
+// from DEFAULT_BROWSER_ADVANCED_FIELDS are intentionally kept so the SO shape
+// matches; Heartbeat's `api` plugin ignores them at runtime.
+export const DEFAULT_API_SIMPLE_FIELDS: APISimpleFields = {
+  ...DEFAULT_BROWSER_SIMPLE_FIELDS,
+  [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.API,
+  [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.API,
+};
+
+export const DEFAULT_API_ADVANCED_FIELDS: APIAdvancedFields = {
+  ...DEFAULT_BROWSER_ADVANCED_FIELDS,
+};
+
 export const DEFAULT_HTTP_SIMPLE_FIELDS: HTTPSimpleFields = {
   ...DEFAULT_COMMON_FIELDS,
   [ConfigKey.METADATA]: {
@@ -293,6 +310,11 @@ export const DEFAULT_FIELDS: MonitorDefaults = {
   [MonitorTypeEnum.BROWSER]: {
     ...DEFAULT_BROWSER_SIMPLE_FIELDS,
     ...DEFAULT_BROWSER_ADVANCED_FIELDS,
+    ...DEFAULT_TLS_FIELDS,
+  },
+  [MonitorTypeEnum.API]: {
+    ...DEFAULT_API_SIMPLE_FIELDS,
+    ...DEFAULT_API_ADVANCED_FIELDS,
     ...DEFAULT_TLS_FIELDS,
   },
 };
