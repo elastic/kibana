@@ -95,4 +95,5 @@ export const monitorTypeKeyLabelMap: Record<MonitorTypeEnum, string> = {
   [MonitorTypeEnum.HTTP]: 'HTTP',
   [MonitorTypeEnum.TCP]: 'TCP',
   [MonitorTypeEnum.ICMP]: 'ICMP',
+  [MonitorTypeEnum.API]: 'API Journey',
 };

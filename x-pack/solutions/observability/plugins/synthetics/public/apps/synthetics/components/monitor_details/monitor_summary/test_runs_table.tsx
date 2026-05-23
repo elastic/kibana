@@ -97,7 +97,11 @@ export const TestRunsTable = ({
   const spaceId = useUrlSpaceId();
   const isTabletOrGreater = useIsWithinMinBreakpoint('s');
 
-  const isBrowserMonitor = monitor?.[ConfigKey.MONITOR_TYPE] === MonitorTypeEnum.BROWSER;
+  // API monitors run via the same synthexec pipeline as browser monitors and
+  // produce step-based test runs, so they reuse the browser-style expanded row.
+  const monitorType = monitor?.[ConfigKey.MONITOR_TYPE];
+  const isBrowserMonitor =
+    monitorType === MonitorTypeEnum.BROWSER || monitorType === MonitorTypeEnum.API;
 
   const { expandedRows, setExpandedRows } = useExpandedPingList(pings);
 
