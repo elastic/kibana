@@ -224,6 +224,23 @@ export class SyntheticsAppPage {
     }
   }
 
+  async createBasicAPIMonitorDetails({
+    name,
+    inlineScript,
+    apmServiceName,
+    locations,
+  }: {
+    name: string;
+    inlineScript: string;
+    apmServiceName: string;
+    locations: string[];
+  }) {
+    await this.selectMonitorType('syntheticsMonitorTypeAPI');
+    await this.createBasicMonitorDetails({ name, apmServiceName, locations });
+    await this.page.testSubj.click('syntheticsSourceTab__inline');
+    await this.page.fill('[data-test-subj=codeEditorContainer] textarea', inlineScript);
+  }
+
   async createMonitor({
     monitorConfig,
     monitorType,
@@ -243,6 +260,9 @@ export class SyntheticsAppPage {
         break;
       case FormMonitorType.MULTISTEP:
         await this.createBasicBrowserMonitorDetails(monitorConfig as any);
+        break;
+      case FormMonitorType.API:
+        await this.createBasicAPIMonitorDetails(monitorConfig as any);
         break;
       default:
         break;
