@@ -70,6 +70,17 @@ export const formatSyntheticsPolicy = (
         }
       });
     }
+    // API monitors emit `journey/network_info` to the `synthetics.api.network`
+    // dataset (see elastic/beats#50802). Enable it when the synthetics
+    // integration package exposes it. Older package versions that lack the
+    // dataset are unaffected; the lookup silently no-ops.
+    if (monitorType === 'api') {
+      currentInput.streams.forEach((stream) => {
+        if (stream.data_stream.dataset === 'synthetics.api.network') {
+          stream.enabled = true;
+        }
+      });
+    }
   }
 
   configKeys.forEach((key) => {
@@ -93,9 +104,15 @@ export const formatSyntheticsPolicy = (
   });
 
   // This field is NOT in the monitor config, but needs to be set in the policy
-  // so Heartbeat knows to decode the base64-encoded script
+  // so Heartbeat knows to decode the base64-encoded script. API monitors use
+  // the same synthexec script pipeline as browser, so the encoding logic
+  // applies identically.
   const encodingVar = dataStream?.vars?.['source.inline.encoding'];
-  if (monitorType === 'browser' && encodingVar && config[ConfigKey.SOURCE_INLINE]) {
+  if (
+    (monitorType === 'browser' || monitorType === 'api') &&
+    encodingVar &&
+    config[ConfigKey.SOURCE_INLINE]
+  ) {
     encodingVar.value = 'base64';
     const inlineScript = dataStream.vars?.[ConfigKey.SOURCE_INLINE];
     if (inlineScript && typeof inlineScript.value === 'string') {
