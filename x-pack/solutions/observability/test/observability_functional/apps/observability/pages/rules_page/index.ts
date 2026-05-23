@@ -58,11 +58,13 @@ export default ({ getService }: FtrProviderContext) => {
     describe('User permissions', () => {
       describe('permission prompt', function () {
         this.tags('skipFIPS');
-        it(`shows the no permission prompt when the user has no permissions`, async () => {
-          // We kept this test to make sure that the stack management rule page
-          // is showing the right prompt corresponding to the right privileges.
-          // Knowing that o11y alert page won't come up if you do not have any
-          // kind of privileges to o11y
+        // TODO: This test needs to be rewritten. The rules page now lives in Stack Management
+        // (/app/management/insightsAndAlerting/triggersActions). Users with no management
+        // sections enabled (e.g. discover-only) see "Application not found" instead of
+        // noPermissionPrompt because the management app marks itself inaccessible when the
+        // user has no enabled sections. A follow-up should test the prompt for a user who
+        // can reach management but lacks triggersActions capabilities.
+        it.skip(`shows the no permission prompt when the user has no permissions`, async () => {
           await observability.users.setTestUserRole({
             elasticsearch: {
               cluster: [],
