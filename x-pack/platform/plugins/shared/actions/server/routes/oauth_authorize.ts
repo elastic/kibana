@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import type {
   CoreSetup,
@@ -138,6 +139,28 @@ export const oauthAuthorizeRoute = (
         access: 'public',
         summary: 'Start OAuth authorization (redirects to the identity provider)',
         tags: ['oas-tag:connectors'],
+        response: {
+          302: {
+            description: i18n.translate('xpack.actions.oauthStart.response302Description', {
+              defaultMessage: 'Redirects to the identity provider to begin OAuth authorization.',
+            }),
+          },
+          400: {
+            description: i18n.translate('xpack.actions.oauthStart.response400Description', {
+              defaultMessage: 'Invalid request, such as a disallowed returnUrl.',
+            }),
+          },
+          401: {
+            description: i18n.translate('xpack.actions.oauthStart.response401Description', {
+              defaultMessage: 'User is not authenticated.',
+            }),
+          },
+          404: {
+            description: i18n.translate('xpack.actions.oauthStart.response404Description', {
+              defaultMessage: 'Connector not found.',
+            }),
+          },
+        },
       },
     },
     router.handleLegacyErrors(
