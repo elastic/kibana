@@ -36,6 +36,8 @@ export const servers: ScoutServerConfig = {
       ...uiamConfig.kbnTestServer.serverArgs,
       '--cps.cpsEnabled=true',
       '--xpack.alerting.rules.apiKeyType=uiam',
+      // LOCAL DEV OVERRIDE — see graph_cps_handoff.md. Revert before commit.
+      '--uiSettings.overrides.securitySolution:entityStoreEnableV2=true',
     ],
   },
 };

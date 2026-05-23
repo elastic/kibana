@@ -372,7 +372,8 @@ export function getServerlessNodes(
       esArgs: [
         ['xpack.searchable.snapshot.shared_cache.size', '16MB'],
         ['xpack.searchable.snapshot.shared_cache.region_size', '256K'],
-        ['ES_JAVA_OPTS', '-Xms1536m -Xmx1536m'],
+        // LOCAL DEV OVERRIDE — see graph_cps_handoff.md. Revert before commit.
+        ['ES_JAVA_OPTS', '-Xms3g -Xmx3g'],
       ],
     },
     {
