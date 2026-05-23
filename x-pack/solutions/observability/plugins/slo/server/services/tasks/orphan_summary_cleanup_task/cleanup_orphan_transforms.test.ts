@@ -286,12 +286,19 @@ describe('cleanupOrphanTransforms', () => {
         ],
       } as any);
 
-    soClient.find.mockResolvedValue({
-      total: 1,
-      saved_objects: [{ id: 'so-1', attributes: { id: 'slo-1', revision: 1, enabled: true } }],
-      page: 1,
-      per_page: 1,
-    } as any);
+    soClient.find
+      .mockResolvedValueOnce({
+        total: 1,
+        saved_objects: [{ id: 'so-1', attributes: { id: 'slo1', revision: 1, enabled: true } }],
+        page: 1,
+        per_page: 1,
+      } as any)
+      .mockResolvedValueOnce({
+        total: 1,
+        saved_objects: [{ id: 'so-2', attributes: { id: 'slo2', revision: 1, enabled: true } }],
+        page: 1,
+        per_page: 1,
+      } as any);
 
     const result = await cleanupOrphanTransforms(
       { pageSize: 2, maxPages: 2 },
@@ -300,6 +307,47 @@ describe('cleanupOrphanTransforms', () => {
 
     expect(result).toEqual({ aborted: true, completed: false, nextState: { from: 4 } });
     expect(esClient.transform.getTransformStats).toHaveBeenCalledTimes(2);
+    expect(esClient.transform.deleteTransform).not.toHaveBeenCalled();
+  });
+
+  it('should advance the cursor by the number of survivors so deleted transforms do not shift the page', async () => {
+    // Page 1 has two orphans (deleted) and one valid transform.
+    // After the deletes, the valid transform shifts to position 0 of the live list,
+    // so the next page must start at `from = 1` (3 fetched - 2 deleted), not `from = 3`.
+    esClient.transform.getTransformStats
+      .mockResolvedValueOnce({
+        count: 3,
+        transforms: [
+          { id: 'slo-orphan1-1', state: 'started' },
+          { id: 'slo-orphan2-1', state: 'started' },
+          { id: 'slo-keep-1', state: 'started' },
+        ],
+      } as any)
+      .mockResolvedValueOnce({
+        count: 0,
+        transforms: [],
+      } as any);
+
+    soClient.find
+      .mockResolvedValueOnce({
+        total: 1,
+        saved_objects: [{ id: 'so-1', attributes: { id: 'keep', revision: 1, enabled: true } }],
+        page: 1,
+        per_page: 1,
+      } as any)
+      .mockResolvedValueOnce({ total: 0, saved_objects: [], page: 1, per_page: 1 } as any);
+
+    await cleanupOrphanTransforms(
+      { pageSize: 3 },
+      { esClient, soClient: soClient as any, logger, abortController }
+    );
+
+    expect(esClient.transform.deleteTransform).toHaveBeenCalledTimes(2);
+    expect(esClient.transform.getTransformStats).toHaveBeenNthCalledWith(
+      2,
+      { transform_id: 'slo-*', from: 1, size: 3, allow_no_match: true },
+      expect.objectContaining({ signal: abortController.signal })
+    );
   });
 
   it('should resume from the provided cursor', async () => {

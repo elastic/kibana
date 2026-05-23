@@ -5,17 +5,9 @@
  * 2.0.
  */
 
-import { errors } from '@elastic/elasticsearch';
-import type { ElasticsearchClient, Logger, SavedObjectsClient } from '@kbn/core/server';
 import pLimit from 'p-limit';
 import { findSloDefinitionMap, getKey, type SLO } from './find_slo_definitions';
-
-interface Dependencies {
-  esClient: ElasticsearchClient;
-  soClient: SavedObjectsClient;
-  logger: Logger;
-  abortController: AbortController;
-}
+import { isAbortError, type Dependencies, type RunResult } from './types';
 
 interface RunParams {
   from?: number;
@@ -24,20 +16,7 @@ interface RunParams {
   concurrency?: number;
 }
 
-interface AbortedRunResult {
-  aborted: true;
-  completed: false;
-  nextState: {
-    from: number;
-  };
-}
-
-interface CompletedRunResult {
-  aborted: false;
-  completed: true;
-}
-
-type RunResult = AbortedRunResult | CompletedRunResult;
+type TransformCleanupRunResult = RunResult<{ from: number }>;
 
 const DEFAULT_PAGE_SIZE = 100;
 const DEFAULT_MAX_PAGES = 10;
@@ -63,7 +42,7 @@ export function parseSloTransformId(transformId: string): SLO | null {
 export async function cleanupOrphanTransforms(
   params: RunParams,
   dependencies: Dependencies
-): Promise<RunResult> {
+): Promise<TransformCleanupRunResult> {
   const { esClient, logger, abortController } = dependencies;
   const pageSize = params.pageSize ?? DEFAULT_PAGE_SIZE;
   const maxPages = params.maxPages ?? DEFAULT_MAX_PAGES;
@@ -104,6 +83,7 @@ export async function cleanupOrphanTransforms(
         }
       }
 
+      let deletedCount = 0;
       if (sloTransforms.length > 0) {
         abortController.signal.throwIfAborted();
         const uniqueSloIds = [...new Set(sloTransforms.map(({ slo }) => slo.id))];
@@ -123,6 +103,7 @@ export async function cleanupOrphanTransforms(
                     { transform_id: transformId, force: true },
                     { ignore: [404], signal: abortController.signal }
                   );
+                  deletedCount++;
                 } catch (err) {
                   if (isAbortError(err, abortController)) throw err;
                   logger.warn(
@@ -168,7 +149,10 @@ export async function cleanupOrphanTransforms(
         }
       }
 
-      from += transforms.length;
+      // Deleted transforms are removed from the live list, so subsequent pages
+      // shift up by `deletedCount`. Advance the offset only over the items that
+      // are still there to avoid skipping the entries that took their place.
+      from += transforms.length - deletedCount;
       const reachedLastPage = transforms.length < pageSize;
       if (reachedLastPage) {
         break;
@@ -195,11 +179,4 @@ export async function cleanupOrphanTransforms(
 
 function isTransformRunning(state: string): boolean {
   return state === 'started' || state === 'indexing';
-}
-
-function isAbortError(error: unknown, abortController: AbortController): boolean {
-  if (error instanceof errors.RequestAbortedError) return true;
-  if (abortController.signal.aborted) return true;
-  if (error instanceof DOMException && error.name === 'AbortError') return true;
-  return false;
 }

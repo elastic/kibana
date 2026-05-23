@@ -5,18 +5,10 @@
  * 2.0.
  */
 
-import { errors } from '@elastic/elasticsearch';
 import type { AggregationsCompositeAggregateKey } from '@elastic/elasticsearch/lib/api/types';
-import type { ElasticsearchClient, Logger, SavedObjectsClient } from '@kbn/core/server';
 import { SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../../common/constants';
 import { findSloDefinitionMap, getKey, type SLO } from './find_slo_definitions';
-
-interface Dependencies {
-  esClient: ElasticsearchClient;
-  soClient: SavedObjectsClient;
-  logger: Logger;
-  abortController: AbortController;
-}
+import { isAbortError, type Dependencies, type RunResult } from './types';
 
 interface RunParams {
   searchAfter?: AggregationsCompositeAggregateKey;
@@ -24,20 +16,9 @@ interface RunParams {
   maxRuns?: number;
 }
 
-interface AbortedRunResult {
-  aborted: true;
-  completed: false;
-  nextState: {
-    searchAfter: AggregationsCompositeAggregateKey | undefined;
-  };
-}
-
-interface CompletedRunResult {
-  completed: true;
-  aborted: false;
-}
-
-type RunResult = AbortedRunResult | CompletedRunResult;
+type SummaryCleanupRunResult = RunResult<{
+  searchAfter: AggregationsCompositeAggregateKey | undefined;
+}>;
 
 const DEFAULT_CHUNK_SIZE = 1000;
 const DEFAULT_MAX_RUNS = 10;
@@ -45,7 +26,7 @@ const DEFAULT_MAX_RUNS = 10;
 export async function cleanupOrphanSummaries(
   params: RunParams,
   dependencies: Dependencies
-): Promise<RunResult> {
+): Promise<SummaryCleanupRunResult> {
   const { esClient, logger, abortController } = dependencies;
   const chunkSize = params.chunkSize ?? DEFAULT_CHUNK_SIZE;
   const maxRuns = params.maxRuns ?? DEFAULT_MAX_RUNS;
@@ -139,13 +120,6 @@ export async function cleanupOrphanSummaries(
   }
 
   return { aborted: false, completed: true };
-}
-
-function isAbortError(error: unknown, abortController: AbortController): boolean {
-  if (error instanceof errors.RequestAbortedError) return true;
-  if (abortController.signal.aborted) return true;
-  if (error instanceof DOMException && error.name === 'AbortError') return true;
-  return false;
 }
 
 async function fetchUniqueSloFromSummary(
