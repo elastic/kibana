@@ -104,7 +104,7 @@ export const Workday: ConnectorSpec = {
     displayName: 'Workday',
     description: i18n.translate('core.kibanaConnectorSpecs.workday.metadata.description', {
       defaultMessage:
-        'Search workers, browse org hierarchy, manage recruiting and candidates, access learning courses and enrollments, track expenses, requests, journeys, holidays, projects, procurement, budgets, and revenue in Workday',
+        'Search workers, browse org charts, manage recruiting, learning, expenses, and projects in Workday',
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
@@ -121,12 +121,12 @@ export const Workday: ConnectorSpec = {
             authorizationUrl: {
               placeholder: 'https://wd2-impl-services1.workday.com/ccx/oauth2/<tenant>/authorize',
               helpText:
-                "Replace '<tenant>' with your Workday tenant name (e.g. mycompany). Found in your Workday OAuth client registration.",
+                "Replace '<tenant>' with your Workday tenant name, for example https://wd2-impl-services1.workday.com/ccx/oauth2/mycompany/authorize ",
             },
             tokenUrl: {
               placeholder: 'https://wd2-impl-services1.workday.com/ccx/oauth2/<tenant>/token',
               helpText:
-                "Replace '<tenant>' with your Workday tenant name (e.g. mycompany). Found in your Workday OAuth client registration.",
+                "Replace '<tenant>' with your Workday tenant name, for example https://wd2-impl-services1.workday.com/ccx/oauth2/mycompany/token",
             },
             scope: {
               hidden: true,
