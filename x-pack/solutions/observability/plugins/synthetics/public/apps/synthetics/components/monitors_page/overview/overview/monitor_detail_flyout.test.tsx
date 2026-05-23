@@ -125,6 +125,7 @@ describe('Monitor Detail Flyout', () => {
       {
         state: {
           monitorDetails: {
+            syntheticsMonitor: null,
             syntheticsMonitorLoading: true,
           },
         },
@@ -132,6 +133,66 @@ describe('Monitor Detail Flyout', () => {
     );
 
     expect(getByRole('progressbar'));
+  });
+
+  it('hides the error callout when overview metadata is present', () => {
+    const testErrorText = 'This is a test error';
+
+    const { queryByText } = render(
+      <MonitorDetailFlyout
+        configId="4afd3980-0b72-11ed-9c10-b57918ea89d6"
+        id="test-id"
+        location="US East"
+        locationId="us-east"
+        onClose={jest.fn()}
+        onEnabledChange={jest.fn()}
+        onLocationChange={jest.fn()}
+      />,
+      {
+        state: {
+          monitorDetails: {
+            syntheticsMonitorError: { body: { message: testErrorText } },
+          },
+          overviewStatus: {
+            status: {
+              allConfigs: {},
+              upConfigs: {
+                '4afd3980-0b72-11ed-9c10-b57918ea89d6-us_central': {
+                  configId: '4afd3980-0b72-11ed-9c10-b57918ea89d6',
+                  monitorQueryId: 'test',
+                  name: 'One pixel monitor',
+                  locationId: 'us_central',
+                  locationLabel: 'US Central',
+                  status: 'up',
+                  type: 'browser',
+                  schedule: '10',
+                  isEnabled: true,
+                  isStatusAlertEnabled: false,
+                  spaces: ['default'],
+                  tags: [],
+                  projectId: '',
+                  updated_at: '2022-07-24T17:01:48.326Z',
+                  timestamp: '2022-07-24T17:01:48.326Z',
+                  urls: '',
+                  maintenanceWindows: [],
+                } as any,
+              },
+              downConfigs: {},
+              upConfigsCount: 1,
+              downConfigsCount: 0,
+              disabledMonitorsCount: 0,
+              disabledMonitorQueryIds: [],
+              enabledMonitorQueryIds: ['test'],
+              projectMonitorsCount: 0,
+              pendingMonitorsCount: 0,
+              pendingConfigs: {},
+            },
+          },
+        },
+      }
+    );
+
+    expect(queryByText(testErrorText, { exact: false })).toBeNull();
   });
 
   it('renders details for fetch success', () => {

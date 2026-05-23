@@ -291,16 +291,24 @@ export function MonitorDetailFlyout(props: Props) {
       onClose={props.onClose}
       paddingSize="none"
     >
-      {error && !isLoading && <ErrorCallout {...error} />}
-      {isLoading && <LoadingState />}
-      {monitorObject && (
+      {/*
+        For cross-space monitors the saved-object fetch may legitimately 404
+        when the user can't read the SO from the active space, even though the
+        heartbeat-based `monitor` metadata renders the flyout fine. Don't
+        alarm the user with a "fetch failed" callout if we already have the
+        overview metadata to render — only surface real errors when there's
+        nothing else to show.
+      */}
+      {error && !isLoading && !monitor && <ErrorCallout {...error} />}
+      {isLoading && !monitor && !monitorObject && <LoadingState />}
+      {(monitorObject || monitor) && (
         <>
           <EuiFlyoutHeader hasBorder>
             <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
               <EuiFlexGroup responsive={false} gutterSize="s">
                 <EuiFlexItem grow={false}>
                   <EuiTitle size="s">
-                    <h2>{monitorObject?.[ConfigKey.NAME]}</h2>
+                    <h2>{monitorObject?.[ConfigKey.NAME] ?? monitor?.name ?? configId}</h2>
                   </EuiTitle>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -318,30 +326,36 @@ export function MonitorDetailFlyout(props: Props) {
                   )}
                 </EuiFlexItem>
               </EuiFlexGroup>
-              <EuiSpacer size="m" />
-              <DetailedFlyoutHeader
-                currentLocation={props.location}
-                locations={locations}
-                setCurrentLocation={setLocation}
-                configId={configId}
-                monitor={monitorObject}
-                onEnabledChange={props.onEnabledChange}
-              />
+              {monitorObject && (
+                <>
+                  <EuiSpacer size="m" />
+                  <DetailedFlyoutHeader
+                    currentLocation={props.location}
+                    locations={locations}
+                    setCurrentLocation={setLocation}
+                    configId={configId}
+                    monitor={monitorObject}
+                    onEnabledChange={props.onEnabledChange}
+                  />
+                </>
+              )}
             </EuiPanel>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
             <DetailFlyoutDurationChart {...props} location={props.location} />
-            <MonitorDetailsPanel
-              hasBorder={false}
-              hideEnabled
-              latestPing={monitorDetail.data}
-              configId={configId}
-              monitor={{
-                ...monitorObject,
-                id,
-              }}
-              loading={Boolean(isLoading)}
-            />
+            {monitorObject && (
+              <MonitorDetailsPanel
+                hasBorder={false}
+                hideEnabled
+                latestPing={monitorDetail.data}
+                configId={configId}
+                monitor={{
+                  ...monitorObject,
+                  id,
+                }}
+                loading={Boolean(isLoading)}
+              />
+            )}
           </EuiFlyoutBody>
           <EuiFlyoutFooter>
             <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l" color="transparent">
