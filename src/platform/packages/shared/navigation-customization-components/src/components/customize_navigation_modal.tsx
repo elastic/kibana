@@ -127,6 +127,12 @@ export const CustomizeNavigationModal = ({
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
+        {!calloutDismissed && (
+          <>
+            <SpaceCallout onDismissCallout={handleDismissCallout} />
+            <EuiSpacer size="m" />
+          </>
+        )}
         <EuiDragDropContext onDragEnd={createDragEndHandler('visible')}>
           <EuiDroppable droppableId="nav-items" spacing="none">
             {visibleItems.map((item, index) => (
@@ -145,7 +151,6 @@ export const CustomizeNavigationModal = ({
           onDragEnd={createDragEndHandler('hidden')}
           toggleItemVisibility={toggleItemVisibility}
         />
-        {!calloutDismissed && <SpaceCallout onDismissCallout={handleDismissCallout} />}
       </EuiModalBody>
       <EuiModalFooter>
         <EuiFlexGroup justifyContent="spaceBetween">

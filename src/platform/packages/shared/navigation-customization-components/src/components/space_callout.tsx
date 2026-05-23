@@ -25,7 +25,7 @@ export const SpaceCallout = ({ onDismissCallout }: Props) => (
         <EuiFlexGroup component="span" alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem component="span">
             {i18n.translate('navigationCustomizationComponents.spaceCallout', {
-              defaultMessage: 'The changes will apply to your current space only',
+              defaultMessage: 'Reorder or hide apps in this space without affecting other users.',
             })}
           </EuiFlexItem>
           <EuiFlexItem component="span" grow={false}>
