@@ -7,23 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DashboardAppLocatorDefinition } from './locator';
 import { hashedItemStore } from '@kbn/kibana-utils-plugin/public';
 import { mockStorage } from '@kbn/kibana-utils-plugin/public/storage/hashed_item_store/mock';
 import { FilterStateStore } from '@kbn/es-query';
+import { getLocation } from './get_location';
 
 describe('dashboard locator', () => {
+  const mockGetDashboardFilters = jest.fn();
   beforeEach(() => {
     // @ts-ignore
     hashedItemStore.storage = mockStorage;
+    mockGetDashboardFilters.mockReset();
+    mockGetDashboardFilters.mockResolvedValue([]);
   });
 
+  const useHashedUrl = false;
+
   test('creates a link to an unsaved dashboard', async () => {
-    const definition = new DashboardAppLocatorDefinition({
-      useHashedUrl: false,
-      getDashboardFilterFields: async (dashboardId: string) => [],
-    });
-    const location = await definition.getLocation({});
+    const location = await getLocation({}, useHashedUrl, mockGetDashboardFilters);
 
     expect(location).toMatchObject({
       app: 'dashboards',
@@ -33,13 +34,13 @@ describe('dashboard locator', () => {
   });
 
   test('creates a link with global time range set up', async () => {
-    const definition = new DashboardAppLocatorDefinition({
-      useHashedUrl: false,
-      getDashboardFilterFields: async (dashboardId: string) => [],
-    });
-    const location = await definition.getLocation({
-      time_range: { to: 'now', from: 'now-15m', mode: 'relative' },
-    });
+    const location = await getLocation(
+      {
+        time_range: { to: 'now', from: 'now-15m', mode: 'relative' },
+      },
+      useHashedUrl,
+      mockGetDashboardFilters
+    );
 
     expect(location).toMatchObject({
       app: 'dashboards',
@@ -55,37 +56,37 @@ describe('dashboard locator', () => {
   });
 
   test('creates a link with filters, time range, refresh interval and query to a saved object', async () => {
-    const definition = new DashboardAppLocatorDefinition({
-      useHashedUrl: false,
-      getDashboardFilterFields: async (dashboardId: string) => [],
-    });
-    const location = await definition.getLocation({
-      time_range: { to: 'now', from: 'now-15m', mode: 'relative' },
-      refresh_interval: { pause: false, value: 300 },
-      dashboardId: '123',
-      filters: [
-        {
-          meta: {
-            alias: null,
-            disabled: false,
-            negate: false,
+    const location = await getLocation(
+      {
+        time_range: { to: 'now', from: 'now-15m', mode: 'relative' },
+        refresh_interval: { pause: false, value: 300 },
+        dashboardId: '123',
+        filters: [
+          {
+            meta: {
+              alias: null,
+              disabled: false,
+              negate: false,
+            },
+            query: { query: 'hi' },
           },
-          query: { query: 'hi' },
-        },
-        {
-          meta: {
-            alias: null,
-            disabled: false,
-            negate: false,
+          {
+            meta: {
+              alias: null,
+              disabled: false,
+              negate: false,
+            },
+            query: { query: 'hi' },
+            $state: {
+              store: FilterStateStore.GLOBAL_STATE,
+            },
           },
-          query: { query: 'hi' },
-          $state: {
-            store: FilterStateStore.GLOBAL_STATE,
-          },
-        },
-      ],
-      query: { query: 'bye', language: 'kql' },
-    });
+        ],
+        query: { query: 'bye', language: 'kql' },
+      },
+      useHashedUrl,
+      mockGetDashboardFilters
+    );
 
     expect(location).toMatchObject({
       app: 'dashboards',
@@ -134,18 +135,18 @@ describe('dashboard locator', () => {
   });
 
   test('searchSessionId', async () => {
-    const definition = new DashboardAppLocatorDefinition({
-      useHashedUrl: false,
-      getDashboardFilterFields: async (dashboardId: string) => [],
-    });
-    const location = await definition.getLocation({
-      time_range: { to: 'now', from: 'now-15m', mode: 'relative' },
-      refresh_interval: { pause: false, value: 300 },
-      dashboardId: '123',
-      filters: [],
-      query: { query: 'bye', language: 'kql' },
-      searchSessionId: '__sessionSearchId__',
-    });
+    const location = await getLocation(
+      {
+        time_range: { to: 'now', from: 'now-15m', mode: 'relative' },
+        refresh_interval: { pause: false, value: 300 },
+        dashboardId: '123',
+        filters: [],
+        query: { query: 'bye', language: 'kql' },
+        searchSessionId: '__sessionSearchId__',
+      },
+      useHashedUrl,
+      mockGetDashboardFilters
+    );
 
     expect(location).toMatchObject({
       app: 'dashboards',
@@ -170,13 +171,13 @@ describe('dashboard locator', () => {
   });
 
   test('panels', async () => {
-    const definition = new DashboardAppLocatorDefinition({
-      useHashedUrl: false,
-      getDashboardFilterFields: async (dashboardId: string) => [],
-    });
-    const location = await definition.getLocation({
-      panels: [{ fakePanelContent: 'fakePanelContent' }] as any,
-    });
+    const location = await getLocation(
+      {
+        panels: [{ fakePanelContent: 'fakePanelContent' }] as any,
+      },
+      useHashedUrl,
+      mockGetDashboardFilters
+    );
 
     expect(location).toMatchObject({
       app: 'dashboards',
@@ -188,39 +189,39 @@ describe('dashboard locator', () => {
   });
 
   test('if no useHash setting is given, uses the one was start services', async () => {
-    const definition = new DashboardAppLocatorDefinition({
-      useHashedUrl: true,
-      getDashboardFilterFields: async (dashboardId: string) => [],
-    });
-    const location = await definition.getLocation({
-      time_range: { to: 'now', from: 'now-15m', mode: 'relative' },
-    });
+    const location = await getLocation(
+      {
+        time_range: { to: 'now', from: 'now-15m', mode: 'relative' },
+      },
+      true,
+      mockGetDashboardFilters
+    );
 
     expect(location.path.indexOf('relative')).toBe(-1);
   });
 
   test('can override a false useHash ui setting', async () => {
-    const definition = new DashboardAppLocatorDefinition({
-      useHashedUrl: false,
-      getDashboardFilterFields: async (dashboardId: string) => [],
-    });
-    const location = await definition.getLocation({
-      time_range: { to: 'now', from: 'now-15m', mode: 'relative' },
-      useHash: true,
-    });
+    const location = await getLocation(
+      {
+        time_range: { to: 'now', from: 'now-15m', mode: 'relative' },
+        useHash: true,
+      },
+      useHashedUrl,
+      mockGetDashboardFilters
+    );
 
     expect(location.path.indexOf('relative')).toBe(-1);
   });
 
   test('can override a true useHash ui setting', async () => {
-    const definition = new DashboardAppLocatorDefinition({
-      useHashedUrl: true,
-      getDashboardFilterFields: async (dashboardId: string) => [],
-    });
-    const location = await definition.getLocation({
-      time_range: { to: 'now', from: 'now-15m', mode: 'relative' },
-      useHash: false,
-    });
+    const location = await getLocation(
+      {
+        time_range: { to: 'now', from: 'now-15m', mode: 'relative' },
+        useHash: false,
+      },
+      true,
+      mockGetDashboardFilters
+    );
 
     expect(location.path.indexOf('relative')).toBeGreaterThan(1);
   });
@@ -254,21 +255,21 @@ describe('dashboard locator', () => {
     };
 
     test('attaches filters from destination dashboard', async () => {
-      const definition = new DashboardAppLocatorDefinition({
-        useHashedUrl: false,
-        getDashboardFilterFields: async (dashboardId: string) => {
-          return dashboardId === 'dashboard1'
-            ? [savedFilter1]
-            : dashboardId === 'dashboard2'
-            ? [savedFilter2]
-            : [];
+      mockGetDashboardFilters.mockImplementation(async (dashboardId: string) => {
+        return dashboardId === 'dashboard1'
+          ? [savedFilter1]
+          : dashboardId === 'dashboard2'
+          ? [savedFilter2]
+          : [];
+      });
+      const location1 = await getLocation(
+        {
+          dashboardId: 'dashboard1',
+          filters: [appliedFilter],
         },
-      });
-
-      const location1 = await definition.getLocation({
-        dashboardId: 'dashboard1',
-        filters: [appliedFilter],
-      });
+        useHashedUrl,
+        mockGetDashboardFilters
+      );
 
       expect(location1.path).toMatchInlineSnapshot(`"#/view/dashboard1?_g=(filters:!())"`);
       expect(location1.state).toMatchObject({
@@ -296,10 +297,14 @@ describe('dashboard locator', () => {
         ],
       });
 
-      const location2 = await definition.getLocation({
-        dashboardId: 'dashboard2',
-        filters: [appliedFilter],
-      });
+      const location2 = await getLocation(
+        {
+          dashboardId: 'dashboard2',
+          filters: [appliedFilter],
+        },
+        useHashedUrl,
+        mockGetDashboardFilters
+      );
 
       expect(location2.path).toMatchInlineSnapshot(`"#/view/dashboard2?_g=(filters:!())"`);
       expect(location2.state).toMatchObject({
@@ -329,20 +334,21 @@ describe('dashboard locator', () => {
     });
 
     test("doesn't fail if can't retrieve filters from destination dashboard", async () => {
-      const definition = new DashboardAppLocatorDefinition({
-        useHashedUrl: false,
-        getDashboardFilterFields: async (dashboardId: string) => {
-          if (dashboardId === 'dashboard1') {
-            throw new Error('Not found');
-          }
-          return [];
-        },
+      mockGetDashboardFilters.mockImplementation(async (dashboardId: string) => {
+        if (dashboardId === 'dashboard1') {
+          throw new Error('Not found');
+        }
+        return [];
       });
 
-      const location = await definition.getLocation({
-        dashboardId: 'dashboard1',
-        filters: [appliedFilter],
-      });
+      const location = await getLocation(
+        {
+          dashboardId: 'dashboard1',
+          filters: [appliedFilter],
+        },
+        useHashedUrl,
+        mockGetDashboardFilters
+      );
 
       expect(location.path).toMatchInlineSnapshot(`"#/view/dashboard1?_g=(filters:!())"`);
       expect(location.state).toMatchObject({
@@ -362,21 +368,22 @@ describe('dashboard locator', () => {
     });
 
     test('can enforce empty filters', async () => {
-      const definition = new DashboardAppLocatorDefinition({
-        useHashedUrl: false,
-        getDashboardFilterFields: async (dashboardId: string) => {
-          if (dashboardId === 'dashboard1') {
-            return [savedFilter1];
-          }
-          return [];
-        },
+      mockGetDashboardFilters.mockImplementation(async (dashboardId: string) => {
+        if (dashboardId === 'dashboard1') {
+          return [savedFilter1];
+        }
+        return [];
       });
 
-      const location = await definition.getLocation({
-        dashboardId: 'dashboard1',
-        filters: [],
-        preserveSavedFilters: false,
-      });
+      const location = await getLocation(
+        {
+          dashboardId: 'dashboard1',
+          filters: [],
+          preserveSavedFilters: false,
+        },
+        useHashedUrl,
+        mockGetDashboardFilters
+      );
 
       expect(location.path).toMatchInlineSnapshot(`"#/view/dashboard1?_g=(filters:!())"`);
       expect(location.state).toMatchObject({
@@ -385,40 +392,42 @@ describe('dashboard locator', () => {
     });
 
     test('no filters in result url if no filters applied', async () => {
-      const definition = new DashboardAppLocatorDefinition({
-        useHashedUrl: false,
-        getDashboardFilterFields: async (dashboardId: string) => {
-          if (dashboardId === 'dashboard1') {
-            return [savedFilter1];
-          }
-          return [];
-        },
+      mockGetDashboardFilters.mockImplementation(async (dashboardId: string) => {
+        if (dashboardId === 'dashboard1') {
+          return [savedFilter1];
+        }
+        return [];
       });
 
-      const location = await definition.getLocation({
-        dashboardId: 'dashboard1',
-      });
+      const location = await getLocation(
+        {
+          dashboardId: 'dashboard1',
+        },
+        useHashedUrl,
+        mockGetDashboardFilters
+      );
 
       expect(location.path).toMatchInlineSnapshot(`"#/view/dashboard1?_g=()"`);
       expect(location.state).toMatchObject({});
     });
 
     test('can turn off preserving filters', async () => {
-      const definition = new DashboardAppLocatorDefinition({
-        useHashedUrl: false,
-        getDashboardFilterFields: async (dashboardId: string) => {
-          if (dashboardId === 'dashboard1') {
-            return [savedFilter1];
-          }
-          return [];
-        },
+      mockGetDashboardFilters.mockImplementation(async (dashboardId: string) => {
+        if (dashboardId === 'dashboard1') {
+          return [savedFilter1];
+        }
+        return [];
       });
 
-      const location = await definition.getLocation({
-        dashboardId: 'dashboard1',
-        filters: [appliedFilter],
-        preserveSavedFilters: false,
-      });
+      const location = await getLocation(
+        {
+          dashboardId: 'dashboard1',
+          filters: [appliedFilter],
+          preserveSavedFilters: false,
+        },
+        useHashedUrl,
+        mockGetDashboardFilters
+      );
 
       expect(location.path).toMatchInlineSnapshot(`"#/view/dashboard1?_g=(filters:!())"`);
       expect(location.state).toMatchObject({

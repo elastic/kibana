@@ -68,7 +68,6 @@ import type {
 } from '@kbn/usage-collection-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
-import { DashboardAppLocatorDefinition } from '../common/locator/locator';
 import type { DashboardMountContextProps } from './dashboard_app/types';
 import type { DashboardListingTab } from './dashboard_listing/types';
 import {
@@ -84,6 +83,7 @@ import { setupUrlForwarding } from './dashboard_app/url/setup_url_forwarding';
 import type { FindDashboardsService } from './dashboard_client';
 import { DASHBOARD_DURATION_START_MARK } from './dashboard_api/performance/dashboard_duration_start_mark';
 import type { DashboardApi } from './dashboard_api/types';
+import { getDashboardLocator } from '../common/locator/get_dashboard_locator';
 
 export interface DashboardSetupDependencies {
   data: DataPublicPluginSetup;
@@ -173,9 +173,9 @@ export class DashboardPlugin
 
     if (share) {
       share.url.locators.create(
-        new DashboardAppLocatorDefinition({
-          useHashedUrl: core.uiSettings.get('state:storeInSessionStorage'),
-          getDashboardFilterFields: async (dashboardId: string) => {
+        getDashboardLocator({
+          useHashedUrl: false,
+          getDashboardFilters: async (dashboardId: string) => {
             const [{ dashboardClient }, { toStoredFilters }] = await Promise.all([
               import('./dashboard_client'),
               import('@kbn/as-code-filters-transforms'),

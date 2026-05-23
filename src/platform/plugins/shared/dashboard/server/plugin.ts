@@ -45,7 +45,7 @@ import { createDashboardSavedObjectType } from './dashboard_saved_object';
 import { registerDashboardUsageCollector } from './usage/register_collector';
 import { dashboardPersistableStateServiceFactory } from './dashboard_container/dashboard_container_embeddable_factory';
 import { registerRoutes, read } from './api';
-import { DashboardAppLocatorDefinition } from '../common/locator/locator';
+import { getDashboardLocator } from '../common/locator/get_dashboard_locator';
 import { setKibanaServices } from './kibana_services';
 import { scanDashboards } from './scan_dashboards';
 import { registerDashboardDrilldown } from './dashboard_drilldown/register_dashboard_drilldown';
@@ -152,9 +152,9 @@ export class DashboardPlugin
 
     if (plugins.share) {
       plugins.share.url.locators.create(
-        new DashboardAppLocatorDefinition({
+        getDashboardLocator({
           useHashedUrl: false,
-          getDashboardFilterFields: async (dashboardId: string) => {
+          getDashboardFilters: async (dashboardId: string) => {
             throw new Error(
               'Locator .getLocation() is not supported on the server with the `preserveSavedFilters` parameter.'
             );
