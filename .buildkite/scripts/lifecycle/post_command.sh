@@ -47,6 +47,23 @@ if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
     '.es/uiam*.log'
   )
 
+  if [[ "${BUILDKITE_PIPELINE_SLUG:-}" == "kibana-elasticsearch-snapshot-verify" ]]; then
+    # Rescue ES Docker container logs the in-process teardown may have missed.
+    if command -v docker >/dev/null 2>&1; then
+      for cname in es01 es02 es03 es01-linked es02-linked es03-linked; do
+        if ! docker container inspect "$cname" >/dev/null 2>&1; then
+          continue
+        fi
+        cid=$(docker inspect --format '{{.Id}}' "$cname" 2>/dev/null | cut -c1-12)
+        out=".es/${cname}-${cid}.log"
+        if [[ -n "$cid" && ! -s "$out" ]]; then
+          mkdir -p .es
+          docker logs "$cname" > "$out" 2>&1 || true
+        fi
+      done
+    fi
+  fi
+
   buildkite-agent artifact upload "$(printf '%s;' "${ARTIFACT_PATTERNS[@]}")"
 
   if [[ $BUILDKITE_COMMAND_EXIT_STATUS -ne 0 ]]; then
@@ -55,9 +72,27 @@ if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
       node scripts/report_failed_tests --build-url="${BUILDKITE_BUILD_URL}#${BUILDKITE_JOB_ID}" 'target/junit/**/*.xml'\
         --no-github-update --no-index-errors
     else
-      echo "--- Run Failed Test Reporter"
+      echo "--- Run Failed Test Reporter (JUnit)"
       node scripts/report_failed_tests --build-url="${BUILDKITE_BUILD_URL}#${BUILDKITE_JOB_ID}" \
-        'target/junit/**/*.xml' \
+        'target/junit/**/*.xml'
+
+      # Scout: only update GitHub once a Scout lane has failed in at least 2 attempts
+      # of the current build. The counter is set by run_test_lane.sh on real test
+      # failures (exit 10) and is not incremented by agent-lost retries (exit -1).
+      # BK annotations are still produced because target/test_failures artifacts are
+      # generated regardless of --no-github-update.
+      SCOUT_FAILURE_COUNT=0
+      if [[ -n "${BUILDKITE_STEP_KEY:-}" ]]; then
+        SCOUT_FAILURE_COUNT=$(buildkite-agent meta-data get "${BUILDKITE_STEP_KEY}_scout_failure_count" --default "0" 2>/dev/null || echo 0)
+      fi
+      SCOUT_GH_FLAG="--no-github-update"
+      SCOUT_GH_UPDATE_STATUS="disabled"
+      if [[ "$SCOUT_FAILURE_COUNT" -ge 2 ]]; then
+        SCOUT_GH_FLAG=""
+        SCOUT_GH_UPDATE_STATUS="enabled"
+      fi
+      echo "--- Run Failed Test Reporter (Scout, failure_count=$SCOUT_FAILURE_COUNT, github_update=$SCOUT_GH_UPDATE_STATUS)"
+      node scripts/report_failed_tests --build-url="${BUILDKITE_BUILD_URL}#${BUILDKITE_JOB_ID}" $SCOUT_GH_FLAG \
         '.scout/reports/scout-playwright-test-failures-*/scout-failures-*.ndjson'
     fi
   fi
