@@ -124,6 +124,18 @@ describe('helpers', function () {
         },
       ]);
     });
+
+    it('should return a string message when error.message is a non-string (e.g. DOMException from aborted fetch)', function () {
+      const domException = new DOMException('signal is aborted without reason', 'AbortError');
+      const error = new Error('placeholder');
+      (error as unknown as { message: unknown }).message = domException;
+
+      const result = parseErrors([error], 'FROM logs-*');
+
+      expect(result).toHaveLength(1);
+      expect(typeof result[0].message).toBe('string');
+      expect(result[0].code).toBe('unknownError');
+    });
   });
 
   describe('parseWarning', function () {
