@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo, useRef } from 'react';
-import useObservable from 'react-use/lib/useObservable';
-import { of } from 'rxjs';
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
@@ -101,18 +99,27 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
   } = useKibana().services;
   const { read: hasTimelineAccess } = extractTimelineCapabilities(capabilities);
 
-  // CPS project routing for cross-project events. Subscribes to the cps manager so
-  // routing changes propagate without remounting. Falls back to `of(undefined)` when
-  // the cps plugin is absent (non-serverless / stateful environments).
-  const projectRouting$ = useMemo(
-    () => cps?.cpsManager?.getProjectRouting$() ?? of(undefined),
-    [cps?.cpsManager]
-  );
-  const cpsRouting = useObservable(projectRouting$);
-  const projectRouting: ProjectRouting | undefined =
-    cpsRouting === PROJECT_ROUTING_ALL || cpsRouting === PROJECT_ROUTING_ORIGIN
-      ? cpsRouting
-      : undefined;
+  // CPS project routing for cross-project events. Security pages do not host a CPS
+  // picker — routing is locked to the active space NPRE (see kfirpeled comment on
+  // security-team#16998). Read the space's default routing rather than the picker
+  // observable (which is gated by per-app `ProjectRoutingAccess` and returns
+  // undefined when no app has registered the route as READONLY/EDITABLE).
+  const [projectRouting, setProjectRouting] = useState<ProjectRouting | undefined>(undefined);
+  useEffect(() => {
+    const manager = cps?.cpsManager;
+    if (!manager) return;
+    let cancelled = false;
+    manager.whenReady().then(() => {
+      if (cancelled) return;
+      const routing = manager.getDefaultProjectRouting();
+      setProjectRouting(
+        routing === PROJECT_ROUTING_ALL || routing === PROJECT_ROUTING_ORIGIN ? routing : undefined
+      );
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [cps?.cpsManager]);
 
   const toasts = useToasts();
   const oldDataView = useGetScopedSourcererDataView({
