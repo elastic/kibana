@@ -11,8 +11,13 @@ import {
   FormMonitorType,
   LocationStatus,
   MonitorTypeEnum,
+  ScreenshotOption,
 } from '../../../../common/runtime_types';
-import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
+import {
+  DEFAULT_FIELDS,
+  PROFILE_VALUES_ENUM,
+  PROFILES_MAP,
+} from '../../../../common/constants/monitor_defaults';
 import { normalizeProjectMonitors } from '.';
 import type { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
 
@@ -93,12 +98,13 @@ describe('api normalizers', () => {
     );
   });
 
-  it('reuses BROWSER defaults for screenshot/throttling (SO shape parity)', () => {
-    // API monitors never use SCREENSHOTS / THROTTLING at runtime (Heartbeat's
-    // api plugin strips the CLI flags, see elastic/beats#50802), but the SO
-    // shape is shared with BROWSER. The normalizer must keep the API defaults
-    // exactly aligned with DEFAULT_FIELDS[MonitorTypeEnum.API] so SO writes
-    // round-trip cleanly.
+  it('defaults screenshots to OFF and throttling to NO_THROTTLING (API has no browser/CDP)', () => {
+    // SCREENSHOTS / THROTTLING are part of the shared SO shape with BROWSER,
+    // but they are semantically inapplicable to API journeys: there is no
+    // browser to screenshot, and raw HTTP doesn't go through Chromium's CDP
+    // network throttling. Heartbeat's api plugin strips both CLI flags
+    // (elastic/beats#50802); we mirror that by defaulting to no-op values so
+    // the SO / UI / telemetry don't carry browser-only state.
     const monitors: ProjectMonitor[] = [
       {
         type: MonitorTypeEnum.API,
@@ -121,6 +127,10 @@ describe('api normalizers', () => {
 
     const apiDefaults = DEFAULT_FIELDS[MonitorTypeEnum.API];
     const fields = asApi(actual.normalizedFields);
+    expect(fields[ConfigKey.SCREENSHOTS]).toBe(ScreenshotOption.OFF);
+    expect(fields[ConfigKey.THROTTLING_CONFIG]).toEqual(
+      PROFILES_MAP[PROFILE_VALUES_ENUM.NO_THROTTLING]
+    );
     expect(fields[ConfigKey.SCREENSHOTS]).toBe(apiDefaults[ConfigKey.SCREENSHOTS]);
     expect(fields[ConfigKey.THROTTLING_CONFIG]).toEqual(apiDefaults[ConfigKey.THROTTLING_CONFIG]);
   });
