@@ -103,6 +103,113 @@ describe('Automated Resolution', () => {
   });
 
   describe('runAutomatedResolution', () => {
+    describe('parallelResolutionEnabled', () => {
+      it('queries entity.relationships.resolution.by_rule.resolved_to instead of the legacy slot', async () => {
+        const state = createInitialState();
+        mockEsClient.search
+          .mockResolvedValueOnce(
+            createCollectNewEmailsResponse(['a@test.com'], '2026-03-10T00:00:00Z') as any
+          )
+          .mockResolvedValueOnce(
+            createFindMatchingGroupsResponse([
+              {
+                email: 'a@test.com',
+                unresolved: [
+                  { id: 'user-1', namespace: 'okta' },
+                  { id: 'user-2', namespace: 'entra_id' },
+                ],
+                existingTargets: [],
+              },
+            ]) as any
+          );
+
+        await runAutomatedResolution(
+          createDeps(state, mockEsClient, mockResolutionClient, { parallelResolutionEnabled: true })
+        );
+
+        const step1Query = mockEsClient.search.mock.calls[0][0] as any;
+        const filtersStr = JSON.stringify(step1Query.query.bool.filter);
+        expect(filtersStr).toContain('entity.relationships.resolution.by_rule.resolved_to');
+        expect(filtersStr).not.toContain('"entity.relationships.resolution.resolved_to"');
+
+        const step2Query = mockEsClient.search.mock.calls[1][0] as any;
+        const aggs = JSON.stringify(step2Query.aggs);
+        expect(aggs).toContain('entity.relationships.resolution.by_rule.resolved_to');
+        expect(aggs).not.toContain('"entity.relationships.resolution.resolved_to"');
+      });
+
+      it('passes source: rule to linkEntities so the merge layer stamps by_rule', async () => {
+        const state = createInitialState();
+        mockEsClient.search
+          .mockResolvedValueOnce(
+            createCollectNewEmailsResponse(['a@test.com'], '2026-03-10T00:00:00Z') as any
+          )
+          .mockResolvedValueOnce(
+            createFindMatchingGroupsResponse([
+              {
+                email: 'a@test.com',
+                unresolved: [
+                  { id: 'user-okta', namespace: 'okta' },
+                  { id: 'user-entra', namespace: 'entra_id' },
+                ],
+                existingTargets: [],
+              },
+            ]) as any
+          );
+        mockLinkEntities.mockResolvedValueOnce({
+          linked: ['user-entra'],
+          skipped: [],
+          target_id: 'user-okta',
+        });
+
+        await runAutomatedResolution(
+          createDeps(state, mockEsClient, mockResolutionClient, { parallelResolutionEnabled: true })
+        );
+
+        expect(mockLinkEntities).toHaveBeenCalledWith('user-okta', ['user-entra'], {
+          refresh: false,
+          provenance: { resolved_by: 'rule' },
+          source: 'rule',
+        });
+      });
+
+      it('keeps the legacy filter and call shape when parallelResolutionEnabled is false (default)', async () => {
+        const state = createInitialState();
+        mockEsClient.search
+          .mockResolvedValueOnce(
+            createCollectNewEmailsResponse(['a@test.com'], '2026-03-10T00:00:00Z') as any
+          )
+          .mockResolvedValueOnce(
+            createFindMatchingGroupsResponse([
+              {
+                email: 'a@test.com',
+                unresolved: [
+                  { id: 'user-okta', namespace: 'okta' },
+                  { id: 'user-entra', namespace: 'entra_id' },
+                ],
+                existingTargets: [],
+              },
+            ]) as any
+          );
+        mockLinkEntities.mockResolvedValueOnce({
+          linked: ['user-entra'],
+          skipped: [],
+          target_id: 'user-okta',
+        });
+
+        await runAutomatedResolution(createDeps(state, mockEsClient, mockResolutionClient));
+
+        expect(mockLinkEntities).toHaveBeenCalledWith('user-okta', ['user-entra'], {
+          refresh: false,
+          provenance: { resolved_by: 'rule' },
+        });
+        const step1Query = mockEsClient.search.mock.calls[0][0] as any;
+        expect(JSON.stringify(step1Query.query.bool.filter)).toContain(
+          '"entity.relationships.resolution.resolved_to"'
+        );
+      });
+    });
+
     it('should perform a full scan when watermark is null', async () => {
       const state = createInitialState();
       mockEsClient.search
@@ -208,6 +315,7 @@ describe('Automated Resolution', () => {
 
       expect(mockLinkEntities).toHaveBeenCalledWith('user-okta', ['user-entra'], {
         refresh: false,
+        provenance: { resolved_by: 'rule' },
       });
       expect(result.lastRun?.resolutionsCreated).toBe(1);
     });
@@ -240,6 +348,7 @@ describe('Automated Resolution', () => {
 
       expect(mockLinkEntities).toHaveBeenCalledWith('user-existing-target', ['user-new'], {
         refresh: false,
+        provenance: { resolved_by: 'rule' },
       });
       expect(result.lastRun?.resolutionsCreated).toBe(1);
     });

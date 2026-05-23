@@ -29,7 +29,7 @@ import type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainers/
 import { CRUDClient } from './domain/crud';
 import { ResolutionClient } from './domain/resolution';
 import { registerTelemetry, createReportEvent } from './telemetry/events';
-import { automatedResolutionMaintainerConfig } from './maintainers/automated_resolution';
+import { createAutomatedResolutionMaintainerConfig } from './maintainers/automated_resolution';
 
 export class EntityStorePlugin
   implements
@@ -47,6 +47,12 @@ export class EntityStorePlugin
     this.logger = initializerContext.logger.get();
     this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
   }
+
+  // Mutable holder so the rule maintainer's `run` hook can observe a
+  // late-arriving feature-flag toggle from security_solution without us
+  // having to delay maintainer registration. Captured by closure inside
+  // `createAutomatedResolutionMaintainerConfig` below.
+  private parallelResolutionEnabled = false;
 
   public setup(
     core: EntityStoreCoreSetup,
@@ -83,10 +89,16 @@ export class EntityStorePlugin
     core.savedObjects.registerType(EntityStoreGlobalStateType);
     core.savedObjects.registerType(CcsLogExtractionStateType);
 
+    // Use a getter rather than the boolean directly so the maintainer's
+    // run hook always observes the latest flag value, not whatever it was
+    // at registration time.
+    const ruleMaintainerConfig = createAutomatedResolutionMaintainerConfig({
+      getParallelResolutionEnabled: () => this.parallelResolutionEnabled,
+    });
     registerEntityMaintainerTask({
       taskManager: plugins.taskManager,
       logger: this.logger,
-      config: automatedResolutionMaintainerConfig,
+      config: ruleMaintainerConfig,
       core,
       analytics: createReportEvent(core.analytics),
     });
@@ -100,6 +112,9 @@ export class EntityStorePlugin
           core,
           analytics: createReportEvent(core.analytics),
         }),
+      setParallelResolutionEnabled: (enabled: boolean) => {
+        this.parallelResolutionEnabled = enabled;
+      },
     };
   }
 

@@ -16,10 +16,20 @@ import {
   EntitiesNotFoundError,
   EntityHasAliasesError,
   MixedEntityTypesError,
+  MultiSourceConflictError,
   ResolutionSearchTruncatedError,
   ResolutionUpdateError,
   SelfLinkError,
 } from '../errors';
+import {
+  buildSourceAwareLinkDoc,
+  computeParallelMerge,
+  perSourceResolvedToField,
+  readParallelStateFromDoc,
+  type ParallelResolutionState,
+  type PerSourceVerdict,
+  type ResolutionSource,
+} from './parallel_resolution';
 import type { RefreshOption } from '../../infra/elasticsearch/resolution';
 import {
   searchEntitiesByIds,
@@ -31,6 +41,39 @@ import {
 const RESOLVED_TO_FIELD = 'entity.relationships.resolution.resolved_to';
 const ENGINE_METADATA_TYPE_FIELD = 'entity.EngineMetadata.Type';
 const MAX_RESOLUTION_SEARCH_SIZE = 10_000;
+
+/**
+ * Allowed values for `entity.relationships.resolution.resolved_by`. Defined
+ * in `er-v2-embedding-resolution-design.md` §8.
+ *
+ * - v1 (this PR): `rule | embedding | csv | manual`.
+ * - Phase 4 reservations: `embedding+rerank`, `embedding+llm`. The mapping
+ *   stays `keyword` either way, so consumers should treat this as an open
+ *   string set unless they specifically need to discriminate values.
+ */
+export type ResolutionProvenanceSource =
+  | 'rule'
+  | 'embedding'
+  | 'csv'
+  | 'manual'
+  | 'embedding+rerank'
+  | 'embedding+llm';
+
+/**
+ * Provenance payload stamped onto every link doc when supplied. Mirrors the
+ * three new schema fields added in Phase 3a:
+ * - resolved_by: who created the link (rules engine, embedding maintainer, …).
+ * - score: optional similarity / confidence in [0, 1]. Conventionally omitted
+ *   for `rule` and `manual` (deterministic), set to the cosine score for
+ *   `embedding`. Omitted (not zero / null) when unknown so a previously
+ *   stamped score is never silently overwritten.
+ * - model_id: optional inference endpoint id that produced the score.
+ */
+export interface ResolutionProvenance {
+  resolved_by: ResolutionProvenanceSource;
+  score?: number;
+  model_id?: string;
+}
 
 interface ResolutionClientOpts {
   logger: Logger;
@@ -58,6 +101,22 @@ export interface ResolutionGroup {
 /** Options forwarded to the underlying bulk write. */
 export interface ResolutionWriteOptions {
   refresh?: RefreshOption;
+  /**
+   * Optional provenance attribution to stamp on every link doc. When omitted,
+   * only `resolved_to` is written (back-compat with pre-Phase-3 callers).
+   */
+  provenance?: ResolutionProvenance;
+  /**
+   * Parallel-resolution attribution. When set, the link is recorded under
+   * `entity.relationships.resolution.by_<source>.*` and the per-doc merge
+   * (`effective_to` / `divergent`) is recomputed from the existing verdicts +
+   * this write. The legacy single-slot fields stay in sync with the merge.
+   *
+   * Behind the `entityAnalyticsParallelResolution` experimental flag — when
+   * the flag is off, callers should keep `source` undefined so behavior is
+   * identical to the pre-RFC single-slot path.
+   */
+  source?: ResolutionSource;
 }
 
 interface FetchedEntities {
@@ -86,7 +145,7 @@ export class ResolutionClient {
     rawEntityIds: string[],
     options: ResolutionWriteOptions = {}
   ): Promise<LinkResult> {
-    const { refresh = 'wait_for' } = options;
+    const { refresh = 'wait_for', provenance, source } = options;
     const index = getLatestEntitiesIndexName(this.namespace);
 
     // 1. Deduplicate entity_ids
@@ -114,14 +173,37 @@ export class ResolutionClient {
     // 6. Check which entities among entity_ids have aliases pointing to them
     const entitiesWithAliases = await this.findEntitiesWithAliases(entityIds);
 
-    // 7. Categorize each entity_id
+    // 7. Categorize each entity_id. The chain check varies by mode:
+    //    - Source-omitted (back-compat): the legacy single-slot
+    //      `resolved_to` is the chain. If anything is set there to a
+    //      different target, throw `ChainResolutionError`.
+    //    - Source-aware (parallel mode): only this source's per-source slot
+    //      defines a chain. Different sources are allowed to disagree —
+    //      that's the entire point. If THIS source is already pointing
+    //      somewhere else for the alias, throw `MultiSourceConflictError`.
     const linked: string[] = [];
     const skipped: string[] = [];
 
     for (const entityId of entityIds) {
       const entity = sources.get(entityId)!;
-      const resolvedTo = getFieldValue(entity, RESOLVED_TO_FIELD);
 
+      if (source !== undefined) {
+        const sourceResolvedTo = getFieldValue(entity, perSourceResolvedToField(source));
+        if (sourceResolvedTo === targetId) {
+          skipped.push(entityId);
+          continue;
+        }
+        if (sourceResolvedTo) {
+          throw new MultiSourceConflictError(entityId, source, sourceResolvedTo, targetId);
+        }
+        if (entitiesWithAliases.has(entityId)) {
+          throw new EntityHasAliasesError(entityId, entitiesWithAliases.get(entityId)!);
+        }
+        linked.push(entityId);
+        continue;
+      }
+
+      const resolvedTo = getFieldValue(entity, RESOLVED_TO_FIELD);
       if (resolvedTo === targetId) {
         skipped.push(entityId);
       } else if (resolvedTo) {
@@ -137,13 +219,63 @@ export class ResolutionClient {
       return { linked: [], skipped, target_id: targetId };
     }
 
-    // 8. Bulk update: set resolved_to on all entities to link
-    this.logger.debug(`Linking ${linked.length} entities to target '${targetId}'`);
+    // 8. Bulk update. Two write paths depending on mode:
+    //
+    //    Source-omitted (back-compat): set the legacy `resolved_to` plus the
+    //      single-slot provenance triplet. Identical to pre-RFC behavior.
+    //
+    //    Source-aware (parallel mode): set the per-source slot
+    //      `entity.relationships.resolution.by_<source>.*`, then merge with
+    //      the entity's existing per-source verdicts and rewrite the legacy
+    //      mirrors so anything reading `resolved_to` / `resolved_by` /
+    //      `score` / `model_id` keeps observing the canonical effective link.
+    //      Each entity gets its own doc payload because the merge depends on
+    //      pre-existing per-source state.
+    this.logger.debug(
+      `Linking ${linked.length} entities to target '${targetId}'` +
+        (source
+          ? ` (source=${source})`
+          : provenance
+          ? ` (resolved_by=${provenance.resolved_by})`
+          : '')
+    );
 
-    const updates = linked.map((entityId) => ({
-      docId: docIds.get(entityId)!,
-      doc: { [RESOLVED_TO_FIELD]: targetId },
-    }));
+    let updates: Array<{ docId: string; doc: Record<string, unknown> }>;
+    if (source !== undefined) {
+      const now = new Date().toISOString();
+      const newVerdict: PerSourceVerdict = {
+        resolvedTo: targetId,
+        resolvedAt: now,
+        score: provenance?.score,
+        modelId: provenance?.model_id,
+      };
+      updates = linked.map((entityId) => {
+        const entity = sources.get(entityId)!;
+        const existing = readParallelStateFromDoc(entity);
+        const next: ParallelResolutionState = { ...existing, [source]: newVerdict };
+        const merge = computeParallelMerge(next);
+        return {
+          docId: docIds.get(entityId)!,
+          doc: buildSourceAwareLinkDoc({ source, verdict: newVerdict, merge }),
+        };
+      });
+    } else {
+      const linkDoc: Record<string, unknown> = { [RESOLVED_TO_FIELD]: targetId };
+      if (provenance) {
+        linkDoc['entity.relationships.resolution.resolved_by'] = provenance.resolved_by;
+        if (provenance.score !== undefined) {
+          linkDoc['entity.relationships.resolution.score'] = provenance.score;
+        }
+        if (provenance.model_id !== undefined) {
+          linkDoc['entity.relationships.resolution.model_id'] = provenance.model_id;
+        }
+      }
+      updates = linked.map((entityId) => ({
+        docId: docIds.get(entityId)!,
+        doc: linkDoc,
+      }));
+    }
+
     const linkResult = await bulkUpdateEntityDocs(this.esClient, { index, updates, refresh });
 
     this.throwOnBulkErrors(linkResult, `linking entities to '${targetId}'`);

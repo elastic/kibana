@@ -9,7 +9,11 @@ import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
 import { ResolutionGroupTable } from './resolution_group_table';
-import { RESOLUTION_GROUP_TABLE_TEST_ID, RESOLUTION_EMPTY_STATE_TEST_ID } from './test_ids';
+import {
+  RESOLUTION_GROUP_TABLE_TEST_ID,
+  RESOLUTION_EMPTY_STATE_TEST_ID,
+  RESOLUTION_PROVENANCE_BADGE_TEST_ID,
+} from './test_ids';
 import type { ResolutionGroup } from './hooks/use_resolution_group';
 
 const mockGroup: ResolutionGroup = {
@@ -26,6 +30,9 @@ const mockGroup: ResolutionGroup = {
       'entity.id': 'alice-azure-id',
       'entity.source': 'logs-azure',
       'entity.risk.calculated_score_norm': 60,
+      'entity.relationships.resolution.resolved_by': 'embedding',
+      'entity.relationships.resolution.score': 0.913,
+      'entity.relationships.resolution.model_id': '.jina-embeddings-v5-text-small',
     },
   ],
   group_size: 2,
@@ -200,6 +207,20 @@ describe('ResolutionGroupTable', () => {
     expect(getByText('Entity name')).toBeInTheDocument();
     expect(getByText('Entity ID')).toBeInTheDocument();
     expect(getByText('Data source')).toBeInTheDocument();
+    expect(getByText('Linked by')).toBeInTheDocument();
     expect(getByText('Risk score')).toBeInTheDocument();
+  });
+
+  it('renders the resolution provenance badge for the alias row but not the target row', () => {
+    const { getAllByTestId } = render(
+      <TestProviders>
+        <ResolutionGroupTable group={mockGroup} isLoading={false} targetEntityId="alice-id" />
+      </TestProviders>
+    );
+
+    const badges = getAllByTestId(RESOLUTION_PROVENANCE_BADGE_TEST_ID);
+    // Target row has no resolved_by → no badge; only the alias row renders one.
+    expect(badges).toHaveLength(1);
+    expect(badges[0]).toHaveTextContent('Embedding 91%');
   });
 });

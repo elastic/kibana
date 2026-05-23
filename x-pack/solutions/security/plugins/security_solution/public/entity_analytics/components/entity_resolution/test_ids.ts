@@ -21,3 +21,5 @@ export const ADD_ENTITIES_ACCORDION_TEST_ID = `${PREFIX}AddEntitiesAccordion` as
 export const ADD_ENTITIES_SHOWING_TEST_ID = `${PREFIX}AddEntitiesShowing` as const;
 export const CONFIRM_RESOLUTION_MODAL_TEST_ID = `${PREFIX}ConfirmResolutionModal` as const;
 export const RESOLUTION_EMPTY_STATE_TEST_ID = `${PREFIX}ResolutionEmptyState` as const;
+export const RESOLUTION_PROVENANCE_BADGE_TEST_ID = `${PREFIX}ResolutionProvenanceBadge` as const;
+export const RESOLUTION_DIVERGENCE_BADGE_TEST_ID = `${PREFIX}ResolutionDivergenceBadge` as const;

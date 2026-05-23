@@ -13,6 +13,7 @@ import {
   EntitiesNotFoundError,
   EntityHasAliasesError,
   MixedEntityTypesError,
+  MultiSourceConflictError,
   ResolutionSearchTruncatedError,
   ResolutionUpdateError,
   SelfLinkError,
@@ -162,6 +163,109 @@ describe('ResolutionClient', () => {
       for (const { doc } of docOperations) {
         expect(doc).toEqual(nestedDoc);
       }
+    });
+
+    it('stamps provenance fields on every link doc when provenance is provided', async () => {
+      const targetDoc = createEntityDoc('target-1');
+      const entity1Doc = createEntityDoc('entity-1');
+      const entity2Doc = createEntityDoc('entity-2');
+
+      mockEsClient.search.mockResolvedValueOnce(
+        createSearchResponse([targetDoc, entity1Doc, entity2Doc]) as never
+      );
+      mockEsClient.search.mockResolvedValueOnce(createSearchResponse([]) as never);
+      mockEsClient.bulk.mockResolvedValueOnce({ errors: false, items: [] } as never);
+
+      await client.linkEntities('target-1', ['entity-1', 'entity-2'], {
+        provenance: {
+          resolved_by: 'embedding',
+          score: 0.913,
+          model_id: '.jina-embeddings-v5-text-small',
+        },
+      });
+
+      const bulkPayload = mockEsClient.bulk.mock.calls[0][0];
+      const { operations } = bulkPayload;
+      if (!operations) throw new Error('expected bulk operations');
+      const docOperations = operations.filter(
+        (op: unknown): op is { doc: unknown } =>
+          op !== null && typeof op === 'object' && 'doc' in op
+      );
+      expect(docOperations).toHaveLength(2);
+      const expectedDoc = {
+        entity: {
+          relationships: {
+            resolution: {
+              resolved_to: 'target-1',
+              resolved_by: 'embedding',
+              score: 0.913,
+              model_id: '.jina-embeddings-v5-text-small',
+            },
+          },
+        },
+      };
+      for (const { doc } of docOperations) {
+        expect(doc).toEqual(expectedDoc);
+      }
+    });
+
+    it('omits score/model_id keys when provenance only includes resolved_by (rule/manual links)', async () => {
+      const targetDoc = createEntityDoc('target-1');
+      const entity1Doc = createEntityDoc('entity-1');
+
+      mockEsClient.search.mockResolvedValueOnce(
+        createSearchResponse([targetDoc, entity1Doc]) as never
+      );
+      mockEsClient.search.mockResolvedValueOnce(createSearchResponse([]) as never);
+      mockEsClient.bulk.mockResolvedValueOnce({ errors: false, items: [] } as never);
+
+      await client.linkEntities('target-1', ['entity-1'], {
+        provenance: { resolved_by: 'rule' },
+      });
+
+      const bulkPayload = mockEsClient.bulk.mock.calls[0][0];
+      const { operations } = bulkPayload;
+      if (!operations) throw new Error('expected bulk operations');
+      const doc = operations.find(
+        (op: unknown): op is { doc: unknown } =>
+          op !== null && typeof op === 'object' && 'doc' in op
+      )!.doc as Record<string, unknown>;
+      const resolution = (
+        (doc.entity as Record<string, unknown>).relationships as Record<string, unknown>
+      ).resolution as Record<string, unknown>;
+      expect(resolution).toEqual({
+        resolved_to: 'target-1',
+        resolved_by: 'rule',
+      });
+      // No null / undefined sentinels: keys must be absent so partial provenance
+      // never overwrites a previously-stamped score/model_id with null.
+      expect(Object.keys(resolution)).not.toContain('score');
+      expect(Object.keys(resolution)).not.toContain('model_id');
+    });
+
+    it('writes only resolved_to when no provenance is supplied (back-compat)', async () => {
+      const targetDoc = createEntityDoc('target-1');
+      const entity1Doc = createEntityDoc('entity-1');
+
+      mockEsClient.search.mockResolvedValueOnce(
+        createSearchResponse([targetDoc, entity1Doc]) as never
+      );
+      mockEsClient.search.mockResolvedValueOnce(createSearchResponse([]) as never);
+      mockEsClient.bulk.mockResolvedValueOnce({ errors: false, items: [] } as never);
+
+      await client.linkEntities('target-1', ['entity-1']);
+
+      const bulkPayload = mockEsClient.bulk.mock.calls[0][0];
+      const { operations } = bulkPayload;
+      if (!operations) throw new Error('expected bulk operations');
+      const doc = operations.find(
+        (op: unknown): op is { doc: unknown } =>
+          op !== null && typeof op === 'object' && 'doc' in op
+      )!.doc as Record<string, unknown>;
+      const resolution = (
+        (doc.entity as Record<string, unknown>).relationships as Record<string, unknown>
+      ).resolution as Record<string, unknown>;
+      expect(resolution).toEqual({ resolved_to: 'target-1' });
     });
 
     it('should skip entities already linked to the same target', async () => {
@@ -348,6 +452,205 @@ describe('ResolutionClient', () => {
       await expect(client.linkEntities('target-1', ['entity-1'])).rejects.toThrow(
         ResolutionSearchTruncatedError
       );
+    });
+  });
+
+  describe('linkEntities — parallel resolution (source-aware)', () => {
+    const findResolutionDoc = (bulkPayload: {
+      operations?: unknown[];
+    }): Record<string, unknown> => {
+      const operations = bulkPayload.operations as unknown[] | undefined;
+      if (!operations) throw new Error('expected bulk operations');
+      const opWithDoc = operations.find(
+        (op): op is { doc: unknown } => op !== null && typeof op === 'object' && 'doc' in op
+      );
+      if (!opWithDoc) throw new Error('expected an operation with a doc payload');
+      const entity = (opWithDoc.doc as Record<string, unknown>).entity as Record<string, unknown>;
+      const relationships = entity.relationships as Record<string, unknown>;
+      return relationships.resolution as Record<string, unknown>;
+    };
+
+    it('writes the per-source slot, effective_to, divergent, and legacy mirrors when source: rule', async () => {
+      const targetDoc = createEntityDoc('target-1');
+      const aliasDoc = createEntityDoc('entity-1');
+
+      mockEsClient.search.mockResolvedValueOnce(
+        createSearchResponse([targetDoc, aliasDoc]) as never
+      );
+      mockEsClient.search.mockResolvedValueOnce(createSearchResponse([]) as never);
+      mockEsClient.bulk.mockResolvedValueOnce({ errors: false, items: [] } as never);
+
+      await client.linkEntities('target-1', ['entity-1'], {
+        source: 'rule',
+        provenance: { resolved_by: 'rule' },
+      });
+
+      const resolution = findResolutionDoc(mockEsClient.bulk.mock.calls[0][0] as never);
+      expect(resolution).toMatchObject({
+        by_rule: expect.objectContaining({ resolved_to: 'target-1' }),
+        effective_to: 'target-1',
+        divergent: false,
+        resolved_to: 'target-1',
+        resolved_by: 'rule',
+      });
+      expect(resolution.by_embedding).toBeUndefined();
+      expect(resolution.by_manual).toBeUndefined();
+      // Legacy embedding-only mirrors must NOT be written for rule links so a
+      // previously-stamped embedding score is never silently overwritten.
+      expect(resolution.score).toBeUndefined();
+      expect(resolution.model_id).toBeUndefined();
+    });
+
+    it('writes by_embedding plus score / model_id and mirrors them when source: embedding', async () => {
+      const targetDoc = createEntityDoc('target-1');
+      const aliasDoc = createEntityDoc('entity-1');
+
+      mockEsClient.search.mockResolvedValueOnce(
+        createSearchResponse([targetDoc, aliasDoc]) as never
+      );
+      mockEsClient.search.mockResolvedValueOnce(createSearchResponse([]) as never);
+      mockEsClient.bulk.mockResolvedValueOnce({ errors: false, items: [] } as never);
+
+      await client.linkEntities('target-1', ['entity-1'], {
+        source: 'embedding',
+        provenance: {
+          resolved_by: 'embedding',
+          score: 0.913,
+          model_id: '.jina-embeddings-v5-text-small',
+        },
+      });
+
+      const resolution = findResolutionDoc(mockEsClient.bulk.mock.calls[0][0] as never);
+      expect(resolution).toMatchObject({
+        by_embedding: expect.objectContaining({
+          resolved_to: 'target-1',
+          score: 0.913,
+          model_id: '.jina-embeddings-v5-text-small',
+        }),
+        effective_to: 'target-1',
+        divergent: false,
+        resolved_to: 'target-1',
+        resolved_by: 'embedding',
+        score: 0.913,
+        model_id: '.jina-embeddings-v5-text-small',
+      });
+    });
+
+    it('flags divergent and stamps rule as the effective source when an embedding link disagrees with an existing rule link', async () => {
+      // The alias already has a rule verdict pointing at target-1; we now
+      // link the same alias via embedding to target-2. The merge should
+      // keep target-1 as effective_to, set divergent: true, and preserve
+      // both per-source slots.
+      const targetDoc = createEntityDoc('target-2');
+      const aliasDoc: Record<string, unknown> = {
+        ...createEntityDoc('entity-1'),
+        'entity.relationships.resolution.by_rule.resolved_to': 'target-1',
+      };
+
+      mockEsClient.search.mockResolvedValueOnce(
+        createSearchResponse([targetDoc, aliasDoc]) as never
+      );
+      mockEsClient.search.mockResolvedValueOnce(createSearchResponse([]) as never);
+      mockEsClient.bulk.mockResolvedValueOnce({ errors: false, items: [] } as never);
+
+      await client.linkEntities('target-2', ['entity-1'], {
+        source: 'embedding',
+        provenance: {
+          resolved_by: 'embedding',
+          score: 0.91,
+          model_id: '.jina-embeddings-v5-text-small',
+        },
+      });
+
+      const resolution = findResolutionDoc(mockEsClient.bulk.mock.calls[0][0] as never);
+      expect(resolution).toMatchObject({
+        by_embedding: expect.objectContaining({ resolved_to: 'target-2', score: 0.91 }),
+        effective_to: 'target-1',
+        divergent: true,
+        resolved_to: 'target-1',
+        resolved_by: 'rule',
+      });
+    });
+
+    it('lets a rule link coexist with an existing embedding link instead of throwing ChainResolutionError', async () => {
+      const targetDoc = createEntityDoc('target-1');
+      const aliasDoc: Record<string, unknown> = {
+        ...createEntityDoc('entity-1'),
+        // Pretend embedding already linked the alias to a different target.
+        // In legacy mode this would throw ChainResolutionError; in source-
+        // aware mode the rule maintainer is allowed to record its own opinion.
+        'entity.relationships.resolution.by_embedding.resolved_to': 'target-2',
+      };
+
+      mockEsClient.search.mockResolvedValueOnce(
+        createSearchResponse([targetDoc, aliasDoc]) as never
+      );
+      mockEsClient.search.mockResolvedValueOnce(createSearchResponse([]) as never);
+      mockEsClient.bulk.mockResolvedValueOnce({ errors: false, items: [] } as never);
+
+      const result = await client.linkEntities('target-1', ['entity-1'], { source: 'rule' });
+      expect(result.linked).toEqual(['entity-1']);
+    });
+
+    it('throws MultiSourceConflictError when the same source already has a different verdict for the alias', async () => {
+      const targetDoc = createEntityDoc('target-2');
+      const aliasDoc: Record<string, unknown> = {
+        ...createEntityDoc('entity-1'),
+        'entity.relationships.resolution.by_rule.resolved_to': 'target-1',
+      };
+
+      mockEsClient.search.mockResolvedValueOnce(
+        createSearchResponse([targetDoc, aliasDoc]) as never
+      );
+      mockEsClient.search.mockResolvedValueOnce(createSearchResponse([]) as never);
+
+      await expect(
+        client.linkEntities('target-2', ['entity-1'], { source: 'rule' })
+      ).rejects.toThrow(MultiSourceConflictError);
+    });
+
+    it('skips when the same source already points at the same target', async () => {
+      const targetDoc = createEntityDoc('target-1');
+      const aliasDoc: Record<string, unknown> = {
+        ...createEntityDoc('entity-1'),
+        'entity.relationships.resolution.by_rule.resolved_to': 'target-1',
+      };
+
+      mockEsClient.search.mockResolvedValueOnce(
+        createSearchResponse([targetDoc, aliasDoc]) as never
+      );
+      mockEsClient.search.mockResolvedValueOnce(createSearchResponse([]) as never);
+
+      const result = await client.linkEntities('target-1', ['entity-1'], { source: 'rule' });
+      expect(result).toEqual({ linked: [], skipped: ['entity-1'], target_id: 'target-1' });
+      expect(mockEsClient.bulk).not.toHaveBeenCalled();
+    });
+
+    it('manual link wins effective_to even when rule and embedding disagree', async () => {
+      const targetDoc = createEntityDoc('target-3');
+      const aliasDoc: Record<string, unknown> = {
+        ...createEntityDoc('entity-1'),
+        'entity.relationships.resolution.by_rule.resolved_to': 'target-1',
+        'entity.relationships.resolution.by_embedding.resolved_to': 'target-2',
+        'entity.relationships.resolution.by_embedding.score': 0.92,
+      };
+
+      mockEsClient.search.mockResolvedValueOnce(
+        createSearchResponse([targetDoc, aliasDoc]) as never
+      );
+      mockEsClient.search.mockResolvedValueOnce(createSearchResponse([]) as never);
+      mockEsClient.bulk.mockResolvedValueOnce({ errors: false, items: [] } as never);
+
+      await client.linkEntities('target-3', ['entity-1'], { source: 'manual' });
+
+      const resolution = findResolutionDoc(mockEsClient.bulk.mock.calls[0][0] as never);
+      expect(resolution).toMatchObject({
+        by_manual: expect.objectContaining({ resolved_to: 'target-3' }),
+        effective_to: 'target-3',
+        divergent: true,
+        resolved_to: 'target-3',
+        resolved_by: 'manual',
+      });
     });
   });
 

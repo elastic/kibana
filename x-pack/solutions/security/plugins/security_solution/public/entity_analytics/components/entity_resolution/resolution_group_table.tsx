@@ -39,6 +39,7 @@ import {
   CANNOT_REMOVE_TARGET_TOOLTIP,
   RESOLUTION_EMPTY_STATE,
   RESOLUTION_FETCH_ERROR,
+  RESOLVED_BY_COLUMN,
 } from './translations';
 import {
   RESOLUTION_GROUP_TABLE_TEST_ID,
@@ -46,6 +47,7 @@ import {
   RESOLUTION_PRIMARY_ENTITY_ICON_TEST_ID,
 } from './test_ids';
 import { RiskScoreCell } from '../home/entities_table/risk_score_cell';
+import { ResolutionProvenanceBadge } from './resolution_provenance_badge';
 
 export interface ResolutionGroupTableProps {
   group: ResolutionGroup | null;
@@ -197,6 +199,11 @@ export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
         },
       },
       {
+        name: RESOLVED_BY_COLUMN,
+        width: '140px',
+        render: ({ entity }: TableEntityRow) => <ResolutionProvenanceBadge entity={entity} />,
+      },
+      {
         name: RISK_SCORE_COLUMN,
         width: '100px',
         render: ({ entity }: TableEntityRow) => {
@@ -233,6 +240,7 @@ export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
       { name: ENTITY_NAME_COLUMN, render: () => null },
       { name: ENTITY_ID_COLUMN, render: () => null },
       { name: SOURCE_COLUMN, render: () => null },
+      { name: RESOLVED_BY_COLUMN, width: '140px', render: () => null },
       { name: RISK_SCORE_COLUMN, width: '100px', render: () => null },
     ];
 

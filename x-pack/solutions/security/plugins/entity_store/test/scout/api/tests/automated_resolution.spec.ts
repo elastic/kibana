@@ -444,4 +444,188 @@ apiTest.describe('Automated email resolution integration tests', { tag: ENTITY_S
       await assertNotResolved(esClient, entityA);
     }
   );
+
+  // ---------------------------------------------------------------------------
+  // Extended cases — harder fixtures from security-ml#417 ("Experiment with
+  // incomplete logs"), translated to the 9.4 rules-based matcher's surface.
+  // The richer optional fields (`fullName`, `userId`, `groupName`, `hostName`)
+  // exist for realism only — the matcher itself only ever looks at `user.email`
+  // + `entity.namespace`. See .claude/er-v2-9.4-test-data.md "Extended fixtures
+  // (#11–#18)" for the full pass/fail rationale.
+  // ---------------------------------------------------------------------------
+
+  apiTest(
+    'Sparse data: email-only entities still resolve (fixture #11)',
+    async ({ apiClient, esClient }) => {
+      // Both entities have only `user.email` (plus the helper's defaulted
+      // `user.name`). No fullName / userId / groupName / hostName. The matcher
+      // ignores the absence of any of those — minimal data still resolves.
+      const email = 'er-v2-417-11@example.com';
+      const oktaEntity = 'er11-sparse-okta';
+      const entraEntity = 'er11-sparse-entra';
+
+      await seedUserEntity(esClient, { entityId: oktaEntity, namespace: 'okta', email });
+      await seedUserEntity(esClient, { entityId: entraEntity, namespace: 'entra_id', email });
+
+      await triggerMaintainerRun(apiClient, internalHeaders);
+      await waitForResolution(esClient, entraEntity, oktaEntity);
+
+      const groupResponse = await apiClient.get(
+        `${ENTITY_STORE_ROUTES.public.RESOLUTION_GROUP}?entity_id=${oktaEntity}&apiVersion=2`,
+        { headers: defaultHeaders, responseType: 'json' }
+      );
+
+      expect(groupResponse.statusCode).toBe(200);
+      expect(groupResponse.body.group_size).toBe(2);
+      expect(groupResponse.body.target.entity.id).toBe(oktaEntity);
+    }
+  );
+
+  apiTest(
+    'Email case-mismatch: Alice@Corp.com vs alice@corp.com — both stay unresolved (fixture #13, gap)',
+    async ({ apiClient, esClient }) => {
+      // Documented gap: term query is case-sensitive on `keyword`, so two
+      // case-variant emails form two distinct buckets, each with 1 entity →
+      // both fall below min_doc_count: 2 and are dropped. Real-world
+      // false-negative — humans treat this as one identity.
+      const oktaEntity = 'er13-case-okta';
+      const entraEntity = 'er13-case-entra';
+
+      await seedUserEntity(esClient, {
+        entityId: oktaEntity,
+        namespace: 'okta',
+        email: 'Alice@Corp.com',
+      });
+      await seedUserEntity(esClient, {
+        entityId: entraEntity,
+        namespace: 'entra_id',
+        email: 'alice@corp.com',
+      });
+
+      await triggerMaintainerRun(apiClient, internalHeaders);
+
+      await assertNotResolved(esClient, oktaEntity);
+      await assertNotResolved(esClient, entraEntity);
+    }
+  );
+
+  apiTest(
+    'Plus-aliased emails: bob+work@corp.com vs bob@corp.com — both stay unresolved (fixture #14, gap)',
+    async ({ apiClient, esClient }) => {
+      // Documented gap: rules engine cannot normalise Gmail/O365 aliases.
+      // Same min_doc_count: 2 cliff as fixture #13.
+      const oktaEntity = 'er14-plus-okta';
+      const entraEntity = 'er14-plus-entra';
+
+      await seedUserEntity(esClient, {
+        entityId: oktaEntity,
+        namespace: 'okta',
+        email: 'bob+work@corp.com',
+      });
+      await seedUserEntity(esClient, {
+        entityId: entraEntity,
+        namespace: 'entra_id',
+        email: 'bob@corp.com',
+      });
+
+      await triggerMaintainerRun(apiClient, internalHeaders);
+
+      await assertNotResolved(esClient, oktaEntity);
+      await assertNotResolved(esClient, entraEntity);
+    }
+  );
+
+  apiTest(
+    'Shared role email: 3 okta service-accounts + 1 entra_id admin all linked into one group (fixture #15, documented false positive)',
+    async ({ apiClient, esClient }) => {
+      // Documented false positive: rules engine cannot tell role accounts
+      // apart from people. All 4 share noreply@corp.com → one group.
+      // Target = alphabetically smallest okta entity (okta beats entra_id
+      // in NAMESPACE_PRIORITY; alphabetical tiebreaker on entity.id).
+      const email = 'er-v2-417-15-noreply@corp.com';
+      const svc1 = 'er15-svc-1';
+      const svc2 = 'er15-svc-2';
+      const svc3 = 'er15-svc-3';
+      const admin = 'er15-admin';
+
+      await seedUserEntity(esClient, {
+        entityId: svc1,
+        namespace: 'okta',
+        email,
+        fullName: 'Backup Service',
+      });
+      await seedUserEntity(esClient, {
+        entityId: svc2,
+        namespace: 'okta',
+        email,
+        fullName: 'CI Pipeline',
+      });
+      await seedUserEntity(esClient, {
+        entityId: svc3,
+        namespace: 'okta',
+        email,
+        fullName: 'Monitoring Bot',
+      });
+      await seedUserEntity(esClient, {
+        entityId: admin,
+        namespace: 'entra_id',
+        email,
+        fullName: 'Helpdesk Admin',
+      });
+
+      await triggerMaintainerRun(apiClient, internalHeaders);
+      await waitForResolution(esClient, svc2, svc1);
+      await waitForResolution(esClient, svc3, svc1);
+      await waitForResolution(esClient, admin, svc1);
+
+      const groupResponse = await apiClient.get(
+        `${ENTITY_STORE_ROUTES.public.RESOLUTION_GROUP}?entity_id=${svc1}&apiVersion=2`,
+        { headers: defaultHeaders, responseType: 'json' }
+      );
+
+      expect(groupResponse.statusCode).toBe(200);
+      expect(groupResponse.body.group_size).toBe(4);
+      expect(groupResponse.body.target.entity.id).toBe(svc1);
+
+      const aliasIds = groupResponse.body.aliases.map((a: any) => a.entity.id);
+      expect(aliasIds).toStrictEqual(expect.arrayContaining([svc2, svc3, admin]));
+    }
+  );
+
+  apiTest(
+    'Mapped-but-not-priority namespace: microsoft_365 loses to okta (fixture #17)',
+    async ({ apiClient, esClient }) => {
+      // microsoft_365 is namespace-mapped in user.ts:127-134 but absent from
+      // NAMESPACE_PRIORITY (['active_directory','okta','entra_id']) →
+      // Okta wins target despite M365 being a "real" IDP. group_size=3.
+      const email = 'er-v2-417-17@example.com';
+      const m365Entity = 'er17-m365';
+      const oktaEntity = 'er17-okta';
+      const entraEntity = 'er17-entra';
+
+      await seedUserEntity(esClient, {
+        entityId: m365Entity,
+        namespace: 'microsoft_365',
+        email,
+      });
+      await seedUserEntity(esClient, { entityId: oktaEntity, namespace: 'okta', email });
+      await seedUserEntity(esClient, { entityId: entraEntity, namespace: 'entra_id', email });
+
+      await triggerMaintainerRun(apiClient, internalHeaders);
+      await waitForResolution(esClient, entraEntity, oktaEntity);
+      await waitForResolution(esClient, m365Entity, oktaEntity);
+
+      const groupResponse = await apiClient.get(
+        `${ENTITY_STORE_ROUTES.public.RESOLUTION_GROUP}?entity_id=${oktaEntity}&apiVersion=2`,
+        { headers: defaultHeaders, responseType: 'json' }
+      );
+
+      expect(groupResponse.statusCode).toBe(200);
+      expect(groupResponse.body.group_size).toBe(3);
+      expect(groupResponse.body.target.entity.id).toBe(oktaEntity);
+
+      const aliasIds = groupResponse.body.aliases.map((a: any) => a.entity.id);
+      expect(aliasIds).toStrictEqual(expect.arrayContaining([entraEntity, m365Entity]));
+    }
+  );
 });

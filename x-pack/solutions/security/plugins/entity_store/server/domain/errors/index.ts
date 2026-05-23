@@ -18,3 +18,4 @@ export { ResolutionSearchTruncatedError } from './resolution_search_truncated_er
 export { ResolutionUpdateError } from './resolution_update_error';
 export { EntityAlreadyExistsError } from './entity_already_exists';
 export { EntityStoreNotInstalledError } from './entity_store_not_installed';
+export { MultiSourceConflictError } from './multi_source_conflict_error';

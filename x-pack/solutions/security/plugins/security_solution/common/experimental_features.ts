@@ -247,6 +247,60 @@ export const allowedExperimentalValues = Object.freeze({
   entityAnalyticsEntityStoreV2: true,
 
   /**
+   * Phase 2 of the embedding-resolution design
+   * ([.claude/er-v2-embedding-resolution-design.md]).
+   *
+   * Registers the `embedding-resolution` entity maintainer, which embeds
+   * unresolved user entities via the configured `_inference` endpoint (default
+   * `.jina-embeddings-v5-text-small`, provisioned by EIS). Embed-only — no
+   * auto-linking, no UI changes. Vectors land on `entity.resolution.embedding`
+   * and become available for manual kNN. Phase 3 (auto-linking) will land
+   * behind a separate flag.
+   *
+   * Prerequisite: EIS must be connected at `{KBN}/app/cloud_connect`.
+   */
+  entityAnalyticsEmbeddingResolutionEmbedOnly: false,
+
+  /**
+   * Phase 3 of the embedding-resolution design
+   * ([.claude/er-v2-embedding-resolution-design.md]).
+   *
+   * Adds the auto-linking step on top of Phase 2's embed-only mode: after
+   * each successful embed, the maintainer runs a kNN search and stamps
+   * `entity.relationships.resolution.resolved_to` with provenance
+   * (`resolved_by: "embedding"`, score, model_id) for above-threshold
+   * candidates. Skips role accounts (design §11 E9) and ambiguous bucket
+   * ties (parity with the rules engine).
+   *
+   * **Independent of `…EmbedOnly`**: setting this flag implies "embed and
+   * link" and does not require the embed-only flag to also be on. Both flags
+   * being off is the production default — no embedding work happens.
+   *
+   * Prerequisite: EIS must be connected at `{KBN}/app/cloud_connect`.
+   */
+  entityAnalyticsEmbeddingResolutionEnabled: false,
+
+  /**
+   * Parallel rule + embedding entity resolution
+   * ([.claude/er-v2-parallel-resolution-rfc.md]).
+   *
+   * When ON, the rule and embedding maintainers each maintain a *separate*
+   * opinion per alias under `entity.relationships.resolution.by_rule.*` and
+   * `entity.relationships.resolution.by_embedding.*`, plus a server-computed
+   * `effective_to` / `divergent` pair the UI uses to surface agreement vs.
+   * disagreement. Manual links land under `by_manual.*` and always win the
+   * effective merge.
+   *
+   * When OFF (default), behavior is unchanged: maintainers compete for the
+   * single canonical `resolved_to` slot and only the first writer wins.
+   *
+   * The new schema fields are additive; this flag controls *writes*, not
+   * mappings. Turning the flag off after it has run is safe — the legacy
+   * `resolved_to` mirror remains in sync via the merge policy.
+   */
+  entityAnalyticsParallelResolution: false,
+
+  /**
    * Enables the deprecated prebuilt rules UI
    * Release: 9.4
    */
