@@ -57,17 +57,17 @@ export interface CommonTriggerDefinition<EventSchema extends z.ZodType = z.ZodTy
   /**
    * Short human-readable name for this trigger (UI and agent catalog label).
    */
-  title?: string;
+  title: string;
   /**
    * User-facing description of when this trigger is emitted.
    */
-  description?: string;
+  description: string;
   /**
    * Documentation (details + YAML examples), aligned with step definitions.
    */
-  documentation?: TriggerDocumentation;
+  documentation: TriggerDocumentation;
   /**
    * Pre-filled values for snippet insertion (e.g. on.condition).
    */
-  snippets?: TriggerSnippets;
+  snippets: TriggerSnippets;
 }
