@@ -15,6 +15,7 @@ import type { SchemasSettings } from 'monaco-yaml';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import type YAML from 'yaml';
+import { useChromeService } from '@kbn/core-chrome-browser-context';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { monaco, YAML_LANG_ID } from '@kbn/monaco';
@@ -729,13 +730,14 @@ export const WorkflowYAMLEditor = ({
     }
   }, [workflowJsonSchemaStrict, notifications]);
 
+  const chrome = useChromeService();
+  const isNextChrome = chrome.next.isEnabled;
+
   const extraActions = useMemo<ExtraAction[]>(
     () => [
-      {
-        id: 'documentation',
-        content: <DocumentationLink />,
-        showInReadOnly: true,
-      },
+      ...(!isNextChrome
+        ? [{ id: 'documentation', content: <DocumentationLink />, showInReadOnly: true }]
+        : []),
       {
         id: 'actions-menu',
         content: <ActionsMenuButton onClick={openActionsPopover} />,
@@ -752,7 +754,7 @@ export const WorkflowYAMLEditor = ({
         showInReadOnly: true,
       },
     ],
-    [openActionsPopover, editorRef]
+    [openActionsPopover, editorRef, isNextChrome]
   );
 
   // These were triggering rerendering of the actions containers on every scroll, because they were

@@ -26,14 +26,18 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useMemo, useState } from 'react';
+import { selectUnit } from '@formatjs/intl-utils';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
+import { AppHeader as PageHeader } from '@kbn/app-header';
+import type { AppHeaderBadge } from '@kbn/app-header';
+import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
-import { PLUGIN_ID } from '../../../../common';
+import { PLUGIN_ID, WORKFLOWS_DOCUMENTATION_URL } from '../../../../common';
 import { useSaveYaml } from '../../../entities/workflows/model/use_save_yaml';
 import { useUpdateWorkflow } from '../../../entities/workflows/model/use_update_workflow';
 import {
@@ -64,7 +68,7 @@ const executionsTabReadExecutionDisabledTooltip = i18n.translate(
 
 const Translations = {
   runWorkflow: i18n.translate('workflows.workflowDetailHeader.runWorkflow', {
-    defaultMessage: 'Run workflow',
+    defaultMessage: 'Run',
   }),
   runWithUnsavedChangesQuestion: i18n.translate(
     'workflows.workflowDetailHeader.runWithUnsavedChangesQuestion',
@@ -204,153 +208,333 @@ export const WorkflowDetailHeader = React.memo(
       setShowRunConfirmation(false);
     }, []);
 
+    const navigateToIntegrations = useCallback(() => {
+      application.navigateToApp('integrations', { path: '/browse' });
+    }, [application]);
+
+    const [savedLabel, setSavedLabel] = useState<string>('');
+
+    useEffect(() => {
+      if (hasUnsavedChanges || !workflowId || !lastUpdatedAt) {
+        return;
+      }
+
+      const formatter = new Intl.RelativeTimeFormat(i18n.getLocale(), {
+        numeric: 'auto',
+        style: 'short',
+      });
+
+      const updateLabel = () => {
+        const { value, unit } = selectUnit(lastUpdatedAt);
+        if (unit === 'second') {
+          setSavedLabel(
+            i18n.translate('workflows.savedJustNow', {
+              defaultMessage: 'Saved just now',
+            })
+          );
+        } else {
+          setSavedLabel(
+            i18n.translate('workflows.savedAgo', {
+              defaultMessage: 'Saved {relativeTime}',
+              values: { relativeTime: formatter.format(value, unit) },
+            })
+          );
+        }
+      };
+
+      updateLabel();
+      const interval = setInterval(updateLabel, 30_000);
+
+      return () => clearInterval(interval);
+    }, [hasUnsavedChanges, workflowId, lastUpdatedAt]);
+
+    const badges = useMemo<AppHeaderBadge[]>(() => {
+      if (hasUnsavedChanges) {
+        return [
+          {
+            label: i18n.translate('workflows.unsavedChangesBadge', {
+              defaultMessage: 'Unsaved changes',
+            }),
+            color: 'primary',
+            'data-test-subj': 'workflowUnsavedChangesBadge',
+          },
+        ];
+      }
+      if (workflowId && savedLabel) {
+        return [
+          {
+            label: savedLabel,
+            color: 'primary',
+            'data-test-subj': 'workflowSavedChangesBadge',
+          },
+        ];
+      }
+      return [];
+    }, [hasUnsavedChanges, workflowId, savedLabel]);
+
+    const appMenu = useMemo<AppMenuConfig>(
+      () => ({
+        primaryActionItem: {
+          id: 'saveWorkflow',
+          label: i18n.translate('keepWorkflows.buttonText', {
+            defaultMessage: 'Save',
+          }),
+          iconType: 'save',
+          run: handleSaveWorkflow,
+          disableButton:
+            isExecutionsTab || !canSaveWorkflow || isLoading || isSaving || !isYamlSynced,
+          isLoading: isSaving,
+          tooltipContent: saveWorkflowTooltipContent ?? undefined,
+          testId: 'saveWorkflowHeaderButton',
+        },
+        switch: workflowId
+          ? {
+              id: 'enabledSwitch',
+              label: i18n.translate('workflows.workflowDetailHeader.enabled', {
+                defaultMessage: 'Enabled',
+              }),
+              labelProps: {},
+              checked: isEnabled,
+              onChange: (checked: boolean) => {
+                updateWorkflow({ workflow: { enabled: checked } });
+              },
+              disabled:
+                !workflowId ||
+                isLoading ||
+                !canUpdateWorkflow ||
+                !isSchemaValid ||
+                hasUnsavedChanges,
+              'data-test-subj': 'workflowEnabledSwitch',
+            }
+          : undefined,
+        items: [
+          ...(workflowId
+            ? [
+                {
+                  id: 'executions',
+                  order: 1,
+                  label: i18n.translate('workflows.workflowDetailHeader.executions', {
+                    defaultMessage: 'Executions',
+                  }),
+                  iconType: 'videoPlayer' as const,
+                  run: () => setActiveTab('executions' as WorkflowUrlStateTabType),
+                  disableButton: !canReadWorkflowExecution,
+                  tooltipContent: !canReadWorkflowExecution
+                    ? executionsTabReadExecutionDisabledTooltip
+                    : undefined,
+                  testId: 'executionsTabButton',
+                },
+              ]
+            : []),
+          {
+            id: 'runWorkflow',
+            order: 2,
+            label: Translations.runWorkflow,
+            iconType: 'play' as const,
+            overflow: true,
+            run: handleRunClickWithUnsavedCheck,
+            disableButton: isExecutionsTab || !canExecuteWorkflow || isLoading || !isSyntaxValid,
+            tooltipContent: runWorkflowTooltipContent ?? undefined,
+            testId: 'runWorkflowHeaderButton',
+          },
+        ],
+      }),
+      [
+        handleSaveWorkflow,
+        isExecutionsTab,
+        canSaveWorkflow,
+        isLoading,
+        isSaving,
+        isYamlSynced,
+        saveWorkflowTooltipContent,
+        workflowId,
+        isEnabled,
+        updateWorkflow,
+        canUpdateWorkflow,
+        isSchemaValid,
+        hasUnsavedChanges,
+        canReadWorkflowExecution,
+        setActiveTab,
+        handleRunClickWithUnsavedCheck,
+        canExecuteWorkflow,
+        isSyntaxValid,
+        runWorkflowTooltipContent,
+      ]
+    );
+
     return (
       <>
         <EuiPageTemplate offset={0} minHeight={0} grow={false} css={styles.pageTemplate}>
-          <EuiPageTemplate.Header
-            css={styles.header}
-            restrictWidth={false}
-            bottomBorder={false}
-            paddingSize="m"
-            alignItems="bottom"
-          >
-            <EuiPageHeaderSection css={styles.headerSection} data-test-subj="workflowDetailHeader">
-              <EuiButtonEmpty
-                iconType="sortLeft"
-                size="xs"
-                flush="left"
-                onClick={() => {
-                  application.navigateToApp(PLUGIN_ID);
-                }}
-                aria-label={Translations.backLink}
-              >
-                {Translations.backLink}
-              </EuiButtonEmpty>
-              <EuiFlexGroup
-                alignItems="center"
-                responsive={false}
-                gutterSize="m"
-                css={styles.titleGroup}
-              >
-                <EuiFlexItem grow={false} css={styles.titleItem}>
-                  <EuiSkeletonTitle
-                    size="m"
-                    isLoading={isLoading}
-                    contentAriaLabel={name}
-                    css={styles.skeletonTitle}
+          <PageHeader
+            title={name}
+            back={{
+              href: `/app/${PLUGIN_ID}`,
+              label: i18n.translate('workflows.workflowDetailHeader.backLink', {
+                defaultMessage: 'Back to Workflows',
+              }),
+            }}
+            badges={badges}
+            menu={appMenu}
+            docLink={WORKFLOWS_DOCUMENTATION_URL}
+            integrationsHandler={navigateToIntegrations}
+            fallback={{
+              pageTitle: null,
+              css: styles.header,
+              restrictWidth: false,
+              bottomBorder: false,
+              paddingSize: 'm' as const,
+              alignItems: 'bottom' as const,
+              children: (
+                <>
+                  <EuiPageHeaderSection
+                    css={styles.headerSection}
+                    data-test-subj="workflowDetailHeader"
                   >
-                    <EuiTitle size="m" css={styles.title}>
-                      <h2>{name}</h2>
-                    </EuiTitle>
-                  </EuiSkeletonTitle>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiSkeletonLoading
-                    isLoading={isLoading}
-                    loadingContent={<EuiSkeletonRectangle width="80px" height="20px" />}
-                    loadedContent={
-                      <WorkflowUnsavedChangesBadge
-                        hasChanges={hasUnsavedChanges}
-                        highlightDiff={highlightDiff}
-                        setHighlightDiff={setHighlightDiff}
-                        lastUpdatedAt={lastUpdatedAt}
-                      />
-                    }
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPageHeaderSection>
-            {workflowId && (
-              <EuiPageHeaderSection
-                css={{
-                  flexBasis: '15%',
-                }}
-              >
-                <EuiFlexGroup justifyContent="center">
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonGroup
-                      buttonSize="compressed"
-                      color="primary"
-                      options={workflowDetailTabButtonOptions}
-                      idSelected={activeTab}
-                      legend="Switch between workflow and executions"
-                      type="single"
-                      hasAriaDisabled={!canReadWorkflowExecution}
-                      onChange={(id) => setActiveTab(id as WorkflowUrlStateTabType)}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiPageHeaderSection>
-            )}
-            <EuiPageHeaderSection
-              css={{
-                flexBasis: '40%',
-              }}
-            >
-              <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="m">
-                <EuiToolTip
-                  content={
-                    hasUnsavedChanges
-                      ? i18n.translate('workflows.workflowDetailHeader.unsaved', {
-                          defaultMessage: 'Save changes to enable/disable workflow',
-                        })
-                      : !isSchemaValid
-                      ? i18n.translate('workflows.workflowDetailHeader.invalid', {
-                          defaultMessage: 'Fix validation errors to enable workflow',
-                        })
-                      : undefined
-                  }
-                >
-                  <EuiSwitch
-                    disabled={
-                      !workflowId ||
-                      isLoading ||
-                      !canUpdateWorkflow ||
-                      !isSchemaValid ||
-                      hasUnsavedChanges
-                    }
-                    checked={isEnabled}
-                    onChange={handleToggleWorkflow}
-                    label={i18n.translate('workflows.workflowDetailHeader.enabled', {
-                      defaultMessage: 'Enabled',
-                    })}
-                  />
-                </EuiToolTip>
-                <EuiFlexItem grow={false} css={styles.separator} />
-                <EuiToolTip content={runWorkflowTooltipContent}>
-                  <EuiButtonIcon
-                    color="success"
-                    display="base"
-                    iconType="play"
-                    size="s"
-                    onClick={handleRunClickWithUnsavedCheck}
-                    disabled={isExecutionsTab || !canExecuteWorkflow || isLoading || !isSyntaxValid}
-                    aria-label={Translations.runWorkflow}
-                    data-test-subj="runWorkflowHeaderButton"
-                  />
-                </EuiToolTip>
-                <EuiToolTip content={saveWorkflowTooltipContent}>
-                  <EuiButton
-                    fill
-                    color="primary"
-                    size="s"
-                    onClick={handleSaveWorkflow}
-                    disabled={
-                      isExecutionsTab || !canSaveWorkflow || isLoading || isSaving || !isYamlSynced
-                    }
-                    isLoading={isSaving}
-                    data-test-subj="saveWorkflowHeaderButton"
+                    <EuiButtonEmpty
+                      iconType="sortLeft"
+                      size="xs"
+                      flush="left"
+                      onClick={() => {
+                        application.navigateToApp(PLUGIN_ID);
+                      }}
+                      aria-label={Translations.backLink}
+                    >
+                      {Translations.backLink}
+                    </EuiButtonEmpty>
+                    <EuiFlexGroup
+                      alignItems="center"
+                      responsive={false}
+                      gutterSize="m"
+                      css={styles.titleGroup}
+                    >
+                      <EuiFlexItem grow={false} css={styles.titleItem}>
+                        <EuiSkeletonTitle
+                          size="m"
+                          isLoading={isLoading}
+                          contentAriaLabel={name}
+                          css={styles.skeletonTitle}
+                        >
+                          <EuiTitle size="m" css={styles.title}>
+                            <h2>{name}</h2>
+                          </EuiTitle>
+                        </EuiSkeletonTitle>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiSkeletonLoading
+                          isLoading={isLoading}
+                          loadingContent={<EuiSkeletonRectangle width="80px" height="20px" />}
+                          loadedContent={
+                            <WorkflowUnsavedChangesBadge
+                              hasChanges={hasUnsavedChanges}
+                              highlightDiff={highlightDiff}
+                              setHighlightDiff={setHighlightDiff}
+                              lastUpdatedAt={lastUpdatedAt}
+                            />
+                          }
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiPageHeaderSection>
+                  {workflowId && (
+                    <EuiPageHeaderSection
+                      css={{
+                        flexBasis: '15%',
+                      }}
+                    >
+                      <EuiFlexGroup justifyContent="center">
+                        <EuiFlexItem grow={false}>
+                          <EuiButtonGroup
+                            buttonSize="compressed"
+                            color="primary"
+                            options={workflowDetailTabButtonOptions}
+                            idSelected={activeTab}
+                            legend="Switch between workflow and executions"
+                            type="single"
+                            hasAriaDisabled={!canReadWorkflowExecution}
+                            onChange={(id) => setActiveTab(id as WorkflowUrlStateTabType)}
+                          />
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiPageHeaderSection>
+                  )}
+                  <EuiPageHeaderSection
+                    css={{
+                      flexBasis: '40%',
+                    }}
                   >
-                    <FormattedMessage
-                      id="keepWorkflows.buttonText"
-                      defaultMessage="Save"
-                      ignoreTag
-                    />
-                  </EuiButton>
-                </EuiToolTip>
-              </EuiFlexGroup>
-            </EuiPageHeaderSection>
-          </EuiPageTemplate.Header>
+                    <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="m">
+                      <EuiToolTip
+                        content={
+                          hasUnsavedChanges
+                            ? i18n.translate('workflows.workflowDetailHeader.unsaved', {
+                                defaultMessage: 'Save changes to enable/disable workflow',
+                              })
+                            : !isSchemaValid
+                            ? i18n.translate('workflows.workflowDetailHeader.invalid', {
+                                defaultMessage: 'Fix validation errors to enable workflow',
+                              })
+                            : undefined
+                        }
+                      >
+                        <EuiSwitch
+                          disabled={
+                            !workflowId ||
+                            isLoading ||
+                            !canUpdateWorkflow ||
+                            !isSchemaValid ||
+                            hasUnsavedChanges
+                          }
+                          checked={isEnabled}
+                          onChange={handleToggleWorkflow}
+                          label={i18n.translate('workflows.workflowDetailHeader.enabled', {
+                            defaultMessage: 'Enabled',
+                          })}
+                        />
+                      </EuiToolTip>
+                      <EuiFlexItem grow={false} css={styles.separator} />
+                      <EuiToolTip content={runWorkflowTooltipContent}>
+                        <EuiButtonIcon
+                          color="success"
+                          display="base"
+                          iconType="play"
+                          size="s"
+                          onClick={handleRunClickWithUnsavedCheck}
+                          disabled={
+                            isExecutionsTab || !canExecuteWorkflow || isLoading || !isSyntaxValid
+                          }
+                          aria-label={Translations.runWorkflow}
+                          data-test-subj="runWorkflowHeaderButton"
+                        />
+                      </EuiToolTip>
+                      <EuiToolTip content={saveWorkflowTooltipContent}>
+                        <EuiButton
+                          fill
+                          color="primary"
+                          size="s"
+                          onClick={handleSaveWorkflow}
+                          disabled={
+                            isExecutionsTab ||
+                            !canSaveWorkflow ||
+                            isLoading ||
+                            isSaving ||
+                            !isYamlSynced
+                          }
+                          isLoading={isSaving}
+                          data-test-subj="saveWorkflowHeaderButton"
+                        >
+                          <FormattedMessage
+                            id="keepWorkflows.buttonText"
+                            defaultMessage="Save"
+                            ignoreTag
+                          />
+                        </EuiButton>
+                      </EuiToolTip>
+                    </EuiFlexGroup>
+                  </EuiPageHeaderSection>
+                </>
+              ),
+            }}
+          />
         </EuiPageTemplate>
         {showRunConfirmation && (
           <EuiConfirmModal
