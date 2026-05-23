@@ -118,7 +118,6 @@ const bucketTermsRankByCustomOperationSchema = bucketTermsRankByCustomSharedSche
       schema.literal('median'),
       schema.literal('standard_deviation'),
       schema.literal('unique_count'),
-      schema.literal('count'),
       schema.literal('sum'),
       schema.literal('last_value'),
     ]),
@@ -128,6 +127,26 @@ const bucketTermsRankByCustomOperationSchema = bucketTermsRankByCustomSharedSche
       id: 'termsRankByCustomOperation',
       title: 'Terms Rank By Custom Operation',
       description: 'Terms ranked by custom operation.',
+    },
+  }
+);
+
+const bucketTermsRankByCustomCountOperationSchema = bucketTermsRankByCustomSharedSchema.extends(
+  {
+    operation: schema.literal('count'),
+    field: schema.maybe(
+      schema.string({
+        meta: {
+          description: 'Numeric field to be used for the custom operation.',
+        },
+      })
+    ),
+  },
+  {
+    meta: {
+      id: 'termsRankByCustomCountOperation',
+      title: 'Terms Rank By Custom Count Operation',
+      description: 'Terms ranked by count, either of all documents or of a specific field.',
     },
   }
 );
@@ -348,6 +367,7 @@ export const bucketTermsOperationSchema = schema.object(
           }
         ),
         bucketTermsRankByCustomOperationSchema,
+        bucketTermsRankByCustomCountOperationSchema,
         bucketTermsRankByPercentileOperationSchema,
         bucketTermsRankByPercentileRankOperationSchema,
       ])
@@ -506,6 +526,9 @@ export const bucketOperationDefinitionSchema = schema.oneOf(
 
 export type TermOperationRankByCustomOperationType = TypeOf<
   typeof bucketTermsRankByCustomOperationSchema
+>;
+export type TermOperationRankByCustomCountOperationType = TypeOf<
+  typeof bucketTermsRankByCustomCountOperationSchema
 >;
 export type TermOperationRankByCustomPercentileType = TypeOf<
   typeof bucketTermsRankByPercentileOperationSchema

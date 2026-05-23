@@ -12,6 +12,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { ComposeDiscoverFlyout } from '@kbn/alerting-v2-rule-form';
+import type { ComposeDiscoverMode } from '@kbn/alerting-v2-rule-form';
 import type { RuleApiResponse } from '../services/rules_api';
 import { useCreateRule } from './use_create_rule';
 import { useUpdateRule } from './use_update_rule';
@@ -31,7 +32,8 @@ export const useComposeDiscoverFlyout = ({
   const lens = useService(PluginStart('lens')) as LensPublicStart;
 
   const [flyoutOpen, setFlyoutOpen] = useState(false);
-  const [editRule, setEditRule] = useState<RuleApiResponse | null>(null);
+  const [flyoutMode, setFlyoutMode] = useState<ComposeDiscoverMode>('create');
+  const [targetRule, setTargetRule] = useState<RuleApiResponse | null>(null);
   const historyKey = useMemo(() => Symbol('ruleAuthoring'), []);
   const createRuleMutation = useCreateRule();
   const updateRuleMutation = useUpdateRule();
@@ -42,25 +44,33 @@ export const useComposeDiscoverFlyout = ({
 
   const closeFlyout = useCallback(() => {
     setFlyoutOpen(false);
-    setEditRule(null);
+    setTargetRule(null);
   }, []);
 
   const openCreateFlyout = useCallback(() => {
-    setEditRule(null);
+    setTargetRule(null);
+    setFlyoutMode('create');
     setFlyoutOpen(true);
   }, []);
 
   const openEditFlyout = useCallback((rule: RuleApiResponse) => {
-    setEditRule(rule);
+    setTargetRule(rule);
+    setFlyoutMode('edit');
+    setFlyoutOpen(true);
+  }, []);
+
+  const openCloneFlyout = useCallback((rule: RuleApiResponse) => {
+    setTargetRule(rule);
+    setFlyoutMode('clone');
     setFlyoutOpen(true);
   }, []);
 
   const flyout = flyoutOpen ? (
     <ComposeDiscoverFlyout
       historyKey={historyKey}
-      mode={editRule ? 'edit' : 'create'}
-      rule={editRule ?? undefined}
-      ruleId={editRule?.id}
+      mode={flyoutMode}
+      rule={targetRule ?? undefined}
+      ruleId={flyoutMode === 'edit' ? targetRule?.id : undefined}
       onClose={closeFlyout}
       services={ruleFormServices}
       onCreateRule={(payload) =>
@@ -89,5 +99,6 @@ export const useComposeDiscoverFlyout = ({
     flyout,
     openCreateFlyout,
     openEditFlyout,
+    openCloneFlyout,
   };
 };
