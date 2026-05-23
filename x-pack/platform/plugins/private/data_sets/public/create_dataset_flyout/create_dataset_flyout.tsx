@@ -55,7 +55,7 @@ export interface CreateDatasetFlyoutProps {
 const trimRequired =
   (message: string) =>
   (value: string): true | string =>
-    value.trim() ? true : message;
+    value?.trim() ? true : message;
 
 export const CreateDatasetFlyout: FunctionComponent<CreateDatasetFlyoutProps> = ({
   initialDataSet,
@@ -131,15 +131,16 @@ export const CreateDatasetFlyout: FunctionComponent<CreateDatasetFlyoutProps> = 
   }, [dataSources]);
 
   const onSubmit = async (values: CreateDatasetFormValues) => {
+    console.log('onSubmit', values);
     setSaveError(undefined);
     setIsSaving(true);
     try {
-      const desc = values.description.trim();
+      const desc = values.description?.trim();
       const settings = buildDatasetSettingsFromFormValues(values.settings);
       const payload: DataSetWithName = {
         name: values.name.trim(),
-        data_source: values.data_source.trim(),
-        resource: values.resource.trim(),
+        data_source: values.data_source?.trim(),
+        resource: values.resource?.trim(),
         ...(desc ? { description: desc } : {}),
         ...(settings ? { settings } : {}),
       };

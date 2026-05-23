@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  DatasetSettings,
-  DatasetSettingsFile,
-} from '../../common/dataset_types';
+import type { DatasetSettings, DatasetSettingsFile } from '../../common/dataset_types';
 import { createDatasetFlyoutStrings } from './create_dataset_flyout_i18n';
 
 /** Form value when format should be omitted from the API payload (automatic detection). */
@@ -23,21 +20,16 @@ export type DatasetFormatFormValue =
 
 export type DatasetErrorModeFormValue = '' | 'fail_fast' | 'skip_row' | 'null_field';
 
-export type DatasetPartitionDetectionFormValue =
-  | ''
-  | 'auto'
-  | 'hive'
-  | 'template'
-  | 'none';
+export type DatasetPartitionDetectionFormValue = '' | 'auto' | 'hive' | 'template' | 'none';
 
 export interface CreateDatasetSettingsFormValues {
   format: DatasetFormatFormValue;
-  errorMode: DatasetErrorModeFormValue;
-  maxErrors: string;
-  maxErrorRatio: string;
-  partitionDetection: DatasetPartitionDetectionFormValue;
-  partitionPath: string;
-  hivePartitioning: boolean;
+  error_mode: DatasetErrorModeFormValue;
+  max_errors: string;
+  max_error_ratio: string;
+  partition_detection: DatasetPartitionDetectionFormValue;
+  partition_path: string;
+  hive_partitioning: boolean;
 }
 
 export interface CreateDatasetFormValues {
@@ -50,17 +42,16 @@ export interface CreateDatasetFormValues {
 
 export const emptyCreateDatasetSettingsFormValues = (): CreateDatasetSettingsFormValues => ({
   format: DATASET_FORMAT_AUTOMATIC,
-  errorMode: '',
-  maxErrors: '',
-  maxErrorRatio: '',
-  partitionDetection: '',
-  partitionPath: '',
-  hivePartitioning: false,
+  error_mode: '',
+  max_errors: '',
+  max_error_ratio: '',
+  partition_detection: '',
+  partition_path: '',
+  hive_partitioning: false,
 });
 
-export const isParquetDatasetFormat = (
-  format: DatasetFormatFormValue
-): format is 'parquet' => format === 'parquet';
+export const isParquetDatasetFormat = (format: DatasetFormatFormValue): format is 'parquet' =>
+  format === 'parquet';
 
 export const isFileDatasetFormat = (
   format: DatasetFormatFormValue
@@ -72,7 +63,7 @@ export const showsDatasetFileSettings = (format: DatasetFormatFormValue): boolea
   format === DATASET_FORMAT_AUTOMATIC || isFileDatasetFormat(format);
 
 const parseOptionalPositiveInteger = (value: string): number | undefined => {
-  const trimmed = value.trim();
+  const trimmed = value?.trim();
   if (!trimmed) {
     return undefined;
   }
@@ -84,7 +75,7 @@ const parseOptionalPositiveInteger = (value: string): number | undefined => {
 };
 
 const parseOptionalRatio = (value: string): number | undefined => {
-  const trimmed = value.trim();
+  const trimmed = value?.trim();
   if (!trimmed) {
     return undefined;
   }
@@ -96,7 +87,7 @@ const parseOptionalRatio = (value: string): number | undefined => {
 };
 
 export const validateMaxErrorRatio = (value: string): true | string => {
-  const trimmed = value.trim();
+  const trimmed = value?.trim();
   if (!trimmed) {
     return true;
   }
@@ -108,7 +99,7 @@ export const validateMaxErrorRatio = (value: string): true | string => {
 };
 
 export const validateMaxErrors = (value: string): true | string => {
-  const trimmed = value.trim();
+  const trimmed = value?.trim();
   if (!trimmed) {
     return true;
   }
@@ -123,31 +114,31 @@ const applyFileSettingsFields = (
   fileSettings: DatasetSettingsFile,
   settings: CreateDatasetSettingsFormValues
 ): void => {
-  if (settings.errorMode) {
-    fileSettings.errorMode = settings.errorMode;
+  if (settings.error_mode) {
+    fileSettings.error_mode = settings.error_mode;
   }
 
-  const maxErrors = parseOptionalPositiveInteger(settings.maxErrors);
+  const maxErrors = parseOptionalPositiveInteger(settings.max_errors);
   if (maxErrors !== undefined) {
-    fileSettings.maxErrors = maxErrors;
+    fileSettings.max_errors = maxErrors;
   }
 
-  const maxErrorRatio = parseOptionalRatio(settings.maxErrorRatio);
+  const maxErrorRatio = parseOptionalRatio(settings.max_error_ratio);
   if (maxErrorRatio !== undefined) {
-    fileSettings.maxErrorRatio = maxErrorRatio;
+    fileSettings.max_error_ratio = maxErrorRatio;
   }
 
-  if (settings.partitionDetection) {
-    fileSettings.partitionDetection = settings.partitionDetection;
+  if (settings.partition_detection) {
+    fileSettings.partition_detection = settings.partition_detection;
   }
 
-  const partitionPath = settings.partitionPath.trim();
+  const partitionPath = settings.partition_path?.trim();
   if (partitionPath) {
-    fileSettings.partitionPath = partitionPath;
+    fileSettings.partition_path = partitionPath;
   }
 
-  if (settings.hivePartitioning) {
-    fileSettings.hivePartitioning = true;
+  if (settings.hive_partitioning) {
+    fileSettings.hive_partitioning = true;
   }
 };
 

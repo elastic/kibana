@@ -27,16 +27,16 @@ export const putDataSetBodySchema = schema.object({
           schema.literal('orc'),
         ])
       ),
-      errorMode: schema.maybe(
+      error_mode: schema.maybe(
         schema.oneOf([
           schema.literal('fail_fast'),
           schema.literal('skip_row'),
           schema.literal('null_field'),
         ])
       ),
-      maxErrors: schema.maybe(schema.number()),
-      maxErrorRatio: schema.maybe(schema.number()),
-      partitionDetection: schema.maybe(
+      max_errors: schema.maybe(schema.number()),
+      max_error_ratio: schema.maybe(schema.number()),
+      partition_detection: schema.maybe(
         schema.oneOf([
           schema.literal('auto'),
           schema.literal('hive'),
@@ -44,8 +44,8 @@ export const putDataSetBodySchema = schema.object({
           schema.literal('none'),
         ])
       ),
-      partitionPath: optionalString,
-      hivePartitioning: schema.maybe(schema.boolean()),
+      partition_path: optionalString,
+      hive_partitioning: schema.maybe(schema.boolean()),
     })
   ),
 });

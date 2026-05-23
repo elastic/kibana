@@ -73,6 +73,7 @@ export function CreateDatasetFlyoutSettings({
         {createDatasetFlyoutStrings.settingsSectionHelp()}
       </EuiText>
       <EuiSpacer size="s" />
+      {/**
       <EuiFormRow label={createDatasetFlyoutStrings.settingsFormatLabel()} fullWidth>
         <EuiSelect
           options={formatOptions}
@@ -85,7 +86,10 @@ export function CreateDatasetFlyoutSettings({
           inputRef={formatField.ref}
         />
       </EuiFormRow>
-      {showFileSettings ? <CreateDatasetFlyoutFileSettings control={control} /> : null}
+        {showFileSettings ? <CreateDatasetFlyoutFileSettings control={control} /> : null}
+
+      */}
+      <CreateDatasetFlyoutFileSettings control={control} />
     </>
   );
 }
@@ -96,29 +100,29 @@ function CreateDatasetFlyoutFileSettings({
   control: Control<CreateDatasetFormValues>;
 }) {
   const { field: errorModeField } = useController({
-    name: 'settings.errorMode',
+    name: 'settings.error_mode',
     control,
   });
   const { field: maxErrorsField, fieldState: maxErrorsState } = useController({
-    name: 'settings.maxErrors',
+    name: 'settings.max_errors',
     control,
     rules: { validate: validateMaxErrors },
   });
   const { field: maxErrorRatioField, fieldState: maxErrorRatioState } = useController({
-    name: 'settings.maxErrorRatio',
+    name: 'settings.max_error_ratio',
     control,
     rules: { validate: validateMaxErrorRatio },
   });
   const { field: partitionDetectionField } = useController({
-    name: 'settings.partitionDetection',
+    name: 'settings.partition_detection',
     control,
   });
   const { field: partitionPathField } = useController({
-    name: 'settings.partitionPath',
+    name: 'settings.partition_path',
     control,
   });
   const { field: hivePartitioningField } = useController({
-    name: 'settings.hivePartitioning',
+    name: 'settings.hive_partitioning',
     control,
   });
 
@@ -184,6 +188,7 @@ function CreateDatasetFlyoutFileSettings({
           inputRef={errorModeField.ref}
         />
       </EuiFormRow>
+      {/**
       <EuiFormRow
         label={createDatasetFlyoutStrings.settingsMaxErrorsLabel()}
         helpText={createDatasetFlyoutStrings.settingsMaxErrorsHelp()}
@@ -199,9 +204,7 @@ function CreateDatasetFlyoutFileSettings({
           isInvalid={Boolean(maxErrorsState.error)}
           value={maxErrorsField.value === '' ? undefined : Number(maxErrorsField.value)}
           onChange={(e) =>
-            maxErrorsField.onChange(
-              e.target.value === undefined ? '' : String(e.target.value)
-            )
+            maxErrorsField.onChange(e.target.value === undefined ? '' : String(e.target.value))
           }
           name={maxErrorsField.name}
           inputRef={maxErrorsField.ref}
@@ -221,18 +224,15 @@ function CreateDatasetFlyoutFileSettings({
           max={1}
           step={0.01}
           isInvalid={Boolean(maxErrorRatioState.error)}
-          value={
-            maxErrorRatioField.value === '' ? undefined : Number(maxErrorRatioField.value)
-          }
+          value={maxErrorRatioField.value === '' ? undefined : Number(maxErrorRatioField.value)}
           onChange={(e) =>
-            maxErrorRatioField.onChange(
-              e.target.value === undefined ? '' : String(e.target.value)
-            )
+            maxErrorRatioField.onChange(e.target.value === undefined ? '' : String(e.target.value))
           }
           name={maxErrorRatioField.name}
           inputRef={maxErrorRatioField.ref}
         />
       </EuiFormRow>
+      */}
       <EuiFormRow label={createDatasetFlyoutStrings.settingsPartitionDetectionLabel()} fullWidth>
         <EuiSelect
           options={partitionDetectionOptions}
@@ -245,6 +245,7 @@ function CreateDatasetFlyoutFileSettings({
           inputRef={partitionDetectionField.ref}
         />
       </EuiFormRow>
+      {/**
       <EuiFormRow
         label={createDatasetFlyoutStrings.settingsPartitionPathLabel()}
         helpText={createDatasetFlyoutStrings.settingsPartitionPathHelp()}
@@ -260,10 +261,7 @@ function CreateDatasetFlyoutFileSettings({
           inputRef={partitionPathField.ref}
         />
       </EuiFormRow>
-      <EuiFormRow
-        label={createDatasetFlyoutStrings.settingsHivePartitioningLabel()}
-        fullWidth
-      >
+      <EuiFormRow label={createDatasetFlyoutStrings.settingsHivePartitioningLabel()} fullWidth>
         <EuiSwitch
           data-test-subj="createDatasetFlyoutSettingsHivePartitioning"
           label={createDatasetFlyoutStrings.settingsHivePartitioningLabel()}
@@ -271,9 +269,9 @@ function CreateDatasetFlyoutFileSettings({
           checked={hivePartitioningField.value}
           onChange={(e) => hivePartitioningField.onChange(e.target.checked)}
           name={hivePartitioningField.name}
-          inputRef={hivePartitioningField.ref}
         />
       </EuiFormRow>
+      */}
     </>
   );
 }
