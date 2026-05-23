@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiFormRow,
@@ -34,8 +34,6 @@ import {
   AGENT_BUILDER_UI_EBT,
   VISIBILITY_ICON,
   canChangeAgentVisibility,
-  AgentAclRole,
-  type AgentAclEntry,
   type AgentDefinition,
   type UserIdAndName,
 } from '@kbn/agent-builder-common';
@@ -93,14 +91,11 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
 
   const currentVisibility = useWatch({ control, name: 'visibility' });
 
-  const [draftEntries, setDraftEntries] = useState<AgentAclEntry[]>([
-    { type: 'user', name: 'Sarah Chen', role: AgentAclRole.Editor },
-    { type: 'user', name: 'Marcus Reyes', role: AgentAclRole.Editor },
-    { type: 'user', name: 'Jamie Park', role: AgentAclRole.User },
-  ]);
-
-  const agentStub = useMemo(
-    () => ({ id: agentId ?? 'preview', visibility: currentVisibility } as AgentDefinition),
+  // Lightweight projection used only by AccessForm — it reads `visibility` to filter
+  // selectable ACL roles. The real entries come from the form's `acl` field via Controller
+  // (seeded from the loaded agent in `useAgentEdit`), not from local state.
+  const accessFormAgent = useMemo(
+    () => ({ id: agentId ?? '', visibility: currentVisibility } as AgentDefinition),
     [agentId, currentVisibility]
   );
 
@@ -544,14 +539,21 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
             />
           </EuiFormRow>
 
-          {!isCreateMode && (
+          {!isCreateMode && agentId !== agentBuilderDefaultAgentId && (
             <>
               <EuiSpacer size="m" />
-              <AccessForm
-                agent={agentStub}
-                entries={draftEntries}
-                ownerName={owner?.username ?? currentUser?.username}
-                onChange={setDraftEntries}
+              <Controller
+                name="acl.entries"
+                control={control}
+                render={({ field }) => (
+                  <AccessForm
+                    agent={accessFormAgent}
+                    entries={field.value ?? []}
+                    ownerName={owner?.username}
+                    isDisabled={isFormDisabled}
+                    onChange={field.onChange}
+                  />
+                )}
               />
             </>
           )}
