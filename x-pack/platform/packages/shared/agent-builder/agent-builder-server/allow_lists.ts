@@ -108,6 +108,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'data-exploration',
   'visualization-creation',
   'graph-creation',
+  'elasticsearch-esql',
 
   // Platform – Alerting
   'rule-management',
