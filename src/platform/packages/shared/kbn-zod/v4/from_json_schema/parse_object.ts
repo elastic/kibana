@@ -41,5 +41,26 @@ export function parseObject(
     shape[key] = fieldSchema;
   }
 
-  return z.object(shape);
+  const objectSchema = z.object(shape);
+  const { additionalProperties } = schema;
+
+  // Honor JSON Schema `additionalProperties` semantics. Per spec, when omitted it
+  // defaults to `true` (additional properties are allowed and retained). The
+  // default Zod object behavior is to silently strip unknown keys, which is
+  // lossy for open-shaped objects (e.g. an MCP tool's free-form input
+  // container) — so we opt into `.loose()` unless the schema explicitly says
+  // otherwise.
+  if (additionalProperties === false) {
+    return objectSchema.strict();
+  }
+
+  if (
+    additionalProperties &&
+    typeof additionalProperties === 'object' &&
+    !Array.isArray(additionalProperties)
+  ) {
+    return objectSchema.catchall(parseJsonSchema(additionalProperties));
+  }
+
+  return objectSchema.loose();
 }
