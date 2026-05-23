@@ -18,7 +18,6 @@ import { useScopedServices } from '../../components/scoped_services_provider';
  */
 export const useProfiles = ({ record }: GetProfilesOptions = {}) => {
   const { scopedProfilesManager } = useScopedServices();
-
   const [profiles, setProfiles] = useState(() => scopedProfilesManager.getProfiles({ record }));
   const profiles$ = useMemo(
     () => scopedProfilesManager.getProfiles$({ record }),

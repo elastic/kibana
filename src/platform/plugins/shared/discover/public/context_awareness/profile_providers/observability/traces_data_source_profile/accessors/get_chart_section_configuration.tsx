@@ -23,10 +23,7 @@ export const getChartSectionConfiguration =
           <TraceMetricsGrid
             profileId={OBSERVABILITY_TRACES_DATA_SOURCE_PROFILE_ID}
             {...props}
-            actions={{
-              openInNewTab: toolkit.actions.openInNewTab,
-              updateESQLQuery: toolkit.actions.updateESQLQuery,
-            }}
+            actions={toolkit.actions}
           />
         );
       },

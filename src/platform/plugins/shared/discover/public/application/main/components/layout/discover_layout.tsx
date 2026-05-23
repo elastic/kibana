@@ -191,12 +191,12 @@ export function DiscoverLayout() {
     });
   }, [dataView, isEsqlMode, observabilityAIAssistant?.service]);
 
-  const addFilterAction = useCurrentTabAction(internalStateActions.addFilter);
+  const addFilter = useCurrentTabAction(internalStateActions.addFilter);
   const onAddFilter = useCallback<DocViewFilterFn>(
     (field, values, operation) => {
-      dispatch(addFilterAction({ field, value: values, mode: operation }));
+      dispatch(addFilter({ field, value: values, mode: operation }));
     },
-    [addFilterAction, dispatch]
+    [addFilter, dispatch]
   );
 
   const canSetBreakdownField = useMemo(

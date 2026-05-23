@@ -69,10 +69,7 @@ export const createGetDocViewer =
                 streamsFeature={streamsFeature}
                 cpsHasLinkedProjects={cpsHasLinkedProjects}
                 indexes={indexes}
-                docViewActions={{
-                  openInNewTab: toolkit.actions.openInNewTab,
-                  updateESQLQuery: toolkit.actions.updateESQLQuery,
-                }}
+                docViewActions={toolkit.actions}
                 {...props}
               />
             );

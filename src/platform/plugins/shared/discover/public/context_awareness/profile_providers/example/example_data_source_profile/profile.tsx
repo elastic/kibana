@@ -277,13 +277,7 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
         return {
           ...prev(),
           renderChartSection: (props) => (
-            <ChartWithCustomButtons
-              {...props}
-              actions={{
-                openInNewTab: toolkit.actions.openInNewTab,
-                updateESQLQuery: toolkit.actions.updateESQLQuery,
-              }}
-            />
+            <ChartWithCustomButtons {...props} actions={toolkit.actions} />
           ),
           localStorageKeyPrefix: 'discover:exampleDataSource',
           replaceDefaultChart: true,

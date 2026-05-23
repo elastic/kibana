@@ -47,7 +47,6 @@ const setup = async () => {
   return {
     ...toolkit,
     tabId: persistedTab.id,
-    services,
   };
 };
 

@@ -38,10 +38,7 @@ export const createGetDocViewer =
               {...props}
               indexes={indexes}
               profileId={profileId}
-              docViewActions={{
-                openInNewTab: toolkit.actions.openInNewTab,
-                updateESQLQuery: toolkit.actions.updateESQLQuery,
-              }}
+              docViewActions={toolkit.actions}
             />
           ),
         });

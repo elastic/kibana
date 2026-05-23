@@ -31,7 +31,6 @@ export interface ContextUrlParams {
 }
 
 export function ContextAppRoute() {
-  const services = useDiscoverServices();
   const {
     profilesManager,
     ebtManager,
@@ -40,7 +39,7 @@ export function ContextAppRoute() {
     dataViews,
     capabilities,
     fieldsMetadata,
-  } = services;
+  } = useDiscoverServices();
   const scopedHistory = getScopedHistory<ContextHistoryLocationState>();
   const locationState = useMemo(
     () => scopedHistory?.location.state as ContextHistoryLocationState | undefined,

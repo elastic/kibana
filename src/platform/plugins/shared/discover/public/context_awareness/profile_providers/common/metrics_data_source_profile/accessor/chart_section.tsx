@@ -24,13 +24,10 @@ import { METRICS_DATA_SOURCE_PROFILE_ID } from '../profile';
 /**
  * Wrapper component that reads breakdownField from Discover's app state
  * and passes it to UnifiedMetricsExperienceGrid for syncing with dimensions selector.
- * Triggers METRICS_INFO fetch when in Metrics Experience.
  */
-type MetricsExperienceGridWrapperProps = ChartSectionProps & {
-  actions: ContextAwarenessToolkitActions;
-};
-
-const MetricsExperienceGridWrapper = ({ actions, ...props }: MetricsExperienceGridWrapperProps) => {
+const MetricsExperienceGridWrapper = (
+  props: ChartSectionProps & { actions: ContextAwarenessToolkitActions }
+) => {
   const breakdownField = useAppStateSelector((state: DiscoverAppState) => state.breakdownField);
   const dispatch = useInternalStateDispatch();
   const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
@@ -51,7 +48,7 @@ const MetricsExperienceGridWrapper = ({ actions, ...props }: MetricsExperienceGr
   return (
     <UnifiedMetricsExperienceGrid
       {...props}
-      actions={actions}
+      actions={props.actions}
       profileId={METRICS_DATA_SOURCE_PROFILE_ID}
       breakdownField={breakdownField}
       onBreakdownFieldChange={onBreakdownFieldChange}
