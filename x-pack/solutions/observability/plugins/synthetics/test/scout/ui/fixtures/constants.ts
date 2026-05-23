@@ -26,6 +26,7 @@ export const monitorConfigurations = (locationLabel: string) => {
   const tcpName = `tcp monitor ${uuidv4()}`;
   const browserName = `browser monitor ${uuidv4()}`;
   const browserRecorderName = `browser monitor recorder ${uuidv4()}`;
+  const apiName = `api monitor ${uuidv4()}`;
 
   return {
     [FormMonitorType.HTTP]: {
@@ -111,6 +112,31 @@ export const monitorConfigurations = (locationLabel: string) => {
         [
           'div[data-test-subj="codeEditorContainer"][aria-label="JavaScript code editor"] .view-line',
           'step("test step", () => {})',
+        ],
+        ['[data-test-subj=syntheticsMonitorConfigAPMServiceName]', apmServiceName],
+      ] as Array<[string, string]>,
+    },
+    [FormMonitorType.API]: {
+      monitorType: FormMonitorType.API,
+      monitorConfig: {
+        schedule: '10',
+        name: apiName,
+        inlineScript:
+          'step("ping", async ({ request }) => { await request.get("https://elastic.co"); })',
+        locations: [locationLabel],
+        apmServiceName,
+      },
+      monitorListDetails: {
+        location: locationLabel,
+        schedule: '10 minutes',
+        name: apiName,
+      },
+      monitorEditDetails: [
+        ['[data-test-subj=syntheticsMonitorConfigSchedule]', '10'],
+        ['[data-test-subj=syntheticsMonitorConfigName]', apiName],
+        [
+          'div[data-test-subj="codeEditorContainer"][aria-label="JavaScript code editor"] .view-line',
+          'step("ping", async ({ request }) => { await request.get("https://elastic.co"); })',
         ],
         ['[data-test-subj=syntheticsMonitorConfigAPMServiceName]', apmServiceName],
       ] as Array<[string, string]>,
