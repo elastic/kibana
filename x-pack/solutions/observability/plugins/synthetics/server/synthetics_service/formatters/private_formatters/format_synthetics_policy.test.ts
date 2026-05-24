@@ -974,6 +974,75 @@ describe('formatSyntheticsPolicy', () => {
       policy_ids: ['404812e0-90e1-11ed-8111-f7f9cad30b61'],
     });
   });
+
+  // API monitors emit a companion `synthetics.api.network` document per request
+  // via Heartbeat. Without enabling the `api.network` companion stream here,
+  // Fleet generates an agent API key that lacks write privileges on
+  // `synthetics-synthetics.api.network-default`, and ES rejects every network
+  // event with a 403 — silently emptying the data stream while summary docs
+  // continue to land. Mirror the long-standing browser → browser.network /
+  // browser.screenshot wiring so the API key permissions match what
+  // Heartbeat will actually publish.
+  it('enables the api.network companion stream for api monitors', () => {
+    const apiPolicy: any = {
+      name: 'api-private-default',
+      namespace: 'default',
+      package: { name: 'synthetics', title: 'Elastic Synthetics', version: '1.7.0' },
+      enabled: true,
+      policy_ids: ['loc-1'],
+      inputs: [
+        {
+          type: 'synthetics/api',
+          policy_template: 'synthetics',
+          enabled: false,
+          streams: [
+            {
+              enabled: false,
+              data_stream: { type: 'synthetics', dataset: 'api' },
+              vars: {
+                enabled: { value: true, type: 'bool' },
+                type: { value: 'api', type: 'text' },
+                name: { type: 'text' },
+                schedule: { value: '"@every 1m"', type: 'text' },
+                timeout: { type: 'text' },
+                tags: { type: 'yaml' },
+                'source.inline.script': { type: 'yaml' },
+                'source.inline.encoding': { type: 'text' },
+                'source.project.content': { type: 'text' },
+                params: { type: 'yaml' },
+                location_name: { value: 'Private', type: 'text' },
+                config_id: { type: 'text' },
+              },
+            },
+            { enabled: false, data_stream: { type: 'synthetics', dataset: 'api.network' } },
+          ],
+        },
+      ],
+    };
+
+    const { formattedPolicy } = formatSyntheticsPolicy(
+      apiPolicy,
+      MonitorTypeEnum.API,
+      {
+        type: 'api',
+        enabled: true,
+        name: 'API monitor',
+        schedule: { number: '1', unit: 'm' },
+        config_id: 'abc',
+        location_name: 'Private',
+      } as any,
+      gParams,
+      testMW
+    );
+
+    const apiInput = formattedPolicy.inputs.find((i) => i.type === 'synthetics/api');
+    expect(apiInput?.enabled).toBe(true);
+    const streams = apiInput?.streams ?? [];
+    const apiStream = streams.find((s) => s.data_stream.dataset === 'api');
+    const apiNetworkStream = streams.find((s) => s.data_stream.dataset === 'api.network');
+    expect(apiStream?.enabled).toBe(true);
+    expect(apiNetworkStream?.enabled).toBe(true);
+  });
 });
 
 const testNewPolicy = {
