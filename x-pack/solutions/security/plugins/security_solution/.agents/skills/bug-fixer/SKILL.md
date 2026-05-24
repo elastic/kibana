@@ -11,8 +11,8 @@ description: >
 
 **Scope:** Stateful (ECH) environments only. Decline serverless bugs before starting either step.
 
-Fixing a Security Solution bug is a two-step process. These skills are not
-auto-discovered — they must be invoked explicitly by path.
+Fixing a Security Solution bug is a two-step process. The slash commands below require
+symlink setup — see Prerequisites.
 
 ## How to invoke
 
@@ -51,6 +51,21 @@ implements a TDD fix, verifies in a clean environment, and optionally opens a dr
   - **Claude Code** — add to `~/.claude/mcp.json` and restart:
     ```json
     { "mcpServers": { "playwright": { "command": "npx", "args": ["@playwright/mcp@latest"] } } }
+    ```
+- Skill symlinks (run from repo root, then restart your IDE):
+  - **Claude Code**:
+    ```bash
+    SKILL_ROOT="$(pwd)/x-pack/solutions/security/plugins/security_solution/.agents/skills"
+    ln -s "$SKILL_ROOT/bug-fixer"    ~/.claude/skills/bug-fixer
+    ln -s "$SKILL_ROOT/bug-reproduce" ~/.claude/skills/bug-reproduce
+    ln -s "$SKILL_ROOT/bug-fix"      ~/.claude/skills/bug-fix
+    ```
+  - **Cursor** — symlink into `.agents/skills/` at the repo root:
+    ```bash
+    SKILL_ROOT="x-pack/solutions/security/plugins/security_solution/.agents/skills"
+    ln -s "$SKILL_ROOT/bug-fixer"    .agents/skills/bug-fixer
+    ln -s "$SKILL_ROOT/bug-reproduce" .agents/skills/bug-reproduce
+    ln -s "$SKILL_ROOT/bug-fix"      .agents/skills/bug-fix
     ```
 
 ## Agent instruction

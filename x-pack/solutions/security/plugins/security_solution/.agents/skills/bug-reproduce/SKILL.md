@@ -2,7 +2,8 @@
 name: bug-reproduce
 description: >
   Use when the user mentions a bug number or asks to reproduce, investigate, or debug
-  anything in Kibana Security Solution.
+  anything in Kibana Security Solution — even just "look into #NNN", "can you reproduce
+  this", or "something's wrong with X".
 ---
 
 # Bug Reproduce
