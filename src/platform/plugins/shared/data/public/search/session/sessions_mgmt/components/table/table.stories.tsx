@@ -191,8 +191,8 @@ export const ColumnsFunction = {
   render: () => (
     <Component
       props={{
-        getColumns: ({ core, searchUsageCollector, kibanaVersion }: GetColumnsParams) => [
-          columns.nameColumn({ core, searchUsageCollector, kibanaVersion }),
+        getColumns: ({ searchUsageCollector, kibanaVersion }: GetColumnsParams) => [
+          columns.nameColumn({ searchUsageCollector, kibanaVersion }),
           columns.statusColumn('BROWSER'),
         ],
       }}
@@ -213,7 +213,7 @@ export const FilteredActions = {
           kibanaVersion,
         }: GetColumnsParams) => [
           columns.appIdColumn,
-          columns.nameColumn({ core, searchUsageCollector, kibanaVersion }),
+          columns.nameColumn({ searchUsageCollector, kibanaVersion }),
           columns.statusColumn('BROWSER'),
           columns.actionsColumn({
             core,
@@ -232,8 +232,8 @@ export const NoAppFilter = {
   render: () => (
     <Component
       props={{
-        getColumns: ({ core, searchUsageCollector, kibanaVersion }: GetColumnsParams) => [
-          columns.nameColumn({ core, searchUsageCollector, kibanaVersion }),
+        getColumns: ({ searchUsageCollector, kibanaVersion }: GetColumnsParams) => [
+          columns.nameColumn({ searchUsageCollector, kibanaVersion }),
           columns.statusColumn('BROWSER'),
         ],
       }}
@@ -246,9 +246,9 @@ export const NoStatusFilter = {
   render: () => (
     <Component
       props={{
-        getColumns: ({ core, searchUsageCollector, kibanaVersion }: GetColumnsParams) => [
+        getColumns: ({ searchUsageCollector, kibanaVersion }: GetColumnsParams) => [
           columns.appIdColumn,
-          columns.nameColumn({ core, searchUsageCollector, kibanaVersion }),
+          columns.nameColumn({ searchUsageCollector, kibanaVersion }),
         ],
       }}
     />
@@ -260,8 +260,8 @@ export const NoFilters = {
   render: () => (
     <Component
       props={{
-        getColumns: ({ core, searchUsageCollector, kibanaVersion }: GetColumnsParams) => [
-          columns.nameColumn({ core, searchUsageCollector, kibanaVersion }),
+        getColumns: ({ searchUsageCollector, kibanaVersion }: GetColumnsParams) => [
+          columns.nameColumn({ searchUsageCollector, kibanaVersion }),
         ],
       }}
     />
@@ -279,8 +279,8 @@ export const NoFiltersAndRefreshButton = {
     <Component
       props={{
         hideRefreshButton: true,
-        getColumns: ({ core, searchUsageCollector, kibanaVersion }: GetColumnsParams) => [
-          columns.nameColumn({ core, searchUsageCollector, kibanaVersion }),
+        getColumns: ({ searchUsageCollector, kibanaVersion }: GetColumnsParams) => [
+          columns.nameColumn({ searchUsageCollector, kibanaVersion }),
         ],
       }}
     />
@@ -317,8 +317,8 @@ export const PreFilteredSessions = {
       })}
       props={{
         appId: args.appId,
-        getColumns: ({ core, searchUsageCollector, kibanaVersion }: GetColumnsParams) => [
-          columns.nameColumn({ core, searchUsageCollector, kibanaVersion }),
+        getColumns: ({ searchUsageCollector, kibanaVersion }: GetColumnsParams) => [
+          columns.nameColumn({ searchUsageCollector, kibanaVersion }),
           columns.appIdColumn,
         ],
       }}
@@ -332,9 +332,8 @@ export const OnClickHandler = {
     <Component
       data={getSearchSessionSavedObjectMocks({ length: 10 })}
       props={{
-        getColumns: ({ core, searchUsageCollector, kibanaVersion }: GetColumnsParams) => [
+        getColumns: ({ searchUsageCollector, kibanaVersion }: GetColumnsParams) => [
           columns.nameColumn({
-            core,
             searchUsageCollector,
             kibanaVersion,
             onBackgroundSearchOpened: ({ session }) =>

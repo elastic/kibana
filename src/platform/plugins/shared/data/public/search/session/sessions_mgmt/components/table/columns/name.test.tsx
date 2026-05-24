@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { coreMock } from '@kbn/core/public/mocks';
 import { createSearchUsageCollectorMock } from '../../../../../collectors/mocks';
 import { nameColumn } from './name';
 import { render, screen } from '@testing-library/react';
@@ -24,12 +23,10 @@ const setup = ({
   uiSession?: UISession;
 } = {}) => {
   const user = userEvent.setup();
-  const core = coreMock.createStart();
   const searchUsageCollector = createSearchUsageCollectorMock();
   const onBackgroundSearchOpened = jest.fn();
 
   const column = nameColumn({
-    core,
     searchUsageCollector,
     kibanaVersion,
     onBackgroundSearchOpened,
@@ -39,7 +36,7 @@ const setup = ({
 
   render(column.render(uiSession.name, uiSession));
 
-  return { core, searchUsageCollector, kibanaVersion, onBackgroundSearchOpened, user };
+  return { searchUsageCollector, kibanaVersion, onBackgroundSearchOpened, user };
 };
 
 describe('name column', () => {

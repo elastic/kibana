@@ -13,8 +13,6 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { hasActiveModifierKey } from '@kbn/shared-ux-utility';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import type { CoreStart } from '@kbn/core/public';
 import { css } from '@emotion/react';
 import { SearchSessionStatus } from '../../../../../../../common';
 import type { SearchUsageCollector } from '../../../../../collectors';
@@ -54,12 +52,10 @@ const NameColumnText = ({
 };
 
 export const nameColumn = ({
-  core,
   searchUsageCollector,
   kibanaVersion,
   onBackgroundSearchOpened,
 }: {
-  core: CoreStart;
   searchUsageCollector: SearchUsageCollector;
   kibanaVersion: string;
   onBackgroundSearchOpened?: BackgroundSearchOpenedHandler;
@@ -108,37 +104,31 @@ export const nameColumn = ({
       ) : null;
 
     return (
-      <RedirectAppLinks
-        coreStart={{
-          application: core.application,
+      <NameColumnText
+        status={status}
+        href={href}
+        onClick={(event) => {
+          if (hasActiveModifierKey(event)) return;
+          trackAction?.();
+          onBackgroundSearchOpened?.({ session, event });
         }}
       >
-        <NameColumnText
-          status={status}
-          href={href}
-          onClick={(event) => {
-            if (hasActiveModifierKey(event)) return;
-            trackAction?.();
-            onBackgroundSearchOpened?.({ session, event });
-          }}
-        >
-          <TableText data-test-subj="sessionManagementNameCol">
-            <EuiFlexGroup gutterSize="s" alignItems="center">
-              <EuiFlexItem grow={false}>{name}</EuiFlexItem>
-              {notRestorableWarning && (
-                <EuiFlexItem css={iconCss} grow={false}>
-                  {notRestorableWarning}
-                </EuiFlexItem>
-              )}
-              {versionIncompatibleWarning && (
-                <EuiFlexItem css={iconCss} grow={false}>
-                  {versionIncompatibleWarning}
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-          </TableText>
-        </NameColumnText>
-      </RedirectAppLinks>
+        <TableText data-test-subj="sessionManagementNameCol">
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexItem grow={false}>{name}</EuiFlexItem>
+            {notRestorableWarning && (
+              <EuiFlexItem css={iconCss} grow={false}>
+                {notRestorableWarning}
+              </EuiFlexItem>
+            )}
+            {versionIncompatibleWarning && (
+              <EuiFlexItem css={iconCss} grow={false}>
+                {versionIncompatibleWarning}
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </TableText>
+      </NameColumnText>
     );
   },
 });
