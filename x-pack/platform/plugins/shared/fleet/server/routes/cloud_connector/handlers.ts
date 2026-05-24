@@ -12,6 +12,7 @@ import { buildPackagePolicyFilterExcludingHiddenPackages } from '../../../common
 import { cloudConnectorService, packagePolicyService } from '../../services';
 import type { FleetRequestHandler } from '../../types';
 import { appContextService } from '../../services/app_context';
+import { createSecrets, deleteSecrets } from '../../services/secrets';
 import type {
   GetCloudConnectorsResponse,
   GetOneCloudConnectorResponse,
@@ -31,6 +32,7 @@ import type {
   DeleteCloudConnectorRequestSchema,
   GetCloudConnectorUsageRequestSchema,
 } from '../../types/rest_spec/cloud_connector';
+import { FleetError } from '../../errors';
 
 export const createCloudConnectorHandler: FleetRequestHandler<
   undefined,
@@ -39,24 +41,70 @@ export const createCloudConnectorHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   const fleetContext = await context.fleet;
   const { internalSoClient } = fleetContext;
+  const coreContext = await context.core;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
   const logger = appContextService
     .getLogger()
     .get('CloudConnectorService createCloudConnectorHandler');
 
   try {
     logger.info('Creating cloud connector');
-    const cloudConnector = await cloudConnectorService.create(
-      internalSoClient,
-      // Type assertion is safe: schema validation ensures structure, service validates vars against CloudConnectorVars
-      request.body as unknown as CreateCloudConnectorRequest
-    );
-    logger.info(`Successfully created cloud connector ${cloudConnector.id}`);
-    const body: CreateCloudConnectorResponse = {
-      item: cloudConnector,
+
+    // If external_id.value is a plain string, create a Fleet secret and replace with a reference.
+    // This allows callers to pass raw values without knowing about internal secret storage.
+    const requestBody = request.body ?? {};
+    const body = {
+      ...requestBody,
+      ...(requestBody.vars !== undefined ? { vars: { ...requestBody.vars } } : {}),
     };
-    return response.ok({ body });
+    const externalIdVar = body.vars?.external_id as
+      | { type?: string; value?: unknown; frozen?: boolean }
+      | undefined;
+    let createdSecretId: string | undefined;
+    if (
+      externalIdVar &&
+      typeof externalIdVar === 'object' &&
+      typeof externalIdVar.value === 'string'
+    ) {
+      logger.debug('external_id is a plain string — creating Fleet secret');
+      let secret;
+      try {
+        [secret] = await createSecrets({ esClient, values: [externalIdVar.value] });
+      } catch (secretError) {
+        logger.error('Failed to create Fleet secret for external_id', secretError);
+        throw new FleetError('Failed to securely store external_id');
+      }
+      if (!secret || !('id' in secret)) {
+        logger.error('createSecrets returned a non-secret result for external_id');
+        throw new FleetError('Failed to securely store external_id');
+      }
+      createdSecretId = secret.id;
+      body.vars = {
+        ...body.vars,
+        external_id: { type: 'password', value: { isSecretRef: true, id: createdSecretId } },
+      };
+    }
+
+    let cloudConnector;
+    try {
+      cloudConnector = await cloudConnectorService.create(
+        internalSoClient,
+        // Type assertion is safe: schema validation ensures structure, service validates vars against CloudConnectorVars
+        body as unknown as CreateCloudConnectorRequest
+      );
+    } catch (createError) {
+      if (createdSecretId) {
+        await deleteSecrets({ esClient, ids: [createdSecretId] }).catch((deleteError) => {
+          logger.error(`Failed to clean up orphaned secret ${createdSecretId}`, deleteError);
+        });
+      }
+      throw createError;
+    }
+
+    logger.info(`Successfully created cloud connector ${cloudConnector.id}`);
+    return response.ok({ body: { item: cloudConnector } as CreateCloudConnectorResponse });
   } catch (error) {
-    logger.error(`Failed to create cloud connector`, error.message);
+    logger.error(`Failed to create cloud connector`, error);
     return response.customError({
       statusCode: 400,
       body: {
@@ -91,7 +139,7 @@ export const getCloudConnectorsHandler: FleetRequestHandler<
     };
     return response.ok({ body });
   } catch (error) {
-    logger.error('Failed to get cloud connectors list', error.message);
+    logger.error('Failed to get cloud connectors list', error);
     return response.customError({
       statusCode: 400,
       body: {
@@ -121,7 +169,7 @@ export const getCloudConnectorHandler: FleetRequestHandler<
     };
     return response.ok({ body });
   } catch (error) {
-    logger.error(`Failed to get cloud connector ${cloudConnectorId}`, error.message);
+    logger.error(`Failed to get cloud connector ${cloudConnectorId}`, error);
     return response.customError({
       statusCode: 400,
       body: {
@@ -157,7 +205,7 @@ export const updateCloudConnectorHandler: FleetRequestHandler<
     };
     return response.ok({ body });
   } catch (error) {
-    logger.error(`Failed to update cloud connector ${cloudConnectorId}`, error.message);
+    logger.error(`Failed to update cloud connector ${cloudConnectorId}`, error);
     return response.customError({
       statusCode: 400,
       body: {
@@ -195,7 +243,7 @@ export const deleteCloudConnectorHandler: FleetRequestHandler<
     };
     return response.ok({ body });
   } catch (error) {
-    logger.error(`Failed to delete cloud connector ${cloudConnectorId}`, error.message);
+    logger.error(`Failed to delete cloud connector ${cloudConnectorId}`, error);
 
     return response.customError({
       statusCode: 400,
@@ -272,10 +320,7 @@ export const getCloudConnectorUsageHandler: FleetRequestHandler<
     };
     return response.ok({ body });
   } catch (error) {
-    logger.error(
-      `Failed to get usage for cloud connector ${cloudConnectorId}: ${error.message}`,
-      error
-    );
+    logger.error(`Failed to get usage for cloud connector ${cloudConnectorId}`, error);
     return response.customError({
       statusCode: 400,
       body: {
