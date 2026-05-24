@@ -22,7 +22,7 @@ import type {
   ShareMenuItemLegacy,
   ShareContextMenuPanelItem,
   UrlParamExtension,
-  ShareableUrlLocatorParams,
+  ShareableLocatorParams,
 } from '../types';
 import type { AnonymousAccessServiceContract } from '../../common/anonymous_access';
 import type { BrowserUrlService } from '../types';
@@ -36,7 +36,7 @@ export interface ShareContextMenuProps {
   shareableUrlForSavedObject?: string;
   shareableUrlLocatorParams?: {
     locator: LocatorPublic<any>;
-    params: ShareableUrlLocatorParams;
+    params: ShareableLocatorParams;
   };
   shareMenuItems: ShareMenuItemLegacy[];
   sharingData: any;

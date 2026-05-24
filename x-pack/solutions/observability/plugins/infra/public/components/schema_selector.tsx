@@ -134,13 +134,11 @@ export const SchemaSelector = ({
   schemas,
   value,
   isLoading,
-  isHostsView = false,
 }: {
   onChange: (selected: DataSchemaFormat) => void;
   schemas: DataSchemaFormat[];
   value: DataSchemaFormat;
   isLoading: boolean;
-  isHostsView?: boolean;
 }) => {
   const {
     services: { telemetry },
@@ -208,37 +206,33 @@ export const SchemaSelector = ({
   }, [value, schemas, telemetry]);
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
-      <EuiFlexItem grow={0}>
-        <EuiFormRow
-          aria-label={i18n.translate('xpack.infra.schemaSelector.select.ariaLabel', {
-            defaultMessage: 'Schema selector for data collection',
-          })}
-          css={{ minWidth: isHostsView ? '400px' : '300px' }}
-          helpText={
-            (options.length > 1 || (options.length === 1 && isInvalid)) &&
-            i18n.translate('xpack.infra.schemaSelector.select.helpText', {
-              defaultMessage: 'There are hosts available in another schema',
-            })
-          }
-        >
-          <EuiSuperSelect
-            onClickCapture={handleSchemaSelectorClick}
-            data-test-subj="infraSchemaSelect"
-            id="infraSchemaSelectorSelect"
-            options={displayOptions}
-            compressed
-            valueOfSelected={isInvalid ? 'unknown' : value ?? DEFAULT_SCHEMA}
-            onChange={onSelect}
-            isLoading={isLoading}
-            fullWidth
-            css={{
-              fontSize: useEuiFontSize('s').fontSize,
-            }}
-            prepend={<PrependLabel />}
-          />
-        </EuiFormRow>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiFormRow
+      aria-label={i18n.translate('xpack.infra.schemaSelector.select.ariaLabel', {
+        defaultMessage: 'Schema selector for data collection',
+      })}
+      css={{ minWidth: '300px' }}
+      helpText={
+        (options.length > 1 || (options.length === 1 && isInvalid)) &&
+        i18n.translate('xpack.infra.schemaSelector.select.helpText', {
+          defaultMessage: 'There are hosts available in another schema',
+        })
+      }
+    >
+      <EuiSuperSelect
+        onClickCapture={handleSchemaSelectorClick}
+        data-test-subj="infraSchemaSelect"
+        id="infraSchemaSelectorSelect"
+        options={displayOptions}
+        compressed
+        valueOfSelected={isInvalid ? 'unknown' : value ?? DEFAULT_SCHEMA}
+        onChange={onSelect}
+        isLoading={isLoading}
+        fullWidth
+        css={{
+          fontSize: useEuiFontSize('s').fontSize,
+        }}
+        prepend={<PrependLabel />}
+      />
+    </EuiFormRow>
   );
 };

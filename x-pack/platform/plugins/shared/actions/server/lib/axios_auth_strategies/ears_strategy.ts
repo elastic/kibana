@@ -6,7 +6,7 @@
  */
 
 import type { AxiosInstance } from 'axios';
-import type { GetTokenOpts } from '@kbn/connector-specs';
+import { normalizeAuthorizationHeaderValue, type GetTokenOpts } from '@kbn/connector-specs';
 import type { AxiosErrorWithRetry } from '../axios_utils';
 import { getEarsAccessToken } from '../ears';
 import type { AxiosAuthStrategy, AuthStrategyDeps } from './types';
@@ -73,8 +73,9 @@ export class EarsStrategy implements AxiosAuthStrategy {
         logger.debug(
           `EARS token refreshed successfully for connectorId ${connectorId}. Retrying request.`
         );
-        error.config.headers.Authorization = newAccessToken;
-        axiosInstance.defaults.headers.common.Authorization = newAccessToken;
+        const normalizedAccessToken = normalizeAuthorizationHeaderValue(newAccessToken);
+        error.config.headers.Authorization = normalizedAccessToken;
+        axiosInstance.defaults.headers.common.Authorization = normalizedAccessToken;
         return axiosInstance.request(error.config);
       }
     );

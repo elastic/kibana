@@ -12,6 +12,7 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {
   ContentListProvider,
+  contentListQueryClient,
   type FindItemsResult,
   type FindItemsParams,
 } from '@kbn/content-list-provider';
@@ -67,9 +68,13 @@ interface CreateWrapperOptions {
   tagsService?: ContentManagementTagsServices;
 }
 
-const createWrapper =
-  (options: CreateWrapperOptions = {}) =>
-  ({ children }: { children: React.ReactNode }) => {
+let providerIdCounter = 0;
+const nextProviderId = () => `toolbar-test-list-${++providerIdCounter}`;
+
+const createWrapper = (options: CreateWrapperOptions = {}) => {
+  const providerId = nextProviderId();
+
+  return ({ children }: { children: React.ReactNode }) => {
     const { sortingDisabled, searchDisabled, searchPlaceholder, sortFields, tagsService } = options;
 
     const features = {
@@ -79,7 +84,7 @@ const createWrapper =
 
     return (
       <ContentListProvider
-        id="test-list"
+        id={providerId}
         labels={{
           entity: 'dashboard',
           entityPlural: 'dashboards',
@@ -93,14 +98,20 @@ const createWrapper =
       </ContentListProvider>
     );
   };
+};
 
 describe('ContentListToolbar', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
+  afterEach(() => {
+    contentListQueryClient.cancelQueries();
+    contentListQueryClient.clear();
+  });
+
   describe('rendering', () => {
-    it('renders a search bar', () => {
+    it('renders a search bar once the initial fetch resolves', async () => {
       const Wrapper = createWrapper();
       render(
         <Wrapper>
@@ -108,10 +119,36 @@ describe('ContentListToolbar', () => {
         </Wrapper>
       );
 
-      expect(screen.getByTestId('contentListToolbar-searchBox')).toBeInTheDocument();
+      // Phase is 'initialLoad' on first render; the skeleton stands in for
+      // the search bar until the first fetch settles.
+      expect(await screen.findByTestId('contentListToolbar-searchBox')).toBeInTheDocument();
     });
 
-    it('applies custom data-test-subj prefix to the search box', () => {
+    it('renders a skeleton during the initialLoad phase', () => {
+      // Use a dedicated provider id + never-resolving findItems so phase
+      // stays 'initialLoad' long enough to observe the skeleton
+      // synchronously. A unique id prevents the shared module-level query
+      // cache from replaying a previous test's resolved data here.
+      contentListQueryClient.cancelQueries();
+      contentListQueryClient.clear();
+      const neverResolves = jest.fn(
+        (_params: FindItemsParams) => new Promise<FindItemsResult>(() => undefined)
+      );
+
+      render(
+        <ContentListProvider
+          id="toolbar-skeleton-test"
+          labels={{ entity: 'dashboard', entityPlural: 'dashboards' }}
+          dataSource={{ findItems: neverResolves }}
+        >
+          <ContentListToolbar />
+        </ContentListProvider>
+      );
+
+      expect(screen.getByTestId('contentListToolbar-skeleton')).toBeInTheDocument();
+    });
+
+    it('applies custom data-test-subj prefix to the search box', async () => {
       const Wrapper = createWrapper();
       render(
         <Wrapper>
@@ -119,12 +156,12 @@ describe('ContentListToolbar', () => {
         </Wrapper>
       );
 
-      expect(screen.getByTestId('my-toolbar-searchBox')).toBeInTheDocument();
+      expect(await screen.findByTestId('my-toolbar-searchBox')).toBeInTheDocument();
     });
   });
 
   describe('search box', () => {
-    it('uses the default placeholder when none is configured', () => {
+    it('uses the default placeholder when none is configured', async () => {
       const Wrapper = createWrapper();
       render(
         <Wrapper>
@@ -132,11 +169,11 @@ describe('ContentListToolbar', () => {
         </Wrapper>
       );
 
-      const searchBox = screen.getByTestId('contentListToolbar-searchBox');
+      const searchBox = await screen.findByTestId('contentListToolbar-searchBox');
       expect(searchBox).toHaveAttribute('placeholder', 'Search\u2026');
     });
 
-    it('renders the search box as enabled by default', () => {
+    it('renders the search box as enabled by default', async () => {
       const Wrapper = createWrapper();
       render(
         <Wrapper>
@@ -144,11 +181,11 @@ describe('ContentListToolbar', () => {
         </Wrapper>
       );
 
-      const searchBox = screen.getByTestId('contentListToolbar-searchBox');
+      const searchBox = await screen.findByTestId('contentListToolbar-searchBox');
       expect(searchBox).not.toBeDisabled();
     });
 
-    it('renders the search box as disabled when search is disabled', () => {
+    it('renders the search box as disabled when search is disabled', async () => {
       const Wrapper = createWrapper({ searchDisabled: true });
       render(
         <Wrapper>
@@ -156,7 +193,7 @@ describe('ContentListToolbar', () => {
         </Wrapper>
       );
 
-      const searchBox = screen.getByTestId('contentListToolbar-searchBox');
+      const searchBox = await screen.findByTestId('contentListToolbar-searchBox');
       expect(searchBox).toBeDisabled();
     });
 
@@ -168,7 +205,7 @@ describe('ContentListToolbar', () => {
         </Wrapper>
       );
 
-      const searchBox = screen.getByTestId('contentListToolbar-searchBox');
+      const searchBox = await screen.findByTestId('contentListToolbar-searchBox');
       await userEvent.type(searchBox, 'dashboard');
 
       // Wait for the incremental search to trigger a refetch with the typed text.
@@ -186,7 +223,7 @@ describe('ContentListToolbar', () => {
         </Wrapper>
       );
 
-      const searchBox = screen.getByTestId('contentListToolbar-searchBox');
+      const searchBox = await screen.findByTestId('contentListToolbar-searchBox');
       expect(searchBox).toHaveValue('');
 
       await userEvent.type(searchBox, 'test query');
@@ -211,7 +248,7 @@ describe('ContentListToolbar', () => {
         </Wrapper>
       );
 
-      const searchBox = screen.getByTestId('contentListToolbar-searchBox');
+      const searchBox = await screen.findByTestId('contentListToolbar-searchBox');
 
       // Type a valid query so there is a known good state.
       fireEvent.change(searchBox, { target: { value: 'hello' } });
@@ -236,7 +273,7 @@ describe('ContentListToolbar', () => {
       });
     });
 
-    it('uses the configured search placeholder', () => {
+    it('uses the configured search placeholder', async () => {
       const Wrapper = createWrapper({ searchPlaceholder: 'Search dashboards...' });
       render(
         <Wrapper>
@@ -244,13 +281,13 @@ describe('ContentListToolbar', () => {
         </Wrapper>
       );
 
-      const searchBox = screen.getByTestId('contentListToolbar-searchBox');
+      const searchBox = await screen.findByTestId('contentListToolbar-searchBox');
       expect(searchBox).toHaveAttribute('placeholder', 'Search dashboards...');
     });
   });
 
   describe('sort filter', () => {
-    it('renders the sort filter when sorting is enabled', () => {
+    it('renders the sort filter when sorting is enabled', async () => {
       const Wrapper = createWrapper();
       render(
         <Wrapper>
@@ -258,10 +295,10 @@ describe('ContentListToolbar', () => {
         </Wrapper>
       );
 
-      expect(screen.getByTestId('contentListSortRenderer')).toBeInTheDocument();
+      expect(await screen.findByTestId('contentListSortRenderer')).toBeInTheDocument();
     });
 
-    it('does not render the sort filter when sorting is disabled', () => {
+    it('does not render the sort filter when sorting is disabled', async () => {
       const Wrapper = createWrapper({ sortingDisabled: true });
       render(
         <Wrapper>
@@ -269,12 +306,13 @@ describe('ContentListToolbar', () => {
         </Wrapper>
       );
 
+      await screen.findByTestId('contentListToolbar-searchBox');
       expect(screen.queryByTestId('contentListSortRenderer')).not.toBeInTheDocument();
     });
   });
 
   describe('declarative filter children', () => {
-    it('renders sort filter from declarative children', () => {
+    it('renders sort filter from declarative children', async () => {
       const { Filters } = ContentListToolbar;
       const Wrapper = createWrapper();
 
@@ -288,10 +326,10 @@ describe('ContentListToolbar', () => {
         </Wrapper>
       );
 
-      expect(screen.getByTestId('contentListSortRenderer')).toBeInTheDocument();
+      expect(await screen.findByTestId('contentListSortRenderer')).toBeInTheDocument();
     });
 
-    it('falls back to default filter order when Filters has no valid children', () => {
+    it('falls back to default filter order when Filters has no valid children', async () => {
       const { Filters } = ContentListToolbar;
       const Wrapper = createWrapper();
 
@@ -306,10 +344,10 @@ describe('ContentListToolbar', () => {
       );
 
       // Should still render the sort filter from defaults.
-      expect(screen.getByTestId('contentListSortRenderer')).toBeInTheDocument();
+      expect(await screen.findByTestId('contentListSortRenderer')).toBeInTheDocument();
     });
 
-    it('falls back to default filter order when no Filters child provided', () => {
+    it('falls back to default filter order when no Filters child provided', async () => {
       const Wrapper = createWrapper();
 
       render(
@@ -320,10 +358,10 @@ describe('ContentListToolbar', () => {
         </Wrapper>
       );
 
-      expect(screen.getByTestId('contentListSortRenderer')).toBeInTheDocument();
+      expect(await screen.findByTestId('contentListSortRenderer')).toBeInTheDocument();
     });
 
-    it('ignores non-element children (null, strings)', () => {
+    it('ignores non-element children (null, strings)', async () => {
       const Wrapper = createWrapper();
 
       render(
@@ -336,10 +374,10 @@ describe('ContentListToolbar', () => {
       );
 
       // Should fall back to default filters.
-      expect(screen.getByTestId('contentListSortRenderer')).toBeInTheDocument();
+      expect(await screen.findByTestId('contentListSortRenderer')).toBeInTheDocument();
     });
 
-    it('resolves Filters wrapped in a Fragment', () => {
+    it('resolves Filters wrapped in a Fragment', async () => {
       const { Filters } = ContentListToolbar;
       const Wrapper = createWrapper();
 
@@ -355,7 +393,7 @@ describe('ContentListToolbar', () => {
         </Wrapper>
       );
 
-      expect(screen.getByTestId('contentListSortRenderer')).toBeInTheDocument();
+      expect(await screen.findByTestId('contentListSortRenderer')).toBeInTheDocument();
     });
   });
 
@@ -368,7 +406,7 @@ describe('ContentListToolbar', () => {
         </Wrapper>
       );
 
-      const searchBox = screen.getByTestId('contentListToolbar-searchBox');
+      const searchBox = await screen.findByTestId('contentListToolbar-searchBox');
 
       // Use fireEvent.change to set the full query at once, avoiding
       // EuiSearchBar's controlled-component round-trip on intermediate states
@@ -396,7 +434,7 @@ describe('ContentListToolbar', () => {
         </Wrapper>
       );
 
-      const searchBox = screen.getByTestId('contentListToolbar-searchBox');
+      const searchBox = await screen.findByTestId('contentListToolbar-searchBox');
       await userEvent.type(searchBox, 'plain search');
 
       await waitFor(() => {
@@ -414,7 +452,7 @@ describe('ContentListToolbar', () => {
         </Wrapper>
       );
 
-      const searchBox = screen.getByTestId('contentListToolbar-searchBox');
+      const searchBox = await screen.findByTestId('contentListToolbar-searchBox');
       await userEvent.type(searchBox, 'tag:Production my query');
 
       // Without tags service, the entire text is treated as the search query.
@@ -433,7 +471,7 @@ describe('ContentListToolbar', () => {
         </Wrapper>
       );
 
-      const searchBox = screen.getByTestId('contentListToolbar-searchBox');
+      const searchBox = await screen.findByTestId('contentListToolbar-searchBox');
       fireEvent.change(searchBox, { target: { value: 'tag:"New World" my query' } });
 
       await waitFor(() => {
@@ -454,7 +492,7 @@ describe('ContentListToolbar', () => {
         </Wrapper>
       );
 
-      const searchBox = screen.getByTestId('contentListToolbar-searchBox');
+      const searchBox = await screen.findByTestId('contentListToolbar-searchBox');
 
       // Set a tag name that doesn't match any known tag.
       fireEvent.change(searchBox, { target: { value: 'tag:Unknown my query' } });

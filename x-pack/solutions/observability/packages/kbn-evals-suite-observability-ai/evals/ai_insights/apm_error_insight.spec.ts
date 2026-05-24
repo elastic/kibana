@@ -36,9 +36,6 @@ function createScenarioTest(scenario: ApmErrorScenario) {
       let replayResult: LoadResult;
 
       evaluate.beforeAll(async ({ esClient, log }) => {
-        end = moment().toISOString();
-        start = moment().subtract(15, 'minutes').toISOString();
-
         log.info(`Replaying scenario: ${scenario.id}`);
         replayResult = await replayObservabilityDataStreams(
           esClient,
@@ -49,6 +46,9 @@ function createScenarioTest(scenario: ApmErrorScenario) {
 
         log.debug('Waiting to make sure all indices are refreshed');
         await new Promise((resolve) => setTimeout(resolve, INDEX_REFRESH_WAIT_MS));
+
+        end = moment().toISOString();
+        start = moment().subtract(15, 'minutes').toISOString();
 
         log.info(`Querying for APM error: ${scenario.errorQuery.errorMessage}`);
         const errorsResponse = await esClient.search({

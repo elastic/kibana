@@ -15,6 +15,9 @@ import {
   EVENT_KIND,
 } from '@kbn/rule-data-utils';
 
+const EVENT_TYPE = 'event.type' as const;
+const INDICATOR_EVENT_TYPE = 'indicator' as const;
+
 const ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID = 'attack_discovery_ad_hoc_rule_type_id' as const;
 
 /**
@@ -46,4 +49,14 @@ export const isAlertDocument = (record: DataTableRecord): boolean => {
   if (isEventDocument(record)) return false;
   if (isAttackDocument(record)) return false;
   return getFieldValue(record, EVENT_KIND) === 'signal';
+};
+
+/**
+ * Returns true if the document is a threat intelligence indicator (IOC).
+ * Detection is based on event.type containing 'indicator' (ECS classification).
+ */
+export const isIOCDocument = (record: DataTableRecord): boolean => {
+  const eventType = record.flattened[EVENT_TYPE];
+  if (Array.isArray(eventType)) return eventType.includes(INDICATOR_EVENT_TYPE);
+  return eventType === INDICATOR_EVENT_TYPE;
 };

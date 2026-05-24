@@ -20,6 +20,7 @@ import { LockAcquisitionError, LockManagerService } from '@kbn/lock-manager';
 import { AlertsLocatorDefinition, sloFeatureId } from '@kbn/observability-plugin/common';
 import { DEPRECATED_ALERTING_CONSUMERS, SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { mapValues } from 'lodash';
+import { getScopedClusterClientWithInspect } from './lib/inspect/create_inspectable_scoped_cluster_client';
 import { LOCK_ID_RESOURCE_INSTALLER } from '../common/constants';
 import { registerOverviewEmbeddable } from './lib/embeddables/register_overview_embeddable';
 import { registerErrorBudgetEmbeddable } from './lib/embeddables/register_error_budget_embeddable';
@@ -46,6 +47,7 @@ import {
   DefaultSummaryTransformManager,
   DefaultTransformManager,
 } from './services';
+import { DefaultCompositeSLORepository } from './services/composites/composite_slo_repository';
 import { DefaultSLOSettingsRepository } from './services/slo_settings_repository';
 import { DefaultSLOTemplateRepository } from './services/slo_template_repository';
 import { DefaultSummaryTransformGenerator } from './services/summary_transform_generator/summary_transform_generator';
@@ -164,9 +166,7 @@ export class SLOPlugin
 
     core.savedObjects.registerType(slo);
     core.savedObjects.registerType(sloSettings);
-    if (isCompositeSloEnabled) {
-      core.savedObjects.registerType(sloComposite);
-    }
+    core.savedObjects.registerType(sloComposite);
 
     registerBurnRateRule(plugins.alerting, core.http.basePath, this.logger, ruleDataService, {
       alertsLocator,
@@ -193,6 +193,7 @@ export class SLOPlugin
         plugins: mappedPlugins,
         config: {
           isServerless: this.isServerless,
+          compositeSloSummaryTaskEnabled: this.config.compositeSloSummaryTaskEnabled,
         },
         getScopedClients: async ({ request, logger }) => {
           const [coreStart, pluginsStart] = await core.getStartServices();
@@ -207,7 +208,16 @@ export class SLOPlugin
               ...(isCompositeSloEnabled ? [SO_SLO_COMPOSITE_TYPE] : []),
             ],
           });
-          const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
+          const rawScopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
+
+          const uiSettingsClient = coreStart.uiSettings.asScopedToClient(soClient);
+
+          const scopedClusterClient = await getScopedClusterClientWithInspect({
+            scopedClusterClient: rawScopedClusterClient,
+            uiSettingsClient,
+            request,
+            isDev: this.isDev,
+          });
 
           const [dataViewsService, rulesClient, { id: spaceId }, racClient] = await Promise.all([
             pluginsStart.dataViews.dataViewsServiceFactory(
@@ -220,6 +230,7 @@ export class SLOPlugin
           ]);
 
           const repository = new DefaultSLODefinitionRepository(soClient, logger);
+          const compositeSloRepository = new DefaultCompositeSLORepository(soClient, logger);
           const settingsRepository = new DefaultSLOSettingsRepository(soClient);
           const templateRepository = new DefaultSLOTemplateRepository(soClient);
 
@@ -242,6 +253,7 @@ export class SLOPlugin
             rulesClient,
             spaceId,
             repository,
+            compositeSloRepository,
             settingsRepository,
             templateRepository,
             transformManager,
@@ -262,7 +274,11 @@ export class SLOPlugin
       .getStartServices()
       .then(async ([coreStart, pluginStart]) => {
         const esInternalClient = coreStart.elasticsearch.client.asInternalUser;
-        const sloResourceInstaller = new DefaultResourceInstaller(esInternalClient, this.logger);
+        const sloResourceInstaller = new DefaultResourceInstaller(
+          esInternalClient,
+          this.logger,
+          isCompositeSloEnabled
+        );
         await lockManager.withLock(LOCK_ID_RESOURCE_INSTALLER, () =>
           sloResourceInstaller.ensureCommonResourcesInstalled()
         );

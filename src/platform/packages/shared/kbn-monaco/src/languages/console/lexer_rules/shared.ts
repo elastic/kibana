@@ -116,14 +116,14 @@ xjsonRules.json_root = [
   { include: '@comments' },
   // @ts-expect-error include variables into json
   matchToken('variable.template', /("\${\w+}")/),
+  // @ts-expect-error include a rule to start esql highlighting (triple quotes)
+  buildEsqlStartRule(true),
+  // @ts-expect-error include a rule to start esql highlighting (single quotes)
+  buildEsqlStartRule(false),
   // @ts-expect-error include a rule to start sql highlighting
   buildSqlStartRule(),
   // @ts-expect-error include a rule to start painless highlighting
   buildPainlessStartRule(),
-  // @ts-expect-error include a rule to start esql highlighting
-  buildEsqlStartRule(false),
-  // @ts-expect-error include a rule to start esql highlighting
-  buildEsqlStartRule(true),
   // Include remaining xjson rules, filtering out the original brace rules
   ...originalJsonRoot.filter((rule) => {
     // Filter out the original @push/@pop brace rules from xjson

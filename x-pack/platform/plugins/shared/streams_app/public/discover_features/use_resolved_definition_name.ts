@@ -11,17 +11,15 @@ import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 
 export function useResolvedDefinitionName({
   streamsRepositoryClient,
-  doc,
+  index,
+  fallbackStreamName,
   cpsHasLinkedProjects,
 }: {
   streamsRepositoryClient: StreamsRepositoryClient;
-  doc: DataTableRecord;
+  index?: string;
+  fallbackStreamName?: string;
   cpsHasLinkedProjects?: boolean;
 }) {
-  const flattenedDoc = doc.flattened;
-  const index = doc.raw._index;
-  const fallbackStreamName = getFallbackStreamName(flattenedDoc);
-
   return useAbortableAsync(
     async ({ signal }) => {
       if (!index) {
@@ -56,6 +54,13 @@ export function useResolvedDefinitionName({
     },
     [streamsRepositoryClient, index, fallbackStreamName, cpsHasLinkedProjects]
   );
+}
+
+export function adaptDocToResolverInputs(doc: DataTableRecord) {
+  return {
+    index: doc.raw._index,
+    fallbackStreamName: getFallbackStreamName(doc.flattened),
+  };
 }
 
 function getFallbackStreamName(flattenedDoc: Record<string, unknown>) {

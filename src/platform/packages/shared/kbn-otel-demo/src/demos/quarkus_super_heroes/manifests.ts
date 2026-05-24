@@ -489,7 +489,8 @@ export const quarkusSuperHeroesManifests: DemoManifestGenerator = {
       } else {
         // Standard deployment with resource limits for Quarkus services
         const resources =
-          svc.name.startsWith('rest-') ||
+          svc.resources ??
+          (svc.name.startsWith('rest-') ||
           svc.name.startsWith('grpc-') ||
           svc.name === 'event-statistics' ||
           svc.name === 'ui-super-heroes'
@@ -497,7 +498,7 @@ export const quarkusSuperHeroesManifests: DemoManifestGenerator = {
                 limits: { memory: '1Gi', cpu: '1' },
                 requests: { memory: '256Mi', cpu: '0.5' },
               }
-            : svc.resources;
+            : undefined);
 
         manifests.push(
           createDeployment({

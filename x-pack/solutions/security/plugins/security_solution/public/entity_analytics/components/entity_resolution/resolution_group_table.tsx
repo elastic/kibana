@@ -40,7 +40,11 @@ import {
   RESOLUTION_EMPTY_STATE,
   RESOLUTION_FETCH_ERROR,
 } from './translations';
-import { RESOLUTION_GROUP_TABLE_TEST_ID, RESOLUTION_EMPTY_STATE_TEST_ID } from './test_ids';
+import {
+  RESOLUTION_GROUP_TABLE_TEST_ID,
+  RESOLUTION_EMPTY_STATE_TEST_ID,
+  RESOLUTION_PRIMARY_ENTITY_ICON_TEST_ID,
+} from './test_ids';
 import { RiskScoreCell } from '../home/entities_table/risk_score_cell';
 
 export interface ResolutionGroupTableProps {
@@ -158,7 +162,12 @@ export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
                   {nameContent}
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiIconTip content={TARGET_ENTITY_TOOLTIP} type="aggregate" size="s" />
+                  <EuiIconTip
+                    content={TARGET_ENTITY_TOOLTIP}
+                    type="aggregate"
+                    size="s"
+                    anchorProps={{ 'data-test-subj': RESOLUTION_PRIMARY_ENTITY_ICON_TEST_ID }}
+                  />
                 </EuiFlexItem>
               </EuiFlexGroup>
             );

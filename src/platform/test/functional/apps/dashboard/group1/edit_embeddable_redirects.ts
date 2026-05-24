@@ -88,7 +88,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('loses originatingApp connection after first save when redirectToOrigin is false', async () => {
       const newTitle = 'test create panel originatingApp';
       await dashboard.loadDashboardInEditMode('few panels');
-      await dashboardAddPanel.clickAddCustomVisualization();
+      await dashboardAddPanel.clickAddVega();
       await visualize.saveVisualizationExpectSuccess(newTitle, {
         saveAsNew: true,
         redirectToOrigin: false,

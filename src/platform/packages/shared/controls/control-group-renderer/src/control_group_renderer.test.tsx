@@ -11,13 +11,14 @@ import React from 'react';
 
 import {
   registerEmbeddablePublicDefinition,
-  type EmbeddableFactory,
+  type EmbeddablePublicDefinition,
 } from '@kbn/embeddable-plugin/public/react_embeddable_system';
 import type { Filter } from '@kbn/es-query';
 import type { HasSerializableState } from '@kbn/presentation-publishing';
+import { setStubKibanaServices } from '@kbn/embeddable-plugin/public/mocks';
 import { act, render, waitFor } from '@testing-library/react';
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import type { ControlGroupRendererApi, ControlPanelsState } from '.';
 import type { ControlGroupRendererProps } from './control_group_renderer';
 import { ControlGroupRenderer } from './control_group_renderer';
@@ -44,6 +45,7 @@ const getTestEmbeddableFactory = () =>
         serializeState: () => ({
           selection: initialState.selection,
         }),
+        anyStateChange$: of(),
         applySerializedState: jest.fn(),
       });
       return {
@@ -54,7 +56,7 @@ const getTestEmbeddableFactory = () =>
         },
       };
     },
-  } as EmbeddableFactory<{ selection?: string }>);
+  } as EmbeddablePublicDefinition<{ selection?: string }>);
 
 // defined in the outer scope so that its reference doesn't change on rerender
 const mockGetCreationOptions = jest
@@ -63,6 +65,7 @@ const mockGetCreationOptions = jest
 
 describe('control group renderer', () => {
   beforeAll(() => {
+    setStubKibanaServices();
     registerEmbeddablePublicDefinition('test_control', getTestEmbeddableFactory);
   });
 

@@ -117,6 +117,7 @@ export { getGroupFilters } from '../common/custom_threshold_rule/helpers/get_gro
 export type { GenericAggType } from './components/rule_condition_chart/rule_condition_chart';
 export { AnomalyThreshold } from './components/custom_threshold/components/anomaly_threshold';
 export { Threshold } from './components/custom_threshold/components/threshold';
+export { builtInComparatorsWithInclusive } from './constants/comparators';
 
 export { ObservabilityAlertsTable } from './components/alerts_table/alerts_table_lazy';
 export { AlertActions } from './components/alert_actions/alert_actions_lazy';

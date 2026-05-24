@@ -49,7 +49,6 @@ export const testSubjectIds = {
   USER_PANEL_HEADER_TEST_ID: 'user-panel-header',
   SERVICE_PANEL_HEADER_TEST_ID: 'service-panel-header',
   GROUPED_ITEM_TEST_ID: 'GraphGroupedNodePreviewPanelGroupedItem',
-  GRAPH_CALLOUT_TEST_ID: 'cloudSecurityGraphGraphInvestigationCallout',
   GRAPH_NODE_ENTITY_DETAILS_ID: 'cloudSecurityGraphGraphInvestigationEntityNodeDetails',
   GRAPH_NODE_ENTITY_TAG_TEXT_ID: 'cloudSecurityGraphGraphInvestigationTagText',
   GRAPH_NODE_ENTITY_TAG_COUNT_ID: 'cloudSecurityGraphGraphInvestigationTagCount',

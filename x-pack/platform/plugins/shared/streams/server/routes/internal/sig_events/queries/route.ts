@@ -41,40 +41,6 @@ const requestParamsSchema = baseRequestParamsSchema.extend({
   searchMode: searchModeSchema,
 });
 
-export const getUnbackedQueriesCountRoute = createServerRoute({
-  endpoint: 'GET /internal/streams/queries/_unbacked_count',
-  options: {
-    access: 'internal',
-    summary: 'Count unbacked queries across streams',
-    description:
-      'Returns the count of stored significant-events queries across all streams that do not yet have a backing Kibana rule.',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
-    },
-  },
-  params: z.object({
-    query: z
-      .object({
-        minSeverityScore: z.coerce.number().int().min(0).max(100).optional(),
-      })
-      .optional(),
-  }),
-  handler: async ({ params, request, getScopedClients, server }): Promise<{ count: number }> => {
-    const { getQueryClient, licensing, uiSettingsClient } = await getScopedClients({
-      request,
-    });
-
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
-
-    const queryClient = await getQueryClient();
-    const minSeverityScore = params?.query?.minSeverityScore;
-    const count = await queryClient.countPromotableUnbackedQueries({ minSeverityScore });
-    return { count };
-  },
-});
-
 /**
  * Promotes unbacked queries to rule-backed status. Returns
  * `{ promoted, skipped_stats }`. Since STATS queries are filtered at
@@ -160,6 +126,7 @@ export const demoteBackedQueriesRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const queryClient = await getQueryClient();
+    // Only rule-backed queries can be demoted; unbacked queries have no rule to remove.
     const toDemote = await queryClient.getQueryLinks([], {
       ruleUnbacked: 'exclude',
       queryIds: params.body.queryIds,
@@ -194,6 +161,117 @@ export const demoteBackedQueriesRoute = createServerRoute({
     }
 
     return { demoted };
+  },
+});
+
+export const bulkDeleteQueriesRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/queries/_bulk_delete',
+  options: {
+    access: 'internal',
+    summary: 'Bulk delete queries across streams',
+    description:
+      'Hard-deletes stored significant-events queries across multiple streams in a single request. Removes backing Kibana rules for any backed queries.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  params: z.object({
+    body: z.object({
+      queryIds: z.array(z.string()).min(1),
+    }),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+    logger,
+  }): Promise<{ succeeded: number; failed: number; skipped: number }> => {
+    const { getQueryClient, streamsClient, licensing, uiSettingsClient } = await getScopedClients({
+      request,
+    });
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    const queryClient = await getQueryClient();
+
+    // Bulk delete must cover both backed and unbacked queries; the default
+    // 'exclude' filter would skip unbacked (draft) ones.
+    const queryLinks = await queryClient.getQueryLinks([], {
+      queryIds: params.body.queryIds,
+      ruleUnbacked: 'include',
+    });
+
+    // Count requested IDs that getQueryLinks did not find — these are idempotent
+    // no-ops (already gone / never existed) and reported as `skipped`, not failed.
+    const foundIds = new Set(queryLinks.map((link) => link.query.id));
+    const skipped = params.body.queryIds.filter((id) => !foundIds.has(id)).length;
+
+    // Capture backed rule IDs per stream to log on mid-flight failure.
+    const byStream = new Map<string, { queryIds: string[]; backedRuleIds: string[] }>();
+    for (const link of queryLinks) {
+      const bucket = byStream.get(link.stream_name) ?? { queryIds: [], backedRuleIds: [] };
+      bucket.queryIds.push(link.query.id);
+      if (link.rule_backed && link.rule_id) {
+        bucket.backedRuleIds.push(link.rule_id);
+      }
+      byStream.set(link.stream_name, bucket);
+    }
+
+    // Fetch only the stream definitions we actually need. Rejections (e.g. the
+    // stream definition no longer exists) are treated the same way as the old
+    // `listStreams() + Map.get === undefined` check: that stream's batch is
+    // counted as failed below.
+    const streamNames = Array.from(byStream.keys());
+    const streamDefinitionResults = await Promise.allSettled(
+      streamNames.map((name) => streamsClient.getStream(name))
+    );
+    const streamDefinitionsByName = new Map<
+      string,
+      Awaited<ReturnType<typeof streamsClient.getStream>>
+    >();
+    streamDefinitionResults.forEach((result, i) => {
+      if (result.status === 'fulfilled') {
+        streamDefinitionsByName.set(streamNames[i], result.value);
+      }
+    });
+
+    // syncQueries uninstalls rules before writing storage, so a mid-flight
+    // throw can leave rules gone while stored links still reference them. Log
+    // the backed rule IDs on failure so ops can reconcile manually.
+    const sigEventsLogger = logger.get('significant_events');
+
+    let succeeded = 0;
+    let failed = 0;
+
+    for (const [streamName, { queryIds, backedRuleIds }] of byStream) {
+      const definition = streamDefinitionsByName.get(streamName);
+      if (!definition) {
+        logger.warn(`Skipping bulk delete for missing stream ${streamName}`);
+        failed += queryIds.length;
+        continue;
+      }
+      try {
+        await queryClient.bulk(
+          definition,
+          queryIds.map((id) => ({ delete: { id } }))
+        );
+        succeeded += queryIds.length;
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        const orphanContext =
+          backedRuleIds.length > 0 ? ` candidateOrphanedRuleIds=[${backedRuleIds.join(',')}]` : '';
+        sigEventsLogger.error(
+          `Bulk delete failed for stream ${streamName}: ${errorMessage}. ` +
+            `queryIds=[${queryIds.join(',')}]${orphanContext}`
+        );
+        failed += queryIds.length;
+      }
+    }
+
+    return { succeeded, failed, skipped };
   },
 });
 
@@ -365,7 +443,7 @@ const generateQueriesRoute = createServerRoute({
     server,
     logger,
     telemetry,
-  }): Promise<SignificantEventsQueriesGenerationResult> => {
+  }): Promise<SignificantEventsQueriesGenerationResult & { connectorId: string }> => {
     const {
       streamsClient,
       inferenceClient,
@@ -384,7 +462,7 @@ const generateQueriesRoute = createServerRoute({
 
     const [featureClient, queryClient] = await Promise.all([getFeatureClient(), getQueryClient()]);
 
-    const { queries, tokensUsed } = await generateKIQueries(
+    const result = await generateKIQueries(
       { streamName, connectorId, maxExistingQueriesForContext },
       {
         streamsClient,
@@ -402,7 +480,11 @@ const generateQueriesRoute = createServerRoute({
       }
     );
 
-    return { queries, tokensUsed };
+    return {
+      queries: result.queries,
+      tokensUsed: result.tokensUsed,
+      connectorId: result.connectorId,
+    };
   },
 });
 
@@ -443,9 +525,9 @@ const persistQueriesRoute = createServerRoute({
 });
 
 export const internalQueriesRoutes = {
-  ...getUnbackedQueriesCountRoute,
   ...promoteUnbackedQueriesRoute,
   ...demoteBackedQueriesRoute,
+  ...bulkDeleteQueriesRoute,
   ...getDiscoveryQueriesRoute,
   ...getDiscoveryQueriesOccurrencesRoute,
   ...generateQueriesRoute,

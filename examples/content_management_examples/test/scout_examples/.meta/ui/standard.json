@@ -1,0 +1,44 @@
+{
+  "sha1": "73067c6e200de4cc04cc3ee4c076c9e78ceb8d42",
+  "tests": [
+    {
+      "id": "d757255593aedce-9575d128928e2f0",
+      "title": "Content Management Examples Todo app CRUD operations work",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/content_management_examples/test/scout_examples/ui/tests/content_management.spec.ts",
+        "line": 22,
+        "column": 7
+      }
+    },
+    {
+      "id": "d757255593aedce-3392f09e4640d48",
+      "title": "Content Management Examples MSearch demo displays sample flights data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/content_management_examples/test/scout_examples/ui/tests/content_management.spec.ts",
+        "line": 78,
+        "column": 7
+      }
+    },
+    {
+      "id": "d757255593aedce-51d226556f4caa5",
+      "title": "Content Management Examples Finder demo displays saved objects from sample data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/content_management_examples/test/scout_examples/ui/tests/content_management.spec.ts",
+        "line": 103,
+        "column": 7
+      }
+    }
+  ]
+}

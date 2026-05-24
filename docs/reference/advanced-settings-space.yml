@@ -802,6 +802,24 @@ groups:
           self: ga
           serverless: ga
 
+  - group: Cases
+    id: kibana-cases-settings
+    settings:
+
+      - setting: "cases:maxOpenCasesPerRuleRun"
+        id: cases-max-open-cases-per-rule-run
+        description: |
+          Sets the maximum number of new cases the Cases connector can open in one detection rule run when the rule includes a Cases action. Values must be between 1 and 1000. Very high values can add load on {{kib}} and {{es}}. `20` by default.
+        datatype: int
+        default: 20
+        applies_to:
+          stack: ga 9.4
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: ga
+
   - group: Discover
     id: kibana-discover-settings
     settings:
@@ -2138,6 +2156,19 @@ groups:
           eck: ga
           self: ga
           security: ga
+
+      - setting: "securitySolution:includedDataStreamNamespacesForRuleExecution"
+        id: security-solution-included-data-stream-namespaces-for-rule-execution
+        description: |
+          When configured, the setting restricts which documents detection rules search. Only events whose `data_stream.namespace` field matches one of the specified namespaces are queried. This applies to all detection rules in the {{kib}} space and acts like a global filter on `data_stream.namespace`. Specify an array of namespace strings (for example, `["namespace1", "namespace2"]`). You can configure up to 50 namespaces. Empty by default (searches all namespaces).
+        datatype: json
+        applies_to:
+          stack: ga 9.4
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: ga
 
       - setting: "securitySolution:enablePrivilegedUserMonitoring"
         id: security-solution-enable-privileged-user-monitoring

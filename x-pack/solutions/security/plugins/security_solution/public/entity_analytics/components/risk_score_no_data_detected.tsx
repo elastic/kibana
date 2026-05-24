@@ -31,7 +31,7 @@ const RiskScoresNoDataDetectedComponent = ({ entityType }: { entityType: EntityT
         body={
           <FormattedMessage
             id="xpack.securitySolution.riskScore.entityDashboardWarningPanelBody"
-            defaultMessage={`We haven’t found any {entityType} risk score data. Check if you have any global filters in the global KQL search bar. If you have just enabled the {entityType} risk module, the risk engine might need an hour to generate {entityType} risk score data and display in this panel.`}
+            defaultMessage={`We haven’t found any {entityType} risk score data. Check if you have any global filters in the global KQL search bar. If you have just enabled the {entityType} risk module, the risk score maintainer might need an hour to generate {entityType} risk score data and display in this panel.`}
             values={{ entityType }}
           />
         }

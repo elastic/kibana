@@ -877,8 +877,9 @@ exports[`View policy flyout shows all phases 1`] = `
             <div
               class="euiFlexItem emotion-euiFlexItem-growZero"
             >
-              <div
-                class="css-1qm42o4-PhaseIndicator"
+              <span
+                aria-hidden="true"
+                data-euiicon-type="trash"
               />
             </div>
             <div

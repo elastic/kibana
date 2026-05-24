@@ -89,6 +89,21 @@ export interface NativeAPIKeysType {
    * @param params The params to invalidate the API keys.
    */
   invalidateAsInternalUser(params: InvalidateAPIKeysParams): Promise<InvalidateAPIKeyResult | null>;
+
+  /**
+   * Clones an existing API key using the internal user, creating a new independent key
+   * with the same role descriptors as the source. The source key credential is extracted
+   * from the request's Authorization header.
+   *
+   * Requires the `clone_api_key` cluster privilege (available to `kibana_system`).
+   *
+   * @param request Request instance containing the source API key in the Authorization header.
+   * @param cloneParams Clone operation parameters.
+   */
+  cloneAsInternalUser(
+    request: KibanaRequest,
+    cloneParams: CloneAPIKeyParams
+  ): Promise<CloneAPIKeyResult | null>;
 }
 
 export type CreateAPIKeyParams =
@@ -154,6 +169,18 @@ export interface GrantAPIKeyResult {
    * Generated API key
    */
   api_key: string;
+}
+
+export interface CloneAPIKeyParams {
+  name: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface CloneAPIKeyResult {
+  id: string;
+  name: string;
+  api_key: string;
+  encoded: string;
 }
 
 /**

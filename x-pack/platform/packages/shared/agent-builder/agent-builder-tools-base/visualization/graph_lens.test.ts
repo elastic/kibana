@@ -25,6 +25,12 @@ jest.mock('./chart_type_registry', () => ({
         schema: {
           validate: (config: unknown) => config,
         },
+        prompt: {
+          selection: {
+            description: 'Mock chart description',
+            guideline: 'Mock chart guideline',
+          },
+        },
       }),
     }
   ),

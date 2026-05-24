@@ -33,7 +33,6 @@ import { waitFor, screen } from '@testing-library/react';
 import { useGetTags } from '../../containers/use_get_tags';
 import { casesQueriesKeys } from '../../containers/constants';
 import {
-  alertsHit,
   caseViewProps,
   defaultGetCase,
   defaultGetCaseMetrics,
@@ -193,8 +192,6 @@ describe('CaseView', () => {
             refreshRef,
             caseId: '1234',
             onComponentInitialized: jest.fn(),
-            showAlertDetails: jest.fn(),
-            useFetchAlertData: jest.fn().mockReturnValue([false, alertsHit[0]]),
           }}
         />
       );
@@ -214,8 +211,6 @@ describe('CaseView', () => {
             refreshRef,
             caseId: '1234',
             onComponentInitialized: jest.fn(),
-            showAlertDetails: jest.fn(),
-            useFetchAlertData: jest.fn().mockReturnValue([false, alertsHit[0]]),
           }}
         />,
         { wrapperProps: { queryClient } }

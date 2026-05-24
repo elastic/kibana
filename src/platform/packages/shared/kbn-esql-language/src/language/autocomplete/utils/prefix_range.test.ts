@@ -7,12 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  computePrefixRange,
-  attachReplacementRanges,
-  attachRootQueryReplacementRanges,
-  type PrefixResult,
-} from './prefix_range';
+import { computePrefixRange, attachReplacementRanges, type PrefixResult } from './prefix_range';
+import { ReplacementRangeStrategyKind } from './prefix_range';
 import type { ISuggestionItem } from '../../../commands/registry/types';
 
 describe('computePrefixRange', () => {
@@ -196,26 +192,121 @@ describe('attachReplacementRanges', () => {
 
     expect(result[0].rangeToReplace).toEqual({ start: 19, end: 19 });
   });
-});
 
-describe('attachRootQueryReplacementRanges', () => {
-  const makeSuggestion = (text: string, rangeToReplace?: { start: number; end: number }) =>
-    ({
-      text,
-      label: text,
-      kind: 'Variable' as const,
-      sortText: text,
-      ...(rangeToReplace ? { rangeToReplace } : {}),
-    } as ISuggestionItem);
+  it('resolves declarative scoped-prefix replacement centrally', () => {
+    const suggestions = [
+      {
+        ...makeSuggestion('"inference_id": "$0"'),
+        replacementRangeStrategy: {
+          kind: ReplacementRangeStrategyKind.SCOPED_PREFIX,
+          scopeText: '{ "',
+        },
+      },
+    ];
 
-  it('replaces the typed root prefix and trailing query', () => {
-    const suggestions = [makeSuggestion('FROM kibana_sample_data_logs | LIMIT 10')];
-    const result = attachRootQueryReplacementRanges(
-      suggestions,
-      'FROM kibana_sample_data_logs | STATS count = COUNT(*)',
-      2
-    );
+    const result = attachReplacementRanges('ignored', suggestions);
 
-    expect(result[0].rangeToReplace).toEqual({ start: 0, end: 54 });
+    expect(result[0].rangeToReplace).toEqual({ start: 2, end: 3 });
+  });
+
+  it('resolves declarative quoted-value replacement centrally', () => {
+    const scopeText = '{"param1": "';
+    const suggestions = [
+      {
+        ...makeSuggestion('"value1"'),
+        replacementRangeStrategy: {
+          kind: ReplacementRangeStrategyKind.QUOTED_VALUE,
+          scopeText,
+        },
+      },
+    ];
+
+    const result = attachReplacementRanges('ignored', suggestions);
+
+    expect(result[0].rangeToReplace).toEqual({ start: 11, end: 13 });
+  });
+
+  it('does not extend the quoted-value range when the typed prefix is not quoted', () => {
+    const scopeText = '{"param1": val';
+    const suggestions = [
+      {
+        ...makeSuggestion('"value1"'),
+        replacementRangeStrategy: {
+          kind: ReplacementRangeStrategyKind.QUOTED_VALUE,
+          scopeText,
+        },
+      },
+    ];
+
+    const result = attachReplacementRanges('ignored', suggestions);
+
+    expect(result[0].rangeToReplace).toEqual({ start: 11, end: 14 });
+  });
+
+  it('extends declarative quoted-value replacement past the typed prefix', () => {
+    const scopeText = 'FROM a | COMPLETION "prompt" WITH { "inference_id": "inf';
+    const suggestions = [
+      {
+        ...makeSuggestion('"value1"'),
+        replacementRangeStrategy: {
+          kind: ReplacementRangeStrategyKind.QUOTED_VALUE,
+          scopeText,
+        },
+      },
+    ];
+
+    const result = attachReplacementRanges('ignored', suggestions);
+
+    expect(result[0].rangeToReplace).toEqual({ start: 52, end: 57 });
+  });
+
+  it('resolves declarative whole-scope replacement centrally', () => {
+    const suggestions = [
+      {
+        ...makeSuggestion('value'),
+        replacementRangeStrategy: {
+          kind: ReplacementRangeStrategyKind.WHOLE_SCOPE,
+          scopeText: 'typed value',
+          startOffset: 5,
+        },
+      },
+    ];
+
+    const result = attachReplacementRanges('ignored', suggestions);
+
+    expect(result[0].rangeToReplace).toEqual({ start: 5, end: 16 });
+  });
+
+  it('resolves declarative trailing-whitespace replacement centrally', () => {
+    const suggestions: ISuggestionItem[] = [
+      {
+        ...makeSuggestion(', '),
+        replacementRangeStrategy: {
+          kind: ReplacementRangeStrategyKind.TRAILING_WHITESPACE,
+        },
+      },
+    ];
+
+    const result = attachReplacementRanges('FROM a | SORT field ', suggestions);
+
+    expect(result[0].rangeToReplace).toEqual({ start: 19, end: 20 });
+  });
+
+  it('resolves declarative root-query replacement centrally', () => {
+    const suggestions: ISuggestionItem[] = [
+      {
+        ...makeSuggestion('FROM kibana_sample_data_logs | LIMIT 10'),
+        replacementRangeStrategy: {
+          kind: ReplacementRangeStrategyKind.ROOT_QUERY,
+        },
+      },
+    ];
+
+    const result = attachReplacementRanges('FR', suggestions, {
+      fullText: 'FROM kibana_sample_data_logs | STATS count = COUNT(*)',
+      offset: 2,
+    });
+
+    expect(result[0].rangeToReplace).toEqual({ start: 0, end: 53 });
   });
 });

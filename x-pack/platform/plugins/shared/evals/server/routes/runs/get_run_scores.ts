@@ -10,13 +10,13 @@ import {
   API_VERSIONS,
   INTERNAL_API_ACCESS,
   EVALUATIONS_INDEX_PATTERN,
-  buildRouteValidationWithZod,
   buildRunFilterQuery,
   SCORES_SORT_ORDER,
   GetEvaluationRunScoresRequestParams,
   GetEvaluationRunScoresRequestQuery,
 } from '@kbn/evals-common';
-import { PLUGIN_ID } from '../../../common';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
 
 export const registerGetRunScoresRoute = ({ router, logger }: RouteDependencies) => {
@@ -25,7 +25,7 @@ export const registerGetRunScoresRoute = ({ router, logger }: RouteDependencies)
       path: EVALS_RUN_SCORES_URL,
       access: INTERNAL_API_ACCESS,
       security: {
-        authz: { requiredPrivileges: [PLUGIN_ID] },
+        authz: { requiredPrivileges: [EVALS_API_PRIVILEGES.read] },
       },
       summary: 'Get evaluation run scores',
     })

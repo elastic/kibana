@@ -452,6 +452,10 @@ export class QueryStringInput extends PureComponent<QueryStringInputProps, State
         case KEY_CODES.ESC:
           if (isSuggestionsVisible) {
             event.preventDefault();
+            // Without this, the Esc keeps bubbling up to ancestor handlers
+            // (e.g. EuiFlyout's Esc-to-close), so closing the autocomplete
+            // would also dismiss the surrounding overlay.
+            event.stopPropagation();
           }
           this.setState({ isSuggestionsVisible: false, index: null });
           break;

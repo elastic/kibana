@@ -45,7 +45,6 @@ export function createAddServiceMapPanelAction(
         core: deps.coreStart,
         parentApi: embeddable,
         flyoutProps: {
-          type: 'overlay',
           size: 'm',
         },
         loadContent: async ({ closeFlyout, ariaLabelledBy }) => {

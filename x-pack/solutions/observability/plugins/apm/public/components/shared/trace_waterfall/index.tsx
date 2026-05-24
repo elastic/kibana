@@ -26,10 +26,12 @@ import type { TraceItem } from '../../../../common/waterfall/unified_trace_item'
 import { TimelineAxisContainer, VerticalLinesContainer } from '../charts/timeline';
 import { ACCORDION_HEIGHT, BORDER_THICKNESS, TraceItemRow } from './trace_item_row';
 import { CriticalPathToggle } from './critical_path';
+import { ScrollToOriginButton } from './scroll_to_origin_button';
 import type { OnErrorClick, OnNodeClick } from './trace_waterfall_context';
 import { TraceWaterfallContextProvider, useTraceWaterfallContext } from './trace_waterfall_context';
 import type { TraceWaterfallItem } from './use_trace_waterfall';
 import { TraceWarning } from './trace_warning';
+import { useScrollToOrigin } from './use_scroll_to_origin';
 import { WaterfallLegends } from './waterfall_legends';
 import { WaterfallAccordionButton } from './waterfall_accordion_button';
 import { WaterfallSizeWarning } from './waterfall_size_warning';
@@ -58,6 +60,12 @@ interface BaseTraceWaterfallProps {
   traceDocsTotal?: number;
   maxTraceItems?: number;
   discoverHref?: string;
+  // TODO: Make required once the legacy waterfall is removed. See https://github.com/elastic/kibana/issues/248693
+  ebt?: {
+    row: { element: string };
+    errorBadge: { element: string };
+    serviceBadge: { element: string };
+  };
 }
 
 /** Default: 'window' (page scroll). Use 'parent' for flyout. */
@@ -91,6 +99,7 @@ export function TraceWaterfall(props: TraceWaterfallProps) {
     traceDocsTotal = 0,
     maxTraceItems = 0,
     discoverHref,
+    ebt,
   } = props;
   const contextSpanIds = props.contextSpanIds;
   const scrollToContextOnMount =
@@ -120,6 +129,7 @@ export function TraceWaterfall(props: TraceWaterfallProps) {
       onShowCriticalPathChange={onShowCriticalPathChange}
       entryTransactionId={entryTransactionId}
       scrollToContextOnMount={scrollToContextOnMount}
+      ebt={ebt}
     >
       {exceedMax && (
         <>
@@ -156,7 +166,15 @@ function TraceWaterfallComponent() {
     showCriticalPath,
     setShowCriticalPath,
     showCriticalPathControl,
+    contextSpanIds,
+    scrollStrategy,
   } = useTraceWaterfallContext();
+
+  const [isContextSpanVisible, setIsContextSpanVisible] = useState(true);
+  const scrollToOriginRef = useRef<() => void>(() => {});
+
+  const showScrollToOrigin = scrollStrategy === 'parent' && (contextSpanIds?.length ?? 0) > 0;
+  const showToolbar = showCriticalPathControl || showScrollToOrigin;
 
   const stickyTop = isEmbeddable
     ? '0px'
@@ -171,9 +189,28 @@ function TraceWaterfallComponent() {
         min-height: 0;
       `}
     >
-      {showCriticalPathControl && (
+      {showToolbar && (
         <EuiFlexItem grow={false}>
-          <CriticalPathToggle checked={showCriticalPath} onChange={setShowCriticalPath} />
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            {showCriticalPathControl && (
+              <EuiFlexItem grow={false}>
+                <CriticalPathToggle checked={showCriticalPath} onChange={setShowCriticalPath} />
+              </EuiFlexItem>
+            )}
+            {showScrollToOrigin && (
+              <EuiFlexItem
+                grow={false}
+                css={css`
+                  margin-left: auto;
+                `}
+              >
+                <ScrollToOriginButton
+                  isDisabled={isContextSpanVisible}
+                  onClick={() => scrollToOriginRef.current()}
+                />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
         </EuiFlexItem>
       )}
       <EuiFlexItem
@@ -249,7 +286,10 @@ function TraceWaterfallComponent() {
               min-height: 0;
             `}
           >
-            <TraceTree />
+            <TraceTree
+              setIsContextSpanVisible={setIsContextSpanVisible}
+              scrollToOriginRef={scrollToOriginRef}
+            />
           </div>
         </div>
       </EuiFlexItem>
@@ -257,7 +297,13 @@ function TraceWaterfallComponent() {
   );
 }
 
-function TraceTree() {
+function TraceTree({
+  setIsContextSpanVisible,
+  scrollToOriginRef,
+}: {
+  setIsContextSpanVisible: (visible: boolean) => void;
+  scrollToOriginRef: React.MutableRefObject<() => void>;
+}) {
   const {
     traceWaterfallMap,
     traceWaterfall,
@@ -305,6 +351,14 @@ function TraceTree() {
     return index >= 0 ? index : undefined;
   }, [scrollToContextOnMount, scrollStrategy, scrollComplete, contextSpanIds, visibleList]);
 
+  const { onScrolled } = useScrollToOrigin({
+    contextSpanId: contextSpanIds?.[0],
+    visibleList,
+    listRef,
+    scrollToOriginRef,
+    setIsContextSpanVisible,
+  });
+
   const onRowsRendered = useCallback(
     ({ startIndex, stopIndex }: { startIndex: number; stopIndex: number }) => {
       if (
@@ -314,8 +368,9 @@ function TraceTree() {
       ) {
         setScrollComplete(true);
       }
+      onScrolled({ startIndex, stopIndex });
     },
-    [scrollToIndex]
+    [scrollToIndex, onScrolled]
   );
 
   const rowRenderer: ListRowRenderer = useCallback(

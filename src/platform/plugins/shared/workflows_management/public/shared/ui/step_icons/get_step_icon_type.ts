@@ -55,6 +55,7 @@ export const getStepIconType = (nodeType: string): IconType => {
     case 'workflow.fail':
       iconType = HardcodedIcons['workflow.fail'];
       break;
+    // `workflow` (bare base type) is handled in StepIcon's BASE_TYPE_AGGREGATE_ICONS.
 
     // flow control nodes
     case 'wait':

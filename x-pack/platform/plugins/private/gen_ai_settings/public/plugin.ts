@@ -13,7 +13,7 @@ import type { ManagementApp, ManagementSetup } from '@kbn/management-plugin/publ
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ProductDocBasePluginStart } from '@kbn/product-doc-base-plugin/public';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { GenAiSettingsConfigType } from '../common/config';
 
 export interface GenAiSettingsStartDeps {

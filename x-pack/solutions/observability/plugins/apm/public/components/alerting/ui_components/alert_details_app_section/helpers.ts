@@ -17,8 +17,12 @@ export const getAggsTypeFromRule = (ruleAggType: string): LatencyAggregationType
   return LatencyAggregationType.avg;
 };
 
-export const isAnomalyRuleType = (ruleTypeId: ApmRuleType): boolean =>
+export const isAnomalyRuleType = (ruleTypeId: ApmRuleType): ruleTypeId is ApmRuleType.Anomaly =>
   ruleTypeId === ApmRuleType.Anomaly;
+
+export const isErrorCountRuleType = (
+  ruleTypeId: ApmRuleType
+): ruleTypeId is ApmRuleType.ErrorCount => ruleTypeId === ApmRuleType.ErrorCount;
 
 export const yLabelFormat = (y?: number | null) => {
   return asPercent(y || 0, 1);
@@ -52,7 +56,7 @@ export function formatAnomalySeverityThreshold(alertEvaluationThreshold: number)
       other {Alert when {severity} or above}
     }`,
     values: {
-      severity: severityMatch?.label ?? String(alertEvaluationThreshold),
+      severity: severityMatch?.type ?? String(alertEvaluationThreshold),
     },
   });
 }

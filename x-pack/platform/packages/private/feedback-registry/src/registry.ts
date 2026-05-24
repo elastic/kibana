@@ -11,6 +11,22 @@ import type { FeedbackRegistry } from './types';
 
 const feedbackRegistry: FeedbackRegistry = new Map([
   [DEFAULT_REGISTRY_ID, () => import('./questions/default').then((m) => m.questions)],
+  [
+    'ml:anomalyExplorer',
+    () => import('./questions/machine_learning').then((m) => m.anomalyExplorerQuestions),
+  ],
+  [
+    'ml:resultExplorer',
+    () => import('./questions/machine_learning').then((m) => m.dfaResultsExplorerQuestions),
+  ],
+  [
+    'ml:analyticsMap',
+    () => import('./questions/machine_learning').then((m) => m.analyticsMapQuestions),
+  ],
+  [
+    'ml:singleMetricViewer',
+    () => import('./questions/machine_learning').then((m) => m.singleMetricViewerQuestions),
+  ],
 ]);
 
 export const getFeedbackQuestionsForApp = async (

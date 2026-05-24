@@ -69,12 +69,19 @@ export const tags = {
       },
     },
     workplaceai: getPlaywrightTagsFor('serverless', 'workplaceai'),
+    vectordb: getPlaywrightTagsFor('serverless', 'vectordb'),
 
     /**
      * All serverless project types
      */
     get all(): string[] {
-      return [...this.search, ...this.observability.all, ...this.security.all, ...this.workplaceai];
+      return [
+        ...this.search,
+        ...this.observability.all,
+        ...this.security.all,
+        ...this.workplaceai,
+        ...this.vectordb,
+      ];
     },
   },
 

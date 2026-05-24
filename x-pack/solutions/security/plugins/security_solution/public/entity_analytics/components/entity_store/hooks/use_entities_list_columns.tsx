@@ -47,7 +47,7 @@ export type EntitiesListColumns = [
 ];
 
 export const useEntitiesListColumns = (): EntitiesListColumns => {
-  const { openRightPanel } = useExpandableFlyoutApi();
+  const { openFlyout } = useExpandableFlyoutApi();
   const { euiTheme } = useEuiTheme();
 
   return [
@@ -67,13 +67,15 @@ export const useEntitiesListColumns = (): EntitiesListColumns => {
           const id = EntityPanelKeyByType[entityType];
 
           if (id) {
-            openRightPanel({
-              id,
-              params: {
-                [EntityPanelParamByType[entityType] ?? '']: value,
-                contextID: ENTITIES_LIST_TABLE_ID,
-                scopeId: ENTITIES_LIST_TABLE_ID,
-                entityId: record.entity.id,
+            openFlyout({
+              right: {
+                id,
+                params: {
+                  [EntityPanelParamByType[entityType] ?? '']: value,
+                  contextID: ENTITIES_LIST_TABLE_ID,
+                  scopeId: ENTITIES_LIST_TABLE_ID,
+                  entityId: record.entity.id,
+                },
               },
             });
           }

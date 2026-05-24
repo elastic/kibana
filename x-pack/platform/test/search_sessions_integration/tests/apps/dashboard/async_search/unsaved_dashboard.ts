@@ -39,7 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   async function addFromLibrary() {
     await appMenu.clickMenuItem('dashboardAddTopNavButton');
-    await testSubjects.click('dashboardAddFromLibraryButton');
+    await testSubjects.click('addToDashboardTab-library');
     await testSubjects.setValue('savedObjectFinderSearchInput', 'Unsaved dashboard slow query');
     await testSubjects.click('savedObjectTitleUnsaved-dashboard-slow-query');
   }

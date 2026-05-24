@@ -9,7 +9,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { PresentationPanelQuickActionContext } from '@kbn/presentation-panel-plugin/public';
+import { EmbeddableRendererContext } from '@kbn/embeddable-plugin/public';
 import type { LensProps } from './hooks/use_lens_props';
 import { useLensExtraActions } from './hooks/use_lens_extra_actions';
 import { resolveEsqlVariables } from './helpers/resolve_esql_variables';
@@ -110,8 +110,8 @@ export function LensWrapper({
 
   return (
     <div css={chartCss}>
-      <PresentationPanelQuickActionContext.Provider
-        value={{ view: [ACTION_EXPLORE_IN_DISCOVER_TAB, 'openInspector'] }}
+      <EmbeddableRendererContext.Provider
+        value={{ quickActions: { view: [ACTION_EXPLORE_IN_DISCOVER_TAB, 'openInspector'] } }}
       >
         <EmbeddableComponent
           {...lensProps}
@@ -126,7 +126,7 @@ export function LensWrapper({
           syncTooltips={syncTooltips}
           syncCursor={syncCursor}
         />
-      </PresentationPanelQuickActionContext.Provider>
+      </EmbeddableRendererContext.Provider>
     </div>
   );
 }

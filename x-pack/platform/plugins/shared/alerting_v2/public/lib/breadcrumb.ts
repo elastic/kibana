@@ -10,14 +10,13 @@ import { i18n } from '@kbn/i18n';
 export type AlertingV2BreadcrumbPage =
   | 'root'
   | 'rules_list'
-  | 'create'
-  | 'edit'
   | 'rule_details'
-  | 'notification_policies_list'
-  | 'notification_policy_create'
-  | 'notification_policy_edit'
+  | 'action_policies_list'
+  | 'action_policy_create'
+  | 'action_policy_edit'
   | 'episodes_list'
-  | 'episode_details';
+  | 'episode_details'
+  | 'execution_history_list';
 
 export const getAlertingV2Breadcrumb = (
   page: AlertingV2BreadcrumbPage,
@@ -36,37 +35,25 @@ export const getAlertingV2Breadcrumb = (
           defaultMessage: 'Rules',
         }),
       };
-    case 'create':
-      return {
-        text: i18n.translate('xpack.alertingV2.breadcrumbs.createTitle', {
-          defaultMessage: 'Create',
-        }),
-      };
-    case 'edit':
-      return {
-        text: i18n.translate('xpack.alertingV2.breadcrumbs.editTitle', {
-          defaultMessage: 'Edit',
-        }),
-      };
     case 'rule_details':
       return {
         text: options?.ruleName ?? '',
       };
-    case 'notification_policies_list':
+    case 'action_policies_list':
       return {
-        text: i18n.translate('xpack.alertingV2.breadcrumbs.notificationPoliciesListTitle', {
-          defaultMessage: 'Notification Policies',
+        text: i18n.translate('xpack.alertingV2.breadcrumbs.actionPoliciesListTitle', {
+          defaultMessage: 'Action Policies',
         }),
       };
-    case 'notification_policy_create':
+    case 'action_policy_create':
       return {
-        text: i18n.translate('xpack.alertingV2.breadcrumbs.notificationPolicyCreateTitle', {
+        text: i18n.translate('xpack.alertingV2.breadcrumbs.actionPolicyCreateTitle', {
           defaultMessage: 'Create',
         }),
       };
-    case 'notification_policy_edit':
+    case 'action_policy_edit':
       return {
-        text: i18n.translate('xpack.alertingV2.breadcrumbs.notificationPolicyEditTitle', {
+        text: i18n.translate('xpack.alertingV2.breadcrumbs.actionPolicyEditTitle', {
           defaultMessage: 'Edit',
         }),
       };
@@ -79,6 +66,12 @@ export const getAlertingV2Breadcrumb = (
     case 'episode_details':
       return {
         text: options?.ruleName ?? '',
+      };
+    case 'execution_history_list':
+      return {
+        text: i18n.translate('xpack.alertingV2.breadcrumbs.executionHistoryListTitle', {
+          defaultMessage: 'Execution history',
+        }),
       };
   }
 };

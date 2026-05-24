@@ -13,18 +13,13 @@ import type { ContentManagementPublicStart } from '@kbn/content-management-plugi
 import type { CoreStart } from '@kbn/core/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
-
-import type { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
 import { CONTENT_ID } from '../../common';
 import type { LinksStartDependencies } from '../plugin';
 
 export let coreServices: CoreStart;
 export let dashboardServices: DashboardStart;
 export let embeddableService: EmbeddableStart;
-export let presentationUtil: PresentationUtilPluginStart;
 export let contentManagement: ContentManagementPublicStart;
-export let uiActions: UiActionsPublicStart;
 export let trackUiMetric: (
   type: string,
   eventNames: string | string[],
@@ -49,9 +44,7 @@ export const setKibanaServices = (kibanaCore: CoreStart, deps: LinksStartDepende
   coreServices = kibanaCore;
   dashboardServices = deps.dashboard;
   embeddableService = deps.embeddable;
-  presentationUtil = deps.presentationUtil;
   contentManagement = deps.contentManagement;
-  uiActions = deps.uiActions;
   if (deps.usageCollection)
     trackUiMetric = deps.usageCollection.reportUiCounter.bind(deps.usageCollection, CONTENT_ID);
 

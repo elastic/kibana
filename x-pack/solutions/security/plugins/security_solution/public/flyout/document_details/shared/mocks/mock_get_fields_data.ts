@@ -11,7 +11,7 @@ import {
   ALERT_SEVERITY,
   ALERT_SUPPRESSION_DOCS_COUNT,
 } from '@kbn/rule-data-utils';
-import { EventKind } from '../../../../flyout_v2/document/constants/event_kinds';
+import { EventKind } from '../../../../flyout_v2/document/main/constants/event_kinds';
 import type { GetFieldsData } from '../hooks/use_get_fields_data';
 
 export const mockFieldData: Record<string, string[]> = {

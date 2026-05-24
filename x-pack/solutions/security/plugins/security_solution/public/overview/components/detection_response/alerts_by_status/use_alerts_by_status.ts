@@ -140,11 +140,6 @@ export interface UseAlertsByStatusProps {
   signalIndexName: string | null;
   skip?: boolean;
   identityFields: Record<string, string>;
-  /**
-   * When `identityFields` includes `entity.id`, resolves the store record (Entity Store v2)
-   * and expands to ECS-style identifier terms (e.g. `user.entity.id`, `user.name`) for the alerts query.
-   * Required for v2 resolution when filtering by canonical store id; if omitted, a plain `entity.id` term is used.
-   */
   entityType?: string;
   entityRecord?: EntityStoreRecord | null;
   additionalFilters?: ESBoolQuery[];
@@ -179,8 +174,12 @@ export const useAlertsByStatus: UseAlertsByStatus = ({
       : EMPTY_IDENTITY_FIELDS;
   const entityIdValue = identityFieldsStable[ENTITY_ID_FIELD];
   const storeEntityType = toStoreEntityType(entityType);
+
   const shouldResolveEntityIdFromStore =
-    Boolean(entityIdValue) && entityStoreV2Enabled && storeEntityType != null;
+    Boolean(entityIdValue) && // entity ID is defined
+    entityStoreV2Enabled && // entity store v2 is enabled
+    storeEntityType != null && // entity type is mappable to store-supported types
+    !entityRecordInput; // entity record not already provided as input
 
   const entityFromStore = useEntityFromStore({
     entityId: entityIdValue,
@@ -192,13 +191,15 @@ export const useAlertsByStatus: UseAlertsByStatus = ({
 
   const euidApi = useEntityStoreEuidApi();
   const entityFilters = useMemo(() => {
-    if (entityStoreV2Enabled && euidApi?.euid) {
+    if (entityStoreV2Enabled && euidApi?.euid && (entityRecord || entityRecordInput)) {
+      // Use the entity record to generate a DSL query fragment
       const filter = euidApi.euid?.dsl.getEuidFilterBasedOnDocument(
         storeEntityType ?? 'generic',
         entityRecord ?? entityRecordInput
       );
       return filter != null ? [filter] : [];
     }
+
     return identityFieldsStable != null && Object.keys(identityFieldsStable).length > 0
       ? [buildEntityIdentifierTermFilters(identityFieldsStable)]
       : [];

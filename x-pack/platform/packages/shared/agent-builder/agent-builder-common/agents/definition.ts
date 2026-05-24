@@ -118,6 +118,13 @@ export interface AgentConfiguration {
   plugin_ids?: string[];
 
   /**
+   * Optional list of connector IDs associated with this agent.
+   * When set, SML search filters connector results to only those in this list.
+   * When undefined, all connectors remain visible (backward compatibility).
+   */
+  connector_ids?: string[];
+
+  /**
    * Custom configuration for the research step of the agent.
    */
   research?: AgentResearchStepConfiguration;

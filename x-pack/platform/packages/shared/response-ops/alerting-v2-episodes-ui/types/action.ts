@@ -11,6 +11,7 @@ export interface EpisodeActionState {
   groupHash: string | null;
   lastAckAction: string | null;
   lastAssigneeUid: string | null;
+  lastAckActor: string | null;
 }
 
 export interface AlertEpisodeGroupAction {
@@ -20,4 +21,6 @@ export interface AlertEpisodeGroupAction {
   lastSnoozeAction: string | null;
   snoozeExpiry: string | null;
   tags: string[];
+  lastSnoozeActor: string | null;
+  lastDeactivateActor: string | null;
 }

@@ -1,7 +1,7 @@
 {
   "type": "shared-common",
   "id": "@kbn/apm-embeddable-common",
-  "owner": ["@elastic/obs-presentation-team"],
+  "owner": ["@elastic/obs-presentation-team", "@elastic/obs-exploration-team"],
   "group": "observability",
   "visibility": "private"
 }

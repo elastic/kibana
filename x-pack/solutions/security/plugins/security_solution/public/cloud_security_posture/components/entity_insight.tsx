@@ -53,19 +53,25 @@ export const EntityInsight = <T,>({
 }) => {
   const { euiTheme } = useEuiTheme();
   const euidApi = useEntityStoreEuidApi();
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
   const insightContent: React.ReactElement[] = [];
 
   const cspPreviewEntityType = inferEntityTypeFromIdentityFields(identityFields);
-  const { hasMisconfigurationFindings: showMisconfigurationsPreview } = useHasMisconfigurations(
-    buildEuidCspPreviewOptions(cspPreviewEntityType, identityFields, euidApi, {
+  const {
+    hasMisconfigurationFindings: showMisconfigurationsPreview,
+    passedFindings,
+    failedFindings,
+  } = useHasMisconfigurations(
+    buildEuidCspPreviewOptions(cspPreviewEntityType, entityRecord, euidApi, {
       entityStoreV2Enabled,
+      legacyIdentityFields: identityFields,
     })
   );
 
   const { hasVulnerabilitiesFindings } = useHasVulnerabilities(
-    buildEuidCspPreviewOptions(cspPreviewEntityType, identityFields, euidApi, {
+    buildEuidCspPreviewOptions(cspPreviewEntityType, entityRecord, euidApi, {
       entityStoreV2Enabled,
+      legacyIdentityFields: identityFields,
     })
   );
 
@@ -99,8 +105,9 @@ export const EntityInsight = <T,>({
     insightContent.push(
       <>
         <MisconfigurationsPreview
-          identityFields={identityFields}
           isPreviewMode={isPreviewMode}
+          passedFindings={passedFindings}
+          failedFindings={failedFindings}
           openDetailsPanel={openDetailsPanel}
         />
         <EuiSpacer size="s" />
@@ -111,6 +118,7 @@ export const EntityInsight = <T,>({
       <>
         <VulnerabilitiesPreview
           identityFields={identityFields}
+          entityRecord={entityRecord}
           isPreviewMode={isPreviewMode}
           openDetailsPanel={openDetailsPanel}
         />

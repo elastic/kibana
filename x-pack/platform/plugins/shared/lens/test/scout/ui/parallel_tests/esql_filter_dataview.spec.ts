@@ -78,7 +78,7 @@ spaceTest.describe.skip(
         });
 
         await spaceTest.step('add a Lens chart panel using flights data view', async () => {
-          await dashboard.openNewLensPanel();
+          await dashboard.addNewPanel('Lens');
           await expect(page.testSubj.locator('lnsApp')).toBeVisible();
 
           await page.testSubj.click('lns-dataView-switch-link');

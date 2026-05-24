@@ -46,11 +46,6 @@ export function runKbnOptimizerCli(options: { defaultLimitsPath: string }) {
         throw createFlagError('expected --watch to have no value');
       }
 
-      const oss = flags.oss ?? false;
-      if (typeof oss !== 'boolean') {
-        throw createFlagError('expected --oss to have no value');
-      }
-
       const cache = flags.cache ?? true;
       if (typeof cache !== 'boolean') {
         throw createFlagError('expected --cache to have no value');
@@ -86,19 +81,6 @@ export function runKbnOptimizerCli(options: { defaultLimitsPath: string }) {
         throw createFlagError('expected --no-inspect-workers to have no value');
       }
 
-      const maxWorkerCount = flags.workers ? Number.parseInt(String(flags.workers), 10) : undefined;
-      if (
-        maxWorkerCount !== undefined &&
-        (!Number.isFinite(maxWorkerCount) || maxWorkerCount < 1)
-      ) {
-        throw createFlagError('expected --workers to be a number greater than 0');
-      }
-
-      const reportStats = flags['report-stats'] ?? false;
-      if (typeof reportStats !== 'boolean') {
-        throw createFlagError('expected --report-stats to have no value');
-      }
-
       const logProgress = flags.progress ?? false;
       if (typeof logProgress !== 'boolean') {
         throw createFlagError('expected --progress to have no value');
@@ -129,7 +111,6 @@ export function runKbnOptimizerCli(options: { defaultLimitsPath: string }) {
       const config = OptimizerConfig.create({
         repoRoot: REPO_ROOT,
         watch,
-        maxWorkerCount,
         dist: dist || updateLimits,
         cache,
         examples: examples && !(validateLimits || updateLimits),
@@ -171,7 +152,6 @@ export function runKbnOptimizerCli(options: { defaultLimitsPath: string }) {
         boolean: [
           'core',
           'watch',
-          'oss',
           'examples',
           'test-plugins',
           'dist',
@@ -182,7 +162,7 @@ export function runKbnOptimizerCli(options: { defaultLimitsPath: string }) {
           'update-limits',
           'progress',
         ],
-        string: ['workers', 'scan-dir', 'filter', 'limits'],
+        string: ['filter', 'limits'],
         default: {
           core: true,
           examples: true,
@@ -194,9 +174,7 @@ export function runKbnOptimizerCli(options: { defaultLimitsPath: string }) {
         },
         help: `
           --watch            run the optimizer in watch mode
-          --workers          max number of workers to use
           --no-progress      disable logging of progress information
-          --oss              only build oss plugins
           --profile          profile the webpack builds and write stats.json files to build outputs
           --no-core          disable generating the core bundle
           --no-cache         disable the cache
@@ -205,7 +183,6 @@ export function runKbnOptimizerCli(options: { defaultLimitsPath: string }) {
           --no-examples      don't build the example plugins
           --test-plugins     build test plugins too
           --dist             create bundles that are suitable for inclusion in the Kibana distributable, enabled when running with --update-limits
-          --scan-dir         add a directory to the list of directories scanned for plugins (specify as many times as necessary)
           --no-inspect-workers  when inspecting the parent process, don't inspect the workers
           --limits           path to a limits.yml file to read, defaults to $KBN_OPTIMIZER_LIMITS_PATH or source file
           --validate-limits  validate the limits.yml config to ensure that there are limits defined for every bundle

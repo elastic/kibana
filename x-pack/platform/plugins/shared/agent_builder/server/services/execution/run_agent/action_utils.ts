@@ -42,14 +42,16 @@ const stripLangGraphErrorSuffix = (content: string): string =>
   content.replace(LANGGRAPH_ERROR_SUFFIX, '');
 
 export const processResearchResponse = (
-  message: AIMessageChunk
+  message: AIMessageChunk,
+  { cycle }: { cycle: number }
 ): ToolCallAction | HandoverAction | AgentErrorAction => {
   const textContent = extractTextContent(message);
   if (message.tool_calls?.length) {
-    return toolCallAction(
-      extractToolCallsWithReasoning(message),
-      textContent.trim().length ? textContent : undefined
-    );
+    return toolCallAction({
+      toolCalls: extractToolCallsWithReasoning(message),
+      message: textContent.trim().length ? textContent : undefined,
+      cycle,
+    });
   } else {
     if (textContent) {
       return handoverAction(textContent);
@@ -73,7 +75,8 @@ export const processResearchResponse = (
  * - All interrupted tools are returned as a single `ToolPromptAction` containing all prompts
  */
 export const processToolNodeResponse = (
-  toolNodeResult: BaseMessage[]
+  toolNodeResult: BaseMessage[],
+  { cycle }: { cycle: number }
 ): (ExecuteToolAction | ToolPromptAction)[] => {
   const toolMessages = toolNodeResult.filter(isToolMessage);
 
@@ -93,13 +96,14 @@ export const processToolNodeResponse = (
 
   if (completedMessages.length > 0) {
     actions.push(
-      executeToolAction(
-        completedMessages.map((msg) => ({
+      executeToolAction({
+        toolResults: completedMessages.map((msg) => ({
           toolCallId: msg.tool_call_id,
           content: stripLangGraphErrorSuffix(extractTextContent(msg)),
           artifact: msg.artifact,
-        }))
-      )
+        })),
+        cycle,
+      })
     );
   }
 

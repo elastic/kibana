@@ -14,72 +14,170 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { SafeIdentifier, NonEmptyString } from './primitive.gen';
 
 /**
  * The input type object with its settings.
  */
+export const InputType = lazySchema(() =>
+  z.object({
+    /**
+     * The name of the input type
+     */
+    name: z.enum([
+      'aws-cloudwatch',
+      'aws-s3',
+      'azure-blob-storage',
+      'azure-eventhub',
+      'cloudfoundry',
+      'filestream',
+      'gcp-pubsub',
+      'gcs',
+      'http_endpoint',
+      'journald',
+      'kafka',
+      'tcp',
+      'udp',
+    ]),
+  })
+);
 export type InputType = z.infer<typeof InputType>;
-export const InputType = z.object({
-  /**
-   * The name of the input type
-   */
-  name: z.enum([
-    'aws-cloudwatch',
-    'aws-s3',
-    'azure-blob-storage',
-    'azure-eventhub',
-    'cloudfoundry',
-    'filestream',
-    'gcp-pubsub',
-    'gcs',
-    'http_endpoint',
-    'journald',
-    'kafka',
-    'tcp',
-    'udp',
-  ]),
-});
 
 /**
  * The data stream object with its settings.
  */
+export const DataStream = lazySchema(() =>
+  z.object({
+    /**
+     * The ID of the data stream
+     */
+    dataStreamId: SafeIdentifier,
+    /**
+     * The title of the data stream
+     */
+    title: NonEmptyString,
+    /**
+     * The description of the data stream
+     */
+    description: NonEmptyString,
+    /**
+     * The input types of the data stream
+     */
+    inputTypes: z.array(InputType).max(100),
+  })
+);
 export type DataStream = z.infer<typeof DataStream>;
-export const DataStream = z.object({
-  /**
-   * The ID of the data stream
-   */
-  dataStreamId: SafeIdentifier,
-  /**
-   * The title of the data stream
-   */
-  title: NonEmptyString,
-  /**
-   * The description of the data stream
-   */
-  description: NonEmptyString,
-  /**
-   * The input types of the data stream
-   */
-  inputTypes: z.array(InputType).max(100),
-});
 
 /**
  * The integration object with its settings.
  */
+export const Integration = lazySchema(() =>
+  z
+    .object({
+      /**
+       * The ID of the integration
+       */
+      integrationId: SafeIdentifier,
+      /**
+       * The data streams of the integration
+       */
+      dataStreams: z.array(DataStream).max(10).optional(),
+      /**
+       * The logo of the integration
+       */
+      logo: z.string().optional(),
+      /**
+       * The description of the integration
+       */
+      description: NonEmptyString,
+      /**
+       * The title of the integration
+       */
+      title: NonEmptyString,
+    })
+    .strict()
+);
 export type Integration = z.infer<typeof Integration>;
-export const Integration = z
-  .object({
+
+/**
+ * The type of the original source.
+ */
+export const OriginalSourceType = lazySchema(() => z.enum(['index', 'file']));
+export type OriginalSourceType = z.infer<typeof OriginalSourceType>;
+export type OriginalSourceTypeEnum = typeof OriginalSourceType.enum;
+export const OriginalSourceTypeEnum = OriginalSourceType.enum;
+
+/**
+ * The original source of the samples.
+ */
+export const OriginalSource = lazySchema(() =>
+  z.object({
+    /**
+     * The type of the original source
+     */
+    sourceType: OriginalSourceType,
+    /**
+     * The value of the original source (e.g. index name or filename)
+     */
+    sourceValue: NonEmptyString,
+  })
+);
+export type OriginalSource = z.infer<typeof OriginalSource>;
+
+/**
+ * The status of the task
+ */
+export const TaskStatus = lazySchema(() =>
+  z.enum(['pending', 'processing', 'completed', 'approved', 'failed', 'cancelled', 'deleting'])
+);
+export type TaskStatus = z.infer<typeof TaskStatus>;
+export type TaskStatusEnum = typeof TaskStatus.enum;
+export const TaskStatusEnum = TaskStatus.enum;
+
+/**
+ * The data stream response object with its settings.
+ */
+export const DataStreamResponse = lazySchema(() =>
+  z.object({
+    /**
+     * The ID of the data stream
+     */
+    dataStreamId: NonEmptyString,
+    /**
+     * The title of the data stream
+     */
+    title: NonEmptyString,
+    /**
+     * The description of the data stream
+     */
+    description: NonEmptyString,
+    /**
+     * The input types of the data stream
+     */
+    inputTypes: z.array(InputType).max(100),
+    /**
+     * The status of the data stream
+     */
+    status: TaskStatus,
+  })
+);
+export type DataStreamResponse = z.infer<typeof DataStreamResponse>;
+
+/**
+ * The integration response object with its settings.
+ */
+export const IntegrationResponse = lazySchema(() =>
+  z.object({
     /**
      * The ID of the integration
      */
-    integrationId: SafeIdentifier,
+    integrationId: NonEmptyString,
     /**
-     * The data streams of the integration
+     * The title of the integration
      */
-    dataStreams: z.array(DataStream).max(10).optional(),
+    title: NonEmptyString,
     /**
      * The logo of the integration
      */
@@ -89,181 +187,97 @@ export const Integration = z
      */
     description: NonEmptyString,
     /**
-     * The title of the integration
+     * The version of the integration
      */
-    title: NonEmptyString,
+    version: z.string().optional(),
+    /**
+     * The ID of the connector associated with this integration
+     */
+    connectorId: z.string().optional(),
+    /**
+     * The username of the user who created the integration
+     */
+    createdBy: z.string().optional(),
+    /**
+     * The profile UID of the user who created the integration
+     */
+    createdByProfileUid: z.string().optional(),
+    /**
+     * The data streams of the integration
+     */
+    dataStreams: z.array(DataStreamResponse),
+    /**
+     * The categories of the integration
+     */
+    categories: z.array(z.string()).optional(),
+    /**
+     * The status of the integration
+     */
+    status: TaskStatus,
   })
-  .strict();
-
-/**
- * The type of the original source.
- */
-export type OriginalSourceType = z.infer<typeof OriginalSourceType>;
-export const OriginalSourceType = z.enum(['index', 'file']);
-export type OriginalSourceTypeEnum = typeof OriginalSourceType.enum;
-export const OriginalSourceTypeEnum = OriginalSourceType.enum;
-
-/**
- * The original source of the samples.
- */
-export type OriginalSource = z.infer<typeof OriginalSource>;
-export const OriginalSource = z.object({
-  /**
-   * The type of the original source
-   */
-  sourceType: OriginalSourceType,
-  /**
-   * The value of the original source (e.g. index name or filename)
-   */
-  sourceValue: NonEmptyString,
-});
-
-/**
- * The status of the task
- */
-export type TaskStatus = z.infer<typeof TaskStatus>;
-export const TaskStatus = z.enum([
-  'pending',
-  'processing',
-  'completed',
-  'approved',
-  'failed',
-  'cancelled',
-  'deleting',
-]);
-export type TaskStatusEnum = typeof TaskStatus.enum;
-export const TaskStatusEnum = TaskStatus.enum;
-
-/**
- * The data stream response object with its settings.
- */
-export type DataStreamResponse = z.infer<typeof DataStreamResponse>;
-export const DataStreamResponse = z.object({
-  /**
-   * The ID of the data stream
-   */
-  dataStreamId: NonEmptyString,
-  /**
-   * The title of the data stream
-   */
-  title: NonEmptyString,
-  /**
-   * The description of the data stream
-   */
-  description: NonEmptyString,
-  /**
-   * The input types of the data stream
-   */
-  inputTypes: z.array(InputType).max(100),
-  /**
-   * The status of the data stream
-   */
-  status: TaskStatus,
-});
-
-/**
- * The integration response object with its settings.
- */
+);
 export type IntegrationResponse = z.infer<typeof IntegrationResponse>;
-export const IntegrationResponse = z.object({
-  /**
-   * The ID of the integration
-   */
-  integrationId: NonEmptyString,
-  /**
-   * The title of the integration
-   */
-  title: NonEmptyString,
-  /**
-   * The logo of the integration
-   */
-  logo: z.string().optional(),
-  /**
-   * The description of the integration
-   */
-  description: NonEmptyString,
-  /**
-   * The version of the integration
-   */
-  version: z.string().optional(),
-  /**
-   * The ID of the connector associated with this integration
-   */
-  connectorId: z.string().optional(),
-  /**
-   * The username of the user who created the integration
-   */
-  createdBy: z.string().optional(),
-  /**
-   * The profile UID of the user who created the integration
-   */
-  createdByProfileUid: z.string().optional(),
-  /**
-   * The data streams of the integration
-   */
-  dataStreams: z.array(DataStreamResponse),
-  /**
-   * The status of the integration
-   */
-  status: TaskStatus,
-});
 
 /**
  * The integration object with its settings.
  */
+export const AllIntegrationsResponseIntegration = lazySchema(() =>
+  z.object({
+    /**
+     * The ID of the integration
+     */
+    integrationId: NonEmptyString,
+    /**
+     * The title of the integration
+     */
+    title: NonEmptyString,
+    /**
+     * The logo of the integration (base64 encoded SVG)
+     */
+    logo: z.string().optional(),
+    /**
+     * The number of data streams of the integration
+     */
+    totalDataStreamCount: z.number().int(),
+    /**
+     * The number of successful data streams of the integration
+     */
+    successfulDataStreamCount: z.number().int(),
+    /**
+     * The version of the integration
+     */
+    version: z.string().optional(),
+    /**
+     * The username of the user who created the integration
+     */
+    createdBy: NonEmptyString,
+    /**
+     * The profile UID of the user who created the integration
+     */
+    createdByProfileUid: z.string().optional(),
+    /**
+     * The status of the integration
+     */
+    status: TaskStatus,
+  })
+);
 export type AllIntegrationsResponseIntegration = z.infer<typeof AllIntegrationsResponseIntegration>;
-export const AllIntegrationsResponseIntegration = z.object({
-  /**
-   * The ID of the integration
-   */
-  integrationId: NonEmptyString,
-  /**
-   * The title of the integration
-   */
-  title: NonEmptyString,
-  /**
-   * The logo of the integration (base64 encoded SVG)
-   */
-  logo: z.string().optional(),
-  /**
-   * The number of data streams of the integration
-   */
-  totalDataStreamCount: z.number().int(),
-  /**
-   * The number of successful data streams of the integration
-   */
-  successfulDataStreamCount: z.number().int(),
-  /**
-   * The version of the integration
-   */
-  version: z.string().optional(),
-  /**
-   * The username of the user who created the integration
-   */
-  createdBy: NonEmptyString,
-  /**
-   * The profile UID of the user who created the integration
-   */
-  createdByProfileUid: z.string().optional(),
-  /**
-   * The status of the integration
-   */
-  status: TaskStatus,
-});
 
 /**
  * The LangSmith options object.
  */
+export const LangSmithOptions = lazySchema(() =>
+  z
+    .object({
+      /**
+       * The project name.
+       */
+      projectName: z.string(),
+      /**
+       * The apiKey to use for tracing.
+       */
+      apiKey: z.string(),
+    })
+    .strict()
+);
 export type LangSmithOptions = z.infer<typeof LangSmithOptions>;
-export const LangSmithOptions = z
-  .object({
-    /**
-     * The project name.
-     */
-    projectName: z.string(),
-    /**
-     * The apiKey to use for tracing.
-     */
-    apiKey: z.string(),
-  })
-  .strict();

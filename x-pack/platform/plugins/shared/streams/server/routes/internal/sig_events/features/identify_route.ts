@@ -24,6 +24,7 @@ import {
   identifyInferredFeatures,
   identifyComputedFeatures,
 } from '../../../../lib/sig_events/features';
+import { shouldIdentifyFeatures } from '../../../../lib/sig_events/features/should_identify_features';
 
 // ---------------------------------------------------------------------------
 // Route 1: Identify inferred features (one iteration: sample + infer + reconcile)
@@ -111,7 +112,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
     const streamType = getStreamTypeFromDefinition(stream);
 
     try {
-      return await identifyInferredFeatures({
+      const result = await identifyInferredFeatures({
         esClient: scopedClusterClient.asCurrentUser,
         featureClient,
         soClient,
@@ -136,6 +137,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
         diverseOffset,
         trackFeaturesIdentified: (data) => telemetry.trackFeaturesIdentified(data),
       });
+      return { ...result, connectorId };
     } catch (error) {
       routeLogger.error(
         `Inferred feature identification failed for stream [${streamName}]: ${
@@ -258,10 +260,46 @@ const identifyComputedFeaturesRoute = createServerRoute({
 });
 
 // ---------------------------------------------------------------------------
+// Route 3: Check whether features identification should run
+// ---------------------------------------------------------------------------
+
+const shouldIdentifyRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/{streamName}/features/_should_identify',
+  options: {
+    access: 'internal',
+    summary: 'Check whether KI features identification should run for a stream',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({
+    path: z.object({ streamName: z.string() }),
+    query: z.object({
+      thresholdHours: z.coerce.number().min(0),
+    }),
+  }),
+  handler: async ({ params, request, getScopedClients, server }) => {
+    const { getFeatureClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    const featureClient = await getFeatureClient();
+    return shouldIdentifyFeatures({
+      featureClient,
+      streamName: params.path.streamName,
+      thresholdHours: params.query.thresholdHours,
+    });
+  },
+});
+
+// ---------------------------------------------------------------------------
 // Exports
 // ---------------------------------------------------------------------------
 
 export const identifyFeaturesRoutes = {
   ...identifyInferredFeaturesRoute,
   ...identifyComputedFeaturesRoute,
+  ...shouldIdentifyRoute,
 };

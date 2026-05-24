@@ -14,31 +14,37 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { EvaluationScoreDocument } from '../common_attributes.gen';
 
+export const EvaluationRunDatasetExample = lazySchema(() =>
+  z.object({
+    example_id: z.string(),
+    example_index: z.number().int().nullable(),
+    scores: z.array(EvaluationScoreDocument),
+  })
+);
 export type EvaluationRunDatasetExample = z.infer<typeof EvaluationRunDatasetExample>;
-export const EvaluationRunDatasetExample = z.object({
-  example_id: z.string(),
-  example_index: z.number().int().nullable(),
-  scores: z.array(EvaluationScoreDocument),
-});
 
+export const GetEvaluationRunDatasetExamplesRequestParams = lazySchema(() =>
+  z.object({
+    runId: z.string(),
+    datasetId: z.string(),
+  })
+);
 export type GetEvaluationRunDatasetExamplesRequestParams = z.infer<
   typeof GetEvaluationRunDatasetExamplesRequestParams
 >;
-export const GetEvaluationRunDatasetExamplesRequestParams = z.object({
-  runId: z.string(),
-  datasetId: z.string(),
-});
 export type GetEvaluationRunDatasetExamplesRequestParamsInput = z.input<
   typeof GetEvaluationRunDatasetExamplesRequestParams
 >;
 
+export const GetEvaluationRunDatasetExamplesResponse = lazySchema(() =>
+  z.object({
+    examples: z.array(EvaluationRunDatasetExample),
+  })
+);
 export type GetEvaluationRunDatasetExamplesResponse = z.infer<
   typeof GetEvaluationRunDatasetExamplesResponse
 >;
-export const GetEvaluationRunDatasetExamplesResponse = z.object({
-  examples: z.array(EvaluationRunDatasetExample),
-});

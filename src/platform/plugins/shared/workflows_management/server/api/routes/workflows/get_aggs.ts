@@ -9,19 +9,35 @@
 
 import path from 'path';
 import { schema } from '@kbn/config-schema';
+import { i18n } from '@kbn/i18n';
 import type { RouteDependencies } from '../types';
 import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_READ_SECURITY } from '../utils/route_security';
-import { withLicenseCheck } from '../utils/with_license_check';
+import { withAvailabilityCheck } from '../utils/with_availability_check';
 
 const MAX_AGG_FIELDS = 25;
 const FIELDS_DENY_LIST = new Set(['_id', '_index', '_score', '_source']);
 
+const emptyFieldErrorMessage = () =>
+  i18n.translate('workflowsManagement.getAggs.emptyFieldErrorMessage', {
+    defaultMessage: 'Aggregation field cannot be empty.',
+  });
+
+const forbiddenFieldErrorMessage = () =>
+  i18n.translate('workflowsManagement.getAggs.forbiddenFieldErrorMessage', {
+    defaultMessage: 'Field is not allowed for aggregation.',
+  });
+
 const fieldSchema = schema.string({
   meta: { description: 'Field name to aggregate.' },
-  validate: (field) =>
-    !FIELDS_DENY_LIST.has(field) ? undefined : 'Field is not allowed for aggregation.',
+  validate: (field) => {
+    if (field.trim().length === 0) {
+      return emptyFieldErrorMessage();
+    }
+
+    return !FIELDS_DENY_LIST.has(field) ? undefined : forbiddenFieldErrorMessage();
+  },
 });
 
 export function registerGetAggsRoute({ router, api, spaces }: RouteDependencies) {
@@ -51,6 +67,7 @@ export function registerGetAggsRoute({ router, api, spaces }: RouteDependencies)
                 [
                   fieldSchema,
                   schema.arrayOf(fieldSchema, {
+                    minSize: 1,
                     maxSize: MAX_AGG_FIELDS,
                     meta: { description: 'Fields to aggregate on.' },
                   }),
@@ -61,7 +78,7 @@ export function registerGetAggsRoute({ router, api, spaces }: RouteDependencies)
           },
         },
       },
-      withLicenseCheck(async (context, request, response) => {
+      withAvailabilityCheck(async (context, request, response) => {
         try {
           const { fields: rawFields } = request.query;
           const fields = Array.isArray(rawFields) ? rawFields : [rawFields];

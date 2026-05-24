@@ -5,20 +5,22 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/logging';
 import type { DataView, DataViewListItem, DataViewsService } from '@kbn/data-views-plugin/common';
 import { ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX } from '@kbn/elastic-assistant-common';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import type {
+  DataViewPayload,
+  SecurityDataViewsReadyResult,
+} from '../../../../../common/api/initialization';
 import {
   INITIALIZATION_FLOW_SECURITY_DATA_VIEWS,
   INITIALIZATION_FLOW_STATUS_READY,
 } from '../../../../../common/api/initialization';
 import type {
-  DataViewPayload,
-  SecurityDataViewsReadyResult,
-} from '../../../../../common/api/initialization';
-import type { InitializationFlowContext, InitializationFlowDefinition } from '../../types';
-import type { InitializeSecurityDataViewsProvisionContext } from './types';
+  InitializationFlowContext,
+  InitializationFlowDefinition,
+  InitializationFlowResult,
+} from '../../types';
 import {
   DEFAULT_ALERT_DATA_VIEW_ID,
   DEFAULT_ATTACK_DATA_VIEW_ID,
@@ -206,93 +208,79 @@ export const getOrCreateAttackDataView = async ({
   };
 };
 
-export const initializeSecurityDataViewsFlow: InitializationFlowDefinition<InitializeSecurityDataViewsProvisionContext> =
-  {
-    id: INITIALIZATION_FLOW_SECURITY_DATA_VIEWS,
+export const initializeSecurityDataViewsFlow: InitializationFlowDefinition<
+  SecurityDataViewsReadyResult['payload']
+> = {
+  id: INITIALIZATION_FLOW_SECURITY_DATA_VIEWS,
+  spaceAware: true,
 
-    resolveProvisionContext: async (
-      context: InitializationFlowContext
-    ): Promise<InitializeSecurityDataViewsProvisionContext> => {
-      const securityContext = await context.requestHandlerContext.securitySolution;
-      return {
-        dataViewsService: await securityContext.getInternalDataViewsService(),
-        enableAttackDataView:
-          securityContext.getConfig().experimentalFeatures.enableAlertsAndAttacksAlignment,
-        ruleDataService: securityContext.getRuleDataService(),
-        spaceId: securityContext.getSpaceId(),
-        uiSettingsClient: (await context.requestHandlerContext.core).uiSettings.client,
-      };
-    },
+  runFlow: async (
+    context: InitializationFlowContext
+  ): Promise<InitializationFlowResult<SecurityDataViewsReadyResult['payload']>> => {
+    const securityContext = await context.requestHandlerContext.securitySolution;
+    const dataViewsService = await securityContext.getInternalDataViewsService();
+    const enableAttackDataView =
+      securityContext.getConfig().experimentalFeatures.enableAlertsAndAttacksAlignment;
+    const ruleDataService = securityContext.getRuleDataService();
+    const spaceId = securityContext.getSpaceId();
+    const uiSettingsClient = (await context.requestHandlerContext.core).uiSettings.client;
 
-    provision: async (
-      {
-        dataViewsService,
-        enableAttackDataView,
-        ruleDataService,
-        spaceId,
-        uiSettingsClient,
-      }: InitializeSecurityDataViewsProvisionContext,
-      logger: Logger
-    ) => {
-      const configPatternList: string[] = await uiSettingsClient.get(DEFAULT_INDEX_KEY);
-      const signalIndexName = ruleDataService.getResourceName(`security.alerts-${spaceId}`);
+    const configPatternList: string[] = await uiSettingsClient.get(DEFAULT_INDEX_KEY);
+    const signalIndexName = ruleDataService.getResourceName(`security.alerts-${spaceId}`);
 
-      const allDataViews = await dataViewsService.getIdsWithTitle();
+    const allDataViews = await dataViewsService.getIdsWithTitle();
 
-      const defaultPatternList = [...configPatternList, signalIndexName];
-      const patternListFormatted = ensurePatternFormat(defaultPatternList);
-      const patternListAsTitle = patternListFormatted.join();
+    const defaultPatternList = [...configPatternList, signalIndexName];
+    const patternListFormatted = ensurePatternFormat(defaultPatternList);
+    const patternListAsTitle = patternListFormatted.join();
 
-      const defaultDataViewId = `${DEFAULT_DATA_VIEW_ID}-${spaceId}`;
-      const alertDataViewId = `${DEFAULT_ALERT_DATA_VIEW_ID}-${spaceId}`;
-      const attackDataViewId = `${DEFAULT_ATTACK_DATA_VIEW_ID}-${spaceId}`;
+    const defaultDataViewId = `${DEFAULT_DATA_VIEW_ID}-${spaceId}`;
+    const alertDataViewId = `${DEFAULT_ALERT_DATA_VIEW_ID}-${spaceId}`;
+    const attackDataViewId = `${DEFAULT_ATTACK_DATA_VIEW_ID}-${spaceId}`;
 
-      const defaultDataView = await getOrCreateDefaultDataView({
+    const defaultDataView = await getOrCreateDefaultDataView({
+      allDataViews,
+      dataViewId: defaultDataViewId,
+      dataViewsService,
+      patternListAsTitle,
+      patternListFormatted,
+    });
+
+    const alertDataView = await getOrCreateAlertDataView({
+      allDataViews,
+      dataViewId: alertDataViewId,
+      dataViewsService,
+      indexName: signalIndexName,
+    });
+
+    let attackDataView: DataViewPayload | undefined;
+    if (enableAttackDataView) {
+      attackDataView = await getOrCreateAttackDataView({
         allDataViews,
-        dataViewId: defaultDataViewId,
+        dataViewId: attackDataViewId,
         dataViewsService,
-        patternListAsTitle,
-        patternListFormatted,
+        patternList: [`${ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX}-${spaceId}`, signalIndexName],
       });
+    }
 
-      const alertDataView = await getOrCreateAlertDataView({
-        allDataViews,
-        dataViewId: alertDataViewId,
-        dataViewsService,
-        indexName: signalIndexName,
-      });
+    // Refresh the list after potential creates/updates so kibanaDataViews is current.
+    const updatedDataViews = await dataViewsService.getIdsWithTitle();
+    const kibanaDataViews: DataViewPayload[] = updatedDataViews.map((dv) =>
+      dv.id === defaultDataViewId
+        ? defaultDataView
+        : { id: dv.id, patternList: dv.title.split(','), title: dv.title }
+    );
 
-      let attackDataView: DataViewPayload | undefined;
-      if (enableAttackDataView) {
-        attackDataView = await getOrCreateAttackDataView({
-          allDataViews,
-          dataViewId: attackDataViewId,
-          dataViewsService,
-          patternList: [
-            `${ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX}-${spaceId}`,
-            signalIndexName,
-          ],
-        });
-      }
+    context.logger.info(`Sourcerer data views initialized for space '${spaceId}'`);
 
-      // Refresh the list after potential creates/updates so kibanaDataViews is current.
-      const updatedDataViews = await dataViewsService.getIdsWithTitle();
-      const kibanaDataViews: DataViewPayload[] = updatedDataViews.map((dv) =>
-        dv.id === defaultDataViewId
-          ? defaultDataView
-          : { id: dv.id, patternList: dv.title.split(','), title: dv.title }
-      );
+    const payload: SecurityDataViewsReadyResult['payload'] = {
+      alertDataView,
+      defaultDataView,
+      kibanaDataViews,
+      signalIndexName,
+      ...(attackDataView ? { attackDataView } : {}),
+    };
 
-      logger.info(`Sourcerer data views initialized for space '${spaceId}'`);
-
-      const payload: SecurityDataViewsReadyResult['payload'] = {
-        alertDataView,
-        defaultDataView,
-        kibanaDataViews,
-        signalIndexName,
-        ...(attackDataView ? { attackDataView } : {}),
-      };
-
-      return { status: INITIALIZATION_FLOW_STATUS_READY, payload };
-    },
-  };
+    return { status: INITIALIZATION_FLOW_STATUS_READY, payload };
+  },
+};

@@ -97,6 +97,7 @@ describe('bulkScheduleWorkflow', () => {
 
     const initializerContext = coreMock.createPluginInitializerContext({
       logging: { console: false },
+      eventDriven: { enabled: true, logEvents: true, maxChainDepth: 10 },
     });
     plugin = new WorkflowsExecutionEnginePlugin(initializerContext);
 
@@ -151,10 +152,13 @@ describe('bulkScheduleWorkflow', () => {
     );
 
     expect(mockAreWorkflowsEnabled).toHaveBeenCalledTimes(1);
-    expect(mockAreWorkflowsEnabled).toHaveBeenCalledWith([
-      { workflowId: 'wf-a', spaceId: 'default' },
-      { workflowId: 'wf-b', spaceId: 'default' },
-    ]);
+    expect(mockAreWorkflowsEnabled).toHaveBeenCalledWith(
+      [
+        { workflowId: 'wf-a', spaceId: 'default' },
+        { workflowId: 'wf-b', spaceId: 'default' },
+      ],
+      { includeGlobal: true }
+    );
     expect(mockBulkCreateWorkflowExecutions).toHaveBeenCalledTimes(1);
     expect(mockBulkCreateWorkflowExecutions).toHaveBeenCalledWith(
       expect.arrayContaining([
