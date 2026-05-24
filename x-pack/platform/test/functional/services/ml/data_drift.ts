@@ -358,5 +358,54 @@ export function MachineLearningDataDriftProvider({
 
       await this.assertDataDriftTimestampField(timeFieldName);
     },
+
+    async openDataViewPicker() {
+      await retry.tryForTime(10 * 1000, async () => {
+        await testSubjects.click('mlDataSourceSelectorButton');
+        await testSubjects.existOrFail('changeDataViewPopover');
+      });
+    },
+
+    async openCreateDataViewFromPicker() {
+      await retry.tryForTime(10 * 1000, async () => {
+        await this.openDataViewPicker();
+        await testSubjects.click('dataview-create-new');
+      });
+    },
+
+    async createDataViewViaFlyout({
+      name,
+      indexPattern,
+      timeField,
+    }: {
+      name: string;
+      indexPattern: string;
+      timeField?: string;
+    }) {
+      await retry.tryForTime(10 * 1000, async () => {
+        await testSubjects.existOrFail('createIndexPatternNameInput');
+      });
+
+      await testSubjects.setValue('createIndexPatternNameInput', name);
+      await testSubjects.setValue('createIndexPatternTitleInput', indexPattern);
+
+      if (timeField) {
+        await testSubjects.click('toggleAdvancedSetting');
+        await retry.tryForTime(5 * 1000, async () => {
+          await testSubjects.existOrFail('allowHiddenField');
+        });
+        const timeFieldInput = 'timestampField';
+        await retry.tryForTime(5 * 1000, async () => {
+          await testSubjects.existOrFail(timeFieldInput);
+        });
+        await testSubjects.click(timeFieldInput);
+        await testSubjects.setValue(timeFieldInput, timeField);
+      }
+
+      await retry.tryForTime(10 * 1000, async () => {
+        await testSubjects.click('saveIndexPatternButton');
+        await testSubjects.missingOrFail('createIndexPatternNameInput');
+      });
+    },
   };
 }

@@ -47,7 +47,7 @@ export const DataVisualizerGrid: FC<{ isEsqlEnabled: boolean; cardTitleSize?: 's
     <MLOverviewCard
       layout="horizontal"
       iconType="chartTagCloud"
-      path="/data_drift_index_select"
+      path="/data_drift"
       title={
         <FormattedMessage
           id="xpack.ml.datavisualizer.selector.selectDataDriftTitle"

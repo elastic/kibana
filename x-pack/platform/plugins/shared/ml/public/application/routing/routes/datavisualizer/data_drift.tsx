@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import type { FC } from 'react';
 import React from 'react';
-import { Redirect } from 'react-router-dom';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { DataDriftIndexPatternsPicker } from '../../../datavisualizer/data_drift/index_patterns_picker';
 import type { NavigateToPath } from '../../../contexts/kibana';
@@ -19,16 +18,6 @@ import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 import { useRouteResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
 import { DataSourceContextProvider } from '../../../contexts/ml';
-
-export const dataDriftRouteIndexOrSearchFactory = (): MlRoute => ({
-  id: 'dataDrift',
-  path: createPath(ML_PAGES.DATA_DRIFT_INDEX_SELECT),
-  render: ({ location }) => (
-    <Redirect to={`${createPath(ML_PAGES.DATA_DRIFT)}${location.search}`} />
-  ),
-  breadcrumbs: [],
-  'data-test-subj': 'mlPageDataDrift',
-});
 
 export const dataDriftRouteIndexPatternFactory = (
   navigateToPath: NavigateToPath,

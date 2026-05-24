@@ -182,14 +182,6 @@ export const DATA_DRIFT_PAGE: ChromeBreadcrumb = Object.freeze({
   deepLinkId: 'ml:dataDriftPage',
 });
 
-export const DATA_DRIFT_INDEX_SELECT_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
-  text: i18n.translate('xpack.ml.settings.breadcrumbs.dataComparisonLabel', {
-    defaultMessage: 'Select data view',
-  }),
-  href: '/data_drift_index_select',
-  deepLinkId: 'ml:dataDrift',
-});
-
 const managementBreadcrumbs = {
   ANOMALY_DETECTION_MANAGEMENT_BREADCRUMB,
   CALENDAR_DST_LISTS_MANAGEMENT_BREADCRUMB,
@@ -205,7 +197,6 @@ type ManagementBreadcrumb = keyof typeof managementBreadcrumbs;
 
 const breadcrumbs = {
   ML_BREADCRUMB,
-  DATA_DRIFT_INDEX_SELECT_BREADCRUMB,
   DATA_DRIFT_PAGE,
   DATA_VISUALIZER_BREADCRUMB,
   LOG_RATE_ANALYSIS,
