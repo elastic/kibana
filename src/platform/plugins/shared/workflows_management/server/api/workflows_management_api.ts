@@ -15,7 +15,11 @@ import type {
 } from '@kbn/agent-context-layer-plugin/server';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { getWorkflowJsonSchema, transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
+import {
+  getWorkflowJsonSchema,
+  transformWorkflowYamlJsontoEsWorkflow,
+  WorkflowsManagementApiActions,
+} from '@kbn/workflows';
 import type {
   BulkScheduleWorkflowResult,
   CreateWorkflowCommand,
@@ -64,8 +68,6 @@ const isEnablementOnlyUpdate = (workflow: Partial<EsWorkflow>): boolean => {
   const fields = Object.keys(workflow);
   return fields.length === 1 && fields[0] === 'enabled';
 };
-
-const ADMIN_ROLES = new Set(['superuser', 'kibana_admin']);
 
 export interface GetWorkflowsParams {
   triggerType?: 'schedule' | 'event' | 'manual';
@@ -194,12 +196,6 @@ export class WorkflowsManagementApi {
     });
   }
 
-  private async isAdmin(request: KibanaRequest): Promise<boolean> {
-    const coreStart = await this.workflowsService.getCoreStart();
-    const roles = coreStart.security.authc.getCurrentUser(request)?.roles ?? [];
-    return roles.some((role) => ADMIN_ROLES.has(role));
-  }
-
   public async getWorkflows(
     params: GetWorkflowsParams,
     spaceId: string,
@@ -315,7 +311,7 @@ export class WorkflowsManagementApi {
     if (
       originalWorkflow.managed === true &&
       !isEnablementOnlyUpdate(workflow) &&
-      !(await this.isAdmin(request))
+      request.authzResult?.[WorkflowsManagementApiActions.updateSystemWorkflows] !== true
     ) {
       throw new ManagedWorkflowUpdateForbiddenError();
     }

@@ -12,7 +12,7 @@ import { UpdateWorkflowCommandSchema } from '@kbn/workflows';
 import type { RouteDependencies } from '../types';
 import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
-import { WORKFLOW_UPDATE_SECURITY } from '../utils/route_security';
+import { WORKFLOW_UPDATE_WITH_SYSTEM_WORKFLOWS_SECURITY } from '../utils/route_security';
 import { idParamSchema } from '../utils/schemas';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
@@ -22,7 +22,7 @@ export function registerUpdateWorkflowRoute(deps: RouteDependencies) {
     .put({
       path: '/api/workflows/workflow/{id}',
       access: 'public',
-      security: WORKFLOW_UPDATE_SECURITY,
+      security: WORKFLOW_UPDATE_WITH_SYSTEM_WORKFLOWS_SECURITY,
       summary: 'Update a workflow',
       description:
         'Partially update an existing workflow. You can update individual fields such as name, description, enabled state, tags, or the YAML definition without providing all fields.',

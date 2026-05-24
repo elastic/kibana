@@ -65,6 +65,17 @@ export const WorkflowsManagementFeatureConfig: KibanaFeatureConfig = {
               ui: [WorkflowsManagementUiActions.update],
             },
             {
+              id: 'workflow_update_system',
+              name: i18n.translate(
+                'platform.plugins.shared.workflows_management.featureRegistry.updateSystemWorkflowsSubFeaturePrivilege',
+                { defaultMessage: 'Update system workflows' }
+              ),
+              includeIn: 'all',
+              savedObject: { all: [], read: [] },
+              api: [WorkflowsManagementApiActions.updateSystemWorkflows],
+              ui: [],
+            },
+            {
               id: 'workflow_delete',
               name: i18n.translate(
                 'platform.plugins.shared.workflows_management.featureRegistry.deleteWorkflowSubFeaturePrivilege',

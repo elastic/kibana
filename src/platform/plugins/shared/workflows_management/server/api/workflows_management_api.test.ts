@@ -9,7 +9,7 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { type WorkflowDetailDto } from '@kbn/workflows';
+import { type WorkflowDetailDto, WorkflowsManagementApiActions } from '@kbn/workflows';
 import { WORKFLOW_SML_TYPE } from '@kbn/workflows/common/constants';
 import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
@@ -47,13 +47,6 @@ describe('WorkflowsManagementApi', () => {
       bulkCreateWorkflows: jest.fn(),
       validateWorkflow: jest.fn(),
       getWorkflowsExecutionEngine: () => mockWorkflowsExecutionEngine,
-      getCoreStart: jest.fn().mockResolvedValue({
-        security: {
-          authc: {
-            getCurrentUser: jest.fn().mockReturnValue({ roles: [] }),
-          },
-        },
-      }),
     } as any;
 
     api = new WorkflowsManagementApi(mockWorkflowsService, true);
@@ -642,6 +635,10 @@ steps:
       const updateResult = { enabled: false } as any;
       mockWorkflowsService.getWorkflow.mockResolvedValue(createWorkflowDto({ managed: true }));
       mockWorkflowsService.updateWorkflow.mockResolvedValue(updateResult);
+      (mockRequest as any).authzResult = {
+        [WorkflowsManagementApiActions.update]: true,
+        [WorkflowsManagementApiActions.updateSystemWorkflows]: false,
+      };
 
       const result = await api.updateWorkflow('wf-1', { enabled: false }, 'default', mockRequest);
 
@@ -656,6 +653,10 @@ steps:
 
     it('rejects managed workflow updates with fields other than enabled', async () => {
       mockWorkflowsService.getWorkflow.mockResolvedValue(createWorkflowDto({ managed: true }));
+      (mockRequest as any).authzResult = {
+        [WorkflowsManagementApiActions.update]: true,
+        [WorkflowsManagementApiActions.updateSystemWorkflows]: false,
+      };
 
       await expect(
         api.updateWorkflow(
@@ -669,17 +670,14 @@ steps:
       expect(mockWorkflowsService.updateWorkflow).not.toHaveBeenCalled();
     });
 
-    it.each(['superuser', 'kibana_admin'])('allows %s to edit managed workflows', async (role) => {
+    it('allows system workflow update privilege to edit managed workflows', async () => {
       const updateResult = { name: 'Updated Workflow' } as any;
       mockWorkflowsService.getWorkflow.mockResolvedValue(createWorkflowDto({ managed: true }));
       mockWorkflowsService.updateWorkflow.mockResolvedValue(updateResult);
-      mockWorkflowsService.getCoreStart.mockResolvedValue({
-        security: {
-          authc: {
-            getCurrentUser: jest.fn().mockReturnValue({ roles: [role] }),
-          },
-        },
-      } as any);
+      (mockRequest as any).authzResult = {
+        [WorkflowsManagementApiActions.update]: true,
+        [WorkflowsManagementApiActions.updateSystemWorkflows]: true,
+      };
 
       await expect(
         api.updateWorkflow('wf-1', { name: 'Updated Workflow' }, 'default', mockRequest)
@@ -733,17 +731,13 @@ steps:
       expect(mockWorkflowsService.deleteWorkflows).not.toHaveBeenCalled();
     });
 
-    it('rejects deleting managed workflows for admins', async () => {
+    it('rejects deleting managed workflows even with system workflow update privilege', async () => {
       mockWorkflowsService.getWorkflowsByIds.mockResolvedValue([
         createWorkflowDto({ id: 'system-workflow', managed: true }),
       ]);
-      mockWorkflowsService.getCoreStart.mockResolvedValue({
-        security: {
-          authc: {
-            getCurrentUser: jest.fn().mockReturnValue({ roles: ['superuser'] }),
-          },
-        },
-      } as any);
+      (mockRequest as any).authzResult = {
+        [WorkflowsManagementApiActions.updateSystemWorkflows]: true,
+      };
 
       await expect(
         api.deleteWorkflows(['system-workflow'], 'default', mockRequest)
