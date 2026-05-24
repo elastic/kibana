@@ -639,7 +639,9 @@ export default ({ getService }: FtrProviderContext): void => {
     });
   };
 
-  describe('@ess @serverless Risk Scoring Preview API', () => {
+  // @skipInServerlessMKI: legacy Risk Engine v1 routes return HTTP 400 once Entity Store V2 is enabled in MKI envs.
+  // Tracked migration to Entity Store V2 / Risk Score Maintainer APIs is required before this can be re-enabled.
+  describe('@ess @serverless @skipInServerlessMKI Risk Scoring Preview API', () => {
     describe('ESQL based risk scoring', () => {
       doTests();
     });

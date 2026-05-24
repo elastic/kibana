@@ -25,7 +25,9 @@ export default ({ getService }: FtrProviderContext) => {
   const riskEngineRoutes = riskEngineRouteHelpersFactory(supertest);
   const riskEngineRoutesWithNamespace = riskEngineRouteHelpersFactory(supertest, customSpaceName);
 
-  describe('@ess @serverless @serverlessQA init_and_status_apis', () => {
+  // @skipInServerlessMKI: legacy Risk Engine v1 routes return HTTP 400 once Entity Store V2 is enabled in MKI envs.
+  // Tracked migration to Entity Store V2 / Risk Score Maintainer APIs is required before this can be re-enabled.
+  describe('@ess @serverless @serverlessQA @skipInServerlessMKI init_and_status_apis', () => {
     before(async () => {
       await spaces.create({
         id: customSpaceName,

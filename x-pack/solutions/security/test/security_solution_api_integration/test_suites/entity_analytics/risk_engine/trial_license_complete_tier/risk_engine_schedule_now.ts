@@ -30,7 +30,9 @@ export default ({ getService }: FtrProviderContext) => {
     await riskEngineRoutes.cleanUp();
   };
 
-  describe('@ess @serverless @serverlessQA Risk Engine schedule_now', () => {
+  // @skipInServerlessMKI: legacy Risk Engine v1 routes return HTTP 400 once Entity Store V2 is enabled in MKI envs.
+  // Tracked migration to Entity Store V2 / Risk Score Maintainer APIs is required before this can be re-enabled.
+  describe('@ess @serverless @serverlessQA @skipInServerlessMKI Risk Engine schedule_now', () => {
     const createAndSyncRuleAndAlerts = createAndSyncRuleAndAlertsFactory({ supertest, log });
     const { indexListOfDocuments } = dataGeneratorFactory({
       es,

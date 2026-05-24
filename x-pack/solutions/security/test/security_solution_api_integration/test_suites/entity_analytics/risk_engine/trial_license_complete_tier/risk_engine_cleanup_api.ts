@@ -27,7 +27,9 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
-  describe('@ess @ serverless @serverless QA risk_engine_cleanup_api', () => {
+  // @skipInServerlessMKI: legacy Risk Engine v1 routes return HTTP 400 once Entity Store V2 is enabled in MKI envs.
+  // Tracked migration to Entity Store V2 / Risk Score Maintainer APIs is required before this can be re-enabled.
+  describe('@ess @ serverless @serverless QA @skipInServerlessMKI risk_engine_cleanup_api', () => {
     const createAndSyncRuleAndAlerts = createAndSyncRuleAndAlertsFactory({ supertest, log });
     const { indexListOfDocuments } = dataGeneratorFactory({
       es,
