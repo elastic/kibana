@@ -311,7 +311,7 @@ export class WorkflowsManagementApi {
     if (
       originalWorkflow.managed === true &&
       !isEnablementOnlyUpdate(workflow) &&
-      request.authzResult?.[WorkflowsManagementApiActions.updateSystemWorkflows] !== true
+      request.authzResult?.[WorkflowsManagementApiActions.updateManagedWorkflows] !== true
     ) {
       throw new ManagedWorkflowUpdateForbiddenError();
     }

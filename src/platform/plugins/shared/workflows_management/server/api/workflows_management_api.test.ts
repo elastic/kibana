@@ -637,7 +637,7 @@ steps:
       mockWorkflowsService.updateWorkflow.mockResolvedValue(updateResult);
       (mockRequest as any).authzResult = {
         [WorkflowsManagementApiActions.update]: true,
-        [WorkflowsManagementApiActions.updateSystemWorkflows]: false,
+        [WorkflowsManagementApiActions.updateManagedWorkflows]: false,
       };
 
       const result = await api.updateWorkflow('wf-1', { enabled: false }, 'default', mockRequest);
@@ -655,7 +655,7 @@ steps:
       mockWorkflowsService.getWorkflow.mockResolvedValue(createWorkflowDto({ managed: true }));
       (mockRequest as any).authzResult = {
         [WorkflowsManagementApiActions.update]: true,
-        [WorkflowsManagementApiActions.updateSystemWorkflows]: false,
+        [WorkflowsManagementApiActions.updateManagedWorkflows]: false,
       };
 
       await expect(
@@ -670,13 +670,13 @@ steps:
       expect(mockWorkflowsService.updateWorkflow).not.toHaveBeenCalled();
     });
 
-    it('allows system workflow update privilege to edit managed workflows', async () => {
+    it('allows managed workflow update privilege to edit managed workflows', async () => {
       const updateResult = { name: 'Updated Workflow' } as any;
       mockWorkflowsService.getWorkflow.mockResolvedValue(createWorkflowDto({ managed: true }));
       mockWorkflowsService.updateWorkflow.mockResolvedValue(updateResult);
       (mockRequest as any).authzResult = {
         [WorkflowsManagementApiActions.update]: true,
-        [WorkflowsManagementApiActions.updateSystemWorkflows]: true,
+        [WorkflowsManagementApiActions.updateManagedWorkflows]: true,
       };
 
       await expect(
@@ -731,12 +731,12 @@ steps:
       expect(mockWorkflowsService.deleteWorkflows).not.toHaveBeenCalled();
     });
 
-    it('rejects deleting managed workflows even with system workflow update privilege', async () => {
+    it('rejects deleting managed workflows even with managed workflow update privilege', async () => {
       mockWorkflowsService.getWorkflowsByIds.mockResolvedValue([
         createWorkflowDto({ id: 'system-workflow', managed: true }),
       ]);
       (mockRequest as any).authzResult = {
-        [WorkflowsManagementApiActions.updateSystemWorkflows]: true,
+        [WorkflowsManagementApiActions.updateManagedWorkflows]: true,
       };
 
       await expect(
