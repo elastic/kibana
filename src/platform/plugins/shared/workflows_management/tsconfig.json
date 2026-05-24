@@ -48,7 +48,7 @@
     "@kbn/ui-actions-plugin",
     "@kbn/storybook",
     "@kbn/react-kibana-context-theme",
-    "@kbn/core-chrome-layout",
+    "@kbn/ui-chrome-layout",
     "@kbn/react-kibana-context-theme",
     "@kbn/react-field",
     "@kbn/storage-adapter",
@@ -98,9 +98,12 @@
     "@kbn/cloud-plugin",
     "@kbn/kbn-client",
     "@kbn/rule-data-utils",
-    "@kbn/inbox-plugin",
+    "@kbn/std",
+    "@kbn/core-saved-objects-common",
+    "@kbn/datemath",
     "@kbn/inbox-common",
-    "@kbn/core-saved-objects-common"
+    "@kbn/core-saved-objects-common",
+    "@kbn/inbox-plugin"
   ],
   "exclude": ["target/**/*"]
 }
