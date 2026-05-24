@@ -68,11 +68,7 @@ export class ManagedWorkflowsService {
   /**
    * Called when a plugin signals it has finished installing all its static workflows.
    * Triggers per-plugin reconciliation: removes persisted static workflows that were
-<<<<<<< HEAD
-   * not installed during the startup window.
-=======
    * not installed during the startup window and upgrades dynamic auto workflows.
->>>>>>> 063f0831a9c1f476ef2347e464083d6e4e7e54cf
    */
   public async pluginReady(pluginId: string): Promise<void> {
     if (this.readyPluginIds.has(pluginId)) {
@@ -81,13 +77,8 @@ export class ManagedWorkflowsService {
       );
       return;
     }
-<<<<<<< HEAD
-    this.readyPluginIds.add(pluginId);
-    await this.reconcilePluginStaticWorkflows(pluginId);
-=======
     await this.reconcilePluginManagedWorkflows(pluginId);
     this.readyPluginIds.add(pluginId);
->>>>>>> 063f0831a9c1f476ef2347e464083d6e4e7e54cf
   }
 
   /**
@@ -325,21 +316,6 @@ export class ManagedWorkflowsService {
   /**
    * Per-plugin reconciliation triggered by ready().
    * Removes persisted static workflow documents that were NOT installed during the
-<<<<<<< HEAD
-   * startup window. Compares at the (workflowDocumentId, spaceId) level so that
-   * suffix-based and per-space instances are individually tracked.
-   */
-  private async reconcilePluginStaticWorkflows(pluginId: string): Promise<void> {
-    const installedDocKeys = this.installedDocKeysByPlugin.get(pluginId) ?? new Set<string>();
-
-    const staticDefinitionIds = new Set(
-      getManagedWorkflowDefinitions()
-        .filter((d) => d.pluginId === pluginId && d.management.lifecycle === 'static')
-        .map((d) => d.id)
-    );
-
-    if (staticDefinitionIds.size === 0) {
-=======
    * startup window, and upgrades persisted dynamic auto workflow documents to the
    * current registry definition.
    */
@@ -361,25 +337,10 @@ export class ManagedWorkflowsService {
     );
 
     if (staticDefinitionIds.size === 0 && autoDynamicDefinitionById.size === 0) {
->>>>>>> 063f0831a9c1f476ef2347e464083d6e4e7e54cf
       return;
     }
 
     const existingManagedDocs = await this.deps.crudService.getManagedWorkflowDocumentsAllSpaces({
-<<<<<<< HEAD
-      includeDeleted: true,
-    });
-
-    const orphanIdsBySpace = new Map<string, string[]>();
-    for (const { id: docId, source } of existingManagedDocs) {
-      const owner = source.managedBy;
-      const definitionId = source.originManagedWorkflowId;
-      const isPluginStaticDoc =
-        owner === pluginId && !!definitionId && staticDefinitionIds.has(definitionId);
-
-      if (isPluginStaticDoc) {
-        const workflowSpaceId = source.spaceId ?? GLOBAL_WORKFLOW_SPACE_ID;
-=======
       pluginId,
     });
 
@@ -398,7 +359,6 @@ export class ManagedWorkflowsService {
       const workflowSpaceId = source.spaceId ?? GLOBAL_WORKFLOW_SPACE_ID;
 
       if (isPluginStaticDoc) {
->>>>>>> 063f0831a9c1f476ef2347e464083d6e4e7e54cf
         const docKey = `${docId}:${workflowSpaceId}`;
 
         if (!installedDocKeys.has(docKey)) {
@@ -407,8 +367,6 @@ export class ManagedWorkflowsService {
           orphanIdsBySpace.set(workflowSpaceId, ids);
         }
       }
-<<<<<<< HEAD
-=======
 
       if (autoDynamicDefinition) {
         dynamicUpdates.push({
@@ -417,7 +375,6 @@ export class ManagedWorkflowsService {
           spaceId: workflowSpaceId,
         });
       }
->>>>>>> 063f0831a9c1f476ef2347e464083d6e4e7e54cf
     }
 
     for (const [spaceId, orphanIds] of orphanIdsBySpace) {
@@ -429,8 +386,6 @@ export class ManagedWorkflowsService {
         await this.deps.crudService.deleteWorkflows(orphanIds, spaceId, { force: true });
       }
     }
-<<<<<<< HEAD
-=======
 
     for (const update of dynamicUpdates) {
       await this.installManagedWorkflow(
@@ -439,7 +394,6 @@ export class ManagedWorkflowsService {
         pluginId
       );
     }
->>>>>>> 063f0831a9c1f476ef2347e464083d6e4e7e54cf
   }
 
   private trackInstall(

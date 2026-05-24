@@ -10,11 +10,7 @@
 import { errors } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-<<<<<<< HEAD
-import { buildWorkflowSpaceFilter } from '@kbn/workflows/server';
-=======
 import { buildWorkflowFilters } from '@kbn/workflows/server';
->>>>>>> 063f0831a9c1f476ef2347e464083d6e4e7e54cf
 
 import type { WorkflowSearchDeps } from './types';
 import { WorkflowSearchService } from './workflow_search_service';
@@ -107,14 +103,10 @@ describe('WorkflowSearchService', () => {
 
       const searchArgs = esClient.search.mock.calls[0][0] as any;
       const must = searchArgs.query.bool.must;
-<<<<<<< HEAD
-      const expectedSpaceFilter = buildWorkflowSpaceFilter('my-space', { includeGlobal: true });
-=======
       const expectedSpaceFilter = buildWorkflowFilters({
         space: { id: 'my-space', includeGlobal: true },
         deleted: 'not_deleted',
       });
->>>>>>> 063f0831a9c1f476ef2347e464083d6e4e7e54cf
       expect(must).toContainEqual(expectedSpaceFilter.must[0]);
       expect(must).toContainEqual({ term: { enabled: true } });
       expect(must).toContainEqual({ term: { triggerTypes: 'alert.trigger' } });

@@ -312,8 +312,6 @@ describe('ManagedWorkflowsService', () => {
       expect(crudService.indexWorkflowDocument).not.toHaveBeenCalled();
     });
 
-<<<<<<< HEAD
-=======
     it('skips on_adopt updates during the startup window even when template values change', async () => {
       const definition = createTemplateDefinition({
         management: { versionStrategy: 'on_adopt' },
@@ -339,7 +337,6 @@ describe('ManagedWorkflowsService', () => {
       expect(crudService.indexWorkflowDocument).not.toHaveBeenCalled();
     });
 
->>>>>>> 063f0831a9c1f476ef2347e464083d6e4e7e54cf
     it('applies on_adopt updates after the plugin is ready', async () => {
       const definition = createDefinition({
         management: { versionStrategy: 'on_adopt' },
@@ -451,11 +448,7 @@ describe('ManagedWorkflowsService', () => {
       const orphanDefinition = createDefinition({ id: 'system-orphan' });
       const dynamicDefinition = createDefinition({
         id: 'system-dynamic',
-<<<<<<< HEAD
-        management: { lifecycle: 'dynamic' },
-=======
         management: { lifecycle: 'dynamic', versionStrategy: 'on_adopt' },
->>>>>>> 063f0831a9c1f476ef2347e464083d6e4e7e54cf
       });
       mockManagedWorkflowDefinitions = [installedDefinition, orphanDefinition, dynamicDefinition];
       const { crudService, service } = createService();
@@ -487,13 +480,6 @@ describe('ManagedWorkflowsService', () => {
             lifecycle: 'dynamic',
           }),
         },
-<<<<<<< HEAD
-        {
-          id: 'system-other-plugin',
-          source: createWorkflowSource({
-            managedBy: 'otherPlugin',
-            originManagedWorkflowId: orphanDefinition.id,
-=======
       ]);
 
       await service.pluginReady(PLUGIN_ID);
@@ -639,22 +625,14 @@ describe('ManagedWorkflowsService', () => {
             lifecycle: 'dynamic',
             managedTemplateValues: templateValues,
             originManagedWorkflowId: onAdoptDefinition.id,
->>>>>>> 063f0831a9c1f476ef2347e464083d6e4e7e54cf
           }),
         },
       ]);
 
       await service.pluginReady(PLUGIN_ID);
 
-<<<<<<< HEAD
-      expect(crudService.deleteWorkflows).toHaveBeenCalledTimes(1);
-      expect(crudService.deleteWorkflows).toHaveBeenCalledWith(['system-orphan'], SPACE_ID, {
-        force: true,
-      });
-=======
       expect(crudService.getWorkflowDocumentWithVersion).not.toHaveBeenCalled();
       expect(crudService.indexWorkflowDocument).not.toHaveBeenCalled();
->>>>>>> 063f0831a9c1f476ef2347e464083d6e4e7e54cf
     });
 
     it('is idempotent when called more than once', async () => {
