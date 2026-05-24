@@ -345,7 +345,13 @@ export const WorkflowDetailHeader = React.memo(
                     iconType="play"
                     size="s"
                     onClick={handleRunClickWithUnsavedCheck}
-                    disabled={isExecutionsTab || !canExecuteWorkflow || isLoading || !isSyntaxValid}
+                    disabled={
+                      isExecutionsTab ||
+                      !canExecuteWorkflow ||
+                      isLoading ||
+                      isSaving ||
+                      !isSyntaxValid
+                    }
                     aria-label={Translations.runWorkflow}
                     data-test-subj="runWorkflowHeaderButton"
                   />

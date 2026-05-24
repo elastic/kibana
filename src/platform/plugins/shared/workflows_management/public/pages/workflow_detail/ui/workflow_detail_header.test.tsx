@@ -20,6 +20,7 @@ import {
   setWorkflow,
   setYamlString,
 } from '../../../entities/workflows/store/workflow_detail/slice';
+import { saveYamlThunk } from '../../../entities/workflows/store/workflow_detail/thunks/save_yaml_thunk';
 import { TestWrapper } from '../../../shared/test_utils/test_wrapper';
 
 const mockUseKibana = jest.fn();
@@ -86,11 +87,13 @@ describe('WorkflowDetailHeader', () => {
       hasChanges = false,
       hasYamlSchemaValidationErrors = false,
       serverValid = true,
+      isSaving = false,
     }: {
       isValid?: boolean;
       hasChanges?: boolean;
       hasYamlSchemaValidationErrors?: boolean;
       serverValid?: boolean;
+      isSaving?: boolean;
     } = {}
   ) => {
     const store = createMockStore();
@@ -108,6 +111,9 @@ describe('WorkflowDetailHeader', () => {
     // Simulate strict validation errors from Monaco
     if (hasYamlSchemaValidationErrors) {
       store.dispatch(setHasYamlSchemaValidationErrors(true));
+    }
+    if (isSaving) {
+      store.dispatch(saveYamlThunk.pending('', undefined));
     }
 
     const wrapper = ({ children }: { children: React.ReactNode }) => {
@@ -246,6 +252,21 @@ describe('WorkflowDetailHeader', () => {
 
     expect(result.queryByTestId('runWorkflowWithUnsavedChangesConfirmationModal')).toBeNull();
     expect(result.store.getState().detail.isTestModalOpen).toBe(true);
+  });
+
+  it('disables run workflow button while save is in flight', () => {
+    const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
+      hasChanges: true,
+      isSaving: true,
+    });
+
+    const runButton = result.getByTestId('runWorkflowHeaderButton');
+
+    expect(runButton).toBeDisabled();
+    fireEvent.click(runButton);
+
+    expect(result.queryByTestId('runWorkflowWithUnsavedChangesConfirmationModal')).toBeNull();
+    expect(result.store.getState().detail.isTestModalOpen).toBe(false);
   });
 
   it('disables executions tab when user cannot read workflow executions', () => {
