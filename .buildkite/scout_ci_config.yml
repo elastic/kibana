@@ -11,10 +11,12 @@ plugins:
     - cloud_security_posture
     - console
     - contentManagementExamples
+    - cross_cluster_replication
     - custom_branding
     - dashboard
     - dashboard_markdown
     - data
+    - data_view_editor
     - data_views
     - dev_tools
     - discover
@@ -27,6 +29,7 @@ plugins:
     - gen_ai_settings
     - global_search
     - grokdebugger
+    - index_lifecycle_management
     - index_management
     - infra
     - ingest_pipelines
@@ -35,6 +38,7 @@ plugins:
     - kibana_overview
     - lens
     - logstash
+    - management
     - maps
     - ml
     - navigation
