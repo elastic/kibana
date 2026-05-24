@@ -1262,7 +1262,7 @@ describe('StepIoService', () => {
 
   describe('prepareForRead', () => {
     function buildGraphWorkflow() {
-      const workflow: WorkflowYaml = {
+      const workflow = {
         name: 'Targeted',
         version: '1',
         description: 'test',
@@ -1281,7 +1281,7 @@ describe('StepIoService', () => {
             with: { message: '{{steps.step_b.output}}' },
           } as ConnectorStep,
         ],
-      };
+      } as unknown as WorkflowYaml;
       const graph = WorkflowGraph.fromWorkflowDefinition(workflow);
       const stepCNode = graph.topologicalOrder
         .map((nodeId) => graph.getNode(nodeId))
@@ -1435,7 +1435,7 @@ describe('StepIoService', () => {
     });
 
     it('rehydrates outputs referenced by nested active foreach source expressions', async () => {
-      const workflow: WorkflowYaml = {
+      const workflow = {
         name: 'Nested foreach source dependencies',
         version: '1',
         description: 'test',
@@ -1479,7 +1479,7 @@ describe('StepIoService', () => {
             ],
           },
         ],
-      };
+      } as unknown as WorkflowYaml;
       const graph = WorkflowGraph.fromWorkflowDefinition(workflow);
       const deepStepNode = graph.topologicalOrder
         .map((nodeId) => graph.getNode(nodeId))
