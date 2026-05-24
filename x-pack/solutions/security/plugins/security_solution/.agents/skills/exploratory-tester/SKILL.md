@@ -18,9 +18,29 @@ Explore a feature area of Kibana Security Solution through the browser, collect 
 | Phase | What it does | Exit condition |
 |-------|-------------|----------------|
 | **0 — Setup** | Parse scope, start environment (agent-managed) or verify (user-provided), fetch known bugs, write `config.json` | `config.json` written |
-| **1 — Wait & Login** | Wait for Kibana ready, log in, set up data, confirm scope with user | User confirms: proceed |
-| **2 — Explore** | Walk every flow using checklist + timebox, write findings immediately | Every flow has ≥1 entry in its `findings-flow-N.md` |
+| **1 — Wait & Login** | Wait for Kibana ready, log in, set up data, verify area readiness, confirm scope with user | User confirms: proceed |
+| **2 — Explore** | Walk every flow using checklist + timebox, write findings immediately | Every flow has ≥1 entry in its `findings-flow-<N>.md` |
 | **3 — Report** | Merge findings, classify, filter known noise, present to user, update knowledge | User has reviewed the report |
+
+## Prerequisites
+
+- **`gh` CLI** — authenticated (`gh auth login`)
+- **playwright-mcp** — add to `~/.claude/mcp.json` and restart Claude Code:
+  ```json
+  { "mcpServers": { "playwright": { "command": "npx", "args": ["@playwright/mcp@latest"] } } }
+  ```
+- **Skill symlinks** (run from repo root, then restart your IDE):
+  - **Claude Code**:
+    ```bash
+    SKILL=x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester
+    ln -s "$(pwd)/$SKILL" ~/.claude/skills/exploratory-tester
+    ```
+  - **Cursor**:
+    ```bash
+    SKILL=x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester
+    ln -s "$SKILL" .agents/skills/exploratory-tester
+    ```
+- **Scout** (agent-managed environments only) — `node scripts/scout.js` must be available. Run `yarn kbn bootstrap` if not already done.
 
 ## How to invoke
 
@@ -33,6 +53,7 @@ Flows:
   - cancel mid-progress
     entry: SIEM Migrations > Dashboards > click rename on any migration card
     expected: migration returns to previous state, no orphaned process
+    timeout: 8
 Setup: Bedrock connector, role: t1_analyst
 ```
 
@@ -107,6 +128,8 @@ Resolve env var references in credentials (`$VAR` → environment variable value
 
 **Inline mode:** extract `Area`, `Flows`, `Setup`, `Environment`, and `mode` directly from the invocation text.
 
+For each flow, parse optional sub-fields: `entry:`, `expected:`, `timeout:` (minutes, default 4).
+
 **GitHub mode:**
 ```bash
 # For issue:
@@ -119,7 +142,7 @@ If `gh` returns an authentication error — **stop** and tell the user to run `g
 
 Find the **latest** comment whose body contains `## Exploratory testing scope`. Parse:
 - `### Area` → area name
-- `### Flows` → list (each item may have `entry:` and `expected:` sub-fields)
+- `### Flows` → list (each item may have `entry:`, `expected:`, `timeout:` sub-fields)
 - `### Setup` → connector and role requirements
 - `### Environment` → optional, same keys as inline
 
@@ -135,6 +158,7 @@ If no `## Exploratory testing scope` comment is found — **stop** and show the 
 - <flow name>
   entry: <navigation path — optional>
   expected: <correct outcome — optional>
+  timeout: <minutes — optional, default 4>
 
 ### Setup
 - <connector or role requirement, one per line>
@@ -173,6 +197,9 @@ Create `.exploratory-session/` if it doesn't exist.
 
 If `.exploratory-session/config.json` already exists — ask the user: **"An existing session config was found. Reuse it (r) or start fresh (f)?"** Wait for their answer.
 
+- **Reuse (r):** Trust `config.json` as-is. Skip Phase 0 remaining steps and all of Phase 1. Jump directly to Phase 2. Existing `findings-flow-<N>.md` files are kept and will be included in Phase 3's merge.
+- **Start fresh (f):** Delete all `.exploratory-session/findings-flow-*.md` files. Overwrite `config.json` with the newly parsed input and continue.
+
 Write `.exploratory-session/config.json`:
 ```json
 {
@@ -182,7 +209,8 @@ Write `.exploratory-session/config.json`:
   "environment": {
     "type": "<stateful-classic | stateful-ess | serverless | user-provided>",
     "url": "<resolved url>",
-    "managed": true
+    "managed": true,
+    "data_setup": "<run | skip>"
   },
   "flows": [
     {
@@ -203,6 +231,8 @@ Write `.exploratory-session/config.json`:
 }
 ```
 
+`data_setup` is `"skip"` when the invocation includes `data-setup: skip` in the Environment block; otherwise `"run"`.
+
 Read `x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/knowledge/<area_slug>.md` if it exists — load its contents as context for Phase 2.
 
 ---
@@ -214,17 +244,33 @@ Read `x-pack/solutions/security/plugins/security_solution/.agents/skills/explora
 Skip this step if `environment.managed` is `false` in `config.json`.
 
 ```bash
-until curl -s -u elastic:changeme http://localhost:5620/api/status \
-  | python3 -c "import sys,json; s=json.load(sys.stdin); \
-    exit(0 if s.get('status',{}).get('overall',{}).get('level')=='available' else 1)" \
-  2>/dev/null; do echo "Waiting for Kibana..."; sleep 10; done
+node -e "
+(async () => {
+  const creds = Buffer.from('elastic:changeme').toString('base64');
+  for (let i = 1; i <= 60; i++) {
+    try {
+      const r = await fetch('http://localhost:5620/api/status',
+        { headers: { Authorization: 'Basic ' + creds } });
+      const s = await r.json();
+      if (s?.status?.overall?.level === 'available') {
+        process.stdout.write('Kibana ready\n'); process.exit(0);
+      }
+    } catch(e) {}
+    process.stdout.write('Attempt ' + i + ' — waiting 10s...\n');
+    await new Promise(r => setTimeout(r, 10000));
+  }
+  process.stderr.write('Kibana not ready after 10 minutes\n'); process.exit(1);
+})();
+"
 ```
 
-If not available after **10 minutes** — **stop** and tell the user to check the Scout server output.
+If the script exits with code 1 — **stop** and tell the user to check the Scout server output.
 
 ### Step 1b — Log in via browser
 
-Navigate to `<environment.url>/login?auth_provider_hint=cloud-basic`.
+**Login URL:**
+- Agent-managed (`stateful-classic`, `stateful-ess`, `serverless`): navigate to `<environment.url>/login?auth_provider_hint=cloud-basic`
+- User-provided: navigate to `<environment.url>/login` (no hint). If the page does not show username/password fields, retry with `?auth_provider_hint=cloud-basic`. If login still fails — **stop** and tell the user to check the auth provider configuration.
 
 Fill credentials:
 - Agent-managed environments: username `elastic`, password `changeme`
@@ -232,7 +278,13 @@ Fill credentials:
 
 If login fails — retry once with a fresh navigation. If still failing — **stop** and report the exact error message visible in the browser.
 
+**After login completes**, check for blocking dialogs (onboarding modals, feedback surveys, announcement banners). For each one:
+1. Dismiss it: press `Escape`, or click any visible `Not now`, `Skip`, `Dismiss`, or `Close` button
+2. Log a Level 3 observation describing the dialog title and dismiss method
+
 ### Step 1c — Set up test data
+
+Skip this step entirely if `environment.data_setup` is `"skip"` in `config.json`.
 
 Check environment capabilities before each step. Record every skipped step in `config.json` → `skipped_setup` with its reason.
 
@@ -248,18 +300,38 @@ For user-provided environments: replace URL and credentials. For serverless: sam
 **esArchiver fixtures (stateful environments only):**
 
 If the scope `Setup` section lists esArchiver fixtures, load them via the Kibana API. For serverless, attempt the load — if the response is 404 or 400, skip and add to `skipped_setup`:
-```
+```json
 { "step": "esArchiver:<fixture-name>", "reason": "not supported in serverless: <error>" }
 ```
 
 **Roles and users (stateful only):**
 
 Create the test role and user via the security API. For serverless, skip role/user creation entirely — the `resolved_role` from `config.json` is the project-level role that was already mapped. Add to `skipped_setup`:
-```
+```json
 { "step": "role-creation:<role>", "reason": "serverless uses project roles — resolved to <resolved_role>" }
 ```
 
-### Step 1d — Confirm with user
+### Step 1d — Check area readiness
+
+Navigate to the first flow's `entry` path. Call `browser_snapshot` to see the current state.
+
+If the page shows an empty state (e.g., "No migrations to view", "No data", empty illustration with a CTA):
+
+1. **Attempt to create the required data automatically:**
+   - Look for visible `Create`, `Add`, `Import`, or `Get started` CTAs and follow them
+   - Try the area's onboarding flow if it is accessible from the current page
+   - Use any seed API endpoints listed in the scope `Setup` section
+
+2. After each creation attempt, navigate back to the entry path and re-check with `browser_snapshot`
+
+3. If data was created successfully — continue to Step 1e
+
+4. If the agent cannot determine how to create the data — **stop** and tell the user:
+   > "The area shows an empty state and I couldn't find a way to create the required data automatically. Can you tell me how to set it up, or should I explore the empty state instead?"
+
+   Wait for their answer before continuing.
+
+### Step 1e — Confirm with user
 
 Present a confirmation before starting exploration:
 
@@ -270,8 +342,6 @@ Present a confirmation before starting exploration:
 > Proceed?"
 
 Wait for the user's reply before moving to Phase 2.
-
-In `mode: auto` — skip this confirmation. Proceed immediately.
 
 ---
 
@@ -291,8 +361,11 @@ The orchestrator dispatches one sub-agent per flow concurrently.
 3. Dispatch sub-agents concurrently via the Agent tool. Each sub-agent prompt must include:
 
 ```
+First, read the skill file at:
+x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/SKILL.md
+
 You are a sub-agent for the exploratory-tester skill.
-Your task: run the Explore Loop (defined in Phase 2 of the skill) for this single flow.
+Your task: run the Explore Loop (defined in Phase 2 of that skill) for this single flow.
 
 Flow: <flow object as JSON>
 config.json path: .exploratory-session/config.json
@@ -308,7 +381,7 @@ Exit when the flow is complete or the timebox expires.
 ```
 
 4. Wait for all sub-agents to complete
-5. If a sub-agent crashes or does not produce a findings file: create `findings-flow-N.md` with a single entry:
+5. If a sub-agent crashes or does not produce a findings file: create `findings-flow-<N>.md` with a single entry:
 
 ```markdown
 ## Finding: Sub-agent failure
@@ -343,19 +416,20 @@ Default timebox: `timeout_minutes` from the flow in `config.json` (default 4 min
 | 2 | **Missing prerequisites** — remove one required setup item (e.g. delete the connector) and retry |
 | 3 | **Invalid/edge-case input** — empty strings, special characters (`'`, `"`, `<`, `>`), max length, wrong type |
 | 4 | **Cancel / back-navigate mid-flow** — start the flow, then cancel or navigate away before completion |
-| 5 | **Refresh during in-flight operation** — start the flow, trigger a server call, immediately refresh the page |
+| 5 | **Refresh during in-flight operation** — start the flow, trigger a server call, call `browser_snapshot` to confirm the loading state is visible, then navigate to the same URL to simulate a refresh |
 
 **At every checklist step, before and after the action:**
 1. `browser_console_messages` — capture any new messages
 2. `browser_network_requests` — capture requests triggered by the action
-3. `browser_take_screenshot` — capture the resulting UI state
-4. Append one entry to `findings-flow-N.md` **immediately** — even if nothing went wrong (record what was attempted and what happened)
+3. `browser_take_screenshot` — save to `.exploratory-session/screenshots/<area_slug>-flow<N>-step<M>-<checklist-step-slug>.png` (e.g. `siem-migrations-dashboards-flow1-step1-happy-path.png`)
+4. Append one entry to `findings-flow-<N>.md` **immediately** — even if nothing went wrong
 
 **How to navigate to the flow:**
 1. Use `entry` from `config.json` if provided — navigate exactly as described
-2. If no `entry`: call `browser_snapshot`, read the visible UI, navigate to the area from what's on screen
-3. Check `knowledge/<area_slug>.md` for navigation patterns accumulated from prior sessions
-4. If the flow name is still ambiguous after the snapshot: take a screenshot, describe what you see, choose the most reasonable interpretation and proceed — never skip
+2. After navigation, verify the resulting URL contains the expected area path. If you were redirected to an unrelated page (e.g. `/get_started`, `/overview`): log a Level 2 finding with the redirect chain, then try navigating to a more specific sub-path that matches the `entry` description
+3. If no `entry`: call `browser_snapshot`, read the visible UI, navigate to the area from what's on screen
+4. Check `knowledge/<area_slug>.md` for navigation patterns accumulated from prior sessions
+5. If the flow name is still ambiguous after the snapshot: take a screenshot, describe what you see, choose the most reasonable interpretation and proceed — never skip
 
 **If timebox fires before checklist completes:** log remaining steps as:
 ```
@@ -370,7 +444,7 @@ skipped: time budget exhausted (N minutes elapsed)
 
 ## Finding Format
 
-Each entry appended to `.exploratory-session/findings-flow-N.md`:
+Each entry appended to `.exploratory-session/findings-flow-<N>.md`:
 
 ```markdown
 ## Finding: [short descriptive title]
@@ -394,14 +468,14 @@ Each entry appended to `.exploratory-session/findings-flow-N.md`:
 <mandatory for Level 1 and 2: commit to reasoning, explain user impact>
 
 ### Evidence
-- Screenshot: `.exploratory-session/screenshots/<filename>.png`
-- Console: `<relevant line — one line, not a dump>`
+- Screenshot: `.exploratory-session/screenshots/<area_slug>-flow<N>-step<M>-<checklist-step-slug>.png`
+- Console: `<relevant line — one line>` — relevant = appeared after the triggering action AND contains error/exception keywords or HTTP 5xx; ignore CSP violations, 404s on `/internal/cloud/solution`, browser extension messages
 - Network: <METHOD> `<path>` → <status> `<relevant response snippet>`
 ```
 
 **Level rules:**
-- **Level 1** — JS exception in console, HTTP 5xx on any in-flow request, or current behavior directly contradicts the `expected` field in `config.json` under the same setup → agent decides: confirmed bug
-- **Level 2** — Unexpected 4xx, element that should be present is missing, layout visibly broken, action completes with no user feedback → agent flags: user decides
+- **Level 1** — JS exception in console, HTTP 5xx on any in-flow request, a 2xx response whose body contains an `error` key, a toast notification with error/failure wording, or current behavior directly contradicts the `expected` field in `config.json` → agent decides: confirmed bug
+- **Level 2** — Unexpected 4xx, element that should be present is missing, layout visibly broken, action completes with no user feedback, or a loading indicator that hasn't resolved after 10 seconds → agent flags: user decides
 - **Level 3** — `console.warn`, transient spinner, unclassifiable observation → listed, not flagged
 
 **For Level 3 findings** — use this shorter format:
@@ -426,7 +500,7 @@ Each entry appended to `.exploratory-session/findings-flow-N.md`:
 
 ### Step 3a — Merge findings
 
-Read all `.exploratory-session/findings-flow-N.md` files. Write `.exploratory-session/report.md`:
+Read all `.exploratory-session/findings-flow-<N>.md` files. Write `.exploratory-session/report.md`:
 
 ```markdown
 # Exploratory Testing Report
@@ -484,16 +558,9 @@ Present `report.md` to the user and ask:
 
 Wait for the user's response. Apply any reclassifications to `report.md`.
 
-In `mode: auto`: skip this step. Post the content of `report.md` as a comment on the source GitHub issue or PR:
-```bash
-gh issue comment <NUMBER> --repo elastic/kibana --body "$(cat .exploratory-session/report.md)"
-# or for PRs:
-gh pr comment <NUMBER> --repo elastic/kibana --body "$(cat .exploratory-session/report.md)"
-```
-
 ### Step 3d — Update knowledge file
 
-After user review (or immediately in `mode: auto`), update `knowledge/<area_slug>.md`.
+After user review, update `knowledge/<area_slug>.md`.
 
 If the file does not exist, create it at:
 `x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/knowledge/<area_slug>.md`
@@ -510,6 +577,8 @@ With this initial structure:
 ```
 
 Append confirmed false positives (findings the user dismissed or reclassified) to `## Known non-bugs`. Append any navigation patterns discovered during this session that weren't already in the file to `## Navigation patterns`.
+
+If the file exceeds 100 lines, archive the current content to `knowledge/<area_slug>-archive-<date>.md`, start fresh with the initial structure above, and copy the most recently added entries from each section to the new file.
 
 Commit the knowledge file:
 ```bash
@@ -532,5 +601,6 @@ git commit -m "knowledge(exploratory-tester): update <area_slug> after session o
 | Sub-agent crashes in parallel mode | Phase 2 | Continue with other flows. Mark the crashed flow as `failed: sub-agent error` in the report. |
 | Browser session lost mid-exploration | Phase 2 | Log findings collected so far. Mark remaining checklist steps as `skipped: session lost`. Continue with next flow. |
 | `config.json` already exists | Phase 0 | Ask user: reuse existing session or start fresh? Wait for answer. |
-| esArchiver load fails in serverless | Phase 1 | Skip. Add to `skipped_setup` with reason. Continue — never fail hard on setup steps. |
-| Role unrecognised in serverless | Phase 0 | Warn user. Use `viewer`. Add to `skipped_setup`. |
+| esArchiver load fails in serverless | Phase 1 | Skip. Add `{ "step": "esArchiver:<name>", "reason": "<error>" }` to `skipped_setup`. Continue. |
+| Role unrecognised in serverless | Phase 0 | Warn user. Use `viewer`. Add `{ "step": "role-creation:<role>", "reason": "unrecognised role — defaulted to viewer" }` to `skipped_setup`. |
+| Area shows empty state, agent can't create data | Phase 1 | Describe empty state to user. Ask: create data manually, explore the empty state, or abort. |
