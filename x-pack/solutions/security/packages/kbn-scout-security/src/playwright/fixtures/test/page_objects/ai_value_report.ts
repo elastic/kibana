@@ -16,6 +16,8 @@ export class AIValueReportPage {
   public attackDiscoveryCtaButton: Locator;
   public exportButton: Locator;
   public noPrivilegesPage: Locator;
+  public noResultsEmptyState: Locator;
+  public executiveSummary: Locator;
 
   constructor(private readonly scoutPage: ScoutPage) {
     this.page = this.scoutPage.testSubj.locator('aiValuePage');
@@ -26,6 +28,8 @@ export class AIValueReportPage {
     );
     this.exportButton = this.scoutPage.testSubj.locator('aiValueExportButton');
     this.noPrivilegesPage = this.scoutPage.testSubj.locator('noPrivilegesPage');
+    this.noResultsEmptyState = this.scoutPage.testSubj.locator('aiValueNoResultsEmptyState');
+    this.executiveSummary = this.scoutPage.testSubj.locator('executiveSummaryContainer');
   }
 
   async navigate() {

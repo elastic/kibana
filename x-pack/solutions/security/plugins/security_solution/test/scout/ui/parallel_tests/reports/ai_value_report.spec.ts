@@ -24,7 +24,7 @@ spaceTest.describe(
       async ({ browserAuth, pageObjects }) => {
         const { aiValueReportPage } = pageObjects;
 
-        await browserAuth.loginAsAdmin();
+        await browserAuth.loginAsSecurityRole('soc_manager');
         await aiValueReportPage.navigate();
 
         await expect(aiValueReportPage.page).toBeVisible({ timeout: 30000 });
@@ -39,7 +39,7 @@ spaceTest.describe(
       async ({ browserAuth, pageObjects }) => {
         const { aiValueReportPage } = pageObjects;
 
-        await browserAuth.loginAsAdmin();
+        await browserAuth.loginAsSecurityRole('soc_manager');
         await aiValueReportPage.navigate();
 
         await expect(aiValueReportPage.page).toBeVisible({ timeout: 30000 });

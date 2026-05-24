@@ -171,6 +171,7 @@ const AIValueReportContent: React.FC<AIValueReportContentProps> = (props) => {
           `}
         >
           <EuiEmptyPrompt
+            data-test-subj="aiValueNoResultsEmptyState"
             icon={<EuiImage size="s" src={analyticsSpeedAcceleration} alt="" />}
             title={<h2>{i18n.NO_RESULTS_TITLE}</h2>}
             titleSize="s"
