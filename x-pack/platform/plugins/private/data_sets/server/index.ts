@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { DataSetsServerPlugin } from './plugin';
-
+import type { PluginInitializerContext } from '@kbn/core/server';
 export { DataSourcesClient } from './data_sources_client';
 
-export const plugin = async () => new DataSetsServerPlugin();
+export async function plugin(initializerContext: PluginInitializerContext) {
+  const { DatasetsServerPlugin } = await import('./plugin');
+  return new DatasetsServerPlugin(initializerContext);
+}

@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
-
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { registerDataSetsRoutes } from './routes/register_routes';
 
-export class DataSetsServerPlugin implements Plugin<void, void> {
+export class DatasetsServerPlugin implements Plugin<void, void> {
+  constructor(initializerContext: PluginInitializerContext) {}
+
   public setup({ http }: CoreSetup) {
     registerDataSetsRoutes(http.createRouter());
   }

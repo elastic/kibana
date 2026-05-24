@@ -13,6 +13,8 @@ import type { DataSource, DataSourceWithSecrets } from '../common';
  * Server-side Elasticsearch client for data source management.
  * Pass a scoped cluster client (`asCurrentUser`, `asInternalUser`, etc.) to the request context.
  */
+
+const path = '/_query/data_source';
 export class DataSourcesClient {
   constructor(private readonly esClient: ElasticsearchClient) {}
 
@@ -22,7 +24,7 @@ export class DataSourcesClient {
   public async getAll(): Promise<DataSource[]> {
     return await this.esClient.transport.request({
       method: 'GET',
-      path: '/_query/data_source',
+      path,
     });
   }
 
@@ -33,7 +35,7 @@ export class DataSourcesClient {
     const encoded = encodeURIComponent(id);
     return await this.esClient.transport.request({
       method: 'GET',
-      path: `/_query/data_source/${encoded}`,
+      path: `${path}/${encoded}`,
     });
   }
 
@@ -44,7 +46,7 @@ export class DataSourcesClient {
     const encoded = encodeURIComponent(id);
     return await this.esClient.transport.request({
       method: 'PUT',
-      path: `/_query/data_source/${encoded}`,
+      path: `${path}/${encoded}`,
       body,
     });
   }
@@ -56,7 +58,7 @@ export class DataSourcesClient {
     const encoded = encodeURIComponent(id);
     return await this.esClient.transport.request({
       method: 'DELETE',
-      path: `/_query/data_source/${encoded}`,
+      path: `${path}/${encoded}`,
     });
   }
 }

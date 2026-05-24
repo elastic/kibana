@@ -59,3 +59,8 @@ export const LIST_BREADCRUMB = [
     href: '#/management/kibana/data_sets',
   },
 ];
+
+const DATA_SOURCES_PATH = '/_query/data_source';
+const DATA_SETS_PATH = '/_query/dataset';
+export const DATA_SOURCE_BY_ID_PATH = `${DATA_SOURCES_PATH}/{id}`;
+export const DATA_SET_BY_ID_PATH = `${DATA_SETS_PATH}/{id}`;

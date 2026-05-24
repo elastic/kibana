@@ -9,6 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 
 import type { DataSetWithName, Dataset } from '../common';
 
+const path = '/_query/dataset';
 /**
  * Server-side Elasticsearch client for data set management.
  * Pass a scoped cluster client to the request context.
@@ -22,7 +23,7 @@ export class DataSetsClient {
   public async getAll(): Promise<DataSetWithName[]> {
     return await this.esClient.transport.request({
       method: 'GET',
-      path: '/_query/dataset',
+      path,
     });
   }
 
@@ -33,7 +34,7 @@ export class DataSetsClient {
     const encoded = encodeURIComponent(id);
     return await this.esClient.transport.request({
       method: 'GET',
-      path: `/_query/dataset/${encoded}`,
+      path: `${path}/${encoded}`,
     });
   }
 
@@ -44,7 +45,7 @@ export class DataSetsClient {
     const encoded = encodeURIComponent(id);
     return await this.esClient.transport.request({
       method: 'PUT',
-      path: `/_query/dataset/${encoded}`,
+      path: `${path}/${encoded}`,
       body,
     });
   }
@@ -56,7 +57,7 @@ export class DataSetsClient {
     const encoded = encodeURIComponent(id);
     return await this.esClient.transport.request({
       method: 'DELETE',
-      path: `/_query/dataset/${encoded}`,
+      path: `${path}/${encoded}`,
     });
   }
 }
