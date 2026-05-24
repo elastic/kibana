@@ -79,6 +79,7 @@ import {
   WORKFLOW_SCHEDULED_TASK_TYPE,
 } from './workflow_task_manager/types';
 import { WorkflowTaskManager } from './workflow_task_manager/workflow_task_manager';
+import { createWorkflowTaskAbortController } from './workflow_task_shutdown';
 import { createIndexes } from '../common';
 
 /**
@@ -176,11 +177,11 @@ export class WorkflowsExecutionEnginePlugin
         timeout: '365d',
         // Retries allow `resolveInterruptedWorkflowRunTask` to fail-fast abandoned executions after interrupt.
         maxAttempts: WORKFLOW_RUN_TASK_MAX_ATTEMPTS,
-        createTaskRunner: ({ taskInstance, fakeRequest }) => {
+        createTaskRunner: ({ taskInstance, fakeRequest, abortController }) => {
           if (!fakeRequest) {
             throw new Error('Cannot execute a workflow without Kibana Request');
           }
-          const taskAbortController = new AbortController();
+          const taskAbortController = createWorkflowTaskAbortController(abortController);
           return {
             run: async () => {
               const { workflowRunId, spaceId } =
@@ -280,11 +281,11 @@ export class WorkflowsExecutionEnginePlugin
         timeout: '365d',
         // Retries allow `resolveInterruptedWorkflowResumeTask` to fail-fast abandoned executions after interrupt.
         maxAttempts: WORKFLOW_RESUME_TASK_MAX_ATTEMPTS,
-        createTaskRunner: ({ taskInstance, fakeRequest }) => {
+        createTaskRunner: ({ taskInstance, fakeRequest, abortController }) => {
           if (!fakeRequest) {
             throw new Error('Cannot resume a workflow without Kibana Request');
           }
-          const taskAbortController = new AbortController();
+          const taskAbortController = createWorkflowTaskAbortController(abortController);
           return {
             run: async () => {
               const { workflowRunId, spaceId } =
@@ -388,11 +389,11 @@ export class WorkflowsExecutionEnginePlugin
         // The workflow timeout logic defined in workflow execution engine logic is the primary control.
         timeout: '365d',
         maxAttempts: 3,
-        createTaskRunner: ({ taskInstance, fakeRequest }) => {
+        createTaskRunner: ({ taskInstance, fakeRequest, abortController }) => {
           if (!fakeRequest) {
             throw new Error('Cannot execute a scheduled workflow without Kibana Request');
           }
-          const taskAbortController = new AbortController();
+          const taskAbortController = createWorkflowTaskAbortController(abortController);
           return {
             run: async () => {
               const { workflowId, spaceId } = taskInstance.params as {
