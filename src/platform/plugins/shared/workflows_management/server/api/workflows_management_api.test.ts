@@ -669,14 +669,14 @@ steps:
       expect(mockWorkflowsService.updateWorkflow).not.toHaveBeenCalled();
     });
 
-    it('allows admins to edit managed workflows', async () => {
+    it.each(['superuser', 'kibana_admin'])('allows %s to edit managed workflows', async (role) => {
       const updateResult = { name: 'Updated Workflow' } as any;
       mockWorkflowsService.getWorkflow.mockResolvedValue(createWorkflowDto({ managed: true }));
       mockWorkflowsService.updateWorkflow.mockResolvedValue(updateResult);
       mockWorkflowsService.getCoreStart.mockResolvedValue({
         security: {
           authc: {
-            getCurrentUser: jest.fn().mockReturnValue({ roles: ['superuser'] }),
+            getCurrentUser: jest.fn().mockReturnValue({ roles: [role] }),
           },
         },
       } as any);
@@ -725,6 +725,25 @@ steps:
       mockWorkflowsService.getWorkflowsByIds.mockResolvedValue([
         createWorkflowDto({ id: 'system-workflow', managed: true }),
       ]);
+
+      await expect(
+        api.deleteWorkflows(['system-workflow'], 'default', mockRequest)
+      ).rejects.toBeInstanceOf(ManagedWorkflowDeleteForbiddenError);
+
+      expect(mockWorkflowsService.deleteWorkflows).not.toHaveBeenCalled();
+    });
+
+    it('rejects deleting managed workflows for admins', async () => {
+      mockWorkflowsService.getWorkflowsByIds.mockResolvedValue([
+        createWorkflowDto({ id: 'system-workflow', managed: true }),
+      ]);
+      mockWorkflowsService.getCoreStart.mockResolvedValue({
+        security: {
+          authc: {
+            getCurrentUser: jest.fn().mockReturnValue({ roles: ['superuser'] }),
+          },
+        },
+      } as any);
 
       await expect(
         api.deleteWorkflows(['system-workflow'], 'default', mockRequest)
