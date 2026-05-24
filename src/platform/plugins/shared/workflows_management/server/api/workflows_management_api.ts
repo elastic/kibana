@@ -46,6 +46,7 @@ import type {
   ExecutionLogsParams,
   StepLogsParams,
 } from '@kbn/workflows-execution-engine/server/workflow_event_logger/types';
+import type { ServerTriggerDefinition } from '@kbn/workflows-extensions/server';
 import {
   parseWorkflowYamlToJSON,
   stringifyWorkflowDefinition,
@@ -69,6 +70,7 @@ export interface GetWorkflowsParams {
   enabled?: boolean[];
   tags?: string[];
   query?: string;
+  managedFilter?: 'all' | 'managed' | 'unmanaged';
   _full?: boolean;
 }
 
@@ -126,6 +128,10 @@ export interface SearchStepExecutionsParams {
   includeOutput?: boolean;
   page?: number;
   size?: number;
+  /** Datemath lower bound for filtering by startedAt. */
+  startedAfter?: string;
+  /** Datemath upper bound for filtering by startedAt. */
+  startedBefore?: string;
 }
 
 export interface GetAvailableConnectorsParams {
@@ -827,6 +833,10 @@ export class WorkflowsManagementApi {
     request: KibanaRequest
   ): Promise<GetAvailableConnectorsResponse> {
     return this.workflowsService.getAvailableConnectors(spaceId, request);
+  }
+
+  public async getRegisteredTriggers(): Promise<ServerTriggerDefinition[]> {
+    return this.workflowsService.getRegisteredCustomTriggerDefinitions();
   }
 
   public async getWorkflowJsonSchema(
