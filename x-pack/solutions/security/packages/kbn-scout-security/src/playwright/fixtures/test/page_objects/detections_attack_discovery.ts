@@ -9,6 +9,7 @@ import type { Locator, ScoutPage, ScoutTestConfig } from '@kbn/scout';
 
 const PAGE_URL = 'securitySolutionUI';
 const ATTACKS_PAGE_URL = 'security/attacks';
+const ATTACK_DISCOVERY_PAGE_URL = 'security/attack_discovery';
 const STATEFUL_ALERTS_NAV_ITEM_SELECTOR = 'solutionSideNavItemLink-alerts';
 const STATEFUL_DETECTIONS_NAV_ITEM_SELECTOR = 'solutionSideNavItemLink-alert_detections';
 const STATEFUL_DETECTIONS_NAV_ITEM_BUTTON_SELECTOR = 'solutionSideNavItemButton-alert_detections';
@@ -64,6 +65,10 @@ export class DetectionsAttackDiscoveryPage {
   public assigneesFilterButton: Locator;
   public connectorFilterButton: Locator;
   public tableExpandAttackDetailsButtons: Locator;
+  public settingsButton: Locator;
+  public generateButton: Locator;
+  public runButton: Locator;
+  public globalToastList: Locator;
 
   constructor(private readonly page: ScoutPage, _config: ScoutTestConfig) {
     this.attacksPageContent = this.page.testSubj.locator(ATTACKS_PAGE_CONTENT_TEST_ID);
@@ -93,6 +98,10 @@ export class DetectionsAttackDiscoveryPage {
     this.tableExpandAttackDetailsButtons = this.attacksTableSection.locator(
       `[data-test-subj="${EXPAND_ATTACK_BUTTON_TEST_ID}"]`
     );
+    this.settingsButton = this.page.testSubj.locator('settings');
+    this.generateButton = this.page.testSubj.locator('generate');
+    this.runButton = this.page.testSubj.locator('run');
+    this.globalToastList = this.page.testSubj.locator('globalToastList');
 
     if (_config.serverless) {
       this.standaloneAlertsNavItem = this.page.testSubj.locator(
@@ -141,6 +150,11 @@ export class DetectionsAttackDiscoveryPage {
     // appear after the main content tree. SiemSearchBar also skips rendering until index patterns
     // are ready. Waiting here avoids races that show up on slower CI but not locally.
     await this.attacksPageSearchBar.waitFor({ state: 'visible', timeout: 30_000 });
+  }
+
+  async navigateToAttackDiscoveryPage() {
+    await this.page.gotoApp(ATTACK_DISCOVERY_PAGE_URL);
+    await this.runButton.waitFor({ state: 'visible', timeout: 30_000 });
   }
 
   async expandDetectionsSection() {

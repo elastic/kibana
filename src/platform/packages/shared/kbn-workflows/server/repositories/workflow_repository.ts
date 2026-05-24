@@ -11,8 +11,8 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { EsWorkflow, WorkflowDetailDto } from '../..';
 import { GLOBAL_WORKFLOW_SPACE_ID, WORKFLOW_INDEX_NAME } from '../constants';
-import { applyManagedFilter, buildWorkflowSpaceFilter } from '../lib/workflow_space_filter';
-import type { ManagedFilter } from '../lib/workflow_space_filter';
+import { buildWorkflowFilters } from '../lib/workflow_filters';
+import type { ManagedFilter } from '../lib/workflow_filters';
 
 export interface WorkflowRepositoryOptions {
   esClient: ElasticsearchClient;
@@ -45,22 +45,22 @@ export class WorkflowRepository {
     options?: WorkflowLookupOptions
   ): Promise<EsWorkflow | null> {
     try {
-      const spaceFilter = buildWorkflowSpaceFilter(spaceId, {
-        includeGlobal: options?.includeGlobal ?? false,
+      const { must, must_not } = buildWorkflowFilters({
+        ids: [workflowId],
+        space: {
+          id: spaceId,
+          includeGlobal: options?.includeGlobal ?? false,
+        },
+        deleted: 'not_deleted',
+        managed: options?.managedFilter,
       });
-      const queryMust: estypes.QueryDslQueryContainer[] = [
-        { ids: { values: [workflowId] } },
-        ...spaceFilter.must,
-      ];
-      const queryMustNot = [...spaceFilter.must_not];
-      applyManagedFilter(options?.managedFilter, { must: queryMust, must_not: queryMustNot });
 
       const response = await this.options.esClient.search({
         index: this.options.indexName,
         query: {
           bool: {
-            must: queryMust,
-            must_not: queryMustNot,
+            must,
+            must_not,
           },
         },
         size: 1,
@@ -160,22 +160,17 @@ export class WorkflowRepository {
     }
 
     const should = Array.from(bySpace.entries()).map(([spaceId, ids]) => {
-      const spaceFilter = buildWorkflowSpaceFilter(spaceId, {
-        includeDeleted: true,
-        includeGlobal: options?.includeGlobal ?? false,
+      const filter = buildWorkflowFilters({
+        ids: Array.from(ids),
+        space: {
+          id: spaceId,
+          includeGlobal: options?.includeGlobal ?? false,
+        },
+        managed: options?.managedFilter,
       });
-      const queryMust: estypes.QueryDslQueryContainer[] = [
-        { ids: { values: Array.from(ids) } },
-        ...spaceFilter.must,
-      ];
-      const queryMustNot = [...spaceFilter.must_not];
-      applyManagedFilter(options?.managedFilter, { must: queryMust, must_not: queryMustNot });
 
       return {
-        bool: {
-          must: queryMust,
-          must_not: queryMustNot,
-        },
+        bool: filter,
       };
     });
 
@@ -189,7 +184,7 @@ export class WorkflowRepository {
           bool: {
             should,
             minimum_should_match: 1,
-            must_not: [{ exists: { field: 'deleted_at' } }],
+            ...buildWorkflowFilters({ deleted: 'not_deleted' }),
           },
         },
       });
@@ -244,15 +239,18 @@ export class WorkflowRepository {
     const MAX_PAGES = 50;
     const keepAlive = '1m';
     const sort: estypes.Sort = [{ updated_at: { order: 'desc' } }, '_shard_doc'];
-    const spaceFilter = buildWorkflowSpaceFilter(spaceId, { includeGlobal: true });
+    const workflowFilters = buildWorkflowFilters({
+      space: { id: spaceId, includeGlobal: true },
+      deleted: 'not_deleted',
+    });
     const query = {
       bool: {
         must: [
-          ...spaceFilter.must,
+          ...workflowFilters.must,
           { term: { enabled: true } },
           { term: { triggerTypes: triggerId } },
         ],
-        must_not: spaceFilter.must_not,
+        must_not: workflowFilters.must_not,
       },
     };
     const _source = [

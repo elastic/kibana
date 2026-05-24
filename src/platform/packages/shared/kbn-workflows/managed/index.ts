@@ -7,10 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+<<<<<<< HEAD
 import {
   EXAMPLE_MANAGED_WORKFLOW,
   EXAMPLE_MANAGED_WORKFLOW_ID,
 } from './definitions/workflows_extensions_example';
+=======
+import { managedWorkflowDefinitions } from './definitions';
+>>>>>>> 063f0831a9c1f476ef2347e464083d6e4e7e54cf
 import type {
   ManagedWorkflowDefinition,
   ManagedWorkflowManagement,
@@ -18,8 +22,12 @@ import type {
 } from './types';
 
 export type { ManagedWorkflowDefinition, ManagedWorkflowManagement, ManagedWorkflowTemplateValues };
+<<<<<<< HEAD
 
 export const managedWorkflowDefinitions = [EXAMPLE_MANAGED_WORKFLOW] as const;
+=======
+export * from './definitions';
+>>>>>>> 063f0831a9c1f476ef2347e464083d6e4e7e54cf
 
 type ManagedWorkflowDefinitionById = {
   [TDefinition in (typeof managedWorkflowDefinitions)[number] as TDefinition['id']]: TDefinition;
@@ -48,5 +56,8 @@ export const getManagedWorkflowDefinition = (id: string): ManagedWorkflowDefinit
 export const getManagedWorkflowDefinitions = (): ManagedWorkflowDefinition[] => {
   return [...managedWorkflowDefinitions];
 };
+<<<<<<< HEAD
 
 export { EXAMPLE_MANAGED_WORKFLOW_ID };
+=======
+>>>>>>> 063f0831a9c1f476ef2347e464083d6e4e7e54cf

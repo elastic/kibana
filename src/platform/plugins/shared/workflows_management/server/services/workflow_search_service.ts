@@ -16,7 +16,11 @@ import type {
   WorkflowListDto,
   WorkflowStatsDto,
 } from '@kbn/workflows';
+<<<<<<< HEAD
 import { applyManagedFilter, buildWorkflowSpaceFilter } from '@kbn/workflows/server';
+=======
+import { buildWorkflowFilters } from '@kbn/workflows/server';
+>>>>>>> 063f0831a9c1f476ef2347e464083d6e4e7e54cf
 import type { WorkflowListItemDto } from '@kbn/workflows/types/v1';
 
 import type { WorkflowSearchDeps } from './types';
@@ -57,7 +61,14 @@ export class WorkflowSearchService {
     const keepAlive = '1m';
     const indexPattern = `${workflowIndexName}-*`;
     const sort: estypes.Sort = [{ updated_at: { order: 'desc' } }, '_shard_doc'];
+<<<<<<< HEAD
     const { must, must_not } = buildWorkflowSpaceFilter(spaceId, { includeGlobal: true });
+=======
+    const { must, must_not } = buildWorkflowFilters({
+      space: { id: spaceId, includeGlobal: true },
+      deleted: 'not_deleted',
+    });
+>>>>>>> 063f0831a9c1f476ef2347e464083d6e4e7e54cf
     must.push({ term: { enabled: true } }, { term: { triggerTypes: triggerId } });
     const query = { bool: { must, must_not } };
     const _source = [
@@ -127,8 +138,16 @@ export class WorkflowSearchService {
     const { size = 100, page = 1, enabled, createdBy, tags, query, managedFilter } = params;
     const from = (page - 1) * size;
 
+<<<<<<< HEAD
     const { must, must_not } = buildWorkflowSpaceFilter(spaceId, { includeGlobal: true });
     applyManagedFilter(managedFilter ?? 'unmanaged', { must, must_not });
+=======
+    const { must, must_not } = buildWorkflowFilters({
+      space: { id: spaceId, includeGlobal: true },
+      deleted: 'not_deleted',
+      managed: managedFilter ?? 'unmanaged',
+    });
+>>>>>>> 063f0831a9c1f476ef2347e464083d6e4e7e54cf
 
     must.push(
       ...buildConditionalTermsFilters([
@@ -189,8 +208,16 @@ export class WorkflowSearchService {
     spaceId: string,
     options?: { includeExecutionStats?: boolean }
   ): Promise<WorkflowStatsDto> {
+<<<<<<< HEAD
     const statsFilter = buildWorkflowSpaceFilter(spaceId, { includeGlobal: true });
     applyManagedFilter('unmanaged', statsFilter);
+=======
+    const statsFilter = buildWorkflowFilters({
+      space: { id: spaceId, includeGlobal: true },
+      deleted: 'not_deleted',
+      managed: 'unmanaged',
+    });
+>>>>>>> 063f0831a9c1f476ef2347e464083d6e4e7e54cf
     const statsResponse = await this.deps.workflowStorage.getClient().search({
       size: 0,
       track_total_hits: true,
@@ -235,8 +262,16 @@ export class WorkflowSearchService {
     });
 
     try {
+<<<<<<< HEAD
       const aggsFilter = buildWorkflowSpaceFilter(spaceId, { includeGlobal: true });
       applyManagedFilter('unmanaged', aggsFilter);
+=======
+      const aggsFilter = buildWorkflowFilters({
+        space: { id: spaceId, includeGlobal: true },
+        deleted: 'not_deleted',
+        managed: 'unmanaged',
+      });
+>>>>>>> 063f0831a9c1f476ef2347e464083d6e4e7e54cf
       const aggsResponse = await this.deps.workflowStorage.getClient().search({
         size: 0,
         track_total_hits: true,

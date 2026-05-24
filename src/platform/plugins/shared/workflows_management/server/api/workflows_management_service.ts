@@ -29,6 +29,8 @@ import type {
   WorkflowExecutionDto,
   WorkflowExecutionHistoryModel,
   WorkflowExecutionListDto,
+  WorkflowExecutionSortField,
+  WorkflowExecutionSortOrder,
   WorkflowListDto,
   WorkflowStatsDto,
 } from '@kbn/workflows';
@@ -50,7 +52,10 @@ import type {
   ExecutionLogsParams,
   StepLogsParams,
 } from '@kbn/workflows-execution-engine/server/workflow_event_logger/types';
-import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
+import type {
+  ServerTriggerDefinition,
+  WorkflowsExtensionsServerPluginStart,
+} from '@kbn/workflows-extensions/server';
 import type { z } from '@kbn/zod/v4';
 
 import type { StepExecutionListResult } from './lib/search_step_executions';
@@ -77,9 +82,18 @@ export interface SearchWorkflowExecutionsParams {
   statuses?: ExecutionStatus[];
   executionTypes?: ExecutionType[];
   executedBy?: string[];
+  concurrencyGroupKey?: string;
   omitStepRuns?: boolean;
+  finishedAfter?: string;
+  finishedBefore?: string;
+  sortField?: WorkflowExecutionSortField;
+  sortOrder?: WorkflowExecutionSortOrder;
   page?: number;
   size?: number;
+  /** Datemath lower bound for filtering by startedAt. */
+  startedAfter?: string;
+  /** Datemath upper bound for filtering by startedAt. */
+  startedBefore?: string;
 }
 
 export class WorkflowsService {
@@ -380,6 +394,11 @@ export class WorkflowsService {
   ): Promise<GetAvailableConnectorsResponse> {
     await this.ensureInitialized();
     return this.validationService.getAvailableConnectors(spaceId, request);
+  }
+
+  public async getRegisteredCustomTriggerDefinitions(): Promise<ServerTriggerDefinition[]> {
+    await this.ensureInitialized();
+    return this.validationService.getRegisteredCustomTriggerDefinitions();
   }
 
   public async validateWorkflow(

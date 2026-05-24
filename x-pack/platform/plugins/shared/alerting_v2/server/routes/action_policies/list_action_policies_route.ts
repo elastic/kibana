@@ -7,11 +7,11 @@
 
 import {
   actionPolicyDestinationTypeSchema,
+  errorResponseSchema,
   findActionPoliciesResponseSchema,
 } from '@kbn/alerting-v2-schemas';
 import { Request } from '@kbn/core-di-server';
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
 import { ActionPolicyClient } from '../../lib/action_policy_client';
@@ -21,7 +21,7 @@ import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
 
 const sortFieldSchema = z
-  .enum(['name', 'createdAt', 'updatedAt', 'createdByUsername', 'updatedByUsername'])
+  .enum(['name', 'createdAt', 'updatedAt'])
   .describe('The available fields to sort action policies by.');
 
 const tagFilterItemSchema = z.string().min(1).max(128);
@@ -77,9 +77,9 @@ export class ListActionPoliciesRoute extends BaseAlertingRoute {
     summary: 'List action policies',
     description: 'Get a paginated list of action policies with optional filtering and sorting.',
   } as const;
-  static validate = {
+  static schemas = {
     request: {
-      query: buildRouteValidationWithZod(listActionPoliciesQuerySchema),
+      query: listActionPoliciesQuerySchema,
     },
     response: {
       200: {
@@ -87,6 +87,7 @@ export class ListActionPoliciesRoute extends BaseAlertingRoute {
         description: 'Indicates a successful call.',
       },
       400: {
+        body: () => errorResponseSchema,
         description: 'Indicates invalid query parameters.',
       },
     },
