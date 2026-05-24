@@ -133,6 +133,10 @@ export const LastTestRunComponent = ({
           loading={stepsLoading}
           showStepNumber={true}
           showExpand={isErrorDetails}
+          // API journeys reuse the synthexec step pipeline but have no
+          // browser context to screenshot — keep the column out instead
+          // of rendering empty placeholders.
+          showScreenshots={monitor?.type === MonitorTypeEnum.BROWSER}
         />
       ) : (
         <SinglePingResult ping={latestPing} />

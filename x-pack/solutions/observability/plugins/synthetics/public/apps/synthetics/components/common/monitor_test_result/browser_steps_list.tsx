@@ -45,6 +45,11 @@ interface Props {
   showExpand?: boolean;
   testNowMode?: boolean;
   showLastSuccessful?: boolean;
+  // API monitors reuse the synthexec step pipeline but never render
+  // screenshots (no browser context). Callers that know the monitor type
+  // — e.g. last_test_run / test_run_steps — set this to false to omit
+  // the Screenshot column instead of rendering an empty thumbnail.
+  showScreenshots?: boolean;
 }
 
 export function isStepEnd(step: JourneyStep) {
@@ -80,6 +85,7 @@ export const BrowserStepsList = ({
   compressed = true,
   showExpand = true,
   testNowMode = false,
+  showScreenshots = true,
 }: Props) => {
   const [pageIndex, setPageIndex] = useState(0);
 
@@ -191,39 +197,44 @@ export const BrowserStepsList = ({
           },
         ]
       : []),
-    {
-      align: 'left',
-      field: 'timestamp',
-      name: SCREENSHOT_LABEL,
-      render: (timestamp: string, step) => (
-        <JourneyStepScreenshotContainer
-          checkGroup={step.monitor.check_group}
-          initialStepNumber={step.synthetics?.step?.index}
-          stepStatus={step.synthetics.payload?.status}
-          allStepsLoaded={!loading}
-          retryFetchOnRevisit={true}
-          size={screenshotImageSize}
-          testNowMode={testNowMode}
-          timestamp={timestamp}
-        />
-      ),
-      mobileOptions: {
-        render: (step: JourneyStep) => (
-          <MobileRowDetails
-            journeyStep={step}
-            stepsLoading={loading}
-            showStepNumber={showStepNumber}
-            showLastSuccessful={showLastSuccessful}
-            isExpanded={Boolean(expandedMap[step._id])}
-            isTestNowMode={testNowMode}
-            euiTheme={euiTheme}
-          />
-        ),
-        header: false,
-        enlarge: true,
-        width: '100%',
-      },
-    },
+    ...(showScreenshots
+      ? [
+          {
+            align: 'left' as const,
+            field: 'timestamp',
+            name: SCREENSHOT_LABEL,
+            render: (timestamp: string, step: JourneyStep) => (
+              <JourneyStepScreenshotContainer
+                checkGroup={step.monitor.check_group}
+                initialStepNumber={step.synthetics?.step?.index}
+                stepStatus={step.synthetics.payload?.status}
+                allStepsLoaded={!loading}
+                retryFetchOnRevisit={true}
+                size={screenshotImageSize}
+                testNowMode={testNowMode}
+                timestamp={timestamp}
+              />
+            ),
+            mobileOptions: {
+              render: (step: JourneyStep) => (
+                <MobileRowDetails
+                  journeyStep={step}
+                  stepsLoading={loading}
+                  showStepNumber={showStepNumber}
+                  showLastSuccessful={showLastSuccessful}
+                  isExpanded={Boolean(expandedMap[step._id])}
+                  isTestNowMode={testNowMode}
+                  euiTheme={euiTheme}
+                  showScreenshots={showScreenshots}
+                />
+              ),
+              header: false,
+              enlarge: true,
+              width: '100%',
+            },
+          },
+        ]
+      : []),
     {
       field: 'synthetics.step.name',
       name: STEP_NAME,
@@ -240,9 +251,29 @@ export const BrowserStepsList = ({
           </EuiText>
         );
       },
-      mobileOptions: {
-        show: false,
-      },
+      // When screenshots are hidden (API monitors) the screenshot column
+      // — which normally carries the mobile MobileRowDetails renderer —
+      // is gone, so fall back to hanging mobile rendering off the step
+      // name column to keep parity with browser monitors on small viewports.
+      mobileOptions: showScreenshots
+        ? { show: false }
+        : {
+            render: (step: JourneyStep) => (
+              <MobileRowDetails
+                journeyStep={step}
+                stepsLoading={loading}
+                showStepNumber={showStepNumber}
+                showLastSuccessful={showLastSuccessful}
+                isExpanded={Boolean(expandedMap[step._id])}
+                isTestNowMode={testNowMode}
+                euiTheme={euiTheme}
+                showScreenshots={showScreenshots}
+              />
+            ),
+            header: false,
+            enlarge: true,
+            width: '100%',
+          },
     },
     {
       field: 'synthetics.step.status',
@@ -370,6 +401,7 @@ const MobileRowDetails = ({
   isExpanded,
   isTestNowMode,
   euiTheme,
+  showScreenshots = true,
 }: {
   journeyStep: JourneyStep;
   showStepNumber: boolean;
@@ -378,6 +410,7 @@ const MobileRowDetails = ({
   isExpanded: boolean;
   isTestNowMode: boolean;
   euiTheme: EuiThemeComputed;
+  showScreenshots?: boolean;
 }) => {
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
@@ -392,15 +425,17 @@ const MobileRowDetails = ({
         </h4>
       </EuiTitle>
       <EuiFlexGroup justifyContent="spaceEvenly" responsive={false} wrap={true} gutterSize="xl">
-        <JourneyStepScreenshotContainer
-          checkGroup={journeyStep.monitor.check_group}
-          initialStepNumber={journeyStep.synthetics?.step?.index}
-          stepStatus={journeyStep.synthetics.payload?.status}
-          allStepsLoaded={!stepsLoading}
-          retryFetchOnRevisit={true}
-          size={THUMBNAIL_SCREENSHOT_SIZE_MOBILE}
-          timestamp={journeyStep?.['@timestamp']}
-        />
+        {showScreenshots && (
+          <JourneyStepScreenshotContainer
+            checkGroup={journeyStep.monitor.check_group}
+            initialStepNumber={journeyStep.synthetics?.step?.index}
+            stepStatus={journeyStep.synthetics.payload?.status}
+            allStepsLoaded={!stepsLoading}
+            retryFetchOnRevisit={true}
+            size={THUMBNAIL_SCREENSHOT_SIZE_MOBILE}
+            timestamp={journeyStep?.['@timestamp']}
+          />
+        )}
         <div>
           <EuiFlexGroup direction="column" gutterSize="s">
             {[

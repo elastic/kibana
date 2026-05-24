@@ -42,7 +42,13 @@ export function TestNowMode({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [testRun.id, hasBlockingError, isPushing]);
 
-  const isBrowserMonitor = testRun.monitor.type === 'browser';
+  // API journeys run through the same synthexec/step pipeline as browser
+  // monitors (they emit summary + step events to a `check_group`), so route
+  // them through BrowserTestRunResult — the SimpleTestResults flow only
+  // understands single-ping HTTP/TCP/ICMP monitors. Flag API so the inner
+  // step list omits the (always-empty) screenshot column.
+  const isMultiStepMonitor = testRun.monitor.type === 'browser' || testRun.monitor.type === 'api';
+  const isApiMonitor = testRun.monitor.type === 'api';
 
   return (
     <EuiPanel color="subdued" hasBorder={true}>
@@ -56,11 +62,12 @@ export function TestNowMode({
       {testRun && !hasBlockingError && !isPushing && (
         <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiFlexItem key={testRun.id}>
-            {isBrowserMonitor ? (
+            {isMultiStepMonitor ? (
               <BrowserTestRunResult
                 expectPings={expectPings}
                 onDone={onDone}
                 testRunId={testRun.id}
+                isApiMonitor={isApiMonitor}
               />
             ) : (
               <SimpleTestResults expectPings={expectPings} onDone={onDone} testRunId={testRun.id} />

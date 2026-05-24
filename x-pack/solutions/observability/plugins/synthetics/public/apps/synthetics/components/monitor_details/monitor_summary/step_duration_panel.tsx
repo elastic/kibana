@@ -33,7 +33,11 @@ export const StepDurationPanel = ({
 
   const { queryIdFilter, locationFilter } = useMonitorQueryFilters();
 
-  const isBrowser = monitor?.type === 'browser';
+  // API journeys produce synthexec `step/end` events with
+  // `synthetics.step.duration.us` and `synthetics.step.name`, so they share
+  // the per-step breakdown with browser monitors. HTTP/TCP/ICMP have no step
+  // concept and fall back to `monitor.duration.us` broken down by location.
+  const isStepBased = monitor?.type === 'browser' || monitor?.type === 'api';
 
   if (!queryIdFilter) {
     return null;
@@ -41,7 +45,7 @@ export const StepDurationPanel = ({
 
   const label = !doBreakdown
     ? MONITOR_DURATION
-    : isBrowser
+    : isStepBased
     ? DURATION_BY_STEP_LABEL
     : DURATION_BY_LOCATION;
 
@@ -74,12 +78,12 @@ export const StepDurationPanel = ({
             reportDefinitions: queryIdFilter,
             filters: locationFilter,
             selectedMetricField:
-              isBrowser && doBreakdown ? 'synthetics.step.duration.us' : 'monitor.duration.us',
+              isStepBased && doBreakdown ? 'synthetics.step.duration.us' : 'monitor.duration.us',
             dataType: 'synthetics',
             operationType: doBreakdown ? 'last_value' : 'average',
             seriesType: 'area_stacked',
             ...(doBreakdown
-              ? { breakdown: isBrowser ? 'synthetics.step.name.keyword' : 'observer.geo.name' }
+              ? { breakdown: isStepBased ? 'synthetics.step.name.keyword' : 'observer.geo.name' }
               : {}),
           },
         ]}

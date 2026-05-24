@@ -30,7 +30,7 @@ export const MonitorTestRunsSparkline = () => {
         seriesType: 'area' as const,
         time: { from, to },
         reportDefinitions: {
-          'monitor.type': ['http', 'tcp', 'browser', 'icmp'],
+          'monitor.type': ['http', 'tcp', 'browser', 'icmp', 'api'],
         },
         dataType: 'synthetics' as const,
         selectedMetricField: 'total_test_runs',
