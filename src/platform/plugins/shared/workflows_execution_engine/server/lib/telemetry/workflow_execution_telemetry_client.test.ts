@@ -330,6 +330,7 @@ describe('WorkflowExecutionTelemetryClient', () => {
 
     it('should include managed workflow execution fields when present', () => {
       const workflowExecution = createMockWorkflowExecution({
+        isTestRun: true,
         managed: true,
         managedBy: 'workflowsExtensionsExample',
         originManagedWorkflowId: 'system-example-greeting',
@@ -343,6 +344,7 @@ describe('WorkflowExecutionTelemetryClient', () => {
 
       const [, eventData] = telemetry.reportEvent.mock.calls[0];
       expect(eventData).toMatchObject({
+        isTestRun: true,
         isManaged: true,
         managedBy: 'workflowsExtensionsExample',
         originManagedWorkflowId: 'system-example-greeting',

@@ -214,6 +214,7 @@ describe('WorkflowsMeteringService', () => {
 
     it('should include managed workflow metadata when present', async () => {
       const execution = createMockExecution({
+        isTestRun: true,
         managed: true,
         managedBy: 'workflowsExtensionsExample',
         originManagedWorkflowId: 'system-example-greeting',
@@ -226,6 +227,7 @@ describe('WorkflowsMeteringService', () => {
       const { metadata } = record.usage;
 
       expect(metadata!.is_managed).toBe('true');
+      expect(metadata!.is_test_run).toBe('true');
       expect(metadata!.managed_by).toBe('workflowsExtensionsExample');
       expect(metadata!.origin_managed_workflow_id).toBe('system-example-greeting');
     });
