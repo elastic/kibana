@@ -11,8 +11,11 @@ import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { useWorkflowsCapabilities, type WorkflowsManagementCapabilities } from '@kbn/workflows-ui';
 import { createMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
-import type { WorkflowDetailHeaderProps } from './workflow_detail_header';
-import { WorkflowDetailHeader } from './workflow_detail_header';
+import {
+  SkipUnsavedRunConfirmationStorageKey,
+  WorkflowDetailHeader,
+  type WorkflowDetailHeaderProps,
+} from './workflow_detail_header';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
 import {
   _clearComputedData,
@@ -162,18 +165,16 @@ describe('WorkflowDetailHeader', () => {
   });
 
   it('shows saved status when no changes', () => {
-    const { container } = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);
-    // The WorkflowUnsavedChangesBadge component displays "Saved" when there are no changes
-    // We need to check if the component renders without the unsaved changes badge
-    expect(container).toBeTruthy();
+    const { getByTestId } = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);
+    expect(getByTestId('saveWorkflowHeaderButton')).toBeDisabled();
   });
 
   it('shows unsaved changes when there are changes', () => {
-    const { container } = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
+    const { getByTestId } = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
       isValid: true,
       hasChanges: true,
     });
-    expect(container).toBeTruthy();
+    expect(getByTestId('saveWorkflowHeaderButton')).not.toBeDisabled();
   });
 
   it('disables run workflow button when yaml has syntax errors', () => {
@@ -237,13 +238,13 @@ describe('WorkflowDetailHeader', () => {
     fireEvent.click(result.getByTestId('runWorkflowWithUnsavedChangesDontAskAgain'));
     fireEvent.click(result.getByTestId('confirmModalConfirmButton'));
 
-    expect(localStorage.getItem('workflows:skipUnsavedRunConfirmation')).toBe('true');
+    expect(localStorage.getItem(SkipUnsavedRunConfirmationStorageKey)).toBe('true');
     expect(result.queryByTestId('runWorkflowWithUnsavedChangesConfirmationModal')).toBeNull();
     expect(result.store.getState().detail.isTestModalOpen).toBe(true);
   });
 
   it('skips the unsaved changes confirmation when the preference is stored', () => {
-    localStorage.setItem('workflows:skipUnsavedRunConfirmation', 'true');
+    localStorage.setItem(SkipUnsavedRunConfirmationStorageKey, 'true');
     const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
       hasChanges: true,
     });
@@ -334,7 +335,7 @@ describe('WorkflowDetailHeader', () => {
           canCancelWorkflowExecution: false,
         },
         expectRunDisabled: false,
-        expectSaveDisabled: false,
+        expectSaveDisabled: true,
         expectEnabledSwitchDisabled: false,
         expectExecutionsTabDisabled: false,
       },
@@ -350,7 +351,7 @@ describe('WorkflowDetailHeader', () => {
           canCancelWorkflowExecution: false,
         },
         expectRunDisabled: false,
-        expectSaveDisabled: false,
+        expectSaveDisabled: true,
         expectEnabledSwitchDisabled: false,
         expectExecutionsTabDisabled: true,
       },
@@ -414,7 +415,9 @@ describe('WorkflowDetailHeader', () => {
         canCancelWorkflowExecution: false,
       });
 
-      const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);
+      const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
+        hasChanges: true,
+      });
       expect(result.getByTestId('saveWorkflowHeaderButton')).not.toBeDisabled();
     });
   });

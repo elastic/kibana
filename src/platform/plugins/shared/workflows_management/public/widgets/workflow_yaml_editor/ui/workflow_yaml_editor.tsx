@@ -577,19 +577,20 @@ export const WorkflowYAMLEditor = ({
     if (lastRevealedHighlightedStepIdRef.current === highlightedStepId) {
       return;
     }
-    if (!workflowLookup) {
+    const currentWorkflowLookup = workflowLookupRef.current;
+    if (!currentWorkflowLookup) {
       return;
     }
 
     const lineStart =
       highlightedStepId === HIGHLIGHTED_STEP_TRIGGER
-        ? workflowLookup.triggersLineStart
-        : workflowLookup.steps[highlightedStepId]?.lineStart;
+        ? currentWorkflowLookup.triggersLineStart
+        : currentWorkflowLookup.steps[highlightedStepId]?.lineStart;
     if (lineStart != null) {
       editorRef.current?.revealLineInCenter(lineStart);
       lastRevealedHighlightedStepIdRef.current = highlightedStepId;
     }
-  }, [isEditorMounted, highlightedStepId, workflowLookup]);
+  }, [isEditorMounted, highlightedStepId]);
 
   // Actions
   const [actionsPopoverOpen, setActionsPopoverOpen] = useState(false);

@@ -48,15 +48,22 @@ interface GetTestRunTooltipContentProps {
   isValid: boolean;
   canRunWorkflow: boolean;
   isExecutionsTab: boolean;
+  isSaving?: boolean;
 }
 export function getTestRunTooltipContent({
   isValid,
   canRunWorkflow,
   isExecutionsTab,
+  isSaving = false,
 }: GetTestRunTooltipContentProps) {
   if (isExecutionsTab) {
     return i18n.translate('workflows.actionButtons.runWorkflow.executionsTab', {
       defaultMessage: 'Can not run workflow from executions tab',
+    });
+  }
+  if (isSaving) {
+    return i18n.translate('workflows.actionButtons.runWorkflow.saving', {
+      defaultMessage: 'Workflow is saving',
     });
   }
   if (!isValid) {

@@ -68,7 +68,7 @@ const executionsTabReadExecutionDisabledTooltip = i18n.translate(
   }
 );
 
-const SkipUnsavedRunConfirmationStorageKey = 'workflows:skipUnsavedRunConfirmation';
+export const SkipUnsavedRunConfirmationStorageKey = 'workflows:skipUnsavedRunConfirmation';
 
 const Translations = {
   runWorkflow: i18n.translate('workflows.workflowDetailHeader.runWorkflow', {
@@ -171,9 +171,6 @@ export const WorkflowDetailHeader = React.memo(
     }, [dispatch]);
 
     const [showRunConfirmation, setShowRunConfirmation] = useState(false);
-    const [skipUnsavedRunConfirmation, setSkipUnsavedRunConfirmation] = useState(
-      () => localStorage.getItem(SkipUnsavedRunConfirmationStorageKey) === 'true'
-    );
     const [dontAskAgain, setDontAskAgain] = useState(false);
 
     // Combined validity: syntax must parse AND no strict validation errors AND server considers it valid.
@@ -186,8 +183,9 @@ export const WorkflowDetailHeader = React.memo(
         isExecutionsTab,
         isValid: isSyntaxValid,
         canRunWorkflow: canExecuteWorkflow,
+        isSaving,
       });
-    }, [isSyntaxValid, canExecuteWorkflow, isExecutionsTab]);
+    }, [isSyntaxValid, canExecuteWorkflow, isExecutionsTab, isSaving]);
 
     const saveWorkflowTooltipContent = useMemo(() => {
       const isCreate = !workflowId;
@@ -203,18 +201,19 @@ export const WorkflowDetailHeader = React.memo(
     }, [canUpdateWorkflow, canCreateWorkflow, workflowId]);
 
     const handleRunClickWithUnsavedCheck = useCallback(() => {
-      if (hasUnsavedChanges && !skipUnsavedRunConfirmation) {
+      const shouldSkipUnsavedRunConfirmation =
+        localStorage.getItem(SkipUnsavedRunConfirmationStorageKey) === 'true';
+      if (hasUnsavedChanges && !shouldSkipUnsavedRunConfirmation) {
         setDontAskAgain(false);
         setShowRunConfirmation(true);
       } else {
         openTestModal();
       }
-    }, [hasUnsavedChanges, openTestModal, skipUnsavedRunConfirmation]);
+    }, [hasUnsavedChanges, openTestModal]);
 
     const handleConfirmRun = useCallback(() => {
       if (dontAskAgain) {
         localStorage.setItem(SkipUnsavedRunConfirmationStorageKey, 'true');
-        setSkipUnsavedRunConfirmation(true);
       }
       setShowRunConfirmation(false);
       openTestModal();
@@ -363,7 +362,12 @@ export const WorkflowDetailHeader = React.memo(
                     size="s"
                     onClick={handleSaveWorkflow}
                     disabled={
-                      isExecutionsTab || !canSaveWorkflow || isLoading || isSaving || !isYamlSynced
+                      isExecutionsTab ||
+                      !canSaveWorkflow ||
+                      isLoading ||
+                      isSaving ||
+                      !isYamlSynced ||
+                      !hasUnsavedChanges
                     }
                     isLoading={isSaving}
                     data-test-subj="saveWorkflowHeaderButton"

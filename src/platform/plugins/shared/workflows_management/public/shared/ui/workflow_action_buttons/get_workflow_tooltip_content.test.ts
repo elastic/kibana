@@ -97,6 +97,16 @@ describe('getTestRunTooltipContent', () => {
     expect(result).toBe('You need the Workflows "Execute" privilege to run workflows.');
   });
 
+  it('returns saving message when workflow is saving', () => {
+    const result = getTestRunTooltipContent({
+      isValid: true,
+      canRunWorkflow: true,
+      isExecutionsTab: false,
+      isSaving: true,
+    });
+    expect(result).toBe('Workflow is saving');
+  });
+
   it('returns null when all conditions are met', () => {
     const result = getTestRunTooltipContent({
       isValid: true,
