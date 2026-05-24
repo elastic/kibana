@@ -11,7 +11,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { i18n } from '@kbn/i18n';
 
-import { DataSourcesPage } from './data_sources_page';
+import { Main } from './main';
 
 export const mountManagementSection = (
   coreStart: CoreStart,
@@ -19,7 +19,7 @@ export const mountManagementSection = (
 ) => {
   ReactDOM.render(
     coreStart.rendering.addContext(
-      <DataSourcesPage
+      <Main
         pageTitle={i18n.translate('dataSets.pageTitle', {
           defaultMessage: 'Datasets',
         })}

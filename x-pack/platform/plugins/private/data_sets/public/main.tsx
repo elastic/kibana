@@ -42,15 +42,12 @@ type DataSetFlyoutState =
   | { kind: 'create' }
   | { kind: 'edit'; dataSet: DataSetWithName };
 
-export interface DataSourcesPageProps {
+export interface MainProps {
   pageTitle: string;
   httpClient: HttpSetup;
 }
 
-export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
-  pageTitle,
-  httpClient,
-}) => {
+export const Main: FunctionComponent<MainProps> = ({ pageTitle, httpClient }) => {
   const dataClient = useMemo(() => new DataSourcesClient(httpClient), [httpClient]);
   const dataSetsClient = useMemo(() => new DatasetsClient(httpClient), [httpClient]);
   const [items, setItems] = useState<DataSource[]>([]);
@@ -500,3 +497,4 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
     </>
   );
 };
+
