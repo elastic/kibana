@@ -333,6 +333,7 @@ describe('WorkflowExecutionTelemetryClient', () => {
         managed: true,
         managedBy: 'workflowsExtensionsExample',
         originManagedWorkflowId: 'system-example-greeting',
+        managedVersion: 3,
       });
 
       client.reportWorkflowExecutionCompleted({
@@ -345,6 +346,7 @@ describe('WorkflowExecutionTelemetryClient', () => {
         isManaged: true,
         managedBy: 'workflowsExtensionsExample',
         originManagedWorkflowId: 'system-example-greeting',
+        managedVersion: 3,
       });
     });
   });
@@ -532,6 +534,30 @@ describe('WorkflowExecutionTelemetryClient', () => {
       expect(eventData).not.toHaveProperty('compositionDepth');
       expect(eventData).not.toHaveProperty('parentWorkflowId');
       expect(eventData).not.toHaveProperty('parentWorkflowInvocation');
+    });
+
+    it('should include managed workflow execution fields when present', () => {
+      const workflowExecution = createMockWorkflowExecution({
+        triggeredBy: 'cases.updated',
+        status: ExecutionStatus.SKIPPED,
+        managed: true,
+        managedBy: 'workflowsExtensionsExample',
+        originManagedWorkflowId: 'system-example-greeting',
+        managedVersion: 3,
+      });
+
+      client.reportEventDrivenExecutionSuppressed({
+        workflowExecution,
+        logTriggerEventsEnabled: true,
+      });
+
+      const [, eventData] = telemetry.reportEvent.mock.calls[0];
+      expect(eventData).toMatchObject({
+        isManaged: true,
+        managedBy: 'workflowsExtensionsExample',
+        originManagedWorkflowId: 'system-example-greeting',
+        managedVersion: 3,
+      });
     });
   });
 

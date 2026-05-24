@@ -56,6 +56,7 @@ const baseWorkflowExecutionSchema: RootSchema<{
   isManaged: boolean;
   managedBy?: string;
   originManagedWorkflowId?: string;
+  managedVersion?: number;
   ruleId?: string;
   compositionDepth?: number;
   parentWorkflowId?: string;
@@ -124,6 +125,14 @@ const baseWorkflowExecutionSchema: RootSchema<{
     type: 'keyword',
     _meta: {
       description: 'Registered managed workflow definition ID, when this execution came from one',
+      optional: true,
+    },
+  },
+  managedVersion: {
+    type: 'long',
+    _meta: {
+      description:
+        'Registered managed workflow definition version, when this execution came from one',
       optional: true,
     },
   },

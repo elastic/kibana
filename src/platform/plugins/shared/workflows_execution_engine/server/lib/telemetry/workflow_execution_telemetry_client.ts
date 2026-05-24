@@ -181,6 +181,9 @@ function buildBaseExecutionTelemetryFields(
     ...(typeof workflowExecution.originManagedWorkflowId === 'string' && {
       originManagedWorkflowId: workflowExecution.originManagedWorkflowId,
     }),
+    ...(typeof workflowExecution.managedVersion === 'number' && {
+      managedVersion: workflowExecution.managedVersion,
+    }),
     ...(executionMetadata.ruleId && { ruleId: executionMetadata.ruleId }),
     ...(executionMetadata.compositionDepth !== undefined && {
       compositionDepth: executionMetadata.compositionDepth,
@@ -419,6 +422,9 @@ export class WorkflowExecutionTelemetryClient {
       }),
       ...(typeof workflowExecution.originManagedWorkflowId === 'string' && {
         originManagedWorkflowId: workflowExecution.originManagedWorkflowId,
+      }),
+      ...(typeof workflowExecution.managedVersion === 'number' && {
+        managedVersion: workflowExecution.managedVersion,
       }),
       ...(executionMetadata.ruleId && { ruleId: executionMetadata.ruleId }),
       ...(executionMetadata.eventChainDepth !== undefined && {

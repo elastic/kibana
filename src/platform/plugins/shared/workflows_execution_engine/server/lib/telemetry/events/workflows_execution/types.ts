@@ -51,6 +51,10 @@ export interface BaseWorkflowExecutionTelemetryParams {
    */
   originManagedWorkflowId?: string;
   /**
+   * Registered managed workflow definition version, when this execution came from one
+   */
+  managedVersion?: number;
+  /**
    * The alert rule ID if triggered by alert. Only present when triggerType is 'alert'.
    */
   ruleId?: string;
