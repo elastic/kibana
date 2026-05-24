@@ -57,7 +57,8 @@ export function isInProgressStatus(status: ExecutionStatus) {
     status === ExecutionStatus.RUNNING ||
     status === ExecutionStatus.PENDING ||
     status === ExecutionStatus.WAITING ||
-    status === ExecutionStatus.WAITING_FOR_INPUT
+    status === ExecutionStatus.WAITING_FOR_INPUT ||
+    status === ExecutionStatus.WAITING_FOR_CHILD
   );
 }
 
@@ -81,6 +82,7 @@ export function isCancelableStatus(status: ExecutionStatus) {
     status === ExecutionStatus.RUNNING ||
     status === ExecutionStatus.WAITING ||
     status === ExecutionStatus.WAITING_FOR_INPUT ||
+    status === ExecutionStatus.WAITING_FOR_CHILD ||
     status === ExecutionStatus.PENDING
   );
 }
