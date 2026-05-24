@@ -14,24 +14,25 @@ export class ApmServiceInventoryPage {
     this.page = page;
   }
 
-  // Inventory fetches /internal/apm/services once on mount with no auto-refetch; reload to re-fire if the row hasn't aggregated yet.
+  // Inventory fetches /internal/apm/services once on mount. Reload to re-fire
+  // the request if the row has not aggregated yet.
   public async waitForServiceRow(
     serviceTestId: string,
     { perAttemptTimeoutMs = 30_000, maxRetries = 3 } = {}
-  ) {
+  ): Promise<void> {
     const locator = this.page.getByTestId(serviceTestId);
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       try {
         await locator.waitFor({ timeout: perAttemptTimeoutMs });
         return;
-      } catch (err) {
-        if (attempt === maxRetries) throw err;
+      } catch (error) {
+        if (attempt === maxRetries) throw error;
         await this.page.reload();
       }
     }
   }
 
-  public async assertTransactionExists() {
+  public async assertTransactionExists(): Promise<void> {
     await expect(this.page.getByTestId('apmTransactionDetailLinkLink').first()).toBeVisible();
   }
 }

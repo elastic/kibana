@@ -141,13 +141,13 @@ test('Otel Kubernetes', async ({
       tMs: number;
       status: number;
       requestUrl: string;
-      services: Array<{ service: string; agent: string }>;
+      services: Array<{ service: string; agent: string; transactionType: string }>;
       errorBody?: string;
     }> = [];
 
     try {
       // Open the inventory in a new tab manually so the response listener is
-      // attached before navigation — page.on('response') only catches future
+      // attached before navigation. page.on('response') only catches future
       // events, and the inventory's mount-fetch fires immediately on goto.
       const serviceInventoryHref = await page
         .getByTestId('observabilityOnboardingDataIngestStatusActionLink-services')
@@ -163,23 +163,33 @@ test('Otel Kubernetes', async ({
         const url = new URL(response.url());
         if (url.pathname !== '/internal/apm/services') return;
         const status = response.status();
-        let services: Array<{ service: string; agent: string }> = [];
+        let services: Array<{ service: string; agent: string; transactionType: string }> = [];
         let errorBody: string | undefined;
         if (status >= 400) {
           try {
-            errorBody = await response.text();
+            errorBody = (await response.text()).slice(0, 1000);
           } catch {
             errorBody = '<read-failed>';
           }
         } else {
           try {
             const json = (await response.json()) as {
-              items?: Array<{ serviceName?: string; agentName?: string }>;
+              items?: Array<{
+                serviceName?: string;
+                agentName?: string;
+                transactionType?: string;
+              }>;
+              services?: Array<{
+                serviceName?: string;
+                agentName?: string;
+                transactionType?: string;
+              }>;
             };
-            const items = Array.isArray(json?.items) ? json.items : [];
+            const items = json.items ?? json.services ?? [];
             services = items.map((item) => ({
               service: item?.serviceName ?? '<missing>',
               agent: item?.agentName ?? '<missing>',
+              transactionType: item?.transactionType ?? '<missing>',
             }));
           } catch {
             // leave services empty
