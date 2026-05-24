@@ -46,6 +46,7 @@ export const CUSTOM_ROLES: Record<string, KibanaRole> = {
     },
     kibana: [
       {
+        base: [],
         feature: {
           advancedSettings: ['read'],
           dashboard: ['read'],
