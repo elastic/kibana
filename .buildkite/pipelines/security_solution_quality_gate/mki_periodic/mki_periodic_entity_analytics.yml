@@ -17,6 +17,7 @@ steps:
         parallelism: 1
         soft_fail:
           - exit_status: 101
+          - exit_status: 1
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:entity_analytics:dashboards
         label: 'Cypress MKI - Dashboards'
@@ -33,6 +34,7 @@ steps:
         parallelism: 1
         soft_fail:
           - exit_status: 101
+          - exit_status: 1
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:entity_analytics:entity_analytics_home
         label: 'Cypress MKI - Entity Analytics Home'
@@ -65,6 +67,7 @@ steps:
         parallelism: 1
         soft_fail:
           - exit_status: 101
+          - exit_status: 1
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:entity_analytics:hosts
         label: 'Cypress MKI - Hosts'
@@ -81,6 +84,7 @@ steps:
         parallelism: 1
         soft_fail:
           - exit_status: 101
+          - exit_status: 1
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:entity_analytics:priv_mon
         label: 'Cypress MKI - Priv Mon'
@@ -97,6 +101,7 @@ steps:
         parallelism: 1
         soft_fail:
           - exit_status: 101
+          - exit_status: 1
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:entity_analytics:watchlists
         label: 'Cypress MKI - Watchlists'
@@ -177,6 +182,7 @@ steps:
         parallelism: 1
         soft_fail:
           - exit_status: 101
+          - exit_status: 1
 
   - group: "API MKI - Entity Analytics"
     key: api_test_entity_analytics
@@ -196,6 +202,7 @@ steps:
               limit: 2
         soft_fail:
           - exit_status: 101
+          - exit_status: 1
 
       - label: 'API MKI - entity_analytics:essentials:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh entity_analytics:essentials:qa:serverless
