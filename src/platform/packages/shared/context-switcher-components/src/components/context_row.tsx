@@ -71,7 +71,6 @@ export const ContextRow = ({ row, onClick }: ContextRowProps) => {
       isDisabled={row.disabled}
       aria-label={row.ariaLabel}
       data-test-subj={row['data-test-subj']}
-      size="s"
       color="text"
     />
   );
