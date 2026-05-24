@@ -70,18 +70,20 @@ export const formatSyntheticsPolicy = (
         }
       });
     }
-    // NOTE: Private-location support for `monitor.type: api` requires a
-    // companion change to the Fleet synthetics integration package
-    // (elastic/integrations) that introduces a brand-new `synthetics/api`
-    // input — separate from `synthetics/browser`, with its own vars and
-    // data stream(s). Until that integration PR lands and a package version
-    // exposing it is installed, the `inputs.find(input.type === 'synthetics/api')`
-    // lookup above resolves to undefined, this function returns
-    // `hasInput: false`, and the caller surfaces the existing
-    // "synthetics integration package needs upgrade" warning to the user.
-    // Once the input lands, wire its var mapping in a dedicated
-    // `apiFormatters` map (do NOT reuse browserFormatters — the var schema
-    // will differ).
+    // API monitors emit a companion `synthetics.api.network` document per
+    // request via Heartbeat's enrichSynthEvent → SetEventDataset path.
+    // Enabling the `api.network` stream here is what causes Fleet to include
+    // the matching index privileges in the generated agent API key. Without
+    // it, journey/network_info events are produced and routed correctly by
+    // Heartbeat but rejected at the bulk indexing layer with a 403, leaving
+    // the api.network data stream silently empty.
+    if (monitorType === 'api') {
+      currentInput.streams.forEach((stream) => {
+        if (stream.data_stream.dataset === 'api.network') {
+          stream.enabled = true;
+        }
+      });
+    }
   }
 
   configKeys.forEach((key) => {
