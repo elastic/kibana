@@ -22,6 +22,9 @@ export class AlertsTablePage {
   public bulkRunWorkflowMenuItem: Locator;
   public bulkWorkflowPanel: Locator;
   public selectedShowBulkActionsButton: Locator;
+  public bulkAddToChatMenuItem: Locator;
+  public selectAllAlertsButton: Locator;
+  public bulkActionsHeaderCheckbox: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.detectionsAlertsWrapper = this.page.testSubj.locator('alerts-by-rule-table');
@@ -37,6 +40,9 @@ export class AlertsTablePage {
     this.selectedShowBulkActionsButton = this.page.testSubj.locator(
       'selectedShowBulkActionsButton'
     );
+    this.bulkAddToChatMenuItem = this.page.testSubj.locator('bulk-add-to-chat');
+    this.selectAllAlertsButton = this.page.testSubj.locator('selectAllAlertsButton');
+    this.bulkActionsHeaderCheckbox = this.page.testSubj.locator('bulk-actions-header');
   }
 
   async navigate() {

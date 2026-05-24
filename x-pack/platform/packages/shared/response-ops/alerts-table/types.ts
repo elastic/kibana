@@ -43,6 +43,34 @@ import type { SetRequired } from 'type-fest';
 import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+
+/**
+ * A single conversation attachment or a group of attachments.
+ * Defined structurally here to avoid a compile-time dependency on agent-builder packages.
+ */
+export type ConversationAttachmentInput =
+  | { type: string; data?: unknown; hidden?: boolean }
+  | { type: 'group'; id: string; label: string; items: Array<{ type: string; data?: unknown }> };
+
+/**
+ * Minimal structural interface for the chat service required by the alerts table.
+ * Using a local structural type avoids a compile-time dependency on agent-builder packages
+ * from this shared platform package.
+ */
+export interface OpenChatService {
+  openChat(options?: {
+    attachments?: ConversationAttachmentInput[];
+    newConversation?: boolean;
+    initialMessage?: string;
+    autoSendInitialMessage?: boolean;
+  }): void;
+}
+
+export interface BulkAddToChatConfig {
+  convertAlertToAttachment: (alerts: TimelineItem[]) => ConversationAttachmentInput[];
+  initialMessage?: string;
+  onAddedToChat?: (itemCount: number) => void;
+}
 import type { FieldBrowserOptions } from '@kbn/response-ops-alerts-fields-browser';
 import type { MutedAlerts } from '@kbn/response-ops-alerts-apis/types';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
@@ -411,6 +439,14 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
    * @default new LocalStorageWrapper(window.localStorage)
    */
   configurationStorage?: IStorageWrapper | null;
+
+  /**
+   * Configuration for the bulk "Add to chat" action. When provided, a bulk
+   * action will appear in the table allowing users to add selected alerts to
+   * the Agent Builder chat.
+   */
+  bulkAddToChatConfig?: BulkAddToChatConfig;
+
   /**
    * Show a CSV export button in the toolbar. The button exports all alerts matching
    * the current filters using the reporting CSV endpoint.
@@ -438,6 +474,7 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
      * The cases service is optional: cases features will be disabled if not provided
      */
     cases?: CasesService;
+    agentBuilder?: OpenChatService;
   };
 }
 
@@ -613,6 +650,7 @@ export interface AlertsDataGridProps<AC extends AdditionalContext = AdditionalCo
   extends PublicAlertsDataGridProps,
     Pick<EuiDataGridProps, 'columnVisibility'> {
   renderContext: RenderContext<AC>;
+  bulkAddToChatConfig?: BulkAddToChatConfig;
   additionalToolbarControls?: ReactNode;
   pageSizeOptions?: number[];
   leadingControlColumns?: EuiDataGridControlColumn[];

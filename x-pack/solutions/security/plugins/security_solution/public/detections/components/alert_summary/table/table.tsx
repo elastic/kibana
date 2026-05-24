@@ -37,6 +37,7 @@ import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { combineQueries } from '../../../../common/lib/kuery';
 import { useKibana } from '../../../../common/lib/kibana';
 import { CellValue } from './render_cell';
+import { useBulkAddToChatConfig } from '../../../../agent_builder/hooks/use_bulk_add_to_chat_config';
 import { buildTimeRangeFilter } from '../../alerts_table/helpers';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 
@@ -134,6 +135,7 @@ export const Table = memo(({ dataView, groupingFilters, packages }: TableProps) 
   const {
     services: {
       application,
+      agentBuilder,
       cases,
       data,
       fieldFormats,
@@ -156,9 +158,23 @@ export const Table = memo(({ dataView, groupingFilters, packages }: TableProps) 
       application,
       licensing,
       settings,
+      agentBuilder,
     }),
-    [application, cases, data, fieldFormats, http, licensing, notifications, rendering, settings]
+    [
+      agentBuilder,
+      application,
+      cases,
+      data,
+      fieldFormats,
+      http,
+      licensing,
+      notifications,
+      rendering,
+      settings,
+    ]
   );
+
+  const bulkAddToChatConfig = useBulkAddToChatConfig('bulk_alerts_alert_summary');
 
   const getGlobalFiltersSelector = useMemo(() => inputsSelectors.globalFiltersQuerySelector(), []);
   const globalFilters = useDeepEqualSelector(getGlobalFiltersSelector);
@@ -242,6 +258,7 @@ export const Table = memo(({ dataView, groupingFilters, packages }: TableProps) 
         ruleTypeIds={RULE_TYPE_IDS}
         services={services}
         toolbarVisibility={TOOLBAR_VISIBILITY}
+        bulkAddToChatConfig={bulkAddToChatConfig}
       />
     </EuiDataGridStyleWrapper>
   );

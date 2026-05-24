@@ -27,6 +27,7 @@ import {
 } from '../../../../../../../detections/components/alert_summary/table/table';
 import { ActionsCell } from '../../../../../../../detections/components/alert_summary/table/actions_cell';
 import { useKibana } from '../../../../../../../common/lib/kibana';
+import { useBulkAddToChatConfig } from '../../../../../../../agent_builder/hooks/use_bulk_add_to_chat_config';
 import { CellValue } from '../../../../../../../detections/components/alert_summary/table/render_cell';
 import { useAdditionalBulkActions } from '../../../../../../../detections/hooks/alert_summary/use_additional_bulk_actions';
 
@@ -56,6 +57,7 @@ export interface TableProps {
 export const Table = memo(({ dataView, id, packages, query }: TableProps) => {
   const {
     services: {
+      agentBuilder,
       application,
       cases,
       data,
@@ -69,18 +71,32 @@ export const Table = memo(({ dataView, id, packages, query }: TableProps) => {
   } = useKibana();
   const services = useMemo(
     () => ({
+      agentBuilder,
+      application,
       cases,
       data,
       http,
       notifications,
       rendering,
       fieldFormats,
-      application,
       licensing,
       settings,
     }),
-    [application, cases, data, fieldFormats, http, licensing, notifications, rendering, settings]
+    [
+      agentBuilder,
+      application,
+      cases,
+      data,
+      fieldFormats,
+      http,
+      licensing,
+      notifications,
+      rendering,
+      settings,
+    ]
   );
+
+  const bulkAddToChatConfig = useBulkAddToChatConfig('bulk_alerts_attack_discovery');
 
   const browserFields = useBrowserFields(PageScope.alerts);
 
@@ -122,6 +138,7 @@ export const Table = memo(({ dataView, id, packages, query }: TableProps) => {
         ruleTypeIds={RULE_TYPE_IDS}
         services={services}
         toolbarVisibility={TOOLBAR_VISIBILITY}
+        bulkAddToChatConfig={bulkAddToChatConfig}
       />
     </EuiDataGridStyleWrapper>
   );
