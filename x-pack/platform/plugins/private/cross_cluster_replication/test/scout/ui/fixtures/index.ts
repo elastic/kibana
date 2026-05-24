@@ -5,10 +5,5 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../ftr_provider_context';
-
-export default ({ loadTestFile }: FtrProviderContext) => {
-  describe('License app', function () {
-    loadTestFile(require.resolve('./home_page'));
-  });
-};
+export { test } from '@kbn/scout';
+export { CUSTOM_ROLES } from './custom_roles';
