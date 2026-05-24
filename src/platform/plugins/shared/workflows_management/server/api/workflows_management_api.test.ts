@@ -47,6 +47,13 @@ describe('WorkflowsManagementApi', () => {
       bulkCreateWorkflows: jest.fn(),
       validateWorkflow: jest.fn(),
       getWorkflowsExecutionEngine: () => mockWorkflowsExecutionEngine,
+      getCoreStart: jest.fn().mockResolvedValue({
+        security: {
+          authc: {
+            getCurrentUser: jest.fn().mockReturnValue({ roles: [] }),
+          },
+        },
+      }),
     } as any;
 
     api = new WorkflowsManagementApi(mockWorkflowsService, true);
@@ -660,6 +667,30 @@ steps:
       ).rejects.toBeInstanceOf(ManagedWorkflowUpdateForbiddenError);
 
       expect(mockWorkflowsService.updateWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('allows admins to edit managed workflows', async () => {
+      const updateResult = { name: 'Updated Workflow' } as any;
+      mockWorkflowsService.getWorkflow.mockResolvedValue(createWorkflowDto({ managed: true }));
+      mockWorkflowsService.updateWorkflow.mockResolvedValue(updateResult);
+      mockWorkflowsService.getCoreStart.mockResolvedValue({
+        security: {
+          authc: {
+            getCurrentUser: jest.fn().mockReturnValue({ roles: ['superuser'] }),
+          },
+        },
+      } as any);
+
+      await expect(
+        api.updateWorkflow('wf-1', { name: 'Updated Workflow' }, 'default', mockRequest)
+      ).resolves.toBe(updateResult);
+
+      expect(mockWorkflowsService.updateWorkflow).toHaveBeenCalledWith(
+        'wf-1',
+        { name: 'Updated Workflow' },
+        'default',
+        mockRequest
+      );
     });
 
     it('keeps unmanaged workflow updates unchanged', async () => {

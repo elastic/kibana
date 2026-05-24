@@ -65,6 +65,8 @@ const isEnablementOnlyUpdate = (workflow: Partial<EsWorkflow>): boolean => {
   return fields.length === 1 && fields[0] === 'enabled';
 };
 
+const ADMIN_ROLES = new Set(['superuser', 'kibana_admin']);
+
 export interface GetWorkflowsParams {
   triggerType?: 'schedule' | 'event' | 'manual';
   size: number;
@@ -192,6 +194,12 @@ export class WorkflowsManagementApi {
     });
   }
 
+  private async isAdmin(request: KibanaRequest): Promise<boolean> {
+    const coreStart = await this.workflowsService.getCoreStart();
+    const roles = coreStart.security.authc.getCurrentUser(request)?.roles ?? [];
+    return roles.some((role) => ADMIN_ROLES.has(role));
+  }
+
   public async getWorkflows(
     params: GetWorkflowsParams,
     spaceId: string,
@@ -304,7 +312,11 @@ export class WorkflowsManagementApi {
     if (!originalWorkflow) {
       throw new WorkflowNotFoundError(id);
     }
-    if (originalWorkflow.managed === true && !isEnablementOnlyUpdate(workflow)) {
+    if (
+      originalWorkflow.managed === true &&
+      !isEnablementOnlyUpdate(workflow) &&
+      !(await this.isAdmin(request))
+    ) {
       throw new ManagedWorkflowUpdateForbiddenError();
     }
     const result = await this.workflowsService.updateWorkflow(id, workflow, spaceId, request);
