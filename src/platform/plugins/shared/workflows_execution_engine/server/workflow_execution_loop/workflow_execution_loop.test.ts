@@ -9,7 +9,7 @@
 
 import { ExecutionStatus } from '@kbn/workflows';
 import { workflowExecutionLoop } from './workflow_execution_loop';
-import { WorkflowTaskShutdownError } from '../workflow_task_shutdown';
+import { WorkflowTaskManagerAbortError } from '../workflow_task_shutdown';
 
 jest.mock('elastic-apm-node', () => ({
   __esModule: true,
@@ -98,19 +98,19 @@ describe('workflowExecutionLoop', () => {
     );
   });
 
-  it('marks shutdown abort as system cancellation and suppresses workflow log errors', async () => {
+  it('marks Task Manager abort as system cancellation and suppresses workflow log errors', async () => {
     const params = createParams();
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { flushState } = require('./persistence_loop');
     const loopPromise = workflowExecutionLoop(params as any);
-    params.taskAbortController.abort(new WorkflowTaskShutdownError());
+    params.taskAbortController.abort(new WorkflowTaskManagerAbortError());
     await loopPromise;
 
     expect(params.workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith(
       expect.objectContaining({
         cancelRequested: true,
         status: ExecutionStatus.CANCELLED,
-        cancellationReason: 'Cancelled because Task Manager is shutting down',
+        cancellationReason: 'Cancelled because Task Manager aborted the task',
         cancelledBy: 'system',
       })
     );

@@ -12,9 +12,9 @@ import { ExecutionStatus } from '@kbn/workflows';
 import { executionFlowLoop } from './execution_flow_loop';
 import { flushState, persistenceLoop } from './persistence_loop';
 import type { WorkflowExecutionLoopParams } from './types';
-import { isWorkflowTaskShutdownSignal } from '../workflow_task_shutdown';
+import { isWorkflowTaskManagerAbortSignal } from '../workflow_task_shutdown';
 
-const TASK_MANAGER_SHUTDOWN_CANCELLATION_REASON = 'Cancelled because Task Manager is shutting down';
+const TASK_MANAGER_ABORT_CANCELLATION_REASON = 'Cancelled because Task Manager aborted the task';
 
 /**
  * Executes the main workflow execution loop, processing nodes sequentially until completion.
@@ -42,12 +42,12 @@ export async function workflowExecutionLoop(params: WorkflowExecutionLoopParams)
   const persistenceAbortController = new AbortController();
 
   const onTaskAbort = () => {
-    if (isWorkflowTaskShutdownSignal(params.taskAbortController.signal)) {
+    if (isWorkflowTaskManagerAbortSignal(params.taskAbortController.signal)) {
       params.workflowExecutionState.updateWorkflowExecution({
         cancelRequested: true,
         status: ExecutionStatus.CANCELLED,
         cancelledAt: new Date().toISOString(),
-        cancellationReason: TASK_MANAGER_SHUTDOWN_CANCELLATION_REASON,
+        cancellationReason: TASK_MANAGER_ABORT_CANCELLATION_REASON,
         cancelledBy: 'system',
       });
       persistenceAbortController.abort();

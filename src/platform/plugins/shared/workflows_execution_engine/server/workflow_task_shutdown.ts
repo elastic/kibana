@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export class WorkflowTaskShutdownError extends Error {
+export class WorkflowTaskManagerAbortError extends Error {
   constructor() {
-    super('Workflow task aborted because Task Manager is shutting down');
-    this.name = 'WorkflowTaskShutdownError';
+    super('Workflow task aborted by Task Manager');
+    this.name = 'WorkflowTaskManagerAbortError';
   }
 }
 
-export const isWorkflowTaskShutdownSignal = (signal: AbortSignal): boolean =>
-  signal.reason instanceof WorkflowTaskShutdownError;
+export const isWorkflowTaskManagerAbortSignal = (signal: AbortSignal): boolean =>
+  signal.reason instanceof WorkflowTaskManagerAbortError;
 
 export const createWorkflowTaskAbortController = (
   taskManagerAbortController: AbortController
@@ -24,7 +24,7 @@ export const createWorkflowTaskAbortController = (
 
   const abortWorkflow = () => {
     if (!workflowAbortController.signal.aborted) {
-      workflowAbortController.abort(new WorkflowTaskShutdownError());
+      workflowAbortController.abort(new WorkflowTaskManagerAbortError());
     }
   };
 

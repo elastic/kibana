@@ -21,7 +21,7 @@ import type { StepExecutionRuntime } from '../workflow_context_manager/step_exec
 import type { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
 import { WorkflowScopeStack } from '../workflow_context_manager/workflow_scope_stack';
 import { createMockWorkflowEventLogger } from '../workflow_event_logger/mocks';
-import { WorkflowTaskShutdownError } from '../workflow_task_shutdown';
+import { WorkflowTaskManagerAbortError } from '../workflow_task_shutdown';
 
 jest.mock('./run_stack_monitor/run_stack_monitor');
 jest.mock('./catch_error');
@@ -163,9 +163,9 @@ describe('runNode', () => {
       expect(mockStepExecutionRuntime.flushEventLogs).toHaveBeenCalledTimes(1);
     });
 
-    it('should suppress event log flush errors when task shutdown is signaled during step execution', async () => {
+    it('should pass the task abort signal when Task Manager aborts during step execution', async () => {
       mockNodeImplementation.run.mockImplementation(async () => {
-        mockParams.taskAbortController.abort(new WorkflowTaskShutdownError());
+        mockParams.taskAbortController.abort(new WorkflowTaskManagerAbortError());
       });
 
       await runNode(mockParams);
