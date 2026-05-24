@@ -12,3 +12,6 @@ export interface SetupDependencies {
 }
 
 export type StartDependencies = Record<string, never>;
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface DatasetsPluginStart {}

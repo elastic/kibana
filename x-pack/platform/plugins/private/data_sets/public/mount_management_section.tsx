@@ -21,7 +21,7 @@ export const mountManagementSection = (
     coreStart.rendering.addContext(
       <DataSourcesPage
         pageTitle={i18n.translate('dataSets.pageTitle', {
-          defaultMessage: 'Data sets',
+          defaultMessage: 'Datasets',
         })}
         httpClient={coreStart.http}
       />

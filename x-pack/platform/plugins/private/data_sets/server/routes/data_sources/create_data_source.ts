@@ -38,6 +38,7 @@ export function registerCreateDataSource(router: IRouter): void {
       const { id } = request.params;
       const { client } = (await context.core).elasticsearch;
       const dataSourcesClient = new DataSourcesClient(client.asCurrentUser);
+      // check to see if other requests need to try/catch
       try {
         await dataSourcesClient.put(id, request.body);
         return response.ok();

@@ -8,11 +8,10 @@
 import type { CoreSetup, Plugin } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { LIST_BREADCRUMB, PLUGIN_ID, PLUGIN_NAME } from '../common';
-import type { DataSetsPluginStart } from './plugin_start_contract';
-import type { SetupDependencies, StartDependencies } from './types';
+import type { SetupDependencies, StartDependencies, DatasetsPluginStart } from './types';
 
-export class DataSetsPlugin
-  implements Plugin<void, DataSetsPluginStart, SetupDependencies, StartDependencies>
+export class DatasetsPlugin
+  implements Plugin<void, DatasetsPluginStart, SetupDependencies, StartDependencies>
 {
   public setup(core: CoreSetup<StartDependencies>, { management }: SetupDependencies): void {
     management.sections.section.data.registerApp({
@@ -38,7 +37,7 @@ export class DataSetsPlugin
     });
   }
 
-  public start(): DataSetsPluginStart {
+  public start(): DatasetsPluginStart {
     return {};
   }
 }

@@ -22,8 +22,8 @@ import type { HttpSetup } from '@kbn/core/public';
 import type { DataSetWithName, DataSourceWithSecrets, DataSource } from '../common';
 import { CreateDatasetFlyout } from './create_dataset_flyout';
 import { dataSetFromListItem } from './create_dataset_flyout/dataset_flyout_initial_values';
-import { HttpDataSetsClient } from './http_data_sets_client';
-import { HttpDataSourcesClient } from './http_data_sources_client';
+import { DatasetsClient } from './datasets_client';
+import { DataSourcesClient } from './data_sources_client';
 import { CreateDataSourceFlyout } from './create_data_source_flyout';
 import { dataSourceFromListItem } from './create_data_source_flyout/data_source_flyout_initial_values';
 import { getDataSourceTypeLabel } from './get_data_source_type_label';
@@ -51,8 +51,8 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
   pageTitle,
   httpClient,
 }) => {
-  const dataClient = useMemo(() => new HttpDataSourcesClient(httpClient), [httpClient]);
-  const dataSetsClient = useMemo(() => new HttpDataSetsClient(httpClient), [httpClient]);
+  const dataClient = useMemo(() => new DataSourcesClient(httpClient), [httpClient]);
+  const dataSetsClient = useMemo(() => new DatasetsClient(httpClient), [httpClient]);
   const [items, setItems] = useState<DataSource[]>([]);
   const [selectedItems, setSelectedItems] = useState<DataSource[]>([]);
   const [selectedDataSets, setSelectedDataSets] = useState<DataSetListRow[]>([]);

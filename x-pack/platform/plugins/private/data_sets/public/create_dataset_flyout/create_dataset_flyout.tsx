@@ -48,7 +48,7 @@ export interface CreateDatasetFlyoutProps {
    * Persist a data set (create or update). Resolve `null` on success, or an error message to show in the flyout.
    */
   onSave: (data: DataSetWithName) => Promise<string | null>;
-  /** Data sources used to populate the data source selector (typically `HttpDataSourcesClient.get()`). */
+  /** Data sources used to populate the data source selector (typically `DataSourcesClient.get()`). */
   dataSources: DataSource[];
 }
 
@@ -131,7 +131,6 @@ export const CreateDatasetFlyout: FunctionComponent<CreateDatasetFlyoutProps> = 
   }, [dataSources]);
 
   const onSubmit = async (values: CreateDatasetFormValues) => {
-    console.log('onSubmit', values);
     setSaveError(undefined);
     setIsSaving(true);
     try {
