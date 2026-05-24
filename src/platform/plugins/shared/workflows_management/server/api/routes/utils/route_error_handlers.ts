@@ -19,6 +19,7 @@ import {
   isWorkflowConflictError,
   isWorkflowValidationError,
 } from '@kbn/workflows-yaml';
+import { isManagedWorkflowForbiddenError } from '../../managed_workflow_forbidden_errors';
 
 /**
  * Unified error handler for workflow management routes
@@ -70,6 +71,14 @@ export function handleRouteError(
   if (isWorkflowConflictError(error)) {
     return response.conflict({
       body: error.toJSON(),
+    });
+  }
+
+  if (isManagedWorkflowForbiddenError(error)) {
+    return response.forbidden({
+      body: {
+        message: error.message,
+      },
     });
   }
 

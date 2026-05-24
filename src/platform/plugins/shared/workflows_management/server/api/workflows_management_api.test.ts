@@ -15,6 +15,8 @@ import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import { workflowsExecutionEngineMock } from '@kbn/workflows-execution-engine/server/mocks';
 import { z } from '@kbn/zod/v4';
+import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_error';
+import { ManagedWorkflowUpdateForbiddenError } from './managed_workflow_errors';
 import { type SmlIndexAttachmentFn, WorkflowsManagementApi } from './workflows_management_api';
 import type { WorkflowsService } from './workflows_management_service';
 
@@ -37,6 +39,7 @@ describe('WorkflowsManagementApi', () => {
 
     mockWorkflowsService = {
       getWorkflow: jest.fn(),
+      getWorkflowsByIds: jest.fn(),
       getWorkflowZodSchema: jest.fn(),
       createWorkflow: jest.fn(),
       updateWorkflow: jest.fn(),
@@ -49,6 +52,7 @@ describe('WorkflowsManagementApi', () => {
     api = new WorkflowsManagementApi(mockWorkflowsService, true);
     const mockZodSchema = createMockZodSchema();
     mockWorkflowsService.getWorkflowZodSchema.mockResolvedValue(mockZodSchema);
+    mockWorkflowsService.getWorkflowsByIds.mockResolvedValue([]);
 
     mockRequest = httpServerMock.createKibanaRequest();
   });
@@ -609,6 +613,116 @@ steps:
         mockRequest
       );
       expect(result).toEqual(expectedResult);
+    });
+  });
+
+  describe('updateWorkflow', () => {
+    const createWorkflowDto = (overrides: Partial<WorkflowDetailDto> = {}): WorkflowDetailDto => ({
+      id: 'wf-1',
+      name: 'Test Workflow',
+      enabled: true,
+      yaml: 'name: Test Workflow',
+      valid: true,
+      createdAt: '2025-01-01T00:00:00.000Z',
+      createdBy: 'user',
+      lastUpdatedAt: '2025-01-01T00:00:00.000Z',
+      lastUpdatedBy: 'user',
+      definition: null,
+      ...overrides,
+    });
+
+    it('allows enablement-only updates for managed workflows', async () => {
+      const updateResult = { enabled: false } as any;
+      mockWorkflowsService.getWorkflow.mockResolvedValue(createWorkflowDto({ managed: true }));
+      mockWorkflowsService.updateWorkflow.mockResolvedValue(updateResult);
+
+      const result = await api.updateWorkflow('wf-1', { enabled: false }, 'default', mockRequest);
+
+      expect(result).toBe(updateResult);
+      expect(mockWorkflowsService.updateWorkflow).toHaveBeenCalledWith(
+        'wf-1',
+        { enabled: false },
+        'default',
+        mockRequest
+      );
+    });
+
+    it('rejects managed workflow updates with fields other than enabled', async () => {
+      mockWorkflowsService.getWorkflow.mockResolvedValue(createWorkflowDto({ managed: true }));
+
+      await expect(
+        api.updateWorkflow(
+          'wf-1',
+          { enabled: false, name: 'Updated Workflow' },
+          'default',
+          mockRequest
+        )
+      ).rejects.toBeInstanceOf(ManagedWorkflowUpdateForbiddenError);
+
+      expect(mockWorkflowsService.updateWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('keeps unmanaged workflow updates unchanged', async () => {
+      const updateResult = { name: 'Updated Workflow' } as any;
+      mockWorkflowsService.getWorkflow.mockResolvedValue(createWorkflowDto({ managed: false }));
+      mockWorkflowsService.updateWorkflow.mockResolvedValue(updateResult);
+
+      await expect(
+        api.updateWorkflow('wf-1', { name: 'Updated Workflow' }, 'default', mockRequest)
+      ).resolves.toBe(updateResult);
+
+      expect(mockWorkflowsService.updateWorkflow).toHaveBeenCalled();
+    });
+  });
+
+  describe('deleteWorkflows', () => {
+    const createWorkflowDto = (overrides: Partial<WorkflowDetailDto> = {}): WorkflowDetailDto => ({
+      id: 'wf-1',
+      name: 'Test Workflow',
+      enabled: true,
+      yaml: 'name: Test Workflow',
+      valid: true,
+      createdAt: '2025-01-01T00:00:00.000Z',
+      createdBy: 'user',
+      lastUpdatedAt: '2025-01-01T00:00:00.000Z',
+      lastUpdatedBy: 'user',
+      definition: null,
+      ...overrides,
+    });
+
+    it('rejects deleting managed workflows', async () => {
+      mockWorkflowsService.getWorkflowsByIds.mockResolvedValue([
+        createWorkflowDto({ id: 'system-workflow', managed: true }),
+      ]);
+
+      await expect(
+        api.deleteWorkflows(['system-workflow'], 'default', mockRequest)
+      ).rejects.toBeInstanceOf(ManagedWorkflowDeleteForbiddenError);
+
+      expect(mockWorkflowsService.deleteWorkflows).not.toHaveBeenCalled();
+    });
+
+    it('keeps unmanaged workflow deletes unchanged', async () => {
+      const deleteResult = {
+        total: 1,
+        deleted: 1,
+        failures: [],
+        successfulIds: ['wf-1'],
+      };
+      mockWorkflowsService.getWorkflowsByIds.mockResolvedValue([
+        createWorkflowDto({ id: 'wf-1', managed: false }),
+      ]);
+      mockWorkflowsService.deleteWorkflows.mockResolvedValue(deleteResult);
+
+      await expect(api.deleteWorkflows(['wf-1'], 'default', mockRequest)).resolves.toBe(
+        deleteResult
+      );
+
+      expect(mockWorkflowsService.deleteWorkflows).toHaveBeenCalledWith(
+        ['wf-1'],
+        'default',
+        undefined
+      );
     });
   });
 
