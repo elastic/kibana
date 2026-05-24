@@ -42,7 +42,7 @@ import {
   dataSourceToFlyoutFormValues,
   emptyDataSourceFlyoutFormValues,
 } from './data_source_flyout_initial_values';
-import { getDataSourceTypeLabel } from '../get_data_source_type_label';
+import { getDataSourceTypeVerbose } from '../get_data_source_type_label';
 import type { CreateDataSourceFlyoutFormValues } from './create_data_source_flyout_form_state';
 
 export interface CreateDataSourceFlyoutProps {
@@ -70,12 +70,7 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
     [initialDataSource]
   );
 
-  const {
-    handleSubmit,
-    control,
-    reset,
-    unregister,
-  } = useForm<CreateDataSourceFlyoutFormValues>({
+  const { handleSubmit, control, reset, unregister } = useForm<CreateDataSourceFlyoutFormValues>({
     defaultValues: formDefaultValues,
   });
 
@@ -103,7 +98,7 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
     () =>
       ALL_DATA_SOURCE_TYPES.map((value) => ({
         value,
-        text: getDataSourceTypeLabel(value),
+        text: getDataSourceTypeVerbose(value),
       })),
     []
   );

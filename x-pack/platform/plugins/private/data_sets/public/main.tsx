@@ -26,7 +26,7 @@ import { DatasetsClient } from './datasets_client';
 import { DataSourcesClient } from './data_sources_client';
 import { CreateDataSourceFlyout } from './create_data_source_flyout';
 import { dataSourceFromListItem } from './create_data_source_flyout/data_source_flyout_initial_values';
-import { getDataSourceTypeLabel } from './get_data_source_type_label';
+import { getDataSourceTypeVerbose } from './get_data_source_type_label';
 import { getFlyoutSaveErrorMessage } from './get_flyout_save_error_message';
 
 /** Data set row in the table; `type` is resolved from the linked data source. */
@@ -159,7 +159,7 @@ export const Main: FunctionComponent<MainProps> = ({ pageTitle, httpClient }) =>
         }),
         sortable: true,
         width: '18%',
-        render: (value: DataSource['type']) => getDataSourceTypeLabel(value),
+        render: (value: DataSource['type']) => getDataSourceTypeVerbose(value),
         'data-test-subj': 'dataSetsColType',
       },
       {
@@ -224,7 +224,7 @@ export const Main: FunctionComponent<MainProps> = ({ pageTitle, httpClient }) =>
         }),
         render: (type: DataSetListRow['type']) =>
           type
-            ? getDataSourceTypeLabel(type)
+            ? getDataSourceTypeVerbose(type)
             : i18n.translate('dataSets.setsTable.dataSourceTypeMissing', {
                 defaultMessage: 'Unknown',
               }),
@@ -497,4 +497,3 @@ export const Main: FunctionComponent<MainProps> = ({ pageTitle, httpClient }) =>
     </>
   );
 };
-

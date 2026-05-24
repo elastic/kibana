@@ -5,19 +5,16 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-
 import type { DataSourceType } from '../common/datasource_types';
 
 /**
  * User-visible label for a data source type (flyout, tables).
  */
-export function getDataSourceTypeLabel(type: DataSourceType): string {
-  return i18n.translate(`dataSets.dataSourceType.${type}`, {
-    defaultMessage: messages[type],
-  });
+export function getDataSourceTypeVerbose(type: DataSourceType): string {
+  return messages[type];
 }
 
+// todo localize
 const messages: Record<DataSourceType, string> = {
   s3: 'Amazon S3',
   gcs: 'Google Cloud Storage',
