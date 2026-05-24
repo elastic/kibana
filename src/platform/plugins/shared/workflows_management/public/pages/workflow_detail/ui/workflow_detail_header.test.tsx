@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { render } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { useWorkflowsCapabilities, type WorkflowsManagementCapabilities } from '@kbn/workflows-ui';
 import { createMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
@@ -114,11 +114,12 @@ describe('WorkflowDetailHeader', () => {
       return <TestWrapper store={store}>{children}</TestWrapper>;
     };
 
-    return render(component, { wrapper });
+    return { ...render(component, { wrapper }), store };
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
+    localStorage.clear();
     mockUseKibana.mockReturnValue({
       services: {
         application: {
@@ -206,6 +207,45 @@ describe('WorkflowDetailHeader', () => {
     const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);
     const button = result.getByTestId('runWorkflowHeaderButton');
     expect(button).toBeEnabled();
+  });
+
+  it('shows the unsaved changes confirmation when running with unsaved changes', () => {
+    const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
+      hasChanges: true,
+    });
+
+    fireEvent.click(result.getByTestId('runWorkflowHeaderButton'));
+
+    expect(
+      result.getByTestId('runWorkflowWithUnsavedChangesConfirmationModal')
+    ).toBeInTheDocument();
+    expect(result.getByTestId('runWorkflowWithUnsavedChangesDontAskAgain')).toBeInTheDocument();
+  });
+
+  it('stores the run confirmation preference when confirming with the checkbox selected', () => {
+    const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
+      hasChanges: true,
+    });
+
+    fireEvent.click(result.getByTestId('runWorkflowHeaderButton'));
+    fireEvent.click(result.getByTestId('runWorkflowWithUnsavedChangesDontAskAgain'));
+    fireEvent.click(result.getByTestId('confirmModalConfirmButton'));
+
+    expect(localStorage.getItem('workflows:skipUnsavedRunConfirmation')).toBe('true');
+    expect(result.queryByTestId('runWorkflowWithUnsavedChangesConfirmationModal')).toBeNull();
+    expect(result.store.getState().detail.isTestModalOpen).toBe(true);
+  });
+
+  it('skips the unsaved changes confirmation when the preference is stored', () => {
+    localStorage.setItem('workflows:skipUnsavedRunConfirmation', 'true');
+    const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
+      hasChanges: true,
+    });
+
+    fireEvent.click(result.getByTestId('runWorkflowHeaderButton'));
+
+    expect(result.queryByTestId('runWorkflowWithUnsavedChangesConfirmationModal')).toBeNull();
+    expect(result.store.getState().detail.isTestModalOpen).toBe(true);
   });
 
   it('disables executions tab when user cannot read workflow executions', () => {
