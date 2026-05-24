@@ -35,8 +35,11 @@ export interface AttachmentPresentation {
 export interface AttachmentPresentationConfig {
   /** Number of attachments at which to switch from inline to summary mode (default: 5) */
   threshold?: number;
-  /** Maximum content length per attachment in inline mode before truncation (default: 10000) */
-  maxContentLength?: number;
+  /**
+   * Per-attachment content length limit before truncation. Return `undefined` to use the
+   * default (10000 characters).
+   */
+  resolveMaxContentLength?: (attachment: VersionedAttachment) => number | undefined;
 }
 
 export type AttachmentContentFormatter = (
@@ -58,7 +61,6 @@ export const prepareAttachmentPresentation = async (
   formatContent?: AttachmentContentFormatter
 ): Promise<AttachmentPresentation> => {
   const threshold = config?.threshold ?? DEFAULT_THRESHOLD;
-  const maxContentLength = config?.maxContentLength ?? DEFAULT_MAX_CONTENT_LENGTH;
 
   const activeAttachments = attachments.filter(isAttachmentActive);
   const activeCount = activeAttachments.length;
@@ -74,7 +76,11 @@ export const prepareAttachmentPresentation = async (
   if (activeCount <= threshold) {
     return {
       mode: 'inline',
-      content: await formatInlineAttachments(activeAttachments, maxContentLength, formatContent),
+      content: await formatInlineAttachments(
+        activeAttachments,
+        formatContent,
+        config?.resolveMaxContentLength
+      ),
       activeCount,
     };
   }
@@ -91,8 +97,8 @@ export const prepareAttachmentPresentation = async (
  */
 const formatInlineAttachments = async (
   attachments: VersionedAttachment[],
-  maxContentLength: number,
-  formatContent?: AttachmentContentFormatter
+  formatContent?: AttachmentContentFormatter,
+  resolveMaxContentLength?: (attachment: VersionedAttachment) => number | undefined
 ): Promise<string> => {
   const attachmentElements: XmlNode[] = [];
   for (const attachment of attachments) {
@@ -105,10 +111,10 @@ const formatInlineAttachments = async (
       (formatContent ? await formatContent(attachment, latest.data) : undefined) ??
       formatAttachmentContent(attachment, latest.data);
 
-    // Truncate if too long
-    if (contentStr.length > maxContentLength) {
+    const effectiveMax = resolveMaxContentLength?.(attachment) ?? DEFAULT_MAX_CONTENT_LENGTH;
+    if (contentStr.length > effectiveMax) {
       contentStr =
-        contentStr.substring(0, maxContentLength) +
+        contentStr.substring(0, effectiveMax) +
         '\n... [content truncated, use attachment_read for full content]';
     }
 
@@ -117,7 +123,7 @@ const formatInlineAttachments = async (
     attachmentElements.push({
       tagName: 'attachment',
       attributes: {
-        id: attachment.id,
+        attachment_id: attachment.id,
         type: attachment.type,
         version: latest.version,
         description: attachment.description,
@@ -150,7 +156,7 @@ const formatSummaryAttachments = (attachments: VersionedAttachment[]): string =>
       {
         tagName: 'attachment',
         attributes: {
-          id: attachment.id,
+          attachment_id: attachment.id,
           type: attachment.type,
           version: latest.version,
           estimated_tokens: latest.estimated_tokens,
@@ -168,7 +174,7 @@ const formatSummaryAttachments = (attachments: VersionedAttachment[]): string =>
         {
           tagName: 'note',
           children: [
-            'Too many attachments to show inline. Use attachment_read(id) to access content.',
+            'Too many attachments to show inline. Use attachment_read(attachment_id) to access content.',
           ],
         },
         ...attachmentElements,
@@ -207,13 +213,13 @@ export const getConversationAttachmentsSection = (
   const instructions =
     presentation.mode === 'inline'
       ? `You can:
-- Read attachments using attachment_read(id) to get full content if truncated
+- Read attachments using attachment_read(attachment_id) to get full content if truncated
 - Update attachments using attachment_update(id, data) to modify content
 - Add new attachments using attachment_add(type, data) to store information
 
-If you see "[content truncated, use attachment_read for full content]", you MUST call attachment_read(id) to get the complete content before analyzing or referencing that attachment.`
+If you see "[content truncated, use attachment_read for full content]", you MUST call attachment_read(attachment_id) to get the complete content before analyzing or referencing that attachment.`
       : `You MUST use attachment tools to access content:
-- Read attachments using attachment_read(id) to see the content
+- Read attachments using attachment_read(attachment_id) to see the content
 - Update attachments using attachment_update(id, data) to modify content
 - Add new attachments using attachment_add(type, data) to store information
 - List all attachments using attachment_list() for an overview

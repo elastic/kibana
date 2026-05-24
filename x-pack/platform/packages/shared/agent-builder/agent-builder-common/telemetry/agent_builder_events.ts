@@ -66,6 +66,8 @@ export interface ReportOptOutParams {
 export interface ReportAddToChatClickedParams {
   pathway: string;
   attachments?: string[];
+  /** Number of items added when using bulk add-to-chat. Absent for single-item pathways. */
+  item_count?: number;
 }
 
 export type AgentBuilderUiClickElementKind =
@@ -469,6 +471,13 @@ const ADD_TO_CHAT_CLICKED_EVENT: AgentBuilderTelemetryEvent = {
       },
       _meta: {
         description: 'Types of attachments',
+        optional: true,
+      },
+    },
+    item_count: {
+      type: 'integer',
+      _meta: {
+        description: 'Number of items added via bulk add-to-chat. Absent for single-item pathways.',
         optional: true,
       },
     },

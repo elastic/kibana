@@ -51,6 +51,13 @@ export interface VersionedAttachment<
   /** The client-provided ID if this attachment was created with one (e.g., via flyout configuration) */
   client_id?: string;
   /**
+   * Stable identifier for the logical group this attachment belongs to.
+   * Attachments sharing the same group_id were submitted together as a single
+   * logical entity (e.g. multiple alert batches from one bulk-add action).
+   * Undefined for standalone attachments.
+   */
+  group_id?: string;
+  /**
    * Origin/reference info for attachments created from external sources.
    * For saved-object-backed types this is the saved object ID.
    * Undefined for by-value attachments.
@@ -153,6 +160,16 @@ export interface AttachmentInput<
   hidden?: boolean;
   /** Whether the attachment should be read-only */
   readonly?: boolean;
+  /**
+   * Stable identifier for the logical group this attachment belongs to.
+   * Attachments sharing the same group_id were submitted together as a single
+   * logical entity (e.g. multiple alert batches from one bulk-add action).
+   * Undefined for standalone attachments.
+   *
+   * When this input is part of an AttachmentGroup, flattenAttachments always
+   * stamps this field with the group's id, overriding any value set here.
+   */
+  group_id?: string;
 }
 
 // Zod schemas for validation
@@ -198,6 +215,7 @@ export const versionedAttachmentSchema = z.object({
   client_id: z.string().optional(),
   origin: z.string().optional(),
   origin_snapshot_at: z.string().optional(),
+  group_id: z.string().optional(),
 });
 
 export const attachmentInputSchema = z.object({
@@ -208,7 +226,40 @@ export const attachmentInputSchema = z.object({
   description: z.string().optional(),
   hidden: z.boolean().optional(),
   readonly: z.boolean().optional(),
+  group_id: z.string().optional(),
 });
+
+/**
+ * A named group of attachments that appears as a single chip in the UI.
+ * The group is a client-side-only concept — it is flattened to individual
+ * AttachmentInput items at the serialization boundary before being sent to the server.
+ */
+export interface AttachmentGroup {
+  type: 'group';
+  /** Stable identifier for the group */
+  id: string;
+  /** Display label shown on the chip, e.g. "5 Alerts" */
+  label: string;
+  /** The individual attachment items that make up this group */
+  items: AttachmentInput[];
+}
+
+export const attachmentGroupSchema = z.object({
+  type: z.literal('group'),
+  id: z.string(),
+  label: z.string(),
+  items: z.array(attachmentInputSchema),
+});
+
+export const isAttachmentGroup = (a: ConversationAttachment): a is AttachmentGroup =>
+  a.type === 'group';
+
+/**
+ * Union of a single attachment or a group of attachments.
+ * This is the type used in client-side conversation state.
+ * Groups are flattened to AttachmentInput[] before being sent to the server.
+ */
+export type ConversationAttachment = AttachmentInput | AttachmentGroup;
 
 export const attachmentDiffSchema = z.object({
   change_type: z.enum(['create', 'update', 'delete', 'restore']),
