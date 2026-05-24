@@ -56,7 +56,12 @@ import { focusServiceMapFindInput } from './service_map_find_in_page';
 import { ServiceMapSearchProvider } from '../../shared/service_map/service_map_search_context';
 import { ServiceMapAlertsNavigateProvider } from '../../shared/service_map/service_map_alerts_navigate_context';
 import { useServiceMapAlertsNavigateFactory } from './use_service_map_alerts_tab_href';
-import { ServiceMapOptionsPanel, type ServiceMapOrientation } from './service_map_options_panel';
+import {
+  ServiceMapOptionsPanel,
+  ServiceMapOptionsPanelToggle,
+  type ServiceMapOrientation,
+} from './service_map_options_panel';
+import { ServiceMapLegend } from './service_map_legend';
 import type { Environment } from '../../../../common/environment_rt';
 import {
   isServiceNode,
@@ -206,12 +211,24 @@ function GraphInner({
 
   useEffect(() => {
     setNodes(nodesWithContextHighlight);
-    setEdges(
-      applyEdgeHighlighting(edgesAfterFilters, {
-        selectedNodeId: selectedEdgeForPopoverRef.current ? null : selectedNodeIdRef.current,
-        selectedEdgeId: selectedEdgeForPopoverRef.current,
-      })
-    );
+
+    const highlightedEdges = applyEdgeHighlighting(edgesAfterFilters, {
+      selectedNodeId: selectedEdgeForPopoverRef.current ? null : selectedNodeIdRef.current,
+      selectedEdgeId: selectedEdgeForPopoverRef.current,
+    });
+
+    const edgesWithContextHighlight = highlightedServiceName
+      ? highlightedEdges.map((edge) => ({
+          ...edge,
+          data: {
+            ...edge.data,
+            sourceContextHighlight: edge.source === highlightedServiceName,
+            targetContextHighlight: edge.target === highlightedServiceName,
+          },
+        }))
+      : highlightedEdges;
+
+    setEdges(edgesWithContextHighlight as ServiceMapEdgeType[]);
 
     if (nodesAfterFilters.length > 0) {
       const timer = setTimeout(() => fitView(getFitViewOptions()), FIT_VIEW_DEFER_MS);
@@ -226,6 +243,7 @@ function GraphInner({
     applyEdgeHighlighting,
     getFitViewOptions,
     nodesAfterFilters.length,
+    highlightedServiceName,
   ]);
 
   const handleNodeClick: NodeMouseHandler<ServiceMapNode> = useCallback(
@@ -446,10 +464,21 @@ function GraphInner({
   const topLeftToolbarStyles = useMemo(
     () => css`
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
       gap: ${euiTheme.size.s};
       align-items: flex-start;
       margin: ${euiTheme.size.s};
+    `,
+    [euiTheme]
+  );
+
+  /** Stacks the options toggle and zoom controls; stays in place regardless of menu state. */
+  const topLeftToolbarColumnStyles = useMemo(
+    () => css`
+      display: flex;
+      flex-direction: column;
+      gap: ${euiTheme.size.s};
+      align-items: flex-start;
     `,
     [euiTheme]
   );
@@ -535,7 +564,104 @@ function GraphInner({
           >
             <Background gap={24} size={1} color={euiTheme.colors.lightShade} />
             <Panel position="top-left" css={topLeftToolbarStyles}>
-              {!isEmbedded && (
+              <div css={topLeftToolbarColumnStyles}>
+                {!isEmbedded && (
+                  <ServiceMapOptionsPanelToggle
+                    isExpanded={panelExpanded}
+                    onExpandedChange={setPanelExpanded}
+                  />
+                )}
+                <EuiPanel
+                  hasBorder
+                  hasShadow={false}
+                  paddingSize="none"
+                  borderRadius="m"
+                  grow={false}
+                  data-testid="rf__controls"
+                  data-test-subj="serviceMapControls"
+                  css={serviceMapZoomControlsPanelCss}
+                >
+                  <EuiFlexGroup
+                    direction="column"
+                    gutterSize="none"
+                    alignItems="center"
+                    justifyContent="center"
+                    responsive={false}
+                  >
+                    <EuiButtonIcon
+                      display="empty"
+                      color="text"
+                      size="s"
+                      iconType="plus"
+                      onClick={() => zoomIn()}
+                      title={zoomInLabel}
+                      aria-label={zoomInLabel}
+                      data-test-subj="serviceMapZoomInButton"
+                      css={mapToolbarControlIconCss}
+                    />
+                    <EuiButtonIcon
+                      display="empty"
+                      color="text"
+                      size="s"
+                      iconType="minus"
+                      onClick={() => zoomOut()}
+                      title={zoomOutLabel}
+                      aria-label={zoomOutLabel}
+                      data-test-subj="serviceMapZoomOutButton"
+                      css={mapToolbarControlIconCss}
+                    />
+                    {!isEmbedded && (
+                      <EuiButtonIcon
+                        display="empty"
+                        color="text"
+                        size="s"
+                        iconType="crosshair"
+                        onClick={() => fitView(getFitViewOptions())}
+                        title={fitViewLabel}
+                        aria-label={fitViewLabel}
+                        data-test-subj="serviceMapFitViewButton"
+                        css={mapToolbarControlIconCss}
+                      />
+                    )}
+                    {fullMapHref && (
+                      <EuiButtonIcon
+                        display="empty"
+                        color="text"
+                        size="s"
+                        iconType="apps"
+                        href={fullMapHref}
+                        title={viewFullMapButtonLabel}
+                        aria-label={viewFullMapButtonLabel}
+                        data-test-subj="serviceMapViewFullMapButton"
+                        css={mapToolbarControlIconCss}
+                      />
+                    )}
+                    {onToggleFullscreen && (
+                      <EuiButtonIcon
+                        display="empty"
+                        color="text"
+                        size="s"
+                        iconType={isFullscreen ? 'fullScreenExit' : 'fullScreen'}
+                        onClick={onToggleFullscreen}
+                        title={fullscreenButtonLabel}
+                        aria-label={fullscreenButtonLabel}
+                        data-test-subj="serviceMapFullScreenButton"
+                        css={mapToolbarControlIconCss}
+                      />
+                    )}
+                  </EuiFlexGroup>
+                </EuiPanel>
+                <EuiPanel
+                  hasBorder
+                  hasShadow={false}
+                  paddingSize="none"
+                  borderRadius="m"
+                  grow={false}
+                >
+                  <ServiceMapLegend controlIconCss={mapToolbarControlIconCss} />
+                </EuiPanel>
+              </div>
+              {!isEmbedded && panelExpanded && (
                 <ServiceMapOptionsPanel
                   nodes={nodesAfterFilters}
                   filterOptionCounts={filterOptionCounts}
@@ -557,90 +683,8 @@ function GraphInner({
                   }
                   mapOrientation={mapOrientation}
                   onMapOrientationChange={setMapOrientation}
-                  isExpanded={panelExpanded}
-                  onExpandedChange={setPanelExpanded}
                 />
               )}
-              <EuiPanel
-                hasBorder
-                hasShadow={false}
-                paddingSize="none"
-                borderRadius="m"
-                grow={false}
-                data-testid="rf__controls"
-                data-test-subj="serviceMapControls"
-                css={serviceMapZoomControlsPanelCss}
-              >
-                <EuiFlexGroup
-                  direction="column"
-                  gutterSize="none"
-                  alignItems="center"
-                  justifyContent="center"
-                  responsive={false}
-                >
-                  <EuiButtonIcon
-                    display="empty"
-                    color="text"
-                    size="s"
-                    iconType="plus"
-                    onClick={() => zoomIn()}
-                    title={zoomInLabel}
-                    aria-label={zoomInLabel}
-                    data-test-subj="serviceMapZoomInButton"
-                    css={mapToolbarControlIconCss}
-                  />
-                  <EuiButtonIcon
-                    display="empty"
-                    color="text"
-                    size="s"
-                    iconType="minus"
-                    onClick={() => zoomOut()}
-                    title={zoomOutLabel}
-                    aria-label={zoomOutLabel}
-                    data-test-subj="serviceMapZoomOutButton"
-                    css={mapToolbarControlIconCss}
-                  />
-                  {!isEmbedded && (
-                    <EuiButtonIcon
-                      display="empty"
-                      color="text"
-                      size="s"
-                      iconType="crosshair"
-                      onClick={() => fitView(getFitViewOptions())}
-                      title={fitViewLabel}
-                      aria-label={fitViewLabel}
-                      data-test-subj="serviceMapFitViewButton"
-                      css={mapToolbarControlIconCss}
-                    />
-                  )}
-                  {fullMapHref && (
-                    <EuiButtonIcon
-                      display="empty"
-                      color="text"
-                      size="s"
-                      iconType="apps"
-                      href={fullMapHref}
-                      title={viewFullMapButtonLabel}
-                      aria-label={viewFullMapButtonLabel}
-                      data-test-subj="serviceMapViewFullMapButton"
-                      css={mapToolbarControlIconCss}
-                    />
-                  )}
-                  {onToggleFullscreen && (
-                    <EuiButtonIcon
-                      display="empty"
-                      color="text"
-                      size="s"
-                      iconType={isFullscreen ? 'fullScreenExit' : 'fullScreen'}
-                      onClick={onToggleFullscreen}
-                      title={fullscreenButtonLabel}
-                      aria-label={fullscreenButtonLabel}
-                      data-test-subj="serviceMapFullScreenButton"
-                      css={mapToolbarControlIconCss}
-                    />
-                  )}
-                </EuiFlexGroup>
-              </EuiPanel>
             </Panel>
             {!isEmbedded && <ServiceMapMinimap />}
           </ReactFlow>

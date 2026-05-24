@@ -23,7 +23,10 @@ import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { cloneDeep } from 'lodash';
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
-import { isImpliedDefaultElserInferenceId } from '@kbn/product-doc-common/src/is_default_inference_endpoint';
+import {
+  isDefaultLinuxElserInferenceId,
+  isImpliedDefaultElserInferenceId,
+} from '@kbn/product-doc-common/src/is_default_inference_endpoint';
 import type { ProductDocInstallClient } from '../doc_install_status';
 import type { SecurityLabsStatusResponse } from '../doc_manager/types';
 import {
@@ -283,7 +286,7 @@ export class PackageInstaller {
         inferenceId,
       });
 
-      if (customInference && !isImpliedDefaultElserInferenceId(customInference?.inference_id)) {
+      if (customInference && !isDefaultLinuxElserInferenceId(customInference?.inference_id)) {
         if (customInference?.task_type !== 'text_embedding') {
           throw new Error(
             `Inference [${inferenceId}]'s task type ${customInference?.task_type} is not supported. Please use a model with task type 'text_embedding'.`
@@ -295,7 +298,7 @@ export class PackageInstaller {
         });
       }
 
-      if (!customInference || isImpliedDefaultElserInferenceId(customInference?.inference_id)) {
+      if (!customInference || isDefaultLinuxElserInferenceId(customInference?.inference_id)) {
         await ensureDefaultElserDeployed({
           client: this.esClient,
         });
@@ -430,10 +433,16 @@ export class PackageInstaller {
     let zipArchive: ZipArchive | undefined;
     let selectedVersion: string | undefined;
     try {
-      // Ensure ELSER is deployed
-      await ensureDefaultElserDeployed({
-        client: this.esClient,
-      });
+      // ELSER can come in default linux variant
+      if (isDefaultLinuxElserInferenceId(inferenceId)) {
+        // Ensure ELSER is deployed
+        await ensureDefaultElserDeployed({
+          client: this.esClient,
+        });
+      } else {
+        // or ARM which can be a different Inference id
+        await ensureInferenceDeployed({ client: this.esClient, inferenceId: effectiveInferenceId });
+      }
 
       // Determine version to install
       selectedVersion = version;
@@ -659,11 +668,15 @@ export class PackageInstaller {
     try {
       await this.uninstallOpenAPISpec({ inferenceId: effectiveInferenceId });
 
-      // Ensure ELSER is deployed
-      await ensureDefaultElserDeployed({
-        client: this.esClient,
-      });
-
+      if (isDefaultLinuxElserInferenceId(effectiveInferenceId)) {
+        // Ensure ELSER is deployed
+        await ensureDefaultElserDeployed({
+          client: this.esClient,
+        });
+      } else {
+        // or ARM which can be a different Inference id
+        await ensureInferenceDeployed({ client: this.esClient, inferenceId: effectiveInferenceId });
+      }
       const artifactFileName = this.getOpenApiArtifactFileName({
         stackVersion,
         inferenceId: effectiveInferenceId,

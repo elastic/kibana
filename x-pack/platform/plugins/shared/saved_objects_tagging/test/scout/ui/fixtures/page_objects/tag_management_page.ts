@@ -6,89 +6,66 @@
  */
 
 import type { ScoutPage } from '@kbn/scout';
+
+import { TagAssignFlyout } from './tag_assign_flyout';
+import { TagModal } from './tag_modal';
 import { TagsTable } from './tags_table';
 
-interface FillTagFormFields {
-  name?: string;
-  color?: string;
-  description?: string;
+export interface SubmitTagModalOptions {
+  // When false, do not wait for the modal to close (e.g. when validation is
+  // expected to fail and the modal stays open).
+  waitForClose?: boolean;
 }
 
+// Composes the three surface-scoped page objects (tagsTable, tagModal,
+// assignFlyout) and exposes orchestration methods for flows that span more
+// than one surface.
 export class TagManagementPage {
   readonly tagsTable: TagsTable;
+  readonly tagModal: TagModal;
+  readonly assignFlyout: TagAssignFlyout;
 
   constructor(private readonly page: ScoutPage) {
     this.tagsTable = new TagsTable(page);
+    this.tagModal = new TagModal(page);
+    this.assignFlyout = new TagAssignFlyout(page);
   }
 
-  async waitForTableLoaded() {
-    await this.page.testSubj.waitForSelector('tagsManagementTable table-is-ready');
+  async editTag(tagName: string) {
+    const row = this.tagsTable.rowByName(tagName);
+    await row.locator('[data-test-subj="tagsTableAction-edit"]').click();
+    await this.tagModal.form.waitFor({ state: 'visible' });
   }
 
-  async openCreateModal() {
-    await this.page.testSubj.click('createTagButton');
-    await this.page.testSubj.waitForSelector('tagModalForm');
-  }
-
-  async fillForm(fields: FillTagFormFields, { submit = false }: { submit?: boolean } = {}) {
-    if (fields.name !== undefined) {
-      await this.page.testSubj.click('createModalField-name');
-      await this.page.testSubj.fill('createModalField-name', fields.name);
-    }
-    if (fields.color !== undefined) {
-      await this.page.testSubj.click('~createModalField-color');
-      await this.page.testSubj.fill('~createModalField-color', fields.color);
-      // Close color picker popover before continuing
-      await this.page.testSubj.locator('euiSaturation').waitFor({ state: 'visible' });
-      await this.page.keyboard.press('Enter');
-      await this.page.testSubj.locator('euiSaturation').waitFor({ state: 'hidden' });
-    }
-    if (fields.description !== undefined) {
-      await this.page.testSubj.click('createModalField-description');
-      await this.page.testSubj.fill('createModalField-description', fields.description);
-    }
-    if (submit) {
-      await this.page.testSubj.click('createModalConfirmButton');
-      await this.getTagModalForm().waitFor({ state: 'hidden' });
-      await this.waitForTableLoaded();
+  async submitTagModal({ waitForClose = true }: SubmitTagModalOptions = {}) {
+    await this.tagModal.confirmButton.click();
+    if (waitForClose) {
+      await this.tagModal.form.waitFor({ state: 'hidden' });
+      await this.tagsTable.waitForLoaded();
     }
   }
 
-  async openCollapsedRowMenu(rowIndex = 0) {
-    const rows = await this.page.testSubj.locator('tagsTableRow').all();
-    const row = rows[rowIndex];
-    if (!row) {
-      throw new Error(`Tag row at index ${rowIndex} was not found`);
+  // Selects rows, opens the bulk assign menu, waits for results.
+  async openAssignFlyoutForTags(tagNames: string[]) {
+    for (const tagName of tagNames) {
+      await this.tagsTable.selectTagByName(tagName);
     }
-    const collapseBtn = row.locator('[data-test-subj="euiCollapsedItemActionsButton"]');
-    await collapseBtn.waitFor({ state: 'visible' });
-    await collapseBtn.click();
+    await this.tagsTable.runBulkAction('assign');
+    await this.assignFlyout.waitForResultsLoaded();
   }
 
-  async clickActionItem(action: string) {
-    // Scope to the EUI portal where collapsed-menu items render, avoiding the
-    // always-present inline row buttons that share the same data-test-subj.
-    await this.page
-      .locator('[data-euiportal="true"]')
-      .locator(`[data-test-subj="tagsTableAction-${action}"]`)
-      .click();
+  async confirmAssignFlyout() {
+    await this.assignFlyout.confirmButton.click();
+    await this.assignFlyout.closeButton.waitFor({ state: 'hidden' });
+    await this.tagsTable.waitForLoaded();
   }
 
-  async openBulkActionMenu() {
-    await this.page.testSubj.click('actionBar-contextMenuButton');
+  async cancelAssignFlyout() {
+    await this.assignFlyout.cancelButton.click();
+    await this.assignFlyout.closeButton.waitFor({ state: 'hidden' });
+    await this.tagsTable.waitForLoaded();
   }
 
-  async selectAllTags() {
-    await this.page.testSubj.click('checkboxSelectAll');
-  }
-
-  getTagModalForm() {
-    return this.page.testSubj.locator('tagModalForm');
-  }
-
-  getAssignFlyoutCloseButton() {
-    return this.page.testSubj.locator('euiFlyoutCloseButton');
-  }
   async selectSavedObjectTags(...tagNames: string[]) {
     await this.page.testSubj.click('savedObjectTagSelector');
     for (const tagName of tagNames) {
