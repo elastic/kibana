@@ -42,6 +42,7 @@ import type {
   ExecutionLogsParams,
   StepLogsParams,
 } from '@kbn/workflows-execution-engine/server/workflow_event_logger/types';
+import type { ServerTriggerDefinition } from '@kbn/workflows-extensions/server';
 import {
   parseWorkflowYamlToJSON,
   stringifyWorkflowDefinition,
@@ -65,6 +66,7 @@ export interface GetWorkflowsParams {
   enabled?: boolean[];
   tags?: string[];
   query?: string;
+  managedFilter?: 'all' | 'managed' | 'unmanaged';
   _full?: boolean;
 }
 
@@ -122,6 +124,10 @@ export interface SearchStepExecutionsParams {
   includeOutput?: boolean;
   page?: number;
   size?: number;
+  /** Datemath lower bound for filtering by startedAt. */
+  startedAfter?: string;
+  /** Datemath upper bound for filtering by startedAt. */
+  startedBefore?: string;
 }
 
 export interface GetAvailableConnectorsParams {
@@ -144,6 +150,24 @@ export interface BulkScheduleWorkflowItem {
   triggeredBy: string;
   metadata?: WorkflowExecutionEventDispatchMetadata;
 }
+
+const buildManagedWorkflowExecutionMetadata = (
+  workflow: WorkflowDetailDto | null | undefined
+): Partial<
+  Pick<
+    WorkflowExecutionEngineModel,
+    'managed' | 'managedBy' | 'originManagedWorkflowId' | 'managedVersion'
+  >
+> => ({
+  ...(workflow?.managed === true ? { managed: true } : {}),
+  ...(typeof workflow?.managedBy === 'string' ? { managedBy: workflow.managedBy } : {}),
+  ...(typeof workflow?.originManagedWorkflowId === 'string'
+    ? { originManagedWorkflowId: workflow.originManagedWorkflowId }
+    : {}),
+  ...(typeof workflow?.managedVersion === 'number'
+    ? { managedVersion: workflow.managedVersion }
+    : {}),
+});
 
 export class WorkflowsManagementApi {
   private smlIndexAttachment: SmlIndexAttachmentFn | null = null;
@@ -405,13 +429,16 @@ export class WorkflowsManagementApi {
   }: TestWorkflowParams): Promise<string> {
     let resolvedYaml = workflowYaml;
     let resolvedWorkflowId = workflowId;
+    let existingWorkflow: WorkflowDetailDto | null = null;
 
     if (workflowId && !workflowYaml) {
-      const existingWorkflow = await this.workflowsService.getWorkflow(workflowId, spaceId);
+      existingWorkflow = await this.workflowsService.getWorkflow(workflowId, spaceId);
       if (!existingWorkflow) {
         throw new WorkflowNotFoundError(workflowId);
       }
       resolvedYaml = existingWorkflow.yaml;
+    } else if (workflowId) {
+      existingWorkflow = await this.workflowsService.getWorkflow(workflowId, spaceId);
     }
 
     if (!resolvedWorkflowId) {
@@ -446,6 +473,7 @@ export class WorkflowsManagementApi {
         definition: workflowJson.definition,
         yaml: resolvedYaml,
         isTestRun: true,
+        ...buildManagedWorkflowExecutionMetadata(existingWorkflow),
       },
       context,
       request
@@ -632,6 +660,10 @@ export class WorkflowsManagementApi {
     request: KibanaRequest
   ): Promise<GetAvailableConnectorsResponse> {
     return this.workflowsService.getAvailableConnectors(spaceId, request);
+  }
+
+  public async getRegisteredTriggers(): Promise<ServerTriggerDefinition[]> {
+    return this.workflowsService.getRegisteredCustomTriggerDefinitions();
   }
 
   public async getWorkflowJsonSchema(
