@@ -14,15 +14,15 @@ import type { SavedSearch } from './types';
 import { SAVED_SEARCH_TYPE } from './constants';
 import { toSavedSearchAttributes } from '../../common/service/saved_searches_utils';
 import type { SavedSearchCrudTypes } from '../../common/content_management';
-import type { SavedSearchAttributes } from '../../common';
+import type { DiscoverSessionAttributes } from '../../server';
 
 export interface SaveSavedSearchOptions {
   copyOnSave?: boolean;
 }
 
-export const saveSearchSavedObject = async (
+const saveSearchSavedObject = async (
   id: string | undefined,
-  attributes: SavedSearchAttributes,
+  attributes: DiscoverSessionAttributes,
   references: Reference[] | undefined,
   contentManagement: ContentManagementPublicStart['client']
 ) => {
@@ -65,10 +65,11 @@ export const saveSavedSearch = async (
   const references = savedObjectsTagging
     ? savedObjectsTagging.ui.updateTagsReferences(originalReferences, savedSearch.tags ?? [])
     : originalReferences;
+  const { title, description, tabs } = toSavedSearchAttributes(savedSearch, searchSourceJSON);
 
   return saveSearchSavedObject(
     isNew ? undefined : savedSearch.id,
-    toSavedSearchAttributes(savedSearch, searchSourceJSON),
+    { title, description, tabs },
     references,
     contentManagement
   );
