@@ -745,3 +745,18 @@ export const FIELD_TYPE_TITLE_USER_PICKER = i18n.translate(
   'xpack.cases.templates.fieldType.userPicker',
   { defaultMessage: 'User Picker' }
 );
+
+export const TEMPLATE_DEFINITION_EMPTY = i18n.translate(
+  'xpack.cases.templates.templateDefinitionEmpty',
+  { defaultMessage: 'Template definition is empty' }
+);
+
+export const INVALID_YAML_NON_OBJECT = i18n.translate(
+  'xpack.cases.templates.invalidYamlNonObject',
+  { defaultMessage: 'Invalid YAML: parsed to null or non-object' }
+);
+
+export const INVALID_YAML_DEFINITION = i18n.translate(
+  'xpack.cases.templates.invalidYamlDefinition',
+  { defaultMessage: 'Invalid YAML definition' }
+);

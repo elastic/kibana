@@ -7,6 +7,11 @@
 
 import { load as parseYaml } from 'js-yaml';
 import { ParsedTemplateDefinitionSchema } from '../../../../common/types/domain/template/v1';
+import {
+  TEMPLATE_DEFINITION_EMPTY,
+  INVALID_YAML_NON_OBJECT,
+  INVALID_YAML_DEFINITION,
+} from '../translations';
 
 export type TemplateDefinitionValidationResult =
   | { success: true }
@@ -17,13 +22,13 @@ export const validateTemplateDefinitionYaml = (
 ): TemplateDefinitionValidationResult => {
   try {
     if (!definition || definition.trim() === '') {
-      return { success: false, message: 'Template definition is empty' };
+      return { success: false, message: TEMPLATE_DEFINITION_EMPTY };
     }
 
     const parsedDefinition = parseYaml(definition);
 
     if (!parsedDefinition || typeof parsedDefinition !== 'object') {
-      return { success: false, message: 'Invalid YAML: parsed to null or non-object' };
+      return { success: false, message: INVALID_YAML_NON_OBJECT };
     }
 
     const result = ParsedTemplateDefinitionSchema.safeParse(parsedDefinition);
@@ -35,7 +40,7 @@ export const validateTemplateDefinitionYaml = (
   } catch (error) {
     return {
       success: false,
-      message: error instanceof Error ? error.message : 'Invalid YAML definition',
+      message: error instanceof Error ? error.message : INVALID_YAML_DEFINITION,
     };
   }
 };
