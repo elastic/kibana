@@ -30,6 +30,8 @@ dependsOn:
   - '@kbn/config-schema'
   - '@kbn/repo-info'
   - '@kbn/encrypted-saved-objects-plugin'
+  - '@kbn/object-utils'
+  - '@kbn/std'
 tags:
   - shared-common
   - package
