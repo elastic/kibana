@@ -129,6 +129,7 @@ type TestSubject =
   | 'allowDuplicatesSwitch.input'
   | 'formatsValueField.input'
   | 'timezoneField.input'
+  | 'ignoreEmptyValuesSwitch.input'
   | 'outputFormatField.input'
   | 'localeField.input'
   | 'processorTypeSelector.input'
