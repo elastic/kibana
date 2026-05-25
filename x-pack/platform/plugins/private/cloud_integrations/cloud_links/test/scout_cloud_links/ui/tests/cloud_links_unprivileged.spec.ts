@@ -10,17 +10,9 @@ import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 
 test.describe('Cloud Links integration: Unprivileged User', { tag: tags.stateful.classic }, () => {
-  test.beforeEach(async ({ browserAuth, page }) => {
+  test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsViewer();
-    await page.gotoApp('home');
-    const welcomeInterstitial = page.testSubj.locator('homeWelcomeInterstitial');
-    const homeApp = page.testSubj.locator('homeApp');
-    await homeApp.or(welcomeInterstitial).waitFor({ state: 'visible' });
-    if (await welcomeInterstitial.isVisible()) {
-      await page.keyboard.press('Escape');
-      await welcomeInterstitial.waitFor({ state: 'detached' });
-      await homeApp.waitFor({ state: 'visible' });
-    }
+    await pageObjects.home.goto();
   });
 
   test('viewer sees nav and org/profile links but not billing', async ({ pageObjects }) => {

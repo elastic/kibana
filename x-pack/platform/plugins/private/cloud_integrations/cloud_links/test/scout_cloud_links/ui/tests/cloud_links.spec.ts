@@ -5,22 +5,10 @@
  * 2.0.
  */
 
-import type { ScoutPage } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 import { EXPECTED_CLOUD_ID, EXPECTED_ES_URL } from '../fixtures/constants';
-
-async function dismissWelcomeInterstitial(page: ScoutPage) {
-  const welcomeInterstitial = page.testSubj.locator('homeWelcomeInterstitial');
-  const homeApp = page.testSubj.locator('homeApp');
-  await homeApp.or(welcomeInterstitial).waitFor({ state: 'visible' });
-  if (await welcomeInterstitial.isVisible()) {
-    await page.keyboard.press('Escape');
-    await welcomeInterstitial.waitFor({ state: 'detached' });
-    await homeApp.waitFor({ state: 'visible' });
-  }
-}
 
 test.describe('Cloud Links integration', { tag: tags.stateful.classic }, () => {
   // The billing link requires _ec_billing_admin. Mirror the FTR setup: map the SAML realm to
@@ -63,12 +51,10 @@ test.describe('Cloud Links integration', { tag: tags.stateful.classic }, () => {
 
   test('connection details overlay shows ES URL and Cloud ID', async ({
     browserAuth,
-    page,
     pageObjects,
   }) => {
     await browserAuth.loginAsViewer();
-    await page.gotoApp('home');
-    await dismissWelcomeInterstitial(page);
+    await pageObjects.home.goto();
 
     const { connectionDetails } = pageObjects;
 
@@ -88,10 +74,9 @@ test.describe('Cloud Links integration', { tag: tags.stateful.classic }, () => {
     });
   });
 
-  test('connection details API key can be created', async ({ browserAuth, page, pageObjects }) => {
+  test('connection details API key can be created', async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
-    await page.gotoApp('home');
-    await dismissWelcomeInterstitial(page);
+    await pageObjects.home.goto();
 
     const { connectionDetails } = pageObjects;
     const keyName = `test-api-key-${Date.now().toString(36)}`;
@@ -104,19 +89,17 @@ test.describe('Cloud Links integration', { tag: tags.stateful.classic }, () => {
     expect(apiKeyValue.length).toBeGreaterThan(40);
   });
 
-  test('nav shows "Manage this deployment" link', async ({ browserAuth, page, pageObjects }) => {
+  test('nav shows "Manage this deployment" link', async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsViewer();
-    await page.gotoApp('home');
-    await dismissWelcomeInterstitial(page);
+    await pageObjects.home.goto();
 
     await pageObjects.cloudLinks.openNav();
     expect(await pageObjects.cloudLinks.isManageDeploymentLinkVisible()).toBe(true);
   });
 
-  test('user menu shows cloud profile links', async ({ browserAuth, page, pageObjects }) => {
+  test('user menu shows cloud profile links', async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
-    await page.gotoApp('home');
-    await dismissWelcomeInterstitial(page);
+    await pageObjects.home.goto();
 
     const { cloudLinks } = pageObjects;
     await cloudLinks.openUserMenu();
