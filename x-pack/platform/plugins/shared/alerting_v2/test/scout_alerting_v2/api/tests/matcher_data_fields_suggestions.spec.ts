@@ -8,7 +8,7 @@
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
-import { apiTest, NO_ACCESS_ROLE, READ_ROLE, testData } from '../fixtures';
+import { ALERTING_V2_ALERTS_READ_ROLE, apiTest, NO_ACCESS_ROLE, testData } from '../fixtures';
 
 const RULE_ID_A = 'matcher-suggestions-rule-a';
 const RULE_ID_B = 'matcher-suggestions-rule-b';
@@ -170,7 +170,9 @@ apiTest.describe('Matcher data fields suggestions API', { tag: '@local-stateful-
   apiTest(
     'authorization: returns 200 for a user with read-only privileges',
     async ({ apiClient, requestAuth }) => {
-      const readerCredentials = await requestAuth.getApiKeyForCustomRole(READ_ROLE);
+      const readerCredentials = await requestAuth.getApiKeyForCustomRole(
+        ALERTING_V2_ALERTS_READ_ROLE
+      );
 
       const response = await apiClient.get(dataFieldsUrl(), {
         headers: readerCredentials.apiKeyHeader,

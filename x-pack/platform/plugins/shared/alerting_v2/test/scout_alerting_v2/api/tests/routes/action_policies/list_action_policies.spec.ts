@@ -13,12 +13,12 @@ import {
   ACTION_POLICY_SEARCH_MAX_LENGTH,
   ACTION_POLICY_TAG_MAX_LENGTH,
   ACTION_POLICY_TAGS_MAX_COUNT,
-  ALL_ROLE,
+  ALERTING_V2_ACTION_POLICIES_ALL_ROLE,
+  ALERTING_V2_ACTION_POLICIES_READ_ROLE,
   apiTest,
   buildCreateActionPolicyData,
   getListActionPoliciesUrl,
   NO_ACCESS_ROLE,
-  READ_ROLE,
   testData,
   type AlertingApiServicesFixture,
 } from '../../../fixtures';
@@ -55,7 +55,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
 
   apiTest.beforeAll(async ({ requestAuth }) => {
     const readerCredentials: RoleApiCredentials = await requestAuth.getApiKeyForCustomRole(
-      READ_ROLE
+      ALERTING_V2_ACTION_POLICIES_READ_ROLE
     );
     readerHeaders = { ...readerCredentials.apiKeyHeader };
   });
@@ -517,7 +517,9 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
   apiTest(
     'authorization: 200 with full alerting_v2 privileges',
     async ({ apiClient, requestAuth }) => {
-      const writerCredentials = await requestAuth.getApiKeyForCustomRole(ALL_ROLE);
+      const writerCredentials = await requestAuth.getApiKeyForCustomRole(
+        ALERTING_V2_ACTION_POLICIES_ALL_ROLE
+      );
       const response = await apiClient.get(getListActionPoliciesUrl(), {
         headers: { ...testData.COMMON_HEADERS, ...writerCredentials.apiKeyHeader },
       });
