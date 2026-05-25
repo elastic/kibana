@@ -91,17 +91,17 @@ const renderFlyout = (overrides: Partial<ComposeDiscoverFlyoutProps> = {}) =>
 
 describe('ComposeDiscoverFlyout', () => {
   describe('HorizontalMinimalStepper', () => {
-    it('renders the stepper with the correct aria-label for step 1 of 3', () => {
+    it('renders the stepper with the correct aria-label for step 1 of 2', () => {
       renderFlyout();
 
-      const stepper = screen.getByRole('group', { name: /Step 1 of 3: Alert Condition/ });
+      const stepper = screen.getByRole('group', { name: /Step 1 of 2: Alert Condition/ });
       expect(stepper).toBeInTheDocument();
     });
 
-    it('renders 3 steps when tracking is disabled (default)', () => {
+    it('renders 2 steps for signal rules (default)', () => {
       renderFlyout();
 
-      expect(screen.getByText('1 / 3')).toBeInTheDocument();
+      expect(screen.getByText('1 / 2')).toBeInTheDocument();
       expect(screen.getByText('Alert Condition')).toBeInTheDocument();
     });
 

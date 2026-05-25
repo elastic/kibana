@@ -71,7 +71,7 @@ describe('step validation', () => {
   });
 
   describe('notifications.validate', () => {
-    const notificationsStep = getSteps(false).find((s) => s.id === 'notifications')!;
+    const notificationsStep = getSteps(true).find((s) => s.id === 'notifications')!;
 
     const makeServices = (isValid?: (v: object) => boolean): RuleFormServices =>
       ({ workflowForm: { isValid } } as unknown as RuleFormServices);
