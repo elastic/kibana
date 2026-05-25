@@ -11,7 +11,7 @@ import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { Logger } from '@kbn/core/server';
 import type { UsageRecord, UsageReportingService } from '@kbn/usage-api-plugin/server';
 import type { EsWorkflowExecution } from '@kbn/workflows';
-import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
+import { ExecutionStatus, isTerminalStatus, pickManagedWorkflowFields } from '@kbn/workflows';
 
 import { BUCKET_SIZE_MS, METERING_SOURCE_ID, WORKFLOWS_USAGE_TYPE } from './constants';
 
@@ -91,6 +91,8 @@ export class WorkflowsMeteringService {
     const stepTypes = this.extractStepTypes(execution);
     const stepCount = Object.values(stepTypes).reduce((sum, count) => sum + count, 0);
 
+    const managedWorkflowFields = pickManagedWorkflowFields(execution);
+
     const metadata: Record<string, string> = {
       duration_ms: String(durationMs),
       duration_minutes: String(durationMinutes),
@@ -98,18 +100,18 @@ export class WorkflowsMeteringService {
       status: execution.status,
       triggered_by: execution.triggeredBy || 'unknown',
       is_test_run: String(execution.isTestRun),
-      is_managed: String(execution.managed === true),
+      is_managed: String(managedWorkflowFields.managed === true),
       workflow_id: execution.workflowId,
       space_id: execution.spaceId,
       step_count: String(stepCount),
     };
 
-    if (typeof execution.managedBy === 'string') {
-      metadata.managed_by = execution.managedBy;
+    if (managedWorkflowFields.managedBy !== undefined) {
+      metadata.managed_by = managedWorkflowFields.managedBy;
     }
 
-    if (typeof execution.originManagedWorkflowId === 'string') {
-      metadata.origin_managed_workflow_id = execution.originManagedWorkflowId;
+    if (managedWorkflowFields.originManagedWorkflowId !== undefined) {
+      metadata.origin_managed_workflow_id = managedWorkflowFields.originManagedWorkflowId;
     }
 
     if (Object.keys(stepTypes).length > 0) {

@@ -15,7 +15,11 @@ import type {
 } from '@kbn/agent-context-layer-plugin/server';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { getWorkflowJsonSchema, transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
+import {
+  getWorkflowJsonSchema,
+  pickManagedWorkflowFields,
+  transformWorkflowYamlJsontoEsWorkflow,
+} from '@kbn/workflows';
 import type {
   BulkScheduleWorkflowResult,
   CreateWorkflowCommand,
@@ -150,24 +154,6 @@ export interface BulkScheduleWorkflowItem {
   triggeredBy: string;
   metadata?: WorkflowExecutionEventDispatchMetadata;
 }
-
-const buildManagedWorkflowExecutionMetadata = (
-  workflow: WorkflowDetailDto | null | undefined
-): Partial<
-  Pick<
-    WorkflowExecutionEngineModel,
-    'managed' | 'managedBy' | 'originManagedWorkflowId' | 'managedVersion'
-  >
-> => ({
-  ...(workflow?.managed === true ? { managed: true } : {}),
-  ...(typeof workflow?.managedBy === 'string' ? { managedBy: workflow.managedBy } : {}),
-  ...(typeof workflow?.originManagedWorkflowId === 'string'
-    ? { originManagedWorkflowId: workflow.originManagedWorkflowId }
-    : {}),
-  ...(typeof workflow?.managedVersion === 'number'
-    ? { managedVersion: workflow.managedVersion }
-    : {}),
-});
 
 export class WorkflowsManagementApi {
   private smlIndexAttachment: SmlIndexAttachmentFn | null = null;
@@ -473,7 +459,7 @@ export class WorkflowsManagementApi {
         definition: workflowJson.definition,
         yaml: resolvedYaml,
         isTestRun: true,
-        ...buildManagedWorkflowExecutionMetadata(existingWorkflow),
+        ...pickManagedWorkflowFields(existingWorkflow),
       },
       context,
       request
