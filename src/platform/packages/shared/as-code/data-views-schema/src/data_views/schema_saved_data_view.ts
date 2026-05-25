@@ -64,6 +64,7 @@ export const savedDataViewSpecSchema = schema.object(
     ),
     field_filters: schema.maybe(
       schema.arrayOf(schema.string(), {
+        maxSize: 10_000,
         meta: {
           title: 'Field filters',
           description:
