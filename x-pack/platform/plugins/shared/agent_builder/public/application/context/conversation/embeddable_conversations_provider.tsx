@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
+import { agentBuilderDefaultAgentId, AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type {
@@ -74,6 +74,40 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     sessionTag: currentProps.sessionTag,
     agentId: currentProps.agentId,
   });
+
+  const hasFiredChatOpenRef = useRef(false);
+  useEffect(() => {
+    if (hasFiredChatOpenRef.current) return;
+    hasFiredChatOpenRef.current = true;
+
+    let kibanaApp: string | undefined;
+    const sub = coreStart.application.currentAppId$.subscribe((appId) => {
+      kibanaApp = appId;
+    });
+    sub.unsubscribe();
+
+    const agentId = currentProps.agentId ?? agentBuilderDefaultAgentId;
+    void services.agentService
+      .list()
+      .then((agents) => {
+        coreStart.analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.InappChatOpen, {
+          agent_id: agentId,
+          kibana_app: kibanaApp ?? 'unknown',
+          agent_count: agents.length,
+        });
+      })
+      .catch(() => {
+        coreStart.analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.InappChatOpen, {
+          agent_id: agentId,
+          kibana_app: kibanaApp ?? 'unknown',
+        });
+      });
+  }, [
+    coreStart.analytics,
+    coreStart.application.currentAppId$,
+    currentProps.agentId,
+    services.agentService,
+  ]);
 
   const hasInitializedConversationIdRef = useRef(false);
 

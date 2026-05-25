@@ -35,7 +35,7 @@ import {
 import type { ContentListUrlState } from './content_list';
 import type { KibanaUrl } from '../../common/services/kibana_url';
 
-export { ContentListWrapper, buildContentListSearch, buildContentListUrlRegex };
+export { ContentListWrapper, ListingTable, buildContentListSearch, buildContentListUrlRegex };
 export type { ContentListUrlState };
 
 export interface PageObjectsFixtures {
