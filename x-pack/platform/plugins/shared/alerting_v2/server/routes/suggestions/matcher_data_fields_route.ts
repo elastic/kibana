@@ -7,7 +7,7 @@
 
 import { Request } from '@kbn/core-di-server';
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
-import { errorResponseSchema, matcherDataFieldsResponseSchema } from '@kbn/alerting-v2-schemas';
+import { errorResponseSchema } from '@kbn/alerting-v2-schemas';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
@@ -20,6 +20,10 @@ import { AlertingRouteContext } from '../alerting_route_context';
 const matcherDataFieldsQuerySchema = z.object({
   matcher: z.string().min(1).max(2048).optional(),
 });
+
+const matcherDataFieldsResponseSchema = z
+  .array(z.string())
+  .describe('The list of available matcher data field names');
 
 @injectable()
 export class MatcherDataFieldsRoute extends BaseAlertingRoute {
