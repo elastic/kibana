@@ -17,7 +17,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { ExecutionStatus, WorkflowRepository } from '@kbn/workflows';
+import { ExecutionStatus, pickManagedWorkflowFields, WorkflowRepository } from '@kbn/workflows';
 import type {
   BulkScheduleWorkflowResult,
   ConcurrencySettings,
@@ -109,10 +109,6 @@ const WORKFLOW_RESUME_TASK_MAX_ATTEMPTS = 3;
 const BULK_CANCEL_PAGE_SIZE = 10;
 
 type SetupDependencies = Pick<ContextDependencies, 'cloudSetup'>;
-type ManagedWorkflowExecutionMetadata = Pick<
-  EsWorkflowExecution,
-  'managed' | 'managedBy' | 'originManagedWorkflowId' | 'managedVersion'
->;
 
 export class WorkflowsExecutionEnginePlugin
   implements
@@ -522,7 +518,7 @@ export class WorkflowsExecutionEnginePlugin
                 id: generateUuid(),
                 spaceId,
                 workflowId: workflow.id,
-                ...this.buildManagedWorkflowExecutionMetadata(workflow),
+                ...pickManagedWorkflowFields(workflow),
                 isTestRun: false,
                 workflowDefinition: workflow.definition,
                 yaml: workflow.yaml,
@@ -690,7 +686,7 @@ export class WorkflowsExecutionEnginePlugin
         id: generateUuid(),
         spaceId,
         workflowId: workflow.id,
-        ...this.buildManagedWorkflowExecutionMetadata(workflow),
+        ...pickManagedWorkflowFields(workflow),
         isTestRun: workflow.isTestRun,
         workflowDefinition: workflow.definition,
         yaml: workflow.yaml,
@@ -1109,7 +1105,7 @@ export class WorkflowsExecutionEnginePlugin
         spaceId: workflow.spaceId,
         stepId,
         workflowId: workflow.id,
-        ...this.buildManagedWorkflowExecutionMetadata(workflow),
+        ...pickManagedWorkflowFields(workflow),
         isTestRun: workflow.isTestRun,
         workflowDefinition: workflow.definition,
         yaml: workflow.yaml,
@@ -1400,33 +1396,6 @@ export class WorkflowsExecutionEnginePlugin
       concurrencySettings,
       buildWorkflowContext(normalizedWorkflowExecution, coreStart, dependencies)
     );
-  }
-
-  private buildManagedWorkflowExecutionMetadata(
-    workflow: Pick<
-      WorkflowExecutionEngineModel,
-      'managed' | 'managedBy' | 'originManagedWorkflowId' | 'managedVersion'
-    >
-  ): Partial<ManagedWorkflowExecutionMetadata> {
-    const managedMetadata: Partial<ManagedWorkflowExecutionMetadata> = {};
-
-    if (workflow.managed === true) {
-      managedMetadata.managed = true;
-    }
-
-    if (typeof workflow.managedBy === 'string') {
-      managedMetadata.managedBy = workflow.managedBy;
-    }
-
-    if (typeof workflow.originManagedWorkflowId === 'string') {
-      managedMetadata.originManagedWorkflowId = workflow.originManagedWorkflowId;
-    }
-
-    if (typeof workflow.managedVersion === 'number') {
-      managedMetadata.managedVersion = workflow.managedVersion;
-    }
-
-    return managedMetadata;
   }
 
   /**

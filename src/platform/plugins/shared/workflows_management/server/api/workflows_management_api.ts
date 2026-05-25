@@ -18,6 +18,7 @@ import { i18n } from '@kbn/i18n';
 import {
   ExecutionStatus,
   getWorkflowJsonSchema,
+  pickManagedWorkflowFields,
   transformWorkflowYamlJsontoEsWorkflow,
 } from '@kbn/workflows';
 import type {
@@ -208,24 +209,6 @@ export interface ExecuteWorkflowResult {
 const isExecuteInlineWorkflowParams = (
   params: ExecuteWorkflowParams
 ): params is ExecuteInlineWorkflowParams => params.yaml !== undefined;
-
-const buildManagedWorkflowExecutionMetadata = (
-  workflow: WorkflowDetailDto | null | undefined
-): Partial<
-  Pick<
-    WorkflowExecutionEngineModel,
-    'managed' | 'managedBy' | 'originManagedWorkflowId' | 'managedVersion'
-  >
-> => ({
-  ...(workflow?.managed === true ? { managed: true } : {}),
-  ...(typeof workflow?.managedBy === 'string' ? { managedBy: workflow.managedBy } : {}),
-  ...(typeof workflow?.originManagedWorkflowId === 'string'
-    ? { originManagedWorkflowId: workflow.originManagedWorkflowId }
-    : {}),
-  ...(typeof workflow?.managedVersion === 'number'
-    ? { managedVersion: workflow.managedVersion }
-    : {}),
-});
 
 export class WorkflowsManagementApi {
   private smlIndexAttachment: SmlIndexAttachmentFn | null = null;
@@ -657,6 +640,22 @@ export class WorkflowsManagementApi {
       spaceId,
       inputs: manualInputs,
     };
+    const managedVersion =
+      existingWorkflow &&
+      'managedVersion' in existingWorkflow &&
+      typeof existingWorkflow.managedVersion === 'number'
+        ? existingWorkflow.managedVersion
+        : null;
+    const managedWorkflowFields = pickManagedWorkflowFields(
+      existingWorkflow
+        ? {
+            managed: existingWorkflow.managed,
+            managedBy: existingWorkflow.managedBy,
+            originManagedWorkflowId: existingWorkflow.originManagedWorkflowId,
+            managedVersion,
+          }
+        : null
+    );
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
     const executeResponse = await workflowsExecutionEngine.executeWorkflow(
       {
@@ -667,7 +666,7 @@ export class WorkflowsManagementApi {
         yaml: resolvedYaml,
         isTestRun: true,
         isEphemeral: true,
-        ...buildManagedWorkflowExecutionMetadata(existingWorkflow),
+        ...managedWorkflowFields,
       },
       context,
       request
