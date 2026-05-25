@@ -22,6 +22,7 @@ import { RootDragDropProvider } from '@kbn/dom-drag-drop';
 import type { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import type { ContentListItem } from '@kbn/content-list-provider';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { DataViewFilterDefinition, DataViewSortField } from './data_view_filter';
 
 const labels = {
   entity: i18n.translate('eventAnnotationListing.tableList.entityName', {
@@ -37,6 +38,8 @@ export interface EventAnnotationListingProviderProps
   canDelete: boolean;
   canSave: boolean;
   children?: ReactNode;
+  dataViewFilter: DataViewFilterDefinition;
+  dataViewSort: DataViewSortField;
   eventAnnotationService: EventAnnotationServiceType;
   onEditGroup: ({ group, id }: { group: EventAnnotationGroupConfig; id: string }) => void;
   savedObjectsTagging: SavedObjectsTaggingApi;
@@ -53,6 +56,8 @@ export const EventAnnotationListingProvider = ({
   canSave,
   children,
   core,
+  dataViewFilter,
+  dataViewSort,
   eventAnnotationService,
   onEditGroup,
   onFetchSuccess,
@@ -123,11 +128,17 @@ export const EventAnnotationListingProvider = ({
 
   const features = useMemo<ContentListClientFeatures>(
     () => ({
-      sorting: { initialSort: { field: 'updatedAt', direction: 'desc' } },
+      sorting: {
+        initialSort: { field: 'updatedAt', direction: 'desc' },
+        fields: (defaults) => ({ ...defaults, dataView: dataViewSort }),
+      },
       pagination: true,
       selection: canDelete,
+      filters: {
+        dataView: dataViewFilter,
+      },
     }),
-    [canDelete]
+    [canDelete, dataViewFilter, dataViewSort]
   );
 
   return (

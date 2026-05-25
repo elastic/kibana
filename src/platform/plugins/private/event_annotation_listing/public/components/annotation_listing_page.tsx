@@ -24,6 +24,7 @@ import { useNavigateToLens } from './use_navigate_to_lens';
 import { useSearchSession } from './use_search_session';
 import { EventAnnotationListing } from './annotation_listing';
 import { EventAnnotationListingProvider } from './annotation_listing_provider';
+import { createDataViewFilterDefinition, createDataViewSortField } from './data_view_filter';
 
 /**
  * The bundle of plugin services and start contracts that the listing page
@@ -90,6 +91,11 @@ export const EventAnnotationListingPage = ({
     () => Object.fromEntries(dataViews.map((dv) => [dv.id, dv.name ?? dv.title])),
     [dataViews]
   );
+  const dataViewFilter = useMemo(
+    () => createDataViewFilterDefinition(dataViewNameMap),
+    [dataViewNameMap]
+  );
+  const dataViewSort = useMemo(() => createDataViewSortField(dataViewFilter), [dataViewFilter]);
 
   // Bumping `refreshSignal` re-keys `ContentListClientProvider` after a
   // `GroupEditorFlyout` save so the list refetches with a fresh React Query
@@ -135,6 +141,8 @@ export const EventAnnotationListingPage = ({
         canDelete,
         canSave,
         core,
+        dataViewFilter,
+        dataViewSort,
         eventAnnotationService,
         onEditGroup: setGroupToEditInfo,
         onFetchSuccess,

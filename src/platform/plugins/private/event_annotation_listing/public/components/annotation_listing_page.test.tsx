@@ -55,7 +55,11 @@ jest.mock('./group_editor_flyout/group_editor_flyout', () => ({
   )),
 }));
 
-const buildContent = (id: string, title: string): EventAnnotationGroupContent => ({
+const buildContent = (
+  id: string,
+  title: string,
+  indexPatternId: string = 'some-id'
+): EventAnnotationGroupContent => ({
   id,
   type: EVENT_ANNOTATION_GROUP_TYPE,
   updatedAt: '2024-01-15T10:30:00.000Z',
@@ -63,7 +67,7 @@ const buildContent = (id: string, title: string): EventAnnotationGroupContent =>
   attributes: {
     title,
     description: '',
-    indexPatternId: 'some-id',
+    indexPatternId,
   },
 });
 
@@ -72,6 +76,7 @@ const renderPage = (
     mockEventAnnotationService?: Partial<EventAnnotationServiceType>;
     visualizeCapabilities?: Record<string, boolean>;
     items?: EventAnnotationGroupContent[];
+    dataViews?: DataView[];
   } = {}
 ) => {
   const items = overrides.items ?? [buildContent('item-1', 'Group A')];
@@ -121,7 +126,7 @@ const renderPage = (
     core,
     savedObjectsTagging: taggingApiMock.create(),
     eventAnnotationService: mockEventAnnotationService,
-    dataViews: [
+    dataViews: overrides.dataViews ?? [
       {
         id: 'some-id',
         title: 'Some data view',
@@ -262,6 +267,80 @@ describe('annotation list view', () => {
           'item-2',
         ]);
       });
+    });
+  });
+
+  describe('data view filter', () => {
+    it('filters groups by data view and keeps counts available after selection', async () => {
+      const user = userEvent.setup();
+      renderPage({
+        items: [
+          buildContent('item-1', 'Logs annotations', 'logs-id'),
+          buildContent('item-2', 'Metrics annotations', 'metrics-id'),
+        ],
+        dataViews: [
+          { id: 'logs-id', title: 'Logs' } as DataView,
+          { id: 'metrics-id', title: 'Metrics' } as DataView,
+        ],
+      });
+
+      await waitFor(() => expect(screen.getByText('Logs annotations')).toBeInTheDocument());
+
+      await user.click(screen.getByTestId('contentListDataViewFilter'));
+
+      await waitFor(() => {
+        expect(
+          screen.getByTestId('dataView-searchbar-option-logs-id').closest('li')
+        ).toHaveTextContent(/Logs\s*1/);
+      });
+      expect(
+        screen.getByTestId('dataView-searchbar-option-metrics-id').closest('li')
+      ).toHaveTextContent(/Metrics\s*1/);
+
+      await user.click(screen.getByTestId('dataView-searchbar-option-logs-id'));
+
+      await waitFor(() => {
+        expect(screen.queryByText('Metrics annotations')).not.toBeInTheDocument();
+      });
+      const queryText = (screen.getByTestId('contentListToolbar-searchBox') as HTMLInputElement)
+        .value;
+      expect(queryText).toContain('Logs');
+      expect(queryText).not.toContain('logs-id');
+      expect(screen.getByText('Logs annotations')).toBeInTheDocument();
+      expect(
+        screen.getByTestId('dataView-searchbar-option-logs-id').closest('li')
+      ).toHaveTextContent(/Logs\s*1/);
+      expect(
+        screen.getByTestId('dataView-searchbar-option-metrics-id').closest('li')
+      ).toHaveTextContent(/Metrics\s*1/);
+    });
+
+    it('buckets deleted data views under the unmatched option', async () => {
+      const user = userEvent.setup();
+      renderPage({
+        items: [
+          buildContent('item-1', 'Logs annotations', 'logs-id'),
+          buildContent('item-2', 'Deleted annotations', 'deleted-id'),
+        ],
+        dataViews: [{ id: 'logs-id', title: 'Logs' } as DataView],
+      });
+
+      await waitFor(() => expect(screen.getByText('Deleted annotations')).toBeInTheDocument());
+
+      await user.click(screen.getByTestId('contentListDataViewFilter'));
+
+      await waitFor(() => {
+        expect(
+          screen.getByTestId('dataView-searchbar-option-__no_data_view__').closest('li')
+        ).toHaveTextContent(/No data view\s*1/);
+      });
+
+      await user.click(screen.getByTestId('dataView-searchbar-option-__no_data_view__'));
+
+      await waitFor(() => {
+        expect(screen.queryByText('Logs annotations')).not.toBeInTheDocument();
+      });
+      expect(screen.getByText('Deleted annotations')).toBeInTheDocument();
     });
   });
 
