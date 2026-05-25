@@ -27,10 +27,10 @@ function ruleUnbackedPostGroupingWhere(
     case 'include':
       return undefined;
     case 'only':
-      return esql.exp`${esql.col('query.rule_backed')} == false`;
+      return esql.exp`\`query.rule_backed\` == false`;
     case 'exclude':
     default:
-      return esql.exp`${esql.col('query.rule_backed')} == true`;
+      return esql.exp`\`query.rule_backed\` == true`;
   }
 }
 
@@ -54,11 +54,11 @@ export class IndicatorReader {
 
     const minConfidenceFilter =
       typeof options.minConfidence === 'number'
-        ? esql.exp`${esql.col('feature.confidence')} >= ${options.minConfidence}`
+        ? esql.exp`\`feature.confidence\` >= ${options.minConfidence}`
         : undefined;
 
     const featureTypesFilter = options.type?.length
-      ? esql.exp`${esql.col('feature.type')} IN (${options.type.map((t) => esql.str(t))})`
+      ? esql.exp`\`feature.type\` IN (${options.type.map((t) => esql.str(t))})`
       : undefined;
 
     const where = combineWhere(
@@ -87,7 +87,7 @@ export class IndicatorReader {
     );
     const docs = await this.revisionReader.fetchLatestRevisions(
       where,
-      esql.exp`${esql.col('excluded')} == true`,
+      esql.exp`excluded == true`,
       [['@timestamp', 'DESC']]
     );
     const features = docs.filter(isStoredFeatureKnowledgeIndicator).map(fromStoredFeature);
@@ -115,7 +115,7 @@ export class IndicatorReader {
     options: { types?: string[] } = {}
   ): Promise<{ '@timestamp': string } | null> {
     const featureTypesFilter = options.types?.length
-      ? esql.exp`${esql.col('feature.type')} IN (${options.types.map((t) => esql.str(t))})`
+      ? esql.exp`\`feature.type\` IN (${options.types.map((t) => esql.str(t))})`
       : undefined;
     const where = combineWhere(
       inPredicate(TYPE, [KI_TYPE_FEATURE]),
@@ -144,7 +144,7 @@ export class IndicatorReader {
   ): Promise<QueryLink[]> {
     const minSeverityFilter =
       typeof filters?.minSeverityScore === 'number'
-        ? esql.exp`${esql.col('query.severity_score')} >= ${filters.minSeverityScore}`
+        ? esql.exp`\`query.severity_score\` >= ${filters.minSeverityScore}`
         : undefined;
 
     const where = combineWhere(
@@ -193,15 +193,15 @@ export class IndicatorReader {
   }): Promise<QueryLink[]> {
     const minSeverityFilter =
       typeof filters?.minSeverityScore === 'number'
-        ? esql.exp`${esql.col('query.severity_score')} >= ${filters.minSeverityScore}`
+        ? esql.exp`\`query.severity_score\` >= ${filters.minSeverityScore}`
         : undefined;
 
     const where = inPredicate(TYPE, [KI_TYPE_QUERY]);
 
     const postGroupingWhere = combineWhere(
       IS_NOT_DELETED,
-      esql.exp`${esql.col('query.rule_backed')} == false`,
-      esql.exp`${esql.col('query.query_type')} != ${esql.str(QUERY_TYPE_STATS)}`,
+      esql.exp`\`query.rule_backed\` == false`,
+      esql.exp`\`query.query_type\` != ${esql.str(QUERY_TYPE_STATS)}`,
       minSeverityFilter
     );
 
