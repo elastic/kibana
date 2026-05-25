@@ -21,7 +21,6 @@ import {
 } from '@kbn/agent-builder-dashboards-common';
 import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
 import type { Logger } from '@kbn/core/server';
-import { createRequestHandlerContext } from '../create_request_handler_context';
 
 interface CreateDashboardAttachmentTypeOptions {
   logger: Logger;
@@ -51,10 +50,8 @@ export const createDashboardAttachmentType = ({
     if (!context.savedObjectsClient) {
       throw new Error('Saved objects client is required to read dashboard attachments');
     }
-    // todo: this should be passed from agent builder
-    const requestHandlerContext = createRequestHandlerContext(context.savedObjectsClient);
     const dashboardClient = await getDashboardClient();
-    return dashboardClient.read(requestHandlerContext, origin);
+    return dashboardClient.read(context.savedObjectsClient, origin);
   };
 
   return {
