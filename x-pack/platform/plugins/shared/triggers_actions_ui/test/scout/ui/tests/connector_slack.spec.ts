@@ -85,11 +85,7 @@ test.describe('Slack connector', { tag: tags.stateful.classic }, () => {
   test('shows only the Slack webhook card, not the Slack API card', async ({ page, kbnUrl }) => {
     await page.goto(kbnUrl.get(CONNECTORS_APP_PATH));
 
-    const createButton = page.testSubj
-      .locator('createConnectorButton')
-      .or(page.testSubj.locator('createFirstActionButton'))
-      .first();
-    await createButton.click();
+    await page.testSubj.click('createConnectorButton');
 
     await expect(page.testSubj.locator('.slack-card')).toBeVisible();
     await expect(page.testSubj.locator('.slack_api-card')).toBeHidden();
