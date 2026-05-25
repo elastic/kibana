@@ -33,6 +33,8 @@ export type {
   SmlDocument,
   SmlIndexAction,
   SmlIngestionMethod,
+  SmlIndexAttachmentOriginMode,
+  SmlIndexAttachmentContentMode,
 } from './services/sml/types';
 
 export type { SmlResolvedItemResult } from './services/sml/execute_sml_attach_items';

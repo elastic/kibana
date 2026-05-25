@@ -22,7 +22,8 @@ import type {
   SmlSearchFilters,
   SmlDocument,
   SmlIndexAction,
-  SmlChunk,
+  SmlIndexAttachmentOriginMode,
+  SmlIndexAttachmentContentMode,
 } from './services/sml/types';
 import type { SmlResolvedItemResult } from './services/sml/execute_sml_attach_items';
 
@@ -83,6 +84,11 @@ export interface AgentContextLayerPluginStart {
 
 /**
  * Common params shared by both modes of `AgentContextLayerPluginStart.indexAttachment`.
+ *
+ * The mode is selected by the discriminator fields from
+ * {@link SmlIndexAttachmentOriginMode} / {@link SmlIndexAttachmentContentMode}, which are
+ * shared with the internal `SmlIndexerParams` so the public and internal unions cannot
+ * drift on the discriminator.
  */
 interface SmlIndexAttachmentBaseParams {
   request: KibanaRequest;
@@ -93,28 +99,11 @@ interface SmlIndexAttachmentBaseParams {
   includedHiddenTypes?: string[];
 }
 
-/**
- * Origin mode — content is produced by the registered type's `getSmlData` hook.
- * Resulting chunks are tagged `ingestion_method: 'crawled'`.
- *
- * If the target `origin_id` already has any `ingestion_method: 'manual'` chunks,
- * the call is a no-op unless `force: true` is provided.
- */
-export interface SmlIndexAttachmentOriginParams extends SmlIndexAttachmentBaseParams {
-  /** Override existing manual entries. Default: false. */
-  force?: boolean;
-  content?: undefined;
-}
+export type SmlIndexAttachmentOriginParams = SmlIndexAttachmentBaseParams &
+  SmlIndexAttachmentOriginMode;
 
-/**
- * Content mode — caller supplies pre-built chunks directly; `getSmlData` is not called.
- * Resulting chunks are tagged `ingestion_method: 'manual'`. Always overwrites existing
- * chunks for the `origin_id`.
- */
-export interface SmlIndexAttachmentContentParams extends SmlIndexAttachmentBaseParams {
-  content: SmlChunk[];
-  force?: undefined;
-}
+export type SmlIndexAttachmentContentParams = SmlIndexAttachmentBaseParams &
+  SmlIndexAttachmentContentMode;
 
 /**
  * Discriminated union — `content` selects the mode:

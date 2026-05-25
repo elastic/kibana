@@ -7,18 +7,15 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type {
-  SavedObjectsClientContract,
-  ISavedObjectsRepository,
-} from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
 import type { SmlTypeRegistry } from './sml_type_registry';
 import type {
-  SmlIndexAction,
   SmlContext,
   SmlDocument,
   SmlChunk,
   SmlIngestionMethod,
+  SmlIndexerParams,
 } from './types';
 import { createSmlStorage, smlIndexName } from './sml_storage';
 import { isNotFoundError } from './sml_service';
@@ -27,34 +24,6 @@ export interface SmlIndexerDeps {
   registry: SmlTypeRegistry;
   logger: Logger;
 }
-
-/**
- * Common params for the indexer's `indexAttachment` method.
- */
-interface SmlIndexerBaseParams {
-  originId: string;
-  attachmentType: string;
-  action: SmlIndexAction;
-  spaces: string[];
-  esClient: ElasticsearchClient;
-  savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository;
-  logger: Logger;
-}
-
-/** Origin mode — fetches content via `getSmlData`; chunks marked `'crawled'`. */
-export interface SmlIndexerOriginParams extends SmlIndexerBaseParams {
-  /** Override existing manual entries. Default: false. */
-  force?: boolean;
-  content?: undefined;
-}
-
-/** Content mode — caller supplies pre-built chunks; chunks marked `'manual'`. */
-export interface SmlIndexerContentParams extends SmlIndexerBaseParams {
-  content: SmlChunk[];
-  force?: undefined;
-}
-
-export type SmlIndexerParams = SmlIndexerOriginParams | SmlIndexerContentParams;
 
 export interface SmlIndexer {
   /**
