@@ -5,7 +5,8 @@
     "other_index",
     ".secret_index",
     "my-index",
-    "unsupported_index"
+    "unsupported_index",
+    "hidden_stream"
   ],
   "fields": [
     {

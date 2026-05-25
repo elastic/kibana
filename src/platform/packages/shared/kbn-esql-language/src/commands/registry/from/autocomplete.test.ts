@@ -57,7 +57,7 @@ describe('FROM Autocomplete', () => {
     // Reset mockContext.sources to original indexes
     mockContext.sources = indexes.map((name) => ({
       name,
-      hidden: name.startsWith('.'),
+      hidden: name.startsWith('.') || name === 'hidden_stream',
       type: 'Index',
     }));
 

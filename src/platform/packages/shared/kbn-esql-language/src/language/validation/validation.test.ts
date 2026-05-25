@@ -314,6 +314,39 @@ describe('validation logic', () => {
           });
         });
       });
+
+      describe('hidden sources', () => {
+        test('does not error on dot-prefixed backing index', async () => {
+          const { expectErrors } = await setup();
+          await expectErrors('FROM .ds-log-elasticsearch-default-2025.09.11-000006', []);
+        });
+
+        test('does not error on mix of backing index and known index', async () => {
+          const { expectErrors } = await setup();
+          await expectErrors('FROM .ds-foo,index', []);
+        });
+
+        test('does not error on CCS backing index', async () => {
+          const { expectErrors } = await setup();
+          await expectErrors('FROM "mycluster:.ds-foo"', []);
+        });
+
+        test('does not error on known hidden source without dot prefix', async () => {
+          const { expectErrors } = await setup();
+          // hidden_stream is in the mock sources with hidden: true (no leading dot)
+          await expectErrors('FROM hidden_stream', []);
+        });
+
+        test('still errors on truly unknown non-hidden sources', async () => {
+          const { expectErrors } = await setup();
+          await expectErrors('FROM truly_unknown', ['Unknown data source "truly_unknown"']);
+        });
+
+        test('still errors on mix where one part is unknown and not hidden', async () => {
+          const { expectErrors } = await setup();
+          await expectErrors('FROM truly_unknown,index', ['Unknown data source "truly_unknown"']);
+        });
+      });
     });
 
     describe('row', () => {

@@ -86,6 +86,11 @@ describe('TS Validation', () => {
         tsExpectErrors('TS missingIndex*', []);
         tsExpectErrors('TS *missingIndex, missing*Index2', []);
       });
+
+      test('no errors on hidden or backing index', () => {
+        tsExpectErrors('TS .ds-metrics-x-default-000001', []);
+        tsExpectErrors('TS hidden_stream', []);
+      });
     });
 
     describe('... METADATA <indices>', () => {

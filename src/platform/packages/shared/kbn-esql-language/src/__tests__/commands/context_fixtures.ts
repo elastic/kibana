@@ -79,6 +79,7 @@ export const indexes = [
   '.secret_index',
   'my-index',
   'unsupported_index',
+  'hidden_stream',
 ];
 
 export const integrations = ['nginx', 'k8s'];
@@ -191,7 +192,7 @@ export const mockContext: ICommandContext = {
   policies: new Map<string, ESQLPolicy>(policies.map((policy) => [policy.name, policy])),
   sources: indexes.map((name) => ({
     name,
-    hidden: name.startsWith('.'),
+    hidden: name.startsWith('.') || name === 'hidden_stream',
     type: 'Index',
   })),
   joinSources: joinIndices,
