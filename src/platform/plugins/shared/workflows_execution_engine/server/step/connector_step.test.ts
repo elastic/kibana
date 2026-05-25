@@ -490,7 +490,7 @@ describe('ConnectorStepImpl', () => {
       expect.objectContaining({
         connectorType: '.http-system',
         input: expect.objectContaining({
-          fetchOptions: expect.objectContaining({
+          fetcher: expect.objectContaining({
             max_content_length: expect.any(Number),
           }),
         }),
@@ -529,7 +529,7 @@ describe('ConnectorStepImpl', () => {
 
     await (impl as any)._run({ url: 'https://example.com' });
     const callInput = connectorExecutor.execute.mock.calls[0][0].input;
-    expect(callInput.fetchOptions).toBeDefined();
-    expect(callInput.fetchOptions.max_content_length).toBeGreaterThan(0);
+    expect(callInput.fetcher).toBeDefined();
+    expect(callInput.fetcher.max_content_length).toBeGreaterThan(0);
   });
 });
