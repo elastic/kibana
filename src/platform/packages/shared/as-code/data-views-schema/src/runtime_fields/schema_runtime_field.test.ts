@@ -7,10 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  PRIMITIVE_RUNTIME_FIELD_TYPES,
-  RUNTIME_FIELD_COMPOSITE_TYPE,
-} from '@kbn/data-views-plugin/common';
 import type { TypeOf } from '@kbn/config-schema';
 import type {
   compositeRuntimeFieldSchema,
@@ -18,6 +14,7 @@ import type {
 } from './schema_embedded_runtime_field';
 import { runtimeFieldSchema } from './schema_embedded_runtime_field';
 import { savedRuntimeFieldSchema } from './schema_saved_runtime_fields';
+import { PRIMITIVE_RUNTIME_FIELD_TYPES, RUNTIME_FIELD_COMPOSITE_TYPE } from './common';
 
 const buildPrimitiveRuntimeField = (
   params: Partial<TypeOf<typeof primitiveRuntimeFieldSchema>>
