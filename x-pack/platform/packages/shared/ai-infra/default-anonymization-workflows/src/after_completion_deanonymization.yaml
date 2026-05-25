@@ -18,7 +18,6 @@ steps:
   - name: restore_response
     type: transform.pii_restore
     with:
-      sessionId: '{{ event.sessionId }}'
       input: '{{ event.response }}'
 
   - name: emit_output

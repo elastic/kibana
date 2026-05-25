@@ -16,12 +16,11 @@ import type { TriggerRegistry } from './trigger_registry';
 interface InvokeHookDeps {
   triggerRegistry: TriggerRegistry;
   hookHandlerRegistry: HookHandlerRegistry;
-  sessionCapabilityCache: Map<string, Record<string, unknown>>;
   logger: Logger;
 }
 
 export const invokeHookInternal = async (
-  { triggerRegistry, hookHandlerRegistry, sessionCapabilityCache, logger }: InvokeHookDeps,
+  { triggerRegistry, hookHandlerRegistry, logger }: InvokeHookDeps,
   triggerId: string,
   payload: Record<string, unknown>,
   capabilities?: Record<string, unknown>
@@ -43,11 +42,6 @@ export const invokeHookInternal = async (
     return { status: 'pass_through', output: payload };
   }
 
-  const sessionId = typeof payload.sessionId === 'string' ? payload.sessionId : undefined;
-  if (sessionId && capabilities) {
-    sessionCapabilityCache.set(sessionId, capabilities);
-  }
-
   const { chained, failurePolicy, maxTimeout, outputSchema } = definition.sync;
   // When no outputSchema is declared, fall back to the event schema — the hook is
   // expected to return the same shape it received (default input = output contract).
@@ -55,45 +49,39 @@ export const invokeHookInternal = async (
   const timeoutMs = parseTimeoutMs(maxTimeout);
   let current = payload;
 
-  try {
-    for (const handler of handlers) {
-      try {
-        const rawResult = await Promise.race([
-          handler(current, capabilities),
-          new Promise<never>((_, reject) =>
-            setTimeout(
-              () =>
-                reject(
-                  new Error(`Hook handler for trigger "${triggerId}" timed out after ${maxTimeout}`)
-                ),
-              timeoutMs
-            )
-          ),
-        ]);
+  for (const handler of handlers) {
+    try {
+      const rawResult = await Promise.race([
+        handler(current, capabilities),
+        new Promise<never>((_, reject) =>
+          setTimeout(
+            () =>
+              reject(
+                new Error(`Hook handler for trigger "${triggerId}" timed out after ${maxTimeout}`)
+              ),
+            timeoutMs
+          )
+        ),
+      ]);
 
-        const validation = effectiveOutputSchema.safeParse(rawResult);
-        if (!validation.success) {
-          throw new Error(
-            `Handler output for trigger "${triggerId}" failed schema validation: ${validation.error.message}`
-          );
-        }
-
-        if (chained) {
-          current = rawResult;
-        }
-      } catch (err) {
-        const message = err instanceof Error ? err.message : String(err);
-        if (failurePolicy === 'closed') {
-          return { status: 'failed', output: current, error: message };
-        }
-        logger.warn(
-          `Hook handler for trigger "${triggerId}" failed (failurePolicy: open): ${message}`
+      const validation = effectiveOutputSchema.safeParse(rawResult);
+      if (!validation.success) {
+        throw new Error(
+          `Handler output for trigger "${triggerId}" failed schema validation: ${validation.error.message}`
         );
       }
-    }
-  } finally {
-    if (sessionId) {
-      sessionCapabilityCache.delete(sessionId);
+
+      if (chained) {
+        current = rawResult;
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      if (failurePolicy === 'closed') {
+        return { status: 'failed', output: current, error: message };
+      }
+      logger.warn(
+        `Hook handler for trigger "${triggerId}" failed (failurePolicy: open): ${message}`
+      );
     }
   }
 

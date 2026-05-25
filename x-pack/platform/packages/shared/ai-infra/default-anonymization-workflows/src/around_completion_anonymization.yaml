@@ -9,7 +9,6 @@ steps:
     type: ai.pii
     if: 'event.system'
     with:
-      sessionId: '{{ event.sessionId }}'
       input: '{{ event.system }}'
       entities:
         - IP
@@ -19,7 +18,6 @@ steps:
   - name: anonymize_messages
     type: ai.pii
     with:
-      sessionId: '{{ event.sessionId }}'
       input: '${{ event.messages }}'
       entities:
         - IP

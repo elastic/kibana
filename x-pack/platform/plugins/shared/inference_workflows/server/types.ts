@@ -6,10 +6,7 @@
  */
 
 import type { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-plugin/server';
-import type {
-  WorkflowsExtensionsServerPluginSetup,
-  WorkflowsExtensionsServerPluginStart,
-} from '@kbn/workflows-extensions/server';
+import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 
 export interface InferenceWorkflowsServerSetupDeps {
   inference: InferenceServerSetup;
@@ -18,7 +15,6 @@ export interface InferenceWorkflowsServerSetupDeps {
 
 export interface InferenceWorkflowsServerStartDeps {
   inference: InferenceServerStart;
-  workflowsExtensions: WorkflowsExtensionsServerPluginStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

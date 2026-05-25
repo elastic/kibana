@@ -26,7 +26,6 @@ const createMockLogger = (): jest.Mocked<Pick<Logger, 'warn' | 'error' | 'info' 
 const setupDeps = () => {
   const triggerRegistry = new TriggerRegistry();
   const hookHandlerRegistry = new HookHandlerRegistry();
-  const sessionCapabilityCache = new Map<string, Record<string, unknown>>();
   const logger = createMockLogger();
 
   triggerRegistry.register({
@@ -44,11 +43,9 @@ const setupDeps = () => {
     deps: {
       triggerRegistry,
       hookHandlerRegistry,
-      sessionCapabilityCache,
       logger: logger as unknown as Logger,
     },
     hookHandlerRegistry,
-    sessionCapabilityCache,
     logger,
   };
 };
@@ -139,7 +136,6 @@ describe('invokeHookInternal', () => {
         deps: {
           triggerRegistry,
           hookHandlerRegistry,
-          sessionCapabilityCache: new Map<string, Record<string, unknown>>(),
           logger: logger as unknown as Logger,
         },
         hookHandlerRegistry,
@@ -237,7 +233,6 @@ describe('invokeHookInternal', () => {
         deps: {
           triggerRegistry,
           hookHandlerRegistry,
-          sessionCapabilityCache: new Map<string, Record<string, unknown>>(),
           logger: logger as unknown as Logger,
         },
         hookHandlerRegistry,
@@ -321,7 +316,6 @@ describe('invokeHookInternal', () => {
       const deps = {
         triggerRegistry,
         hookHandlerRegistry,
-        sessionCapabilityCache: new Map<string, Record<string, unknown>>(),
         logger: logger as unknown as Logger,
       };
 
@@ -334,62 +328,6 @@ describe('invokeHookInternal', () => {
       const invalid = await invokeHookInternal(deps, TRIGGER_ID, { value: 'x' });
       expect(invalid.status).toBe('failed');
       expect(invalid.error).toContain('failed schema validation');
-    });
-  });
-
-  describe('sessionCapabilityCache', () => {
-    it('stores capabilities under sessionId before handlers run', async () => {
-      const { deps, hookHandlerRegistry, sessionCapabilityCache } = setupDeps();
-      const capabilities = { token: 'abc' };
-      let capturedDuringHandler: Record<string, unknown> | undefined;
-
-      hookHandlerRegistry.register(TRIGGER_ID, async () => {
-        capturedDuringHandler = sessionCapabilityCache.get('sess-1');
-        return { value: 'ok' };
-      });
-
-      await invokeHookInternal(deps, TRIGGER_ID, { value: 'x', sessionId: 'sess-1' }, capabilities);
-
-      expect(capturedDuringHandler).toBe(capabilities);
-    });
-
-    it('removes capabilities from cache after successful completion', async () => {
-      const { deps, hookHandlerRegistry, sessionCapabilityCache } = setupDeps();
-      hookHandlerRegistry.register(TRIGGER_ID, async () => ({ value: 'ok' }));
-
-      await invokeHookInternal(
-        deps,
-        TRIGGER_ID,
-        { value: 'x', sessionId: 'sess-1' },
-        { token: 'abc' }
-      );
-
-      expect(sessionCapabilityCache.has('sess-1')).toBe(false);
-    });
-
-    it('removes capabilities from cache even when a handler fails', async () => {
-      const { deps, hookHandlerRegistry, sessionCapabilityCache } = setupDeps();
-      hookHandlerRegistry.register(TRIGGER_ID, async () => {
-        throw new Error('fail');
-      });
-
-      await invokeHookInternal(
-        deps,
-        TRIGGER_ID,
-        { value: 'x', sessionId: 'sess-1' },
-        { token: 'abc' }
-      );
-
-      expect(sessionCapabilityCache.has('sess-1')).toBe(false);
-    });
-
-    it('does not store capabilities when no sessionId is present in payload', async () => {
-      const { deps, hookHandlerRegistry, sessionCapabilityCache } = setupDeps();
-      hookHandlerRegistry.register(TRIGGER_ID, async () => ({ value: 'ok' }));
-
-      await invokeHookInternal(deps, TRIGGER_ID, { value: 'x' }, { token: 'abc' });
-
-      expect(sessionCapabilityCache.size).toBe(0);
     });
   });
 });

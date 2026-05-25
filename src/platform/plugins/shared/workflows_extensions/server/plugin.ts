@@ -48,13 +48,6 @@ export class WorkflowsExtensionsServerPlugin
   private readonly stepRegistry: ServerStepRegistry;
   private readonly triggerRegistry: TriggerRegistry;
   private readonly hookHandlerRegistry: HookHandlerRegistry;
-  // Short-lived store keyed by sessionId, set before handlers run and deleted in finally.
-  // Lets YAML step executors look up call-scoped capabilities (e.g. AnonymizationContext)
-  // without them appearing in the YAML event payload.
-  // Known limitation: concurrent calls sharing the same sessionId on one node race on this
-  // map. Benign for the POC (Agent Builder drives sequential calls). Fix: thread context
-  // through the workflow engine's per-execution context (Phase 2).
-  private readonly sessionCapabilityCache = new Map<string, Record<string, unknown>>();
   private workflowsClientProvider: WorkflowsClientProvider | undefined;
 
   constructor(initializerContext: PluginInitializerContext) {
@@ -143,15 +136,6 @@ export class WorkflowsExtensionsServerPlugin
       ): Promise<HookResult> => {
         return this.invokeHookInternal(triggerId, payload, capabilities);
       },
-      getSessionCapabilities: (sessionId: string): Record<string, unknown> | undefined => {
-        return this.sessionCapabilityCache.get(sessionId);
-      },
-      setSessionCapabilities: (sessionId: string, capabilities: Record<string, unknown>): void => {
-        this.sessionCapabilityCache.set(sessionId, capabilities);
-      },
-      clearSessionCapabilities: (sessionId: string): void => {
-        this.sessionCapabilityCache.delete(sessionId);
-      },
     };
   }
 
@@ -164,7 +148,6 @@ export class WorkflowsExtensionsServerPlugin
       {
         triggerRegistry: this.triggerRegistry,
         hookHandlerRegistry: this.hookHandlerRegistry,
-        sessionCapabilityCache: this.sessionCapabilityCache,
         logger: this.logger,
       },
       triggerId,

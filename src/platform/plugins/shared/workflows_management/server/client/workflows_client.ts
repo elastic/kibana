@@ -94,11 +94,6 @@ export const createWorkflowsClientProvider = (
 
         const { chained, failurePolicy, maxTimeout } = triggerDef.sync;
         const timeoutMs = parseTimeoutMs(maxTimeout);
-        const sessionId = typeof payload.sessionId === 'string' ? payload.sessionId : undefined;
-
-        if (sessionId && capabilities) {
-          workflowsExtensions.setSessionCapabilities(sessionId, capabilities);
-        }
 
         const { workflowsExecutionEngine } = await workflowsService.getPluginsStart();
 
@@ -108,83 +103,79 @@ export const createWorkflowsClientProvider = (
           | undefined;
 
         let current = payload;
-        try {
-          for (const workflow of enabledWorkflows) {
-            const firstResult = await workflowsExecutionEngine.executeWorkflowSync({
-              workflowDefinition: workflow.definition,
-              payload: current,
-              maxTimeoutMs: timeoutMs,
-            });
+        for (const workflow of enabledWorkflows) {
+          const firstResult = await workflowsExecutionEngine.executeWorkflowSync({
+            workflowDefinition: workflow.definition,
+            payload: current,
+            maxTimeoutMs: timeoutMs,
+            capabilities,
+          });
 
-            if (firstResult.status === 'failed') {
-              if (failurePolicy === 'closed') {
-                return { status: 'failed', output: current, error: firstResult.error };
-              }
-              logger.warn(
-                `[invokeHook] workflow "${workflow.name}" failed (open policy): ${firstResult.error}`
-              );
-            } else if (firstResult.status === 'suspended') {
-              if (!firstResult.checkpoint) {
-                return {
-                  status: 'failed',
-                  output: current,
-                  error: 'suspended result missing checkpoint',
-                };
-              }
-              if (!proceedFn) {
-                return {
-                  status: 'failed',
-                  output: current,
-                  error:
-                    '[invokeHook] around-hook workflow suspended but no proceedFn capability provided',
-                };
-              }
-
-              let proceedResult: Record<string, unknown> | undefined;
-              try {
-                proceedResult = await proceedFn(firstResult.checkpoint.proceedInput);
-              } catch (err) {
-                const message = err instanceof Error ? err.message : String(err);
-                if (failurePolicy === 'closed') {
-                  return {
-                    status: 'failed',
-                    output: current,
-                    error: `[invokeHook] proceed function failed: ${message}`,
-                  };
-                }
-                logger.warn(`[invokeHook] proceed function failed (open policy): ${message}`);
-              }
-
-              if (proceedResult !== undefined) {
-                const resumeResult = await workflowsExecutionEngine.executeWorkflowSync({
-                  workflowDefinition: workflow.definition,
-                  payload: current,
-                  maxTimeoutMs: timeoutMs,
-                  resumeFrom: firstResult.checkpoint,
-                  proceedResult,
-                });
-
-                if (resumeResult.status === 'failed') {
-                  if (failurePolicy === 'closed') {
-                    return { status: 'failed', output: current, error: resumeResult.error };
-                  }
-                  logger.warn(
-                    `[invokeHook] workflow "${workflow.name}" resume failed (open policy): ${resumeResult.error}`
-                  );
-                } else {
-                  current = resumeResult.output;
-                }
-              }
-            } else if (chained) {
-              current = firstResult.output;
+          if (firstResult.status === 'failed') {
+            if (failurePolicy === 'closed') {
+              return { status: 'failed', output: current, error: firstResult.error };
             }
-          }
-          return { status: 'completed', output: current };
-        } finally {
-          if (sessionId) {
-            workflowsExtensions.clearSessionCapabilities(sessionId);
+            logger.warn(
+              `[invokeHook] workflow "${workflow.name}" failed (open policy): ${firstResult.error}`
+            );
+          } else if (firstResult.status === 'suspended') {
+            if (!firstResult.checkpoint) {
+              return {
+                status: 'failed',
+                output: current,
+                error: 'suspended result missing checkpoint',
+              };
+            }
+            if (!proceedFn) {
+              return {
+                status: 'failed',
+                output: current,
+                error:
+                  '[invokeHook] around-hook workflow suspended but no proceedFn capability provided',
+              };
+            }
+
+            let proceedResult: Record<string, unknown> | undefined;
+            try {
+              proceedResult = await proceedFn(firstResult.checkpoint.proceedInput);
+            } catch (err) {
+              const message = err instanceof Error ? err.message : String(err);
+              if (failurePolicy === 'closed') {
+                return {
+                  status: 'failed',
+                  output: current,
+                  error: `[invokeHook] proceed function failed: ${message}`,
+                };
+              }
+              logger.warn(`[invokeHook] proceed function failed (open policy): ${message}`);
+            }
+
+            if (proceedResult !== undefined) {
+              const resumeResult = await workflowsExecutionEngine.executeWorkflowSync({
+                workflowDefinition: workflow.definition,
+                payload: current,
+                maxTimeoutMs: timeoutMs,
+                resumeFrom: firstResult.checkpoint,
+                proceedResult,
+                capabilities,
+              });
+
+              if (resumeResult.status === 'failed') {
+                if (failurePolicy === 'closed') {
+                  return { status: 'failed', output: current, error: resumeResult.error };
+                }
+                logger.warn(
+                  `[invokeHook] workflow "${workflow.name}" resume failed (open policy): ${resumeResult.error}`
+                );
+              } else {
+                current = resumeResult.output;
+              }
+            }
+          } else if (chained) {
+            current = firstResult.output;
           }
         }
+        return { status: 'completed', output: current };
       },
     };
   };

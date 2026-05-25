@@ -15,9 +15,6 @@ import {
 } from '../../../anonymization/context_handle';
 
 const inputSchema = z.object({
-  sessionId: z
-    .string()
-    .describe('Session ID — used to look up the shared AnonymizationContext capability'),
   input: z
     .union([z.string(), z.array(z.unknown())])
     .describe('Anonymized text or messages array containing PII tokens to restore'),
@@ -30,13 +27,11 @@ const outputSchema = z.object({
 });
 
 /**
- * Factory that creates the transform.pii_restore step definition with access to the
- * anonymization context registry (keyed by sessionId).
- * The tokenMap is never exposed in the YAML `with:` block.
+ * Creates the transform.pii_restore step definition.
+ * The tokenMap is accessed via handlerContext.capabilities — it never appears
+ * in the YAML workflow event.
  */
-export const createTransformPiiRestoreStepDefinition = (
-  getCapabilities: (sessionId: string) => Record<string, unknown> | undefined
-) =>
+export const createTransformPiiRestoreStepDefinition = () =>
   createServerStepDefinition({
     id: 'transform.pii_restore',
     label: 'Restore PII Tokens',
@@ -47,13 +42,14 @@ export const createTransformPiiRestoreStepDefinition = (
     category: StepCategory.Data,
     inputSchema,
     outputSchema,
-    handler: async ({ input: { sessionId, input } }) => {
-      const ctx = getCapabilities(sessionId)?.[ANONYMIZATION_CONTEXT_CAPABILITY_KEY] as
+    handler: async (handlerCtx) => {
+      const { input } = handlerCtx.input as { input: string | unknown[] };
+      const ctx = handlerCtx.capabilities?.[ANONYMIZATION_CONTEXT_CAPABILITY_KEY] as
         | AnonymizationContextHandle
         | undefined;
       if (!ctx) {
         throw new Error(
-          `[transform.pii_restore] No AnonymizationContext found for session "${sessionId}". ` +
+          '[transform.pii_restore] No AnonymizationContext found in handlerContext.capabilities. ' +
             'Ensure the hook was invoked with the anonymizationContext capability.'
         );
       }

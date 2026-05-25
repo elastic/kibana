@@ -171,6 +171,12 @@ export interface StepHandlerContext<TInput = z.ZodType, TConfig = z.ZodObject> {
    * Current step's type
    */
   stepType: string;
+
+  /**
+   * Optional call-scoped map of opaque JS references threaded by synchronous hook invokers.
+   * Always undefined on async/Task-Manager-driven runs.
+   */
+  capabilities?: Record<string, unknown>;
 }
 
 /**

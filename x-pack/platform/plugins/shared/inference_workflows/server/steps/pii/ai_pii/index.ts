@@ -21,9 +21,6 @@ const CustomPatternSchema = z.object({
 });
 
 const inputSchema = z.object({
-  sessionId: z
-    .string()
-    .describe('Session ID — used to look up the shared AnonymizationContext capability'),
   input: z
     .union([z.string(), z.array(z.unknown())])
     .describe('Text string or messages array to anonymize'),
@@ -51,13 +48,11 @@ const outputSchema = z.object({
 });
 
 /**
- * Factory that creates the ai.pii step definition with access to the
- * anonymization context registry (keyed by sessionId).
- * The salt and tokenMap are never exposed in the YAML `with:` block.
+ * Creates the ai.pii step definition.
+ * The salt and tokenMap are accessed via handlerContext.capabilities — they never
+ * appear in the YAML workflow event.
  */
-export const createAiPiiStepDefinition = (
-  getCapabilities: (sessionId: string) => Record<string, unknown> | undefined
-) =>
+export const createAiPiiStepDefinition = () =>
   createServerStepDefinition({
     id: 'ai.pii',
     label: 'Anonymize PII',
@@ -69,21 +64,19 @@ export const createAiPiiStepDefinition = (
     inputSchema,
     outputSchema,
     handler: async (handlerCtx) => {
-      const { sessionId, input, entities, customPatterns, systemPromptInstruction } =
-        handlerCtx.input as {
-          sessionId: string;
-          input: string | unknown[];
-          entities?: string[];
-          customPatterns?: Array<{ pattern: string; entityClass: string }>;
-          systemPromptInstruction?: string;
-        };
+      const { input, entities, customPatterns, systemPromptInstruction } = handlerCtx.input as {
+        input: string | unknown[];
+        entities?: string[];
+        customPatterns?: Array<{ pattern: string; entityClass: string }>;
+        systemPromptInstruction?: string;
+      };
 
-      const ctx = getCapabilities(sessionId)?.[ANONYMIZATION_CONTEXT_CAPABILITY_KEY] as
+      const ctx = handlerCtx.capabilities?.[ANONYMIZATION_CONTEXT_CAPABILITY_KEY] as
         | AnonymizationContextHandle
         | undefined;
       if (!ctx) {
         throw new Error(
-          `[ai.pii] No AnonymizationContext found for session "${sessionId}". ` +
+          '[ai.pii] No AnonymizationContext found in handlerContext.capabilities. ' +
             'Ensure the hook was invoked with the anonymizationContext capability.'
         );
       }

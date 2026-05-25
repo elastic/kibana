@@ -38,15 +38,6 @@ export class InferenceWorkflowsServerPlugin
       InferenceWorkflowsServerStartDeps
     >
 {
-  /**
-   * Holds the workflowsExtensions start contract.
-   * Populated in start(); read by PII step closures registered in setup().
-   * Safe because all request handling happens after start() completes.
-   */
-  private workflowsExtStart:
-    | { getSessionCapabilities: (s: string) => Record<string, unknown> | undefined }
-    | undefined = undefined;
-
   constructor(_initializerContext: PluginInitializerContext) {}
 
   setup(
@@ -92,16 +83,8 @@ export class InferenceWorkflowsServerPlugin
     workflowsExtensions.registerStepDefinition(aiPromptStepDefinition(core));
     workflowsExtensions.registerStepDefinition(aiSummarizeStepDefinition(core));
 
-    // Register PII steps with a lazy capability lookup.
-    // The closure reads from this.workflowsExtStart which is set in start().
-    // All request handling is guaranteed to happen after start() completes.
-    const getCapabilities = (sessionId: string): Record<string, unknown> | undefined =>
-      this.workflowsExtStart?.getSessionCapabilities(sessionId);
-
-    workflowsExtensions.registerStepDefinition(createAiPiiStepDefinition(getCapabilities));
-    workflowsExtensions.registerStepDefinition(
-      createTransformPiiRestoreStepDefinition(getCapabilities)
-    );
+    workflowsExtensions.registerStepDefinition(createAiPiiStepDefinition());
+    workflowsExtensions.registerStepDefinition(createTransformPiiRestoreStepDefinition());
     workflowsExtensions.registerStepDefinition(callSiteProceedStepDefinition);
 
     return {};
@@ -109,9 +92,8 @@ export class InferenceWorkflowsServerPlugin
 
   start(
     _core: CoreStart,
-    plugins: InferenceWorkflowsServerStartDeps
+    _plugins: InferenceWorkflowsServerStartDeps
   ): InferenceWorkflowsServerStart {
-    this.workflowsExtStart = plugins.workflowsExtensions;
     return {
       getDefaultWorkflows: () => [
         {

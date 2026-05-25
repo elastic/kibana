@@ -23,7 +23,6 @@ steps:
     type: ai.pii
     if: 'event.system'
     with:
-      sessionId: '{{ event.sessionId }}'
       input: '{{ event.system }}'
       entities:
         - IP
@@ -33,7 +32,6 @@ steps:
   - name: anonymize_messages
     type: ai.pii
     with:
-      sessionId: '{{ event.sessionId }}'
       # ${{ }} calls evalValueSync which preserves the array type.
       # {{ }} calls renderSync which coerces arrays to a string.
       input: '${{ event.messages }}'
@@ -45,8 +43,6 @@ steps:
   - name: emit_output
     type: workflow.output
     with:
-      # Pass sessionId through so chained workflows can look up the same AnonymizationContext.
-      sessionId: '{{ event.sessionId }}'
       # ${{ }} returns null (not "") when anonymize_system was skipped,
       # so invoke_before_completion.ts can fall back to the original system via `?? system`.
       system: '${{ steps.anonymize_system.output.output }}'

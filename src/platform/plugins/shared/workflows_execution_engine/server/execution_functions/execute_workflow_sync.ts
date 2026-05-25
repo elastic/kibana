@@ -30,6 +30,8 @@ export interface ExecuteWorkflowSyncInput {
   logger: Logger;
   resumeFrom?: WorkflowCheckpoint;
   proceedResult?: Record<string, unknown>;
+  /** Call-scoped opaque references threaded by synchronous hook invokers. Always undefined on async/Task-Manager-driven runs. */
+  capabilities?: Record<string, unknown>;
 }
 
 export interface ExecuteWorkflowSyncResult {
@@ -59,6 +61,7 @@ export const executeWorkflowSync = async ({
   logger,
   resumeFrom,
   proceedResult,
+  capabilities,
 }: ExecuteWorkflowSyncInput): Promise<ExecuteWorkflowSyncResult> => {
   const execute = async (): Promise<ExecuteWorkflowSyncResult> => {
     const engine = new WorkflowTemplatingEngine();
@@ -133,6 +136,7 @@ export const executeWorkflowSync = async ({
           abortSignal: abortController.signal,
           stepId: stepName,
           stepType,
+          capabilities,
         };
 
         const result = await stepDef.handler(handlerContext as never);
