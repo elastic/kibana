@@ -158,19 +158,35 @@ describe('BaseAtomicNodeImplementation', () => {
     expect(runtime.finishStep).not.toHaveBeenCalled();
   });
 
-  it('does not finish or navigate when _run returns suspended', async () => {
-    const step: BaseStep = { name: 'test-step', stepId: 'test-step', type: 'atomic' };
+  it('includes actual serialized output size when output exceeds max-step-size', async () => {
+    const step: BaseStep = {
+      name: 'download_file',
+      stepId: 'download_file',
+      type: 'atomic',
+      'max-step-size': '10b',
+    };
     const runtime = createStepExecutionRuntime();
     const workflowRuntime = createWorkflowRuntime();
 
     const impl = new TestStepImpl(step, runtime as any, undefined, workflowRuntime as any);
-    impl.mockResult = { input: {}, output: undefined, error: undefined, suspended: true };
+    impl.mockResult = {
+      input: {},
+      output: { content: 'larger than ten bytes' },
+      error: undefined,
+    };
 
     await impl.run();
 
     expect(runtime.finishStep).not.toHaveBeenCalled();
-    expect(runtime.failStep).not.toHaveBeenCalled();
-    expect(workflowRuntime.navigateToNextNode).not.toHaveBeenCalled();
+    expect(runtime.failStep).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'StepSizeLimitExceeded',
+        details: expect.objectContaining({
+          actualBytes: expect.any(Number),
+          suggestedLimitBytes: expect.any(Number),
+        }),
+      })
+    );
   });
 
   describe('getMaxResponseBytes', () => {
