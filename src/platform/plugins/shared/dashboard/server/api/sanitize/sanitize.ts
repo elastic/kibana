@@ -33,9 +33,8 @@ export async function sanitize(
     transformedApiDashboardState as Partial<DashboardState>
   );
   warnings.push(...dashboardStateWarnings, ...scopeWarnings);
+  // TODO: As part of sanitization, we should drop panels, filters, etc. that exceed their max array sizes
   const sanitizedDashboardState = dashboardStateSchema.validate(scopedDashboardState);
-
-  console.log('SANITIZE', sanitizedDashboardState);
 
   // access_control is separate from the transforms and stripping logic since it is not part of the
   // dashboard saved object attributes but it should be preserved in the sanitized output if present
