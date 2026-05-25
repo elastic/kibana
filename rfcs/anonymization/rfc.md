@@ -427,7 +427,7 @@ The session token map is mutated incrementally by each `ai.pii` invocation acros
 
 **Tool call argument restoration is outside the hook payload.** The `afterCompletion` hook payload is `{ sessionId, response: string }` — text only. Tool call argument restoration (`restoreInValue` on the assembled message's `toolCalls`) happens in the inference pipeline outside the hook and is not part of the hook contract. Workflow handlers for `inference.afterCompletion` only need to handle the `response` text field.
 
-**Session capability registry:** The `AnonymizationContext` instance is stored in a per-session registry for the duration of each hook invocation (for YAML step executors like `ai.pii` to look up), then deleted in a `finally` block. Two concurrent `chatComplete` calls sharing the same `sessionId` on the same node will race on this registry. This is acceptable for Phase 1 (Agent Builder drives sequential calls) but must be fixed before production: thread the context through the workflow engine's per-execution context rather than a module-level map.
+**Per-execution capability threading:** The `AnonymizationContext` instance is passed as a normal JS argument from `invokeHook` into `executeWorkflowSync`, where it lands on `handlerContext.capabilities`. Its lifetime is exactly the call stack of a single `executeWorkflowSync` invocation — it is never written to a shared map, never keyed by `sessionId`, and is garbage-collected as soon as the invocation returns. Two concurrent `chatComplete` calls sharing the same `sessionId` each receive their own `AnonymizationContext` reference via their own `executeWorkflowSync` call stack, so there is no race.
 
 ### 4.6 Streaming de-anonymization
 
@@ -719,7 +719,7 @@ The import is implemented as a one-shot migration in the inference plugin's star
 - `WorkflowsClient.invokeHook` updated to execute YAML inline when `triggerDef.sync.inlineExecution === true` and enabled workflows exist in the current space.  
 - One-shot migration: `ai:anonymizationSettings` regex rules imported into the seeded before-completion workflow's `customPatterns` on first run; NER rules logged as dropped with a deprecation warning.  
 - Per-space control via the standard workflow `enabled` toggle — no separate UI setting or workflow ID list is required. Each workflow document is space-scoped; enabling one in space A does not affect space B.  
-- `setSessionCapabilities` / `clearSessionCapabilities` added to the `workflowsExtensions` start contract so `WorkflowsClient.invokeHook` can manage the `AnonymizationContext` capability cache directly for the inline execution path.  
+- `capabilities` field added to `ExecuteWorkflowSyncInput` and forwarded onto each step's `handlerContext.capabilities` by the inline executor; `WorkflowsClient.invokeHook` passes the caller-supplied capabilities map directly into `executeWorkflowSync` — no shared session-keyed cache is involved.  
 - Agent Builder `conversationId` threading added (see §6.3).
 
 **Phase 3 — Remove deprecated code**

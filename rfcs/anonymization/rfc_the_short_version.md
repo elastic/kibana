@@ -49,7 +49,7 @@ Because every LLM consumer in Kibana — Agent Builder, Observability AI Assista
 
 Gains the concept of a **synchronous hook** — a trigger that blocks the caller until all subscribed workflows have run and returns their combined output. Previously all triggers were fire-and-forget. The sync variant adds a timeout, a failure policy, and a chained execution mode where each workflow receives the previous one's output rather than the original event.
 
-A small addition to the public contract lets the workflow runner manage a per-session capability store directly, which is needed so step types can access call-scoped state (the anonymization context) without it leaking through the YAML.
+The public start contract gains **`invokeHook(triggerId, payload, capabilities?)`** — the single entry point for firing a synchronous hook. Callers pass an optional `capabilities` map of opaque JS references (e.g. the `AnonymizationContext`) that must not appear in the YAML event payload. The inline executor threads those capabilities onto each step's `handlerContext.capabilities`, scoping them to exactly one execution call stack — no shared map, no session-keyed lookup, no concurrency race.
 
 ### Inline workflow executor
 

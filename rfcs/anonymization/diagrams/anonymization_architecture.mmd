@@ -19,13 +19,13 @@ flowchart TD
 
     subgraph WM["WorkflowsClient (workflowsManagement)\n \nqueries .kibana-workflows for enabled workflows in current space"]
         direction TB
-        EXEC["executeWorkflowSync\n \ninline YAML execution — no Task Manager\nuses WorkflowTemplatingEngine\nstep definitions looked up from workflowsExtensions registry\nsuspends at call_site.proceed, resumes after proceedFn returns"]
+        EXEC["executeWorkflowSync\n \ninline YAML execution — no Task Manager\nuses WorkflowTemplatingEngine\nstep definitions looked up from workflowsExtensions registry\ncapabilities forwarded onto each step's handlerContext\nsuspends at call_site.proceed, resumes after proceedFn returns"]
     end
 
     subgraph IW["inference_workflows plugin — step definitions registered at setup()"]
         direction TB
-        PIIDEF["ai.pii step\n \nreads AnonymizationContext via capabilities\nruns regex rules against input\ngenerates HMAC tokens → writes to tokenMap"]
-        RESTOREDEF["transform.pii_restore step\n \nreads AnonymizationContext via capabilities\nscans text for tokens, restores originals from tokenMap"]
+        PIIDEF["ai.pii step\n \nreads AnonymizationContext via handlerContext.capabilities\nruns regex rules against input\ngenerates HMAC tokens → writes to tokenMap"]
+        RESTOREDEF["transform.pii_restore step\n \nreads AnonymizationContext via handlerContext.capabilities\nscans text for tokens, restores originals from tokenMap"]
     end
 
     LLM["Large Language Model\n \nAnthropic · OpenAI · Bedrock · Gemini\nSees only HMAC tokens — never raw PII"]
@@ -39,7 +39,7 @@ flowchart TD
     FUTURE -->|"chatComplete(…)"| CTX
 
     CTX --> AROUND
-    AROUND <-->|"invoke / result"| EXEC
+    AROUND <-->|"invokeHook(payload, capabilities)\n→ executeWorkflowSync({ ..., capabilities })"| EXEC
     EXEC -->|"pre-proceed: runs step"| PIIDEF
     PIIDEF -->|"{ anonymized system, messages }"| CONNECTOR
     CONNECTOR --> LLM
