@@ -30,7 +30,7 @@ export default ({ getService }: FtrProviderContext) => {
     await riskEngineRoutes.cleanUp();
   };
 
-  describe('@ess @serverless @serverlessQA Risk Engine schedule_now', () => {
+  describe('@ess @serverless @skipInServerlessMKI @serverlessQA Risk Engine schedule_now', () => {
     const createAndSyncRuleAndAlerts = createAndSyncRuleAndAlertsFactory({ supertest, log });
     const { indexListOfDocuments } = dataGeneratorFactory({
       es,

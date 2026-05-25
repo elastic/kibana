@@ -12,7 +12,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const riskEngineRoutes = riskEngineRouteHelpersFactory(supertest);
 
-  describe('@serverless essentials tier api access', () => {
+  describe('@serverless @skipInServerlessMKI essentials tier api access', () => {
     it('should not find init api', async () => {
       await riskEngineRoutes.init(404);
     });

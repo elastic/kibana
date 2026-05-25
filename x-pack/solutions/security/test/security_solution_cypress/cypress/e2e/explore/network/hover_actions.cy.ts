@@ -25,7 +25,7 @@ import { openTimelineUsingToggle } from '../../../tasks/security_main';
 
 const testDomain = 'myTest';
 
-describe('Hover actions', { tags: ['@ess', '@serverless'] }, () => {
+describe('Hover actions', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
   const onBeforeLoadCallback = (win: Cypress.AUTWindow) => {
     // avoid cypress being held by windows prompt and timeout
     cy.stub(win, 'prompt').returns(true);
