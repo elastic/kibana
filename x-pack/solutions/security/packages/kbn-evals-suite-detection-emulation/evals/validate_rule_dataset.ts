@@ -313,8 +313,7 @@ export const validateRuleDataset = {
     // ─── Distractor: dashboard creation request (skill must NOT fire) ─────────
     {
       input: {
-        question:
-          'Create a dashboard showing the top 10 rules by alert count this week.',
+        question: 'Create a dashboard showing the top 10 rules by alert count this week.',
       },
       output: {
         criteria: [

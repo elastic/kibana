@@ -20,11 +20,14 @@ export interface EmulationErrorContext {
   mode?: string;
 }
 
-type ToolErrorResult = {
+interface ToolErrorResult {
   results: Array<{ type: typeof ToolResultType.error; data: Record<string, unknown> }>;
-};
+}
 
-const errorResult = (ctx: EmulationErrorContext, data: Record<string, unknown>): ToolErrorResult => ({
+const errorResult = (
+  ctx: EmulationErrorContext,
+  data: Record<string, unknown>
+): ToolErrorResult => ({
   results: [
     {
       type: ToolResultType.error,
