@@ -1053,30 +1053,32 @@ export async function setupClassicFieldMappingAtScale(
 ) {
   if (!shouldRunSetup(log)) return;
 
-  await enableStreams(kibanaServer, log);
-  await createSingleClassicStream(kibanaServer, CLASSIC_MAPPING_STREAM);
-
   const FIELD_COUNT = 10000;
   const FIELD_TYPES = ['keyword', 'long', 'double', 'boolean', 'ip', 'date'];
-
-  // ES default `index.mapping.total_fields.limit` is 1000, well below our
-  // intentional stress target. The Streams `_ingest` PUT validates the field
-  // overrides via `PUT /_data_stream/{name}/_mappings?dry_run=true`, which
-  // reads the limit from the current write index's live settings - not from
-  // the data stream level or matching templates. Raise the limit on each
-  // backing index directly so the dry-run validation passes.
   const TOTAL_FIELDS_LIMIT = FIELD_COUNT * 2;
-  const dataStream = await es.indices.getDataStream({ name: CLASSIC_MAPPING_STREAM });
-  const backingIndices = dataStream.data_streams[0].indices.map((idx) => idx.index_name);
+
+  // The Streams `_ingest` PUT applies `field_overrides` via
+  // `PUT /_data_stream/{name}/_mappings` followed by a lazy rollover, so its
+  // dry-run validation resolves `total_fields.limit` from the matching index
+  // template (the next-rollover index), not from any live backing index
+  // settings. Install a narrow, high-priority data-stream template that
+  // raises the limit before the classic stream is created.
+  const PERF_TEMPLATE_NAME = 'streams-perf-classic-mapping-fields-override';
   log.info(
-    `Raising index.mapping.total_fields.limit to ${TOTAL_FIELDS_LIMIT} on backing indices [${backingIndices.join(
-      ', '
-    )}]...`
+    `Installing index template ${PERF_TEMPLATE_NAME} with index.mapping.total_fields.limit=${TOTAL_FIELDS_LIMIT}...`
   );
-  await es.indices.putSettings({
-    index: backingIndices,
-    settings: { 'index.mapping.total_fields.limit': TOTAL_FIELDS_LIMIT },
+  await es.indices.putIndexTemplate({
+    name: PERF_TEMPLATE_NAME,
+    index_patterns: [CLASSIC_MAPPING_STREAM],
+    priority: 500,
+    data_stream: {},
+    template: {
+      settings: { 'index.mapping.total_fields.limit': TOTAL_FIELDS_LIMIT },
+    },
   });
+
+  await enableStreams(kibanaServer, log);
+  await createSingleClassicStream(kibanaServer, CLASSIC_MAPPING_STREAM);
 
   log.info(`Mapping ${FIELD_COUNT} field_overrides on ${CLASSIC_MAPPING_STREAM}...`);
 
