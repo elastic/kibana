@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { fetchAlertsIndexNames } from '@kbn/alerts-ui-shared/src/common/apis/fetch_alerts_index_names';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
@@ -169,7 +169,7 @@ describe('WorkflowExecuteEventForm', () => {
   });
 
   it('fetches and displays alerts in table', async () => {
-    const { getByText } = render(
+    render(
       <TestWrapper>
         <WorkflowExecuteEventForm
           value=""
@@ -182,10 +182,7 @@ describe('WorkflowExecuteEventForm', () => {
 
     await waitFor(() => {
       expect(mockSearchSource.fetch$).toHaveBeenCalled();
-    });
-
-    await waitFor(() => {
-      expect(getByText('Test Rule')).toBeInTheDocument();
+      expect(screen.getByText('Test Rule')).toBeInTheDocument();
     });
   });
 

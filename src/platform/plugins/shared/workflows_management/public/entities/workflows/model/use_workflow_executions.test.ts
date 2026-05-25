@@ -51,7 +51,7 @@ describe('useWorkflowExecutions', () => {
     mockGetWorkflowExecutions = jest.fn().mockResolvedValue(executionsPage1);
     mockUseWorkflowsApi.mockReturnValue({
       getWorkflowExecutions: mockGetWorkflowExecutions,
-    } as any);
+    } satisfies Pick<ReturnType<typeof useWorkflowsApi>, 'getWorkflowExecutions'>);
     queryClient = createTestQueryClient();
   });
 
