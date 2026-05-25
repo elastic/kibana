@@ -7,23 +7,34 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { findEsqlStepRegionsFromText } from './find_esql_step_regions';
+import { LineCounter, parseDocument } from 'yaml';
+import { buildWorkflowLookup } from '../../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
+import { collectEsqlRegionsFromLookup } from './extract_esql_region';
 
-describe('findEsqlStepRegionsFromText', () => {
+function regionsFromText(text: string) {
+  const lineCounter = new LineCounter();
+  const document = parseDocument(text, { lineCounter, keepSourceTokens: true });
+  const workflowLookup = buildWorkflowLookup(document, lineCounter);
+  return collectEsqlRegionsFromLookup(workflowLookup, text);
+}
+
+describe('collectEsqlRegionsFromLookup', () => {
   it('returns one region per elasticsearch.esql.query step', () => {
     const text = `steps:
-  - type: elasticsearch.esql.query
+  - name: esql_a
+    type: elasticsearch.esql.query
     with:
       query: |
         FROM logs-* | LIMIT 10
   - type: elasticsearch.search
     with:
       index: other
-  - type: elasticsearch.esql.query
+  - name: esql_b
+    type: elasticsearch.esql.query
     with:
       query: "FROM events | KEEP id"
 `;
-    const regions = findEsqlStepRegionsFromText(text);
+    const regions = regionsFromText(text);
     expect(regions).toHaveLength(2);
     expect(regions[0].scalarStyle).toBe('BLOCK_LITERAL');
     expect(regions[0].esql.includes('FROM logs-* | LIMIT 10')).toBe(true);
@@ -36,23 +47,25 @@ describe('findEsqlStepRegionsFromText', () => {
   - type: foreach
     foreach: '[1,2,3]'
     steps:
-      - type: elasticsearch.esql.query
+      - name: nested_esql
+        type: elasticsearch.esql.query
         with:
           query: |
             FROM logs-*
 `;
-    const regions = findEsqlStepRegionsFromText(text);
+    const regions = regionsFromText(text);
     expect(regions).toHaveLength(1);
     expect(regions[0].esql.includes('FROM logs-*')).toBe(true);
   });
 
   it('skips steps with no query value yet', () => {
     const text = `steps:
-  - type: elasticsearch.esql.query
+  - name: esql_step
+    type: elasticsearch.esql.query
     with:
       query:
 `;
-    expect(findEsqlStepRegionsFromText(text)).toHaveLength(0);
+    expect(regionsFromText(text)).toHaveLength(0);
   });
 
   it('returns [] for unrelated step types', () => {
@@ -62,10 +75,16 @@ describe('findEsqlStepRegionsFromText', () => {
       query:
         match_all: {}
 `;
-    expect(findEsqlStepRegionsFromText(text)).toHaveLength(0);
+    expect(regionsFromText(text)).toHaveLength(0);
   });
 
-  it('returns [] on completely malformed input', () => {
-    expect(findEsqlStepRegionsFromText('::: not yaml :::')).toEqual([]);
+  it('does not treat a comment substring as an ES|QL step', () => {
+    const text = `steps:
+  - name: log_step
+    type: console
+    with:
+      message: "elasticsearch.esql.query is documented here"
+`;
+    expect(regionsFromText(text)).toHaveLength(0);
   });
 });

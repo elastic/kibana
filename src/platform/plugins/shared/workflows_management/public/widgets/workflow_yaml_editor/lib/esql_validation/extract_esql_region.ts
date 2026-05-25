@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Document, Pair, Scalar, YAMLMap } from 'yaml';
-import { isMap, isScalar, parseDocument, visit } from 'yaml';
+import type { Scalar } from 'yaml';
+import { isScalar } from 'yaml';
+import type { WorkflowLookup } from '../../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
 
-const ESQL_QUERY_STEP_TYPE = 'elasticsearch.esql.query';
+export const ESQL_QUERY_STEP_TYPE = 'elasticsearch.esql.query' as const;
 
 export type EsqlScalarStyle =
   | 'BLOCK_LITERAL'
@@ -31,78 +32,45 @@ export interface EsqlStepRegion {
 }
 
 /**
- * Walks the YAML document and returns one `EsqlStepRegion` per
- * `elasticsearch.esql.query` step found. Regions are returned in document
- * order. Steps without a `with.query` value (e.g. the user just typed
- * `query:` without a body yet) are skipped.
- *
- * Pass `parseDocument(modelText)` for a fresh AST; the function gracefully
- * handles partially invalid YAML by ignoring whatever it can't resolve.
+ * Collects one `EsqlStepRegion` per `elasticsearch.esql.query` step from the
+ * store-built workflow lookup (same source as other YAML validators).
  */
-export function findEsqlStepRegions(
-  document: Document | null | undefined,
+export function collectEsqlRegionsFromLookup(
+  workflowLookup: WorkflowLookup,
   modelText: string
 ): EsqlStepRegion[] {
-  if (!document?.contents) {
-    return [];
-  }
   const out: EsqlStepRegion[] = [];
-
-  visit(document, {
-    Map(_key, mapNode) {
-      if (mapNode.get('type') !== ESQL_QUERY_STEP_TYPE) {
-        return undefined;
+  for (const step of Object.values(workflowLookup.steps)) {
+    if (step.stepType === ESQL_QUERY_STEP_TYPE) {
+      const queryProp = step.propInfos['with.query'];
+      if (queryProp?.valueNode) {
+        const region = extractEsqlRegionFromScalar(queryProp.valueNode, modelText);
+        if (region && region.esql.trim().length > 0) {
+          out.push(region);
+        }
       }
-      const withNode = mapNode.get('with', true);
-      if (!isMap(withNode)) {
-        return undefined;
-      }
-      const queryPair = findQueryPair(withNode);
-      if (!queryPair) {
-        return undefined;
-      }
-      const region = extractRegion(queryPair, modelText);
-      // Skip queries that don't yet have any text the validator could chew on —
-      // an empty `query:` is a perfectly valid in-progress state, not an error.
-      if (region && region.esql.trim().length > 0) {
-        out.push(region);
-      }
-      return undefined;
-    },
-  });
-
+    }
+  }
   return out;
 }
 
-/** Convenience: parse + find in one call. Swallows parse errors. */
-export function findEsqlStepRegionsFromText(modelText: string): EsqlStepRegion[] {
-  try {
-    return findEsqlStepRegions(parseDocument(modelText), modelText);
-  } catch {
-    return [];
-  }
-}
-
-function findQueryPair(withNode: YAMLMap): Pair | undefined {
-  for (const item of withNode.items) {
-    if (isScalar(item.key) && item.key.value === 'query') {
-      return item;
-    }
-  }
-  return undefined;
-}
-
-function extractRegion(queryPair: Pair, modelText: string): EsqlStepRegion | null {
-  const value = queryPair.value;
-  if (!isScalar(value) || !value.range) {
+/**
+ * Maps a `with.query` YAML scalar to the ES|QL substring and file offsets used
+ * for validation markers.
+ */
+export function extractEsqlRegionFromScalar(
+  valueNode: Scalar,
+  modelText: string
+): EsqlStepRegion | null {
+  if (!isScalar(valueNode) || !valueNode.range) {
     return null;
   }
-  const [r0, , r2] = value.range;
+  const [r0, , r2] = valueNode.range;
   if (r0 < 0 || r2 < r0 || r2 > modelText.length) {
     return null;
   }
   const sourceSlice = modelText.slice(r0, r2);
-  const style = scalarTypeToStyle(value.type);
+  const style = scalarTypeToStyle(valueNode.type);
 
   if (style === 'BLOCK_LITERAL' || style === 'BLOCK_FOLDED') {
     const newlineIdx = sourceSlice.indexOf('\n');
@@ -137,7 +105,6 @@ function extractRegion(queryPair: Pair, modelText: string): EsqlStepRegion | nul
     };
   }
 
-  // PLAIN
   const leading = sourceSlice.length - sourceSlice.trimStart().length;
   const trailing = sourceSlice.length - sourceSlice.trimEnd().length;
   const contentStart = r0 + leading;
