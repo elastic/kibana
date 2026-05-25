@@ -324,7 +324,7 @@ export const AddEndpointModal: React.FC<AddEndpointModalProps> = ({
                       data-test-subj="addEndpointReasoningTokenUsageNote"
                     >
                       <EuiFlexItem grow={false}>
-                        <EuiIcon type="iInCircle" size="s" color="subdued" aria-hidden />
+                        <EuiIcon type="info" size="s" color="subdued" aria-hidden />
                       </EuiFlexItem>
                       <EuiFlexItem>
                         <EuiText size="xs" color="subdued">
