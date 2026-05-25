@@ -17,6 +17,7 @@ import {
   EuiSelectable,
   EuiSpacer,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import type { ComposeFormValues } from '../compose_form_types';
 import { useMatchedActionPolicies } from './use_matched_action_policies';
@@ -83,9 +84,10 @@ export const LinkedActionPoliciesStep: React.FC<LinkedActionPoliciesStepProps> =
 
   return (
     <>
-      <EuiText size="s">
-        <strong>{actionPoliciesTitle}</strong>
-      </EuiText>
+      <EuiTitle size="xs">
+        <h3>{actionPoliciesTitle}</h3>
+      </EuiTitle>
+      <EuiSpacer size="xs" />
       <EuiText size="s" color="subdued">
         <p>{matchingSubtext}</p>
       </EuiText>
