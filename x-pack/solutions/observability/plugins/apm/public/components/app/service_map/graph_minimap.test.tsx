@@ -21,6 +21,23 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
+jest.mock('../../../context/apm_plugin/use_apm_plugin_context', () => ({
+  useApmPluginContext: () => ({
+    core: {
+      docLinks: {
+        links: {
+          apm: {
+            supportedServiceMaps:
+              'https://www.elastic.co/guide/en/kibana/current/service-maps.html',
+            supportedServiceMapsLegend:
+              'https://www.elastic.co/guide/en/kibana/current/service-maps.html#service-maps-legend',
+          },
+        },
+      },
+    },
+  }),
+}));
+
 jest.mock('./use_keyboard_navigation', () => ({
   useKeyboardNavigation: jest.fn(() => ({
     screenReaderAnnouncement: '',
