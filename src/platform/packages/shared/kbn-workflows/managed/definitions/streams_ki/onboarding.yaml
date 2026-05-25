@@ -178,11 +178,11 @@ steps:
   # -----------------------------------------------------------------------
   # Step 4: Memory generation (best-effort, calls endpoint directly to
   #          avoid workflow input validation on complex objects).
-  #          Triggered when at least one of features or queries was run.
+  #          Triggered when at least one discovery produced results.
   # -----------------------------------------------------------------------
   - name: trigger_memory
     type: if
-    condition: "${{ variables.skipFeatures == false or inputs.skipQueries == false }}"
+    condition: "${{ variables.discoveredFeatures.size > 0 or variables.generatedQueries.size > 0 }}"
     steps:
       - name: generate_memory
         type: kibana.request
