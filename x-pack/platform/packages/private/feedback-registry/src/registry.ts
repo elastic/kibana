@@ -9,6 +9,32 @@ import type { FeedbackRegistryEntry } from '@kbn/feedback-components';
 import { DEFAULT_REGISTRY_ID } from './constants';
 import type { FeedbackRegistry } from './types';
 
+/**
+ * Apps listed here will not have their category prefix in the satisfaction question.
+ * e.g. Questions for "metrics:inventory" will ask users about "Infrastructure inventory" instead of "Observability - Infrastructure inventory"
+ */
+export const APPS_WITHOUT_CATEGORY_PREFIX = [
+  'ml:singleMetricViewer',
+  'ml:resultExplorer',
+  'ml:analyticsMap',
+  'ml:anomalyExplorer',
+  'apm',
+  'apm:service-groups-list',
+  'apm:services',
+  'apm:traces',
+  'apm:service-map',
+  'apm:dependencies',
+  'apm:settings',
+  'apm:storage-explorer',
+  'apm:tutorial',
+  'metrics',
+  'metrics:inventory',
+  'metrics:hosts',
+  'metrics:metrics-explorer',
+  'metrics:settings',
+  'metrics:assetDetails',
+];
+
 const feedbackRegistry: FeedbackRegistry = new Map([
   [DEFAULT_REGISTRY_ID, () => import('./questions/default').then((m) => m.questions)],
   [

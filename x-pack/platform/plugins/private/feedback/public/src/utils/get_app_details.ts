@@ -6,13 +6,7 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-
-const APPS_WITHOUT_CATEGORY_PREFIX = [
-  'ml:singleMetricViewer',
-  'ml:resultExplorer',
-  'ml:analyticsMap',
-  'ml:anomalyExplorer',
-];
+import { APPS_WITHOUT_CATEGORY_PREFIX } from '@kbn/feedback-registry';
 
 /**
  * Get current app details from browser URL and nav links.

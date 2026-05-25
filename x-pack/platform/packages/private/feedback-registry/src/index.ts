@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { getFeedbackQuestionsForApp } from './registry';
+export { getFeedbackQuestionsForApp, APPS_WITHOUT_CATEGORY_PREFIX } from './registry';
 
 export {
   DEFAULT_REGISTRY_ID,
