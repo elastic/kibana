@@ -60,5 +60,8 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
 
     // Cloud connectors
     loadTestFile(require.resolve('./cloud_connector'));
+
+    // Cloud onboarding deployments
+    loadTestFile(require.resolve('./cloud_onboarding_deployment'));
   });
 }
