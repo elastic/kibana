@@ -96,16 +96,47 @@ export function safeOutputSize(output: unknown): number | null {
  * Used by both Layer 1 (pre-emptive I/O enforcement) and Layer 2 (base class output guard).
  */
 export class ResponseSizeLimitError extends ExecutionError {
-  constructor(limitBytes: number, stepName: string) {
+  constructor(
+    limitBytes: number,
+    stepName: string,
+    options: {
+      actualBytes?: number;
+      contentLengthBytes?: number;
+      estimatedOutputBytes?: number;
+    } = {}
+  ) {
+    const { actualBytes, contentLengthBytes, estimatedOutputBytes } = options;
+    const candidates = [actualBytes, estimatedOutputBytes, contentLengthBytes];
+    const suggestedLimitBytes = candidates.find(
+      (n): n is number => typeof n === 'number' && n > limitBytes
+    );
+    const actualSizeMessage = actualBytes
+      ? `Actual serialized output size was ${formatBytes(actualBytes)}. `
+      : '';
+    const contentLengthMessage =
+      contentLengthBytes !== undefined && contentLengthBytes >= limitBytes
+        ? `The response advertised a content length of ${formatBytes(contentLengthBytes)}. `
+        : '';
+    const estimatedOutputMessage = estimatedOutputBytes
+      ? `Estimated step output size is ${formatBytes(estimatedOutputBytes)}. `
+      : '';
+    const suggestedLimitMessage = suggestedLimitBytes
+      ? `Set 'max-step-size' to at least ${formatBytes(
+          suggestedLimitBytes
+        )}, or reduce the response size.`
+      : `Configure 'max-step-size' at the step or workflow level to increase the limit, or reduce the response size (e.g., filter fields, limit results).`;
+
     super({
       type: 'StepSizeLimitExceeded',
-      message:
-        `Step "${stepName}" output exceeded the ` +
-        `${formatBytes(limitBytes)} size limit. ` +
-        `Configure 'max-step-size' at the step or workflow level to increase the limit, ` +
-        `or reduce the response size (e.g., filter fields, limit results).`,
+      message: `Step "${stepName}" output exceeded the ${formatBytes(
+        limitBytes
+      )} size limit. ${actualSizeMessage}${contentLengthMessage}${estimatedOutputMessage}${suggestedLimitMessage}`,
       details: {
         limitBytes,
+        ...(actualBytes ? { actualBytes } : {}),
+        ...(contentLengthBytes ? { contentLengthBytes } : {}),
+        ...(estimatedOutputBytes ? { estimatedOutputBytes } : {}),
+        ...(suggestedLimitBytes ? { suggestedLimitBytes } : {}),
       },
     });
   }
