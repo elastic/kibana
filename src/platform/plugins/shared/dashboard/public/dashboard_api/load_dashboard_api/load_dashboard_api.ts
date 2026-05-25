@@ -9,8 +9,6 @@
 
 import type { EuiFlyoutProps } from '@elastic/eui';
 import { ContentInsightsClient } from '@kbn/content-management-content-insights-public';
-import { i18n } from '@kbn/i18n';
-import { toMountPoint } from '@kbn/react-kibana-mount';
 import { asyncForEach } from '@kbn/std';
 
 import { getLastSavedState } from '../../../common/default_dashboard_state';
@@ -28,7 +26,7 @@ import { DASHBOARD_DURATION_START_MARK } from '../performance/dashboard_duration
 import { startQueryPerformanceTracking } from '../performance/query_performance_tracking';
 import type { DashboardCreationOptions } from '../types';
 import { getUserAccessControlData } from './get_user_access_control_data';
-import { getWarningToast } from './get_warning_toast';
+import { showWarningToast } from './show_warning_toast';
 import { transformPanels } from './transform_panels';
 
 export async function loadDashboardApi({
@@ -71,17 +69,7 @@ export async function loadDashboardApi({
   }
 
   if (readResult?.warnings?.length) {
-    coreServices.notifications.toasts.addWarning({
-      title: i18n.translate('dashboard.schemaWarning', {
-        defaultMessage:
-          'This dashboard has {warningCount, plural, one {a warning} other {warnings}}',
-        values: { warningCount: readResult.warnings.length },
-      }),
-      text: toMountPoint(
-        getWarningToast({ warnings: readResult.warnings }),
-        coreServices.rendering
-      ),
-    });
+    showWarningToast({ warnings: readResult.warnings });
   }
 
   await initializeDashboardApiServices();

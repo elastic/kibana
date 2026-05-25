@@ -27,7 +27,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { Warnings } from '../../../server/api/types';
 import { coreServices } from '../../services/kibana_services';
 
-export const getWarningToast = ({ warnings }: { warnings: Warnings }) => {
+export const showWarningToast = ({ warnings }: { warnings: Warnings }) => {
   let droppedPanelsCount = 0;
   let generalWarningCount = 0;
   warnings.forEach((warning) => {
@@ -72,7 +72,7 @@ export const getWarningToast = ({ warnings }: { warnings: Warnings }) => {
           </EuiModalHeader>
           <EuiModalBody>
             <EuiCodeBlock language="json" fontSize="m" paddingSize="s" isCopyable>
-              {JSON.stringify(warnings)}
+              {JSON.stringify(warnings, null, 2)}
             </EuiCodeBlock>
           </EuiModalBody>
           <EuiModalFooter>
@@ -88,18 +88,26 @@ export const getWarningToast = ({ warnings }: { warnings: Warnings }) => {
     );
   };
 
-  return (
-    <>
-      <p>{warningMessage}</p>
-      <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <EuiButton color="warning" size="s" onClick={openModal}>
-            {i18n.translate('dashboard.warningToast.button', {
-              defaultMessage: 'Learn more',
-            })}
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </>
-  );
+  coreServices.notifications.toasts.addWarning({
+    title: i18n.translate('dashboard.schemaWarning', {
+      defaultMessage:
+        'This dashboard has {warningCount} {warningCount, plural, one {warning} other {warnings}}.',
+      values: { warningCount: warnings.length },
+    }),
+    text: toMountPoint(
+      <>
+        <p>{warningMessage}</p>
+        <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiButton color="warning" size="s" onClick={openModal}>
+              {i18n.translate('dashboard.warningToast.button', {
+                defaultMessage: 'Learn more',
+              })}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </>,
+      coreServices.rendering
+    ),
+  });
 };
