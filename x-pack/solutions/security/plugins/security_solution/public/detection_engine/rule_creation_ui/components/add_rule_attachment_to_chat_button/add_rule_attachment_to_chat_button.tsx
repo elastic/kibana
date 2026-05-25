@@ -6,6 +6,7 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import type { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import type { RuleCreateProps } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { RuleResponse } from '../../../../../common/api/detection_engine';
@@ -101,7 +102,14 @@ export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButt
     } else {
       formattedRule = rule;
     }
-    const attachmentLabel = formattedRule?.name;
+    const attachmentLabel =
+      formattedRule?.name ||
+      (isFormBased && !existingRuleId
+        ? i18n.translate(
+            'xpack.securitySolution.detectionEngine.createRule.aiRuleCreationAttachmentLabel',
+            { defaultMessage: 'New Rule' }
+          )
+        : undefined);
     const attachmentData = JSON.stringify(formattedRule);
 
     return {
