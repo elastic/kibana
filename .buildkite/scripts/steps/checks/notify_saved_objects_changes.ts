@@ -61,6 +61,12 @@ export interface SavedObjectsCheckReport {
    * Only present when both `from` and `to` snapshots were available during the check.
    */
   typeChanges?: Record<string, TypeChangeDetails>;
+  /**
+   * True when the check ran against synthetic test data (either via `--test`
+   * or the automatic fallback when no real SO types changed). The change lists
+   * in this case reflect test fixtures, not actual contributor changes.
+   */
+  testMode?: boolean;
 }
 
 const COMMENT_CONTEXT = 'saved-objects-check';
@@ -227,6 +233,12 @@ ${summary}${changeDetails}${mappingsBanner}${reminder}`;
 }
 
 export function buildCommentBody(report: SavedObjectsCheckReport): string | null {
+  // When the check ran against synthetic test data (no real SO types changed),
+  // the change lists reflect test fixtures rather than contributor work.
+  // Posting a comment in this case would be confusing and unhelpful.
+  if (report.testMode) {
+    return null;
+  }
   if (report.status === 'fail') {
     return buildFailureBody(report);
   }
