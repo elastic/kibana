@@ -47,6 +47,7 @@ export interface DocLinks {
     readonly tailSamplingPolicies: string;
     readonly elasticAgent: string;
     readonly storageExplorer: string;
+    readonly infrastructureTab: string;
     readonly spanCompression: string;
     readonly transactionSampling: string;
     readonly indexLifecycleManagement: string;

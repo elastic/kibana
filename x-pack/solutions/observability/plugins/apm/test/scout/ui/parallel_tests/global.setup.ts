@@ -23,6 +23,7 @@ import { testData } from '../fixtures';
 import { serviceDataWithRecentErrors } from '../fixtures/synthtrace/recent_errors';
 import { distributedTrace } from '../fixtures/synthtrace/distributed_trace';
 import { serviceMapMultiEnv } from '../fixtures/synthtrace/service_map_multi_env';
+import { infrastructure } from '../fixtures/synthtrace/infrastructure';
 
 globalSetupHook(
   'Ingest data to Elasticsearch',
@@ -39,8 +40,13 @@ globalSetupHook(
       from: new Date(testData.START_DATE).getTime(),
       to: new Date(testData.END_DATE).getTime(),
     });
+    const infrastructureDataGenerator = infrastructure({
+      from: new Date(testData.START_DATE).getTime(),
+      to: new Date(testData.END_DATE).getTime(),
+    });
 
     await apmSynthtraceEsClient.index(opbeansDataGenerator);
+    await apmSynthtraceEsClient.index(infrastructureDataGenerator);
     await apmSynthtraceEsClient.index(servicesDataFromTheLast24Hours());
 
     // Generate service map multi-environment data for embeddable tests
