@@ -24,6 +24,9 @@ export function toExecutionModel(
     ...(typeof workflow.originManagedWorkflowId === 'string'
       ? { originManagedWorkflowId: workflow.originManagedWorkflowId }
       : {}),
+    ...(typeof workflow.managedVersion === 'number'
+      ? { managedVersion: workflow.managedVersion }
+      : {}),
     isTestRun,
   };
 }
