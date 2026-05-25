@@ -157,10 +157,7 @@ describe('build_prompts', () => {
 
     it('renders object categories with name and description', () => {
       const parts = buildClassificationRequestPart({
-        categories: [
-          { name: 'Critical', description: 'Immediate action required' },
-          'Info',
-        ],
+        categories: [{ name: 'Critical', description: 'Immediate action required' }, 'Info'],
         allowMultipleCategories: false,
         includeRationale: false,
       });

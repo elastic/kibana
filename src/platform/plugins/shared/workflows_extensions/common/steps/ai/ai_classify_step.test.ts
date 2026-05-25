@@ -41,10 +41,7 @@ describe('ai_classify_step common', () => {
     it('InputSchema accepts categories and fallbackCategory as objects with name and description', () => {
       const result = InputSchema.safeParse({
         input: 'text',
-        categories: [
-          { name: 'Critical', description: 'Immediate action required' },
-          'Info',
-        ],
+        categories: [{ name: 'Critical', description: 'Immediate action required' }, 'Info'],
         fallbackCategory: { name: 'Unknown', description: 'No clear match' },
       });
       expect(result.success).toBe(true);
