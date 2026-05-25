@@ -373,17 +373,24 @@ export const RuleDetailsPage = connector(
       }
     }, [maybeRule]);
 
-    // Refresh the rule whenever a chat-initiated save completes so changes made
-    // via the AI assistant are immediately reflected on this page.
     useEffect(() => {
       let wasSaving = false;
-      const sub = aiRuleCreation.saving$.subscribe((isSaving) => {
-        if (wasSaving && !isSaving) {
+      let isDirty = false;
+
+      const dirtySub = aiRuleCreation.dirty$.subscribe((d: boolean) => {
+        isDirty = d;
+      });
+      const savingSub = aiRuleCreation.saving$.subscribe((isSaving: boolean) => {
+        if (wasSaving && !isSaving && !isDirty) {
           refreshRule();
         }
         wasSaving = isSaving;
       });
-      return () => sub.unsubscribe();
+
+      return () => {
+        dirtySub.unsubscribe();
+        savingSub.unsubscribe();
+      };
     }, [aiRuleCreation, refreshRule]);
 
     useLegacyUrlRedirect({ rule, spacesApi });
