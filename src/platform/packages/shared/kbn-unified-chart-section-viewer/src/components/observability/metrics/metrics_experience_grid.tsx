@@ -38,7 +38,6 @@ export const MetricsExperienceGrid = ({
   isTabSelected,
   breakdownField,
   onBreakdownFieldChange,
-  chartSectionSearchError,
 }: UnifiedMetricsGridProps) => {
   const {
     searchTerm,
@@ -138,10 +137,10 @@ export const MetricsExperienceGrid = ({
     return <EmptyState isLoading={isDiscoverLoading} />;
   }
 
-  const showMetricsInfoError =
+  const showChartSectionSearchError =
     metricsInfoError != null && !isDiscoverLoading && !isSuppressedFetchError(metricsInfoError);
 
-  if (showMetricsInfoError) {
+  if (showChartSectionSearchError) {
     return (
       <ChartSectionSearchError
         error={metricsInfoError}
@@ -149,7 +148,6 @@ export const MetricsExperienceGrid = ({
           defaultMessage: 'Unable to retrieve search results',
         })}
         isEsqlMode
-        {...chartSectionSearchError}
       />
     );
   }

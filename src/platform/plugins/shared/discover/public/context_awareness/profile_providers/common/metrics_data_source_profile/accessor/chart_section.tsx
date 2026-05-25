@@ -41,17 +41,13 @@ const MetricsExperienceGridWrapper = (
   );
 
   const externalServices = useMemo(
-    () => ({ discoverShared, dataViews }),
-    [discoverShared, dataViews]
-  );
-
-  const chartSectionSearchError = useMemo(
     () => ({
-      showErrorDialog: ({ title, error }: { title: string; error: Error }) =>
-        core.notifications.showErrorDialog({ title, error }),
-      esqlReferenceHref: docLinks.links.query.queryESQL,
+      discoverShared,
+      dataViews,
+      notifications: core.notifications,
+      docLinks,
     }),
-    [core.notifications, docLinks.links.query.queryESQL]
+    [discoverShared, dataViews, core.notifications, docLinks]
   );
 
   return (
@@ -62,7 +58,6 @@ const MetricsExperienceGridWrapper = (
       breakdownField={breakdownField}
       onBreakdownFieldChange={onBreakdownFieldChange}
       externalServices={externalServices}
-      chartSectionSearchError={chartSectionSearchError}
     />
   );
 };
