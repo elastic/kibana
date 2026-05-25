@@ -76,6 +76,10 @@ describe('getViewInAppUrl', () => {
   });
 
   it('should extend the time range with the lookback window', () => {
+    const mockDateNow = jest
+      .spyOn(global.Date, 'now')
+      .mockImplementation(() => new Date('2026-01-01T00:00:00.000Z').valueOf());
+
     const args: GetViewInAppUrlArgs = {
       logsLocator,
       startedAt,
@@ -101,6 +105,8 @@ describe('getViewInAppUrl', () => {
       },
       {}
     );
+
+    mockDateNow.mockRestore();
   });
 
   it('should call getRedirectUrl with only count filter', () => {

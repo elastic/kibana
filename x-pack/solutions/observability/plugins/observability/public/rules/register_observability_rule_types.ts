@@ -62,6 +62,39 @@ const getDataViewId = (searchConfiguration?: SearchConfigurationWithExtractedRef
     ? searchConfiguration.index
     : searchConfiguration?.index?.title;
 
+export const formatCustomThresholdAlert = (
+  fields: Record<string, any>,
+  logsLocator?: LocatorPublic<DiscoverAppLocatorParams>
+) => {
+  const groups = getGroups(fields[ALERT_GROUP_FIELD], fields[ALERT_GROUP_VALUE]);
+  const searchConfiguration = fields[ALERT_RULE_PARAMETERS]?.searchConfiguration as
+    | SearchConfigurationWithExtractedReferenceType
+    | undefined;
+  const criteriaRaw = fields[ALERT_RULE_PARAMETERS]?.criteria;
+  const criteria = (
+    Array.isArray(criteriaRaw) ? criteriaRaw : criteriaRaw ? [criteriaRaw] : []
+  ) as MetricExpression[];
+  const singleCriterion = criteria.length === 1 ? criteria[0] : undefined;
+  const metrics: CustomThresholdExpressionMetric[] = singleCriterion?.metrics ?? [];
+
+  const dataViewId = getDataViewId(searchConfiguration);
+
+  return {
+    reason: fields[ALERT_REASON] ?? '-',
+    link: getViewInAppUrl({
+      dataViewId,
+      groups,
+      logsLocator,
+      metrics,
+      searchConfiguration,
+      startedAt: fields[ALERT_START],
+      timeSize: singleCriterion?.timeSize,
+      timeUnit: singleCriterion?.timeUnit,
+    }),
+    hasBasePath: true,
+  };
+};
+
 export const registerObservabilityRuleTypes = (
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry,
   uiSettings: IUiSettingsClient,
@@ -93,35 +126,8 @@ export const registerObservabilityRuleTypes = (
     defaultActionMessage: thresholdDefaultActionMessage,
     defaultRecoveryMessage: thresholdDefaultRecoveryMessage,
     requiresAppContext: false,
-    format: ({ fields }) => {
-      const groups = getGroups(fields[ALERT_GROUP_FIELD], fields[ALERT_GROUP_VALUE]);
-      const searchConfiguration = fields[ALERT_RULE_PARAMETERS]?.searchConfiguration as
-        | SearchConfigurationWithExtractedReferenceType
-        | undefined;
-      const criteriaRaw = fields[ALERT_RULE_PARAMETERS]?.criteria;
-      const criteria = (
-        Array.isArray(criteriaRaw) ? criteriaRaw : criteriaRaw ? [criteriaRaw] : []
-      ) as MetricExpression[];
-      const singleCriterion = criteria.length === 1 ? criteria[0] : undefined;
-      const metrics: CustomThresholdExpressionMetric[] = singleCriterion?.metrics ?? [];
-
-      const dataViewId = getDataViewId(searchConfiguration);
-
-      return {
-        reason: fields[ALERT_REASON] ?? '-',
-        link: getViewInAppUrl({
-          dataViewId,
-          groups,
-          logsLocator,
-          metrics,
-          searchConfiguration,
-          startedAt: fields[ALERT_START],
-          timeSize: singleCriterion?.timeSize,
-          timeUnit: singleCriterion?.timeUnit,
-        }),
-        hasBasePath: true,
-      };
-    },
+    format: ({ fields }) =>
+      formatCustomThresholdAlert(fields, logsLocator),
     alertDetailsAppSection: lazy(
       () =>
         import(

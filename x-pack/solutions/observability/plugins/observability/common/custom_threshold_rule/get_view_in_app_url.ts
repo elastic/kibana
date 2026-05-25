@@ -41,7 +41,8 @@ export const getViewInAppLocatorParams = ({
   const searchConfigurationQuery = searchConfiguration?.query.query;
   const searchConfigurationFilters = searchConfiguration?.filter || [];
   const groupFilters = getGroupFilters(groups);
-  const lookBackWindow = timeSize && timeUnit ? { size: timeSize, unit: timeUnit } : undefined;
+  const lookBackWindow =
+    timeSize !== undefined && timeUnit ? { size: timeSize, unit: timeUnit } : undefined;
   const timeRange: TimeRange | undefined = getPaddedAlertTimeRange(
     startedAt,
     endedAt,
