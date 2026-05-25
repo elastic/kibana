@@ -126,7 +126,8 @@ export function fromColorByValueLensStateToAPI(
   const { rangeType, reverse } = colorParams;
   let originalStops = colorParams.stops ?? [];
 
-  const palette = colorParams.name ?? 'custom';
+  // config.name is the root palette identifier used by the runtime palette service
+  const palette = config.name ?? colorParams.name ?? 'custom';
   const isLegacy = palette !== 'custom';
   const rangeMin = getRangeValue(colorParams.rangeMin);
   const rangeMax = getRangeValue(colorParams.rangeMax);

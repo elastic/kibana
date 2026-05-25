@@ -1,0 +1,499 @@
+{
+  "sha1": "5468f66aa8dfbca4630df7e832a08a85e6a4c4a8",
+  "tests": [
+    {
+      "id": "567909ceb07724b-3b647c7c5404028",
+      "title": "certs api returns empty array for no data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/certs.spec.ts",
+        "line": 33,
+        "column": 10
+      }
+    },
+    {
+      "id": "567909ceb07724b-ae3ed9f9482799d",
+      "title": "certs api retrieves expected cert data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/certs.spec.ts",
+        "line": 53,
+        "column": 10
+      }
+    },
+    {
+      "id": "e483209da94aeb8-cfc1a3e7992c280",
+      "title": "dynamic settings returns the defaults when no user settings have been saved",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/dynamic_settings.spec.ts",
+        "line": 38,
+        "column": 10
+      }
+    },
+    {
+      "id": "e483209da94aeb8-40d2dfdb3c33679",
+      "title": "dynamic settings can change the settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/dynamic_settings.spec.ts",
+        "line": 53,
+        "column": 10
+      }
+    },
+    {
+      "id": "fce897984f71798-b9ef7c35e2a0869",
+      "title": "feature controls heartbeat-* read privileges only returns 403",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/feature_controls.spec.ts",
+        "line": 30,
+        "column": 10
+      }
+    },
+    {
+      "id": "fce897984f71798-8aa92f27bd11c3a",
+      "title": "feature controls global all plus heartbeat-* read returns 200",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/feature_controls.spec.ts",
+        "line": 48,
+        "column": 10
+      }
+    },
+    {
+      "id": "fce897984f71798-964af03885a959d",
+      "title": "feature controls dashboard all plus heartbeat-* read returns 403",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/feature_controls.spec.ts",
+        "line": 70,
+        "column": 10
+      }
+    },
+    {
+      "id": "fce897984f71798-ef520772abab1bb",
+      "title": "feature controls uptime read in space_1 can access pings API in space_1",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/feature_controls.spec.ts",
+        "line": 98,
+        "column": 10
+      }
+    },
+    {
+      "id": "fce897984f71798-0e1ac33719803c3",
+      "title": "feature controls uptime read in space_1 cannot access pings API in default space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/feature_controls.spec.ts",
+        "line": 132,
+        "column": 10
+      }
+    },
+    {
+      "id": "28f84d33e329cad-c4dd0908722f188",
+      "title": "get_all_pings should get all pings stored in index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/get_all_pings.spec.ts",
+        "line": 20,
+        "column": 10
+      }
+    },
+    {
+      "id": "28f84d33e329cad-dabfc996e0b705f",
+      "title": "get_all_pings should sort pings according to timestamp",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/get_all_pings.spec.ts",
+        "line": 36,
+        "column": 10
+      }
+    },
+    {
+      "id": "28f84d33e329cad-9b8055a70e816fd",
+      "title": "get_all_pings should return results of n length",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/get_all_pings.spec.ts",
+        "line": 53,
+        "column": 10
+      }
+    },
+    {
+      "id": "28f84d33e329cad-7a646820f88b500",
+      "title": "get_all_pings should miss pings outside of date range",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/get_all_pings.spec.ts",
+        "line": 70,
+        "column": 10
+      }
+    },
+    {
+      "id": "8803804a84c7d36-a2f68bce77d2650",
+      "title": "indexStatus query returns index status for heartbeat indices",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/index_status.spec.ts",
+        "line": 21,
+        "column": 10
+      }
+    },
+    {
+      "id": "c838d5fd0e4eee9-ed96d9a9f13cdde",
+      "title": "monitor duration query will fetch a series of data points for monitor duration and status",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/monitor_duration.spec.ts",
+        "line": 21,
+        "column": 10
+      }
+    },
+    {
+      "id": "c838d5fd0e4eee9-9624c2cefae08a6",
+      "title": "monitor duration query will fetch empty sets for a date range with no data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/monitor_duration.spec.ts",
+        "line": 41,
+        "column": 10
+      }
+    },
+    {
+      "id": "e6f421412a77017-c3e9a9daa5b7248",
+      "title": "get monitor latest status API returns the status for only the given monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/monitor_latest_status.spec.ts",
+        "line": 21,
+        "column": 10
+      }
+    },
+    {
+      "id": "c21194b3cd084bf-051050a27d65972",
+      "title": "monitor state scoping should return no monitors and have no errors for checks with no summaries",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/monitor_states_generated.spec.ts",
+        "line": 30,
+        "column": 10
+      }
+    },
+    {
+      "id": "c21194b3cd084bf-87ececcdbfc2500",
+      "title": "monitor state scoping should not match non summary documents when check status does not match document status",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/monitor_states_generated.spec.ts",
+        "line": 56,
+        "column": 10
+      }
+    },
+    {
+      "id": "c21194b3cd084bf-65190b1adaf37fa",
+      "title": "monitor state scoping should return all monitors when no status filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/monitor_states_generated.spec.ts",
+        "line": 190,
+        "column": 10
+      }
+    },
+    {
+      "id": "c21194b3cd084bf-f699d19c4121bd6",
+      "title": "monitor state scoping should return a monitor with mix state if check status filter is down",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/monitor_states_generated.spec.ts",
+        "line": 217,
+        "column": 10
+      }
+    },
+    {
+      "id": "c21194b3cd084bf-667719ae7d7096e",
+      "title": "monitor state scoping should not return a monitor with mix state if check status filter is up",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/monitor_states_generated.spec.ts",
+        "line": 244,
+        "column": 10
+      }
+    },
+    {
+      "id": "4fb8ce6951d1c55-7dec5453ef81638",
+      "title": "monitor states endpoint will fetch monitor state data for the given filters and range",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/monitor_states_real_data.spec.ts",
+        "line": 59,
+        "column": 10
+      }
+    },
+    {
+      "id": "4fb8ce6951d1c55-c004e08a58d0a93",
+      "title": "monitor states endpoint will fetch monitor state data for the given down filters",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/monitor_states_real_data.spec.ts",
+        "line": 86,
+        "column": 10
+      }
+    },
+    {
+      "id": "4fb8ce6951d1c55-dd279aad18a41c6",
+      "title": "monitor states endpoint can navigate forward and backward using pagination",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/monitor_states_real_data.spec.ts",
+        "line": 117,
+        "column": 10
+      }
+    },
+    {
+      "id": "85b726593749900-a10cfd2196c8a72",
+      "title": "pingHistogram will fetch histogram data for all monitors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/ping_histogram.spec.ts",
+        "line": 25,
+        "column": 10
+      }
+    },
+    {
+      "id": "85b726593749900-a6dd2dc60e8ed99",
+      "title": "pingHistogram will fetch histogram data for a given monitor id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/ping_histogram.spec.ts",
+        "line": 39,
+        "column": 10
+      }
+    },
+    {
+      "id": "85b726593749900-c404123caaa9bc7",
+      "title": "pingHistogram will fetch histogram data for a given filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/ping_histogram.spec.ts",
+        "line": 54,
+        "column": 10
+      }
+    },
+    {
+      "id": "31c1bb347b9557c-d428ab40a194f03",
+      "title": "pingList query returns a list of pings for the date range and given size",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/ping_list.spec.ts",
+        "line": 24,
+        "column": 10
+      }
+    },
+    {
+      "id": "31c1bb347b9557c-71902d4960e506b",
+      "title": "pingList query returns a list of pings for a monitor ID",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/ping_list.spec.ts",
+        "line": 93,
+        "column": 10
+      }
+    },
+    {
+      "id": "31c1bb347b9557c-46c2ae1874d2be4",
+      "title": "pingList query returns a list of pings sorted ascending",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/ping_list.spec.ts",
+        "line": 130,
+        "column": 10
+      }
+    },
+    {
+      "id": "11c5bbd1ee67015-7c82c3f2732cb2b",
+      "title": "snapshot count returns null snapshot when no data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/snapshot.spec.ts",
+        "line": 28,
+        "column": 10
+      }
+    },
+    {
+      "id": "11c5bbd1ee67015-f4bc7f42b0044da",
+      "title": "snapshot count counts correctly with timespans=true and observer=true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/snapshot.spec.ts",
+        "line": 47,
+        "column": 14
+      }
+    },
+    {
+      "id": "11c5bbd1ee67015-8565bc24a83d876",
+      "title": "snapshot count counts correctly with timespans=true and observer=false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/snapshot.spec.ts",
+        "line": 47,
+        "column": 14
+      }
+    },
+    {
+      "id": "11c5bbd1ee67015-888327a3549c855",
+      "title": "snapshot count counts correctly with timespans=false and observer=true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/snapshot.spec.ts",
+        "line": 47,
+        "column": 14
+      }
+    },
+    {
+      "id": "11c5bbd1ee67015-41ec473798af69f",
+      "title": "snapshot count counts correctly with timespans=false and observer=false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/snapshot.spec.ts",
+        "line": 47,
+        "column": 14
+      }
+    },
+    {
+      "id": "bdc8ee6216ae416-b70e6d1b020dee2",
+      "title": "UptimeIntegrationDeprecation returns false when no zip url policies",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/uptime_integration_deprecation.spec.ts",
+        "line": 92,
+        "column": 10
+      }
+    },
+    {
+      "id": "bdc8ee6216ae416-fb7104f58b169f4",
+      "title": "UptimeIntegrationDeprecation returns true when non-managed synthetics policies exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/uptime_integration_deprecation.spec.ts",
+        "line": 105,
+        "column": 10
+      }
+    }
+  ]
+}
