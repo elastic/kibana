@@ -9,8 +9,8 @@
 
 import { WorkflowForbiddenError } from './workflow_forbidden_error';
 
-export class ManagedWorkflowDeleteForbiddenError extends WorkflowForbiddenError {
+export class WorkflowUpdateForbiddenError extends WorkflowForbiddenError {
   constructor() {
-    super('Managed workflows cannot be deleted.');
+    super('Workflow update requires the workflow update privilege.');
   }
 }

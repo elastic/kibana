@@ -17,6 +17,7 @@ import { workflowsExecutionEngineMock } from '@kbn/workflows-execution-engine/se
 import { z } from '@kbn/zod/v4';
 import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_error';
 import { ManagedWorkflowUpdateForbiddenError } from './managed_workflow_errors';
+import { WorkflowUpdateForbiddenError } from './workflow_update_forbidden_error';
 import { type SmlIndexAttachmentFn, WorkflowsManagementApi } from './workflows_management_api';
 import type { WorkflowsService } from './workflows_management_service';
 
@@ -691,16 +692,48 @@ steps:
       );
     });
 
+    it('rejects managed workflow updates without the workflow update privilege', async () => {
+      mockWorkflowsService.getWorkflow.mockResolvedValue(createWorkflowDto({ managed: true }));
+      (mockRequest as any).authzResult = {
+        [WorkflowsManagementApiActions.update]: false,
+        [WorkflowsManagementApiActions.updateManagedWorkflows]: true,
+      };
+
+      await expect(
+        api.updateWorkflow('wf-1', { name: 'Updated Workflow' }, 'default', mockRequest)
+      ).rejects.toBeInstanceOf(WorkflowUpdateForbiddenError);
+
+      expect(mockWorkflowsService.updateWorkflow).not.toHaveBeenCalled();
+    });
+
     it('keeps unmanaged workflow updates unchanged', async () => {
       const updateResult = { name: 'Updated Workflow' } as any;
       mockWorkflowsService.getWorkflow.mockResolvedValue(createWorkflowDto({ managed: false }));
       mockWorkflowsService.updateWorkflow.mockResolvedValue(updateResult);
+      (mockRequest as any).authzResult = {
+        [WorkflowsManagementApiActions.update]: true,
+        [WorkflowsManagementApiActions.updateManagedWorkflows]: false,
+      };
 
       await expect(
         api.updateWorkflow('wf-1', { name: 'Updated Workflow' }, 'default', mockRequest)
       ).resolves.toBe(updateResult);
 
       expect(mockWorkflowsService.updateWorkflow).toHaveBeenCalled();
+    });
+
+    it('rejects unmanaged workflow updates without the workflow update privilege', async () => {
+      mockWorkflowsService.getWorkflow.mockResolvedValue(createWorkflowDto({ managed: false }));
+      (mockRequest as any).authzResult = {
+        [WorkflowsManagementApiActions.update]: false,
+        [WorkflowsManagementApiActions.updateManagedWorkflows]: true,
+      };
+
+      await expect(
+        api.updateWorkflow('wf-1', { name: 'Updated Workflow' }, 'default', mockRequest)
+      ).rejects.toBeInstanceOf(WorkflowUpdateForbiddenError);
+
+      expect(mockWorkflowsService.updateWorkflow).not.toHaveBeenCalled();
     });
   });
 
@@ -834,6 +867,9 @@ steps:
     it('notifies SML with "update" action on updateWorkflow', async () => {
       mockWorkflowsService.getWorkflow.mockResolvedValue(createWorkflowDto({ id: 'wf-upd' }));
       mockWorkflowsService.updateWorkflow.mockResolvedValue({} as any);
+      (mockRequest as any).authzResult = {
+        [WorkflowsManagementApiActions.update]: true,
+      };
 
       await api.updateWorkflow('wf-upd', { name: 'Updated' }, 'default', mockRequest);
 

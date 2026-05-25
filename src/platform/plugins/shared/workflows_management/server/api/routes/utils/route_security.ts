@@ -64,7 +64,6 @@ export const WORKFLOW_UPDATE_SECURITY: RouteSecurity = {
 export const WORKFLOW_UPDATE_WITH_MANAGED_WORKFLOWS_SECURITY: RouteSecurity = {
   authz: {
     requiredPrivileges: [
-      WorkflowsManagementApiActions.update,
       {
         anyRequired: [
           WorkflowsManagementApiActions.update,

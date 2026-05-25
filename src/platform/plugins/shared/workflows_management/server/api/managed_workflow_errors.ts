@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export class ManagedWorkflowUpdateForbiddenError extends Error {
+import { WorkflowForbiddenError } from './workflow_forbidden_error';
+
+export class ManagedWorkflowUpdateForbiddenError extends WorkflowForbiddenError {
   constructor() {
     super('Managed workflows cannot be edited. You can only enable or disable them.');
   }

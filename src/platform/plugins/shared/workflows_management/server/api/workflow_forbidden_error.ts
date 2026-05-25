@@ -7,11 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_error';
-import { ManagedWorkflowUpdateForbiddenError } from './managed_workflow_errors';
-
-export const isManagedWorkflowForbiddenError = (
-  error: Error
-): error is ManagedWorkflowDeleteForbiddenError | ManagedWorkflowUpdateForbiddenError =>
-  error instanceof ManagedWorkflowDeleteForbiddenError ||
-  error instanceof ManagedWorkflowUpdateForbiddenError;
+export abstract class WorkflowForbiddenError extends Error {}
