@@ -560,15 +560,6 @@ export const getAgentVersionMatchingCurrentStack = async (
     version += '-SNAPSHOT';
   }
 
-  // --- TEMPORARY WORKAROUND ---
-  // Temporarily pinned to 9.4.1 as a workaround for a Fleet Server regression in 9.5.0-SNAPSHOT.
-  // See Slack thread: https://elastic.slack.com/archives/C06TGC6D343/p1779259445336199
-  if (version === '9.5.0-SNAPSHOT') {
-    log.info(`Using temporarily fixed agent version 9.4.1 instead of 9.5.0-SNAPSHOT.`);
-    return '9.4.1';
-  }
-  // --- TEMPORARY WORKAROUND ---
-
   return version;
 };
 
