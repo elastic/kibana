@@ -25,6 +25,7 @@ jest.mock(
   })
 );
 
+import type { WorkflowLookup } from '@kbn/workflows-yaml';
 import { useYamlValidation } from './use_yaml_validation';
 import { WorkflowsContextProvider } from '../../../common/context';
 import { selectDetail } from '../../../entities/workflows/store';
@@ -525,7 +526,7 @@ steps:
   });
 
   it('validateEsqlSteps early-outs when no elasticsearch.esql.query step exists', async () => {
-    mockValidateEsqlSteps.mockImplementation(async (workflowLookup) => {
+    mockValidateEsqlSteps.mockImplementation(async (workflowLookup: WorkflowLookup) => {
       const hasEsqlStep = Object.values(workflowLookup.steps).some(
         (step) => step.stepType === 'elasticsearch.esql.query'
       );

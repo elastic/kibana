@@ -77,7 +77,6 @@ describe('validateEsqlSteps — Liquid policy', () => {
 
   it('row 10: runs validateQuery on plain ES|QL and surfaces real diagnostics', async () => {
     const text = buildStep('FROM logs-* | KEEPP @timestamp');
-    const model = createTextModel(text);
     mockValidate.mockResolvedValue({
       errors: [
         {
@@ -99,7 +98,6 @@ describe('validateEsqlSteps — Liquid policy', () => {
   describe('mask path: Liquid only inside string literals', () => {
     it('row 1: passes a whitespace-masked query to validateQuery', async () => {
       const text = buildStep('WHERE host == "{{ inputs.host }}"');
-      const model = createTextModel(text);
       mockValidate.mockResolvedValue({ errors: [], warnings: [] });
       await validateEsqlFromText(text, stubCallbacks);
       expect(mockValidate).toHaveBeenCalledTimes(1);
@@ -112,7 +110,6 @@ describe('validateEsqlSteps — Liquid policy', () => {
 
     it('drops a diagnostic that lands fully inside the masked region', async () => {
       const text = buildStep('WHERE host == "{{ inputs.host }}"');
-      const model = createTextModel(text);
       const queryStartInLine = '        '.length;
       const innerStringStart = queryStartInLine + 'WHERE host == "'.length;
       const innerStringEnd = innerStringStart + '{{ inputs.host }}'.length;
@@ -133,7 +130,6 @@ describe('validateEsqlSteps — Liquid policy', () => {
 
     it('keeps a diagnostic that touches the mask boundary but extends outside', async () => {
       const text = buildStep('WHERE host == "{{ x }}" | LIMIT abc');
-      const model = createTextModel(text);
       // Diagnostic on the `LIMIT abc` token — well outside the mask.
       const limitStart = text.indexOf('LIMIT abc') - text.indexOf('WHERE');
       mockValidate.mockResolvedValue({
@@ -190,7 +186,6 @@ describe('validateEsqlSteps — Liquid policy', () => {
     for (const { row, description, query } of cases) {
       it(`row ${row}: skips validation for ${description}`, async () => {
         const text = buildStep(query);
-        const model = createTextModel(text);
         const markers = await validateEsqlFromText(text, stubCallbacks);
         expect(markers).toEqual([]);
         expect(mockValidate).not.toHaveBeenCalled();
@@ -201,7 +196,6 @@ describe('validateEsqlSteps — Liquid policy', () => {
   describe('Liquid comments and ES|QL comments stay on the mask path', () => {
     it('row 8: a `{# … #}` Liquid comment outside any string is masked, not skipped', async () => {
       const text = buildStep('FROM logs-* {# pick the env #} | LIMIT 10');
-      const model = createTextModel(text);
       mockValidate.mockResolvedValue({ errors: [], warnings: [] });
       await validateEsqlFromText(text, stubCallbacks);
       expect(mockValidate).toHaveBeenCalledTimes(1);
@@ -212,7 +206,6 @@ describe('validateEsqlSteps — Liquid policy', () => {
 
     it('Liquid inside an ES|QL line comment is masked', async () => {
       const text = buildStep('FROM logs-* // {{ debug }}\n        | LIMIT 10');
-      const model = createTextModel(text);
       mockValidate.mockResolvedValue({ errors: [], warnings: [] });
       await validateEsqlFromText(text, stubCallbacks);
       expect(mockValidate).toHaveBeenCalledTimes(1);
@@ -220,7 +213,6 @@ describe('validateEsqlSteps — Liquid policy', () => {
 
     it('Liquid inside an ES|QL block comment is masked', async () => {
       const text = buildStep('FROM logs-* /* note: {{ debug }} */ | LIMIT 10');
-      const model = createTextModel(text);
       mockValidate.mockResolvedValue({ errors: [], warnings: [] });
       await validateEsqlFromText(text, stubCallbacks);
       expect(mockValidate).toHaveBeenCalledTimes(1);
@@ -241,7 +233,6 @@ describe('validateEsqlSteps — Liquid policy', () => {
       query: |
         FROM logs-* | KEEPP foo
 `;
-      const model = createTextModel(text);
       mockValidate.mockResolvedValue({
         errors: [
           {
@@ -273,7 +264,6 @@ describe('validateEsqlSteps — Liquid policy', () => {
       query: |
         FROM good | LIMIT 5
 `;
-      const model = createTextModel(text);
       mockValidate.mockRejectedValueOnce(new Error('boom')).mockResolvedValueOnce({
         errors: [
           { type: 'error', text: 'second error', location: { min: 0, max: 4 }, code: 'esql.x' },
@@ -299,7 +289,6 @@ describe('validateEsqlSteps — Liquid policy', () => {
   describe('warnings', () => {
     it('emits warnings as warning-severity validation results', async () => {
       const text = buildStep('FROM logs-* | LIMIT 1000000');
-      const model = createTextModel(text);
       mockValidate.mockResolvedValue({
         errors: [],
         warnings: [
@@ -321,9 +310,9 @@ describe('validateEsqlSteps — Liquid policy', () => {
       // claims `endColumn: 999` must not be allowed to push the marker offset
       // past the line into the surrounding YAML.
       const text = buildStep('FROM x');
-      const model = createTextModel(text);
       const queryStartInFile = text.indexOf('FROM x');
       const queryEndInFile = queryStartInFile + 'FROM x'.length;
+      const model = createTextModel(text);
       mockValidate.mockResolvedValue({
         errors: [
           {
@@ -356,7 +345,6 @@ describe('validateEsqlSteps — Liquid policy', () => {
 
     it('maps Monaco numeric severities (Warning=4, Info=2) on EditorError diagnostics', async () => {
       const text = buildStep('FROM logs-* | LIMIT 1000000');
-      const model = createTextModel(text);
       mockValidate.mockResolvedValue({
         errors: [],
         warnings: [
