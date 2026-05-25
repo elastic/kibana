@@ -14,11 +14,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ChangePointDetection } from '@kbn/aiops-plugin/public';
 import { AIOPS_EMBEDDABLE_ORIGIN } from '@kbn/aiops-common/constants';
 import { useFieldStatsTrigger, FieldStatsFlyoutProvider } from '@kbn/ml-field-stats-flyout';
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { MlDataSourcePicker } from '@kbn/aiops-components';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
+import { NoDataViewPrompt } from './no_data_view_prompt';
 import { useDataSource } from '../contexts/ml/data_source_context';
 import { useMlKibana } from '../contexts/kibana';
 import { HelpMenu } from '../components/help_menu';
@@ -64,31 +65,13 @@ export const ChangePointDetectionPage: FC = () => {
       {!dataView ? (
         <>
           {headerContent}
-          <EuiEmptyPrompt
-            title={
-              <h2>
-                <FormattedMessage
-                  id="xpack.ml.changePointDetection.noDataViewTitle"
-                  defaultMessage="No data view selected"
-                />
-              </h2>
-            }
-            body={
-              <p>
-                <FormattedMessage
-                  id="xpack.ml.changePointDetection.noDataViewBody"
-                  defaultMessage="Select a data view or Discover session to get started."
-                />
-              </p>
-            }
-          />
+          <NoDataViewPrompt />
         </>
       ) : (
         <ChangePointDetection
           dataView={dataView}
           savedSearch={savedSearch}
           showFrozenDataTierChoice={showNodeInfo}
-          pageTitle={pageTitle}
           headerContent={headerContent}
           appContextValue={{
             embeddingOrigin: AIOPS_EMBEDDABLE_ORIGIN.ML_AIOPS_LABS,

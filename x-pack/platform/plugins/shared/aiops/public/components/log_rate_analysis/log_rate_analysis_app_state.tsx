@@ -44,8 +44,6 @@ export interface LogRateAnalysisAppStateProps {
   showContextualInsights?: boolean;
   /** Optional flag to indicate whether kibana is running in serverless */
   showFrozenDataTierChoice?: boolean;
-  /** Optional page title for screen readers */
-  pageTitle?: ReactNode;
   /**
    * Optional data source picker rendered in the page header. When provided it
    * replaces the static data view title. Typically a `DataDriftDataSourcePicker`-
@@ -60,7 +58,6 @@ export const LogRateAnalysisAppState: FC<LogRateAnalysisAppStateProps> = ({
   appContextValue,
   showContextualInsights = false,
   showFrozenDataTierChoice = true,
-  pageTitle,
   headerContent,
 }) => {
   if (!dataView) {
@@ -115,7 +112,6 @@ export const LogRateAnalysisAppState: FC<LogRateAnalysisAppStateProps> = ({
                   <FilterQueryContextProvider>
                     <LogRateAnalysisPage
                       showContextualInsights={showContextualInsights}
-                      pageTitle={pageTitle}
                       headerContent={headerContent}
                     />
                   </FilterQueryContextProvider>

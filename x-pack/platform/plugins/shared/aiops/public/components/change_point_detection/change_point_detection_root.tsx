@@ -55,8 +55,6 @@ export interface ChangePointDetectionAppStateProps {
   appContextValue: AiopsAppContextValue;
   /** Optional flag to indicate whether kibana is running in serverless */
   showFrozenDataTierChoice?: boolean;
-  /** Optional page title for screen readers */
-  pageTitle?: ReactNode;
   /**
    * Optional data source picker rendered in the page header. When provided it
    * replaces the static data view title. Typically a `DataDriftDataSourcePicker`-
@@ -72,7 +70,6 @@ export const ChangePointDetectionAppState: FC<ChangePointDetectionAppStateProps>
   savedSearch,
   appContextValue,
   showFrozenDataTierChoice = true,
-  pageTitle,
   headerContent,
   rightSideItems,
 }) => {
@@ -136,11 +133,7 @@ export const ChangePointDetectionAppState: FC<ChangePointDetectionAppStateProps>
           <DataSourceContext.Provider key={dataView.id} value={{ dataView, savedSearch }}>
             <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
               <DatePickerContextProvider {...datePickerDeps}>
-                <PageHeader
-                  pageTitle={pageTitle}
-                  headerContent={headerContent}
-                  rightSideItems={rightSideItems}
-                />
+                <PageHeader headerContent={headerContent} rightSideItems={rightSideItems} />
                 <EuiSpacer />
                 <ReloadContextProvider reload$={reload$}>
                   <FilterQueryContextProvider>

@@ -21,7 +21,7 @@ export const journey = new Journey({
     await page.waitForSelector(subj('globalLoadingIndicator-hidden'));
   })
   .step('Go to Index data visualizer', async ({ page }) => {
-    const createButtons = page.locator(subj('mlDataVisualizerSelectIndexButton')); // this stays
+    const createButtons = page.locator(subj('mlDataVisualizerSelectIndexButton'));
     await createButtons.first().click();
     await page.waitForSelector(subj('dataVisualizerIndexPage'));
   })

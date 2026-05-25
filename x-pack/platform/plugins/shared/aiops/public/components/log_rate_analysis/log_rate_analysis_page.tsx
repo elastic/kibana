@@ -58,13 +58,11 @@ interface SignificantFieldValue {
 
 interface LogRateAnalysisPageProps {
   showContextualInsights?: boolean;
-  pageTitle?: ReactNode;
   headerContent?: ReactNode;
 }
 
 export const LogRateAnalysisPage: FC<LogRateAnalysisPageProps> = ({
   showContextualInsights = false,
-  pageTitle,
   headerContent,
 }) => {
   const aiopsAppContext = useAiopsAppContext();
@@ -300,7 +298,7 @@ export const LogRateAnalysisPage: FC<LogRateAnalysisPageProps> = ({
 
   return (
     <EuiPageBody data-test-subj="aiopsLogRateAnalysisPage" paddingSize="none" panelled={false}>
-      <PageHeader pageTitle={pageTitle} headerContent={headerContent} />
+      <PageHeader headerContent={headerContent} />
       <EuiSpacer size="m" />
       <EuiPageSection paddingSize="none">
         <EuiFlexGroup gutterSize="m" direction="column">

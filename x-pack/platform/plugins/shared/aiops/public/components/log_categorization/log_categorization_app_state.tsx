@@ -39,8 +39,6 @@ export interface LogCategorizationAppStateProps {
   appContextValue: AiopsAppContextValue;
   /** Optional flag to indicate whether kibana is running in serverless */
   showFrozenDataTierChoice?: boolean;
-  /** Optional page title for screen readers */
-  pageTitle?: ReactNode;
   /**
    * Optional data source picker rendered in the page header. When provided it
    * replaces the static data view title. Typically a `DataDriftDataSourcePicker`-
@@ -54,7 +52,6 @@ export const LogCategorizationAppState: FC<LogCategorizationAppStateProps> = ({
   savedSearch,
   appContextValue,
   showFrozenDataTierChoice = true,
-  pageTitle,
   headerContent,
 }) => {
   if (!dataView) {
@@ -107,7 +104,7 @@ export const LogCategorizationAppState: FC<LogCategorizationAppStateProps> = ({
           <DataSourceContext.Provider key={dataView.id} value={{ dataView, savedSearch }}>
             <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
               <DatePickerContextProvider {...datePickerDeps}>
-                <LogCategorizationPage pageTitle={pageTitle} headerContent={headerContent} />
+                <LogCategorizationPage headerContent={headerContent} />
               </DatePickerContextProvider>
             </StorageContextProvider>
           </DataSourceContext.Provider>

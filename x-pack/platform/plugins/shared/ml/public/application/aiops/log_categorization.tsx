@@ -12,11 +12,11 @@ import { pick } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { LogCategorization } from '@kbn/aiops-plugin/public';
 import { AIOPS_EMBEDDABLE_ORIGIN } from '@kbn/aiops-common/constants';
-import { EuiEmptyPrompt } from '@elastic/eui';
 
 import { MlDataSourcePicker } from '@kbn/aiops-components';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
+import { NoDataViewPrompt } from './no_data_view_prompt';
 import { useDataSource } from '../contexts/ml/data_source_context';
 import { useMlKibana } from '../contexts/kibana';
 import { useEnabledFeatures } from '../contexts/ml';
@@ -54,31 +54,13 @@ export const LogCategorizationPage: FC = () => {
       {!dataView ? (
         <>
           {headerContent}
-          <EuiEmptyPrompt
-            title={
-              <h2>
-                <FormattedMessage
-                  id="xpack.ml.logCategorization.noDataViewTitle"
-                  defaultMessage="No data view selected"
-                />
-              </h2>
-            }
-            body={
-              <p>
-                <FormattedMessage
-                  id="xpack.ml.logCategorization.noDataViewBody"
-                  defaultMessage="Select a data view or Discover session to get started."
-                />
-              </p>
-            }
-          />
+          <NoDataViewPrompt />
         </>
       ) : (
         <LogCategorization
           dataView={dataView}
           savedSearch={savedSearch}
           showFrozenDataTierChoice={showNodeInfo}
-          pageTitle={pageTitle}
           headerContent={headerContent}
           appContextValue={{
             embeddingOrigin: AIOPS_EMBEDDABLE_ORIGIN.ML_AIOPS_LABS,

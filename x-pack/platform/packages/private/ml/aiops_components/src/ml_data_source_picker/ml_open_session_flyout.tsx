@@ -116,10 +116,7 @@ export const MlOpenSessionFlyout: FC<MlOpenSessionFlyoutProps> = ({
                 : {}),
             },
           ]}
-          onChoose={(id) => {
-            onOpenSavedSearch(id);
-            onClose();
-          }}
+          onChoose={onOpenSavedSearch}
           showFilter
         />
       </EuiFlyoutBody>

@@ -9,7 +9,7 @@ import { css } from '@emotion/react';
 import type { FC, ReactNode } from 'react';
 import React, { useCallback, useMemo } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiScreenReaderOnly, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 
 import { useUrlState } from '@kbn/ml-url-state';
 import { useStorage } from '@kbn/ml-local-storage';
@@ -35,8 +35,6 @@ const maxInlineSizeStyles = css`
 `;
 
 export interface PageHeaderProps {
-  /** Screen-reader page title rendered as an h1 when `headerContent` is provided. */
-  pageTitle?: ReactNode;
   /** Optional content rendered to the right of the header content */
   rightSideItems?: ReactNode;
   /**
@@ -46,7 +44,7 @@ export interface PageHeaderProps {
   headerContent?: ReactNode;
 }
 
-export const PageHeader: FC<PageHeaderProps> = ({ pageTitle, rightSideItems, headerContent }) => {
+export const PageHeader: FC<PageHeaderProps> = ({ rightSideItems, headerContent }) => {
   const [, setGlobalState] = useUrlState('_g');
   const { dataView } = useDataSource();
 
@@ -85,17 +83,10 @@ export const PageHeader: FC<PageHeaderProps> = ({ pageTitle, rightSideItems, hea
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s" wrap={true}>
       <EuiFlexItem grow={false}>
         {headerContent !== undefined ? (
-          <>
-            {pageTitle ? (
-              <EuiScreenReaderOnly>
-                <h1>{pageTitle}</h1>
-              </EuiScreenReaderOnly>
-            ) : null}
-            <EuiFlexGroup responsive={false} wrap alignItems="center" gutterSize="m">
-              <EuiFlexItem grow={false}>{headerContent}</EuiFlexItem>
-              {rightSideItems ? <EuiFlexItem grow={false}>{rightSideItems}</EuiFlexItem> : null}
-            </EuiFlexGroup>
-          </>
+          <EuiFlexGroup responsive={false} wrap alignItems="center" gutterSize="m">
+            <EuiFlexItem grow={false}>{headerContent}</EuiFlexItem>
+            {rightSideItems ? <EuiFlexItem grow={false}>{rightSideItems}</EuiFlexItem> : null}
+          </EuiFlexGroup>
         ) : (
           <EuiTitle size="l">
             <h2>{dataView.getName()}</h2>

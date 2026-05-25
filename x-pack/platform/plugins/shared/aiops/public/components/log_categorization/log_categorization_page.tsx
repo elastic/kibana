@@ -60,10 +60,7 @@ import { AttachmentsMenu } from './attachments_menu';
 const BAR_TARGET = 20;
 const DEFAULT_SELECTED_FIELD = 'message';
 
-export const LogCategorizationPage: FC<{ pageTitle?: ReactNode; headerContent?: ReactNode }> = ({
-  pageTitle,
-  headerContent,
-}) => {
+export const LogCategorizationPage: FC<{ headerContent?: ReactNode }> = ({ headerContent }) => {
   const {
     notifications: { toasts },
     embeddingOrigin,
@@ -352,7 +349,7 @@ export const LogCategorizationPage: FC<{ pageTitle?: ReactNode; headerContent?: 
 
   return (
     <EuiPageBody data-test-subj="aiopsLogPatternAnalysisPage" paddingSize="none" panelled={false}>
-      <PageHeader pageTitle={pageTitle} headerContent={headerContent} />
+      <PageHeader headerContent={headerContent} />
       <EuiSpacer />
       <EuiFlexGroup gutterSize="none">
         <EuiFlexItem>
