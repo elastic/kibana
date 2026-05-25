@@ -6,7 +6,8 @@
   "include": [
     "common/**/*",
     "public/**/*",
-    "server/**/*"
+    "server/**/*",
+    "test/scout/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -35,13 +36,13 @@
     "@kbn/ui-theme",
     "@kbn/expressions-plugin",
     "@kbn/es-query",
-    "@kbn/core-ui-settings-browser",
-    "@kbn/core-notifications-browser-mocks",
-    "@kbn/core-notifications-browser",
     "@kbn/test-eui-helpers",
     "@kbn/kql",
     "@kbn/dashboard-plugin",
-    "@kbn/embeddable-plugin"
+    "@kbn/embeddable-plugin",
+    "@kbn/scout",
+    "@kbn/content-list-provider",
+    "@kbn/test"
   ],
   "exclude": [
     "target/**/*",
