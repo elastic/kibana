@@ -38,7 +38,7 @@ export class MatcherDataFieldsRoute extends BaseAlertingRoute {
     summary: 'Get matcher data fields suggestions',
     description: 'Get suggestions for matcher data fields.',
   } as const;
-  static validate = {
+  static schemas = {
     request: {
       query: matcherDataFieldsQuerySchema,
     },
