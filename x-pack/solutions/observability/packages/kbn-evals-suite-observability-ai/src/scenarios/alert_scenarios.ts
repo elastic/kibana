@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import type { AlertScenario } from './types';
-import { PAYMENT_SERVICE_GCS, PAYMENT_UNREACHABLE_GCS } from './constants';
+import type { AlertScenario, TransactionDurationAggregationType } from './types';
+import { AD_HIGH_CPU_GCS, PAYMENT_SERVICE_GCS, PAYMENT_UNREACHABLE_GCS } from './constants';
 
 const PAYMENT_ERROR_COUNT_ALERT_SCENARIO_ID = 'payment-error-count-alert';
 const PAYMENT_UNREACHABLE_ALERT_SCENARIO_ID = 'payment-unreachable-alert';
+const AD_HIGH_CPU_ALERT_SCENARIO_ID = 'ad-high-cpu-alert';
 
 const PAYMENT_ALERT_EXPECTED_OUTPUT = `-   Summary: A single handled error was detected in the payment service, specifically related to an invalid token during a payment request. The error appears isolated, with no evidence of broader anomalies or downstream impact.
 
@@ -41,6 +42,16 @@ const PAYMENT_UNREACHABLE_ALERT_EXPECTED = `-   Summary: An APM error count aler
     1.  Verify the payment service is running, healthy, and reachable from the checkout service's network.
     2.  Check DNS resolution for the payment service endpoint from within the checkout service's environment.
     3.  If using the \`paymentUnreachable\` feature flag, verify its state in flagd and disable it if unintentional.`;
+
+const AD_HIGH_CPU_ALERT_EXPECTED = `-   Summary: The ad service's 95th percentile latency has exceeded the configured threshold. Runtime metrics confirm elevated CPU utilization, indicating the service is under CPU load stress that is causing request processing delays.
+
+-   Assessment: The elevated latency correlates directly with high CPU utilization on the ad service. Memory utilization remains low, ruling out memory pressure as a factor. No application error logs or anomalies are present, confirming CPU saturation as the root cause rather than application logic failures. The downstream dependencies are checked and found to be not the source of the problem.
+
+-   Related signals:
+
+    -   Latency: \`oteldemo.AdService/GetAds\` transaction durations elevated well above baseline (apmServiceSummary, alert window, Direct) — CPU contention causes resource starvation.
+    -   CPU: Runtime metrics show elevated CPU utilization well above healthy levels (apmServiceSummary, alert window, Direct).
+    -   Memory: Heap memory utilization remains low (apmServiceSummary, alert window, Unrelated) — rules out memory pressure.`;
 
 export const ALERT_SCENARIOS: Record<string, AlertScenario> = {
   [PAYMENT_ERROR_COUNT_ALERT_SCENARIO_ID]: {
@@ -100,6 +111,36 @@ export const ALERT_SCENARIOS: Record<string, AlertScenario> = {
       alertsIndex: '.alerts-observability.apm.alerts-default',
     },
     expectedOutput: PAYMENT_UNREACHABLE_ALERT_EXPECTED,
+  },
+  [AD_HIGH_CPU_ALERT_SCENARIO_ID]: {
+    id: AD_HIGH_CPU_ALERT_SCENARIO_ID,
+    description: 'APM transaction duration alert for ad service under high CPU load',
+    snapshotName: 'ad-high-cpu',
+    gcs: AD_HIGH_CPU_GCS,
+    alertRule: {
+      ruleParams: {
+        consumer: 'apm',
+        enabled: true,
+        name: 'Latency threshold - ad service high CPU',
+        rule_type_id: 'apm.transaction_duration',
+        tags: [],
+        params: {
+          threshold: 10,
+          aggregationType: '95th' as TransactionDurationAggregationType,
+          windowSize: 30,
+          windowUnit: 'm',
+          serviceName: 'ad',
+          environment: 'ENVIRONMENT_ALL',
+          groupBy: ['service.name', 'service.environment'],
+        },
+        actions: [],
+        schedule: {
+          interval: '1m',
+        },
+      },
+      alertsIndex: '.alerts-observability.apm.alerts-default',
+    },
+    expectedOutput: AD_HIGH_CPU_ALERT_EXPECTED,
   },
 };
 
