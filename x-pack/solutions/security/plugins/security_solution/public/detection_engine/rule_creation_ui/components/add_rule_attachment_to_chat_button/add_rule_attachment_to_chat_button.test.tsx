@@ -10,7 +10,6 @@ import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import type { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import { AddRuleAttachmentToChatButton } from './add_rule_attachment_to_chat_button';
-import { RULE_EXPLORATION_ATTACHMENT_PROMPT } from '../../../../agent_builder/components/prompts';
 import type { NewAgentBuilderAttachmentProps } from '../../../../agent_builder/components/new_agent_builder_attachment';
 import type { UseAgentBuilderAttachmentParams } from '../../../../agent_builder/hooks/use_agent_builder_attachment';
 import {
@@ -53,6 +52,7 @@ const mockKibanaServices = () => ({
     aiRuleCreation: {
       activateFormSync: mockActivateFormSync,
       setLastSavedRuleId: jest.fn(),
+      setExistingRuleId: jest.fn(),
     },
     agentBuilder: undefined,
   },
@@ -94,7 +94,6 @@ describe('AddRuleAttachmentToChatButton', () => {
     expect(attachment.attachmentData.text).toBe(JSON.stringify(ruleResponseMock));
     expect(attachment.attachmentData.attachmentLabel).toBe('My Rule');
     expect(attachment.attachmentDescription).toBe('My Rule');
-    expect(attachment.attachmentPrompt).toBe(RULE_EXPLORATION_ATTACHMENT_PROMPT);
     const newAttachmentProps = mockNewAgentBuilderAttachment.mock.calls[0][0];
     expect(newAttachmentProps.telemetry?.pathway).toBe('rule_details');
     expect(newAttachmentProps.telemetry?.attachments).toEqual(['rule']);
@@ -125,7 +124,6 @@ describe('AddRuleAttachmentToChatButton', () => {
         attachmentLabel: 'Formatted Rule',
       },
       attachmentDescription: 'Formatted Rule',
-      attachmentPrompt: RULE_EXPLORATION_ATTACHMENT_PROMPT,
     });
 
     await user.click(screen.getByTestId('newAgentBuilderAttachmentMock'));
