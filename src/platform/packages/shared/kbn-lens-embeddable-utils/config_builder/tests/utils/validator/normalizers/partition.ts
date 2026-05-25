@@ -122,6 +122,11 @@ const alignLegacyTypes: NormalizerConfig<PartitionAttributes> = {
       delete layer.emptySizeRatio;
     }
 
+    // strip undefined palette
+    if (viz.palette == null) {
+      delete viz.palette;
+    }
+
     return attributes;
   },
 };
