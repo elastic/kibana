@@ -44,7 +44,7 @@ const INACTIVE_AGENT_CONDITION = `status:inactive`;
 const ACTIVE_AGENT_CONDITION = `NOT (${INACTIVE_AGENT_CONDITION})`;
 const ENROLLED_AGENT_CONDITION = `NOT status:unenrolled`;
 
-const includeUnenrolled = (kuery?: string) =>
+export const includeUnenrolled = (kuery?: string) =>
   kuery?.toLowerCase().includes('status:*') || kuery?.toLowerCase().includes('status:unenrolled');
 
 export function _joinFilters(

@@ -32,6 +32,10 @@ export const GetCollectorGroupsRequestSchema = {
         },
       })
     ),
+    showInactive: schema.boolean({
+      defaultValue: false,
+      meta: { description: 'When true, include inactive collectors in the results' },
+    }),
   }),
 };
 
@@ -46,6 +50,7 @@ export const CollectorGroupSchema = schema.object({
     meta: { description: 'Number of collectors in this group' },
   }),
   signals: schema.arrayOf(schema.string(), {
+    maxSize: 10,
     meta: { description: 'Signal types present in this group (e.g. logs, metrics, traces)' },
   }),
   isUngrouped: schema.maybe(
@@ -58,7 +63,7 @@ export const CollectorGroupSchema = schema.object({
 });
 
 export const GetCollectorGroupsResponseSchema = schema.object({
-  items: schema.arrayOf(CollectorGroupSchema),
+  items: schema.arrayOf(CollectorGroupSchema, { maxSize: 1000 }),
   afterKey: schema.maybe(schema.string()),
 });
 

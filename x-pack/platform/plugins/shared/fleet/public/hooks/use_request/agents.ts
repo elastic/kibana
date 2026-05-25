@@ -514,7 +514,13 @@ export function sendPostGenerateAgentsReport(body: PostGenerateAgentsReportReque
 }
 
 export function useGetCollectorGroupsQuery(
-  query: { groupBy?: string; kuery?: string; perPage?: number; afterKey?: string },
+  query: {
+    groupBy?: string;
+    kuery?: string;
+    perPage?: number;
+    afterKey?: string;
+    showInactive?: boolean;
+  },
   options: Partial<{
     enabled: boolean;
     refetchInterval: number | false;

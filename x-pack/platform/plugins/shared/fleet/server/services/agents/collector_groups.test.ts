@@ -9,13 +9,21 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/
 
 import { getCollectorGroups } from './collector_groups';
 
-jest.mock('./crud', () => ({
-  _joinFilters: jest.fn((filters: string[]) => {
-    const joined = filters.filter(Boolean).join(' AND ');
-    return joined ? { type: 'mock', query: joined } : undefined;
-  }),
-  getSpaceAwarenessFilterForAgents: jest.fn().mockResolvedValue([]),
+jest.mock('./build_status_runtime_field', () => ({
+  buildAgentStatusRuntimeField: jest.fn().mockResolvedValue({}),
 }));
+
+jest.mock('./crud', () => {
+  const actual = jest.requireActual('./crud');
+  return {
+    _joinFilters: jest.fn((filters: string[]) => {
+      const joined = filters.filter(Boolean).join(' AND ');
+      return joined ? { type: 'mock', query: joined } : undefined;
+    }),
+    getSpaceAwarenessFilterForAgents: jest.fn().mockImplementation(() => Promise.resolve([])),
+    includeUnenrolled: actual.includeUnenrolled,
+  };
+});
 
 const createMockEsClient = (response: any) =>
   ({
@@ -25,6 +33,11 @@ const createMockEsClient = (response: any) =>
 const mockSoClient = {} as SavedObjectsClientContract;
 
 describe('getCollectorGroups', () => {
+  beforeEach(() => {
+    const { _joinFilters } = jest.requireMock('./crud');
+    (_joinFilters as jest.Mock).mockClear();
+  });
+
   it('returns groups and afterKey when more buckets exist', async () => {
     const esClient = createMockEsClient({
       hits: { hits: [] },
@@ -275,5 +288,107 @@ describe('getCollectorGroups', () => {
     expect(searchCall.aggs.groups.aggs.group_name.terms.field).toBe(
       'non_identifying_attributes.elastic.collector.group_name'
     );
+  });
+
+  describe('showInactive and unenrolled filtering', () => {
+    const emptyResponse = {
+      hits: { hits: [] },
+      aggregations: { groups: { buckets: [] } },
+    };
+
+    const getFilters = (mock: jest.Mock) => mock.mock.calls[0][0] as string[];
+
+    it('excludes inactive and unenrolled by default', async () => {
+      const esClient = createMockEsClient(emptyResponse);
+      const { _joinFilters } = jest.requireMock('./crud');
+
+      await getCollectorGroups(esClient, mockSoClient, {
+        groupBy: 'collector.group',
+        perPage: 20,
+      });
+
+      const filters = getFilters(_joinFilters as jest.Mock);
+      expect(filters).toContain('type:OPAMP');
+      expect(filters).toContain('NOT (status:inactive)');
+      expect(filters).toContain('NOT status:unenrolled');
+    });
+
+    it('includes inactive when showInactive is true', async () => {
+      const esClient = createMockEsClient(emptyResponse);
+      const { _joinFilters } = jest.requireMock('./crud');
+
+      await getCollectorGroups(esClient, mockSoClient, {
+        groupBy: 'collector.group',
+        perPage: 20,
+        showInactive: true,
+      });
+
+      const filters = getFilters(_joinFilters as jest.Mock);
+      expect(filters).toContain('type:OPAMP');
+      expect(filters).not.toContain('NOT (status:inactive)');
+      expect(filters).toContain('NOT status:unenrolled');
+    });
+
+    it('includes unenrolled when kuery contains status:*', async () => {
+      const esClient = createMockEsClient(emptyResponse);
+      const { _joinFilters } = jest.requireMock('./crud');
+
+      await getCollectorGroups(esClient, mockSoClient, {
+        groupBy: 'collector.group',
+        perPage: 20,
+        kuery: 'status:*',
+      });
+
+      const filters = getFilters(_joinFilters as jest.Mock);
+      expect(filters).toContain('type:OPAMP');
+      expect(filters).toContain('NOT (status:inactive)');
+      expect(filters).not.toContain('NOT status:unenrolled');
+    });
+
+    it('includes unenrolled when kuery contains status:unenrolled', async () => {
+      const esClient = createMockEsClient(emptyResponse);
+      const { _joinFilters } = jest.requireMock('./crud');
+
+      await getCollectorGroups(esClient, mockSoClient, {
+        groupBy: 'collector.group',
+        perPage: 20,
+        kuery: 'status:unenrolled',
+      });
+
+      const filters = getFilters(_joinFilters as jest.Mock);
+      expect(filters).not.toContain('NOT status:unenrolled');
+    });
+
+    it('excludes neither condition when showInactive is true and kuery contains status:*', async () => {
+      const esClient = createMockEsClient(emptyResponse);
+      const { _joinFilters } = jest.requireMock('./crud');
+
+      await getCollectorGroups(esClient, mockSoClient, {
+        groupBy: 'collector.group',
+        perPage: 20,
+        showInactive: true,
+        kuery: 'status:*',
+      });
+
+      const filters = getFilters(_joinFilters as jest.Mock);
+      expect(filters).toContain('type:OPAMP');
+      expect(filters).not.toContain('NOT (status:inactive)');
+      expect(filters).not.toContain('NOT status:unenrolled');
+    });
+
+    it('always includes the opamp type filter regardless of showInactive', async () => {
+      const esClient = createMockEsClient(emptyResponse);
+      const { _joinFilters } = jest.requireMock('./crud');
+
+      await getCollectorGroups(esClient, mockSoClient, {
+        groupBy: 'collector.group',
+        perPage: 20,
+        showInactive: true,
+        kuery: 'status:*',
+      });
+
+      const filters = getFilters(_joinFilters as jest.Mock);
+      expect(filters).toContain('type:OPAMP');
+    });
   });
 });

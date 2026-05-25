@@ -21,7 +21,7 @@ export const getCollectorGroupsHandler: FleetRequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const spaceId = fleetContext.spaceId;
 
-  const { groupBy, kuery, perPage, afterKey } = request.query;
+  const { groupBy, kuery, perPage, afterKey, showInactive } = request.query;
 
   let parsedAfterKey: Record<string, string> | undefined;
   if (afterKey) {
@@ -38,6 +38,7 @@ export const getCollectorGroupsHandler: FleetRequestHandler<
     perPage,
     afterKey: parsedAfterKey,
     spaceId,
+    showInactive,
   });
 
   return response.ok({ body });

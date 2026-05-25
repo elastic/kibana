@@ -12,7 +12,8 @@ import { AGENTS_INDEX, AGENT_TYPE_OPAMP } from '../../../common/constants';
 import type { CollectorGroup } from '../../../common/types';
 
 import { SIGNALS_RUNTIME_FIELD } from './build_signals_runtime_field';
-import { _joinFilters, getSpaceAwarenessFilterForAgents } from './crud';
+import { _joinFilters, getSpaceAwarenessFilterForAgents, includeUnenrolled } from './crud';
+import { buildAgentStatusRuntimeField } from './build_status_runtime_field';
 
 const ACTIVE_AGENT_CONDITION = 'NOT (status:inactive)';
 const ENROLLED_AGENT_CONDITION = 'NOT status:unenrolled';
@@ -36,6 +37,7 @@ interface GetCollectorGroupsOptions {
   perPage: number;
   afterKey?: Record<string, string>;
   spaceId?: string;
+  showInactive?: boolean;
 }
 
 export async function getCollectorGroups(
@@ -43,19 +45,28 @@ export async function getCollectorGroups(
   soClient: SavedObjectsClientContract,
   options: GetCollectorGroupsOptions
 ): Promise<{ items: CollectorGroup[]; afterKey?: string }> {
-  const { groupBy, kuery, perPage, afterKey, spaceId } = options;
+  const { groupBy, kuery, perPage, afterKey, spaceId, showInactive = false } = options;
   const { valueField, nameField } = GROUP_BY_FIELDS[groupBy];
 
   const filters = await getSpaceAwarenessFilterForAgents(spaceId);
   filters.push(`type:${AGENT_TYPE_OPAMP}`);
-  filters.push(ACTIVE_AGENT_CONDITION);
-  filters.push(ENROLLED_AGENT_CONDITION);
+  if (showInactive === false) {
+    filters.push(ACTIVE_AGENT_CONDITION);
+  }
+  if (!includeUnenrolled(kuery)) {
+    filters.push(ENROLLED_AGENT_CONDITION);
+  }
 
   if (kuery) {
     filters.push(kuery);
   }
 
   const kueryNode = _joinFilters(filters);
+
+  const runtimeFields = {
+    ...(await buildAgentStatusRuntimeField(soClient)),
+    ...SIGNALS_RUNTIME_FIELD,
+  };
 
   const res = await esClient.search<
     {},
@@ -73,7 +84,7 @@ export async function getCollectorGroups(
   >({
     index: AGENTS_INDEX,
     size: 0,
-    runtime_mappings: SIGNALS_RUNTIME_FIELD,
+    runtime_mappings: runtimeFields,
     query: kueryNode ? toElasticsearchQuery(kueryNode) : undefined,
     aggs: {
       groups: {
