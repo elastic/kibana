@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Suspense, useCallback } from 'react';
+import React, { Suspense, useCallback, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiLoadingSpinner, EuiSpacer, EuiSwitch, EuiText } from '@elastic/eui';
@@ -47,11 +47,14 @@ export const NotificationsStep: React.FC<NotificationsStepProps> = ({ services }
   const notifications = watch('notifications');
   const enabled = !!notifications;
   const { workflowForm } = services;
-  const isWorkflowInvalid = enabled && !(workflowForm.isValid?.(notifications!.workflow) ?? true);
+  const [touched, setTouched] = useState(false);
+  const isWorkflowInvalid =
+    touched && enabled && !(workflowForm.isValid?.(notifications!.workflow) ?? true);
 
   const handleToggle = useCallback(() => {
     if (enabled) {
       setValue('notifications', undefined, { shouldDirty: true });
+      setTouched(false);
     } else {
       setValue('notifications', { workflow: workflowForm.defaultValue() }, { shouldDirty: true });
     }
@@ -73,15 +76,17 @@ export const NotificationsStep: React.FC<NotificationsStepProps> = ({ services }
       {enabled && (
         <>
           <EuiSpacer size="m" />
-          <Suspense fallback={<EuiLoadingSpinner size="m" />}>
-            <workflowForm.Component
-              value={notifications!.workflow}
-              onChange={(next) =>
-                setValue('notifications', { workflow: next }, { shouldDirty: true })
-              }
-              isInvalid={isWorkflowInvalid}
-            />
-          </Suspense>
+          <div onBlur={() => setTouched(true)}>
+            <Suspense fallback={<EuiLoadingSpinner size="m" />}>
+              <workflowForm.Component
+                value={notifications!.workflow}
+                onChange={(next) =>
+                  setValue('notifications', { workflow: next }, { shouldDirty: true })
+                }
+                isInvalid={isWorkflowInvalid}
+              />
+            </Suspense>
+          </div>
         </>
       )}
 
