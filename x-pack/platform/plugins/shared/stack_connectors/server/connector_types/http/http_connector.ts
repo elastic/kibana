@@ -214,14 +214,31 @@ function serializeHttpRequestBody(body: unknown): string {
   }) as string; // will return a string or throw an error if it fails
 }
 
-function buildFormData(formData: HttpFormDataField): FormData {
+function checkFormDataMaxSize(formData: HttpFormDataField, maxSize: number | undefined): void {
+  if (maxSize != null) {
+    let total = 0;
+    for (const spec of Object.values(formData)) {
+      if (spec.encoding === 'base64') {
+        // estimate the size of the base64 encoded content using the 75% rule
+        total += Math.ceil(spec.content.length * 0.75);
+      } else {
+        total += spec.content.length;
+      }
+      if (total > maxSize) {
+        throw new Error(`form_data exceeds max_content_length (${maxSize} bytes)`);
+      }
+    }
+  }
+}
+
+function buildFormData(formData: HttpFormDataField, maxSize: number | undefined): FormData {
+  checkFormDataMaxSize(formData, maxSize);
+
   const form = new FormData();
   for (const [fieldName, spec] of Object.entries(formData)) {
     if (spec.encoding === 'base64') {
       // Binary field — always go through the Blob branch so the bytes round-trip intact.
       // Wrap the Buffer in a Uint8Array so the underlying storage is an ArrayBuffer (Buffer's `.buffer` is typed as ArrayBufferLike).
-      // Strip whitespace so multi-line base64 (line-wrapped at 64/76 chars) is accepted.
-      // Node's Buffer.from(..., 'base64') silently drops invalid characters, so validate the normalized input upfront to surface a clear error to the user.
       const normalized = spec.content.replace(/\s+/g, '');
       if (normalized.length % 4 !== 0 || !/^[A-Za-z0-9+/]*={0,2}$/.test(normalized)) {
         throw new Error(`Invalid base64 content in form_data field "${fieldName}"`);
@@ -298,7 +315,7 @@ export async function executor(
   let requestData: unknown;
   try {
     if (formData) {
-      requestData = buildFormData(formData);
+      requestData = buildFormData(formData, fetcher?.max_content_length);
     } else {
       requestData = serializeHttpRequestBody(body);
     }

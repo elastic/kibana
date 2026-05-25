@@ -1263,6 +1263,133 @@ describe('execute()', () => {
       expect(result?.serviceMessage).toBe('Invalid base64 content in form_data field "file"');
       expect(requestMock).not.toHaveBeenCalled();
     });
+
+    test('returns an error when aggregate form_data size exceeds max_content_length', async () => {
+      // Each field is well under the cap individually, but together they overflow.
+      const result = await connectorType.executor?.({
+        actionId: 'some-id',
+        services,
+        config: baseConfig,
+        secrets: { ...emptySecrets, user: 'abc', password: '123' },
+        params: {
+          method: 'POST',
+          path: '/upload',
+          form_data: {
+            a: { content: 'x'.repeat(400) },
+            b: { content: 'y'.repeat(400) },
+            c: { content: 'z'.repeat(400) },
+          },
+          fetcher: { max_content_length: 1000 },
+        },
+        configurationUtilities,
+        logger: mockedLogger,
+        connectorUsageCollector,
+      });
+
+      expect(result?.status).toBe('error');
+      expect(result?.serviceMessage).toBe('form_data exceeds max_content_length (1000 bytes)');
+      expect(requestMock).not.toHaveBeenCalled();
+    });
+
+    test('sends form_data when aggregate size is under max_content_length', async () => {
+      await connectorType.executor?.({
+        actionId: 'some-id',
+        services,
+        config: baseConfig,
+        secrets: { ...emptySecrets, user: 'abc', password: '123' },
+        params: {
+          method: 'POST',
+          path: '/upload',
+          form_data: {
+            a: { content: 'x'.repeat(400) },
+            b: { content: 'y'.repeat(400) },
+            c: { content: 'z'.repeat(400) },
+          },
+          fetcher: { max_content_length: 2000 },
+        },
+        configurationUtilities,
+        logger: mockedLogger,
+        connectorUsageCollector,
+      });
+
+      expect(requestMock).toHaveBeenCalledTimes(1);
+      expect(requestMock.mock.calls[0][0].data).toBeInstanceOf(FormData);
+    });
+
+    test('returns an error when a single form_data field exceeds max_content_length', async () => {
+      const result = await connectorType.executor?.({
+        actionId: 'some-id',
+        services,
+        config: baseConfig,
+        secrets: { ...emptySecrets, user: 'abc', password: '123' },
+        params: {
+          method: 'POST',
+          path: '/upload',
+          form_data: {
+            file: { content: 'x'.repeat(2000), filename: 'big.txt' },
+          },
+          fetcher: { max_content_length: 1000 },
+        },
+        configurationUtilities,
+        logger: mockedLogger,
+        connectorUsageCollector,
+      });
+
+      expect(result?.status).toBe('error');
+      expect(result?.serviceMessage).toBe('form_data exceeds max_content_length (1000 bytes)');
+      expect(requestMock).not.toHaveBeenCalled();
+    });
+
+    test('skips the form_data size check when max_content_length is not set', async () => {
+      await connectorType.executor?.({
+        actionId: 'some-id',
+        services,
+        config: baseConfig,
+        secrets: { ...emptySecrets, user: 'abc', password: '123' },
+        params: {
+          method: 'POST',
+          path: '/upload',
+          form_data: {
+            big: { content: 'x'.repeat(100_000) },
+          },
+        },
+        configurationUtilities,
+        logger: mockedLogger,
+        connectorUsageCollector,
+      });
+
+      expect(requestMock).toHaveBeenCalledTimes(1);
+      expect(requestMock.mock.calls[0][0].data).toBeInstanceOf(FormData);
+    });
+
+    test('uses the decoded byte estimate (not the encoded length) for base64 fields', async () => {
+      // 100 raw bytes → 136 base64 chars. With cap=120, the encoded length
+      // exceeds the cap but the decoded size (~102 with ceil(.75 * 136)) is
+      // what matters — and even that is over 120? No: 102 < 120, passes.
+      const bytes = Buffer.alloc(100, 0xab);
+      const encoded = bytes.toString('base64');
+      expect(encoded.length).toBeGreaterThan(120); // sanity check on the fixture
+
+      await connectorType.executor?.({
+        actionId: 'some-id',
+        services,
+        config: baseConfig,
+        secrets: { ...emptySecrets, user: 'abc', password: '123' },
+        params: {
+          method: 'POST',
+          path: '/upload',
+          form_data: {
+            file: { content: encoded, encoding: 'base64' },
+          },
+          fetcher: { max_content_length: 120 },
+        },
+        configurationUtilities,
+        logger: mockedLogger,
+        connectorUsageCollector,
+      });
+
+      expect(requestMock).toHaveBeenCalledTimes(1);
+    });
   });
 
   test('renders parameter templates as expected', async () => {
