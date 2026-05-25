@@ -185,4 +185,26 @@ describe('MetricsExperienceGridWrapper', () => {
       }),
     });
   });
+<<<<<<< HEAD
+=======
+
+  it('forwards chartSectionSearchError (showErrorDialog, esqlReferenceHref) to the metrics grid', () => {
+    renderChartSection();
+
+    expect(unifiedGridProps?.chartSectionSearchError?.esqlReferenceHref).toBe(
+      mockEsqlReferenceHref
+    );
+    expect(unifiedGridProps?.chartSectionSearchError?.showErrorDialog).toEqual(
+      expect.any(Function)
+    );
+
+    const error = new Error('test');
+    unifiedGridProps?.chartSectionSearchError?.showErrorDialog?.({
+      title: 'Error',
+      error,
+    });
+
+    expect(mockShowErrorDialog).toHaveBeenCalledWith({ title: 'Error', error });
+  });
+>>>>>>> 7c6f950733596d17a5f4ffa8e150930b278bec95
 });

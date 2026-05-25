@@ -16,9 +16,5 @@ export const normalizeChartSectionSearchError = (error: unknown): Error => {
     return error;
   }
 
-  if (typeof error === 'string' && error.trim()) {
-    return new Error(error);
-  }
-
   return new Error(String(error));
 };
