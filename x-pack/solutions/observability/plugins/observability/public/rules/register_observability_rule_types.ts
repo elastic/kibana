@@ -98,9 +98,12 @@ export const registerObservabilityRuleTypes = (
       const searchConfiguration = fields[ALERT_RULE_PARAMETERS]?.searchConfiguration as
         | SearchConfigurationWithExtractedReferenceType
         | undefined;
-      const criteria = fields[ALERT_RULE_PARAMETERS]?.criteria as MetricExpression[];
-      const metrics: CustomThresholdExpressionMetric[] =
-        criteria.length === 1 ? criteria[0].metrics : [];
+      const criteriaRaw = fields[ALERT_RULE_PARAMETERS]?.criteria;
+      const criteria = (
+        Array.isArray(criteriaRaw) ? criteriaRaw : criteriaRaw ? [criteriaRaw] : []
+      ) as MetricExpression[];
+      const singleCriterion = criteria.length === 1 ? criteria[0] : undefined;
+      const metrics: CustomThresholdExpressionMetric[] = singleCriterion?.metrics ?? [];
 
       const dataViewId = getDataViewId(searchConfiguration);
 
@@ -113,6 +116,8 @@ export const registerObservabilityRuleTypes = (
           metrics,
           searchConfiguration,
           startedAt: fields[ALERT_START],
+          timeSize: singleCriterion?.timeSize,
+          timeUnit: singleCriterion?.timeUnit,
         }),
         hasBasePath: true,
       };
