@@ -37,8 +37,7 @@ export interface LiquidMaskedRange {
 }
 
 export type LiquidPositionClass =
-  | { kind: 'no-liquid' }
-  | { kind: 'all-maskable'; maskedRanges: ReadonlyArray<LiquidMaskedRange> }
+  | { kind: 'safe'; maskedRanges: ReadonlyArray<LiquidMaskedRange> }
   | { kind: 'has-structural' };
 
 const TRIPLE_QUOTE = '"""';
@@ -56,7 +55,7 @@ type ScannerState = 'normal' | 'string-double' | 'string-triple' | 'line-comment
 
 export function classifyLiquidPosition(text: string): LiquidPositionClass {
   if (!text || (!text.includes('{{') && !text.includes('{%') && !text.includes('{#'))) {
-    return { kind: 'no-liquid' };
+    return { kind: 'safe', maskedRanges: [] };
   }
 
   const masked: LiquidMaskedRange[] = [];
@@ -75,10 +74,7 @@ export function classifyLiquidPosition(text: string): LiquidPositionClass {
     i = step.nextIndex;
   }
 
-  if (masked.length === 0) {
-    return { kind: 'no-liquid' };
-  }
-  return { kind: 'all-maskable', maskedRanges: masked };
+  return { kind: 'safe', maskedRanges: masked };
 }
 
 interface ScanStep {

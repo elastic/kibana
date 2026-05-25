@@ -14,19 +14,27 @@ import {
 } from './classify_liquid_position';
 
 describe('classifyLiquidPosition', () => {
-  it('returns no-liquid for plain ES|QL', () => {
-    expect(classifyLiquidPosition('FROM logs-* | LIMIT 10').kind).toBe('no-liquid');
+  it('returns safe with no masks for plain ES|QL', () => {
+    const result = classifyLiquidPosition('FROM logs-* | LIMIT 10');
+    expect(result.kind).toBe('safe');
+    if (result.kind === 'safe') {
+      expect(result.maskedRanges).toEqual([]);
+    }
   });
 
-  it('returns no-liquid for empty input', () => {
-    expect(classifyLiquidPosition('').kind).toBe('no-liquid');
+  it('returns safe with no masks for empty input', () => {
+    const result = classifyLiquidPosition('');
+    expect(result.kind).toBe('safe');
+    if (result.kind === 'safe') {
+      expect(result.maskedRanges).toEqual([]);
+    }
   });
 
   it('classifies a {{ … }} span inside a double-quoted string as maskable', () => {
     const text = 'FROM logs-* | WHERE host == "{{ inputs.host }}"';
     const result = classifyLiquidPosition(text);
-    expect(result.kind).toBe('all-maskable');
-    if (result.kind === 'all-maskable') {
+    expect(result.kind).toBe('safe');
+    if (result.kind === 'safe') {
       expect(result.maskedRanges).toEqual([
         { start: text.indexOf('{{'), end: text.indexOf('}}') + 2 },
       ]);
@@ -36,8 +44,8 @@ describe('classifyLiquidPosition', () => {
   it('classifies multiple in-string spans as maskable', () => {
     const text = 'WHERE a == "{{ x }}" AND b == "{{ y }}"';
     const result = classifyLiquidPosition(text);
-    expect(result.kind).toBe('all-maskable');
-    if (result.kind === 'all-maskable') {
+    expect(result.kind).toBe('safe');
+    if (result.kind === 'safe') {
       expect(result.maskedRanges).toHaveLength(2);
     }
   });
@@ -55,8 +63,8 @@ describe('classifyLiquidPosition', () => {
   it('treats `{# … #}` as maskable even outside a string (Liquid comments are inert)', () => {
     const text = 'FROM logs-* {# pick the right index #} | LIMIT 10';
     const result = classifyLiquidPosition(text);
-    expect(result.kind).toBe('all-maskable');
-    if (result.kind === 'all-maskable') {
+    expect(result.kind).toBe('safe');
+    if (result.kind === 'safe') {
       expect(result.maskedRanges).toEqual([
         { start: text.indexOf('{#'), end: text.indexOf('#}') + 2 },
       ]);
@@ -72,8 +80,8 @@ describe('classifyLiquidPosition', () => {
   it('classifies a Liquid span inside `"""…"""` as maskable', () => {
     const text = 'WHERE x == """foo {{ bar }} baz"""';
     const result = classifyLiquidPosition(text);
-    expect(result.kind).toBe('all-maskable');
-    if (result.kind === 'all-maskable') {
+    expect(result.kind).toBe('safe');
+    if (result.kind === 'safe') {
       expect(result.maskedRanges).toEqual([
         { start: text.indexOf('{{'), end: text.indexOf('}}') + 2 },
       ]);
@@ -85,19 +93,19 @@ describe('classifyLiquidPosition', () => {
     // it reaches `{{ env }}`, so the span must be classified as in-string.
     const text = 'WHERE x == "a \\"quoted\\" {{ env }} tail"';
     const result = classifyLiquidPosition(text);
-    expect(result.kind).toBe('all-maskable');
+    expect(result.kind).toBe('safe');
   });
 
   it('classifies Liquid inside an ES|QL line comment as maskable', () => {
     const text = 'FROM logs-* // {{ debug }}\n| LIMIT 10';
     const result = classifyLiquidPosition(text);
-    expect(result.kind).toBe('all-maskable');
+    expect(result.kind).toBe('safe');
   });
 
   it('classifies Liquid inside an ES|QL block comment as maskable', () => {
     const text = 'FROM logs-* /* note: {{ debug }} */ | LIMIT 10';
     const result = classifyLiquidPosition(text);
-    expect(result.kind).toBe('all-maskable');
+    expect(result.kind).toBe('safe');
   });
 
   it('returns has-structural for an unclosed `{{` outside a string', () => {
