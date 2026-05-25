@@ -90,10 +90,7 @@ export interface MlCalendarsApi {
 
 export interface MlFiltersApi {
   /** Create an ML filter via the Elasticsearch API */
-  create: (
-    filterId: string,
-    body: { description?: string; items: string[] }
-  ) => Promise<void>;
+  create: (filterId: string, body: { description?: string; items: string[] }) => Promise<void>;
   /** Get all ML filters via the Elasticsearch API */
   getAll: () => Promise<estypes.MlFilter[]>;
   /** Get an ML filter by ID via the Elasticsearch API */
@@ -372,10 +369,7 @@ export const getMlApiHelper = (
       });
     },
 
-    async create(
-      filterId: string,
-      body: { description?: string; items: string[] }
-    ): Promise<void> {
+    async create(filterId: string, body: { description?: string; items: string[] }): Promise<void> {
       await measurePerformanceAsync(log, `mlApi.filters.create [${filterId}]`, async () => {
         await esClient.ml.putFilter({ filter_id: filterId, ...body });
         await this.waitForFilterToExist(filterId);
