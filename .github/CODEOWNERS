@@ -349,11 +349,13 @@ src/core/packages/user-profile/server-mocks @elastic/kibana-core
 src/core/packages/user-settings/server @elastic/kibana-security
 src/core/packages/user-settings/server-internal @elastic/kibana-security
 src/core/packages/user-settings/server-mocks @elastic/kibana-security
+src/core/packages/user-storage/browser @elastic/appex-sharedux
+src/core/packages/user-storage/browser-internal @elastic/appex-sharedux
+src/core/packages/user-storage/browser-mocks @elastic/appex-sharedux
 src/core/packages/user-storage/common @elastic/appex-sharedux
 src/core/packages/user-storage/server @elastic/appex-sharedux
 src/core/packages/user-storage/server-internal @elastic/appex-sharedux
 src/core/packages/user-storage/server-mocks @elastic/appex-sharedux
-src/core/packages/user-storage/test/plugins/user_storage_test @elastic/appex-sharedux
 src/core/test-helpers/kbn-server @elastic/kibana-core
 src/core/test-helpers/model-versions @elastic/kibana-core
 src/platform/kbn-ui/chrome-layout @elastic/appex-sharedux
@@ -927,6 +929,7 @@ src/platform/test/plugin_functional/plugins/ui_settings_plugin @elastic/kibana-c
 src/platform/test/plugin_functional/plugins/usage_collection @elastic/kibana-core
 src/platform/test/server_integration/plugins/status_plugin_a @elastic/kibana-core
 src/platform/test/server_integration/plugins/status_plugin_b @elastic/kibana-core
+src/platform/test/user_storage/plugins/user_storage_test @elastic/appex-sharedux
 src/setup_node_env @elastic/kibana-operations
 x-pack/examples/alerting_example @elastic/response-ops
 x-pack/examples/embedded_lens_example @elastic/kibana-visualizations
@@ -1259,6 +1262,7 @@ x-pack/solutions/observability/packages/kbn-apm-embeddable-common @elastic/obs-p
 x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant @elastic/obs-ai-team
 x-pack/solutions/observability/packages/kbn-evals-suite-observability-ai @elastic/obs-ai-team
 x-pack/solutions/observability/packages/kbn-genai-cli @elastic/obs-ai-team
+x-pack/solutions/observability/packages/kbn-nightshift @elastic/streams-program-team
 x-pack/solutions/observability/packages/kbn-observability-schema @elastic/obs-presentation-team
 x-pack/solutions/observability/packages/kbn-scout-oblt @elastic/appex-qa
 x-pack/solutions/observability/packages/kbn-synthetics-forge @elastic/obs-ux-management-team
