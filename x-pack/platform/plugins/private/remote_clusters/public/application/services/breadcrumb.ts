@@ -61,7 +61,7 @@ export function setBreadcrumbs(type: 'home' | 'add' | 'edit', queryParams?: stri
   }
 
   // Pop off last breadcrumb
-  const lastBreadcrumb = newBreadcrumbs.pop() as Breadcrumb;
+  const lastBreadcrumb = newBreadcrumbs.pop()!;
 
   // Put last breadcrumb back without href so it's not clickable
   newBreadcrumbs.push({
