@@ -611,7 +611,11 @@ export const riskEngineRouteHelpersFactory = (supertest: SuperTest.Agent, namesp
         .set('kbn-xsrf', 'true')
         .set('elastic-api-version', '2023-10-31')
         .send();
-      assertStatusCode(expectStatusCode, response);
+      // When Entity Store V2 is enabled, Risk Engine APIs return 400. Treat as
+      // a no-op since there is nothing to clean up in V2 mode.
+      if (response.status !== 400) {
+        assertStatusCode(expectStatusCode, response);
+      }
       return response;
     },
 
