@@ -51,7 +51,7 @@ export const EditModalPreview = ({
   );
 
   // Checkerboard transparency pattern (fixed light colors are intentional)
-  const previewCss = useMemo(() => {
+  const previewScrollerCss = useMemo(() => {
     return css({
       border: `1px solid ${euiTheme.colors.borderBasePlain}`,
       borderRadius: euiTheme.border.radius.medium,
@@ -67,16 +67,26 @@ export const EditModalPreview = ({
       backgroundSize: '16px 16px',
       backgroundPosition: '0 0, 0 8px, 8px -8px, -8px 0px',
       height: 400,
+    });
+  }, [euiTheme]);
+
+  const previewContentCss = useMemo(() => {
+    return css({
+      width: '100%',
+      minWidth: 'max-content',
+      minHeight: '100%',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
     });
-  }, [euiTheme]);
+  }, []);
 
   return (
     <EuiFlexGroup gutterSize="m" css={rowCss}>
       <EuiFlexItem css={previewItemCss}>
-        <div ref={previewCallbackRef} css={previewCss} onWheel={(e) => e.stopPropagation()} />
+        <div css={previewScrollerCss} onWheel={(e) => e.stopPropagation()}>
+          <div ref={previewCallbackRef} css={previewContentCss} />
+        </div>
       </EuiFlexItem>
       <EuiFlexItem css={treeItemCss}>
         {cloneRoot && (

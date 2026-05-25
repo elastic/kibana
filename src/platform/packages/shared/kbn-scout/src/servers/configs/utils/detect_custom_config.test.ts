@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import path from 'path';
+
 import { detectCustomConfigDir, getConfigRootDir } from './detect_custom_config';
 import { ScoutTestTarget } from '@kbn/scout-info';
 
@@ -50,9 +52,7 @@ describe('getConfigRootDir', () => {
     const testTarget = new ScoutTestTarget('local', 'serverless', 'search');
     const result = getConfigRootDir(defaultPlaywrightPath, testTarget);
 
-    expect(result).toContain('default');
-    expect(result).toContain('serverless');
-    expect(result).not.toContain('custom');
+    expect(result).toContain(path.join('config_sets', 'default', 'serverless'));
   });
 
   it('should return default stateful root when playwright path does not contain custom config', () => {
@@ -60,9 +60,7 @@ describe('getConfigRootDir', () => {
     const testTarget = new ScoutTestTarget('local', 'stateful', 'classic');
     const result = getConfigRootDir(defaultPlaywrightPath, testTarget);
 
-    expect(result).toContain('default');
-    expect(result).toContain('stateful');
-    expect(result).not.toContain('custom');
+    expect(result).toContain(path.join('config_sets', 'default', 'stateful'));
   });
 
   it('should return default root when playwright path does not contain custom config', () => {
@@ -70,9 +68,7 @@ describe('getConfigRootDir', () => {
     const testTarget = new ScoutTestTarget('local', 'serverless', 'search');
     const result = getConfigRootDir(playwrightPath, testTarget);
 
-    expect(result).toContain('default');
-    expect(result).toContain('serverless');
-    expect(result).not.toContain('custom');
+    expect(result).toContain(path.join('config_sets', 'default', 'serverless'));
   });
 
   it('should return custom root when playwright path contains custom config for serverless', () => {
