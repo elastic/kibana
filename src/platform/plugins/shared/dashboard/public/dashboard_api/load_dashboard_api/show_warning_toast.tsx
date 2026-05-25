@@ -66,7 +66,7 @@ export const showWarningToast = ({ warnings }: { warnings: Warnings }) => {
           <EuiModalHeader>
             <EuiModalHeaderTitle id={'modalTitleId'}>
               {i18n.translate('dashboard.warnings.modalTitle', {
-                defaultMessage: 'Dashboard warnings',
+                defaultMessage: 'Warning details',
               })}
             </EuiModalHeaderTitle>
           </EuiModalHeader>
