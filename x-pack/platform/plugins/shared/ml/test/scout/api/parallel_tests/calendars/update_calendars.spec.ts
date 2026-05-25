@@ -67,7 +67,9 @@ apiTest.describe(
         // Verify persisted state via elevated-privilege service calls (side-effect check)
         const calendar = await apiServices.ml.anomalyDetection.calendars.get(CALENDAR_ID);
         expect(calendar.calendar_id).toBe(UPDATE_REQUEST_BODY.calendarId);
-        expect(calendar.job_ids).toHaveLength(UPDATE_REQUEST_BODY.job_ids.length);
+        const expectedJobIds = [...UPDATE_REQUEST_BODY.job_ids].sort();
+        const actualJobIds = [...calendar.job_ids].sort();
+        expect(actualJobIds).toStrictEqual(expectedJobIds);
 
         const { events } = await apiServices.ml.anomalyDetection.calendars.getCalendarEvents(
           CALENDAR_ID
