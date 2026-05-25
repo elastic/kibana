@@ -241,14 +241,13 @@ export const convertSOQueriesToPackConfig = (
 ): PackConfigOutput => {
   const { spaceId, packSchedule, isRruleFeatureEnabled = true } = options;
 
-  const packMode: ScheduleType | undefined =
-    isRruleFeatureEnabled && packSchedule?.schedule_type
-      ? (packSchedule.schedule_type as ScheduleType)
-      : packSchedule?.schedule_type === 'interval'
-      ? 'interval'
-      : undefined;
-  // Note: when rrule flag is off and SO has `schedule_type: 'rrule'`, packMode
-  // is `undefined` → legacy fan-out, RRULE state is ignored.
+  // Single source of truth for the D25 wire-boundary rollback gate: when the
+  // flag is off, `packSchedule` is ignored in full — no `default_rrule_schedule`
+  // AND no `default_native_schedule`. Per-query fallback to legacy `interval`
+  // happens in the loop below.
+  const packMode: ScheduleType | undefined = isRruleFeatureEnabled
+    ? (packSchedule?.schedule_type as ScheduleType | undefined)
+    : undefined;
 
   const queriesOut: Record<string, Record<string, unknown>> = {};
 
@@ -337,7 +336,9 @@ export const convertSOQueriesToPackConfig = (
 
   const output: PackConfigOutput = { queries: queriesOut };
 
-  if (isRruleFeatureEnabled && packMode === 'rrule' && packSchedule?.rrule_schedule) {
+  // `packMode` is forced to `undefined` when the flag is off, so neither
+  // branch fires under D25 rollback — no redundant flag check needed here.
+  if (packMode === 'rrule' && packSchedule?.rrule_schedule) {
     output.default_rrule_schedule = packSchedule.rrule_schedule;
   } else if (packMode === 'interval' && packSchedule?.interval != null) {
     output.default_native_schedule = { interval: packSchedule.interval };
@@ -704,9 +705,18 @@ export const removePackFromPolicy = (
 };
 
 export const makePackKey = (packName: string, spaceId: string) => `${spaceId}--${packName}`;
+/**
+ * Filter and validate caller-supplied policy ids against the set of osquery
+ * package-policy-supported agent policies. The `policyIds` argument is REQUIRED
+ * and must be explicit — callers MUST resolve any "preserve current attachments"
+ * semantic upstream (e.g. on the update path, fall back to the pack's existing
+ * agent-policy references before calling). A bare `[]` here means: detach from
+ * every policy, which was the silent default that previously caused the PUT-
+ * without-`policy_ids` strip bug.
+ */
 export const getInitialPolicies = (
   packagePolicies: PackagePolicy[] | never[],
-  policyIds: string[] = [],
+  policyIds: string[],
   shards?: Shard
 ): { policiesList: string[]; invalidPolicies?: string[] } => {
   const supportedPackagePolicies = filter(packagePolicies, (packagePolicy) =>

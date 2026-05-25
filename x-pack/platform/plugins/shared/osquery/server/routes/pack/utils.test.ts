@@ -279,6 +279,69 @@ describe('Pack utils', () => {
       expect(out.default_rrule_schedule).toBeUndefined();
       expect(out.queries.q1).not.toHaveProperty('rrule_schedule');
     });
+
+    // D25 rollback symmetry: a pack SO planted with `schedule_type:'interval'`
+    // and a pack-level interval (i.e. a pack written during a flag-on era)
+    // MUST also fall back to the pre-PR-A wire shape when the flag is off —
+    // no `default_native_schedule`. The per-query `interval` is the legacy
+    // signal and survives. Locks the fix for the gating bug at the packMode
+    // ternary that previously let `'interval'` mode escape D25.
+    test('defense in depth: pack SO carries interval mode + flag off → no default_native_schedule', () => {
+      const out = convertSOQueriesToPackConfig(
+        [{ id: 'q1', name: 'q1', query: 'SELECT 1', interval: 60 }],
+        {
+          packSchedule: { schedule_type: 'interval', interval: 60 },
+          isRruleFeatureEnabled: false,
+        }
+      );
+      expect(out.default_native_schedule).toBeUndefined();
+      expect(out.default_rrule_schedule).toBeUndefined();
+      expect(out.queries.q1.interval).toBe(60);
+    });
+
+    // Dim 6 D25 rollback sub-cases — guard rails on pack-level emission.
+
+    // Sub-case 1: malformed SO where schedule_type is 'rrule' but rrule_schedule
+    // is missing. The L341 guard (`packSchedule?.rrule_schedule` truthy) must
+    // prevent emitting a `default_rrule_schedule` of undefined, and no
+    // `default_native_schedule` should appear either.
+    test('flag on + malformed SO (schedule_type rrule, missing rrule_schedule) — no default_rrule_schedule emitted', () => {
+      const out = convertSOQueriesToPackConfig([{ id: 'q1', name: 'q1', query: 'SELECT 1' }], {
+        packSchedule: { schedule_type: 'rrule', rrule_schedule: undefined },
+        isRruleFeatureEnabled: true,
+      });
+      expect(out.default_rrule_schedule).toBeUndefined();
+      expect(out.default_native_schedule).toBeUndefined();
+    });
+
+    // Sub-case 2: no pack-level schedule_type at all, but a query SO carries
+    // per-query rrule fields. With packMode === undefined the per-query loop
+    // falls into the legacy `else` branch (utils.ts:312-318), so per-query
+    // rrule_schedule is NOT emitted to the wire — only per-query interval if
+    // present.
+    test('flag on + no pack-level schedule_type + per-query rrule_schedule on SO — emits legacy per-query path', () => {
+      const perQueryRrule = {
+        rrule: 'FREQ=DAILY',
+        start_date: '2024-01-01T00:00:00.000Z',
+      };
+      const out = convertSOQueriesToPackConfig(
+        [
+          {
+            id: 'q1',
+            name: 'q1',
+            query: 'SELECT 1',
+            schedule_type: 'rrule',
+            rrule_schedule: perQueryRrule,
+            interval: 60,
+          },
+        ],
+        { isRruleFeatureEnabled: true }
+      );
+      expect(out.default_rrule_schedule).toBeUndefined();
+      expect(out.default_native_schedule).toBeUndefined();
+      // Legacy else branch: rrule_schedule not emitted, interval emitted if present.
+      expect(out.queries.q1).not.toHaveProperty('rrule_schedule');
+    });
   });
 
   // 3.2.17 — wire-format byte contract against a beats #48767 fixture.

@@ -1545,7 +1545,7 @@ components:
         enabled:
           $ref: '#/components/schemas/EnabledOrUndefined'
         interval:
-          $ref: '#/components/schemas/PackIntervalOrUndefined'
+          $ref: '#/components/schemas/PackInterval'
         name:
           $ref: '#/components/schemas/PackName'
         policy_ids:
@@ -1553,9 +1553,9 @@ components:
         queries:
           $ref: '#/components/schemas/ObjectQueries'
         rrule_schedule:
-          $ref: '#/components/schemas/RRuleScheduleConfigOrUndefined'
+          $ref: '#/components/schemas/RRuleScheduleConfig'
         schedule_type:
-          $ref: '#/components/schemas/ScheduleTypeOrUndefined'
+          $ref: '#/components/schemas/ScheduleType'
         shards:
           $ref: '#/components/schemas/Shards'
     CreatePacksResponse:
@@ -1607,7 +1607,7 @@ components:
             enabled:
               $ref: '#/components/schemas/EnabledOrUndefined'
             interval:
-              $ref: '#/components/schemas/PackIntervalOrUndefined'
+              $ref: '#/components/schemas/PackInterval'
             name:
               $ref: '#/components/schemas/PackName'
             policy_ids:
@@ -1615,12 +1615,12 @@ components:
             queries:
               $ref: '#/components/schemas/ObjectQueries'
             rrule_schedule:
-              $ref: '#/components/schemas/RRuleScheduleConfigOrUndefined'
+              $ref: '#/components/schemas/RRuleScheduleConfig'
             saved_object_id:
               description: The saved object ID of the pack.
               type: string
             schedule_type:
-              $ref: '#/components/schemas/ScheduleTypeOrUndefined'
+              $ref: '#/components/schemas/ScheduleType'
             shards:
               description: Shard configuration as an array of key-value pairs.
               items:

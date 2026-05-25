@@ -169,7 +169,7 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
         const { policiesList, invalidPolicies } = getInitialPolicies(
           packagePolicies,
-          policy_ids,
+          policy_ids ?? [],
           shards
         );
         if (invalidPolicies?.length) {

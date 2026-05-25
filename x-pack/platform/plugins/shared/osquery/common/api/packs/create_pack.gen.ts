@@ -23,9 +23,9 @@ import {
   PolicyIdsOrUndefined,
   Shards,
   ObjectQueries,
-  ScheduleTypeOrUndefined,
-  PackIntervalOrUndefined,
-  RRuleScheduleConfigOrUndefined,
+  ScheduleType,
+  PackInterval,
+  RRuleScheduleConfig,
 } from '../model/schema/common_attributes.gen';
 
 export const CreatePacksRequestBody = lazySchema(() =>
@@ -36,9 +36,9 @@ export const CreatePacksRequestBody = lazySchema(() =>
     policy_ids: PolicyIdsOrUndefined.optional(),
     shards: Shards.optional(),
     queries: ObjectQueries.optional(),
-    schedule_type: ScheduleTypeOrUndefined.optional(),
-    interval: PackIntervalOrUndefined.optional(),
-    rrule_schedule: RRuleScheduleConfigOrUndefined.optional(),
+    schedule_type: ScheduleType.optional(),
+    interval: PackInterval.optional(),
+    rrule_schedule: RRuleScheduleConfig.optional(),
   })
 );
 export type CreatePacksRequestBody = z.infer<typeof CreatePacksRequestBody>;
@@ -97,9 +97,9 @@ export const CreatePacksResponse = lazySchema(() =>
           })
         )
         .optional(),
-      schedule_type: ScheduleTypeOrUndefined.optional(),
-      interval: PackIntervalOrUndefined.optional(),
-      rrule_schedule: RRuleScheduleConfigOrUndefined.optional(),
+      schedule_type: ScheduleType.optional(),
+      interval: PackInterval.optional(),
+      rrule_schedule: RRuleScheduleConfig.optional(),
     }),
   })
 );
