@@ -10,7 +10,7 @@ import { ToolType, internalTools } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createOtherResult } from '@kbn/agent-builder-server';
 
-export const SleepToolName = internalTools.sleepTool;
+export const SleepToolName = internalTools.sleep;
 
 const MAX_SLEEP_SECONDS = 120;
 

@@ -38,7 +38,9 @@ jest.mock('@kbn/field-utils', () => ({
   getFieldIconType: jest.fn(() => 'number'),
 }));
 jest.mock('../../../../context/ebt_telemetry_context', () => ({
-  useTelemetry: () => ({ trackMetricsInfo: mockTrackMetricsInfo }),
+  useTelemetry: () => ({
+    trackMetricsInfo: mockTrackMetricsInfo,
+  }),
 }));
 jest.mock('../../../../context/chart_section_inspector', () => ({
   useChartSectionInspector: () => ({
@@ -504,6 +506,7 @@ describe('useFetchMetricsData', () => {
         error: fetchError,
         source: 'useFetchMetricsData',
         labels: {
+          page: 'metrics_fetch_metrics_info',
           profile_id: 'test-profile-id',
         },
       });
@@ -528,6 +531,7 @@ describe('useFetchMetricsData', () => {
         error: abortError,
         source: 'useFetchMetricsData',
         labels: {
+          page: 'metrics_fetch_metrics_info',
           profile_id: 'test-profile-id',
         },
       });
@@ -591,6 +595,7 @@ describe('useFetchMetricsData', () => {
         error: secondError,
         source: 'useFetchMetricsData',
         labels: {
+          page: 'metrics_fetch_metrics_info',
           profile_id: 'test-profile-id',
         },
       });
@@ -785,6 +790,34 @@ describe('useFetchMetricsData', () => {
           total_number_of_metrics: 1,
         })
       );
+    });
+
+    it('forwards profileId to executeEsqlQuery so the request executionContext carries it as meta', async () => {
+      const params = createDefaultParams();
+      const { result } = renderHook(() => useFetchMetricsData(params));
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledWith(
+        expect.objectContaining({ profileId: 'test-profile-id' })
+      );
+    });
+
+    it('does not fire trackMetricsInfo when the fetch fails', async () => {
+      const fetchError = new Error('Network error');
+      mockExecuteEsqlQuery.mockRejectedValue(fetchError);
+
+      const params = createDefaultParams();
+      const { result } = renderHook(() => useFetchMetricsData(params));
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+        expect(result.current.error).toBeTruthy();
+      });
+
+      expect(mockTrackMetricsInfo).not.toHaveBeenCalled();
     });
   });
 });
