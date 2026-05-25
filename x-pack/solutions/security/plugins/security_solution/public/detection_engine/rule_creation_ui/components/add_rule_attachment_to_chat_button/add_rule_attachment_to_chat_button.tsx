@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import type { RuleCreateProps } from '../../../../../common/api/detection_engine/model/rule_schema';
@@ -135,9 +135,16 @@ export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButt
 
   const { openAgentBuilderFlyout } = useAgentBuilderAttachment(ruleAttachment);
 
+  const handleClick = useCallback(() => {
+    if (isFormBased) {
+      aiRuleCreation.activateFormSync();
+    }
+    openAgentBuilderFlyout();
+  }, [isFormBased, aiRuleCreation, openAgentBuilderFlyout]);
+
   return (
     <NewAgentBuilderAttachment
-      onClick={openAgentBuilderFlyout}
+      onClick={handleClick}
       telemetry={{
         pathway,
         attachments: ['rule'],
