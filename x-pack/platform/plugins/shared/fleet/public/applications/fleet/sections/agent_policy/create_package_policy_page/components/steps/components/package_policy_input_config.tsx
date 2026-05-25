@@ -106,7 +106,6 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
   varGroups?: RegistryVarGroup[];
   varGroupSelections?: VarGroupSelection;
   onVarGroupSelectionChange?: (groupName: string, optionName: string) => void;
-  showDescriptionColumn?: boolean;
   streamAdvancedVars?: StreamAdvancedVarsConfig;
   sections?: RegistrySection[];
 }> = memo(
@@ -121,7 +120,6 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
     varGroups,
     varGroupSelections = {},
     onVarGroupSelectionChange,
-    showDescriptionColumn = true,
     streamAdvancedVars,
     sections,
   }) => {
@@ -188,71 +186,69 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
     const flexWidth = isBiggerScreen ? 7 : 5;
 
     return (
-      <EuiFlexGrid columns={showDescriptionColumn ? 2 : 1} gutterSize="l">
-        {showDescriptionColumn ? (
-          <EuiFlexItem>
-            <EuiFlexGroup gutterSize="none" alignItems="flexStart">
-              <EuiFlexItem grow={1} />
-              <EuiFlexItem grow={flexWidth}>
-                <EuiText>
-                  <h4>
-                    <FormattedMessage
-                      id="xpack.fleet.createPackagePolicy.stepConfigure.inputSettingsTitle"
-                      defaultMessage="Settings"
-                    />
-                  </h4>
-                </EuiText>
-                {hasInputStreams ? (
-                  <>
-                    <EuiSpacer size="s" />
-                    <EuiText color="subdued" size="s">
-                      <p>
+      <EuiFlexGrid columns={2} gutterSize="l">
+        <EuiFlexItem>
+          <EuiFlexGroup gutterSize="none" alignItems="flexStart">
+            <EuiFlexItem grow={1} />
+            <EuiFlexItem grow={flexWidth}>
+              <EuiText>
+                <h4>
+                  <FormattedMessage
+                    id="xpack.fleet.createPackagePolicy.stepConfigure.inputSettingsTitle"
+                    defaultMessage="Settings"
+                  />
+                </h4>
+              </EuiText>
+              {hasInputStreams ? (
+                <>
+                  <EuiSpacer size="s" />
+                  <EuiText color="subdued" size="s">
+                    <p>
+                      <FormattedMessage
+                        id="xpack.fleet.createPackagePolicy.stepConfigure.inputSettingsDescription"
+                        defaultMessage="The following settings are applicable to all inputs below."
+                      />
+                    </p>
+                  </EuiText>
+                </>
+              ) : null}
+              {hasRequiredVarGroupErrors && (
+                <>
+                  <EuiSpacer size="m" />
+                  <EuiAccordion
+                    id={`${packagePolicyInput.type}-required-vars-group-error`}
+                    paddingSize="s"
+                    buttonContent={
+                      <EuiText color="danger" size="s">
                         <FormattedMessage
-                          id="xpack.fleet.createPackagePolicy.stepConfigure.inputSettingsDescription"
-                          defaultMessage="The following settings are applicable to all inputs below."
+                          id="xpack.fleet.createPackagePolicy.stepConfigure.requiredVarsGroupErrorText"
+                          defaultMessage="One of these settings groups is required"
                         />
-                      </p>
-                    </EuiText>
-                  </>
-                ) : null}
-                {hasRequiredVarGroupErrors && (
-                  <>
-                    <EuiSpacer size="m" />
-                    <EuiAccordion
-                      id={`${packagePolicyInput.type}-required-vars-group-error`}
-                      paddingSize="s"
-                      buttonContent={
-                        <EuiText color="danger" size="s">
-                          <FormattedMessage
-                            id="xpack.fleet.createPackagePolicy.stepConfigure.requiredVarsGroupErrorText"
-                            defaultMessage="One of these settings groups is required"
-                          />
-                        </EuiText>
-                      }
-                    >
-                      <EuiText size="xs" color="danger">
-                        {Object.entries(inputValidationResults.required_vars || {}).map(
-                          ([groupName, vars]) => {
-                            return (
-                              <>
-                                <strong>{groupName}</strong>
-                                <ul>
-                                  {vars.map(({ name }) => (
-                                    <li key={`${groupName}-${name}`}>{name}</li>
-                                  ))}
-                                </ul>
-                              </>
-                            );
-                          }
-                        )}
                       </EuiText>
-                    </EuiAccordion>
-                  </>
-                )}
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        ) : null}
+                    }
+                  >
+                    <EuiText size="xs" color="danger">
+                      {Object.entries(inputValidationResults.required_vars || {}).map(
+                        ([groupName, vars]) => {
+                          return (
+                            <>
+                              <strong>{groupName}</strong>
+                              <ul>
+                                {vars.map(({ name }) => (
+                                  <li key={`${groupName}-${name}`}>{name}</li>
+                                ))}
+                              </ul>
+                            </>
+                          );
+                        }
+                      )}
+                    </EuiText>
+                  </EuiAccordion>
+                </>
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup direction="column" gutterSize="m">
             {renderVarsWithSections(
