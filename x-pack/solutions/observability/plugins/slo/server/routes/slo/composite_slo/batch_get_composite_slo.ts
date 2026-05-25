@@ -7,11 +7,9 @@
 
 import { batchGetCompositeSLOParamsSchema } from '@kbn/slo-schema';
 import { DefaultBurnRatesClient, DefaultSummaryClient, GetCompositeSLO } from '../../../services';
-import { createSloServerRoute } from '../../create_slo_server_route';
-import { assertCompositeSloEnabled } from '../utils/assert_composite_slo_enabled';
-import { assertPlatinumLicense } from '../utils/assert_platinum_license';
+import { createCompositeSloServerRoute } from './create_composite_slo_server_route';
 
-export const batchGetCompositeSLORoute = createSloServerRoute({
+export const batchGetCompositeSLORoute = createCompositeSloServerRoute({
   endpoint: 'POST /internal/observability/slo_composites/_batch_get',
   options: { access: 'internal' },
   security: {
@@ -21,9 +19,6 @@ export const batchGetCompositeSLORoute = createSloServerRoute({
   },
   params: batchGetCompositeSLOParamsSchema,
   handler: async ({ context, params, logger, request, plugins, getScopedClients }) => {
-    await assertCompositeSloEnabled(await context.core);
-    await assertPlatinumLicense(plugins);
-
     const { scopedClusterClient, repository, compositeSloRepository, spaceId } =
       await getScopedClients({
         request,
