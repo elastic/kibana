@@ -27,6 +27,21 @@ const feedbackRegistry: FeedbackRegistry = new Map([
     'ml:singleMetricViewer',
     () => import('./questions/machine_learning').then((m) => m.singleMetricViewerQuestions),
   ],
+  ['apm', () => import('./questions/apm').then((m) => m.questions)],
+  ['apm:service-groups-list', () => import('./questions/apm').then((m) => m.questions)],
+  ['apm:services', () => import('./questions/apm').then((m) => m.questions)],
+  ['apm:traces', () => import('./questions/apm').then((m) => m.questions)],
+  ['apm:service-map', () => import('./questions/apm').then((m) => m.questions)],
+  ['apm:dependencies', () => import('./questions/apm').then((m) => m.questions)],
+  ['apm:settings', () => import('./questions/apm').then((m) => m.questions)],
+  ['apm:storage-explorer', () => import('./questions/apm').then((m) => m.questions)],
+  ['apm:tutorial', () => import('./questions/apm').then((m) => m.questions)],
+  ['metrics', () => import('./questions/infra').then((m) => m.questions)],
+  ['metrics:inventory', () => import('./questions/infra').then((m) => m.questions)],
+  ['metrics:hosts', () => import('./questions/infra').then((m) => m.questions)],
+  ['metrics:metrics-explorer', () => import('./questions/infra').then((m) => m.questions)],
+  ['metrics:settings', () => import('./questions/infra').then((m) => m.questions)],
+  ['metrics:assetDetails', () => import('./questions/infra').then((m) => m.questions)],
 ]);
 
 export const getFeedbackQuestionsForApp = async (
