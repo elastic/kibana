@@ -14,11 +14,12 @@ import {
   throttleStrategySchema,
   durationSchema,
   tagsSchema,
+  actionPolicyTypeAndRuleIdSchema,
   PER_EPISODE_STRATEGIES,
   AGGREGATE_STRATEGIES,
   STRATEGIES_REQUIRING_INTERVAL,
 } from '@kbn/alerting-v2-schemas';
-import { buildActionPolicyPayload } from '../../../../common/agent_builder/action_policy_mappers';
+import { attachmentDataToActionPolicyPayload } from '../../../../common/agent_builder/action_policy_mappers';
 
 // ─── Operation schemas ────────────────────────────────────────────────────────
 // Derived from shared alerting-v2-schemas so tool-level validation stays
@@ -66,6 +67,10 @@ export const setThrottleOperationSchema = z.object({
   interval: durationSchema.optional().describe('The throttle interval (e.g. 5m, 1h).'),
 });
 
+export const setTypeOperationSchema = actionPolicyTypeAndRuleIdSchema.extend({
+  operation: z.literal('set_type'),
+});
+
 export const validateOperationSchema = z.object({
   operation: z.literal('validate'),
 });
@@ -78,6 +83,7 @@ export const actionPolicyOperationSchema = z.discriminatedUnion('operation', [
   setMatcherOperationSchema,
   setGroupingOperationSchema,
   setThrottleOperationSchema,
+  setTypeOperationSchema,
   validateOperationSchema,
 ]);
 
@@ -172,8 +178,16 @@ export const executeActionPolicyOperations = (
         };
         break;
 
+      case 'set_type':
+        next = {
+          ...next,
+          type: op.type,
+          ruleId: op.type === 'single_rule' ? op.ruleId : null,
+        };
+        break;
+
       case 'validate': {
-        const payload = buildActionPolicyPayload(next);
+        const payload = attachmentDataToActionPolicyPayload(next);
         const result = createActionPolicyDataSchema.safeParse(payload);
         if (!result.success) {
           const issues = result.error.issues
