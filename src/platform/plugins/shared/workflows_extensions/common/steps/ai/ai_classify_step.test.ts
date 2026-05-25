@@ -38,6 +38,18 @@ describe('ai_classify_step common', () => {
       expect(result.success).toBe(true);
     });
 
+    it('InputSchema accepts categories and fallbackCategory as objects with name and description', () => {
+      const result = InputSchema.safeParse({
+        input: 'text',
+        categories: [
+          { name: 'Critical', description: 'Immediate action required' },
+          'Info',
+        ],
+        fallbackCategory: { name: 'Unknown', description: 'No clear match' },
+      });
+      expect(result.success).toBe(true);
+    });
+
     it('InputSchema rejects temperature out of range', () => {
       expect(InputSchema.safeParse({ input: 'x', categories: ['A'], temperature: 2 }).success).toBe(
         false
@@ -64,7 +76,7 @@ describe('ai_classify_step common', () => {
 
       expect(schema.shape).toHaveProperty('category');
       expect(schema.shape).not.toHaveProperty('categories');
-      expect(schema.shape).toHaveProperty('metadata');
+      expect(schema.shape).not.toHaveProperty('metadata');
       expect(schema.shape).not.toHaveProperty('rationale');
     });
 
@@ -115,7 +127,6 @@ describe('ai_classify_step common', () => {
       const result = schema.safeParse({
         categories: ['A'],
         rationale: 'because',
-        metadata: { model: 'test' },
       });
       expect(result.success).toBe(true);
     });
@@ -126,8 +137,20 @@ describe('ai_classify_step common', () => {
         categories: ['A'],
       });
 
-      // Missing category and metadata
       const result = schema.safeParse({});
+      expect(result.success).toBe(false);
+    });
+
+    it('returned schema rejects metadata from the model (added by the step handler)', () => {
+      const schema = buildStructuredOutputSchema({
+        input: 'text',
+        categories: ['A'],
+      });
+
+      const result = schema.safeParse({
+        category: 'A',
+        metadata: { model: 'test' },
+      });
       expect(result.success).toBe(false);
     });
   });

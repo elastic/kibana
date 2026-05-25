@@ -154,5 +154,29 @@ describe('build_prompts', () => {
         expect(parts[0].content).toContain(`- ${cat}`);
       });
     });
+
+    it('renders object categories with name and description', () => {
+      const parts = buildClassificationRequestPart({
+        categories: [
+          { name: 'Critical', description: 'Immediate action required' },
+          'Info',
+        ],
+        allowMultipleCategories: false,
+        includeRationale: false,
+      });
+      expect(parts[0].content).toContain('- Critical: Immediate action required');
+      expect(parts[0].content).toContain('- Info');
+    });
+
+    it('uses category name for object fallbackCategory', () => {
+      const parts = buildClassificationRequestPart({
+        categories: ['A'],
+        allowMultipleCategories: false,
+        fallbackCategory: { name: 'Other', description: 'No clear match' },
+        includeRationale: false,
+      });
+      expect(parts[0].content).toContain('fallback category: "Other"');
+      expect(parts[0].content).not.toContain('[object Object]');
+    });
   });
 });
