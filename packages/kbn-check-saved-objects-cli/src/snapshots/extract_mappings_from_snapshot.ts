@@ -15,7 +15,8 @@ export const extractMappingsFromSnapshot = (
 ): SavedObjectsTypeMappingDefinitions =>
   Object.entries(snapshot.typeDefinitions).reduce<SavedObjectsTypeMappingDefinitions>(
     (mappings, [typeName, typeDefinition]) => {
-      mappings[typeName] = typeDefinition.mappings as unknown as SavedObjectsTypeMappingDefinitions[string];
+      mappings[typeName] =
+        typeDefinition.mappings as unknown as SavedObjectsTypeMappingDefinitions[string];
       return mappings;
     },
     {}
