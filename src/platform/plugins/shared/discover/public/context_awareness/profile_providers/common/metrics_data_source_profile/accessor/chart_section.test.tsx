@@ -182,7 +182,9 @@ describe('MetricsExperienceGridWrapper', () => {
   it('forwards chartSectionSearchError (showErrorDialog, esqlReferenceHref) to the metrics grid', () => {
     renderChartSection();
 
-    expect(unifiedGridProps?.chartSectionSearchError?.esqlReferenceHref).toBe(mockEsqlReferenceHref);
+    expect(unifiedGridProps?.chartSectionSearchError?.esqlReferenceHref).toBe(
+      mockEsqlReferenceHref
+    );
     expect(unifiedGridProps?.chartSectionSearchError?.showErrorDialog).toEqual(
       expect.any(Function)
     );
