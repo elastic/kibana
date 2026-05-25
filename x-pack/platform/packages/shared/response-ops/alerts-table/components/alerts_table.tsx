@@ -219,6 +219,7 @@ const AlertsTableContent = typedForwardRef(
       lastReloadRequestTime,
       configurationStorage: configurationStorageProp,
       isMutedAlertsEnabled = true,
+      showCsvExportButton = false,
       services,
       ...publicDataGridProps
     }: AlertsTableProps<AC>,
@@ -513,6 +514,10 @@ const AlertsTableContent = typedForwardRef(
           columns: columnsWithFieldsData,
           tableId: id,
           dataGridRef,
+          ruleTypeIds,
+          consumers,
+          query,
+          sort,
           refresh,
           isLoading:
             isLoadingAlerts ||
@@ -553,6 +558,10 @@ const AlertsTableContent = typedForwardRef(
         additionalContext,
         columnsWithFieldsData,
         id,
+        ruleTypeIds,
+        consumers,
+        query,
+        sort,
         refresh,
         isLoadingAlerts,
         casesQuery.isFetching,
@@ -624,6 +633,7 @@ const AlertsTableContent = typedForwardRef(
         alertsQuerySnapshot,
         sort,
         onSortChange: onDataGridSortChange,
+        showCsvExportButton,
       }),
       [
         publicDataGridProps,
@@ -646,6 +656,7 @@ const AlertsTableContent = typedForwardRef(
         alertsQuerySnapshot,
         sort,
         onDataGridSortChange,
+        showCsvExportButton,
       ]
     );
 
