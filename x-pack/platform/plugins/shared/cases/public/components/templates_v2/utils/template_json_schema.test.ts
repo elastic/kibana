@@ -25,11 +25,23 @@ function getFieldsOneOfBranches(
   const unionBranches =
     (itemsSchema.oneOf as JsonSchemaObject[] | undefined) ??
     (itemsSchema.anyOf as JsonSchemaObject[] | undefined);
-  if (!Array.isArray(unionBranches)) {
-    throw new Error('oneOf/anyOf not found in fields.items schema');
+
+  const branches: JsonSchemaObject[] = [];
+  if (Array.isArray(unionBranches)) {
+    branches.push(...unionBranches);
+  } else if (Array.isArray(itemsSchema.allOf)) {
+    for (const entry of itemsSchema.allOf as JsonSchemaObject[]) {
+      if (entry.then) {
+        branches.push(entry.then as JsonSchemaObject);
+      }
+    }
   }
 
-  return (unionBranches as JsonSchemaObject[]).map((branch) => {
+  if (branches.length === 0) {
+    throw new Error('No branches found in fields.items schema');
+  }
+
+  return branches.map((branch) => {
     let controlConst: string | undefined;
 
     if (branch.properties) {
@@ -111,5 +123,43 @@ describe('getTemplateDefinitionJsonSchema', () => {
     expect(Array.isArray(controlProp.enum)).toBe(true);
     expect(controlProp.enum).toContain('INPUT_TEXT');
     expect(controlProp.enum).toContain('SELECT_BASIC');
+  });
+
+  it('adds a type enum hint that includes numeric field types', () => {
+    const schema = getTemplateDefinitionJsonSchema() as JsonSchemaObject;
+    const fieldsSchema = (schema.properties as JsonSchemaObject)?.fields as JsonSchemaObject;
+    const itemsSchema = fieldsSchema.items as JsonSchemaObject;
+
+    const typeProp = (itemsSchema.properties as JsonSchemaObject)?.type as JsonSchemaObject;
+    expect(typeProp).toBeDefined();
+    expect(typeProp.enum).toBeDefined();
+    expect(Array.isArray(typeProp.enum)).toBe(true);
+    expect(typeProp.enum).toContain('keyword');
+    expect(typeProp.enum).toContain('date');
+    expect(typeProp.enum).toContain('integer');
+    expect(typeProp.enum).toContain('long');
+    expect(typeProp.enum).toContain('double');
+  });
+
+  it('uses if/then structure keyed on control for better error messages', () => {
+    const schema = getTemplateDefinitionJsonSchema() as JsonSchemaObject;
+    const fieldsSchema = (schema.properties as JsonSchemaObject)?.fields as JsonSchemaObject;
+    const itemsSchema = fieldsSchema.items as JsonSchemaObject;
+
+    expect(itemsSchema.allOf).toBeDefined();
+    expect(Array.isArray(itemsSchema.allOf)).toBe(true);
+    expect(itemsSchema.oneOf).toBeUndefined();
+    expect(itemsSchema.anyOf).toBeUndefined();
+
+    const allOf = itemsSchema.allOf as JsonSchemaObject[];
+    const ifThenEntries = allOf.filter((entry) => entry.if && entry.then);
+    expect(ifThenEntries.length).toBeGreaterThan(0);
+
+    const inputNumberEntry = ifThenEntries.find((entry) => {
+      const ifSchema = entry.if as JsonSchemaObject;
+      const props = (ifSchema.properties as JsonSchemaObject)?.control as JsonSchemaObject;
+      return props?.const === 'INPUT_NUMBER';
+    });
+    expect(inputNumberEntry).toBeDefined();
   });
 });

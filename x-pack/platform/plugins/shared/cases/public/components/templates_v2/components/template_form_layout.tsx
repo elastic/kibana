@@ -27,6 +27,7 @@ import {
   updateYamlFieldDefault,
   removeYamlFieldDefault,
 } from '../utils/update_yaml_field_default';
+import { validateTemplateDefinitionYaml } from '../utils/validate_template_definition';
 import { computeChangedLines } from '../hooks/use_line_differences_decorations';
 import {
   FieldType,
@@ -92,6 +93,11 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
     [initialValue, yamlValue]
   );
 
+  const hasValidationErrors = useMemo(
+    () => !validateTemplateDefinitionYaml(yamlValue ?? '').success,
+    [yamlValue]
+  );
+
   const yamlValueRef = useRef(yamlValue);
   yamlValueRef.current = yamlValue;
 
@@ -151,6 +157,13 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
 
   const handleSave = useCallback(() => {
     setSubmitError(null);
+
+    const validationResult = validateTemplateDefinitionYaml(yamlValue ?? '');
+    if (!validationResult.success) {
+      setSubmitError(i18n.FIX_VALIDATION_ERRORS);
+      return;
+    }
+
     form.handleSubmit(
       async (data) => {
         try {
@@ -164,7 +177,7 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
         setSubmitError(i18n.FIX_VALIDATION_ERRORS);
       }
     )();
-  }, [form, onCreate, isEnabled, isEdit, clearDraft]);
+  }, [form, onCreate, isEnabled, isEdit, clearDraft, yamlValue]);
 
   const handleIsEnabledChange = useCallback((enabled: boolean) => {
     setIsEnabled(enabled);
@@ -185,6 +198,7 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
             hasChanges={hasChanges}
             isEdit={isEdit}
             submitError={submitError}
+            hasValidationErrors={hasValidationErrors}
             isEnabled={isEnabled}
             onBack={navigateToCasesTemplates}
             onReset={handleResetClick}

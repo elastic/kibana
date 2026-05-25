@@ -7,7 +7,10 @@
 
 import { schema } from '@kbn/config-schema';
 import yaml from 'js-yaml';
-import { PatchTemplateInputSchema } from '../../../../common/types/domain/template/v1';
+import {
+  PatchTemplateInputSchema,
+  ParsedTemplateDefinitionSchema,
+} from '../../../../common/types/domain/template/v1';
 import { INTERNAL_TEMPLATE_DETAILS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
@@ -49,11 +52,24 @@ export const patchTemplateRoute = createCasesRoute({
 
       // Validate YAML definition if provided
       if (input.definition) {
+        let parsedYaml: unknown;
         try {
-          yaml.load(input.definition);
+          parsedYaml = yaml.load(input.definition);
         } catch (yamlError) {
           return response.badRequest({
             body: { message: `Invalid YAML definition: ${yamlError}` },
+          });
+        }
+
+        // Validate parsed definition against the field schema
+        const definitionResult = ParsedTemplateDefinitionSchema.safeParse(parsedYaml);
+        if (!definitionResult.success) {
+          return response.badRequest({
+            body: {
+              message: `Invalid template definition: ${JSON.stringify(
+                definitionResult.error.issues
+              )}`,
+            },
           });
         }
       }

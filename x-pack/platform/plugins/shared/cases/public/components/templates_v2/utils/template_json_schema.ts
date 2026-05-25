@@ -28,6 +28,7 @@ function applySchemaOverrides(ctx: OverrideCtx) {
   addDiscriminatorEnumHints(ctx);
   addUniqueItemsToOptionsArrays(ctx);
   addTitlesToOneOfBranches(ctx);
+  convertFieldUnionToIfThenChain(ctx);
 }
 
 /**
@@ -66,11 +67,44 @@ function removeAdditionalPropertiesFromAllOfItems(ctx: OverrideCtx) {
 }
 
 /**
- * discriminatedUnion generates oneOf with individual const values per branch.
- * Monaco YAML needs an explicit enum on the discriminator property to offer
- * autocomplete suggestions. This walks oneOf branches (including allOf nesting
- * from .extend()), collects const values for a shared property, and adds an
- * enum hint alongside the oneOf.
+ * Extracts discriminator values (const, enum, or oneOf/anyOf of consts) from a
+ * single property schema.
+ */
+function extractDiscriminatorValues(propSchema: unknown): string[] {
+  if (!propSchema || typeof propSchema !== 'object') {
+    return [];
+  }
+
+  const schema = propSchema as Record<string, unknown>;
+
+  if ('const' in schema) {
+    return [schema.const as string];
+  }
+
+  if ('enum' in schema && Array.isArray(schema.enum)) {
+    return schema.enum as string[];
+  }
+
+  const nestedBranches =
+    (schema.oneOf as unknown[] | undefined) ?? (schema.anyOf as unknown[] | undefined);
+  if (Array.isArray(nestedBranches)) {
+    return nestedBranches
+      .filter((nested): nested is { const: string } => {
+        return nested != null && typeof nested === 'object' && 'const' in nested;
+      })
+      .map((nested) => nested.const);
+  }
+
+  return [];
+}
+
+/**
+ * Zod unions (z.union / z.discriminatedUnion) emit oneOf/anyOf in JSON Schema
+ * where each branch may carry a const or enum value on a shared property (e.g.
+ * `control`). Monaco YAML needs an explicit top-level enum on that property to
+ * offer autocomplete suggestions. This walks oneOf/anyOf branches (including
+ * allOf nesting from .extend()), collects discriminator values, deduplicates
+ * them, and injects an enum hint alongside the union.
  */
 function addDiscriminatorEnumHints(ctx: OverrideCtx) {
   const unionBranches = getUnionBranches(ctx.jsonSchema);
@@ -78,18 +112,18 @@ function addDiscriminatorEnumHints(ctx: OverrideCtx) {
     return;
   }
 
-  const branches = unionBranches;
   const discriminatorValues: Record<string, string[]> = {};
 
-  for (const branch of branches) {
+  for (const branch of unionBranches) {
     const props = getPropertiesFromBranch(branch);
     if (props) {
       for (const [propName, propSchema] of Object.entries(props)) {
-        if (propSchema && typeof propSchema === 'object' && 'const' in propSchema) {
+        const values = extractDiscriminatorValues(propSchema);
+        if (values.length > 0) {
           if (!discriminatorValues[propName]) {
             discriminatorValues[propName] = [];
           }
-          discriminatorValues[propName].push((propSchema as { const: string }).const);
+          discriminatorValues[propName].push(...values);
         }
       }
     }
@@ -100,9 +134,10 @@ function addDiscriminatorEnumHints(ctx: OverrideCtx) {
       if (!ctx.jsonSchema.properties) {
         ctx.jsonSchema.properties = {};
       }
+      const uniqueValues = [...new Set(values)];
       ctx.jsonSchema.properties[propName] = {
         type: 'string',
-        enum: values,
+        enum: uniqueValues,
       };
     }
   }
@@ -158,6 +193,50 @@ function addTitlesToOneOfBranches(ctx: OverrideCtx) {
       }
     }
   }
+}
+
+/**
+ * Converts the field-level oneOf/anyOf into if/then chains keyed on `control`.
+ * This causes monaco-yaml to narrow validation to the matching branch first,
+ * producing errors like "type must be long | integer | ..." rather than the
+ * confusing "control must be INPUT_TEXT | SELECT_BASIC | ...".
+ */
+function convertFieldUnionToIfThenChain(ctx: OverrideCtx) {
+  const unionBranches = getUnionBranches(ctx.jsonSchema);
+  if (!unionBranches || unionBranches.length === 0) {
+    return;
+  }
+
+  const branchesWithControl: Array<{
+    controlValue: string;
+    branch: Record<string, unknown>;
+  }> = [];
+
+  for (const branch of unionBranches) {
+    const props = getPropertiesFromBranch(branch);
+    if (props?.control && typeof props.control === 'object' && 'const' in props.control) {
+      branchesWithControl.push({
+        controlValue: (props.control as { const: string }).const,
+        branch,
+      });
+    }
+  }
+
+  if (branchesWithControl.length < 2) {
+    return;
+  }
+
+  const allOf: Array<Record<string, unknown>> = branchesWithControl.map(
+    ({ controlValue, branch }) => ({
+      if: { properties: { control: { const: controlValue } }, required: ['control'] },
+      then: branch,
+    })
+  );
+
+  const schema = ctx.jsonSchema as Record<string, unknown>;
+  schema.allOf = allOf;
+  delete schema.oneOf;
+  delete schema.anyOf;
 }
 
 /**
