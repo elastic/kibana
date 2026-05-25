@@ -41,6 +41,7 @@ import {
   resolveValidationGateConfig,
 } from '../../../lib/detection_emulation/execution/validation_gate';
 import { resolveCurrentUsername } from './resolve_current_user';
+import { toolError, type EmulationErrorContext } from './emulation_tool_errors';
 
 /**
  * Shared per-call dependencies the four per-family runEmulationCommand
@@ -78,10 +79,6 @@ export interface CommandGatesContext {
  */
 export type GatedCommand = RunEmulationCommandInput;
 
-/**
- * The shape every per-family tool returns. Mirrors the
- * `BuiltinSkillBoundedTool` handler return contract.
- */
 type ToolResult =
   | {
       results: Array<{ type: typeof ToolResultType.error; data: Record<string, unknown> }>;
@@ -89,10 +86,6 @@ type ToolResult =
   | {
       results: Array<{ type: typeof ToolResultType.other; data: Record<string, unknown> }>;
     };
-
-const errorResult = (data: Record<string, unknown>): ToolResult => ({
-  results: [{ type: ToolResultType.error, data }],
-});
 
 /**
  * Run the standard emulation gate sequence around a single command
@@ -132,20 +125,16 @@ export const withCommandGates = async (
     actorContext,
   } = ctx;
   const { emulationId, agentType, endpointIds, command } = cmd;
+  const errCtx: EmulationErrorContext = {
+    emulation_id: emulationId,
+    agent_type: agentType,
+    command,
+  };
 
-  // Track the rate-limit token across the full handler so we can release
-  // it from any post-acquire failure path (typed runner errors or generic
-  // catches). `undefined` until Gate 4 acquires.
   let rateLimitToken: ReturnType<typeof rateLimiter.acquire>['token'];
 
   try {
     // ── Gate 1: Feature flag + runtime kill switch ─────────────────────────
-    // Two knobs gate real execution: the static `experimentalFeatures` flag
-    // (ships dark; restart to flip) and the runtime
-    // `detectionEmulation.realExecutionEnabled` kill switch (defaults to true;
-    // operators flip via `kibana.yml` reload to halt new dispatches without
-    // a restart). The disable-reason helper picks whichever knob actually
-    // closed so the error response steers operators to the right config key.
     const featureFlags = getDetectionEmulationFeatureFlags(config);
     if (!isRealExecutionEnabled(featureFlags)) {
       const disableReason = getRealExecutionDisableReason(featureFlags);
@@ -157,63 +146,31 @@ export const withCommandGates = async (
           disableReason ?? 'unknown'
         })`
       );
-      return errorResult({
-        error_type: 'feature_disabled',
+      return toolError.featureDisabled(errCtx, {
         message: 'Detection emulation real execution is disabled',
-        emulation_id: emulationId,
-        agent_type: agentType,
-        command,
-        status_code: 403,
-        likely_cause: likelyCause,
-        disable_reason: disableReason ?? undefined,
+        likelyCause,
+        disableReason: disableReason ?? undefined,
       });
     }
 
     // ── Gate 1.5: Validation gates (curatedOnly + allowedScriptIds) ─────────
-    // Pure-function checks against the bundled payload library and the
-    // operator's `runscript` allow-list. Both default to no-op so existing
-    // deployments see no behaviour change. Runs BEFORE the RBAC lookup
-    // because it requires no I/O — fail-fast cheapest checks first.
-    //
-    // Closes register rows #15 (curatedOnly) and #12 (allowedScriptIds).
-    // See `detection-emulation-production-risk-analysis.html`.
     const validationGateConfig = resolveValidationGateConfig(config.detectionEmulation?.validation);
     const validationGateResult = checkValidationGates(cmd, validationGateConfig);
     if (!validationGateResult.allowed) {
       logger.warn(
         `Emulation command [${command}] for emulation [${emulationId}] blocked by validation gate [${validationGateResult.reason}]: ${validationGateResult.message}`
       );
-      return errorResult({
-        error_type: validationGateResult.reason,
+      return toolError.validationGateBlocked(errCtx, {
+        reason: validationGateResult.reason,
         message: validationGateResult.message,
-        emulation_id: emulationId,
-        agent_type: agentType,
-        command,
-        status_code: 403,
-        likely_cause:
-          validationGateResult.reason === 'not_in_curated_library'
-            ? 'Curated-only mode rejects commands not present in the bundled payload library.'
-            : 'Script ID is not on the operator allow-list.',
       });
     }
 
     // ── Gate 2: Per-command RBAC ────────────────────────────────────────────
-    // Missing entries in the RBAC map mean "no extra privilege required"
-    // (e.g. `cancel` has no dedicated privilege today).
-    //
-    // Use `RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ` (yields
-    // `canXxx` properties on `EndpointAuthz`), NOT
-    // `RESPONSE_CONSOLE_ACTION_COMMANDS_TO_RBAC_FEATURE_CONTROL` (yields
-    // Kibana feature-privilege strings that are not EndpointAuthz keys).
-    // Mirrors `validate_rule/route.ts` and `run_command/route.ts`.
     const consoleCommand = RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[command];
     const requiredAuthzKey = RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ[consoleCommand];
 
     if (requiredAuthzKey) {
-      // Pass the request-scoped ES client so `getEndpointAuthz` can fall back
-      // to ES `_security/_authenticate` for `roles` when the request is a
-      // Task-Manager-dispatched `fakeRequest`. Same fakeRequest mitigation as
-      // `resolve_current_user.ts`.
       const endpointAuthz = await endpointService.getEndpointAuthz(request, esClient.asCurrentUser);
       const hasPrivilege = endpointAuthz[requiredAuthzKey];
 
@@ -221,14 +178,9 @@ export const withCommandGates = async (
         logger.warn(
           `Emulation command [${command}] for emulation [${emulationId}] blocked: user lacks required RBAC privilege [${requiredAuthzKey}]`
         );
-        return errorResult({
-          error_type: 'authorization_error',
+        return toolError.authorizationError(errCtx, {
           message: `Insufficient privileges: command [${command}] requires [${requiredAuthzKey}]`,
-          emulation_id: emulationId,
-          agent_type: agentType,
-          command,
-          status_code: 403,
-          likely_cause: `User lacks required RBAC privilege [${requiredAuthzKey}]`,
+          likelyCause: `User lacks required RBAC privilege [${requiredAuthzKey}]`,
         });
       }
 
@@ -238,11 +190,6 @@ export const withCommandGates = async (
     }
 
     // ── Per-request guardrail resolution ────────────────────────────────────
-    // Read the four `securitySolution:detectionEmulation:*` Advanced
-    // Settings for the current space and fall back to `kibana.yml`
-    // defaults. coreStart is also needed below for SO/cases lookups, so
-    // fetch it ONCE here and reuse — `getStartServices()` is async but
-    // memoized by core, so the cost amortises across the gate sequence.
     const [coreStart] = await core.getStartServices();
     const soClient = coreStart.savedObjects.getScopedClient(request);
     const uiSettingsClient = coreStart.uiSettings.asScopedToClient(soClient);
@@ -262,27 +209,14 @@ export const withCommandGates = async (
       logger.warn(
         `Emulation command [${command}] for emulation [${emulationId}] blocked by allowlist: ${allowlistResult.error}`
       );
-      return errorResult({
-        error_type: 'authorization_error',
+      return toolError.authorizationError(errCtx, {
         message: allowlistResult.error ?? 'Endpoints not in allowlist',
-        blocked_endpoints: allowlistResult.blockedEndpoints,
-        emulation_id: emulationId,
-        agent_type: agentType,
-        command,
-        status_code: 403,
-        likely_cause: 'One or more endpoints not in allowlist',
+        likelyCause: 'One or more endpoints not in allowlist',
+        blockedEndpoints: allowlistResult.blockedEndpoints,
       });
     }
 
     // ── Gate 4: Atomic rate-limit acquire ───────────────────────────────────
-    //
-    // PROD-4: endpointIds is forwarded so the limiter also enforces the
-    // per-host bucket. If any host is over capacity the call is rejected
-    // before any reservation lands and `blocked_endpoints` tells the
-    // LLM (and the operator reading the audit trail) which hosts are
-    // saturated. Because the per-family tools always target a non-empty
-    // endpointIds (it's required by their schema), per-host limiting
-    // always engages here.
     const acquireResult = rateLimiter.acquire(
       spaceId,
       emulationId,
@@ -294,38 +228,17 @@ export const withCommandGates = async (
       logger.warn(
         `Emulation command [${command}] for emulation [${emulationId}] blocked by rate limiter: ${acquireResult.error}`
       );
-      return errorResult({
-        error_type: 'rate_limit_error',
-        message: acquireResult.error ?? 'Rate limit exceeded',
-        current_count: acquireResult.currentCount,
-        max_commands: acquireResult.maxCommands,
-        reset_ms: acquireResult.resetMs,
-        emulation_id: emulationId,
-        agent_type: agentType,
-        command,
-        status_code: 429,
-        likely_cause:
-          acquireResult.blockedEndpoints && acquireResult.blockedEndpoints.length > 0
-            ? 'Per-host rate limit exceeded for one or more endpoints'
-            : 'Rate limit exceeded for this space',
-        ...(acquireResult.blockedEndpoints
-          ? { blocked_endpoints: acquireResult.blockedEndpoints }
-          : {}),
+      return toolError.rateLimitExceeded(errCtx, {
+        error: acquireResult.error,
+        currentCount: acquireResult.currentCount,
+        maxCommands: acquireResult.maxCommands,
+        resetMs: acquireResult.resetMs,
+        blockedEndpoints: acquireResult.blockedEndpoints,
       });
     }
     rateLimitToken = acquireResult.token;
 
     // ── Gate 5: Authenticated caller (defense-in-depth) ─────────────────────
-    // Cases is acquired through `endpointService.getCasesClient` rather
-    // than direct plugin access — security_solution's core start
-    // dependencies do not register the cases plugin. We swallow lookup
-    // failures because the cases client is optional for emulation
-    // dispatch.
-    //
-    // `coreStart` was already resolved above for the per-request guardrail
-    // resolver — reuse it here. `getStartServices()` is async but core
-    // memoizes the promise so a second await would be cheap, but
-    // explicitly reusing the binding makes the dependency obvious.
     let casesClient;
     try {
       casesClient = await endpointService.getCasesClient(request);
@@ -337,13 +250,6 @@ export const withCommandGates = async (
       );
       casesClient = undefined;
     }
-    // Inside Agent Builder the request can be a fake KibanaRequest (Task
-    // Manager dispatches the agent loop with a synthetic request whose
-    // `http.auth.get(request).state` is empty), so `getCurrentUser` returns
-    // null even though the chat endpoint already authenticated the operator.
-    // The shared helper falls back to ES `_security/_authenticate` for that
-    // case, matching the canonical `getUserFromRequest` pattern in the
-    // agent_builder plugin.
     const username = await resolveCurrentUsername({
       request,
       security: coreStart.security,
@@ -354,31 +260,14 @@ export const withCommandGates = async (
       logger.warn(
         `Emulation command [${command}] for emulation [${emulationId}] blocked: no authenticated user`
       );
-      return errorResult({
-        error_type: 'authorization_error',
-        message: 'Authentication is required to run an emulation command.',
-        emulation_id: emulationId,
-        agent_type: agentType,
-        command,
-        status_code: 401,
-        likely_cause: 'No current user attached to the request.',
-      });
+      return toolError.authenticationRequired(errCtx);
     }
 
     // ── Dispatch via EmulationRunner ────────────────────────────────────────
-    // Rule-binding lookup (I7): the SO type is `hidden: true`, so we need
-    // the *internal* SO client — the request-scoped client cannot read
-    // hidden types. We pass the lookup factory rather than a fixed
-    // (ruleId, ruleName) pair so the runner only pays the lookup cost
-    // once per dispatch and tests can stub it.
     const internalSoClient = coreStart.savedObjects.createInternalRepository([
       emulationRuleBindingTypeName,
     ]);
     const ruleBindingLookup = createSavedObjectRuleBindingLookup(
-      // createInternalRepository returns an `ISavedObjectsRepository` which
-      // implements the `SavedObjectsClientContract` shape we need (find /
-      // search). Cast through `unknown` to avoid pulling the repository
-      // typing into our public surface.
       internalSoClient as unknown as Parameters<typeof createSavedObjectRuleBindingLookup>[0],
       logger
     );
@@ -394,22 +283,14 @@ export const withCommandGates = async (
       actorContext,
     });
 
-    // The per-family tool already re-parsed against the strict union —
-    // forward the typed `RunEmulationCommandInput` to the runner.
     const result = await runner.run(cmd);
 
     if (result.status === 'error') {
-      // Roll the rate-limit acquire back so retries are not penalised.
       rateLimiter.release(rateLimitToken);
-      return errorResult({
-        error_type: 'execution_error',
+      return toolError.executionError(errCtx, {
         message: 'Failed to dispatch the emulation command.',
-        action_id: result.actionId,
-        emulation_id: emulationId,
-        agent_type: agentType,
-        command,
-        status_code: 502,
-        likely_cause: 'Internal error during command execution',
+        likelyCause: 'Internal error during command execution',
+        actionId: result.actionId,
       });
     }
 
@@ -433,53 +314,25 @@ export const withCommandGates = async (
     rateLimiter.release(rateLimitToken);
     const error = err as Error;
 
-    // Map typed runner errors → caller-facing classifications. We never
-    // echo raw error messages back to the LLM in the unknown case;
-    // that's logged server-side only (matches I3 in the REST route).
     if (error instanceof UnsupportedAgentTypeError) {
       logger.warn(
         `Emulation command [${command}] for emulation [${emulationId}] rejected: ${error.message}`
       );
-      return errorResult({
-        error_type: 'unsupported_agent_type',
-        message: error.message,
-        emulation_id: emulationId,
-        agent_type: agentType,
-        command,
-        status_code: 400,
-        likely_cause: 'Selected agent type is not supported by this build.',
-      });
+      return toolError.unsupportedAgentType(errCtx, error.message);
     }
 
     if (error instanceof UnsupportedCommandForAgentTypeError) {
       logger.warn(
         `Emulation command [${command}] for emulation [${emulationId}] rejected: ${error.message}`
       );
-      return errorResult({
-        error_type: 'unsupported_command_for_agent_type',
-        message: error.message,
-        emulation_id: emulationId,
-        agent_type: agentType,
-        command,
-        status_code: 400,
-        likely_cause: 'This command is not supported for the selected agent type.',
-      });
+      return toolError.unsupportedCommandForAgentType(errCtx, error.message);
     }
 
     if (error instanceof MissingConnectorActionsError) {
       logger.error(
         `Emulation command [${command}] for emulation [${emulationId}] failed: ${error.message}`
       );
-      return errorResult({
-        error_type: 'missing_connector_actions',
-        message:
-          'Missing connector configuration required to dispatch this command. Please contact an administrator.',
-        emulation_id: emulationId,
-        agent_type: agentType,
-        command,
-        status_code: 500,
-        likely_cause: 'Server-side wiring is incomplete for this agent type.',
-      });
+      return toolError.missingConnectorActions(errCtx);
     }
 
     logger.error(
@@ -487,14 +340,6 @@ export const withCommandGates = async (
       { tags: ['detection-emulation'], stack: error.stack } as Record<string, unknown>
     );
 
-    return errorResult({
-      error_type: 'execution_error',
-      message: 'Failed to execute the emulation command.',
-      emulation_id: emulationId,
-      agent_type: agentType,
-      command,
-      status_code: 500,
-      likely_cause: 'Internal error during command execution',
-    });
+    return toolError.executionError(errCtx);
   }
 };

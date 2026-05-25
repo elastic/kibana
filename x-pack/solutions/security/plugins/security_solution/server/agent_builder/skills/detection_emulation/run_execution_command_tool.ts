@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import { z } from '@kbn/zod/v4';
-import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
+import { ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { RunEmulationCommandInputSchema } from '../../../../common/detection_emulation/schemas/run_emulation_command_input';
 import { MAX_ENDPOINT_FANOUT } from '../../../../common/detection_emulation/schemas/constants';
@@ -18,6 +18,7 @@ import type { DetectionEmulationGuardrails } from '../../../lib/detection_emulat
 import { buildAgentBuilderActor } from '../../../lib/detection_emulation/execution/audit_context';
 import { withCommandGates } from './with_command_gates';
 import { buildEmulationConfirmation } from './build_emulation_confirmation';
+import { toolError } from './emulation_tool_errors';
 
 const EXECUTION_FAMILY_COMMANDS = ['execute', 'runscript', 'cancel'] as const;
 
@@ -126,27 +127,13 @@ unrelated work.`,
         logger.warn(
           `Emulation command [${command}] for emulation [${emulationId}] rejected: invalid parameters for command (${strictParseResult.error.message})`
         );
-        return {
-          results: [
-            {
-              type: ToolResultType.error,
-              data: {
-                error_type: 'invalid_parameters',
-                message: 'Invalid parameters for the requested command.',
-                emulation_id: emulationId,
-                agent_type: agentType,
-                command,
-                status_code: 400,
-                likely_cause:
-                  'The provided `parameters` do not match the expected shape for this command (see schema description for the required fields).',
-              },
-            },
-          ],
-        };
+        return toolError.invalidParameters({
+          emulation_id: emulationId,
+          agent_type: agentType,
+          command,
+        });
       }
 
-      // PROD-2: capture agent-builder attribution for the dispatched
-      // response action's audit comment.
       const actorContext = buildAgentBuilderActor(runContext, callContext.toolCallId);
 
       return withCommandGates(

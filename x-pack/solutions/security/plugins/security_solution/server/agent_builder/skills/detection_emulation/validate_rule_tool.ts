@@ -25,7 +25,6 @@ import {
 } from '../../../lib/detection_emulation/feature_flag';
 import {
   generateScenario,
-  type GenerateScenarioFailureReason,
 } from '../../../lib/detection_emulation/scenario_generator';
 import { generateDocs } from '../../../lib/detection_emulation/log_injection/generator';
 import { executeLogInjection } from '../../../lib/detection_emulation/log_injection/executor';
@@ -49,6 +48,7 @@ import {
 import { buildAgentBuilderActor } from '../../../lib/detection_emulation/execution/audit_context';
 import { resolveCurrentUsername } from './resolve_current_user';
 import { validateRuleSchema } from './validate_rule_input';
+import { toolError, type EmulationErrorContext } from './emulation_tool_errors';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -58,10 +58,6 @@ const WALL_BUDGET_CEILING_MS = 300_000;
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-/**
- * Deterministic fingerprint for a (ruleId, payloadIds, agentType) triple.
- * Mirrors the equivalent helper in the validate_rule route.
- */
 const computeScenarioFingerprint = (
   ruleId: string,
   payloadIds: string[],
@@ -69,40 +65,6 @@ const computeScenarioFingerprint = (
 ): string => {
   const serialized = JSON.stringify({ ruleId, payloadIds: [...payloadIds].sort(), agentType });
   return createHash('sha256').update(serialized).digest('hex');
-};
-
-const scenarioFailureData = (
-  reason: GenerateScenarioFailureReason
-): { error_type: string; message: string; status_code: number } => {
-  switch (reason) {
-    case 'rule_not_found':
-      return {
-        error_type: 'rule_not_found',
-        message: 'The specified rule was not found.',
-        status_code: 404,
-      };
-    case 'no_mitre_tags':
-      return {
-        error_type: 'no_mitre_tags',
-        message: 'The rule has no MITRE ATT&CK technique tags.',
-        status_code: 422,
-      };
-    case 'no_supported_techniques':
-      return {
-        error_type: 'no_supported_techniques',
-        message: "None of the rule's techniques have emulation payloads in the library.",
-        status_code: 422,
-      };
-    default: {
-      const _exhaustive: never = reason;
-      void _exhaustive;
-      return {
-        error_type: 'scenario_error',
-        message: 'Failed to generate an emulation scenario for this rule.',
-        status_code: 500,
-      };
-    }
-  }
 };
 
 // ─── Tool ─────────────────────────────────────────────────────────────────────
@@ -164,68 +126,32 @@ Fails with \`no_mitre_tags\` or \`no_supported_techniques\` if the rule has no e
       } = rawParams;
       const wallBudgetMs = Math.min(rawBudget ?? WALL_BUDGET_DEFAULT_MS, WALL_BUDGET_CEILING_MS);
 
-      // PROD-2: capture the agent-builder attribution once for both the
-      // SO write (Step 8 below) and the runner-side audit comment
-      // (passed via EmulationRunner.actorContext when real_execution
-      // dispatches). Pure / cheap; safe to compute even on the
-      // log_injection path because the SO write happens in either mode.
       const actorContext = buildAgentBuilderActor(runContext, callContext.toolCallId);
+      const errCtx: EmulationErrorContext = { rule_id: ruleId, mode };
 
-      // I1: token from rate-limit acquire (real_execution only). Released in
-      // the unified catch when any downstream step throws after acquire so a
-      // caller-side retry isn't penalised by the rate-limit slot the failed
-      // attempt consumed.
       let rateLimitToken: ReturnType<typeof rateLimiter.acquire>['token'];
-      // PROD-5: token from concurrency-gate acquire (real_execution only,
-      // after scenario fingerprint is known). Released on every exit path
-      // — success, scenario-failure, or thrown error — so the gate never
-      // wedges. Stale-entry sweeper backstops process crashes that
-      // bypass the catch.
       let concurrencyToken: ReturnType<typeof concurrencyGate.acquire>['token'];
       try {
-        // Step 1: Feature flag gate — each mode is independently gated.
-        // `real_execution` is two-keyed (static feature flag AND runtime kill
-        // switch); the precise blocking reason flows into `likely_cause` so
-        // operators flip the right knob without grepping logs.
+        // Step 1: Feature flag gate
         const featureFlags = getDetectionEmulationFeatureFlags(config);
         if (mode === 'log_injection' && !featureFlags.logInjection) {
-          return {
-            results: [
-              {
-                type: ToolResultType.error,
-                data: {
-                  error_type: 'feature_disabled',
-                  message: 'Detection emulation log injection is disabled.',
-                  mode,
-                  status_code: 403,
-                  likely_cause: 'Feature flag detectionEmulationLogInjection is not enabled.',
-                },
-              },
-            ],
-          };
+          return toolError.featureDisabled(errCtx, {
+            message: 'Detection emulation log injection is disabled.',
+            likelyCause: 'Feature flag detectionEmulationLogInjection is not enabled.',
+          });
         }
         if (
           mode === 'real_execution' &&
           (!featureFlags.realExecution || !featureFlags.realExecutionRuntimeEnabled)
         ) {
           const disableReason = getRealExecutionDisableReason(featureFlags);
-          return {
-            results: [
-              {
-                type: ToolResultType.error,
-                data: {
-                  error_type: 'feature_disabled',
-                  message: 'Detection emulation real execution is disabled.',
-                  mode,
-                  status_code: 403,
-                  likely_cause: disableReason
-                    ? REAL_EXECUTION_DISABLE_REASON_TEXT[disableReason]
-                    : 'Real-execution dispatch is disabled.',
-                  disable_reason: disableReason ?? undefined,
-                },
-              },
-            ],
-          };
+          return toolError.featureDisabled(errCtx, {
+            message: 'Detection emulation real execution is disabled.',
+            likelyCause: disableReason
+              ? REAL_EXECUTION_DISABLE_REASON_TEXT[disableReason]
+              : 'Real-execution dispatch is disabled.',
+            disableReason: disableReason ?? undefined,
+          });
         }
 
         const [coreStart, startPlugins] = await core.getStartServices();
@@ -247,19 +173,7 @@ Fails with \`no_mitre_tags\` or \`no_supported_techniques\` if the rule has no e
           esClient: esClient.asCurrentUser,
         });
         if (!username) {
-          return {
-            results: [
-              {
-                type: ToolResultType.error,
-                data: {
-                  error_type: 'authorization_error',
-                  message: 'Authentication is required to run a rule validation.',
-                  status_code: 401,
-                  likely_cause: 'No authenticated user attached to the request.',
-                },
-              },
-            ],
-          };
+          return toolError.authenticationRequired(errCtx);
         }
 
         // Step 3: RBAC — real_execution dispatches `execute` response actions;
@@ -291,19 +205,10 @@ Fails with \`no_mitre_tags\` or \`no_supported_techniques\` if the rule has no e
               logger.warn(
                 `validate_rule tool blocked: user lacks required RBAC privilege [${requiredAuthzKey}]`
               );
-              return {
-                results: [
-                  {
-                    type: ToolResultType.error,
-                    data: {
-                      error_type: 'authorization_error',
-                      message: `Insufficient privileges: real_execution requires [${requiredAuthzKey}].`,
-                      status_code: 403,
-                      likely_cause: `User lacks required RBAC privilege [${requiredAuthzKey}].`,
-                    },
-                  },
-                ],
-              };
+              return toolError.authorizationError(errCtx, {
+                message: `Insufficient privileges: real_execution requires [${requiredAuthzKey}].`,
+                likelyCause: `User lacks required RBAC privilege [${requiredAuthzKey}].`,
+              });
             }
           }
         }
@@ -340,21 +245,11 @@ Fails with \`no_mitre_tags\` or \`no_supported_techniques\` if the rule has no e
             logger.warn(
               `validate_rule tool blocked by allowlist for rule [${ruleId}]: ${allowlistResult.error}`
             );
-            return {
-              results: [
-                {
-                  type: ToolResultType.error,
-                  data: {
-                    error_type: 'authorization_error',
-                    message: allowlistResult.error ?? 'Endpoints not in allowlist.',
-                    blocked_endpoints: allowlistResult.blockedEndpoints,
-                    rule_id: ruleId,
-                    status_code: 403,
-                    likely_cause: 'One or more endpoints are not in the emulation allowlist.',
-                  },
-                },
-              ],
-            };
+            return toolError.authorizationError(errCtx, {
+              message: allowlistResult.error ?? 'Endpoints not in allowlist.',
+              likelyCause: 'One or more endpoints are not in the emulation allowlist.',
+              blockedEndpoints: allowlistResult.blockedEndpoints,
+            });
           }
         }
 
@@ -384,22 +279,7 @@ Fails with \`no_mitre_tags\` or \`no_supported_techniques\` if the rule has no e
             logger.info(
               `validate_rule tool: user declined real_execution prompt for rule [${ruleId}]`
             );
-            return {
-              results: [
-                {
-                  type: ToolResultType.error,
-                  data: {
-                    error_type: 'user_declined',
-                    message: 'User declined to dispatch the live response actions for this rule.',
-                    rule_id: ruleId,
-                    mode,
-                    status_code: 403,
-                    likely_cause:
-                      'Operator cancelled the confirmation prompt; do not retry without an explicit user instruction.',
-                  },
-                },
-              ],
-            };
+            return toolError.userDeclined(errCtx);
           }
 
           if (status.status === ConfirmationStatus.unprompted) {
@@ -458,29 +338,13 @@ Fails with \`no_mitre_tags\` or \`no_supported_techniques\` if the rule has no e
             logger.warn(
               `validate_rule tool blocked by rate limiter for rule [${ruleId}]: ${acquireResult.error}`
             );
-            return {
-              results: [
-                {
-                  type: ToolResultType.error,
-                  data: {
-                    error_type: 'rate_limit_error',
-                    message: acquireResult.error ?? 'Rate limit exceeded.',
-                    current_count: acquireResult.currentCount,
-                    max_commands: acquireResult.maxCommands,
-                    reset_ms: acquireResult.resetMs,
-                    rule_id: ruleId,
-                    status_code: 429,
-                    likely_cause:
-                      acquireResult.blockedEndpoints && acquireResult.blockedEndpoints.length > 0
-                        ? 'Per-host rate limit exceeded for one or more endpoints.'
-                        : 'Rate limit exceeded for this space.',
-                    ...(acquireResult.blockedEndpoints
-                      ? { blocked_endpoints: acquireResult.blockedEndpoints }
-                      : {}),
-                  },
-                },
-              ],
-            };
+            return toolError.rateLimitExceeded(errCtx, {
+              error: acquireResult.error,
+              currentCount: acquireResult.currentCount,
+              maxCommands: acquireResult.maxCommands,
+              resetMs: acquireResult.resetMs,
+              blockedEndpoints: acquireResult.blockedEndpoints,
+            });
           }
           rateLimitToken = acquireResult.token;
         }
@@ -493,20 +357,9 @@ Fails with \`no_mitre_tags\` or \`no_supported_techniques\` if the rule has no e
         );
 
         if (!scenarioResult.ok) {
-          // Release the rate-limit slot we reserved before scenario gen —
-          // a `no_mitre_tags` / `no_supported_techniques` failure should not
-          // count against the per-space window since no payload was dispatched.
           rateLimiter.release(rateLimitToken);
           rateLimitToken = undefined;
-          const failureData = scenarioFailureData(scenarioResult.reason);
-          return {
-            results: [
-              {
-                type: ToolResultType.error,
-                data: { ...failureData, rule_id: ruleId },
-              },
-            ],
-          };
+          return toolError.scenarioFailure(errCtx, scenarioResult.reason);
         }
 
         const startedAt = new Date().toISOString();
@@ -528,23 +381,10 @@ Fails with \`no_mitre_tags\` or \`no_supported_techniques\` if the rule has no e
           if (!concurrencyResult.allowed) {
             rateLimiter.release(rateLimitToken);
             rateLimitToken = undefined;
-            return {
-              results: [
-                {
-                  type: ToolResultType.error,
-                  data: {
-                    error:
-                      'Another real_execution scenario is already in flight for this Kibana space. Concurrent real_execution scenarios are not allowed.',
-                    reason: 'concurrency_exceeded',
-                    rule_id: ruleId,
-                    inflight_scenario_fingerprint: concurrencyResult.inflightScenarioFingerprint,
-                    retry_after_seconds: concurrencyResult.retryAfterSeconds,
-                    likely_cause:
-                      'Another real_execution scenario is currently in flight for this space. Wait for it to complete or retry after the suggested interval.',
-                  },
-                },
-              ],
-            };
+            return toolError.concurrencyExceeded(errCtx, {
+              inflightScenarioFingerprint: concurrencyResult.inflightScenarioFingerprint,
+              retryAfterSeconds: concurrencyResult.retryAfterSeconds,
+            });
           }
           concurrencyToken = concurrencyResult.token;
         }
@@ -743,33 +583,17 @@ Fails with \`no_mitre_tags\` or \`no_supported_techniques\` if the rule has no e
           ],
         };
       } catch (err) {
-        // Release the rate-limit slot on any post-acquire failure so a
-        // caller-side retry isn't penalised by the slot consumed by this
-        // failed attempt. Safe to call with `undefined` — release is a
-        // no-op when the token is missing.
         rateLimiter.release(rateLimitToken);
-        // PROD-5: same for the concurrency slot — the in-flight scenario
-        // is over (failed); the next caller should be able to proceed.
         concurrencyGate.release(concurrencyToken);
         const error = err as Error;
         logger.error(`[validate_rule tool] Failed for rule [${ruleId}]: ${error.message}`, {
           tags: ['detection-emulation'],
           stack: error.stack,
         } as Record<string, unknown>);
-        return {
-          results: [
-            {
-              type: ToolResultType.error,
-              data: {
-                error_type: 'execution_error',
-                message: 'Failed to validate the rule via detection emulation.',
-                rule_id: ruleId,
-                status_code: 500,
-                likely_cause: 'Internal error during the validation pipeline.',
-              },
-            },
-          ],
-        };
+        return toolError.executionError(errCtx, {
+          message: 'Failed to validate the rule via detection emulation.',
+          likelyCause: 'Internal error during the validation pipeline.',
+        });
       }
     },
   };
