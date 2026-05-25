@@ -1404,6 +1404,28 @@ const earliestDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'cartesian_point',
+          optional: false,
+          description: 'The search field',
+        },
+      ],
+      returnType: 'cartesian_point',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'cartesian_shape',
+          optional: false,
+          description: 'The search field',
+        },
+      ],
+      returnType: 'cartesian_shape',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'date',
           optional: false,
           description: 'The search field',
@@ -1432,6 +1454,61 @@ const earliestDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geo_point',
+          optional: false,
+          description: 'The search field',
+        },
+      ],
+      returnType: 'geo_point',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geo_shape',
+          optional: false,
+          description: 'The search field',
+        },
+      ],
+      returnType: 'geo_shape',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geohash',
+          optional: false,
+          description: 'The search field',
+        },
+      ],
+      returnType: 'geohash',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geohex',
+          optional: false,
+          description: 'The search field',
+        },
+      ],
+      returnType: 'geohex',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geotile',
+          optional: false,
+          description: 'The search field',
+        },
+      ],
+      returnType: 'geotile',
     },
     {
       params: [
@@ -1487,6 +1564,28 @@ const earliestDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'unsigned_long',
+          optional: false,
+          description: 'The search field',
+        },
+      ],
+      returnType: 'unsigned_long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'version',
+          optional: false,
+          description: 'The search field',
+        },
+      ],
+      returnType: 'version',
     },
   ],
   locationsAvailable: [Location.STATS],
@@ -1578,6 +1677,142 @@ const firstDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'cartesian_point',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'date',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'cartesian_point',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'cartesian_point',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'date_nanos',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'cartesian_point',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'cartesian_point',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'integer',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'cartesian_point',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'cartesian_point',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'long',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'cartesian_point',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'cartesian_shape',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'date',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'cartesian_shape',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'cartesian_shape',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'date_nanos',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'cartesian_shape',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'cartesian_shape',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'integer',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'cartesian_shape',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'cartesian_shape',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'long',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'cartesian_shape',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'date',
           optional: false,
           description: 'The search field',
@@ -1777,6 +2012,346 @@ const firstDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geo_point',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'date',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'geo_point',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geo_point',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'date_nanos',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'geo_point',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geo_point',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'integer',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'geo_point',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geo_point',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'long',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'geo_point',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geo_shape',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'date',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'geo_shape',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geo_shape',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'date_nanos',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'geo_shape',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geo_shape',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'integer',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'geo_shape',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geo_shape',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'long',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'geo_shape',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geohash',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'date',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'geohash',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geohash',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'date_nanos',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'geohash',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geohash',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'integer',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'geohash',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geohash',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'long',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'geohash',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geohex',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'date',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'geohex',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geohex',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'date_nanos',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'geohex',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geohex',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'integer',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'geohex',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geohex',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'long',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'geohex',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geotile',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'date',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'geotile',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geotile',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'date_nanos',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'geotile',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geotile',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'integer',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'geotile',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geotile',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'long',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'geotile',
     },
     {
       params: [
@@ -2117,6 +2692,142 @@ const firstDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'unsigned_long',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'date',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'unsigned_long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'unsigned_long',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'date_nanos',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'unsigned_long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'unsigned_long',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'integer',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'unsigned_long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'unsigned_long',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'long',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'unsigned_long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'version',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'date',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'version',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'version',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'date_nanos',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'version',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'version',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'integer',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'version',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'version',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'long',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'version',
     },
   ],
   locationsAvailable: [Location.STATS],
@@ -4241,7 +4952,6 @@ const sparklineDefinition: FunctionDefinition = {
     defaultMessage:
       'The values representing the y-axis values of a sparkline graph for a given aggregation over a period of time.',
   }),
-  tsdbCompatible: false,
   preview: true,
   alias: undefined,
   signatures: [
