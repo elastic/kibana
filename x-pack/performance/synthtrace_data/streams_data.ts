@@ -1060,14 +1060,15 @@ export async function setupClassicFieldMappingAtScale(
   const FIELD_TYPES = ['keyword', 'long', 'double', 'boolean', 'ip', 'date'];
 
   // ES default `index.mapping.total_fields.limit` is 1000, well below our
-  // intentional stress target. Raise it on the classic stream's backing index
-  // before pushing field_overrides so the Streams API mapping update succeeds.
+  // intentional stress target. Use the data stream settings API so the new
+  // limit applies to both current backing indices and the next rollover,
+  // which is what the Streams mapping dry-run validation reads from.
   const TOTAL_FIELDS_LIMIT = FIELD_COUNT * 2;
   log.info(
     `Raising index.mapping.total_fields.limit to ${TOTAL_FIELDS_LIMIT} on ${CLASSIC_MAPPING_STREAM}...`
   );
-  await es.indices.putSettings({
-    index: CLASSIC_MAPPING_STREAM,
+  await es.indices.putDataStreamSettings({
+    name: CLASSIC_MAPPING_STREAM,
     settings: { 'index.mapping.total_fields.limit': TOTAL_FIELDS_LIMIT },
   });
 
