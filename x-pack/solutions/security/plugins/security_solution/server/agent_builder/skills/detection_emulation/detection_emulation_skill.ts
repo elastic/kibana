@@ -59,9 +59,9 @@ Do **not** use this skill for:
 
 ### Standard flow: validate a rule
 
-1. **Check history first** — Call \`getEmulationHistory\` with the \`ruleId\`. If recent
+1. **Check history first** — Call \`security.detection-emulation.get-history\` with the \`ruleId\`. If recent
    runs already show high confidence, tell the user and ask whether to re-run.
-2. **Run validation** — Call \`validateRule\` with \`mode: 'log_injection'\` (safe default;
+2. **Run validation** — Call \`security.detection-emulation.validate-rule\` with \`mode: 'log_injection'\` (safe default;
    no real endpoints touched). For \`endpointIds\`, log_injection accepts any non-empty
    string — use the relevant host name or a synthetic ID like \`"emulation-host-1"\`.
 3. **Present results** — Report \`confidence\`, \`coverage\`, \`precision\`, \`tp\`, \`fp\`,
@@ -74,41 +74,39 @@ unrelated work — do **not** retry.
 
 ### Low-level command dispatch
 
-Use the per-family \`run*Command\` tools only when the user needs to fire a specific
-response action outside of a full \`validateRule\` flow (e.g. testing a single
+Use the per-family tools (\`security.detection-emulation.run-process-command\`,
+\`security.detection-emulation.run-file-command\`,
+\`security.detection-emulation.run-network-command\`,
+\`security.detection-emulation.run-execution-command\`) only when the user needs to fire a specific
+response action outside of a full validation flow (e.g. testing a single
 \`execute\` command by hand). They do not score, collect telemetry, or write history,
-so they are not a substitute for \`validateRule\`. Each tool's own description
-documents its commands and required \`parameters\` shape (validated by Zod against
-the central discriminated union).
+so they are not a substitute for \`security.detection-emulation.validate-rule\`.
 
 ## Examples
 
 **Validate a rule:**
 > "Test my PowerShell rule (ID: abc-123) against host ws-001"
-1. \`getEmulationHistory({ ruleId: 'abc-123' })\` — check prior runs
-2. \`validateRule({ ruleId: 'abc-123', endpointIds: ['ws-001'], mode: 'log_injection' })\`
+1. \`security.detection-emulation.get-history({ ruleId: 'abc-123' })\` — check prior runs
+2. \`security.detection-emulation.validate-rule({ ruleId: 'abc-123', endpointIds: ['ws-001'], mode: 'log_injection' })\`
 3. Report confidence score and which signals fired / missed
 
 **Show history:**
 > "Show me the last 10 emulation runs for rule abc-123"
-1. \`getEmulationHistory({ ruleId: 'abc-123', limit: 10 })\`
+1. \`security.detection-emulation.get-history({ ruleId: 'abc-123', limit: 10 })\`
 2. Summarise: confidence range, trend, any regressions
 
 **Re-run with real execution:**
 > "Re-validate rule abc-123 with live endpoints"
-1. \`validateRule({ ruleId: 'abc-123', endpointIds: ['<real-id>'], mode: 'real_execution' })\`
+1. \`security.detection-emulation.validate-rule({ ruleId: 'abc-123', endpointIds: ['<real-id>'], mode: 'real_execution' })\`
 2. The framework prompts the user; if they cancel, acknowledge and stop.
 3. If accepted, report confidence + matched/unmatched signals once the run finishes.
 
 ## Scheduled / Alerted Use
 
 For "validate this rule every night" or "validate when this rule itself fires
-in production", wrap \`validateRule\` in a workflow rather than orchestrating
+in production", wrap \`security.detection-emulation.validate-rule\` in a workflow rather than orchestrating
 inside this skill — see the bundled \`detection_rule_periodic_validation\`
 example (workflow-authoring skill → \`getExamples({ search: 'detection-emulation' })\`).
-The example pairs the validation with case creation + Slack escalation on
-confidence regression and demonstrates the layered model (skill = capability,
-workflow = composition).
 
 ## Operator Guardrails (informational)
 
@@ -124,7 +122,7 @@ explain them when an error references them:
   A 429 response names \`blocked_endpoints\` (per-host) or returns a
   \`reset_ms\` hint (per-space). Suggest waiting, switching hosts, or using
   \`log_injection\` (which is exempt from per-host limiting).
-- **Concurrency gate.** Only one \`real_execution\` \`validateRule\` scenario per
+- **Concurrency gate.** Only one \`real_execution\` validation scenario per
   space at a time. A 429 with \`reason: concurrency_exceeded\` includes
   \`retry_after_seconds\`; suggest waiting.
 - **HITL.** Real-execution paths require user confirmation (handled

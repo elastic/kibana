@@ -143,32 +143,13 @@ export const createValidateRuleTool = (
   return {
     id: 'security.detection-emulation.validate-rule',
     type: ToolType.builtin,
-    description: `Validate a detection rule by running an attack emulation scenario and measuring whether the rule fires.
+    description: `Validate a detection rule by dispatching MITRE ATT&CK payloads and scoring whether it fires.
 
-Dispatches payloads mapped to the rule's MITRE ATT&CK technique tags, collects resulting Detection Engine alerts, and returns a composite confidence score.
+Modes: \`log_injection\` (default, safe — synthetic ECS docs, no real endpoints touched) or \`real_execution\` (live response actions, requires RBAC + feature flag + user confirmation).
 
-**Modes:**
-- \`log_injection\` (default, safe): Injects synthetic ECS documents into a dedicated emulation index. No real endpoints are touched. Use this for all exploratory validation.
-- \`real_execution\` (requires privileges + feature flag): Dispatches live response actions to the target endpoints. Use only when \`log_injection\` confidence is insufficient and the operator has explicitly authorised live execution.
+Returns: \`confidence\` (0–1), \`coverage\`, \`precision\`, \`tp\`, \`fp\`, \`matched_signals\`, \`unmatched_signals\`, \`report_id\`, \`caveats\`.
 
-**Pipeline steps:**
-1. Feature flag gate — respects \`detectionEmulationLogInjection\` / \`detectionEmulationRealExecution\` flags.
-2. Auth check — emulation runs are always attributable to an operator.
-3. RBAC check (\`real_execution\`) — verifies the caller holds the endpoint execute privilege.
-4. Scenario generation — maps the rule's MITRE tags to the emulation payload library; fails with \`no_mitre_tags\` or \`no_supported_techniques\` if no match.
-5. Dispatch — injects docs (\`log_injection\`) or fires response actions (\`real_execution\`).
-6. Telemetry collection — polls Detection Engine alerts until \`wallBudgetMs\` elapses.
-7. Confidence scoring — \`confidence = coverage × 0.6 + precision × 0.4\`, clamped [0, 1].
-8. History write — persists a \`detection-emulation-report\` saved object for audit and trend analysis.
-
-**Output fields:** \`confidence\`, \`coverage\`, \`precision\`, \`tp\`, \`fp\`, \`caveats\`, \`matched_signals\`, \`unmatched_signals\`, \`report_id\`.
-
-**Confirmation (\`real_execution\` only):** the agent-builder framework prompts the
-user once per scenario before the live response actions are dispatched. If the
-user declines, the tool returns a \`user_declined\` error — do NOT retry; surface
-the cancellation and continue with unrelated work.
-
-Use this tool when the user asks to validate, test, score, or confirm whether a detection rule will fire on a known attack technique.`,
+Fails with \`no_mitre_tags\` or \`no_supported_techniques\` if the rule has no emulable techniques. On \`user_declined\`, do NOT retry.`,
     schema: validateRuleSchema,
     handler: async (
       rawParams,

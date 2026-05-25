@@ -59,16 +59,20 @@ interface DetectionEmulationDataset {
  *  - Failure: rule with no MITRE tags → no_mitre_tags
  *  - Failure: rule with unmapped technique → no_supported_techniques
  *  - Failure: caller lacks real_execution privilege → authorization_error
+ *  - HITL: user declines real_execution prompt → user_declined
  *  - Distractor: alert investigation (skill must NOT be invoked)
  *  - Distractor: rule creation request (skill must NOT be invoked)
+ *  - Distractor: ES|QL question (skill must NOT be invoked)
+ *  - Distractor: threat hunting (skill must NOT be invoked)
+ *  - Distractor: dashboard creation (skill must NOT be invoked)
  */
 export const validateRuleDataset = {
   name: 'security: detection-emulation-validate-rule',
   description:
     'Exercises the detection-emulation skill validateRule tool. ' +
     'Covers success (T1059.001, T1218.005), failure (no_mitre_tags, ' +
-    'no_supported_techniques, authorization_error), default log_injection mode, ' +
-    'history-first flow, and distractor prompts where the skill should not fire.',
+    'no_supported_techniques, authorization_error), HITL rejection, default log_injection mode, ' +
+    'history-first flow, and 5 distractor prompts where the skill should not fire.',
   examples: [
     // ─── Success path: PowerShell (T1059.001) ─────────────────────────────────
     {
@@ -270,6 +274,52 @@ export const validateRuleDataset = {
         criteria: [
           'Did NOT call any detection-emulation tool (security.detection-emulation.validate-rule, security.detection-emulation.run-command, security.detection-emulation.get-history).',
           'Addressed the rule creation request using rule management tooling, not emulation tooling.',
+        ],
+        tool_sequence: [],
+      },
+    },
+
+    // ─── Distractor: general ES|QL question (skill must NOT fire) ─────────────
+    {
+      input: {
+        question:
+          'How do I write an ES|QL query that counts unique source IPs per destination port over the last 24 hours?',
+      },
+      output: {
+        criteria: [
+          'Did NOT call any detection-emulation tool.',
+          'Provided guidance on ES|QL syntax or used an appropriate ES|QL or data exploration tool.',
+        ],
+        tool_sequence: [],
+      },
+    },
+
+    // ─── Distractor: threat hunting request (skill must NOT fire) ─────────────
+    {
+      input: {
+        question:
+          'Hunt for lateral movement from host srv-dc01 over the last 7 days. ' +
+          'I want to see RDP, SMB, and WMI connections from that host.',
+      },
+      output: {
+        criteria: [
+          'Did NOT call any detection-emulation tool — this is a threat hunt, not a rule validation.',
+          'Used threat hunting or alert search tooling instead.',
+        ],
+        tool_sequence: [],
+      },
+    },
+
+    // ─── Distractor: dashboard creation request (skill must NOT fire) ─────────
+    {
+      input: {
+        question:
+          'Create a dashboard showing the top 10 rules by alert count this week.',
+      },
+      output: {
+        criteria: [
+          'Did NOT call any detection-emulation tool.',
+          'Addressed the dashboard creation request appropriately.',
         ],
         tool_sequence: [],
       },

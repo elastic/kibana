@@ -477,6 +477,9 @@ evaluate.describe(
       userDeclines,
       alertInvestigation,
       ruleCreation,
+      esqlQuestion,
+      threatHunting,
+      dashboardCreation,
     ] = validateRuleDataset.examples;
 
     evaluate(
@@ -620,6 +623,51 @@ evaluate.describe(
         await runScenario({
           name: 'distractor: rule creation',
           example: ruleCreation,
+          chatClient,
+          evaluators,
+          executorClient,
+          traceEsClient,
+          log,
+        });
+      }
+    );
+
+    evaluate(
+      'distractor — ES|QL question (skill must not fire)',
+      async ({ chatClient, evaluators, executorClient, traceEsClient, log }) => {
+        await runScenario({
+          name: 'distractor: ES|QL question',
+          example: esqlQuestion,
+          chatClient,
+          evaluators,
+          executorClient,
+          traceEsClient,
+          log,
+        });
+      }
+    );
+
+    evaluate(
+      'distractor — threat hunting request (skill must not fire)',
+      async ({ chatClient, evaluators, executorClient, traceEsClient, log }) => {
+        await runScenario({
+          name: 'distractor: threat hunting',
+          example: threatHunting,
+          chatClient,
+          evaluators,
+          executorClient,
+          traceEsClient,
+          log,
+        });
+      }
+    );
+
+    evaluate(
+      'distractor — dashboard creation (skill must not fire)',
+      async ({ chatClient, evaluators, executorClient, traceEsClient, log }) => {
+        await runScenario({
+          name: 'distractor: dashboard creation',
+          example: dashboardCreation,
           chatClient,
           evaluators,
           executorClient,

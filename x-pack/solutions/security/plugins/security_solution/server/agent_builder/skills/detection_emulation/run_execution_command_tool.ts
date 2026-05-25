@@ -30,10 +30,10 @@ const EXECUTION_FAMILY_COMMANDS = ['execute', 'runscript', 'cancel'] as const;
 const runExecutionCommandSchema = z.object({
   emulationId: z.string().min(1).describe('Unique identifier for the emulation run.'),
   agentType: z
-    .literal('endpoint')
+    .enum(['endpoint'])
     .default('endpoint')
     .describe(
-      'EDR agent type. Always `endpoint` — the route does not yet wire `sentinel_one`, `crowdstrike`, or `microsoft_defender_endpoint`. Omit; defaults to `endpoint`.'
+      'EDR agent type. Currently only `endpoint` (Elastic Defend) is wired. Omit; defaults to `endpoint`.'
     ),
   endpointIds: z
     .array(z.string().min(1))

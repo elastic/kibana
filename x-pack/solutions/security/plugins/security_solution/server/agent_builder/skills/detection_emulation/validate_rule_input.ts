@@ -33,7 +33,7 @@ export const validateRuleSchema = z.object({
       message: `endpointIds must contain at most ${MAX_ENDPOINT_FANOUT} entries (MAX_ENDPOINT_FANOUT)`,
     })
     .describe(
-      `One or more target Elastic Agent IDs (capped at ${MAX_ENDPOINT_FANOUT}). For \`real_execution\` these must be enrolled, reachable endpoint agents — the pipeline dispatches live response actions against them. For \`log_injection\` they are used as synthetic host identifiers in the injected ECS documents and do not need to correspond to real agents. The fanout cap exists so a single call cannot N-multiply the per-host EDR rate budget by accident; if a user asks to validate against more than ${MAX_ENDPOINT_FANOUT} endpoints, suggest splitting the request or using \`log_injection\` mode (which doesn't dispatch real response actions).`
+      `Target Elastic Agent IDs (1–${MAX_ENDPOINT_FANOUT}). For \`real_execution\`, must be enrolled reachable agents; for \`log_injection\`, synthetic IDs are acceptable. Split requests exceeding the cap or switch to \`log_injection\` mode.`
     ),
   mode: z
     .enum(['log_injection', 'real_execution'])
@@ -42,10 +42,10 @@ export const validateRuleSchema = z.object({
       'Dispatch mode. `log_injection` (default): synthesises structurally-correct ECS documents in a dedicated emulation index (`.kibana-security-emulation-logs-<spaceId>-*`) so Detection Engine rules can match without touching real endpoints — safe for all environments. `real_execution`: dispatches live response actions to the target endpoints via the ResponseActionsClient — requires additional endpoint RBAC privileges and the `detectionEmulationRealExecution` feature flag. Omit to use `log_injection`.'
     ),
   agentType: z
-    .literal('endpoint')
+    .enum(['endpoint'])
     .default('endpoint')
     .describe(
-      'EDR agent family for `real_execution` dispatch. Always `endpoint` — the route does not yet wire `sentinel_one`, `crowdstrike`, or `microsoft_defender_endpoint`. Omit; defaults to `endpoint`. Ignored for `log_injection` (which writes synthetic ECS docs and is agent-agnostic).'
+      'EDR agent family for dispatch. Currently only `endpoint` (Elastic Defend) is wired. Defaults to `endpoint`. Ignored for `log_injection`.'
     ),
   wallBudgetMs: z
     .number()
