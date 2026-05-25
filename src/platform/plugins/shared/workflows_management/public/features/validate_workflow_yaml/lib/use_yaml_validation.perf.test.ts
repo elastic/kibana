@@ -12,7 +12,9 @@ import fs from 'fs';
 // eslint-disable-next-line import/no-nodejs-modules
 import path from 'path';
 import YAML, { LineCounter } from 'yaml';
+import type { ESQLCallbacks } from '@kbn/esql-types';
 import { VARIABLE_REGEX_GLOBAL } from '@kbn/workflows-yaml';
+import { validateEsqlSteps } from '../../../widgets/workflow_yaml_editor/lib/esql_validation/validate_esql_steps';
 import { collectAllConnectorIds } from './collect_all_connector_ids';
 import { collectAllStepPropertyItems } from './collect_all_step_property_items';
 import { collectAllVariables } from './collect_all_variables';
@@ -30,6 +32,8 @@ import { getPropertyHandler } from '../../../../common/schema';
 import { performComputation } from '../../../entities/workflows/store/workflow_detail/utils/computation';
 
 const WARMUP_ITERATIONS = 5;
+
+const stubEsqlCallbacks: ESQLCallbacks = {};
 
 interface BenchmarkConfig {
   iterations: number;
@@ -238,6 +242,10 @@ async function runE2EBenchmark(yamlContent: string, config: BenchmarkConfig) {
       start = performance.now();
       validateIfConditions(workflowLookup, lc);
       record('validateIfConditions', performance.now() - start);
+
+      start = performance.now();
+      await validateEsqlSteps(workflowLookup, lc, model, stubEsqlCallbacks);
+      record('validateEsqlSteps', performance.now() - start);
     }
 
     if (workflowGraph && workflowDefinition) {

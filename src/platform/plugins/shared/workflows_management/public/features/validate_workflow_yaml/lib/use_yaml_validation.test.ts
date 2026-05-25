@@ -11,6 +11,20 @@ import { renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { Provider } from 'react-redux';
 import { monaco } from '@kbn/monaco';
+
+const mockValidateEsqlSteps = jest.fn().mockResolvedValue([]);
+
+jest.mock('../../../widgets/workflow_yaml_editor/lib/esql_validation/validate_esql_steps', () => ({
+  validateEsqlSteps: (...args: unknown[]) => mockValidateEsqlSteps(...args),
+}));
+
+jest.mock(
+  '../../../widgets/workflow_yaml_editor/lib/esql_validation/use_workflow_esql_callbacks',
+  () => ({
+    useWorkflowEsqlCallbacks: () => ({}),
+  })
+);
+
 import { useYamlValidation } from './use_yaml_validation';
 import { WorkflowsContextProvider } from '../../../common/context';
 import { selectDetail } from '../../../entities/workflows/store';
@@ -475,5 +489,71 @@ steps:
       (call) => call[1] !== 'custom-yaml-validation'
     );
     expect(individualOwnerCalls).toHaveLength(0);
+  });
+});
+
+describe('useYamlValidation - ES|QL step wiring', () => {
+  beforeEach(() => {
+    mockValidateEsqlSteps.mockReset();
+    mockValidateEsqlSteps.mockResolvedValue([]);
+  });
+
+  it('calls validateEsqlSteps when the workflow has an elasticsearch.esql.query step', async () => {
+    const yamlContent = `
+version: "1"
+name: "ES|QL Workflow"
+enabled: true
+triggers:
+  - type: manual
+    enabled: true
+steps:
+  - name: esql_step
+    type: elasticsearch.esql.query
+    with:
+      query: |
+        FROM logs-* | LIMIT 10
+`;
+    const mockEditor = createMockEditor(yamlContent);
+    renderHookWithProviders(mockEditor as any, yamlContent);
+
+    await waitFor(
+      () => {
+        expect(mockValidateEsqlSteps).toHaveBeenCalled();
+      },
+      { timeout: 3000 }
+    );
+  });
+
+  it('validateEsqlSteps early-outs when no elasticsearch.esql.query step exists', async () => {
+    mockValidateEsqlSteps.mockImplementation(async (workflowLookup) => {
+      const hasEsqlStep = Object.values(workflowLookup.steps).some(
+        (step) => step.stepType === 'elasticsearch.esql.query'
+      );
+      expect(hasEsqlStep).toBe(false);
+      return [];
+    });
+
+    const yamlContent = `
+version: "1"
+name: "No ES|QL Workflow"
+enabled: true
+triggers:
+  - type: manual
+    enabled: true
+steps:
+  - name: log_step
+    type: console
+    with:
+      message: "elasticsearch.esql.query is documented in the guide"
+`;
+    const mockEditor = createMockEditor(yamlContent);
+    renderHookWithProviders(mockEditor as any, yamlContent);
+
+    await waitFor(
+      () => {
+        expect(mockValidateEsqlSteps).toHaveBeenCalled();
+      },
+      { timeout: 3000 }
+    );
   });
 });

@@ -102,6 +102,8 @@ export function useYamlValidation(
   const getPropertyHandler = useGetPropertyHandler();
 
   useEffect(() => {
+    const esqlAbortController = new AbortController();
+
     async function validateYaml() {
       if (!editor) {
         return;
@@ -154,32 +156,24 @@ export function useYamlValidation(
         ...validateConnectorIds(connectorIdItems, dynamicConnectorTypes, connectorsManagementUrl),
         ...validateWorkflowOutputsInYaml(yamlDocument, model, workflowDefinition?.outputs),
         ...(stepPropertyItems ? await validateStepProperties(stepPropertyItems) : []),
+        // Lookup-backed validators run sequentially (each await blocks the next).
+        // ES|QL runs after step-property validation so property errors surface first
+        // and we avoid overlapping cluster calls from validateQuery with property handlers.
         ...(workflowLookup && lineCounter
           ? [
               ...validateDeprecatedStepTypes(workflowLookup, lineCounter),
               ...validateWorkflowInputs(workflowLookup, workflows, lineCounter),
               ...validateIfConditions(workflowLookup, lineCounter),
+              ...(await validateEsqlSteps(
+                workflowLookup,
+                lineCounter,
+                model,
+                esqlCallbacksRef.current,
+                esqlAbortController.signal
+              ).catch(() => [])),
             ]
           : []),
       ];
-
-      // ES|QL validation runs against `with.query` of every
-      // `elasticsearch.esql.query` step. Errors flow through the same
-      // results array so they show up in the bottom-bar accordion. The cheap
-      // text-search guard avoids the async pipeline entirely when no ES|QL
-      // step is present — keeps the common case microtask-free.
-      if (model.getValue().includes('elasticsearch.esql.query')) {
-        try {
-          const esqlResults = await validateEsqlSteps(
-            yamlDocument,
-            model,
-            esqlCallbacksRef.current
-          );
-          results.push(...esqlResults);
-        } catch {
-          // never let ES|QL validation break the rest of the pipeline
-        }
-      }
 
       // Variable and JSON-schema-default validations require a fully parsed
       // workflowGraph and workflowDefinition. When those are unavailable
@@ -215,6 +209,10 @@ export function useYamlValidation(
     }
 
     validateYaml();
+
+    return () => {
+      esqlAbortController.abort();
+    };
   }, [
     editor,
     lineCounter,
