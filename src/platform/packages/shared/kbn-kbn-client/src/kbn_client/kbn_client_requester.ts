@@ -118,6 +118,16 @@ interface Options {
   certificateAuthorities?: Buffer[];
 }
 
+// FTR talks to a local Kibana that may be slow to accept connections during
+// startup or under heavy load (large multipart uploads, perf journeys). The
+// previous axios-based requester had no socket connect timeout, while undici's
+// default `connect.timeout` is 10s and causes spurious ConnectTimeoutError
+// failures on those workloads. Pick generous values to match the prior
+// effectively-unlimited behaviour without disabling the safeguard entirely.
+const FETCH_CONNECT_TIMEOUT_MS = 60_000;
+const FETCH_HEADERS_TIMEOUT_MS = 5 * 60_000;
+const FETCH_BODY_TIMEOUT_MS = 10 * 60_000;
+
 export class KbnClientRequester {
   // `url` retains any `user:pass@` from the original config - `resolveUrl()` is
   // a public API used by FTR tests (e.g. http connector tests) that pluck
@@ -125,7 +135,7 @@ export class KbnClientRequester {
   private readonly url: string;
   private readonly urlForFetch: string;
   private readonly authorization?: string;
-  private readonly dispatcher: Dispatcher | null;
+  private readonly dispatcher: Dispatcher;
 
   constructor(private readonly log: ToolingLog, options: Options) {
     this.url = options.url;
@@ -145,8 +155,20 @@ export class KbnClientRequester {
 
     this.dispatcher =
       parsed.protocol === 'https:'
-        ? new Agent({ connect: { ca: options.certificateAuthorities, rejectUnauthorized: false } })
-        : null;
+        ? new Agent({
+            connect: {
+              ca: options.certificateAuthorities,
+              rejectUnauthorized: false,
+              timeout: FETCH_CONNECT_TIMEOUT_MS,
+            },
+            headersTimeout: FETCH_HEADERS_TIMEOUT_MS,
+            bodyTimeout: FETCH_BODY_TIMEOUT_MS,
+          })
+        : new Agent({
+            connect: { timeout: FETCH_CONNECT_TIMEOUT_MS },
+            headersTimeout: FETCH_HEADERS_TIMEOUT_MS,
+            bodyTimeout: FETCH_BODY_TIMEOUT_MS,
+          });
   }
 
   public resolveUrl(relativeUrl = '/') {
@@ -209,7 +231,7 @@ export class KbnClientRequester {
           headers,
           body,
           signal: options.signal,
-          ...(this.dispatcher ? { dispatcher: this.dispatcher } : {}),
+          dispatcher: this.dispatcher,
         } as RequestInit);
 
         if (!response.ok) {
