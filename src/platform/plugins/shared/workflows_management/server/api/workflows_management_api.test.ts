@@ -410,7 +410,13 @@ steps:
 
     describe('when testing with workflowId parameter', () => {
       it('should fetch workflow YAML by ID and execute it', async () => {
-        mockWorkflowsService.getWorkflow.mockResolvedValue(mockWorkflowDetailDto);
+        mockWorkflowsService.getWorkflow.mockResolvedValue({
+          ...mockWorkflowDetailDto,
+          managed: true,
+          managedBy: 'workflowsExtensionsExample',
+          originManagedWorkflowId: 'system-example-greeting',
+          managedVersion: 3,
+        });
 
         const result = await api.testWorkflow({
           workflowId: 'existing-workflow-id',
@@ -429,6 +435,41 @@ steps:
           expect.objectContaining({
             id: 'existing-workflow-id',
             yaml: mockWorkflowYaml,
+            managed: true,
+            managedBy: 'workflowsExtensionsExample',
+            originManagedWorkflowId: 'system-example-greeting',
+            managedVersion: 3,
+          }),
+          expect.any(Object),
+          mockRequest
+        );
+      });
+
+      it('should preserve managed metadata when testing provided YAML for a saved workflow', async () => {
+        mockWorkflowsService.getWorkflow.mockResolvedValue({
+          ...mockWorkflowDetailDto,
+          managed: true,
+          managedBy: 'workflowsExtensionsExample',
+          originManagedWorkflowId: 'system-example-greeting',
+          managedVersion: 3,
+        });
+
+        await api.testWorkflow({
+          workflowId: 'existing-workflow-id',
+          workflowYaml: mockWorkflowYaml,
+          inputs,
+          spaceId,
+          request: mockRequest,
+        });
+
+        const engine = await mockWorkflowsService.getWorkflowsExecutionEngine();
+        expect(engine.executeWorkflow).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: 'existing-workflow-id',
+            managed: true,
+            managedBy: 'workflowsExtensionsExample',
+            originManagedWorkflowId: 'system-example-greeting',
+            managedVersion: 3,
           }),
           expect.any(Object),
           mockRequest
