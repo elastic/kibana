@@ -8,8 +8,8 @@
  */
 
 import { LineCounter, parseDocument } from 'yaml';
-import { buildWorkflowLookup } from '../../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
 import { collectEsqlRegionsFromLookup } from './extract_esql_region';
+import { buildWorkflowLookup } from '../../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
 
 function regionsFromText(text: string) {
   const lineCounter = new LineCounter();

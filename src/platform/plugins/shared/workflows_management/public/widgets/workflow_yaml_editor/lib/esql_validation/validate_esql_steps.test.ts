@@ -10,8 +10,8 @@
 import { LineCounter, parseDocument } from 'yaml';
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import type { monaco } from '@kbn/monaco';
-import { buildWorkflowLookup } from '../../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
 import { validateEsqlSteps } from './validate_esql_steps';
+import { buildWorkflowLookup } from '../../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
 
 const mockValidate = jest.fn();
 
@@ -38,11 +38,7 @@ function createTextModel(content: string): monaco.editor.ITextModel {
 
 const stubCallbacks: ESQLCallbacks = {};
 
-async function validateEsqlFromText(
-  text: string,
-  callbacks: ESQLCallbacks,
-  signal?: AbortSignal
-) {
+async function validateEsqlFromText(text: string, callbacks: ESQLCallbacks, signal?: AbortSignal) {
   const lineCounter = new LineCounter();
   const document = parseDocument(text, { lineCounter, keepSourceTokens: true });
   const workflowLookup = buildWorkflowLookup(document, lineCounter);

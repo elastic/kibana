@@ -14,7 +14,6 @@ import path from 'path';
 import YAML, { LineCounter } from 'yaml';
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import { VARIABLE_REGEX_GLOBAL } from '@kbn/workflows-yaml';
-import { validateEsqlSteps } from '../../../widgets/workflow_yaml_editor/lib/esql_validation/validate_esql_steps';
 import { collectAllConnectorIds } from './collect_all_connector_ids';
 import { collectAllStepPropertyItems } from './collect_all_step_property_items';
 import { collectAllVariables } from './collect_all_variables';
@@ -30,6 +29,7 @@ import { validateWorkflowInputs } from './validate_workflow_inputs';
 import { validateWorkflowOutputsInYaml } from './validate_workflow_outputs_in_yaml';
 import { getPropertyHandler } from '../../../../common/schema';
 import { performComputation } from '../../../entities/workflows/store/workflow_detail/utils/computation';
+import { validateEsqlSteps } from '../../../widgets/workflow_yaml_editor/lib/esql_validation/validate_esql_steps';
 
 const WARMUP_ITERATIONS = 5;
 
