@@ -229,6 +229,26 @@ describe('ModelSettings', () => {
     expect(screen.getByTestId('save-settings-button')).toBeEnabled();
   });
 
+  it('moves focus to save button when form becomes dirty', () => {
+    const { rerender } = render(
+      <Wrapper>
+        <ModelSettings />
+      </Wrapper>
+    );
+
+    expect(screen.getByTestId('save-settings-button')).not.toHaveFocus();
+
+    mockUseModelSettingsForm.mockReturnValue({ ...defaultFormState, isDirty: true });
+
+    rerender(
+      <Wrapper>
+        <ModelSettings />
+      </Wrapper>
+    );
+
+    expect(screen.getByTestId('save-settings-button')).toHaveFocus();
+  });
+
   it('save button stays disabled when validation fails, even if dirty', () => {
     mockUseDefaultModelSettings.mockReturnValue({
       ...defaultModelSettingsState,

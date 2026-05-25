@@ -124,7 +124,14 @@ export const ModelSettings: React.FC = () => {
 
   const history = useHistory();
   const unblockRef = useRef<(() => void) | null>(null);
+  const saveButtonRef = useRef<HTMLButtonElement | null>(null);
   const [pendingLocation, setPendingLocation] = useState<Location | null>(null);
+
+  useEffect(() => {
+    if (isDirty) {
+      saveButtonRef.current?.focus();
+    }
+  }, [isDirty]);
 
   useEffect(() => {
     if (!isDirty) {
@@ -219,6 +226,7 @@ export const ModelSettings: React.FC = () => {
         restrictWidth={true}
         rightSideItems={[
           <EuiButton
+            buttonRef={saveButtonRef}
             fill
             onClick={handleSave}
             isLoading={isFeatureSaving}
