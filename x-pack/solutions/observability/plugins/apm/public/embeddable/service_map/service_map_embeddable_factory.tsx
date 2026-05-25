@@ -7,7 +7,7 @@
 
 import React, { useEffect } from 'react';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import type {
   HasEditCapabilities,
   PublishesBlockingError,
@@ -107,7 +107,7 @@ function buildQueryFromKuery(kuery: string | undefined): Query | undefined {
 }
 
 export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
-  const factory: EmbeddableFactory<ServiceMapEmbeddableState, ServiceMapEmbeddableApi> = {
+  const factory: EmbeddablePublicDefinition<ServiceMapEmbeddableState, ServiceMapEmbeddableApi> = {
     type: APM_SERVICE_MAP_EMBEDDABLE,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const { coreStart } = deps;

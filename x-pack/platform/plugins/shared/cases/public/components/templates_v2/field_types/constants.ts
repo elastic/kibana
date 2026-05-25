@@ -51,6 +51,28 @@ fields:
     type: keyword
     metadata:
       default: Enter details here...
+  # TEXTAREA with markdown: true renders a markdown editor instead of plain text
+  - name: instructions
+    control: TEXTAREA
+    label: Investigation instructions
+    type: keyword
+    metadata:
+      markdown: true
+      default: |
+        ## Investigation playbook
+
+        Follow these steps when triaging the case:
+
+        1. **Collect evidence** — gather relevant logs and screenshots
+        2. **Identify scope** — determine affected systems and users
+        3. **Escalate** if severity is *critical* or impact is widespread
+
+        ### Useful links
+
+        - [Incident runbook](https://example.com/runbook)
+        - [Escalation matrix](https://example.com/escalation)
+
+        > Remember to update the case status as you progress through each step.
   - name: priority
     control: SELECT_BASIC
     label: Priority
