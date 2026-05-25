@@ -305,6 +305,9 @@ export class ManagedWorkflowsService {
         ...(typeof existing.originManagedWorkflowId === 'string'
           ? { originManagedWorkflowId: existing.originManagedWorkflowId }
           : {}),
+        ...(typeof existing.managedVersion === 'number'
+          ? { managedVersion: existing.managedVersion }
+          : {}),
       },
       context,
       request
