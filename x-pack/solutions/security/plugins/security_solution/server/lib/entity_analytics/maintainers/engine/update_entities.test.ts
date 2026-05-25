@@ -5,10 +5,14 @@
  * 2.0.
  */
 
+import { createHash } from 'crypto';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import type { EntityUpdateClient } from '@kbn/entity-store/server';
 import { writeEntityIds } from './update_entities';
 import type { EntityRelationshipRecord } from './types';
+
+const hashEntityId = (id: string) => createHash('sha256').update(id).digest('hex');
 
 const makeCrudClient = (errors: Array<{ status: number }> = []): EntityUpdateClient =>
   ({
@@ -19,7 +23,7 @@ describe('writeEntityIds', () => {
   it('returns zero counts immediately when records is empty', async () => {
     const crudClient = makeCrudClient();
     const result = await writeEntityIds(crudClient, loggerMock.create(), []);
-    expect(result).toEqual({ updated: 0, notFound: 0, errors: 0 });
+    expect(result).toEqual({ updated: 0, notFound: 0, errors: 0, relationshipTypeApplied: {} });
     expect(crudClient.bulkUpdateEntity).not.toHaveBeenCalled();
   });
 
@@ -33,7 +37,7 @@ describe('writeEntityIds', () => {
       },
     ];
     const result = await writeEntityIds(crudClient, loggerMock.create(), records);
-    expect(result).toEqual({ updated: 0, notFound: 0, errors: 0 });
+    expect(result).toEqual({ updated: 0, notFound: 0, errors: 0, relationshipTypeApplied: {} });
     expect(crudClient.bulkUpdateEntity).not.toHaveBeenCalled();
   });
 
@@ -50,7 +54,7 @@ describe('writeEntityIds', () => {
       },
     ];
     const result = await writeEntityIds(crudClient, loggerMock.create(), records);
-    expect(result).toEqual({ updated: 0, notFound: 0, errors: 0 });
+    expect(result).toEqual({ updated: 0, notFound: 0, errors: 0, relationshipTypeApplied: {} });
     expect(crudClient.bulkUpdateEntity).not.toHaveBeenCalled();
   });
 
@@ -114,7 +118,7 @@ describe('writeEntityIds', () => {
       },
     ];
     const result = await writeEntityIds(crudClient, loggerMock.create(), records);
-    expect(result).toEqual({ updated: 1, notFound: 1, errors: 0 });
+    expect(result).toMatchObject({ updated: 1, notFound: 1, errors: 0 });
   });
 
   it('separates 404 (notFound) from non-404 (errors) in the response counts', async () => {
@@ -142,7 +146,7 @@ describe('writeEntityIds', () => {
       },
     ];
     const result = await writeEntityIds(crudClient, loggerMock.create(), records);
-    expect(result).toEqual({ updated: 1, notFound: 1, errors: 2 });
+    expect(result).toMatchObject({ updated: 1, notFound: 1, errors: 2 });
   });
 
   it('logs 404 (notFound) at info level — non-zero 404s are surfaced for the caller (was debug)', async () => {
@@ -187,5 +191,67 @@ describe('writeEntityIds', () => {
     await writeEntityIds(crudClient, loggerMock.create(), records);
     const [call] = (crudClient.bulkUpdateEntity as jest.Mock).mock.calls;
     expect(call[0].force).toBe(true);
+  });
+
+  describe('relationshipTypeApplied', () => {
+    it('returns empty relationshipTypeApplied when records is empty', async () => {
+      const crudClient = makeCrudClient();
+      const result = await writeEntityIds(crudClient, loggerMock.create(), []);
+      expect(result.relationshipTypeApplied).toEqual({});
+    });
+
+    it('counts relationshipTypeApplied per relationship type on successful writes', async () => {
+      const crudClient = makeCrudClient(); // no errors
+      const records: EntityRelationshipRecord[] = [
+        {
+          entityId: 'user:alice@corp',
+          entityType: 'user',
+          relationships: {
+            accesses_frequently: ['host:D3F5C9B9-web-01'],
+            accesses_infrequently: ['host:D3F5C9B9-db-02'],
+          },
+        },
+        {
+          entityId: 'user:bob@corp',
+          entityType: 'user',
+          relationships: {
+            accesses_frequently: ['host:D3F5C9B9-web-01'],
+          },
+        },
+      ];
+      const result = await writeEntityIds(crudClient, loggerMock.create(), records);
+      expect(result.relationshipTypeApplied).toEqual({
+        accesses_frequently: 2, // alice and bob
+        accesses_infrequently: 1, // alice only
+      });
+    });
+
+    it('excludes failed entities from relationshipTypeApplied counts', async () => {
+      const aliceHash = hashEntityId('user:alice@corp');
+      const crudClient = {
+        bulkUpdateEntity: jest
+          .fn()
+          .mockResolvedValue([
+            { _id: aliceHash, status: 500, type: 'es_exception', reason: 'boom' },
+          ]),
+      } as unknown as EntityUpdateClient;
+
+      const records: EntityRelationshipRecord[] = [
+        {
+          entityId: 'user:alice@corp',
+          entityType: 'user',
+          relationships: { accesses_frequently: ['host:D3F5C9B9-x'] },
+        },
+        {
+          entityId: 'user:bob@corp',
+          entityType: 'user',
+          relationships: { accesses_frequently: ['host:D3F5C9B9-y'] },
+        },
+      ];
+      const result = await writeEntityIds(crudClient, loggerMock.create(), records);
+      expect(result.relationshipTypeApplied).toEqual({ accesses_frequently: 1 }); // bob only
+      expect(result.updated).toBe(1);
+      expect(result.errors).toBe(1);
+    });
   });
 });
