@@ -436,6 +436,9 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
       const composed = formValuesFromYamlToCompose(result.values);
       if (isEditing) composed.kind = initialKind;
       methods.reset(composed);
+      // No syncSandbox() here: draft is temporarily stale after methods.reset(), but
+      // we're about to submit. On success the flyout closes; on failure the user is still
+      // in YAML mode and handleToggleYamlMode(false) will resync when they switch back.
     }
     handleSubmit();
   }, [cancelYamlParse, yamlText, methods, handleSubmit, isEditing, initialKind]);
