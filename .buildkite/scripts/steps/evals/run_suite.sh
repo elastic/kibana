@@ -204,13 +204,24 @@ EOF
 EOF
       done <<<"$CONNECTOR_IDS"
 
-      if [[ "${KBN_EVALS_WEEKLY:-}" =~ ^(1|true)$ ]] && [[ -n "${EVAL_SUITE_SLACK_CHANNEL:-}" ]]; then
+      enable_suite_owner_notify="false"
+      if [[ -n "${EVAL_SUITE_SLACK_CHANNEL:-}" ]]; then
+        if [[ "${KBN_EVALS_WEEKLY:-}" =~ ^(1|true)$ ]] || [[ "${KBN_EVALS_ON_DEMAND:-}" =~ ^(1|true)$ ]]; then
+          enable_suite_owner_notify="true"
+        fi
+      fi
+
+      if [[ "${enable_suite_owner_notify}" == "true" ]]; then
         cat >>"$FANOUT_PIPELINE_FILE" <<EOF
       - label: "LLM Evals: ${EVAL_SUITE_ID} (suite owner notify)"
         key: "kbn-evals-${group_key_safe}-suite-owner-notify"
         command: "bash .buildkite/scripts/steps/evals/suite_owner_notify.sh"
         env:
+          KBN_EVALS: "1"
+          KBN_EVALS_WEEKLY: "${KBN_EVALS_WEEKLY:-}"
+          KBN_EVALS_ON_DEMAND: "${KBN_EVALS_ON_DEMAND:-}"
           EVAL_SUITE_ID: "${EVAL_SUITE_ID}"
+          EVAL_SUITE_SLACK_CHANNEL: "${EVAL_SUITE_SLACK_CHANNEL:-}"
           EVAL_SUITE_NAME: "${EVAL_SUITE_NAME:-}"
         depends_on:
 EOF
@@ -227,11 +238,6 @@ EOF
           provider: gcp
           machineType: n2-standard-2
           preemptible: true
-        notify:
-          - slack:
-              channels: ["${EVAL_SUITE_SLACK_CHANNEL}"]
-              message: ":rotating_light: LLM eval suite *${EVAL_SUITE_NAME:-$EVAL_SUITE_ID}* failed in <${BUILDKITE_BUILD_URL}|${BUILDKITE_PIPELINE_NAME:-Buildkite} #${BUILDKITE_BUILD_NUMBER:-}>."
-            if: step.outcome == "hard_failed"
 EOF
       fi
 

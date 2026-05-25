@@ -1,5 +1,6 @@
 env:
   KBN_EVALS: '1'
+  KBN_EVALS_ON_DEMAND: '1'
 steps:
   - label: '👨‍🔧 Pre-Build'
     command: .buildkite/scripts/lifecycle/pre_build.sh

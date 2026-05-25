@@ -30,12 +30,35 @@ echo ""
 echo "Failing connector projects:"
 while IFS= read -r key; do
   [[ -z "${key}" ]] && continue
-  value="$(buildkite-agent meta-data get "${key}" --default '' 2>/dev/null || true)"
+    value="$(buildkite-agent meta-data get "${key}" --default '' 2>/dev/null || true)"
   [[ -z "${value}" ]] && continue
   printf '%s\n' "${value}"
 done <<<"${failure_keys}" | sort -u | sed 's/^/- /'
 echo ""
 echo "Build: ${BUILDKITE_BUILD_URL:-}"
 
-exit 1
+EVAL_SUITE_INFO="$(
+  node x-pack/platform/packages/shared/kbn-evals/scripts/ci/get_suite_info.js "$EVAL_SUITE_ID" || true
+)"
+EVAL_SUITE_SLACK_CHANNEL="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.slackChannel // empty' 2>/dev/null || true)"
 
+SUMMARY_FILE="$(mktemp -t kbn-evals-suite-summary.XXXXXX.md)"
+NOTIFY_PIPELINE_FILE="$(mktemp -t kbn-evals-notify-pipeline.XXXXXX.yml)"
+
+node x-pack/platform/packages/shared/kbn-evals/scripts/ci/format_suite_failure_summary.js \
+  "$EVAL_SUITE_ID" "$SUMMARY_FILE"
+
+echo "--- Suite failure summary"
+cat "$SUMMARY_FILE"
+
+buildkite-agent meta-data set "kbn-evals:triage:${suite_key_safe}" "$(cat "$SUMMARY_FILE")" >/dev/null 2>&1 || true
+buildkite-agent annotate --context "kbn-evals-summary-${suite_key_safe}" --style 'error' "$(cat "$SUMMARY_FILE")" || true
+
+if [[ -n "${EVAL_SUITE_SLACK_CHANNEL:-}" ]]; then
+  node x-pack/platform/packages/shared/kbn-evals/scripts/ci/generate_suite_notify_pipeline.js \
+    "$SUMMARY_FILE" "$EVAL_SUITE_SLACK_CHANNEL" >"$NOTIFY_PIPELINE_FILE"
+  buildkite-agent pipeline upload "$NOTIFY_PIPELINE_FILE"
+fi
+
+rm -f "$SUMMARY_FILE" "$NOTIFY_PIPELINE_FILE"
+exit 1
