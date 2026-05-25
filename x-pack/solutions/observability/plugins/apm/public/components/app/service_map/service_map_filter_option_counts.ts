@@ -14,12 +14,17 @@ import {
 } from '@kbn/rule-data-utils';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import type { SloStatus } from '../../../../common/service_inventory';
-import type { ServiceMapNode, ServiceNodeData } from '../../../../common/service_map';
+import type {
+  ServiceMapNode,
+  ServiceMapEdge,
+  ServiceNodeData,
+} from '../../../../common/service_map';
 import { isServiceNodeData } from '../../../../common/service_map';
 import {
   getMlSeverityForServiceMapNode,
   getNormalizedSloStatusForMapFilters,
   getServiceNodeAlertCountForStatus,
+  buildConnectedNodeIdSet,
 } from './apply_service_map_visibility';
 
 const ALERT_STATUSES: AlertStatus[] = [
@@ -85,11 +90,34 @@ function getAnomalySeverityCounts(
   return counts;
 }
 
+export interface ConnectionCounts {
+  orphaned: number;
+  connected: number;
+}
+
 export interface ServiceMapFilterOptionCounts {
   alerts: Record<AlertStatus, number>;
   slo: Record<SloStatus, number>;
   anomaly: Record<ML_ANOMALY_SEVERITY, number>;
+  connection: ConnectionCounts;
   totalServiceNodes: number;
+}
+
+/** Count nodes by connection bucket. */
+function getConnectionCounts(
+  allNodes: ServiceMapNode[],
+  edges: ServiceMapEdge[]
+): ConnectionCounts {
+  const connectedIds = buildConnectedNodeIdSet(edges);
+  const counts: ConnectionCounts = { orphaned: 0, connected: 0 };
+  for (const node of allNodes) {
+    if (connectedIds.has(node.id)) {
+      counts.connected++;
+    } else {
+      counts.orphaned++;
+    }
+  }
+  return counts;
 }
 
 /**
@@ -97,7 +125,8 @@ export interface ServiceMapFilterOptionCounts {
  * so filter options can show count badges.
  */
 export function computeServiceMapFilterOptionCounts(
-  nodes: ServiceMapNode[]
+  nodes: ServiceMapNode[],
+  edges: ServiceMapEdge[]
 ): ServiceMapFilterOptionCounts {
   const serviceNodes = nodes.filter((n) => n.type === 'service' && isServiceNodeData(n.data));
 
@@ -105,6 +134,7 @@ export function computeServiceMapFilterOptionCounts(
     alerts: getAlertStatusServiceCounts(serviceNodes),
     slo: getSloStatusCounts(serviceNodes),
     anomaly: getAnomalySeverityCounts(serviceNodes),
+    connection: getConnectionCounts(nodes, edges),
     totalServiceNodes: serviceNodes.length,
   };
 }

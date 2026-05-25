@@ -45,6 +45,7 @@ describe('options list control transforms', () => {
           searchTechnique: 'prefix',
           selectedOptions: ['val'],
           singleSelect: null,
+          title: null,
         },
         panelReferences,
         undefined,
@@ -61,7 +62,6 @@ describe('options list control transforms', () => {
           "selected_options": Array [
             "val",
           ],
-          "title": "Test",
           "use_global_filters": true,
         }
       `);

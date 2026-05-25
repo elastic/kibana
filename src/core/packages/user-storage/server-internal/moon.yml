@@ -25,12 +25,14 @@ dependsOn:
   - '@kbn/core-http-server-internal'
   - '@kbn/core-http-request-handler-context-server'
   - '@kbn/core-saved-objects-api-server'
+  - '@kbn/core-saved-objects-api-server-mocks'
   - '@kbn/core-saved-objects-server'
   - '@kbn/core-saved-objects-server-internal'
   - '@kbn/core-security-server'
   - '@kbn/core-security-server-internal'
   - '@kbn/core-user-storage-common'
   - '@kbn/core-user-storage-server'
+  - '@kbn/logging-mocks'
 tags:
   - shared-server
   - package

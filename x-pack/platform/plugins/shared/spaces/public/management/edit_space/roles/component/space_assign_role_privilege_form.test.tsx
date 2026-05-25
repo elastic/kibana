@@ -131,8 +131,7 @@ const renderPrivilegeRolesForm = ({
   );
 };
 
-// Failing: See https://github.com/elastic/kibana/issues/253821
-describe.skip('PrivilegesRolesForm', () => {
+describe('PrivilegesRolesForm', () => {
   let getRolesSpy: jest.SpiedFunction<ReturnType<typeof createRolesAPIClientMock>['getRoles']>;
   let getAllKibanaPrivilegeSpy: jest.SpiedFunction<
     ReturnType<typeof createPrivilegeAPIClientMock>['getAll']
@@ -441,6 +440,14 @@ describe.skip('PrivilegesRolesForm', () => {
       );
 
       await user.click(screen.getByTestId('changeAllPrivilegesButton'));
+
+      // EUI sets pointer-events: none via inline style on the popover panel during its opening
+      // animation. With delay:null there is no buffer, so we must wait for it to clear before
+      // user-event can interact with the button inside.
+      await waitFor(() => {
+        const btn = screen.getByTestId(`changeAllPrivileges-${FEATURE_PRIVILEGES_READ}`);
+        expect(btn.closest('[style*="pointer-events: none"]')).toBeNull();
+      });
 
       // change all privileges to read
       await user.click(screen.getByTestId(`changeAllPrivileges-${FEATURE_PRIVILEGES_READ}`));

@@ -15,7 +15,7 @@ import { AddPanelFlyout } from './add_panel_flyout';
 import type { DashboardApi } from '../../../../dashboard_api/types';
 import { EuiThemeProvider } from '@elastic/eui';
 
-jest.mock('../get_menu_item_groups', () => ({}));
+jest.mock('../use_menu_item_groups', () => ({}));
 
 jest.mock('../../../../services/kibana_services', () => {
   return {
@@ -39,7 +39,7 @@ describe('AddPanelFlyout', () => {
   describe('tabs', () => {
     beforeEach(() => {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      require('../get_menu_item_groups').getMenuItemGroups = async () => [];
+      require('../use_menu_item_groups').useMenuItemGroups = () => ({});
     });
 
     test('renders "New" and "From library" tabs', async () => {
@@ -102,7 +102,7 @@ describe('AddPanelFlyout', () => {
   describe('header', () => {
     beforeEach(() => {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      require('../get_menu_item_groups').getMenuItemGroups = async () => [];
+      require('../use_menu_item_groups').useMenuItemGroups = () => ({});
     });
 
     test('displays "Add to dashboard" heading', async () => {
@@ -115,15 +115,16 @@ describe('AddPanelFlyout', () => {
     });
   });
 
-  describe('getMenuItemGroups throws', () => {
+  describe('displays errors', () => {
     beforeEach(() => {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      require('../get_menu_item_groups').getMenuItemGroups = async () => {
-        throw new Error('simulated getMenuItemGroups error');
-      };
+      require('../use_menu_item_groups').useMenuItemGroups = () => ({
+        loading: false,
+        error: new Error('simulated useMenuItemGroups error'),
+      });
     });
 
-    test('displays getMenuItemGroups error', async () => {
+    test('displays useMenuItemGroups error', async () => {
       render(<AddPanelFlyout dashboardApi={mockDashboardApi} ariaLabelledBy="addPanelFlyout" />, {
         wrapper: ContextWrapper,
       });
@@ -134,30 +135,35 @@ describe('AddPanelFlyout', () => {
     });
   });
 
-  describe('getMenuItemGroups returns results', () => {
+  describe('useMenuItemGroups returns results', () => {
     const onClickMock = jest.fn();
+    // define this outside mock so that the reference doesn't change between renders
+    const groups = [
+      {
+        id: 'panel1',
+        title: 'App 1',
+        items: [
+          {
+            icon: 'icon1',
+            id: 'mockFactory',
+            name: 'Factory 1',
+            description: 'Factory 1 description',
+            'data-test-subj': 'myItem',
+            onClick: onClickMock,
+            order: 0,
+          },
+        ],
+        order: 10,
+        'data-test-subj': 'dashboardEditorMenu-group1Group',
+      },
+    ];
     beforeEach(() => {
       onClickMock.mockClear();
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      require('../get_menu_item_groups').getMenuItemGroups = async () => [
-        {
-          id: 'panel1',
-          title: 'App 1',
-          items: [
-            {
-              icon: 'icon1',
-              id: 'mockFactory',
-              name: 'Factory 1',
-              description: 'Factory 1 description',
-              'data-test-subj': 'myItem',
-              onClick: onClickMock,
-              order: 0,
-            },
-          ],
-          order: 10,
-          'data-test-subj': 'dashboardEditorMenu-group1Group',
-        },
-      ];
+      require('../use_menu_item_groups').useMenuItemGroups = () => ({
+        groups,
+        loading: false,
+      });
     });
 
     test('calls item onClick handler when item is clicked', async () => {

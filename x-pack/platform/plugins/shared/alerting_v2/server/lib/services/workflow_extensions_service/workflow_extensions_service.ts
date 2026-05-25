@@ -5,55 +5,19 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
-import type {
-  WorkflowsExtensionsServerPluginSetup,
-  WorkflowsExtensionsServerPluginStart,
-  ServerTriggerDefinition,
-} from '@kbn/workflows-extensions/server';
-
-type ServerStepDefinitionOrLoader = Parameters<
-  WorkflowsExtensionsServerPluginSetup['registerStepDefinition']
->[0];
+import { inject, injectable } from 'inversify';
+import type { WorkflowsClient } from '@kbn/workflows/server/types';
+import { WorkflowsClientToken } from './tokens';
 
 export interface WorkflowExtensionsServiceContract {
-  /**
-   * Registers all alerting-v2-owned workflow triggers and steps. Call once during
-   * plugin setup (see bind_on_setup).
-   */
-  registerTriggerDefinitions(triggerDefinitions: ServerTriggerDefinition[]): void;
-  registerStepDefinitions(stepDefintions: ServerStepDefinitionOrLoader[]): void;
-  emitEvent(
-    request: KibanaRequest,
-    triggerId: string,
-    payload: Record<string, unknown>
-  ): Promise<void>;
+  emitEvent(triggerId: string, payload: Record<string, unknown>): Promise<void>;
 }
 
+@injectable()
 export class WorkflowExtensionsService implements WorkflowExtensionsServiceContract {
-  constructor(
-    private readonly workflowsExtensionsSetup: WorkflowsExtensionsServerPluginSetup,
-    private readonly getWorkflowsExtensionsStart: () => WorkflowsExtensionsServerPluginStart
-  ) {}
+  constructor(@inject(WorkflowsClientToken) private readonly client: WorkflowsClient) {}
 
-  public registerStepDefinitions(stepDefintions: ServerStepDefinitionOrLoader[]): void {
-    stepDefintions.forEach((stepDefinition) =>
-      this.workflowsExtensionsSetup.registerStepDefinition(stepDefinition)
-    );
-  }
-
-  public registerTriggerDefinitions(triggerDefinitions: ServerTriggerDefinition[]): void {
-    triggerDefinitions.forEach((triggerDefinition) =>
-      this.workflowsExtensionsSetup.registerTriggerDefinition(triggerDefinition)
-    );
-  }
-
-  public async emitEvent(
-    request: KibanaRequest,
-    triggerId: string,
-    payload: Record<string, unknown>
-  ): Promise<void> {
-    const client = await this.getWorkflowsExtensionsStart().getClient(request);
-    await client.emitEvent(triggerId, payload);
+  public async emitEvent(triggerId: string, payload: Record<string, unknown>): Promise<void> {
+    await this.client.emitEvent(triggerId, payload);
   }
 }

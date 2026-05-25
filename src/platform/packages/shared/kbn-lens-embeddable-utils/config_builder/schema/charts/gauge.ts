@@ -12,7 +12,7 @@ import { schema } from '@kbn/config-schema';
 import {
   esqlColumnWithFormatSchema,
   esqlColumnSchema,
-  metricOperationDefinitionSchema,
+  fieldMetricOrStaticOrFormulaOperationDefinitionSchema,
 } from '../metric_ops';
 import { colorByValueSchema, noColorSchema, autoColorSchema, AUTO_COLOR } from '../color';
 import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
@@ -76,17 +76,17 @@ const gaugeConfigMetricInnerNoESQLOpsSchema = {
    * Minimum value for the gauge
    * Note: label, format and other visual options are ignored
    */
-  min: schema.maybe(metricOperationDefinitionSchema),
+  min: schema.maybe(fieldMetricOrStaticOrFormulaOperationDefinitionSchema),
   /**
    * Maximum value for the gauge
    * Note: label, format and other visual options are ignored
    */
-  max: schema.maybe(metricOperationDefinitionSchema),
+  max: schema.maybe(fieldMetricOrStaticOrFormulaOperationDefinitionSchema),
   /**
    * Goal value for the gauge
    * Note: label, format and other visual options are ignored
    */
-  goal: schema.maybe(metricOperationDefinitionSchema),
+  goal: schema.maybe(fieldMetricOrStaticOrFormulaOperationDefinitionSchema),
 };
 
 const gaugeConfigMetricInnerESQLOpsSchema = {

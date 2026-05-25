@@ -8,20 +8,17 @@
 import { spaceTest, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 
-// Failing: See https://github.com/elastic/kibana/issues/259664
-spaceTest.describe.skip(
+spaceTest.describe(
   'Entity analytics management page - Engine Status tab',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
     spaceTest.beforeEach(async ({ browserAuth, apiServices }) => {
       await apiServices.entityAnalytics.deleteEntityStoreEngines();
-      await apiServices.entityAnalytics.deleteRiskEngineConfiguration();
       await browserAuth.loginAsAdmin();
     });
 
     spaceTest.afterEach(async ({ apiServices }) => {
       await apiServices.entityAnalytics.deleteEntityStoreEngines();
-      await apiServices.entityAnalytics.deleteRiskEngineConfiguration();
     });
 
     spaceTest(
@@ -48,7 +45,7 @@ spaceTest.describe.skip(
           await managementPage.waitForStatusLoaded();
           await managementPage.toggleEntityAnalytics();
           await managementPage.waitForStatusLoaded();
-          await apiServices.entityAnalytics.waitForEntityStoreStatus('running', 60000);
+          await apiServices.entityAnalytics.waitForEntityStoreStatusV2('running', 60000);
           await expect(managementPage.entityAnalyticsHealth).toContainText('On', {
             timeout: 60000,
           });

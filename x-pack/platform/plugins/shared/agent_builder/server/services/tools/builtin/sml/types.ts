@@ -9,8 +9,7 @@ import type { AgentContextLayerPluginStart } from '@kbn/agent-context-layer-plug
 
 /**
  * Options for creating SML tools.
- * Uses a getter for lazy resolution — the agent context layer start contract
- * is not available until after plugin start.
+ * Uses a getter for lazy resolution — the start contract is not available until after plugin start.
  */
 export interface SmlToolsOptions {
   getAgentContextLayer: () => AgentContextLayerPluginStart;

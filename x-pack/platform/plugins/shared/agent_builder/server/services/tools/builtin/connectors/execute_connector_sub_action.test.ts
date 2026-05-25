@@ -13,7 +13,10 @@ import type {
   ToolHandlerStandardReturn,
 } from '@kbn/agent-builder-server/tools/handler';
 import { getConnectorSpec, isToolAction } from '@kbn/connector-specs';
-import { createExecuteConnectorSubActionTool } from './execute_connector_sub_action';
+import {
+  createExecuteConnectorSubActionTool,
+  executeConnectorSubActionArgsSchema,
+} from './execute_connector_sub_action';
 import type { ConnectorToolsOptions } from './types';
 
 jest.mock('@kbn/connector-specs', () => ({
@@ -71,6 +74,58 @@ describe('createExecuteConnectorSubActionTool', () => {
     expect(tool.id).toBe(platformCoreTools.executeConnectorSubAction);
     expect(tool.type).toBe(ToolType.builtin);
     expect(tool.tags).toEqual(['connector', 'sub-action']);
+  });
+
+  describe('schema (strict, no structural normalization)', () => {
+    it('rejects flattened sub-action fields at the root (unknown keys)', () => {
+      const tool = createExecuteConnectorSubActionTool({ getActions });
+      const result = tool.schema.safeParse({
+        connectorId: 'conn-123',
+        subAction: 'searchMessages',
+        messageId: 'm1',
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects snake_case aliases (strict canonical keys only)', () => {
+      const tool = createExecuteConnectorSubActionTool({ getActions });
+      const result = tool.schema.safeParse({
+        connector_id: 'conn-123',
+        sub_action: 'searchMessages',
+        params: { query: 'hi' },
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects payloads missing connectorId and subAction', () => {
+      const tool = createExecuteConnectorSubActionTool({ getActions });
+      const result = tool.schema.safeParse({ messageId: '123' });
+      expect(result.success).toBe(false);
+    });
+
+    it('includes actionable validation messages for empty connectorId or subAction', () => {
+      const emptyConnectorId = executeConnectorSubActionArgsSchema.safeParse({
+        connectorId: '',
+        subAction: 'searchMessages',
+        params: {},
+      });
+      expect(emptyConnectorId.success).toBe(false);
+      if (!emptyConnectorId.success) {
+        expect(
+          emptyConnectorId.error.issues.some((i) => i.message.includes('connector attachment'))
+        ).toBe(true);
+      }
+
+      const emptySubAction = executeConnectorSubActionArgsSchema.safeParse({
+        connectorId: 'conn-123',
+        subAction: '',
+        params: {},
+      });
+      expect(emptySubAction.success).toBe(false);
+      if (!emptySubAction.success) {
+        expect(emptySubAction.error.issues.some((i) => i.message.includes('infer'))).toBe(true);
+      }
+    });
   });
 
   it('executes a sub-action successfully', async () => {

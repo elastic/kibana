@@ -26,7 +26,7 @@ export const EditTransformFlyoutCallout: FC = () => {
     <EuiCallOut>
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
-          <EuiIcon type="question" />
+          <EuiIcon type="question" aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiTextColor color="subdued">

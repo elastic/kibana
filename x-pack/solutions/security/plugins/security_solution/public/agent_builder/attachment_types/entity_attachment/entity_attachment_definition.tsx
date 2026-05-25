@@ -17,7 +17,6 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { ISessionService } from '@kbn/data-plugin/public';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSkeletonText } from '@elastic/eui';
 import type { ExperimentalFeatures } from '../../../../common/experimental_features';
-import { APP_UI_ID } from '../../../../common/constants';
 import type { EntityAttachment } from './types';
 import { isFlyoutCapableIdentifierType } from './types';
 import { normaliseEntityAttachment } from './payload';
@@ -28,6 +27,8 @@ import {
   navigateToEntityAnalyticsWithFlyoutInApp,
   type SecurityAgentBuilderChrome,
 } from '../entity_explore_navigation';
+import { EntityAnalyticsAgentNavigationProvider } from '../entity_analytics_agent_navigation_context';
+import { APP_UI_ID } from '../../../../common/constants';
 
 const DEFAULT_LABEL = i18n.translate(
   'xpack.securitySolution.agentBuilder.attachments.entity.label',
@@ -117,14 +118,20 @@ export const createEntityAttachmentDefinition = ({
     },
     getIcon: () => 'user',
     renderInlineContent: (props) => (
-      <React.Suspense fallback={<EuiSkeletonText lines={4} />}>
-        <LazyEntityAttachmentInlineContent
-          {...props}
-          experimentalFeatures={experimentalFeatures}
-          application={application}
-          searchSession={searchSession}
-        />
-      </React.Suspense>
+      <EntityAnalyticsAgentNavigationProvider
+        application={application}
+        agentBuilder={agentBuilder}
+        chrome={chrome}
+        openSidebarConversation={props.openSidebarConversation}
+        searchSession={searchSession}
+      >
+        <React.Suspense fallback={<EuiSkeletonText lines={4} />}>
+          <LazyEntityAttachmentInlineContent
+            {...props}
+            experimentalFeatures={experimentalFeatures}
+          />
+        </React.Suspense>
+      </EntityAnalyticsAgentNavigationProvider>
     ),
   };
 
@@ -139,25 +146,33 @@ export const createEntityAttachmentDefinition = ({
     ...baseDefinition,
     canvasWidth: ENTITY_CANVAS_WIDTH,
     renderCanvasContent: (props: AttachmentRenderProps<EntityAttachment>) => (
-      <React.Suspense
-        fallback={
-          <EuiFlexGroup alignItems="center" justifyContent="center" css={{ minHeight: 200 }}>
-            <EuiFlexItem grow={false}>
-              <EuiLoadingSpinner size="l" />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
+      <EntityAnalyticsAgentNavigationProvider
+        application={resolvedApplication}
+        agentBuilder={agentBuilder}
+        chrome={chrome}
+        openSidebarConversation={props.openSidebarConversation}
+        searchSession={searchSession}
       >
-        <LazyEntityAttachmentCanvasContent
-          {...props}
-          experimentalFeatures={experimentalFeatures}
-          application={resolvedApplication}
-          agentBuilder={agentBuilder}
-          chrome={chrome}
-          resolveSecurityCanvasContext={resolvedResolveCanvasContext}
-          searchSession={searchSession}
-        />
-      </React.Suspense>
+        <React.Suspense
+          fallback={
+            <EuiFlexGroup alignItems="center" justifyContent="center" css={{ minHeight: 200 }}>
+              <EuiFlexItem grow={false}>
+                <EuiLoadingSpinner size="l" />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          }
+        >
+          <LazyEntityAttachmentCanvasContent
+            {...props}
+            experimentalFeatures={experimentalFeatures}
+            application={resolvedApplication}
+            agentBuilder={agentBuilder}
+            chrome={chrome}
+            resolveSecurityCanvasContext={resolvedResolveCanvasContext}
+            searchSession={searchSession}
+          />
+        </React.Suspense>
+      </EntityAnalyticsAgentNavigationProvider>
     ),
     getActionButtons: ({ attachment, isCanvas, openCanvas, openSidebarConversation }) => {
       const parsed = normaliseEntityAttachment(attachment);

@@ -7,10 +7,12 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
+import { EF_ALL_VALUES_FIELD } from './extended_field_search_utils';
 import {
   constructSearchQuery,
   convertFindQueryParams,
   DEFAULT_CASE_NESTED_FIELDS,
+  DEFAULT_CASE_RUNTIME_FIELDS,
   DEFAULT_CASE_SEARCH_FIELDS,
   mergeSearchQuery,
 } from './utils';
@@ -219,7 +221,7 @@ const searchFieldQuery: estypes.QueryDslQueryContainer[] = [
     },
   },
   {
-    multi_match: {
+    simple_query_string: {
       query: search,
       fields: DEFAULT_CASE_SEARCH_FIELDS,
     },
@@ -272,7 +274,7 @@ describe('constructSearchQuery', () => {
 
     expect(result).toEqual({
       bool: {
-        should: searchFieldQuery.slice(0, 2), // id and multi_match
+        should: searchFieldQuery.slice(0, 2), // id and simple_query_string
         minimum_should_match: 1,
       },
     });
@@ -430,7 +432,7 @@ describe('constructSearchQuery with extendedFieldFilters', () => {
           {
             bool: {
               filter: [
-                { term: { ef_priority_as_keyword: { value: 'high' } } },
+                { term: { 'cases.extended_fields.priority_as_keyword': 'high' } },
                 {
                   bool: {
                     minimum_should_match: 1,
@@ -510,7 +512,7 @@ describe('constructSearchQuery with extendedFieldFilters', () => {
           {
             bool: {
               filter: [
-                { term: { ef_priority_as_keyword: { value: 'high' } } },
+                { term: { 'cases.extended_fields.priority_as_keyword': 'high' } },
                 {
                   bool: {
                     minimum_should_match: 1,
@@ -532,7 +534,7 @@ describe('constructSearchQuery with extendedFieldFilters', () => {
           {
             bool: {
               filter: [
-                { term: { ef_region_as_keyword: { value: 'emea' } } },
+                { term: { 'cases.extended_fields.region_as_keyword': 'emea' } },
                 {
                   bool: {
                     minimum_should_match: 1,
@@ -577,7 +579,7 @@ describe('constructSearchQuery with fieldLabelFilters', () => {
           {
             bool: {
               filter: [
-                { exists: { field: 'ef_priority_as_keyword' } },
+                { exists: { field: 'cases.extended_fields.priority_as_keyword' } },
                 {
                   bool: {
                     should: [
@@ -617,14 +619,17 @@ describe('constructSearchQuery with fieldLabelFilters', () => {
     const existsClause = shouldClauses!.find(
       (c: estypes.QueryDslQueryContainer) =>
         (c?.bool?.filter as estypes.QueryDslQueryContainer[])?.[0]?.exists?.field ===
-        'ef_priority_as_keyword'
+        'cases.extended_fields.priority_as_keyword'
     );
     expect(existsClause).toBeDefined();
 
-    const multiMatchClause = shouldClauses!.find(
-      (c: estypes.QueryDslQueryContainer) => c?.multi_match != null
+    const freeTextSearchClause = shouldClauses!.find(
+      (c: estypes.QueryDslQueryContainer) => c?.simple_query_string != null
     );
-    expect(multiMatchClause).toBeDefined();
+    expect(freeTextSearchClause?.simple_query_string).toEqual({
+      query: 'test',
+      fields: [`${CASE_SAVED_OBJECT}.title`],
+    });
   });
 
   it('combines fieldLabelFilters (should) with extendedFieldFilters (filter) correctly', () => {
@@ -652,11 +657,11 @@ describe('constructSearchQuery with fieldLabelFilters', () => {
     expect(shouldWrapper?.bool?.should).toBeDefined();
     const shouldClauses = shouldWrapper!.bool!.should as estypes.QueryDslQueryContainer[];
     const innerFilter = shouldClauses[0]?.bool?.filter as estypes.QueryDslQueryContainer[];
-    expect(innerFilter?.[0]?.exists?.field).toBe('ef_priority_as_keyword');
+    expect(innerFilter?.[0]?.exists?.field).toBe('cases.extended_fields.priority_as_keyword');
 
     const extendedFilter = filter[1];
     const extFilterClauses = extendedFilter?.bool?.filter as estypes.QueryDslQueryContainer[];
-    expect(extFilterClauses?.[0]?.term?.ef_region_as_keyword).toBeDefined();
+    expect(extFilterClauses?.[0]?.term?.['cases.extended_fields.region_as_keyword']).toBeDefined();
   });
 
   it('returns undefined when no search, caseIds, extendedFieldFilters, or fieldLabelFilters', () => {
@@ -664,5 +669,184 @@ describe('constructSearchQuery with fieldLabelFilters', () => {
       caseIds: [],
     });
     expect(result).toBeUndefined();
+  });
+});
+
+describe('constructSearchQuery with runtime fields (EF_ALL_VALUES_FIELD)', () => {
+  it('adds a simple_query_string clause for EF_ALL_VALUES_FIELD when included in searchFields', () => {
+    const result = constructSearchQuery({
+      search: 'reason',
+      searchFields: [...DEFAULT_CASE_SEARCH_FIELDS, ...DEFAULT_CASE_RUNTIME_FIELDS],
+      caseIds: [],
+    });
+
+    const shouldClauses = result?.bool?.should as estypes.QueryDslQueryContainer[] | undefined;
+    expect(shouldClauses).toBeDefined();
+
+    const runtimeClause = shouldClauses!.find(
+      (c: estypes.QueryDslQueryContainer) =>
+        c?.simple_query_string != null &&
+        (c.simple_query_string as { fields?: string[] }).fields?.[0] === EF_ALL_VALUES_FIELD
+    );
+    expect(runtimeClause).toEqual({
+      simple_query_string: {
+        query: 'reason',
+        fields: [EF_ALL_VALUES_FIELD],
+        default_operator: 'AND',
+      },
+    });
+  });
+
+  it('lowercases the search query to match the lowercased runtime field tokens', () => {
+    const result = constructSearchQuery({
+      search: 'EMEA',
+      searchFields: DEFAULT_CASE_RUNTIME_FIELDS,
+      caseIds: [],
+    });
+
+    const shouldClauses = result?.bool?.should as estypes.QueryDslQueryContainer[] | undefined;
+    expect(shouldClauses).toBeDefined();
+
+    const runtimeClause = shouldClauses!.find(
+      (c: estypes.QueryDslQueryContainer) => c?.simple_query_string != null
+    );
+    expect(runtimeClause).toEqual({
+      simple_query_string: {
+        query: 'emea',
+        fields: [EF_ALL_VALUES_FIELD],
+        default_operator: 'AND',
+      },
+    });
+  });
+
+  it('does not add runtime field clause when EF_ALL_VALUES_FIELD is not in searchFields', () => {
+    const result = constructSearchQuery({
+      search: 'reason',
+      searchFields: DEFAULT_CASE_SEARCH_FIELDS,
+      caseIds: [],
+    });
+
+    const shouldClauses = result?.bool?.should as estypes.QueryDslQueryContainer[] | undefined;
+    expect(shouldClauses).toBeDefined();
+
+    const runtimeClause = shouldClauses!.find(
+      (c: estypes.QueryDslQueryContainer) =>
+        c?.simple_query_string != null &&
+        (c.simple_query_string as { fields?: string[] }).fields?.[0] === EF_ALL_VALUES_FIELD
+    );
+    expect(runtimeClause).toBeUndefined();
+  });
+
+  it('combines runtime field clause with other search clauses', () => {
+    const result = constructSearchQuery({
+      search: 'test',
+      searchFields: [
+        ...DEFAULT_CASE_SEARCH_FIELDS,
+        ...DEFAULT_CASE_NESTED_FIELDS,
+        ...DEFAULT_CASE_RUNTIME_FIELDS,
+      ],
+      caseIds: [],
+    });
+
+    const shouldClauses = result?.bool?.should as estypes.QueryDslQueryContainer[] | undefined;
+    expect(shouldClauses).toBeDefined();
+
+    expect(shouldClauses).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ term: expect.objectContaining({ _id: expect.any(String) }) }),
+        expect.objectContaining({
+          simple_query_string: expect.objectContaining({
+            query: 'test',
+            fields: DEFAULT_CASE_SEARCH_FIELDS,
+          }),
+        }),
+        expect.objectContaining({ nested: expect.anything() }),
+        expect.objectContaining({
+          simple_query_string: expect.objectContaining({
+            query: 'test',
+            fields: [EF_ALL_VALUES_FIELD],
+            default_operator: 'AND',
+          }),
+        }),
+      ])
+    );
+  });
+
+  it('does not add runtime field clause when search is empty', () => {
+    const result = constructSearchQuery({
+      search: '',
+      searchFields: DEFAULT_CASE_RUNTIME_FIELDS,
+      caseIds: [],
+    });
+
+    expect(result).toBeUndefined();
+  });
+
+  it('uses simple_query_string with AND operator for multi-word search', () => {
+    const result = constructSearchQuery({
+      search: 'test text',
+      searchFields: DEFAULT_CASE_RUNTIME_FIELDS,
+      caseIds: [],
+    });
+
+    const shouldClauses = result?.bool?.should as estypes.QueryDslQueryContainer[] | undefined;
+    expect(shouldClauses).toBeDefined();
+
+    const runtimeClause = shouldClauses!.find(
+      (c: estypes.QueryDslQueryContainer) => c?.simple_query_string != null
+    );
+    expect(runtimeClause).toEqual({
+      simple_query_string: {
+        query: 'test text',
+        fields: [EF_ALL_VALUES_FIELD],
+        default_operator: 'AND',
+      },
+    });
+  });
+
+  it('lowercases and passes extra whitespace through to simple_query_string (ES normalizes)', () => {
+    const result = constructSearchQuery({
+      search: '  Test   TEXT  ',
+      searchFields: DEFAULT_CASE_RUNTIME_FIELDS,
+      caseIds: [],
+    });
+
+    const shouldClauses = result?.bool?.should as estypes.QueryDslQueryContainer[] | undefined;
+    expect(shouldClauses).toBeDefined();
+
+    const runtimeClause = shouldClauses!.find(
+      (c: estypes.QueryDslQueryContainer) => c?.simple_query_string != null
+    );
+    expect(runtimeClause).toEqual({
+      simple_query_string: {
+        query: '  test   text  ',
+        fields: [EF_ALL_VALUES_FIELD],
+        default_operator: 'AND',
+      },
+    });
+  });
+
+  it('uses simple_query_string with AND for single-word search', () => {
+    const result = constructSearchQuery({
+      search: 'spy',
+      searchFields: DEFAULT_CASE_RUNTIME_FIELDS,
+      caseIds: [],
+    });
+
+    const shouldClauses = result?.bool?.should as estypes.QueryDslQueryContainer[] | undefined;
+    expect(shouldClauses).toBeDefined();
+
+    const runtimeClause = shouldClauses!.find(
+      (c: estypes.QueryDslQueryContainer) =>
+        c?.simple_query_string != null &&
+        (c.simple_query_string as { fields?: string[] }).fields?.[0] === EF_ALL_VALUES_FIELD
+    );
+    expect(runtimeClause).toEqual({
+      simple_query_string: {
+        query: 'spy',
+        fields: [EF_ALL_VALUES_FIELD],
+        default_operator: 'AND',
+      },
+    });
   });
 });

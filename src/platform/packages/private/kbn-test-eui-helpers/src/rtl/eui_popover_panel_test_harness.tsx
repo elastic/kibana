@@ -55,9 +55,10 @@ export class EuiPopoverPanelTestHarness {
       if (panels.length === 0) throw new Error('Expected an open popover panel');
 
       const matching = panels.find((panel) => {
+        const menuitem = within(panel).queryByRole('menuitem', { name: label });
         const button = within(panel).queryByRole('button', { name: label });
         const link = within(panel).queryByRole('link', { name: label });
-        return !!button || !!link;
+        return !!menuitem || !!button || !!link;
       });
 
       if (!matching) {

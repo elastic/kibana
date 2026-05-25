@@ -39,7 +39,11 @@ describe('Security Plugin', () => {
           licensing: licensingMock.createSetup(),
         })
       ).toEqual({
-        authc: { getCurrentUser: expect.any(Function), areAPIKeysEnabled: expect.any(Function) },
+        authc: {
+          getCurrentUser: expect.any(Function),
+          areAPIKeysEnabled: expect.any(Function),
+          isUIAMEnabled: expect.any(Function),
+        },
         authz: {
           isRoleManagementEnabled: expect.any(Function),
           roles: expect.any(Object),
@@ -73,7 +77,11 @@ describe('Security Plugin', () => {
 
       expect(setupManagementServiceMock).toHaveBeenCalledTimes(1);
       expect(setupManagementServiceMock).toHaveBeenCalledWith({
-        authc: { getCurrentUser: expect.any(Function), areAPIKeysEnabled: expect.any(Function) },
+        authc: {
+          getCurrentUser: expect.any(Function),
+          areAPIKeysEnabled: expect.any(Function),
+          isUIAMEnabled: expect.any(Function),
+        },
         license: {
           isLicenseAvailable: expect.any(Function),
           getLicenseType: expect.any(Function),
@@ -130,6 +138,7 @@ describe('Security Plugin', () => {
           "authc": Object {
             "areAPIKeysEnabled": [Function],
             "getCurrentUser": [Function],
+            "isUIAMEnabled": [Function],
           },
           "authz": Object {
             "isRoleManagementEnabled": [Function],

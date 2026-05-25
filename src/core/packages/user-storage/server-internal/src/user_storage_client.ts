@@ -64,22 +64,42 @@ export class UserStorageClient implements IUserStorageClient {
     return definition.defaultValue as T;
   }
 
-  async getAll(): Promise<Record<string, unknown>> {
+  async getForInjection(): Promise<Record<string, unknown>> {
+    const injectableEntries = [...this.definitions.entries()].filter(([, d]) => d.preload === true);
+    if (injectableEntries.length === 0) return {};
+
     let hasSpace = false;
     let hasGlobal = false;
-    for (const d of this.definitions.values()) {
+    for (const [, d] of injectableEntries) {
       if (d.scope === 'space') hasSpace = true;
       else if (d.scope === 'global') hasGlobal = true;
       if (hasSpace && hasGlobal) break;
     }
 
-    const [spaceData, globalData] = await Promise.all([
-      hasSpace ? this.readSoData(USER_STORAGE_SO_TYPE) : undefined,
-      hasGlobal ? this.readSoData(USER_STORAGE_GLOBAL_SO_TYPE) : undefined,
-    ]);
+    const objectsToFetch: Array<{ type: string; id: string }> = [];
+    if (hasSpace) objectsToFetch.push({ type: USER_STORAGE_SO_TYPE, id: this.profileUid });
+    if (hasGlobal) objectsToFetch.push({ type: USER_STORAGE_GLOBAL_SO_TYPE, id: this.profileUid });
+
+    let spaceData: Record<string, unknown> | undefined;
+    let globalData: Record<string, unknown> | undefined;
+
+    if (objectsToFetch.length > 0) {
+      const { saved_objects: docs } = await this.soClient.bulkGet<UserStorageAttributes>(
+        objectsToFetch
+      );
+      for (const doc of docs) {
+        // bulkGet surfaces a missing SO via `doc.error` rather than throwing.
+        if (doc.error) continue;
+        if (doc.type === USER_STORAGE_SO_TYPE) {
+          spaceData = doc.attributes.data;
+        } else if (doc.type === USER_STORAGE_GLOBAL_SO_TYPE) {
+          globalData = doc.attributes.data;
+        }
+      }
+    }
 
     const result: Record<string, unknown> = {};
-    for (const [key, definition] of this.definitions) {
+    for (const [key, definition] of injectableEntries) {
       const data = definition.scope === 'space' ? spaceData : globalData;
       const raw = data?.[key];
       if (raw != null) {
@@ -97,9 +117,9 @@ export class UserStorageClient implements IUserStorageClient {
     return result;
   }
 
-  async set<T = unknown>(key: string, value: T): Promise<void> {
+  async set<T = unknown>(key: string, value: T): Promise<T> {
     const definition = this.assertRegistered(key);
-    const validated = definition.schema.parse(value);
+    const validated = definition.schema.parse(value) as T;
     const soType = this.getSoType(definition);
 
     this.logger.debug(`Setting userStorage key [${key}] (scope: ${definition.scope})`);
@@ -129,6 +149,8 @@ export class UserStorageClient implements IUserStorageClient {
         throw err;
       }
     }
+
+    return validated;
   }
 
   async remove(key: string): Promise<void> {
@@ -156,17 +178,5 @@ export class UserStorageClient implements IUserStorageClient {
 
   private getSoType(definition: UserStorageDefinition): string {
     return definition.scope === 'space' ? USER_STORAGE_SO_TYPE : USER_STORAGE_GLOBAL_SO_TYPE;
-  }
-
-  private async readSoData(soType: string): Promise<Record<string, unknown> | undefined> {
-    try {
-      const doc = await this.soClient.get<UserStorageAttributes>(soType, this.profileUid);
-      return doc.attributes.data;
-    } catch (err) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
-        return undefined;
-      }
-      throw err;
-    }
   }
 }

@@ -71,8 +71,8 @@ export function transformDataControlOut<
   const dataViewId = dataViewRef?.id ?? data_view_id ?? '';
   const convertedState = {
     ...DEFAULT_DATA_CONTROL_STATE,
-    title,
     data_view_id: dataViewId,
+    ...(title && { title }),
     ...(typeof use_global_filters === 'boolean' && { use_global_filters }),
     ...(typeof ignore_validations === 'boolean' && { ignore_validations }),
     field_name: field_name ?? '',

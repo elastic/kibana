@@ -6,7 +6,7 @@
  */
 
 import { hasStartEndParams } from '@kbn/esql-utils';
-import type { EsqlESQLParam, EsqlQueryRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { EsqlNamedValue, EsqlQueryRequest } from '@elastic/elasticsearch/lib/api/types';
 import { RESERVED_ESQL_PARAMS } from '@kbn/alerting-v2-constants';
 import { parseDurationToMs } from '../duration';
 
@@ -59,10 +59,9 @@ export function getQueryPayload({
   }
 
   const paramValues: Record<string, string> = { _tstart: dateStart, _tend: dateEnd };
-  // TODO: wait until client is fixed: https://github.com/elastic/elasticsearch-specification/issues/5083
   const params: EsqlQueryRequest['params'] = RESERVED_ESQL_PARAMS.filter((name) =>
     new RegExp(`\\?${name}`, 'i').test(query)
-  ).map((name) => ({ [name]: paramValues[name] } as unknown as EsqlESQLParam));
+  ).map((name): EsqlNamedValue => ({ [name]: paramValues[name] }));
 
   return { dateStart, dateEnd, filter, ...(params.length ? { params } : {}) };
 }

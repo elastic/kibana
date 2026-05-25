@@ -9,6 +9,7 @@
 
 import type { SavedObjectsType, ModelVersionIdentifier } from '@kbn/core-saved-objects-server';
 import type { MigrationInfoRecord, ModelVersionSummary } from '../../types';
+import { RULE_IDS, SavedObjectsCheckError } from '../../findings';
 import { getVersions } from '../../migrations';
 
 export function getFirstModelVersion(info: MigrationInfoRecord): ModelVersionSummary {
@@ -25,9 +26,14 @@ export function getLatestModelVersion(info: MigrationInfoRecord): ModelVersionSu
 
 export function validateInitialModelVersion(name: string, mv: ModelVersionSummary): void {
   if (mv.changeTypes.length) {
-    throw new Error(
-      `❌ The new model version '${mv.version}' for SO type '${name}' is defining mappings' changes. For backwards-compatibility reasons, the initial model version can only include schema definitions.`
-    );
+    throw new SavedObjectsCheckError({
+      ruleId: RULE_IDS.INITIAL_MODEL_VERSION_HAS_CHANGES,
+      severity: 'error',
+      typeName: name,
+      message: `The new model version '${mv.version}' for SO type '${name}' is defining mappings' changes. For backwards-compatibility reasons, the initial model version can only include schema definitions.`,
+      fixHint: `Remove 'changes' from model version '${mv.version}' and only define 'schemas'.`,
+      docsAnchor: '#defining-model-versions',
+    });
   }
 }
 
@@ -36,39 +42,66 @@ export function validateModelVersionNumbers(name: string, mvs: ModelVersionSumma
     .map<number>(({ version }) => {
       const parsed = parseInt(version, 10);
       if (isNaN(parsed)) {
-        throw new Error(
-          `❌ Invalid model version '${version}' for SO type '${name}'. Model versions must be consecutive integer numbers starting at 1.`
-        );
+        throw new SavedObjectsCheckError({
+          ruleId: RULE_IDS.MODEL_VERSION_NUMBERS_INVALID,
+          severity: 'error',
+          typeName: name,
+          message: `Invalid model version '${version}' for SO type '${name}'. Model versions must be consecutive integer numbers starting at 1.`,
+          fixHint: `Rename the model version key to a positive integer.`,
+          docsAnchor: '#defining-model-versions',
+        });
       }
       return parsed;
     })
     .sort((a, b) => a - b)
     .forEach((versionNumber, index, list) => {
       if (versionNumber !== index + 1) {
-        throw new Error(
-          `❌ The '${name}' SO type is missing model version '${
+        throw new SavedObjectsCheckError({
+          ruleId: RULE_IDS.MODEL_VERSION_NUMBERS_INVALID,
+          severity: 'error',
+          typeName: name,
+          message: `The '${name}' SO type is missing model version '${
             index + 1
-          }'. Model versions defined: ${list}`
-        );
+          }'. Model versions defined: ${list}`,
+          fixHint: `Add the missing model version '${
+            index + 1
+          }' so versions are consecutive integers starting at 1.`,
+          docsAnchor: '#defining-model-versions',
+        });
       }
     });
 }
 
 export function validateNewModelVersionSchemas(name: string, mv: ModelVersionSummary) {
   if (!mv.schemas) {
-    throw new Error(
-      `❌ The new model version '${mv.version}' for SO type '${name}' is missing the 'schemas' definition.`
-    );
+    throw new SavedObjectsCheckError({
+      ruleId: RULE_IDS.MODEL_VERSION_MISSING_SCHEMAS,
+      severity: 'error',
+      typeName: name,
+      message: `The new model version '${mv.version}' for SO type '${name}' is missing the 'schemas' definition.`,
+      fixHint: `Add a 'schemas' object with both 'create' and 'forwardCompatibility' to model version '${mv.version}'.`,
+      docsAnchor: '#defining-model-versions',
+    });
   }
   if (mv.schemas.forwardCompatibility === false) {
-    throw new Error(
-      `❌ The new model version '${mv.version}' for SO type '${name}' is missing the 'forwardCompatibility' schema definition.`
-    );
+    throw new SavedObjectsCheckError({
+      ruleId: RULE_IDS.MODEL_VERSION_MISSING_FORWARD_COMPATIBILITY,
+      severity: 'error',
+      typeName: name,
+      message: `The new model version '${mv.version}' for SO type '${name}' is missing the 'forwardCompatibility' schema definition.`,
+      fixHint: `Add 'schemas.forwardCompatibility' to model version '${mv.version}'.`,
+      docsAnchor: '#defining-model-versions',
+    });
   }
   if (mv.schemas.create === false) {
-    throw new Error(
-      `❌ The new model version '${mv.version}' for SO type '${name}' is missing the 'create' schema definition.`
-    );
+    throw new SavedObjectsCheckError({
+      ruleId: RULE_IDS.MODEL_VERSION_MISSING_CREATE_SCHEMA,
+      severity: 'error',
+      typeName: name,
+      message: `The new model version '${mv.version}' for SO type '${name}' is missing the 'create' schema definition.`,
+      fixHint: `Add 'schemas.create' to model version '${mv.version}'.`,
+      docsAnchor: '#defining-model-versions',
+    });
   }
 }
 
@@ -175,11 +208,16 @@ export function validateAllMappingsInModelVersion(
   });
 
   if (undeclaredFields.length > 0) {
-    throw new Error(
-      `❌ The SO type '${name}' has mapping fields not present in the latest model version schema: ${undeclaredFields.join(
+    throw new SavedObjectsCheckError({
+      ruleId: RULE_IDS.MODEL_VERSION_MAPPINGS_NOT_IN_SCHEMA,
+      severity: 'error',
+      typeName: name,
+      message: `The SO type '${name}' has mapping fields not present in the latest model version schema: ${undeclaredFields.join(
         ', '
-      )}. ` + `All mapping fields must be declared in the latest model version's 'create' schema.`
-    );
+      )}.`,
+      fixHint: `Add the missing fields to the 'create' schema of the latest model version.`,
+      docsAnchor: '#defining-model-versions',
+    });
   }
 }
 
@@ -189,21 +227,29 @@ function throwIfIndexOrEnabledFalse(
   fieldsWithEnabledFalse: string[]
 ): void {
   if (fieldsWithIndexFalse.length > 0) {
-    throw new Error(
-      `❌ The SO type '${name}' has new mapping fields with 'index: false': ${fieldsWithIndexFalse.join(
+    throw new SavedObjectsCheckError({
+      ruleId: RULE_IDS.MODEL_VERSION_MAPPING_INDEX_FALSE,
+      severity: 'error',
+      typeName: name,
+      message: `The SO type '${name}' has new mapping fields with 'index: false': ${fieldsWithIndexFalse.join(
         ', '
-      )}. ` +
-        `This option cannot be updated without reindexing. Use 'dynamic: false' instead or omit the mapping.`
-    );
+      )}.`,
+      fixHint: `Use 'dynamic: false' instead or omit the mapping entirely. The 'index: false' option cannot be updated without reindexing.`,
+      docsAnchor: '#defining-model-versions',
+    });
   }
 
   if (fieldsWithEnabledFalse.length > 0) {
-    throw new Error(
-      `❌ The SO type '${name}' has new mapping fields with 'enabled: false': ${fieldsWithEnabledFalse.join(
+    throw new SavedObjectsCheckError({
+      ruleId: RULE_IDS.MODEL_VERSION_MAPPING_ENABLED_FALSE,
+      severity: 'error',
+      typeName: name,
+      message: `The SO type '${name}' has new mapping fields with 'enabled: false': ${fieldsWithEnabledFalse.join(
         ', '
-      )}. ` +
-        `This option cannot be updated without reindexing. Use 'dynamic: false' instead or omit the mapping.`
-    );
+      )}.`,
+      fixHint: `Use 'dynamic: false' instead or omit the mapping entirely. The 'enabled: false' option cannot be updated without reindexing.`,
+      docsAnchor: '#defining-model-versions',
+    });
   }
 }
 
@@ -255,6 +301,33 @@ export function validateNoIndexOrEnabledFalseInAllMappings(
   });
 
   throwIfIndexOrEnabledFalse(name, fieldsWithIndexFalse, fieldsWithEnabledFalse);
+}
+
+const TYPES_REQUIRING_IGNORE_ABOVE = new Set(['keyword', 'flattened']);
+
+/**
+ * Returns the paths of all `keyword` and `flattened` mapping fields that are missing an
+ * `ignore_above` constraint. Paths are expressed in schema format (dot-separated, with
+ * `.properties.` collapsed), e.g. `parent.child` or `name.fields.keyword`.
+ */
+export function getFieldsMissingIgnoreAbove(mappings: Record<string, unknown>): string[] {
+  return Object.entries(mappings)
+    .filter(([key, value]) => {
+      if (!key.endsWith('.type')) return false;
+      if (!TYPES_REQUIRING_IGNORE_ABOVE.has(value as string)) return false;
+      const fieldPrefix = key.slice(0, -'.type'.length);
+      // Non-indexed fields are never indexed, so ignore_above has no effect on them.
+      if (mappings[`${fieldPrefix}.index`] === false) return false;
+      return !(`${fieldPrefix}.ignore_above` in mappings);
+    })
+    .map(([key]) => {
+      const fieldPrefix = key.slice(0, -'.type'.length);
+      const withoutTopLevelPrefix = fieldPrefix.startsWith('properties.')
+        ? fieldPrefix.slice('properties.'.length)
+        : fieldPrefix;
+      return toSchemaPathFormat(withoutTopLevelPrefix);
+    })
+    .sort();
 }
 
 /**

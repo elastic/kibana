@@ -240,6 +240,28 @@ describe('Cloud Plugin', () => {
           expect(setup.isInTrial()).toBe(false);
         });
       });
+      describe('exposes trialDaysLeft', () => {
+        it('returns positive number when `trial_end_date` is in the future', () => {
+          const { setup } = setupPlugin({
+            trial_end_date: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
+          });
+          expect(setup.trialDaysLeft()).toBe(5);
+        });
+        it('returns 0 when `trial_end_date` is in the past', () => {
+          const { setup } = setupPlugin({
+            trial_end_date: new Date(Date.now() - 10000).toISOString(),
+          });
+          expect(setup.trialDaysLeft()).toBe(0);
+        });
+        it('returns undefined when `trial_end_date` is not set', () => {
+          const { setup } = setupPlugin({});
+          expect(setup.trialDaysLeft()).toBeUndefined();
+        });
+        it('returns undefined when `trial_end_date` is invalid', () => {
+          const { setup } = setupPlugin({ trial_end_date: 'invalid-date' });
+          expect(setup.trialDaysLeft()).toBeUndefined();
+        });
+      });
     });
   });
 
@@ -405,6 +427,34 @@ describe('Cloud Plugin', () => {
       it('is `false` when `serverless.in_trial` & `trial_end_date` are not set', () => {
         const pluginStart = getStart();
         expect(pluginStart.isInTrial()).toBe(false);
+      });
+    });
+    describe('exposes trialDaysLeft', () => {
+      const getStart = (configParts: Partial<CloudConfigType> = {}) => {
+        const { plugin } = startPlugin(configParts);
+        const coreStart = coreMock.createStart();
+        coreStart.http.get.mockResolvedValue({ elasticsearch_url: 'elasticsearch-url' });
+        return plugin.start(coreStart);
+      };
+      it('returns positive number when `trial_end_date` is in the future', () => {
+        const pluginStart = getStart({
+          trial_end_date: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
+        });
+        expect(pluginStart.trialDaysLeft()).toBe(5);
+      });
+      it('returns 0 when `trial_end_date` is in the past', () => {
+        const pluginStart = getStart({
+          trial_end_date: new Date(Date.now() - 10000).toISOString(),
+        });
+        expect(pluginStart.trialDaysLeft()).toBe(0);
+      });
+      it('returns undefined when `trial_end_date` is invalid', () => {
+        const pluginStart = getStart({ trial_end_date: 'invalid-date' });
+        expect(pluginStart.trialDaysLeft()).toBeUndefined();
+      });
+      it('returns undefined when `trial_end_date` is not set', () => {
+        const pluginStart = getStart();
+        expect(pluginStart.trialDaysLeft()).toBeUndefined();
       });
     });
   });

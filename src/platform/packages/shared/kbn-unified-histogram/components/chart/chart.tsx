@@ -307,7 +307,7 @@ export function UnifiedHistogramChart({
       label: i18n.translate('unifiedHistogram.saveVisualizationButton', {
         defaultMessage: 'Save visualization to dashboard',
       }),
-      iconType: 'dashboardApp',
+      iconType: 'addToDashboard',
       'data-test-subj': 'unifiedHistogramSaveVisualization',
       onClick: () => setIsSaveModalVisible(true),
     });

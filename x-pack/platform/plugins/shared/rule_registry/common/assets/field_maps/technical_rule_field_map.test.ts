@@ -431,6 +431,16 @@ it('matches snapshot', () => {
         "required": false,
         "type": "keyword",
       },
+      "kibana.cps_scope.expression": Object {
+        "array": false,
+        "required": false,
+        "type": "keyword",
+      },
+      "kibana.cps_scope.linked_projects": Object {
+        "array": true,
+        "required": false,
+        "type": "flattened",
+      },
       "kibana.space_ids": Object {
         "array": true,
         "required": true,

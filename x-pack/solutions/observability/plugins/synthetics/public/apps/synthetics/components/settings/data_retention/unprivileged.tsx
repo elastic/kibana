@@ -19,7 +19,7 @@ export const Unprivileged = ({ hideIlmMessage = false }: { hideIlmMessage?: bool
     <EuiEmptyPrompt
       data-test-subj="syntheticsUnprivileged"
       color="plain"
-      icon={<EuiIcon type="logoObservability" size="xl" />}
+      icon={<EuiIcon type="logoObservability" size="xl" aria-hidden={true} />}
       title={
         <h2>
           <FormattedMessage

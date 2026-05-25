@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 
 import {
   EuiButton,
@@ -30,6 +30,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 import type { OverlayStart } from '@kbn/core/public';
 import type { RenderingService } from '@kbn/core-rendering-browser';
+import { useBooleanUrlState } from '@kbn/shared-url-state';
 
 interface NonSessionFlyoutsProps {
   overlays: OverlayStart;
@@ -37,72 +38,87 @@ interface NonSessionFlyoutsProps {
 }
 
 const OverlaysFlyout: React.FC<NonSessionFlyoutsProps> = React.memo(({ overlays, rendering }) => {
-  const [isFlyoutOpen, setIsFlyoutOpen] = useState<boolean>(false);
+  const [isFlyoutOpen, setIsFlyoutOpen] = useBooleanUrlState('flyoutGlobalOverlaysOpen');
   const flyoutRef = useRef<OverlayRef | null>(null);
 
   // Ref for manual focus management - return focus to trigger button
   const triggerRef = useRef<HTMLButtonElement>(null);
 
-  const openFlyout = useCallback(() => {
-    // Create a handler that will be called to close the flyout
-    const handleClose = () => {
+  // Bridge URL-backed open state to the imperative overlays.openFlyout API:
+  // opening mounts the overlay, closing (via URL, Back button, or user click) unmounts it.
+  useEffect(() => {
+    if (isFlyoutOpen && !flyoutRef.current) {
+      flyoutRef.current = overlays.openFlyout(
+        toMountPoint(
+          <>
+            <EuiFlyoutHeader>
+              <EuiTitle>
+                <h2 id="globalFlyoutHeading">Global Flyout</h2>
+              </EuiTitle>
+            </EuiFlyoutHeader>
+            <EuiFlyoutBody>
+              <EuiText>
+                <p>
+                  This flyout is opened using the non-session aware <EuiCode>openFlyout</EuiCode>{' '}
+                  API.
+                </p>
+              </EuiText>
+            </EuiFlyoutBody>
+            <EuiFlyoutFooter>
+              <EuiFlexGroup justifyContent="flexEnd">
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty onClick={() => setIsFlyoutOpen(false)} aria-label="Close">
+                    Close
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlyoutFooter>
+          </>,
+          rendering
+        ),
+        {
+          id: 'globalFlyout',
+          container: null,
+          size: 'm',
+          ['aria-labelledby']: 'globalFlyoutHeading',
+          type: 'overlay',
+          ownFocus: true,
+          onClose: (flyout) => {
+            // overlays.openFlyout does not auto-close when options.onClose is provided —
+            // the consumer must call .close() to dismiss the overlay (see flyout_service.tsx).
+            flyout.close();
+            setIsFlyoutOpen(false);
+            // flyoutRef is cleared by the effect cleanup
+          },
+        }
+      );
+    } else if (!isFlyoutOpen && flyoutRef.current) {
+      flyoutRef.current.close();
+      flyoutRef.current = null;
+      setTimeout(() => {
+        triggerRef.current?.focus();
+      }, 100);
+    }
+  }, [isFlyoutOpen, overlays, rendering, setIsFlyoutOpen]);
+
+  // Unmount cleanup: prevent an orphaned overlay if the component unmounts while open.
+  useEffect(() => {
+    return () => {
       if (flyoutRef.current) {
         flyoutRef.current.close();
         flyoutRef.current = null;
       }
-      setIsFlyoutOpen(false);
-
-      // Return focus to trigger button after closing flyout
-      setTimeout(() => {
-        triggerRef.current?.focus();
-      }, 100);
     };
-
-    const ref = overlays.openFlyout(
-      toMountPoint(
-        <>
-          <EuiFlyoutHeader>
-            <EuiTitle>
-              <h2 id="globalFlyoutHeading">Global Flyout</h2>
-            </EuiTitle>
-          </EuiFlyoutHeader>
-          <EuiFlyoutBody>
-            <EuiText>
-              <p>
-                This flyout is opened using the non-session aware <EuiCode>openFlyout</EuiCode> API.
-              </p>
-            </EuiText>
-          </EuiFlyoutBody>
-          <EuiFlyoutFooter>
-            <EuiFlexGroup justifyContent="flexEnd">
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty onClick={handleClose} aria-label="Close">
-                  Close
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlyoutFooter>
-        </>,
-        rendering
-      ),
-      {
-        id: 'globalFlyout',
-        container: null,
-        size: 'm',
-        ['aria-labelledby']: 'globalFlyoutHeading',
-        type: 'overlay',
-        ownFocus: true,
-        onClose: handleClose,
-      }
-    );
-    flyoutRef.current = ref;
-    setIsFlyoutOpen(true);
-  }, [overlays, rendering]);
+  }, []);
 
   return (
     <EuiFlexGroup gutterSize="m" alignItems="center">
       <EuiFlexItem grow={false}>
-        <EuiButton buttonRef={triggerRef} onClick={openFlyout} disabled={isFlyoutOpen}>
+        <EuiButton
+          buttonRef={triggerRef}
+          onClick={() => setIsFlyoutOpen(true)}
+          disabled={isFlyoutOpen}
+        >
           Open Global Flyout
         </EuiButton>
       </EuiFlexItem>
@@ -113,7 +129,7 @@ const OverlaysFlyout: React.FC<NonSessionFlyoutsProps> = React.memo(({ overlays,
 OverlaysFlyout.displayName = 'GlobalFlyoutFromOverlaysService';
 
 const SessionNeverFlyout: React.FC = React.memo(() => {
-  const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
+  const [isFlyoutVisible, setIsFlyoutVisible] = useBooleanUrlState('flyoutGlobalNeverOpen');
 
   // Refs for manual focus management
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -135,7 +151,7 @@ const SessionNeverFlyout: React.FC = React.memo(() => {
     setTimeout(() => {
       triggerRef.current?.focus();
     }, 100);
-  }, []);
+  }, [setIsFlyoutVisible]);
 
   return (
     <>

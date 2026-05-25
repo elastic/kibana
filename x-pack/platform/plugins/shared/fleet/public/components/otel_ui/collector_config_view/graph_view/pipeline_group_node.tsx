@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { type NodeProps, type Node } from '@xyflow/react';
 import { useEuiTheme, EuiText, EuiHealth, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-import { HEALTH_STATUS_COLORS } from '../utils';
+import { getHealthStatusColor } from '../utils';
 
 import type { OTelPipelineGroupNodeData } from './config_to_graph';
 
@@ -18,6 +18,15 @@ type PipelineGroupNodeType = Node<OTelPipelineGroupNodeData, 'pipelineGroup'>;
 
 export const PipelineGroupNode = memo(({ data }: NodeProps<PipelineGroupNodeType>) => {
   const { euiTheme } = useEuiTheme();
+
+  const healthDotColor = useMemo(() => {
+    const { healthCounts } = data;
+    if (!healthCounts) return getHealthStatusColor(data.healthStatus ?? 'unknown', euiTheme);
+    const { healthy, total } = healthCounts;
+    if (healthy === total) return euiTheme.colors.backgroundFilledSuccess;
+    if (healthy === 0) return euiTheme.colors.backgroundFilledDanger;
+    return euiTheme.colors.backgroundFilledWarning;
+  }, [data, euiTheme]);
 
   const containerStyles = css`
     width: 100%;
@@ -44,7 +53,7 @@ export const PipelineGroupNode = memo(({ data }: NodeProps<PipelineGroupNodeType
         <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
           {data.healthStatus && (
             <EuiFlexItem grow={false}>
-              <EuiHealth color={HEALTH_STATUS_COLORS[data.healthStatus]} />
+              <EuiHealth color={healthDotColor} />
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={false}>

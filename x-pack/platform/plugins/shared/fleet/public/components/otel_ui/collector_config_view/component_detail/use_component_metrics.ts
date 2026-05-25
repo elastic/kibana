@@ -10,8 +10,8 @@ import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-ty
 import { lastValueFrom } from 'rxjs';
 
 import { useStartServices } from '../../../../hooks';
-import type { OTelComponentType } from '../graph_view/constants';
-import { useCollectorMetrics } from '../collector_metrics_context';
+import type { OTelComponentType } from '../constants';
+import { useCollectorContext } from '../collector_context';
 
 interface MetricSeries {
   label: string;
@@ -29,7 +29,7 @@ interface UseComponentMetricsResult {
   error?: Error;
 }
 
-const METRICS_INDEX = 'metrics-*';
+const METRICS_INDEX = 'metrics-collectortelemetry.otel-*';
 
 interface MetricDefinition {
   field: string;
@@ -216,7 +216,7 @@ export const useComponentMetrics = ({
   fixedInterval: string;
 }): UseComponentMetricsResult => {
   const { data } = useStartServices();
-  const { serviceInstanceId } = useCollectorMetrics();
+  const { serviceInstanceId } = useCollectorContext();
 
   const [groups, setGroups] = useState<MetricGroup[]>([]);
   const [isLoading, setIsLoading] = useState(false);

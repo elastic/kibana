@@ -255,10 +255,13 @@ export class RuleTypeRunner<
             return maintenanceWindowsPromise;
           };
 
+          const cpsData = context.isServerless ? await executorServices.getCpsData() : undefined;
+
           executorResult = await withAlertingSpan('rule-type-executor', () =>
             this.options.context.executionContext.withContext(ctx, () =>
               ruleType.executor({
                 executionId,
+                cpsData,
                 services: {
                   alertFactory: alertsClient.factory(),
                   alertsClient: alertsClient.client(),
