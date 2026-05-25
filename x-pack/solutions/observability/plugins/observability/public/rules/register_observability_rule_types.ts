@@ -126,8 +126,7 @@ export const registerObservabilityRuleTypes = (
     defaultActionMessage: thresholdDefaultActionMessage,
     defaultRecoveryMessage: thresholdDefaultRecoveryMessage,
     requiresAppContext: false,
-    format: ({ fields }) =>
-      formatCustomThresholdAlert(fields, logsLocator),
+    format: ({ fields }) => formatCustomThresholdAlert(fields, logsLocator),
     alertDetailsAppSection: lazy(
       () =>
         import(

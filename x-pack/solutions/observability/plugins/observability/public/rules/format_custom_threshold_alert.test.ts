@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  ALERT_REASON,
-  ALERT_RULE_PARAMETERS,
-  ALERT_START,
-} from '@kbn/rule-data-utils';
+import { ALERT_REASON, ALERT_RULE_PARAMETERS, ALERT_START } from '@kbn/rule-data-utils';
 import { formatCustomThresholdAlert } from './register_observability_rule_types';
 import { Aggregators } from '../../common/custom_threshold_rule/types';
 
