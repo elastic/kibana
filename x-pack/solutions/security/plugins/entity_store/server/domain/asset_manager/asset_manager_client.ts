@@ -23,15 +23,18 @@ import {
 } from '../../tasks/history_snapshot_task';
 import { scheduleStatusReportTask, stopStatusReportTask } from '../../tasks/status_report_task';
 import { installSharedElasticsearchAssets, uninstallElasticsearchAssets } from './install_assets';
+import { EngineNotActionableError, EnginesNotInstalledError } from '../errors';
 import {
   EngineDescriptorTypeName,
+  EngineLogExtractionConfig,
   type EngineDescriptor,
   type EngineDescriptorClient,
   type EntityStoreGlobalStateClient,
   HistorySnapshotState,
   LogExtractionConfig,
+  resolveEffectiveFrequency,
 } from '../saved_objects';
-import type { HistorySnapshotBodyParams, LogExtractionInstallParams } from '../../routes/constants';
+import type { HistorySnapshotBodyParams, LogExtractionConfigBody } from '../../routes/constants';
 import {
   ENGINE_STATUS,
   ENTITY_STORE_CLUSTER_PRIVILEGES,
@@ -116,7 +119,7 @@ export class AssetManagerClient {
   public async init(
     request: KibanaRequest,
     entityTypes: EntityType[],
-    logsExtractionParams?: LogExtractionInstallParams,
+    logsExtractionParams?: LogExtractionConfigBody,
     historySnapshotParams?: HistorySnapshotBodyParams
   ) {
     try {
@@ -156,7 +159,13 @@ export class AssetManagerClient {
 
       // Phase 2: Initialize engines and start background tasks.
       await Promise.all([
-        ...entityTypes.map((type) => this.initEntity(request, type, logsExtraction)),
+        ...entityTypes.map((type) =>
+          this.initEntity(
+            request,
+            type,
+            EngineLogExtractionConfig.partial().parse(logsExtractionParams ?? {})
+          )
+        ),
 
         scheduleHistorySnapshotTasks({
           logger: this.logger,
@@ -188,17 +197,18 @@ export class AssetManagerClient {
     }
   }
 
-  public async start(request: KibanaRequest, type: EntityType, { frequency }: LogExtractionConfig) {
+  public async start(request: KibanaRequest, type: EntityType) {
     try {
       this.logger.get(type).debug(`Scheduling extract entity task for type: ${type}`);
 
+      const engine = await this.engineDescriptorClient.findOrThrow(type);
       await this.engineDescriptorClient.update(type, { status: ENGINE_STATUS.STARTED });
 
       await scheduleExtractEntityTask({
         logger: this.logger,
         taskManager: this.taskManager,
         type,
-        frequency,
+        frequency: resolveEffectiveFrequency(engine),
         namespace: this.namespace,
         request,
       });
@@ -206,6 +216,63 @@ export class AssetManagerClient {
       this.logger.get(type).error(`Error starting extract entity task for type ${type}:`, error);
       await this.engineDescriptorClient.update(type, { status: ENGINE_STATUS.ERROR });
       throw error;
+    }
+  }
+
+  public async setExtractFrequency(
+    request: KibanaRequest,
+    frequency: string,
+    entityTypes: EntityType[]
+  ): Promise<void> {
+    this.logger.debug(
+      `Setting extract frequency to '${frequency}' for entity types: ${entityTypes.join(', ')}`
+    );
+    const allEngines = await this.engineDescriptorClient.getAll();
+
+    const missing = entityTypes.filter((t) => !allEngines.some((e) => e.type === t));
+    if (missing.length) {
+      throw new EnginesNotInstalledError(
+        missing,
+        allEngines.map((e) => e.type)
+      );
+    }
+
+    const targets = allEngines.filter((e) => entityTypes.includes(e.type));
+
+    const nonActionable = targets.filter(
+      (e) => e.status !== ENGINE_STATUS.STARTED && e.status !== ENGINE_STATUS.STOPPED
+    );
+    if (nonActionable.length) {
+      throw new EngineNotActionableError(
+        nonActionable.map((e) => ({ type: e.type, status: e.status }))
+      );
+    }
+
+    const errors: Array<{ type: EntityType; message: string }> = [];
+    for (const engine of targets) {
+      try {
+        if (engine.status === ENGINE_STATUS.STARTED) {
+          const result = await this.taskManager.bulkUpdateSchedules(
+            [getExtractEntityTaskId(engine.type, this.namespace)],
+            { interval: frequency },
+            { request }
+          );
+          if (result.errors.length) {
+            errors.push({ type: engine.type, message: result.errors[0].error.message });
+            continue;
+          }
+        }
+
+        await this.engineDescriptorClient.update(engine.type, { config: { frequency } });
+      } catch (error) {
+        errors.push({ type: engine.type, message: getErrorMessage(error) });
+      }
+    }
+
+    if (errors.length) {
+      const msg = errors.map((e) => `${e.type}: ${e.message}`).join('; ');
+      this.logger.error(`Failed to update frequency for some engines: ${msg}`);
+      throw new Error(`Failed to update extract entity task frequency for some engines: ${msg}`);
     }
   }
 
@@ -310,19 +377,14 @@ export class AssetManagerClient {
     }
   }
 
-  public async getLogExtractionConfig(): Promise<LogExtractionConfig> {
-    const globalState = await this.globalStateClient.find();
-    return globalState?.logsExtraction ?? LogExtractionConfig.parse({});
-  }
-
   private async initEntity(
     request: KibanaRequest,
     type: EntityType,
-    logsExtractionConfig: LogExtractionConfig
+    engineConfig: Partial<EngineLogExtractionConfig> = {}
   ): Promise<boolean> {
-    const installed = await this.install(type);
+    const installed = await this.install(type, engineConfig);
     if (installed) {
-      await this.start(request, type, logsExtractionConfig);
+      await this.start(request, type);
     }
     this.analytics.reportEvent(ENTITY_STORE_INITIALIZATION_EVENT, {
       entityType: type,
@@ -363,7 +425,10 @@ export class AssetManagerClient {
     });
   }
 
-  public async install(type: EntityType): Promise<boolean> {
+  public async install(
+    type: EntityType,
+    engineConfig: Partial<EngineLogExtractionConfig> = {}
+  ): Promise<boolean> {
     try {
       const { engines } = await this.getStatus();
       if (engines.some((e) => e.type === type)) {
@@ -373,7 +438,7 @@ export class AssetManagerClient {
       this.logger.get(type).debug(`Installing assets for entity type: ${type}`);
       // Engine installation is per-type. Shared indices and data streams are created once
       // during `init()` before parallel engine initialization begins.
-      await this.engineDescriptorClient.init(type);
+      await this.engineDescriptorClient.init(type, engineConfig);
       this.logger.debug(`Installed definition: ${type}`);
 
       return true;
@@ -544,14 +609,10 @@ export class AssetManagerClient {
 
 function resolveLogsExtractionOnInstall(
   existing: LogExtractionConfig | undefined,
-  params: LogExtractionInstallParams | undefined
+  params: LogExtractionConfigBody | undefined
 ): LogExtractionConfig {
-  const hasParams = params !== undefined && Object.keys(params).length > 0;
-  if (hasParams) {
-    return LogExtractionConfig.parse(params);
-  }
-  if (existing !== undefined) {
-    return existing;
-  }
-  return LogExtractionConfig.parse({});
+  // Overlay onto existing (or defaults) so a partial update doesn't clobber other customizations.
+  // Per-engine fields (e.g. `frequency`) are silently stripped by the global-schema parse.
+  const base = existing ?? LogExtractionConfig.parse({});
+  return LogExtractionConfig.parse({ ...base, ...(params ?? {}) });
 }

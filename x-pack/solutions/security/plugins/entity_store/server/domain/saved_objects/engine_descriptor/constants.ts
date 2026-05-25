@@ -7,9 +7,27 @@
 
 import { z } from '@kbn/zod/v4';
 import { EntityType } from '../../../../common/domain/definitions/entity_schema';
+import { LogExtractionConfigSchema } from '../log_extraction_config_schema';
 
 export type EngineStatus = z.infer<typeof EngineStatus>;
 export const EngineStatus = z.enum(['installing', 'started', 'stopped', 'updating', 'error']);
+
+export type EngineLogExtractionConfig = z.infer<typeof EngineLogExtractionConfig>;
+export const EngineLogExtractionConfig = LogExtractionConfigSchema.pick({
+  frequency: true,
+}).partial();
+
+export const extractEntityTaskFrequencyByType = {
+  host: '1m',
+  user: '1m',
+  service: '10m',
+  generic: '30m',
+} as const satisfies Record<z.infer<typeof EntityType>, string>;
+
+export const resolveEffectiveFrequency = (engine: {
+  type: z.infer<typeof EntityType>;
+  config?: { frequency?: string };
+}): string => engine.config?.frequency ?? extractEntityTaskFrequencyByType[engine.type];
 
 export type EngineLogExtractionState = z.infer<typeof EngineLogExtractionState>;
 export const EngineLogExtractionState = z.object({
@@ -39,4 +57,5 @@ export const EngineDescriptor = z.object({
   logExtractionState: EngineLogExtractionState,
   error: EngineError.nullable().default(null),
   versionState: VersionState,
+  config: EngineLogExtractionConfig.optional(),
 });

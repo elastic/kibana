@@ -23,6 +23,15 @@ requestBody:
               frequency: "5m"
               delay: "2m"
               fieldHistoryLength: 20
+        installWithFrequencyPerEntityTypeExample:
+          summary: "Install with frequency for specific entity types"
+          description: "Install the Entity Store for the specified entity types with a shared extraction frequency. To set different frequencies per type, call the install endpoint separately for each type, or use the update endpoint afterwards."
+          value:
+            entityTypes:
+              - host
+              - service
+            logExtraction:
+              frequency: "5m"
 responses:
   201:
     description: "Indicates the Entity Store was successfully installed."

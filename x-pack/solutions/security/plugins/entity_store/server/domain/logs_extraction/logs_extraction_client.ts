@@ -46,10 +46,7 @@ import {
   getAlertsIndexName,
   getSecuritySolutionDataViewName,
 } from '../asset_manager/external_indices_contants';
-import {
-  type LogExtractionConfig,
-  LogExtractionConfig as LogExtractionConfigSchema,
-} from '../saved_objects';
+import { LogExtractionConfig } from '../saved_objects';
 import {
   type EngineDescriptorClient,
   type EngineLogExtractionState,
@@ -58,7 +55,7 @@ import {
 import { ENGINE_STATUS } from '../constants';
 import type { CcsLogsExtractionClient } from './ccs_logs_extraction_client';
 import { EntityStoreNotRunningError } from '../errors';
-import type { LogExtractionUpdateParams } from '../../routes/constants';
+import type { LogExtractionConfigBody } from '../../routes/constants';
 
 /** Engine state with all cursor fields cleared. Used between sub-window iterations so a fresh
  * sub-window does not re-trigger recovery from cursors persisted by an earlier sub-window. */
@@ -204,9 +201,11 @@ export class LogsExtractionClient {
     }
   }
 
-  public async updateConfig(params: LogExtractionUpdateParams): Promise<LogExtractionConfig> {
+  public async updateConfig(
+    params: Omit<LogExtractionConfigBody, 'frequency'>
+  ): Promise<LogExtractionConfig> {
     const globalState = await this.globalStateClient.findOrThrow();
-    const mergedConfig = LogExtractionConfigSchema.parse({
+    const mergedConfig = LogExtractionConfig.parse({
       ...globalState.logsExtraction,
       ...params,
     });

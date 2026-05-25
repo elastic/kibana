@@ -448,6 +448,8 @@
     "apiKey"
   ],
   "entity-engine-descriptor-v2": [
+    "config",
+    "config.frequency",
     "error",
     "error.action",
     "error.message",

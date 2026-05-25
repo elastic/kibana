@@ -173,12 +173,11 @@ export async function scheduleExtractEntityTask({
   try {
     const taskType = getTaskType(type);
     const taskId = getExtractEntityTaskId(type, namespace);
-    const interval = frequency ?? TasksConfig[EntityStoreTaskType.enum.extractEntity].interval;
     await taskManager.ensureScheduled(
       {
         id: taskId,
         taskType,
-        schedule: { interval },
+        schedule: { interval: frequency },
         state: { namespace },
         params: {},
       },

@@ -1529,6 +1529,13 @@
   "entity-engine-descriptor-v2": {
     "dynamic": false,
     "properties": {
+      "config": {
+        "properties": {
+          "frequency": {
+            "type": "keyword"
+          }
+        }
+      },
       "error": {
         "properties": {
           "action": {

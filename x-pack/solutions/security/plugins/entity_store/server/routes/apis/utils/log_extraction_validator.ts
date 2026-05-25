@@ -7,8 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { validateDataView } from '@kbn/data-view-validation';
-import type { LogExtractionBodyParams } from '../../constants';
-import { LogExtractionInstallParams, LogExtractionUpdateParams } from '../../constants';
+import { LogExtractionConfigBody } from '../../constants';
 import { parseDurationToMs } from '../../../infra/time';
 import {
   LOG_EXTRACTION_DELAY_DEFAULT,
@@ -17,7 +16,7 @@ import {
 
 const MIN_FREQUENCY_MS = 30 * 1000;
 
-function validateFrequencyParam(data: LogExtractionBodyParams, ctx: z.RefinementCtx): void {
+function validateFrequencyParam(data: LogExtractionConfigBody, ctx: z.RefinementCtx): void {
   if (data.frequency === undefined) {
     return;
   }
@@ -63,7 +62,7 @@ function validateIndexPatternList(
   });
 }
 
-function validateDelayVsLookbackPeriod(data: LogExtractionBodyParams, ctx: z.RefinementCtx): void {
+function validateDelayVsLookbackPeriod(data: LogExtractionConfigBody, ctx: z.RefinementCtx): void {
   const hasDelay = data.delay !== undefined;
   const hasLookback = data.lookbackPeriod !== undefined;
   if (!hasDelay && !hasLookback) {
@@ -92,7 +91,7 @@ function isDelayGteLookbackPeriod(delay?: string, lookbackPeriod?: string): bool
 }
 
 export function validateLogExtractionParams(
-  data: LogExtractionBodyParams | undefined,
+  data: LogExtractionConfigBody | undefined,
   ctx: z.RefinementCtx
 ): void {
   if (!data) return;
@@ -103,10 +102,16 @@ export function validateLogExtractionParams(
   validateDelayVsLookbackPeriod(data, ctx);
 }
 
-export const LogExtractionInstallSchema = LogExtractionInstallParams.superRefine(
+export const LogExtractionInstallSchema = LogExtractionConfigBody.superRefine(
   validateLogExtractionParams
 ).optional();
 
-export const LogExtractionUpdadeSchema = LogExtractionUpdateParams.superRefine(
+export const LogExtractionUpdadeSchema = LogExtractionConfigBody.superRefine(
   validateLogExtractionParams
 );
+
+// Pick is not allowed on schemas with superRefine, so we build this from the base schema.
+export const LogExtractionFrequencySchema = LogExtractionConfigBody.pick({ frequency: true })
+  .required()
+  .strict()
+  .superRefine(validateFrequencyParam);

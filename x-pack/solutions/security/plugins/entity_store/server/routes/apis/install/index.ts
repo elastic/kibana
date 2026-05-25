@@ -23,8 +23,9 @@ export function registerInstall(router: EntityStorePluginRouter) {
       summary: 'Install the Entity Store',
       description:
         'Install the Entity Store and create engines for the specified entity types. ' +
-        'A single `logExtraction` configuration is shared across all entity types. ' +
-        'Supply it once at install to customize settings; omit it (or send an empty object) to use defaults on first install or preserve the existing configuration on re-install. ' +
+        'The `logExtraction` body shares most settings across all entity types; ' +
+        '`frequency` is per-engine — if supplied, it seeds every engine being installed, otherwise per-type defaults are used. ' +
+        'Supply `logExtraction` once at install to customize settings; omit it (or send an empty object) to use defaults on first install or preserve the existing configuration on re-install. ' +
         'To change settings after install, use the update endpoint.',
       options: {
         tags: ['oas-tag:Security entity store'],
@@ -68,6 +69,7 @@ export function registerInstall(router: EntityStorePluginRouter) {
             },
           });
         }
+
         const { engines } = await assetManager.getStatus();
         const installedTypes = new Set(engines.map((e) => e.type));
         const toInstall = entityTypes.filter((type) => !installedTypes.has(type));

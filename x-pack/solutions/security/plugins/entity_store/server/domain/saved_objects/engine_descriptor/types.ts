@@ -61,6 +61,11 @@ export const EngineDescriptorTypeMappings: SavedObjectsType['mappings'] = {
         },
       },
     },
+    config: {
+      properties: {
+        frequency: { type: 'keyword', ignore_above: 1024 },
+      },
+    },
   },
 };
 
@@ -318,11 +323,58 @@ const version6: SavedObjectsFullModelVersion = {
   },
 };
 
+const engineDescriptorSchemaV7 = engineDescriptorSchemaV6.extends({
+  config: schema.nullable(
+    schema.object({
+      frequency: schema.maybe(schema.string()),
+    })
+  ),
+});
+
+const version7: SavedObjectsFullModelVersion = {
+  changes: [
+    {
+      type: 'mappings_addition',
+      addedMappings: {
+        config: {
+          properties: {
+            frequency: { type: 'keyword', ignore_above: 1024 },
+          },
+        },
+      },
+    },
+    {
+      type: 'data_backfill',
+      backfillFn: () => {
+        return {
+          attributes: {
+            // We're not backfilling because that will only update the SO, not reschdule existing tasks
+            // To reschdule existing tasks, value will be set by API requests: install / update
+            config: null,
+          },
+        };
+      },
+    },
+  ],
+  schemas: {
+    create: engineDescriptorSchemaV7,
+    forwardCompatibility: engineDescriptorSchemaV7.extends({}, { unknowns: 'ignore' }),
+  },
+};
+
 export const EngineDescriptorType: SavedObjectsType = {
   name: EngineDescriptorTypeName,
   hidden: false,
   namespaceType: 'multiple-isolated',
   mappings: EngineDescriptorTypeMappings,
-  modelVersions: { 1: version1, 2: version2, 3: version3, 4: version4, 5: version5, 6: version6 },
+  modelVersions: {
+    1: version1,
+    2: version2,
+    3: version3,
+    4: version4,
+    5: version5,
+    6: version6,
+    7: version7,
+  },
   hiddenFromHttpApis: true,
 };

@@ -11,8 +11,8 @@ import type {
 } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers, type Logger } from '@kbn/core/server';
 import type { EntityType } from '../../../../common/domain/definitions/entity_schema';
-import type { EngineDescriptor } from './constants';
-import { EngineLogExtractionState, VersionState } from './constants';
+import type { EngineLogExtractionConfig, EngineDescriptor } from './constants';
+import { EngineLogExtractionState, extractEntityTaskFrequencyByType, VersionState } from './constants';
 import { EngineDescriptorTypeName } from './types';
 import { ENGINE_STATUS } from '../../constants';
 
@@ -48,7 +48,10 @@ export class EngineDescriptorClient {
     return response.saved_objects[0].attributes;
   }
 
-  async init(entityType: EntityType): Promise<EngineDescriptor> {
+  async init(
+    entityType: EntityType,
+    engineConfig: Partial<EngineLogExtractionConfig> = {}
+  ): Promise<EngineDescriptor> {
     const engineDescriptor = await this.find(entityType);
 
     if (engineDescriptor.total > 0) {
@@ -62,6 +65,9 @@ export class EngineDescriptorClient {
 
     const logExtractionState = EngineLogExtractionState.parse({});
     const defaultVersionState = VersionState.parse({});
+    const config: EngineLogExtractionConfig = {
+      frequency: engineConfig.frequency ?? extractEntityTaskFrequencyByType[entityType],
+    };
     const { attributes } = await this.soClient.create<EngineDescriptor>(
       EngineDescriptorTypeName,
       {
@@ -70,6 +76,7 @@ export class EngineDescriptorClient {
         error: null,
         logExtractionState,
         versionState: defaultVersionState,
+        config,
       },
       { id }
     );

@@ -6,8 +6,8 @@
  */
 
 import type { AuthzEnabled } from '@kbn/core/server';
-import { z } from '@kbn/zod/v4';
-import { HistorySnapshotState, LogExtractionConfig } from '../domain/saved_objects';
+import type { z } from '@kbn/zod/v4';
+import { LogExtractionConfigSchema, HistorySnapshotState } from '../domain/saved_objects';
 
 export const DEFAULT_ENTITY_STORE_PERMISSIONS: AuthzEnabled = {
   requiredPrivileges: ['securitySolution'],
@@ -17,52 +17,9 @@ export const RESOLUTION_ENTITY_STORE_PERMISSIONS: AuthzEnabled = {
   requiredPrivileges: ['securitySolution', 'securitySolution-entity-analytics'],
 };
 
-export type LogExtractionInstallParams = z.infer<typeof LogExtractionInstallParams>;
-// timeout: intentionally excluded from LogExtractionBodyParams
-// TODO: add timeout once we have a way to set it as a task override param
-export const LogExtractionInstallParams = LogExtractionConfig.pick({
-  fieldHistoryLength: true,
-  additionalIndexPatterns: true,
-  excludedIndexPatterns: true,
-  lookbackPeriod: true,
-  frequency: true,
-  delay: true,
-  docsLimit: true,
-  maxLogsPerPage: true,
-  maxTimeWindowSize: true,
-  maxLogsPerWindow: true,
-  maxLogsPerWindowCapBehavior: true,
-}).partial();
-
-export type LogExtractionUpdateParams = z.infer<typeof LogExtractionUpdateParams>;
-
-export const LogExtractionUpdateParams = z.object({
-  fieldHistoryLength: z.number().int().optional(),
-  additionalIndexPatterns: z.array(z.string()).optional(),
-  excludedIndexPatterns: z.array(z.string()).optional(),
-  lookbackPeriod: z
-    .string()
-    .regex(/[smdh]$/)
-    .optional(),
-  frequency: z
-    .string()
-    .regex(/[smdh]$/)
-    .optional(),
-  delay: z
-    .string()
-    .regex(/[smdh]$/)
-    .optional(),
-  docsLimit: z.number().int().min(1).optional(),
-  maxLogsPerPage: z.number().int().min(1).optional(),
-  maxTimeWindowSize: z
-    .string()
-    .regex(/[smdh]$/)
-    .optional(),
-  maxLogsPerWindow: z.number().int().min(0).optional(),
-  maxLogsPerWindowCapBehavior: z.enum(['defer', 'drop']).optional(),
-});
-
-export type LogExtractionBodyParams = LogExtractionInstallParams | LogExtractionUpdateParams;
+// Used for the `/install` and `/update` HTTP body, all fields optional
+export type LogExtractionConfigBody = z.infer<typeof LogExtractionConfigBody>;
+export const LogExtractionConfigBody = LogExtractionConfigSchema.omit({ timeout: true }).partial();
 
 export type HistorySnapshotBodyParams = z.infer<typeof HistorySnapshotBodyParams>;
 export const HistorySnapshotBodyParams = HistorySnapshotState.pick({
