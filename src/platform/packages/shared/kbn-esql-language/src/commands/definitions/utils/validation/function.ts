@@ -112,6 +112,14 @@ class FunctionValidator {
       return;
     }
 
+    // Return early so the source-incompatibility error takes priority over the generic
+    // "not allowed here" check below — the location may technically match, but the function
+    // is invalid regardless because the pipeline source is TS.
+    if (isTimeseriesSourceCommand(this.ast) && this.definition.tsdbCompatible === false) {
+      this.report(errors.tsdbIncompatibleFunction(this.fn));
+      return;
+    }
+
     if (!this.allowedHere) {
       this.report(errors.functionNotAllowedHere(this.fn, this.location.displayName));
     }
