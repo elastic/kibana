@@ -6,7 +6,8 @@
       "jest",
       "node",
       "react",
-      "@testing-library/jest-dom"
+      "@testing-library/jest-dom",
+      "@kbn/ambient-ui-types"
     ]
   },
   "include": [
@@ -34,6 +35,7 @@
     "@kbn/alerting-v2-constants",
     "@kbn/yaml-rule-editor",
     "@kbn/core-application-browser-mocks",
+    "@kbn/ambient-ui-types",
     "@kbn/react-hooks",
     "@kbn/field-types",
     "@kbn/lens-plugin",

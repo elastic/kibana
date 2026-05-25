@@ -8,6 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useWatch } from 'react-hook-form';
+import { EuiSpacer } from '@elastic/eui';
 import type {
   ComposeDiscoverState,
   ComposeDiscoverAction,
@@ -22,6 +23,7 @@ import { RecoveryConditionStep } from './recovery_condition_step';
 import { DetailsAndArtifactsStep } from './details_and_artifacts_step';
 import { NotificationsStep } from './notifications_step';
 import { LinkedActionPoliciesStep } from './linked_action_policies_step';
+import { CentralizedActionPoliciesPanel } from './centralized_action_policies_panel';
 
 interface ComposeDiscoverFormProps {
   state: ComposeDiscoverState;
@@ -74,12 +76,17 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
     title: i18n.translate('xpack.alertingV2.composeDiscover.notifications.stepTitle', {
       defaultMessage: 'Actions',
     }),
-    render: (props) =>
-      props.state.mode === 'edit' && props.ruleId ? (
-        <LinkedActionPoliciesStep http={props.services.http} ruleId={props.ruleId} />
-      ) : (
-        <NotificationsStep services={props.services} />
-      ),
+    render: (props) => (
+      <>
+        <CentralizedActionPoliciesPanel http={props.services.http} />
+        <EuiSpacer size="m" />
+        {props.state.mode === 'edit' && props.ruleId ? (
+          <LinkedActionPoliciesStep http={props.services.http} ruleId={props.ruleId} />
+        ) : (
+          <NotificationsStep services={props.services} />
+        )}
+      </>
+    ),
     validate: (methods, state, services) => {
       if (state.mode === 'edit') return true;
       const notifs = methods.getValues('notifications');
