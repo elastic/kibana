@@ -109,6 +109,7 @@ export const LinkedActionPoliciesStep: React.FC<LinkedActionPoliciesStepProps> =
         <EuiSelectable
           options={options}
           onChange={() => {}}
+          color="subdued"
           emptyMessage={
             <EuiText size="s" color="subdued" data-test-subj="linkedActionPoliciesEmpty">
               <p>{emptyStateLabel}</p>

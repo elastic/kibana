@@ -8,34 +8,25 @@
 import React, { Suspense, useCallback, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
-import { EuiCallOut, EuiLoadingSpinner, EuiSpacer, EuiSwitch, EuiText } from '@elastic/eui';
+import { EuiButton, EuiLoadingSpinner, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import type { RuleFormServices } from '../../../form/contexts/rule_form_context';
 import type { ComposeFormValues } from '../compose_form_types';
 
-const notificationsDescription = i18n.translate(
-  'xpack.responseOps.alertingV2RuleForm.composeDiscover.notifications.description',
+const notificationsTitle = i18n.translate(
+  'xpack.responseOps.alertingV2RuleForm.composeDiscover.notifications.title',
+  { defaultMessage: 'Simple actions' }
+);
+
+const notificationsSubtext = i18n.translate(
+  'xpack.responseOps.alertingV2RuleForm.composeDiscover.notifications.subtext',
   {
-    defaultMessage:
-      "Send a notification when this rule's alerts change status. A linked action policy will be created with this rule.",
+    defaultMessage: "Send a notification when this rule's alerts change status.",
   }
 );
 
-const notificationsEnableLabel = i18n.translate(
-  'xpack.responseOps.alertingV2RuleForm.composeDiscover.notifications.enableToggleLabel',
-  { defaultMessage: 'Enable notifications' }
-);
-
-const notificationsCalloutTitle = i18n.translate(
-  'xpack.responseOps.alertingV2RuleForm.composeDiscover.notifications.calloutTitle',
-  { defaultMessage: 'Need more control?' }
-);
-
-const notificationsCalloutBody = i18n.translate(
-  'xpack.responseOps.alertingV2RuleForm.composeDiscover.notifications.calloutBody',
-  {
-    defaultMessage:
-      'You can refine this policy later by adding matchers, grouping fields, or adjusting the throttle interval.',
-  }
+const createSingleActionLabel = i18n.translate(
+  'xpack.responseOps.alertingV2RuleForm.composeDiscover.notifications.createSingleActionLabel',
+  { defaultMessage: 'Create single action' }
 );
 
 interface NotificationsStepProps {
@@ -51,55 +42,44 @@ export const NotificationsStep: React.FC<NotificationsStepProps> = ({ services }
   const isWorkflowInvalid =
     touched && enabled && !(workflowForm.isValid?.(notifications!.workflow) ?? true);
 
-  const handleToggle = useCallback(() => {
-    if (enabled) {
-      setValue('notifications', undefined, { shouldDirty: true });
-      setTouched(false);
-    } else {
-      setValue('notifications', { workflow: workflowForm.defaultValue() }, { shouldDirty: true });
-    }
-  }, [enabled, setValue, workflowForm]);
+  const handleCreate = useCallback(() => {
+    setValue('notifications', { workflow: workflowForm.defaultValue() }, { shouldDirty: true });
+  }, [setValue, workflowForm]);
 
   return (
     <>
+      <EuiTitle size="xs">
+        <h3>{notificationsTitle}</h3>
+      </EuiTitle>
+      <EuiSpacer size="xs" />
       <EuiText size="s" color="subdued">
-        <p>{notificationsDescription}</p>
+        <p>{notificationsSubtext}</p>
       </EuiText>
       <EuiSpacer size="m" />
-      <EuiSwitch
-        label={notificationsEnableLabel}
-        checked={enabled}
-        onChange={handleToggle}
-        data-test-subj="notificationsEnableToggle"
-      />
 
-      {enabled && (
-        <>
-          <EuiSpacer size="m" />
-          <div onBlur={() => setTouched(true)}>
-            <Suspense fallback={<EuiLoadingSpinner size="m" />}>
-              <workflowForm.Component
-                value={notifications!.workflow}
-                onChange={(next) =>
-                  setValue('notifications', { workflow: next }, { shouldDirty: true })
-                }
-                isInvalid={isWorkflowInvalid}
-              />
-            </Suspense>
-          </div>
-        </>
+      {enabled ? (
+        <div onBlur={() => setTouched(true)}>
+          <Suspense fallback={<EuiLoadingSpinner size="m" />}>
+            <workflowForm.Component
+              value={notifications!.workflow}
+              onChange={(next) =>
+                setValue('notifications', { workflow: next }, { shouldDirty: true })
+              }
+              isInvalid={isWorkflowInvalid}
+            />
+          </Suspense>
+        </div>
+      ) : (
+        <EuiButton
+          iconType="plusInCircle"
+          onClick={handleCreate}
+          size="s"
+          color="text"
+          data-test-subj="createSingleActionButton"
+        >
+          {createSingleActionLabel}
+        </EuiButton>
       )}
-
-      <EuiSpacer size="m" />
-      <EuiCallOut
-        size="s"
-        color="primary"
-        iconType="info"
-        title={notificationsCalloutTitle}
-        data-test-subj="notificationsMoreControlCallout"
-      >
-        <p>{notificationsCalloutBody}</p>
-      </EuiCallOut>
     </>
   );
 };
