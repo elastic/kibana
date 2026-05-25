@@ -498,6 +498,11 @@ export const getCommonNormalizer = <T extends LensAttributes>(
               // scale is not preserved through transforms
               delete col.scale;
 
+              // Empty-string timeShift is semantically "no shift" and is dropped by the transform
+              if (col.timeShift === '') {
+                delete col.timeShift;
+              }
+
               // remap inner column references (e.g. orderBy.columnId in terms columns)
               const orderByCol = (col as any).params?.orderBy?.columnId;
               if (orderByCol && columnIdMap.has(orderByCol)) {
