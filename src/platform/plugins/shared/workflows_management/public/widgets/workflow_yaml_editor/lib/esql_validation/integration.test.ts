@@ -11,10 +11,11 @@
 // scenario matrix in the plan. Each row of the table in the plan is locked
 // in here so any future regression in mask/skip behaviour fails loudly.
 
-import { parseDocument } from 'yaml';
+import { LineCounter, parseDocument } from 'yaml';
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import type { monaco } from '@kbn/monaco';
 import { validateEsqlSteps } from './validate_esql_steps';
+import { buildWorkflowLookup } from '../../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
 
 function createTextModel(content: string): monaco.editor.ITextModel {
   return {
@@ -38,7 +39,8 @@ function buildStep(query: string): string {
     .map((line) => `        ${line}`)
     .join('\n');
   return `steps:
-  - type: elasticsearch.esql.query
+  - name: esql_step
+    type: elasticsearch.esql.query
     with:
       query: |
 ${body}
@@ -62,8 +64,11 @@ const stubCallbacks: ESQLCallbacks = {
 
 async function validate(query: string) {
   const text = buildStep(query);
+  const lineCounter = new LineCounter();
+  const document = parseDocument(text, { lineCounter, keepSourceTokens: true });
+  const workflowLookup = buildWorkflowLookup(document, lineCounter);
   const model = createTextModel(text);
-  return validateEsqlSteps(parseDocument(text), model, stubCallbacks);
+  return validateEsqlSteps(workflowLookup, lineCounter, model, stubCallbacks);
 }
 
 describe('end-to-end ES|QL validation — Liquid policy (real validateQuery)', () => {
@@ -81,8 +86,8 @@ describe('end-to-end ES|QL validation — Liquid policy (real validateQuery)', (
     it('row 10: a real ES|QL typo on a non-Liquid step still surfaces', async () => {
       const markers = await validate('FROM logs-app-* | KEEPP @timestamp');
       expect(markers.length).toBeGreaterThan(0);
-      // The marker must land on the body line (line 5 in the YAML).
-      expect(markers[0].startLineNumber).toBe(5);
+      // The marker must land on the query body line (after adding `name:` on its own line).
+      expect(markers[0].startLineNumber).toBe(6);
       expect(markers[0].owner).toBe('esql-validation');
     });
 
@@ -130,20 +135,25 @@ describe('end-to-end ES|QL validation — Liquid policy (real validateQuery)', (
   describe('multi-step independence', () => {
     it('skips a Liquid-templated step and still flags a real typo on another', async () => {
       const text = `steps:
-  - type: elasticsearch.esql.query
+  - name: liquid_step
+    type: elasticsearch.esql.query
     with:
       query: |
         FROM logs-{{ env }}-*
-  - type: elasticsearch.esql.query
+  - name: typo_step
+    type: elasticsearch.esql.query
     with:
       query: |
         FROM logs-app-* | KEEPP @timestamp
 `;
+      const lineCounter = new LineCounter();
+      const document = parseDocument(text, { lineCounter, keepSourceTokens: true });
+      const workflowLookup = buildWorkflowLookup(document, lineCounter);
       const model = createTextModel(text);
-      const markers = await validateEsqlSteps(parseDocument(text), model, stubCallbacks);
+      const markers = await validateEsqlSteps(workflowLookup, lineCounter, model, stubCallbacks);
       expect(markers.length).toBeGreaterThan(0);
-      // The marker must point at the second step's body (line 9), not the first.
-      expect(markers.every((m) => m.startLineNumber >= 9)).toBe(true);
+      // The marker must point at the second step's body (line 10), not the first.
+      expect(markers.every((m) => m.startLineNumber >= 10)).toBe(true);
     });
   });
 });
