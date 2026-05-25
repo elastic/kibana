@@ -52,15 +52,17 @@ export const initializePatternAnalysisControls = (state: PatternAnalysisEmbeddab
     random_sampler_probability: 'referenceEquality',
   };
 
+  const patternAnalysisControlsApi: PatternAnalysisComponentApi = {
+    dataViewId,
+    fieldName,
+    minimumTimeRangeOption,
+    randomSamplerMode,
+    randomSamplerProbability,
+    updateUserInput,
+  };
+
   return {
-    patternAnalysisControlsApi: {
-      dataViewId,
-      fieldName,
-      minimumTimeRangeOption,
-      randomSamplerMode,
-      randomSamplerProbability,
-      updateUserInput,
-    } as unknown as PatternAnalysisComponentApi,
+    patternAnalysisControlsApi,
     serializePatternAnalysisChartState,
     patternAnalysisControlsComparators,
   };
