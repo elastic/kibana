@@ -181,7 +181,7 @@ export const MetricVis = ({
       : primaryMetricColumn.name;
     const subtitle = breakdownByColumn ? primaryMetricColumn.name : config.metric.subtitle;
 
-    const tileColor =
+    const paletteColor =
       config.metric.palette?.params && typeof value === 'number'
         ? getColor(
             value,
@@ -194,7 +194,9 @@ export const MetricVis = ({
             data,
             rowIdx
           ) ?? defaultColor
-        : config.metric.color ?? defaultColor;
+        : undefined;
+
+    const tileColor = paletteColor ?? config.metric.color ?? defaultColor;
 
     let secondaryMetricProps: SecondaryMetricProps | undefined;
     const { secondaryMetric } = config.dimensions;
@@ -231,7 +233,7 @@ export const MetricVis = ({
         subtitle,
         icon: config.metric?.icon ? getIcon(config.metric?.icon) : undefined,
         extra: secondaryMetricProps,
-        color: config.metric.color ?? defaultColor,
+        color: config.metric.applyColorTo ? config.metric.color ?? defaultColor : defaultColor,
       };
       return Array.isArray(value)
         ? { ...nonNumericMetricBase, value: value.map((v) => formatPrimaryMetric(v)) }
@@ -282,9 +284,11 @@ export const MetricVis = ({
     return {
       ...baseMetric,
       // Override the background and main value color when the color is applied to the value
-      ...(config.metric.applyColorTo === 'value'
-        ? { color: defaultColor, valueColor: tileColor }
-        : { color: tileColor, valueColor: undefined }),
+      ...(config.metric.applyColorTo === 'value' && { color: defaultColor, valueColor: tileColor }),
+      ...(config.metric.applyColorTo === 'background' && {
+        color: tileColor,
+        valueColor: undefined,
+      }),
     };
   });
 

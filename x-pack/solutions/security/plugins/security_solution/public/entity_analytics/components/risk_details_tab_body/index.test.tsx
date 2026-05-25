@@ -9,10 +9,9 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
+import { useUiSetting } from '../../../common/lib/kibana';
 import { RiskDetailsTabBody } from '.';
 import { EntityType } from '../../../../common/search_strategy';
-import { HostsType } from '../../../explore/hosts/store/model';
-import { UsersType } from '../../../explore/users/store/model';
 import { useRiskScore } from '../../api/hooks/use_risk_score';
 
 jest.mock('../../api/hooks/use_risk_score');
@@ -22,17 +21,16 @@ jest.mock('../../../common/lib/kibana');
 describe.each([EntityType.host, EntityType.user])('Risk Tab Body entityType: %s', (riskEntity) => {
   const defaultProps = {
     entityName: 'testEntity',
-    indexNames: [],
     setQuery: jest.fn(),
-    skip: false,
     startDate: '2019-06-25T04:31:59.345Z',
     endDate: '2019-06-25T06:31:59.345Z',
-    type: riskEntity === EntityType.host ? HostsType.page : UsersType.page,
     riskEntity,
   };
 
   const mockUseRiskScore = useRiskScore as jest.Mock;
   const mockUseQueryToggle = useQueryToggle as jest.Mock;
+  const mockUseUiSetting = useUiSetting as jest.Mock;
+
   beforeEach(() => {
     jest.clearAllMocks();
 
@@ -48,6 +46,7 @@ describe.each([EntityType.host, EntityType.user])('Risk Tab Body entityType: %s'
       hasEngineBeenInstalled: true,
     });
     mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: jest.fn() });
+    mockUseUiSetting.mockReturnValue(false);
   });
 
   it('calls with correct arguments for each entity', () => {
@@ -72,55 +71,25 @@ describe.each([EntityType.host, EntityType.user])('Risk Tab Body entityType: %s'
     });
   });
 
-  it('uses identityScopedFilterQuery when provided', () => {
-    const scoped = JSON.stringify({ term: { 'host.hostname': { value: 'h1' } } });
+  it('uses entityId as filter when entityStoreV2 is enabled', () => {
+    mockUseUiSetting.mockReturnValueOnce(true);
     render(
       <TestProviders>
-        <RiskDetailsTabBody {...defaultProps} identityScopedFilterQuery={scoped} />
-      </TestProviders>
-    );
-    expect(mockUseRiskScore).toBeCalledWith(
-      expect.objectContaining({
-        filterQuery: scoped,
-      })
-    );
-  });
-
-  it('uses identityFields as bool filter when identityScopedFilterQuery is absent', () => {
-    render(
-      <TestProviders>
-        <RiskDetailsTabBody
-          {...defaultProps}
-          identityFields={{
-            'host.name': 'n1',
-            'host.hostname': 'h1',
-          }}
-        />
+        <RiskDetailsTabBody {...defaultProps} entityId="entity-123" />
       </TestProviders>
     );
     expect(mockUseRiskScore).toBeCalledWith(
       expect.objectContaining({
         filterQuery: {
-          bool: {
-            filter: [
-              {
-                match: {
-                  'host.name': { query: 'n1', type: 'phrase' },
-                },
-              },
-              {
-                match: {
-                  'host.hostname': { query: 'h1', type: 'phrase' },
-                },
-              },
-            ],
+          terms: {
+            [`${riskEntity}.name`]: ['entity-123'],
           },
         },
       })
     );
   });
 
-  it("doesn't skip when both toggleStatus are true", () => {
+  it("doesn't skip when toggleStatus is true", () => {
     render(
       <TestProviders>
         <RiskDetailsTabBody {...defaultProps} />
@@ -129,19 +98,7 @@ describe.each([EntityType.host, EntityType.user])('Risk Tab Body entityType: %s'
     expect(mockUseRiskScore.mock.calls[0][0].skip).toEqual(false);
   });
 
-  it("doesn't skip when at least one toggleStatus is true", () => {
-    mockUseQueryToggle.mockReturnValueOnce({ toggleStatus: true, setToggleStatus: jest.fn() });
-    mockUseQueryToggle.mockReturnValueOnce({ toggleStatus: false, setToggleStatus: jest.fn() });
-
-    render(
-      <TestProviders>
-        <RiskDetailsTabBody {...defaultProps} />
-      </TestProviders>
-    );
-    expect(mockUseRiskScore.mock.calls[0][0].skip).toEqual(false);
-  });
-
-  it('does skip when both toggleStatus are false', () => {
+  it('skips when toggleStatus is false', () => {
     mockUseQueryToggle.mockReturnValue({ toggleStatus: false, setToggleStatus: jest.fn() });
 
     render(

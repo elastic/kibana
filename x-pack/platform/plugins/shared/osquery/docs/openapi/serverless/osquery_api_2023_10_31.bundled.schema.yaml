@@ -170,6 +170,30 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                liveQueriesList:
+                  summary: A list of recent live queries
+                  value:
+                    data:
+                      items:
+                        - _source:
+                            '@timestamp': '2023-10-31T00:00:00Z'
+                            action_id: 3c42c847-eb30-4452-80e0-728584042334
+                            agents:
+                              - 16d7caf5-efd2-4212-9b62-73dafc91fa13
+                            expiration: '2023-10-31T00:00:00Z'
+                            queries:
+                              - action_id: 609c4c66-ba3d-43fa-afdd-53e244577aa0
+                                agents:
+                                  - 16d7caf5-efd2-4212-9b62-73dafc91fa13
+                                ecs_mapping:
+                                  host.uptime:
+                                    field: total_seconds
+                                id: 6724a474-cbba-41ef-a1aa-66aebf0879e2
+                                query: select * from uptime;
+                                saved_query_id: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
+                            user_id: elastic
+                      total: 1
               schema:
                 $ref: '#/components/schemas/FindLiveQueryResponse'
           description: Indicates a successful call.
@@ -182,6 +206,21 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              singleQueryAllAgents:
+                summary: Run a single query on all agents
+                value:
+                  agent_all: true
+                  ecs_mapping:
+                    host.uptime:
+                      field: total_seconds
+                  query: select * from uptime;
+              targetedQuery:
+                summary: Run a query against specific agents
+                value:
+                  agent_ids:
+                    - 16d7caf5-efd2-4212-9b62-73dafc91fa13
+                  query: select * from processes;
             schema:
               $ref: '#/components/schemas/CreateLiveQueryRequestBody'
         required: true
@@ -189,6 +228,27 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                liveQueryCreated:
+                  summary: Live query created
+                  value:
+                    data:
+                      '@timestamp': '2022-07-26T09:59:32.220Z'
+                      action_id: 3c42c847-eb30-4452-80e0-728584042334
+                      agent_all: true
+                      agents:
+                        - 16d7caf5-efd2-4212-9b62-73dafc91fa13
+                      expiration: '2022-07-26T10:04:32.220Z'
+                      input_type: osquery
+                      queries:
+                        - action_id: 609c4c66-ba3d-43fa-afdd-53e244577aa0
+                          agents:
+                            - 16d7caf5-efd2-4212-9b62-73dafc91fa13
+                          id: 6724a474-cbba-41ef-a1aa-66aebf0879e2
+                          query: select * from uptime;
+                          timeout: 120
+                      type: INPUT_ACTION
+                      user_id: elastic
               schema:
                 $ref: '#/components/schemas/CreateLiveQueryResponse'
           description: Indicates a successful call.
@@ -212,6 +272,30 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                liveQueryDetails:
+                  summary: Live query details with execution status
+                  value:
+                    data:
+                      '@timestamp': '2022-07-26T09:59:32.220Z'
+                      action_id: 3c42c847-eb30-4452-80e0-728584042334
+                      agents:
+                        - 16d7caf5-efd2-4212-9b62-73dafc91fa13
+                      expiration: '2022-07-26T10:04:32.220Z'
+                      queries:
+                        - action_id: 609c4c66-ba3d-43fa-afdd-53e244577aa0
+                          agents:
+                            - 16d7caf5-efd2-4212-9b62-73dafc91fa13
+                          docs: 1
+                          failed: 0
+                          id: 6724a474-cbba-41ef-a1aa-66aebf0879e2
+                          pending: 0
+                          query: select * from uptime;
+                          responded: 1
+                          status: completed
+                          successful: 1
+                      status: completed
+                      user_id: elastic
               schema:
                 $ref: '#/components/schemas/FindLiveQueryDetailsResponse'
           description: Indicates a successful call.
@@ -273,6 +357,27 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                liveQueryResults:
+                  summary: Result rows from a live query execution
+                  value:
+                    data:
+                      edges:
+                        - _id: doc1
+                          _source:
+                            action_id: 609c4c66-ba3d-43fa-afdd-53e244577aa0
+                            agent:
+                              id: 16d7caf5-efd2-4212-9b62-73dafc91fa13
+                            osquery:
+                              total_seconds: '12345'
+                        - _id: doc2
+                          _source:
+                            action_id: 609c4c66-ba3d-43fa-afdd-53e244577aa0
+                            agent:
+                              id: 16d7caf5-efd2-4212-9b62-73dafc91fa13
+                            osquery:
+                              total_seconds: '67890'
+                      total: 2
               schema:
                 $ref: '#/components/schemas/GetLiveQueryResultsResponse'
           description: Indicates a successful call.
@@ -312,6 +417,30 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                packsList:
+                  summary: A list of query packs
+                  value:
+                    data:
+                      - created_at: '2025-02-26T13:37:30.452Z'
+                        created_by: elastic
+                        description: My pack
+                        enabled: true
+                        name: my_pack
+                        queries:
+                          - id: ports
+                            interval: 60
+                            query: SELECT * FROM listening_ports;
+                            removed: false
+                            snapshot: true
+                            timeout: 120
+                        saved_object_id: 1c266590-381f-428c-878f-c80c1334f856
+                        updated_at: '2025-02-26T13:37:30.452Z'
+                        updated_by: elastic
+                        version: 1
+                    page: 1
+                    per_page: 20
+                    total: 1
               schema:
                 $ref: '#/components/schemas/FindPacksResponse'
           description: Indicates a successful call.
@@ -324,6 +453,23 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              createPack:
+                summary: Create a pack with a single query
+                value:
+                  description: My pack
+                  enabled: true
+                  name: my_pack
+                  policy_ids:
+                    - my_policy_id
+                  queries:
+                    ports:
+                      ecs_mapping:
+                        client.port:
+                          field: port
+                      interval: 60
+                      query: SELECT * FROM listening_ports;
+                      timeout: 120
             schema:
               $ref: '#/components/schemas/CreatePacksRequestBody'
         required: true
@@ -331,6 +477,30 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                packCreated:
+                  summary: Pack created
+                  value:
+                    data:
+                      created_at: '2025-02-26T13:37:30.452Z'
+                      created_by: elastic
+                      description: My pack
+                      enabled: true
+                      name: my_pack
+                      policy_ids:
+                        - my_policy_id
+                      queries:
+                        ports:
+                          interval: 60
+                          query: SELECT * FROM listening_ports;
+                          removed: false
+                          snapshot: true
+                          timeout: 120
+                      saved_object_id: 1c266590-381f-428c-878f-c80c1334f856
+                      shards: []
+                      updated_at: '2025-02-26T13:37:30.452Z'
+                      updated_by: elastic
+                      version: 1
               schema:
                 $ref: '#/components/schemas/CreatePacksResponse'
           description: Indicates a successful call.
@@ -352,8 +522,11 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                packDeleted:
+                  summary: Pack deleted (empty response body)
+                  value: {}
               schema:
-                example: {}
                 type: object
                 properties: {}
           description: Indicates a successful call.
@@ -374,6 +547,30 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                packDetails:
+                  summary: Pack details
+                  value:
+                    data:
+                      created_at: '2025-02-26T13:37:30.452Z'
+                      created_by: elastic
+                      description: My pack
+                      enabled: true
+                      name: my_pack
+                      policy_ids:
+                        - my_policy_id
+                      queries:
+                        ports:
+                          interval: 60
+                          query: SELECT * FROM listening_ports;
+                          removed: false
+                          snapshot: true
+                          timeout: 120
+                      saved_object_id: 1c266590-381f-428c-878f-c80c1334f856
+                      shards: {}
+                      updated_at: '2025-02-26T13:37:30.452Z'
+                      updated_by: elastic
+                      version: 1
               schema:
                 $ref: '#/components/schemas/FindPackResponse'
           description: Indicates a successful call.
@@ -396,6 +593,13 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              renamePack:
+                summary: Rename a pack and update its description
+                value:
+                  description: Updated pack description
+                  enabled: true
+                  name: my_pack_renamed
             schema:
               $ref: '#/components/schemas/UpdatePacksRequestBody'
         required: true
@@ -403,6 +607,28 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                packUpdated:
+                  summary: Pack updated
+                  value:
+                    data:
+                      description: Updated pack description
+                      enabled: true
+                      name: my_pack_renamed
+                      policy_ids:
+                        - my_policy_id
+                      queries:
+                        ports:
+                          interval: 60
+                          query: SELECT * FROM listening_ports;
+                          removed: false
+                          snapshot: true
+                          timeout: 120
+                      saved_object_id: 1c266590-381f-428c-878f-c80c1334f856
+                      shards: []
+                      updated_at: '2025-02-27T10:00:00.000Z'
+                      updated_by: elastic
+                      version: 2
               schema:
                 $ref: '#/components/schemas/UpdatePacksResponse'
           description: Indicates a successful call.
@@ -494,6 +720,28 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                savedQueriesList:
+                  summary: A list of saved queries
+                  value:
+                    data:
+                      - created_at: '2025-02-26T13:37:30.452Z'
+                        created_by: elastic
+                        description: Saved query description
+                        ecs_mapping:
+                          host.uptime:
+                            field: total_seconds
+                        id: my_saved_query
+                        interval: '60'
+                        platform: linux,darwin
+                        query: select * from uptime;
+                        saved_object_id: 42ba1280-2172-11ee-8523-5765fca79a3c
+                        timeout: 120
+                        updated_at: '2025-02-26T13:37:30.452Z'
+                        updated_by: elastic
+                    page: 1
+                    per_page: 20
+                    total: 1
               schema:
                 $ref: '#/components/schemas/FindSavedQueryResponse'
           description: Indicates a successful call.
@@ -506,6 +754,19 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              createSavedQuery:
+                summary: Create a saved query
+                value:
+                  description: Saved query description
+                  ecs_mapping:
+                    host.uptime:
+                      field: total_seconds
+                  id: my_saved_query
+                  interval: '60'
+                  platform: linux,darwin
+                  query: select * from uptime;
+                  timeout: 120
             schema:
               $ref: '#/components/schemas/CreateSavedQueryRequestBody'
         required: true
@@ -513,6 +774,25 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                savedQueryCreated:
+                  summary: Saved query created
+                  value:
+                    data:
+                      created_at: '2025-02-26T13:37:30.452Z'
+                      created_by: elastic
+                      description: Saved query description
+                      ecs_mapping:
+                        host.uptime:
+                          field: total_seconds
+                      id: my_saved_query
+                      interval: '60'
+                      platform: linux,darwin
+                      query: select * from uptime;
+                      saved_object_id: 42ba1280-2172-11ee-8523-5765fca79a3c
+                      timeout: 120
+                      updated_at: '2025-02-26T13:37:30.452Z'
+                      updated_by: elastic
               schema:
                 $ref: '#/components/schemas/CreateSavedQueryResponse'
           description: Indicates a successful call.
@@ -534,6 +814,10 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                savedQueryDeleted:
+                  summary: Saved query deleted (empty response body)
+                  value: {}
               schema:
                 $ref: '#/components/schemas/DefaultSuccessResponse'
           description: Indicates a successful call.
@@ -554,6 +838,25 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                savedQueryDetails:
+                  summary: Saved query details
+                  value:
+                    data:
+                      created_at: '2025-02-26T13:37:30.452Z'
+                      created_by: elastic
+                      description: Saved query description
+                      ecs_mapping:
+                        host.uptime:
+                          field: total_seconds
+                      id: my_saved_query
+                      interval: '60'
+                      platform: linux,darwin
+                      query: select * from uptime;
+                      saved_object_id: 42ba1280-2172-11ee-8523-5765fca79a3c
+                      timeout: 120
+                      updated_at: '2025-02-26T13:37:30.452Z'
+                      updated_by: elastic
               schema:
                 $ref: '#/components/schemas/FindSavedQueryDetailResponse'
           description: Indicates a successful call.
@@ -576,6 +879,16 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              updateSavedQuery:
+                summary: Update a saved query
+                value:
+                  description: Updated saved query description
+                  id: my_saved_query
+                  interval: '120'
+                  platform: linux,darwin
+                  query: select * from osquery_info;
+                  timeout: 60
             schema:
               $ref: '#/components/schemas/UpdateSavedQueryRequestBody'
         required: true
@@ -583,6 +896,20 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                savedQueryUpdated:
+                  summary: Saved query updated
+                  value:
+                    data:
+                      description: Updated saved query description
+                      id: my_saved_query
+                      interval: '120'
+                      platform: linux,darwin
+                      query: select * from osquery_info;
+                      saved_object_id: 42ba1280-2172-11ee-8523-5765fca79a3c
+                      timeout: 60
+                      updated_at: '2025-02-27T10:00:00.000Z'
+                      updated_by: elastic
               schema:
                 $ref: '#/components/schemas/UpdateSavedQueryResponse'
           description: Indicates a successful call.

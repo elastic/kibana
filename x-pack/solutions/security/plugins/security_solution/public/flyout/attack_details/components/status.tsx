@@ -13,7 +13,7 @@ import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { SIGNAL_STATUS_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
 import { getEnrichedFieldInfo } from '../../document_details/right/utils/enriched_field_info';
 
-import { AlertHeaderBlock } from '../../../flyout_v2/shared/components/alert_header_block';
+import { FlyoutHeaderBlock } from '../../../flyout_v2/shared/components/flyout_header_block';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import type {
   EnrichedFieldInfo,
@@ -53,7 +53,7 @@ export const Status = memo(() => {
   }, [dataFormattedForFieldBrowser, attackId, currentSpaceId, browserFields]);
 
   return (
-    <AlertHeaderBlock
+    <FlyoutHeaderBlock
       hasBorder
       title={
         <FormattedMessage
@@ -68,7 +68,7 @@ export const Status = memo(() => {
       ) : (
         <StatusPopoverButton enrichedFieldInfo={statusData} disabled={isRemoteDocument} />
       )}
-    </AlertHeaderBlock>
+    </FlyoutHeaderBlock>
   );
 });
 

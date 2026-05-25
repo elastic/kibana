@@ -52,6 +52,7 @@ import {
 import { CHART_LAYOUTS, DEFAULT_LAYOUT } from './types';
 import type { AlertDetailsAppSectionProps } from './types';
 import { AlertDetailsCharts } from './alert_details_charts';
+import { AlertDetailsServiceMapSection } from '../alert_details_service_map_section';
 
 export function AlertDetailsAppSection({
   rule,
@@ -136,8 +137,9 @@ export function AlertDetailsAppSection({
         value: (
           <EuiLink
             data-test-subj="apmAlertDetailsErrorGroupKeyLink"
-            data-source={`alertDetails-${alertRuleTypeId}`}
-            data-action={`navigateTo-${ERROR_GROUP_ID}`}
+            data-ebt-action="openInApm"
+            data-ebt-element="alertDetailsSources"
+            data-ebt-detail={alertRuleTypeId}
             href={errorDetailsHref}
           >
             {errorGroupingKey}
@@ -207,6 +209,12 @@ export function AlertDetailsAppSection({
           />
         </ChartPointerEventContextProvider>
       </TimeRangeMetadataContextProvider>
+      <AlertDetailsServiceMapSection
+        alert={alert}
+        rule={rule}
+        timeZone={timeZone}
+        setSources={setSources}
+      />
     </EuiFlexGroup>
   );
 }

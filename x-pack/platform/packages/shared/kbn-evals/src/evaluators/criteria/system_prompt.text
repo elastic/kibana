@@ -10,9 +10,47 @@ Each decision must be one of:
 - **FAIL** – the output clearly violates or misses the criterion.
 - **N/A** – the criterion does not apply to this example.
 
+## Scope of evaluation
+
+Evaluate the criteria as written. Decide each criterion against the literal scope it asserts — do **not** infer additional requirements that the criterion does not state.
+
+In particular, when a criterion asserts that a *call* was made (for example: "tool is called with X", "queries Y", "invokes Z"), the criterion is about the call itself. **PASS** when the call was made as described, regardless of whether the call returned data, returned an empty result, or surfaced a "not found" error. Do not require successful resolution, non-empty results, or downstream behavior.
+
+**Exception:** if the criterion explicitly requires success or a specific return value (e.g. "successfully executes X", "returns Y", "catches Z"), the return matters — evaluate resolution as well.
+
+When a criterion is **disjunctive** (uses "or" / "OR" between alternatives, e.g. "do X **or** clearly state Y is unavailable"), satisfying **either** branch is sufficient. **PASS** when any one branch is met. Do not require both branches, and do not treat the unfulfilled branch as a "partial failure". Treat conjunctive criteria ("X **and** Y") the opposite way: both parts must hold to PASS.
+
+### Example A — call vs. resolution
+
+*Criterion:* `Tool fs.read_file is called with path 'config/app.yml'`
+*Output:* The tool was invoked with `path='config/app.yml'`. The call returned `"ENOENT: no such file or directory"`.
+*Decision:* **PASS** — the criterion only asserts that the call was made with those arguments. The error / not-found return does not violate it.
+
+```json
+{
+  "criteria": [
+    { "id": "tool-call-config", "result": "PASS" }
+  ]
+}
+```
+
+### Example B — disjunctive criterion
+
+*Criterion:* `Summarise the user's recent login activity, or clearly state that no login data is available.`
+*Output:* "I could not find any login records for that user."
+*Decision:* **PASS** — the criterion is disjunctive; the second branch ("clearly state no data is available") is satisfied. The unfulfilled first branch is not a partial failure.
+
+```json
+{
+  "criteria": [
+    { "id": "login-summary-or-none", "result": "PASS" }
+  ]
+}
+```
+
 ## Examples
 
-### Example A
+### Example C
 *Criterion:* `syntax-valid`  
 *Input / Output:* A well-formed SQL string.  
 *Decision:* **PASS**  
@@ -25,7 +63,7 @@ Each decision must be one of:
 }
 ````
 
-### Example B
+### Example D
 
 *Criterion:* `contains-latency-agg`
 *Input / Output:* Query lacks any latency aggregation.
@@ -39,7 +77,7 @@ Each decision must be one of:
 }
 ```
 
-### Example C
+### Example E
 
 *Criterion:* `requires-image`
 *Input / Output:* Text-only request — no images involved.

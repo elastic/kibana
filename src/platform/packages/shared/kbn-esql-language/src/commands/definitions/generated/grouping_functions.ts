@@ -2419,7 +2419,7 @@ const tstepDefinition: FunctionDefinition = {
   name: EsqlFunctionNames.TSTEP,
   description: i18n.translate('kbn-esql-language.esql.definitions.tstep', {
     defaultMessage:
-      "Creates groups of values - buckets - out of a `@timestamp` attribute using a fixed `step` width.\n\nUnlike `TBUCKET`,\nwhich aligns buckets to calendar boundaries, `TSTEP` always buckets at the fixed interval increments in UTC timezone.\nEach `bucket` label is rendered as the upper boundary of the half-open interval `(timestamp - step, timestamp]`.\n\nIn the one-argument form, provide a\n`@timestamp` range\nin the request query filter; that range's start anchors the grid.\nIn the three-argument form, supply explicit `from` and `to` bounds directly; these take precedence over any\nrequest `@timestamp` filter. `TSTEP` cannot be used together with `TRANGE`.",
+      'Creates groups of values - buckets - out of a `@timestamp` attribute using either a fixed step width\nor a target bucket count.\nUnlike `TBUCKET`,\nwhich aligns buckets to calendar boundaries, TSTEP uses a fixed-width UTC grid anchored at the start\nof the query range. Each bucket is labeled by its right boundary.\nWhen a target bucket count is provided, TSTEP derives a fixed step width from the query range.\nThe derived step is rounded up so that the result uses no more than the target number of buckets.\n\nWhen using ES|QL in Kibana, the range can be derived automatically from the\n`@timestamp` filter\nthat Kibana adds to the query.',
   }),
   ignoreAsSuggestion: true,
   preview: false,
@@ -2429,34 +2429,10 @@ const tstepDefinition: FunctionDefinition = {
       params: [
         {
           name: 'step',
-          type: 'time_duration',
+          type: 'integer',
           optional: false,
           description:
-            'Fixed bucket width in UTC. Bucket boundaries are spaced by `step` from the start of the time range.',
-        },
-      ],
-      returnType: 'date',
-    },
-    {
-      params: [
-        {
-          name: 'step',
-          type: 'time_duration',
-          optional: false,
-          description:
-            'Fixed bucket width in UTC. Bucket boundaries are spaced by `step` from the start of the time range.',
-        },
-      ],
-      returnType: 'date_nanos',
-    },
-    {
-      params: [
-        {
-          name: 'step',
-          type: 'time_duration',
-          optional: false,
-          description:
-            'Fixed bucket width in UTC. Bucket boundaries are spaced by `step` from the start of the time range.',
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
@@ -2478,10 +2454,10 @@ const tstepDefinition: FunctionDefinition = {
       params: [
         {
           name: 'step',
-          type: 'time_duration',
+          type: 'integer',
           optional: false,
           description:
-            'Fixed bucket width in UTC. Bucket boundaries are spaced by `step` from the start of the time range.',
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
@@ -2503,10 +2479,934 @@ const tstepDefinition: FunctionDefinition = {
       params: [
         {
           name: 'step',
+          type: 'integer',
+          optional: false,
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
+        },
+        {
+          name: 'from',
+          type: 'date',
+          optional: true,
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
+        },
+        {
+          name: 'to',
+          type: 'date_nanos',
+          optional: true,
+          description: 'End of the time range. Required together with `from`.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'step',
+          type: 'integer',
+          optional: false,
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
+        },
+        {
+          name: 'from',
+          type: 'date',
+          optional: true,
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
+        },
+        {
+          name: 'to',
+          type: 'date_nanos',
+          optional: true,
+          description: 'End of the time range. Required together with `from`.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'step',
+          type: 'integer',
+          optional: false,
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
+        },
+        {
+          name: 'from',
+          type: 'date',
+          optional: true,
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
+        },
+        {
+          name: 'to',
+          type: 'keyword',
+          optional: true,
+          description: 'End of the time range. Required together with `from`.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'step',
+          type: 'integer',
+          optional: false,
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
+        },
+        {
+          name: 'from',
+          type: 'date',
+          optional: true,
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
+        },
+        {
+          name: 'to',
+          type: 'keyword',
+          optional: true,
+          description: 'End of the time range. Required together with `from`.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'step',
+          type: 'integer',
+          optional: false,
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
+        },
+        {
+          name: 'from',
+          type: 'date_nanos',
+          optional: true,
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
+        },
+        {
+          name: 'to',
+          type: 'date',
+          optional: true,
+          description: 'End of the time range. Required together with `from`.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'step',
+          type: 'integer',
+          optional: false,
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
+        },
+        {
+          name: 'from',
+          type: 'date_nanos',
+          optional: true,
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
+        },
+        {
+          name: 'to',
+          type: 'date',
+          optional: true,
+          description: 'End of the time range. Required together with `from`.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'step',
+          type: 'integer',
+          optional: false,
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
+        },
+        {
+          name: 'from',
+          type: 'date_nanos',
+          optional: true,
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
+        },
+        {
+          name: 'to',
+          type: 'date_nanos',
+          optional: true,
+          description: 'End of the time range. Required together with `from`.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'step',
+          type: 'integer',
+          optional: false,
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
+        },
+        {
+          name: 'from',
+          type: 'date_nanos',
+          optional: true,
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
+        },
+        {
+          name: 'to',
+          type: 'date_nanos',
+          optional: true,
+          description: 'End of the time range. Required together with `from`.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'step',
+          type: 'integer',
+          optional: false,
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
+        },
+        {
+          name: 'from',
+          type: 'date_nanos',
+          optional: true,
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
+        },
+        {
+          name: 'to',
+          type: 'keyword',
+          optional: true,
+          description: 'End of the time range. Required together with `from`.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'step',
+          type: 'integer',
+          optional: false,
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
+        },
+        {
+          name: 'from',
+          type: 'date_nanos',
+          optional: true,
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
+        },
+        {
+          name: 'to',
+          type: 'keyword',
+          optional: true,
+          description: 'End of the time range. Required together with `from`.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'step',
+          type: 'integer',
+          optional: false,
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
+        },
+        {
+          name: 'from',
+          type: 'keyword',
+          optional: true,
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
+        },
+        {
+          name: 'to',
+          type: 'date',
+          optional: true,
+          description: 'End of the time range. Required together with `from`.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'step',
+          type: 'integer',
+          optional: false,
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
+        },
+        {
+          name: 'from',
+          type: 'keyword',
+          optional: true,
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
+        },
+        {
+          name: 'to',
+          type: 'date',
+          optional: true,
+          description: 'End of the time range. Required together with `from`.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'step',
+          type: 'integer',
+          optional: false,
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
+        },
+        {
+          name: 'from',
+          type: 'keyword',
+          optional: true,
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
+        },
+        {
+          name: 'to',
+          type: 'date_nanos',
+          optional: true,
+          description: 'End of the time range. Required together with `from`.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'step',
+          type: 'integer',
+          optional: false,
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
+        },
+        {
+          name: 'from',
+          type: 'keyword',
+          optional: true,
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
+        },
+        {
+          name: 'to',
+          type: 'date_nanos',
+          optional: true,
+          description: 'End of the time range. Required together with `from`.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'step',
+          type: 'integer',
+          optional: false,
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
+        },
+        {
+          name: 'from',
+          type: 'keyword',
+          optional: true,
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
+        },
+        {
+          name: 'to',
+          type: 'keyword',
+          optional: true,
+          description: 'End of the time range. Required together with `from`.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'step',
+          type: 'integer',
+          optional: false,
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
+        },
+        {
+          name: 'from',
+          type: 'keyword',
+          optional: true,
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
+        },
+        {
+          name: 'to',
+          type: 'keyword',
+          optional: true,
+          description: 'End of the time range. Required together with `from`.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'step',
+          type: 'long',
+          optional: false,
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
+        },
+        {
+          name: 'from',
+          type: 'date',
+          optional: true,
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
+        },
+        {
+          name: 'to',
+          type: 'date',
+          optional: true,
+          description: 'End of the time range. Required together with `from`.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'step',
+          type: 'long',
+          optional: false,
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
+        },
+        {
+          name: 'from',
+          type: 'date',
+          optional: true,
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
+        },
+        {
+          name: 'to',
+          type: 'date',
+          optional: true,
+          description: 'End of the time range. Required together with `from`.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'step',
+          type: 'long',
+          optional: false,
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
+        },
+        {
+          name: 'from',
+          type: 'date',
+          optional: true,
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
+        },
+        {
+          name: 'to',
+          type: 'date_nanos',
+          optional: true,
+          description: 'End of the time range. Required together with `from`.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'step',
+          type: 'long',
+          optional: false,
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
+        },
+        {
+          name: 'from',
+          type: 'date',
+          optional: true,
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
+        },
+        {
+          name: 'to',
+          type: 'date_nanos',
+          optional: true,
+          description: 'End of the time range. Required together with `from`.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'step',
+          type: 'long',
+          optional: false,
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
+        },
+        {
+          name: 'from',
+          type: 'date',
+          optional: true,
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
+        },
+        {
+          name: 'to',
+          type: 'keyword',
+          optional: true,
+          description: 'End of the time range. Required together with `from`.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'step',
+          type: 'long',
+          optional: false,
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
+        },
+        {
+          name: 'from',
+          type: 'date',
+          optional: true,
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
+        },
+        {
+          name: 'to',
+          type: 'keyword',
+          optional: true,
+          description: 'End of the time range. Required together with `from`.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'step',
+          type: 'long',
+          optional: false,
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
+        },
+        {
+          name: 'from',
+          type: 'date_nanos',
+          optional: true,
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
+        },
+        {
+          name: 'to',
+          type: 'date',
+          optional: true,
+          description: 'End of the time range. Required together with `from`.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'step',
+          type: 'long',
+          optional: false,
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
+        },
+        {
+          name: 'from',
+          type: 'date_nanos',
+          optional: true,
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
+        },
+        {
+          name: 'to',
+          type: 'date',
+          optional: true,
+          description: 'End of the time range. Required together with `from`.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'step',
+          type: 'long',
+          optional: false,
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
+        },
+        {
+          name: 'from',
+          type: 'date_nanos',
+          optional: true,
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
+        },
+        {
+          name: 'to',
+          type: 'date_nanos',
+          optional: true,
+          description: 'End of the time range. Required together with `from`.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'step',
+          type: 'long',
+          optional: false,
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
+        },
+        {
+          name: 'from',
+          type: 'date_nanos',
+          optional: true,
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
+        },
+        {
+          name: 'to',
+          type: 'date_nanos',
+          optional: true,
+          description: 'End of the time range. Required together with `from`.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'step',
+          type: 'long',
+          optional: false,
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
+        },
+        {
+          name: 'from',
+          type: 'date_nanos',
+          optional: true,
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
+        },
+        {
+          name: 'to',
+          type: 'keyword',
+          optional: true,
+          description: 'End of the time range. Required together with `from`.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'step',
+          type: 'long',
+          optional: false,
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
+        },
+        {
+          name: 'from',
+          type: 'date_nanos',
+          optional: true,
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
+        },
+        {
+          name: 'to',
+          type: 'keyword',
+          optional: true,
+          description: 'End of the time range. Required together with `from`.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'step',
+          type: 'long',
+          optional: false,
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
+        },
+        {
+          name: 'from',
+          type: 'keyword',
+          optional: true,
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
+        },
+        {
+          name: 'to',
+          type: 'date',
+          optional: true,
+          description: 'End of the time range. Required together with `from`.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'step',
+          type: 'long',
+          optional: false,
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
+        },
+        {
+          name: 'from',
+          type: 'keyword',
+          optional: true,
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
+        },
+        {
+          name: 'to',
+          type: 'date',
+          optional: true,
+          description: 'End of the time range. Required together with `from`.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'step',
+          type: 'long',
+          optional: false,
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
+        },
+        {
+          name: 'from',
+          type: 'keyword',
+          optional: true,
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
+        },
+        {
+          name: 'to',
+          type: 'date_nanos',
+          optional: true,
+          description: 'End of the time range. Required together with `from`.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'step',
+          type: 'long',
+          optional: false,
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
+        },
+        {
+          name: 'from',
+          type: 'keyword',
+          optional: true,
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
+        },
+        {
+          name: 'to',
+          type: 'date_nanos',
+          optional: true,
+          description: 'End of the time range. Required together with `from`.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'step',
+          type: 'long',
+          optional: false,
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
+        },
+        {
+          name: 'from',
+          type: 'keyword',
+          optional: true,
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
+        },
+        {
+          name: 'to',
+          type: 'keyword',
+          optional: true,
+          description: 'End of the time range. Required together with `from`.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'step',
+          type: 'long',
+          optional: false,
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
+        },
+        {
+          name: 'from',
+          type: 'keyword',
+          optional: true,
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
+        },
+        {
+          name: 'to',
+          type: 'keyword',
+          optional: true,
+          description: 'End of the time range. Required together with `from`.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'step',
           type: 'time_duration',
           optional: false,
           description:
-            'Fixed bucket width in UTC. Bucket boundaries are spaced by `step` from the start of the time range.',
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'step',
+          type: 'time_duration',
+          optional: false,
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'step',
+          type: 'time_duration',
+          optional: false,
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
+        },
+        {
+          name: 'from',
+          type: 'date',
+          optional: true,
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
+        },
+        {
+          name: 'to',
+          type: 'date',
+          optional: true,
+          description: 'End of the time range. Required together with `from`.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'step',
+          type: 'time_duration',
+          optional: false,
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
+        },
+        {
+          name: 'from',
+          type: 'date',
+          optional: true,
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
+        },
+        {
+          name: 'to',
+          type: 'date',
+          optional: true,
+          description: 'End of the time range. Required together with `from`.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'step',
+          type: 'time_duration',
+          optional: false,
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
@@ -2531,7 +3431,7 @@ const tstepDefinition: FunctionDefinition = {
           type: 'time_duration',
           optional: false,
           description:
-            'Fixed bucket width in UTC. Bucket boundaries are spaced by `step` from the start of the time range.',
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
@@ -2556,7 +3456,7 @@ const tstepDefinition: FunctionDefinition = {
           type: 'time_duration',
           optional: false,
           description:
-            'Fixed bucket width in UTC. Bucket boundaries are spaced by `step` from the start of the time range.',
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
@@ -2581,7 +3481,7 @@ const tstepDefinition: FunctionDefinition = {
           type: 'time_duration',
           optional: false,
           description:
-            'Fixed bucket width in UTC. Bucket boundaries are spaced by `step` from the start of the time range.',
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
@@ -2606,7 +3506,7 @@ const tstepDefinition: FunctionDefinition = {
           type: 'time_duration',
           optional: false,
           description:
-            'Fixed bucket width in UTC. Bucket boundaries are spaced by `step` from the start of the time range.',
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
@@ -2631,7 +3531,7 @@ const tstepDefinition: FunctionDefinition = {
           type: 'time_duration',
           optional: false,
           description:
-            'Fixed bucket width in UTC. Bucket boundaries are spaced by `step` from the start of the time range.',
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
@@ -2656,7 +3556,7 @@ const tstepDefinition: FunctionDefinition = {
           type: 'time_duration',
           optional: false,
           description:
-            'Fixed bucket width in UTC. Bucket boundaries are spaced by `step` from the start of the time range.',
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
@@ -2681,7 +3581,7 @@ const tstepDefinition: FunctionDefinition = {
           type: 'time_duration',
           optional: false,
           description:
-            'Fixed bucket width in UTC. Bucket boundaries are spaced by `step` from the start of the time range.',
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
@@ -2706,7 +3606,7 @@ const tstepDefinition: FunctionDefinition = {
           type: 'time_duration',
           optional: false,
           description:
-            'Fixed bucket width in UTC. Bucket boundaries are spaced by `step` from the start of the time range.',
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
@@ -2731,7 +3631,7 @@ const tstepDefinition: FunctionDefinition = {
           type: 'time_duration',
           optional: false,
           description:
-            'Fixed bucket width in UTC. Bucket boundaries are spaced by `step` from the start of the time range.',
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
@@ -2756,7 +3656,7 @@ const tstepDefinition: FunctionDefinition = {
           type: 'time_duration',
           optional: false,
           description:
-            'Fixed bucket width in UTC. Bucket boundaries are spaced by `step` from the start of the time range.',
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
@@ -2781,7 +3681,7 @@ const tstepDefinition: FunctionDefinition = {
           type: 'time_duration',
           optional: false,
           description:
-            'Fixed bucket width in UTC. Bucket boundaries are spaced by `step` from the start of the time range.',
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
@@ -2806,7 +3706,7 @@ const tstepDefinition: FunctionDefinition = {
           type: 'time_duration',
           optional: false,
           description:
-            'Fixed bucket width in UTC. Bucket boundaries are spaced by `step` from the start of the time range.',
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
@@ -2831,7 +3731,7 @@ const tstepDefinition: FunctionDefinition = {
           type: 'time_duration',
           optional: false,
           description:
-            'Fixed bucket width in UTC. Bucket boundaries are spaced by `step` from the start of the time range.',
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
@@ -2856,7 +3756,7 @@ const tstepDefinition: FunctionDefinition = {
           type: 'time_duration',
           optional: false,
           description:
-            'Fixed bucket width in UTC. Bucket boundaries are spaced by `step` from the start of the time range.',
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
@@ -2881,7 +3781,7 @@ const tstepDefinition: FunctionDefinition = {
           type: 'time_duration',
           optional: false,
           description:
-            'Fixed bucket width in UTC. Bucket boundaries are spaced by `step` from the start of the time range.',
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
@@ -2904,6 +3804,7 @@ const tstepDefinition: FunctionDefinition = {
   examples: [
     'FROM sample_data\n| STATS min = MIN(@timestamp), max = MAX(@timestamp) BY bucket = TSTEP(1 hour)\n| SORT bucket',
     'FROM sample_data\n| STATS min = MIN(@timestamp), max = MAX(@timestamp) BY bucket = TSTEP(1 hour, "2023-10-23T12:15:00.000Z", "2023-10-23T13:55:01.543Z")\n| SORT bucket',
+    'FROM sample_data\n| STATS min = MIN(@timestamp), max = MAX(@timestamp) BY bucket = TSTEP(2, "2023-10-23T12:15:00.000Z", "2023-10-23T14:15:00.000Z")\n| SORT bucket',
   ],
 };
 export const groupingFunctionDefinitions = [

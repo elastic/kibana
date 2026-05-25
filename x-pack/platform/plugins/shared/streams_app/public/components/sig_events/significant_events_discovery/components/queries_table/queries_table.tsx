@@ -39,10 +39,10 @@ import {
 } from '../../../../../hooks/sig_events/use_fetch_discovery_queries_occurrences';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useQueriesApi } from '../../../../../hooks/sig_events/use_queries_api';
-import { UNBACKED_QUERIES_COUNT_QUERY_KEY } from '../../../../../hooks/sig_events/use_unbacked_queries_count';
 import { getFormattedError } from '../../../../../util/errors';
 import { AssetImage } from '../../../../asset_image';
 import { useStreamsAppRouter } from '../../../../../hooks/use_streams_app_router';
+import { useStreamsAppParams } from '../../../../../hooks/use_streams_app_params';
 import { LoadingPanel } from '../../../../loading_panel';
 import { SparkPlot } from '../../../../spark_plot';
 import { StreamsAppSearchBar } from '../../../../streams_app_search_bar';
@@ -88,6 +88,7 @@ const PAGE_SIZE_OPTIONS = [10, 25, 50] as const;
 
 export function QueriesTable() {
   const router = useStreamsAppRouter();
+  const { query: routeQuery } = useStreamsAppParams('/_discovery/{tab}');
   const { euiTheme } = useEuiTheme();
   const {
     dependencies: {
@@ -105,11 +106,6 @@ export function QueriesTable() {
     size: number;
   }>({ ...DEFAULT_PAGINATION });
 
-  const [selectedQuery, setSelectedQuery] = useState<SignificantEventQueryRow | null>(null);
-
-  const handleSelectQuery = useCallback((item: SignificantEventQueryRow) => {
-    setSelectedQuery((prev) => (prev?.query.id === item.query.id ? null : item));
-  }, []);
   const {
     data: queriesData,
     isLoading: queriesLoading,
@@ -120,14 +116,41 @@ export function QueriesTable() {
     perPage: pagination.size,
     status: ['active'],
   });
-  const queriesList = queriesData?.queries;
-  useEffect(() => {
-    if (!queriesList) return;
-    setSelectedQuery((prev) => {
-      if (!prev) return null;
-      return queriesList.find((q) => q.query.id === prev.query.id) ?? null;
+
+  const selectedQuery = useMemo(
+    () =>
+      routeQuery?.selectedItem
+        ? queriesData?.queries.find((q) => q.query.id === routeQuery.selectedItem) ?? null
+        : null,
+    [queriesData?.queries, routeQuery?.selectedItem]
+  );
+
+  const buildQueryRouteParams = useCallback(
+    (selectedItem?: string) => ({
+      ...(routeQuery?.rangeFrom ? { rangeFrom: routeQuery.rangeFrom } : {}),
+      ...(routeQuery?.rangeTo ? { rangeTo: routeQuery.rangeTo } : {}),
+      ...(selectedItem ? { selectedItem } : {}),
+    }),
+    [routeQuery?.rangeFrom, routeQuery?.rangeTo]
+  );
+
+  const handleSelectQuery = useCallback(
+    (item: SignificantEventQueryRow) => {
+      const isAlreadyOpen = item.query.id === routeQuery?.selectedItem;
+      router.push('/_discovery/{tab}', {
+        path: { tab: 'queries' },
+        query: buildQueryRouteParams(isAlreadyOpen ? undefined : item.query.id),
+      });
+    },
+    [router, routeQuery?.selectedItem, buildQueryRouteParams]
+  );
+
+  const closeQueryFlyout = useCallback(() => {
+    router.push('/_discovery/{tab}', {
+      path: { tab: 'queries' },
+      query: buildQueryRouteParams(),
     });
-  }, [queriesList, setSelectedQuery]);
+  }, [router, buildQueryRouteParams]);
 
   useEffect(() => {
     setSelectedItems([]);
@@ -148,7 +171,6 @@ export function QueriesTable() {
       Promise.all([
         queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERIES_QUERY_KEY }),
         queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERIES_OCCURRENCES_QUERY_KEY }),
-        queryClient.invalidateQueries({ queryKey: UNBACKED_QUERIES_COUNT_QUERY_KEY }),
       ]),
     [queryClient]
   );
@@ -175,7 +197,7 @@ export function QueriesTable() {
     },
     onSuccess: async (_, { queryId }) => {
       await invalidateQueriesData();
-      setSelectedQuery(null);
+      closeQueryFlyout();
       setSelectedItems((prev) => prev.filter((item) => item.query.id !== queryId));
     },
     onError: (error) => {
@@ -491,7 +513,7 @@ export function QueriesTable() {
       {selectedQuery && (
         <QueryDetailsFlyout
           item={selectedQuery}
-          onClose={() => setSelectedQuery(null)}
+          onClose={closeQueryFlyout}
           onDelete={(queryId, streamName) =>
             deleteQueryMutation.mutateAsync({ queryId, streamName })
           }

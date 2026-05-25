@@ -20,6 +20,7 @@ import { assertSignificantEventsAccess } from '../../../utils/assert_significant
 import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
 import { queryStatusSchema, toRuleUnbackedFilter } from '../../../utils/query_status';
 import { readSignificantEventsFromAlertsIndices } from '../../../../lib/sig_events/read_significant_events_from_alerts_indices';
+import { resolveAlertsSource } from '../../../utils/resolve_alerts_source';
 import { searchModeSchema } from '../../../utils/search_mode';
 import type { PersistQueriesResult } from '../../../../lib/sig_events/persist_queries';
 import { persistQueries } from '../../../../lib/sig_events/persist_queries';
@@ -39,40 +40,6 @@ const baseRequestParamsSchema = z.object({
 
 const requestParamsSchema = baseRequestParamsSchema.extend({
   searchMode: searchModeSchema,
-});
-
-export const getUnbackedQueriesCountRoute = createServerRoute({
-  endpoint: 'GET /internal/streams/queries/_unbacked_count',
-  options: {
-    access: 'internal',
-    summary: 'Count unbacked queries across streams',
-    description:
-      'Returns the count of stored significant-events queries across all streams that do not yet have a backing Kibana rule.',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
-    },
-  },
-  params: z.object({
-    query: z
-      .object({
-        minSeverityScore: z.coerce.number().int().min(0).max(100).optional(),
-      })
-      .optional(),
-  }),
-  handler: async ({ params, request, getScopedClients, server }): Promise<{ count: number }> => {
-    const { getQueryClient, licensing, uiSettingsClient } = await getScopedClients({
-      request,
-    });
-
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
-
-    const queryClient = await getQueryClient();
-    const minSeverityScore = params?.query?.minSeverityScore;
-    const count = await queryClient.countPromotableUnbackedQueries({ minSeverityScore });
-    return { count };
-  },
 });
 
 /**
@@ -335,10 +302,15 @@ const getDiscoveryQueriesRoute = createServerRoute({
     },
   },
   handler: async ({ params, request, getScopedClients, server }): Promise<QueriesGetResponse> => {
-    const { getQueryClient, scopedClusterClient, licensing, uiSettingsClient } =
-      await getScopedClients({
-        request,
-      });
+    const {
+      getQueryClient,
+      getAlertingV2RulesClient,
+      scopedClusterClient,
+      licensing,
+      uiSettingsClient,
+    } = await getScopedClients({
+      request,
+    });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
@@ -354,6 +326,10 @@ const getDiscoveryQueriesRoute = createServerRoute({
       searchMode,
     } = params.query;
 
+    const alertsSource = await resolveAlertsSource({
+      uiSettingsClient,
+      alertingV2RulesClient: await getAlertingV2RulesClient(),
+    });
     const queryClient = await getQueryClient();
     const { significant_events: queries } = await readSignificantEventsFromAlertsIndices(
       {
@@ -364,6 +340,7 @@ const getDiscoveryQueriesRoute = createServerRoute({
         streamNames,
         filters: { ruleUnbacked: toRuleUnbackedFilter(status) },
         searchMode,
+        alertsSource,
       },
       { queryClient, scopedClusterClient }
     );
@@ -402,15 +379,24 @@ const getDiscoveryQueriesOccurrencesRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<QueriesOccurrencesGetResponse> => {
-    const { getQueryClient, scopedClusterClient, licensing, uiSettingsClient } =
-      await getScopedClients({
-        request,
-      });
+    const {
+      getQueryClient,
+      getAlertingV2RulesClient,
+      scopedClusterClient,
+      licensing,
+      uiSettingsClient,
+    } = await getScopedClients({
+      request,
+    });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const { from, to, bucketSize, query, streamNames } = params.query;
 
+    const alertsSource = await resolveAlertsSource({
+      uiSettingsClient,
+      alertingV2RulesClient: await getAlertingV2RulesClient(),
+    });
     const queryClient = await getQueryClient();
     const { aggregated_occurrences: aggregatedOccurrenceBuckets } =
       await readSignificantEventsFromAlertsIndices(
@@ -420,6 +406,7 @@ const getDiscoveryQueriesOccurrencesRoute = createServerRoute({
           bucketSize,
           query,
           streamNames,
+          alertsSource,
         },
         { queryClient, scopedClusterClient }
       );
@@ -559,7 +546,6 @@ const persistQueriesRoute = createServerRoute({
 });
 
 export const internalQueriesRoutes = {
-  ...getUnbackedQueriesCountRoute,
   ...promoteUnbackedQueriesRoute,
   ...demoteBackedQueriesRoute,
   ...bulkDeleteQueriesRoute,

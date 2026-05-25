@@ -52,7 +52,7 @@ export function MultiFieldSelect(props: {
                     {...provided.dragHandleProps}
                     aria-label={dragAriaLabel}
                   >
-                    <EuiIcon type="dragVertical" />
+                    <EuiIcon type="dragVertical" aria-hidden={true} />
                   </EuiPanel>
                 </EuiFlexItem>
                 <EuiFlexItem grow={true}>

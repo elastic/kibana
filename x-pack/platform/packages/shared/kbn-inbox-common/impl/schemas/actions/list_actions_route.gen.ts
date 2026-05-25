@@ -32,11 +32,11 @@ export const InboxAction = lazySchema(() =>
     description: z.string().nullable().optional(),
     status: z.enum(['pending', 'approved', 'rejected']),
     /**
-     * App id of the system that produced the action (e.g. security_solution, attack_discovery)
+     * App id of the system that produced the action (e.g. security_solution, attack_discovery, workflows)
      */
     source_app: z.string(),
     /**
-     * Stable id of the originating entity (task/agent/run)
+     * Stable id of the originating entity (task/agent/run/step execution)
      */
     source_id: z.string(),
     /**
@@ -47,6 +47,34 @@ export const InboxAction = lazySchema(() =>
      * ISO 8601 timestamp of when the action was created
      */
     created_at: z.string(),
+    /**
+     * JSON Schema for the shape of the response input (string/number/boolean/enum/array-of-enum supported in v1)
+     */
+    input_schema: z.object({}).catchall(z.unknown()).nullable().optional(),
+    /**
+     * Rendered prompt to show the responder (Liquid-evaluated upstream)
+     */
+    input_message: z.string().nullable().optional(),
+    /**
+     * ISO 8601 timestamp after which the step auto-resolves with its default response
+     */
+    timeout_at: z.string().nullable().optional(),
+    /**
+     * Elastic user id of the responder (null until resolved)
+     */
+    responded_by: z.string().nullable().optional(),
+    /**
+     * ISO 8601 timestamp of the resolution
+     */
+    responded_at: z.string().nullable().optional(),
+    /**
+     * Surface the response was submitted through (inbox, kibana_execution_view, agent_builder, slack, api)
+     */
+    channel: z.string().nullable().optional(),
+    /**
+     * Distinguishes a human response from a timeout-default resolution
+     */
+    response_mode: z.enum(['pending', 'responded', 'timed_out']).nullable().optional(),
   })
 );
 export type InboxAction = z.infer<typeof InboxAction>;

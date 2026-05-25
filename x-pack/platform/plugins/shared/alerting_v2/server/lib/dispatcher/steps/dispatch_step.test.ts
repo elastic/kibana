@@ -72,6 +72,9 @@ describe('DispatchStep', () => {
     const result = await step.execute(state);
 
     expect(result.type).toBe('continue');
+    expect(result.type === 'continue' && result.data?.dispatchedExecutions).toEqual(
+      new Map([['g1', ['exec-1']]])
+    );
     expect(mockWfm.getWorkflow).toHaveBeenCalledWith('workflow-1', 'default');
     expect(mockWfm.scheduleWorkflow).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'workflow-1', name: 'Test Workflow' }),

@@ -42,6 +42,28 @@ paths:
             application/json:
               schema:
                 $ref: './find_saved_query.schema.yaml#/components/schemas/FindSavedQueryResponse'
+              examples:
+                savedQueriesList:
+                  summary: A list of saved queries
+                  value:
+                    page: 1
+                    per_page: 20
+                    total: 1
+                    data:
+                      - saved_object_id: '42ba1280-2172-11ee-8523-5765fca79a3c'
+                        id: 'my_saved_query'
+                        query: 'select * from uptime;'
+                        description: 'Saved query description'
+                        platform: 'linux,darwin'
+                        interval: '60'
+                        timeout: 120
+                        ecs_mapping:
+                          host.uptime:
+                            field: 'total_seconds'
+                        created_at: '2025-02-26T13:37:30.452Z'
+                        created_by: 'elastic'
+                        updated_at: '2025-02-26T13:37:30.452Z'
+                        updated_by: 'elastic'
     post:
       summary: Create a saved query
       description: Create and save a query for later use.
@@ -54,6 +76,19 @@ paths:
           application/json:
             schema:
               $ref: './create_saved_query.schema.yaml#/components/schemas/CreateSavedQueryRequestBody'
+            examples:
+              createSavedQuery:
+                summary: Create a saved query
+                value:
+                  id: 'my_saved_query'
+                  query: 'select * from uptime;'
+                  description: 'Saved query description'
+                  platform: 'linux,darwin'
+                  interval: '60'
+                  timeout: 120
+                  ecs_mapping:
+                    host.uptime:
+                      field: 'total_seconds'
       responses:
         '200':
           description: Indicates a successful call.
@@ -61,6 +96,25 @@ paths:
             application/json:
               schema:
                 $ref: './create_saved_query.schema.yaml#/components/schemas/CreateSavedQueryResponse'
+              examples:
+                savedQueryCreated:
+                  summary: Saved query created
+                  value:
+                    data:
+                      saved_object_id: '42ba1280-2172-11ee-8523-5765fca79a3c'
+                      id: 'my_saved_query'
+                      query: 'select * from uptime;'
+                      description: 'Saved query description'
+                      platform: 'linux,darwin'
+                      interval: '60'
+                      timeout: 120
+                      ecs_mapping:
+                        host.uptime:
+                          field: 'total_seconds'
+                      created_at: '2025-02-26T13:37:30.452Z'
+                      created_by: 'elastic'
+                      updated_at: '2025-02-26T13:37:30.452Z'
+                      updated_by: 'elastic'
   /api/osquery/saved_queries/{id}:
     get:
       summary: Get saved query details
@@ -82,6 +136,25 @@ paths:
             application/json:
               schema:
                 $ref: './find_saved_query.schema.yaml#/components/schemas/FindSavedQueryDetailResponse'
+              examples:
+                savedQueryDetails:
+                  summary: Saved query details
+                  value:
+                    data:
+                      saved_object_id: '42ba1280-2172-11ee-8523-5765fca79a3c'
+                      id: 'my_saved_query'
+                      query: 'select * from uptime;'
+                      description: 'Saved query description'
+                      platform: 'linux,darwin'
+                      interval: '60'
+                      timeout: 120
+                      ecs_mapping:
+                        host.uptime:
+                          field: 'total_seconds'
+                      created_at: '2025-02-26T13:37:30.452Z'
+                      created_by: 'elastic'
+                      updated_at: '2025-02-26T13:37:30.452Z'
+                      updated_by: 'elastic'
     delete:
       summary: Delete a saved query
       description: Delete a saved query using the query ID.
@@ -102,6 +175,10 @@ paths:
             application/json:
               schema:
                 $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/DefaultSuccessResponse'
+              examples:
+                savedQueryDeleted:
+                  summary: Saved query deleted (empty response body)
+                  value: {}
     put:
       summary: Update a saved query
       description: |
@@ -124,6 +201,16 @@ paths:
           application/json:
             schema:
               $ref: './update_saved_query.schema.yaml#/components/schemas/UpdateSavedQueryRequestBody'
+            examples:
+              updateSavedQuery:
+                summary: Update a saved query
+                value:
+                  id: 'my_saved_query'
+                  query: 'select * from osquery_info;'
+                  description: 'Updated saved query description'
+                  platform: 'linux,darwin'
+                  interval: '120'
+                  timeout: 60
       responses:
         '200':
           description: Indicates a successful call.
@@ -131,6 +218,20 @@ paths:
             application/json:
               schema:
                 $ref: './update_saved_query.schema.yaml#/components/schemas/UpdateSavedQueryResponse'
+              examples:
+                savedQueryUpdated:
+                  summary: Saved query updated
+                  value:
+                    data:
+                      saved_object_id: '42ba1280-2172-11ee-8523-5765fca79a3c'
+                      id: 'my_saved_query'
+                      query: 'select * from osquery_info;'
+                      description: 'Updated saved query description'
+                      platform: 'linux,darwin'
+                      interval: '120'
+                      timeout: 60
+                      updated_at: '2025-02-27T10:00:00.000Z'
+                      updated_by: 'elastic'
   /api/osquery/saved_queries/{id}/copy:
     post:
       summary: Copy a saved query

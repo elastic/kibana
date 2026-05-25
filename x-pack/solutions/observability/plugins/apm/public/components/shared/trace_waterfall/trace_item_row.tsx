@@ -10,6 +10,7 @@ import { css } from '@emotion/react';
 import { transparentize } from 'polished';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import type { CriticalPathSegment } from './critical_path';
 import { Bar, type BarSegment } from './bar';
 import { BarDetails } from './bar_details';
@@ -39,6 +40,7 @@ export function TraceItemRow({ item, childrenCount, state, onToggle }: Props) {
     selectedSpanId,
     criticalPathSegmentsById,
     showCriticalPath,
+    ebt,
   } = useTraceWaterfallContext();
   const isContext = contextSpanIds?.includes(item.id) ?? false;
   const isSelected = selectedSpanId === item.id;
@@ -72,7 +74,8 @@ export function TraceItemRow({ item, childrenCount, state, onToggle }: Props) {
           border-bottom: ${euiTheme.border.thin};
           ${onClick || hasToggle ? 'cursor: pointer;' : 'cursor: default'}
         `}
-        onClick={() => {
+        onClick={(e) => {
+          if ((e.target as HTMLElement).closest('[data-prevent-row-click]')) return;
           if (!hasToggle && onClick) {
             onClick(item.id);
           }
@@ -119,10 +122,14 @@ export function TraceItemRow({ item, childrenCount, state, onToggle }: Props) {
           <EuiFlexItem>
             <div
               data-test-subj="traceItemRowContent"
+              {...(onClick && ebt?.row
+                ? getEbtProps({ action: EBT_CLICK_ACTIONS.VIEW_SPAN, element: ebt.row.element })
+                : {})}
               css={css`
                 margin-left: ${calculateMarginLeft()}px;
               `}
-              onClick={() => {
+              onClick={(e) => {
+                if ((e.target as HTMLElement).closest('[data-prevent-row-click]')) return;
                 if (hasToggle && onClick) {
                   onClick(item.id);
                 }

@@ -10,6 +10,7 @@
 import type { ComponentType, ReactElement, Ref } from 'react';
 import React, { Suspense } from 'react';
 import { EuiLoadingSpinner, EuiErrorBoundary } from '@elastic/eui';
+import type { SaveModalDashboardProps } from './types';
 
 /**
  * A HOC which supplies React.Suspense with a fallback component, and a `EuiErrorBoundary` to contain errors.
@@ -36,16 +37,20 @@ export const LazyLabsFlyout = React.lazy(() => import('./labs/labs_flyout'));
 
 export const LazyDashboardPicker = React.lazy(() => import('./dashboard_picker/dashboard_picker'));
 
-export const LazySavedObjectSaveModalDashboard = React.lazy(
-  () => import('./saved_object_save_modal_dashboard')
-);
+const LazySavedObjectSaveModalDashboard = React.lazy(async () => {
+  const { SavedObjectSaveModalDashboard } = await import('./saved_object_save_modal_dashboard');
 
-/**
- * Used with `showSaveModal` to pass `SaveResult` back from `onSave`
- */
-export const LazySavedObjectSaveModalDashboardWithSaveResult = React.lazy(
-  () => import('./saved_object_save_modal_dashboard_with_save_result')
-);
+  return { default: SavedObjectSaveModalDashboard };
+});
+export const SavedObjectSaveModalDashboard = <SaveResponse = void,>(
+  props: SaveModalDashboardProps<SaveResponse>
+) => {
+  return (
+    <Suspense>
+      <LazySavedObjectSaveModalDashboard {...props} />
+    </Suspense>
+  );
+};
 
 export const LazyDataViewPicker = React.lazy(() => import('./data_view_picker/data_view_picker'));
 

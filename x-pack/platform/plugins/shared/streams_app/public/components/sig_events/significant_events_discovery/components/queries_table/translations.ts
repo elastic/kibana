@@ -7,57 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const getPromoteAllSuccessToast = (
-  promoted: number,
-  skippedStats: number
-): { text: string; severity: 'success' | 'info' } => {
-  if (promoted === 0 && skippedStats === 0) {
-    return {
-      text: i18n.translate(
-        'xpack.streams.significantEventsDiscovery.queriesTable.promoteAllNothingToPromote',
-        { defaultMessage: 'No queries available for promotion' }
-      ),
-      severity: 'info',
-    };
-  }
-  if (promoted === 0 && skippedStats > 0) {
-    return {
-      text: i18n.translate(
-        'xpack.streams.significantEventsDiscovery.queriesTable.promoteAllNonePromoted',
-        {
-          defaultMessage:
-            'No queries promoted. {skippedStats} STATS {skippedStats, plural, one {query was} other {queries were}} skipped (not currently supported as background rules)',
-          values: { skippedStats },
-        }
-      ),
-      severity: 'info',
-    };
-  }
-  if (skippedStats > 0) {
-    return {
-      text: i18n.translate(
-        'xpack.streams.significantEventsDiscovery.queriesTable.promoteAllSuccessWithSkipped',
-        {
-          defaultMessage:
-            'Promoted {promoted} {promoted, plural, one {query} other {queries}} ({skippedStats} STATS {skippedStats, plural, one {query} other {queries}} skipped, not currently supported as background rules)',
-          values: { promoted, skippedStats },
-        }
-      ),
-      severity: 'success',
-    };
-  }
-  return {
-    text: i18n.translate(
-      'xpack.streams.significantEventsDiscovery.queriesTable.promoteAllSuccess',
-      {
-        defaultMessage: 'Promoted {promoted} {promoted, plural, one {query} other {queries}}',
-        values: { promoted },
-      }
-    ),
-    severity: 'success',
-  };
-};
-
 export const TITLE_COLUMN = i18n.translate(
   'xpack.streams.significantEventsDiscovery.queriesTable.titleColumn',
   {

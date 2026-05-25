@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/core'
   - '@kbn/config-schema'
   - '@kbn/actions-plugin'
+  - '@kbn/connector-specs'
   - '@kbn/workflows'
   - '@kbn/task-manager-plugin'
   - '@kbn/es-query'
@@ -38,7 +39,6 @@ dependsOn:
   - '@kbn/logging-mocks'
   - '@kbn/crypto'
   - '@kbn/es-errors'
-  - '@kbn/core-http-common'
   - '@kbn/spaces-plugin'
   - '@kbn/spaces-utils'
 tags:

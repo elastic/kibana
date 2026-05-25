@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { ActionPolicyType } from '@kbn/alerting-v2-schemas';
+
 export type RuleId = string;
 export type ActionPolicyId = string;
 export type ActionGroupId = string;
@@ -50,6 +52,7 @@ export interface DispatcherTaskState {
 export interface Rule {
   id: RuleId;
   spaceId: string;
+  kind: 'alert' | 'signal';
   name: string;
   description: string;
   tags: string[];
@@ -58,7 +61,7 @@ export interface Rule {
   updatedAt: string;
 }
 
-export interface ActionPolicy {
+interface BaseActionPolicy {
   id: ActionPolicyId;
   spaceId: string;
   name: string;
@@ -75,15 +78,27 @@ export interface ActionPolicy {
   /** Throttle configuration controlling action frequency */
   throttle?: {
     strategy?: 'on_status_change' | 'per_status_interval' | 'time_interval' | 'every_time';
-    interval?: string; // e.g. '1h', '30m', '5m'
+    interval?: string | null; // e.g. '1h', '30m', '5m'; null for intervalless strategies
   };
   snoozedUntil?: string | null;
   /** Target destinations to dispatch matched episodes to */
   destinations: ActionPolicyDestination[];
-
   /** Decrypted base64-encoded API key (id:key) for authenticated workflow dispatch */
   apiKey?: string;
 }
+
+export interface GlobalActionPolicy extends BaseActionPolicy {
+  type: 'global';
+}
+
+export interface SingleRuleActionPolicy extends BaseActionPolicy {
+  type: 'single_rule';
+  ruleId: string;
+}
+
+export type ActionPolicy = GlobalActionPolicy | SingleRuleActionPolicy;
+
+export type { ActionPolicyType };
 
 export interface MatchedPair {
   episode: AlertEpisode;
@@ -120,6 +135,7 @@ export interface LastNotifiedInfo {
 export interface DispatcherPipelineInput {
   readonly startedAt: Date;
   readonly previousStartedAt: Date;
+  readonly executionUuid: string;
 }
 
 export interface DispatcherPipelineState {
@@ -134,6 +150,7 @@ export interface DispatcherPipelineState {
   readonly groups?: ActionGroup[];
   readonly dispatch?: ActionGroup[];
   readonly throttled?: ActionGroup[];
+  readonly dispatchedExecutions?: Map<ActionGroupId, string[]>;
 }
 
 export type DispatcherHaltReason = 'no_episodes' | 'no_actions';

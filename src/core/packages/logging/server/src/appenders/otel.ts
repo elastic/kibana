@@ -10,6 +10,36 @@
 import type { LayoutConfigType } from '../layout';
 
 /**
+ * TLS / mTLS options for the OTLP log appender.
+ *
+ * Values may be **filesystem paths** to PEM files (recommended for production) or **inline PEM strings**
+ * (strings containing `-----BEGIN`).
+ *
+ * Maps to Node.js TLS options for `http` / `proto` (via `https.Agent`) and to `grpc.credentials.createSsl`
+ * for `grpc`.
+ *
+ * @public
+ */
+export interface OtelAppenderTlsConfig {
+  /**
+   * PEM-encoded certificate authority bundle(s) used to verify the OTLP endpoint.
+   * Use a single string, or an array when multiple CA files are required.
+   */
+  certificateAuthorities?: string | string[];
+  /** Client certificate for mutual TLS (requires {@link OtelAppenderTlsConfig.key}). */
+  certificate?: string;
+  /** Private key for the client certificate (requires {@link OtelAppenderTlsConfig.certificate}). */
+  key?: string;
+  /** Passphrase for {@link OtelAppenderTlsConfig.key} when the key is encrypted. */
+  keyPassphrase?: string;
+  /**
+   * How strictly to verify the server certificate (aligned with Elasticsearch client semantics).
+   * Defaults to `full`.
+   */
+  verificationMode: 'none' | 'certificate' | 'full';
+}
+
+/**
  * Configuration of an OpenTelemetry (OTLP) log appender.
  * Ships log records to an OTLP-compatible endpoint over HTTP.
  *
@@ -31,7 +61,7 @@ export interface OtelAppenderConfig {
   type: 'otel';
   /**
    * The protocol to use for the OTLP exporter.
-   * Defaults to 'grpc'.
+   * Defaults to `proto`.
    */
   protocol: 'http' | 'proto' | 'grpc';
   /** OTLP HTTP endpoint URL, e.g. https://collector:4318/v1/logs */
@@ -67,4 +97,8 @@ export interface OtelAppenderConfig {
    * `"[service.name]": my-kibana`
    */
   attributes?: Record<string, string>;
+  /**
+   * Optional TLS settings for HTTPS/gRPC to the OTLP endpoint, including mutual TLS (client certificates).
+   */
+  ssl?: OtelAppenderTlsConfig;
 }

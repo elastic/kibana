@@ -17,7 +17,7 @@ jest.mock('../lib/kibana');
 // Mock the fallback JSON — returned as a pre-sorted list so the hook's
 // sortBy() call produces a deterministic result in tests.
 // Path must match `v${FALLBACK_OSQUERY_VERSION}.json` from common/constants.
-jest.mock('../schemas/osquery/v5.19.0.json', () => [
+jest.mock('../../../common/schemas/osquery/v5.19.0.json', () => [
   { name: 'processes', description: 'Running processes', platforms: ['linux'], columns: [] },
   { name: 'users', description: 'Local users', platforms: ['linux'], columns: [] },
 ]);

@@ -52,8 +52,6 @@ export const INDEX_PATTERNS_DETAILS = 'Index patterns';
 
 export const INVESTIGATION_FIELDS_DETAILS = 'Custom highlighted fields';
 
-export const ENDPOINT_EXCEPTIONS_TAB = 'a[data-test-subj="navigation-endpoint_exceptions"]';
-
 export const INDICATOR_INDEX_PATTERNS = 'Indicator index patterns';
 
 export const INDICATOR_INDEX_QUERY = 'Indicator index query';

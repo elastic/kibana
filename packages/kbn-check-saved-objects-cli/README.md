@@ -17,6 +17,10 @@ On a PR, the step:
 1. **Resolves a baseline commit**: It uses the PR merge-base commit (`GITHUB_PR_MERGE_BASE`). Because a snapshot may not exist for that exact SHA, the script walks the commit’s parent chain (up to a limit) until it finds a commit for which a snapshot exists in the cloud bucket (`findExistingSnapshotSha`).
 2. **Runs the check**: It calls `node scripts/check_saved_objects --baseline <resolved-sha> --algorithm both` (and `--fix` when auto-commit is enabled). The script fetches the baseline snapshot from the bucket, starts Kibana to build the current type registry, and runs validations comparing current state to that baseline.
 
+### Work-in-progress SO types
+
+If your Saved Object type is still in early development and you need to iterate on its schema and mappings freely, use the WIP types mechanism instead of trying to bypass the check. See [Work-in-progress Saved Object types](https://www.elastic.co/docs/extend/kibana/saved-objects/validate#saved-objects-wip-types) in the developer documentation for the two available workflows (disabled-plugin and conditional-registration).
+
 ### Where snapshots come from
 
 Baseline snapshots are **stored in a GCP bucket** and served at:

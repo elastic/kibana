@@ -92,6 +92,9 @@ export class WorkflowsBaseTelemetry {
       tagCount: metadata.tagCount,
       constCount: metadata.constCount,
       hasTriggerConditions: metadata.hasTriggerConditions,
+      hasTriggerWorkflowEventsIgnore: metadata.hasTriggerWorkflowEventsIgnore,
+      hasTriggerWorkflowEventsAllow: metadata.hasTriggerWorkflowEventsAllow,
+      hasTriggerWorkflowEventsAvoidLoop: metadata.hasTriggerWorkflowEventsAvoidLoop,
       ...this.getBaseResultParams(error),
     });
   };
@@ -455,6 +458,28 @@ export class WorkflowsBaseTelemetry {
       eventName: workflowEventNames[WorkflowExecutionEventTypes.WorkflowExecutionsCancelled],
       workflowId,
       ...(origin && { origin }),
+      ...this.getBaseResultParams(error),
+    });
+  };
+
+  /**
+   * Reports a HITL workflow execution resume attempt.
+   */
+  reportWorkflowRunResumed = (params: {
+    workflowExecutionId: string;
+    workflowId?: string;
+    timeInModalMs?: number;
+    timeSinceStepStartedMs?: number;
+    error?: Error;
+  }) => {
+    const { workflowExecutionId, workflowId, timeInModalMs, timeSinceStepStartedMs, error } =
+      params;
+    this.telemetryService.reportEvent(WorkflowExecutionEventTypes.WorkflowRunResumed, {
+      eventName: workflowEventNames[WorkflowExecutionEventTypes.WorkflowRunResumed],
+      workflowExecutionId,
+      ...(workflowId && { workflowId }),
+      ...(timeInModalMs !== undefined && { timeInModalMs }),
+      ...(timeSinceStepStartedMs !== undefined && { timeSinceStepStartedMs }),
       ...this.getBaseResultParams(error),
     });
   };

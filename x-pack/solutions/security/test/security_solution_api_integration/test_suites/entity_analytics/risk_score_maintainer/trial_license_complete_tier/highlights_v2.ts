@@ -10,7 +10,11 @@ import { v4 as uuidv4 } from 'uuid';
 import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/common';
 import { hashEuid } from '@kbn/entity-store/common/domain/euid';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
-import { EntityStoreUtils, cleanUpRiskScoreMaintainer } from '../../utils';
+import {
+  EntityStoreUtils,
+  cleanUpRiskScoreMaintainer,
+  entityMaintainerRouteHelpersFactory,
+} from '../../utils';
 import { deleteAllDocuments } from '../../utils/elasticsearch_helpers';
 
 const VULNERABILITIES_LATEST_INDEX = 'logs-cloud_security_posture.vulnerabilities_latest-default';
@@ -20,12 +24,13 @@ const ML_ANOMALY_INDEX = `.ml-anomalies-custom-${ML_JOB_ID}`;
 
 export default ({ getService }: FtrProviderContext): void => {
   const entityAnalyticsApi = getService('entityAnalyticsApi');
+  const supertest = getService('supertest');
   const es = getService('es');
   const log = getService('log');
-  const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
 
   const entityStoreUtils = EntityStoreUtils(getService);
+  const maintainerRoutes = entityMaintainerRouteHelpersFactory(supertest);
 
   const LATEST_ALIAS = getEntitiesAlias(ENTITY_LATEST, 'default');
   const RISK_SCORE_DATA_STREAM = 'risk-score.risk-score-default';
@@ -71,27 +76,15 @@ export default ({ getService }: FtrProviderContext): void => {
         .delete({ index: RISK_SCORE_DATA_STREAM, ignore_unavailable: true })
         .catch(() => {});
 
-      // Install the entity store and risk score maintainer, which creates the data stream and index template
+      // Install the entity store. installEntityStoreV2 stops the maintainer
+      // after install, so the data stream is not yet created. A single
+      // synchronous maintainer run creates risk score resources before we
+      // index direct test fixtures.
       await entityStoreUtils.installEntityStoreV2({
         entityTypes: ['host', 'user'],
         waitForEntities: false,
-        maintainerAutoStart: true,
       });
-
-      // Wait for the risk score data stream to be fully created before indexing into it.
-      // Task Manager scheduling is non-deterministic under CI load; 120 s gives enough headroom.
-      await retry.waitForWithTimeout('risk score data stream to exist', 120_000, async () => {
-        try {
-          const response = await es.indices.getDataStream({ name: RISK_SCORE_DATA_STREAM });
-          return response.data_streams.length > 0;
-        } catch {
-          return false;
-        }
-      });
-
-      // Additional wait to ensure the risk score maintainer has completed its first run
-      // otherwise it will overwrite the test risk scores we're directly indexing
-      await new Promise((resolve) => setTimeout(resolve, 15000));
+      await maintainerRoutes.runMaintainerSync('risk-score');
 
       // Index host and user entities directly into the entity store latest index
       const entityOperations = [

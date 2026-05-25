@@ -311,11 +311,13 @@ const transformItem = (item: UserContentCommonSchema): ContentListItem => {
  *
  * @param tableListViewFindItems - The consumer's existing `findItems` function.
  * @param decorate - Optional callback that enriches raw items with external data.
+ * @param listingLimit - Maximum number of items to fetch from the server per request.
  * @returns A {@link ClientStrategy} with `findItems`, `onInvalidate`, `onRefresh`, and `getItems`.
  */
 export const createClientStrategy = (
   tableListViewFindItems: TableListViewFindItemsFn,
-  decorate?: ItemDecorator
+  decorate?: ItemDecorator,
+  listingLimit?: number
 ): ClientStrategy => {
   let rawItems: UserContentCommonSchema[] = [];
   let decoratedItems: UserContentCommonSchema[] = [];
@@ -329,7 +331,11 @@ export const createClientStrategy = (
     const { searchQuery, filters, sort, page, signal } = params;
 
     if (lastSearchQuery !== searchQuery) {
-      const result = await tableListViewFindItems(searchQuery, undefined, signal);
+      const result = await tableListViewFindItems(
+        searchQuery,
+        listingLimit !== undefined ? { listingLimit } : undefined,
+        signal
+      );
       if (signal?.aborted) {
         throw new DOMException('The operation was aborted.', 'AbortError');
       }

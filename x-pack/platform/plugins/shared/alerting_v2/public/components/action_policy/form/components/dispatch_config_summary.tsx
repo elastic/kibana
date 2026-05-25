@@ -9,7 +9,6 @@ import { EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import type { GroupingMode, ThrottleStrategy } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { DURATION_UNIT_LABELS } from '../constants';
 
 interface DispatchConfigSummaryProps {
   groupingMode: GroupingMode;
@@ -18,12 +17,38 @@ interface DispatchConfigSummaryProps {
   throttleInterval: string;
 }
 
+type DurationUnit = 's' | 'm' | 'h' | 'd';
+
+const isDurationUnit = (c: string): c is DurationUnit =>
+  c === 's' || c === 'm' || c === 'h' || c === 'd';
+
 const formatInterval = (raw: string): string => {
   if (!raw) return '';
   const unit = raw.charAt(raw.length - 1);
   const value = parseInt(raw, 10);
-  if (Number.isNaN(value)) return raw;
-  return `${value} ${DURATION_UNIT_LABELS[unit] ?? unit}`;
+  if (Number.isNaN(value) || !isDurationUnit(unit)) return raw;
+  switch (unit) {
+    case 's':
+      return i18n.translate('xpack.alertingV2.actionPolicy.form.dispatchSummary.duration.seconds', {
+        defaultMessage: '{value, plural, one {# second} other {# seconds}}',
+        values: { value },
+      });
+    case 'm':
+      return i18n.translate('xpack.alertingV2.actionPolicy.form.dispatchSummary.duration.minutes', {
+        defaultMessage: '{value, plural, one {# minute} other {# minutes}}',
+        values: { value },
+      });
+    case 'h':
+      return i18n.translate('xpack.alertingV2.actionPolicy.form.dispatchSummary.duration.hours', {
+        defaultMessage: '{value, plural, one {# hour} other {# hours}}',
+        values: { value },
+      });
+    case 'd':
+      return i18n.translate('xpack.alertingV2.actionPolicy.form.dispatchSummary.duration.days', {
+        defaultMessage: '{value, plural, one {# day} other {# days}}',
+        values: { value },
+      });
+  }
 };
 
 const getDispatchSummary = ({
@@ -40,14 +65,17 @@ const getDispatchSummary = ({
       case 'on_status_change':
         return i18n.translate(
           'xpack.alertingV2.actionPolicy.form.dispatchSummary.episode.statusChange',
-          { defaultMessage: 'Each episode is dispatched once per status transition.' }
+          {
+            defaultMessage:
+              'Sends one notification when an episode opens and one when it recovers.',
+          }
         );
       case 'per_status_interval':
         if (!interval) {
           return i18n.translate(
             'xpack.alertingV2.actionPolicy.form.dispatchSummary.episode.statusChangeNoInterval',
             {
-              defaultMessage: 'Each episode is dispatched on status change.',
+              defaultMessage: 'Sends a notification on status change.',
             }
           );
         }
@@ -55,7 +83,7 @@ const getDispatchSummary = ({
           'xpack.alertingV2.actionPolicy.form.dispatchSummary.episode.statusChangeRepeat',
           {
             defaultMessage:
-              'Each episode is dispatched on status change and repeated every {interval}.',
+              'Sends a notification on status change and repeats every {interval} while the episode remains active.',
             values: { interval },
           }
         );
@@ -63,7 +91,8 @@ const getDispatchSummary = ({
         return i18n.translate(
           'xpack.alertingV2.actionPolicy.form.dispatchSummary.episode.everyEvaluation',
           {
-            defaultMessage: 'Each episode is dispatched on every evaluation with no throttle.',
+            defaultMessage:
+              'Sends a notification for every rule evaluation. No limit on notification frequency.',
           }
         );
     }
@@ -72,7 +101,7 @@ const getDispatchSummary = ({
   if (groupingMode === 'per_field') {
     if (groupBy.length === 0) {
       return i18n.translate('xpack.alertingV2.actionPolicy.form.dispatchSummary.group.noFields', {
-        defaultMessage: 'Add group-by fields to configure grouped dispatch.',
+        defaultMessage: 'Select a field in Group by to configure group notifications.',
       });
     }
 
@@ -82,14 +111,14 @@ const getDispatchSummary = ({
           return i18n.translate(
             'xpack.alertingV2.actionPolicy.form.dispatchSummary.group.throttleNoInterval',
             {
-              defaultMessage: 'Episodes grouped by {fields} are dispatched.',
+              defaultMessage: 'Sends a notification for each group sharing values in {fields}.',
               values: { fields },
             }
           );
         }
         return i18n.translate('xpack.alertingV2.actionPolicy.form.dispatchSummary.group.throttle', {
           defaultMessage:
-            'Episodes grouped by {fields} are dispatched at most once every {interval}.',
+            'Sends at most one notification every {interval} for each group sharing values in {fields}.',
           values: { fields, interval },
         });
       case 'every_time':
@@ -97,8 +126,7 @@ const getDispatchSummary = ({
           'xpack.alertingV2.actionPolicy.form.dispatchSummary.group.everyEvaluation',
           {
             defaultMessage:
-              'Episodes grouped by {fields} are dispatched on every evaluation with no throttle.',
-            values: { fields },
+              'Sends a notification for each group on every rule evaluation. No limit on notification frequency.',
           }
         );
     }
@@ -110,13 +138,16 @@ const getDispatchSummary = ({
         if (!interval) {
           return i18n.translate(
             'xpack.alertingV2.actionPolicy.form.dispatchSummary.digest.throttleNoInterval',
-            { defaultMessage: 'All matched episodes are dispatched.' }
+            {
+              defaultMessage: 'Combines all matching episodes into one notification.',
+            }
           );
         }
         return i18n.translate(
           'xpack.alertingV2.actionPolicy.form.dispatchSummary.digest.throttle',
           {
-            defaultMessage: 'All matched episodes are dispatched at most once every {interval}.',
+            defaultMessage:
+              'Combines all matching episodes into one notification at most every {interval}.',
             values: { interval },
           }
         );
@@ -125,7 +156,7 @@ const getDispatchSummary = ({
           'xpack.alertingV2.actionPolicy.form.dispatchSummary.digest.everyEvaluation',
           {
             defaultMessage:
-              'All matched episodes are dispatched on every evaluation with no throttle.',
+              'Combines all matching episodes into one notification on every rule evaluation. No limit on notification frequency.',
           }
         );
     }
@@ -149,7 +180,7 @@ export const DispatchConfigSummary = (props: DispatchConfigSummaryProps) => {
       <EuiTitle size="xxs">
         <h4>
           {i18n.translate('xpack.alertingV2.actionPolicy.form.dispatchSummary.title', {
-            defaultMessage: 'Dispatch configuration',
+            defaultMessage: 'Notification summary',
           })}
         </h4>
       </EuiTitle>

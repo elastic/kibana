@@ -32,14 +32,16 @@ export const GROUPING_MODE_OPTIONS: Array<{ id: GroupingMode; label: string }> =
 
 export const GROUPING_MODE_HELP_TEXT: Record<GroupingMode, string> = {
   per_episode: i18n.translate('xpack.alertingV2.actionPolicy.form.dispatch.mode.perEpisode.help', {
-    defaultMessage: 'One dispatch per matched episode.',
+    defaultMessage:
+      'Each matching episode triggers its own notification. Best for when you need individual visibility into each issue.',
   }),
   per_field: i18n.translate('xpack.alertingV2.actionPolicy.form.dispatch.mode.perGroup.help', {
-    defaultMessage: 'Episodes grouped by shared field values. One dispatch per group.',
+    defaultMessage:
+      'Bundles episodes that share the same field value into one notification per unique value. Best for reducing noise when a rule produces many related episodes, such as one per service or host.',
   }),
   all: i18n.translate('xpack.alertingV2.actionPolicy.form.dispatch.mode.digest.help', {
     defaultMessage:
-      'All matched episodes bundled into a single dispatch. Good for periodic summaries.',
+      "Combines all matching episodes into one notification on a set schedule. Best for periodic summaries when individual alerts aren't necessary.",
   }),
 };
 
@@ -59,7 +61,7 @@ export const PER_EPISODE_STRATEGY_OPTIONS: Array<{ value: ThrottleStrategy; text
   {
     value: 'every_time',
     text: i18n.translate('xpack.alertingV2.actionPolicy.form.dispatch.strategy.everyTime', {
-      defaultMessage: 'Every evaluation (per episode, no throttle)',
+      defaultMessage: 'Every evaluation',
     }),
   },
 ];
@@ -75,7 +77,7 @@ export const AGGREGATE_STRATEGY_OPTIONS: Array<{ value: ThrottleStrategy; text: 
     value: 'every_time',
     text: i18n.translate(
       'xpack.alertingV2.actionPolicy.form.dispatch.strategy.everyTimeAggregate',
-      { defaultMessage: 'Every evaluation (per group, no throttle)' }
+      { defaultMessage: 'Every evaluation' }
     ),
   },
 ];
@@ -89,26 +91,41 @@ export const DEFAULT_STRATEGY_FOR_MODE: Record<GroupingMode, ThrottleStrategy> =
 export const PER_EPISODE_STRATEGY_HELP_TEXT: Partial<Record<ThrottleStrategy, string>> = {
   on_status_change: i18n.translate(
     'xpack.alertingV2.actionPolicy.form.dispatch.strategy.onStatusChange.help',
-    { defaultMessage: 'When the episode status changes.' }
+    {
+      defaultMessage:
+        'Notifies once when an episode opens and once when it recovers. No repeat notifications while it remains active.',
+    }
   ),
   per_status_interval: i18n.translate(
     'xpack.alertingV2.actionPolicy.form.dispatch.strategy.perStatusInterval.help',
-    { defaultMessage: 'On status change and on a repeat interval while status is unchanged.' }
+    {
+      defaultMessage:
+        'Notifies on status change, then resends at a regular interval while the episode remains active. Use this when issues can stay open for long periods and you want ongoing notifications until they resolve.',
+    }
   ),
   every_time: i18n.translate(
     'xpack.alertingV2.actionPolicy.form.dispatch.strategy.everyTime.help',
-    { defaultMessage: 'No minimum time between dispatches for the same episode.' }
+    {
+      defaultMessage:
+        'Sends a notification on every rule evaluation per episode. Use only for infrequent rule schedules or when you need a full audit trail.',
+    }
   ),
 };
 
 export const AGGREGATE_STRATEGY_HELP_TEXT: Partial<Record<ThrottleStrategy, string>> = {
   time_interval: i18n.translate(
     'xpack.alertingV2.actionPolicy.form.dispatch.strategy.timeInterval.help',
-    { defaultMessage: 'At most one dispatch per group per repeat interval.' }
+    {
+      defaultMessage:
+        'Sends at most one notification per group within the specified interval, regardless of how often the rule runs. Use this to limit notification volume for noisy rules.',
+    }
   ),
   every_time: i18n.translate(
     'xpack.alertingV2.actionPolicy.form.dispatch.strategy.everyTimeAggregate.help',
-    { defaultMessage: 'No minimum time between dispatches for the same group.' }
+    {
+      defaultMessage:
+        'Sends a notification for each group on every rule evaluation. Use only for infrequent rule schedules or when you need a full audit trail.',
+    }
   ),
 };
 

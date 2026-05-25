@@ -55,8 +55,8 @@ jest.mock('../../../flyout_v2/shared/components/notes', () => ({
   ),
 }));
 
-jest.mock('../../../flyout_v2/shared/components/alert_header_block', () => ({
-  AlertHeaderBlock: ({
+jest.mock('../../../flyout_v2/shared/components/flyout_header_block', () => ({
+  FlyoutHeaderBlock: ({
     children,
     'data-test-subj': dataTestSubj,
   }: {

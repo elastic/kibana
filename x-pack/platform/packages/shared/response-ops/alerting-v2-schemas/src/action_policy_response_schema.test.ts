@@ -16,20 +16,20 @@ const validResponse = {
   version: 'WzEsMV0=',
   name: 'My Policy',
   description: 'A test policy',
+  type: 'global' as const,
+  ruleId: null,
   enabled: true,
   destinations: [{ type: 'workflow' as const, id: 'wf-1' }],
   matcher: 'host.name: "server-1"',
   groupBy: ['host.name'],
   tags: ['production'],
   groupingMode: 'per_episode' as const,
-  throttle: { strategy: 'on_status_change' as const },
+  throttle: { strategy: 'on_status_change' as const, interval: null },
   snoozedUntil: null,
   auth: { owner: 'user-1', createdByUser: true },
   createdBy: 'user-1',
-  createdByUsername: 'admin',
   createdAt: '2026-01-01T00:00:00.000Z',
   updatedBy: 'user-1',
-  updatedByUsername: 'admin',
   updatedAt: '2026-01-01T00:00:00.000Z',
 };
 
@@ -50,9 +50,7 @@ describe('actionPolicyResponseSchema', () => {
       throttle: null,
       snoozedUntil: null,
       createdBy: null,
-      createdByUsername: null,
       updatedBy: null,
-      updatedByUsername: null,
     });
     expect(result.matcher).toBeNull();
     expect(result.groupBy).toBeNull();
@@ -67,6 +65,28 @@ describe('actionPolicyResponseSchema', () => {
 
   it('rejects invalid enabled type', () => {
     expect(() => actionPolicyResponseSchema.parse({ ...validResponse, enabled: 'yes' })).toThrow();
+  });
+
+  it('accepts a single_rule policy with a non-null ruleId', () => {
+    const result = actionPolicyResponseSchema.parse({
+      ...validResponse,
+      type: 'single_rule',
+      ruleId: 'rule-1',
+    });
+
+    expect(result.type).toBe('single_rule');
+    expect(result.ruleId).toBe('rule-1');
+  });
+
+  it('rejects a missing type', () => {
+    const { type: _type, ...rest } = validResponse;
+    expect(() => actionPolicyResponseSchema.parse(rest)).toThrow();
+  });
+
+  it('rejects an unknown type value', () => {
+    expect(() =>
+      actionPolicyResponseSchema.parse({ ...validResponse, type: 'team_rule' })
+    ).toThrow();
   });
 });
 

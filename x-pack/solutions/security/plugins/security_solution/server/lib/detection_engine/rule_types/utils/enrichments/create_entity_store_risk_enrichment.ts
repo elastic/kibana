@@ -18,6 +18,27 @@ import type { IRuleExecutionLogForExecutors } from '../../../rule_monitoring';
 
 const CHUNK_SIZE = 1000;
 
+interface ListEntitiesForEuidChunkOpts {
+  euids: string[];
+  entityStoreCrudClient: EntityStoreCRUDClient;
+  enrichmentFields: string[];
+}
+const listEntitiesForEuidChunk = async ({
+  euids,
+  entityStoreCrudClient,
+  enrichmentFields,
+}: ListEntitiesForEuidChunkOpts) => {
+  try {
+    return await entityStoreCrudClient.listEntities({
+      filter: { terms: { 'entity.id': euids } },
+      size: euids.length,
+      fields: ['entity.id', ...enrichmentFields],
+    });
+  } catch (e) {
+    // Swallow errors from the entity store and return an empty result, since enrichment failure shouldn't block the rule execution. The enrichment will simply be skipped for all events in this chunk.
+    return { entities: [], fields: [] };
+  }
+};
 /**
  * Enriches alert events with data from the entity store V2, using the EUID translation
  * layer to identify entities. Queries via the entity store's `listEntities` API with a
@@ -68,10 +89,10 @@ export const createEntityStoreEnrichment = async <T extends DetectionAlertLatest
     const eventsMapById: EventsMapByEnrichments = {};
 
     for (const euidChunk of chunk(euids, CHUNK_SIZE)) {
-      const chunkResults = await entityStoreCrudClient.listEntities({
-        filter: { terms: { 'entity.id': euidChunk } },
-        size: euidChunk.length,
-        fields: ['entity.id', ...enrichmentFields],
+      const chunkResults = await listEntitiesForEuidChunk({
+        euids: euidChunk,
+        entityStoreCrudClient,
+        enrichmentFields,
       });
 
       const enrichableEntities: Array<{ entityId: string; fields: Record<string, unknown[]> }> =
@@ -97,7 +118,7 @@ export const createEntityStoreEnrichment = async <T extends DetectionAlertLatest
     );
     return eventsMapById;
   } catch (error) {
-    logger.error(`Enrichment ${name} failed: ${error}`);
+    logger.info(`Enrichment ${name} failed: ${error}`);
     return {};
   }
 };

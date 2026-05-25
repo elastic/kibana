@@ -36,9 +36,6 @@ const createSetupContractMock = (): AgentBuilderPluginSetupMock => {
     plugins: {
       register: jest.fn(),
     },
-    sml: {
-      registerType: jest.fn(),
-    },
     topSnippets: { numSnippets: 2, numWords: 750 },
   };
 };
@@ -75,9 +72,6 @@ const createStartContractMock = (): AgentBuilderPluginStartMock => {
         get: jest.fn(),
         list: jest.fn(),
       }),
-    },
-    sml: {
-      indexAttachment: jest.fn(),
     },
   };
 };

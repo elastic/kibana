@@ -20,7 +20,14 @@ import { z, lazySchema } from '@kbn/zod/v4';
  * Identifier for an initialization flow.
  */
 export const InitializationFlowId = lazySchema(() =>
-  z.enum(['create-list-indices', 'security-data-views'])
+  z.enum([
+    'create-list-indices',
+    'security-data-views',
+    'init-prebuilt-rules',
+    'init-endpoint-protection',
+    'init-ai-prompts',
+    'init-detection-rule-monitoring',
+  ])
 );
 export type InitializationFlowId = z.infer<typeof InitializationFlowId>;
 export type InitializationFlowIdEnum = typeof InitializationFlowId.enum;
@@ -64,6 +71,30 @@ export const SecurityDataViewsReadyResult = lazySchema(() =>
 );
 export type SecurityDataViewsReadyResult = z.infer<typeof SecurityDataViewsReadyResult>;
 
+export const PackageInstallReadyResult = lazySchema(() =>
+  z.object({
+    status: z.literal('ready'),
+    payload: z.object({
+      name: z.string(),
+      version: z.string(),
+      /**
+       * Fleet package installation status (e.g., installed, already_installed).
+       */
+      install_status: z.string(),
+    }),
+  })
+);
+export type PackageInstallReadyResult = z.infer<typeof PackageInstallReadyResult>;
+
+export const InstallDetectionEngineRuleMonitoringAssetsReadyResult = lazySchema(() =>
+  z.object({
+    status: z.literal('ready'),
+  })
+);
+export type InstallDetectionEngineRuleMonitoringAssetsReadyResult = z.infer<
+  typeof InstallDetectionEngineRuleMonitoringAssetsReadyResult
+>;
+
 /**
  * Per-flow results. Only requested flows appear in the response, so all properties are optional. Each flow is either a typed ready result or an error result.
  */
@@ -74,6 +105,18 @@ export const InitializationFlowsResult = lazySchema(() =>
       .optional(),
     'security-data-views': z
       .union([SecurityDataViewsReadyResult, InitializationFlowErrorResult])
+      .optional(),
+    'init-prebuilt-rules': z
+      .union([PackageInstallReadyResult, InitializationFlowErrorResult])
+      .optional(),
+    'init-endpoint-protection': z
+      .union([PackageInstallReadyResult, InitializationFlowErrorResult])
+      .optional(),
+    'init-ai-prompts': z
+      .union([PackageInstallReadyResult, InitializationFlowErrorResult])
+      .optional(),
+    'init-detection-rule-monitoring': z
+      .union([InstallDetectionEngineRuleMonitoringAssetsReadyResult, InitializationFlowErrorResult])
       .optional(),
   })
 );

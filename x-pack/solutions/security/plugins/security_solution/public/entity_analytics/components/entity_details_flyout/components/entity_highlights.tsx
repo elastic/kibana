@@ -13,7 +13,6 @@ import {
   EuiCallOut,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiIcon,
   EuiSkeletonText,
   EuiSpacer,
   EuiText,
@@ -21,6 +20,7 @@ import {
   EuiFlexGroup,
   EuiPanel,
 } from '@elastic/eui';
+import { AiButton, AiIcon } from '@kbn/shared-ux-ai-components';
 import { useFetchAnonymizationFields, useMaybeAssistantContext } from '@kbn/elastic-assistant';
 import React, { Suspense, useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -81,8 +81,7 @@ export const EntityHighlightsAccordion: React.FC<{
   }, [aiConnectors, connectorId]);
 
   const [isConnectorModalVisible, setIsConnectorModalVisible] = useState<boolean>(false);
-  const { hasConnectorsReadPrivilege, hasAssistantPrivilege, isAssistantVisible } =
-    useAssistantAvailability();
+  const { hasConnectorsReadPrivilege, hasAssistantPrivilege } = useAssistantAvailability();
   const { hasAgentBuilderPrivilege } = useAgentBuilderAvailability();
   const hasEntityHighlightsLicense = useHasEntityHighlightsLicense();
   const [selectedActionType, setSelectedActionType] = useState<ActionType | null>(null);
@@ -186,7 +185,7 @@ export const EntityHighlightsAccordion: React.FC<{
                 id="xpack.securitySolution.flyout.entityDetails.highlights.title"
                 defaultMessage="Entity summary"
               />{' '}
-              <EuiIcon type="sparkles" aria-hidden={true} />
+              <AiIcon iconType="sparkles" aria-hidden={true} />
             </h3>
           </EuiTitle>
         }
@@ -204,9 +203,6 @@ export const EntityHighlightsAccordion: React.FC<{
               openPopover={onButtonClick}
               isLoading={isLoading}
               isPopoverOpen={isPopoverOpen}
-              isAssistantVisible={isAssistantVisible}
-              entityType={entityType}
-              entityIdentifier={entityIdentifier}
             />
           )
         }
@@ -295,17 +291,17 @@ export const EntityHighlightsAccordion: React.FC<{
               </EuiFlexItem>
               {(aiConnectors?.length ?? 0) > 0 ? (
                 <EuiFlexItem grow={1}>
-                  <EuiButton
+                  <AiButton
                     onClick={fetchEntityHighlights}
                     isDisabled={!connectorId}
-                    color="primary"
                     size="s"
+                    iconType="sparkles"
                   >
                     <FormattedMessage
                       id="xpack.securitySolution.flyout.entityDetails.highlights.generateButton"
                       defaultMessage="Generate"
                     />
-                  </EuiButton>
+                  </AiButton>
                 </EuiFlexItem>
               ) : (
                 <EuiFlexItem grow={1}>
