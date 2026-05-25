@@ -183,6 +183,21 @@ describe('utils', () => {
         })
       );
     });
+
+    it('attaches IMMUTABLE_FIELDS_CHANGED code and the changed fields in details', () => {
+      const existing = createRuleSoAttributes({ kind: 'alert' });
+
+      expect(() =>
+        assertImmutableUnchanged({ ...baseCreateData, kind: 'signal' }, existing)
+      ).toThrow(
+        expect.objectContaining({
+          data: {
+            code: 'IMMUTABLE_FIELDS_CHANGED',
+            details: { fields: ['kind'] },
+          },
+        })
+      );
+    });
   });
 
   describe('pickImmutable', () => {
