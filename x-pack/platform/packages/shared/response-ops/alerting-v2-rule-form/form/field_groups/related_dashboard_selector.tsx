@@ -7,7 +7,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiComboBox, EuiFormRow, EuiText } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow, EuiText, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DASHBOARD_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
@@ -29,11 +29,13 @@ const RelatedDashboardsComboBox = ({
   dashboardsFormData,
   onChange,
   placeholder,
+  labelId,
 }: {
   uiActions: UiActionsStart;
   dashboardsFormData: Array<{ id: string }>;
   onChange: (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => void;
   placeholder: string;
+  labelId: string;
 }) => {
   const [dashboardOptions, setDashboardOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
     []
@@ -121,7 +123,7 @@ const RelatedDashboardsComboBox = ({
       options={dashboardOptions}
       selectedOptions={selectedDashboards}
       placeholder={placeholder}
-      aria-label={placeholder}
+      aria-labelledby={labelId}
       onChange={onSelectionChange}
       onFocus={handleComboBoxFocus}
       onSearchChange={debouncedLoadDashboards}
@@ -133,6 +135,7 @@ const RelatedDashboardsComboBox = ({
 export const RelatedDashboardSelector: React.FC = () => {
   const { control } = useFormContext<ArtifactsFormValues>();
   const { uiActions } = useRuleFormServices();
+  const relatedDashboardsLabelId = useGeneratedHtmlId({ prefix: 'relatedDashboardsLabel' });
   const {
     field: { value: artifactsValue, onChange },
   } = useController<ArtifactsFormValues, 'artifacts'>({
@@ -189,9 +192,13 @@ export const RelatedDashboardSelector: React.FC = () => {
 
   return (
     <EuiFormRow
-      label={i18n.translate('xpack.alertingV2.ruleForm.relatedDashboardsLabel', {
-        defaultMessage: 'Related dashboards',
-      })}
+      label={
+        <span id={relatedDashboardsLabelId}>
+          {i18n.translate('xpack.alertingV2.ruleForm.relatedDashboardsLabel', {
+            defaultMessage: 'Related dashboards',
+          })}
+        </span>
+      }
       fullWidth
       labelAppend={
         <EuiText size="xs">
@@ -206,6 +213,7 @@ export const RelatedDashboardSelector: React.FC = () => {
         uiActions={uiActions}
         dashboardsFormData={dashboardsFormData}
         onChange={updateDashboardArtifacts}
+        labelId={relatedDashboardsLabelId}
         placeholder={i18n.translate('xpack.alertingV2.ruleForm.relatedDashboardsPlaceholder', {
           defaultMessage: 'Link related dashboards for investigation',
         })}

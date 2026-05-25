@@ -16,6 +16,7 @@ import {
   EuiSplitPanel,
   EuiSpacer,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
 import { useController, useFormContext } from 'react-hook-form';
 import { RUNBOOK_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
@@ -23,14 +24,14 @@ import { RunbookField } from '../fields/runbook_field';
 import type { FormValues } from '../types';
 
 export const RunbookArtifactField: React.FC = () => {
+  const { euiTheme } = useEuiTheme();
   const { setValue, control } = useFormContext<FormValues>();
   const {
-    field: { value: artifactsValue },
+    field: { value: artifacts },
   } = useController<FormValues, 'artifacts'>({
     control,
     name: 'artifacts',
   });
-  const artifacts = artifactsValue;
   const runbookArtifact = artifacts?.find((artifact) => artifact.type === RUNBOOK_ARTIFACT_TYPE);
   const runbookValue = runbookArtifact?.value;
   const hasRunbook = Boolean(runbookValue?.trim());
@@ -68,12 +69,10 @@ export const RunbookArtifactField: React.FC = () => {
 
   return (
     <>
-      <EuiText size="s">
-        <strong>
-          {i18n.translate('xpack.alertingV2.ruleForm.runbookGroupTitle', {
-            defaultMessage: 'Runbook',
-          })}
-        </strong>
+      <EuiText size="xs" css={{ fontWeight: euiTheme.font.weight.medium }}>
+        {i18n.translate('xpack.alertingV2.ruleForm.runbookGroupTitle', {
+          defaultMessage: 'Runbook',
+        })}
       </EuiText>
       <EuiSpacer size="xs" />
       {!hasRunbook ? (
