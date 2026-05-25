@@ -185,11 +185,13 @@ describe('createEvaluateExternalDataset', () => {
     expect(runExperiment).toHaveBeenCalledTimes(1);
     expect(runExperiment).toHaveBeenCalledWith(
       expect.objectContaining({
-        dataset: {
-          name: 'dataset-from-es',
-          description: 'External dataset resolved from Elasticsearch by name',
-          examples: [],
-        },
+        datasets: [
+          {
+            name: 'dataset-from-es',
+            description: 'External dataset resolved from Elasticsearch by name',
+            examples: [],
+          },
+        ],
         trustUpstreamDataset: true,
       }),
       expect.any(Array)
@@ -205,11 +207,13 @@ describe('createEvaluateExternalDataset', () => {
     expect(runExperiment).toHaveBeenCalledTimes(1);
     expect(runExperiment).toHaveBeenCalledWith(
       expect.objectContaining({
-        dataset: {
-          name: 'dataset-from-phoenix',
-          description: 'External dataset resolved from Phoenix by name',
-          examples: [],
-        },
+        datasets: [
+          {
+            name: 'dataset-from-phoenix',
+            description: 'External dataset resolved from Phoenix by name',
+            examples: [],
+          },
+        ],
         trustUpstreamDataset: true,
       }),
       expect.any(Array)
