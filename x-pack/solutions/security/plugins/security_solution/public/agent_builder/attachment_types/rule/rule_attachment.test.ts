@@ -32,14 +32,6 @@ const validRule = {
   risk_score: 73,
 };
 
-const validEsqlRule = {
-  name: 'ES|QL Test Rule',
-  type: 'esql',
-  description: 'An ES|QL test rule',
-  severity: 'medium',
-  risk_score: 50,
-};
-
 const makeAttachment = (ruleJson: string, label?: string) => ({
   id: 'test-attachment',
   type: 'security.rule',
