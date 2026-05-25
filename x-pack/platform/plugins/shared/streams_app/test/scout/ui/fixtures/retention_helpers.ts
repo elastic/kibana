@@ -149,6 +149,15 @@ export async function saveRetentionChanges(page: ScoutPage): Promise<void> {
 }
 
 /**
+ * Saves failure store changes by waiting for the save button to be enabled and clicking it
+ */
+export async function saveFailureStoreChanges(page: ScoutPage): Promise<void> {
+  const saveButton = page.getByTestId('failureStoreModalSaveButton');
+  await expect(saveButton).toBeEnabled();
+  await saveButton.click();
+}
+
+/**
  * Sets custom DSL retention with specified value and unit
  */
 export async function setCustomRetention(
