@@ -6,7 +6,11 @@
  */
 
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import { buildVisualizationConfig, type VisualizationConfig } from '@kbn/agent-builder-tools-base';
+import {
+  buildVisualizationConfig,
+  INLINE_VISUALIZATION_AXIS_TITLE_INSTRUCTIONS,
+  type VisualizationConfig,
+} from '@kbn/agent-builder-tools-base';
 import { type ModelProvider, type ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
@@ -14,10 +18,6 @@ import { type AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import type { VisualizationFailure } from './utils';
 import { getErrorMessage } from './utils';
-
-const DASHBOARD_CHART_CONFIG_INSTRUCTIONS = `XY AXIS TITLE RULES:
-- For XY charts, do NOT set axis titles. Rely on the visualization title and column labels to convey meaning.
-- Set axis title visibility to false (e.g. { visible: false }) for both X and Y axes.`;
 
 export type VisualizationAttempt =
   | {
@@ -95,7 +95,7 @@ export const createVisualizationResolver = ({
         existingConfig: existingConfig ? JSON.stringify(existingConfig) : undefined,
         parsedExistingConfig: existingConfig,
         includeTimeRange: false,
-        additionalChartConfigInstructions: DASHBOARD_CHART_CONFIG_INSTRUCTIONS,
+        additionalChartConfigInstructions: INLINE_VISUALIZATION_AXIS_TITLE_INSTRUCTIONS,
         modelProvider,
         logger,
         events,

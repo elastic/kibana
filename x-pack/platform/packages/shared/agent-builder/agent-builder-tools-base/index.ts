@@ -10,5 +10,6 @@ export {
   type BuildVisualizationConfigParams,
 } from './visualization/build_visualization_config';
 export { getChartTypeSelectionPromptContent } from './visualization/chart_type_guidance';
+export { INLINE_VISUALIZATION_AXIS_TITLE_INSTRUCTIONS } from './visualization/prompts';
 export type { VisualizationConfig } from './visualization/types';
 export { getExecutionState, getWorkflowOutput, type WorkflowExecutionState } from './workflows';
