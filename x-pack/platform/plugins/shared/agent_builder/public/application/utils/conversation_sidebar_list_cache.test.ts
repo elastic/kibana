@@ -104,9 +104,10 @@ describe('conversation_sidebar_list_cache', () => {
       expect(result?.find((c) => c.id === 'B')?.title).toBe('unrelated');
     });
 
-    it('inserts the row at the top when the conversation is not in the list (evicted by background fetch)', () => {
+    it('is a no-op when the conversation is not in the list (preserves reference)', () => {
       const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
       queryClient.setQueryData<ConversationWithoutRounds[]>(listKey, [buildRow('A')]);
+      const before = queryClient.getQueryData<ConversationWithoutRounds[]>(listKey);
 
       patchSidebarConversationListTitle({
         queryClient,
@@ -115,9 +116,7 @@ describe('conversation_sidebar_list_cache', () => {
         title: 'Real title',
       });
 
-      const result = queryClient.getQueryData<ConversationWithoutRounds[]>(listKey);
-      expect(result?.[0]).toMatchObject({ id: 'C', title: 'Real title', agent_id: agentId });
-      expect(result?.[1]).toMatchObject({ id: 'A' });
+      expect(queryClient.getQueryData<ConversationWithoutRounds[]>(listKey)).toBe(before);
     });
 
     it('is a no-op when the title is already up to date (preserves reference)', () => {
