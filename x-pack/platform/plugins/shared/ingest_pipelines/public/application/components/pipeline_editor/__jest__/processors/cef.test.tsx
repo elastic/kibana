@@ -1,3 +1,4 @@
+
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,14 +6,24 @@
  * 2.0.
  */
 
-import { fireEvent, screen, waitFor, within } from '@testing-library/react';
-import { getProcessorValue, renderProcessorEditor, setupEnvironment } from './processor.helpers';
+import { act } from 'react-dom/test-utils';
+import type { SetupResult } from './processor.helpers';
+import { getProcessorValue, setup, setupEnvironment } from './processor.helpers';
 
 const CEF_TYPE = 'cef';
 
 describe('Processor: CEF', () => {
   let onUpdate: jest.Mock;
+  let testBed: SetupResult;
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
+
+  beforeAll(() => {
+    jest.useFakeTimers({ legacyFakeTimers: true });
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
 
   describe('add CEF processor', () => {
     beforeEach(async () => {
@@ -20,65 +31,77 @@ describe('Processor: CEF', () => {
       ({ httpSetup } = setupEnvironment());
       onUpdate = jest.fn();
 
-      renderProcessorEditor(httpSetup, {
-        value: {
-          processors: [],
-        },
-        onFlyoutOpen: jest.fn(),
-        onUpdate,
+      await act(async () => {
+        testBed = await setup(httpSetup, {
+          value: {
+            processors: [],
+          },
+          onFlyoutOpen: jest.fn(),
+          onUpdate,
+        });
       });
 
-      fireEvent.click(screen.getByTestId('addProcessorButton'));
-      fireEvent.change(within(screen.getByTestId('processorTypeSelector')).getByTestId('input'), {
-        target: { value: CEF_TYPE },
-      });
+      testBed.component.update();
 
-      await screen.findByTestId('addProcessorForm');
-      await screen.findByTestId('fieldNameField');
+      // Open flyout to add new processor
+      testBed.actions.addProcessor();
+      // Add type (the other fields are not visible until a type is selected)
+      await testBed.actions.addProcessorType(CEF_TYPE);
     });
 
     test('prevents form submission if required fields are not provided', async () => {
-      fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
+      const {
+        actions: { saveNewProcessor },
+        form,
+      } = testBed;
 
-      expect(await screen.findByText('A field value is required.')).toBeInTheDocument();
+      // Click submit button with only the type defined
+      await saveNewProcessor();
+
+      // Expect form error as "field" is a required parameter
+      expect(form.getErrorsMessages()).toEqual(['A field value is required.']);
     });
 
     test('saves with required parameter values', async () => {
-      fireEvent.change(within(screen.getByTestId('fieldNameField')).getByTestId('input'), {
-        target: { value: 'message' },
-      });
+      const {
+        actions: { saveNewProcessor },
+        form,
+      } = testBed;
 
-      fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
-      await waitFor(() => expect(onUpdate).toHaveBeenCalled());
+      // Add "field" value (required)
+      form.setInputValue('fieldNameField.input', 'message');
 
-      const processors = getProcessorValue(onUpdate);
+      // Save the processor
+      await saveNewProcessor();
+
+      const processors = getProcessorValue(onUpdate, CEF_TYPE);
       expect(processors[0][CEF_TYPE]).toEqual({
         field: 'message',
       });
     });
 
     test('allows optional parameters to be set', async () => {
-      fireEvent.change(within(screen.getByTestId('fieldNameField')).getByTestId('input'), {
-        target: { value: 'message' },
-      });
+      const {
+        actions: { saveNewProcessor },
+        form,
+      } = testBed;
 
-      fireEvent.change(within(screen.getByTestId('targetField')).getByTestId('input'), {
-        target: { value: 'event' },
-      });
+      // Add "field" value (required)
+      form.setInputValue('fieldNameField.input', 'message');
 
-      fireEvent.change(within(screen.getByTestId('timezoneField')).getByTestId('input'), {
-        target: { value: 'Europe/Madrid' },
-      });
+      // Set optional parameters
+      form.setInputValue('targetField.input', 'event');
+      form.setInputValue('timezoneField.input', 'Europe/Madrid');
 
-      // ignore_empty_values defaults to true; clicking toggles it to false
-      fireEvent.click(within(screen.getByTestId('ignoreEmptyValuesSwitch')).getByTestId('input'));
-      // ignore_missing defaults to false; clicking toggles it to true
-      fireEvent.click(within(screen.getByTestId('ignoreMissingSwitch')).getByTestId('input'));
+      // ignore_empty_values defaults to true; toggling sets it to false
+      form.toggleEuiSwitch('ignoreEmptyValuesSwitch.input');
+      // ignore_missing defaults to false; toggling sets it to true
+      form.toggleEuiSwitch('ignoreMissingSwitch.input');
 
-      fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
-      await waitFor(() => expect(onUpdate).toHaveBeenCalled());
+      // Save the processor
+      await saveNewProcessor();
 
-      const processors = getProcessorValue(onUpdate);
+      const processors = getProcessorValue(onUpdate, CEF_TYPE);
       expect(processors[0][CEF_TYPE]).toEqual({
         field: 'message',
         target_field: 'event',
@@ -97,37 +120,44 @@ describe('Processor: CEF', () => {
     });
 
     test('clearing target_field and resetting ignore_empty_values removes both keys on save', async () => {
-      renderProcessorEditor(httpSetup, {
-        value: {
-          processors: [
-            {
-              [CEF_TYPE]: {
-                field: 'message',
-                target_field: 'event',
-                ignore_empty_values: false,
+      await act(async () => {
+        testBed = await setup(httpSetup, {
+          value: {
+            processors: [
+              {
+                [CEF_TYPE]: {
+                  field: 'message',
+                  target_field: 'event',
+                  ignore_empty_values: false,
+                },
               },
-            },
-          ],
-        },
-        onFlyoutOpen: jest.fn(),
-        onUpdate,
+            ],
+          },
+          onFlyoutOpen: jest.fn(),
+          onUpdate,
+        });
       });
 
-      fireEvent.click(within(screen.getByTestId('processors>0')).getByTestId('manageItemButton'));
-      expect(await screen.findByTestId('editProcessorForm')).toBeInTheDocument();
-      const editForm = within(screen.getByTestId('editProcessorForm'));
+      const { component, find, form } = testBed;
+      component.update();
 
-      fireEvent.change(within(editForm.getByTestId('targetField')).getByTestId('input'), {
-        target: { value: '' },
+      await act(async () => {
+        find('processors>0.manageItemButton').simulate('click');
       });
+      component.update();
 
+      // Clear target_field
+      form.setInputValue('targetField.input', '');
       // ignore_empty_values defaults to true; saved value is false, so toggle back to true.
-      fireEvent.click(within(editForm.getByTestId('ignoreEmptyValuesSwitch')).getByTestId('input'));
+      form.toggleEuiSwitch('ignoreEmptyValuesSwitch.input');
 
-      fireEvent.click(editForm.getByTestId('submitButton'));
-      await waitFor(() => expect(onUpdate).toHaveBeenCalled());
+      await act(async () => {
+        find('editProcessorForm.submitButton').simulate('click');
+        jest.advanceTimersByTime(0); // allow the form to validate + submit
+      });
+      component.update();
 
-      const processors = getProcessorValue(onUpdate);
+      const processors = getProcessorValue(onUpdate, CEF_TYPE);
       const cef = processors[0][CEF_TYPE];
 
       expect(JSON.stringify(cef)).toBe(JSON.stringify({ field: 'message' }));
