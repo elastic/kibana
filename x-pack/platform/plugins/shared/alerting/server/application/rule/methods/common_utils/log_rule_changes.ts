@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { every, isUndefined } from 'lodash';
+import type { LogChangeHistoryOptions } from '@kbn/change-history';
 import type { Logger, SavedObject } from '@kbn/core/server';
 import type { RuleChange } from '../../../../rules_client/lib/change_tracking';
 import type { RawRule, RuleTypeRegistry } from '../../../../types';
@@ -83,10 +85,14 @@ export async function logRuleChanges({
   }
 
   try {
+    const data: LogChangeHistoryOptions['data'] = every(metadata, isUndefined)
+      ? undefined
+      : { metadata };
+
     await changeTrackingService.logBulk(changes, {
       action,
       spaceId,
-      ...(isEmptyObject(metadata ?? {}) ? {} : { data: { metadata } }),
+      data,
     });
   } catch (e) {
     logger.warn(`Unable to log bulk rule changes for action "${action}": ${e}`);
@@ -107,20 +113,4 @@ function getRuleType(
   } catch (e) {
     logger.debug(`Unable to fetch "${alertTypeId}" rule type from RuleTypeRegistry: ${e}`);
   }
-}
-
-/**
- * Checks whether an object has non-undefined data.
- *
- * It could be solved via chaining lodash functions but this
- * implementation is simpler and memory efficient.
- */
-function isEmptyObject(obj: Record<string, unknown>): boolean {
-  for (const key in obj) {
-    if (obj[key] !== undefined) {
-      return false;
-    }
-  }
-
-  return true;
 }
