@@ -32,6 +32,7 @@ import type {
   AgentContextLayerPluginSetup,
   AgentContextLayerPluginStart,
 } from '@kbn/agent-context-layer-plugin/server';
+import type { CasesServerStart } from '@kbn/cases-plugin/server';
 
 export type {
   AgentBuilderPluginSetup,
@@ -79,4 +80,5 @@ export interface AgentBuilderStartDependencies {
   security?: SecurityPluginStart;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
   agentContextLayer: AgentContextLayerPluginStart;
+  cases?: CasesServerStart;
 }

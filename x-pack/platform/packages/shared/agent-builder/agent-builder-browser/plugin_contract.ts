@@ -75,6 +75,16 @@ export interface EmbeddableConversationProps {
   attachments?: AttachmentInput[];
 
   /**
+   * Cases case ID when opening chat from a case (persisted on new conversations).
+   */
+  caseId?: string;
+
+  /**
+   * Agent Builder project ID when chat belongs to a project workspace.
+   */
+  projectId?: string;
+
+  /**
    * Browser API tools that the agent can use to interact with the page.
    * Tools are executed browser-side when the LLM requests them.
    *

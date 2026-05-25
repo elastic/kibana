@@ -41,6 +41,14 @@ const ALERT_ATTACHMENT_CONFIG: AttachmentTypeConfig = {
   icon: 'bell',
 };
 
+const CASE_ATTACHMENT_CONFIG: AttachmentTypeConfig = {
+  type: SecurityAgentBuilderAttachments.case,
+  label: i18n.translate('xpack.securitySolution.agentBuilder.attachments.case.label', {
+    defaultMessage: 'Security Case',
+  }),
+  icon: 'folderOpen',
+};
+
 const createAttachmentTypeConfig = (defaultLabel: string, icon: string) => ({
   getLabel: (attachment: UnknownAttachmentWithLabel) => {
     const attachmentLabel = attachment?.data?.attachmentLabel;
@@ -62,6 +70,10 @@ export const registerAttachmentUiDefinitions = (attachments: AttachmentServiceSt
   attachments.addAttachmentType<UnknownAttachmentWithLabel>(
     ALERT_ATTACHMENT_CONFIG.type,
     createAttachmentTypeConfig(ALERT_ATTACHMENT_CONFIG.label, ALERT_ATTACHMENT_CONFIG.icon)
+  );
+  attachments.addAttachmentType<UnknownAttachmentWithLabel>(
+    CASE_ATTACHMENT_CONFIG.type,
+    createAttachmentTypeConfig(CASE_ATTACHMENT_CONFIG.label, CASE_ATTACHMENT_CONFIG.icon)
   );
 };
 

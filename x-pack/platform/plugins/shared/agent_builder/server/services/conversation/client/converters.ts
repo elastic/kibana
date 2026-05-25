@@ -59,6 +59,8 @@ const convertBaseFromEs = (document: Document) => {
     title: document._source.title,
     created_at: document._source.created_at,
     updated_at: document._source.updated_at,
+    ...(document._source.case_id && { case_id: document._source.case_id }),
+    ...(document._source.project_id && { project_id: document._source.project_id }),
   };
 };
 
@@ -188,12 +190,18 @@ export const fromEs = (document: Document): Conversation => {
 
   const roundsWithRefs = applyAttachmentRefsToRounds(deserializedRounds, refsByRound);
 
+  const contextLinks = {
+    ...(document._source!.case_id && { case_id: document._source!.case_id }),
+    ...(document._source!.project_id && { project_id: document._source!.project_id }),
+  };
+
   if (existingAttachments && existingAttachments.length > 0) {
     return {
       ...base,
       rounds: roundsWithRefs,
       attachments: existingAttachments,
       ...(document._source!.state && { state: document._source!.state }),
+      ...contextLinks,
     };
   }
 
@@ -203,6 +211,7 @@ export const fromEs = (document: Document): Conversation => {
       rounds: roundsWithRefs,
       ...(attachmentsForRefs.length > 0 && { attachments: attachmentsForRefs }),
       ...(document._source!.state && { state: document._source!.state }),
+      ...contextLinks,
     };
   }
 
@@ -210,6 +219,7 @@ export const fromEs = (document: Document): Conversation => {
     ...base,
     rounds: roundsWithRefs,
     ...(document._source!.state && { state: document._source!.state }),
+    ...contextLinks,
   };
 };
 
@@ -231,6 +241,8 @@ export const toEs = (conversation: Conversation, space: string): ConversationPro
     conversation_rounds: serializeStepResults(conversation.rounds),
     attachments: conversation.attachments ?? [],
     state: conversation.state,
+    ...(conversation.case_id && { case_id: conversation.case_id }),
+    ...(conversation.project_id && { project_id: conversation.project_id }),
   };
 };
 
@@ -277,5 +289,21 @@ export const createRequestToEs = ({
     conversation_rounds: serializeStepResults(conversation.rounds),
     attachments: conversation.attachments ?? [],
     state: conversation.state,
+    ...(conversation.case_id && { case_id: conversation.case_id }),
+    ...(conversation.project_id && { project_id: conversation.project_id }),
   };
 };
+
+export const mergeConversationContextLinks = ({
+  conversation,
+  caseId,
+  projectId,
+}: {
+  conversation: Conversation;
+  caseId?: string;
+  projectId?: string;
+}): Conversation => ({
+  ...conversation,
+  ...(caseId && !conversation.case_id ? { case_id: caseId } : {}),
+  ...(projectId && !conversation.project_id ? { project_id: projectId } : {}),
+});

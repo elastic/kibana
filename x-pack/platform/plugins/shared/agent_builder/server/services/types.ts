@@ -27,6 +27,7 @@ import type { ToolsServiceSetup, ToolsServiceStart } from './tools';
 import type { RunnerFactory } from './execution/runner';
 import type { AgentsServiceSetup, AgentsServiceStart } from './agents';
 import type { ConversationService } from './conversation';
+import type { ProjectService } from './project';
 import type { AttachmentServiceSetup, AttachmentServiceStart } from './attachments';
 import type { SkillServiceSetup, SkillServiceStart } from './skills';
 import type { TrackingService } from '../telemetry/tracking_service';
@@ -35,6 +36,8 @@ import type { AuditLogService } from '../audit';
 import type { TaskHandler } from './execution';
 import type { MeteringService, ConsumptionServiceStart } from './metering';
 import type { PluginsServiceSetup, PluginsServiceStart } from './plugins';
+import type { CasesClient } from '@kbn/cases-plugin/server';
+import type { KibanaRequest } from '@kbn/core-http-server';
 
 export interface InternalSetupServices {
   tools: ToolsServiceSetup;
@@ -52,6 +55,7 @@ export interface InternalStartServices {
   attachments: AttachmentServiceStart;
   skills: SkillServiceStart;
   conversations: ConversationService;
+  projects: ProjectService;
   runnerFactory: RunnerFactory;
   hooks: HooksServiceStart;
   auditLogService: AuditLogService;
@@ -91,4 +95,5 @@ export interface ServicesStartDeps {
   trackingService?: TrackingService;
   analyticsService?: AnalyticsService;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
+  getCasesClientWithRequest?: (request: KibanaRequest) => Promise<CasesClient>;
 }

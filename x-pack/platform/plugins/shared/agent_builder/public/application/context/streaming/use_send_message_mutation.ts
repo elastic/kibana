@@ -40,6 +40,12 @@ import {
 
 const SCREEN_CONTEXT_ATTACHMENT_ID = 'screen-context';
 
+/** Extracts case ID from Kibana case detail URLs (`.../cases/{caseId}`). */
+const extractCaseIdFromUrl = (url: string): string | undefined => {
+  const match = url.match(/\/cases\/([0-9a-f-]{36})(?:\?|#|$|\/)/i);
+  return match?.[1];
+};
+
 const optimisticConversationListTitle = i18n.translate(
   'xpack.agentBuilder.conversationList.optimisticNewConversationTitle',
   { defaultMessage: 'New conversation' }
@@ -51,6 +57,8 @@ export interface SendMessageVars {
   conversationId: string;
   agentId: string;
   connectorId?: string;
+  caseId?: string;
+  projectId?: string;
   attachments?: AttachmentInput[];
   conversationAttachments?: VersionedAttachment[];
   lastRoundSteps?: ConversationRoundStep[];
@@ -81,10 +89,13 @@ const buildScreenContextData = async ({
   const timeRange =
     time?.from && time?.to ? { from: String(time.from), to: String(time.to) } : undefined;
 
+  const caseIdFromUrl = url ? extractCaseIdFromUrl(url) : undefined;
+
   const data: ScreenContextAttachmentData = {
     ...(url ? { url } : {}),
     ...(app ? { app } : {}),
     ...(timeRange ? { time_range: timeRange } : {}),
+    ...(caseIdFromUrl ? { additional_data: { case_id: caseIdFromUrl } } : {}),
   };
 
   if (!data.url && !data.app && !data.time_range) {
@@ -217,6 +228,8 @@ export const useSendMessageMutation = ({
               conversationId: vars.conversationId,
               agentId: vars.agentId,
               connectorId: vars.connectorId,
+              caseId: vars.caseId,
+              projectId: vars.projectId,
               attachments: [
                 ...(vars.attachments ?? []),
                 ...(await withScreenContextAttachment({

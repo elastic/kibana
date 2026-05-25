@@ -219,6 +219,8 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       isEmbeddedContext: true,
       sessionTag: currentProps.sessionTag,
       agentId: currentProps.agentId ?? agentBuilderDefaultAgentId,
+      caseId: currentProps.caseId,
+      projectId: currentProps.projectId,
       initialMessage: currentProps.initialMessage,
       autoSendInitialMessage: currentProps.autoSendInitialMessage ?? false,
       resetInitialMessage,

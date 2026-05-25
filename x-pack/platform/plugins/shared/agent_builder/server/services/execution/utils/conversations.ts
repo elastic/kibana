@@ -25,12 +25,16 @@ export const createConversation$ = ({
   conversationId,
   title$,
   roundCompletedEvents$,
+  caseId,
+  projectId,
 }: {
   agentId: string;
   conversationClient: ConversationClient;
   conversationId?: string;
   title$: Observable<string>;
   roundCompletedEvents$: Observable<RoundCompleteEvent>;
+  caseId?: string;
+  projectId?: string;
 }) => {
   return forkJoin({
     title: title$,
@@ -46,6 +50,8 @@ export const createConversation$ = ({
         ...(roundCompletedEvent.data.attachments
           ? { attachments: roundCompletedEvent.data.attachments }
           : {}),
+        ...(caseId ? { case_id: caseId } : {}),
+        ...(projectId ? { project_id: projectId } : {}),
       });
     }),
     switchMap((createdConversation) => {

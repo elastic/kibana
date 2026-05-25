@@ -25,6 +25,7 @@ import { useCasesFeatures } from '../../common/use_cases_features';
 import { useGetCaseConnectors } from '../../containers/use_get_case_connectors';
 import { useShouldDisableStatus } from '../actions/status/use_should_disable_status';
 import { useStatusAction } from '../actions/status/use_status_action';
+import { AddCaseToChatButton } from '../agent_builder/add_case_to_chat_button';
 
 export interface CaseActionBarProps {
   caseData: CaseUI;
@@ -146,6 +147,10 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
             </ActionBarStatusItem>
           </EuiFlexItem>
         ) : null}
+
+        <EuiFlexItem grow={false}>
+          <AddCaseToChatButton caseData={caseData} />
+        </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty

@@ -239,6 +239,7 @@ export class AgentBuilderPlugin
       trackingService: this.trackingService,
       analyticsService: this.analyticsService,
       searchInferenceEndpoints,
+      getCasesClientWithRequest: startDeps.cases?.getCasesClientWithRequest,
     });
 
     const { tools, agents, skills, runnerFactory, execution, plugins, conversations } =

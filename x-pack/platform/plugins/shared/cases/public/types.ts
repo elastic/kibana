@@ -29,6 +29,7 @@ import type { FilesSetup, FilesStart } from '@kbn/files-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -80,6 +81,7 @@ export interface CasesPublicSetupDependencies {
 
 export interface CasesPublicStartDependencies {
   apm?: ApmBase;
+  agentBuilder?: AgentBuilderPluginStart;
   cloud?: CloudStart;
   data: DataPublicPluginStart;
   embeddable: EmbeddableStart;

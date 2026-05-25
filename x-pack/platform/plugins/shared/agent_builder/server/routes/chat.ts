@@ -80,6 +80,22 @@ export function registerChatRoutes({
         },
       })
     ),
+    case_id: schema.maybe(
+      schema.string({
+        meta: {
+          description:
+            'Optional Cases case ID to associate with the conversation when it is first persisted.',
+        },
+      })
+    ),
+    project_id: schema.maybe(
+      schema.string({
+        validate: (v) => (uuidValidate(v) ? undefined : 'project_id must be a valid UUID'),
+        meta: {
+          description: 'Optional Agent Builder project ID to associate with the conversation.',
+        },
+      })
+    ),
     input: schema.maybe(
       schema.string({
         meta: { description: 'The user input message to send to the agent.' },
@@ -279,6 +295,8 @@ export function registerChatRoutes({
     const {
       agent_id: agentId,
       conversation_id: conversationId,
+      case_id: caseId,
+      project_id: projectId,
       input,
       prompts,
       attachments,
@@ -313,6 +331,8 @@ export function registerChatRoutes({
           prompts,
           attachments,
         },
+        caseId,
+        projectId,
       },
     });
 

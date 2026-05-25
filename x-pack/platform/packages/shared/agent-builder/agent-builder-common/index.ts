@@ -133,6 +133,14 @@ export {
   type AgentDeleteRequest,
 } from './agents';
 export {
+  ProjectType,
+  type CaseRef,
+  type Project,
+  type ProjectCreateRequest,
+  type ProjectUpdateRequest,
+  type CreateProjectFromCaseRequest,
+} from './project/project';
+export {
   type RoundInput,
   type ConverseInput,
   type AssistantResponse,

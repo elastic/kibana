@@ -32,7 +32,8 @@ export const useConversationStream = () => {
   const conversationId = useConversationId();
   const agentId = useAgentId();
   const { conversation } = useConversation();
-  const { attachments, resetAttachments, browserApiTools } = useConversationContext();
+  const { attachments, resetAttachments, browserApiTools, caseId, projectId } =
+    useConversationContext();
   const { selectedConnector: connectorId } = useConnectorSelection();
 
   const {
@@ -72,6 +73,8 @@ export const useConversationStream = () => {
         conversationId: targetConversationId,
         agentId,
         connectorId,
+        caseId,
+        projectId,
         attachments,
         conversationAttachments: conversation?.attachments,
         lastRoundSteps: lastRound?.steps,
@@ -114,8 +117,10 @@ export const useConversationStream = () => {
     connectorId,
     conversation?.attachments,
     lastRound?.steps,
-    browserApiTools,
-  ]);
+      browserApiTools,
+      caseId,
+      projectId,
+    ]);
 
   const resumeRound = useCallback(
     ({ prompts }: { prompts: Record<string, { allow: boolean }> }) => {
