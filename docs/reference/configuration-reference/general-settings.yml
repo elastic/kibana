@@ -27,10 +27,9 @@ groups:
       - setting: execution_context.enabled
         description: |
           Propagate request-specific metadata to Elasticsearch server by way of the `x-opaque-id` header.
-          It is available in {{ecloud}} 8.1.0 and later versions.
         datatype: bool
         applies_to:
-          stack: ga
+          stack: ga 8.1
           ech: ga
           self: ga
 
@@ -411,11 +410,10 @@ groups:
       - setting: elasticsearch.compression
         description: |
           Specifies whether {{kib}} should use compression for communications with {{es}}.
-          It is available in {{ecloud}} 8.3.0 and later versions.
         datatype: bool
         default: false
         applies_to:
-          stack: ga
+          stack: ga 8.3
           ech: ga
           self: ga
 
@@ -453,11 +451,10 @@ groups:
         id: elasticsearch-maxsockets
         description: |
           The maximum number of sockets that can be used for communications with {{es}}.
-          It is available in {{ecloud}} 8.2.0 and later versions.
         datatype: int
         default: 800
         applies_to:
-          stack: ga
+          stack: ga 8.2
           ech: ga
           self: ga
 
@@ -811,20 +808,18 @@ groups:
       - setting: migrations.discardUnknownObjects
         description: |
           Discard saved objects with unknown types during a migration. Must be set to the target version, for example: `8.4.0`. Default: undefined.
-          It is available in {{ecloud}} 8.4.0 and later versions.
         datatype: string
         applies_to:
-          stack: ga
+          stack: ga 8.4
           ech: ga
           self: ga
 
       - setting: migrations.discardCorruptObjects
         description: |
           Discard corrupt saved objects, as well as those that cause transform errors during a migration. Must be set to the target version, for example: `8.4.0`. Default: undefined.
-          It is available in {{ecloud}} 8.4.0 and later versions.
         datatype: string
         applies_to:
-          stack: ga
+          stack: ga 8.4
           ech: ga
           self: ga
 
@@ -1139,11 +1134,10 @@ groups:
       - setting: server.compression.brotli.enabled
         description: |
           Set to `true` to enable brotli (br) compression format. Browsers not supporting brotli compression will fallback to using gzip instead. This setting may not be used when [`server.compression.enabled`](#server-compression) is set to `false`.
-          It is available in {{ecloud}} 8.6.0 and later versions.
         datatype: bool
         default: false
         applies_to:
-          stack: ga
+          stack: ga 8.6
           ech: ga
           self: ga
 
@@ -1303,7 +1297,6 @@ groups:
         id: server-securityresponseheaders-crossoriginopenerpolicy
         description: |
           Controls whether the [`Cross-Origin-Opener-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Opener-Policy) header is used in all responses to the client from the {{kib}} server, and specifies what value is used. Allowed values are `unsafe-none`, `same-origin-allow-popups`, `same-origin`, or `null`. To disable, set to `null`.
-          It is available in {{ecloud}} 8.7.0 and later versions.
         datatype: enum
         default: '"same-origin"'
         options:
@@ -1312,7 +1305,7 @@ groups:
           - option: same-origin
           - option: "null"
         applies_to:
-          stack: ga
+          stack: ga 8.7
           ech: ga
           self: ga
 
@@ -1473,11 +1466,10 @@ groups:
           ```text
           *Default: [ ]* An array of API endpoints which should be exempt from Cross-Site Request Forgery ("XSRF") protections.
           ```
-          It is available in {{ecloud}} 8.0.0 and later versions.
         datatype: string
         default: "[]"
         applies_to:
-          stack: ga
+          stack: ga 8.0
           ech: ga
           self: ga
 
@@ -1685,10 +1677,9 @@ groups:
       - setting: xpack.securitySolution.maxUploadResponseActionFileBytes
         description: |
           Allow to configure the max file upload size for use with the Upload File Response action available with the Defend Integration. To learn more, check [Endpoint Response actions](docs-content://solutions/security/endpoint-response-actions.md).
-          It is available in {{ecloud}} 8.9.0 and later versions.
         datatype: string
         applies_to:
-          stack: ga
+          stack: ga 8.9
           ech: ga
           self: ga
 

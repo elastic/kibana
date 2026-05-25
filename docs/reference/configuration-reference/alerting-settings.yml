@@ -439,11 +439,11 @@ groups:
 
       - setting: xpack.actions.queued.max
         description: |
-          Specifies the maximum number of actions that can be queued. It is available in {{ecloud}} 8.11.0 and later versions.
+          Specifies the maximum number of actions that can be queued.
         datatype: int
         default: 1000000
         applies_to:
-          stack: ga
+          stack: ga 8.11
           ech: ga
           self: ga
 
