@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useWatch } from 'react-hook-form';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import type {
   ComposeDiscoverState,
   ComposeDiscoverAction,
@@ -80,10 +80,12 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
       <>
         <CentralizedActionPoliciesPanel http={props.services.http} />
         <EuiSpacer size="m" />
-        {props.state.mode === 'edit' && props.ruleId ? (
-          <LinkedActionPoliciesStep http={props.services.http} ruleId={props.ruleId} />
-        ) : (
-          <NotificationsStep services={props.services} />
+        <LinkedActionPoliciesStep http={props.services.http} ruleId={props.ruleId} />
+        {props.state.mode !== 'edit' && (
+          <>
+            <EuiHorizontalRule margin="m" />
+            <NotificationsStep services={props.services} />
+          </>
         )}
       </>
     ),

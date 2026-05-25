@@ -14,7 +14,9 @@ import type {
 
 interface UseMatchedActionPoliciesParams {
   http: HttpStart;
-  ruleId: string;
+  ruleId?: string;
+  name?: string;
+  tags?: string[];
 }
 
 export interface UseMatchedActionPoliciesResult {
@@ -26,20 +28,29 @@ export interface UseMatchedActionPoliciesResult {
 export const useMatchedActionPolicies = ({
   http,
   ruleId,
+  name,
+  tags,
 }: UseMatchedActionPoliciesParams): UseMatchedActionPoliciesResult => {
+  const enabled = Boolean(ruleId) || Boolean(name) || Boolean(tags?.length);
+
+  const body = ruleId
+    ? { rule: { id: ruleId } }
+    : { rule: { ...(name ? { name } : {}), ...(tags?.length ? { tags } : {}) } };
+
   const { isLoading, error, data } = useQuery({
-    queryKey: ['matchedActionPolicies', ruleId],
+    queryKey: ['matchedActionPolicies', ruleId, name, tags],
     queryFn: () =>
       http.fetch<MatchActionPoliciesForRuleResponse>(
         '/api/alerting/v2/action_policies/_match_for_rule',
-        { method: 'POST', body: JSON.stringify({ rule: { id: ruleId } }) }
+        { method: 'POST', body: JSON.stringify(body) }
       ),
+    enabled,
     keepPreviousData: true,
     refetchOnWindowFocus: false,
   });
 
   return {
-    isLoading,
+    isLoading: enabled && isLoading,
     error: error instanceof Error ? error : error != null ? new Error(String(error)) : null,
     items: data?.items ?? [],
   };

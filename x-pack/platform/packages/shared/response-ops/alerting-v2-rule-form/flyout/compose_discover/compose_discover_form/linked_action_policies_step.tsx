@@ -6,18 +6,19 @@
  */
 
 import React from 'react';
+import { useWatch } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { MatchedActionPolicyCategory } from '@kbn/alerting-v2-schemas';
 import {
   EuiBadge,
   EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiLoadingSpinner,
+  EuiSelectable,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import type { ComposeFormValues } from '../compose_form_types';
 import { useMatchedActionPolicies } from './use_matched_action_policies';
 
 const CATEGORY_LABELS: Record<MatchedActionPolicyCategory, string> = {
@@ -39,9 +40,19 @@ const CATEGORY_COLORS: Record<MatchedActionPolicyCategory, string> = {
   'global-filtered': 'primary',
 };
 
+const actionPoliciesTitle = i18n.translate(
+  'xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.title',
+  { defaultMessage: 'Action policies' }
+);
+
+const matchingSubtext = i18n.translate(
+  'xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.matchingSubtext',
+  { defaultMessage: 'These policies currently match this rule.' }
+);
+
 const emptyStateLabel = i18n.translate(
-  'xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.emptyState',
-  { defaultMessage: 'No action policies are linked to this rule.' }
+  'xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.noMatchesEmptyState',
+  { defaultMessage: 'No action policies match this rule.' }
 );
 
 const errorTitle = i18n.translate(
@@ -51,58 +62,64 @@ const errorTitle = i18n.translate(
 
 interface LinkedActionPoliciesStepProps {
   http: HttpStart;
-  ruleId: string;
+  ruleId?: string;
 }
 
 export const LinkedActionPoliciesStep: React.FC<LinkedActionPoliciesStepProps> = ({
   http,
   ruleId,
 }) => {
-  const { isLoading, error, items } = useMatchedActionPolicies({ http, ruleId });
+  const metadata = useWatch<ComposeFormValues, 'metadata'>({ name: 'metadata' });
+  const name = ruleId ? undefined : metadata?.name;
+  const tags = ruleId ? undefined : metadata?.tags;
 
-  if (isLoading) {
-    return <EuiLoadingSpinner size="m" data-test-subj="linkedActionPoliciesLoading" />;
-  }
+  const { isLoading, error, items } = useMatchedActionPolicies({ http, ruleId, name, tags });
 
-  if (error) {
-    return (
-      <EuiCallOut
-        announceOnMount
-        title={errorTitle}
-        color="danger"
-        iconType="error"
-        data-test-subj="linkedActionPoliciesError"
-      >
-        <p aria-label={error.message}>{error.message}</p>
-      </EuiCallOut>
-    );
-  }
-
-  if (items.length === 0) {
-    return (
-      <EuiText size="s" color="subdued" data-test-subj="linkedActionPoliciesEmpty">
-        <p>{emptyStateLabel}</p>
-      </EuiText>
-    );
-  }
+  const options = items.map(({ actionPolicy, category }) => ({
+    key: actionPolicy.id,
+    label: actionPolicy.name,
+    append: <EuiBadge color={CATEGORY_COLORS[category]}>{CATEGORY_LABELS[category]}</EuiBadge>,
+  }));
 
   return (
     <>
-      {items.map(({ actionPolicy, category }) => (
-        <React.Fragment key={actionPolicy.id}>
-          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-            <EuiFlexItem grow>
-              <EuiText size="s">
-                <span>{actionPolicy.name}</span>
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBadge color={CATEGORY_COLORS[category]}>{CATEGORY_LABELS[category]}</EuiBadge>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="s" />
-        </React.Fragment>
-      ))}
+      <EuiText size="s">
+        <strong>{actionPoliciesTitle}</strong>
+      </EuiText>
+      <EuiText size="s" color="subdued">
+        <p>{matchingSubtext}</p>
+      </EuiText>
+      <EuiSpacer size="s" />
+
+      {isLoading && <EuiLoadingSpinner size="m" data-test-subj="linkedActionPoliciesLoading" />}
+
+      {error && (
+        <EuiCallOut
+          announceOnMount
+          title={errorTitle}
+          color="danger"
+          iconType="error"
+          data-test-subj="linkedActionPoliciesError"
+        >
+          <p aria-label={error.message}>{error.message}</p>
+        </EuiCallOut>
+      )}
+
+      {!isLoading && !error && items.length === 0 && (
+        <EuiText size="s" color="subdued" data-test-subj="linkedActionPoliciesEmpty">
+          <p>{emptyStateLabel}</p>
+        </EuiText>
+      )}
+
+      {!isLoading && !error && items.length > 0 && (
+        <EuiSelectable
+          options={options}
+          onChange={() => {}}
+          listProps={{ showIcons: false, bordered: true, isVirtualized: false }}
+        >
+          {(list) => list}
+        </EuiSelectable>
+      )}
     </>
   );
 };

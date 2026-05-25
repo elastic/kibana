@@ -12,11 +12,19 @@ import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { LinkedActionPoliciesStep } from './linked_action_policies_step';
 import { useMatchedActionPolicies } from './use_matched_action_policies';
 
+jest.mock('react-hook-form', () => ({
+  ...jest.requireActual('react-hook-form'),
+  useWatch: jest.fn().mockReturnValue({ name: '', tags: [] }),
+}));
+
 jest.mock('./use_matched_action_policies');
 
 const mockUseMatchedActionPolicies = useMatchedActionPolicies as jest.MockedFunction<
   typeof useMatchedActionPolicies
 >;
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const mockUseWatch = require('react-hook-form').useWatch as jest.Mock;
 
 const renderComponent = (
   props?: Partial<React.ComponentProps<typeof LinkedActionPoliciesStep>>
@@ -30,6 +38,15 @@ const renderComponent = (
 };
 
 describe('LinkedActionPoliciesStep', () => {
+  it('always renders the title and subtext', () => {
+    mockUseMatchedActionPolicies.mockReturnValue({ isLoading: false, error: null, items: [] });
+
+    renderComponent();
+
+    expect(screen.getByText('Action policies')).toBeInTheDocument();
+    expect(screen.getByText('These policies currently match this rule.')).toBeInTheDocument();
+  });
+
   it('shows a loading spinner while fetching', () => {
     mockUseMatchedActionPolicies.mockReturnValue({ isLoading: true, error: null, items: [] });
 
@@ -44,9 +61,10 @@ describe('LinkedActionPoliciesStep', () => {
     renderComponent();
 
     expect(screen.getByTestId('linkedActionPoliciesEmpty')).toBeInTheDocument();
+    expect(screen.getByText('No action policies match this rule.')).toBeInTheDocument();
   });
 
-  it('renders policy names with category badges', () => {
+  it('renders policy names with category badges in an EuiSelectable', () => {
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: false,
       error: null,
@@ -71,6 +89,9 @@ describe('LinkedActionPoliciesStep', () => {
     expect(screen.getByText('Global Policy')).toBeInTheDocument();
     expect(screen.getByText('Tag Filtered Policy')).toBeInTheDocument();
     expect(screen.getByText('Direct Policy')).toBeInTheDocument();
+    expect(screen.getByText('global')).toBeInTheDocument();
+    expect(screen.getByText('global-filtered')).toBeInTheDocument();
+    expect(screen.getByText('direct')).toBeInTheDocument();
   });
 
   it('shows an error callout when the fetch fails', () => {
@@ -83,5 +104,27 @@ describe('LinkedActionPoliciesStep', () => {
     renderComponent();
 
     expect(screen.getByTestId('linkedActionPoliciesError')).toBeInTheDocument();
+  });
+
+  it('passes name and tags from form values when ruleId is not provided', () => {
+    mockUseWatch.mockReturnValue({ name: 'My Rule', tags: ['env:prod'] });
+    mockUseMatchedActionPolicies.mockReturnValue({ isLoading: false, error: null, items: [] });
+
+    renderComponent({ ruleId: undefined });
+
+    expect(mockUseMatchedActionPolicies).toHaveBeenCalledWith(
+      expect.objectContaining({ ruleId: undefined, name: 'My Rule', tags: ['env:prod'] })
+    );
+  });
+
+  it('ignores form values and passes ruleId when ruleId is provided', () => {
+    mockUseWatch.mockReturnValue({ name: 'My Rule', tags: ['env:prod'] });
+    mockUseMatchedActionPolicies.mockReturnValue({ isLoading: false, error: null, items: [] });
+
+    renderComponent({ ruleId: 'rule-abc' });
+
+    expect(mockUseMatchedActionPolicies).toHaveBeenCalledWith(
+      expect.objectContaining({ ruleId: 'rule-abc', name: undefined, tags: undefined })
+    );
   });
 });
