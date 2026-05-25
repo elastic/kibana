@@ -1046,7 +1046,11 @@ export async function setupFieldMappingAtScale(kibanaServer: KibanaServer, log: 
  * Creates one classic stream and sets 10,000 field_overrides via the public
  * Streams API (the same path the schema editor uses).
  */
-export async function setupClassicFieldMappingAtScale(kibanaServer: KibanaServer, log: ToolingLog) {
+export async function setupClassicFieldMappingAtScale(
+  kibanaServer: KibanaServer,
+  es: Client,
+  log: ToolingLog
+) {
   if (!shouldRunSetup(log)) return;
 
   await enableStreams(kibanaServer, log);
@@ -1054,6 +1058,18 @@ export async function setupClassicFieldMappingAtScale(kibanaServer: KibanaServer
 
   const FIELD_COUNT = 10000;
   const FIELD_TYPES = ['keyword', 'long', 'double', 'boolean', 'ip', 'date'];
+
+  // ES default `index.mapping.total_fields.limit` is 1000, well below our
+  // intentional stress target. Raise it on the classic stream's backing index
+  // before pushing field_overrides so the Streams API mapping update succeeds.
+  const TOTAL_FIELDS_LIMIT = FIELD_COUNT * 2;
+  log.info(
+    `Raising index.mapping.total_fields.limit to ${TOTAL_FIELDS_LIMIT} on ${CLASSIC_MAPPING_STREAM}...`
+  );
+  await es.indices.putSettings({
+    index: CLASSIC_MAPPING_STREAM,
+    settings: { 'index.mapping.total_fields.limit': TOTAL_FIELDS_LIMIT },
+  });
 
   log.info(`Mapping ${FIELD_COUNT} field_overrides on ${CLASSIC_MAPPING_STREAM}...`);
 

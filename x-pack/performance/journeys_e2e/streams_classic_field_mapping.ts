@@ -21,8 +21,8 @@ const getNewFieldName = (): string => {
 
 export const journey = new Journey({
   ftrConfigPath: 'x-pack/performance/configs/streams_heavy_config.ts',
-  beforeSteps: async ({ kibanaServer, log }) => {
-    await setupClassicFieldMappingAtScale(kibanaServer, log);
+  beforeSteps: async ({ kibanaServer, es, log }) => {
+    await setupClassicFieldMappingAtScale(kibanaServer, es, log);
   },
 })
   .step('Go to classic stream schema page', async ({ page, kbnUrl }) => {
