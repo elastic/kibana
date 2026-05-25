@@ -69,7 +69,7 @@ export interface PatternAnalysisInitializerProps {
   initialInput?: Partial<PatternAnalysisEmbeddableState>;
   onCreate: (props: PatternAnalysisEmbeddableState) => void;
   onCancel: () => void;
-  onPreview: (update: PatternAnalysisEmbeddableState) => Promise<void>;
+  onPreview?: (update: PatternAnalysisEmbeddableState) => Promise<void>;
   isNewPanel: boolean;
 }
 
@@ -115,7 +115,7 @@ export const PatternAnalysisEmbeddableInitializer: FC<PatternAnalysisInitializer
 
   useEffect(
     function previewChanges() {
-      if (isFormValid && formInput.fieldName !== undefined) {
+      if (onPreview && isFormValid && formInput.fieldName !== undefined) {
         onPreview(updatedProps);
       }
     },

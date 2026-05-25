@@ -82,7 +82,6 @@ export function createAddPatternAnalysisEmbeddableAction(
                   closeFlyout();
                 }}
                 onCancel={closeFlyout}
-                onPreview={async () => {}}
                 isNewPanel={true}
               />
             </AiopsAppContext.Provider>
