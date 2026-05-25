@@ -20,6 +20,7 @@ import {
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type {
   ExecuteManagedWorkflowOptions,
+  InternalManagedWorkflowInstallOptions,
   ManagedWorkflowOperationOptions,
 } from '@kbn/workflows/server/types';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
@@ -127,7 +128,7 @@ export class ManagedWorkflowsService {
 
   public async installManagedWorkflow(
     id: ManagedWorkflowId,
-    options: ManagedWorkflowOperationOptions,
+    options: InternalManagedWorkflowInstallOptions,
     registeredPluginId: string
   ): Promise<void> {
     for (let attempt = 0; attempt <= MAX_MANAGED_INSTALL_RETRIES; attempt++) {
@@ -148,7 +149,7 @@ export class ManagedWorkflowsService {
 
   private async installManagedWorkflowOnce(
     id: ManagedWorkflowId,
-    options: ManagedWorkflowOperationOptions,
+    options: InternalManagedWorkflowInstallOptions,
     registeredPluginId: string
   ): Promise<void> {
     const definition = getManagedWorkflowDefinition(id);

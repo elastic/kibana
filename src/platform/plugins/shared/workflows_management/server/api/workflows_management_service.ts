@@ -37,6 +37,7 @@ import type {
 import type { ManagedWorkflowId } from '@kbn/workflows/managed';
 import type {
   ExecuteManagedWorkflowOptions,
+  InternalManagedWorkflowInstallOptions,
   ManagedWorkflowOperationOptions,
 } from '@kbn/workflows/server/types';
 import type {
@@ -421,7 +422,7 @@ export class WorkflowsService {
 
   public async installManagedWorkflow(
     id: ManagedWorkflowId,
-    options: ManagedWorkflowOperationOptions,
+    options: InternalManagedWorkflowInstallOptions,
     registeredPluginId: string
   ): Promise<void> {
     await this.ensureInitialized();
