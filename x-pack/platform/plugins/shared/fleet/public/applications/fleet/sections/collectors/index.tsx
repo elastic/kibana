@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { LazyCollectorsApp } from './lazy_collectors_app';
+export { LazyCollectorsApp } from './lazy_collector_app';
