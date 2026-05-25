@@ -100,6 +100,8 @@ export const AgentOverview: React.FC = () => {
     ).length;
   }, [agent, allTools, enableElasticCapabilities, defaultToolIdSet]);
 
+  const connectorsCount = agent?.configuration?.connector_ids?.length ?? 0;
+
   if (isLoading || !agent) {
     return (
       <EuiFlexGroup
@@ -138,6 +140,7 @@ export const AgentOverview: React.FC = () => {
         <CapabilitiesSection
           skillsCount={skillsCount}
           pluginsCount={pluginsCount}
+          connectorsCount={connectorsCount}
           toolsCount={toolsCount}
           skillsCountLoading={skillsLoading}
           pluginsCountLoading={pluginsLoading}
@@ -146,12 +149,16 @@ export const AgentOverview: React.FC = () => {
           isExperimentalFeaturesEnabled={isExperimentalFeaturesEnabled}
           skillsHref={createAgentBuilderUrl(appPaths.agent.skills({ agentId: agentId! }))}
           pluginsHref={createAgentBuilderUrl(appPaths.agent.plugins({ agentId: agentId! }))}
+          connectorsHref={createAgentBuilderUrl(appPaths.agent.connectors({ agentId: agentId! }))}
           toolsHref={createAgentBuilderUrl(appPaths.agent.tools({ agentId: agentId! }))}
           onNavigateToSkills={() =>
             navigateToAgentBuilderUrl(appPaths.agent.skills({ agentId: agentId! }))
           }
           onNavigateToPlugins={() =>
             navigateToAgentBuilderUrl(appPaths.agent.plugins({ agentId: agentId! }))
+          }
+          onNavigateToConnectors={() =>
+            navigateToAgentBuilderUrl(appPaths.agent.connectors({ agentId: agentId! }))
           }
           onNavigateToTools={() =>
             navigateToAgentBuilderUrl(appPaths.agent.tools({ agentId: agentId! }))

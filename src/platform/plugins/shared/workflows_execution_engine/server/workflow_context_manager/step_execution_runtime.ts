@@ -20,7 +20,7 @@ import type { WorkflowExecutionState } from './workflow_execution_state';
 import type { RunStepResult } from '../step/node_implementation';
 import { parseDuration } from '../utils';
 
-import type { IWorkflowEventLogger } from '../workflow_event_logger';
+import type { IWorkflowEventLogger, WorkflowEventFlushOptions } from '../workflow_event_logger';
 
 interface StepExecutionRuntimeInit {
   contextManager: WorkflowContextManager;
@@ -242,8 +242,8 @@ export class StepExecutionRuntime implements IStepExecutionRuntime {
     this.logStepFail(executionError);
   }
 
-  public async flushEventLogs(): Promise<void> {
-    await this.stepLogger?.flushEvents();
+  public async flushEventLogs(options?: WorkflowEventFlushOptions): Promise<void> {
+    await this.stepLogger?.flushEvents(options);
   }
 
   /**

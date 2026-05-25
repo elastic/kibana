@@ -86,6 +86,10 @@ export interface WorkflowEventLoggerOptions {
   enableConsoleLogging?: boolean;
 }
 
+export interface WorkflowEventFlushOptions {
+  signal?: AbortSignal;
+}
+
 // Local logger interface extends the structural shape published from
 // `@kbn/workflows-execution-engine-core`. The plugin adds richer methods
 // (timing, scoped sub-loggers) on top of the contract that the engine's
@@ -105,5 +109,5 @@ export interface IWorkflowEventLogger extends ICoreWorkflowEventLogger {
     stepName?: string,
     stepType?: string
   ): IWorkflowEventLogger;
-  flushEvents(): Promise<void>;
+  flushEvents(options?: WorkflowEventFlushOptions): Promise<void>;
 }
