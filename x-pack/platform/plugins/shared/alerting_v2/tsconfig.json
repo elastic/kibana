@@ -111,7 +111,9 @@
     "@kbn/core-elasticsearch-server",
     "@kbn/code-editor",
     "@kbn/workflows-yaml",
-    "@kbn/workflows-ui"
+    "@kbn/workflows-ui",
+    "@kbn/datemath",
+    "@kbn/coloring"
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"]
 }
