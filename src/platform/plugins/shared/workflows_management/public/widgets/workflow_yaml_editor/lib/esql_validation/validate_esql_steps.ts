@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Document } from 'yaml';
+import type { EditorError } from '@elastic/esql/types';
+import type { LineCounter } from 'yaml';
 import { validateQuery } from '@kbn/esql-language';
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import type { monaco } from '@kbn/monaco';
@@ -17,12 +18,15 @@ import {
   isOffsetInsideMaskedRange,
   type LiquidMaskedRange,
 } from './classify_liquid_position';
-import { type EsqlStepRegion, findEsqlStepRegions } from './find_esql_step_regions';
+import { collectEsqlRegionsFromLookup, type EsqlStepRegion } from './extract_esql_region';
+import type { WorkflowLookup } from '../../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
 import type { YamlValidationResult } from '../../../../features/validate_workflow_yaml/model/types';
+
+type EsqlValidationDiagnostic = Awaited<ReturnType<typeof validateQuery>>['errors'][number];
 
 /**
  * Runs `validateQuery` against every `elasticsearch.esql.query` step in the
- * document and returns workflow-style `YamlValidationResult`s in YAML
+ * workflow lookup and returns workflow-style `YamlValidationResult`s in YAML
  * coordinates. The host pipeline (`useYamlValidation`) batches these into
  * markers and feeds the bottom-bar accordion alongside every other validator.
  *
@@ -43,20 +47,23 @@ import type { YamlValidationResult } from '../../../../features/validate_workflo
  * and [validate_if_conditions.ts] which also bail out on Liquid presence.
  */
 export async function validateEsqlSteps(
-  document: Document | null | undefined,
+  workflowLookup: WorkflowLookup,
+  _lineCounter: LineCounter,
   model: monaco.editor.ITextModel,
   callbacks: ESQLCallbacks,
   signal?: AbortSignal
 ): Promise<YamlValidationResult[]> {
   const modelText = model.getValue();
-  const regions = findEsqlStepRegions(document, modelText);
+  const regions = collectEsqlRegionsFromLookup(workflowLookup, modelText);
   if (regions.length === 0) {
     return [];
   }
 
   const out: YamlValidationResult[] = [];
   for (let regionIdx = 0; regionIdx < regions.length; regionIdx++) {
-    if (signal?.aborted) return [];
+    if (signal?.aborted) {
+      return [];
+    }
     const regionResults = await validateRegion(
       regions[regionIdx],
       regionIdx,
@@ -64,7 +71,9 @@ export async function validateEsqlSteps(
       callbacks,
       signal
     );
-    if (signal?.aborted) return [];
+    if (signal?.aborted) {
+      return [];
+    }
     out.push(...regionResults);
   }
   return out;
@@ -78,18 +87,13 @@ async function validateRegion(
   signal: AbortSignal | undefined
 ): Promise<YamlValidationResult[]> {
   const classification = classifyLiquidPosition(region.esql);
-  // Liquid sits where ES|QL expects syntax. Skip honestly — the runtime
-  // substitution might produce a perfectly valid query, or might not, but
-  // either way we can't tell from edit-time text alone.
   if (classification.kind === 'has-structural') {
     return [];
   }
 
-  const maskedRanges = classification.kind === 'all-maskable' ? classification.maskedRanges : [];
+  const maskedRanges = classification.maskedRanges;
   const maskedQuery = applyLiquidMask(region.esql, maskedRanges);
 
-  // safeValidate swallows per-query failures so a single bad step can't
-  // prevent the rest of the workflow from being validated.
   const result = await safeValidate(maskedQuery, callbacks);
   if (signal?.aborted || !result) {
     return [];
@@ -107,7 +111,9 @@ async function validateRegion(
       regionIdx,
       diagnosticIdx++
     );
-    if (v) out.push(v);
+    if (v) {
+      out.push(v);
+    }
   }
   for (const warning of result.warnings) {
     const v = toValidationResult(
@@ -119,7 +125,9 @@ async function validateRegion(
       regionIdx,
       diagnosticIdx++
     );
-    if (v) out.push(v);
+    if (v) {
+      out.push(v);
+    }
   }
   return out;
 }
@@ -135,25 +143,8 @@ async function safeValidate(
   }
 }
 
-type EsqlDiagnostic =
-  | {
-      type: 'error' | 'warning';
-      text: string;
-      location: { min: number; max: number };
-      code: string;
-    }
-  | {
-      message: string;
-      code: string;
-      severity: 'error' | 'warning' | number;
-      startLineNumber: number;
-      startColumn: number;
-      endLineNumber: number;
-      endColumn: number;
-    };
-
 function toValidationResult(
-  diagnostic: unknown,
+  diagnostic: EsqlValidationDiagnostic,
   region: EsqlStepRegion,
   maskedRanges: ReadonlyArray<LiquidMaskedRange>,
   model: monaco.editor.ITextModel,
@@ -162,16 +153,18 @@ function toValidationResult(
   diagnosticIdx: number
 ): YamlValidationResult | null {
   const innerRange = extractInnerRange(diagnostic, region.esql);
-  if (!innerRange) return null;
-  // Diagnostics whose range is entirely inside a mask are noise — they
-  // describe the run of spaces we put there. Anything that *touches* a mask
-  // boundary but extends outside it stays: the parser is reporting on the
-  // surrounding ES|QL, not on the mask itself.
-  if (rangeFullyInsideMask(innerRange, maskedRanges)) return null;
+  if (!innerRange) {
+    return null;
+  }
+  if (rangeFullyInsideMask(innerRange, maskedRanges)) {
+    return null;
+  }
 
   const startOffset = region.contentStartInFile + innerRange.start;
   const endOffset = region.contentStartInFile + innerRange.end;
-  if (startOffset < 0 || endOffset < startOffset) return null;
+  if (startOffset < 0 || endOffset < startOffset) {
+    return null;
+  }
 
   const maxOffset = model.getValueLength();
   const safeStart = Math.min(startOffset, maxOffset);
@@ -196,46 +189,63 @@ function toValidationResult(
   };
 }
 
+function isEsqlMessage(
+  diagnostic: EsqlValidationDiagnostic
+): diagnostic is EsqlValidationDiagnostic & {
+  type: 'error' | 'warning';
+  text: string;
+  location: { min: number; max: number };
+  code: string;
+} {
+  return (
+    'location' in diagnostic &&
+    typeof diagnostic.location === 'object' &&
+    diagnostic.location !== null &&
+    'min' in diagnostic.location &&
+    'max' in diagnostic.location
+  );
+}
+
+function isEditorError(diagnostic: EsqlValidationDiagnostic): diagnostic is EditorError {
+  return (
+    'startLineNumber' in diagnostic &&
+    typeof diagnostic.startLineNumber === 'number' &&
+    typeof diagnostic.startColumn === 'number'
+  );
+}
+
 function extractInnerRange(
-  diagnostic: unknown,
+  diagnostic: EsqlValidationDiagnostic,
   esql: string
 ): { start: number; end: number } | null {
-  if (typeof diagnostic !== 'object' || diagnostic === null) return null;
-  const d = diagnostic as Partial<EsqlDiagnostic>;
-  if ('location' in d && d.location && typeof d.location === 'object') {
-    const loc = d.location as { min?: number; max?: number };
-    if (typeof loc.min === 'number' && typeof loc.max === 'number') {
-      return { start: loc.min, end: loc.max + 1 };
-    }
+  if (isEsqlMessage(diagnostic)) {
+    return { start: diagnostic.location.min, end: diagnostic.location.max + 1 };
   }
-  if (
-    'startLineNumber' in d &&
-    typeof d.startLineNumber === 'number' &&
-    typeof d.startColumn === 'number' &&
-    typeof d.endLineNumber === 'number' &&
-    typeof d.endColumn === 'number'
-  ) {
-    const start = lineColToOffset(esql, d.startLineNumber, d.startColumn);
-    const end = lineColToOffset(esql, d.endLineNumber, d.endColumn);
-    if (start === null || end === null) return null;
+  if (isEditorError(diagnostic)) {
+    const start = lineColToOffset(esql, diagnostic.startLineNumber, diagnostic.startColumn);
+    const end = lineColToOffset(esql, diagnostic.endLineNumber, diagnostic.endColumn);
+    if (start === null || end === null) {
+      return null;
+    }
     return { start, end: Math.max(start + 1, end) };
   }
   return null;
 }
 
 function lineColToOffset(text: string, line: number, column: number): number | null {
-  if (line < 1 || column < 1) return null;
+  if (line < 1 || column < 1) {
+    return null;
+  }
   let offset = 0;
   let currentLine = 1;
   while (currentLine < line) {
     const idx = text.indexOf('\n', offset);
-    if (idx === -1) return null;
+    if (idx === -1) {
+      return null;
+    }
     offset = idx + 1;
     currentLine += 1;
   }
-  // Clamp column to the line's bounds so a malformed diagnostic can't push the
-  // offset past the line end into unrelated YAML content (the caller maps this
-  // offset back into the document and clamps only against the full length).
   const nextNewline = text.indexOf('\n', offset);
   const lineEnd = nextNewline === -1 ? text.length : nextNewline;
   const clampedColumn = Math.min(column - 1, lineEnd - offset);
@@ -251,36 +261,62 @@ function rangeFullyInsideMask(
       return true;
     }
   }
-  // `isOffsetInsideMaskedRange` is intentionally re-used here as a defensive
-  // check for the edge case where a diagnostic reports a single-character
-  // range inside a mask (start == end-1, both inside).
   if (range.end === range.start + 1 && isOffsetInsideMaskedRange(range.start, masks)) {
     return true;
   }
   return false;
 }
 
-function extractMessageAndCode(diagnostic: unknown): { message: string; code: string } {
-  const d = diagnostic as { text?: string; message?: string; code?: string };
+function extractMessageAndCode(diagnostic: EsqlValidationDiagnostic): {
+  message: string;
+  code: string;
+} {
+  if (isEsqlMessage(diagnostic)) {
+    return {
+      message: diagnostic.text,
+      code: diagnostic.code,
+    };
+  }
+  if (isEditorError(diagnostic)) {
+    return {
+      message: diagnostic.message,
+      code: diagnostic.code,
+    };
+  }
   return {
-    message: d.text ?? d.message ?? 'ES|QL validation error',
-    code: d.code ?? 'esql.invalid',
+    message: 'ES|QL validation error',
+    code: 'esql.invalid',
   };
 }
 
 function resolveSeverity(
-  diagnostic: unknown,
+  diagnostic: EsqlValidationDiagnostic,
   fallback: 'error' | 'warning'
 ): 'error' | 'warning' | 'info' {
-  const d = diagnostic as { type?: string; severity?: string | number };
-  const raw = d.type ?? d.severity ?? fallback;
-  if (typeof raw === 'number') {
-    // Monaco MarkerSeverity: Hint = 1, Info = 2, Warning = 4, Error = 8
-    if (raw === 4) return 'warning';
-    if (raw === 2 || raw === 1) return 'info';
+  if (isEsqlMessage(diagnostic)) {
+    if (diagnostic.type === 'warning') {
+      return 'warning';
+    }
     return 'error';
   }
-  if (raw === 'warning') return 'warning';
-  if (raw === 'info') return 'info';
-  return 'error';
+  if (isEditorError(diagnostic)) {
+    const raw: string | number = diagnostic.severity;
+    if (typeof raw === 'number') {
+      if (raw === 4) {
+        return 'warning';
+      }
+      if (raw === 2 || raw === 1) {
+        return 'info';
+      }
+      return 'error';
+    }
+    if (raw === 'warning') {
+      return 'warning';
+    }
+    if (raw === 'info') {
+      return 'info';
+    }
+    return 'error';
+  }
+  return fallback;
 }

@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parseDocument } from 'yaml';
+import { LineCounter, parseDocument } from 'yaml';
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import type { monaco } from '@kbn/monaco';
+import { buildWorkflowLookup } from '../../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
 import { validateEsqlSteps } from './validate_esql_steps';
 
 const mockValidate = jest.fn();
@@ -37,6 +38,18 @@ function createTextModel(content: string): monaco.editor.ITextModel {
 
 const stubCallbacks: ESQLCallbacks = {};
 
+async function validateEsqlFromText(
+  text: string,
+  callbacks: ESQLCallbacks,
+  signal?: AbortSignal
+) {
+  const lineCounter = new LineCounter();
+  const document = parseDocument(text, { lineCounter, keepSourceTokens: true });
+  const workflowLookup = buildWorkflowLookup(document, lineCounter);
+  const model = createTextModel(text);
+  return validateEsqlSteps(workflowLookup, lineCounter, model, callbacks, signal);
+}
+
 function buildStep(query: string): string {
   // Indent matches what the YAML parser would extract for a `|` block scalar.
   const body = query
@@ -44,7 +57,8 @@ function buildStep(query: string): string {
     .map((line) => `        ${line}`)
     .join('\n');
   return `steps:
-  - type: elasticsearch.esql.query
+  - name: esql_step
+    type: elasticsearch.esql.query
     with:
       query: |
 ${body}
@@ -60,8 +74,7 @@ describe('validateEsqlSteps — Liquid policy', () => {
     with:
       index: test
 `;
-    const model = createTextModel(text);
-    const markers = await validateEsqlSteps(parseDocument(text), model, stubCallbacks);
+    const markers = await validateEsqlFromText(text, stubCallbacks);
     expect(markers).toEqual([]);
     expect(mockValidate).not.toHaveBeenCalled();
   });
@@ -80,7 +93,7 @@ describe('validateEsqlSteps — Liquid policy', () => {
       ],
       warnings: [],
     });
-    const markers = await validateEsqlSteps(parseDocument(text), model, stubCallbacks);
+    const markers = await validateEsqlFromText(text, stubCallbacks);
     expect(markers).toHaveLength(1);
     expect(markers[0].owner).toBe('esql-validation');
     expect(markers[0].severity).toBe('error');
@@ -92,7 +105,7 @@ describe('validateEsqlSteps — Liquid policy', () => {
       const text = buildStep('WHERE host == "{{ inputs.host }}"');
       const model = createTextModel(text);
       mockValidate.mockResolvedValue({ errors: [], warnings: [] });
-      await validateEsqlSteps(parseDocument(text), model, stubCallbacks);
+      await validateEsqlFromText(text, stubCallbacks);
       expect(mockValidate).toHaveBeenCalledTimes(1);
       const [maskedQuery] = mockValidate.mock.calls[0];
       // No `{{` survives the mask.
@@ -118,7 +131,7 @@ describe('validateEsqlSteps — Liquid policy', () => {
         ],
         warnings: [],
       });
-      const markers = await validateEsqlSteps(parseDocument(text), model, stubCallbacks);
+      const markers = await validateEsqlFromText(text, stubCallbacks);
       expect(markers).toEqual([]);
     });
 
@@ -138,7 +151,7 @@ describe('validateEsqlSteps — Liquid policy', () => {
         ],
         warnings: [],
       });
-      const markers = await validateEsqlSteps(parseDocument(text), model, stubCallbacks);
+      const markers = await validateEsqlFromText(text, stubCallbacks);
       expect(markers).toHaveLength(1);
       expect(markers[0].message).toBe('expected number');
     });
@@ -182,7 +195,7 @@ describe('validateEsqlSteps — Liquid policy', () => {
       it(`row ${row}: skips validation for ${description}`, async () => {
         const text = buildStep(query);
         const model = createTextModel(text);
-        const markers = await validateEsqlSteps(parseDocument(text), model, stubCallbacks);
+        const markers = await validateEsqlFromText(text, stubCallbacks);
         expect(markers).toEqual([]);
         expect(mockValidate).not.toHaveBeenCalled();
       });
@@ -194,7 +207,7 @@ describe('validateEsqlSteps — Liquid policy', () => {
       const text = buildStep('FROM logs-* {# pick the env #} | LIMIT 10');
       const model = createTextModel(text);
       mockValidate.mockResolvedValue({ errors: [], warnings: [] });
-      await validateEsqlSteps(parseDocument(text), model, stubCallbacks);
+      await validateEsqlFromText(text, stubCallbacks);
       expect(mockValidate).toHaveBeenCalledTimes(1);
       const [maskedQuery] = mockValidate.mock.calls[0];
       expect(maskedQuery).not.toMatch(/\{#/);
@@ -205,7 +218,7 @@ describe('validateEsqlSteps — Liquid policy', () => {
       const text = buildStep('FROM logs-* // {{ debug }}\n        | LIMIT 10');
       const model = createTextModel(text);
       mockValidate.mockResolvedValue({ errors: [], warnings: [] });
-      await validateEsqlSteps(parseDocument(text), model, stubCallbacks);
+      await validateEsqlFromText(text, stubCallbacks);
       expect(mockValidate).toHaveBeenCalledTimes(1);
     });
 
@@ -213,7 +226,7 @@ describe('validateEsqlSteps — Liquid policy', () => {
       const text = buildStep('FROM logs-* /* note: {{ debug }} */ | LIMIT 10');
       const model = createTextModel(text);
       mockValidate.mockResolvedValue({ errors: [], warnings: [] });
-      await validateEsqlSteps(parseDocument(text), model, stubCallbacks);
+      await validateEsqlFromText(text, stubCallbacks);
       expect(mockValidate).toHaveBeenCalledTimes(1);
     });
   });
@@ -221,11 +234,13 @@ describe('validateEsqlSteps — Liquid policy', () => {
   describe('multi-step robustness', () => {
     it('skips one step on Liquid and validates another', async () => {
       const text = `steps:
-  - type: elasticsearch.esql.query
+  - name: liquid_step
+    type: elasticsearch.esql.query
     with:
       query: |
         FROM logs-{{ env }}-*
-  - type: elasticsearch.esql.query
+  - name: typo_step
+    type: elasticsearch.esql.query
     with:
       query: |
         FROM logs-* | KEEPP foo
@@ -242,7 +257,7 @@ describe('validateEsqlSteps — Liquid policy', () => {
         ],
         warnings: [],
       });
-      const markers = await validateEsqlSteps(parseDocument(text), model, stubCallbacks);
+      const markers = await validateEsqlFromText(text, stubCallbacks);
       // The first step is skipped (structural Liquid); only the second runs.
       expect(mockValidate).toHaveBeenCalledTimes(1);
       expect(markers).toHaveLength(1);
@@ -251,11 +266,13 @@ describe('validateEsqlSteps — Liquid policy', () => {
 
     it('a thrown validateQuery on one step does not stop the next', async () => {
       const text = `steps:
-  - type: elasticsearch.esql.query
+  - name: bad_step
+    type: elasticsearch.esql.query
     with:
       query: |
         FROM bad
-  - type: elasticsearch.esql.query
+  - name: good_step
+    type: elasticsearch.esql.query
     with:
       query: |
         FROM good | LIMIT 5
@@ -267,7 +284,7 @@ describe('validateEsqlSteps — Liquid policy', () => {
         ],
         warnings: [],
       });
-      const markers = await validateEsqlSteps(parseDocument(text), model, stubCallbacks);
+      const markers = await validateEsqlFromText(text, stubCallbacks);
       expect(mockValidate).toHaveBeenCalledTimes(2);
       expect(markers).toHaveLength(1);
       expect(markers[0].message).toBe('second error');
@@ -275,16 +292,10 @@ describe('validateEsqlSteps — Liquid policy', () => {
 
     it('an aborted signal returns [] early', async () => {
       const text = buildStep('FROM x');
-      const model = createTextModel(text);
       const controller = new AbortController();
       controller.abort();
       mockValidate.mockResolvedValue({ errors: [], warnings: [] });
-      const markers = await validateEsqlSteps(
-        parseDocument(text),
-        model,
-        stubCallbacks,
-        controller.signal
-      );
+      const markers = await validateEsqlFromText(text, stubCallbacks, controller.signal);
       expect(markers).toEqual([]);
     });
   });
@@ -304,7 +315,7 @@ describe('validateEsqlSteps — Liquid policy', () => {
           },
         ],
       });
-      const markers = await validateEsqlSteps(parseDocument(text), model, stubCallbacks);
+      const markers = await validateEsqlFromText(text, stubCallbacks);
       expect(markers).toHaveLength(1);
       expect(markers[0].severity).toBe('warning');
     });
@@ -331,7 +342,7 @@ describe('validateEsqlSteps — Liquid policy', () => {
         ],
         warnings: [],
       });
-      const markers = await validateEsqlSteps(parseDocument(text), model, stubCallbacks);
+      const markers = await validateEsqlFromText(text, stubCallbacks);
       expect(markers).toHaveLength(1);
       const marker = markers[0];
       // Reconstruct the marker's end offset and confirm it doesn't escape the
@@ -373,7 +384,7 @@ describe('validateEsqlSteps — Liquid policy', () => {
           },
         ],
       });
-      const markers = await validateEsqlSteps(parseDocument(text), model, stubCallbacks);
+      const markers = await validateEsqlFromText(text, stubCallbacks);
       expect(markers).toHaveLength(2);
       expect(markers[0].severity).toBe('warning');
       expect(markers[1].severity).toBe('info');
