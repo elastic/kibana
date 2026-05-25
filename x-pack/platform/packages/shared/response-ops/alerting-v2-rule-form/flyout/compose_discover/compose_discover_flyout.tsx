@@ -454,11 +454,11 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
 
   const handleNext = useCallback(async () => {
     if (currentStep?.validate) {
-      const valid = await currentStep.validate(methods, uiState);
+      const valid = await currentStep.validate(methods, uiState, baseServices);
       if (!valid) return;
     }
     dispatch({ type: 'GO_NEXT', isAlert });
-  }, [currentStep, methods, uiState, isAlert, dispatch]);
+  }, [currentStep, methods, uiState, isAlert, dispatch, baseServices]);
 
   // TODO: recoveryType drives whether the recovery tab appears in YAML mode.
   // Follow schema decisions in #268984 — if recoveryType is superseded by a
@@ -539,6 +539,7 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
                 services={baseServices}
                 onRecoveryTypeChange={handleRecoveryTypeChange}
                 onKindChange={handleKindChange}
+                ruleId={ruleId}
               />
             )}
           </EuiFlyoutBody>

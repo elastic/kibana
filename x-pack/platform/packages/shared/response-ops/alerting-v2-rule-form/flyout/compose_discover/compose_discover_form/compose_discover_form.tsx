@@ -21,6 +21,7 @@ import { AlertConditionStep } from './alert_condition_step';
 import { RecoveryConditionStep } from './recovery_condition_step';
 import { DetailsAndArtifactsStep } from './details_and_artifacts_step';
 import { NotificationsStep } from './notifications_step';
+import { LinkedActionPoliciesStep } from './linked_action_policies_step';
 
 interface ComposeDiscoverFormProps {
   state: ComposeDiscoverState;
@@ -28,6 +29,7 @@ interface ComposeDiscoverFormProps {
   services: RuleFormServices;
   onRecoveryTypeChange: (type: RecoveryType) => void;
   onKindChange: (kind: 'signal' | 'alert') => void;
+  ruleId?: string;
 }
 
 const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
@@ -70,9 +72,20 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
   notifications: {
     id: 'notifications',
     title: i18n.translate('xpack.alertingV2.composeDiscover.notifications.stepTitle', {
-      defaultMessage: 'Notifications',
+      defaultMessage: 'Actions',
     }),
-    render: (props) => <NotificationsStep services={props.services} />,
+    render: (props) =>
+      props.state.mode === 'edit' && props.ruleId ? (
+        <LinkedActionPoliciesStep http={props.services.http} ruleId={props.ruleId} />
+      ) : (
+        <NotificationsStep services={props.services} />
+      ),
+    validate: (methods, state, services) => {
+      if (state.mode === 'edit') return true;
+      const notifs = methods.getValues('notifications');
+      if (!notifs) return true;
+      return services?.workflowForm?.isValid?.(notifs.workflow) ?? true;
+    },
   },
 };
 
@@ -85,6 +98,7 @@ export const ComposeDiscoverForm: React.FC<ComposeDiscoverFormProps> = ({
   services,
   onRecoveryTypeChange,
   onKindChange,
+  ruleId,
 }) => {
   const isAlert = useWatch<ComposeFormValues, 'kind'>({ name: 'kind' }) === 'alert';
   const steps = getSteps(isAlert);
@@ -94,5 +108,6 @@ export const ComposeDiscoverForm: React.FC<ComposeDiscoverFormProps> = ({
     services,
     onRecoveryTypeChange,
     onKindChange,
+    ruleId,
   });
 };

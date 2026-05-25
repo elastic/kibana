@@ -24,6 +24,7 @@ export interface StepRenderProps {
   services: RuleFormServices;
   onRecoveryTypeChange: (type: RecoveryType) => void;
   onKindChange: (kind: 'signal' | 'alert') => void;
+  ruleId?: string;
 }
 
 export interface StepDefinition {
@@ -32,7 +33,8 @@ export interface StepDefinition {
   render: (props: StepRenderProps) => React.ReactNode;
   validate?: (
     methods: UseFormReturn<ComposeFormValues>,
-    state: ComposeDiscoverState
+    state: ComposeDiscoverState,
+    services?: RuleFormServices
   ) => Promise<boolean> | boolean;
 }
 

@@ -23,6 +23,8 @@ export interface RuleFormServices<TWorkflow extends object = object> {
   workflowForm: {
     Component: React.ComponentType<WorkflowFormComponentProps<TWorkflow>>;
     defaultValue: () => TWorkflow;
+    /** Returns true when the current workflow value satisfies submission requirements. */
+    isValid?: (value: TWorkflow) => boolean;
   };
 }
 
