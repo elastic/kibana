@@ -9,8 +9,7 @@ import { schema } from '@kbn/config-schema';
 
 import type { AlertingTaskDefinition } from '../services/task_run_scope_service/create_task_runner';
 import { RuleExecutorTaskRunner } from './task_runner';
-
-export const ALERTING_RULE_EXECUTOR_TASK_TYPE = 'alerting_v2:rule_executor' as const;
+import { ALERTING_RULE_EXECUTOR_TASK_TYPE } from './constants';
 
 /**
  * Task definition for rule executor.

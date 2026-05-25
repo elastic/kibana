@@ -25,7 +25,7 @@ import {
 import { isResponseError } from '@kbn/es-errors';
 import { inject, injectable } from 'inversify';
 
-import { ALERTING_RULE_EXECUTOR_TASK_TYPE } from '../lib/rule_executor/task_definition';
+import { ALERTING_RULE_EXECUTOR_TASK_TYPE } from '../lib/rule_executor/constants';
 import { ALERTING_V2_API_PRIVILEGES } from '../lib/security/privileges';
 import { EsServiceScopedToken } from '../lib/services/es_service/tokens';
 import { DatastreamInitializer } from '../lib/services/resource_service/datastream_initializer';

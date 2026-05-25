@@ -26,3 +26,13 @@ groups:
           stack: ga
           ech: ga
           self: ga
+
+      - setting: xpack.reporting.roles.enabled
+        description: |
+          When `true`, enables a deprecated role-based access model for reporting where access is controlled by the `reporting_user` role. Set to `false` to use the application privilege-based access model instead.
+        datatype: bool
+        applies_to:
+          - "stack: ga 7.14, removed 9.0"
+          - "ech: ga"
+          - "self: ga"
+        deprecation_details: "Removed in 9.0. Reporting access is now controlled exclusively through Kibana application privileges."

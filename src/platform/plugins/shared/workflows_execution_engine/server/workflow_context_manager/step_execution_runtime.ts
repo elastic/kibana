@@ -12,6 +12,7 @@ import type { EsWorkflowExecution, EsWorkflowStepExecution, StackFrame } from '@
 import { ExecutionStatus } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
+import type { StepIoService } from './step_io_service';
 import type { WorkflowContextManager } from './workflow_context_manager';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
@@ -23,6 +24,7 @@ import type { IWorkflowEventLogger } from '../workflow_event_logger';
 interface StepExecutionRuntimeInit {
   contextManager: WorkflowContextManager;
   workflowExecutionState: WorkflowExecutionState;
+  stepIoService: StepIoService;
   workflowExecutionGraph: WorkflowGraph;
   stepLogger: IWorkflowEventLogger;
   stepExecutionId: string;
@@ -51,6 +53,7 @@ interface StepExecutionRuntimeInit {
  */
 export class StepExecutionRuntime {
   private workflowExecutionState: WorkflowExecutionState;
+  private stepIoService: StepIoService;
   private workflowGraph: WorkflowGraph;
   private stackFrames: StackFrame[];
 
@@ -99,6 +102,7 @@ export class StepExecutionRuntime {
     // Use workflow execution ID as traceId for APM compatibility
     this.stepLogger = stepExecutionRuntimeInit.stepLogger;
     this.workflowExecutionState = stepExecutionRuntimeInit.workflowExecutionState;
+    this.stepIoService = stepExecutionRuntimeInit.stepIoService;
     this.node = stepExecutionRuntimeInit.node;
     this.stepExecutionId = stepExecutionRuntimeInit.stepExecutionId;
     this.stackFrames = stepExecutionRuntimeInit.stackFrames;
@@ -109,15 +113,14 @@ export class StepExecutionRuntime {
   }
 
   public getCurrentStepResult(): RunStepResult | undefined {
-    const stepExecution = this.workflowExecutionState.getStepExecution(this.stepExecutionId);
-
-    if (!stepExecution) {
+    if (!this.stepExecutionExists()) {
       return undefined;
     }
+    const error = this.stepIoService.getStepError(this.stepExecutionId);
     return {
-      input: stepExecution.input || {},
-      output: stepExecution.output || {},
-      error: stepExecution.error ? new ExecutionError(stepExecution.error) : undefined,
+      input: this.stepIoService.getStepInput(this.stepExecutionId) || {},
+      output: this.stepIoService.getStepOutput(this.stepExecutionId) || {},
+      error: error ? new ExecutionError(error) : undefined,
     };
   }
 
@@ -138,7 +141,7 @@ export class StepExecutionRuntime {
     const stepId = this.node.stepId;
     const stepStartedAt = new Date();
 
-    const stepExecution = {
+    this.workflowExecutionState.upsertStep({
       id: this.stepExecutionId,
       stepId: this.node.stepId,
       stepType: this.node.stepType,
@@ -146,41 +149,64 @@ export class StepExecutionRuntime {
       topologicalIndex: this.topologicalOrder.indexOf(this.node.id),
       status: ExecutionStatus.RUNNING,
       startedAt: this.stepExecution?.startedAt ?? stepStartedAt.toISOString(),
-    } as Partial<EsWorkflowStepExecution>;
-
-    this.workflowExecutionState.upsertStep(stepExecution);
+    });
     this.logStepStart(stepId, this.stepExecutionId);
   }
 
   public setInput(input: Record<string, unknown>): void {
+    this.stepIoService.setStepInput(this.stepExecutionId, input as JsonValue);
+  }
+
+  /**
+   * Marks the step as COMPLETED.
+   *
+   * Lifecycle vs IO split: the lifecycle write (status, finishedAt,
+   * executionTimeMs) goes through `WorkflowExecutionState.upsertStep` here
+   * directly; the IO write (output, optional size) goes through the IO
+   * service. Both calls happen synchronously on the same tick, so the
+   * persistence loop cannot interleave between them — the flush queue
+   * receives one merged entry per step id, identical to the previous
+   * single-call shape.
+   *
+   * @param sizeBytes Optional pre-measured output size (Layer 2 enforcement)
+   *   forwarded to the IO service for eviction/telemetry. Omit when the
+   *   step has no output to size.
+   */
+  public finishStep(stepOutput?: unknown, sizeBytes?: number): void {
+    const startedStepExecution = this.workflowExecutionState.getStepExecution(this.stepExecutionId);
+    const finishedAt = new Date().toISOString();
+    const executionTimeMs = startedStepExecution?.startedAt
+      ? new Date(finishedAt).getTime() - new Date(startedStepExecution.startedAt).getTime()
+      : undefined;
+
     this.workflowExecutionState.upsertStep({
       id: this.stepExecutionId,
-      input: input as JsonValue,
+      status: ExecutionStatus.COMPLETED,
+      finishedAt,
+      ...(executionTimeMs !== undefined ? { executionTimeMs } : {}),
+    });
+    this.stepIoService.setStepOutput(
+      this.stepExecutionId,
+      (stepOutput ?? null) as JsonValue | null,
+      sizeBytes
+    );
+    this.logStepComplete({
+      id: this.stepExecutionId,
+      status: ExecutionStatus.COMPLETED,
+      finishedAt,
+      executionTimeMs,
     });
   }
 
-  public finishStep(stepOutput?: unknown): void {
-    const startedStepExecution = this.workflowExecutionState.getStepExecution(this.stepExecutionId);
-    const stepExecutionUpdate = {
-      id: this.stepExecutionId,
-      status: ExecutionStatus.COMPLETED,
-      finishedAt: new Date().toISOString(),
-      output: stepOutput,
-    } as Partial<EsWorkflowStepExecution>;
-
-    if (startedStepExecution?.startedAt) {
-      stepExecutionUpdate.executionTimeMs =
-        new Date(stepExecutionUpdate.finishedAt as string).getTime() -
-        new Date(startedStepExecution.startedAt).getTime();
-    }
-
-    this.workflowExecutionState.upsertStep(stepExecutionUpdate);
-    this.logStepComplete(stepExecutionUpdate);
-  }
-
+  /**
+   * Marks the step as FAILED.
+   *
+   * Same lifecycle/IO split as {@link finishStep}: status / error /
+   * scopeStack / timing go through state, the FAILED-step `output: null`
+   * sentinel goes through the IO service. Atomicity is preserved because
+   * the two writes share a synchronous tick.
+   */
   public failStep(error: Error): void {
-    // if there is a last step execution, fail it
-    // if not, create a new step execution with fail
     const executionError = ExecutionError.fromError(error);
     const serializedError = executionError.toSerializableObject();
 
@@ -191,26 +217,27 @@ export class StepExecutionRuntime {
     });
 
     const startedStepExecution = this.workflowExecutionState.getStepExecution(this.stepExecutionId);
-    const stepExecutionUpdate = {
+    const finishedAt = new Date().toISOString();
+    const executionTimeMs = startedStepExecution?.startedAt
+      ? new Date(finishedAt).getTime() - new Date(startedStepExecution.startedAt).getTime()
+      : undefined;
+
+    this.workflowExecutionState.updateWorkflowExecution({
+      error: serializedError,
+    });
+    this.workflowExecutionState.upsertStep({
       id: this.stepExecutionId,
       stepId: this.node.stepId,
       stepType: this.node.stepType,
       status: ExecutionStatus.FAILED,
       scopeStack: this.stackFrames,
-      finishedAt: new Date().toISOString(),
-      output: null,
+      finishedAt,
       error: serializedError,
-    } as Partial<EsWorkflowStepExecution>;
-
-    if (startedStepExecution && startedStepExecution.startedAt) {
-      stepExecutionUpdate.executionTimeMs =
-        new Date(stepExecutionUpdate.finishedAt as string).getTime() -
-        new Date(startedStepExecution.startedAt).getTime();
-    }
-    this.workflowExecutionState.updateWorkflowExecution({
-      error: serializedError,
+      ...(executionTimeMs !== undefined ? { executionTimeMs } : {}),
     });
-    this.workflowExecutionState.upsertStep(stepExecutionUpdate);
+    // `null` is the FAILED-step sentinel — distinct from `undefined`
+    // (evicted) so the eviction predicate can keep them apart.
+    this.stepIoService.setStepOutput(this.stepExecutionId, null);
     this.logStepFail(executionError);
   }
 

@@ -84,7 +84,7 @@ export const SkillContextMenu: React.FC<SkillContextMenuProps> = ({
       panelPaddingSize="none"
       anchorPosition="downRight"
     >
-      <EuiContextMenu initialPanelId={0} panels={panels} size="s" />
+      <EuiContextMenu initialPanelId={0} panels={panels} />
     </EuiPopover>
   );
 };

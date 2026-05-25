@@ -24,6 +24,20 @@ To check for security updates, go to [Security announcements for the Elastic sta
 % FEATURES, ENHANCEMENTS, FIXES
 % Paste in index.md
 
+## 9.4.1 [kibana-9.4.1-release-notes]
+
+### Fixes [kibana-9.4.1-fixes]
+
+**Alerting**:
+* Fixes empty rule type fields, such as `kibana.alert.reason`, on active alert documents when a delayed alert graduates to active during a flapping hold without an executor report. [#266012]({{kib-pull}}266012)
+
+**Dashboards and Visualizations**:
+* Fixes a critical validation failure that occurred when dashboard controls had `null` titles. Control titles are now converted to `undefined` during transforms, allowing validation to pass [#268220]({{kib-pull}}268220).
+* Fixes a regression where the dashboard remained locked in an open-flyout state after closing the {{esql}} control edit flyout when editing an existing query-based control [#267605]({{kib-pull}}267605).
+
+**Elastic Security solution**:
+For the Elastic Security 9.4.1 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
 ## 9.4.0 [kibana-9.4.0-release-notes]
 
 :::{important} - New recommended {{kib}} instance minimum size of 2 GB
@@ -104,6 +118,7 @@ New {{ech}} deployments now default to 2 GB of RAM for each {{kib}} instance.
 % sections
 * Extends the selectable area for dragging, collapsing and expanding sections to their entire header [#258502]({{kib-pull}}258502).
 * Allows dragging of opened collapsible sections [#257191]({{kib-pull}}257191).
+* Enforces panel limits on dashboards: up to 100 top-level items (panels, unpinned controls, and sections combined), up to 100 panels per section, and up to 100 pinned controls [#256102]({{kib-pull}}256102).
 
 % dashboard usability
 * Makes the filter pills section collapsible [#255887]({{kib-pull}}255887).
@@ -299,6 +314,7 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 ### Fixes [kibana-9.4.0-fixes]
 
 **Alerting**:
+* Fixes an issue where Stack alerts sent recovery notifications but remained `active` in {{kib}} instead of transitioning to `recovered` [#261012]({{kib-pull}}261012).
 * Fixes stale `uiamApiKey` leaking through object spread in rule updates [#263887]({{kib-pull}}263887).
 * Fixes OpenAPI alerting rule params schemas missing accepted keys for burn-rate windows and Elasticsearch query `sourceFields` [#263634]({{kib-pull}}263634).
 * Fixes an index template update failing due to system-managed fields [#262534]({{kib-pull}}262534).
@@ -573,6 +589,7 @@ For the Elastic Security 9.3.4 release information, refer to [Elastic Security R
 ### Fixes [kibana-9.3.4-fixes]
 
 **Alerting**:
+* Fixes an issue where Stack alerts sent recovery notifications but remained `active` in {{kib}} instead of transitioning to `recovered` [#261012]({{kib-pull}}261012).
 * Adds the `application/x-zip-compressed` MIME type as an accepted value for case file attachments [#262414]({{kib-pull}}262414).
 * Fixes the "Failed to check if maintenance windows are active" error [#261048]({{kib-pull}}261048).
 

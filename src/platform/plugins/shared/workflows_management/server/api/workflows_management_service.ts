@@ -29,6 +29,8 @@ import type {
   WorkflowExecutionDto,
   WorkflowExecutionHistoryModel,
   WorkflowExecutionListDto,
+  WorkflowExecutionSortField,
+  WorkflowExecutionSortOrder,
   WorkflowListDto,
   WorkflowStatsDto,
 } from '@kbn/workflows';
@@ -72,7 +74,12 @@ export interface SearchWorkflowExecutionsParams {
   statuses?: ExecutionStatus[];
   executionTypes?: ExecutionType[];
   executedBy?: string[];
+  concurrencyGroupKey?: string;
   omitStepRuns?: boolean;
+  finishedAfter?: string;
+  finishedBefore?: string;
+  sortField?: WorkflowExecutionSortField;
+  sortOrder?: WorkflowExecutionSortOrder;
   page?: number;
   size?: number;
 }
@@ -313,6 +320,14 @@ export class WorkflowsService {
   ): Promise<WorkflowExecutionListDto> {
     await this.ensureInitialized();
     return this.executionQueryService.getWorkflowExecutions(params, spaceId);
+  }
+
+  public async listWaitingForInputSteps(
+    spaceId: string,
+    pagination: { page?: number; perPage?: number } = {}
+  ): Promise<{ results: EsWorkflowStepExecution[]; total: number }> {
+    await this.ensureInitialized();
+    return this.executionQueryService.listWaitingForInputSteps(spaceId, pagination);
   }
 
   public async getWorkflowExecutionHistory(

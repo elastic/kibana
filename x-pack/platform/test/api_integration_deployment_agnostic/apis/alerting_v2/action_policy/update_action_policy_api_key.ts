@@ -41,7 +41,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           destinations: [{ type: 'workflow', id: 'api-key-workflow-id' }],
         });
 
-      expect(createResponse.status).to.be(200);
+      expect(createResponse.status).to.be(201);
 
       const policyId = createResponse.body.id as string;
       const originalUpdatedAt = createResponse.body.updatedAt as string;
@@ -85,7 +85,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           throttle: { interval: '5m' },
         });
 
-      expect(createResponse.status).to.be(200);
+      expect(createResponse.status).to.be(201);
 
       const policyId = createResponse.body.id as string;
 

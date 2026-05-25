@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import {
@@ -26,6 +26,8 @@ import {
   type ActionConnectorFieldsProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
 
+import { useSecretQueryParams } from '../../common/auth/use_secret_query_params';
+import { QueryParamFields } from '../../common/auth/query_param_fields';
 import * as i18n from './translations';
 
 const { urlField, emptyField } = fieldValidators;
@@ -84,15 +86,59 @@ const HttpActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
     services: { isWebhookSslWithPfxEnabled: isPfxEnabled },
   } = useConnectorContext();
 
-  const { getFieldDefaultValue } = useFormContext();
-  const [{ config, __internal__ }] = useFormData({
-    watch: ['config.hasProxyAuth', '__internal__.hasProxy'],
+  const { getFieldDefaultValue, getFormData, updateFieldValues } = useFormContext();
+  const [{ config, __internal__, id: connectorId }] = useFormData({
+    watch: ['config.hasProxyAuth', '__internal__.hasProxy', '__internal__.hasQueryParams'],
   });
+
+  const {
+    data: secretQueryParamKeys = [],
+    isLoading: isLoadingQueryParams,
+    isFetching: isFetchingQueryParams,
+  } = useSecretQueryParams(connectorId, isEdit);
+
+  const loadingQueryParams = isLoadingQueryParams || isFetchingQueryParams;
+  const queryParamsHydratedRef = useRef(false);
 
   // TODO: remove this check once the intermediate release is complete
   const supportsProxySettings = !isEdit || getFieldDefaultValue('config.proxyUrl') !== undefined;
   const hasProxy = __internal__?.hasProxy ?? false;
   const hasProxyAuth = config?.hasProxyAuth ?? false;
+  const hasQueryParams = __internal__?.hasQueryParams ?? false;
+
+  useEffect(() => {
+    if (queryParamsHydratedRef.current) return;
+    if (!isEdit) {
+      queryParamsHydratedRef.current = true;
+      return;
+    }
+    if (!connectorId || loadingQueryParams) return;
+
+    if (secretQueryParamKeys.length === 0) {
+      queryParamsHydratedRef.current = true;
+      return;
+    }
+
+    const currentFormData = getFormData();
+    const queryParams = secretQueryParamKeys.map((key) => ({ key, value: '' }));
+
+    updateFieldValues({
+      __internal__: {
+        ...currentFormData.__internal__,
+        hasQueryParams: true,
+        queryParams,
+      },
+    });
+
+    queryParamsHydratedRef.current = true;
+  }, [
+    secretQueryParamKeys,
+    loadingQueryParams,
+    connectorId,
+    isEdit,
+    getFormData,
+    updateFieldValues,
+  ]);
 
   const proxyAuthOptions = [
     {
@@ -139,6 +185,32 @@ const HttpActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
           isOAuth2Enabled={true}
         />
       </React.Suspense>
+      <EuiSpacer size="m" />
+      <UseField
+        style={{ visibility: loadingQueryParams ? 'hidden' : 'visible' }}
+        path="__internal__.hasQueryParams"
+        component={ToggleField}
+        config={{
+          defaultValue: false,
+          label: i18n.QUERY_PARAMS_SWITCH,
+        }}
+        componentProps={{
+          euiFieldProps: {
+            disabled: readOnly,
+            'data-test-subj': 'httpQueryParamsSwitch',
+          },
+        }}
+      />
+      {hasQueryParams &&
+        (loadingQueryParams ? (
+          <EuiFlexGroup justifyContent="spaceAround">
+            <EuiFlexItem grow={false}>
+              <EuiLoadingSpinner size="xl" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ) : (
+          <QueryParamFields readOnly={readOnly} />
+        ))}
       {supportsProxySettings && (
         <>
           <EuiSpacer size="m" />

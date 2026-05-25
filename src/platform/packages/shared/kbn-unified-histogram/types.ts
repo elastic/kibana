@@ -328,4 +328,8 @@ export interface ChartSectionProps {
    * inspectorAdapters.lensRequests via the unified histogram state service.
    */
   setLensRequestAdapter?: (adapter: RequestAdapter | undefined) => void;
+  /**
+   * Indicates whether the current tab is selected/active.
+   */
+  isTabSelected: boolean;
 }

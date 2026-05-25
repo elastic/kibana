@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { FormValues } from '../types';
 import { useQueryColumns, type QueryColumn } from '../hooks/use_query_columns';
+import { getGroupByColumnsFromQuery } from '../hooks/use_default_group_by';
 import { useRuleFormServices, useRuleFormMeta } from '../contexts';
 
 export const GroupFieldSelect = () => {
@@ -20,7 +21,24 @@ export const GroupFieldSelect = () => {
   const query = useWatch({ name: 'evaluation.query.base', control });
   const groupByRowId = 'ruleV2FormGroupByField';
 
-  // When columns change, filter out any invalid selections
+  // Auto-populate group fields from the STATS ... BY clause whenever the
+  // parsed BY columns change. Watches `query` directly
+  // Skips the initial mount — useFormDefaults handles that.
+  const prevByColumnsRef = useRef<string[] | null>(null);
+  useEffect(() => {
+    const byColumns = getGroupByColumnsFromQuery(query);
+    if (prevByColumnsRef.current === null) {
+      prevByColumnsRef.current = byColumns;
+      return;
+    }
+    if (JSON.stringify(byColumns) !== JSON.stringify(prevByColumnsRef.current)) {
+      prevByColumnsRef.current = byColumns;
+      setValue('grouping.fields', byColumns);
+    }
+  }, [query, setValue]);
+
+  // Validates existing group field selections against actual columns returned
+  // by the query. Strips any fields that no longer exist in the column list.
   const handleColumnsSuccess = useCallback(
     (cols: QueryColumn[]) => {
       const validNames = new Set(cols.map((c) => c.name));

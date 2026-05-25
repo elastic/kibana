@@ -105,4 +105,71 @@ describe('useServiceMap()', () => {
       expect(result.current.status).not.toBe(FETCH_STATUS.LOADING);
     });
   });
+
+  describe('strictEnvironmentScope', () => {
+    const opbeansSpan = {
+      spanId: 'span-1',
+      spanType: 'external',
+      spanSubtype: 'http',
+      spanDestinationServiceResource: 'opbeans:3000',
+      serviceName: 'opbeans-go',
+      agentName: 'go',
+      serviceEnvironment: 'opbeans',
+    };
+    const productionSpan = {
+      spanId: 'span-2',
+      spanType: 'external',
+      spanSubtype: 'http',
+      spanDestinationServiceResource: 'opbeans-dotnet',
+      serviceName: 'opbeans-go',
+      agentName: 'go',
+      serviceEnvironment: 'opbeans',
+      destinationService: {
+        serviceName: 'opbeans-dotnet',
+        agentName: 'dotnet' as const,
+        serviceEnvironment: 'production',
+      },
+    };
+    const apiResponse = { spans: [opbeansSpan, productionSpan] };
+    const emptyTransformed: ReactFlowServiceMapResponse = {
+      nodes: [],
+      edges: [],
+      nodesCount: 0,
+      tracesCount: 1,
+    };
+
+    beforeEach(() => {
+      mockUseFetcher.mockReturnValue({ data: apiResponse, status: FETCH_STATUS.SUCCESS });
+      mockedTransformToReactFlow.mockReturnValue(emptyTransformed);
+    });
+
+    it('passes the raw response through to transform when off (default)', () => {
+      renderHook(() => useServiceMap({ ...defaultParams, environment: 'opbeans' }));
+      expect(mockedTransformToReactFlow).toHaveBeenCalledWith(apiResponse);
+    });
+
+    it('passes the raw response through when ENVIRONMENT_ALL is selected, even if enabled', () => {
+      renderHook(() =>
+        useServiceMap({
+          ...defaultParams,
+          environment: ENVIRONMENT_ALL.value,
+          strictEnvironmentScope: true,
+        })
+      );
+      expect(mockedTransformToReactFlow).toHaveBeenCalledWith(apiResponse);
+    });
+
+    it('drops cross-env spans before transform when enabled and env is specific', () => {
+      renderHook(() =>
+        useServiceMap({
+          ...defaultParams,
+          environment: 'opbeans',
+          strictEnvironmentScope: true,
+        })
+      );
+
+      const transformedArg = mockedTransformToReactFlow.mock.calls[0]?.[0];
+      expect((transformedArg as { spans: unknown[] }).spans).toEqual([opbeansSpan]);
+    });
+  });
 });

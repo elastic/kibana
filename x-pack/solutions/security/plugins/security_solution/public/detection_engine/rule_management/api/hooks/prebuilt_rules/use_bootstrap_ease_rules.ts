@@ -7,7 +7,7 @@
 import type { UseMutationOptions } from '@kbn/react-query';
 import { useMutation } from '@kbn/react-query';
 import { BOOTSTRAP_EASE_RULES_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules';
-import type { RuleBootstrapResults } from '../../../../../../common/api/detection_engine/prebuilt_rules/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.gen';
+import type { RuleBootstrapResults } from '../../../../../../common/api/detection_engine/prebuilt_rules/bootstrap_ease_rules/bootstrap_ease_rules.gen';
 import { bootstrapEaseRules } from '../../api';
 import { useInvalidateFindRulesQuery } from '../use_find_rules_query';
 

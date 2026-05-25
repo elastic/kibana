@@ -13,7 +13,10 @@ var yaml = require('yaml');
 var fs = require('fs');
 var path = require('path');
 
-var manifestsJsonPath = path.resolve(__dirname, '../.buildkite/ftr_configs_manifests.json');
+var manifestsJsonPath = path.resolve(
+  __dirname,
+  '../.buildkite/ftr-manifests/ftr_configs_manifests.json'
+);
 console.log(manifestsJsonPath);
 var manifestsSource = JSON.parse(fs.readFileSync(manifestsJsonPath, 'utf8'));
 var allManifestPaths = Object.values(manifestsSource).flat();

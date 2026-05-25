@@ -38,7 +38,16 @@ import {
   tagcloudConfigSchemaESQL,
   tagcloudConfigSchemaNoESQL,
 } from './charts/tagcloud';
-import type { XYConfig, XYConfigESQL, XYConfigNoESQL } from './charts/xy';
+import type {
+  XYConfig,
+  XYConfigESQL,
+  XYConfigNoESQL,
+  XYLegendOutsideHorizontal,
+  XYLegendOutsideVertical,
+  XYLegendInside,
+  XYLegendStatistic,
+  XYLegendSize,
+} from './charts/xy';
 import { xyConfigSchema, xyConfigSchemaESQL, xyConfigSchemaNoESQL } from './charts/xy';
 import type {
   RegionMapConfig,
@@ -340,4 +349,10 @@ export type {
   TreemapConfigNoESQL,
   WaffleConfigNoESQL,
   MosaicConfigNoESQL,
+  // XY Legend types
+  XYLegendOutsideHorizontal,
+  XYLegendOutsideVertical,
+  XYLegendInside,
+  XYLegendStatistic,
+  XYLegendSize,
 };

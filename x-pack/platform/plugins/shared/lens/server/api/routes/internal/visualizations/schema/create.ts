@@ -8,18 +8,10 @@
 import { schema } from '@kbn/config-schema';
 import { lensApiConfigSchema } from '@kbn/lens-embeddable-utils';
 
-import { lensCMCreateOptionsSchema, lensItemDataSchemaV2 } from '../../../../../content_management';
+import { lensItemDataSchemaV2 } from '../../../../../content_management';
 import { lensItemDataSchemaV0 } from '../../../../../content_management/v0';
 import { lensItemDataSchemaV1 } from '../../../../../content_management/v1';
-import { pickFromObjectSchema } from '../../../../../utils';
 import { lensResponseItemSchema } from './common';
-
-export const lensCreateRequestQuerySchema = schema.object(
-  {
-    ...pickFromObjectSchema(lensCMCreateOptionsSchema.getPropSchemas(), ['overwrite']),
-  },
-  { unknowns: 'forbid' }
-);
 
 export const lensCreateRequestBodySchema = schema.oneOf([
   lensApiConfigSchema,

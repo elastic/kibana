@@ -1322,31 +1322,40 @@ The full implementation is ~130 lines and serves as the reference for new types.
 
 ## Streams lifecycle (frontend)
 
-The chat streaming layer lives in `public/application/context/send_message/`. This section
-documents how mutations, lifted state, and the React Query cache fit together. Read this
-before touching any of:
-`send_message_context.tsx`, `use_send_message.ts`, `use_send_message_mutation.ts`,
-`use_resume_round_mutation.ts`, `use_subscribe_to_chat_events.ts`,
+The chat streaming layer lives across two folders:
+
+- `public/application/context/streaming/` — the lifted provider, its context hook, the
+  send/regenerate and resume mutation hooks, the chat-events subscriber, and shared types.
+- `public/application/hooks/` — the per-conversation convenience hook
+  (`use_conversation_stream.ts`) and the "any stream active?" derived hook
+  (`use_is_any_conversation_streaming.ts`). They live here because they compose
+  `useConversation` (a sibling in `hooks/`) with the streaming context.
+
+This section documents how mutations, lifted state, and the React Query cache fit
+together. Read this before touching any of: `streaming_context.tsx`,
+`use_send_message_mutation.ts`, `use_resume_round_mutation.ts`,
+`use_subscribe_to_chat_events.ts`, `use_conversation_stream.ts`,
 `use_is_any_conversation_streaming.ts`.
 
 ### The lift
 
-`<SendMessageProvider>` is mounted **once** above the routes/sidebar:
+`<StreamingProvider>` is mounted **once** above the routes/sidebar:
 
 - Routed app: in `mount.tsx`, above `<AgentBuilderRoutes>`. The sidebar is part of the
   routes, so it can read streaming state directly.
 - Embeddable: in `embeddable_conversations_provider.tsx`, one provider per embeddable
   instance because each instance has its own `QueryClient`.
 
-The sidebar uses `useSendMessageContext()` directly. `useIsAnyConversationStreaming()`
+The sidebar uses `useStreamingContext()` directly. `useIsAnyConversationStreaming()`
 is derived from the same context and is used by the page-leave guard and the
 embeddable welcome-message dismiss — both genuinely care about "is anything in
 flight, anywhere?". Anything inside the conversation tree should use the per-conversation
-scoped hook, `useSendMessage()` (in `use_send_message.ts`).
+scoped hook, `useConversationStream()` (in `hooks/use_conversation_stream.ts`).
+
 
 ### Lifted state
 
-`SendMessageProvider` owns two slices with split lifecycles:
+`StreamingProvider` owns two slices with split lifecycles:
 
 - `activeStreams: Map<conversationId, { type, agentReasoning }>` — one entry per
   in-flight stream. Set synchronously when each mutation kicks off; deleted in the
@@ -1426,7 +1435,7 @@ cache, B writes to its own. Cancelling one doesn't affect the other.
 What this means in practice:
 
 - **Submit gate** (`conversation_input.tsx`) is per-conversation: `isResponseLoading`
-  from `useSendMessage()`. The new-conversation route (`/conversations/new`) has
+  from `useConversationStream()`. The new-conversation route (`/conversations/new`) has
   no `conversationId`, so `isResponseLoading` is `false` and submit is always
   allowed there even while other conversations stream.
 - **HITL Approve / Cancel gate** (`round_layout.tsx`) is per-conversation:
