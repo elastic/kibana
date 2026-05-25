@@ -365,7 +365,7 @@ instanceStateValue: true
           const reference = alertUtils.generateReference();
           const response = await alertUtils.createAlwaysFiringAction({
             reference,
-            overwrites: { throttle: null },
+            overwrites: { throttle: null, schedule: { interval: '3s' } },
           });
 
           // only need to test creation success paths
