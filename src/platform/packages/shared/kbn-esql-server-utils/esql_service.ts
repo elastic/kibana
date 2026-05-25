@@ -143,13 +143,10 @@ export class EsqlService {
   private processSuggestedIndices(indices: ResolveIndexResponse['indices']): ESQLSourceResult[] {
     return (
       indices?.map((index) => {
-        // for remote clusters the format is cluster:indexName
-        const [_, indexName] = index.name.split(':');
         return {
           name: index.name,
           type: this.getIndexSourceType(index.mode),
-          // Extra hidden flag to flag system indices in the UI
-          hidden: indexName?.startsWith('.') || index.name.startsWith('.'),
+          hidden: index.attributes?.includes('hidden') ?? false,
         };
       }) ?? []
     );
@@ -158,13 +155,10 @@ export class EsqlService {
   private processSuggestedAliases(aliases: ResolveIndexResponse['aliases']): ESQLSourceResult[] {
     return (
       aliases?.map((alias) => {
-        // for remote clusters the format is cluster:aliasName
-        const [_, aliasName] = alias.name.split(':');
         return {
           name: alias.name,
           type: SOURCES_TYPES.ALIAS,
-          // Extra hidden flag to flag system aliases in the UI
-          hidden: aliasName?.startsWith('.') || alias.name.startsWith('.'),
+          hidden: alias.attributes?.includes('hidden') ?? false,
         };
       }) ?? []
     );
@@ -186,8 +180,7 @@ export class EsqlService {
         return {
           name: dataStream.name,
           type: isTimeSeries ? SOURCES_TYPES.TIMESERIES : SOURCES_TYPES.DATA_STREAM,
-          // Extra hidden flag to flag system data streams in the UI
-          hidden: dataStream.name.startsWith('.'),
+          hidden: dataStream.attributes?.includes('hidden') ?? false,
         };
       }) ?? []
     );

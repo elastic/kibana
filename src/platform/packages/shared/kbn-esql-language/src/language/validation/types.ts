@@ -13,7 +13,8 @@ import type { ESQLPolicy } from '../../commands/registry/types';
 import type { ESQLMessage } from '../../commands';
 
 export interface ReferenceMaps {
-  sources: Set<string>;
+  /** Map of source name → hidden flag */
+  sources: Map<string, boolean>;
   columns: Map<string, ESQLColumnData>;
   policies: Map<string, ESQLPolicy>;
   query: string;

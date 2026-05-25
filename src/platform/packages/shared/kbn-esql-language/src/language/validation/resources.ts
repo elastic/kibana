@@ -39,13 +39,13 @@ export async function retrievePolicies(
 export async function retrieveSources(
   commands: ESQLAstAllCommands[],
   callbacks?: ESQLCallbacks
-): Promise<Set<string>> {
+): Promise<Map<string, boolean>> {
   if (!callbacks || commands.length < 1) {
-    return new Set();
+    return new Map();
   }
   if (['row', 'show', 'meta'].includes(commands[0].name)) {
-    return new Set();
+    return new Map();
   }
   const sources = await getSourcesHelper(callbacks)();
-  return new Set(sources.map(({ name }) => name));
+  return new Map(sources.map(({ name, hidden }) => [name, hidden]));
 }
