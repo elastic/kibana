@@ -6,8 +6,6 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { isBoom } from '@hapi/boom';
-import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type {
   IStorageClient,
@@ -15,7 +13,7 @@ import type {
   StorageClientSearchResponse,
 } from '@kbn/storage-adapter';
 import type { QueryFeature } from '@kbn/streams-schema';
-import { deriveQueryType } from '@kbn/streams-schema/src/helpers/esql_helpers';
+import { deriveQueryType, hasSameEsql } from '@kbn/streams-schema/src/helpers/esql_helpers';
 import type { Streams } from '@kbn/streams-schema/src/models/streams';
 import {
   type QueryType,
@@ -31,7 +29,6 @@ import {
   type QueryUnlinkRequest,
   type SearchMode,
 } from '../../../../../common/queries';
-import type { EsqlRuleParams } from '../../../sig_events/rules/esql/types';
 
 import { AssetNotFoundError } from '../../errors/asset_not_found_error';
 import {
@@ -57,6 +54,11 @@ import type { QueryStorageSettings } from '../storage_settings';
 import { bulkWithInferenceFallback } from '../../errors/bulk_with_inference_fallback';
 import { searchWithKeywordFallback } from '../../errors/search_with_keyword_fallback';
 import { computeRuleId } from './helpers/query';
+import {
+  STREAMS_RULE_CONSUMER,
+  STREAMS_ESQL_RULE_TYPE_ID,
+  type IRulesManagementClient,
+} from './rules_management_client';
 import {
   DEFAULT_SIG_EVENTS_TUNING_CONFIG,
   type SigEventsTuningConfig,
@@ -303,7 +305,7 @@ function toStorage(
 }
 
 function hasBreakingChange(currentQuery: StreamQuery, nextQuery: StreamQuery): boolean {
-  return currentQuery.esql.query !== nextQuery.esql.query;
+  return !hasSameEsql(currentQuery.esql.query, nextQuery.esql.query);
 }
 
 function toQueryLinkFromQuery({
@@ -346,7 +348,7 @@ export class QueryClient {
     private readonly dependencies: {
       storageClient: IStorageClient<QueryStorageSettings, StoredQueryLink>;
       soClient: SavedObjectsClientContract;
-      rulesClient: RulesClient;
+      rulesManagementClient: IRulesManagementClient;
       logger: Logger;
     },
     private readonly isSignificantEventsEnabled: boolean = false,
@@ -837,21 +839,19 @@ export class QueryClient {
     const currentQueriesToDelete = currentQueryLinks.filter(
       (link) => link.rule_backed && !nextIds.has(link.query.id)
     );
-    const currentQueriesToDeleteBeforeUpdate = currentQueryLinks.filter((link) =>
+    const staleBreakingChangeRules = currentQueryLinks.filter((link) =>
       nextQueriesUpdatedWithBreakingChange.some((updated) => updated.query.id === link.query.id)
     );
 
-    await this.uninstallQueries([
-      ...currentQueriesToDelete,
-      ...currentQueriesToDeleteBeforeUpdate,
-      ...demotedToStats,
-    ]);
     const isRuleBacked = (link: QueryLink) => link.rule_backed;
     const toCreate = [...nextQueriesToCreate, ...nextQueriesUpdatedWithBreakingChange].filter(
       isRuleBacked
     );
     const toUpdate = nextQueriesUpdatedWithoutBreakingChange.filter(isRuleBacked);
 
+    // Install replacements first so new rules start firing before the stale ones
+    // are removed — breaking-change rules have distinct rule_ids so both can coexist
+    // briefly, avoiding a monitoring coverage gap.
     try {
       await this.installQueries(toCreate, toUpdate, definition);
     } catch (installError) {
@@ -871,6 +871,12 @@ export class QueryClient {
       });
       throw installError;
     }
+
+    await this.uninstallQueries([
+      ...currentQueriesToDelete,
+      ...staleBreakingChangeRules,
+      ...demotedToStats,
+    ]);
 
     try {
       await this.syncQueryList(
@@ -1098,6 +1104,10 @@ export class QueryClient {
       return { demoted: 0 };
     }
 
+    // Uninstall rules first: if this fails, storage still shows rule_backed=true
+    // which is correct since the rule is still running.
+    await this.uninstallQueries(toDemote);
+
     await this.bulkStorage(
       definition,
       toDemote.map((link) => ({
@@ -1113,8 +1123,6 @@ export class QueryClient {
       }))
     );
 
-    await this.uninstallQueries(toDemote);
-
     return { demoted: toDemote.length };
   }
 
@@ -1123,38 +1131,20 @@ export class QueryClient {
     queriesToUpdate: QueryLink[],
     definition: Streams.all.Definition
   ) {
-    const { rulesClient } = this.dependencies;
+    const { rulesManagementClient } = this.dependencies;
     const limiter = pLimit(10);
 
     await Promise.all([
-      ...queriesToCreate.map((query) => {
-        return limiter(() =>
-          rulesClient
-            .create<EsqlRuleParams>(this.toCreateRuleParams(query, definition))
-            .catch((error) => {
-              if (isBoom(error) && error.output.statusCode === 409) {
-                return rulesClient.update<EsqlRuleParams>(
-                  this.toUpdateRuleParams(query, definition)
-                );
-              }
-              throw error;
-            })
-        );
-      }),
-      ...queriesToUpdate.map((query) => {
-        return limiter(() =>
-          rulesClient
-            .update<EsqlRuleParams>(this.toUpdateRuleParams(query, definition))
-            .catch((error) => {
-              if (isBoom(error) && error.output.statusCode === 404) {
-                return rulesClient.create<EsqlRuleParams>(
-                  this.toCreateRuleParams(query, definition)
-                );
-              }
-              throw error;
-            })
-        );
-      }),
+      ...queriesToCreate.map((query) =>
+        limiter(() =>
+          rulesManagementClient.createRule(query.rule_id, this.toCreateRuleBody(query, definition))
+        )
+      ),
+      ...queriesToUpdate.map((query) =>
+        limiter(() =>
+          rulesManagementClient.updateRule(query.rule_id, this.toUpdateRuleBody(query, definition))
+        )
+      ),
     ]);
   }
 
@@ -1163,62 +1153,44 @@ export class QueryClient {
       return;
     }
 
-    const { rulesClient, logger } = this.dependencies;
+    const { rulesManagementClient } = this.dependencies;
     const ruleIds = queries.map((q) => q.rule_id);
-    await rulesClient
-      .bulkDeleteRules({ ids: ruleIds, ignoreInternalRuleTypes: false })
-      .catch((error) => {
-        if (isBoom(error) && error.output.statusCode === 400) {
-          logger.warn(
-            `bulkDeleteRules returned 400 for ${ruleIds.length} rule(s) — some rules may not have existed: ${error.message}`
-          );
-          return;
-        }
-        throw error;
-      });
+    await rulesManagementClient.bulkDeleteRules(ruleIds);
   }
 
-  private toCreateRuleParams(queryLink: QueryLink, definition: Streams.all.Definition) {
-    const { rule_id: ruleId, query } = queryLink;
+  private toCreateRuleBody(queryLink: QueryLink, definition: Streams.all.Definition) {
+    const { query } = queryLink;
 
     return {
-      data: {
-        name: query.title,
-        consumer: 'streams',
-        alertTypeId: 'streams.rules.esql',
-        actions: [],
-        params: {
-          timestampField: '@timestamp',
-          query: query.esql.query,
-        },
-        enabled: true,
-        tags: ['streams', definition.name],
-        schedule: {
-          interval: '1m',
-        },
+      name: query.title,
+      consumer: STREAMS_RULE_CONSUMER,
+      alertTypeId: STREAMS_ESQL_RULE_TYPE_ID,
+      actions: [] as never[],
+      params: {
+        timestampField: '@timestamp',
+        query: query.esql.query,
       },
-      options: {
-        id: ruleId,
+      enabled: true,
+      tags: ['streams', definition.name],
+      schedule: {
+        interval: '1m',
       },
     };
   }
 
-  private toUpdateRuleParams(queryLink: QueryLink, definition: Streams.all.Definition) {
-    const { rule_id: ruleId, query } = queryLink;
+  private toUpdateRuleBody(queryLink: QueryLink, definition: Streams.all.Definition) {
+    const { query } = queryLink;
 
     return {
-      id: ruleId,
-      data: {
-        name: query.title,
-        actions: [],
-        params: {
-          timestampField: '@timestamp',
-          query: query.esql.query,
-        },
-        tags: ['streams', definition.name],
-        schedule: {
-          interval: '1m',
-        },
+      name: query.title,
+      actions: [] as never[],
+      params: {
+        timestampField: '@timestamp',
+        query: query.esql.query,
+      },
+      tags: ['streams', definition.name],
+      schedule: {
+        interval: '1m',
       },
     };
   }

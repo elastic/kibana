@@ -32,47 +32,124 @@ import { deleteCriticality } from '../../tasks/api_calls/entity_analytics';
 const USER_NAME = 'user1';
 const SIEM_KIBANA_HOST_NAME = 'Host-fwarau82er';
 
-describe('Entity Flyout', { tags: ['@ess', '@serverless'] }, () => {
-  beforeEach(() => {
-    cy.task('esArchiverLoad', { archiveName: 'risk_scores_new_complete_data' });
-    cy.task('esArchiverLoad', { archiveName: 'query_alert', useCreate: true, docsOnly: true });
-    cy.task('esArchiverLoad', { archiveName: 'user_managed_data' });
-    mockRiskEngineEnabled();
-    login();
-    visitWithTimeRange(ALERTS_URL);
-    waitForAlerts();
-  });
-
-  afterEach(() => {
-    cy.task('esArchiverUnload', { archiveName: 'risk_scores_new_complete_data' });
-    cy.task('esArchiverUnload', { archiveName: 'user_managed_data' });
-    deleteAlertsAndRules(); // esArchiverUnload doesn't work properly when using with `useCreate` and `docsOnly` flags
-    deleteCriticality({ idField: 'host.name', idValue: SIEM_KIBANA_HOST_NAME });
-    deleteCriticality({ idField: 'user.name', idValue: USER_NAME });
-  });
-
-  describe('User details', () => {
-    it('should display entity flyout and open risk input panel', () => {
-      expandFirstAlertUserFlyout();
-
-      cy.log('header section');
-      cy.get(USER_PANEL_HEADER).should('contain.text', USER_NAME);
-
-      cy.log('risk input');
-      expandRiskInputsFlyoutPanel();
-      cy.get(RISK_INPUT_PANEL_HEADER).should('exist');
+describe(
+  'Entity Flyout',
+  {
+    tags: ['@ess', '@serverless'],
+    env: {
+      ftrConfig: {
+        kbnServerArgs: [
+          '--uiSettings.overrides.securitySolution:entityStoreEnableV2=false',
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'disable:entityAnalyticsEntityStoreV2',
+          ])}`,
+        ],
+      },
+    },
+  },
+  () => {
+    beforeEach(() => {
+      cy.task('esArchiverLoad', { archiveName: 'risk_scores_new_complete_data' });
+      cy.task('esArchiverLoad', { archiveName: 'query_alert', useCreate: true, docsOnly: true });
+      cy.task('esArchiverLoad', { archiveName: 'user_managed_data' });
+      mockRiskEngineEnabled();
+      login();
+      visitWithTimeRange(ALERTS_URL);
+      waitForAlerts();
     });
 
-    describe('Asset criticality', () => {
-      it('should show asset criticality in the risk input panel', () => {
+    afterEach(() => {
+      cy.task('esArchiverUnload', { archiveName: 'risk_scores_new_complete_data' });
+      cy.task('esArchiverUnload', { archiveName: 'user_managed_data' });
+      deleteAlertsAndRules(); // esArchiverUnload doesn't work properly when using with `useCreate` and `docsOnly` flags
+      deleteCriticality({ idField: 'host.name', idValue: SIEM_KIBANA_HOST_NAME });
+      deleteCriticality({ idField: 'user.name', idValue: USER_NAME });
+    });
+
+    describe('User details', () => {
+      it('should display entity flyout and open risk input panel', () => {
         expandFirstAlertUserFlyout();
+
+        cy.log('header section');
+        cy.get(USER_PANEL_HEADER).should('contain.text', USER_NAME);
+
+        cy.log('risk input');
+        expandRiskInputsFlyoutPanel();
+        cy.get(RISK_INPUT_PANEL_HEADER).should('exist');
+      });
+
+      describe('Asset criticality', () => {
+        it('should show asset criticality in the risk input panel', () => {
+          expandFirstAlertUserFlyout();
+          expandRiskInputsFlyoutPanel();
+          cy.get(ASSET_CRITICALITY_BADGE).should('contain.text', 'Extreme Impact');
+        });
+
+        it('should display asset criticality accordion', () => {
+          cy.log('asset criticality');
+          expandFirstAlertUserFlyout();
+          cy.get(ENTITY_DETAILS_FLYOUT_ASSET_CRITICALITY_SELECTOR).should(
+            'contain.text',
+            'Asset Criticality'
+          );
+
+          cy.get(ENTITY_DETAILS_FLYOUT_ASSET_CRITICALITY_BUTTON).should('have.text', 'Assign');
+        });
+
+        it('should display asset criticality modal', () => {
+          cy.log('asset criticality modal');
+          expandFirstAlertUserFlyout();
+          toggleAssetCriticalityModal();
+          cy.get(ENTITY_DETAILS_FLYOUT_ASSET_CRITICALITY_MODAL_TITLE).should(
+            'have.text',
+            'Change asset criticality'
+          );
+        });
+
+        it('should update asset criticality state', () => {
+          cy.log('asset criticality update');
+          expandFirstAlertUserFlyout();
+          selectAssetCriticalityLevel('High Impact');
+          cy.get(ENTITY_DETAILS_FLYOUT_ASSET_CRITICALITY_LEVEL)
+            .contains('High Impact')
+            .should('be.visible');
+        });
+        it('should unassign asset criticality state', () => {
+          cy.log('asset criticality update');
+          expandFirstAlertUserFlyout();
+          selectAssetCriticalityLevel('High Impact');
+          cy.get(ENTITY_DETAILS_FLYOUT_ASSET_CRITICALITY_LEVEL)
+            .contains('High Impact')
+            .should('be.visible');
+          selectAssetCriticalityLevel('Unassigned');
+          cy.get(ENTITY_DETAILS_FLYOUT_ASSET_CRITICALITY_LEVEL)
+            .contains('Unassigned')
+            .should('be.visible');
+        });
+      });
+    });
+
+    describe('Host details', () => {
+      it('should display entity flyout and open risk input panel', () => {
+        expandFirstAlertHostFlyout();
+
+        cy.log('header section');
+        cy.get(HOST_PANEL_HEADER).should('contain.text', SIEM_KIBANA_HOST_NAME);
+
+        cy.log('risk input');
+        expandRiskInputsFlyoutPanel();
+        cy.get(RISK_INPUT_PANEL_HEADER).should('exist');
+      });
+
+      it('should show asset criticality in the risk input panel', () => {
+        expandFirstAlertHostFlyout();
         expandRiskInputsFlyoutPanel();
         cy.get(ASSET_CRITICALITY_BADGE).should('contain.text', 'Extreme Impact');
       });
 
       it('should display asset criticality accordion', () => {
         cy.log('asset criticality');
-        expandFirstAlertUserFlyout();
+        expandFirstAlertHostFlyout();
         cy.get(ENTITY_DETAILS_FLYOUT_ASSET_CRITICALITY_SELECTOR).should(
           'contain.text',
           'Asset Criticality'
@@ -83,7 +160,7 @@ describe('Entity Flyout', { tags: ['@ess', '@serverless'] }, () => {
 
       it('should display asset criticality modal', () => {
         cy.log('asset criticality modal');
-        expandFirstAlertUserFlyout();
+        expandFirstAlertHostFlyout();
         toggleAssetCriticalityModal();
         cy.get(ENTITY_DETAILS_FLYOUT_ASSET_CRITICALITY_MODAL_TITLE).should(
           'have.text',
@@ -93,73 +170,12 @@ describe('Entity Flyout', { tags: ['@ess', '@serverless'] }, () => {
 
       it('should update asset criticality state', () => {
         cy.log('asset criticality update');
-        expandFirstAlertUserFlyout();
+        expandFirstAlertHostFlyout();
         selectAssetCriticalityLevel('High Impact');
         cy.get(ENTITY_DETAILS_FLYOUT_ASSET_CRITICALITY_LEVEL)
           .contains('High Impact')
           .should('be.visible');
       });
-      it('should unassign asset criticality state', () => {
-        cy.log('asset criticality update');
-        expandFirstAlertUserFlyout();
-        selectAssetCriticalityLevel('High Impact');
-        cy.get(ENTITY_DETAILS_FLYOUT_ASSET_CRITICALITY_LEVEL)
-          .contains('High Impact')
-          .should('be.visible');
-        selectAssetCriticalityLevel('Unassigned');
-        cy.get(ENTITY_DETAILS_FLYOUT_ASSET_CRITICALITY_LEVEL)
-          .contains('Unassigned')
-          .should('be.visible');
-      });
     });
-  });
-
-  describe('Host details', () => {
-    it('should display entity flyout and open risk input panel', () => {
-      expandFirstAlertHostFlyout();
-
-      cy.log('header section');
-      cy.get(HOST_PANEL_HEADER).should('contain.text', SIEM_KIBANA_HOST_NAME);
-
-      cy.log('risk input');
-      expandRiskInputsFlyoutPanel();
-      cy.get(RISK_INPUT_PANEL_HEADER).should('exist');
-    });
-
-    it('should show asset criticality in the risk input panel', () => {
-      expandFirstAlertHostFlyout();
-      expandRiskInputsFlyoutPanel();
-      cy.get(ASSET_CRITICALITY_BADGE).should('contain.text', 'Extreme Impact');
-    });
-
-    it('should display asset criticality accordion', () => {
-      cy.log('asset criticality');
-      expandFirstAlertHostFlyout();
-      cy.get(ENTITY_DETAILS_FLYOUT_ASSET_CRITICALITY_SELECTOR).should(
-        'contain.text',
-        'Asset Criticality'
-      );
-
-      cy.get(ENTITY_DETAILS_FLYOUT_ASSET_CRITICALITY_BUTTON).should('have.text', 'Assign');
-    });
-
-    it('should display asset criticality modal', () => {
-      cy.log('asset criticality modal');
-      expandFirstAlertHostFlyout();
-      toggleAssetCriticalityModal();
-      cy.get(ENTITY_DETAILS_FLYOUT_ASSET_CRITICALITY_MODAL_TITLE).should(
-        'have.text',
-        'Change asset criticality'
-      );
-    });
-
-    it('should update asset criticality state', () => {
-      cy.log('asset criticality update');
-      expandFirstAlertHostFlyout();
-      selectAssetCriticalityLevel('High Impact');
-      cy.get(ENTITY_DETAILS_FLYOUT_ASSET_CRITICALITY_LEVEL)
-        .contains('High Impact')
-        .should('be.visible');
-    });
-  });
-});
+  }
+);
