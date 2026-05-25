@@ -434,6 +434,7 @@ export interface WorkflowExecutionEngineModel
     | 'managedVersion'
   > {
   isTestRun?: boolean;
+  isEphemeral?: boolean;
   spaceId?: string;
 }
 
