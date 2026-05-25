@@ -234,7 +234,11 @@ export const dateHistogramOperation: OperationDefinition<
     };
   },
   toEsAggsFn: (column, columnId, indexPattern) => {
-    const { usedField, timeZone, interval } = getTimeZoneAndInterval(column, indexPattern);
+    const sourceField = column.sourceField ? column.sourceField : indexPattern.timeFieldName ?? '';
+    const { usedField, timeZone, interval } = getTimeZoneAndInterval(
+      { ...column, sourceField },
+      indexPattern
+    );
     const dropPartials = Boolean(
       column.params?.dropPartials &&
         // set to false when detached from time picker
@@ -245,7 +249,7 @@ export const dateHistogramOperation: OperationDefinition<
       id: columnId,
       enabled: true,
       schema: 'segment',
-      field: column.sourceField,
+      field: sourceField,
       time_zone: timeZone,
       useNormalizedEsInterval: !usedField?.aggregationRestrictions?.date_histogram,
       interval,
@@ -579,6 +583,12 @@ export const dateHistogramOperation: OperationDefinition<
         </p>
 
         <EuiBasicTable
+          tableCaption={i18n.translate(
+            'xpack.lens.indexPattern.dateHistogram.autoIntervalTableCaption',
+            {
+              defaultMessage: 'Auto date histogram interval thresholds',
+            }
+          )}
           items={search.aggs.boundsDescendingRaw.map(({ bound, boundLabel, intervalLabel }) => ({
             bound: typeof bound === 'number' ? infiniteBound : `${upToLabel} ${boundLabel}`,
             interval: intervalLabel,
