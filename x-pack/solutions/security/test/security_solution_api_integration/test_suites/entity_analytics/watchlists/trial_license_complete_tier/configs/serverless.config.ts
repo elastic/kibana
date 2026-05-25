@@ -18,6 +18,7 @@ export default createTestConfig({
     `--xpack.securitySolution.enableExperimental=${JSON.stringify([
       'endpointExceptionsMovedUnderManagement',
       'entityAnalyticsWatchlistEnabled',
+      'entityAnalyticsEntityStoreV2',
     ])}`,
     '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
   ],
