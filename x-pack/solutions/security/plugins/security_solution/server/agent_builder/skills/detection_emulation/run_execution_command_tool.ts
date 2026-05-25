@@ -79,7 +79,7 @@ export const createRunExecutionCommandTool = (
   deps: RunExecutionCommandToolDeps
 ): BuiltinSkillBoundedTool<typeof runExecutionCommandSchema> => {
   const { core, endpointService, config, logger, guardrails } = deps;
-  const { allowlist, rateLimiter } = guardrails;
+  const { allowlist, rateLimiter, idempotencyCache } = guardrails;
 
   return {
     id: 'security.detection-emulation.run-execution-command',
@@ -144,6 +144,7 @@ unrelated work.`,
           logger,
           allowlist,
           rateLimiter,
+          idempotencyCache,
           request,
           esClient,
           spaceId,

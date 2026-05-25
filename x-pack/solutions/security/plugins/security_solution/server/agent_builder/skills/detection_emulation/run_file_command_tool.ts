@@ -79,7 +79,7 @@ export const createRunFileCommandTool = (
   deps: RunFileCommandToolDeps
 ): BuiltinSkillBoundedTool<typeof runFileCommandSchema> => {
   const { core, endpointService, config, logger, guardrails } = deps;
-  const { allowlist, rateLimiter } = guardrails;
+  const { allowlist, rateLimiter, idempotencyCache } = guardrails;
 
   return {
     id: 'security.detection-emulation.run-file-command',
@@ -143,6 +143,7 @@ unrelated work.`,
           logger,
           allowlist,
           rateLimiter,
+          idempotencyCache,
           request,
           esClient,
           spaceId,

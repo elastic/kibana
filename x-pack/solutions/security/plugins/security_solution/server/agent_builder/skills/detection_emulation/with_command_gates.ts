@@ -23,6 +23,8 @@ import {
 } from '../../../lib/detection_emulation/execution/runner';
 import type { EmulationAllowlist } from '../../../lib/detection_emulation/execution/allowlist';
 import type { EmulationRateLimiter } from '../../../lib/detection_emulation/execution/rate_limiter';
+import type { EmulationIdempotencyCache } from '../../../lib/detection_emulation/execution/idempotency_cache';
+import { buildIdempotencyKey } from '../../../lib/detection_emulation/execution/idempotency_cache';
 import type { ActorContext } from '../../../lib/detection_emulation/execution/audit_context';
 import {
   getDetectionEmulationFeatureFlags,
@@ -57,16 +59,10 @@ export interface CommandGatesContext {
   logger: Logger;
   allowlist: EmulationAllowlist;
   rateLimiter: EmulationRateLimiter;
+  idempotencyCache?: EmulationIdempotencyCache;
   request: KibanaRequest;
   esClient: { asCurrentUser: ElasticsearchClient };
   spaceId: string;
-  /**
-   * PROD-2: actor attribution for the dispatched response action's
-   * audit comment. Each per-family tool builds this from its
-   * `runContext` + `callContext.toolCallId` so the comment carries
-   * `via=agent-builder ...` straight through to the audit trail.
-   * Optional for backward compat with any future non-tool caller.
-   */
   actorContext?: ActorContext;
 }
 
@@ -116,6 +112,7 @@ export const withCommandGates = async (
     logger,
     allowlist,
     rateLimiter,
+    idempotencyCache,
     config,
     endpointService,
     core,
@@ -216,6 +213,49 @@ export const withCommandGates = async (
       });
     }
 
+    // ── Gate 3.5: Idempotency cache ────────────────────────────────────────
+    // Deduplicates double-dispatch from LLM retries or network replays.
+    // Mirrors the REST route's idempotency gate so both surfaces are safe.
+    if (idempotencyCache) {
+      const idempotencyKey = buildIdempotencyKey({
+        spaceId,
+        emulationId,
+        command,
+        agentType,
+        endpointIds,
+      });
+      const cached = idempotencyCache.get(spaceId, idempotencyKey);
+      if (cached) {
+        logger.debug(
+          `Idempotency cache replay for emulation [${emulationId}] command [${command}] (action_id=${cached.actionId})`
+        );
+        if (cached.status === 'dispatched') {
+          return {
+            results: [
+              {
+                type: ToolResultType.other,
+                data: {
+                  success: true,
+                  action_id: cached.actionId,
+                  agent_type: cached.agentType,
+                  command: cached.command,
+                  status: cached.status,
+                  emulation_id: emulationId,
+                  endpoint_count: endpointIds.length,
+                  idempotent_replay: true,
+                },
+              },
+            ],
+          };
+        }
+        return toolError.executionError(errCtx, {
+          message: 'Failed to dispatch the emulation command.',
+          likelyCause: 'Internal error during command execution',
+          actionId: cached.actionId,
+        });
+      }
+    }
+
     // ── Gate 4: Atomic rate-limit acquire ───────────────────────────────────
     const acquireResult = rateLimiter.acquire(
       spaceId,
@@ -287,10 +327,30 @@ export const withCommandGates = async (
 
     if (result.status === 'error') {
       rateLimiter.release(rateLimitToken);
+      if (idempotencyCache) {
+        const key = buildIdempotencyKey({ spaceId, emulationId, command, agentType, endpointIds });
+        idempotencyCache.set(spaceId, key, {
+          actionId: result.actionId,
+          agentType,
+          command,
+          status: 'error',
+          error: result.error,
+        });
+      }
       return toolError.executionError(errCtx, {
         message: 'Failed to dispatch the emulation command.',
         likelyCause: 'Internal error during command execution',
         actionId: result.actionId,
+      });
+    }
+
+    if (idempotencyCache) {
+      const key = buildIdempotencyKey({ spaceId, emulationId, command, agentType, endpointIds });
+      idempotencyCache.set(spaceId, key, {
+        actionId: result.actionId,
+        agentType: result.agentType,
+        command: result.command,
+        status: result.status,
       });
     }
 

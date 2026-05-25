@@ -103,7 +103,7 @@ export const createRunProcessCommandTool = (
   deps: RunProcessCommandToolDeps
 ): BuiltinSkillBoundedTool<typeof runProcessCommandSchema> => {
   const { core, endpointService, config, logger, guardrails } = deps;
-  const { allowlist, rateLimiter } = guardrails;
+  const { allowlist, rateLimiter, idempotencyCache } = guardrails;
 
   return {
     id: 'security.detection-emulation.run-process-command',
@@ -171,6 +171,7 @@ unrelated work.`,
           logger,
           allowlist,
           rateLimiter,
+          idempotencyCache,
           request,
           esClient,
           spaceId,
