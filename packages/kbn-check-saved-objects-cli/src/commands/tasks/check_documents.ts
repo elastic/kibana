@@ -11,6 +11,7 @@ import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server
 import { diff } from 'jest-diff';
 import equal from 'fast-deep-equal';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import { RULE_IDS, SavedObjectsCheckError } from '../../findings';
 import type { Task, FixtureMap } from '../types';
 
 /**
@@ -146,12 +147,14 @@ export function checkDocuments({
         const closestDiff = diffs.reduce((best, current) =>
           current.totalChanges < best.totalChanges ? current : best
         );
-        const messages = [
-          `❌ A document of type '${type}' did NOT match any of the fixtures`,
-          `Closest match: fixtures['${version}'][${closestDiff.index}] (${relativePath})\n`,
-          closestDiff.diffResult,
-        ];
-        throw new Error(messages.join('\n'));
+        throw new SavedObjectsCheckError({
+          ruleId: RULE_IDS.DOCUMENTS_FIXTURE_MISMATCH,
+          severity: 'error',
+          typeName: type,
+          message: `A document of type '${type}' did NOT match any of the fixtures. Closest match: fixtures['${version}'][${closestDiff.index}] (${relativePath})\n${closestDiff.diffResult}`,
+          fixHint: `Update the fixture at '${relativePath}' to match the actual document structure.`,
+          docsAnchor: '#defining-model-versions',
+        });
       }
     });
   };
