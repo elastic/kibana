@@ -26,6 +26,7 @@ export type ApplicationConnectionsEntityKind = 'application' | 'connection';
 export interface RevokeApplicationConnectionsModalConnection {
   connectionId: string;
   connectionName?: string;
+  userId?: string;
   client: OAuthClient;
 }
 

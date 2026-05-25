@@ -17,10 +17,13 @@ import {
   EuiModalHeaderTitle,
   EuiSpacer,
   EuiText,
+  EuiTextColor,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import React, { useCallback } from 'react';
+
+import { getUserDisplayName } from '@kbn/user-profile-components';
 
 import { labels } from './constants/i18n';
 import type {
@@ -29,6 +32,7 @@ import type {
 } from './constants/types';
 import { useRevokeConnections } from './hooks/use_revoke_connections';
 import { useToasts } from './hooks/use_toasts';
+import { useCurrentUser } from '../../components/use_current_user';
 
 export interface RevokeApplicationConnectionsModalProps {
   connections: RevokeApplicationConnectionsModalConnection[];
@@ -44,6 +48,7 @@ export const RevokeApplicationConnectionsModal = ({
   const modalTitleId = useGeneratedHtmlId({ prefix: 'revokeApplicationConnectionsModalTitle' });
   const { revokeConnections, isRevoking } = useRevokeConnections();
   const { addSuccess, addDanger, addWarning } = useToasts();
+  const { value: currentUser } = useCurrentUser();
 
   const count = connections.length;
 
@@ -98,6 +103,18 @@ export const RevokeApplicationConnectionsModal = ({
       field: 'client.client_name',
       name: labels.revoke.clientNameColumn,
       render: (_value, item) => item.client.client_name ?? item.client.id,
+    },
+    {
+      field: 'userId',
+      name: labels.revoke.connectedByColumn,
+      render: (_value, item) => {
+        if (!item.userId) {
+          return <EuiTextColor color="subdued">{'—'}</EuiTextColor>;
+        }
+        return currentUser && item.userId === currentUser.username
+          ? getUserDisplayName(currentUser)
+          : item.userId;
+      },
     },
   ];
 

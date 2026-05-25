@@ -109,6 +109,10 @@ export const labels = {
       'xpack.security.management.applicationConnections.connectionColumns.authorizationDate',
       { defaultMessage: 'Authorization date' }
     ),
+    connectedBy: i18n.translate(
+      'xpack.security.management.applicationConnections.connectionColumns.connectedBy',
+      { defaultMessage: 'Connected by' }
+    ),
     status: i18n.translate(
       'xpack.security.management.applicationConnections.connectionColumns.status',
       { defaultMessage: 'Status' }
@@ -248,6 +252,10 @@ export const labels = {
     clientNameColumn: i18n.translate(
       'xpack.security.management.applicationConnections.revoke.clientNameColumn',
       { defaultMessage: 'Client name' }
+    ),
+    connectedByColumn: i18n.translate(
+      'xpack.security.management.applicationConnections.revoke.connectedByColumn',
+      { defaultMessage: 'Connected by' }
     ),
     calloutTitle: i18n.translate(
       'xpack.security.management.applicationConnections.revoke.calloutTitle',

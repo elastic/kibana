@@ -12,6 +12,8 @@ import React from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
 
 import { ApplicationConnections } from './application_connections';
+import { mockAuthenticatedUser } from '../../../../common/model/authenticated_user.mock';
+import { securityMock } from '../../../mocks';
 import { Providers } from '../application_connections_management_app';
 import { ApplicationConnectionsProvider } from '../context/application_connections_provider';
 
@@ -40,9 +42,13 @@ function setupHttpResponses(coreStart: CoreStartMock, responses: GetResponses) {
 
 function renderPage(coreStart: CoreStartMock) {
   const history = createMemoryHistory({ initialEntries: ['/'] });
+  const { authc } = securityMock.createSetup();
+  authc.getCurrentUser.mockResolvedValue(
+    mockAuthenticatedUser({ username: 'current_user', full_name: 'Current User' })
+  );
   return render(
     coreStart.rendering.addContext(
-      <Providers services={coreStart} history={history}>
+      <Providers services={coreStart} authc={authc} history={history}>
         <ApplicationConnectionsProvider>
           <ApplicationConnections />
         </ApplicationConnectionsProvider>
@@ -63,8 +69,6 @@ describe('ApplicationConnections', () => {
       clients: { clients: [] },
       connections: { connections: [] },
     });
-    // Stub Agent Builder URL resolution so we can verify the CTAs link to the
-    // right pages in the Agent Builder plugin.
     coreStart.application.getUrlForApp.mockImplementation((appId, options) => {
       return `/mock/app/${appId}${options?.path ?? ''}`;
     });
@@ -75,8 +79,6 @@ describe('ApplicationConnections', () => {
     expect(await findByText(/Get started with MCP clients/)).toBeInTheDocument();
     const addButton = await findByTestId('applicationConnectionsEmptyPromptAddButton');
     expect(addButton).toBeInTheDocument();
-    // The "Create MCP client (OAuth)" CTA navigates to the Agent Builder MCP
-    // client creation page.
     expect(addButton).toHaveAttribute(
       'href',
       '/mock/app/agent_builder/manage/tools/mcp_clients/new'
@@ -85,8 +87,6 @@ describe('ApplicationConnections', () => {
       await findByTestId('applicationConnectionsEmptyPromptLearnMoreLink')
     ).toBeInTheDocument();
 
-    // The header stays visible, including the inline "Manage MCP clients" link
-    // in the page description.
     const manageClientsLink = getByTestId('applicationConnectionsManageClientsLink');
     expect(manageClientsLink).toBeInTheDocument();
     expect(manageClientsLink).toHaveAttribute(
@@ -94,9 +94,6 @@ describe('ApplicationConnections', () => {
       '/mock/app/agent_builder/manage/tools/mcp_clients'
     );
 
-    // Mirroring agent_builder's `McpClientsTable`, the search bar and the
-    // table chrome stay mounted; the empty prompt is rendered inside the
-    // table's `noItemsMessage`.
     expect(getByPlaceholderText('Search')).toBeInTheDocument();
     expect(getByTestId('applicationConnectionsTable')).toBeInTheDocument();
   });
@@ -119,8 +116,6 @@ describe('ApplicationConnections', () => {
 
     expect(await findByText(/No MCP clients \(OAuth\)/)).toBeInTheDocument();
     expect(queryByText('Unused MCP app')).not.toBeInTheDocument();
-    // The row test-id is set by the table on each rendered row; a client
-    // with no connections is filtered out before rendering.
     expect(
       queryByTestId('applicationConnectionsListRow-client-without-conn')
     ).not.toBeInTheDocument();
@@ -162,19 +157,12 @@ describe('ApplicationConnections', () => {
     const { findByText, findByTestId, queryByTestId } = renderPage(coreStart);
 
     expect(await findByText('My MCP app')).toBeInTheDocument();
-    // Per the Figma "Group by client" view, the outer row is intentionally
-    // minimal: client name + total connection count notification badge
-    // (active + revoked), with no inline status badge or per-client revoke
-    // action. The revoke affordances live in the expanded sub-table and in
-    // the new "List view".
     const badge = await findByTestId('applicationConnectionsCount-client-a');
     expect(badge).toHaveTextContent('2');
     expect(queryByTestId('revokeClientAction-client-a')).not.toBeInTheDocument();
   });
 
   it('filters by status without leaking the filter syntax into the free-text search', async () => {
-    // Two clients: one fully active, one fully revoked. Selecting the
-    // "Active" status filter should keep only the active client.
     setupHttpResponses(coreStart, {
       clients: {
         clients: [
@@ -197,26 +185,18 @@ describe('ApplicationConnections', () => {
 
     const { findByText, findByRole, getByRole, getByText, queryByText } = renderPage(coreStart);
 
-    // Both clients render initially.
     expect(await findByText('Active app')).toBeInTheDocument();
     expect(await findByText('Revoked app')).toBeInTheDocument();
 
-    // Open the Status filter popover and choose "Connected". Targeting by ARIA
-    // roles isolates the filter UI from any other "Connected" text on the page
-    // (e.g. status pills inside the expanded sub-table or list view rows).
     fireEvent.click(getByRole('button', { name: /Status Selection/ }));
     fireEvent.click(await findByRole('option', { name: /Connected/ }));
 
-    // Revoked client should be filtered out; active client stays.
     await waitFor(() => {
       expect(queryByText('Revoked app')).not.toBeInTheDocument();
     });
     expect(getByText('Active app')).toBeInTheDocument();
   });
 
-  // The grouped view's status filter must drill into each client row so the
-  // badge count and the expanded sub-table only show connections matching the
-  // selected status, even when the client has mixed-status connections.
   function setupMixedStatusFixture() {
     setupHttpResponses(coreStart, {
       clients: {
@@ -302,20 +282,89 @@ describe('ApplicationConnections', () => {
       },
     });
 
-    const { findByText, getByTestId, queryByText } = renderPage(coreStart);
+    const { findByTestId, findByText, getByTestId, queryByText } = renderPage(coreStart);
 
     await findByText('My MCP app');
     fireEvent.click(getByTestId('expandRow-client-a'));
 
-    // Renamed column header
     expect(await findByText('Connection name')).toBeInTheDocument();
-    // Renamed "Created" -> "Authorization date"
     expect(await findByText('Authorization date')).toBeInTheDocument();
-    // Renamed status value "Active" -> "Connected"
     expect(await findByText('Connected')).toBeInTheDocument();
-    // Columns that shouldn't exist in the Figma mock
+    expect(await findByText('Connected by')).toBeInTheDocument();
+    expect(await findByTestId('applicationConnectionConnectedBy-conn-1')).toHaveTextContent('—');
     expect(queryByText('Scopes')).not.toBeInTheDocument();
-    expect(queryByText('Connected by')).not.toBeInTheDocument();
+  });
+
+  it('renders the current user display name when "Connected by" matches the signed-in user', async () => {
+    setupHttpResponses(coreStart, {
+      clients: {
+        clients: [
+          {
+            id: 'client-a',
+            client_name: 'My MCP app',
+            resource: 'cluster:elastic',
+          },
+        ],
+      },
+      connections: {
+        connections: [
+          {
+            id: 'conn-1',
+            client_id: 'client-a',
+            name: 'Laptop session',
+            resource: 'cluster:elastic',
+            user_id: 'current_user',
+          },
+        ],
+      },
+    });
+
+    const { findByTestId, getByTestId } = renderPage(coreStart);
+
+    await findByTestId('expandRow-client-a');
+    fireEvent.click(getByTestId('expandRow-client-a'));
+
+    await waitFor(() => {
+      expect(getByTestId('applicationConnectionConnectedBy-conn-1')).toHaveTextContent(
+        'Current User'
+      );
+    });
+  });
+
+  it('falls back to the raw user_id when "Connected by" does not match the signed-in user', async () => {
+    setupHttpResponses(coreStart, {
+      clients: {
+        clients: [
+          {
+            id: 'client-a',
+            client_name: 'My MCP app',
+            resource: 'cluster:elastic',
+          },
+        ],
+      },
+      connections: {
+        connections: [
+          {
+            id: 'conn-1',
+            client_id: 'client-a',
+            name: 'Laptop session',
+            resource: 'cluster:elastic',
+            user_id: 'other_cloud_user_id',
+          },
+        ],
+      },
+    });
+
+    const { findByTestId, getByTestId } = renderPage(coreStart);
+
+    await findByTestId('expandRow-client-a');
+    fireEvent.click(getByTestId('expandRow-client-a'));
+
+    await waitFor(() => {
+      expect(getByTestId('applicationConnectionConnectedBy-conn-1')).toHaveTextContent(
+        'other_cloud_user_id'
+      );
+    });
   });
 
   it('shows the bulk revoke toolbar when a per-row checkbox is selected', async () => {
@@ -348,18 +397,73 @@ describe('ApplicationConnections', () => {
     const innerTable = await findByTestId('applicationConnectionsChildTable-client-a');
     await findByText('Laptop session');
 
-    // Before selecting, no bulk revoke toolbar is visible.
     expect(queryByTestId('applicationConnectionsBulkRevokeButton')).not.toBeInTheDocument();
 
-    // Click the per-row checkbox (the header 'Select all' is hidden via CSS).
-    // The row checkbox is rendered via EuiCheckbox with an accessible label.
     const rowCheckbox = within(innerTable).getByLabelText(/Select connection 'Laptop session'/);
     fireEvent.click(rowCheckbox);
 
-    // Toolbar should now appear with the correct count.
     expect(await findByTestId('applicationConnectionsBulkRevokeButton')).toHaveTextContent(
       'Revoke 1 connection'
     );
+  });
+
+  it('renders the "Connected by" column in the revoke modal with current-user resolution', async () => {
+    setupHttpResponses(coreStart, {
+      clients: {
+        clients: [
+          {
+            id: 'client-a',
+            client_name: 'My MCP app',
+            resource: 'cluster:elastic',
+          },
+        ],
+      },
+      connections: {
+        connections: [
+          {
+            id: 'conn-1',
+            client_id: 'client-a',
+            name: 'Laptop session',
+            resource: 'cluster:elastic',
+            user_id: 'current_user',
+          },
+          {
+            id: 'conn-2',
+            client_id: 'client-a',
+            name: 'Desktop session',
+            resource: 'cluster:elastic',
+            user_id: 'other_cloud_user_id',
+          },
+          {
+            id: 'conn-3',
+            client_id: 'client-a',
+            name: 'Server session',
+            resource: 'cluster:elastic',
+          },
+        ],
+      },
+    });
+
+    const { findByText, findByTestId, getByTestId } = renderPage(coreStart);
+
+    await findByText('My MCP app');
+    fireEvent.click(getByTestId('expandRow-client-a'));
+
+    const revokeLink = await findByTestId('revokeConnection-conn-1');
+    fireEvent.click(revokeLink);
+    let modal = await findByTestId('applicationConnectionsRevokeModal');
+    expect(within(modal).getByText('Connected by')).toBeInTheDocument();
+    expect(within(modal).getByText('Current User')).toBeInTheDocument();
+    fireEvent.click(within(modal).getByTestId('applicationConnectionsRevokeCancelButton'));
+
+    fireEvent.click(await findByTestId('revokeConnection-conn-2'));
+    modal = await findByTestId('applicationConnectionsRevokeModal');
+    expect(within(modal).getByText('other_cloud_user_id')).toBeInTheDocument();
+    fireEvent.click(within(modal).getByTestId('applicationConnectionsRevokeCancelButton'));
+
+    fireEvent.click(await findByTestId('revokeConnection-conn-3'));
+    modal = await findByTestId('applicationConnectionsRevokeModal');
+    expect(within(modal).getByText('—')).toBeInTheDocument();
   });
 
   it('opens the confirm modal for a single connection revoke and calls the bulk-revoke API', async () => {
@@ -510,8 +614,6 @@ describe('ApplicationConnections', () => {
     expect(toggle).toBeInTheDocument();
     expect(within(toggle).getByTestId('applicationConnectionsViewModeGrouped')).toBeInTheDocument();
     expect(within(toggle).getByTestId('applicationConnectionsViewModeList')).toBeInTheDocument();
-    // Default view: the grouped-view in-memory table is mounted; the list
-    // view is not.
     expect(await findByTestId('applicationConnectionsInMemoryTable')).toBeInTheDocument();
     expect(queryByTestId('applicationConnectionsListView')).not.toBeInTheDocument();
   });
@@ -546,18 +648,14 @@ describe('ApplicationConnections', () => {
 
     const { findByText, findByTestId, queryByTestId, getByTestId } = renderPage(coreStart);
 
-    // Grouped view is the default: outer rows are clients.
     expect(await findByText('My MCP app')).toBeInTheDocument();
     expect(queryByTestId('applicationConnectionsListView')).not.toBeInTheDocument();
 
-    // Click the "List view" toggle option.
     fireEvent.click(getByTestId('applicationConnectionsViewModeList'));
 
-    // The list view now renders, with one row per connection.
     expect(await findByTestId('applicationConnectionsListView')).toBeInTheDocument();
     expect(await findByTestId('applicationConnectionsListViewRow-conn-1')).toBeInTheDocument();
     expect(await findByTestId('applicationConnectionsListViewRow-conn-2')).toBeInTheDocument();
-    // Grouped-view chrome should be gone.
     expect(queryByTestId('applicationConnectionsInMemoryTable')).not.toBeInTheDocument();
   });
 

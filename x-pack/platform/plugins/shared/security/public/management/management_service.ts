@@ -94,7 +94,7 @@ export class ManagementService {
 
     if (this.isUIAMEnabled) {
       this.securitySection.registerApp(
-        applicationConnectionsManagementApp.create({ getStartServices })
+        applicationConnectionsManagementApp.create({ authc, getStartServices })
       );
     }
 

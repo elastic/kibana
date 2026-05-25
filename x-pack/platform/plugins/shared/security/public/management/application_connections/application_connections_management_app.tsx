@@ -15,6 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { RegisterManagementAppArgs } from '@kbn/management-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import type { AuthenticationServiceSetup } from '@kbn/security-plugin-types-public';
 import { Router } from '@kbn/shared-ux-router';
 
 import { ApplicationConnectionsServicesContext } from './context/application_connections_services_context';
@@ -25,15 +26,17 @@ import {
   BreadcrumbsProvider,
   createBreadcrumbsChangeHandler,
 } from '../../components/breadcrumb';
+import { AuthenticationProvider } from '../../components/use_current_user';
 import type { PluginStartDependencies } from '../../plugin';
 
 interface CreateParams {
+  authc: AuthenticationServiceSetup;
   getStartServices: StartServicesAccessor<PluginStartDependencies>;
 }
 
 export const applicationConnectionsManagementApp = Object.freeze({
   id: 'application_connections',
-  create({ getStartServices }: CreateParams) {
+  create({ authc, getStartServices }: CreateParams) {
     return {
       id: this.id,
       order: 25,
@@ -50,6 +53,7 @@ export const applicationConnectionsManagementApp = Object.freeze({
           coreStart.rendering.addContext(
             <Providers
               services={coreStart}
+              authc={authc}
               history={history}
               onChange={createBreadcrumbsChangeHandler(coreStart.chrome, setBreadcrumbs)}
             >
@@ -76,12 +80,14 @@ export const applicationConnectionsManagementApp = Object.freeze({
 
 export interface ProvidersProps {
   services: CoreStart;
+  authc: AuthenticationServiceSetup;
   history: History;
   onChange?: BreadcrumbsChangeHandler;
 }
 
 export const Providers = ({
   services,
+  authc,
   history,
   onChange,
   children,
@@ -94,15 +100,19 @@ export const Providers = ({
 
   return (
     <KibanaContextProvider services={services}>
-      <QueryClientProvider client={queryClient}>
-        <Router history={history}>
-          <BreadcrumbsProvider onChange={onChange}>
-            <ApplicationConnectionsServicesContext.Provider value={applicationConnectionsServices}>
-              {children}
-            </ApplicationConnectionsServicesContext.Provider>
-          </BreadcrumbsProvider>
-        </Router>
-      </QueryClientProvider>
+      <AuthenticationProvider authc={authc}>
+        <QueryClientProvider client={queryClient}>
+          <Router history={history}>
+            <BreadcrumbsProvider onChange={onChange}>
+              <ApplicationConnectionsServicesContext.Provider
+                value={applicationConnectionsServices}
+              >
+                {children}
+              </ApplicationConnectionsServicesContext.Provider>
+            </BreadcrumbsProvider>
+          </Router>
+        </QueryClientProvider>
+      </AuthenticationProvider>
     </KibanaContextProvider>
   );
 };
