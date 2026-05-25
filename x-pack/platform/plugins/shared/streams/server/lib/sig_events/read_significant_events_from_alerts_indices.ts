@@ -58,7 +58,6 @@ export async function readSignificantEventsFromAlertsIndices(
     query,
     filters,
     searchMode,
-    alertsSource,
   } = params;
 
   const queryLinks = query
