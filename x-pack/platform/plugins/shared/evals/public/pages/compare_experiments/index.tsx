@@ -797,7 +797,7 @@ export const CompareExperimentsPage: React.FC = () => {
       <EuiFlexGroup gutterSize="m" responsive={false} alignItems="center">
         <EuiFlexItem>
           <ExperimentHeader
-            label={i18n.RUN_A_LABEL}
+            label={i18n.BASELINE_LABEL}
             experimentId={baselineId}
             executionId={executionIdForDetail}
             isNewer={isNewerA}
@@ -821,7 +821,7 @@ export const CompareExperimentsPage: React.FC = () => {
         </EuiFlexItem>
         <EuiFlexItem>
           <ExperimentHeader
-            label={i18n.RUN_B_LABEL}
+            label={i18n.TARGET_LABEL}
             experimentId={targetId}
             executionId={executionIdForDetailB}
             isNewer={isNewerA !== undefined ? !isNewerA : undefined}

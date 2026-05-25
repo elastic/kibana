@@ -11,26 +11,12 @@ export const PAGE_TITLE = i18n.translate('xpack.evals.compareExperiments.pageTit
   defaultMessage: 'Compare experiments',
 });
 
-export const EXPERIMENT_A_LABEL = i18n.translate(
-  'xpack.evals.compareExperiments.experimentALabel',
-  {
-    defaultMessage: 'Experiment A',
-  }
-);
-
-export const EXPERIMENT_B_LABEL = i18n.translate(
-  'xpack.evals.compareExperiments.experimentBLabel',
-  {
-    defaultMessage: 'Experiment B',
-  }
-);
-
-export const RUN_A_LABEL = i18n.translate('xpack.evals.compareExperiments.runALabel', {
-  defaultMessage: 'Run A',
+export const BASELINE_LABEL = i18n.translate('xpack.evals.compareExperiments.baselineLabel', {
+  defaultMessage: 'Baseline',
 });
 
-export const RUN_B_LABEL = i18n.translate('xpack.evals.compareExperiments.runBLabel', {
-  defaultMessage: 'Run B',
+export const TARGET_LABEL = i18n.translate('xpack.evals.compareExperiments.targetLabel', {
+  defaultMessage: 'Target',
 });
 
 export const COLUMN_DATASET = i18n.translate('xpack.evals.compareExperiments.columns.dataset', {

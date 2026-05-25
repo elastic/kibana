@@ -95,6 +95,37 @@ describe('buildIngestRequest', () => {
     expect(requests[0].scores).toHaveLength(1);
   });
 
+  it('uses explicit executionId for metadata.execution_id when provided', () => {
+    const requests = buildIngestRequest({
+      taskModel,
+      evaluatorModel,
+      repetitions: 1,
+      hostName: 'host-a',
+      gitMetadata: { branch: 'main', commitSha: 'abc123' },
+      executionId: 'suite-run-42',
+      source: { kind: 'event', event: createEvent() },
+    });
+
+    expect(requests).toHaveLength(1);
+    expect(requests[0].experiment_id).toBe('exp-1');
+    expect(requests[0].metadata.execution_id).toBe('suite-run-42');
+  });
+
+  it('falls back metadata.execution_id to experiment_id when executionId is omitted', () => {
+    const requests = buildIngestRequest({
+      taskModel,
+      evaluatorModel,
+      repetitions: 1,
+      hostName: 'host-a',
+      gitMetadata: { branch: null, commitSha: null },
+      source: { kind: 'event', event: createEvent({ experimentId: 'standalone-exp' }) },
+    });
+
+    expect(requests).toHaveLength(1);
+    expect(requests[0].experiment_id).toBe('standalone-exp');
+    expect(requests[0].metadata.execution_id).toBe('standalone-exp');
+  });
+
   it('builds one request per experiment', () => {
     const experiments: DatasetRunResult[] = [
       {

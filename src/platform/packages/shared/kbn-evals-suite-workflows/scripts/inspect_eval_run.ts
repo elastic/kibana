@@ -230,7 +230,7 @@ async function showModelComparison(client: Client, runId: string) {
     console.log(`Only ${modelIds.length} model(s) found. Compare needs 2+ models in the same run.`);
     console.log('Models found:', modelIds.join(', '));
     console.log(
-      '\nTo compare across runs, query two run_ids separately and use the "failures" mode.'
+      '\nTo compare across runs, query two execution_ids separately and use the "failures" mode.'
     );
     return;
   }
@@ -331,7 +331,7 @@ async function showEfficiency(client: Client, runId: string) {
   });
 
   if (efficiencyDocs.length === 0) {
-    console.log(`No Efficiency results for run_id: ${runId}`);
+    console.log(`No Efficiency results for execution_id: ${runId}`);
     return;
   }
 
