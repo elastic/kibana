@@ -122,16 +122,17 @@ export const CreateRuleMenu: React.FC<CreateRuleContextMenuProps> = ({ loading, 
       sessionId: session.sessionId,
     });
 
+    const newRuleLabel = i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.aiRuleCreationAttachmentLabel',
+      { defaultMessage: 'New Rule' }
+    );
     const emptyRuleAttachment: AttachmentInput = {
       id: SECURITY_RULE_ATTACHMENT_ID,
       type: SecurityAgentBuilderAttachments.rule,
-      description: i18n.translate(
-        'xpack.securitySolution.detectionEngine.createRule.aiRuleCreationAttachmentLabel',
-        { defaultMessage: 'New Rule' }
-      ),
+      description: newRuleLabel,
       data: {
         text: JSON.stringify({}),
-        attachmentLabel: 'New Rule',
+        attachmentLabel: newRuleLabel,
       },
     };
 
