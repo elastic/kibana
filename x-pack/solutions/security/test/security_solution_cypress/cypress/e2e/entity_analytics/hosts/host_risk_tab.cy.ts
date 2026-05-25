@@ -25,7 +25,7 @@ import { mockRiskEngineEnabled } from '../../../tasks/entity_analytics';
 describe(
   'risk tab',
   {
-    tags: ['@ess', '@serverless'],
+    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
     env: {
       ftrConfig: {
         kbnServerArgs: [
