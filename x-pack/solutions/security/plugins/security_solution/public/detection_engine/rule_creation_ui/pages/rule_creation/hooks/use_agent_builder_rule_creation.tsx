@@ -245,7 +245,19 @@ export const useAgentBuilderRuleCreation = ({
         const ruleToSync = syncRuleIdRef.current
           ? { ...formattedRule, id: syncRuleIdRef.current }
           : formattedRule;
-        addRuleAttachment(ruleToSync, ruleToSync.name || 'Rule');
+        addRuleAttachment(
+          ruleToSync,
+          ruleToSync.name ||
+            (syncRuleIdRef.current
+              ? i18n.translate(
+                  'xpack.securitySolution.detectionEngine.createRule.aiRuleCreationAttachmentLabelExisting',
+                  { defaultMessage: 'Rule' }
+                )
+              : i18n.translate(
+                  'xpack.securitySolution.detectionEngine.createRule.aiRuleCreationAttachmentLabel',
+                  { defaultMessage: 'New Rule' }
+                ))
+        );
         // Mark dirty on any form change so user edits are also savable from chat.
         aiRuleCreation.markDirty();
       } catch {
