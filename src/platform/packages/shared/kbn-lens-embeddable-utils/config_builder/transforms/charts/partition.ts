@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { LensPartitionLayerState, LensPartitionVisualizationState } from '@kbn/lens-common';
+import type {
+  FormBasedLayer,
+  LensPartitionLayerState,
+  LensPartitionVisualizationState,
+  TextBasedLayer,
+} from '@kbn/lens-common';
 import {
   LENS_LAYER_TYPES,
   PARTITION_EMPTY_SIZE_RADIUS,
@@ -17,6 +22,7 @@ import {
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { PaletteOutput } from '@kbn/coloring';
 import type { $Values } from 'utility-types';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 import type {
   PartitionConfig,
   PartitionConfigESQL,
@@ -28,6 +34,7 @@ import {
   buildDataSourceStateESQL,
   buildDataSourceStateNoESQL,
   buildDatasourceStates,
+  generateApiLayer,
   generateLayer,
   isFormBasedLayer,
   isTextBasedLayer,
@@ -80,7 +87,8 @@ type PartitionLensWithoutQueryAndFilters = Omit<PartitionLens, 'state'> & {
 
 const ACCESSOR = 'partition_value_accessor';
 
-function getAccessorName(type: 'group_by' | 'metric' | 'group_breakdown_by', index: number) {
+export type AccessorType = 'group_by' | 'metric' | 'group_breakdown_by';
+export function getAccessorName(type: 'group_by' | 'metric' | 'group_breakdown_by', index: number) {
   return `${ACCESSOR}_${type}_${index}`;
 }
 
@@ -294,20 +302,22 @@ function convertCollapseAPItoCollapseFns<P extends 'group_by' | 'group_breakdown
 function computeSharedPartitionLayerState(config: PartitionConfig) {
   const groupColouring = config.group_by?.find(({ color }) => color != null)?.color;
   const hasColorMapping = groupColouring != null && !('type' in groupColouring);
+  const collapseFns = Object.fromEntries(
+    convertCollapseAPItoCollapseFns(config, 'group_by').concat(
+      isAPIMosaicChartLayer(config)
+        ? convertCollapseAPItoCollapseFns(config, 'group_breakdown_by')
+        : []
+    )
+  );
+
   return {
     layerId: DEFAULT_LAYER_ID,
     layerType: LENS_LAYER_TYPES.DATA,
     ...convertAPINumberDisplayOption(config.styling?.values),
     ...convertAPILegendDisplayOption(config),
     ...convertAPIStaticColorToLensState(config),
-    collapseFns: Object.fromEntries(
-      convertCollapseAPItoCollapseFns(config, 'group_by').concat(
-        isAPIMosaicChartLayer(config)
-          ? convertCollapseAPItoCollapseFns(config, 'group_breakdown_by')
-          : []
-      )
-    ),
-    colorMapping: hasColorMapping ? fromColorMappingAPIToLensState(groupColouring) : undefined,
+    ...(Object.keys(collapseFns).length > 0 ? { collapseFns } : {}),
+    ...(hasColorMapping ? { colorMapping: fromColorMappingAPIToLensState(groupColouring) } : {}),
   };
 }
 
@@ -357,6 +367,7 @@ function buildVisualizationState(
   const primaryGroups = (config.group_by ?? []).map((_, index) =>
     getAccessorName('group_by', index)
   );
+
   const { colorMapping, ...sharedState } = computeSharedPartitionLayerState(config);
   const isLegacyColor = isLegacyColorPalette(colorMapping);
 
@@ -460,6 +471,7 @@ export function fromAPItoLensState(config: PartitionConfig): PartitionLensWithou
       adHocDataViews,
     },
     references,
+    version: LENS_ITEM_LATEST_VERSION,
   };
 }
 
@@ -543,15 +555,19 @@ function fromLensStateToAPIMetrics(
   const vizLayer = visualization.layers[0];
   const hasActiveGroupBy = getGroups(vizLayer).some((id) => !vizLayer.collapseFns?.[id]);
   const staticColouring = vizLayer.colorsByDimension;
+  // Mosaic metrics do not carry color in the API schema -> color is only owned by the breakdown dimensions
+  const supportsMetricColor = !isStateMosaicChart(visualization);
+  const colorForMetric = (id: string) =>
+    !supportsMetricColor || hasActiveGroupBy
+      ? undefined
+      : fromStaticColorLensStateToAPI(staticColouring?.[id]) ?? AUTO_COLOR;
 
   if (isTextBasedLayer(layer)) {
     return getMetrics(vizLayer).map(
       (id) =>
         stripUndefined({
           ...getValueApiColumn(id, layer),
-          color: hasActiveGroupBy
-            ? undefined
-            : fromStaticColorLensStateToAPI(staticColouring?.[id]) ?? AUTO_COLOR,
+          color: colorForMetric(id),
         }) as PartitionMetricItem
     );
   }
@@ -563,9 +579,7 @@ function fromLensStateToAPIMetrics(
     (id) =>
       stripUndefined({
         ...operationFromColumn(id, layer),
-        color: hasActiveGroupBy
-          ? undefined
-          : fromStaticColorLensStateToAPI(staticColouring?.[id]) ?? AUTO_COLOR,
+        color: colorForMetric(id),
       }) as PartitionMetricItem
   );
 }
@@ -576,7 +590,7 @@ function getUniqueIds(array: string[]): string[] {
 }
 
 // Helper function to overcome the failure of partition chart migrations (found in integration data_source)
-function getGroups(vizLayer: LensPartitionVisualizationState['layers'][0]): string[] {
+export function getGroups(vizLayer: LensPartitionVisualizationState['layers'][0]): string[] {
   if ('groups' in vizLayer && Array.isArray(vizLayer.groups)) {
     return getUniqueIds(vizLayer.groups);
   }
@@ -584,7 +598,7 @@ function getGroups(vizLayer: LensPartitionVisualizationState['layers'][0]): stri
 }
 
 // Helper function to overcome the failure of partition chart migrations (found in integration data_source)
-function getMetrics(vizLayer: LensPartitionVisualizationState['layers'][0]): string[] {
+export function getMetrics(vizLayer: LensPartitionVisualizationState['layers'][0]): string[] {
   if ('metric' in vizLayer && typeof vizLayer.metric === 'string') {
     return [vizLayer.metric];
   }
@@ -730,7 +744,11 @@ function fromLensStateToChartSpecificStylingAPI(
   // Pie chart has the label_position and donut_hole options
   if (isStatePieChart(visualization)) {
     return stripUndefined({
-      donut_hole: donutHoleSizeCompat.toAPI(vizLayer.emptySizeRatio),
+      donut_hole:
+        // At runtime, lens renders `shape: 'donut'` with an undefined `emptySizeRatio` as a SMALL donut
+        visualization.shape === 'donut'
+          ? donutHoleSizeCompat.toAPI(vizLayer.emptySizeRatio) ?? 's'
+          : undefined,
       labels: convertStateCategoryDisplayOption(vizLayer.categoryDisplay),
       values,
     });
@@ -749,7 +767,7 @@ function fromLensStateToChartSpecificStylingAPI(
 
 function buildVisualizationAPI(
   visualization: LensPartitionVisualizationState,
-  layer: DataSourceStateLayer,
+  layer: Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer,
   adHocDataViews: Record<string, unknown>,
   references: SavedObjectReference[],
   adhocReferences: SavedObjectReference[]
@@ -760,6 +778,7 @@ function buildVisualizationAPI(
     : { metrics: metricsArray };
   return stripUndefined({
     type: isStatePieChart(visualization) ? 'pie' : visualization.shape,
+    ...generateApiLayer(layer),
     ...metricsField,
     group_by: fromLensStateToAPIGroups(visualization, layer),
     ...fromLensStateToAPISecondaryGroups(visualization, layer),

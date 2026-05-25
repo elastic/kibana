@@ -1,0 +1,135 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import {
+  PARTITION_EMPTY_SIZE_RADIUS,
+  type LensPartitionVisualizationState,
+} from '@kbn/lens-common';
+import type { ColorMapping } from '@kbn/coloring';
+import {
+  DEFAULT_CATEGORICAL_COLOR_MAPPING,
+  fromColorMappingAPIToLensState,
+} from '../../../../transforms/coloring';
+import type { LensAttributes } from '../../../../types';
+import type { NormalizerConfig } from './normalize';
+import { mergeNormalizers } from './normalize';
+import type { IdRemapping } from './common';
+import { DEFAULT_LAYER_ID, getCommonNormalizer } from './common';
+import type { AccessorType } from '../../../../transforms/charts/partition';
+import { getAccessorName, getGroups, getMetrics } from '../../../../transforms/charts/partition';
+
+type PartitionAttributes = Extract<LensAttributes, { visualizationType: 'lnsPie' }>;
+type PartitionLayer = LensPartitionVisualizationState['layers'][number];
+
+// Legacy partition SOs persisted the singular `metric` / `groups` fields instead
+// of `metrics` / `primaryGroups`. The transform tolerates both via `getMetrics`
+// / `getGroups`; reuse the same helpers here so the normalizer stays in sync
+// with the canonical legacy-detection logic and we don't crash on undefined
+// arrays.
+function getColumnRemapping({ layers }: LensPartitionVisualizationState): IdRemapping {
+  const layer = layers[0];
+  if (!layer) return [];
+
+  const remap = (ids: string[] | undefined, type: AccessorType): IdRemapping =>
+    (ids ?? []).map((id, index) => [id, getAccessorName(type, index)]);
+
+  return [
+    ...remap(getMetrics(layer), 'metric'),
+    ...remap(getGroups(layer), 'group_by'),
+    ...remap(layer.secondaryGroups, 'group_breakdown_by'),
+  ];
+}
+
+function remapAccessors(ids: string[], idMap: Map<string, string>): string[] {
+  return ids.map((id) => idMap.get(id) ?? id);
+}
+
+const alignId: NormalizerConfig<PartitionAttributes> = {
+  original: (attributes) => {
+    const viz = attributes.state.visualization;
+    const layer = viz.layers[0];
+    if (!layer) return attributes;
+
+    const columnRemapping = getColumnRemapping(viz);
+    const idMap = new Map(
+      columnRemapping.filter((pair): pair is [string, string] => pair[0] != null)
+    );
+
+    // Canonicalize legacy `metric` (string) / `groups` (array) onto the `metrics` / `primaryGroups` fields
+    const legacyLayer = layer as PartitionLayer & { metric?: string; groups?: string[] };
+    layer.metrics = getMetrics(layer);
+    layer.primaryGroups = getGroups(layer);
+    delete legacyLayer.metric;
+    delete legacyLayer.groups;
+
+    layer.layerId = DEFAULT_LAYER_ID;
+    layer.metrics = remapAccessors(layer.metrics, idMap);
+    layer.primaryGroups = remapAccessors(layer.primaryGroups, idMap);
+    if (layer.secondaryGroups) {
+      layer.secondaryGroups = remapAccessors(layer.secondaryGroups, idMap);
+    }
+
+    return attributes;
+  },
+};
+
+const alignLegacyTypes: NormalizerConfig<PartitionAttributes> = {
+  original: (attributes) => {
+    const viz = attributes.state.visualization;
+    const layer = viz.layers[0];
+    if (!layer) return attributes;
+
+    // allowMultipleMetrics can be undefined -> default to false
+    layer.allowMultipleMetrics = layer.allowMultipleMetrics ?? false;
+
+    // colorMapping can be undefined -> default to the transformation of DEFAULT_CATEGORICAL_COLOR_MAPPING when there is grouping by
+    if (layer.primaryGroups.length > 0 && layer.colorMapping === undefined) {
+      layer.colorMapping = (
+        fromColorMappingAPIToLensState(DEFAULT_CATEGORICAL_COLOR_MAPPING) as {
+          colorMapping: ColorMapping.Config;
+        }
+      ).colorMapping;
+    }
+
+    // truncateLegend can be undefined -> default to false
+    layer.truncateLegend = layer.truncateLegend ?? false;
+
+    // emptySizeRatio can be undefined for donut charts -> runtime defaults to SMALL donut hole
+    // in order for the transformation to keep the donut shape, we need to default to SMALL at the transformation step
+    if (viz.shape === 'donut' && layer.emptySizeRatio === undefined) {
+      layer.emptySizeRatio = PARTITION_EMPTY_SIZE_RADIUS.SMALL;
+    }
+
+    return attributes;
+  },
+};
+
+const clearEmptySecondaryGroups: NormalizerConfig<PartitionAttributes> = {
+  original: (attributes) => {
+    const viz = attributes.state.visualization;
+    const layer = viz.layers[0];
+    if (!layer) return attributes;
+
+    if (layer.secondaryGroups?.length === 0) {
+      delete layer.secondaryGroups;
+    }
+
+    return attributes;
+  },
+};
+
+export const normalizePartition = mergeNormalizers<PartitionAttributes>([
+  getCommonNormalizer<PartitionAttributes>(({ state: { visualization } }) => ({
+    layerRemapping: [[visualization.layers[0]?.layerId, DEFAULT_LAYER_ID]],
+    columnRemapping: getColumnRemapping(visualization),
+  })),
+  alignId,
+  clearEmptySecondaryGroups,
+  alignLegacyTypes,
+]);
