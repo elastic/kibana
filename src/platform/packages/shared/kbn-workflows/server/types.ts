@@ -34,7 +34,8 @@ export type ManagedWorkflowOperationOptions = ManagedWorkflowOperationBaseOption
 export type ManagedWorkflowInstallOptions<TId extends ManagedWorkflowId> =
   ManagedWorkflowOperationBaseOptions & ManagedWorkflowInstallValuesOption<TId>;
 
-export type InternalManagedWorkflowInstallOptions = ManagedWorkflowOperationBaseOptions & {
+// Service installs can reuse persisted template values during reconciliation.
+export type ManagedWorkflowServiceInstallOptions = ManagedWorkflowOperationBaseOptions & {
   values?: ManagedWorkflowTemplateValues;
 };
 
