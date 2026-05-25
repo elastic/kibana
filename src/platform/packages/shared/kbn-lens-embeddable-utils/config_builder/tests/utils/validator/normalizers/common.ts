@@ -12,6 +12,7 @@ import { orderBy } from 'lodash';
 import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import type { Reference } from '@kbn/content-management-utils';
 import type {
+  DataType,
   FormBasedPersistedState,
   GenericIndexPatternColumn,
   ReferenceBasedIndexPatternColumn,
@@ -61,6 +62,8 @@ const COMMON_STATE_IGNORE_PATHS = [
   'state.adHocDataViews.*.allowHidden', // hardcoded to false by transform; if original was true, hidden indices would no longer be queried
   'state.adHocDataViews.*.fieldFormats', // custom field formats (e.g. url formatters) will be lost
   'state.adHocDataViews.*.runtimeFieldMap', // runtime field definitions will be lost
+  // TODO: check missing/different properties on colorMapping
+  'state.visualization.columns.*.colorMapping.assignments.*.touched', // dropped at state -> API and only applied from API -> State, hardcoded to false by transform
 ];
 
 export const DEFAULT_LAYER_ID = 'layer_0';
@@ -286,10 +289,18 @@ function normalizeDescription(attributes: LensAttributes) {
 }
 
 /**
- * dataType cannot be preserved through transforms — it falls back to the
+ * dataType cannot always be preserved through transforms — it usually falls back to the
  * actual field type at runtime. These are the known remappings the transform applies.
+ *
+ * Some charts (e.g. datatable) can derive a more accurate dataType from extra context
+ * (color config, etc.) and provide it via `inferred`. When supplied, it overrides the
+ * generic fallback rules below; otherwise the default coercions are applied.
  */
-function normalizeDataTypes(col: GenericIndexPatternColumn) {
+function normalizeDataTypes(col: GenericIndexPatternColumn, inferred?: DataType) {
+  if (inferred !== undefined) {
+    col.dataType = inferred;
+    return;
+  }
   const { dataType, isBucketed, operationType } = col;
   if (operationType === 'terms' && dataType === 'number') {
     col.dataType = 'string';
@@ -374,13 +385,23 @@ function normalizeColumnReferences(
   }
 }
 
+export interface CommonNormalizerArgs {
+  layerRemapping: IdRemapping;
+  columnRemapping: IdRemapping;
+  /**
+   * Optional per-chart dataType inference. When provided and returns a value,
+   * it overrides the generic blanket coercions in `normalizeDataTypes`.
+   */
+  inferColumnDataType?: (newColumnId: string) => DataType | undefined;
+}
+
 export const getCommonNormalizer = <T extends LensAttributes>(
-  getArgs: (attributes: T) => { layerRemapping: IdRemapping; columnRemapping: IdRemapping }
+  getArgs: (attributes: T) => CommonNormalizerArgs
 ): NormalizerConfig<T> => ({
   order: -1,
   ignore: COMMON_STATE_IGNORE_PATHS,
   original: (attributes: T) => {
-    const { layerRemapping, columnRemapping } = getArgs(attributes);
+    const { layerRemapping, columnRemapping, inferColumnDataType } = getArgs(attributes);
 
     normalizeAdHocDataViews(attributes);
     normalizeESQLQuery(attributes);
@@ -472,7 +493,7 @@ export const getCommonNormalizer = <T extends LensAttributes>(
               layer.linkToLayers = layer.linkToLayers?.map((l) => layerIdMap.get(l) ?? l);
             }
 
-            for (const col of Object.values(layer.columns)) {
+            for (const [columnId, col] of Object.entries(layer.columns)) {
               // scale is not preserved through transforms
               delete col.scale;
 
@@ -483,7 +504,7 @@ export const getCommonNormalizer = <T extends LensAttributes>(
               }
 
               normalizeColumnReferences(col, columnIdMap);
-              normalizeDataTypes(col);
+              normalizeDataTypes(col, inferColumnDataType?.(columnId));
             }
           }
           return ds;
