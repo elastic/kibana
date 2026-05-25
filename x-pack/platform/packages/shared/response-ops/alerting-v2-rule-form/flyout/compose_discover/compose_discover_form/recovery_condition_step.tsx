@@ -173,7 +173,13 @@ export function RecoveryConditionStep({
             </strong>
           </EuiText>
           <EuiSpacer size="xs" />
-          <QuerySummary query={baseQuery} label="base query" />
+          <QuerySummary
+            query={baseQuery}
+            emptyMessage={i18n.translate(
+              'xpack.alertingV2.composeDiscover.recoveryCondition.noBaseQueryDefined',
+              { defaultMessage: 'No base query defined' }
+            )}
+          />
           <EuiSpacer size="m" />
           <EuiText size="xs" color="subdued">
             <strong>
@@ -184,7 +190,13 @@ export function RecoveryConditionStep({
             </strong>
           </EuiText>
           <EuiSpacer size="xs" />
-          <QuerySummary query={recoveryBlock} label="recovery condition" />
+          <QuerySummary
+            query={recoveryBlock}
+            emptyMessage={i18n.translate(
+              'xpack.alertingV2.composeDiscover.recoveryCondition.noRecoveryConditionDefined',
+              { defaultMessage: 'No recovery condition defined' }
+            )}
+          />
           <EuiSpacer size="s" />
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
