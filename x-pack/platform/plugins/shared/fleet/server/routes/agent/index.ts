@@ -13,7 +13,7 @@ import { API_VERSIONS } from '../../../common/constants';
 import {
   GetCollectorGroupsRequestSchema,
   GetCollectorGroupsResponseSchema,
-} from '../../../common/types';
+} from '../../../common/types/rest_spec/collector';
 import { getRouteRequiredAuthz, type FleetAuthzRouter } from '../../services/security';
 import { parseExperimentalConfigValue } from '../../../common/experimental_features';
 
