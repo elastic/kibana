@@ -78,7 +78,10 @@ import {
   WORKFLOW_RUN_TASK_TYPE,
   WORKFLOW_SCHEDULED_TASK_TYPE,
 } from './workflow_task_manager/types';
-import { WorkflowTaskManager } from './workflow_task_manager/workflow_task_manager';
+import {
+  getWorkflowGlobalTimeoutResumeTaskId,
+  WorkflowTaskManager,
+} from './workflow_task_manager/workflow_task_manager';
 import { createWorkflowTaskAbortController } from './workflow_task_shutdown';
 import { createIndexes } from '../common';
 
@@ -1277,6 +1280,16 @@ export class WorkflowsExecutionEnginePlugin
         spaceId,
         fakeRequest: request,
       });
+
+      await plugins.taskManager
+        .removeIfExists(getWorkflowGlobalTimeoutResumeTaskId(executionId))
+        .catch((error: unknown) => {
+          this.logger.warn(
+            `Failed to remove idle-timeout resume task (execution=${executionId}): ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
+        });
 
       // Same idea as cancel: nudge TM so the resume task runs as soon as possible
       await workflowTaskManager.forceRunIdleTasks(executionId);
