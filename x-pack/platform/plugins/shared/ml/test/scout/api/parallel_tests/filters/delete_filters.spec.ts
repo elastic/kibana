@@ -9,13 +9,11 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { mlApiTest as apiTest, INTERNAL_API_HEADERS } from '../../fixtures';
 
-// TODO: Add the ECH cloud tag once support for custom roles is implemented.
-// See related issue: https://github.com/elastic/kibana/issues/259284
 apiTest.describe(
   'delete_filters',
   {
     tag: [
-      '@local-stateful-classic',
+      ...tags.stateful.classic,
       ...tags.serverless.observability.complete,
       ...tags.serverless.security.complete,
     ],
