@@ -61,13 +61,6 @@ export const LogRateAnalysisAppState: FC<LogRateAnalysisAppStateProps> = ({
   headerContent,
 }) => {
   if (!dataView) {
-    if (headerContent !== undefined) {
-      return (
-        <AiopsAppContext.Provider value={appContextValue}>
-          <UrlStateProvider>{headerContent}</UrlStateProvider>
-        </AiopsAppContext.Provider>
-      );
-    }
     return null;
   }
 

@@ -55,13 +55,6 @@ export const LogCategorizationAppState: FC<LogCategorizationAppStateProps> = ({
   headerContent,
 }) => {
   if (!dataView) {
-    if (headerContent !== undefined) {
-      return (
-        <AiopsAppContext.Provider value={appContextValue}>
-          <UrlStateProvider>{headerContent}</UrlStateProvider>
-        </AiopsAppContext.Provider>
-      );
-    }
     return null;
   }
 

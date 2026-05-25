@@ -97,13 +97,6 @@ export const ChangePointDetectionAppState: FC<ChangePointDetectionAppStateProps>
   );
 
   if (!dataView) {
-    if (headerContent !== undefined) {
-      return (
-        <AiopsAppContext.Provider value={appContextValue}>
-          <UrlStateProvider>{headerContent}</UrlStateProvider>
-        </AiopsAppContext.Provider>
-      );
-    }
     return null;
   }
 
