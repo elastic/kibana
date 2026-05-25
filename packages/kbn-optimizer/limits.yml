@@ -9,7 +9,7 @@ pageLoadAssetSize:
   aiAssistantManagementSelection: 11569
   aiops: 15227
   alerting: 22371
-  alertingVTwo: 57086
+  alertingVTwo: 56591
   apm: 54371
   apmSourcesAccess: 2278
   automaticImport: 18629
@@ -29,7 +29,7 @@ pageLoadAssetSize:
   contentConnectors: 33014
   contentManagement: 8350
   controls: 10300
-  core: 3415547
+  core: 548600
   cps: 9209
   crossClusterReplication: 12662
   customIntegrations: 11715
@@ -56,7 +56,7 @@ pageLoadAssetSize:
   embeddableAlertsTable: 6524
   enterpriseSearch: 37565
   entityStore: 9718
-  esql: 29469
+  esql: 29547
   esqlDataGrid: 10209
   esUiShared: 101220
   evals: 6117
