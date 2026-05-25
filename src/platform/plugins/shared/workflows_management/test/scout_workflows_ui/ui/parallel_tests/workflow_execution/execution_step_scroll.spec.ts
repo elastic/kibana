@@ -68,6 +68,21 @@ test.describe('Workflow execution - Step scroll', { tag: [...tags.stateful.class
       await expectEditorScrolledTo('name: step_alpha');
     });
 
+    await test.step('editing while a step is highlighted does not jump back to that step', async () => {
+      await pageObjects.workflowEditor.setCursorToText('message: "Hotel executing last"');
+      await expectEditorScrolledTo('name: step_hotel');
+
+      const currentYaml = await pageObjects.workflowEditor.getYamlEditorValue();
+      await pageObjects.workflowEditor.setYamlEditorValue(`${currentYaml}
+
+  - name: step_india
+    type: console
+    with:
+      message: "India executing after hotel"`);
+
+      await expectEditorScrolledTo('name: step_hotel');
+    });
+
     await test.step('click trigger and verify editor scrolled to triggers section', async () => {
       await pageObjects.workflowExecution.executionPanel
         .getByRole('button', { name: 'manual' })
