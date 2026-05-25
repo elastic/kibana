@@ -48,7 +48,7 @@ apiTest.describe(
   () => {
     apiTest.beforeEach(async ({ apiServices }) => {
       for (const cal of TEST_CALENDARS) {
-        await apiServices.ml.anomalyDetection.calendars.createCalendar(cal.calendar_id, {
+        await apiServices.ml.anomalyDetection.calendars.create(cal.calendar_id, {
           job_ids: [...cal.job_ids],
           description: cal.description,
         });

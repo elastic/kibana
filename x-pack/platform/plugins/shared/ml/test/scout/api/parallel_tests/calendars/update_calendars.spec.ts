@@ -44,10 +44,7 @@ apiTest.describe(
   },
   () => {
     apiTest.beforeEach(async ({ apiServices }) => {
-      await apiServices.ml.anomalyDetection.calendars.createCalendar(
-        CALENDAR_ID,
-        ORIGINAL_CALENDAR
-      );
+      await apiServices.ml.anomalyDetection.calendars.create(CALENDAR_ID, ORIGINAL_CALENDAR);
       await apiServices.ml.anomalyDetection.calendars.createCalendarEvents(
         CALENDAR_ID,
         ORIGINAL_EVENTS

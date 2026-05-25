@@ -48,6 +48,7 @@ export interface MlADJobsApi {
   annotations: MlAnnotationsApi;
 }
 
+// Intentionally duplicated from the ML plugin to avoid a @kbn/scout → ml circular dep.
 export interface MlCalendar {
   calendar_id: string;
   description: string;
@@ -58,7 +59,7 @@ export interface MlCalendar {
 
 export interface MlCalendarsApi {
   /** Create an ML calendar via the Elasticsearch API */
-  createCalendar: (
+  create: (
     calendarId: string,
     config?: { job_ids?: string[]; description?: string }
   ) => Promise<void>;
@@ -101,13 +102,13 @@ export interface MlFiltersApi {
 }
 
 export interface MlAnnotationsApi {
-  /** Get all ML annotations by querying Elasticsearch directly */
+  /** Get all ML annotations via the Elasticsearch API */
   getAll: () => Promise<Array<{ _id: string; _source: Annotation }>>;
-  /** Get an ML annotation by ID by querying Elasticsearch directly */
+  /** Get an ML annotation by ID via the Elasticsearch API */
   getById: (annotationId: string) => Promise<{ _id: string; _source: Annotation } | undefined>;
-  /** Wait for an annotation to exist by polling Elasticsearch directly */
+  /** Wait for an annotation to exist by polling the Elasticsearch API */
   waitForAnnotationToExist: (annotationId: string) => Promise<void>;
-  /** Wait for an annotation to be deleted by polling Elasticsearch directly */
+  /** Wait for an annotation to be deleted by polling the Elasticsearch API */
   waitForAnnotationNotToExist: (annotationId: string) => Promise<void>;
   /** Delete an annotation via the Kibana API */
   delete: (annotationId: string) => Promise<void>;
@@ -215,18 +216,14 @@ export const getMlApiHelper = (
   };
 
   const calendars: MlCalendarsApi = {
-    async createCalendar(
+    async create(
       calendarId: string,
       config: { job_ids?: string[]; description?: string } = {}
     ): Promise<void> {
-      await measurePerformanceAsync(
-        log,
-        `mlApi.calendars.createCalendar [${calendarId}]`,
-        async () => {
-          await esClient.ml.putCalendar({ calendar_id: calendarId, ...config });
-          await this.waitForCalendarToExist(calendarId);
-        }
-      );
+      await measurePerformanceAsync(log, `mlApi.calendars.create [${calendarId}]`, async () => {
+        await esClient.ml.putCalendar({ calendar_id: calendarId, ...config });
+        await this.waitForCalendarToExist(calendarId);
+      });
     },
 
     async createCalendarEvents(
