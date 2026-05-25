@@ -343,6 +343,24 @@ describe('ActionPolicyCanvasContent', () => {
 
       expect(mockGetRule).not.toHaveBeenCalled();
     });
+
+    it('uses data.ruleId directly for single_rule policies instead of parsing matcher', async () => {
+      await renderCanvas({
+        data: { type: 'single_rule', ruleId: 'direct-rule-id', matcher: null },
+      });
+
+      expect(mockGetRule).toHaveBeenCalledWith('direct-rule-id', expect.any(AbortSignal));
+      expect(mockGetRule).toHaveBeenCalledTimes(1);
+    });
+
+    it('prefers data.ruleId over matcher when both are present', async () => {
+      await renderCanvas({
+        data: { ruleId: 'from-ruleId', matcher: 'rule.id: "from-matcher"' },
+      });
+
+      expect(mockGetRule).toHaveBeenCalledWith('from-ruleId', expect.any(AbortSignal));
+      expect(mockGetRule).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('mounted guard', () => {
