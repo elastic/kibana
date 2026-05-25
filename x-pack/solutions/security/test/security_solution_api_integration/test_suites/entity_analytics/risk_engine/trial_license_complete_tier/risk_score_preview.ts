@@ -67,7 +67,7 @@ export default ({ getService }: FtrProviderContext): void => {
     return await previewRiskScores({ body: {} });
   };
 
-  describe('@ess @serverless Risk Scoring Preview API', () => {
+  describe('@ess @serverless @skipInServerlessMKI Risk Scoring Preview API', () => {
     context('with auditbeat data', () => {
       const { indexListOfDocuments } = dataGeneratorFactory({
         es,
