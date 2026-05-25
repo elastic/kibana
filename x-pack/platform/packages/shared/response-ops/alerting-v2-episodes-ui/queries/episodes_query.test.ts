@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { buildEpisodesBaseQuery, buildEpisodesQuery } from './episodes_query';
+import {
+  buildEpisodesBaseQuery,
+  buildEpisodesHistogramQuery,
+  buildEpisodesKpisQuery,
+  buildEpisodesQuery,
+} from './episodes_query';
 import {
   PAGE_SIZE_ESQL_VARIABLE,
   ALERT_EVENTS_DATA_STREAM,
@@ -298,6 +303,121 @@ describe('buildEpisodesQuery', () => {
 
     expect(queryString).toContain('QSTR("alert.name: \\"test\\"")');
     expect(queryString).toContain('WHERE last_assignee_uid == "user-123"');
+  });
+});
+
+describe('buildEpisodesHistogramQuery', () => {
+  it('includes first_timestamp, last_timestamp, and episode.status in KEEP', () => {
+    const output = buildEpisodesHistogramQuery('default');
+    expect(output).toMatch(/first_timestamp/);
+    expect(output).toMatch(/last_timestamp/);
+    expect(output).toMatch(/episode\.status/);
+  });
+
+  it('includes LIMIT 10000', () => {
+    const output = buildEpisodesHistogramQuery('default');
+    expect(output).toContain('10000');
+  });
+
+  it('does not include a SORT command', () => {
+    const output = buildEpisodesHistogramQuery('default');
+    expect(output.toUpperCase()).not.toContain('SORT');
+  });
+
+  it('includes the breakdown field in the output when provided', () => {
+    const output = buildEpisodesHistogramQuery('default', undefined, 'rule.id');
+    expect(output).toMatch(/rule\.id/);
+  });
+
+  it('includes the status filter when filterState.status is provided', () => {
+    const output = buildEpisodesHistogramQuery('default', { status: 'active' });
+    expect(output).toMatch(/effective_status/);
+    expect(output).toContain('active');
+  });
+
+  it('includes the ruleId filter when filterState.ruleId is provided', () => {
+    const output = buildEpisodesHistogramQuery('default', { ruleId: 'rule-abc' });
+    expect(output).toContain('rule-abc');
+  });
+
+  it('includes the tags filter when filterState.tags is provided', () => {
+    const output = buildEpisodesHistogramQuery('default', { tags: ['critical', 'prod'] });
+    expect(output).toMatch(/critical/);
+    expect(output).toMatch(/prod/);
+  });
+
+  it('includes the assigneeUid filter when filterState.assigneeUid is provided', () => {
+    const output = buildEpisodesHistogramQuery('default', { assigneeUid: 'user-xyz' });
+    expect(output).toContain('user-xyz');
+  });
+});
+
+describe('buildEpisodesKpisQuery', () => {
+  const SPACE = 'default';
+  const UID = 'user-abc-123';
+
+  it('produces a STATS command with all six KPI aggregations', () => {
+    const output = buildEpisodesKpisQuery(SPACE, UID);
+    expect(output).toContain('STATS');
+    expect(output).toContain('alerts_count');
+    expect(output).toContain('firing_rules');
+    expect(output).toContain('assigned_to_me');
+    expect(output).toContain('unassigned');
+    expect(output).toContain('acknowledged');
+    expect(output).toContain('snoozed');
+  });
+
+  it('uses COUNT(*) for alerts_count to capture all matching episodes', () => {
+    const output = buildEpisodesKpisQuery(SPACE, UID);
+    expect(output).toMatch(/alerts_count\s*=\s*COUNT\(\*\)/);
+  });
+
+  it('uses COUNT_DISTINCT over a nullable rule.id column for firing_rules', () => {
+    const output = buildEpisodesKpisQuery(SPACE, UID);
+    expect(output).toMatch(/COUNT_DISTINCT\(_active_rule_id\)/);
+  });
+
+  it('embeds the currentUserUid in the assigned_to_me EVAL', () => {
+    const output = buildEpisodesKpisQuery(SPACE, UID);
+    expect(output).toContain(UID);
+    expect(output).toMatch(/SUM\(_assigned_to_me\)/);
+  });
+
+  it('uses IS NULL check for unassigned', () => {
+    const output = buildEpisodesKpisQuery(SPACE, UID);
+    expect(output).toContain('last_assignee_uid IS NULL');
+  });
+
+  it('checks last_ack_action for acknowledged', () => {
+    const output = buildEpisodesKpisQuery(SPACE, UID);
+    expect(output).toContain('last_ack_action == "ack"');
+  });
+
+  it('checks last_snooze_action and snooze_expiry for snoozed', () => {
+    const output = buildEpisodesKpisQuery(SPACE, UID);
+    expect(output).toContain('last_snooze_action == "snooze"');
+    expect(output).toContain('snooze_expiry IS NOT NULL');
+  });
+
+  it('applies queryString filter when provided', () => {
+    const output = buildEpisodesKpisQuery(SPACE, UID, { queryString: 'alert.name: "cpu"' });
+    expect(output).toContain('QSTR(');
+  });
+
+  it('does not include SORT or LIMIT', () => {
+    const output = buildEpisodesKpisQuery(SPACE, UID);
+    expect(output.toUpperCase()).not.toContain('SORT');
+    expect(output.toUpperCase()).not.toContain('LIMIT');
+  });
+
+  it('applies status filter when provided', () => {
+    const output = buildEpisodesKpisQuery(SPACE, UID, { status: 'active' });
+    expect(output).toContain('WHERE effective_status == "active"');
+  });
+
+  it('applies ruleId filter when provided', () => {
+    const output = buildEpisodesKpisQuery(SPACE, UID, { ruleId: 'rule-xyz' });
+    expect(output).toContain('WHERE rule.id == "rule-xyz"');
   });
 });
 

@@ -44,6 +44,7 @@ import type { AlertEpisodesKibanaServices } from '../../episodes_kibana_services
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import * as i18n from './translations';
 import { EpisodesFilterBar } from './components/episodes_filter_bar';
+import { EpisodesKpis } from './components/episodes_kpis';
 import { alertEpisodeToDataTableRecord } from './utils';
 import { dataTableRecordToEpisode } from './utils/data_table_record_to_episode';
 import { getDiscoverHrefForRuleAndEpisodeTimestamp } from '../../utils/discover_href_for_episode';
@@ -177,6 +178,15 @@ export const AlertEpisodesListPage = () => {
 
   const rows = useMemo(() => episodesData?.map(alertEpisodeToDataTableRecord), [episodesData]);
 
+  // Refresh the list and the KPIs (used for both the Refresh button and action callbacks).
+  const onRefresh = useCallback(() => {
+    refetch();
+    queryClient.invalidateQueries({ queryKey: ['episodesKpis'] });
+  }, [refetch, queryClient]);
+
+  // Refresh the list and the KPIs after any action that mutates episode state.
+  const onActionSuccess = onRefresh;
+
   const episodeActions: EpisodeAction[] = useMemo(
     () =>
       createEpisodeActions({
@@ -216,19 +226,19 @@ export const AlertEpisodesListPage = () => {
             <Control
               iconType={action.iconType}
               label={action.displayName}
-              onClick={() => action.execute({ episodes, onSuccess: refetch })}
+              onClick={() => action.execute({ episodes, onSuccess: onActionSuccess })}
               tooltipContent={action.displayName}
             />
           );
         },
       })),
-    [episodeActions, refetch]
+    [episodeActions, onActionSuccess]
   );
 
   const customBulkActions = useEpisodesBulkActions({
     actions: episodeActions,
     episodesData,
-    onSuccess: refetch,
+    onSuccess: onActionSuccess,
   });
 
   const assigneeUids = useMemo(
@@ -295,11 +305,13 @@ export const AlertEpisodesListPage = () => {
             onTimeChange={handleTimeChange}
             ruleOptions={ruleOptions}
             assigneeUids={assigneeUids}
-            onRefresh={() => refetch()}
+            onRefresh={onRefresh}
             isLoading={isLoading}
             services={services}
           />
-          <EuiSpacer size="s" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EpisodesKpis services={services} filterState={filterState} timeRange={timeRange} />
         </EuiFlexItem>
         <EuiFlexItem
           grow

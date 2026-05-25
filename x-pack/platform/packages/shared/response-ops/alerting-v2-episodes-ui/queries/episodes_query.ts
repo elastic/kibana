@@ -137,6 +137,21 @@ const addTagsFilter = (query: ComposerQuery, tags: string[]) => {
   query.pipe(`WHERE (${clause})`);
 };
 
+const applyFilterState = (query: ComposerQuery, filterState: EpisodesFilterState): void => {
+  if (filterState.status) {
+    query.where`effective_status == ${filterState.status}`;
+  }
+  if (filterState.ruleId) {
+    query.where`rule.id == ${filterState.ruleId}`;
+  }
+  if (filterState.tags?.length) {
+    addTagsFilter(query, filterState.tags);
+  }
+  if (filterState.assigneeUid) {
+    query.where`last_assignee_uid == ${filterState.assigneeUid}`;
+  }
+};
+
 /**
  * Builds an ES|QL query that aggregates episode data from `.rule-events` and
  * `.alert-actions` (last tags / deactivate state per group_hash, last assignee per episode),
@@ -185,23 +200,48 @@ export const buildEpisodesQuery = (
 
   const query = buildEpisodesBaseQuery(spaceId, filterState?.queryString?.trim());
 
-  if (filterState?.status) {
-    query.where`effective_status == ${filterState.status}`;
-  }
-
-  if (filterState?.ruleId) {
-    query.where`rule.id == ${filterState.ruleId}`;
-  }
-
-  if (filterState?.tags?.length) {
-    addTagsFilter(query, filterState.tags);
-  }
-
-  if (filterState?.assigneeUid) {
-    query.where`last_assignee_uid == ${filterState.assigneeUid}`;
+  if (filterState) {
+    applyFilterState(query, filterState);
   }
 
   return query.sort([sortField, sortDir]).pipe`LIMIT ${pageSizeParam}`.keep(
     ...ALERT_EPISODE_FIELDS
   );
+};
+
+/**
+ * Builds an ES|QL query that computes six KPI counts in a single STATS pass.
+ * Uses indicator EVALs (CASE-based 0/1 columns) so all aggregations can share
+ * one STATS command without sub-queries.
+ *
+ * Counts: active_alerts, firing_rules, assigned_to_me, unassigned, acknowledged, snoozed.
+ */
+export const buildEpisodesKpisQuery = (
+  spaceId: string,
+  currentUserUid: string,
+  filterState?: EpisodesFilterState
+): string => {
+  const query = buildEpisodesBaseQuery(spaceId, filterState?.queryString?.trim());
+
+  if (filterState) {
+    applyFilterState(query, filterState);
+  }
+
+  // Indicator columns — null for distinct count, 1/0 for sum-based counts
+  // prettier-ignore
+  query
+    .pipe`EVAL _active_rule_id = CASE(effective_status == "active", \`rule.id\`, null)`
+    .pipe(`EVAL _assigned_to_me = CASE(last_assignee_uid == ${escapeStringValue(currentUserUid)}, 1, 0)`)
+    .pipe`EVAL _is_unassigned  = CASE(last_assignee_uid IS NULL, 1, 0)`
+    .pipe`EVAL _is_acked       = CASE(last_ack_action == "ack", 1, 0)`
+    .pipe`EVAL _is_snoozed     = CASE(last_snooze_action == "snooze" AND snooze_expiry IS NOT NULL, 1, 0)`
+    .pipe`STATS
+      alerts_count   = COUNT(*),
+      firing_rules   = COUNT_DISTINCT(_active_rule_id),
+      assigned_to_me = SUM(_assigned_to_me),
+      unassigned     = SUM(_is_unassigned),
+      acknowledged   = SUM(_is_acked),
+      snoozed        = SUM(_is_snoozed)`;
+
+  return query.print('basic');
 };

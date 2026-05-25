@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, waitFor } from '@testing-library/react';
+import { act, render, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { AlertEpisodesListPage } from './alert_episodes_list_page';
@@ -16,7 +16,10 @@ import { UnifiedDataTable } from '@kbn/unified-data-table';
 import { fetchAlertingEpisodes } from '@kbn/alerting-v2-episodes-ui/apis/fetch_alerting_episodes';
 import { useAlertingEpisodesDataView } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_episodes_data_view';
 import { createMockSpaces } from '../../../common/utils/test_utils';
-import { createEpisodeActions } from '@kbn/alerting-v2-episodes-ui/actions';
+import {
+  createEpisodeActions,
+  type EpisodeActionContext,
+} from '@kbn/alerting-v2-episodes-ui/actions';
 
 jest.mock('@kbn/unified-data-table', () => ({
   DataLoadingState: { loading: 'loading', loaded: 'loaded' },
@@ -36,6 +39,19 @@ jest.mock('@kbn/alerting-v2-episodes-ui/actions', () => ({
 }));
 
 jest.mock('../../hooks/use_breadcrumbs', () => ({ useBreadcrumbs: jest.fn() }));
+
+jest.mock('./components/episodes_kpis', () => ({
+  EpisodesKpis: () => null,
+}));
+
+// Capture the onRefresh prop from EpisodesFilterBar so tests can invoke it directly.
+let capturedFilterBarOnRefresh: (() => void) | undefined;
+jest.mock('./components/episodes_filter_bar', () => ({
+  EpisodesFilterBar: jest.fn(({ onRefresh }: { onRefresh?: () => void }) => {
+    capturedFilterBarOnRefresh = onRefresh;
+    return null;
+  }),
+}));
 
 jest.mock('react-use/lib/useObservable', () =>
   jest.fn().mockReturnValue({ from: 'now-24h', to: 'now' })
@@ -184,5 +200,63 @@ describe('AlertEpisodesListPage', () => {
         expressions: mockServices.expressions,
       })
     );
+  });
+});
+
+describe('query invalidation', () => {
+  let mockInvalidateQueries: jest.SpyInstance;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    capturedFilterBarOnRefresh = undefined;
+    mockCreateEpisodeActions.mockReturnValue([]);
+    jest.mocked(useAlertingEpisodesDataView).mockReturnValue(mockDataView as any);
+    jest.mocked(fetchAlertingEpisodes).mockResolvedValue(mockEpisodes as any);
+    mockHttp.get.mockResolvedValue({ items: [] });
+    mockInvalidateQueries = jest
+      .spyOn(QueryClient.prototype, 'invalidateQueries')
+      .mockResolvedValue(undefined);
+  });
+
+  afterEach(() => {
+    mockInvalidateQueries.mockRestore();
+  });
+
+  it('invalidates episodesKpis when an episode action succeeds', async () => {
+    let capturedOnSuccess: (() => void) | undefined;
+    const mockAction = {
+      id: 'test-action',
+      order: 1,
+      displayName: 'Test Action',
+      iconType: 'star',
+      isCompatible: jest.fn(() => true),
+      execute: jest.fn(async ({ onSuccess }: EpisodeActionContext) => {
+        capturedOnSuccess = onSuccess;
+      }),
+    };
+    mockCreateEpisodeActions.mockReturnValue([mockAction]);
+
+    renderPage();
+
+    // Wait for the episodes to load so that customBulkActions is populated
+    await waitFor(() => {
+      const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
+      expect(lastCall?.customBulkActions?.length).toBeGreaterThan(0);
+    });
+
+    const bulkActions = getCapturedBulkActions();
+    const firstAction = bulkActions[0];
+
+    // Trigger the bulk action — this calls action.execute with an onSuccess callback
+    await act(async () => {
+      await firstAction.onClick({ selectedDocIds: ['ep1'] });
+    });
+
+    expect(capturedOnSuccess).toBeDefined();
+
+    // Simulate success — verify the KPIs query is invalidated
+    act(() => capturedOnSuccess!());
+
+    expect(mockInvalidateQueries).toHaveBeenCalledWith({ queryKey: ['episodesKpis'] });
   });
 });
