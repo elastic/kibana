@@ -83,10 +83,11 @@ export class ManagementPlugin
             title: mgmtApp.title,
             path: mgmtApp.basePath,
             keywords: mgmtApp.keywords,
-            // Default includes both 'classicSideNav' and 'solutionSideNav' so all management sections
-            // appear in both navigation modes. Sections that explicitly set visibleIn
-            // (e.g. to hide from globalSearch) must also include the relevant nav flags.
-            visibleIn: mgmtApp.visibleIn ?? ['globalSearch', 'classicSideNav', 'solutionSideNav'],
+            // Default excludes 'classicSideNav' so management sub-apps do not surface as
+            // top-level entries in the classic hamburger nav (the "Stack Management" app
+            // is the entry point there). 'solutionSideNav' is included so solution
+            // navigation trees can keep referencing them by id (e.g. 'management:dataViews').
+            visibleIn: mgmtApp.visibleIn ?? ['globalSearch', 'solutionSideNav'],
           })),
       }));
 

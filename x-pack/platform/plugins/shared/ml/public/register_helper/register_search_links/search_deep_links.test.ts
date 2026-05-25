@@ -45,28 +45,34 @@ describe('getDeepLinks', () => {
     ]);
   });
 
-  it('hidden nav nodes (breadcrumb-only) use solutionSideNav-only visibleIn', () => {
+  it('file upload / index data visualizer / data drift remain in globalSearch + solutionSideNav', () => {
+    const links = getDeepLinks(true, fullCapabilities, false);
+
+    expect(links.find((l) => l.id === 'fileUpload')?.visibleIn).toEqual([
+      'globalSearch',
+      'solutionSideNav',
+    ]);
+    expect(links.find((l) => l.id === 'indexDataVisualizer')?.visibleIn).toEqual([
+      'globalSearch',
+      'solutionSideNav',
+    ]);
+    expect(links.find((l) => l.id === 'dataDrift')?.visibleIn).toEqual([
+      'globalSearch',
+      'solutionSideNav',
+    ]);
+  });
+
+  it('breadcrumb-only *Page variants are hidden everywhere (visibleIn: [])', () => {
     const links = getDeepLinks(true, fullCapabilities, false);
     const aiOps = links.find((l) => l.id === 'aiOps');
 
-    expect(links.find((l) => l.id === 'fileUpload')?.visibleIn).toEqual(['solutionSideNav']);
-    expect(links.find((l) => l.id === 'indexDataVisualizer')?.visibleIn).toEqual([
-      'solutionSideNav',
-    ]);
-    expect(links.find((l) => l.id === 'indexDataVisualizerPage')?.visibleIn).toEqual([
-      'solutionSideNav',
-    ]);
-    expect(links.find((l) => l.id === 'dataDrift')?.visibleIn).toEqual(['solutionSideNav']);
-    expect(links.find((l) => l.id === 'dataDriftPage')?.visibleIn).toEqual(['solutionSideNav']);
-    expect(aiOps?.deepLinks?.find((l) => l.id === 'logRateAnalysisPage')?.visibleIn).toEqual([
-      'solutionSideNav',
-    ]);
-    expect(aiOps?.deepLinks?.find((l) => l.id === 'logPatternAnalysisPage')?.visibleIn).toEqual([
-      'solutionSideNav',
-    ]);
-    expect(aiOps?.deepLinks?.find((l) => l.id === 'changePointDetectionsPage')?.visibleIn).toEqual([
-      'solutionSideNav',
-    ]);
+    expect(links.find((l) => l.id === 'indexDataVisualizerPage')?.visibleIn).toEqual([]);
+    expect(links.find((l) => l.id === 'dataDriftPage')?.visibleIn).toEqual([]);
+    expect(aiOps?.deepLinks?.find((l) => l.id === 'logRateAnalysisPage')?.visibleIn).toEqual([]);
+    expect(aiOps?.deepLinks?.find((l) => l.id === 'logPatternAnalysisPage')?.visibleIn).toEqual([]);
+    expect(aiOps?.deepLinks?.find((l) => l.id === 'changePointDetectionsPage')?.visibleIn).toEqual(
+      []
+    );
   });
 
   it('omits links when capabilities or license are insufficient', () => {
