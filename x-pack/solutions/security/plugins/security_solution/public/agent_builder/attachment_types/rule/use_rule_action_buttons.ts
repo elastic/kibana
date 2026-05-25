@@ -23,7 +23,7 @@ import {
   getEditRuleUrl,
   getRuleDetailsUrl,
 } from '../../../common/components/link_to/redirect_to_detection_engine';
-import { isOnRuleFormPage } from './helpers';
+import { getSavedRuleId, isOnRuleFormPage } from './helpers';
 import type { RuleResponse } from '../../../../common/api/detection_engine/model/rule_schema';
 
 interface UseRuleActionButtonsParams {
@@ -35,6 +35,8 @@ interface UseRuleActionButtonsParams {
   isDirty: boolean;
   isSaving: boolean;
   lastSavedRuleId: string | null | undefined;
+  existingRuleId: string | null | undefined;
+  attachmentOrigin: string | null | undefined;
   showButtons: boolean;
 }
 
@@ -47,9 +49,12 @@ export const useRuleActionButtons = ({
   isDirty,
   isSaving,
   lastSavedRuleId,
+  existingRuleId,
+  attachmentOrigin,
   showButtons,
 }: UseRuleActionButtonsParams) => {
   const frozenSaveLabelRef = useRef<'save_rule' | 'save_changes' | null>(null);
+  const previousSavedRuleIdRef = useRef<string | undefined>();
 
   // Destructure to get a stable reference — callbacks object literal is recreated every render.
   const registerActionButtons = callbacks?.registerActionButtons;
@@ -65,13 +70,20 @@ export const useRuleActionButtons = ({
       registerActionButtons([]);
       return;
     }
-    const savedRuleId = rule.id ?? lastSavedRuleId ?? undefined;
+    const savedRuleId = getSavedRuleId(rule, aiRuleCreation, lastSavedRuleId, attachmentOrigin);
     // Disabled after a save until the agent makes another change; unsaved rules always enabled.
     const isClean = savedRuleId !== undefined && !isDirty;
-    // Freeze label at first registration: pre-first-save cards show "Save rule", post-save show "Save changes".
+    // Freeze label at first registration; upgrade once a saved id appears (e.g. page remounted).
     if (frozenSaveLabelRef.current === null) {
       frozenSaveLabelRef.current = savedRuleId ? 'save_changes' : 'save_rule';
+    } else if (
+      savedRuleId &&
+      frozenSaveLabelRef.current === 'save_rule' &&
+      previousSavedRuleIdRef.current === undefined
+    ) {
+      frozenSaveLabelRef.current = 'save_changes';
     }
+    previousSavedRuleIdRef.current = savedRuleId;
 
     const buttons: ActionButton[] = [
       {
@@ -125,6 +137,8 @@ export const useRuleActionButtons = ({
     isSaving,
     isDirty,
     lastSavedRuleId,
+    existingRuleId,
+    attachmentOrigin,
     showButtons,
     aiRuleCreation,
     application,

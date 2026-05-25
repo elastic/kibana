@@ -31,6 +31,7 @@ export class AiRuleCreationService {
 
   public readonly saveRuleRequest$ = this.saveRuleSubject.asObservable();
   public readonly lastSavedRuleId$ = this.lastSavedRuleIdSubject.asObservable();
+  public readonly existingRuleId$ = this.existingRuleIdSubject.asObservable();
   public readonly dirty$ = this.dirtySubject.pipe(distinctUntilChanged());
   public readonly saving$ = this.savingSubject.pipe(distinctUntilChanged());
   public readonly aiCreatedRule$ = this.aiRuleSubject.asObservable();

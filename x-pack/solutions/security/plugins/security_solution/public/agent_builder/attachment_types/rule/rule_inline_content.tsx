@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import {
@@ -109,10 +109,13 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
 }) => {
   const isDirty = useObservable(aiRuleCreation.dirty$, false);
   const isSaving = useObservable(aiRuleCreation.saving$, false);
-  // Seed from getter so first render sees the real value — useObservable's async subscribe would briefly return null, freezing the wrong label.
   const lastSavedRuleId = useObservable(
     aiRuleCreation.lastSavedRuleId$,
     aiRuleCreation.getLastSavedRuleId()
+  );
+  const existingRuleId = useObservable(
+    aiRuleCreation.existingRuleId$,
+    aiRuleCreation.getExistingRuleId()
   );
   const agentBusy = useObservable(aiRuleCreation.agentBusy$, false);
 
@@ -121,6 +124,16 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
   // registerActionButtons is only passed to the latest card — use it as the "is current" proxy.
   const isCurrentAttachment = callbacks?.registerActionButtons !== undefined;
   const showButtons = isCurrentAttachment && !agentBusy;
+
+  const savedIdFromAttachment = (attachment as { origin?: string }).origin ?? rule?.id;
+  useEffect(() => {
+    if (!isCurrentAttachment || !savedIdFromAttachment) {
+      return;
+    }
+    if (aiRuleCreation.getLastSavedRuleId() !== savedIdFromAttachment) {
+      aiRuleCreation.setLastSavedRuleId(savedIdFromAttachment);
+    }
+  }, [isCurrentAttachment, savedIdFromAttachment, aiRuleCreation]);
 
   useRuleActionButtons({
     rule,
@@ -131,6 +144,8 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
     isDirty,
     isSaving,
     lastSavedRuleId,
+    existingRuleId,
+    attachmentOrigin: savedIdFromAttachment ?? null,
     showButtons,
   });
 

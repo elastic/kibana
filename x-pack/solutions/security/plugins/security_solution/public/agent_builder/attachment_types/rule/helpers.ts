@@ -7,6 +7,7 @@
 
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { RuleResponse } from '../../../../common/api/detection_engine/model/rule_schema';
+import type { AiRuleCreationService } from '../../../detection_engine/common/ai_rule_creation_store';
 import { RULES_PATH } from '../../../../common/constants';
 import {
   ML_TYPE_DESCRIPTION,
@@ -26,6 +27,18 @@ export type RuleAttachment = Attachment<string, { text: string; attachmentLabel?
 
 export const isOnRuleFormPage = (pathname: string): boolean =>
   pathname.includes(RULES_PATH) && (pathname.includes('/create') || pathname.includes('/edit'));
+
+export const getSavedRuleId = (
+  rule: RuleResponse | null | undefined,
+  aiRuleCreation: AiRuleCreationService,
+  lastSavedRuleId?: string | null,
+  attachmentOrigin?: string | null
+): string | undefined =>
+  rule?.id ??
+  attachmentOrigin ??
+  lastSavedRuleId ??
+  aiRuleCreation.getExistingRuleId() ??
+  undefined;
 
 export const parseRuleFromAttachment = (attachment: RuleAttachment): RuleResponse | null => {
   try {

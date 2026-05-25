@@ -83,8 +83,20 @@ export const useAgentBuilderRuleCreation = ({
   const isAiRuleUpdateRef = useRef(false);
   const [isSyncActive, setIsSyncActive] = useState(false);
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout>>();
-  // Rule id to inject into form→agent syncs; updated when agent provides an id.
+  // Rule id to inject into form→agent syncs; page-lifetime on edit pages, cleared on
+  // conversation switch for create flows unless the target conversation's attachment has an id.
   const syncRuleIdRef = useRef<string | undefined>(existingRuleId);
+  const existingRuleIdRef = useRef(existingRuleId);
+  existingRuleIdRef.current = existingRuleId;
+
+  const getRuleIdForSync = useCallback((): string | undefined => {
+    return (
+      syncRuleIdRef.current ??
+      existingRuleIdRef.current ??
+      aiRuleCreation.getExistingRuleId() ??
+      undefined
+    );
+  }, [aiRuleCreation]);
 
   useEffect(() => {
     const subscription = aiRuleCreation.formSyncActive$.subscribe(setIsSyncActive);
@@ -96,6 +108,65 @@ export const useAgentBuilderRuleCreation = ({
     aiRuleCreation.setExistingRuleId(existingRuleId ?? null);
     return () => aiRuleCreation.setExistingRuleId(null);
   }, [existingRuleId, aiRuleCreation]);
+
+  useEffect(() => {
+    if (existingRuleId) {
+      syncRuleIdRef.current = existingRuleId;
+    }
+  }, [existingRuleId]);
+
+  // Keep syncRuleIdRef aligned with chat saves; clear on conversation switch for create flows.
+  useEffect(() => {
+    const subscription = aiRuleCreation.lastSavedRuleId$.subscribe((id) => {
+      if (id) {
+        syncRuleIdRef.current = id;
+      } else if (!existingRuleIdRef.current) {
+        syncRuleIdRef.current = undefined;
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [aiRuleCreation]);
+
+  // When returning to a conversation whose rule attachment already has an id, restore sync state
+  // after the global handler clears lastSavedRuleId on conversation switch.
+  useEffect(() => {
+    if (!agentBuilder?.events?.ui?.activeConversation$) {
+      return;
+    }
+    const subscription = agentBuilder.events.ui.activeConversation$.subscribe((change) => {
+      if (existingRuleIdRef.current) {
+        return;
+      }
+      const ruleAttachment = change?.conversation?.attachments?.find(
+        (a) => a.type === SecurityAgentBuilderAttachments.rule
+      );
+      if (!ruleAttachment) {
+        return;
+      }
+      // origin is set by updateAttachmentOrigin after a chat-save and is the canonical id source.
+      const idFromOrigin = (ruleAttachment as { origin?: string }).origin;
+      if (idFromOrigin) {
+        syncRuleIdRef.current = idFromOrigin;
+        aiRuleCreation.setLastSavedRuleId(idFromOrigin);
+        return;
+      }
+      const latestVersion = getLatestVersion(ruleAttachment);
+      const text = (latestVersion?.data as { text?: string } | undefined)?.text;
+      if (!text) {
+        return;
+      }
+      try {
+        const parsed = JSON.parse(text) as RuleResponse;
+        if (parsed.id) {
+          syncRuleIdRef.current = parsed.id;
+          aiRuleCreation.setLastSavedRuleId(parsed.id);
+        }
+      } catch {
+        // Malformed attachment text — ignore silently
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [agentBuilder, aiRuleCreation]);
 
   const addRuleAttachment = useCallback(
     (ruleData: unknown, label: string) => {
@@ -132,9 +203,16 @@ export const useAgentBuilderRuleCreation = ({
       });
 
       // Keep syncRuleIdRef in sync so subsequent form→agent pushes preserve the id.
-      if (rule.id) {
-        syncRuleIdRef.current = rule.id;
+      const ruleIdForSync = rule.id ?? getRuleIdForSync();
+      if (ruleIdForSync) {
+        syncRuleIdRef.current = ruleIdForSync;
       }
+
+      // eslint-disable-next-line no-console
+      console.log('[AI Rule Debug] updateFormFromChat called', {
+        esqlQuery: (stepsData.defineRuleData as { queryBar?: { query?: { query?: string } } })
+          ?.queryBar?.query?.query,
+      });
 
       isAiRuleUpdateRef.current = true;
       aiRuleCreation.activateFormSync();
@@ -142,6 +220,13 @@ export const useAgentBuilderRuleCreation = ({
       aboutStepForm.updateFieldValues(stepsData.aboutRuleData);
       scheduleStepForm.updateFieldValues(stepsData.scheduleRuleData);
       actionsStepForm.updateFieldValues(stepsData.ruleActionsData);
+
+      // Push the AI rule directly to the attachment so it propagates even when the form sync
+      // effect doesn't re-run (e.g. isSyncActive is already true, or defineStepData reference
+      // doesn't change because the ES|QL editor is uncontrolled and ignores updateFieldValues).
+      const ruleToSync = ruleIdForSync ? { ...rule, id: ruleIdForSync } : rule;
+      addRuleAttachment(ruleToSync, ruleToSync.name || '');
+      aiRuleCreation.markDirty();
 
       if (!silent) {
         addSuccess({
@@ -162,8 +247,10 @@ export const useAgentBuilderRuleCreation = ({
       scheduleStepForm,
       actionsStepForm,
       addSuccess,
+      addRuleAttachment,
       aiRuleCreation,
       existingRuleId,
+      getRuleIdForSync,
       telemetry,
     ]
   );
@@ -175,9 +262,10 @@ export const useAgentBuilderRuleCreation = ({
 
   useEffect(() => {
     const subscription = aiRuleCreation.aiCreatedRule$.subscribe((rule) => {
+      // eslint-disable-next-line no-console
+      console.log('[AI Rule Debug] aiCreatedRule$ subscription fired, rule=', rule ? 'defined' : 'null');
       if (rule) {
         updateFormFromChatRef.current(rule);
-        addRuleAttachmentRef.current(rule, rule.name);
         aiRuleCreation.clearAiCreatedRule();
       }
     });
@@ -242,13 +330,12 @@ export const useAgentBuilderRuleCreation = ({
           actionTypeRegistry
         );
         // Inject rule id so the attachment keeps track of which rule after form edits.
-        const ruleToSync = syncRuleIdRef.current
-          ? { ...formattedRule, id: syncRuleIdRef.current }
-          : formattedRule;
+        const ruleIdForSync = getRuleIdForSync();
+        const ruleToSync = ruleIdForSync ? { ...formattedRule, id: ruleIdForSync } : formattedRule;
         addRuleAttachment(
           ruleToSync,
           ruleToSync.name ||
-            (syncRuleIdRef.current
+            (ruleIdForSync
               ? i18n.translate(
                   'xpack.securitySolution.detectionEngine.createRule.aiRuleCreationAttachmentLabelExisting',
                   { defaultMessage: 'Rule' }
@@ -280,6 +367,7 @@ export const useAgentBuilderRuleCreation = ({
     actionTypeRegistry,
     addRuleAttachment,
     aiRuleCreation,
+    getRuleIdForSync,
   ]);
 
   return { isAiRuleUpdateRef };

@@ -78,6 +78,11 @@ export const createAiRuleCreationHandler = ({
   agentBuilder?: AgentBuilderPluginStart;
   telemetry: TelemetryServiceStart;
 }): Subscription => {
+  let activeConversationId: string | undefined;
+  const conversationIdSub = agentBuilder?.events.ui.activeConversation$.subscribe((change) => {
+    activeConversationId = change?.id;
+  });
+
   const saveSub = aiRuleCreation.saveRuleRequest$.subscribe(async (rule) => {
     const parseResult = EsqlRuleCreateProps.safeParse(rule);
     if (!parseResult.success) {
@@ -137,6 +142,11 @@ export const createAiRuleCreationHandler = ({
       aiRuleCreation.setLastSavedRuleId(saved.id);
       aiRuleCreation.clearDirty();
       aiRuleCreation.clearSaving();
+
+      const convId = activeConversationId;
+      if (convId) {
+        agentBuilder?.updateAttachmentOrigin(convId, SECURITY_RULE_ATTACHMENT_ID, saved.id);
+      }
 
       securitySolutionQueryClient.invalidateQueries(['POST', RULE_MANAGEMENT_RULES_URL_SEARCH], {
         exact: false,
@@ -213,6 +223,7 @@ export const createAiRuleCreationHandler = ({
     }
   });
 
+  saveSub.add(conversationIdSub);
   saveSub.add(dirtySub);
   saveSub.add(conversationSub);
   saveSub.add(agentBusySub);

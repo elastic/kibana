@@ -221,6 +221,8 @@ describe('useRuleActionButtons', () => {
       isDirty: false,
       isSaving: false,
       lastSavedRuleId: null,
+      existingRuleId: null,
+      attachmentOrigin: null,
       showButtons: true,
     };
   });
@@ -243,14 +245,14 @@ describe('useRuleActionButtons', () => {
     expect(registerActionButtons).toHaveBeenCalledWith([]);
   });
 
-  it('freezes the save label: "Save rule" on first render, stays frozen after a savedRuleId arrives', () => {
+  it('upgrades the save label to "Save changes" when a savedRuleId arrives after mount', () => {
     const props = { ...baseProps, isDirty: true };
     const { rerender } = renderHook((p: typeof props) => useRuleActionButtons(p), {
       initialProps: props,
     });
     expect(saveButton()?.label).toBe('Save rule');
     rerender({ ...props, lastSavedRuleId: 'saved-id' });
-    expect(saveButton()?.label).toBe('Save rule');
+    expect(saveButton()?.label).toBe('Save changes');
   });
 
   it('freezes the save label at "Save changes" when a saved rule ID is present at mount', () => {
@@ -267,6 +269,19 @@ describe('useRuleActionButtons', () => {
     const savedRule = { ...baseProps.rule!, id: 'rule-123' } as unknown as RuleResponse;
     renderHook(() => useRuleActionButtons({ ...baseProps, rule: savedRule }));
     const labels = registerActionButtons.mock.calls[0][0].map((b: { label: string }) => b.label);
+    expect(labels).toContain('View rule');
+  });
+
+  it('includes View rule when existingRuleId is set by the page after mount', () => {
+    const { rerender } = renderHook((p: typeof baseProps) => useRuleActionButtons(p), {
+      initialProps: baseProps,
+    });
+    let labels = registerActionButtons.mock.calls.at(-1)![0].map((b: { label: string }) => b.label);
+    expect(labels).not.toContain('View rule');
+
+    aiRuleCreation.setExistingRuleId('rule-from-page');
+    rerender({ ...baseProps, existingRuleId: 'rule-from-page' });
+    labels = registerActionButtons.mock.calls.at(-1)![0].map((b: { label: string }) => b.label);
     expect(labels).toContain('View rule');
   });
 
