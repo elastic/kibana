@@ -8,12 +8,12 @@
 import expect from 'expect';
 import type { RoleCredentials, InternalRequestHeader } from '@kbn/ftr-common-functional-services';
 import { BOOTSTRAP_EASE_RULES_URL } from '@kbn/security-solution-plugin/common/api/detection_engine/prebuilt_rules';
+import { INITIALIZE_SECURITY_SOLUTION_URL } from '@kbn/security-solution-plugin/common/api/initialization';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const samlAuth = getService('samlAuth');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-  const detectionsApi = getService('detectionsApi');
 
   const bootstrapEaseRules = (roleAuthc: RoleCredentials, internalHeaders: InternalRequestHeader) =>
     supertestWithoutAuth
@@ -22,6 +22,18 @@ export default function ({ getService }: FtrProviderContext) {
       .set(internalHeaders)
       .set('kbn-xsrf', 'true')
       .set('elastic-api-version', '1');
+
+  const initPrebuiltRulesPackage = (
+    roleAuthc: RoleCredentials,
+    internalHeaders: InternalRequestHeader
+  ) =>
+    supertestWithoutAuth
+      .post(INITIALIZE_SECURITY_SOLUTION_URL)
+      .set(roleAuthc.apiKeyHeader)
+      .set(internalHeaders)
+      .set('kbn-xsrf', 'true')
+      .set('elastic-api-version', '2023-10-31')
+      .send({ flows: ['init-prebuilt-rules'] });
 
   // Uses soc_manager and t1_analyst as proxies for _search_ai_lake_soc_manager
   // and _search_ai_lake_analyst respectively, because the FTR samlAuth provider
@@ -37,7 +49,7 @@ export default function ({ getService }: FtrProviderContext) {
         internalHeaders = samlAuth.getInternalRequestHeader();
 
         // Install prebuilt rules package first (required for promotion rules)
-        await detectionsApi.bootstrapPrebuiltRules().expect(200);
+        await initPrebuiltRulesPackage(roleAuthc, internalHeaders).expect(200);
       });
 
       after(async () => {

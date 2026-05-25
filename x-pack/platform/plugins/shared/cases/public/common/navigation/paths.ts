@@ -17,6 +17,7 @@ import {
   CASES_CONFIGURE_TEMPLATES_PATH,
   CASES_CONFIGURE_CREATE_TEMPLATE_PATH,
   CASES_CONFIGURE_EDIT_TEMPLATE_PATH,
+  CASES_CONFIGURE_FIELD_LIBRARY_PATH,
 } from '../../../common/constants';
 import type { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 
@@ -47,6 +48,8 @@ export interface TemplateViewPathParams {
 
 export const getCasesConfigureTemplatesPath = (casesBasePath: string) =>
   normalizePath(`${casesBasePath}${CASES_CONFIGURE_TEMPLATES_PATH}`);
+export const getCasesConfigureFieldLibraryPath = (casesBasePath: string) =>
+  normalizePath(`${casesBasePath}${CASES_CONFIGURE_FIELD_LIBRARY_PATH}`);
 export const getCasesConfigureCreateTemplatePath = (casesBasePath: string) =>
   normalizePath(`${casesBasePath}${CASES_CONFIGURE_CREATE_TEMPLATE_PATH}`);
 export const getCasesConfigureEditTemplatePath = (casesBasePath: string) =>

@@ -13,6 +13,7 @@ import type { FunctionComponent } from 'react';
 import type React from 'react';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import type { Query, TimeRange } from '@kbn/es-query';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type {
   ErrorsByTraceId,
   FocusedTraceWaterfallProps,
@@ -112,6 +113,7 @@ export interface ObservabilityLogEventsFeature {
       enableDocumentViewer: false;
       enableFilters: false;
     };
+    executionContext?: KibanaExecutionContext;
   }) => JSX.Element;
 }
 

@@ -14,6 +14,7 @@ export async function queryMonitorHeatmap({
   monitorId,
   location,
   intervalInMinutes,
+  remoteName,
 }: {
   syntheticsEsClient: SyntheticsEsClient;
   from: number | string;
@@ -21,8 +22,12 @@ export async function queryMonitorHeatmap({
   monitorId: string;
   location: string;
   intervalInMinutes: number;
+  remoteName?: string;
 }) {
+  const index = remoteName ? `${remoteName}:${syntheticsEsClient.heartbeatIndices}` : undefined;
+
   return syntheticsEsClient.search({
+    ...(index ? { index } : {}),
     size: 0,
     query: {
       bool: {

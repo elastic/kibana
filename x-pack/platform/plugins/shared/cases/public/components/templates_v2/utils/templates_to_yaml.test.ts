@@ -296,6 +296,57 @@ describe('templatesToYaml', () => {
     expect(yaml).toContain('category: "Security"');
     expect(yaml).toContain('isEnabled: false');
   });
+
+  describe('$ref field serialization', () => {
+    const baseRefTemplate = (
+      refField: ParsedTemplate['definition']['fields'][number]
+    ): ParsedTemplate => ({
+      templateId: 'tpl-ref',
+      name: 'Ref template',
+      owner: 'securitySolution',
+      templateVersion: 1,
+      latestVersion: 1,
+      isLatest: true,
+      deletedAt: null,
+      definitionString: '',
+      definition: {
+        name: 'Ref template',
+        fields: [refField],
+      },
+    });
+
+    it('serializes a bare $ref entry without metadata', () => {
+      const yaml = templatesToYaml([baseRefTemplate({ $ref: 'lib_field' })]);
+      expect(yaml).toContain('    - $ref: "lib_field"');
+      expect(yaml).not.toContain('metadata:');
+    });
+
+    it('serializes a $ref entry with name alias and metadata.default scalar', () => {
+      const yaml = templatesToYaml([
+        baseRefTemplate({
+          name: 'my_alias',
+          $ref: 'lib_field',
+          metadata: { default: 'override_value' },
+        }),
+      ]);
+      expect(yaml).toContain('    - name: "my_alias"');
+      expect(yaml).toContain('      $ref: "lib_field"');
+      expect(yaml).toContain('      metadata:');
+      expect(yaml).toContain('        default: "override_value"');
+    });
+
+    it('serializes a $ref entry with an array string default', () => {
+      const yaml = templatesToYaml([
+        baseRefTemplate({
+          $ref: 'lib_field',
+          metadata: { default: ['a', 'b'] },
+        }),
+      ]);
+      expect(yaml).toContain('        default:');
+      expect(yaml).toContain('          - "a"');
+      expect(yaml).toContain('          - "b"');
+    });
+  });
 });
 
 describe('RADIO_GROUP field serialization', () => {
@@ -651,6 +702,136 @@ describe('display and validation serialization', () => {
     const yaml = templatesToYaml([template]);
 
     expect(yaml).not.toContain('validation:');
+  });
+});
+
+describe('TEXTAREA field serialization', () => {
+  const baseTemplate: ParsedTemplate = {
+    templateId: 'tpl-textarea',
+    name: 'Textarea template',
+    owner: 'securitySolution',
+    tags: [],
+    usageCount: 0,
+    fieldCount: 1,
+    templateVersion: 1,
+    latestVersion: 1,
+    isLatest: true,
+    deletedAt: null,
+    definition: { name: 'Textarea template', fields: [] },
+    definitionString: 'name: Textarea template\nfields: []',
+  };
+
+  it('serializes TEXTAREA with markdown: true', () => {
+    const template: ParsedTemplate = {
+      ...baseTemplate,
+      definition: {
+        name: 'Textarea template',
+        fields: [
+          {
+            name: 'instructions',
+            control: 'TEXTAREA',
+            type: 'keyword',
+            metadata: { markdown: true, default: '## Steps' },
+          },
+        ],
+      },
+    };
+
+    const yaml = templatesToYaml([template]);
+
+    expect(yaml).toContain('      control: "TEXTAREA"');
+    expect(yaml).toContain('      metadata:');
+    expect(yaml).toContain('        default: "## Steps"');
+    expect(yaml).toContain('        markdown: true');
+  });
+
+  it('serializes TEXTAREA with only default (no markdown)', () => {
+    const template: ParsedTemplate = {
+      ...baseTemplate,
+      definition: {
+        name: 'Textarea template',
+        fields: [
+          {
+            name: 'details',
+            control: 'TEXTAREA',
+            type: 'keyword',
+            metadata: { default: 'Enter details here...' },
+          },
+        ],
+      },
+    };
+
+    const yaml = templatesToYaml([template]);
+
+    expect(yaml).toContain('      metadata:');
+    expect(yaml).toContain('        default: "Enter details here..."');
+    expect(yaml).not.toContain('markdown');
+  });
+
+  it('omits metadata block when TEXTAREA has no metadata', () => {
+    const template: ParsedTemplate = {
+      ...baseTemplate,
+      definition: {
+        name: 'Textarea template',
+        fields: [
+          {
+            name: 'notes',
+            control: 'TEXTAREA',
+            type: 'keyword',
+          },
+        ],
+      },
+    };
+
+    const yaml = templatesToYaml([template]);
+
+    expect(yaml).toContain('      control: "TEXTAREA"');
+    expect(yaml).not.toContain('metadata:');
+  });
+
+  it('omits metadata block when markdown is false and no default', () => {
+    const template: ParsedTemplate = {
+      ...baseTemplate,
+      definition: {
+        name: 'Textarea template',
+        fields: [
+          {
+            name: 'notes',
+            control: 'TEXTAREA',
+            type: 'keyword',
+            metadata: { markdown: false },
+          },
+        ],
+      },
+    };
+
+    const yaml = templatesToYaml([template]);
+
+    expect(yaml).not.toContain('metadata:');
+    expect(yaml).not.toContain('markdown');
+  });
+
+  it('serializes TEXTAREA with only markdown: true (no default)', () => {
+    const template: ParsedTemplate = {
+      ...baseTemplate,
+      definition: {
+        name: 'Textarea template',
+        fields: [
+          {
+            name: 'instructions',
+            control: 'TEXTAREA',
+            type: 'keyword',
+            metadata: { markdown: true },
+          },
+        ],
+      },
+    };
+
+    const yaml = templatesToYaml([template]);
+
+    expect(yaml).toContain('      metadata:');
+    expect(yaml).toContain('        markdown: true');
+    expect(yaml).not.toContain('default:');
   });
 });
 

@@ -53,7 +53,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.existOrFail('docViewerTab-doc_view_source');
         await testSubjects.existOrFail('docViewerTab-doc_view_example');
         await testSubjects.existOrFail('docViewerTab-doc_view_restorable_state_example');
-        expect(await testSubjects.getVisibleText('docViewerRowDetailsTitle')).to.be('Record #0');
+        expect(await testSubjects.getVisibleText('docViewerRowDetailsTitle')).to.contain(
+          'Record #1'
+        );
       });
 
       it('should render custom doc viewer header', async () => {

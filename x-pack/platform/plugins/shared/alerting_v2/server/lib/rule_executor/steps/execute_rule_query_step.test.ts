@@ -8,11 +8,12 @@
 import { ExecuteRuleQueryStep } from './execute_rule_query_step';
 import {
   collectStreamResults,
-  createEsqlResponse,
   createPipelineStream,
   createRuleExecutionInput,
   createRuleResponse,
   createRulePipelineState,
+  mockHelpersEsqlArrowBatches,
+  mockHelpersEsqlToArrowReader,
 } from '../test_utils';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { createQueryService } from '../../services/query_service/query_service.mock';
@@ -31,9 +32,7 @@ describe('ExecuteRuleQueryStep', () => {
   });
 
   it('builds query payload and executes query', async () => {
-    mockEsClient.esql.query.mockResolvedValue(
-      createEsqlResponse([{ name: 'host.name', type: 'keyword' }], [['host-a']])
-    );
+    mockHelpersEsqlArrowBatches(mockEsClient, [{ numRows: 1, rows: [{ 'host.name': 'host-a' }] }]);
 
     const state = createRulePipelineState({ rule: createRuleResponse() });
     const results = await collectStreamResults(step.executeStream(createPipelineStream([state])));
@@ -45,9 +44,7 @@ describe('ExecuteRuleQueryStep', () => {
   });
 
   it('passes correct parameters to ES client', async () => {
-    mockEsClient.esql.query.mockResolvedValue(
-      createEsqlResponse([{ name: 'host.name', type: 'keyword' }], [['host-a']])
-    );
+    mockHelpersEsqlArrowBatches(mockEsClient, [{ numRows: 1, rows: [{ 'host.name': 'host-a' }] }]);
 
     const rule = createRuleResponse();
     const abortController = new AbortController();
@@ -56,7 +53,7 @@ describe('ExecuteRuleQueryStep', () => {
 
     await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
-    expect(mockEsClient.esql.query).toHaveBeenCalledWith(
+    expect(mockEsClient.helpers.esql).toHaveBeenCalledWith(
       expect.objectContaining({ query: rule.evaluation.query.base.trimEnd() }),
       expect.objectContaining({ signal: abortController.signal })
     );
@@ -66,7 +63,10 @@ describe('ExecuteRuleQueryStep', () => {
     const abortController = new AbortController();
     abortController.abort();
 
-    mockEsClient.esql.query.mockRejectedValue(new Error('Request aborted'));
+    mockHelpersEsqlToArrowReader(
+      mockEsClient,
+      jest.fn().mockRejectedValue(new Error('Request aborted'))
+    );
 
     const state = createRulePipelineState({
       input: createRuleExecutionInput({ abortSignal: abortController.signal }),
@@ -79,7 +79,10 @@ describe('ExecuteRuleQueryStep', () => {
   });
 
   it('propagates non-abort errors', async () => {
-    mockEsClient.esql.query.mockRejectedValue(new Error('Query execution failed'));
+    mockHelpersEsqlToArrowReader(
+      mockEsClient,
+      jest.fn().mockRejectedValue(new Error('Query execution failed'))
+    );
 
     const state = createRulePipelineState({ rule: createRuleResponse() });
 
@@ -89,18 +92,15 @@ describe('ExecuteRuleQueryStep', () => {
   });
 
   it('yields rows from query results', async () => {
-    mockEsClient.esql.query.mockResolvedValue(
-      createEsqlResponse(
-        [
-          { name: 'host.name', type: 'keyword' },
-          { name: 'count', type: 'integer' },
+    mockHelpersEsqlArrowBatches(mockEsClient, [
+      {
+        numRows: 2,
+        rows: [
+          { 'host.name': 'host-a', count: 1 },
+          { 'host.name': 'host-b', count: 2 },
         ],
-        [
-          ['host-a', 1],
-          ['host-b', 2],
-        ]
-      )
-    );
+      },
+    ]);
 
     const state = createRulePipelineState({ rule: createRuleResponse() });
     const results = await collectStreamResults(step.executeStream(createPipelineStream([state])));
@@ -114,9 +114,7 @@ describe('ExecuteRuleQueryStep', () => {
   });
 
   it('yields continue with empty esqlRowBatch when query returns no rows', async () => {
-    mockEsClient.esql.query.mockResolvedValue(
-      createEsqlResponse([{ name: 'host.name', type: 'keyword' }], [])
-    );
+    mockHelpersEsqlArrowBatches(mockEsClient, []);
 
     const state = createRulePipelineState({ rule: createRuleResponse() });
     const results = await collectStreamResults(step.executeStream(createPipelineStream([state])));

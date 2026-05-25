@@ -23,6 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { ApplicationStart } from '@kbn/core/public';
+import { hasActiveModifierKey } from '@kbn/shared-ux-utility';
 import { getServices } from '../../kibana_services';
 
 interface Props {
@@ -34,6 +35,7 @@ export const SetupCloudConnect: FC<Props> = ({ addBasePath, application }) => {
   const { trackUiMetric } = getServices();
   const cloudConnectUrl = application.getUrlForApp('cloud_connect');
   const handleConnectClick = (e: React.MouseEvent) => {
+    if (hasActiveModifierKey(e)) return;
     e.preventDefault();
     trackUiMetric(METRIC_TYPE.CLICK, 'home_page_open_cloud_connect');
     application.navigateToApp('cloud_connect');

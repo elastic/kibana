@@ -23,7 +23,7 @@ jest.mock('../../common/components/user_privileges/user_privileges_context', () 
 
 const mockOverviewTab = jest.fn((_: unknown) => <div>{'MockOverviewTab'}</div>);
 
-jest.mock('../../flyout_v2/document/tabs/overview_tab', () => ({
+jest.mock('../../flyout_v2/document/main/tabs/overview_tab', () => ({
   OverviewTab: (props: unknown) => mockOverviewTab(props),
 }));
 

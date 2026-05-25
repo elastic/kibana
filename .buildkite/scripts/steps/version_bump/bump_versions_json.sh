@@ -115,6 +115,12 @@ git config --global user.email '42973632+kibanamachine@users.noreply.github.com'
 branch="bump-versions-json-$(date +%F_%H-%M-%S)"
 git checkout -b "$branch"
 git add $FILES_TO_COMMIT
+
+if git diff --cached --quiet; then
+  echo "No changes to commit — skipping PR creation"
+  exit 0
+fi
+
 git commit -m "[versions.json bump] Bump versions.json to ${NEW_VERSION}"
 
 git push origin "$branch"

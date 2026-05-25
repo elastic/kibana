@@ -26,6 +26,7 @@ import {
   EuiLink,
   EuiText,
   EuiToolTip,
+  type EuiToolTipRef,
 } from '@elastic/eui';
 import { AiButton } from '@kbn/shared-ux-ai-components';
 import { i18n } from '@kbn/i18n';
@@ -130,7 +131,7 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
       defaultMessage: 'Keyboard shortcut {keyboardShortcut}',
     }
   );
-  const tooltipRef = useRef<EuiToolTip>(null);
+  const tooltipRef = useRef<EuiToolTipRef>(null);
   const [tooltipVisible, setTooltipVisible] = useState(true);
   const fullTooltipContent = (
     <div style={{ textAlign: 'center' }}>

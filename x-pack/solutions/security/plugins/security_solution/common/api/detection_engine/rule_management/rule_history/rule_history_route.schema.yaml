@@ -1,0 +1,125 @@
+openapi: 3.0.0
+info:
+  title: Rule Changes History API endpoint
+  version: '1'
+paths:
+  /internal/detection_engine/rules/{ruleId}/history:
+    get:
+      x-labels: [ess, serverless]
+      x-internal: true
+      x-codegen-enabled: true
+      operationId: RuleChangesHistory
+      summary: List historical revisions for a detection rule
+      description: |
+        Retrieve a paginated list of historical revisions for a single detection rule.
+        Each item contains the rule snapshot at that point in time and the snapshot of
+        the immediately preceding revision in `old_values`.
+      tags:
+        - Rules API
+      parameters:
+        - name: ruleId
+          in: path
+          required: true
+          description: The rule's object `id` value (Saved Object id).
+          schema:
+            $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleObjectId'
+        - name: page
+          in: query
+          required: false
+          description: Page number (1-based).
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: per_page
+          in: query
+          required: false
+          description: Items per page.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: Successful response.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - page
+                  - perPage
+                  - total
+                  - items
+                properties:
+                  page:
+                    type: integer
+                  perPage:
+                    type: integer
+                  total:
+                    type: integer
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/RuleHistoryItem'
+        '400':
+          description: Invalid request.
+        '403':
+          description: Not authorised to access the rule.
+        '404':
+          description: Rule not found.
+
+components:
+  schemas:
+    RuleHistoryItem:
+      type: object
+      required:
+        - timestamp
+        - id
+        - action
+        - rule
+        - old_values
+      properties:
+        timestamp:
+          type: string
+          description: ISO-8601 timestamp at which the change was recorded.
+        id:
+          type: string
+          description: Unique identifier of the change-history event.
+        user:
+          type: object
+          nullable: true
+          required:
+            - name
+          properties:
+            id:
+              type: string
+              description: User profile id (when available from the auth realm).
+            name:
+              type: string
+              description: Login name of the user that produced the change.
+          description: |
+            User that produced the change, with both their `name` (login)
+            and (when available) `id` (profile id). May be null for
+            system-driven changes.
+        action:
+          type: string
+          description: Human-readable action that produced the change (e.g. `rule_create`, `rule_update`).
+        rule:
+          $ref: '../../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/RuleResponse'
+          description: Full rule snapshot after the change.
+        old_values:
+          type: object
+          additionalProperties: true
+          nullable: true
+          description: |
+            Sparse object containing only the rule fields whose values differ
+            between this revision and the immediately preceding one (computed
+            as an RFC 7396 JSON Merge Patch from `rule` back to the previous
+            snapshot). `null` for creation events, where no previous revision
+            exists.
+        metadata:
+          type: object
+          additionalProperties: true
+          description: Optional event metadata that is not part of the ECS schema.

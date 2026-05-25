@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { AlertEpisodesListPage } from './alert_episodes_list_page';
 import type { CustomBulkActions } from '@kbn/unified-data-table';
@@ -14,6 +15,7 @@ import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { UnifiedDataTable } from '@kbn/unified-data-table';
 import { fetchAlertingEpisodes } from '@kbn/alerting-v2-episodes-ui/apis/fetch_alerting_episodes';
 import { useAlertingEpisodesDataView } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_episodes_data_view';
+import { createMockSpaces } from '../../../common/utils/test_utils';
 import { createEpisodeActions } from '@kbn/alerting-v2-episodes-ui/actions';
 
 jest.mock('@kbn/unified-data-table', () => ({
@@ -40,6 +42,7 @@ jest.mock('react-use/lib/useObservable', () =>
 );
 
 const mockHttp = httpServiceMock.createStartContract();
+const mockSpaces = createMockSpaces();
 
 const mockServices = {
   http: mockHttp,
@@ -64,6 +67,7 @@ const mockServices = {
   share: {},
   uiSettings: {},
   uiActions: { getTriggerCompatibleActions: jest.fn().mockResolvedValue([]) },
+  spaces: mockSpaces,
 };
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
@@ -118,9 +122,11 @@ const getCapturedBulkActions = (): CustomBulkActions => {
 const renderPage = () => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
-    <QueryClientProvider client={queryClient}>
-      <AlertEpisodesListPage />
-    </QueryClientProvider>
+    <MemoryRouter>
+      <QueryClientProvider client={queryClient}>
+        <AlertEpisodesListPage />
+      </QueryClientProvider>
+    </MemoryRouter>
   );
 };
 

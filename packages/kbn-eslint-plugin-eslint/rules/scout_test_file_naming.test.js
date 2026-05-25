@@ -110,6 +110,24 @@ ruleTester.run('@kbn/eslint/scout_test_file_naming', rule, {
       filename:
         'x-pack/solutions/observability/plugins/my_plugin/test/scout/api/tests/global.setup.ts',
     },
+    // Valid: global.teardown.ts in tests directory
+    {
+      code: '',
+      filename:
+        'x-pack/solutions/observability/plugins/my_plugin/test/scout/ui/tests/global.teardown.ts',
+    },
+    // Valid: global.teardown.ts in parallel_tests directory
+    {
+      code: '',
+      filename:
+        'x-pack/solutions/observability/plugins/my_plugin/test/scout/ui/parallel_tests/global.teardown.ts',
+    },
+    // Valid: global.teardown.ts in API tests
+    {
+      code: '',
+      filename:
+        'x-pack/solutions/observability/plugins/my_plugin/test/scout/api/tests/global.teardown.ts',
+    },
   ],
 
   invalid: [

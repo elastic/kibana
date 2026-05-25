@@ -43,7 +43,6 @@ export const ExternalLinkComponent = ({
 
   return (
     <EuiListGroupItem
-      size="s"
       external
       color="text"
       isDisabled={Boolean(link.error)}
@@ -53,7 +52,6 @@ export const ExternalLinkComponent = ({
         content: link.error?.message,
         position: layout === LINKS_VERTICAL_LAYOUT ? 'right' : 'bottom',
         repositionOnScroll: true,
-        delay: 'long',
         'data-test-subj': `${testId}--tooltip`,
       }}
       iconType={link.error ? 'warning' : undefined}

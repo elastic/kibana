@@ -100,13 +100,13 @@ export class RuleMigrationsDataIntegrationsClient extends SiemMigrationsDataBase
         pkg.version
       );
 
-      const allPaths = await packageArchive?.archiveIterator.getPaths();
+      const allPaths = await packageArchive?.archiveIterator?.getPaths();
       const relevantPaths = allPaths?.filter((path) =>
         PATH_PATTERNS_TO_INCLUDE_IN_KB.some((includedPath) => path.includes(includedPath))
       );
 
       let currentTokens = 0;
-      await packageArchive?.archiveIterator.traverseEntries(
+      await packageArchive?.archiveIterator?.traverseEntries(
         async (entry) => {
           if (!entry.buffer || !relevantPaths?.includes(entry.path)) {
             return;
