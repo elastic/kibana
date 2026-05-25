@@ -212,6 +212,12 @@ export interface ActionDefinition<TInput = unknown, TOutput = unknown, TError = 
   description?: string;
   actionGroup?: string;
   supportsStreaming?: boolean;
+  /**
+   * HTTP response header that advertises response size for this action.
+   * The generated executor reads this header from Axios errors when the Actions
+   * response-size limit is exceeded. Defaults to `content-length`.
+   */
+  responseSizeHeader?: string;
 }
 
 export interface ActionContext {
