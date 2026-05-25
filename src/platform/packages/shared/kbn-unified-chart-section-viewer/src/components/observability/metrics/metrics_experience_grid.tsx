@@ -45,6 +45,7 @@ export const MetricsExperienceGrid = ({
     onToggleFullscreen,
     selectedDimensions,
     onDimensionsChange,
+    onPageChange,
     profileId,
   } = useMetricsExperienceState();
 
@@ -77,9 +78,10 @@ export const MetricsExperienceGrid = ({
   const onToolbarDimensionsChange = useCallback(
     (nextSelectedDimensions: Dimension[]) => {
       onDimensionsChange(nextSelectedDimensions);
+      onPageChange(0);
       onBreakdownFieldChange?.(nextSelectedDimensions[0]?.name);
     },
-    [onDimensionsChange, onBreakdownFieldChange]
+    [onDimensionsChange, onPageChange, onBreakdownFieldChange]
   );
 
   useDimensionsWipe({
