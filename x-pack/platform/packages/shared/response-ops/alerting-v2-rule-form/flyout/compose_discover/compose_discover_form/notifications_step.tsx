@@ -47,6 +47,7 @@ export const NotificationsStep: React.FC<NotificationsStepProps> = ({ services }
   const notifications = watch('notifications');
   const enabled = !!notifications;
   const { workflowForm } = services;
+  const isWorkflowInvalid = enabled && !(workflowForm.isValid?.(notifications!.workflow) ?? true);
 
   const handleToggle = useCallback(() => {
     if (enabled) {
@@ -78,6 +79,7 @@ export const NotificationsStep: React.FC<NotificationsStepProps> = ({ services }
               onChange={(next) =>
                 setValue('notifications', { workflow: next }, { shouldDirty: true })
               }
+              isInvalid={isWorkflowInvalid}
             />
           </Suspense>
         </>

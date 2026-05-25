@@ -53,8 +53,10 @@ export const useComposeDiscoverFlyout = ({
       workflowForm: {
         Component: SingleStepWorkflowForm,
         defaultValue: () => ({ mode: 'existing', workflowId: null }),
-        isValid: (value: SingleStepWorkflowFormValue) =>
-          value.mode === 'create' ? value.connectorId !== null : Boolean(value.workflowId),
+        isValid: (value: SingleStepWorkflowFormValue) => {
+          if (value.mode === 'existing') return Boolean(value.workflowId);
+          return Boolean(value.typeId) && value.connectorId !== null && value.params.trim() !== '';
+        },
       },
     }),
     [http, data, dataViews, notifications, application, lens]

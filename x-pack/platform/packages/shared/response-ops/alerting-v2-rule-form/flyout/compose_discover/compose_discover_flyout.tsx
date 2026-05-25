@@ -460,6 +460,14 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
     dispatch({ type: 'GO_NEXT', isAlert });
   }, [currentStep, methods, uiState, isAlert, dispatch, baseServices]);
 
+  const handleFinalSubmit = useCallback(async () => {
+    if (currentStep?.validate) {
+      const valid = await currentStep.validate(methods, uiState, baseServices);
+      if (!valid) return;
+    }
+    handleSubmit();
+  }, [currentStep, methods, uiState, baseServices, handleSubmit]);
+
   // TODO: recoveryType drives whether the recovery tab appears in YAML mode.
   // Follow schema decisions in #268984 — if recoveryType is superseded by a
   // field on RuleQuery itself, gate this on query shape instead.
@@ -584,7 +592,7 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
                         <EuiButton
                           fill
                           isLoading={isSaving}
-                          onClick={handleSubmit}
+                          onClick={handleFinalSubmit}
                           data-test-subj="composeDiscoverSubmit"
                         >
                           {isCreate ? CREATE_RULE_BUTTON_LABEL : SAVE_RULE_BUTTON_LABEL}
