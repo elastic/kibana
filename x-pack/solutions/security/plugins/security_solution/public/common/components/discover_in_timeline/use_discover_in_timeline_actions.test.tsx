@@ -121,7 +121,7 @@ const originalSavedSearchMock = {
 export const savedSearchMock = {
   ...originalSavedSearchMock,
   hideChart: true,
-  sort: ['@timestamp', 'desc'],
+  sort: [['@timestamp', 'desc']],
   timeRange: {
     from: 'now-20d',
     to: 'now',

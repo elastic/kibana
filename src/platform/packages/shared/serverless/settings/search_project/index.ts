@@ -34,6 +34,6 @@ export const SEARCH_PROJECT_SETTINGS = [
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
   GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING,
-  // This setting is temporary, will be removed on 9.4.0 release.
+  // This setting is temporary, will be removed on 9.5.0 release.
   WORKFLOWS_UI_SETTING_ID,
 ];
