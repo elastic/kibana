@@ -21,7 +21,6 @@ interface SessionInfo {
 }
 
 interface UseRuleCreationTelemetryReturn {
-  isAiRuleAppliedRef: React.MutableRefObject<boolean>;
   ruleSavedRef: React.MutableRefObject<boolean>;
   getAiMeta: () => { creationSource: 'ai'; aiSessionId: string } | undefined;
   reportRuleCreated: (params: { rule: RuleResponse }) => void;
@@ -41,7 +40,6 @@ interface UseRuleCreationTelemetryReturn {
  */
 export const useRuleCreationTelemetry = (ruleType: string): UseRuleCreationTelemetryReturn => {
   const { telemetry, aiRuleCreation } = useKibana().services;
-  const isAiRuleAppliedRef = useRef(false);
   const ruleSavedRef = useRef(false);
   const manualSessionRef = useRef<{ sessionId: string; startTimestamp: number } | null>(null);
 
@@ -90,7 +88,7 @@ export const useRuleCreationTelemetry = (ruleType: string): UseRuleCreationTelem
 
   const getSessionInfo = useCallback((): SessionInfo => {
     const aiSession = aiRuleCreation.getSession();
-    const isAiCreated = isAiRuleAppliedRef.current && aiSession != null;
+    const isAiCreated = aiSession != null && aiSession.applyCount > 0;
     return {
       creationSource: isAiCreated ? 'ai' : 'manual',
       sessionId: isAiCreated ? aiSession.sessionId : manualSessionRef.current?.sessionId ?? '',
@@ -102,7 +100,7 @@ export const useRuleCreationTelemetry = (ruleType: string): UseRuleCreationTelem
 
   const getAiMeta = useCallback((): { creationSource: 'ai'; aiSessionId: string } | undefined => {
     const aiSession = aiRuleCreation.getSession();
-    const isAiCreated = isAiRuleAppliedRef.current && aiSession != null;
+    const isAiCreated = aiSession != null && aiSession.applyCount > 0;
     if (isAiCreated) {
       return { creationSource: 'ai', aiSessionId: aiSession.sessionId };
     }
@@ -112,7 +110,7 @@ export const useRuleCreationTelemetry = (ruleType: string): UseRuleCreationTelem
   const reportRuleCreated = useCallback(
     ({ rule }: { rule: RuleResponse }) => {
       const aiSession = aiRuleCreation.getSession();
-      const isAiCreated = isAiRuleAppliedRef.current && aiSession != null;
+      const isAiCreated = aiSession != null && aiSession.applyCount > 0;
       const { creationSource, sessionId, sessionStart } = getSessionInfo();
 
       ruleSavedRef.current = true;
@@ -137,7 +135,7 @@ export const useRuleCreationTelemetry = (ruleType: string): UseRuleCreationTelem
   const reportRuleCreationError = useCallback(
     ({ ruleType: type, error }: { ruleType: string; error: Error }) => {
       const aiSession = aiRuleCreation.getSession();
-      const isAiCreated = isAiRuleAppliedRef.current && aiSession != null;
+      const isAiCreated = aiSession != null && aiSession.applyCount > 0;
       const { creationSource, sessionId, sessionStart } = getSessionInfo();
 
       telemetry.reportEvent(RuleCreationEventTypes.RuleCreationError, {
@@ -157,7 +155,6 @@ export const useRuleCreationTelemetry = (ruleType: string): UseRuleCreationTelem
   );
 
   return {
-    isAiRuleAppliedRef,
     ruleSavedRef,
     getAiMeta,
     reportRuleCreated,

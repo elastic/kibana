@@ -118,7 +118,7 @@ const MyEuiPanel = styled(EuiPanel)<{
 MyEuiPanel.displayName = 'MyEuiPanel';
 
 const CreateRulePageComponent: React.FC<{}> = () => {
-  const { application, triggersActionsUi, cps } = useKibana().services;
+  const { application, triggersActionsUi, cps, aiRuleCreation } = useKibana().services;
   const { navigateToApp } = application;
   useRouteBasedCpsPickerAccess(ProjectRoutingAccess.READONLY, { application, cps });
   const [{ loading: userInfoLoading, isSignalIndexExists, isAuthenticated, hasEncryptionKey }] =
@@ -235,7 +235,7 @@ const CreateRulePageComponent: React.FC<{}> = () => {
     actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
   });
 
-  const { isAiRuleAppliedRef, getAiMeta, reportRuleCreated, reportRuleCreationError } =
+  const { getAiMeta, reportRuleCreated, reportRuleCreationError } =
     useRuleCreationTelemetry(ruleType);
 
   useEffect(() => {
@@ -307,14 +307,14 @@ const CreateRulePageComponent: React.FC<{}> = () => {
     (step: RuleStep) => {
       if (
         !openSteps[step] &&
-        (isAiRuleAppliedRef.current ||
+        ((aiRuleCreation.getSession()?.applyCount ?? 0) > 0 ||
           ruleStepsOrder.indexOf(step) > ruleStepsOrder.indexOf(activeStep))
       ) {
         toggleStepAccordion(step);
       }
       setActiveStep(step);
     },
-    [activeStep, isAiRuleAppliedRef, openSteps]
+    [activeStep, aiRuleCreation, openSteps]
   );
 
   const toggleStepAccordion = (step: RuleStep | null) => {
@@ -410,7 +410,7 @@ const CreateRulePageComponent: React.FC<{}> = () => {
 
   const editStep = useCallback(
     async (step: RuleStep) => {
-      if (isAiRuleAppliedRef.current) {
+      if ((aiRuleCreation.getSession()?.applyCount ?? 0) > 0) {
         goToStep(step);
         return;
       }
@@ -421,7 +421,7 @@ const CreateRulePageComponent: React.FC<{}> = () => {
         goToStep(step);
       }
     },
-    [validateStep, activeStep, goToStep, isAiRuleAppliedRef]
+    [validateStep, activeStep, goToStep, aiRuleCreation]
   );
 
   const createRuleFromFormData = useCallback(
