@@ -8,15 +8,37 @@
  */
 
 import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects-base-server-internal';
+import { unflattenObject } from '@kbn/object-utils';
 import type { MigrationSnapshot } from '../types';
+
+const isFlattenedMapping = (mappings: Record<string, unknown>): boolean =>
+  Object.keys(mappings).some((key) => key.includes('.'));
+
+const normalizeRootMappingProperties = (
+  mappings: SavedObjectsTypeMappingDefinitions[string]
+): SavedObjectsTypeMappingDefinitions[string] => {
+  if (!Object.hasOwn(mappings, 'properties')) {
+    return { ...mappings, properties: {} };
+  }
+  return mappings;
+};
+
+export const unflattenSnapshotMappings = (
+  mappings: Record<string, unknown>
+): SavedObjectsTypeMappingDefinitions[string] => {
+  const nestedMappings = isFlattenedMapping(mappings)
+    ? (unflattenObject(mappings) as unknown as SavedObjectsTypeMappingDefinitions[string])
+    : (mappings as unknown as SavedObjectsTypeMappingDefinitions[string]);
+
+  return normalizeRootMappingProperties(nestedMappings);
+};
 
 export const extractMappingsFromSnapshot = (
   snapshot: MigrationSnapshot
 ): SavedObjectsTypeMappingDefinitions =>
   Object.entries(snapshot.typeDefinitions).reduce<SavedObjectsTypeMappingDefinitions>(
     (mappings, [typeName, typeDefinition]) => {
-      mappings[typeName] =
-        typeDefinition.mappings as unknown as SavedObjectsTypeMappingDefinitions[string];
+      mappings[typeName] = unflattenSnapshotMappings(typeDefinition.mappings);
       return mappings;
     },
     {}
