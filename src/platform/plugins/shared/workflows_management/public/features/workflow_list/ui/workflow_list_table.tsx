@@ -29,7 +29,12 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowListItemDto } from '@kbn/workflows';
 import { WorkflowTriggersAndSteps } from './workflow_triggers_and_steps';
-import { getRunTooltipContent, StatusBadge, WorkflowStatus } from '../../../shared/ui';
+import {
+  getRunTooltipContent,
+  ManagedWorkflowBadge,
+  StatusBadge,
+  WorkflowStatus,
+} from '../../../shared/ui';
 import { NextExecutionTime } from '../../../shared/ui/next_execution_time';
 import { WORKFLOWS_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
 
@@ -136,6 +141,11 @@ export const WorkflowListTable = ({
                       </EuiText>
                     )}
                   </EuiFlexItem>
+                  {item.managed === true ? (
+                    <EuiFlexItem grow={false}>
+                      <ManagedWorkflowBadge dataTestSubj={`workflowManagedBadge-${item.id}`} />
+                    </EuiFlexItem>
+                  ) : null}
                 </EuiFlexGroup>
               </EuiFlexItem>
               <EuiFlexItem>

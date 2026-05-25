@@ -106,6 +106,9 @@ jest.mock('../../run_workflow/ui/workflow_execute_modal', () => ({
 
 jest.mock('../../../shared/ui', () => ({
   getRunTooltipContent: () => 'Run',
+  ManagedWorkflowBadge: ({ dataTestSubj }: { dataTestSubj?: string }) => (
+    <span data-test-subj={dataTestSubj}>{'Managed'}</span>
+  ),
   StatusBadge: ({ status }: { status: string }) => <span>{status}</span>,
   WorkflowStatus: ({ valid }: { valid: boolean }) => <span>{valid ? 'Valid' : 'Invalid'}</span>,
 }));
@@ -285,6 +288,19 @@ describe('WorkflowList', () => {
     it('renders workflow description', () => {
       renderComponent();
       expect(screen.getByText('A workflow for testing')).toBeInTheDocument();
+    });
+
+    it('renders a managed badge for managed workflows', () => {
+      mockUseWorkflows.mockReturnValue({
+        data: createMockWorkflowListDto([createMockWorkflow({ managed: true })]),
+        isLoading: false,
+        error: null,
+        refetch: mockRefetch,
+      });
+
+      renderComponent();
+
+      expect(screen.getByTestId('workflowManagedBadge-wf-1')).toHaveTextContent('Managed');
     });
 
     it('shows "No description" for workflows without description', () => {

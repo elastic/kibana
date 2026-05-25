@@ -91,18 +91,20 @@ describe('WorkflowDetailHeader', () => {
       hasYamlSchemaValidationErrors = false,
       serverValid = true,
       isSaving = false,
+      isManaged = false,
     }: {
       isValid?: boolean;
       hasChanges?: boolean;
       hasYamlSchemaValidationErrors?: boolean;
       serverValid?: boolean;
       isSaving?: boolean;
+      isManaged?: boolean;
     } = {}
   ) => {
     const store = createMockStore();
 
     // Set up the workflow in the store (with server-side valid flag)
-    store.dispatch(setWorkflow({ ...mockWorkflow, valid: serverValid }));
+    store.dispatch(setWorkflow({ ...mockWorkflow, managed: isManaged, valid: serverValid }));
     store.dispatch(setYamlString(hasChanges ? 'modified yaml' : mockWorkflow.yaml));
 
     if (!isValid) {
@@ -214,6 +216,31 @@ describe('WorkflowDetailHeader', () => {
     const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);
     const button = result.getByTestId('runWorkflowHeaderButton');
     expect(button).toBeEnabled();
+  });
+
+  it('shows the managed badge for managed workflows', () => {
+    const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
+      isManaged: true,
+    });
+
+    expect(result.getByTestId('workflowDetailManagedBadge')).toHaveTextContent('Managed');
+  });
+
+  it('keeps the enabled toggle editable for managed workflows', () => {
+    const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
+      isManaged: true,
+    });
+
+    expect(result.getByRole('switch')).not.toBeDisabled();
+  });
+
+  it('disables saving managed workflow YAML', () => {
+    const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
+      hasChanges: true,
+      isManaged: true,
+    });
+
+    expect(result.getByTestId('saveWorkflowHeaderButton')).toBeDisabled();
   });
 
   it('shows the unsaved changes confirmation when running with unsaved changes', () => {
