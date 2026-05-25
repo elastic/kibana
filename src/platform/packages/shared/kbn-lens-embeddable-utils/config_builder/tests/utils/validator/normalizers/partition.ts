@@ -102,14 +102,26 @@ const alignLegacyTypes: NormalizerConfig<PartitionAttributes> = {
     layer.truncateLegend = layer.truncateLegend ?? false;
 
     // emptySizeRatio can be undefined for donut charts -> runtime defaults to SMALL donut hole
-    // in order for the transformation to keep the donut shape, we need to default to SMALL at the transformation step
-    if (viz.shape === 'donut' && layer.emptySizeRatio === undefined) {
+    const validDonutHoleSizes = Object.values(PARTITION_EMPTY_SIZE_RADIUS) as number[];
+    if (
+      viz.shape === 'donut' &&
+      (layer.emptySizeRatio === undefined ||
+        (layer.emptySizeRatio !== 0 && !validDonutHoleSizes.includes(layer.emptySizeRatio)))
+    ) {
       layer.emptySizeRatio = PARTITION_EMPTY_SIZE_RADIUS.SMALL;
     }
+
+    // emptySizeRatio can be 0 for donut charts -> runtime renders a pie chart
+    if (viz.shape === 'donut' && layer.emptySizeRatio === 0) {
+      delete layer.emptySizeRatio;
+      viz.shape = 'pie';
+    }
+
     // emptySizeRatio is not supported for non-donut charts -> delete it
     if (viz.shape !== 'donut' && layer.emptySizeRatio !== undefined) {
       delete layer.emptySizeRatio;
     }
+
     return attributes;
   },
 };

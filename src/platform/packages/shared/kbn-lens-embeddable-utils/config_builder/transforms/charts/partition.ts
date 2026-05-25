@@ -724,6 +724,18 @@ function convertStateCategoryDisplayOption(
   return undefined;
 }
 
+export function getDonutHoleSize(
+  partitionShape: LensPartitionVisualizationState['shape'],
+  donutHoleSize?: number
+): PieStyling['donut_hole'] {
+  // runtime renders a pie chart when emptySizeRatio is 0
+  if (partitionShape !== 'donut' || donutHoleSize === 0) {
+    return undefined;
+  }
+  // runtime renders `shape: 'donut'` with a small donut hole when `emptySizeRatio` is undefined -> default to SMALL
+  return donutHoleSizeCompat.toAPI(donutHoleSize) ?? 's';
+}
+
 function fromLensStateToChartSpecificStylingAPI(
   visualization: LensPartitionVisualizationState
 ): PartitionStyling {
@@ -744,11 +756,7 @@ function fromLensStateToChartSpecificStylingAPI(
   // Pie chart has the label_position and donut_hole options
   if (isStatePieChart(visualization)) {
     return stripUndefined({
-      donut_hole:
-        // At runtime, lens renders `shape: 'donut'` with an undefined `emptySizeRatio` as a SMALL donut
-        visualization.shape === 'donut'
-          ? donutHoleSizeCompat.toAPI(vizLayer.emptySizeRatio) ?? 's'
-          : undefined,
+      donut_hole: getDonutHoleSize(visualization.shape, vizLayer.emptySizeRatio),
       labels: convertStateCategoryDisplayOption(vizLayer.categoryDisplay),
       values,
     });
