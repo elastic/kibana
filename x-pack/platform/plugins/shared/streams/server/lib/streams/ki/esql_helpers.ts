@@ -32,10 +32,8 @@ export const inPredicate = <T extends string>(
   return esql.exp`${esql.col(column)} IN (${literals})`;
 };
 
-export const IS_NOT_DELETED: LatestSourceWhereCondition = esql.exp`${esql.col(
-  'deleted'
-)} IS NULL OR ${esql.col('deleted')} == false`;
+export const IS_NOT_DELETED: LatestSourceWhereCondition =
+  esql.exp`deleted IS NULL OR deleted == false`;
 
-export const IS_NOT_EXCLUDED: LatestSourceWhereCondition = esql.exp`${esql.col(
-  'excluded'
-)} IS NULL OR ${esql.col('excluded')} == false`;
+export const IS_NOT_EXCLUDED: LatestSourceWhereCondition =
+  esql.exp`excluded IS NULL OR excluded == false`;
