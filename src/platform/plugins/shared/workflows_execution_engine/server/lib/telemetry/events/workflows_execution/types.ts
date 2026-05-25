@@ -39,6 +39,22 @@ export interface BaseWorkflowExecutionTelemetryParams {
    */
   isTestRun: boolean;
   /**
+   * Whether this execution belongs to a managed workflow
+   */
+  isManaged: boolean;
+  /**
+   * Owning plugin for managed workflow executions
+   */
+  managedBy?: string;
+  /**
+   * Registered managed workflow definition ID, when this execution came from one
+   */
+  originManagedWorkflowId?: string;
+  /**
+   * Registered managed workflow definition version, when this execution came from one
+   */
+  managedVersion?: number;
+  /**
    * The alert rule ID if triggered by alert. Only present when triggerType is 'alert'.
    */
   ruleId?: string;
