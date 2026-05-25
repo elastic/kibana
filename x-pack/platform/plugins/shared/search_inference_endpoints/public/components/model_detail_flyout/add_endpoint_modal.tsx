@@ -317,17 +317,24 @@ export const AddEndpointModal: React.FC<AddEndpointModalProps> = ({
                       options={REASONING_EFFORT_OPTIONS}
                       data-test-subj="addEndpointReasoningButtonGroup"
                     />
-                    <EuiText
-                      size="xs"
-                      color="subdued"
+                    <EuiFlexGroup
+                      gutterSize="xs"
+                      alignItems="center"
+                      responsive={false}
                       data-test-subj="addEndpointReasoningTokenUsageNote"
                     >
-                      <EuiIcon type="iInCircle" size="s" aria-hidden />{' '}
-                      {i18n.translate(
-                        'xpack.searchInferenceEndpoints.addEndpointModal.reasoningTokenUsageNote',
-                        { defaultMessage: 'These settings will effect token usage.' }
-                      )}
-                    </EuiText>
+                      <EuiFlexItem grow={false}>
+                        <EuiIcon type="iInCircle" size="s" color="subdued" aria-hidden />
+                      </EuiFlexItem>
+                      <EuiFlexItem>
+                        <EuiText size="xs" color="subdued">
+                          {i18n.translate(
+                            'xpack.searchInferenceEndpoints.addEndpointModal.reasoningTokenUsageNote',
+                            { defaultMessage: 'These settings will effect token usage.' }
+                          )}
+                        </EuiText>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
                   </>
                 )}
               </EuiFlexGroup>
