@@ -6,7 +6,6 @@
  */
 
 import { esql } from '@elastic/esql';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import type { StreamQuery, SignificantEventsGetResponse } from '@kbn/streams-schema';
@@ -21,23 +20,6 @@ import { getColumnIndex, toEsqlRequest } from '../streams/helpers/esql';
 import { ALERTS_DATA_STREAM } from './alerts_data_stream';
 import { ESQL_UNITS, fillBucketGaps, parseBucketSize } from './helpers/fill_bucket_gaps';
 
-export interface AlertsSource {
-  index: string;
-  ruleIdField: string;
-  extraFilters?: QueryDslQueryContainer[];
-}
-
-export const V1_ALERTS_SOURCE: AlertsSource = {
-  index: '.alerts-streams.alerts-default',
-  ruleIdField: 'kibana.alert.rule.uuid',
-};
-
-export const V2_ALERTS_SOURCE: AlertsSource = {
-  index: '.rule-events',
-  ruleIdField: 'rule.id',
-  extraFilters: [{ term: { type: 'signal' } }, { term: { status: 'breached' } }],
-};
-
 // `change_points` on the GET response is no longer populated by the server.
 // Kept as an empty stub until the consumer-side schema/usage is removed.
 const EMPTY_CHANGE_POINTS = { type: {} } as const;
@@ -45,6 +27,11 @@ const EMPTY_CHANGE_POINTS = { type: {} } as const;
 // Shared empty array for rules with no firings and the alerts-index-missing path
 // — mirrors the pre-ES|QL DSL `notFoundSignificantEvents` behaviour.
 const EMPTY_OCCURRENCES: Array<{ date: string; count: number }> = [];
+
+export const V1_ALERTS_SOURCE = 'v1' as const;
+export const V2_ALERTS_SOURCE = 'v2' as const;
+
+export type AlertsSource = typeof V1_ALERTS_SOURCE | typeof V2_ALERTS_SOURCE;
 
 export async function readSignificantEventsFromAlertsIndices(
   params: {
@@ -71,7 +58,7 @@ export async function readSignificantEventsFromAlertsIndices(
     query,
     filters,
     searchMode,
-    alertsSource: _alertsSource = V1_ALERTS_SOURCE,
+    alertsSource,
   } = params;
 
   const queryLinks = query

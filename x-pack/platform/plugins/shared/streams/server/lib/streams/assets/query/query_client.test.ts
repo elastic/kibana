@@ -141,10 +141,9 @@ const toEsqlSourceResponse = (docs: Array<Record<string, unknown>>) => ({
   values: docs.map((doc) => [doc]),
 });
 
-/** Wraps a stored doc in the shape returned by storageClient.search. */
+/** Wraps a document in the shape returned by storageClient.search (with _source). */
 const toSearchHit = (doc: Record<string, unknown>) => ({
-  _id: doc[ASSET_UUID] as string,
-  _source: doc as StoredQueryLink,
+  _source: doc,
 });
 
 /** Renders the ES|QL string from a mocked `storageClient.esql` call. */
@@ -1123,7 +1122,7 @@ describe('rule lifecycle — syncQueries', () => {
     it('calls rulesClient.createRule once for a brand-new rule-backed query', async () => {
       const rc = rulesManagementClientMock();
       const sc = createMockStorageClient();
-      sc.esql.mockResolvedValue(toEsqlSourceResponse([]));
+      sc.search.mockResolvedValue({ hits: { hits: [] } });
       const { client } = makeClient(rc, sc);
 
       await client.syncQueries(def, [matchQuery()]);
@@ -1136,7 +1135,7 @@ describe('rule lifecycle — syncQueries', () => {
     it('passes the correct rule body when creating', async () => {
       const rc = rulesManagementClientMock();
       const sc = createMockStorageClient();
-      sc.esql.mockResolvedValue(toEsqlSourceResponse([]));
+      sc.search.mockResolvedValue({ hits: { hits: [] } });
       const { client } = makeClient(rc, sc);
 
       await client.syncQueries(def, [matchQuery('q1', MATCH_ESQL)]);
@@ -1159,7 +1158,9 @@ describe('rule lifecycle — syncQueries', () => {
     it('calls rulesClient.updateRule and does not create or delete', async () => {
       const rc = rulesManagementClientMock();
       const sc = createMockStorageClient();
-      sc.esql.mockResolvedValue(toEsqlSourceResponse([existingStoredDoc('q1', MATCH_ESQL)]));
+      sc.search.mockResolvedValue({
+        hits: { hits: [toSearchHit(existingStoredDoc('q1', MATCH_ESQL))] },
+      });
       const { client } = makeClient(rc, sc);
 
       const updated = { ...matchQuery('q1', MATCH_ESQL), title: 'Updated Title' };
@@ -1173,7 +1174,9 @@ describe('rule lifecycle — syncQueries', () => {
     it('passes the correct update body', async () => {
       const rc = rulesManagementClientMock();
       const sc = createMockStorageClient();
-      sc.esql.mockResolvedValue(toEsqlSourceResponse([existingStoredDoc('q1', MATCH_ESQL)]));
+      sc.search.mockResolvedValue({
+        hits: { hits: [toSearchHit(existingStoredDoc('q1', MATCH_ESQL))] },
+      });
       const { client } = makeClient(rc, sc);
 
       const updated = { ...matchQuery('q1', MATCH_ESQL), title: 'Updated Title' };
@@ -1194,7 +1197,9 @@ describe('rule lifecycle — syncQueries', () => {
     it('deletes the old rule and creates a new one with a new rule ID', async () => {
       const rc = rulesManagementClientMock();
       const sc = createMockStorageClient();
-      sc.esql.mockResolvedValue(toEsqlSourceResponse([existingStoredDoc('q1', MATCH_ESQL)]));
+      sc.search.mockResolvedValue({
+        hits: { hits: [toSearchHit(existingStoredDoc('q1', MATCH_ESQL))] },
+      });
       const { client } = makeClient(rc, sc);
 
       const newEsql = 'FROM logs-* METADATA _id | WHERE http.status >= 503';
@@ -1214,7 +1219,9 @@ describe('rule lifecycle — syncQueries', () => {
     it('treats whitespace-only ES|QL changes as non-breaking (no rule churn)', async () => {
       const rc = rulesManagementClientMock();
       const sc = createMockStorageClient();
-      sc.esql.mockResolvedValue(toEsqlSourceResponse([existingStoredDoc('q1', MATCH_ESQL)]));
+      sc.search.mockResolvedValue({
+        hits: { hits: [toSearchHit(existingStoredDoc('q1', MATCH_ESQL))] },
+      });
       const { client } = makeClient(rc, sc);
 
       const reformatted = '  FROM  logs-*   METADATA   _id  |  WHERE  http.status  >=  500  ';
@@ -1230,7 +1237,9 @@ describe('rule lifecycle — syncQueries', () => {
     it('calls bulkDeleteRules when a rule-backed query is no longer in the input list', async () => {
       const rc = rulesManagementClientMock();
       const sc = createMockStorageClient();
-      sc.esql.mockResolvedValue(toEsqlSourceResponse([existingStoredDoc('q1', MATCH_ESQL)]));
+      sc.search.mockResolvedValue({
+        hits: { hits: [toSearchHit(existingStoredDoc('q1', MATCH_ESQL))] },
+      });
       const { client } = makeClient(rc, sc);
 
       await client.syncQueries(def, []); // empty → delete all
@@ -1243,9 +1252,11 @@ describe('rule lifecycle — syncQueries', () => {
     it('does not call bulkDeleteRules for an unbacked query that is removed', async () => {
       const rc = rulesManagementClientMock();
       const sc = createMockStorageClient();
-      sc.esql.mockResolvedValue(
-        toEsqlSourceResponse([existingStoredDoc('q1', MATCH_ESQL, { ruleBacked: false })])
-      );
+      sc.search.mockResolvedValue({
+        hits: {
+          hits: [toSearchHit(existingStoredDoc('q1', MATCH_ESQL, { ruleBacked: false }))],
+        },
+      });
       const { client } = makeClient(rc, sc);
 
       await client.syncQueries(def, []); // remove the unbacked query
@@ -1258,7 +1269,7 @@ describe('rule lifecycle — syncQueries', () => {
     it('does not create a rule for a new STATS query', async () => {
       const rc = rulesManagementClientMock();
       const sc = createMockStorageClient();
-      sc.esql.mockResolvedValue(toEsqlSourceResponse([]));
+      sc.search.mockResolvedValue({ hits: { hits: [] } });
       const { client } = makeClient(rc, sc);
 
       const statsQuery: StreamQuery = {
@@ -1278,7 +1289,9 @@ describe('rule lifecycle — syncQueries', () => {
     it('deletes the rule when a previously rule-backed query becomes STATS', async () => {
       const rc = rulesManagementClientMock();
       const sc = createMockStorageClient();
-      sc.esql.mockResolvedValue(toEsqlSourceResponse([existingStoredDoc('q1', MATCH_ESQL)]));
+      sc.search.mockResolvedValue({
+        hits: { hits: [toSearchHit(existingStoredDoc('q1', MATCH_ESQL))] },
+      });
       const { client } = makeClient(rc, sc);
 
       const demotedQuery: StreamQuery = {
@@ -1321,7 +1334,7 @@ describe('rule lifecycle — syncQueries', () => {
         .mockRejectedValueOnce(new Error('server error'));
 
       const sc = createMockStorageClient();
-      sc.esql.mockResolvedValue(toEsqlSourceResponse([]));
+      sc.search.mockResolvedValue({ hits: { hits: [] } });
       const { client } = makeClient(rc, sc);
 
       const esql1 = 'FROM logs-* METADATA _id | WHERE http.status == 500';
@@ -1342,7 +1355,9 @@ describe('rule lifecycle — syncQueries', () => {
       rc.updateRule.mockRejectedValue(new Error('update failed'));
 
       const sc = createMockStorageClient();
-      sc.esql.mockResolvedValue(toEsqlSourceResponse([existingStoredDoc('q1', MATCH_ESQL)]));
+      sc.search.mockResolvedValue({
+        hits: { hits: [toSearchHit(existingStoredDoc('q1', MATCH_ESQL))] },
+      });
       const { client } = makeClient(rc, sc);
 
       await expect(client.syncQueries(def, [matchQuery('q1', MATCH_ESQL)])).rejects.toThrow(
