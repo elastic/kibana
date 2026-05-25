@@ -87,7 +87,8 @@ test.describe('Slack connector', { tag: tags.stateful.classic }, () => {
 
     const createButton = page.testSubj
       .locator('createConnectorButton')
-      .or(page.testSubj.locator('createFirstActionButton'));
+      .or(page.testSubj.locator('createFirstActionButton'))
+      .first();
     await createButton.click();
 
     await expect(page.testSubj.locator('.slack-card')).toBeVisible();
