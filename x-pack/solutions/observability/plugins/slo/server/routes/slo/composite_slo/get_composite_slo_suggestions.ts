@@ -7,6 +7,7 @@
 
 import { GetCompositeSLOSuggestions } from '../../../services/composites/get_composite_slo_suggestions';
 import { createSloServerRoute } from '../../create_slo_server_route';
+import { assertCompositeSloEnabled } from '../utils/assert_composite_slo_enabled';
 import { assertPlatinumLicense } from '../utils/assert_platinum_license';
 
 export const getCompositeSLOSuggestionsRoute = createSloServerRoute({
@@ -17,7 +18,8 @@ export const getCompositeSLOSuggestionsRoute = createSloServerRoute({
       requiredPrivileges: ['slo_read'],
     },
   },
-  handler: async ({ request, logger, plugins, getScopedClients }) => {
+  handler: async ({ context, request, logger, plugins, getScopedClients }) => {
+    await assertCompositeSloEnabled(await context.core);
     await assertPlatinumLicense(plugins);
     const { soClient } = await getScopedClients({ request, logger });
 

@@ -10,6 +10,7 @@ import { DefaultBurnRatesClient } from '../../../services/burn_rates_client';
 import { DefaultSummaryClient } from '../../../services/summary_client';
 import { updateCompositeSlo } from '../../../services/composites/update_composite_slo';
 import { createSloServerRoute } from '../../create_slo_server_route';
+import { assertCompositeSloEnabled } from '../utils/assert_composite_slo_enabled';
 import { assertPlatinumLicense } from '../utils/assert_platinum_license';
 
 export const updateCompositeSLORoute = createSloServerRoute({
@@ -22,6 +23,7 @@ export const updateCompositeSLORoute = createSloServerRoute({
   },
   params: updateCompositeSLOParamsSchema,
   handler: async ({ context, params, logger, request, plugins, getScopedClients }) => {
+    await assertCompositeSloEnabled(await context.core);
     await assertPlatinumLicense(plugins);
 
     const { scopedClusterClient, repository, compositeSloRepository, spaceId } =

@@ -10,6 +10,7 @@ import { DefaultBurnRatesClient } from '../../../services/burn_rates_client';
 import { createCompositeSlo } from '../../../services/composites/create_composite_slo';
 import { DefaultSummaryClient } from '../../../services/summary_client';
 import { createSloServerRoute } from '../../create_slo_server_route';
+import { assertCompositeSloEnabled } from '../utils/assert_composite_slo_enabled';
 import { assertPlatinumLicense } from '../utils/assert_platinum_license';
 
 export const createCompositeSLORoute = createSloServerRoute({
@@ -22,6 +23,8 @@ export const createCompositeSLORoute = createSloServerRoute({
   },
   params: createCompositeSLOParamsSchema,
   handler: async ({ context, params, logger, request, plugins, getScopedClients }) => {
+    const core = await context.core;
+    await assertCompositeSloEnabled(core);
     await assertPlatinumLicense(plugins);
 
     const { scopedClusterClient, repository, compositeSloRepository, spaceId } =
@@ -30,7 +33,6 @@ export const createCompositeSLORoute = createSloServerRoute({
         logger,
       });
 
-    const core = await context.core;
     const userId = core.security.authc.getCurrentUser()?.username ?? 'unknown';
 
     const burnRatesClient = new DefaultBurnRatesClient(scopedClusterClient.asCurrentUser);

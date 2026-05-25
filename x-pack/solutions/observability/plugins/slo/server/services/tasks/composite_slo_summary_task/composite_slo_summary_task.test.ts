@@ -79,7 +79,6 @@ describe('CompositeSloSummaryTask', () => {
     enabled: true,
     experimental: {
       ruleFormV2: { enabled: false },
-      compositeSlo: { enabled: true },
     },
   } satisfies SLOConfig;
 
@@ -94,6 +93,9 @@ describe('CompositeSloSummaryTask', () => {
         },
         savedObjects: {
           createInternalRepository: jest.fn().mockReturnValue(savedObjectsRepositoryMock.create()),
+        },
+        featureFlags: {
+          getBooleanValue: jest.fn().mockResolvedValue(true),
         },
       } as never,
       {} as never,

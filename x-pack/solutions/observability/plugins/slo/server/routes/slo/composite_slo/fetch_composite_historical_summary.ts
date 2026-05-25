@@ -8,6 +8,7 @@
 import { fetchCompositeHistoricalSummaryParamsSchema } from '@kbn/slo-schema';
 import { CompositeHistoricalSummaryClient } from '../../../services';
 import { createSloServerRoute } from '../../create_slo_server_route';
+import { assertCompositeSloEnabled } from '../utils/assert_composite_slo_enabled';
 import { assertPlatinumLicense } from '../utils/assert_platinum_license';
 
 export const fetchCompositeHistoricalSummaryRoute = createSloServerRoute({
@@ -19,7 +20,8 @@ export const fetchCompositeHistoricalSummaryRoute = createSloServerRoute({
     },
   },
   params: fetchCompositeHistoricalSummaryParamsSchema,
-  handler: async ({ request, logger, params, plugins, getScopedClients }) => {
+  handler: async ({ context, request, logger, params, plugins, getScopedClients }) => {
+    await assertCompositeSloEnabled(await context.core);
     await assertPlatinumLicense(plugins);
 
     const { scopedClusterClient, repository, compositeSloRepository } = await getScopedClients({

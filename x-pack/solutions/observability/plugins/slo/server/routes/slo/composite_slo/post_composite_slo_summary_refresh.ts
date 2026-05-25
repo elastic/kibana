@@ -8,6 +8,7 @@
 import { postCompositeSloSummaryRefreshParamsSchema } from '@kbn/slo-schema';
 import { refreshCompositeSloSummaries } from '../../../services/tasks/composite_slo_summary_task/refresh_composite_slo_summaries';
 import { createSloServerRoute } from '../../create_slo_server_route';
+import { assertCompositeSloEnabled } from '../utils/assert_composite_slo_enabled';
 import { assertPlatinumLicense } from '../utils/assert_platinum_license';
 
 export const postCompositeSloSummaryRefreshRoute = createSloServerRoute({
@@ -19,7 +20,8 @@ export const postCompositeSloSummaryRefreshRoute = createSloServerRoute({
     },
   },
   params: postCompositeSloSummaryRefreshParamsSchema,
-  handler: async ({ plugins, logger, config }) => {
+  handler: async ({ context, plugins, logger, config }) => {
+    await assertCompositeSloEnabled(await context.core);
     await assertPlatinumLicense(plugins);
     const taskManager = await plugins.taskManager.start();
 

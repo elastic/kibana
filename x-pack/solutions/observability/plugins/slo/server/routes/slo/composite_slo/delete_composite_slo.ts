@@ -11,6 +11,7 @@ import { COMPOSITE_SUMMARY_INDEX_NAME } from '../../../../common/constants';
 import { buildCompositeSloSummaryDocId } from '../../../services/composites/composite_slo_summary_index';
 import { retryTransientEsErrors } from '../../../utils/retry';
 import { createSloServerRoute } from '../../create_slo_server_route';
+import { assertCompositeSloEnabled } from '../utils/assert_composite_slo_enabled';
 import { assertPlatinumLicense } from '../utils/assert_platinum_license';
 
 // TODO: move into CompositeSummaryRepository alongside the upsert added for inline summary persist on create/update
@@ -48,7 +49,8 @@ export const deleteCompositeSLORoute = createSloServerRoute({
     },
   },
   params: deleteCompositeSLOParamsSchema,
-  handler: async ({ response, params, logger, request, plugins, getScopedClients }) => {
+  handler: async ({ context, response, params, logger, request, plugins, getScopedClients }) => {
+    await assertCompositeSloEnabled(await context.core);
     await assertPlatinumLicense(plugins);
 
     const { scopedClusterClient, compositeSloRepository, spaceId } = await getScopedClients({

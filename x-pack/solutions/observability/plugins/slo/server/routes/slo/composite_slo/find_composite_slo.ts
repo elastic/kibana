@@ -13,6 +13,7 @@ import { COMPOSITE_SUMMARY_INDEX_NAME } from '../../../../common/constants';
 import type { CompositeSLODefinition } from '../../../domain/models';
 import type { CompositeSLORepository } from '../../../services';
 import { createSloServerRoute } from '../../create_slo_server_route';
+import { assertCompositeSloEnabled } from '../utils/assert_composite_slo_enabled';
 import { assertPlatinumLicense } from '../utils/assert_platinum_license';
 
 interface FindCompositeSloParams {
@@ -115,7 +116,8 @@ export const findCompositeSLORoute = createSloServerRoute({
     },
   },
   params: findCompositeSLOParamsSchema,
-  handler: async ({ params, logger, request, plugins, getScopedClients }) => {
+  handler: async ({ context, params, logger, request, plugins, getScopedClients }) => {
+    await assertCompositeSloEnabled(await context.core);
     await assertPlatinumLicense(plugins);
 
     const { scopedClusterClient, compositeSloRepository, spaceId } = await getScopedClients({
