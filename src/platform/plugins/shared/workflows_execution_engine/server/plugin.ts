@@ -109,6 +109,10 @@ const WORKFLOW_RESUME_TASK_MAX_ATTEMPTS = 3;
 const BULK_CANCEL_PAGE_SIZE = 10;
 
 type SetupDependencies = Pick<ContextDependencies, 'cloudSetup'>;
+type ManagedWorkflowExecutionMetadata = Pick<
+  EsWorkflowExecution,
+  'managed' | 'managedBy' | 'originManagedWorkflowId' | 'managedVersion'
+>;
 
 export class WorkflowsExecutionEnginePlugin
   implements
@@ -1416,12 +1420,10 @@ export class WorkflowsExecutionEnginePlugin
   private buildManagedWorkflowExecutionMetadata(
     workflow: Pick<
       WorkflowExecutionEngineModel,
-      'managed' | 'managedBy' | 'originManagedWorkflowId'
+      'managed' | 'managedBy' | 'originManagedWorkflowId' | 'managedVersion'
     >
-  ): Partial<Pick<EsWorkflowExecution, 'managed' | 'managedBy' | 'originManagedWorkflowId'>> {
-    const managedMetadata: Partial<
-      Pick<EsWorkflowExecution, 'managed' | 'managedBy' | 'originManagedWorkflowId'>
-    > = {};
+  ): Partial<ManagedWorkflowExecutionMetadata> {
+    const managedMetadata: Partial<ManagedWorkflowExecutionMetadata> = {};
 
     if (workflow.managed === true) {
       managedMetadata.managed = true;
@@ -1433,6 +1435,10 @@ export class WorkflowsExecutionEnginePlugin
 
     if (typeof workflow.originManagedWorkflowId === 'string') {
       managedMetadata.originManagedWorkflowId = workflow.originManagedWorkflowId;
+    }
+
+    if (typeof workflow.managedVersion === 'number') {
+      managedMetadata.managedVersion = workflow.managedVersion;
     }
 
     return managedMetadata;

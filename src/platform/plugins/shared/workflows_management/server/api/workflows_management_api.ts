@@ -151,6 +151,24 @@ export interface BulkScheduleWorkflowItem {
   metadata?: WorkflowExecutionEventDispatchMetadata;
 }
 
+const buildManagedWorkflowExecutionMetadata = (
+  workflow: WorkflowDetailDto | null | undefined
+): Partial<
+  Pick<
+    WorkflowExecutionEngineModel,
+    'managed' | 'managedBy' | 'originManagedWorkflowId' | 'managedVersion'
+  >
+> => ({
+  ...(workflow?.managed === true ? { managed: true } : {}),
+  ...(typeof workflow?.managedBy === 'string' ? { managedBy: workflow.managedBy } : {}),
+  ...(typeof workflow?.originManagedWorkflowId === 'string'
+    ? { originManagedWorkflowId: workflow.originManagedWorkflowId }
+    : {}),
+  ...(typeof workflow?.managedVersion === 'number'
+    ? { managedVersion: workflow.managedVersion }
+    : {}),
+});
+
 export class WorkflowsManagementApi {
   private smlIndexAttachment: SmlIndexAttachmentFn | null = null;
   private smlLogger: Logger | null = null;
@@ -411,18 +429,16 @@ export class WorkflowsManagementApi {
   }: TestWorkflowParams): Promise<string> {
     let resolvedYaml = workflowYaml;
     let resolvedWorkflowId = workflowId;
-
-    // Fetch the persisted workflow when an id is provided so we can
-    // fall back to its YAML and carry managed flags into the execution.
     let existingWorkflow: WorkflowDetailDto | null = null;
-    if (workflowId) {
+
+    if (workflowId && !workflowYaml) {
       existingWorkflow = await this.workflowsService.getWorkflow(workflowId, spaceId);
       if (!existingWorkflow) {
         throw new WorkflowNotFoundError(workflowId);
       }
-      if (!resolvedYaml) {
-        resolvedYaml = existingWorkflow.yaml;
-      }
+      resolvedYaml = existingWorkflow.yaml;
+    } else if (workflowId) {
+      existingWorkflow = await this.workflowsService.getWorkflow(workflowId, spaceId);
     }
 
     if (!resolvedWorkflowId) {
@@ -457,13 +473,7 @@ export class WorkflowsManagementApi {
         definition: workflowJson.definition,
         yaml: resolvedYaml,
         isTestRun: true,
-        ...(existingWorkflow?.managed === true ? { managed: true } : {}),
-        ...(typeof existingWorkflow?.managedBy === 'string'
-          ? { managedBy: existingWorkflow.managedBy }
-          : {}),
-        ...(typeof existingWorkflow?.originManagedWorkflowId === 'string'
-          ? { originManagedWorkflowId: existingWorkflow.originManagedWorkflowId }
-          : {}),
+        ...buildManagedWorkflowExecutionMetadata(existingWorkflow),
       },
       context,
       request
