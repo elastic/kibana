@@ -174,6 +174,16 @@ function buildBaseExecutionTelemetryFields(
     triggerType,
     ...(eventTriggerId !== undefined ? { eventTriggerId } : {}),
     isTestRun: workflowExecution.isTestRun || false,
+    isManaged: workflowExecution.managed === true,
+    ...(typeof workflowExecution.managedBy === 'string' && {
+      managedBy: workflowExecution.managedBy,
+    }),
+    ...(typeof workflowExecution.originManagedWorkflowId === 'string' && {
+      originManagedWorkflowId: workflowExecution.originManagedWorkflowId,
+    }),
+    ...(typeof workflowExecution.managedVersion === 'number' && {
+      managedVersion: workflowExecution.managedVersion,
+    }),
     ...(executionMetadata.ruleId && { ruleId: executionMetadata.ruleId }),
     ...(executionMetadata.compositionDepth !== undefined && {
       compositionDepth: executionMetadata.compositionDepth,
@@ -406,6 +416,16 @@ export class WorkflowExecutionTelemetryClient {
       triggerType,
       ...(eventTriggerId !== undefined ? { eventTriggerId } : {}),
       isTestRun: workflowExecution.isTestRun || false,
+      isManaged: workflowExecution.managed === true,
+      ...(typeof workflowExecution.managedBy === 'string' && {
+        managedBy: workflowExecution.managedBy,
+      }),
+      ...(typeof workflowExecution.originManagedWorkflowId === 'string' && {
+        originManagedWorkflowId: workflowExecution.originManagedWorkflowId,
+      }),
+      ...(typeof workflowExecution.managedVersion === 'number' && {
+        managedVersion: workflowExecution.managedVersion,
+      }),
       ...(executionMetadata.ruleId && { ruleId: executionMetadata.ruleId }),
       ...(executionMetadata.eventChainDepth !== undefined && {
         eventChainDepth: executionMetadata.eventChainDepth,
