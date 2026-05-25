@@ -28,7 +28,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useDateFormat } from '../../../../../hooks/use_date_format';
 import { useSyntheticsSettingsContext } from '../../../contexts';
-import { getErrorDetailsUrl } from '../../common/links/error_details_url';
+import { getErrorDetailsUrl } from '../../monitor_details/monitor_errors/error_details_url';
 import { JourneyStepScreenshotContainer } from '../../common/screenshot/journey_step_screenshot_container';
 import type { ErrorGroupItem } from '../../../../../../common/runtime_types';
 
