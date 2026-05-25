@@ -7,6 +7,7 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
+import type { FilterStats } from '@kbn/ml-common-types/filters';
 import { mlApiTest as apiTest, INTERNAL_API_HEADERS } from '../../fixtures';
 import {
   getADFqFilterStatsJobConfig1,
@@ -32,15 +33,6 @@ const testFilters = [
   },
 ];
 
-interface FilterStats {
-  filter_id: string;
-  item_count: number;
-  used_by?: {
-    jobs: string[];
-    detectors: string[];
-  };
-}
-
 // TODO: Add the ECH cloud tag once support for custom roles is implemented.
 // See related issue: https://github.com/elastic/kibana/issues/259284
 apiTest.describe(
@@ -62,7 +54,7 @@ apiTest.describe(
         await apiServices.ml.anomalyDetection.delete({ jobIds: [jobConfig.job_id] }).catch(() => {
           /* no-op if job doesn't exist */
         });
-        await apiServices.ml.anomalyDetection.create(jobConfig);
+        await apiServices.ml.anomalyDetection.createViaKibana(jobConfig);
       }
     });
 

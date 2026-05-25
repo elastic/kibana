@@ -52,77 +52,79 @@ export const getADFqMultiMetricJobConfig = (jobId: string): Partial<estypes.MlJo
  * Returns AD job config 1 used by get_filters_stats tests: mean(responsetime) with two filter rules.
  * Source: FTR x-pack/platform/test/api_integration/apis/ml/filters/get_filters_stats.ts (jobConfig1)
  */
-export const getADFqFilterStatsJobConfig1 = (jobId: string) => ({
-  job_id: jobId,
-  description: 'mean(responsetime) partition=airline on farequote dataset with 1h bucket span',
-  groups: ['farequote', 'automated', 'multi-metric'],
-  analysis_config: {
-    bucket_span: '1h',
-    influencers: ['airline'],
-    detectors: [
-      {
-        function: 'mean',
-        field_name: 'responsetime',
-        partition_field_name: 'airline',
-        detector_description: 'mean(responsetime) partitionfield=airline',
-        custom_rules: [
-          {
-            actions: ['skip_result'],
-            scope: { airline: { filter_id: 'ignore_a_airlines', filter_type: 'include' } },
-          },
-          {
-            actions: ['skip_result'],
-            scope: { airline: { filter_id: 'ignore_b_airlines', filter_type: 'include' } },
-          },
-        ],
-      },
-    ],
-  },
-  data_description: { time_field: '@timestamp' },
-  analysis_limits: { model_memory_limit: '20mb' },
-  model_plot_config: { enabled: true },
-});
+export const getADFqFilterStatsJobConfig1 = (jobId: string) =>
+  ({
+    job_id: jobId,
+    description: 'mean(responsetime) partition=airline on farequote dataset with 1h bucket span',
+    groups: ['farequote', 'automated', 'multi-metric'],
+    analysis_config: {
+      bucket_span: '1h',
+      influencers: ['airline'],
+      detectors: [
+        {
+          function: 'mean',
+          field_name: 'responsetime',
+          partition_field_name: 'airline',
+          detector_description: 'mean(responsetime) partitionfield=airline',
+          custom_rules: [
+            {
+              actions: ['skip_result'],
+              scope: { airline: { filter_id: 'ignore_a_airlines', filter_type: 'include' } },
+            },
+            {
+              actions: ['skip_result'],
+              scope: { airline: { filter_id: 'ignore_b_airlines', filter_type: 'include' } },
+            },
+          ],
+        },
+      ],
+    },
+    data_description: { time_field: '@timestamp' },
+    analysis_limits: { model_memory_limit: '20mb' },
+    model_plot_config: { enabled: true },
+  } satisfies Partial<estypes.MlJob>);
 
 /**
  * Returns AD job config 2 used by get_filters_stats tests: max+min(responsetime) with one filter rule.
  * Source: FTR x-pack/platform/test/api_integration/apis/ml/filters/get_filters_stats.ts (jobConfig2)
  */
-export const getADFqFilterStatsJobConfig2 = (jobId: string) => ({
-  job_id: jobId,
-  description: 'max(responsetime) partition=airline on farequote dataset with 30m bucket span',
-  groups: ['farequote', 'automated', 'multi-metric'],
-  analysis_config: {
-    bucket_span: '30m',
-    influencers: ['airline'],
-    detectors: [
-      {
-        function: 'max',
-        field_name: 'responsetime',
-        partition_field_name: 'airline',
-        detector_description: 'max(responsetime) partitionfield=airline',
-      },
-      {
-        function: 'min',
-        field_name: 'responsetime',
-        partition_field_name: 'airline',
-        detector_description: 'min(responsetime) partitionfield=airline',
-        custom_rules: [
-          {
-            actions: ['skip_result'],
-            conditions: [{ applies_to: 'actual', operator: 'lt', value: 100 }],
-          },
-          {
-            actions: ['skip_result'],
-            scope: { airline: { filter_id: 'ignore_a_airlines', filter_type: 'include' } },
-          },
-        ],
-      },
-    ],
-  },
-  data_description: { time_field: '@timestamp' },
-  analysis_limits: { model_memory_limit: '20mb' },
-  model_plot_config: { enabled: true },
-});
+export const getADFqFilterStatsJobConfig2 = (jobId: string) =>
+  ({
+    job_id: jobId,
+    description: 'max(responsetime) partition=airline on farequote dataset with 30m bucket span',
+    groups: ['farequote', 'automated', 'multi-metric'],
+    analysis_config: {
+      bucket_span: '30m',
+      influencers: ['airline'],
+      detectors: [
+        {
+          function: 'max',
+          field_name: 'responsetime',
+          partition_field_name: 'airline',
+          detector_description: 'max(responsetime) partitionfield=airline',
+        },
+        {
+          function: 'min',
+          field_name: 'responsetime',
+          partition_field_name: 'airline',
+          detector_description: 'min(responsetime) partitionfield=airline',
+          custom_rules: [
+            {
+              actions: ['skip_result'],
+              conditions: [{ applies_to: 'actual', operator: 'lt', value: 100 }],
+            },
+            {
+              actions: ['skip_result'],
+              scope: { airline: { filter_id: 'ignore_a_airlines', filter_type: 'include' } },
+            },
+          ],
+        },
+      ],
+    },
+    data_description: { time_field: '@timestamp' },
+    analysis_limits: { model_memory_limit: '20mb' },
+    model_plot_config: { enabled: true },
+  } satisfies Partial<estypes.MlJob>);
 
 /**
  * Returns a datafeed config targeting the ft_farequote index for the given AD job.

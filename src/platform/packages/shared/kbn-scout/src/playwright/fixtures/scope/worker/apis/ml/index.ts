@@ -31,8 +31,8 @@ export interface DeleteJobsOptions {
 }
 
 export interface MlADJobsApi {
-  /** Create an anomaly detection job via the Kibana internal API (registers in current space) */
-  create: <T extends { job_id: string }>(jobConfig: T) => Promise<void>;
+  /** Create an anomaly detection job via the Kibana API (registers in current space) */
+  createViaKibana: (jobConfig: Partial<estypes.MlJob>) => Promise<void>;
   /** Delete anomaly detection jobs via the Kibana API */
   delete: (options: DeleteJobsOptions) => Promise<void>;
   /** Get all anomaly detection jobs via the Elasticsearch API */
@@ -497,19 +497,22 @@ export const getMlApiHelper = (
   };
 
   const anomalyDetection: MlADJobsApi = {
-    async create<T extends { job_id: string }>(jobConfig: T): Promise<void> {
+    async createViaKibana(jobConfig: Partial<estypes.MlJob>): Promise<void> {
       const { job_id: jobId, ...body } = jobConfig;
-      await measurePerformanceAsync(log, `mlApi.anomalyDetection.create [${jobId}]`, async () => {
-        // Use Kibana internal API so the job is registered in the current space.
-        // esClient.ml.putJob bypasses Kibana saved objects and jobs get filtered by filterJobsForSpace().
-        await kbnClient.request({
-          method: 'PUT',
-          path: `/internal/ml/anomaly_detectors/${jobId}`,
-          headers: ML_INTERNAL_HEADERS,
-          body,
-        });
-        await this.waitForJobToExist(jobId);
-      });
+      if (!jobId) throw new Error('jobConfig.job_id is required');
+      await measurePerformanceAsync(
+        log,
+        `mlApi.anomalyDetection.createViaKibana [${jobId}]`,
+        async () => {
+          await kbnClient.request({
+            method: 'PUT',
+            path: `/internal/ml/anomaly_detectors/${jobId}`,
+            headers: ML_INTERNAL_HEADERS,
+            body,
+          });
+          await this.waitForJobToExist(jobId);
+        }
+      );
     },
 
     async delete({
