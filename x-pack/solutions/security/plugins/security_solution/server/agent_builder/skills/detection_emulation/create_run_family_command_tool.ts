@@ -88,7 +88,7 @@ export function createRunFamilyCommandTool(
     },
     handler: async (
       rawParams: z.infer<typeof schema>,
-      { esClient, spaceId, request, runContext, callContext }: any
+      { esClient, spaceId, request, runContext, callContext, savedObjectsClient }: any
     ) => {
       const { emulationId, agentType, command } = rawParams;
 
@@ -118,6 +118,7 @@ export function createRunFamilyCommandTool(
           request,
           esClient,
           spaceId,
+          savedObjectsClient,
           actorContext,
         },
         strictParseResult.data

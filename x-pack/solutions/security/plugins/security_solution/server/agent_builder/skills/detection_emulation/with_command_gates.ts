@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger, ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
+import type { Logger, ElasticsearchClient, KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import { ToolResultType } from '@kbn/agent-builder-common';
 import type { RunEmulationCommandInput } from '../../../../common/detection_emulation/schemas';
 import type { ConfigType } from '../../../config';
@@ -54,6 +54,7 @@ export interface CommandGatesContext {
   request: KibanaRequest;
   esClient: { asCurrentUser: ElasticsearchClient };
   spaceId: string;
+  savedObjectsClient?: SavedObjectsClientContract;
   actorContext?: ActorContext;
 }
 
@@ -110,6 +111,7 @@ export const withCommandGates = async (
     request,
     esClient,
     spaceId,
+    savedObjectsClient,
     actorContext,
   } = ctx;
   const { emulationId, agentType, endpointIds, command } = cmd;
@@ -162,7 +164,7 @@ export const withCommandGates = async (
 
     // ── Per-request guardrail resolution ────────────────────────────────────
     const [coreStart] = await core.getStartServices();
-    const soClient = coreStart.savedObjects.getScopedClient(request);
+    const soClient = savedObjectsClient ?? coreStart.savedObjects.getScopedClient(request);
     const uiSettingsClient = coreStart.uiSettings.asScopedToClient(soClient);
     const { effectiveAllowlist, effectiveRateLimiter } = await resolveEffectiveConfig({
       uiSettingsClient,
