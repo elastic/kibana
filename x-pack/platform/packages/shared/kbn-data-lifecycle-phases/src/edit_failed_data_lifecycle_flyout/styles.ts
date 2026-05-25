@@ -8,12 +8,10 @@
 import { css } from '@emotion/react';
 import type { EuiThemeComputed } from '@elastic/eui';
 
-type EuiTheme = EuiThemeComputed;
-
 export const getEditFailedDataLifecycleFlyoutBodyStyles = ({
   euiTheme,
 }: {
-  euiTheme: EuiTheme;
+  euiTheme: EuiThemeComputed;
 }) => ({
   headerSection: css`
     padding: ${euiTheme.size.l};
