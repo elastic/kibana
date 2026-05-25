@@ -26,12 +26,22 @@ export const queryKeys = {
       page?: number;
       perPage?: number;
     }) => ['evals', 'experiments', 'list', filters] as const,
-    detail: (experimentId: string) => ['evals', 'experiments', 'detail', experimentId] as const,
-    scores: (experimentId: string) => ['evals', 'experiments', 'scores', experimentId] as const,
-    datasetExamples: (experimentId: string, datasetId: string) =>
-      ['evals', 'experiments', 'datasets', 'examples', experimentId, datasetId] as const,
-    compare: (experimentIdA: string, experimentIdB: string) =>
-      ['evals', 'experiments', 'compare', experimentIdA, experimentIdB] as const,
+    detail: (experimentId: string, executionId?: string) =>
+      ['evals', 'experiments', 'detail', experimentId, executionId] as const,
+    scores: (experimentId: string, executionId?: string) =>
+      ['evals', 'experiments', 'scores', experimentId, executionId] as const,
+    datasetExamples: (experimentId: string, datasetId: string, executionId?: string) =>
+      [
+        'evals',
+        'experiments',
+        'datasets',
+        'examples',
+        experimentId,
+        datasetId,
+        executionId,
+      ] as const,
+    compare: (type: string, baselineId: string, targetId: string) =>
+      ['evals', 'experiments', 'compare', type, baselineId, targetId] as const,
   },
   examples: {
     all: ['evals', 'examples'] as const,

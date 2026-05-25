@@ -172,7 +172,11 @@ const ExperimentHeader: React.FC<{
         <EuiFlexItem grow={false}>
           <EuiToolTip content={i18n.VIEW_EXPERIMENT_DETAIL}>
             <EuiLink
-              onClick={() => history.push(`/experiments/${encodeURIComponent(experimentId)}`)}
+              onClick={() => {
+                const path = `/experiments/${encodeURIComponent(experimentId)}`;
+                const query = executionId ? `?execution_id=${encodeURIComponent(executionId)}` : '';
+                history.push(`${path}${query}`);
+              }}
             >
               {experimentId}
             </EuiLink>
@@ -544,7 +548,7 @@ export const CompareExperimentsPage: React.FC = () => {
   const { euiTheme } = useEuiTheme();
 
   const params = useMemo(() => new URLSearchParams(search), [search]);
-  const compareType = (params.get('type') as 'experiment' | 'execution') || 'experiment';
+  const compareType = params.get('type') === 'execution' ? 'execution' : 'experiment';
   const baselineId = params.get('baseline') ?? '';
   const targetId = params.get('target') ?? '';
   const isExecutionCompare = compareType === 'execution';

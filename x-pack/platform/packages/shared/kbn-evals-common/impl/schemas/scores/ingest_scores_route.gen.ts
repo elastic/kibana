@@ -31,8 +31,8 @@ export const IngestScoresRequestBody = lazySchema(() =>
       hostname: z.string(),
       git: z
         .object({
-          branch: z.string().optional(),
-          commit_sha: z.string().optional(),
+          branch: z.string().nullable().optional(),
+          commit_sha: z.string().nullable().optional(),
         })
         .optional(),
       ci: BuildkiteMetadata.optional(),
