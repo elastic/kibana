@@ -14,6 +14,15 @@ import {
   buildSystemPart,
 } from './build_prompts';
 
+const expectCategoryInPrompt = (
+  content: string,
+  name: string,
+  description = 'No description provided'
+) => {
+  expect(content).toContain(`**Category Name:** ${name}`);
+  expect(content).toContain(`**Category Description:** ${description}`);
+};
+
 describe('build_prompts', () => {
   describe('buildSystemPart', () => {
     it('returns a system-role message with classification rules', () => {
@@ -90,9 +99,10 @@ describe('build_prompts', () => {
         allowMultipleCategories: false,
         includeRationale: false,
       });
-      expect(parts[0].content).toContain('- Urgent');
-      expect(parts[0].content).toContain('- Normal');
-      expect(parts[0].content).toContain('- Low');
+      const content = parts[0].content as string;
+      expectCategoryInPrompt(content, 'Urgent');
+      expectCategoryInPrompt(content, 'Normal');
+      expectCategoryInPrompt(content, 'Low');
     });
 
     it('includes fallback category rule when provided', () => {
@@ -102,7 +112,8 @@ describe('build_prompts', () => {
         fallbackCategory: 'Other',
         includeRationale: false,
       });
-      expect(parts[0].content).toContain('fallback category: "Other"');
+      expect(parts[0].content).toContain('use the fallback category:');
+      expectCategoryInPrompt(parts[0].content as string, 'Other');
     });
 
     it('includes single-category rules when allowMultipleCategories is false', () => {
@@ -150,22 +161,21 @@ describe('build_prompts', () => {
         allowMultipleCategories: false,
         includeRationale: false,
       });
+      const content = parts[0].content as string;
       categories.forEach((cat) => {
-        expect(parts[0].content).toContain(`- ${cat}`);
+        expectCategoryInPrompt(content, cat);
       });
     });
 
     it('renders object categories with name and description', () => {
       const parts = buildClassificationRequestPart({
-        categories: [
-          { name: 'Critical', description: 'Immediate action required' },
-          'Info',
-        ],
+        categories: [{ name: 'Critical', description: 'Immediate action required' }, 'Info'],
         allowMultipleCategories: false,
         includeRationale: false,
       });
-      expect(parts[0].content).toContain('- Critical: Immediate action required');
-      expect(parts[0].content).toContain('- Info');
+      const content = parts[0].content as string;
+      expectCategoryInPrompt(content, 'Critical', 'Immediate action required');
+      expectCategoryInPrompt(content, 'Info');
     });
 
     it('uses category name for object fallbackCategory', () => {
@@ -175,7 +185,8 @@ describe('build_prompts', () => {
         fallbackCategory: { name: 'Other', description: 'No clear match' },
         includeRationale: false,
       });
-      expect(parts[0].content).toContain('fallback category: "Other"');
+      expect(parts[0].content).toContain('use the fallback category:');
+      expectCategoryInPrompt(parts[0].content as string, 'Other', 'No clear match');
       expect(parts[0].content).not.toContain('[object Object]');
     });
   });
