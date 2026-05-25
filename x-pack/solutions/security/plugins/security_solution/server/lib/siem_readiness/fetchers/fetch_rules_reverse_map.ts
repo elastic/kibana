@@ -29,26 +29,17 @@ export interface FetchRulesReverseMapDeps {
   esClient: ElasticsearchClient;
   dataViewsService: DataViewsService;
   logger: Logger;
+  packageToPlatform?: Map<string, string>;
 }
 
-const PACKAGE_TO_PLATFORM: Record<string, string> = {
-  aws: 'AWS',
-  azure: 'Azure',
-  gcp: 'GCP',
-  endpoint: 'Endpoint',
-  windows: 'Windows',
-  linux: 'Linux',
-  macos: 'macOS',
-  okta: 'Okta',
-  google_workspace: 'Google Workspace',
-  network_traffic: 'Network',
-  zeek: 'Network',
-  suricata: 'Network',
-  cloudflare: 'Cloudflare',
-  azure_ad: 'Azure AD',
-  o365: 'Office 365',
-  github: 'GitHub',
-  kubernetes: 'Kubernetes',
+export const buildPackageToPlatform = (
+  packages: Array<{ name: string; title: string }>
+): Map<string, string> => {
+  const map = new Map<string, string>();
+  for (const pkg of packages) {
+    map.set(pkg.name, pkg.title);
+  }
+  return map;
 };
 
 interface ThreatTactic {
@@ -87,11 +78,14 @@ interface AlertingRule {
   params: RuleParams;
 }
 
-const buildRuleEntry = (rule: AlertingRule): RuleIndexEntry => {
+const buildRuleEntry = (
+  rule: AlertingRule,
+  packageToPlatform: Map<string, string>
+): RuleIndexEntry => {
   const relatedIntegrations = (rule.params as { relatedIntegrations?: RelatedIntegration[] })
     .relatedIntegrations;
   const pkg = relatedIntegrations?.[0]?.package;
-  let platform = pkg ? PACKAGE_TO_PLATFORM[pkg] : undefined;
+  let platform = pkg ? packageToPlatform.get(pkg) : undefined;
 
   if (!platform) {
     const { tags } = rule;
@@ -171,6 +165,7 @@ export const fetchRulesReverseMap = async ({
   esClient,
   dataViewsService,
   logger,
+  packageToPlatform = new Map(),
 }: FetchRulesReverseMapDeps): Promise<ReverseMapResult> => {
   const indexToRules: IndexToRulesMap = new Map();
   const pipelineToIndices: PipelineToIndicesMap = new Map();
@@ -232,7 +227,7 @@ export const fetchRulesReverseMap = async ({
 
     for (const ruleData of result.data) {
       const rule = ruleData as unknown as AlertingRule;
-      const entry = buildRuleEntry(rule);
+      const entry = buildRuleEntry(rule, packageToPlatform);
 
       for (const tactic of entry.tactics) {
         const existing = tacticTotals.get(tactic.id);

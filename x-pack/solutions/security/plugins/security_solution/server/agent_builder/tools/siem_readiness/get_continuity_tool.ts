@@ -19,7 +19,11 @@ import {
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
 import { getContinuity } from '../../../lib/siem_readiness/dimensions';
-import { fetchCategories, fetchRulesReverseMap } from '../../../lib/siem_readiness/fetchers';
+import {
+  fetchCategories,
+  fetchRulesReverseMap,
+  buildPackageToPlatform,
+} from '../../../lib/siem_readiness/fetchers';
 import { SIEM_READINESS_CONTINUITY_TOOL_ID } from './tool_ids';
 
 const schema = z.object({});
@@ -51,12 +55,25 @@ export const getContinuityTool = (
         esClient.asCurrentUser
       );
 
+      let packageToPlatform = new Map<string, string>();
+      try {
+        if (startPlugins.fleet) {
+          const fleetPackages = await startPlugins.fleet.packageService.asInternalUser.getPackages();
+          packageToPlatform = buildPackageToPlatform(fleetPackages);
+        }
+      } catch (e) {
+        handlerLogger.warn(
+          'Failed to fetch Fleet packages, platform mapping will use tag fallback'
+        );
+      }
+
       const [reverseMapResult, categoriesResult] = await Promise.all([
         fetchRulesReverseMap({
           rulesClient,
           esClient: esClient.asCurrentUser,
           dataViewsService,
           logger: handlerLogger,
+          packageToPlatform,
         }),
         fetchCategories({ esClient: esClient.asCurrentUser, logger: handlerLogger }),
       ]);
