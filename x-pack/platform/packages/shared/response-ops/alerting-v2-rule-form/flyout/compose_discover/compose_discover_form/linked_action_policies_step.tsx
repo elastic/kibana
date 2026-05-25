@@ -52,7 +52,7 @@ const matchingSubtext = i18n.translate(
 
 const emptyStateLabel = i18n.translate(
   'xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.noMatchesEmptyState',
-  { defaultMessage: 'No action policies match this rule.' }
+  { defaultMessage: '0 matching action policies' }
 );
 
 const errorTitle = i18n.translate(
@@ -105,16 +105,15 @@ export const LinkedActionPoliciesStep: React.FC<LinkedActionPoliciesStepProps> =
         </EuiCallOut>
       )}
 
-      {!isLoading && !error && items.length === 0 && (
-        <EuiText size="s" color="subdued" data-test-subj="linkedActionPoliciesEmpty">
-          <p>{emptyStateLabel}</p>
-        </EuiText>
-      )}
-
-      {!isLoading && !error && items.length > 0 && (
+      {!isLoading && !error && (
         <EuiSelectable
           options={options}
           onChange={() => {}}
+          emptyMessage={
+            <EuiText size="s" color="subdued" data-test-subj="linkedActionPoliciesEmpty">
+              <p>{emptyStateLabel}</p>
+            </EuiText>
+          }
           listProps={{ showIcons: false, bordered: true, isVirtualized: false }}
         >
           {(list) => list}

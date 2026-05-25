@@ -61,7 +61,7 @@ describe('LinkedActionPoliciesStep', () => {
     renderComponent();
 
     expect(screen.getByTestId('linkedActionPoliciesEmpty')).toBeInTheDocument();
-    expect(screen.getByText('No action policies match this rule.')).toBeInTheDocument();
+    expect(screen.getByText('0 matching action policies')).toBeInTheDocument();
   });
 
   it('renders policy names with category badges in an EuiSelectable', () => {
