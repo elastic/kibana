@@ -153,7 +153,7 @@ function createDeepLinks(
               defaultMessage: 'Log rate analysis',
             }),
             path: `/${ML_PAGES.AIOPS_LOG_RATE_ANALYSIS}`,
-            visibleIn: ['solutionSideNav'],
+            visibleIn: [],
           },
           {
             id: 'logPatternAnalysis',
@@ -169,7 +169,7 @@ function createDeepLinks(
               defaultMessage: 'Log pattern analysis',
             }),
             path: `/${ML_PAGES.AIOPS_LOG_CATEGORIZATION}`,
-            visibleIn: ['solutionSideNav'],
+            visibleIn: [],
           },
           {
             id: 'changePointDetections',
@@ -185,7 +185,7 @@ function createDeepLinks(
               defaultMessage: 'Change point detection',
             }),
             path: `/${ML_PAGES.AIOPS_CHANGE_POINT_DETECTION}`,
-            visibleIn: ['solutionSideNav'],
+            visibleIn: [],
           },
         ],
       };
@@ -223,7 +223,7 @@ function createDeepLinks(
         }),
         keywords: ['CSV', 'JSON'],
         path: `/${ML_PAGES.DATA_VISUALIZER_FILE}`,
-        visibleIn: ['solutionSideNav'],
+        visibleIn: ['globalSearch', 'solutionSideNav'],
       };
     },
 
@@ -234,7 +234,7 @@ function createDeepLinks(
           defaultMessage: 'Index data visualizer',
         }),
         path: `/${ML_PAGES.DATA_VISUALIZER_INDEX_SELECT}`,
-        visibleIn: ['solutionSideNav'],
+        visibleIn: ['globalSearch', 'solutionSideNav'],
       };
     },
     getIndexDataVisualizerPageDeepLink: (): AppDeepLink<LinkId> => {
@@ -244,7 +244,7 @@ function createDeepLinks(
           defaultMessage: 'Index data visualizer',
         }),
         path: `/${ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER}`,
-        visibleIn: ['solutionSideNav'],
+        visibleIn: [],
       };
     },
 
@@ -266,7 +266,7 @@ function createDeepLinks(
           defaultMessage: 'Data drift',
         }),
         path: `/${ML_PAGES.DATA_DRIFT_INDEX_SELECT}`,
-        visibleIn: ['solutionSideNav'],
+        visibleIn: ['globalSearch', 'solutionSideNav'],
       };
     },
     getDataDriftPageDeepLink: (): AppDeepLink<LinkId> => {
@@ -276,7 +276,7 @@ function createDeepLinks(
           defaultMessage: 'Data drift',
         }),
         path: `/${ML_PAGES.DATA_DRIFT}`,
-        visibleIn: ['solutionSideNav'],
+        visibleIn: [],
       };
     },
   };
