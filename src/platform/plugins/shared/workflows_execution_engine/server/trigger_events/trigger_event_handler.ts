@@ -515,6 +515,9 @@ export class TriggerEventHandler {
               ...(typeof workflow.originManagedWorkflowId === 'string'
                 ? { originManagedWorkflowId: workflow.originManagedWorkflowId }
                 : {}),
+              ...(typeof workflow.managedVersion === 'number'
+                ? { managedVersion: workflow.managedVersion }
+                : {}),
             };
             const context: Record<string, unknown> = {
               event: scheduleResult.event,

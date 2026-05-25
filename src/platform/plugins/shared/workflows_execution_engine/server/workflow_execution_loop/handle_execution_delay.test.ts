@@ -41,6 +41,10 @@ const makeParams = (): jest.Mocked<WorkflowExecutionLoopParams> =>
     },
     workflowLogger: {
       logWarn: jest.fn(),
+      flushEvents: jest.fn().mockResolvedValue(undefined),
+    },
+    stepIoService: {
+      flush: jest.fn().mockResolvedValue(undefined),
     },
   } as unknown as jest.Mocked<WorkflowExecutionLoopParams>);
 
@@ -364,6 +368,7 @@ describe('handleExecutionDelay', () => {
 
       await handleExecutionDelay(params, stepRuntime);
 
+      expect(params.stepIoService.flush).toHaveBeenCalled();
       expect(params.workflowTaskManager.scheduleResumeTask).toHaveBeenCalledTimes(1);
       const call = (params.workflowTaskManager.scheduleResumeTask as jest.Mock).mock.calls[0][0];
       expect(call.workflowExecution).toEqual(expect.objectContaining({ id: 'exec-parent' }));
