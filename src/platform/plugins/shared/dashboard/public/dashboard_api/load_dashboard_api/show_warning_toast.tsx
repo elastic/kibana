@@ -65,8 +65,8 @@ export const showWarningToast = ({ warnings }: { warnings: Warnings }) => {
         <EuiModal aria-labelledby={'modalTitleId'} onClose={() => modal.close()}>
           <EuiModalHeader>
             <EuiModalHeaderTitle id={'modalTitleId'}>
-              {i18n.translate('xpack.transform.toastText.modalTitle', {
-                defaultMessage: 'Error details',
+              {i18n.translate('dashboard.warnings.modalTitle', {
+                defaultMessage: 'Dashboard warnings',
               })}
             </EuiModalHeaderTitle>
           </EuiModalHeader>
