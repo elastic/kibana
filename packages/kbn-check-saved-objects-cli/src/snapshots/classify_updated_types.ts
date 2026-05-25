@@ -23,9 +23,8 @@ export interface ClassifiedUpdatedTypes {
 
 /**
  * Classifies updated SO types in a single pass over the snapshot diff.
- * Prefer this over calling `getUpdatedTypes` + `getTypesWithNewModelVersions` separately
- * to guarantee that `typesWithNewModelVersions` is always a strict subset of `updatedTypes`
- * and to avoid iterating the snapshot twice.
+ * This guarantees that `typesWithNewModelVersions` is always a strict subset
+ * of `updatedTypes` without iterating the snapshot twice.
  */
 export function classifyUpdatedTypes({
   from,
@@ -50,15 +49,3 @@ export function classifyUpdatedTypes({
 
   return { updatedTypes, typesWithNewModelVersions };
 }
-
-/** @deprecated Prefer `classifyUpdatedTypes` to avoid iterating the snapshot twice. */
-export const getUpdatedTypes = (args: {
-  from: MigrationSnapshot;
-  to: MigrationSnapshot;
-}): string[] => classifyUpdatedTypes(args).updatedTypes;
-
-/** @deprecated Prefer `classifyUpdatedTypes` to avoid iterating the snapshot twice. */
-export const getTypesWithNewModelVersions = (args: {
-  from: MigrationSnapshot;
-  to: MigrationSnapshot;
-}): string[] => classifyUpdatedTypes(args).typesWithNewModelVersions;
