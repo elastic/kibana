@@ -15,6 +15,7 @@ import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { ISessionService } from '@kbn/data-plugin/public';
 import type { Subscription } from 'rxjs';
+import type { TelemetryServiceStart } from '../../common/lib/telemetry';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import type { SecurityCanvasEmbeddedBundle } from '../components/security_redux_embedded_provider';
@@ -158,18 +159,22 @@ export const registerAiRuleCreationHandler = ({
   aiRuleCreation,
   notifications,
   agentBuilder,
+  telemetry,
   register,
 }: {
   aiRuleCreation: AiRuleCreationService;
   notifications: NotificationsStart;
   agentBuilder?: AgentBuilderPluginStart;
+  telemetry: TelemetryServiceStart;
   register: (subscription: Subscription) => void;
 }): void => {
   void import(
     /* webpackChunkName: "security_ai_rule_creation_handler" */
     '../../detection_engine/common/ai_rule_creation_handler'
   ).then(({ createAiRuleCreationHandler }) => {
-    register(createAiRuleCreationHandler({ aiRuleCreation, notifications, agentBuilder }));
+    register(
+      createAiRuleCreationHandler({ aiRuleCreation, notifications, agentBuilder, telemetry })
+    );
   });
 };
 

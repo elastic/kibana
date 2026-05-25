@@ -11,6 +11,8 @@ import { i18n } from '@kbn/i18n';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import { ChatEventType, isRoundCompleteEvent } from '@kbn/agent-builder-common/chat/events';
+import type { TelemetryServiceStart } from '../../common/lib/telemetry';
+import { RuleCreationEventTypes } from '../../common/lib/telemetry/types';
 import type {
   RuleResponse,
   RuleUpdateProps,
@@ -69,10 +71,12 @@ export const createAiRuleCreationHandler = ({
   aiRuleCreation,
   notifications,
   agentBuilder,
+  telemetry,
 }: {
   aiRuleCreation: AiRuleCreationService;
   notifications: NotificationsStart;
   agentBuilder?: AgentBuilderPluginStart;
+  telemetry: TelemetryServiceStart;
 }): Subscription => {
   const saveSub = aiRuleCreation.saveRuleRequest$.subscribe(async (rule) => {
     const parseResult = EsqlRuleCreateProps.safeParse(rule);
@@ -118,6 +122,17 @@ export const createAiRuleCreationHandler = ({
               defaultMessage: 'Rule saved',
             })
       );
+
+      const session = aiRuleCreation.getSession();
+      if (session) {
+        telemetry.reportEvent(RuleCreationEventTypes.AiSaved, {
+          ruleId: saved.id,
+          isUpdate,
+          sessionId: session.sessionId,
+          applyCount: session.applyCount,
+          durationSinceSessionStartMs: Date.now() - session.startTimestamp,
+        });
+      }
 
       aiRuleCreation.setLastSavedRuleId(saved.id);
       aiRuleCreation.clearDirty();
