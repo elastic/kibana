@@ -22,7 +22,11 @@ export interface ChartSectionSearchErrorProps {
  * Chart-section fetch failures (METRICS_INFO, Traces, etc.) using Discover's ErrorCallout.
  * Host injects notifications and doc links via `ExternalServicesProvider`.
  */
-export const ChartSectionSearchError = ({ error, title, isEsqlMode }: ChartSectionSearchErrorProps) => {
+export const ChartSectionSearchError = ({
+  error,
+  title,
+  isEsqlMode,
+}: ChartSectionSearchErrorProps) => {
   const services = useExternalServices();
 
   return (

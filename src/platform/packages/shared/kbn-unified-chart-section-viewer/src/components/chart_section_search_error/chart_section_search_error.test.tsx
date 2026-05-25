@@ -20,9 +20,7 @@ const renderChartSectionSearchError = (
 ) =>
   render(
     <EuiProvider highContrastMode={false}>
-      <ExternalServicesProvider externalServices={externalServices}>
-        {ui}
-      </ExternalServicesProvider>
+      <ExternalServicesProvider externalServices={externalServices}>{ui}</ExternalServicesProvider>
     </EuiProvider>
   );
 
@@ -70,7 +68,9 @@ describe('ChartSectionSearchError', () => {
         title="Unable to retrieve search results"
         isEsqlMode
       />,
-      { docLinks: { links: { query: { queryESQL: 'https://www.elastic.co/docs/reference/esql' } } } }
+      {
+        docLinks: { links: { query: { queryESQL: 'https://www.elastic.co/docs/reference/esql' } } },
+      }
     );
 
     expect(screen.getByTestId('discoverErrorCalloutESQLReferenceButton')).toHaveAttribute(
