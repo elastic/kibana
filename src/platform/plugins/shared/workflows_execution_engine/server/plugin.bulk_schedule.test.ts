@@ -474,9 +474,10 @@ describe('bulkScheduleWorkflow', () => {
       request
     );
 
-    expect(mockAreWorkflowsEnabled).toHaveBeenCalledWith([
-      { workflowId: 'wf-test', spaceId: 'default' },
-    ]);
+    expect(mockAreWorkflowsEnabled).toHaveBeenCalledWith(
+      [{ workflowId: 'wf-test', spaceId: 'default' }],
+      { includeGlobal: true }
+    );
     expect(mockBulkCreateWorkflowExecutions).not.toHaveBeenCalled();
     expect(taskManager.bulkSchedule).not.toHaveBeenCalled();
     expect(result).toEqual([
@@ -523,7 +524,9 @@ describe('bulkScheduleWorkflow', () => {
       )
     ).rejects.toThrow('Workflow is disabled: wf-test. Enable the workflow to run it.');
 
-    expect(mockIsWorkflowEnabled).toHaveBeenCalledWith('wf-test', 'default');
+    expect(mockIsWorkflowEnabled).toHaveBeenCalledWith('wf-test', 'default', {
+      includeGlobal: true,
+    });
     expect(mockCreateWorkflowExecution).not.toHaveBeenCalled();
     expect(taskManager.schedule).not.toHaveBeenCalled();
   });
