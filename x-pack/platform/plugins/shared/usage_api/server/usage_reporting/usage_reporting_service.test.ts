@@ -269,7 +269,7 @@ describe('UsageReportingService', () => {
       fetchMock.mockResolvedValue(okResponse());
       const service = createService({
         url: 'https://usage-api.local/v1/usage',
-        tls: { certificate: 'cert', key: 'key', ca: 'ca' },
+        tls: { certificate: 'cert', key: 'key' },
       });
 
       await service.reportUsage([createRecord()]);
