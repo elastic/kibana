@@ -46,7 +46,7 @@ import {
   resolveRateLimiterConfig,
 } from '../../../lib/detection_emulation/runtime_config_resolver';
 import { buildAgentBuilderActor } from '../../../lib/detection_emulation/execution/audit_context';
-import { resolveCurrentUsername } from './resolve_current_user';
+import { resolveCurrentUsername } from '../../../lib/detection_emulation/resolve_current_user';
 import { validateRuleSchema } from './validate_rule_input';
 import { toolError, type EmulationErrorContext } from './emulation_tool_errors';
 

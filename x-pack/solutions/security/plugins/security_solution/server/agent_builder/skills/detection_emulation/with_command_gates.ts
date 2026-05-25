@@ -24,7 +24,7 @@ import { buildIdempotencyKey } from '../../../lib/detection_emulation/execution/
 import type { ActorContext } from '../../../lib/detection_emulation/execution/audit_context';
 import { createSavedObjectRuleBindingLookup } from '../../../lib/detection_emulation/rule_binding_lookup';
 import { emulationRuleBindingTypeName } from '../../../lib/detection_emulation/rule_binding';
-import { resolveCurrentUsername } from './resolve_current_user';
+import { resolveCurrentUsername } from '../../../lib/detection_emulation/resolve_current_user';
 import { toolError, type EmulationErrorContext } from './emulation_tool_errors';
 import {
   checkRealExecutionFeatureFlags,
