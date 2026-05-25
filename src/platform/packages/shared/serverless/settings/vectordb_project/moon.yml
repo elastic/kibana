@@ -16,7 +16,10 @@ project:
   channel: ''
   owner: '@elastic/search-kibana'
   sourceRoot: src/platform/packages/shared/serverless/settings/vectordb_project
-dependsOn: []
+dependsOn:
+  - '@kbn/management-settings-ids'
+  - '@kbn/dev-tools-plugin'
+  - '@kbn/workflows'
 tags:
   - shared-common
   - package
