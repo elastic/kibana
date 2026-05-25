@@ -19,7 +19,7 @@ import { ActionPolicyDefinitionList } from '../../components/action_policy/detai
 import { paths } from '../../constants';
 import { ActionPoliciesApi } from '../../services/action_policies_api';
 import { RulesApi } from '../../services/rules_api';
-import { buildActionPolicyPayload } from '../../../common/agent_builder/action_policy_mappers';
+import { attachmentDataToActionPolicyPayload } from '../../../common/agent_builder/action_policy_mappers';
 import type { ActionPolicyAttachment } from './action_policy_attachment_definition';
 
 const EMPTY_VALUE = '-';
@@ -64,11 +64,11 @@ export const ActionPolicyCanvasContent = ({
       );
     }
 
-    const matcherRuleId = extractRuleIdFromMatcher(data.matcher);
-    if (matcherRuleId) {
+    const linkedRuleId = data.ruleId ?? extractRuleIdFromMatcher(data.matcher);
+    if (linkedRuleId) {
       checks.push(
         rulesApi
-          .getRule(matcherRuleId, abortController.signal)
+          .getRule(linkedRuleId, abortController.signal)
           .then(() => ({ rule: true }))
           .catch(() => ({ rule: false }))
       );
@@ -90,7 +90,7 @@ export const ActionPolicyCanvasContent = ({
     return () => {
       abortController.abort();
     };
-  }, [workflowApi, rulesApi, data.destinations, data.matcher]);
+  }, [workflowApi, rulesApi, data.destinations, data.ruleId, data.matcher]);
 
   const hasDraftDependencies = dependenciesReady !== true;
 
@@ -120,7 +120,10 @@ export const ActionPolicyCanvasContent = ({
             : undefined,
           handler: async () => {
             try {
-              await actionPoliciesApi.upsertActionPolicy(data.id, buildActionPolicyPayload(data));
+              await actionPoliciesApi.upsertActionPolicy(
+                data.id,
+                attachmentDataToActionPolicyPayload(data)
+              );
               await updateOrigin(data.id);
               notifications.toasts.addSuccess(
                 i18n.translate('xpack.alertingV2.actionPolicyAttachment.createdSuccess', {
@@ -157,7 +160,10 @@ export const ActionPolicyCanvasContent = ({
           : undefined,
         handler: async () => {
           try {
-            await actionPoliciesApi.upsertActionPolicy(data.id, buildActionPolicyPayload(data));
+            await actionPoliciesApi.upsertActionPolicy(
+              data.id,
+              attachmentDataToActionPolicyPayload(data)
+            );
             notifications.toasts.addSuccess(
               i18n.translate('xpack.alertingV2.actionPolicyAttachment.updatedSuccess', {
                 defaultMessage: 'Policy "{name}" updated',
