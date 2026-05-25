@@ -17,13 +17,11 @@ const TEST_CALENDAR = {
   description: 'Test calendar',
 };
 
-// TODO: Add the ECH cloud tag once support for custom roles is implemented.
-// See related issue: https://github.com/elastic/kibana/issues/259284
 apiTest.describe(
   'ML Calendar - delete',
   {
     tag: [
-      '@local-stateful-classic',
+      ...tags.stateful.classic,
       ...tags.serverless.observability.complete,
       ...tags.serverless.security.complete,
     ],
