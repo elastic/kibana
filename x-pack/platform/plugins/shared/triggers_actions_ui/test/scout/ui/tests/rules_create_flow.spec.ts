@@ -67,8 +67,7 @@ test.describe('Rules create flow', { tag: tags.stateful.classic }, () => {
     });
 
     await test.step('selecting a rule type navigates to the create form', async () => {
-      // `.es-query` is built-in in Scout's stateful/classic config. The FTR
-      // test used `test.noop` here, which is FTR-fixture-only.
+      // `.es-query` is built-in in Scout's stateful/classic config.
       await page.testSubj.click('.es-query-SelectOption');
       await expect(page.testSubj.locator('ruleForm')).toBeVisible();
     });

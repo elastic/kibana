@@ -39,10 +39,6 @@ test.describe('Stack alerts page (admin)', { tag: tags.stateful.classic }, () =>
     const menu = page.testSubj.locator('queryBarMenuPanel');
     await expect(menu).toBeVisible();
 
-    // The FTR equivalent contained `expect(FILTERABLE_SOLUTIONS.every(...))`
-    // without a chained matcher, so it asserted nothing. Preserve the
-    // intended coverage by verifying that all four solution filters are
-    // present (Stack, Machine Learning, Observability, Security).
     const solutionFilters = menu.locator(`[data-test-subj$="${SOLUTION_FILTER_SUFFIX}"]`);
     await expect(solutionFilters).toHaveCount(4);
   });
@@ -74,6 +70,7 @@ test.describe('Stack alerts page (admin)', { tag: tags.stateful.classic }, () =>
     // non-Security solution filter is enabled (they're exclusive with SIEM).
     await page.testSubj.click('showQueryBarMenu');
     const reopenedMenu = page.testSubj.locator('queryBarMenuPanel');
+
     const enabledNonSecurityFilters = reopenedMenu.locator(
       `[data-test-subj$="${SOLUTION_FILTER_SUFFIX}"]:not([data-test-subj*="Security"]):not([disabled])`
     );
@@ -89,7 +86,6 @@ test.describe('Stack alerts page (admin)', { tag: tags.stateful.classic }, () =>
       .first();
     await firstNonSecurityFilter.click();
 
-    // Re-open the menu and verify the Security filter is disabled.
     await page.testSubj.click('showQueryBarMenu');
     const reopenedMenu = page.testSubj.locator('queryBarMenuPanel');
     const securityFilter = reopenedMenu.locator(
