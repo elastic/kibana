@@ -63,6 +63,11 @@ const RULE_CREATION_POPOVER_ARIA_LABEL = i18n.translate(
   }
 );
 
+const AI_RULE_CREATION_ATTACHMENT_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.aiRuleCreationAttachmentLabel',
+  { defaultMessage: 'New Rule' }
+);
+
 const AI_RULE_CREATION_MENU_TOUR_INITIAL_STATE = {
   currentTourStep: 1,
   isTourActive: true,
@@ -122,17 +127,13 @@ export const CreateRuleMenu: React.FC<CreateRuleContextMenuProps> = ({ loading, 
       sessionId: session.sessionId,
     });
 
-    const newRuleLabel = i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.aiRuleCreationAttachmentLabel',
-      { defaultMessage: 'New Rule' }
-    );
     const emptyRuleAttachment: AttachmentInput = {
       id: SECURITY_RULE_ATTACHMENT_ID,
       type: SecurityAgentBuilderAttachments.rule,
-      description: newRuleLabel,
+      description: AI_RULE_CREATION_ATTACHMENT_LABEL,
       data: {
         text: JSON.stringify({}),
-        attachmentLabel: newRuleLabel,
+        attachmentLabel: AI_RULE_CREATION_ATTACHMENT_LABEL,
       },
     };
 
