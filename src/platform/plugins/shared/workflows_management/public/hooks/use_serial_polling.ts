@@ -8,7 +8,6 @@
  */
 
 import { useEffect, useRef } from 'react';
-import { sleep } from './polling_utils';
 
 export interface UseSerialPollingParams {
   poll: () => Promise<unknown>;
@@ -72,7 +71,9 @@ export const useSerialPolling = ({
 
         isFirstIteration = false;
 
-        await sleep(resolveIntervalMs(intervalMsRef.current));
+        await new Promise((resolve) => {
+          setTimeout(resolve, resolveIntervalMs(intervalMsRef.current));
+        });
 
         if (cancelled || shouldStopRef.current()) {
           break;

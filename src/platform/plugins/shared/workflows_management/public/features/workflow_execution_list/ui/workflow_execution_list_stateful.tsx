@@ -9,7 +9,7 @@
 
 import React, { useCallback, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { type ExecutionStatus, type ExecutionType } from '@kbn/workflows';
+import { type ExecutionStatus, type ExecutionType, isInProgressStatus } from '@kbn/workflows';
 import { WORKFLOWS_UI_SHOW_EXECUTOR_SETTING_ID } from '@kbn/workflows/common/constants';
 import { useWorkflowsApi, useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { WorkflowExecutionList as WorkflowExecutionListComponent } from './workflow_execution_list';
@@ -18,7 +18,6 @@ import {
   WORKFLOW_EXECUTIONS_LIST_POLL_ACTIVE_INTERVAL_MS,
   WORKFLOW_EXECUTIONS_LIST_POLL_INTERVAL_MS,
 } from '../../../hooks/polling_constants';
-import { hasActiveWorkflowExecutions } from '../../../hooks/polling_utils';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useSerialPolling } from '../../../hooks/use_serial_polling';
 import { useTelemetry } from '../../../hooks/use_telemetry';
@@ -72,10 +71,17 @@ export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps
     poll: () => refetch(),
     enabled: workflowId !== null,
     immediate: false,
-    intervalMs: () =>
-      hasActiveWorkflowExecutions(workflowExecutionsRef.current?.results)
-        ? WORKFLOW_EXECUTIONS_LIST_POLL_ACTIVE_INTERVAL_MS
-        : WORKFLOW_EXECUTIONS_LIST_POLL_INTERVAL_MS,
+    intervalMs: () => {
+      if (
+        workflowExecutionsRef.current?.results.some((execution) =>
+          isInProgressStatus(execution.status)
+        )
+      ) {
+        return WORKFLOW_EXECUTIONS_LIST_POLL_ACTIVE_INTERVAL_MS;
+      }
+
+      return WORKFLOW_EXECUTIONS_LIST_POLL_INTERVAL_MS;
+    },
     pollKey: workflowId,
   });
 
