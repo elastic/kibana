@@ -770,6 +770,7 @@ export interface WorkflowsSearchParams {
   createdBy?: string[];
   enabled?: boolean[];
   tags?: string[];
+  managed?: 'all' | 'managed' | 'unmanaged';
 }
 
 export interface RequestOptions {
