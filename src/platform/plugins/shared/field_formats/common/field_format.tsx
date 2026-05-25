@@ -24,7 +24,7 @@ import type {
   FieldFormatParams,
 } from './types';
 import { textContentTypeSetup, TEXT_CONTEXT_TYPE } from './content_types';
-import { getHighlightReact } from './utils/highlight';
+import { getFieldHighlightReact } from './utils/highlight';
 import type {
   ReactContextTypeConvert,
   ReactContextTypeSingleConvert,
@@ -111,10 +111,8 @@ export abstract class FieldFormat {
       ? this.textConvert(val, options)
       : this.convert(val, TEXT_CONTEXT_TYPE, options);
     const fieldName = options?.field?.name;
-    const highlights = fieldName ? options?.hit?.highlight?.[fieldName] : undefined;
-    // getHighlightReact expects a string; guard against edge cases where convert() returns non-string
-    return highlights && typeof formatted === 'string'
-      ? getHighlightReact(formatted, highlights)
+    return typeof formatted === 'string'
+      ? getFieldHighlightReact(formatted, fieldName, options?.hit)
       : formatted;
   };
 

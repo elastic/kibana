@@ -664,6 +664,32 @@ describe('UrlFormat', () => {
     `);
   });
 
+  test('wraps ES|QL inline-tag highlighted link text in <mark>', () => {
+    const url = new UrlFormat({});
+    expect(
+      url.reactConvert('<em>http://elastic.co</em>', {
+        field: { name: 'link' },
+        hit: {
+          esql_highlight: {
+            link: { preTag: '<em>', postTag: '</em>' },
+          },
+        },
+      })
+    ).toMatchInlineSnapshot(`
+      <a
+        href="http://elastic.co"
+        rel="noopener noreferrer"
+        target="_blank"
+      >
+        <mark
+          className="ffSearch__highlight"
+        >
+          http://elastic.co
+        </mark>
+      </a>
+    `);
+  });
+
   test('renders a numeric value as text when no URL template is set', () => {
     const url = new UrlFormat({});
 

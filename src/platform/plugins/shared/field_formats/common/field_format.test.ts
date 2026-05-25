@@ -172,6 +172,18 @@ describe('FieldFormat class', () => {
         hit: { highlight: { [fieldName]: highlights } },
       });
 
+      const makeEsqlOptions = (fieldName: string): ReactContextTypeOptions => ({
+        field: { name: fieldName },
+        hit: {
+          esql_highlight: {
+            [fieldName]: {
+              preTag: '<em>',
+              postTag: '</em>',
+            },
+          },
+        },
+      });
+
       test('wraps matched text in <mark> via reactConvert when highlights are present', () => {
         const f = getTestFormat(undefined, constant('lorem ipsum dolor'));
         const result = renderReact(
@@ -188,6 +200,14 @@ describe('FieldFormat class', () => {
         expect(f.reactConvert('lorem ipsum', { field: { name: 'myField' }, hit: {} })).toBe(
           'lorem ipsum'
         );
+      });
+
+      test('wraps matched text in <mark> via reactConvert when ES|QL highlights are present', () => {
+        const f = getTestFormat(undefined, constant('lorem <em>ipsum</em> dolor'));
+        const result = renderReact(
+          f.reactConvert('lorem <em>ipsum</em> dolor', makeEsqlOptions('myField'))
+        );
+        expect(result).toBe('lorem <mark class="ffSearch__highlight">ipsum</mark> dolor');
       });
 
       test('returns plain text from reactConvert when highlight is for a different field', () => {

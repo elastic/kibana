@@ -81,9 +81,11 @@ export { convertQueryToESQLExpression } from './utils/convert_query_to_esql';
 export { injectWhereClauseAfterSourceCommand } from './utils/inject_where_after_source';
 export {
   getColumnsWithHighlights,
+  getColumnsWithHighlightsMap,
   DEFAULT_HIGHLIGHT_PRE_TAG,
   DEFAULT_HIGHLIGHT_POST_TAG,
   type EsqlColumnHighlight,
+  type EsqlColumnHighlightMap,
 } from './utils/get_columns_with_highlights';
 
 // Callback functions

@@ -21,9 +21,19 @@ export type FieldFormatsContentType = 'text';
 /**
  * React converter options
  */
+export interface FieldFormatHighlightTags {
+  preTag: string;
+  postTag: string;
+}
+
+export interface ReactContextTypeHit {
+  highlight?: Record<string, string[]>;
+  esql_highlight?: Record<string, FieldFormatHighlightTags>;
+}
+
 export interface ReactContextTypeOptions {
   field?: { name: string };
-  hit?: { highlight?: Record<string, string[]> };
+  hit?: ReactContextTypeHit;
   skipFormattingInStringifiedJSON?: boolean;
 }
 

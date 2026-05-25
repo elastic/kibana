@@ -7,5 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getHighlightReact } from './highlight_react';
+export {
+  getFieldHighlightReact,
+  getHighlightReact,
+  getInlineTagHighlightReact,
+  injectWholeValueInlineHighlight,
+  stripInlineHighlightTags,
+} from './highlight_react';
 export { getHighlightRequest } from './highlight_request';

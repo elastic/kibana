@@ -8,6 +8,7 @@
  */
 
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type { EsqlColumnHighlightMap } from '@kbn/esql-utils';
 import type { DatatableColumnMeta } from '@kbn/expressions-plugin/common';
 
 export type { IgnoredReason, ShouldShowFieldInTableHandler } from './utils';
@@ -26,6 +27,7 @@ export interface EsHitRecord extends Omit<DiscoverSearchHit, '_index' | '_id' | 
   _index?: DiscoverSearchHit['_index'];
   _id?: DiscoverSearchHit['_id'];
   _source?: DiscoverSearchHit['_source'];
+  esql_highlight?: EsqlColumnHighlightMap;
 }
 
 /**

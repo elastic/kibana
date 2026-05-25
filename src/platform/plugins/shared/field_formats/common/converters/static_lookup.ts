@@ -12,7 +12,11 @@ import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormat } from '../field_format';
 import type { ReactContextTypeSingleConvert, TextContextTypeConvert } from '../types';
 import { FIELD_FORMAT_IDS } from '../types';
-import { getHighlightReact } from '../utils';
+import {
+  getFieldHighlightReact,
+  injectWholeValueInlineHighlight,
+  stripInlineHighlightTags,
+} from '../utils';
 
 function convertLookupEntriesToMap(
   lookupEntries: Array<{ key?: string | null; value: unknown }>
@@ -107,21 +111,22 @@ export class StaticLookupFormat extends FieldFormat {
   };
 
   reactConvertSingle: ReactContextTypeSingleConvert = (val, options = {}) => {
-    const { result, isMissingValue } = this.lookup(val);
+    const { field, hit } = options;
+    const inlineHighlightTags = field?.name ? hit?.esql_highlight?.[field.name] : undefined;
+    const lookupValue =
+      typeof val === 'string' ? stripInlineHighlightTags(val, inlineHighlightTags) : val;
+    const { result, isMissingValue } = this.lookup(lookupValue);
 
     if (isMissingValue) {
       const missing = this.checkForMissingValueReact(result);
       if (missing) return missing;
     }
 
-    const { field, hit } = options;
-    const formatted = String(result ?? '');
+    const formatted =
+      typeof val === 'string'
+        ? injectWholeValueInlineHighlight(String(result ?? ''), val, inlineHighlightTags)
+        : String(result ?? '');
 
-    const fieldName = field?.name;
-    if (fieldName && hit?.highlight?.[fieldName]) {
-      return getHighlightReact(formatted, hit.highlight[fieldName]);
-    }
-
-    return formatted;
+    return getFieldHighlightReact(formatted, field?.name, hit);
   };
 }

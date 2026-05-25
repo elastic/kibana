@@ -79,9 +79,11 @@ export {
   convertQueryToESQLExpression,
   injectWhereClauseAfterSourceCommand,
   getColumnsWithHighlights,
+  getColumnsWithHighlightsMap,
   DEFAULT_HIGHLIGHT_PRE_TAG,
   DEFAULT_HIGHLIGHT_POST_TAG,
   type EsqlColumnHighlight,
+  type EsqlColumnHighlightMap,
   type ESQLStatsQueryMeta,
 } from './src';
 

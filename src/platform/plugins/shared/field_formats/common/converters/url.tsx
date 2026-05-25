@@ -11,7 +11,11 @@ import { i18n } from '@kbn/i18n';
 import { memoize } from 'lodash';
 import React from 'react';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { getHighlightReact } from '../utils';
+import {
+  getFieldHighlightReact,
+  injectWholeValueInlineHighlight,
+  stripInlineHighlightTags,
+} from '../utils';
 import { FieldFormat } from '../field_format';
 import type {
   ReactContextTypeSingleConvert,
@@ -143,11 +147,15 @@ export class UrlFormat extends FieldFormat {
     const value = rawValue as string | number;
 
     const { field, hit } = options;
+    const inlineHighlightTags = field?.name ? hit?.esql_highlight?.[field.name] : undefined;
     const { parsedUrl } = this._params;
     const { basePath, pathname, origin } = parsedUrl || {};
 
-    const url = this.formatUrl(value);
-    const label = this.formatLabel(value, url);
+    const normalizedValue =
+      typeof value === 'string' ? stripInlineHighlightTags(value, inlineHighlightTags) : value;
+
+    const url = this.formatUrl(normalizedValue);
+    const label = this.formatLabel(normalizedValue, url);
 
     switch (this.param('type')) {
       case 'audio':
@@ -183,7 +191,11 @@ export class UrlFormat extends FieldFormat {
       default: {
         const allowed = allowedUrlSchemes.some((scheme) => url.indexOf(scheme) === 0);
         if (!allowed && !parsedUrl) {
-          return url;
+          const highlightableUrl =
+            typeof value === 'string'
+              ? injectWholeValueInlineHighlight(url, value, inlineHighlightTags)
+              : url;
+          return getFieldHighlightReact(highlightableUrl, field?.name, hit);
         }
 
         let prefix = '';
@@ -215,11 +227,11 @@ export class UrlFormat extends FieldFormat {
         }
 
         const linkTarget = this.param('openLinkInCurrentTab') ? '_self' : '_blank';
-        const fieldName = field?.name;
-        const linkContent =
-          fieldName && hit?.highlight?.[fieldName]
-            ? getHighlightReact(label, hit.highlight[fieldName])
+        const highlightableLabel =
+          typeof value === 'string'
+            ? injectWholeValueInlineHighlight(label, value, inlineHighlightTags)
             : label;
+        const linkContent = getFieldHighlightReact(highlightableLabel, field?.name, hit);
 
         return (
           <a href={`${prefix}${url}`} target={linkTarget} rel="noopener noreferrer">

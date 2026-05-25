@@ -40,31 +40,10 @@ export interface EsqlColumnHighlight {
   postTag: string;
 }
 
-/**
- * Returns columns built using a highlighting algorithm,
- * including the opening and closing markup tags configured for each column.
- *
- * Example:
- * ```
- * FROM books
- *  | EVAL snippets = TOP_SNIPPETS(description, "Tolkien", { "highlight": true })
- *  | EVAL titles = TOP_SNIPPETS(title, "Tolkien", { "highlight": true, "pre_tag": "<mark>", "post_tag": "</mark>" })
- * ```
- * Will return the following column:
- * ```
- * {
- *   column: 'snippets',
- *   preTag: '<em>',
- *   postTag: '</em>',
- * }
- * {
- *   column: 'titles',
- *   preTag: '<mark>',
- *   postTag: '</mark>',
- * }
- */
-export function getColumnsWithHighlights(query: string): EsqlColumnHighlight[] {
-  const columnsWithHighlights = new Map<string, EsqlColumnHighlight>();
+export type EsqlColumnHighlightMap = Record<string, EsqlColumnHighlight>;
+
+export function getColumnsWithHighlightsMap(query: string): EsqlColumnHighlightMap {
+  const columnsWithHighlights: EsqlColumnHighlightMap = {};
   const { root } = Parser.parse(query);
 
   const highlightFunctionsCandidates = Walker.findAll(
@@ -92,14 +71,41 @@ export function getColumnsWithHighlights(query: string): EsqlColumnHighlight[] {
     // Check if the column name has been renamed in the query
     const [resolvedColumnName] = replaceColumnNamesIfRenamed(root, [columnName]);
 
-    columnsWithHighlights.set(resolvedColumnName, {
+    columnsWithHighlights[resolvedColumnName] = {
       column: resolvedColumnName,
       preTag,
       postTag,
-    });
+    };
   }
 
-  return Array.from(columnsWithHighlights.values());
+  return columnsWithHighlights;
+}
+
+/**
+ * Returns columns built using a highlighting algorithm,
+ * including the opening and closing markup tags configured for each column.
+ *
+ * Example:
+ * ```
+ * FROM books
+ *  | EVAL snippets = TOP_SNIPPETS(description, "Tolkien", { "highlight": true })
+ *  | EVAL titles = TOP_SNIPPETS(title, "Tolkien", { "highlight": true, "pre_tag": "<mark>", "post_tag": "</mark>" })
+ * ```
+ * Will return the following column:
+ * ```
+ * {
+ *   column: 'snippets',
+ *   preTag: '<em>',
+ *   postTag: '</em>',
+ * }
+ * {
+ *   column: 'titles',
+ *   preTag: '<mark>',
+ *   postTag: '</mark>',
+ * }
+ */
+export function getColumnsWithHighlights(query: string): EsqlColumnHighlight[] {
+  return Object.values(getColumnsWithHighlightsMap(query));
 }
 
 /**

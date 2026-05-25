@@ -138,6 +138,25 @@ describe('String Format', () => {
     `);
   });
 
+  test('does escape value while applying ES|QL inline-tag highlighting', () => {
+    const string = new StringFormat();
+    const options = {
+      field: { name: 'foo' },
+      hit: {
+        esql_highlight: {
+          foo: { preTag: '<em>', postTag: '</em>' },
+        },
+      },
+    };
+    expect(string.reactConvert('<em><img /></em>', options)).toMatchInlineSnapshot(`
+      <mark
+        className="ffSearch__highlight"
+      >
+        &lt;img /&gt;
+      </mark>
+    `);
+  });
+
   test('reactConvert returns raw string for unhighlighted content (React escapes at render)', () => {
     expect(new StringFormat().reactConvert('<script>alert("test")</script>')).toBe(
       '<script>alert("test")</script>'

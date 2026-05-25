@@ -9,7 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { asPrettyString, getHighlightReact, shortenDottedString } from '../utils';
+import { asPrettyString, getFieldHighlightReact, shortenDottedString } from '../utils';
 import { FieldFormat } from '../field_format';
 import type { ReactContextTypeSingleConvert, TextContextTypeConvert } from '../types';
 import { FIELD_FORMAT_IDS } from '../types';
@@ -134,11 +134,6 @@ export class StringFormat extends FieldFormat {
     const missing = this.checkForMissingValueReact(val);
     if (missing) return missing;
 
-    const fieldName = field?.name;
-    if (fieldName && hit?.highlight?.[fieldName]) {
-      return getHighlightReact(this.textConvert(val), hit.highlight[fieldName]);
-    }
-
-    return this.textConvert(val);
+    return getFieldHighlightReact(this.textConvert(val), field?.name, hit);
   };
 }

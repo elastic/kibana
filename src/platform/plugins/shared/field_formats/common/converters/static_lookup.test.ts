@@ -116,6 +116,24 @@ describe('StaticLookupFormat', () => {
       `);
     });
 
+    test('preserves ES|QL inline-tag highlight functionality via reactConvert', () => {
+      const options = {
+        field: { name: 'test_field' },
+        hit: {
+          esql_highlight: {
+            test_field: { preTag: '<em>', postTag: '</em>' },
+          },
+        },
+      };
+      expect(formatter.reactConvert('<em>test</em>', options)).toMatchInlineSnapshot(`
+        <mark
+          className="ffSearch__highlight"
+        >
+          Test Value
+        </mark>
+      `);
+    });
+
     test('falls back to missing value handling when lookup yields missing originals', () => {
       const formatterWithoutCustomMapping = new StaticLookupFormat({
         lookupEntries: [{ key: 'test', value: 'Test Value' }],

@@ -8,7 +8,11 @@
  */
 
 import React from 'react';
+import type { FieldFormatHighlightTags, ReactContextTypeHit } from '../../types';
 import { highlightTags } from './highlight_tags';
+
+export type HighlightTags = FieldFormatHighlightTags;
+export type HighlightHit = ReactContextTypeHit;
 
 /**
  * Applies search highlighting to a field value, returning React nodes.
@@ -75,4 +79,105 @@ export function getHighlightReact(
   if (nodes.length === 0) return fieldValue;
   if (nodes.length === 1) return nodes[0];
   return <>{nodes}</>;
+}
+
+/**
+ * Resolves the applicable highlight source for a formatted field value.
+ * DSL snippet highlights take precedence over ES|QL inline-tag highlights.
+ */
+export function getFieldHighlightReact(
+  fieldValue: string,
+  fieldName: string | undefined,
+  hit: HighlightHit | undefined
+): React.ReactNode {
+  if (!fieldName) return fieldValue;
+
+  const highlights = hit?.highlight?.[fieldName];
+  if (highlights?.length) {
+    return getHighlightReact(fieldValue, highlights);
+  }
+
+  const inlineHighlightTags = hit?.esql_highlight?.[fieldName];
+  if (!inlineHighlightTags) {
+    return fieldValue;
+  }
+
+  return getInlineTagHighlightReact(fieldValue, inlineHighlightTags);
+}
+
+export function getInlineTagHighlightReact(
+  fieldValue: string,
+  tags: HighlightTags | undefined | null
+): React.ReactNode {
+  if (!tags?.preTag || !tags?.postTag) {
+    return fieldValue;
+  }
+
+  const { preTag, postTag } = tags;
+  if (!fieldValue.includes(preTag)) {
+    return fieldValue;
+  }
+
+  const nodes: React.ReactNode[] = [];
+  let remaining = fieldValue;
+  let key = 0;
+
+  while (remaining.length > 0) {
+    const openIndex = remaining.indexOf(preTag);
+    if (openIndex === -1) {
+      nodes.push(remaining);
+      break;
+    }
+
+    if (openIndex > 0) {
+      nodes.push(remaining.slice(0, openIndex));
+    }
+
+    const contentStart = openIndex + preTag.length;
+    const closeIndex = remaining.indexOf(postTag, contentStart);
+
+    if (closeIndex === -1) {
+      nodes.push(remaining.slice(openIndex));
+      break;
+    }
+
+    nodes.push(
+      <mark className="ffSearch__highlight" key={key++}>
+        {remaining.slice(contentStart, closeIndex)}
+      </mark>
+    );
+    remaining = remaining.slice(closeIndex + postTag.length);
+  }
+
+  if (nodes.length === 0) return fieldValue;
+  if (nodes.length === 1) return nodes[0];
+  return <>{nodes}</>;
+}
+
+export function stripInlineHighlightTags(
+  fieldValue: string,
+  tags: HighlightTags | undefined | null
+): string {
+  if (!tags?.preTag || !tags?.postTag) {
+    return fieldValue;
+  }
+
+  return fieldValue.split(tags.preTag).join('').split(tags.postTag).join('');
+}
+
+export function injectWholeValueInlineHighlight(
+  fieldValue: string,
+  rawValue: string,
+  tags: HighlightTags | undefined | null
+): string {
+  if (!tags?.preTag || !tags?.postTag) {
+    return fieldValue;
+  }
+
+  const strippedRawValue = stripInlineHighlightTags(rawValue, tags);
+  if (`${tags.preTag}${strippedRawValue}${tags.postTag}` !== rawValue) {
+    return fieldValue;
+  }
+
+  return `${tags.preTag}${fieldValue}${tags.postTag}`;
 }

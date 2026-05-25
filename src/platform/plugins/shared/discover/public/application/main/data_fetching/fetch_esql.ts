@@ -10,7 +10,14 @@
 import { pluck } from 'rxjs';
 import { lastValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import type { Query, AggregateQuery, Filter, TimeRange, ProjectRouting } from '@kbn/es-query';
+import {
+  type Query,
+  type AggregateQuery,
+  type Filter,
+  type TimeRange,
+  type ProjectRouting,
+  isOfAggregateQueryType,
+} from '@kbn/es-query';
 import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -21,6 +28,7 @@ import { textBasedQueryStateToAstWithValidation } from '@kbn/data-plugin/common'
 import { getDocId, type DataTableRecord } from '@kbn/discover-utils';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import moment from 'moment';
+import { getColumnsWithHighlightsMap } from '@kbn/esql-utils';
 import type { RecordsFetchResponse } from '../../types';
 import type { ScopedProfilesManager } from '../../../context_awareness';
 
@@ -104,12 +112,16 @@ export function fetchEsql({
             const table = response as Datatable;
             const rows = table?.rows ?? [];
             const responseTime = moment().format('YYYY-MM-DD_HH_mm_ss');
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            const esql_highlight = isOfAggregateQueryType(query)
+              ? getColumnsWithHighlightsMap(query.esql)
+              : undefined;
             esqlQueryColumns = table?.columns ?? undefined;
             esqlHeaderWarning = table.warning ?? undefined;
             finalData = rows.map((row, idx) => {
               const record: DataTableRecord = {
                 id: row._index && row._id ? getDocId(row) : `${idx + 1}@${responseTime}`,
-                raw: row,
+                raw: esql_highlight ? { ...row, esql_highlight } : row,
                 flattened: row,
               };
 
