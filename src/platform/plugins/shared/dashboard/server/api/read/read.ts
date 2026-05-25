@@ -13,11 +13,9 @@ import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_objec
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import { getDashboardCRUResponseBody } from '../get_cru_response_body';
 import type { DashboardReadResponseBody } from './types';
-import type { getDashboardStateSchema } from '../dashboard_state_schemas';
 
 export async function read(
   savedObjectsClient: SavedObjectsClientContract,
-  dashboardStateSchema: ReturnType<typeof getDashboardStateSchema>,
   id: string,
   serverTiming?: RequestTiming,
   isDashboardAppRequest: boolean = false

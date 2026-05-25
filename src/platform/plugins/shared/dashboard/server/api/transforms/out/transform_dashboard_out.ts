@@ -22,7 +22,8 @@ import { DEFAULT_DASHBOARD_STATE } from '../../../../common/default_dashboard_st
 export function transformDashboardOut(
   attributes: DashboardSavedObjectAttributes | Partial<DashboardSavedObjectAttributes>,
   references: SavedObjectReference[] | undefined,
-  isDashboardAppRequest: boolean = false
+  isDashboardAppRequest: boolean = false,
+  isReadRequest: boolean = false
 ): {
   dashboardState: DashboardState;
   warnings: Warnings;
