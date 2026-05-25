@@ -14,7 +14,7 @@ import React, { Suspense } from 'react';
 import { isTriggerType } from '@kbn/workflows';
 import { PopoverItems } from './popover_items';
 import * as i18n from '../../../common/translations';
-import { withTooltip } from '../../shared/ui';
+import { withTooltip } from '../../shared/ui/with_tooltip';
 import { triggerSchemas } from '../../trigger_schemas';
 
 interface WorkflowsTriggersListProps {
