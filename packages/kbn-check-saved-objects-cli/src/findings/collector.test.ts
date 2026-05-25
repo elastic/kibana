@@ -16,10 +16,11 @@ import type { TaskContext } from '../commands/types';
 
 /**
  * Minimal stub satisfying the ListrError constructor at runtime.
- * ListrError only reads `task.path` and `task.ctx`; a full Task instance
- * is not constructable in unit tests without a live Listr runner.
+ * The constructor reads `task.path` (always) and `task.options.collectErrors`
+ * (to decide whether to clone ctx). A full Task instance is not constructable
+ * in unit tests without a live Listr runner.
  */
-const stubTask = { path: [] } as Partial<
+const stubTask = { path: [], options: {} } as Partial<
   ListrTaskObject<TaskContext>
 > as ListrTaskObject<TaskContext>;
 
