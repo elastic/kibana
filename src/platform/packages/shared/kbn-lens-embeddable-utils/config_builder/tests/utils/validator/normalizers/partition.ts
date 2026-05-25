@@ -132,7 +132,7 @@ const clearEmptySecondaryGroups: NormalizerConfig<PartitionAttributes> = {
     const layer = viz.layers[0];
     if (!layer) return attributes;
 
-    if (layer.secondaryGroups?.length === 0) {
+    if (layer.secondaryGroups?.length === 0 || layer.secondaryGroups == null) {
       delete layer.secondaryGroups;
     }
 
