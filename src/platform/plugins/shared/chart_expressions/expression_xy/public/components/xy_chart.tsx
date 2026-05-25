@@ -957,7 +957,10 @@ export function XYChart({
               tickLabelMaxLength={
                 xAxisConfig?.truncate ?? (isHorizontalBarChart ? '40%' : undefined)
               }
-              tickLabelTruncate={isHorizontalBarChart ? ('middle' as const) : undefined}
+              tickLabelTruncate={
+                // If legacy truncate is set, preserve end truncation behavior.
+                isHorizontalBarChart ? (xAxisConfig?.truncate ? 'end' : 'middle') : undefined
+              }
               {...getOverridesFor(overrides, 'axisX')}
             />
             {isSplitChart && splitTable && (
