@@ -12,6 +12,9 @@ export const EMBEDDABLE_PATTERN_ANALYSIS_TYPE = 'aiops_pattern_analysis' as cons
 
 export const PATTERN_ANALYSIS_DATA_VIEW_REF_NAME = 'aiopsPatternAnalysisEmbeddableDataViewId';
 
+//
+// Do not change constant values - part of public REST APIs and persisted embeddable state.
+//
 export const MINIMUM_TIME_RANGE_OPTION = {
   NO_MINIMUM: 'no_minimum',
   ONE_WEEK: '1_week',
