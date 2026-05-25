@@ -25,6 +25,7 @@ import type {
 import { getFetchParamsMock, getFetch$Mock } from '@kbn/unified-histogram/__mocks__/fetch_params';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { EsqlResponseError } from '../../../common/errors/esql_response_error';
+import { ExternalServicesProvider } from '../../../context/external_services';
 import type { ParsedMetricItem, Dimension, UnifiedMetricsGridProps } from '../../../types';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 import * as metricsExperienceStateProvider from './context/metrics_experience_state_provider';
@@ -85,9 +86,17 @@ const useDiscoverFieldForBreakdownMock = hooks.useDiscoverFieldForBreakdown as j
   typeof hooks.useDiscoverFieldForBreakdown
 >;
 
-const TestWrapper = ({ children }: { children: React.ReactNode }) => (
+const TestWrapper = ({
+  children,
+  externalServices,
+}: {
+  children: React.ReactNode;
+  externalServices?: { docLinks?: { links: { query: { queryESQL: string } } } };
+}) => (
   <EuiProvider highContrastMode={false}>
-    <IntlProvider locale="en">{children}</IntlProvider>
+    <IntlProvider locale="en">
+      <ExternalServicesProvider externalServices={externalServices}>{children}</ExternalServicesProvider>
+    </IntlProvider>
   </EuiProvider>
 );
 
@@ -253,7 +262,7 @@ describe('MetricsExperienceGrid', () => {
     );
   });
 
-  it('renders ES|QL reference link when chartSectionSearchError provides esqlReferenceHref', () => {
+  it('renders ES|QL reference link when externalServices provides docLinks', () => {
     useFetchMetricsDataMock.mockReturnValue({
       metricItems: [],
       allDimensions: [],
@@ -263,15 +272,17 @@ describe('MetricsExperienceGrid', () => {
     });
     useMetricFieldsFilterMock.mockReturnValue({ filteredMetricItems: [] });
 
-    const { getByTestId } = render(
-      <MetricsExperienceGrid
-        {...defaultProps}
-        chartSectionSearchError={{
-          esqlReferenceHref: 'https://www.elastic.co/docs/reference/esql',
-        }}
-      />,
-      { wrapper: TestWrapper }
-    );
+    const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
+      wrapper: ({ children }) => (
+        <TestWrapper
+          externalServices={{
+            docLinks: { links: { query: { queryESQL: 'https://www.elastic.co/docs/reference/esql' } } },
+          }}
+        >
+          {children}
+        </TestWrapper>
+      ),
+    });
 
     expect(getByTestId('discoverErrorCalloutESQLReferenceButton')).toHaveAttribute(
       'href',

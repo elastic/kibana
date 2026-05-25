@@ -34,10 +34,11 @@ type UnifiedGridProps = ChartSectionProps & {
   actions: ChartSectionConfigurationExtensionParams['actions'];
   breakdownField?: string;
   onBreakdownFieldChange?: (fieldName?: string) => void;
-  externalServices?: { discoverShared?: unknown; dataViews?: unknown };
-  chartSectionSearchError?: {
-    showErrorDialog?: (args: { title: string; error: Error }) => void;
-    esqlReferenceHref?: string;
+  externalServices?: {
+    discoverShared?: unknown;
+    dataViews?: unknown;
+    notifications?: { showErrorDialog: (args: { title: string; error: Error }) => void };
+    docLinks?: { links: { query: { queryESQL: string } } };
   };
 };
 
@@ -170,29 +171,18 @@ describe('MetricsExperienceGridWrapper', () => {
     });
   });
 
-  it('forwards externalServices (discoverShared, dataViews) to the metrics grid', () => {
+  it('forwards externalServices (discoverShared, dataViews, notifications, docLinks) to the metrics grid', () => {
     renderChartSection();
 
     expect(unifiedGridProps?.externalServices).toEqual({
       discoverShared: mockDiscoverShared,
       dataViews: mockDataViews,
+      notifications: expect.objectContaining({
+        showErrorDialog: mockShowErrorDialog,
+      }),
+      docLinks: expect.objectContaining({
+        links: { query: { queryESQL: mockEsqlReferenceHref } },
+      }),
     });
-  });
-
-  it('forwards chartSectionSearchError (showErrorDialog, esqlReferenceHref) to the metrics grid', () => {
-    renderChartSection();
-
-    expect(unifiedGridProps?.chartSectionSearchError?.esqlReferenceHref).toBe(mockEsqlReferenceHref);
-    expect(unifiedGridProps?.chartSectionSearchError?.showErrorDialog).toEqual(
-      expect.any(Function)
-    );
-
-    const error = new Error('test');
-    unifiedGridProps?.chartSectionSearchError?.showErrorDialog?.({
-      title: 'Error',
-      error,
-    });
-
-    expect(mockShowErrorDialog).toHaveBeenCalledWith({ title: 'Error', error });
   });
 });

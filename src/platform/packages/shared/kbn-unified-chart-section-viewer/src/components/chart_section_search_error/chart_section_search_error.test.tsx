@@ -11,10 +11,20 @@ import { EuiProvider } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { EsqlResponseError } from '../../common/errors/esql_response_error';
+import { ExternalServicesProvider } from '../../context/external_services';
 import { ChartSectionSearchError } from './chart_section_search_error';
 
-const renderChartSectionSearchError = (ui: React.ReactElement) =>
-  render(<EuiProvider highContrastMode={false}>{ui}</EuiProvider>);
+const renderChartSectionSearchError = (
+  ui: React.ReactElement,
+  externalServices?: { docLinks?: { links: { query: { queryESQL: string } } } }
+) =>
+  render(
+    <EuiProvider highContrastMode={false}>
+      <ExternalServicesProvider externalServices={externalServices}>
+        {ui}
+      </ExternalServicesProvider>
+    </EuiProvider>
+  );
 
 describe('ChartSectionSearchError', () => {
   it('renders Discover ErrorCallout with title and error message', () => {
@@ -53,14 +63,14 @@ describe('ChartSectionSearchError', () => {
     );
   });
 
-  it('renders ES|QL reference link when isEsqlMode and href are set', () => {
+  it('renders ES|QL reference link when externalServices provides docLinks', () => {
     renderChartSectionSearchError(
       <ChartSectionSearchError
         error={new Error('x')}
         title="Unable to retrieve search results"
         isEsqlMode
-        esqlReferenceHref="https://www.elastic.co/docs/reference/esql"
-      />
+      />,
+      { docLinks: { links: { query: { queryESQL: 'https://www.elastic.co/docs/reference/esql' } } } }
     );
 
     expect(screen.getByTestId('discoverErrorCalloutESQLReferenceButton')).toHaveAttribute(
