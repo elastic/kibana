@@ -13,6 +13,7 @@ import {
   EuiEmptyPrompt,
   EuiLoadingSpinner,
   EuiPageTemplate,
+  EuiScreenReaderLive,
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -124,14 +125,7 @@ export const ModelSettings: React.FC = () => {
 
   const history = useHistory();
   const unblockRef = useRef<(() => void) | null>(null);
-  const saveButtonRef = useRef<HTMLButtonElement | null>(null);
   const [pendingLocation, setPendingLocation] = useState<Location | null>(null);
-
-  useEffect(() => {
-    if (isDirty) {
-      saveButtonRef.current?.focus();
-    }
-  }, [isDirty]);
 
   useEffect(() => {
     if (!isDirty) {
@@ -226,7 +220,6 @@ export const ModelSettings: React.FC = () => {
         restrictWidth={true}
         rightSideItems={[
           <EuiButton
-            buttonRef={saveButtonRef}
             fill
             onClick={handleSave}
             isLoading={isFeatureSaving}
@@ -386,6 +379,15 @@ export const ModelSettings: React.FC = () => {
           </>
         )}
       </EuiPageTemplate.Section>
+
+      <EuiScreenReaderLive>
+        {isDirty
+          ? i18n.translate('xpack.searchInferenceEndpoints.settings.unsavedChanges', {
+              defaultMessage:
+                'You have unsaved changes. Use the Save settings button to save them.',
+            })
+          : ''}
+      </EuiScreenReaderLive>
 
       {pendingLocation && (
         <UnsavedChangesModal
