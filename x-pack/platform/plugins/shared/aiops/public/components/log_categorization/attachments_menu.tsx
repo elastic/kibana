@@ -140,11 +140,11 @@ export const AttachmentsMenu = ({
                   onClick: () => {
                     setIsActionMenuOpen(false);
                     openCasesModalCallback({
-                      dataViewId: dataView.id,
-                      fieldName: selectedField,
-                      minimumTimeRangeOption: 'No minimum',
-                      randomSamplerMode,
-                      randomSamplerProbability,
+                      data_view_id: dataView.id,
+                      field_name: selectedField,
+                      minimum_time_range: DEFAULT_MINIMUM_TIME_RANGE,
+                      random_sampler_mode: randomSamplerMode,
+                      random_sampler_probability: randomSamplerProbability,
                       time_range: timeRange,
                     });
                   },

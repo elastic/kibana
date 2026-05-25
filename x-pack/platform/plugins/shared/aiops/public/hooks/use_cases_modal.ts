@@ -13,40 +13,27 @@ import {
   AIOPS_PATTERN_ANALYSIS_ATTACHMENT_TYPE,
 } from '@kbn/cases-plugin/common';
 import { i18n } from '@kbn/i18n';
-import type { TimeRange } from '@kbn/es-query';
 import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '@kbn/aiops-change-point-detection/constants';
 import { EMBEDDABLE_PATTERN_ANALYSIS_TYPE } from '@kbn/aiops-log-pattern-analysis/constants';
 import { EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-log-rate-analysis/constants';
 import type { ChangePointChartEmbeddableState } from '@kbn/aiops-server-schemas/embeddables/change_point_chart';
+import type { PatternAnalysisEmbeddableState } from '@kbn/aiops-server-schemas/embeddables/pattern_analysis';
 import type { EmbeddableChangePointChartType } from '../embeddables/change_point_chart/embeddable_change_point_chart_factory';
 import { useAiopsAppContext } from './use_aiops_app_context';
 import type { EmbeddablePatternAnalysisType } from '../embeddables/pattern_analysis/embeddable_pattern_analysis_factory';
 import type { EmbeddableLogRateAnalysisType } from '../embeddables/log_rate_analysis/embeddable_log_rate_analysis_factory';
 import type { LogRateAnalysisEmbeddableState } from '../../common/embeddables/log_rate_analysis/types';
-import type { PatternAnalysisProps } from '../shared_components/pattern_analysis';
 
 type SupportedEmbeddableTypes =
   | EmbeddableChangePointChartType
   | EmbeddablePatternAnalysisType
   | EmbeddableLogRateAnalysisType;
 
-type PatternAnalysisCaseAttachmentState = Pick<
-  PatternAnalysisProps,
-  | 'dataViewId'
-  | 'fieldName'
-  | 'minimumTimeRangeOption'
-  | 'randomSamplerMode'
-  | 'randomSamplerProbability'
-> & {
-  time_range?: TimeRange;
-  timeRange?: TimeRange;
-};
-
 type EmbeddableRuntimeState<T extends SupportedEmbeddableTypes> =
   T extends EmbeddableChangePointChartType
     ? ChangePointChartEmbeddableState
     : T extends EmbeddablePatternAnalysisType
-    ? PatternAnalysisCaseAttachmentState
+    ? PatternAnalysisEmbeddableState
     : T extends EmbeddableLogRateAnalysisType
     ? LogRateAnalysisEmbeddableState
     : never;
