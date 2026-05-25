@@ -1,0 +1,7 @@
+prs:
+- https://github.com/elastic/kibana/pull/267549
+type: feature
+products:
+- product: cloud-serverless
+  target: 2026-05-20
+title: Add bulk actions for Attack Discovery schedules
