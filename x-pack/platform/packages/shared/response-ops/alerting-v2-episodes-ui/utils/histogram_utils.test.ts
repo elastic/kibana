@@ -153,6 +153,14 @@ describe('computeOverlapCounts', () => {
     expect(counts.find((c) => c.breakdown === 'rule-a')?.count).toBe(1);
     expect(counts.find((c) => c.breakdown === 'rule-b')?.count).toBe(1);
   });
+
+  it('emits no row for a bucket with no overlapping episodes when a breakdown is active', () => {
+    // Episode falls entirely outside BUCKET_1
+    const ep = { ...inactive(t0 + HOUR + MIN, t0 + 2 * HOUR), effective_status: 'active' };
+    const counts = computeOverlapCounts([ep], [BUCKET_1], 'effective_status');
+    // No (null) breakdown row should be produced — the bucket is simply absent
+    expect(counts).toHaveLength(0);
+  });
 });
 
 describe('formatHistogramDatatable', () => {
@@ -179,7 +187,9 @@ describe('formatHistogramDatatable', () => {
     });
   });
 
-  it('sets breakdown to null for entries with no breakdown value', () => {
+  it('sets breakdown column to null when an entry has no breakdown value (defensive)', () => {
+    // computeOverlapCounts no longer produces entries without a breakdown field when a
+    // breakdown is active; this test guards the formatter against callers that might.
     const table = formatHistogramDatatable(
       [{ bucketStart: 0, count: 1, breakdown: undefined }],
       'episode.status'

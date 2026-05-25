@@ -110,13 +110,11 @@ export const computeOverlapCounts = (
         const key = String(ep[breakdownField] ?? 'unknown');
         byBreakdown.set(key, (byBreakdown.get(key) ?? 0) + 1);
       }
-      if (byBreakdown.size === 0) {
-        result.push({ bucketStart: bucket.start, count: 0 });
-      } else {
-        for (const [breakdown, count] of byBreakdown) {
-          result.push({ bucketStart: bucket.start, count, breakdown });
-        }
+      for (const [breakdown, count] of byBreakdown) {
+        result.push({ bucketStart: bucket.start, count, breakdown });
       }
+      // Empty buckets (byBreakdown.size === 0) are intentionally skipped: emitting a row
+      // with no breakdown value would cause Lens to render a "(null)" category bucket.
     }
   }
 

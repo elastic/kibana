@@ -206,4 +206,82 @@ describe('EpisodesHistogram', () => {
     render(<EpisodesHistogram {...defaultProps} dataView={undefined} />);
     expect(screen.queryByTestId('unifiedBreakdownFieldSelector')).not.toBeInTheDocument();
   });
+
+  describe('getModifiedVisAttributes', () => {
+    const mockLensAttributes = {
+      state: {
+        visualization: {
+          layers: [{ layerType: 'data', accessors: ['col_count'], yConfig: [] }],
+          axisTitlesVisibilitySettings: { yLeft: true, yRight: true, x: true },
+        },
+      },
+    } as any;
+
+    const captureGetModifiedVisAttributes = () => {
+      const call = mockFetch.mock.calls[0]?.[0];
+      return call?.getModifiedVisAttributes as
+        | ((attrs: typeof mockLensAttributes) => typeof mockLensAttributes)
+        | undefined;
+    };
+
+    it('applies the danger (red) yConfig color when there is no breakdown and no status filter', () => {
+      render(<EpisodesHistogram {...defaultProps} filterState={{}} />);
+      const fn = captureGetModifiedVisAttributes();
+      const result = fn?.(mockLensAttributes);
+      const layer = result?.state.visualization.layers[0];
+      expect(layer?.colorMapping).toBeUndefined();
+      expect(layer?.yConfig).toHaveLength(1);
+      expect(layer?.yConfig[0]).toMatchObject({
+        forAccessor: 'col_count',
+        color: expect.any(String),
+      });
+    });
+
+    it.each(['active', 'inactive', 'recovering', 'pending'] as const)(
+      'sets yConfig color on every accessor for the %s status filter when no breakdown is selected',
+      (status) => {
+        render(<EpisodesHistogram {...defaultProps} filterState={{ status }} />);
+        const fn = captureGetModifiedVisAttributes();
+        const result = fn?.(mockLensAttributes);
+        const layer = result?.state.visualization.layers[0];
+        // colorMapping must not be used (Lens ignores it without a splitAccessor)
+        expect(layer?.colorMapping).toBeUndefined();
+        // yConfig must have one entry per accessor, each with a non-empty color
+        expect(layer?.yConfig).toHaveLength(1);
+        expect(layer?.yConfig[0]).toMatchObject({
+          forAccessor: 'col_count',
+          color: expect.any(String),
+        });
+      }
+    );
+
+    it('does not set yConfig color when a breakdown field is also set', () => {
+      render(
+        <EpisodesHistogram
+          {...defaultProps}
+          filterState={{ status: 'active' }}
+          breakdownField="rule.id"
+        />
+      );
+      const fn = captureGetModifiedVisAttributes();
+      const result = fn?.(mockLensAttributes);
+      // With a non-effective_status breakdown, neither colorMapping nor yConfig color applies
+      expect(result?.state.visualization.layers[0].colorMapping).toBeUndefined();
+      expect(result?.state.visualization.layers[0].yConfig).toEqual([]);
+    });
+
+    it('applies per-status colorMapping when breakdown is effective_status', () => {
+      render(<EpisodesHistogram {...defaultProps} breakdownField="effective_status" />);
+      const fn = captureGetModifiedVisAttributes();
+      const result = fn?.(mockLensAttributes);
+      const layer = result?.state.visualization.layers[0];
+      expect(layer?.colorMapping?.assignments).toHaveLength(4);
+      const patterns = layer?.colorMapping?.assignments.map(
+        (a: { rules: Array<{ pattern: string }> }) => a.rules[0].pattern
+      );
+      expect(patterns).toEqual(
+        expect.arrayContaining(['active', 'inactive', 'recovering', 'pending'])
+      );
+    });
+  });
 });

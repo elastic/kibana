@@ -142,6 +142,21 @@ export const EpisodesHistogram = ({
     [spaceId, filterState, breakdownField]
   );
 
+  const statusColorMap: Record<string, string> = useMemo(
+    () => ({
+      active: euiTheme.colors.danger,
+      inactive: euiTheme.colors.success,
+      recovering: euiTheme.colors.primary,
+      pending: euiTheme.colors.warning,
+    }),
+    [
+      euiTheme.colors.danger,
+      euiTheme.colors.success,
+      euiTheme.colors.primary,
+      euiTheme.colors.warning,
+    ]
+  );
+
   const getModifiedVisAttributes = useCallback(
     (
       attributes: Parameters<
@@ -160,40 +175,7 @@ export const EpisodesHistogram = ({
         },
       };
 
-      if (breakdownField !== 'effective_status') {
-        return { ...attributes, state: { ...attributes.state, visualization: baseVisualization } };
-      }
-
-      const colorMapping: ColorMapping.Config = {
-        paletteId: 'default',
-        colorMode: { type: 'categorical' },
-        assignments: [
-          {
-            rules: [{ type: 'match', pattern: 'active', matchEntireWord: true }],
-            color: { type: 'colorCode', colorCode: euiTheme.colors.danger },
-            touched: true,
-          },
-          {
-            rules: [{ type: 'match', pattern: 'inactive', matchEntireWord: true }],
-            color: { type: 'colorCode', colorCode: euiTheme.colors.success },
-            touched: true,
-          },
-          {
-            rules: [{ type: 'match', pattern: 'recovering', matchEntireWord: true }],
-            color: { type: 'colorCode', colorCode: euiTheme.colors.primary },
-            touched: true,
-          },
-          {
-            rules: [{ type: 'match', pattern: 'pending', matchEntireWord: true }],
-            color: { type: 'colorCode', colorCode: euiTheme.colors.warning },
-            touched: true,
-          },
-        ],
-        specialAssignments: [
-          { rules: [{ type: 'other' }], color: { type: 'loop' }, touched: false },
-        ],
-      };
-      return {
+      const applyColorMapping = (colorMapping: ColorMapping.Config) => ({
         ...attributes,
         state: {
           ...attributes.state,
@@ -204,11 +186,75 @@ export const EpisodesHistogram = ({
             ),
           },
         },
-      };
+      });
+
+      if (breakdownField === 'effective_status') {
+        return applyColorMapping({
+          paletteId: 'default',
+          colorMode: { type: 'categorical' },
+          assignments: [
+            {
+              rules: [{ type: 'match', pattern: 'active', matchEntireWord: true }],
+              color: { type: 'colorCode', colorCode: euiTheme.colors.danger },
+              touched: true,
+            },
+            {
+              rules: [{ type: 'match', pattern: 'inactive', matchEntireWord: true }],
+              color: { type: 'colorCode', colorCode: euiTheme.colors.success },
+              touched: true,
+            },
+            {
+              rules: [{ type: 'match', pattern: 'recovering', matchEntireWord: true }],
+              color: { type: 'colorCode', colorCode: euiTheme.colors.primary },
+              touched: true,
+            },
+            {
+              rules: [{ type: 'match', pattern: 'pending', matchEntireWord: true }],
+              color: { type: 'colorCode', colorCode: euiTheme.colors.warning },
+              touched: true,
+            },
+          ],
+          specialAssignments: [
+            { rules: [{ type: 'other' }], color: { type: 'loop' }, touched: false },
+          ],
+        });
+      }
+
+      // When no breakdown is selected but a single status is filtered, colour the whole
+      // series to match the status — so the chart stays visually consistent with the filter.
+      // Fall back to danger (red) when no status filter is active so the no-breakdown,
+      // no-filter state still has a meaningful colour rather than the Lens palette default.
+      const statusColor =
+        (filterState.status ? statusColorMap[filterState.status] : undefined) ??
+        euiTheme.colors.danger;
+      if (!breakdownField) {
+        return {
+          ...attributes,
+          state: {
+            ...attributes.state,
+            visualization: {
+              ...baseVisualization,
+              layers: baseVisualization.layers.map((layer) => {
+                if (layer.layerType !== 'data') return layer;
+                const existingYConfig = layer.yConfig ?? [];
+                const yConfig = (layer.accessors as string[]).map((acc) => {
+                  const existing = existingYConfig.find((yc) => yc.forAccessor === acc);
+                  return { ...existing, forAccessor: acc, color: statusColor };
+                });
+                return { ...layer, yConfig };
+              }),
+            },
+          },
+        };
+      }
+
+      return { ...attributes, state: { ...attributes.state, visualization: baseVisualization } };
     },
     [
       api,
       breakdownField,
+      filterState.status,
+      statusColorMap,
       euiTheme.colors.danger,
       euiTheme.colors.success,
       euiTheme.colors.primary,
@@ -310,6 +356,13 @@ export const EpisodesHistogram = ({
             gutterSize="none"
             css={css`
               height: 192px;
+              /*
+               * TODO: Replace these selectors with a proper prop on UnifiedHistogramChart (e.g. withLensActions={false})
+               */
+              [data-test-subj='unifiedHistogramEditFlyoutVisualization'],
+              [data-test-subj='unifiedHistogramSaveVisualization'] {
+                display: none;
+              }
             `}
           >
             <EuiFlexItem>
