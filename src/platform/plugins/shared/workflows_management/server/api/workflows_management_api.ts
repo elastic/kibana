@@ -209,6 +209,24 @@ const isExecuteInlineWorkflowParams = (
   params: ExecuteWorkflowParams
 ): params is ExecuteInlineWorkflowParams => params.yaml !== undefined;
 
+const buildManagedWorkflowExecutionMetadata = (
+  workflow: WorkflowDetailDto | null | undefined
+): Partial<
+  Pick<
+    WorkflowExecutionEngineModel,
+    'managed' | 'managedBy' | 'originManagedWorkflowId' | 'managedVersion'
+  >
+> => ({
+  ...(workflow?.managed === true ? { managed: true } : {}),
+  ...(typeof workflow?.managedBy === 'string' ? { managedBy: workflow.managedBy } : {}),
+  ...(typeof workflow?.originManagedWorkflowId === 'string'
+    ? { originManagedWorkflowId: workflow.originManagedWorkflowId }
+    : {}),
+  ...(typeof workflow?.managedVersion === 'number'
+    ? { managedVersion: workflow.managedVersion }
+    : {}),
+});
+
 export class WorkflowsManagementApi {
   private smlIndexAttachment: SmlIndexAttachmentFn | null = null;
   private smlLogger: Logger | null = null;
@@ -604,13 +622,16 @@ export class WorkflowsManagementApi {
   }: TestWorkflowParams): Promise<string> {
     let resolvedYaml = workflowYaml;
     let resolvedWorkflowId = workflowId;
+    let existingWorkflow: WorkflowDetailDto | null = null;
 
     if (workflowId && !workflowYaml) {
-      const existingWorkflow = await this.workflowsService.getWorkflow(workflowId, spaceId);
+      existingWorkflow = await this.workflowsService.getWorkflow(workflowId, spaceId);
       if (!existingWorkflow) {
         throw new WorkflowNotFoundError(workflowId);
       }
       resolvedYaml = existingWorkflow.yaml;
+    } else if (workflowId) {
+      existingWorkflow = await this.workflowsService.getWorkflow(workflowId, spaceId);
     }
 
     if (!resolvedWorkflowId) {
@@ -646,6 +667,7 @@ export class WorkflowsManagementApi {
         yaml: resolvedYaml,
         isTestRun: true,
         isEphemeral: true,
+        ...buildManagedWorkflowExecutionMetadata(existingWorkflow),
       },
       context,
       request
