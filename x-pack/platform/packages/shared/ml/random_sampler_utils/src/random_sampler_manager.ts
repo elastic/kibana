@@ -21,6 +21,11 @@ export const RANDOM_SAMPLER_PROBABILITIES = [
 export const MIN_SAMPLER_PROBABILITY = 0.00001;
 
 /**
+ * Maximum probability for random sampling (matches the ES random_sampler upper bound for useful results)
+ */
+export const MAX_SAMPLER_PROBABILITY = 0.5;
+
+/**
  * Default step minimum probability for default sampling
  */
 export const RANDOM_SAMPLER_STEP = MIN_SAMPLER_PROBABILITY * 100;
