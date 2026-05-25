@@ -5,7 +5,5 @@
  * 2.0.
  */
 
-import { setProjectAnnotations } from '@storybook/react';
-import * as globalStorybookConfig from './jest_preview';
-
-setProjectAnnotations(globalStorybookConfig);
+require('@kbn/setup-node-env');
+require('./check_template_drift').run();
