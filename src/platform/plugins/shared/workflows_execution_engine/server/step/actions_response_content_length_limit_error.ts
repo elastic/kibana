@@ -8,7 +8,7 @@
  */
 
 import { ExecutionError } from '@kbn/workflows/server';
-import { formatBytes } from './errors';
+import { formatBytes } from '@kbn/workflows-execution-engine-core';
 
 export const ACTIONS_MAX_RESPONSE_CONTENT_LENGTH_CONFIG = 'xpack.actions.maxResponseContentLength';
 
