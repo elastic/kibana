@@ -40,7 +40,7 @@ export class MatcherDataFieldsRoute extends BaseAlertingRoute {
   } as const;
   static validate = {
     request: {
-      query: buildRouteValidationWithZod(matcherDataFieldsQuerySchema),
+      query: matcherDataFieldsQuerySchema,
     },
     response: {
       200: {
