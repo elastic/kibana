@@ -507,7 +507,7 @@ describe('MetricsExperienceGrid', () => {
   });
 
   describe('onToolbarDimensionsChange', () => {
-    it('resets currentPage to 0 and calls onBreakdownFieldChange when user picks a dimension via the toolbar', () => {
+    it('calls onDimensionsChange and onBreakdownFieldChange when user picks a dimension via the toolbar', () => {
       const onPageChange = jest.fn();
       const onDimensionsChange = jest.fn();
       const onBreakdownFieldChange = jest.fn();
@@ -537,7 +537,9 @@ describe('MetricsExperienceGrid', () => {
       });
 
       expect(onDimensionsChange).toHaveBeenCalledWith([dimensions[0]]);
-      expect(onPageChange).toHaveBeenCalledWith(0);
+      // Page reset is now owned exclusively by useDiscoverFieldForBreakdown reacting
+      // to the breakdownField prop change — not by the toolbar handler directly.
+      expect(onPageChange).not.toHaveBeenCalled();
       expect(onBreakdownFieldChange).toHaveBeenCalledWith(dimensions[0].name);
     });
   });

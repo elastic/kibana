@@ -72,16 +72,16 @@ export const MetricsExperienceGrid = ({
     breakdownField,
     allDimensions,
     selectedDimensions,
-    onDimensionsChange
+    onDimensionsChange,
+    onPageChange
   );
 
   const onToolbarDimensionsChange = useCallback(
     (nextSelectedDimensions: Dimension[]) => {
       onDimensionsChange(nextSelectedDimensions);
-      onPageChange(0);
       onBreakdownFieldChange?.(nextSelectedDimensions[0]?.name);
     },
-    [onDimensionsChange, onPageChange, onBreakdownFieldChange]
+    [onDimensionsChange, onBreakdownFieldChange]
   );
 
   useDimensionsWipe({
