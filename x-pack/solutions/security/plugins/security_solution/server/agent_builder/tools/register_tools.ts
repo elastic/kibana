@@ -23,7 +23,6 @@ import {
 } from './migration_translated_rules_tools';
 import { migrationResourcesListTool } from './migration_resources_tools';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
-import type { SiemMigrationsService } from '../../lib/siem_migrations/siem_migrations_service';
 
 /**
  * Registers all security agent builder tools with the agentBuilder plugin.
@@ -42,8 +41,7 @@ export const registerTools = async (
   core: SecuritySolutionPluginCoreSetupDependencies,
   logger: Logger,
   experimentalFeatures: ExperimentalFeatures,
-  isServerless: boolean = false,
-  _siemMigrationsService: SiemMigrationsService
+  isServerless: boolean = false
 ) => {
   agentBuilder.tools.register(entityRiskScoreTool(core, logger));
   agentBuilder.tools.register(attackDiscoverySearchTool(core, logger));
