@@ -141,6 +141,7 @@ describe('getSaveWorkflowTooltipContent', () => {
       isExecutionsTab: true,
       canSaveWorkflow: true,
       isCreate: false,
+      hasUnsavedChanges: true,
     });
     expect(result).toBe('Can not save workflow from executions tab');
   });
@@ -150,6 +151,7 @@ describe('getSaveWorkflowTooltipContent', () => {
       isExecutionsTab: false,
       canSaveWorkflow: false,
       isCreate: true,
+      hasUnsavedChanges: true,
     });
     expect(result).toBe('You are not allowed to create workflows');
   });
@@ -159,6 +161,7 @@ describe('getSaveWorkflowTooltipContent', () => {
       isExecutionsTab: false,
       canSaveWorkflow: false,
       isCreate: false,
+      hasUnsavedChanges: true,
     });
     expect(result).toBe('You are not allowed to update workflows');
   });
@@ -168,6 +171,7 @@ describe('getSaveWorkflowTooltipContent', () => {
       isExecutionsTab: false,
       canSaveWorkflow: true,
       isCreate: false,
+      hasUnsavedChanges: true,
     });
     expect(result).toBeNull();
   });
@@ -177,6 +181,7 @@ describe('getSaveWorkflowTooltipContent', () => {
       isExecutionsTab: false,
       canSaveWorkflow: true,
       isCreate: true,
+      hasUnsavedChanges: true,
     });
     expect(result).toBeNull();
   });
@@ -186,7 +191,18 @@ describe('getSaveWorkflowTooltipContent', () => {
       isExecutionsTab: true,
       canSaveWorkflow: false,
       isCreate: true,
+      hasUnsavedChanges: false,
     });
     expect(result).toBe('Can not save workflow from executions tab');
+  });
+
+  it('returns no changes message when workflow has no unsaved changes', () => {
+    const result = getSaveWorkflowTooltipContent({
+      isExecutionsTab: false,
+      canSaveWorkflow: true,
+      isCreate: false,
+      hasUnsavedChanges: false,
+    });
+    expect(result).toBe('No changes to save');
   });
 });
