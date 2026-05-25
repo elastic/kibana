@@ -15,7 +15,11 @@ import type {
 } from '@kbn/agent-context-layer-plugin/server';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { getWorkflowJsonSchema, transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
+import {
+  getWorkflowJsonSchema,
+  pickManagedWorkflowFields,
+  transformWorkflowYamlJsontoEsWorkflow,
+} from '@kbn/workflows';
 import type {
   BulkScheduleWorkflowResult,
   CreateWorkflowCommand,
@@ -411,13 +415,16 @@ export class WorkflowsManagementApi {
   }: TestWorkflowParams): Promise<string> {
     let resolvedYaml = workflowYaml;
     let resolvedWorkflowId = workflowId;
+    let existingWorkflow: WorkflowDetailDto | null = null;
 
     if (workflowId && !workflowYaml) {
-      const existingWorkflow = await this.workflowsService.getWorkflow(workflowId, spaceId);
+      existingWorkflow = await this.workflowsService.getWorkflow(workflowId, spaceId);
       if (!existingWorkflow) {
         throw new WorkflowNotFoundError(workflowId);
       }
       resolvedYaml = existingWorkflow.yaml;
+    } else if (workflowId) {
+      existingWorkflow = await this.workflowsService.getWorkflow(workflowId, spaceId);
     }
 
     if (!resolvedWorkflowId) {
@@ -452,6 +459,7 @@ export class WorkflowsManagementApi {
         definition: workflowJson.definition,
         yaml: resolvedYaml,
         isTestRun: true,
+        ...pickManagedWorkflowFields(existingWorkflow),
       },
       context,
       request
