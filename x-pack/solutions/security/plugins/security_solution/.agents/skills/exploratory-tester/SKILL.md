@@ -1,10 +1,9 @@
 ---
 name: exploratory-tester
 description: >
-  Use when the user wants to perform exploratory testing on Kibana Security Solution.
-  Invoke inline with an area and flows, or point at a GitHub issue/PR number that contains
-  an "## Exploratory testing scope" comment.
-  Supports stateful-classic, stateful-ess, and serverless environments — agent-managed or user-provided.
+  Use when proactively exploring a Kibana feature area for unknown bugs without a specific
+  defect in mind. Also triggered by requests to validate a new feature, check for regressions,
+  or exercise a user flow before release — in stateful or serverless environments.
 ---
 
 # Exploratory Tester
@@ -18,7 +17,7 @@ Explore a feature area of Kibana Security Solution through the browser, collect 
 | Phase | What it does | Exit condition |
 |-------|-------------|----------------|
 | **0 — Setup** | Parse scope, start environment (agent-managed) or verify (user-provided), fetch known bugs, write `config.json` | `config.json` written |
-| **1 — Wait & Login** | Wait for Kibana ready, log in as admin for setup, create space + test user, switch to test user, verify area readiness, confirm with user | User confirms: proceed |
+| **1 — Wait & Login** | Wait for Kibana ready (1a), log in as admin for setup (1b), create space + test user (1c), switch to test user (1d), verify area readiness (1e), confirm with user (1f) | User confirms: proceed |
 | **2 — Explore** | Walk every flow using checklist + timebox, write findings immediately | Every flow has ≥1 entry in its `findings-flow-<N>.md` |
 | **3 — Report** | Merge findings, classify, filter known noise, present to user, update knowledge | User has reviewed the report |
 
@@ -94,6 +93,18 @@ Environment:
 | "This error always shows up, it's expected" | Document it. The user decides — then add it to `knowledge/<area-slug>.md`. |
 | "I called the API directly and it works" | UI and API hit different code paths. Browser reproduction is required. |
 | "The flow name is ambiguous — I'll skip it" | Use browser discovery: take a snapshot and navigate from what you see. |
+
+## Common Mistakes
+
+| Mistake | How to avoid |
+|---|---|
+| Staying in the `default` space | All navigation must include `/s/<space_id>/`. Verify the URL after every navigation. |
+| Forgetting to switch to the test user | Step 1d is mandatory. Verify via `/api/security/me` before starting exploration. |
+| Reading source code to fill in expected behavior | Expected behavior comes from the UI itself, `config.json`, and UX heuristics only. See Red Flags. |
+| Logging every `console.warn` as Level 2 | `console.warn` is Level 3. Only React `Warning:` messages and error-level console output are Level 2+. |
+| Skipping checklist steps when the area is complex | When the timebox fires, log remaining steps as `skipped: time budget exhausted`. Never drop silently. |
+| Sub-agent in parallel mode guessing the Explore Loop | The sub-agent prompt must begin with `Read x-pack/.../SKILL.md`. Never describe the loop inline. |
+| Reporting the same duplicate API call across multiple steps | One finding per unique `method + path` pair per flow, regardless of how many steps it reappears in. |
 
 ---
 
@@ -342,7 +353,7 @@ For **serverless**: skip user creation — project roles are pre-provisioned. Ad
 { "step": "role-creation:<role>", "reason": "serverless uses project roles — resolved to <resolved_role>" }
 ```
 
-### Step 1f — Switch to test user
+### Step 1d — Switch to test user
 
 _Skip this step for user-provided environments — the provided credentials are the test credentials._
 
@@ -358,9 +369,11 @@ _Skip this step for user-provided environments — the provided credentials are 
    If this fails — **stop** and report the exact error. The `elastic` admin session is still available for debugging.
 6. Navigate to `<environment.url>/s/<space_id>/` to enter the test space
 
-### Step 1d — Check area readiness
+### Step 1e — Check area readiness
 
 Navigate to the first flow's `entry` path within the test space (prefix with `/s/<space_id>/` — see Phase 2 navigation rules). Call `browser_snapshot` to see the current state.
+
+_This step runs as the test user (after Step 1d). If still logged in as `elastic`, go back and complete Step 1d first._
 
 If the page shows an empty state (e.g., "No migrations to view", "No data", empty illustration with a CTA):
 
@@ -378,7 +391,7 @@ If the page shows an empty state (e.g., "No migrations to view", "No data", empt
 
    Wait for their answer before continuing.
 
-### Step 1e — Confirm with user
+### Step 1f — Confirm with user
 
 Present a confirmation before starting exploration:
 
@@ -658,7 +671,7 @@ git commit -m "knowledge(exploratory-tester): update <area_slug> after session o
 | Scout already running on port 5620 | Phase 0 (agent-managed) | Reuse. Tell user an existing session is being reused. |
 | User-provided environment unreachable | Phase 0 | **Stop.** Tell user to check the environment URL and credentials. |
 | Login fails after one retry | Phase 1 | **Stop.** Report the exact error visible in the browser. |
-| Test user login fails | Phase 1f | **Stop.** Report the exact error. The `elastic` admin session is still available for debugging. |
+| Test user login fails | Phase 1 (Step 1d) | **Stop.** Report the exact error. The `elastic` admin session is still available for debugging. |
 | Space creation fails (non-409) | Phase 1c | Add `{ "step": "space-creation", "reason": "<error>" }` to `skipped_setup`. Update `space_id` to `"default"` in `config.json`. Continue. |
 | `admin` role requested | Phase 0c | Warn and substitute (`t2_analyst` stateful / `platform_engineer` serverless). Never stop — exploration proceeds with the substituted role. |
 | `gh` CLI not authenticated | Phase 0 (GitHub mode) | **Stop.** Tell user to run `gh auth login`. |
