@@ -18,14 +18,18 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import { GrokExpressionsProvider, GrokSampleWithContext, useGrokExpressions } from '@kbn/grok-ui';
+import { GrokExpressionsProvider, GrokSampleWithContext } from '@kbn/grok-ui';
 import { i18n } from '@kbn/i18n';
-import type { GrokProcessor } from '@kbn/streamlang';
 import { isActionBlock } from '@kbn/streamlang';
 import type { FlattenRecord, SampleDocument } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import {
+  DissectColorProvider,
+  DissectSampleWithContext,
+} from './steps/blocks/action/dissect/dissect_color_context';
+import { useProcessorHighlightMode } from './use_processor_highlight_mode';
 import { useDocViewerSetup } from '../../../../hooks/use_doc_viewer_setup';
 import { useDocumentExpansion } from '../../../../hooks/use_document_expansion';
 import { useStreamDataViewFieldTypes } from '../../../../hooks/use_stream_data_view_field_types';
@@ -38,12 +42,7 @@ import {
   NoPreviewDocumentsEmptyPrompt,
   NoProcessingDataAvailableEmptyPrompt,
 } from './empty_prompts';
-import {
-  createOriginalFieldValuesMap,
-  getSourceFieldDisplayValue,
-  grokExpressionOverwritesSourceField,
-  hasPrecedingProcessorTouchedField,
-} from './processor_outcome_preview_helpers';
+import { getSourceFieldDisplayValue } from './processor_outcome_preview_helpers';
 import { useDataSourceSelector } from './state_management/data_source_state_machine';
 import { selectDraftProcessor } from './state_management/interactive_mode_machine/selectors';
 import type { PreviewDocsFilterOption } from './state_management/simulation_state_machine';
@@ -421,75 +420,28 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     const isInteractiveMode = selectIsInteractiveMode(snapshot);
     return isInteractiveMode && snapshot.context.interactiveModeRef
       ? selectDraftProcessor(snapshot.context.interactiveModeRef.getSnapshot().context)
-      : {
-          processor: undefined,
-          resources: undefined,
-        };
+      : { processor: undefined };
   });
 
-  // Get grok patterns from the draft processor
-  const grokPatterns =
-    draftProcessor?.processor &&
-    'action' in draftProcessor.processor &&
-    draftProcessor.processor.action === 'grok'
-      ? draftProcessor.processor.patterns
-      : [];
-
-  // Convert patterns to DraftGrokExpression instances for field analysis
-  const grokExpressions = useGrokExpressions(grokPatterns);
-
-  // Determine if the grok processor is active (has a from field)
-  const isGrokProcessorActive =
-    draftProcessor?.processor &&
-    'action' in draftProcessor.processor &&
-    draftProcessor.processor.action === 'grok' &&
-    !isEmpty(draftProcessor.processor.from);
-
-  // Get the source field for the grok processor
-  const grokSourceField = isGrokProcessorActive
-    ? (draftProcessor.processor as GrokProcessor).from
-    : undefined;
-  const validGrokSourceField =
-    grokSourceField && allColumns.includes(grokSourceField) ? grokSourceField : undefined;
-
-  // Check if the grok expression overwrites the source field (non-additive pattern)
-  const grokOverwritesSourceField = useMemo(() => {
-    if (!validGrokSourceField || grokExpressions.length === 0) return false;
-    return grokExpressionOverwritesSourceField(grokExpressions, validGrokSourceField);
-  }, [grokExpressions, validGrokSourceField]);
-
-  // Check if any preceding processor has touched the grok source field
-  const precedingProcessorTouchedGrokField = useMemo(() => {
-    if (!validGrokSourceField) return false;
-    return hasPrecedingProcessorTouchedField(
-      stepIds,
-      currentStepId,
-      processorsMetrics,
-      validGrokSourceField
-    );
-  }, [stepIds, currentStepId, processorsMetrics, validGrokSourceField]);
-
-  /**
-   * Grok mode enables the special highlighting preview for grok patterns.
-   *
-   * We enable grok mode when:
-   * - We have a grok processor with a valid source field
-   * - AND one of:
-   *   - The grok pattern is additive (doesn't overwrite the source field), OR
-   *   - The grok pattern overwrites the source field BUT no preceding processor has touched it
-   *     (in this case, we can safely use the original pre-transformation value for highlighting)
-   *
-   * We DISABLE grok mode when:
-   * - The grok pattern overwrites the source field AND a preceding processor touched the field
-   *   (in this case, we can't show correct highlighting - the original value doesn't reflect
-   *   preceding transformations, and the current value has been overwritten by grok)
-   */
-  const grokMode =
-    isGrokProcessorActive &&
-    validGrokSourceField !== undefined &&
-    !(grokOverwritesSourceField && precedingProcessorTouchedGrokField);
-
-  const validGrokField = grokMode ? validGrokSourceField : undefined;
+  const {
+    grokMode,
+    validGrokField,
+    grokPatterns,
+    originalGrokFieldValues,
+    dissectMode,
+    validDissectField,
+    dissectPattern,
+    originalDissectFieldValues,
+    highlightColumns,
+  } = useProcessorHighlightMode({
+    processor: draftProcessor.processor,
+    allColumns,
+    stepIds,
+    currentStepId,
+    processorsMetrics,
+    originalSamples,
+    previewDocuments,
+  });
 
   const validCurrentProcessorSourceField =
     currentProcessorSourceField && allColumns.includes(currentProcessorSourceField)
@@ -497,7 +449,9 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
       : undefined;
 
   // Calculate if view mode should be forced to 'columns'
-  const isViewModeForced = Boolean(validGrokField || validCurrentProcessorSourceField);
+  const isViewModeForced = Boolean(
+    validGrokField || validDissectField || validCurrentProcessorSourceField
+  );
 
   // Determine the effective view mode (forced to 'columns' if needed, otherwise user's choice)
   const effectiveViewMode = isViewModeForced ? 'columns' : userSelectedViewMode ?? 'summary';
@@ -510,12 +464,9 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     });
 
     if (cols.length === 0) {
-      // If no columns are detected, fall back to all fields from the preview documents
       cols = allColumns;
     }
-    // Filter out columns that are explicitly disabled
     const filteredCols = cols.filter((col) => !explicitlyDisabledPreviewColumns.includes(col));
-    // Add explicitly enabled columns if they are not already included and exist in allFields
     explicitlyEnabledPreviewColumns.forEach((col) => {
       if (!filteredCols.includes(col) && allColumns.includes(col)) {
         filteredCols.push(col);
@@ -532,32 +483,7 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     validCurrentProcessorSourceField,
   ]);
 
-  /**
-   * If we are in Grok mode and the field matches an existing field,
-   * we exclude the detected fields and only use the Grok field since it is highlighting extracted values
-   */
-  const grokColumns = useMemo(
-    () => (validGrokField ? [validGrokField] : undefined),
-    [validGrokField]
-  );
-
-  /**
-   * Map from preview document to the original (pre-transformation) value of the grok field.
-   * This is needed when the grok pattern extracts into the same field it reads from (e.g., message → message).
-   * We use a WeakMap keyed by the document object reference for O(1) lookup in renderCellValue.
-   *
-   * We only create this map when grok mode is active AND the grok expression overwrites the source field.
-   * When the grok expression is additive (doesn't overwrite the source field), the current document value
-   * is correct for highlighting and we don't need the original values.
-   */
-  const originalGrokFieldValues = useMemo(() => {
-    if (!grokMode || !validGrokField || !originalSamples) return undefined;
-    if (!grokOverwritesSourceField) return undefined;
-
-    return createOriginalFieldValuesMap(previewDocuments, originalSamples, validGrokField);
-  }, [grokMode, validGrokField, originalSamples, previewDocuments, grokOverwritesSourceField]);
-
-  const previewColumns = grokColumns ?? availableColumns;
+  const previewColumns = highlightColumns ?? availableColumns;
 
   // Calculate columns specifically for summary mode
   const displayColumnsForSummaryMode = useMemo(() => {
@@ -627,27 +553,44 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     ]
   );
 
-  const renderCellValue = useMemo(
-    () =>
-      grokMode && validGrokField
-        ? (document: SampleDocument, columnId: string) => {
-            // Use the original (pre-transformation) value for the grok field.
-            // This ensures highlighting works even when grok extracts into the same field it reads from.
-            const value = getSourceFieldDisplayValue(
-              document,
-              columnId,
-              validGrokField,
-              originalGrokFieldValues
-            );
-
-            if (typeof value === 'string') {
-              return <GrokSampleWithContext sample={value} />;
-            }
-            return <>&nbsp;</>;
-          }
-        : undefined,
-    [grokMode, originalGrokFieldValues, validGrokField]
-  );
+  const renderCellValue = useMemo(() => {
+    if (grokMode && validGrokField) {
+      return (document: SampleDocument, columnId: string) => {
+        const value = getSourceFieldDisplayValue(
+          document,
+          columnId,
+          validGrokField,
+          originalGrokFieldValues
+        );
+        if (typeof value === 'string') {
+          return <GrokSampleWithContext sample={value} />;
+        }
+        return <>&nbsp;</>;
+      };
+    }
+    if (dissectMode && validDissectField) {
+      return (document: SampleDocument, columnId: string) => {
+        const value = getSourceFieldDisplayValue(
+          document,
+          columnId,
+          validDissectField,
+          originalDissectFieldValues
+        );
+        if (typeof value === 'string') {
+          return <DissectSampleWithContext sample={value} />;
+        }
+        return <>&nbsp;</>;
+      };
+    }
+    return undefined;
+  }, [
+    grokMode,
+    validGrokField,
+    originalGrokFieldValues,
+    dissectMode,
+    validDissectField,
+    originalDissectFieldValues,
+  ]);
 
   const hits = useMemo(() => {
     return toDataTableRecordWithIndex(previewDocuments);
@@ -692,7 +635,7 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
         <MemoPreviewTable
           documents={previewDocuments}
           displayColumns={displayColumnsForTable}
-          rowHeightsOptions={validGrokField ? staticRowHeightsOptions : undefined}
+          rowHeightsOptions={highlightColumns ? staticRowHeightsOptions : undefined}
           toolbarVisibility
           setVisibleColumns={setVisibleColumns}
           sorting={previewColumnsSorting}
@@ -718,12 +661,13 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     </>
   );
 
-  // Wrap with GrokExpressionsProvider when in grok mode to provide patterns to Sample components
-  return grokMode ? (
-    <GrokExpressionsProvider patterns={grokPatterns}>{content}</GrokExpressionsProvider>
-  ) : (
-    content
-  );
+  if (grokMode) {
+    return <GrokExpressionsProvider patterns={grokPatterns}>{content}</GrokExpressionsProvider>;
+  }
+  if (dissectMode && dissectPattern) {
+    return <DissectColorProvider pattern={dissectPattern}>{content}</DissectColorProvider>;
+  }
+  return content;
 };
 
 const staticRowHeightsOptions: EuiDataGridRowHeightsOptions = { defaultHeight: 'auto' };
