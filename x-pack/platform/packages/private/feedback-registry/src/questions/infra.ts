@@ -30,7 +30,7 @@ export const questions: FeedbackRegistryEntry[] = [
     order: 2,
     placeholder: {
       i18nId: 'xpack.feedbackRegistry.infraUsedTechnologiesPlaceholder',
-      defaultMessage: 'e.g. React, Spring Boot, PostgreSQL, AWS Lambda...',
+      defaultMessage: 'e.g. Linux, Kubernetes, Docker, AWS EC2, GCP...',
     },
     label: {
       i18nId: 'xpack.feedbackRegistry.infraUsedTechnologiesLabel',

@@ -33,7 +33,17 @@ export const APPS_WITHOUT_CATEGORY_PREFIX = [
   'metrics:metrics-explorer',
   'metrics:settings',
   'metrics:assetDetails',
-];
+] as readonly string[];
+
+async function apmLoader() {
+  const m = await import('./questions/apm');
+  return m.questions;
+}
+
+async function infraLoader() {
+  const m = await import('./questions/infra');
+  return m.questions;
+}
 
 const feedbackRegistry: FeedbackRegistry = new Map([
   [DEFAULT_REGISTRY_ID, () => import('./questions/default').then((m) => m.questions)],
@@ -53,21 +63,21 @@ const feedbackRegistry: FeedbackRegistry = new Map([
     'ml:singleMetricViewer',
     () => import('./questions/machine_learning').then((m) => m.singleMetricViewerQuestions),
   ],
-  ['apm', () => import('./questions/apm').then((m) => m.questions)],
-  ['apm:service-groups-list', () => import('./questions/apm').then((m) => m.questions)],
-  ['apm:services', () => import('./questions/apm').then((m) => m.questions)],
-  ['apm:traces', () => import('./questions/apm').then((m) => m.questions)],
-  ['apm:service-map', () => import('./questions/apm').then((m) => m.questions)],
-  ['apm:dependencies', () => import('./questions/apm').then((m) => m.questions)],
-  ['apm:settings', () => import('./questions/apm').then((m) => m.questions)],
-  ['apm:storage-explorer', () => import('./questions/apm').then((m) => m.questions)],
-  ['apm:tutorial', () => import('./questions/apm').then((m) => m.questions)],
-  ['metrics', () => import('./questions/infra').then((m) => m.questions)],
-  ['metrics:inventory', () => import('./questions/infra').then((m) => m.questions)],
-  ['metrics:hosts', () => import('./questions/infra').then((m) => m.questions)],
-  ['metrics:metrics-explorer', () => import('./questions/infra').then((m) => m.questions)],
-  ['metrics:settings', () => import('./questions/infra').then((m) => m.questions)],
-  ['metrics:assetDetails', () => import('./questions/infra').then((m) => m.questions)],
+  ['apm', apmLoader],
+  ['apm:service-groups-list', apmLoader],
+  ['apm:services', apmLoader],
+  ['apm:traces', apmLoader],
+  ['apm:service-map', apmLoader],
+  ['apm:dependencies', apmLoader],
+  ['apm:settings', apmLoader],
+  ['apm:storage-explorer', apmLoader],
+  ['apm:tutorial', apmLoader],
+  ['metrics', infraLoader],
+  ['metrics:inventory', infraLoader],
+  ['metrics:hosts', infraLoader],
+  ['metrics:metrics-explorer', infraLoader],
+  ['metrics:settings', infraLoader],
+  ['metrics:assetDetails', infraLoader],
 ]);
 
 export const getFeedbackQuestionsForApp = async (
