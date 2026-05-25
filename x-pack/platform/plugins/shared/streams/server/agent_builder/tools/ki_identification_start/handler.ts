@@ -6,15 +6,12 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import type { OnboardingStep } from '@kbn/streams-schema';
+import { OnboardingStep } from '@kbn/streams-schema';
 import { getStreamsLocation } from '../../../../common/get_streams_location/get_streams_location';
-import type { TaskClient } from '../../../lib/tasks/task_client';
-import type { StreamsTaskType } from '../../../lib/tasks/task_definitions';
-import {
-  getOnboardingTaskId,
-  STREAMS_ONBOARDING_TASK_TYPE,
-  type OnboardingTaskParams,
-} from '../../../lib/tasks/task_definitions/onboarding';
+import type {
+  OnboardingWorkflowClient,
+  OnboardingWorkflowInputs,
+} from '../../../lib/workflows/onboarding_workflow_client';
 
 const DEFAULT_LOOKBACK_MS = 24 * 60 * 60 * 1000;
 
@@ -25,7 +22,7 @@ interface StartKiIdentificationHandlerParams {
     features?: string;
     queries?: string;
   };
-  taskClient: TaskClient<StreamsTaskType>;
+  onboardingClient: OnboardingWorkflowClient;
   request: KibanaRequest;
 }
 
@@ -37,27 +34,24 @@ export async function startKiIdentificationToolHandler({
   streamName,
   steps,
   connectors,
-  taskClient,
+  onboardingClient,
   request,
 }: StartKiIdentificationHandlerParams): Promise<StartKiIdentificationHandlerResult> {
-  const taskId = getOnboardingTaskId(streamName);
   const now = Date.now();
+  const skipFeatures = !steps.includes(OnboardingStep.FeaturesIdentification);
+  const skipQueries = !steps.includes(OnboardingStep.QueriesGeneration);
 
-  await taskClient.schedule<OnboardingTaskParams>({
-    task: {
-      type: STREAMS_ONBOARDING_TASK_TYPE,
-      id: taskId,
-      space: '*',
-    },
-    params: {
-      streamName,
-      from: now - DEFAULT_LOOKBACK_MS,
-      to: now,
-      steps,
-      connectors,
-    },
-    request,
-  });
+  const inputs: OnboardingWorkflowInputs = {
+    streamName,
+    skipFeatures,
+    skipQueries,
+    featuresStart: now - DEFAULT_LOOKBACK_MS,
+    featuresEnd: now,
+    ...(connectors?.features && { featuresConnectorId: connectors.features }),
+    ...(connectors?.queries && { queriesConnectorId: connectors.queries }),
+  };
+
+  await onboardingClient.run({ inputs, request });
 
   const location = getStreamsLocation({
     name: streamName,

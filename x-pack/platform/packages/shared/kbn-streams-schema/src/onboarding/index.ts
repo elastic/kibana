@@ -5,16 +5,37 @@
  * 2.0.
  */
 
-import type { IdentifyFeaturesResult } from '../api/features';
-import type { SignificantEventsQueriesGenerationResult } from '../api/significant_events';
-import type { TaskResult } from '../tasks/types';
-
 export interface OnboardingResult {
-  featuresTaskResult?: TaskResult<IdentifyFeaturesResult>;
-  queriesTaskResult?: TaskResult<SignificantEventsQueriesGenerationResult>;
+  featuresSkipped: boolean;
+  discoveredFeaturesCount: number;
+  featuresConnectorUsed: string;
+  queriesSkipped: boolean;
+  persistedQueriesCount: number;
+  queriesConnectorUsed: string;
 }
 
 export enum OnboardingStep {
   FeaturesIdentification = 'features_identification',
   QueriesGeneration = 'queries_generation',
 }
+
+export enum OnboardingStatus {
+  NotStarted = 'not_started',
+  InProgress = 'in_progress',
+  /** Client-only optimistic state; the server never returns this value. */
+  BeingCanceled = 'being_canceled',
+  Canceled = 'canceled',
+  Failed = 'failed',
+  Completed = 'completed',
+}
+
+export type OnboardingStatusResult =
+  | {
+      status:
+        | OnboardingStatus.NotStarted
+        | OnboardingStatus.InProgress
+        | OnboardingStatus.BeingCanceled
+        | OnboardingStatus.Canceled;
+    }
+  | ({ status: OnboardingStatus.Failed; error: string } & Partial<OnboardingResult>)
+  | ({ status: OnboardingStatus.Completed } & OnboardingResult);

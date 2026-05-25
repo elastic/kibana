@@ -10,7 +10,11 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSearchBar, EuiText } from '@el
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { STREAMS_SIG_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID, TaskStatus } from '@kbn/streams-schema';
+import {
+  STREAMS_SIG_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
+  TaskStatus,
+  OnboardingStatus,
+} from '@kbn/streams-schema';
 import React, { useCallback, useEffect, useState } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import type { TableRow } from './utils';
@@ -34,7 +38,10 @@ import {
 } from './translations';
 import { StreamsTreeTable } from './tree_table';
 
-const IN_PROGRESS_STATUSES = new Set<TaskStatus>([TaskStatus.InProgress, TaskStatus.BeingCanceled]);
+const IN_PROGRESS_STATUSES = new Set<OnboardingStatus>([
+  OnboardingStatus.InProgress,
+  OnboardingStatus.BeingCanceled,
+]);
 
 const datePickerStyle = css`
   .euiFormControlLayout,
@@ -64,8 +71,8 @@ export function StreamsView() {
     queriesConnectors,
     generatingStreamNames,
     streamStatusMap,
-    cancelOnboardingTask,
-    bulkScheduleOnboardingTask,
+    cancelOnboarding,
+    bulkScheduleOnboarding,
     bulkOnboardAll,
     bulkOnboardFeaturesOnly,
     bulkOnboardQueriesOnly,
@@ -206,11 +213,11 @@ export function StreamsView() {
   }, [getActionableStreamNames, bulkOnboardQueriesOnly]);
 
   const onOnboardStreamActionClick = async (streamName: string) => {
-    await bulkScheduleOnboardingTask([streamName]);
+    await bulkScheduleOnboarding([streamName]);
   };
 
   const onStopOnboardingActionClick = (streamName: string) => {
-    cancelOnboardingTask(streamName);
+    cancelOnboarding(streamName);
   };
 
   return (

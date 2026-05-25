@@ -5,13 +5,26 @@
  * 2.0.
  */
 
+/**
+ * @deprecated Onboarding is now handled via the onboarding workflow (streams_ki/onboarding.yaml).
+ * This task definition is kept for reference and will be removed in a follow-up.
+ */
+
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type {
   IdentifyFeaturesResult,
-  OnboardingResult,
   SignificantEventsQueriesGenerationResult,
   TaskResult,
 } from '@kbn/streams-schema';
+
+/**
+ * @deprecated Legacy onboarding result shape used by the task-based implementation.
+ * The new workflow-based implementation uses the flat OnboardingResult from @kbn/streams-schema.
+ */
+interface LegacyOnboardingResult {
+  featuresTaskResult?: TaskResult<IdentifyFeaturesResult>;
+  queriesTaskResult?: TaskResult<SignificantEventsQueriesGenerationResult>;
+}
 import { OnboardingStep, TaskStatus } from '@kbn/streams-schema';
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
@@ -164,7 +177,7 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                   }
                 }
 
-                await taskClient.complete<OnboardingTaskParams, OnboardingResult>(
+                await taskClient.complete<OnboardingTaskParams, LegacyOnboardingResult>(
                   _task,
                   {
                     streamName,

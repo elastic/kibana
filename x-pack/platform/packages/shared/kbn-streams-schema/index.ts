@@ -305,8 +305,8 @@ export {
   sigEventSchema,
   type SigEvent,
 } from './src/sig_events';
-export type { OnboardingResult } from './src/onboarding';
-export { OnboardingStep } from './src/onboarding';
+export type { OnboardingResult, OnboardingStatusResult } from './src/onboarding';
+export { OnboardingStep, OnboardingStatus } from './src/onboarding';
 export { streamsOasDefinitions } from './src/oas_definitions';
 export type { StreamsOasDefinitions } from './src/oas_definitions';
 

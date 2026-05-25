@@ -5,29 +5,21 @@
  * 2.0.
  */
 
-import type { OnboardingResult } from '@kbn/streams-schema';
-import type { TaskClient } from '../../../lib/tasks/task_client';
-import type { StreamsTaskType } from '../../../lib/tasks/task_definitions';
-import {
-  getOnboardingTaskId,
-  type OnboardingTaskParams,
-} from '../../../lib/tasks/task_definitions/onboarding';
+import type { OnboardingWorkflowClient } from '../../../lib/workflows/onboarding_workflow_client';
 
 interface GetKiIdentificationStatusHandlerParams {
   streamName: string;
-  taskClient: TaskClient<StreamsTaskType>;
+  onboardingClient: OnboardingWorkflowClient;
 }
 
 export async function getKiIdentificationStatusToolHandler({
   streamName,
-  taskClient,
+  onboardingClient,
 }: GetKiIdentificationStatusHandlerParams) {
-  const taskId = getOnboardingTaskId(streamName);
-  const status = await taskClient.getStatus<OnboardingTaskParams, OnboardingResult>(taskId);
+  const statusResult = await onboardingClient.getStatus({ streamName });
 
   return {
     stream_name: streamName,
-    task_id: taskId,
-    ...status,
+    ...statusResult,
   };
 }

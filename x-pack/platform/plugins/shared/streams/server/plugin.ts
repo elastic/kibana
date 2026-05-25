@@ -91,6 +91,7 @@ import {
   createContinuousKiExtractionWorkflowService,
   type ContinuousKiExtractionWorkflowService,
 } from './lib/workflows/continuous_extraction_workflow';
+import { OnboardingWorkflowClient } from './lib/workflows/onboarding_workflow_client';
 
 const STREAMS_MANAGED_WORKFLOW_OWNER = 'streams';
 
@@ -322,6 +323,10 @@ export class StreamsPlugin
 
     const telemetryClient = this.ebtTelemetryService.getClient();
 
+    const onboardingClient = plugins.workflowsManagement
+      ? new OnboardingWorkflowClient({ managementApi: plugins.workflowsManagement.management })
+      : undefined;
+
     if (plugins.agentBuilder) {
       registerStreamsAgentBuilder({
         agentBuilder: plugins.agentBuilder,
@@ -329,6 +334,7 @@ export class StreamsPlugin
         server: this.server,
         logger: this.logger,
         telemetry: telemetryClient,
+        onboardingClient,
         isMemoryEnabled: async () => {
           try {
             const [coreStart] = await core.getStartServices();
@@ -350,11 +356,12 @@ export class StreamsPlugin
 
     let continuousKiExtractionWorkflowService: ContinuousKiExtractionWorkflowService | undefined;
 
-    if (plugins.workflowsManagement) {
-      continuousKiExtractionWorkflowService = createContinuousKiExtractionWorkflowService(
-        this.logger,
-        plugins.workflowsManagement.management
-      );
+    if (plugins.workflowsManagement && onboardingClient) {
+      continuousKiExtractionWorkflowService = createContinuousKiExtractionWorkflowService({
+        logger: this.logger,
+        managementApi: plugins.workflowsManagement.management,
+        onboardingClient,
+      });
     }
 
     plugins.workflowsExtensions?.registerManagedWorkflowOwner(STREAMS_MANAGED_WORKFLOW_OWNER);
@@ -434,6 +441,7 @@ export class StreamsPlugin
         patternExtractionService: this.patternExtractionService,
         getScopedClients,
         continuousKiExtractionWorkflowService,
+        onboardingClient,
       },
       core,
       logger: this.logger,

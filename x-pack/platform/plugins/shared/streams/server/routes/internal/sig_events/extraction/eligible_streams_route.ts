@@ -19,10 +19,6 @@ import {
   DEFAULT_EXTRACTION_INTERVAL_HOURS,
   MAX_SCHEDULED_STREAMS,
 } from '../../../../../common/constants';
-import {
-  type FeaturesIdentificationTaskParams,
-  FEATURES_IDENTIFICATION_TASK_TYPE,
-} from '../../../../lib/tasks/task_definitions/features_identification';
 import { StatusError } from '../../../../lib/streams/errors/status_error';
 import {
   classifyStreams,
@@ -71,7 +67,7 @@ const eligibleStreamsRoute = createServerRoute({
     access: 'internal',
     summary: 'List streams eligible for KI extraction',
     description:
-      'Classifies streams into eligible candidates, already-running, up-to-date, and excluded buckets based on extraction settings and task state.',
+      'Classifies streams into eligible candidates, already-running, up-to-date, and excluded buckets based on extraction settings and workflow execution state.',
   },
   security: {
     authz: {
@@ -93,8 +89,13 @@ const eligibleStreamsRoute = createServerRoute({
     request,
     getScopedClients,
     server,
+    onboardingClient,
   }): Promise<EligibleStreamsResponse> => {
-    const { streamsClient, taskClient, globalUiSettingsClient, uiSettingsClient, licensing } =
+    if (!onboardingClient) {
+      throw new Error('Workflows management is not available');
+    }
+
+    const { streamsClient, globalUiSettingsClient, uiSettingsClient, licensing } =
       await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
@@ -121,24 +122,14 @@ const eligibleStreamsRoute = createServerRoute({
     const maxStreams = query.maxScheduledStreams ?? MAX_SCHEDULED_STREAMS;
     const lookbackHours = query.lookbackHours ?? DEFAULT_LOOKBACK_HOURS;
 
-    const [connectorId, sortedTasks, allStreams] = await Promise.all([
+    const [connectorId, executions, allStreams] = await Promise.all([
       resolveConnectorForFeature({
         searchInferenceEndpoints: server.searchInferenceEndpoints,
         featureId: STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
         featureName: 'knowledge indicator extraction',
         request,
       }),
-      taskClient.findByType<FeaturesIdentificationTaskParams>(FEATURES_IDENTIFICATION_TASK_TYPE, {
-        sort: [
-          {
-            last_completed_at: {
-              order: 'asc',
-              missing: '_first',
-              unmapped_type: 'date',
-            },
-          },
-        ],
-      }),
+      onboardingClient.getRecentExecutions(),
       streamsClient.listStreams(),
     ]);
 
@@ -149,7 +140,7 @@ const eligibleStreamsRoute = createServerRoute({
 
     const { alreadyRunning, candidates, upToDate, excluded, unsupported } = classifyStreams({
       allStreams,
-      sortedTasks,
+      executions,
       excludedStreamPatterns: resolvedExcludedPatterns,
       intervalHours,
     });

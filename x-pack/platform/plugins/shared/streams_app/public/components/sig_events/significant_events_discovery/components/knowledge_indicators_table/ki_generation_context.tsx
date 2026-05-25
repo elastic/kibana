@@ -6,12 +6,12 @@
  */
 
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
-import type { OnboardingResult, TaskResult } from '@kbn/streams-schema';
 import {
   OnboardingStep,
+  OnboardingStatus,
+  type OnboardingStatusResult,
   STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
   STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
-  TaskStatus,
 } from '@kbn/streams-schema';
 import React, {
   createContext,
@@ -29,7 +29,10 @@ import { useBulkOnboarding } from '../../hooks/use_bulk_onboarding';
 import { useFetchStreams } from '../../hooks/use_fetch_streams';
 import type { OnboardingConfig } from '../shared/types';
 
-const IN_PROGRESS_STATUSES = new Set<TaskStatus>([TaskStatus.InProgress, TaskStatus.BeingCanceled]);
+const IN_PROGRESS_STATUSES = new Set<OnboardingStatus>([
+  OnboardingStatus.InProgress,
+  OnboardingStatus.BeingCanceled,
+]);
 
 interface ConnectorState {
   resolvedConnectorId: string | undefined;
@@ -43,7 +46,7 @@ interface KiGenerationContextValue {
   generatingStreamNames: string[];
   isGenerating: boolean;
   isScheduling: boolean;
-  streamStatusMap: Record<string, TaskResult<OnboardingResult>>;
+  streamStatusMap: Record<string, OnboardingStatusResult>;
   onboardingConfig: OnboardingConfig;
   setOnboardingConfig: (config: OnboardingConfig) => void;
   featuresConnectors: ConnectorState;
@@ -51,30 +54,30 @@ interface KiGenerationContextValue {
   bulkOnboardAll: (streamNames: string[]) => Promise<string[]>;
   bulkOnboardFeaturesOnly: (streamNames: string[]) => Promise<string[]>;
   bulkOnboardQueriesOnly: (streamNames: string[]) => Promise<string[]>;
-  bulkScheduleOnboardingTask: (
+  bulkScheduleOnboarding: (
     streamNames: string[],
     options?: ScheduleOnboardingOptions
   ) => Promise<string[]>;
-  cancelOnboardingTask: (streamName: string) => Promise<void>;
+  cancelOnboarding: (streamName: string) => Promise<void>;
 }
 
 const KiGenerationReactContext = createContext<KiGenerationContextValue | null>(null);
 
 interface KiGenerationProviderProps {
   children: React.ReactNode;
-  onTaskCompleted?: () => void;
-  onTaskFailed?: (error: string) => void;
+  onCompleted?: () => void;
+  onFailed?: (error: string) => void;
 }
 
 export function KiGenerationProvider({
   children,
-  onTaskCompleted,
-  onTaskFailed,
+  onCompleted,
+  onFailed,
 }: KiGenerationProviderProps) {
   const [generatingStreams, setGeneratingStreams] = useState<Set<string>>(new Set());
-  const [streamStatusMap, setStreamStatusMap] = useState<
-    Record<string, TaskResult<OnboardingResult>>
-  >({});
+  const [streamStatusMap, setStreamStatusMap] = useState<Record<string, OnboardingStatusResult>>(
+    {}
+  );
   const initialStatusFetchDoneRef = useRef(false);
   // Dedup guard: filteredStreams gets a new array reference on every render
   // (due to the select transform), which re-fires the status-fetch effect.
@@ -121,10 +124,10 @@ export function KiGenerationProvider({
   // forwarding is gated on the initial-fetch flag so initial-load updates
   // don't trigger consumer side effects (like error toasts).
   const onStreamStatusUpdate = useCallback(
-    (streamName: string, taskResult: TaskResult<OnboardingResult>) => {
-      setStreamStatusMap((current) => ({ ...current, [streamName]: taskResult }));
+    (streamName: string, statusResult: OnboardingStatusResult) => {
+      setStreamStatusMap((current) => ({ ...current, [streamName]: statusResult }));
 
-      const isInProgress = IN_PROGRESS_STATUSES.has(taskResult.status);
+      const isInProgress = IN_PROGRESS_STATUSES.has(statusResult.status);
 
       setGeneratingStreams((current) => {
         const has = current.has(streamName);
@@ -139,15 +142,15 @@ export function KiGenerationProvider({
       });
 
       if (initialStatusFetchDoneRef.current) {
-        if (taskResult.status === TaskStatus.Failed) {
-          onTaskFailed?.(taskResult.error ?? 'Unknown error');
+        if (statusResult.status === OnboardingStatus.Failed) {
+          onFailed?.(statusResult.error ?? 'Unknown error');
         }
-        if (taskResult.status === TaskStatus.Completed) {
-          onTaskCompleted?.();
+        if (statusResult.status === OnboardingStatus.Completed) {
+          onCompleted?.();
         }
       }
     },
-    [onTaskCompleted, onTaskFailed]
+    [onCompleted, onFailed]
   );
 
   const bulkOnboarding = useBulkOnboarding({ onboardingConfig, onStreamStatusUpdate });
@@ -157,7 +160,7 @@ export function KiGenerationProvider({
     bulkOnboardAll: rawBulkOnboardAll,
     bulkOnboardFeaturesOnly: rawBulkOnboardFeaturesOnly,
     bulkOnboardQueriesOnly: rawBulkOnboardQueriesOnly,
-    bulkScheduleOnboardingTask: rawBulkScheduleOnboardingTask,
+    bulkScheduleOnboarding: rawBulkScheduleOnboarding,
   } = bulkOnboarding;
 
   useEffect(() => {
@@ -224,16 +227,16 @@ export function KiGenerationProvider({
     () => withGeneratingTracking(rawBulkOnboardQueriesOnly),
     [withGeneratingTracking, rawBulkOnboardQueriesOnly]
   );
-  const bulkScheduleOnboardingTask = useCallback(
+  const bulkScheduleOnboarding = useCallback(
     (streamNames: string[], options?: ScheduleOnboardingOptions) =>
-      withGeneratingTracking((names) => rawBulkScheduleOnboardingTask(names, options))(streamNames),
-    [withGeneratingTracking, rawBulkScheduleOnboardingTask]
+      withGeneratingTracking((names) => rawBulkScheduleOnboarding(names, options))(streamNames),
+    [withGeneratingTracking, rawBulkScheduleOnboarding]
   );
 
   const value = useMemo<KiGenerationContextValue>(
     () => ({
       isScheduling: bulkOnboarding.isScheduling,
-      cancelOnboardingTask: bulkOnboarding.cancelOnboardingTask,
+      cancelOnboarding: bulkOnboarding.cancelOnboarding,
       filteredStreams,
       isStreamsLoading,
       isInitialGenerationStatusLoading,
@@ -247,11 +250,11 @@ export function KiGenerationProvider({
       bulkOnboardAll,
       bulkOnboardFeaturesOnly,
       bulkOnboardQueriesOnly,
-      bulkScheduleOnboardingTask,
+      bulkScheduleOnboarding,
     }),
     [
       bulkOnboarding.isScheduling,
-      bulkOnboarding.cancelOnboardingTask,
+      bulkOnboarding.cancelOnboarding,
       filteredStreams,
       isStreamsLoading,
       isInitialGenerationStatusLoading,
@@ -265,7 +268,7 @@ export function KiGenerationProvider({
       bulkOnboardAll,
       bulkOnboardFeaturesOnly,
       bulkOnboardQueriesOnly,
-      bulkScheduleOnboardingTask,
+      bulkScheduleOnboarding,
     ]
   );
 
