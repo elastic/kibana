@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { act, renderHook } from '@testing-library/react';
+import { act, renderHook, type RenderHookResult } from '@testing-library/react';
 import { ExecutionStatus, TerminalExecutionStatuses } from '@kbn/workflows';
 import type { WorkflowExecutionDto, WorkflowYaml } from '@kbn/workflows';
-import { PollingIntervalMs, useWorkflowExecutionPolling } from './use_workflow_execution_polling';
+import { type PollingState, useWorkflowExecutionPolling } from './use_workflow_execution_polling';
+import { WORKFLOW_EXECUTION_POLL_INTERVAL_MS } from '../../../hooks/polling_constants';
 import { useAsyncThunkState } from '../../../hooks/use_async_thunk';
 
 jest.mock('../../../hooks/use_async_thunk');
@@ -19,7 +20,7 @@ const mockUseAsyncThunkState = useAsyncThunkState as jest.MockedFunction<typeof 
 describe('useWorkflowExecutionPolling', () => {
   const mockWorkflowExecutionId = 'test-execution-id';
   let mockLoadExecution: jest.Mock;
-  let hookResult: ReturnType<typeof renderHook> | null;
+  let hookResult: RenderHookResult<PollingState, { id: string }> | null;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -67,7 +68,7 @@ describe('useWorkflowExecutionPolling', () => {
     workflowDefinition: createMockWorkflowDefinition(),
     stepId: undefined,
     stepExecutions: [],
-    duration: PollingIntervalMs * 2,
+    duration: WORKFLOW_EXECUTION_POLL_INTERVAL_MS * 2,
     triggeredBy: 'manual',
     yaml: 'version: "1"\\nname: test-workflow\\nenabled: true\\ntriggers:\\n  - type: manual\\nsteps:\\n  - name: test-step\\n    type: console.log\\n    with:\\n      message: Hello World',
   });
@@ -109,7 +110,7 @@ describe('useWorkflowExecutionPolling', () => {
 
   const advancePollInterval = async () => {
     await act(async () => {
-      jest.advanceTimersByTime(PollingIntervalMs);
+      jest.advanceTimersByTime(WORKFLOW_EXECUTION_POLL_INTERVAL_MS);
       await Promise.resolve();
     });
   };
@@ -202,7 +203,7 @@ describe('useWorkflowExecutionPolling', () => {
         mockLoadExecution.mockClear();
 
         await act(async () => {
-          jest.advanceTimersByTime(PollingIntervalMs * 4);
+          jest.advanceTimersByTime(WORKFLOW_EXECUTION_POLL_INTERVAL_MS * 4);
           await Promise.resolve();
         });
         expect(mockLoadExecution).not.toHaveBeenCalled();
@@ -219,7 +220,7 @@ describe('useWorkflowExecutionPolling', () => {
         mockLoadExecution.mockClear();
 
         await act(async () => {
-          jest.advanceTimersByTime(PollingIntervalMs * 4);
+          jest.advanceTimersByTime(WORKFLOW_EXECUTION_POLL_INTERVAL_MS * 4);
           await Promise.resolve();
         });
         expect(mockLoadExecution).not.toHaveBeenCalled();
@@ -247,7 +248,7 @@ describe('useWorkflowExecutionPolling', () => {
     mockLoadExecution.mockClear();
 
     await act(async () => {
-      jest.advanceTimersByTime(PollingIntervalMs * 4);
+      jest.advanceTimersByTime(WORKFLOW_EXECUTION_POLL_INTERVAL_MS * 4);
       await Promise.resolve();
     });
     expect(mockLoadExecution).not.toHaveBeenCalled();
@@ -286,7 +287,7 @@ describe('useWorkflowExecutionPolling', () => {
     mockLoadExecution.mockClear();
 
     await act(async () => {
-      jest.advanceTimersByTime(PollingIntervalMs * 4);
+      jest.advanceTimersByTime(WORKFLOW_EXECUTION_POLL_INTERVAL_MS * 4);
       await Promise.resolve();
     });
     expect(mockLoadExecution).not.toHaveBeenCalled();

@@ -15,10 +15,7 @@ import { useAsyncThunkState } from '../../../hooks/use_async_thunk';
 import { useSerialPolling } from '../../../hooks/use_serial_polling';
 import { loadExecutionThunk } from '../store/workflow_detail/thunks/load_execution_thunk';
 
-/** @deprecated Use WORKFLOW_EXECUTION_POLL_INTERVAL_MS */
-export const PollingIntervalMs = WORKFLOW_EXECUTION_POLL_INTERVAL_MS;
-
-interface PollingState {
+export interface PollingState {
   workflowExecution: WorkflowExecutionDto | undefined;
   isLoading: boolean;
   error: Error | null;
