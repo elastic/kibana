@@ -17,7 +17,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { ExecutionStatus, WorkflowRepository } from '@kbn/workflows';
+import { ExecutionStatus, pickManagedWorkflowFields, WorkflowRepository } from '@kbn/workflows';
 import type {
   BulkScheduleWorkflowResult,
   ConcurrencySettings,
@@ -78,7 +78,10 @@ import {
   WORKFLOW_RUN_TASK_TYPE,
   WORKFLOW_SCHEDULED_TASK_TYPE,
 } from './workflow_task_manager/types';
-import { WorkflowTaskManager } from './workflow_task_manager/workflow_task_manager';
+import {
+  getWorkflowGlobalTimeoutResumeTaskId,
+  WorkflowTaskManager,
+} from './workflow_task_manager/workflow_task_manager';
 import { createWorkflowTaskAbortController } from './workflow_task_shutdown';
 import { createIndexes } from '../common';
 
@@ -515,7 +518,7 @@ export class WorkflowsExecutionEnginePlugin
                 id: generateUuid(),
                 spaceId,
                 workflowId: workflow.id,
-                ...this.buildManagedWorkflowExecutionMetadata(workflow),
+                ...pickManagedWorkflowFields(workflow),
                 isTestRun: false,
                 workflowDefinition: workflow.definition,
                 yaml: workflow.yaml,
@@ -683,7 +686,7 @@ export class WorkflowsExecutionEnginePlugin
         id: generateUuid(),
         spaceId,
         workflowId: workflow.id,
-        ...this.buildManagedWorkflowExecutionMetadata(workflow),
+        ...pickManagedWorkflowFields(workflow),
         isTestRun: workflow.isTestRun,
         workflowDefinition: workflow.definition,
         yaml: workflow.yaml,
@@ -1102,7 +1105,7 @@ export class WorkflowsExecutionEnginePlugin
         spaceId: workflow.spaceId,
         stepId,
         workflowId: workflow.id,
-        ...this.buildManagedWorkflowExecutionMetadata(workflow),
+        ...pickManagedWorkflowFields(workflow),
         isTestRun: workflow.isTestRun,
         workflowDefinition: workflow.definition,
         yaml: workflow.yaml,
@@ -1278,6 +1281,16 @@ export class WorkflowsExecutionEnginePlugin
         fakeRequest: request,
       });
 
+      await plugins.taskManager
+        .removeIfExists(getWorkflowGlobalTimeoutResumeTaskId(executionId))
+        .catch((error: unknown) => {
+          this.logger.warn(
+            `Failed to remove idle-timeout resume task (execution=${executionId}): ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
+        });
+
       // Same idea as cancel: nudge TM so the resume task runs as soon as possible
       await workflowTaskManager.forceRunIdleTasks(executionId);
     };
@@ -1383,31 +1396,6 @@ export class WorkflowsExecutionEnginePlugin
       concurrencySettings,
       buildWorkflowContext(normalizedWorkflowExecution, coreStart, dependencies)
     );
-  }
-
-  private buildManagedWorkflowExecutionMetadata(
-    workflow: Pick<
-      WorkflowExecutionEngineModel,
-      'managed' | 'managedBy' | 'originManagedWorkflowId'
-    >
-  ): Partial<Pick<EsWorkflowExecution, 'managed' | 'managedBy' | 'originManagedWorkflowId'>> {
-    const managedMetadata: Partial<
-      Pick<EsWorkflowExecution, 'managed' | 'managedBy' | 'originManagedWorkflowId'>
-    > = {};
-
-    if (workflow.managed === true) {
-      managedMetadata.managed = true;
-    }
-
-    if (typeof workflow.managedBy === 'string') {
-      managedMetadata.managedBy = workflow.managedBy;
-    }
-
-    if (typeof workflow.originManagedWorkflowId === 'string') {
-      managedMetadata.originManagedWorkflowId = workflow.originManagedWorkflowId;
-    }
-
-    return managedMetadata;
   }
 
   /**
