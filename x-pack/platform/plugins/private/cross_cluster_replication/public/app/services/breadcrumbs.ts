@@ -25,7 +25,7 @@ export const setBreadcrumbs = (crumbs: ChromeBreadcrumb[]): void => {
   }
   const newCrumbs = [...crumbs];
   // Pop off last breadcrumb
-  const lastBreadcrumb = newCrumbs.pop() as ChromeBreadcrumb;
+  const lastBreadcrumb = newCrumbs.pop()!;
   // Put last breadcrumb back without href so it's not clickable
   newCrumbs.push({
     ...lastBreadcrumb,
