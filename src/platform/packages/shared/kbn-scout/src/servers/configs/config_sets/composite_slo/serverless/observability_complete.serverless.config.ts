@@ -16,7 +16,7 @@ export const servers: ScoutServerConfig = {
     ...obltServerlessConfig.kbnTestServer,
     serverArgs: [
       ...obltServerlessConfig.kbnTestServer.serverArgs,
-      '--xpack.slo.experimental.compositeSlo.enabled=true',
+      '--feature_flags.overrides.slo.compositeSloEnabled=true',
     ],
   },
 };
