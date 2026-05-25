@@ -13,9 +13,9 @@ For information about how to debug unit tests, refer to [Debugging Unit Tests](/
 
 ## Instrumenting with OTel Traces [_instrumenting_with_otel_traces]
 
-{{kib}} instruments OpenTelemetry traces, metrics, and logs built-in for debugging and observabiilty purposes.
+{{kib}} has built-in OpenTelemetry instrumentation for debugging and observability. The following sections cover tracing configuration.
 
-To enable OTel traces, apply the following configuration
+To enable OTel traces, apply the following configuration:
 
 ```yaml
 telemetry.tracing:
@@ -30,7 +30,7 @@ telemetry.tracing:
 
 The OTLP endpoint can be any OTel/EDOT collector. It is recommended to use the mOTLP (Managed OTLP) endpoint that is provided by Elastic Cloud. The instructions to retrieve the OTLP endpoint and the API Key are available in [Get started with traces and APM](https://www.elastic.co/docs/solutions/observability/apm/get-started).
 
-### Supported exporters protocols
+### Supported exporter protocols
 
 {{kib}} supports gRPC, protobuf and plain HTTP protocols to export the OTel Traces. The protocol to use is specified in the config via top property name in the exporter's declaration. The config syntax is the same for all.
 
@@ -60,7 +60,7 @@ When using the mOTLP endpoint, the port is the same, but the endpoint changes:
 
 - gRPC uses the root path (https://my-ech-deployment.ingest.europe-west1.gcp.elastic-cloud.com:443)
 - Protobuf and HTTP use the path `/v1/traces` (https://my-ech-deployment.ingest.europe-west1.gcp.elastic-cloud.com:443/v1/traces)
-  :::::
+:::::
 
 ### Enable OTel Traces on the server + Elastic RUM on the browser in {{kib}}
 
@@ -70,18 +70,22 @@ OTel instrumentation is only available on the server side. For RUM observability
 OTel instrumentation in the browser will be available in the future, once the [OTel for RUM](https://www.elastic.co/docs/solutions/observability/applications/otel-rum) is ready for production.
 :::::
 
-To enable Elastic RUM alongside the OTel instrumentation, define the APM Server's URL in the Kibana config. [Any settings accepted by the agent](https://www.elastic.co/docs/reference/apm/agents/rum-js/configuration) are also accepted.
+When `telemetry.tracing.enabled` is `true`, server-side Elastic APM is disabled by default, but the `kibana-frontend` (RUM) service remains active. Elastic APM and OpenTelemetry tracing cannot be enabled simultaneously; setting `elastic.apm.active: true` while OTel tracing is enabled causes Kibana to fail on startup. You can still collect browser traces with Elastic RUM.
+
+To enable Elastic RUM alongside OTel tracing, define the APM Server's URL in the Kibana config. [Any settings accepted by the agent](https://www.elastic.co/docs/reference/apm/agents/rum-js/configuration) are also accepted:
 
 ```yaml
-elastic.apm:
-  serverUrl: https://my-ech-deployment.apm.europe-west1.gcp.cloud.es.io:443
-  # Below are optional
-  environment: localhost
-  transactionSampleRate: 1
+elastic:
+  apm:
+    serverUrl: https://my-ech-deployment.apm.europe-west1.gcp.cloud.es.io:443
+    # RUM is enabled by default when telemetry.tracing.enabled is true; serverUrl is required to send data to your deployment.
+    # Below are optional
+    environment: localhost
+    transactionSampleRate: 1
 ```
 
 :::::{tip}
-RUM is only supported in ECH. Serverless APM endpoint won't accept RUM traces because the Serverless endpoint requires authentication, and RUM traces are reported without any authentication.
+RUM sends traces from the browser without embedded credentials. Prefer an Elastic Cloud Hosted (ECH) APM endpoint configured for RUM intake. Serverless APM endpoints often require authenticated intake and are usually not suitable for RUM unless your deployment explicitly supports unauthenticated browser intake.
 :::::
 
 ## Instrumenting with Elastic APM [_instrumenting_with_elastic_apm]
@@ -94,7 +98,7 @@ This approach is deprecated. Use [OTel Traces](#_instrumenting_with_otel_traces)
 
 With an application as varied and complex as Kibana has become, it’s not practical or scalable to craft all possible performance measurements by hand ahead of time. As such, we need to rely on tooling to help us catch things we might otherwise have missed.
 
-For example, say you implement a brand new feature, plugin or service but don’t quite know how it will impact Kibana’s performance as a whole. APM allows us to not only spot that something is slow, but also hints at why it might be performing slowly. For example, if a function is slow on specific types of inputs, we can see where the time is spent by viewing the trace for that function call in the APM UI.
+For example, say you implement a brand new feature, plugin or service but do not know how it will impact Kibana’s performance as a whole. APM allows us to not only spot that something is slow, but also hints at why it might be performing slowly. For example, if a function is slow on specific types of inputs, we can see where the time is spent by viewing the trace for that function call in the APM UI.
 
 ![apm example trace](images/apm_example_trace.png)
 

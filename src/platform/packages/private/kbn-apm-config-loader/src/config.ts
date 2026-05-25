@@ -67,10 +67,12 @@ interface KibanaRawConfig {
   };
 }
 
+type ApmBaseConfiguration = AgentConfigOptions & {
+  servicesOverrides?: Record<string, AgentConfigOptions>;
+};
+
 export class ApmConfiguration {
-  private baseConfig?: AgentConfigOptions & {
-    servicesOverrides?: Record<string, AgentConfigOptions>;
-  };
+  private baseConfig?: ApmBaseConfiguration;
   private kibanaVersion: string;
   private pkgBuild: Record<string, any>;
 
@@ -103,7 +105,8 @@ export class ApmConfiguration {
       baseConfig = merge({}, baseConfig, serviceOverride);
     }
 
-    return baseConfig;
+    const { servicesOverrides: _servicesOverrides, ...resolvedConfig } = baseConfig;
+    return resolvedConfig;
   }
 
   public getTelemetryConfig(): TelemetryConfig {
@@ -167,11 +170,11 @@ export class ApmConfiguration {
 
   /**
    * Retrieve the default Elastic APM config derived from the OTel config.
+   * Only applies when `telemetry.tracing.enabled` is true; otherwise returns an empty object.
+   *
    * @returns The default Elastic APM config derived from the OTel config.
    */
-  private getElasticAPMConfigDerivedFromOTelConfig(): AgentConfigOptions & {
-    servicesOverrides?: Record<string, AgentConfigOptions>;
-  } {
+  private getElasticAPMConfigDerivedFromOTelConfig(): ApmBaseConfiguration {
     const telemetryConfig = this.getTelemetryConfig();
     if (telemetryConfig.tracing.enabled) {
       // We want to disable Elastic APM if OTel tracing is enabled.
