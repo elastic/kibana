@@ -10,6 +10,7 @@
 import type { FC } from 'react';
 import React, { memo, useMemo, useState, useCallback, useRef } from 'react';
 import { css } from '@emotion/react';
+import type { UseEuiTheme } from '@elastic/eui';
 import { useEuiTheme } from '@elastic/eui';
 import moment from 'moment';
 import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
@@ -46,6 +47,7 @@ import {
 } from '@kbn/chart-expressions-common';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import type { CoreSetup } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { HeatmapRenderProps, FilterEvent, BrushEvent } from '../../common';
 import {
   applyPaletteParams,
@@ -286,14 +288,20 @@ export function getDateFormatPattern(
   return uiSettings.get('dateFormat');
 }
 
+const computedColumnWarningStyles = {
+  message: ({ euiTheme }: UseEuiTheme) =>
+    css`
+      color: ${euiTheme.colors.textSubdued};
+      font-size: ${euiTheme.size.m};
+      font-weight: ${euiTheme.font.weight.regular};
+    `,
+};
+
 /** Renders the computed-column filter warning inside the chart tooltip footer. */
-const TooltipComputedColumnWarning: React.FC<{ message: string }> = ({ message }) => {
-  const { euiTheme } = useEuiTheme();
+const ComputedColumnWarning: React.FC<{ message: string }> = ({ message }) => {
+  const styles = useMemoCss(computedColumnWarningStyles);
   return (
-    <div
-      css={css({ color: euiTheme.colors.textSubdued, fontSize: euiTheme.size.m })}
-      data-test-subj="heatmapChartComputedColumnWarning"
-    >
+    <div css={styles.message} data-test-subj="heatmapChartComputedColumnWarning">
       {message}
     </div>
   );
@@ -476,7 +484,6 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     const hasTooltipActions = interactive && !isEsqlMode;
 
     // Compute warning message for ES|QL computed columns that cannot be filtered.
-    // Shown in the tooltip footer on every hover (tooltip actions only show when pinned).
     const computedColumnWarningMessage = useMemo(
       () =>
         isEsqlMode
@@ -496,8 +503,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       | 'default'
     >(() => {
       if (!computedColumnWarningMessage) return 'default';
-      const message = computedColumnWarningMessage;
-      return () => <TooltipComputedColumnWarning message={message} />;
+      return () => <ComputedColumnWarning message={computedColumnWarningMessage} />;
     }, [computedColumnWarningMessage]);
 
     const onElementClick = useCallback(

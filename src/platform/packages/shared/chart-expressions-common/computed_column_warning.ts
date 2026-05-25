@@ -10,7 +10,7 @@
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
 
-function getComputedColumnFilterDisabledMessage({
+const getComputedColumnFilterDisabledMessage = ({
   computedColumnNames,
   allColumnsAreComputed,
   panelHasConfiguredDrilldowns,
@@ -18,48 +18,59 @@ function getComputedColumnFilterDisabledMessage({
   computedColumnNames: string[];
   allColumnsAreComputed: boolean;
   panelHasConfiguredDrilldowns: boolean;
-}): string {
-  const hasDrilldowns = String(panelHasConfiguredDrilldowns);
+}) => {
   const count = computedColumnNames.length;
 
   if (allColumnsAreComputed) {
-    return i18n.translate('chartExpressionsCommon.computedColumnFilterDisabledMessage', {
-      defaultMessage:
-        "You can't apply a filter {hasDrilldowns, select, true {or drill down } other {}}{count, plural, one {from this value because it relies on a field} other {from these values because they rely on fields}} created at query time.",
-      values: { hasDrilldowns, count },
-    });
+    return panelHasConfiguredDrilldowns
+      ? i18n.translate('chartExpressionsCommon.computedColumn.filterDrilldownDisabledDescription', {
+          defaultMessage:
+            "You can't apply a filter or drill down {count, plural, one {from this value because it relies on a field} other {from these values because they rely on fields}} created at query time.",
+          values: { count },
+        })
+      : i18n.translate('chartExpressionsCommon.computedColumn.filterDisabledDescription', {
+          defaultMessage:
+            "You can't apply a filter {count, plural, one {from this value because it relies on a field} other {from these values because they rely on fields}} created at query time.",
+          values: { count },
+        });
   }
 
   const names = computedColumnNames.map((n) => `'${n}'`).join(', ');
-  return i18n.translate('chartExpressionsCommon.partialComputedColumnFilterDisabledMessage', {
-    defaultMessage:
-      "You can't apply a filter {hasDrilldowns, select, true {or drill down } other {}}from {names} because {count, plural, one {it relies on a field} other {they rely on fields}} created at query time.",
-    values: { hasDrilldowns, names, count },
-  });
-}
+  return panelHasConfiguredDrilldowns
+    ? i18n.translate(
+        'chartExpressionsCommon.computedColumn.partialFilterDrilldownDisabledDescription',
+        {
+          defaultMessage:
+            "You can't apply a filter or drill down from {names} because {count, plural, one {it relies on a field} other {they rely on fields}} created at query time.",
+          values: { names, count },
+        }
+      )
+    : i18n.translate('chartExpressionsCommon.computedColumn.partialFilterDisabledDescription', {
+        defaultMessage:
+          "You can't apply a filter from {names} because {count, plural, one {it relies on a field} other {they rely on fields}} created at query time.",
+        values: { names, count },
+      });
+};
 
 /**
  * Returns the warning message to show when filterable chart columns are computed ES|QL
  * fields that cannot be used for filtering. Returns `undefined` when there is nothing
  * to warn about.
- *
- * The caller is responsible for:
- *  - Passing only the columns that represent filterable dimensions (x-axis, y-axis,
- *    split accessors, etc.) — not every column in the table.
- *  - Deduplicating columns when the same column ID appears across multiple layers.
- *  - Checking `isEsqlMode` before calling (pass an empty array or skip the call entirely
- *    when not in ES|QL mode).
  */
 export const getComputedColumnWarningForColumns = (
   filterableColumns: Array<DatatableColumn | undefined>,
   panelHasConfiguredDrilldowns: boolean
 ): string | undefined => {
   const defined = filterableColumns.filter((c): c is DatatableColumn => c != null);
-  if (defined.length === 0) return undefined;
+  if (defined.length === 0) {
+    return undefined;
+  }
 
   const computedColumnNames = defined.filter((col) => col.isComputedColumn).map((col) => col.name);
 
-  if (computedColumnNames.length === 0) return undefined;
+  if (computedColumnNames.length === 0) {
+    return undefined;
+  }
 
   const allColumnsAreComputed = computedColumnNames.length === defined.length;
   return getComputedColumnFilterDisabledMessage({

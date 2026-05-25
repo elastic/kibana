@@ -22,6 +22,7 @@ import { mockPaletteOutput } from '../../common/test_utils';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { InvertedRawValueMap, LayerFieldFormats } from '../helpers';
 import type { RawValue } from '@kbn/data-plugin/common';
+import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
 
 const legendCellValueActions: LegendCellValueActions = [
   { id: 'action_1', displayName: 'Action 1', iconType: 'testIcon1', execute: () => {} },
@@ -271,6 +272,7 @@ describe('getLegendAction', function () {
   it('disables filter actions if column has isComputedColumn set to true', () => {
     const tableWithComputedColumn: Datatable = {
       ...table,
+      meta: { type: ESQL_TABLE_TYPE },
       columns: table.columns.map((col) =>
         col.id === 'splitAccessorId' ? { ...col, isComputedColumn: true } : col
       ),
@@ -314,7 +316,7 @@ describe('getLegendAction', function () {
     };
     wrapper = mountWithIntl(<ComponentWithComputedColumn {...newProps} />);
     expect(wrapper.find(EuiPopover).length).toBe(1);
-    expect(wrapper.find(LegendActionPopover).prop('filterActionsDisabled')).toBe(true);
+    expect(wrapper.find(LegendActionPopover).prop('hasComputedColumn')).toBe(true);
   });
 
   it('is rendered if column has isComputedColumn set to false', () => {

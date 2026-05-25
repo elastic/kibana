@@ -24,11 +24,11 @@ const getEsqlComputedColumnFilterDisabledMessage = (
   panelHasConfiguredDrilldowns: boolean = false
 ) => {
   return panelHasConfiguredDrilldowns
-    ? i18n.translate('expressionXY.legend.esqlComputedColumnFilterDrilldownDisabledMessage', {
+    ? i18n.translate('expressionXY.legend.esqlComputedColumnFilterDrilldownDisabledDescription', {
         defaultMessage:
           "You can't apply a filter or drill down from this value because it relies on a field created at query time.",
       })
-    : i18n.translate('expressionXY.legend.esqlComputedColumnFilterDisabledMessage', {
+    : i18n.translate('expressionXY.legend.esqlComputedColumnFilterDisabledDescription', {
         defaultMessage:
           "You can't apply a filter from this value because it relies on a field created at query time.",
       });

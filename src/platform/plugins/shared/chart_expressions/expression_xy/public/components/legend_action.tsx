@@ -11,6 +11,7 @@ import React from 'react';
 import type { LegendAction, XYChartSeriesIdentifier } from '@elastic/charts';
 import { getAccessorByDimension } from '@kbn/chart-expressions-common';
 import type { CellValueContext } from '@kbn/embeddable-plugin/public';
+import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
 import type { LayerCellValueActions, FilterEvent } from '../types';
 import type { CommonXYDataLayerConfig } from '../../common';
 import type { LegendCellValueActions } from './legend_action_popover';
@@ -53,6 +54,7 @@ export const getLegendAction = (
     }
 
     const { table } = layer;
+    const isEsqlMode = table?.meta?.type === ESQL_TABLE_TYPE;
 
     const filterActionData: FilterEvent['data']['data'] = [];
     const cellValueActionData: CellValueContext['data'] = [];
@@ -82,7 +84,7 @@ export const getLegendAction = (
       return null;
     }
 
-    const hasComputedColumn = filterActionData.some((data) => {
+    const hasComputedColumn = isEsqlMode && filterActionData.some((data) => {
       const column = data.table.columns[data.column];
       return column?.isComputedColumn === true;
     });

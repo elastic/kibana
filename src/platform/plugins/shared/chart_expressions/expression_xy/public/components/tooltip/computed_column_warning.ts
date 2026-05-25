@@ -20,11 +20,8 @@ import type { CommonXYDataLayerConfig } from '../../../common';
  */
 export const getComputedColumnWarning = (
   dataLayers: CommonXYDataLayerConfig[],
-  isEsqlMode: boolean | undefined,
   panelHasConfiguredDrilldowns: boolean
 ): string | undefined => {
-  if (!isEsqlMode) return undefined;
-
   // Collect all filterable column IDs (x-accessor + split accessors) across layers.
   const allFilterableColumnIds = new Set(
     dataLayers.flatMap((layer) => {

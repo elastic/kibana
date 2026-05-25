@@ -38,7 +38,7 @@ import {
   LEGACY_LIGHT_THEME,
 } from '@elastic/charts';
 import { partition } from 'lodash';
-import type { IconType } from '@elastic/eui';
+import type { IconType, UseEuiTheme } from '@elastic/eui';
 import { useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isOfAggregateQueryType } from '@kbn/es-query';
@@ -65,6 +65,7 @@ import {
 import { useAppFixedViewport } from '@kbn/core-rendering-browser';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import type { AlertRuleFromVisUIActionData } from '@kbn/alerts-ui-shared';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type {
   FilterEvent,
   BrushEvent,
@@ -201,14 +202,20 @@ function getIconForSeriesType(layer: CommonXYDataLayerConfig): IconType {
   );
 }
 
+const computedColumnWarningStyles = {
+  message: ({ euiTheme }: UseEuiTheme) =>
+    css`
+      color: ${euiTheme.colors.textSubdued};
+      font-size: ${euiTheme.size.m};
+      font-weight: ${euiTheme.font.weight.regular};
+    `,
+};
+
 /** Renders the computed-column filter warning inside the chart tooltip footer. */
-const TooltipComputedColumnWarning: React.FC<{ message: string }> = ({ message }) => {
-  const { euiTheme } = useEuiTheme();
+const ComputedColumnWarning: React.FC<{ message: string }> = ({ message }) => {
+  const styles = useMemoCss(computedColumnWarningStyles);
   return (
-    <div
-      css={css({ color: euiTheme.colors.textSubdued, fontSize: euiTheme.size.m })}
-      data-test-subj="xyChartComputedColumnWarning"
-    >
+    <div css={styles.message} data-test-subj="xyChartComputedColumnWarning">
       {message}
     </div>
   );
@@ -368,10 +375,12 @@ export function XYChart({
   const isEsqlMode = dataLayers.some((l) => l.table?.meta?.type === ESQL_TABLE_TYPE);
 
   // Compute warning message for ES|QL computed columns that cannot be filtered.
-  // Shown in the tooltip footer on every hover.
   const computedColumnWarningMessage = useMemo(
-    () => getComputedColumnWarning(dataLayers, isEsqlMode, panelHasConfiguredDrilldowns ?? false),
-    [dataLayers, isEsqlMode, panelHasConfiguredDrilldowns]
+    () =>
+      isEsqlMode
+        ? getComputedColumnWarning(dataLayers, panelHasConfiguredDrilldowns ?? false)
+        : undefined,
+    [isEsqlMode, dataLayers, panelHasConfiguredDrilldowns]
   );
 
   const TooltipWarningFooter = useMemo<
@@ -382,7 +391,7 @@ export function XYChart({
     | 'default'
   >(() => {
     if (!computedColumnWarningMessage) return 'default';
-    return () => <TooltipComputedColumnWarning message={computedColumnWarningMessage} />;
+    return () => <ComputedColumnWarning message={computedColumnWarningMessage} />;
   }, [computedColumnWarningMessage]);
 
   const icon: IconType = getIconForSeriesType(getDataLayers(layers)?.[0]);
