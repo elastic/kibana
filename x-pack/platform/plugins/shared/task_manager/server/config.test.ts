@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { configSchema, CLAIM_STRATEGY_UPDATE_BY_QUERY, CLAIM_STRATEGY_MGET } from './config';
+import { configSchema, CLAIM_STRATEGY_MGET } from './config';
 
 describe('config validation', () => {
   test('task manager defaults', () => {
@@ -264,9 +264,9 @@ describe('config validation', () => {
     configSchema.validate({ claim_strategy: 'anything!' });
   });
 
-  test('default claim strategy defaults poll interval to 3000ms', () => {
-    const result = configSchema.validate({ claim_strategy: CLAIM_STRATEGY_UPDATE_BY_QUERY });
-    expect(result.poll_interval).toEqual(3000);
+  test('non-mget claim strategy defaults poll interval to 500ms', () => {
+    const result = configSchema.validate({ claim_strategy: 'update_by_query' });
+    expect(result.poll_interval).toEqual(500);
   });
 
   test('mget claim strategy defaults poll interval to 500ms', () => {

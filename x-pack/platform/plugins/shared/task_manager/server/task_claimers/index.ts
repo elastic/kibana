@@ -14,9 +14,8 @@ import type { TaskClaim, TaskTiming } from '../task_events';
 import type { TaskTypeDictionary } from '../task_type_dictionary';
 import type { TaskClaimingBatches } from '../queries/task_claiming';
 import type { ConcreteTaskInstance } from '../task';
-import { claimAvailableTasksUpdateByQuery } from './strategy_update_by_query';
 import { claimAvailableTasksMget } from './strategy_mget';
-import { CLAIM_STRATEGY_UPDATE_BY_QUERY, CLAIM_STRATEGY_MGET } from '../config';
+import { CLAIM_STRATEGY_MGET } from '../config';
 import type { TaskPartitioner } from '../lib/task_partitioner';
 
 export interface TaskClaimerOpts {
@@ -50,18 +49,13 @@ export type TaskClaimerFn = (opts: TaskClaimerOpts) => Promise<ClaimOwnershipRes
 let WarnedOnInvalidClaimer = false;
 
 export function getTaskClaimer(logger: Logger, strategy: string): TaskClaimerFn {
-  switch (strategy) {
-    case CLAIM_STRATEGY_UPDATE_BY_QUERY:
-      return claimAvailableTasksUpdateByQuery;
-    case CLAIM_STRATEGY_MGET:
-      return claimAvailableTasksMget;
-  }
-
-  if (!WarnedOnInvalidClaimer) {
+  if (strategy !== CLAIM_STRATEGY_MGET && !WarnedOnInvalidClaimer) {
     WarnedOnInvalidClaimer = true;
-    logger.warn(`Unknown task claiming strategy "${strategy}", falling back to update_by_query`);
+    logger.warn(
+      `xpack.task_manager.claim_strategy="${strategy}" is no longer supported; using "mget". This setting is now a noop and will be removed in a future major release.`
+    );
   }
-  return claimAvailableTasksUpdateByQuery;
+  return claimAvailableTasksMget;
 }
 
 export function getEmptyClaimOwnershipResult(): ClaimOwnershipResult {

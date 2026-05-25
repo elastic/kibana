@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CLAIM_STRATEGY_UPDATE_BY_QUERY, CLAIM_STRATEGY_MGET, DEFAULT_CAPACITY } from '../config';
+import { CLAIM_STRATEGY_MGET, DEFAULT_CAPACITY } from '../config';
 import { getDefaultCapacity } from './get_default_capacity';
 
 describe('getDefaultCapacity', () => {
@@ -101,7 +101,7 @@ describe('getDefaultCapacity', () => {
     ).toBe(DEFAULT_CAPACITY);
   });
 
-  it('returns default capacity when default claim strategy', () => {
+  it('returns capacity as expected when claim strategy is not mget', () => {
     expect(
       getDefaultCapacity({
         autoCalculateDefaultEchCapacity: true,
@@ -109,9 +109,9 @@ describe('getDefaultCapacity', () => {
         isCloud: true,
         isServerless: false,
         isBackgroundTaskNodeOnly: false,
-        claimStrategy: CLAIM_STRATEGY_UPDATE_BY_QUERY,
+        claimStrategy: 'update_by_query',
       })
-    ).toBe(DEFAULT_CAPACITY);
+    ).toBe(10);
 
     expect(
       getDefaultCapacity({
@@ -120,9 +120,9 @@ describe('getDefaultCapacity', () => {
         isCloud: true,
         isServerless: false,
         isBackgroundTaskNodeOnly: true,
-        claimStrategy: CLAIM_STRATEGY_UPDATE_BY_QUERY,
+        claimStrategy: 'update_by_query',
       })
-    ).toBe(DEFAULT_CAPACITY);
+    ).toBe(10);
   });
 
   it('returns default capacity when serverless', () => {

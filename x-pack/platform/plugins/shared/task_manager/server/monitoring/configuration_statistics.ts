@@ -11,7 +11,6 @@ import { map, startWith } from 'rxjs';
 import type { JsonObject } from '@kbn/utility-types';
 import type { AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
 import type { TaskManagerConfig } from '../config';
-import { CLAIM_STRATEGY_UPDATE_BY_QUERY } from '../config';
 import { getCapacityInCost, getCapacityInWorkers } from '../task_pool';
 import type { TaskPollingLifecycle } from '../polling_lifecycle';
 
@@ -62,7 +61,7 @@ export function createConfigurationAggregator(
 
   return combineLatest([
     of(pick(config, ...CONFIG_FIELDS_TO_EXPOSE)),
-    of({ claim_strategy: config.claim_strategy ?? CLAIM_STRATEGY_UPDATE_BY_QUERY }),
+    of({ claim_strategy: config.claim_strategy }),
     of({ poll_interval: config.poll_interval }),
     capacity$,
   ]).pipe(

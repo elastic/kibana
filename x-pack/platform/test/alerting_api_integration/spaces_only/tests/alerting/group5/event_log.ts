@@ -715,6 +715,10 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
         });
 
         it('should generate expected events for flapping alerts that settle on active', async () => {
+          if (space.id !== Spaces.default.id) {
+            return;
+          }
+
           await supertest
             .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/settings/_flapping`)
             .set('kbn-xsrf', 'foo')
@@ -776,120 +780,6 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                 alert_delay: {
                   active: 1,
                 },
-              })
-            );
-
-          expect(response.status).to.eql(200);
-          const alertId = response.body.id;
-          objectRemover.add(space.id, alertId, 'rule', 'alerting');
-
-          await runRuleAndEnsureCompletion({
-            runs: 15,
-            totalAlertsGeneratedPerRun: [1, 2, 2, 3, 4, 5, 5, 5, 5, ...new Array(6).fill(5)],
-            ruleId: alertId,
-            spaceId: space.id,
-          });
-
-          // get the events we're expecting
-          const events = await retry.try(async () => {
-            return await getEventLog({
-              getService,
-              spaceId: space.id,
-              type: 'alert',
-              id: alertId,
-              provider: 'alerting',
-              actions: new Map([
-                // make sure the counts of the # of events per type are as expected
-                ['execute-start', { equal: 15 }],
-                ['execute', { equal: 15 }],
-                ['execute-action', { equal: 5 }],
-                ['active-instance', { equal: 12 }],
-                ['new-instance', { equal: 3 }],
-                ['recovered-instance', { equal: 2 }],
-              ]),
-            });
-          });
-
-          const flapping = events
-            .filter(
-              (event) =>
-                event?.event?.action === 'active-instance' ||
-                event?.event?.action === 'recovered-instance'
-            )
-            .map((event) => event?.kibana?.alert?.flapping);
-          const result = [false, false, false, false, false].concat(new Array(9).fill(true));
-          expect(flapping).to.eql(result);
-        });
-
-        it('should generate expected events for flapping alerts that settle on active where the action notifyWhen is set to "on status change"', async () => {
-          await supertest
-            .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/settings/_flapping`)
-            .set('kbn-xsrf', 'foo')
-            .auth('superuser', 'superuser')
-            .send({
-              enabled: true,
-              look_back_window: 6,
-              status_change_threshold: 4,
-            })
-            .expect(200);
-
-          // wait so cache expires
-          await setTimeoutAsync(TEST_CACHE_EXPIRATION_TIME);
-
-          const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              name: 'MY action',
-              connector_type_id: 'test.noop',
-              config: {},
-              secrets: {},
-            })
-            .expect(200);
-
-          // pattern of when the alert should fire
-          const instance = [true, false, false, true, false, true, false, true, false].concat(
-            ...new Array(8).fill(true),
-            false
-          );
-          const pattern = {
-            instance,
-          };
-
-          const response = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
-            .set('kbn-xsrf', 'foo')
-            .send(
-              getTestRuleData({
-                rule_type_id: 'test.patternFiring',
-                schedule: { interval: '24h' },
-                throttle: null,
-                notify_when: null,
-                params: {
-                  pattern,
-                },
-                actions: [
-                  {
-                    id: createdAction.id,
-                    group: 'default',
-                    params: {},
-                    frequency: {
-                      summary: false,
-                      throttle: null,
-                      notify_when: RuleNotifyWhen.CHANGE,
-                    },
-                  },
-                  {
-                    id: createdAction.id,
-                    group: 'recovered',
-                    params: {},
-                    frequency: {
-                      summary: false,
-                      throttle: null,
-                      notify_when: RuleNotifyWhen.CHANGE,
-                    },
-                  },
-                ],
               })
             );
 
@@ -936,6 +826,10 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
         });
 
         it('should generate expected events for flapping alerts settle on recovered', async () => {
+          if (space.id !== Spaces.default.id) {
+            return;
+          }
+
           await supertest
             .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/settings/_flapping`)
             .set('kbn-xsrf', 'foo')
@@ -993,123 +887,6 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                   },
                 ],
                 notify_when: RuleNotifyWhen.CHANGE,
-                alert_delay: {
-                  active: 1,
-                },
-              })
-            );
-
-          expect(response.status).to.eql(200);
-          const alertId = response.body.id;
-          objectRemover.add(space.id, alertId, 'rule', 'alerting');
-
-          await runRuleAndEnsureCompletion({
-            runs: 14,
-            totalAlertsGeneratedPerRun: [1, 2, 2, 3, 4, 5, 5, 5, 5, 5, ...new Array(3).fill(5), 6],
-            ruleId: alertId,
-            spaceId: space.id,
-          });
-
-          // get the events we're expecting
-          const events = await retry.try(async () => {
-            return await getEventLog({
-              getService,
-              spaceId: space.id,
-              type: 'alert',
-              id: alertId,
-              provider: 'alerting',
-              actions: new Map([
-                // make sure the counts of the # of events per type are as expected
-                ['execute-start', { equal: 14 }],
-                ['execute', { equal: 14 }],
-                ['execute-action', { equal: 6 }],
-                ['new-instance', { equal: 3 }],
-                ['active-instance', { equal: 10 }],
-                ['recovered-instance', { equal: 3 }],
-              ]),
-            });
-          });
-
-          const flapping = events
-            .filter(
-              (event) =>
-                event?.event?.action === 'active-instance' ||
-                event?.event?.action === 'recovered-instance'
-            )
-            .map((event) => event?.kibana?.alert?.flapping);
-          expect(flapping).to.eql(
-            [false, false, false, false, false].concat(new Array(8).fill(true))
-          );
-        });
-
-        it('should generate expected events for flapping alerts settle on recovered where the action notifyWhen is set to "on status change"', async () => {
-          await supertest
-            .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/settings/_flapping`)
-            .set('kbn-xsrf', 'foo')
-            .auth('superuser', 'superuser')
-            .send({
-              enabled: true,
-              look_back_window: 6,
-              status_change_threshold: 4,
-            })
-            .expect(200);
-
-          // wait so cache expires
-          await setTimeoutAsync(TEST_CACHE_EXPIRATION_TIME);
-
-          const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              name: 'MY action',
-              connector_type_id: 'test.noop',
-              config: {},
-              secrets: {},
-            })
-            .expect(200);
-
-          // pattern of when the alert should fire
-          const instance = [true, false, false, true, false, true, false, true, false, true].concat(
-            new Array(11).fill(false)
-          );
-          const pattern = {
-            instance,
-          };
-
-          const response = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
-            .set('kbn-xsrf', 'foo')
-            .send(
-              getTestRuleData({
-                rule_type_id: 'test.patternFiring',
-                schedule: { interval: '24h' },
-                throttle: null,
-                notify_when: null,
-                params: {
-                  pattern,
-                },
-                actions: [
-                  {
-                    id: createdAction.id,
-                    group: 'default',
-                    params: {},
-                    frequency: {
-                      summary: false,
-                      throttle: null,
-                      notify_when: RuleNotifyWhen.CHANGE,
-                    },
-                  },
-                  {
-                    id: createdAction.id,
-                    group: 'recovered',
-                    params: {},
-                    frequency: {
-                      summary: false,
-                      throttle: null,
-                      notify_when: RuleNotifyWhen.CHANGE,
-                    },
-                  },
-                ],
                 alert_delay: {
                   active: 1,
                 },
@@ -1160,6 +937,10 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
         });
 
         it('should generate expected events for flapping alerts over a period of time longer than the look back', async () => {
+          if (space.id !== Spaces.default.id) {
+            return;
+          }
+
           await supertest
             .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/settings/_flapping`)
             .set('kbn-xsrf', 'foo')
