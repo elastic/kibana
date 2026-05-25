@@ -112,6 +112,20 @@ export interface SmlTypeDefinition {
 }
 
 /**
+ * How a chunk was produced.
+ *
+ * - `'crawled'`: written by the SML crawler or by an event-driven `indexAttachment`
+ *   origin-mode call (content fetched via `getSmlData`).
+ * - `'manual'`: written explicitly by a user/admin — via the HTTP upsert route or via
+ *   `indexAttachment` content-mode. Manual entries are protected from being overwritten
+ *   by the crawler / origin-mode `indexAttachment` unless `force: true` is passed.
+ *
+ * Documents written before this field was introduced have it omitted; queries treat
+ * a missing value as `'crawled'`.
+ */
+export type SmlIngestionMethod = 'manual' | 'crawled';
+
+/**
  * An SML document as stored in the system index.
  */
 export interface SmlDocument {
@@ -139,6 +153,8 @@ export interface SmlDocument {
   spaces: string[];
   /** Permissions required to access the underlying element */
   permissions: string[];
+  /** How this chunk was produced. Missing on legacy documents (treated as `'crawled'`). */
+  ingestion_method?: SmlIngestionMethod;
 }
 
 /**
@@ -218,6 +234,47 @@ export interface SmlUpsertResult {
 export type { SmlSearchFilters } from '../../../common/http_api/sml';
 
 /**
+ * Common params shared by both modes of `SmlService.indexAttachment`.
+ */
+interface SmlServiceIndexAttachmentBaseParams {
+  originId: string;
+  attachmentType: string;
+  action: SmlIndexAction;
+  spaces: string[];
+  esClient: ElasticsearchClient;
+  savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository;
+  logger: Logger;
+}
+
+/**
+ * Origin mode — content is produced by the registered type's `getSmlData` hook.
+ * Resulting chunks are tagged `ingestion_method: 'crawled'`.
+ *
+ * If the target `origin_id` already has any `ingestion_method: 'manual'` chunks,
+ * the call is a no-op unless `force: true` is provided.
+ */
+export interface SmlServiceIndexAttachmentOriginParams extends SmlServiceIndexAttachmentBaseParams {
+  /** Override existing manual entries. Default: false. */
+  force?: boolean;
+  content?: undefined;
+}
+
+/**
+ * Content mode — caller supplies pre-built chunks directly; `getSmlData` is not called.
+ * Resulting chunks are tagged `ingestion_method: 'manual'`. Always overwrites existing
+ * chunks for the `origin_id`.
+ */
+export interface SmlServiceIndexAttachmentContentParams
+  extends SmlServiceIndexAttachmentBaseParams {
+  content: SmlChunk[];
+  force?: undefined;
+}
+
+export type SmlServiceIndexAttachmentParams =
+  | SmlServiceIndexAttachmentOriginParams
+  | SmlServiceIndexAttachmentContentParams;
+
+/**
  * SML service interface — exposed on the plugin start contract.
  */
 export interface SmlService {
@@ -253,16 +310,8 @@ export interface SmlService {
     request: KibanaRequest;
   }) => Promise<Map<string, boolean>>;
 
-  /** Index a single attachment (event-driven) */
-  indexAttachment: (params: {
-    originId: string;
-    attachmentType: string;
-    action: SmlIndexAction;
-    spaces: string[];
-    esClient: ElasticsearchClient;
-    savedObjectsClient: SavedObjectsClientContract;
-    logger: Logger;
-  }) => Promise<void>;
+  /** Index a single attachment (event-driven or manual). See {@link SmlServiceIndexAttachmentParams}. */
+  indexAttachment: (params: SmlServiceIndexAttachmentParams) => Promise<void>;
 
   /**
    * Fetch SML documents by their chunk IDs, scoped to a space.

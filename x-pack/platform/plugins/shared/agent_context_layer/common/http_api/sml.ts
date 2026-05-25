@@ -56,6 +56,8 @@ export interface SmlHttpItem {
   updated_at: string;
   spaces: string[];
   permissions: string[];
+  /** How this chunk was produced. May be absent on legacy documents (treat as `'crawled'`). */
+  ingestion_method?: 'manual' | 'crawled';
 }
 
 /**

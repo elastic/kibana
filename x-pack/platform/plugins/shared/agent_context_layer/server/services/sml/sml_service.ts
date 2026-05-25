@@ -535,6 +535,7 @@ const searchSml = async ({
           spaces: source.spaces ?? [],
           permissions: source.permissions ?? [],
           user_id: source.user_id,
+          ingestion_method: source.ingestion_method,
           score: hit._score ?? 0,
         };
       });
@@ -613,6 +614,9 @@ const getDocumentsByIds = async ({
       if (source.references !== undefined) {
         doc.references = source.references;
       }
+      if (source.ingestion_method !== undefined) {
+        doc.ingestion_method = source.ingestion_method;
+      }
       docMap.set(doc.id, doc);
     }
   } catch (error) {
@@ -664,7 +668,7 @@ const getDocumentById = async ({
     if (!hit?._source) return undefined;
 
     const source = hit._source;
-    return {
+    const doc: SmlDocument = {
       id: source.id ?? '',
       type: source.type ?? '',
       title: source.title ?? '',
@@ -675,6 +679,10 @@ const getDocumentById = async ({
       spaces: source.spaces ?? [],
       permissions: source.permissions ?? [],
     };
+    if (source.ingestion_method !== undefined) {
+      doc.ingestion_method = source.ingestion_method;
+    }
+    return doc;
   } catch (error) {
     if (isNotFoundError(error)) {
       return undefined;
@@ -747,7 +755,7 @@ const listDocuments = async ({
       .filter((hit) => hit._source != null)
       .map((hit) => {
         const source = hit._source!;
-        return {
+        const doc: SmlDocument = {
           id: source.id ?? '',
           type: source.type ?? '',
           title: source.title ?? '',
@@ -758,6 +766,10 @@ const listDocuments = async ({
           spaces: source.spaces ?? [],
           permissions: source.permissions ?? [],
         };
+        if (source.ingestion_method !== undefined) {
+          doc.ingestion_method = source.ingestion_method;
+        }
+        return doc;
       });
 
     return { total, results };
@@ -845,6 +857,9 @@ const upsertDocument = async ({
     updated_at: now,
     spaces: existing?.spaces ?? [spaceId],
     permissions: document.permissions ?? [],
+    // HTTP upserts are by definition manual writes; tagging here lets the crawler
+    // (and origin-mode indexAttachment) skip these entries to avoid clobbering them.
+    ingestion_method: 'manual',
   };
 
   await smlClient.index({ id, document: fullDocument });

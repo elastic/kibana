@@ -22,6 +22,7 @@ export const toSmlHttpItem = (doc: SmlDocument): SmlHttpItem => ({
   updated_at: doc.updated_at,
   spaces: doc.spaces,
   permissions: doc.permissions,
+  ...(doc.ingestion_method !== undefined ? { ingestion_method: doc.ingestion_method } : {}),
 });
 
 export const READ_SECURITY: RouteSecurity = {

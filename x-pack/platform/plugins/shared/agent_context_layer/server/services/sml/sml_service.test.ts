@@ -1363,6 +1363,33 @@ describe('SmlService', () => {
       ).rejects.toThrow('boom');
       expect(smlClient.index).not.toHaveBeenCalled();
     });
+
+    it("tags the written document with ingestion_method='manual'", async () => {
+      smlClient.get.mockRejectedValue(createNotFoundError());
+
+      const service = createSmlService();
+      service.setup({ logger });
+      const smlService = service.start({ logger });
+
+      const result = await smlService.upsertDocument({
+        id: 'doc-manual',
+        spaceId: 'default',
+        document: {
+          type: 'lens',
+          title: 'Manual Doc',
+          origin_id: 'ref-manual',
+          content: 'c',
+        },
+        esClient: scopedClient,
+      });
+
+      expect(result).not.toBeNull();
+      expect(result!.document.ingestion_method).toBe('manual');
+      expect(smlClient.index).toHaveBeenCalledWith({
+        id: 'doc-manual',
+        document: expect.objectContaining({ ingestion_method: 'manual' }),
+      });
+    });
   });
 
   describe('deleteDocument', () => {
