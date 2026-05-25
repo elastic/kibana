@@ -18,6 +18,12 @@ import { MockApmPluginStorybook } from '../public/context/apm_plugin/mock_apm_pl
 (window as any).jest = jest;
 
 const ApmJestDecorator: Decorator = (Story, context) => {
+  // Opt-out for stories that establish their own providers from `args` (e.g. tests that
+  // render the same story with different inputs). Avoids nesting <Router> providers.
+  if (context.parameters.skipApmJestDecorator) {
+    return <Story />;
+  }
+
   // Lazy require: `jest.mock()` calls in the test file are hoisted and registered before this
   // line runs, so any modules reachable from `apmRouter` resolve through those mocks.
   // eslint-disable-next-line @typescript-eslint/no-var-requires
