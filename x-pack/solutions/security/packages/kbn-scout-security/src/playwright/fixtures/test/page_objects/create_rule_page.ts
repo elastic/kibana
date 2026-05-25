@@ -73,6 +73,7 @@ export class CreateRulePage {
   }
 
   async fillRuleName(name: string) {
+    await this.ruleNameInput.waitFor();
     await this.ruleNameInput.fill(name);
   }
 
