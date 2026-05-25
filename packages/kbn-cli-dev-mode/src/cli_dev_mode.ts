@@ -150,6 +150,11 @@ export class CliDevMode {
           .split(`${this.basePathProxy.host}:${this.basePathProxy.targetPort}`)
           .join(`${this.basePathProxy.host}:${this.basePathProxy.port}`);
       },
+      proxyUrl: this.basePathProxy
+        ? `${config.http.ssl.enabled ? 'https' : 'http'}://${this.basePathProxy.host}:${
+            this.basePathProxy.port
+          }${this.basePathProxy.basePath ?? ''}`
+        : undefined,
     });
 
     this.optimizer = new Optimizer({
@@ -164,6 +169,7 @@ export class CliDevMode {
       watch: cliArgs.watch,
       pluginPaths: config.plugins.additionalPluginPaths,
       pluginScanDirs: config.plugins.pluginSearchPaths,
+      basePath: this.basePathProxy?.basePath,
     });
   }
 

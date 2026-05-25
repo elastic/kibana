@@ -65,7 +65,6 @@
     "@kbn/react-kibana-mount",
     "@kbn/logging",
     "@kbn/presentation-publishing",
-    "@kbn/presentation-panel-plugin",
     "@kbn/content-management-table-list-view-common",
     "@kbn/shared-ux-utility",
     "@kbn/core-test-helpers-model-versions",

@@ -54,6 +54,7 @@ export const FileDataVisualizer: FC<Props> = ({
           fileUpload,
           http: dependencies.http,
           notifications: dependencies.notifications,
+          capabilities: application.capabilities,
         },
         autoAddInference ?? null,
         autoCreateDataView,
@@ -63,7 +64,16 @@ export const FileDataVisualizer: FC<Props> = ({
         location
       );
     },
-    [autoAddInference, autoCreateDataView, data, dependencies, fileUpload, indexSettings, location]
+    [
+      autoAddInference,
+      autoCreateDataView,
+      data,
+      dependencies,
+      fileUpload,
+      indexSettings,
+      location,
+      application.capabilities,
+    ]
   );
 
   const [fileUploadManager, setFileUploadManager] = useState<FileUploadManager>(() =>

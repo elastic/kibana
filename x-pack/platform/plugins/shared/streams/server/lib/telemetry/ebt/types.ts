@@ -83,6 +83,12 @@ interface StreamsAgentBuilderKnowledgeIndicatorCreatedProps {
   error_message?: string;
 }
 
+interface StreamsAgentToolKiIdentificationStartedProps {
+  success: boolean;
+  stream_name: string;
+  error_message?: string;
+}
+
 export {
   type StreamEndpointLatencyProps,
   type StreamsStateErrorProps,
@@ -92,4 +98,5 @@ export {
   type StreamsProcessingPipelineSuggestedProps,
   type StreamsFeaturesIdentifiedProps,
   type StreamsAgentBuilderKnowledgeIndicatorCreatedProps,
+  type StreamsAgentToolKiIdentificationStartedProps,
 };

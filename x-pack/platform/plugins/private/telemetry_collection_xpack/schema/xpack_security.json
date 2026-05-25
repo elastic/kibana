@@ -7993,6 +7993,16 @@
                     }
                   }
                 },
+                "elastic_detection_rule_deprecated_status": {
+                  "properties": {
+                    "total": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of installed prebuilt rules that are deprecated"
+                      }
+                    }
+                  }
+                },
                 "ai_created_rules": {
                   "properties": {
                     "total": {
@@ -8011,16 +8021,6 @@
                       "type": "long",
                       "_meta": {
                         "description": "Number of AI-created rules that are disabled"
-                      }
-                    }
-                  }
-                },
-                "elastic_detection_rule_deprecated_status": {
-                  "properties": {
-                    "total": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "The number of installed prebuilt rules that are deprecated"
                       }
                     }
                   }

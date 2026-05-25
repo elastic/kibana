@@ -8,6 +8,7 @@
  */
 
 import type { Presentable } from '@kbn/ui-actions-browser/src/types';
+import type { IconType } from '@elastic/eui';
 import type { Observable } from 'rxjs';
 import type { Trigger } from '../types';
 
@@ -68,7 +69,7 @@ export interface Action<Context extends object = object, ActionExtension extends
   /**
    * Optional EUI icon type that can be displayed along with the title.
    */
-  getIconType(context: ActionExecutionContext<Context>): string | undefined;
+  getIconType(context: ActionExecutionContext<Context>): IconType | undefined;
 
   /**
    * Returns a title to be displayed to the user.
@@ -114,10 +115,14 @@ export interface Action<Context extends object = object, ActionExtension extends
   couldBecomeCompatible?: (context: Context) => boolean;
 
   /**
-   * action is disabled or not
-   *
+   * Determines if the action is disabled or not
    */
-  disabled?: boolean;
+  isDisabled?(context: ActionExecutionContext<Context>): boolean;
+
+  /**
+   * @returns an Observable that emits when this action's disabled state should be recalculated.
+   */
+  getDisabledStateChangesSubject?: (context: Context) => Observable<undefined> | undefined;
 
   /**
    * Determines if notification should be shown in menu for that action
@@ -171,10 +176,14 @@ export type ActionDefinition<
   getHref?(context: ActionDefinitionContext<Context>): Promise<string | undefined>;
 
   /**
-   * action is disabled or not
-   *
+   * Determines if the action is disabled or not
    */
-  disabled?: boolean;
+  isDisabled?(context: ActionDefinitionContext<Context>): boolean;
+
+  /**
+   * @returns an Observable that emits when this action's disabled state should be recalculated.
+   */
+  getDisabledStateChangesSubject?: (context: Context) => Observable<undefined> | undefined;
 
   /**
    * Determines if notification should be shown in menu for that action

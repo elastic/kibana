@@ -31,6 +31,8 @@ export interface TriggerEventDispatchedTelemetryEvent {
   kqlErrorCount: number;
   matchedCount: number;
   depthSkippedCount: number;
+  workflowEventsIgnoreSkippedCount: number;
+  workflowEventsCycleSkippedCount: number;
   scheduledAttemptCount: number;
   scheduledSuccessCount: number;
   scheduledFailureCount: number;
@@ -123,6 +125,22 @@ export const triggerEventDispatchedSchema: RootSchema<TriggerEventDispatchedTele
     type: 'integer',
     _meta: {
       description: 'Number of matched workflows skipped by max event chain depth',
+      optional: false,
+    },
+  },
+  workflowEventsIgnoreSkippedCount: {
+    type: 'integer',
+    _meta: {
+      description:
+        'Number of matched workflows skipped because on.workflowEvents is ignore and the emit was workflow-attributed',
+      optional: false,
+    },
+  },
+  workflowEventsCycleSkippedCount: {
+    type: 'integer',
+    _meta: {
+      description:
+        'Number of matched workflows skipped by the event-chain cycle guard (on.workflowEvents avoid-loop or omitted)',
       optional: false,
     },
   },

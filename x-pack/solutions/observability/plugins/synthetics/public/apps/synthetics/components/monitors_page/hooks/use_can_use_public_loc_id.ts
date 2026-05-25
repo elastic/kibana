@@ -31,7 +31,8 @@ export const useCanUsePublicLocById = (configId: string) => {
   const hasManagedLocation = useMemo(
     () =>
       allConfigs?.some(
-        (mon) => mon.configId === configId && managedLocationIds.has(mon.locationId)
+        (mon) =>
+          mon.configId === configId && mon.locations.some((loc) => managedLocationIds.has(loc.id))
       ) ?? false,
     [allConfigs, configId, managedLocationIds]
   );

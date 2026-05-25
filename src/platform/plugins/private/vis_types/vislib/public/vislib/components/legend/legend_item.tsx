@@ -123,6 +123,7 @@ const VisLegendItemComponent = ({
       <EuiIcon
         size="l"
         type="dot"
+        aria-hidden={true}
         color={getColor(item.label)}
         data-test-subj={`legendSelectedColor-${getColor(item.label)}`}
       />

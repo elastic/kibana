@@ -28,18 +28,18 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';
 import { MODEL_STATE, TRAINED_MODEL_TYPE } from '@kbn/ml-trained-models-utils';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { InferenceApi } from './inference_api_tab';
-import { ModelPipelines } from './pipelines';
-import { AllocatedModels } from '../memory_usage/nodes_overview/allocated_models';
 import type {
   AllocatedModel,
   NLPModelItem,
   TrainedModelItem,
   TrainedModelStat,
-} from '../../../common/types/trained_models';
+} from '@kbn/ml-common-types/trained_models';
+import { isNLPModelItem } from '@kbn/ml-common-types/trained_models';
+import { InferenceApi } from './inference_api_tab';
+import { ModelPipelines } from './pipelines';
+import { AllocatedModels } from '../memory_usage/nodes_overview/allocated_models';
 import { useFieldFormatter } from '../contexts/kibana/use_field_formatter';
 import { useEnabledFeatures } from '../contexts/ml';
-import { isNLPModelItem } from '../../../common/types/trained_models';
 
 interface ExpandedRowProps {
   item: TrainedModelItem;

@@ -59,6 +59,7 @@ export function useMonitorsSortedByStatus(): OverviewStatusMetaData[] {
         ...Object.values(pendingConfigs),
       ] as OverviewStatusMetaData[];
     }
+
     switch (sortField) {
       case 'name.keyword':
         result = result.sort((a, b) => a.name.localeCompare(b.name));
@@ -69,6 +70,22 @@ export function useMonitorsSortedByStatus(): OverviewStatusMetaData[] {
         result = result.sort((a, b) => {
           return moment(a.updated_at).diff(moment(b.updated_at));
         });
+        return sortOrder === 'asc' ? result : result.reverse();
+      case 'urls': {
+        // Monitors without a URL (e.g. ICMP/TCP, or browser checks where the
+        // url field is empty) are always sorted last regardless of direction —
+        // an alphabetical run that ends with a wall of "—" is more useful for
+        // triage than letting empty strings flip to the top in desc order.
+        const withUrl = result.filter((m) => m.urls);
+        const withoutUrl = result.filter((m) => !m.urls);
+        withUrl.sort((a, b) => (a.urls ?? '').localeCompare(b.urls ?? ''));
+        return [...(sortOrder === 'asc' ? withUrl : withUrl.reverse()), ...withoutUrl];
+      }
+      case 'type.keyword':
+        // Group same-type monitors together (asc gives browser → http → icmp
+        // → tcp). `localeCompare` is overkill for short type tokens but keeps
+        // behaviour consistent with the other alphabetical sorts.
+        result = result.sort((a, b) => (a.type ?? '').localeCompare(b.type ?? ''));
         return sortOrder === 'asc' ? result : result.reverse();
     }
     return result;

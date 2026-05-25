@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import React from 'react';
-
+import { EuiBadge } from '@elastic/eui';
 import {
   AGENT_NAME,
   AT_TIMESTAMP,
@@ -28,7 +28,6 @@ import {
   USER_AGENT_VERSION,
 } from '@kbn/apm-types';
 import { HttpStatusCode, Timestamp } from '@kbn/apm-ui-shared';
-import { EuiBadge } from '@elastic/eui';
 import type { TraceDocumentOverview } from '@kbn/discover-utils';
 import type { ContentFrameworkTableProps } from '../../../../content_framework';
 import { ServiceNameLink } from '../service_name_link';
@@ -36,6 +35,12 @@ import { TransactionNameLink } from '../transaction_name_link';
 import { HighlightField } from '../highlight_field';
 import { DependencyNameLink } from '../dependency_name_link';
 import { fieldDescriptions, fieldLabels } from '../../../constants';
+import { TRACES_DOC_VIEWER_EBT_ELEMENTS, TRACES_DOC_VIEWER_EBT_DETAILS } from '../../ebt_constants';
+
+const aboutEbt = {
+  element: TRACES_DOC_VIEWER_EBT_ELEMENTS.ABOUT,
+  detail: TRACES_DOC_VIEWER_EBT_DETAILS.SPAN_DOC,
+};
 
 export const getSharedFieldConfigurations = (
   flattenedHit: TraceDocumentOverview
@@ -52,6 +57,7 @@ export const getSharedFieldConfigurations = (
                 agentName={flattenedHit[AGENT_NAME] ?? ''}
                 formattedServiceName={content}
                 data-test-subj="unifiedDocViewerObservabilityTracesServiceNameLink"
+                ebt={aboutEbt}
               />
             )}
           </HighlightField>
@@ -71,7 +77,9 @@ export const getSharedFieldConfigurations = (
     },
     [TRACE_ID]: {
       title: fieldLabels.TRACE_ID_LABEL,
-      formatter: (value: unknown) => <HighlightField value={value as string} />,
+      formatter: (value, formattedValue) => (
+        <HighlightField value={value as string} formattedValue={formattedValue} />
+      ),
     },
   };
 };
@@ -97,6 +105,7 @@ export const getSpanFieldConfigurations = (
               spanSubtype={flattenedHit[SPAN_SUBTYPE] ?? ''}
               environment={flattenedHit[SERVICE_ENVIRONMENT] ?? ''}
               formattedDependencyName={content}
+              ebt={aboutEbt}
             />
           )}
         </HighlightField>
@@ -138,6 +147,7 @@ export const getTransactionFieldConfigurations = (
               serviceName={flattenedHit[SERVICE_NAME] ?? ''}
               transactionName={value as string}
               renderContent={() => content}
+              ebt={aboutEbt}
             />
           )}
         </HighlightField>

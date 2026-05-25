@@ -8,6 +8,10 @@
 import { MAX_SUGGESTED_PROFILES } from '../../../constants';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { GetCaseUsersResponseRt, SuggestUserProfilesRequestRt } from './v1';
+import {
+  GetCaseUsersResponseSchema,
+  SuggestUserProfilesRequestSchema,
+} from '../../api_zod/user/v1';
 
 describe('User', () => {
   describe('GetCaseUsersResponseRt', () => {
@@ -144,6 +148,18 @@ describe('User', () => {
         right: defaultRequest,
       });
     });
+
+    it('zod: has expected attributes in request', () => {
+      const result = GetCaseUsersResponseSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
+
+    it('zod: strips unknown fields', () => {
+      const result = GetCaseUsersResponseSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
   });
 
   describe('UserProfile', () => {
@@ -227,6 +243,21 @@ describe('User', () => {
         });
 
         expect(PathReporter.report(query)).toContain('The size field cannot be less than 1.');
+      });
+
+      it('zod: has expected attributes in request', () => {
+        const result = SuggestUserProfilesRequestSchema.safeParse(defaultRequest);
+        expect(result.success).toBe(true);
+        expect(result.data).toStrictEqual(defaultRequest);
+      });
+
+      it('zod: strips unknown fields', () => {
+        const result = SuggestUserProfilesRequestSchema.safeParse({
+          ...defaultRequest,
+          foo: 'bar',
+        });
+        expect(result.success).toBe(true);
+        expect(result.data).toStrictEqual(defaultRequest);
       });
     });
   });

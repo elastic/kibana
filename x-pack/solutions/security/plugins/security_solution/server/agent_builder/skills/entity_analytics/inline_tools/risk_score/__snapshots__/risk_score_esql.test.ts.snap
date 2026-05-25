@@ -8,7 +8,7 @@ exports[`riskScoreInlineToolHandler should modify additional context when entity
         * When querying the risk score for a entity you must **ALWAYS** use the normalized field 'host.risk.calculated_score_norm'.
         * The field 'host.risk.calculated_level' contains a textual description of the risk level.
         * The inputs field inside the risk score document contains the 10 highest-risk documents (sorted by 'kibana.alert.risk_score') that contributed to the risk score of an entity.
-        * When searching the risk score of an entity of type 'host', you must **ALWAYS** use exact and entire filter: \\"'WHERE (NOT(\`host.id\` IS NULL) AND \`host.id\` != \\"\\" OR NOT(\`host.name\` IS NULL) AND \`host.name\` != \\"\\" OR NOT(\`host.hostname\` IS NULL) AND \`host.hostname\` != \\"\\")'\\""
+        * When searching the risk score of an entity of type 'host', you must **ALWAYS** use exact and entire filter: \\"'WHERE (NOT(\`host.id\` IS NULL) AND COALESCE(\`host.id\` != \\"\\", TRUE) OR NOT(\`host.name\` IS NULL) AND COALESCE(\`host.name\` != \\"\\", TRUE) OR NOT(\`host.hostname\` IS NULL) AND COALESCE(\`host.hostname\` != \\"\\", TRUE))'\\""
 `;
 
 exports[`riskScoreInlineToolHandler should return generic security solution message when risk score index does not exist 1`] = `"Risk score index does not exist for this space. The user needs to enable the risk engine so that this agent can answer risk-related questions."`;

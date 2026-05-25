@@ -46,7 +46,9 @@ export const FleetProxyResponseSchema = schema.object({
 });
 
 export const PutFleetProxyRequestSchema = {
-  params: schema.object({ itemId: schema.string() }),
+  params: schema.object({
+    itemId: schema.string({ meta: { description: 'The ID of the proxy' } }),
+  }),
   body: schema.object({
     name: schema.maybe(schema.string()),
     url: schema.maybe(schema.string({ validate: validateUrl })),
@@ -58,5 +60,7 @@ export const PutFleetProxyRequestSchema = {
 };
 
 export const GetOneFleetProxyRequestSchema = {
-  params: schema.object({ itemId: schema.string() }),
+  params: schema.object({
+    itemId: schema.string({ meta: { description: 'The ID of the proxy' } }),
+  }),
 };

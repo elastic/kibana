@@ -81,4 +81,33 @@ describe('APMLocatorDefinition', () => {
       '/services/example-app/transactions?comparisonEnabled=false&environment=prod&kuery=&latencyAggregationType=avg&rangeFrom=now-15m&rangeTo=now&serviceGroup='
     );
   });
+
+  it('should deeplink to the error group details page when errorGroupId is provided', async () => {
+    const location = await locator.getLocation({
+      serviceName: 'example-app',
+      serviceOverviewTab: 'errors',
+      errorGroupId: 'group-1',
+      query: {
+        environment: 'prod' as Environment,
+      },
+    });
+
+    expect(location.path).toBe(
+      '/services/example-app/errors/group-1?comparisonEnabled=false&environment=prod&kuery=&latencyAggregationType=avg&rangeFrom=now-15m&rangeTo=now&serviceGroup='
+    );
+  });
+
+  it('should fall back to the errors tab when errorGroupId is not provided', async () => {
+    const location = await locator.getLocation({
+      serviceName: 'example-app',
+      serviceOverviewTab: 'errors',
+      query: {
+        environment: 'prod' as Environment,
+      },
+    });
+
+    expect(location.path).toBe(
+      '/services/example-app/errors?comparisonEnabled=false&environment=prod&kuery=&latencyAggregationType=avg&rangeFrom=now-15m&rangeTo=now&serviceGroup='
+    );
+  });
 });

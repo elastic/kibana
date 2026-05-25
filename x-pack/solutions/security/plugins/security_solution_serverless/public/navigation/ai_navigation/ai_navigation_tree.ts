@@ -76,6 +76,10 @@ export const createAiNavigationTree = (
       breadcrumbStatus: 'hidden',
       children: [
         {
+          link: 'inbox' as AppDeepLinkId,
+          icon: 'email',
+        },
+        {
           link: 'discover' as AppDeepLinkId,
           icon: 'productDiscover',
         },
@@ -100,6 +104,10 @@ export const createAiNavigationTree = (
           icon: 'reporter',
         },
       ],
+    },
+    {
+      link: 'onboarding' as AppDeepLinkId,
+      sideNavStatus: 'hidden',
     },
   ],
   footer: [
@@ -173,7 +181,8 @@ export const createAiNavigationTree = (
                 renderAs: 'panelOpener' as const,
                 children: [
                   { link: 'management:rules' as const },
-                  { link: 'management:notification_policies' as const },
+                  { link: 'management:action_policies' as const },
+                  { link: 'management:execution_history' as const },
                 ],
               },
             ]

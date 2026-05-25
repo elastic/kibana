@@ -40,4 +40,14 @@ describe('AnomaliesPanel', () => {
     expect(link).toBeInTheDocument();
     expect(link).toHaveAttribute('href', MOCK_ML_HREF);
   });
+
+  it('should render the inspect button', () => {
+    render(
+      <TestProviders>
+        <EntityAnalyticsRecentAnomalies />
+      </TestProviders>
+    );
+
+    expect(screen.getByTestId('inspect-icon-button')).toBeInTheDocument();
+  });
 });

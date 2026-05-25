@@ -11,6 +11,9 @@ import { tags } from '@kbn/scout';
 import { PIPELINE_SUGGESTION_DATASETS } from './pipeline_suggestion/pipeline_suggestion_datasets';
 import { indexSynthtraceScenario } from './synthtrace_helpers';
 
+const PARTITIONING_EVAL_SYSTEMS = ['Hadoop', 'Proxifier', 'Android', 'OpenStack'] as const;
+const PARTITIONING_HOMOG_SYSTEMS = ['Linux'] as const;
+const PARTITIONING_HARD_SYSTEMS = ['Hadoop', 'Mac', 'Linux', 'HPC'] as const;
 /** Must match `sample_logs` scenario `range.interval('5s')` in kbn-synthtrace. */
 const SAMPLE_LOGS_STEP_MS = 5000;
 
@@ -56,18 +59,12 @@ globalSetupHookWithSynthtrace(
     log.info('[streams eval setup] enabling streams');
     await apiServices.streams.enable();
 
-    // Dissect/grok pattern extraction (and other routes under logs.otel) need streams enabled,
-    // but not the fork + synthtrace path below—that is only for index-mode pipeline examples.
-    if (indexModeExamples.length === 0) {
-      log.info('[streams eval setup] no index-mode pipeline examples; skipping fork/synthtrace');
-      return;
-    }
-
     log.info('[streams eval setup] forking child streams and indexing synthtrace data');
 
     // Clean up child streams from previous runs so forks don't 409
     await apiServices.streams.clearStreamChildren('logs.otel');
 
+    // Fork child streams for index-mode pipeline suggestion examples
     for (const example of indexModeExamples) {
       await apiServices.streams.forkStream('logs.otel', example.input.stream_name, {
         field: 'attributes.filepath',
@@ -75,7 +72,52 @@ globalSetupHookWithSynthtrace(
       });
     }
 
-    const allSystems = indexModeExamples.map((e) => e.input.system).join(',');
+    // Fork child stream for partitioning evaluation: diverse systems
+    await apiServices.streams.forkStream('logs.otel', 'logs.otel.partition-eval', {
+      or: PARTITIONING_EVAL_SYSTEMS.map((system) => ({
+        field: 'attributes.filepath',
+        eq: `${system}.log`,
+      })),
+    });
+
+    // Fork child stream for partitioning evaluation: homogeneous data
+    await apiServices.streams.forkStream('logs.otel', 'logs.otel.partition-homog', {
+      field: 'attributes.filepath',
+      eq: `${PARTITIONING_HOMOG_SYSTEMS[0]}.log`,
+    });
+
+    // Fork child stream for partitioning evaluation: overlapping metadata (hard)
+    await apiServices.streams.forkStream('logs.otel', 'logs.otel.partition-hard', {
+      or: PARTITIONING_HARD_SYSTEMS.map((system) => ({
+        field: 'attributes.filepath',
+        eq: `${system}.log`,
+      })),
+    });
+
+    // Add remove processor to partitioning streams BEFORE indexing so that
+    // attributes.filepath is stripped at ingest time, forcing the LLM to
+    // analyze body.text content rather than relying on filepath as a discriminator.
+    const partitioningStreams = [
+      'logs.otel.partition-eval',
+      'logs.otel.partition-homog',
+      'logs.otel.partition-hard',
+    ];
+    for (const stream of partitioningStreams) {
+      await apiServices.streams.updateStreamProcessors(stream, {
+        steps: [{ action: 'remove', from: 'attributes.filepath' }],
+      });
+    }
+
+    // Collect all systems needed across pipeline + partitioning tests
+    const pipelineSystems = indexModeExamples.map((e) => e.input.system);
+    const partitioningSystems = [
+      ...PARTITIONING_EVAL_SYSTEMS,
+      ...PARTITIONING_HOMOG_SYSTEMS,
+      ...PARTITIONING_HARD_SYSTEMS,
+    ];
+    // Deduplicate systems: Hadoop appears in both EVAL and HARD; Linux appears in both HOMOG and HARD
+    const uniqueSystems = [...new Set([...pipelineSystems, ...partitioningSystems])];
+    const allSystems = uniqueSystems.join(',');
     const from = kbnDatemath.parse('now-5m')!;
     const to = kbnDatemath.parse('now')!;
 
@@ -88,7 +130,7 @@ globalSetupHookWithSynthtrace(
     }
 
     const maxSampleCount = Math.max(...sampleCounts);
-    const systemCount = indexModeExamples.length;
+    const systemCount = uniqueSystems.length;
     const rpm = computeTotalRpmForSampleCount({
       maxSampleCount,
       systemCount,

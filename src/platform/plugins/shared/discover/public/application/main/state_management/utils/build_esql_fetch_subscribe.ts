@@ -116,8 +116,12 @@ export const buildEsqlFetchSubscribe = ({
     let nextAllColumns = prevEsqlData.allColumns;
     let nextDefaultColumns = prevEsqlData.defaultColumns;
 
-    if (next.result?.length) {
-      nextAllColumns = Object.keys(next.result[0].raw);
+    const responseColumns =
+      next.esqlQueryColumns?.map((c) => c.name) ??
+      (next.result?.length ? Object.keys(next.result[0].raw) : undefined);
+
+    if (responseColumns !== undefined) {
+      nextAllColumns = responseColumns;
 
       if (
         hasTransformationalCommand(nextQuery.esql) ||
@@ -129,7 +133,9 @@ export const buildEsqlFetchSubscribe = ({
       }
     }
 
-    if (prevEsqlData.initialFetch) {
+    const isInitialFetch = prevEsqlData.initialFetch;
+
+    if (isInitialFetch) {
       prevEsqlData.initialFetch = false;
       prevEsqlData.query = nextQuery.esql;
       prevEsqlData.allColumns = nextAllColumns;
@@ -147,11 +153,6 @@ export const buildEsqlFetchSubscribe = ({
 
     const allColumnsChanged = !isEqual(nextAllColumns, prevEsqlData.allColumns);
 
-    const changeDefaultColumns =
-      indexPatternChanged || !isEqual(nextDefaultColumns, prevEsqlData.defaultColumns);
-
-    const { viewMode } = getCurrentTab().appState;
-    const changeViewMode = viewMode !== getValidViewMode({ viewMode, isEsqlMode: true });
     // If the index pattern hasn't changed, but the available columns have changed
     // due to transformational commands, mark the associated profile state fields to reset
     if (!indexPatternChanged && allColumnsChanged) {
@@ -164,16 +165,34 @@ export const buildEsqlFetchSubscribe = ({
       );
     }
 
+    const changeDefaultColumns =
+      indexPatternChanged || !isEqual(nextDefaultColumns, prevEsqlData.defaultColumns);
+
+    const appStateColumns = getCurrentTab().appState.columns ?? [];
+    const nextSelectedColumns = appStateColumns.filter(
+      (column) => responseColumns?.includes(column) ?? true
+    );
+    const changeSelectedColumns = !isInitialFetch && !isEqual(nextSelectedColumns, appStateColumns);
+
+    const { viewMode } = getCurrentTab().appState;
+    const changeViewMode = viewMode !== getValidViewMode({ viewMode, isEsqlMode: true });
+
     prevEsqlData.allColumns = nextAllColumns;
 
-    if (indexPatternChanged || changeDefaultColumns || changeViewMode) {
+    if (indexPatternChanged || changeDefaultColumns || changeSelectedColumns || changeViewMode) {
       prevEsqlData.query = nextQuery.esql;
       prevEsqlData.defaultColumns = nextDefaultColumns;
 
       // just change URL state if necessary
-      if (changeDefaultColumns || changeViewMode) {
+      if (changeDefaultColumns || changeSelectedColumns || changeViewMode) {
+        const nextColumns = changeDefaultColumns
+          ? nextDefaultColumns
+          : changeSelectedColumns
+          ? nextSelectedColumns
+          : undefined;
+
         const nextState = {
-          ...(changeDefaultColumns && { columns: nextDefaultColumns }),
+          ...(nextColumns && { columns: nextColumns }),
           ...(changeViewMode && { viewMode: undefined }),
         };
 

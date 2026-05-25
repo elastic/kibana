@@ -20,6 +20,7 @@
  *      (regression guard: once an allowlist is added, metadata fields must be blocked).
  * 1d – Sending more than MAX_AGG_FIELDS (25) fields is rejected with 400
  *      (regression guard for the existing schema validation).
+ * 1e – An empty field value is rejected with 400.
  */
 
 import { tags } from '@kbn/scout';
@@ -124,5 +125,12 @@ spaceTest.describe('GET /api/workflows/aggs', { tag: tags.deploymentAgnostic }, 
 
     expect(status).toBe(400);
     expect(data?.message).toContain('array size is [26], but cannot be greater than [25]');
+  });
+
+  spaceTest('rejects an empty field value', async () => {
+    const { status, data } = await workflowsApi.rawGetAggs('');
+
+    expect(status).toBe(400);
+    expect(data?.message).toContain('Aggregation field cannot be empty.');
   });
 });

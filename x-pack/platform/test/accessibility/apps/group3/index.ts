@@ -24,7 +24,6 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./search_sessions'));
 
     loadTestFile(require.resolve('./license_management'));
-    loadTestFile(require.resolve('./tags'));
     loadTestFile(require.resolve('./stack_monitoring'));
     loadTestFile(require.resolve('./watcher'));
 

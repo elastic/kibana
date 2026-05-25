@@ -62,9 +62,7 @@ export function registerEsqlExampleRoutes(router: IRouter, log: Logger) {
   // Parameterized query — when the pipeline includes user-provided values,
   // use ES|QL named params (`?paramName`) to prevent injection attacks.
   // Values are passed via the `params` array as `{ name: value }` entries
-  // and are never interpolated into the query string.
-  // Note: the ES client types don't include the named param record format,
-  // but Elasticsearch supports named params at runtime.
+  // (typed as `EsqlNamedValue`) and are never interpolated into the query string.
   router.versioned
     .post({
       path: '/api/saved_objects_example/_esql_query_parameterized',
@@ -92,7 +90,7 @@ export function registerEsqlExampleRoutes(router: IRouter, log: Logger) {
             type: TYPE_A,
             namespaces: ['default'],
             pipeline: `| WHERE ${TYPE_A}.myField == ?searchTerm | LIMIT 10`,
-            params: [{ searchTerm }] as unknown as estypes.EsqlESQLParam[],
+            params: [{ searchTerm } satisfies estypes.EsqlNamedValue],
           });
           return res.ok({
             body: {

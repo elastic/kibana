@@ -11,6 +11,7 @@ import {
   type Logger,
   type LoggerFactory,
 } from '@kbn/core/server';
+import { addTransactionLabels } from '@kbn/apm-utils';
 import type {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
@@ -19,8 +20,13 @@ import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { SLOConfig, SLOPluginStartDependencies } from '../../../types';
 import { SO_SLO_COMPOSITE_TYPE } from '../../../saved_objects/slo_composite';
 import { computeAndPersistCompositeSummaries } from './compute_and_persist_composite_summaries';
+import { COMPOSITE_SLO_SUMMARY_TASK_SKIP_REASON } from './constants';
 
 export const TYPE = 'slo:composite-slo-summary-task';
+
+export function getCompositeSloSummaryTaskId(): string {
+  return `${TYPE}:1.0.0`;
+}
 
 interface TaskSetupContract {
   taskManager: TaskManagerSetupContract;
@@ -36,7 +42,7 @@ export class CompositeSloSummaryTask {
 
   constructor(setupContract: TaskSetupContract) {
     const { core, config, taskManager, logFactory } = setupContract;
-    this.logger = logFactory.get(this.taskId);
+    this.logger = logFactory.get(getCompositeSloSummaryTaskId());
     this.config = config;
 
     taskManager.registerTaskDefinitions({
@@ -63,7 +69,7 @@ export class CompositeSloSummaryTask {
   }
 
   private get taskId() {
-    return `${TYPE}:1.0.0`;
+    return getCompositeSloSummaryTaskId();
   }
 
   public async start(plugins: SLOPluginStartDependencies) {
@@ -111,9 +117,14 @@ export class CompositeSloSummaryTask {
     taskInstance: ConcreteTaskInstance,
     core: CoreSetup,
     abortController: AbortController
-  ) {
+  ): Promise<{ state: Record<string, unknown> } | void> {
     if (!this.wasStarted) {
       this.logger.debug('runTask Aborted. Task not started yet');
+      addTransactionLabels({
+        plugin: 'slo',
+        composite_slo_summary_run_outcome: 'skipped',
+        composite_slo_summary_skip_reason: COMPOSITE_SLO_SUMMARY_TASK_SKIP_REASON.TASK_NOT_STARTED,
+      });
       return;
     }
 
@@ -121,6 +132,12 @@ export class CompositeSloSummaryTask {
       this.logger.debug(
         `Outdated task version: Got [${taskInstance.id}], current version is [${this.taskId}]`
       );
+      addTransactionLabels({
+        plugin: 'slo',
+        composite_slo_summary_run_outcome: 'skipped',
+        composite_slo_summary_skip_reason:
+          COMPOSITE_SLO_SUMMARY_TASK_SKIP_REASON.OUTDATED_TASK_VERSION,
+      });
       return getDeleteTaskRunResult();
     }
 
@@ -136,5 +153,7 @@ export class CompositeSloSummaryTask {
       logger: this.logger,
       abortController,
     });
+
+    return { state: { ...taskInstance.state } };
   }
 }

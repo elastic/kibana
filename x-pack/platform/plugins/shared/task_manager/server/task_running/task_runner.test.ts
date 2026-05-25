@@ -2004,6 +2004,60 @@ describe('TaskManagerRunner', () => {
       expect(wasCancelled).toBeTruthy();
     });
 
+    test('does not run heartbeat updates while processing recurring task result', async () => {
+      let sawProcessResultUpdate = false;
+      let heartbeatUpdateCount = 0;
+      let heartbeatCountBeforeProcessResult: number | undefined;
+      const { runner, store } = await readyToRunStageSetup({
+        instance: {
+          id: 'foo',
+          status: TaskStatus.Running,
+          startedAt: new Date(),
+          enabled: true,
+          schedule: { interval: '1m' },
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            timeout: `365d`,
+            createTaskRunner: () => ({
+              async run() {
+                const promise = new Promise((r) => setTimeout(r, 60000));
+                jest.advanceTimersByTime(60000);
+                await promise;
+                return { state: {} };
+              },
+            }),
+          },
+        },
+      });
+
+      store.partialUpdate.mockImplementation(async (doc) => {
+        if (doc.retryAt && !doc.status) {
+          heartbeatUpdateCount += 1;
+        }
+
+        if (doc.status === TaskStatus.Idle) {
+          sawProcessResultUpdate = true;
+          heartbeatCountBeforeProcessResult = heartbeatUpdateCount;
+          // If heartbeat timer is still running while processResult persists task state,
+          // advancing time here will trigger an additional retryAt update.
+          jest.advanceTimersByTime(60000);
+        }
+        return mockInstance({
+          ...doc,
+          schedule: { interval: '1m' },
+        }) as ConcreteTaskInstance;
+      });
+
+      await runner.run();
+
+      expect(sawProcessResultUpdate).toBe(true);
+      expect(heartbeatUpdateCount).toBeGreaterThan(0);
+      expect(heartbeatCountBeforeProcessResult).toBeDefined();
+      expect(heartbeatUpdateCount).toBe(heartbeatCountBeforeProcessResult);
+    });
+
     describe('TaskEvents', () => {
       test('emits TaskEvent when a task is run successfully', async () => {
         const id = _.random(1, 20).toString();

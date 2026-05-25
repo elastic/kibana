@@ -6,8 +6,8 @@
  */
 
 import { createDeleteStreamTool } from './delete_stream';
-import { createMockGetScopedClients, createMockToolContext } from '../test_helpers';
-import { StreamsWriteQueue } from '../write_queue';
+import { createMockGetScopedClients, createMockToolContext } from '../../utils/test_helpers';
+import { StreamsWriteQueue } from '../../utils/write_queue';
 
 describe('createDeleteStreamTool', () => {
   const setup = () => {
@@ -24,12 +24,12 @@ describe('createDeleteStreamTool', () => {
     expect(tool.confirmation!.askUser).toBe('always');
   });
 
-  it('uses change_description as confirmation message when provided', async () => {
+  it('uses confirmation_body as confirmation message when provided', async () => {
     const { tool } = setup();
     const description = '**Stream**: logs.nginx\n~1,200,000 docs will be deleted.';
 
     const confirmation = await tool.confirmation!.getConfirmation!({
-      toolParams: { name: 'logs.nginx', change_description: description },
+      toolParams: { name: 'logs.nginx', confirmation_body: description },
     });
 
     expect(confirmation.title).toBe('Permanently delete stream "logs.nginx"');
@@ -38,16 +38,16 @@ describe('createDeleteStreamTool', () => {
     expect(confirmation.confirm_text).toBe('Delete permanently');
   });
 
-  it('falls back to JSON params when change_description is omitted', async () => {
+  it('falls back to JSON params when confirmation_body is omitted', async () => {
     const { tool } = setup();
 
     const confirmation = await tool.confirmation!.getConfirmation!({
       toolParams: { name: 'logs.nginx' },
     });
 
-    expect(confirmation.message).toContain('"name": "logs.nginx"');
-    expect(confirmation.message).toContain('```json');
-    expect(confirmation.message).not.toContain('change_description');
+    expect(confirmation.message).toContain('**name:** logs.nginx');
+    expect(confirmation.message).not.toContain('```json');
+    expect(confirmation.message).not.toContain('confirmation_body');
     expect(confirmation.color).toBe('danger');
   });
 

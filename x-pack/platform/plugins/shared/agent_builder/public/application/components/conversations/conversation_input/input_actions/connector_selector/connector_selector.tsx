@@ -19,9 +19,11 @@ import { useLoadConnectors } from '@kbn/inference-connectors';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { useUiPrivileges } from '../../../../../hooks/use_ui_privileges';
 import { useNavigation } from '../../../../../hooks/use_navigation';
-import { useSendMessage } from '../../../../../context/send_message/send_message_context';
+import { useConnectorSelection } from '../../../../../hooks/chat/use_connector_selection';
 import { useDefaultConnector } from '../../../../../hooks/chat/use_default_connector';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import {
@@ -39,6 +41,21 @@ const selectableAriaLabel = i18n.translate(
     defaultMessage: 'Select a model',
   }
 );
+
+/**
+ * Generates an accessible label for the connector selector button that includes
+ * both the action ("Select connector") and the current value, satisfying WCAG 4.1.2
+ * Name, Role, Value requirement so screen readers announce the selected connector.
+ */
+const getConnectorButtonAriaLabel = (connectorName: string) =>
+  i18n.translate(
+    'xpack.agentBuilder.conversationInput.connectorSelector.connectorButtonAriaLabel',
+    {
+      defaultMessage: 'Select connector, {connectorName}',
+      values: { connectorName },
+    }
+  );
+
 const defaultConnectorLabel = i18n.translate(
   'xpack.agentBuilder.conversationInput.connectorSelector.defaultConnectorLabel',
   {
@@ -65,27 +82,33 @@ const connectorSelectId = 'agentBuilderConnectorSelect';
 const connectorListId = `${connectorSelectId}_listbox`;
 const CONNECTOR_OPTION_ROW_HEIGHT = 32;
 
+const defaultConnectorButtonLabel = i18n.translate(
+  'xpack.agentBuilder.conversationInput.connectorSelector.buttonLabel',
+  { defaultMessage: 'LLM' }
+);
+
 const ConnectorPopoverButton: React.FC<{
   isPopoverOpen: boolean;
   onClick: () => void;
   disabled: boolean;
   selectedConnectorName?: string;
 }> = ({ isPopoverOpen, onClick, disabled, selectedConnectorName }) => {
+  const connectorDisplayName = selectedConnectorName ?? defaultConnectorButtonLabel;
   return (
     <InputPopoverButton
       open={isPopoverOpen}
       disabled={disabled}
       iconType={() => <ConnectorIcon connectorName={selectedConnectorName} />}
       onClick={onClick}
-      aria-labelledby={connectorSelectId}
+      aria-label={getConnectorButtonAriaLabel(connectorDisplayName)}
       data-test-subj="agentBuilderConnectorSelectorButton"
+      ebtProps={getEbtProps({
+        element: AGENT_BUILDER_UI_EBT.element.pageContent,
+        action: AGENT_BUILDER_UI_EBT.action.conversation.OPEN_CONNECTOR_SELECTOR,
+        detail: 'connector',
+      })}
     >
-      {selectedConnectorName ?? (
-        <FormattedMessage
-          id="xpack.agentBuilder.conversationInput.connectorSelector.buttonLabel"
-          defaultMessage="LLM"
-        />
-      )}
+      {connectorDisplayName}
     </InputPopoverButton>
   );
 };
@@ -130,6 +153,11 @@ const ConnectorListFooter: React.FC = () => {
             aria-label={manageConnectorsAriaLabel}
             href={manageConnectorsUrl}
             disabled={!hasWritePrivilege}
+            {...getEbtProps({
+              element: AGENT_BUILDER_UI_EBT.element.pageContent,
+              action: AGENT_BUILDER_UI_EBT.action.conversation.MANAGE_CONNECTORS,
+              detail: 'connector',
+            })}
           >
             <FormattedMessage
               id="xpack.agentBuilder.conversationInput.agentSelector.manageAgents"
@@ -149,13 +177,11 @@ export const ConnectorSelector: React.FC<{}> = () => {
     services: { http, settings },
   } = useKibana();
   const {
-    connectorSelection: {
-      selectConnector: onSelectConnector,
-      selectedConnector: selectedConnectorId,
-      defaultConnectorId,
-      defaultConnectorOnly,
-    },
-  } = useSendMessage();
+    selectConnector: onSelectConnector,
+    selectedConnector: selectedConnectorId,
+    defaultConnectorId,
+    defaultConnectorOnly,
+  } = useConnectorSelection();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const { data: aiConnectors, isLoading } = useLoadConnectors({
@@ -351,6 +377,7 @@ export const ConnectorSelector: React.FC<{}> = () => {
           css: selectorListStyles,
           rowHeight: CONNECTOR_OPTION_ROW_HEIGHT,
           onFocusBadge: false,
+          paddingSize: 's',
         }}
       >
         {(list) => (

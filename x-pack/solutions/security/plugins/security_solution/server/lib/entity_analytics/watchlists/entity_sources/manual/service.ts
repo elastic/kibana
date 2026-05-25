@@ -20,7 +20,7 @@ import { MANUAL_SOURCE_ID } from './constants';
 import type { BulkItemOutcome, WatchlistBulkEntity } from '../types';
 import type { WatchlistEntityDoc } from '../../entities/types';
 import type { WatchlistsByEuid } from '../../entities/service';
-import { getEntityType } from '../../entities/utils';
+import { getEntityType, type EntityTypeSource } from '../../entities/utils';
 
 interface ServiceDeps {
   esClient: ElasticsearchClient;
@@ -204,7 +204,7 @@ const findEntitiesInStore = async (crudClient: CRUDClient, euids: string[]) => {
     return [
       {
         euid: id,
-        type: getEntityType(entity as Parameters<typeof getEntityType>[0]),
+        type: getEntityType(entity as EntityTypeSource),
         name: entity.entity?.name,
         currentWatchlists: normalizeWatchlists(entity.entity?.attributes?.watchlists),
       },

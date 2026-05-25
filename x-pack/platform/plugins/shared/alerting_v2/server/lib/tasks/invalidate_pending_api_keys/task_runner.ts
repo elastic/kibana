@@ -78,7 +78,7 @@ export class ApiKeyInvalidationTaskRunner {
       };
     } catch (e) {
       this.logger.error(
-        `Error executing notification policy apiKey invalidation task: ${(e as Error).message}`,
+        `Error executing action policy apiKey invalidation task: ${(e as Error).message}`,
         {
           error: { stack_trace: (e as Error).stack },
         }

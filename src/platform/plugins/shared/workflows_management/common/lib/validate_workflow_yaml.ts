@@ -9,13 +9,17 @@
 
 import type { ValidateWorkflowResponseDto, WorkflowYaml } from '@kbn/workflows';
 import type { WorkflowDiagnostic } from '@kbn/workflows/types/v1';
+import {
+  InvalidYamlSchemaError,
+  InvalidYamlSyntaxError,
+  parseWorkflowYamlToJSON,
+  validateLiquidTemplate,
+} from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
-import { InvalidYamlSchemaError, InvalidYamlSyntaxError } from './errors';
-import { validateLiquidTemplate } from './validate_liquid_template';
+import { connectorParamsSchemaResolver } from './connector_params_schema_resolver';
 import { validateStepNameUniqueness } from './validate_step_names';
 import type { TriggerDefinitionForValidateTriggers } from './validate_triggers';
 import { validateTriggers } from './validate_triggers';
-import { parseWorkflowYamlToJSON } from './yaml';
 
 export interface ValidateWorkflowYamlOptions {
   triggerDefinitions?: TriggerDefinitionForValidateTriggers[];
@@ -29,7 +33,9 @@ export function validateWorkflowYaml(
   const diagnostics: WorkflowDiagnostic[] = [];
   let parsedWorkflow: WorkflowYaml | undefined;
 
-  const parseResult = parseWorkflowYamlToJSON(yaml, zodSchema);
+  const parseResult = parseWorkflowYamlToJSON(yaml, zodSchema, {
+    connectorParamsSchemaResolver,
+  });
 
   if (!parseResult.success) {
     const { error } = parseResult;

@@ -11,8 +11,6 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
   describe('alerting_v2', () => {
     loadTestFile(require.resolve('./bulk_create_alert_action'));
     loadTestFile(require.resolve('./episode_status_filter'));
-    loadTestFile(require.resolve('./notification_policy'));
-    loadTestFile(require.resolve('./rule'));
     loadTestFile(require.resolve('./telemetry'));
   });
 }

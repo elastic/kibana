@@ -66,11 +66,11 @@ function AssigneeFlyoutSelectableMessage({
   );
 }
 
-function AssigneeFlyoutEmptyListMessage() {
+function AssigneeFlyoutEmptyListMessage({ episodeCount }: { episodeCount: number }) {
   return (
     <AssigneeFlyoutSelectableMessage
       data-test-subj="alertingV2EditEpisodeAssigneeEmptyList"
-      title={i18n.ASSIGNEE_FLYOUT_EMPTY_LIST_TITLE(1)}
+      title={i18n.ASSIGNEE_FLYOUT_EMPTY_LIST_TITLE(episodeCount)}
       body={i18n.ASSIGNEE_FLYOUT_EMPTY_LIST_HELP}
     />
   );
@@ -97,10 +97,30 @@ function AssigneeFlyoutNoMatchesMessage() {
 }
 
 export interface EditEpisodeAssigneeFlyoutProps {
-  episodeId: string;
-  groupHash: string;
+  /** Required for inline (single-row) usage that posts the assign action itself. */
+  episodeId?: string;
+  /** Required for inline (single-row) usage that posts the assign action itself. */
+  groupHash?: string;
   lastAssigneeUid: string | null | undefined;
   onClose: () => void;
+  /**
+   * When provided, called with the selected uid (or null) instead of posting the
+   * assign action. The bulk path uses this to gather the selection and post one
+   * action per selected episode itself. The flyout closes immediately after calling.
+   */
+  onSave?: (uid: string | null) => void;
+  /**
+   * Number of episodes the action will apply to. Drives plural copy in the
+   * empty list message and, when > 1, keeps Save enabled even if the selection
+   * is unchanged from the (empty) "current" state — so the bulk path can clear
+   * assignees across multiple rows. Defaults to 1 (single-row usage).
+   */
+  episodeCount?: number;
+  /**
+   * When true, render only the body — `overlays.openFlyout` already provides
+   * the surrounding `EuiFlyout` shell. Default `false` for inline usage.
+   */
+  embedded?: boolean;
 }
 
 export function EditEpisodeAssigneeFlyout({
@@ -108,7 +128,11 @@ export function EditEpisodeAssigneeFlyout({
   groupHash,
   lastAssigneeUid,
   onClose,
+  onSave,
+  embedded = false,
+  episodeCount = 1,
 }: EditEpisodeAssigneeFlyoutProps) {
+  const isBulk = episodeCount > 1;
   const { http, userProfile, notifications } = useKibana<CoreStart>().services;
   const toasts = notifications.toasts;
 
@@ -156,17 +180,32 @@ export function EditEpisodeAssigneeFlyout({
     if (lastAssigneeUid && currentProfiles === undefined) {
       return true;
     }
+    // In bulk mode there's no shared "current" assignee across the selection,
+    // so any save (including clearing) is meaningful — only block while the
+    // initial fetch above is pending.
+    if (isBulk) {
+      return false;
+    }
     return (selectedProfile?.uid ?? null) === (currentProfile?.uid ?? null);
-  }, [currentProfiles, currentProfile, lastAssigneeUid, selectedProfile]);
+  }, [currentProfiles, currentProfile, isBulk, lastAssigneeUid, selectedProfile]);
 
   const handleSave = useCallback(() => {
+    const nextUid = selectedProfile?.uid ?? null;
+    if (onSave) {
+      onSave(nextUid);
+      onClose();
+      return;
+    }
+    if (!episodeId || !groupHash) {
+      return;
+    }
     createAssignAction(
       {
         groupHash,
         actionType: ALERT_EPISODE_ACTION_TYPE.ASSIGN,
         body: {
           episode_id: episodeId,
-          assignee_uid: selectedProfile?.uid ?? null,
+          assignee_uid: nextUid,
         },
       },
       {
@@ -181,21 +220,27 @@ export function EditEpisodeAssigneeFlyout({
         },
       }
     );
-  }, [createAssignAction, episodeId, groupHash, onClose, selectedProfile, toasts]);
+  }, [createAssignAction, episodeId, groupHash, onClose, onSave, selectedProfile, toasts]);
 
-  const subtitle = useMemo(() => i18n.getAssigneeFlyoutSubtitle(episodeId), [episodeId]);
+  const subtitle = useMemo(
+    () => (episodeId ? i18n.getAssigneeFlyoutSubtitle(episodeId) : undefined),
+    [episodeId]
+  );
 
   return (
     <EpisodeActionFlyout
+      embedded={embedded}
       onClose={onClose}
       dataTestSubj="alertingV2EditEpisodeAssigneeFlyout"
       ariaLabelledBy="alertingV2EditEpisodeAssigneeFlyoutTitle"
       titleId="alertingV2EditEpisodeAssigneeFlyoutTitle"
       title={i18n.ASSIGNEE_FLYOUT_TITLE}
       subtitle={
-        <EuiText color="subdued" size="s">
-          <p>{subtitle}</p>
-        </EuiText>
+        subtitle ? (
+          <EuiText color="subdued" size="s">
+            <p>{subtitle}</p>
+          </EuiText>
+        ) : undefined
       }
       footer={
         <EpisodeActionFlyoutFooter
@@ -219,7 +264,7 @@ export function EditEpisodeAssigneeFlyout({
         selectedOptions={selectedProfile ? [selectedProfile] : []}
         options={suggestOptions}
         isLoading={isSuggestLoading}
-        emptyMessage={<AssigneeFlyoutEmptyListMessage />}
+        emptyMessage={<AssigneeFlyoutEmptyListMessage episodeCount={episodeCount} />}
         noMatchesMessage={!isSuggestLoading ? <AssigneeFlyoutNoMatchesMessage /> : undefined}
         onSearchChange={(term) => setSearchInput(term)}
         onChange={(next) => {

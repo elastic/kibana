@@ -85,6 +85,7 @@ describe('ToolManager', () => {
     description,
     tags: [],
     readonly: false,
+    experimental: false,
     configuration: {},
     getSchema: async () => z.object({}),
     execute: jest.fn(),

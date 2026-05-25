@@ -9,23 +9,23 @@ import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-serve
 import type { Logger, SavedObject, SavedObjectsServiceSetup } from '@kbn/core/server';
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import {
+  actionPolicyModelVersions,
   apiKeyPendingInvalidationModelVersions,
-  notificationPolicyModelVersions,
   ruleModelVersions,
 } from './model_versions';
 import { apiKeyPendingInvalidationMappings } from './api_key_pending_invalidation_mappings';
-import { notificationPolicyMappings } from './notification_policy_mappings';
+import { actionPolicyMappings } from './action_policy_mappings';
 import { ruleMappings } from './rule_mappings';
-import type { NotificationPolicySavedObjectAttributes } from './schemas/notification_policy_saved_object_attributes';
+import type { ActionPolicySavedObjectAttributes } from './schemas/action_policy_saved_object_attributes';
 import type { RuleSavedObjectAttributes } from './schemas/rule_saved_object_attributes';
 
 export const RULE_SAVED_OBJECT_TYPE = 'alerting_rule';
-export const NOTIFICATION_POLICY_SAVED_OBJECT_TYPE = 'alerting_notification_policy';
+export const ACTION_POLICY_SAVED_OBJECT_TYPE = 'alerting_action_policy';
 export const API_KEY_PENDING_INVALIDATION_TYPE = 'alerting_api_key_pending_invalidation';
 
-export const NotificationPolicyAttributesToEncrypt = ['auth.apiKey'];
+export const ActionPolicyAttributesToEncrypt = ['auth.apiKey'];
 
-export const NotificationPolicyAttributesIncludedInAAD = ['auth.owner', 'auth.createdByUser'];
+export const ActionPolicyAttributesIncludedInAAD = ['auth.owner', 'auth.createdByUser'];
 
 export function registerSavedObjects({
   savedObjects,
@@ -52,18 +52,18 @@ export function registerSavedObjects({
   });
 
   savedObjects.registerType({
-    name: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+    name: ACTION_POLICY_SAVED_OBJECT_TYPE,
     indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
     hidden: true,
     namespaceType: 'multiple-isolated',
-    mappings: notificationPolicyMappings,
+    mappings: actionPolicyMappings,
     management: {
       importableAndExportable: false,
-      getTitle(so: SavedObject<NotificationPolicySavedObjectAttributes>) {
-        return `Notification Policy: [${so.attributes.name}]`;
+      getTitle(so: SavedObject<ActionPolicySavedObjectAttributes>) {
+        return `Action Policy: [${so.attributes.name}]`;
       },
     },
-    modelVersions: notificationPolicyModelVersions,
+    modelVersions: actionPolicyModelVersions,
   });
 
   savedObjects.registerType({
@@ -76,12 +76,12 @@ export function registerSavedObjects({
   });
 
   encryptedSavedObjects.registerType({
-    type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+    type: ACTION_POLICY_SAVED_OBJECT_TYPE,
     enforceRandomId: false,
-    attributesToEncrypt: new Set(NotificationPolicyAttributesToEncrypt),
-    attributesToIncludeInAAD: new Set(NotificationPolicyAttributesIncludedInAAD),
+    attributesToEncrypt: new Set(ActionPolicyAttributesToEncrypt),
+    attributesToIncludeInAAD: new Set(ActionPolicyAttributesIncludedInAAD),
   });
 }
 
-export type { NotificationPolicySavedObjectAttributes } from './schemas/notification_policy_saved_object_attributes';
+export type { ActionPolicySavedObjectAttributes } from './schemas/action_policy_saved_object_attributes';
 export type { RuleSavedObjectAttributes } from './schemas/rule_saved_object_attributes';

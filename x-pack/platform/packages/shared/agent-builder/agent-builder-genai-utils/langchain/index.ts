@@ -32,6 +32,7 @@ export {
   createToolResultMessage,
   createToolCallMessage,
   generateFakeToolCallId,
+  wrapToolResultContent,
   type ToolCall,
   type ToolCallWithReasoning,
 } from './messages';

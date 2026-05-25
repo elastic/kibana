@@ -82,7 +82,7 @@ export function TimeseriesChartWithContext({
       style={{
         line: { strokeWidth: 1, stroke: annotationColor, opacity: 1 },
       }}
-      marker={<EuiIcon type="dot" color={annotationColor} />}
+      marker={<EuiIcon type="dot" color={annotationColor} aria-hidden={true} />}
       markerPosition={Position.Top}
     />,
   ];

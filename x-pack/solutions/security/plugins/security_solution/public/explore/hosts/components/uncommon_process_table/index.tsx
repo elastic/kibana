@@ -65,21 +65,23 @@ const UncommonProcessTableComponent = React.memo<UncommonProcessTableProps>(
       getUncommonProcessesSelector(state, type)
     );
 
-    const { openRightPanel } = useExpandableFlyoutApi();
+    const { openFlyout } = useExpandableFlyoutApi();
 
     const openHostFlyout = useCallback(
       (hostName: string) => {
-        openRightPanel({
-          id: HostPanelKey,
-          params: {
-            hostName,
-            contextID: tableType,
-            scopeId: tableType,
-            isPreviewMode: false,
+        openFlyout({
+          right: {
+            id: HostPanelKey,
+            params: {
+              hostName,
+              contextID: tableType,
+              scopeId: tableType,
+              isPreviewMode: false,
+            },
           },
         });
       },
-      [openRightPanel]
+      [openFlyout]
     );
 
     const updateLimitPagination = useCallback(

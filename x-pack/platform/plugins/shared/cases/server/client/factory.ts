@@ -48,6 +48,7 @@ import {
   AttachmentService,
   AlertService,
   TemplatesService,
+  FieldDefinitionsService,
 } from '../services';
 
 import { AuthorizationAuditLogger } from '../authorization';
@@ -60,6 +61,7 @@ import type { CasesServices } from './types';
 import { LicensingService } from '../services/licensing';
 import { EmailNotificationService } from '../services/notifications/email_notification_service';
 import type { ConfigType } from '../config';
+import type { CasesEventBus } from '../events/event_bus';
 import { getSavedObjectsTypes } from '../../common';
 
 interface CasesClientFactoryArgs {
@@ -80,6 +82,7 @@ interface CasesClientFactoryArgs {
   filesPluginStart: FilesStart;
   usageCounter?: IUsageCounter;
   config: ConfigType;
+  casesEventBus?: CasesEventBus;
   closeReasonValidator?: (
     closeReason: string,
     owner: string,
@@ -162,6 +165,8 @@ export class CasesClientFactory {
 
     const userInfo = await this.getUserInfo(request);
 
+    const spaceId =
+      this.options.spacesPluginStart?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
     const fileService = this.options.filesPluginStart.fileServiceFactory.asScoped(request);
     const { closeReasonValidator } = this.options;
     const boundCloseReasonValidator = closeReasonValidator
@@ -181,12 +186,13 @@ export class CasesClientFactory {
       unifiedAttachmentTypeRegistry: this.options.unifiedAttachmentTypeRegistry,
       securityStartPlugin: this.options.securityPluginStart,
       publicBaseUrl: this.options.publicBaseUrl,
-      spaceId:
-        this.options.spacesPluginStart?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
+      spaceId,
       savedObjectsSerializer,
       fileService,
       usageCounter: this.options.usageCounter,
       config: this.options.config,
+      casesEventBus: this.options.casesEventBus,
+      request,
       closeReasonValidator: boundCloseReasonValidator,
     });
   }
@@ -234,6 +240,10 @@ export class CasesClientFactory {
       namespace,
     });
 
+    const fieldDefinitionsService = new FieldDefinitionsService({
+      unsecuredSavedObjectsClient,
+    });
+
     const caseService = new CasesService({
       log: this.logger,
       unsecuredSavedObjectsClient,
@@ -261,6 +271,7 @@ export class CasesClientFactory {
 
     return {
       templatesService,
+      fieldDefinitionsService,
       alertsService: new AlertService(esClient, this.logger, alertsClient),
       caseService,
       caseConfigureService: new CaseConfigureService(this.logger),

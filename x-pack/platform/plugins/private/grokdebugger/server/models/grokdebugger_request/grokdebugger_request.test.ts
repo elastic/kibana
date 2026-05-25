@@ -7,8 +7,7 @@
 
 import { GrokdebuggerRequest } from './grokdebugger_request';
 
-// FAILING: https://github.com/elastic/kibana/issues/51372
-describe.skip('grokdebugger_request', () => {
+describe('grokdebugger_request', () => {
   describe('GrokdebuggerRequest', () => {
     const downstreamRequest = {
       rawEvent: '55.3.244.1 GET /index.html',
@@ -57,7 +56,6 @@ describe.skip('grokdebugger_request', () => {
           docs: [
             {
               _index: 'grokdebugger',
-              _type: 'grokdebugger',
               _id: 'grokdebugger',
               _source: {
                 rawEvent: '55.3.244.1 GET /index.html',
@@ -87,7 +85,6 @@ describe.skip('grokdebugger_request', () => {
           docs: [
             {
               _index: 'grokdebugger',
-              _type: 'grokdebugger',
               _id: 'grokdebugger',
               _source: {
                 rawEvent: '55.3.244.1 GET /index.html',

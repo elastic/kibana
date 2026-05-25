@@ -23,7 +23,6 @@ requestBody:
               frequency: "5m"
               delay: "2m"
               fieldHistoryLength: 20
-              filter: "host.os.type: linux"
 responses:
   201:
     description: "Indicates the Entity Store was successfully installed."

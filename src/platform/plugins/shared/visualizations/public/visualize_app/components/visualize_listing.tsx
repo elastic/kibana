@@ -45,7 +45,6 @@ import {
   deleteListItems,
   updateBasicSoAttributes,
 } from '../../utils/saved_objects_utils/update_basic_attributes';
-import { checkForDuplicateTitle } from '../../utils/saved_objects_utils/check_for_duplicate_title';
 import { showNewVisModal } from '../../wizard';
 import { getTypes } from '../../services';
 import type { VisualizeServices } from '../types';
@@ -54,6 +53,7 @@ import {
   toTableListViewSavedObject,
   type VisualizeUserContent,
 } from '../../utils/to_table_list_view_saved_object';
+import { hasLibraryItemWithTitle } from '../../utils/saved_objects_utils';
 
 const visualizeLibraryPageTitle = i18n.translate('visualizations.listingPageTitle', {
   defaultMessage: 'Visualize library',
@@ -197,33 +197,29 @@ const useTableListViewProps = (
         {
           type: 'warning',
           async fn(value, id) {
-            if (id) {
-              const content = visualizedUserContent.current?.find((c) => c.id === id);
-              if (content) {
-                try {
-                  await checkForDuplicateTitle(
-                    {
-                      id,
-                      title: value,
-                      lastSavedTitle: content.title,
-                    },
-                    false,
-                    false,
-                    () => {}
-                  );
-                } catch (e) {
-                  return i18n.translate(
-                    'visualizations.visualizeListingDeleteErrorTitle.duplicateWarning',
-                    {
-                      defaultMessage: 'Saving "{value}" creates a duplicate title.',
-                      values: {
-                        value,
-                      },
-                    }
-                  );
-                }
-              }
+            if (!id) return;
+
+            const content = visualizedUserContent.current?.find((c) => c.id === id);
+            if (!content) return;
+
+            if (value.toLowerCase() === content.title.toLowerCase()) {
+              return;
             }
+
+            let hasDuplicateTitle = false;
+            try {
+              hasDuplicateTitle = await hasLibraryItemWithTitle(value);
+            } catch (e) {
+              // ignore error checking for duplicate title
+            }
+            return hasDuplicateTitle
+              ? i18n.translate('visualizations.visualizeListingDeleteErrorTitle.duplicateWarning', {
+                  defaultMessage: 'Saving "{value}" creates a duplicate title.',
+                  values: {
+                    value,
+                  },
+                })
+              : undefined;
           },
         },
       ],

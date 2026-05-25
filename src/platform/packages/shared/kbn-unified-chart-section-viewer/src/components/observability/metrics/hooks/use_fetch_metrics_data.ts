@@ -18,6 +18,11 @@ import { useChartSectionInspector } from '../../../../context/chart_section_insp
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { parseMetricsWithTelemetry } from '../utils/parse_metrics_response_with_telemetry';
 import { getEsqlQuery } from '../utils/get_esql_query';
+import {
+  MetricsExecutionContextAction,
+  MetricsExecutionContextName,
+} from '../utils/execution_context_enums';
+import { reportChartSectionError } from '../../../chart/utils/report_chart_section_error';
 
 /**
  * Fetches METRICS_INFO when in Metrics Experience (non-transformational ES|QL, chart visible).
@@ -30,11 +35,14 @@ export function useFetchMetricsData({
   services,
   isComponentVisible,
   selectedDimensionNames,
+  profileId,
 }: {
   fetchParams: ChartSectionProps['fetchParams'];
   services: ChartSectionProps['services'];
   isComponentVisible: boolean;
   selectedDimensionNames?: Dimension[];
+  /** Forwarded as `profile_id` APM label on captured errors. */
+  profileId: string;
 }): MetricsInfo {
   const { trackMetricsInfo } = useTelemetry();
   const { trackRequest } = useChartSectionInspector();
@@ -42,14 +50,28 @@ export function useFetchMetricsData({
 
   const shouldFetch = isComponentVisible && !!esql && !hasTransformationalCommand(esql);
 
-  const selectedDimensions = useMemo(
-    () => selectedDimensionNames?.map((dimension) => dimension.name),
-    [selectedDimensionNames]
+  // Pre-fetch defense against dimensions the active stream does not map.
+  // Pushing a field name that is not in the dataView into the
+  // `WHERE TO_STRING(field) IS NOT NULL` clause breaks the query and surfaces
+  // "Unable to load visualization". The post-fetch state wipe (against
+  // `allDimensions`) lives in `MetricsExperienceGrid` via `useDimensionsWipe`.
+  const appliedDimensions = useMemo(() => {
+    if (!selectedDimensionNames?.length || !fetchParams.dataView) {
+      return selectedDimensionNames;
+    }
+    return selectedDimensionNames.filter(
+      (dimension) => fetchParams.dataView!.getFieldByName(dimension.name) != null
+    );
+  }, [selectedDimensionNames, fetchParams.dataView]);
+
+  const appliedDimensionNames = useMemo(
+    () => appliedDimensions?.map((dimension) => dimension.name),
+    [appliedDimensions]
   );
 
   const metricsInfoQuery = useMemo(
-    () => buildMetricsInfoQuery(esql, selectedDimensions),
-    [esql, selectedDimensions]
+    () => buildMetricsInfoQuery(esql, appliedDimensionNames),
+    [esql, appliedDimensionNames]
   );
 
   const [{ value, error, loading }, executeFetch] = useAsyncFn(
@@ -73,6 +95,7 @@ export function useFetchMetricsData({
             filters: fetchParams.filters ?? [],
             variables: fetchParams.esqlVariables,
             uiSettings: services.uiSettings,
+            profileId,
           });
 
           return {
@@ -103,7 +126,7 @@ export function useFetchMetricsData({
 
       return {
         ...sortedMetrics,
-        activeDimensions: selectedDimensionNames ?? [],
+        activeDimensions: appliedDimensions ?? [],
       };
     },
     [
@@ -116,7 +139,8 @@ export function useFetchMetricsData({
       services.data.search.search,
       services.uiSettings,
       trackMetricsInfo,
-      selectedDimensionNames,
+      appliedDimensions,
+      profileId,
     ]
   );
 
@@ -131,7 +155,6 @@ export function useFetchMetricsData({
     };
   }, [
     shouldFetch,
-    selectedDimensionNames,
     fetchParams.dataView,
     fetchParams.timeRange,
     fetchParams.abortController,
@@ -139,6 +162,25 @@ export function useFetchMetricsData({
     fetchParams.esqlVariables,
     executeFetch,
   ]);
+
+  // Report every distinct landed fetch error. Repeated failures are a
+  // monitoring signal (something is broken right now), so we deliberately do
+  // not de-dupe at the source - rate-limiting / sampling belongs in APM.
+  // `useAsyncFn` produces a single error reference per failed run, so the
+  // effect only fires once per failure landing.
+  useEffect(() => {
+    if (!error) {
+      return;
+    }
+    reportChartSectionError({
+      error,
+      source: 'useFetchMetricsData',
+      labels: {
+        page: `metrics_${MetricsExecutionContextAction.FETCH}_${MetricsExecutionContextName.METRICS_INFO}`,
+        profile_id: profileId,
+      },
+    });
+  }, [error, profileId]);
 
   return {
     loading,

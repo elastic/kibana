@@ -11,6 +11,7 @@ import {
   renderTemplateMock,
   getPluginsBundlePathsMock,
   getJsDependencyPathsMock,
+  getRspackDependencyPathsMock,
 } from './bootstrap_renderer.test.mocks';
 
 import { BehaviorSubject } from 'rxjs';
@@ -61,8 +62,12 @@ describe('bootstrapRenderer', () => {
   let packageInfo: PackageInfo;
   let userSettingsService: ReturnType<typeof userSettingsServiceMock.createSetupContract>;
   let themeName$: BehaviorSubject<ThemeName>;
+  let kbnUseRspackBeforeEach: string | undefined;
 
   beforeEach(() => {
+    kbnUseRspackBeforeEach = process.env.KBN_USE_RSPACK;
+    delete process.env.KBN_USE_RSPACK;
+
     themeName$ = new BehaviorSubject<ThemeName>(DEFAULT_THEME_NAME);
     auth = httpServiceMock.createAuth();
     uiSettingsClient = uiSettingsServiceMock.createClient();
@@ -73,6 +78,7 @@ describe('bootstrapRenderer', () => {
     getPluginsBundlePathsMock.mockReturnValue(new Map());
     renderTemplateMock.mockReturnValue('__rendered__');
     getJsDependencyPathsMock.mockReturnValue([]);
+    getRspackDependencyPathsMock.mockReturnValue([]);
     uiSettingsClient.get.mockImplementation(getClientGetMockImplementation());
 
     renderer = bootstrapRendererFactory({
@@ -85,9 +91,16 @@ describe('bootstrapRenderer', () => {
   });
 
   afterEach(() => {
+    if (kbnUseRspackBeforeEach === undefined) {
+      delete process.env.KBN_USE_RSPACK;
+    } else {
+      process.env.KBN_USE_RSPACK = kbnUseRspackBeforeEach;
+    }
+
     getPluginsBundlePathsMock.mockReset();
     renderTemplateMock.mockReset();
     getJsDependencyPathsMock.mockReset();
+    getRspackDependencyPathsMock.mockReset();
     themeName$.complete();
   });
 
@@ -427,7 +440,6 @@ describe('bootstrapRenderer', () => {
     });
   });
 
-  // here
   it('calls getJsDependencyPaths with the correct parameters', async () => {
     const pluginsBundlePaths = new Map<string, unknown>();
 
@@ -462,6 +474,47 @@ describe('bootstrapRenderer', () => {
       colorMode: 'light',
       jsDependencyPaths: ['path-1', 'path-2'],
       publicPathMap: expect.any(String),
+    });
+  });
+
+  describe('when KBN_USE_RSPACK is enabled', () => {
+    beforeEach(() => {
+      process.env.KBN_USE_RSPACK = 'true';
+      getRspackDependencyPathsMock.mockReturnValue(['rspack-dep-a', 'rspack-dep-b']);
+      auth.get.mockReturnValue({
+        status: 'unauthenticated' as AuthStatus,
+        state: {},
+      });
+
+      renderer = bootstrapRendererFactory({
+        auth,
+        packageInfo,
+        uiPlugins,
+        baseHref: `/base-path/${packageInfo.buildShaShort}`,
+        themeName$,
+      });
+    });
+
+    afterEach(() => {
+      delete process.env.KBN_USE_RSPACK;
+    });
+
+    it('calls getRspackDependencyPaths and renderTemplate with useRspack', async () => {
+      const request = httpServerMock.createKibanaRequest();
+
+      await renderer({
+        request,
+        uiSettingsClient,
+      });
+
+      expect(getRspackDependencyPathsMock).toHaveBeenCalled();
+      expect(getJsDependencyPathsMock).not.toHaveBeenCalled();
+      expect(renderTemplateMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          useRspack: true,
+          jsDependencyPaths: ['rspack-dep-a', 'rspack-dep-b'],
+        })
+      );
     });
   });
 });

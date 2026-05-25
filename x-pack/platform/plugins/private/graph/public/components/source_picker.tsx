@@ -51,6 +51,9 @@ export function SourcePicker({
         },
       ]}
       fixedPageSize={fixedPageSize}
+      tableCaption={i18n.translate('xpack.graph.sourceModal.tableCaption', {
+        defaultMessage: 'Data sources',
+      })}
     />
   );
 }

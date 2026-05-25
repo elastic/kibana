@@ -14,10 +14,13 @@ import type {
 } from '@kbn/lens-common';
 import type {
   LensByRefSerializedAPIConfig,
+  LensByValueFlattenedSerializedAPIConfig,
   LensByValueSerializedAPIConfig,
   LensSerializedAPIConfig,
+  LensWireAPIConfig,
 } from '@kbn/lens-common-2';
 
+import { isLensAPIFormat } from '@kbn/lens-embeddable-utils';
 import type { FlattenedLensByValuePanelSchema } from '../../server/types';
 import { DOC_TYPE } from '../constants';
 
@@ -34,19 +37,29 @@ export function isByRefLensState(state: LensSerializedState): state is LensByRef
 }
 
 export function isByRefLensConfig(
-  config: LensByRefSerializedAPIConfig | LensSerializedAPIConfig | FlattenedLensByValuePanelSchema
+  config:
+    | LensByRefSerializedAPIConfig
+    | LensSerializedAPIConfig
+    | LensByValueFlattenedSerializedAPIConfig
+    | FlattenedLensByValuePanelSchema
 ): config is LensByRefSerializedAPIConfig {
   return 'ref_id' in config && !!config.ref_id;
 }
 
 export function isFlattenedAPIConfig(
-  config: LensSerializedAPIConfig | FlattenedLensByValuePanelSchema | LensByValueSerializedState
-): config is FlattenedLensByValuePanelSchema {
-  return !('attributes' in config);
+  config:
+    | FlattenedLensByValuePanelSchema
+    | LensWireAPIConfig
+    | LensSerializedAPIConfig
+    | LensByValueSerializedState
+): config is FlattenedLensByValuePanelSchema | LensByValueFlattenedSerializedAPIConfig {
+  return (
+    typeof config === 'object' && config !== null && 'type' in config && !('attributes' in config)
+  );
 }
 
 export function unflattenAPIConfig(
-  config: FlattenedLensByValuePanelSchema
+  config: FlattenedLensByValuePanelSchema | LensByValueFlattenedSerializedAPIConfig
 ): LensByValueSerializedAPIConfig {
   const { title, description, hide_title, hide_border, time_range, drilldowns, ...attributes } =
     config;
@@ -60,4 +73,26 @@ export function unflattenAPIConfig(
     drilldowns,
     attributes,
   };
+}
+
+/**
+ * Counterpart of {@link unflattenAPIConfig}: moves chart fields from nested `attributes`
+ * to the root, producing the flat dashboard app wire shape used with `lens.apiFormat`.
+ *
+ * Chart-level `title`/`description` are stripped because the panel-level ones
+ * (already at the root) are the source of truth. This makes the operation lossy:
+ * `unflatten(flatten(x))` may differ from `x` when the chart carried its own title/description.
+ *
+ * Returns the input unchanged for by-ref configs or when `attributes` is not in API format.
+ */
+export function flattenAPIConfig(config: LensSerializedAPIConfig): LensWireAPIConfig {
+  if (!('attributes' in config) || !config.attributes || !isLensAPIFormat(config.attributes)) {
+    return config;
+  }
+  const { title: _title, description: _description, ...chartFields } = config.attributes;
+  const { attributes: _attributes, ...panelState } = config;
+  return {
+    ...panelState,
+    ...chartFields,
+  } satisfies LensByValueFlattenedSerializedAPIConfig;
 }

@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { STALE_ENDPOINT_PACKAGE_MESSAGE } from '../../../../../common/endpoint/utils/is_endpoint_package_stale';
 
 export const OVERVIEW = i18n.translate('xpack.securitySolution.endpointDetails.overview', {
   defaultMessage: 'Overview',
@@ -60,24 +61,24 @@ export const WORKFLOW_INSIGHTS = {
       }
     ),
   },
+  stalePackageBanner: {
+    title: i18n.translate(
+      'xpack.securitySolution.endpointDetails.workflowInsights.stalePackageBanner.title',
+      { defaultMessage: 'Endpoint integration update available' }
+    ),
+    description: (installedVersion: string, latestVersion: string) =>
+      i18n.translate(
+        'xpack.securitySolution.endpointDetails.workflowInsights.stalePackageBanner.description',
+        {
+          defaultMessage: STALE_ENDPOINT_PACKAGE_MESSAGE,
+          values: { installedVersion, latestVersion },
+        }
+      ),
+  },
   issues: {
     title: i18n.translate('xpack.securitySolution.endpointDetails.workflowInsights.issues.title', {
       defaultMessage: 'Insights',
     }),
-    survey: {
-      description: i18n.translate(
-        'xpack.securitySolution.endpointDetails.workflowInsights.survey.text',
-        {
-          defaultMessage: 'How is Automatic Troubleshooting working for you? ',
-        }
-      ),
-      callToAction: i18n.translate(
-        'xpack.securitySolution.endpointDetails.workflowInsights.survey.callToAction',
-        {
-          defaultMessage: 'Provide feedback',
-        }
-      ),
-    },
     emptyResults: i18n.translate(
       'xpack.securitySolution.endpointDetails.workflowInsights.issues.emptyResults',
       {

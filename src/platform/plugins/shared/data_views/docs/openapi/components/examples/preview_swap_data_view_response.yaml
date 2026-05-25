@@ -1,0 +1,15 @@
+summary: A preview of saved objects that would be affected by a data view swap.
+description: The result array lists every saved object that references the source data view. No saved objects are modified by the preview endpoint.
+value:
+  {
+    "result": [
+      {
+        "id": "8963ca30-bca7-11e8-aa00-0123456789ab",
+        "type": "visualization"
+      },
+      {
+        "id": "edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b",
+        "type": "dashboard"
+      }
+    ]
+  }

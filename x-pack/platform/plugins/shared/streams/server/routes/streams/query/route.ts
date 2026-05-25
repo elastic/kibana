@@ -41,6 +41,20 @@ const readQueryStreamRoute = createServerRoute({
       since: '9.4.0',
       stability: 'experimental',
     },
+    oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {},
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'Query settings for the stream.',
+        },
+      },
+    }),
   },
   security: {
     authz: {
@@ -48,7 +62,7 @@ const readQueryStreamRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ name: z.string() }),
+    path: z.object({ name: z.string().describe('The name of the query stream.') }),
   }),
   handler: async ({
     params,
@@ -106,6 +120,11 @@ const upsertQueryStreamRoute = createServerRoute({
           },
         },
       },
+      responses: {
+        200: {
+          description: 'The query stream settings were updated successfully.',
+        },
+      },
     }),
   },
   security: {
@@ -115,7 +134,7 @@ const upsertQueryStreamRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      name: z.string(),
+      name: z.string().describe('The name of the query stream.'),
     }),
     body: z.object({
       // API accepts esql for UX simplicity, not the stored query format

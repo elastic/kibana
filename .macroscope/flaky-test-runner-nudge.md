@@ -88,9 +88,7 @@ When the changed file is a shared fixture:
 Post one comment on the PR with a single `/flaky` command. Include tokens only for runner types that qualify. All configs — any number, any mix of Scout and FTR — go space-separated on the same line. Format:
 
 ````markdown
-## Catch flakiness early (recommended)
-
-**Recommended before merge**: run the flaky test runner against this PR to catch flakiness early.
+**Catch flakiness early (recommended)**: run the flaky test runner against this PR before merging.
 
 <!-- optional: one-sentence rationale, see "Rationale line" below -->
 

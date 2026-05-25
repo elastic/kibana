@@ -30,7 +30,21 @@ export const QUERY_TYPE_STATS = 'stats' as const;
 
 export type QueryType = typeof QUERY_TYPE_MATCH | typeof QUERY_TYPE_STATS;
 
+/**
+ * Minimum severity score for auto-creating backing rules.
+ * Severity bands: Low < 40, Medium [40, 60), High [60, 80), Critical >= 80.
+ * High + Critical queries are eligible for automatic rule creation.
+ */
+export const HIGH_SEVERITY_THRESHOLD = 60;
+
 export const queryTypeSchema = z.enum([QUERY_TYPE_MATCH, QUERY_TYPE_STATS]);
+
+export const queryFeatureSchema = z.object({
+  id: z.string(),
+  run_id: z.string().optional(),
+});
+
+export type QueryFeature = z.infer<typeof queryFeatureSchema>;
 
 export interface StreamQuery extends StreamQueryBase {
   type: QueryType;
@@ -38,6 +52,7 @@ export interface StreamQuery extends StreamQueryBase {
   // from 0 to 100. aligned with anomaly detection scoring
   severity_score?: number;
   evidence?: string[];
+  features?: QueryFeature[];
 }
 
 const streamQueryBaseSchema = z.object({
@@ -55,6 +70,7 @@ export const streamQuerySchema: z.Schema<StreamQuery> = streamQueryBaseSchema.ex
   type: queryTypeSchema.default(QUERY_TYPE_MATCH),
   severity_score: z.number().optional(),
   evidence: z.array(z.string()).optional(),
+  features: z.array(queryFeatureSchema).optional(),
   esql: esqlQuerySchema,
 });
 

@@ -245,6 +245,64 @@ describe('document selection', () => {
       expect(props.selectedDocsState.clearAllSelectedDocs).toHaveBeenCalled();
     });
 
+    test('filters custom bulk actions based on the available predicate', () => {
+      const props = {
+        isPlainRecord: false,
+        isFilterActive: false,
+        rows: dataTableContextRowsMock,
+        selectedDocsState: buildSelectedDocsState(['i::1::', 'i::2::']),
+        setIsFilterActive: jest.fn(),
+        enableComparisonMode: false,
+        setIsCompareActive: jest.fn(),
+        fieldFormats: servicesMock.fieldFormats,
+        pageIndex: 0,
+        pageSize: 2,
+        toastNotifications: servicesMock.toastNotifications,
+        columns: ['test'],
+        customBulkActions: [
+          {
+            key: 'always',
+            label: 'Always',
+            'data-test-subj': 'bulkActionAlways',
+            onClick: jest.fn(),
+          },
+          {
+            key: 'never',
+            label: 'Never',
+            'data-test-subj': 'bulkActionNever',
+            onClick: jest.fn(),
+            isAvailable: () => false,
+          },
+          {
+            key: 'when-two',
+            label: 'When two',
+            'data-test-subj': 'bulkActionWhenTwo',
+            onClick: jest.fn(),
+            isAvailable: ({ selectedDocIds }: { selectedDocIds: string[] }) =>
+              selectedDocIds.length >= 2,
+          },
+        ],
+      };
+      const contextMock = {
+        ...dataTableContextMock,
+        selectedDocsState: props.selectedDocsState,
+      };
+      const component = mountWithIntl(
+        <UnifiedDataTableContext.Provider value={contextMock}>
+          <DataTableDocumentToolbarBtn {...props} />
+        </UnifiedDataTableContext.Provider>
+      );
+
+      act(() => {
+        findTestSubject(component, 'unifiedDataTableSelectionBtn').simulate('click');
+      });
+      component.update();
+
+      expect(findTestSubject(component, 'bulkActionAlways').exists()).toBe(true);
+      expect(findTestSubject(component, 'bulkActionNever').exists()).toBe(false);
+      expect(findTestSubject(component, 'bulkActionWhenTwo').exists()).toBe(true);
+    });
+
     test('it should not render "Select all X" button if less than pageSize is selected', () => {
       const props = {
         isPlainRecord: false,

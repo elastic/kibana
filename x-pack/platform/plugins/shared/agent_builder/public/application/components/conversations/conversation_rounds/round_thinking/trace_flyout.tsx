@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import React, { type ComponentType } from 'react';
+import React, { useMemo } from 'react';
 import { EuiFlyoutResizable, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { createEsTraceFetcher, TraceWaterfall, useTraceSpans } from '@kbn/llm-trace-waterfall';
+import { useKibana } from '../../../../hooks/use_kibana';
 
 const traceFlyoutTitle = i18n.translate('xpack.agentBuilder.conversation.traceFlyout.title', {
   defaultMessage: 'Trace',
@@ -18,10 +20,16 @@ const traceFlyoutTitle = i18n.translate('xpack.agentBuilder.conversation.traceFl
 interface TraceFlyoutProps {
   traceId: string;
   onClose: () => void;
-  TraceWaterfall: ComponentType<{ traceId: string }>;
 }
 
-export const TraceFlyout: React.FC<TraceFlyoutProps> = ({ traceId, onClose, TraceWaterfall }) => {
+export const TraceFlyout: React.FC<TraceFlyoutProps> = ({ traceId, onClose }) => {
+  const { services } = useKibana();
+  const { data } = services.plugins;
+  const fetchTrace = useMemo(() => createEsTraceFetcher(data.search.search), [data.search.search]);
+  const traceSpansResult = useTraceSpans(traceId, {
+    fetchTrace,
+  });
+
   return (
     <EuiFlyoutResizable
       onClose={onClose}
@@ -50,7 +58,13 @@ export const TraceFlyout: React.FC<TraceFlyoutProps> = ({ traceId, onClose, Trac
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <div style={{ height: '100%', padding: 16 }}>
-          <TraceWaterfall traceId={traceId} />
+          <TraceWaterfall
+            spans={traceSpansResult.spans}
+            traceId={traceId}
+            durationMs={traceSpansResult.durationMs}
+            isLoading={traceSpansResult.isLoading}
+            error={traceSpansResult.error}
+          />
         </div>
       </EuiFlyoutBody>
     </EuiFlyoutResizable>

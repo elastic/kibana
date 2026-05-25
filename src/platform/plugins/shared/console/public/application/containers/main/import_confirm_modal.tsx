@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { useEditorActionContext } from '../../contexts';
 import { useServicesContext } from '../../contexts';
+import { IMPORT_REQUESTS_METRIC_ID } from './constants';
 
 interface ImportConfirmModalProps {
   onClose: () => void;
@@ -21,17 +22,18 @@ interface ImportConfirmModalProps {
 export const ImportConfirmModal = ({ onClose, fileContent }: ImportConfirmModalProps) => {
   const dispatch = useEditorActionContext();
   const {
-    services: { notifications },
+    services: { notifications, trackUiMetric },
   } = useServicesContext();
 
   const modalTitleId = useGeneratedHtmlId();
 
   const onConfirmImport = useCallback(() => {
-    // Import the file content
     dispatch({
       type: 'setFileToImport',
       payload: fileContent as string,
     });
+
+    trackUiMetric.count(IMPORT_REQUESTS_METRIC_ID);
 
     notifications.toasts.addSuccess(
       i18n.translate('console.notification.fileImportedSuccessfully', {
@@ -40,7 +42,7 @@ export const ImportConfirmModal = ({ onClose, fileContent }: ImportConfirmModalP
     );
 
     onClose();
-  }, [fileContent, onClose, dispatch, notifications.toasts]);
+  }, [fileContent, onClose, dispatch, notifications.toasts, trackUiMetric]);
 
   return (
     <EuiConfirmModal

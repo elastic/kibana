@@ -26,7 +26,6 @@ export function Group({ group }: { group: MenuItemGroup }) {
       group.items.map((item) => ({
         // default values for an item
         key: item.id,
-        size: 's',
         toolTipText: item.description,
         toolTipProps: {
           position: 'right',
@@ -34,7 +33,7 @@ export function Group({ group }: { group: MenuItemGroup }) {
         showToolTip: true,
         label: item.name,
         onClick: item.onClick,
-        iconType: item.icon,
+        ...(typeof item.icon === 'string' ? { iconType: item.icon } : { icon: <item.icon /> }),
         isDisabled: item.isDisabled,
         'data-test-subj': item['data-test-subj'],
         role: 'menuitem',
@@ -70,15 +69,7 @@ export function Group({ group }: { group: MenuItemGroup }) {
       <EuiTitle size="xxs">
         <h3 id={titleId}>{group.title}</h3>
       </EuiTitle>
-      <EuiListGroup
-        aria-labelledby={titleId}
-        size="s"
-        gutterSize="none"
-        maxWidth={false}
-        flush
-        listItems={listItems}
-        role="menu"
-      />
+      <EuiListGroup aria-labelledby={titleId} maxWidth={false} listItems={listItems} role="menu" />
     </>
   );
 }

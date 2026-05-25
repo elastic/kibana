@@ -35,6 +35,7 @@ describe('headless webgl arm mac workaround', () => {
       proxy: { enabled: false },
     });
     expect(flags.includes(`--disable-gpu`)).toBe(true);
+    expect(flags.includes(`--enable-gpu`)).toBe(false);
   });
 
   test("doesn't disable gpu when on an arm mac, adds --enable-gpu", () => {

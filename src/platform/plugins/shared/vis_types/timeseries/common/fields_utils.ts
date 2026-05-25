@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import type { FieldSpec, DataView } from '@kbn/data-plugin/common';
@@ -78,7 +79,43 @@ export const getMultiFieldLabel = (fieldForTerms: string[], fields?: SanitizedFi
   return firstFieldLabel ?? '';
 };
 
-export const createCachedFieldValueFormatter = (
+const getOrSetFormatter = (
+  cache: Map<string, FieldFormat>,
+  fieldName: string,
+  dataView?: DataView | null,
+  fields?: SanitizedFieldType[],
+  fieldFormatService?: FieldFormatsRegistry,
+  excludedFieldFormatsIds: FIELD_FORMAT_IDS[] = []
+): FieldFormat | undefined => {
+  const cachedFormatter = cache.get(fieldName);
+  if (cachedFormatter) {
+    return cachedFormatter;
+  }
+
+  const formatId = dataView?.fieldFormatMap?.[fieldName]?.id as FIELD_FORMAT_IDS;
+  if (dataView && !excludedFieldFormatsIds.includes(formatId)) {
+    const field = dataView.fields.getByName(fieldName);
+    if (field) {
+      const formatter = dataView.getFormatterForField(field);
+      if (formatter) {
+        cache.set(fieldName, formatter);
+        return formatter;
+      }
+    }
+  } else if (fieldFormatService && fields) {
+    const f = fields.find((item) => item.name === fieldName);
+    if (f) {
+      const formatter = fieldFormatService.getDefaultInstance(f.type);
+      if (formatter) {
+        cache.set(fieldName, formatter);
+        return formatter;
+      }
+    }
+  }
+  return undefined;
+};
+
+export const createCachedTextFieldValueFormatter = (
   dataView?: DataView | null,
   fields?: SanitizedFieldType[],
   fieldFormatService?: FieldFormatsRegistry,
@@ -87,39 +124,37 @@ export const createCachedFieldValueFormatter = (
 ) => {
   const cache = new Map<string, FieldFormat>();
 
-  return (fieldName: string, value: string, contentType: 'text' | 'html' = 'text') => {
-    const cachedFormatter = cache.get(fieldName);
+  return (fieldName: string, value: string): string | undefined => {
+    const formatter = getOrSetFormatter(
+      cache,
+      fieldName,
+      dataView,
+      fields,
+      fieldFormatService,
+      excludedFieldFormatsIds
+    );
+    return formatter?.convert(value, 'text', options ? { timezone: options.timezone } : undefined);
+  };
+};
 
-    const convert = (fieldFormat: FieldFormat) =>
-      fieldFormat.convert(value, contentType, options ? { timezone: options.timezone } : undefined);
+export const createCachedReactFieldValueFormatter = (
+  dataView?: DataView | null,
+  fields?: SanitizedFieldType[],
+  fieldFormatService?: FieldFormatsRegistry,
+  excludedFieldFormatsIds: FIELD_FORMAT_IDS[] = []
+) => {
+  const cache = new Map<string, FieldFormat>();
 
-    if (cachedFormatter) {
-      return convert(cachedFormatter);
-    }
-
-    const formatId = dataView?.fieldFormatMap?.[fieldName]?.id as FIELD_FORMAT_IDS;
-    if (dataView && !excludedFieldFormatsIds.includes(formatId)) {
-      const field = dataView.fields.getByName(fieldName);
-      if (field) {
-        const formatter = dataView.getFormatterForField(field);
-
-        if (formatter) {
-          cache.set(fieldName, formatter);
-          return convert(formatter);
-        }
-      }
-    } else if (fieldFormatService && fields) {
-      const f = fields.find((item) => item.name === fieldName);
-
-      if (f) {
-        const formatter = fieldFormatService.getDefaultInstance(f.type);
-
-        if (formatter) {
-          cache.set(fieldName, formatter);
-          return convert(formatter);
-        }
-      }
-    }
+  return (fieldName: string, value: string): ReactNode | undefined => {
+    const formatter = getOrSetFormatter(
+      cache,
+      fieldName,
+      dataView,
+      fields,
+      fieldFormatService,
+      excludedFieldFormatsIds
+    );
+    return formatter?.reactConvert(value);
   };
 };
 

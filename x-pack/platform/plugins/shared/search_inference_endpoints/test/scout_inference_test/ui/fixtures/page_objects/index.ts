@@ -7,3 +7,5 @@
 
 export { FeatureSettingsPage } from './feature_settings_page';
 export { EisModelsPage } from './eis_models_page';
+export { ExternalInferencePage } from './external_inference_page';
+export { PageNavigation } from './page_navigation';

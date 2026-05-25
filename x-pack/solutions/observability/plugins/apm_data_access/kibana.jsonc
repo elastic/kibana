@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/apm-data-access-plugin",
-  "owner": ["@elastic/obs-presentation-team"],
+  "owner": ["@elastic/obs-presentation-team", "@elastic/obs-exploration-team"],
   "group": "observability",
   "visibility": "private",
   "plugin": {

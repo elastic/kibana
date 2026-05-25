@@ -6,7 +6,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import type { SmlListItem } from '@kbn/agent-builder-plugin/server';
+import type { SmlListItem } from '@kbn/agent-context-layer-plugin/server';
 import { visualizationSmlType } from './visualization';
 
 jest.mock('@kbn/lens-embeddable-utils', () => ({

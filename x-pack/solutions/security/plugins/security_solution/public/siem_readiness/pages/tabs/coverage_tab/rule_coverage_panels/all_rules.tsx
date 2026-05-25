@@ -19,11 +19,9 @@ import {
 import type { PartialTheme } from '@elastic/charts';
 import { Chart, Partition, Settings, PartitionLayout, LIGHT_THEME } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import {
-  useDetectionRulesByIntegration,
-  useIntegrationDisplayNames,
-  useSiemReadinessApi,
-} from '@kbn/siem-readiness';
+import { useDetectionRulesByIntegration } from '../../../../hooks/use_get_detection_rules_by_integration';
+import { useIntegrationDisplayNames } from '../../../../hooks/use_integration_display_names';
+import { useSiemReadinessApi } from '../../../../hooks/use_siem_readiness_api';
 import { IntegrationSelectablePopover } from '../../../components/integrations_selectable_popover';
 import { createIntegrationStatusMapFromSets } from '../create_integration_status_maps';
 
@@ -289,12 +287,11 @@ export const AllRuleCoveragePanel: React.FC = () => {
                     {
                       groupByRollup: (d: (typeof DONUT_CHART_DATA)[0]) => d.status,
                       shape: {
-                        fillColor: (key, sortIndex) => {
-                          const colors = [
-                            euiTheme.colors.vis.euiColorVis0,
-                            euiTheme.colors.vis.euiColorVis6,
-                          ];
-                          return colors[sortIndex % colors.length];
+                        fillColor: (key) => {
+                          if (key === 'Rules with enabled integrations') {
+                            return euiTheme.colors.vis.euiColorVis0; // Always green for enabled
+                          }
+                          return euiTheme.colors.vis.euiColorVis6; // Always orange for missing/disabled
                         },
                       },
                     },
