@@ -8,9 +8,6 @@
 import type { StoryObj, Meta } from '@storybook/react';
 import type { ComponentProps } from 'react';
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
-import { MockApmPluginContextWrapper } from '../../../../../context/apm_plugin/mock_apm_plugin_context';
-import { MockUrlParamsContextProvider } from '../../../../../context/url_params_context/mock_url_params_context_provider';
 
 import { MobileErrorGroupList } from '.';
 
@@ -19,23 +16,9 @@ type Args = ComponentProps<typeof MobileErrorGroupList>;
 const stories: Meta<Args> = {
   title: 'app/ErrorGroupOverview/MobileErrorGroupList',
   component: MobileErrorGroupList,
-  decorators: [
-    (StoryComponent) => {
-      return (
-        <MemoryRouter
-          initialEntries={[
-            '/mobile-services/{serviceName}/errors-and-crashes?rangeFrom=now-15m&rangeTo=now',
-          ]}
-        >
-          <MockApmPluginContextWrapper>
-            <MockUrlParamsContextProvider>
-              <StoryComponent />
-            </MockUrlParamsContextProvider>
-          </MockApmPluginContextWrapper>
-        </MemoryRouter>
-      );
-    },
-  ],
+  parameters: {
+    routePath: '/mobile-services/{serviceName}/errors-and-crashes?rangeFrom=now-15m&rangeTo=now',
+  },
 };
 export default stories;
 
