@@ -17,6 +17,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
 
+import { AiRuleCreationService } from '../../../detection_engine/common/ai_rule_creation_store';
 import {
   DEFAULT_APP_REFRESH_INTERVAL,
   DEFAULT_APP_TIME_RANGE,
@@ -278,7 +279,7 @@ export const createStartServicesMock = (
     alerting,
     siemMigrations,
     sessionStorage,
-    aiRuleCreation: jest.fn(),
+    aiRuleCreation: new AiRuleCreationService(),
     plugins: { onStart: jest.fn() },
   } as unknown as StartServices;
 };

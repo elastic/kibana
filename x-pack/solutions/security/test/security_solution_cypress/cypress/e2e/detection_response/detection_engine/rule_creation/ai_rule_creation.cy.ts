@@ -14,7 +14,7 @@ import {
   openCreateRuleMenu,
   clickAiRuleCreationMenuItem,
   assertAgentBuilderSidebarIsOpen,
-  assertAgentBuilderConversationInputEditorContains,
+  assertAgentBuilderAttachmentPillContains,
 } from '../../../../tasks/agent_builder';
 import {
   CREATE_RULE_BUTTON,
@@ -52,12 +52,12 @@ describe(
       cy.get(MANUAL_RULE_CREATION_MENU_ITEM).should('be.visible');
     });
 
-    it('should open Agent Builder sidebar with pre-populated prompt when clicking "AI rule creation"', () => {
+    it('should open Agent Builder sidebar with a new rule attachment when clicking "AI rule creation"', () => {
       openCreateRuleMenu();
       clickAiRuleCreationMenuItem();
 
       assertAgentBuilderSidebarIsOpen();
-      assertAgentBuilderConversationInputEditorContains('ES|QL SIEM detection rule');
+      assertAgentBuilderAttachmentPillContains('New Rule');
     });
   }
 );
