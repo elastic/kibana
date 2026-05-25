@@ -218,7 +218,7 @@ export class Plugin
       }),
       order: 8001,
       path: ALERTS_PATH,
-      visibleIn: ['sideNav'],
+      visibleIn: ['solutionSideNav'],
       keywords: ['alerts', 'rules'],
     },
     {
@@ -258,13 +258,13 @@ export class Plugin
           extend: {
             [CasesDeepLinkId.cases]: {
               order: 8003,
-              visibleIn: ['sideNav'],
+              visibleIn: ['solutionSideNav'],
             },
             [CasesDeepLinkId.casesCreate]: {
-              visibleIn: ['sideNav'],
+              visibleIn: ['solutionSideNav'],
             },
             [CasesDeepLinkId.casesConfigure]: {
-              visibleIn: ['sideNav'],
+              visibleIn: ['solutionSideNav'],
             },
           },
         })
@@ -360,8 +360,8 @@ export class Plugin
         'experience',
       ],
       visibleIn: Boolean(pluginsSetup.serverless)
-        ? ['sideNav', 'home', 'kibanaOverview']
-        : ['globalSearch', 'sideNav', 'home', 'kibanaOverview'],
+        ? ['solutionSideNav', 'home', 'kibanaOverview']
+        : ['globalSearch', 'classicSideNav', 'solutionSideNav', 'home', 'kibanaOverview'],
     };
 
     coreSetup.application.register(app);

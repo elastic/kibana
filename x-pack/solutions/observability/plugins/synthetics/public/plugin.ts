@@ -213,7 +213,7 @@ export class SyntheticsPlugin
                 defaultMessage: 'Monitors',
               }),
           path: '/',
-          visibleIn: ['globalSearch', 'sideNav'],
+          visibleIn: ['globalSearch', 'solutionSideNav'],
         },
         {
           id: 'certificates',
@@ -221,7 +221,7 @@ export class SyntheticsPlugin
             defaultMessage: 'TLS Certificates',
           }),
           path: '/certificates',
-          visibleIn: ['globalSearch', 'sideNav'],
+          visibleIn: ['globalSearch', 'solutionSideNav'],
         },
       ],
       mount: async (params: AppMountParameters) => {

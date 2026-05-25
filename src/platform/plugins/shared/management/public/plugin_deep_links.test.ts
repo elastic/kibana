@@ -31,7 +31,7 @@ function getDeepLinksFromUpdater(plugin: ManagementPlugin): AppDeepLink[] {
 }
 
 describe('ManagementPlugin appUpdater deep link visibleIn', () => {
-  it('defaults visibleIn to globalSearch and sideNav for apps without an explicit visibleIn', () => {
+  it('defaults visibleIn to globalSearch and classicSideNav/solutionSideNav for apps without an explicit visibleIn', () => {
     const plugin = createPlugin();
     const setup = plugin.setup(coreMock.createSetup(), { share: mockShare });
 
@@ -46,25 +46,25 @@ describe('ManagementPlugin appUpdater deep link visibleIn', () => {
     const app = kibana?.deepLinks?.find((a) => a.id === 'test-no-visible-in');
 
     expect(app).toBeDefined();
-    expect(app?.visibleIn).toEqual(['globalSearch', 'sideNav']);
+    expect(app?.visibleIn).toEqual(['globalSearch', 'classicSideNav', 'solutionSideNav']);
   });
 
-  it('preserves explicit visibleIn when set to sideNav-only', () => {
+  it('preserves explicit visibleIn when set to classicSideNav/solutionSideNav-only', () => {
     const plugin = createPlugin();
     const setup = plugin.setup(coreMock.createSetup(), { share: mockShare });
 
     setup.sections.section.kibana.registerApp({
-      id: 'test-sidenav-only',
-      title: 'Test App sideNav only',
+      id: 'test-both-nav-only',
+      title: 'Test App both nav only',
       mount: jest.fn(),
-      visibleIn: ['sideNav'],
+      visibleIn: ['classicSideNav', 'solutionSideNav'],
     });
 
     const deepLinks = getDeepLinksFromUpdater(plugin);
     const kibana = deepLinks.find((s) => s.id === 'kibana');
-    const app = kibana?.deepLinks?.find((a) => a.id === 'test-sidenav-only');
+    const app = kibana?.deepLinks?.find((a) => a.id === 'test-both-nav-only');
 
-    expect(app?.visibleIn).toEqual(['sideNav']);
+    expect(app?.visibleIn).toEqual(['classicSideNav', 'solutionSideNav']);
   });
 
   it('preserves explicit visibleIn when set to globalSearch-only', () => {
@@ -112,7 +112,7 @@ describe('ManagementPlugin appUpdater deep link visibleIn', () => {
       title: 'Hidden App With visibleIn',
       mount: jest.fn(),
       hideFromGlobalSearch: true,
-      visibleIn: ['sideNav'],
+      visibleIn: ['classicSideNav', 'solutionSideNav'],
     });
 
     const deepLinks = getDeepLinksFromUpdater(plugin);
@@ -120,6 +120,6 @@ describe('ManagementPlugin appUpdater deep link visibleIn', () => {
     const app = kibana?.deepLinks?.find((a) => a.id === 'test-hidden-with-visible-in');
 
     expect(app).toBeDefined();
-    expect(app?.visibleIn).toEqual(['sideNav']);
+    expect(app?.visibleIn).toEqual(['classicSideNav', 'solutionSideNav']);
   });
 });

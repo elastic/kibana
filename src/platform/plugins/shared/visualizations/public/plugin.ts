@@ -582,7 +582,7 @@ export class VisualizationsPlugin
         const isServerless = Boolean(serverless);
         const isSolutionView = space.solution && space.solution !== 'classic';
         const visibleIn: AppDeepLinkLocations[] =
-          isServerless || isSolutionView ? [] : ['globalSearch', 'sideNav'];
+          isServerless || isSolutionView ? [] : ['globalSearch', 'classicSideNav'];
         this.visibilityUpdater.next(() => ({ visibleIn }));
       });
     }

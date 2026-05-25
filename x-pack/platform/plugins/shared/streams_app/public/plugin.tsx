@@ -122,7 +122,7 @@ export class StreamsAppPlugin
                 }
 
                 return {
-                  visibleIn: ['sideNav', 'globalSearch'],
+                  visibleIn: ['classicSideNav', 'solutionSideNav', 'globalSearch'],
                 };
               };
             })

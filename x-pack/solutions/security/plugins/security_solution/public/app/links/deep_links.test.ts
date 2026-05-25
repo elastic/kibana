@@ -37,7 +37,7 @@ describe('solutionFormatter', () => {
         id,
         path: `/path/${id}`,
         title: `Title for ${id}`,
-        visibleIn: ['globalSearch', 'sideNav'],
+        visibleIn: ['globalSearch', 'solutionSideNav'],
       },
     ]);
   });
@@ -59,7 +59,7 @@ describe('solutionFormatter', () => {
         id,
         path: `/path/${id}`,
         title: `Title for ${id}`,
-        visibleIn: ['globalSearch', 'sideNav'],
+        visibleIn: ['globalSearch', 'solutionSideNav'],
       },
     ]);
   });
@@ -82,12 +82,12 @@ describe('solutionFormatter', () => {
         id,
         path: `/path/${id}`,
         title: `Title for ${id}`,
-        visibleIn: ['globalSearch', 'sideNav'],
+        visibleIn: ['globalSearch', 'solutionSideNav'],
       },
     ]);
   });
 
-  it('should include unavailable links with sideNav visibility only', () => {
+  it('should include unavailable links with solutionSideNav visibility only', () => {
     const id = 'page-1' as SecurityPageName;
     const id2 = 'page-2' as SecurityPageName;
     const tree: NavigationTreeDefinition = {
@@ -105,13 +105,13 @@ describe('solutionFormatter', () => {
         id,
         path: `/path/${id}`,
         title: `Title for ${id}`,
-        visibleIn: ['globalSearch', 'sideNav'],
+        visibleIn: ['globalSearch', 'solutionSideNav'],
       },
       {
         id: id2,
         path: `/path/${id2}`,
         title: `Title for ${id2}`,
-        visibleIn: ['sideNav'],
+        visibleIn: ['solutionSideNav'],
       },
     ]);
   });
@@ -137,7 +137,7 @@ describe('solutionFormatter', () => {
         id,
         path: `/path/${id}`,
         title: `Title for ${id}`,
-        visibleIn: ['globalSearch', 'sideNav'],
+        visibleIn: ['globalSearch', 'solutionSideNav'],
       },
     ]);
   });
@@ -164,7 +164,7 @@ describe('solutionFormatter', () => {
         id,
         path: `/path/${id}`,
         title: `Title for ${id}`,
-        visibleIn: ['globalSearch', 'sideNav'],
+        visibleIn: ['globalSearch', 'solutionSideNav'],
       },
     ]);
   });

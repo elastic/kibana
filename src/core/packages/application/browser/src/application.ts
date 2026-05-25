@@ -108,10 +108,13 @@ export interface App<HistoryLocationState = unknown> extends AppNavOptions {
    * - "globalSearch": the link will appear in the global search bar
    * - "home": the link will appear on the Kibana home page
    * - "kibanaOverview": the link will appear in the Kibana overview page
-   * - "sideNav": the link will appear in the side navigation.
-   *   Note: "sideNav" will be deprecated when we change the navigation to "solutions" style.
+   * - "classicSideNav": the link will appear in the classic (hamburger) side navigation only.
+   * - "solutionSideNav": the link will appear in solution navs only, not in the classic side navigation.
+   *   Use this when the link should be accessible from a solution nav but hidden from the classic hamburger menu.
    *
-   * @default ['globalSearch', 'sideNav']
+   * To appear in both classic and solution navs, use `['classicSideNav', 'solutionSideNav']`.
+   *
+   * @default ['globalSearch', 'classicSideNav', 'solutionSideNav']
    * unless the status is marked as `inaccessible`.
    * @note Set to `[]` (empty array) to hide this link
    */
@@ -254,7 +257,12 @@ export type PublicAppDeepLinkInfo = Omit<AppDeepLink, 'deepLinks' | 'keywords' |
 };
 
 /** The places in the UI where a deepLink can be shown */
-export type AppDeepLinkLocations = 'globalSearch' | 'sideNav' | 'home' | 'kibanaOverview';
+export type AppDeepLinkLocations =
+  | 'globalSearch'
+  | 'classicSideNav'
+  | 'solutionSideNav'
+  | 'home'
+  | 'kibanaOverview';
 
 /**
  * Input type for registering secondary in-app locations for an application.

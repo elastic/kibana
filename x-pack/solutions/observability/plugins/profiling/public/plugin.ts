@@ -6,7 +6,7 @@
  */
 
 import type {
-  AppDeepLinkLocations,
+  AppDeepLink,
   AppMountParameters,
   AppUpdater,
   CoreSetup,
@@ -48,7 +48,7 @@ export class ProfilingPlugin
           defaultMessage: 'Stacktraces',
         }),
         path: '/stacktraces',
-        visibleIn: ['globalSearch', 'sideNav'] as AppDeepLinkLocations[],
+        visibleIn: ['globalSearch', 'solutionSideNav'],
       },
       {
         id: 'flamegraphs',
@@ -56,7 +56,7 @@ export class ProfilingPlugin
           defaultMessage: 'Flamegraphs',
         }),
         path: '/flamegraphs',
-        visibleIn: ['globalSearch', 'sideNav'] as AppDeepLinkLocations[],
+        visibleIn: ['globalSearch', 'solutionSideNav'],
       },
       {
         id: 'functions',
@@ -64,9 +64,9 @@ export class ProfilingPlugin
           defaultMessage: 'Functions',
         }),
         path: '/functions',
-        visibleIn: ['globalSearch', 'sideNav'] as AppDeepLinkLocations[],
+        visibleIn: ['globalSearch', 'solutionSideNav'],
       },
-    ];
+    ] satisfies AppDeepLink[];
 
     const kuerySubject = new BehaviorSubject<string>('');
     const appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));

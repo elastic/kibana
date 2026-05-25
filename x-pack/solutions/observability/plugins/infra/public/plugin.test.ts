@@ -8,16 +8,22 @@
 import { getInfraDeepLinks } from './plugin';
 
 describe('getInfraDeepLinks', () => {
-  it('visible nav links include both globalSearch and sideNav', () => {
+  it('visible nav links include globalSearch and solutionSideNav', () => {
     const links = getInfraDeepLinks({ metricsExplorerEnabled: false });
 
-    expect(links.find((l) => l.id === 'inventory')?.visibleIn).toEqual(['globalSearch', 'sideNav']);
-    expect(links.find((l) => l.id === 'hosts')?.visibleIn).toEqual(['globalSearch', 'sideNav']);
+    expect(links.find((l) => l.id === 'inventory')?.visibleIn).toEqual([
+      'globalSearch',
+      'solutionSideNav',
+    ]);
+    expect(links.find((l) => l.id === 'hosts')?.visibleIn).toEqual([
+      'globalSearch',
+      'solutionSideNav',
+    ]);
   });
 
-  it('settings is sideNav-only (hidden breadcrumb node)', () => {
+  it('settings is solutionSideNav (hidden breadcrumb node)', () => {
     const links = getInfraDeepLinks({ metricsExplorerEnabled: false });
-    expect(links.find((l) => l.id === 'settings')?.visibleIn).toEqual(['sideNav']);
+    expect(links.find((l) => l.id === 'settings')?.visibleIn).toEqual(['solutionSideNav']);
   });
 
   it('assetDetails is hidden from all nav locations', () => {
@@ -25,11 +31,11 @@ describe('getInfraDeepLinks', () => {
     expect(links.find((l) => l.id === 'assetDetails')?.visibleIn).toEqual([]);
   });
 
-  it('includes metrics-explorer with globalSearch and sideNav when feature flag is enabled', () => {
+  it('includes metrics-explorer with globalSearch and solutionSideNav when feature flag is enabled', () => {
     const links = getInfraDeepLinks({ metricsExplorerEnabled: true });
     expect(links.find((l) => l.id === 'metrics-explorer')?.visibleIn).toEqual([
       'globalSearch',
-      'sideNav',
+      'solutionSideNav',
     ]);
   });
 

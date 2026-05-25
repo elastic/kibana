@@ -26,13 +26,13 @@ export const getLogsAppRoutes = () => {
       id: 'anomalies',
       title: logsAnomaliesTitle,
       path: '/anomalies',
-      visibleIn: ['globalSearch', 'sideNav'],
+      visibleIn: ['globalSearch', 'solutionSideNav'],
     },
     logsCategories: {
       id: 'log-categories',
       title: logCategoriesTitle,
       path: '/log-categories',
-      visibleIn: ['globalSearch', 'sideNav'],
+      visibleIn: ['globalSearch', 'solutionSideNav'],
     },
   };
 

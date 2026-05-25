@@ -130,7 +130,7 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
               id: tool.id,
               title: tool.title as string,
               path: `#/${tool.id}`,
-              visibleIn: ['globalSearch', 'sideNav'],
+              visibleIn: ['globalSearch', 'solutionSideNav'],
             };
             if (!devtoolsDeeplinkIds.some((id) => id === deepLink.id)) {
               throw new Error('Deeplink must be registered in package.');

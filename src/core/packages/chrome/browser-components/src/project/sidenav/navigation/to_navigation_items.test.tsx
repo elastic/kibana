@@ -254,7 +254,7 @@ describe('hidden panel link', () => {
         baseUrl: '/',
         href: '/app/management',
         url: '/app/management',
-        visibleIn: ['sideNav'],
+        visibleIn: ['classicSideNav', 'solutionSideNav'],
       },
       sideNavStatus: 'hidden',
       id: 'stack_management',

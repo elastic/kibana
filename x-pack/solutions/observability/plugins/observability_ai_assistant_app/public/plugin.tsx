@@ -67,7 +67,7 @@ export class ObservabilityAIAssistantAppPlugin
       euiIconType: 'logoObservability',
       appRoute: '/app/observabilityAIAssistant',
       category: DEFAULT_APP_CATEGORIES.observability,
-      visibleIn: ['sideNav'],
+      visibleIn: ['solutionSideNav'],
       deepLinks: [
         {
           id: 'conversations',

@@ -15,50 +15,57 @@ const fullCapabilities: MlCapabilities = {
 };
 
 describe('getDeepLinks', () => {
-  it('visible nav links include both globalSearch and sideNav', () => {
+  it('visible nav links include both globalSearch and solutionSideNav', () => {
     const links = getDeepLinks(true, fullCapabilities, false);
     const anomalyDetection = links.find((l) => l.id === 'anomalyDetection');
     const dfa = links.find((l) => l.id === 'dataFrameAnalytics');
     const aiOps = links.find((l) => l.id === 'aiOps');
 
-    expect(links.find((l) => l.id === 'overview')?.visibleIn).toEqual(['globalSearch', 'sideNav']);
+    expect(links.find((l) => l.id === 'overview')?.visibleIn).toEqual([
+      'globalSearch',
+      'solutionSideNav',
+    ]);
     expect(links.find((l) => l.id === 'dataVisualizer')?.visibleIn).toEqual([
       'globalSearch',
-      'sideNav',
+      'solutionSideNav',
     ]);
     expect(anomalyDetection?.deepLinks?.find((l) => l.id === 'anomalyExplorer')?.visibleIn).toEqual(
-      ['globalSearch', 'sideNav']
+      ['globalSearch', 'solutionSideNav']
     );
     expect(
       anomalyDetection?.deepLinks?.find((l) => l.id === 'singleMetricViewer')?.visibleIn
-    ).toEqual(['globalSearch', 'sideNav']);
+    ).toEqual(['globalSearch', 'solutionSideNav']);
     expect(dfa?.deepLinks?.find((l) => l.id === 'resultExplorer')?.visibleIn).toEqual([
       'globalSearch',
-      'sideNav',
+      'solutionSideNav',
     ]);
     expect(aiOps?.deepLinks?.find((l) => l.id === 'logRateAnalysis')?.visibleIn).toEqual([
       'globalSearch',
-      'sideNav',
+      'solutionSideNav',
     ]);
   });
 
-  it('hidden nav nodes (breadcrumb-only) use sideNav-only visibleIn', () => {
+  it('hidden nav nodes (breadcrumb-only) use solutionSideNav-only visibleIn', () => {
     const links = getDeepLinks(true, fullCapabilities, false);
     const aiOps = links.find((l) => l.id === 'aiOps');
 
-    expect(links.find((l) => l.id === 'fileUpload')?.visibleIn).toEqual(['sideNav']);
-    expect(links.find((l) => l.id === 'indexDataVisualizer')?.visibleIn).toEqual(['sideNav']);
-    expect(links.find((l) => l.id === 'indexDataVisualizerPage')?.visibleIn).toEqual(['sideNav']);
-    expect(links.find((l) => l.id === 'dataDrift')?.visibleIn).toEqual(['sideNav']);
-    expect(links.find((l) => l.id === 'dataDriftPage')?.visibleIn).toEqual(['sideNav']);
+    expect(links.find((l) => l.id === 'fileUpload')?.visibleIn).toEqual(['solutionSideNav']);
+    expect(links.find((l) => l.id === 'indexDataVisualizer')?.visibleIn).toEqual([
+      'solutionSideNav',
+    ]);
+    expect(links.find((l) => l.id === 'indexDataVisualizerPage')?.visibleIn).toEqual([
+      'solutionSideNav',
+    ]);
+    expect(links.find((l) => l.id === 'dataDrift')?.visibleIn).toEqual(['solutionSideNav']);
+    expect(links.find((l) => l.id === 'dataDriftPage')?.visibleIn).toEqual(['solutionSideNav']);
     expect(aiOps?.deepLinks?.find((l) => l.id === 'logRateAnalysisPage')?.visibleIn).toEqual([
-      'sideNav',
+      'solutionSideNav',
     ]);
     expect(aiOps?.deepLinks?.find((l) => l.id === 'logPatternAnalysisPage')?.visibleIn).toEqual([
-      'sideNav',
+      'solutionSideNav',
     ]);
     expect(aiOps?.deepLinks?.find((l) => l.id === 'changePointDetectionsPage')?.visibleIn).toEqual([
-      'sideNav',
+      'solutionSideNav',
     ]);
   });
 
