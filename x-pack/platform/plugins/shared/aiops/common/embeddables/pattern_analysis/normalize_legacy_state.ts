@@ -60,7 +60,7 @@ export const toUiMinimumTimeRange = (
   return STORED_TO_UI_MINIMUM_TIME_RANGE[minimumTimeRange];
 };
 
-// Pre-9.x stored state used camelCase for these fields.
+// Pre-9.5 stored state used camelCase for these fields.
 export interface LegacyPatternAnalysisFields {
   dataViewId?: string;
   fieldName?: string;

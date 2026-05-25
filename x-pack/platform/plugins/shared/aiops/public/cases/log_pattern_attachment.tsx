@@ -24,7 +24,7 @@ import type {
   PatternAnalysisSharedComponent,
 } from '../shared_components/pattern_analysis';
 
-// Pre-9.x case attachments stored time_range as timeRange.
+// Pre-9.5 case attachments stored time_range as timeRange.
 type RawAttachmentState = RawPatternAnalysisState & { timeRange?: TimeRange };
 
 export const initComponent = memoize(
