@@ -10,6 +10,7 @@
 import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import { tagSavedObjectTypeName } from '@kbn/saved-objects-tagging-plugin/common';
 
+import { DEFAULT_DASHBOARD_STATE } from '../../../../common/default_dashboard_state';
 import type { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object';
 import { getDashboardStateSchema } from '../../dashboard_state_schemas';
 import type { DashboardState, Warnings } from '../../types';
@@ -17,18 +18,18 @@ import { transformOptionsOut } from './transform_options_out';
 import { transformPanelsOut } from './transform_panels_out';
 import { transformPinnedPanelsOut } from './transform_pinned_panels_out';
 import { transformSearchSourceOut } from './transform_search_source_out';
-import { DEFAULT_DASHBOARD_STATE } from '../../../../common/default_dashboard_state';
 
 export function transformDashboardOut(
   attributes: DashboardSavedObjectAttributes | Partial<DashboardSavedObjectAttributes>,
   references: SavedObjectReference[] | undefined,
   isDashboardAppRequest: boolean = false,
-  isReadRequest: boolean = false
+  strictStateSchema?: ReturnType<typeof getDashboardStateSchema>
 ): {
   dashboardState: DashboardState;
   warnings: Warnings;
 } {
-  const strictPropsSchemas = getDashboardStateSchema(false);
+  const schema: ReturnType<typeof getDashboardStateSchema> =
+    strictStateSchema ?? getDashboardStateSchema(isDashboardAppRequest);
 
   const {
     pinned_panels,
@@ -56,14 +57,14 @@ export function transformDashboardOut(
     sections,
     references,
     isDashboardAppRequest,
-    strictPropsSchemas
+    schema
   );
 
   const { panels: pinnedPanels, warnings: pinnedPanelWarnings } = transformPinnedPanelsOut(
     legacyControls,
     pinned_panels,
     references,
-    strictPropsSchemas
+    schema
   );
 
   const timeRange =
@@ -80,7 +81,7 @@ export function transformDashboardOut(
     filters,
     query,
     warnings: searchSourceWarnings,
-  } = transformSearchSourceOut(kibanaSavedObjectMeta, references, strictPropsSchemas);
+  } = transformSearchSourceOut(kibanaSavedObjectMeta, references, schema);
 
   /**
    * Handle validating each state key that wasn't already validated above; if any validation fails,
@@ -110,7 +111,7 @@ export function transformDashboardOut(
     try {
       validatedState = {
         ...validatedState,
-        [key]: strictPropsSchemas.validateKey(key, validatedState[key]),
+        [key]: schema.validateKey(key, validatedState[key]),
       };
     } catch (e) {
       validatedState = {

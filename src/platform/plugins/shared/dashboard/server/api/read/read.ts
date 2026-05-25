@@ -7,15 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { RequestTiming } from '@kbn/core-http-server';
-import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
+import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
+import type { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { getDashboardCRUResponseBody } from '../get_cru_response_body';
 import type { DashboardReadResponseBody } from './types';
 
 export async function read(
   savedObjectsClient: SavedObjectsClientContract,
+  strictStateSchema: ReturnType<typeof getDashboardStateSchema>,
   id: string,
   serverTiming?: RequestTiming,
   isDashboardAppRequest: boolean = false
@@ -41,7 +43,13 @@ export async function read(
   }
 
   return {
-    body: getDashboardCRUResponseBody(savedObject, 'read', isDashboardAppRequest, serverTiming),
+    body: getDashboardCRUResponseBody(
+      savedObject,
+      'read',
+      strictStateSchema,
+      isDashboardAppRequest,
+      serverTiming
+    ),
     resolveHeaders,
   };
 }

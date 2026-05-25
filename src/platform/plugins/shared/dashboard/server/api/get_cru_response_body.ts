@@ -8,14 +8,14 @@
  */
 
 import Boom from '@hapi/boom';
-import type { SavedObject, SavedObjectsUpdateResponse } from '@kbn/core-saved-objects-api-server';
-import type { RequestTiming } from '@kbn/core-http-server';
 import { getMeta } from '@kbn/as-code-shared-schemas';
+import type { RequestTiming } from '@kbn/core-http-server';
+import type { SavedObject, SavedObjectsUpdateResponse } from '@kbn/core-saved-objects-api-server';
 import type { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
-import type { DashboardState, Operation } from './types';
-import { transformDashboardOut } from './transforms';
+import type { getDashboardStateSchema } from './dashboard_state_schemas';
 import { stripUnmappedKeys } from './scope_tooling';
-import type { Warnings } from './types';
+import { transformDashboardOut } from './transforms';
+import type { DashboardState, Operation, Warnings } from './types';
 
 // CRU is Create, Read, Update
 export function getDashboardCRUResponseBody(
@@ -23,6 +23,7 @@ export function getDashboardCRUResponseBody(
     | SavedObject<DashboardSavedObjectAttributes>
     | SavedObjectsUpdateResponse<DashboardSavedObjectAttributes>,
   operation: Operation,
+  strictStateSchema: ReturnType<typeof getDashboardStateSchema>,
   isDashboardAppRequest: boolean = false,
   serverTiming?: RequestTiming
 ) {
@@ -35,7 +36,8 @@ export function getDashboardCRUResponseBody(
     ({ dashboardState, warnings: dashboardStateWarnings } = transformDashboardOut(
       savedObject.attributes,
       savedObject.references,
-      isDashboardAppRequest
+      isDashboardAppRequest,
+      strictStateSchema
     ));
     warnings.push(...dashboardStateWarnings);
     if (!isDashboardAppRequest && operation === 'read') {
