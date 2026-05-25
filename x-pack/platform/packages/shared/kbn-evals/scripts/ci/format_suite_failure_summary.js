@@ -9,7 +9,7 @@
 const { execFileSync } = require('child_process');
 const { readFileSync, writeFileSync } = require('fs');
 const { suiteKeySafe } = require('./suite_key_safe');
-const { fromRoot } = require('@kbn/repo-info');
+const { fromRoot } = require('./repo_root');
 
 const suiteId = process.argv[2] || process.env.EVAL_SUITE_ID || '';
 const outputPath = process.argv[3] || process.env.EVAL_TRIAGE_SUMMARY_PATH || '';
@@ -70,7 +70,7 @@ if (uniqueProjects.length === 0) {
 
 const buildUrl = process.env.BUILDKITE_BUILD_URL || '';
 const lines = [
-  `:rotating_light: *${suiteName}* (\`${suiteId}\`) failed in weekly LLM evals.`,
+  `:rotating_light: *${suiteName}* (\`${suiteId}\`) failed in LLM evals.`,
   '',
   '*Failing models:*',
   ...uniqueProjects.map((project) => `- \`${project}\``),
