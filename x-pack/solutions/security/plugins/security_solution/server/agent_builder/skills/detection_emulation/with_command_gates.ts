@@ -7,10 +7,6 @@
 
 import type { Logger, ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import { ToolResultType } from '@kbn/agent-builder-common';
-import {
-  RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP,
-  RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ,
-} from '../../../../common/endpoint/service/response_actions/constants';
 import type { RunEmulationCommandInput } from '../../../../common/detection_emulation/schemas';
 import type { ConfigType } from '../../../config';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
@@ -26,24 +22,19 @@ import type { EmulationRateLimiter } from '../../../lib/detection_emulation/exec
 import type { EmulationIdempotencyCache } from '../../../lib/detection_emulation/execution/idempotency_cache';
 import { buildIdempotencyKey } from '../../../lib/detection_emulation/execution/idempotency_cache';
 import type { ActorContext } from '../../../lib/detection_emulation/execution/audit_context';
-import {
-  getDetectionEmulationFeatureFlags,
-  getRealExecutionDisableReason,
-  isRealExecutionEnabled,
-  REAL_EXECUTION_DISABLE_REASON_TEXT,
-} from '../../../lib/detection_emulation/feature_flag';
 import { createSavedObjectRuleBindingLookup } from '../../../lib/detection_emulation/rule_binding_lookup';
 import { emulationRuleBindingTypeName } from '../../../lib/detection_emulation/rule_binding';
-import {
-  resolveAllowlistConfig,
-  resolveRateLimiterConfig,
-} from '../../../lib/detection_emulation/runtime_config_resolver';
-import {
-  checkValidationGates,
-  resolveValidationGateConfig,
-} from '../../../lib/detection_emulation/execution/validation_gate';
 import { resolveCurrentUsername } from './resolve_current_user';
 import { toolError, type EmulationErrorContext } from './emulation_tool_errors';
+import {
+  checkRealExecutionFeatureFlags,
+  checkValidation,
+  checkRbac,
+  resolveEffectiveConfig,
+  checkAllowlist,
+  acquireRateLimit,
+  checkAuth,
+} from './gate_checks';
 
 /**
  * Shared per-call dependencies the four per-family runEmulationCommand
@@ -132,90 +123,68 @@ export const withCommandGates = async (
 
   try {
     // ── Gate 1: Feature flag + runtime kill switch ─────────────────────────
-    const featureFlags = getDetectionEmulationFeatureFlags(config);
-    if (!isRealExecutionEnabled(featureFlags)) {
-      const disableReason = getRealExecutionDisableReason(featureFlags);
-      const likelyCause = disableReason
-        ? REAL_EXECUTION_DISABLE_REASON_TEXT[disableReason]
-        : 'Real-execution dispatch is disabled';
+    const ffResult = checkRealExecutionFeatureFlags(config);
+    if (!ffResult.ok) {
       logger.warn(
-        `Emulation command [${command}] for emulation [${emulationId}] blocked: real execution is disabled (${
-          disableReason ?? 'unknown'
-        })`
+        `Emulation command [${command}] for emulation [${emulationId}] blocked: ${ffResult.message}`
       );
       return toolError.featureDisabled(errCtx, {
-        message: 'Detection emulation real execution is disabled',
-        likelyCause,
-        disableReason: disableReason ?? undefined,
+        message: ffResult.message,
+        likelyCause: (ffResult.extra?.likely_cause as string) ?? 'Feature disabled',
+        disableReason: ffResult.extra?.disable_reason as string | undefined,
       });
     }
 
     // ── Gate 1.5: Validation gates (curatedOnly + allowedScriptIds) ─────────
-    const validationGateConfig = resolveValidationGateConfig(config.detectionEmulation?.validation);
-    const validationGateResult = checkValidationGates(cmd, validationGateConfig);
-    if (!validationGateResult.allowed) {
+    const validationResult = checkValidation(cmd, config);
+    if (!validationResult.ok) {
       logger.warn(
-        `Emulation command [${command}] for emulation [${emulationId}] blocked by validation gate [${validationGateResult.reason}]: ${validationGateResult.message}`
+        `Emulation command [${command}] for emulation [${emulationId}] blocked by validation gate [${validationResult.reason}]: ${validationResult.message}`
       );
       return toolError.validationGateBlocked(errCtx, {
-        reason: validationGateResult.reason,
-        message: validationGateResult.message,
+        reason: validationResult.reason,
+        message: validationResult.message,
       });
     }
 
     // ── Gate 2: Per-command RBAC ────────────────────────────────────────────
-    const consoleCommand = RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[command];
-    const requiredAuthzKey = RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ[consoleCommand];
-
-    if (requiredAuthzKey) {
-      const endpointAuthz = await endpointService.getEndpointAuthz(request, esClient.asCurrentUser);
-      const hasPrivilege = endpointAuthz[requiredAuthzKey];
-
-      if (!hasPrivilege) {
-        logger.warn(
-          `Emulation command [${command}] for emulation [${emulationId}] blocked: user lacks required RBAC privilege [${requiredAuthzKey}]`
-        );
-        return toolError.authorizationError(errCtx, {
-          message: `Insufficient privileges: command [${command}] requires [${requiredAuthzKey}]`,
-          likelyCause: `User lacks required RBAC privilege [${requiredAuthzKey}]`,
-        });
-      }
-
-      logger.debug(
-        `RBAC check passed for command [${command}]: user has privilege [${requiredAuthzKey}]`
+    const rbacResult = await checkRbac(endpointService, request, esClient.asCurrentUser, command);
+    if (!rbacResult.ok) {
+      logger.warn(
+        `Emulation command [${command}] for emulation [${emulationId}] blocked: ${rbacResult.message}`
       );
+      return toolError.authorizationError(errCtx, {
+        message: rbacResult.message,
+        likelyCause: (rbacResult.extra?.likely_cause as string) ?? 'RBAC check failed',
+      });
     }
+    logger.debug(`RBAC check passed for command [${command}]`);
 
     // ── Per-request guardrail resolution ────────────────────────────────────
     const [coreStart] = await core.getStartServices();
     const soClient = coreStart.savedObjects.getScopedClient(request);
     const uiSettingsClient = coreStart.uiSettings.asScopedToClient(soClient);
-    const [effectiveAllowlist, effectiveRateLimiter] = await Promise.all([
-      resolveAllowlistConfig({ uiSettingsClient, config, logger }),
-      resolveRateLimiterConfig({
-        uiSettingsClient,
-        config,
-        logger,
-        constructorConfig: rateLimiter.getConfig(),
-      }),
-    ]);
+    const { effectiveAllowlist, effectiveRateLimiter } = await resolveEffectiveConfig({
+      uiSettingsClient,
+      config,
+      logger,
+      rateLimiterConfig: rateLimiter.getConfig(),
+    });
 
     // ── Gate 3: Host allowlist ──────────────────────────────────────────────
-    const allowlistResult = allowlist.validate(endpointIds, effectiveAllowlist);
-    if (!allowlistResult.allowed) {
+    const allowlistResult = checkAllowlist(allowlist, endpointIds, effectiveAllowlist);
+    if (!allowlistResult.ok) {
       logger.warn(
-        `Emulation command [${command}] for emulation [${emulationId}] blocked by allowlist: ${allowlistResult.error}`
+        `Emulation command [${command}] for emulation [${emulationId}] blocked by allowlist: ${allowlistResult.message}`
       );
       return toolError.authorizationError(errCtx, {
-        message: allowlistResult.error ?? 'Endpoints not in allowlist',
-        likelyCause: 'One or more endpoints not in allowlist',
-        blockedEndpoints: allowlistResult.blockedEndpoints,
+        message: allowlistResult.message,
+        likelyCause: (allowlistResult.extra?.likely_cause as string) ?? 'Allowlist check failed',
+        blockedEndpoints: allowlistResult.extra?.blocked_endpoints as string[] | undefined,
       });
     }
 
     // ── Gate 3.5: Idempotency cache ────────────────────────────────────────
-    // Deduplicates double-dispatch from LLM retries or network replays.
-    // Mirrors the REST route's idempotency gate so both surfaces are safe.
     if (idempotencyCache) {
       const idempotencyKey = buildIdempotencyKey({
         spaceId,
@@ -257,26 +226,27 @@ export const withCommandGates = async (
     }
 
     // ── Gate 4: Atomic rate-limit acquire ───────────────────────────────────
-    const acquireResult = rateLimiter.acquire(
+    const rateLimitResult = acquireRateLimit(
+      rateLimiter,
       spaceId,
       emulationId,
       command,
       endpointIds,
       effectiveRateLimiter
     );
-    if (!acquireResult.allowed) {
+    if (!rateLimitResult.ok) {
       logger.warn(
-        `Emulation command [${command}] for emulation [${emulationId}] blocked by rate limiter: ${acquireResult.error}`
+        `Emulation command [${command}] for emulation [${emulationId}] blocked by rate limiter: ${rateLimitResult.message}`
       );
       return toolError.rateLimitExceeded(errCtx, {
-        error: acquireResult.error,
-        currentCount: acquireResult.currentCount,
-        maxCommands: acquireResult.maxCommands,
-        resetMs: acquireResult.resetMs,
-        blockedEndpoints: acquireResult.blockedEndpoints,
+        error: rateLimitResult.message,
+        currentCount: rateLimitResult.extra?.current_count as number | undefined,
+        maxCommands: rateLimitResult.extra?.max_commands as number | undefined,
+        resetMs: rateLimitResult.extra?.reset_ms as number | undefined,
+        blockedEndpoints: rateLimitResult.extra?.blocked_endpoints as string[] | undefined,
       });
     }
-    rateLimitToken = acquireResult.token;
+    rateLimitToken = rateLimitResult.value.token;
 
     // ── Gate 5: Authenticated caller (defense-in-depth) ─────────────────────
     let casesClient;
@@ -290,18 +260,19 @@ export const withCommandGates = async (
       );
       casesClient = undefined;
     }
-    const username = await resolveCurrentUsername({
+    const authResult = await checkAuth(resolveCurrentUsername, {
       request,
-      security: coreStart.security,
+      security: coreStart.security as any,
       esClient: esClient.asCurrentUser,
     });
-    if (!username) {
+    if (!authResult.ok) {
       rateLimiter.release(rateLimitToken);
       logger.warn(
         `Emulation command [${command}] for emulation [${emulationId}] blocked: no authenticated user`
       );
       return toolError.authenticationRequired(errCtx);
     }
+    const username = authResult.value.username;
 
     // ── Dispatch via EmulationRunner ────────────────────────────────────────
     const internalSoClient = coreStart.savedObjects.createInternalRepository([
