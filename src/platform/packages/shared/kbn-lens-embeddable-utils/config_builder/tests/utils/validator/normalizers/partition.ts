@@ -88,8 +88,9 @@ const alignLegacyTypes: NormalizerConfig<PartitionAttributes> = {
     // allowMultipleMetrics can be undefined -> default to false
     layer.allowMultipleMetrics = layer.allowMultipleMetrics ?? false;
 
-    // colorMapping can be undefined -> default to the transformation of DEFAULT_CATEGORICAL_COLOR_MAPPING when there is grouping by
-    if (layer.primaryGroups.length > 0 && layer.colorMapping === undefined) {
+    // colorMapping/ palette can be undefined -> default to the transformation of DEFAULT_CATEGORICAL_COLOR_MAPPING when there is grouping by
+    const hasColorDefined = layer.colorMapping !== undefined || viz.palette !== undefined;
+    if (layer.primaryGroups.length > 0 && !hasColorDefined) {
       layer.colorMapping = (
         fromColorMappingAPIToLensState(DEFAULT_CATEGORICAL_COLOR_MAPPING) as {
           colorMapping: ColorMapping.Config;
