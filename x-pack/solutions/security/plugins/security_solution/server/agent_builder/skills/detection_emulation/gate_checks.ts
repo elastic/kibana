@@ -20,7 +20,6 @@ import {
   getRealExecutionDisableReason,
   isRealExecutionEnabled,
   REAL_EXECUTION_DISABLE_REASON_TEXT,
-  type DetectionEmulationFeatureFlags,
 } from '../../../lib/detection_emulation/feature_flag';
 import {
   resolveAllowlistConfig,

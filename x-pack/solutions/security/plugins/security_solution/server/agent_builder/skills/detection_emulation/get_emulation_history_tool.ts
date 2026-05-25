@@ -12,6 +12,7 @@ import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
 import { findEmulationHistory } from '../../../lib/detection_emulation/emulation_history';
 import { emulationReportTypeName } from '../../../lib/detection_emulation/emulation_report_type';
+import { toolError } from './emulation_tool_errors';
 
 // ─── Schema ───────────────────────────────────────────────────────────────────
 
@@ -111,20 +112,13 @@ Results are scoped to the current Kibana space — reports from other spaces are
           tags: ['detection-emulation'],
           stack: error.stack,
         } as Record<string, unknown>);
-        return {
-          results: [
-            {
-              type: ToolResultType.error,
-              data: {
-                error_type: 'execution_error',
-                message: 'Failed to retrieve emulation history.',
-                rule_id: ruleId,
-                status_code: 500,
-                likely_cause: 'Internal error querying the emulation history saved objects.',
-              },
-            },
-          ],
-        };
+        return toolError.executionError(
+          { rule_id: ruleId },
+          {
+            message: 'Failed to retrieve emulation history.',
+            likelyCause: 'Internal error querying the emulation history saved objects.',
+          }
+        );
       }
     },
   };
