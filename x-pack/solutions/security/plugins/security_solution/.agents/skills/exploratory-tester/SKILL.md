@@ -89,7 +89,8 @@ Environment:
 | If you're thinking this... | Reality |
 |---|---|
 | "This area looks fine — I didn't find anything" | Did you attempt every checklist step for every flow? |
-| "I know what this component does from the source" | The code says what should happen; the browser says what does. |
+| "Let me check the source to understand expected behavior" | **Hard stop.** Never read source code, test files, or component internals during a session. Expected behavior comes from the UI itself, the `expected` field in `config.json`, and UX heuristics — not from implementation. |
+| "I'll look at the test file to find the right selector" | **Hard stop.** Navigate from what's visible in the browser. Use `browser_snapshot` and follow visible labels, roles, and text. |
 | "This error always shows up, it's expected" | Document it. The user decides — then add it to `knowledge/<area-slug>.md`. |
 | "I called the API directly and it works" | UI and API hit different code paths. Browser reproduction is required. |
 | "The flow name is ambiguous — I'll skip it" | Use browser discovery: take a snapshot and navigate from what you see. |
@@ -488,6 +489,7 @@ All navigation must happen within the test space (`space_id` from `config.json`)
 3. If no `entry`: call `browser_snapshot`, read the visible UI, navigate from what's on screen (within the test space)
 4. Check `knowledge/<area_slug>.md` for navigation patterns accumulated from prior sessions
 5. If the flow name is still ambiguous after the snapshot: take a screenshot, describe what you see, choose the most reasonable interpretation and proceed — never skip
+6. **Never read source code, component files, or test files to find selectors or understand the UI structure.** Use only what is visible in the browser.
 
 **If timebox fires before checklist completes:** log remaining steps as:
 ```
@@ -520,7 +522,7 @@ Each entry appended to `.exploratory-session/findings-flow-<N>.md`:
 <what actually happened — include error messages verbatim, HTTP status codes, console output>
 
 ### Expected behavior
-<what should have happened — use config.json expected field, or state the heuristic used>
+<what should have happened — derive ONLY from: (1) the `expected` field in config.json, (2) what the UI communicates via labels, tooltips, help text, or in-product copy, (3) standard UX heuristics (actions give feedback, destructive operations ask confirmation, successful saves navigate away). Never read source code, component internals, or test files to determine this.>
 
 ### Why this might be an issue
 <mandatory for Level 1 and 2: commit to reasoning, explain user impact>
