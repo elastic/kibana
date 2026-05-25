@@ -19,6 +19,7 @@ import {
   getWorkflowJsonSchema,
   pickManagedWorkflowFields,
   transformWorkflowYamlJsontoEsWorkflow,
+  WorkflowsManagementApiActions,
 } from '@kbn/workflows';
 import type {
   BulkScheduleWorkflowResult,
