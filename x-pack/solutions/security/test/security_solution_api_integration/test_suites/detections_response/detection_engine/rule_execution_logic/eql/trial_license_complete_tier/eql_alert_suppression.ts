@@ -47,6 +47,7 @@ import {
 } from '../../../../utils';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/utils';
+import { EntityStoreV2EnrichmentSetup } from '../../entity_store_v2_enrichment_setup';
 
 const getQuery = (id: string) => `any where id == "${id}"`;
 const getSequenceQuery = (id: string) =>
@@ -56,6 +57,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
+  const entityStoreV2 = EntityStoreV2EnrichmentSetup(getService);
 
   const es = getService('es');
   const log = getService('log');
@@ -1718,23 +1720,59 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       describe('alert enrichment', () => {
+        let entityStoreV2Installed = false;
+
         before(async () => {
-          await esArchiver.load('x-pack/solutions/security/test/fixtures/es_archives/entity/risks');
-          await esArchiver.load(
-            'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
-          );
+          // Dynamic docs in this describe only have host.name / user.name (no host.id),
+          // so the EUID is name-based.
+          entityStoreV2Installed = await entityStoreV2.setup({
+            hosts: [
+              {
+                host: { name: 'suricata-zeek-sensor-toronto' },
+                entity: {
+                  id: 'host:suricata-zeek-sensor-toronto',
+                  type: 'host',
+                  risk: { calculated_level: 'Critical', calculated_score_norm: 96 },
+                },
+              },
+              {
+                host: { name: 'zeek-newyork-sha-aa8df15' },
+                entity: { id: 'host:zeek-newyork-sha-aa8df15', type: 'host' },
+                asset: { criticality: 'medium_impact' },
+              },
+            ],
+            users: [
+              {
+                user: { name: 'root' },
+                entity: { id: 'user:root', type: 'user' },
+                asset: { criticality: 'extreme_impact' },
+              },
+            ],
+          });
+          if (!entityStoreV2Installed) {
+            await esArchiver.load(
+              'x-pack/solutions/security/test/fixtures/es_archives/entity/risks'
+            );
+            await esArchiver.load(
+              'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
+            );
+          }
         });
 
         after(async () => {
-          await esArchiver.unload(
-            'x-pack/solutions/security/test/fixtures/es_archives/entity/risks'
-          );
-          await esArchiver.unload(
-            'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
-          );
+          if (entityStoreV2Installed) {
+            await entityStoreV2.teardown();
+          } else {
+            await esArchiver.unload(
+              'x-pack/solutions/security/test/fixtures/es_archives/entity/risks'
+            );
+            await esArchiver.unload(
+              'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
+            );
+          }
         });
 
-        it('@skipInServerlessMKI suppressed alerts are enriched with host risk score', async () => {
+        it('suppressed alerts are enriched with host risk score', async () => {
           const eventId = uuidv4();
           await indexGeneratedSourceDocuments({
             docsCount: 1,
@@ -1763,7 +1801,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(previewAlerts[0]?._source?.host?.risk?.calculated_score_norm).toBe(96);
         });
 
-        it('@skipInServerlessMKI suppressed alerts are enriched with criticality_level', async () => {
+        it('suppressed alerts are enriched with criticality_level', async () => {
           const id = uuidv4();
           const timestamp = '2020-10-28T06:45:00.000Z';
 

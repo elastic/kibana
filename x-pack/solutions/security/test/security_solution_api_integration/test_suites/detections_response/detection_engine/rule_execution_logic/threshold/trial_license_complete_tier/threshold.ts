@@ -42,6 +42,14 @@ import {
 } from '../../../../utils';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
+import { EntityStoreV2EnrichmentSetup } from '../../entity_store_v2_enrichment_setup';
+
+// host.id values for auditbeat hosts that meet the threshold of 100 docs.
+// Sorted by host.name: suricata-sensor-london < suricata-zeek-sensor-toronto.
+const LONDON_HOST_ID = '6608e786b11a45ea991cb473a4c3d554';
+const LONDON_HOST_NAME = 'suricata-sensor-london';
+const TORONTO_HOST_ID = '8cc95778cce5407c809480e8e32ad76b';
+const TORONTO_HOST_NAME = 'suricata-zeek-sensor-toronto';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
@@ -53,6 +61,7 @@ export default ({ getService }: FtrProviderContext) => {
   const isServerless = config.get('serverless');
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const path = dataPathBuilder.getPath('auditbeat/hosts');
+  const entityStoreV2 = EntityStoreV2EnrichmentSetup(getService);
 
   describe('@ess @serverless @serverlessQA Threshold type rules', () => {
     before(async () => {
@@ -427,15 +436,45 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('with host risk index', () => {
+      let entityStoreV2Installed = false;
+
       before(async () => {
-        await esArchiver.load('x-pack/solutions/security/test/fixtures/es_archives/entity/risks');
+        entityStoreV2Installed = await entityStoreV2.setup({
+          hosts: [
+            {
+              host: { name: LONDON_HOST_NAME, id: [LONDON_HOST_ID] },
+              entity: {
+                id: `host:${LONDON_HOST_ID}`,
+                type: 'host',
+                risk: { calculated_level: 'Low', calculated_score_norm: 20 },
+              },
+            },
+            {
+              host: { name: TORONTO_HOST_NAME, id: [TORONTO_HOST_ID] },
+              entity: {
+                id: `host:${TORONTO_HOST_ID}`,
+                type: 'host',
+                risk: { calculated_level: 'Critical', calculated_score_norm: 96 },
+              },
+            },
+          ],
+        });
+        if (!entityStoreV2Installed) {
+          await esArchiver.load('x-pack/solutions/security/test/fixtures/es_archives/entity/risks');
+        }
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/solutions/security/test/fixtures/es_archives/entity/risks');
+        if (entityStoreV2Installed) {
+          await entityStoreV2.teardown();
+        } else {
+          await esArchiver.unload(
+            'x-pack/solutions/security/test/fixtures/es_archives/entity/risks'
+          );
+        }
       });
 
-      it('@skipInServerlessMKI should be enriched with host risk score', async () => {
+      it('should be enriched with host risk score', async () => {
         const rule: ThresholdRuleCreateProps = {
           ...getThresholdRuleForAlertTesting(['auditbeat-*']),
           threshold: {
@@ -454,19 +493,37 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('with asset criticality', () => {
+      let entityStoreV2Installed = false;
+
       before(async () => {
-        await esArchiver.load(
-          'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
-        );
+        // Only the first alert (sorted by host.name) is asserted on — suricata-sensor-london.
+        entityStoreV2Installed = await entityStoreV2.setup({
+          hosts: [
+            {
+              host: { name: LONDON_HOST_NAME, id: [LONDON_HOST_ID] },
+              entity: { id: `host:${LONDON_HOST_ID}`, type: 'host' },
+              asset: { criticality: 'high_impact' },
+            },
+          ],
+        });
+        if (!entityStoreV2Installed) {
+          await esArchiver.load(
+            'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
+          );
+        }
       });
 
       after(async () => {
-        await esArchiver.unload(
-          'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
-        );
+        if (entityStoreV2Installed) {
+          await entityStoreV2.teardown();
+        } else {
+          await esArchiver.unload(
+            'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
+          );
+        }
       });
 
-      it('@skipInServerlessMKI should be enriched alert with criticality_level', async () => {
+      it('should be enriched alert with criticality_level', async () => {
         const rule: ThresholdRuleCreateProps = {
           ...getThresholdRuleForAlertTesting(['auditbeat-*']),
           threshold: {

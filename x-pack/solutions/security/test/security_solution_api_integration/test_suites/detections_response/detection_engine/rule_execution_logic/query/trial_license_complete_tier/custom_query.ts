@@ -77,12 +77,19 @@ import {
 
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
+import { EntityStoreV2EnrichmentSetup } from '../../entity_store_v2_enrichment_setup';
 
 /**
  * Specific _id to use for some of the tests. If the archiver changes and you see errors
  * here, update this to a new value of a chosen auditbeat record and update the tests values.
  */
 const ID = 'BhbXBmkBR346wHgn4PeZ';
+// Entity fields for the auditbeat record with _id = ID.
+const ENRICHMENT_HOST_ID = '8cc95778cce5407c809480e8e32ad76b';
+const ENRICHMENT_HOST_NAME = 'suricata-zeek-sensor-toronto';
+const ENRICHMENT_HOST_EUID = `host:${ENRICHMENT_HOST_ID}`;
+const ENRICHMENT_USER_NAME = 'root';
+const ENRICHMENT_USER_EUID = `user:${ENRICHMENT_USER_NAME}`;
 
 /**
  * Test coverage:
@@ -97,6 +104,7 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const log = getService('log');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
+  const entityStoreV2 = EntityStoreV2EnrichmentSetup(getService);
   // TODO: add a new service for loading archiver files similar to "getService('es')"
   const config = getService('config');
   const isServerless = config.get('serverless');
@@ -277,15 +285,47 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('with host and user risk indices', () => {
+      let entityStoreV2Installed = false;
+
       before(async () => {
-        await esArchiver.load('x-pack/solutions/security/test/fixtures/es_archives/entity/risks');
+        entityStoreV2Installed = await entityStoreV2.setup({
+          hosts: [
+            {
+              host: { name: ENRICHMENT_HOST_NAME, id: [ENRICHMENT_HOST_ID] },
+              entity: {
+                id: ENRICHMENT_HOST_EUID,
+                type: 'host',
+                risk: { calculated_level: 'Critical', calculated_score_norm: 96 },
+              },
+            },
+          ],
+          users: [
+            {
+              user: { name: ENRICHMENT_USER_NAME },
+              entity: {
+                id: ENRICHMENT_USER_EUID,
+                type: 'user',
+                risk: { calculated_level: 'Low', calculated_score_norm: 11 },
+              },
+            },
+          ],
+        });
+        if (!entityStoreV2Installed) {
+          await esArchiver.load('x-pack/solutions/security/test/fixtures/es_archives/entity/risks');
+        }
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/solutions/security/test/fixtures/es_archives/entity/risks');
+        if (entityStoreV2Installed) {
+          await entityStoreV2.teardown();
+        } else {
+          await esArchiver.unload(
+            'x-pack/solutions/security/test/fixtures/es_archives/entity/risks'
+          );
+        }
       });
 
-      it('@skipInServerlessMKI should have host and user risk score fields', async () => {
+      it('should have host and user risk score fields', async () => {
         const rule: QueryRuleCreateProps = {
           ...getRuleForAlertTesting(['auditbeat-*']),
           query: `_id:${ID}`,
@@ -299,7 +339,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(previewAlerts[0]?._source?.user?.risk?.calculated_score_norm).toEqual(11);
       });
 
-      it('@skipInServerlessMKI should have host and user risk score fields when suppression enabled on interval', async () => {
+      it('should have host and user risk score fields when suppression enabled on interval', async () => {
         const rule: QueryRuleCreateProps = {
           ...getRuleForAlertTesting(['auditbeat-*']),
           query: `_id:${ID}`,
@@ -320,7 +360,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(previewAlerts[0]?._source?.user?.risk?.calculated_score_norm).toEqual(11);
       });
 
-      it('@skipInServerlessMKI should have host and user risk score fields when suppression enabled on rule execution only', async () => {
+      it('should have host and user risk score fields when suppression enabled on rule execution only', async () => {
         const rule: QueryRuleCreateProps = {
           ...getRuleForAlertTesting(['auditbeat-*']),
           query: `_id:${ID}`,
@@ -339,19 +379,43 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('with asset criticality', () => {
+      let entityStoreV2Installed = false;
+
       before(async () => {
-        await esArchiver.load(
-          'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
-        );
+        entityStoreV2Installed = await entityStoreV2.setup({
+          hosts: [
+            {
+              host: { name: ENRICHMENT_HOST_NAME, id: [ENRICHMENT_HOST_ID] },
+              entity: { id: ENRICHMENT_HOST_EUID, type: 'host' },
+              asset: { criticality: 'high_impact' },
+            },
+          ],
+          users: [
+            {
+              user: { name: ENRICHMENT_USER_NAME },
+              entity: { id: ENRICHMENT_USER_EUID, type: 'user' },
+              asset: { criticality: 'extreme_impact' },
+            },
+          ],
+        });
+        if (!entityStoreV2Installed) {
+          await esArchiver.load(
+            'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
+          );
+        }
       });
 
       after(async () => {
-        await esArchiver.unload(
-          'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
-        );
+        if (entityStoreV2Installed) {
+          await entityStoreV2.teardown();
+        } else {
+          await esArchiver.unload(
+            'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
+          );
+        }
       });
 
-      it('@skipInServerlessMKI should be enriched alert with criticality_level', async () => {
+      it('should be enriched alert with criticality_level', async () => {
         const rule: QueryRuleCreateProps = {
           ...getRuleForAlertTesting(['auditbeat-*']),
           query: `_id:${ID}`,
@@ -362,7 +426,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(previewAlerts[0]?._source?.['user.asset.criticality']).toEqual('extreme_impact');
       });
 
-      it('@skipInServerlessMKI should be enriched alert with criticality_level when suppression enabled', async () => {
+      it('should be enriched alert with criticality_level when suppression enabled', async () => {
         const rule: QueryRuleCreateProps = {
           ...getRuleForAlertTesting(['auditbeat-*']),
           query: `_id:${ID}`,

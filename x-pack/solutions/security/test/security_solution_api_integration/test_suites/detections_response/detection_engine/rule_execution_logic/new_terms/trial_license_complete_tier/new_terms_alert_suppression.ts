@@ -40,12 +40,19 @@ import {
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/utils';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
+import { EntityStoreV2EnrichmentSetup } from '../../entity_store_v2_enrichment_setup';
+
+// host.id of the auditbeat record for zeek-newyork-sha-aa8df15 (first new term).
+const ENRICHMENT_HOST_ID = '3729d06ce9964aa98549f41cbd99334d';
+const ENRICHMENT_HOST_NAME = 'zeek-newyork-sha-aa8df15';
+const ENRICHMENT_HOST_EUID = `host:${ENRICHMENT_HOST_ID}`;
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const es = getService('es');
   const log = getService('log');
+  const entityStoreV2 = EntityStoreV2EnrichmentSetup(getService);
 
   const { indexListOfDocuments, indexGeneratedDocuments } = dataGeneratorFactory({
     es,
@@ -2248,26 +2255,62 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('@skipInServerlessMKI enrichment', () => {
+    describe('enrichment', () => {
       const config = getService('config');
       const isServerless = config.get('serverless');
       const dataPathBuilder = new EsArchivePathBuilder(isServerless);
       const path = dataPathBuilder.getPath('auditbeat/hosts');
+      let entityStoreV2Installed = false;
 
       before(async () => {
-        await esArchiver.load('x-pack/solutions/security/test/fixtures/es_archives/entity/risks');
         await esArchiver.load(path);
-        await esArchiver.load(
-          'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
-        );
+        // Two entities are needed:
+        //   1. Id-based EUID for auditbeat docs (risk test, host.id present in alert).
+        //   2. Name-based EUID for dynamic ecs_compliant docs (criticality test, no host.id).
+        entityStoreV2Installed = await entityStoreV2.setup({
+          hosts: [
+            {
+              host: { name: ENRICHMENT_HOST_NAME, id: [ENRICHMENT_HOST_ID] },
+              entity: {
+                id: ENRICHMENT_HOST_EUID,
+                type: 'host',
+                risk: { calculated_level: 'Low', calculated_score_norm: 23 },
+              },
+            },
+            {
+              host: { name: ENRICHMENT_HOST_NAME },
+              entity: { id: `host:${ENRICHMENT_HOST_NAME}`, type: 'host' },
+              asset: { criticality: 'medium_impact' },
+            },
+          ],
+          users: [
+            {
+              user: { name: 'root' },
+              entity: { id: 'user:root', type: 'user' },
+              asset: { criticality: 'extreme_impact' },
+            },
+          ],
+        });
+        if (!entityStoreV2Installed) {
+          await esArchiver.load('x-pack/solutions/security/test/fixtures/es_archives/entity/risks');
+          await esArchiver.load(
+            'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
+          );
+        }
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/solutions/security/test/fixtures/es_archives/entity/risks');
         await esArchiver.unload(path);
-        await esArchiver.unload(
-          'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
-        );
+        if (entityStoreV2Installed) {
+          await entityStoreV2.teardown();
+        } else {
+          await esArchiver.unload(
+            'x-pack/solutions/security/test/fixtures/es_archives/entity/risks'
+          );
+          await esArchiver.unload(
+            'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
+          );
+        }
       });
 
       it('should be enriched with host risk score', async () => {

@@ -37,10 +37,12 @@ import {
 } from '../../../../utils';
 import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/utils';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import { EntityStoreV2EnrichmentSetup } from '../../entity_store_v2_enrichment_setup';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const entityStoreV2 = EntityStoreV2EnrichmentSetup(getService);
   const es = getService('es');
   const log = getService('log');
   const { indexEnhancedDocuments, indexListOfDocuments, indexGeneratedDocuments } =
@@ -2024,15 +2026,37 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('alerts enrichment', () => {
+      let entityStoreV2Installed = false;
+
       before(async () => {
-        await esArchiver.load('x-pack/solutions/security/test/fixtures/es_archives/entity/risks');
+        entityStoreV2Installed = await entityStoreV2.setup({
+          hosts: [
+            {
+              host: { name: 'host-0' },
+              entity: {
+                id: 'host:host-0',
+                type: 'host',
+                risk: { calculated_level: 'Low', calculated_score_norm: 1 },
+              },
+            },
+          ],
+        });
+        if (!entityStoreV2Installed) {
+          await esArchiver.load('x-pack/solutions/security/test/fixtures/es_archives/entity/risks');
+        }
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/solutions/security/test/fixtures/es_archives/entity/risks');
+        if (entityStoreV2Installed) {
+          await entityStoreV2.teardown();
+        } else {
+          await esArchiver.unload(
+            'x-pack/solutions/security/test/fixtures/es_archives/entity/risks'
+          );
+        }
       });
 
-      it('@skipInServerlessMKI should be enriched with host risk score', async () => {
+      it('should be enriched with host risk score', async () => {
         const id = uuidv4();
         const interval: [string, string] = ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'];
         const doc1 = { host: { name: 'host-0' } };
@@ -2066,19 +2090,36 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('with asset criticality', () => {
+      let entityStoreV2Installed = false;
+
       before(async () => {
-        await esArchiver.load(
-          'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
-        );
+        entityStoreV2Installed = await entityStoreV2.setup({
+          hosts: [
+            {
+              host: { name: 'host-0' },
+              entity: { id: 'host:host-0', type: 'host' },
+              asset: { criticality: 'extreme_impact' },
+            },
+          ],
+        });
+        if (!entityStoreV2Installed) {
+          await esArchiver.load(
+            'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
+          );
+        }
       });
 
       after(async () => {
-        await esArchiver.unload(
-          'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
-        );
+        if (entityStoreV2Installed) {
+          await entityStoreV2.teardown();
+        } else {
+          await esArchiver.unload(
+            'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
+          );
+        }
       });
 
-      it('@skipInServerlessMKI should be enriched alert with criticality_level', async () => {
+      it('should be enriched alert with criticality_level', async () => {
         const id = uuidv4();
         const interval: [string, string] = ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'];
         const doc1 = { host: { name: 'host-0' } };

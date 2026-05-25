@@ -57,6 +57,14 @@ import {
 } from '../../../../utils';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
+import { EntityStoreV2EnrichmentSetup } from '../../entity_store_v2_enrichment_setup';
+
+// Entity fields for the auditbeat record with ancestor _id = '7yJ-B2kBR346wHgnhlMn'.
+const ENRICHMENT_HOST_ID = '2ce8b1e7d69e4a1d9c6bcddc473da9d9';
+const ENRICHMENT_HOST_NAME = 'zeek-sensor-amsterdam';
+const ENRICHMENT_HOST_EUID = `host:${ENRICHMENT_HOST_ID}`;
+const ENRICHMENT_USER_NAME = 'root';
+const ENRICHMENT_USER_EUID = `user:${ENRICHMENT_USER_NAME}`;
 
 const createThreatMatchRule = ({
   name = 'Query with a rule id',
@@ -171,6 +179,7 @@ export default ({ getService }: FtrProviderContext) => {
   const config = getService('config');
   const isServerless = config.get('serverless');
   const utils = getService('securitySolutionUtils');
+  const entityStoreV2 = EntityStoreV2EnrichmentSetup(getService);
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const audibeatHostsPath = dataPathBuilder.getPath('auditbeat/hosts');
   const threatIntelPath = dataPathBuilder.getPath('filebeat/threat_intel');
@@ -2459,15 +2468,37 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('alerts should be enriched', () => {
+      let entityStoreV2Installed = false;
+
       before(async () => {
-        await esArchiver.load('x-pack/solutions/security/test/fixtures/es_archives/entity/risks');
+        entityStoreV2Installed = await entityStoreV2.setup({
+          hosts: [
+            {
+              host: { name: ENRICHMENT_HOST_NAME, id: [ENRICHMENT_HOST_ID] },
+              entity: {
+                id: ENRICHMENT_HOST_EUID,
+                type: 'host',
+                risk: { calculated_level: 'Critical', calculated_score_norm: 70 },
+              },
+            },
+          ],
+        });
+        if (!entityStoreV2Installed) {
+          await esArchiver.load('x-pack/solutions/security/test/fixtures/es_archives/entity/risks');
+        }
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/solutions/security/test/fixtures/es_archives/entity/risks');
+        if (entityStoreV2Installed) {
+          await entityStoreV2.teardown();
+        } else {
+          await esArchiver.unload(
+            'x-pack/solutions/security/test/fixtures/es_archives/entity/risks'
+          );
+        }
       });
 
-      it('@skipInServerlessMKI should be enriched with host risk score', async () => {
+      it('should be enriched with host risk score', async () => {
         const rule: ThreatMatchRuleCreateProps = createThreatMatchRule({
           query: '*:*',
           threat_query: 'source.ip: "188.166.120.93"', // narrow things down with a query to a specific source ip
@@ -2503,19 +2534,43 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('with asset criticality', () => {
+      let entityStoreV2Installed = false;
+
       before(async () => {
-        await esArchiver.load(
-          'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
-        );
+        entityStoreV2Installed = await entityStoreV2.setup({
+          hosts: [
+            {
+              host: { name: ENRICHMENT_HOST_NAME, id: [ENRICHMENT_HOST_ID] },
+              entity: { id: ENRICHMENT_HOST_EUID, type: 'host' },
+              asset: { criticality: 'low_impact' },
+            },
+          ],
+          users: [
+            {
+              user: { name: ENRICHMENT_USER_NAME },
+              entity: { id: ENRICHMENT_USER_EUID, type: 'user' },
+              asset: { criticality: 'extreme_impact' },
+            },
+          ],
+        });
+        if (!entityStoreV2Installed) {
+          await esArchiver.load(
+            'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
+          );
+        }
       });
 
       after(async () => {
-        await esArchiver.unload(
-          'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
-        );
+        if (entityStoreV2Installed) {
+          await entityStoreV2.teardown();
+        } else {
+          await esArchiver.unload(
+            'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
+          );
+        }
       });
 
-      it('@skipInServerlessMKI should be enriched alert with criticality_level', async () => {
+      it('should be enriched alert with criticality_level', async () => {
         const rule: ThreatMatchRuleCreateProps = createThreatMatchRule({
           query: '*:*',
           threat_query: 'source.ip: "188.166.120.93"', // narrow things down with a query to a specific source ip
