@@ -8,8 +8,8 @@
 import React from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 
-import { useCaseViewParams } from '../../common/navigation';
-import { CASE_DETAILS_TITLE, VIEWING_CASE } from './translations';
+import { useCaseViewParams } from '../../../common/navigation';
+import { CASE_DETAILS_TITLE, VIEWING_CASE } from '../translations';
 
 // Placeholder — will be replaced with the full redesigned Case Details page.
 export const CaseViewRedesign: React.FC = () => {

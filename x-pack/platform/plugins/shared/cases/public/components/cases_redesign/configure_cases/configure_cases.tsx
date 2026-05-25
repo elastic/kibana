@@ -8,19 +8,19 @@
 import React from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 
-import { CASES_LIST_TITLE, UNDER_CONSTRUCTION } from './translations';
+import { CASE_SETTINGS_TITLE, UNDER_CONSTRUCTION } from '../translations';
 
-// Placeholder — will be replaced with the full redesigned Cases List page.
-export const AllCasesRedesign: React.FC = () => (
+// Placeholder — will be replaced with the full redesigned Case Settings page.
+export const ConfigureCasesRedesign: React.FC = () => (
   <EuiEmptyPrompt
-    data-test-subj="cases-redesign-all-cases"
+    data-test-subj="cases-redesign-configure-cases"
     iconType="casesApp"
-    title={<h2>{CASES_LIST_TITLE}</h2>}
+    title={<h2>{CASE_SETTINGS_TITLE}</h2>}
     body={<p>{UNDER_CONSTRUCTION}</p>}
   />
 );
 
-AllCasesRedesign.displayName = 'AllCasesRedesign';
+ConfigureCasesRedesign.displayName = 'ConfigureCasesRedesign';
 
 // eslint-disable-next-line import/no-default-export
-export { AllCasesRedesign as default };
+export { ConfigureCasesRedesign as default };

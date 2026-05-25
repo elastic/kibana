@@ -55,8 +55,10 @@ const AllFieldDefinitionsLazy: FC<AllFieldDefinitionsPageProps> = lazy(
 // Temporary: placeholder pages for the Cases UX redesign (elastic/security-team#17398).
 // These will progressively replace the current pages and the FF will be removed.
 const AllCasesRedesignLazy = lazy(() => import('../cases_redesign/all_cases'));
-const CaseViewRedesignLazy = lazy(() => import('../cases_redesign/case_view'));
-const ConfigureCasesRedesignLazy = lazy(() => import('../cases_redesign/configure_cases'));
+const CaseViewRedesignLazy = lazy(() => import('../cases_redesign/case_view/case_view'));
+const ConfigureCasesRedesignLazy = lazy(
+  () => import('../cases_redesign/configure_cases/configure_cases')
+);
 
 const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
   actionsNavigation,
