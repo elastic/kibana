@@ -20,15 +20,8 @@ import {
   MissingConnectorActionsError,
 } from '../../execution/runner';
 import type { ConfigType } from '../../../../config';
-import {
-  getDetectionEmulationFeatureFlags,
-  getRealExecutionDisableReason,
-  isRealExecutionEnabled,
-  REAL_EXECUTION_DISABLE_REASON_TEXT,
-} from '../../feature_flag';
 import { EmulationAllowlist, createAllowlistFromConfig } from '../../execution/allowlist';
 import { EmulationRateLimiter, createDefaultRateLimiterConfig } from '../../execution/rate_limiter';
-import { resolveAllowlistConfig, resolveRateLimiterConfig } from '../../runtime_config_resolver';
 import {
   EmulationIdempotencyCache,
   buildIdempotencyKey,
@@ -40,6 +33,12 @@ import {
 } from '../../../../../common/endpoint/service/response_actions/constants';
 import { createSavedObjectRuleBindingLookup } from '../../rule_binding_lookup';
 import { emulationRuleBindingTypeName } from '../../rule_binding';
+import {
+  checkRealExecutionFeatureFlags,
+  checkAllowlist as checkAllowlistGate,
+  acquireRateLimit as acquireRateLimitGate,
+} from '../../../../agent_builder/skills/detection_emulation/gate_checks';
+import { resolveAllowlistConfig, resolveRateLimiterConfig } from '../../runtime_config_resolver';
 
 const I18N_PREFIX = 'xpack.securitySolution.detectionEmulation.route' as const;
 
@@ -157,27 +156,16 @@ export const runEmulationCommandRoute = (
         try {
           const { emulationId, command, endpointIds } = request.body;
 
-          // Gate 1: feature flag (static `experimentalFeatures` flag — ships dark
-          // by default) AND runtime kill switch (`detectionEmulation.realExecutionEnabled`
-          // — defaults to true; operators flip it to halt new dispatches without
-          // a Kibana restart). Both must resolve true; the precise blocking
-          // reason flows into the `likely_cause` body so operators fix the
-          // right knob.
-          const featureFlags = getDetectionEmulationFeatureFlags(config);
-          if (!isRealExecutionEnabled(featureFlags)) {
-            const disableReason = getRealExecutionDisableReason(featureFlags);
-            const likelyCause = disableReason
-              ? REAL_EXECUTION_DISABLE_REASON_TEXT[disableReason]
-              : undefined;
+          // Gate 1: feature flag + runtime kill switch
+          const ffResult = checkRealExecutionFeatureFlags(config);
+          if (!ffResult.ok) {
             logger.warn(
-              `Emulation command [${command}] for emulation [${emulationId}] blocked: real execution is disabled (${
-                disableReason ?? 'unknown'
-              })`
+              `Emulation command [${command}] for emulation [${emulationId}] blocked: ${ffResult.message}`
             );
             return siemResponse.error({
               statusCode: 403,
-              body: likelyCause
-                ? `${MESSAGES.featureDisabled} ${likelyCause}.`
+              body: ffResult.extra?.likely_cause
+                ? `${MESSAGES.featureDisabled} ${ffResult.extra.likely_cause}.`
                 : MESSAGES.featureDisabled,
             });
           }
@@ -244,19 +232,17 @@ export const runEmulationCommandRoute = (
             }),
           ]);
 
-          // Gate 3: host allowlist. The allowlist returns the *full* list of blocked
-          // endpoints (not just the first) so operators can see every host that needs
-          // remediation in one shot.
-          const allowlistResult = allowlist.validate(endpointIds, effectiveAllowlist);
-          if (!allowlistResult.allowed) {
+          // Gate 3: host allowlist
+          const allowlistResult = checkAllowlistGate(allowlist, endpointIds, effectiveAllowlist);
+          if (!allowlistResult.ok) {
             logger.warn(
-              `Emulation command [${command}] for emulation [${emulationId}] blocked by allowlist: ${allowlistResult.error}`
+              `Emulation command [${command}] for emulation [${emulationId}] blocked by allowlist: ${allowlistResult.message}`
             );
             return siemResponse.error({
               statusCode: 403,
               body: {
                 message: MESSAGES.endpointsNotInAllowlist,
-                blocked_endpoints: allowlistResult.blockedEndpoints,
+                blocked_endpoints: allowlistResult.extra?.blocked_endpoints,
               },
             });
           }
@@ -296,36 +282,28 @@ export const runEmulationCommandRoute = (
             });
           }
 
-          // Gate 4 (b): atomic rate-limit acquire. Combines the previous check+record in
-          // a single synchronous call so concurrent requests in the same space cannot all
-          // pass the gate before any of them records (B3). On dispatch failure below we
-          // pass `acquireResult.token` to `release()` to roll the count back.
-          //
-          // PROD-4: endpointIds is forwarded so the limiter can also enforce the
-          // per-host bucket. If any host is over capacity the call is rejected
-          // before any reservation is recorded, and the saturated host IDs are
-          // surfaced in `blocked_endpoints` so the operator knows which hosts
-          // need to drain before the command can be retried.
-          const acquireResult = rateLimiter.acquire(
+          // Gate 4 (b): atomic rate-limit acquire
+          const rateLimitResult = acquireRateLimitGate(
+            rateLimiter,
             spaceId,
             emulationId,
             command,
             endpointIds,
             effectiveRateLimiter
           );
-          if (!acquireResult.allowed) {
+          if (!rateLimitResult.ok) {
             logger.warn(
-              `Emulation command [${command}] for emulation [${emulationId}] blocked by rate limiter: ${acquireResult.error}`
+              `Emulation command [${command}] for emulation [${emulationId}] blocked by rate limiter: ${rateLimitResult.message}`
             );
             return siemResponse.error({
               statusCode: 429,
               body: {
                 message: MESSAGES.rateLimitExceeded,
-                current_count: acquireResult.currentCount,
-                max_commands: acquireResult.maxCommands,
-                reset_ms: acquireResult.resetMs,
-                ...(acquireResult.blockedEndpoints
-                  ? { blocked_endpoints: acquireResult.blockedEndpoints }
+                current_count: rateLimitResult.extra?.current_count,
+                max_commands: rateLimitResult.extra?.max_commands,
+                reset_ms: rateLimitResult.extra?.reset_ms,
+                ...(rateLimitResult.extra?.blocked_endpoints
+                  ? { blocked_endpoints: rateLimitResult.extra.blocked_endpoints }
                   : {}),
               },
             });
@@ -379,14 +357,14 @@ export const runEmulationCommandRoute = (
           } catch (runnerErr) {
             // Roll back the rate-limit acquire on a thrown gate-style error so a
             // misconfigured request doesn't permanently consume a slot.
-            rateLimiter.release(acquireResult.token);
+            rateLimiter.release(rateLimitResult.value.token);
             return mapRunnerThrow(runnerErr, siemResponse, logger);
           }
 
           if (result.status === 'error') {
             // Internal dispatch failure (Fleet down, connector unavailable, etc.).
             // Roll the rate-limit acquire back so retries are not penalised.
-            rateLimiter.release(acquireResult.token);
+            rateLimiter.release(rateLimitResult.value.token);
             // Don't leak the underlying error message to the client — it can include
             // ES/Fleet/connector internals. Log the full message server-side, return a
             // stable user-facing string in the response body.
