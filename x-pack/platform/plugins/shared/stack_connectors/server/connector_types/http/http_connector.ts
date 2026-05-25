@@ -217,7 +217,6 @@ function serializeHttpRequestBody(body: unknown): string {
 function buildFormData(formData: HttpFormDataField): FormData {
   const form = new FormData();
   for (const [fieldName, spec] of Object.entries(formData)) {
-    let blob: Blob;
     if (spec.encoding === 'base64') {
       // Binary field — always go through the Blob branch so the bytes round-trip intact.
       // Wrap the Buffer in a Uint8Array so the underlying storage is an ArrayBuffer (Buffer's `.buffer` is typed as ArrayBufferLike).
@@ -228,16 +227,22 @@ function buildFormData(formData: HttpFormDataField): FormData {
         throw new Error(`Invalid base64 content in form_data field "${fieldName}"`);
       }
       const buf = Buffer.from(normalized, 'base64');
-      blob = new Blob([new Uint8Array(buf)], {
+      const blob = new Blob([new Uint8Array(buf)], {
         type: spec.content_type ?? 'application/octet-stream',
       });
+      form.append(fieldName, blob, spec.filename); // filename optional
+    } else if (spec.filename !== undefined) {
+      const blob = new Blob([spec.content], {
+        type: spec.content_type ?? 'application/octet-stream',
+      });
+      form.append(fieldName, blob, spec.filename);
+    } else if (spec.content_type !== undefined) {
+      const blob = new Blob([spec.content], { type: spec.content_type });
+      form.append(fieldName, blob);
     } else {
-      // utf8
-      blob = new Blob([spec.content], {
-        type: spec.content_type ?? 'application/octet-stream',
-      });
+      // Plain HTML-form text field — no per-part Content-Type.
+      form.append(fieldName, spec.content);
     }
-    form.append(fieldName, blob, spec.filename); // filename is optional
   }
   return form;
 }

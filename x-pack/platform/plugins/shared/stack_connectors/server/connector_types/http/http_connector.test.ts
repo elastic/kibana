@@ -981,22 +981,26 @@ describe('execute()', () => {
         },
       },
     };
-    await expect(
-      connectorType.executor?.({
-        actionId: 'some-id',
-        services,
-        config,
-        secrets: { ...emptySecrets, user: 'abc', password: '123' },
-        params: {
-          method: 'POST',
-          path: '/my-endpoint',
-          body: body as any,
-        },
-        configurationUtilities,
-        logger: mockedLogger,
-        connectorUsageCollector,
-      })
-    ).rejects.toThrow('Error serializing request body: foo is not serializable');
+    const result = await connectorType.executor?.({
+      actionId: 'some-id',
+      services,
+      config,
+      secrets: { ...emptySecrets, user: 'abc', password: '123' },
+      params: {
+        method: 'POST',
+        path: '/my-endpoint',
+        body: body as any,
+      },
+      configurationUtilities,
+      logger: mockedLogger,
+      connectorUsageCollector,
+    });
+
+    expect(result?.status).toBe('error');
+    expect(result?.serviceMessage).toContain(
+      'Error serializing request body: foo is not serializable'
+    );
+    expect(requestMock).not.toHaveBeenCalled();
   });
 
   describe('form_data (multipart/form-data)', () => {
