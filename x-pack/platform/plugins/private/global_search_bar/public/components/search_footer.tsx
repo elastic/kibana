@@ -11,7 +11,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { isMac } from '@kbn/shared-ux-utility';
 
 export const SearchFooter = () => {
-  const shortcutKey = '/';
   return (
     <EuiFlexGroup
       alignItems="center"
@@ -56,14 +55,12 @@ export const SearchFooter = () => {
                     {isMac ? (
                       <FormattedMessage
                         id="xpack.globalSearchBar.searchBar.shortcutDescription.macCommandDescription"
-                        defaultMessage="Command + {key}"
-                        values={{ key: shortcutKey }}
+                        defaultMessage="Command + /"
                       />
                     ) : (
                       <FormattedMessage
                         id="xpack.globalSearchBar.searchBar.shortcutDescription.windowsCommandDescription"
-                        defaultMessage="Control + {key}"
-                        values={{ key: shortcutKey }}
+                        defaultMessage="Control + /"
                       />
                     )}
                   </EuiCode>
