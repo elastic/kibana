@@ -56,6 +56,7 @@ export {
   getLogEventTypeFieldWithFallback,
   getLogExceptionTypeFieldWithFallback,
   getShouldShowFieldHandler,
+  isEsqlSavedSearch,
   isNestedFieldParent,
   usePager,
   calcFieldCounts,
@@ -98,6 +99,7 @@ export type {
   SortInput,
   SortPair,
   ErrorCalloutProps,
+  DiscoverSessionFinderAttributes,
 } from './src';
 
 export * from './src/types';

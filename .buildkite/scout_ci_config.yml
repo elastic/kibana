@@ -30,6 +30,7 @@ plugins:
     - grokdebugger
     - index_management
     - infra
+    - ingest_hub
     - ingest_pipelines
     - intercepts
     - home
