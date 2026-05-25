@@ -1743,6 +1743,7 @@
     "@kbn/evals-suite-agent-builder": "link:x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder",
     "@kbn/evals-suite-alerts-rag": "link:x-pack/solutions/security/packages/kbn-evals-suite-alerts-rag",
     "@kbn/evals-suite-attack-discovery": "link:x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery",
+    "@kbn/evals-suite-detection-emulation": "link:x-pack/solutions/security/packages/kbn-evals-suite-detection-emulation",
     "@kbn/evals-suite-endpoint": "link:x-pack/solutions/security/packages/kbn-evals-suite-endpoint",
     "@kbn/evals-suite-entity-analytics": "link:x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics",
     "@kbn/evals-suite-llm-tasks": "link:x-pack/platform/packages/shared/ai-infra/kbn-evals-suite-llm-tasks",
