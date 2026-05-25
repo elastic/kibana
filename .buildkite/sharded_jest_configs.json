@@ -19,7 +19,7 @@
   "x-pack/platform/plugins/shared/streams_app/jest.config.js": 2,
   "x-pack/solutions/security/plugins/elastic_assistant/jest.config.js": 2,
   "x-pack/solutions/observability/plugins/observability/jest.config.js": 2,
-  "x-pack/solutions/observability/plugins/apm/jest.config.js": 8,
+  "x-pack/solutions/observability/plugins/apm/jest.config.js": 5,
   "x-pack/solutions/security/plugins/security_solution/public/detection_engine/jest.config.js": 6,
   "x-pack/platform/plugins/private/canvas/jest.config.js": 4,
   "x-pack/solutions/observability/plugins/infra/jest.config.js": 2,
