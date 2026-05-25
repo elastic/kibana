@@ -25,6 +25,7 @@ interface OverrideCtx {
 
 function applySchemaOverrides(ctx: OverrideCtx) {
   removeAdditionalPropertiesFromAllOfItems(ctx);
+  addBranchPropertyEnumHints(ctx);
   addDiscriminatorEnumHints(ctx);
   addUniqueItemsToOptionsArrays(ctx);
   addTitlesToOneOfBranches(ctx);
@@ -102,9 +103,9 @@ function extractDiscriminatorValues(propSchema: unknown): string[] {
  * Zod unions (z.union / z.discriminatedUnion) emit oneOf/anyOf in JSON Schema
  * where each branch may carry a const or enum value on a shared property (e.g.
  * `control`). Monaco YAML needs an explicit top-level enum on that property to
- * offer autocomplete suggestions. This walks oneOf/anyOf branches (including
- * allOf nesting from .extend()), collects discriminator values, deduplicates
- * them, and injects an enum hint alongside the union.
+ * offer autocomplete suggestions. Only properties that act as true union
+ * discriminators are hinted here — each branch must contribute exactly one
+ * const value and all branch values must be unique (e.g. `control`, not `type`).
  */
 function addDiscriminatorEnumHints(ctx: OverrideCtx) {
   const unionBranches = getUnionBranches(ctx.jsonSchema);
@@ -112,33 +113,79 @@ function addDiscriminatorEnumHints(ctx: OverrideCtx) {
     return;
   }
 
-  const discriminatorValues: Record<string, string[]> = {};
+  const propNames = new Set<string>();
+  for (const branch of unionBranches) {
+    const props = getPropertiesFromBranch(branch);
+    if (props) {
+      for (const propName of Object.keys(props)) {
+        propNames.add(propName);
+      }
+    }
+  }
+
+  for (const propName of propNames) {
+    const branchSingleValues: string[] = [];
+
+    for (const branch of unionBranches) {
+      const props = getPropertiesFromBranch(branch);
+      if (props && propName in props) {
+        const values = extractDiscriminatorValues(props[propName]);
+        if (values.length !== 1) {
+          branchSingleValues.length = 0;
+          break;
+        }
+        branchSingleValues.push(values[0]);
+      }
+    }
+
+    if (branchSingleValues.length >= 2) {
+      const uniqueValues = [...new Set(branchSingleValues)];
+      if (uniqueValues.length === branchSingleValues.length) {
+        if (!ctx.jsonSchema.properties) {
+          ctx.jsonSchema.properties = {};
+        }
+        ctx.jsonSchema.properties[propName] = {
+          type: 'string',
+          enum: uniqueValues,
+        };
+      }
+    }
+  }
+}
+
+/**
+ * Adds enum hints on individual union branches when a property is a union of
+ * literal values (e.g. INPUT_NUMBER `type`). Keeps branch-specific values out
+ * of the top-level properties object so DATE_PICKER only suggests `date`.
+ */
+function addBranchPropertyEnumHints(ctx: OverrideCtx) {
+  const unionBranches = getUnionBranches(ctx.jsonSchema);
+  if (!unionBranches || unionBranches.length === 0) {
+    return;
+  }
 
   for (const branch of unionBranches) {
     const props = getPropertiesFromBranch(branch);
     if (props) {
       for (const [propName, propSchema] of Object.entries(props)) {
-        const values = extractDiscriminatorValues(propSchema);
-        if (values.length > 0) {
-          if (!discriminatorValues[propName]) {
-            discriminatorValues[propName] = [];
+        if (propSchema && typeof propSchema === 'object') {
+          const schema = propSchema as Record<string, unknown>;
+          const hasLiteralUnion =
+            Array.isArray(schema.oneOf) ||
+            Array.isArray(schema.anyOf) ||
+            (Array.isArray(schema.enum) && (schema.enum as unknown[]).length >= 2);
+
+          if (hasLiteralUnion) {
+            const values = extractDiscriminatorValues(propSchema);
+            if (values.length >= 2) {
+              setPropertyOnBranch(branch, propName, {
+                type: 'string',
+                enum: [...new Set(values)],
+              });
+            }
           }
-          discriminatorValues[propName].push(...values);
         }
       }
-    }
-  }
-
-  for (const [propName, values] of Object.entries(discriminatorValues)) {
-    if (values.length >= 2) {
-      if (!ctx.jsonSchema.properties) {
-        ctx.jsonSchema.properties = {};
-      }
-      const uniqueValues = [...new Set(values)];
-      ctx.jsonSchema.properties[propName] = {
-        type: 'string',
-        enum: uniqueValues,
-      };
     }
   }
 }
@@ -266,4 +313,28 @@ function getPropertiesFromBranch(branch: Record<string, unknown>): Record<string
   }
 
   return null;
+}
+
+function setPropertyOnBranch(
+  branch: Record<string, unknown>,
+  propName: string,
+  propSchema: Record<string, unknown>
+): void {
+  if (branch.properties && typeof branch.properties === 'object') {
+    (branch.properties as Record<string, unknown>)[propName] = propSchema;
+    return;
+  }
+
+  if (branch.allOf && Array.isArray(branch.allOf)) {
+    for (const entry of branch.allOf as Array<Record<string, unknown>>) {
+      if (
+        entry.properties &&
+        typeof entry.properties === 'object' &&
+        propName in (entry.properties as Record<string, unknown>)
+      ) {
+        (entry.properties as Record<string, unknown>)[propName] = propSchema;
+        return;
+      }
+    }
+  }
 }

@@ -125,20 +125,61 @@ describe('getTemplateDefinitionJsonSchema', () => {
     expect(controlProp.enum).toContain('SELECT_BASIC');
   });
 
-  it('adds a type enum hint that includes numeric field types', () => {
+  it('does not add a merged type enum hint at the top level', () => {
     const schema = getTemplateDefinitionJsonSchema() as JsonSchemaObject;
     const fieldsSchema = (schema.properties as JsonSchemaObject)?.fields as JsonSchemaObject;
     const itemsSchema = fieldsSchema.items as JsonSchemaObject;
 
-    const typeProp = (itemsSchema.properties as JsonSchemaObject)?.type as JsonSchemaObject;
-    expect(typeProp).toBeDefined();
-    expect(typeProp.enum).toBeDefined();
-    expect(Array.isArray(typeProp.enum)).toBe(true);
-    expect(typeProp.enum).toContain('keyword');
-    expect(typeProp.enum).toContain('date');
-    expect(typeProp.enum).toContain('integer');
-    expect(typeProp.enum).toContain('long');
-    expect(typeProp.enum).toContain('double');
+    const typeProp = (itemsSchema.properties as JsonSchemaObject | undefined)?.type;
+    expect(typeProp).toBeUndefined();
+  });
+
+  it('adds numeric type enum hints on the INPUT_NUMBER branch only', () => {
+    const schema = getTemplateDefinitionJsonSchema() as JsonSchemaObject;
+    const branches = getFieldsOneOfBranches(schema);
+
+    const inputNumberBranch = branches.find(({ controlConst }) => controlConst === 'INPUT_NUMBER');
+    expect(inputNumberBranch).toBeDefined();
+
+    const branchProps = inputNumberBranch!.branch.properties as JsonSchemaObject | undefined;
+    let typeProp = branchProps?.type as JsonSchemaObject | undefined;
+
+    if (!typeProp && Array.isArray(inputNumberBranch!.branch.allOf)) {
+      for (const entry of inputNumberBranch!.branch.allOf as JsonSchemaObject[]) {
+        typeProp = (entry.properties as JsonSchemaObject | undefined)?.type as JsonSchemaObject;
+        if (typeProp) {
+          break;
+        }
+      }
+    }
+
+    expect(typeProp?.enum).toEqual(
+      expect.arrayContaining(['integer', 'long', 'double', 'float', 'byte'])
+    );
+    expect(typeProp?.enum).not.toContain('date');
+    expect(typeProp?.enum).not.toContain('keyword');
+  });
+
+  it('keeps date as the only type on the DATE_PICKER branch', () => {
+    const schema = getTemplateDefinitionJsonSchema() as JsonSchemaObject;
+    const branches = getFieldsOneOfBranches(schema);
+
+    const datePickerBranch = branches.find(({ controlConst }) => controlConst === 'DATE_PICKER');
+    expect(datePickerBranch).toBeDefined();
+
+    const branchProps = datePickerBranch!.branch.properties as JsonSchemaObject | undefined;
+    let typeProp = branchProps?.type as JsonSchemaObject | undefined;
+
+    if (!typeProp && Array.isArray(datePickerBranch!.branch.allOf)) {
+      for (const entry of datePickerBranch!.branch.allOf as JsonSchemaObject[]) {
+        typeProp = (entry.properties as JsonSchemaObject | undefined)?.type as JsonSchemaObject;
+        if (typeProp) {
+          break;
+        }
+      }
+    }
+
+    expect(typeProp?.const ?? typeProp?.enum).toEqual('date');
   });
 
   it('uses if/then structure keyed on control for better error messages', () => {
