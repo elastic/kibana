@@ -141,14 +141,6 @@ export class WorkflowTaskManager {
     };
   }
 
-  async removeIfExists(taskId: string): Promise<void> {
-    await this.taskManager.removeIfExists(taskId);
-  }
-
-  async runSoon(taskId: string): Promise<void> {
-    await this.taskManager.runSoon(taskId);
-  }
-
   async forceRunIdleTasks(
     workflowExecutionId: string,
     options?: { spaceId: string; fakeRequest?: KibanaRequest }

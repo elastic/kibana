@@ -1279,25 +1279,7 @@ export class WorkflowsExecutionEnginePlugin
         });
       }
 
-      // Schedule an immediate resume and call runSoon on its specific task ID
-      // so the parent workflow resumes as soon as possible.
-      //
-      // We intentionally avoid forceRunIdleTasks here because its ES _search
-      // query can return stale results: the global-timeout resume task
-      // scheduled by handleExecutionDelay may still appear in the search
-      // even after removeIfExists deletes it (ES eventual consistency).
-      // When forceRunIdleTasks calls runSoon on both the stale global-timeout
-      // task and the new immediate resume, the stale runSoon throws "not found",
-      // which propagates up and triggers the fallback scheduleImmediateResume
-      // in handlePostExecutionLoop — creating a second concurrent resume.
-      // Two concurrent resumes both reach the next workflow.execute step and
-      // call executeWorkflow, producing duplicate children. The second child
-      // is dropped by concurrency:drop, and the parent reads the skipped
-      // child and fails.
-      //
-      // By calling runSoon directly on the known task ID we guarantee exactly
-      // one resume runs, regardless of ES search consistency.
-      const { taskId } = await workflowTaskManager.scheduleImmediateResume({
+      await workflowTaskManager.scheduleImmediateResume({
         executionId,
         spaceId,
         fakeRequest: request,
