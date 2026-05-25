@@ -66,4 +66,36 @@ export const episodeAssignedTriggerCommonDefinition: CommonTriggerDefinition<
 > = {
   id: EPISODE_ASSIGNED_TRIGGER_ID,
   eventSchema: episodeAssignedPayloadSchema,
+  title: i18n.translate('xpack.alertingVTwo.workflowTriggers.episodeAssigned.title', {
+    defaultMessage: 'Alerting - Episode assigned',
+  }),
+  description: i18n.translate('xpack.alertingVTwo.workflowTriggers.episodeAssigned.description', {
+    defaultMessage: 'Emitted when an alerting episode is assigned to a user.',
+  }),
+  documentation: {
+    details: i18n.translate(
+      'xpack.alertingVTwo.workflowTriggers.episodeAssigned.documentation.details',
+      {
+        defaultMessage:
+          'Emitted after an episode assign action is persisted with a non-null assignee. The payload includes event.episodeId, event.ruleId, event.spaceId, and event.assigneeUid for trigger conditions.',
+      }
+    ),
+    examples: [
+      i18n.translate('xpack.alertingVTwo.workflowTriggers.episodeAssigned.documentation.example', {
+        defaultMessage: `## Run for a specific rule
+\`\`\`yaml
+triggers:
+  - type: {triggerId}
+    on:
+      condition: 'event.ruleId: "my-rule-id"'
+\`\`\``,
+        values: {
+          triggerId: EPISODE_ASSIGNED_TRIGGER_ID,
+        },
+      }),
+    ],
+  },
+  snippets: {
+    condition: 'event.assigneeUid: "user-profile-uid"',
+  },
 };
