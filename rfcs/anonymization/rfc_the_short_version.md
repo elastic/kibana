@@ -75,7 +75,7 @@ Registers the two hook definitions with the framework — specifying their input
 
 Also registers the step types that workflows use: **`ai.pii`** (regex-based PII detection and HMAC tokenization) and **`transform.pii_restore`** (the reverse pass). Both are described in detail in the [New step types](#new-step-types) section below.
 
-A separate plugin is required here to avoid a circular dependency. The step types (e.g. `ai.pii`) need access to `inference` capabilities at runtime, so if they were registered directly inside `workflowsExtensions`, that plugin would need to depend on `inference`. But `inference` itself optionally depends on `workflowsExtensions` to call `invokeHook`. That would be a cycle. By placing the registrations in `inference_workflows` — a plugin that depends on both `inference` and `workflowsExtensions`, and that nothing depends on in return (except `workflowsManagement` as an optional seeding dep) — the dependency graph stays a clean DAG and `workflowsExtensions` retains zero knowledge of AI or inference concepts.
+A separate plugin is required here to avoid a circular dependency. The step types (e.g. `ai.pii`) need access to `inference` capabilities at runtime, so if they were registered directly inside `workflowsExtensions`, that plugin would need to depend on `inference`. But `inference` itself optionally depends on `workflowsExtensions` to call `invokeHook`. That would be a cycle. By placing the registrations in `inference_workflows` — a plugin that depends on both `inference` and `workflowsExtensions`, and that nothing depends on in return (except `workflowsManagement` as an optional seeding dep) — the dependency graph stays a clean acyclic graph (DAG) and `workflowsExtensions` retains zero knowledge of AI or inference concepts.
 
 ### Inference plugin
 
@@ -115,7 +115,8 @@ Every consumer verified against the codebase:
 
 **Tool coverage — two events, not one:** Each tool invocation has two anonymization events covering opposite sides of the call:
 
-1. **LLM → tool (tool call arguments):** The LLM responds with anonymized tool call arguments (tokens). In `afterCompletion`, `restoreInValue` de-anonymizes those arguments immediately. The tool executes with real values.  
+1. **LLM → tool (tool call arguments):** The LLM responds with anonymized tool call arguments (tokens). In `afterCompletion`, `restoreInValue` de-anonymizes those arguments immediately. The tool executes with real values.
+
 2. **Tool → LLM (tool results):** The tool returns real data. Tool result messages are included in the anonymization pass — when they appear in the *next* `chatComplete` call's `messages` array, `beforeCompletion` anonymizes their content before the connector sees them. There is no path from tool result to LLM that bypasses `chatComplete`.
 
 The result: the LLM never receives raw PII from either direction. Tool results do sit in agent memory as real data between the tool's return and the next `chatComplete` call; that is an in-process exposure window, not a network exposure.
@@ -124,7 +125,8 @@ The result: the LLM never receives raw PII from either direction. Tool results d
 
 The inference plugin creates an `AnonymizationContext` at the start of each `chatComplete` call and discards it when the call returns. It holds:
 
-1. **A derived salt:** `HMAC(serverSecret, sessionId)` — where `serverSecret` is `xpack.inference.anonymization.encryptionKey`, a dedicated keystore secret. Same result on any Kibana node, across restarts, because both inputs are stable. No session affinity needed. No TTL. No eviction.  
+1. **A derived salt:** `HMAC(serverSecret, sessionId)` — where `serverSecret` is `xpack.inference.anonymization.encryptionKey`, a dedicated keystore secret. Same result on any Kibana node, across restarts, because both inputs are stable. No session affinity needed. No TTL. No eviction.
+
 2. **A token map:** `Map<token, original>` accumulated during the `beforeCompletion` pass, read during `afterCompletion`.
 
 Token format: `ENTITY_CLASS_<32 hex chars>` (e.g. `IP_a3f2c1d809e64b275fae2a8c9b1d04e7`). Because the salt is derived rather than stored, `192.168.1.50` produces `IP_a1b2…` in turn 1 and `IP_a1b2…` in turn 5 — even if the Kibana process restarted between them.
@@ -191,7 +193,7 @@ steps:
 
 Both system prompt and messages are anonymized. System prompts can contain PII when callers embed user-configurable strings (space names, agent descriptions, tool definitions referencing URLs). Leaving the system prompt unprocessed would create a bypass.
 
-### New step types
+### New step types {#new-step-types}
 
 **`ai.pii`** — detects PII using configured regex patterns, replaces each match with a deterministic HMAC token, writes `token → original` into the call-scoped token map. Supports built-in entity types (`IP`, `EMAIL`, `HOST_NAME`) and custom patterns:
 
@@ -379,7 +381,9 @@ The operational benefit of the single-trigger design: with two separate workflow
 | **State persistence** | None — call-scoped only | Conversation data stream (`.kibana-elastic-ai-assistant-conversation`) — replacements embedded in conversation documents | None — deterministic tokens provide cross-turn stability without storage |
 | **New consumer wiring required** | No | Yes | No — automatic for all request-scoped `chatComplete` consumers |
 
-The key differences from the Observability AI Assistant approach are a fail-closed default (the current implementation is fail-open), per-space workflow authoring in place of a global JSON blob in Advanced Settings, and a session-scoped HMAC salt in place of a global object-hash (which prevents cross-space token correlation). The coverage and cross-turn consistency properties are equivalent. Relative to Security AI's legacy path: this approach requires no per-consumer wiring, covers every LLM call regardless of nesting depth, and derives token stability from an HMAC secret rather than requiring replacements to be stored and loaded per conversation. Security AI is also multi-node compatible (state is in a shared data stream), but its UUID-based tokens are not reproducible without that stored state — a new process with no saved conversation yields different tokens for the same PII values.
+The key differences from the Observability AI Assistant approach are a fail-closed default (the current implementation is fail-open), per-space workflow authoring in place of a global JSON blob in Advanced Settings, and a session-scoped HMAC salt in place of a global object-hash (which prevents cross-space token correlation). The coverage and cross-turn consistency properties are equivalent. 
+
+Relative to Security AI's legacy path: this approach requires no per-consumer wiring, covers every LLM call regardless of nesting depth, and derives token stability from an HMAC secret rather than requiring replacements to be stored and loaded per conversation. Security AI is also multi-node compatible (state is in a shared data stream), but its UUID-based tokens are not reproducible without that stored state — a new process with no saved conversation yields different tokens for the same PII values.
 
 ## Questions for reviewers
 
@@ -392,3 +396,4 @@ The key differences from the Observability AI Assistant approach are a fail-clos
 4. **Admin control surface:** Per-space anonymization is controlled entirely by enabling/disabling the workflow document in Workflow Management. Is a single toggle per space the right granularity, or is there a need for per-agent or per-connector control?  
      
 5. **Scope boundary:** This RFC covers only what is sent to the LLM. Cases, dashboards, exports, and emails are explicitly out of scope. Does that boundary match where the team's risk lies, or should the scope be wider?
+
