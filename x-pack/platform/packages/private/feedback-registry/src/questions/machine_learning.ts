@@ -11,7 +11,7 @@ import type { FeedbackRegistryEntry } from '@kbn/feedback-components';
  * Custom page-specific ML feedback questions live in this module. When you add
  * questions for a new ML deep link / app id, also add that app id to
  * `APPS_WITHOUT_CATEGORY_PREFIX` in
- * `x-pack/platform/packages/private/feedback-registry/src/registry.ts`
+ * `x-pack/platform/plugins/private/feedback/public/src/utils/get_app_details.ts`
  * so the feedback form title omits the redundant category prefix (same pattern
  * as existing `ml:*` entries there).
  */
