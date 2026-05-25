@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonGroup,
@@ -50,7 +50,6 @@ import { css } from '@emotion/react';
 import { useHistory, useParams } from 'react-router-dom';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
-import { paths } from '../../constants';
 import type { AlertEpisodesKibanaServices } from '../../episodes_kibana_services';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { getDiscoverHrefForRuleAndEpisodeTimestamp } from '../../utils/discover_href_for_episode';
@@ -139,16 +138,6 @@ export function EpisodeDetailsPage() {
       dataViews: services.dataViews,
     }),
     [detailsServices, services.uiSettings, services.unifiedDocViewer, services.dataViews]
-  );
-
-  const getRuleDetailsHref = useCallback(
-    (id: string) => http.basePath.prepend(paths.ruleDetails(id)),
-    [http.basePath]
-  );
-
-  const getEpisodeDetailsHref = useCallback(
-    (id: string) => http.basePath.prepend(paths.alertEpisodeDetails(id)),
-    [http.basePath]
   );
 
   const episodeActions: EpisodeAction[] = useMemo(
@@ -326,7 +315,6 @@ export function EpisodeDetailsPage() {
               episodeId={episodeId}
               services={detailsServices}
               collapsible={false}
-              getRuleDetailsHref={getRuleDetailsHref}
             />
           </>
         ) : (
@@ -485,11 +473,7 @@ export function EpisodeDetailsPage() {
                     services={detailsServices}
                   />
                   <EuiSpacer size="l" />
-                  <AlertEpisodesRelatedSection
-                    episodeId={episodeId}
-                    services={detailsServices}
-                    getEpisodeDetailsHref={getEpisodeDetailsHref}
-                  />
+                  <AlertEpisodesRelatedSection episodeId={episodeId} services={detailsServices} />
                 </EuiPanel>
               )}
             </EuiSplitPanel.Inner>

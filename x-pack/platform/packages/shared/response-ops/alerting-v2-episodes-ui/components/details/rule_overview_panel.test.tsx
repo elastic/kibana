@@ -19,7 +19,7 @@ const mockRule = {
   evaluation: { query: { base: 'FROM logs-* | WHERE foo=1' } },
 } as unknown as RuleResponse;
 
-const mockGetRuleDetailsHref = (id: string) => `/rules/${id}`;
+const mockRuleDetailsHref = '/rules/rule-1';
 
 describe('AlertEpisodeRuleOverviewPanel', () => {
   it('renders the rule name, esql code block and view-rule-details link when not collapsible', () => {
@@ -28,7 +28,7 @@ describe('AlertEpisodeRuleOverviewPanel', () => {
         <AlertEpisodeRuleOverviewPanel
           rule={mockRule}
           collapsible={false}
-          getRuleDetailsHref={mockGetRuleDetailsHref}
+          ruleDetailsHref={mockRuleDetailsHref}
         />
       </I18nProvider>
     );
@@ -50,7 +50,7 @@ describe('AlertEpisodeRuleOverviewPanel', () => {
         <AlertEpisodeRuleOverviewPanel
           rule={mockRule}
           collapsible={true}
-          getRuleDetailsHref={mockGetRuleDetailsHref}
+          ruleDetailsHref={mockRuleDetailsHref}
         />
       </I18nProvider>
     );

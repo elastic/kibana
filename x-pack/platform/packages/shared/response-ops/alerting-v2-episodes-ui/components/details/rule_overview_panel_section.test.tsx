@@ -45,7 +45,6 @@ const mockRule = createMockRule();
 
 const queryClient = createTestQueryClient();
 const wrapper = createQueryClientWrapper(queryClient);
-const getRuleDetailsHref = (ruleId: string) => `/rules/${ruleId}`;
 
 describe('AlertEpisodeRuleOverviewPanelSection', () => {
   beforeEach(() => {
@@ -67,11 +66,7 @@ describe('AlertEpisodeRuleOverviewPanelSection', () => {
 
     render(
       <I18nProvider>
-        <AlertEpisodeRuleOverviewPanelSection
-          episodeId="ep-1"
-          services={mockServices}
-          getRuleDetailsHref={getRuleDetailsHref}
-        />
+        <AlertEpisodeRuleOverviewPanelSection episodeId="ep-1" services={mockServices} />
       </I18nProvider>,
       { wrapper }
     );
@@ -86,11 +81,7 @@ describe('AlertEpisodeRuleOverviewPanelSection', () => {
 
     render(
       <I18nProvider>
-        <AlertEpisodeRuleOverviewPanelSection
-          episodeId="ep-1"
-          services={mockServices}
-          getRuleDetailsHref={getRuleDetailsHref}
-        />
+        <AlertEpisodeRuleOverviewPanelSection episodeId="ep-1" services={mockServices} />
       </I18nProvider>,
       { wrapper }
     );
@@ -114,11 +105,7 @@ describe('AlertEpisodeRuleOverviewPanelSection', () => {
 
     render(
       <I18nProvider>
-        <AlertEpisodeRuleOverviewPanelSection
-          episodeId="ep-1"
-          services={mockServices}
-          getRuleDetailsHref={getRuleDetailsHref}
-        />
+        <AlertEpisodeRuleOverviewPanelSection episodeId="ep-1" services={mockServices} />
       </I18nProvider>,
       { wrapper }
     );

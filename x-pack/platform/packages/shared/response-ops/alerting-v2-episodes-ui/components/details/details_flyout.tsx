@@ -20,6 +20,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { alertEpisodeDetailsPath } from '../../constants';
 import { AlertEpisodeDetailsHeaderSection } from './details_header_section';
 import { AlertEpisodeOverviewSection } from './overview_section';
 import { AlertEpisodesRelatedSection } from './related_section';
@@ -35,8 +36,6 @@ export interface AlertEpisodeDetailsFlyoutProps {
   groupHash: string | undefined;
   onClose: () => void;
   services: AlertEpisodeMetadataSectionServices;
-  getEpisodeDetailsHref: (episodeId: string) => string;
-  getRuleDetailsHref: (ruleId: string) => string;
 }
 
 export const AlertEpisodeDetailsFlyout = ({
@@ -44,8 +43,6 @@ export const AlertEpisodeDetailsFlyout = ({
   groupHash,
   onClose,
   services,
-  getEpisodeDetailsHref,
-  getRuleDetailsHref,
 }: AlertEpisodeDetailsFlyoutProps) => {
   const { euiTheme } = useEuiTheme();
   const [tab, setTab] = useState<TabId>('overview');
@@ -137,14 +134,12 @@ export const AlertEpisodeDetailsFlyout = ({
             episodeId={episodeId}
             groupHash={groupHash}
             services={services}
-            getRuleDetailsHref={getRuleDetailsHref}
           />
         )}
         {tab === 'related' && (
           <AlertEpisodesRelatedSection
             episodeId={episodeId}
             services={services}
-            getEpisodeDetailsHref={getEpisodeDetailsHref}
             showHeading={false}
             compressed
           />
@@ -179,7 +174,7 @@ export const AlertEpisodeDetailsFlyout = ({
           <EuiFlexItem grow={false}>
             <EuiButton
               fill
-              href={getEpisodeDetailsHref(episodeId)}
+              href={services.http.basePath.prepend(alertEpisodeDetailsPath(episodeId))}
               data-test-subj="alertingV2EpisodeFlyoutViewDetailsButton"
               iconType="eye"
             >

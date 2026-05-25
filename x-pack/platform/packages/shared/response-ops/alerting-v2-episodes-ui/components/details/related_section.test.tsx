@@ -68,8 +68,6 @@ const mockEpisodeEventsResponse = {
 const queryClient = createTestQueryClient();
 const wrapper = createQueryClientWrapper(queryClient);
 
-const getEpisodeDetailsHref = (id: string) => `/episodes/${id}`;
-
 describe('AlertEpisodesRelatedSection', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -82,11 +80,7 @@ describe('AlertEpisodesRelatedSection', () => {
 
     render(
       <I18nProvider>
-        <AlertEpisodesRelatedSection
-          episodeId="ep-1"
-          services={mockServices}
-          getEpisodeDetailsHref={getEpisodeDetailsHref}
-        />
+        <AlertEpisodesRelatedSection episodeId="ep-1" services={mockServices} />
       </I18nProvider>,
       { wrapper }
     );
@@ -99,7 +93,7 @@ describe('AlertEpisodesRelatedSection', () => {
         groupHash: 'gh-1',
         ruleId: 'rule-1',
         rule: mockRule,
-        getEpisodeDetailsHref,
+        getEpisodeDetailsHref: expect.any(Function),
       }),
       expect.anything()
     );
@@ -110,11 +104,7 @@ describe('AlertEpisodesRelatedSection', () => {
 
     render(
       <I18nProvider>
-        <AlertEpisodesRelatedSection
-          episodeId="ep-1"
-          services={mockServices}
-          getEpisodeDetailsHref={getEpisodeDetailsHref}
-        />
+        <AlertEpisodesRelatedSection episodeId="ep-1" services={mockServices} />
       </I18nProvider>,
       { wrapper }
     );
@@ -128,11 +118,7 @@ describe('AlertEpisodesRelatedSection', () => {
 
     render(
       <I18nProvider>
-        <AlertEpisodesRelatedSection
-          episodeId="ep-1"
-          services={mockServices}
-          getEpisodeDetailsHref={getEpisodeDetailsHref}
-        />
+        <AlertEpisodesRelatedSection episodeId="ep-1" services={mockServices} />
       </I18nProvider>,
       { wrapper }
     );

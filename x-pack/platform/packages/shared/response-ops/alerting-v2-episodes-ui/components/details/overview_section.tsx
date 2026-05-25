@@ -17,14 +17,12 @@ export interface AlertEpisodeOverviewSectionProps {
   episodeId: string;
   groupHash: string | undefined;
   services: AlertEpisodeDetailsServices;
-  getRuleDetailsHref: (ruleId: string) => string;
 }
 
 export const AlertEpisodeOverviewSection = ({
   episodeId,
   groupHash,
   services,
-  getRuleDetailsHref,
 }: AlertEpisodeOverviewSectionProps) => (
   <>
     <AlertEpisodeMetadataDetailsListSection episodeId={episodeId} services={services} />
@@ -37,11 +35,6 @@ export const AlertEpisodeOverviewSection = ({
     <EuiSpacer size="l" />
     <AlertEpisodeLifecycleHeatmapSection episodeId={episodeId} services={services} />
     <EuiSpacer size="l" />
-    <AlertEpisodeRuleOverviewPanelSection
-      episodeId={episodeId}
-      services={services}
-      collapsible
-      getRuleDetailsHref={getRuleDetailsHref}
-    />
+    <AlertEpisodeRuleOverviewPanelSection episodeId={episodeId} services={services} collapsible />
   </>
 );

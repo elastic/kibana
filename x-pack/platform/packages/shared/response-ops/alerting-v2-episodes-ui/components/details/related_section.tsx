@@ -13,6 +13,7 @@ import {
   getGroupHashFromEpisodeRows,
   getRuleIdFromEpisodeRows,
 } from '../../utils/episode_series_derived';
+import { alertEpisodeDetailsPath } from '../../constants';
 import { AlertEpisodesRelated } from './related/related';
 import type { AlertEpisodeDetailsServices } from './types';
 import * as i18n from './translations';
@@ -20,7 +21,6 @@ import * as i18n from './translations';
 export interface AlertEpisodesRelatedSectionProps {
   episodeId: string;
   services: AlertEpisodeDetailsServices;
-  getEpisodeDetailsHref: (episodeId: string) => string;
   showHeading?: boolean;
   compressed?: boolean;
 }
@@ -28,10 +28,11 @@ export interface AlertEpisodesRelatedSectionProps {
 export const AlertEpisodesRelatedSection = ({
   episodeId,
   services,
-  getEpisodeDetailsHref,
   showHeading,
   compressed,
 }: AlertEpisodesRelatedSectionProps) => {
+  const getEpisodeDetailsHref = (id: string) =>
+    services.http.basePath.prepend(alertEpisodeDetailsPath(id));
   const {
     data: eventRows,
     isLoading: isLoadingEvents,

@@ -10,6 +10,7 @@ import { EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import { useFetchEpisodeEventsQuery } from '../../hooks/use_fetch_episode_events_query';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { getRuleIdFromEpisodeRows } from '../../utils/episode_series_derived';
+import { ruleDetailsPath } from '../../constants';
 import { AlertEpisodeRuleOverviewPanel } from './rule_overview_panel';
 import type { AlertEpisodeDetailsServices } from './types';
 import * as i18n from './translations';
@@ -18,14 +19,12 @@ export interface AlertEpisodeRuleOverviewPanelSectionProps {
   episodeId: string;
   services: AlertEpisodeDetailsServices;
   collapsible?: boolean;
-  getRuleDetailsHref: (ruleId: string) => string;
 }
 
 export const AlertEpisodeRuleOverviewPanelSection = ({
   episodeId,
   services,
   collapsible,
-  getRuleDetailsHref,
 }: AlertEpisodeRuleOverviewPanelSectionProps) => {
   const {
     data: eventRows,
@@ -67,7 +66,7 @@ export const AlertEpisodeRuleOverviewPanelSection = ({
     <AlertEpisodeRuleOverviewPanel
       rule={rule}
       collapsible={collapsible ?? false}
-      getRuleDetailsHref={getRuleDetailsHref}
+      ruleDetailsHref={services.http.basePath.prepend(ruleDetailsPath(ruleId))}
     />
   );
 };

@@ -11,3 +11,18 @@ export const LAST_EPISODE_TIMESTAMP_ESQL_VARIABLE = 'lastEpisodeTimestamp';
 export const PAGE_SIZE_ESQL_VARIABLE = 'pageSize';
 export const RELATED_ALERT_EPISODES_PAGE_SIZE = 5;
 export const TIME_FIELD = '@timestamp';
+
+const ALERTING_V2_SECTION_ID = 'alertingV2';
+const ALERTING_V2_RULES_APP_ID = 'rules';
+const ALERTING_V2_EPISODES_APP_ID = 'episodes';
+
+// Ideally, these should be computed using the `paths` factory of the alerting-v2-plugin, which
+// shouldn't be imported in this package. We should find a way to improve this in the future.
+export const ALERTING_V2_RULES_BASE_PATH = `/app/management/${ALERTING_V2_SECTION_ID}/${ALERTING_V2_RULES_APP_ID}`;
+export const ALERTING_V2_EPISODES_BASE_PATH = `/app/management/${ALERTING_V2_SECTION_ID}/${ALERTING_V2_EPISODES_APP_ID}`;
+
+export const alertEpisodeDetailsPath = (episodeId: string) =>
+  `${ALERTING_V2_EPISODES_BASE_PATH}/${encodeURIComponent(episodeId)}`;
+
+export const ruleDetailsPath = (ruleId: string) =>
+  `${ALERTING_V2_RULES_BASE_PATH}/${encodeURIComponent(ruleId)}`;

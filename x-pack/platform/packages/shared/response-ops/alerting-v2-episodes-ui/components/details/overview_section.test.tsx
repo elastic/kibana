@@ -57,8 +57,6 @@ const mockServices: AlertEpisodeDetailsServices = {
   spaces: createMockSpaces(),
 };
 
-const getRuleDetailsHref = (ruleId: string) => `/rules/${ruleId}`;
-
 describe('AlertEpisodeOverviewSection', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -66,12 +64,7 @@ describe('AlertEpisodeOverviewSection', () => {
 
   it('stacks all four sub-sections', () => {
     render(
-      <AlertEpisodeOverviewSection
-        episodeId="ep-1"
-        groupHash="gh-1"
-        services={mockServices}
-        getRuleDetailsHref={getRuleDetailsHref}
-      />
+      <AlertEpisodeOverviewSection episodeId="ep-1" groupHash="gh-1" services={mockServices} />
     );
 
     expect(screen.getByTestId('metadataDetailsListSectionStub')).toBeInTheDocument();
@@ -82,12 +75,7 @@ describe('AlertEpisodeOverviewSection', () => {
 
   it('forwards groupHash to the actions overview section', () => {
     render(
-      <AlertEpisodeOverviewSection
-        episodeId="ep-1"
-        groupHash="gh-1"
-        services={mockServices}
-        getRuleDetailsHref={getRuleDetailsHref}
-      />
+      <AlertEpisodeOverviewSection episodeId="ep-1" groupHash="gh-1" services={mockServices} />
     );
 
     expect(AlertEpisodeActionsOverviewSection).toHaveBeenCalledWith(
@@ -98,19 +86,13 @@ describe('AlertEpisodeOverviewSection', () => {
 
   it('passes collapsible=true to the rule overview panel section', () => {
     render(
-      <AlertEpisodeOverviewSection
-        episodeId="ep-1"
-        groupHash="gh-1"
-        services={mockServices}
-        getRuleDetailsHref={getRuleDetailsHref}
-      />
+      <AlertEpisodeOverviewSection episodeId="ep-1" groupHash="gh-1" services={mockServices} />
     );
 
     expect(AlertEpisodeRuleOverviewPanelSection).toHaveBeenCalledWith(
       expect.objectContaining({
         collapsible: true,
         episodeId: 'ep-1',
-        getRuleDetailsHref,
       }),
       expect.anything()
     );

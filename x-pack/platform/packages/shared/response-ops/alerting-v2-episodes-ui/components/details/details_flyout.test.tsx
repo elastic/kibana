@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { AlertEpisodeDetailsFlyout } from './details_flyout';
 
 jest.mock('./details_header_section', () => ({
@@ -25,13 +26,13 @@ jest.mock('./runbook_section', () => ({
   AlertEpisodeRunbookSection: () => <div data-test-subj="runbookSectionStub" />,
 }));
 
+const mockHttp = httpServiceMock.createStartContract();
+
 const baseProps = {
   episodeId: 'ep-1',
   groupHash: 'gh-1',
   onClose: jest.fn(),
-  services: {} as any,
-  getEpisodeDetailsHref: (id: string) => `/episodes/${id}`,
-  getRuleDetailsHref: (id: string) => `/rules/${id}`,
+  services: { http: mockHttp } as any,
 };
 
 describe('AlertEpisodeDetailsFlyout', () => {
@@ -41,7 +42,7 @@ describe('AlertEpisodeDetailsFlyout', () => {
     expect(screen.getByTestId('overviewSectionStub')).toBeInTheDocument();
     expect(screen.getByTestId('alertingV2EpisodeFlyoutViewDetailsButton')).toHaveAttribute(
       'href',
-      '/episodes/ep-1'
+      mockHttp.basePath.prepend('/app/management/alertingV2/episodes/ep-1')
     );
   });
 

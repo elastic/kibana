@@ -51,7 +51,6 @@ import { EpisodesFilterBar } from './components/episodes_filter_bar';
 import { alertEpisodeToDataTableRecord } from './utils';
 import { dataTableRecordToEpisode } from './utils/data_table_record_to_episode';
 import { getDiscoverHrefForRuleAndEpisodeTimestamp } from '../../utils/discover_href_for_episode';
-import { paths } from '../../constants';
 import { useEpisodesListUrlState } from './hooks/use_episodes_list_url_state';
 import { useEpisodesBulkActions } from './hooks/use_episodes_bulk_actions';
 
@@ -146,10 +145,6 @@ export const AlertEpisodesListPage = () => {
           unifiedDocViewer: services.unifiedDocViewer,
           dataViews: services.dataViews,
         }}
-        getEpisodeDetailsHref={(id) =>
-          services.http.basePath.prepend(paths.alertEpisodeDetails(id))
-        }
-        getRuleDetailsHref={(id) => services.http.basePath.prepend(paths.ruleDetails(id))}
       />
     ),
     [closeFlyout, services]

@@ -25,13 +25,13 @@ import * as i18n from './translations';
 export interface AlertEpisodeRuleOverviewPanelProps {
   rule: RuleResponse;
   collapsible: boolean;
-  getRuleDetailsHref: (ruleId: string) => string;
+  ruleDetailsHref: string;
 }
 
 export const AlertEpisodeRuleOverviewPanel = ({
   rule,
   collapsible,
-  getRuleDetailsHref,
+  ruleDetailsHref,
 }: AlertEpisodeRuleOverviewPanelProps) => {
   const ruleKindLabel =
     rule.kind === 'signal' ? i18n.RULE_OVERVIEW_KIND_SIGNAL : i18n.RULE_OVERVIEW_KIND_ALERTING;
@@ -49,7 +49,7 @@ export const AlertEpisodeRuleOverviewPanel = ({
       size="xs"
       color="text"
       iconType="eye"
-      href={getRuleDetailsHref(rule.id)}
+      href={ruleDetailsHref}
       data-test-subj="alertingV2EpisodeDetailsViewRuleDetailsButton"
     >
       {i18n.RULE_OVERVIEW_VIEW_DETAILS}
