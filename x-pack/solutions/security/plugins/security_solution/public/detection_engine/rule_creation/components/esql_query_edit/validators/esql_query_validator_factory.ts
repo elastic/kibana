@@ -6,6 +6,7 @@
  */
 
 import type { QueryClient } from '@kbn/react-query';
+import { isCancelledError } from '@kbn/react-query';
 import { parseEsqlQuery, injectMetadataId } from '@kbn/securitysolution-utils';
 import type { FormData, ValidationError, ValidationFunc } from '../../../../../shared_imports';
 import type { FieldValueQueryBar } from '../../../../rule_creation_ui/components/query_bar_field';
@@ -73,6 +74,11 @@ export function esqlQueryValidatorFactory({
         return constructMissingIdFieldWarning();
       }
     } catch (error) {
+      // Ignore errors caused by request cancellation (navigating away or a newer
+      // validation superseding this one). These are not user-facing problems.
+      if (isCancelledError(error) || error?.name === 'AbortError') {
+        return;
+      }
       return constructValidationError(error);
     }
   };
