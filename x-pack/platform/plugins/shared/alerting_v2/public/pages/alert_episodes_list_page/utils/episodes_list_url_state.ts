@@ -59,17 +59,22 @@ function decodeFilterFields(o: Record<string, unknown>): EpisodesFilterState {
 function splitEpisodesListRaw(raw: unknown): {
   filter: EpisodesFilterState;
   timeRange?: TimeRange;
+  histogramBreakdownField?: string;
 } {
   if (!isPlainObject(raw)) {
     return { filter: {} };
   }
   const o = raw as Record<string, unknown>;
-  const { timeFrom, timeTo, ...rest } = o;
+  const { timeFrom, timeTo, histBreakdown, ...rest } = o;
   const filter = decodeFilterFields(rest);
+  const result: ReturnType<typeof splitEpisodesListRaw> = { filter };
   if (isNonEmptyString(timeFrom) && isNonEmptyString(timeTo)) {
-    return { filter, timeRange: { from: timeFrom, to: timeTo } };
+    result.timeRange = { from: timeFrom, to: timeTo };
   }
-  return { filter };
+  if (isNonEmptyString(histBreakdown)) {
+    result.histogramBreakdownField = histBreakdown;
+  }
+  return result;
 }
 
 function encodeFilterFields(state: EpisodesFilterState): Record<string, unknown> {
@@ -97,7 +102,8 @@ function encodeFilterFields(state: EpisodesFilterState): Record<string, unknown>
 
 function encodeEpisodesListRecord(
   filter: EpisodesFilterState,
-  timeRange: TimeRange
+  timeRange: TimeRange,
+  histogramBreakdownField?: string
 ): Record<string, unknown> {
   const out = encodeFilterFields(filter);
   if (
@@ -107,27 +113,33 @@ function encodeEpisodesListRecord(
     out.timeFrom = timeRange.from;
     out.timeTo = timeRange.to;
   }
+  if (isNonEmptyString(histogramBreakdownField)) {
+    out.histBreakdown = histogramBreakdownField;
+  }
   return out;
 }
 
 export function readEpisodesListAppStateFromUrlStorage(storage: IKbnUrlStateStorage): {
   filterState: EpisodesFilterState;
   timeRange?: TimeRange;
+  histogramBreakdownField?: string;
 } {
   const raw = storage.get<AppStateRecord>('_a')?.[EPISODES_LIST_APP_STATE_KEY];
-  const { filter, timeRange } = splitEpisodesListRaw(raw);
+  const { filter, timeRange, histogramBreakdownField } = splitEpisodesListRaw(raw);
   return {
     filterState: { ...DEFAULT_EPISODES_LIST_FILTER, ...filter },
     ...(timeRange ? { timeRange } : {}),
+    ...(histogramBreakdownField ? { histogramBreakdownField } : {}),
   };
 }
 
 export async function writeEpisodesListAppStateToUrlStorage(
   storage: IKbnUrlStateStorage,
   filter: EpisodesFilterState,
-  timeRange: TimeRange
+  timeRange: TimeRange,
+  histogramBreakdownField?: string
 ): Promise<void> {
-  const serialized = encodeEpisodesListRecord(filter, timeRange);
+  const serialized = encodeEpisodesListRecord(filter, timeRange, histogramBreakdownField);
   const appState = storage.get<AppStateRecord>('_a') ?? {};
   const {
     [EPISODES_LIST_APP_STATE_KEY]: _ignoredEpisodesListState,

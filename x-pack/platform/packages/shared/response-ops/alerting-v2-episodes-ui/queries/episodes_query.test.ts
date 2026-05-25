@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { buildEpisodesBaseQuery, buildEpisodesQuery } from './episodes_query';
+import {
+  buildEpisodesBaseQuery,
+  buildEpisodesHistogramQuery,
+  buildEpisodesQuery,
+} from './episodes_query';
 import {
   PAGE_SIZE_ESQL_VARIABLE,
   ALERT_EVENTS_DATA_STREAM,
@@ -298,6 +302,52 @@ describe('buildEpisodesQuery', () => {
 
     expect(queryString).toContain('QSTR("alert.name: \\"test\\"")');
     expect(queryString).toContain('WHERE last_assignee_uid == "user-123"');
+  });
+});
+
+describe('buildEpisodesHistogramQuery', () => {
+  it('includes first_timestamp, last_timestamp, and episode.status in KEEP', () => {
+    const output = buildEpisodesHistogramQuery('default');
+    expect(output).toMatch(/first_timestamp/);
+    expect(output).toMatch(/last_timestamp/);
+    expect(output).toMatch(/episode\.status/);
+  });
+
+  it('includes LIMIT 10000', () => {
+    const output = buildEpisodesHistogramQuery('default');
+    expect(output).toContain('10000');
+  });
+
+  it('does not include a SORT command', () => {
+    const output = buildEpisodesHistogramQuery('default');
+    expect(output.toUpperCase()).not.toContain('SORT');
+  });
+
+  it('includes the breakdown field in the output when provided', () => {
+    const output = buildEpisodesHistogramQuery('default', undefined, 'rule.id');
+    expect(output).toMatch(/rule\.id/);
+  });
+
+  it('includes the status filter when filterState.status is provided', () => {
+    const output = buildEpisodesHistogramQuery('default', { status: 'active' });
+    expect(output).toMatch(/effective_status/);
+    expect(output).toContain('active');
+  });
+
+  it('includes the ruleId filter when filterState.ruleId is provided', () => {
+    const output = buildEpisodesHistogramQuery('default', { ruleId: 'rule-abc' });
+    expect(output).toContain('rule-abc');
+  });
+
+  it('includes the tags filter when filterState.tags is provided', () => {
+    const output = buildEpisodesHistogramQuery('default', { tags: ['critical', 'prod'] });
+    expect(output).toMatch(/critical/);
+    expect(output).toMatch(/prod/);
+  });
+
+  it('includes the assigneeUid filter when filterState.assigneeUid is provided', () => {
+    const output = buildEpisodesHistogramQuery('default', { assigneeUid: 'user-xyz' });
+    expect(output).toContain('user-xyz');
   });
 });
 

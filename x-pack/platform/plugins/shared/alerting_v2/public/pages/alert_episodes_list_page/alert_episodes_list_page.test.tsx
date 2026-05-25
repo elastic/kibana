@@ -37,6 +37,10 @@ jest.mock('@kbn/alerting-v2-episodes-ui/actions', () => ({
 
 jest.mock('../../hooks/use_breadcrumbs', () => ({ useBreadcrumbs: jest.fn() }));
 
+jest.mock('./components/episodes_histogram', () => ({
+  EpisodesHistogram: () => null,
+}));
+
 jest.mock('react-use/lib/useObservable', () =>
   jest.fn().mockReturnValue({ from: 'now-24h', to: 'now' })
 );
