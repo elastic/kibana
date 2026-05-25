@@ -9,9 +9,9 @@ import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '
 import { i18n } from '@kbn/i18n';
 import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import React, { useCallback, useMemo, useState } from 'react';
+import { useCompositeSloEnabled } from '../../../../hooks/use_composite_slo_enabled';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { usePermissions } from '../../../../hooks/use_permissions';
-import { usePluginContext } from '../../../../hooks/use_plugin_context';
 import { SloTemplatesFlyout } from '../../../../components/slo/slo_templates/slo_templates_flyout';
 
 export function CreateSloBtn() {
@@ -20,13 +20,12 @@ export function CreateSloBtn() {
     http: { basePath },
   } = useKibana().services;
 
-  const { experimentalFeatures } = usePluginContext();
   const { data: permissions } = usePermissions();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
 
   const isDisabled = !permissions?.hasAllWriteRequested;
-  const isCompositeSloEnabled = experimentalFeatures?.compositeSlo?.enabled === true;
+  const isCompositeSloEnabled = useCompositeSloEnabled();
 
   const handleClickCreateSlo = useCallback(() => {
     setIsPopoverOpen(false);
