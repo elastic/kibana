@@ -113,7 +113,7 @@ describe('AddEndpointModal', () => {
     expect(screen.getByDisplayValue('my-custom-id')).toBeInTheDocument();
   });
 
-  it('calls saveEndpoint mutation with correct config on save', () => {
+  it('calls add mutation (isEditing=false) on save in add mode', () => {
     renderModal();
     fireEvent.click(screen.getByTestId('addEndpointModalSaveButton'));
     expect(mockMutate).toHaveBeenCalledWith(
@@ -170,6 +170,94 @@ describe('AddEndpointModal', () => {
     });
   });
 
+  describe('edit mode', () => {
+    it('renders Edit endpoint title', () => {
+      renderModal({
+        mode: 'edit',
+        initialEndpointId: 'my-chat-ep',
+        initialTaskType: 'chat_completion',
+      });
+      expect(screen.getByText('Edit endpoint')).toBeInTheDocument();
+    });
+
+    it('shows Cancel and Save buttons (not Close)', () => {
+      renderModal({
+        mode: 'edit',
+        initialEndpointId: 'my-chat-ep',
+        initialTaskType: 'chat_completion',
+      });
+      expect(screen.getByText('Cancel')).toBeInTheDocument();
+      expect(screen.getByTestId('addEndpointModalSaveButton')).toBeInTheDocument();
+      expect(screen.queryByText('Close')).not.toBeInTheDocument();
+    });
+
+    it('enables Save button', () => {
+      renderModal({
+        mode: 'edit',
+        initialEndpointId: 'my-chat-ep',
+        initialTaskType: 'chat_completion',
+      });
+      expect(screen.getByTestId('addEndpointModalSaveButton')).not.toBeDisabled();
+    });
+
+    it('calls update mutation (isEditing=true) on Save', () => {
+      renderModal({
+        mode: 'edit',
+        initialEndpointId: 'my-chat-ep',
+        initialTaskType: 'chat_completion',
+      });
+      fireEvent.click(screen.getByTestId('addEndpointModalSaveButton'));
+      expect(mockMutate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          config: expect.objectContaining({ inferenceId: 'my-chat-ep' }),
+        }),
+        true
+      );
+    });
+
+    it('renders endpoint ID as read-only', () => {
+      renderModal({
+        mode: 'edit',
+        initialEndpointId: 'my-chat-ep',
+        initialTaskType: 'chat_completion',
+      });
+      const endpointInput = screen.getByDisplayValue('my-chat-ep') as HTMLInputElement;
+      expect(endpointInput).toHaveAttribute('readonly');
+    });
+
+    it('renders task type cards as disabled', () => {
+      renderModal({
+        mode: 'edit',
+        initialEndpointId: 'my-chat-ep',
+        initialTaskType: 'chat_completion',
+      });
+      const chatCompletionCard = screen.getByLabelText(/Chat completion/i);
+      expect(chatCompletionCard).toBeDisabled();
+    });
+
+    it('enables the reasoning toggle in edit mode', () => {
+      renderModal({
+        mode: 'edit',
+        initialEndpointId: 'my-chat-ep',
+        initialTaskType: 'chat_completion',
+      });
+      const toggle = screen.getByTestId('addEndpointReasoningToggle');
+      expect(toggle).not.toBeDisabled();
+    });
+
+    it('allows interacting with reasoning effort levels in edit mode', () => {
+      renderModal({
+        mode: 'edit',
+        initialEndpointId: 'my-chat-ep',
+        initialTaskType: 'chat_completion',
+      });
+      fireEvent.click(screen.getByTestId('addEndpointReasoningToggle'));
+      const highButton = screen.getByRole('button', { name: 'High' });
+      fireEvent.click(highButton);
+      expect(highButton.getAttribute('aria-pressed')).toBe('true');
+    });
+  });
+
   describe('Reasoning section', () => {
     it('shows the reasoning toggle when chat_completion is selected', () => {
       renderModal();
@@ -198,8 +286,7 @@ describe('AddEndpointModal', () => {
     it('defaults to Medium effort when toggle is first enabled', () => {
       renderModal();
       fireEvent.click(screen.getByTestId('addEndpointReasoningToggle'));
-      const buttonGroup = screen.getByTestId('addEndpointReasoningButtonGroup');
-      const mediumButton = buttonGroup.querySelector('[id="medium"]') as HTMLButtonElement;
+      const mediumButton = screen.getByRole('button', { name: 'Medium' });
       expect(mediumButton).toBeInTheDocument();
       expect(mediumButton.getAttribute('aria-pressed')).toBe('true');
     });
@@ -207,8 +294,7 @@ describe('AddEndpointModal', () => {
     it('changes effort level when a different option is clicked', () => {
       renderModal();
       fireEvent.click(screen.getByTestId('addEndpointReasoningToggle'));
-      const buttonGroup = screen.getByTestId('addEndpointReasoningButtonGroup');
-      const highButton = buttonGroup.querySelector('[id="high"]') as HTMLButtonElement;
+      const highButton = screen.getByRole('button', { name: 'High' });
       fireEvent.click(highButton);
       expect(highButton.getAttribute('aria-pressed')).toBe('true');
     });
@@ -226,7 +312,7 @@ describe('AddEndpointModal', () => {
       renderModal();
       fireEvent.click(screen.getByTestId('addEndpointReasoningToggle'));
       fireEvent.click(screen.getByLabelText('Completion'));
-      fireEvent.click(screen.getByLabelText('Chat completion'));
+      fireEvent.click(screen.getByLabelText(/Chat completion/i));
 
       expect(screen.getByTestId('addEndpointReasoningToggle')).toBeInTheDocument();
       expect(screen.queryByTestId('addEndpointReasoningButtonGroup')).not.toBeInTheDocument();
@@ -241,8 +327,7 @@ describe('AddEndpointModal', () => {
     it('does not include taskTypeConfig in the save payload (pending backend support)', () => {
       renderModal();
       fireEvent.click(screen.getByTestId('addEndpointReasoningToggle'));
-      const buttonGroup = screen.getByTestId('addEndpointReasoningButtonGroup');
-      fireEvent.click(buttonGroup.querySelector('[id="high"]') as HTMLButtonElement);
+      fireEvent.click(screen.getByRole('button', { name: 'High' }));
 
       fireEvent.click(screen.getByTestId('addEndpointModalSaveButton'));
       expect(mockMutate).toHaveBeenCalledWith(

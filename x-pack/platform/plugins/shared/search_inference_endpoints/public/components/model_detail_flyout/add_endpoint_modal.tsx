@@ -40,7 +40,7 @@ export interface TaskTypeOption {
   recommended?: boolean;
 }
 
-export type EndpointModalMode = 'add' | 'view';
+export type EndpointModalMode = 'add' | 'view' | 'edit';
 
 export interface AddEndpointModalProps {
   mode?: EndpointModalMode;
@@ -109,6 +109,8 @@ export const AddEndpointModal: React.FC<AddEndpointModalProps> = ({
     }
   );
   const isView = mode === 'view';
+  const isEdit = mode === 'edit';
+  const isReadOnly = isView || isEdit;
   const radioGroupName = useGeneratedHtmlId();
   const modalTitleId = useGeneratedHtmlId();
 
@@ -122,7 +124,7 @@ export const AddEndpointModal: React.FC<AddEndpointModalProps> = ({
   const [endpointId, setEndpointId] = useState(
     () => initialEndpointId ?? generateEndpointId(modelId, defaultTaskType)
   );
-  const [endpointIdTouched, setEndpointIdTouched] = useState(isView);
+  const [endpointIdTouched, setEndpointIdTouched] = useState(isReadOnly);
   const [reasoningEnabled, setReasoningEnabled] = useState(false);
   const [effortLevel, setEffortLevel] = useState<ReasoningEffortLevel>('medium');
 
@@ -166,12 +168,12 @@ export const AddEndpointModal: React.FC<AddEndpointModalProps> = ({
         },
         secrets: { providerSecrets: {} },
       },
-      false
+      isEdit
     );
-  }, [saveEndpoint, endpointId, selectedTaskType, modelId]);
+  }, [saveEndpoint, endpointId, selectedTaskType, modelId, isEdit]);
 
   const endpointIdError = useMemo(() => {
-    if (isView) return undefined;
+    if (isReadOnly) return undefined;
     const trimmed = endpointId.trim();
     if (trimmed.length === 0) return undefined;
     if (!isValidEndpointId(trimmed)) {
@@ -184,7 +186,7 @@ export const AddEndpointModal: React.FC<AddEndpointModalProps> = ({
       );
     }
     return undefined;
-  }, [endpointId, isView]);
+  }, [endpointId, isReadOnly]);
 
   const isValid =
     !isView && endpointId.trim().length > 0 && selectedTaskType.length > 0 && !endpointIdError;
@@ -201,6 +203,10 @@ export const AddEndpointModal: React.FC<AddEndpointModalProps> = ({
           {isView
             ? i18n.translate('xpack.searchInferenceEndpoints.addEndpointModal.viewTitle', {
                 defaultMessage: 'View endpoint',
+              })
+            : isEdit
+            ? i18n.translate('xpack.searchInferenceEndpoints.addEndpointModal.editTitle', {
+                defaultMessage: 'Edit endpoint',
               })
             : i18n.translate('xpack.searchInferenceEndpoints.addEndpointModal.title', {
                 defaultMessage: 'Add endpoint',
@@ -267,7 +273,7 @@ export const AddEndpointModal: React.FC<AddEndpointModalProps> = ({
                   }
                   checked={selectedTaskType === taskType.value}
                   onChange={() => handleTaskTypeChange(taskType.value)}
-                  disabled={isView}
+                  disabled={isReadOnly}
                 >
                   <div style={{ marginTop: 4, marginBottom: 4 }}>
                     <EuiText size="xs" color="subdued">
@@ -374,7 +380,7 @@ export const AddEndpointModal: React.FC<AddEndpointModalProps> = ({
             isInvalid={endpointIdTouched && !!endpointIdError}
             value={endpointId}
             onChange={handleEndpointIdChange}
-            readOnly={isView}
+            readOnly={isReadOnly}
             fullWidth
             data-test-subj="addEndpointIdField"
             prepend={
