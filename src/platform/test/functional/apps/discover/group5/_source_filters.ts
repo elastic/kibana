@@ -13,7 +13,6 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
   const { common, timePicker, discover, settings, unifiedFieldList } = getPageObjects([
@@ -28,9 +27,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async function () {
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/visualize.json'
-      );
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
       );
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'logstash-*',

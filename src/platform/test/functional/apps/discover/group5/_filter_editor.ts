@@ -14,7 +14,6 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const filterBar = getService('filterBar');
   const security = getService('security');
@@ -39,10 +38,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'src/platform/test/functional/fixtures/kbn_archiver/discover.json'
       );
 
-      // and load a set of makelogs data
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
       await kibanaServer.uiSettings.replace(defaultSettings);
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       log.debug('discover filter editor');

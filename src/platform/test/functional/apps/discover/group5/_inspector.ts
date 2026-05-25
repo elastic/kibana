@@ -13,7 +13,6 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { common, timePicker, discover } = getPageObjects(['common', 'timePicker', 'discover']);
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const inspector = getService('inspector');
   const testSubjects = getService('testSubjects');
@@ -38,9 +37,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/discover.json'
-      );
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
       );
       // delete .kibana index and update configDoc
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
