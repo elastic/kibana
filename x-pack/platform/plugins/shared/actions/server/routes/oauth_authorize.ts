@@ -35,11 +35,21 @@ class OAuthRouteError extends Error {
 }
 
 const paramsSchema = schema.object({
-  connectorId: schema.string(),
+  connectorId: schema.string({
+    meta: { description: 'An identifier for the connector.' },
+  }),
 });
 
 const oauthStartReturnUrlFields = {
-  returnUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
+  returnUrl: schema.maybe(
+    schema.uri({
+      scheme: ['http', 'https'],
+      meta: {
+        description:
+          'The Kibana URL to redirect the browser to after completing the OAuth flow. Must be the same origin as the Kibana server.',
+      },
+    })
+  ),
 };
 
 const validateOAuthUrlsAreAllowed = (
@@ -132,13 +142,10 @@ export const oauthAuthorizeRoute = (
         },
       },
       validate: {
-        params: paramsSchema,
-        query: schema.object(oauthStartReturnUrlFields),
-      },
-      options: {
-        access: 'public',
-        summary: 'Start OAuth authorization (redirects to the identity provider)',
-        tags: ['oas-tag:connectors'],
+        request: {
+          params: paramsSchema,
+          query: schema.object(oauthStartReturnUrlFields),
+        },
         response: {
           302: {
             description: i18n.translate('xpack.actions.oauthStart.response302Description', {
@@ -161,6 +168,11 @@ export const oauthAuthorizeRoute = (
             }),
           },
         },
+      },
+      options: {
+        access: 'public',
+        summary: 'Start OAuth authorization (redirects to the identity provider)',
+        tags: ['oas-tag:connectors'],
       },
     },
     router.handleLegacyErrors(
