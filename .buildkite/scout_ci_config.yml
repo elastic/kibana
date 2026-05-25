@@ -32,6 +32,7 @@ plugins:
     - index_lifecycle_management
     - index_management
     - infra
+    - ingest_hub
     - ingest_pipelines
     - intercepts
     - home
