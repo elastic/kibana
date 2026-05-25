@@ -292,6 +292,32 @@ describe('useWorkflowExecutionPolling', () => {
     expect(mockLoadExecution).not.toHaveBeenCalled();
   });
 
+  it('should restart polling when workflowExecutionId changes after a terminal execution', async () => {
+    const completedExecution = createMockWorkflowExecution(ExecutionStatus.COMPLETED);
+    setupMock(completedExecution);
+
+    hookResult = renderHook(({ id }: { id: string }) => useWorkflowExecutionPolling(id), {
+      initialProps: { id: mockWorkflowExecutionId },
+    });
+    await flushPoll();
+    expect(mockLoadExecution).toHaveBeenCalledTimes(1);
+
+    mockLoadExecution.mockClear();
+
+    const runningExecution = createMockWorkflowExecution(ExecutionStatus.RUNNING);
+    runningExecution.id = 'new-execution-id';
+    setupMock(runningExecution);
+
+    await act(async () => {
+      hookResult?.rerender({ id: 'new-execution-id' });
+      await Promise.resolve();
+    });
+    expect(mockLoadExecution).toHaveBeenCalledWith({ id: 'new-execution-id' });
+
+    await advancePollInterval();
+    expect(mockLoadExecution).toHaveBeenCalledTimes(2);
+  });
+
   it('should set isLoading to false when execution reaches terminal state', async () => {
     const mockWorkflowExecution = createMockWorkflowExecution(ExecutionStatus.COMPLETED);
     setupMock(mockWorkflowExecution);

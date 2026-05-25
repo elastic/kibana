@@ -76,6 +76,7 @@ export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps
       hasActiveWorkflowExecutions(workflowExecutionsRef.current?.results)
         ? WORKFLOW_EXECUTIONS_LIST_POLL_ACTIVE_INTERVAL_MS
         : WORKFLOW_EXECUTIONS_LIST_POLL_INTERVAL_MS,
+    pollKey: workflowId,
   });
 
   const { selectedExecutionId, setSelectedExecution } = useWorkflowUrlState();

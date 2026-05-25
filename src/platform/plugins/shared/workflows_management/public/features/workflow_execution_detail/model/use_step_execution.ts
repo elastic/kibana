@@ -52,6 +52,7 @@ export function useStepExecution(
       const data = dataRef.current;
       return data !== undefined && isTerminalStatus(data.status);
     },
+    pollKey: stepExecutionId,
   });
 
   return query;

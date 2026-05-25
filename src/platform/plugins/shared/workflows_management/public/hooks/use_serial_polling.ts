@@ -16,6 +16,11 @@ export interface UseSerialPollingParams {
   enabled?: boolean;
   /** When false, waits one interval before the first poll (use when an initial fetch already ran). */
   immediate?: boolean;
+  /**
+   * Restarts the polling loop when this value changes (e.g. a new execution id).
+   * Required when shouldStop can end the loop and the polled resource identity changes.
+   */
+  pollKey?: string | number | boolean | null | undefined;
   shouldStop?: () => boolean;
 }
 
@@ -31,6 +36,7 @@ export const useSerialPolling = ({
   intervalMs,
   enabled = true,
   immediate = true,
+  pollKey,
   shouldStop = () => false,
 }: UseSerialPollingParams): void => {
   const pollRef = useRef(poll);
@@ -79,5 +85,5 @@ export const useSerialPolling = ({
     return () => {
       cancelled = true;
     };
-  }, [enabled, immediate]);
+  }, [enabled, immediate, pollKey]);
 };

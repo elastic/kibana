@@ -239,6 +239,40 @@ describe('useSerialPolling', () => {
     expect(poll).toHaveBeenCalledTimes(1);
   });
 
+  it('restarts polling when pollKey changes after the loop had stopped', async () => {
+    const poll = jest.fn().mockResolvedValue(undefined);
+    let stop = true;
+
+    const { rerender } = renderHook(
+      ({ pollKey }: { pollKey: string }) =>
+        useSerialPolling({
+          poll,
+          intervalMs: 1000,
+          pollKey,
+          shouldStop: () => stop,
+        }),
+      { initialProps: { pollKey: 'exec-1' } }
+    );
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(poll).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      jest.advanceTimersByTime(5000);
+      await Promise.resolve();
+    });
+    expect(poll).toHaveBeenCalledTimes(1);
+
+    stop = false;
+    await act(async () => {
+      rerender({ pollKey: 'exec-2' });
+      await Promise.resolve();
+    });
+    expect(poll).toHaveBeenCalledTimes(2);
+  });
+
   it('continues polling after poll rejects', async () => {
     const poll = jest.fn().mockRejectedValueOnce(new Error('network')).mockResolvedValue(undefined);
 

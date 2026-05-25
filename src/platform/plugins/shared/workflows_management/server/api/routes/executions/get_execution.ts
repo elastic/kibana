@@ -53,6 +53,7 @@ export function registerGetExecutionRoute({ router, api, spaces }: RouteDependen
       },
       withAvailabilityCheck(async (context, request, response) => {
         try {
+          // await new Promise((resolve) => setTimeout(resolve, 4000));
           const { executionId } = request.params;
           const { includeInput, includeOutput } = request.query;
           const spaceId = spaces.getSpaceId(request);

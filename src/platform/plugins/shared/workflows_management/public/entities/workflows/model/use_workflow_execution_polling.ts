@@ -33,6 +33,9 @@ export const useWorkflowExecutionPolling = (workflowExecutionId: string): Pollin
     useAsyncThunkState(loadExecutionThunk);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
+  const workflowExecutionIdRef = useRef(workflowExecutionId);
+  workflowExecutionIdRef.current = workflowExecutionId;
+
   const workflowExecutionRef = useRef(workflowExecution);
   workflowExecutionRef.current = workflowExecution;
 
@@ -41,17 +44,22 @@ export const useWorkflowExecutionPolling = (workflowExecutionId: string): Pollin
   }, [workflowExecutionId]);
 
   useEffect(() => {
-    if (workflowExecution) {
+    if (workflowExecution?.id === workflowExecutionId) {
       setIsLoading(false);
     }
-  }, [workflowExecution]);
+  }, [workflowExecution, workflowExecutionId]);
 
   useSerialPolling({
     poll: () => loadExecution({ id: workflowExecutionId }),
+    pollKey: workflowExecutionId,
     intervalMs: WORKFLOW_EXECUTION_POLL_INTERVAL_MS,
     shouldStop: () => {
       const execution = workflowExecutionRef.current;
-      return execution !== undefined && isTerminalStatus(execution.status);
+      return (
+        execution !== undefined &&
+        execution.id === workflowExecutionIdRef.current &&
+        isTerminalStatus(execution.status)
+      );
     },
   });
 

@@ -63,6 +63,7 @@ export function useChildWorkflowExecutions(
       const execution = parentExecutionRef.current;
       return execution !== undefined && execution !== null && isTerminalStatus(execution.status);
     },
+    pollKey: parentExecution?.id,
   });
 
   return {
