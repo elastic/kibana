@@ -1516,10 +1516,9 @@ describe('LogsExtractionClient', () => {
     });
 
     it('should return the merged config', async () => {
-      const result = await client.updateConfig({ delay: '5m', frequency: '2m' });
+      const result = await client.updateConfig({ delay: '5m' });
 
       expect(result.delay).toBe('5m');
-      expect(result.frequency).toBe('2m');
     });
 
     it('should preserve existing config values not present in params', async () => {
@@ -1544,7 +1543,6 @@ describe('LogsExtractionClient', () => {
         additionalIndexPatterns: ['custom-logs-*'],
         lookbackPeriod: '6h',
         delay: '30s',
-        frequency: '1m',
         docsLimit: 5000,
         fieldHistoryLength: 5,
       });
@@ -1552,7 +1550,6 @@ describe('LogsExtractionClient', () => {
       expect(result.additionalIndexPatterns).toEqual(['custom-logs-*']);
       expect(result.lookbackPeriod).toBe('6h');
       expect(result.delay).toBe('30s');
-      expect(result.frequency).toBe('1m');
       expect(result.docsLimit).toBe(5000);
       expect(result.fieldHistoryLength).toBe(5);
     });

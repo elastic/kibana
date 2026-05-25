@@ -79,6 +79,7 @@ describe('AssetManagerClient', () => {
   let client: AssetManagerClient;
   let mockEngineDescriptorClient: {
     getAll: jest.Mock;
+    findOrThrow: jest.Mock;
     init: jest.Mock;
     update: jest.Mock;
     delete: jest.Mock;
@@ -109,6 +110,14 @@ describe('AssetManagerClient', () => {
 
     mockEngineDescriptorClient = {
       getAll: jest.fn().mockResolvedValue([]),
+      findOrThrow: jest.fn().mockResolvedValue({
+        type: 'host',
+        status: 'installing',
+        logExtractionState: {},
+        error: null,
+        versionState: { version: 2, state: 'running', isMigratedFromV1: false },
+        config: { frequency: '1m' },
+      }),
       init: jest.fn().mockResolvedValue(undefined),
       update: jest.fn().mockResolvedValue(undefined),
       delete: jest.fn().mockResolvedValue(undefined),
@@ -152,8 +161,8 @@ describe('AssetManagerClient', () => {
     expect(mockInstallSharedElasticsearchAssets).toHaveBeenCalledTimes(1);
     expect(mockInstallIndicesAndDataStreams).not.toHaveBeenCalled();
     expect(mockEngineDescriptorClient.init).toHaveBeenCalledTimes(2);
-    expect(mockEngineDescriptorClient.init).toHaveBeenCalledWith('host');
-    expect(mockEngineDescriptorClient.init).toHaveBeenCalledWith('user');
+    expect(mockEngineDescriptorClient.init).toHaveBeenCalledWith('host', {});
+    expect(mockEngineDescriptorClient.init).toHaveBeenCalledWith('user', {});
     expect(mockScheduleExtractEntityTask).toHaveBeenCalledTimes(2);
   });
 
@@ -161,7 +170,7 @@ describe('AssetManagerClient', () => {
     const installed = await client.install('host');
 
     expect(installed).toBe(true);
-    expect(mockEngineDescriptorClient.init).toHaveBeenCalledWith('host');
+    expect(mockEngineDescriptorClient.init).toHaveBeenCalledWith('host', {});
     expect(mockInstallIndicesAndDataStreams).not.toHaveBeenCalled();
     expect(mockEngineDescriptorClient.update).not.toHaveBeenCalled();
   });
@@ -175,7 +184,6 @@ describe('AssetManagerClient', () => {
       docsLimit: 1234,
       maxLogsPerPage: 5678,
       timeout: '60s',
-      frequency: '2m',
     };
 
     it('fresh install with no params applies defaults', async () => {
@@ -190,7 +198,6 @@ describe('AssetManagerClient', () => {
             fieldHistoryLength: 10,
             lookbackPeriod: '3h',
             delay: '1m',
-            frequency: '1m',
             docsLimit: 10000,
             maxLogsPerPage: LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT,
             timeout: '59s',
@@ -202,13 +209,12 @@ describe('AssetManagerClient', () => {
     it('fresh install with params merges params with defaults', async () => {
       mockGlobalStateClient.find.mockResolvedValue(undefined);
 
-      await client.init({} as KibanaRequest, ['host'], { delay: '2m', frequency: '1m' });
+      await client.init({} as KibanaRequest, ['host'], { delay: '2m' });
 
       expect(mockGlobalStateClient.init).toHaveBeenCalledWith(
         expect.objectContaining({
           logsExtraction: expect.objectContaining({
             delay: '2m',
-            frequency: '1m',
             lookbackPeriod: '3h',
             fieldHistoryLength: 10,
             additionalIndexPatterns: [],
@@ -228,7 +234,9 @@ describe('AssetManagerClient', () => {
       await client.init({} as KibanaRequest, ['host']);
 
       expect(mockGlobalStateClient.init).toHaveBeenCalledWith(
-        expect.objectContaining({ logsExtraction: existingLogsExtraction })
+        expect.objectContaining({
+          logsExtraction: expect.objectContaining(existingLogsExtraction),
+        })
       );
     });
 
@@ -241,11 +249,13 @@ describe('AssetManagerClient', () => {
       await client.init({} as KibanaRequest, ['host'], {});
 
       expect(mockGlobalStateClient.init).toHaveBeenCalledWith(
-        expect.objectContaining({ logsExtraction: existingLogsExtraction })
+        expect.objectContaining({
+          logsExtraction: expect.objectContaining(existingLogsExtraction),
+        })
       );
     });
 
-    it('re-install with params overwrites existing config with parsed params', async () => {
+    it('re-install with params overlays the params onto existing config', async () => {
       mockGlobalStateClient.find.mockResolvedValue({
         historySnapshot: {},
         logsExtraction: existingLogsExtraction,
@@ -256,13 +266,8 @@ describe('AssetManagerClient', () => {
       expect(mockGlobalStateClient.init).toHaveBeenCalledWith(
         expect.objectContaining({
           logsExtraction: expect.objectContaining({
+            ...existingLogsExtraction,
             delay: '2m',
-            frequency: '1m',
-            lookbackPeriod: '3h',
-            fieldHistoryLength: 10,
-            additionalIndexPatterns: [],
-            docsLimit: 10000,
-            maxLogsPerPage: LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT,
           }),
         })
       );
