@@ -52,7 +52,7 @@ export class MatcherDataFieldsRoute extends BaseAlertingRoute {
         description: 'Indicates invalid query parameters.',
       },
     },
-  } as const;
+  }
 
   protected readonly routeName = 'matcher data fields suggestions';
 
