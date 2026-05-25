@@ -19,7 +19,7 @@ import type {
 export const getStepIds = (isAlert: boolean): StepId[] =>
   isAlert
     ? ['alertCondition', 'recoveryCondition', 'details', 'notifications']
-    : ['alertCondition', 'details', 'notifications'];
+    : ['alertCondition', 'details'];
 
 export interface InitialStateConfig {
   mode: ComposeDiscoverMode;
