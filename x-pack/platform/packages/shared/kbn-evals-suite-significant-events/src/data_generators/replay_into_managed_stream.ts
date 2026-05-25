@@ -338,17 +338,19 @@ const cleanupReplayArtifacts = async ({
   log: ToolingLog;
   artifacts: ReplayArtifacts;
 }): Promise<void> => {
-  const { writeIndexName, previousDefaultPipeline, tempIndices, pipelineName, repoName } =
-    artifacts;
+  const { writeIndexName, tempIndices, pipelineName, repoName } = artifacts;
 
-  if (writeIndexName && previousDefaultPipeline !== undefined) {
+  if (writeIndexName) {
     try {
+      // Reset to _none rather than restoring the streams pipeline so that
+      // streams.disable() can delete the pipeline without ES rejecting it due
+      // to an active index reference. streams.enable() will re-apply it.
       await esClient.indices.putSettings({
         index: writeIndexName,
-        settings: { 'index.default_pipeline': previousDefaultPipeline },
+        settings: { 'index.default_pipeline': '_none' },
       });
     } catch {
-      log.warning('Failed to restore default_pipeline');
+      log.warning('Failed to clear default_pipeline on write index');
     }
   }
 
@@ -378,13 +380,21 @@ export const deleteTemporaryReplayIndices = async (
   log: ToolingLog
 ): Promise<void> => {
   try {
-    await esClient.indices.delete({
+    const resolved = await esClient.indices.get({
       index: `${REPLAY_TEMP_PREFIX}*`,
       ignore_unavailable: true,
       allow_no_indices: true,
     });
-  } catch {
-    log.warning('Failed to delete temporary replay indices');
+    const indexNames = Object.keys(resolved);
+    if (indexNames.length === 0) return;
+    await esClient.indices.delete({ index: indexNames, ignore_unavailable: true });
+    log.debug(`Deleted ${indexNames.length} temporary replay indices`);
+  } catch (error) {
+    log.warning(
+      `Failed to delete temporary replay indices: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
   }
 };
 
@@ -430,6 +440,25 @@ export async function replayIntoManagedStream(
       logsIndices,
       log,
     });
+
+    // Temp indices inherit default_pipeline from the snapshot, which points to the
+    // Streams ingest pipeline. Clear it now so streams.disable() can delete that
+    // pipeline without ES rejecting it due to an active index reference.
+    if (artifacts.tempIndices.length > 0) {
+      try {
+        await esClient.indices.putSettings({
+          index: artifacts.tempIndices,
+          settings: { 'index.default_pipeline': '_none' },
+        });
+        log.debug('Cleared default_pipeline on temporary replay indices');
+      } catch (clearError) {
+        log.warning(
+          `Failed to clear default_pipeline on temp indices: ${
+            clearError instanceof Error ? clearError.message : String(clearError)
+          }`
+        );
+      }
+    }
 
     log.info('Step 3/4: Preparing replay pipeline and managed stream write index...');
     const maxTimestamp = await getMaxTimestampFromTempIndices({

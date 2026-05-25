@@ -262,6 +262,7 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                         .delete({ index: name, ignore_unavailable: true })
                         .catch(() => {});
                     }
+                    await deleteTemporaryReplayIndices(esClient, log);
                     await apiServices.streams.disable().catch(() => {});
                     await apiServices.streams.enable();
                     await replayIntoManagedStream(esClient, log, source.snapshotName, source.gcs);
