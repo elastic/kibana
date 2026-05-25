@@ -110,6 +110,9 @@ function getWorkflowsConnectorTypeArgs(
         ...(typeof workflow.originManagedWorkflowId === 'string'
           ? { originManagedWorkflowId: workflow.originManagedWorkflowId }
           : {}),
+        ...(typeof workflow.managedVersion === 'number'
+          ? { managedVersion: workflow.managedVersion }
+          : {}),
       };
 
       // Run the workflow, @tb: maybe switch to scheduler?
@@ -143,6 +146,9 @@ function getWorkflowsConnectorTypeArgs(
         ...(typeof workflow.managedBy === 'string' ? { managedBy: workflow.managedBy } : {}),
         ...(typeof workflow.originManagedWorkflowId === 'string'
           ? { originManagedWorkflowId: workflow.originManagedWorkflowId }
+          : {}),
+        ...(typeof workflow.managedVersion === 'number'
+          ? { managedVersion: workflow.managedVersion }
           : {}),
       };
 
