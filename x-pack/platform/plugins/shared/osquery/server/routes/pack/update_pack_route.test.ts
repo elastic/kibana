@@ -702,5 +702,65 @@ describe('updatePackRoute', () => {
       expect(patchedAttributes).not.toHaveProperty('schedule_type');
       expect(patchedAttributes).not.toHaveProperty('rrule_schedule');
     });
+
+    it('feature flag off + per-query rrule on SO — response queries omit schedule_type and rrule_schedule', async () => {
+      const rruleValue = { rrule: 'FREQ=HOURLY', start_date: '2026-01-01T00:00:00Z' };
+      const soWithPerQueryRrule = {
+        ...basePackSO,
+        attributes: {
+          ...basePackSO.attributes,
+          queries: [
+            {
+              id: 'q1',
+              name: 'q1',
+              query: 'SELECT 1',
+              schedule_type: 'rrule',
+              rrule_schedule: rruleValue,
+              interval: 60,
+            },
+          ],
+        },
+      };
+      let getCallCount = 0;
+      const mockClient = {
+        get: jest.fn().mockImplementation(() => {
+          getCallCount += 1;
+
+          return Promise.resolve(soWithPerQueryRrule);
+        }),
+        find: jest.fn().mockResolvedValue({ saved_objects: [] }),
+        update: jest.fn().mockResolvedValue({
+          id: 'pack-id',
+          attributes: soWithPerQueryRrule.attributes,
+          references: [],
+        }),
+        list: jest.fn().mockResolvedValue({ items: [] }),
+      };
+
+      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+
+      setupRoute(false);
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { id: 'pack-id' },
+        body: { name: 'my-pack' },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
+
+      expect(getCallCount).toBeGreaterThanOrEqual(2);
+      expect(mockResponse.ok).toHaveBeenCalled();
+      const responseBody = mockResponse.ok.mock.calls[0][0]?.body as any;
+      // The disabled-pack short-circuit at line 366-367 returns updatedPackSO
+      // directly (no PackResponseData build). The gate applied at the
+      // convertSOQueriesToPack mutation step covers this path too.
+      const responseQuery = responseBody.data.attributes.queries.q1;
+      expect(responseQuery).toBeDefined();
+      expect(responseQuery).not.toHaveProperty('schedule_type');
+      expect(responseQuery).not.toHaveProperty('rrule_schedule');
+      // Per-query interval (legacy field) MUST still surface.
+      expect(responseQuery.interval).toBe(60);
+    });
   });
 });

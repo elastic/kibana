@@ -18,7 +18,7 @@ import type { ReadPacksRequestParamsSchema } from '../../../common/api';
 import { readPacksRequestParamsSchema } from '../../../common/api';
 import { prepareSavedObjectCopy } from '../utils/copy_saved_object';
 import type { PackResponseData } from './types';
-import { buildScheduleResponseSlice } from './utils';
+import { buildScheduleResponseSlice, stripPerQueryRruleFields } from './utils';
 import { copyPackResponseSchema } from './response_schemas';
 
 // Fields that are intentionally NOT copied — they are pack-instance metadata
@@ -97,10 +97,18 @@ export const copyPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
             ...restAttributes
           } = sourceAttributes;
 
-          const copiedQueries = restAttributes.queries?.map((q) => {
-            const base = { ...q, schedule_id: uuidv4(), start_date: moment().toISOString() };
+          const copiedQueries = restAttributes.queries?.map((sourceQuery) => {
+            const base = {
+              ...sourceQuery,
+              schedule_id: uuidv4(),
+              start_date: moment().toISOString(),
+            };
             if (!isRruleFeatureEnabled) {
-              const { schedule_type: _st, rrule_schedule: _rr, ...rest } = base;
+              const {
+                schedule_type: _scheduleType,
+                rrule_schedule: _rruleSchedule,
+                ...rest
+              } = base;
 
               return rest;
             }
@@ -145,7 +153,7 @@ export const copyPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
           const data: PackResponseData = {
             name: attributes.name,
             description: attributes.description,
-            queries: attributes.queries,
+            queries: stripPerQueryRruleFields(attributes.queries, isRruleFeatureEnabled),
             version: attributes.version,
             enabled: attributes.enabled,
             created_at: attributes.created_at,

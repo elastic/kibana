@@ -21,7 +21,7 @@ import type { PackSavedObject } from '../../common/types';
 import type { PackResponseData } from './types';
 import { findPacksRequestQuerySchema } from '../../../common/api';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
-import { buildScheduleResponseSlice } from './utils';
+import { buildScheduleResponseSlice, stripPerQueryRruleFields } from './utils';
 import { findPackResponseSchema } from './response_schemas';
 
 export const findPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
@@ -68,7 +68,7 @@ export const findPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
         if (request.query.createdBy) {
           const users = request.query.createdBy.split(',');
           const userFilters = users.map(
-            (u) => `${packSavedObjectType}.attributes.created_by: "${escapeQuotes(u.trim())}"`
+            (user) => `${packSavedObjectType}.attributes.created_by: "${escapeQuotes(user.trim())}"`
           );
           filters.push(`(${userFilters.join(' OR ')})`);
         }
@@ -103,7 +103,7 @@ export const findPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
           return {
             name: attributes.name,
             description: attributes.description,
-            queries: attributes.queries,
+            queries: stripPerQueryRruleFields(attributes.queries, isRruleFeatureEnabled),
             version: attributes.version,
             enabled: attributes.enabled,
             created_at: attributes.created_at,

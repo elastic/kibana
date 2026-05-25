@@ -54,6 +54,7 @@ import {
   validatePackScheduleFields,
   resolvePackScheduleForUpdate,
   buildScheduleResponseSlice,
+  stripPerQueryRruleFields,
 } from './utils';
 
 import { convertShardsToArray } from '../utils';
@@ -146,8 +147,12 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         const gatedQueries = isRruleFeatureEnabled
           ? rawQueries
           : rawQueries
-          ? mapValues(rawQueries, (q) => {
-              const { schedule_type: _st, rrule_schedule: _rr, ...rest } = q as PackQueryInput;
+          ? mapValues(rawQueries, (rawQuery) => {
+              const {
+                schedule_type: _scheduleType,
+                rrule_schedule: _rruleSchedule,
+                ...rest
+              } = rawQuery as PackQueryInput;
 
               return rest;
             })
@@ -171,7 +176,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
         const existingScheduleIds = keyBy(
           (currentPackSO.attributes.queries ?? []).filter(
-            (q: { id: string; schedule_id?: string }) => q.schedule_id
+            (existingQuery: { id: string; schedule_id?: string }) => existingQuery.schedule_id
           ),
           'id'
         );
@@ -338,7 +343,10 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         );
 
         // @ts-expect-error update types
-        updatedPackSO.attributes.queries = convertSOQueriesToPack(updatedPackSO.attributes.queries);
+        updatedPackSO.attributes.queries = stripPerQueryRruleFields(
+          convertSOQueriesToPack(updatedPackSO.attributes.queries),
+          isRruleFeatureEnabled
+        );
 
         const buildFleetPackBlock = (agentPolicyId: string) => {
           const { queries: builtQueries, ...packDefaults } = convertSOQueriesToPackConfig(
@@ -523,7 +531,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         const data: PackResponseData = {
           name: attributes.name,
           description: attributes.description,
-          queries: attributes.queries,
+          queries: stripPerQueryRruleFields(attributes.queries, isRruleFeatureEnabled),
           version: attributes.version,
           enabled: attributes.enabled,
           created_at: attributes.created_at,

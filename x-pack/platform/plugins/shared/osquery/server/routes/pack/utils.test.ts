@@ -13,6 +13,7 @@ import {
   validateRruleConfig,
   isValidRfc3339,
   resolvePackScheduleForUpdate,
+  stripPerQueryRruleFields,
 } from './utils';
 
 const getTestQueries = (additionalFields?: Record<string, unknown>, packName = 'default') => ({
@@ -391,6 +392,76 @@ describe('Pack utils', () => {
       expect(result.q1).toBeDefined();
       expect(result.q1.schedule_id).toBe('uuid-preserved');
       expect(result.q1.start_date).toBe('2024-03-01T00:00:00.000Z');
+    });
+  });
+
+  describe('stripPerQueryRruleFields', () => {
+    const rrule = { rrule: 'FREQ=DAILY', start_date: '2026-01-01T00:00:00Z' };
+
+    test('flag on — array shape returned unchanged (identity)', () => {
+      const input = [
+        {
+          id: 'q1',
+          name: 'q1',
+          query: 'SELECT 1',
+          schedule_type: 'rrule' as const,
+          rrule_schedule: rrule,
+        },
+      ];
+      const out = stripPerQueryRruleFields(input, true);
+      expect(out).toBe(input);
+    });
+
+    test('flag on — record shape returned unchanged (identity)', () => {
+      const input = {
+        q1: { query: 'SELECT 1', schedule_type: 'rrule' as const, rrule_schedule: rrule },
+      };
+      const out = stripPerQueryRruleFields(input, true);
+      expect(out).toBe(input);
+    });
+
+    test('flag off — strips schedule_type and rrule_schedule from array shape', () => {
+      const input = [
+        {
+          id: 'q1',
+          name: 'q1',
+          query: 'SELECT 1',
+          schedule_type: 'rrule' as const,
+          rrule_schedule: rrule,
+          interval: 60,
+        },
+      ];
+      const out = stripPerQueryRruleFields(input, false);
+      expect(out[0]).not.toHaveProperty('schedule_type');
+      expect(out[0]).not.toHaveProperty('rrule_schedule');
+      expect(out[0].interval).toBe(60);
+      expect(out[0].query).toBe('SELECT 1');
+    });
+
+    test('flag off — strips schedule_type and rrule_schedule from record shape', () => {
+      const input = {
+        q1: {
+          query: 'SELECT 1',
+          schedule_type: 'rrule' as const,
+          rrule_schedule: rrule,
+          interval: 60,
+        },
+      };
+      const out = stripPerQueryRruleFields(input, false);
+      expect(out.q1).not.toHaveProperty('schedule_type');
+      expect(out.q1).not.toHaveProperty('rrule_schedule');
+      expect(out.q1.interval).toBe(60);
+    });
+
+    test('flag off — per-query interval continues to surface (legacy field)', () => {
+      const input = { q1: { query: 'SELECT 1', interval: 120 } };
+      const out = stripPerQueryRruleFields(input, false);
+      expect(out.q1.interval).toBe(120);
+    });
+
+    test('flag off — empty queries returns empty', () => {
+      expect(stripPerQueryRruleFields([], false)).toEqual([]);
+      expect(stripPerQueryRruleFields({}, false)).toEqual({});
     });
   });
 

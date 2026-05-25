@@ -35,6 +35,7 @@ import {
   makePackKey,
   validatePackScheduleFields,
   buildScheduleResponseSlice,
+  stripPerQueryRruleFields,
 } from './utils';
 import { convertShardsToArray } from '../utils';
 import type { PackSavedObject } from '../../common/types';
@@ -127,8 +128,12 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         // is defense in depth — this gate keeps RRULE state off the SO entirely.
         const gatedQueries = isRruleFeatureEnabled
           ? rawQueries
-          : mapValues(rawQueries, (q) => {
-              const { schedule_type: _st, rrule_schedule: _rr, ...rest } = q as PackQueryInput;
+          : mapValues(rawQueries, (rawQuery) => {
+              const {
+                schedule_type: _scheduleType,
+                rrule_schedule: _rruleSchedule,
+                ...rest
+              } = rawQuery as PackQueryInput;
 
               return rest;
             });
@@ -270,7 +275,7 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         const data: PackResponseData = {
           name: attributes.name,
           description: attributes.description,
-          queries: attributes.queries,
+          queries: stripPerQueryRruleFields(attributes.queries, isRruleFeatureEnabled),
           version: attributes.version,
           enabled: attributes.enabled,
           created_at: attributes.created_at,

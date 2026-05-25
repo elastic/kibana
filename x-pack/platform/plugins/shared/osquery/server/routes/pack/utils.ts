@@ -21,6 +21,7 @@ import {
   flatMap,
   omitBy,
   isUndefined,
+  mapValues,
 } from 'lodash';
 import { satisfies } from 'semver';
 import type { AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
@@ -187,6 +188,37 @@ export const buildScheduleResponseSlice = (
 
   return {};
 };
+
+/**
+ * Per-query response-boundary gate (response-side mirror of the wire-boundary
+ * gate in `convertSOQueriesToPackConfig`). When the rrule feature flag is off,
+ * strip per-query `schedule_type` and `rrule_schedule` from every query so the
+ * "pretend this never happened" contract holds at the response boundary
+ * regardless of what the SO carries. Per-query `interval` continues to
+ * surface (legacy field).
+ *
+ * Accepts both the SO-array shape (`SOPackQuery[]`) and the converted-record
+ * shape (`Record<string, PackQueryInput>`) so it can be applied uniformly
+ * before any route's response build. When the flag is on, returns the input
+ * unchanged (no allocation, no copy) so the hot path stays cheap.
+ */
+export function stripPerQueryRruleFields<T extends SOPackQuery[] | Record<string, PackQueryInput>>(
+  queries: T,
+  isRruleFeatureEnabled: boolean
+): T {
+  if (isRruleFeatureEnabled || queries == null) return queries;
+
+  if (isArray(queries)) {
+    return queries.map(
+      ({ schedule_type: _scheduleType, rrule_schedule: _rruleSchedule, ...rest }) => rest
+    ) as T;
+  }
+
+  return mapValues(
+    queries as Record<string, PackQueryInput>,
+    ({ schedule_type: _scheduleType, rrule_schedule: _rruleSchedule, ...rest }) => rest
+  ) as T;
+}
 
 export interface ConvertSOQueriesToPackConfigOptions {
   spaceId?: string;
@@ -635,39 +667,42 @@ export const validatePackScheduleFields = ({
 
   if (!queries) return null;
 
-  for (const [queryId, q] of Object.entries(queries)) {
+  for (const [queryId, query] of Object.entries(queries)) {
     // Per-query mutual exclusivity.
-    if (q.interval !== undefined && q.rrule_schedule) {
+    if (query.interval !== undefined && query.rrule_schedule) {
       return `Query "${queryId}" cannot specify both interval and rrule_schedule`;
     }
 
-    if (q.schedule_type === 'rrule') {
-      if (!q.rrule_schedule) {
+    if (query.schedule_type === 'rrule') {
+      if (!query.rrule_schedule) {
         return `Query "${queryId}" schedule_type "rrule" requires rrule_schedule`;
       }
 
       const queryPeriodSeconds =
-        safeDerivePeriodSeconds(q.rrule_schedule.rrule) ??
+        safeDerivePeriodSeconds(query.rrule_schedule.rrule) ??
         (packRrule ? safeDerivePeriodSeconds(packRrule.rrule) : undefined);
-      const error = validateRruleConfig(q.rrule_schedule, queryPeriodSeconds);
+      const error = validateRruleConfig(query.rrule_schedule, queryPeriodSeconds);
       if (error) return `Query "${queryId}": ${error}`;
-    } else if (q.schedule_type === 'interval') {
-      if (q.interval !== undefined && (typeof q.interval !== 'number' || q.interval <= 0)) {
+    } else if (query.schedule_type === 'interval') {
+      if (
+        query.interval !== undefined &&
+        (typeof query.interval !== 'number' || query.interval <= 0)
+      ) {
         return `Query "${queryId}" interval must be a positive number (seconds)`;
       }
     }
 
     // Same-mode constraint — when the pack has a mode, every query
     // override SHALL match.
-    if (packScheduleType && q.schedule_type && q.schedule_type !== packScheduleType) {
-      return `Query "${queryId}" schedule_type "${q.schedule_type}" does not match pack schedule_type "${packScheduleType}"; per-query overrides must use the same mode as the pack`;
+    if (packScheduleType && query.schedule_type && query.schedule_type !== packScheduleType) {
+      return `Query "${queryId}" schedule_type "${query.schedule_type}" does not match pack schedule_type "${packScheduleType}"; per-query overrides must use the same mode as the pack`;
     }
 
-    if (packScheduleType === 'rrule' && q.interval !== undefined) {
+    if (packScheduleType === 'rrule' && query.interval !== undefined) {
       return `Query "${queryId}" carries interval but the pack uses schedule_type "rrule"; per-query overrides must use the same mode as the pack`;
     }
 
-    if (packScheduleType === 'interval' && q.rrule_schedule) {
+    if (packScheduleType === 'interval' && query.rrule_schedule) {
       return `Query "${queryId}" carries rrule_schedule but the pack uses schedule_type "interval"; per-query overrides must use the same mode as the pack`;
     }
   }
