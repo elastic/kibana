@@ -8,7 +8,6 @@
 import { Request } from '@kbn/core-di-server';
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { errorResponseSchema } from '@kbn/alerting-v2-schemas';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
@@ -52,7 +51,7 @@ export class MatcherDataFieldsRoute extends BaseAlertingRoute {
         description: 'Indicates invalid query parameters.',
       },
     },
-  }
+  };
 
   protected readonly routeName = 'matcher data fields suggestions';
 
