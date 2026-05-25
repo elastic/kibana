@@ -3067,6 +3067,10 @@ x-pack/solutions/security/test/moon.yml @elastic/kibana-operations
 
 /.mise.toml @elastic/kibana-operations
 
+# FTR config manifests have no single owner — touched by all solutions.
+# Leaving this unowned avoids routing every edit through Kibana Operations.
+/.buildkite/ftr-manifests/
+
 ####
 ## These rules are always last so they take ultimate priority over everything else
 ####

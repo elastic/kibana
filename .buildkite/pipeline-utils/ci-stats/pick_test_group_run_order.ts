@@ -12,7 +12,7 @@ import * as Fs from 'fs';
 import * as globby from 'globby';
 import minimatch from 'minimatch';
 
-import { load as loadYaml } from 'js-yaml';
+import { parse as loadYaml } from 'yaml';
 
 import type { BuildkiteStep } from '../buildkite';
 import { BuildkiteClient } from '../buildkite';
@@ -22,7 +22,7 @@ import { getTrackedBranch } from '../utils';
 
 import DISABLED_JEST_CONFIGS from '../../disabled_jest_configs.json';
 import SHARDED_JEST_CONFIGS from '../../sharded_jest_configs.json';
-import { serverless, stateful } from '../../ftr_configs_manifests.json';
+import { serverless, stateful } from '../../ftr-manifests/ftr_configs_manifests.json';
 import { filterEmptyJestConfigs } from './get_tests_from_config';
 import {
   getAffectedPackages,
