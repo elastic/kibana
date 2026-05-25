@@ -131,8 +131,9 @@ export class ConnectorStepImpl extends BaseAtomicNodeImplementation<ConnectorSte
           }
         : withInputs;
 
-      // For connector types with Layer 1 support, inject max_content_length into fetchOptions
+      // For connector types with Layer 1 support, inject max_content_length
       // so axios can abort mid-stream (Layer 1 OOM prevention).
+      // The HTTP system connector uses "fetcher"; spec-based connectors use "fetchOptions".
       const rawType = step.type;
       const isSpecConnector = isSpecConnectorType(stepType);
       const hasStepMaxSize = Boolean(step['max-step-size']);
@@ -144,10 +145,11 @@ export class ConnectorStepImpl extends BaseAtomicNodeImplementation<ConnectorSte
       if (usesWorkflowTransportLimit) {
         const maxBytes = this.getMaxResponseBytes();
         if (maxBytes > 0) {
+          const fetchKey = CONNECTOR_TYPES_WITH_LAYER_1.has(rawType) ? 'fetcher' : 'fetchOptions';
           renderedInputs = {
             ...renderedInputs,
-            fetchOptions: {
-              ...(renderedInputs?.fetchOptions || {}),
+            [fetchKey]: {
+              ...(renderedInputs?.[fetchKey] || {}),
               max_content_length: maxBytes,
             },
           };

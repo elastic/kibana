@@ -17,6 +17,7 @@ import {
   ExecutionStatus,
   isEventDrivenWorkflowTriggerSource,
   isWellKnownWorkflowTriggerSource,
+  toManagedWorkflowTelemetryFields,
 } from '@kbn/workflows';
 import {
   type EventDrivenExecutionSuppressedParams,
@@ -161,6 +162,7 @@ function buildBaseExecutionTelemetryFields(
   const { triggerType, eventTriggerId } = resolveExecutionTriggerTelemetry(
     workflowExecution.triggeredBy
   );
+  const managedWorkflowFields = toManagedWorkflowTelemetryFields(workflowExecution);
   return {
     workflowExecutionId: workflowExecution.id,
     workflowId: workflowExecution.workflowId,
@@ -168,6 +170,7 @@ function buildBaseExecutionTelemetryFields(
     triggerType,
     ...(eventTriggerId !== undefined ? { eventTriggerId } : {}),
     isTestRun: workflowExecution.isTestRun || false,
+    ...managedWorkflowFields,
     ...(executionMetadata.ruleId && { ruleId: executionMetadata.ruleId }),
     ...(executionMetadata.compositionDepth !== undefined && {
       compositionDepth: executionMetadata.compositionDepth,
@@ -388,6 +391,7 @@ export class WorkflowExecutionTelemetryClient {
     const { triggerType, eventTriggerId } = resolveExecutionTriggerTelemetry(
       workflowExecution.triggeredBy
     );
+    const managedWorkflowFields = toManagedWorkflowTelemetryFields(workflowExecution);
 
     const eventData: EventDrivenExecutionSuppressedParams = {
       eventName:
@@ -400,6 +404,7 @@ export class WorkflowExecutionTelemetryClient {
       triggerType,
       ...(eventTriggerId !== undefined ? { eventTriggerId } : {}),
       isTestRun: workflowExecution.isTestRun || false,
+      ...managedWorkflowFields,
       ...(executionMetadata.ruleId && { ruleId: executionMetadata.ruleId }),
       ...(executionMetadata.eventChainDepth !== undefined && {
         eventChainDepth: executionMetadata.eventChainDepth,

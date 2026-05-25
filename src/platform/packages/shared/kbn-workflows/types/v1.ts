@@ -104,6 +104,7 @@ export interface EsWorkflowExecution {
   managed?: boolean;
   managedBy?: string | null;
   originManagedWorkflowId?: string | null;
+  managedVersion?: number | null;
   isTestRun: boolean;
   status: ExecutionStatus;
   context: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -268,6 +269,7 @@ export const EsWorkflowSchema = z.object({
   managed: z.boolean().optional(),
   managedBy: z.string().nullable().optional(),
   originManagedWorkflowId: z.string().nullable().optional(),
+  managedVersion: z.number().nullable().optional(),
   tags: z.array(z.string()),
   createdAt: z.date(),
   createdBy: z.string(),
@@ -382,6 +384,7 @@ export interface WorkflowDetailDto {
   managedBy?: string | null;
   definitionHash?: string | null;
   originManagedWorkflowId?: string | null;
+  managedVersion?: number | null;
   lifecycle?: 'static' | 'dynamic' | null;
   createdAt: string;
   createdBy: string;
@@ -428,8 +431,10 @@ export interface WorkflowExecutionEngineModel
     | 'managed'
     | 'managedBy'
     | 'originManagedWorkflowId'
+    | 'managedVersion'
   > {
   isTestRun?: boolean;
+  isEphemeral?: boolean;
   spaceId?: string;
 }
 
