@@ -19,6 +19,8 @@ import type { EuiThemeComputed } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { ConfirmPromptDefinition, ConfirmPromptColor } from '@kbn/agent-builder-common/agents';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { borderRadiusXlStyles } from '../../../../../common.styles';
 
 const defaultLabels = {
@@ -50,6 +52,7 @@ export interface ConfirmationPromptProps {
   onConfirm: () => void;
   onCancel: () => void;
   isLoading?: boolean;
+  isDisabled?: boolean;
   isAnswered?: boolean;
   answeredValue?: boolean;
 }
@@ -59,6 +62,7 @@ export const ConfirmationPrompt: React.FC<ConfirmationPromptProps> = ({
   onConfirm,
   onCancel,
   isLoading = false,
+  isDisabled = false,
   isAnswered = false,
   answeredValue,
 }) => {
@@ -120,10 +124,15 @@ export const ConfirmationPrompt: React.FC<ConfirmationPromptProps> = ({
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               onClick={onCancel}
-              disabled={isLoading || isAnswered}
+              disabled={isDisabled || isLoading || isAnswered}
               size="s"
               color={isAnswered && answeredValue === false ? 'danger' : 'text'}
               data-test-subj="agentBuilderConfirmationPromptCancelButton"
+              {...getEbtProps({
+                element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                action: AGENT_BUILDER_UI_EBT.action.conversation.CONFIRM_PROMPT_CANCEL,
+                detail: 'conversation',
+              })}
             >
               {cancelText}
             </EuiButtonEmpty>
@@ -132,11 +141,16 @@ export const ConfirmationPrompt: React.FC<ConfirmationPromptProps> = ({
             <EuiButton
               onClick={onConfirm}
               isLoading={isLoading}
-              disabled={isAnswered}
+              disabled={isDisabled || isAnswered}
               fill={!isAnswered || answeredValue === true}
               size="s"
               color={isAnswered && answeredValue === true ? 'success' : color}
               data-test-subj="agentBuilderConfirmationPromptConfirmButton"
+              {...getEbtProps({
+                element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                action: AGENT_BUILDER_UI_EBT.action.conversation.CONFIRM_PROMPT_CONFIRM,
+                detail: 'conversation',
+              })}
             >
               {confirmText}
             </EuiButton>

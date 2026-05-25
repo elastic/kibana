@@ -12,16 +12,26 @@ import {
   ALERT_ACTIONS_DATA_STREAM,
 } from '../constants';
 
+const SPACE_ID = 'default';
+
 describe('buildEpisodesBaseQuery', () => {
   it('should build query with correct structure', () => {
-    const query = buildEpisodesBaseQuery();
+    const query = buildEpisodesBaseQuery(SPACE_ID);
     const queryString = query.print('basic');
 
     expect(queryString).toContain(`FROM ${ALERT_EVENTS_DATA_STREAM}`);
+    expect(queryString).toContain('WHERE space_id == "default"');
+    expect(queryString).toContain('METADATA');
+    expect(queryString).toContain('_source');
     expect(queryString).toContain('type == "alert"');
     expect(queryString).toContain('INLINE STATS');
     expect(queryString).toContain('first_timestamp = MIN(@timestamp)');
     expect(queryString).toContain('last_timestamp = MAX(@timestamp)');
+    expect(queryString).toContain('episode_data');
+    expect(queryString).toContain('extracted_data = JSON_EXTRACT(_source, "data")');
+    expect(queryString).toContain(
+      'episode_data = LAST(extracted_data, @timestamp) WHERE extracted_data != "{}"'
+    );
     expect(queryString).toContain('BY episode.id');
     expect(queryString).toContain('EVAL duration = DATE_DIFF');
     expect(queryString).toContain('"ms"');
@@ -33,15 +43,16 @@ describe('buildEpisodesBaseQuery', () => {
 
 describe('buildEpisodesQuery', () => {
   it('should join both data streams', () => {
-    const query = buildEpisodesQuery();
+    const query = buildEpisodesQuery(SPACE_ID);
     const queryString = query.print('basic');
 
     expect(queryString).toContain(`FROM ${ALERT_EVENTS_DATA_STREAM}`);
     expect(queryString).toContain(ALERT_ACTIONS_DATA_STREAM);
+    expect(queryString).toContain('episode_data');
   });
 
   it('should compute effective_status from deactivation actions', () => {
-    const query = buildEpisodesQuery();
+    const query = buildEpisodesQuery(SPACE_ID);
     const queryString = query.print('basic');
 
     expect(queryString).toContain(
@@ -54,7 +65,7 @@ describe('buildEpisodesQuery', () => {
   });
 
   it('should build query with default sort', () => {
-    const query = buildEpisodesQuery();
+    const query = buildEpisodesQuery(SPACE_ID);
     const queryString = query.print('basic');
 
     expect(queryString).toContain('SORT @timestamp DESC');
@@ -62,7 +73,7 @@ describe('buildEpisodesQuery', () => {
   });
 
   it('should correctly sanitize and apply custom sort', () => {
-    const query = buildEpisodesQuery({
+    const query = buildEpisodesQuery(SPACE_ID, {
       sortField: 'episode.id',
       sortDirection: 'asc',
     });
@@ -73,7 +84,7 @@ describe('buildEpisodesQuery', () => {
   });
 
   it('should sanitize invalid sort fields to @timestamp', () => {
-    const query = buildEpisodesQuery({
+    const query = buildEpisodesQuery(SPACE_ID, {
       sortField: 'invalid.field',
       sortDirection: 'desc',
     });
@@ -87,7 +98,7 @@ describe('buildEpisodesQuery', () => {
     const allowlistedFields = ['@timestamp', 'episode.id', 'episode.status', 'rule.id', 'duration'];
 
     allowlistedFields.forEach((field) => {
-      const query = buildEpisodesQuery({
+      const query = buildEpisodesQuery(SPACE_ID, {
         sortField: field,
         sortDirection: 'asc',
       });
@@ -99,6 +110,7 @@ describe('buildEpisodesQuery', () => {
 
   it('should filter on effective_status when status filter is set', () => {
     const query = buildEpisodesQuery(
+      SPACE_ID,
       { sortField: '@timestamp', sortDirection: 'desc' },
       { status: 'active' }
     );
@@ -108,7 +120,11 @@ describe('buildEpisodesQuery', () => {
   });
 
   it('should not filter on effective_status when no status filter is set', () => {
-    const query = buildEpisodesQuery({ sortField: '@timestamp', sortDirection: 'desc' }, {});
+    const query = buildEpisodesQuery(
+      SPACE_ID,
+      { sortField: '@timestamp', sortDirection: 'desc' },
+      {}
+    );
     const queryString = query.print('basic');
 
     expect(queryString).not.toContain('WHERE effective_status ==');
@@ -116,6 +132,7 @@ describe('buildEpisodesQuery', () => {
 
   it('should apply ruleId filter', () => {
     const query = buildEpisodesQuery(
+      SPACE_ID,
       { sortField: '@timestamp', sortDirection: 'desc' },
       { ruleId: 'rule-123' }
     );
@@ -126,6 +143,7 @@ describe('buildEpisodesQuery', () => {
 
   it('should apply queryString filter with QSTR', () => {
     const query = buildEpisodesQuery(
+      SPACE_ID,
       { sortField: '@timestamp', sortDirection: 'desc' },
       { queryString: 'alert.name: "test"' }
     );
@@ -136,6 +154,7 @@ describe('buildEpisodesQuery', () => {
 
   it('should apply multiple filters together', () => {
     const query = buildEpisodesQuery(
+      SPACE_ID,
       { sortField: '@timestamp', sortDirection: 'desc' },
       {
         queryString: 'alert.name: "test"',
@@ -152,6 +171,7 @@ describe('buildEpisodesQuery', () => {
 
   it('should apply single tag filter with MV_CONTAINS', () => {
     const query = buildEpisodesQuery(
+      SPACE_ID,
       { sortField: '@timestamp', sortDirection: 'desc' },
       { tags: ['prod'] }
     );
@@ -162,6 +182,7 @@ describe('buildEpisodesQuery', () => {
 
   it('should apply multiple tags as OR of MV_CONTAINS', () => {
     const query = buildEpisodesQuery(
+      SPACE_ID,
       { sortField: '@timestamp', sortDirection: 'desc' },
       { tags: ['a', 'b'] }
     );
@@ -174,6 +195,7 @@ describe('buildEpisodesQuery', () => {
 
   it('should ignore empty tag strings when filtering', () => {
     const query = buildEpisodesQuery(
+      SPACE_ID,
       { sortField: '@timestamp', sortDirection: 'desc' },
       { tags: ['  ', ''] }
     );
@@ -184,6 +206,7 @@ describe('buildEpisodesQuery', () => {
 
   it('should trim queryString before applying', () => {
     const query = buildEpisodesQuery(
+      SPACE_ID,
       { sortField: '@timestamp', sortDirection: 'desc' },
       { queryString: '  alert.name: "test"  ' }
     );
@@ -194,6 +217,7 @@ describe('buildEpisodesQuery', () => {
 
   it('should not apply filters when they are null or undefined', () => {
     const query = buildEpisodesQuery(
+      SPACE_ID,
       { sortField: '@timestamp', sortDirection: 'desc' },
       { queryString: null, status: null, ruleId: undefined, tags: null }
     );
@@ -207,6 +231,7 @@ describe('buildEpisodesQuery', () => {
 
   it('should not apply queryString filter when it is empty or whitespace', () => {
     const query = buildEpisodesQuery(
+      SPACE_ID,
       { sortField: '@timestamp', sortDirection: 'desc' },
       { queryString: '   ' }
     );
@@ -217,6 +242,7 @@ describe('buildEpisodesQuery', () => {
 
   it('should apply assigneeUid filter with per-episode INLINE STATS', () => {
     const query = buildEpisodesQuery(
+      SPACE_ID,
       { sortField: '@timestamp', sortDirection: 'desc' },
       { assigneeUid: 'user-123' }
     );
@@ -234,7 +260,11 @@ describe('buildEpisodesQuery', () => {
   });
 
   it('should always include assign actions and assignee INLINE STATS regardless of filter', () => {
-    const query = buildEpisodesQuery({ sortField: '@timestamp', sortDirection: 'desc' }, {});
+    const query = buildEpisodesQuery(
+      SPACE_ID,
+      { sortField: '@timestamp', sortDirection: 'desc' },
+      {}
+    );
     const queryString = query.print('basic');
 
     expect(queryString).toContain(
@@ -247,6 +277,7 @@ describe('buildEpisodesQuery', () => {
 
   it('should combine assigneeUid with other filters', () => {
     const query = buildEpisodesQuery(
+      SPACE_ID,
       { sortField: '@timestamp', sortDirection: 'desc' },
       { assigneeUid: 'user-123', status: 'active', ruleId: 'rule-456' }
     );
@@ -259,6 +290,7 @@ describe('buildEpisodesQuery', () => {
 
   it('should apply queryString with assigneeUid filter', () => {
     const query = buildEpisodesQuery(
+      SPACE_ID,
       { sortField: '@timestamp', sortDirection: 'desc' },
       { assigneeUid: 'user-123', queryString: 'alert.name: "test"' }
     );
@@ -271,7 +303,7 @@ describe('buildEpisodesQuery', () => {
 
 describe('buildEpisodesBaseQuery — action state stats', () => {
   it('computes last_snooze_action and snooze_expiry grouped by group_hash', () => {
-    const esql = buildEpisodesBaseQuery().print('basic');
+    const esql = buildEpisodesBaseQuery(SPACE_ID).print('basic');
     expect(esql).toMatch(
       /last_snooze_action\s*=\s*LAST\(action_type,\s*@timestamp\)\s*WHERE\s*\(action_type\s*IN\s*\("snooze",\s*"unsnooze"\)\)/
     );
@@ -280,7 +312,7 @@ describe('buildEpisodesBaseQuery — action state stats', () => {
     );
   });
   it('unifies episode.id and episode_id before computing per-episode action stats', () => {
-    const esql = buildEpisodesBaseQuery().print('basic');
+    const esql = buildEpisodesBaseQuery(SPACE_ID).print('basic');
     expect(esql).toMatch(/EVAL\s+episode_id\s*=\s*COALESCE\(`episode\.id`,\s*episode_id\)/);
     expect(esql).toMatch(
       /last_ack_action\s*=\s*LAST\(action_type,\s*@timestamp\)\s*WHERE\s*\(action_type\s*IN\s*\("ack",\s*"unack"\)\)/

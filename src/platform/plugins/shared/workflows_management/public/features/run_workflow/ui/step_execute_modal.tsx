@@ -26,6 +26,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
+import { useWorkflowsMonacoTheme } from '@kbn/workflows-ui';
 import { z } from '@kbn/zod/v4';
 import { ENABLED_STEP_TRIGGER_TABS } from './constants';
 import { NOT_READY_SENTINEL, StepExecuteHistoricalForm } from './step_execute_historical_form';
@@ -33,7 +34,6 @@ import { StepExecuteManualForm } from './step_execute_manual_form';
 import type { WorkflowStepTriggerTab } from './types';
 import { sanitizeText } from '../../../shared/lib/sanitize_text';
 import type { ContextOverrideData } from '../../../shared/utils/build_step_context_override/build_step_context_override';
-import { useWorkflowsMonacoTheme } from '../../../widgets/workflow_yaml_editor/styles/use_workflows_monaco_theme';
 
 const STEP_TAB_LABELS: Record<WorkflowStepTriggerTab, string> = {
   manual: i18n.translate('workflows.testStepModal.manualTab', { defaultMessage: 'Manual' }),

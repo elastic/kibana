@@ -31,6 +31,7 @@ describe('<RepositoryEdit />', () => {
     const { httpSetup } = setupEnvironment();
     const clearSaveError = jest.fn();
     const onSave = jest.fn();
+    const onCancel = jest.fn();
 
     const RepositoryFormWithDeps = WithAppDependencies(RepositoryForm, httpSetup);
     render(
@@ -41,6 +42,7 @@ describe('<RepositoryEdit />', () => {
         isSaving={false}
         clearSaveError={clearSaveError}
         onSave={onSave}
+        onCancel={onCancel}
       />
     );
 

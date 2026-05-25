@@ -19,6 +19,7 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { useFormContext } from 'react-hook-form';
 import { docLinks } from '../../../common/doc_links';
 import { useLLMsModels } from '../../hooks/use_llms_models';
@@ -55,6 +56,10 @@ export const TokenEstimateTooltip: React.FC<TokenEstimateTooltipProps> = ({
 
   return (
     <EuiPopover
+      aria-label={i18n.translate(
+        'xpack.searchPlayground.chat.message.tokenEstimateTooltip.popover.ariaLabel',
+        { defaultMessage: 'Token estimate breakdown' }
+      )}
       id={normalContextMenuPopoverId}
       button={
         <EuiButtonEmpty

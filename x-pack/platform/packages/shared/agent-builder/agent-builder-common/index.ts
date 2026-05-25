@@ -11,6 +11,7 @@ export {
   protectedNamespaces as toolReservedNamespaces,
   isInProtectedNamespace,
 } from './base/namespaces';
+export { DOT_INDEX_ALLOW_LIST_PATTERNS, isVisibleSearchSource } from './base/dot_index_allow_list';
 export {
   ToolType,
   ToolOrigin,
@@ -156,6 +157,10 @@ export {
   isCompactionStep,
   isBackgroundAgentCompleteStep,
   type BackgroundAgentCompleteStep,
+  isTodosStep,
+  findTodosStep,
+  type TodosStep,
+  carriedOverTodos,
   ChatEventType,
   ConversationRoundStatus,
   type ChatEventBase,
@@ -211,6 +216,9 @@ export {
   type BackgroundAgentCompleteEvent,
   type BackgroundAgentCompleteEventData,
   isBackgroundAgentCompleteEvent,
+  isTodosUpdatedEvent,
+  TODOS_UPDATED_UI_EVENT,
+  type TodosUpdatedUiEventData,
   type ConversationListOptions,
 } from './chat';
 export {
@@ -254,3 +262,9 @@ export {
   type PluginDefinition,
 } from './plugins';
 export { EffortLevels, type EffortLevel } from './model_provider';
+export {
+  type OAuthClient,
+  type OAuthClientLogo,
+  type OAuthClientConnectionsSummary,
+  OAuthClientType,
+} from './oauth_clients';

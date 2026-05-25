@@ -811,6 +811,26 @@ describe('function validation', () => {
         'Function TS_FUNCTION not allowed in STATS',
       ]);
     });
+
+    it('rejects tsdbCompatible:false functions in TS pipelines', async () => {
+      setTestFunctions([
+        {
+          name: 'tsdb_incompatible_agg',
+          type: FunctionDefinitionTypes.AGG,
+          description: '',
+          locationsAvailable: [Location.STATS],
+          tsdbCompatible: false,
+          signatures: [{ params: [], returnType: 'double' }],
+        },
+      ]);
+
+      const { expectErrors } = await setup();
+
+      await expectErrors('TS a_index | STATS TSDB_INCOMPATIBLE_AGG()', [
+        'Function TSDB_INCOMPATIBLE_AGG is not supported in time series (TS) pipelines',
+      ]);
+      await expectErrors('FROM a_index | STATS TSDB_INCOMPATIBLE_AGG()', []);
+    });
   });
 
   it('should flag nested aggregation functions', async () => {
@@ -862,6 +882,82 @@ describe('function validation', () => {
     await expectErrors('FROM a_index | STATS AGG_FUNCTION_1(SCALAR_FUNCTION(AGG_FUNCTION_2()))', [
       'Aggregation functions cannot be nested. Found AGG_FUNCTION_2 in AGG_FUNCTION_1.',
     ]);
+  });
+
+  describe('param with hint.kind === "aggregation"', () => {
+    beforeEach(() => {
+      setTestFunctions([
+        {
+          name: 'agg_outer',
+          type: FunctionDefinitionTypes.AGG,
+          description: '',
+          locationsAvailable: [Location.STATS],
+          signatures: [
+            {
+              params: [
+                {
+                  name: 'aggregation',
+                  type: 'double',
+                  optional: false,
+                  hint: { kind: 'aggregation' },
+                },
+              ],
+              returnType: 'double',
+            },
+          ],
+        },
+        {
+          name: 'agg_inner',
+          type: FunctionDefinitionTypes.AGG,
+          description: '',
+          locationsAvailable: [Location.STATS],
+          signatures: [
+            {
+              params: [{ name: 'field', type: 'double', optional: false }],
+              returnType: 'double',
+            },
+          ],
+        },
+        {
+          name: 'scalar_inner',
+          type: FunctionDefinitionTypes.SCALAR,
+          description: '',
+          locationsAvailable: [Location.STATS],
+          signatures: [
+            {
+              params: [{ name: 'field', type: 'double', optional: false }],
+              returnType: 'double',
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('allows a nested aggregation at the hint-marked position', async () => {
+      const { expectErrors } = await setup();
+      await expectErrors('FROM a_index | STATS AGG_OUTER(AGG_INNER(doubleField))', []);
+    });
+
+    it('reports an error when the hint-marked position receives a non-aggregation function', async () => {
+      const { expectErrors } = await setup();
+      await expectErrors('FROM a_index | STATS AGG_OUTER(SCALAR_INNER(doubleField))', [
+        'This argument of AGG_OUTER must be an aggregation function.',
+      ]);
+    });
+
+    it('reports an error when the hint-marked position receives a column', async () => {
+      const { expectErrors } = await setup();
+      await expectErrors('FROM a_index | STATS AGG_OUTER(doubleField)', [
+        'This argument of AGG_OUTER must be an aggregation function.',
+      ]);
+    });
+
+    it('still forbids nested aggregations inside the inner aggregation (the rule is only lifted at the hint position)', async () => {
+      const { expectErrors } = await setup();
+      await expectErrors('FROM a_index | STATS AGG_OUTER(AGG_INNER(AGG_INNER(doubleField)))', [
+        'Aggregation functions cannot be nested. Found AGG_INNER in AGG_INNER.',
+      ]);
+    });
   });
 
   it('should ignore a function whose name is defined by a parameter', async () => {
@@ -1152,6 +1248,30 @@ describe('function validation', () => {
       await expectErrors('FROM index | EVAL result = CONDITIONAL_MOCK("string", keywordField)', [
         getNoValidCallSignatureError('conditional_mock', ['keyword', 'keyword']),
       ]);
+    });
+
+    it('allows null as a result value in combination with other types', async () => {
+      const { expectErrors } = await setup();
+
+      await expectErrors(
+        'FROM index | EVAL result = CONDITIONAL_MOCK(booleanField, "text", booleanField, null)',
+        []
+      );
+    });
+
+    it('allows null as a result value in combination with other types, being null in the first position', async () => {
+      const { expectErrors } = await setup();
+
+      await expectErrors(
+        'FROM index | EVAL result = CONDITIONAL_MOCK(booleanField, null, booleanField, "text")',
+        []
+      );
+    });
+
+    it('allows null as the elseValue in combination with other types', async () => {
+      const { expectErrors } = await setup();
+
+      await expectErrors('FROM index | EVAL result = CONDITIONAL_MOCK(booleanField, 42, null)', []);
     });
   });
 });

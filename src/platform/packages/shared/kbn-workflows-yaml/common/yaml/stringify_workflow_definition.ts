@@ -25,7 +25,6 @@ export const WORKFLOW_DEFINITION_KEYS_ORDER: Array<keyof WorkflowYaml> = [
   'settings',
   'consts',
   'triggers',
-  'inputs',
   'outputs',
   'steps',
 ];

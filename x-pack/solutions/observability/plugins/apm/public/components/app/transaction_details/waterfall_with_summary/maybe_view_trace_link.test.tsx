@@ -12,28 +12,6 @@ import type { Transaction } from '../../../../../typings/es_schemas/ui/transacti
 import type { TraceItem } from '../../../../../common/waterfall/unified_trace_item';
 import { MaybeViewTraceLink } from './maybe_view_trace_link';
 
-jest.mock('../../../../hooks/use_apm_params', () => ({
-  useAnyOfApmParams: jest.fn(),
-}));
-
-jest.mock('../../../../hooks/use_apm_router', () => ({
-  useApmRouter: jest.fn(),
-}));
-
-jest.mock('../../../../context/apm_plugin/use_apm_plugin_context', () => ({
-  useApmPluginContext: jest.fn(),
-}));
-
-import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
-import { useApmRouter } from '../../../../hooks/use_apm_router';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-
-const mockUseAnyOfApmParams = useAnyOfApmParams as jest.MockedFunction<typeof useAnyOfApmParams>;
-const mockUseApmRouter = useApmRouter as jest.MockedFunction<typeof useApmRouter>;
-const mockUseApmPluginContext = useApmPluginContext as jest.MockedFunction<
-  typeof useApmPluginContext
->;
-
 const rootTransactionItem: TraceItem = {
   id: 'root-tx',
   name: 'GET /api/root',
@@ -80,27 +58,7 @@ function buildTransaction(id: string): Transaction {
   } as Transaction;
 }
 
-const mockLink = jest.fn(() => '/mock-full-trace-href');
-
-function setupMocks() {
-  mockUseAnyOfApmParams.mockReturnValue({
-    query: {
-      comparisonEnabled: true,
-      offset: '1d',
-      latencyAggregationType: 'avg',
-      rangeFrom: 'now-15m',
-      rangeTo: 'now',
-    },
-  } as any);
-
-  mockUseApmRouter.mockReturnValue({ link: mockLink } as any);
-
-  mockUseApmPluginContext.mockReturnValue({
-    core: {
-      uiSettings: { get: jest.fn().mockReturnValue(true) },
-    },
-  } as any);
-}
+const mockOnViewFullTrace = jest.fn();
 
 function renderLink(props: Partial<React.ComponentProps<typeof MaybeViewTraceLink>> = {}) {
   return render(
@@ -108,8 +66,8 @@ function renderLink(props: Partial<React.ComponentProps<typeof MaybeViewTraceLin
       <MaybeViewTraceLink
         isLoading={false}
         transaction={buildTransaction('child-tx')}
-        environment="production"
         traceItems={[rootTransactionItem, childTransactionItem]}
+        onViewFullTrace={mockOnViewFullTrace}
         {...props}
       />
     </I18nProvider>
@@ -119,7 +77,6 @@ function renderLink(props: Partial<React.ComponentProps<typeof MaybeViewTraceLin
 describe('MaybeViewTraceLink', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    setupMocks();
   });
 
   it('renders a button and no link when isLoading is true', () => {
@@ -169,41 +126,14 @@ describe('MaybeViewTraceLink', () => {
     expect(await screen.findByText('Currently viewing the full trace')).toBeInTheDocument();
   });
 
-  it('renders a TransactionDetailLink with the href built from the root transaction', () => {
+  it('calls onViewFullTrace when the button is clicked and the current transaction is not root', async () => {
+    const user = userEvent.setup();
     renderLink();
 
-    const link = screen.getByTestId('apmTransactionDetailLinkLink');
-    expect(link).toHaveAttribute('href', '/mock-full-trace-href');
+    const button = screen.getByTestId('apmFullTraceButtonViewFullTraceButton');
+    expect(button).not.toBeDisabled();
 
-    expect(mockLink).toHaveBeenCalledWith(
-      '/services/{serviceName}/transactions/view',
-      expect.objectContaining({
-        path: { serviceName: 'root-service' },
-        query: expect.objectContaining({
-          traceId: 'trace-xyz',
-          transactionId: 'root-tx',
-          transactionName: 'GET /api/root',
-          transactionType: 'request',
-          latencyAggregationType: 'avg',
-          offset: '1d',
-          serviceGroup: '',
-        }),
-      })
-    );
-  });
-
-  it('uses the default latency aggregation when not provided in the query', () => {
-    mockUseAnyOfApmParams.mockReturnValue({
-      query: { comparisonEnabled: true, offset: '1d' },
-    } as any);
-
-    renderLink();
-
-    expect(mockLink).toHaveBeenCalledWith(
-      expect.any(String),
-      expect.objectContaining({
-        query: expect.objectContaining({ latencyAggregationType: 'avg' }),
-      })
-    );
+    await user.click(button);
+    expect(mockOnViewFullTrace).toHaveBeenCalledTimes(1);
   });
 });

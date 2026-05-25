@@ -9,7 +9,6 @@
 
 export {
   MIGRATION_CLIENT_OPTIONS,
-  REMOVED_TYPES,
   SavedObjectsService,
   CoreSavedObjectsRouteHandlerContext,
   SAVED_OBJECT_TYPES_COUNT,

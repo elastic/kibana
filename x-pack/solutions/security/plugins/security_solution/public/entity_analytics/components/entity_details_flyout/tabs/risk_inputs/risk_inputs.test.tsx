@@ -13,6 +13,10 @@ import { EXPAND_ALERT_TEST_ID, RiskInputsTab } from './risk_inputs_tab';
 import { alertInputDataMock } from '../../mocks';
 import { RiskSeverity } from '../../../../../../common/search_strategy';
 import { EntityType } from '../../../../../../common/entity_analytics/types';
+import {
+  EntityDetailsLeftPanelTab,
+  RiskScoreLeftPanelSubTab,
+} from '../../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 
 const mockUseRiskContributingAlerts = jest.fn().mockReturnValue({ loading: false, data: [] });
 const mockGetEuidFromObject = jest.fn().mockReturnValue('user:entity-1');
@@ -55,6 +59,12 @@ const mockUseResolutionGroup = jest.fn().mockReturnValue({ data: undefined });
 
 jest.mock('../../../entity_resolution/hooks/use_resolution_group', () => ({
   useResolutionGroup: (entityId: string) => mockUseResolutionGroup(entityId),
+}));
+
+const mockUseStableExpandableFlyoutState = jest.fn().mockReturnValue({});
+
+jest.mock('../../../../../flyout/shared/hooks/use_stable_expandable_flyout_state', () => ({
+  useStableExpandableFlyoutState: () => mockUseStableExpandableFlyoutState(),
 }));
 
 const riskScore = {
@@ -107,6 +117,7 @@ describe('RiskInputsTab', () => {
     mockGetEuidFromObject.mockReturnValue('user:entity-1');
     mockUseResolutionGroup.mockReturnValue({ data: undefined });
     mockUseGetWatchlists.mockReturnValue({ data: [] });
+    mockUseStableExpandableFlyoutState.mockReturnValue({});
     mockUseRiskScore.mockImplementation((params?: { filterQuery?: unknown; skip?: boolean }) =>
       params?.skip
         ? {
@@ -596,6 +607,265 @@ describe('RiskInputsTab', () => {
     expect(getByTestId('risk-input-contexts-table')).toHaveTextContent('Entity');
     expect(getByTestId('risk-input-contexts-table')).toHaveTextContent('elastic');
     expect(getByTestId('risk-input-contexts-table')).toHaveTextContent('entity-1');
+  });
+
+  it('initializes to resolution view when flyout state subTab is "resolution"', () => {
+    mockUseStableExpandableFlyoutState.mockReturnValue({
+      left: {
+        params: {
+          path: {
+            tab: EntityDetailsLeftPanelTab.RISK_INPUTS,
+            subTab: RiskScoreLeftPanelSubTab.RESOLUTION,
+          },
+        },
+      },
+    });
+    mockUseResolutionGroup.mockReturnValue({
+      data: {
+        target: {
+          entity: { id: 'user:elastic', name: 'elastic', attributes: { watchlists: [] } },
+        },
+        aliases: [
+          {
+            entity: { id: 'user:entity-1', name: 'entity-1', attributes: { watchlists: [] } },
+          },
+        ],
+        group_size: 2,
+      },
+    });
+    mockUseRiskScore.mockImplementation((params?: { filterQuery?: unknown; skip?: boolean }) =>
+      params?.skip
+        ? { loading: false, error: false, data: [] }
+        : { loading: false, error: false, data: [riskScore] }
+    );
+
+    const { getByRole } = render(
+      <TestProviders>
+        <RiskInputsTab
+          entityType={EntityType.user}
+          entityName="elastic"
+          scopeId="scopeId"
+          entityId="user:elastic"
+        />
+      </TestProviders>
+    );
+
+    expect(getByRole('button', { name: 'Resolution group risk score' })).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    );
+  });
+
+  it('auto-switches to resolution view when there is no entity risk score but a resolution score exists', () => {
+    mockUseResolutionGroup.mockReturnValue({
+      data: {
+        target: {
+          entity: { id: 'user:elastic', name: 'elastic', attributes: { watchlists: [] } },
+        },
+        aliases: [
+          {
+            entity: { id: 'user:entity-1', name: 'entity-1', attributes: { watchlists: [] } },
+          },
+        ],
+        group_size: 2,
+      },
+    });
+    mockUseRiskScore.mockImplementation((params?: { filterQuery?: unknown; skip?: boolean }) =>
+      params?.skip
+        ? { loading: false, error: false, data: [] }
+        : isResolutionFilter(params)
+        ? { loading: false, error: false, data: [riskScore] }
+        : { loading: false, error: false, data: [] }
+    );
+
+    const { getByRole } = render(
+      <TestProviders>
+        <RiskInputsTab
+          entityType={EntityType.user}
+          entityName="elastic"
+          scopeId="scopeId"
+          entityId="user:elastic"
+        />
+      </TestProviders>
+    );
+
+    expect(getByRole('button', { name: 'Resolution group risk score' })).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    );
+  });
+
+  it('switches from entity view to resolution view and back', () => {
+    mockUseResolutionGroup.mockReturnValue({
+      data: {
+        target: {
+          entity: { id: 'user:elastic', name: 'elastic', attributes: { watchlists: [] } },
+        },
+        aliases: [
+          {
+            entity: { id: 'user:entity-1', name: 'entity-1', attributes: { watchlists: [] } },
+          },
+        ],
+        group_size: 2,
+      },
+    });
+    mockUseRiskScore.mockImplementation((params?: { filterQuery?: unknown; skip?: boolean }) =>
+      params?.skip
+        ? { loading: false, error: false, data: [] }
+        : isResolutionFilter(params)
+        ? { loading: false, error: false, data: [riskScore] }
+        : { loading: false, error: false, data: [riskScore] }
+    );
+
+    const { getByText, getByRole, getByTestId } = render(
+      <TestProviders>
+        <RiskInputsTab
+          entityType={EntityType.user}
+          entityName="elastic"
+          scopeId="scopeId"
+          entityId="user:elastic"
+        />
+      </TestProviders>
+    );
+
+    expect(getByTestId('risk-input-score-view-toggle')).toBeInTheDocument();
+    expect(getByRole('button', { name: 'Entity risk score' })).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    );
+
+    fireEvent.click(getByRole('button', { name: 'Resolution group risk score' }));
+    expect(getByRole('button', { name: 'Resolution group risk score' })).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    );
+
+    fireEvent.click(getByText('Entity risk score'));
+    expect(getByRole('button', { name: 'Entity risk score' })).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    );
+  });
+
+  it('content changes when switching between entity and resolution views', () => {
+    const entityScore = {
+      '@timestamp': '2021-08-19T16:00:00.000Z',
+      user: {
+        name: 'elastic',
+        risk: {
+          ...riskScore.user.risk,
+          modifiers: [
+            { type: 'watchlist', contribution: 5, metadata: { watchlist_id: 'wl-entity' } },
+          ],
+        },
+      },
+    };
+    const resolutionScore = {
+      '@timestamp': '2021-08-19T16:00:00.000Z',
+      user: {
+        name: 'elastic',
+        risk: {
+          ...riskScore.user.risk,
+          modifiers: [
+            { type: 'watchlist', contribution: 3, metadata: { watchlist_id: 'wl-resolution' } },
+          ],
+        },
+      },
+    };
+
+    mockUseResolutionGroup.mockReturnValue({
+      data: {
+        target: {
+          entity: { id: 'user:elastic', name: 'elastic', attributes: { watchlists: [] } },
+        },
+        aliases: [
+          {
+            entity: { id: 'user:entity-1', name: 'entity-1', attributes: { watchlists: [] } },
+          },
+        ],
+        group_size: 2,
+      },
+    });
+    mockUseRiskScore.mockImplementation((params?: { filterQuery?: unknown; skip?: boolean }) =>
+      params?.skip
+        ? { loading: false, error: false, data: [] }
+        : isResolutionFilter(params)
+        ? { loading: false, error: false, data: [resolutionScore] }
+        : { loading: false, error: false, data: [entityScore] }
+    );
+
+    const { getByText, getByTestId } = render(
+      <TestProviders>
+        <RiskInputsTab
+          entityType={EntityType.user}
+          entityName="elastic"
+          scopeId="scopeId"
+          entityId="user:elastic"
+        />
+      </TestProviders>
+    );
+
+    expect(getByTestId('risk-input-contexts-table')).toHaveTextContent('wl-entity');
+    expect(getByTestId('risk-input-contexts-table')).not.toHaveTextContent('wl-resolution');
+
+    fireEvent.click(getByText('Resolution group risk score'));
+
+    expect(getByTestId('risk-input-contexts-table')).not.toHaveTextContent('wl-entity');
+    expect(getByTestId('risk-input-contexts-table')).toHaveTextContent('wl-resolution');
+  });
+
+  it('user tab selection overrides initial subTab from URL', () => {
+    mockUseStableExpandableFlyoutState.mockReturnValue({
+      left: {
+        params: {
+          path: {
+            tab: EntityDetailsLeftPanelTab.RISK_INPUTS,
+            subTab: RiskScoreLeftPanelSubTab.RESOLUTION,
+          },
+        },
+      },
+    });
+    mockUseResolutionGroup.mockReturnValue({
+      data: {
+        target: {
+          entity: { id: 'user:elastic', name: 'elastic', attributes: { watchlists: [] } },
+        },
+        aliases: [
+          {
+            entity: { id: 'user:entity-1', name: 'entity-1', attributes: { watchlists: [] } },
+          },
+        ],
+        group_size: 2,
+      },
+    });
+    mockUseRiskScore.mockImplementation((params?: { filterQuery?: unknown; skip?: boolean }) =>
+      params?.skip
+        ? { loading: false, error: false, data: [] }
+        : { loading: false, error: false, data: [riskScore] }
+    );
+
+    const { getByRole } = render(
+      <TestProviders>
+        <RiskInputsTab
+          entityType={EntityType.user}
+          entityName="elastic"
+          scopeId="scopeId"
+          entityId="user:elastic"
+        />
+      </TestProviders>
+    );
+
+    expect(getByRole('button', { name: 'Resolution group risk score' })).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    );
+
+    fireEvent.click(getByRole('button', { name: 'Entity risk score' }));
+
+    expect(getByRole('button', { name: 'Entity risk score' })).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    );
   });
 
   it('renders watchlist modifiers in context section', () => {

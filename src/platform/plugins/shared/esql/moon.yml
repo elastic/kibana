@@ -29,7 +29,6 @@ dependsOn:
   - '@kbn/fields-metadata-plugin'
   - '@kbn/usage-collection-plugin'
   - '@kbn/kibana-utils-plugin'
-  - '@kbn/monaco'
   - '@kbn/search-types'
   - '@kbn/react-kibana-context-render'
   - '@kbn/core-test-helpers-kbn-server'
@@ -61,6 +60,7 @@ dependsOn:
   - '@kbn/logging-mocks'
   - '@kbn/agent-builder-genai-utils'
   - '@kbn/agent-builder-server'
+  - '@kbn/code-editor'
 tags:
   - plugin
   - prod

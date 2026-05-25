@@ -9,6 +9,7 @@
     "server/**/*",
     "scripts/**/*",
     "__mocks__/**/*",
+    "test/scout/**/*",
     "../../../../../typings/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "common/**/*.json",
@@ -44,6 +45,7 @@
     "@kbn/data-view-editor-plugin",
     "@kbn/data-views-plugin",
     "@kbn/data-visualizer-plugin",
+    "@kbn/discover-utils",
     "@kbn/deeplinks-management",
     "@kbn/deeplinks-ml",
     "@kbn/embeddable-plugin",
@@ -148,5 +150,7 @@
     "@kbn/cps",
     "@kbn/cps-utils",
     "@kbn/lens-common",
+    "@kbn/scout",
+    "@kbn/core-http-common",
   ]
 }

@@ -25,6 +25,7 @@ const projectDefaultRoles = new Map<string, Role>([
   ['security', 'editor'],
   ['oblt', 'editor'],
   ['workplaceai', 'developer'], // TODO: double check if it's really 'developer'
+  ['vectordb', 'developer'],
 ]);
 
 const projectTypesWithCustomRolesEnabled = ['es', 'security', 'oblt'];

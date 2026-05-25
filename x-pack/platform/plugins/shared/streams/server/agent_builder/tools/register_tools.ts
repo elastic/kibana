@@ -22,6 +22,7 @@ import { createInspectStreamsTool } from './read/inspect_streams';
 import { createDiagnoseStreamTool } from './read/diagnose_stream';
 import { createQueryDocumentsTool } from './read/query_documents';
 import { createDesignPipelineTool } from './read/design_pipeline';
+import { createListIlmPoliciesTool } from './read/list_ilm_policies';
 import {
   createSearchKnowledgeIndicatorsTool,
   STREAMS_SEARCH_KNOWLEDGE_INDICATORS_TOOL_ID,
@@ -38,6 +39,7 @@ export {
   STREAMS_DIAGNOSE_STREAM_TOOL_ID,
   STREAMS_QUERY_DOCUMENTS_TOOL_ID,
   STREAMS_DESIGN_PIPELINE_TOOL_ID,
+  STREAMS_LIST_ILM_POLICIES_TOOL_ID,
   STREAMS_UPDATE_STREAM_TOOL_ID,
   STREAMS_CREATE_PARTITION_TOOL_ID,
   STREAMS_DELETE_STREAM_TOOL_ID,
@@ -78,6 +80,7 @@ export function registerAgentBuilderTools({
     }),
     createQueryDocumentsTool({ getScopedClients }),
     createDesignPipelineTool({ getScopedClients }),
+    createListIlmPoliciesTool({ getScopedClients, isServerless: server.isServerless }),
 
     // Write tools
     createUpdateStreamTool({ getScopedClients, writeQueue }),

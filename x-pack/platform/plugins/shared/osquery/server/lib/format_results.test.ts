@@ -10,8 +10,6 @@ import {
   createJsonFormatter,
   createCsvFormatter,
   createFormatter,
-  parseExportFormat,
-  SUPPORTED_EXPORT_FORMATS,
 } from './format_results';
 import type { ExportMetadata } from './format_results';
 
@@ -28,25 +26,6 @@ const record1 = { 'osquery.pid': 1234, 'osquery.name': 'kibana', 'agent.name': '
 const record2 = { 'osquery.pid': 5678, 'osquery.name': 'elastic-agent', 'agent.name': 'host-2' };
 
 describe('format_results', () => {
-  describe('parseExportFormat', () => {
-    it('accepts supported formats', () => {
-      expect(parseExportFormat('ndjson')).toBe('ndjson');
-      expect(parseExportFormat('json')).toBe('json');
-      expect(parseExportFormat('csv')).toBe('csv');
-    });
-
-    it('returns undefined for invalid, empty, or missing values', () => {
-      expect(parseExportFormat('xml')).toBeUndefined();
-      expect(parseExportFormat('NDJSON')).toBeUndefined();
-      expect(parseExportFormat('')).toBeUndefined();
-      expect(parseExportFormat(undefined)).toBeUndefined();
-    });
-
-    it('lists every supported format in SUPPORTED_EXPORT_FORMATS', () => {
-      expect(SUPPORTED_EXPORT_FORMATS).toEqual(['ndjson', 'json', 'csv']);
-    });
-  });
-
   describe('createNdjsonFormatter', () => {
     it('writes metadata as first line', () => {
       const formatter = createNdjsonFormatter();
@@ -231,6 +210,47 @@ describe('format_results', () => {
       const formatter = createCsvFormatter();
       expect(formatter.contentType).toBe('text/csv');
       expect(formatter.fileExtension).toBe('csv');
+    });
+
+    describe('formula injection mitigation', () => {
+      it('prefixes a single-quote on cells starting with =', () => {
+        const formatter = createCsvFormatter();
+        const row = formatter.row({ field: '=SUM(A1:A2)' }, true);
+        const lines = row.split('\n').filter(Boolean);
+        expect(lines[1]).toBe("'=SUM(A1:A2)");
+      });
+
+      it.each([
+        ['+', '+1234'],
+        ['-', '-1234'],
+        ['@', '@user'],
+        ['\t', '\t tab'],
+      ])('prefixes a single-quote on cells starting with %s', (_label, value) => {
+        const formatter = createCsvFormatter();
+        const row = formatter.row({ field: value }, true);
+        expect(row).toContain(`'${value}`);
+      });
+
+      it('still quotes when the prefixed cell contains a comma', () => {
+        const formatter = createCsvFormatter();
+        const row = formatter.row({ field: '=HYPERLINK("http://evil.com","click,me")' }, true);
+        expect(row).toContain('"\'=HYPERLINK');
+      });
+
+      it('does not prefix plain numeric cells', () => {
+        const formatter = createCsvFormatter();
+        const row = formatter.row({ field: '1234' }, true);
+        const lines = row.split('\n').filter(Boolean);
+        expect(lines[1]).toBe('1234');
+      });
+
+      it('applies the formula-injection prefix to header columns', () => {
+        const formatter = createCsvFormatter();
+        formatter.finalizeColumns?.([{ '=evil_col': 'val' }]);
+        const row = formatter.row({ '=evil_col': 'val' }, true);
+        const lines = row.split('\n').filter(Boolean);
+        expect(lines[0]).toContain("'=evil_col");
+      });
     });
   });
 

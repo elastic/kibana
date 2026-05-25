@@ -13,13 +13,14 @@ import type { RuleSignatureId } from '../../../../../../common/api/detection_eng
 import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { invariant } from '../../../../../../common/utils/invariant';
 import { useFetchPrebuiltRulesStatusQuery } from '../../../../rule_management/api/hooks/prebuilt_rules/use_fetch_prebuilt_rules_status_query';
+import { useInvalidatePrebuiltRulesStatusOnInit } from '../../../../rule_management/logic/prebuilt_rules/use_invalidate_prebuilt_rules_status_on_init';
 import { PERFORM_ALL_RULES_INSTALLATION_KEY } from '../../../../rule_management/api/hooks/prebuilt_rules/use_perform_all_rules_install_mutation';
 import {
   usePerformInstallAllRules,
   usePerformInstallSpecificRules,
 } from '../../../../rule_management/logic/prebuilt_rules/use_perform_rule_install';
 import { usePrebuiltRulesInstallReview } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_install_review';
-import { useIsUpgradingSecurityPackages } from '../../../../rule_management/logic/use_upgrade_security_packages';
+import { useIsInitializingPrebuiltRulesPackage } from '../../../../rule_management/logic/prebuilt_rules/use_is_initializing_prebuilt_rules_package';
 import { useRulePreviewFlyout } from '../use_rule_preview_flyout';
 import { isUpgradeReviewRequestEnabled } from './add_prebuilt_rules_utils';
 import * as i18n from './translations';
@@ -58,10 +59,10 @@ export interface AddPrebuiltRulesTableState {
    */
   isRefetching: boolean;
   /**
-   * Is true when installing security_detection_rules
-   * package in background
+   * Is true while the `security_detection_engine` Fleet package is being
+   * initialized (installed or upgraded) in the background.
    */
-  isUpgradingSecurityPackages: boolean;
+  isInitializingPrebuiltRulesPackage: boolean;
   /**
    * Is true when performing Install All Rules mutation
    */
@@ -158,9 +159,10 @@ export const AddPrebuiltRulesTableContextProvider = ({
 
   const [sortingOptions, setSortingOptions] = useState<PrebuiltRuleAssetsSortItem | undefined>();
 
+  useInvalidatePrebuiltRulesStatusOnInit();
   const { data: prebuiltRulesStatus } = useFetchPrebuiltRulesStatusQuery();
 
-  const isUpgradingSecurityPackages = useIsUpgradingSecurityPackages();
+  const isInitializingPrebuiltRulesPackage = useIsInitializingPrebuiltRulesPackage();
   const isInstallingAllRules =
     useIsMutating({
       mutationKey: PERFORM_ALL_RULES_INSTALLATION_KEY,
@@ -168,7 +170,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
 
   const isUpgradeReviewEnabled = isUpgradeReviewRequestEnabled({
     canEditRules,
-    isUpgradingSecurityPackages,
+    isInitializingPrebuiltRulesPackage,
     prebuiltRulesStatus: prebuiltRulesStatus?.stats,
   });
   const {
@@ -264,7 +266,8 @@ export const AddPrebuiltRulesTableContextProvider = ({
     (rule: RuleResponse, closeRulePreview: () => void) => {
       const isPreviewRuleLoading = loadingRules.includes(rule.rule_id);
       const canPreviewedRuleBeInstalled =
-        canEditRules && !(isPreviewRuleLoading || isRefetching || isUpgradingSecurityPackages);
+        canEditRules &&
+        !(isPreviewRuleLoading || isRefetching || isInitializingPrebuiltRulesPackage);
 
       return (
         <EuiFlexGroup>
@@ -296,7 +299,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
         </EuiFlexGroup>
       );
     },
-    [loadingRules, canEditRules, isRefetching, isUpgradingSecurityPackages, installOneRule]
+    [loadingRules, canEditRules, isRefetching, isInitializingPrebuiltRulesPackage, installOneRule]
   );
 
   const { rulePreviewFlyout, openRulePreview } = useRulePreviewFlyout({
@@ -344,7 +347,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
         isFetching,
         loadingRules,
         isRefetching,
-        isUpgradingSecurityPackages,
+        isInitializingPrebuiltRulesPackage,
         isInstallingAllRules,
         isAnyRuleInstalling,
         selectedRules,
@@ -368,7 +371,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
     isLoading,
     loadingRules,
     isRefetching,
-    isUpgradingSecurityPackages,
+    isInitializingPrebuiltRulesPackage,
     isInstallingAllRules,
     isAnyRuleInstalling,
     selectedRules,

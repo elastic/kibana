@@ -24,12 +24,12 @@ core.userActivity.trackUserAction({
 });
 ```
 
-You can optionally provide a custom message and metadata:
+You can optionally provide a custom message, ECS `event.outcome`, top-level ECS `error.*` fields, and metadata:
 
 ```ts
 core.userActivity.trackUserAction({
   message: 'User snoozed an alerting rule',
-  event: { action: 'snooze_alerting_rule', type: 'change' },
+  event: { action: 'snooze_alerting_rule', type: 'change', outcome: 'success' },
   object: { id: 'rule-456', name: 'CPU usage threshold', type: 'rule', tags: ['production'] },
   metadata: {
     ui_surface: 'rules_table',
@@ -37,6 +37,8 @@ core.userActivity.trackUserAction({
   },
 });
 ```
+
+For failed actions, set `event.outcome` to `failure` and populate `error` with ECS fields (`type`, `message`, `stack_trace`, `code`) instead of stuffing failure detail only into `metadata`.
 
 ## Registering new actions
 

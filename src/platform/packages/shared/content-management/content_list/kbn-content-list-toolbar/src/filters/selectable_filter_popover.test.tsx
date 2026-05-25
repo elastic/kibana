@@ -18,12 +18,68 @@ const options = [
 ];
 
 describe('SelectableFilterPopover', () => {
-  it('counts only active values that match an available option', () => {
+  it('counts only active values that match an available option once options have loaded', () => {
     const query = Query.parse('')
       .addOrFieldValue('tag', 'Production', true, 'eq')
       .addOrFieldValue('tag', 'Missing', true, 'eq');
 
     render(
+      <SelectableFilterPopover
+        fieldName="tag"
+        title="Tags"
+        query={query}
+        options={options}
+        renderOption={(option) => <span>{option.label}</span>}
+      />
+    );
+
+    expect(screen.getByText('1')).toBeInTheDocument();
+    expect(screen.queryByText('2')).not.toBeInTheDocument();
+  });
+
+  it('shows the raw active-clause count before options load (URL hydration)', () => {
+    // Facets are typically fetched lazily on first popover open, so `options`
+    // can be empty when the page hydrates from a URL with filter clauses. The
+    // badge must reflect the active count immediately rather than waiting for
+    // the user to open the popover.
+    const query = Query.parse('')
+      .addOrFieldValue('tag', 'Alerting', true, 'eq')
+      .addOrFieldValue('tag', 'Flights', true, 'eq')
+      .addOrFieldValue('tag', 'Compliance', false, 'eq');
+
+    render(
+      <SelectableFilterPopover
+        fieldName="tag"
+        title="Tags"
+        query={query}
+        options={[]}
+        isLoading
+        renderOption={(option) => <span>{option.label}</span>}
+      />
+    );
+
+    expect(screen.getByText('3')).toBeInTheDocument();
+  });
+
+  it('switches from raw count to validated count when options resolve', () => {
+    const query = Query.parse('')
+      .addOrFieldValue('tag', 'Production', true, 'eq')
+      .addOrFieldValue('tag', 'Missing', true, 'eq');
+
+    const { rerender } = render(
+      <SelectableFilterPopover
+        fieldName="tag"
+        title="Tags"
+        query={query}
+        options={[]}
+        isLoading
+        renderOption={(option) => <span>{option.label}</span>}
+      />
+    );
+
+    expect(screen.getByText('2')).toBeInTheDocument();
+
+    rerender(
       <SelectableFilterPopover
         fieldName="tag"
         title="Tags"

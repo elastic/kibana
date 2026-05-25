@@ -16,12 +16,9 @@ project:
   channel: ''
   owner: '@elastic/contextual-security-apps'
   sourceRoot: x-pack/solutions/security/packages/siem-readiness
-dependsOn:
-  - '@kbn/kibana-react-plugin'
-  - '@kbn/core'
-  - '@kbn/react-query'
+dependsOn: []
 tags:
-  - shared-browser
+  - shared-common
   - package
   - prod
   - group-security

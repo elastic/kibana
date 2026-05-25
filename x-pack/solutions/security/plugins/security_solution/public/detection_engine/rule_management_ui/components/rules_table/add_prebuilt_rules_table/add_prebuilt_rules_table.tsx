@@ -38,7 +38,7 @@ export const AddPrebuiltRulesTable = React.memo(() => {
       isFetching,
       isRefetching,
       selectedRules,
-      isUpgradingSecurityPackages,
+      isInitializingPrebuiltRulesPackage,
       pagination,
       sortingOptions,
     },
@@ -47,7 +47,7 @@ export const AddPrebuiltRulesTable = React.memo(() => {
 
   const rulesColumns = useAddPrebuiltRulesTableColumns();
 
-  const shouldShowProgress = isUpgradingSecurityPackages || isRefetching;
+  const shouldShowProgress = isInitializingPrebuiltRulesPackage || isRefetching;
 
   const handleTableChange = useCallback(
     ({ page: { index, size }, sort }: CriteriaWithPagination<RuleResponse>) => {

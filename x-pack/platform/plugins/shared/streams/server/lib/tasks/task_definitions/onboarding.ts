@@ -19,6 +19,7 @@ import type { LogMeta } from '@kbn/logging';
 import { OBSERVABILITY_STREAMS_ENABLE_MEMORY } from '@kbn/management-settings-ids';
 import type { StreamsTaskType, TaskContext } from '.';
 import { getErrorMessage, parseError } from '../../streams/errors/parse_error';
+import { shouldIdentifyFeatures } from '../../sig_events/features/should_identify_features';
 import { persistQueries } from '../../sig_events/persist_queries';
 import { cancellableTask } from '../cancellable_task';
 import type { TaskClient } from '../task_client';
@@ -53,30 +54,7 @@ export function getOnboardingTaskId(streamName: string) {
   return `${STREAMS_ONBOARDING_TASK_TYPE}_${streamName}`;
 }
 
-const FEATURES_IDENTIFICATION_RECENCY_MS = 12 * 60 * 60 * 1000; // 12 hours
-
-async function areFeaturesUpToDate({
-  taskClient,
-  featuresTaskId,
-}: {
-  taskClient: TaskClient<StreamsTaskType>;
-  featuresTaskId: string;
-}) {
-  const featuresTask = await taskClient.get<
-    FeaturesIdentificationTaskParams,
-    IdentifyFeaturesResult
-  >(featuresTaskId);
-
-  if (featuresTask.status !== TaskStatus.Completed) {
-    return false;
-  }
-
-  return Boolean(
-    featuresTask.last_completed_at &&
-      Date.now() - new Date(featuresTask.last_completed_at).getTime() <
-        FEATURES_IDENTIFICATION_RECENCY_MS
-  );
-}
+const FEATURES_IDENTIFICATION_THRESHOLD_HOURS = 12;
 
 export function createStreamsOnboardingTask(taskContext: TaskContext) {
   return {
@@ -94,11 +72,18 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
               const { streamName, from, to, steps, connectors, _task } = runContext.taskInstance
                 .params as TaskParams<OnboardingTaskParams>;
 
-              const { taskClient, getQueryClient, streamsClient, uiSettingsClient } =
-                await taskContext.getScopedClients({
-                  request: fakeRequest,
-                  rulesClientOptions: { cloneApiKeysOnCreate: true },
-                });
+              const {
+                taskClient,
+                getQueryClient,
+                getFeatureClient,
+                streamsClient,
+                uiSettingsClient,
+              } = await taskContext.getScopedClients({
+                request: fakeRequest,
+                rulesClientOptions: { cloneApiKeysOnCreate: true },
+              });
+
+              const featureClient = await getFeatureClient();
 
               try {
                 let featuresTaskResult: TaskResult<IdentifyFeaturesResult> | undefined;
@@ -113,36 +98,33 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                       const isFeaturesOnlyStep =
                         steps.length === 1 && steps[0] === OnboardingStep.FeaturesIdentification;
 
-                      if (
-                        !isFeaturesOnlyStep &&
-                        (await areFeaturesUpToDate({ taskClient, featuresTaskId }))
-                      ) {
-                        featuresTaskResult = await taskClient.getStatus<
-                          FeaturesIdentificationTaskParams,
-                          IdentifyFeaturesResult
-                        >(featuresTaskId);
-                      } else {
-                        await scheduleFeaturesIdentificationTask(
-                          {
-                            start: from,
-                            end: to,
-                            streamName,
-                            connectorId: connectors?.features,
-                          },
-                          taskClient,
-                          fakeRequest
-                        );
+                      if (!isFeaturesOnlyStep) {
+                        const { shouldIdentify } = await shouldIdentifyFeatures({
+                          featureClient,
+                          streamName,
+                          thresholdHours: FEATURES_IDENTIFICATION_THRESHOLD_HOURS,
+                        });
 
-                        featuresTaskResult = await waitForSubtask<
-                          FeaturesIdentificationTaskParams,
-                          IdentifyFeaturesResult
-                        >(
-                          featuresTaskId,
-                          runContext.taskInstance.id,
-                          taskClient,
-                          taskContext.logger
-                        );
+                        if (!shouldIdentify) {
+                          break;
+                        }
                       }
+
+                      await scheduleFeaturesIdentificationTask(
+                        {
+                          start: from,
+                          end: to,
+                          streamName,
+                          connectorId: connectors?.features,
+                        },
+                        taskClient,
+                        fakeRequest
+                      );
+
+                      featuresTaskResult = await waitForSubtask<
+                        FeaturesIdentificationTaskParams,
+                        IdentifyFeaturesResult
+                      >(featuresTaskId, runContext.taskInstance.id, taskClient, taskContext.logger);
 
                       if (featuresTaskResult.status !== TaskStatus.Completed) {
                         return;
