@@ -27,25 +27,34 @@ import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_
 
 export const SECURITY_CREATE_DETECTION_RULE_TOOL_ID = securityTool('create_detection_rule');
 
-const createDetectionRuleSchema = z.object({
-  user_query: z
-    .string()
-    .describe(
-      'Natural language description of the detection rule to create, including threat scenarios, data sources, and desired detection logic'
-    ),
-  existing_rule: z
-    .record(z.string(), z.unknown())
-    .optional()
-    .describe(
-      'Current rule object from the attachment. Pass when rewriting the query of an existing rule — seeds the graph with the current rule state so non-query fields (severity, risk_score, etc.) are preserved as the base.'
-    ),
-  attachment_id: z
-    .string()
-    .optional()
-    .describe(
-      'ID of the existing rule attachment to update. Required alongside existing_rule — causes the tool to update the attachment in place rather than create a new one.'
-    ),
-});
+const createDetectionRuleSchema = z
+  .object({
+    user_query: z
+      .string()
+      .describe(
+        'Natural language description of the detection rule to create, including threat scenarios, data sources, and desired detection logic'
+      ),
+    existing_rule: z
+      .record(z.string(), z.unknown())
+      .optional()
+      .describe(
+        'Current rule object from the attachment. Pass when rewriting the query of an existing rule — seeds the graph with the current rule state so non-query fields (severity, risk_score, etc.) are preserved as the base. Must be provided together with attachment_id.'
+      ),
+    attachment_id: z
+      .string()
+      .optional()
+      .describe(
+        'ID of the existing rule attachment to update. Must be provided together with existing_rule — causes the tool to update the attachment in place rather than create a new one.'
+      ),
+  })
+  .refine((val) => !val.existing_rule || val.attachment_id !== undefined, {
+    message: 'attachment_id is required when existing_rule is provided',
+    path: ['attachment_id'],
+  })
+  .refine((val) => !val.attachment_id || val.existing_rule !== undefined, {
+    message: 'existing_rule is required when attachment_id is provided',
+    path: ['existing_rule'],
+  });
 
 export function createDetectionRuleTool(
   core: CoreSetup<SecuritySolutionPluginStartDependencies, SecuritySolutionPluginStart>,
