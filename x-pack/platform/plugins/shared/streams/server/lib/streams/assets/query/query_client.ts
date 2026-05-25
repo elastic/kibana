@@ -8,8 +8,6 @@
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { esql, type ComposerQuery, type ComposerQueryTagHole } from '@elastic/esql';
 import type { ESQLAstExpression } from '@elastic/esql/types';
-import { isBoom } from '@hapi/boom';
-import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type {
   IStorageClient,
