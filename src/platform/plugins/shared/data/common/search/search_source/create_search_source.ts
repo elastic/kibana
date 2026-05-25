@@ -47,9 +47,10 @@ export const createSearchSource = (
     searchSourceFields: SerializedSearchSourceFields = {},
     useDataViewLazy = false
   ) => {
-    const { index, parent, ...restOfFields } = searchSourceFields;
+    const { index, parent, query, ...restOfFields } = searchSourceFields;
     const fields: SearchSourceFields = {
       ...restOfFields,
+      ...(typeof query !== 'undefined' ? { query: migrateLegacyQuery(query) } : {}),
     };
 
     // hydrating index pattern
@@ -96,12 +97,6 @@ export const createSearchSource = (
     const fields = await createFields(searchSourceFields, !!useDataViewLazy);
     const searchSource = new SearchSource(fields, searchSourceDependencies);
 
-    // todo: move to migration script .. create issue
-    const query = searchSource.getOwnField('query');
-
-    if (typeof query !== 'undefined') {
-      searchSource.setField('query', migrateLegacyQuery(query));
-    }
     // using the dataViewLazy check as a type guard
     if (useDataViewLazy && dataViewLazy) {
       const dataViewFields = await searchSource.loadDataViewFields(dataViewLazy);
