@@ -105,7 +105,10 @@ const alignLegacyTypes: NormalizerConfig<PartitionAttributes> = {
     if (viz.shape === 'donut' && layer.emptySizeRatio === undefined) {
       layer.emptySizeRatio = PARTITION_EMPTY_SIZE_RADIUS.SMALL;
     }
-
+    // emptySizeRatio is not supported for non-donut charts -> delete it
+    if (viz.shape !== 'donut' && layer.emptySizeRatio !== undefined) {
+      delete layer.emptySizeRatio;
+    }
     return attributes;
   },
 };
