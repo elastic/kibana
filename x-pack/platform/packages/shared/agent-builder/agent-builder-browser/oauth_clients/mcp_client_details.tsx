@@ -23,7 +23,7 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { labels } from '../../utils/i18n';
+import { labels } from './translations';
 import { McpClientLogo } from './mcp_client_logo';
 import {
   McpClientDetailsContent,
@@ -65,7 +65,7 @@ export const McpClientDetails = ({
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           <EuiTitle size="xs">
-            <h3>{labels.tools.mcpClients.details.flyout.serverDetailsHeading}</h3>
+            <h3>{labels.details.flyout.serverDetailsHeading}</h3>
           </EuiTitle>
           <EuiSpacer size="l" />
           <McpClientDetailsContent clientDetails={clientDetails} presentation="flyout" />
@@ -73,7 +73,7 @@ export const McpClientDetails = ({
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
             <EuiButton onClick={onClose} data-test-subj="mcpClientDetailsCloseButton">
-              {labels.tools.mcpClients.details.closeButton}
+              {labels.details.closeButton}
             </EuiButton>
           </EuiFlexGroup>
         </EuiFlyoutFooter>
@@ -89,19 +89,19 @@ export const McpClientDetails = ({
     >
       <EuiModalHeader>
         <EuiModalHeaderTitle id={modalTitleId}>
-          {labels.tools.mcpClients.details.modal.title(clientName)}
+          {labels.details.modal.title(clientName)}
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
         <EuiText size="s" color="subdued">
-          {labels.tools.mcpClients.details.modal.description}
+          {labels.details.modal.description}
         </EuiText>
         <EuiSpacer size="l" />
         <McpClientDetailsContent clientDetails={clientDetails} presentation="modal" />
       </EuiModalBody>
       <EuiModalFooter>
         <EuiButton onClick={onClose} fill data-test-subj="mcpClientDetailsCloseButton">
-          {labels.tools.mcpClients.details.closeButton}
+          {labels.details.closeButton}
         </EuiButton>
       </EuiModalFooter>
     </EuiModal>
