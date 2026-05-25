@@ -32,7 +32,7 @@ jest.mock('../../knowledge_base_index');
 
 // Mock the es assets reference module
 jest.mock('../../es_assets_reference', () => ({
-  updateEsAssetReferences: jest.fn().mockResolvedValue([]),
+  optimisticallyAddEsAssetReferences: jest.fn().mockResolvedValue([]),
 }));
 
 // Mock the utils module
@@ -485,8 +485,8 @@ describe('stepSaveKnowledgeBase', () => {
 
   describe('ES Asset References', () => {
     it('should update ES asset references with knowledge base assets', async () => {
-      const { updateEsAssetReferences } = jest.requireMock('../../es_assets_reference');
-      updateEsAssetReferences.mockResolvedValueOnce([
+      const { optimisticallyAddEsAssetReferences } = jest.requireMock('../../es_assets_reference');
+      optimisticallyAddEsAssetReferences.mockResolvedValueOnce([
         { id: 'test-package-guide.md', type: 'knowledge_base' },
         { id: 'test-package-troubleshooting.md', type: 'knowledge_base' },
       ]);
@@ -507,12 +507,14 @@ describe('stepSaveKnowledgeBase', () => {
 
       const result = await stepSaveKnowledgeBase(context);
 
-      expect(updateEsAssetReferences).toHaveBeenCalledWith(savedObjectsClient, 'test-package', [], {
-        assetsToAdd: [
+      expect(optimisticallyAddEsAssetReferences).toHaveBeenCalledWith(
+        savedObjectsClient,
+        'test-package',
+        [
           { id: 'test-package-guide.md', type: 'knowledge_base' },
           { id: 'test-package-troubleshooting.md', type: 'knowledge_base' },
-        ],
-      });
+        ]
+      );
 
       // Check that the return value contains the new references
       expect(result.esReferences).toEqual([
@@ -522,7 +524,7 @@ describe('stepSaveKnowledgeBase', () => {
     });
 
     it('should not update ES asset references when no knowledge base files exist', async () => {
-      const { updateEsAssetReferences } = jest.requireMock('../../es_assets_reference');
+      const { optimisticallyAddEsAssetReferences } = jest.requireMock('../../es_assets_reference');
 
       const entries: ArchiveEntry[] = [
         {
@@ -536,7 +538,7 @@ describe('stepSaveKnowledgeBase', () => {
 
       await stepSaveKnowledgeBase(context);
 
-      expect(updateEsAssetReferences).not.toHaveBeenCalled();
+      expect(optimisticallyAddEsAssetReferences).not.toHaveBeenCalled();
     });
   });
 
@@ -656,9 +658,9 @@ describe('stepSaveKnowledgeBase', () => {
       // Verify that saveKnowledgeBaseContentToIndex was NOT called due to license restriction
       expect(saveKnowledgeBaseContentToIndex).not.toHaveBeenCalled();
 
-      // Verify that updateEsAssetReferences was NOT called
-      const { updateEsAssetReferences } = jest.requireMock('../../es_assets_reference');
-      expect(updateEsAssetReferences).not.toHaveBeenCalled();
+      // Verify that optimisticallyAddEsAssetReferences was NOT called
+      const { optimisticallyAddEsAssetReferences } = jest.requireMock('../../es_assets_reference');
+      expect(optimisticallyAddEsAssetReferences).not.toHaveBeenCalled();
 
       // Reset the mock back to true for other tests
       licenseService.isEnterprise.mockReturnValue(true);
@@ -694,9 +696,9 @@ describe('stepSaveKnowledgeBase', () => {
         ],
       });
 
-      // Verify that updateEsAssetReferences WAS called
-      const { updateEsAssetReferences } = jest.requireMock('../../es_assets_reference');
-      expect(updateEsAssetReferences).toHaveBeenCalled();
+      // Verify that optimisticallyAddEsAssetReferences WAS called
+      const { optimisticallyAddEsAssetReferences } = jest.requireMock('../../es_assets_reference');
+      expect(optimisticallyAddEsAssetReferences).toHaveBeenCalled();
     });
 
     it('should skip knowledge base processing when installIntegrationsKnowledge feature flag is disabled', async () => {
@@ -717,9 +719,9 @@ describe('stepSaveKnowledgeBase', () => {
       // Verify that saveKnowledgeBaseContentToIndex was NOT called due to feature flag being disabled
       expect(saveKnowledgeBaseContentToIndex).not.toHaveBeenCalled();
 
-      // Verify that updateEsAssetReferences was NOT called
-      const { updateEsAssetReferences } = jest.requireMock('../../es_assets_reference');
-      expect(updateEsAssetReferences).not.toHaveBeenCalled();
+      // Verify that optimisticallyAddEsAssetReferences was NOT called
+      const { optimisticallyAddEsAssetReferences } = jest.requireMock('../../es_assets_reference');
+      expect(optimisticallyAddEsAssetReferences).not.toHaveBeenCalled();
     });
 
     it('should process knowledge base when installIntegrationsKnowledge feature flag is enabled', async () => {
@@ -748,9 +750,9 @@ describe('stepSaveKnowledgeBase', () => {
         ],
       });
 
-      // Verify that updateEsAssetReferences WAS called
-      const { updateEsAssetReferences } = jest.requireMock('../../es_assets_reference');
-      expect(updateEsAssetReferences).toHaveBeenCalled();
+      // Verify that optimisticallyAddEsAssetReferences WAS called
+      const { optimisticallyAddEsAssetReferences } = jest.requireMock('../../es_assets_reference');
+      expect(optimisticallyAddEsAssetReferences).toHaveBeenCalled();
     });
   });
 });

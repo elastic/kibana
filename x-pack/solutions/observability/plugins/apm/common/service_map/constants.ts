@@ -45,7 +45,7 @@ export const DEPENDENCY_NODE_DIAMOND_SIZE = 48;
 
 /** Border width (px) for service and dependency nodes when not selected. */
 export const NODE_BORDER_WIDTH_DEFAULT = 3;
-/** Border width (px) for service and dependency nodes when selected or critical. */
+/** Border width (px) for service and dependency nodes when selected. */
 export const NODE_BORDER_WIDTH_SELECTED = 4;
 // When rotated 45deg, the diagonal becomes the width/height: size * sqrt(2)
 export const DEPENDENCY_NODE_DIAMOND_CONTAINER_SIZE = Math.ceil(

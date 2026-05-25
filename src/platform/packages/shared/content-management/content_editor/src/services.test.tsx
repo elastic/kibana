@@ -9,8 +9,6 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { UserProfilesProvider } from '@kbn/content-management-user-profiles';
 import type { ContentEditorKibanaDependencies, TagSelectorProps } from './services';
 import { ContentEditorKibanaProvider, useServices } from './services';
 
@@ -43,28 +41,19 @@ const createCoreMock = (): ContentEditorKibanaDependencies['core'] =>
     },
   } as unknown as ContentEditorKibanaDependencies['core']);
 
-const createWrapper = (
-  savedObjectsTagging: ContentEditorKibanaDependencies['savedObjectsTagging']
-) => {
-  const queryClient = new QueryClient();
-
-  return ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={queryClient}>
-      <UserProfilesProvider
-        bulkGetUserProfiles={jest.fn()}
-        getUserProfile={jest.fn()}
-        suggestUserProfiles={jest.fn()}
+// `ContentEditorKibanaProvider` self-provides `QueryClientProvider` and
+// `UserProfilesKibanaProvider`, so no consumer-side wrapping is required.
+const createWrapper =
+  (savedObjectsTagging: ContentEditorKibanaDependencies['savedObjectsTagging']) =>
+  ({ children }: { children: React.ReactNode }) =>
+    (
+      <ContentEditorKibanaProvider
+        core={createCoreMock()}
+        savedObjectsTagging={savedObjectsTagging}
       >
-        <ContentEditorKibanaProvider
-          core={createCoreMock()}
-          savedObjectsTagging={savedObjectsTagging}
-        >
-          {children}
-        </ContentEditorKibanaProvider>
-      </UserProfilesProvider>
-    </QueryClientProvider>
-  );
-};
+        {children}
+      </ContentEditorKibanaProvider>
+    );
 
 const TagListConsumer = ({ tagIds }: { tagIds: string[] }) => {
   const { TagList } = useServices();

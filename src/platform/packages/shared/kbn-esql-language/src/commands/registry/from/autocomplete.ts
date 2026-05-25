@@ -15,6 +15,7 @@ import {
   getSourceSuggestions,
   additionalSourcesSuggestions,
   buildViewsDefinitions,
+  buildDatasetsDefinitions,
 } from '../../definitions/utils/sources';
 import { metadataSuggestion, getMetadataSuggestions } from '../options/metadata';
 import { getRecommendedQueriesSuggestions } from '../options/recommended_queries';
@@ -151,7 +152,8 @@ function suggestInitialSources(
     commandStart,
   });
   const viewSuggestions = buildViewsDefinitions(context?.views ?? [], []);
-  const suggestions = [...sourceSuggestions, ...viewSuggestions];
+  const datasetSuggestions = buildDatasetsDefinitions(context?.datasets ?? [], []);
+  const suggestions = [...sourceSuggestions, ...viewSuggestions, ...datasetSuggestions];
 
   if (subquerySuggestion && shouldSuggestSubquery(context)) {
     suggestions.push(subquerySuggestion);
@@ -219,6 +221,7 @@ async function suggestAdditionalSources(
     indexes.map(({ name }) => name),
     recommendedQueries,
     context?.views ?? [],
+    context?.datasets ?? [],
     canRewriteFromToTs ? sourceReplacementContext : undefined
   );
 

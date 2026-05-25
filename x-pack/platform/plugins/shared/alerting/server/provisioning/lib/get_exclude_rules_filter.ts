@@ -8,6 +8,7 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { nodeBuilder, nodeTypes, type KueryNode } from '@kbn/es-query';
 import { UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import { NON_CLOUD_USER_API_KEY_CREATOR_ERROR_CODE } from '../constants';
 import {
   UiamApiKeyProvisioningStatus,
   UiamApiKeyProvisioningEntityType,
@@ -17,7 +18,8 @@ import { GET_STATUS_BATCH_SIZE, EXCLUDE_FILTER_CLAUSE_BATCH_SIZE } from '../cons
 
 /**
  * Returns a KQL filter that excludes rules which already have provisioning status
- * COMPLETED or SKIPPED. Returns undefined when there are no such rules (no filter applied).
+ * COMPLETED/SKIPPED or failed due to non-Cloud user API key creator code.
+ * Returns undefined when there are no such rules (no filter applied).
  */
 export const getExcludeRulesFilter = async (
   savedObjectsClient: SavedObjectsClientContract
@@ -27,6 +29,10 @@ export const getExcludeRulesFilter = async (
     nodeBuilder.or([
       nodeBuilder.is(`${statusAttr}.status`, UiamApiKeyProvisioningStatus.COMPLETED),
       nodeBuilder.is(`${statusAttr}.status`, UiamApiKeyProvisioningStatus.SKIPPED),
+      nodeBuilder.and([
+        nodeBuilder.is(`${statusAttr}.status`, UiamApiKeyProvisioningStatus.FAILED),
+        nodeBuilder.is(`${statusAttr}.errorCode`, NON_CLOUD_USER_API_KEY_CREATOR_ERROR_CODE),
+      ]),
     ]),
     nodeBuilder.is(`${statusAttr}.entityType`, UiamApiKeyProvisioningEntityType.RULE),
   ]);

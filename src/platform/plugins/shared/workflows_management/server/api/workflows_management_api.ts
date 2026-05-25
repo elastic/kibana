@@ -15,13 +15,18 @@ import type {
 } from '@kbn/agent-context-layer-plugin/server';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { getWorkflowJsonSchema, transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
+import {
+  getWorkflowJsonSchema,
+  pickManagedWorkflowFields,
+  transformWorkflowYamlJsontoEsWorkflow,
+} from '@kbn/workflows';
 import type {
   BulkScheduleWorkflowResult,
   CreateWorkflowCommand,
   EsWorkflow,
   EsWorkflowStepExecution,
   GetAvailableConnectorsResponse,
+  ResumeWorkflowExecutionResponseDto,
   UpdatedWorkflowResponseDto,
   ValidateWorkflowResponseDto,
   WorkflowDetailDto,
@@ -32,6 +37,7 @@ import type {
   WorkflowListDto,
   WorkflowYaml,
 } from '@kbn/workflows';
+import { WORKFLOW_SML_TYPE } from '@kbn/workflows/common/constants';
 import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 import type { ChildWorkflowExecutionItem, WorkflowPartialDetailDto } from '@kbn/workflows/types/v1';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
@@ -40,6 +46,7 @@ import type {
   ExecutionLogsParams,
   StepLogsParams,
 } from '@kbn/workflows-execution-engine/server/workflow_event_logger/types';
+import type { ServerTriggerDefinition } from '@kbn/workflows-extensions/server';
 import {
   parseWorkflowYamlToJSON,
   stringifyWorkflowDefinition,
@@ -51,7 +58,6 @@ import type {
   SearchWorkflowExecutionsParams,
   WorkflowsService,
 } from './workflows_management_service';
-import { WORKFLOW_SML_TYPE } from '../../common/agent_builder/constants';
 import { connectorParamsSchemaResolver } from '../../common/lib/connector_params_schema_resolver';
 
 export type SmlIndexAttachmentFn = (params: SmlIndexAttachmentParams) => Promise<void>;
@@ -64,6 +70,7 @@ export interface GetWorkflowsParams {
   enabled?: boolean[];
   tags?: string[];
   query?: string;
+  managedFilter?: 'all' | 'managed' | 'unmanaged';
   _full?: boolean;
 }
 
@@ -121,6 +128,10 @@ export interface SearchStepExecutionsParams {
   includeOutput?: boolean;
   page?: number;
   size?: number;
+  /** Datemath lower bound for filtering by startedAt. */
+  startedAfter?: string;
+  /** Datemath upper bound for filtering by startedAt. */
+  startedBefore?: string;
 }
 
 export interface GetAvailableConnectorsParams {
@@ -404,13 +415,16 @@ export class WorkflowsManagementApi {
   }: TestWorkflowParams): Promise<string> {
     let resolvedYaml = workflowYaml;
     let resolvedWorkflowId = workflowId;
+    let existingWorkflow: WorkflowDetailDto | null = null;
 
     if (workflowId && !workflowYaml) {
-      const existingWorkflow = await this.workflowsService.getWorkflow(workflowId, spaceId);
+      existingWorkflow = await this.workflowsService.getWorkflow(workflowId, spaceId);
       if (!existingWorkflow) {
         throw new WorkflowNotFoundError(workflowId);
       }
       resolvedYaml = existingWorkflow.yaml;
+    } else if (workflowId) {
+      existingWorkflow = await this.workflowsService.getWorkflow(workflowId, spaceId);
     }
 
     if (!resolvedWorkflowId) {
@@ -445,6 +459,7 @@ export class WorkflowsManagementApi {
         definition: workflowJson.definition,
         yaml: resolvedYaml,
         isTestRun: true,
+        ...pickManagedWorkflowFields(existingWorkflow),
       },
       context,
       request
@@ -578,10 +593,11 @@ export class WorkflowsManagementApi {
 
   public async cancelWorkflowExecution(
     workflowExecutionId: string,
-    spaceId: string
+    spaceId: string,
+    request?: KibanaRequest
   ): Promise<void> {
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
-    return workflowsExecutionEngine.cancelWorkflowExecution(workflowExecutionId, spaceId);
+    return workflowsExecutionEngine.cancelWorkflowExecution(workflowExecutionId, spaceId, request);
   }
 
   public async cancelAllActiveWorkflowExecutions(
@@ -601,9 +617,20 @@ export class WorkflowsManagementApi {
     spaceId: string,
     input: Record<string, unknown>,
     request: KibanaRequest
-  ): Promise<void> {
+  ): Promise<ResumeWorkflowExecutionResponseDto> {
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
     return workflowsExecutionEngine.resumeWorkflowExecution(executionId, spaceId, input, request);
+  }
+
+  /**
+   * Cross-workflow listing of step executions currently blocked on
+   * `waitForInput`. Consumed by the Inbox plugin's workflows provider.
+   */
+  public async listWaitingForInputSteps(
+    spaceId: string,
+    params: { page?: number; perPage?: number } = {}
+  ): Promise<{ results: EsWorkflowStepExecution[]; total: number }> {
+    return this.workflowsService.listWaitingForInputSteps(spaceId, params);
   }
 
   public async getWorkflowStats(spaceId: string, options?: { includeExecutionStats?: boolean }) {
@@ -619,6 +646,10 @@ export class WorkflowsManagementApi {
     request: KibanaRequest
   ): Promise<GetAvailableConnectorsResponse> {
     return this.workflowsService.getAvailableConnectors(spaceId, request);
+  }
+
+  public async getRegisteredTriggers(): Promise<ServerTriggerDefinition[]> {
+    return this.workflowsService.getRegisteredCustomTriggerDefinitions();
   }
 
   public async getWorkflowJsonSchema(

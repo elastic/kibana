@@ -7,9 +7,9 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
+import { usePhaseColors } from '@kbn/data-lifecycle-phases';
 import { EuiIcon } from '@elastic/eui';
 import type { Phase } from '../../../../../common/types';
-import { usePhaseColors } from '../../../lib';
 
 export const PhaseIndicator = ({ phase }: { phase: Phase }) => {
   const phaseToIndicatorColors = usePhaseColors();

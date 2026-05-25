@@ -134,12 +134,12 @@ export const SIDEBAR_TAB_TITLE_DETAILS = i18n.translate(
 );
 
 /** --- Episode details list --- */
-export const EPISODE_ID_LABEL = i18n.translate('xpack.alertingV2.episodeDetails.episodeIdLabel', {
-  defaultMessage: 'Alert episode id',
+export const GROUPING_LABEL = i18n.translate('xpack.alertingV2.episodeDetails.groupingLabel', {
+  defaultMessage: 'Grouping fields',
 });
 
-export const GROUPING_LABEL = i18n.translate('xpack.alertingV2.episodeDetails.groupingLabel', {
-  defaultMessage: 'Grouping',
+export const TAGS_LABEL = i18n.translate('xpack.alertingV2.episodeDetails.tagsLabel', {
+  defaultMessage: 'Tags',
 });
 
 export const TRIGGERED_LABEL = i18n.translate('xpack.alertingV2.episodeDetails.triggeredLabel', {

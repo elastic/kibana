@@ -67,7 +67,7 @@ export function EpisodeAssigneeCell({ assigneeUid, userProfile }: EpisodeAssigne
   const avatar = profile.data?.avatar;
 
   return (
-    <UserToolTip user={user} avatar={avatar} position="top" delay="regular">
+    <UserToolTip user={user} avatar={avatar} position="top">
       <EuiFlexGroup
         gutterSize="xs"
         alignItems="center"

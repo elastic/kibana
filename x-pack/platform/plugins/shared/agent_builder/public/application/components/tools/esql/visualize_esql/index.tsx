@@ -8,15 +8,18 @@
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { ChartType } from '@kbn/visualization-utils';
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import { EuiSplitPanel } from '@elastic/eui';
 import type { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { EsqlResults } from '@kbn/agent-builder-common/tools/tool_result';
 import type { TimeRange } from '@kbn/agent-builder-common';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { ActionButton } from '@kbn/agent-builder-browser/attachments';
 import { useLensInput } from './use_lens_input';
 import { BaseVisualization } from '../shared/base_visualization';
+import { FallbackVisualizationActions } from '../shared/visualization_actions';
+import { visualizationWrapperStyles } from '../shared/styles';
 
 export function VisualizeESQL({
   lens,
@@ -44,26 +47,32 @@ export function VisualizeESQL({
     preferredChartType,
     timeRange,
   });
+  const [actionButtons, setActionButtons] = useState<ActionButton[]>([]);
+  const registerActionButtons = useCallback((buttons: ActionButton[]) => {
+    setActionButtons(buttons);
+  }, []);
 
   return (
     <EuiSplitPanel.Outer
       grow
       hasShadow={false}
       hasBorder={true}
-      css={({ euiTheme }: UseEuiTheme) =>
-        css({
-          backgroundColor: euiTheme.colors.backgroundBasePlain,
-          overflow: 'visible',
-          marginBlockEnd: euiTheme.size.m,
-        })
-      }
+      css={[
+        visualizationWrapperStyles,
+        ({ euiTheme }: UseEuiTheme) =>
+          css({
+            marginBlockEnd: euiTheme.size.m,
+          }),
+      ]}
     >
+      {actionButtons.length > 0 && <FallbackVisualizationActions buttons={actionButtons} />}
       <BaseVisualization
         lens={lens}
         uiActions={uiActions}
         lensInput={lensInput}
         setLensInput={setLensInput}
         isLoading={isLoading}
+        registerActionButtons={registerActionButtons}
       />
     </EuiSplitPanel.Outer>
   );

@@ -41,10 +41,8 @@ export class OverviewTab extends ServiceDetailsTab {
   }
 
   protected async waitForTabLoad(): Promise<void> {
-    await Promise.all([
-      this.latencyChart.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT }),
-      this.throughputChart.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT }),
-    ]);
+    await this.latencyChart.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+    await this.throughputChart.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
   }
 
   // #region Charts and Tables

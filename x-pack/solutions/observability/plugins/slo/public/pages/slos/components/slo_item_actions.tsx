@@ -171,6 +171,7 @@ export function SloItemActions({
     <EuiIcon
       type="external"
       size="s"
+      aria-hidden={true}
       css={{
         marginLeft: '10px',
       }}
@@ -186,7 +187,6 @@ export function SloItemActions({
       isOpen={isActionsPopoverOpen}
     >
       <EuiContextMenuPanel
-        size="m"
         items={[
           <EuiContextMenuItem
             key="view"

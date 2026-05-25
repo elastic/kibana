@@ -7,6 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { runBuildApiDocsCli, runCheckPackageDocsCli } from './src';
+export { runBuildApiDocsCli, runCheckPackageDocsCli, runReportPackageMetricsCli } from './src';
 
 export { findPlugins, findTeamPlugins } from './src/find_plugins';

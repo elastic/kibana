@@ -150,7 +150,11 @@ jest.mock('react-router-dom', () => ({
   }),
 }));
 
-import { SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ } from '../../../../../../services/setup_technology_selector';
+import type { AgentlessDeploymentReleaseStatus } from '../../../../../../../common/types';
+import {
+  SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ,
+  SETUP_TECHNOLOGY_SELECTOR_BETA_BADGE_TEST_SUBJ,
+} from '../../../../../../services/setup_technology_selector';
 
 import { CreatePackagePolicySinglePage } from '.';
 
@@ -188,14 +192,21 @@ describe('When on the package policy create page', () => {
   function getMockPackageInfo(options?: {
     requiresRoot?: boolean;
     dataStreamRequiresRoot?: boolean;
-    agentlessEnabled?: boolean;
+    version?: string;
+    agentless?: {
+      enabled: boolean;
+      release?: AgentlessDeploymentReleaseStatus;
+      isDefault?: boolean;
+    };
+    dualMode?: boolean;
   }) {
+    const { agentless } = options ?? {};
     return {
       data: {
         item: {
           name: 'nginx',
           title: 'Nginx',
-          version: '1.3.0',
+          version: options?.version ?? '1.3.0',
           description: 'Collect logs and metrics from Nginx HTTP servers with Elastic Agent.',
           policy_templates: [
             {
@@ -210,14 +221,17 @@ describe('When on the package policy create page', () => {
                 },
               ],
               multiple: true,
-              deployment_modes: options?.agentlessEnabled
+              deployment_modes: agentless?.enabled
                 ? {
                     agentless: {
                       enabled: true,
                       organization: 'org',
                       division: 'division',
                       team: 'team',
+                      ...(agentless.release !== undefined && { release: agentless.release }),
+                      ...(agentless.isDefault !== undefined && { is_default: agentless.isDefault }),
                     },
+                    ...(options?.dualMode && { default: { enabled: true } }),
                   }
                 : { agentless: { enabled: false } },
             },
@@ -798,7 +812,7 @@ describe('When on the package policy create page', () => {
           getMockPackageInfo({
             requiresRoot: false,
             dataStreamRequiresRoot: false,
-            agentlessEnabled: true,
+            agentless: { enabled: true },
           })
         );
         await act(async () => {
@@ -850,6 +864,87 @@ describe('When on the package policy create page', () => {
           INTEGRATIONS_PLUGIN_ID,
           { path: '/detail/nginx-1.3.0/policies?openEnrollmentFlyout=agent-policy-1' }
         );
+      });
+    });
+
+    describe('beta badge visibility based on agentless release', () => {
+      beforeEach(() => {
+        (useConfig as jest.MockedFunction<any>).mockReturnValue({
+          agentless: { enabled: true, api: { url: 'http://agentless-api-url' } },
+          agents: { enabled: true },
+        });
+        (useStartServices as jest.MockedFunction<any>).mockReturnValue({
+          ...useStartServices(),
+          cloud: { ...useStartServices().cloud, isServerlessEnabled: false, isCloudEnabled: true },
+        });
+      });
+
+      test('should show beta badge when package semver is pre-release', async () => {
+        (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue(
+          getMockPackageInfo({ version: '0.1.0', agentless: { enabled: true } })
+        );
+        await act(async () => {
+          render();
+        });
+
+        await waitFor(() => {
+          expect(renderResult.getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ)).toBeInTheDocument();
+          expect(
+            renderResult.getByTestId(SETUP_TECHNOLOGY_SELECTOR_BETA_BADGE_TEST_SUBJ)
+          ).toBeInTheDocument();
+        });
+      });
+
+      test('should show beta badge for a dual-mode package with GA semver and no explicit release', async () => {
+        (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue(
+          getMockPackageInfo({
+            agentless: { enabled: true },
+            dualMode: true,
+          })
+        );
+        await act(async () => {
+          render();
+        });
+
+        await waitFor(() => {
+          expect(renderResult.getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ)).toBeInTheDocument();
+          expect(
+            renderResult.getByTestId(SETUP_TECHNOLOGY_SELECTOR_BETA_BADGE_TEST_SUBJ)
+          ).toBeInTheDocument();
+        });
+      });
+
+      test('should not show beta badge when only-agentless package semver is GA', async () => {
+        (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue(
+          getMockPackageInfo({ agentless: { enabled: true } })
+        );
+        await act(async () => {
+          render();
+        });
+
+        await waitFor(() => {
+          expect(renderResult.getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ)).toBeInTheDocument();
+          expect(
+            renderResult.queryByTestId(SETUP_TECHNOLOGY_SELECTOR_BETA_BADGE_TEST_SUBJ)
+          ).not.toBeInTheDocument();
+        });
+      });
+
+      test('should show Recommended badge alongside beta badge when agentless is the default deployment and semver is pre-release', async () => {
+        (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue(
+          getMockPackageInfo({ version: '0.1.0', agentless: { enabled: true, isDefault: true } })
+        );
+        await act(async () => {
+          render();
+        });
+
+        await waitFor(() => {
+          expect(renderResult.getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ)).toBeInTheDocument();
+          expect(
+            renderResult.getByTestId(SETUP_TECHNOLOGY_SELECTOR_BETA_BADGE_TEST_SUBJ)
+          ).toBeInTheDocument();
+          expect(renderResult.getByText('Recommended')).toBeInTheDocument();
+        });
       });
     });
   });

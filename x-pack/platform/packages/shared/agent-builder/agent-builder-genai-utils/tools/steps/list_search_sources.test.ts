@@ -59,7 +59,7 @@ describe('listSearchSources', () => {
 
     expect(esClient.indices.resolveIndex).toHaveBeenCalledTimes(1);
     expect(esClient.indices.resolveIndex).toHaveBeenCalledWith({
-      name: ['*', '-.*'],
+      name: ['*'],
       allow_no_indices: true,
       expand_wildcards: ['open'],
     });
@@ -262,6 +262,120 @@ describe('listSearchSources', () => {
       'index-4',
     ]);
     expect(results.aliases.map((item) => item.name)).toEqual(['alias-1', 'alias-2']);
+  });
+
+  it('filters out dot-prefixed indices not on the allow-list by default', async () => {
+    esClient.indices.resolveIndex.mockResolvedValue({
+      indices: [
+        indexItem('regular-index-1'),
+        indexItem('.kibana_8.0.0_001'),
+        indexItem('.fleet-actions'),
+        indexItem('.siem-signals-default'),
+        indexItem('regular-index-2'),
+      ],
+      aliases: [],
+      data_streams: [],
+    });
+
+    const results = await listSearchSources({
+      pattern: '*',
+      esClient,
+    });
+
+    expect(results.indices.map((item) => item.name)).toEqual([
+      'regular-index-1',
+      '.siem-signals-default',
+      'regular-index-2',
+    ]);
+  });
+
+  it('returns on-list dot-prefixed aliases (e.g. `.alerts-*`)', async () => {
+    // `.alerts-security.alerts-default` is on the curated allow-list, so it must
+    // surface even though it's dot-prefixed.
+    esClient.indices.resolveIndex.mockResolvedValue({
+      indices: [],
+      aliases: [
+        aliasItem('.alerts-security.alerts-default', [
+          '.internal.alerts-security.alerts-default-000001',
+        ]),
+      ],
+      data_streams: [],
+    });
+
+    const results = await listSearchSources({
+      pattern: '.alerts-*',
+      esClient,
+    });
+
+    expect(results.aliases.map((item) => item.name)).toEqual(['.alerts-security.alerts-default']);
+  });
+
+  it('filters off-list dot-prefixed aliases and data streams', async () => {
+    esClient.indices.resolveIndex.mockResolvedValue({
+      indices: [],
+      aliases: [
+        aliasItem('.fleet-actions', ['.fleet-actions-7']),
+        aliasItem('.alerts-observability.logs.alerts-default', ['logs-backing-1']),
+      ],
+      data_streams: [
+        datastreamItem('.chat-conversations', ['.ds-chat-conversations-1']),
+        datastreamItem('.ml-anomalies-shared', ['ml-backing-1']),
+      ],
+    });
+
+    const results = await listSearchSources({
+      pattern: '.*',
+      esClient,
+    });
+
+    expect(results.aliases.map((item) => item.name)).toEqual([
+      '.alerts-observability.logs.alerts-default',
+    ]);
+    expect(results.data_streams.map((item) => item.name)).toEqual(['.ml-anomalies-shared']);
+  });
+
+  it('applies the allow-list uniformly across indices, aliases, and data streams', async () => {
+    // Mixed bag: confirm each bucket honors the same policy so off-list names
+    // can't sneak in through any result type.
+    esClient.indices.resolveIndex.mockResolvedValue({
+      indices: [indexItem('.kibana_8.0.0_001'), indexItem('.monitoring-es-8-mb-2024.01.01')],
+      aliases: [
+        aliasItem('.fleet-actions', ['some-index']),
+        aliasItem('.alerts-security.alerts-default', ['some-index']),
+      ],
+      data_streams: [
+        datastreamItem('.chat-conversations', ['chat-backing-1']),
+        datastreamItem('.ml-anomalies-shared', ['ml-backing-1']),
+      ],
+    });
+
+    const results = await listSearchSources({
+      pattern: '.*',
+      esClient,
+    });
+
+    expect(results.indices.map((item) => item.name)).toEqual(['.monitoring-es-8-mb-2024.01.01']);
+    expect(results.aliases.map((item) => item.name)).toEqual(['.alerts-security.alerts-default']);
+    expect(results.data_streams.map((item) => item.name)).toEqual(['.ml-anomalies-shared']);
+  });
+
+  it('still dedupes backing indices when their parent alias is filtered out by the allow-list', async () => {
+    esClient.indices.resolveIndex.mockResolvedValue({
+      indices: [
+        indexItem('.monitoring-fleet-7', { aliases: ['.fleet-actions'] }),
+        indexItem('regular-index'),
+      ],
+      aliases: [aliasItem('.fleet-actions', ['.monitoring-fleet-7'])],
+      data_streams: [],
+    });
+
+    const results = await listSearchSources({
+      pattern: '*',
+      esClient,
+    });
+
+    expect(results.aliases).toEqual([]);
+    expect(results.indices.map((item) => item.name)).toEqual(['regular-index']);
   });
 
   it('truncates per-type results to max `perTypeLimit`', async () => {

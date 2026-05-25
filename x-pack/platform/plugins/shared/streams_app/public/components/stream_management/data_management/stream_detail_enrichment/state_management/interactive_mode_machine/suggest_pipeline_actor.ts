@@ -55,8 +55,7 @@ export async function suggestPipelineLogic(input: SuggestPipelineInput): Promise
       })
       .pipe(
         map((event) => {
-          // Handle case where LLM couldn't generate suggestions
-          if (event.pipeline === null) {
+          if (event.pipeline === null || event.pipeline.steps.length === 0) {
             throw new NoSuggestionsError(
               i18n.translate(
                 'xpack.streams.streamDetailView.managementTab.enrichment.noSuggestionsError',

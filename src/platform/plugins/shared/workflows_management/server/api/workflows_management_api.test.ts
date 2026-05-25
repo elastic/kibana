@@ -10,13 +10,13 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { type WorkflowDetailDto } from '@kbn/workflows';
+import { WORKFLOW_SML_TYPE } from '@kbn/workflows/common/constants';
 import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import { workflowsExecutionEngineMock } from '@kbn/workflows-execution-engine/server/mocks';
 import { z } from '@kbn/zod/v4';
 import { type SmlIndexAttachmentFn, WorkflowsManagementApi } from './workflows_management_api';
 import type { WorkflowsService } from './workflows_management_service';
-import { WORKFLOW_SML_TYPE } from '../../common/agent_builder/constants';
 
 describe('WorkflowsManagementApi', () => {
   let api: WorkflowsManagementApi;
@@ -410,7 +410,13 @@ steps:
 
     describe('when testing with workflowId parameter', () => {
       it('should fetch workflow YAML by ID and execute it', async () => {
-        mockWorkflowsService.getWorkflow.mockResolvedValue(mockWorkflowDetailDto);
+        mockWorkflowsService.getWorkflow.mockResolvedValue({
+          ...mockWorkflowDetailDto,
+          managed: true,
+          managedBy: 'workflowsExtensionsExample',
+          originManagedWorkflowId: 'system-example-greeting',
+          managedVersion: 3,
+        });
 
         const result = await api.testWorkflow({
           workflowId: 'existing-workflow-id',
@@ -429,6 +435,41 @@ steps:
           expect.objectContaining({
             id: 'existing-workflow-id',
             yaml: mockWorkflowYaml,
+            managed: true,
+            managedBy: 'workflowsExtensionsExample',
+            originManagedWorkflowId: 'system-example-greeting',
+            managedVersion: 3,
+          }),
+          expect.any(Object),
+          mockRequest
+        );
+      });
+
+      it('should preserve managed metadata when testing provided YAML for a saved workflow', async () => {
+        mockWorkflowsService.getWorkflow.mockResolvedValue({
+          ...mockWorkflowDetailDto,
+          managed: true,
+          managedBy: 'workflowsExtensionsExample',
+          originManagedWorkflowId: 'system-example-greeting',
+          managedVersion: 3,
+        });
+
+        await api.testWorkflow({
+          workflowId: 'existing-workflow-id',
+          workflowYaml: mockWorkflowYaml,
+          inputs,
+          spaceId,
+          request: mockRequest,
+        });
+
+        const engine = await mockWorkflowsService.getWorkflowsExecutionEngine();
+        expect(engine.executeWorkflow).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: 'existing-workflow-id',
+            managed: true,
+            managedBy: 'workflowsExtensionsExample',
+            originManagedWorkflowId: 'system-example-greeting',
+            managedVersion: 3,
           }),
           expect.any(Object),
           mockRequest

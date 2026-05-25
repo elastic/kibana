@@ -125,6 +125,16 @@ describe('UserPanelHeader', () => {
     expect(queryByTestId('user-panel-header-observed-badge')).not.toBeInTheDocument();
   });
 
+  it('does not render lastSeen element when isEntityInStore is true', () => {
+    const { queryByTestId } = render(
+      <TestProviders>
+        <UserPanelHeader {...mockProps} isEntityInStore />
+      </TestProviders>
+    );
+
+    expect(queryByTestId('user-panel-header-lastSeen')).not.toBeInTheDocument();
+  });
+
   it('renders entity store badge when isEntityInStore is true', () => {
     const { getByTestId } = render(
       <TestProviders>

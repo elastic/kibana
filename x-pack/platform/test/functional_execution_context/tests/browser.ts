@@ -6,6 +6,7 @@
  */
 
 import type { Ecs, KibanaExecutionContext } from '@kbn/core/server';
+import { encode } from '@kbn/rison';
 import type { FtrProviderContext } from '../ftr_provider_context';
 import { assertLogContains, isExecutionContextLog, readLogFile } from '../test_utils';
 
@@ -19,8 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'timePicker',
   ]);
 
-  // Failing: See https://github.com/elastic/kibana/issues/258554
-  describe.skip('Browser apps', () => {
+  describe('Browser apps', () => {
     let logs: Ecs[];
     let discoverSessionFirstTabId = '';
     const retry = getService('retry');
@@ -340,7 +340,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 name: 'discover',
                 id: '571aaf70-4c88-11e8-b3d7-01146121b73d',
                 description: '[Flights] Flight Log',
-                url: `/app/discover#/view/571aaf70-4c88-11e8-b3d7-01146121b73d?_tab=(tabId:'${discoverSessionFirstTabId}')`,
+                url: `/app/discover#/view/571aaf70-4c88-11e8-b3d7-01146121b73d?_tab=${encode({
+                  tabId: discoverSessionFirstTabId,
+                })}`,
               },
             }),
           });

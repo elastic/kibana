@@ -22,7 +22,7 @@ export const BackToListPanel: FC = () => {
     <Fragment>
       <EuiCard
         css={{ width: '300px' }}
-        icon={<EuiIcon size="xxl" type="listBullet" />}
+        icon={<EuiIcon size="xxl" type="listBullet" aria-hidden={true} />}
         title={i18n.translate('xpack.ml.dataframe.analytics.create.analyticsListCardTitle', {
           defaultMessage: 'Data Frame Analytics',
         })}

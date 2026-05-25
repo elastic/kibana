@@ -15,6 +15,7 @@ import {
   isAzureFunctionsAgentName,
   isElasticAgentName,
   isEDOTAgentName,
+  isOTELAgentName,
   isIosAgentName,
   isJavaAgentName,
   isJRubyAgentName,
@@ -61,6 +62,12 @@ describe('Agents guards', () => {
     expect(isEDOTAgentName('opentelemetry/java/elastic')).toBe(true);
     expect(isEDOTAgentName('opentelemetry/java/opentelemetry-java-instrumentation')).toBe(false);
     expect(isEDOTAgentName('opentelemetry/java')).toBe(false);
+  });
+
+  it('isOTELAgentName should guard if the passed agent is an OTEL SDK one.', () => {
+    expect(isOTELAgentName('opentelemetry/java/opentelemetry-java-instrumentation')).toBe(true);
+    expect(isOTELAgentName('opentelemetry/java/elastic')).toBe(false);
+    expect(isOTELAgentName('opentelemetry/java')).toBe(false);
   });
 
   it('isJavaAgentName should guard if the passed agent is an Java one.', () => {

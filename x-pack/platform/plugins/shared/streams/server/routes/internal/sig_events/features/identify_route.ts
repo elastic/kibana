@@ -24,7 +24,7 @@ import {
   identifyInferredFeatures,
   identifyComputedFeatures,
 } from '../../../../lib/sig_events/features';
-import { areFeaturesRecent } from '../../../../lib/sig_events/features/are_features_recent';
+import { shouldIdentifyFeatures } from '../../../../lib/sig_events/features/should_identify_features';
 
 // ---------------------------------------------------------------------------
 // Route 1: Identify inferred features (one iteration: sample + infer + reconcile)
@@ -260,14 +260,14 @@ const identifyComputedFeaturesRoute = createServerRoute({
 });
 
 // ---------------------------------------------------------------------------
-// Route 3: Check features recency
+// Route 3: Check whether features identification should run
 // ---------------------------------------------------------------------------
 
-const featuresRecencyRoute = createServerRoute({
-  endpoint: 'GET /internal/streams/{streamName}/features/_recency',
+const shouldIdentifyRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/{streamName}/features/_should_identify',
   options: {
     access: 'internal',
-    summary: 'Check whether KI features for a stream were identified recently',
+    summary: 'Check whether KI features identification should run for a stream',
   },
   security: {
     authz: {
@@ -286,7 +286,7 @@ const featuresRecencyRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const featureClient = await getFeatureClient();
-    return areFeaturesRecent({
+    return shouldIdentifyFeatures({
       featureClient,
       streamName: params.path.streamName,
       thresholdHours: params.query.thresholdHours,
@@ -301,5 +301,5 @@ const featuresRecencyRoute = createServerRoute({
 export const identifyFeaturesRoutes = {
   ...identifyInferredFeaturesRoute,
   ...identifyComputedFeaturesRoute,
-  ...featuresRecencyRoute,
+  ...shouldIdentifyRoute,
 };

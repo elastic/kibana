@@ -7,11 +7,16 @@
 
 import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
-import { waitForApmSettingsHeaderLink } from '../page_helpers';
+import { dismissGlobalToastsIfPresent, waitForApmSettingsHeaderLink } from '../page_helpers';
 import { EXTENDED_TIMEOUT } from '../constants';
+import { type TraceWaterfallFlyout, createTraceWaterfallFlyout } from './trace_waterfall_flyout';
 
 export class TransactionDetailsPage {
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
+  public readonly traceWaterfallFlyout: TraceWaterfallFlyout;
+
+  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+    this.traceWaterfallFlyout = createTraceWaterfallFlyout(page);
+  }
 
   async goToTransactionDetails(params: {
     serviceName: string;
@@ -167,6 +172,7 @@ export class TransactionDetailsPage {
    * Open the transaction action menu by clicking the "Investigate" button
    */
   async openActionMenu() {
+    await dismissGlobalToastsIfPresent(this.page);
     const investigateButton = this.page.getByTestId('apmActionMenuButtonInvestigateButton');
     await investigateButton.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
     await investigateButton.scrollIntoViewIfNeeded();

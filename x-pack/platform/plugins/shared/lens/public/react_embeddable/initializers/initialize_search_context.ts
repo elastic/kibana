@@ -21,7 +21,7 @@ import { BehaviorSubject, merge, map, distinctUntilChanged } from 'rxjs';
 import { isEqual } from 'lodash';
 import { getProjectRoutingFromEsqlQuery } from '@kbn/esql-utils';
 import type { LensInternalApi, LensRuntimeState, LensUnifiedSearchContext } from '@kbn/lens-common';
-import type { LensSerializedAPIConfig } from '@kbn/lens-common-2';
+import type { LensWireAPIConfig } from '@kbn/lens-common-2';
 
 import type { LensEmbeddableStartServices } from '../types';
 
@@ -39,7 +39,7 @@ export interface SearchContextConfig {
   anyStateChange$: Observable<void>;
   cleanup: () => void;
   getLatestState: () => LensUnifiedSearchContext;
-  reinitializeState: (lastSaved?: LensSerializedAPIConfig) => void;
+  reinitializeState: (lastSaved?: LensWireAPIConfig) => void;
 }
 
 const getProjectRoutingOverrides = (query: Query | AggregateQuery | undefined) => {
@@ -118,7 +118,7 @@ export function initializeSearchContext(
       lastReloadRequestTime: lastReloadRequestTime$.getValue(),
       ...timeRangeManager.getLatestState(),
     }),
-    reinitializeState: (lastSaved?: LensSerializedAPIConfig) => {
+    reinitializeState: (lastSaved?: LensWireAPIConfig) => {
       const timeRange =
         lastSaved && 'time_range' in lastSaved ? { time_range: lastSaved.time_range } : undefined;
       timeRangeManager.reinitializeState(timeRange);

@@ -17,6 +17,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { useState } from 'react';
@@ -50,6 +51,7 @@ export const EmbeddableMenu: FC<Props> = ({
 }) => {
   const [showMenu, setShowMenu] = useState(false);
   const togglePopover = () => setShowMenu(!showMenu);
+  const popoverTitleId = useGeneratedHtmlId();
 
   const button = (
     <EuiToolTip
@@ -74,6 +76,7 @@ export const EmbeddableMenu: FC<Props> = ({
   return (
     <EuiPopover
       id={'embeddableMenu'}
+      aria-labelledby={popoverTitleId}
       button={button}
       isOpen={showMenu}
       closePopover={() => togglePopover()}
@@ -82,7 +85,7 @@ export const EmbeddableMenu: FC<Props> = ({
     >
       <EuiPanel color="transparent" paddingSize="s" css={{ maxWidth: '400px' }}>
         <EuiTitle size="xxxs">
-          <EuiPopoverTitle>
+          <EuiPopoverTitle id={popoverTitleId}>
             <FormattedMessage
               id="xpack.aiops.logCategorization.embeddableMenu.patternAnalysisSettingsTitle"
               defaultMessage=" Pattern analysis settings"
