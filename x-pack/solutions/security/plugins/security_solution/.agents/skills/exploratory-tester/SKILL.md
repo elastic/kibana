@@ -18,7 +18,7 @@ Explore a feature area of Kibana Security Solution through the browser, collect 
 | Phase | What it does | Exit condition |
 |-------|-------------|----------------|
 | **0 — Setup** | Parse scope, start environment (agent-managed) or verify (user-provided), fetch known bugs, write `config.json` | `config.json` written |
-| **1 — Wait & Login** | Wait for Kibana ready, log in, set up data, verify area readiness, confirm scope with user | User confirms: proceed |
+| **1 — Wait & Login** | Wait for Kibana ready, log in as admin for setup, create space + test user, switch to test user, verify area readiness, confirm with user | User confirms: proceed |
 | **2 — Explore** | Walk every flow using checklist + timebox, write findings immediately | Every flow has ≥1 entry in its `findings-flow-<N>.md` |
 | **3 — Report** | Merge findings, classify, filter known noise, present to user, update knowledge | User has reviewed the report |
 
@@ -169,16 +169,15 @@ If no `## Exploratory testing scope` comment is found — **stop** and show the 
 **Area slug:** lowercase the Area value, replace spaces with hyphens.
 `"SIEM Migrations dashboards"` → `siem-migrations-dashboards`
 
-**Role resolution for serverless environments:**
+**Role resolution — never use `admin` for exploration.** If the scope requests `admin`, substitute and warn the user: _"Role 'admin' is not allowed for exploratory testing — findings must reflect a realistic user's perspective. Substituting with `<platform_engineer | t2_analyst>`."_
 
-| Scope role | Serverless project role |
-|---|---|
-| `t1_analyst` | `viewer` |
-| `t2_analyst` | `editor` |
-| `admin` | `admin` |
-| Any unrecognised role | Warn user, use `viewer`, add to `skipped_setup` |
-
-For stateful environments: use the scope role as-is.
+| Scope role | Stateful | Serverless |
+|---|---|---|
+| `t1_analyst` | `t1_analyst` | `viewer` |
+| `t2_analyst` | `t2_analyst` | `editor` |
+| `platform_engineer` | `platform_engineer` | `platform_engineer` |
+| `admin` | ⚠️ substituted → `t2_analyst` | ⚠️ substituted → `platform_engineer` |
+| Any unrecognised role | warn → `viewer`, add to `skipped_setup` | warn → `viewer`, add to `skipped_setup` |
 
 ### Step 0d — Fetch known bugs
 
@@ -210,7 +209,12 @@ Write `.exploratory-session/config.json`:
     "type": "<stateful-classic | stateful-ess | serverless | user-provided>",
     "url": "<resolved url>",
     "managed": true,
-    "data_setup": "<run | skip>"
+    "data_setup": "<run | skip>",
+    "space_id": "exploratory-testing"
+  },
+  "test_user": {
+    "username": "exploratory-tester",
+    "password": "Exploratory123!"
   },
   "flows": [
     {
@@ -223,7 +227,7 @@ Write `.exploratory-session/config.json`:
   "setup": {
     "connectors": ["<connector names>"],
     "role": "<scope role>",
-    "resolved_role": "<resolved role>"
+    "resolved_role": "<resolved role — never admin>"
   },
   "skipped_setup": [],
   "known_open_bugs": [{ "number": 0, "title": "" }],
@@ -232,6 +236,8 @@ Write `.exploratory-session/config.json`:
 ```
 
 `data_setup` is `"skip"` when the invocation includes `data-setup: skip` in the Environment block; otherwise `"run"`.
+
+For **user-provided environments**: `space_id` defaults to `"default"` unless the invocation includes `space: <id>` in the Environment block. `test_user` is omitted — the provided credentials are used directly.
 
 Read `x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/knowledge/<area_slug>.md` if it exists — load its contents as context for Phase 2.
 
@@ -266,7 +272,9 @@ node -e "
 
 If the script exits with code 1 — **stop** and tell the user to check the Scout server output.
 
-### Step 1b — Log in via browser
+### Step 1b — Log in as admin for setup
+
+_This login is for setup only (creating space, connectors, test user). The agent will switch to the test user after Phase 1c._
 
 **Login URL:**
 - Agent-managed (`stateful-classic`, `stateful-ess`, `serverless`): navigate to `<environment.url>/login?auth_provider_hint=cloud-basic`
@@ -274,7 +282,7 @@ If the script exits with code 1 — **stop** and tell the user to check the Scou
 
 Fill credentials:
 - Agent-managed environments: username `elastic`, password `changeme`
-- User-provided environments: username and password from `config.json` environment block
+- User-provided environments: skip this step — go directly to Step 1f
 
 If login fails — retry once with a fresh navigation. If still failing — **stop** and report the exact error message visible in the browser.
 
@@ -288,10 +296,21 @@ Skip this step entirely if `environment.data_setup` is `"skip"` in `config.json`
 
 Check environment capabilities before each step. Record every skipped step in `config.json` → `skipped_setup` with its reason.
 
+**Create test space (all agent-managed environment types):**
+```bash
+curl -s -u elastic:changeme -X POST http://localhost:5620/api/spaces/space \
+  -H 'kbn-xsrf: true' -H 'Content-Type: application/json' \
+  -d '{"id":"exploratory-testing","name":"Exploratory Testing","description":"Isolated space for agent-driven testing sessions","color":"#DD0A73"}'
+```
+If the response is `409 Conflict`, the space already exists — reuse it silently.
+If any other error — add to `skipped_setup` and continue in the `default` space (update `environment.space_id` to `"default"` in `config.json`).
+
+For **user-provided environments**: skip space creation.
+
 **Connectors (all environment types):**
 ```bash
-# Create Bedrock connector (stateful):
-curl -s -u elastic:changeme -X POST http://localhost:5620/api/actions/connector \
+# Create Bedrock connector — substitute space_id from config.json:
+curl -s -u elastic:changeme -X POST http://localhost:5620/s/exploratory-testing/api/actions/connector \
   -H 'kbn-xsrf: true' -H 'Content-Type: application/json' \
   -d '{"name":"Bedrock","connector_type_id":".bedrock","config":{"apiUrl":"https://bedrock.us-east-1.amazonaws.com"},"secrets":{"accessKey":"test","secret":"test"}}'
 ```
@@ -304,16 +323,43 @@ If the scope `Setup` section lists esArchiver fixtures, load them via the Kibana
 { "step": "esArchiver:<fixture-name>", "reason": "not supported in serverless: <error>" }
 ```
 
-**Roles and users (stateful only):**
+**Create test user (stateful only):**
+```bash
+curl -s -u elastic:changeme -X POST http://localhost:5620/internal/security/users/exploratory-tester \
+  -H 'kbn-xsrf: true' -H 'Content-Type: application/json' \
+  -d '{"username":"exploratory-tester","password":"Exploratory123!","roles":["<resolved_role>"],"full_name":"Exploratory Tester"}'
+```
+If the user already exists (409): update it instead:
+```bash
+curl -s -u elastic:changeme -X PUT http://localhost:5620/internal/security/users/exploratory-tester \
+  -H 'kbn-xsrf: true' -H 'Content-Type: application/json' \
+  -d '{"username":"exploratory-tester","password":"Exploratory123!","roles":["<resolved_role>"],"full_name":"Exploratory Tester"}'
+```
 
-Create the test role and user via the security API. For serverless, skip role/user creation entirely — the `resolved_role` from `config.json` is the project-level role that was already mapped. Add to `skipped_setup`:
+For **serverless**: skip user creation — project roles are pre-provisioned. Add to `skipped_setup`:
 ```json
 { "step": "role-creation:<role>", "reason": "serverless uses project roles — resolved to <resolved_role>" }
 ```
 
+### Step 1f — Switch to test user
+
+_Skip this step for user-provided environments — the provided credentials are the test credentials._
+
+1. Navigate to `<environment.url>/logout`
+2. Navigate to `<environment.url>/login?auth_provider_hint=cloud-basic`
+3. Log in as `exploratory-tester` / `Exploratory123!` (from `config.json` → `test_user`)
+4. Dismiss any post-login dialogs (same as Step 1b)
+5. Verify the session is the test user (not the superuser):
+   ```bash
+   curl -s -u exploratory-tester:Exploratory123! http://localhost:5620/api/security/me \
+     | python3 -c "import sys,json; u=json.load(sys.stdin); print(u.get('username')); exit(0 if u.get('username')=='exploratory-tester' else 1)"
+   ```
+   If this fails — **stop** and report the exact error. The `elastic` admin session is still available for debugging.
+6. Navigate to `<environment.url>/s/<space_id>/` to enter the test space
+
 ### Step 1d — Check area readiness
 
-Navigate to the first flow's `entry` path. Call `browser_snapshot` to see the current state.
+Navigate to the first flow's `entry` path within the test space (prefix with `/s/<space_id>/` — see Phase 2 navigation rules). Call `browser_snapshot` to see the current state.
 
 If the page shows an empty state (e.g., "No migrations to view", "No data", empty illustration with a CTA):
 
@@ -336,7 +382,7 @@ If the page shows an empty state (e.g., "No migrations to view", "No data", empt
 Present a confirmation before starting exploration:
 
 > "Kibana ready (`<environment.type>` at `<environment.url>`).
-> Exploring **`<area>`** with role **`<resolved_role>`**.
+> Exploring **`<area>`** in space **`<space_id>`** with role **`<resolved_role>`** as user **`<test_user.username>`**.
 > Flows: `<flow names, comma-separated>`
 > Skipped setup: `<skipped_setup list, or 'none'>`
 > Proceed?"
@@ -372,7 +418,7 @@ config.json path: .exploratory-session/config.json
 findings file path: .exploratory-session/findings-flow-<N>.md
 knowledge file path: x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/knowledge/<area_slug>.md
 
-Read config.json for environment details, resolved_role, area, and known_open_bugs.
+Read config.json for environment details, resolved_role, space_id, test_user, area, and known_open_bugs.
 Read the knowledge file if it exists — use it to recognise known non-bugs.
 Run the Explore Loop for your assigned flow.
 Write all findings to findings-flow-<N>.md.
@@ -419,15 +465,27 @@ Default timebox: `timeout_minutes` from the flow in `config.json` (default 4 min
 | 5 | **Refresh during in-flight operation** — start the flow, trigger a server call, call `browser_snapshot` to confirm the loading state is visible, then navigate to the same URL to simulate a refresh |
 
 **At every checklist step, before and after the action:**
-1. `browser_console_messages` — capture any new messages
-2. `browser_network_requests` — capture requests triggered by the action
+1. `browser_console_messages` — capture any new messages. Then:
+   - Scan for React-specific warnings that appeared **after** the action:
+     - `"Maximum update depth exceeded"` → **Level 1** finding (infinite render loop)
+     - Any other `"Warning: ..."` React message → **Level 2** finding
+   - Ignore background noise: CSP violations, 404s on `/internal/cloud/solution`, browser extension messages
+2. `browser_network_requests` — capture requests triggered by the action. Then:
+   - Group by `method + path` (strip query strings). If any group has **2+ entries** triggered by a single user action: log a **Level 2** finding — "Duplicate API call: `<METHOD> <path>` called `<N>` times." Exception: exclude polling paths (`/health`, `/status`, `/metrics`, `/fleet-setup`).
+   - If the same GET fires 2+ times within ~500ms of one action with no intervening navigation: note "Rapid duplicate GETs may indicate component remounting" in the finding.
 3. `browser_take_screenshot` — save to `.exploratory-session/screenshots/<area_slug>-flow<N>-step<M>-<checklist-step-slug>.png` (e.g. `siem-migrations-dashboards-flow1-step1-happy-path.png`)
 4. Append one entry to `findings-flow-<N>.md` **immediately** — even if nothing went wrong
 
 **How to navigate to the flow:**
-1. Use `entry` from `config.json` if provided — navigate exactly as described
-2. After navigation, verify the resulting URL contains the expected area path. If you were redirected to an unrelated page (e.g. `/get_started`, `/overview`): log a Level 2 finding with the redirect chain, then try navigating to a more specific sub-path that matches the `entry` description
-3. If no `entry`: call `browser_snapshot`, read the visible UI, navigate to the area from what's on screen
+
+All navigation must happen within the test space (`space_id` from `config.json`).
+
+1. Use `entry` from `config.json` if provided:
+   - If `entry` starts with `/app/`: navigate to `<environment.url>/s/<space_id><entry>`
+   - If `entry` starts with `/s/`: navigate to `<environment.url><entry>` as-is
+   - If `entry` is a natural-language description (e.g., "Security > SIEM Migrations"): navigate from `<environment.url>/s/<space_id>/app/security` and follow the path
+2. After navigation, verify the resulting URL contains `/s/<space_id>/`. If you were redirected to an unrelated page (e.g. `/get_started`, `/overview`) or the space prefix is missing: log a Level 2 finding with the redirect chain, then try navigating to a more specific sub-path
+3. If no `entry`: call `browser_snapshot`, read the visible UI, navigate from what's on screen (within the test space)
 4. Check `knowledge/<area_slug>.md` for navigation patterns accumulated from prior sessions
 5. If the flow name is still ambiguous after the snapshot: take a screenshot, describe what you see, choose the most reasonable interpretation and proceed — never skip
 
@@ -474,8 +532,8 @@ Each entry appended to `.exploratory-session/findings-flow-<N>.md`:
 ```
 
 **Level rules:**
-- **Level 1** — JS exception in console, HTTP 5xx on any in-flow request, a 2xx response whose body contains an `error` key, a toast notification with error/failure wording, or current behavior directly contradicts the `expected` field in `config.json` → agent decides: confirmed bug
-- **Level 2** — Unexpected 4xx, element that should be present is missing, layout visibly broken, action completes with no user feedback, or a loading indicator that hasn't resolved after 10 seconds → agent flags: user decides
+- **Level 1** — JS exception in console, HTTP 5xx on any in-flow request, a 2xx response whose body contains an `error` key, a toast notification with error/failure wording, React "Maximum update depth exceeded" warning, or current behavior directly contradicts the `expected` field in `config.json` → agent decides: confirmed bug
+- **Level 2** — Unexpected 4xx, element that should be present is missing, layout visibly broken, action completes with no user feedback, a loading indicator that hasn't resolved after 10 seconds, any React DevTools warning other than maximum update depth, or the same API endpoint called 2+ times for a single user action → agent flags: user decides
 - **Level 3** — `console.warn`, transient spinner, unclassifiable observation → listed, not flagged
 
 **For Level 3 findings** — use this shorter format:
@@ -507,7 +565,9 @@ Read all `.exploratory-session/findings-flow-<N>.md` files. Write `.exploratory-
 
 **Area:** <area>
 **Environment:** <environment.type> at <environment.url>
+**Space:** <space_id>
 **Role:** <resolved_role>
+**User:** <test_user.username>
 **Date:** <today's date>
 **Mode:** <single | parallel>
 **Flows explored:** <N>
@@ -596,6 +656,9 @@ git commit -m "knowledge(exploratory-tester): update <area_slug> after session o
 | Scout already running on port 5620 | Phase 0 (agent-managed) | Reuse. Tell user an existing session is being reused. |
 | User-provided environment unreachable | Phase 0 | **Stop.** Tell user to check the environment URL and credentials. |
 | Login fails after one retry | Phase 1 | **Stop.** Report the exact error visible in the browser. |
+| Test user login fails | Phase 1f | **Stop.** Report the exact error. The `elastic` admin session is still available for debugging. |
+| Space creation fails (non-409) | Phase 1c | Add `{ "step": "space-creation", "reason": "<error>" }` to `skipped_setup`. Update `space_id` to `"default"` in `config.json`. Continue. |
+| `admin` role requested | Phase 0c | Warn and substitute (`t2_analyst` stateful / `platform_engineer` serverless). Never stop — exploration proceeds with the substituted role. |
 | `gh` CLI not authenticated | Phase 0 (GitHub mode) | **Stop.** Tell user to run `gh auth login`. |
 | No `## Exploratory testing scope` comment found | Phase 0 (GitHub mode) | **Stop.** Show the exact comment format to add (see Phase 0 Step 0b). |
 | Sub-agent crashes in parallel mode | Phase 2 | Continue with other flows. Mark the crashed flow as `failed: sub-agent error` in the report. |
