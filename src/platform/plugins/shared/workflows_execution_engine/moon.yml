@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/core'
   - '@kbn/config-schema'
   - '@kbn/actions-plugin'
+  - '@kbn/connector-specs'
   - '@kbn/workflows'
   - '@kbn/task-manager-plugin'
   - '@kbn/es-query'

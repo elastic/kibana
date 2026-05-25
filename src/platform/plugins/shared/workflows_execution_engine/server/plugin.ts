@@ -78,7 +78,11 @@ import {
   WORKFLOW_RUN_TASK_TYPE,
   WORKFLOW_SCHEDULED_TASK_TYPE,
 } from './workflow_task_manager/types';
-import { WorkflowTaskManager } from './workflow_task_manager/workflow_task_manager';
+import {
+  getWorkflowGlobalTimeoutResumeTaskId,
+  WorkflowTaskManager,
+} from './workflow_task_manager/workflow_task_manager';
+import { createWorkflowTaskAbortController } from './workflow_task_shutdown';
 import { createIndexes } from '../common';
 
 /**
@@ -105,6 +109,10 @@ const WORKFLOW_RESUME_TASK_MAX_ATTEMPTS = 3;
 const BULK_CANCEL_PAGE_SIZE = 10;
 
 type SetupDependencies = Pick<ContextDependencies, 'cloudSetup'>;
+type ManagedWorkflowExecutionMetadata = Pick<
+  EsWorkflowExecution,
+  'managed' | 'managedBy' | 'originManagedWorkflowId' | 'managedVersion'
+>;
 
 export class WorkflowsExecutionEnginePlugin
   implements
@@ -176,11 +184,11 @@ export class WorkflowsExecutionEnginePlugin
         timeout: '365d',
         // Retries allow `resolveInterruptedWorkflowRunTask` to fail-fast abandoned executions after interrupt.
         maxAttempts: WORKFLOW_RUN_TASK_MAX_ATTEMPTS,
-        createTaskRunner: ({ taskInstance, fakeRequest }) => {
+        createTaskRunner: ({ taskInstance, fakeRequest, abortController }) => {
           if (!fakeRequest) {
             throw new Error('Cannot execute a workflow without Kibana Request');
           }
-          const taskAbortController = new AbortController();
+          const taskAbortController = createWorkflowTaskAbortController(abortController);
           return {
             run: async () => {
               const { workflowRunId, spaceId } =
@@ -280,11 +288,11 @@ export class WorkflowsExecutionEnginePlugin
         timeout: '365d',
         // Retries allow `resolveInterruptedWorkflowResumeTask` to fail-fast abandoned executions after interrupt.
         maxAttempts: WORKFLOW_RESUME_TASK_MAX_ATTEMPTS,
-        createTaskRunner: ({ taskInstance, fakeRequest }) => {
+        createTaskRunner: ({ taskInstance, fakeRequest, abortController }) => {
           if (!fakeRequest) {
             throw new Error('Cannot resume a workflow without Kibana Request');
           }
-          const taskAbortController = new AbortController();
+          const taskAbortController = createWorkflowTaskAbortController(abortController);
           return {
             run: async () => {
               const { workflowRunId, spaceId } =
@@ -388,11 +396,11 @@ export class WorkflowsExecutionEnginePlugin
         // The workflow timeout logic defined in workflow execution engine logic is the primary control.
         timeout: '365d',
         maxAttempts: 3,
-        createTaskRunner: ({ taskInstance, fakeRequest }) => {
+        createTaskRunner: ({ taskInstance, fakeRequest, abortController }) => {
           if (!fakeRequest) {
             throw new Error('Cannot execute a scheduled workflow without Kibana Request');
           }
-          const taskAbortController = new AbortController();
+          const taskAbortController = createWorkflowTaskAbortController(abortController);
           return {
             run: async () => {
               const { workflowId, spaceId } = taskInstance.params as {
@@ -1277,6 +1285,16 @@ export class WorkflowsExecutionEnginePlugin
         fakeRequest: request,
       });
 
+      await plugins.taskManager
+        .removeIfExists(getWorkflowGlobalTimeoutResumeTaskId(executionId))
+        .catch((error: unknown) => {
+          this.logger.warn(
+            `Failed to remove idle-timeout resume task (execution=${executionId}): ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
+        });
+
       // Same idea as cancel: nudge TM so the resume task runs as soon as possible
       await workflowTaskManager.forceRunIdleTasks(executionId);
     };
@@ -1387,12 +1405,10 @@ export class WorkflowsExecutionEnginePlugin
   private buildManagedWorkflowExecutionMetadata(
     workflow: Pick<
       WorkflowExecutionEngineModel,
-      'managed' | 'managedBy' | 'originManagedWorkflowId'
+      'managed' | 'managedBy' | 'originManagedWorkflowId' | 'managedVersion'
     >
-  ): Partial<Pick<EsWorkflowExecution, 'managed' | 'managedBy' | 'originManagedWorkflowId'>> {
-    const managedMetadata: Partial<
-      Pick<EsWorkflowExecution, 'managed' | 'managedBy' | 'originManagedWorkflowId'>
-    > = {};
+  ): Partial<ManagedWorkflowExecutionMetadata> {
+    const managedMetadata: Partial<ManagedWorkflowExecutionMetadata> = {};
 
     if (workflow.managed === true) {
       managedMetadata.managed = true;
@@ -1404,6 +1420,10 @@ export class WorkflowsExecutionEnginePlugin
 
     if (typeof workflow.originManagedWorkflowId === 'string') {
       managedMetadata.originManagedWorkflowId = workflow.originManagedWorkflowId;
+    }
+
+    if (typeof workflow.managedVersion === 'number') {
+      managedMetadata.managedVersion = workflow.managedVersion;
     }
 
     return managedMetadata;

@@ -55,6 +55,7 @@ const createSetupContractMock = () => {
     getKibanaBuildNumber: jest.fn(),
     getCustomBranding: jest.fn(),
     getFeatureFlags: jest.fn(),
+    getUserStorage: jest.fn().mockReturnValue({ values: {} }),
   });
 
   return setupContract;

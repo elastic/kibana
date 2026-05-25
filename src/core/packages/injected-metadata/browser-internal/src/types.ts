@@ -65,6 +65,9 @@ export interface InternalInjectedMetadataSetup {
         initialFeatureFlags: Record<string, unknown>;
       }
     | undefined;
+  getUserStorage: () => {
+    values: Record<string, unknown>;
+  };
 }
 
 /** @internal */
