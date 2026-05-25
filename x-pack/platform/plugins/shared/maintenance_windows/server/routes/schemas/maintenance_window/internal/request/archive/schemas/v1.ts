@@ -11,6 +11,9 @@ export const archiveParamsSchema = schema.object({
   id: schema.string(),
 });
 
-export const archiveBodySchema = schema.object({
-  archive: schema.boolean(),
-});
+export const archiveBodySchema = schema.object(
+  {
+    archive: schema.boolean(),
+  },
+  { meta: { id: 'maintenance_window_archive_body' } }
+);
