@@ -184,6 +184,12 @@ export const AlertEpisodesListPage = () => {
 
   const rows = useMemo(() => episodesData?.map(alertEpisodeToDataTableRecord), [episodesData]);
 
+  // Refresh both the list and the histogram after any action that mutates episode state.
+  const onActionSuccess = useCallback(() => {
+    refetch();
+    queryClient.invalidateQueries({ queryKey: ['episodesHistogram'] });
+  }, [refetch, queryClient]);
+
   const episodeActions: EpisodeAction[] = useMemo(
     () =>
       createEpisodeActions({
@@ -223,19 +229,19 @@ export const AlertEpisodesListPage = () => {
             <Control
               iconType={action.iconType}
               label={action.displayName}
-              onClick={() => action.execute({ episodes, onSuccess: refetch })}
+              onClick={() => action.execute({ episodes, onSuccess: onActionSuccess })}
               tooltipContent={action.displayName}
             />
           );
         },
       })),
-    [episodeActions, refetch]
+    [episodeActions, onActionSuccess]
   );
 
   const customBulkActions = useEpisodesBulkActions({
     actions: episodeActions,
     episodesData,
-    onSuccess: refetch,
+    onSuccess: onActionSuccess,
   });
 
   const assigneeUids = useMemo(
