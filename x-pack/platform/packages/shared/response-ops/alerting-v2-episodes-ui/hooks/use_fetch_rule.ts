@@ -25,4 +25,7 @@ export const useFetchRule = ({ id, http }: UseFetchRuleOptions) =>
     enabled: Boolean(id),
     retry: false,
     refetchOnWindowFocus: false,
+    // Rule definitions change rarely and are not invalidated by episode actions;
+    // 5 minutes prevents unnecessary refetches when flyout panes remount.
+    staleTime: 5 * 60_000,
   });

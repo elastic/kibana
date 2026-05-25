@@ -7,14 +7,8 @@
 
 import React from 'react';
 import { EuiLoadingSpinner, EuiText } from '@elastic/eui';
-import { useFetchEpisodeEventsQuery } from '../../hooks/use_fetch_episode_events_query';
-import { useFetchEpisodeActions } from '../../hooks/use_fetch_episode_actions';
+import { useFetchEpisodeQuery } from '../../hooks/use_fetch_episode_query';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
-import {
-  getEpisodeDurationMs,
-  getRuleIdFromEpisodeRows,
-  getTriggeredTimestamp,
-} from '../../utils/episode_series_derived';
 import { AlertEpisodeMetadataDetailsList } from './metadata_details_list';
 import type { AlertEpisodeDetailsServices } from './types';
 import * as i18n from './translations';
@@ -29,20 +23,14 @@ export const AlertEpisodeMetadataDetailsListSection = ({
   services,
 }: AlertEpisodeMetadataDetailsListSectionProps) => {
   const {
-    data: eventRows,
-    isLoading: isLoadingEvents,
-    isError: isEventsError,
-  } = useFetchEpisodeEventsQuery({ episodeId, services });
-  const rows = eventRows ?? [];
+    data: episode,
+    isLoading: isLoadingEpisode,
+    isError: isEpisodeError,
+  } = useFetchEpisodeQuery({ episodeId, services });
 
-  const ruleId = getRuleIdFromEpisodeRows(rows);
-  const triggeredAt = getTriggeredTimestamp(rows);
-  const durationMs = getEpisodeDurationMs(rows);
-
-  const { data: episodeActionsMap } = useFetchEpisodeActions({
-    episodeIds: [episodeId],
-    services,
-  });
+  const ruleId = episode?.['rule.id'];
+  const triggeredAt = episode?.triggered_at;
+  const durationMs = episode?.duration;
 
   const {
     data: rule,
@@ -50,7 +38,7 @@ export const AlertEpisodeMetadataDetailsListSection = ({
     isError: isRuleError,
   } = useFetchRule({ id: ruleId, http: services.http });
 
-  if (isEventsError || isRuleError) {
+  if (isEpisodeError || isRuleError) {
     return (
       <EuiText
         size="s"
@@ -62,7 +50,7 @@ export const AlertEpisodeMetadataDetailsListSection = ({
     );
   }
 
-  if (isLoadingEvents || (ruleId && isLoadingRule)) {
+  if (isLoadingEpisode || (ruleId && isLoadingRule)) {
     return (
       <EuiLoadingSpinner
         size="m"
@@ -72,7 +60,7 @@ export const AlertEpisodeMetadataDetailsListSection = ({
   }
 
   const groupingFields = rule?.grouping?.fields ?? [];
-  const assigneeUid = episodeActionsMap?.get(episodeId)?.lastAssigneeUid ?? undefined;
+  const assigneeUid = episode?.last_assignee_uid ?? undefined;
 
   return (
     <AlertEpisodeMetadataDetailsList

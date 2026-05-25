@@ -7,9 +7,8 @@
 
 import React from 'react';
 import { EuiLoadingSpinner, EuiText } from '@elastic/eui';
-import { useFetchEpisodeEventsQuery } from '../../hooks/use_fetch_episode_events_query';
+import { useFetchEpisodeQuery } from '../../hooks/use_fetch_episode_query';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
-import { getRuleIdFromEpisodeRows } from '../../utils/episode_series_derived';
 import { AlertEpisodeRunbook } from './runbook';
 import type { AlertEpisodeDetailsServices } from './types';
 import * as i18n from './translations';
@@ -24,13 +23,12 @@ export const AlertEpisodeRunbookSection = ({
   services,
 }: AlertEpisodeRunbookSectionProps) => {
   const {
-    data: eventRows,
-    isLoading: isLoadingEvents,
-    isError: isEventsError,
-  } = useFetchEpisodeEventsQuery({ episodeId, services });
-  const rows = eventRows ?? [];
+    data: episode,
+    isLoading: isLoadingEpisode,
+    isError: isEpisodeError,
+  } = useFetchEpisodeQuery({ episodeId, services });
 
-  const ruleId = getRuleIdFromEpisodeRows(rows);
+  const ruleId = episode?.['rule.id'];
 
   const {
     data: rule,
@@ -38,11 +36,11 @@ export const AlertEpisodeRunbookSection = ({
     isError: isRuleError,
   } = useFetchRule({ id: ruleId, http: services.http });
 
-  if (isLoadingEvents || (ruleId && isLoadingRule)) {
+  if (isLoadingEpisode || (ruleId && isLoadingRule)) {
     return <EuiLoadingSpinner size="m" data-test-subj="alertingV2EpisodeRunbookSectionLoading" />;
   }
 
-  if (isEventsError || isRuleError) {
+  if (isEpisodeError || isRuleError) {
     return (
       <EuiText size="s" color="danger" data-test-subj="alertingV2EpisodeRunbookSectionError">
         {i18n.RUNBOOK_SECTION_LOAD_ERROR}

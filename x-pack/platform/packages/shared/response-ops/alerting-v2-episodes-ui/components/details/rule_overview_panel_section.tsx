@@ -7,9 +7,8 @@
 
 import React from 'react';
 import { EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
-import { useFetchEpisodeEventsQuery } from '../../hooks/use_fetch_episode_events_query';
+import { useFetchEpisodeQuery } from '../../hooks/use_fetch_episode_query';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
-import { getRuleIdFromEpisodeRows } from '../../utils/episode_series_derived';
 import { ruleDetailsPath } from '../../constants';
 import { AlertEpisodeRuleOverviewPanel } from './rule_overview_panel';
 import type { AlertEpisodeDetailsServices } from './types';
@@ -27,13 +26,12 @@ export const AlertEpisodeRuleOverviewPanelSection = ({
   collapsible,
 }: AlertEpisodeRuleOverviewPanelSectionProps) => {
   const {
-    data: eventRows,
-    isLoading: isLoadingEvents,
-    isError: isEventsError,
-  } = useFetchEpisodeEventsQuery({ episodeId, services });
-  const rows = eventRows ?? [];
+    data: episode,
+    isLoading: isLoadingEpisode,
+    isError: isEpisodeError,
+  } = useFetchEpisodeQuery({ episodeId, services });
 
-  const ruleId = getRuleIdFromEpisodeRows(rows);
+  const ruleId = episode?.['rule.id'];
 
   const {
     data: rule,
@@ -41,7 +39,7 @@ export const AlertEpisodeRuleOverviewPanelSection = ({
     isError: isRuleError,
   } = useFetchRule({ id: ruleId, http: services.http });
 
-  if (isLoadingEvents || (ruleId && isLoadingRule)) {
+  if (isLoadingEpisode || (ruleId && isLoadingRule)) {
     return (
       <EuiLoadingSpinner
         size="m"
@@ -50,7 +48,7 @@ export const AlertEpisodeRuleOverviewPanelSection = ({
     );
   }
 
-  if (isEventsError || isRuleError || !ruleId || !rule) {
+  if (isEpisodeError || isRuleError || !ruleId || !rule) {
     return (
       <EuiEmptyPrompt
         data-test-subj="alertingV2EpisodeRuleOverviewPanelSectionError"

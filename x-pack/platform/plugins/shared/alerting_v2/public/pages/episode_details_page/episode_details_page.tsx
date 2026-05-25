@@ -24,18 +24,9 @@ import {
 } from '@elastic/eui';
 import { useQueryClient } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useFetchEpisodeEventsQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_events_query';
-import { useFetchEpisodeActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_actions';
-import { useFetchGroupActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_group_actions';
+import { useFetchEpisodeQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_query';
 import { useFetchRule } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_rule';
 import { useInvalidateEpisodeQueries } from '@kbn/alerting-v2-episodes-ui/hooks/use_invalidate_episode_queries';
-import {
-  getEpisodeDurationMs,
-  getGroupHashFromEpisodeRows,
-  getLastEpisodeStatus,
-  getRuleIdFromEpisodeRows,
-  getTriggeredTimestamp,
-} from '@kbn/alerting-v2-episodes-ui/utils/episode_series_derived';
 import { createEpisodeActions, type EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
 import { EpisodeActionsBar } from '@kbn/alerting-v2-episodes-ui/components/episode_actions_bar';
 import { AlertEpisodeDetailsHeaderSection } from '@kbn/alerting-v2-episodes-ui/components/details/details_header_section';
@@ -71,7 +62,7 @@ export function EpisodeDetailsPage() {
 
   const { services } = useKibana<AlertEpisodesKibanaServices>();
   const queryClient = useQueryClient();
-  const { data, http, expressions, spaces } = services;
+  const { data, http, spaces } = services;
   const history = useHistory();
 
   const smallMediaQuery = useEuiMaxBreakpoint('s');
@@ -80,28 +71,18 @@ export function EpisodeDetailsPage() {
   const invalidateEpisodeQueries = useInvalidateEpisodeQueries();
 
   const {
-    data: eventRows = [],
-    isLoading: isLoadingEvents,
-    isError: isEventsError,
-  } = useFetchEpisodeEventsQuery({
+    data: episode,
+    isLoading: isLoadingEpisode,
+    isError: isEpisodeError,
+  } = useFetchEpisodeQuery({
     episodeId,
     services: { data, spaces },
   });
 
-  const ruleId = useMemo(() => getRuleIdFromEpisodeRows(eventRows), [eventRows]);
-  const groupHash = useMemo(() => getGroupHashFromEpisodeRows(eventRows), [eventRows]);
+  const ruleId = episode?.['rule.id'];
+  const groupHash = episode?.group_hash;
 
   const { data: rule, isLoading: isLoadingRule } = useFetchRule({ id: ruleId, http });
-
-  const { data: episodeActionsMap } = useFetchEpisodeActions({
-    episodeIds: episodeId ? [episodeId] : [],
-    services: { expressions, spaces },
-  });
-
-  const { data: groupActionsMap } = useFetchGroupActions({
-    groupHashes: groupHash ? [groupHash] : [],
-    services: { expressions, spaces },
-  });
 
   const episodeBreadcrumbTitle =
     rule?.metadata.name != null && rule.metadata.name.length > 0
@@ -109,15 +90,6 @@ export function EpisodeDetailsPage() {
       : i18n.EPISODE_DETAILS_BREADCRUMB_FALLBACK;
 
   useBreadcrumbs('episode_details', { ruleName: episodeBreadcrumbTitle });
-
-  const episodeAction = episodeId ? episodeActionsMap?.get(episodeId) : undefined;
-  const groupAction = groupHash ? groupActionsMap?.get(groupHash) : undefined;
-
-  const lastStatus = useMemo(() => getLastEpisodeStatus(eventRows), [eventRows]);
-  const triggeredAt = useMemo(() => getTriggeredTimestamp(eventRows), [eventRows]);
-  const durationMs = useMemo(() => getEpisodeDurationMs(eventRows), [eventRows]);
-
-  const episodeIsoTimestamp = triggeredAt ?? eventRows[0]?.['@timestamp'];
 
   const detailsServices = useMemo(
     () => ({
@@ -165,39 +137,6 @@ export function EpisodeDetailsPage() {
     [services, queryClient, rule]
   );
 
-  const episode = useMemo(() => {
-    if (!episodeId || !lastStatus || !ruleId || !groupHash) {
-      return undefined;
-    }
-    return {
-      '@timestamp': episodeIsoTimestamp ?? eventRows[0]?.['@timestamp'] ?? '',
-      'episode.id': episodeId,
-      'episode.status': lastStatus,
-      'rule.id': ruleId,
-      group_hash: groupHash,
-      first_timestamp: eventRows[0]?.['@timestamp'] ?? '',
-      last_timestamp: eventRows[eventRows.length - 1]?.['@timestamp'] ?? '',
-      duration: durationMs ?? 0,
-      last_ack_action: (episodeAction?.lastAckAction as 'ack' | 'unack' | undefined) ?? undefined,
-      last_assignee_uid: episodeAction?.lastAssigneeUid ?? undefined,
-      last_snooze_action:
-        (groupAction?.lastSnoozeAction as 'snooze' | 'unsnooze' | undefined) ?? undefined,
-      last_deactivate_action:
-        (groupAction?.lastDeactivateAction as 'activate' | 'deactivate' | undefined) ?? undefined,
-      last_tags: groupAction?.tags,
-    };
-  }, [
-    episodeId,
-    lastStatus,
-    ruleId,
-    groupHash,
-    episodeIsoTimestamp,
-    eventRows,
-    durationMs,
-    episodeAction,
-    groupAction,
-  ]);
-
   const applicableActions = useMemo(
     () =>
       episode
@@ -206,10 +145,10 @@ export function EpisodeDetailsPage() {
     [episodeActions, episode]
   );
 
-  const isLoading = isLoadingEvents || (Boolean(ruleId) && isLoadingRule);
-  const episodeNotFound = !isLoading && eventRows.length === 0;
+  const isLoading = isLoadingEpisode || (Boolean(ruleId) && isLoadingRule);
+  const episodeNotFound = !isLoading && episode == null;
 
-  if (!episodeId || episodeNotFound || isEventsError) {
+  if (!episodeId || episodeNotFound || isEpisodeError) {
     return (
       <EuiEmptyPrompt
         iconType="warning"

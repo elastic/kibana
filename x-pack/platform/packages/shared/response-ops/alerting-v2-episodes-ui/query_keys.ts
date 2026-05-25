@@ -23,6 +23,9 @@ export const queryKeys = {
     sortState?: EpisodesSortState,
     timeRange?: { from: string; to: string } | null
   ) => [...queryKeys.listAll(), spaceId, pageSize, filterState, sortState, timeRange] as const,
+  episodeAll: () => [...queryKeys.all, 'episode'] as const,
+  episode: (spaceId: string, episodeId: string) =>
+    [...queryKeys.episodeAll(), spaceId, episodeId] as const,
   episodeEventsAll: () => [...queryKeys.all, 'episode-events'] as const,
   episodeEvents: (spaceId: string, episodeId: string) =>
     [...queryKeys.episodeEventsAll(), spaceId, episodeId] as const,

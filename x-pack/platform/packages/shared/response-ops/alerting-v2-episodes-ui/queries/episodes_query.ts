@@ -24,6 +24,8 @@ export interface AlertEpisode {
   first_timestamp: string;
   last_timestamp: string;
   duration: number;
+  /** ISO timestamp of the first event where episode.status === 'active'. */
+  triggered_at?: string;
   last_ack_action?: 'ack' | 'unack';
   last_assignee_uid?: string | null;
   last_snooze_action?: 'snooze' | 'unsnooze';
@@ -50,6 +52,7 @@ export const ALERT_EPISODE_FIELDS = [
   'first_timestamp',
   'last_timestamp',
   'duration',
+  'triggered_at',
   'last_ack_action',
   'last_assignee_uid',
   'last_snooze_action',
@@ -97,7 +100,7 @@ export const addEpisodeAggregation = (query: ComposerQuery) => {
   // prettier-ignore
   query
     .pipe`EVAL extracted_data = JSON_EXTRACT(_source, "data")`
-    .pipe`INLINE STATS first_timestamp = MIN(@timestamp), last_timestamp = MAX(@timestamp), episode_data = LAST(extracted_data, @timestamp) WHERE extracted_data != "{}" BY episode.id`
+    .pipe`INLINE STATS first_timestamp = MIN(@timestamp), last_timestamp = MAX(@timestamp), triggered_at = MIN(@timestamp) WHERE \`episode.status\` == "active", episode_data = LAST(extracted_data, @timestamp) WHERE extracted_data != "{}" BY episode.id`
     .pipe`EVAL duration = DATE_DIFF("ms", first_timestamp, last_timestamp)`
     .pipe`WHERE @timestamp == last_timestamp`;
 };

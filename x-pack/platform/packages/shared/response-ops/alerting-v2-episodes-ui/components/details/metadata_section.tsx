@@ -12,11 +12,10 @@ import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { useFetchEpisodeEventsQuery } from '../../hooks/use_fetch_episode_events_query';
+import { useFetchEpisodeQuery } from '../../hooks/use_fetch_episode_query';
 import { useFetchEpisodeEventDataQuery } from '../../hooks/use_fetch_episode_event_data_query';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { useAlertingEpisodeSourceDataView } from '../../hooks/use_alerting_episode_source_data_view';
-import { getRuleIdFromEpisodeRows } from '../../utils/episode_series_derived';
 import { AlertEpisodeMetadataTable } from './metadata_table';
 import type { AlertEpisodeDetailsServices } from './types';
 import * as i18n from './translations';
@@ -47,12 +46,11 @@ export const AlertEpisodeMetadataSection = ({
   services,
   decreaseAvailableHeightBy,
 }: AlertEpisodeMetadataSectionProps) => {
-  const { data: eventRows, isLoading: isLoadingEvents } = useFetchEpisodeEventsQuery({
+  const { data: episode, isLoading: isLoadingEpisode } = useFetchEpisodeQuery({
     episodeId,
     services,
   });
-  const rows = eventRows ?? [];
-  const ruleId = getRuleIdFromEpisodeRows(rows);
+  const ruleId = episode?.['rule.id'];
 
   const { data: rule } = useFetchRule({ id: ruleId, http: services.http });
 
@@ -91,7 +89,7 @@ export const AlertEpisodeMetadataSection = ({
     );
   }
 
-  if (isLoadingEvents || isEventDataLoading || isDataViewLoading) {
+  if (isLoadingEpisode || isEventDataLoading || isDataViewLoading) {
     return <EuiLoadingSpinner size="m" data-test-subj="alertingV2EpisodeMetadataSectionLoading" />;
   }
 

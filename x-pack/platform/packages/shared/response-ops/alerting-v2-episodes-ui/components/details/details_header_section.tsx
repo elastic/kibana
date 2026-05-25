@@ -6,15 +6,10 @@
  */
 
 import React from 'react';
-import { useFetchEpisodeEventsQuery } from '../../hooks/use_fetch_episode_events_query';
+import { useFetchEpisodeQuery } from '../../hooks/use_fetch_episode_query';
 import { useFetchEpisodeActions } from '../../hooks/use_fetch_episode_actions';
 import { useFetchGroupActions } from '../../hooks/use_fetch_group_actions';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
-import {
-  getGroupHashFromEpisodeRows,
-  getLastEpisodeStatus,
-  getRuleIdFromEpisodeRows,
-} from '../../utils/episode_series_derived';
 import { AlertEpisodeDetailsHeader } from './details_header';
 import type { AlertEpisodeDetailsServices } from './types';
 
@@ -27,12 +22,11 @@ export const AlertEpisodeDetailsHeaderSection = ({
   episodeId,
   services,
 }: AlertEpisodeDetailsHeaderSectionProps) => {
-  const { data: eventRows } = useFetchEpisodeEventsQuery({ episodeId, services });
-  const rows = eventRows ?? [];
+  const { data: episode } = useFetchEpisodeQuery({ episodeId, services });
 
-  const ruleId = getRuleIdFromEpisodeRows(rows);
-  const groupHash = getGroupHashFromEpisodeRows(rows);
-  const lastStatus = getLastEpisodeStatus(rows);
+  const ruleId = episode?.['rule.id'];
+  const groupHash = episode?.group_hash;
+  const lastStatus = episode?.['episode.status'];
 
   const { data: episodeActionsMap } = useFetchEpisodeActions({
     episodeIds: [episodeId],

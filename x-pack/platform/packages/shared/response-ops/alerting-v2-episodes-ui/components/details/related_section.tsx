@@ -7,12 +7,8 @@
 
 import React from 'react';
 import { EuiLoadingSpinner, EuiText } from '@elastic/eui';
-import { useFetchEpisodeEventsQuery } from '../../hooks/use_fetch_episode_events_query';
+import { useFetchEpisodeQuery } from '../../hooks/use_fetch_episode_query';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
-import {
-  getGroupHashFromEpisodeRows,
-  getRuleIdFromEpisodeRows,
-} from '../../utils/episode_series_derived';
 import { alertEpisodeDetailsPath } from '../../constants';
 import { AlertEpisodesRelated } from './related/related';
 import type { AlertEpisodeDetailsServices } from './types';
@@ -34,14 +30,13 @@ export const AlertEpisodesRelatedSection = ({
   const getEpisodeDetailsHref = (id: string) =>
     services.http.basePath.prepend(alertEpisodeDetailsPath(id));
   const {
-    data: eventRows,
-    isLoading: isLoadingEvents,
-    isError: isEventsError,
-  } = useFetchEpisodeEventsQuery({ episodeId, services });
-  const rows = eventRows ?? [];
+    data: episode,
+    isLoading: isLoadingEpisode,
+    isError: isEpisodeError,
+  } = useFetchEpisodeQuery({ episodeId, services });
 
-  const ruleId = getRuleIdFromEpisodeRows(rows);
-  const groupHash = getGroupHashFromEpisodeRows(rows);
+  const ruleId = episode?.['rule.id'];
+  const groupHash = episode?.group_hash;
 
   const {
     data: rule,
@@ -49,11 +44,11 @@ export const AlertEpisodesRelatedSection = ({
     isError: isRuleError,
   } = useFetchRule({ id: ruleId, http: services.http });
 
-  if (isLoadingEvents || (ruleId && isLoadingRule)) {
+  if (isLoadingEpisode || (ruleId && isLoadingRule)) {
     return <EuiLoadingSpinner size="m" data-test-subj="alertingV2EpisodesRelatedSectionLoading" />;
   }
 
-  if (isEventsError || isRuleError || !rule) {
+  if (isEpisodeError || isRuleError || !rule) {
     return (
       <EuiText size="s" color="danger" data-test-subj="alertingV2EpisodesRelatedSectionError">
         {i18n.RELATED_SECTION_LOAD_ERROR}

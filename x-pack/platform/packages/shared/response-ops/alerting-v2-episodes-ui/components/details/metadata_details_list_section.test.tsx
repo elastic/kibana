@@ -15,7 +15,6 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import { runEsqlAsyncSearch } from '../../utils/run_esql_async_search';
-import { fetchEpisodeActions } from '../../apis/fetch_episode_actions';
 import {
   createMockSpaces,
   createQueryClientWrapper,
@@ -25,10 +24,8 @@ import { AlertEpisodeMetadataDetailsListSection } from './metadata_details_list_
 import type { AlertEpisodeDetailsServices } from './types';
 
 jest.mock('../../utils/run_esql_async_search');
-jest.mock('../../apis/fetch_episode_actions');
 
 const runEsqlAsyncSearchMock = jest.mocked(runEsqlAsyncSearch);
-const fetchEpisodeActionsMock = jest.mocked(fetchEpisodeActions);
 
 const mockData = dataPluginMock.createStartContract();
 const mockHttp = httpServiceMock.createStartContract();
@@ -69,7 +66,6 @@ describe('AlertEpisodeMetadataDetailsListSection', () => {
       ],
       values: [['2024-01-01T00:00:00.000Z', ALERT_EPISODE_STATUS.ACTIVE, 'rule-1', 'gh-1']],
     });
-    fetchEpisodeActionsMock.mockResolvedValue([]);
     mockHttp.get.mockResolvedValueOnce(mockRule);
 
     render(
@@ -86,7 +82,6 @@ describe('AlertEpisodeMetadataDetailsListSection', () => {
 
   it('renders the loading state while events are loading', () => {
     runEsqlAsyncSearchMock.mockImplementation(() => new Promise(() => {}));
-    fetchEpisodeActionsMock.mockImplementation(() => new Promise(() => {}));
 
     render(
       <I18nProvider>
@@ -102,7 +97,6 @@ describe('AlertEpisodeMetadataDetailsListSection', () => {
 
   it('renders the error state when events fail to load', async () => {
     runEsqlAsyncSearchMock.mockRejectedValue(new Error('boom'));
-    fetchEpisodeActionsMock.mockResolvedValue([]);
 
     render(
       <I18nProvider>

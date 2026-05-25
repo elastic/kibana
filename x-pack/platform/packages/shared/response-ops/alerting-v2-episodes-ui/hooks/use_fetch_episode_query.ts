@@ -8,40 +8,43 @@
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { useQuery } from '@kbn/react-query';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { buildEpisodeEventsEsqlQuery, type EpisodeEventRow } from '../queries/episode_events_query';
+import { buildEpisodeQuery } from '../queries/episode_query';
 import { QUERY_STALE_TIME } from '../constants';
+import type { AlertEpisode, AlertEpisodeEsqlRow } from '../queries/episodes_query';
 import { esqlResponseToObjectRows } from '../utils/esql_response_to_rows';
 import { runEsqlAsyncSearch } from '../utils/run_esql_async_search';
+import { normalizeTags } from '../utils/normalize_tags';
 import { queryKeys } from '../query_keys';
 import { useSpaceId } from './use_space_id';
 
-export interface UseFetchEpisodeEventsQueryOptions {
+export interface UseFetchEpisodeQueryOptions {
   episodeId: string | undefined;
   services: { data: DataPublicPluginStart; spaces: SpacesPluginStart };
 }
 
 /**
- * Loads all `.rule-events` rows for an episode (sorted ascending by @timestamp).
+ * Loads the aggregated metadata row for a single episode.
  */
-export const useFetchEpisodeEventsQuery = ({
-  episodeId,
-  services,
-}: UseFetchEpisodeEventsQueryOptions) => {
+export const useFetchEpisodeQuery = ({ episodeId, services }: UseFetchEpisodeQueryOptions) => {
   const { data } = services;
   const spaceId = useSpaceId(services.spaces);
 
-  return useQuery({
-    queryKey: queryKeys.episodeEvents(spaceId, episodeId ?? ''),
+  return useQuery<AlertEpisodeEsqlRow[], unknown, AlertEpisode | undefined>({
+    queryKey: queryKeys.episode(spaceId, episodeId ?? ''),
     queryFn: ({ signal }) =>
       runEsqlAsyncSearch({
         data,
         params: {
-          query: buildEpisodeEventsEsqlQuery(spaceId, episodeId!).print('basic'),
+          query: buildEpisodeQuery(spaceId, episodeId!).print('basic'),
           time_zone: 'UTC',
         },
         abortSignal: signal,
-      }),
-    select: (raw) => esqlResponseToObjectRows<EpisodeEventRow>(raw),
+      }).then((raw) => esqlResponseToObjectRows<AlertEpisodeEsqlRow>(raw)),
+    select: (rows): AlertEpisode | undefined => {
+      const row = rows[0];
+      if (!row) return undefined;
+      return { ...row, last_tags: normalizeTags(row.last_tags) };
+    },
     enabled: Boolean(episodeId),
     staleTime: QUERY_STALE_TIME,
   });

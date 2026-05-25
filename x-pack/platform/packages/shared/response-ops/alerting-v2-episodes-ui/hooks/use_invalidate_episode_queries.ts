@@ -28,6 +28,7 @@ export const useInvalidateEpisodeQueries = () => {
         queryClient.invalidateQueries({ queryKey: queryKeys.actionsAll() }),
         queryClient.invalidateQueries({ queryKey: queryKeys.groupActionsAll() }),
         queryClient.invalidateQueries({ queryKey: queryKeys.listAll() }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.episodeAll() }),
         queryClient.invalidateQueries({ queryKey: queryKeys.episodeEventsAll() }),
         queryClient.invalidateQueries({ queryKey: queryKeys.episodeEventDataAll() }),
         queryClient.invalidateQueries({ queryKey: queryKeys.tagSuggestionsAll() }),
