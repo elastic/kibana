@@ -11,13 +11,13 @@ import type { ReactElement } from 'react';
 import { DEVTOOL_HIDDEN_ATTR, DEVTOOL_MANAGED_ATTR } from '../lib/constants';
 import { applySourceAttribute } from '../components/edit/library/eui_icon_cache';
 import {
-  setImportant,
   reflowManagedStyle,
   reflowManagedText,
   restoreHiddenElement,
   collectStyleReflowDimensions,
   collectTextReflowDimensions,
 } from './clone_element';
+import { setImportant } from '../lib/dom/set_important';
 
 /**
  * A forward style change descriptor produced by the edit modal.
@@ -132,8 +132,9 @@ export const applyEditChanges = (
     const originalPriority = element.style.getPropertyPriority(cssProp);
     styleEdits.push({ element, property: cssProp, original, originalPriority });
     setImportant(element, cssProp, value);
-    if (element.closest(`[${DEVTOOL_MANAGED_ATTR}]`)) {
-      for (const d of collectStyleReflowDimensions(element, cssProp)) {
+    const managedRoot = element.closest(`[${DEVTOOL_MANAGED_ATTR}]`);
+    if (managedRoot instanceof HTMLElement) {
+      for (const d of collectStyleReflowDimensions(element, cssProp, managedRoot)) {
         styleEdits.push({
           element: d.element,
           property: d.property,
@@ -152,8 +153,9 @@ export const applyEditChanges = (
     }
     const parent = node.parentElement;
     const needsReflow = text !== undefined || fontSize !== undefined || fontWeight !== undefined;
-    if (needsReflow && parent?.closest(`[${DEVTOOL_MANAGED_ATTR}]`)) {
-      for (const d of collectTextReflowDimensions(parent)) {
+    const managedRoot = parent?.closest(`[${DEVTOOL_MANAGED_ATTR}]`);
+    if (needsReflow && parent && managedRoot instanceof HTMLElement) {
+      for (const d of collectTextReflowDimensions(parent, managedRoot)) {
         styleEdits.push({
           element: d.element,
           property: d.property,

@@ -29,6 +29,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           'previewTelemetryUrlEnabled',
           'endpointExceptionsMovedUnderManagement',
           'entityAnalyticsWatchlistEnabled',
+          'entityAnalyticsEntityStoreV2',
         ])}`,
       ],
     },
