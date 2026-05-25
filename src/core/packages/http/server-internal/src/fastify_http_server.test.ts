@@ -591,6 +591,86 @@ describe('FastifyHttpServer', () => {
       expect(JSON.parse(res.body)).toEqual({ len: pngHeader.length });
     }, 15000);
 
+    it('accepts text/plain bodies on parse: false stream routes (Files upload parity)', async () => {
+      const ctx = createCoreContext();
+      const config = createHttpConfig(PORT);
+      const config$ = new BehaviorSubject(config);
+
+      server = new FastifyHttpServer(ctx, 'Kibana', new BehaviorSubject(config.shutdownTimeout));
+      const setup = await server.setup({ config$ });
+
+      const enhanceHandler = (handler: any) => async (req: any, res: any) =>
+        handler({} as any, req, res);
+
+      const router = new Router('/api/fastify-mvp', ctx.logger.get('router'), enhanceHandler, {
+        env,
+      });
+
+      router.put(
+        {
+          path: '/text-plain-stream',
+          security: { authz: { enabled: false, reason: 'test' } },
+          validate: {
+            body: schema.stream(),
+          },
+          options: {
+            body: {
+              output: 'stream',
+              parse: false,
+              accepts: 'text/plain',
+            },
+          },
+        },
+        async (_context, req, res) => {
+          expect(typeof (req.body as { pipe?: unknown })?.pipe).toBe('function');
+          const chunks: Buffer[] = [];
+          for await (const chunk of req.body as Readable) {
+            chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+          }
+          return res.ok({ body: { text: Buffer.concat(chunks).toString('utf8') } });
+        }
+      );
+
+      setup.registerRouter(router);
+      await server.start();
+
+      const address = (setup.server as any).server.address();
+      listenPort = typeof address === 'object' && address ? address.port : 0;
+      expect(listenPort).toBeGreaterThan(0);
+
+      const fileBytes = 'case attachment bytes';
+      const res = await new Promise<{ statusCode: number; body: string }>((resolve, reject) => {
+        const req = http.request(
+          {
+            hostname: '127.0.0.1',
+            port: listenPort,
+            path: '/api/fastify-mvp/text-plain-stream',
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'text/plain',
+              'Content-Length': Buffer.byteLength(fileBytes),
+            },
+          },
+          (incoming) => {
+            const chunks: Buffer[] = [];
+            incoming.on('data', (c) => chunks.push(Buffer.from(c)));
+            incoming.on('end', () =>
+              resolve({
+                statusCode: incoming.statusCode ?? 0,
+                body: Buffer.concat(chunks).toString('utf8'),
+              })
+            );
+          }
+        );
+        req.on('error', reject);
+        req.write(fileBytes);
+        req.end();
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(JSON.parse(res.body)).toEqual({ text: fileBytes });
+    }, 15000);
+
     it('accepts application/zip with parse: false and default output data (Fleet upload parity)', async () => {
       const ctx = createCoreContext();
       const config = createHttpConfig(PORT);

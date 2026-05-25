@@ -12,6 +12,18 @@ import { getUrlPrefix } from '../../../../../common/lib';
 
 export const RETURN_URL = 'https://localhost:5601/app/connectors';
 
+/** Combine all `Set-Cookie` lines into a single `Cookie` request header (Fastify parity). */
+export const sessionCookieFromLoginResponse = (headers: {
+  'set-cookie'?: string | string[];
+}): string => {
+  const setCookieHeader = headers['set-cookie'];
+  if (!setCookieHeader) {
+    throw new Error('Login response did not include set-cookie');
+  }
+  const lines = Array.isArray(setCookieHeader) ? setCookieHeader : [setCookieHeader];
+  return lines.map((line) => line.split(';')[0].trim()).join('; ');
+};
+
 export async function login(
   supertestWithoutAuth: SupertestWithoutAuthProviderType,
   user: User
@@ -27,7 +39,7 @@ export async function login(
     })
     .expect(200);
 
-  return response.header['set-cookie'][0];
+  return sessionCookieFromLoginResponse(response.header);
 }
 
 export async function performOAuthFlow(

@@ -133,18 +133,34 @@ export function coercePayloadForUnparsedStreamRoute(
   ) {
     return payload;
   }
+
+  if (payload instanceof Readable) {
+    return payload;
+  }
+
+  if (typeof payload === 'object' && typeof (payload as { pipe?: unknown }).pipe === 'function') {
+    return payload;
+  }
+
+  if (Buffer.isBuffer(payload)) {
+    return Readable.from(payload);
+  }
+
+  if (typeof payload === 'string') {
+    return Readable.from(Buffer.from(payload));
+  }
+
   if (
     payload === undefined ||
     payload === null ||
-    (typeof payload === 'object' &&
-      !Buffer.isBuffer(payload) &&
-      !(payload instanceof Readable) &&
-      typeof (payload as { pipe?: unknown }).pipe !== 'function')
+    (typeof payload === 'object' && !Array.isArray(payload))
   ) {
     // Hapi stream routes with `parse: false` expose an empty Readable for bodyless POSTs
-    // (e.g. Console proxy `.send()`). `sanitizeRequest` would otherwise turn `undefined` into `{}`.
+    // (e.g. Console proxy `.send()`). Fastify's built-in `text/plain` parser and
+    // `sanitizeRequest` can otherwise leave a plain object or string that fails `schema.stream()`.
     return Readable.from(Buffer.alloc(0));
   }
+
   return payload;
 }
 

@@ -461,17 +461,30 @@ function isCompleted(request: Request) {
  * exclude from further processing like validation. This method removes those
  * internal values.
  */
+function routeHasUnparsedPayload(req: Request): boolean {
+  const parse = (req.route?.settings?.payload as { parse?: boolean | 'gunzip' } | undefined)?.parse;
+  return parse === false || parse === 'gunzip';
+}
+
 function sanitizeRequest(req: Request): { query: unknown; params: unknown; body: unknown } {
   const { [ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM]: __, ...query } = req.query ?? {};
 
   // Hapi leaves GET (and other non-body) payloads as `null` when unset; Fastify often leaves
   // them `undefined`. For POST/PUT/PATCH, Hapi treats a missing payload as `{}` so
   // `schema.object` routes can run handler-level validation (e.g. saved_objects export).
-  // Explicit JSON `null` and `schema.nullable(...)` still receive `null`.
+  // Routes with `payload.parse: false` keep `null` (stream/buffer validation runs on the raw
+  // payload from the Fastify adapter). Explicit JSON `null` and `schema.nullable(...)` still
+  // receive `null`.
   const method = String(req.method ?? 'get').toLowerCase();
   let body: unknown = req.payload;
   if (body === undefined) {
-    body = method === 'post' || method === 'put' || method === 'patch' ? {} : null;
+    if (routeHasUnparsedPayload(req)) {
+      body = null;
+    } else if (method === 'post' || method === 'put' || method === 'patch') {
+      body = {};
+    } else {
+      body = null;
+    }
   }
 
   return {

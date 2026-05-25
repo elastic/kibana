@@ -209,6 +209,30 @@ describe('CoreKibanaRequest', () => {
         });
         expect(kibanaRequest.body).toBeNull();
       });
+      it('does not map undefined to {} for unparsed stream routes (avoids stream validation on plain objects)', () => {
+        const request = hapiMocks.createRequest({
+          method: 'put',
+          payload: undefined,
+          route: {
+            settings: {
+              payload: { output: 'stream', parse: false },
+            },
+          },
+        });
+        expect(() => CoreKibanaRequest.from(request, { body: schema.stream() })).toThrow(
+          /expected value of type \[Stream\] but got \[null\]/
+        );
+      });
+      it('maps an undefined POST payload to {} for parsed JSON object routes', () => {
+        const request = hapiMocks.createRequest({
+          method: 'post',
+          payload: undefined,
+        });
+        const kibanaRequest = CoreKibanaRequest.from(request, {
+          body: schema.object({ ids: schema.maybe(schema.arrayOf(schema.string())) }),
+        });
+        expect(kibanaRequest.body).toEqual({});
+      });
     });
 
     describe('route.httpVersion property', () => {
