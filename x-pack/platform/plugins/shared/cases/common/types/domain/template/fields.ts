@@ -123,6 +123,13 @@ export const SelectBasicFieldSchema = BaseFieldSchema.extend({
 
 export const TextareaFieldSchema = BaseFieldSchema.extend({
   control: z.literal(FieldType.TEXTAREA),
+  metadata: z
+    .object({
+      default: z.string().optional(),
+      markdown: z.boolean().optional(),
+    })
+    .catchall(z.unknown())
+    .optional(),
 });
 
 export const DatePickerFieldSchema = BaseFieldSchema.extend({
