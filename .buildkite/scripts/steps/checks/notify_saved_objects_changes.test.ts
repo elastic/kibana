@@ -55,6 +55,16 @@ describe('buildCommentBody', () => {
     const body = buildCommentBody(report({ status: 'fail', findings: [finding()] }));
     expect(body).toContain('Saved Objects CI check failed');
   });
+
+  it('returns null when testMode is true, even if SO types appear changed (pass)', () => {
+    expect(buildCommentBody(report({ updatedTypes: ['person-so-type'], testMode: true }))).toBeNull();
+  });
+
+  it('returns null when testMode is true, even if the check failed', () => {
+    expect(
+      buildCommentBody(report({ status: 'fail', findings: [finding()], testMode: true }))
+    ).toBeNull();
+  });
 });
 
 describe('buildSuccessBody', () => {

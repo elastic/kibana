@@ -252,6 +252,7 @@ export function runCheckSavedObjectsCli() {
               removedTypes: context.newRemovedTypes,
               findings: collector.getFindings(),
               ...(Object.keys(typeChanges).length > 0 && { typeChanges }),
+              ...(context.test && { testMode: true }),
             };
             writeFileSync(reportPath, JSON.stringify(report, null, 2));
           } catch (writeErr) {
