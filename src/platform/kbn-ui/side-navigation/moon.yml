@@ -19,7 +19,7 @@ project:
 dependsOn:
   - '@kbn/i18n'
   - '@kbn/i18n-react'
-  - '@kbn/core-chrome-layout-components'
+  - '@kbn/ui-chrome-layout'
   - '@kbn/core-chrome-layout-utils'
   - '@kbn/core-chrome-layout-constants'
 tags:
