@@ -164,9 +164,8 @@ export function generateOtelcolConfig({
                   ...stream.service,
                   ...(stream.service.extensions?.length
                     ? {
-                        extensions: addSuffixToOtelcolServiceExtensions(
-                          stream.service.extensions,
-                          suffix
+                        extensions: stream.service.extensions.map(
+                          (id: string) => originalToSuffixedExtensionIds[id] ?? id
                         ),
                       }
                     : {}),
@@ -415,13 +414,6 @@ function alignPipelineSignalType(
   }
   const newKey = [dataStreamType, ...rest].join('/') as OTelCollectorPipelineID;
   return { [newKey]: pipeline };
-}
-
-function addSuffixToOtelcolServiceExtensions(
-  extensions: OTelCollectorComponentID[],
-  suffix: string
-): OTelCollectorComponentID[] {
-  return extensions.map((id) => `${id}/${suffix}`);
 }
 
 // Recursively walks a component config body and rewrites auth.authenticator
