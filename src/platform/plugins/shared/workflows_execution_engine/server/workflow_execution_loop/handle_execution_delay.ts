@@ -8,6 +8,7 @@
  */
 
 import { ExecutionStatus } from '@kbn/workflows';
+import { flushState } from './persistence_loop';
 import type { WorkflowExecutionLoopParams } from './types';
 import { abortableTimeout, TimeoutAbortedError } from '../utils';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
@@ -44,6 +45,7 @@ export async function handleExecutionDelay(
   const resumeAt = new Date(resumeAtFromState);
   const now = new Date();
   const diff = resumeAt.getTime() - now.getTime();
+  await flushState(params);
   params.workflowExecutionState.updateWorkflowExecution({
     status: ExecutionStatus.WAITING,
   });

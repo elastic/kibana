@@ -19,9 +19,13 @@ const makeParams = (): jest.Mocked<WorkflowExecutionLoopParams> =>
     },
     workflowExecutionState: {
       updateWorkflowExecution: jest.fn(),
+      flush: jest.fn().mockResolvedValue(undefined),
     },
     workflowTaskManager: {
       scheduleResumeTask: jest.fn().mockResolvedValue(undefined),
+    },
+    workflowLogger: {
+      flushEvents: jest.fn().mockResolvedValue(undefined),
     },
     fakeRequest: {},
   } as unknown as jest.Mocked<WorkflowExecutionLoopParams>);
@@ -81,6 +85,28 @@ describe('handleExecutionDelay', () => {
       await handleExecutionDelay(params, stepRuntime);
 
       expect(params.workflowExecutionState.updateWorkflowExecution).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('long wait (>= 5s) schedules TM resume task', () => {
+    it('flushes state before scheduling resume task', async () => {
+      const params = makeParams();
+      const resumeAt = new Date(Date.now() + 8000).toISOString();
+      const stepRuntime = makeStepRuntime({
+        stepExecution: {
+          status: ExecutionStatus.WAITING,
+          state: { resumeAt },
+        } as any,
+      });
+
+      await handleExecutionDelay(params, stepRuntime);
+
+      expect(params.workflowExecutionState.flush).toHaveBeenCalled();
+      expect(params.workflowLogger.flushEvents).toHaveBeenCalled();
+      expect(params.workflowTaskManager.scheduleResumeTask).toHaveBeenCalledTimes(1);
+      expect(params.workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith({
+        status: ExecutionStatus.WAITING,
+      });
     });
   });
 });
