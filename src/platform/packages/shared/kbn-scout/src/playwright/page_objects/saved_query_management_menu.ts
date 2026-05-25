@@ -62,16 +62,6 @@ export class SavedQueryManagementMenu {
   }
 
   /**
-   * Opens the popover and guarantees we land on the root context-menu panel.
-   *
-   * EuiPopover un-mounts the panel DOM on close, but EuiContextMenu's panel-id
-   * state lives on the parent component and persists across hide/show. Without
-   * `ensureOnMainPanel()`, calls that follow a Load-submenu interaction (e.g.
-   * `clearLoadedQuery`, `openLoadSubmenu`) would re-open straight into the
-   * submenu where `loadButton` / `clearAllFiltersButton` do not exist and the
-   * click would time out.
-   */
-  /**
    * Lower-level open: clicks the trigger and waits for `aria-expanded`, without
    * assuming any specific panel content is rendered. Use this when inspecting
    * capability-gated affordances that may be absent (e.g. the saved-query
@@ -82,12 +72,19 @@ export class SavedQueryManagementMenu {
     if (await this.isOpen()) return;
     await this.menuButton.click();
     await expect(this.menuButton).toHaveAttribute('aria-expanded', 'true');
-    // EUI popover open animation has no deterministic settled event; waiting on
-    // it directly is the only reliable way to avoid racing inner-panel clicks.
+    // EUI popover animation has no deterministic settled event; avoid racing inner-panel clicks.
     // eslint-disable-next-line playwright/no-wait-for-timeout
     await this.page.waitForTimeout(1000);
   }
 
+  /**
+   * Opens the popover and guarantees we land on the root context-menu panel.
+   *
+   * EuiPopover un-mounts the panel DOM on close, but EuiContextMenu's panel-id
+   * state persists across hide/show. Without `ensureOnMainPanel()`, calls that
+   * follow a Load-submenu interaction would re-open into the submenu where
+   * `loadButton` / `clearAllFiltersButton` don't exist and the click times out.
+   */
   async open(): Promise<void> {
     await this.openPopover();
     await this.ensureOnMainPanel();
@@ -100,16 +97,9 @@ export class SavedQueryManagementMenu {
   }
 
   /**
-   * Walks the popover back to the root panel that exposes the Save / Load
-   * entries. Prefers the EUI back-arrow over a full remount because the
-   * remount also re-fetches the saved-queries list, which is wasted work for
-   * callers that just want the main panel.
-   *
-   * The back arrow only exists on non-root EuiContextMenuPanels, so waiting
-   * for it to become hidden is a deterministic "panel-slide finished" signal
-   * — without it, a follow-up click on `loadButton` races the CSS transform
-   * and Playwright's actionability checks flap between "not stable" and
-   * "detached from the DOM".
+   * Walks the popover back to the root panel. Prefers the EUI back-arrow over
+   * a full remount; waiting for the arrow to hide is a deterministic
+   * "panel-slide finished" signal that avoids racing the CSS transform.
    */
   private async ensureOnMainPanel(): Promise<void> {
     if (await this.loadButton.isVisible()) return;
@@ -121,8 +111,7 @@ export class SavedQueryManagementMenu {
       return;
     }
 
-    // Last resort: hard-remount the popover when the back button isn't there
-    // (e.g. inside the save form). After remount EuiContextMenu resets to root.
+    // Last resort (e.g. inside the save form): hard-remount resets EuiContextMenu to root.
     await this.close();
     await this.menuButton.click();
     await expect(this.menuButton).toHaveAttribute('aria-expanded', 'true');
@@ -142,10 +131,7 @@ export class SavedQueryManagementMenu {
    * disabled and the click will time out.
    */
   async saveLoadedQueryAsNew(name: string, options: SaveQueryOptions = {}): Promise<void> {
-    await this.open();
-    await this.saveButton.dispatchEvent('click');
-    await this.page.testSubj.locator('saveQueryForm').waitFor({ state: 'visible' });
-    await this.submitSaveQueryForm(name, options);
+    await this.saveNewQuery(name, options);
   }
 
   async updateLoadedQuery(options: SaveQueryOptions = {}): Promise<void> {
@@ -159,7 +145,6 @@ export class SavedQueryManagementMenu {
     await this.openLoadSubmenu();
     await this.page.testSubj.locator(`~load-saved-query-${title}-button`).dispatchEvent('click');
     await this.applyChangesButton.click();
-    // "Apply changes" auto-dismisses the popover.
     await this.panel.waitFor({ state: 'hidden' });
   }
 
@@ -180,22 +165,13 @@ export class SavedQueryManagementMenu {
   /**
    * Opens the popover and navigates to the Load submenu.
    *
-   * Always force-closes the popover first so the EuiPopover remounts on open:
-   * after a save/update/delete, an already-open popover serves a stale cached
-   * saved-query list and the newly-mutated entry is missing. (The FTR uses the
-   * same `close → open` dance in `clickMenuButtonByTestSubject` for the same
-   * reason.) `open()` then guarantees we land on the root panel even if a
-   * prior interaction left the EuiContextMenu on the submenu.
+   * Always force-closes first so EuiPopover remounts on open: an already-open
+   * popover serves a stale saved-query list after a save/update/delete.
    */
   private async openLoadSubmenu(): Promise<void> {
     await this.close();
     await this.open();
-    // dispatchEvent bypasses Playwright's actionability checks, which flap on
-    // EuiContextMenu items mid-slide ("not stable" → "detached"). The EUI item
-    // is plain HTML so a synthetic click triggers the same React handler.
     await this.loadButton.dispatchEvent('click');
-    // The submenu owns the "Load query" apply button; waiting for it confirms
-    // the EUI panel-slide is done.
     await this.applyChangesButton.waitFor({ state: 'visible' });
   }
 
@@ -203,8 +179,6 @@ export class SavedQueryManagementMenu {
 
   async hasSavedQuery(title: string): Promise<boolean> {
     await this.openLoadSubmenu();
-    // The submenu list items may render slightly after the panel itself, so we
-    // wait briefly before declaring the query missing.
     const exists = await this.waitForVisible(
       this.page.testSubj.locator(`~load-saved-query-${title}-button`),
       2000
@@ -222,9 +196,9 @@ export class SavedQueryManagementMenu {
 
   async isSaveButtonEnabled(): Promise<boolean> {
     await this.open();
-    const disabled = await this.saveButton.getAttribute('disabled');
+    const enabled = await this.saveButton.isEnabled();
     await this.close();
-    return disabled === null;
+    return enabled;
   }
 
   async isSaveChangesButtonVisible(): Promise<boolean> {
@@ -250,7 +224,7 @@ export class SavedQueryManagementMenu {
     await this.openPopover();
     const loadVisible = await this.loadButton.isVisible();
     const saveVisible = await this.saveButton.isVisible();
-    const saveEnabled = saveVisible && (await this.saveButton.getAttribute('disabled')) === null;
+    const saveEnabled = saveVisible && (await this.saveButton.isEnabled());
     await this.close();
     return { loadVisible, saveVisible, saveEnabled };
   }
@@ -263,7 +237,6 @@ export class SavedQueryManagementMenu {
   async isDeleteVisibleForQuery(title: string): Promise<boolean> {
     await this.openLoadSubmenu();
     await this.page.testSubj.locator(`~load-saved-query-${title}-button`).dispatchEvent('click');
-    // The delete button only renders after the row is selected; wait briefly.
     const visible = await this.waitForVisible(
       this.page.testSubj.locator('delete-saved-query-button'),
       2000
@@ -272,12 +245,7 @@ export class SavedQueryManagementMenu {
     return visible;
   }
 
-  /**
-   * Boolean equivalent of `expect(locator).toBeVisible({ timeout })`: returns
-   * `true` once the element becomes visible within `timeoutMs`, `false`
-   * otherwise. `Locator.isVisible()` is synchronous and does not wait, so this
-   * helper bridges the gap for state-returning page-object methods.
-   */
+  /** Waits up to `timeoutMs` for the element to appear; returns `false` on timeout. */
   private waitForVisible(locator: Locator, timeoutMs: number): Promise<boolean> {
     return locator
       .waitFor({ state: 'visible', timeout: timeoutMs })
@@ -300,8 +268,7 @@ export class SavedQueryManagementMenu {
 
   private async toggleSwitchTo(testSubj: string, desired: boolean): Promise<void> {
     const el = this.page.testSubj.locator(testSubj);
-    const current = (await el.getAttribute('aria-checked')) === 'true';
-    if (current !== desired) {
+    if ((await el.isChecked()) !== desired) {
       await el.click();
     }
   }
