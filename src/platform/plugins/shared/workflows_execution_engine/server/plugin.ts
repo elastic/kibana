@@ -1302,16 +1302,19 @@ export class WorkflowsExecutionEnginePlugin
         spaceId,
         fakeRequest: request,
       });
-      await workflowTaskManager.runSoon(taskId);
 
-      // Best-effort removal of the global-timeout resume task. If it no
-      // longer exists (e.g. already consumed or never scheduled) we
-      // silently ignore the error. The timeout task has runAt far in the
-      // future so it won't interfere before it is garbage-collected, but
-      // removing it avoids a wasted resume attempt later.
-      await workflowTaskManager
+      await plugins.taskManager
         .removeIfExists(getWorkflowGlobalTimeoutResumeTaskId(executionId))
-        .catch(() => {});
+        .catch((error: unknown) => {
+          this.logger.warn(
+            `Failed to remove idle-timeout resume task (execution=${executionId}): ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
+        });
+
+      // Same idea as cancel: nudge TM so the resume task runs as soon as possible
+      await workflowTaskManager.forceRunIdleTasks(executionId);
     };
 
     this.internalResumeWorkflowExecutionHandler = internalResumeWorkflowExecution;
