@@ -428,6 +428,7 @@ describe('useDataStreamStats', () => {
     });
 
     it('should handle errors', async () => {
+      const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
       const mockError = new Error('Failed to fetch data stream stats');
       mockDataStreamsClient.getDataStreamsStats.mockRejectedValue(mockError);
 
@@ -442,6 +443,7 @@ describe('useDataStreamStats', () => {
         expect(result.current.error).toBeDefined();
       });
       expect(result.current.error).toBe(mockError);
+      consoleSpy.mockRestore();
     });
 
     it('exposes time series count error without failing overall stats', async () => {

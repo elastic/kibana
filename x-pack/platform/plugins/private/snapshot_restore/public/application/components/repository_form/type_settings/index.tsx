@@ -27,6 +27,8 @@ interface Props {
   isManagedRepository?: boolean;
   updateRepository: (updatedFields: Partial<Repository>) => void;
   settingErrors: RepositorySettingsValidation;
+  isReadOnlyToggleDisabled?: boolean;
+  readOnlyToggleDisabledTooltipContent?: React.ReactNode;
 }
 
 export const TypeSettings: React.FunctionComponent<Props> = ({
@@ -34,6 +36,8 @@ export const TypeSettings: React.FunctionComponent<Props> = ({
   isManagedRepository,
   updateRepository,
   settingErrors,
+  isReadOnlyToggleDisabled,
+  readOnlyToggleDisabledTooltipContent,
 }) => {
   const { i18n } = useServices();
   const { type, settings } = repository;
@@ -77,6 +81,8 @@ export const TypeSettings: React.FunctionComponent<Props> = ({
           isManagedRepository={isManagedRepository}
           updateRepositorySettings={updateRepositorySettings}
           settingErrors={settingErrors}
+          isReadOnlyToggleDisabled={isReadOnlyToggleDisabled}
+          readOnlyToggleDisabledTooltipContent={readOnlyToggleDisabledTooltipContent}
         />
       );
     }

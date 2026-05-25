@@ -1,0 +1,7 @@
+prs:
+- https://github.com/elastic/kibana/pull/268249
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-05-12
+title: Fix wrong banner shown in Discover document flyout because of missing services
