@@ -22,7 +22,7 @@ import {
   MetricsExecutionContextAction,
   MetricsExecutionContextName,
 } from '../utils/execution_context_enums';
-import { useReportChartSectionError } from '../../../chart/utils/report_chart_section_error';
+import { useReportChartSectionError } from '../../../chart/hooks/use_report_chart_section_error';
 
 /**
  * Fetches METRICS_INFO when in Metrics Experience (non-transformational ES|QL, chart visible).

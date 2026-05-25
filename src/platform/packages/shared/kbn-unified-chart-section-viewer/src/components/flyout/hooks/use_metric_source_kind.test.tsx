@@ -14,7 +14,7 @@ import {
   ExternalServicesProvider,
   type ExternalServices,
 } from '../../../context/external_services';
-import { useReportChartSectionError } from '../../chart/utils/report_chart_section_error';
+import { useReportChartSectionError } from '../../chart/hooks/use_report_chart_section_error';
 import { useMetricsExperienceState } from '../../observability/metrics/context/metrics_experience_state_provider';
 import {
   METRIC_SOURCE_KIND,
@@ -23,7 +23,7 @@ import {
 } from './use_metric_source_kind';
 
 const mockReportError = jest.fn();
-jest.mock('../../chart/utils/report_chart_section_error', () => ({
+jest.mock('../../chart/hooks/use_report_chart_section_error', () => ({
   useReportChartSectionError: jest.fn(() => mockReportError),
 }));
 

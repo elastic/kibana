@@ -48,7 +48,7 @@ jest.mock('../../../../context/chart_section_inspector', () => ({
   }),
 }));
 const mockReportError = jest.fn();
-jest.mock('../../../chart/utils/report_chart_section_error', () => ({
+jest.mock('../../../chart/hooks/use_report_chart_section_error', () => ({
   useReportChartSectionError: jest.fn(() => mockReportError),
 }));
 

@@ -25,7 +25,7 @@ import type { UnifiedHistogramFetch$ } from '@kbn/unified-histogram/types';
 jest.mock('./use_chart_layers');
 jest.mock('@kbn/lens-embeddable-utils');
 const mockReportError = jest.fn();
-jest.mock('../utils/report_chart_section_error', () => ({
+jest.mock('./use_report_chart_section_error', () => ({
   useReportChartSectionError: jest.fn(() => mockReportError),
 }));
 

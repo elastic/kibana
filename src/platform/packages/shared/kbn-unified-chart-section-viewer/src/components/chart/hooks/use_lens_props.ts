@@ -39,7 +39,7 @@ import {
 import type { TimeRange } from '@kbn/data-plugin/common';
 import { useEuiTheme } from '@elastic/eui';
 import type { UnifiedMetricsGridProps } from '../../../types';
-import { useReportChartSectionError } from '../utils/report_chart_section_error';
+import { useReportChartSectionError } from './use_report_chart_section_error';
 
 export type LensProps = Pick<
   EmbeddableComponentProps,

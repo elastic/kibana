@@ -11,19 +11,16 @@ import { apm } from '@elastic/apm-rum';
 import type { Logger } from '@kbn/logging';
 import { useCallback } from 'react';
 import { useExternalServices } from '../../../context/external_services';
-import { ERROR_TYPE } from '../../../utils/log_labels';
+import { ERROR_TYPE } from '../../../utils/error_labels';
 import { toLoggable } from '../../../utils/logger_utils';
-import { EsqlResponseError } from './esql_response_error';
-import { isSuppressedFetchError } from './is_suppressed_fetch_error';
+import { EsqlResponseError } from '../utils/esql_response_error';
+import { isSuppressedFetchError } from '../utils/is_suppressed_fetch_error';
 
 /** APM label identifying which chart-section call site produced an error. */
 export type ChartSectionErrorSource =
   | 'useFetchMetricsData'
   | 'useLensProps'
   | 'useMetricSourceKind';
-
-/** APM `error_type` label for non-render captures (vs. SectionFatalReactError). */
-export const CHART_SECTION_ERROR_TYPE_LABEL = 'ChartSectionNonRenderError';
 
 /**
  * Correlation labels merged into the APM payload alongside the error.
@@ -56,15 +53,11 @@ interface SpanWithOutcome {
 }
 
 /**
- * Reports a non-render chart-section error to APM.
- * No-ops on `AbortError` (per `isSuppressedFetchError`) and non-Error values.
- *
- * @internal Use {@link useReportChartSectionError} instead.
- * @remarks The hook binds the package logger from {@link useExternalServices},
- *   which is required to record APM-transport failures (the second arg below)
- *   without leaking that plumbing to call sites.
+ * Reports a non-render chart-section error to APM. No-ops on `AbortError`
+ * (per `isSuppressedFetchError`) and non-Error values. APM transport
+ * failures are swallowed and routed through `logger` when provided.
  */
-export const reportChartSectionError = (
+const reportChartSectionError = (
   { error, source, labels: callerLabels }: ReportChartSectionErrorArgs,
   logger?: Logger
 ): void => {
@@ -89,7 +82,7 @@ export const reportChartSectionError = (
         labels[key] = value;
       }
     }
-    labels.error_type = CHART_SECTION_ERROR_TYPE_LABEL;
+    labels.error_type = ERROR_TYPE.CHART_SECTION_NON_RENDER_ERROR;
     labels.chart_section_source = source;
     if (error instanceof EsqlResponseError) {
       if (error.type) {
@@ -126,9 +119,7 @@ export const reportChartSectionError = (
 
 /**
  * Returns a stable reporter bound to the package logger from
- * {@link useExternalServices} context. Callers must use this hook — the
- * underlying {@link reportChartSectionError} is `@internal` because the
- * logger must come from context, not from a call-site argument.
+ * {@link useExternalServices}.
  */
 export const useReportChartSectionError = (): ((args: ReportChartSectionErrorArgs) => void) => {
   const logger = useExternalServices()?.logger;

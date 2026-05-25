@@ -13,7 +13,7 @@ import { useExternalServices } from '../../../context/external_services';
 import {
   type ReportChartSectionErrorArgs,
   useReportChartSectionError,
-} from '../../chart/utils/report_chart_section_error';
+} from '../../chart/hooks/use_report_chart_section_error';
 import { useMetricsExperienceState } from '../../observability/metrics/context/metrics_experience_state_provider';
 
 // Tag key emitted by data_views.getIndices() / responseToItemArray for plain
