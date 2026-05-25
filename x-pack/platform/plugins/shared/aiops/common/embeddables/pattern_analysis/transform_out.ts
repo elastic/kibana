@@ -45,10 +45,6 @@ export function transformOut(
     minimumTimeRangeOption: _minimumTimeRangeOption,
     randomSamplerMode: _randomSamplerMode,
     randomSamplerProbability: _randomSamplerProbability,
-    minimum_time_range: _minimumTimeRange,
-    field_name: _legacyFieldName,
-    random_sampler_mode: _legacyRandomSamplerMode,
-    random_sampler_probability: _legacyRandomSamplerProbability,
     ...passthrough
   } = state;
 
