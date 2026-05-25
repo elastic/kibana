@@ -64,10 +64,13 @@ export class UserStorageClient implements IUserStorageClient {
     return definition.defaultValue as T;
   }
 
-  async getAll(): Promise<Record<string, unknown>> {
+  async getForInjection(): Promise<Record<string, unknown>> {
+    const injectableEntries = [...this.definitions.entries()].filter(([, d]) => d.preload === true);
+    if (injectableEntries.length === 0) return {};
+
     let hasSpace = false;
     let hasGlobal = false;
-    for (const d of this.definitions.values()) {
+    for (const [, d] of injectableEntries) {
       if (d.scope === 'space') hasSpace = true;
       else if (d.scope === 'global') hasGlobal = true;
       if (hasSpace && hasGlobal) break;
@@ -96,7 +99,7 @@ export class UserStorageClient implements IUserStorageClient {
     }
 
     const result: Record<string, unknown> = {};
-    for (const [key, definition] of this.definitions) {
+    for (const [key, definition] of injectableEntries) {
       const data = definition.scope === 'space' ? spaceData : globalData;
       const raw = data?.[key];
       if (raw != null) {
@@ -114,9 +117,9 @@ export class UserStorageClient implements IUserStorageClient {
     return result;
   }
 
-  async set<T = unknown>(key: string, value: T): Promise<void> {
+  async set<T = unknown>(key: string, value: T): Promise<T> {
     const definition = this.assertRegistered(key);
-    const validated = definition.schema.parse(value);
+    const validated = definition.schema.parse(value) as T;
     const soType = this.getSoType(definition);
 
     this.logger.debug(`Setting userStorage key [${key}] (scope: ${definition.scope})`);
@@ -146,6 +149,8 @@ export class UserStorageClient implements IUserStorageClient {
         throw err;
       }
     }
+
+    return validated;
   }
 
   async remove(key: string): Promise<void> {
