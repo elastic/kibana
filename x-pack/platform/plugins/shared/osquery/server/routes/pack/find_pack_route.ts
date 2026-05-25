@@ -115,7 +115,7 @@ export const findPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
             saved_object_id: pack.id,
             policy_ids: policyIds,
             read_only: attributes.version !== undefined && osqueryPackAssetReference,
-            // Discriminated find response (D14) — see buildScheduleResponseSlice.
+            // Discriminated find response — see buildScheduleResponseSlice.
             ...buildScheduleResponseSlice(attributes, isRruleFeatureEnabled),
           };
         });

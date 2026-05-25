@@ -69,27 +69,27 @@ export const safeDerivePeriodSeconds = (rrule: string): number | undefined => {
  * string parser.
  */
 export const derivePeriodSeconds = (fields: ReturnType<typeof parseRRule>): number => {
-  const n = fields.interval ?? 1;
+  const interval = fields.interval ?? 1;
 
   switch (fields.freq) {
     case Frequency.MINUTELY:
-      return SEC.MIN * n;
+      return SEC.MIN * interval;
 
     case Frequency.HOURLY:
-      return SEC.HOUR * n;
+      return SEC.HOUR * interval;
 
     case Frequency.DAILY:
-      return SEC.DAY * n;
+      return SEC.DAY * interval;
 
     case Frequency.WEEKLY:
       if (fields.byweekday && fields.byweekday.length > 1) {
         return minCyclicGapDays(fields.byweekday) * SEC.DAY;
       }
 
-      return SEC.WEEK * n;
+      return SEC.WEEK * interval;
 
     case Frequency.MONTHLY:
-      return SEC.MONTH_FLOOR * n;
+      return SEC.MONTH_FLOOR * interval;
 
     case Frequency.YEARLY:
       return SEC.MONTH_FLOOR;

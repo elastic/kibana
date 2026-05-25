@@ -323,7 +323,7 @@ describe('copyPackRoute', () => {
   it('flag off — strips RRULE state from source SO before persisting the copy', async () => {
     // Regression: copy MUST NOT smuggle RRULE state from a flag-on era onto a
     // fresh SO when the feature flag is off. Symmetric with create_pack_route
-    // and update_pack_route's request-boundary gate (D14 / D25).
+    // and update_pack_route's request-boundary gate.
     const rrulePackSO = {
       ...sourcePackSO,
       attributes: {
@@ -379,7 +379,7 @@ describe('copyPackRoute', () => {
     expect(createArgs.queries[0].schedule_type).toBeUndefined();
     expect(createArgs.queries[0].rrule_schedule).toBeUndefined();
 
-    // Response also omits the discriminator (D14 flag-off contract).
+    // Response also omits the discriminator (flag-off contract).
     const responseBody = mockResponse.ok.mock.calls[0][0]?.body as any;
     expect(responseBody.data.schedule_type).toBeUndefined();
     expect(responseBody.data.rrule_schedule).toBeUndefined();

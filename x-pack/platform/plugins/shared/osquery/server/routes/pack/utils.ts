@@ -19,6 +19,8 @@ import {
   difference,
   intersection,
   flatMap,
+  omitBy,
+  isUndefined,
 } from 'lodash';
 import { satisfies } from 'semver';
 import type { AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
@@ -104,16 +106,15 @@ export const convertPackQueriesToSO = (queries: Record<string, PackQueryInput>):
         value.schedule_type === 'rrule' ? RRULE_MODE_PICK : INTERVAL_MODE_PICK
       );
 
+      // Defense in depth: if a query carries `rrule_schedule` without
+      // `schedule_type`, drop it. The route validator rejects this earlier;
+      // this branch covers code paths that bypass the validator.
       let scheduleOverride: Partial<SOPackQuery> = {};
       if (value.schedule_type === 'rrule') {
         scheduleOverride = pick(value, ['schedule_type', 'rrule_schedule']);
       } else if (value.schedule_type === 'interval') {
         scheduleOverride = pick(value, ['schedule_type']);
       }
-      // Defense in depth (3.2.14): if a query carries `rrule_schedule` without
-      // `schedule_type`, drop it. The route validator rejects this earlier;
-      // this branch is the belt-and-braces layer for code paths that bypass
-      // the validator. Covered by test in `utils.test.ts`.
 
       acc.push({
         id: key,
@@ -163,10 +164,10 @@ export interface PackScheduleInput {
 }
 
 /**
- * Build the discriminated pack-level schedule slice for a route response (D14).
+ * Build the discriminated pack-level schedule slice for a route response.
  * Returns the active-mode field(s) only, gated by the feature flag. When the
  * flag is off, returns an empty object — `schedule_type` and the active-mode
- * field are both hidden, symmetric with the D25 wire-boundary gate.
+ * field are both hidden, symmetric with the wire-boundary gate.
  */
 export const buildScheduleResponseSlice = (
   attributes: Pick<PackScheduleInput, 'schedule_type' | 'interval' | 'rrule_schedule'>,
@@ -191,7 +192,7 @@ export interface ConvertSOQueriesToPackConfigOptions {
   spaceId?: string;
   packSchedule?: PackScheduleInput;
   /**
-   * Wire-boundary rollback gate (D25). When `false`, ignore `packSchedule`
+   * Wire-boundary rollback gate. When `false`, ignore `packSchedule`
    * entirely (no `default_rrule_schedule`), drop per-query `rrule_schedule`,
    * fall back to per-query `interval` if present. `default_space_id`
    * continues to emit regardless of the flag.
@@ -209,20 +210,11 @@ export interface PackConfigOutput {
   queries: Record<string, Record<string, unknown>>;
 }
 
-const stripUndefined = <T extends Record<string, unknown>>(obj: T): T => {
-  const out = {} as Record<string, unknown>;
-  for (const k of Object.keys(obj)) {
-    if (obj[k] !== undefined) out[k] = obj[k];
-  }
-
-  return out as T;
-};
-
 /**
  * Build the Fleet agent-policy `packs.{key}.queries` config plus pack-level
  * defaults from a pack's SO queries and optional pack-level schedule.
  *
- * Output shape (per design.md D8 / D13):
+ * Output shape:
  *   {
  *     default_native_schedule?: { interval: number };
  *     default_rrule_schedule?: RRuleScheduleConfig;
@@ -241,12 +233,12 @@ export const convertSOQueriesToPackConfig = (
 ): PackConfigOutput => {
   const { spaceId, packSchedule, isRruleFeatureEnabled = true } = options;
 
-  // Single source of truth for the D25 wire-boundary rollback gate: when the
-  // flag is off, `packSchedule` is ignored in full — no `default_rrule_schedule`
+  // Single source of truth for the wire-boundary rollback gate: when the flag
+  // is off, `packSchedule` is ignored in full — no `default_rrule_schedule`
   // AND no `default_native_schedule`. Per-query fallback to legacy `interval`
   // happens in the loop below.
   const packMode: ScheduleType | undefined = isRruleFeatureEnabled
-    ? (packSchedule?.schedule_type as ScheduleType | undefined)
+    ? packSchedule?.schedule_type ?? undefined
     : undefined;
 
   const queriesOut: Record<string, Record<string, unknown>> = {};
@@ -280,7 +272,7 @@ export const convertSOQueriesToPackConfig = (
       let scheduleFields: Record<string, unknown> = {};
 
       if (!isRruleFeatureEnabled) {
-        // Wire-boundary rollback gate (D25): ignore RRULE state entirely.
+        // Wire-boundary rollback gate: ignore RRULE state entirely.
         // Fall back to legacy: per-query `interval` if present, otherwise
         // no schedule field on the query.
         if (interval !== undefined) {
@@ -299,7 +291,7 @@ export const convertSOQueriesToPackConfig = (
         // default. Any per-query `rrule_schedule` on the SO is stale.
         // Covers both explicit `schedule_type: 'interval'` overrides and
         // legacy queries without `schedule_type`; rrule overrides on an
-        // interval pack are rejected at the validator (D11) but defensively
+        // interval pack are rejected at the validator but defensively
         // ignored here too.
         if (
           querySchedType !== 'rrule' &&
@@ -316,18 +308,21 @@ export const convertSOQueriesToPackConfig = (
         }
       }
 
-      queriesOut[index] = stripUndefined({
-        ...baseRest,
-        ...scheduleFields,
-        query: removeMultilines(query),
-        ...(!isEmpty(ecs_mapping)
-          ? isArray(ecs_mapping)
-            ? { ecs_mapping: convertECSMappingToObject(ecs_mapping) }
-            : { ecs_mapping }
-          : {}),
-        ...(platform === DEFAULT_PLATFORM || platform === undefined ? {} : { platform }),
-        ...resultType,
-      });
+      queriesOut[index] = omitBy(
+        {
+          ...baseRest,
+          ...scheduleFields,
+          query: removeMultilines(query),
+          ...(!isEmpty(ecs_mapping)
+            ? isArray(ecs_mapping)
+              ? { ecs_mapping: convertECSMappingToObject(ecs_mapping) }
+              : { ecs_mapping }
+            : {}),
+          ...(platform === DEFAULT_PLATFORM || platform === undefined ? {} : { platform }),
+          ...resultType,
+        },
+        isUndefined
+      );
 
       return null;
     },
@@ -337,7 +332,7 @@ export const convertSOQueriesToPackConfig = (
   const output: PackConfigOutput = { queries: queriesOut };
 
   // `packMode` is forced to `undefined` when the flag is off, so neither
-  // branch fires under D25 rollback — no redundant flag check needed here.
+  // branch fires under rollback — no redundant flag check needed here.
   if (packMode === 'rrule' && packSchedule?.rrule_schedule) {
     output.default_rrule_schedule = packSchedule.rrule_schedule;
   } else if (packMode === 'interval' && packSchedule?.interval != null) {
@@ -360,27 +355,27 @@ export const convertSOQueriesToPackConfig = (
 const GO_DURATION_SEGMENT = /(\d+(?:\.\d+)?)(ms|us|µs|ns|h|m|s)/g;
 const goDurationToSeconds = (raw: string): number => {
   let total = 0;
-  for (const m of raw.matchAll(GO_DURATION_SEGMENT)) {
-    const n = Number(m[1]);
-    switch (m[2]) {
+  for (const match of raw.matchAll(GO_DURATION_SEGMENT)) {
+    const value = Number(match[1]);
+    switch (match[2]) {
       case 'h':
-        total += n * 3600;
+        total += value * 3600;
         break;
       case 'm':
-        total += n * 60;
+        total += value * 60;
         break;
       case 's':
-        total += n;
+        total += value;
         break;
       case 'ms':
-        total += n / 1_000;
+        total += value / 1_000;
         break;
       case 'us':
       case 'µs':
-        total += n / 1_000_000;
+        total += value / 1_000_000;
         break;
       case 'ns':
-        total += n / 1_000_000_000;
+        total += value / 1_000_000_000;
         break;
     }
   }
@@ -394,18 +389,18 @@ const goDurationToSeconds = (raw: string): number => {
  * so the Kibana `400` message is directly searchable alongside agent logs.
  */
 const formatGoDurationSeconds = (totalSeconds: number): string => {
-  const h = Math.floor(totalSeconds / 3600);
-  const m = Math.floor((totalSeconds % 3600) / 60);
-  const s = totalSeconds % 60;
-  if (h > 0) return `${h}h${m}m${s}s`;
-  if (m > 0) return `${m}m${s}s`;
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  if (hours > 0) return `${hours}h${minutes}m${seconds}s`;
+  if (minutes > 0) return `${minutes}m${seconds}s`;
 
-  return `${s}s`;
+  return `${seconds}s`;
 };
 
 /**
  * Strict RFC 3339 datetime regex matching the OpenAPI Zod `.datetime()` shape
- * and beats's `time.Parse(time.RFC3339, ...)` parser (D15). Requires:
+ * and beats's `time.Parse(time.RFC3339, ...)` parser. Requires:
  * - YYYY-MM-DD
  * - `T` separator (uppercase)
  * - HH:MM:SS
@@ -415,28 +410,26 @@ const formatGoDurationSeconds = (totalSeconds: number): string => {
 const RFC_3339_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/;
 
 /**
- * Strict RFC 3339 datetime validator (D15). Rejects loose strings like
+ * Strict RFC 3339 datetime validator. Rejects loose strings like
  * `"2024-01-01"` (no time component) which `Date.parse` would accept.
  */
 export const isValidRfc3339 = (value: unknown): value is string => {
   if (typeof value !== 'string') return false;
   if (!RFC_3339_REGEX.test(value)) return false;
-  // Defensive: regex matches `2024-13-40T...` — verify with Date parse.
-  const t = Date.parse(value);
 
-  return !Number.isNaN(t);
+  // Defensive: regex matches `2024-13-40T...` — verify with Date parse.
+  return !Number.isNaN(Date.parse(value));
 };
 
 /**
- * Validate an `RRuleScheduleConfig` object at the API request boundary
- * (D11/D12/D15/D24/D26). Returns `null` on success or a human-readable error
- * message on failure.
+ * Validate an `RRuleScheduleConfig` object at the API request boundary.
+ * Returns `null` on success or a human-readable error message on failure.
  *
  * @param recurrenceSeconds - Conservative lower bound of the RRULE period in
  *   seconds (derived by the caller via {@link safeDerivePeriodSeconds}). When
  *   provided, the splay is also checked against the half-period rule enforced
- *   by osquerybeat (D26): `splay ≤ period / 2`. When omitted, only the
- *   absolute 12h cap is checked (backward-compatible behaviour).
+ *   by osquerybeat: `splay ≤ period / 2`. When omitted, only the absolute 12h
+ *   cap is checked (backward-compatible behaviour).
  */
 export const validateRruleConfig = (
   config: RRuleScheduleConfig,
@@ -450,18 +443,13 @@ export const validateRruleConfig = (
     return 'rrule_schedule.rrule is required and must be a non-empty string';
   }
 
-  // String-length cap (3.2.11) — defense at the API edge against blob-sized
-  // RRULE strings even though SO `unknowns: 'allow'` would persist them.
-  if (config.rrule.length > 2048) {
-    return 'rrule_schedule.rrule must not exceed 2048 characters';
-  }
-
-  // D24: parse the string with the actual parser so malformed RRULEs never
-  // reach beats.
+  // Parse the string with the actual parser so malformed RRULEs never reach
+  // beats. The 2048-char length cap is enforced upstream by the io-ts schema
+  // (`boundedString(2048)` in `shared_schemas.ts`).
   try {
     parseRRule(config.rrule);
-  } catch (err) {
-    return `rrule_schedule.rrule is invalid: ${(err as Error).message}`;
+  } catch (error) {
+    return `rrule_schedule.rrule is invalid: ${(error as Error).message}`;
   }
 
   if (!isValidRfc3339(config.start_date)) {
@@ -487,17 +475,17 @@ export const validateRruleConfig = (
       return 'rrule_schedule.splay must not exceed 64 characters';
     }
 
-    let parsed;
+    let parsedSplay;
     try {
-      parsed = parseSplayPermissive(config.splay);
-    } catch (err) {
-      return `rrule_schedule.splay is invalid: ${(err as Error).message}`;
+      parsedSplay = parseSplayPermissive(config.splay);
+    } catch (error) {
+      return `rrule_schedule.splay is invalid: ${(error as Error).message}`;
     }
 
     const seconds =
-      parsed.kind === 'simple'
-        ? parsed.value * ({ seconds: 1, minutes: 60, hours: 3600 }[parsed.unit] as number)
-        : goDurationToSeconds(parsed.raw);
+      parsedSplay.kind === 'simple'
+        ? parsedSplay.value * ({ seconds: 1, minutes: 60, hours: 3600 }[parsedSplay.unit] as number)
+        : goDurationToSeconds(parsedSplay.raw);
     if (seconds > MAX_SPLAY_SECONDS) {
       return `rrule_schedule.splay must not exceed ${MAX_SPLAY_SECONDS} seconds (12 hours)`;
     }
@@ -506,11 +494,11 @@ export const validateRruleConfig = (
       recurrenceSeconds !== undefined &&
       !isSplayWithinHalfRecurrence(seconds, recurrenceSeconds)
     ) {
-      const halfStr = formatGoDurationSeconds(Math.floor(recurrenceSeconds / 2));
-      const periodStr = formatGoDurationSeconds(recurrenceSeconds);
-      const gotStr = formatGoDurationSeconds(seconds);
+      const halfPeriod = formatGoDurationSeconds(Math.floor(recurrenceSeconds / 2));
+      const period = formatGoDurationSeconds(recurrenceSeconds);
+      const provided = formatGoDurationSeconds(seconds);
 
-      return `rrule_schedule.splay must be at most ${halfStr} (half of minimum interval ${periodStr}), got: ${gotStr}`;
+      return `rrule_schedule.splay must be at most ${halfPeriod} (half of minimum interval ${period}), got: ${provided}`;
     }
   }
 
@@ -592,7 +580,7 @@ export const resolvePackScheduleForUpdate = ({
  * each per-query override. Enforces:
  * - Mutual exclusivity (no both `interval` and `rrule_schedule`).
  * - Pack-level discriminator presence when fields are present.
- * - Per-query same-mode constraint (D11): every override SHALL match the
+ * - Per-query same-mode constraint: every override SHALL match the
  *   pack's schedule_type.
  * - Field-level validity via `validateRruleConfig` (RFC 3339, parseability,
  *   splay cap, end_date > start_date).
@@ -623,8 +611,8 @@ export const validatePackScheduleFields = ({
     }
 
     const packPeriodSeconds = safeDerivePeriodSeconds(packRrule.rrule);
-    const err = validateRruleConfig(packRrule, packPeriodSeconds);
-    if (err) return err;
+    const error = validateRruleConfig(packRrule, packPeriodSeconds);
+    if (error) return error;
   } else if (packScheduleType === 'interval') {
     if (packInterval == null) {
       return 'Pack schedule_type "interval" requires pack-level interval';
@@ -661,26 +649,26 @@ export const validatePackScheduleFields = ({
       const queryPeriodSeconds =
         safeDerivePeriodSeconds(q.rrule_schedule.rrule) ??
         (packRrule ? safeDerivePeriodSeconds(packRrule.rrule) : undefined);
-      const err = validateRruleConfig(q.rrule_schedule, queryPeriodSeconds);
-      if (err) return `Query "${queryId}": ${err}`;
+      const error = validateRruleConfig(q.rrule_schedule, queryPeriodSeconds);
+      if (error) return `Query "${queryId}": ${error}`;
     } else if (q.schedule_type === 'interval') {
       if (q.interval !== undefined && (typeof q.interval !== 'number' || q.interval <= 0)) {
         return `Query "${queryId}" interval must be a positive number (seconds)`;
       }
     }
 
-    // Same-mode constraint (D11) — when the pack has a mode, every query
+    // Same-mode constraint — when the pack has a mode, every query
     // override SHALL match.
     if (packScheduleType && q.schedule_type && q.schedule_type !== packScheduleType) {
-      return `Query "${queryId}" schedule_type "${q.schedule_type}" does not match pack schedule_type "${packScheduleType}"; per-query overrides must use the same mode as the pack (D11)`;
+      return `Query "${queryId}" schedule_type "${q.schedule_type}" does not match pack schedule_type "${packScheduleType}"; per-query overrides must use the same mode as the pack`;
     }
 
     if (packScheduleType === 'rrule' && q.interval !== undefined) {
-      return `Query "${queryId}" carries interval but the pack uses schedule_type "rrule"; per-query overrides must use the same mode as the pack (D11)`;
+      return `Query "${queryId}" carries interval but the pack uses schedule_type "rrule"; per-query overrides must use the same mode as the pack`;
     }
 
     if (packScheduleType === 'interval' && q.rrule_schedule) {
-      return `Query "${queryId}" carries rrule_schedule but the pack uses schedule_type "interval"; per-query overrides must use the same mode as the pack (D11)`;
+      return `Query "${queryId}" carries rrule_schedule but the pack uses schedule_type "interval"; per-query overrides must use the same mode as the pack`;
     }
   }
 

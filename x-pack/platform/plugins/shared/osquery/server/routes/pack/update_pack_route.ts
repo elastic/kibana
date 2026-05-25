@@ -138,7 +138,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
         // Request-boundary feature-flag gate. Any RRULE-shaped field on the
         // body is considered "present" only when the flag is on; the wire-
-        // boundary gate (D25) handles the read/Fleet-push side independently.
+        // boundary gate handles the read/Fleet-push side independently.
         const scheduleTypePresent = isRruleFeatureEnabled && rawScheduleType !== undefined;
         const intervalPresent = isRruleFeatureEnabled && rawInterval !== undefined;
         const rruleSchedulePresent = isRruleFeatureEnabled && rawRruleSchedule !== undefined;
@@ -292,7 +292,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
         // Build the schedule slice for the SO write. Honor read→merge→write
         // by only including a field on the patch when the request actually
-        // sent it (or when transitioning between modes — D14).
+        // sent it (or when transitioning between modes).
         const scheduleSoPatch: Partial<{
           schedule_type: 'interval' | 'rrule' | null;
           interval: number | null;
@@ -535,7 +535,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           policy_ids: attributes.policy_ids,
           shards: attributes.shards,
           saved_object_id: updatedPackSO.id,
-          // Discriminated response (D14) — see buildScheduleResponseSlice.
+          // Discriminated response — see buildScheduleResponseSlice.
           ...buildScheduleResponseSlice(attributes, isRruleFeatureEnabled),
         };
 

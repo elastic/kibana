@@ -305,7 +305,7 @@ describe('updatePackRoute', () => {
     });
 
     it('policy_ids omitted — preserves existing policy attachments (no strip)', async () => {
-      // Reproduces the D14-adjacent bug: when a PUT updates schedule fields
+      // Reproduces the schedule-update bug: when a PUT updates schedule fields
       // without restating `policy_ids`, the pack must remain attached to its
       // current policies. Previously, missing `policy_ids` was interpreted as
       // "intersect with empty set" by getInitialPolicies, which then drove
@@ -456,7 +456,7 @@ describe('updatePackRoute', () => {
       };
 
       // Two-stage get: route reads current SO first, then re-reads the updated
-      // SO after writing. Mirror the pattern used in the D14 regression test.
+      // SO after writing. Mirror the pattern used in the regression test above.
       let getCallCount = 0;
       const mockClient = {
         get: jest.fn().mockImplementation(() => {
@@ -554,8 +554,8 @@ describe('updatePackRoute', () => {
     });
 
     it('read → merge → write preserves _unknown sub-fields on rrule_schedule when request omits schedule fields', async () => {
-      // 3.2.13 follow-up: an SO that already has extra/unknown sub-fields on
-      // rrule_schedule must survive a PUT that touches only non-schedule fields.
+      // An SO that already has extra/unknown sub-fields on rrule_schedule
+      // must survive a PUT that touches only non-schedule fields.
       // The scheduleSoPatch must be completely empty in this case, so no
       // `rrule_schedule` key reaches the SO write at all.
       const rruleWithUnknown = {

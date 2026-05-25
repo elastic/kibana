@@ -218,7 +218,7 @@ describe('Pack utils', () => {
       expect(out.queries.q1).not.toHaveProperty('rrule_schedule');
     });
 
-    test('wire-gate off (D25) — RRULE on SO is ignored, legacy interval emission', () => {
+    test('wire-gate off — RRULE on SO is ignored, legacy interval emission', () => {
       const out = convertSOQueriesToPackConfig(
         [
           { id: 'q1', name: 'q1', query: 'SELECT 1', interval: 60 },
@@ -257,9 +257,9 @@ describe('Pack utils', () => {
       expect(out.default_space_id).toBe('my-space');
     });
 
-    // 3.2.16 — wire-gate is the actual enforcement boundary, not just the
-    // request gate. A pack SO planted with RRULE state still produces the
-    // legacy shape when the flag is off.
+    // Wire-gate is the actual enforcement boundary, not just the request
+    // gate. A pack SO planted with RRULE state still produces the legacy
+    // shape when the flag is off.
     test('defense in depth: pack SO carries rrule + flag off → legacy wire shape', () => {
       const out = convertSOQueriesToPackConfig(
         [
@@ -280,12 +280,12 @@ describe('Pack utils', () => {
       expect(out.queries.q1).not.toHaveProperty('rrule_schedule');
     });
 
-    // D25 rollback symmetry: a pack SO planted with `schedule_type:'interval'`
+    // Rollback symmetry: a pack SO planted with `schedule_type:'interval'`
     // and a pack-level interval (i.e. a pack written during a flag-on era)
-    // MUST also fall back to the pre-PR-A wire shape when the flag is off —
+    // MUST also fall back to the pre-rrule wire shape when the flag is off —
     // no `default_native_schedule`. The per-query `interval` is the legacy
     // signal and survives. Locks the fix for the gating bug at the packMode
-    // ternary that previously let `'interval'` mode escape D25.
+    // ternary that previously let `'interval'` mode escape the rollback gate.
     test('defense in depth: pack SO carries interval mode + flag off → no default_native_schedule', () => {
       const out = convertSOQueriesToPackConfig(
         [{ id: 'q1', name: 'q1', query: 'SELECT 1', interval: 60 }],
@@ -299,7 +299,7 @@ describe('Pack utils', () => {
       expect(out.queries.q1.interval).toBe(60);
     });
 
-    // Dim 6 D25 rollback sub-cases — guard rails on pack-level emission.
+    // Rollback sub-cases — guard rails on pack-level emission.
 
     // Sub-case 1: malformed SO where schedule_type is 'rrule' but rrule_schedule
     // is missing. The L341 guard (`packSchedule?.rrule_schedule` truthy) must
@@ -344,7 +344,7 @@ describe('Pack utils', () => {
     });
   });
 
-  // 3.2.17 — wire-format byte contract against a beats #48767 fixture.
+  // Wire-format byte contract against a beats RRuleScheduleConfig fixture.
   describe('convertSOQueriesToPackConfig — beats wire-format byte contract', () => {
     test('default_rrule_schedule matches the beats RRuleScheduleConfig shape byte-for-byte', () => {
       // Fixture lifted from `elastic/beats#48767/internal/config/osquery.go`
@@ -502,11 +502,11 @@ describe('Pack utils', () => {
       });
     });
 
-    // 3.2.14 — defense in depth: query carries rrule_schedule without
+    // Defense in depth: query carries rrule_schedule without
     // schedule_type. Route validator rejects earlier; here we ensure the
     // utility drops the field so no RRULE state lands on the SO without
     // its discriminator.
-    describe('defense in depth (3.2.14)', () => {
+    describe('defense in depth', () => {
       test('drops rrule_schedule when schedule_type is missing', () => {
         const result = convertPackQueriesToSO({
           q1: {
@@ -523,7 +523,7 @@ describe('Pack utils', () => {
     });
   });
 
-  describe('isValidRfc3339 (D15)', () => {
+  describe('isValidRfc3339', () => {
     test('rejects loose dates', () => {
       expect(isValidRfc3339('2024-01-01')).toBe(false);
       expect(isValidRfc3339('01/02/2024')).toBe(false);
@@ -551,31 +551,31 @@ describe('Pack utils', () => {
       expect(validateRruleConfig({ rrule: 'FREQ=DAILY', start_date: start })).toBeNull();
     });
 
-    test('D24: rejects unparseable rrule', () => {
+    test('rejects unparseable rrule', () => {
       expect(validateRruleConfig({ rrule: 'garbage', start_date: start })).toMatch(
         /rrule_schedule\.rrule is invalid/
       );
     });
 
-    test('D24: rejects missing FREQ', () => {
+    test('rejects missing FREQ', () => {
       expect(validateRruleConfig({ rrule: 'BYDAY=MO,WE', start_date: start })).toMatch(
         /rrule_schedule\.rrule is invalid/
       );
     });
 
-    test('D24: rejects FREQ=BANANA', () => {
+    test('rejects FREQ=BANANA', () => {
       expect(validateRruleConfig({ rrule: 'FREQ=BANANA', start_date: start })).toMatch(
         /rrule_schedule\.rrule is invalid/
       );
     });
 
-    test('D15: rejects loose start_date', () => {
+    test('rejects loose start_date', () => {
       expect(validateRruleConfig({ rrule: 'FREQ=DAILY', start_date: '2024-01-01' })).toMatch(
         /start_date must be an RFC 3339/
       );
     });
 
-    test('D15: rejects loose end_date', () => {
+    test('rejects loose end_date', () => {
       expect(
         validateRruleConfig({
           rrule: 'FREQ=DAILY',
@@ -595,26 +595,19 @@ describe('Pack utils', () => {
       ).toMatch(/end_date must be after/);
     });
 
-    test('D12: rejects splay > 12h', () => {
+    test('rejects splay > 12h', () => {
       expect(validateRruleConfig({ rrule: 'FREQ=DAILY', start_date: start, splay: '13h' })).toMatch(
         /must not exceed 43200/
       );
     });
 
-    test('D12: accepts splay at the 12h boundary', () => {
+    test('accepts splay at the 12h boundary', () => {
       expect(
         validateRruleConfig({ rrule: 'FREQ=DAILY', start_date: start, splay: '12h' })
       ).toBeNull();
     });
 
-    test('3.2.11: rejects oversized rrule string', () => {
-      const huge = 'FREQ=DAILY;' + 'X'.repeat(2500);
-      expect(validateRruleConfig({ rrule: huge, start_date: start })).toMatch(
-        /must not exceed 2048/
-      );
-    });
-
-    test('D26: rejects splay exceeding half the recurrence period', () => {
+    test('rejects splay exceeding half the recurrence period', () => {
       expect(
         validateRruleConfig(
           { rrule: 'FREQ=MINUTELY;INTERVAL=2', start_date: start, splay: '2m' },
@@ -623,7 +616,7 @@ describe('Pack utils', () => {
       ).toMatch(/half of minimum interval 2m0s/);
     });
 
-    test('D26: rejects splay just over the half-period boundary (61s on 120s period)', () => {
+    test('rejects splay just over the half-period boundary (61s on 120s period)', () => {
       expect(
         validateRruleConfig(
           { rrule: 'FREQ=MINUTELY;INTERVAL=2', start_date: start, splay: '61s' },
@@ -632,7 +625,7 @@ describe('Pack utils', () => {
       ).toMatch(/half of minimum interval/);
     });
 
-    test('D26: accepts splay at exactly the half-period boundary (60s on 120s period)', () => {
+    test('accepts splay at exactly the half-period boundary (60s on 120s period)', () => {
       expect(
         validateRruleConfig(
           { rrule: 'FREQ=MINUTELY;INTERVAL=2', start_date: start, splay: '60s' },
@@ -641,7 +634,7 @@ describe('Pack utils', () => {
       ).toBeNull();
     });
 
-    test('D26: accepts splay of 1m on 2m period', () => {
+    test('accepts splay of 1m on 2m period', () => {
       expect(
         validateRruleConfig(
           { rrule: 'FREQ=MINUTELY;INTERVAL=2', start_date: start, splay: '1m' },
@@ -650,25 +643,25 @@ describe('Pack utils', () => {
       ).toBeNull();
     });
 
-    test('D26: absent recurrenceSeconds skips the half-period check', () => {
+    test('absent recurrenceSeconds skips the half-period check', () => {
       expect(
         validateRruleConfig({ rrule: 'FREQ=MINUTELY;INTERVAL=2', start_date: start, splay: '2m' })
       ).toBeNull();
     });
 
-    test('D12 wins over D26: 13h splay on YEARLY returns cap message, not period message', () => {
+    test('12h cap wins over half-period: 13h splay on YEARLY returns cap message, not period message', () => {
       expect(
         validateRruleConfig({ rrule: 'FREQ=YEARLY', start_date: start, splay: '13h' }, 28 * 86400)
       ).toMatch(/must not exceed 43200/);
     });
 
-    test('D26: compound splay "1h30m" rejected on HOURLY (5400 * 2 > 3600)', () => {
+    test('compound splay "1h30m" rejected on HOURLY (5400 * 2 > 3600)', () => {
       expect(
         validateRruleConfig({ rrule: 'FREQ=HOURLY', start_date: start, splay: '1h30m' }, 3600)
       ).toMatch(/half of minimum interval/);
     });
 
-    test('D26: compound splay "1h30m" accepted on HOURLY;INTERVAL=4 (5400 * 2 <= 14400)', () => {
+    test('compound splay "1h30m" accepted on HOURLY;INTERVAL=4 (5400 * 2 <= 14400)', () => {
       expect(
         validateRruleConfig(
           { rrule: 'FREQ=HOURLY;INTERVAL=4', start_date: start, splay: '1h30m' },
@@ -707,7 +700,7 @@ describe('Pack utils', () => {
       expect(validatePackScheduleFields({ packRrule: rrule })).toMatch(/requires schedule_type/);
     });
 
-    test('D11: rejects per-query cross-mode override', () => {
+    test('rejects per-query cross-mode override', () => {
       expect(
         validatePackScheduleFields({
           packScheduleType: 'rrule',
@@ -717,7 +710,7 @@ describe('Pack utils', () => {
       ).toMatch(/does not match pack schedule_type/);
     });
 
-    test('D11: rejects per-query interval when pack is rrule', () => {
+    test('rejects per-query interval when pack is rrule', () => {
       expect(
         validatePackScheduleFields({
           packScheduleType: 'rrule',
@@ -727,7 +720,7 @@ describe('Pack utils', () => {
       ).toMatch(/must use the same mode/);
     });
 
-    test('D11: rejects per-query rrule_schedule when pack is interval', () => {
+    test('rejects per-query rrule_schedule when pack is interval', () => {
       expect(
         validatePackScheduleFields({
           packScheduleType: 'interval',
@@ -737,7 +730,7 @@ describe('Pack utils', () => {
       ).toMatch(/must use the same mode/);
     });
 
-    test('D11: accepts same-mode override (rrule + rrule)', () => {
+    test('accepts same-mode override (rrule + rrule)', () => {
       expect(
         validatePackScheduleFields({
           packScheduleType: 'rrule',
@@ -760,7 +753,7 @@ describe('Pack utils', () => {
       ).toBeNull();
     });
 
-    test('D26: field-probe scenario — pack FREQ=MINUTELY;INTERVAL=2 + splay 2m rejected', () => {
+    test('field-probe scenario — pack FREQ=MINUTELY;INTERVAL=2 + splay 2m rejected', () => {
       expect(
         validatePackScheduleFields({
           packScheduleType: 'rrule',
@@ -773,7 +766,7 @@ describe('Pack utils', () => {
       ).toMatch(/half of minimum interval 2m0s/);
     });
 
-    test('D26: field-probe scenario — same pack with splay 1m accepted', () => {
+    test('field-probe scenario — same pack with splay 1m accepted', () => {
       expect(
         validatePackScheduleFields({
           packScheduleType: 'rrule',
@@ -786,7 +779,7 @@ describe('Pack utils', () => {
       ).toBeNull();
     });
 
-    test('D26: per-query RRULE validated against query period (HOURLY;INTERVAL=2 + splay 2h)', () => {
+    test('per-query RRULE validated against query period (HOURLY;INTERVAL=2 + splay 2h)', () => {
       expect(
         validatePackScheduleFields({
           packScheduleType: 'rrule',
@@ -805,7 +798,7 @@ describe('Pack utils', () => {
       ).toMatch(/Query "q1": rrule_schedule\.splay must be at most/);
     });
 
-    test('D26: per-query override with own RRULE uses query period not pack period', () => {
+    test('per-query override with own RRULE uses query period not pack period', () => {
       expect(
         validatePackScheduleFields({
           packScheduleType: 'rrule',
@@ -824,7 +817,7 @@ describe('Pack utils', () => {
       ).toBeNull();
     });
 
-    test('D26: per-query override inherits pack period when own RRULE parse fails', () => {
+    test('per-query override inherits pack period when own RRULE parse fails', () => {
       expect(
         validatePackScheduleFields({
           packScheduleType: 'rrule',

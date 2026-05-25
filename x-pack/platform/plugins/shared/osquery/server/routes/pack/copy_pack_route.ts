@@ -157,7 +157,7 @@ export const copyPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
             policy_ids: [], // No policy assignments — references are empty
             shards: attributes.shards,
             saved_object_id: newPackSO.id,
-            // Discriminated response (D14) — see buildScheduleResponseSlice.
+            // Discriminated response — see buildScheduleResponseSlice.
             ...buildScheduleResponseSlice(attributes, isRruleFeatureEnabled),
           };
 

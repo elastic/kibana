@@ -292,7 +292,7 @@ describe('findPackRoute', () => {
     expect(findArgs.filter).toBeUndefined();
   });
 
-  describe('flag-off response contract (D14 / D25)', () => {
+  describe('flag-off response contract', () => {
     it('flag off + interval-mode SO: response omits schedule_type and pack-level interval', async () => {
       mockSavedObjectsClient.find.mockResolvedValue({
         saved_objects: [makePack({ schedule_type: 'interval', interval: 60 })],

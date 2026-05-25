@@ -25,7 +25,7 @@ export interface PackResponseData {
   policy_ids?: string[];
   shards?: SOShard;
   read_only?: boolean;
-  /** Pack-level schedule type (D14 discriminated read response). */
+  /** Pack-level schedule type (discriminated read response). */
   schedule_type?: ScheduleType;
   /** Pack-level interval (seconds) — present only when `schedule_type === 'interval'`. */
   interval?: number;
@@ -54,7 +54,7 @@ export interface ReadPackResponseData {
   migrationVersion?: Record<string, string>;
   managed?: boolean;
   coreMigrationVersion?: string;
-  /** Pack-level schedule type (D14 discriminated read response). */
+  /** Pack-level schedule type (discriminated read response). */
   schedule_type?: ScheduleType;
   /** Pack-level interval (seconds) — present only when `schedule_type === 'interval'`. */
   interval?: number;

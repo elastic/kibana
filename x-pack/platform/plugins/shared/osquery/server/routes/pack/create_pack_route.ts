@@ -282,7 +282,7 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           policy_ids: attributes.policy_ids,
           shards: attributes.shards,
           saved_object_id: packSO.id,
-          // Discriminated response (D14) — see buildScheduleResponseSlice.
+          // Discriminated response — see buildScheduleResponseSlice.
           ...buildScheduleResponseSlice(
             { schedule_type: scheduleType, interval: packInterval, rrule_schedule: rruleSchedule },
             isRruleFeatureEnabled

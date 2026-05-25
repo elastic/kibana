@@ -242,7 +242,7 @@ describe('updateGlobalPacksCreateCallback', () => {
       mockOsqueryContext
     );
 
-    // D13 — the pack-level space identifier is emitted as `default_space_id`
+    // The pack-level space identifier is emitted as `default_space_id`
     // at the pack level; per-query `space_id` is collapsed when uniform.
     expect(result.inputs[0].config?.osquery?.value?.packs?.['default--embedded-pack']).toEqual({
       shard: 100,

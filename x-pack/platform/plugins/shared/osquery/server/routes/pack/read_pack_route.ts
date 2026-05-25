@@ -110,7 +110,7 @@ export const readPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
           shards: convertShardsToObject(attributes.shards),
           policy_ids: policyIds,
           read_only: attributes.version !== undefined && osqueryPackAssetReference,
-          // Discriminated read response (D14) — see buildScheduleResponseSlice.
+          // Discriminated read response — see buildScheduleResponseSlice.
           ...buildScheduleResponseSlice(attributes, isRruleFeatureEnabled),
         };
 

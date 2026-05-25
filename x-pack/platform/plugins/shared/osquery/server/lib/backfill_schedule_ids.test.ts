@@ -284,7 +284,7 @@ describe('backfillScheduleIds', () => {
   });
 
   describe('isRruleFeatureEnabled flag — Fleet wire fields on backfill', () => {
-    // These tests lock the D25 contract for the backfill code path:
+    // These tests lock the wire-gate contract for the backfill code path:
     // when isRruleFeatureEnabled is true and the SO has schedule_type 'rrule',
     // the Fleet package-policy update must carry `default_rrule_schedule` and
     // must NOT carry `default_native_schedule`. When the flag is false (or
@@ -394,7 +394,7 @@ describe('backfillScheduleIds', () => {
         coreStart: core,
         osqueryContext,
         logger: logger as unknown as Parameters<typeof backfillScheduleIds>[0]['logger'],
-        // isRruleFeatureEnabled omitted (defaults to false) — D25 rollback gate
+        // isRruleFeatureEnabled omitted (defaults to false) — rollback gate
       });
 
       expect(result).toEqual({ hadFailures: false });
