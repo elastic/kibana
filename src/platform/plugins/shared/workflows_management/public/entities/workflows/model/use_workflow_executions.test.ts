@@ -9,8 +9,10 @@
 
 import { renderHook, waitFor } from '@testing-library/react';
 import type { QueryClient } from '@kbn/react-query';
+import type { WorkflowExecutionListDto } from '@kbn/workflows';
 import { ExecutionStatus, ExecutionType } from '@kbn/workflows/types/v1';
 import { useWorkflowsApi } from '@kbn/workflows-ui';
+import { createMockWorkflowApi, type MockWorkflowApi } from '@kbn/workflows-ui/mocks';
 import { useWorkflowExecutions } from './use_workflow_executions';
 import { createQueryClientWrapper, createTestQueryClient } from '../../../shared/test_utils';
 
@@ -21,13 +23,36 @@ jest.mock('@kbn/workflows-ui', () => ({
 const mockUseWorkflowsApi = useWorkflowsApi as jest.MockedFunction<typeof useWorkflowsApi>;
 
 describe('useWorkflowExecutions', () => {
-  let mockGetWorkflowExecutions: jest.Mock;
+  let mockWorkflowApi: MockWorkflowApi;
+  let mockGetWorkflowExecutions: jest.MockedFunction<MockWorkflowApi['getWorkflowExecutions']>;
   let queryClient: QueryClient;
 
-  const executionsPage1 = {
+  const executionsPage1: WorkflowExecutionListDto = {
     results: [
-      { id: 'exec-1', status: 'completed' },
-      { id: 'exec-2', status: 'running' },
+      {
+        id: 'exec-1',
+        spaceId: 'default',
+        status: ExecutionStatus.COMPLETED,
+        isTestRun: false,
+        startedAt: '2024-01-01T10:00:00Z',
+        finishedAt: '2024-01-01T10:01:00Z',
+        error: null,
+        duration: 60_000,
+        workflowId: 'wf-1',
+        workflowName: 'Test Workflow',
+      },
+      {
+        id: 'exec-2',
+        spaceId: 'default',
+        status: ExecutionStatus.RUNNING,
+        isTestRun: false,
+        startedAt: '2024-01-01T11:00:00Z',
+        finishedAt: '2024-01-01T11:00:00Z',
+        error: null,
+        duration: 1_000,
+        workflowId: 'wf-1',
+        workflowName: 'Test Workflow',
+      },
     ],
     page: 1,
     size: 100,
@@ -48,10 +73,10 @@ describe('useWorkflowExecutions', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockGetWorkflowExecutions = jest.fn().mockResolvedValue(executionsPage1);
-    mockUseWorkflowsApi.mockReturnValue({
-      getWorkflowExecutions: mockGetWorkflowExecutions,
-    } satisfies Pick<ReturnType<typeof useWorkflowsApi>, 'getWorkflowExecutions'>);
+    mockWorkflowApi = createMockWorkflowApi();
+    mockGetWorkflowExecutions = mockWorkflowApi.getWorkflowExecutions;
+    mockGetWorkflowExecutions.mockResolvedValue(executionsPage1);
+    mockUseWorkflowsApi.mockReturnValue(mockWorkflowApi);
     queryClient = createTestQueryClient();
   });
 
@@ -84,15 +109,7 @@ describe('useWorkflowExecutions', () => {
 
     await waitFor(() => expect(result.current.data).not.toBeNull());
 
-    expect(result.current.data).toEqual({
-      results: [
-        { id: 'exec-1', status: 'completed' },
-        { id: 'exec-2', status: 'running' },
-      ],
-      page: 1,
-      size: 100,
-      total: 2,
-    });
+    expect(result.current.data).toEqual(executionsPage1);
   });
 
   it('should pass statuses filter to query params', async () => {
@@ -227,7 +244,7 @@ describe('useWorkflowExecutions', () => {
 
   it('should expose hasNextPage as true when total exceeds page size', async () => {
     mockGetWorkflowExecutions.mockResolvedValue({
-      results: [{ id: 'exec-1', status: 'completed' }],
+      results: [executionsPage1.results[0]],
       page: 1,
       size: 1,
       total: 3,
