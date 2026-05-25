@@ -5,86 +5,17 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
-import { z } from '@kbn/zod/v4';
-import { ToolType } from '@kbn/agent-builder-common';
-import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import { RunEmulationCommandInputSchema } from '../../../../common/detection_emulation/schemas/run_emulation_command_input';
-import { MAX_ENDPOINT_FANOUT } from '../../../../common/detection_emulation/schemas/constants';
-import type { ConfigType } from '../../../config';
-import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
-import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
-import type { DetectionEmulationGuardrails } from '../../../lib/detection_emulation/execution/shared_guardrails';
-import { buildAgentBuilderActor } from '../../../lib/detection_emulation/execution/audit_context';
-import { withCommandGates } from './with_command_gates';
-import { buildEmulationConfirmation } from './build_emulation_confirmation';
-import { toolError } from './emulation_tool_errors';
+import {
+  createRunFamilyCommandTool,
+  type FamilyToolConfig,
+  type RunFamilyCommandToolDeps,
+} from './create_run_family_command_tool';
 
-const EXECUTION_FAMILY_COMMANDS = ['execute', 'runscript', 'cancel'] as const;
-
-/**
- * Tool boundary schema for the execution-family commands. See the
- * process-family tool docstring for why the boundary keeps
- * `parameters` opaque and the handler re-parses with the strict
- * discriminated union.
- */
-const runExecutionCommandSchema = z.object({
-  emulationId: z.string().min(1).describe('Unique identifier for the emulation run.'),
-  agentType: z
-    .enum(['endpoint'])
-    .default('endpoint')
-    .describe(
-      'EDR agent type. Currently only `endpoint` (Elastic Defend) is wired. Omit; defaults to `endpoint`.'
-    ),
-  endpointIds: z
-    .array(z.string().min(1))
-    .min(1)
-    .max(MAX_ENDPOINT_FANOUT, {
-      message: `endpointIds must contain at most ${MAX_ENDPOINT_FANOUT} entries (MAX_ENDPOINT_FANOUT)`,
-    })
-    .describe(
-      `Endpoint agent IDs to dispatch the action against (1–${MAX_ENDPOINT_FANOUT}). The fanout cap exists so a single call cannot N-multiply the per-host EDR rate budget by accident; if a user asks to dispatch against more than ${MAX_ENDPOINT_FANOUT} endpoints, split the request into sequential calls.`
-    ),
-  command: z.enum(EXECUTION_FAMILY_COMMANDS).describe(
-    `Execution-family command (HIGHEST IMPACT — runs arbitrary code on the endpoint):
-- \`execute\` — \`{ command: string, timeout?: number }\` — run a shell command/executable
-- \`runscript\` — \`{ scriptId: string, scriptInput?: string, timeout?: number }\` — run a script-library entry
-- \`cancel\` — \`{ id: string }\` — cancel a previously-dispatched response action by id
-
-Every command in this family ALSO accepts an optional \`comment: string\` in \`parameters\` — recorded against the response-action audit trail. Strongly recommended for \`execute\` and \`runscript\` so an auditor can see *why* the code ran (e.g. \`{ command: 'whoami', comment: 'verify hostname for rule X validation' }\`).`
-  ),
-  parameters: z
-    .record(z.string(), z.unknown())
-    .optional()
-    .describe(
-      'Command-specific parameters (strictly validated server-side per command). See `command` description for the required shape. Every command additionally accepts an optional `{ comment: string }` attached to the response-action audit trail.'
-    ),
-});
-
-export interface RunExecutionCommandToolDeps {
-  core: SecuritySolutionPluginCoreSetupDependencies;
-  endpointService: EndpointAppContextService;
-  config: ConfigType;
-  logger: Logger;
-  /** See `RunProcessCommandToolDeps.guardrails`. */
-  guardrails: DetectionEmulationGuardrails;
-}
-
-/**
- * Execution-family runEmulationCommand tool. Covers `execute`,
- * `runscript`, and `cancel`. Shares the gate sequence with the other
- * three per-family tools via {@link withCommandGates}.
- */
-export const createRunExecutionCommandTool = (
-  deps: RunExecutionCommandToolDeps
-): BuiltinSkillBoundedTool<typeof runExecutionCommandSchema> => {
-  const { core, endpointService, config, logger, guardrails } = deps;
-  const { allowlist, rateLimiter, idempotencyCache } = guardrails;
-
-  return {
-    id: 'security.detection-emulation.run-execution-command',
-    type: ToolType.builtin,
-    description: `Run an *execution-family* response action against one or more endpoints.
+const EXECUTION_FAMILY_CONFIG: FamilyToolConfig = {
+  family: 'execution',
+  id: 'security.detection-emulation.run-execution-command',
+  commands: ['execute', 'runscript', 'cancel'],
+  description: `Run an *execution-family* response action against one or more endpoints.
 
 Covers: \`execute\`, \`runscript\`, \`cancel\`.
 
@@ -107,51 +38,15 @@ conversation before the first invocation. \`execute\` and \`runscript\` render
 a destructive (red) confirm button; \`cancel\` is treated as recoverable. If
 the user declines, do NOT retry; surface the cancellation and continue with
 unrelated work.`,
-    schema: runExecutionCommandSchema,
-    confirmation: {
-      askUser: 'once',
-      getConfirmation: ({ toolParams }) =>
-        buildEmulationConfirmation({
-          family: 'execution',
-          emulationId: toolParams.emulationId,
-          command: toolParams.command,
-          endpointIds: toolParams.endpointIds,
-          parameters: toolParams.parameters,
-        }),
-    },
-    handler: async (rawParams, { esClient, spaceId, request, runContext, callContext }) => {
-      const { emulationId, agentType, command } = rawParams;
+  commandFieldDescription: `Execution-family command (HIGHEST IMPACT — runs arbitrary code on the endpoint):
+- \`execute\` — \`{ command: string, timeout?: number }\` — run a shell command/executable
+- \`runscript\` — \`{ scriptId: string, scriptInput?: string, timeout?: number }\` — run a script-library entry
+- \`cancel\` — \`{ id: string }\` — cancel a previously-dispatched response action by id
 
-      const strictParseResult = RunEmulationCommandInputSchema.safeParse(rawParams);
-      if (!strictParseResult.success) {
-        logger.warn(
-          `Emulation command [${command}] for emulation [${emulationId}] rejected: invalid parameters for command (${strictParseResult.error.message})`
-        );
-        return toolError.invalidParameters({
-          emulation_id: emulationId,
-          agent_type: agentType,
-          command,
-        });
-      }
-
-      const actorContext = buildAgentBuilderActor(runContext, callContext.toolCallId);
-
-      return withCommandGates(
-        {
-          core,
-          endpointService,
-          config,
-          logger,
-          allowlist,
-          rateLimiter,
-          idempotencyCache,
-          request,
-          esClient,
-          spaceId,
-          actorContext,
-        },
-        strictParseResult.data
-      );
-    },
-  };
+Every command in this family ALSO accepts an optional \`comment: string\` in \`parameters\` — recorded against the response-action audit trail. Strongly recommended for \`execute\` and \`runscript\` so an auditor can see *why* the code ran (e.g. \`{ command: 'whoami', comment: 'verify hostname for rule X validation' }\`).`,
 };
+
+export type RunExecutionCommandToolDeps = RunFamilyCommandToolDeps;
+
+export const createRunExecutionCommandTool = (deps: RunExecutionCommandToolDeps) =>
+  createRunFamilyCommandTool(EXECUTION_FAMILY_CONFIG, deps);
