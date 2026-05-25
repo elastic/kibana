@@ -98,16 +98,20 @@ describe('readElasticsearchDefinitions', () => {
   });
 
   it('exits when pathToElasticsearch is missing', () => {
-    const exitSpy = jest
-      .spyOn(process, 'exit')
-      .mockImplementation((() => undefined) as typeof process.exit);
+    // process.exit normally halts execution; in the test we make it throw so the function
+    // aborts the same way and we can assert it never reached the filesystem read.
+    const exitSpy = jest.spyOn(process, 'exit').mockImplementation((() => {
+      throw new Error('process.exit called');
+    }) as typeof process.exit);
     const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => undefined);
 
-    readElasticsearchDefinitions({
-      pathToElasticsearch: '',
-      keywordType: 'functions',
-      language: 'esql',
-    });
+    expect(() =>
+      readElasticsearchDefinitions({
+        pathToElasticsearch: '',
+        keywordType: 'functions',
+        language: 'esql',
+      })
+    ).toThrow('process.exit called');
 
     expect(errorSpy).toHaveBeenCalledWith('Error: Path to Elasticsearch is required.');
     expect(exitSpy).toHaveBeenCalledWith(1);
