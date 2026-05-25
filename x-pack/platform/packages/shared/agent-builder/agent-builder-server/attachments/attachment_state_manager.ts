@@ -180,6 +180,14 @@ const descriptionFromAttachmentLabel = (data: unknown): string | undefined => {
   return trimmed || undefined;
 };
 
+const normalizeDescription = (description: string | undefined): string | undefined => {
+  if (description === undefined) {
+    return undefined;
+  }
+  const trimmed = description.trim();
+  return trimmed || undefined;
+};
+
 /**
  * Private implementation of AttachmentStateManager.
  */
@@ -366,9 +374,7 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
     };
 
     const resolvedDescription =
-      input.description !== undefined
-        ? input.description
-        : descriptionFromAttachmentLabel(validatedData);
+      normalizeDescription(input.description) ?? descriptionFromAttachmentLabel(validatedData);
 
     const attachment: VersionedAttachment = {
       id,

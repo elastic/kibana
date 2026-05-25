@@ -366,6 +366,17 @@ describe('AttachmentStateManager', () => {
       expect(added.description).toBe('Initial label');
     });
 
+    it('falls back to attachmentLabel on add when description is empty string', async () => {
+      const added = await manager.add({
+        id: 'test-1',
+        type: 'labeled',
+        data: { content: 'v1', attachmentLabel: 'Initial label' },
+        description: '',
+      });
+
+      expect(added.description).toBe('Initial label');
+    });
+
     it('merges partial data updates and preserves attachmentLabel', async () => {
       await manager.add({
         id: 'test-1',
