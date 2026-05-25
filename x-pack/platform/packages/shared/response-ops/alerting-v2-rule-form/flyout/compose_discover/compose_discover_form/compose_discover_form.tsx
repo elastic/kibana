@@ -28,6 +28,7 @@ interface ComposeDiscoverFormProps {
   services: RuleFormServices;
   onRecoveryTypeChange: (type: RecoveryType) => void;
   onKindChange: (kind: 'signal' | 'alert') => void;
+  isEditing: boolean;
 }
 
 const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
@@ -42,6 +43,7 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
         dispatch={props.dispatch}
         services={props.services}
         onKindChange={props.onKindChange}
+        isEditing={props.isEditing}
       />
     ),
     validate: (_methods, s) => s.queryCommitted,
@@ -85,6 +87,7 @@ export const ComposeDiscoverForm: React.FC<ComposeDiscoverFormProps> = ({
   services,
   onRecoveryTypeChange,
   onKindChange,
+  isEditing,
 }) => {
   const isAlert = useWatch<ComposeFormValues, 'kind'>({ name: 'kind' }) === 'alert';
   const steps = getSteps(isAlert);
@@ -94,5 +97,6 @@ export const ComposeDiscoverForm: React.FC<ComposeDiscoverFormProps> = ({
     services,
     onRecoveryTypeChange,
     onKindChange,
+    isEditing,
   });
 };

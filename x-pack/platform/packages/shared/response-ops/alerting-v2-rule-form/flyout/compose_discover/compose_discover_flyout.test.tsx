@@ -17,6 +17,9 @@ import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
 import { ComposeDiscoverFlyout } from './compose_discover_flyout';
 import type { ComposeDiscoverFlyoutProps } from './compose_discover_flyout';
+import type { ComposeDiscoverForm } from './compose_discover_form';
+
+type FormProps = React.ComponentProps<typeof ComposeDiscoverForm>;
 
 jest.mock('@kbn/code-editor', () => ({
   CodeEditor: () => <div data-test-subj="codeEditorMock" />,
@@ -25,6 +28,10 @@ jest.mock('@kbn/code-editor', () => ({
 jest.mock('@kbn/esql-editor', () => ({
   ESQLEditor: () => <div data-test-subj="esqlEditorMock" />,
 }));
+
+const mockComposeDiscoverForm = jest.fn((_props: FormProps) => (
+  <div data-test-subj="composeDiscoverFormMock" />
+));
 
 jest.mock('./compose_discover_form', () => {
   const actual = jest.requireActual('./use_compose_discover_state');
@@ -39,7 +46,7 @@ jest.mock('./compose_discover_form', () => {
         };
         return { id, title: titles[id], render: () => <div /> };
       }),
-    ComposeDiscoverForm: () => <div data-test-subj="composeDiscoverFormMock" />,
+    ComposeDiscoverForm: (props: FormProps) => mockComposeDiscoverForm(props),
   };
 });
 
@@ -127,6 +134,33 @@ describe('ComposeDiscoverFlyout', () => {
     it('shows "Edit alert rule" in edit mode', () => {
       renderFlyout({ mode: 'edit' });
       expect(screen.getByText('Edit alert rule')).toBeInTheDocument();
+    });
+  });
+
+  describe('isEditing prop', () => {
+    beforeEach(() => {
+      mockComposeDiscoverForm.mockClear();
+    });
+
+    it('passes isEditing=false in create mode', () => {
+      renderFlyout({ mode: 'create' });
+      expect(mockComposeDiscoverForm).toHaveBeenCalledWith(
+        expect.objectContaining({ isEditing: false })
+      );
+    });
+
+    it('passes isEditing=true in edit mode', () => {
+      renderFlyout({ mode: 'edit' });
+      expect(mockComposeDiscoverForm).toHaveBeenCalledWith(
+        expect.objectContaining({ isEditing: true })
+      );
+    });
+
+    it('passes isEditing=false in clone mode', () => {
+      renderFlyout({ mode: 'clone' });
+      expect(mockComposeDiscoverForm).toHaveBeenCalledWith(
+        expect.objectContaining({ isEditing: false })
+      );
     });
   });
 

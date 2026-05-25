@@ -37,6 +37,7 @@ interface AlertConditionStepProps {
   dispatch: React.Dispatch<ComposeDiscoverAction>;
   services: RuleFormServices;
   onKindChange: (kind: 'signal' | 'alert') => void;
+  isEditing: boolean;
 }
 
 export function AlertConditionStep({
@@ -44,6 +45,7 @@ export function AlertConditionStep({
   dispatch,
   services,
   onKindChange,
+  isEditing,
 }: AlertConditionStepProps) {
   const { setValue, watch } = useFormContext<ComposeFormValues>();
   const isAlert = watch('kind') === 'alert';
@@ -303,7 +305,7 @@ export function AlertConditionStep({
         )}
         checked={isAlert}
         onChange={handleTrackingToggle}
-        disabled={!state.queryCommitted}
+        disabled={!state.queryCommitted || isEditing}
         data-test-subj="composeDiscoverTrackingToggle"
       />
 

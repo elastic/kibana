@@ -24,6 +24,7 @@ export interface StepRenderProps {
   services: RuleFormServices;
   onRecoveryTypeChange: (type: RecoveryType) => void;
   onKindChange: (kind: 'signal' | 'alert') => void;
+  isEditing: boolean;
 }
 
 export interface StepDefinition {

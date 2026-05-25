@@ -354,6 +354,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   );
 
   const isCreate = mode === 'create' || mode === 'clone';
+  const isEditing = mode === 'edit';
   const title = getFlyoutTitle(mode);
 
   const steps = getSteps(isAlert);
@@ -368,7 +369,9 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   const { run: runYamlParse, cancel: cancelYamlParse } = useDebounceFn((yaml: string) => {
     const result = parseYamlToFormValues(yaml);
     if (result.values) {
-      methods.reset(formValuesFromYamlToCompose(result.values));
+      const composed = formValuesFromYamlToCompose(result.values);
+      if (isEditing) composed.kind = initialKind;
+      methods.reset(composed);
       syncSandbox();
     }
   }, YAML_PARSE_DEBOUNCE_OPTIONS);
@@ -390,6 +393,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
         const result = parseYamlToFormValues(yamlText);
         if (result.values) {
           const compose = formValuesFromYamlToCompose(result.values);
+          if (isEditing) compose.kind = initialKind;
           methods.reset(compose);
           syncSandbox();
           if (getBreachQuery(compose.query).trim()) {
@@ -402,7 +406,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
       }
       dispatch({ type: 'SET_YAML_MODE', enabled });
     },
-    [cancelYamlParse, methods, yamlText, syncSandbox, dispatch]
+    [cancelYamlParse, methods, yamlText, syncSandbox, dispatch, isEditing, initialKind]
   );
 
   const handleSandboxApply = useCallback(() => {
@@ -429,13 +433,12 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
     cancelYamlParse();
     const result = parseYamlToFormValues(yamlText);
     if (result.values) {
-      methods.reset(formValuesFromYamlToCompose(result.values));
-      // No syncForm() here: draft is temporarily stale after methods.reset(), but
-      // we're about to submit. On success the flyout closes; on failure the user is still
-      // in YAML mode and handleToggleYamlMode(false) will resync draft when they switch back.
+      const composed = formValuesFromYamlToCompose(result.values);
+      if (isEditing) composed.kind = initialKind;
+      methods.reset(composed);
     }
     handleSubmit();
-  }, [cancelYamlParse, yamlText, methods, handleSubmit]);
+  }, [cancelYamlParse, yamlText, methods, handleSubmit, isEditing, initialKind]);
 
   const handleNext = useCallback(async () => {
     if (currentStep?.validate) {
@@ -524,6 +527,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
                 services={services}
                 onRecoveryTypeChange={handleRecoveryTypeChange}
                 onKindChange={handleKindChange}
+                isEditing={isEditing}
               />
             )}
           </EuiFlyoutBody>
