@@ -423,7 +423,6 @@ const buildEventEsqlRow = (
   return {
     _id,
     action: 'test-action',
-    actorEntityId: overrides.actorEntityId,
     targetEntityId: overrides.targetEntityId ?? null,
     isOrigin: false,
     isOriginAlert: false,
@@ -720,18 +719,6 @@ describe('regroupEvents', () => {
 });
 
 describe('enrichEventDocData', () => {
-  let logger: Logger;
-
-  beforeEach(() => {
-    logger = {
-      trace: jest.fn(),
-      debug: jest.fn(),
-      info: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
-    } as unknown as Logger;
-  });
-
   it('returns empty array for empty input', () => {
     const result = enrichEventDocData([], new Map());
     expect(result).toEqual([]);

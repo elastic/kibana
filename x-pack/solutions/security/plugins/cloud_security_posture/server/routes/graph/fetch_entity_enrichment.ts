@@ -7,6 +7,7 @@
 
 import { chunk } from 'lodash';
 import pRetry from 'p-retry';
+import type { errors as EsErrors } from '@elastic/elasticsearch';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
 import { isRetryableEsClientError } from '@kbn/core-elasticsearch-server-utils';
@@ -158,8 +159,12 @@ FROM ${indexName}
           randomize: true,
           onFailedAttempt: (err) => {
             // Re-throwing here aborts further retries — used to skip non-transient
-            // errors (authz, validation, etc.). p-retry preserves the thrown error.
-            if (!isRetryableEsClientError(err)) throw err;
+            // errors (authz, validation, etc.). p-retry preserves the thrown error,
+            // so the underlying ES error shape is intact; isRetryableEsClientError
+            // uses instanceof checks and safely returns false for non-ES errors.
+            if (!isRetryableEsClientError(err as unknown as EsErrors.ElasticsearchClientError)) {
+              throw err;
+            }
             logger.warn(
               `Retrying entity enrichment after transient ES error: ${err.message} (${err.retriesLeft} retries left)`
             );

@@ -60,7 +60,6 @@ describe('fetchGraph', () => {
     spaceId: 'default',
   };
 
-  // Include actorEntityId and targetEntityId so re-grouping works correctly
   const mockEventRecords: EventEdge[] = [
     {
       badge: 1,
@@ -76,8 +75,6 @@ describe('fetchGraph', () => {
       uniqueEventsCount: 1,
       uniqueAlertsCount: 0,
       labelNodeId: 'doc-1',
-      actorEntityId: 'actor-1',
-      targetEntityId: 'target-1',
     },
   ];
 
@@ -92,7 +89,6 @@ describe('fetchGraph', () => {
       targetNodeId: 'target-1',
       targetIdsCount: 1,
       targetIds: ['target-1'],
-      targetId: 'target-1',
     },
   ];
 
@@ -110,10 +106,15 @@ describe('fetchGraph', () => {
     } as any);
     // Return empty enrichment map by default (no entity store data)
     mockedFetchEntityEnrichment.mockResolvedValue(new Map());
-    // Mock re-grouping functions to return predictable results
-    mockedRegroupEvents.mockImplementation((records) => records);
+    // Mock re-grouping functions to pass records through unchanged. The mocked
+    // fetchEvents/fetchEntityRelationships return EventEdge/RelationshipEdge-shaped
+    // records (rather than the real *EsqlRow inputs) so the test can assert on the
+    // final post-regroup shape — cast through unknown to satisfy the signatures.
+    mockedRegroupEvents.mockImplementation((records) => records as unknown as EventEdge[]);
     mockedEnrichEventDocData.mockImplementation((events) => events);
-    mockedRegroupRelationships.mockImplementation((records) => records);
+    mockedRegroupRelationships.mockImplementation(
+      (records) => records as unknown as RelationshipEdge[]
+    );
     mockedEnrichRelationshipDocData.mockImplementation((rels) => rels);
     mockedApplyEnrichmentToEntityRecords.mockImplementation((records: EntityRecord[]) => records);
   });

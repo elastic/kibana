@@ -237,8 +237,6 @@ describe('fetchEntityRelationships', () => {
 const buildRelationshipEsqlRow = (
   overrides: Partial<RelationshipEsqlRow> & Pick<RelationshipEsqlRow, 'actorId' | 'targetId'>
 ): RelationshipEsqlRow => ({
-  actorId: overrides.actorId,
-  targetId: overrides.targetId,
   relationship: 'Owns',
   relationshipNodeId: `${overrides.actorId}-Owns`,
   actorDocData: `{"id":"${overrides.actorId}","type":"entity","entity":{"availableInEntityStore":true}}`,
