@@ -6,6 +6,7 @@
  */
 
 import { esql } from '@elastic/esql';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import type { StreamQuery, SignificantEventsGetResponse } from '@kbn/streams-schema';
@@ -19,6 +20,23 @@ import { SecurityError } from '../streams/errors/security_error';
 import { getColumnIndex, toEsqlRequest } from '../streams/helpers/esql';
 import { ALERTS_DATA_STREAM } from './alerts_data_stream';
 import { ESQL_UNITS, fillBucketGaps, parseBucketSize } from './helpers/fill_bucket_gaps';
+
+export interface AlertsSource {
+  index: string;
+  ruleIdField: string;
+  extraFilters?: QueryDslQueryContainer[];
+}
+
+export const V1_ALERTS_SOURCE: AlertsSource = {
+  index: '.alerts-streams.alerts-default',
+  ruleIdField: 'kibana.alert.rule.uuid',
+};
+
+export const V2_ALERTS_SOURCE: AlertsSource = {
+  index: '.rule-events',
+  ruleIdField: 'rule.id',
+  extraFilters: [{ term: { type: 'signal' } }, { term: { status: 'breached' } }],
+};
 
 // `change_points` on the GET response is no longer populated by the server.
 // Kept as an empty stub until the consumer-side schema/usage is removed.
@@ -37,6 +55,7 @@ export async function readSignificantEventsFromAlertsIndices(
     query?: string;
     filters?: QueryLinkFilters;
     searchMode?: SearchMode;
+    alertsSource?: AlertsSource;
   },
   dependencies: {
     queryClient: QueryClient;
@@ -44,7 +63,16 @@ export async function readSignificantEventsFromAlertsIndices(
   }
 ): Promise<SignificantEventsGetResponse> {
   const { queryClient, scopedClusterClient } = dependencies;
-  const { streamNames = [], from, to, bucketSize, query, filters, searchMode } = params;
+  const {
+    streamNames = [],
+    from,
+    to,
+    bucketSize,
+    query,
+    filters,
+    searchMode,
+    alertsSource: _alertsSource = V1_ALERTS_SOURCE,
+  } = params;
 
   const queryLinks = query
     ? await queryClient.findQueries(streamNames, query, filters, searchMode)
