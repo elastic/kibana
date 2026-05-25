@@ -6,4 +6,7 @@
  */
 
 export { useSubAction } from './use_sub_action';
-export { useActionTypeModel, type UseActionTypeModelResult } from '@kbn/alerts-ui-shared';
+export {
+  useActionTypeModel,
+  type UseActionTypeModelResult,
+} from '@kbn/alerts-ui-shared/src/common/hooks/use_action_type_model';

@@ -29,7 +29,7 @@ import type { Option } from 'fp-ts/Option';
 import { none, some } from 'fp-ts/Option';
 import type { ConnectorFormSchema } from '@kbn/alerts-ui-shared';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types/action_types';
-import { useActionTypeModel } from '@kbn/alerts-ui-shared';
+import { useActionTypeModel } from '@kbn/alerts-ui-shared/src/common/hooks/use_action_type_model';
 import { ReadOnlyConnectorMessage } from './read_only';
 import type {
   ActionConnector,

@@ -25,7 +25,7 @@ import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { i18n } from '@kbn/i18n';
 import { getConnectorCompatibility } from '@kbn/actions-plugin/common';
 import type { ConnectorFormSchema } from '@kbn/alerts-ui-shared';
-import { useActionTypeModel } from '@kbn/alerts-ui-shared';
+import { useActionTypeModel } from '@kbn/alerts-ui-shared/src/common/hooks/use_action_type_model';
 import { isLLMConnectorTypeId } from '@kbn/response-ops-rule-form/src/constants';
 import {
   DEPRECATED_LLM_CONNECTOR_CALLOUT_TITLE,
