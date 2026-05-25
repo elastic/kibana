@@ -57,7 +57,9 @@ describe('buildCommentBody', () => {
   });
 
   it('returns null when testMode is true, even if SO types appear changed (pass)', () => {
-    expect(buildCommentBody(report({ updatedTypes: ['person-so-type'], testMode: true }))).toBeNull();
+    expect(
+      buildCommentBody(report({ updatedTypes: ['person-so-type'], testMode: true }))
+    ).toBeNull();
   });
 
   it('returns null when testMode is true, even if the check failed', () => {
