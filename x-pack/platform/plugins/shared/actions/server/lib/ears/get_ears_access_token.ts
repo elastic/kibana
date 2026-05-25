@@ -47,6 +47,10 @@ export const getEarsAccessToken = async ({
   profileUid,
   forceRefresh = false,
 }: GetEarsAccessTokenOpts): Promise<string | null> => {
+  logger.debug(
+    `[EARS][${provider}] getEarsAccessToken called — connectorId: ${connectorId}, forceRefresh: ${forceRefresh}`
+  );
+
   const isPerUser = authMode === 'per-user';
 
   if (isPerUser && !profileUid) {

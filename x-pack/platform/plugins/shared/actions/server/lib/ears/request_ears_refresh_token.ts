@@ -34,6 +34,10 @@ export async function requestEarsRefreshToken(
   const { refreshEndpoint: earsRefreshPath } = getEarsEndpointsForProvider(provider);
   const refreshUrl = resolveEarsUrl(earsRefreshPath, configurationUtilities.getEarsUrl());
 
+  logger.debug(
+    `[EARS][${provider}] sending refresh request — refresh_token: ${params.refreshToken}`
+  );
+
   const res = await request({
     axios: axiosInstance,
     url: refreshUrl,
@@ -50,6 +54,9 @@ export async function requestEarsRefreshToken(
   });
 
   if (res.status === 200) {
+    logger.debug(
+      `[EARS][${provider}] token refresh succeeded — token_type: ${res.data.token_type} access_token: ${res.data.access_token} refresh_token: ${res.data.refresh_token}`
+    );
     return {
       tokenType: res.data.token_type,
       accessToken: res.data.access_token,

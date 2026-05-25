@@ -39,6 +39,8 @@ export const generateExecutorFunction = ({
     } = execOptions;
     const { subAction, subActionParams } = params as ExecutorParams;
 
+    logger.debug(`[generateExecutorFunction] connectorId: ${connectorId}, subAction: ${subAction}`);
+
     const axiosInstance = await getAxiosInstanceWithAuth({
       connectorId,
       connectorTokenClient,

@@ -84,6 +84,10 @@ export class EarsStrategy implements AxiosAuthStrategy {
         // spec handler can throw its formatted error rather than looping forever.
         if ((response.config as { _retry?: boolean })._retry) return response;
 
+        deps.logger.debug(
+          `[EARS][slack] ok:false auth error triggering token refresh — error: ${body.error}, url: ${response.config.url}`
+        );
+
         return this.refreshAndRetry(
           axiosInstance,
           deps,
@@ -101,6 +105,12 @@ export class EarsStrategy implements AxiosAuthStrategy {
         if (error.config._retry) {
           return Promise.reject(error);
         }
+
+        deps.logger.debug(
+          `[EARS][${
+            (deps.secrets as EarsSecrets).provider ?? 'unknown'
+          }] HTTP 401 triggering token refresh — url: ${error.config.url}`
+        );
 
         try {
           return await this.refreshAndRetry(axiosInstance, deps, error.config, (msg) => {
