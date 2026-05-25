@@ -17,6 +17,7 @@ import {
   EuiHorizontalRule,
   EuiSkeletonText,
   EuiSpacer,
+  EuiFlexGroup,
   EuiText,
   EuiTitle,
   useGeneratedHtmlId,
@@ -30,11 +31,13 @@ import type {
   ExceptionsBuilderReturnExceptionItem,
 } from '@kbn/securitysolution-list-utils';
 import {
+  getMalformedMatchesFields,
   hasPartialCodeSignatureEntry,
   hasWrongOperatorWithWildcard,
 } from '@kbn/securitysolution-list-utils';
 
 import {
+  MalformedMatchesValueCallout,
   PartialCodeSignatureCallout,
   WildCardWithWrongOperatorCallout,
 } from '@kbn/securitysolution-exception-list-components';
@@ -173,6 +176,8 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       expireErrorExists,
       wildcardWarningExists,
       partialCodeSignatureWarningExists,
+      malformedMatchesValueExists,
+      malformedMatchesFields,
     },
     dispatch,
   ] = useReducer(createExceptionItemsReducer(), {
@@ -209,6 +214,8 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
         type: 'setPartialCodeSignature',
         warningExists: hasPartialCodeSignatureEntry(items),
       });
+      const fields = getMalformedMatchesFields(items);
+      dispatch({ type: 'setMalformedMatchesValue', fields });
       dispatch({
         type: 'setExceptionItems',
         items,
@@ -476,12 +483,12 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   ]);
 
   const handleOnSubmit = useCallback(() => {
-    if (wildcardWarningExists) {
+    if (wildcardWarningExists || malformedMatchesValueExists) {
       setShowConfirmModal(true);
     } else {
       return submitException();
     }
-  }, [wildcardWarningExists, submitException]);
+  }, [wildcardWarningExists, malformedMatchesValueExists, submitException]);
 
   const isSubmitButtonDisabled = isSubmitDisabled({
     isSubmitting,
@@ -519,7 +526,10 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   const confirmModal = useMemo(() => {
     const labels = CONFIRM_WARNING_MODAL_LABELS(
       listType === ExceptionListTypeEnum.ENDPOINT ? ENDPOINT_EXCEPTION : RULE_EXCEPTION,
-      { hasWildcardWithWrongOperator: wildcardWarningExists },
+      {
+        hasWildcardWithWrongOperator: wildcardWarningExists,
+        hasMalformedMatchesValue: malformedMatchesFields,
+      },
       links
     );
 
@@ -531,7 +541,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
         data-test-subj="artifactConfirmModal"
       />
     );
-  }, [links, listType, submitException, wildcardWarningExists]);
+  }, [links, listType, submitException, wildcardWarningExists, malformedMatchesFields]);
 
   return (
     <EuiFlyout
@@ -597,8 +607,15 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
           onSetErrorExists={setConditionsValidationError}
           getExtendedFields={getExtendedFields}
         />
-        {wildcardWarningExists && <WildCardWithWrongOperatorCallout />}
-        {partialCodeSignatureWarningExists && <PartialCodeSignatureCallout />}
+        {(wildcardWarningExists ||
+          malformedMatchesValueExists ||
+          partialCodeSignatureWarningExists) && (
+          <EuiFlexGroup direction="column" gutterSize="s">
+            {wildcardWarningExists && <WildCardWithWrongOperatorCallout />}
+            {malformedMatchesValueExists && <MalformedMatchesValueCallout />}
+            {partialCodeSignatureWarningExists && <PartialCodeSignatureCallout />}
+          </EuiFlexGroup>
+        )}
         {listType !== ExceptionListTypeEnum.ENDPOINT && !sharedListToAddTo?.length && (
           <>
             <EuiHorizontalRule />

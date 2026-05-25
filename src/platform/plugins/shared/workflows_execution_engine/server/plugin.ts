@@ -17,7 +17,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { ExecutionStatus, WorkflowRepository } from '@kbn/workflows';
+import { ExecutionStatus, pickManagedWorkflowFields, WorkflowRepository } from '@kbn/workflows';
 import type {
   BulkScheduleWorkflowResult,
   ConcurrencySettings,
@@ -78,7 +78,11 @@ import {
   WORKFLOW_RUN_TASK_TYPE,
   WORKFLOW_SCHEDULED_TASK_TYPE,
 } from './workflow_task_manager/types';
-import { WorkflowTaskManager } from './workflow_task_manager/workflow_task_manager';
+import {
+  getWorkflowGlobalTimeoutResumeTaskId,
+  WorkflowTaskManager,
+} from './workflow_task_manager/workflow_task_manager';
+import { createWorkflowTaskAbortController } from './workflow_task_shutdown';
 import { createIndexes } from '../common';
 
 /**
@@ -176,11 +180,11 @@ export class WorkflowsExecutionEnginePlugin
         timeout: '365d',
         // Retries allow `resolveInterruptedWorkflowRunTask` to fail-fast abandoned executions after interrupt.
         maxAttempts: WORKFLOW_RUN_TASK_MAX_ATTEMPTS,
-        createTaskRunner: ({ taskInstance, fakeRequest }) => {
+        createTaskRunner: ({ taskInstance, fakeRequest, abortController }) => {
           if (!fakeRequest) {
             throw new Error('Cannot execute a workflow without Kibana Request');
           }
-          const taskAbortController = new AbortController();
+          const taskAbortController = createWorkflowTaskAbortController(abortController);
           return {
             run: async () => {
               const { workflowRunId, spaceId } =
@@ -280,11 +284,11 @@ export class WorkflowsExecutionEnginePlugin
         timeout: '365d',
         // Retries allow `resolveInterruptedWorkflowResumeTask` to fail-fast abandoned executions after interrupt.
         maxAttempts: WORKFLOW_RESUME_TASK_MAX_ATTEMPTS,
-        createTaskRunner: ({ taskInstance, fakeRequest }) => {
+        createTaskRunner: ({ taskInstance, fakeRequest, abortController }) => {
           if (!fakeRequest) {
             throw new Error('Cannot resume a workflow without Kibana Request');
           }
-          const taskAbortController = new AbortController();
+          const taskAbortController = createWorkflowTaskAbortController(abortController);
           return {
             run: async () => {
               const { workflowRunId, spaceId } =
@@ -388,11 +392,11 @@ export class WorkflowsExecutionEnginePlugin
         // The workflow timeout logic defined in workflow execution engine logic is the primary control.
         timeout: '365d',
         maxAttempts: 3,
-        createTaskRunner: ({ taskInstance, fakeRequest }) => {
+        createTaskRunner: ({ taskInstance, fakeRequest, abortController }) => {
           if (!fakeRequest) {
             throw new Error('Cannot execute a scheduled workflow without Kibana Request');
           }
-          const taskAbortController = new AbortController();
+          const taskAbortController = createWorkflowTaskAbortController(abortController);
           return {
             run: async () => {
               const { workflowId, spaceId } = taskInstance.params as {
@@ -451,7 +455,9 @@ export class WorkflowsExecutionEnginePlugin
               const workflowRepository = new WorkflowRepository({ esClient, logger });
               const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
 
-              const workflow = await workflowRepository.getWorkflow(workflowId, spaceId);
+              const workflow = await workflowRepository.getWorkflow(workflowId, spaceId, {
+                includeGlobal: true,
+              });
               if (!workflow) {
                 logger.error(`Workflow ${workflowId} not found`);
                 return;
@@ -512,6 +518,7 @@ export class WorkflowsExecutionEnginePlugin
                 id: generateUuid(),
                 spaceId,
                 workflowId: workflow.id,
+                ...pickManagedWorkflowFields(workflow),
                 isTestRun: false,
                 workflowDefinition: workflow.definition,
                 yaml: workflow.yaml,
@@ -635,7 +642,9 @@ export class WorkflowsExecutionEnginePlugin
       if (workflow.isTestRun) {
         return;
       }
-      const stillEnabled = await workflowRepository.isWorkflowEnabled(workflow.id, spaceId);
+      const stillEnabled = await workflowRepository.isWorkflowEnabled(workflow.id, spaceId, {
+        includeGlobal: true,
+      });
       if (!stillEnabled) {
         throw new Error(`Workflow is disabled: ${workflow.id}. Enable the workflow to run it.`);
       }
@@ -677,6 +686,7 @@ export class WorkflowsExecutionEnginePlugin
         id: generateUuid(),
         spaceId,
         workflowId: workflow.id,
+        ...pickManagedWorkflowFields(workflow),
         isTestRun: workflow.isTestRun,
         workflowDefinition: workflow.definition,
         yaml: workflow.yaml,
@@ -936,7 +946,9 @@ export class WorkflowsExecutionEnginePlugin
       const enabledMap =
         enabledRefs.length === 0
           ? new Map<string, boolean>()
-          : await workflowRepository.areWorkflowsEnabled(enabledRefs);
+          : await workflowRepository.areWorkflowsEnabled(enabledRefs, {
+              includeGlobal: true,
+            });
 
       interface PreparedItem {
         idx: number;
@@ -1093,6 +1105,7 @@ export class WorkflowsExecutionEnginePlugin
         spaceId: workflow.spaceId,
         stepId,
         workflowId: workflow.id,
+        ...pickManagedWorkflowFields(workflow),
         isTestRun: workflow.isTestRun,
         workflowDefinition: workflow.definition,
         yaml: workflow.yaml,
@@ -1267,6 +1280,16 @@ export class WorkflowsExecutionEnginePlugin
         spaceId,
         fakeRequest: request,
       });
+
+      await plugins.taskManager
+        .removeIfExists(getWorkflowGlobalTimeoutResumeTaskId(executionId))
+        .catch((error: unknown) => {
+          this.logger.warn(
+            `Failed to remove idle-timeout resume task (execution=${executionId}): ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
+        });
 
       // Same idea as cancel: nudge TM so the resume task runs as soon as possible
       await workflowTaskManager.forceRunIdleTasks(executionId);
