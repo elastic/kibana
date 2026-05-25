@@ -117,6 +117,14 @@ const baselineForSkill = (skillName: AutomaticMigrationSkillName): string[] => {
  * every happy-path example shows them as "extra tools" and pollutes the
  * diagnostic output. `createSkillInvocationEvaluator` already covers SKILL.md
  * activation, so we strip these from the trajectory's actual-tool view.
+ *
+ * NOTE: The upstream `createSkillInvocationEvaluator` (in `@kbn/evals`) queries
+ * for `attributes.gen_ai.tool.name == "filestore.read"` (without `platform.`
+ * prefix). If the Agent Builder runtime emits traces with the prefixed name
+ * `platform.filestore.read`, the evaluator returns 0 even when the skill was
+ * invoked. This is a known upstream issue — when `skill_invoked` is 0 across
+ * all scenarios but criteria/trajectory pass, it signals this mismatch rather
+ * than a real activation failure. Track in the @kbn/evals package.
  */
 const TRAJECTORY_IGNORED_TOOL_IDS = new Set<string>(['platform.filestore.read', 'filestore.read']);
 

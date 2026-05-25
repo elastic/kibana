@@ -98,8 +98,12 @@ Do **NOT** use this skill for:
   \`retry: 'selected'\` and \`selection.ids: [...]\`. This skill applies
   field-level corrections; it does not re-invoke the translator.
 - Editing already-installed detection rules in the live rules index — use
-  \`detection-rule-edit\`. This skill only touches the **translated rule
-  draft** that has not yet been installed.
+  \`detection-rule-edit\`. If the user says "installed", "running in
+  production", "already deployed", "in my live rules", or otherwise
+  indicates the rule has left the migration draft and been promoted to
+  the live detection engine, this skill does NOT apply. Only rules that
+  are still in the \`migration_translated_rules\` draft index are in
+  scope. Decline politely and reference \`detection-rule-edit\`.
 
 ## Process
 

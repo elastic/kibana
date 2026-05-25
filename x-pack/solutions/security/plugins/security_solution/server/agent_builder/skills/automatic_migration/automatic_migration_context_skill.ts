@@ -80,8 +80,13 @@ Do **NOT** use this skill for:
 - Creating a brand-new detection rule from scratch — use
   \`detection-rule-edit\`.
 - Editing already-installed detection rules — use \`detection-rule-edit\`.
-- Bulk uploading hundreds of resources programmatically — that is a
-  backfill / import job, not an interactive chat skill.
+- Bulk uploading many resources at once (e.g. "upload these 50 macros",
+  "import all resources from a zip", "batch-apply all from the library").
+  This skill handles ONE resource at a time through interactive chat. If
+  the user asks to upload more than a few resources at once, refuse
+  politely: explain that bulk import belongs to a programmatic API or
+  the migration upload flow, and offer to start with one resource
+  interactively instead.
 
 ## Process
 
@@ -230,8 +235,12 @@ Response:
   that already-translated rules retain the old context — operators
   often misunderstand this.
 - **No bulk import.** If the user asks "upload these 50 documents",
-  refuse politely and direct them to the bulk import API; this skill
-  is for one-resource-at-a-time interactive work.
+  "import all macros from a zip", "batch-apply everything from the
+  global library", or any request involving more than a handful of
+  resources at once, refuse politely. Explain that this skill is for
+  one-resource-at-a-time interactive work and direct them to the bulk
+  import API or the migration upload flow. Offer to start with one
+  resource interactively so they can validate the shape first.
 
 ## Upsert Resources API (write via workflow_execute_step)
 

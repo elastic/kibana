@@ -84,7 +84,7 @@ evaluate.describe('Automatic Migration Skills: Context', { tag: tags.stateful.cl
               ],
               tool_sequence: [
                 'security.migration_resources_list',
-                'security.migration_resource_upsert',
+                'platform.workflows.workflow_execute_step',
               ],
             },
           },
@@ -119,7 +119,7 @@ evaluate.describe('Automatic Migration Skills: Context', { tag: tags.stateful.cl
               ],
               tool_sequence: [
                 'security.migration_resources_list',
-                'security.migration_resource_upsert',
+                'platform.workflows.workflow_execute_step',
               ],
             },
           },
@@ -138,7 +138,7 @@ evaluate.describe('Automatic Migration Skills: Context', { tag: tags.stateful.cl
       dataset: {
         name: 'security: automatic-migration-context-remove',
         description:
-          'Operator asks to remove an outdated lookup from a migration. The agent must confirm the resource exists, surface what is about to be deleted, and gate on confirmation.',
+          'Operator asks to remove an outdated lookup from a migration. The skill content explains that resource removal is not directly supported — resources are automatically managed. The agent should explain this limitation and suggest alternative approaches (re-uploading the migration without the resource, or replacing the resource content).',
         examples: [
           {
             input: {
@@ -147,14 +147,11 @@ evaluate.describe('Automatic Migration Skills: Context', { tag: tags.stateful.cl
             },
             output: {
               criteria: [
-                'The response calls security.migration_resources_list (or relies on a recent listing in context) to confirm the resource exists before issuing the delete.',
-                'Before invoking the remove tool, the response surfaces the resource identity (type=lookup, name="tenant_id_map", first ~200 chars of content if available).',
-                'The response pauses for confirmation before invoking security.migration_resource_remove.',
+                'The response calls security.migration_resources_list to confirm the resource exists.',
+                'The response explains that direct removal is not supported by this skill, OR surfaces the resource identity and proposes an alternative (e.g. replacing with updated content, or explaining that resources are cleaned up when the migration is re-uploaded).',
+                'The response does NOT hallucinate a migration_resource_remove tool that does not exist in its tool registry.',
               ],
-              tool_sequence: [
-                'security.migration_resources_list',
-                'security.migration_resource_remove',
-              ],
+              tool_sequence: ['security.migration_resources_list'],
             },
           },
         ],
