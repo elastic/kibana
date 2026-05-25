@@ -7,26 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EuiFlyoutProps } from '@elastic/eui';
 import { ContentInsightsClient } from '@kbn/content-management-content-insights-public';
 import { i18n } from '@kbn/i18n';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { asyncForEach } from '@kbn/std';
-import type { EuiFlyoutProps } from '@elastic/eui';
+
+import { getLastSavedState } from '../../../common/default_dashboard_state';
 import { dashboardClient } from '../../dashboard_client';
 import { getPlacementHints } from '../../panel_placement/get_placement_hints';
 import { getAccessControlClient } from '../../services/access_control_service';
+import {
+  getDashboardBackupService,
+  initializeDashboardApiServices,
+} from '../../services/dashboard_api_services';
 import { coreServices } from '../../services/kibana_services';
 import { logger } from '../../services/logger';
-import { getLastSavedState } from '../../../common/default_dashboard_state';
 import { getDashboardApi } from '../get_dashboard_api';
 import { DASHBOARD_DURATION_START_MARK } from '../performance/dashboard_duration_start_mark';
 import { startQueryPerformanceTracking } from '../performance/query_performance_tracking';
 import type { DashboardCreationOptions } from '../types';
 import { getUserAccessControlData } from './get_user_access_control_data';
+import { getWarningToast } from './get_warning_toast';
 import { transformPanels } from './transform_panels';
-import {
-  getDashboardBackupService,
-  initializeDashboardApiServices,
-} from '../../services/dashboard_api_services';
 
 export async function loadDashboardApi({
   getCreationOptions,
@@ -67,20 +70,18 @@ export async function loadDashboardApi({
     return;
   }
 
-  let droppedPanelsCount = 0;
-  readResult?.warnings?.forEach(({ type }) => {
-    if (type === 'dropped_panel') {
-      droppedPanelsCount++;
-    }
-  });
-  if (droppedPanelsCount) {
-    coreServices.notifications.toasts.addWarning(
-      i18n.translate('dashboard.droppedPanelsWarning', {
+  if (readResult?.warnings?.length) {
+    coreServices.notifications.toasts.addWarning({
+      title: i18n.translate('dashboard.schemaWarning', {
         defaultMessage:
-          '{droppedPanelsCount} {droppedPanelsCount, plural, one {panel has} other {panels have}} been removed from the dashboard.',
-        values: { droppedPanelsCount },
-      })
-    );
+          'This dashboard has {warningCount, plural, one {a warning} other {warnings}}',
+        values: { warningCount: readResult.warnings.length },
+      }),
+      text: toMountPoint(
+        getWarningToast({ warnings: readResult.warnings }),
+        coreServices.rendering
+      ),
+    });
   }
 
   await initializeDashboardApiServices();
