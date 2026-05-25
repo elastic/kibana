@@ -392,7 +392,9 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
           const compose = formValuesFromYamlToCompose(result.values);
           methods.reset(compose);
           syncSandbox();
-          dispatch({ type: 'COMMIT_QUERY' });
+          if (getBreachQuery(compose.query).trim()) {
+            dispatch({ type: 'COMMIT_QUERY' });
+          }
         }
         // No syncSandbox() on parse-failure path: the debounced parse always calls
         // methods.reset() + syncSandbox() together, so RHF and sandbox state are already in
