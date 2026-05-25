@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import crypto from 'crypto';
 import type { EsClient, ObltWorkerFixtures } from '@kbn/scout-oblt';
+import { faker } from '@faker-js/faker';
 
 const ALERTS_INDEX_PATTERN = '.alerts-observability.metrics.alerts-*';
 const ALERTS_WRITE_TARGET = '.alerts-observability.metrics.alerts-default';
@@ -45,7 +45,7 @@ const createAlertDocument = ({
   ...(endTime && { 'kibana.alert.end': endTime }),
   'kibana.alert.status': status,
   'kibana.alert.time_range': { gte: alertStartTime },
-  'kibana.alert.uuid': crypto.randomUUID(),
+  'kibana.alert.uuid': faker.string.uuid(),
   'kibana.alert.workflow_status': 'open',
   'kibana.space_ids': ['default'],
   'kibana.version': '8.0.0',
