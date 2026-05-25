@@ -18,6 +18,7 @@ project:
   sourceRoot: x-pack/platform/packages/shared/response-ops/alerting-v2-episodes-ui
 dependsOn:
   - '@kbn/alerting-v2-schemas'
+  - '@kbn/datemath'
   - '@kbn/core'
   - '@kbn/core-application-browser'
   - '@kbn/core-application-browser-mocks'
