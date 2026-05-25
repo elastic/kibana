@@ -7,6 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 
+import type { PackageDataStreamTypes } from '../types';
+
 // Namespace string eventually becomes part of an index name. This method partially implements index name rules from
 // https://github.com/elastic/elasticsearch/blob/master/docs/reference/indices/create-index.asciidoc
 // and implements a limit based on https://github.com/elastic/kibana/issues/75846
@@ -118,3 +120,30 @@ function isValidEntity(
 }
 
 export const INVALID_NAMESPACE_CHARACTERS = /[\*\\/\?"<>|\s,#:-]+/;
+
+export const VALID_DATA_STREAM_TYPES: readonly PackageDataStreamTypes[] = [
+  'logs',
+  'metrics',
+  'traces',
+  'synthetics',
+  'profiling',
+];
+
+export function isValidDataStreamType(
+  type: string,
+  allowBlank?: boolean
+): { valid: boolean; error?: string } {
+  if (!type.trim() && allowBlank) {
+    return { valid: true };
+  }
+  if (!VALID_DATA_STREAM_TYPES.includes(type as PackageDataStreamTypes)) {
+    return {
+      valid: false,
+      error: i18n.translate('xpack.fleet.dataStreamTypeValidation.invalidValueErrorMessage', {
+        defaultMessage: 'Data stream type must be one of: {allowedTypes}',
+        values: { allowedTypes: VALID_DATA_STREAM_TYPES.join(', ') },
+      }),
+    };
+  }
+  return { valid: true };
+}
