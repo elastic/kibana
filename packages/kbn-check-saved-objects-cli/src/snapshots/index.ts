@@ -8,6 +8,7 @@
  */
 
 export { takeSnapshot } from './take_snapshot';
+export { extractMappingsFromSnapshot } from './extract_mappings_from_snapshot';
 export { fetchSnapshot, gcsSnapshotUrl } from './fetch_snapshot';
 export { compareSnapshots } from './compare_snapshots';
 export { getNewTypes } from './get_new_types';
