@@ -327,14 +327,9 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     output: JsonValue | null,
     sizeBytes?: number
   ): void {
-    // Clear the evicted flag so that a subsequent `prepareForRead` does not
-    // rehydrate from ES and overwrite this freshly-set value with stale data.
-    // This matters for `workflow.execute` steps on resume: the step is marked
-    // evicted during `load()` (it is not a pinned type), then `finishStep`
-    // writes the child-workflow output here. Without clearing the flag the
-    // next step's `prepareForRead` would fetch the old ES doc (persisted
-    // while the step was still in WAITING_FOR_CHILD with no output) and
-    // clobber the correct in-memory value.
+    // Fresh in-memory output is authoritative — do not let a subsequent
+    // prepareForRead rehydrate from ES and overwrite with a stale doc
+    // (common when a deferred step completes on resume before flush).
     this.clearEvicted(stepExecutionId);
 
     if (this.state.getStepExecution(stepExecutionId)?.stepType === 'data.set') {
