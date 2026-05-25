@@ -141,6 +141,11 @@ const toEsqlSourceResponse = (docs: Array<Record<string, unknown>>) => ({
   values: docs.map((doc) => [doc]),
 });
 
+/** Wraps a document in the shape returned by storageClient.search (with _source). */
+const toSearchHit = (doc: Record<string, unknown>) => ({
+  _source: doc,
+});
+
 /** Renders the ES|QL string from a mocked `storageClient.esql` call. */
 const renderEsqlCallQuery = (call: {
   metadata?: string[];
@@ -1075,20 +1080,20 @@ describe('rule lifecycle — syncQueries', () => {
     };
   }
 
-  function matchQuery(id = 'q1', esql = MATCH_ESQL): StreamQuery {
+  function matchQuery(id = 'q1', esqlQuery = MATCH_ESQL): StreamQuery {
     return {
       id,
       type: 'match',
       title: `Query ${id}`,
       description: '',
-      esql: { query: esql },
+      esql: { query: esqlQuery },
     };
   }
 
   /** Deterministic rule ID matching QueryClient's own computation for a given stream+query. */
-  function ruleIdFor(queryId: string, esql: string): string {
+  function ruleIdFor(queryId: string, esqlQuery: string): string {
     const uuid = getQueryLinkUuid(STREAM, { 'asset.type': 'query', 'asset.id': queryId });
-    return computeRuleId(uuid, esql);
+    return computeRuleId(uuid, esqlQuery);
   }
 
   /**
@@ -1097,17 +1102,17 @@ describe('rule lifecycle — syncQueries', () => {
    */
   function existingStoredDoc(
     queryId: string,
-    esql: string,
+    esqlQuery: string,
     opts: { ruleBacked?: boolean } = {}
   ): Record<string, unknown> {
     const uuid = getQueryLinkUuid(STREAM, { 'asset.type': 'query', 'asset.id': queryId });
     return createOldShapeStoredDoc({
       [ASSET_ID]: queryId,
       [ASSET_UUID]: uuid,
-      [QUERY_ESQL_QUERY]: esql,
+      [QUERY_ESQL_QUERY]: esqlQuery,
       [QUERY_TITLE]: `Query ${queryId}`,
       [RULE_BACKED]: opts.ruleBacked ?? true,
-      [RULE_ID]: computeRuleId(uuid, esql),
+      [RULE_ID]: computeRuleId(uuid, esqlQuery),
     });
   }
 

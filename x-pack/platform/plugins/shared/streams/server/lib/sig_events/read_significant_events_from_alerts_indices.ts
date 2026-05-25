@@ -28,6 +28,11 @@ const EMPTY_CHANGE_POINTS = { type: {} } as const;
 // — mirrors the pre-ES|QL DSL `notFoundSignificantEvents` behaviour.
 const EMPTY_OCCURRENCES: Array<{ date: string; count: number }> = [];
 
+export const V1_ALERTS_SOURCE = 'v1' as const;
+export const V2_ALERTS_SOURCE = 'v2' as const;
+
+export type AlertsSource = typeof V1_ALERTS_SOURCE | typeof V2_ALERTS_SOURCE;
+
 export async function readSignificantEventsFromAlertsIndices(
   params: {
     streamNames?: string[];
@@ -37,6 +42,7 @@ export async function readSignificantEventsFromAlertsIndices(
     query?: string;
     filters?: QueryLinkFilters;
     searchMode?: SearchMode;
+    alertsSource?: AlertsSource;
   },
   dependencies: {
     queryClient: QueryClient;
@@ -52,6 +58,7 @@ export async function readSignificantEventsFromAlertsIndices(
     query,
     filters,
     searchMode,
+    alertsSource,
   } = params;
 
   const queryLinks = query
