@@ -148,13 +148,7 @@ export async function update(
   );
 
   return {
-    body: getDashboardCRUResponseBody(
-      updated,
-      'update',
-      dashboardStateSchema,
-      isDashboardAppRequest,
-      serverTiming
-    ),
+    body: getDashboardCRUResponseBody(updated, 'update', isDashboardAppRequest, serverTiming),
     operation: 'update',
   };
 }

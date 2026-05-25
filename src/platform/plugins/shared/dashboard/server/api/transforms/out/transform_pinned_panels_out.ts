@@ -91,21 +91,8 @@ export function transformPinnedPanelsOut(
       type: 'schema_warning',
       message: `Error: ${e.message}`, // the size error message is already descriptive enough
     });
-    // const max = schema.getSchema().extract('pinned_panels').$_getRule('max')?.args?.limit;
-    // if (typeof max === 'number') {
-    //   for (let i = max; i < transformedPanels.length; i++) {
-    //     const panel = transformedPanels[i];
-    //     warnings.push({
-    //       type: 'dropped_panel',
-    //       panel_type: panel.type,
-    //       panel_config: panel.config,
-    //       message: `Error: ${e.message}`, // the size error message is already descriptive enough
-    //     });
-    //   }
-    //   transformedPanels = transformedPanels.slice(0, max);
-    // }
   }
-  // console.log(schema.getPropSchemas().pinned_panels.getSchema().failover());
+
   return { warnings, panels: transformedPanels };
 }
 

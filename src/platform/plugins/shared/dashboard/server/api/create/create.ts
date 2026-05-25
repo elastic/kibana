@@ -51,11 +51,5 @@ export async function create(
     }
   );
 
-  return getDashboardCRUResponseBody(
-    savedObject,
-    'create',
-    dashboardStateSchema,
-    isDashboardAppRequest,
-    serverTiming
-  );
+  return getDashboardCRUResponseBody(savedObject, 'create', isDashboardAppRequest, serverTiming);
 }

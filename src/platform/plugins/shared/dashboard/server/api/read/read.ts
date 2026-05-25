@@ -43,13 +43,7 @@ export async function read(
   }
 
   return {
-    body: getDashboardCRUResponseBody(
-      savedObject,
-      'read',
-      dashboardStateSchema,
-      isDashboardAppRequest,
-      serverTiming
-    ),
+    body: getDashboardCRUResponseBody(savedObject, 'read', isDashboardAppRequest, serverTiming),
     resolveHeaders,
   };
 }

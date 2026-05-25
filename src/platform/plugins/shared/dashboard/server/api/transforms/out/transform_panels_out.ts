@@ -19,7 +19,6 @@ import type { getDashboardStateSchema } from '../../dashboard_state_schemas';
 import type { DashboardPanel, DashboardSection, DashboardState, Warnings } from '../../types';
 import { getPanelReferences } from './get_panel_references';
 import { panelBwc } from './panel_bwc';
-import { isDashboardSection } from '../../../../common';
 
 export function transformPanelsOut(
   panelsJSON: string = '[]',
@@ -96,32 +95,6 @@ export function transformPanelsOut(
       type: 'schema_warning',
       message: `Error: ${e.message}`, // the size error message is already descriptive enough
     });
-
-    // const max = dashboardSchema.getSchema().extract('panels').$_getRule('max')?.args?.limit;
-    // if (typeof max === 'number') {
-    //   for (let i = max; i < transformedPanels.length; i++) {
-    //     const widget = transformedPanels[i];
-    //     if (isDashboardSection(widget)) {
-    //       //
-    //       transformedPanels[i] = transformedPanels.slice(0, max);
-
-    //       warnings.push({
-    //         type: 'dropped_panel',
-    //         panel_type: 'collapsible_section',
-    //         panel_config: widget,
-    //         message: `Error: ${e.message}`, // the size error message is already descriptive enough
-    //       });
-    //     } else {
-    //       warnings.push({
-    //         type: 'dropped_panel',
-    //         panel_type: widget.type,
-    //         panel_config: widget.config,
-    //         message: `Error: ${e.message}`, // the size error message is already descriptive enough
-    //       });
-    //     }
-    //   }
-    //   transformedPanels = transformedPanels.slice(0, max);
-    // }
   }
 
   return {

@@ -103,7 +103,7 @@ const sectionGridSchema = schema.object({
   y: schema.number({ meta: { description: 'The y coordinate of the section in grid units.' } }),
 });
 
-export function getSectionSchema(isDashboardAppRequest: boolean) {
+export function getSectionSchema(isDashboardAppRequest: boolean, isReadRequest: boolean = false) {
   return schema.object(
     {
       title: schema.string({
@@ -117,23 +117,21 @@ export function getSectionSchema(isDashboardAppRequest: boolean) {
         defaultValue: false,
       }),
       grid: sectionGridSchema,
-      panels: isDashboardAppRequest
-        ? schema.arrayOf(
-            schema.object(
+      panels: schema.arrayOf(
+        isDashboardAppRequest
+          ? getPanelSchema()
+          : (schema.object(
               {},
               {
                 unknowns: 'allow',
               }
-            ) as unknown as ReturnType<typeof getPanelSchema>, // keeps derived types happy
-            {
-              maxSize: Number.MAX_SAFE_INTEGER,
-            }
-          )
-        : schema.arrayOf(getPanelSchema(), {
-            meta: { description: 'The panels that belong to the section.' },
-            defaultValue: [],
-            maxSize: MAX_PANELS,
-          }),
+            ) as unknown as ReturnType<typeof getPanelSchema>),
+        {
+          meta: { description: 'The panels that belong to the section.' },
+          defaultValue: [],
+          maxSize: isDashboardAppRequest && isReadRequest ? Number.MAX_SAFE_INTEGER : MAX_PANELS,
+        }
+      ),
       id: schema.maybe(
         schema.string({
           meta: { description: 'The unique ID of the section.' },
