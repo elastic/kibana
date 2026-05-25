@@ -21,6 +21,8 @@ import { PackagePolicyNameExistsError } from '../../errors';
 
 import { getSpaceSettings } from './space_settings';
 
+export { isNamespaceAllowedByPrefixes } from '../../../common/services/namespace_prefixes';
+
 /**
  * Returns the allowed namespace prefixes for the given Kibana space, or `null`
  * if no restriction applies (space awareness disabled or no prefixes configured).
@@ -37,20 +39,6 @@ export async function getAllowedNamespacePrefixesForSpace(
     return null;
   }
   return settings.allowed_namespace_prefixes;
-}
-
-/**
- * Returns true if the namespace is permitted by the given prefix list.
- * `null` means no restriction (anything is permitted).
- */
-export function isNamespaceAllowedByPrefixes(
-  namespace: string,
-  prefixes: string[] | null
-): boolean {
-  if (prefixes === null) {
-    return true;
-  }
-  return prefixes.some((prefix) => namespace.startsWith(prefix));
 }
 
 export async function validatePolicyNamespaceForSpace({
