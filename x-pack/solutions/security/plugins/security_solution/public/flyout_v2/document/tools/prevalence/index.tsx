@@ -11,8 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiFlyoutBody, EuiFlyoutHeader, useEuiTheme } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { ToolsFlyoutHeader } from '../../../shared/components/tools_flyout_header';
-import { useDocumentFlyoutTitle } from '../../../shared/hooks/use_document_flyout_title';
+import { DocumentToolsFlyoutHeader } from '../../../shared/components/document_tools_flyout_header';
 import type { PrevalenceDetailsRow } from './utils/get_columns';
 import { PrevalenceDetailsView } from './components/prevalence_details_view';
 
@@ -49,7 +48,6 @@ export const PrevalenceDetails: React.FC<PrevalenceDetailsProps> = ({
   columns,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const { label, iconType, onTitleClick, badge, timestamp } = useDocumentFlyoutTitle({ hit });
 
   return (
     <>
@@ -59,14 +57,7 @@ export const PrevalenceDetails: React.FC<PrevalenceDetailsProps> = ({
           padding-block: ${euiTheme.size.s} !important;
         `}
       >
-        <ToolsFlyoutHeader
-          title={TITLE}
-          onTitleClick={onTitleClick}
-          label={label}
-          iconType={iconType}
-          badge={badge}
-          timestamp={timestamp}
-        />
+        <DocumentToolsFlyoutHeader title={TITLE} hit={hit} />
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <PrevalenceDetailsView

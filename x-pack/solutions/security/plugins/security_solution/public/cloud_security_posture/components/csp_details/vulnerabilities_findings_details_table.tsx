@@ -118,14 +118,14 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
     scopeId,
     entityId,
     entityType,
-    onExpandVulnerability,
+    onShowVulnerability,
   }: {
     identityField: CloudPostureEntityIdentifier;
     value: string;
     scopeId: string;
     entityId?: string;
     entityType?: string;
-    onExpandVulnerability?: (params: {
+    onShowVulnerability?: (params: {
       vulnerabilityId: string;
       resourceId: string;
       packageName: string;
@@ -343,14 +343,14 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
               iconType="maximize"
               onClick={() => {
                 if (
-                  onExpandVulnerability &&
+                  onShowVulnerability &&
                   vulnerabilityId &&
                   resourceId &&
                   packageName &&
                   packageVersion &&
                   eventId
                 ) {
-                  onExpandVulnerability({
+                  onShowVulnerability({
                     vulnerabilityId,
                     resourceId,
                     packageName,

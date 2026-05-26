@@ -37,6 +37,9 @@ export interface MisconfigurationInsightsProps {
   onOpenHost?: () => void;
 }
 
+/**
+ * Tool flyout displaying CSP misconfiguration findings for a host entity.
+ */
 export const MisconfigurationInsights = memo(
   ({ value, entityId, scopeId, onOpenHost }: MisconfigurationInsightsProps) => {
     const { services } = useKibana();
@@ -45,7 +48,7 @@ export const MisconfigurationInsights = memo(
     const history = useHistory();
     const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
 
-    const onExpandFinding = useCallback(
+    const onShowFinding = useCallback(
       (resourceId: string, ruleId: string) => {
         overlays.openSystemFlyout(
           flyoutProviders({
@@ -76,7 +79,7 @@ export const MisconfigurationInsights = memo(
           scopeId={scopeId}
           entityId={entityId}
           entityType={EntityType.host}
-          onExpandFinding={onExpandFinding}
+          onShowFinding={onShowFinding}
         />
       </>
     );

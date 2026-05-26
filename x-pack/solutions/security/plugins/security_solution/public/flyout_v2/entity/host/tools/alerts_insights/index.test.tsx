@@ -42,13 +42,13 @@ jest.mock(
       value,
       entityId,
       entityType,
-      onExpandAlert,
+      onShowAlert,
     }: {
       field: string;
       value: string;
       entityId?: string;
       entityType?: string;
-      onExpandAlert?: (eventId: string, indexName: string) => void;
+      onShowAlert?: (eventId: string, indexName: string) => void;
     }) => (
       <button
         type="button"
@@ -57,7 +57,7 @@ jest.mock(
         data-value={value}
         data-entity-id={entityId ?? ''}
         data-entity-type={entityType ?? ''}
-        onClick={() => onExpandAlert?.('event-1', '.alerts-security')}
+        onClick={() => onShowAlert?.('event-1', '.alerts-security')}
       >
         {'alerts-table'}
       </button>

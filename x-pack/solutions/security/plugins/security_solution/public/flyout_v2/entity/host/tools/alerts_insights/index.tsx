@@ -40,6 +40,9 @@ export interface AlertsInsightsProps {
   onOpenHost?: () => void;
 }
 
+/**
+ * Tool flyout displaying alert findings for a host entity.
+ */
 export const AlertsInsights = memo(({ value, entityId, onOpenHost }: AlertsInsightsProps) => {
   const { services } = useKibana();
   const store = useStore();
@@ -48,7 +51,7 @@ export const AlertsInsights = memo(({ value, entityId, onOpenHost }: AlertsInsig
   const isInSecurityApp = useIsInSecurityApp();
   const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
 
-  const onExpandAlert = useCallback(
+  const onShowAlert = useCallback(
     (eventId: string, indexName: string) => {
       services.overlays.openSystemFlyout(
         flyoutProviders({
@@ -89,7 +92,7 @@ export const AlertsInsights = memo(({ value, entityId, onOpenHost }: AlertsInsig
         value={value}
         entityId={entityId}
         entityType={EntityType.host}
-        onExpandAlert={onExpandAlert}
+        onShowAlert={onShowAlert}
       />
     </>
   );

@@ -43,14 +43,14 @@ jest.mock(
       scopeId,
       entityId,
       entityType,
-      onExpandFinding,
+      onShowFinding,
     }: {
       field: string;
       value: string;
       scopeId: string;
       entityId?: string;
       entityType?: string;
-      onExpandFinding?: (resourceId: string, ruleId: string) => void;
+      onShowFinding?: (resourceId: string, ruleId: string) => void;
     }) => (
       <button
         type="button"
@@ -60,7 +60,7 @@ jest.mock(
         data-scope-id={scopeId}
         data-entity-id={entityId ?? ''}
         data-entity-type={entityType ?? ''}
-        onClick={() => onExpandFinding?.('resource-1', 'rule-1')}
+        onClick={() => onShowFinding?.('resource-1', 'rule-1')}
       >
         {'misconfiguration-table'}
       </button>

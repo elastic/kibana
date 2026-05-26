@@ -11,8 +11,7 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { EuiFlyoutBody, EuiFlyoutHeader, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useSelector } from 'react-redux';
-import { ToolsFlyoutHeader } from '../../components/tools_flyout_header';
-import { useDocumentFlyoutTitle } from '../../hooks/use_document_flyout_title';
+import { DocumentToolsFlyoutHeader } from '../../components/document_tools_flyout_header';
 import { useTimelineConfig } from './hooks/use_timeline_config';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 import type { State } from '../../../../common/store';
@@ -51,7 +50,6 @@ export interface NotesDetailsProps {
  */
 export const NotesDetails = memo(({ hit }: NotesDetailsProps) => {
   const { euiTheme } = useEuiTheme();
-  const { label, iconType, onTitleClick, badge, timestamp } = useDocumentFlyoutTitle({ hit });
   const eventId = hit.raw._id ?? '';
 
   const isTimelineOpen = useSelector(
@@ -70,14 +68,7 @@ export const NotesDetails = memo(({ hit }: NotesDetailsProps) => {
           padding-block: ${euiTheme.size.s} !important;
         `}
       >
-        <ToolsFlyoutHeader
-          title={TITLE}
-          onTitleClick={onTitleClick}
-          label={label}
-          iconType={iconType}
-          badge={badge}
-          timestamp={timestamp}
-        />
+        <DocumentToolsFlyoutHeader title={TITLE} hit={hit} />
       </EuiFlyoutHeader>
       <EuiFlyoutBody data-test-subj={NOTES_DETAILS_TEST_ID}>
         <NotesDetailsContent

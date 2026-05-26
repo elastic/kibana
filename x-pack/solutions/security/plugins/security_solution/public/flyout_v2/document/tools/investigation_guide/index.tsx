@@ -19,8 +19,7 @@ import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
 import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
-import { ToolsFlyoutHeader } from '../../../shared/components/tools_flyout_header';
-import { useDocumentFlyoutTitle } from '../../../shared/hooks/use_document_flyout_title';
+import { DocumentToolsFlyoutHeader } from '../../../shared/components/document_tools_flyout_header';
 import { InvestigationGuideView } from './components/investigation_guide_view';
 
 export interface InvestigationGuideProps {
@@ -40,7 +39,6 @@ const TITLE = i18n.translate('xpack.securitySolution.flyout.investigationGuide.t
  */
 export const InvestigationGuide = memo(({ hit }: InvestigationGuideProps) => {
   const { euiTheme } = useEuiTheme();
-  const { label, iconType, onTitleClick, badge, timestamp } = useDocumentFlyoutTitle({ hit });
   const isAlert = useMemo(
     () => Boolean(getFieldValue(hit, 'kibana.alert.rule.uuid') as string),
     [hit]
@@ -65,14 +63,7 @@ export const InvestigationGuide = memo(({ hit }: InvestigationGuideProps) => {
           padding-block: ${euiTheme.size.s} !important;
         `}
       >
-        <ToolsFlyoutHeader
-          title={TITLE}
-          onTitleClick={onTitleClick}
-          label={label}
-          iconType={iconType}
-          badge={badge}
-          timestamp={timestamp}
-        />
+        <DocumentToolsFlyoutHeader title={TITLE} hit={hit} />
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         {loading ? (

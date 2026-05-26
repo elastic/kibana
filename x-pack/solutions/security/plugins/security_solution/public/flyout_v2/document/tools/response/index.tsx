@@ -10,8 +10,7 @@ import React, { memo } from 'react';
 import { EuiFlyoutBody, EuiFlyoutHeader, useEuiTheme } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
-import { ToolsFlyoutHeader } from '../../../shared/components/tools_flyout_header';
-import { useDocumentFlyoutTitle } from '../../../shared/hooks/use_document_flyout_title';
+import { DocumentToolsFlyoutHeader } from '../../../shared/components/document_tools_flyout_header';
 import { ResponseDetailsContent } from './components/response_details';
 
 const TITLE = i18n.translate('xpack.securitySolution.flyout.response.title', {
@@ -30,7 +29,6 @@ export interface ResponseDetailsProps {
  */
 export const ResponseDetails = memo(({ hit }: ResponseDetailsProps) => {
   const { euiTheme } = useEuiTheme();
-  const { label, iconType, onTitleClick, badge, timestamp } = useDocumentFlyoutTitle({ hit });
 
   return (
     <>
@@ -40,14 +38,7 @@ export const ResponseDetails = memo(({ hit }: ResponseDetailsProps) => {
           padding-block: ${euiTheme.size.s} !important;
         `}
       >
-        <ToolsFlyoutHeader
-          title={TITLE}
-          onTitleClick={onTitleClick}
-          label={label}
-          iconType={iconType}
-          badge={badge}
-          timestamp={timestamp}
-        />
+        <DocumentToolsFlyoutHeader title={TITLE} hit={hit} />
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <ResponseDetailsContent hit={hit} />
