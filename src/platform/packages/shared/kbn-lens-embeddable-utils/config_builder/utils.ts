@@ -263,10 +263,8 @@ export const buildDatasourceStates = async (
     const layer = configLayers[i];
     const layerId = `layer_${i}`;
 
-    // Annotation layers only exist in XY visualization state; they must not create a second
-    // text-based datasource (getValueColumns would be empty and breaks the chart + markers).
     if ('type' in layer && (layer as LensAnnotationLayer).type === 'annotation') {
-      continue;
+      continue; // manual annotations need no data view
     }
 
     const dataset = layer.dataset ?? mainDataset;
@@ -274,42 +272,40 @@ export const buildDatasourceStates = async (
     if (!dataset) {
       throw Error('dataset must be defined');
     }
-    if (dataset) {
-      const index = getDatasetIndex(dataset);
 
-      const dataView = index
-        ? await getDataView(
-            index,
-            dataViewsAPI,
-            isESQLDataset(dataset) ? JSON.stringify(index) : undefined
-          )
-        : undefined;
+    const index = getDatasetIndex(dataset);
+    const dataView = index
+      ? await getDataView(
+          index,
+          dataViewsAPI,
+          isESQLDataset(dataset) ? JSON.stringify(index) : undefined
+        )
+      : undefined;
 
-      const [type, layerConfig] = buildDatasourceStatesLayer(
-        layer,
-        i,
-        dataset,
-        dataView,
-        buildFormulaLayers,
-        getValueColumns
-      );
-      if (layerConfig) {
-        layers = {
-          ...layers,
-          [type]: {
-            layers: isSingleLayer(layerConfig)
-              ? { ...layers[type]?.layers, [layerId]: layerConfig }
-              : // metric chart can return 2 layers (one for the metric and one for the trendline)
-                { ...layerConfig },
-          },
-        };
-      }
+    const [type, layerConfig] = buildDatasourceStatesLayer(
+      layer,
+      i,
+      dataset,
+      dataView,
+      buildFormulaLayers,
+      getValueColumns
+    );
+    if (layerConfig) {
+      layers = {
+        ...layers,
+        [type]: {
+          layers: isSingleLayer(layerConfig)
+            ? { ...layers[type]?.layers, [layerId]: layerConfig }
+            : // metric chart can return 2 layers (one for the metric and one for the trendline)
+              { ...layerConfig },
+        },
+      };
+    }
 
-      if (dataView) {
-        Object.keys(layers[type]?.layers ?? []).forEach((id) => {
-          dataviews[id] = dataView;
-        });
-      }
+    if (dataView) {
+      Object.keys(layers[type]?.layers ?? []).forEach((id) => {
+        dataviews[id] = dataView;
+      });
     }
   }
 
