@@ -30,7 +30,7 @@ const CONNECTORS_API_PATH = '/api/actions/connectors';
 // All connector types share one cache entry: we fetch the full list once and filter client-side
 // in useMemo. Every caller must use the same `isEnabled` value; diverging values between
 // concurrent instances can cause a disabled caller to receive cached data from an enabled one.
-const ALL_CONNECTORS_KEY = ['alertingV2', 'singleStepWorkflow', 'connectors'] as const;
+export const ALL_CONNECTORS_KEY = ['alertingV2', 'singleStepWorkflow', 'connectors'] as const;
 
 const toSingleStepConnector = (c: RawConnectorResponse): SingleStepConnector => ({
   id: c.id,
