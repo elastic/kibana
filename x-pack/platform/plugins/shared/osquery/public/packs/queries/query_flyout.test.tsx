@@ -48,6 +48,14 @@ jest.mock('../../saved_queries/saved_queries_dropdown', () => ({
 }));
 
 import { QueryFlyout } from './query_flyout';
+import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
+import { allowedExperimentalValues } from '../../../common/experimental_features';
+
+beforeAll(() => {
+  ExperimentalFeaturesService.init({
+    experimentalFeatures: { ...allowedExperimentalValues, rruleScheduling: false },
+  });
+});
 
 const renderFlyout = (props: Partial<React.ComponentProps<typeof QueryFlyout>> = {}) =>
   render(

@@ -45,8 +45,13 @@ export const ToggleableRow = ({
 
   return (
     <>
-      <EuiHorizontalRule margin="s" />
-      <EuiFlexGroup gutterSize="m" alignItems="center" data-test-subj={`${dataTestSubj}-row`}>
+      <EuiHorizontalRule margin="m" />
+      <EuiFlexGroup
+        gutterSize="m"
+        alignItems="center"
+        responsive={false}
+        data-test-subj={`${dataTestSubj}-row`}
+      >
         <EuiFlexItem>
           <EuiText size="s">
             <strong>{title}</strong>
@@ -70,7 +75,7 @@ export const ToggleableRow = ({
       </EuiFlexGroup>
       {enabled && children ? (
         <>
-          <EuiSpacer size="s" />
+          <EuiSpacer size="m" />
           {children}
         </>
       ) : null}

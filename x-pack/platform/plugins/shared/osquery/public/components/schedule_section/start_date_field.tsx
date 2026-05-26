@@ -30,6 +30,7 @@ export const StartDateField = ({ value, onChange, disabled }: StartDateFieldProp
   return (
     <EuiFormRow label={START_DATE_LABEL} fullWidth>
       <EuiDatePicker
+        fullWidth
         selected={selectedMoment}
         onChange={handleChange}
         showTimeSelect

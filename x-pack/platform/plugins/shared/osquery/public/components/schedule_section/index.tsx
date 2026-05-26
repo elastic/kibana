@@ -111,11 +111,11 @@ export const ScheduleSection = ({
   const weekdaysError = !weekdaysAreValid(value);
 
   return (
-    <EuiPanel hasBorder hasShadow={false} data-test-subj="osquery-schedule-section">
+    <div data-test-subj="osquery-schedule-section">
       {title ? (
         <>
-          <EuiTitle size="xs">
-            <h3>{title}</h3>
+          <EuiTitle size="s">
+            <h2>{title}</h2>
           </EuiTitle>
           <EuiSpacer size="m" />
         </>
@@ -130,58 +130,64 @@ export const ScheduleSection = ({
 
       <EuiSpacer size="m" />
 
-      {isRecurrence ? (
-        <>
-          {hasUnknownParts ? (
-            <>
-              <EuiCallOut
-                size="s"
-                color="primary"
-                iconType="iInCircle"
-                title={ADVANCED_PARTS_ADVISORY_TITLE}
-                data-test-subj="osquery-schedule-advanced-parts-advisory"
-              >
-                <p>{ADVANCED_PARTS_ADVISORY_BODY}</p>
-              </EuiCallOut>
-              <EuiSpacer size="m" />
-            </>
-          ) : null}
+      <EuiPanel hasBorder hasShadow={false}>
+        {isRecurrence ? (
+          <>
+            {hasUnknownParts ? (
+              <>
+                <EuiCallOut
+                  size="s"
+                  color="primary"
+                  iconType="iInCircle"
+                  title={ADVANCED_PARTS_ADVISORY_TITLE}
+                  data-test-subj="osquery-schedule-advanced-parts-advisory"
+                >
+                  <p>{ADVANCED_PARTS_ADVISORY_BODY}</p>
+                </EuiCallOut>
+                <EuiSpacer size="m" />
+              </>
+            ) : null}
 
-          <StartDateField
-            value={value.startDate}
-            onChange={handleStartDateChange}
+            <StartDateField
+              value={value.startDate}
+              onChange={handleStartDateChange}
+              disabled={disabled}
+            />
+
+            <EuiSpacer size="m" />
+
+            <FrequencySelector
+              value={value.recurrence}
+              onChange={handleRecurrenceChange}
+              disabled={disabled}
+              weekdaysError={weekdaysError}
+            />
+
+            <StopAfterField
+              enabled={value.stopAfter.enabled}
+              value={value.stopAfter.date}
+              startDate={value.startDate}
+              onChange={handleStopAfterChange}
+              disabled={disabled}
+            />
+
+            <SplayTimeField
+              value={value.splay}
+              onChange={handleSplayChange}
+              frequency={value.recurrence.frequency}
+              isRecurrence
+              disabled={disabled}
+            />
+          </>
+        ) : (
+          <IntervalField
+            value={value.interval}
+            onChange={handleIntervalChange}
             disabled={disabled}
           />
-
-          <EuiSpacer size="m" />
-
-          <FrequencySelector
-            value={value.recurrence}
-            onChange={handleRecurrenceChange}
-            disabled={disabled}
-            weekdaysError={weekdaysError}
-          />
-
-          <StopAfterField
-            enabled={value.stopAfter.enabled}
-            value={value.stopAfter.date}
-            startDate={value.startDate}
-            onChange={handleStopAfterChange}
-            disabled={disabled}
-          />
-
-          <SplayTimeField
-            value={value.splay}
-            onChange={handleSplayChange}
-            frequency={value.recurrence.frequency}
-            isRecurrence
-            disabled={disabled}
-          />
-        </>
-      ) : (
-        <IntervalField value={value.interval} onChange={handleIntervalChange} disabled={disabled} />
-      )}
-    </EuiPanel>
+        )}
+      </EuiPanel>
+    </div>
   );
 };
 

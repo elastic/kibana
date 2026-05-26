@@ -16,6 +16,7 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiButton,
+  EuiText,
 } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -23,6 +24,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { FormProvider } from 'react-hook-form';
 
 import { DEFAULT_PLATFORM, QUERY_TIMEOUT } from '../../../common/constants';
+import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
 import {
   QueryIdField,
   IntervalField,
@@ -30,6 +32,13 @@ import {
   ResultsTypeField,
   TimeoutField,
 } from '../../form';
+import { ScheduleSection } from '../../components/schedule_section';
+import { ToggleableRow } from '../../components/schedule_section/toggleable_row';
+import {
+  QUERY_OVERRIDE_SCHEDULE_TOGGLE_DESCRIPTION,
+  QUERY_OVERRIDE_SCHEDULE_TOGGLE_LABEL,
+  QUERY_USING_PACK_SCHEDULE_LABEL,
+} from '../../components/schedule_section/translations';
 import { CodeEditorField } from '../../saved_queries/form/code_editor_field';
 import { PlatformCheckBoxGroupField } from './platform_checkbox_group_field';
 import { ALL_OSQUERY_VERSIONS_OPTIONS } from './constants';
@@ -49,6 +58,7 @@ interface QueryFlyoutProps {
   defaultValue?: UsePackQueryFormProps['defaultValue'] | undefined;
   onSave: (payload: PackSOQueryFormData) => void;
   onClose: () => void;
+  packSchedule?: UsePackQueryFormProps['packSchedule'];
 }
 
 const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
@@ -56,19 +66,41 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
   defaultValue,
   onSave,
   onClose,
+  packSchedule,
 }) => {
   const permissions = useKibana().services.application.capabilities.osquery;
   const [isEditMode] = useState(!!defaultValue);
+  const isRruleSchedulingEnabled = ExperimentalFeaturesService.get().rruleScheduling;
   const { serializer, idSet, ...hooksForm } = usePackQueryForm({
     uniqueQueryIds,
     defaultValue,
+    packSchedule,
   });
 
   const {
     handleSubmit,
     formState: { isSubmitting },
     resetField,
+    watch,
+    setValue,
   } = hooksForm;
+
+  const overridePackSchedule = watch('override_pack_schedule');
+  const schedule = watch('schedule');
+
+  const handleToggleOverride = useCallback(
+    (next: boolean) => {
+      setValue('override_pack_schedule', next, { shouldDirty: true });
+    },
+    [setValue]
+  );
+
+  const handleScheduleChange = useCallback(
+    (next: NonNullable<PackQueryFormData['schedule']>) => {
+      setValue('schedule', next, { shouldDirty: true });
+    },
+    [setValue]
+  );
   const onSubmit = async (payload: PackQueryFormData) => {
     const serializedData: PackSOQueryFormData = serializer(payload);
     await onSave(serializedData);
@@ -133,13 +165,47 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
           <EuiSpacer />
           <CodeEditorField />
           <EuiSpacer />
+          {isRruleSchedulingEnabled ? (
+            <>
+              <EuiFlexGroup>
+                <EuiFlexItem>
+                  <ToggleableRow
+                    title={QUERY_OVERRIDE_SCHEDULE_TOGGLE_LABEL}
+                    description={QUERY_OVERRIDE_SCHEDULE_TOGGLE_DESCRIPTION}
+                    enabled={!!overridePackSchedule}
+                    onToggle={handleToggleOverride}
+                    dataTestSubj="osquery-query-override-pack-schedule"
+                  >
+                    {schedule ? (
+                      <ScheduleSection
+                        value={schedule}
+                        onChange={handleScheduleChange}
+                        lockedScheduleType={packSchedule?.schedule_type}
+                        title={null}
+                      />
+                    ) : null}
+                  </ToggleableRow>
+                  {!overridePackSchedule && packSchedule?.schedule_type ? (
+                    <EuiText size="xs" color="subdued" data-test-subj="osquery-using-pack-schedule">
+                      {QUERY_USING_PACK_SCHEDULE_LABEL}
+                    </EuiText>
+                  ) : null}
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiSpacer />
+            </>
+          ) : null}
           <EuiFlexGroup>
             <EuiFlexItem>
-              <IntervalField
-                // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-                euiFieldProps={{ append: 's' }}
-              />
-              <EuiSpacer />
+              {!isRruleSchedulingEnabled ? (
+                <>
+                  <IntervalField
+                    // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+                    euiFieldProps={{ append: 's' }}
+                  />
+                  <EuiSpacer />
+                </>
+              ) : null}
               <VersionField
                 // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
                 euiFieldProps={{

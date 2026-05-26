@@ -12,10 +12,10 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiSelect,
-  EuiText,
+  EuiPanel,
+  EuiRadioGroup,
 } from '@elastic/eui';
-import type { EuiCheckboxGroupOption, EuiSelectOption } from '@elastic/eui';
+import type { EuiCheckboxGroupOption, EuiRadioGroupOption } from '@elastic/eui';
 import type { WeekdayStr } from '@kbn/rrule';
 import {
   AT_LEAST_ONE_DAY_ERROR,
@@ -44,13 +44,15 @@ export interface FrequencySelectorProps {
   weekdaysError?: boolean;
 }
 
+const FREQUENCY_ID_PREFIX = 'osquery-frequency-selector-option';
+
 // Daily + Custom (weekly) only for the initial release. Re-enable the other
 // frequencies by adding the corresponding entries to FREQUENCY_OPTIONS, the
 // matching FrequencyMode tokens in `./types`, and the dead JSX branches /
 // handlers / imports below.
-const FREQUENCY_OPTIONS: EuiSelectOption[] = [
-  { value: 'daily', text: FREQUENCY_DAILY },
-  { value: 'custom', text: FREQUENCY_CUSTOM },
+const FREQUENCY_OPTIONS: Array<EuiRadioGroupOption & { mode: FrequencyMode }> = [
+  { id: `${FREQUENCY_ID_PREFIX}-daily`, label: FREQUENCY_DAILY, mode: 'daily' },
+  { id: `${FREQUENCY_ID_PREFIX}-custom`, label: FREQUENCY_CUSTOM, mode: 'custom' },
 ];
 
 // MONTH_OPTIONS — unused until monthly/yearly are re-enabled.
@@ -58,7 +60,15 @@ const FREQUENCY_OPTIONS: EuiSelectOption[] = [
 //   { value: 1, text: MONTH_JAN }, ..., { value: 12, text: MONTH_DEC },
 // ];
 
-const EVERY_FLEX_STYLE: React.CSSProperties = { width: 100 };
+// EUI's `EuiRadioGroup` / `EuiCheckboxGroup` apply `flex-direction: column` via
+// their own emotion `css` prop, so wrapping selectors lose the specificity tie
+// and the group renders vertically. Pass the override directly to the EUI
+// component's `css` prop so it merges last and wins.
+const HORIZONTAL_GROUP_CSS = {
+  flexDirection: 'row',
+  flexWrap: 'wrap',
+  gap: 16,
+} as const;
 
 const WEEKDAY_LABEL: Record<WeekdayStr, string> = {
   MO: DAY_MO,
@@ -71,7 +81,13 @@ const WEEKDAY_LABEL: Record<WeekdayStr, string> = {
 };
 
 const isFrequencyMode = (value: string): value is FrequencyMode =>
-  FREQUENCY_OPTIONS.some((opt) => opt.value === value);
+  FREQUENCY_OPTIONS.some((opt) => opt.mode === value);
+
+const optionIdForMode = (mode: FrequencyMode): string =>
+  FREQUENCY_OPTIONS.find((opt) => opt.mode === mode)?.id ?? FREQUENCY_OPTIONS[0].id;
+
+const modeForOptionId = (id: string): FrequencyMode | undefined =>
+  FREQUENCY_OPTIONS.find((opt) => opt.id === id)?.mode;
 
 const clampInt = (value: number, min: number, max: number, fallback: number): number => {
   if (!Number.isFinite(value) || !Number.isInteger(value)) return fallback;
@@ -88,9 +104,9 @@ export const FrequencySelector = ({
   weekdaysError,
 }: FrequencySelectorProps) => {
   const handleFrequencyChange = useCallback(
-    (event: React.ChangeEvent<HTMLSelectElement>) => {
-      const next = event.target.value;
-      if (!isFrequencyMode(next) || next === value.frequency) return;
+    (optionId: string) => {
+      const next = modeForOptionId(optionId);
+      if (!next || !isFrequencyMode(next) || next === value.frequency) return;
 
       // D22: changing the frequency SHALL clear `_unknown` parts so the new
       // RRULE shape is not silently contaminated by parts that only made
@@ -185,53 +201,52 @@ export const FrequencySelector = ({
     <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="osquery-frequency-selector">
       <EuiFlexItem>
         <EuiFormRow label={FREQUENCY_LABEL} fullWidth>
-          <EuiSelect
-            options={FREQUENCY_OPTIONS}
-            value={value.frequency}
+          <EuiRadioGroup
+            css={HORIZONTAL_GROUP_CSS}
+            options={FREQUENCY_OPTIONS.map(({ id, label, mode }) => ({
+              id,
+              label,
+              disabled: disabled || mode === undefined,
+            }))}
+            idSelected={optionIdForMode(value.frequency)}
             onChange={handleFrequencyChange}
-            disabled={disabled}
             data-test-subj="osquery-frequency-selector-mode"
           />
         </EuiFormRow>
       </EuiFlexItem>
 
-      {everyUnitLabel ? (
+      {value.frequency === 'custom' ? (
         <EuiFlexItem>
-          <EuiFormRow label={REPEAT_EVERY_LABEL} fullWidth>
-            <EuiFlexGroup gutterSize="s" alignItems="center">
-              <EuiFlexItem grow={false} style={EVERY_FLEX_STYLE}>
+          <EuiPanel color="subdued" hasShadow={false} hasBorder={false} paddingSize="m">
+            <EuiFormRow
+              label={DAYS_OF_WEEK_LABEL}
+              isInvalid={!!weekdaysError}
+              error={weekdaysError ? AT_LEAST_ONE_DAY_ERROR : undefined}
+              fullWidth
+            >
+              <EuiCheckboxGroup
+                css={HORIZONTAL_GROUP_CSS}
+                options={weekdayOptions}
+                idToSelectedMap={weekdayIdToSelectedMap}
+                onChange={handleWeekdayToggle}
+                data-test-subj="osquery-frequency-selector-weekdays"
+              />
+            </EuiFormRow>
+            {everyUnitLabel ? (
+              <EuiFormRow label={REPEAT_EVERY_LABEL} fullWidth>
                 <EuiFieldNumber
+                  fullWidth
                   min={1}
                   step={1}
                   value={value.interval}
                   onChange={handleIntervalChange}
                   disabled={disabled}
+                  append={everyUnitLabel}
                   data-test-subj="osquery-frequency-selector-every"
                 />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText size="s">{everyUnitLabel}</EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFormRow>
-        </EuiFlexItem>
-      ) : null}
-
-      {value.frequency === 'custom' ? (
-        <EuiFlexItem>
-          <EuiFormRow
-            label={DAYS_OF_WEEK_LABEL}
-            isInvalid={!!weekdaysError}
-            error={weekdaysError ? AT_LEAST_ONE_DAY_ERROR : undefined}
-            fullWidth
-          >
-            <EuiCheckboxGroup
-              options={weekdayOptions}
-              idToSelectedMap={weekdayIdToSelectedMap}
-              onChange={handleWeekdayToggle}
-              data-test-subj="osquery-frequency-selector-weekdays"
-            />
-          </EuiFormRow>
+              </EuiFormRow>
+            ) : null}
+          </EuiPanel>
         </EuiFlexItem>
       ) : null}
 

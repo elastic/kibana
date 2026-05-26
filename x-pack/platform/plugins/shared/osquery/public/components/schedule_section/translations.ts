@@ -35,12 +35,17 @@ export const SCHEDULE_TYPE_LOCKED_HELP = i18n.translate(
 
 export const INTERVAL_FIELD_LABEL = i18n.translate(
   'xpack.osquery.scheduleSection.intervalFieldLabel',
-  { defaultMessage: 'Interval (seconds)' }
+  { defaultMessage: 'Intervals' }
 );
 
 export const INTERVAL_FIELD_HELP = i18n.translate(
   'xpack.osquery.scheduleSection.intervalFieldHelp',
   { defaultMessage: 'Run every N seconds (1 – 604,800).' }
+);
+
+export const INTERVAL_FIELD_UNIT = i18n.translate(
+  'xpack.osquery.scheduleSection.intervalFieldUnit',
+  { defaultMessage: 'second(s)' }
 );
 
 export const FREQUENCY_LABEL = i18n.translate('xpack.osquery.scheduleSection.frequencyLabel', {
@@ -89,7 +94,7 @@ export const UNIT_WEEKS = i18n.translate('xpack.osquery.scheduleSection.unitWeek
 });
 
 export const DAYS_OF_WEEK_LABEL = i18n.translate('xpack.osquery.scheduleSection.daysOfWeekLabel', {
-  defaultMessage: 'On days',
+  defaultMessage: 'Days',
 });
 
 export const DAY_MO = i18n.translate('xpack.osquery.scheduleSection.day.mo', {
@@ -165,8 +170,23 @@ export const AT_LEAST_ONE_DAY_ERROR = i18n.translate(
 );
 
 export const START_DATE_LABEL = i18n.translate('xpack.osquery.scheduleSection.startDateLabel', {
-  defaultMessage: 'Start date',
+  defaultMessage: 'Start date and time',
 });
+
+export const SCHEDULE_TYPE_INTERVAL_DESCRIPTION = i18n.translate(
+  'xpack.osquery.scheduleSection.scheduleTypeIntervalDescription',
+  {
+    defaultMessage:
+      'Run queries based on specified time intervals, calculated from when each agent was deployed.',
+  }
+);
+
+export const SCHEDULE_TYPE_RECURRENCE_DESCRIPTION = i18n.translate(
+  'xpack.osquery.scheduleSection.scheduleTypeRecurrenceDescription',
+  {
+    defaultMessage: 'Run queries at a set date and time, such as every Saturday at 9am.',
+  }
+);
 
 export const STOP_AFTER_LABEL = i18n.translate('xpack.osquery.scheduleSection.stopAfterLabel', {
   defaultMessage: 'Stop after',
@@ -238,4 +258,22 @@ export const ADVANCED_PARTS_ADVISORY_BODY = i18n.translate(
     defaultMessage:
       'This schedule contains advanced settings that this Kibana version cannot edit. Saving will preserve them. Changing the frequency will discard them.',
   }
+);
+
+export const QUERY_OVERRIDE_SCHEDULE_TOGGLE_LABEL = i18n.translate(
+  'xpack.osquery.scheduleSection.queryOverrideToggleLabel',
+  { defaultMessage: 'Override pack schedule' }
+);
+
+export const QUERY_OVERRIDE_SCHEDULE_TOGGLE_DESCRIPTION = i18n.translate(
+  'xpack.osquery.scheduleSection.queryOverrideToggleDescription',
+  {
+    defaultMessage:
+      "When enabled, this query runs on its own schedule instead of inheriting the pack's. The mode (interval or recurrence) stays the same as the pack.",
+  }
+);
+
+export const QUERY_USING_PACK_SCHEDULE_LABEL = i18n.translate(
+  'xpack.osquery.scheduleSection.queryUsingPackScheduleLabel',
+  { defaultMessage: 'Using pack schedule' }
 );

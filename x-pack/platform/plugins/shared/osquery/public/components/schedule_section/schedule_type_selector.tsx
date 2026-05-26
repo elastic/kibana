@@ -6,15 +6,45 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiFormRow, EuiRadioGroup } from '@elastic/eui';
-import type { EuiRadioGroupOption } from '@elastic/eui';
+import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiRadio } from '@elastic/eui';
+import { noop } from 'lodash';
+import styled from '@emotion/styled';
 import type { ScheduleType } from '../../../common/schedule';
 import {
+  SCHEDULE_TYPE_INTERVAL_DESCRIPTION,
   SCHEDULE_TYPE_INTERVAL_LABEL,
   SCHEDULE_TYPE_LABEL,
   SCHEDULE_TYPE_LOCKED_HELP,
+  SCHEDULE_TYPE_RECURRENCE_DESCRIPTION,
   SCHEDULE_TYPE_RECURRENCE_LABEL,
 } from './translations';
+
+const StyledEuiCard = styled(EuiCard)`
+  padding: 16px 92px 16px 16px !important;
+  border: ${({ theme, selectable }) => {
+    if (selectable?.isSelected) {
+      return `${theme.euiTheme.border.width.thin} solid ${theme.euiTheme.colors.success}`;
+    }
+  }};
+
+  .euiTitle {
+    font-size: 1rem;
+  }
+
+  .euiSpacer {
+    display: none;
+  }
+
+  .euiText {
+    margin-top: 0;
+    margin-left: 25px;
+    color: ${({ theme }) => theme.euiTheme.colors.subduedText};
+  }
+
+  > button[role='switch'] {
+    display: none;
+  }
+`;
 
 export interface ScheduleTypeSelectorProps {
   value: ScheduleType;
@@ -29,8 +59,6 @@ export interface ScheduleTypeSelectorProps {
   idPrefix?: string;
 }
 
-const SCHEDULE_TYPE_VALUES: ScheduleType[] = ['interval', 'rrule'];
-
 export const ScheduleTypeSelector = ({
   value,
   onChange,
@@ -41,34 +69,30 @@ export const ScheduleTypeSelector = ({
   const isLocked = lockedScheduleType !== undefined;
   const effectiveValue = isLocked ? lockedScheduleType : value;
 
-  const options = useMemo<EuiRadioGroupOption[]>(
-    () => [
-      {
-        id: `${idPrefix}-interval`,
-        label: SCHEDULE_TYPE_INTERVAL_LABEL,
-        disabled: disabled || isLocked,
-      },
-      {
-        id: `${idPrefix}-rrule`,
-        label: SCHEDULE_TYPE_RECURRENCE_LABEL,
-        disabled: disabled || isLocked,
-      },
-    ],
-    [disabled, idPrefix, isLocked]
+  const handleSelect = useCallback(
+    (next: ScheduleType) => {
+      if (isLocked || disabled || next === value) return;
+      onChange(next);
+    },
+    [disabled, isLocked, onChange, value]
   );
 
-  const selectedId = `${idPrefix}-${effectiveValue}`;
+  const intervalSelectable = useMemo(
+    () => ({
+      onClick: () => handleSelect('interval'),
+      isSelected: effectiveValue === 'interval',
+      isDisabled: disabled || isLocked,
+    }),
+    [disabled, effectiveValue, handleSelect, isLocked]
+  );
 
-  const handleChange = useCallback(
-    (id: string) => {
-      if (isLocked) return;
-
-      const next = SCHEDULE_TYPE_VALUES.find((token) => id === `${idPrefix}-${token}`);
-      if (next && next !== value) {
-        onChange(next);
-      }
-    },
-    [idPrefix, isLocked, onChange, value]
+  const recurrenceSelectable = useMemo(
+    () => ({
+      onClick: () => handleSelect('rrule'),
+      isSelected: effectiveValue === 'rrule',
+      isDisabled: disabled || isLocked,
+    }),
+    [disabled, effectiveValue, handleSelect, isLocked]
   );
 
   return (
@@ -77,12 +101,50 @@ export const ScheduleTypeSelector = ({
       helpText={isLocked ? SCHEDULE_TYPE_LOCKED_HELP : undefined}
       fullWidth
     >
-      <EuiRadioGroup
-        options={options}
-        idSelected={selectedId}
-        onChange={handleChange}
-        data-test-subj="osquery-schedule-type-selector"
-      />
+      <EuiFlexGroup gutterSize="m" data-test-subj="osquery-schedule-type-selector">
+        <EuiFlexItem>
+          <StyledEuiCard
+            layout="horizontal"
+            title={
+              <EuiRadio
+                id={`${idPrefix}-interval`}
+                name={idPrefix}
+                label={SCHEDULE_TYPE_INTERVAL_LABEL}
+                onChange={noop}
+                checked={effectiveValue === 'interval'}
+                disabled={disabled || isLocked}
+              />
+            }
+            titleSize="xs"
+            hasBorder
+            description={SCHEDULE_TYPE_INTERVAL_DESCRIPTION}
+            data-test-subj="osquery-schedule-type-interval"
+            selectable={intervalSelectable}
+            {...(effectiveValue === 'interval' && { color: 'primary' })}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <StyledEuiCard
+            layout="horizontal"
+            title={
+              <EuiRadio
+                id={`${idPrefix}-rrule`}
+                name={idPrefix}
+                label={SCHEDULE_TYPE_RECURRENCE_LABEL}
+                onChange={noop}
+                checked={effectiveValue === 'rrule'}
+                disabled={disabled || isLocked}
+              />
+            }
+            titleSize="xs"
+            hasBorder
+            description={SCHEDULE_TYPE_RECURRENCE_DESCRIPTION}
+            data-test-subj="osquery-schedule-type-rrule"
+            selectable={recurrenceSelectable}
+            {...(effectiveValue === 'rrule' && { color: 'primary' })}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiFormRow>
   );
 };

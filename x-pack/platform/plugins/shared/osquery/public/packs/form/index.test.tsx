@@ -15,8 +15,16 @@ import { ThemeProvider } from '@emotion/react';
 
 import { PackForm } from '.';
 import { queryClient } from '../../query_client';
+import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
+import { allowedExperimentalValues } from '../../../common/experimental_features';
 
 const mockUseRouterNavigate = jest.fn();
+
+beforeAll(() => {
+  ExperimentalFeaturesService.init({
+    experimentalFeatures: { ...allowedExperimentalValues, rruleScheduling: false },
+  });
+});
 
 jest.mock('../../common/lib/kibana', () => ({
   ...jest.requireActual('../../common/lib/kibana'),
@@ -144,5 +152,76 @@ describe('PackForm', () => {
 
     expect(mockUseRouterNavigate).toHaveBeenCalledWith(`packs/${testPackId}`);
     expect(mockUseRouterNavigate).not.toHaveBeenCalledWith(`packs/${defaultValue.id}`);
+  });
+
+  describe('rruleScheduling feature flag', () => {
+    const rrulePackDefaultValue = {
+      id: 'rrule-pack-id',
+      saved_object_id: 'rrule-pack-saved-object-id',
+      name: 'Daily Pack',
+      description: 'A pack scheduled via RRULE',
+      enabled: true,
+      queries: {},
+      created_at: '2024-01-01',
+      created_by: 'test-user',
+      updated_at: '2024-01-01',
+      updated_by: 'test-user',
+      policy_ids: [],
+      references: [],
+      schedule_type: 'rrule' as const,
+      rrule_schedule: {
+        rrule: 'FREQ=DAILY',
+        start_date: '2024-01-01T00:00:00.000Z',
+      },
+    };
+
+    afterEach(() => {
+      ExperimentalFeaturesService.init({
+        experimentalFeatures: { ...allowedExperimentalValues, rruleScheduling: false },
+      });
+    });
+
+    it('hides ScheduleSection and does not advertise schedule fields when the flag is off', () => {
+      ExperimentalFeaturesService.init({
+        experimentalFeatures: { ...allowedExperimentalValues, rruleScheduling: false },
+      });
+
+      const { queryByTestId } = renderWithContext(
+        <PackForm editMode={true} defaultValue={rrulePackDefaultValue} />
+      );
+
+      // Wire-boundary guarantee: with the flag off, the ScheduleSection does
+      // not mount even if the SO already carries `schedule_type: 'rrule'`. This
+      // pairs with the server-side D25 wire gate so a downgrade is a clean
+      // "pretend this never happened" experience.
+      expect(queryByTestId('osquery-schedule-section')).toBeNull();
+      expect(queryByTestId('osquery-schedule-type-selector')).toBeNull();
+    });
+
+    it('renders ScheduleSection in recurrence mode when the flag flips on and the SO carries an RRULE', () => {
+      // Simulate the flag-flip race: a pack form is being prepared while the
+      // operator flips the flag on. The form mounts (or remounts) with
+      // `rruleScheduling: true` and an SO that already carries RRULE state —
+      // the deserializer SHALL hydrate the recurrence form, not silently fall
+      // back to interval defaults.
+      ExperimentalFeaturesService.init({
+        experimentalFeatures: { ...allowedExperimentalValues, rruleScheduling: true },
+      });
+
+      const { getByTestId } = renderWithContext(
+        <PackForm editMode={true} defaultValue={rrulePackDefaultValue} />
+      );
+
+      const section = getByTestId('osquery-schedule-section');
+      const typeSelector = getByTestId('osquery-schedule-type-selector');
+
+      expect(section).toBeInTheDocument();
+      // The radio group exposes both options; the recurrence one is selected.
+      const recurrenceRadio = typeSelector.querySelector(
+        'input[id$="osquery-schedule-type-rrule"]'
+      ) as HTMLInputElement | null;
+      expect(recurrenceRadio).not.toBeNull();
+      expect(recurrenceRadio?.checked).toBe(true);
+    });
   });
 });

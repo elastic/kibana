@@ -39,7 +39,21 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) =
   });
 
   const { setValue } = useFormContext();
-  const { name: packName } = useWatch();
+  const {
+    name: packName,
+    schedule_type: packScheduleType,
+    interval: packInterval,
+    rrule_schedule: packRruleSchedule,
+  } = useWatch();
+
+  const packSchedule = useMemo(
+    () => ({
+      schedule_type: packScheduleType,
+      interval: packInterval,
+      rrule_schedule: packRruleSchedule,
+    }),
+    [packScheduleType, packInterval, packRruleSchedule]
+  );
 
   const handleNameChange = useCallback(
     (newName: string) => isEmpty(packName) && setValue('name', newName),
@@ -101,6 +115,18 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) =
 
               draft.snapshot = updatedQuery.snapshot;
               draft.removed = updatedQuery.removed;
+
+              if (updatedQuery.schedule_type) {
+                draft.schedule_type = updatedQuery.schedule_type;
+              } else {
+                delete draft.schedule_type;
+              }
+
+              if (updatedQuery.rrule_schedule) {
+                draft.rrule_schedule = updatedQuery.rrule_schedule;
+              } else {
+                delete draft.rrule_schedule;
+              }
 
               return draft;
             })
@@ -211,6 +237,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) =
           uniqueQueryIds={uniqueQueryIds}
           onSave={handleAddQuery}
           onClose={handleHideAddFlyout}
+          packSchedule={packSchedule}
         />
       )}
       {showEditQueryFlyout != null && showEditQueryFlyout >= 0 && (
@@ -220,6 +247,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) =
           defaultValue={fieldValue[showEditQueryFlyout]}
           onSave={handleEditQuery}
           onClose={handleHideEditFlyout}
+          packSchedule={packSchedule}
         />
       )}
     </>

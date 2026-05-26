@@ -60,12 +60,13 @@ export const StopAfterField = ({
       dataTestSubj="osquery-schedule-stop-after-toggle"
     >
       <EuiFormRow
-        label={STOP_AFTER_DATE_LABEL}
         isInvalid={isBeforeStart}
         error={isBeforeStart ? STOP_AFTER_BEFORE_START_ERROR : undefined}
         fullWidth
       >
         <EuiDatePicker
+          fullWidth
+          aria-label={STOP_AFTER_DATE_LABEL}
           selected={selectedMoment}
           onChange={handleDateChange}
           showTimeSelect

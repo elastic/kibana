@@ -25,6 +25,7 @@ import { FormProvider, useForm as useHookForm } from 'react-hook-form';
 
 import { PackShardsField } from './shards/pack_shards_field';
 import { useRouterNavigate } from '../../common/lib/kibana';
+import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
 import { PolicyIdComboBoxField } from './policy_id_combobox_field';
 import { QueriesField } from './queries_field';
 import { ConfirmDeployAgentPolicyModal } from './confirmation_modal';
@@ -32,6 +33,9 @@ import { useAgentPolicies } from '../../agent_policies';
 import { useCreatePack } from '../use_create_pack';
 import { useUpdatePack } from '../use_update_pack';
 import { convertPackQueriesToSO, convertSOQueriesToPack } from './utils';
+import { deserializeSchedule, serializeSchedule } from './schedule_serializer';
+import { ScheduleSection } from '../../components/schedule_section';
+import type { ScheduleFormData } from '../../components/schedule_section/types';
 import type { PackItem } from '../types';
 import { NameField } from './name_field';
 import { DescriptionField } from './description_field';
@@ -42,6 +46,7 @@ import { overflowCss } from '../utils';
 type PackFormData = Omit<PackItem, 'id' | 'queries'> & {
   queries: PackQueryFormData[];
   pack_type: string;
+  schedule?: ScheduleFormData;
 };
 
 const euiAccordionCss = ({ euiTheme }: UseEuiTheme) => ({
@@ -87,6 +92,8 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     withRedirect: true,
   });
 
+  const isRruleSchedulingEnabled = ExperimentalFeaturesService.get().rruleScheduling;
+
   const deserializer = (payload: PackItem) => {
     const defaultPolicyIds = filter(
       payload.policy_ids,
@@ -98,6 +105,13 @@ const PackFormComponent: React.FC<PackFormProps> = ({
       policy_ids: defaultPolicyIds ?? [],
       queries: convertPackQueriesToSO(payload.queries),
       shards: omit(payload.shards, '*') ?? {},
+      schedule: isRruleSchedulingEnabled
+        ? deserializeSchedule({
+            schedule_type: payload.schedule_type,
+            interval: payload.interval,
+            rrule_schedule: payload.rrule_schedule,
+          })
+        : undefined,
     };
   };
 
@@ -113,6 +127,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
           enabled: true,
           queries: [],
           pack_type: 'policy',
+          schedule: isRruleSchedulingEnabled ? deserializeSchedule(undefined) : undefined,
         },
   });
 
@@ -129,7 +144,27 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     setValue,
     formState: { isSubmitting, isDirty },
   } = hooksForm;
-  const { policy_ids: policyIds, shards, pack_type: packType } = watch();
+  const { policy_ids: policyIds, shards, pack_type: packType, schedule } = watch();
+
+  // Mirror the pack-level schedule into the legacy top-level fields so the
+  // QueriesField → QueryFlyout path sees `schedule_type` / `interval` /
+  // `rrule_schedule` via `useWatch()` and can lock the per-query override
+  // selector to the pack mode (D11).
+  useEffect(() => {
+    if (!isRruleSchedulingEnabled || !schedule) {
+      return;
+    }
+
+    const serialized = serializeSchedule(schedule);
+    setValue('schedule_type', serialized.schedule_type, { shouldDirty: false });
+    if (serialized.schedule_type === 'interval') {
+      setValue('interval', serialized.interval, { shouldDirty: false });
+      setValue('rrule_schedule', undefined, { shouldDirty: false });
+    } else {
+      setValue('rrule_schedule', serialized.rrule_schedule, { shouldDirty: false });
+      setValue('interval', undefined, { shouldDirty: false });
+    }
+  }, [isRruleSchedulingEnabled, schedule, setValue]);
 
   const onDirtyStateChangeRef = useRef(onDirtyStateChange);
   onDirtyStateChangeRef.current = onDirtyStateChange;
@@ -156,11 +191,19 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     );
   }, [packType, shards]);
 
+  const handleScheduleChange = useCallback(
+    (next: ScheduleFormData) => {
+      setValue('schedule', next, { shouldDirty: true });
+    },
+    [setValue]
+  );
+
   const onSubmit = useCallback(
     async (values: PackFormData) => {
       const serializer = ({
         shards: _,
         pack_type: __,
+        schedule: scheduleFormState,
         policy_ids: payloadAgentPolicyIds,
         queries,
         ...restPayload
@@ -176,11 +219,15 @@ const PackFormComponent: React.FC<PackFormProps> = ({
           : [];
         const policies = [...payloadAgentPolicyIds, ...mappedShards];
 
+        const scheduleFields =
+          isRruleSchedulingEnabled && scheduleFormState ? serializeSchedule(scheduleFormState) : {};
+
         return {
           ...restPayload,
           policy_ids: policies ?? [],
           queries: convertSOQueriesToPack(queries),
           shards: getShards() ?? {},
+          ...scheduleFields,
         };
       };
 
@@ -193,7 +240,15 @@ const PackFormComponent: React.FC<PackFormProps> = ({
         // eslint-disable-next-line no-empty
       } catch (e) {}
     },
-    [createAsync, defaultValue?.saved_object_id, editMode, getShards, shards, updateAsync]
+    [
+      createAsync,
+      defaultValue?.saved_object_id,
+      editMode,
+      getShards,
+      isRruleSchedulingEnabled,
+      shards,
+      updateAsync,
+    ]
   );
 
   const handleSubmitForm = useMemo(() => handleSubmit(onSubmit), [handleSubmit, onSubmit]);
@@ -307,6 +362,21 @@ const PackFormComponent: React.FC<PackFormProps> = ({
             <EuiSpacer size="m" />
           </>
         )}
+
+        {isRruleSchedulingEnabled && schedule ? (
+          <>
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <ScheduleSection
+                  value={schedule}
+                  onChange={handleScheduleChange}
+                  disabled={isReadOnly}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="m" />
+          </>
+        ) : null}
 
         <EuiSpacer size="xl" />
 

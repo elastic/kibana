@@ -7,7 +7,7 @@
 
 import React, { useCallback } from 'react';
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
-import { INTERVAL_FIELD_HELP, INTERVAL_FIELD_LABEL } from './translations';
+import { INTERVAL_FIELD_LABEL, INTERVAL_FIELD_UNIT } from './translations';
 
 /**
  * Minimum 1 second, maximum 604,800 seconds (7 days) — matches the existing
@@ -38,14 +38,16 @@ export const IntervalField = ({ value, onChange, disabled }: IntervalFieldProps)
   );
 
   return (
-    <EuiFormRow label={INTERVAL_FIELD_LABEL} helpText={INTERVAL_FIELD_HELP} fullWidth>
+    <EuiFormRow label={INTERVAL_FIELD_LABEL} fullWidth>
       <EuiFieldNumber
+        fullWidth
         min={MIN_INTERVAL_SECONDS}
         max={MAX_INTERVAL_SECONDS}
         step={1}
         value={value}
         onChange={handleChange}
         disabled={disabled}
+        append={INTERVAL_FIELD_UNIT}
         data-test-subj="osquery-schedule-interval"
       />
     </EuiFormRow>

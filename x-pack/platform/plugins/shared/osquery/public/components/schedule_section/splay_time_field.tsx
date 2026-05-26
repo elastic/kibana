@@ -6,15 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import {
-  EuiCallOut,
-  EuiFieldNumber,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiSelect,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiCallOut, EuiFieldNumber, EuiFormRow, EuiSelect, EuiSpacer } from '@elastic/eui';
 import type { EuiSelectOption } from '@elastic/eui';
 import { MAX_SPLAY_SECONDS } from '../../../common/schedule';
 import { isSplayWithinMax, type SplayUnit } from '../../../common/utils/splay_utils';
@@ -51,9 +43,6 @@ const UNIT_OPTIONS: EuiSelectOption[] = [
   { value: 'minutes', text: SPLAY_UNIT_MINUTES },
   { value: 'hours', text: SPLAY_UNIT_HOURS },
 ];
-
-const VALUE_FLEX_STYLE: React.CSSProperties = { width: 120 };
-const UNIT_FLEX_STYLE: React.CSSProperties = { width: 160 };
 
 const isSplayUnit = (raw: string): raw is SplayUnit =>
   raw === 'seconds' || raw === 'minutes' || raw === 'hours';
@@ -116,37 +105,35 @@ export const SplayTimeField = ({
         disabled={disabled}
         dataTestSubj="osquery-schedule-splay-toggle"
       >
-        <EuiFlexGroup gutterSize="s" alignItems="flexStart">
-          <EuiFlexItem grow={false} style={VALUE_FLEX_STYLE}>
-            <EuiFormRow
-              label={SPLAY_VALUE_LABEL}
-              isInvalid={isInvalid}
-              error={isInvalid ? SPLAY_MAX_ERROR : undefined}
-            >
-              <EuiFieldNumber
-                min={1}
-                max={MAX_SPLAY_SECONDS}
-                step={1}
-                value={value.value}
-                onChange={handleValueChange}
-                disabled={disabled}
-                isInvalid={isInvalid}
-                data-test-subj="osquery-schedule-splay-value"
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false} style={UNIT_FLEX_STYLE}>
-            <EuiFormRow label={SPLAY_UNIT_LABEL}>
+        <EuiFormRow
+          label={SPLAY_VALUE_LABEL}
+          isInvalid={isInvalid}
+          error={isInvalid ? SPLAY_MAX_ERROR : undefined}
+          fullWidth
+        >
+          <EuiFieldNumber
+            fullWidth
+            min={1}
+            max={MAX_SPLAY_SECONDS}
+            step={1}
+            value={value.value}
+            onChange={handleValueChange}
+            disabled={disabled}
+            isInvalid={isInvalid}
+            append={
               <EuiSelect
+                // compressed
                 options={UNIT_OPTIONS}
                 value={value.unit}
                 onChange={handleUnitChange}
                 disabled={disabled}
+                aria-label={SPLAY_UNIT_LABEL}
                 data-test-subj="osquery-schedule-splay-unit"
               />
-            </EuiFormRow>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+            }
+            data-test-subj="osquery-schedule-splay-value"
+          />
+        </EuiFormRow>
       </ToggleableRow>
       {showQueryStormAdvisory ? (
         <>
