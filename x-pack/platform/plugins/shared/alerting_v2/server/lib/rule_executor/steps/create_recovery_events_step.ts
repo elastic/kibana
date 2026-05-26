@@ -9,6 +9,7 @@ import { inject, injectable } from 'inversify';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { stableStringify } from '@kbn/std';
 import { recoveryPolicyType } from '@kbn/alerting-v2-schemas';
+import { isEsqlUserError } from '../../services/query_service/esql_user_error';
 import type { PipelineStateStream, RuleExecutionStep, RulePipelineState } from '../types';
 import { buildRecoveryAlertEvents, buildQueryRecoveryAlertEvents } from '../build_alert_events';
 import { getQueryPayload } from '../get_query_payload';
@@ -145,7 +146,10 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
         scheduledTimestamp: input.scheduledAt,
       });
     } catch (error) {
-      throw createTaskRunError(error as Error, TaskErrorSource.USER);
+      if (isEsqlUserError(error)) {
+        throw createTaskRunError(error as Error, TaskErrorSource.USER);
+      }
+      throw error;
     }
   }
 

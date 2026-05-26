@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { DiagnosticResult } from '@elastic/elasticsearch';
+import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mocks';
@@ -408,7 +410,58 @@ describe('QueryService', () => {
       expect(mockLogger.error).not.toHaveBeenCalled();
     });
 
-    it('decorates non-cancellation errors with TaskErrorSource.USER', async () => {
+    it('decorates ResponseError(400) with TaskErrorSource.USER', async () => {
+      const responseError = new errors.ResponseError({ statusCode: 400 } as DiagnosticResult);
+      mockHelpersEsqlToArrowReader(mockEsClient, jest.fn().mockRejectedValue(responseError));
+
+      let caughtError: unknown;
+      try {
+        for await (const _batch of queryService.executeQueryStream({ query: mockQuery })) {
+          // consume
+        }
+      } catch (error) {
+        caughtError = error;
+      }
+
+      expect(caughtError).toBe(responseError);
+      expect(getErrorSource(caughtError as Error)).toBe(TaskErrorSource.USER);
+    });
+
+    it('decorates ResponseError(404) with TaskErrorSource.USER', async () => {
+      const responseError = new errors.ResponseError({ statusCode: 404 } as DiagnosticResult);
+      mockHelpersEsqlToArrowReader(mockEsClient, jest.fn().mockRejectedValue(responseError));
+
+      let caughtError: unknown;
+      try {
+        for await (const _batch of queryService.executeQueryStream({ query: mockQuery })) {
+          // consume
+        }
+      } catch (error) {
+        caughtError = error;
+      }
+
+      expect(caughtError).toBe(responseError);
+      expect(getErrorSource(caughtError as Error)).toBe(TaskErrorSource.USER);
+    });
+
+    it('does not decorate ResponseError(503) with TaskErrorSource.USER', async () => {
+      const responseError = new errors.ResponseError({ statusCode: 503 } as DiagnosticResult);
+      mockHelpersEsqlToArrowReader(mockEsClient, jest.fn().mockRejectedValue(responseError));
+
+      let caughtError: unknown;
+      try {
+        for await (const _batch of queryService.executeQueryStream({ query: mockQuery })) {
+          // consume
+        }
+      } catch (error) {
+        caughtError = error;
+      }
+
+      expect(caughtError).toBe(responseError);
+      expect(getErrorSource(caughtError as Error)).toBeUndefined();
+    });
+
+    it('does not decorate plain errors with TaskErrorSource.USER', async () => {
       mockHelpersEsqlToArrowReader(
         mockEsClient,
         jest.fn().mockRejectedValue(new Error('ES query failed'))
@@ -424,7 +477,30 @@ describe('QueryService', () => {
       }
 
       expect(caughtError).toBeInstanceOf(Error);
-      expect(getErrorSource(caughtError as Error)).toBe(TaskErrorSource.USER);
+      expect(getErrorSource(caughtError as Error)).toBeUndefined();
+    });
+
+    it('does not decorate Arrow parse errors with TaskErrorSource.USER', async () => {
+      const reader: MockArrowReader = {
+        closed: false,
+        cancel: jest.fn().mockResolvedValue(undefined),
+        async *[Symbol.asyncIterator]() {
+          throw new Error('Expected to read 1919230334 metadata bytes, but only read 8');
+        },
+      };
+      mockHelpersEsqlToArrowReader(mockEsClient, jest.fn().mockResolvedValue(reader));
+
+      let caughtError: unknown;
+      try {
+        for await (const _batch of queryService.executeQueryStream({ query: mockQuery })) {
+          // consume
+        }
+      } catch (error) {
+        caughtError = error;
+      }
+
+      expect(caughtError).toBeInstanceOf(Error);
+      expect(getErrorSource(caughtError as Error)).toBeUndefined();
     });
 
     it('does not decorate cancellation errors with TaskErrorSource.USER', async () => {
