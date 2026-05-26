@@ -85,6 +85,9 @@ interface EmptyRowsParamEditorCustomProps {
 }
 
 // Visualization configs pass per-dimension defaults through paramEditorCustomProps.
+// This only backfills values while the editor is creating or replacing a column;
+// chart switch, suggestion, and config-builder bulk updates use the shared
+// `@kbn/lens-common` datasource normalization helpers instead.
 const getEmptyRowsDefaultForTargetGroup = (
   visualizationGroups: VisualizationDimensionGroupConfig[],
   targetGroup?: string

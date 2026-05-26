@@ -10,6 +10,7 @@
 import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 import type { DateHistogramIndexPatternColumn, TypedLensByValueInput } from '@kbn/lens-common';
 import { LensConfigBuilder } from './config_builder';
+import { lensApiConfigSchemaNoESQL } from './schema';
 import { mockDataViewsService } from './charts/mock_utils';
 import { multiMetricRowSplitByDatatableWithAdhocDataView } from './tests/datatable/lens_api_config_dsl.mock';
 import { basicTagcloudWithDataView } from './tests/tagcloud/lens_api_config.mock';
@@ -90,6 +91,22 @@ describe('LensConfigBuilder', () => {
       ...apiXYWithNoYTitleAndInsideLegend,
       layers: [{ ...apiXYWithNoYTitleAndInsideLegend.layers[0], x }],
     }) as LensAttributes;
+
+    expect(result.state.visualization).toMatchObject({ preferredSeriesType: 'bar_stacked' });
+    expect(getDateHistogramColumn(result)?.params.includeEmptyRows).toBe(false);
+  });
+
+  it('defaults empty rows off after validating XY API configs through the route schema', () => {
+    const builder = new LensConfigBuilder();
+    const { include_empty_rows: _includeEmptyRows, ...x } =
+      apiXYWithNoYTitleAndInsideLegend.layers[0].x;
+
+    const validated = lensApiConfigSchemaNoESQL.validate({
+      ...apiXYWithNoYTitleAndInsideLegend,
+      layers: [{ ...apiXYWithNoYTitleAndInsideLegend.layers[0], x }],
+    });
+
+    const result = builder.fromAPIFormat(validated) as LensAttributes;
 
     expect(result.state.visualization).toMatchObject({ preferredSeriesType: 'bar_stacked' });
     expect(getDateHistogramColumn(result)?.params.includeEmptyRows).toBe(false);

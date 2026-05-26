@@ -16,6 +16,8 @@ import {
   bucketOperationDefinitionSchema,
 } from './bucket_ops';
 import {
+  LENS_DATE_HISTOGRAM_IGNORE_TIME_RANGE_DEFAULT,
+  LENS_DATE_HISTOGRAM_INTERVAL_DEFAULT,
   LENS_HISTOGRAM_EMPTY_ROWS_DEFAULT,
   LENS_HISTOGRAM_GRANULARITY_DEFAULT_VALUE,
   LENS_PERCENTILE_DEFAULT_VALUE,
@@ -36,6 +38,21 @@ describe('Bucket Operation Schemas', () => {
 
       const validated = bucketDateHistogramOperationSchema.validate(input);
       expect(validated).toEqual(input);
+    });
+
+    it('preserves omitted include_empty_rows for downstream chart defaults', () => {
+      const validated = bucketDateHistogramOperationSchema.validate({
+        operation: 'date_histogram',
+        field: 'timestamp',
+      });
+
+      expect(validated).toEqual({
+        operation: 'date_histogram',
+        field: 'timestamp',
+        suggested_interval: LENS_DATE_HISTOGRAM_INTERVAL_DEFAULT,
+        use_original_time_range: LENS_DATE_HISTOGRAM_IGNORE_TIME_RANGE_DEFAULT,
+      });
+      expect(validated).not.toHaveProperty('include_empty_rows');
     });
 
     it('requires operation and field', () => {

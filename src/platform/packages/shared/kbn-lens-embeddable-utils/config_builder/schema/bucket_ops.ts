@@ -16,7 +16,6 @@ import {
   LENS_HISTOGRAM_GRANULARITY_MAX,
   LENS_HISTOGRAM_GRANULARITY_MIN,
   LENS_TERMS_LIMIT_DEFAULT,
-  LENS_DATE_HISTOGRAM_EMPTY_ROWS_DEFAULT,
   LENS_DATE_HISTOGRAM_INTERVAL_DEFAULT,
   LENS_DATE_HISTOGRAM_IGNORE_TIME_RANGE_DEFAULT,
   LENS_PERCENTILE_DEFAULT_VALUE,
@@ -71,12 +70,13 @@ export const bucketDateHistogramOperationSchema = schema.object(
     /**
      * Whether to include empty rows
      */
-    include_empty_rows: schema.boolean({
-      defaultValue: LENS_DATE_HISTOGRAM_EMPTY_ROWS_DEFAULT,
-      meta: {
-        description: 'When `true`, includes empty rows in the results.',
-      },
-    }),
+    include_empty_rows: schema.maybe(
+      schema.boolean({
+        meta: {
+          description: 'When `true`, includes empty rows in the results.',
+        },
+      })
+    ),
     drop_partial_intervals: schema.maybe(
       schema.boolean({
         defaultValue: false,

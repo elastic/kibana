@@ -54,6 +54,10 @@ interface ApplyEmptyRowsDefaultOptions {
  * This module owns both parts of the empty-rows default flow:
  * - resolve the visualization-family default from visualization state
  * - apply that default to form-based datasource state when Lens needs to materialize it
+ *
+ * Editor-time insert/replace flows still inject per-dimension defaults from Lens
+ * visualization configs. This module handles the bulk datasource normalization used
+ * by chart switch, suggestion, and config-builder call sites.
  */
 
 const isDateHistogramColumn = (
@@ -92,7 +96,7 @@ const getPartitionShapeFromState = (visualizationState: unknown) => {
   return typeof shape === 'string' ? shape : undefined;
 };
 
-const shouldKeepColumn = (
+const shouldSkipEmptyRowsUpdate = (
   column: DateHistogramIndexPatternColumn,
   defaultValue: boolean,
   overwriteExisting: boolean
@@ -119,7 +123,7 @@ const applyEmptyRowsDefaultToLayerState = <T extends FormBasedLayerStateLike>(
         Object.entries(layer.columns).map(([columnId, column]) => {
           if (
             !isDateHistogramColumn(column) ||
-            shouldKeepColumn(column, defaultValue, overwriteExisting)
+            shouldSkipEmptyRowsUpdate(column, defaultValue, overwriteExisting)
           ) {
             return [columnId, column];
           }

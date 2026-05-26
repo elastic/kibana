@@ -49,7 +49,7 @@ describe('Date Histogram Transforms', () => {
       expect(fromDateHistogramLensApiToLensState(input)).toEqual(expected);
     });
 
-    it('should use default values when optional parameters are not provided', () => {
+    it('preserves omitted include_empty_rows while defaulting the other optional parameters', () => {
       const partialInput: Partial<LensApiDateHistogramOperation> = {
         operation: 'date_histogram',
         field: '@timestamp',
@@ -62,7 +62,6 @@ describe('Date Histogram Transforms', () => {
 
       expect(result.params).toEqual({
         interval: LENS_DATE_HISTOGRAM_INTERVAL_DEFAULT,
-        includeEmptyRows: LENS_DATE_HISTOGRAM_EMPTY_ROWS_DEFAULT,
         dropPartials: false,
         ignoreTimeRange: LENS_DATE_HISTOGRAM_IGNORE_TIME_RANGE_DEFAULT,
       });
@@ -152,6 +151,30 @@ describe('Date Histogram Transforms', () => {
 
       const result = fromDateHistogramLensStateToAPI(input);
       expect(result.label).toBe('Daily Events');
+    });
+
+    it('omits include_empty_rows when the internal state leaves it unset', () => {
+      const input: DateHistogramIndexPatternColumn = {
+        operationType: 'date_histogram',
+        sourceField: '@timestamp',
+        customLabel: false,
+        label: '@timestamp',
+        isBucketed: true,
+        dataType: 'date',
+        params: {
+          interval: '1d',
+          dropPartials: false,
+          ignoreTimeRange: false,
+        },
+      };
+
+      expect(fromDateHistogramLensStateToAPI(input)).toEqual({
+        operation: 'date_histogram',
+        field: '@timestamp',
+        suggested_interval: '1d',
+        use_original_time_range: false,
+        drop_partial_intervals: false,
+      });
     });
 
     it('should preserve all configuration options', () => {
