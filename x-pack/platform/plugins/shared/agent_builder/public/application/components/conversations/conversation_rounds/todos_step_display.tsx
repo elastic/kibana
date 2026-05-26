@@ -107,7 +107,7 @@ export const TodosStepDisplay: React.FC<TodosStepDisplayProps> = ({ step }) => {
       <EuiFlexItem grow={false}>
         <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiIcon type="checkInCircleFilled" size="s" color="subdued" />
+            <EuiIcon type="checkInCircleFilled" size="s" color="subdued" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="xs" css={headerTextStyles}>
