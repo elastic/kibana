@@ -19,6 +19,9 @@ tags:
   - streams
   - knowledge-indicators
   - continuous-extraction
+consts:
+  maxScheduledStreams: 5
+  lookbackHours: 24
 settings:
   # Timeout is 1 minute shorter than the schedule to avoid overlapping runs.
   timeout: "9m"
@@ -54,7 +57,7 @@ steps:
     with:
       method: GET
       path: |-
-        /internal/streams/_extraction/_eligible?maxScheduledStreams={{ inputs.maxScheduledStreams }}&lookbackHours={{ inputs.lookbackHours }}
+        /internal/streams/_extraction/_eligible?maxScheduledStreams={{ inputs.maxScheduledStreams | default: consts.maxScheduledStreams }}&lookbackHours={{ inputs.lookbackHours | default: consts.lookbackHours }}
         {%- if inputs.extractionIntervalHours %}&extractionIntervalHours={{ inputs.extractionIntervalHours }}{% endif -%}
         {%- if inputs.excludedStreamPatterns %}&excludedStreamPatterns={{ inputs.excludedStreamPatterns }}{% endif -%}
       headers:

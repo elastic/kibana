@@ -6,8 +6,9 @@
  */
 
 import type { HttpSetup } from '@kbn/core-http-browser';
-import type { AgentDefinition } from '@kbn/agent-builder-common';
+import type { AgentAcl, AgentDefinition } from '@kbn/agent-builder-common';
 import type {
+  AgentAclUpdateRequest,
   AgentCreateRequest,
   AgentListOptions,
   AgentUpdateRequest,
@@ -15,8 +16,10 @@ import type {
 import type {
   CreateAgentResponse,
   DeleteAgentResponse,
+  GetAgentAclResponse,
   GetAgentResponse,
   ListAgentResponse,
+  UpdateAgentAclResponse,
   UpdateAgentResponse,
 } from '../../../common/http_api/agents';
 import { publicApiPath } from '../../../common/constants';
@@ -66,5 +69,21 @@ export class AgentService {
    */
   async delete(id: string): Promise<DeleteAgentResponse> {
     return await this.http.delete<DeleteAgentResponse>(`${publicApiPath}/agents/${id}`);
+  }
+
+  /**
+   * Get the ACL for an agent. Callers without manage rights receive a redacted entries list.
+   */
+  async getAcl(id: string): Promise<GetAgentAclResponse> {
+    return await this.http.get<GetAgentAclResponse>(`${publicApiPath}/agents/${id}/acl`);
+  }
+
+  /**
+   * Replace the ACL for an agent. Returns the new ACL with the bumped version.
+   */
+  async updateAcl(id: string, update: AgentAclUpdateRequest): Promise<AgentAcl> {
+    return await this.http.put<UpdateAgentAclResponse>(`${publicApiPath}/agents/${id}/acl`, {
+      body: JSON.stringify(update),
+    });
   }
 }

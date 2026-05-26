@@ -29,7 +29,7 @@ import {
 import type { TodoItem } from '@kbn/agent-builder-common/chat/conversation';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
-import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import type { AttachmentInput, VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { ConversationsService } from '../../../services/conversations';
 import { queryKeys } from '../../query_keys';
 import { buildOptimisticAttachments } from '../../utils/build_optimistic_attachments';
@@ -73,6 +73,7 @@ export interface ConversationActions {
   onConversationCreated: ({ title }: { title: string }) => void;
   addBackgroundExecutionCompleteStep: ({ step }: { step: BackgroundAgentCompleteStep }) => void;
   addOrUpdateTodosStep: ({ todos }: { todos: TodoItem[] }) => void;
+  setAttachments: ({ attachments }: { attachments: VersionedAttachment[] }) => void;
   addCompactionStep: ({ tokenCountBefore }: { tokenCountBefore: number }) => void;
   setCompactionStepComplete: ({
     tokenCountAfter,
@@ -246,6 +247,15 @@ export const createConversationActions = ({
           round.steps.push(step);
         }
       });
+    },
+    setAttachments: ({ attachments }: { attachments: VersionedAttachment[] }) => {
+      setConversation(
+        produce((draft) => {
+          if (draft) {
+            draft.attachments = attachments;
+          }
+        })
+      );
     },
     addCompactionStep: ({ tokenCountBefore }: { tokenCountBefore: number }) => {
       setCurrentRound((round) => {

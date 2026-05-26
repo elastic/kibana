@@ -6,6 +6,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import { RUNBOOK_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
 import { buildCreateRuleData, test } from '../fixtures';
 
 // Importing @kbn/alerting-v2-rule-form transitively pulls in monaco-editor CSS,
@@ -18,6 +19,7 @@ const TEST_QUERY = `FROM ${TEST_INDEX} | LIMIT 10`;
 const RULE_NAME = 'scout-compose-discover-create';
 const EDIT_RULE_NAME = 'scout-compose-discover-edit';
 const EDITED_RULE_NAME = 'scout-compose-discover-edited';
+const RUNBOOK_TEXT = 'Investigate failed transactions';
 
 test.describe(
   'ComposeDiscoverFlyout — create and edit flows',
@@ -88,8 +90,14 @@ test.describe(
         await pageObjects.composeDiscover.setRuleName(RULE_NAME);
       });
 
-      await test.step('advance to Notifications step (final)', async () => {
-        await pageObjects.composeDiscover.clickNext();
+      await test.step('add runbook and verify related dashboards field', async () => {
+        await expect(pageObjects.composeDiscover.addRunbookButton).toBeVisible();
+        await expect(pageObjects.composeDiscover.relatedDashboardsSelector).toBeVisible();
+        await expect(pageObjects.composeDiscover.relatedDashboardsInput).toBeVisible();
+
+        await pageObjects.composeDiscover.addRunbook(RUNBOOK_TEXT);
+        await expect(pageObjects.composeDiscover.addRunbookButton).toBeHidden();
+        await expect(pageObjects.composeDiscover.flyout.getByText(RUNBOOK_TEXT)).toBeVisible();
         await expect(pageObjects.composeDiscover.submitButton).toBeVisible();
       });
 
@@ -103,11 +111,14 @@ test.describe(
               const { items } = await apiServices.alertingV2.rules.find({
                 search: RULE_NAME,
               });
-              return items.length;
+              return items[0]?.artifacts?.some(
+                (artifact) =>
+                  artifact.type === RUNBOOK_ARTIFACT_TYPE && artifact.value === RUNBOOK_TEXT
+              );
             },
             { timeout: 30_000 }
           )
-          .toBeGreaterThan(0);
+          .toBe(true);
       });
     });
 
@@ -123,6 +134,13 @@ test.describe(
             kind: 'signal',
             state_transition: undefined,
             metadata: { name: EDIT_RULE_NAME },
+            artifacts: [
+              {
+                id: 'runbook-id',
+                type: RUNBOOK_ARTIFACT_TYPE,
+                value: RUNBOOK_TEXT,
+              },
+            ],
           })
         );
         ruleId = rule.id;
@@ -143,13 +161,14 @@ test.describe(
         // Navigate to Details step to see the name input.
         await pageObjects.composeDiscover.clickNext();
         await expect(pageObjects.composeDiscover.ruleNameInput).toHaveValue(EDIT_RULE_NAME);
+        await expect(pageObjects.composeDiscover.flyout.getByText(RUNBOOK_TEXT)).toBeVisible();
+        await expect(pageObjects.composeDiscover.relatedDashboardsSelector).toBeVisible();
+        await expect(pageObjects.composeDiscover.relatedDashboardsInput).toBeVisible();
       });
 
       await test.step('modify name and save', async () => {
         await pageObjects.composeDiscover.ruleNameInput.clear();
         await pageObjects.composeDiscover.setRuleName(EDITED_RULE_NAME);
-        // Advance to notifications (final step)
-        await pageObjects.composeDiscover.clickNext();
         await pageObjects.composeDiscover.clickSubmit();
         await expect(pageObjects.composeDiscover.flyout).toBeHidden({ timeout: 30_000 });
       });
@@ -192,25 +211,25 @@ test.describe(
         await pageObjects.composeDiscover.clickNext();
       });
 
-      await test.step('Next does not advance without a name', async () => {
+      await test.step('Submit does not create without a name', async () => {
         await expect(page.testSubj.locator('ruleNameInput')).toBeVisible();
-        await pageObjects.composeDiscover.clickNext();
-        await expect(pageObjects.composeDiscover.submitButton).toBeHidden();
+        await pageObjects.composeDiscover.clickSubmit();
+        await expect(pageObjects.composeDiscover.flyout).toBeVisible();
         await expect(page.testSubj.locator('ruleNameInput')).toBeVisible();
       });
 
       await test.step('clearing a name after typing it blocks advancement', async () => {
         await pageObjects.composeDiscover.setRuleName('Temporary name');
         await pageObjects.composeDiscover.ruleNameInput.clear();
-        await pageObjects.composeDiscover.clickNext();
-        await expect(pageObjects.composeDiscover.submitButton).toBeHidden();
+        await pageObjects.composeDiscover.clickSubmit();
+        await expect(pageObjects.composeDiscover.flyout).toBeVisible();
         await expect(page.testSubj.locator('ruleNameInput')).toBeVisible();
       });
 
       await test.step('"Untitled rule" placeholder text is rejected as a name', async () => {
         await pageObjects.composeDiscover.setRuleName(DEFAULT_RULE_NAME);
-        await pageObjects.composeDiscover.clickNext();
-        await expect(pageObjects.composeDiscover.submitButton).toBeHidden();
+        await pageObjects.composeDiscover.clickSubmit();
+        await expect(pageObjects.composeDiscover.flyout).toBeVisible();
         await expect(page.testSubj.locator('ruleNameInput')).toBeVisible();
       });
 
