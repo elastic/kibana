@@ -51,6 +51,7 @@ interface GetErrorGroupsParams {
   locations?: string[];
   tags?: string[];
   projects?: string[];
+  statusCodes?: string[];
   query?: string;
 }
 
@@ -62,6 +63,7 @@ export async function getErrorGroups({
   locations,
   tags,
   projects,
+  statusCodes,
   query,
 }: GetErrorGroupsParams): Promise<ErrorGroupsResponse> {
   const filters: QueryDslQueryContainer[] = [
@@ -82,6 +84,14 @@ export async function getErrorGroups({
   }
   if (projects?.length) {
     filters.push({ terms: { 'monitor.project.id': projects } });
+  }
+  if (statusCodes?.length) {
+    // `http.response.status_code` is mapped as a numeric field, so coerce
+    // any URL-string codes to numbers before sending the `terms` query.
+    const numericStatusCodes = statusCodes.map((s) => Number(s)).filter((n) => Number.isFinite(n));
+    if (numericStatusCodes.length) {
+      filters.push({ terms: { 'http.response.status_code': numericStatusCodes } });
+    }
   }
 
   const must: QueryDslQueryContainer[] = [];

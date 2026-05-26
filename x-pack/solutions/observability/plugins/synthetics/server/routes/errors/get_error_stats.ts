@@ -22,11 +22,12 @@ export const getErrorStatsRoute: SyntheticsRestApiRouteFactory = () => ({
       locations: schema.maybe(schema.string()),
       tags: schema.maybe(schema.string()),
       projects: schema.maybe(schema.string()),
+      statusCodes: schema.maybe(schema.string()),
       query: schema.maybe(schema.string()),
     }),
   },
   handler: async ({ syntheticsEsClient, request }) => {
-    const { from, to, monitorTypes, locations, tags, projects, query } = request.query;
+    const { from, to, monitorTypes, locations, tags, projects, statusCodes, query } = request.query;
 
     return await getErrorStats({
       syntheticsEsClient,
@@ -36,6 +37,7 @@ export const getErrorStatsRoute: SyntheticsRestApiRouteFactory = () => ({
       locations: safeJsonParse(locations),
       tags: safeJsonParse(tags),
       projects: safeJsonParse(projects),
+      statusCodes: safeJsonParse(statusCodes),
       query: query || undefined,
     });
   },

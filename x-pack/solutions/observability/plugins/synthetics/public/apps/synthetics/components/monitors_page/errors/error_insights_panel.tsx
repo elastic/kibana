@@ -37,7 +37,7 @@ export const ErrorInsightsPanel = ({
   const { refreshApp } = useContext(SyntheticsRefreshContext);
 
   const toggleArrayFilter = useCallback(
-    (key: 'tags' | 'monitorTypes', value: string) => {
+    (key: 'tags' | 'monitorTypes' | 'statusCodes', value: string) => {
       const current = urlParams[key] ?? [];
       const asArray = Array.isArray(current) ? current : current ? [current] : [];
       const next = asArray.includes(value)
@@ -59,6 +59,11 @@ export const ErrorInsightsPanel = ({
     [toggleArrayFilter]
   );
 
+  const toggleStatusCode = useCallback(
+    (code: string) => toggleArrayFilter('statusCodes', code),
+    [toggleArrayFilter]
+  );
+
   const filterByQuery = useCallback(
     (queryStr: string) => {
       updateUrl({ query: queryStr });
@@ -71,6 +76,10 @@ export const ErrorInsightsPanel = ({
   const selectedMonitorTypes = useMemo(
     () => toStringArray(urlParams.monitorTypes),
     [urlParams.monitorTypes]
+  );
+  const selectedStatusCodes = useMemo(
+    () => toStringArray(urlParams.statusCodes),
+    [urlParams.statusCodes]
   );
 
   if (loading && !insights) {
@@ -123,7 +132,11 @@ export const ErrorInsightsPanel = ({
         </EuiFlexItem>
         {hasStatusCodes && (
           <EuiFlexItem grow={1} style={{ minWidth: 180 }}>
-            <StatusCodesCard codes={insights.statusCodes} onFilter={filterByQuery} />
+            <StatusCodesCard
+              codes={insights.statusCodes}
+              onFilter={toggleStatusCode}
+              selected={selectedStatusCodes}
+            />
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
@@ -444,9 +457,11 @@ const TagBreakdownCard = ({
 const StatusCodesCard = ({
   codes,
   onFilter,
+  selected,
 }: {
   codes: Array<{ statusCode: number; count: number }>;
-  onFilter: (query: string) => void;
+  onFilter: (code: string) => void;
+  selected: string[];
 }) => {
   const { euiTheme } = useEuiTheme();
   const totalErrors = codes.reduce((sum, c) => sum + c.count, 0);
@@ -466,8 +481,13 @@ const StatusCodesCard = ({
         const pct = totalErrors > 0 ? Math.round((c.count / totalErrors) * 100) : 0;
         const codeColor =
           c.statusCode >= 500 ? 'danger' : c.statusCode >= 400 ? 'warning' : 'hollow';
+        const isSelected = selected.includes(String(c.statusCode));
         return (
-          <EuiToolTip key={c.statusCode} display="block" content={FILTER_BY_CODE_HINT}>
+          <EuiToolTip
+            key={c.statusCode}
+            display="block"
+            content={isSelected ? CLICK_TO_REMOVE_FILTER : FILTER_BY_CODE_HINT}
+          >
             <EuiFlexGroup
               alignItems="center"
               gutterSize="s"
@@ -475,11 +495,16 @@ const StatusCodesCard = ({
               css={css`
                 ${clickableRow};
                 margin-bottom: 6px;
+                ${isSelected
+                  ? `background: ${euiTheme.colors.lightestShade}; outline: 1px solid ${euiTheme.colors.primary};`
+                  : ''}
               `}
               onClick={() => onFilter(String(c.statusCode))}
             >
               <EuiFlexItem grow={false}>
-                <EuiBadge color={codeColor}>{c.statusCode}</EuiBadge>
+                <EuiBadge color={codeColor} iconType={isSelected ? 'check' : undefined}>
+                  {c.statusCode}
+                </EuiBadge>
               </EuiFlexItem>
               <EuiFlexItem>
                 <div

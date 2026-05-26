@@ -16,14 +16,32 @@ import { buildErrorFilterParams } from './use_error_filter_params';
 export function useErrorStats() {
   const { lastRefresh } = useSyntheticsRefreshContext();
   const urlParams = useGetUrlParams();
-  const { dateRangeStart, dateRangeEnd, query, monitorTypes, locations, tags, projects } =
-    urlParams;
+  const {
+    dateRangeStart,
+    dateRangeEnd,
+    query,
+    monitorTypes,
+    locations,
+    tags,
+    projects,
+    statusCodes,
+  } = urlParams;
 
   const { data, loading } = useFetcher(async () => {
     const params = buildErrorFilterParams(urlParams);
     return apiService.get<ErrorStats>(SYNTHETICS_API_URLS.ERROR_STATS, params);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lastRefresh, dateRangeStart, dateRangeEnd, query, monitorTypes, locations, tags, projects]);
+  }, [
+    lastRefresh,
+    dateRangeStart,
+    dateRangeEnd,
+    query,
+    monitorTypes,
+    locations,
+    tags,
+    projects,
+    statusCodes,
+  ]);
 
   return {
     stats: data ?? null,

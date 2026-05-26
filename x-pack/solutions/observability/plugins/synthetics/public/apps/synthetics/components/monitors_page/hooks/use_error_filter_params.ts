@@ -8,8 +8,16 @@
 import type { useGetUrlParams } from '../../../hooks';
 
 export function buildErrorFilterParams(urlParams: ReturnType<typeof useGetUrlParams>) {
-  const { dateRangeStart, dateRangeEnd, query, monitorTypes, locations, tags, projects } =
-    urlParams;
+  const {
+    dateRangeStart,
+    dateRangeEnd,
+    query,
+    monitorTypes,
+    locations,
+    tags,
+    projects,
+    statusCodes,
+  } = urlParams;
 
   const params: Record<string, string> = {
     from: dateRangeStart,
@@ -28,6 +36,9 @@ export function buildErrorFilterParams(urlParams: ReturnType<typeof useGetUrlPar
   }
   if (projects) {
     params.projects = JSON.stringify(Array.isArray(projects) ? projects : [projects]);
+  }
+  if (statusCodes?.length) {
+    params.statusCodes = JSON.stringify(statusCodes);
   }
   if (query) {
     params.query = query;

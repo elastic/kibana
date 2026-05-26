@@ -33,6 +33,7 @@ interface GetErrorStatsParams {
   locations?: string[];
   tags?: string[];
   projects?: string[];
+  statusCodes?: string[];
   query?: string;
 }
 
@@ -62,6 +63,7 @@ export async function getErrorStats({
   locations,
   tags,
   projects,
+  statusCodes,
   query,
 }: GetErrorStatsParams): Promise<ErrorStats> {
   const { prevFrom, prevTo } = getPreviousPeriod(from, to);
@@ -86,6 +88,12 @@ export async function getErrorStats({
     : null;
   const projectFilter: QueryDslQueryContainer | null = projects?.length
     ? { terms: { 'monitor.project.id': projects } }
+    : null;
+  // `http.response.status_code` is mapped as a numeric field, so coerce
+  // any URL-string codes to numbers before sending the `terms` query.
+  const numericStatusCodes = statusCodes?.map((s) => Number(s)).filter((n) => Number.isFinite(n));
+  const statusCodeFilter: QueryDslQueryContainer | null = numericStatusCodes?.length
+    ? { terms: { 'http.response.status_code': numericStatusCodes } }
     : null;
   const queryFilter: QueryDslQueryContainer | null = query
     ? (getQueryFilters(query) as QueryDslQueryContainer)
@@ -122,15 +130,39 @@ export async function getErrorStats({
     tagsFilter,
     locationFilter,
     projectFilter,
+    statusCodeFilter,
     queryFilter,
   ];
 
   // User filters excluding the monitor-type dimension — used by the
   // by_monitor_type breakdown.
-  const userFiltersExcludingMonitorType = [tagsFilter, locationFilter, projectFilter, queryFilter];
+  const userFiltersExcludingMonitorType = [
+    tagsFilter,
+    locationFilter,
+    projectFilter,
+    statusCodeFilter,
+    queryFilter,
+  ];
 
   // User filters excluding the tags dimension — used by the by_tag breakdown.
-  const userFiltersExcludingTags = [monitorTypeFilter, locationFilter, projectFilter, queryFilter];
+  const userFiltersExcludingTags = [
+    monitorTypeFilter,
+    locationFilter,
+    projectFilter,
+    statusCodeFilter,
+    queryFilter,
+  ];
+
+  // User filters excluding the status-code dimension — used by the
+  // status_codes breakdown so the user can still pick another code after
+  // clicking one.
+  const userFiltersExcludingStatusCodes = [
+    monitorTypeFilter,
+    tagsFilter,
+    locationFilter,
+    projectFilter,
+    queryFilter,
+  ];
 
   const result = await syntheticsEsClient.search(
     {
@@ -204,7 +236,15 @@ export async function getErrorStats({
                 },
               },
             },
-            status_codes: {
+          },
+        },
+        // Same pattern as by_monitor_type / by_tag: lives outside `current`
+        // so we can apply every user filter EXCEPT statusCodes, so the user
+        // can keep clicking other codes after picking one.
+        status_codes: {
+          filter: buildPeriodFilter(currentRange, userFiltersExcludingStatusCodes),
+          aggs: {
+            down: {
               filter: { term: { 'monitor.status': 'down' } },
               aggs: {
                 codes: {
@@ -322,8 +362,8 @@ export async function getErrorStats({
     })
     .sort((a: TagErrorStat, b: TagErrorStat) => b.downChecks - a.downChecks);
 
-  const codeBuckets = aggs?.current?.status_codes?.codes?.buckets ?? [];
-  const statusCodes: StatusCodeStat[] = codeBuckets.map((b: any) => ({
+  const codeBuckets = aggs?.status_codes?.down?.codes?.buckets ?? [];
+  const statusCodeStats: StatusCodeStat[] = codeBuckets.map((b: any) => ({
     statusCode: b.key as number,
     count: b.doc_count as number,
   }));
@@ -359,7 +399,7 @@ export async function getErrorStats({
   const insights: ErrorInsights = {
     failingDomains,
     tagStats,
-    statusCodes,
+    statusCodes: statusCodeStats,
     monitorTypeStats,
     emergingTerms,
   };

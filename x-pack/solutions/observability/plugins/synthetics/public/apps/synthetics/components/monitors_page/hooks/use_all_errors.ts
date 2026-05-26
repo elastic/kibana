@@ -23,11 +23,29 @@ function buildTermsFilter(field: string, values?: string | string[]) {
   return [{ terms: { [field]: arr } }];
 }
 
+function buildStatusCodesFilter(values?: string | string[]) {
+  if (!values || (Array.isArray(values) && values.length === 0)) return [];
+  const arr = Array.isArray(values) ? values : [values];
+  // `http.response.status_code` is mapped as a numeric field, so coerce
+  // any URL-string codes to numbers before sending the `terms` query.
+  const numeric = arr.map((s) => Number(s)).filter((n) => Number.isFinite(n));
+  if (!numeric.length) return [];
+  return [{ terms: { 'http.response.status_code': numeric } }];
+}
+
 export function useAllMonitorErrors() {
   const { lastRefresh } = useSyntheticsRefreshContext();
 
-  const { dateRangeStart, dateRangeEnd, query, monitorTypes, locations, tags, projects } =
-    useGetUrlParams();
+  const {
+    dateRangeStart,
+    dateRangeEnd,
+    query,
+    monitorTypes,
+    locations,
+    tags,
+    projects,
+    statusCodes,
+  } = useGetUrlParams();
 
   const timeZone = useTimeZone();
 
@@ -47,6 +65,7 @@ export function useAllMonitorErrors() {
     ...buildTermsFilter('observer.geo.name', locations),
     ...buildTermsFilter('tags', tags),
     ...buildTermsFilter('monitor.project.id', projects),
+    ...buildStatusCodesFilter(statusCodes),
   ];
 
   const must = query ? [getQueryFilters(query)] : [];
@@ -95,7 +114,17 @@ export function useAllMonitorErrors() {
         },
       },
     },
-    [lastRefresh, dateRangeStart, dateRangeEnd, query, monitorTypes, locations, tags, projects],
+    [
+      lastRefresh,
+      dateRangeStart,
+      dateRangeEnd,
+      query,
+      monitorTypes,
+      locations,
+      tags,
+      projects,
+      statusCodes,
+    ],
     {
       name: `getAllMonitorErrors/${dateRangeStart}/${dateRangeEnd}`,
       isRequestReady: true,

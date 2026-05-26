@@ -18,14 +18,32 @@ export type { ErrorGroup } from '../../../../../../common/runtime_types';
 export function useErrorGroups() {
   const { lastRefresh } = useSyntheticsRefreshContext();
   const urlParams = useGetUrlParams();
-  const { dateRangeStart, dateRangeEnd, query, monitorTypes, locations, tags, projects } =
-    urlParams;
+  const {
+    dateRangeStart,
+    dateRangeEnd,
+    query,
+    monitorTypes,
+    locations,
+    tags,
+    projects,
+    statusCodes,
+  } = urlParams;
 
   const { data, loading } = useFetcher(async () => {
     const params = buildErrorFilterParams(urlParams);
     return apiService.get<ErrorGroupsResponse>(SYNTHETICS_API_URLS.ERROR_GROUPS, params);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lastRefresh, dateRangeStart, dateRangeEnd, query, monitorTypes, locations, tags, projects]);
+  }, [
+    lastRefresh,
+    dateRangeStart,
+    dateRangeEnd,
+    query,
+    monitorTypes,
+    locations,
+    tags,
+    projects,
+    statusCodes,
+  ]);
 
   return {
     groups: data?.groups ?? [],
