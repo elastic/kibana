@@ -41,55 +41,6 @@ globalSetupHook(
     );
     log.debug('[setup:logstash] logstash_functional ES data ready');
 
-    // Huge fields data for Discover sidebar virtualization coverage
-    const hugeFieldsIndex = 'testhuge';
-    const hugeFieldCount = 11_000;
-    const hugeFieldsExists = await esClient.indices.exists({ index: hugeFieldsIndex });
-
-    if (!hugeFieldsExists) {
-      log.debug('[setup:huge_fields] creating testhuge index with high-field-count document...');
-      await esClient.indices.create({
-        index: hugeFieldsIndex,
-        settings: {
-          index: {
-            mapping: {
-              total_fields: {
-                limit: 50_000,
-              },
-            },
-            number_of_replicas: 0,
-            number_of_shards: 1,
-          },
-        },
-        mappings: {
-          properties: {
-            date: {
-              type: 'date',
-            },
-          },
-        },
-      });
-
-      const doc: Record<string, number | string> = {
-        date: '2016-10-05T14:00:00',
-      };
-
-      for (let i = 0; i <= hugeFieldCount; i++) {
-        doc[`myvar${i}`] = i;
-      }
-
-      await esClient.index({
-        index: hugeFieldsIndex,
-        id: '1',
-        document: doc,
-        refresh: 'wait_for',
-      });
-
-      log.debug('[setup:huge_fields] testhuge index ready');
-    } else {
-      log.debug('[setup:huge_fields] testhuge index already exists, skipping');
-    }
-
     // Metrics Experience setup
     log.debug('[setup:metrics] creating metrics test index (only if it does not exist)...');
     const created = await createMetricsTestIndexIfNeeded(esClient);
