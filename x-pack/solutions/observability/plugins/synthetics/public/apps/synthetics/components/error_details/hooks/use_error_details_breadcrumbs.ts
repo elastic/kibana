@@ -11,6 +11,7 @@ import { useTestRunDetailsBreadcrumbs } from '../../test_run_details/hooks/use_t
 import { useSelectedMonitor } from '../../monitor_details/hooks/use_selected_monitor';
 import { ConfigKey } from '../../../../../../common/runtime_types';
 import { PLUGIN } from '../../../../../../common/constants/plugin';
+import { useUrlSpaceId } from '../../../hooks/use_url_space_id';
 
 export const useErrorDetailsBreadcrumbs = (
   extraCrumbs?: Array<{ text: string; href?: string }>
@@ -21,13 +22,15 @@ export const useErrorDetailsBreadcrumbs = (
   const { monitor } = useSelectedMonitor();
 
   const selectedLocation = useSelectedLocation();
+  const spaceId = useUrlSpaceId();
 
+  const spaceIdQuery = spaceId ? `&spaceId=${spaceId}` : '';
   const errorsBreadcrumbs = [
     {
       text: ERRORS_CRUMB,
       href: `${appPath}/monitor/${monitor?.[ConfigKey.CONFIG_ID]}/errors?locationId=${
         selectedLocation?.id
-      }`,
+      }${spaceIdQuery}`,
     },
     ...(extraCrumbs ?? []),
   ];

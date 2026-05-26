@@ -13,7 +13,7 @@ import { datatableToCSV } from './export_csv';
 
 function getDefaultOptions() {
   const formatFactory = jest.fn();
-  formatFactory.mockReturnValue({ convert: (v: unknown) => `Formatted_${v}` } as FieldFormat);
+  formatFactory.mockReturnValue({ convertToText: (v: unknown) => `Formatted_${v}` } as FieldFormat);
   return {
     csvSeparator: ',',
     quoteValues: true,
@@ -81,7 +81,7 @@ describe('CSV exporter', () => {
       datatableToCSV(datatable, {
         ...getDefaultOptions(),
         escapeFormulaValues: true,
-        formatFactory: () => ({ convert: (v: unknown) => v } as FieldFormat),
+        formatFactory: () => ({ convertToText: (v: unknown) => v } as FieldFormat),
       })
     ).toMatch('columnOne\r\n"\'=1"\r\n');
   });
@@ -93,7 +93,7 @@ describe('CSV exporter', () => {
       datatableToCSV(datatable, {
         ...getDefaultOptions(),
         escapeFormulaValues: true,
-        formatFactory: () => ({ convert: (v: unknown) => v } as FieldFormat),
+        formatFactory: () => ({ convertToText: (v: unknown) => v } as FieldFormat),
       })
     ).toMatch('columnOne\r\n"a,b"\r\n');
   });
