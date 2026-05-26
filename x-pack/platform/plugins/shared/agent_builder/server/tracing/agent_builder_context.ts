@@ -12,19 +12,25 @@ import { isInferenceSpan } from '@kbn/inference-tracing';
 
 export const AGENT_BUILDER_OWNER_BAGGAGE_KEY = 'kibana.agent_builder';
 export const AGENT_BUILDER_OWNER_BAGGAGE_VALUE = '1';
+export const SPACE_ID_BAGGAGE_KEY = 'agent_builder.space_id';
+export const DATA_STREAM_NAMESPACE_ATTR = 'data_stream.namespace';
 
 /**
- * Executes a function within a context that has the Agent Builder ownership baggage set.
+ * Executes a function within a context that has the Agent Builder ownership baggage set,
+ * along with an optional space ID for data stream routing.
  * All descendant inference spans created inside this context will be tagged as Agent Builder spans,
  * allowing the AgentBuilderSpanProcessor to filter them from other inference consumers.
  */
-export const withAgentBuilderContext = <T>(fn: () => T): T => {
+export const withAgentBuilderContext = <T>(fn: () => T, options?: { spaceId?: string }): T => {
   const ctx = otelContext.active();
-  const currentBaggage = propagation.getBaggage(ctx) ?? propagation.createBaggage();
-  const updatedBaggage = currentBaggage.setEntry(AGENT_BUILDER_OWNER_BAGGAGE_KEY, {
+  let baggage = propagation.getBaggage(ctx) ?? propagation.createBaggage();
+  baggage = baggage.setEntry(AGENT_BUILDER_OWNER_BAGGAGE_KEY, {
     value: AGENT_BUILDER_OWNER_BAGGAGE_VALUE,
   });
-  const updatedContext = propagation.setBaggage(ctx, updatedBaggage);
+  if (options?.spaceId) {
+    baggage = baggage.setEntry(SPACE_ID_BAGGAGE_KEY, { value: options.spaceId });
+  }
+  const updatedContext = propagation.setBaggage(ctx, baggage);
 
   return otelContext.with(updatedContext, fn);
 };
