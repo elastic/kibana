@@ -13,6 +13,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { AgentBuilderConfig } from '../config';
 import { registerTracingExporter } from './register_tracing';
 import { AgentBuilderSpanProcessor } from './agent_builder_span_processor';
+import { DATA_STREAM_NAMESPACE_ATTR } from './agent_builder_context';
 
 jest.mock('@kbn/core/server', () => {
   const actual = jest.requireActual('@kbn/core/server');
@@ -188,6 +189,7 @@ describe('registerTracingExporter', () => {
     expect(MockedEvalSpanProcessor).toHaveBeenCalledWith([
       { baggageKey: 'execution.id.baggage.key' },
       { baggageKey: 'experiment.id.baggage.key' },
+      { baggageKey: 'agent_builder.space_id', attributeKey: DATA_STREAM_NAMESPACE_ATTR },
     ]);
     const [providerOpts] = jest.mocked(initInferenceTracerProvider).mock.calls[0];
     expect(providerOpts.processors).toHaveLength(3);
