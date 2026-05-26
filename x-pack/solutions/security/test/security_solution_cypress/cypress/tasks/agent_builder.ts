@@ -7,6 +7,7 @@
 
 import {
   NEW_AGENT_BUILDER_ATTACHMENT_BUTTON,
+  AGENT_BUILDER_ATTACHMENT_PILL,
   AGENT_BUILDER_CONVERSATION_INPUT_EDITOR,
   AGENT_BUILDER_SIDEBAR_PANEL,
   CREATE_RULE_BUTTON,
@@ -42,4 +43,8 @@ export const assertAgentBuilderSidebarIsOpen = () => {
 
 export const assertAgentBuilderSidebarIsNotOpen = () => {
   cy.get(AGENT_BUILDER_SIDEBAR_PANEL).should('not.exist');
+};
+
+export const assertAgentBuilderAttachmentPillContains = (expectedText: string) => {
+  cy.get(AGENT_BUILDER_ATTACHMENT_PILL).should('contain', expectedText);
 };

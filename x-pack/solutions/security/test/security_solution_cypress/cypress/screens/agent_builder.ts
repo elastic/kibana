@@ -25,3 +25,5 @@ export const CREATE_RULE_CONTEXT_MENU_POPOVER =
 export const AI_RULE_CREATION_MENU_ITEM = '[data-test-subj="ai-rule-creation"]';
 
 export const MANUAL_RULE_CREATION_MENU_ITEM = '[data-test-subj="manual-rule-creation"]';
+
+export const AGENT_BUILDER_ATTACHMENT_PILL = '[data-test-subj^="agentBuilderAttachmentPill-"]';
