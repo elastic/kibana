@@ -137,8 +137,14 @@ const alignLegacyTypes: NormalizerConfig<PartitionAttributes> = {
       delete layer.legendPosition;
     }
 
+    // legendMaxLines is ignored at runtime when truncateLegend is false or undefined -> delete it
     if (!layer.truncateLegend) {
       delete layer.legendMaxLines;
+    }
+
+    // legendMaxLines defaults to 1 when truncateLegend is true
+    if (layer.truncateLegend && layer.legendMaxLines == null) {
+      layer.legendMaxLines = 1;
     }
 
     return attributes;
