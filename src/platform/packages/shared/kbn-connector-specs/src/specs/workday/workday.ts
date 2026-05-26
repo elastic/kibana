@@ -115,7 +115,9 @@ export const Workday: ConnectorSpec = {
     types: [
       {
         type: 'oauth_authorization_code',
-        defaults: {},
+        defaults: {
+          scope: '',
+        },
         overrides: {
           meta: {
             authorizationUrl: {
@@ -904,6 +906,7 @@ export const Workday: ConnectorSpec = {
       isTool: true,
       description:
         'Check budget availability for a proposed transaction in Workday. ' +
+        'This is a read-only check — it does not create or modify any data. ' +
         'Requires a budget structure WID and a proposed amount. ' +
         'Optionally specify currency code (e.g. "USD") and a cost center WID to scope the check. ' +
         'Returns whether sufficient budget is available for the proposed amount.',
@@ -1019,6 +1022,8 @@ export const Workday: ConnectorSpec = {
     'Use `listPurchaseRequisitions` to list requisitions; filter by `status` if needed.',
     'Use `getPurchaseRequisition` with a WID to get full line-item and approval details.',
     'Use `listPurchaseOrders` to list purchase orders (read-only); filter by `status` if needed.',
+    'Note: the Workday Procurement REST API does not expose a GET-by-ID endpoint for purchase orders.',
+    'If you need line-item details for a specific PO, reference the `listPurchaseOrders` summary fields — no drill-down action is available.',
     '',
     '### Budgets',
     'Use `checkBudget` to verify budget availability before proposing a transaction.',
