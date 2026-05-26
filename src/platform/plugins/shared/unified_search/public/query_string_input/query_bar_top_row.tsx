@@ -876,7 +876,10 @@ export const QueryBarTopRow = React.memo(
               isLoading={isSendingToBackground}
               isDisabled={!canSendToBackground}
               onClick={onClickSendToBackground}
-              title={strings.getSendToBackgroundLabel()}
+              tooltipProps={{
+                content: strings.getSendToBackgroundLabel(),
+                disableScreenReaderOutput: true,
+              }}
               aria-label={strings.getSendToBackgroundLabel()}
               iconType="backgroundTask"
               data-test-subj="queryCancelButton-secondary-button"
@@ -973,7 +976,10 @@ export const QueryBarTopRow = React.memo(
             isLoading={isSendingToBackground}
             isDisabled={!canSendToBackground}
             onClick={onClickSendToBackground}
-            title={strings.getSendToBackgroundLabel()}
+            tooltipProps={{
+              content: strings.getSendToBackgroundLabel(),
+              disableScreenReaderOutput: true,
+            }}
             aria-label={strings.getSendToBackgroundLabel()}
             data-test-subj="querySubmitButton-secondary-button"
           />
