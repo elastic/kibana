@@ -38,6 +38,7 @@ dependsOn:
   - '@kbn/chart-test-jest-helpers'
   - '@kbn/field-formats-common'
   - '@kbn/visualizations-common'
+  - '@kbn/css-utils'
 tags:
   - plugin
   - prod
