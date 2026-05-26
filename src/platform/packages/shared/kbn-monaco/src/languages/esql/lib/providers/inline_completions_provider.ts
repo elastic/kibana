@@ -10,7 +10,7 @@
 import { inlineSuggest } from '@kbn/esql-language';
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import { monaco } from '../../../../monaco_imports';
-import { createMonacoProvider } from './providers_factory';
+import { createCancellableCallbacks, createMonacoProvider } from './providers_factory';
 
 export function getInlineCompletionsProvider(
   callbacks?: ESQLCallbacks
@@ -20,7 +20,7 @@ export function getInlineCompletionsProvider(
       model: monaco.editor.ITextModel,
       position: monaco.Position,
       _context: monaco.languages.InlineCompletionContext,
-      _token: monaco.CancellationToken
+      token: monaco.CancellationToken
     ) {
       return createMonacoProvider({
         model,
@@ -40,7 +40,8 @@ export function getInlineCompletionsProvider(
             position.column
           );
 
-          return await inlineSuggest(fullText, textBeforeCursor, range, callbacks);
+          const cancellableCallbacks = createCancellableCallbacks(callbacks, token);
+          return await inlineSuggest(fullText, textBeforeCursor, range, cancellableCallbacks);
         },
         emptyResult: { items: [] },
       });

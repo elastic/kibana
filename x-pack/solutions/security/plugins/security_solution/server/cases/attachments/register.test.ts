@@ -8,9 +8,11 @@
 import {
   SECURITY_ENDPOINT_ATTACHMENT_TYPE,
   SECURITY_EVENT_ATTACHMENT_TYPE,
+  INDICATOR_ATTACHMENT_TYPE,
 } from '@kbn/cases-plugin/common';
 
-import { LEGACY_ENDPOINT_EXTERNAL_REFERENCE_TYPE_ID, registerCaseAttachments } from './register';
+import { registerCaseAttachments } from './register';
+import { EndpointAttachmentPayloadSchema } from '../../../common/cases/attachments/endpoint';
 
 describe('registerCaseAttachments', () => {
   const buildFramework = () => ({
@@ -19,17 +21,15 @@ describe('registerCaseAttachments', () => {
     registerUnified: jest.fn(),
   });
 
-  it('registers the unified security.endpoint attachment type with the metadata validator', () => {
+  it('registers the unified security.endpoint attachment with the zod payload schema', () => {
     const framework = buildFramework();
 
     registerCaseAttachments(framework);
 
-    expect(framework.registerUnified).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
-        schemaValidator: expect.any(Function),
-      })
-    );
+    expect(framework.registerUnified).toHaveBeenCalledWith({
+      id: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
+      schema: EndpointAttachmentPayloadSchema,
+    });
   });
 
   it('registers the unified security.event attachment type', () => {
@@ -42,23 +42,29 @@ describe('registerCaseAttachments', () => {
     );
   });
 
-  // Regression: addresses @szwarckonrad review comment on PR #260544.
-  // Dropping this registration is a silent breaking change for any API client
-  // still POSTing the legacy shape
-  // `{ type: 'externalReference', externalReferenceAttachmentTypeId: 'endpoint', ... }`.
-  // Such clients would receive `400 "Attachment type endpoint is not registered."`
-  // even though the cases server's external-reference transformer can still
-  // round-trip the resulting SO into the unified `security.endpoint` shape on read.
-  it('keeps the legacy `endpoint` external-reference type registered for back-compat', () => {
+  it('registers the unified indicator attachment type with the zod schema', () => {
     const framework = buildFramework();
 
     registerCaseAttachments(framework);
 
-    expect(framework.registerExternalReference).toHaveBeenCalledTimes(1);
-    expect(framework.registerExternalReference).toHaveBeenCalledWith({
-      id: LEGACY_ENDPOINT_EXTERNAL_REFERENCE_TYPE_ID,
-    });
-    expect(LEGACY_ENDPOINT_EXTERNAL_REFERENCE_TYPE_ID).toBe('endpoint');
+    expect(framework.registerUnified).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: INDICATOR_ATTACHMENT_TYPE,
+        schema: expect.anything(),
+      })
+    );
+  });
+
+  // The cases-plugin routes inbound `externalReferenceAttachmentTypeId: 'endpoint'`
+  // payloads through `EXTERNAL_REFERENCE_TYPE_MAP` -> 'security.endpoint' at the
+  // validator boundary, so the unified registration above is sufficient for
+  // back-compat. No external-reference registration is required.
+  it('does not register any external-reference attachment types', () => {
+    const framework = buildFramework();
+
+    registerCaseAttachments(framework);
+
+    expect(framework.registerExternalReference).not.toHaveBeenCalled();
   });
 
   it('does not register any persistable-state attachment types', () => {
@@ -69,12 +75,11 @@ describe('registerCaseAttachments', () => {
     expect(framework.registerPersistableState).not.toHaveBeenCalled();
   });
 
-  it('registers exactly the three expected attachment types', () => {
+  it('registers exactly the three expected unified attachment types', () => {
     const framework = buildFramework();
 
     registerCaseAttachments(framework);
 
-    expect(framework.registerUnified).toHaveBeenCalledTimes(2);
-    expect(framework.registerExternalReference).toHaveBeenCalledTimes(1);
+    expect(framework.registerUnified).toHaveBeenCalledTimes(3);
   });
 });

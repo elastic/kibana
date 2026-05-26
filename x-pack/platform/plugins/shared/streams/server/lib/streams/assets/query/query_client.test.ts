@@ -7,14 +7,10 @@
 
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
-import type { RulesClient } from '@kbn/alerting-plugin/server';
 import { BulkOperationError, type IStorageClient } from '@kbn/storage-adapter';
-
-jest.mock('timers/promises', () => ({
-  setTimeout: jest.fn().mockResolvedValue(undefined),
-}));
 import type { StreamQuery, Streams } from '@kbn/streams-schema';
 import { QUERY_TYPE_STATS } from '@kbn/streams-schema/src/queries';
+import { DEFAULT_SIG_EVENTS_TUNING_CONFIG } from '../../../../../common/sig_events_tuning_config';
 import type { QueryStorageSettings } from '../storage_settings';
 import {
   ASSET_ID,
@@ -35,9 +31,20 @@ import {
   RULE_ID,
   STREAM_NAME,
 } from '../fields';
-import { buildSearchEmbeddingText, QueryClient, type StoredQueryLink } from './query_client';
+import {
+  buildSearchEmbeddingText,
+  getQueryLinkUuid,
+  QueryClient,
+  type StoredQueryLink,
+} from './query_client';
+import type { IRulesManagementClient } from './rules_management_client';
+import { computeRuleId } from './helpers/query';
 
 // ==================== Helpers ====================
+
+jest.mock('timers/promises', () => ({
+  setTimeout: jest.fn().mockResolvedValue(undefined),
+}));
 
 const createMockLogger = () => loggerMock.create();
 
@@ -68,7 +75,7 @@ const createQueryClient = ({
         StoredQueryLink
       >,
       soClient: {} as SavedObjectsClientContract,
-      rulesClient: {} as RulesClient,
+      rulesManagementClient: {} as IRulesManagementClient,
       logger: logger as unknown as Logger,
     },
     true
@@ -823,10 +830,10 @@ describe('QueryClient backward compatibility', () => {
             ],
           },
         });
-        const rulesClient = {
-          create: jest.fn().mockResolvedValue({}),
-          update: jest.fn().mockResolvedValue({}),
-          bulkDeleteRules: jest.fn().mockResolvedValue({}),
+        const rulesManagementClient: jest.Mocked<IRulesManagementClient> = {
+          createRule: jest.fn().mockResolvedValue(undefined),
+          updateRule: jest.fn().mockResolvedValue(undefined),
+          bulkDeleteRules: jest.fn().mockResolvedValue(undefined),
         };
         const client = new QueryClient(
           {
@@ -835,7 +842,7 @@ describe('QueryClient backward compatibility', () => {
               StoredQueryLink
             >,
             soClient: {} as SavedObjectsClientContract,
-            rulesClient: rulesClient as unknown as RulesClient,
+            rulesManagementClient,
             logger: createMockLogger() as unknown as Logger,
           },
           true
@@ -855,7 +862,7 @@ describe('QueryClient backward compatibility', () => {
         );
         expect(rangeFilter).toBeUndefined();
         // Rule creation should proceed for the low-severity query
-        expect(rulesClient.create).toHaveBeenCalledTimes(1);
+        expect(rulesManagementClient.createRule).toHaveBeenCalledTimes(1);
       });
     });
   });
@@ -875,6 +882,338 @@ describe('QueryClient backward compatibility', () => {
       expect(topLevelKeys).not.toContain(QUERY_SEARCH_EMBEDDING);
       expect(topLevelKeys).not.toContain(QUERY_KQL_BODY);
       expect(results[0].query.title).toBe('SSH Failed Logins');
+    });
+  });
+});
+
+// ==================== Rule lifecycle (syncQueries / installQueries / uninstallQueries) ====================
+
+describe('rule lifecycle — syncQueries', () => {
+  const STREAM = 'logs.test';
+  const def = createMockDefinition(STREAM);
+
+  // A simple MATCH ES|QL query with METADATA _id (required for rule-backed queries).
+  const MATCH_ESQL = 'FROM logs-* METADATA _id | WHERE http.status >= 500';
+  // A STATS ES|QL query — must never produce a rule.
+  const STATS_ESQL = 'FROM logs-* | STATS count = COUNT(*) BY service.name';
+
+  // --- local helpers ---
+
+  function rulesManagementClientMock(): jest.Mocked<IRulesManagementClient> {
+    return {
+      createRule: jest.fn().mockResolvedValue(undefined),
+      updateRule: jest.fn().mockResolvedValue(undefined),
+      bulkDeleteRules: jest.fn().mockResolvedValue(undefined),
+    };
+  }
+
+  /** Build a QueryClient with a fully-wired IRulesManagementClient mock. */
+  function makeClient(
+    rc: jest.Mocked<IRulesManagementClient>,
+    sc = createMockStorageClient(),
+    sigEventsEnabled = true
+  ) {
+    return {
+      client: new QueryClient(
+        {
+          storageClient: sc as unknown as IStorageClient<QueryStorageSettings, StoredQueryLink>,
+          soClient: {} as SavedObjectsClientContract,
+          rulesManagementClient: rc,
+          logger: createMockLogger() as unknown as Logger,
+        },
+        sigEventsEnabled,
+        DEFAULT_SIG_EVENTS_TUNING_CONFIG
+      ),
+      storageClient: sc,
+      rc,
+    };
+  }
+
+  function matchQuery(id = 'q1', esql = MATCH_ESQL): StreamQuery {
+    return {
+      id,
+      type: 'match',
+      title: `Query ${id}`,
+      description: '',
+      esql: { query: esql },
+    };
+  }
+
+  /** Deterministic rule ID matching QueryClient's own computation for a given stream+query. */
+  function ruleIdFor(queryId: string, esql: string): string {
+    const uuid = getQueryLinkUuid(STREAM, { 'asset.type': 'query', 'asset.id': queryId });
+    return computeRuleId(uuid, esql);
+  }
+
+  /**
+   * Builds the stored-doc shape that `fromStorage` would read for an existing rule-backed query.
+   * STREAM_NAME is inherited from `createOldShapeStoredDoc`'s default ('logs.test').
+   */
+  function existingStoredDoc(
+    queryId: string,
+    esql: string,
+    opts: { ruleBacked?: boolean } = {}
+  ): Record<string, unknown> {
+    const uuid = getQueryLinkUuid(STREAM, { 'asset.type': 'query', 'asset.id': queryId });
+    return createOldShapeStoredDoc({
+      [ASSET_ID]: queryId,
+      [ASSET_UUID]: uuid,
+      [QUERY_ESQL_QUERY]: esql,
+      [QUERY_TITLE]: `Query ${queryId}`,
+      [RULE_BACKED]: opts.ruleBacked ?? true,
+      [RULE_ID]: computeRuleId(uuid, esql),
+    });
+  }
+
+  // --- tests ---
+
+  describe('new query', () => {
+    it('calls rulesClient.createRule once for a brand-new rule-backed query', async () => {
+      const rc = rulesManagementClientMock();
+      const sc = createMockStorageClient();
+      sc.search.mockResolvedValue({ hits: { hits: [] } });
+      const { client } = makeClient(rc, sc);
+
+      await client.syncQueries(def, [matchQuery()]);
+
+      expect(rc.createRule).toHaveBeenCalledTimes(1);
+      expect(rc.updateRule).not.toHaveBeenCalled();
+      expect(rc.bulkDeleteRules).not.toHaveBeenCalled();
+    });
+
+    it('passes the correct rule body when creating', async () => {
+      const rc = rulesManagementClientMock();
+      const sc = createMockStorageClient();
+      sc.search.mockResolvedValue({ hits: { hits: [] } });
+      const { client } = makeClient(rc, sc);
+
+      await client.syncQueries(def, [matchQuery('q1', MATCH_ESQL)]);
+
+      const expectedRuleId = ruleIdFor('q1', MATCH_ESQL);
+      expect(rc.createRule).toHaveBeenCalledWith(expectedRuleId, {
+        name: 'Query q1',
+        consumer: 'streams',
+        alertTypeId: 'streams.rules.esql',
+        actions: [],
+        params: { timestampField: '@timestamp', query: MATCH_ESQL },
+        enabled: true,
+        tags: ['streams', STREAM],
+        schedule: { interval: '1m' },
+      });
+    });
+  });
+
+  describe('non-breaking update (title/description changed, ES|QL unchanged)', () => {
+    it('calls rulesClient.updateRule and does not create or delete', async () => {
+      const rc = rulesManagementClientMock();
+      const sc = createMockStorageClient();
+      sc.search.mockResolvedValue({
+        hits: { hits: [toSearchHit(existingStoredDoc('q1', MATCH_ESQL))] },
+      });
+      const { client } = makeClient(rc, sc);
+
+      const updated = { ...matchQuery('q1', MATCH_ESQL), title: 'Updated Title' };
+      await client.syncQueries(def, [updated]);
+
+      expect(rc.updateRule).toHaveBeenCalledTimes(1);
+      expect(rc.createRule).not.toHaveBeenCalled();
+      expect(rc.bulkDeleteRules).not.toHaveBeenCalled();
+    });
+
+    it('passes the correct update body', async () => {
+      const rc = rulesManagementClientMock();
+      const sc = createMockStorageClient();
+      sc.search.mockResolvedValue({
+        hits: { hits: [toSearchHit(existingStoredDoc('q1', MATCH_ESQL))] },
+      });
+      const { client } = makeClient(rc, sc);
+
+      const updated = { ...matchQuery('q1', MATCH_ESQL), title: 'Updated Title' };
+      await client.syncQueries(def, [updated]);
+
+      const expectedRuleId = ruleIdFor('q1', MATCH_ESQL);
+      expect(rc.updateRule).toHaveBeenCalledWith(expectedRuleId, {
+        name: 'Updated Title',
+        actions: [],
+        params: { timestampField: '@timestamp', query: MATCH_ESQL },
+        tags: ['streams', STREAM],
+        schedule: { interval: '1m' },
+      });
+    });
+  });
+
+  describe('breaking change (ES|QL changed)', () => {
+    it('deletes the old rule and creates a new one with a new rule ID', async () => {
+      const rc = rulesManagementClientMock();
+      const sc = createMockStorageClient();
+      sc.search.mockResolvedValue({
+        hits: { hits: [toSearchHit(existingStoredDoc('q1', MATCH_ESQL))] },
+      });
+      const { client } = makeClient(rc, sc);
+
+      const newEsql = 'FROM logs-* METADATA _id | WHERE http.status >= 503';
+      await client.syncQueries(def, [{ ...matchQuery('q1'), esql: { query: newEsql } }]);
+
+      const oldRuleId = ruleIdFor('q1', MATCH_ESQL);
+      const newRuleId = ruleIdFor('q1', newEsql);
+
+      expect(rc.bulkDeleteRules).toHaveBeenCalledWith([oldRuleId]);
+      expect(rc.createRule).toHaveBeenCalledWith(
+        newRuleId,
+        expect.objectContaining({ params: { timestampField: '@timestamp', query: newEsql } })
+      );
+      expect(rc.updateRule).not.toHaveBeenCalled();
+    });
+
+    it('treats whitespace-only ES|QL changes as non-breaking (no rule churn)', async () => {
+      const rc = rulesManagementClientMock();
+      const sc = createMockStorageClient();
+      sc.search.mockResolvedValue({
+        hits: { hits: [toSearchHit(existingStoredDoc('q1', MATCH_ESQL))] },
+      });
+      const { client } = makeClient(rc, sc);
+
+      const reformatted = '  FROM  logs-*   METADATA   _id  |  WHERE  http.status  >=  500  ';
+      await client.syncQueries(def, [{ ...matchQuery('q1'), esql: { query: reformatted } }]);
+
+      expect(rc.updateRule).toHaveBeenCalledTimes(1);
+      expect(rc.createRule).not.toHaveBeenCalled();
+      expect(rc.bulkDeleteRules).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('removed query', () => {
+    it('calls bulkDeleteRules when a rule-backed query is no longer in the input list', async () => {
+      const rc = rulesManagementClientMock();
+      const sc = createMockStorageClient();
+      sc.search.mockResolvedValue({
+        hits: { hits: [toSearchHit(existingStoredDoc('q1', MATCH_ESQL))] },
+      });
+      const { client } = makeClient(rc, sc);
+
+      await client.syncQueries(def, []); // empty → delete all
+
+      const expectedRuleId = ruleIdFor('q1', MATCH_ESQL);
+      expect(rc.bulkDeleteRules).toHaveBeenCalledWith([expectedRuleId]);
+      expect(rc.createRule).not.toHaveBeenCalled();
+    });
+
+    it('does not call bulkDeleteRules for an unbacked query that is removed', async () => {
+      const rc = rulesManagementClientMock();
+      const sc = createMockStorageClient();
+      sc.search.mockResolvedValue({
+        hits: {
+          hits: [toSearchHit(existingStoredDoc('q1', MATCH_ESQL, { ruleBacked: false }))],
+        },
+      });
+      const { client } = makeClient(rc, sc);
+
+      await client.syncQueries(def, []); // remove the unbacked query
+
+      expect(rc.bulkDeleteRules).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('STATS query', () => {
+    it('does not create a rule for a new STATS query', async () => {
+      const rc = rulesManagementClientMock();
+      const sc = createMockStorageClient();
+      sc.search.mockResolvedValue({ hits: { hits: [] } });
+      const { client } = makeClient(rc, sc);
+
+      const statsQuery: StreamQuery = {
+        id: 'q-stats',
+        type: 'stats',
+        title: 'Stats Query',
+        description: '',
+        esql: { query: STATS_ESQL },
+      };
+      await client.syncQueries(def, [statsQuery]);
+
+      expect(rc.createRule).not.toHaveBeenCalled();
+      expect(rc.updateRule).not.toHaveBeenCalled();
+      expect(rc.bulkDeleteRules).not.toHaveBeenCalled();
+    });
+
+    it('deletes the rule when a previously rule-backed query becomes STATS', async () => {
+      const rc = rulesManagementClientMock();
+      const sc = createMockStorageClient();
+      sc.search.mockResolvedValue({
+        hits: { hits: [toSearchHit(existingStoredDoc('q1', MATCH_ESQL))] },
+      });
+      const { client } = makeClient(rc, sc);
+
+      const demotedQuery: StreamQuery = {
+        id: 'q1',
+        type: 'stats',
+        title: 'Query q1',
+        description: '',
+        esql: { query: STATS_ESQL },
+      };
+      await client.syncQueries(def, [demotedQuery]);
+
+      const expectedRuleId = ruleIdFor('q1', MATCH_ESQL);
+      expect(rc.bulkDeleteRules).toHaveBeenCalledWith([expectedRuleId]);
+      expect(rc.createRule).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('feature flag disabled', () => {
+    it('is a no-op when significant events is disabled', async () => {
+      const rc = rulesManagementClientMock();
+      const sc = createMockStorageClient();
+      const { client } = makeClient(rc, sc, false /* sigEventsEnabled = false */);
+
+      await client.syncQueries(def, [matchQuery()]);
+
+      expect(rc.createRule).not.toHaveBeenCalled();
+      expect(rc.updateRule).not.toHaveBeenCalled();
+      expect(rc.bulkDeleteRules).not.toHaveBeenCalled();
+      expect(sc.search).not.toHaveBeenCalled();
+      expect(sc.bulk).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('compensation on install failure', () => {
+    it('calls bulkDeleteRules for all queued creates when installQueries partially fails', async () => {
+      const rc = rulesManagementClientMock();
+      // First createRule succeeds; second rejects.
+      rc.createRule
+        .mockResolvedValueOnce(undefined)
+        .mockRejectedValueOnce(new Error('server error'));
+
+      const sc = createMockStorageClient();
+      sc.search.mockResolvedValue({ hits: { hits: [] } });
+      const { client } = makeClient(rc, sc);
+
+      const esql1 = 'FROM logs-* METADATA _id | WHERE http.status == 500';
+      const esql2 = 'FROM logs-* METADATA _id | WHERE http.status == 503';
+
+      await expect(
+        client.syncQueries(def, [matchQuery('q1', esql1), matchQuery('q2', esql2)])
+      ).rejects.toThrow('server error');
+
+      const ruleId1 = ruleIdFor('q1', esql1);
+      const ruleId2 = ruleIdFor('q2', esql2);
+
+      expect(rc.bulkDeleteRules).toHaveBeenCalledWith(expect.arrayContaining([ruleId1, ruleId2]));
+    });
+
+    it('does not call bulkDeleteRules for update-only queries when install fails', async () => {
+      const rc = rulesManagementClientMock();
+      rc.updateRule.mockRejectedValue(new Error('update failed'));
+
+      const sc = createMockStorageClient();
+      sc.search.mockResolvedValue({
+        hits: { hits: [toSearchHit(existingStoredDoc('q1', MATCH_ESQL))] },
+      });
+      const { client } = makeClient(rc, sc);
+
+      await expect(client.syncQueries(def, [matchQuery('q1', MATCH_ESQL)])).rejects.toThrow(
+        'update failed'
+      );
+
+      expect(rc.bulkDeleteRules).not.toHaveBeenCalled();
     });
   });
 });
