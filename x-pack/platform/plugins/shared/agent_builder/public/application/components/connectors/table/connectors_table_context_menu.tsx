@@ -67,7 +67,6 @@ const DisconnectConfirmModal: React.FC<{
       ebt_element: AGENT_BUILDER_UI_EBT.element.pageContent,
       ebt_action: AGENT_BUILDER_UI_EBT.action.connectors.DISCONNECT_CONFIRM,
       element_kind: 'button',
-      location_pathname: window.location.pathname,
     });
     disconnect();
   }, [analytics, disconnect]);
@@ -77,7 +76,6 @@ const DisconnectConfirmModal: React.FC<{
       ebt_element: AGENT_BUILDER_UI_EBT.element.pageContent,
       ebt_action: AGENT_BUILDER_UI_EBT.action.connectors.DISCONNECT_CANCEL,
       element_kind: 'button',
-      location_pathname: window.location.pathname,
     });
     onCancel();
   }, [analytics, onCancel]);

@@ -33,7 +33,6 @@ export const ExternalLinkModal: React.FC<ExternalLinkModalProps> = ({ url, onClo
       ebt_element: AGENT_BUILDER_UI_EBT.element.pageContent,
       ebt_action: AGENT_BUILDER_UI_EBT.action.conversation.EXTERNAL_LINK_CONFIRM,
       element_kind: 'button',
-      location_pathname: window.location.pathname,
     });
     window.open(url, '_blank', 'noreferrer');
     onClose();
@@ -44,7 +43,6 @@ export const ExternalLinkModal: React.FC<ExternalLinkModalProps> = ({ url, onClo
       ebt_element: AGENT_BUILDER_UI_EBT.element.pageContent,
       ebt_action: AGENT_BUILDER_UI_EBT.action.conversation.EXTERNAL_LINK_CANCEL,
       element_kind: 'button',
-      location_pathname: window.location.pathname,
     });
     onClose();
   }, [analytics, onClose]);
