@@ -19,15 +19,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await ml.securityUI.loginAsMlPowerUser();
     });
 
-    after(async () => {
-      await ml.securityUI.logout();
-
-      await ml.securityCommon.cleanMlUsers();
-      await ml.securityCommon.cleanMlRoles();
-
-      await ml.testResources.resetKibanaTimeZone();
-    });
-
     loadTestFile(require.resolve('./memory_usage_page'));
   });
 }

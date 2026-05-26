@@ -23,16 +23,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/ihp_outlier');
     });
 
-    after(async () => {
-      // NOTE: Logout needs to happen before anything else to avoid flaky behavior
-      await ml.securityUI.logout();
-
-      await ml.securityCommon.cleanMlUsers();
-      await ml.securityCommon.cleanMlRoles();
-
-      await ml.testResources.resetKibanaTimeZone();
-    });
-
     loadTestFile(require.resolve('./synchronize'));
     loadTestFile(require.resolve('./manage_spaces'));
     loadTestFile(require.resolve('./import_jobs'));

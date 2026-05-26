@@ -24,16 +24,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       );
     });
 
-    after(async () => {
-      // NOTE: Logout needs to happen before anything else to avoid flaky behavior
-      await ml.securityUI.logout();
-
-      await ml.securityCommon.cleanMlUsers();
-      await ml.securityCommon.cleanMlRoles();
-
-      await ml.testResources.resetKibanaTimeZone();
-    });
-
     loadTestFile(require.resolve('./full_ml_access'));
     loadTestFile(require.resolve('./read_ml_access'));
     loadTestFile(require.resolve('./no_ml_access'));

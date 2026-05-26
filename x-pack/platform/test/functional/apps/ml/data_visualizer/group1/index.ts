@@ -23,15 +23,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       );
     });
 
-    after(async () => {
-      // NOTE: Logout needs to happen before anything else to avoid flaky behavior
-      await ml.securityUI.logout();
-
-      await ml.securityCommon.cleanMlUsers();
-      await ml.securityCommon.cleanMlRoles();
-
-      await ml.testResources.resetKibanaTimeZone();
-    });
     loadTestFile(require.resolve('./index_data_visualizer'));
     loadTestFile(require.resolve('./index_data_visualizer_random_sampler'));
     loadTestFile(require.resolve('./index_data_visualizer_filters'));

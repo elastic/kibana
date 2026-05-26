@@ -18,16 +18,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await ml.securityCommon.createMlUsers();
     });
 
-    after(async () => {
-      // NOTE: Logout needs to happen before anything else to avoid flaky behavior
-      await ml.securityUI.logout();
-
-      await ml.securityCommon.cleanMlUsers();
-      await ml.securityCommon.cleanMlRoles();
-
-      await ml.testResources.resetKibanaTimeZone();
-    });
-
     loadTestFile(require.resolve('./outlier_detection_creation'));
     loadTestFile(require.resolve('./regression_creation'));
     loadTestFile(require.resolve('./classification_creation'));

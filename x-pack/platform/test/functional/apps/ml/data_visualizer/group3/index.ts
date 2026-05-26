@@ -20,15 +20,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
     });
 
-    after(async () => {
-      // NOTE: Logout needs to happen before anything else to avoid flaky behavior
-      await ml.securityUI.logout();
-
-      await ml.securityCommon.cleanMlUsers();
-      await ml.securityCommon.cleanMlRoles();
-
-      await ml.testResources.resetKibanaTimeZone();
-    });
     loadTestFile(require.resolve('./index_data_visualizer_grid_in_discover'));
     loadTestFile(require.resolve('./index_data_visualizer_grid_in_discover_trial'));
     loadTestFile(require.resolve('./index_data_visualizer_grid_in_dashboard'));

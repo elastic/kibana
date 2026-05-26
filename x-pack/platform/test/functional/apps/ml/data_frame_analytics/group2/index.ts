@@ -20,16 +20,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote_small');
     });
 
-    after(async () => {
-      // NOTE: Logout needs to happen before anything else to avoid flaky behavior
-      await ml.securityUI.logout();
-
-      await ml.securityCommon.cleanMlUsers();
-      await ml.securityCommon.cleanMlRoles();
-
-      await ml.testResources.resetKibanaTimeZone();
-    });
-
     loadTestFile(require.resolve('./regression_creation_saved_search'));
     loadTestFile(require.resolve('./classification_creation_saved_search'));
     loadTestFile(require.resolve('./outlier_detection_creation_saved_search'));
