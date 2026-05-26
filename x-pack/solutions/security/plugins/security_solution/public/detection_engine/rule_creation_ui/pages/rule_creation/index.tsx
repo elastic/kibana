@@ -322,7 +322,7 @@ const CreateRulePageComponent: React.FC<{}> = () => {
       }
       setActiveStep(step);
     },
-    [activeStep, aiRuleCreation, openSteps]
+    [activeStep, aiRuleCreation, openSteps, toggleStepAccordion]
   );
 
   const openStepsRef = useRef(openSteps);
