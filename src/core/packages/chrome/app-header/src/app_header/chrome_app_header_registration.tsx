@@ -17,24 +17,22 @@ export const useChromeAppHeaderRegistration = (config: AppHeaderConfig) => {
   const isActive = chrome.next.isEnabled && chrome.getChromeStyle() === 'project';
 
   useLayoutEffect(() => {
+    unregisterRef.current?.();
+    unregisterRef.current = undefined;
+
     if (!isActive) {
       return;
     }
+
+    const unregister = chrome.next.appHeader.set(config);
+    unregisterRef.current = unregister;
 
     return () => {
-      unregisterRef.current?.();
-      unregisterRef.current = undefined;
+      if (unregisterRef.current === unregister) {
+        unregisterRef.current = undefined;
+      }
+      unregister();
     };
-  }, [isActive]);
-
-  useLayoutEffect(() => {
-    if (!isActive) {
-      unregisterRef.current?.();
-      unregisterRef.current = undefined;
-      return;
-    }
-
-    unregisterRef.current = chrome.next.appHeader.set(config);
   }, [chrome, config, isActive]);
 };
 

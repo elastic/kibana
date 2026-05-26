@@ -40,6 +40,10 @@ function useFallbackProps(): FallbackProps {
   const appMenu = useObservable(appMenu$, undefined);
 
   const hasLegacyActionMenu = useHasLegacyActionMenu();
+  const legacyBadge$ = useMemo(() => chrome.getBadge$(), [chrome]);
+  const legacyBadge = useObservable(legacyBadge$, undefined);
+  const breadcrumbsBadges$ = useMemo(() => chrome.getBreadcrumbsBadges$(), [chrome]);
+  const breadcrumbsBadges = useObservable(breadcrumbsBadges$, []);
 
   return useMemo(() => {
     const backTargets: AppHeaderBack[] = [];
@@ -56,14 +60,15 @@ function useFallbackProps(): FallbackProps {
 
     const hasBack = backTargets.length > 0;
     const hasMenu = !!appMenu?.items?.length;
-    const hasContent = hasBack || hasMenu || hasLegacyActionMenu;
+    const hasBadges = !!legacyBadge || breadcrumbsBadges.length > 0;
+    const hasContent = hasBack || hasMenu || hasBadges || hasLegacyActionMenu;
 
     return {
       hasContent,
       back: hasBack ? backTargets : undefined,
       menu: hasMenu ? appMenu : undefined,
     };
-  }, [breadcrumbs, appMenu, hasLegacyActionMenu]);
+  }, [breadcrumbs, appMenu, legacyBadge, breadcrumbsBadges, hasLegacyActionMenu]);
 }
 
 function useAppHeaderConfig(): AppHeaderConfig | undefined {
@@ -86,7 +91,9 @@ function hasExplicitAppHeaderContent(config: AppHeaderConfig | undefined): boole
     normalizeAppHeaderBack(config.back) !== undefined ||
     !!config.tabs?.length ||
     !!config.badges?.length ||
-    !!config.menu?.items?.length
+    !!config.menu?.items?.length ||
+    !!config.onShare ||
+    !!config.favorite
   );
 }
 

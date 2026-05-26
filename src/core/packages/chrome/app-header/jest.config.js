@@ -7,16 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { AppHeaderWithFallback, AppHeader } from './src';
-export { AppHeaderView, ChromeAppHeaderRegistration, useChromeAppHeaderRegistration } from './src';
-export type { AppHeaderViewProps, AppHeaderConfig } from './src';
-export type {
-  AppHeaderWithFallbackProps,
-  AppHeaderProps,
-  AppHeaderBack,
-  AppHeaderBadge,
-  AppHeaderBadgeItem,
-  AppHeaderTab,
-  AppHeaderMenu,
-  AppHeaderPadding,
-} from './src';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/core/packages/chrome/app-header'],
+};

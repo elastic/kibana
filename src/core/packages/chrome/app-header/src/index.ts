@@ -13,6 +13,7 @@ export { ChromeAppHeaderRegistration, useChromeAppHeaderRegistration } from './a
 export type {
   AppHeaderBack,
   AppHeaderBadge,
+  AppHeaderBadgeItem,
   AppHeaderTab,
   AppHeaderMenu,
   AppHeaderPadding,

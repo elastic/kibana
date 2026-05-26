@@ -1,0 +1,83 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import React from 'react';
+import '@testing-library/jest-dom';
+import { BehaviorSubject } from 'rxjs';
+import { render, screen } from '@testing-library/react';
+import { EuiButtonIcon } from '@elastic/eui';
+import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal-types';
+import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
+import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
+import type { ChromeBadge } from '@kbn/core-chrome-browser';
+import { AppHeaderView } from './app_header';
+
+const renderAppHeader = (
+  ui: React.ReactElement,
+  chrome: InternalChromeStart = chromeServiceMock.createStartContract()
+) => {
+  return render(<ChromeServiceProvider value={{ chrome }}>{ui}</ChromeServiceProvider>);
+};
+
+describe('AppHeaderView', () => {
+  it('renders when the only content is an explicit share action', () => {
+    renderAppHeader(<AppHeaderView onShare={jest.fn()} />);
+
+    expect(screen.getByTestId('appHeader')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Share' })).toBeInTheDocument();
+  });
+
+  it('renders when the only content is a favorite action', () => {
+    renderAppHeader(
+      <AppHeaderView
+        favorite={<EuiButtonIcon aria-label="Favorite" iconType="starEmpty" onClick={jest.fn()} />}
+      />
+    );
+
+    expect(screen.getByTestId('appHeader')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Favorite' })).toBeInTheDocument();
+  });
+
+  it('renders when the only content is a static app menu item', async () => {
+    renderAppHeader(<AppHeaderView showAddIntegrations />);
+
+    expect(screen.getByTestId('appHeader')).toBeInTheDocument();
+    expect(await screen.findByTestId('app-menu')).toBeInTheDocument();
+  });
+
+  it('renders legacy badge fallback content', () => {
+    const chrome = chromeServiceMock.createStartContract();
+    chrome.getBadge$.mockReturnValue(
+      new BehaviorSubject<ChromeBadge>({ text: 'Technical preview', tooltip: '' })
+    );
+
+    renderAppHeader(<AppHeaderView />, chrome);
+
+    expect(screen.getByTestId('appHeader')).toBeInTheDocument();
+    expect(screen.getByText('Technical preview')).toBeInTheDocument();
+  });
+
+  it('renders tab badge and test subject metadata', () => {
+    renderAppHeader(
+      <AppHeaderView
+        tabs={[
+          {
+            id: 'alerts',
+            label: 'Alerts',
+            badge: 3,
+            'data-test-subj': 'alertsTab',
+          },
+        ]}
+      />
+    );
+
+    expect(screen.getByTestId('alertsTab')).toBeInTheDocument();
+    expect(screen.getByText('3')).toBeInTheDocument();
+  });
+});

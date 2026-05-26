@@ -27,6 +27,8 @@ const createSetupContractMock = (): DeeplyMockedKeys<InternalChromeSetup> => {
 
 const createStartContractMock = () => {
   const nextAppHeaderState$ = new BehaviorSubject<AppHeaderConfig | undefined>(undefined);
+  const inlineAppHeaderState$ = new BehaviorSubject(false);
+  let appHeaderRegistrationId = 0;
 
   const startContract: DeeplyMockedKeys<InternalChromeStart> = lazyObject({
     withProvider: jest.fn((children) => children),
@@ -70,7 +72,7 @@ const createStartContractMock = () => {
     }),
     setIsVisible: jest.fn(),
     getIsVisible$: jest.fn().mockReturnValue(new BehaviorSubject(false)),
-    getBadge$: jest.fn().mockReturnValue(new BehaviorSubject({} as ChromeBadge)),
+    getBadge$: jest.fn().mockReturnValue(new BehaviorSubject<ChromeBadge | undefined>(undefined)),
     setBadge: jest.fn(),
     getBreadcrumbs$: jest.fn().mockReturnValue(new BehaviorSubject([{} as ChromeBreadcrumb])),
     getBreadcrumbs: jest.fn().mockReturnValue([]),
@@ -122,15 +124,18 @@ const createStartContractMock = () => {
         get$: jest.fn().mockReturnValue(new BehaviorSubject(undefined)),
       }),
       inlineAppHeader: lazyObject({
-        get$: jest.fn().mockReturnValue(new BehaviorSubject(false)),
-        set: jest.fn(),
+        get$: jest.fn().mockReturnValue(inlineAppHeaderState$),
+        set: jest.fn((value: boolean) => inlineAppHeaderState$.next(value)),
       }),
       appHeader: lazyObject({
         get$: jest.fn().mockReturnValue(nextAppHeaderState$),
         set: jest.fn((config: AppHeaderConfig) => {
+          const registrationId = ++appHeaderRegistrationId;
           nextAppHeaderState$.next(config);
           return () => {
-            nextAppHeaderState$.next(undefined);
+            if (registrationId === appHeaderRegistrationId) {
+              nextAppHeaderState$.next(undefined);
+            }
           };
         }),
       }),

@@ -19,7 +19,7 @@ import { AppTabs } from './app_tabs';
 import { TitleArea } from './title_area';
 import { TitleActions } from './title_actions';
 import { AppMenu } from './app_menu';
-import { useShareAction } from './hooks';
+import { useResolvedBadges, useShareAction } from './hooks';
 
 export interface AppHeaderViewProps {
   title?: string;
@@ -51,12 +51,17 @@ export const AppHeaderView = React.memo<AppHeaderViewProps>(
   }) => {
     const hasLegacyActionMenu = useHasLegacyActionMenu();
     const shareAction = useShareAction(menu, onShare);
+    const resolvedBadges = useResolvedBadges(badges);
     const show =
       title !== undefined ||
       back !== undefined ||
       !!tabs?.length ||
-      !!badges?.length ||
+      !!resolvedBadges?.length ||
       !!menu?.items?.length ||
+      !!shareAction ||
+      !!favorite ||
+      !!docLink ||
+      !!showAddIntegrations ||
       hasLegacyActionMenu;
 
     if (!show) {
@@ -66,7 +71,7 @@ export const AppHeaderView = React.memo<AppHeaderViewProps>(
     return (
       <AppHeaderShell
         title={<TitleArea title={title} back={back} />}
-        badges={<AppBadges badges={badges} />}
+        badges={<AppBadges badges={resolvedBadges} />}
         titleActions={<TitleActions shareAction={shareAction} favorite={favorite} />}
         trailing={
           <AppMenu
