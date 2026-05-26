@@ -108,6 +108,10 @@ export interface IDslSearchOptions extends IBaseSearchOptions {
   trackTotalHits?: boolean | number;
 }
 
+export type IDslPaginatedSearchParams = IDslSearchParams & Required<Pick<IDslSearchParams, 'sort'>>;
+
+export type IDslPaginatedSearchOptions = Omit<IDslSearchOptions, 'trackTotalHits'>;
+
 /**
  * Pagination helpers for DSL search results
  */
@@ -373,8 +377,8 @@ export interface ISearchMethods {
    * Execute a paginated DSL (Elasticsearch Query DSL) search with pagination helpers
    */
   dslPaginated: (
-    params: IDslSearchParams,
-    options?: Omit<IDslSearchOptions, 'trackTotalHits'>
+    params: IDslPaginatedSearchParams,
+    options?: IDslPaginatedSearchOptions
   ) => Promise<IDslPaginatedSearchResult>;
 
   /**
