@@ -23,7 +23,6 @@ const mockUseMatchedActionPolicies = useMatchedActionPolicies as jest.MockedFunc
   typeof useMatchedActionPolicies
 >;
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
 const mockUseWatch = require('react-hook-form').useWatch as jest.Mock;
 
 const renderComponent = (
