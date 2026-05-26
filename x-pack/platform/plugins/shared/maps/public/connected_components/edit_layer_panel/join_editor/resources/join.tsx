@@ -279,18 +279,21 @@ export class Join extends Component<Props, State> {
 
         {globalTimeCheckbox}
 
-        <EuiButtonIcon
-          className="mapJoinItem__delete"
-          iconType="trash"
-          color="danger"
-          aria-label={i18n.translate('xpack.maps.layerPanel.join.deleteJoinAriaLabel', {
+        <EuiToolTip
+          content={i18n.translate('xpack.maps.layerPanel.join.deleteJoinTitle', {
             defaultMessage: 'Delete join',
           })}
-          title={i18n.translate('xpack.maps.layerPanel.join.deleteJoinTitle', {
-            defaultMessage: 'Delete join',
-          })}
-          onClick={onRemove}
-        />
+        >
+          <EuiButtonIcon
+            className="mapJoinItem__delete"
+            iconType="trash"
+            color="danger"
+            aria-label={i18n.translate('xpack.maps.layerPanel.join.deleteJoinAriaLabel', {
+              defaultMessage: 'Delete join',
+            })}
+            onClick={onRemove}
+          />
+        </EuiToolTip>
       </div>
     );
   }
