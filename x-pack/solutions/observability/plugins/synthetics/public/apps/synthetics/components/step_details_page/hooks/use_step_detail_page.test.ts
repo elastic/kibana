@@ -45,7 +45,9 @@ describe('getStepDetailLink', () => {
         locationId: 'loc-1',
         remoteName: 'cluster-one',
       })
-    ).toBe('/app/synthetics/monitor/mon-1/test-run/cg-1/step/1?locationId=loc-1&remoteName=cluster-one');
+    ).toBe(
+      '/app/synthetics/monitor/mon-1/test-run/cg-1/step/1?locationId=loc-1&remoteName=cluster-one'
+    );
   });
 
   it('appends spaceId and remoteName together when both are provided', () => {

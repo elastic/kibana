@@ -90,9 +90,7 @@ describe('getTestRunDetailRelativeLink', () => {
         spaceId: 'team-a',
         remoteName: 'cluster-one',
       })
-    ).toBe(
-      '/monitor/mon-1/test-run/cg-1?locationId=loc-1&spaceId=team-a&remoteName=cluster-one'
-    );
+    ).toBe('/monitor/mon-1/test-run/cg-1?locationId=loc-1&spaceId=team-a&remoteName=cluster-one');
   });
 
   it('keeps remoteName even when locationId is undefined', () => {

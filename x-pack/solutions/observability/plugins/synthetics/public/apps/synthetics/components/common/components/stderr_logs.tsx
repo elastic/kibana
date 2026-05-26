@@ -115,9 +115,7 @@ export const StdErrorLogs = ({
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiToolTip
-                content={isRemote ? VIEW_IN_DISCOVER_REMOTE_TOOLTIP : undefined}
-              >
+              <EuiToolTip content={isRemote ? VIEW_IN_DISCOVER_REMOTE_TOOLTIP : undefined}>
                 <EuiLink data-test-subj="syntheticsStdErrorLogsLink">
                   <EuiButtonEmpty
                     data-test-subj="syntheticsStdErrorLogsButton"
