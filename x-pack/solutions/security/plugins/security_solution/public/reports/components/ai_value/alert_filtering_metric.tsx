@@ -31,6 +31,12 @@ interface Props {
 }
 const ID = 'AlertFilteringMetricQuery';
 
+const VISUALIZATION_ACTIONS = [
+  VisualizationContextMenuActions.addToExistingCase,
+  VisualizationContextMenuActions.addToNewCase,
+  VisualizationContextMenuActions.inspect,
+];
+
 interface LiveContentProps {
   attackAlertIds: string[];
   from: string;
@@ -64,11 +70,7 @@ const LiveAlertFilteringMetricContent: React.FC<LiveContentProps> = ({
       id={`${ID}-area-embeddable`}
       inspectTitle={i18n.FILTERING_RATE}
       scopeId={PageScope.alerts}
-      withActions={[
-        VisualizationContextMenuActions.addToExistingCase,
-        VisualizationContextMenuActions.addToNewCase,
-        VisualizationContextMenuActions.inspect,
-      ]}
+      withActions={VISUALIZATION_ACTIONS}
     />
   );
 };

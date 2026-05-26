@@ -31,6 +31,12 @@ import { SAMPLE_VALUE_METRICS } from './sample_data';
 import * as i18n from './translations';
 
 const ChartSize = 250;
+
+const VISUALIZATION_ACTIONS = [
+  VisualizationContextMenuActions.addToExistingCase,
+  VisualizationContextMenuActions.addToNewCase,
+  VisualizationContextMenuActions.inspect,
+];
 const visualizationIdPrefix = 'aiValueAlertProcessingDonut';
 
 const donutTheme: PartialTheme = {
@@ -77,11 +83,7 @@ const LiveAlertProcessingDonut: React.FC<{
       donutTextWrapperClassName={'donutText'}
       scopeId={PageScope.alerts}
       timerange={{ from, to }}
-      withActions={[
-        VisualizationContextMenuActions.addToExistingCase,
-        VisualizationContextMenuActions.addToNewCase,
-        VisualizationContextMenuActions.inspect,
-      ]}
+      withActions={VISUALIZATION_ACTIONS}
     />
   );
 };

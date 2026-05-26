@@ -33,6 +33,12 @@ interface Props {
 }
 const ID = 'CostSavingsMetricQuery';
 
+const VISUALIZATION_ACTIONS = [
+  VisualizationContextMenuActions.addToExistingCase,
+  VisualizationContextMenuActions.addToNewCase,
+  VisualizationContextMenuActions.inspect,
+];
+
 const WithMetricAnimation = ({ children }: { children: React.ReactNode }) => {
   // Apply animation to the metric value
   useMetricAnimation({
@@ -87,11 +93,7 @@ const LiveCostSavingsMetricContent: React.FC<LiveContentProps> = ({
       id={`${ID}-metric`}
       inspectTitle={i18n.COST_SAVINGS_TREND}
       scopeId={PageScope.alerts}
-      withActions={[
-        VisualizationContextMenuActions.addToExistingCase,
-        VisualizationContextMenuActions.addToNewCase,
-        VisualizationContextMenuActions.inspect,
-      ]}
+      withActions={VISUALIZATION_ACTIONS}
     />
   );
 

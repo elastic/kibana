@@ -26,6 +26,12 @@ interface Props {
 }
 const ID = 'ThreatsDetectedMetricQuery';
 
+const VISUALIZATION_ACTIONS = [
+  VisualizationContextMenuActions.addToExistingCase,
+  VisualizationContextMenuActions.addToNewCase,
+  VisualizationContextMenuActions.inspect,
+];
+
 interface LiveContentProps {
   from: string;
   to: string;
@@ -42,11 +48,7 @@ const LiveThreatsDetectedMetricContent: React.FC<LiveContentProps> = ({ from, to
       timerange={{ from, to }}
       id={`${ID}-area-embeddable`}
       inspectTitle={i18n.THREATS_DETECTED}
-      withActions={[
-        VisualizationContextMenuActions.addToExistingCase,
-        VisualizationContextMenuActions.addToNewCase,
-        VisualizationContextMenuActions.inspect,
-      ]}
+      withActions={VISUALIZATION_ACTIONS}
     />
   );
 };

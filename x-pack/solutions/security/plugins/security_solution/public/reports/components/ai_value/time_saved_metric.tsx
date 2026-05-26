@@ -31,6 +31,12 @@ interface Props {
 }
 const ID = 'TimeSavedMetricQuery';
 
+const VISUALIZATION_ACTIONS = [
+  VisualizationContextMenuActions.addToExistingCase,
+  VisualizationContextMenuActions.addToNewCase,
+  VisualizationContextMenuActions.inspect,
+] as const;
+
 interface LiveContentProps {
   from: string;
   to: string;
@@ -53,11 +59,7 @@ const LiveTimeSavedMetricContent: React.FC<LiveContentProps> = ({ from, to, minu
       id={`${ID}-metric`}
       inspectTitle={i18n.TIME_SAVED}
       scopeId={PageScope.alerts}
-      withActions={[
-        VisualizationContextMenuActions.addToExistingCase,
-        VisualizationContextMenuActions.addToNewCase,
-        VisualizationContextMenuActions.inspect,
-      ]}
+      withActions={VISUALIZATION_ACTIONS}
     />
   );
 };

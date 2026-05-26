@@ -41,7 +41,23 @@ interface Props {
   minutesPerAlert: number;
   analystHourlyRate: number;
 }
+const formatTooltipHeader = ({ value }: { value: number }) => {
+  const d = new Date(value);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  const hour = String(d.getHours()).padStart(2, '0');
+  const min = String(d.getMinutes()).padStart(2, '0');
+  return `${year}-${month}-${day} ${hour}:${min}`;
+};
+
 const ID = 'CostSavingsTrendQuery';
+
+const VISUALIZATION_ACTIONS = [
+  VisualizationContextMenuActions.addToExistingCase,
+  VisualizationContextMenuActions.addToNewCase,
+  VisualizationContextMenuActions.inspect,
+];
 
 const LiveTrendVisualization: React.FC<{
   from: string;
@@ -73,11 +89,7 @@ const LiveTrendVisualization: React.FC<{
       height={300}
       inspectTitle={i18n.COST_SAVINGS_TREND}
       scopeId={PageScope.alerts}
-      withActions={[
-        VisualizationContextMenuActions.addToExistingCase,
-        VisualizationContextMenuActions.addToNewCase,
-        VisualizationContextMenuActions.inspect,
-      ]}
+      withActions={VISUALIZATION_ACTIONS}
     />
   );
 };
@@ -102,18 +114,7 @@ const SampleTrendVisualization: React.FC<{ from: string; to: string }> = ({ from
           showLegend={false}
           legendPosition={Position.Right}
         />
-        <Tooltip
-          headerFormatter={({ value }) => {
-            const d = new Date(value);
-            const year = d.getFullYear();
-            const month = String(d.getMonth() + 1).padStart(2, '0');
-            const day = String(d.getDate()).padStart(2, '0');
-            const hour = String(d.getHours()).padStart(2, '0');
-            const min = String(d.getMinutes()).padStart(2, '0');
-            return `${year}-${month}-${day} ${hour}:${min}`;
-          }}
-          type="follow"
-        />
+        <Tooltip headerFormatter={formatTooltipHeader} type="follow" />
         <Axis
           id="bottom"
           position={Position.Bottom}

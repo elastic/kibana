@@ -78,6 +78,8 @@ const mockLensResponse = {
 const defaultProps = {
   isSample: false as const,
   lensResponse: mockLensResponse,
+  from: 'now-7d',
+  to: 'now',
 };
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -259,7 +261,10 @@ describe('CostSavingsKeyInsight', () => {
   });
 
   it('shows loading state when lensResponse is null', () => {
-    render(<CostSavingsKeyInsight isSample={false} lensResponse={null} />, { wrapper });
+    render(
+      <CostSavingsKeyInsight from={'now-7d'} to={'now'} isSample={false} lensResponse={null} />,
+      { wrapper }
+    );
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
   });
 
@@ -298,7 +303,14 @@ describe('CostSavingsKeyInsight', () => {
       },
     };
 
-    rerender(<CostSavingsKeyInsight isSample={false} lensResponse={newLensResponse} />);
+    rerender(
+      <CostSavingsKeyInsight
+        from={'now-7d'}
+        to={'now'}
+        isSample={false}
+        lensResponse={newLensResponse}
+      />
+    );
 
     await waitFor(() => {
       expect(mockChatComplete).toHaveBeenCalledTimes(2);
@@ -399,7 +411,12 @@ describe('CostSavingsKeyInsight', () => {
       });
 
       const { rerender } = render(
-        <CostSavingsKeyInsight isSample={false} lensResponse={mockLensResponse} />,
+        <CostSavingsKeyInsight
+          from={'now-7d'}
+          to={'now'}
+          isSample={false}
+          lensResponse={mockLensResponse}
+        />,
         { wrapper }
       );
 
@@ -417,7 +434,14 @@ describe('CostSavingsKeyInsight', () => {
         shouldRegenerateInsight: false,
         setInsight: mockSetInsightInExportContext,
       });
-      rerender(<CostSavingsKeyInsight isSample={false} lensResponse={mockLensResponse} />);
+      rerender(
+        <CostSavingsKeyInsight
+          from={'now-7d'}
+          to={'now'}
+          isSample={false}
+          lensResponse={mockLensResponse}
+        />
+      );
 
       await waitFor(() => {
         expect(container).toHaveAttribute('data-render-complete', 'true');
