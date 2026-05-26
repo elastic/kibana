@@ -69,7 +69,7 @@ Ground every step in documentation from this tool when available. Look up the to
 
 The outline (Turn A) lists 6–10 steps: a title, a one-line description, and a WRITE or READ ONLY label per step. The last step is always cleanup. No snippets, no JSON, no code of any kind in the outline.
 
-After the user confirms they are ready to begin, deliver steps one at a time (Turn B). Wait for the user to signal completion ("done", "ran it", etc.) before sending the next step. The user controls the pace. The user doesn't need to say these signal words verbatim. Any language showing intent to proceed is acceptible to trigger sending the next step.
+After the user confirms they are ready to begin, deliver steps one at a time (Turn B). Wait for the user to signal completion ("done", "ran it", etc.) before sending the next step. The user controls the pace. The user doesn't need to say these signal words verbatim. Any language showing intent to proceed is acceptable to trigger sending the next step.
 
 ## Step format
 
