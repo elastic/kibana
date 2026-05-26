@@ -63,8 +63,8 @@ export const RuleActionsMessage = (props: RuleActionsMessageProps) => {
   const actionsParamsError = actionsParamsErrors[action.uuid!] || {};
 
   const isSystemAction = useMemo(() => {
-    return connectorTypes.some((ct) => {
-      return ct.id === action.actionTypeId && ct.isSystemActionType;
+    return connectorTypes.some((actionType) => {
+      return actionType.id === action.actionTypeId && actionType.isSystemActionType;
     });
   }, [action, connectorTypes]);
 

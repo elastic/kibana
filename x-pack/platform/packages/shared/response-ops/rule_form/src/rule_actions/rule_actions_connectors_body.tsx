@@ -27,6 +27,8 @@ import {
   useEuiTheme,
   EuiSelectable,
   useCurrentEuiBreakpoint,
+  EuiBetaBadge,
+  EuiIconTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ActionConnector } from '@kbn/alerts-ui-shared';
@@ -44,7 +46,11 @@ import {
   ACTION_TYPE_MODAL_FILTER_LIST_TITLE,
   MODAL_SEARCH_CLEAR_FILTERS_TEXT,
   MODAL_SEARCH_PLACEHOLDER,
+  DEPRECATED_LABEL,
+  DEPRECATED_CONNECTOR_TOOLTIP_CONTENT,
+  DEPRECATED_LLM_CONNECTOR_INFO,
 } from '../translations';
+import { isLLMConnectorTypeId } from '../constants';
 import { getDefaultParams } from '../utils';
 
 type ConnectorsMap = Record<string, { actionTypeId: string; name: string; total: number }>;
@@ -166,6 +172,10 @@ export const RuleActionsConnectorsBody = ({
       }
 
       if (!actionTypeModel?.actionParamsFields) {
+        return false;
+      }
+
+      if (actionTypeModel.getHideInUi?.(connectorTypes) && !actionTypeModel.subtype?.length) {
         return false;
       }
 
@@ -333,7 +343,7 @@ export const RuleActionsConnectorsBody = ({
           button={button}
           closePopover={closeFilterPopover}
           isOpen={isConenctorFilterPopoverOpen}
-          panelPaddingSize="none"
+          panelPaddingSize="s"
         >
           <EuiSelectable singleSelection options={options}>
             {(list) => <div style={{ width: 400 }}>{list}</div>}
@@ -420,7 +430,7 @@ export const RuleActionsConnectorsBody = ({
               icon={
                 <div style={{ marginInlineEnd: `16px` }}>
                   <Suspense fallback={<EuiLoadingSpinner />}>
-                    <EuiIcon size="l" type={actionTypeModel.iconClass} />
+                    <EuiIcon size="l" type={actionTypeModel.iconClass} aria-hidden={true} />
                   </Suspense>
                 </div>
               }
@@ -429,9 +439,31 @@ export const RuleActionsConnectorsBody = ({
                 <>
                   <EuiText size="xs">{actionTypeModel.selectMessage}</EuiText>
                   <EuiSpacer size="s" />
-                  <EuiText color="subdued" size="xs" style={{ textTransform: 'uppercase' }}>
-                    <strong>{actionType?.name}</strong>
-                  </EuiText>
+                  <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+                    {actionType.isDeprecated && (
+                      <EuiFlexItem grow={false} style={{ height: `1.5rem` }}>
+                        <EuiBetaBadge
+                          color="warning"
+                          label={DEPRECATED_LABEL}
+                          size="s"
+                          tooltipContent={DEPRECATED_CONNECTOR_TOOLTIP_CONTENT}
+                        />
+                      </EuiFlexItem>
+                    )}
+                    {actionType.isDeprecated && isLLMConnectorTypeId(actionType.id) && (
+                      <EuiFlexItem grow={false}>
+                        <EuiIconTip
+                          type="info"
+                          color="subdued"
+                          content={DEPRECATED_LLM_CONNECTOR_INFO}
+                          data-test-subj={`deprecatedLLMConnectorInfo-${actionType.id}`}
+                        />
+                      </EuiFlexItem>
+                    )}
+                    <EuiText color="subdued" size="xs" style={{ textTransform: 'uppercase' }}>
+                      <strong>{actionType?.name}</strong>
+                    </EuiText>
+                  </EuiFlexGroup>
                 </>
               }
               onClick={() => onSelectConnectorInternal(connector)}
