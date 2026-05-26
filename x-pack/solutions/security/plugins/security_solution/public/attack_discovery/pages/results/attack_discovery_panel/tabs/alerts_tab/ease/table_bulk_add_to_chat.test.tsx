@@ -23,6 +23,14 @@ jest.mock('@kbn/response-ops-alerts-table', () => ({
   AlertsTable: jest.fn(() => null),
 }));
 jest.mock('../../../../../../../agent_builder/hooks/use_report_add_to_chat');
+jest.mock('../../../../../../../agent_builder/hooks/use_agent_builder_availability', () => ({
+  useAgentBuilderAvailability: jest.fn(() => ({
+    isAgentBuilderEnabled: true,
+    hasAgentBuilderPrivilege: true,
+    isAgentChatExperienceEnabled: true,
+    hasValidAgentBuilderLicense: false,
+  })),
+}));
 jest.mock('../../../../../../../agent_builder/helpers', () => ({
   alertsToAttachmentGroup: jest.fn(() => []),
 }));
@@ -76,14 +84,14 @@ describe('Attack Discovery Table — bulkAddToChatConfig', () => {
     expect(initialMessage).toBe(BULK_ALERTS_ATTACHMENT_PROMPT);
   });
 
-  it('calls reportAddToChat with bulk_alerts_attack_discovery pathway and alert_count', () => {
+  it('calls reportAddToChat with bulk_alerts_attack_discovery pathway and item_count', () => {
     const { convertAlertToAttachment } = renderAndGetBulkConfig();
     const items = [makeItem('a'), makeItem('b')];
     convertAlertToAttachment(items);
     expect(mockReportAddToChat).toHaveBeenCalledWith({
       pathway: 'bulk_alerts_attack_discovery',
       attachments: ['alert'],
-      alert_count: 2,
+      item_count: 2,
     });
   });
 
