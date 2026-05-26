@@ -146,7 +146,6 @@ describe('Fleet proxies service', () => {
     });
   });
 
-
   describe('create', () => {
     it('should throw FleetError when given an invalid id', async () => {
       await expect(
@@ -158,7 +157,6 @@ describe('Fleet proxies service', () => {
       ).rejects.toThrow('id is not valid');
     });
   });
-
 
   describe('delete', () => {
     it('should not allow to delete preconfigured proxy', async () => {
