@@ -6,6 +6,7 @@
  */
 import apm from 'elastic-apm-node';
 import { withActiveSpan } from '@kbn/tracing-utils';
+import { escapeKuery, escapeQuotes } from '@kbn/es-query';
 import { groupBy, isEqual, keyBy, omit, pick, uniq } from 'lodash';
 import { v4 as uuidv4, v5 as uuidv5 } from 'uuid';
 import { dump } from 'js-yaml';
@@ -45,12 +46,12 @@ import {
   policyHasEndpointSecurity,
   policyHasFleetServer,
   policyHasSyntheticsIntegration,
+  validateFleetSavedObjectId,
 } from '../../common/services';
 
 import {
   LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
   AGENTS_PREFIX,
-  AGENT_POLICY_VERSION_SEPARATOR,
   FLEET_AGENT_POLICIES_SCHEMA_VERSION,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
@@ -75,6 +76,7 @@ import type { AgentPolicyAgentVersionCondition } from '../../common/types/models
 import {
   AGENTLESS_AGENT_POLICY_INACTIVITY_TIMEOUT,
   AGENT_POLICY_INDEX,
+  AGENT_POLICY_VERSION_SEPARATOR,
   agentPolicyStatuses,
   FLEET_ELASTIC_AGENT_PACKAGE,
   UUID_V5_NAMESPACE,
@@ -467,6 +469,8 @@ class AgentPolicyService {
     } = {}
   ): Promise<AgentPolicy> {
     const logger = this.getLogger('create');
+
+    validateFleetSavedObjectId(options.id);
 
     const savedObjectType = await getAgentPolicySavedObjectType();
     // Ensure an ID is provided, so we can include it in the audit logs below
@@ -960,8 +964,11 @@ class AgentPolicyService {
               (await packagePolicyService.findAllForAgentPolicy(soClient, agentPolicy.id)) || [];
           }
           if (options.withAgentCount) {
-            // Wildcard outside quotes so KQL treats * as wildcard for version-specific policies
-            const policyKuery = `(${AGENTS_PREFIX}.policy_id:"${agentPolicy.id}" or ${AGENTS_PREFIX}.policy_id:${agentPolicy.id}${AGENT_POLICY_VERSION_SEPARATOR}*)`;
+            const policyKuery = `(${AGENTS_PREFIX}.policy_id:"${escapeQuotes(
+              agentPolicy.id
+            )}" or ${AGENTS_PREFIX}.policy_id:${escapeKuery(
+              agentPolicy.id
+            )}${AGENT_POLICY_VERSION_SEPARATOR}*)`;
             await getAgentsByKuery(appContextService.getInternalUserESClient(), soClient, {
               showInactive: true,
               perPage: 0,
@@ -1505,20 +1512,30 @@ class AgentPolicyService {
   public async bumpAllAgentPoliciesForOutput(
     esClient: ElasticsearchClient,
     outputId: string,
-    options?: { user?: AuthenticatedUser }
+    options?: { isDefault?: boolean; isDefaultMonitoring?: boolean; user?: AuthenticatedUser }
   ): Promise<SavedObjectsBulkUpdateResponse<AgentPolicy>> {
     const useSpaceAwareness = await isSpaceAwarenessEnabled();
     const internalSoClientWithoutSpaceExtension =
       appContextService.getInternalUserSOClientWithoutSpaceExtension();
 
     const savedObjectType = await getAgentPolicySavedObjectType();
-    // All agent policies directly using output
+    const escapedId = escapeSearchQueryPhrase(outputId);
+    const filterClauses = [
+      `(${savedObjectType}.attributes.data_output_id:${escapedId} OR ${savedObjectType}.attributes.monitoring_output_id:${escapedId})`,
+    ];
+    if (options?.isDefault) {
+      filterClauses.push(`(NOT ${savedObjectType}.attributes.data_output_id:*)`);
+    }
+    if (options?.isDefaultMonitoring) {
+      filterClauses.push(`(NOT ${savedObjectType}.attributes.monitoring_output_id:*)`);
+    }
+    const filter = filterClauses.join(' OR ');
+
     const agentPoliciesUsingOutput =
       await internalSoClientWithoutSpaceExtension.find<AgentPolicySOAttributes>({
         type: savedObjectType,
         fields: ['revision', 'data_output_id', 'monitoring_output_id', 'namespaces'],
-        searchFields: ['data_output_id', 'monitoring_output_id'],
-        search: escapeSearchQueryPhrase(outputId),
+        filter,
         perPage: SO_SEARCH_LIMIT,
         namespaces: ['*'],
       });
@@ -1566,28 +1583,6 @@ class AgentPolicyService {
     );
   }
 
-  public async bumpAllAgentPolicies(
-    esClient: ElasticsearchClient,
-    options?: { user?: AuthenticatedUser }
-  ): Promise<SavedObjectsBulkUpdateResponse<AgentPolicy>> {
-    const internalSoClientWithoutSpaceExtension =
-      appContextService.getInternalUserSOClientWithoutSpaceExtension();
-    const savedObjectType = await getAgentPolicySavedObjectType();
-    const currentPolicies =
-      await internalSoClientWithoutSpaceExtension.find<AgentPolicySOAttributes>({
-        type: savedObjectType,
-        fields: ['name', 'revision', 'namespaces'],
-        perPage: SO_SEARCH_LIMIT,
-        namespaces: ['*'],
-      });
-
-    return this._bumpPolicies(
-      internalSoClientWithoutSpaceExtension,
-      currentPolicies.saved_objects,
-      options
-    );
-  }
-
   public async delete(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
@@ -1618,7 +1613,7 @@ class AgentPolicyService {
       showInactive: true,
       perPage: 0,
       page: 1,
-      kuery: `${AGENTS_PREFIX}.policy_id:"${id}"`,
+      kuery: `${AGENTS_PREFIX}.policy_id:"${escapeQuotes(id)}"`,
     });
 
     if (total > 0 && !agentPolicy?.supports_agentless) {
@@ -2221,17 +2216,23 @@ class AgentPolicyService {
   public async bumpAllAgentPoliciesForDownloadSource(
     esClient: ElasticsearchClient,
     downloadSourceId: string,
-    options?: { user?: AuthenticatedUser }
+    options?: { isDefault?: boolean; user?: AuthenticatedUser }
   ): Promise<SavedObjectsBulkUpdateResponse<AgentPolicy>> {
     const internalSoClientWithoutSpaceExtension =
       appContextService.getInternalUserSOClientWithoutSpaceExtension();
     const savedObjectType = await getAgentPolicySavedObjectType();
+    const escapedId = escapeSearchQueryPhrase(downloadSourceId);
+    const filterClauses = [`(${savedObjectType}.attributes.download_source_id:${escapedId})`];
+    if (options?.isDefault) {
+      filterClauses.push(`(NOT ${savedObjectType}.attributes.download_source_id:*)`);
+    }
+    const filter = filterClauses.join(' OR ');
+
     const currentPolicies =
       await internalSoClientWithoutSpaceExtension.find<AgentPolicySOAttributes>({
         type: savedObjectType,
         fields: ['revision', 'download_source_id', 'namespaces'],
-        searchFields: ['download_source_id'],
-        search: escapeSearchQueryPhrase(downloadSourceId),
+        filter,
         perPage: SO_SEARCH_LIMIT,
         namespaces: ['*'],
       });
@@ -2246,18 +2247,25 @@ class AgentPolicyService {
   public async bumpAllAgentPoliciesForFleetServerHosts(
     esClient: ElasticsearchClient,
     fleetServerHostId: string,
-    options?: { user?: AuthenticatedUser }
+    options?: { isDefault?: boolean; user?: AuthenticatedUser }
   ): Promise<SavedObjectsBulkUpdateResponse<AgentPolicy>> {
     const internalSoClientWithoutSpaceExtension =
       appContextService.getInternalUserSOClientWithoutSpaceExtension();
     const savedObjectType = await getAgentPolicySavedObjectType();
+    const escapedId = escapeSearchQueryPhrase(fleetServerHostId);
+    const filterClauses = [`(${savedObjectType}.attributes.fleet_server_host_id:${escapedId})`];
+    if (options?.isDefault) {
+      filterClauses.push(`(NOT ${savedObjectType}.attributes.fleet_server_host_id:*)`);
+    }
+    const filter = filterClauses.join(' OR ');
+
     const currentPolicies =
       await internalSoClientWithoutSpaceExtension.find<AgentPolicySOAttributes>({
         type: savedObjectType,
         fields: ['revision', 'fleet_server_host_id', 'namespaces'],
-        searchFields: ['fleet_server_host_id'],
-        search: escapeSearchQueryPhrase(fleetServerHostId),
+        filter,
         perPage: SO_SEARCH_LIMIT,
+        namespaces: ['*'],
       });
 
     return this._bumpPolicies(
