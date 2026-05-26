@@ -16,6 +16,7 @@ import { AppBadge } from './app_badge';
 import { useResolvedBadges } from './hooks';
 
 const MAX_VISIBLE_BADGES = 2;
+const OVERFLOW_THRESHOLD = 3;
 
 const useBadgesStyle = () => {
   const { euiTheme } = useEuiTheme();
@@ -46,8 +47,9 @@ export const AppBadges = memo<AppBadgesProps>(({ badges: propBadges }) => {
     return null;
   }
 
-  const visibleBadges = badges.slice(0, MAX_VISIBLE_BADGES);
-  const overflowBadges = badges.slice(MAX_VISIBLE_BADGES);
+  const shouldOverflow = badges.length > OVERFLOW_THRESHOLD;
+  const visibleBadges = shouldOverflow ? badges.slice(0, MAX_VISIBLE_BADGES) : badges;
+  const overflowBadges = shouldOverflow ? badges.slice(MAX_VISIBLE_BADGES) : [];
 
   const handleClosePopover = () => {
     setIsPopoverOpen(false);

@@ -24,6 +24,7 @@ import type { AppHeaderBadge } from '../types';
 import { AppBadge } from './app_badge';
 
 const MAX_VISIBLE_BADGES = 2;
+const OVERFLOW_THRESHOLD = 3;
 
 interface AppBadgeStoryProps {
   title: string;
@@ -32,8 +33,9 @@ interface AppBadgeStoryProps {
 
 const HeaderWithBadges = ({ title, badges }: AppBadgeStoryProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const visibleBadges = badges.slice(0, MAX_VISIBLE_BADGES);
-  const overflowBadges = badges.slice(MAX_VISIBLE_BADGES);
+  const shouldOverflow = badges.length > OVERFLOW_THRESHOLD;
+  const visibleBadges = shouldOverflow ? badges.slice(0, MAX_VISIBLE_BADGES) : badges;
+  const overflowBadges = shouldOverflow ? badges.slice(MAX_VISIBLE_BADGES) : [];
 
   return (
     <EuiHeader>
@@ -154,6 +156,27 @@ export const Badges: Story = {
         ],
       },
       { label: 'New', color: 'primary' },
+    ],
+  },
+};
+
+export const ThreeBadges: Story = {
+  name: 'Three badges',
+  args: {
+    title: '[Logs] Web Traffic',
+    badges: [
+      { label: 'Beta' },
+      {
+        label: 'Tech Preview',
+        color: 'warning',
+        tooltip: 'This feature is in tech preview and may change.',
+      },
+      {
+        label: 'Managed',
+        color: 'primary',
+        onClick: action('managed-clicked'),
+        onClickAriaLabel: 'Click to view managed details',
+      },
     ],
   },
 };
