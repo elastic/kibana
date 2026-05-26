@@ -70,6 +70,10 @@ components:
         identifier_type:
           description: Used to define the type of entity.
           $ref: '../common/common.schema.yaml#/components/schemas/IdentifierType'
+        entity_id:
+          description: V2-only, the canonical Entity Store EUID.
+          type: string
+          example: 'host:HW-UUID-ABC'
         refresh:
           type: string
           enum: [wait_for]

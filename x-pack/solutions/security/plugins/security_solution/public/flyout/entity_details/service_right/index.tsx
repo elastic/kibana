@@ -135,11 +135,12 @@ export const ServicePanel = memo(function ServicePanel({
     entityStoreV2Enabled,
   ]);
 
-  const { isLoading: recalculatingScore, calculateEntityRiskScore } = useCalculateEntityRiskScore(
-    EntityType.service,
-    serviceName,
-    { onSuccess: onRiskScoreUpdated }
-  );
+  const { isLoading: recalculatingScore, calculateEntityRiskScore } = useCalculateEntityRiskScore({
+    identifierType: EntityType.service,
+    identifier: serviceName,
+    entityId: entityFromStoreResult.entityRecord?.entity?.id,
+    onSuccess: onRiskScoreUpdated,
+  });
 
   const onAssetCriticalityChanged = useCallback(() => {
     (refetchEntitiesTable as Refetch | null)?.();

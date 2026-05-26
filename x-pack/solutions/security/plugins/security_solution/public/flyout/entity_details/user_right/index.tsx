@@ -183,11 +183,12 @@ export const UserPanel = memo(function UserPanel({
     entityStoreV2Enabled,
   ]);
 
-  const { isLoading: recalculatingScore, calculateEntityRiskScore } = useCalculateEntityRiskScore(
-    EntityType.user,
-    userName,
-    { onSuccess: onRiskScoreUpdated }
-  );
+  const { isLoading: recalculatingScore, calculateEntityRiskScore } = useCalculateEntityRiskScore({
+    identifierType: EntityType.user,
+    identifier: userName,
+    entityId: entityStoreV2Enabled ? observedUser.entityRecord?.entity?.id : undefined,
+    onSuccess: onRiskScoreUpdated,
+  });
 
   const onAssetCriticalityChanged = useCallback(() => {
     (refetchEntitiesTable as Refetch | null)?.();

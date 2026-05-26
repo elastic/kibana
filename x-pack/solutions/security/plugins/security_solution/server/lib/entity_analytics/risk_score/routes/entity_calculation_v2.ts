@@ -15,6 +15,8 @@ import type {
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { euid } from '@kbn/entity-store/common/euid_helpers';
+import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../types';
 import type { RiskScoresEntityCalculationResponse } from '../../../../../common/api/entity_analytics';
 import { RiskScoresEntityCalculationRequest } from '../../../../../common/api/entity_analytics';
@@ -24,7 +26,7 @@ import {
   DEFAULT_RISK_SCORE_PAGE_SIZE,
 } from '../../../../../common/constants';
 import { getRiskInputsIndex } from '../get_risk_inputs_index';
-import type { EntityAnalyticsRoutesDeps } from '../../types';
+import type { EntityAnalyticsRoutesDeps, RiskEngineConfiguration } from '../../types';
 import { RiskScoreAuditActions } from '../audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
 import { getFieldForIdentifier } from '../helpers';
@@ -43,6 +45,61 @@ type Handler = (
   request: KibanaRequest<unknown, unknown, RiskScoresEntityCalculationRequest>,
   response: KibanaResponseFactory
 ) => Promise<IKibanaResponse<RiskScoresEntityCalculationResponse>>;
+
+async function buildScoringContext({
+  entityId,
+  identifierType,
+  identifier,
+  engineConfig,
+  logger,
+  crudClient,
+}: {
+  entityId: string | undefined;
+  identifierType: string;
+  identifier: string;
+  engineConfig: RiskEngineConfiguration;
+  logger: Logger;
+  crudClient: EntityStoreCRUDClient;
+}) {
+  const baseAlertFilters = buildAlertFilters(engineConfig, identifierType as EntityType, logger);
+
+  if (entityId) {
+    const { entities } = await crudClient.listEntities({
+      filter: { term: { 'entity.id': entityId } },
+      size: 1,
+    });
+    const entityDoc = entities[0];
+    const entityIdentityFilter = euid.dsl.getEuidFilterBasedOnDocument(
+      identifierType as EntityType,
+      entityDoc
+    );
+
+    const resolvedTo = entityDoc?.entity?.relationships?.resolution?.resolved_to ?? entityId;
+
+    return {
+      alertFilters: [...baseAlertFilters, entityIdentityFilter],
+      resolutionTargetIds: [resolvedTo],
+    };
+  }
+
+  const nameFilter = {
+    term: { [getFieldForIdentifier(identifierType as EntityType)]: identifier },
+  };
+  const { entities } = await crudClient.listEntities({
+    filter: nameFilter,
+  });
+  const resolutionTargetIds = entities
+    .map(
+      (entityDoc) =>
+        entityDoc?.entity?.relationships?.resolution?.resolved_to ?? entityDoc?.entity?.id
+    )
+    .filter((id): id is string => typeof id === 'string');
+
+  return {
+    alertFilters: [...baseAlertFilters, nameFilter],
+    resolutionTargetIds,
+  };
+}
 
 const handler: (logger: Logger) => Handler = (logger) => async (context, request, response) => {
   const securityContext = await context.securitySolution;
@@ -71,7 +128,12 @@ const handler: (logger: Logger) => Handler = (logger) => async (context, request
   const esClient = coreContext.elasticsearch.client.asCurrentUser;
   const namespace = securityContext.getSpaceId();
 
-  const { identifier_type: identifierType, identifier, refresh } = request.body;
+  const {
+    identifier_type: identifierType,
+    identifier,
+    entity_id: entityId,
+    refresh,
+  } = request.body;
 
   try {
     const engineConfig = await getConfiguration({
@@ -91,14 +153,18 @@ const handler: (logger: Logger) => Handler = (logger) => async (context, request
       securityConfig.entityAnalytics?.riskEngine?.alertSampleSizePerShard ??
       10000;
 
-    const { index: alertsIndex } = await getRiskInputsIndex({ dataViewId, logger, soClient });
-
-    const alertFilters = [
-      ...buildAlertFilters(engineConfig, identifierType as EntityType, logger),
-      { term: { [getFieldForIdentifier(identifierType as EntityType)]: identifier } },
-    ];
-
     const crudClient = securityContext.getEntityStoreUpdateClient();
+
+    const { index: alertsIndex } = await getRiskInputsIndex({ dataViewId, logger, soClient });
+    const { alertFilters, resolutionTargetIds } = await buildScoringContext({
+      entityId,
+      identifierType,
+      identifier,
+      engineConfig,
+      logger,
+      crudClient,
+    });
+
     const writer = await securityContext.getRiskScoreDataClient().getWriter({ namespace });
     const idBasedRiskScoringEnabled = await getIsIdBasedRiskScoringEnabled(
       coreContext.uiSettings.client
@@ -125,35 +191,7 @@ const handler: (logger: Logger) => Handler = (logger) => async (context, request
       refresh,
     });
 
-    const { entities } = await crudClient.listEntities({
-      filter: { term: { [getFieldForIdentifier(identifierType as EntityType)]: identifier } },
-      size: 1,
-      source: ['entity.id'],
-    });
-    const euid = (entities[0] as { entity?: { id?: string } } | undefined)?.entity?.id;
-
-    if (!euid) {
-      return response.ok({ body: { success: true } });
-    }
-
-    const resolutionLookupResult = await esClient.search({
-      index: lookupIndex,
-      query: { term: { entity_id: euid } },
-      _source: ['resolution_target_id'],
-      size: 100,
-      ignore_unavailable: true,
-      allow_no_indices: true,
-    });
-
-    const targetEntityIds = [
-      ...new Set(
-        resolutionLookupResult.hits.hits
-          .map((h) => (h._source as { resolution_target_id?: string }).resolution_target_id)
-          .filter((id): id is string => id !== undefined)
-      ),
-    ];
-
-    if (targetEntityIds.length > 0) {
+    if (resolutionTargetIds.length > 0) {
       await runResolutionScoringStep({
         esClient,
         crudClient,
@@ -168,7 +206,7 @@ const handler: (logger: Logger) => Handler = (logger) => async (context, request
         watchlistConfigs,
         idBasedRiskScoringEnabled,
         writer,
-        targetEntityIds,
+        targetEntityIds: resolutionTargetIds,
         refresh,
       });
     }

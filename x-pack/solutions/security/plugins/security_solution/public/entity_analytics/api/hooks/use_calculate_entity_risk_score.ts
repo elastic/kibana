@@ -17,11 +17,18 @@ import { useEntityAnalyticsRoutes } from '../api';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { useRiskEngineStatus } from './use_risk_engine_status';
 
-export const useCalculateEntityRiskScore = (
-  identifierType: EntityType,
-  identifier: string,
-  { onSuccess }: { onSuccess: () => void }
-) => {
+export const useCalculateEntityRiskScore = ({
+  identifierType,
+  identifier,
+  entityId,
+  onSuccess,
+}: {
+  identifierType: EntityType;
+  identifier: string;
+  // V2-only: the canonical EUID for the entity being scored
+  entityId?: string;
+  onSuccess: () => void;
+}) => {
   const { addError } = useAppToasts();
   const { data: riskEngineStatus } = useRiskEngineStatus();
   const { calculateEntityRiskScore, calculateEntityRiskScoreV2 } = useEntityAnalyticsRoutes();
@@ -51,7 +58,12 @@ export const useCalculateEntityRiskScore = (
 
   const calculateEntityRiskScoreCb = useCallback(async () => {
     if (entityStoreV2Enabled) {
-      mutateV2({ identifier_type: identifierType, identifier, refresh: 'wait_for' });
+      mutateV2({
+        identifier_type: identifierType,
+        identifier,
+        entity_id: entityId,
+        refresh: 'wait_for',
+      });
       return;
     }
 
@@ -68,6 +80,7 @@ export const useCalculateEntityRiskScore = (
     mutateV2,
     identifierType,
     identifier,
+    entityId,
     entityStoreV2Enabled,
   ]);
 

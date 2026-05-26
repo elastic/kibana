@@ -355,11 +355,12 @@ const HostEntityFlyoutOverviewCanvas: React.FC<{
     refetchRiskInputsTab,
   ]);
 
-  const { isLoading: recalculatingScore, calculateEntityRiskScore } = useCalculateEntityRiskScore(
-    EntityType.host,
-    hostName,
-    { onSuccess: onRiskScoreUpdated }
-  );
+  const { isLoading: recalculatingScore, calculateEntityRiskScore } = useCalculateEntityRiskScore({
+    identifierType: EntityType.host,
+    identifier: hostName,
+    entityId: entityStoreV2Enabled ? observedHost.entityRecord?.entity.id : undefined,
+    onSuccess: onRiskScoreUpdated,
+  });
 
   const { updateAssetCriticalityLevel } = useUpdateAssetCriticality('host', {
     onSuccess: calculateEntityRiskScore,
@@ -734,11 +735,12 @@ const UserEntityFlyoutOverviewCanvas: React.FC<{
     refetchRiskInputsTab,
   ]);
 
-  const { isLoading: recalculatingScore, calculateEntityRiskScore } = useCalculateEntityRiskScore(
-    EntityType.user,
-    userName,
-    { onSuccess: onRiskScoreUpdated }
-  );
+  const { isLoading: recalculatingScore, calculateEntityRiskScore } = useCalculateEntityRiskScore({
+    identifierType: EntityType.user,
+    identifier: userName,
+    entityId: entityStoreV2Enabled ? observedUser.entityRecord?.entity?.id : undefined,
+    onSuccess: onRiskScoreUpdated,
+  });
 
   const { updateAssetCriticalityLevel } = useUpdateAssetCriticality('user', {
     onSuccess: calculateEntityRiskScore,
@@ -1112,11 +1114,12 @@ const ServiceEntityFlyoutOverviewCanvas: React.FC<{
     refetchRiskInputsTab,
   ]);
 
-  const { isLoading: recalculatingScore, calculateEntityRiskScore } = useCalculateEntityRiskScore(
-    EntityType.service,
-    serviceName,
-    { onSuccess: onRiskScoreUpdated }
-  );
+  const { isLoading: recalculatingScore, calculateEntityRiskScore } = useCalculateEntityRiskScore({
+    identifierType: EntityType.service,
+    identifier: serviceName,
+    entityId: entityFromStoreResult.entityRecord?.entity?.id,
+    onSuccess: onRiskScoreUpdated,
+  });
 
   const { updateAssetCriticalityLevel } = useUpdateAssetCriticality('service', {
     onSuccess: calculateEntityRiskScore,

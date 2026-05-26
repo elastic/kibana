@@ -47,7 +47,9 @@ jest.mock('../../../common/hooks/use_app_toasts', () => ({
 
 const identifierType = EntityType.user;
 const identifier = 'test-user';
-const options = {
+const params = {
+  identifierType,
+  identifier,
   onSuccess: jest.fn(),
 };
 
@@ -61,10 +63,9 @@ describe('useRiskScoreData', () => {
   });
 
   it('should call calculateEntityRiskScore API when the callback function is called', async () => {
-    const { result } = renderHook(
-      () => useCalculateEntityRiskScore(identifierType, identifier, options),
-      { wrapper: TestProviders }
-    );
+    const { result } = renderHook(() => useCalculateEntityRiskScore(params), {
+      wrapper: TestProviders,
+    });
 
     await act(async () => {
       result.current.calculateEntityRiskScore();
@@ -84,10 +85,9 @@ describe('useRiskScoreData', () => {
     mockUseRiskEngineStatus.mockReturnValue({
       data: disabledRiskEngineStatus,
     });
-    const { result } = renderHook(
-      () => useCalculateEntityRiskScore(identifierType, identifier, options),
-      { wrapper: TestProviders }
-    );
+    const { result } = renderHook(() => useCalculateEntityRiskScore(params), {
+      wrapper: TestProviders,
+    });
 
     await act(async () => {
       result.current.calculateEntityRiskScore();
@@ -98,10 +98,9 @@ describe('useRiskScoreData', () => {
 
   it('should display a toast error when the API returns an error', async () => {
     mockCalculateEntityRiskScore.mockRejectedValue({});
-    const { result } = renderHook(
-      () => useCalculateEntityRiskScore(identifierType, identifier, options),
-      { wrapper: TestProviders }
-    );
+    const { result } = renderHook(() => useCalculateEntityRiskScore(params), {
+      wrapper: TestProviders,
+    });
 
     await act(async () => {
       result.current.calculateEntityRiskScore();
@@ -116,10 +115,9 @@ describe('useRiskScoreData', () => {
     });
 
     it('calls calculateEntityRiskScoreV2 instead of V1', async () => {
-      const { result } = renderHook(
-        () => useCalculateEntityRiskScore(identifierType, identifier, options),
-        { wrapper: TestProviders }
-      );
+      const { result } = renderHook(() => useCalculateEntityRiskScore(params), {
+        wrapper: TestProviders,
+      });
 
       await act(async () => {
         result.current.calculateEntityRiskScore();
@@ -136,10 +134,9 @@ describe('useRiskScoreData', () => {
     });
 
     it('does NOT call the V1 calculateEntityRiskScore', async () => {
-      const { result } = renderHook(
-        () => useCalculateEntityRiskScore(identifierType, identifier, options),
-        { wrapper: TestProviders }
-      );
+      const { result } = renderHook(() => useCalculateEntityRiskScore(params), {
+        wrapper: TestProviders,
+      });
 
       await act(async () => {
         result.current.calculateEntityRiskScore();
@@ -151,10 +148,9 @@ describe('useRiskScoreData', () => {
 
     it('displays a toast error when the V2 API returns an error', async () => {
       mockCalculateEntityRiskScoreV2.mockRejectedValue({});
-      const { result } = renderHook(
-        () => useCalculateEntityRiskScore(identifierType, identifier, options),
-        { wrapper: TestProviders }
-      );
+      const { result } = renderHook(() => useCalculateEntityRiskScore(params), {
+        wrapper: TestProviders,
+      });
 
       await act(async () => {
         result.current.calculateEntityRiskScore();

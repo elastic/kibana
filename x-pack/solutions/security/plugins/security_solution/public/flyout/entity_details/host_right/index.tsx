@@ -177,11 +177,12 @@ export const HostPanel = memo(function HostPanel({
     entityStoreV2Enabled,
   ]);
 
-  const { isLoading: recalculatingScore, calculateEntityRiskScore } = useCalculateEntityRiskScore(
-    EntityType.host,
-    hostName,
-    { onSuccess: onRiskScoreUpdated }
-  );
+  const { isLoading: recalculatingScore, calculateEntityRiskScore } = useCalculateEntityRiskScore({
+    identifierType: EntityType.host,
+    identifier: hostName,
+    entityId: entityStoreV2Enabled ? observedHost.entityRecord?.entity.id : undefined,
+    onSuccess: onRiskScoreUpdated,
+  });
 
   const onAssetCriticalityChanged = useCallback(() => {
     (refetchEntitiesTable as Refetch | null)?.();

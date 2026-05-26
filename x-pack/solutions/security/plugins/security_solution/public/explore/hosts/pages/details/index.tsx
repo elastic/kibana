@@ -372,7 +372,9 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
   const privileges = useAssetCriticalityPrivileges(entity.name);
 
   const refetchRiskScore = useRefetchOverviewPageRiskScore(HOST_OVERVIEW_RISK_SCORE_QUERY_ID);
-  const { calculateEntityRiskScore } = useCalculateEntityRiskScore(EntityType.host, detailName, {
+  const { calculateEntityRiskScore } = useCalculateEntityRiskScore({
+    identifierType: EntityType.host,
+    identifier: detailName,
     onSuccess: refetchRiskScore,
   });
 
