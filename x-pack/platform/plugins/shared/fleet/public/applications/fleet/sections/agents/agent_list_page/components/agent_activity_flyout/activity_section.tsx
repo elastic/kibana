@@ -58,6 +58,10 @@ export const ActivitySection: React.FunctionComponent<{
             />
           );
         }
+        // Show the cancellable scheduled unenrollment item only while the grace period
+        // is still active (start_time in the future). Once start_time has passed the
+        // execute phase will have picked up the action, so cancellation is no longer
+        // meaningful and we fall through to the standard activity item rendering.
         if (
           currentAction.type === 'UNENROLL' &&
           currentAction.status === 'IN_PROGRESS' &&

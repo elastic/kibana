@@ -529,92 +529,47 @@ export async function cancelAgentAction(
     }
   }
 
-  // For cancelled UNENROLL actions, also cancel any other pending scheduled batches
-  // for the same policies so the entire policy's scheduled unenrollment is cancelled,
-  // not just the one action doc the user clicked.
-  const cancelledUnenrollPolicyIds = uniq(
-    cancelledActions.filter((a) => a.type === 'UNENROLL').flatMap((a) => a.policyIds)
-  );
-  if (cancelledUnenrollPolicyIds.length > 0) {
-    const currentTime = new Date().toISOString();
-    // Find all agents belonging to these policies
-    const policyAgentsRes = await esClient.search<{ policy_id?: string }>({
-      index: '.fleet-agents',
-      ignore_unavailable: true,
-      query: { terms: { policy_id: cancelledUnenrollPolicyIds } },
-      _source: ['policy_id'],
-      size: SO_SEARCH_LIMIT,
-    });
-    const allPolicyAgentIds = policyAgentsRes.hits.hits
-      .map((h) => h._id)
-      .filter((id): id is string => !!id);
-
-    if (allPolicyAgentIds.length > 0) {
-      // Find other pending scheduled UNENROLL actions for these agents that weren't already cancelled
-      const alreadyCancelledActionIds = new Set(
-        cancelledActions.filter((a) => a.type === 'UNENROLL').flatMap(() => [actionId])
+  // The following side-effects only apply when the cancelled action was created by the
+  // inactive-unenrollment task (identified by the prefix). Manual UNENROLL cancellations
+  // should not affect the scheduled unenrollment setting on the policy.
+  if (actionId.startsWith(SCHEDULED_UNENROLL_ACTION_ID_PREFIX)) {
+    // Cancel any other pending scheduled batches for the same policies so the entire
+    // policy's scheduled unenrollment is cancelled, not just the one batch the user selected.
+    const cancelledUnenrollPolicyIds = uniq(
+      cancelledActions.filter((a) => a.type === 'UNENROLL').flatMap((a) => a.policyIds)
+    );
+    if (cancelledUnenrollPolicyIds.length > 0) {
+      await cancelPendingBatches(
+        esClient,
+        soClient,
+        cancelledUnenrollPolicyIds,
+        actionId,
+        currentSpaceId
       );
-      const pendingRes = await esClient.search<FleetServerAgentAction>({
-        index: AGENT_ACTIONS_INDEX,
-        ignore_unavailable: true,
-        query: {
-          bool: {
-            filter: [
-              { term: { type: 'UNENROLL' } },
-              { range: { start_time: { gt: currentTime } } },
-              { prefix: { action_id: SCHEDULED_UNENROLL_ACTION_ID_PREFIX } },
-              { terms: { agents: allPolicyAgentIds } },
-            ],
-            must_not: [{ term: { action_id: actionId } }],
-          },
-        },
-        size: SO_SEARCH_LIMIT,
-      });
-
-      for (const hit of pendingRes.hits.hits) {
-        const pendingAction = hit._source;
-        if (!pendingAction?.action_id || alreadyCancelledActionIds.has(pendingAction.action_id))
-          continue;
-        alreadyCancelledActionIds.add(pendingAction.action_id);
-        await createAgentAction(esClient, soClient, {
-          id: uuidv4(),
-          type: 'CANCEL',
-          namespaces: [currentSpaceId],
-          agents: pendingAction.agents!,
-          data: { target_id: pendingAction.action_id },
-          created_at: currentTime,
-          expiration: pendingAction.expiration,
-        });
-        appContextService
-          .getLogger()
-          .debug(
-            `[cancelAgentAction] Also cancelled pending scheduled unenrollment batch ${pendingAction.action_id} for same policies`
-          );
-      }
     }
-  }
 
-  // For cancelled UNENROLL actions, disable unenroll_timeout on the affected policies
-  // so the task does not re-schedule the same agents on the next tick.
-  const unenrollPolicyIds = uniq(
-    cancelledActions.filter((a) => a.type === 'UNENROLL').flatMap((a) => a.policyIds)
-  );
-  if (unenrollPolicyIds.length > 0) {
-    const esClientForPolicy = appContextService.getInternalUserESClient();
-    for (const policyId of unenrollPolicyIds) {
-      try {
-        await agentPolicyService.update(soClient, esClientForPolicy, policyId, {
-          unenroll_timeout: 0,
-        });
-        auditLoggingService.writeCustomAuditLog({
-          message: `Disabled unenroll_timeout on agent policy [id=${policyId}] after user cancelled inactive unenrollment action [id=${actionId}]`,
-        });
-      } catch (err) {
-        appContextService
-          .getLogger()
-          .warn(
-            `Failed to disable unenroll_timeout on policy ${policyId} after cancel: ${err.message}`
-          );
+    // Disable unenroll_timeout on the affected policies so the task does not
+    // re-schedule the same agents on the next tick.
+    const unenrollPolicyIds = uniq(
+      cancelledActions.filter((a) => a.type === 'UNENROLL').flatMap((a) => a.policyIds)
+    );
+    if (unenrollPolicyIds.length > 0) {
+      const esClientForPolicy = appContextService.getInternalUserESClient();
+      for (const policyId of unenrollPolicyIds) {
+        try {
+          await agentPolicyService.update(soClient, esClientForPolicy, policyId, {
+            unenroll_timeout: 0,
+          });
+          auditLoggingService.writeCustomAuditLog({
+            message: `Disabled unenroll_timeout on agent policy [id=${policyId}] after user cancelled inactive unenrollment action [id=${actionId}]`,
+          });
+        } catch (err) {
+          appContextService
+            .getLogger()
+            .warn(
+              `Failed to disable unenroll_timeout on policy ${policyId} after cancel: ${err.message}`
+            );
+        }
       }
     }
   }
@@ -682,6 +637,67 @@ async function getAgentActionsByIds(
   }
 
   return agentIds;
+}
+
+async function cancelPendingBatches(
+  esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract,
+  policyIds: string[],
+  alreadyCancelledActionId: string,
+  currentSpaceId: string
+) {
+  const currentTime = new Date().toISOString();
+
+  const policyAgentsRes = await esClient.search<{ policy_id?: string }>({
+    index: '.fleet-agents',
+    ignore_unavailable: true,
+    query: { terms: { policy_id: policyIds } },
+    _source: ['policy_id'],
+    size: SO_SEARCH_LIMIT,
+  });
+  const allPolicyAgentIds = policyAgentsRes.hits.hits
+    .map((h) => h._id)
+    .filter((id): id is string => !!id);
+
+  if (allPolicyAgentIds.length === 0) return;
+
+  const pendingRes = await esClient.search<FleetServerAgentAction>({
+    index: AGENT_ACTIONS_INDEX,
+    ignore_unavailable: true,
+    query: {
+      bool: {
+        filter: [
+          { term: { type: 'UNENROLL' } },
+          { range: { start_time: { gt: currentTime } } },
+          { prefix: { action_id: SCHEDULED_UNENROLL_ACTION_ID_PREFIX } },
+          { terms: { agents: allPolicyAgentIds } },
+        ],
+        must_not: [{ term: { action_id: alreadyCancelledActionId } }],
+      },
+    },
+    size: SO_SEARCH_LIMIT,
+  });
+
+  const seen = new Set<string>([alreadyCancelledActionId]);
+  for (const hit of pendingRes.hits.hits) {
+    const pendingAction = hit._source;
+    if (!pendingAction?.action_id || seen.has(pendingAction.action_id)) continue;
+    seen.add(pendingAction.action_id);
+    await createAgentAction(esClient, soClient, {
+      id: uuidv4(),
+      type: 'CANCEL',
+      namespaces: [currentSpaceId],
+      agents: pendingAction.agents!,
+      data: { target_id: pendingAction.action_id },
+      created_at: currentTime,
+      expiration: pendingAction.expiration,
+    });
+    appContextService
+      .getLogger()
+      .debug(
+        `[cancelAgentAction] Also cancelled pending scheduled unenrollment batch ${pendingAction.action_id} for same policies`
+      );
+  }
 }
 
 async function getAgentIdsFromResults(

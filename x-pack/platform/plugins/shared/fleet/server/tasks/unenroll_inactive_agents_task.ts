@@ -22,7 +22,7 @@ import type { LoggerFactory } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
 
 import { AGENTS_PREFIX, AGENT_POLICY_SAVED_OBJECT_TYPE } from '../constants';
-import { AGENT_ACTIONS_INDEX } from '../../common/constants';
+import { AGENT_ACTIONS_INDEX, SO_SEARCH_LIMIT } from '../../common/constants';
 import { getAgentsByKuery } from '../services/agents';
 import { unenrollBatch } from '../services/agents/unenroll_action_runner';
 import { agentPolicyService, appContextService, auditLoggingService } from '../services';
@@ -166,7 +166,7 @@ export class UnenrollInactiveAgentsTask {
     return scheduledIds;
   }
 
-  // Phase A: schedule unenrollments for eligible inactive agents.
+  // Schedule unenrollments for eligible inactive agents.
   // Creates UNENROLL actions with a future start_time but does not revoke API keys.
   public async scheduleUnenrollments(
     esClient: ElasticsearchClient,
@@ -243,7 +243,7 @@ export class UnenrollInactiveAgentsTask {
     }
   }
 
-  // Phase B: execute due scheduled unenrollments that have not been cancelled.
+  // Execute due scheduled unenrollments that have not been cancelled.
   public async executeDueUnenrollments(
     esClient: ElasticsearchClient,
     soClient: SavedObjectsClientContract
@@ -282,7 +282,7 @@ export class UnenrollInactiveAgentsTask {
         },
       },
       _source: ['data.target_id'],
-      size: this.unenrollBatchSize,
+      size: SO_SEARCH_LIMIT,
     });
 
     const cancelledActionIds = new Set(
