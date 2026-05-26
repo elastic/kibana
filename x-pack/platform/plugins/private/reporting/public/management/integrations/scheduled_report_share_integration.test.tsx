@@ -8,6 +8,7 @@
 import React from 'react';
 import { getReportingShareIntegrationConfig } from './scheduled_report_share_integration';
 import type { ExportShareConfig, ShareContext } from '@kbn/share-plugin/public/types';
+import { ReportingAPIClient } from '@kbn/reporting-public';
 
 jest.mock('../components/scheduled_report_flyout_share_wrapper', () => ({
   ScheduledReportFlyoutShareWrapper: () => (
@@ -16,7 +17,7 @@ jest.mock('../components/scheduled_report_flyout_share_wrapper', () => ({
 }));
 
 describe('getReportingShareIntegrationConfig', () => {
-  const mockApiClient = {} as any;
+  const mockApiClient = {} as jest.Mocked<ReportingAPIClient>;;
   const mockServices = {} as any;
   const mockShareContext = {
     sharingData: { exportType: 'pngV2' },

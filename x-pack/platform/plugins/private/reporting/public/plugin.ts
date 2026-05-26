@@ -244,32 +244,40 @@ export class ReportingPublicPlugin
       );
     }
 
-    shouldRegisterReportingIntegration(core.http).then((shouldRegister) => {
-      if (shouldRegister) {
-        shareSetup.registerShareIntegration<ExportShareDerivatives>({
-          id: 'scheduledReports',
-          groupId: 'exportDerivatives',
-          getShareIntegrationConfig: async (shareOpts: ShareContext) => {
-            const [[coreStart, startDeps], { getReportingShareIntegrationConfig }] =
-              await Promise.all([
-                getStartServices(),
-                import('./management/integrations/scheduled_report_share_integration'),
-              ]);
-            return getReportingShareIntegrationConfig(
-              apiClient,
-              { ...coreStart, ...startDeps, actions: actionsSetup },
-              shareOpts
-            );
-          },
-          prerequisiteCheck: ({ license }) => {
-            if (!license || !license.type) {
-              return false;
-            }
-            return SCHEDULED_REPORT_VALID_LICENSES.includes(license.type);
-          },
-        });
-      }
-    });
+    shouldRegisterReportingIntegration(core.http)
+      .then((shouldRegister) => {
+        if (shouldRegister) {
+          shareSetup.registerShareIntegration<ExportShareDerivatives>({
+            id: 'scheduledReports',
+            groupId: 'exportDerivatives',
+            getShareIntegrationConfig: async (shareOpts: ShareContext) => {
+              const [[coreStart, startDeps], { getReportingShareIntegrationConfig }] =
+                await Promise.all([
+                  getStartServices(),
+                  import('./management/integrations/scheduled_report_share_integration'),
+                ]);
+              return getReportingShareIntegrationConfig(
+                apiClient,
+                { ...coreStart, ...startDeps, actions: actionsSetup },
+                shareOpts
+              );
+            },
+            prerequisiteCheck: ({ license }) => {
+              if (!license || !license.type) {
+                return false;
+              }
+              return SCHEDULED_REPORT_VALID_LICENSES.includes(license.type);
+            },
+          });
+        }
+      })
+      .catch((e) => {
+        // eslint-disable-next-line no-console
+        console.warn(
+          `Could not register 'scheduledReports' share integration. 'shouldRegisterReportingIntegration' threw error:`,
+          e
+        );
+      });
 
     this.startServices$ = startServices$;
     return this.getContract(apiClient, startServices$);
