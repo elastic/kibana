@@ -20,11 +20,8 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { SearchBar } from './components/search_bar';
 import type { GlobalSearchBarConfigType } from './types';
 import { EventReporter, eventTypes } from './telemetry';
-import {
-  SEARCH_MODAL_KEYBOARD_SHORTCUT,
-  SEARCH_MODAL_SELECTOR_PREFIX,
-  type SearchProps,
-} from './components/types';
+import type { SearchProps } from './components/types';
+import { SEARCH_MODAL_SELECTOR_PREFIX } from './components/types';
 import { SearchModal } from './components/search_modal';
 
 export interface GlobalSearchBarPluginStartDeps {
@@ -63,19 +60,23 @@ export class GlobalSearchBarPlugin implements Plugin<{}, {}, {}, GlobalSearchBar
 
     let activeModalRef: OverlayRef | null = null;
 
+    const closeModal = () => {
+      activeModalRef?.close();
+      activeModalRef = null;
+    };
+
     const toggleSearchModal = () => {
       if (activeModalRef) {
-        activeModalRef.close();
-        activeModalRef = null;
+        closeModal();
         return;
       }
+
       activeModalRef = core.overlays.openModal(
         toMountPoint(
           <SearchModal
             {...searchProps}
             onClose={() => {
-              activeModalRef?.close();
-              activeModalRef = null;
+              closeModal();
             }}
           />,
           core
@@ -91,10 +92,11 @@ export class GlobalSearchBarPlugin implements Plugin<{}, {}, {}, GlobalSearchBar
       });
     };
 
-    core.chrome.next.globalSearch.set({
-      onClick: toggleSearchModal,
-      shortcutKey: SEARCH_MODAL_KEYBOARD_SHORTCUT,
-    });
+    if (core.chrome.next.isEnabled) {
+      core.chrome.next.globalSearch.set({
+        onClick: toggleSearchModal,
+      });
+    }
 
     core.chrome.navControls.registerCenter({
       order: 1000,

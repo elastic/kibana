@@ -13,15 +13,21 @@ import {
   EuiButtonEmpty,
   EuiButtonGroup,
   EuiButtonIcon,
-  EuiConfirmModal,
+  EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
   EuiPageHeaderSection,
   EuiPageTemplate,
   EuiSkeletonLoading,
   EuiSkeletonRectangle,
   EuiSkeletonTitle,
   EuiSwitch,
+  EuiText,
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
@@ -30,8 +36,8 @@ import { selectUnit } from '@formatjs/intl-utils';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { AppHeader as PageHeader } from '@kbn/app-header';
 import type { AppHeaderBadge } from '@kbn/app-header';
+import { AppHeader as PageHeader } from '@kbn/app-header';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
@@ -66,6 +72,8 @@ const executionsTabReadExecutionDisabledTooltip = i18n.translate(
   }
 );
 
+export const SkipUnsavedRunConfirmationStorageKey = 'workflows:skipUnsavedRunConfirmation';
+
 const Translations = {
   runWorkflow: i18n.translate('workflows.workflowDetailHeader.runWorkflow', {
     defaultMessage: 'Run',
@@ -76,6 +84,9 @@ const Translations = {
   ),
   runWorkflowCancel: i18n.translate('workflows.workflowDetailHeader.runWorkflowCancel', {
     defaultMessage: 'Cancel',
+  }),
+  dontAskAgain: i18n.translate('workflows.workflowDetailHeader.dontAskAgain', {
+    defaultMessage: "Don't ask again",
   }),
   backLink: i18n.translate('workflows.workflowDetailHeader.backLink', {
     defaultMessage: 'Back to Workflows',
@@ -114,6 +125,10 @@ export const WorkflowDetailHeader = React.memo(
     const dispatch = useDispatch();
     const { canCreateWorkflow, canUpdateWorkflow, canExecuteWorkflow, canReadWorkflowExecution } =
       useWorkflowsCapabilities();
+
+    const navigateToIntegrations = useCallback(() => {
+      application.navigateToApp('integrations', { path: '/browse' });
+    }, [application]);
 
     const workflowDetailTabButtonOptions = useMemo(
       () =>
@@ -164,54 +179,7 @@ export const WorkflowDetailHeader = React.memo(
     }, [dispatch]);
 
     const [showRunConfirmation, setShowRunConfirmation] = useState(false);
-
-    // Combined validity: syntax must parse AND no strict validation errors AND server considers it valid.
-    // workflow?.valid !== false covers the initial page load before Monaco validates.
-    const isSchemaValid =
-      isSyntaxValid && !hasYamlSchemaValidationErrors && workflow?.valid !== false;
-
-    const runWorkflowTooltipContent = useMemo(() => {
-      return getTestRunTooltipContent({
-        isExecutionsTab,
-        isValid: isSyntaxValid,
-        canRunWorkflow: canExecuteWorkflow,
-      });
-    }, [isSyntaxValid, canExecuteWorkflow, isExecutionsTab]);
-
-    const saveWorkflowTooltipContent = useMemo(() => {
-      const isCreate = !workflowId;
-      return getSaveWorkflowTooltipContent({
-        isExecutionsTab,
-        canSaveWorkflow: isCreate ? canCreateWorkflow : canUpdateWorkflow,
-        isCreate,
-      });
-    }, [isExecutionsTab, workflowId, canCreateWorkflow, canUpdateWorkflow]);
-
-    const canSaveWorkflow = useMemo(() => {
-      return workflowId ? canUpdateWorkflow : canCreateWorkflow;
-    }, [canUpdateWorkflow, canCreateWorkflow, workflowId]);
-
-    const handleRunClickWithUnsavedCheck = useCallback(() => {
-      if (hasUnsavedChanges) {
-        setShowRunConfirmation(true);
-      } else {
-        openTestModal();
-      }
-    }, [hasUnsavedChanges, openTestModal]);
-
-    const handleConfirmRun = useCallback(() => {
-      setShowRunConfirmation(false);
-      openTestModal();
-    }, [openTestModal]);
-
-    const handleCancelRun = useCallback(() => {
-      setShowRunConfirmation(false);
-    }, []);
-
-    const navigateToIntegrations = useCallback(() => {
-      application.navigateToApp('integrations', { path: '/browse' });
-    }, [application]);
-
+    const [dontAskAgain, setDontAskAgain] = useState(false);
     const [savedLabel, setSavedLabel] = useState<string>('');
 
     useEffect(() => {
@@ -247,6 +215,58 @@ export const WorkflowDetailHeader = React.memo(
 
       return () => clearInterval(interval);
     }, [hasUnsavedChanges, workflowId, lastUpdatedAt]);
+
+    // Combined validity: syntax must parse AND no strict validation errors AND server considers it valid.
+    // workflow?.valid !== false covers the initial page load before Monaco validates.
+    const isSchemaValid =
+      isSyntaxValid && !hasYamlSchemaValidationErrors && workflow?.valid !== false;
+
+    const runWorkflowTooltipContent = useMemo(() => {
+      return getTestRunTooltipContent({
+        isExecutionsTab,
+        isValid: isSyntaxValid,
+        canRunWorkflow: canExecuteWorkflow,
+        isSaving,
+      });
+    }, [isSyntaxValid, canExecuteWorkflow, isExecutionsTab, isSaving]);
+
+    const saveWorkflowTooltipContent = useMemo(() => {
+      const isCreate = !workflowId;
+      return getSaveWorkflowTooltipContent({
+        isExecutionsTab,
+        canSaveWorkflow: isCreate ? canCreateWorkflow : canUpdateWorkflow,
+        isCreate,
+        hasUnsavedChanges,
+      });
+    }, [isExecutionsTab, workflowId, canCreateWorkflow, canUpdateWorkflow, hasUnsavedChanges]);
+
+    const canSaveWorkflow = useMemo(() => {
+      return workflowId ? canUpdateWorkflow : canCreateWorkflow;
+    }, [canUpdateWorkflow, canCreateWorkflow, workflowId]);
+
+    const handleRunClickWithUnsavedCheck = useCallback(() => {
+      const shouldSkipUnsavedRunConfirmation =
+        localStorage.getItem(SkipUnsavedRunConfirmationStorageKey) === 'true';
+      if (hasUnsavedChanges && !shouldSkipUnsavedRunConfirmation) {
+        setDontAskAgain(false);
+        setShowRunConfirmation(true);
+      } else {
+        openTestModal();
+      }
+    }, [hasUnsavedChanges, openTestModal]);
+
+    const handleConfirmRun = useCallback(() => {
+      if (dontAskAgain) {
+        localStorage.setItem(SkipUnsavedRunConfirmationStorageKey, 'true');
+      }
+      setShowRunConfirmation(false);
+      openTestModal();
+    }, [dontAskAgain, openTestModal]);
+
+    const handleCancelRun = useCallback(() => {
+      setDontAskAgain(false);
+      setShowRunConfirmation(false);
+    }, []);
 
     const badges = useMemo<AppHeaderBadge[]>(() => {
       if (hasUnsavedChanges) {
@@ -537,24 +557,59 @@ export const WorkflowDetailHeader = React.memo(
           />
         </EuiPageTemplate>
         {showRunConfirmation && (
-          <EuiConfirmModal
+          <EuiModal
+            className="euiModal--confirmation"
             data-test-subj="runWorkflowWithUnsavedChangesConfirmationModal"
-            title={Translations.runWithUnsavedChangesQuestion}
-            onCancel={handleCancelRun}
-            onConfirm={handleConfirmRun}
-            cancelButtonText={Translations.runWorkflowCancel}
-            confirmButtonText={Translations.runWorkflow}
-            buttonColor="success"
-            defaultFocusedButton="confirm"
+            onClose={handleCancelRun}
+            role="alertdialog"
+            initialFocus="[data-test-subj='confirmModalConfirmButton']"
             aria-label={Translations.runWithUnsavedChangesQuestion}
           >
-            <p>
-              <FormattedMessage
-                id="workflows.workflowDetailHeader.runWithUnsavedChanges.message"
-                defaultMessage="You have unsaved changes. Running the workflow will not save your changes. Are you sure you want to continue?"
+            <EuiModalHeader>
+              <EuiModalHeaderTitle data-test-subj="confirmModalTitleText">
+                {Translations.runWithUnsavedChangesQuestion}
+              </EuiModalHeaderTitle>
+            </EuiModalHeader>
+            <EuiModalBody>
+              <EuiText data-test-subj="confirmModalBodyText">
+                <p>
+                  <FormattedMessage
+                    id="workflows.workflowDetailHeader.runWithUnsavedChanges.message"
+                    defaultMessage="You have unsaved changes. Running the workflow will not save your changes. Are you sure you want to continue?"
+                  />
+                </p>
+              </EuiText>
+            </EuiModalBody>
+            <EuiModalFooter css={styles.runConfirmationFooter}>
+              <EuiCheckbox
+                id="workflowsRunWithUnsavedChangesDontAskAgain"
+                data-test-subj="runWorkflowWithUnsavedChangesDontAskAgain"
+                label={Translations.dontAskAgain}
+                checked={dontAskAgain}
+                onChange={(event) => setDontAskAgain(event.target.checked)}
               />
-            </p>
-          </EuiConfirmModal>
+              <EuiFlexGroup gutterSize="m" justifyContent="flexEnd" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    data-test-subj="confirmModalCancelButton"
+                    onClick={handleCancelRun}
+                  >
+                    {Translations.runWorkflowCancel}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    data-test-subj="confirmModalConfirmButton"
+                    onClick={handleConfirmRun}
+                    fill
+                    color="success"
+                  >
+                    {Translations.runWorkflow}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiModalFooter>
+          </EuiModal>
         )}
       </>
     );
@@ -591,6 +646,10 @@ const componentStyles = {
       backgroundColor: euiTheme.colors.borderBasePlain,
       alignSelf: 'stretch',
     }),
+  runConfirmationFooter: css({
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  }),
   skeletonTitle: css({
     minWidth: '250px',
     width: '100%',

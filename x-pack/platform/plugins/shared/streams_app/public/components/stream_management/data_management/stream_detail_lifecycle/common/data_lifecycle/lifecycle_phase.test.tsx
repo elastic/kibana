@@ -141,8 +141,7 @@ describe('LifecyclePhase', () => {
       const button = screen.getByRole('button');
       fireEvent.click(button);
 
-      expect(screen.getByTestId('lifecyclePhase-warm-minAge')).toBeInTheDocument();
-      expect(screen.getByTestId('lifecyclePhase-warm-minAgeValue')).toHaveTextContent('30d');
+      expect(screen.getByTestId('lifecyclePhase-warm-ageBadge')).toHaveTextContent('30d');
     });
 
     it('should not display retention period for hot phase', () => {
@@ -151,7 +150,7 @@ describe('LifecyclePhase', () => {
       const button = screen.getByRole('button');
       fireEvent.click(button);
 
-      expect(screen.queryByTestId('lifecyclePhase-hot-minAge')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('lifecyclePhase-hot-ageBadge')).not.toBeInTheDocument();
     });
 
     it('should not display retention period for zero age', () => {
@@ -160,7 +159,7 @@ describe('LifecyclePhase', () => {
       const button = screen.getByRole('button');
       fireEvent.click(button);
 
-      expect(screen.queryByTestId('lifecyclePhase-warm-minAge')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('lifecyclePhase-warm-ageBadge')).not.toBeInTheDocument();
     });
 
     it('should display read-only indicator', () => {
@@ -170,6 +169,7 @@ describe('LifecyclePhase', () => {
       fireEvent.click(button);
 
       expect(screen.getByTestId('lifecyclePhase-cold-readOnly')).toBeInTheDocument();
+      expect(screen.getByTestId('lifecyclePhase-cold-readOnlyValue')).toHaveTextContent('Enabled');
     });
 
     it('should display searchable snapshot for cold phase', () => {

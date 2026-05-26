@@ -49,8 +49,9 @@ dependsOn:
   - '@kbn/cell-actions'
   - '@kbn/ui-actions-plugin'
   - '@kbn/storybook'
-  - '@kbn/react-kibana-context-render'
-  - '@kbn/core-chrome-layout'
+  - '@kbn/react-kibana-context-theme'
+  - '@kbn/ui-chrome-layout'
+  - '@kbn/react-kibana-context-theme'
   - '@kbn/react-field'
   - '@kbn/storage-adapter'
   - '@kbn/core-i18n-browser-mocks'
@@ -99,12 +100,12 @@ dependsOn:
   - '@kbn/cloud-plugin'
   - '@kbn/kbn-client'
   - '@kbn/rule-data-utils'
-  - '@kbn/inbox-plugin'
+  - '@kbn/std'
+  - '@kbn/core-saved-objects-common'
+  - '@kbn/datemath'
   - '@kbn/inbox-common'
   - '@kbn/core-saved-objects-common'
-  - '@kbn/app-header'
-  - '@kbn/core-chrome-app-menu-components'
-  - '@kbn/core-chrome-browser-context'
+  - '@kbn/inbox-plugin'
 tags:
   - plugin
   - prod

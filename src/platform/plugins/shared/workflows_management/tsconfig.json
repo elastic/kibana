@@ -97,12 +97,15 @@
     "@kbn/cloud-plugin",
     "@kbn/kbn-client",
     "@kbn/rule-data-utils",
-    "@kbn/inbox-plugin",
+    "@kbn/std",
+    "@kbn/core-saved-objects-common",
+    "@kbn/datemath",
     "@kbn/inbox-common",
     "@kbn/core-saved-objects-common",
+    "@kbn/inbox-plugin",
     "@kbn/app-header",
     "@kbn/core-chrome-app-menu-components",
-    "@kbn/core-chrome-browser-context"
+    "@kbn/core-chrome-browser-context",
   ],
   "exclude": ["target/**/*"]
 }
