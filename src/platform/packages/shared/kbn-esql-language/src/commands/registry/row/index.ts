@@ -26,6 +26,7 @@ export const rowCommand = {
   methods: rowCommandMethods,
   metadata: {
     type: 'source' as const,
+    subquerySource: true,
     description: i18n.translate('kbn-esql-language.esql.definitions.rowDoc', {
       defaultMessage:
         'Produces a row with one or more columns with values that you specify. This can be useful for testing.',
