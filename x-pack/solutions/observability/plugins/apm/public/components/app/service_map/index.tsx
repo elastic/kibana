@@ -294,6 +294,7 @@ export function ServiceMap({
               kuery={kuery}
               start={start}
               end={end}
+              serviceGroupId={serviceGroupId}
               isFullscreen={isFullscreen}
               onToggleFullscreen={onToggleFullscreen}
               fullMapHref={fullMapHref}

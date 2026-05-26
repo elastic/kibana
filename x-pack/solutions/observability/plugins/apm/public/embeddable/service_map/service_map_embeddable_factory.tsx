@@ -51,6 +51,8 @@ const defaultCustomState: WithAllKeys<ServiceMapCustomState> = {
   kuery: undefined,
   service_name: undefined,
   service_group_id: undefined,
+  map_orientation: 'horizontal',
+  sync_with_dashboard_filters: false,
 };
 
 const customStateComparators: StateComparators<ServiceMapCustomState> = {
@@ -58,6 +60,8 @@ const customStateComparators: StateComparators<ServiceMapCustomState> = {
   kuery: 'referenceEquality',
   service_name: 'referenceEquality',
   service_group_id: 'referenceEquality',
+  map_orientation: 'referenceEquality',
+  sync_with_dashboard_filters: 'referenceEquality',
 };
 
 export type ServiceMapEmbeddableApi = DefaultEmbeddableApi<ServiceMapEmbeddableState> &
@@ -124,6 +128,8 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
           kuery: state.kuery,
           service_name: state.service_name,
           service_group_id: state.service_group_id,
+          map_orientation: state.map_orientation,
+          sync_with_dashboard_filters: state.sync_with_dashboard_filters,
         },
         defaultCustomState
       );
@@ -204,6 +210,10 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
                       }
                       customStateManager.api.setKuery(newState.kuery);
                       customStateManager.api.setServiceName(newState.service_name);
+                      customStateManager.api.setMapOrientation(newState.map_orientation);
+                      customStateManager.api.setSyncWithDashboardFilters(
+                        newState.sync_with_dashboard_filters
+                      );
                       closeFlyout();
                     }}
                   />
@@ -233,15 +243,30 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
             };
           }, []);
 
-          const [environment, kuery, serviceName, serviceGroupId] = useBatchedPublishingSubjects(
+          const [
+            environment,
+            kuery,
+            serviceName,
+            serviceGroupId,
+            mapOrientation,
+            syncWithDashboardFilters,
+          ] = useBatchedPublishingSubjects(
             customStateManager.api.environment$,
             customStateManager.api.kuery$,
             customStateManager.api.serviceName$,
-            customStateManager.api.serviceGroupId$
+            customStateManager.api.serviceGroupId$,
+            customStateManager.api.mapOrientation$,
+            customStateManager.api.syncWithDashboardFilters$
           );
 
-          const { timeRange } = useFetchContext(api);
-          const effectiveTimeRange = timeRange ?? DEFAULT_TIME_RANGE;
+          const fetchContext = useFetchContext(api);
+          const effectiveTimeRange = fetchContext.timeRange ?? DEFAULT_TIME_RANGE;
+
+          // Parent dashboard filters/query are merged into fetchContext by `useFetchContext`.
+          // Only forward them when the panel opts in via `sync_with_dashboard_filters`; otherwise
+          // the panel stays isolated (preserves back-compat for panels added from the dashboard menu).
+          const parentFilters = syncWithDashboardFilters ? fetchContext.filters : undefined;
+          const parentQuery = syncWithDashboardFilters ? fetchContext.query : undefined;
 
           return (
             <div style={{ width: '100%', height: '100%', position: 'relative' }}>
@@ -260,6 +285,10 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
                   serviceGroupId={serviceGroupId ?? undefined}
                   core={deps.coreStart}
                   onBlockingError={(error) => blockingError$.next(error)}
+                  mapOrientation={mapOrientation ?? 'horizontal'}
+                  onMapOrientationChange={customStateManager.api.setMapOrientation}
+                  parentFilters={parentFilters}
+                  parentQuery={parentQuery}
                 />
               </ApmEmbeddableContext>
             </div>

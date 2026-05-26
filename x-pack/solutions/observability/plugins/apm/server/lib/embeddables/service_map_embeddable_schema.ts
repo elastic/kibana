@@ -19,6 +19,10 @@ export const serviceMapCustomStateSchema = schema.object({
   kuery: schema.maybe(schema.string()),
   service_name: schema.maybe(schema.string()),
   service_group_id: schema.maybe(schema.string()),
+  map_orientation: schema.maybe(
+    schema.oneOf([schema.literal('horizontal'), schema.literal('vertical')])
+  ),
+  sync_with_dashboard_filters: schema.maybe(schema.boolean()),
 });
 
 export type ServiceMapCustomState = TypeOf<typeof serviceMapCustomStateSchema>;

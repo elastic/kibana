@@ -8,6 +8,7 @@
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonGroup,
   EuiComboBox,
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,8 +19,10 @@ import {
   EuiFormRow,
   EuiLink,
   EuiSkeletonText,
+  EuiSwitch,
   EuiTitle,
 } from '@elastic/eui';
+import type { ServiceMapOrientation } from '../../components/app/service_map/service_map_options_panel';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -177,6 +180,12 @@ export function ServiceMapEditorFlyout({
   );
   const [kuery, setKuery] = useState(initialState?.kuery ?? '');
   const [serviceName, setServiceName] = useState(initialState?.service_name ?? '');
+  const [mapOrientation, setMapOrientation] = useState<ServiceMapOrientation>(
+    initialState?.map_orientation ?? 'horizontal'
+  );
+  const [syncWithDashboardFilters, setSyncWithDashboardFilters] = useState<boolean>(
+    initialState?.sync_with_dashboard_filters ?? false
+  );
 
   const [selectedServiceOption, setSelectedServiceOption] = useState<
     Array<EuiComboBoxOptionOption<string>>
@@ -251,9 +260,11 @@ export function ServiceMapEditorFlyout({
       environment,
       kuery: kuery.trim() ? kuery : undefined,
       service_name: serviceName || undefined,
+      map_orientation: mapOrientation,
+      sync_with_dashboard_filters: syncWithDashboardFilters,
     };
     onSave(state);
-  }, [environment, kuery, serviceName, onSave]);
+  }, [environment, kuery, serviceName, mapOrientation, syncWithDashboardFilters, onSave]);
 
   return (
     <div style={serviceMapFlyoutShellStyle}>
@@ -341,6 +352,57 @@ export function ServiceMapEditorFlyout({
           </EuiFormRow>
 
           <KueryInput kuery={kuery} onChange={setKuery} deps={deps} />
+
+          <EuiFormRow
+            label={i18n.translate('xpack.apm.serviceMapEditor.orientationLabel', {
+              defaultMessage: 'Layout orientation',
+            })}
+            fullWidth
+          >
+            <EuiButtonGroup
+              legend={i18n.translate('xpack.apm.serviceMapEditor.orientationLegend', {
+                defaultMessage: 'Service map layout orientation',
+              })}
+              idSelected={mapOrientation}
+              onChange={(id) => setMapOrientation(id as ServiceMapOrientation)}
+              options={[
+                {
+                  id: 'horizontal',
+                  label: i18n.translate('xpack.apm.serviceMapEditor.orientationHorizontal', {
+                    defaultMessage: 'Horizontal',
+                  }),
+                  iconType: 'arrowRight',
+                },
+                {
+                  id: 'vertical',
+                  label: i18n.translate('xpack.apm.serviceMapEditor.orientationVertical', {
+                    defaultMessage: 'Vertical',
+                  }),
+                  iconType: 'arrowDown',
+                },
+              ]}
+              buttonSize="compressed"
+              isFullWidth
+              data-test-subj="apmServiceMapEditorOrientation"
+            />
+          </EuiFormRow>
+
+          <EuiFormRow
+            helpText={i18n.translate('xpack.apm.serviceMapEditor.syncFiltersHelpText', {
+              defaultMessage:
+                "When on, the panel responds to the dashboard's global filters and search. Time range is not synced — it stays panel-owned.",
+            })}
+            fullWidth
+          >
+            <EuiSwitch
+              label={i18n.translate('xpack.apm.serviceMapEditor.syncFiltersLabel', {
+                defaultMessage: 'Sync with dashboard filters',
+              })}
+              checked={syncWithDashboardFilters}
+              onChange={(e) => setSyncWithDashboardFilters(e.target.checked)}
+              data-test-subj="apmServiceMapEditorSyncFiltersToggle"
+            />
+          </EuiFormRow>
         </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
