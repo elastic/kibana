@@ -31,6 +31,7 @@ test.describe(
         await pageObjects.onboarding.clickIntegrationCard(
           'integration-card:kubernetes-quick-start'
         );
+        await pageObjects.onboarding.waitForIngestionModeSelector();
       });
 
       await test.step('ingestion selector is visible with both options', async () => {
@@ -53,6 +54,7 @@ test.describe(
     }) => {
       await pageObjects.onboarding.selectKubernetesUseCase();
       await pageObjects.onboarding.clickIntegrationCard('integration-card:kubernetes-quick-start');
+      await pageObjects.onboarding.waitForIngestionModeSelector();
 
       await test.step('command does NOT include wired streams config in Classic mode', async () => {
         const classicCommand = await pageObjects.onboarding.getKubernetesCommandContent();

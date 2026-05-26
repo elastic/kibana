@@ -17,6 +17,10 @@ jest.mock('../onboarding_flow_form/onboarding_flow_form', () => ({
   OnboardingFlowForm: () => null,
 }));
 
+jest.mock('../integrations_grid/integrations_grid', () => ({
+  IntegrationsGrid: () => null,
+}));
+
 const renderWithFlag = (enabled: boolean) => {
   const coreStart = coreMock.createStart();
   coreStart.featureFlags.getBooleanValue.mockImplementation((id, fallback) =>
