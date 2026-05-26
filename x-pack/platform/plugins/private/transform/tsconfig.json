@@ -32,6 +32,7 @@
     "@kbn/kibana-react-plugin",
     "@kbn/es-ui-shared-plugin",
     "@kbn/discover-plugin",
+    "@kbn/discover-utils",
     "@kbn/kibana-utils-plugin",
     "@kbn/usage-collection-plugin",
     "@kbn/core-http-browser",
