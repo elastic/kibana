@@ -351,7 +351,7 @@ describe('Package policy service', () => {
 
     it('should throw FleetError when given an invalid id', async () => {
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      const soClient = createSavedObjectClientMock();
+      const soClient = savedObjectsClientMock.create();
 
       await expect(
         packagePolicyService.create(soClient, esClient, { name: 'test', inputs: [] } as any, {
