@@ -229,7 +229,7 @@ describe('ModelSettings', () => {
     expect(screen.getByTestId('save-settings-button')).toBeEnabled();
   });
 
-  it('announces unsaved changes to screen readers when form becomes dirty', () => {
+  it('shows unsaved changes bottom bar when form becomes dirty', () => {
     mockUseModelSettingsForm.mockReturnValue({ ...defaultFormState, isDirty: true });
 
     render(
@@ -238,9 +238,18 @@ describe('ModelSettings', () => {
       </Wrapper>
     );
 
-    expect(
-      screen.getByText('You have unsaved changes. Use the Save settings button to save them.')
-    ).toBeInTheDocument();
+    expect(screen.getByTestId('unsaved-changes-bar')).toBeInTheDocument();
+    expect(screen.getByTestId('unsaved-changes-save-button')).toBeInTheDocument();
+  });
+
+  it('does not show unsaved changes bottom bar when form is clean', () => {
+    render(
+      <Wrapper>
+        <ModelSettings />
+      </Wrapper>
+    );
+
+    expect(screen.queryByTestId('unsaved-changes-bar')).not.toBeInTheDocument();
   });
 
   it('save button stays disabled when validation fails, even if dirty', () => {

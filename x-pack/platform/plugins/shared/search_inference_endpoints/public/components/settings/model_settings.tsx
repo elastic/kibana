@@ -11,10 +11,12 @@ import {
   EuiButtonEmpty,
   EuiCallOut,
   EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiLoadingSpinner,
   EuiPageTemplate,
-  EuiScreenReaderLive,
   EuiSpacer,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Location } from 'history';
@@ -380,14 +382,51 @@ export const ModelSettings: React.FC = () => {
         )}
       </EuiPageTemplate.Section>
 
-      <EuiScreenReaderLive>
-        {isDirty
-          ? i18n.translate('xpack.searchInferenceEndpoints.settings.unsavedChanges', {
-              defaultMessage:
-                'You have unsaved changes. Use the Save settings button to save them.',
-            })
-          : ''}
-      </EuiScreenReaderLive>
+      {isDirty && (
+        <EuiPageTemplate.BottomBar
+          paddingSize="s"
+          position="fixed"
+          data-test-subj="unsaved-changes-bar"
+        >
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexItem grow={false}>
+              {i18n.translate('xpack.searchInferenceEndpoints.settings.unsavedChanges', {
+                defaultMessage: 'You have unsaved changes.',
+              })}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                content={
+                  !defaultModelValidation.isValid &&
+                  i18n.translate(
+                    'xpack.searchInferenceEndpoints.settings.saveButtonTooltipInvalid',
+                    {
+                      defaultMessage: 'Fix invalid settings before saving.',
+                    }
+                  )
+                }
+              >
+                <EuiButton
+                  fill
+                  size="s"
+                  onClick={handleSave}
+                  isLoading={isFeatureSaving}
+                  isDisabled={!defaultModelValidation.isValid}
+                  data-test-subj="unsaved-changes-save-button"
+                  iconType="check"
+                >
+                  {i18n.translate(
+                    'xpack.searchInferenceEndpoints.settings.bottomBar.saveButton',
+                    {
+                      defaultMessage: 'Save settings',
+                    }
+                  )}
+                </EuiButton>
+              </EuiToolTip>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPageTemplate.BottomBar>
+      )}
 
       {pendingLocation && (
         <UnsavedChangesModal
