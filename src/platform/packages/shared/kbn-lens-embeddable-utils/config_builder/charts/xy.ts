@@ -9,16 +9,14 @@
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { QueryPointEventAnnotationConfig } from '@kbn/event-annotation-common';
-import {
-  LENS_DATASOURCE_ID,
-  type FormBasedPersistedState,
-  type PersistedIndexPatternLayer,
-  type TextBasedLayerColumn,
-  type XYAnnotationLayerConfig,
-  type XYByValueAnnotationLayerConfig,
-  type XYDataLayerConfig,
-  type XYReferenceLineLayerConfig,
-  type XYVisualizationState,
+import type {
+  FormBasedPersistedState,
+  PersistedIndexPatternLayer,
+  TextBasedLayerColumn,
+  XYByValueAnnotationLayerConfig,
+  XYDataLayerConfig,
+  XYReferenceLineLayerConfig,
+  XYVisualizationState,
 } from '@kbn/lens-common';
 import { getBreakdownColumn, getFormulaColumn, getValueColumn } from '../columns';
 import { addLayerColumn, buildDatasourceStates, extractReferences, mapToFormula } from '../utils';
@@ -268,40 +266,6 @@ function buildFormulaLayer(
   return resultLayer;
 }
 
-/**
- * Manual / by-value annotation layers require {@link XYByValueAnnotationLayerConfig.indexPatternId}
- * so `eventAnnotationService.toFetchExpression` can call `indexPatternLoad`. ES|QL (text-based) XY
- * charts only set `index` on the data layer; this copies that id onto annotation layers.
- */
-function injectAnnotationIndexPatternIdsFromTextBasedDatasource(
-  visualization: XYVisualizationState,
-  datasourceStates: LensAttributes['state']['datasourceStates']
-): XYVisualizationState {
-  const textLayers = datasourceStates?.[LENS_DATASOURCE_ID.TEXT_BASED]?.layers;
-  if (!textLayers) {
-    return visualization;
-  }
-
-  const adHocDataViewId = Object.values(textLayers).find((layer) => layer.index)?.index;
-  if (!adHocDataViewId) {
-    return visualization;
-  }
-
-  return {
-    ...visualization,
-    layers: visualization.layers.map((layer): XYAnnotationLayerConfig | typeof layer => {
-      if (layer.layerType !== 'annotations' || 'annotationGroupId' in layer) {
-        return layer;
-      }
-      const byValue = layer as XYByValueAnnotationLayerConfig;
-      if (byValue.indexPatternId) {
-        return layer;
-      }
-      return { ...byValue, indexPatternId: adHocDataViewId };
-    }),
-  };
-}
-
 export async function buildXY(
   config: LensXYConfig,
   { dataViewsAPI }: BuildDependencies
@@ -318,10 +282,7 @@ export async function buildXY(
   );
   const { references, internalReferences, adHocDataViews } = extractReferences(dataviews);
 
-  const visualization = injectAnnotationIndexPatternIdsFromTextBasedDatasource(
-    buildVisualizationState(config),
-    datasourceStates
-  );
+  const visualization = buildVisualizationState(config);
 
   return {
     title: config.title,
