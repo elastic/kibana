@@ -239,6 +239,13 @@ describe('DocumentationManager', () => {
 
       expect(waitUntilTaskCompletedMock).not.toHaveBeenCalled();
     });
+
+    it('calls waitUntilTaskCompleted for each inferenceId when wait=true', async () => {
+      await docManager.updateAll({ wait: true });
+
+      expect(scheduleEnsureUpToDateTaskMock).toHaveBeenCalledTimes(2);
+      expect(waitUntilTaskCompletedMock).toHaveBeenCalledTimes(2);
+    });
   });
 
   describe('#uninstall', () => {

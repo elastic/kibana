@@ -227,6 +227,7 @@ export const registerInstallationRoutes = ({
         body: schema.object({
           forceUpdate: schema.boolean({ defaultValue: false }),
           inferenceIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10000 })),
+          wait: schema.boolean({ defaultValue: false }),
         }),
       },
       options: {
@@ -247,6 +248,7 @@ export const registerInstallationRoutes = ({
       const updated = await documentationManager.updateAll({
         request: req,
         forceUpdate,
+        wait: req.body.wait,
         // If inferenceIds is provided, use it, otherwise use all previously installed inference IDs
         inferenceIds: req.body.inferenceIds ?? [],
       });
