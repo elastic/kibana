@@ -59,7 +59,8 @@ Use operations[] to:
 3. set_matcher — set a KQL query to filter alert episodes, or null for catch-all
 4. set_grouping — set groupingMode (per_episode | all | per_field) and groupBy fields
 5. set_throttle — set throttle strategy and optional interval
-6. validate — validate the accumulated policy against the API request schema; throws if not ready to save`,
+6. set_type — set the policy type ('single_rule' with ruleId, or 'global'). Prefer 'single_rule' when the policy is scoped to one rule.
+7. validate — validate the accumulated policy against the API request schema; throws if not ready to save`,
   schema: manageActionPolicySchema,
   handler: async (
     { actionPolicyAttachmentId: previousAttachmentId, operations },
@@ -141,6 +142,8 @@ Use operations[] to:
                 id: attachment.id,
                 policyId: updatedData.id,
                 name: updatedData.name,
+                type: updatedData.type,
+                ruleId: updatedData.ruleId,
                 destinations: updatedData.destinations,
                 matcher: updatedData.matcher,
                 groupingMode: updatedData.groupingMode,

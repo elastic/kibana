@@ -180,11 +180,13 @@ describe('useWorkflowExecutions', () => {
     );
   });
 
-  it('should pass finished-time filters and sort params when provided', async () => {
+  it('should pass time range and sort params when provided', async () => {
     const { result } = renderHook(
       () =>
         useWorkflowExecutions({
           workflowId: 'wf-1',
+          startedAfter: 'now-1w',
+          startedBefore: 'now',
           finishedAfter: '2026-05-01T00:00:00.000Z',
           finishedBefore: '2026-05-14T00:00:00.000Z',
           sortField: 'finishedAt',
@@ -198,6 +200,8 @@ describe('useWorkflowExecutions', () => {
     expect(mockGetWorkflowExecutions).toHaveBeenCalledWith(
       'wf-1',
       expect.objectContaining({
+        startedAfter: 'now-1w',
+        startedBefore: 'now',
         finishedAfter: '2026-05-01T00:00:00.000Z',
         finishedBefore: '2026-05-14T00:00:00.000Z',
         sortField: 'finishedAt',

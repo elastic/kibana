@@ -600,6 +600,162 @@ describe('generateOtelcolConfig', () => {
     });
   });
 
+  it('should suffix service.extensions and auth.authenticator references to match suffixed extension keys (bearertokenauth regression)', () => {
+    const inputId = 'otlp-input-1';
+    const streamId = 'stream-id-1';
+    const expectedSuffix = `${inputId}-${streamId}`;
+
+    const otelInputWithExtension: FullAgentPolicyInput = {
+      type: OTEL_COLLECTOR_INPUT_TYPE,
+      id: inputId,
+      name: inputId,
+      revision: 0,
+      data_stream: { namespace: 'default' },
+      use_output: 'default',
+      package_policy_id: 'mypolicy',
+      streams: [
+        {
+          id: streamId,
+          data_stream: { dataset: 'generic.otel', type: 'logs' },
+          extensions: {
+            bearertokenauth: { token: 'secret' },
+          },
+          receivers: {
+            otlp: {
+              protocols: {
+                grpc: {
+                  endpoint: '0.0.0.0:4317',
+                  auth: { authenticator: 'bearertokenauth' },
+                },
+                http: {
+                  endpoint: '0.0.0.0:4318',
+                  auth: { authenticator: 'bearertokenauth' },
+                },
+              },
+            },
+          },
+          service: {
+            extensions: ['bearertokenauth'],
+            pipelines: {
+              logs: { receivers: ['otlp'] },
+            },
+          },
+        },
+      ],
+    };
+
+    const result = generateOtelcolConfig({
+      inputs: [otelInputWithExtension],
+      dataOutput: defaultOutput,
+    });
+
+    // The extension key must be suffixed
+    expect(result.extensions?.[`bearertokenauth/${expectedSuffix}`]).toEqual({ token: 'secret' });
+    expect(result.extensions?.bearertokenauth).toBeUndefined();
+
+    // The service.extensions reference must also be suffixed to match
+    expect(result.service?.extensions).toContain(`bearertokenauth/${expectedSuffix}`);
+    expect(result.service?.extensions).not.toContain('bearertokenauth');
+
+    // auth.authenticator references inside receiver bodies must be suffixed
+    const suffixedReceiver = result.receivers?.[`otlp/${expectedSuffix}`];
+    expect(suffixedReceiver?.protocols?.grpc?.auth?.authenticator).toBe(
+      `bearertokenauth/${expectedSuffix}`
+    );
+    expect(suffixedReceiver?.protocols?.http?.auth?.authenticator).toBe(
+      `bearertokenauth/${expectedSuffix}`
+    );
+
+    // Pipeline component references must still be suffixed
+    expect(result.service?.pipelines?.[`logs/${expectedSuffix}`]?.receivers).toContain(
+      `otlp/${expectedSuffix}`
+    );
+  });
+
+  it('should leave auth.authenticator untouched when it does not reference a stream-declared extension', () => {
+    const inputId = 'otlp-input-2';
+    const streamId = 'stream-id-1';
+    const expectedSuffix = `${inputId}-${streamId}`;
+
+    // The receiver references an externally-managed authenticator (e.g. injected by output path)
+    // that was NOT declared in stream.extensions — it must not be rewritten.
+    const otelInputExternalAuth: FullAgentPolicyInput = {
+      type: OTEL_COLLECTOR_INPUT_TYPE,
+      id: inputId,
+      name: inputId,
+      revision: 0,
+      data_stream: { namespace: 'default' },
+      use_output: 'default',
+      package_policy_id: 'mypolicy2',
+      streams: [
+        {
+          id: streamId,
+          data_stream: { dataset: 'generic.otel', type: 'logs' },
+          receivers: {
+            otlp: {
+              protocols: {
+                grpc: {
+                  auth: { authenticator: 'beatsauth/default' },
+                },
+              },
+            },
+          },
+          service: {
+            pipelines: {
+              logs: { receivers: ['otlp'] },
+            },
+          },
+        },
+      ],
+    };
+
+    const result = generateOtelcolConfig({
+      inputs: [otelInputExternalAuth],
+      dataOutput: defaultOutput,
+    });
+
+    const suffixedReceiver = result.receivers?.[`otlp/${expectedSuffix}`];
+    expect(suffixedReceiver?.protocols?.grpc?.auth?.authenticator).toBe('beatsauth/default');
+  });
+
+  it('should suffix only locally-declared extensions in service.extensions, leaving external references untouched', () => {
+    const inputId = 'otlp-input-1';
+    const streamId = 'stream-id-1';
+    const expectedSuffix = `${inputId}-${streamId}`;
+
+    const input: FullAgentPolicyInput = {
+      type: OTEL_COLLECTOR_INPUT_TYPE,
+      id: inputId,
+      name: inputId,
+      revision: 0,
+      data_stream: { namespace: 'default' },
+      use_output: 'default',
+      package_policy_id: 'mypolicy',
+      streams: [
+        {
+          id: streamId,
+          data_stream: { dataset: 'generic.otel', type: 'logs' },
+          extensions: {
+            bearertokenauth: { token: 'secret' },
+          },
+          service: {
+            extensions: ['bearertokenauth', 'beatsauth/default'],
+            pipelines: {
+              logs: { receivers: ['otlp'] },
+            },
+          },
+        },
+      ],
+    };
+
+    const result = generateOtelcolConfig({ inputs: [input], dataOutput: defaultOutput });
+
+    expect(result.service?.extensions).toContain(`bearertokenauth/${expectedSuffix}`);
+    expect(result.service?.extensions).not.toContain('bearertokenauth');
+    expect(result.service?.extensions).toContain('beatsauth/default');
+    expect(result.service?.extensions).not.toContain(`beatsauth/default/${expectedSuffix}`);
+  });
+
   it('should add elasticapm connector and processor for traces input with use_apm enabled', () => {
     const inputs: FullAgentPolicyInput[] = [otelTracesInputWithAPM];
     expect(generateOtelcolConfig({ inputs, dataOutput: defaultOutput })).toEqual({
