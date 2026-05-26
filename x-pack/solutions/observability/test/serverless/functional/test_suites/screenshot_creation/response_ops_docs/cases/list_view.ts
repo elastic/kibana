@@ -78,8 +78,6 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
       await pageObjects.svlCommonNavigation.sidenav.toggle(true);
       const attachmentsTab = await testSubjects.find('case-view-tab-title-attachments');
       await attachmentsTab.click();
-      const filesTab = await testSubjects.find('case-view-tab-title-files');
-      await filesTab.click();
       await cases.casesFilesTable.addFile(require.resolve('./testfile.png'));
       await testSubjects.getVisibleText('cases-files-name-link');
       await svlCommonScreenshots.takeScreenshot(

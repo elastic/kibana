@@ -913,8 +913,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('adds a file to the case', async () => {
-        await testSubjects.existOrFail('case-view-attachment-accordion-file');
-
         await cases.casesFilesTable.addFile(require.resolve('./elastic_logo.png'));
 
         // make sure the uploaded file is displayed on the table

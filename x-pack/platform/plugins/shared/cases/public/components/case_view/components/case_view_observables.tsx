@@ -5,11 +5,7 @@
  * 2.0.
  */
 import React, { useCallback, useMemo } from 'react';
-
-import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
-
 import type { CaseUI } from '../../../../common/ui/types';
-
 import { ObservablesTable } from '../../observables/observables_table';
 import { useCaseObservables } from '../use_case_observables';
 import type { OnUpdateFields } from '../types';
@@ -47,19 +43,11 @@ export const CaseViewObservables = ({
   );
 
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem>
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <ObservablesTable
-              caseData={caseDataWithFilteredObservables}
-              isLoading={isLoading || isLoadingObservables}
-              onExtractObservablesChanged={onExtractObservablesChanged}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <ObservablesTable
+      caseData={caseDataWithFilteredObservables}
+      isLoading={isLoading || isLoadingObservables}
+      onExtractObservablesChanged={onExtractObservablesChanged}
+    />
   );
 };
 

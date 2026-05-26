@@ -15,7 +15,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 
 interface AttachmentAccordionProps {
   id: string;
@@ -27,6 +27,9 @@ interface AttachmentAccordionProps {
 export const AttachmentAccordion = ({ id, title, count, children }: AttachmentAccordionProps) => {
   const { euiTheme } = useEuiTheme();
   const accordionId = useGeneratedHtmlId({ prefix: `case-view-attachment-${id}` });
+  // Controlled isOpen so we can fully unmount children when collapsed
+  const [isOpen, setIsOpen] = useState(true);
+  const onToggle = useCallback((nextIsOpen: boolean) => setIsOpen(nextIsOpen), []);
   return (
     <EuiFlexItem grow={false}>
       <EuiPanel hasBorder>
@@ -34,7 +37,8 @@ export const AttachmentAccordion = ({ id, title, count, children }: AttachmentAc
           id={accordionId}
           data-test-subj={`case-view-attachment-accordion-${id}`}
           buttonProps={{ 'data-test-subj': `case-view-attachment-accordion-toggle-${id}` }}
-          initialIsOpen
+          forceState={isOpen ? 'open' : 'closed'}
+          onToggle={onToggle}
           buttonContent={
             <EuiText size="s">
               <h4
@@ -57,7 +61,7 @@ export const AttachmentAccordion = ({ id, title, count, children }: AttachmentAc
             </EuiText>
           }
         >
-          {children}
+          {isOpen ? children : null}
         </EuiAccordion>
       </EuiPanel>
     </EuiFlexItem>
