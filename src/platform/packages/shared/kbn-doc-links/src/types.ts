@@ -38,6 +38,7 @@ export interface DocLinks {
   readonly apm: {
     readonly kibanaSettings: string;
     readonly supportedServiceMaps: string;
+    readonly supportedServiceMapsLegend: string;
     readonly customLinks: string;
     readonly droppedTransactionSpans: string;
     readonly upgrading: string;
