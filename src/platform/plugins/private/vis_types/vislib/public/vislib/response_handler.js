@@ -24,7 +24,7 @@ function tableResponseHandler(table, dimensions) {
 
     table.rows.forEach((row, rowIndex) => {
       const splitValue = row[splitColumn.id];
-      const formattedValue = splitColumnFormatter.convert(splitValue);
+      const formattedValue = splitColumnFormatter.convertToText(splitValue);
 
       if (!Object.hasOwn(splitMap, splitValue)) {
         splitMap[splitValue] = splitIndex++;
