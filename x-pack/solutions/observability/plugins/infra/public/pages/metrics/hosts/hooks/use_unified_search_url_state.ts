@@ -6,7 +6,7 @@
  */
 
 import type { Dispatch } from 'react';
-import { useReducer } from 'react';
+import { useEffect, useReducer } from 'react';
 import deepEqual from 'fast-deep-equal';
 import * as rt from 'io-ts';
 import { pipe } from 'fp-ts/pipeable';
@@ -88,12 +88,26 @@ export const useHostsUrlState = (): [HostsState, Dispatch<HostsStateAction>] => 
 
   const [search, setSearch] = useReducer(reducer, urlState);
 
-  if (!deepEqual(search, urlState)) {
+  // Mirror the reducer's `search` back into the URL (and localStorage for
+  // the persisted host-limit option) whenever they drift apart. This used
+  // to run inline during render, which triggered the router's listeners
+  // synchronously and produced React's "Cannot update a component
+  // (`CompatRouter`) while rendering a different component" warning every
+  // time a user changed the host-limit / sort / filter selectors. Moving
+  // it to a `useEffect` defers the `history.replace` to the commit phase
+  // where setState on other components is legal.
+  //
+  // No infinite-loop risk: `setUrlState` updates the URL, which on the
+  // next render is decoded back into `urlState`. `deepEqual(search,
+  // urlState)` then returns `true`, so the effect short-circuits and
+  // settles in one extra render.
+  useEffect(() => {
+    if (deepEqual(search, urlState)) return;
     setUrlState(search);
     if (localStorageHostLimit !== search.limit) {
       setLocalStorageHostLimit(search.limit);
     }
-  }
+  }, [search, urlState, setUrlState, localStorageHostLimit, setLocalStorageHostLimit]);
 
   useSyncKibanaTimeFilterTime(INITIAL_DATE_RANGE, urlState.dateRange, (dateRange) =>
     setSearch({ type: 'SET_DATE_RANGE', dateRange })

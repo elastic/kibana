@@ -36,6 +36,8 @@ import { GetHostsMetricsTimeseriesResponsePayloadRT } from '../../../../../commo
 import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { useUnifiedSearchContext } from './use_unified_search';
 import { useHostsTableContext } from './use_hosts_table';
+import { useHostsPageReady } from './use_hosts_page_ready';
+import { PERF_KEYS, perfTracker } from '../utils/perf_tracker';
 
 const TIMESERIES_PATH = '/api/metrics/infra/host/metrics_timeseries';
 
@@ -54,7 +56,8 @@ export interface UseHostsMetricsTimeseriesResult {
 }
 
 export const useHostsMetricsTimeseries = (): UseHostsMetricsTimeseriesResult => {
-  const { buildQuery, isReady, parsedDateRange, searchCriteria } = useUnifiedSearchContext();
+  const { buildQuery, parsedDateRange, searchCriteria } = useUnifiedSearchContext();
+  const isReady = useHostsPageReady();
   const { currentPage } = useHostsTableContext();
 
   // `currentPage` items have a `name` field but we don't want the hook's
@@ -84,16 +87,24 @@ export const useHostsMetricsTimeseries = (): UseHostsMetricsTimeseriesResult => 
     (callApi) => {
       if (!isReady || !payload) return;
       return (async () => {
+        const start = performance.now();
         const response = await callApi(TIMESERIES_PATH, {
           method: 'POST',
           body: payload,
         });
+        const duration = performance.now() - start;
+        perfTracker.record(PERF_KEYS.metricsTimeseries, duration, { hosts: names.length });
         return decodeOrThrow(GetHostsMetricsTimeseriesResponsePayloadRT)(
           response as GetHostsMetricsTimeseriesResponsePayload
         );
       })();
     },
-    [isReady, payload]
+    // `names.length` is read directly inside the callback to label the
+    // `perfTracker` sample. The value is already captured transitively via
+    // `payload` (the request body is stringified from `names`), so listing
+    // it here keeps `react-hooks/exhaustive-deps` happy without changing the
+    // refetch cadence.
+    [isReady, payload, names.length]
   );
 
   const series = data?.series ?? EMPTY_SERIES;

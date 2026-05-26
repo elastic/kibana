@@ -8,6 +8,7 @@
 import { createLiteralValueFromUndefinedRT, inRangeRt, isoToEpochRt } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
 import { EntityTypeRT, DataSchemaFormatRT } from '../shared';
+import { MAX_HOST_COUNT_LIMIT } from '../../constants';
 
 export const InfraMetricTypeRT = rt.keyof({
   cpu: null,
@@ -45,7 +46,17 @@ export const GetInfraMetricsRequestBodyPayloadRT = rt.intersection([
     schema: DataSchemaFormatRT,
   }),
   rt.type({
-    limit: rt.union([inRangeRt(1, 500), createLiteralValueFromUndefinedRT(500)]),
+    // Aligned with Phase A (`get_hosts_two_phase.ts`) via the shared
+    // `MAX_HOST_COUNT_LIMIT` constant so the legacy and PoC endpoints can't
+    // drift. Pre-PoC this was capped at 500 because the original `getAllHosts`
+    // shape doesn't scale well past that — the PoC widened the UI's limit
+    // selector to expose 1000 / 2000 / 3000 / 10000 for A/B benchmarking
+    // (see `pages/metrics/hosts/constants.ts`), and selecting any of those
+    // with the legacy `useTwoPhaseFetch=false` toggle would fail io-ts
+    // decode at the route validator before the request ever hit ES. Raising
+    // the ceiling lets reviewers measure the legacy path's cost at the same
+    // limits Phase A handles.
+    limit: rt.union([inRangeRt(1, MAX_HOST_COUNT_LIMIT), createLiteralValueFromUndefinedRT(500)]),
     metrics: rt.array(InfraMetricTypeRT),
     from: isoToEpochRt,
     to: isoToEpochRt,

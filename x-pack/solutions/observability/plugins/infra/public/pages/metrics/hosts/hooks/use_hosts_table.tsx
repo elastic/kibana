@@ -82,9 +82,20 @@ export type HostNodeRow = HostMetadata &
 /**
  * Helper functions
  */
+// Render real metric values through the inventory formatter, but never
+// coerce a missing value to `0` — historically `value ?? 0` produced
+// fake "0%" / "0 B" cells whenever Phase A had landed but Phase B
+// hadn't, masking the loading state and confusing reviewers. The hostNodes
+// memo in `useHostsView` now holds rows until Phase B is in, so this null
+// branch is mostly defensive; we still keep the explicit `–` so any
+// future code path that surfaces a null metric stays visually honest.
+const NULL_METRIC_PLACEHOLDER = '–';
+
 const formatMetric = (type: InfraEntityMetricType, value: number | undefined | null) => {
-  const defaultValue = value ?? 0;
-  return createInventoryMetricFormatter({ type })(defaultValue);
+  if (value === null || value === undefined) {
+    return NULL_METRIC_PLACEHOLDER;
+  }
+  return createInventoryMetricFormatter({ type })(value);
 };
 
 const buildMetricCell = (
@@ -279,18 +290,24 @@ export const useHostsTable = () => {
   }, [useNewTable, items, sorting, pagination.pageIndex, pagination.pageSize]);
 
   const showNetworkColumns = searchCriteria.preferredSchema !== 'semconv';
+  // EUI deprecated `%` / `vw` / `cqw` / `cqi` units for table column widths
+  // (logs "Detected not recommended unit ..." on every render). Using `em`
+  // here keeps the proportional relationship between columns —
+  // title:metric:metric ≈ same ratio as before — while satisfying EUI's
+  // requirement for absolute-length units. Values picked so the visible
+  // grid lays out within the existing breakpoints.
   const metricColumnsWidth = useMemo(() => {
     if (displayAlerts) {
-      return showNetworkColumns ? '12%' : '16%';
+      return showNetworkColumns ? '8em' : '11em';
     }
-    return showNetworkColumns ? '16%' : '20%';
+    return showNetworkColumns ? '11em' : '14em';
   }, [displayAlerts, showNetworkColumns]);
 
   const titleColumnWidth = useMemo(() => {
     if (displayAlerts) {
-      return showNetworkColumns ? '15%' : '20%';
+      return showNetworkColumns ? '11em' : '14em';
     }
-    return showNetworkColumns ? '20%' : '25%';
+    return showNetworkColumns ? '14em' : '18em';
   }, [displayAlerts, showNetworkColumns]);
 
   const columns: Array<EuiBasicTableColumn<HostNodeRow>> = useMemo(
@@ -518,7 +535,7 @@ export const useHostsTable = () => {
                   />
                 </>
               ),
-              width: '12%',
+              width: '8em',
               field: 'rxV2',
               sortable: true,
               'data-test-subj': 'hostsView-tableRow-rx',
@@ -543,7 +560,7 @@ export const useHostsTable = () => {
                   />
                 </>
               ),
-              width: '12%',
+              width: '8em',
               field: 'txV2',
               sortable: true,
               'data-test-subj': 'hostsView-tableRow-tx',

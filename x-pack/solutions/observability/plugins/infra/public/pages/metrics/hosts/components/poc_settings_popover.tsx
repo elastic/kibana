@@ -16,11 +16,14 @@
 // which toggles only have an effect when another toggle is also ON
 // (dependency-bound flags).
 
-import React, { useState } from 'react';
+import React, { useCallback, useState, useSyncExternalStore } from 'react';
 import {
   EuiAccordion,
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiCode,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiPanel,
   EuiPopover,
   EuiPopoverFooter,
@@ -31,15 +34,16 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { usePocSettingsContext } from '../hooks/use_poc_settings';
+import { PERF_KEYS, perfTracker, type PerfEntry } from '../utils/perf_tracker';
 
 export const PocSettingsPopover = () => {
   const [open, setOpen] = useState(false);
   const settings = usePocSettingsContext();
 
-  // The button switches to "fill" state whenever *any* flag is off, so a
-  // reviewer's eye is drawn to the gear icon when the page is in a
-  // non-default configuration. Cheap visual cue.
-  const allOn =
+  // The button switches to "fill" state whenever *any* flag is in a non-
+  // default (ON) position, so a reviewer's eye is drawn to the gear icon
+  // when the page is in a non-default configuration.
+  const allDefault =
     settings.useKpiEndpoint &&
     settings.dropKpiTrendline &&
     settings.useTwoPhaseFetch &&
@@ -60,7 +64,7 @@ export const PocSettingsPopover = () => {
           aria-label="PoC settings"
           iconType="gear"
           color="text"
-          display={allOn ? 'empty' : 'fill'}
+          display={allDefault ? 'empty' : 'fill'}
           onClick={() => setOpen((prev) => !prev)}
           data-test-subj="hostsViewPocSettingsButton"
         />
@@ -252,15 +256,121 @@ export const PocSettingsPopover = () => {
             }
           />
         </Section>
+
+        <Section title="Recent endpoint timings" defaultOpen>
+          <PerfOverlay />
+        </Section>
       </div>
       <EuiPopoverFooter>
         <EuiText size="xs" color="subdued">
-          PoC-only. All eleven flags ship as ON by default.
+          PoC-only. All flags ship ON by default.
         </EuiText>
       </EuiPopoverFooter>
     </EuiPopover>
   );
 };
+
+// Live overlay of the most recent endpoint timings captured by `perfTracker`.
+// Subscribes through `useSyncExternalStore` so the rest of the tree never
+// re-renders when a new sample lands — only this component does. Each row
+// is one tracked endpoint; we display the latest sample large, plus a small
+// summary (count / min / avg / max) so reviewers can eyeball variance
+// without copy-pasting numbers into a spreadsheet.
+const PerfOverlay: React.FC = () => {
+  const snapshot = useSyncExternalStore(
+    useCallback((cb) => perfTracker.subscribe(cb), []),
+    () => perfTracker.getSnapshot(),
+    () => perfTracker.getSnapshot()
+  );
+
+  const rows = Object.values(PERF_KEYS).map((key) => ({
+    key,
+    entries: snapshot.get(key) ?? [],
+  }));
+  const hasAny = rows.some((row) => row.entries.length > 0);
+
+  return (
+    <>
+      <EuiText size="xs" color="subdued">
+        Wall-time of each Hosts UI endpoint as measured client-side (network + server). Updates
+        live; latest sample shown large, summary across the last {`≤10`} samples on the right.
+        Numbers also logged to the dev console with the <EuiCode>[hosts-perf]</EuiCode> prefix.
+      </EuiText>
+      <EuiSpacer size="s" />
+      {hasAny ? (
+        <>
+          {rows.map((row) =>
+            row.entries.length === 0 ? null : (
+              <PerfRow key={row.key} label={row.key} entries={row.entries} />
+            )
+          )}
+          <EuiSpacer size="xs" />
+          <EuiButtonEmpty
+            size="xs"
+            iconType="cross"
+            onClick={() => perfTracker.clear()}
+            data-test-subj="hostsViewPocSettingsClearTimings"
+          >
+            Clear timings
+          </EuiButtonEmpty>
+        </>
+      ) : (
+        <EuiText size="xs" color="subdued">
+          No samples yet. Reload the page or change a toggle to trigger a fetch.
+        </EuiText>
+      )}
+    </>
+  );
+};
+
+const PerfRow: React.FC<{ label: string; entries: ReadonlyArray<PerfEntry> }> = ({
+  label,
+  entries,
+}) => {
+  const latest = entries[0];
+  // Summary stats are intentionally derived from `entries` (capped at the
+  // tracker's ring-buffer size) so trends inside a single session are
+  // legible without ever growing unbounded.
+  const durations = entries.map((e) => e.duration);
+  const min = Math.min(...durations);
+  const max = Math.max(...durations);
+  const avg = durations.reduce((sum, d) => sum + d, 0) / durations.length;
+
+  return (
+    <EuiPanel hasBorder paddingSize="s" style={{ marginBottom: 6 }}>
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+        <EuiFlexItem grow>
+          <EuiText size="xs">
+            <strong>{label}</strong>
+          </EuiText>
+          <EuiText size="xs" color="subdued">
+            {formatMeta(latest.meta)} · n={entries.length} · min/avg/max {formatMs(min)}/
+            {formatMs(avg)}/{formatMs(max)}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="m" textAlign="right">
+            <strong>{formatMs(latest.duration)}</strong>
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPanel>
+  );
+};
+
+function formatMs(value: number): string {
+  if (value >= 1000) return `${(value / 1000).toFixed(2)}s`;
+  return `${value.toFixed(0)}ms`;
+}
+
+function formatMeta(meta: PerfEntry['meta']): string {
+  if (!meta) return '';
+  const parts: string[] = [];
+  for (const [k, v] of Object.entries(meta)) {
+    parts.push(`${k}=${v}`);
+  }
+  return parts.join(' · ');
+}
 
 // Small wrapper around `EuiAccordion` to standardise section spacing. Each
 // section opens / closes independently; `defaultOpen` lets us pre-expand the

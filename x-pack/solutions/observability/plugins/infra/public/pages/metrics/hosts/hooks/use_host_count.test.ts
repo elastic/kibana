@@ -10,6 +10,7 @@ import { useFetcher, FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import type * as useKibanaContextForPluginHook from '../../../../hooks/use_kibana';
 import * as useTimeRangeMetadataContextModule from '../../../../hooks/use_time_range_metadata';
+import * as useHostsPageReadyModule from './use_hosts_page_ready';
 import * as useUnifiedSearchHooks from './use_unified_search';
 import { useHostCount } from './use_host_count';
 
@@ -17,6 +18,7 @@ jest.mock('../../../../hooks/use_fetcher');
 jest.mock('../../../../hooks/use_kibana');
 jest.mock('../../../../containers/plugin_config_context');
 jest.mock('./use_unified_search');
+jest.mock('./use_hosts_page_ready');
 
 describe('useHostCount', () => {
   jest.spyOn(useTimeRangeMetadataContextModule, 'useTimeRangeMetadataContext').mockReturnValue({
@@ -37,14 +39,20 @@ describe('useHostCount', () => {
     useUnifiedSearchHooks.useUnifiedSearchContext as jest.MockedFunction<
       typeof useUnifiedSearchHooks.useUnifiedSearchContext
     >;
+  const useHostsPageReadyMock = useHostsPageReadyModule.useHostsPageReady as jest.MockedFunction<
+    typeof useHostsPageReadyModule.useHostsPageReady
+  >;
 
+  // `isReady` used to live on `useUnifiedSearch`; the cyclic-provider fix
+  // moved it to a standalone `useHostsPageReady` hook that runs inside the
+  // `HostsTimeRangeMetadataProvider` subtree. Tests mock it directly.
   const mockUseUnifiedContext = (searchCriteria: any, isReady = true) => {
     useUnifiedSearchContextMock.mockReturnValue({
       buildQuery: jest.fn(() => 'query'),
-      isReady,
       parsedDateRange: { from: '', to: '' },
       searchCriteria,
     } as unknown as ReturnType<typeof useUnifiedSearchHooks.useUnifiedSearchContext>);
+    useHostsPageReadyMock.mockReturnValue(isReady);
   };
 
   describe('when data is fetched', () => {

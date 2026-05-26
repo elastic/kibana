@@ -35,6 +35,8 @@ import { GetHostsKpisResponsePayloadRT } from '../../../../../common/http_api';
 import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { useUnifiedSearchContext } from './use_unified_search';
 import { useHostsViewContext } from './use_hosts_view';
+import { useHostsPageReady } from './use_hosts_page_ready';
+import { PERF_KEYS, perfTracker } from '../utils/perf_tracker';
 
 const KPIS_PATH = '/api/metrics/infra/host/kpis';
 
@@ -53,14 +55,15 @@ export interface UseHostsKpisResult {
 }
 
 export const useHostsKpis = (): UseHostsKpisResult => {
-  const { buildQuery, isReady, parsedDateRange, searchCriteria } = useUnifiedSearchContext();
-  const { hostNodes } = useHostsViewContext();
-
-  // Match the table's host set exactly. Lens did this implicitly with
-  // `buildCombinedAssetFilter`; here the contract is explicit (the names
-  // travel in the request body) which also makes the KPI 1:1 reproducible
-  // for a given Phase A response.
-  const names = useMemo(() => hostNodes.map((node) => node.name), [hostNodes]);
+  const { buildQuery, parsedDateRange, searchCriteria } = useUnifiedSearchContext();
+  const isReady = useHostsPageReady();
+  // Scope to the *full* ranked top-N list Phase A computed — same set the
+  // table is paginating across, not just the visible 20-row page.
+  // Reading `hostNodes` here instead used to scope KPIs to the visible
+  // page (a) producing the wrong "average across 20 hosts" semantic and
+  // (b) firing the request twice — once with no `names` (fleet-wide,
+  // pre-Phase-A) and once with the 20 visible names (post-Phase-B).
+  const { allHostNames } = useHostsViewContext();
 
   const payload = useMemo<string>(() => {
     const body: GetHostsKpisRequestBodyPayloadClient = {
@@ -69,7 +72,7 @@ export const useHostsKpis = (): UseHostsKpisResult => {
       query: buildQuery() as GetHostsKpisRequestBodyPayloadClient['query'],
       schema: searchCriteria?.preferredSchema || DEFAULT_SCHEMA,
       limit: searchCriteria.limit,
-      ...(names.length > 0 ? { names } : {}),
+      ...(allHostNames.length > 0 ? { names: allHostNames } : {}),
     };
     return JSON.stringify(body);
   }, [
@@ -78,23 +81,40 @@ export const useHostsKpis = (): UseHostsKpisResult => {
     parsedDateRange.to,
     searchCriteria?.preferredSchema,
     searchCriteria.limit,
-    names,
+    allHostNames,
   ]);
 
   const { data, status, error } = useFetcher(
     (callApi) => {
-      if (!isReady) return;
+      // Wait for Phase A's ranked name list before firing. Phase A is
+      // cheap; the cost of sequencing here is well under the cost of
+      // the wasted first call we used to make. Skipping when the list
+      // is empty also collapses the request count to exactly one per
+      // query change.
+      if (!isReady || allHostNames.length === 0) return;
       return (async () => {
+        const start = performance.now();
         const response = await callApi(KPIS_PATH, {
           method: 'POST',
           body: payload,
+        });
+        const duration = performance.now() - start;
+        perfTracker.record(PERF_KEYS.kpis, duration, {
+          hosts: allHostNames.length,
+          limit: searchCriteria.limit,
         });
         return decodeOrThrow(GetHostsKpisResponsePayloadRT)(
           response as GetHostsKpisResponsePayload
         );
       })();
     },
-    [isReady, payload]
+    // `allHostNames.length` and `searchCriteria.limit` are already captured
+    // transitively via `payload` (the request body is stringified from them),
+    // but they're also read directly inside the callback to label the
+    // `perfTracker` sample. Listing them explicitly keeps
+    // `react-hooks/exhaustive-deps` happy without changing the refetch cadence
+    // — when either value changes, `payload` changes in the same render.
+    [isReady, payload, allHostNames.length, searchCriteria.limit]
   );
 
   return {

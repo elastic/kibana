@@ -15,9 +15,11 @@ import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { GetInfraEntityCountResponsePayloadRT } from '../../../../../common/http_api';
 import { FETCH_STATUS, isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { useUnifiedSearchContext } from './use_unified_search';
+import { useHostsPageReady } from './use_hosts_page_ready';
 
 export const useHostCount = () => {
-  const { buildQuery, isReady, parsedDateRange, searchCriteria } = useUnifiedSearchContext();
+  const { buildQuery, parsedDateRange, searchCriteria } = useUnifiedSearchContext();
+  const isReady = useHostsPageReady();
   const { data: timeRangeMetadata, status: timeRangeMetadataStatus } =
     useTimeRangeMetadataContext();
   const {

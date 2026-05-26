@@ -228,6 +228,12 @@ async function fetchKpisDsl({
   const load1mField = isSemconv ? 'metrics.system.cpu.load_average.1m' : 'system.load.1';
   const coresField = isSemconv ? 'metrics.system.cpu.logical.count' : 'system.load.cores';
 
+  // We *cannot* use `bucket_script` to derive `diskUsage` and
+  // `normalizedLoad1m` here: pipeline aggs require a multi-bucket parent,
+  // but at the root of this request all siblings are metric aggs. Returning
+  // the raw numerator/denominator and dividing in `extract*` below is one
+  // extra division per request — cheaper than wrapping everything in a
+  // dummy `filters` bucket just to satisfy the parser.
   const diskAggs: Record<string, estypes.AggregationsAggregationContainer> = isSemconv
     ? {
         disk_free: {
@@ -235,13 +241,6 @@ async function fetchKpisDsl({
           aggs: { value: { sum: { field: 'metrics.system.filesystem.usage' } } },
         },
         disk_total: { sum: { field: 'metrics.system.filesystem.usage' } },
-        diskUsage: {
-          bucket_script: {
-            buckets_path: { free: 'disk_free>value', total: 'disk_total' },
-            // Guard against `total=0` so we don't return `Infinity`.
-            script: 'params.total > 0 ? 1 - params.free / params.total : null',
-          },
-        },
       }
     : {
         diskUsage: { max: { field: 'system.filesystem.used.pct' } },
@@ -266,12 +265,6 @@ async function fetchKpisDsl({
         mem: memAgg,
         load1m: { avg: { field: load1mField } },
         cores: { max: { field: coresField } },
-        normalizedLoad1m: {
-          bucket_script: {
-            buckets_path: { load: 'load1m', cores: 'cores' },
-            script: 'params.cores > 0 ? params.load / params.cores : null',
-          },
-        },
         ...diskAggs,
         host_count: { cardinality: { field: HOST_NAME_FIELD } },
       },
@@ -283,7 +276,7 @@ async function fetchKpisDsl({
 
   const kpis: HostsKpis = {
     cpuUsage: extractCpuUsage(aggs, isSemconv),
-    normalizedLoad1m: numberOrNull(aggs?.normalizedLoad1m?.value),
+    normalizedLoad1m: extractNormalizedLoad(aggs),
     memoryUsage: extractMemoryUsage(aggs, isSemconv),
     diskUsage: extractDiskUsage(aggs, isSemconv),
   };
@@ -331,9 +324,28 @@ function extractDiskUsage(
 ): number | null {
   if (!aggs) return null;
   if (isSemconv) {
-    return numberOrNull((aggs.diskUsage as { value?: number | null } | undefined)?.value);
+    // Semconv: `system.filesystem.usage` reports bytes per `state`. Total
+    // capacity == sum across all states; `1 - free/total` is the canonical
+    // used-ratio formula used everywhere else in the inventory model.
+    const free = numberOrNull(
+      (aggs.disk_free as { value?: { value?: number | null } } | undefined)?.value?.value
+    );
+    const total = numberOrNull((aggs.disk_total as { value?: number | null } | undefined)?.value);
+    if (free === null || total === null || total <= 0) return null;
+    return 1 - free / total;
   }
   return numberOrNull((aggs.diskUsage as { value?: number | null } | undefined)?.value);
+}
+
+function extractNormalizedLoad(aggs: Record<string, unknown> | undefined): number | null {
+  if (!aggs) return null;
+  // load1m and cores have identical shape on both ECS and semconv branches
+  // (plain metric aggs); the field names differ but the response shape
+  // doesn't, so this branch-free.
+  const load = numberOrNull((aggs.load1m as { value?: number | null } | undefined)?.value);
+  const cores = numberOrNull((aggs.cores as { value?: number | null } | undefined)?.value);
+  if (load === null || cores === null || cores <= 0) return null;
+  return load / cores;
 }
 
 function numberOrNull(value: unknown): number | null {

@@ -31,7 +31,9 @@ import { FETCH_STATUS, isPending, useFetcher } from '../../../../hooks/use_fetch
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { useUnifiedSearchContext } from './use_unified_search';
 import { useHostsTableUrlState } from './use_hosts_table_url_state';
+import { useHostsPageReady } from './use_hosts_page_ready';
 import { usePocSettingsContext } from './use_poc_settings';
+import { PERF_KEYS, perfTracker } from '../utils/perf_tracker';
 import type {
   GetHostsListRequestBodyPayloadClient,
   GetHostsListResponsePayload,
@@ -85,7 +87,8 @@ export const useHostsView = () => {
   const {
     services: { telemetry },
   } = useKibanaContextForPlugin();
-  const { buildQuery, isReady, parsedDateRange, searchCriteria } = useUnifiedSearchContext();
+  const { buildQuery, parsedDateRange, searchCriteria } = useUnifiedSearchContext();
+  const isReady = useHostsPageReady();
   const [{ sorting, pagination }] = useHostsTableUrlState();
   // P10 — `useTwoPhaseFetch` controls whether the page issues Phase A +
   // Phase B against the new endpoints or falls back to the legacy single
@@ -162,6 +165,7 @@ export const useHostsView = () => {
           { key1: 'data_load', value1: duration },
           { limit: searchCriteria.limit }
         );
+        perfTracker.record(PERF_KEYS.phaseA, duration, { limit: searchCriteria.limit });
         return decodeOrThrow(GetHostsListResponsePayloadRT)(
           response as GetHostsListResponsePayload
         );
@@ -211,6 +215,7 @@ export const useHostsView = () => {
           { key1: 'data_load', value1: duration },
           { limit: pageNames.length }
         );
+        perfTracker.record(PERF_KEYS.phaseB, duration, { hosts: pageNames.length });
         return decodeOrThrow(GetHostsMetricsResponsePayloadRT)(
           response as GetHostsMetricsResponsePayload
         );
@@ -260,6 +265,7 @@ export const useHostsView = () => {
           { key1: 'data_load', value1: duration },
           { limit: searchCriteria.limit }
         );
+        perfTracker.record(PERF_KEYS.legacy, duration, { limit: searchCriteria.limit });
         return response;
       })();
     },
@@ -272,6 +278,31 @@ export const useHostsView = () => {
   // still renders the rows with skeleton cells.
   // ---------------------------------------------------------------------
 
+  // Compute whether Phase B's response actually covers Phase A's
+  // currently-visible names. When the user changes sort / page, Phase A
+  // returns the new names *before* Phase B fires its follow-up request:
+  // for one or two render ticks we have `listStatus='success'`,
+  // `metricsStatus='success'`, but the names in `metricsData` are from
+  // the previous page. Without this check, `hostNodes` collapses to `[]`
+  // while `loading` is `false` and the table briefly renders the empty
+  // state ("No data"), then re-renders into the loading state once
+  // Phase B's new request flips its status to pending. Treating
+  // "Phase B doesn't cover Phase A" as a loading signal eliminates the
+  // flash.
+  const phaseBCoversPhaseA = useMemo(() => {
+    if (!useNewTable) return true;
+    const listNodes = listData?.nodes ?? [];
+    if (listNodes.length === 0) return true; // nothing to cover
+    const metricsNames = new Set((metricsData?.nodes ?? []).map((n) => n.name));
+    return listNodes.every((n) => metricsNames.has(n.name));
+  }, [useNewTable, listData?.nodes, metricsData?.nodes]);
+
+  // Defer materialising rows on the two-phase path until Phase B has
+  // resolved for the *current* set of names. Rendering rows the moment
+  // Phase A lands meant the table flashed `0%` cells (formatter coerces
+  // null → 0) for ~200 ms before Phase B swapped real numbers in — a UX
+  // regression the user explicitly called out. Holding rows back keeps
+  // the table empty / in its loading state until we have both.
   const hostNodes: TwoPhaseHostNode[] = useMemo(() => {
     if (!useNewTable) {
       return legacyData?.nodes ?? [];
@@ -279,6 +310,7 @@ export const useHostsView = () => {
 
     const listNodes = listData?.nodes ?? [];
     if (listNodes.length === 0) return [];
+    if (!phaseBCoversPhaseA) return [];
 
     type MetricsNode = NonNullable<typeof metricsData>['nodes'][number];
     const metricsByName = new Map<string, MetricsNode>();
@@ -303,12 +335,27 @@ export const useHostsView = () => {
       }
       return node;
     });
-  }, [useNewTable, legacyData?.nodes, listData?.nodes, metricsData?.nodes, metrics]);
+  }, [
+    useNewTable,
+    legacyData?.nodes,
+    listData?.nodes,
+    metricsData?.nodes,
+    metrics,
+    phaseBCoversPhaseA,
+  ]);
 
   // Two-phase: Phase A returns the ranked fleet count so pagination math
   // doesn't depend on the page's length. Legacy: the table client-paginates
   // over what the endpoint returned, so totalHosts is the response length.
   const totalHosts = useNewTable ? listData?.totalHosts ?? 0 : legacyData?.nodes?.length ?? 0;
+
+  // Full ranked top-N name list, available to siblings that need the
+  // same scoping as the table (KPIs, etc.). On the legacy path we surface
+  // the same shape derived from the response so consumers don't need to
+  // branch on `useNewTable` themselves.
+  const allHostNames: string[] = useNewTable
+    ? listData?.allHostNames ?? []
+    : (legacyData?.nodes ?? []).map((n) => n.name);
 
   if (!useNewTable) {
     return {
@@ -317,6 +364,7 @@ export const useHostsView = () => {
       error: legacyError ?? undefined,
       hostNodes,
       totalHosts,
+      allHostNames,
       phaseAStatus: legacyStatus,
       phaseBStatus: legacyStatus,
       isPhaseAReady: legacyStatus === FETCH_STATUS.SUCCESS,
@@ -324,14 +372,21 @@ export const useHostsView = () => {
   }
 
   return {
-    // Phase A drives the loading state. Phase B's loading is hidden because
-    // the row exists from Phase A; cells render with nulls (skeleton) until
-    // Phase B resolves and they swap in.
-    loading: isPending(listStatus),
+    // `loading` is true while *any* of:
+    //   1. Phase A is in flight,
+    //   2. Phase B is in flight,
+    //   3. Phase A succeeded but Phase B's response is still for the
+    //      previous set of names (the inter-phase tick that used to
+    //      flash "No data"). See `phaseBCoversPhaseA` above.
+    loading:
+      isPending(listStatus) ||
+      isPending(metricsStatus) ||
+      (listStatus === FETCH_STATUS.SUCCESS && !phaseBCoversPhaseA),
     phaseBLoading: isPending(metricsStatus),
     error: listError ?? metricsError ?? undefined,
     hostNodes,
     totalHosts,
+    allHostNames,
     phaseAStatus: listStatus,
     phaseBStatus: metricsStatus,
     isPhaseAReady: listStatus === FETCH_STATUS.SUCCESS,

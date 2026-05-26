@@ -80,7 +80,10 @@ export const HostMetricsChart: React.FC<HostMetricsChartProps> = ({
   // Stable x-domain from the first non-empty series so the chart doesn't pan
   // around as different hosts come online / offline within the window. Using
   // the first series is safe because the server emits aligned buckets for
-  // every host — they all share the same x-axis.
+  // every host — they all share the same x-axis. Read from `entry.data`
+  // (which still contains nulls) rather than `cleanedSeries` below so the
+  // domain spans the full requested window even when the first / last
+  // buckets are empty.
   const xDomain = useMemo(() => {
     for (const entry of series) {
       if (entry.data.length > 0) {
@@ -91,6 +94,24 @@ export const HostMetricsChart: React.FC<HostMetricsChartProps> = ({
     }
     return undefined;
   }, [series]);
+
+  // `@elastic/charts` validates each datapoint and logs a warning whenever a
+  // `LineSeries` receives a non-numeric `y` — including the API's explicit
+  // `null` for "bucket exists, no data reported". The legacy Lens charts
+  // dodge this by configuring `fit: nearest`, but we render through
+  // `@elastic/charts` directly, so the equivalent is to drop the null
+  // buckets up front. Visually identical (the time x-scale connects the
+  // remaining points), no warning floods on every refresh / sort / page
+  // change. Single pass keyed on `series` so we don't re-filter when the
+  // host order shifts during pagination.
+  const cleanedSeries = useMemo(
+    () =>
+      series.map((entry) => ({
+        ...entry,
+        data: entry.data.filter((point) => point.y != null),
+      })),
+    [series]
+  );
 
   const formatter = FORMATTERS[metric];
 
@@ -168,7 +189,7 @@ export const HostMetricsChart: React.FC<HostMetricsChartProps> = ({
             position={Position.Left}
             tickFormat={(v) => formatter(typeof v === 'number' ? v : null)}
           />
-          {series.map((entry) => (
+          {cleanedSeries.map((entry) => (
             <LineSeries
               key={entry.host}
               id={entry.host}
@@ -178,9 +199,11 @@ export const HostMetricsChart: React.FC<HostMetricsChartProps> = ({
               xAccessor="x"
               yAccessors={['y']}
               data={entry.data}
-              // `fit: nearest` is what Lens does for our xy charts when a
-              // bucket has `null` — it bridges single-bucket gaps without
-              // smearing longer counter-reset gaps.
+              // Nulls are filtered above so we don't need the `fit` prop —
+              // the time x-scale draws a continuous line through whatever
+              // numeric points remain, which matches Lens's `fit: nearest`
+              // behaviour for the single-bucket gaps that show up on idle
+              // hosts (network / disk-IO metrics).
             />
           ))}
         </Chart>

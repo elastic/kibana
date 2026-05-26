@@ -106,10 +106,19 @@ export async function getHostsList({
   // a metric (APM-only hosts have no metric value, so they belong at the end
   // for desc and at the start for asc — but that's a future polish; PoC
   // keeps them at the tail).
+  //
+  // The cap to `limit` is critical: both `rankInfraHostsEsql` and
+  // `rankInfraHostsDsl` honour `limit` themselves, but `apmHostNames` is
+  // fetched independently and can overflow when an APM-only host isn't
+  // already in the infra ranking. Without this slice the merged list
+  // grows past the user-selected limit (e.g. 1001 hosts when the limit is
+  // 1000) and downstream consumers — KPI/metrics-timeseries endpoints
+  // that scope by `allHostNames` — would silently scan more hosts than
+  // the table is paginating across.
   const infraNamesInOrder = infraHostNames;
   const infraSet = new Set(infraNamesInOrder);
   const apmOnly = apmHostNames.filter((n) => !infraSet.has(n)).sort();
-  const merged = [...infraNamesInOrder, ...apmOnly];
+  const merged = [...infraNamesInOrder, ...apmOnly].slice(0, limit);
   const totalHosts = merged.length;
 
   // Page slice (Kibana-side because ES|QL `TS` has no OFFSET).
@@ -148,6 +157,12 @@ export async function getHostsList({
     entityType: 'host',
     nodes,
     totalHosts,
+    // Full ranked list (≤ limit). Consumers downstream — notably the new
+    // KPI endpoint (P15b) — need exactly the same set the table is
+    // paginating across, not just the visible page slice. Returning it
+    // here lets the client pass it through verbatim without re-running
+    // the rank query.
+    allHostNames: merged,
   };
 }
 
@@ -319,6 +334,8 @@ function buildDslRankSubAgg(
         return { rank: { avg: { field: 'system.cpu.total.norm.pct' } } };
       case 'memory':
         return { rank: { avg: { field: 'system.memory.actual.used.pct' } } };
+      case 'memoryFree':
+        return { rank: { avg: { field: 'system.memory.actual.free' } } };
       case 'normalizedLoad1m':
         return { rank: { avg: { field: 'system.load.1' } } };
       default:
@@ -336,6 +353,12 @@ function buildDslRankSubAgg(
       // overwhelming majority of fleets.
       return { rank: { avg: { field: 'system.cpu.utilization' } } };
     case 'memory':
+      return { rank: { avg: { field: 'system.memory.utilization' } } };
+    case 'memoryFree':
+      // Use the inverse of utilization as a proxy ranker so the sub-agg
+      // shape stays uniform across metrics. Real value is computed in
+      // Phase B from `system.memory.usage WHERE state="free"`; the DSL
+      // fallback here only needs to be monotonic with that.
       return { rank: { avg: { field: 'system.memory.utilization' } } };
     case 'normalizedLoad1m':
       return { rank: { avg: { field: 'system.cpu.load_average.1m' } } };
@@ -357,6 +380,14 @@ function buildMetricRankExpression(metric: InfraEntityMetricType): string {
       return '1 - AVG(metrics.system.cpu.utilization) WHERE state == "idle"';
     case 'memory':
       return 'AVG(system.memory.utilization) WHERE state == "used"';
+    case 'memoryFree':
+      // Free bytes per host. The Phase B "memoryFree" formula reads
+      // `system.memory.usage WHERE state=="free"` aggregated as a SUM
+      // (one document per host carries the per-state bytes); for ranking
+      // we want a single scalar per host that is monotonic with that, so
+      // AVG works (every per-state slice contributes a constant value
+      // within the window).
+      return 'AVG(system.memory.usage) WHERE state == "free"';
     case 'normalizedLoad1m':
       // load1m / cores — single divisor per host; expressed as ratio of
       // averages, monotonically equivalent for ranking purposes.

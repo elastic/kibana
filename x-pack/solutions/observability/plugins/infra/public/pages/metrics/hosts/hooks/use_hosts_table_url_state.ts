@@ -16,9 +16,15 @@ import { DEFAULT_PAGE_SIZE, LOCAL_STORAGE_PAGE_SIZE_KEY } from '../constants';
 
 export const GET_DEFAULT_TABLE_PROPERTIES: TableProperties = {
   detailsItemId: null,
+  // Default sort is CPU desc so the most interesting hosts surface first.
+  // The previous default — `alertsCount` desc — degrades to a `host.name`
+  // tie-break for the (large) majority of pages where no alerts are
+  // firing, which is misleading on top of Phase A's server-side ranking
+  // (alertsCount isn't a server-supported sort field, so it falls back to
+  // alphabetical there too).
   sorting: {
     direction: 'desc',
-    field: 'alertsCount',
+    field: 'cpuV2',
   },
   pagination: {
     pageIndex: 0,

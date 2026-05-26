@@ -86,8 +86,18 @@ export const HostsListItemRT = rt.intersection([
 export const GetHostsListResponsePayloadRT = rt.intersection([
   EntityTypeRT,
   rt.type({
+    // The page slice: at most `page.size` items, in the ranked order
+    // computed by Phase A.
     nodes: rt.array(HostsListItemRT),
     totalHosts: rt.number,
+    // The full ranked name list (≤ `limit`), in Phase A's ranking order.
+    // Consumers that need the same "top-N hosts the table is paginating
+    // across" scoping (e.g. the P15b KPI endpoint, the P16 metrics-tab
+    // endpoint when computing fleet aggregates) read this rather than the
+    // page slice. Costs essentially nothing on the wire — pure strings,
+    // capped at MAX_HOST_COUNT_LIMIT = 10_000 → ~150 KB worst case, KPI-tile
+    // request payload was already larger before P15b.
+    allHostNames: rt.array(rt.string),
   }),
 ]);
 
