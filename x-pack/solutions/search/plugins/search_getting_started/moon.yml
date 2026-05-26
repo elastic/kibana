@@ -46,8 +46,9 @@ dependsOn:
   - '@kbn/search-agent'
   - '@kbn/shared-ux-ai-components'
   - '@kbn/agent-builder-plugin'
-  - '@kbn/core-chrome-layout-constants'
   - '@kbn/spaces-plugin'
+  - '@kbn/deeplinks-agent-builder'
+  - '@kbn/agent-builder-common'
 tags:
   - plugin
   - prod
