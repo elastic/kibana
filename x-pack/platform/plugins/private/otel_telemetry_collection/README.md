@@ -21,7 +21,7 @@ The OTel Telemetry Collection plugin is owned by the Observability BI team and p
 - **OS & Runtime Info**: OS type/name/version, runtime name/version, executable name
 - **Instrumentation Scopes**: Library/scope names (e.g. `io.opentelemetry.grpc-1.6`)
 - **Orchestration Detection**: K8s and container presence (boolean flags)
-- **Task Scheduling**: Runs collection tasks once per day via Task Manager (CDN-configurable)
+- **Task Scheduling**: Runs collection tasks once per day via Task Manager
 
 ## Configuration
 
