@@ -241,6 +241,7 @@ EOF
         cat >>"$FANOUT_PIPELINE_FILE" <<EOF
         timeout_in_minutes: 10
         allow_dependency_failure: true
+        soft_fail: true
         agents:
           image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod

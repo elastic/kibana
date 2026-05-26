@@ -83,9 +83,14 @@ if [[ -n "${EVAL_SUITE_SLACK_CHANNEL:-}" ]]; then
 
   echo "--- Uploading suite owner Slack notify pipeline (channel: ${EVAL_SUITE_SLACK_CHANNEL})"
   cat "$NOTIFY_PIPELINE_FILE"
-  buildkite-agent pipeline upload "$NOTIFY_PIPELINE_FILE"
+  if ! buildkite-agent pipeline upload "$NOTIFY_PIPELINE_FILE"; then
+    rm -f "$NOTIFY_PIPELINE_FILE" "$SUMMARY_FILE"
+    exit 1
+  fi
   rm -f "$NOTIFY_PIPELINE_FILE"
 fi
 
 rm -f "$SUMMARY_FILE"
-exit 1
+# Exit 0 so Buildkite schedules dynamically uploaded Slack notify steps. Suite failure is
+# already reflected by failing model steps, metadata (kbn-evals:triage:*), and annotations.
+exit 0
