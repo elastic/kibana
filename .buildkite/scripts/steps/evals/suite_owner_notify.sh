@@ -63,6 +63,43 @@ SUMMARY_FILE="$(mktemp -t kbn-evals-suite-summary.XXXXXX.md)"
   fi
 } >"$SUMMARY_FILE"
 
+if [[ "${KBN_EVALS:-}" == "1" ]]; then
+  cd "${KIBANA_DIR:-${BUILDKITE_BUILD_CHECKOUT_PATH:-$(pwd)}}"
+
+  if ! node -e "require('@elastic/elasticsearch')" 2>/dev/null; then
+    echo "--- Bootstrap (required for failure context collection)"
+    .buildkite/scripts/bootstrap.sh
+  fi
+
+  # Ensure judge connector is available for LiteLLM-backed triage summaries.
+  if [[ -n "${KBN_EVALS_CONFIG_B64:-}" ]]; then
+    source .buildkite/scripts/steps/evals/setup_connectors.sh
+  fi
+
+  CONTEXT_FILE="$(mktemp -t kbn-evals-failure-context.XXXXXX.json)"
+  FAILING_PROJECTS_CSV="$(IFS=,; echo "${failing_projects[*]}")"
+
+  if node x-pack/platform/packages/shared/kbn-evals/scripts/ci/collect_failure_context.js \
+    "$EVAL_SUITE_ID" "$CONTEXT_FILE" "$FAILING_PROJECTS_CSV"; then
+    TRIAGE_SUMMARY="$(
+      node x-pack/platform/packages/shared/kbn-evals/scripts/ci/summarize_failures_with_judge.js "$CONTEXT_FILE" 2>/dev/null || true
+    )"
+    if [[ -n "${TRIAGE_SUMMARY}" ]]; then
+      {
+        printf '\n*Triage summary'
+        if [[ -n "${EVALUATION_CONNECTOR_ID:-}" ]]; then
+          printf ' (judge: `%s`)' "${EVALUATION_CONNECTOR_ID}"
+        fi
+        printf ':*\n%s\n' "${TRIAGE_SUMMARY}"
+      } >>"$SUMMARY_FILE"
+    fi
+  else
+    echo "--- Failed to collect failure context for judge triage (continuing with static summary)"
+  fi
+
+  rm -f "$CONTEXT_FILE"
+fi
+
 echo "--- Suite failure summary"
 cat "$SUMMARY_FILE"
 

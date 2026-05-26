@@ -75,6 +75,17 @@ record_suite_failure() {
   # Use one key per failing project to avoid non-atomic read/modify/write races when fanout steps fail concurrently.
   local failure_key="kbn-evals:suite-failures:${suite_key_safe}:${project_key_safe}"
   buildkite-agent meta-data set "$failure_key" "${EVAL_PROJECT}" >/dev/null 2>&1 || true
+
+  local failure_log_key="kbn-evals:suite-failure-log:${suite_key_safe}:${project_key_safe}"
+  if [[ -n "${KBN_EVALS_RUN_LOG:-}" && -f "${KBN_EVALS_RUN_LOG}" ]]; then
+    local excerpt
+    excerpt="$(
+      tail -c 4000 "${KBN_EVALS_RUN_LOG}" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g' || true
+    )"
+    if [[ -n "${excerpt}" ]]; then
+      buildkite-agent meta-data set "$failure_log_key" "${excerpt}" >/dev/null 2>&1 || true
+    fi
+  fi
 }
 
 on_exit() {
@@ -232,6 +243,7 @@ EOF
           EVAL_SUITE_ID: "${EVAL_SUITE_ID}"
           EVAL_SUITE_SLACK_CHANNEL: "${EVAL_SUITE_SLACK_CHANNEL:-}"
           EVAL_SUITE_NAME: "${EVAL_SUITE_NAME:-}"
+          EVALUATION_CONNECTOR_ID: "${EVALUATION_CONNECTOR_ID:-}"
         depends_on:
 EOF
         for key in "${fanout_step_keys[@]}"; do
@@ -390,9 +402,19 @@ if [[ -n "${EVAL_GREP:-}" ]]; then
   EVAL_RUN_ARGS+=(--grep "${EVAL_GREP}")
 fi
 
-if [[ -n "${EVAL_PROJECT:-}" ]]; then
-  node scripts/evals run --suite "$EVAL_SUITE_ID" --project "$EVAL_PROJECT" "${EVAL_RUN_ARGS[@]}"
-else
+run_eval_suite() {
+  if [[ -n "${EVAL_PROJECT:-}" ]]; then
+    KBN_EVALS_RUN_LOG="$(mktemp -t kbn-evals-run.XXXXXX.log)"
+    export KBN_EVALS_RUN_LOG
+    set +e
+    node scripts/evals run --suite "$EVAL_SUITE_ID" --project "$EVAL_PROJECT" "${EVAL_RUN_ARGS[@]}" 2>&1 | tee "$KBN_EVALS_RUN_LOG"
+    local eval_exit="${PIPESTATUS[0]}"
+    set -e
+    return "${eval_exit}"
+  fi
+
   node scripts/evals run --suite "$EVAL_SUITE_ID" "${EVAL_RUN_ARGS[@]}"
-fi
+}
+
+run_eval_suite
 
