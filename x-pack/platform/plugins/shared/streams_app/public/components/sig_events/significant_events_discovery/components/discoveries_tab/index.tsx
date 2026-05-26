@@ -21,32 +21,34 @@ import {
   useFetchDiscoveriesEntities,
   useFetchDiscoveryHistory,
 } from '../../../../../hooks/sig_events/use_fetch_discoveries_entities';
-import { useTabTimeRange } from '../../../../../hooks/sig_events/use_tab_time_range';
-import { DiscoveryFlyout } from './discovery_flyout';
+import { useTimefilter } from '../../../../../hooks/use_timefilter';
+import { useTimeRange } from '../../../../../hooks/use_time_range';
+import { useTimeRangeUpdate } from '../../../../../hooks/use_time_range_update';
+import { DiscoveryFlyout } from '../discovery_flyout';
 import { formatTimestamp } from '../../../../../util/formatters';
-import { DISCOVERY_KIND_LABELS } from '../shared/translations';
-import { DISCOVERY_KIND_COLORS } from '../shared/constants';
 
 const MAX_VISIBLE_STREAMS = 3;
 
+const KIND_LABELS: Record<string, string> = {
+  finding: i18n.translate('xpack.streams.discoveriesTab.kind.finding', {
+    defaultMessage: 'Finding',
+  }),
+  clearance: i18n.translate('xpack.streams.discoveriesTab.kind.clearance', {
+    defaultMessage: 'Cleared',
+  }),
+};
+
+const KIND_COLORS: Record<string, string> = { finding: 'warning', clearance: 'success' };
+
 const columns: Array<EuiBasicTableColumn<Discovery>> = [
   {
-    field: 'discovered_at',
-    name: i18n.translate('xpack.streams.discoveriesTab.timestampColumn', {
-      defaultMessage: 'Timestamp',
-    }),
-    width: '200px',
-    render: (discoveredAt: string | undefined, discovery: Discovery) =>
-      formatTimestamp(discoveredAt ?? discovery['@timestamp']),
-  },
-  {
     field: 'kind',
-    name: i18n.translate('xpack.streams.discoveriesTab.kindColumn', {
-      defaultMessage: 'Kind',
+    name: i18n.translate('xpack.streams.discoveriesTab.statusColumn', {
+      defaultMessage: 'Status',
     }),
     width: '90px',
-    render: (kind: Discovery['kind']) => (
-      <EuiBadge color={DISCOVERY_KIND_COLORS[kind]}>{DISCOVERY_KIND_LABELS[kind]}</EuiBadge>
+    render: (kind: string) => (
+      <EuiBadge color={KIND_COLORS[kind] ?? 'default'}>{KIND_LABELS[kind] ?? kind}</EuiBadge>
     ),
   },
   {
@@ -57,10 +59,33 @@ const columns: Array<EuiBasicTableColumn<Discovery>> = [
     truncateText: true,
   },
   {
+    field: 'criticality',
+    name: i18n.translate('xpack.streams.discoveriesTab.criticalityColumn', {
+      defaultMessage: 'Criticality',
+    }),
+    width: '100px',
+    render: (value: number | undefined) => (value != null ? String(value) : '-'),
+  },
+  {
+    field: 'confidence',
+    name: i18n.translate('xpack.streams.discoveriesTab.confidenceColumn', {
+      defaultMessage: 'Confidence',
+    }),
+    width: '100px',
+    render: (value: number | undefined) => (value != null ? String(value) : '-'),
+  },
+  {
+    field: 'discovered_at',
+    name: i18n.translate('xpack.streams.discoveriesTab.foundColumn', {
+      defaultMessage: 'Found',
+    }),
+    render: (discoveredAt: string | undefined, discovery: Discovery) =>
+      formatTimestamp(discoveredAt ?? discovery['@timestamp']),
+  },
+  {
     name: i18n.translate('xpack.streams.discoveriesTab.streamsColumn', {
       defaultMessage: 'Streams',
     }),
-    width: '160px',
     render: (discovery: Discovery) => {
       const streamNames = [
         ...new Set(
@@ -83,33 +108,16 @@ const columns: Array<EuiBasicTableColumn<Discovery>> = [
       );
     },
   },
-  {
-    field: 'criticality',
-    name: i18n.translate('xpack.streams.discoveriesTab.criticalityColumn', {
-      defaultMessage: 'Criticality',
-    }),
-    width: '100px',
-    render: (value: number | undefined) => (value != null ? String(value) : '-'),
-  },
-  {
-    field: 'confidence',
-    name: i18n.translate('xpack.streams.discoveriesTab.confidenceColumn', {
-      defaultMessage: 'Confidence',
-    }),
-    width: '100px',
-    render: (value: number | undefined) => (value != null ? `${value}%` : '-'),
-  },
 ];
 
-const DEFAULT_DISCOVERIES_RANGE = { from: 'now-7d', to: 'now' };
-
 export const DiscoveriesTab = () => {
-  const { pickerRange, absoluteRange, handleTimeChange, refreshAbsoluteRange } =
-    useTabTimeRange(DEFAULT_DISCOVERIES_RANGE);
+  const { timeState } = useTimefilter();
+  const { rangeFrom, rangeTo } = useTimeRange();
+  const { updateTimeRange } = useTimeRangeUpdate();
 
   const { data, isLoading, refetch, pagination, setPagination } = useFetchDiscoveriesEntities({
-    from: absoluteRange.from,
-    to: absoluteRange.to,
+    from: timeState.start,
+    to: timeState.end,
   });
   const [selectedDiscovery, setSelectedDiscovery] = useState<Discovery | undefined>();
 
@@ -136,13 +144,10 @@ export const DiscoveriesTab = () => {
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
             <EuiSuperDatePicker
-              start={pickerRange.from}
-              end={pickerRange.to}
-              onTimeChange={handleTimeChange}
-              onRefresh={() => {
-                refreshAbsoluteRange();
-                refetch();
-              }}
+              start={rangeFrom}
+              end={rangeTo}
+              onTimeChange={({ start: s, end: e }) => updateTimeRange({ from: s, to: e })}
+              onRefresh={() => refetch()}
               compressed
               showUpdateButton="iconOnly"
               updateButtonProps={{ size: 's', fill: false }}

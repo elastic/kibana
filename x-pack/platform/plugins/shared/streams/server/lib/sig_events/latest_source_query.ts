@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import { esql, type ComposerQuery, type ComposerSortShorthand } from '@elastic/esql';
+import { esql, type ComposerQueryTagHole, type ComposerSortShorthand } from '@elastic/esql';
 import type { ESQLAstExpression } from '@elastic/esql/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import { getSourceColumnIndex, toEsqlRequest } from '../streams/helpers/esql';
 import {
   type CommonSearchOptions,
   type PaginatedResponse,
   type PaginatedSearchOptions,
 } from './query_utils';
 
-export const isIndexNotFoundError = (error: unknown): boolean => {
+const isIndexNotFoundError = (error: unknown): boolean => {
   if (error instanceof Error) {
     return (
       error.message.includes('verification_exception') && error.message.includes('Unknown index')
@@ -30,16 +29,13 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 
 // esClient.esql.query() return type doesn't match ESQLSearchResponse.
 // Known typing gap in the ES client — centralized here to avoid scattered assertions.
-// Uses `toEsqlRequest` so named-parameter holes (`${{ name: value }}`) are bound
-// at the protocol level rather than inlined into the query string.
 export const queryEsql = async ({
   esClient,
   query,
 }: {
   esClient: ElasticsearchClient;
-  query: ComposerQuery;
-}): Promise<ESQLSearchResponse> =>
-  (await esClient.esql.query(toEsqlRequest(query))) as ESQLSearchResponse;
+  query: string;
+}): Promise<ESQLSearchResponse> => (await esClient.esql.query({ query })) as ESQLSearchResponse;
 
 // Converts a columnar ESQLSearchResponse into an array of plain objects keyed by column name.
 export const esqlToObjects = <T extends Record<string, unknown>>(
@@ -55,7 +51,7 @@ export const esqlToObjects = <T extends Record<string, unknown>>(
   );
 
 const parseSourceResponse = <T>(response: ESQLSearchResponse): T[] => {
-  const sourceIdx = getSourceColumnIndex(response);
+  const sourceIdx = response.columns.findIndex((c) => c.name === '_source');
   if (sourceIdx === -1) {
     return [];
   }
@@ -77,7 +73,7 @@ const executeEsqlQuery = async <T>({
   query,
 }: {
   esClient: ElasticsearchClient;
-  query: ComposerQuery;
+  query: string;
 }): Promise<T[]> => {
   try {
     return parseSourceResponse<T>(await queryEsql({ esClient, query }));
@@ -94,7 +90,7 @@ const executeCountQuery = async ({
   query,
 }: {
   esClient: ElasticsearchClient;
-  query: ComposerQuery;
+  query: string;
 }): Promise<number> => {
   try {
     const response = await queryEsql({ esClient, query });
@@ -111,68 +107,13 @@ const executeCountQuery = async ({
   }
 };
 
-export const andWhere = (
-  current: ESQLAstExpression | undefined,
-  next: ESQLAstExpression
-): ESQLAstExpression => {
-  return current ? esql.exp`${current} AND ${next}` : next;
-};
-
-export const inFilter = ({
-  where,
-  field,
-  values,
-}: {
-  where: ESQLAstExpression | undefined;
-  field: string;
-  values: string[] | undefined;
-}): ESQLAstExpression | undefined => {
-  if (!values?.length) return where;
-  return andWhere(where, esql.exp`${esql.col(field)} IN (${values.map((v) => esql.str(v))})`);
-};
-
-// TODO: Remove `IS NULL` fallback once workflows write `kibana.space_ids` on every document.
-export const fromIndexForSpace = ({
-  index,
-  space,
-  columns,
-}: {
-  index: string;
-  space: string;
-  columns?: string[];
-}): ComposerQuery => {
-  const base = columns ? esql.from([index], columns) : esql.from([index]);
-  return base.where`${esql.col('kibana.space_ids')} == ${space} OR ${esql.col(
-    'kibana.space_ids'
-  )} IS NULL`;
-};
-
-export const applyTimeRange = ({
-  query,
-  from,
-  to,
-}: {
-  query: ComposerQuery;
-  from?: string;
-  to?: string;
-}): ComposerQuery => {
-  let q = query;
-  if (from !== undefined) {
-    const fromIso = from;
-    q = q.where`@timestamp >= TO_DATETIME(${{ fromIso }})`;
-  }
-  if (to !== undefined) {
-    const toIso = to;
-    q = q.where`@timestamp <= TO_DATETIME(${{ toIso }})`;
-  }
-  return q;
-};
+export type LatestSourceWhereCondition = ESQLAstExpression & ComposerQueryTagHole;
 
 interface BuildLatestSourceBaseQueryArgs {
   space: string;
   index: string;
   options: CommonSearchOptions;
-  where?: ESQLAstExpression;
+  where?: LatestSourceWhereCondition;
   groupBy: string;
 }
 
@@ -183,11 +124,18 @@ const buildLatestSourceBaseQuery = ({
   where,
   groupBy,
 }: BuildLatestSourceBaseQueryArgs) => {
-  let query = applyTimeRange({
-    query: fromIndexForSpace({ index, space, columns: ['_id', '_source'] }),
-    from: options.from,
-    to: options.to,
-  });
+  // TODO: Remove `IS NULL` fallback once workflows write `kibana.space_ids` on every document.
+  let query = esql.from([index], ['_id', '_source']).where`${esql.col(
+    'kibana.space_ids'
+  )} == ${space} OR ${esql.col('kibana.space_ids')} IS NULL`;
+
+  if (options.from !== undefined) {
+    query = query.where`@timestamp >= TO_DATETIME(${esql.str(options.from)})`;
+  }
+
+  if (options.to !== undefined) {
+    query = query.where`@timestamp <= TO_DATETIME(${esql.str(options.to)})`;
+  }
 
   if (where) {
     query = query.where`${where}`;
@@ -209,7 +157,7 @@ interface RunLatestSourceEsqlQueryArgs {
   space: string;
   options: CommonSearchOptions;
   index: string;
-  where?: ESQLAstExpression;
+  where?: LatestSourceWhereCondition;
   sort?: ComposerSortShorthand[];
   groupBy: string;
 }
@@ -231,7 +179,7 @@ export const runLatestSourceEsqlQuery = async <T>({
 
   query = query.keep('_source');
 
-  const hits = await executeEsqlQuery<T>({ esClient, query });
+  const hits = await executeEsqlQuery<T>({ esClient, query: query.print() });
   return { hits };
 };
 
@@ -243,7 +191,7 @@ interface RunPaginatedLatestSourceEsqlQueryArgs {
   space: string;
   options: PaginatedSearchOptions;
   index: string;
-  where?: ESQLAstExpression;
+  where?: LatestSourceWhereCondition;
   sort?: ComposerSortShorthand[];
   groupBy: string;
 }
@@ -272,8 +220,8 @@ export const runPaginatedLatestSourceEsqlQuery = async <T>({
     .keep('_source');
 
   const [total, hits] = await Promise.all([
-    executeCountQuery({ esClient, query: countQuery }),
-    executeEsqlQuery<T>({ esClient, query: dataQuery }),
+    executeCountQuery({ esClient, query: countQuery.print() }),
+    executeEsqlQuery<T>({ esClient, query: dataQuery.print() }),
   ]);
 
   const start = (page - 1) * perPage;
@@ -297,42 +245,15 @@ export const runFindByIdEsqlQuery = async <T>({
   idField,
   idValue,
 }: RunFindByIdEsqlQueryArgs): Promise<{ hits: T[] }> => {
-  let query = fromIndexForSpace({ index, space, columns: ['_source'] });
+  // TODO: Remove `IS NULL` fallback once workflows write `kibana.space_ids` on every document.
+  let query = esql.from([index], ['_source']).where`${esql.col(
+    'kibana.space_ids'
+  )} == ${space} OR ${esql.col('kibana.space_ids')} IS NULL`;
 
   query = query.where`${esql.col(idField)} == ${esql.str(idValue)}`;
   query = query.sort(['@timestamp', 'ASC']);
   query = query.keep('_source');
 
-  const hits = await executeEsqlQuery<T>({ esClient, query });
-  return { hits };
-};
-
-interface RunFindByIdsEsqlQueryArgs {
-  esClient: ElasticsearchClient;
-  space: string;
-  index: string;
-  idField: string;
-  idValues: string[];
-}
-
-export const runFindByIdsEsqlQuery = async <T>({
-  esClient,
-  space,
-  index,
-  idField,
-  idValues,
-}: RunFindByIdsEsqlQueryArgs): Promise<{ hits: T[] }> => {
-  if (idValues.length === 0) return { hits: [] };
-
-  const where = inFilter({ where: undefined, field: idField, values: idValues });
-  let query = fromIndexForSpace({ index, space, columns: ['_source'] });
-
-  if (where) {
-    query = query.where`${where}`;
-  }
-  query = query.sort(['@timestamp', 'ASC']);
-  query = query.keep('_source');
-
-  const hits = await executeEsqlQuery<T>({ esClient, query });
+  const hits = await executeEsqlQuery<T>({ esClient, query: query.print() });
   return { hits };
 };

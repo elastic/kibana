@@ -17,50 +17,62 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { Detection } from '@kbn/streams-schema';
-import { useFetchDetections } from '../../../../../hooks/sig_events/use_fetch_detections';
-import { useTabTimeRange } from '../../../../../hooks/sig_events/use_tab_time_range';
-import { DetectionFlyout } from './detection_flyout';
+import {
+  useFetchDetections,
+  useFetchDetectionHistory,
+} from '../../../../../hooks/sig_events/use_fetch_detections';
+import { useTimefilter } from '../../../../../hooks/use_timefilter';
+import { useTimeRange } from '../../../../../hooks/use_time_range';
+import { useTimeRangeUpdate } from '../../../../../hooks/use_time_range_update';
+import { DetectionFlyout } from '../detection_flyout';
 import { formatTimestamp } from '../../../../../util/formatters';
-import { CHANGE_TYPE_LABELS, DETECTION_KIND_LABELS } from '../shared/translations';
-import { DETECTION_KIND_COLORS } from '../shared/constants';
 
-const DISCOVERY_STATUS_LABELS = {
-  processed: i18n.translate('xpack.streams.detectionsTab.statusProcessed', {
-    defaultMessage: 'Processed',
+const KIND_LABELS: Record<string, string> = {
+  detection: i18n.translate('xpack.streams.detectionsTab.statusActive', {
+    defaultMessage: 'Active',
   }),
-  missed: i18n.translate('xpack.streams.detectionsTab.statusMissed', {
-    defaultMessage: 'Missed',
+  quiet: i18n.translate('xpack.streams.detectionsTab.statusQuiet', {
+    defaultMessage: 'Quiet',
   }),
-  pending: i18n.translate('xpack.streams.detectionsTab.statusPending', {
-    defaultMessage: 'Pending',
+  // kept for history view which shows all doc kinds
+  handled: i18n.translate('xpack.streams.detectionsTab.statusHandled', {
+    defaultMessage: 'Investigated',
   }),
 };
 
-const kindLabel = (kind: Detection['kind']) => DETECTION_KIND_LABELS[kind] ?? kind;
-const kindColor = (kind: Detection['kind']) => DETECTION_KIND_COLORS[kind] ?? 'default';
+const KIND_COLORS: Record<string, string> = {
+  detection: 'warning',
+  quiet: 'default',
+  handled: 'primary',
+};
 
-// Unhandled detections older than this window are outside the discovery lookback
-// and won't be picked up automatically by the discovery pipeline.
-const DISCOVERY_LOOKBACK_MS = 2 * 60 * 60 * 1000;
+const kindLabel = (kind: string) => KIND_LABELS[kind] ?? kind;
+const kindColor = (kind: string) => KIND_COLORS[kind] ?? 'default';
+
+const CHANGE_TYPE_LABELS: Record<string, string> = {
+  distribution_change: i18n.translate('xpack.streams.detectionsTab.changeType.distribution', {
+    defaultMessage: 'Distribution shift',
+  }),
+  spike: i18n.translate('xpack.streams.detectionsTab.changeType.spike', {
+    defaultMessage: 'Spike',
+  }),
+  dip: i18n.translate('xpack.streams.detectionsTab.changeType.dip', { defaultMessage: 'Dip' }),
+  step_change: i18n.translate('xpack.streams.detectionsTab.changeType.step', {
+    defaultMessage: 'Step change',
+  }),
+  stationary: i18n.translate('xpack.streams.detectionsTab.changeType.stationary', {
+    defaultMessage: 'Returned to baseline',
+  }),
+};
 
 const columns: Array<EuiBasicTableColumn<Detection>> = [
   {
-    field: 'detected_at',
-    name: i18n.translate('xpack.streams.detectionsTab.timestampColumn', {
-      defaultMessage: 'Timestamp',
-    }),
-    width: '200px',
-    render: (timestamp: string) => formatTimestamp(timestamp),
-  },
-  {
     field: 'kind',
-    name: i18n.translate('xpack.streams.detectionsTab.kindColumn', {
-      defaultMessage: 'Kind',
+    name: i18n.translate('xpack.streams.detectionsTab.statusColumn', {
+      defaultMessage: 'Status',
     }),
-    width: '100px',
-    render: (kind: Detection['kind']) => (
-      <EuiBadge color={kindColor(kind)}>{kindLabel(kind)}</EuiBadge>
-    ),
+    width: '90px',
+    render: (kind: string) => <EuiBadge color={kindColor(kind)}>{kindLabel(kind)}</EuiBadge>,
   },
   {
     field: 'rule_name',
@@ -69,52 +81,59 @@ const columns: Array<EuiBasicTableColumn<Detection>> = [
     }),
   },
   {
-    field: 'stream_name',
-    name: i18n.translate('xpack.streams.detectionsTab.streamColumn', {
-      defaultMessage: 'Stream',
-    }),
-    width: '140px',
-  },
-  {
     name: i18n.translate('xpack.streams.detectionsTab.changeTypeColumn', {
       defaultMessage: 'Change',
     }),
-    width: '160px',
     render: (detection: Detection) =>
       CHANGE_TYPE_LABELS[detection.detection_evidence?.change_point_type ?? ''] ??
       detection.detection_evidence?.change_point_type ??
       '-',
   },
   {
-    name: i18n.translate('xpack.streams.detectionsTab.discoveryColumn', {
-      defaultMessage: 'Discovery',
+    field: 'stream_name',
+    name: i18n.translate('xpack.streams.detectionsTab.streamColumn', {
+      defaultMessage: 'Stream',
     }),
-    width: '110px',
-    render: (detection: Detection) => {
-      if (detection.processed) {
-        return <EuiBadge color="success">{DISCOVERY_STATUS_LABELS.processed}</EuiBadge>;
-      }
-      const docAgeMs =
-        Date.now() - new Date(detection.detected_at ?? detection['@timestamp']).getTime();
-      if (docAgeMs > DISCOVERY_LOOKBACK_MS) {
-        return <EuiBadge color="warning">{DISCOVERY_STATUS_LABELS.missed}</EuiBadge>;
-      }
-      return <EuiBadge color="hollow">{DISCOVERY_STATUS_LABELS.pending}</EuiBadge>;
-    },
+  },
+  {
+    field: 'detected_at',
+    name: i18n.translate('xpack.streams.detectionsTab.detectedAtColumn', {
+      defaultMessage: 'Detected',
+    }),
+    sortable: true,
+    render: (timestamp: string) => formatTimestamp(timestamp),
+  },
+  {
+    field: 'processed',
+    name: i18n.translate('xpack.streams.detectionsTab.investigatedColumn', {
+      defaultMessage: 'Investigated',
+    }),
+    width: '100px',
+    render: (processed: boolean) =>
+      processed ? (
+        <EuiBadge color="success">
+          {i18n.translate('xpack.streams.detectionsTab.investigatedYes', {
+            defaultMessage: 'Yes',
+          })}
+        </EuiBadge>
+      ) : null,
   },
 ];
 
-const DEFAULT_DETECTIONS_RANGE = { from: 'now-24h', to: 'now' };
-
 export const DetectionsTab = () => {
-  const { pickerRange, absoluteRange, handleTimeChange, refreshAbsoluteRange } =
-    useTabTimeRange(DEFAULT_DETECTIONS_RANGE);
+  const { timeState } = useTimefilter();
+  const { rangeFrom, rangeTo } = useTimeRange();
+  const { updateTimeRange } = useTimeRangeUpdate();
 
   const { data, isLoading, refetch, pagination, setPagination } = useFetchDetections({
-    from: absoluteRange.from,
-    to: absoluteRange.to,
+    from: timeState.start,
+    to: timeState.end,
   });
   const [selectedDetection, setSelectedDetection] = useState<Detection | undefined>();
+
+  const { data: historyData, isLoading: isHistoryLoading } = useFetchDetectionHistory(
+    selectedDetection?.detection_id
+  );
 
   const onTableChange = ({ page }: { page?: { index: number; size: number } }) => {
     if (page) {
@@ -135,13 +154,10 @@ export const DetectionsTab = () => {
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
             <EuiSuperDatePicker
-              start={pickerRange.from}
-              end={pickerRange.to}
-              onTimeChange={handleTimeChange}
-              onRefresh={() => {
-                refreshAbsoluteRange();
-                refetch();
-              }}
+              start={rangeFrom}
+              end={rangeTo}
+              onTimeChange={({ start: s, end: e }) => updateTimeRange({ from: s, to: e })}
+              onRefresh={() => refetch()}
               compressed
               showUpdateButton="iconOnly"
               updateButtonProps={{ size: 's', fill: false }}
@@ -173,6 +189,8 @@ export const DetectionsTab = () => {
       {selectedDetection && (
         <DetectionFlyout
           detection={selectedDetection}
+          history={historyData?.hits ?? []}
+          isHistoryLoading={isHistoryLoading}
           onClose={() => setSelectedDetection(undefined)}
         />
       )}
