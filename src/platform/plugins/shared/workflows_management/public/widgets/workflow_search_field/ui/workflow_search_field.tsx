@@ -38,6 +38,8 @@ export function WorkflowSearchField({
 }: WorkflowSearchFieldProps): JSX.Element {
   const [searchText, setSearchText] = useState(initialValue);
   const isUserChange = useRef(false);
+  const onSearchRef = useRef(onSearch);
+  onSearchRef.current = onSearch;
 
   const handleChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     isUserChange.current = true;
@@ -52,7 +54,7 @@ export function WorkflowSearchField({
   useDebounce(
     () => {
       if (isUserChange.current) {
-        onSearch(searchText ?? '');
+        onSearchRef.current(searchText ?? '');
       }
     },
     SEARCH_DEBOUNCE_MS,

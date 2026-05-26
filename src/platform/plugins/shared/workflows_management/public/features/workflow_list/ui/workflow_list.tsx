@@ -43,8 +43,15 @@ function useMinLoadingTime(isLoading: boolean): boolean {
   const [showLoading, setShowLoading] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const startedAtRef = useRef<number | null>(null);
+  const isInitialFetchRef = useRef(true);
 
   useEffect(() => {
+    // Skip the initial page-load fetch so the bar only appears on user-triggered searches.
+    if (isInitialFetchRef.current) {
+      if (!isLoading) isInitialFetchRef.current = false;
+      return;
+    }
+
     if (isLoading) {
       if (timerRef.current) clearTimeout(timerRef.current);
       startedAtRef.current = Date.now();
