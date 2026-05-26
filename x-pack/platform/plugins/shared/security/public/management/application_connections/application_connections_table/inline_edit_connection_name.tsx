@@ -9,8 +9,10 @@ import { EuiInlineEditText } from '@elastic/eui';
 import type { ChangeEventHandler } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
+import type { CoreStart } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+
 import { labels } from '../constants/i18n';
-import { useToasts } from '../hooks/use_toasts';
 import { useUpdateConnectionName } from '../hooks/use_update_connection_name';
 import type { OAuthConnection } from '../service/application_connections_api_client';
 
@@ -27,7 +29,8 @@ export const InlineEditConnectionName = ({
   const displayName = name ?? id;
   const [value, setValue] = useState(displayName);
   const { updateConnectionName, isUpdating } = useUpdateConnectionName();
-  const { addSuccess, addDanger } = useToasts();
+  const { services } = useKibana<CoreStart>();
+  const { toasts } = services.notifications;
 
   // Reconcile the local input with upstream changes
   useEffect(() => {
@@ -59,17 +62,17 @@ export const InlineEditConnectionName = ({
           connectionId: connection.id,
           name: trimmed,
         });
-        addSuccess({ title: labels.update.successToast(trimmed) });
+        toasts.addSuccess({ title: labels.update.successToast(trimmed) });
         return true;
       } catch (error) {
-        addDanger({
+        toasts.addDanger({
           title: labels.update.errorToastTitle,
           text: error instanceof Error ? error.message : undefined,
         });
         return false;
       }
     },
-    [addDanger, addSuccess, clientId, connection.id, displayName, updateConnectionName]
+    [clientId, connection.id, displayName, toasts, updateConnectionName]
   );
 
   const editModeProps = useMemo(

@@ -26,7 +26,7 @@ export const ApplicationConnectionsTable = () => {
   ] = useMap<Record<string, OAuthConnection[]>>({});
 
   const { applicationConnections, isLoading } = useApplicationConnections();
-  const { bulkRevokeConnections } = useApplicationConnectionsActions();
+  const { revokeConnections } = useApplicationConnectionsActions();
 
   const totalConnections = useMemo(
     () =>
@@ -98,7 +98,7 @@ export const ApplicationConnectionsTable = () => {
   const handleBulkRevoke = useCallback(() => {
     if (selectedConnections.length === 0) return;
     const clientById = keyBy(applicationConnections, (connection) => connection.client.id);
-    bulkRevokeConnections(
+    revokeConnections(
       selectedConnections.flatMap((connection) => {
         const client = clientById[connection.client_id]?.client;
         if (!client) return [];
@@ -113,7 +113,7 @@ export const ApplicationConnectionsTable = () => {
       }),
       { onRevoked: handleRevoked }
     );
-  }, [applicationConnections, bulkRevokeConnections, selectedConnections, handleRevoked]);
+  }, [applicationConnections, revokeConnections, selectedConnections, handleRevoked]);
 
   const bulkRevokeButton = useMemo(
     () =>

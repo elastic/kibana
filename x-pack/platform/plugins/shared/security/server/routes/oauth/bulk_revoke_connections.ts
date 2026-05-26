@@ -82,10 +82,10 @@ export function defineBulkRevokeOAuthConnectionsRoute({
             )
           );
 
-          const hasNullResult = settled.some(
+          const allUnavailable = settled.every(
             (result) => result.status === 'fulfilled' && result.value === null
           );
-          if (hasNullResult) {
+          if (allUnavailable) {
             return response.notFound({
               body: {
                 message: 'OAuth management is not available: security features are disabled',
@@ -98,6 +98,15 @@ export function defineBulkRevokeOAuthConnectionsRoute({
               const { client_id: clientId, connection_id: connectionId } = connections[index];
 
               if (settledResult.status === 'fulfilled') {
+                if (settledResult.value === null) {
+                  return {
+                    client_id: clientId,
+                    connection_id: connectionId,
+                    status: 'error',
+                    status_code: 404,
+                    message: 'OAuth management is not available: security features are disabled',
+                  };
+                }
                 return { client_id: clientId, connection_id: connectionId, status: 'revoked' };
               }
 

@@ -23,6 +23,8 @@ import {
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import React, { useCallback } from 'react';
 
+import type { CoreStart } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { getUserDisplayName } from '@kbn/user-profile-components';
 
 import { labels } from './constants/i18n';
@@ -31,7 +33,6 @@ import type {
   RevokedApplicationConnection,
 } from './constants/types';
 import { useRevokeConnections } from './hooks/use_revoke_connections';
-import { useToasts } from './hooks/use_toasts';
 import { useCurrentUser } from '../../components/use_current_user';
 
 export interface RevokeApplicationConnectionsModalProps {
@@ -47,7 +48,8 @@ export const RevokeApplicationConnectionsModal = ({
 }: RevokeApplicationConnectionsModalProps) => {
   const modalTitleId = useGeneratedHtmlId({ prefix: 'revokeApplicationConnectionsModalTitle' });
   const { revokeConnections, isRevoking } = useRevokeConnections();
-  const { addSuccess, addDanger, addWarning } = useToasts();
+  const { services } = useKibana<CoreStart>();
+  const { toasts } = services.notifications;
   const { value: currentUser } = useCurrentUser();
 
   const count = connections.length;
@@ -71,27 +73,27 @@ export const RevokeApplicationConnectionsModal = ({
       }
 
       if (failures.length === 0) {
-        addSuccess({ title: labels.revoke.successToast(results.length) });
+        toasts.addSuccess({ title: labels.revoke.successToast(results.length) });
         onClose();
         return;
       }
 
       if (failures.length === results.length) {
-        addDanger({ title: labels.revoke.allFailedToast(results.length) });
+        toasts.addDanger({ title: labels.revoke.allFailedToast(results.length) });
         return;
       }
 
-      addWarning({
+      toasts.addWarning({
         title: labels.revoke.partialFailedToast(revokedConnections.length, results.length),
       });
       onClose();
     } catch (error) {
-      addDanger({
+      toasts.addDanger({
         title: labels.revoke.unexpectedErrorToast,
         text: error instanceof Error ? error.message : String(error),
       });
     }
-  }, [revokeConnections, connections, onRevoked, addSuccess, addDanger, addWarning, onClose]);
+  }, [revokeConnections, connections, onRevoked, toasts, onClose]);
 
   const columns: Array<EuiBasicTableColumn<RevokeApplicationConnectionsModalConnection>> = [
     {

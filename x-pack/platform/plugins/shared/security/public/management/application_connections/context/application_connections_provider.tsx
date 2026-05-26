@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { createContext, useCallback, useContext, useRef, useState } from 'react';
+import React, { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
 
 import { McpClientDetails } from '@kbn/agent-builder-browser';
 
@@ -21,11 +21,7 @@ export interface RevokeApplicationConnectionsOptions {
 }
 
 export interface ApplicationConnectionsActionsContextType {
-  revokeConnection: (
-    connection: RevokeApplicationConnectionsModalConnection,
-    options?: RevokeApplicationConnectionsOptions
-  ) => void;
-  bulkRevokeConnections: (
+  revokeConnections: (
     connections: RevokeApplicationConnectionsModalConnection[],
     options?: RevokeApplicationConnectionsOptions
   ) => void;
@@ -51,18 +47,7 @@ export const ApplicationConnectionsProvider = ({ children }: { children: React.R
     undefined
   );
 
-  const revokeConnection = useCallback(
-    (
-      connection: RevokeApplicationConnectionsModalConnection,
-      options?: RevokeApplicationConnectionsOptions
-    ) => {
-      onRevokedRef.current = options?.onRevoked;
-      setRevokeState({ connections: [connection] });
-    },
-    []
-  );
-
-  const bulkRevokeConnections = useCallback(
+  const revokeConnections = useCallback(
     (
       connections: RevokeApplicationConnectionsModalConnection[],
       options?: RevokeApplicationConnectionsOptions
@@ -90,10 +75,13 @@ export const ApplicationConnectionsProvider = ({ children }: { children: React.R
     onRevokedRef.current?.(revoked);
   }, []);
 
+  const actions = useMemo<ApplicationConnectionsActionsContextType>(
+    () => ({ revokeConnections, viewClientDetails }),
+    [revokeConnections, viewClientDetails]
+  );
+
   return (
-    <ApplicationConnectionsActionsContext.Provider
-      value={{ revokeConnection, bulkRevokeConnections, viewClientDetails }}
-    >
+    <ApplicationConnectionsActionsContext.Provider value={actions}>
       {children}
       {revokeState && (
         <RevokeApplicationConnectionsModal

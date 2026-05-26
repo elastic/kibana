@@ -33,7 +33,7 @@ export interface ConnectionTableColumnsOptions {
 export const useConnectionTableColumns = ({
   withClientNameColumn = true,
 }: ConnectionTableColumnsOptions = {}): Array<EuiBasicTableColumn<ApplicationConnection>> => {
-  const { revokeConnection, viewClientDetails } = useApplicationConnectionsActions();
+  const { revokeConnections, viewClientDetails } = useApplicationConnectionsActions();
   const { value: currentUser } = useCurrentUser();
 
   return useMemo(() => {
@@ -148,12 +148,14 @@ export const useConnectionTableColumns = ({
             color="danger"
             data-test-subj={`revokeConnection-${connection.id}`}
             onClick={() =>
-              revokeConnection({
-                client,
-                connectionId: connection.id,
-                connectionName: connection.name,
-                userId: connection.user_id,
-              })
+              revokeConnections([
+                {
+                  client,
+                  connectionId: connection.id,
+                  connectionName: connection.name,
+                  userId: connection.user_id,
+                },
+              ])
             }
           >
             {labels.connectionColumns.revokeLabel}
@@ -170,5 +172,5 @@ export const useConnectionTableColumns = ({
       statusColumn,
       actionsColumn,
     ];
-  }, [currentUser, revokeConnection, viewClientDetails, withClientNameColumn]);
+  }, [currentUser, revokeConnections, viewClientDetails, withClientNameColumn]);
 };

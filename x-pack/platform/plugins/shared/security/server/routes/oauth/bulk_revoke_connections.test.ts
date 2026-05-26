@@ -219,4 +219,40 @@ describe('Bulk revoke OAuth connections route', () => {
 
     expect(response.status).toBe(404);
   });
+
+  it('reports per-item errors for null upstream results when some items succeed', async () => {
+    oauthMock.revokeConnection.mockImplementation(async (_request, _clientId, connectionId) => {
+      if (connectionId === 'conn-2') {
+        return null;
+      }
+      return buildConnection({ id: connectionId });
+    });
+
+    const response = await routeHandler(
+      getMockContext(),
+      httpServerMock.createKibanaRequest({
+        body: {
+          connections: [
+            { client_id: 'client-1', connection_id: 'conn-1' },
+            { client_id: 'client-1', connection_id: 'conn-2' },
+          ],
+        },
+      }),
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.payload).toEqual({
+      results: [
+        { client_id: 'client-1', connection_id: 'conn-1', status: 'revoked' },
+        {
+          client_id: 'client-1',
+          connection_id: 'conn-2',
+          status: 'error',
+          status_code: 404,
+          message: 'OAuth management is not available: security features are disabled',
+        },
+      ],
+    });
+  });
 });

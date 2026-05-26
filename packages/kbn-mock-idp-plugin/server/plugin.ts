@@ -223,6 +223,8 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
                   ...serverlessOptions,
                 }),
                 ...(relayState ? { RelayState: relayState } : {}),
+                // Echoed alongside SAMLResponse so the browser's auto-submitted form posts to UIAM
+                // instead of the default Kibana ACS endpoint (see mock_idp_page form action).
                 ...(externalAcsUrl ? { acsUrl: externalAcsUrl } : {}),
               },
             });

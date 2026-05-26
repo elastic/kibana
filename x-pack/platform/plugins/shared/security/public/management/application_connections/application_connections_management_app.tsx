@@ -11,13 +11,13 @@ import React, { useMemo } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
 import type { CoreStart, StartServicesAccessor } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { RegisterManagementAppArgs } from '@kbn/management-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { AuthenticationServiceSetup } from '@kbn/security-plugin-types-public';
 import { Router } from '@kbn/shared-ux-router';
 
+import { labels } from './constants/i18n';
 import { ApplicationConnectionsServicesContext } from './context/application_connections_services_context';
 import { ApplicationConnectionsAPIClient } from './service/application_connections_api_client';
 import type { BreadcrumbsChangeHandler } from '../../components/breadcrumb';
@@ -40,9 +40,7 @@ export const applicationConnectionsManagementApp = Object.freeze({
     return {
       id: this.id,
       order: 25,
-      title: i18n.translate('xpack.security.management.applicationConnectionsTitle', {
-        defaultMessage: 'Application connections',
-      }),
+      title: labels.page.title,
       async mount({ element, setBreadcrumbs, history }) {
         const [[coreStart], { ApplicationConnectionsPage }] = await Promise.all([
           getStartServices(),
@@ -57,12 +55,7 @@ export const applicationConnectionsManagementApp = Object.freeze({
               history={history}
               onChange={createBreadcrumbsChangeHandler(coreStart.chrome, setBreadcrumbs)}
             >
-              <Breadcrumb
-                text={i18n.translate('xpack.security.management.applicationConnectionsTitle', {
-                  defaultMessage: 'Application connections',
-                })}
-                href="/"
-              >
+              <Breadcrumb text={labels.page.title} href="/">
                 <ApplicationConnectionsPage />
               </Breadcrumb>
             </Providers>
