@@ -22,10 +22,12 @@ import {
 import {
   enrichFields as enrichFieldsHelper,
   fields as fieldsHelper,
+  getCallbackMocks,
   indexes,
   policies,
   unsupported_field,
 } from '../../../__tests__/language/helpers';
+import { validateQuery } from '../validation';
 
 const fields = [...fieldsHelper, { name: policies[0].matchField, type: 'keyword' }];
 const enrichFieldsRaw = [...enrichFieldsHelper, { name: policies[0].matchField, type: 'keyword' }];
@@ -48,7 +50,6 @@ export interface MappingVariant {
 
 export interface EsqlValidationTestCase {
   query: string;
-  error: string[];
 }
 
 export interface EsqlValidationFixtures {
@@ -157,6 +158,8 @@ const createIndexRequest = (
   };
 };
 
+export const runClientValidation = (query: string) => validateQuery(query, getCallbackMocks());
+
 const setupIntegrationEnv = async () => {
   const es = createTestEsCluster({
     license: 'basic',
@@ -165,8 +168,6 @@ const setupIntegrationEnv = async () => {
       writeTo: process.stdout,
     }),
   });
-
-  jest.setTimeout(es.getStartTimeout() + 100000);
 
   await es.start();
 
@@ -260,7 +261,6 @@ export const setupEsqlEnv = async () => {
   return {
     integrationEnv,
     cleanup,
-    createIndexRequest,
     setupIndicesPolicies,
     sendEsqlQuery,
   };

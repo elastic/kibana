@@ -12,6 +12,7 @@ import { join } from 'path';
 import {
   setupEsqlEnv,
   mappingVariants,
+  runClientValidation,
   type EsqlEnv,
   type EsqlValidationFixtures,
 } from './helpers';
@@ -30,7 +31,6 @@ describe('ES|QL validation error integration', () => {
   });
 
   afterAll(async () => {
-    await esqlEnv?.cleanup();
     await esqlEnv?.integrationEnv.shutdown();
   });
 
@@ -45,17 +45,20 @@ describe('ES|QL validation error integration', () => {
       });
 
       it('does not report client-side validation errors for queries accepted by Elasticsearch', async () => {
-        const failures: string[] = [];
+        const results = await Promise.all(
+          fixtures.testCases.map(async ({ query }) => {
+            const [{ errors }, esqlResponse] = await Promise.all([
+              runClientValidation(query),
+              esqlEnv.sendEsqlQuery(query),
+            ]);
 
-        for (const { query, error } of fixtures.testCases) {
-          const esqlResponse = await esqlEnv.sendEsqlQuery(query);
+            return errors.length > 0 && !esqlResponse.error
+              ? `Client-side validator rejected a query accepted by ES: ${query}`
+              : null;
+          })
+        );
 
-          if (error.length && !esqlResponse.error) {
-            failures.push(`Client-side validator rejected a query accepted by ES: ${query}`);
-          }
-        }
-
-        expect(failures).toEqual([]);
+        expect(results.filter(Boolean)).toEqual([]);
       });
     });
   }
