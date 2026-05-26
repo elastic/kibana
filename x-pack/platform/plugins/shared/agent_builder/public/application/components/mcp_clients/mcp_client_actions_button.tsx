@@ -56,10 +56,7 @@ export const McpClientActionsMenu = ({
     <EuiPopover
       aria-label={labels.tools.mcpClients.actions.ariaLabel}
       button={
-        <EuiToolTip
-          content={labels.tools.mcpClients.actions.ariaLabel}
-          disableScreenReaderOutput
-        >
+        <EuiToolTip content={labels.tools.mcpClients.actions.ariaLabel} disableScreenReaderOutput>
           <EuiButtonIcon
             iconType="boxesVertical"
             color="text"

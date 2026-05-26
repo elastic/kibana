@@ -11,7 +11,6 @@ import {
   EuiHeaderSectionItemButton,
   EuiIcon,
   EuiSelectableTemplateSitewide,
-  EuiText,
   EuiToolTip,
   euiSelectableTemplateSitewideRenderOptions,
   mathWithUnits,
