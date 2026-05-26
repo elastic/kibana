@@ -45,14 +45,12 @@ const VERDICT_COLORS: Record<string, string> = {
 
 const columns: Array<EuiBasicTableColumn<Verdict>> = [
   {
-    field: 'verdict',
-    name: i18n.translate('xpack.streams.verdictsTab.verdictColumn', {
-      defaultMessage: 'Verdict',
+    field: '@timestamp',
+    name: i18n.translate('xpack.streams.verdictsTab.timestampColumn', {
+      defaultMessage: 'Last verdict',
     }),
-    width: '100px',
-    render: (v: string) => (
-      <EuiBadge color={VERDICT_COLORS[v] ?? 'default'}>{VERDICT_LABELS[v] ?? v}</EuiBadge>
-    ),
+    width: '200px',
+    render: (timestamp: string) => formatTimestamp(timestamp),
   },
   {
     field: 'title',
@@ -60,6 +58,16 @@ const columns: Array<EuiBasicTableColumn<Verdict>> = [
       defaultMessage: 'Title',
     }),
     truncateText: true,
+  },
+  {
+    field: 'verdict',
+    name: i18n.translate('xpack.streams.verdictsTab.verdictColumn', {
+      defaultMessage: 'Verdict',
+    }),
+    width: '110px',
+    render: (v: string) => (
+      <EuiBadge color={VERDICT_COLORS[v] ?? 'default'}>{VERDICT_LABELS[v] ?? v}</EuiBadge>
+    ),
   },
   {
     field: 'criticality',
@@ -81,6 +89,7 @@ const columns: Array<EuiBasicTableColumn<Verdict>> = [
     name: i18n.translate('xpack.streams.verdictsTab.streamsColumn', {
       defaultMessage: 'Streams',
     }),
+    width: '160px',
     render: (row: Verdict) => {
       const fromEvidences = (row.evidences ?? [])
         .map((e) => e.stream_name)
@@ -98,13 +107,6 @@ const columns: Array<EuiBasicTableColumn<Verdict>> = [
         </EuiFlexGroup>
       ) : null;
     },
-  },
-  {
-    field: '@timestamp',
-    name: i18n.translate('xpack.streams.verdictsTab.timestampColumn', {
-      defaultMessage: 'Last verdict',
-    }),
-    render: (timestamp: string) => formatTimestamp(timestamp),
   },
 ];
 
@@ -153,7 +155,10 @@ export const SigEventsTab = () => {
               start={pickerRange.from}
               end={pickerRange.to}
               onTimeChange={handleTimeChange}
-              onRefresh={() => refetch()}
+              onRefresh={() => {
+                setAbsoluteRange(getAbsoluteTimeRange(pickerRange, { forceNow: new Date() }));
+                refetch();
+              }}
               compressed
               showUpdateButton="iconOnly"
               updateButtonProps={{ size: 's', fill: false }}

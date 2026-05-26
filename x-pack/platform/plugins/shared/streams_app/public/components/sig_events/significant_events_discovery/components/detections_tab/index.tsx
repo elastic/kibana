@@ -63,14 +63,18 @@ const CHANGE_TYPE_LABELS: Record<string, string> = {
   }),
 };
 
+// Unhandled detections older than this window are outside the discovery lookback
+// and won't be picked up automatically by the discovery pipeline.
+const DISCOVERY_LOOKBACK_MS = 2 * 60 * 60 * 1000;
+
 const columns: Array<EuiBasicTableColumn<Detection>> = [
   {
-    field: 'kind',
-    name: i18n.translate('xpack.streams.detectionsTab.statusColumn', {
-      defaultMessage: 'Status',
+    field: 'detected_at',
+    name: i18n.translate('xpack.streams.detectionsTab.detectedAtColumn', {
+      defaultMessage: 'Detected',
     }),
-    width: '90px',
-    render: (kind: string) => <EuiBadge color={kindColor(kind)}>{kindLabel(kind)}</EuiBadge>,
+    width: '200px',
+    render: (timestamp: string) => formatTimestamp(timestamp),
   },
   {
     field: 'rule_name',
@@ -82,38 +86,54 @@ const columns: Array<EuiBasicTableColumn<Detection>> = [
     name: i18n.translate('xpack.streams.detectionsTab.changeTypeColumn', {
       defaultMessage: 'Change',
     }),
+    width: '160px',
     render: (detection: Detection) =>
       CHANGE_TYPE_LABELS[detection.detection_evidence?.change_point_type ?? ''] ??
       detection.detection_evidence?.change_point_type ??
       '-',
   },
   {
+    field: 'kind',
+    name: i18n.translate('xpack.streams.detectionsTab.statusColumn', {
+      defaultMessage: 'Status',
+    }),
+    width: '90px',
+    render: (kind: string) => <EuiBadge color={kindColor(kind)}>{kindLabel(kind)}</EuiBadge>,
+  },
+  {
     field: 'stream_name',
     name: i18n.translate('xpack.streams.detectionsTab.streamColumn', {
       defaultMessage: 'Stream',
     }),
+    width: '140px',
   },
   {
-    field: 'detected_at',
-    name: i18n.translate('xpack.streams.detectionsTab.detectedAtColumn', {
-      defaultMessage: 'Detected',
+    name: i18n.translate('xpack.streams.detectionsTab.discoveryColumn', {
+      defaultMessage: 'Discovery',
     }),
-    render: (timestamp: string) => formatTimestamp(timestamp),
-  },
-  {
-    field: 'processed',
-    name: i18n.translate('xpack.streams.detectionsTab.investigatedColumn', {
-      defaultMessage: 'Investigated',
-    }),
-    width: '100px',
-    render: (processed: boolean) =>
-      processed ? (
-        <EuiBadge color="success">
-          {i18n.translate('xpack.streams.detectionsTab.investigatedYes', {
-            defaultMessage: 'Yes',
-          })}
-        </EuiBadge>
-      ) : null,
+    width: '110px',
+    render: (detection: Detection) => {
+      if (detection.processed) {
+        return (
+          <EuiBadge color="success">
+            {i18n.translate('xpack.streams.detectionsTab.discoveryProcessed', {
+              defaultMessage: 'Investigated',
+            })}
+          </EuiBadge>
+        );
+      }
+      const docAgeMs = Date.now() - new Date(detection['@timestamp']).getTime();
+      if (docAgeMs > DISCOVERY_LOOKBACK_MS) {
+        return (
+          <EuiBadge color="warning">
+            {i18n.translate('xpack.streams.detectionsTab.discoveryMissed', {
+              defaultMessage: 'Missed',
+            })}
+          </EuiBadge>
+        );
+      }
+      return null;
+    },
   },
 ];
 
@@ -162,7 +182,10 @@ export const DetectionsTab = () => {
               start={pickerRange.from}
               end={pickerRange.to}
               onTimeChange={handleTimeChange}
-              onRefresh={() => refetch()}
+              onRefresh={() => {
+                setAbsoluteRange(getAbsoluteTimeRange(pickerRange, { forceNow: new Date() }));
+                refetch();
+              }}
               compressed
               showUpdateButton="iconOnly"
               updateButtonProps={{ size: 's', fill: false }}

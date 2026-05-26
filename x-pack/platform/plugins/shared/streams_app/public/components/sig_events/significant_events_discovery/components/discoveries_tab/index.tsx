@@ -40,6 +40,22 @@ const KIND_COLORS: Record<string, string> = { finding: 'warning', clearance: 'su
 
 const columns: Array<EuiBasicTableColumn<Discovery>> = [
   {
+    field: 'discovered_at',
+    name: i18n.translate('xpack.streams.discoveriesTab.foundColumn', {
+      defaultMessage: 'Found',
+    }),
+    width: '200px',
+    render: (discoveredAt: string | undefined, discovery: Discovery) =>
+      formatTimestamp(discoveredAt ?? discovery['@timestamp']),
+  },
+  {
+    field: 'title',
+    name: i18n.translate('xpack.streams.discoveriesTab.titleColumn', {
+      defaultMessage: 'Title',
+    }),
+    truncateText: true,
+  },
+  {
     field: 'kind',
     name: i18n.translate('xpack.streams.discoveriesTab.statusColumn', {
       defaultMessage: 'Status',
@@ -48,13 +64,6 @@ const columns: Array<EuiBasicTableColumn<Discovery>> = [
     render: (kind: string) => (
       <EuiBadge color={KIND_COLORS[kind] ?? 'default'}>{KIND_LABELS[kind] ?? kind}</EuiBadge>
     ),
-  },
-  {
-    field: 'title',
-    name: i18n.translate('xpack.streams.discoveriesTab.titleColumn', {
-      defaultMessage: 'Title',
-    }),
-    truncateText: true,
   },
   {
     field: 'criticality',
@@ -73,17 +82,10 @@ const columns: Array<EuiBasicTableColumn<Discovery>> = [
     render: (value: number | undefined) => (value != null ? String(value) : '-'),
   },
   {
-    field: 'discovered_at',
-    name: i18n.translate('xpack.streams.discoveriesTab.foundColumn', {
-      defaultMessage: 'Found',
-    }),
-    render: (discoveredAt: string | undefined, discovery: Discovery) =>
-      formatTimestamp(discoveredAt ?? discovery['@timestamp']),
-  },
-  {
     name: i18n.translate('xpack.streams.discoveriesTab.streamsColumn', {
       defaultMessage: 'Streams',
     }),
+    width: '160px',
     render: (discovery: Discovery) => {
       const streamNames = [
         ...new Set(
@@ -153,7 +155,10 @@ export const DiscoveriesTab = () => {
               start={pickerRange.from}
               end={pickerRange.to}
               onTimeChange={handleTimeChange}
-              onRefresh={() => refetch()}
+              onRefresh={() => {
+                setAbsoluteRange(getAbsoluteTimeRange(pickerRange, { forceNow: new Date() }));
+                refetch();
+              }}
               compressed
               showUpdateButton="iconOnly"
               updateButtonProps={{ size: 's', fill: false }}

@@ -18,6 +18,8 @@ import {
   EuiFlexItem,
   EuiDescriptionList,
   EuiLoadingSpinner,
+  EuiTimeline,
+  EuiTimelineItem,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -44,21 +46,20 @@ const CHANGE_TYPE_LABELS: Record<string, string> = {
 
 const changeTypeLabel = (type?: string) => (type ? CHANGE_TYPE_LABELS[type] ?? type : '-');
 
-const confidenceLabel = (pValue?: number): string => {
+const formatPValue = (pValue?: number | string): string => {
   if (pValue === undefined || pValue === null) return '-';
-  if (pValue < 0.001)
-    return i18n.translate('xpack.streams.detectionFlyout.confidence.high', {
-      defaultMessage: 'High (p={pValue})',
-      values: { pValue: pValue.toExponential(2) },
+  const n = Number(pValue);
+  if (isNaN(n)) return '-';
+  if (n === 0)
+    return i18n.translate('xpack.streams.detectionFlyout.pValue.zero', { defaultMessage: 'p=0' });
+  if (n < 0.0001)
+    return i18n.translate('xpack.streams.detectionFlyout.pValue.scientific', {
+      defaultMessage: 'p={value}',
+      values: { value: n.toExponential(2) },
     });
-  if (pValue < 0.05)
-    return i18n.translate('xpack.streams.detectionFlyout.confidence.medium', {
-      defaultMessage: 'Medium (p={pValue})',
-      values: { pValue: pValue.toFixed(4) },
-    });
-  return i18n.translate('xpack.streams.detectionFlyout.confidence.low', {
-    defaultMessage: 'Low (p={pValue})',
-    values: { pValue: pValue.toFixed(4) },
+  return i18n.translate('xpack.streams.detectionFlyout.pValue.decimal', {
+    defaultMessage: 'p={value}',
+    values: { value: n.toFixed(4) },
   });
 };
 
@@ -69,9 +70,16 @@ const KIND_LABELS: Record<string, string> = {
   quiet: i18n.translate('xpack.streams.detectionFlyout.status.quiet', {
     defaultMessage: 'Quiet',
   }),
+  handled: i18n.translate('xpack.streams.detectionFlyout.status.investigated', {
+    defaultMessage: 'Investigated',
+  }),
 };
 
-const KIND_COLORS: Record<string, string> = { detection: 'warning', quiet: 'default' };
+const KIND_COLORS: Record<string, string> = {
+  detection: 'warning',
+  quiet: 'default',
+  handled: 'success',
+};
 
 // history is sorted @timestamp ASC — a kind:detection after another kind:detection is a type revision.
 const timelineLabel = (entry: Detection, prev: Detection | undefined): string => {
@@ -116,6 +124,19 @@ export const DetectionFlyout = ({
 }: DetectionFlyoutProps) => {
   const titleId = useGeneratedHtmlId();
 
+  // The episode is processed when the latest kind:handled doc is on or after
+  // the latest kind:detection/quiet doc — mirrors getProcessedIds server logic.
+  const isProcessed = isHistoryLoading
+    ? detection.processed
+    : (() => {
+        const latestStateTs = [...history]
+          .reverse()
+          .find((e) => e.kind === 'detection' || e.kind === 'quiet')?.['@timestamp'];
+        return latestStateTs
+          ? history.some((e) => e.kind === 'handled' && e['@timestamp'] >= latestStateTs)
+          : history.some((e) => e.kind === 'handled');
+      })();
+
   const diagnostics = useMemo(
     () => [
       {
@@ -131,10 +152,10 @@ export const DetectionFlyout = ({
         description: changeTypeLabel(detection.detection_evidence?.change_point_type),
       },
       {
-        title: i18n.translate('xpack.streams.detectionFlyout.confidence', {
-          defaultMessage: 'Confidence',
+        title: i18n.translate('xpack.streams.detectionFlyout.significance', {
+          defaultMessage: 'Statistical significance',
         }),
-        description: confidenceLabel(detection.detection_evidence?.p_value),
+        description: formatPValue(detection.detection_evidence?.p_value),
       },
       {
         title: i18n.translate('xpack.streams.detectionFlyout.peakAlerts', {
@@ -161,7 +182,7 @@ export const DetectionFlyout = ({
               {KIND_LABELS[detection.kind] ?? detection.kind}
             </EuiBadge>
           </EuiFlexItem>
-          {detection.processed && (
+          {isProcessed && (
             <EuiFlexItem grow={false}>
               <EuiBadge color="success">
                 {i18n.translate('xpack.streams.detectionFlyout.investigated', {
@@ -202,20 +223,38 @@ export const DetectionFlyout = ({
         {isHistoryLoading ? (
           <EuiLoadingSpinner size="m" />
         ) : (
-          <EuiFlexGroup direction="column" gutterSize="s">
+          <EuiTimeline
+            aria-label={i18n.translate(
+              'xpack.streams.detectionFlyout.euiTimeline.detectionHistoryLabel',
+              { defaultMessage: 'Detection history' }
+            )}
+            gutterSize="m"
+          >
             {history.map((entry, idx) => (
-              <EuiFlexItem key={`${entry['@timestamp']}-${idx}`}>
-                <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiTimelineItem
+                key={`${entry['@timestamp']}-${idx}`}
+                icon="dot"
+                iconAriaLabel={KIND_LABELS[entry.kind] ?? entry.kind}
+                verticalAlign="top"
+              >
+                <EuiFlexGroup gutterSize="xs" alignItems="center" wrap responsive={false}>
                   <EuiFlexItem grow={false}>
-                    <EuiBadge color="hollow">{formatTimestamp(entry['@timestamp'])}</EuiBadge>
+                    <EuiBadge color={KIND_COLORS[entry.kind] ?? 'hollow'}>
+                      {KIND_LABELS[entry.kind] ?? entry.kind}
+                    </EuiBadge>
                   </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiText size="s">{timelineLabel(entry, history[idx - 1])}</EuiText>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="xs" color="subdued">
+                      {formatTimestamp(entry['@timestamp'])}
+                    </EuiText>
                   </EuiFlexItem>
                 </EuiFlexGroup>
-              </EuiFlexItem>
+                <EuiText size="s">
+                  <p>{timelineLabel(entry, history[idx - 1])}</p>
+                </EuiText>
+              </EuiTimelineItem>
             ))}
-          </EuiFlexGroup>
+          </EuiTimeline>
         )}
       </EuiFlyoutBody>
     </EuiFlyout>
