@@ -1435,7 +1435,7 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/person-so-type @elastic/kibana-core
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/product-doc-install-status @elastic/appex-ai-infra
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/search @elastic/kibana-data-discovery
-/packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/search-session @elastic/kibana-visualizations @elastic/kibana-data-discovery
+/packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/search-session @elastic/kibana-data-discovery
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/security-rule @elastic/security-detection-rule-management
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/stream-prompts @elastic/obs-onboarding-team @elastic/obs-sig-events-team
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/task @elastic/response-ops
