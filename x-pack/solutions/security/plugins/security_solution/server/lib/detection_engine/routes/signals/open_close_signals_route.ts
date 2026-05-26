@@ -350,7 +350,7 @@ const resolveIndicesForRule = async (
     // by the same helper the exception flyout uses on the client.
     return getIndexListFromEsqlQuery(rule.query);
   }
-  
+
   return [];
 };
 
