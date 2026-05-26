@@ -25,3 +25,4 @@ export const createWorkflowSystemIndex = (suffix: string): string => {
  * The main workflows index name.
  */
 export const WORKFLOW_INDEX_NAME = createWorkflowSystemIndex('workflows');
+export const GLOBAL_WORKFLOW_SPACE_ID = '*';

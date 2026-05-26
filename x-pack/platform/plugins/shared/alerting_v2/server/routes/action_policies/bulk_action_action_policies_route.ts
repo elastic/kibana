@@ -8,6 +8,7 @@
 import {
   bulkActionActionPoliciesBodySchema,
   bulkActionActionPoliciesResponseSchema,
+  errorResponseSchema,
   type BulkActionActionPoliciesBody,
 } from '@kbn/alerting-v2-schemas';
 import { Request } from '@kbn/core-di-server';
@@ -18,7 +19,6 @@ import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
-import { buildRouteValidationWithZod } from '../route_validation';
 
 @injectable()
 export class BulkActionActionPoliciesRoute extends BaseAlertingRoute {
@@ -33,9 +33,9 @@ export class BulkActionActionPoliciesRoute extends BaseAlertingRoute {
     summary: 'Bulk action action policies',
     description: 'Perform bulk actions on action policies.',
   } as const;
-  static validate = {
+  static schemas = {
     request: {
-      body: buildRouteValidationWithZod(bulkActionActionPoliciesBodySchema),
+      body: bulkActionActionPoliciesBodySchema,
     },
     response: {
       200: {
@@ -43,6 +43,7 @@ export class BulkActionActionPoliciesRoute extends BaseAlertingRoute {
         description: 'Indicates a successful call.',
       },
       400: {
+        body: () => errorResponseSchema,
         description: 'Indicates invalid request body.',
       },
     },

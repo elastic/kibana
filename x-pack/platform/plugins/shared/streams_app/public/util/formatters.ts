@@ -13,3 +13,20 @@ export function getPercentageFormatter(opts?: { precision: number }): Intl.Numbe
     maximumFractionDigits: opts?.precision ?? 1,
   });
 }
+
+export function formatTimestamp(value: string | number): string {
+  const date = new Date(value);
+  const formattedDate = date.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+  const formattedTime = date.toLocaleTimeString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  });
+
+  return `${formattedDate} @ ${formattedTime}`;
+}

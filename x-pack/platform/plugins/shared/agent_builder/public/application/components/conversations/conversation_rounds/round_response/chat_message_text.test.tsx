@@ -137,6 +137,7 @@ describe('chat_message_text', () => {
         addCompactionStep: jest.fn(),
         setCompactionStepComplete: jest.fn(),
         addOrUpdateTodosStep: jest.fn(),
+        setAttachments: jest.fn(),
       },
     });
   });

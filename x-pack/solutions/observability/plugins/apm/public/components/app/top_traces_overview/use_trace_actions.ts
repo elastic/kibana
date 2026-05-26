@@ -13,6 +13,8 @@ import { getESQLQuery } from '../../shared/links/discover_links/get_esql_query';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import type { TableActions } from '../../shared/managed_table';
 import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
+import { APM_EBT_ACTIONS } from '../ebt_constants';
+import { TOP_TRACES_TABLE_EBT_ELEMENTS } from './ebt_constants';
 
 export type TraceGroup = APIReturnType<'GET /internal/apm/traces'>['items'][number];
 
@@ -46,6 +48,10 @@ export function useTraceActions({
               defaultMessage: 'Explore traces',
             }),
             icon: 'discoverApp',
+            ebt: {
+              action: APM_EBT_ACTIONS.EXPLORE_TRACES,
+              element: TOP_TRACES_TABLE_EBT_ELEMENTS.ROW_ACTIONS,
+            },
             href: (item) => {
               if (!discoverLocator) return undefined;
 

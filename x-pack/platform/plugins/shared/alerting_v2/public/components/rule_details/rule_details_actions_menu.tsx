@@ -8,22 +8,20 @@
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { EuiButtonIcon, EuiContextMenu, EuiPopover } from '@elastic/eui';
-import { CoreStart, useService } from '@kbn/core-di-browser';
-import { paths } from '../../constants';
 import { useToggleRuleEnabled } from '../../hooks/use_toggle_rule_enabled';
 import { useRule } from './rule_context';
 
 export interface RuleDetailsActionsMenuProps {
   showDeleteConfirmation: () => void;
+  onClone: () => void;
 }
 
 export const RuleDetailsActionsMenu: React.FunctionComponent<RuleDetailsActionsMenuProps> = ({
   showDeleteConfirmation,
+  onClone,
 }) => {
   const rule = useRule();
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
-  const { navigateToUrl } = useService(CoreStart('application'));
-  const { basePath } = useService(CoreStart('http'));
   const { mutate: toggleRuleEnabled } = useToggleRuleEnabled();
 
   const handleToggleEnable = () => {
@@ -36,7 +34,7 @@ export const RuleDetailsActionsMenu: React.FunctionComponent<RuleDetailsActionsM
 
   const handleClone = () => {
     setIsPopoverOpen(false);
-    navigateToUrl(basePath.prepend(`${paths.ruleCreate}?cloneFrom=${encodeURIComponent(rule.id)}`));
+    onClone();
   };
 
   const handleDelete = () => {

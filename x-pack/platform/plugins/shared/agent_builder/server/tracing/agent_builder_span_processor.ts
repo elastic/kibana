@@ -7,14 +7,9 @@
 
 import type { api } from '@elastic/opentelemetry-node/sdk';
 import { resources, tracing } from '@elastic/opentelemetry-node/sdk';
-import { TraceFlags } from '@opentelemetry/api';
-import { isInferenceSpan } from '@kbn/inference-tracing';
+import { DATA_STREAM_NAMESPACE_ATTR, isAgentBuilderSpan } from './agent_builder_context';
 
 const SHOULD_TRACK_ATTR = '_agent_builder_should_track';
-
-const AGENT_BUILDER_DATASET_RESOURCE = resources.resourceFromAttributes({
-  'data_stream.dataset': 'agent_builder',
-});
 
 interface AgentBuilderSpanProcessorOpts {
   exporter: tracing.SpanExporter;
@@ -24,13 +19,6 @@ interface AgentBuilderSpanProcessorOpts {
 
 /**
  * Span processor that exports Agent Builder inference spans.
- *
- * This processor forces the SAMPLED trace flag on the span copy before
- * passing it to BatchSpanProcessor.onEnd. This is necessary because
- * InferencePreservingSampler upgrades dropped inference spans to RECORD
- * (not RECORD_AND_SAMPLED), so BatchSpanProcessor would otherwise skip
- * them. By setting the flag on a copy, we ensure export without affecting
- * the original span or other processors.
  */
 export class AgentBuilderSpanProcessor implements tracing.SpanProcessor {
   private readonly batchProcessor: tracing.SpanProcessor;
@@ -47,7 +35,7 @@ export class AgentBuilderSpanProcessor implements tracing.SpanProcessor {
     if (!this.isEnabled()) {
       return;
     }
-    if (isInferenceSpan(span, parentContext)) {
+    if (isAgentBuilderSpan(span, parentContext)) {
       span.setAttribute(SHOULD_TRACK_ATTR, true);
       this.batchProcessor.onStart(span, parentContext);
     }
@@ -58,18 +46,27 @@ export class AgentBuilderSpanProcessor implements tracing.SpanProcessor {
       return;
     }
 
-    const { [SHOULD_TRACK_ATTR]: _, ...cleanAttributes } = span.attributes;
-    const originalSpanContext = span.spanContext();
+    const {
+      [SHOULD_TRACK_ATTR]: _,
+      [DATA_STREAM_NAMESPACE_ATTR]: namespace,
+      ...cleanAttributes
+    } = span.attributes;
 
-    const exportSpan: tracing.ReadableSpan = {
-      ...span,
-      resource: span.resource.merge(AGENT_BUILDER_DATASET_RESOURCE),
-      spanContext: () => ({
-        ...originalSpanContext,
-        traceFlags: TraceFlags.SAMPLED, // force 100% sampling
-      }),
-      attributes: cleanAttributes,
-    };
+    const datasetResource = resources.resourceFromAttributes({
+      'data_stream.dataset': 'agent_builder',
+      ...(typeof namespace === 'string' ? { [DATA_STREAM_NAMESPACE_ATTR]: namespace } : {}),
+    });
+
+    const exportSpan: tracing.ReadableSpan = Object.create(span, {
+      resource: {
+        value: span.resource.merge(datasetResource),
+        enumerable: true,
+      },
+      attributes: {
+        value: cleanAttributes,
+        enumerable: true,
+      },
+    });
 
     this.batchProcessor.onEnd(exportSpan);
   }
