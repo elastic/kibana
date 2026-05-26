@@ -90,9 +90,20 @@ if [ -z "$REPORT" ]; then
   REPORT="No issues found for search-kibana and workchat-eng :tada:"
 fi
 
-echo "--- Results: ${SUMMARY_LINE:-no issues found}"
+echo "+++ Results"
+echo ""
+echo "search-kibana + workchat-eng code quality:"
+echo ""
+for owner in "${FALLOW_OWNERS[@]}"; do
+  dead_count=$(extract_issue_count "$DEAD_CODE_SUMMARY_OUTPUT" "$owner")
+  dupes_count=$(extract_issue_count "$DUPES_SUMMARY_OUTPUT" "$owner")
+  echo "  ${owner}"
+  echo "    dead-code: ${dead_count:-no issues}"
+  echo "    duplication: ${dupes_count:-no issues}"
+done
+echo ""
 
-echo "+++ Post Buildkite annotation"
+echo "--- Post Buildkite annotation"
 
 printf "## Fallow Code Quality Report\n\n%b\n\n[Full report in build logs]" "$REPORT" \
   | buildkite-agent annotate --style info --context fallow-report
