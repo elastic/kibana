@@ -61,6 +61,15 @@ function isConflictError(error: unknown): boolean {
   return err?.response?.status === 409;
 }
 
+function isNotFoundError(error: unknown): boolean {
+  const err = error as {
+    response?: { status?: number };
+    statusCode?: number;
+    meta?: { statusCode?: number };
+  };
+  return err?.response?.status === 404 || err?.statusCode === 404 || err?.meta?.statusCode === 404;
+}
+
 function isLockContentionError(error: unknown): boolean {
   const err = error as { response?: { status?: number } };
   return err?.response?.status === 422;
@@ -156,6 +165,50 @@ async function createSingleClassicStream(kibanaServer: KibanaServer, name: strin
       throw error;
     }
   }
+}
+
+async function updateLogsCustomTotalFieldsLimit(
+  es: Client,
+  log: ToolingLog,
+  totalFieldsLimit: number
+): Promise<void> {
+  let existingComponentTemplate:
+    | Awaited<
+        ReturnType<Client['cluster']['getComponentTemplate']>
+      >['component_templates'][number]['component_template']
+    | undefined;
+
+  try {
+    const response = await es.cluster.getComponentTemplate({
+      name: LOGS_CUSTOM_COMPONENT_TEMPLATE,
+    });
+    existingComponentTemplate = response.component_templates[0]?.component_template;
+  } catch (error) {
+    if (!isNotFoundError(error)) {
+      throw error;
+    }
+  }
+
+  const existingTemplate = existingComponentTemplate?.template ?? {};
+  const version = existingComponentTemplate?.version;
+
+  log.info(
+    `Updating component template ${LOGS_CUSTOM_COMPONENT_TEMPLATE} with ` +
+      `index.mapping.total_fields.limit=${totalFieldsLimit}...`
+  );
+
+  await es.cluster.putComponentTemplate({
+    name: LOGS_CUSTOM_COMPONENT_TEMPLATE,
+    template: {
+      ...existingTemplate,
+      settings: {
+        ...existingTemplate.settings,
+        'index.mapping.total_fields.limit': totalFieldsLimit,
+      },
+    },
+    ...(existingComponentTemplate?._meta ? { _meta: existingComponentTemplate._meta } : {}),
+    ...(typeof version === 'number' ? { version } : {}),
+  });
 }
 
 /** Create classic streams serially to reduce lock contention. */
@@ -820,6 +873,8 @@ export async function setupLargeWiredHierarchy(
 
 const CHILD_STREAM = `${WIRED_ROOT_STREAM}.child1`;
 const CLASSIC_MAPPING_STREAM = 'logs-perf-classic-mapping';
+const LOGS_CUSTOM_COMPONENT_TEMPLATE = 'logs@custom';
+const LEGACY_CLASSIC_MAPPING_TEMPLATE = 'streams-perf-classic-mapping-fields-override';
 
 /** Skip heavy setup during performance TEST phase. */
 function shouldRunSetup(log: ToolingLog): boolean {
@@ -1057,25 +1112,12 @@ export async function setupClassicFieldMappingAtScale(
   const FIELD_TYPES = ['keyword', 'long', 'double', 'boolean', 'ip', 'date'];
   const TOTAL_FIELDS_LIMIT = FIELD_COUNT * 2;
 
-  // The Streams `_ingest` PUT applies `field_overrides` via
-  // `PUT /_data_stream/{name}/_mappings` followed by a lazy rollover, so its
-  // dry-run validation resolves `total_fields.limit` from the matching index
-  // template (the next-rollover index), not from any live backing index
-  // settings. Install a narrow, high-priority data-stream template that
-  // raises the limit before the classic stream is created.
-  const PERF_TEMPLATE_NAME = 'streams-perf-classic-mapping-fields-override';
-  log.info(
-    `Installing index template ${PERF_TEMPLATE_NAME} with index.mapping.total_fields.limit=${TOTAL_FIELDS_LIMIT}...`
+  await es.indices.deleteIndexTemplate(
+    { name: LEGACY_CLASSIC_MAPPING_TEMPLATE },
+    { ignore: [404] }
   );
-  await es.indices.putIndexTemplate({
-    name: PERF_TEMPLATE_NAME,
-    index_patterns: [CLASSIC_MAPPING_STREAM],
-    priority: 500,
-    data_stream: {},
-    template: {
-      settings: { 'index.mapping.total_fields.limit': TOTAL_FIELDS_LIMIT },
-    },
-  });
+
+  await updateLogsCustomTotalFieldsLimit(es, log, TOTAL_FIELDS_LIMIT);
 
   await enableStreams(kibanaServer, log);
   await createSingleClassicStream(kibanaServer, CLASSIC_MAPPING_STREAM);

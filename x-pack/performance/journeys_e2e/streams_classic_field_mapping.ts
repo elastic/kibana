@@ -30,7 +30,10 @@ export const journey = new Journey({
     await page.waitForSelector(subj('streamsAppContentAddFieldButton'), { timeout: 60000 });
   })
   .step('Open add field flyout', async ({ page }) => {
-    await page.click(subj('streamsAppContentAddFieldButton'));
+    await page.waitForSelector(subj('streamsAppSchemaEditorFieldsTableLoaded'), {
+      timeout: 120000,
+    });
+    await page.click(subj('streamsAppContentAddFieldButton'), { timeout: 120000 });
     await page.waitForSelector(subj('streamsAppSchemaEditorAddFieldFlyoutFieldName'), {
       timeout: 30000,
     });
