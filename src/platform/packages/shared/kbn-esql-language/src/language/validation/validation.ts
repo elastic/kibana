@@ -244,7 +244,7 @@ function validateCommand(
   const context = {
     columns: references.columns,
     policies: references.policies,
-    sources: Array.from(references.sources, (name) => ({ name, hidden: false })),
+    sources: [...references.sources].map((source) => ({ name: source, hidden: false })),
     joinSources: references.joinIndices,
     timeSeriesSources: references.timeSeriesSources,
     views: references.views,
