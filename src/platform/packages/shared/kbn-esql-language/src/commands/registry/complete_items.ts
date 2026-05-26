@@ -368,7 +368,7 @@ function buildSubqueryCompleteItem(sourceCommand: string): ISuggestionItem {
     text: `(${commandName} $0)`,
     asSnippet: true,
     kind: 'Method',
-    detail: i18n.translate('kbn-esql-language.esql.autocomplete.subqueryFromDoc', {
+    detail: i18n.translate('kbn-esql-language.esql.autocomplete.subquerySourceDoc', {
       defaultMessage: 'Adds a nested ES|QL query to your current query',
     }),
     category: SuggestionCategory.SUBQUERY,
