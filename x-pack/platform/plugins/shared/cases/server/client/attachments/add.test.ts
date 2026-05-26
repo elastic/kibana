@@ -115,4 +115,47 @@ describe('addComment', () => {
       })
     );
   });
+
+  it('emits attachmentAdded event after creating a comment', async () => {
+    if (!clientArgs.unifiedAttachmentTypeRegistry.has(commentAttachmentType.id)) {
+      clientArgs.unifiedAttachmentTypeRegistry.register(commentAttachmentType);
+    }
+    userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({ [caseId]: 0 });
+
+    const theCase = { ...mockCases[0], id: caseId };
+    caseService.getCase.mockResolvedValue(theCase);
+    caseService.patchCase.mockResolvedValue(theCase);
+    caseService.getAllCaseComments.mockResolvedValue({
+      saved_objects: [],
+      total: 1,
+      per_page: 1,
+      page: 1,
+    });
+    attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+      new Map([[caseId, { alerts: 0, userComments: 0, events: 0 }]])
+    );
+    attachmentService.create.mockResolvedValue(mockCaseUnifiedAttachments[0]);
+
+    await addComment(
+      {
+        comment: {
+          type: 'comment',
+          data: { content: 'unified text' },
+          owner: SECURITY_SOLUTION_OWNER,
+        },
+        caseId,
+      },
+      clientArgs
+    );
+
+    expect(clientArgs.casesEventBus.emitAttachmentsAdded).toHaveBeenCalledWith(
+      clientArgs.request,
+      expect.objectContaining({
+        caseId,
+        attachmentIds: expect.any(Array),
+        attachmentType: 'comment',
+        owner: SECURITY_SOLUTION_OWNER,
+      })
+    );
+  });
 });

@@ -14,9 +14,19 @@ import type { ContentListItem } from '@kbn/content-list-provider';
 import { useContentListFilters, getIncludeExcludeFlag } from '@kbn/content-list-provider';
 import type { ColumnBuilderContext } from '../types';
 import { column } from '../part';
-import { getColumnLayoutProps, type ColumnLayoutProps } from '../layout';
+import { getColumnLayoutProps, pickAttribute, type ColumnLayoutProps } from '../layout';
 import { StarredCell } from './starred_cell';
 
+/**
+ * Locked width for the starred column.
+ *
+ * The header and cell render a single 16px `EuiIcon`; `40px` gives the icon
+ * a small centered gutter on both sides without wasting horizontal space.
+ * Both `minWidth` and `maxWidth` default to the same value so the column
+ * stays pinned at exactly the icon footprint regardless of available table
+ * width. No `'max-content'` floor needed because the header is iconic, not
+ * textual, and so has no locale exposure.
+ */
 const DEFAULT_WIDTH = '40px';
 
 /**
@@ -57,14 +67,16 @@ export const buildStarredColumn = (
     return undefined;
   }
 
-  const { width = DEFAULT_WIDTH, minWidth, maxWidth } = attributes;
-
   return {
     field: 'id',
     name: <StarredColumnHeader />,
     align: 'center' as const,
     sortable: false,
-    ...getColumnLayoutProps({ width, minWidth, maxWidth }),
+    ...getColumnLayoutProps({
+      width: pickAttribute(attributes, 'width', DEFAULT_WIDTH),
+      minWidth: pickAttribute(attributes, 'minWidth', DEFAULT_WIDTH),
+      maxWidth: pickAttribute(attributes, 'maxWidth', DEFAULT_WIDTH),
+    }),
     'data-test-subj': 'content-list-table-column-starred',
     render: (_value: string, item: ContentListItem) => {
       return <StarredCell id={item.id} />;

@@ -8,6 +8,7 @@
  */
 import type {
   ESQLCallbacks,
+  EsqlDataset,
   IndexAutocompleteItem,
   ESQLSourceResult,
   EsqlView,
@@ -164,6 +165,27 @@ export const buildViewsDefinitions = (
     });
 
 /**
+ * Builds suggestion items for ES|QL datasets (GET _query/dataset).
+ */
+export const buildDatasetsDefinitions = (
+  datasets: EsqlDataset[],
+  alreadyUsed: string[] = []
+): ISuggestionItem[] =>
+  datasets
+    .filter(({ name }) => !alreadyUsed.includes(name))
+    .map(({ name }) => {
+      const text = getSafeInsertSourceText(name);
+      return withAutoSuggest({
+        label: name,
+        text,
+        kind: 'Issue',
+        detail: i18n.translate('kbn-esql-language.esql.autocomplete.datasetDefinition', {
+          defaultMessage: 'Dataset',
+        }),
+      });
+    });
+
+/**
  * Checks if the source exists in the provided sources set.
  * It supports both exact matches and fuzzy searches.
  *
@@ -268,6 +290,7 @@ export async function additionalSourcesSuggestions(
   ignored: string[],
   recommendedQuerySuggestions: ISuggestionItem[],
   views: EsqlView[] = [],
+  datasets: EsqlDataset[] = [],
   sourceReplacementContext?: {
     textBeforeCursor: string;
     commandStart: number;
@@ -276,6 +299,7 @@ export async function additionalSourcesSuggestions(
   const sourceNames = new Set([
     ...sources.map(({ name }) => name),
     ...views.map(({ name }) => name),
+    ...datasets.map(({ name }) => name),
   ]);
   const prefix = findFinalWord(queryText);
   const isComplete = prefix ? sourceExists(prefix, sourceNames) : false;
@@ -319,8 +343,9 @@ export async function additionalSourcesSuggestions(
 
   const sourceSuggestions = getSourceSuggestions(sources, ignored, sourceReplacementContext);
   const viewSuggestions = buildViewsDefinitions(views, ignored);
+  const datasetSuggestions = buildDatasetsDefinitions(datasets, ignored);
 
-  return [...sourceSuggestions, ...viewSuggestions];
+  return [...sourceSuggestions, ...viewSuggestions, ...datasetSuggestions];
 }
 
 // Treating lookup and time_series mode indices

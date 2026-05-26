@@ -401,3 +401,19 @@ export function getTraceWaterfallDuration(flattenedTraceWaterfall: TraceWaterfal
     0
   );
 }
+
+export function getSubtreeIds(
+  parentChildMap: Record<string, TraceItem[]>,
+  rootId: string
+): string[] {
+  const ids: string[] = [];
+  const stack = [rootId];
+  while (stack.length > 0) {
+    const current = stack.pop()!;
+    ids.push(current);
+    for (const child of parentChildMap[current] ?? []) {
+      stack.push(child.id);
+    }
+  }
+  return ids;
+}

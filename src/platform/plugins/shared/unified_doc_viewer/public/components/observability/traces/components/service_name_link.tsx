@@ -10,6 +10,7 @@
 import { EuiLink } from '@elastic/eui';
 import { getRouterLinkProps } from '@kbn/router-utils';
 import React from 'react';
+import { EBT_CLICK_ACTIONS, getEbtProps, type EbtClickAttrs } from '@kbn/ebt-click';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
 import { ServiceNameWithIcon } from './service_name_with_icon';
 
@@ -20,6 +21,7 @@ interface ServiceNameLinkProps {
   agentName?: string;
   formattedServiceName: React.ReactNode;
   'data-test-subj': string;
+  ebt: Omit<EbtClickAttrs, 'action'>;
 }
 
 export function ServiceNameLink({
@@ -27,6 +29,7 @@ export function ServiceNameLink({
   agentName,
   formattedServiceName,
   'data-test-subj': dataTestSubj,
+  ebt,
 }: ServiceNameLinkProps) {
   const {
     share: { url: urlService },
@@ -68,7 +71,11 @@ export function ServiceNameLink({
   return (
     <>
       {canViewApm && routeLinkProps ? (
-        <EuiLink {...routeLinkProps} data-test-subj={dataTestSubj}>
+        <EuiLink
+          {...routeLinkProps}
+          data-test-subj={dataTestSubj}
+          {...getEbtProps({ action: EBT_CLICK_ACTIONS.VIEW_SERVICE, ...ebt })}
+        >
           {content}
         </EuiLink>
       ) : (

@@ -54,7 +54,7 @@ export const LocationsBadge = ({
         return {
           key: location.id,
           name: location.label,
-          icon: <EuiIcon type="dot" color={getColor(location.status)} />,
+          icon: <EuiIcon type="dot" color={getColor(location.status)} aria-hidden={true} />,
           onClick: () => {
             closePopover();
             onLocationClick?.(location.id, location.label);

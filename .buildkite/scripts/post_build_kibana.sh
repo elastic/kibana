@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+source "$(dirname "$0")/common/util.sh"
+
 
 # [rspack-transition] avoid shipping bundle sizes while RSPack is not the default
 if [[ "${KBN_USE_RSPACK:-}" == "true" ]]; then
@@ -29,6 +31,10 @@ echo "--- Upload Build Artifacts"
 version="$(jq -r '.version' package.json)"
 cd "$KIBANA_DIR/target"
 cp "kibana-$version-SNAPSHOT-linux-x86_64.tar.zst" kibana-default.tar.zst
+
+upload_tmp_artifact "$KIBANA_DIR/target/kibana-default.tar.zst" kibana-default.tar.zst "$BUILDKITE_BUILD_ID" &
+GCS_UPLOAD_PID=$!
+
 buildkite-agent artifact upload "./*.tar.zst;./*.tar.gz;./*.zip;./*.deb;./*.rpm"
 cd -
 
@@ -42,3 +48,5 @@ fi
 cd "$KIBANA_DIR/target"
 buildkite-agent artifact upload "kibana-build-type.txt"
 cd -
+
+wait "$GCS_UPLOAD_PID"

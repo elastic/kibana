@@ -13,7 +13,6 @@ import type { ActionButton } from '@kbn/agent-builder-browser/attachments';
 import type { AttachmentsService } from '../../../../../../services/attachments/attachements_service';
 import { useConversationId } from '../../../../../context/conversation/use_conversation_id';
 import { useConversationContext } from '../../../../../context/conversation/conversation_context';
-import { usePersistedConversationId } from '../../../../../hooks/use_persisted_conversation_id';
 import { useAgentBuilderServices } from '../../../../../hooks/use_agent_builder_service';
 import { AttachmentHeader } from './attachment_header';
 import { useCanvasContext } from './canvas_context';
@@ -40,15 +39,11 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
   const conversationId = useConversationId();
   const { conversationActions } = useConversationContext();
   const { openSidebarConversation: openSidebarConversationInternal } = useAgentBuilderServices();
-  const { updatePersistedConversationId } = usePersistedConversationId({});
   const isNarrowViewport = useIsWithinBreakpoints(['xs', 's', 'm']);
 
   const openSidebarConversation = useCallback(() => {
-    if (conversationId) {
-      updatePersistedConversationId(conversationId);
-    }
-    openSidebarConversationInternal();
-  }, [conversationId, updatePersistedConversationId, openSidebarConversationInternal]);
+    openSidebarConversationInternal({ conversationId });
+  }, [conversationId, openSidebarConversationInternal]);
 
   // Track previous conversation ID to detect changes
   const prevConversationIdRef = useRef(conversationId);

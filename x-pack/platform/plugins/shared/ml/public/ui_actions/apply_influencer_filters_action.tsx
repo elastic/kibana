@@ -18,7 +18,7 @@ import { VIEW_BY_JOB_LABEL } from '../application/explorer/explorer_constants';
 import type { SwimLaneDrilldownContext } from '../embeddables';
 import type { MlCoreSetup } from '../plugin';
 import { CONTROLLED_BY_SWIM_LANE_FILTER } from './constants';
-import { isValidLicense } from './action_license_check';
+import { checkPermissionAsync } from '../application/capabilities/check_capabilities';
 
 export const APPLY_INFLUENCER_FILTERS_ACTION = 'applyInfluencerFiltersAction';
 
@@ -77,7 +77,7 @@ export function createApplyInfluencerFiltersAction(
       );
     },
     async isCompatible(context: EmbeddableApiContext) {
-      if (!(await isValidLicense(getStartServices))) return false;
+      if (!(await checkPermissionAsync(getStartServices, 'canGetJobs'))) return false;
       const [{ application }] = await getStartServices();
       const appId = await firstValueFrom(application.currentAppId$);
 

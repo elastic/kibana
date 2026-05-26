@@ -38,6 +38,7 @@ import { retryTransientEsErrors } from '../epm/elasticsearch/retry';
 import { searchHitToAgent, agentSOAttributesToFleetServerAgentDoc } from './helpers';
 import { buildAgentStatusRuntimeField } from './build_status_runtime_field';
 import { PIPELINE_CONFIG_RUNTIME_FIELD } from './build_pipeline_config_runtime_field';
+import { SIGNALS_RUNTIME_FIELD } from './build_signals_runtime_field';
 import { getLatestAvailableAgentVersion } from './versions';
 
 const INACTIVE_AGENT_CONDITION = `status:inactive`;
@@ -176,10 +177,11 @@ export async function getAgentTags(
 
   const kueryNode = _joinFilters(filters);
   const query = kueryNode ? { query: toElasticsearchQuery(kueryNode) } : {};
-  const runtimeFields = Object.assign(
-    await buildAgentStatusRuntimeField(soClient),
-    appContextService.getExperimentalFeatures().enableOpAMP ? PIPELINE_CONFIG_RUNTIME_FIELD : {}
-  );
+  const runtimeFields = {
+    ...(await buildAgentStatusRuntimeField(soClient)),
+    ...SIGNALS_RUNTIME_FIELD,
+    ...(appContextService.getExperimentalFeatures().enableOpAMP ? PIPELINE_CONFIG_RUNTIME_FIELD : {}),
+  };
   try {
     const result = await retryTransientEsErrors(() =>
       esClient.search<{}, { tags: { buckets: Array<{ key: string }> } }>({
@@ -281,10 +283,11 @@ export async function getAgentsByKuery(
 
   const kueryNode = _joinFilters(filters);
 
-  const runtimeFields = Object.assign(
-    await buildAgentStatusRuntimeField(soClient),
-    appContextService.getExperimentalFeatures().enableOpAMP ? PIPELINE_CONFIG_RUNTIME_FIELD : {}
-  );
+  const runtimeFields = {
+    ...(await buildAgentStatusRuntimeField(soClient)),
+    ...SIGNALS_RUNTIME_FIELD,
+    ...(appContextService.getExperimentalFeatures().enableOpAMP ? PIPELINE_CONFIG_RUNTIME_FIELD : {}),
+  };
 
   const sort = getSortConfig(sortField, sortOrder);
 
@@ -479,11 +482,12 @@ export async function fetchAllAgentsByKuery(
   }
   const kueryNode = _joinFilters(filters);
   const query = kueryNode ? { query: toElasticsearchQuery(kueryNode) } : {};
-  const runtimeFields = Object.assign(
-    await buildAgentStatusRuntimeField(soClient),
-    appContextService.getExperimentalFeatures().enableOpAMP ? PIPELINE_CONFIG_RUNTIME_FIELD : {},
-    options.runtimeFields
-  );
+  const runtimeFields = {
+    ...(await buildAgentStatusRuntimeField(soClient)),
+    ...SIGNALS_RUNTIME_FIELD,
+    ...(appContextService.getExperimentalFeatures().enableOpAMP ? PIPELINE_CONFIG_RUNTIME_FIELD : {}),
+    ...options.runtimeFields,
+  };
 
   const sort = getSortConfig(sortField, sortOrder);
 
@@ -592,10 +596,11 @@ async function _filterAgents(
   perPage: number;
 }> {
   const { page = 1, perPage = 20, sortField = 'enrolled_at', sortOrder = 'desc' } = options;
-  const runtimeFields = Object.assign(
-    await buildAgentStatusRuntimeField(soClient),
-    appContextService.getExperimentalFeatures().enableOpAMP ? PIPELINE_CONFIG_RUNTIME_FIELD : {}
-  );
+  const runtimeFields = {
+    ...(await buildAgentStatusRuntimeField(soClient)),
+    ...SIGNALS_RUNTIME_FIELD,
+    ...(appContextService.getExperimentalFeatures().enableOpAMP ? PIPELINE_CONFIG_RUNTIME_FIELD : {}),
+  };
   const currentSpaceId = getCurrentNamespace(soClient);
 
   let res;
@@ -772,6 +777,7 @@ export async function updateAgent(
       index: AGENTS_INDEX,
       doc: agentSOAttributesToFleetServerAgentDoc(data),
       refresh: 'wait_for',
+      retry_on_conflict: 5,
     })
   );
 }

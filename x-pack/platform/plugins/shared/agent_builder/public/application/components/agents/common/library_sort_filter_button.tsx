@@ -22,6 +22,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import type { FilterCounts, FilterMode, SortOrder } from './use_library_sort_filter';
 
 const POPOVER_WIDTH = 250;
@@ -66,6 +68,7 @@ interface LibrarySortFilterButtonProps {
   filterMode: FilterMode;
   onFilterChange: (mode: FilterMode) => void;
   filterCounts: FilterCounts;
+  ebtEntityType?: string;
 }
 
 export const LibrarySortFilterButton: React.FC<LibrarySortFilterButtonProps> = ({
@@ -74,6 +77,7 @@ export const LibrarySortFilterButton: React.FC<LibrarySortFilterButtonProps> = (
   filterMode,
   onFilterChange,
   filterCounts,
+  ebtEntityType,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const sortTitleId = useGeneratedHtmlId();
@@ -106,6 +110,11 @@ export const LibrarySortFilterButton: React.FC<LibrarySortFilterButtonProps> = (
           color="text"
           size="m"
           onClick={() => setIsOpen((o) => !o)}
+          {...getEbtProps({
+            element: AGENT_BUILDER_UI_EBT.element.flyout,
+            action: AGENT_BUILDER_UI_EBT.action.libraryPanel.SORT_FILTER_OPEN,
+            detail: ebtEntityType ?? '',
+          })}
         />
       }
       isOpen={isOpen}
@@ -115,12 +124,16 @@ export const LibrarySortFilterButton: React.FC<LibrarySortFilterButtonProps> = (
         <SectionTitle id={sortTitleId} title={labels.sortSectionTitle} />
       </EuiPopoverTitle>
       <EuiContextMenuPanel
-        size="s"
         items={[
           <EuiContextMenuItem
             key="sort-asc"
             icon={sortOrder === 'asc' ? 'check' : 'empty'}
             onClick={() => onSortChange('asc')}
+            {...getEbtProps({
+              element: AGENT_BUILDER_UI_EBT.element.flyout,
+              action: AGENT_BUILDER_UI_EBT.action.libraryPanel.SORT_ASC,
+              detail: ebtEntityType ?? '',
+            })}
           >
             {labels.sortAscLabel}
           </EuiContextMenuItem>,
@@ -128,6 +141,11 @@ export const LibrarySortFilterButton: React.FC<LibrarySortFilterButtonProps> = (
             key="sort-desc"
             icon={sortOrder === 'desc' ? 'check' : 'empty'}
             onClick={() => onSortChange('desc')}
+            {...getEbtProps({
+              element: AGENT_BUILDER_UI_EBT.element.flyout,
+              action: AGENT_BUILDER_UI_EBT.action.libraryPanel.SORT_DESC,
+              detail: ebtEntityType ?? '',
+            })}
           >
             {labels.sortDescLabel}
           </EuiContextMenuItem>,
@@ -137,12 +155,16 @@ export const LibrarySortFilterButton: React.FC<LibrarySortFilterButtonProps> = (
       <SectionTitle title={labels.filterSectionTitle} />
       <EuiHorizontalRule margin="none" />
       <EuiContextMenuPanel
-        size="s"
         items={[
           <EuiContextMenuItem
             key="filter-all"
             icon={filterMode === 'all' ? 'check' : 'empty'}
             onClick={() => onFilterChange('all')}
+            {...getEbtProps({
+              element: AGENT_BUILDER_UI_EBT.element.flyout,
+              action: AGENT_BUILDER_UI_EBT.action.libraryPanel.FILTER_ALL,
+              detail: ebtEntityType ?? '',
+            })}
           >
             <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" responsive={false}>
               <EuiFlexItem grow={false}>{labels.filterAllLabel}</EuiFlexItem>
@@ -155,6 +177,11 @@ export const LibrarySortFilterButton: React.FC<LibrarySortFilterButtonProps> = (
             key="filter-active"
             icon={filterMode === 'active' ? 'check' : 'empty'}
             onClick={() => onFilterChange('active')}
+            {...getEbtProps({
+              element: AGENT_BUILDER_UI_EBT.element.flyout,
+              action: AGENT_BUILDER_UI_EBT.action.libraryPanel.FILTER_ACTIVE,
+              detail: ebtEntityType ?? '',
+            })}
           >
             <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" responsive={false}>
               <EuiFlexItem grow={false}>{labels.filterActiveLabel}</EuiFlexItem>
@@ -167,6 +194,11 @@ export const LibrarySortFilterButton: React.FC<LibrarySortFilterButtonProps> = (
             key="filter-elastic"
             icon={filterMode === 'elastic' ? 'check' : 'empty'}
             onClick={() => onFilterChange('elastic')}
+            {...getEbtProps({
+              element: AGENT_BUILDER_UI_EBT.element.flyout,
+              action: AGENT_BUILDER_UI_EBT.action.libraryPanel.FILTER_ELASTIC,
+              detail: ebtEntityType ?? '',
+            })}
           >
             <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" responsive={false}>
               <EuiFlexItem grow={false}>{labels.filterElasticLabel}</EuiFlexItem>
@@ -179,6 +211,11 @@ export const LibrarySortFilterButton: React.FC<LibrarySortFilterButtonProps> = (
             key="filter-custom"
             icon={filterMode === 'custom' ? 'check' : 'empty'}
             onClick={() => onFilterChange('custom')}
+            {...getEbtProps({
+              element: AGENT_BUILDER_UI_EBT.element.flyout,
+              action: AGENT_BUILDER_UI_EBT.action.libraryPanel.FILTER_CUSTOM,
+              detail: ebtEntityType ?? '',
+            })}
           >
             <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" responsive={false}>
               <EuiFlexItem grow={false}>{labels.filterCustomLabel}</EuiFlexItem>

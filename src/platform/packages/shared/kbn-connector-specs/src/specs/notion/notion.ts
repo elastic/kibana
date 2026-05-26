@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
 import type * as Notion from './types';
 export const NotionConnector: ConnectorSpec = {
@@ -51,31 +51,33 @@ export const NotionConnector: ConnectorSpec = {
       isTool: true,
       description:
         'Search for Notion pages or data sources (databases) whose title contains a given string. Use this to discover what pages or databases exist before fetching their content or querying their rows.',
-      input: z.object({
-        query: z
-          .string()
-          .describe(
-            'The text string to search for within page or data source titles. Example: "Engineering roadmap"'
-          ),
-        queryObjectType: z
-          .enum(['page', 'data_source'])
-          .describe(
-            'Whether to search for pages ("page") or databases/data sources ("data_source"). Use "page" to find wiki-style content, and "data_source" to find structured databases.'
-          ),
-        startCursor: z
-          .string()
-          .optional()
-          .describe(
-            'Pagination cursor returned from a previous search response. Pass this to retrieve the next page of results.'
-          ),
-        pageSize: z
-          .number()
-          .max(100)
-          .default(10)
-          .describe(
-            'Maximum number of results to return per page. Defaults to 10 if not specified.'
-          ),
-      }),
+      input: lazySchema(() =>
+        z.object({
+          query: z
+            .string()
+            .describe(
+              'The text string to search for within page or data source titles. Example: "Engineering roadmap"'
+            ),
+          queryObjectType: z
+            .enum(['page', 'data_source'])
+            .describe(
+              'Whether to search for pages ("page") or databases/data sources ("data_source"). Use "page" to find wiki-style content, and "data_source" to find structured databases.'
+            ),
+          startCursor: z
+            .string()
+            .optional()
+            .describe(
+              'Pagination cursor returned from a previous search response. Pass this to retrieve the next page of results.'
+            ),
+          pageSize: z
+            .number()
+            .max(100)
+            .default(10)
+            .describe(
+              'Maximum number of results to return per page. Defaults to 10 if not specified.'
+            ),
+        })
+      ),
       handler: async (ctx, input: Notion.SearchByTitleInput) => {
         const response = await ctx.client.post('https://api.notion.com/v1/search', {
           query: input.query,
@@ -96,13 +98,15 @@ export const NotionConnector: ConnectorSpec = {
       isTool: true,
       description:
         'Given the ID of a Notion page, retrieve its metadata — including title, properties, parent, created/edited timestamps, and URL. Use this after finding a page ID via searchPageOrDSByTitle.',
-      input: z.object({
-        pageId: z
-          .string()
-          .describe(
-            'The Notion page ID to retrieve. This is the UUID found in the page URL or returned by searchPageOrDSByTitle. Example: "5b2c3d4e-1234-5678-abcd-ef0123456789"'
-          ),
-      }),
+      input: lazySchema(() =>
+        z.object({
+          pageId: z
+            .string()
+            .describe(
+              'The Notion page ID to retrieve. This is the UUID found in the page URL or returned by searchPageOrDSByTitle. Example: "5b2c3d4e-1234-5678-abcd-ef0123456789"'
+            ),
+        })
+      ),
       handler: async (ctx, input: Notion.GetPageInput) => {
         const response = await ctx.client.get(
           `https://api.notion.com/v1/pages/${input.pageId}`,
@@ -117,13 +121,15 @@ export const NotionConnector: ConnectorSpec = {
       isTool: true,
       description:
         'Given the ID of a Notion data source (database), retrieve its schema — including the names, types, and options for all columns/properties. Use this before querying rows so you know what filters and fields are available.',
-      input: z.object({
-        dataSourceId: z
-          .string()
-          .describe(
-            'The Notion data source (database) ID to inspect. This is the UUID found in the database URL or returned by searchPageOrDSByTitle. Example: "a1b2c3d4-5678-90ab-cdef-1234567890ab"'
-          ),
-      }),
+      input: lazySchema(() =>
+        z.object({
+          dataSourceId: z
+            .string()
+            .describe(
+              'The Notion data source (database) ID to inspect. This is the UUID found in the database URL or returned by searchPageOrDSByTitle. Example: "a1b2c3d4-5678-90ab-cdef-1234567890ab"'
+            ),
+        })
+      ),
       handler: async (ctx, input: Notion.GetDataSourceInput) => {
         const response = await ctx.client.get(
           `https://api.notion.com/v1/data_sources/${input.dataSourceId}`,
@@ -138,39 +144,41 @@ export const NotionConnector: ConnectorSpec = {
       isTool: true,
       description:
         'Given the ID of a Notion data source (database), query its rows. Returns up to 10 rows by default. Supports filtering via the Notion filter JSON format (see https://developers.notion.com/reference/filter-data-source-entries) and cursor-based pagination. Use getDataSource first to understand the available columns and their types before constructing a filter.',
-      input: z.object({
-        dataSourceId: z
-          .string()
-          .describe(
-            'The Notion data source (database) ID to query. Example: "a1b2c3d4-5678-90ab-cdef-1234567890ab"'
-          ),
-        filter: z
-          .string()
-          .optional()
-          .describe(
-            'Optional filter expressed as a JSON string following the Notion filter format (https://developers.notion.com/reference/filter-data-source-entries). Each filter targets one property by name and applies a type-specific condition. Common patterns:\n' +
-              '- Status: {"property":"Status","status":{"equals":"In progress"}}\n' +
-              '- Checkbox: {"property":"Done","checkbox":{"equals":true}}\n' +
-              '- Text contains: {"property":"Name","rich_text":{"contains":"keyword"}}\n' +
-              '- Date after: {"property":"Due","date":{"after":"2024-01-01"}}\n' +
-              '- Compound (AND): {"and":[{...},{...}]}\n' +
-              '- Compound (OR): {"or":[{...},{...}]}\n' +
-              'Always call getDataSource first to discover the available property names and their types before constructing a filter. Omit to return all rows up to pageSize.'
-          ),
-        startCursor: z
-          .string()
-          .optional()
-          .describe(
-            'Pagination cursor returned from a previous queryDataSource response. Pass this to fetch the next page of rows.'
-          ),
-        pageSize: z
-          .number()
-          .max(100)
-          .default(10)
-          .describe(
-            'Maximum number of rows to return. Defaults to 10 if not specified. Maximum allowed by Notion is 100.'
-          ),
-      }),
+      input: lazySchema(() =>
+        z.object({
+          dataSourceId: z
+            .string()
+            .describe(
+              'The Notion data source (database) ID to query. Example: "a1b2c3d4-5678-90ab-cdef-1234567890ab"'
+            ),
+          filter: z
+            .string()
+            .optional()
+            .describe(
+              'Optional filter expressed as a JSON string following the Notion filter format (https://developers.notion.com/reference/filter-data-source-entries). Each filter targets one property by name and applies a type-specific condition. Common patterns:\n' +
+                '- Status: {"property":"Status","status":{"equals":"In progress"}}\n' +
+                '- Checkbox: {"property":"Done","checkbox":{"equals":true}}\n' +
+                '- Text contains: {"property":"Name","rich_text":{"contains":"keyword"}}\n' +
+                '- Date after: {"property":"Due","date":{"after":"2024-01-01"}}\n' +
+                '- Compound (AND): {"and":[{...},{...}]}\n' +
+                '- Compound (OR): {"or":[{...},{...}]}\n' +
+                'Always call getDataSource first to discover the available property names and their types before constructing a filter. Omit to return all rows up to pageSize.'
+            ),
+          startCursor: z
+            .string()
+            .optional()
+            .describe(
+              'Pagination cursor returned from a previous queryDataSource response. Pass this to fetch the next page of rows.'
+            ),
+          pageSize: z
+            .number()
+            .max(100)
+            .default(10)
+            .describe(
+              'Maximum number of rows to return. Defaults to 10 if not specified. Maximum allowed by Notion is 100.'
+            ),
+        })
+      ),
       handler: async (ctx, input: Notion.QueryDataSourceInput) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let requestData: Record<string, any> = {

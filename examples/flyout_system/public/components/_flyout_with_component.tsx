@@ -25,6 +25,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { useBooleanUrlState } from '@kbn/shared-url-state';
 import {
   createChildFlyoutDescriptionItems,
   createMainFlyoutDescriptionItems,
@@ -49,9 +50,9 @@ interface FlyoutFromComponentsProps {
 const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
   const { title, mainSize, childSize, mainMaxWidth, childMaxWidth, historyKey } = props;
 
+  const [isFlyoutOpen, setIsFlyoutOpen] = useBooleanUrlState(`flyoutOpen-${title}`);
   const [flyoutType, setFlyoutType] = useState<'overlay' | 'push'>('overlay');
   const [flyoutOwnFocus, setFlyoutOwnFocus] = useState<boolean>(false);
-  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
   const [isChildFlyoutAOpen, setIsChildFlyoutAOpen] = useState(false);
   const [isChildFlyoutBOpen, setIsChildFlyoutBOpen] = useState(false);
 
@@ -98,7 +99,7 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
     setTimeout(() => {
       mainTriggerRef.current?.focus();
     }, 100);
-  }, [title]);
+  }, [title, setIsFlyoutOpen]);
 
   const handleCloseChildFlyoutA = useCallback(() => {
     console.log('close child flyout A', title); // eslint-disable-line no-console

@@ -67,6 +67,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
 
     await runPreBuild();
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml', false));
+    pipeline.push(getPipeline('.buildkite/pipelines/pull_request/local_check.yml', {}));
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/api_contracts.yml', cancelable));
 
     // Register steps from base.yml that should still be canceled on gate failure.
@@ -74,7 +75,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     registerCancelKeys([
       'pick_test_group_run_order',
       'build_scout_tests',
-      'build_api_docs',
+      'report_package_metrics',
       'verify_rspack_build',
     ]);
 
@@ -649,6 +650,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
         /^packages\/kbn-check-saved-objects-cli\/current_mappings.json/,
         /^src\/core\/server\/integration_tests\/ci_checks\/saved_objects\/check_registered_types.test.ts/,
         /^\.buildkite\/pipelines\/pull_request\/check_saved_objects\.yml/,
+        /^src\/core\/packages\/saved-objects\/server-internal\/wip_types\.json/,
       ])
     ) {
       pipeline.push(
@@ -669,6 +671,10 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       pipeline.push(
         getPipeline('.buildkite/pipelines/pull_request/workflows_oom_testing.yml', cancelable)
       );
+    }
+
+    if (GITHUB_PR_LABELS.includes('ci:cps-test')) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/cps_testing.yml', cancelable));
     }
 
     if (GITHUB_PR_LABELS.includes('ci:bench-jest')) {

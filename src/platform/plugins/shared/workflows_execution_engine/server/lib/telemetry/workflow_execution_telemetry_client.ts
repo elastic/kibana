@@ -24,6 +24,8 @@ import {
 } from './events/workflows_execution';
 import {
   type EventDrivenExecutionSuppressedParams,
+  type OutputSizeStats,
+  type OutputSizeTelemetryFields,
   type TriggerEventDispatchedParams,
   type WorkflowExecutionCancelledParams,
   type WorkflowExecutionCompletedParams,
@@ -43,6 +45,18 @@ import type {
   TriggerResolutionStats,
 } from '../../trigger_events/trigger_event_stats';
 
+/** Picks the output-size telemetry fields from execution metadata, omitting undefined entries. */
+const pickOutputSizeFields = (
+  metadata: WorkflowExecutionTelemetryMetadata
+): OutputSizeTelemetryFields => ({
+  ...(metadata.totalOutputSizeBytes !== undefined && {
+    totalOutputSizeBytes: metadata.totalOutputSizeBytes,
+  }),
+  ...(metadata.averageOutputSizeBytes !== undefined && {
+    averageOutputSizeBytes: metadata.averageOutputSizeBytes,
+  }),
+});
+
 function resolveExecutionTriggerTelemetry(triggeredBy: string | undefined): {
   triggerType: WellKnownWorkflowTriggerSource | 'event';
   eventTriggerId?: string;
@@ -55,6 +69,92 @@ function resolveExecutionTriggerTelemetry(triggeredBy: string | undefined): {
   }
 
   return { triggerType: 'manual' };
+}
+
+/**
+ * Resolved per-call inputs for the three terminal-event builders. Computing
+ * these once and passing them around drops the trio of identical mappings
+ * each report function used to repeat.
+ */
+interface TerminalEventInputs {
+  workflowExecution: EsWorkflowExecution;
+  workflowMetadata: ReturnType<typeof extractWorkflowMetadata>;
+  executionMetadata: WorkflowExecutionTelemetryMetadata;
+}
+
+/**
+ * Builds the shared payload common to Completed / Failed / Cancelled telemetry
+ * events. Event-specific fields (failure cause, cancellation reason, etc.)
+ * are merged in by each caller.
+ *
+ * Conditional fields use the spread-when-defined idiom so the resulting
+ * object only carries keys that have a real value — matches the registered
+ * event schemas, which omit the same fields rather than send `undefined`.
+ */
+function buildTerminalEventBase({
+  workflowExecution,
+  workflowMetadata,
+  executionMetadata,
+}: TerminalEventInputs) {
+  return {
+    ...buildBaseExecutionTelemetryFields(workflowExecution, executionMetadata),
+    startedAt: workflowExecution.createdAt,
+    ...(executionMetadata.timeToFirstStep !== undefined && {
+      timeToFirstStep: executionMetadata.timeToFirstStep,
+    }),
+    stepCount: workflowMetadata.stepCount,
+    stepTypes: Object.keys(workflowMetadata.stepTypeCounts),
+    connectorTypes: workflowMetadata.connectorTypes,
+    hasScheduledTriggers: workflowMetadata.hasScheduledTriggers,
+    hasAlertTriggers: workflowMetadata.hasAlertTriggers,
+    hasTimeout: workflowMetadata.hasTimeout,
+    hasConcurrency: workflowMetadata.hasConcurrency,
+    hasOnFailure: workflowMetadata.hasOnFailure,
+    executedStepCount: executionMetadata.executedStepCount,
+    successfulStepCount: executionMetadata.successfulStepCount,
+    executedConnectorTypes: executionMetadata.executedConnectorTypes,
+    maxExecutionDepth: executionMetadata.maxExecutionDepth,
+    hasRetries: executionMetadata.hasRetries,
+    hasErrorHandling: executionMetadata.hasErrorHandling,
+    uniqueStepIdsExecuted: executionMetadata.uniqueStepIdsExecuted,
+    ...(executionMetadata.queueDelayMs !== undefined && {
+      queueDelayMs: executionMetadata.queueDelayMs,
+    }),
+    ...(executionMetadata.emitToStartMs !== undefined && {
+      emitToStartMs: executionMetadata.emitToStartMs,
+    }),
+    timedOut: executionMetadata.timedOut,
+    ...(executionMetadata.timeoutMs !== undefined && { timeoutMs: executionMetadata.timeoutMs }),
+    ...(executionMetadata.timeoutExceededByMs !== undefined && {
+      timeoutExceededByMs: executionMetadata.timeoutExceededByMs,
+    }),
+    ...(executionMetadata.stepDurations &&
+      executionMetadata.stepDurations.length > 0 && {
+        stepDurations: executionMetadata.stepDurations,
+      }),
+    ...(executionMetadata.stepAvgDurationsByType &&
+      Object.keys(executionMetadata.stepAvgDurationsByType).length > 0 && {
+        stepAvgDurationsByType: executionMetadata.stepAvgDurationsByType,
+      }),
+    ...pickOutputSizeFields(executionMetadata),
+  };
+}
+
+/**
+ * Resolves the inputs once per terminal-event report. Centralising this also
+ * means callers do not have to remember to thread `outputSizeStats` through
+ * `extractExecutionMetadata`.
+ */
+function buildTerminalEventInputs(
+  workflowExecution: EsWorkflowExecution,
+  stepExecutions: EsWorkflowStepExecution[],
+  outputSizeStats?: OutputSizeStats
+): TerminalEventInputs {
+  return {
+    workflowExecution,
+    workflowMetadata: extractWorkflowMetadata(workflowExecution.workflowDefinition),
+    executionMetadata: extractExecutionMetadata(workflowExecution, stepExecutions, outputSizeStats),
+  };
 }
 
 /**
@@ -138,13 +238,15 @@ export class WorkflowExecutionTelemetryClient {
     workflowExecution: EsWorkflowExecution;
     stepExecutions: EsWorkflowStepExecution[];
     finalStatus: ExecutionStatus;
+    outputSizeStats?: OutputSizeStats;
   }): void {
-    const { workflowExecution, stepExecutions, finalStatus } = params;
+    const { workflowExecution, stepExecutions, finalStatus, outputSizeStats } = params;
 
     if (finalStatus === ExecutionStatus.COMPLETED) {
       this.reportWorkflowExecutionCompleted({
         workflowExecution,
         stepExecutions,
+        outputSizeStats,
       });
     } else if (
       finalStatus === ExecutionStatus.FAILED ||
@@ -153,11 +255,13 @@ export class WorkflowExecutionTelemetryClient {
       this.reportWorkflowExecutionFailed({
         workflowExecution,
         stepExecutions,
+        outputSizeStats,
       });
     } else if (finalStatus === ExecutionStatus.CANCELLED) {
       this.reportWorkflowExecutionCancelled({
         workflowExecution,
         stepExecutions,
+        outputSizeStats,
       });
     }
     // Note: SKIPPED status is not currently tracked in telemetry
@@ -170,63 +274,29 @@ export class WorkflowExecutionTelemetryClient {
   reportWorkflowExecutionCompleted(params: {
     workflowExecution: EsWorkflowExecution;
     stepExecutions: EsWorkflowStepExecution[];
+    outputSizeStats?: OutputSizeStats;
   }): void {
-    const { workflowExecution, stepExecutions } = params;
-    const workflowMetadata = extractWorkflowMetadata(workflowExecution.workflowDefinition);
-    const executionMetadata = extractExecutionMetadata(workflowExecution, stepExecutions);
+    const inputs = buildTerminalEventInputs(
+      params.workflowExecution,
+      params.stepExecutions,
+      params.outputSizeStats
+    );
+    const { workflowExecution, executionMetadata } = inputs;
 
     const completedAt = workflowExecution.finishedAt || new Date().toISOString();
-    const startedAt = new Date(workflowExecution.createdAt);
-    const duration = new Date(completedAt).getTime() - startedAt.getTime();
+    const duration =
+      new Date(completedAt).getTime() - new Date(workflowExecution.createdAt).getTime();
 
     const eventData: WorkflowExecutionCompletedParams = {
       eventName:
         workflowExecutionEventNames[
           WorkflowExecutionTelemetryEventTypes.WorkflowExecutionCompleted
         ],
-      ...buildBaseExecutionTelemetryFields(workflowExecution, executionMetadata),
-      startedAt: workflowExecution.createdAt,
+      ...buildTerminalEventBase(inputs),
       completedAt,
       duration,
-      ...(executionMetadata.timeToFirstStep !== undefined && {
-        timeToFirstStep: executionMetadata.timeToFirstStep,
-      }),
-      stepCount: workflowMetadata.stepCount,
-      stepTypes: Object.keys(workflowMetadata.stepTypeCounts),
-      connectorTypes: workflowMetadata.connectorTypes,
-      hasScheduledTriggers: workflowMetadata.hasScheduledTriggers,
-      hasAlertTriggers: workflowMetadata.hasAlertTriggers,
-      hasTimeout: workflowMetadata.hasTimeout,
-      hasConcurrency: workflowMetadata.hasConcurrency,
-      hasOnFailure: workflowMetadata.hasOnFailure,
-      executedStepCount: executionMetadata.executedStepCount,
-      successfulStepCount: executionMetadata.successfulStepCount,
       failedStepCount: executionMetadata.failedStepCount,
       skippedStepCount: executionMetadata.skippedStepCount,
-      executedConnectorTypes: executionMetadata.executedConnectorTypes,
-      maxExecutionDepth: executionMetadata.maxExecutionDepth,
-      hasRetries: executionMetadata.hasRetries,
-      hasErrorHandling: executionMetadata.hasErrorHandling,
-      uniqueStepIdsExecuted: executionMetadata.uniqueStepIdsExecuted,
-      ...(executionMetadata.queueDelayMs !== undefined && {
-        queueDelayMs: executionMetadata.queueDelayMs,
-      }),
-      ...(executionMetadata.emitToStartMs !== undefined && {
-        emitToStartMs: executionMetadata.emitToStartMs,
-      }),
-      timedOut: executionMetadata.timedOut,
-      ...(executionMetadata.timeoutMs !== undefined && { timeoutMs: executionMetadata.timeoutMs }),
-      ...(executionMetadata.timeoutExceededByMs !== undefined && {
-        timeoutExceededByMs: executionMetadata.timeoutExceededByMs,
-      }),
-      ...(executionMetadata.stepDurations &&
-        executionMetadata.stepDurations.length > 0 && {
-          stepDurations: executionMetadata.stepDurations,
-        }),
-      ...(executionMetadata.stepAvgDurationsByType &&
-        Object.keys(executionMetadata.stepAvgDurationsByType).length > 0 && {
-          stepAvgDurationsByType: executionMetadata.stepAvgDurationsByType,
-        }),
     };
 
     this.reportEvent(WorkflowExecutionTelemetryEventTypes.WorkflowExecutionCompleted, eventData);
@@ -238,75 +308,36 @@ export class WorkflowExecutionTelemetryClient {
   reportWorkflowExecutionFailed(params: {
     workflowExecution: EsWorkflowExecution;
     stepExecutions: EsWorkflowStepExecution[];
+    outputSizeStats?: OutputSizeStats;
   }): void {
-    const { workflowExecution, stepExecutions } = params;
-    const workflowMetadata = extractWorkflowMetadata(workflowExecution.workflowDefinition);
-    const executionMetadata = extractExecutionMetadata(workflowExecution, stepExecutions);
+    const inputs = buildTerminalEventInputs(
+      params.workflowExecution,
+      params.stepExecutions,
+      params.outputSizeStats
+    );
+    const { workflowExecution } = inputs;
 
     const failedAt = workflowExecution.finishedAt || new Date().toISOString();
-    const startedAt = new Date(workflowExecution.createdAt);
-    const duration = new Date(failedAt).getTime() - startedAt.getTime();
+    const duration = new Date(failedAt).getTime() - new Date(workflowExecution.createdAt).getTime();
 
-    // Find the failed step
-    const failedStep = stepExecutions.find((step) => step.status === 'failed');
-
+    const failedStep = params.stepExecutions.find((step) => step.status === 'failed');
     const errorMessage = workflowExecution.error?.message || 'Unknown error';
     const errorType = workflowExecution.error?.type || 'ExecutionError';
-
-    // Check if error was handled by on-failure handler
-    // This is a heuristic: if we have a failed step but workflow didn't fail immediately,
-    // it have been handled
+    // Heuristic: a failed step + workflow status FAILED means the on-failure
+    // handler did not absorb the error.
     const errorHandled = failedStep !== undefined && workflowExecution.status === 'failed';
 
     const eventData: WorkflowExecutionFailedParams = {
       eventName:
         workflowExecutionEventNames[WorkflowExecutionTelemetryEventTypes.WorkflowExecutionFailed],
-      ...buildBaseExecutionTelemetryFields(workflowExecution, executionMetadata),
-      startedAt: workflowExecution.createdAt,
+      ...buildTerminalEventBase(inputs),
       failedAt,
       duration,
-      ...(executionMetadata.timeToFirstStep !== undefined && {
-        timeToFirstStep: executionMetadata.timeToFirstStep,
-      }),
-      stepCount: workflowMetadata.stepCount,
-      stepTypes: Object.keys(workflowMetadata.stepTypeCounts),
-      connectorTypes: workflowMetadata.connectorTypes,
-      hasScheduledTriggers: workflowMetadata.hasScheduledTriggers,
-      hasAlertTriggers: workflowMetadata.hasAlertTriggers,
-      hasTimeout: workflowMetadata.hasTimeout,
-      hasConcurrency: workflowMetadata.hasConcurrency,
-      hasOnFailure: workflowMetadata.hasOnFailure,
       errorMessage,
       errorType,
       ...(failedStep && { failedStepId: failedStep.stepId }),
       ...(failedStep?.stepType && { failedStepType: failedStep.stepType }),
-      executedStepCount: executionMetadata.executedStepCount,
-      successfulStepCount: executionMetadata.successfulStepCount,
-      executedConnectorTypes: executionMetadata.executedConnectorTypes,
-      maxExecutionDepth: executionMetadata.maxExecutionDepth,
-      hasRetries: executionMetadata.hasRetries,
-      hasErrorHandling: executionMetadata.hasErrorHandling,
-      uniqueStepIdsExecuted: executionMetadata.uniqueStepIdsExecuted,
       errorHandled,
-      ...(executionMetadata.queueDelayMs !== undefined && {
-        queueDelayMs: executionMetadata.queueDelayMs,
-      }),
-      ...(executionMetadata.emitToStartMs !== undefined && {
-        emitToStartMs: executionMetadata.emitToStartMs,
-      }),
-      timedOut: executionMetadata.timedOut,
-      ...(executionMetadata.timeoutMs !== undefined && { timeoutMs: executionMetadata.timeoutMs }),
-      ...(executionMetadata.timeoutExceededByMs !== undefined && {
-        timeoutExceededByMs: executionMetadata.timeoutExceededByMs,
-      }),
-      ...(executionMetadata.stepDurations &&
-        executionMetadata.stepDurations.length > 0 && {
-          stepDurations: executionMetadata.stepDurations,
-        }),
-      ...(executionMetadata.stepAvgDurationsByType &&
-        Object.keys(executionMetadata.stepAvgDurationsByType).length > 0 && {
-          stepAvgDurationsByType: executionMetadata.stepAvgDurationsByType,
-        }),
     };
 
     this.reportEvent(WorkflowExecutionTelemetryEventTypes.WorkflowExecutionFailed, eventData);
@@ -318,67 +349,33 @@ export class WorkflowExecutionTelemetryClient {
   reportWorkflowExecutionCancelled(params: {
     workflowExecution: EsWorkflowExecution;
     stepExecutions: EsWorkflowStepExecution[];
+    outputSizeStats?: OutputSizeStats;
   }): void {
-    const { workflowExecution, stepExecutions } = params;
-    const workflowMetadata = extractWorkflowMetadata(workflowExecution.workflowDefinition);
-    const executionMetadata = extractExecutionMetadata(workflowExecution, stepExecutions);
+    const inputs = buildTerminalEventInputs(
+      params.workflowExecution,
+      params.stepExecutions,
+      params.outputSizeStats
+    );
+    const { workflowExecution } = inputs;
 
     const cancelledAt = workflowExecution.cancelledAt || new Date().toISOString();
-    const startedAt = new Date(workflowExecution.createdAt);
-    const duration = new Date(cancelledAt).getTime() - startedAt.getTime();
+    const duration =
+      new Date(cancelledAt).getTime() - new Date(workflowExecution.createdAt).getTime();
 
     const eventData: WorkflowExecutionCancelledParams = {
       eventName:
         workflowExecutionEventNames[
           WorkflowExecutionTelemetryEventTypes.WorkflowExecutionCancelled
         ],
-      ...buildBaseExecutionTelemetryFields(workflowExecution, executionMetadata),
-      startedAt: workflowExecution.createdAt,
+      ...buildTerminalEventBase(inputs),
       cancelledAt,
       duration,
-      ...(executionMetadata.timeToFirstStep !== undefined && {
-        timeToFirstStep: executionMetadata.timeToFirstStep,
-      }),
-      stepCount: workflowMetadata.stepCount,
-      stepTypes: Object.keys(workflowMetadata.stepTypeCounts),
-      connectorTypes: workflowMetadata.connectorTypes,
-      hasScheduledTriggers: workflowMetadata.hasScheduledTriggers,
-      hasAlertTriggers: workflowMetadata.hasAlertTriggers,
-      hasTimeout: workflowMetadata.hasTimeout,
-      hasConcurrency: workflowMetadata.hasConcurrency,
-      hasOnFailure: workflowMetadata.hasOnFailure,
       ...(workflowExecution.cancellationReason && {
         cancellationReason: workflowExecution.cancellationReason,
       }),
       ...(workflowExecution.cancelledBy && {
         cancelledBy: workflowExecution.cancelledBy,
       }),
-      executedStepCount: executionMetadata.executedStepCount,
-      successfulStepCount: executionMetadata.successfulStepCount,
-      executedConnectorTypes: executionMetadata.executedConnectorTypes,
-      maxExecutionDepth: executionMetadata.maxExecutionDepth,
-      hasRetries: executionMetadata.hasRetries,
-      hasErrorHandling: executionMetadata.hasErrorHandling,
-      uniqueStepIdsExecuted: executionMetadata.uniqueStepIdsExecuted,
-      ...(executionMetadata.queueDelayMs !== undefined && {
-        queueDelayMs: executionMetadata.queueDelayMs,
-      }),
-      ...(executionMetadata.emitToStartMs !== undefined && {
-        emitToStartMs: executionMetadata.emitToStartMs,
-      }),
-      timedOut: executionMetadata.timedOut,
-      ...(executionMetadata.timeoutMs !== undefined && { timeoutMs: executionMetadata.timeoutMs }),
-      ...(executionMetadata.timeoutExceededByMs !== undefined && {
-        timeoutExceededByMs: executionMetadata.timeoutExceededByMs,
-      }),
-      ...(executionMetadata.stepDurations &&
-        executionMetadata.stepDurations.length > 0 && {
-          stepDurations: executionMetadata.stepDurations,
-        }),
-      ...(executionMetadata.stepAvgDurationsByType &&
-        Object.keys(executionMetadata.stepAvgDurationsByType).length > 0 && {
-          stepAvgDurationsByType: executionMetadata.stepAvgDurationsByType,
-        }),
     };
 
     this.reportEvent(WorkflowExecutionTelemetryEventTypes.WorkflowExecutionCancelled, eventData);

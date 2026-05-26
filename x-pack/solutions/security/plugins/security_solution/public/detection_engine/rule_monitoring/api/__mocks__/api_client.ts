@@ -23,8 +23,6 @@ import type {
 } from '../api_client_interface';
 
 export const api: jest.Mocked<IRuleMonitoringApiClient> = {
-  setupDetectionEngineHealthApi: jest.fn<Promise<void>, []>().mockResolvedValue(),
-
   readRuleExecutionResults: jest
     .fn<Promise<ReadRuleExecutionResultsResponse>, [ReadRuleExecutionResultsArgs]>()
     .mockResolvedValue({

@@ -36,9 +36,14 @@ export enum CspInsightLeftPanelSubTab {
   ALERTS = 'alertsTabId',
 }
 
+export enum RiskScoreLeftPanelSubTab {
+  ENTITY = 'entity',
+  RESOLUTION = 'resolution',
+}
+
 export interface EntityDetailsPath {
   tab: EntityDetailsLeftPanelTab;
-  subTab?: CspInsightLeftPanelSubTab;
+  subTab?: CspInsightLeftPanelSubTab | RiskScoreLeftPanelSubTab;
 }
 
 const TechnicalPreviewBadge = () => (

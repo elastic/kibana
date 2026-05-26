@@ -25,6 +25,11 @@ export interface InferenceFeatureConfig {
   recommendedEndpoints: string[];
   isTechPreview?: boolean;
   isBeta?: boolean;
+  ignoreGlobalDefault?: boolean;
+  visibilityCondition?: {
+    key: string;
+    value: string | number | boolean | null;
+  };
 }
 
 export type RegisterResult = { ok: true } | { ok: false; error: string };

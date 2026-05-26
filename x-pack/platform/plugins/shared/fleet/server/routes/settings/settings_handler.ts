@@ -6,6 +6,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 
 import type {
   FleetRequestHandler,
@@ -31,13 +32,17 @@ export const putSpaceSettingsHandler: FleetRequestHandler<
   TypeOf<typeof PutSpaceSettingsRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = (await context.fleet).internalSoClient;
+  const spaceId = soClient.getCurrentNamespace() ?? DEFAULT_SPACE_ID;
+
   await saveSpaceSettings({
     settings: {
       allowed_namespace_prefixes: request.body.allowed_namespace_prefixes,
     },
-    spaceId: soClient.getCurrentNamespace(),
+    spaceId,
   });
-  const settings = await getSpaceSettings(soClient.getCurrentNamespace());
+
+  const settings = await getSpaceSettings(spaceId);
+
   const body = {
     item: settings,
   };

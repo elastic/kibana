@@ -520,6 +520,357 @@ export const labels = {
         }
       ),
     },
+    mcpClients: {
+      title: i18n.translate('xpack.agentBuilder.mcpClients.title', {
+        defaultMessage: 'MCP clients (OAuth)',
+      }),
+      description: i18n.translate('xpack.agentBuilder.mcpClients.description', {
+        defaultMessage:
+          'An MCP client enables agentic AI to securely interact with Elastic Cloud on your behalf. Agents can request access dynamically and act as delegated users.',
+      }),
+      breadcrumb: i18n.translate('xpack.agentBuilder.mcpClients.breadcrumb', {
+        defaultMessage: 'MCP clients',
+      }),
+      addMcpClientButtonLabel: i18n.translate(
+        'xpack.agentBuilder.mcpClients.addMcpClientButtonLabel',
+        {
+          defaultMessage: 'Add MCP client',
+        }
+      ),
+      searchMcpClientsPlaceholder: i18n.translate(
+        'xpack.agentBuilder.mcpClients.searchMcpClientsPlaceholder',
+        {
+          defaultMessage: 'Search',
+        }
+      ),
+      listMcpClientsErrorMessage: i18n.translate(
+        'xpack.agentBuilder.mcpClients.listMcpClientsErrorMessage',
+        {
+          defaultMessage: 'Failed to fetch MCP clients',
+        }
+      ),
+      noMcpClientsFoundMessage: i18n.translate(
+        'xpack.agentBuilder.mcpClients.noMcpClientsFoundMessage',
+        {
+          defaultMessage: 'No MCP clients found.',
+        }
+      ),
+      noMcpClientsPromptTitle: i18n.translate(
+        'xpack.agentBuilder.mcpClients.noMcpClientsPromptTitle',
+        {
+          defaultMessage: 'No MCP clients (OAuth)',
+        }
+      ),
+      noMcpClientsPromptBody: i18n.translate(
+        'xpack.agentBuilder.mcpClients.noMcpClientsPromptBody',
+        {
+          defaultMessage: 'Get started with MCP clients (OAuth).',
+        }
+      ),
+      noItemsPromptLearnMoreLinkLabel: i18n.translate(
+        'xpack.agentBuilder.mcpClients.noItemsPromptLearnMoreLinkLabel',
+        {
+          defaultMessage: 'Learn more',
+        }
+      ),
+      name: i18n.translate('xpack.agentBuilder.mcpClients.name', { defaultMessage: 'Name' }),
+      connections: i18n.translate('xpack.agentBuilder.mcpClients.connections', {
+        defaultMessage: 'Connections',
+      }),
+      status: i18n.translate('xpack.agentBuilder.mcpClients.status', {
+        defaultMessage: 'Status',
+      }),
+      actionsColumnLabel: i18n.translate('xpack.agentBuilder.mcpClients.actions', {
+        defaultMessage: 'Actions',
+      }),
+      statusFilter: i18n.translate('xpack.agentBuilder.mcpClients.statusFilter', {
+        defaultMessage: 'Status',
+      }),
+      mcpClientsLabel: i18n.translate('xpack.agentBuilder.mcpClients.mcpClientsLabel', {
+        defaultMessage: 'MCP clients',
+      }),
+      addMcpClientOAuthButtonLabel: i18n.translate(
+        'xpack.agentBuilder.mcpClients.addMcpClientOAuthButtonLabel',
+        {
+          defaultMessage: 'Add MCP client (OAuth)',
+        }
+      ),
+      actions: {
+        ariaLabel: i18n.translate('xpack.agentBuilder.mcpClients.actions.ariaLabel', {
+          defaultMessage: 'Actions',
+        }),
+        revoke: i18n.translate('xpack.agentBuilder.mcpClients.actions.revoke', {
+          defaultMessage: 'Revoke',
+        }),
+      },
+      form: {
+        pageTitle: i18n.translate('xpack.agentBuilder.mcpClients.form.pageTitle', {
+          defaultMessage: 'Create MCP client (OAuth)',
+        }),
+        pageDescription: i18n.translate('xpack.agentBuilder.mcpClients.form.pageDescription', {
+          defaultMessage:
+            'An MCP client enables agentic AI to securely interact with Elastic Cloud on your behalf. Agents can request access dynamically and act as delegated users.',
+        }),
+        createBreadcrumb: i18n.translate('xpack.agentBuilder.mcpClients.form.createBreadcrumb', {
+          defaultMessage: 'Create MCP client',
+        }),
+        createButton: i18n.translate('xpack.agentBuilder.mcpClients.form.createButton', {
+          defaultMessage: 'Create client',
+        }),
+        cancelButton: i18n.translate('xpack.agentBuilder.mcpClients.form.cancelButton', {
+          defaultMessage: 'Cancel',
+        }),
+        nameLabel: i18n.translate('xpack.agentBuilder.mcpClients.form.nameLabel', {
+          defaultMessage: 'Name',
+        }),
+        namePlaceholder: i18n.translate('xpack.agentBuilder.mcpClients.form.namePlaceholder', {
+          defaultMessage: 'Enter a client name (e.g. Log Analysis Agent)',
+        }),
+        logoLabel: i18n.translate('xpack.agentBuilder.mcpClients.form.logoLabel', {
+          defaultMessage: 'Client logo (optional)',
+        }),
+        selectLogoPlaceholder: i18n.translate(
+          'xpack.agentBuilder.mcpClients.form.selectLogoPlaceholder',
+          {
+            defaultMessage: 'Select logo',
+          }
+        ),
+        defaultLogoBadge: i18n.translate('xpack.agentBuilder.mcpClients.form.defaultLogoBadge', {
+          defaultMessage: 'Default',
+        }),
+        uploadLogoPrompt: i18n.translate('xpack.agentBuilder.mcpClients.form.uploadLogoPrompt', {
+          defaultMessage: 'Drag and drop or click to upload',
+        }),
+        uploadLogoHelp: (maxSize: string) =>
+          i18n.translate('xpack.agentBuilder.mcpClients.form.uploadLogoHelp', {
+            defaultMessage: 'PNG, JPEG, or GIF. Max {maxSize}. Recommended size: 48x48.',
+            values: { maxSize },
+          }),
+        uploadLogoInvalidType: i18n.translate(
+          'xpack.agentBuilder.mcpClients.form.uploadLogoInvalidType',
+          {
+            defaultMessage: 'Logo must be a PNG, JPEG, or GIF.',
+          }
+        ),
+        uploadLogoTooLarge: (maxSize: string, actualSize: string) =>
+          i18n.translate('xpack.agentBuilder.mcpClients.form.uploadLogoTooLarge', {
+            defaultMessage: 'Logo must be {maxSize} or smaller. Selected file is {actualSize}.',
+            values: { maxSize, actualSize },
+          }),
+        uploadLogoReadError: i18n.translate(
+          'xpack.agentBuilder.mcpClients.form.uploadLogoReadError',
+          {
+            defaultMessage: 'Could not read the selected file. Please try again.',
+          }
+        ),
+        logoUploadPreview: i18n.translate('xpack.agentBuilder.mcpClients.form.logoUploadPreview', {
+          defaultMessage: 'Selected logo: ',
+        }),
+        detailsSectionTitle: i18n.translate(
+          'xpack.agentBuilder.mcpClients.form.detailsSectionTitle',
+          {
+            defaultMessage: 'MCP details',
+          }
+        ),
+        redirectSectionTitle: i18n.translate(
+          'xpack.agentBuilder.mcpClients.form.redirectSectionTitle',
+          {
+            defaultMessage: 'Redirect URI type',
+          }
+        ),
+        redirectTypeLabel: i18n.translate('xpack.agentBuilder.mcpClients.form.redirectTypeLabel', {
+          defaultMessage: 'Redirect URI type',
+        }),
+        redirectLocal: i18n.translate('xpack.agentBuilder.mcpClients.form.redirectLocal', {
+          defaultMessage: 'Local',
+        }),
+        redirectLocalDescription: i18n.translate(
+          'xpack.agentBuilder.mcpClients.form.redirectLocalDescription',
+          {
+            defaultMessage: 'For applications running on your local machine.',
+          }
+        ),
+        redirectRemote: i18n.translate('xpack.agentBuilder.mcpClients.form.redirectRemote', {
+          defaultMessage: 'Remote',
+        }),
+        redirectRemoteDescription: i18n.translate(
+          'xpack.agentBuilder.mcpClients.form.redirectRemoteDescription',
+          {
+            defaultMessage: 'For hosted or cloud-based applications.',
+          }
+        ),
+        localUrlsLabel: i18n.translate('xpack.agentBuilder.mcpClients.form.localUrlsLabel', {
+          defaultMessage: 'Local URLs',
+        }),
+        localUrlsHelpText: i18n.translate('xpack.agentBuilder.mcpClients.form.localUrlsHelpText', {
+          defaultMessage: 'For common local agent (Claude Desktop, Cursor etc) you can use:',
+        }),
+        remoteUrlsLabel: i18n.translate('xpack.agentBuilder.mcpClients.form.remoteUrlsLabel', {
+          defaultMessage: 'Remote URL',
+        }),
+        remoteUrlsHelpText: i18n.translate(
+          'xpack.agentBuilder.mcpClients.form.remoteUrlsHelpText',
+          {
+            defaultMessage: 'Only HTTPS URLs are allowed.',
+          }
+        ),
+        addLocalUrl: i18n.translate('xpack.agentBuilder.mcpClients.form.addLocalUrl', {
+          defaultMessage: 'Add local URL',
+        }),
+        addRemoteUrl: i18n.translate('xpack.agentBuilder.mcpClients.form.addRemoteUrl', {
+          defaultMessage: 'Add remote URL',
+        }),
+        removeUriAriaLabel: i18n.translate(
+          'xpack.agentBuilder.mcpClients.form.removeUriAriaLabel',
+          {
+            defaultMessage: 'Remove URL',
+          }
+        ),
+        credentialsSectionTitle: i18n.translate(
+          'xpack.agentBuilder.mcpClients.form.credentialsSectionTitle',
+          {
+            defaultMessage: 'Client credentials',
+          }
+        ),
+        credentialsSectionDescription: i18n.translate(
+          'xpack.agentBuilder.mcpClients.form.credentialsSectionDescription',
+          {
+            defaultMessage:
+              'Client ID and server URL will be generated automatically when you create the client.',
+          }
+        ),
+        confidentialLabel: i18n.translate('xpack.agentBuilder.mcpClients.form.confidentialLabel', {
+          defaultMessage: 'Generate confidential MCP client (optional)',
+        }),
+        confidentialDescription: i18n.translate(
+          'xpack.agentBuilder.mcpClients.form.confidentialDescription',
+          {
+            defaultMessage:
+              'Make your MCP client confidential by generating a client secret. This is recommended for improved security.',
+          }
+        ),
+        createSuccessToast: (name: string) =>
+          i18n.translate('xpack.agentBuilder.mcpClients.form.createSuccessToast', {
+            defaultMessage: 'MCP client "{name}" created successfully',
+            values: { name },
+          }),
+        createErrorToast: i18n.translate('xpack.agentBuilder.mcpClients.form.createErrorToast', {
+          defaultMessage: 'Failed to create MCP client',
+        }),
+      },
+      details: {
+        clientIdLabel: i18n.translate('xpack.agentBuilder.mcpClients.details.clientIdLabel', {
+          defaultMessage: 'Client ID',
+        }),
+        serverUrlLabel: i18n.translate('xpack.agentBuilder.mcpClients.details.serverUrlLabel', {
+          defaultMessage: 'MCP server URL',
+        }),
+        closeButton: i18n.translate('xpack.agentBuilder.mcpClients.details.closeButton', {
+          defaultMessage: 'Close',
+        }),
+        copyClientId: i18n.translate('xpack.agentBuilder.mcpClients.details.copyClientId', {
+          defaultMessage: 'Copy Client ID',
+        }),
+        copyServerUrl: i18n.translate('xpack.agentBuilder.mcpClients.details.copyServerUrl', {
+          defaultMessage: 'Copy MCP server URL',
+        }),
+        modal: {
+          title: (name: string) =>
+            i18n.translate('xpack.agentBuilder.mcpClients.details.modal.title', {
+              defaultMessage: 'Copy server details for {name}',
+              values: { name },
+            }),
+          description: i18n.translate('xpack.agentBuilder.mcpClients.details.modal.description', {
+            defaultMessage:
+              'Copy the new Client ID and the Server URL into the application config file, and save your changes. To apply the new configuration, restart the application.',
+          }),
+          clientSecretLabel: i18n.translate(
+            'xpack.agentBuilder.mcpClients.details.modal.clientSecretLabel',
+            {
+              defaultMessage: 'MCP client secret',
+            }
+          ),
+          secretWarning: i18n.translate(
+            'xpack.agentBuilder.mcpClients.details.modal.secretWarning',
+            {
+              defaultMessage:
+                "Here's your confidential MCP client. We won't show it again, make sure to copy or download it now.",
+            }
+          ),
+          copySecret: i18n.translate('xpack.agentBuilder.mcpClients.details.modal.copySecret', {
+            defaultMessage: 'Copy client secret',
+          }),
+          downloadSecret: i18n.translate(
+            'xpack.agentBuilder.mcpClients.details.modal.downloadSecret',
+            {
+              defaultMessage: 'Download client secret',
+            }
+          ),
+          toggleSecretVisibility: i18n.translate(
+            'xpack.agentBuilder.mcpClients.details.modal.toggleSecretVisibility',
+            {
+              defaultMessage: 'Toggle secret visibility',
+            }
+          ),
+        },
+        flyout: {
+          serverDetailsHeading: i18n.translate(
+            'xpack.agentBuilder.mcpClients.details.flyout.serverDetailsHeading',
+            {
+              defaultMessage: 'Server details',
+            }
+          ),
+          clientSecretRequiredTitle: i18n.translate(
+            'xpack.agentBuilder.mcpClients.details.flyout.clientSecretRequiredTitle',
+            {
+              defaultMessage: 'Client secret required',
+            }
+          ),
+          clientSecretRequiredBody: i18n.translate(
+            'xpack.agentBuilder.mcpClients.details.flyout.clientSecretRequiredBody',
+            {
+              defaultMessage:
+                'This client was created with a client secret. The secret is required for authentication but is not shown here. Please use the copy you saved when it was created.',
+            }
+          ),
+        },
+      },
+      revoke: {
+        title: (name: string) =>
+          i18n.translate('xpack.agentBuilder.mcpClients.revoke.title', {
+            defaultMessage: 'Revoke {name}?',
+            values: { name },
+          }),
+        warningTitle: i18n.translate('xpack.agentBuilder.mcpClients.revoke.warningTitle', {
+          defaultMessage: 'Warning',
+        }),
+        confirmLabel: (name: string) =>
+          i18n.translate('xpack.agentBuilder.mcpClients.revoke.confirmLabel', {
+            defaultMessage: 'To confirm, type {name}',
+            values: { name },
+          }),
+        confirmPlaceholder: i18n.translate(
+          'xpack.agentBuilder.mcpClients.revoke.confirmPlaceholder',
+          {
+            defaultMessage: 'MCP client name',
+          }
+        ),
+        revokeButton: i18n.translate('xpack.agentBuilder.mcpClients.revoke.revokeButton', {
+          defaultMessage: 'Revoke',
+        }),
+        cancelButton: i18n.translate('xpack.agentBuilder.mcpClients.revoke.cancelButton', {
+          defaultMessage: 'Cancel',
+        }),
+        successToast: (name: string) =>
+          i18n.translate('xpack.agentBuilder.mcpClients.revoke.successToast', {
+            defaultMessage: 'MCP client "{name}" revoked successfully',
+            values: { name },
+          }),
+        errorToast: i18n.translate('xpack.agentBuilder.mcpClients.revoke.errorToast', {
+          defaultMessage: 'Failed to revoke MCP client',
+        }),
+      },
+    },
   },
   byAuthor: (author: string) =>
     i18n.translate('xpack.agentBuilder.byAuthor', {
@@ -1688,7 +2039,7 @@ export const labels = {
       'xpack.agentBuilder.connectors.status.earsDisabledTooltip',
       {
         defaultMessage:
-          'EARS authentication is disabled. Enable it via xpack.actions.ears.enabled in kibana.yml.',
+          'EARS authentication is disabled. Enable it via xpack.actions.auth.ears.enabled in kibana.yml.',
       }
     ),
     statusFilter: i18n.translate('xpack.agentBuilder.connectors.statusFilter', {

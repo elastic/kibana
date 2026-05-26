@@ -335,7 +335,7 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
         closePopover={() => togglePopover(false)}
         panelPaddingSize="none"
       >
-        <EuiContextMenuPanel size="s" items={items} />
+        <EuiContextMenuPanel items={items} />
       </EuiPopover>
       {isEditDescriptionModalOpen && !isWhere && isActionBlock(step) && (
         <EditStepDescriptionModal
