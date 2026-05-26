@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 
 const DurationSchema = z.string().regex(/[smhd]$/);
-const PositiveInt = z.int().positive();
+const PositiveInt = z.int().min(1);
 const NonNegativeInt = z.int().nonnegative();
 
 /**

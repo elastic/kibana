@@ -124,7 +124,7 @@ export class AssetManagerClient {
   ) {
     try {
       const existingState = await this.globalStateClient.find();
-      const logsExtraction = resolveLogsExtractionOnInstall(
+      const logsExtraction = getGlobalLogsExtractionConfig(
         existingState?.logsExtraction,
         logsExtractionParams
       );
@@ -607,12 +607,15 @@ export class AssetManagerClient {
   }
 }
 
-function resolveLogsExtractionOnInstall(
+
+/**
+ * Merge install params onto existing global config (or defaults).
+ * Per-engine `frequency` is stripped by LogExtractionConfig.parse() as it's not part of that schema.
+ */
+function getGlobalLogsExtractionConfig(
   existing: LogExtractionConfig | undefined,
   params: LogExtractionConfigBody | undefined
 ): LogExtractionConfig {
-  // Overlay onto existing (or defaults) so a partial update doesn't clobber other customizations.
-  // Per-engine fields (e.g. `frequency`) are silently stripped by the global-schema parse.
   const base = existing ?? LogExtractionConfig.parse({});
   return LogExtractionConfig.parse({ ...base, ...(params ?? {}) });
 }
