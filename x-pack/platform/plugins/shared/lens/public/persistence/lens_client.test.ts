@@ -35,6 +35,7 @@ describe('LensClient', () => {
   });
 
   beforeEach(() => {
+    jest.clearAllMocks();
     httpMock.get.mockResolvedValue(mockResponse);
     httpMock.post.mockResolvedValue(mockResponse);
     httpMock.put.mockResolvedValue(mockResponse);
