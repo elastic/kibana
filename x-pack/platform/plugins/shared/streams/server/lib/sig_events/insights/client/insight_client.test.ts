@@ -5,23 +5,31 @@
  * 2.0.
  */
 
-import { errors as esErrors } from '@elastic/elasticsearch';
 import expect from 'expect';
 
-type ResponseErrorMeta = ConstructorParameters<typeof esErrors.ResponseError>[0]['meta'];
 import type {
   IStorageClient,
   StorageClientBulkResponse,
   StorageClientCleanResponse,
   StorageClientDeleteResponse,
-  StorageClientGetResponse,
   StorageClientIndexResponse,
 } from '@kbn/storage-adapter';
 import type { Insight } from '@kbn/streams-schema';
 import { InsightClient } from './insight_client';
 import { INSIGHT_IMPACT, INSIGHT_IMPACT_LEVEL, INSIGHT_GENERATED_AT } from './fields';
 import type { InsightStorageSettings } from './storage_settings';
+import type { esql } from '@elastic/esql';
 import { StatusError } from '../../../streams/errors/status_error';
+
+/** Renders the ES|QL string from a mocked `storageClient.esql` call. */
+const renderEsqlCallQuery = (call: { pipeline: ReturnType<typeof esql.from> }): string =>
+  renderEsqlCall(call).query;
+
+const renderEsqlCall = (call: {
+  pipeline: ReturnType<typeof esql.from>;
+}): ReturnType<ReturnType<typeof esql.from>['toRequest']> => {
+  return call.pipeline.toRequest();
+};
 
 describe('InsightClient', () => {
   const createMockStorageClient = (): jest.Mocked<
@@ -35,6 +43,7 @@ describe('InsightClient', () => {
       bulk: jest.fn(),
       clean: jest.fn(),
       existsIndex: jest.fn(),
+      esql: jest.fn().mockResolvedValue({ columns: [], values: [] }),
     } as jest.Mocked<IStorageClient<InsightStorageSettings, Insight>>);
 
   const defaultGeneratedAt = '2024-01-15T12:00:00.000Z';
@@ -82,16 +91,20 @@ describe('InsightClient', () => {
       const client = new InsightClient({ storageClient: mockStorageClient });
 
       const insight = createInsight();
-      mockStorageClient.get.mockResolvedValue({
-        _source: insight,
-        _index: '.kibana_streams_insights',
-        _id: 'test-id',
-        found: true,
+      mockStorageClient.esql.mockResolvedValueOnce({
+        columns: [
+          { name: '_id', type: 'keyword' },
+          { name: '_source', type: 'object' },
+        ],
+        values: [['test-id', insight]],
       });
 
       const result = await client.get('test-id');
 
-      expect(mockStorageClient.get).toHaveBeenCalledWith({ id: 'test-id' });
+      const { query, params } = renderEsqlCall(mockStorageClient.esql.mock.calls[0][0]);
+      // ID is passed via a named param hole rather than baked into the query string.
+      expect(query).toContain('?id');
+      expect(params).toContainEqual({ id: 'test-id' });
       expect(result.id).toEqual('test-id');
       expect(result.title).toEqual('Test Insight');
     });
@@ -100,21 +113,7 @@ describe('InsightClient', () => {
       const mockStorageClient = createMockStorageClient();
       const client = new InsightClient({ storageClient: mockStorageClient });
 
-      const notFoundError = new esErrors.ResponseError({
-        statusCode: 404,
-        body: {},
-        headers: {},
-        warnings: [],
-        meta: {
-          aborted: false,
-          attempts: 1,
-          connection: null,
-          context: null,
-          name: 'elasticsearch-js',
-        } as unknown as ResponseErrorMeta,
-      });
-      mockStorageClient.get.mockRejectedValue(notFoundError);
-
+      // default esql mock returns empty response — no rows → not found
       await expect(client.get('non-existent-id')).rejects.toThrow();
     });
   });
@@ -124,21 +123,20 @@ describe('InsightClient', () => {
       const mockStorageClient = createMockStorageClient();
       const client = new InsightClient({ storageClient: mockStorageClient });
 
-      mockStorageClient.search.mockResolvedValue({
-        hits: {
-          hits: [{ _source: createInsight() }],
-          total: { value: 1 },
-        },
+      const insight = createInsight();
+      mockStorageClient.esql.mockResolvedValueOnce({
+        columns: [
+          { name: '_id', type: 'keyword' },
+          { name: '_source', type: 'object' },
+        ],
+        values: [['test-id', insight]],
       });
 
       const result = await client.list();
 
-      expect(mockStorageClient.search).toHaveBeenCalledWith(
-        expect.objectContaining({
-          query: { match_all: {} },
-          sort: [{ [INSIGHT_IMPACT_LEVEL]: 'asc' }, { [INSIGHT_GENERATED_AT]: 'desc' }],
-        })
-      );
+      const rendered = renderEsqlCallQuery(mockStorageClient.esql.mock.calls[0][0]);
+      expect(rendered).toContain(`SORT ${INSIGHT_IMPACT_LEVEL} ASC, ${INSIGHT_GENERATED_AT} DESC`);
+      expect(mockStorageClient.search).not.toHaveBeenCalled();
       expect(result.insights).toHaveLength(1);
       expect(result.total).toEqual(1);
     });
@@ -147,18 +145,12 @@ describe('InsightClient', () => {
       const mockStorageClient = createMockStorageClient();
       const client = new InsightClient({ storageClient: mockStorageClient });
 
-      mockStorageClient.search.mockResolvedValue({
-        hits: {
-          hits: [],
-          total: { value: 0 },
-        },
-      });
-
+      // default esql mock returns empty response
       await client.list({ impact: ['critical', 'high'] });
 
-      expect(mockStorageClient.search).toHaveBeenCalledWith(
+      expect(mockStorageClient.esql).toHaveBeenCalledWith(
         expect.objectContaining({
-          query: {
+          filter: {
             bool: {
               filter: [{ terms: { [INSIGHT_IMPACT]: ['critical', 'high'] } }],
             },
@@ -174,17 +166,20 @@ describe('InsightClient', () => {
       const client = new InsightClient({ storageClient: mockStorageClient });
 
       const storedInsight = createInsight();
-      mockStorageClient.get.mockResolvedValue({
-        _source: storedInsight,
-        _index: '.kibana_streams_insights',
-        _id: 'test-id',
-        found: true,
-      } as unknown as StorageClientGetResponse<Insight & { _id?: string }>);
+      mockStorageClient.esql.mockResolvedValueOnce({
+        columns: [
+          { name: '_id', type: 'keyword' },
+          { name: '_source', type: 'object' },
+        ],
+        values: [['test-id', storedInsight]],
+      });
       mockStorageClient.delete.mockResolvedValue({} as StorageClientDeleteResponse);
 
       const result = await client.delete('test-id');
 
-      expect(mockStorageClient.get).toHaveBeenCalledWith({ id: 'test-id' });
+      const { query, params } = renderEsqlCall(mockStorageClient.esql.mock.calls[0][0]);
+      expect(query).toContain('?id');
+      expect(params).toContainEqual({ id: 'test-id' });
       expect(mockStorageClient.delete).toHaveBeenCalledWith({ id: 'test-id' });
       expect(result).toEqual({ acknowledged: true });
     });
@@ -214,11 +209,12 @@ describe('InsightClient', () => {
       const mockStorageClient = createMockStorageClient();
       const client = new InsightClient({ storageClient: mockStorageClient });
 
-      mockStorageClient.search.mockResolvedValue({
-        hits: {
-          hits: [{ _id: 'test-id' }],
-          total: { value: 1 },
-        },
+      mockStorageClient.esql.mockResolvedValueOnce({
+        columns: [
+          { name: '_id', type: 'keyword' },
+          { name: '_source', type: 'object' },
+        ],
+        values: [['test-id', createInsight()]],
       });
       mockStorageClient.bulk.mockResolvedValue({} as StorageClientBulkResponse);
 
@@ -236,13 +232,7 @@ describe('InsightClient', () => {
       const mockStorageClient = createMockStorageClient();
       const client = new InsightClient({ storageClient: mockStorageClient });
 
-      mockStorageClient.search.mockResolvedValue({
-        hits: {
-          hits: [],
-          total: { value: 0 },
-        },
-      });
-
+      // default esql mock returns empty response — no matching id → missing
       await expect(client.bulk([{ delete: { id: 'non-existent' } }])).rejects.toThrow(StatusError);
     });
   });

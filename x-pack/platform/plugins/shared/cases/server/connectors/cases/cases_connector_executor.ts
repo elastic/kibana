@@ -25,6 +25,7 @@ import {
   MAX_SUFFIX_LENGTH,
 } from '../../../common/constants';
 import { COMMENT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
+import { hasOwnerUnifiedPrefix, toUnifiedAttachmentType } from '../../../common/utils/attachments';
 import type { AttachmentRequestV2, BulkCreateCasesRequest } from '../../../common/types/api';
 import type { Case } from '../../../common';
 import { ConnectorTypes, AttachmentType } from '../../../common';
@@ -52,6 +53,7 @@ import {
   GROUPED_BY_DESC,
   GROUPED_BY_TITLE,
 } from './translations';
+import { toStringArray } from '../../../common/utils/attachments/string_utils';
 
 interface CasesConnectorExecutorParams {
   logger: Logger;
@@ -1197,25 +1199,52 @@ export class CasesConnectorExecutor {
                   owner: theCase.owner,
                 }
           ) ?? [];
+        const rulePayload = internallyManagedAlerts
+          ? { id: null, name: null }
+          : { id: rule.id, name: rule.name };
+        // Collect the parallel alertId / alertIndex arrays in a single pass.
+        // Order is preserved by reduce per the ECMA-262 spec.
+        const { alertIds, alertIndices } = alerts.reduce<{
+          alertIds: string[];
+          alertIndices: string[];
+        }>(
+          (acc, alert) => {
+            acc.alertIds.push(alert._id);
+            acc.alertIndices.push(alert._index);
+            return acc;
+          },
+          { alertIds: [], alertIndices: [] }
+        );
+
+        // Only write the unified shape when the feature flag is on AND the
+        // case owner has a registered unified prefix.
+        const isUnifiedAlertValid =
+          this.isCasesAttachmentsEnabled && hasOwnerUnifiedPrefix(theCase.owner);
+
+        if (this.isCasesAttachmentsEnabled && !isUnifiedAlertValid) {
+          this.logger.warn(
+            `[CasesConnector][CasesConnectorExecutor][attachAlertsToCases] Owner "${theCase.owner}" has no unified attachment prefix; falling back to legacy alert attachment for case ${theCase.id}.`
+          );
+        }
+
+        const alertAttachment: AttachmentRequestV2 = isUnifiedAlertValid
+          ? {
+              type: toUnifiedAttachmentType(AttachmentType.alert, theCase.owner),
+              attachmentId: alertIds,
+              metadata: { index: alertIndices, rule: rulePayload },
+              owner: theCase.owner,
+            }
+          : {
+              type: AttachmentType.alert,
+              rule: rulePayload,
+              alertId: alertIds,
+              index: alertIndices,
+              owner: theCase.owner,
+            };
+
         return {
           caseId: theCase.id,
-          attachments: [
-            ...extraComments,
-            {
-              type: AttachmentType.alert,
-              rule: internallyManagedAlerts
-                ? { id: null, name: null }
-                : { id: rule.id, name: rule.name },
-              /**
-               * Map traverses the array in ascending order.
-               * The order is guaranteed to be the same for
-               * both calls by the ECMA-262 spec.
-               */
-              alertId: alerts.map((alert) => alert._id),
-              index: alerts.map((alert) => alert._index),
-              owner: theCase.owner,
-            },
-          ],
+          attachments: [...extraComments, alertAttachment],
         };
       }
     );
@@ -1227,15 +1256,21 @@ export class CasesConnectorExecutor {
        */
       async (req: BulkCreateAlertsReq) => {
         if (this.logger.isLevelEnabled('debug')) {
+          const attachmentIdsForLogging = req.attachments.flatMap((attachment) => {
+            if ('alertId' in attachment) {
+              return toStringArray(attachment.alertId);
+            }
+            if ('attachmentId' in attachment) {
+              return toStringArray(attachment.attachmentId);
+            }
+            return [];
+          });
+
           this.logger.debug(
             `[CasesConnector][CasesConnectorExecutor][attachAlertsToCases] Attaching ${req.attachments.length} alerts to case with ID ${req.caseId}`,
             this.getLogMetadata(params, {
               labels: { caseId: req.caseId },
-              tags: [
-                'case-connector:attachAlertsToCases',
-                req.caseId,
-                ...(req.attachments as Array<{ alertId: string }>).map(({ alertId }) => alertId),
-              ],
+              tags: ['case-connector:attachAlertsToCases', req.caseId, ...attachmentIdsForLogging],
             })
           );
         }

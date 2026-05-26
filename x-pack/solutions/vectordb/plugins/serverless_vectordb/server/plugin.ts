@@ -15,6 +15,8 @@ import type {
 import { VECTORDB_PROJECT_SETTINGS } from '@kbn/serverless-vectordb-settings';
 
 import type { ServerlessVectordbConfig } from './config';
+import { registerCreateApiKeyRoute } from './routes/api_key';
+import { registerDeploymentStatsRoute } from './routes/deployment_stats';
 import type {
   ServerlessVectordbPluginSetup,
   ServerlessVectordbPluginStart,
@@ -33,7 +35,6 @@ export class ServerlessVectordbPlugin
 {
   // @ts-ignore config is not used for now
   private readonly config: ServerlessVectordbConfig;
-  // @ts-ignore logger is not used for now
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {
@@ -43,6 +44,11 @@ export class ServerlessVectordbPlugin
 
   public setup(core: CoreSetup<StartDependencies>, { serverless }: SetupDependencies) {
     serverless.setupProjectSettings(VECTORDB_PROJECT_SETTINGS);
+
+    const router = core.http.createRouter();
+    registerDeploymentStatsRoute(router, this.logger);
+    registerCreateApiKeyRoute(router, this.logger);
+
     return {};
   }
 

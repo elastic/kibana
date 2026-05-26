@@ -20,6 +20,7 @@ import type { AtomicGraphNode } from '@kbn/workflows/graph';
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import { mockContextDependencies } from '../../execution_functions/__mock__/context_dependencies';
 import { WorkflowTemplatingEngine } from '../../templating_engine';
+import type { StepIoService } from '../step_io_service';
 import { WorkflowContextManager } from '../workflow_context_manager';
 import type { WorkflowExecutionState } from '../workflow_execution_state';
 
@@ -167,10 +168,11 @@ const createBroaderSurfaceContainer = () => {
     .fn()
     .mockImplementation((stepId: string): Partial<EsWorkflowStepExecution> | undefined => {
       if (stepId in largeStepOutputs) {
+        // Metadata only — IO lives in the IO service mock below.
         return {
+          id: stepId,
+          stepId,
           state: { fetched: true, stepId },
-          input: undefined,
-          output: largeStepOutputs[stepId as keyof typeof largeStepOutputs],
           error: undefined,
         };
       }
@@ -195,12 +197,37 @@ const createBroaderSurfaceContainer = () => {
     return actualRender(obj, context);
   });
 
+  // IO maps live entirely in the service mock now (state holds metadata only).
+  const stepIoService = {
+    hasEvictedOutputs: jest.fn().mockReturnValue(false),
+    prepareForRead: jest.fn().mockResolvedValue(undefined),
+    releaseTransientlyRehydratedOutputs: jest.fn(),
+    getStepInput: jest.fn().mockReturnValue(undefined),
+    getStepOutput: jest.fn(
+      (id: string) =>
+        (largeStepOutputs as Record<string, unknown>)[id as keyof typeof largeStepOutputs]
+    ),
+    getStepError: jest.fn().mockReturnValue(undefined),
+    getLatestStepIO: jest.fn((stepId: string) => {
+      if (stepId in largeStepOutputs) {
+        return {
+          input: undefined,
+          output: largeStepOutputs[stepId as keyof typeof largeStepOutputs],
+          error: undefined,
+        };
+      }
+      return undefined;
+    }),
+    getDataSetVariables: jest.fn((): Record<string, unknown> => ({})),
+  } as unknown as StepIoService;
+
   const contextManager = new WorkflowContextManager({
     templateEngine: templatingEngine,
     node,
     stackFrames: [],
     workflowExecutionGraph,
     workflowExecutionState,
+    stepIoService,
     esClient,
     dependencies,
     fakeRequest: {} as KibanaRequest,

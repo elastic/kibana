@@ -190,15 +190,11 @@ function validateEmails(
   addresses: string[],
   options: ValidateEmailAddressesOptions
 ): string | undefined {
-  if (config.email?.domain_allowlist == null && config.email?.recipient_allowlist == null) {
-    return;
-  }
-
   const validated = validateEmailAddresses(
-    config.email.domain_allowlist,
+    config.email?.domain_allowlist ?? null,
     addresses,
     options,
-    config.email.recipient_allowlist
+    config.email?.recipient_allowlist ?? null
   );
   return invalidEmailsAsMessage(validated);
 }
@@ -285,7 +281,7 @@ export function getActionsConfigurationUtilities(
       const nonNegativeLength = Math.max(0, configuredLength);
       return Math.min(nonNegativeLength, MAX_EMAIL_BODY_LENGTH);
     },
-    getEarsUrl: () => config.auth.ears?.url || config.ears?.url,
-    isEarsEnabled: () => config.auth.ears?.enabled ?? config.ears?.enabled ?? false,
+    getEarsUrl: () => config.auth.ears?.url,
+    isEarsEnabled: () => config.auth.ears?.enabled ?? false,
   };
 }

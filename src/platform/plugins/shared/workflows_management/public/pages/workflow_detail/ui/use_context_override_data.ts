@@ -10,7 +10,7 @@
 import { useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { v4 as generateUuid } from 'uuid';
-import YAML from 'yaml';
+import { extractNormalizedInputsFromYaml } from '@kbn/workflows/spec/lib/field_conversion';
 import {
   selectWorkflowDefinition,
   selectWorkflowGraph,
@@ -37,19 +37,10 @@ export function useContextOverrideData() {
         return null;
       }
 
-      // Try to get inputs from workflowDefinition first, fallback to parsing YAML directly
-      let inputsDefinition = workflowDefinition.inputs;
-      if (!inputsDefinition && yamlString) {
-        try {
-          const yamlDoc = YAML.parseDocument(yamlString);
-          const parsed = yamlDoc.toJSON() as Record<string, unknown>;
-          inputsDefinition = parsed.inputs as typeof inputsDefinition;
-        } catch (error) {
-          // Ignore YAML parsing errors
-        }
-      }
+      const inputs = extractNormalizedInputsFromYaml(workflowDefinition, yamlString);
 
       const stepSubGraph = workflowGraph.getStepGraph(stepId);
+
       return buildContextOverride(stepSubGraph, {
         consts: workflowDefinition.consts,
         workflow: {
@@ -58,7 +49,7 @@ export function useContextOverrideData() {
           enabled: workflowDefinition.enabled || true,
           spaceId,
         },
-        inputsDefinition,
+        inputsDefinition: inputs,
       });
     },
     [workflowGraph, workflowDefinition, spaceId, yamlString]

@@ -46,8 +46,8 @@ export interface ChangeHistoryDocument {
     created?: string;
   };
 
-  transaction?: {
-    /** ID shared between events in the same transaction. */
+  span?: {
+    /** ID shared between events in the same bulk operation. */
     id: string;
   };
 
@@ -58,7 +58,16 @@ export interface ChangeHistoryDocument {
     type: string;
     /** SHA256 hash of the entity.raw to identify changes in the payload. */
     hash: string;
-    /** Version identifier used for ordering. Increases with each version. */
+    /**
+     * Monotonically increasing integer determining object changes order.
+     *
+     * `@timestamp` is used for ordering when omitted.
+     *
+     * Use `object.sequence` when you can't tolerate clock skew. The best source for
+     * such a sequence number is some monotonically increasing number tracked in the
+     * source object which gets incremented upon every object change. It has to survive
+     * reindexing, upgrades, failovers, migrations and cluster rebuilds.
+     */
     sequence?: number;
     fields: {
       /** Full paths of fields stored as hashes (sensitive fields or blob binaries). */
@@ -88,7 +97,16 @@ export interface ObjectChange {
   objectType: string;
   /** The `object.id`. Uniquely identifies this object in Kibana within its `type` */
   objectId: string;
-  /** A sequentially increasing version for ordering changes. Please avoid ES _seq_no or _version as these are not reliable */
+  /**
+   * Monotonically increasing integer determining object changes order.
+   *
+   * `@timestamp` is used for ordering when omitted.
+   *
+   * Use `object.sequence` when you can't tolerate clock skew. The best source for
+   * such a sequence number is some monotonically increasing number tracked in the
+   * source object which gets incremented upon every object change. It has to survive
+   * reindexing, upgrades, failovers, migrations and cluster rebuilds.
+   */
   sequence?: number;
   /**
    * Full snapshot of the object **after** the change (post-write state). Persisted as
@@ -106,7 +124,7 @@ export interface LogChangeHistoryOptions {
   userProfileId?: string;
   /** Kibana space that the event belongs to. (ie `default` etc). */
   spaceId: string;
-  /** ID shared between events that take place together (ie in the same transaction). */
+  /** ID shared between events that take place together (ie in the same bulk operation). */
   correlationId?: string;
   /**
    * Direct overrides for the change document (`tags`, `metadata`, and selected `event` fields).

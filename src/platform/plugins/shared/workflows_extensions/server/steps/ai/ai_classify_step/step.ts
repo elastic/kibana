@@ -15,6 +15,7 @@ import {
   buildInstructionsPart,
   buildSystemPart,
 } from './build_prompts';
+import { convertOutputToModelResponseSchema } from './schemas';
 import { validateModelResponse } from './validate_model_response';
 import {
   AiClassifyStepCommonDefinition,
@@ -22,6 +23,7 @@ import {
 } from '../../../../common/steps/ai';
 import { createServerStepDefinition } from '../../../step_registry/types';
 import type { WorkflowsExtensionsServerPluginStartDeps } from '../../../types';
+import { AI_CLASSIFY_FEATURE_ID } from '../ai_feature_ids';
 import { resolveConnectorId } from '../utils/resolve_connector_id';
 
 export const aiClassifyStepDefinition = (
@@ -30,12 +32,13 @@ export const aiClassifyStepDefinition = (
   createServerStepDefinition({
     ...AiClassifyStepCommonDefinition,
     handler: async (context) => {
-      const [, { inference }] = await coreSetup.getStartServices();
+      const [, { inference, searchInferenceEndpoints }] = await coreSetup.getStartServices();
 
       const resolvedConnectorId = await resolveConnectorId(
         context.config['connector-id'],
         inference,
-        context.contextManager.getFakeRequest()
+        context.contextManager.getFakeRequest(),
+        { featureId: AI_CLASSIFY_FEATURE_ID, searchInferenceEndpoints }
       );
 
       const chatModel = await inference.getChatModel({
@@ -55,7 +58,9 @@ export const aiClassifyStepDefinition = (
         fallbackCategory,
         includeRationale = false,
       } = context.input;
-      const responseZodSchema = buildStructuredOutputSchema(context.input);
+      const responseZodSchema = convertOutputToModelResponseSchema(
+        buildStructuredOutputSchema(context.input)
+      );
       const modelInput: MessageFieldWithRole[] = [
         ...buildSystemPart(),
         ...buildDataPart(input),

@@ -81,6 +81,7 @@ const ObservabilityUptimeAlertOptional = rt.partial({
   'host.name': schemaString,
   'kibana.alert.context': schemaUnknown,
   'kibana.alert.evaluation.threshold': schemaStringOrNumber,
+  'kibana.alert.evaluation.time_range': schemaDateRange,
   'kibana.alert.evaluation.value': schemaStringOrNumber,
   'kibana.alert.evaluation.values': schemaStringOrNumberArray,
   'kibana.alert.group': rt.array(

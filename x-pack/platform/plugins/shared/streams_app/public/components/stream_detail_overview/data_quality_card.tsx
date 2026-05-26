@@ -10,15 +10,16 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
+  EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
   EuiTitle,
   EuiToolTip,
   formatNumber,
 } from '@elastic/eui';
-import { calculatePercentage, DatasetQualityIndicator } from '@kbn/dataset-quality-plugin/public';
+import { calculatePercentage } from '@kbn/dataset-quality-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { Streams } from '@kbn/streams-schema';
+import { isEnabledFailureStore, Streams } from '@kbn/streams-schema';
 import React, { useMemo } from 'react';
 import { useStreamDetail } from '../../hooks/use_stream_detail';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
@@ -26,39 +27,13 @@ import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { useKibana } from '../../hooks/use_kibana';
 import { executeEsqlQuery } from '../../hooks/use_execute_esql_query';
-import { calculateDataQuality } from '../../util/calculate_data_quality';
 import {
   buildDataQualityDegradedDocCountEsql,
   buildDataQualityIgnoredFieldsCountEsql,
   buildDataQualityTotalDocCountEsql,
 } from '../../util/stream_overview_esql';
-import { OverviewStat } from './overview_stat';
-
-function FailedDocsNoPrivilege() {
-  return (
-    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-      <span>{'—'}</span>
-      <EuiToolTip
-        content={i18n.translate(
-          'xpack.streams.streamOverview.dataQualityCard.failedDocsNoPrivilege',
-          { defaultMessage: 'You do not have the required privilege to view failure store data.' }
-        )}
-      >
-        <EuiButtonIcon
-          iconType="warning"
-          color="text"
-          size="xs"
-          href="https://www.elastic.co/docs/manage-data/data-store/data-streams/failure-store"
-          target="_blank"
-          aria-label={i18n.translate(
-            'xpack.streams.streamOverview.dataQualityCard.failedDocsNoPrivilegeAriaLabel',
-            { defaultMessage: 'Insufficient privilege — learn more about failure store' }
-          )}
-        />
-      </EuiToolTip>
-    </EuiFlexGroup>
-  );
-}
+import { StatCell, TrendSubtitle } from './stat_cell';
+import { TopFailureReasons } from './top_failure_reasons';
 
 export function DataQualityCard() {
   const { definition } = useStreamDetail();
@@ -74,7 +49,7 @@ function DataQualityCardContent({ definition }: { definition: Streams.ingest.all
   const router = useStreamsAppRouter();
   const { rangeFrom, rangeTo } = useTimeRange();
   const {
-    core: { uiSettings },
+    core: { application, uiSettings },
     dependencies: {
       start: {
         data,
@@ -84,9 +59,11 @@ function DataQualityCardContent({ definition }: { definition: Streams.ingest.all
   } = useKibana();
 
   const canReadFailureStore = definition.privileges.read_failure_store;
+  const failureStoreEnabled = isEnabledFailureStore(definition.effective_failure_store);
+  const canQueryFailureStore = canReadFailureStore && failureStoreEnabled;
   const streamName = definition.stream.name;
 
-  const dataSourceForTimeRange = canReadFailureStore
+  const dataSourceForTimeRange = canQueryFailureStore
     ? `${streamName},${streamName}::failures`
     : streamName;
 
@@ -135,7 +112,7 @@ function DataQualityCardContent({ definition }: { definition: Streams.ingest.all
   // Only fetched when the user has read_failure_store privilege.
   const failedDocsResult = useStreamsAppFetch(
     async ({ signal, timeState: ts }) => {
-      if (!canReadFailureStore) return 0;
+      if (!canQueryFailureStore) return 0;
       if (!ts) return 0;
       const result = await streamsRepositoryClient.fetch(
         'GET /internal/streams/doc_counts/failed',
@@ -146,7 +123,7 @@ function DataQualityCardContent({ definition }: { definition: Streams.ingest.all
       );
       return result.find((d) => d.stream === streamName)?.count ?? 0;
     },
-    [streamName, streamsRepositoryClient, canReadFailureStore],
+    [streamName, streamsRepositoryClient, canQueryFailureStore],
     { withTimeRange: true, withRefresh: true }
   );
 
@@ -173,11 +150,6 @@ function DataQualityCardContent({ definition }: { definition: Streams.ingest.all
   const degradedDocs = degradedDocsResult.value ?? 0;
   const failedDocs = failedDocsResult.value ?? 0;
 
-  const quality = useMemo(
-    () => calculateDataQuality({ totalDocs, degradedDocs, failedDocs }),
-    [totalDocs, degradedDocs, failedDocs]
-  );
-
   const degradedPercentage = useMemo(
     () => calculatePercentage({ totalDocs, count: degradedDocs }),
     [totalDocs, degradedDocs]
@@ -191,15 +163,13 @@ function DataQualityCardContent({ definition }: { definition: Streams.ingest.all
   const isQualityLoading =
     totalDocsResult.loading || degradedDocsResult.loading || failedDocsResult.loading;
 
-  const dataQualityManagementLinkArgs = [
-    '/{key}/management/{tab}',
-    {
-      path: { key: streamName, tab: 'dataQuality' as const },
-      query: { rangeFrom, rangeTo },
-    },
-  ] as const;
+  const degradedColor =
+    degradedPercentage === 0 ? 'success' : degradedPercentage <= 3 ? 'warning' : 'danger';
 
-  const dataQualityTabHref = router.link(...dataQualityManagementLinkArgs);
+  const dataQualityTabHref = router.link('/{key}/management/{tab}', {
+    path: { key: streamName, tab: 'dataQuality' as const },
+    query: { rangeFrom, rangeTo },
+  });
 
   const formatPct = (value: number) => `${formatNumber(value, '0.[00]')}%`;
 
@@ -215,79 +185,111 @@ function DataQualityCardContent({ definition }: { definition: Streams.ingest.all
             </h2>
           </EuiTitle>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <DatasetQualityIndicator
-            quality={quality}
-            isLoading={isQualityLoading}
-            showTooltip={true}
-            dataTestSubj={`streamsOverviewDataQualityIndicator-${streamName}`}
-          />
-        </EuiFlexItem>
         <EuiFlexItem />
         <EuiFlexItem grow={false}>
-          {
-            // eslint-disable-next-line @elastic/eui/href-or-on-click -- client-side navigation via router.push; href for a11y / new tab
-            <EuiLink
-              href={dataQualityTabHref}
-              data-test-subj="streamsOverviewDataQualityLink"
-              onClick={(e: React.MouseEvent) => {
-                e.preventDefault();
-                router.push(...dataQualityManagementLinkArgs);
-              }}
-            >
-              {i18n.translate('xpack.streams.streamOverview.dataQualityCard.viewAll', {
-                defaultMessage: 'View all',
-              })}
-            </EuiLink>
-          }
+          <EuiLink
+            href={dataQualityTabHref}
+            data-test-subj="streamsOverviewDataQualityLink"
+            onMouseDown={(e: React.MouseEvent) => {
+              // Only handle plain left clicks; let modifier combos (Ctrl/Cmd+click etc.) use the href.
+              if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+              // Prevent focus-on-mousedown. Without this, focus triggers a connector
+              // re-fetch → React re-render → inner scroll container resets → mouseup
+              // lands on a different element → the browser never fires the click event.
+              e.preventDefault();
+              application.navigateToUrl(dataQualityTabHref);
+            }}
+          >
+            {i18n.translate('xpack.streams.streamOverview.dataQualityCard.viewAll', {
+              defaultMessage: 'View all',
+            })}
+          </EuiLink>
         </EuiFlexItem>
       </EuiFlexGroup>
 
       <EuiSpacer size="m" />
 
-      <EuiFlexGroup
-        justifyContent="spaceBetween"
-        alignItems="flexStart"
-        responsive
-        gutterSize="none"
-      >
-        <EuiFlexItem grow={false}>
-          <OverviewStat
-            title={formatPct(degradedPercentage)}
-            description={i18n.translate(
-              'xpack.streams.streamOverview.dataQualityCard.degradedDocs',
-              { defaultMessage: 'Degraded docs' }
-            )}
-            isLoading={isQualityLoading}
-            titleColor="warning"
-            dataTestSubj="streamsOverviewDegradedDocs"
-          />
-        </EuiFlexItem>
+      <EuiFlexGroup wrap>
+        <EuiFlexItem>
+          <EuiFlexGroup>
+            <StatCell
+              data-test-subj="streamsOverviewDegradedDocs"
+              title={i18n.translate('xpack.streams.streamOverview.dataQualityCard.degradedDocs', {
+                defaultMessage: 'Degraded docs',
+              })}
+              value={
+                isQualityLoading ? <EuiLoadingSpinner size="m" /> : formatPct(degradedPercentage)
+              }
+              valueColor={isQualityLoading ? undefined : degradedColor}
+              subtitle={<TrendSubtitle trend={null} loading={isQualityLoading} />}
+            />
 
-        <EuiFlexItem grow={false}>
-          <OverviewStat
-            title={canReadFailureStore ? formatPct(failedPercentage) : <FailedDocsNoPrivilege />}
-            description={i18n.translate('xpack.streams.streamOverview.dataQualityCard.failedDocs', {
-              defaultMessage: 'Failed docs',
-            })}
-            isLoading={canReadFailureStore ? failedDocsResult.loading : false}
-            titleColor={canReadFailureStore ? 'danger' : undefined}
-            dataTestSubj="streamsOverviewFailedDocs"
-          />
-        </EuiFlexItem>
+            <StatCell
+              data-test-subj="streamsOverviewFailedDocs"
+              title={i18n.translate('xpack.streams.streamOverview.dataQualityCard.failedDocs', {
+                defaultMessage: 'Failed docs',
+              })}
+              value={canReadFailureStore ? formatPct(failedPercentage) : <FailedDocsNoPrivilege />}
+              subtitle={
+                <TrendSubtitle
+                  trend={null}
+                  loading={canReadFailureStore && failedDocsResult.loading}
+                />
+              }
+            />
 
-        <EuiFlexItem grow={false}>
-          <OverviewStat
-            title={formatNumber(ignoredFieldsResult.value ?? 0, '0,0')}
-            description={i18n.translate(
-              'xpack.streams.streamOverview.dataQualityCard.ignoredFields',
-              { defaultMessage: 'Ignored fields' }
-            )}
-            isLoading={ignoredFieldsResult.loading}
-            dataTestSubj="streamsOverviewIgnoredFields"
-          />
+            <StatCell
+              data-test-subj="streamsOverviewIgnoredFields"
+              title={i18n.translate('xpack.streams.streamOverview.dataQualityCard.ignoredFields', {
+                defaultMessage: 'Ignored fields',
+              })}
+              value={
+                ignoredFieldsResult.loading ? (
+                  <EuiLoadingSpinner size="m" />
+                ) : (
+                  formatNumber(ignoredFieldsResult.value ?? 0, '0,0')
+                )
+              }
+              unit={i18n.translate(
+                'xpack.streams.streamOverview.dataQualityCard.ignoredFields.unit',
+                {
+                  defaultMessage: 'fields',
+                }
+              )}
+              subtitle={<TrendSubtitle trend={null} loading={ignoredFieldsResult.loading} />}
+            />
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <TopFailureReasons streamName={streamName} canReadFailureStore={canQueryFailureStore} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
+  );
+}
+
+function FailedDocsNoPrivilege() {
+  return (
+    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+      <span>{'—'}</span>
+      <EuiToolTip
+        content={i18n.translate(
+          'xpack.streams.streamOverview.dataQualityCard.failedDocsNoPrivilege',
+          { defaultMessage: 'You do not have the required privilege to view failure store data.' }
+        )}
+      >
+        <EuiButtonIcon
+          iconType="warning"
+          color="text"
+          size="xs"
+          href="https://www.elastic.co/docs/manage-data/data-store/data-streams/failure-store"
+          target="_blank"
+          aria-label={i18n.translate(
+            'xpack.streams.streamOverview.dataQualityCard.failedDocsNoPrivilegeAriaLabel',
+            { defaultMessage: 'Insufficient privilege — learn more about failure store' }
+          )}
+        />
+      </EuiToolTip>
+    </EuiFlexGroup>
   );
 }

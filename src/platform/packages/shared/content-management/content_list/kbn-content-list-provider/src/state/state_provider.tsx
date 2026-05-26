@@ -19,6 +19,7 @@ import { getPersistedPageSize } from '../features/pagination';
 import type { PaginationConfig } from '../features/pagination';
 import { reducer, DEFAULT_SELECTION } from './state_reducer';
 import { useContentListItemsQuery } from '../query';
+import { ContentListUrlSync } from '../features/url_sync';
 
 /**
  * Props for `ContentListStateProvider`.
@@ -159,6 +160,7 @@ export const ContentListStateProvider = ({ children }: ContentListStateProviderP
 
   return (
     <ContentListStateContext.Provider value={contextValue}>
+      <ContentListUrlSync />
       {children}
     </ContentListStateContext.Provider>
   );
