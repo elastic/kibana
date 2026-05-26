@@ -114,13 +114,14 @@ export const RuleActionsConnectorsBody = ({
       const uuid = uuidv4();
       const group = selectedRuleType.defaultActionGroupId;
       const connectorConfig = 'config' in connector ? connector.config : undefined;
-      const actionTypeModel = actionTypeRegistry.has(actionTypeId)
-        ? actionTypeRegistry.get(actionTypeId)
-        : undefined;
+      const actionTypeModel = actionTypeRegistry.get(actionTypeId);
 
-      const params = actionTypeModel
-        ? getDefaultParams({ group, ruleType: selectedRuleType, actionTypeModel }) || {}
-        : {};
+      const params =
+        getDefaultParams({
+          group,
+          ruleType: selectedRuleType,
+          actionTypeModel,
+        }) || {};
 
       dispatch({
         type: 'addAction',
@@ -134,9 +135,9 @@ export const RuleActionsConnectorsBody = ({
         },
       });
 
-      const res: { errors: RuleFormParamsErrors } = actionTypeModel
-        ? await actionTypeModel.validateParams(params, connectorConfig)
-        : { errors: {} };
+      const res: { errors: RuleFormParamsErrors } = await actionTypeRegistry
+        .get(actionTypeId)
+        ?.validateParams(params, connectorConfig);
 
       dispatch({
         type: 'setActionParamsError',

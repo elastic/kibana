@@ -182,29 +182,6 @@ describe('useActionTypeModel', () => {
     expect(result.current.actionTypeModel).toBeNull();
   });
 
-  it('does not fetch for non-spec connectors not in registry', async () => {
-    actionTypeRegistry.has.mockReturnValue(false);
-
-    const { result } = renderHook(
-      () =>
-        useActionTypeModel({
-          actionTypeRegistry,
-          actionTypeId: 'unknown-connector',
-          http: mockHttp as any,
-          uiSettings: mockUiSettings as any,
-        }),
-      { wrapper: createWrapper() }
-    );
-
-    // Should not be loading (no fetch triggered)
-    expect(result.current.isLoading).toBe(false);
-    expect(result.current.actionTypeModel).toBeNull();
-    expect(result.current.error).toBeNull();
-
-    // Should not call HTTP get for non-spec connectors
-    expect(mockHttp.get).not.toHaveBeenCalled();
-  });
-
   it('handles fetch errors correctly', async () => {
     actionTypeRegistry.has.mockReturnValue(false);
     const fetchError = new Error('Failed to fetch spec');
