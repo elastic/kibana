@@ -14,7 +14,7 @@ import { FLEET_PROXY_SAVED_OBJECT_TYPE } from '../constants';
 
 import { appContextService } from './app_context';
 
-import { deleteFleetProxy, bulkCreateFleetProxies } from './fleet_proxies';
+import { createFleetProxy, deleteFleetProxy, bulkCreateFleetProxies } from './fleet_proxies';
 import { fleetServerHostService } from './fleet_server_host';
 import { outputService } from './output';
 import { downloadSourceService } from './download_source';
@@ -171,6 +171,18 @@ describe('Fleet proxies service', () => {
           { name: 'proxy-1', url: 'http://proxy.fr', is_preconfigured: false },
         ])
       ).rejects.toMatchObject({ statusCode: 409 });
+    });
+  });
+
+  describe('create', () => {
+    it('should throw FleetError when given an invalid id', async () => {
+      await expect(
+        createFleetProxy(
+          soClientMock,
+          { name: 'Test', url: 'http://proxy.co', is_preconfigured: false },
+          { id: '../bad-id' }
+        )
+      ).rejects.toThrow('id is not valid');
     });
   });
 
