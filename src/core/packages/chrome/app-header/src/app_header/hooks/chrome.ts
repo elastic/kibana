@@ -12,6 +12,8 @@ import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import { useObservable } from '@kbn/use-observable';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
 
+// App-header components render outside `browser-internal`, but still need a few
+// Chrome-owned dependencies that are not part of the public plugin contract.
 export function useBasePath(): IBasePath {
   return useChromeService().componentDeps.basePath;
 }

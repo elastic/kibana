@@ -33,9 +33,15 @@ export function useBackNavTargets(
     const base = basePath.get();
     const explicit: BackNavigation[] = [];
     for (const b of backItems) {
-      if (b.href?.trim()) {
-        const href = base && b.href.startsWith(base) ? b.href : basePath.prepend(b.href);
-        explicit.push({ backHref: href, backOnClick: b.onClick, backDestinationLabel: b.label });
+      const target = typeof b === 'string' ? { href: b } : b;
+      if (target.href?.trim()) {
+        const href =
+          base && target.href.startsWith(base) ? target.href : basePath.prepend(target.href);
+        explicit.push({
+          backHref: href,
+          backOnClick: target.onClick,
+          backDestinationLabel: target.label,
+        });
       }
     }
     return explicit.length > 0 ? explicit : EMPTY;

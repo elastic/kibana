@@ -77,18 +77,11 @@ function useAppHeaderConfig(): AppHeaderConfig | undefined {
   return useObservable(config$, undefined);
 }
 
-function normalizeAppHeaderBack(
-  back: string | AppHeaderBack | undefined
-): AppHeaderBack | undefined {
-  if (typeof back === 'string') return { href: back };
-  return back;
-}
-
 function hasExplicitAppHeaderContent(config: AppHeaderConfig | undefined): boolean {
   if (!config) return false;
   return (
     config.title !== undefined ||
-    normalizeAppHeaderBack(config.back) !== undefined ||
+    config.back !== undefined ||
     !!config.tabs?.length ||
     !!config.badges?.length ||
     !!config.menu?.items?.length ||
@@ -128,7 +121,6 @@ export const ChromeAppHeaderRenderer = React.memo(() => {
   const config = useAppHeaderConfig();
   const fallback = useFallbackProps();
 
-  const back = normalizeAppHeaderBack(config?.back);
   const hasContent = hasExplicitAppHeaderContent(config) || fallback.hasContent;
   const measureRef = useMeasuredAppHeaderHeight();
 
@@ -138,7 +130,7 @@ export const ChromeAppHeaderRenderer = React.memo(() => {
     <div ref={measureRef}>
       <AppHeaderView
         title={config?.title}
-        back={back ?? fallback.back}
+        back={config?.back ?? fallback.back}
         tabs={config?.tabs}
         badges={config?.badges}
         menu={config?.menu ?? fallback.menu}

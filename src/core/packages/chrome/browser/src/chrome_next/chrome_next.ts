@@ -8,12 +8,14 @@
  */
 
 import type { ReactElement, ReactNode, MouseEventHandler } from 'react';
-import type { Observable } from 'rxjs';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import type { GlobalSearchConfig } from './global_search';
 
 /** @public */
-export interface AppHeaderBack {
+export type AppHeaderBack = string | AppHeaderBackTarget;
+
+/** @public */
+export interface AppHeaderBackTarget {
   href: string;
   /** Click handler, called alongside href navigation when provided. */
   onClick?: MouseEventHandler;
@@ -64,7 +66,7 @@ export interface AppHeaderTab {
 /** @public */
 export interface AppHeaderConfig {
   title?: string;
-  back?: string | AppHeaderBack;
+  back?: AppHeaderBack;
   tabs?: AppHeaderTab[];
   badges?: AppHeaderBadge[];
   menu?: AppMenuConfig;
@@ -92,8 +94,6 @@ export interface ChromeNext {
      * Pass `undefined` to remove. Global — persists across app changes.
      */
     set(config?: GlobalSearchConfig): void;
-    /** Observable of the current global search config. */
-    get$(): Observable<GlobalSearchConfig | undefined>;
   };
   appHeader: {
     /**

@@ -36,6 +36,10 @@ export type InternalChromeSetup = ChromeSetup;
 
 /** @internal */
 export interface InternalChromeStart extends ChromeStart {
+  /**
+   * Dependencies used by Chrome-owned React components that live outside
+   * `browser-internal`, but still render under `ChromeServiceProvider`.
+   */
   componentDeps: {
     readonly basePath: IBasePath;
     readonly legacyActionMenu$: Observable<MountPoint | undefined>;

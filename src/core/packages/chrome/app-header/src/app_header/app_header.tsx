@@ -91,21 +91,18 @@ export const AppHeaderView = React.memo<AppHeaderViewProps>(
 
 AppHeaderView.displayName = 'AppHeaderView';
 
-export interface AppHeaderProps extends Omit<AppHeaderViewProps, 'back'> {
+export interface AppHeaderProps extends AppHeaderViewProps {
   title: string;
-  back?: string | AppHeaderBack;
 }
 
-export const AppHeader = React.memo<AppHeaderProps>(({ back, ...rest }) => {
+export const AppHeader = React.memo<AppHeaderProps>((props) => {
   const chrome = useChromeService();
   useLayoutEffect(() => {
     chrome.next.inlineAppHeader.set(true);
     return () => chrome.next.inlineAppHeader.set(false);
   }, [chrome]);
 
-  const resolvedBack = typeof back === 'string' ? { href: back } : back;
-
-  return <AppHeaderView {...rest} back={resolvedBack} />;
+  return <AppHeaderView {...props} />;
 });
 
 AppHeader.displayName = 'AppHeader';
