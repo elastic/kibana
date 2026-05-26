@@ -22,5 +22,6 @@
     "@kbn/scout",
     "@kbn/agent-builder-common",
     "@kbn/es-snapshot-loader",
+    "@kbn/kbn-client",
   ]
 }
