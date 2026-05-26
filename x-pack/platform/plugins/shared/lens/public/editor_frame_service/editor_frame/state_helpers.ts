@@ -12,7 +12,6 @@ import { difference } from 'lodash';
 import type { DataViewsContract, DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
-import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import type { DataPublicPluginStart, TimefilterContract } from '@kbn/data-plugin/public';
 import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import {
@@ -138,8 +137,7 @@ export async function initializeDataViews(
 ) {
   const adHocDataViews = Object.fromEntries(
     Object.entries(persistedAdHocDataViews || {}).map(([id, persistedSpec]) => {
-      const spec = DataViewPersistableStateService.inject(persistedSpec, references || []);
-      return [id, spec];
+      return [id, persistedSpec];
     })
   );
 

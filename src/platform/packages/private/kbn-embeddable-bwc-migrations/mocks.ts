@@ -6,3 +6,11 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import type { LegacyEmbeddablePresistableStateService } from './persistable_state/types';
+
+export const mockPersistableStateService: jest.Mocked<LegacyEmbeddablePresistableStateService> = {
+  inject: jest.fn(),
+  extract: jest.fn(),
+  getAllMigrations: jest.fn(),
+};

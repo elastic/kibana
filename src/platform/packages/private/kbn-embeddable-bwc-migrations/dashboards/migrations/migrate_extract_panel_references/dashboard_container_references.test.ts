@@ -7,13 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createExtract, createInject } from './dashboard_container_references';
-import { createEmbeddablePersistableStateServiceMock } from '@kbn/embeddable-plugin/common/mocks';
-import type { ParsedDashboardAttributesWithType810 } from '../types';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import type { ParsedDashboardAttributesWithType810 } from '../types';
+import { createExtract, createInject } from './dashboard_container_references';
 
-const persistableStateService =
-  createEmbeddablePersistableStateServiceMock() as jest.Mocked<EmbeddableSetup>;
+import * as legacyInjectModule from '../../../embeddable_inject';
+import * as legacyExtractModule from '../../../embeddable_extract';
+
+jest
+  .spyOn(legacyExtractModule, 'legacyEmbeddableExtract')
+  .mockImplementation((state) => ({ state, references: [] }));
+jest.spyOn(legacyInjectModule, 'legacyEmbeddableInject').mockImplementation((state) => state);
+
+// TODO remove this when all legacy embeddable inject / extract is moved into this package.
+const legacyEmbeddableMock = {
+  getLegacyEmbeddableFactories: jest.fn(),
+} as unknown as jest.Mocked<EmbeddableSetup>;
 
 const dashboardWithExtractedPanel: ParsedDashboardAttributesWithType810 = {
   type: 'dashboard',
@@ -51,7 +60,7 @@ const unextractedDashboardState: ParsedDashboardAttributesWithType810 = {
 
 describe('inject/extract by reference panel', () => {
   it('should inject the extracted saved object panel', () => {
-    const inject = createInject({}, persistableStateService);
+    const inject = createInject(legacyEmbeddableMock);
     const references = [extractedSavedObjectPanelRef];
 
     const injected = inject(
@@ -63,7 +72,7 @@ describe('inject/extract by reference panel', () => {
   });
 
   it('should extract the saved object panel', () => {
-    const extract = createExtract({}, persistableStateService);
+    const extract = createExtract(legacyEmbeddableMock);
     const { state: extractedState, references: extractedReferences } =
       extract(unextractedDashboardState);
 
@@ -108,21 +117,23 @@ const unextractedDashboardByValueState: ParsedDashboardAttributesWithType810 = {
 
 describe('inject/extract by value panels', () => {
   it('should inject the extracted references', () => {
-    const inject = createInject({}, persistableStateService);
+    const inject = createInject(legacyEmbeddableMock);
 
-    persistableStateService.inject.mockImplementationOnce((state, references) => {
-      const ref = references.find((r) => r.name === 'ref');
-      if (!ref) {
+    jest
+      .spyOn(legacyInjectModule, 'legacyEmbeddableInject')
+      .mockImplementationOnce((state, references) => {
+        const ref = references.find((r) => r.name === 'ref');
+        if (!ref) {
+          return state;
+        }
+
+        if (('extracted_reference' in state) as any) {
+          (state as any).value = ref.id;
+          delete (state as any).extracted_reference;
+        }
+
         return state;
-      }
-
-      if (('extracted_reference' in state) as any) {
-        (state as any).value = ref.id;
-        delete (state as any).extracted_reference;
-      }
-
-      return state;
-    });
+      });
 
     const injectedState = inject(dashboardWithExtractedByValuePanel, [extractedByValueRef]);
 
@@ -130,9 +141,9 @@ describe('inject/extract by value panels', () => {
   });
 
   it('should extract references using persistable state', () => {
-    const extract = createExtract({}, persistableStateService);
+    const extract = createExtract(legacyEmbeddableMock);
 
-    persistableStateService.extract.mockImplementationOnce((state) => {
+    jest.spyOn(legacyExtractModule, 'legacyEmbeddableExtract').mockImplementationOnce((state) => {
       if ((state as any).value === 'id') {
         delete (state as any).value;
         (state as any).extracted_reference = 'ref';

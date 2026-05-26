@@ -9,21 +9,20 @@
 
 import type { Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { createEmbeddablePersistableStateServiceMock } from '../common/mocks';
 import type { EmbeddableSetup, EmbeddableStart } from './plugin';
 
 export const createEmbeddableSetupMock = (): jest.Mocked<EmbeddableSetup> => ({
-  ...createEmbeddablePersistableStateServiceMock(),
   registerDrilldown: jest.fn(),
   registerEmbeddableFactory: jest.fn(),
   registerTransforms: jest.fn(),
-  getAllMigrations: jest.fn().mockReturnValue({}),
+  getLegacyEmbeddableFactories: jest.fn(),
+  telemetry: jest.fn(),
 });
 
 export const createEmbeddableStartMock = (): jest.Mocked<EmbeddableStart> => ({
-  ...createEmbeddablePersistableStateServiceMock(),
   getAllEmbeddableSchemas: jest.fn(),
   getTransforms: jest.fn(),
+  telemetry: jest.fn(),
 });
 
 export function mockGetDrilldownsSchema(triggers: string[]) {

@@ -48,6 +48,11 @@ export interface LegacyEmbeddablePersistableStateItem {
   migrations: MigrateFunctionsObject | GetMigrationFunctionObjectFn;
 }
 
+export interface LegacyEmbeddablePresistableStateService
+  extends Omit<LegacyEmbeddablePersistableStateItem, 'migrations'> {
+  getAllMigrations: () => MigrateFunctionsObject;
+}
+
 export interface EmbeddableStateWithType {
   type: string;
   enhancements?: SerializableRecord;

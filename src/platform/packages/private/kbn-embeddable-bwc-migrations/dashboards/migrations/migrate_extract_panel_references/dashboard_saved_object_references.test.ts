@@ -8,32 +8,21 @@
  */
 
 import { extractReferences, injectReferences } from './dashboard_saved_object_references';
-import { createEmbeddablePersistableStateServiceMock } from '@kbn/embeddable-plugin/common/mocks';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
-import { createExtract, createInject } from './dashboard_container_references';
 import type { RawDashboardSavedObjectAttributes } from '../types';
 
-const embeddablePersistableStateServiceMock =
-  createEmbeddablePersistableStateServiceMock() as jest.Mocked<EmbeddableSetup>;
+import * as legacyInjectModule from '../../../embeddable_inject';
+import * as legacyExtractModule from '../../../embeddable_extract';
 
-const dashboardInject = createInject({}, embeddablePersistableStateServiceMock);
-const dashboardExtract = createExtract({}, embeddablePersistableStateServiceMock);
+jest
+  .spyOn(legacyExtractModule, 'legacyEmbeddableExtract')
+  .mockImplementation((state) => ({ state, references: [] }));
+jest.spyOn(legacyInjectModule, 'legacyEmbeddableInject').mockImplementation((state) => state);
 
-embeddablePersistableStateServiceMock.extract.mockImplementation((state) => {
-  if (state.type === 'dashboard') {
-    return dashboardExtract(state);
-  }
-
-  return { state, references: [] };
-});
-
-embeddablePersistableStateServiceMock.inject.mockImplementation((state, references) => {
-  if (state.type === 'dashboard') {
-    return dashboardInject(state, references);
-  }
-
-  return state;
-});
+// TODO remove this when all legacy embeddable inject / extract is moved into this package.
+const legacyEmbeddableMock = {
+  getLegacyEmbeddableFactories: jest.fn(),
+} as unknown as jest.Mocked<EmbeddableSetup>;
 
 const commonAttributes = {
   kibanaSavedObjectMeta: { searchSourceJSON: '' },
@@ -70,7 +59,7 @@ describe('extractReferences', () => {
       },
       references: [],
     };
-    const updatedDoc = extractReferences(doc, {}, embeddablePersistableStateServiceMock);
+    const updatedDoc = extractReferences(doc, legacyEmbeddableMock);
 
     expect(updatedDoc).toMatchInlineSnapshot(`
       Object {
@@ -117,9 +106,9 @@ describe('extractReferences', () => {
       },
       references: [],
     };
-    expect(() =>
-      extractReferences(doc, {}, embeddablePersistableStateServiceMock)
-    ).toThrowErrorMatchingInlineSnapshot(`"\\"type\\" attribute is missing from panel \\"0\\""`);
+    expect(() => extractReferences(doc, legacyEmbeddableMock)).toThrowErrorMatchingInlineSnapshot(
+      `"\\"type\\" attribute is missing from panel \\"0\\""`
+    );
   });
 
   test('passes when "id" attribute is missing from a panel', () => {
@@ -138,8 +127,7 @@ describe('extractReferences', () => {
       },
       references: [],
     };
-    expect(extractReferences(doc, {}, embeddablePersistableStateServiceMock))
-      .toMatchInlineSnapshot(`
+    expect(extractReferences(doc, legacyEmbeddableMock)).toMatchInlineSnapshot(`
       Object {
         "attributes": Object {
           "description": "",
@@ -189,11 +177,7 @@ describe('injectReferences', () => {
         id: '2',
       },
     ];
-    const newAttributes = injectReferences(
-      { attributes, references },
-      {},
-      embeddablePersistableStateServiceMock
-    );
+    const newAttributes = injectReferences({ attributes, references }, legacyEmbeddableMock);
     expect(newAttributes).toMatchInlineSnapshot(`
       Object {
         "description": "",
@@ -214,11 +198,7 @@ describe('injectReferences', () => {
       id: '1',
       title: 'test',
     } as unknown as RawDashboardSavedObjectAttributes;
-    const newAttributes = injectReferences(
-      { attributes, references: [] },
-      {},
-      embeddablePersistableStateServiceMock
-    );
+    const newAttributes = injectReferences({ attributes, references: [] }, legacyEmbeddableMock);
     expect(newAttributes).toMatchInlineSnapshot(`
       Object {
         "id": "1",
@@ -235,11 +215,7 @@ describe('injectReferences', () => {
       panelsJSON: '{}',
       title: 'test',
     };
-    const newAttributes = injectReferences(
-      { attributes, references: [] },
-      {},
-      embeddablePersistableStateServiceMock
-    );
+    const newAttributes = injectReferences({ attributes, references: [] }, legacyEmbeddableMock);
     expect(newAttributes).toMatchInlineSnapshot(`
       Object {
         "description": "",
@@ -277,11 +253,7 @@ describe('injectReferences', () => {
         id: '1',
       },
     ];
-    const newAttributes = injectReferences(
-      { attributes, references },
-      {},
-      embeddablePersistableStateServiceMock
-    );
+    const newAttributes = injectReferences({ attributes, references }, legacyEmbeddableMock);
     expect(newAttributes).toMatchInlineSnapshot(`
       Object {
         "description": "",
@@ -310,7 +282,7 @@ describe('injectReferences', () => {
       ]),
     };
     expect(() =>
-      injectReferences({ attributes, references: [] }, {}, embeddablePersistableStateServiceMock)
+      injectReferences({ attributes, references: [] }, legacyEmbeddableMock)
     ).toThrowErrorMatchingInlineSnapshot(`"Could not find reference \\"panel_0\\""`);
   });
 });

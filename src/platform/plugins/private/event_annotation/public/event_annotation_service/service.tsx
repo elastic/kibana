@@ -14,7 +14,6 @@ import { queryToAst } from '@kbn/data-plugin/common';
 import type { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
 import type { CoreStart } from '@kbn/core/public';
 import type { Reference } from '@kbn/content-management-utils';
-import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { type EventAnnotationServiceType } from '@kbn/event-annotation-components';
 import {
@@ -58,12 +57,7 @@ export function getEventAnnotationService(
   const mapSavedObjectToGroupConfig = (
     savedObject: EventAnnotationGroupSavedObject
   ): EventAnnotationGroupConfig => {
-    const adHocDataViewSpec = savedObject.attributes.dataViewSpec
-      ? DataViewPersistableStateService.inject(
-          savedObject.attributes.dataViewSpec,
-          savedObject.references
-        )
-      : undefined;
+    const adHocDataViewSpec = savedObject.attributes.dataViewSpec ?? undefined;
 
     return {
       title: savedObject.attributes.title,
@@ -181,11 +175,8 @@ export function getEventAnnotationService(
         throw new Error(
           'tried to create annotation group with a data view spec that did not include an ID!'
         );
-
-      const { state, references: refsFromDataView } =
-        DataViewPersistableStateService.extract(dataViewSpec);
-      dataViewSpec = state;
-      references = refsFromDataView;
+      dataViewSpec = dataViewSpec;
+      references = [];
     } else {
       references = [
         {

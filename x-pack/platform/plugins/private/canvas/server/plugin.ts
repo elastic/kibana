@@ -17,11 +17,7 @@ import type {
   PluginStart as DataPluginStart,
 } from '@kbn/data-plugin/server';
 import type { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
-import {
-  getAllEmbeddableMigrations,
-  legacyEmbeddableExtract,
-  legacyEmbeddableInject,
-} from '@kbn/embeddable-bwc-migrations';
+import { getLegacyEmbeddablePersistableStateService } from '@kbn/embeddable-bwc-migrations';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
@@ -62,13 +58,11 @@ export class CanvasPlugin implements Plugin<void, void, PluginsSetup, PluginsSta
   public setup(coreSetup: CoreSetup<PluginsStart>, plugins: PluginsSetup) {
     const expressionsFork = plugins.expressions.fork('canvas');
     const expressionsSetup = expressionsFork.setup();
+
     setupInterpreter(expressionsSetup, {
-      embeddablePersistableStateService: {
-        extract: (state) => legacyEmbeddableExtract(state, plugins.embeddable),
-        inject: (state, references) =>
-          legacyEmbeddableInject(state, references, plugins.embeddable),
-        getAllMigrations: () => getAllEmbeddableMigrations(plugins.embeddable),
-      },
+      embeddablePersistableStateService: getLegacyEmbeddablePersistableStateService(
+        plugins.embeddable
+      ),
     });
 
     const deps: CanvasSavedObjectTypeMigrationsDeps = { expressions: expressionsSetup };

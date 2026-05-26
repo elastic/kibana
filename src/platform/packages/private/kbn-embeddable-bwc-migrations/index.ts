@@ -7,9 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getAllEmbeddableMigrations } from './embeddable_migrations';
-export { legacyEmbeddableExtract } from './embeddable_extract';
-export { legacyEmbeddableInject } from './embeddable_inject';
+export { getLegacyEmbeddablePersistableStateService } from './get_legacy_embeddable_persistable_state';
 export type { LegacyEmbeddablePersistableStateItem } from './persistable_state/types';
 export { legacyVisualizationSavedObjectMigrations } from './legacy_visualizations/legacy_visualizations_saved_object_migrations';
 export { getDashboardSavedObjectMigrations } from './dashboards/dashboard_saved_object_migrations';

@@ -59,12 +59,6 @@ export interface EmbeddableSetup extends TelemetryOnlyPersistableState {
 
 export type EmbeddableStart = TelemetryOnlyPersistableState & {
   /**
-   * @deprecated
-   * Gets a legacy persistable state factory associated with this type.
-   */
-  getLegacyPersistableStateFactory: (type: string) => PersistableState<EmbeddableStateWithType>;
-
-  /**
    * Returns all embeddable schemas registered with registerTransforms.
    */
   getAllEmbeddableSchemas: () => { [key: string]: ObjectType };
@@ -95,7 +89,6 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
 
   public start(core: CoreStart): EmbeddableStart {
     return {
-      getLegacyPersistableStateFactory: (type) => this.getEmbeddableFactory(type),
       getAllEmbeddableSchemas: this.transformsRegistry.getAllEmbeddableSchemas,
       getTransforms: this.transformsRegistry.getEmbeddableTransforms,
       telemetry: getTelemetryFunction(this.getEmbeddableFactory),

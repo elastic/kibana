@@ -66,7 +66,7 @@ export type {
   DataViewsServiceDeps,
   DataViewSavedObjectAttrs,
 } from './data_views';
-export { DataViewsService, DataViewPersistableStateService } from './data_views';
+export { DataViewsService } from './data_views';
 export type {
   DataViewListItem,
   DataViewsServicePublicMethods,

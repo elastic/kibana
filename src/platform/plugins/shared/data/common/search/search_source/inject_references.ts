@@ -8,7 +8,6 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core/server';
-import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import type { SerializedSearchSourceFields } from './types';
 
 export const injectReferences = (
@@ -29,10 +28,7 @@ export const injectReferences = (
   }
 
   if (searchSourceFields.index && typeof searchSourceFields.index !== 'string') {
-    searchSourceFields.index = DataViewPersistableStateService.inject(
-      searchSourceFields.index,
-      references
-    );
+    searchSourceFields.index = searchSourceFields.index;
   }
 
   if (searchSourceReturnFields.filter && Array.isArray(searchSourceReturnFields.filter)) {
