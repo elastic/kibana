@@ -127,6 +127,20 @@ const alignLegacyTypes: NormalizerConfig<PartitionAttributes> = {
       delete viz.palette;
     }
 
+    // legendStats is not supported for non-waffle charts -> delete it
+    if (viz.shape !== 'waffle' && 'legendStats' in layer) {
+      delete layer.legendStats;
+    }
+
+    // default legend position is right -> delete it
+    if (layer.legendPosition === 'right') {
+      delete layer.legendPosition;
+    }
+
+    if (!layer.truncateLegend) {
+      delete layer.legendMaxLines;
+    }
+
     return attributes;
   },
 };
@@ -145,12 +159,21 @@ const clearEmptySecondaryGroups: NormalizerConfig<PartitionAttributes> = {
   },
 };
 
-export const normalizePartition = mergeNormalizers<PartitionAttributes>([
-  getCommonNormalizer<PartitionAttributes>(({ state: { visualization } }) => ({
-    layerRemapping: [[visualization.layers[0]?.layerId, DEFAULT_LAYER_ID]],
-    columnRemapping: getColumnRemapping(visualization),
-  })),
-  alignId,
-  clearEmptySecondaryGroups,
-  alignLegacyTypes,
-]);
+export const normalizePartition = mergeNormalizers<PartitionAttributes>(
+  [
+    getCommonNormalizer<PartitionAttributes>(({ state: { visualization } }) => ({
+      layerRemapping: [[visualization.layers[0]?.layerId, DEFAULT_LAYER_ID]],
+      columnRemapping: getColumnRemapping(visualization),
+    })),
+    alignId,
+    clearEmptySecondaryGroups,
+    alignLegacyTypes,
+  ],
+  [
+    // Re-apply at the end of the chain because alignLegacyTypes may inject a
+    // default colorMapping (with touched: false) after the common normalizer's
+    // ignore pass has already run.
+    'state.visualization.layers.*.colorMapping.assignments.*.touched',
+    'state.visualization.layers.*.colorMapping.specialAssignments.*.touched',
+  ]
+);

@@ -64,7 +64,9 @@ const COMMON_STATE_IGNORE_PATHS = [
   'state.adHocDataViews.*.runtimeFieldMap', // runtime field definitions will be lost
   // TODO: check missing/different properties on colorMapping
   'state.visualization.columns.*.colorMapping.assignments.*.touched', // dropped at state -> API and only applied from API -> State, hardcoded to false by transform
+  'state.visualization.columns.*.colorMapping.specialAssignments.*.touched',
   'state.visualization.layers.*.colorMapping.assignments.*.touched',
+  'state.visualization.layers.*.colorMapping.specialAssignments.*.touched',
 ];
 
 export const DEFAULT_LAYER_ID = 'layer_0';
