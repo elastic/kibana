@@ -20,7 +20,6 @@ export const ruleMappings: SavedObjectsTypeMappingDefinition = {
         description: { type: 'text' },
         owner: { type: 'keyword' },
         tags: { type: 'keyword' },
-        builder_type: { type: 'keyword', ignore_above: 256 },
       },
     },
     time_field: { type: 'keyword' },

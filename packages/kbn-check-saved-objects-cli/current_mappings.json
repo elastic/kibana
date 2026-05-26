@@ -452,10 +452,6 @@
       },
       "metadata": {
         "properties": {
-          "builder_type": {
-            "type": "keyword",
-            "ignore_above": 256
-          },
           "description": {
             "type": "text"
           },

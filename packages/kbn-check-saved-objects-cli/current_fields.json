@@ -133,7 +133,6 @@
     "grouping.fields",
     "kind",
     "metadata",
-    "metadata.builder_type",
     "metadata.description",
     "metadata.name",
     "metadata.owner",
