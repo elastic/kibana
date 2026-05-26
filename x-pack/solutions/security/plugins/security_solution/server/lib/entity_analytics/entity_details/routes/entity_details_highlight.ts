@@ -109,10 +109,20 @@ export const entityDetailsHighlightsRoute = ({
               ? await getV2Data(getDataOpts)
               : await getV1Data(getDataOpts);
 
+            // POC: opt-in switch between the packaged entity-highlights prompt and the
+            // candidate replacement. `entityDetailsHighlightsNew` has no saved object,
+            // so `getPrompt` resolves it via the local fallback in
+            // `local_prompt_object.ts`. Defaulting to the packaged variant keeps the
+            // existing client/UI behavior unchanged when the field is omitted.
+            const promptVariant = request.body.promptVariant ?? 'default';
+            const resolvedPromptId =
+              promptVariant === 'new'
+                ? promptDictionary.entityDetailsHighlightsNew
+                : promptDictionary.entityDetailsHighlights;
             const prompt = await getPrompt({
               getInferenceConnectorById: (id) => inference.getConnectorById(id, request),
               connectorId,
-              promptId: promptDictionary.entityDetailsHighlights,
+              promptId: resolvedPromptId,
               promptGroupId: promptGroupId.aiForEntityAnalytics,
               savedObjectsClient: soClient,
             });

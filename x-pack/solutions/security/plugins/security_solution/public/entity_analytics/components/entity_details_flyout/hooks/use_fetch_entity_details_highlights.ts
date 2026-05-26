@@ -90,6 +90,7 @@ export const useFetchEntityDetailsHighlights = ({
   storedSummary,
   entitySnapshot,
   refetchEntityRecord,
+  promptVariant,
 }: {
   connectorId: string;
   anonymizationFields: AnonymizationFieldResponse[];
@@ -100,6 +101,8 @@ export const useFetchEntityDetailsHighlights = ({
   entitySnapshot?: EntitySummaryStalenessEntitySnapshot | null;
   /** Refetch entity store record after persist so `storedSummary` and staleness snapshot stay in sync. */
   refetchEntityRecord?: () => void;
+  /** POC: dev-only A/B selector forwarded to the highlights route. Omit for the packaged prompt. */
+  promptVariant?: 'default' | 'new';
 }) => {
   const { inference } = useKibana().services;
   const { fetchEntityDetailsHighlights, saveEntityAiSummary } = useEntityAnalyticsRoutes();
@@ -155,6 +158,7 @@ export const useFetchEntityDetailsHighlights = ({
       from: fromDate,
       to: toDate,
       connectorId,
+      promptVariant,
     }).catch((e: Error) => {
       const caughtError = e instanceof Error ? e : new Error(String(e));
       addError(caughtError, {
@@ -254,6 +258,7 @@ export const useFetchEntityDetailsHighlights = ({
     currentUser,
     entitySnapshot,
     refetchEntityRecord,
+    promptVariant,
   ]);
 
   const abortStream = useCallback(() => {
