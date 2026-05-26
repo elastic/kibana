@@ -6,7 +6,14 @@
  */
 
 import React, { Component } from 'react';
-import { EuiFlexItem, EuiFlexGroup, EuiButtonIcon, EuiText, EuiTextColor } from '@elastic/eui';
+import {
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiButtonIcon,
+  EuiText,
+  EuiTextColor,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataViewField, DataView, Query } from '@kbn/data-plugin/common';
 import { isNestedField } from '@kbn/data-views-plugin/common';

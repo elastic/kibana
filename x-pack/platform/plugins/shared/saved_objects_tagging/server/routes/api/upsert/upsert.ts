@@ -55,7 +55,7 @@ export const upsert = async (
   }
 
   if (isCreateRequest) {
-    asCodeIdSchema.validate(id);
+    asCodeIdSchema.parse(id);
   }
 
   const savedObject = await client.update<TagAttributes>(tagSavedObjectTypeName, id, attributes, {

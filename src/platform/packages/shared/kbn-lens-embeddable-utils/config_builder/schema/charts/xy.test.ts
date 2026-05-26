@@ -583,7 +583,6 @@ describe('XY', () => {
           type: 'xy',
           title: `Faulty Chart`,
           layers: [
-            // @ts-expect-error - mixing not allowed
             {
               data_source: { type: 'esql', query: 'FROM company_index' },
               type: 'bar',
@@ -597,6 +596,7 @@ describe('XY', () => {
                 include_empty_rows: false,
               },
               y: [
+                // @ts-expect-error - mixing not allowed
                 { operation: 'count', empty_as_null: false },
                 { operation: 'average', field: 'price' },
               ],
