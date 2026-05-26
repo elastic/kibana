@@ -147,7 +147,7 @@
 # metrics. Minimum is 100ms. Defaults to 5000ms.
 #ops.interval: 5000
 
-# Specifies the available locales in the user settings.
+# Specifies the available locales in the User Profile settings.
 #i18n.locales: ["en", "fr-FR", "ja-JP", "zh-CN", "de-DE"]
 
 # Specifies the default locale to be used for all localizable strings, dates and number formats.
