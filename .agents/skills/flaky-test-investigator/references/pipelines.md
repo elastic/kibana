@@ -1,6 +1,6 @@
-# Cloud and local pipelines
+# Pipelines
 
-This document provides more information on Kibana's CI testing setup. Tests run either on Elastic Cloud ("Cloud pipeline") or on the machine that triggered the run ("local pipeline", a.k.a. "Kibana CI"). A test that passes locally on the agent's machine may still fail on Cloud. Use the pipeline name to identify where the test ran.
+This document provides more information on Kibana's CI testing setup. Most tests run either on Elastic Cloud ("Cloud pipeline") or on the machine that triggered the run ("local pipeline", a.k.a. "Kibana CI"). A test that passes locally on the agent's machine may still fail on Cloud. Use the pipeline name to identify where the test ran.
 
 ## Elastic Cloud pipelines
 
@@ -18,6 +18,8 @@ This document provides more information on Kibana's CI testing setup. Tests run 
 - Common examples: `kibana-on-merge`, `kibana-pull-request`, `kibana-flaky-test-suite-runner`. Any non-Cloud pipeline is "local".
 - Test servers start on the agent's local machine with no external dependencies, giving a more stable environment.
 - Run Scout tests tagged `@local-*`.
+- `kibana-elasticsearch-snapshot-verify` is a specialised local pipeline that builds Kibana from source against the **daily Elasticsearch snapshot** instead of a stable ES release.
+- `kibana-es-forward-compatibility-testing-<branch>` (e.g. `9-dot-3`) validates the rolling-upgrade scenario where Elasticsearch is bumped to a new major before Kibana — it runs the previous Kibana major's FTR suite against ES from the named newer-major branch.
 
 ## Key differences between Kibana CI and Cloud
 

@@ -25,7 +25,7 @@ If no link to a `failed-test` issue was provided, search for one in the `elastic
 
 - **Is it failing on `kibana-on-merge` (local pipeline), on Cloud pipelines, or both?**
   - _Why it matters:_ tells you whether the test is compatible with Elastic Cloud at all, and whether the failure is more likely environmental (more common on Cloud) or a defect in the test itself (more common when both fail).
-  - Recommended: learn more about local versus Elastic Cloud pipelines in `references/local-vs-cloud-pipelines.md`
+  - Recommended: learn more about local versus Elastic Cloud pipelines in `references/pipelines.md`
 - **Did it fail in Buildkite builds with many other unrelated test failures?**
   - _Why it matters:_ broad failure across unrelated tests points to an environment or infrastructure problem, not a problem with this test.
 - **Understand the test server configuration.** Are Scout tests using the **default** or a **custom** test server configuration? Do FTR tests belong to a test config that defines custom server arguments that aren't supported on e.g., Elastic Cloud?
