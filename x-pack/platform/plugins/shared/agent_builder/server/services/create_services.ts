@@ -236,6 +236,7 @@ export class ServiceManager {
       analyticsService,
       meteringService: this.services.metering,
       searchInferenceEndpoints,
+      security,
     });
 
     const consumption = this.services.consumption.start({ elasticsearch, spaces });

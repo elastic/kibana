@@ -20,6 +20,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { dynamic } from '@kbn/shared-ux-utility';
+import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import { registerLocators } from './locator/register_locators';
 import { buildAgentBuilderDeepLinks, registerAnalytics, registerApp } from './register';
 import { AgentBuilderNavControlInitiator } from './components/nav_control/lazy_agent_builder_nav_control';
@@ -144,6 +145,19 @@ export class AgentBuilderPlugin
   ): AgentBuilderPluginStart {
     const { http } = core;
     const { licensing, inference } = startDependencies;
+
+    // Tell CPS that Agent Builder uses space-default project routing (read-only).
+    // Without this registration, browser-side queries issued by `data`/`dataViews` from
+    // within the Agent Builder app (e.g. Lens re-executing an ESQL query to render a
+    // visualization in chat) default to origin-only routing — which would drop linked-project
+    // rows from chart panels even though the agent's own tool call (server-side, see
+    // `run_tool.ts`/`run_agent.ts`) correctly fans out across linked projects.
+    // READONLY (not EDITABLE) because Agent Builder doesn't expose a project picker UI; the
+    // routing is fully controlled by the space's NPRE configuration.
+    startDependencies.cps?.cpsManager?.registerAppAccess(
+      'agentBuilder',
+      () => ProjectRoutingAccess.READONLY
+    );
 
     const agentService = new AgentService({ http });
     const attachmentsService = new AttachmentsService({ http });

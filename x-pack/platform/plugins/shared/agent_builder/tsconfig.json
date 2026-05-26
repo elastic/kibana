@@ -83,6 +83,8 @@
     "@kbn/workflows",
     "@kbn/spaces-utils",
     "@kbn/spaces-plugin",
+    "@kbn/cps",
+    "@kbn/cps-utils",
     "@kbn/licensing-types",
     "@kbn/licensing-plugin",
     "@kbn/lens-embeddable-utils",

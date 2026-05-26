@@ -90,6 +90,7 @@ describe('AgentExecutionService', () => {
     savedObjects,
     meteringService,
     searchInferenceEndpoints: {} as any,
+    security: { authc: { getCurrentUser: jest.fn().mockReturnValue(null) } } as any,
   });
 
   beforeEach(() => {

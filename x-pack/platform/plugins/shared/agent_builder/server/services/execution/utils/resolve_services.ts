@@ -27,6 +27,7 @@ export const resolveServices = async ({
   uiSettings,
   savedObjects,
   searchInferenceEndpoints,
+  userName,
 }: {
   agentId: string;
   connectorId?: string;
@@ -38,6 +39,12 @@ export const resolveServices = async ({
   uiSettings: UiSettingsServiceStart;
   savedObjects: SavedObjectsServiceStart;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
+  /**
+   * Optional override for the conversation owner's username. Forwarded to
+   * `conversationService.getScopedClient` so the conversation is persisted/looked up under
+   * the originating user rather than whatever identity the (possibly fake) request resolves to.
+   */
+  userName?: string;
 }) => {
   const selectedConnectorId = await resolveSelectedConnectorId({
     request,
@@ -70,7 +77,7 @@ export const resolveServices = async ({
     searchInferenceEndpoints,
   });
 
-  const conversationClient = await conversationService.getScopedClient({ request });
+  const conversationClient = await conversationService.getScopedClient({ request, userName });
 
   return {
     conversationClient,

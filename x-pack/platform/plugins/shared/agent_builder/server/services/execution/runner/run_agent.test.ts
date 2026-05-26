@@ -137,4 +137,24 @@ describe('runAgent', () => {
 
     expect(result).toEqual({ success: true, data: { foo: 'bar' } });
   });
+
+  it('scopes the ES client with space-level project routing for CPS support', async () => {
+    const params: ScopedRunnerRunAgentParams = {
+      agentId: 'test-agent',
+      agentParams: { nextInput: { message: 'hi' } },
+    };
+
+    await runAgent({
+      agentExecutionParams: params,
+      parentManager: runnerManager,
+    });
+
+    expect(runnerDeps.elasticsearch.client.asScoped).toHaveBeenCalledWith(
+      expect.objectContaining({
+        headers: runnerDeps.request.headers,
+        url: expect.any(URL),
+      }),
+      { projectRouting: 'space' }
+    );
+  });
 });
