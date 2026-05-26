@@ -29,7 +29,7 @@ pageLoadAssetSize:
   contentConnectors: 33014
   contentManagement: 8350
   controls: 10300
-  core: 547151
+  core: 548600
   cps: 9209
   crossClusterReplication: 12662
   customIntegrations: 11715
@@ -81,14 +81,14 @@ pageLoadAssetSize:
   fleet: 229970
   genAiSettings: 6342
   globalSearch: 6890
-  globalSearchBar: 26122
+  globalSearchBar: 31212
   globalSearchProviders: 4646
   graph: 9924
   grokdebugger: 5469
   home: 13091
   imageEmbeddable: 6189
   inbox: 5344
-  indexLifecycleManagement: 42659
+  indexLifecycleManagement: 47110
   indexManagement: 39694
   inference: 10368
   infra: 56302
