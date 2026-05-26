@@ -22,6 +22,7 @@ import {
   OBSERVABILITY_STREAMS_SIG_EVENTS_TUNING_CONFIG,
   OBSERVABILITY_STREAMS_ENABLE_MEMORY,
   OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_ALERTING_V2,
+  OBSERVABILITY_STREAMS_SCS_CODEBASE_INDEX,
 } from '@kbn/management-settings-ids';
 import { DEFAULT_INDEX_PATTERNS } from '@kbn/streams-schema';
 import type { StreamsPluginStartDependencies } from './types';
@@ -138,6 +139,25 @@ export function registerFeatureFlags(
             }),
             type: 'boolean',
             schema: schema.boolean(),
+            requiresPageReload: false,
+            solutionViews: ['classic', 'oblt'],
+            technicalPreview: true,
+          },
+        });
+
+        core.uiSettings.register({
+          [OBSERVABILITY_STREAMS_SCS_CODEBASE_INDEX]: {
+            category: ['observability'],
+            name: i18n.translate('xpack.streams.scsCodebaseIndexSettingsName', {
+              defaultMessage: 'Streams SCS codebase index',
+            }) as string,
+            value: '',
+            description: i18n.translate('xpack.streams.scsCodebaseIndexSettingsDescription', {
+              defaultMessage:
+                'Elasticsearch index name created by Semantic Code Search (SCS). When set, the Knowledge Indicator query generation agent can search the indexed codebase for relevant patterns when writing ES|QL queries. Run `scs index` and `scs install-agentic-interfaces` to set up SCS before enabling this.',
+            }),
+            type: 'string',
+            schema: schema.string(),
             requiresPageReload: false,
             solutionViews: ['classic', 'oblt'],
             technicalPreview: true,

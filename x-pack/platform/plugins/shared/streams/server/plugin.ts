@@ -107,6 +107,7 @@ export class StreamsPlugin
   private statsTelemetryService = new StatsTelemetryService();
   private processorSuggestionsService: ProcessorSuggestionsService;
   private patternExtractionService?: PatternExtractionService;
+  private workflowsManagementApi?: import('@kbn/workflows-management-plugin/server').WorkflowsManagementApi;
 
   constructor(context: PluginInitializerContext<StreamsConfig>) {
     this.isDev = context.env.mode.dev;
@@ -342,6 +343,7 @@ export class StreamsPlugin
     let continuousKiExtractionWorkflowService: ContinuousKiExtractionWorkflowService | undefined;
 
     if (plugins.workflowsManagement) {
+      this.workflowsManagementApi = plugins.workflowsManagement.management;
       continuousKiExtractionWorkflowService = createContinuousKiExtractionWorkflowService(
         this.logger,
         plugins.workflowsManagement.management
@@ -584,6 +586,7 @@ export class StreamsPlugin
       this.server.licensing = plugins.licensing;
       this.server.taskManager = plugins.taskManager;
       this.server.searchInferenceEndpoints = plugins.searchInferenceEndpoints;
+      this.server.workflowsManagement = this.workflowsManagementApi;
 
       // Set up memory trigger registry with all built-in triggers
       const memoryTriggerRegistry = new MemoryTriggerRegistry({ logger: this.logger });
