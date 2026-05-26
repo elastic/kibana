@@ -43,6 +43,7 @@ const DEFAULT_SUGGESTIONS_COUNT = 10;
 const MIN_SUGGESTIONS_FOR_PRIVILEGES_CHECK = 10;
 const BULK_GET_MAX_UIDS_PER_BATCH = 50;
 const BULK_GET_MAX_CONCURRENT_BATCH_REQUESTS = 5;
+const RUNAS_HEADER = 'es-security-runas-user';
 
 export interface UserProfileServiceStartInternal extends UserProfileServiceStart {
   /**
@@ -67,6 +68,7 @@ export interface UserProfileServiceSetupParams {
 export interface UserProfileServiceStartParams {
   clusterClient: IClusterClient;
   session: PublicMethodsOf<Session>;
+  sessionlessUserProfileRetrievalEnabled: boolean;
 }
 
 function parseUserProfile<D extends UserProfileData>(
@@ -115,10 +117,19 @@ export class UserProfileService {
     this.license = license;
   }
 
-  start({ clusterClient, session }: UserProfileServiceStartParams) {
+  start({
+    clusterClient,
+    session,
+    sessionlessUserProfileRetrievalEnabled,
+  }: UserProfileServiceStartParams) {
     return {
       activate: this.activate.bind(this, clusterClient),
-      getCurrent: this.getCurrent.bind(this, clusterClient, session),
+      getCurrent: this.getCurrent.bind(
+        this,
+        clusterClient,
+        session,
+        sessionlessUserProfileRetrievalEnabled
+      ),
       bulkGet: this.bulkGet.bind(this, clusterClient),
       update: this.update.bind(this, clusterClient),
       suggest: this.suggest.bind(this, clusterClient),
@@ -342,6 +353,7 @@ export class UserProfileService {
   private async getCurrent<D extends UserProfileData>(
     clusterClient: IClusterClient,
     session: PublicMethodsOf<Session>,
+    sessionlessUserProfileRetrievalEnabled: boolean,
     { request, dataPath }: UserProfileGetCurrentParams
   ) {
     if (request.auth.isAuthenticated === false) {
@@ -356,6 +368,18 @@ export class UserProfileService {
     if (await session.getSID(request)) {
       this.logger.debug(`Request to get current user profile is authenticated via session.`);
       ({ profileId, sessionId } = await this.getCurrentUserProfileIdViaSession(session, request));
+    } else if (!sessionlessUserProfileRetrievalEnabled) {
+      this.logger.debug(`Skipping user profile retrieval: sessionless retrieval is disabled.`);
+      return null;
+    } else if (request.headers[RUNAS_HEADER]) {
+      // When a proxy sets `es-security-runas-user`, the Authorization header belongs to the proxy
+      // credential (e.g. `elastic`), not the effective user. Activating a profile from those
+      // credentials would associate the avatar with the proxy account, not the impersonated user.
+      // Return null because a user profile is not applicable in this context.
+      this.logger.debug(
+        `Skipping user profile retrieval for request with 'es-security-runas-user' header.`
+      );
+      return null;
     } else {
       const authType = this.getAuthHeaderType(request.headers.authorization);
 

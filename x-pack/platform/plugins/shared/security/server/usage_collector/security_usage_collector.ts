@@ -23,6 +23,7 @@ interface Usage {
   sessionCleanupInMinutes: number;
   sessionConcurrentSessionsMaxSessions: number;
   anonymousCredentialType: string | undefined;
+  sessionlessUserProfileRetrievalEnabled: boolean;
 }
 
 interface Deps {
@@ -144,6 +145,13 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
             'The credential type that is configured for the anonymous authentication provider.',
         },
       },
+      sessionlessUserProfileRetrievalEnabled: {
+        type: 'boolean',
+        _meta: {
+          description:
+            'Indicates if sessionless user profile retrieval is enabled for HTTP authentication.',
+        },
+      },
     },
     fetch: () => {
       const { allowRbac, allowAccessAgreement, allowAuditLogging, allowFips } =
@@ -162,6 +170,7 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
           sessionCleanupInMinutes: 0,
           sessionConcurrentSessionsMaxSessions: 0,
           anonymousCredentialType: undefined,
+          sessionlessUserProfileRetrievalEnabled: true,
         };
       }
 
@@ -207,6 +216,9 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
           anonymousCredentialType = credUsernamePassword;
       }
 
+      const sessionlessUserProfileRetrievalEnabled =
+        config.authc.http.sessionlessUserProfileRetrievalEnabled;
+
       return {
         auditLoggingEnabled,
         loginSelectorEnabled,
@@ -220,6 +232,7 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
         sessionCleanupInMinutes,
         sessionConcurrentSessionsMaxSessions,
         anonymousCredentialType,
+        sessionlessUserProfileRetrievalEnabled,
       };
     },
   });

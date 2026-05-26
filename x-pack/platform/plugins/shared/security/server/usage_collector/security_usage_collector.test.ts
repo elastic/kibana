@@ -54,6 +54,7 @@ describe('Security UsageCollector', () => {
     sessionCleanupInMinutes: 60,
     sessionConcurrentSessionsMaxSessions: 0,
     anonymousCredentialType: undefined,
+    sessionlessUserProfileRetrievalEnabled: true,
   };
 
   describe('initialization', () => {
@@ -117,6 +118,7 @@ describe('Security UsageCollector', () => {
       sessionCleanupInMinutes: 0,
       sessionConcurrentSessionsMaxSessions: 0,
       anonymousCredentialType: undefined,
+      sessionlessUserProfileRetrievalEnabled: true,
     });
   });
 
@@ -557,6 +559,38 @@ describe('Security UsageCollector', () => {
         sessionCleanupInMinutes: 789,
         sessionConcurrentSessionsMaxSessions: 321,
       });
+    });
+  });
+
+  describe('sessionlessUserProfileRetrievalEnabled', () => {
+    it('reports true by default', async () => {
+      const config = createSecurityConfig(ConfigSchema.validate({}));
+      const usageCollection = usageCollectionPluginMock.createSetupContract();
+      const license = createSecurityLicense({ isLicenseAvailable: true });
+      registerSecurityUsageCollector({ usageCollection, config, license });
+
+      const usage = await usageCollection
+        .getCollectorByType('security')
+        ?.fetch(collectorFetchContext);
+
+      expect(usage).toEqual({ ...DEFAULT_USAGE, sessionlessUserProfileRetrievalEnabled: true });
+    });
+
+    it('reports false when explicitly disabled', async () => {
+      const config = createSecurityConfig(
+        ConfigSchema.validate({
+          authc: { http: { sessionlessUserProfileRetrievalEnabled: false } },
+        })
+      );
+      const usageCollection = usageCollectionPluginMock.createSetupContract();
+      const license = createSecurityLicense({ isLicenseAvailable: true });
+      registerSecurityUsageCollector({ usageCollection, config, license });
+
+      const usage = await usageCollection
+        .getCollectorByType('security')
+        ?.fetch(collectorFetchContext);
+
+      expect(usage).toEqual({ ...DEFAULT_USAGE, sessionlessUserProfileRetrievalEnabled: false });
     });
   });
 
