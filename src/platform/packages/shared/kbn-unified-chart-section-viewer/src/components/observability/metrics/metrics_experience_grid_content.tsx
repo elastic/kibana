@@ -98,10 +98,10 @@ export const MetricsExperienceGridContent = ({
   const getDescription = useCallback(
     (metricItem: ParsedMetricItem) =>
       duplicateMetricNames.has(metricItem.metricName)
-        ? i18n.translate('metricsExperience.grid.duplicateMetricSourceDescription', {
+        ? i18n.translate('metricsExperience.grid.duplicateMetricIndexDescription', {
             defaultMessage:
-              'This metric exists in multiple data streams. This chart shows data from {sourceName} only.',
-            values: { sourceName: metricItem.sourceName },
+              'This metric exists in multiple data streams. This chart shows data from {indexName} only.',
+            values: { indexName: metricItem.indexName },
           })
         : undefined,
     [duplicateMetricNames]

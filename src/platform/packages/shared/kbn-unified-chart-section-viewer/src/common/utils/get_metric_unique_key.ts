@@ -19,4 +19,4 @@ import type { ParsedMetricItem } from '../../types';
  * `metricName` contains `::`.
  */
 export const getMetricUniqueKey = (metricItem: ParsedMetricItem): string =>
-  `${metricItem.sourceName}::${metricItem.metricName}`;
+  `${metricItem.indexName}::${metricItem.metricName}`;

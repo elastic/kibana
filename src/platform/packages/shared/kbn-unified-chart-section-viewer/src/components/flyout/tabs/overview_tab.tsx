@@ -42,9 +42,9 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
   const [activePage, setActivePage] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(DEFAULT_PAGINATION_SIZE);
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
-  const localIndexName = isNonLocalIndexName(metricItem.sourceName)
+  const localIndexName = isNonLocalIndexName(metricItem.indexName)
     ? undefined
-    : metricItem.sourceName;
+    : metricItem.indexName;
 
   const { kind: sourceKind } = useMetricSourceKind({
     name: localIndexName,
@@ -53,7 +53,7 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
   const renderStreamField = useStreamsFieldRenderer();
 
   const sourceLink = useMemo(() => {
-    if (!metricItem.sourceName) {
+    if (!metricItem.indexName) {
       return undefined;
     }
 
@@ -63,11 +63,11 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
         : null;
 
     return {
-      indexName: metricItem.sourceName,
+      indexName: metricItem.indexName,
       kind: sourceKind,
       streamLink,
     };
-  }, [metricItem.sourceName, localIndexName, sourceKind, renderStreamField]);
+  }, [metricItem.indexName, localIndexName, sourceKind, renderStreamField]);
 
   // Sort dimensions alphabetically by name
   const sortedDimensions = useMemo(() => {

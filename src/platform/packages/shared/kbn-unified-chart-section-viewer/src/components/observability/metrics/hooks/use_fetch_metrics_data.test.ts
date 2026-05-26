@@ -78,7 +78,7 @@ const createMockParsedMetrics = (
 ): ParsedMetricsWithTelemetry => ({
   metricItems: metricNames.map((name) => ({
     metricName: name,
-    sourceName: 'metrics-*',
+    indexName: 'metrics-*',
     units: [null],
     metricTypes: ['gauge'],
     fieldTypes: [ES_FIELD_TYPES.DOUBLE],
@@ -90,7 +90,7 @@ const createMockParsedMetrics = (
     total_number_of_dimensions: dimensions.length,
     metrics_by_type: { gauge: metricNames.length },
     units: { none: metricNames.length },
-    multi_value_counts: { source_names: 0, field_types: 0, metric_types: 0, units: 0 },
+    multi_value_counts: { index_names: 0, field_types: 0, metric_types: 0, units: 0 },
   },
 });
 
@@ -169,7 +169,7 @@ describe('useFetchMetricsData', () => {
       documents: [
         {
           metric_name: 'system.cpu.utilization',
-          source_name: 'metrics-*',
+          index_name: 'metrics-*',
           unit: null,
           metric_type: 'gauge',
           field_type: 'double',
@@ -232,7 +232,7 @@ describe('useFetchMetricsData', () => {
           total_number_of_dimensions: 0,
           metrics_by_type: {},
           units: {},
-          multi_value_counts: { source_names: 0, field_types: 0, metric_types: 0, units: 0 },
+          multi_value_counts: { index_names: 0, field_types: 0, metric_types: 0, units: 0 },
         },
       });
 
@@ -348,7 +348,7 @@ describe('useFetchMetricsData', () => {
           documents: [
             {
               metric_name: 'system.cpu.utilization',
-              source_name: 'metrics-*',
+              index_name: 'metrics-*',
               unit: null,
               metric_type: 'gauge',
               field_type: 'double',
@@ -385,7 +385,7 @@ describe('useFetchMetricsData', () => {
         documents: [
           {
             metric_name: 'system.cpu.utilization',
-            source_name: 'metrics-*',
+            index_name: 'metrics-*',
             unit: null,
             metric_type: 'gauge',
             field_type: 'double',

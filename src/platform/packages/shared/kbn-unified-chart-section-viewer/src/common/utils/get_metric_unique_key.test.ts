@@ -13,7 +13,7 @@ import { getMetricUniqueKey } from './get_metric_unique_key';
 
 const buildItem = (overrides: Partial<ParsedMetricItem> = {}): ParsedMetricItem => ({
   metricName: 'system.cpu.utilization',
-  sourceName: 'metrics-system.cpu-default',
+  indexName: 'metrics-system.cpu-default',
   units: ['percent'],
   metricTypes: ['gauge'],
   fieldTypes: [ES_FIELD_TYPES.DOUBLE],
@@ -22,7 +22,7 @@ const buildItem = (overrides: Partial<ParsedMetricItem> = {}): ParsedMetricItem 
 });
 
 describe('getMetricUniqueKey', () => {
-  it('joins sourceName and metricName with the "::" separator', () => {
+  it('joins indexName and metricName with the "::" separator', () => {
     expect(getMetricUniqueKey(buildItem())).toBe(
       'metrics-system.cpu-default::system.cpu.utilization'
     );
@@ -39,15 +39,15 @@ describe('getMetricUniqueKey', () => {
     );
   });
 
-  it('produces different keys when sourceName differs', () => {
-    expect(getMetricUniqueKey(buildItem({ sourceName: 'a' }))).not.toBe(
-      getMetricUniqueKey(buildItem({ sourceName: 'b' }))
+  it('produces different keys when indexName differs', () => {
+    expect(getMetricUniqueKey(buildItem({ indexName: 'a' }))).not.toBe(
+      getMetricUniqueKey(buildItem({ indexName: 'b' }))
     );
   });
 
   it('distinguishes metrics that share metricName across sources', () => {
-    const a = buildItem({ sourceName: 'metrics-host-default', metricName: 'cpu.usage' });
-    const b = buildItem({ sourceName: 'metrics-container-default', metricName: 'cpu.usage' });
+    const a = buildItem({ indexName: 'metrics-host-default', metricName: 'cpu.usage' });
+    const b = buildItem({ indexName: 'metrics-container-default', metricName: 'cpu.usage' });
     expect(getMetricUniqueKey(a)).not.toBe(getMetricUniqueKey(b));
   });
 
@@ -61,23 +61,23 @@ describe('getMetricUniqueKey', () => {
   // 255 characters, so the maximum key size is bounded at ~513 bytes
   // (255 + 2 for "::" + 255).
   it('handles maximum-length inputs without truncation', () => {
-    const longSourceName = 'd'.repeat(255);
+    const longIndexName = 'd'.repeat(255);
     const longMetricName = 'm'.repeat(255);
     const key = getMetricUniqueKey(
-      buildItem({ sourceName: longSourceName, metricName: longMetricName })
+      buildItem({ indexName: longIndexName, metricName: longMetricName })
     );
 
-    expect(key).toBe(`${longSourceName}::${longMetricName}`);
+    expect(key).toBe(`${longIndexName}::${longMetricName}`);
     expect(key.length).toBe(255 + 2 + 255);
   });
 
   // ES forbids ":" in source names, so the first "::" is always the delimiter
   // and the encoding stays injective even if metricName contains "::".
   it('stays injective when metricName contains "::"', () => {
-    const a = buildItem({ sourceName: 'metrics-system', metricName: 'a::b' });
-    const b = buildItem({ sourceName: 'metrics-system', metricName: 'a::c' });
-    const c = buildItem({ sourceName: 'metrics-system', metricName: 'a::b::c' });
-    const d = buildItem({ sourceName: 'metrics-other', metricName: 'a::b' });
+    const a = buildItem({ indexName: 'metrics-system', metricName: 'a::b' });
+    const b = buildItem({ indexName: 'metrics-system', metricName: 'a::c' });
+    const c = buildItem({ indexName: 'metrics-system', metricName: 'a::b::c' });
+    const d = buildItem({ indexName: 'metrics-other', metricName: 'a::b' });
 
     const keys = [a, b, c, d].map(getMetricUniqueKey);
     expect(new Set(keys).size).toBe(keys.length);

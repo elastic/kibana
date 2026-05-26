@@ -26,7 +26,7 @@ export const createInitialMetricsTelemetry = (): MetricsTelemetry => ({
   total_number_of_dimensions: 0,
   metrics_by_type: {},
   units: {},
-  multi_value_counts: { source_names: 0, field_types: 0, metric_types: 0, units: 0 },
+  multi_value_counts: { index_names: 0, field_types: 0, metric_types: 0, units: 0 },
 });
 
 /**
@@ -64,12 +64,12 @@ export const parseMetricsWithTelemetry = (
 
   for (const metric of response) {
     const metricTypes = toArray(metric.metric_type);
-    // The TS shape exposes `source_name`, but ES|QL `METRICS_INFO` returns a
+    // The TS shape exposes `index_name`, but ES|QL `METRICS_INFO` returns a
     // column literally named `data_stream`. Accept either at parse time so a
     // future ES|QL column rename can land before or after this Kibana rename
     // without breaking parsing in either direction.
-    const sourceNames = toArray(
-      metric.source_name ?? (metric as unknown as { data_stream?: string[] | string }).data_stream
+    const indexNames = toArray(
+      metric.index_name ?? (metric as unknown as { data_stream?: string[] | string }).data_stream
     );
     const units = toArray(metric.unit);
     const fieldTypes = toArray(metric.field_type);
@@ -79,7 +79,7 @@ export const parseMetricsWithTelemetry = (
 
     accumulateMetricsRowTelemetry(telemetry, {
       metricTypes,
-      sourceNames,
+      indexNames,
       units,
       fieldTypes,
     });
@@ -97,10 +97,10 @@ export const parseMetricsWithTelemetry = (
       return toDimension(name);
     });
 
-    for (const source of sourceNames) {
+    for (const source of indexNames) {
       parsedMetrics.push({
         metricName: metric.metric_name,
-        sourceName: source,
+        indexName: source,
         units,
         metricTypes,
         fieldTypes,
