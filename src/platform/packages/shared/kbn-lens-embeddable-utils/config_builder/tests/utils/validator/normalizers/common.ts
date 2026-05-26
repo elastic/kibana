@@ -67,6 +67,7 @@ const COMMON_STATE_IGNORE_PATHS = [
   'state.visualization.columns.*.colorMapping.specialAssignments.*.touched',
   'state.visualization.layers.*.colorMapping.assignments.*.touched',
   'state.visualization.layers.*.colorMapping.specialAssignments.*.touched',
+  'state.visualization.layers.*.colorMapping.colorMode.steps.*.touched',
 ];
 
 export const DEFAULT_LAYER_ID = 'layer_0';
