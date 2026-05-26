@@ -18,7 +18,7 @@ export const useFeaturedItems = ({
   dashboardApi,
 }: {
   dashboardApi: DashboardApi;
-}): { featuredItems: MenuItem[]; loading: boolean; } => {
+}): { featuredItems: MenuItem[]; loading: boolean } => {
   const [featuredItems, setFeaturedItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -33,7 +33,8 @@ export const useFeaturedItems = ({
       },
     };
 
-    uiActionsService.getTriggerCompatibleActions(FEATURED_ADD_PANEL_TRIGGER, context)
+    uiActionsService
+      .getTriggerCompatibleActions(FEATURED_ADD_PANEL_TRIGGER, context)
       .then((actions) => {
         if (canceled) return;
         setLoading(false);
@@ -45,11 +46,11 @@ export const useFeaturedItems = ({
         }
         // eslint-disable-next-line no-console
         console.warn('Unable to load Featured add panel actions, error: ', e);
-      })
+      });
 
     return () => {
       canceled = true;
-    }
+    };
   }, [dashboardApi]);
 
   return { loading, featuredItems };

@@ -26,11 +26,11 @@ jest.mock('../../../dashboard_app/top_nav/add_panel_button/use_featured_items', 
           icon: 'chart',
           onClick: jest.fn(),
           order: 0,
-          ['data-test-subj']: 'mockAddPanelAction'
-        }
+          ['data-test-subj']: 'mockAddPanelAction',
+        },
       ],
-      loading: false
-    })
+      loading: false,
+    }),
   };
 });
 

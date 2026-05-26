@@ -89,7 +89,11 @@ async function getActionGroups(
   };
 }
 
-export function getMenuItems(actions: Action[], dashboardApi: DashboardApi, context: ActionExecutionContext) {
+export function getMenuItems(
+  actions: Action[],
+  dashboardApi: DashboardApi,
+  context: ActionExecutionContext
+) {
   return actions
     .map((action) => {
       const actionName = action.getDisplayName(context);

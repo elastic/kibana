@@ -26,7 +26,7 @@ export const ON_OPEN_PANEL_MENU = 'on_open_panel_menu';
  */
 
 /**
- * Actions attached to ADD_PANEL_TRIGGER trigger 
+ * Actions attached to ADD_PANEL_TRIGGER trigger
  * are displayed in dashboards' add panel menu
  *
  * Please consult with @elastic/kibana-presentation before attaching
@@ -34,9 +34,9 @@ export const ON_OPEN_PANEL_MENU = 'on_open_panel_menu';
  */
 export const ADD_PANEL_TRIGGER = 'ADD_PANEL_TRIGGER';
 /**
- * Actions attached to FEATURED_ADD_PANEL_TRIGGER trigger 
+ * Actions attached to FEATURED_ADD_PANEL_TRIGGER trigger
  * are displayed at top of dashboards' add panel menu with distinct UI
- * 
+ *
  * Please consult with @elastic/kibana-presentation before attaching
  * new actions to this trigger.
  */

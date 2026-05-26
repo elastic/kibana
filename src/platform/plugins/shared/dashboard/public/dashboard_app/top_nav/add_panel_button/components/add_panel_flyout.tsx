@@ -44,7 +44,11 @@ const TAB_LIBRARY_ID = 'library' as const;
 type FlyoutTab = typeof TAB_NEW_ID | typeof TAB_LIBRARY_ID;
 
 function NewPanelContent({ dashboardApi }: { dashboardApi: DashboardApi }) {
-  const { groups, loading: isLoadingGroups, error: loadGroupsError } = useMenuItemGroups({ dashboardApi });
+  const {
+    groups,
+    loading: isLoadingGroups,
+    error: loadGroupsError,
+  } = useMenuItemGroups({ dashboardApi });
   const { featuredItems, loading: isLoadingFeaturedItems } = useFeaturedItems({ dashboardApi });
 
   const [searchTerm, setSearchTerm] = useState<string>('');

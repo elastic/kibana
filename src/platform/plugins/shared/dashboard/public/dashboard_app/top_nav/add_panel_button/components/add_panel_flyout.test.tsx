@@ -31,8 +31,8 @@ jest.mock('../use_featured_items', () => {
   return {
     useFeaturedItems: () => ({
       featuredItems: [],
-      loading: false
-    })
+      loading: false,
+    }),
   };
 });
 

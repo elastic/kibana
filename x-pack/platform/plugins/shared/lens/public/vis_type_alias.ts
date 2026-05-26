@@ -28,8 +28,7 @@ export const lensVisTypeAlias: VisTypeAlias = {
     defaultMessage: 'Visualization',
   }),
   description: i18n.translate('xpack.lens.visTypeAlias.description', {
-    defaultMessage:
-      'Build charts, metrics, and tables with a point-and-click editor.',
+    defaultMessage: 'Build charts, metrics, and tables with a point-and-click editor.',
   }),
   order: 60,
   icon: LENS_ICON,
