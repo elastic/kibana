@@ -14,10 +14,13 @@ import { useAppToastsMock } from '../../../../../common/hooks/use_app_toasts.moc
 import { renderMutation } from '../../../../../management/hooks/test_utils';
 import { useInvalidateFindAttackDiscoverySchedule } from './use_find_schedules';
 import { createAttackDiscoverySchedule } from '../api';
+import { useKibana } from '../../../../../common/lib/kibana';
+import { AttackDiscoverySchedulesEventTypes } from '../../../../../common/lib/telemetry';
 
 jest.mock('./use_find_schedules');
 jest.mock('../api');
 jest.mock('../../../../../common/hooks/use_app_toasts');
+jest.mock('../../../../../common/lib/kibana');
 
 const createAttackDiscoveryScheduleMock = createAttackDiscoverySchedule as jest.MockedFunction<
   typeof createAttackDiscoverySchedule
@@ -31,9 +34,19 @@ const mockUseInvalidateFindAttackDiscoverySchedule =
 
 describe('useCreateAttackDiscoverySchedule', () => {
   let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
+  let reportEventMock: jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
+
+    reportEventMock = jest.fn();
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        telemetry: {
+          reportEvent: reportEventMock,
+        },
+      },
+    });
 
     appToastsMock = useAppToastsMock.create();
     (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
@@ -60,13 +73,17 @@ describe('useCreateAttackDiscoverySchedule', () => {
     });
   });
 
-  it('should invoke `addSuccess`', async () => {
+  it('should invoke `addSuccess` and `reportEvent`', async () => {
     const result = await renderMutation(() => useCreateAttackDiscoverySchedule());
 
     await act(async () => {
       await result.mutateAsync({ scheduleToCreate: mockCreateAttackDiscoverySchedule });
       expect(appToastsMock.addSuccess).toHaveBeenCalledWith(
         '1 attack discovery schedule created successfully.'
+      );
+      expect(reportEventMock).toHaveBeenCalledWith(
+        AttackDiscoverySchedulesEventTypes.CreateSuccess,
+        {}
       );
     });
   });
@@ -80,7 +97,7 @@ describe('useCreateAttackDiscoverySchedule', () => {
     });
   });
 
-  it('should invoke `addError`', async () => {
+  it('should invoke `addError` and `reportEvent`', async () => {
     createAttackDiscoveryScheduleMock.mockRejectedValue('Royally failed!');
 
     const result = await renderMutation(() => useCreateAttackDiscoverySchedule());
@@ -92,6 +109,10 @@ describe('useCreateAttackDiscoverySchedule', () => {
         expect(appToastsMock.addError).toHaveBeenCalledWith('Royally failed!', {
           title: 'Failed to create 1 attack discovery schedule',
         });
+        expect(reportEventMock).toHaveBeenCalledWith(
+          AttackDiscoverySchedulesEventTypes.CreateFailed,
+          {}
+        );
       }
     });
   });
