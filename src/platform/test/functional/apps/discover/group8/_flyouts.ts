@@ -11,7 +11,6 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const { common, discover, timePicker, header } = getPageObjects([
     'common',
     'discover',
@@ -30,9 +29,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
       );
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
     });
@@ -49,9 +45,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async () => {
       await kibanaServer.importExport.unload(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
-      );
-      await esArchiver.unload(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
       );
       await kibanaServer.uiSettings.replace({});
       await kibanaServer.savedObjects.cleanStandardList();
