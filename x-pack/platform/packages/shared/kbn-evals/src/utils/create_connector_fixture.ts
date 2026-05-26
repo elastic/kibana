@@ -8,7 +8,6 @@
 import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
 import { v5 } from 'uuid';
 import type { HttpHandler } from '@kbn/core/public';
-import { isAxiosError } from 'axios';
 import type { ToolingLog } from '@kbn/tooling-log';
 
 /**
@@ -31,26 +30,40 @@ export function resolveConnectorId(connectorId: string): string {
     : getConnectorIdAsUuid(connectorId);
 }
 
+function getErrorStatus(error: unknown): number | undefined {
+  if (error && typeof error === 'object') {
+    if ('status' in error && typeof (error as any).status === 'number') {
+      return (error as any).status;
+    }
+    if ('response' in error && typeof (error as any).response === 'object') {
+      return (error as any).response?.status;
+    }
+  }
+  return undefined;
+}
+
+function getErrorMessage(error: unknown): string {
+  if (error && typeof error === 'object' && 'message' in error) {
+    return String((error as any).message);
+  }
+  return '';
+}
+
 /**
  * Inference connectors may return 400 (not 409) when the backing inference endpoint
  * was created by another parallel worker — treat as success and reuse.
+ * Handles both AxiosError and KbnClientRequesterError shapes.
  */
 function isAlreadyExistsConnectorError(error: unknown): boolean {
-  if (!isAxiosError(error)) {
-    return false;
-  }
-  if (error.status === 409) {
+  const status = getErrorStatus(error);
+  if (status === 409) {
     return true;
   }
-  if (error.status !== 400) {
+  if (status !== 400) {
     return false;
   }
-  const data = error.response?.data;
-  const message =
-    typeof data === 'object' && data !== null && 'message' in data
-      ? String((data as { message: unknown }).message)
-      : '';
-  return /already exists/i.test(message);
+  const message = getErrorMessage(error);
+  return /already exists/i.test(message) || /already using this ID/i.test(message);
 }
 
 export async function deleteConnectorById({
@@ -67,7 +80,7 @@ export async function deleteConnectorById({
     path: `/api/actions/connector/${connectorId}`,
     method: 'DELETE',
   }).catch((error) => {
-    if (isAxiosError(error) && error.status === 404) {
+    if (getErrorStatus(error) === 404) {
       return;
     }
     throw error;
@@ -98,8 +111,7 @@ export async function createConnectorFixture({
 
       return res?.is_preconfigured === true;
     } catch (error) {
-      const status = isAxiosError(error) ? error.status : (error as any)?.status;
-      if (status === 404) return false;
+      if (getErrorStatus(error) === 404) return false;
       throw error;
     }
   }
