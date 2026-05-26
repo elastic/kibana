@@ -21,15 +21,12 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import {
-  SavedSearchType,
-  SavedSearchTypeDisplayName,
-  type SavedSearchAttributes,
-} from '@kbn/saved-search-plugin/common';
+import { SavedSearchType, SavedSearchTypeDisplayName } from '@kbn/saved-search-plugin/common';
 import type { ApplicationStart, IUiSettingsClient } from '@kbn/core/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { SavedObjectFinderProps } from '@kbn/saved-objects-finder-plugin/public';
-import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
+import type { FinderAttributes, SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
+import { isEsqlSavedSearch, type DiscoverSessionFinderAttributes } from '@kbn/discover-utils';
 
 export type { SavedObjectFinderProps };
 
@@ -49,8 +46,6 @@ export interface MlOpenSessionFlyoutProps {
   onClose: () => void;
   onOpenSavedSearch: (id: string) => void;
   SavedObjectFinderComponent: ComponentType<SavedObjectFinderProps>;
-  /** When true, ES|QL-based sessions are hidden from the list */
-  filterEsql?: boolean;
 }
 
 export const MlOpenSessionFlyout: FC<MlOpenSessionFlyoutProps> = ({
@@ -58,7 +53,6 @@ export const MlOpenSessionFlyout: FC<MlOpenSessionFlyoutProps> = ({
   onClose,
   onOpenSavedSearch,
   SavedObjectFinderComponent,
-  filterEsql = false,
 }) => {
   const modalTitleId = useGeneratedHtmlId();
   const { http, application, contentManagement, uiSettings } = services;
@@ -108,12 +102,10 @@ export const MlOpenSessionFlyout: FC<MlOpenSessionFlyoutProps> = ({
                   defaultMessage: 'Discover session',
                 }
               ),
-              ...(filterEsql
-                ? {
-                    showSavedObject: (savedObject: SavedObjectCommon<SavedSearchAttributes>) =>
-                      !savedObject.attributes.isTextBasedQuery,
-                  }
-                : {}),
+              // ES|QL Based saved searches are not supported in Discover sessions, filter them out
+              showSavedObject: (
+                savedObject: SavedObjectCommon<FinderAttributes & DiscoverSessionFinderAttributes>
+              ) => !isEsqlSavedSearch(savedObject),
             },
           ]}
           onChoose={onOpenSavedSearch}

@@ -42,8 +42,6 @@ export interface MlDataSourcePickerProps {
   services: MlDataSourcePickerServices;
   DataViewPickerComponent: ComponentType<DataViewPickerProps>;
   SavedObjectFinderComponent: MlOpenSessionFlyoutProps['SavedObjectFinderComponent'];
-  /** When true, ES|QL-based sessions are hidden from the session picker */
-  filterEsql?: boolean;
   /** Called after a field is saved via the field editor */
   onFieldSaved?: () => void;
 }
@@ -55,7 +53,6 @@ export const MlDataSourcePicker: FC<MlDataSourcePickerProps> = ({
   services,
   DataViewPickerComponent,
   SavedObjectFinderComponent,
-  filterEsql = false,
   onFieldSaved,
 }) => {
   const [savedDataViews, setSavedDataViews] = useState<DataViewListItem[]>([]);
@@ -189,7 +186,6 @@ export const MlDataSourcePicker: FC<MlDataSourcePickerProps> = ({
         onClose={onCloseSession}
         onOpenSavedSearch={onOpenSavedSearch}
         SavedObjectFinderComponent={SavedObjectFinderComponent}
-        filterEsql={filterEsql}
       />
     </>
   ) : (

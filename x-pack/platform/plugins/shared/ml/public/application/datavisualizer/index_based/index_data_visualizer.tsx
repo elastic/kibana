@@ -204,7 +204,6 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false })
       services={services}
       DataViewPickerComponent={DataViewPicker}
       SavedObjectFinderComponent={SavedObjectFinder}
-      filterEsql
       onFieldSaved={() => mlTimefilterRefresh$.next({ lastRefresh: Date.now() })}
     />
   ) : undefined;
