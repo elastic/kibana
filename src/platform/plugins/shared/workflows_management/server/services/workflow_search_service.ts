@@ -17,7 +17,7 @@ import type {
   WorkflowStatsDto,
 } from '@kbn/workflows';
 import { buildWorkflowFilters } from '@kbn/workflows/server';
-import type { WorkflowListItemDto } from '@kbn/workflows/types/v1';
+import type { WorkflowListItemDto, WorkflowSortField } from '@kbn/workflows/types/v1';
 
 import type { WorkflowSearchDeps } from './types';
 import { WORKFLOWS_EXECUTIONS_INDEX } from '../../common';
@@ -31,6 +31,11 @@ import {
 import type { GetWorkflowsParams } from '../api/workflows_management_api';
 import type { WorkflowProperties } from '../storage/workflow_storage';
 import { workflowIndexName } from '../storage/workflow_storage';
+
+const ES_SORT_FIELDS: Record<WorkflowSortField, string> = {
+  name: 'name.keyword',
+  enabled: 'enabled',
+};
 
 interface WorkflowAggBucket {
   key: string | number | boolean;
@@ -158,12 +163,11 @@ export class WorkflowSearchService {
       must.push(buildWorkflowTextSearchClause(query));
     }
 
-    const ES_SORT_FIELDS: Record<string, string> = {
-      name: 'name.keyword',
-      enabled: 'enabled',
-    };
     const esSort = sortField
-      ? [{ [ES_SORT_FIELDS[sortField]]: { order: sortDirection } }]
+      ? [
+          { [ES_SORT_FIELDS[sortField]]: { order: sortDirection } },
+          { updated_at: { order: 'desc' as const } },
+        ]
       : [{ updated_at: { order: 'desc' as const } }];
 
     const searchResponse = await this.deps.workflowStorage.getClient().search({

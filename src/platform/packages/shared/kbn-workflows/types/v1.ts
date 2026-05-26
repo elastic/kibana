@@ -764,6 +764,8 @@ export type ConnectorContractUnion =
   | BaseConnectorContract
   | InternalConnectorContract;
 
+export type WorkflowSortField = 'name' | 'enabled';
+
 export interface WorkflowsSearchParams {
   size?: number;
   page?: number;
@@ -771,7 +773,7 @@ export interface WorkflowsSearchParams {
   createdBy?: string[];
   enabled?: boolean[];
   tags?: string[];
-  sortField?: 'name' | 'enabled';
+  sortField?: WorkflowSortField;
   sortDirection?: 'asc' | 'desc';
 }
 

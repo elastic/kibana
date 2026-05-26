@@ -27,7 +27,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { WorkflowListItemDto } from '@kbn/workflows';
+import type { WorkflowListItemDto, WorkflowSortField } from '@kbn/workflows';
 import { WorkflowTriggersAndSteps } from './workflow_triggers_and_steps';
 import { getRunTooltipContent, StatusBadge, WorkflowStatus } from '../../../shared/ui';
 import { NextExecutionTime } from '../../../shared/ui/next_execution_time';
@@ -55,9 +55,9 @@ export interface WorkflowListTableProps {
   canUpdateWorkflow: boolean;
   canDeleteWorkflow: boolean;
   canExecuteWorkflow: boolean;
-  sortField?: 'name' | 'enabled';
+  sortField?: WorkflowSortField;
   sortDirection?: 'asc' | 'desc';
-  onSortChange: (field: 'name' | 'enabled', direction: 'asc' | 'desc') => void;
+  onSortChange?: (field: WorkflowSortField, direction: 'asc' | 'desc') => void;
 }
 
 export const WorkflowListTable = ({
@@ -232,7 +232,7 @@ export const WorkflowListTable = ({
           defaultMessage: 'Enabled',
         }),
         field: 'enabled',
-        width: '70px',
+        width: '90px',
         sortable: true,
         render: (value: unknown, item: WorkflowListItemDto) => {
           return (
@@ -394,10 +394,10 @@ export const WorkflowListTable = ({
       }: CriteriaWithPagination<WorkflowListItemDto>) => {
         const incomingField =
           sort?.field === 'name' || sort?.field === 'enabled' ? sort.field : undefined;
-        const incomingDirection = sort?.direction ?? 'asc';
+        const incomingDirection = sort?.direction;
         const sortChanged = incomingField !== sortField || incomingDirection !== sortDirection;
-        if (sortChanged && incomingField) {
-          onSortChange(incomingField, incomingDirection);
+        if (sortChanged && incomingField && incomingDirection) {
+          onSortChange?.(incomingField, incomingDirection);
         } else {
           onPageChange(pageIndex, pageSize);
         }

@@ -157,7 +157,7 @@ export function WorkflowsPage() {
                   >
                     <FormattedMessage
                       id="workflows.createWorkflowButton"
-                      defaultMessage="Create workflow"
+                      defaultMessage="Create a new workflow"
                       ignoreTag
                     />
                   </EuiButton>

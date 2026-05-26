@@ -51,6 +51,7 @@ export type {
   ExecutionStatusUnion,
   ExecutionTypeUnion,
   // api types
+  WorkflowSortField,
   WorkflowsSearchParams,
   // connector types
   ConnectorSubAction,
