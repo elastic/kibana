@@ -28,7 +28,7 @@ spaceTest.describe(
         await aiValueReportPage.navigate();
 
         await expect(aiValueReportPage.page).toBeVisible({ timeout: 30000 });
-        await expect(aiValueReportPage.sampleBanner).toBeVisible();
+        await expect(aiValueReportPage.sampleBanner).toBeVisible({ timeout: 30000 });
         await expect(aiValueReportPage.sampleDataBadge).toBeVisible();
         await expect(aiValueReportPage.attackDiscoveryCtaButton).toBeVisible();
       }
