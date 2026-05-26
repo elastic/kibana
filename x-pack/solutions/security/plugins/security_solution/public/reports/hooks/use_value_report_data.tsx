@@ -52,12 +52,11 @@ export const useValueReportData = ({
 }: Props): ValueReportData => {
   const {
     attackAlertIds,
+    hasNoCurrentDiscoveries: shouldCheckHistory,
     isLoading: isLoadingMetrics,
     valueMetrics,
     valueMetricsCompare,
   } = useValueMetrics({ from, to, minutesPerAlert, analystHourlyRate });
-
-  const shouldCheckHistory = !isLoadingMetrics && valueMetrics.attackDiscoveryCount === 0;
 
   const {
     hasLatelyUsedAttackDiscovery: hasHistoricalAttackDiscoveries,

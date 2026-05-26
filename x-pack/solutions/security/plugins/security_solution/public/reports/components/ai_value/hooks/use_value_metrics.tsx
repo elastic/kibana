@@ -28,6 +28,7 @@ interface Props {
 }
 interface UseValueMetrics {
   attackAlertIds: string[];
+  hasNoCurrentDiscoveries: boolean;
   isLoading: boolean;
   valueMetrics: ValueMetrics;
   valueMetricsCompare: ValueMetrics;
@@ -146,6 +147,7 @@ export const useValueMetrics = ({
 
   return {
     attackAlertIds: data?.unique_alert_ids ?? [],
+    hasNoCurrentDiscoveries: !isLoading && (data?.total ?? 0) === 0,
     isLoading,
     valueMetrics,
     valueMetricsCompare,

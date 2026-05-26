@@ -60,12 +60,15 @@ const mockMetrics = ({
   valueMetrics = LIVE_METRICS,
   valueMetricsCompare = LIVE_METRICS_COMPARE,
   attackAlertIds = LIVE_ALERT_IDS,
+  hasNoCurrentDiscoveries,
 }: Partial<ReturnType<typeof useValueMetrics>> = {}) => {
   mockUseValueMetrics.mockReturnValue({
     isLoading,
     valueMetrics,
     valueMetricsCompare,
     attackAlertIds,
+    hasNoCurrentDiscoveries:
+      hasNoCurrentDiscoveries ?? (!isLoading && valueMetrics.attackDiscoveryCount === 0),
   });
 };
 

@@ -117,6 +117,7 @@ describe('AIValueReport', () => {
 
     mockUseValueMetrics.mockReturnValue({
       attackAlertIds: ['alert-1', 'alert-2'],
+      hasNoCurrentDiscoveries: false,
       isLoading: false,
       valueMetrics: mockValueMetrics,
       valueMetricsCompare: mockValueMetricsCompare,
@@ -163,6 +164,7 @@ describe('AIValueReport', () => {
   it('renders the sample layout when the user has never used Attack Discovery and there are no discoveries', () => {
     mockUseValueMetrics.mockReturnValue({
       attackAlertIds: [],
+      hasNoCurrentDiscoveries: true,
       isLoading: false,
       valueMetrics: {
         ...mockValueMetrics,
@@ -195,6 +197,7 @@ describe('AIValueReport', () => {
   it('renders the empty state when the feature was used before but the window has no discoveries', () => {
     mockUseValueMetrics.mockReturnValue({
       attackAlertIds: [],
+      hasNoCurrentDiscoveries: true,
       isLoading: false,
       valueMetrics: {
         ...mockValueMetrics,
@@ -219,6 +222,7 @@ describe('AIValueReport', () => {
   it('renders the page loader while data or sourcerer is loading', () => {
     mockUseValueMetrics.mockReturnValue({
       attackAlertIds: [],
+      hasNoCurrentDiscoveries: false,
       isLoading: true,
       valueMetrics: mockValueMetrics,
       valueMetricsCompare: mockValueMetricsCompare,
@@ -320,6 +324,7 @@ describe('AIValueReport', () => {
     });
     mockUseValueMetrics.mockReturnValue({
       attackAlertIds: [],
+      hasNoCurrentDiscoveries: true,
       isLoading: false,
       valueMetrics: {
         ...mockValueMetrics,

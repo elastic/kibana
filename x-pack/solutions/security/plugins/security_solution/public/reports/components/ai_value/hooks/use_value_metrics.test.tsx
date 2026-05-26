@@ -101,4 +101,49 @@ describe('useValueMetrics', () => {
       costSavings: 166.66666666666669,
     });
   });
+
+  it('hasNoCurrentDiscoveries is false when there are discoveries', () => {
+    const { result } = renderHook(() =>
+      useValueMetrics({
+        analystHourlyRate: 100,
+        from: '2025-07-22T15:16:31.006Z',
+        to: '2025-07-23T15:16:31.006Z',
+        minutesPerAlert: 10,
+      })
+    );
+    expect(result.current.hasNoCurrentDiscoveries).toBe(false);
+  });
+
+  it('hasNoCurrentDiscoveries is true when loaded and discovery count is zero', () => {
+    (useFindAttackDiscoveries as jest.Mock).mockReturnValue({
+      data: { unique_alert_ids: [], total: 0 },
+      isLoading: false,
+    });
+    const { result } = renderHook(() =>
+      useValueMetrics({
+        analystHourlyRate: 100,
+        from: '2025-07-22T15:16:31.006Z',
+        to: '2025-07-23T15:16:31.006Z',
+        minutesPerAlert: 10,
+      })
+    );
+    expect(result.current.hasNoCurrentDiscoveries).toBe(true);
+  });
+
+  it('hasNoCurrentDiscoveries is false while still loading', () => {
+    (useFindAttackDiscoveries as jest.Mock).mockReturnValue({
+      data: { unique_alert_ids: [], total: 0 },
+      isLoading: true,
+    });
+    (useAlertCountQuery as jest.Mock).mockReturnValue({ alertCount: 0, isLoading: true });
+    const { result } = renderHook(() =>
+      useValueMetrics({
+        analystHourlyRate: 100,
+        from: '2025-07-22T15:16:31.006Z',
+        to: '2025-07-23T15:16:31.006Z',
+        minutesPerAlert: 10,
+      })
+    );
+    expect(result.current.hasNoCurrentDiscoveries).toBe(false);
+  });
 });
