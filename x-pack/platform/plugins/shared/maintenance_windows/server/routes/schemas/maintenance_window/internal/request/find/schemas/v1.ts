@@ -35,12 +35,9 @@ export const findMaintenanceWindowsRequestQuerySchema = schema.object(
   }
 );
 
-export const findMaintenanceWindowsResponseBodySchema = schema.object(
-  {
-    page: schema.number(),
-    per_page: schema.number(),
-    total: schema.number(),
-    data: schema.arrayOf(maintenanceWindowResponseSchemaV1),
-  },
-  { meta: { id: 'find_maintenance_windows_internal_response' } }
-);
+export const findMaintenanceWindowsResponseBodySchema = schema.object({
+  page: schema.number(),
+  per_page: schema.number(),
+  total: schema.number(),
+  data: schema.arrayOf(maintenanceWindowResponseSchemaV1),
+});

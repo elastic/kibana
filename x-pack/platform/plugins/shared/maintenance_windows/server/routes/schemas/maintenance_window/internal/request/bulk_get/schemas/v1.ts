@@ -7,9 +7,6 @@
 
 import { schema } from '@kbn/config-schema';
 
-export const bulkGetBodySchema = schema.object(
-  {
-    ids: schema.arrayOf(schema.string()),
-  },
-  { meta: { id: 'maintenance_window_bulk_get_body' } }
-);
+export const bulkGetBodySchema = schema.object({
+  ids: schema.arrayOf(schema.string()),
+});

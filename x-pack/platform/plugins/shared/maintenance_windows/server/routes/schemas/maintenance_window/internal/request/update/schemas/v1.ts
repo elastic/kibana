@@ -14,14 +14,11 @@ export const updateParamsSchema = schema.object({
   id: schema.string(),
 });
 
-export const updateBodySchema = schema.object(
-  {
-    title: schema.maybe(schema.string()),
-    enabled: schema.maybe(schema.boolean()),
-    duration: schema.maybe(schema.number()),
-    r_rule: schema.maybe(rRuleRequestSchemaV1),
-    category_ids: maintenanceWindowCategoryIdsSchemaV1,
-    scoped_query: schema.maybe(schema.nullable(alertsFilterQuerySchemaV1)),
-  },
-  { meta: { id: 'update_maintenance_window_internal' } }
-);
+export const updateBodySchema = schema.object({
+  title: schema.maybe(schema.string()),
+  enabled: schema.maybe(schema.boolean()),
+  duration: schema.maybe(schema.number()),
+  r_rule: schema.maybe(rRuleRequestSchemaV1),
+  category_ids: maintenanceWindowCategoryIdsSchemaV1,
+  scoped_query: schema.maybe(schema.nullable(alertsFilterQuerySchemaV1)),
+});
