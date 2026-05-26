@@ -30,9 +30,9 @@ export const ACTION_COPY_TO_DASHBOARD = 'ACTION_METRICS_EXPERIENCE_COPY_TO_DASHB
 export const ACTION_VIEW_DETAILS = 'ACTION_METRICS_EXPERIENCE_VIEW_DETAILS';
 export const ACTION_EXPLORE_IN_DISCOVER_TAB = 'ACTION_METRICS_EXPERIENCE_EXPLORE_IN_DISCOVER_TAB';
 export const ACTION_OPEN_IN_DISCOVER = 'ACTION_OPEN_IN_DISCOVER';
-// Re-export the canonical inspect-panel action ID from the embeddable plugin so
-// we have a single source of truth instead of a duplicated string literal.
-export { ACTION_INSPECT_PANEL } from '@kbn/embeddable-plugin/public';
+// Note: `ACTION_INSPECT_PANEL` is the canonical inspect-panel action ID and is owned
+// by the embeddable plugin. Consumers should import it directly from
+// `@kbn/embeddable-plugin/public` rather than re-exporting it from here.
 /** Set of numeric field types used for metrics */
 export const NUMERIC_TYPES = [
   ES_FIELD_TYPES.LONG,

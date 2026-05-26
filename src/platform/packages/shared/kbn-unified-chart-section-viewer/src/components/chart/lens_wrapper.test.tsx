@@ -11,7 +11,7 @@ import React, { useContext } from 'react';
 import '@testing-library/jest-dom';
 import { act, render } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
-import { EmbeddableRendererContext } from '@kbn/embeddable-plugin/public';
+import { ACTION_INSPECT_PANEL, EmbeddableRendererContext } from '@kbn/embeddable-plugin/public';
 import { LensWrapper } from './lens_wrapper';
 import type { LensWrapperProps } from './lens_wrapper';
 import { ESQLVariableType } from '@kbn/esql-types';
@@ -20,7 +20,6 @@ import {
   ACTION_COPY_TO_DASHBOARD,
   ACTION_EXPLORE_IN_DISCOVER_TAB,
   ACTION_VIEW_DETAILS,
-  ACTION_INSPECT_PANEL,
 } from '../../common/constants';
 
 // Mock the EmbeddableComponent

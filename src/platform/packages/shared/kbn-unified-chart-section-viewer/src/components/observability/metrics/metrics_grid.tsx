@@ -13,6 +13,7 @@ import { EuiFlexGrid, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { EmbeddableComponentProps } from '@kbn/lens-plugin/public';
+import { ACTION_INSPECT_PANEL } from '@kbn/embeddable-plugin/public';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { Dimension, UnifiedMetricsGridProps, ParsedMetricItem } from '../../../types';
@@ -28,7 +29,6 @@ import {
   ACTION_EXPLORE_IN_DISCOVER_TAB,
   ACTION_OPEN_IN_DISCOVER,
   ACTION_VIEW_DETAILS,
-  ACTION_INSPECT_PANEL,
 } from '../../../common/constants';
 import { useChartLayers } from '../../chart/hooks/use_chart_layers';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
