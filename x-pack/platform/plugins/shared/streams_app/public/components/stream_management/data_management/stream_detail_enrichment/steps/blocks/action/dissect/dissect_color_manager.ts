@@ -82,7 +82,12 @@ export class DissectColorManager {
 
       if (oldName && newName && oldName !== newName) {
         const oldColour = this.fieldColourMap.get(oldName);
-        if (oldColour && !this.fieldColourMap.has(newName) && !pendingTransfers.has(newName)) {
+        if (
+          oldColour &&
+          !this.fieldColourMap.has(newName) &&
+          !pendingTransfers.has(newName) &&
+          !currentUniqueNames.has(oldName)
+        ) {
           pendingTransfers.set(newName, oldColour);
         }
       }
