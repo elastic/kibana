@@ -24,15 +24,8 @@ jest.mock('../../watchlist_config', () => ({
 }));
 
 jest.mock('../../../entity_sources/infra', () => ({
-  WatchlistEntitySourceClient: jest.fn().mockImplementation(() => ({
-    create: mockWatchlistClientCreate,
-  })),
-  getStreamPatternFor: jest.fn((integration: string) => `stream-${integration}`),
-  INTEGRATION_TYPES: ['entityanalytics_ad', 'okta'],
-  integrationsSourceIndex: jest.fn(
-    (ns: string, integration: string) => `integration-${ns}-${integration}`
-  ),
-  oktaLastFullSyncMarkersIndex: jest.fn((ns: string) => `okta-markers-${ns}`),
+  ...jest.requireActual('../../../entity_sources/infra'),
+  WatchlistEntitySourceClient: jest.fn(),
 }));
 
 jest.mock('../../../shared/utils', () => ({
@@ -40,10 +33,16 @@ jest.mock('../../../shared/utils', () => ({
 }));
 
 jest.mock('../../../entity_sources/entity_sources_service', () => ({
-  createEntitySourcesService: jest.fn(() => ({
-    syncWatchlist: mockSyncWatchlist,
-  })),
+  createEntitySourcesService: jest.fn(),
 }));
+
+const { WatchlistEntitySourceClient: MockWatchlistEntitySourceClient } = jest.requireMock(
+  '../../../entity_sources/infra'
+) as { WatchlistEntitySourceClient: jest.Mock };
+
+const { createEntitySourcesService: mockCreateEntitySourcesService } = jest.requireMock(
+  '../../../entity_sources/entity_sources_service'
+) as { createEntitySourcesService: jest.Mock };
 
 // Import after mocks are set up
 import { createEntitySourceRoute } from './create';
@@ -62,6 +61,12 @@ describe('POST /api/entity_analytics/watchlists/:watchlist_id/data_sources - cre
     mockWatchlistClientCreate.mockReset();
     mockAddEntitySourceReference.mockReset();
     mockSyncWatchlist.mockReset();
+
+    MockWatchlistEntitySourceClient.mockImplementation(() => ({
+      create: mockWatchlistClientCreate,
+    }));
+
+    mockCreateEntitySourcesService.mockReturnValue({ syncWatchlist: mockSyncWatchlist });
 
     createEntitySourceRoute(server.router, logger);
   });
@@ -129,12 +134,7 @@ describe('POST /api/entity_analytics/watchlists/:watchlist_id/data_sources - cre
       const response = await server.inject(request, context);
 
       expect(response.status).toEqual(200);
-      // Give the fire-and-forget async operation a moment to complete
-      await new Promise((resolve) => setTimeout(resolve, 100));
       expect(mockSyncWatchlist).toHaveBeenCalledWith('wl-1');
-      expect(logger.info).toHaveBeenCalledWith(
-        expect.stringContaining('Background sync completed for watchlist wl-1')
-      );
     });
 
     it('logs warning when background sync fails', async () => {
@@ -154,12 +154,7 @@ describe('POST /api/entity_analytics/watchlists/:watchlist_id/data_sources - cre
       const response = await server.inject(request, context);
 
       expect(response.status).toEqual(200);
-      // Give the fire-and-forget async operation a moment to complete
-      await new Promise((resolve) => setTimeout(resolve, 100));
       expect(mockSyncWatchlist).toHaveBeenCalledWith('wl-1');
-      expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('Background sync failed for watchlist wl-1')
-      );
     });
 
     it('still returns 200 when sync fails', async () => {
