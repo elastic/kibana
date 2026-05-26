@@ -249,11 +249,6 @@ export const createConversationActions = ({
       });
     },
     setAttachments: ({ attachments }: { attachments: VersionedAttachment[] }) => {
-      // Server sends the canonical attachments array on `roundComplete`. Writing it to the
-      // cache eagerly keeps newly-rendered `<render_attachment>` chips reading the latest
-      // version data — otherwise the chip would render from a stale `conversation.attachments`
-      // until the post-stream `invalidateConversation()` refetch lands, and a user clicking
-      // "Preview" in that window would capture the previous version's data.
       setConversation(
         produce((draft) => {
           if (draft) {
