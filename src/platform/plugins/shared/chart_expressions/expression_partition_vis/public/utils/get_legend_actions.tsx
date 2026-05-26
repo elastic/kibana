@@ -10,20 +10,44 @@
 import React, { useState, useEffect, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import type { EuiContextMenuPanelDescriptor, UseEuiTheme } from '@elastic/eui';
 import { EuiIcon, EuiPopover, EuiContextMenu } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { LegendAction, SeriesIdentifier } from '@elastic/charts';
 import { useLegendAction } from '@elastic/charts';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { FILTER_CELL_ACTION_TYPE } from '@kbn/cell-actions/constants';
 import type { IInterpreterRenderEvent } from '@kbn/expressions-plugin/common';
+import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
+import { getComputedColumnWarningForColumns } from '@kbn/chart-expressions-common';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { PartitionVisParams } from '../../common/types';
 import type { CellValueAction, ColumnCellValueActions, FilterEvent } from '../types';
 import { getSeriesValueColumnIndex, getFilterPopoverTitle } from './filter_helpers';
 
 const hasFilterCellAction = (actions: CellValueAction[]) => {
   return actions.some(({ type }) => type === FILTER_CELL_ACTION_TYPE);
+};
+
+const legendActionPopoverStyles = {
+  message: ({ euiTheme }: UseEuiTheme) =>
+    css`
+      padding: ${euiTheme.size.m};
+      color: ${euiTheme.colors.textSubdued};
+      border-block-start: ${euiTheme.border.thin};
+      margin-block: ${euiTheme.size.s} -${euiTheme.size.s};
+      margin-inline: -${euiTheme.size.s};
+    `,
+};
+
+const LegendFilterDisabledMessage = ({ message }: { message: string }) => {
+  const styles = useMemoCss(legendActionPopoverStyles);
+  return (
+    <div css={styles.message} data-test-subj="legendFilterDisabledMessage">
+      {message}
+    </div>
+  );
 };
 
 export const getLegendActions = (
@@ -33,7 +57,8 @@ export const getLegendActions = (
   columnCellValueActions: ColumnCellValueActions,
   visParams: PartitionVisParams,
   visData: Datatable,
-  formatter: FieldFormatsStart
+  formatter: FieldFormatsStart,
+  panelHasConfiguredDrilldowns?: boolean
 ): LegendAction => {
   return ({ series: [pieSeries] }) => {
     const [popoverOpen, setPopoverOpen] = useState(false);
@@ -45,22 +70,20 @@ export const getLegendActions = (
     );
     const [ref, onClose] = useLegendAction<HTMLDivElement>();
 
+    const isEsqlMode = visData.meta?.type === ESQL_TABLE_TYPE;
+    const column = columnIndex !== -1 ? visData.columns[columnIndex] : undefined;
+    const hasComputedColumn = isEsqlMode && column?.isComputedColumn === true;
+
     useEffect(() => {
-      if (!canFilter || !filterData) {
+      if (!canFilter || !filterData || hasComputedColumn) {
         setIsFilterable(false);
         return;
       }
 
       (async () => setIsFilterable(await canFilter(filterData)))();
-    }, [filterData]);
+    }, [filterData, hasComputedColumn]);
 
     if (columnIndex === -1) {
-      return null;
-    }
-
-    // Don't show filter actions for computed columns
-    const column = visData.columns[columnIndex];
-    if (column?.isComputedColumn === true) {
       return null;
     }
 
@@ -75,8 +98,41 @@ export const getLegendActions = (
 
     const compatibleCellActions = columnCellValueActions[columnIndex] ?? [];
 
+    const computedColumnWarningMessage = hasComputedColumn
+      ? getComputedColumnWarningForColumns([column], panelHasConfiguredDrilldowns ?? false)
+      : undefined;
+
     const panelItems: EuiContextMenuPanelDescriptor['items'] = [];
-    if (!hasFilterCellAction(compatibleCellActions) && isFilterable && filterData) {
+
+    if (hasComputedColumn) {
+      // Show disabled filter items with a warning message for ES|QL computed columns
+      panelItems.push(
+        {
+          name: i18n.translate('expressionPartitionVis.legend.filterForValueButtonAriaLabel', {
+            defaultMessage: 'Filter for',
+          }),
+          'data-test-subj': `legend-${title}-filterIn`,
+          icon: <EuiIcon type="plusCircle" size="m" aria-hidden={true} />,
+          disabled: true,
+          onClick: () => {},
+        },
+        {
+          name: i18n.translate('expressionPartitionVis.legend.filterOutValueButtonAriaLabel', {
+            defaultMessage: 'Filter out',
+          }),
+          'data-test-subj': `legend-${title}-filterOut`,
+          icon: <EuiIcon type="minusCircle" size="m" aria-hidden={true} />,
+          disabled: true,
+          onClick: () => {},
+        }
+      );
+
+      if (computedColumnWarningMessage) {
+        panelItems.push({
+          renderItem: () => <LegendFilterDisabledMessage message={computedColumnWarningMessage} />,
+        });
+      }
+    } else if (!hasFilterCellAction(compatibleCellActions) && isFilterable && filterData) {
       panelItems.push(
         {
           name: i18n.translate('expressionPartitionVis.legend.filterForValueButtonAriaLabel', {
@@ -143,7 +199,7 @@ export const getLegendActions = (
           marginRight: 4,
         }}
         data-test-subj={`legend-${title}`}
-        onKeyPress={() => setPopoverOpen(!popoverOpen)}
+        onKeyDown={() => setPopoverOpen(!popoverOpen)}
         onClick={() => setPopoverOpen(!popoverOpen)}
         aria-label={i18n.translate('expressionPartitionVis.legend.legendActionsAria', {
           defaultMessage: 'Legend actions',

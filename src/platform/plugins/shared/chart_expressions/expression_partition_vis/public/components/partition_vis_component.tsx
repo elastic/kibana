@@ -371,7 +371,8 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
             columnCellValueActions,
             visParams,
             visData,
-            services.fieldFormats
+            services.fieldFormats,
+            panelHasConfiguredDrilldowns
           )
         : undefined,
     [
@@ -379,6 +380,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
       getLegendActionEventData,
       handleLegendAction,
       interactive,
+      panelHasConfiguredDrilldowns,
       services.fieldFormats,
       visData,
       visParams,
