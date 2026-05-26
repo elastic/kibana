@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ComponentType } from 'react';
+import type { ComponentType, FC } from 'react';
 import type { AttachmentInput, UpdateOriginResponse } from '@kbn/agent-builder-common/attachments';
 import type { BrowserApiToolDefinition } from './tools/browser_api_tool';
 import type {
@@ -113,6 +113,19 @@ export interface EmbeddableConversationProps {
    * ```
    */
   browserApiTools?: Array<BrowserApiToolDefinition<any>>;
+}
+
+/**
+ * Props for the case detail "AI Workspace" tab (Option B: case is the entry point).
+ */
+export interface CaseAiWorkspaceProps {
+  caseId: string;
+  caseTitle: string;
+  caseOwner: string;
+  caseDescription?: string;
+  totalAlerts?: number;
+  totalComments?: number;
+  fileCount?: number;
 }
 
 /**
@@ -234,4 +247,8 @@ export interface AgentBuilderPluginStart {
    * functional agent_builder chat without the sidebar chrome.
    */
   EmbeddableConversation: ComponentType<PublicEmbeddableConversationProps>;
+  /**
+   * Inline AI Workspace for a case detail tab. Undefined when Agent Builder is unavailable.
+   */
+  CaseAiWorkspace?: FC<CaseAiWorkspaceProps>;
 }

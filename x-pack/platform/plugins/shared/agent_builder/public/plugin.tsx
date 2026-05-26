@@ -61,6 +61,7 @@ import type {
 } from './types';
 import type { EmbeddableConversationProps } from './embeddable/types';
 import type { PublicEmbeddableConversationProps } from './types';
+import { createCaseAiWorkspace } from './case_ai_workspace/create_case_ai_workspace';
 import type { OpenConversationSidebarOptions, OpenSidebarInternalOptions } from './sidebar/types';
 import {
   setSidebarServices,
@@ -273,6 +274,11 @@ export class AgentBuilderPlugin
       </React.Suspense>
     );
 
+    const CaseAiWorkspace = createCaseAiWorkspace({
+      services: internalServices,
+      coreStart: core,
+    });
+
     this.experimentalDeepLinksSubscription = core.uiSettings
       .get$<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID)
       .pipe(distinctUntilChanged())
@@ -328,6 +334,7 @@ export class AgentBuilderPlugin
         return attachmentsService.updateOrigin(conversationId, attachmentId, origin);
       },
       EmbeddableConversation: PublicEmbeddableConversation,
+      CaseAiWorkspace,
     };
 
     if (hasAgentBuilder) {

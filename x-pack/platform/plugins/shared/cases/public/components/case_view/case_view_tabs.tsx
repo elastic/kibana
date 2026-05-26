@@ -10,7 +10,8 @@ import { EuiTab, EuiTabs, useEuiTheme } from '@elastic/eui';
 
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { useCaseViewNavigation } from '../../common/navigation';
-import { ACTIVITY_TAB, ATTACHMENTS_TAB, SIMILAR_CASES_TAB } from './translations';
+import { ACTIVITY_TAB, AI_WORKSPACE_TAB, ATTACHMENTS_TAB, SIMILAR_CASES_TAB } from './translations';
+import { useCasesDependencies } from '../../common/use_cases_dependencies';
 import { type CaseUI } from '../../../common';
 import type { CaseViewTab } from './use_case_attachment_tabs';
 import {
@@ -32,6 +33,7 @@ export interface CaseViewTabsProps {
 }
 
 export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab, searchTerm }) => {
+  const { agentBuilder } = useCasesDependencies();
   const { navigateToCaseView } = useCaseViewNavigation();
   const { tabs: attachmentTabs, totalAttachments } = useCaseAttachmentTabs({
     caseData,
@@ -58,8 +60,8 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
 
   const defaultAttachmentsTabId = attachmentTabs[0].id;
 
-  const tabs: CaseViewTab[] = useMemo(
-    () => [
+  const tabs: CaseViewTab[] = useMemo(() => {
+    const baseTabs: CaseViewTab[] = [
       {
         id: CASE_VIEW_PAGE_TABS.ACTIVITY,
         name: ACTIVITY_TAB,
@@ -86,9 +88,24 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
           />
         ),
       },
-    ],
-    [activeTab, euiTheme, isAttachmentsTabActive, similarCasesData?.total, totalAttachments]
-  );
+    ];
+
+    if (agentBuilder?.CaseAiWorkspace) {
+      baseTabs.splice(1, 0, {
+        id: CASE_VIEW_PAGE_TABS.AI_WORKSPACE,
+        name: AI_WORKSPACE_TAB,
+      });
+    }
+
+    return baseTabs;
+  }, [
+    activeTab,
+    agentBuilder?.CaseAiWorkspace,
+    euiTheme,
+    isAttachmentsTabActive,
+    similarCasesData?.total,
+    totalAttachments,
+  ]);
 
   const trackAttachmentsTabClick = useAttachmentsTabClickedEBT();
   const trackAttachmentsSubTabClick = useAttachmentsSubTabClickedEBT();

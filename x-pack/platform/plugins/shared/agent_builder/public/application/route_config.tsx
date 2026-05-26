@@ -248,7 +248,6 @@ export const manageRoutes: RouteDefinition[] = [
     viewId: agentBuilderViewIds.manageProjects,
     sidebarView: 'manage',
     isExperimental: true,
-    navLabel: navLabels.projects,
     element: <AgentBuilderProjectsPage />,
   },
 ];

@@ -210,6 +210,10 @@ export const SIMILAR_CASES_TAB = i18n.translate('xpack.cases.caseView.tabs.simil
   defaultMessage: 'Similar cases',
 });
 
+export const AI_WORKSPACE_TAB = i18n.translate('xpack.cases.caseView.tabs.aiWorkspace', {
+  defaultMessage: 'AI Workspace',
+});
+
 export const SEND_EMAIL_ARIA = (user: string) =>
   i18n.translate('xpack.cases.caseView.sendEmalLinkAria', {
     values: { user },

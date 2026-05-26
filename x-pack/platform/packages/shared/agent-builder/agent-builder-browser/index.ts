@@ -29,6 +29,7 @@ export type { ConversationInputShellProps } from './conversation_input_shell';
 export type {
   AgentBuilderPluginSetup,
   AgentBuilderPluginStart,
+  CaseAiWorkspaceProps,
   EmbeddableConversationProps,
   PublicEmbeddableConversationProps,
   OpenConversationSidebarOptions,
