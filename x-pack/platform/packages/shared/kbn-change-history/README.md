@@ -52,19 +52,24 @@ All persisted documents follow the same schema (see below).
 
 Without `object.sequence`, ordering falls back to `@timestamp`. That is simple and works most of the time, but clock skew or concurrent writers can occasionally show changes out of order. Product copy should not promise strict ordering unless the solution passes `sequence`.
 
-**`object.sequence` (optional, `long`)** holds a **solution-defined** monotonic version for the tracked object. It is **not**:
+**`object.sequence` (optional, `long`)** holds a **solution-defined** monotonically increasing integer determining changes order for the tracked object. This number should properly handle optimistic concurrency control, reindexing, upgrades, failovers, migrations and cluster rebuilds.
+
+**Good** examples:
+
+1. Field stored in the tracked document itself and incremented every time the tracked object gets changed
+2. **Optimistic concurrency** on the primary index/data stream (Saved Objects client / `if_seq_no` + `if_primary_term` on raw Elasticsearch indices) plus a monotonic field surviving reindexing, upgrades, failovers, migrations and cluster rebuilds
+
+After each successful primary write, pass that counter as `sequence` on each `log` / `logBulk` call.
+
+**Bad** examples (won't work):
 
 - Saved Object `SavedObject.version` (opaque Elasticsearch OCC metadata)
-- Alerting `rule.revision` or other domain `revision` fields (unless you explicitly copy that value into `sequence`)
-- ECS `event.sequence` (ordering of events globally, not per object)
-
-For **reliable** history order that reflects commits on the primary store:
-
-1. Use **optimistic concurrency** on the primary index (Saved Objects client / `if_seq_no` + `if_primary_term` on raw Elasticsearch indices).
-2. Maintain a **monotonic counter in primary document `_source`** (increment only after a successful write).
-3. Pass that value as `sequence` on each `log` / `logBulk` call after the write succeeds.
-
-Do **not** pass raw `_seq_no` / `_primary_term` as `sequence`: they reset on Saved Object reindex/migration and are not stable version identifiers across index lineages.
+  _`version` is a base64-encoded string containing two Elasticsearch internal counters: [`_seq_no`, `_primary_term`]. These numbers get reset upon reindexing, upgrades, failovers, migrations and cluster rebuilds._
+- Alerting `rule.revision` or other domain `revision` fields
+  _It doesn't increment on every operation and sometimes it could be reset to 1._
+- ECS `event.sequence` (global event ordering, not per tracked object)
+  _A single global sequence can work in theory, but it is hard to maintain when many writers append to the same stream: collisions and gaps are likely without centralized allocation. Prefer a monotonic counter scoped to each tracked object (your domain’s `object.id` + `object.type`)._
+- Raw Elasticsearch `_seq_no` / `_primary_term` copied directly into `sequence` (not stable version identifiers across index lineages)
 
 **Raw Elasticsearch indices** (no SO migrations): the same pattern applies—your app owns reindex policy; keep an incrementing field in `_source` with OCC writes, then copy it to `sequence`.
 

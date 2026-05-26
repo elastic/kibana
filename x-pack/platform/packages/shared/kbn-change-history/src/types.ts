@@ -59,8 +59,14 @@ export interface ChangeHistoryDocument {
     /** SHA256 hash of the entity.raw to identify changes in the payload. */
     hash: string;
     /**
-     * Optional monotonic version from the primary store, used for `getHistory` sort when set.
-     * Not Saved Object `version`, nor domain fields such as `rule.revision`.
+     * Monotonically increasing integer determining object changes order.
+     *
+     * `@timestamp` is used for ordering when omitted.
+     *
+     * Use `object.sequence` when you can't tolerate clock skew. The best source for
+     * such a sequence number is some monotonically increasing number tracked in the
+     * source object which gets incremented upon every object change. It has to survive
+     * reindexing, upgrades, failovers, migrations and cluster rebuilds.
      */
     sequence?: number;
     fields: {
@@ -92,9 +98,14 @@ export interface ObjectChange {
   /** The `object.id`. Uniquely identifies this object in Kibana within its `type` */
   objectId: string;
   /**
-   * Optional monotonic version copied from the primary object after a successful write.
-   * Use a counter your domain maintains in document `_source` (with optimistic concurrency on the
-   * primary store), not Elasticsearch `_seq_no` / `_primary_term` or Saved Object `version`.
+   * Monotonically increasing integer determining object changes order.
+   *
+   * `@timestamp` is used for ordering when omitted.
+   *
+   * Use `object.sequence` when you can't tolerate clock skew. The best source for
+   * such a sequence number is some monotonically increasing number tracked in the
+   * source object which gets incremented upon every object change. It has to survive
+   * reindexing, upgrades, failovers, migrations and cluster rebuilds.
    */
   sequence?: number;
   /**
