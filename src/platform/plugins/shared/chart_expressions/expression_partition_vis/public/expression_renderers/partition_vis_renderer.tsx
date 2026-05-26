@@ -164,6 +164,7 @@ export const getPartitionVisRenderer: (
             columnCellValueActions={columnCellValueActions}
             overrides={overrides}
             hasOpenedOnAggBasedEditor={hasOpenedOnAggBasedEditor}
+            panelHasConfiguredDrilldowns={handlers.panelHasConfiguredDrilldowns}
           />
         </div>
       </KibanaRenderContextProvider>,

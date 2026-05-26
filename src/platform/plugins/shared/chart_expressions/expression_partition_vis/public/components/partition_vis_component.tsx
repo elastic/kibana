@@ -16,16 +16,23 @@ import type {
   PartitionElementEvent,
   SettingsProps,
   TooltipValue,
+  PointerValue,
 } from '@elastic/charts';
 import { Chart, Partition, Position, Settings, TooltipType, Tooltip } from '@elastic/charts';
 import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import type { UseEuiTheme } from '@elastic/eui';
 import { useEuiTheme } from '@elastic/eui';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { PaletteRegistry } from '@kbn/coloring';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { LegendToggle } from '@kbn/charts-plugin/public';
 import type { PersistedState } from '@kbn/visualizations-common';
-import { getColumnByAccessor } from '@kbn/chart-expressions-common';
+import {
+  getColumnByAccessor,
+  getComputedColumnWarningForColumns,
+} from '@kbn/chart-expressions-common';
 import type {
   Datatable,
   DatatableColumn,
@@ -84,6 +91,26 @@ declare global {
     _echDebugStateFlag?: boolean;
   }
 }
+
+const computedColumnWarningStyles = {
+  message: ({ euiTheme }: UseEuiTheme) =>
+    css`
+      color: ${euiTheme.colors.textSubdued};
+      font-size: ${euiTheme.size.m};
+      font-weight: ${euiTheme.font.weight.regular};
+    `,
+};
+
+/** Renders the computed-column filter warning inside the chart tooltip footer. */
+const ComputedColumnWarning: React.FC<{ message: string }> = ({ message }) => {
+  const styles = useMemoCss(computedColumnWarningStyles);
+  return (
+    <div css={styles.message} data-test-subj="partitionChartComputedColumnWarning">
+      {message}
+    </div>
+  );
+};
+
 export type PartitionVisComponentProps = Omit<
   PartitionChartProps,
   'navigateToLens' | 'visConfig'
@@ -112,6 +139,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
     interactive,
     overrides,
     hasOpenedOnAggBasedEditor,
+    panelHasConfiguredDrilldowns,
   } = props;
   const visParams = useMemo(() => filterOutConfig(visType, preVisParams), [preVisParams, visType]);
   const chartBaseTheme = props.chartsThemeService.useChartsBaseTheme();
@@ -408,6 +436,25 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   const hasTooltipActions =
     interactive && !isEsqlMode && bucketAccessors.filter((a) => a !== 'metric-name').length > 0;
 
+  const computedColumnWarningMessage = useMemo(
+    () =>
+      isEsqlMode
+        ? getComputedColumnWarningForColumns(bucketColumns, panelHasConfiguredDrilldowns ?? false)
+        : undefined,
+    [isEsqlMode, bucketColumns, panelHasConfiguredDrilldowns]
+  );
+
+  const TooltipWarningFooter = useMemo<
+    | React.ComponentType<{
+        items: Array<TooltipValue<Record<'key', string | number>, SeriesIdentifier>>;
+        header: PointerValue<Record<'key', string | number>> | null;
+      }>
+    | 'default'
+  >(() => {
+    if (!computedColumnWarningMessage) return 'default';
+    return () => <ComputedColumnWarning message={computedColumnWarningMessage} />;
+  }, [computedColumnWarningMessage]);
+
   const tooltip: TooltipProps = {
     ...(fixedViewPort ? { boundary: fixedViewPort } : {}),
     type: visParams.addTooltip ? TooltipType.Follow : TooltipType.None,
@@ -544,7 +591,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
                 splitColumnAccessor={splitChartColumnAccessor}
                 splitRowAccessor={splitChartRowAccessor}
               />
-              <Tooltip {...tooltip} />
+              <Tooltip {...tooltip} footer={TooltipWarningFooter} />
               <Settings
                 noResults={
                   <VisualizationNoResults chartType={visType} renderComplete={onRenderChange} />
