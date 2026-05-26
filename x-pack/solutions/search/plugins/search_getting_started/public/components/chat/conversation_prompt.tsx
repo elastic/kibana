@@ -67,17 +67,27 @@ export const ConversationPrompt = () => {
           onKeyDown={onInputKeyDown}
         />
         <div css={NewConversationSendButton}>
-          <EuiButtonIcon
-            iconType="kqlFunction"
-            display="fill"
-            size="m"
-            disabled={initialMessage.trim().length === 0}
-            onClick={openConversation}
-            aria-label={i18n.translate('xpack.search.gettingStarted.chat.conversationPrompt.send', {
+          <EuiToolTip
+            content={i18n.translate('xpack.search.gettingStarted.chat.conversationPrompt.send', {
               defaultMessage: 'Open the AI assistant chat',
             })}
-            data-test-subj="searchGettingStartedChatPromptSend"
-          />
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              iconType="kqlFunction"
+              display="fill"
+              size="m"
+              disabled={initialMessage.trim().length === 0}
+              onClick={openConversation}
+              aria-label={i18n.translate(
+                'xpack.search.gettingStarted.chat.conversationPrompt.send',
+                {
+                  defaultMessage: 'Open the AI assistant chat',
+                }
+              )}
+              data-test-subj="searchGettingStartedChatPromptSend"
+            />
+          </EuiToolTip>
         </div>
       </ConversationInputShell>
     </div>
