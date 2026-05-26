@@ -13,16 +13,16 @@ import type { CompositeSLOMemberSummary } from '@kbn/slo-schema';
 import React, { lazy, Suspense, useMemo, useState } from 'react';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 import {
-  CompositeSloBurnRateWindowColumnHeader,
-  type CompositeSloBurnRateWindow,
-} from './composite_slo_burn_rate_window_column_header';
+  SloBurnRateWindowColumnHeader,
+  type SloBurnRateWindow,
+} from './common/slo_burn_rate_window_column_header';
 import { MemberStatusBadge } from './composite_slo_member_status_badge';
 
 const SLODetailsFlyout = lazy(() => import('../../slo_details/shared_flyout/slo_details_flyout'));
 
 function getMemberBurnRateValue(
   item: CompositeSLOMemberSummary,
-  window: CompositeSloBurnRateWindow
+  window: SloBurnRateWindow
 ): number | undefined {
   const map = {
     '5m': item.fiveMinuteBurnRate,
@@ -34,8 +34,8 @@ function getMemberBurnRateValue(
 
 const getMemberColumns = (
   percentFormat: string,
-  burnRateWindow: CompositeSloBurnRateWindow,
-  setBurnRateWindow: (w: CompositeSloBurnRateWindow) => void,
+  burnRateWindow: SloBurnRateWindow,
+  setBurnRateWindow: (w: SloBurnRateWindow) => void,
   isBurnRatePopoverOpen: boolean,
   setIsBurnRatePopoverOpen: React.Dispatch<React.SetStateAction<boolean>>
 ): Array<EuiBasicTableColumn<CompositeSLOMemberSummary>> => [
@@ -106,7 +106,7 @@ const getMemberColumns = (
   },
   {
     name: (
-      <CompositeSloBurnRateWindowColumnHeader
+      <SloBurnRateWindowColumnHeader
         burnRateWindow={burnRateWindow}
         onBurnRateWindowChange={setBurnRateWindow}
         isPopoverOpen={isBurnRatePopoverOpen}
@@ -144,7 +144,7 @@ export function CompositeSloMembersTable({
   members: CompositeSLOMemberSummary[];
   percentFormat: string;
 }) {
-  const [burnRateWindow, setBurnRateWindow] = useState<CompositeSloBurnRateWindow>('5m');
+  const [burnRateWindow, setBurnRateWindow] = useState<SloBurnRateWindow>('5m');
   const [isBurnRatePopoverOpen, setIsBurnRatePopoverOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState<CompositeSLOMemberSummary | null>(null);
 
