@@ -262,6 +262,23 @@ export enum ConversationRoundStatus {
 }
 
 /**
+ * Display status for a conversation in the conversation list.
+ * Derived from the conversation's last round status and streaming state.
+ */
+export enum ConversationDisplayStatus {
+  /** conversation has been read, no pending activity */
+  read = 'read',
+  /** conversation has new content the user hasn't seen */
+  unread = 'unread',
+  /** agent is actively streaming a response */
+  inProgress = 'in_progress',
+  /** agent is paused and waiting for user confirmation (HITL) */
+  awaitingPrompt = 'awaiting_prompt',
+  /** last round ended with an error */
+  error = 'error',
+}
+
+/**
  * Represents a round in a conversation, containing all the information
  * related to this particular round.
  */

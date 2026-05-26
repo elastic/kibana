@@ -22,6 +22,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { getEbtProps } from '@kbn/ebt-click';
+import type { ConversationDisplayStatus } from '@kbn/agent-builder-common';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 
 import { appPaths } from '../../../../../utils/app_paths';
@@ -29,11 +30,14 @@ import { useConversationListMutations } from '../../../../../hooks/use_conversat
 import {
   createActiveConversationListItemStyles,
   createConversationListItemStyles,
+  createStatusLinkStyles,
 } from '../../../../conversations/conversation_list_item_styles';
 import { BaseDeleteConversationModal } from '../../../../conversations/delete_conversation_modal';
 import { BaseRenameConversationModal } from '../../../../conversations/rename_conversation_modal';
+import { ConversationStatusIndicator } from './conversation_status_indicator';
 
 const ACTIONS_CLASS = 'agentBuilderSidebarConversationListRowActions';
+const STATUS_INDICATOR_CLASS = 'agentBuilderSidebarConversationListRowStatusIndicator';
 
 const labels = {
   rename: i18n.translate('xpack.agentBuilder.sidebar.conversationList.rename', {
@@ -58,6 +62,7 @@ export interface ConversationListItemRowProps {
   routeConversationId: string | undefined;
   showActionsMenu?: boolean;
   onItemClick?: () => void;
+  status?: ConversationDisplayStatus;
 }
 
 export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = ({
@@ -68,6 +73,7 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
   routeConversationId,
   showActionsMenu = true,
   onItemClick,
+  status,
 }) => {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -83,9 +89,11 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
 
   const baseLinkStyles = createConversationListItemStyles(euiTheme);
   const activeLinkStyles = createActiveConversationListItemStyles(euiTheme);
+  const statusLinkStyles = createStatusLinkStyles(status, euiTheme);
 
   const linkStyles = css([
     isActive ? activeLinkStyles : baseLinkStyles,
+    statusLinkStyles,
     css`
       flex: 1 1 0;
       min-width: 0;
@@ -101,7 +109,7 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
       align-items: center;
       gap: ${euiTheme.size.xxs};
       border-radius: ${euiTheme.border.radius.small};
-      padding-inline-end: ${showActionsMenu ? euiTheme.size.xxs : 0};
+      padding-inline-end: ${status || showActionsMenu ? euiTheme.size.xxs : 0};
 
       &:hover,
       &:focus-within {
@@ -113,10 +121,19 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
         background-color: ${bg};
       `}
 
+      .${STATUS_INDICATOR_CLASS} {
+        opacity: 1;
+        transition: opacity 150ms ease;
+      }
+
+      .${ACTIONS_CLASS} {
+        opacity: 0;
+        transition: opacity 150ms ease;
+      }
+
       ${showActionsMenu &&
       css`
-        .${ACTIONS_CLASS} {
-          flex-shrink: 0;
+        &:hover .${STATUS_INDICATOR_CLASS}, &:focus-within .${STATUS_INDICATOR_CLASS} {
           opacity: 0;
         }
 
@@ -126,13 +143,16 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
 
         ${isPopoverOpen &&
         css`
+          .${STATUS_INDICATOR_CLASS} {
+            opacity: 0;
+          }
           .${ACTIONS_CLASS} {
             opacity: 1;
           }
         `}
       `}
     `;
-  }, [euiTheme, isActive, isPopoverOpen, showActionsMenu]);
+  }, [euiTheme, isActive, isPopoverOpen, showActionsMenu, status]);
 
   const menuItems = useMemo(
     () => [
@@ -224,20 +244,55 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
           </Link>
         </EuiFlexItem>
 
-        {showActionsMenu ? (
+        {status !== undefined || showActionsMenu ? (
           <EuiFlexItem grow={false}>
-            <div className={ACTIONS_CLASS}>
-              <EuiPopover
-                button={menuButton}
-                isOpen={isPopoverOpen}
-                closePopover={closePopover}
-                panelPaddingSize="none"
-                anchorPosition="downRight"
-                repositionOnScroll
-                aria-label={labels.actionsMenu}
-              >
-                <EuiContextMenuPanel items={menuItems} />
-              </EuiPopover>
+            <div
+              css={css`
+                position: relative;
+                width: ${euiTheme.size.l};
+                height: ${euiTheme.size.l};
+                flex-shrink: 0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+              `}
+            >
+              {status !== undefined && (
+                <div
+                  className={STATUS_INDICATOR_CLASS}
+                  css={css`
+                    position: absolute;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                  `}
+                >
+                  <ConversationStatusIndicator status={status} />
+                </div>
+              )}
+              {showActionsMenu && (
+                <div
+                  className={ACTIONS_CLASS}
+                  css={css`
+                    position: absolute;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                  `}
+                >
+                  <EuiPopover
+                    button={menuButton}
+                    isOpen={isPopoverOpen}
+                    closePopover={closePopover}
+                    panelPaddingSize="none"
+                    anchorPosition="downRight"
+                    repositionOnScroll
+                    aria-label={labels.actionsMenu}
+                  >
+                    <EuiContextMenuPanel items={menuItems} />
+                  </EuiPopover>
+                </div>
+              )}
             </div>
           </EuiFlexItem>
         ) : null}

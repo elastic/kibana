@@ -24,6 +24,7 @@ import {
   createActiveConversationListItemStyles,
 } from '../../../../conversations/conversation_list_item_styles';
 import { ConversationListItemRow } from './conversation_list_item_row';
+import { MOCK_STATUS_CYCLE } from './conversation_status_dev_data';
 
 const newConversationLabel = i18n.translate(
   'xpack.agentBuilder.sidebar.conversation.newConversation',
@@ -88,8 +89,10 @@ export const ConversationList: React.FC<ConversationListProps> = ({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">
-      {sortedConversations.map((conversation) => {
+      {sortedConversations.map((conversation, index) => {
         const isActive = currentConversationId === conversation.id;
+        // TODO: replace with conversation.status once the BE ships the field.
+        const mockStatus = MOCK_STATUS_CYCLE[index % MOCK_STATUS_CYCLE.length];
         return (
           <EuiFlexItem grow={false} key={conversation.id}>
             <ConversationListItemRow
@@ -100,6 +103,7 @@ export const ConversationList: React.FC<ConversationListProps> = ({
               routeConversationId={currentConversationId}
               showActionsMenu={!activeStreams.has(conversation.id)}
               onItemClick={onItemClick}
+              status={mockStatus}
             />
           </EuiFlexItem>
         );
