@@ -31,12 +31,6 @@ export default function ({ getPageObject, getService, loadTestFile }: FtrProvide
       );
     });
 
-    after(async () => {
-      await securityPage.forceLogout();
-      await sampleData.testResources.removeAllKibanaSampleData();
-      await ml.testResources.resetKibanaTimeZone();
-    });
-
     loadTestFile(require.resolve('./stack_alerting'));
     loadTestFile(require.resolve('./stack_cases'));
     loadTestFile(require.resolve('./stack_connectors'));
