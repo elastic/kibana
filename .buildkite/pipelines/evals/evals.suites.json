@@ -1,6 +1,19 @@
 {
   "suites": [
     {
+      "id": "smoke-tests",
+      "name": "@kbn/evals Smoke Tests",
+      "slackChannel": "#obs-ai-team-alerts",
+      "configPath": "x-pack/platform/packages/shared/kbn-evals-suite-smoke-tests/playwright.config.ts",
+      "tags": [
+        "platform",
+        "smoke"
+      ],
+      "ciLabels": [
+        "evals:smoke-tests"
+      ]
+    },
+    {
       "id": "agent-builder",
       "name": "Agent Builder",
       "slackChannel": "#agent-builder-alerts",
