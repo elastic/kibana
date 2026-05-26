@@ -9,13 +9,11 @@ import type { AnalyticsTableRowDetails } from '../../../../services/ml/data_fram
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const ml = getService('ml');
   const editedDescription = 'Edited description';
 
   describe('regression saved search creation', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote_small');
       await ml.testResources.createDataViewIfNeeded('ft_farequote_small', '@timestamp');
       await ml.testResources.createSavedSearchFarequoteLuceneIfNeeded('ft_farequote_small');
       await ml.testResources.createSavedSearchFarequoteKueryIfNeeded('ft_farequote_small');

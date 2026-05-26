@@ -16,6 +16,11 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     before(async () => {
       await ml.securityCommon.createMlRoles();
       await ml.securityCommon.createMlUsers();
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
+      await esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/ml/bm_classification'
+      );
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/ihp_outlier');
     });
 
     after(async () => {
@@ -24,11 +29,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
       await ml.securityCommon.cleanMlUsers();
       await ml.securityCommon.cleanMlRoles();
-
-      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/ml/farequote');
-      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/ml/bm_classification');
-      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/ml/ihp_outlier');
-      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/ml/egs_regression');
 
       await ml.testResources.resetKibanaTimeZone();
     });

@@ -17,6 +17,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     before(async () => {
       await ml.securityCommon.createMlRoles();
       await ml.securityCommon.createMlUsers();
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/ecommerce');
     });
 
     after(async () => {
@@ -25,9 +27,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
       await ml.securityCommon.cleanMlUsers();
       await ml.securityCommon.cleanMlRoles();
-
-      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/ml/farequote');
-      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/ml/ecommerce');
 
       await ml.testResources.resetKibanaTimeZone();
     });
