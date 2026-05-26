@@ -43,7 +43,6 @@ export const ExternalLinkComponent = ({
 
   return (
     <EuiListGroupItem
-      size="s"
       external
       color="text"
       isDisabled={Boolean(link.error)}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { COMMUNICATES_WITH_ENGINE_CONFIGS } from './configs';
+import { COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS } from './configs';
 import { buildActorDiscoveryQuery } from '../engine/build_actor_discovery_query';
 import { buildTargetsPerActorQuery } from '../engine/build_targets_per_actor_query';
 import { COMPOSITE_PAGE_SIZE } from '../engine/constants';
@@ -14,16 +14,16 @@ import type {
   OverrideRelationshipIntegrationConfig,
 } from '../engine/types';
 
-const standardConfigs = COMMUNICATES_WITH_ENGINE_CONFIGS.filter(
+const standardConfigs = COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS.filter(
   (c): c is StandardRelationshipIntegrationConfig => c.kind === 'standard'
 );
-const overrideConfigs = COMMUNICATES_WITH_ENGINE_CONFIGS.filter(
+const overrideConfigs = COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS.filter(
   (c): c is OverrideRelationshipIntegrationConfig => c.kind === 'override'
 );
 
-describe('COMMUNICATES_WITH_ENGINE_CONFIGS', () => {
+describe('COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
   it('ships exactly the four expected integrations', () => {
-    expect(COMMUNICATES_WITH_ENGINE_CONFIGS.map((c) => c.id).sort()).toEqual([
+    expect(COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS.map((c) => c.id).sort()).toEqual([
       'aws_cloudtrail',
       'azure_auditlogs',
       'jamf_pro',
@@ -38,16 +38,16 @@ describe('COMMUNICATES_WITH_ENGINE_CONFIGS', () => {
   });
 
   it('uses only kind: "standard" or "override" (no bucketing — communicates_with is a flat targets list)', () => {
-    for (const config of COMMUNICATES_WITH_ENGINE_CONFIGS) {
+    for (const config of COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS) {
       expect(['standard', 'override']).toContain(config.kind);
     }
     // Sanity-check that filtered partitions cover every config.
     expect(standardConfigs.length + overrideConfigs.length).toBe(
-      COMMUNICATES_WITH_ENGINE_CONFIGS.length
+      COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS.length
     );
   });
 
-  it.each(COMMUNICATES_WITH_ENGINE_CONFIGS)(
+  it.each(COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS)(
     '$id: builds a syntactically-locked actor discovery query',
     (config) => {
       const query = buildActorDiscoveryQuery(config, undefined) as {
@@ -61,7 +61,7 @@ describe('COMMUNICATES_WITH_ENGINE_CONFIGS', () => {
     }
   );
 
-  it.each(COMMUNICATES_WITH_ENGINE_CONFIGS)(
+  it.each(COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS)(
     '$id: indexPattern is namespace-templated',
     (config) => {
       expect(config.indexPattern('myns')).toContain('-myns');
@@ -70,7 +70,7 @@ describe('COMMUNICATES_WITH_ENGINE_CONFIGS', () => {
   );
 
   describe('host-targeted configs (require Step1/Step2 EUID-exists consistency)', () => {
-    const hostTargeted = COMMUNICATES_WITH_ENGINE_CONFIGS.filter(
+    const hostTargeted = COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS.filter(
       (c) => c.targetEntityType === 'host'
     );
 
@@ -182,6 +182,27 @@ describe('COMMUNICATES_WITH_ENGINE_CONFIGS', () => {
       expect(query).toContain('targetEntityId != "user:@entra_id"');
       expect(query).toContain('targetEntityId != "host:"');
     });
+
+    // Regression: every config — including `kind: 'override'` — runs through
+    // Step 1 actor discovery. Before the fix, Step 1 hardcoded an ECS
+    // user-EUID-exists base filter, so Azure auditlogs documents (which have
+    // only `azure.auditlogs.properties.initiated_by.user.userPrincipalName`
+    // and no ECS `user.*` fields) were silently dropped at Step 1, and the
+    // override Step 2 never executed. This test locks in the fix: Step 1
+    // must use the customActor field as the actor-presence gate, not ECS
+    // user.*.
+    it('actor-discovery (Step 1) uses customActor.fields — not ECS user.* — as the actor-presence gate', () => {
+      const query = JSON.stringify(buildActorDiscoveryQuery(azure!, undefined));
+      // The Azure UPN field is required to be non-empty (composite source +
+      // base presence filter both reference it).
+      expect(query).toContain('azure.auditlogs.properties.initiated_by.user.userPrincipalName');
+      // The base filter does NOT depend on ECS user.* fields. (We assert via
+      // exact field-name strings rather than a snapshot to keep the test
+      // resilient to unrelated DSL formatting changes.)
+      expect(query).not.toContain('"user.email"');
+      expect(query).not.toContain('"user.id"');
+      expect(query).not.toContain('"user.name"');
+    });
   });
 
   describe('non-override configs share the COALESCE empty-guard form', () => {
@@ -201,7 +222,7 @@ describe('COMMUNICATES_WITH_ENGINE_CONFIGS', () => {
   // Golden snapshots: any future template change will surface here in PR review.
   // Update with `--ci=false -u` only when the change is intentional and reviewed.
   describe('golden snapshots', () => {
-    it.each(COMMUNICATES_WITH_ENGINE_CONFIGS)(
+    it.each(COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS)(
       '$id: targets-per-actor ES|QL is locked',
       (config) => {
         expect(buildTargetsPerActorQuery(config, '__namespace__')).toMatchSnapshot();

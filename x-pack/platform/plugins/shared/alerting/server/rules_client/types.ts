@@ -27,7 +27,6 @@ import type { DistributiveOmit } from '@elastic/eui';
 import type {
   RuleTypeRegistry,
   IntervalSchedule,
-  SanitizedRule,
   RuleSnoozeSchedule,
   RawRuleAlertsFilter,
   RuleSystemAction,
@@ -58,6 +57,11 @@ export type {
 } from './methods/get_execution_kpi';
 export type { GetGlobalExecutionSummaryParams } from './methods/get_execution_summary';
 export type { GetActionErrorLogByIdParams } from './methods/get_action_error_log';
+export type {
+  GetRuleHistoryParams,
+  GetRuleHistoryResult,
+  RuleChangeHistoryDocument,
+} from './methods/get_rule_history';
 
 export interface RulesClientContext {
   readonly logger: Logger;
@@ -81,7 +85,6 @@ export interface RulesClientContext {
   readonly auditLogger?: AuditLogger;
   readonly eventLogger?: IEventLogger;
   readonly changeTrackingService?: IScopedChangeTrackingService;
-  readonly fieldsToExcludeFromPublicApi: Array<keyof SanitizedRule>;
   readonly isAuthenticationTypeAPIKey: () => boolean;
   readonly getAuthenticationAPIKey: (name: string) => CreateAPIKeyResult;
   readonly cloneAPIKey: (name: string) => Promise<CreateAPIKeyResult>;
