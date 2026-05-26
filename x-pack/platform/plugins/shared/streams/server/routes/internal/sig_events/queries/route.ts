@@ -494,6 +494,7 @@ const generateQueriesRoute = createServerRoute({
         esClient: scopedClusterClient.asCurrentUser,
         uiSettingsClient,
         searchInferenceEndpoints: server.searchInferenceEndpoints,
+        workflowsManagement: server.workflowsManagement,
         request,
         logger: logger.get('significant_events_queries_generation'),
         signal: getRequestAbortSignal(request),

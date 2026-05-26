@@ -175,6 +175,59 @@ async function runFeaturesIdentification(
 
     let diverseOffset = 0;
 
+    // Pre-fetch SCS codebase context once per task run. If SCS is configured
+    // the resulting snippet is injected into each iteration's system prompt so
+    // the LLM has source-code context while identifying features from log samples.
+    let scsContextSnippet: string | undefined;
+    const workflowsManagement = taskContext.server.workflowsManagement;
+    if (workflowsManagement) {
+      const { uiSettingsClient } = await taskContext.getScopedClients({ request: fakeRequest });
+      const scsIndexName = await uiSettingsClient
+        .get<string>('observability:streamsScsCodebaseIndex')
+        .catch(() => '');
+
+      if (scsIndexName) {
+        try {
+          const { execution } = await workflowsManagement.executeWorkflow({
+            workflowId: 'workflow-38aec933-751e-5da9-b915-c6353529cc96',
+            inputs: { query: streamName, index: scsIndexName, size: 5 },
+            spaceId: 'default',
+            request: fakeRequest,
+            waitForCompletion: true,
+          });
+          const stepsOutput = (execution as { steps?: Record<string, { output?: unknown }> })
+            ?.steps;
+          const chunks: Array<{ content?: string; language?: string; locations?: unknown[] }> = [];
+          for (const step of Object.values(stepsOutput ?? {})) {
+            const out = step?.output;
+            if (Array.isArray(out)) {
+              chunks.push(...out);
+              break;
+            }
+          }
+          if (chunks.length > 0) {
+            const summary = chunks
+              .slice(0, 5)
+              .map(
+                (c, idx) =>
+                  `[${idx + 1}] (${c.language ?? 'unknown'}) ${(c.content ?? '').slice(0, 400)}`
+              )
+              .join('\n\n');
+            scsContextSnippet =
+              `The following code snippets from the application source code may help you understand ` +
+              `what events and fields are emitted by the "${streamName}" stream:\n\n${summary}`;
+            taskLogger.debug(`SCS pre-fetch for feature extraction: ${chunks.length} chunks`);
+          }
+        } catch (scsError) {
+          taskLogger.debug(
+            `SCS pre-fetch for feature extraction failed (non-fatal): ${
+              scsError instanceof Error ? scsError.message : String(scsError)
+            }`
+          );
+        }
+      }
+    }
+
     for (let i = 0; i < maxIterations; i++) {
       if (runContext.abortController.signal.aborted) {
         taskLogger.debug('Feature identification aborted');
@@ -203,6 +256,7 @@ async function runFeaturesIdentification(
         tuning,
         diverseOffset,
         trackFeaturesIdentified,
+        scsContextSnippet,
       });
 
       if (!result.hasDocuments) {

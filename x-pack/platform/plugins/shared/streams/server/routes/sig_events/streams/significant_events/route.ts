@@ -12,7 +12,10 @@ import {
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod/v4';
 import { catchError, from as fromRxjs, map } from 'rxjs';
-import { OBSERVABILITY_STREAMS_ENABLE_MEMORY } from '@kbn/management-settings-ids';
+import {
+  OBSERVABILITY_STREAMS_ENABLE_MEMORY,
+  OBSERVABILITY_STREAMS_SCS_CODEBASE_INDEX,
+} from '@kbn/management-settings-ids';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { PromptsConfigService } from '../../../../lib/sig_events/saved_objects/prompts_config_service';
 import { generateSignificantEventDefinitions } from '../../../../lib/sig_events/generate_significant_events';
@@ -30,6 +33,7 @@ import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
 import { resolveConnectorId } from '../../../utils/resolve_connector_id';
 import { MemoryServiceImpl } from '../../../../lib/memory';
 import { createMemoryDiscoveryTools } from '../../../../lib/sig_events/memory_discovery_tools';
+import { createScsCodebaseTools } from '../../../../lib/sig_events/scs_codebase_tools';
 import { searchModeSchema } from '../../../utils/search_mode';
 
 // Make sure strings are expected for input, but still converted to a
@@ -297,7 +301,11 @@ const generateSignificantEventsRoute = createServerRoute({
       logger,
     });
 
-    const useMemory = await uiSettingsClient.get<boolean>(OBSERVABILITY_STREAMS_ENABLE_MEMORY);
+    const [useMemory, scsIndexName] = await Promise.all([
+      uiSettingsClient.get<boolean>(OBSERVABILITY_STREAMS_ENABLE_MEMORY),
+      uiSettingsClient.get<string>(OBSERVABILITY_STREAMS_SCS_CODEBASE_INDEX),
+    ]);
+
     const memoryTools = useMemory
       ? createMemoryDiscoveryTools({
           memoryService: new MemoryServiceImpl({
@@ -306,6 +314,16 @@ const generateSignificantEventsRoute = createServerRoute({
           }),
         })
       : undefined;
+
+    const scsTools =
+      server.workflowsManagement && scsIndexName
+        ? createScsCodebaseTools({
+            workflowsManagement: server.workflowsManagement,
+            scsIndexName,
+            spaceId: 'default',
+            request,
+          })
+        : undefined;
 
     const [connector, definition, { significantEventsPromptOverride }, featureClient, queryClient] =
       await Promise.all([
@@ -331,6 +349,7 @@ const generateSignificantEventsRoute = createServerRoute({
           signal: getRequestAbortSignal(request),
           esClient: scopedClusterClient.asCurrentUser,
           memoryTools,
+          scsTools,
         }
       )
     ).pipe(
