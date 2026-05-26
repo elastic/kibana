@@ -17,4 +17,4 @@ export const ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_COUNT_API_PATH =
 export const ALERTING_V2_MATCHER_VALUE_SUGGESTIONS_API_PATH =
   '/internal/action_policies/suggestions/values' as const;
 export const ALERTING_V2_INTERNAL_SUGGEST_USER_PROFILES_API_PATH =
-  '/api/alerting/v2/internal/user_profiles/_suggest' as const;
+  '/internal/alerting/v2/user_profiles/_suggest' as const;
