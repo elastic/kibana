@@ -1775,6 +1775,7 @@ describe('getOAuthAccessToken()', () => {
       logger,
       configurationUtilities,
       credentials: {
+        type: 'client_secret',
         config: {
           clientId: 'abc',
         },

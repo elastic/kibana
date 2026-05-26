@@ -23,7 +23,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { getESQLQueryVariables } from '@kbn/esql-utils';
-import { EsqlToolFieldType } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT, EsqlToolFieldType } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { defer } from 'lodash';
 import React, { useCallback, useMemo } from 'react';
@@ -92,6 +93,10 @@ const EsqlParamActions: React.FC<EsqlParamActionsProps> = ({ onAppend, onReplace
             trigger('esql');
             triggerEsqlParamFieldsValidation(['name']);
           }}
+          {...getEbtProps({
+            element: AGENT_BUILDER_UI_EBT.element.pageContent,
+            action: AGENT_BUILDER_UI_EBT.action.globalManagement.INFER_PARAMS,
+          })}
         >
           {i18nMessages.inferParamsButtonLabel}
         </AiButton>
@@ -106,6 +111,10 @@ const EsqlParamActions: React.FC<EsqlParamActionsProps> = ({ onAppend, onReplace
             triggerEsqlParamFieldsValidation(['name', 'description', 'type']);
             onAppend();
           }}
+          {...getEbtProps({
+            element: AGENT_BUILDER_UI_EBT.element.pageContent,
+            action: AGENT_BUILDER_UI_EBT.action.globalManagement.ADD_PARAM,
+          })}
         >
           {i18nMessages.addParamButtonLabel}
         </EuiButtonEmpty>
@@ -230,6 +239,11 @@ export const EsqlParams = () => {
                               target="_blank"
                               data-test-subj="mvContainsLink"
                               aria-label="MV_CONTAINS"
+                              {...getEbtProps({
+                                element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                                action:
+                                  AGENT_BUILDER_UI_EBT.action.globalManagement.MV_CONTAINS_DOCS,
+                              })}
                             >
                               MV_CONTAINS
                             </EuiLink>
