@@ -8,7 +8,7 @@
  */
 
 /** The base API path for markdown endpoints (no leading slash for apiClient). */
-export const MARKDOWN_API_PATH = 'api/markdown';
+export const MARKDOWN_API_PATH = 'api/markdowns';
 
 /** Common headers for Markdown API requests (public API version 2023-10-31) */
 export const COMMON_HEADERS = {
