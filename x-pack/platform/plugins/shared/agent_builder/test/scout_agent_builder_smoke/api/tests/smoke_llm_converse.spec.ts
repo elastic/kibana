@@ -7,11 +7,7 @@
 
 import { isToolCallStep, platformCoreTools } from '@kbn/agent-builder-common';
 import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
-import {
-  getAvailableConnectors,
-  omitFtrExcludedConnectors,
-  takeRandomLlmSample,
-} from '@kbn/gen-ai-functional-testing';
+import { getAvailableConnectors, takeRandomLlmSample } from '@kbn/gen-ai-functional-testing';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { ChatRequestBodyPayload, ChatResponse } from '../../../../common/http_api/chat';
@@ -30,7 +26,7 @@ const eisCcmKeyMissingReason = `${EIS_CCM_API_KEY_ENV} not set. For local dev: e
 
 const safeGetAvailableConnectors = (): AvailableConnectorWithId[] => {
   try {
-    return omitFtrExcludedConnectors(getAvailableConnectors());
+    return getAvailableConnectors();
   } catch {
     return [];
   }
