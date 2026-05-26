@@ -21,6 +21,7 @@ import { useUpdateAssetCriticality } from '../../../entity_analytics/api/hooks/u
 import { RISK_INPUTS_TAB_QUERY_ID } from '../../../entity_analytics/components/entity_details_flyout/tabs/risk_inputs/risk_inputs_tab';
 import { useCalculateEntityRiskScore } from '../../../entity_analytics/api/hooks/use_calculate_entity_risk_score';
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
+import { useEntityRiskScores } from '../../../entity_analytics/api/hooks/use_entity_risk_scores';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { FlyoutLoading } from '../../../flyout_v2/shared/components/flyout_loading';
@@ -39,6 +40,7 @@ import { useEntityPanelTabs, TABLE_TAB_ID } from '../shared/hooks/use_entity_pan
 import { EntityPanelHeaderTabs } from '../shared/components/entity_panel_tabs';
 import { EntityStoreTableTab } from '../shared/components/entity_store_table_tab';
 import { EntitySummaryGrid } from '../shared/components/entity_summary_grid';
+import { ENTITY_ANALYTICS_TABLE_ID } from '../../../entity_analytics/components/home/constants';
 
 export interface ServicePanelProps extends Record<string, unknown> {
   contextID: string;
@@ -101,27 +103,51 @@ export const ServicePanel = memo(function ServicePanel({
     skip: entityStoreV2Enabled,
   });
 
-  const { inspect, refetch, loading } = riskScoreState;
+  const { inspect, loading, data: serviceRisk } = riskScoreState;
   const { setQuery, deleteQuery } = useGlobalTime();
   const observedService = useObservedService(documentEntityIdentifiers, scopeId);
-  const { data: serviceRisk } = riskScoreState;
   const serviceRiskData = serviceRisk && serviceRisk.length > 0 ? serviceRisk[0] : undefined;
   const isRiskScoreExist = !!serviceRiskData?.service.risk;
 
+  const entityRiskScores = useEntityRiskScores(
+    EntityType.service,
+    entityFromStoreResult.entityRecord?.entity?.id
+  );
+
   const refetchRiskInputsTab = useRefetchQueryById(RISK_INPUTS_TAB_QUERY_ID) ?? noop;
-  const refetchRiskScore = useCallback(() => {
-    refetch();
-    (refetchRiskInputsTab as Refetch)();
-  }, [refetch, refetchRiskInputsTab]);
+  const refetchEntitiesTable = useRefetchQueryById(ENTITY_ANALYTICS_TABLE_ID);
+
+  const onRiskScoreUpdated = useCallback(() => {
+    if (entityStoreV2Enabled) {
+      entityFromStoreResult.refetch();
+    } else {
+      riskScoreState.refetch();
+    }
+    entityRiskScores.refetch();
+    (refetchRiskInputsTab as Refetch | null)?.();
+    (refetchEntitiesTable as Refetch | null)?.();
+  }, [
+    riskScoreState,
+    entityFromStoreResult,
+    entityRiskScores,
+    refetchRiskInputsTab,
+    refetchEntitiesTable,
+    entityStoreV2Enabled,
+  ]);
 
   const { isLoading: recalculatingScore, calculateEntityRiskScore } = useCalculateEntityRiskScore(
     EntityType.service,
     serviceName,
-    { onSuccess: refetchRiskScore }
+    { onSuccess: onRiskScoreUpdated }
   );
 
+  const onAssetCriticalityChanged = useCallback(() => {
+    (refetchEntitiesTable as Refetch | null)?.();
+    calculateEntityRiskScore();
+  }, [calculateEntityRiskScore, refetchEntitiesTable]);
+
   const { updateAssetCriticalityLevel } = useUpdateAssetCriticality('service', {
-    onSuccess: calculateEntityRiskScore,
+    onSuccess: onAssetCriticalityChanged,
   });
 
   useQueryInspector({
@@ -129,7 +155,7 @@ export const ServicePanel = memo(function ServicePanel({
     inspect,
     loading,
     queryId: SERVICE_PANEL_RISK_SCORE_QUERY_ID,
-    refetch,
+    refetch: riskScoreState.refetch,
     setQuery,
   });
 
@@ -220,8 +246,9 @@ export const ServicePanel = memo(function ServicePanel({
             serviceName={serviceName}
             observedService={observedService}
             riskScoreState={riskScoreState}
+            entityRiskScores={entityRiskScores}
             recalculatingScore={recalculatingScore}
-            onAssetCriticalityChange={calculateEntityRiskScore}
+            onAssetCriticalityChange={onAssetCriticalityChanged}
             contextID={safeContextID}
             scopeId={scopeId}
             openDetailsPanel={openDetailsPanel}
