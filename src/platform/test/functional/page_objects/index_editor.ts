@@ -136,7 +136,7 @@ export class IndexEditorObject extends FtrService {
   }
 
   public async search(query: string): Promise<void> {
-    // clearValue does not update controlled KQL inputs; use clearValueWithKeyboard (see query_bar service).
+    // clearValue does not update controlled KQL input; use clearValueWithKeyboard.
     await this.retry.try(async () => {
       await this.testSubjects.click('indexEditorQueryBar');
       const input = await this.find.activeElement();
