@@ -124,6 +124,8 @@ export enum SecurityPageName {
   externalLinkAgentBuilder = 'external_link-agent_builder',
   externalLinkDiscover = 'external_link-discover',
   externalLinkWorkflows = 'external_link-workflows',
+
+  /**
    * Ingest Hub Onboarding
    */
   onboarding = 'onboarding',
