@@ -30,6 +30,15 @@ const mockUseAgentBuilderAttachment = jest.fn();
 const mockFormatRule = jest.fn();
 const mockNewAgentBuilderAttachment = jest.fn();
 const mockActivateFormSync = jest.fn();
+const mockSetLastSavedRuleId = jest.fn();
+const mockLastSavedRuleId$ = {
+  subscribe: jest.fn((handler: (id: string | null) => void) => {
+    mockLastSavedRuleIdSubscribeHandler = handler;
+    return { unsubscribe: mockLastSavedRuleIdUnsubscribe };
+  }),
+};
+let mockLastSavedRuleIdSubscribeHandler: ((id: string | null) => void) | undefined;
+const mockLastSavedRuleIdUnsubscribe = jest.fn();
 
 const getCapturedAttachment = (): UseAgentBuilderAttachmentParams => {
   const [attachment] = mockUseAgentBuilderAttachment.mock.calls[0] as [
@@ -38,7 +47,7 @@ const getCapturedAttachment = (): UseAgentBuilderAttachmentParams => {
   return attachment;
 };
 
-const ruleResponseMock = { name: 'My Rule' } as RuleResponse;
+const ruleResponseMock = { id: 'rule-123', name: 'My Rule' } as RuleResponse;
 const defineStepDataMock = {} as DefineStepRule;
 const aboutStepDataMock = {} as AboutStepRule;
 const scheduleStepDataMock = {} as ScheduleStepRule;
@@ -51,7 +60,8 @@ const mockKibanaServices = () => ({
   services: {
     aiRuleCreation: {
       activateFormSync: mockActivateFormSync,
-      setLastSavedRuleId: jest.fn(),
+      setLastSavedRuleId: mockSetLastSavedRuleId,
+      lastSavedRuleId$: mockLastSavedRuleId$,
     },
     agentBuilder: undefined,
   },
@@ -82,7 +92,25 @@ jest.mock('../../pages/rule_creation/helpers', () => ({
 describe('AddRuleAttachmentToChatButton', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockLastSavedRuleIdSubscribeHandler = undefined;
     (useKibana as jest.Mock).mockReturnValue(mockKibanaServices());
+  });
+
+  it('seeds lastSavedRuleId and re-seeds when conversation switch clears it', () => {
+    const { unmount } = render(
+      <AddRuleAttachmentToChatButton rule={ruleResponseMock} pathway="rule_details" />
+    );
+
+    expect(mockSetLastSavedRuleId).toHaveBeenCalledWith('rule-123');
+    expect(mockLastSavedRuleId$.subscribe).toHaveBeenCalled();
+
+    mockSetLastSavedRuleId.mockClear();
+    mockLastSavedRuleIdSubscribeHandler?.(null);
+    expect(mockSetLastSavedRuleId).toHaveBeenCalledWith('rule-123');
+
+    unmount();
+    expect(mockLastSavedRuleIdUnsubscribe).toHaveBeenCalled();
+    expect(mockSetLastSavedRuleId).toHaveBeenCalledWith(null);
   });
 
   it('captures attachment call with expected params', () => {

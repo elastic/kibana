@@ -25,6 +25,7 @@ import {
 } from '@kbn/agent-builder-browser/attachments';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { RuleResponse } from '../../../../common/api/detection_engine/model/rule_schema';
 import type { AiRuleCreationService } from '../../../detection_engine/common/ai_rule_creation_store';
 import { FiltersDisplay } from './filters_display';
 import { RuleTypeDetails } from './rule_type_details';
@@ -93,6 +94,14 @@ const SeverityRiskScore: React.FC<{
   </EuiText>
 );
 
+const getRuleDisplayFields = (rule: RuleResponse) => ({
+  query: 'query' in rule ? rule.query : undefined,
+  index: 'index' in rule ? (rule.index as string[] | undefined) : undefined,
+  filters: 'filters' in rule ? (rule.filters as unknown[] | undefined) : undefined,
+  interval: 'interval' in rule ? rule.interval : undefined,
+  from: 'from' in rule ? rule.from : undefined,
+});
+
 interface RuleInlineContentProps extends AttachmentRenderProps<RuleAttachment> {
   aiRuleCreation: AiRuleCreationService;
   application: ApplicationStart;
@@ -125,6 +134,8 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
   // after a save). Prefer it over rule.id in the JSON since it doesn't require a new version.
   const savedIdFromAttachment = (attachment as { origin?: string }).origin ?? rule?.id;
 
+  // Keep lastSavedRuleId aligned with the attachment's rule id so markDirty fires after
+  // agent edits (conversation switch on "Add to chat" clears the in-session id).
   useEffect(() => {
     if (!renderButtons || !savedIdFromAttachment) {
       return;
@@ -132,6 +143,12 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
     if (aiRuleCreation.getLastSavedRuleId() === null) {
       aiRuleCreation.setLastSavedRuleId(savedIdFromAttachment);
     }
+    const sub = aiRuleCreation.lastSavedRuleId$.subscribe((id) => {
+      if (id === null) {
+        aiRuleCreation.setLastSavedRuleId(savedIdFromAttachment);
+      }
+    });
+    return () => sub.unsubscribe();
   }, [renderButtons, savedIdFromAttachment, aiRuleCreation]);
 
   useRuleActionButtons({
@@ -151,11 +168,7 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
     return null;
   }
 
-  const query = 'query' in rule ? rule.query : undefined;
-  const index = 'index' in rule ? (rule.index as string[] | undefined) : undefined;
-  const filters = 'filters' in rule ? (rule.filters as unknown[] | undefined) : undefined;
-  const interval = 'interval' in rule ? rule.interval : undefined;
-  const from = 'from' in rule ? rule.from : undefined;
+  const { query, index, filters, interval, from } = getRuleDisplayFields(rule);
 
   return (
     <EuiPanel paddingSize="m" hasShadow={false} hasBorder={false}>
