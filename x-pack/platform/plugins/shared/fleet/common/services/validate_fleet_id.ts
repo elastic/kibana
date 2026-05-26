@@ -5,9 +5,17 @@
  * 2.0.
  */
 
-import { isUnsafeId } from '@kbn/human-readable-id';
-
 import { FleetError } from '../errors';
+
+const UNSAFE_IDS = new Set(['__proto__', 'constructor', 'prototype']);
+const HUMAN_READABLE_ID_MAX_LENGTH = 255;
+
+const isUnsafeId = (id: string): boolean =>
+  UNSAFE_IDS.has(id) ||
+  id.length === 0 ||
+  id.length > HUMAN_READABLE_ID_MAX_LENGTH ||
+  id.includes('..') ||
+  id.includes('/');
 
 /**
  * Throws a FleetError if the id contains path separators, traversal sequences,
