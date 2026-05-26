@@ -23,13 +23,13 @@ export function transformDashboardOut(
   attributes: DashboardSavedObjectAttributes | Partial<DashboardSavedObjectAttributes>,
   references: SavedObjectReference[] | undefined,
   isDashboardAppRequest: boolean = false,
-  strictStateSchema?: ReturnType<typeof getDashboardStateSchema>
+  strictValidationSchema?: ReturnType<typeof getDashboardStateSchema>
 ): {
   dashboardState: DashboardState;
   warnings: Warnings;
 } {
   const schema: ReturnType<typeof getDashboardStateSchema> =
-    strictStateSchema ?? getDashboardStateSchema(isDashboardAppRequest);
+    strictValidationSchema ?? getDashboardStateSchema(isDashboardAppRequest);
 
   const {
     pinned_panels,

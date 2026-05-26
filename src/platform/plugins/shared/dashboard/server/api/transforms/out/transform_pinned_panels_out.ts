@@ -29,7 +29,7 @@ export function transformPinnedPanelsOut(
   controlGroupInput: DashboardSavedObjectAttributes['controlGroupInput'], // legacy
   pinnedPanels: DashboardSavedObjectAttributes['pinned_panels'],
   containerReferences: Reference[] = [],
-  schema: ReturnType<typeof getDashboardStateSchema>
+  strictValidationSchema: ReturnType<typeof getDashboardStateSchema>
 ): { panels: DashboardPinnedPanelsState; warnings: Warnings } {
   const pinnedPanelSchema = getControlsSchemas();
   let warnings: Warnings = [];
@@ -85,7 +85,7 @@ export function transformPinnedPanelsOut(
 
   // Validate against the array to ensure the number of elements is valid
   try {
-    transformedPanels = schema.validateKey('pinned_panels', transformedPanels);
+    transformedPanels = strictValidationSchema.validateKey('pinned_panels', transformedPanels);
   } catch (e) {
     warnings.push({
       type: 'schema_warning',

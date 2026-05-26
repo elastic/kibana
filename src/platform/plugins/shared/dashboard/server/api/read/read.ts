@@ -17,7 +17,7 @@ import type { DashboardReadResponseBody } from './types';
 
 export async function read(
   savedObjectsClient: SavedObjectsClientContract,
-  strictStateSchema: ReturnType<typeof getDashboardStateSchema>,
+  strictValidationSchema: ReturnType<typeof getDashboardStateSchema>,
   id: string,
   serverTiming?: RequestTiming,
   isDashboardAppRequest: boolean = false
@@ -46,7 +46,7 @@ export async function read(
     body: getDashboardCRUResponseBody(
       savedObject,
       'read',
-      strictStateSchema,
+      strictValidationSchema,
       isDashboardAppRequest,
       serverTiming
     ),

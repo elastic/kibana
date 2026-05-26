@@ -36,7 +36,7 @@ import type { DashboardUpdateResponseBody } from './types';
  */
 export async function update(
   requestCtx: RequestHandlerContext,
-  dashboardStateSchema: ReturnType<typeof getDashboardStateSchema>,
+  strictValidationSchema: ReturnType<typeof getDashboardStateSchema>,
   id: string,
   updateBody: DashboardState,
   serverTiming?: RequestTiming,
@@ -85,7 +85,7 @@ export async function update(
 
     const body = await create(
       requestCtx,
-      dashboardStateSchema,
+      strictValidationSchema,
       updateBody,
       serverTiming,
       isDashboardAppRequest,
@@ -151,7 +151,7 @@ export async function update(
     body: getDashboardCRUResponseBody(
       updated,
       'update',
-      dashboardStateSchema,
+      strictValidationSchema,
       isDashboardAppRequest,
       serverTiming
     ),

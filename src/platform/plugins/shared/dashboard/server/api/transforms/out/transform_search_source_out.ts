@@ -23,7 +23,7 @@ import type { DashboardState, Warnings } from '../../types';
 export function transformSearchSourceOut(
   kibanaSavedObjectMeta: DashboardSavedObjectAttributes['kibanaSavedObjectMeta'] = {},
   references: SavedObjectReference[] = [],
-  schema: ReturnType<typeof getDashboardStateSchema>
+  strictValidationSchema: ReturnType<typeof getDashboardStateSchema>
 ): Pick<DashboardState, 'filters' | 'query'> & { warnings: Warnings } {
   const warnings: Warnings = [];
 
@@ -53,7 +53,7 @@ export function transformSearchSourceOut(
   let filters: AsCodeFilter[] | undefined;
   try {
     filters = fromStoredFilters(searchSource.filter, logger) ?? [];
-    filters = schema.validateKey('filters', filters);
+    filters = strictValidationSchema.validateKey('filters', filters);
   } catch (error) {
     // drop all invalid filters
     const { valid, invalid } = (filters ?? []).reduce(
@@ -85,7 +85,7 @@ export function transformSearchSourceOut(
   let query: AsCodeQuery | undefined;
   try {
     const storedQuery = searchSource.query ? migrateLegacyQuery(searchSource.query) : undefined;
-    query = schema.validateKey('query', toAsCodeQuery(storedQuery));
+    query = strictValidationSchema.validateKey('query', toAsCodeQuery(storedQuery));
   } catch (error) {
     const warningMessage = `Unexpected error transforming query state on read. Error: ${error.message}`;
     logger.warn(warningMessage);

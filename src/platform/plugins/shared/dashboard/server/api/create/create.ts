@@ -18,7 +18,7 @@ import type { DashboardCreateResponseBody } from './types';
 
 export async function create(
   requestCtx: RequestHandlerContext,
-  dashboardStateSchema: ReturnType<typeof getDashboardStateSchema>,
+  strictValidationSchema: ReturnType<typeof getDashboardStateSchema>,
   createBody: DashboardState,
   serverTiming?: RequestTiming,
   isDashboardAppRequest: boolean = false,
@@ -54,7 +54,7 @@ export async function create(
   return getDashboardCRUResponseBody(
     savedObject,
     'create',
-    dashboardStateSchema,
+    strictValidationSchema,
     isDashboardAppRequest,
     serverTiming
   );
