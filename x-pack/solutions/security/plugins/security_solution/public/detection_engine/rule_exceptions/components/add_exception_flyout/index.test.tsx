@@ -91,7 +91,6 @@ describe('When the add exception modal is opened', () => {
       mockFetchIndexPatterns.mockImplementation(() => ({
         isLoading: true,
         indexPatterns: { fields: [], title: 'foo' },
-        runtimeMappingIndices: [],
         getExtendedFields: () => Promise.resolve([]),
       }));
 
@@ -393,8 +392,7 @@ describe('When the add exception modal is opened', () => {
         mockFetchIndexPatterns.mockImplementation(() => ({
           isLoading: false,
           indexPatterns: stubFields,
-          runtimeMappingIndices: [],
-          getExtendedFields: () => Promise.resolve([]),
+            getExtendedFields: () => Promise.resolve([]),
         }));
         wrapper = mount(
           <TestProviders>

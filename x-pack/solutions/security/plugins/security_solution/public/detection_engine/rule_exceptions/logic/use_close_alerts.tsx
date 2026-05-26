@@ -23,23 +23,22 @@ import { updateAlertStatus } from '../../../common/components/toolbar/bulk_actio
 /**
  * Closes alerts.
  *
- * @param ruleStaticIds static id of the rules (rule.ruleId, not rule.id) where the exception updates will be applied
+ * @param ruleStaticIds static id of the rules (rule.ruleId, not rule.id) where
+ *   the exception updates will be applied. The server uses these to resolve
+ *   each rule's declared source indices and attach their runtime mappings to
+ *   the bulk-close `updateByQuery`, so runtime fields referenced by the
+ *   exception filter can be evaluated (e.g. the workaround in
+ *   elastic/security-ml#677).
  * @param exceptionItems array of ExceptionListItemSchema to add or update
  * @param alertIdToClose - optional string representing alert to close
  * @param bulkCloseIndex - optional index used to create bulk close query
- * @param runtimeMappingIndices - optional rule source indices; the server
- *   fetches `GET <index>/_mapping` for these and attaches the resulting
- *   `runtime` block as `runtime_mappings` on the bulk-close `updateByQuery`
- *   so runtime fields referenced by the exception filter can be evaluated
- *   (e.g. the workaround in elastic/security-ml#677).
  *
  */
 export type AddOrUpdateExceptionItemsFunc = (
   ruleStaticIds: string[],
   exceptionItems: ExceptionListItemSchema[],
   alertIdToClose?: string,
-  bulkCloseIndex?: IndexPatternArray,
-  runtimeMappingIndices?: string[]
+  bulkCloseIndex?: IndexPatternArray
 ) => Promise<void>;
 
 export type ReturnUseCloseAlertsFromExceptions = [boolean, AddOrUpdateExceptionItemsFunc | null];
@@ -61,8 +60,7 @@ export const useCloseAlertsFromExceptions = (): ReturnUseCloseAlertsFromExceptio
       ruleStaticIds,
       exceptionItems,
       alertIdToClose,
-      bulkCloseIndex,
-      runtimeMappingIndices
+      bulkCloseIndex
     ) => {
       try {
         setIsLoading(true);
@@ -98,7 +96,7 @@ export const useCloseAlertsFromExceptions = (): ReturnUseCloseAlertsFromExceptio
             query: filter,
             status: 'closed',
             signal: abortCtrl.signal,
-            runtimeMappingIndices,
+            ruleStaticIds,
           });
         }
 

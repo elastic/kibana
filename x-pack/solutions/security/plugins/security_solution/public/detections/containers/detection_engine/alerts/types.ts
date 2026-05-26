@@ -44,7 +44,9 @@ export interface UpdateAlertStatusByQueryProps {
   status: Status;
   signal?: AbortSignal;
   reason?: AlertClosingReason;
-  runtimeMappingIndices?: string[];
+  /** Static rule_ids (rule.rule_id, not SO id) whose source-index runtime
+   *  mappings the server should resolve and attach to updateByQuery. */
+  ruleStaticIds?: string[];
 }
 
 export interface UpdateAlertStatusByIdsProps {

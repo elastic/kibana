@@ -125,8 +125,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   } = useKibana().services;
   const { hasAlertsUpdate } = useAlertsPrivileges();
   const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
-  const { isLoading, indexPatterns, runtimeMappingIndices, getExtendedFields } =
-    useFetchIndexPatterns(rules);
+  const { isLoading, indexPatterns, getExtendedFields } = useFetchIndexPatterns(rules);
   const [isSubmitting, submitNewExceptionItems] = useAddNewExceptionItems();
   const [isClosingAlerts, closeAlerts] = useCloseAlertsFromExceptions();
   const invalidateFetchRuleByIdQuery = useInvalidateFetchRuleByIdQuery();
@@ -442,13 +441,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       });
 
       if (closeAlerts != null && shouldCloseAlerts) {
-        await closeAlerts(
-          ruleStaticIds,
-          addedItems,
-          alertIdToClose,
-          bulkCloseIndex,
-          runtimeMappingIndices
-        );
+        await closeAlerts(ruleStaticIds, addedItems, alertIdToClose, bulkCloseIndex);
       }
 
       invalidateFetchRuleByIdQuery();
@@ -476,7 +469,6 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     bulkCloseAlerts,
     onConfirm,
     bulkCloseIndex,
-    runtimeMappingIndices,
     setErrorSubmitting,
     invalidateFetchRuleByIdQuery,
     expireTime,

@@ -7,9 +7,17 @@
 
 import { get } from 'lodash';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
+import type {
+  AuthenticatedUser,
+  ElasticsearchClient,
+  Logger,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { DataViewAttributes } from '@kbn/data-views-plugin/common';
 import type { estypes } from '@elastic/elasticsearch';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { getIndexListFromEsqlQuery } from '@kbn/securitysolution-utils';
 import {
   ALERTS_API_ALL,
   ALERTS_API_UPDATE_DEPRECATED_PRIVILEGE,
@@ -35,6 +43,7 @@ import {
   getUpdateSignalStatusScript,
   setWorkflowStatusHandler,
 } from '../common/set_workflow_status_handler';
+import { getRuleByRuleId } from '../../rule_management/logic/detection_rules_client/methods/get_rule_by_rule_id';
 
 export const setSignalsStatusRoute = (
   router: SecuritySolutionPluginRouter,
@@ -129,15 +138,21 @@ export const setSignalsStatusRoute = (
               getIndexPattern,
             });
           } else {
-            const {
-              conflicts,
-              query,
-              runtime_mapping_indices: runtimeMappingIndices,
-            } = request.body;
+            const { conflicts, query, rule_ids: ruleStaticIds } = request.body;
 
+            // Resolve the runtime mappings server-side from the rule's own
+            // declared source indices.
+            const rulesClient = await (await context.alerting).getRulesClient();
+            const savedObjectsClient = core.savedObjects.client;
+            const sourceIndices = await resolveSourceIndicesForRules(
+              rulesClient,
+              savedObjectsClient,
+              ruleStaticIds,
+              logger
+            );
             const runtimeMappings = await resolveRuntimeMappingsFromIndices(
               esClient,
-              runtimeMappingIndices,
+              sourceIndices,
               logger
             );
 
@@ -271,3 +286,105 @@ const areRuntimeFieldsEqual = (
   a: estypes.MappingRuntimeField,
   b: estypes.MappingRuntimeField
 ): boolean => a.type === b.type && JSON.stringify(a.script) === JSON.stringify(b.script);
+
+/**
+ * Resolve the set of source index patterns declared by the given detection
+ * rules. Used by bulk-close to scope server-side `_mapping` reads to the
+ * rules' own indices — the user supplies rule_ids; they do not pick which
+ * indices are read from.
+ *
+ * Per rule type:
+ *  - rules with `params.dataViewId`: load the data view saved object and use
+ *    its `title` (comma-separated index patterns).
+ *  - ML rules: use the `.ml-anomalies-*` wildcard. We don't dereference the
+ *    job's `results_index_name` here — the ML rule executor itself queries
+ *    the wildcard, and our user-scoped esClient is bounded by the user's
+ *    existing ML index privileges.
+ *  - rules with `params.index`: use those patterns directly.
+ *  - anything else (e.g. ES|QL): skipped — runtime field workarounds are not
+ *    a documented pattern for those rule types yet.
+ *
+ * Missing/unloadable rules are logged and skipped. The function always
+ * returns an array (possibly empty); callers tolerate emptiness as "no
+ * runtime mappings to attach".
+ */
+const resolveSourceIndicesForRules = async (
+  rulesClient: RulesClient,
+  savedObjectsClient: SavedObjectsClientContract,
+  ruleStaticIds: string[] | undefined,
+  logger: Logger
+): Promise<string[]> => {
+  if (!ruleStaticIds || ruleStaticIds.length === 0) return [];
+
+  const indices = new Set<string>();
+  for (const ruleId of ruleStaticIds) {
+    const perRule = await resolveIndicesForRule(rulesClient, savedObjectsClient, ruleId, logger);
+    for (const pattern of perRule) indices.add(pattern);
+  }
+  return Array.from(indices);
+};
+
+const resolveIndicesForRule = async (
+  rulesClient: RulesClient,
+  savedObjectsClient: SavedObjectsClientContract,
+  ruleId: string,
+  logger: Logger
+): Promise<string[]> => {
+  const rule = await loadRule(rulesClient, ruleId, logger);
+  if (!rule) return [];
+
+  if ('data_view_id' in rule && rule.data_view_id) {
+    return resolveDataViewIndices(savedObjectsClient, rule.data_view_id, ruleId, logger);
+  }
+  if (rule.type === 'machine_learning') {
+    // The ML rule executor itself queries the `.ml-anomalies-*` wildcard; our
+    // user-scoped esClient is already bounded by the user's ML index privileges,
+    // so we don't need to dereference `results_index_name` per job.
+    return ['.ml-anomalies-*'];
+  }
+  if ('index' in rule && Array.isArray(rule.index)) {
+    return rule.index;
+  }
+  if (rule.type === 'esql') {
+    // ES|QL rules carry their source indices inside the query string, parsed
+    // by the same helper the exception flyout uses on the client.
+    return getIndexListFromEsqlQuery(rule.query);
+  }
+  
+  return [];
+};
+
+const loadRule = async (rulesClient: RulesClient, ruleId: string, logger: Logger) => {
+  try {
+    return await getRuleByRuleId({ rulesClient, ruleId });
+  } catch (err) {
+    logger.warn(
+      `bulk-close: failed to load rule_id "${ruleId}" for runtime mapping resolution: ${
+        err?.message ?? err
+      }`
+    );
+    return null;
+  }
+};
+
+const resolveDataViewIndices = async (
+  savedObjectsClient: SavedObjectsClientContract,
+  dataViewId: string,
+  ruleId: string,
+  logger: Logger
+): Promise<string[]> => {
+  try {
+    const dv = await savedObjectsClient.get<DataViewAttributes>('index-pattern', dataViewId);
+    return dv.attributes.title
+      .split(',')
+      .map((pattern) => pattern.trim())
+      .filter(Boolean);
+  } catch (err) {
+    logger.warn(
+      `bulk-close: failed to load data view "${dataViewId}" for rule_id "${ruleId}": ${
+        err?.message ?? err
+      }`
+    );
+    return [];
+  }
+};

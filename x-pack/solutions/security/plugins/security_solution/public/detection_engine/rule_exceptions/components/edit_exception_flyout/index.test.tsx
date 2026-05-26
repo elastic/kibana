@@ -118,7 +118,6 @@ describe('When the edit exception modal is opened', () => {
     mockFetchIndexPatterns.mockImplementation(() => ({
       isLoading: false,
       indexPatterns: flyoutDataViewStub,
-      runtimeMappingIndices: [],
       getExtendedFields: () => Promise.resolve([]),
     }));
     mockUseFindExceptionListReferences.mockImplementation(() => [
@@ -162,7 +161,6 @@ describe('When the edit exception modal is opened', () => {
       mockFetchIndexPatterns.mockImplementation(() => ({
         isLoading: true,
         indexPatterns: { fields: [], title: 'foo' },
-        runtimeMappingIndices: [],
         getExtendedFields: () => Promise.resolve([]),
       }));
 

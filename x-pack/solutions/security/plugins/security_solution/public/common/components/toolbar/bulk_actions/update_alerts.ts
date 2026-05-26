@@ -24,7 +24,9 @@ interface UpdatedAlertsProps {
   signalIds?: string[];
   signal?: AbortSignal;
   reason?: AlertClosingReason;
-  runtimeMappingIndices?: string[];
+  /** Static rule_ids whose source-index runtime mappings the server should
+   *  resolve and attach to updateByQuery. */
+  ruleStaticIds?: string[];
 }
 
 /**
@@ -47,7 +49,7 @@ export const updateAlertStatus = ({
   signalIds,
   signal,
   reason,
-  runtimeMappingIndices,
+  ruleStaticIds,
 }: UpdatedAlertsProps): Promise<UpdatedAlertsResponse> => {
   if (signalIds && signalIds.length > 0) {
     return updateAlertStatusByIds({ status, signalIds, signal, reason }).then(({ updated }) => ({
@@ -60,7 +62,7 @@ export const updateAlertStatus = ({
       query,
       signal,
       reason,
-      runtimeMappingIndices,
+      ruleStaticIds,
     }).then(({ updated, version_conflicts: conflicts }) => ({
       updated: updated ?? 0,
       version_conflicts: conflicts,

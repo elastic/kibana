@@ -117,8 +117,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
   const rules = useMemo(() => (rule != null ? [rule] : null), [rule]);
   const listType = useMemo((): ExceptionListTypeEnum => list.type as ExceptionListTypeEnum, [list]);
 
-  const { isLoading, indexPatterns, runtimeMappingIndices, getExtendedFields } =
-    useFetchIndexPatterns(rules);
+  const { isLoading, indexPatterns, getExtendedFields } = useFetchIndexPatterns(rules);
   const [isSubmitting, submitEditExceptionItems] = useEditExceptionItems();
   const [isClosingAlerts, closeAlerts] = useCloseAlertsFromExceptions();
   const { read: canReadExceptions } = useUserPrivileges().rulesPrivileges.exceptions;
@@ -339,13 +338,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
           listType === ExceptionListTypeEnum.RULE_DEFAULT ? ruleDefaultRule : referencedRules;
 
         if (closeAlerts != null && !isEmpty(ruleIdsForBulkClose) && bulkCloseAlerts) {
-          await closeAlerts(
-            ruleIdsForBulkClose,
-            items,
-            undefined,
-            bulkCloseIndex,
-            runtimeMappingIndices
-          );
+          await closeAlerts(ruleIdsForBulkClose, items, undefined, bulkCloseIndex);
         }
 
         onConfirm(true);
@@ -368,7 +361,6 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
     bulkCloseAlerts,
     onConfirm,
     bulkCloseIndex,
-    runtimeMappingIndices,
     onCancel,
     expireTime,
   ]);
