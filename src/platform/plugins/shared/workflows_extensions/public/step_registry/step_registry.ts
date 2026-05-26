@@ -19,7 +19,8 @@ import type { PublicStepDefinitionOrLoader } from '../types';
  */
 export class PublicStepRegistry {
   private readonly registry = new Map<string, PublicStepDefinition>();
-  private readonly pending = new Set<Promise<void>>(); // Stores promises that are either in progress or have been rejected
+  private readonly pending: Array<() => Promise<void>> = [];
+  private whenReadyPromise: Promise<void> | undefined;
 
   constructor(private readonly logger: Logger) {}
 
@@ -34,19 +35,17 @@ export class PublicStepRegistry {
     Config extends z.ZodObject = z.ZodObject
   >(definitionOrLoader: PublicStepDefinitionOrLoader<Input, Output, Config>): void {
     if (typeof definitionOrLoader === 'function') {
-      const promise = definitionOrLoader()
-        .then((definition) => {
-          if (definition) {
-            this.addToRegistry(definition);
-          }
-        })
-        .catch((error) => {
-          this.logger.error('Failed to register step definition', { error });
-        })
-        .finally(() => {
-          this.pending.delete(promise);
-        });
-      this.pending.add(promise);
+      this.pending.push(async () => {
+        definitionOrLoader()
+          .then((definition) => {
+            if (definition) {
+              this.addToRegistry(definition);
+            }
+          })
+          .catch((error) => {
+            this.logger.error('Failed to register step definition', { error });
+          });
+      });
     } else {
       this.addToRegistry(definitionOrLoader);
     }
@@ -75,9 +74,16 @@ export class PublicStepRegistry {
    * Use before reading the registry if you need to guarantee all async registrations are complete.
    */
   public async whenReady(): Promise<void> {
-    if (this.pending.size > 0) {
-      await Promise.allSettled(this.pending);
-    }
+    if (this.whenReadyPromise) return this.whenReadyPromise;
+    this.whenReadyPromise = new Promise(async (resolve, reject) => {
+      try {
+        await Promise.all(this.pending.map((loader) => loader()));
+        resolve();
+      } catch (error) {
+        reject(error);
+      }
+    });
+    return this.whenReadyPromise;
   }
 
   /**

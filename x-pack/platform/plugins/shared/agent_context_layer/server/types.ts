@@ -51,17 +51,19 @@ export interface AgentContextLayerPluginStart {
     filters?: SmlSearchFilters;
   }) => Promise<{ results: SmlSearchResult[]; total: number }>;
 
-  checkItemsAccess: (params: {
-    ids: string[];
-    spaceId: string;
-    esClient: IScopedClusterClient;
-    request: KibanaRequest;
-  }) => Promise<Map<string, boolean>>;
-
+  /**
+   * Fetch SML documents by their chunk IDs.
+   *
+   * The returned map only contains documents the user (identified by `request`) is
+   * authorized to access in the resolved space; unauthorized or missing IDs are
+   * simply absent from the result. Permission checks are performed internally —
+   * callers do not need to pre-authorize the IDs.
+   */
   getDocuments: (params: {
     ids: string[];
-    spaceId: string;
-    esClient: IScopedClusterClient;
+    request: KibanaRequest;
+    /** Optional. Resolved from `request` via the spaces service when omitted. */
+    spaceId?: string;
   }) => Promise<Map<string, SmlDocument>>;
 
   getTypeDefinition: (typeId: string) => SmlTypeDefinition | undefined;

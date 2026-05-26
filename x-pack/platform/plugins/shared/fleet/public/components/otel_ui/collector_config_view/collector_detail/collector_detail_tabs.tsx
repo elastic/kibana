@@ -102,7 +102,12 @@ export const CollectorDetailTabs: React.FC<CollectorDetailTabsProps> = ({
 
   return (
     <>
-      <EuiTabs size="s" data-test-subj="collectorDetailTabs">
+      <EuiTabs
+        css={css`
+          margin-top: -${euiTheme.size.s};
+        `}
+        data-test-subj="collectorDetailTabs"
+      >
         {DETAIL_TABS.map((tab) => (
           <EuiTab
             key={tab.id}

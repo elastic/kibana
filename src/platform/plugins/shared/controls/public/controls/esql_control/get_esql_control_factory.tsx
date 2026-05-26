@@ -9,11 +9,11 @@
 
 import { pick } from 'lodash';
 import React, { useEffect } from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, merge } from 'rxjs';
 
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import {
   apiPublishesESQLVariables,
   isStaticESQLControl,
@@ -22,7 +22,7 @@ import {
 } from '@kbn/esql-types';
 import {
   apiHasPinnedPanels,
-  initializeUnsavedChanges,
+  initializeStateApi,
   type StateComparators,
 } from '@kbn/presentation-publishing';
 
@@ -37,15 +37,18 @@ import type {
   ESQLOptionsListComponentApi,
   ESQLOptionsListRuntimeState,
 } from './types';
+import { getPlacementHints, LAYOUT_CONSTRAINTS } from '../constants';
 
 export const getESQLControlFactory = <
   State extends OptionsListESQLControlState = OptionsListESQLControlState
->(): EmbeddableFactory<
+>(): EmbeddablePublicDefinition<
   State extends { control_type: 'STATIC_VALUES' } ? StaticESQLControl : QueryESQLControl,
   ESQLControlApi<State>
 > => {
   return {
     type: ESQL_CONTROL,
+    getPlacementHints,
+    layoutConstraints: LAYOUT_CONSTRAINTS,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const state = initialState;
 
@@ -59,18 +62,15 @@ export const getESQLControlFactory = <
         'variableName'
       );
 
-      function serializeState() {
-        return {
-          ...selections.getLatestState(),
-          ...labelManager.getLatestState(),
-        } as typeof initialState;
-      }
-
-      const unsavedChangesApi = initializeUnsavedChanges<typeof initialState>({
+      const stateApi = initializeStateApi<typeof initialState>({
         uuid,
         parentApi,
-        serializeState,
-        anyStateChange$: selections.anyStateChange$,
+        serializeState: () =>
+          ({
+            ...selections.getLatestState(),
+            ...labelManager.getLatestState(),
+          } as typeof initialState),
+        anyStateChange$: merge(labelManager.anyStateChange$, selections.anyStateChange$),
         getComparators: () => {
           return {
             ...getSelectionComparators(state.control_type),
@@ -78,17 +78,17 @@ export const getESQLControlFactory = <
             display_settings: 'skip',
           } as StateComparators<typeof initialState>;
         },
-        onReset: (lastSaved) => {
+        applySerializedState: (nextState) => {
           selections.reinitializeState({
             available_options: [],
-            ...lastSaved,
+            ...nextState,
           } as ESQLOptionsListRuntimeState);
-          labelManager.reinitializeState(lastSaved);
+          labelManager.reinitializeState(nextState);
         },
       });
 
       const api = finalizeApi({
-        ...unsavedChangesApi,
+        ...stateApi,
         ...selections.api,
         ...labelManager.api,
         dataLoading$,
@@ -133,7 +133,6 @@ export const getESQLControlFactory = <
             console.error('Error getting ESQL control trigger', e);
           }
         },
-        serializeState,
       }) as ESQLControlApi<State>;
 
       const componentApi: ESQLOptionsListComponentApi = {

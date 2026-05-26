@@ -10,7 +10,7 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { openLazyFlyout } from '@kbn/presentation-util';
 
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import React from 'react';
 import useUnmount from 'react-use/lib/useUnmount';
 import type { SingleMetricViewerEmbeddableState } from '@kbn/ml-server-schemas/embeddables/single_metric_viewer';
@@ -23,7 +23,7 @@ import {
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
 import { BehaviorSubject, Subscription, merge } from 'rxjs';
-import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
+import { initializeStateApi } from '@kbn/presentation-publishing';
 import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '..';
 import type { MlPluginStart, MlStartDependencies } from '../../plugin';
 import type { SingleMetricViewerEmbeddableApi } from '../types';
@@ -42,7 +42,7 @@ export const getSingleMetricViewerEmbeddableFactory = (
   getStartServices: StartServicesAccessor<MlStartDependencies, MlPluginStart>,
   usageCollection?: UsageCollectionSetup
 ) => {
-  const factory: EmbeddableFactory<
+  const factory: EmbeddablePublicDefinition<
     SingleMetricViewerEmbeddableState,
     SingleMetricViewerEmbeddableApi
   > = {
@@ -62,18 +62,14 @@ export const getSingleMetricViewerEmbeddableFactory = (
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
 
-      function serializeState() {
-        return {
+      const stateApi = initializeStateApi<SingleMetricViewerEmbeddableState>({
+        uuid,
+        parentApi,
+        serializeState: () => ({
           ...titleManager.getLatestState(),
           ...timeRangeManager.getLatestState(),
           ...singleMetricManager.getLatestState(),
-        };
-      }
-
-      const unsavedChangesApi = initializeUnsavedChanges<SingleMetricViewerEmbeddableState>({
-        uuid,
-        parentApi,
-        serializeState,
+        }),
         anyStateChange$: merge(
           titleManager.anyStateChange$,
           timeRangeManager.anyStateChange$,
@@ -90,10 +86,10 @@ export const getSingleMetricViewerEmbeddableFactory = (
             refreshConfig: 'skip',
           };
         },
-        onReset: (lastSaved) => {
-          timeRangeManager.reinitializeState(lastSaved);
-          titleManager.reinitializeState(lastSaved);
-          if (lastSaved) singleMetricManager.reinitializeState(lastSaved);
+        applySerializedState: (nextState) => {
+          timeRangeManager.reinitializeState(nextState);
+          titleManager.reinitializeState(nextState);
+          singleMetricManager.reinitializeState(nextState);
         },
       });
 
@@ -134,10 +130,9 @@ export const getSingleMetricViewerEmbeddableFactory = (
         ...titleManager.api,
         ...timeRangeManager.api,
         ...singleMetricManager.api,
-        ...unsavedChangesApi,
+        ...stateApi,
         dataLoading$,
         blockingError$,
-        serializeState,
       });
 
       const { singleMetricViewerData$, onDestroy } = initializeSingleMetricViewerDataFetcher(

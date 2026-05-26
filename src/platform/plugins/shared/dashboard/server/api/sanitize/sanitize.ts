@@ -35,8 +35,15 @@ export async function sanitize(
   );
   warnings.push(...dashboardStateWarnings, ...scopeWarnings);
   const sanitizedDashboardState = dashboardStateSchema.validate(scopedDashboardState);
+  // access_control is separate from the transforms and stripping logic since it is not part of the
+  // dashboard saved object attributes but it should be preserved in the sanitized output if present
+  // in the incoming dashboard state
+  const { access_control } = dashboardState;
   return {
-    data: sanitizedDashboardState,
+    data: {
+      ...sanitizedDashboardState,
+      ...(access_control !== undefined && { access_control }),
+    },
     ...(warnings.length ? { warnings } : {}),
   };
 }

@@ -787,38 +787,6 @@ describe('Both modes', () => {
         expect(integrationsLink).toHaveAttribute('data-highlighted', 'true');
       });
 
-      /**
-       * GIVEN there are footer items
-       * WHEN I hover over a footer item
-       * THEN a tooltip appears with the item label
-       * AND when I click on the trigger
-       * AND then I hover out
-       * THEN the tooltip disappears
-       */
-      it('should display a tooltip with the item label on hover, and hide on hover out', async () => {
-        render(<TestComponent items={basicMock.navItems} logo={basicMock.logo} />);
-
-        const developerToolsLink = screen.getByTestId(footerItemId('developer_tools'));
-
-        await user.hover(developerToolsLink);
-        flushPopoverTimers();
-
-        const tooltip = await screen.findByRole('tooltip', {
-          name: 'Developer tools',
-        });
-
-        expect(tooltip).toBeInTheDocument();
-
-        await user.click(developerToolsLink);
-        await user.unhover(developerToolsLink);
-
-        // Even after clicking on the trigger which makes the `EuiToolTip` persistent by default
-        // See: https://eui.elastic.co/docs/components/display/tooltip/
-        await waitFor(() => {
-          expect(tooltip).not.toBeInTheDocument();
-        });
-      });
-
       it('should switch popover when hovering from one item to another', async () => {
         const customNavItems = {
           ...basicMock.navItems,

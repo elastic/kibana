@@ -16,7 +16,6 @@ import { TestProviders } from '../../../../common/mock';
 import { mockFindAttackDiscoverySchedules } from '../../mock/mock_find_attack_discovery_schedules';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { ATTACK_DISCOVERY_FEATURE_ID } from '../../../../../common/constants';
-import { waitForEuiToolTipVisible } from '@elastic/eui/lib/test/rtl';
 
 jest.mock('react-router', () => ({
   matchPath: jest.fn(),
@@ -172,7 +171,6 @@ describe('useScheduleView', () => {
 
       const createButton = screen.getByTestId('createSchedule');
       fireEvent.mouseOver(createButton.parentElement as Node);
-      await waitForEuiToolTipVisible();
 
       const tooltip = screen.getByRole('tooltip');
       expect(tooltip).toHaveTextContent('Missing privileges');

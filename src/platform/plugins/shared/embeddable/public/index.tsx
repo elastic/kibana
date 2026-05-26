@@ -42,8 +42,10 @@ export type { EmbeddableSetup, EmbeddableStart } from './types';
 export {
   EmbeddableRenderer,
   EmbeddableRendererContext,
+  PlacementStrategy,
   type DefaultEmbeddableApi,
-  type EmbeddableFactory,
+  type EmbeddablePublicDefinition,
+  type LayoutConstraints,
 } from './react_embeddable_system';
 
 export type { PresentationPanelProps } from './react_embeddable_system/panel_component/types';

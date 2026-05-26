@@ -46,7 +46,7 @@ import { createRuleDataSchema } from './schemas';
 import { createRuleSavedObject } from '../../../../rules_client/lib';
 import type { ValidateScheduleLimitResult } from '../get_schedule_frequency';
 import { validateScheduleLimit } from '../get_schedule_frequency';
-import { logBulkRuleChanges } from '../common_utils/log_bulk_rule_changes';
+import { logRuleChanges } from '../common_utils/log_rule_changes';
 
 export interface CreateRuleOptions {
   id?: string;
@@ -253,7 +253,7 @@ export async function createRule<Params extends RuleParams = never>(
       })
   );
 
-  await logBulkRuleChanges({
+  await logRuleChanges({
     ruleSOs: [createdRuleSavedObject],
     rulesClientContext: context,
     changesContext: {
@@ -282,7 +282,7 @@ export async function createRule<Params extends RuleParams = never>(
   }
 
   // Convert domain rule to rule (Remove certain properties)
-  const rule = transformRuleDomainToRule<Params>(ruleDomain, { isPublic: true });
+  const rule = transformRuleDomainToRule<Params>(ruleDomain);
 
   // TODO (http-versioning): Remove this cast, this enables us to move forward
   // without fixing all of other solution types

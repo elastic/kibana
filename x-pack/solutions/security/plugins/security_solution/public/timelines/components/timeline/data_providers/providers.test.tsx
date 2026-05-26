@@ -106,6 +106,7 @@ describe('Providers', () => {
 
       wrapper
         .find(`[data-test-subj="providerActions"] .${DELETE_CLASS_NAME}`)
+        .hostNodes()
         .first()
         .simulate('click');
       expect(mockOnDataProviderRemoved.mock.calls[0][0].providerId).toEqual('id-Provider 1');
@@ -135,6 +136,7 @@ describe('Providers', () => {
 
       wrapper
         .find(`[data-test-subj="providerActions"] .${ENABLE_CLASS_NAME}`)
+        .hostNodes()
         .first()
         .simulate('click');
       expect(mockOnToggleDataProviderEnabled.mock.calls[0][0]).toEqual({
@@ -171,6 +173,7 @@ describe('Providers', () => {
 
       wrapper
         .find(`[data-test-subj="providerActions"] .${EXCLUDE_CLASS_NAME}`)
+        .hostNodes()
         .first()
         .simulate('click');
 
@@ -273,6 +276,7 @@ describe('Providers', () => {
 
       wrapper
         .find(`[data-test-subj="providerActions"] .${ENABLE_CLASS_NAME}`)
+        .hostNodes()
         .first()
         .simulate('click');
 
@@ -315,6 +319,7 @@ describe('Providers', () => {
 
       wrapper
         .find(`[data-test-subj="providerActions"] .${EXCLUDE_CLASS_NAME}`)
+        .hostNodes()
         .first()
         .simulate('click');
 

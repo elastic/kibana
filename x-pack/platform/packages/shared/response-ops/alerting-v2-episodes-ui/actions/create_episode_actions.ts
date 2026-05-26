@@ -13,6 +13,7 @@ import type { OverlayStart } from '@kbn/core-overlays-browser';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { QueryClient } from '@kbn/react-query';
 import type { EpisodeAction } from './types';
 import { createViewDetailsAction } from './view_details';
@@ -35,6 +36,7 @@ export interface EpisodeActionsDeps {
   userProfile: UserProfileService;
   docLinks: DocLinksStart;
   expressions: ExpressionsStart;
+  spaces: SpacesPluginStart;
   queryClient: QueryClient;
   /** Resolver for single-episode-page URL (caller prepends basePath). */
   getEpisodeDetailsHref: (episodeId: string) => string;

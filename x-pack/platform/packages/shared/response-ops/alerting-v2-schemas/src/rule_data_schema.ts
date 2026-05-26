@@ -64,6 +64,13 @@ export const metadataSchema = z
       .min(1)
       .optional()
       .describe('Tags for categorization, e.g. ["production", "infra"].'),
+    builder_type: z
+      .string()
+      .max(64)
+      .optional()
+      .describe(
+        'Identifies the rule builder that authored this rule (e.g. "threshold"). Absent for rules authored directly in ES|QL.'
+      ),
   })
   .strict()
   .describe('Rule metadata.');
@@ -125,7 +132,9 @@ export const recoveryPolicySchema = z
       .describe('Recovery query configuration; required when type is "query".'),
   })
   .strict()
-  .describe('Recovery detection configuration.');
+  .describe(
+    'Recovery detection configuration. Optional: rules without a recovery policy never emit recovery events.'
+  );
 
 /** State transition (optional, alert-only) */
 
@@ -218,10 +227,11 @@ const artifactSchema = z
 /** Create rule API schema */
 
 /**
- * Base schema without refinements - used for extending in response schema.
+ * Base schema without refinements - used for extending in response schema and
+ * for introspection by the immutability classification meta-tests.
  * @internal
  */
-const createRuleDataBaseSchema = z
+export const createRuleDataBaseSchema = z
   .object({
     kind: ruleKindSchema,
     metadata: metadataSchema,
@@ -266,11 +276,35 @@ export const createRuleDataSchema = createRuleDataBaseSchema
 
 export type CreateRuleData = z.infer<typeof createRuleDataSchema>;
 
+/**
+ * Top-level fields of the create-rule schema that cannot be changed after the
+ * rule has been created. Every other field of {@link createRuleDataBaseSchema}
+ * is implicitly mutable.
+ *
+ * Consumers that implement PUT-style upsert must reject requests that try to
+ * mutate one of these. Consumers that implement PATCH-style update must
+ * preserve them from storage regardless of the body.
+ *
+ * Whenever a top-level field is added to {@link createRuleDataBaseSchema}, the
+ * snapshot test in `rule_data_schema.test.ts` will fail. Updating the
+ * snapshot surfaces the new field in the PR diff so reviewers can confirm
+ * whether it should be classified as immutable here instead of being silently
+ * mutable.
+ */
+export const IMMUTABLE_RULE_FIELDS = ['kind'] as const satisfies ReadonlyArray<
+  keyof CreateRuleData
+>;
+
+export type ImmutableRuleField = (typeof IMMUTABLE_RULE_FIELDS)[number];
+
 /** Update rule API schema — all fields optional for partial updates */
 
 export const updateRuleDataSchema = z
   .object({
-    metadata: metadataSchema.partial().optional(),
+    metadata: metadataSchema
+      .partial()
+      .extend({ builder_type: z.string().max(64).optional().nullable() })
+      .optional(),
     time_field: z.string().min(1).max(128).optional(),
     schedule: scheduleSchema.partial().optional().nullable(),
     evaluation: z
@@ -316,13 +350,13 @@ export type FindRulesSortField = z.infer<typeof findRulesSortFieldSchema>;
 
 /** Query parameters for the find rules (list) API. */
 export const findRulesParamsSchema = z.object({
-  page: z.coerce.number().min(1).optional().describe('The page number to return.'),
+  page: z.coerce.number().min(1).optional().describe('The page number to return. Defaults to 1.'),
   perPage: z.coerce
     .number()
     .min(1)
     .max(1000)
     .optional()
-    .describe('The number of rules to return per page.'),
+    .describe('The number of rules to return per page. Defaults to 20.'),
   filter: z.string().optional().describe('The filter to apply to the rules.'),
   sortField: findRulesSortFieldSchema.optional().describe('The field to sort rules by.'),
   sortOrder: z.enum(['asc', 'desc']).optional().describe('The direction to sort rules.'),

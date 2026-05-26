@@ -22,6 +22,10 @@ jest.mock('./validate_model_response', () => ({
   validateModelResponse: jest.fn(),
 }));
 
+jest.mock('./schemas', () => ({
+  convertOutputToModelResponseSchema: jest.fn((schema) => schema),
+}));
+
 jest.mock('../../../../common/steps/ai', () => ({
   AiClassifyStepCommonDefinition: {
     id: 'ai.classify',
@@ -46,6 +50,7 @@ import {
   buildInstructionsPart,
   buildSystemPart,
 } from './build_prompts';
+import { convertOutputToModelResponseSchema } from './schemas';
 import { aiClassifyStepDefinition } from './step';
 import { validateModelResponse } from './validate_model_response';
 import { buildStructuredOutputSchema } from '../../../../common/steps/ai';
@@ -68,6 +73,10 @@ const mockValidateModelResponse = validateModelResponse as jest.MockedFunction<
 const mockBuildStructuredOutputSchema = buildStructuredOutputSchema as jest.MockedFunction<
   typeof buildStructuredOutputSchema
 >;
+const mockConvertOutputToModelResponseSchema =
+  convertOutputToModelResponseSchema as jest.MockedFunction<
+    typeof convertOutputToModelResponseSchema
+  >;
 const mockCreateServerStepDefinition = createServerStepDefinition as jest.MockedFunction<
   typeof createServerStepDefinition
 >;
@@ -209,7 +218,8 @@ describe('aiClassifyStepDefinition', () => {
       expect(mockResolveConnectorId).toHaveBeenCalledWith(
         'test-connector-id',
         mockInference,
-        expect.any(Object)
+        expect.any(Object),
+        { featureId: 'ai_classify', searchInferenceEndpoints: undefined }
       );
       expect(mockInference.getChatModel).toHaveBeenCalledWith({
         connectorId: 'resolved-connector-id',
@@ -390,9 +400,10 @@ describe('aiClassifyStepDefinition', () => {
       await stepDefinition.handler(mockContext);
 
       expect(mockBuildStructuredOutputSchema).toHaveBeenCalledWith(mockContext.input);
+      expect(mockConvertOutputToModelResponseSchema).toHaveBeenCalledWith(mockSchema);
     });
 
-    it('should pass Zod schema directly to withStructuredOutput', async () => {
+    it('should pass model response schema to withStructuredOutput', async () => {
       const stepDefinition = aiClassifyStepDefinition(mockCoreSetup);
       await stepDefinition.handler(mockContext);
 
@@ -490,7 +501,8 @@ describe('aiClassifyStepDefinition', () => {
       expect(mockResolveConnectorId).toHaveBeenCalledWith(
         'test-connector-id',
         mockInference,
-        expect.any(Object)
+        expect.any(Object),
+        { featureId: 'ai_classify', searchInferenceEndpoints: undefined }
       );
     });
 
@@ -503,7 +515,8 @@ describe('aiClassifyStepDefinition', () => {
       expect(mockResolveConnectorId).toHaveBeenCalledWith(
         undefined,
         mockInference,
-        expect.any(Object)
+        expect.any(Object),
+        { featureId: 'ai_classify', searchInferenceEndpoints: undefined }
       );
     });
 
@@ -618,7 +631,8 @@ describe('aiClassifyStepDefinition', () => {
       expect(mockResolveConnectorId).toHaveBeenCalledWith(
         'test-connector-id',
         mockInference,
-        fakeRequest
+        fakeRequest,
+        { featureId: 'ai_classify', searchInferenceEndpoints: undefined }
       );
       expect(mockInference.getChatModel).toHaveBeenCalledWith(
         expect.objectContaining({

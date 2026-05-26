@@ -66,13 +66,22 @@ export const EntitySummaryGrid = memo(
             <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap={false}>
               <EuiFlexItem className="eui-textTruncate">
                 <EuiToolTip content={entityId}>
-                  <EuiText size="s" className="eui-textTruncate">
+                  <EuiText size="xs" className="eui-textTruncate" tabIndex={0}>
                     {entityId ?? getEmptyTagValue()}
                   </EuiText>
                 </EuiToolTip>
               </EuiFlexItem>
               {entityId && (
-                <EuiFlexItem grow={false}>
+                <EuiFlexItem
+                  grow={false}
+                  // setting height to 0 and overflow to visible to avoid the button from pushing the text down
+                  // translateY(-50%) is used on EuiCopy to center the button vertically
+                  css={css`
+                    height: 0;
+                    overflow: visible;
+                    align-self: center;
+                  `}
+                >
                   <EuiToolTip
                     content={i18n.translate(
                       'xpack.securitySolution.flyout.entityDetails.grid.copyToClipboard',
@@ -90,6 +99,9 @@ export const EntitySummaryGrid = memo(
                           onClick={copy}
                           iconSize="s"
                           color="text"
+                          css={css`
+                            transform: translateY(-50%);
+                          `}
                         />
                       )}
                     </EuiCopy>
@@ -104,7 +116,10 @@ export const EntitySummaryGrid = memo(
               { defaultMessage: 'Data source' }
             )}
           >
-            <EntitySourceValue values={toEntitySourceArray(entityRecord.entity?.source)} />
+            <EntitySourceValue
+              values={toEntitySourceArray(entityRecord.entity?.source)}
+              textSize="xs"
+            />
           </SummaryPanel>
           <SummaryPanel
             label={i18n.translate(
@@ -147,8 +162,15 @@ export const EntitySummaryGrid = memo(
 EntitySummaryGrid.displayName = 'EntitySummaryGrid';
 
 const SummaryPanel = memo(({ label, children }: { label: string; children: React.ReactNode }) => (
-  <EuiPanel hasBorder paddingSize="m" style={{ minWidth: 0 }}>
-    <EuiText size="s">
+  <EuiPanel
+    hasBorder
+    paddingSize="s"
+    css={css`
+      min-width: 0;
+      padding: 8px 12px 10px;
+    `}
+  >
+    <EuiText size="xs">
       <strong>{label}</strong>
     </EuiText>
     <EuiSpacer size="xs" />
@@ -181,7 +203,7 @@ const AssetCriticalityCell = memo(
       onClick={canEdit ? onOpenModal : undefined}
     >
       <EuiFlexItem grow={false}>
-        <AssetCriticalityBadge criticalityLevel={criticalityLevel ?? 'unassigned'} />
+        <AssetCriticalityBadge criticalityLevel={criticalityLevel ?? 'unassigned'} textSize="xs" />
       </EuiFlexItem>
       {canEdit && (
         <EuiFlexItem grow={false}>
@@ -222,6 +244,7 @@ const WatchlistsCell = memo(({ watchlistIds }: { watchlistIds: string[] }) => {
       values={resolvedNames}
       overflowTooltipTitle={WATCHLISTS_OVERFLOW_TOOLTIP_TITLE}
       data-test-subj="entityWatchlistsCell"
+      textSize="xs"
     />
   );
 });

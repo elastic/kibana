@@ -9,12 +9,13 @@
 import { SOURCES_TYPES } from '@kbn/esql-types';
 import type { ESQLAstAllCommands } from '@elastic/esql/types';
 import { isSubQuery, isSource } from '@elastic/esql';
-import { pipeCompleteItem, commaCompleteItem, buildSubqueryCompleteItem } from '../complete_items';
+import { pipeCompleteItem, commaCompleteItem, buildSubqueryCompleteItems } from '../complete_items';
 import {
   getSourcesFromCommands,
   getSourceSuggestions,
   additionalSourcesSuggestions,
   buildViewsDefinitions,
+  buildDatasetsDefinitions,
 } from '../../definitions/utils/sources';
 import { metadataSuggestion, getMetadataSuggestions } from '../options/metadata';
 import { getRecommendedQueriesSuggestions } from '../options/recommended_queries';
@@ -71,7 +72,9 @@ async function handleFromAutocomplete(
   // checks need to operate on the current command only, not the entire query
   const commandText = query.substring(command.location.min, cursorPos);
   const subquerySuggestion =
-    commandText.length > command.name.length ? buildSubqueryCompleteItem() : undefined;
+    commandText.length > command.name.length
+      ? buildSubqueryCompleteItems([command.name]).at(0)
+      : undefined;
   const indicesBrowserSuggestion = await getIndicesBrowserSuggestion({
     callbacks,
     context,
@@ -151,7 +154,8 @@ function suggestInitialSources(
     commandStart,
   });
   const viewSuggestions = buildViewsDefinitions(context?.views ?? [], []);
-  const suggestions = [...sourceSuggestions, ...viewSuggestions];
+  const datasetSuggestions = buildDatasetsDefinitions(context?.datasets ?? [], []);
+  const suggestions = [...sourceSuggestions, ...viewSuggestions, ...datasetSuggestions];
 
   if (subquerySuggestion && shouldSuggestSubquery(context)) {
     suggestions.push(subquerySuggestion);
@@ -219,6 +223,7 @@ async function suggestAdditionalSources(
     indexes.map(({ name }) => name),
     recommendedQueries,
     context?.views ?? [],
+    context?.datasets ?? [],
     canRewriteFromToTs ? sourceReplacementContext : undefined
   );
 

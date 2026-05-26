@@ -80,7 +80,7 @@ export function CreateEditComponentTemplateLink({
         css={{ width: '100%' }}
       >
         <EuiFlexGroup alignItems="center" gutterSize="s">
-          <EuiIcon type="external" />
+          <EuiIcon type="external" aria-hidden={true} />
           {otherMitigationsCustomComponentTemplate}
         </EuiFlexGroup>
       </EuiLink>

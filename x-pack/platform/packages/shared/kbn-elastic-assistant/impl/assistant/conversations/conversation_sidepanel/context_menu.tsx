@@ -73,7 +73,7 @@ export const ConversationSidePanelContextMenu = ({
         'aria-labelledby': buttonId,
       }}
     >
-      <EuiContextMenuPanel data-test-subj="convo-context-menu" size="s" items={actionItems} />
+      <EuiContextMenuPanel data-test-subj="convo-context-menu" items={actionItems} />
     </EuiPopover>
   );
 };

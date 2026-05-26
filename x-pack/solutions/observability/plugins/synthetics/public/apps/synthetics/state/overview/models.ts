@@ -45,6 +45,7 @@ export interface GroupByState {
     | ConfigKey.MONITOR_TYPE
     | 'locationId'
     | 'monitor'
+    | 'remoteName'
     | 'none';
   order: 'asc' | 'desc';
 }

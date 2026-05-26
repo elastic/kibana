@@ -1,0 +1,5 @@
+description: An example of a 500 Internal Server Error response, returned when an unexpected error occurs while processing the request.
+value:
+  statusCode: 500
+  error: Internal Server Error
+  message: "An internal server error occurred. Check the Kibana server logs for details."
