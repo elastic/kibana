@@ -121,7 +121,7 @@ const sectionGridSchema = schema.object({
   y: schema.number({ meta: { description: 'The y coordinate of the section in grid units.' } }),
 });
 
-export function getSectionSchema(isDashboardAppRequest: boolean) {
+export function getSectionSchema(isDashboardAppRequest: boolean, isReadRequest: boolean = false) {
   return schema.object(
     {
       title: schema.string({
@@ -138,7 +138,7 @@ export function getSectionSchema(isDashboardAppRequest: boolean) {
       panels: schema.arrayOf(getPanelSchema(isDashboardAppRequest), {
         meta: { description: 'The panels that belong to the section.' },
         defaultValue: [],
-        maxSize: MAX_PANELS,
+        maxSize: isDashboardAppRequest && isReadRequest ? Number.MAX_SAFE_INTEGER : MAX_PANELS,
       }),
       id: schema.maybe(
         schema.string({
@@ -252,7 +252,7 @@ export function getDashboardStateSchema(
       panels: schema.arrayOf(
         schema.oneOf([
           getPanelSchema(isDashboardAppRequest),
-          getSectionSchema(isDashboardAppRequest),
+          getSectionSchema(isDashboardAppRequest, isReadRequest),
         ]),
         {
           defaultValue: [],
