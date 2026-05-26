@@ -40,13 +40,15 @@ const makeEntityEnginePrivileges = (
 
 const renderCallout = (
   riskEngineReadPrivileges: RiskEngineMissingPrivilegesResponse,
-  entityEnginePrivileges: EntityAnalyticsPrivileges | undefined
+  entityEnginePrivileges: EntityAnalyticsPrivileges | undefined,
+  leadGenerationPrivileges?: EntityAnalyticsPrivileges
 ) =>
   render(
     <TestProviders>
       <EntityAnalyticsReadPrivilegesCallout
         riskEngineReadPrivileges={riskEngineReadPrivileges}
         entityEnginePrivileges={entityEnginePrivileges}
+        leadGenerationPrivileges={leadGenerationPrivileges}
       />
     </TestProviders>
   );
@@ -139,6 +141,49 @@ describe('EntityAnalyticsReadPrivilegesCallout', () => {
     };
 
     renderCallout(missingPrivileges, makeEntityEnginePrivileges({}));
+
+    expect(screen.queryByText(CALLOUT_TITLE)).not.toBeInTheDocument();
+  });
+
+  it('shows callout when lead generation index is missing read privilege', () => {
+    const leadsIndex = '.entity_analytics.entity-leads-*';
+    const leadPrivileges = makeEntityEnginePrivileges({
+      [leadsIndex]: { read: false, view_index_metadata: true },
+    });
+
+    renderCallout(ALL_PRIVILEGES_GRANTED, makeEntityEnginePrivileges({}), leadPrivileges);
+
+    expect(screen.getByText(CALLOUT_TITLE)).toBeInTheDocument();
+    expect(screen.getByText(leadsIndex)).toBeInTheDocument();
+  });
+
+  it('combines missing privileges from risk engine, entity store, and lead generation', () => {
+    const leadsIndex = '.entity_analytics.entity-leads-*';
+    const missingRiskPrivileges: RiskEngineMissingPrivilegesResponse = {
+      isLoading: false,
+      hasAllRequiredPrivileges: false,
+      missingPrivileges: {
+        indexPrivileges: [[RISK_ENGINE_PRIVILEGE, ['read']]],
+        clusterPrivileges: { enable: [], run: [] },
+      },
+    };
+    const entityPrivileges = makeEntityEnginePrivileges({
+      [ENTITY_ENGINE_PRIVILEGE]: { read: false, view_index_metadata: false },
+    });
+    const leadPrivileges = makeEntityEnginePrivileges({
+      [leadsIndex]: { read: false, view_index_metadata: true },
+    });
+
+    renderCallout(missingRiskPrivileges, entityPrivileges, leadPrivileges);
+
+    expect(screen.getByText(CALLOUT_TITLE)).toBeInTheDocument();
+    expect(screen.getByText(RISK_ENGINE_PRIVILEGE)).toBeInTheDocument();
+    expect(screen.getByText(ENTITY_ENGINE_PRIVILEGE)).toBeInTheDocument();
+    expect(screen.getByText(leadsIndex)).toBeInTheDocument();
+  });
+
+  it('renders nothing when lead generation privileges are undefined', () => {
+    renderCallout(ALL_PRIVILEGES_GRANTED, makeEntityEnginePrivileges({}), undefined);
 
     expect(screen.queryByText(CALLOUT_TITLE)).not.toBeInTheDocument();
   });
