@@ -155,7 +155,35 @@ Keep fixes simple — prefer the smallest change that resolves the bug. Stop and
 
 Restart services for a clean environment — stale reproduction state produces false positives:
 
-1. Stop and restart the Scout server (same commands as Phase 1, same `server_args` and `config_sets/bug_fixer/kibana.yml`)
+1. Stop and restart the Scout server. Read `server_args` from `.bug-fixer-session/analysis.json` first:
+
+   **No feature flags** (`server_args` empty):
+   ```bash
+   pkill -f 'node.*scripts/scout' ; pkill -f 'org.elasticsearch'
+   node scripts/scout.js start-server --arch stateful --domain classic &
+   TIMEOUT=60; COUNT=0
+   until curl -s -u elastic:changeme http://localhost:5620/api/status \
+     | python3 -c "import sys,json; s=json.load(sys.stdin); exit(0 if s.get('status',{}).get('overall',{}).get('level')=='available' else 1)" 2>/dev/null; do
+     echo "Waiting for Kibana... (${COUNT}/${TIMEOUT})"; sleep 10
+     COUNT=$((COUNT + 1))
+     if [ "$COUNT" -ge "$TIMEOUT" ]; then echo "ERROR: Kibana did not start after $((TIMEOUT * 10))s"; exit 1; fi
+   done
+   ```
+
+   **With feature flags** — recreate `config_sets/bug_fixer/kibana.yml` from `server_args` in `analysis.json`, then start:
+   ```bash
+   pkill -f 'node.*scripts/scout' ; pkill -f 'org.elasticsearch'
+   mkdir -p config_sets/bug_fixer
+   # Write kibana.yml from server_args in analysis.json (same content as reproduction session)
+   node scripts/scout.js start-server --arch stateful --domain classic --serverConfigSet bug_fixer &
+   TIMEOUT=60; COUNT=0
+   until curl -s -u elastic:changeme http://localhost:5620/api/status \
+     | python3 -c "import sys,json; s=json.load(sys.stdin); exit(0 if s.get('status',{}).get('overall',{}).get('level')=='available' else 1)" 2>/dev/null; do
+     echo "Waiting for Kibana... (${COUNT}/${TIMEOUT})"; sleep 10
+     COUNT=$((COUNT + 1))
+     if [ "$COUNT" -ge "$TIMEOUT" ]; then echo "ERROR: Kibana did not start after $((TIMEOUT * 10))s"; exit 1; fi
+   done
+   ```
 2. Re-create test data from scratch (same steps as Phase 2)
 3. Browser reproduction — bug should not reproduce; `browser_take_screenshot` → `.bug-fixer-session/after.png`
 
@@ -234,14 +262,12 @@ if [ -f .bug-fixer-session/before.png ] && [ -f .bug-fixer-session/after.png ]; 
   REPO=$(gh repo view --json nameWithOwner -q '.nameWithOwner')
   BEFORE_URL=$(curl -s -X POST \
     -H "Authorization: Bearer $(gh auth token)" \
-    -H "Content-Type: image/png" \
-    --data-binary @.bug-fixer-session/before.png \
+    -F "file=@.bug-fixer-session/before.png;type=image/png" \
     "https://uploads.github.com/repos/${REPO}/issues/${PR_NUMBER}/assets?name=before.png" \
     | jq -r '.browser_download_url')
   AFTER_URL=$(curl -s -X POST \
     -H "Authorization: Bearer $(gh auth token)" \
-    -H "Content-Type: image/png" \
-    --data-binary @.bug-fixer-session/after.png \
+    -F "file=@.bug-fixer-session/after.png;type=image/png" \
     "https://uploads.github.com/repos/${REPO}/issues/${PR_NUMBER}/assets?name=after.png" \
     | jq -r '.browser_download_url')
   gh pr comment "$PR_NUMBER" --body "$(cat <<EOF

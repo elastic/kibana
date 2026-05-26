@@ -117,9 +117,15 @@ The server has been booting since Phase 0. Check `server_args` from `analysis.js
 
 **No feature flags** — just wait for ready:
 ```bash
+TIMEOUT=60; COUNT=0
 until curl -s -u elastic:changeme http://localhost:5620/api/status \
   | python3 -c "import sys,json; s=json.load(sys.stdin); exit(0 if s.get('status',{}).get('overall',{}).get('level')=='available' else 1)" 2>/dev/null; do
-  echo "Waiting for Kibana..."; sleep 10
+  echo "Waiting for Kibana... (${COUNT}/${TIMEOUT})"; sleep 10
+  COUNT=$((COUNT + 1))
+  if [ "$COUNT" -ge "$TIMEOUT" ]; then
+    echo "ERROR: Kibana did not start after $((TIMEOUT * 10))s. Check logs."
+    exit 1
+  fi
 done
 ```
 
@@ -133,9 +139,15 @@ xpack.securitySolution.enableExperimental:
 feature_flags.overrides.some.flag: true
 EOF
 node scripts/scout.js start-server --arch stateful --domain classic --serverConfigSet bug_fixer &
+TIMEOUT=60; COUNT=0
 until curl -s -u elastic:changeme http://localhost:5620/api/status \
   | python3 -c "import sys,json; s=json.load(sys.stdin); exit(0 if s.get('status',{}).get('overall',{}).get('level')=='available' else 1)" 2>/dev/null; do
-  echo "Waiting for Kibana..."; sleep 10
+  echo "Waiting for Kibana... (${COUNT}/${TIMEOUT})"; sleep 10
+  COUNT=$((COUNT + 1))
+  if [ "$COUNT" -ge "$TIMEOUT" ]; then
+    echo "ERROR: Kibana did not start after $((TIMEOUT * 10))s. Check logs."
+    exit 1
+  fi
 done
 ```
 
@@ -189,6 +201,10 @@ an API shortcut can mask the real defect entirely.
 
 Ask yourself: _"Have I opened a browser and followed the reproduction steps?"_ If no, do
 that now before reading any further.
+
+**Browser MCP check**: Before navigating anywhere, call `browser_snapshot` on `about:blank`. If it errors, stop immediately:
+_"Browser MCP is unavailable — Phase 3 cannot proceed. Install Playwright MCP (see `bug-fixer/SKILL.md` Prerequisites) and restart the session."_
+Do not fall back to API-only reproduction. `status: reproduced` must reflect a real browser session.
 
 **Login**: `http://localhost:5620/login?auth_provider_hint=cloud-basic` with `elastic` / `changeme`
 

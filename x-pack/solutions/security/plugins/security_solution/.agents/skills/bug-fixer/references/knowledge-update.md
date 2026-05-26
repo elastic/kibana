@@ -1,6 +1,6 @@
 # Knowledge Update Protocol
 
-After every session (success or failure), review what you learned and update `.agents/skills/bug-fixer/KNOWLEDGE.md`.
+After every session (success or failure), review what you learned and update `x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-fixer/KNOWLEDGE.md`.
 
 ## What to Capture
 
