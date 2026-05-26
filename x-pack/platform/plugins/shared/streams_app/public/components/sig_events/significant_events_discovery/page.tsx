@@ -6,6 +6,7 @@
  */
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingElastic, useEuiTheme } from '@elastic/eui';
+import { AiButton } from '@kbn/shared-ux-ai-components';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo } from 'react';
@@ -54,6 +55,9 @@ export function SignificantEventsDiscoveryPage() {
       application: { getUrlForApp },
       notifications: { toasts },
     },
+    dependencies: {
+      start: { agentBuilder },
+    },
   } = useKibana();
 
   const {
@@ -71,6 +75,14 @@ export function SignificantEventsDiscoveryPage() {
   );
 
   const { isMemoryEnabled, isLoading: isSettingsLoading } = useDiscoverySettings();
+
+  const handleOpenSystemOnboarding = useCallback(() => {
+    agentBuilder?.openChat({
+      newConversation: true,
+      agentId: 'sigevents.memory.system-onboarding',
+      autoSendInitialMessage: true,
+    });
+  }, [agentBuilder]);
 
   useStreamsAppBreadcrumbs(() => {
     return [
@@ -194,6 +206,20 @@ export function SignificantEventsDiscoveryPage() {
                 })}
               </EuiButton>
             </EuiFlexItem>
+            {isMemoryEnabled && agentBuilder && (
+              <EuiFlexItem grow={false}>
+                <AiButton
+                  iconType="sparkles"
+                  onClick={handleOpenSystemOnboarding}
+                  data-test-subj="significantEventsSystemOnboardingButton"
+                >
+                  {i18n.translate(
+                    'xpack.streams.significantEventsDiscovery.systemOnboardingButton',
+                    { defaultMessage: 'Tell us about your system' }
+                  )}
+                </AiButton>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         }
         tabs={tabs}
