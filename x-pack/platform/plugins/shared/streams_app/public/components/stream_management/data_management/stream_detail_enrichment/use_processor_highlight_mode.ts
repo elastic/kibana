@@ -117,7 +117,6 @@ export const useProcessorHighlightMode = ({
   const dissectMode =
     isDissectActive &&
     validDissectSourceField !== undefined &&
-    !isEmpty(dissectPattern) &&
     !(dissectOverwrites && precedingTouchedDissect);
 
   const validDissectField = dissectMode ? validDissectSourceField : undefined;

@@ -664,7 +664,7 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
   if (grokMode) {
     return <GrokExpressionsProvider patterns={grokPatterns}>{content}</GrokExpressionsProvider>;
   }
-  if (dissectMode && dissectPattern) {
+  if (dissectMode) {
     return <DissectColorProvider pattern={dissectPattern}>{content}</DissectColorProvider>;
   }
   return content;
