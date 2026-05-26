@@ -42,11 +42,29 @@ export type RiskScoreHistoryResponse = z.infer<typeof RiskScoreHistoryResponse>;
 
 export const GetRiskScoreHistoryRequestQuery = lazySchema(() =>
   z.object({
+    /**
+     * The type of entity to retrieve history for.
+     */
     entity_type: IdentifierType,
+    /**
+     * The identifier of the entity to retrieve history for.
+     */
     entity_id: z.string(),
+    /**
+     * Start of the time range, in date-math syntax. Defaults to 90 days ago.
+     */
     from: z.string().optional().default('now-90d'),
+    /**
+     * End of the time range, in date-math syntax. Defaults to now.
+     */
     to: z.string().optional().default('now'),
+    /**
+     * Filter entries by the type of score recorded (`base`, `propagated`, or `resolution`).
+     */
     score_type: z.enum(['base', 'propagated', 'resolution']).optional(),
+    /**
+     * Maximum number of history entries to return per request.
+     */
     page_size: z.coerce.number().int().min(1).max(1000).optional().default(100),
   })
 );

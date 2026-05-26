@@ -18,29 +18,38 @@ paths:
         time-series index for a given entity.
       operationId: GetRiskScoreHistory
       parameters:
-        - in: query
+        - description: The type of entity to retrieve history for.
+          in: query
           name: entity_type
           required: true
           schema:
             $ref: '#/components/schemas/IdentifierType'
-        - in: query
+        - description: The identifier of the entity to retrieve history for.
+          in: query
           name: entity_id
           required: true
           schema:
             type: string
-        - in: query
+        - description: >-
+            Start of the time range, in date-math syntax. Defaults to 90 days
+            ago.
+          in: query
           name: from
           required: false
           schema:
             default: now-90d
             type: string
-        - in: query
+        - description: End of the time range, in date-math syntax. Defaults to now.
+          in: query
           name: to
           required: false
           schema:
             default: now
             type: string
-        - in: query
+        - description: >-
+            Filter entries by the type of score recorded (`base`, `propagated`,
+            or `resolution`).
+          in: query
           name: score_type
           required: false
           schema:
@@ -49,7 +58,8 @@ paths:
               - propagated
               - resolution
             type: string
-        - in: query
+        - description: Maximum number of history entries to return per request.
+          in: query
           name: page_size
           required: false
           schema:
@@ -61,6 +71,20 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                riskScoreHistory:
+                  summary: Risk score history for a user
+                  value:
+                    entity_id: alice
+                    entity_type: user
+                    entries:
+                      - '@timestamp': '2026-05-20T12:00:00.000Z'
+                        calculated_level: High
+                        calculated_score: 145.2
+                        calculated_score_norm: 72.4
+                        category_1_count: 18
+                        category_1_score: 102
+                        score_type: base
               schema:
                 $ref: '#/components/schemas/RiskScoreHistoryResponse'
           description: Successful response
