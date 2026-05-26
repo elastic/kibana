@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { apm } from '@elastic/apm-rum';
 import type { APIReturnType } from './create_call_apm_api';
 import { callApmApi } from './create_call_apm_api';
+import { reportFetchError } from './report_fetch_error';
 
 type ErrorsByTraceId = APIReturnType<'GET /internal/apm/unified_traces/{traceId}/errors'>;
 
@@ -40,11 +40,7 @@ export const fetchErrorsByTraceId = async (
       signal,
     });
   } catch (error) {
-    if (error instanceof Error && error.name !== 'AbortError') {
-      apm.captureError(error, {
-        labels: { kibana_meta_operation_id: FETCH_TRACE_ERRORS_OPERATION_ID },
-      });
-    }
+    reportFetchError({ error, operationId: FETCH_TRACE_ERRORS_OPERATION_ID });
     throw error;
   }
 };
