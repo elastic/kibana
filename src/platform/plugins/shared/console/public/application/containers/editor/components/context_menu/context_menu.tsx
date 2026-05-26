@@ -343,6 +343,9 @@ export const ContextMenu = ({
         closePopover={closePopover}
         panelPaddingSize="none"
         anchorPosition="downLeft"
+        aria-label={i18n.translate('console.contextMenu.popoverAriaLabel', {
+          defaultMessage: 'Request options',
+        })}
       >
         <EuiContextMenuPanel items={items} data-test-subj="consoleMenu" />
       </EuiPopover>
