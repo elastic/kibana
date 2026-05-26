@@ -34,6 +34,9 @@ import { CapabilitiesSection } from './capabilities_section';
 import { EditDetailsFlyout } from './edit_details_flyout';
 import { SettingsSection } from './settings_section';
 import { PageWrapper } from '../common/page_wrapper';
+import { AccessFlyout } from '../access/access_flyout';
+import { AccessSummaryCard } from '../access/access_summary_card';
+import { useCanManageAgentAccess } from '../../../hooks/agents/use_can_manage_agent_access';
 import {
   getActivePlugins,
   getActiveSkills,
@@ -59,7 +62,9 @@ export const AgentOverview: React.FC = () => {
   const { plugins: allPlugins, isLoading: pluginsLoading } = usePluginsService();
   const { tools: allTools, isLoading: toolsLoading } = useToolsService();
   const [isEditFlyoutOpen, setIsEditFlyoutOpen] = useState(false);
+  const [isAccessFlyoutOpen, setIsAccessFlyoutOpen] = useState(false);
   const canEditAgent = useCanEditAgent({ agent });
+  const { canManage: canManageAccess } = useCanManageAgentAccess(agent);
 
   const canChangeVisibility = useMemo(() => {
     if (!isExperimentalFeaturesEnabled || !agent) return false;
@@ -131,10 +136,15 @@ export const AgentOverview: React.FC = () => {
           docsUrl={docLinksService.agentBuilderAgents}
           canEditAgent={canEditAgent}
           onEditDetails={() => setIsEditFlyoutOpen(true)}
+          canManageAccess={canManageAccess}
+          onManageAccess={() => setIsAccessFlyoutOpen(true)}
         />
 
         <EuiSpacer size="l" />
         <EuiHorizontalRule margin="none" />
+        <EuiSpacer size="l" />
+
+        <AccessSummaryCard agent={agent} onManage={() => setIsAccessFlyoutOpen(true)} />
         <EuiSpacer size="l" />
 
         <CapabilitiesSection
@@ -183,6 +193,10 @@ export const AgentOverview: React.FC = () => {
             canChangeVisibility={canChangeVisibility}
             showWorkflowSection={showWorkflowSection}
           />
+        )}
+
+        {isAccessFlyoutOpen && agent && (
+          <AccessFlyout agent={agent} onClose={() => setIsAccessFlyoutOpen(false)} />
         )}
       </div>
     </PageWrapper>
