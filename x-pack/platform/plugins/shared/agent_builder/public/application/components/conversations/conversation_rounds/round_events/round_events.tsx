@@ -63,7 +63,7 @@ export const RoundEvents: React.FC<RoundEventsProps> = ({
   const togglePosition: 'above' | 'below' = isExpanded ? 'below' : 'above';
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
+    <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="agentBuilderThinkingPanel">
       {showToggle && togglePosition === 'above' && (
         <EuiFlexItem grow={false}>
           <MasterToggle expanded={isExpanded} onToggle={toggleExpanded} />

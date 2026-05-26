@@ -56,6 +56,7 @@ export const MasterToggle: React.FC<MasterToggleProps> = ({ expanded, onToggle }
           css={linkStyles}
           onClick={onToggle}
           role="button"
+          data-test-subj="agentBuilderThinkingToggle"
           {...getEbtProps({
             element: AGENT_BUILDER_UI_EBT.element.pageContent,
             action: AGENT_BUILDER_UI_EBT.action.conversation.THINKING_TOGGLE,
