@@ -98,6 +98,7 @@ export interface ICommandMetadata {
   requiresTimeseriesSource?: boolean; // Optional property to indicate the command is only available when the source command is TS
   hiddenAfterCommands?: string[]; // Optional list of command names; this command is not suggested when any of them appear anywhere in the pipeline
   subquerySupport?: boolean; // Temporary property to indicate if the command supports subquery suggestions.
+  subquerySource?: boolean; // Optional property to indicate if the command can start a subquery expression.
   subqueryRestrictions?: {
     hideInside: boolean; // Command is hidden inside subqueries
     hideOutside: boolean; // Command is hidden outside subqueries (at root level)

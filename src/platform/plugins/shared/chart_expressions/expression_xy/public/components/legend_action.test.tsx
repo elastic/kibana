@@ -196,7 +196,7 @@ describe('getLegendAction', function () {
           splitAccessorId: {
             format: { id: 'string' },
             formatter: {
-              convert(x: unknown) {
+              convertToText(x: unknown) {
                 return x;
               },
             } as FieldFormat,
@@ -288,7 +288,7 @@ describe('getLegendAction', function () {
             splitAccessorId: {
               format: { id: 'string' },
               formatter: {
-                convert(x: unknown) {
+                convertToText(x: unknown) {
                   return x;
                 },
               } as FieldFormat,
@@ -337,7 +337,7 @@ describe('getLegendAction', function () {
             splitAccessorId: {
               format: { id: 'string' },
               formatter: {
-                convert(x: unknown) {
+                convertToText(x: unknown) {
                   return x;
                 },
               } as FieldFormat,

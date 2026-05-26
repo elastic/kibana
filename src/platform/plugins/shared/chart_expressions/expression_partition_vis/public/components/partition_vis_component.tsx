@@ -652,7 +652,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
                 layout={partitionType}
                 specialFirstInnermostSector={visParams.startFromSecondLargestSlice}
                 valueAccessor={(d: Datum) => getSliceValue(d, metricColumn)}
-                percentFormatter={(d: number) => percentFormatter.convert(d / 100)}
+                percentFormatter={(d: number) => percentFormatter.convertToText(d / 100)}
                 valueGetter={
                   !visParams.labels.show ||
                   visParams.labels.valuesFormat === ValueFormats.VALUE ||
@@ -663,7 +663,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
                 valueFormatter={(d: number) =>
                   !visParams.labels.show || !visParams.labels.values
                     ? ''
-                    : metricFieldFormatter.convert(d)
+                    : metricFieldFormatter.convertToText(d)
                 }
                 layers={layers}
                 topGroove={!visParams.labels.show ? 0 : undefined}
