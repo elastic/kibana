@@ -391,7 +391,9 @@ apiTest.describe(
         expect(entityC).toBeDefined();
         expect(get(entityC, ['entity', 'name'])).toBe('romulo.farias');
         expect(get(entityC, ['entity', 'namespace'])).toBe('okta');
-        expect(get(entityC, ['event', 'module'])).toMatchObject(['entityanalytics_okta', 'okta']);
+        expect((get(entityC, ['event', 'module']) as string[]).sort()).toStrictEqual(
+          ['entityanalytics_okta', 'okta'].sort()
+        );
         expect(get(entityC, ['event', 'kind'])).toBe('asset');
 
         const entityD = byId['user:cecilia@okta'];
@@ -399,10 +401,9 @@ apiTest.describe(
         expect(get(entityD, ['entity', 'name'])).toBe('cecilia');
         expect(get(entityD, ['entity', 'namespace'])).toBe('okta');
         expect(get(entityD, ['event', 'kind'])).toBe('asset');
-        expect(get(entityD, ['data_stream', 'dataset'])).toMatchObject([
-          'entityanalytics_okta.users',
-          'okta.logs',
-        ]);
+        expect((get(entityD, ['data_stream', 'dataset']) as string[]).sort()).toStrictEqual(
+          ['entityanalytics_okta.users', 'okta.logs'].sort()
+        );
 
         const entityE = byId['user:flora@unknown'];
         expect(entityE).toBeDefined();
