@@ -8,7 +8,9 @@
 import React, { useState, Fragment } from 'react';
 import { EuiButton, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
+import { getEbtProps } from '@kbn/ebt-click';
 import { ToolResponseFlyout } from '../flyouts/tool_response_flyout';
 import { ToolResult as ToolResultDispatcher } from './tool_result';
 
@@ -32,7 +34,17 @@ export const ViewResponseButton: React.FC<ViewResponseButtonProps> = ({ results 
 
   return (
     <>
-      <EuiButton iconType="editorCodeBlock" size="s" color="text" onClick={() => setIsOpen(true)}>
+      <EuiButton
+        iconType="editorCodeBlock"
+        size="s"
+        color="text"
+        onClick={() => setIsOpen(true)}
+        {...getEbtProps({
+          element: AGENT_BUILDER_UI_EBT.element.pageContent,
+          action: AGENT_BUILDER_UI_EBT.action.conversation.VIEW_TOOL_RESPONSE,
+          detail: 'conversation',
+        })}
+      >
         {buttonLabel}
       </EuiButton>
       <ToolResponseFlyout isOpen={isOpen} onClose={() => setIsOpen(false)}>

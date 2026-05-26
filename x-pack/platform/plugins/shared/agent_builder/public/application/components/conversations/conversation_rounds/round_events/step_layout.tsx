@@ -9,6 +9,11 @@ import React from 'react';
 import type { ReactNode } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
+
+type ConversationAction =
+  (typeof AGENT_BUILDER_UI_EBT.action.conversation)[keyof typeof AGENT_BUILDER_UI_EBT.action.conversation];
 
 interface StepLayoutProps {
   /** Top-level row content (the headline label) */
@@ -23,6 +28,13 @@ interface StepLayoutProps {
   isExpanded?: boolean;
   /** Sub-field content shown indented when isExpanded is true */
   expansion?: ReactNode;
+  /**
+   * EBT click-telemetry action for the row's expand/collapse click. Required
+   * when `onClick` is provided so every clickable step row reports an event;
+   * caller passes the appropriate step-type action (e.g.
+   * `EXPAND_TOOL_CALL_STEP`).
+   */
+  ebtAction?: ConversationAction;
 }
 
 /**
@@ -39,6 +51,7 @@ export const StepLayout: React.FC<StepLayoutProps> = ({
   onClick,
   isExpanded = false,
   expansion,
+  ebtAction,
 }) => {
   const { euiTheme } = useEuiTheme();
   const isClickable = !!onClick;
@@ -89,6 +102,13 @@ export const StepLayout: React.FC<StepLayoutProps> = ({
               }
             : undefined
         }
+        {...(isClickable && ebtAction
+          ? getEbtProps({
+              element: AGENT_BUILDER_UI_EBT.element.pageContent,
+              action: ebtAction,
+              detail: 'conversation',
+            })
+          : {})}
       >
         {/* grow={false} so the chevron sits next to the label (8px gap via gutterSize="s")
             instead of being pushed to the far right by the label's flex stretch. */}

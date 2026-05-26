@@ -8,6 +8,8 @@
 import React, { useState } from 'react';
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { SubAgentExecutionFlyout } from '../flyouts/sub_agent_execution_flyout';
 
 const buttonLabel = i18n.translate('xpack.agentBuilder.roundEvents.results.viewExecution', {
@@ -30,7 +32,7 @@ interface ViewExecutionButtonProps {
  *
  * Used in two places:
  *   1. `tool_call_step.tsx` — when a `ToolCallStep` is a sub-agent invocation
- *      (`tool_id === internalTools.subAgentTool`), this replaces the generic
+ *      (`tool_id === internalTools.runSubagent`), this replaces the generic
  *      `ViewResponseButton` so the user gets the rich nested-steps + final
  *      response view instead of a JSON dump.
  *   2. `background_agent_step.tsx` — the equivalent affordance on the
@@ -48,7 +50,17 @@ export const ViewExecutionButton: React.FC<ViewExecutionButtonProps> = ({
 
   return (
     <>
-      <EuiButton iconType="popout" size="s" color="text" onClick={() => setIsOpen(true)}>
+      <EuiButton
+        iconType="popout"
+        size="s"
+        color="text"
+        onClick={() => setIsOpen(true)}
+        {...getEbtProps({
+          element: AGENT_BUILDER_UI_EBT.element.pageContent,
+          action: AGENT_BUILDER_UI_EBT.action.conversation.VIEW_SUB_AGENT_EXECUTION,
+          detail: 'conversation',
+        })}
+      >
         {buttonLabel}
       </EuiButton>
       {isOpen && (

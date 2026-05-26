@@ -19,6 +19,8 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { ConversationRound } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { RoundJsonFlyout } from './round_json_flyout';
 
 const MIN_WIDTH = 260;
@@ -85,6 +87,11 @@ export const RoundMetadataPopover: React.FC<RoundMetadataPopoverProps> = ({ rawR
       onClick={togglePopover}
       aria-label={labels.triggerAriaLabel}
       data-test-subj="roundMetadataPopoverTrigger"
+      {...getEbtProps({
+        element: AGENT_BUILDER_UI_EBT.element.pageContent,
+        action: AGENT_BUILDER_UI_EBT.action.conversation.OPEN_ROUND_METADATA,
+        detail: 'conversation',
+      })}
     >
       {secondsLabel}
     </EuiButtonEmpty>
@@ -127,6 +134,11 @@ export const RoundMetadataPopover: React.FC<RoundMetadataPopoverProps> = ({ rawR
               color="text"
               onClick={openJsonFlyout}
               data-test-subj="roundMetadataPopoverViewJsonButton"
+              {...getEbtProps({
+                element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                action: AGENT_BUILDER_UI_EBT.action.conversation.VIEW_JSON,
+                detail: 'conversation',
+              })}
             >
               {labels.viewResponseJson}
             </EuiButton>

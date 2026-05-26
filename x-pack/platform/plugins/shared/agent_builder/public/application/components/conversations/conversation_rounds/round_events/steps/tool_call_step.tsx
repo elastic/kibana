@@ -10,7 +10,7 @@ import { EuiBadge, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { internalTools } from '@kbn/agent-builder-common';
+import { internalTools, AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import type { ToolCallStep as ToolCallStepData } from '@kbn/agent-builder-common/chat/conversation';
 import type { ToolResult as ToolResultData } from '@kbn/agent-builder-common/tools/tool_result';
 import { isErrorResult } from '@kbn/agent-builder-common/tools/tool_result';
@@ -60,6 +60,7 @@ export const ToolCallStep: React.FC<ToolCallStepProps> = ({ step }) => {
       onClick={onToggle}
       isExpanded={isExpanded}
       expansion={<ToolCallExpansion step={step} />}
+      ebtAction={AGENT_BUILDER_UI_EBT.action.conversation.EXPAND_TOOL_CALL_STEP}
     />
   );
 };
@@ -125,7 +126,7 @@ const ToolCallExpansion: React.FC<ToolCallExpansionProps> = ({ step }) => {
   // the generic ToolResponseFlyout (JSON dump). The execution_id is available
   // from results once the sub-agent completes, or from progression metadata
   // while it's still running — we look in both.
-  const isSubAgentCall = step.tool_id === internalTools.subAgentTool;
+  const isSubAgentCall = step.tool_id === internalTools.runSubagent;
   const subAgentExecutionId = isSubAgentCall ? getSubAgentExecutionId(step) : undefined;
 
   const hasInlineResults = inlineResults.length > 0;

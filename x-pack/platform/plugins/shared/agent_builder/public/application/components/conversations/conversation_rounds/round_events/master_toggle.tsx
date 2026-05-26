@@ -17,6 +17,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 
 interface MasterToggleProps {
   expanded: boolean;
@@ -50,7 +52,16 @@ export const MasterToggle: React.FC<MasterToggleProps> = ({ expanded, onToggle }
   return (
     <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
-        <EuiLink css={linkStyles} onClick={onToggle} role="button">
+        <EuiLink
+          css={linkStyles}
+          onClick={onToggle}
+          role="button"
+          {...getEbtProps({
+            element: AGENT_BUILDER_UI_EBT.element.pageContent,
+            action: AGENT_BUILDER_UI_EBT.action.conversation.THINKING_TOGGLE,
+            detail: 'conversation',
+          })}
+        >
           <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiText size="xs" css={textDisabledStyles}>

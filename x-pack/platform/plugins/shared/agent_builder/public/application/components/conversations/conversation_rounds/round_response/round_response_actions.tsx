@@ -149,6 +149,11 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
             aria-label={addToDatasetAction.label}
             onClick={addToDatasetAction.onClick}
             data-test-subj="roundAddToDatasetButton"
+            {...getEbtProps({
+              element: AGENT_BUILDER_UI_EBT.element.pageContent,
+              action: AGENT_BUILDER_UI_EBT.action.conversation.ROUND_ADD_TO_DATASET,
+              detail: 'conversation',
+            })}
           />
         </EuiFlexItem>
       )}

@@ -10,7 +10,7 @@ import { EuiBadge, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { BackgroundAgentCompleteStep as BackgroundAgentCompleteStepData } from '@kbn/agent-builder-common';
-import { ExecutionStatus } from '@kbn/agent-builder-common';
+import { ExecutionStatus, AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { StepLayout } from '../step_layout';
@@ -62,6 +62,7 @@ export const BackgroundAgentStep: React.FC<BackgroundAgentStepProps> = ({ step }
       onClick={onToggle}
       isExpanded={isExpanded}
       expansion={<BackgroundAgentExpansion step={step} />}
+      ebtAction={AGENT_BUILDER_UI_EBT.action.conversation.EXPAND_BACKGROUND_AGENT_STEP}
     />
   );
 };
