@@ -18,27 +18,26 @@ export const DATA_VIEW_DETAIL_URL_PATTERN = /\/management\/kibana\/dataViews\/.+
  * then interact with it through this page object.
  */
 export class DataViewEditorPage {
-  readonly flyout;
+  private readonly flyout;
+  private readonly form;
   readonly titleInput;
   readonly timestampField;
   readonly saveButton;
-  readonly form;
   readonly detailPageTitle;
   readonly detailUrlPattern = DATA_VIEW_DETAIL_URL_PATTERN;
 
   constructor(private readonly page: ScoutPage) {
     this.flyout = page.testSubj.locator('indexPatternEditorFlyout');
+    this.form = page.testSubj.locator('indexPatternEditorForm');
     this.titleInput = page.testSubj.locator('createIndexPatternTitleInput');
     this.timestampField = page.testSubj.locator('timestampField');
     this.saveButton = page.testSubj.locator('saveIndexPatternButton');
-    this.form = page.testSubj.locator('indexPatternEditorForm');
     this.detailPageTitle = page.testSubj.locator('indexPatternTitle');
   }
 
   // Fills the title field and waits for async validation to settle.
   async setTitle(title: string): Promise<void> {
     await this.titleInput.fill(title);
-    await this.form.waitFor({ state: 'visible' });
     await this.form
       .and(this.page.locator('[data-validation-error="0"]'))
       .waitFor({ state: 'visible' });
