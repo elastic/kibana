@@ -135,6 +135,8 @@ export const getActionStatus = (status: ResponseActionStatus): string => {
     return UX_MESSAGES.badge.successful;
   } else if (status === 'pending') {
     return UX_MESSAGES.badge.pending;
+  } else if (status === 'canceled') {
+    return UX_MESSAGES.badge.canceled;
   }
   return '';
 };
