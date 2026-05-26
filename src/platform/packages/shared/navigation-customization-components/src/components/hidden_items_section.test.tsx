@@ -18,8 +18,8 @@ describe('HiddenItemsSection', () => {
   const toggleItemVisibility = jest.fn();
 
   const hiddenItems: NavigationItemInfo[] = [
-    { id: 'item1', title: 'Item 1', hidden: true, locked: false },
-    { id: 'item2', title: 'Item 2', hidden: true, locked: false },
+    { id: 'item1', title: 'Item 1', hidden: true },
+    { id: 'item2', title: 'Item 2', hidden: true },
   ];
 
   afterEach(() => {

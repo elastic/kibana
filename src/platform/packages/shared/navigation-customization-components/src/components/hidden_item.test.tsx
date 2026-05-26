@@ -19,7 +19,6 @@ describe('HiddenItem', () => {
     id: 'dashboards',
     title: 'Dashboards',
     hidden: true,
-    locked: false,
     icon: 'dashboard',
   };
 

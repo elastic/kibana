@@ -38,7 +38,7 @@ export const getActiveItems = (
   }
 
   // Second, search the secondary menu items using their IDs (prioritize children over parents)
-  for (const primary of [...items.primaryItems, ...items.overflowItems]) {
+  for (const primary of [...items.primaryItems, ...(items.overflowItems ?? [])]) {
     if (!primary.sections) continue;
 
     for (const section of primary.sections) {
@@ -62,7 +62,7 @@ export const getActiveItems = (
   }
 
   // Fourth, search the primary and overflow menu items using their IDs
-  const primaryItem = [...items.primaryItems, ...items.overflowItems].find(
+  const primaryItem = [...items.primaryItems, ...(items.overflowItems ?? [])].find(
     (item) => item.id === activeItemId
   );
   if (primaryItem) {
