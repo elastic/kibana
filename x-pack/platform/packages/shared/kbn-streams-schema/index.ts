@@ -87,6 +87,7 @@ export {
   hasSameEsql,
   replaceFromSources,
   rewriteFromSources,
+  stripMetadata,
 } from './src/helpers/esql_helpers';
 
 export * from './src/ingest_pipeline_processors';
