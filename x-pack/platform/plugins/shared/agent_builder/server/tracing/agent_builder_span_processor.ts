@@ -7,10 +7,9 @@
 
 import type { api } from '@elastic/opentelemetry-node/sdk';
 import { resources, tracing } from '@elastic/opentelemetry-node/sdk';
-import { isAgentBuilderSpan } from './agent_builder_context';
+import { DATA_STREAM_NAMESPACE_ATTR, isAgentBuilderSpan } from './agent_builder_context';
 
 const SHOULD_TRACK_ATTR = '_agent_builder_should_track';
-const DATA_STREAM_NAMESPACE_ATTR = 'data_stream.namespace';
 
 interface AgentBuilderSpanProcessorOpts {
   exporter: tracing.SpanExporter;

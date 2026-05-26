@@ -15,6 +15,7 @@ import { AgentBuilderSpanProcessor } from './agent_builder_span_processor';
 import {
   AGENT_BUILDER_OWNER_BAGGAGE_KEY,
   AGENT_BUILDER_OWNER_BAGGAGE_VALUE,
+  DATA_STREAM_NAMESPACE_ATTR,
 } from './agent_builder_context';
 
 const SHOULD_TRACK_ATTR = '_agent_builder_should_track';
@@ -230,12 +231,12 @@ describe('AgentBuilderSpanProcessor', () => {
     expect(exported.resource.attributes).toEqual(
       expect.objectContaining({ 'data_stream.dataset': 'agent_builder' })
     );
-    expect(exported.resource.attributes).not.toHaveProperty('data_stream.namespace');
+    expect(exported.resource.attributes).not.toHaveProperty(DATA_STREAM_NAMESPACE_ATTR);
     expect(exported.spanContext().traceFlags).toBe(TraceFlags.NONE);
     expect(SHOULD_TRACK_ATTR in exported.attributes).toBe(false);
   });
 
-  it('onEnd includes data_stream.namespace in resource when span has the attribute', () => {
+  it(`onEnd includes ${DATA_STREAM_NAMESPACE_ATTR} in resource when span has the attribute`, () => {
     const processor = new AgentBuilderSpanProcessor({
       exporter: createExporter(),
       scheduledDelayMillis: 1,
@@ -243,7 +244,7 @@ describe('AgentBuilderSpanProcessor', () => {
 
     const readable = createMockReadableSpan({
       [SHOULD_TRACK_ATTR]: true,
-      'data_stream.namespace': 'pablo',
+      [DATA_STREAM_NAMESPACE_ATTR]: 'pablo',
       existing: 'keep-me',
     });
 
@@ -257,10 +258,10 @@ describe('AgentBuilderSpanProcessor', () => {
     expect(exported.resource.attributes).toEqual(
       expect.objectContaining({
         'data_stream.dataset': 'agent_builder',
-        'data_stream.namespace': 'pablo',
+        [DATA_STREAM_NAMESPACE_ATTR]: 'pablo',
       })
     );
-    expect('data_stream.namespace' in exported.attributes).toBe(false);
+    expect(DATA_STREAM_NAMESPACE_ATTR in exported.attributes).toBe(false);
   });
 
   it('onEnd preserves span events without modifying their attributes', () => {

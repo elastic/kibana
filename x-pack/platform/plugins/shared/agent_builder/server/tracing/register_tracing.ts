@@ -26,7 +26,7 @@ import type { AgentBuilderConfig } from '../config';
 import { AgentBuilderSpanProcessor } from './agent_builder_span_processor';
 import { GlobalBridgeProcessor } from './global_bridge_processor';
 import { OpikDistributedTracingSpanProcessor } from './opik_distributed_tracing';
-import { SPACE_ID_BAGGAGE_KEY } from './agent_builder_context';
+import { DATA_STREAM_NAMESPACE_ATTR, SPACE_ID_BAGGAGE_KEY } from './agent_builder_context';
 
 const SETTING_CACHE_TTL_MS = 30_000;
 
@@ -113,7 +113,7 @@ export const registerTracingExporter = async ({
   processors.push(
     new EvalSpanProcessor([
       { baggageKey: EVAL_RUN_ID_BAGGAGE_KEY },
-      { baggageKey: SPACE_ID_BAGGAGE_KEY, attributeKey: 'data_stream.namespace' },
+      { baggageKey: SPACE_ID_BAGGAGE_KEY, attributeKey: DATA_STREAM_NAMESPACE_ATTR },
     ])
   );
 
