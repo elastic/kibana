@@ -32,7 +32,7 @@ export interface AppHeaderViewProps {
   sticky?: boolean;
   padding?: AppHeaderPadding;
   docLink?: string;
-  integrationsHandler?: () => void;
+  showAddIntegrations?: boolean;
 }
 
 export const AppHeaderView = React.memo<AppHeaderViewProps>(
@@ -47,7 +47,7 @@ export const AppHeaderView = React.memo<AppHeaderViewProps>(
     sticky,
     padding,
     docLink,
-    integrationsHandler,
+    showAddIntegrations,
   }) => {
     const hasLegacyActionMenu = useHasLegacyActionMenu();
     const shareAction = useShareAction(menu, onShare);
@@ -73,7 +73,7 @@ export const AppHeaderView = React.memo<AppHeaderViewProps>(
             menu={menu}
             hasExplicitShare={!!onShare}
             docLink={docLink}
-            integrationsHandler={integrationsHandler}
+            showAddIntegrations={showAddIntegrations}
           />
         }
         tabs={tabs?.length ? <AppTabs tabs={tabs} /> : undefined}

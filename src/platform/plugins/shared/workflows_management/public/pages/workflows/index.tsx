@@ -106,10 +106,6 @@ export function WorkflowsPage() {
     false
   );
 
-  const navigateToIntegrations = useCallback(() => {
-    application.navigateToApp('integrations', { path: '/browse' });
-  }, [application]);
-
   const appMenu = useMemo<AppMenuConfig>(
     () => ({
       primaryActionItem: canCreateWorkflow
@@ -155,7 +151,7 @@ export function WorkflowsPage() {
         title={i18n.translate('workflows.pageTitle', { defaultMessage: 'Workflows' })}
         menu={appMenu}
         docLink={WORKFLOWS_DOCUMENTATION_URL}
-        integrationsHandler={navigateToIntegrations}
+        showAddIntegrations
         fallback={{
           paddingSize: 'l',
           pageTitle: (

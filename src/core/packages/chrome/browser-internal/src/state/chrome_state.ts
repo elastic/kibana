@@ -85,6 +85,9 @@ export interface ChromeState {
   /** Feedback handler registered by the feedback plugin */
   feedbackHandler: State<(() => void) | undefined>;
 
+  /** Integrations handler registered by the fleet/integrations plugin */
+  integrationsHandler: State<(() => void) | undefined>;
+
   /** Newsfeed handler registered by the newsfeed plugin */
   newsfeedHandler: State<{ open: () => void; hasNew$: Observable<boolean> } | undefined>;
 
@@ -144,6 +147,9 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
   // Feedback
   const feedbackHandler = createState<(() => void) | undefined>(undefined);
 
+  // Integrations
+  const integrationsHandler = createState<(() => void) | undefined>(undefined);
+
   // Newsfeed
   const newsfeedHandler = createState<
     { open: () => void; hasNew$: Observable<boolean> } | undefined
@@ -184,6 +190,7 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
     },
     appDocumentationLink,
     feedbackHandler,
+    integrationsHandler,
     newsfeedHandler,
     inlineAppHeader,
     appHeader,

@@ -22,16 +22,16 @@ export interface AppMenuProps {
   menu?: AppMenuConfig;
   hasExplicitShare?: boolean;
   docLink?: string;
-  integrationsHandler?: () => void;
+  showAddIntegrations?: boolean;
 }
 
 export const AppMenu = React.memo<AppMenuProps>(
-  ({ menu, hasExplicitShare, docLink, integrationsHandler }) => {
+  ({ menu, hasExplicitShare, docLink, showAddIntegrations }) => {
     const { config, staticItems } = useAppHeaderMenu(
       menu,
       !!hasExplicitShare,
       docLink,
-      integrationsHandler
+      showAddIntegrations
     );
     const hasLegacyActionMenu = useHasLegacyActionMenu();
 

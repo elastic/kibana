@@ -57,13 +57,14 @@ interface ResolvedAppMenu {
 
 const useStaticItems = ({
   docLink: explicitDocLink,
-  integrationsHandler,
+  showAddIntegrations,
 }: {
   docLink?: string;
-  integrationsHandler?: () => void;
+  showAddIntegrations?: boolean;
 }) => {
   const chrome = useChromeService();
   const feedbackHandler = useObservable(chrome.getFeedbackHandler$(), undefined);
+  const integrationsHandler = useObservable(chrome.getIntegrationsHandler$(), undefined);
   const documentationLink = useObservable(chrome.getAppDocumentationLink$(), undefined);
   const helpExtension = useObservable(chrome.getHelpExtension$(), undefined);
 
@@ -86,12 +87,19 @@ const useStaticItems = ({
       staticItems.push(createDocumentationMenuItem(docLink));
     }
 
-    if (integrationsHandler) {
+    if (showAddIntegrations && integrationsHandler) {
       staticItems.push(createIntegrationsMenuItem(integrationsHandler));
     }
 
     return staticItems;
-  }, [feedbackHandler, explicitDocLink, documentationLink, helpExtension, integrationsHandler]);
+  }, [
+    feedbackHandler,
+    explicitDocLink,
+    documentationLink,
+    helpExtension,
+    showAddIntegrations,
+    integrationsHandler,
+  ]);
 };
 
 const useResolvedAppMenu = (
@@ -118,13 +126,13 @@ export function useAppHeaderMenu(
   pageAppMenu: AppMenuConfig | undefined,
   hasExplicitShare: boolean,
   docLink?: string,
-  integrationsHandler?: () => void
+  showAddIntegrations?: boolean
 ): {
   config: AppMenuConfig | undefined;
   staticItems: AppMenuStaticItem[];
 } {
   const { menu } = useResolvedAppMenu(pageAppMenu, hasExplicitShare);
-  const staticItems = useStaticItems({ docLink, integrationsHandler });
+  const staticItems = useStaticItems({ docLink, showAddIntegrations });
 
   return {
     config: menu,

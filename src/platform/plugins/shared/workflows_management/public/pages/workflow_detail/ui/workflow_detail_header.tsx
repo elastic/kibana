@@ -126,10 +126,6 @@ export const WorkflowDetailHeader = React.memo(
     const { canCreateWorkflow, canUpdateWorkflow, canExecuteWorkflow, canReadWorkflowExecution } =
       useWorkflowsCapabilities();
 
-    const navigateToIntegrations = useCallback(() => {
-      application.navigateToApp('integrations', { path: '/browse' });
-    }, [application]);
-
     const workflowDetailTabButtonOptions = useMemo(
       () =>
         ButtonGroupOptions.map((option) =>
@@ -396,7 +392,7 @@ export const WorkflowDetailHeader = React.memo(
             badges={badges}
             menu={appMenu}
             docLink={WORKFLOWS_DOCUMENTATION_URL}
-            integrationsHandler={navigateToIntegrations}
+            showAddIntegrations
             fallback={{
               pageTitle: null,
               css: styles.header,

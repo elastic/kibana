@@ -47,7 +47,6 @@
     "@kbn/cell-actions",
     "@kbn/ui-actions-plugin",
     "@kbn/storybook",
-    "@kbn/react-kibana-context-render",
     "@kbn/react-field",
     "@kbn/storage-adapter",
     "@kbn/core-i18n-browser-mocks",

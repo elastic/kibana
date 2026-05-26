@@ -43,7 +43,7 @@ export const AppHeaderWithFallback: FC<AppHeaderWithFallbackProps> = ({
   sticky,
   padding,
   docLink,
-  integrationsHandler,
+  showAddIntegrations,
 }) => {
   const chrome = useChromeService();
 
@@ -83,7 +83,7 @@ export const AppHeaderWithFallback: FC<AppHeaderWithFallbackProps> = ({
       sticky={sticky}
       padding={padding}
       docLink={docLink}
-      integrationsHandler={integrationsHandler}
+      showAddIntegrations={showAddIntegrations}
     />
   );
 };
