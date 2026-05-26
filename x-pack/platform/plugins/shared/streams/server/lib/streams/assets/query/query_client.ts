@@ -214,7 +214,6 @@ function buildKeywordQuery(
 // Caller is responsible for `SET unmapped_fields="LOAD"` if querying legacy
 // `_source`-only fields.
 function appendQueryKeywordEsqlPipeline(
-  query: ComposerQuery,
   searchTerm: string,
   size: number,
   extraWhere?: WhereCondition
@@ -234,16 +233,16 @@ function appendQueryKeywordEsqlPipeline(
 
   const finalWhere = extraWhere ? esql.exp`${extraWhere} AND (${keywordWhere})` : keywordWhere;
 
-  return query.where`${finalWhere}`
-    .pipe`EVAL _kw_title_hit = CASE(TO_LOWER(${titleCol}) LIKE ${lowerWildcard}, 3.0, 0.0)`
-    .pipe`EVAL _kw_desc_hit = CASE(TO_LOWER(${descCol}) LIKE ${lowerWildcard}, 2.0, 0.0)`
-    .pipe`EVAL _kw_kql_hit = CASE(TO_LOWER(${kqlCol}) LIKE ${lowerWildcard}, 1.0, 0.0)`
-    .pipe`EVAL _kw_fn_hit = CASE(TO_LOWER(${featureNameCol}) LIKE ${lowerWildcard}, 1.0, 0.0)`
-    .pipe`EVAL _kw_ff_hit = CASE(TO_LOWER(${featureFilterCol}) LIKE ${lowerWildcard}, 1.0, 0.0)`
-    .pipe`EVAL _kw_score = _kw_title_hit + _kw_desc_hit + _kw_kql_hit + _kw_fn_hit + _kw_ff_hit`
-    .pipe`SORT _kw_score DESC, _id ASC`
-    .keep('_id', '_source')
-    .limit(size);
+  return esql`WHERE ${finalWhere}
+    | EVAL _kw_title_hit = CASE(TO_LOWER(${titleCol}) LIKE ${lowerWildcard}, 3.0, 0.0)
+    | EVAL _kw_desc_hit = CASE(TO_LOWER(${descCol}) LIKE ${lowerWildcard}, 2.0, 0.0)
+    | EVAL _kw_kql_hit = CASE(TO_LOWER(${kqlCol}) LIKE ${lowerWildcard}, 1.0, 0.0)
+    | EVAL _kw_fn_hit = CASE(TO_LOWER(${featureNameCol}) LIKE ${lowerWildcard}, 1.0, 0.0)
+    | EVAL _kw_ff_hit = CASE(TO_LOWER(${featureFilterCol}) LIKE ${lowerWildcard}, 1.0, 0.0)
+    | EVAL _kw_score = _kw_title_hit + _kw_desc_hit + _kw_kql_hit + _kw_fn_hit + _kw_ff_hit
+    | SORT _kw_score DESC, _id ASC
+    | KEEP _id, _source
+    | LIMIT ${esql.num(size)}`;
 }
 
 export function getQueryLinkUuid(name: string, asset: Pick<QueryLink, 'asset.id' | 'asset.type'>) {
@@ -431,7 +430,7 @@ export class QueryClient {
     const name = definition.name;
     const response = await this.dependencies.storageClient.esql({
       metadata: ['_id', '_source'],
-      buildPipeline: (q) => q.limit(SEARCH_SIZE_LIMIT),
+      pipeline: esql`LIMIT ${esql.num(SEARCH_SIZE_LIMIT)}`,
       filter: {
         bool: { filter: [...termQuery(STREAM_NAME, name), ...termQuery(ASSET_TYPE, 'query')] },
       },
@@ -482,7 +481,7 @@ export class QueryClient {
 
     const response = await this.dependencies.storageClient.esql({
       metadata: ['_id', '_source'],
-      buildPipeline: (q) => q.limit(SEARCH_SIZE_LIMIT),
+      pipeline: esql`LIMIT ${esql.num(SEARCH_SIZE_LIMIT)}`,
       filter: { bool: { filter: filterClauses } },
     });
 
@@ -526,7 +525,7 @@ export class QueryClient {
 
     const response = await this.dependencies.storageClient.esql({
       metadata: ['_id', '_source'],
-      buildPipeline: (q) => q.limit(SEARCH_SIZE_LIMIT),
+      pipeline: esql`LIMIT ${esql.num(SEARCH_SIZE_LIMIT)}`,
       filter: { bool: { filter: filterClauses } },
     });
 
@@ -566,7 +565,7 @@ export class QueryClient {
   }): Promise<QueryLink[]> {
     const response = await this.dependencies.storageClient.esql({
       metadata: ['_id', '_source'],
-      buildPipeline: (q) => q.limit(SEARCH_SIZE_LIMIT),
+      pipeline: esql`LIMIT ${esql.num(SEARCH_SIZE_LIMIT)}`,
       filter: { bool: this.promotableUnbackedBoolQuery(filters) },
     });
 
@@ -641,10 +640,11 @@ export class QueryClient {
 
     const response = await this.dependencies.storageClient.esql({
       metadata: ['_id', '_source'],
-      buildPipeline: (q) =>
-        q.where`_id IN (${idLiterals}) AND ${normalizeColumn(STREAM_NAME)} == ${{
-          name,
-        }} AND ${normalizeColumn(ASSET_TYPE)} == ${esql.str('query')}`.limit(uuids.length),
+      pipeline: esql`WHERE _id IN (${idLiterals}) AND ${normalizeColumn(STREAM_NAME)} == ${{
+        name,
+      }} AND ${normalizeColumn(ASSET_TYPE)} == ${esql.str('query')} | LIMIT ${esql.num(
+        uuids.length
+      )}`,
     });
 
     return mapSourceRows<StoredQueryLink, QueryLink>(response, fromStorage);
@@ -729,10 +729,8 @@ export class QueryClient {
     // (mapped `dynamic:false`) be queried from `_source`.
     const response = await this.dependencies.storageClient.esql({
       metadata: ['_id', '_source'],
-      buildPipeline: (q) => {
-        q.addSetCommand('unmapped_fields', 'LOAD');
-        return appendQueryKeywordEsqlPipeline(q, query, size, baseWhere);
-      },
+      pipeline: appendQueryKeywordEsqlPipeline(query, size, baseWhere),
+      setOptions: { unmapped_fields: 'LOAD' },
     });
 
     return mapSourceRows<StoredQueryLink, QueryLink>(response, fromStorage);

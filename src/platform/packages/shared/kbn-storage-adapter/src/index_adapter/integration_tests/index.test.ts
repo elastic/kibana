@@ -8,6 +8,7 @@
  */
 
 import { createTestServers, type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
+import { esql } from '@elastic/esql';
 import type {
   SimpleIStorageClient,
   StorageClientBulkResponse,
@@ -583,7 +584,7 @@ describe('StorageIndexAdapter', () => {
       it('returns both documents via _source', async () => {
         const response = await client.esql({
           metadata: ['_id', '_source'],
-          buildPipeline: (q) => q.pipe`SORT _id ASC`.limit(10),
+          pipeline: esql`SORT _id ASC | LIMIT 10`,
         });
 
         const sourceIdx = response.columns.findIndex((c) => c.name === '_source');
@@ -600,7 +601,7 @@ describe('StorageIndexAdapter', () => {
 
       it('omits METADATA when metadata is not provided', async () => {
         const response = await client.esql({
-          buildPipeline: (q) => q.pipe`STATS count = COUNT(*)`,
+          pipeline: esql`STATS count = COUNT(*)`,
         });
         const countIdx = response.columns.findIndex((c) => c.name === 'count');
         expect(countIdx).toBeGreaterThanOrEqual(0);
@@ -625,7 +626,7 @@ describe('StorageIndexAdapter', () => {
       it('narrows the result set to docs matching the body filter', async () => {
         const response = await client.esql({
           metadata: ['_id'],
-          buildPipeline: (q) => q.pipe`SORT _id ASC`.limit(10),
+          pipeline: esql`SORT _id ASC | LIMIT 10`,
           filter: { bool: { filter: [{ term: { foo: 'bar' } }] } },
         });
 
@@ -645,7 +646,7 @@ describe('StorageIndexAdapter', () => {
 
         const response = await freshClient.esql({
           metadata: ['_id', '_source'],
-          buildPipeline: (q) => q.limit(10),
+          pipeline: esql`LIMIT 10`,
         });
 
         expect(response).toEqual({ columns: [], values: [] });
@@ -683,7 +684,7 @@ describe('StorageIndexAdapter', () => {
       it('applies migrateSource by default when _source is in metadata', async () => {
         const response = await migratingClient.esql({
           metadata: ['_source'],
-          buildPipeline: (q) => q.limit(1),
+          pipeline: esql`LIMIT 1`,
         });
 
         const sourceIdx = response.columns.findIndex((c) => c.name === '_source');
@@ -693,7 +694,7 @@ describe('StorageIndexAdapter', () => {
       it('returns the raw _source when migrateSource: false is passed', async () => {
         const response = await migratingClient.esql({
           metadata: ['_source'],
-          buildPipeline: (q) => q.limit(1),
+          pipeline: esql`LIMIT 1`,
           migrateSource: false,
         });
 

@@ -8,7 +8,7 @@
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { BulkOperationError, type IStorageClient } from '@kbn/storage-adapter';
-import { esql } from '@elastic/esql';
+import type { esql } from '@elastic/esql';
 import type { StreamQuery, Streams } from '@kbn/streams-schema';
 import { QUERY_TYPE_STATS } from '@kbn/streams-schema/src/queries';
 import { DEFAULT_SIG_EVENTS_TUNING_CONFIG } from '../../../../../common/sig_events_tuning_config';
@@ -142,15 +142,8 @@ const toEsqlSourceResponse = (docs: Array<Record<string, unknown>>) => ({
 });
 
 /** Renders the ES|QL string from a mocked `storageClient.esql` call. */
-const renderEsqlCallQuery = (call: {
-  metadata?: string[];
-  buildPipeline: (q: ReturnType<typeof esql.from>) => unknown;
-}): string => {
-  const base =
-    call.metadata && call.metadata.length > 0
-      ? esql.from(['test_index'], call.metadata)
-      : esql.from(['test_index']);
-  return (call.buildPipeline(base) as ReturnType<typeof esql.from>).print('basic');
+const renderEsqlCallQuery = (call: { pipeline: ReturnType<typeof esql.from> }): string => {
+  return call.pipeline.toRequest().query;
 };
 
 // ==================== Tests ====================

@@ -18,24 +18,17 @@ import type { Insight } from '@kbn/streams-schema';
 import { InsightClient } from './insight_client';
 import { INSIGHT_IMPACT, INSIGHT_IMPACT_LEVEL, INSIGHT_GENERATED_AT } from './fields';
 import type { InsightStorageSettings } from './storage_settings';
-import { esql } from '@elastic/esql';
+import type { esql } from '@elastic/esql';
 import { StatusError } from '../../../streams/errors/status_error';
 
 /** Renders the ES|QL string from a mocked `storageClient.esql` call. */
-const renderEsqlCallQuery = (call: {
-  metadata?: string[];
-  buildPipeline: (q: ReturnType<typeof esql.from>) => unknown;
-}): string => renderEsqlCall(call).query;
+const renderEsqlCallQuery = (call: { pipeline: ReturnType<typeof esql.from> }): string =>
+  renderEsqlCall(call).query;
 
 const renderEsqlCall = (call: {
-  metadata?: string[];
-  buildPipeline: (q: ReturnType<typeof esql.from>) => unknown;
+  pipeline: ReturnType<typeof esql.from>;
 }): ReturnType<ReturnType<typeof esql.from>['toRequest']> => {
-  const base =
-    call.metadata && call.metadata.length > 0
-      ? esql.from(['test_index'], call.metadata)
-      : esql.from(['test_index']);
-  return (call.buildPipeline(base) as ReturnType<typeof esql.from>).toRequest();
+  return call.pipeline.toRequest();
 };
 
 describe('InsightClient', () => {

@@ -155,7 +155,7 @@ export type StorageClientExistsIndex = () => Promise<boolean>;
  * Executes an ES|QL query against the storage adapter's index. The adapter
  * owns the `FROM`/`METADATA` prefix and applies the same read-side guarantees
  * as `search`/`get`; the caller supplies the post-FROM pipeline via
- * `buildPipeline`.
+ * `pipeline`.
  */
 export type StorageClientEsql = (
   request: StorageClientEsqlRequest,
@@ -163,8 +163,20 @@ export type StorageClientEsql = (
 ) => Promise<ESQLSearchResponse>;
 
 export interface StorageClientEsqlRequest {
-  /** Chains the post-FROM pipeline on the adapter-supplied `ComposerQuery`. */
-  buildPipeline: (query: ComposerQuery) => ComposerQuery;
+  /**
+   * The ES|QL processing pipeline (everything after FROM), built with the `esql` tagged template
+   * from `@elastic/esql`. The FROM clause is auto-generated from the adapter's storage index.
+   *
+   * Template holes (`${{ name: value }}`) are promoted to named parameters sent to Elasticsearch
+   * at the protocol level, never interpolated into the query string.
+   *
+   * @example
+   * ```ts
+   * import { esql } from '@elastic/esql';
+   * pipeline: esql`WHERE _id == ${{ id }} | LIMIT 1`
+   * ```
+   */
+  pipeline: ComposerQuery;
   /** METADATA fields for the auto-generated `FROM` clause (e.g. `['_id', '_source']`). */
   metadata?: string[];
   /** DSL query ANDed with the pipeline. */
@@ -172,6 +184,11 @@ export interface StorageClientEsqlRequest {
   drop_null_columns?: boolean;
   /** Apply `maybeMigrateSource` to the `_source` column (default true; no-op without `metadata: ['_source', ...]`). */
   migrateSource?: boolean;
+  /**
+   * SET options prepended before the FROM clause (e.g. `{ unmapped_fields: 'LOAD' }`).
+   * Use when querying indices with `dynamic: false` fields that must be loaded from `_source`.
+   */
+  setOptions?: Record<string, string>;
 }
 
 export interface InternalIStorageClient<TDocumentType extends { _id?: string } = never> {

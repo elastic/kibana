@@ -110,11 +110,7 @@ type WhereCondition = ESQLAstExpression & ComposerQueryTagHole;
 
 // `EVAL CASE` chain mirrors the DSL `wildcard(boost: N)` ranking so result order
 // is identical between the keyword and ES|QL search paths.
-function appendKeywordEsqlPipeline(
-  query: ComposerQuery,
-  searchTerm: string,
-  size: number
-): ComposerQuery {
+function appendKeywordEsqlPipeline(searchTerm: string, size: number): ComposerQuery {
   const lowerWildcard = esql.str(`*${escapeWildcard(searchTerm.toLowerCase())}*`);
   const tagTokens = searchTerm
     .split(/\s+/)
@@ -145,16 +141,16 @@ function appendKeywordEsqlPipeline(
     ? esql.exp`CASE(${tagOrExpr}, 1.0, 0.0)`
     : esql.exp`0.0`;
 
-  return query.where`${whereExpr}`
-    .pipe`EVAL _kw_title_hit = CASE(TO_LOWER(${titleCol}) LIKE ${lowerWildcard}, 3.0, 0.0)`
-    .pipe`EVAL _kw_desc_hit = CASE(TO_LOWER(${descCol}) LIKE ${lowerWildcard}, 2.0, 0.0)`
-    .pipe`EVAL _kw_type_hit = CASE(TO_LOWER(${typeCol}) LIKE ${lowerWildcard}, 1.0, 0.0)`
-    .pipe`EVAL _kw_subtype_hit = CASE(TO_LOWER(${subtypeCol}) LIKE ${lowerWildcard}, 1.0, 0.0)`
-    .pipe`EVAL _kw_tag_hit = ${tagHitCase}`
-    .pipe`EVAL _kw_score = _kw_title_hit + _kw_desc_hit + _kw_type_hit + _kw_subtype_hit + _kw_tag_hit`
-    .pipe`SORT _kw_score DESC, _id ASC`
-    .keep('_id', '_source')
-    .limit(size);
+  return esql`WHERE ${whereExpr}
+    | EVAL _kw_title_hit = CASE(TO_LOWER(${titleCol}) LIKE ${lowerWildcard}, 3.0, 0.0)
+    | EVAL _kw_desc_hit = CASE(TO_LOWER(${descCol}) LIKE ${lowerWildcard}, 2.0, 0.0)
+    | EVAL _kw_type_hit = CASE(TO_LOWER(${typeCol}) LIKE ${lowerWildcard}, 1.0, 0.0)
+    | EVAL _kw_subtype_hit = CASE(TO_LOWER(${subtypeCol}) LIKE ${lowerWildcard}, 1.0, 0.0)
+    | EVAL _kw_tag_hit = ${tagHitCase}
+    | EVAL _kw_score = _kw_title_hit + _kw_desc_hit + _kw_type_hit + _kw_subtype_hit + _kw_tag_hit
+    | SORT _kw_score DESC, _id ASC
+    | KEEP _id, _source
+    | LIMIT ${esql.num(size)}`;
 }
 
 function buildBaseFilters({
@@ -326,7 +322,7 @@ export class FeatureClient {
     const size = options.limit ?? 10_000;
     const response = await this.clients.storageClient.esql({
       metadata: ['_id', '_source'],
-      buildPipeline: (q) => q.pipe`SORT ${normalizeColumn(sortField)} DESC`.limit(size),
+      pipeline: esql`SORT ${normalizeColumn(sortField)} DESC | LIMIT ${esql.num(size)}`,
       filter: { bool: { filter: filterClauses } },
     });
 
@@ -336,8 +332,9 @@ export class FeatureClient {
   async getFeature(stream: string, uuid: string) {
     const response = await this.clients.storageClient.esql({
       metadata: ['_id', '_source'],
-      buildPipeline: (q) =>
-        q.where`_id == ${{ uuid }} AND ${normalizeColumn(STREAM_NAME)} == ${{ stream }}`.limit(1),
+      pipeline: esql`WHERE _id == ${{ uuid }} AND ${normalizeColumn(STREAM_NAME)} == ${{
+        stream,
+      }} | LIMIT 1`,
     });
 
     const sourceIdx = getSourceColumnIndex(response);
@@ -365,7 +362,7 @@ export class FeatureClient {
     const idLiterals = uuids.map((id) => esql.str(id));
     const response = await this.clients.storageClient.esql({
       metadata: ['_id', '_source'],
-      buildPipeline: (q) => q.where`_id IN (${idLiterals})`.limit(uuids.length),
+      pipeline: esql`WHERE _id IN (${idLiterals}) | LIMIT ${esql.num(uuids.length)}`,
     });
 
     const idIdx = getColumnIndex(response, '_id');
@@ -398,10 +395,11 @@ export class FeatureClient {
   async getExcludedFeatures(stream: string): Promise<{ hits: Feature[] }> {
     const response = await this.clients.storageClient.esql({
       metadata: ['_id', '_source'],
-      buildPipeline: (q) =>
-        q.where`${normalizeColumn(STREAM_NAME)} == ${{ stream }} AND ${normalizeColumn(
-          FEATURE_EXCLUDED_AT
-        )} IS NOT NULL`.pipe`SORT ${normalizeColumn(FEATURE_EXCLUDED_AT)} DESC`.limit(10_000),
+      pipeline: esql`WHERE ${normalizeColumn(STREAM_NAME)} == ${{ stream }} AND ${normalizeColumn(
+        FEATURE_EXCLUDED_AT
+      )} IS NOT NULL | SORT ${normalizeColumn(FEATURE_EXCLUDED_AT)} DESC | LIMIT ${esql.num(
+        10_000
+      )}`,
     });
 
     return { hits: mapSourceRows<StoredFeature, Feature>(response, fromStorage) };
@@ -465,7 +463,7 @@ export class FeatureClient {
     const size = limit ?? SEARCH_SIZE_LIMIT;
     const response = await this.clients.storageClient.esql({
       metadata: ['_id', '_source'],
-      buildPipeline: (q) => appendKeywordEsqlPipeline(q, query, size),
+      pipeline: appendKeywordEsqlPipeline(query, size),
       filter: { bool: { filter } },
     });
 
@@ -589,10 +587,9 @@ export class FeatureClient {
             const idLiterals = idsToValidate.map((id) => esql.str(id));
             const response = await this.clients.storageClient.esql({
               metadata: ['_id', '_source'],
-              buildPipeline: (q) =>
-                q.where`_id IN (${idLiterals}) AND ${normalizeColumn(STREAM_NAME)} == ${{
-                  stream,
-                }}`.limit(idsToValidate.length),
+              pipeline: esql`WHERE _id IN (${idLiterals}) AND ${normalizeColumn(STREAM_NAME)} == ${{
+                stream,
+              }} | LIMIT ${esql.num(idsToValidate.length)}`,
             });
             const idIdx = getColumnIndex(response, '_id');
             const sourceIdx = getSourceColumnIndex(response);

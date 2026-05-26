@@ -56,7 +56,7 @@ export class InsightClient {
   async get(id: string): Promise<Insight> {
     const response = await this.clients.storageClient.esql({
       metadata: ['_id', '_source'],
-      buildPipeline: (q) => q.where`_id == ${{ id }}`.limit(1),
+      pipeline: esql`WHERE _id == ${{ id }} | LIMIT 1`,
     });
 
     const sourceIdx = getSourceColumnIndex(response);
@@ -86,10 +86,9 @@ export class InsightClient {
 
     const response = await this.clients.storageClient.esql({
       metadata: ['_id', '_source'],
-      buildPipeline: (q) =>
-        q.pipe`SORT ${normalizeColumn(INSIGHT_IMPACT_LEVEL)} ASC, ${normalizeColumn(
-          INSIGHT_GENERATED_AT
-        )} DESC`.limit(10000),
+      pipeline: esql`SORT ${normalizeColumn(INSIGHT_IMPACT_LEVEL)} ASC, ${normalizeColumn(
+        INSIGHT_GENERATED_AT
+      )} DESC | LIMIT ${esql.num(10_000)}`,
       ...(filterClauses.length > 0 ? { filter: { bool: { filter: filterClauses } } } : {}),
     });
 
@@ -130,7 +129,7 @@ export class InsightClient {
 
       const existingResponse = await this.clients.storageClient.esql({
         metadata: ['_id', '_source'],
-        buildPipeline: (q) => q.where`_id IN (${idLiterals})`.limit(deleteIds.length),
+        pipeline: esql`WHERE _id IN (${idLiterals}) | LIMIT ${esql.num(deleteIds.length)}`,
       });
 
       const idIdx = getColumnIndex(existingResponse, '_id');

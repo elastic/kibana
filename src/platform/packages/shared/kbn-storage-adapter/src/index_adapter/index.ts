@@ -24,8 +24,7 @@ import { last, mapValues, padStart } from 'lodash';
 import type { DiagnosticResult } from '@elastic/elasticsearch';
 import { errors } from '@elastic/elasticsearch';
 import type { TransportRequestOptions } from '@elastic/transport';
-import { Parser, esql } from '@elastic/esql';
-import type { ESQLCommand, ESQLSource } from '@elastic/esql/types';
+import { esql } from '@elastic/esql';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type {
   IndexStorageSettings,
@@ -102,34 +101,6 @@ export function isEsqlUnknownIndexError(error: unknown): boolean {
     typeof body?.error?.reason === 'string' &&
     body.error.reason.includes('Unknown index')
   );
-}
-
-// Runtime guard — `buildPipeline` returns a `ComposerQuery` typed but not
-// pinned to our index; callers could call `esql.from(otherIndex)` instead.
-function assertRenderedEsqlTargetsStorageIndex(query: string, expectedIndex: string): void {
-  const { root, errors: parseErrors } = Parser.parse(query);
-  if (parseErrors.length > 0) {
-    throw new Error(
-      `StorageClientEsql rendered query could not be parsed: ${parseErrors
-        .map((e) => e.message)
-        .join('; ')}`
-    );
-  }
-  const fromCommand = root.commands.find((c): c is ESQLCommand => c.name === 'from');
-  if (!fromCommand) {
-    throw new Error('StorageClientEsql buildPipeline must produce a FROM command');
-  }
-  const indexSources = fromCommand.args.filter(
-    (arg): arg is ESQLSource => 'type' in arg && arg.type === 'source'
-  );
-  const invalid = indexSources.filter((s) => s.name !== expectedIndex);
-  if (indexSources.length === 0 || invalid.length > 0) {
-    throw new Error(
-      `StorageClientEsql buildPipeline must target storage index [${expectedIndex}], got [${
-        indexSources.map((s) => s.name).join(', ') || 'none'
-      }]. The callback must derive from the adapter-supplied ComposerQuery — do not call esql.from() inside it.`
-    );
-  }
 }
 
 function isServerlessSettingsError(error: unknown): boolean {
@@ -768,22 +739,33 @@ export class StorageIndexAdapter<
    */
 
   private esql: StorageClientEsql = (
-    { buildPipeline, metadata, filter, drop_null_columns = true, migrateSource = true },
+    { pipeline, metadata, filter, drop_null_columns = true, migrateSource = true, setOptions },
     transportOptions
   ) =>
     this.ensureMappingsBeforeReading(async () => {
       const emptyResponse: ESQLSearchResponse = { columns: [], values: [] };
-      const baseQuery =
+
+      // Build the adapter-owned FROM clause; callers supply only the pipeline.
+      const fromQuery =
         metadata && metadata.length > 0
           ? esql.from([this.getSearchIndexPattern()], metadata)
           : esql.from([this.getSearchIndexPattern()]);
-      // Drop Composer's loose `filter` (caller supplies a typed one below).
-      const { filter: _composerFilter, ...request } = buildPipeline(baseQuery).toRequest();
-      assertRenderedEsqlTargetsStorageIndex(request.query, this.getSearchIndexPattern());
+
+      // Prepend any SET options (e.g. unmapped_fields="LOAD") before the FROM clause.
+      if (setOptions) {
+        for (const [key, value] of Object.entries(setOptions)) {
+          fromQuery.addSetCommand(key, value);
+        }
+      }
+
+      const { query: fromStr } = fromQuery.toRequest();
+      const { query: pipelineStr, params } = pipeline.toRequest();
+      const query = `${fromStr} | ${pipelineStr}`;
 
       try {
         const esqlRequest = {
-          ...request,
+          query,
+          ...(params && params.length > 0 ? { params } : {}),
           ...(filter !== undefined ? { filter } : {}),
           drop_null_columns,
           format: 'json' as const,

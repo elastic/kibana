@@ -387,7 +387,7 @@ describe('StorageIndexAdapter - esql method', () => {
     const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
     const client = adapter.getClient();
 
-    const result = await client.esql({ buildPipeline: (q) => q.limit(1) });
+    const result = await client.esql({ pipeline: esql`LIMIT 1` });
 
     expect(esqlQuery).toHaveBeenCalledWith(
       expect.objectContaining({ query: 'FROM test_index | LIMIT 1', format: 'json' })
@@ -399,10 +399,7 @@ describe('StorageIndexAdapter - esql method', () => {
     const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
     const client = adapter.getClient();
 
-    await client.esql({
-      metadata: ['_id', '_source'],
-      buildPipeline: (q) => q.limit(1),
-    });
+    await client.esql({ metadata: ['_id', '_source'], pipeline: esql`LIMIT 1` });
 
     expect(esqlQuery).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -411,14 +408,12 @@ describe('StorageIndexAdapter - esql method', () => {
     );
   });
 
-  it('forwards param-hole values from the rendered ComposerQuery to esClient.esql.query', async () => {
+  it('forwards param-hole values from the pipeline ComposerQuery to esClient.esql.query', async () => {
     const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
     const client = adapter.getClient();
 
     const searchTerm = '*foo*';
-    await client.esql({
-      buildPipeline: (q) => q.where`foo LIKE ${{ searchTerm }}`.limit(5),
-    });
+    await client.esql({ pipeline: esql`WHERE foo LIKE ${{ searchTerm }} | LIMIT 5` });
 
     expect(esqlQuery).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -441,7 +436,7 @@ describe('StorageIndexAdapter - esql method', () => {
     const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
     const client = adapter.getClient();
 
-    const result = await client.esql({ buildPipeline: (q) => q.limit(1) });
+    const result = await client.esql({ pipeline: esql`LIMIT 1` });
 
     expect(result).toEqual({ columns: [], values: [] });
   });
@@ -461,22 +456,21 @@ describe('StorageIndexAdapter - esql method', () => {
     const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
     const client = adapter.getClient();
 
-    const result = await client.esql({ buildPipeline: (q) => q.limit(1) });
+    const result = await client.esql({ pipeline: esql`LIMIT 1` });
     expect(result).toEqual({ columns: [], values: [] });
   });
 
-  it('rejects a buildPipeline that returns a query targeting a different index', async () => {
+  it('prepends SET options before the FROM clause when setOptions is provided', async () => {
     const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
     const client = adapter.getClient();
 
-    // Caller ignores the adapter-supplied ComposerQuery and returns a fresh
-    // one targeting another index — this must be caught before ES execution.
-    await expect(
-      client.esql({
-        buildPipeline: () => esql.from(['other_index'], ['_source']).limit(1),
+    await client.esql({ pipeline: esql`LIMIT 1`, setOptions: { unmapped_fields: 'LOAD' } });
+
+    expect(esqlQuery).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: expect.stringMatching(/^SET unmapped_fields = "LOAD".*FROM test_index.*LIMIT 1$/s),
       })
-    ).rejects.toThrow(/must target storage index \[test_index\], got \[other_index\]/);
-    expect(esqlQuery).not.toHaveBeenCalled();
+    );
   });
 
   it('rethrows non-404 errors (verification_exception, etc.)', async () => {
@@ -494,7 +488,7 @@ describe('StorageIndexAdapter - esql method', () => {
     const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
     const client = adapter.getClient();
 
-    await expect(client.esql({ buildPipeline: (q) => q.limit(1) })).rejects.toThrow(
+    await expect(client.esql({ pipeline: esql`LIMIT 1` })).rejects.toThrow(
       'verification_exception'
     );
   });
@@ -516,10 +510,7 @@ describe('StorageIndexAdapter - esql method', () => {
     });
     const client = adapter.getClient();
 
-    const result = await client.esql({
-      metadata: ['_source'],
-      buildPipeline: (q) => q.limit(1),
-    });
+    const result = await client.esql({ metadata: ['_source'], pipeline: esql`LIMIT 1` });
 
     expect(migrateSource).toHaveBeenCalledWith(rawSource);
     expect(result.values[0][0]).toEqual(migratedSource);
@@ -540,7 +531,7 @@ describe('StorageIndexAdapter - esql method', () => {
 
     // metadata omitted — even if a `_source` column shows up in the response,
     // the adapter must not touch it (caller did not opt in).
-    await client.esql({ buildPipeline: (q) => q.limit(1) });
+    await client.esql({ pipeline: esql`LIMIT 1` });
 
     expect(migrateSource).not.toHaveBeenCalled();
   });
@@ -560,7 +551,7 @@ describe('StorageIndexAdapter - esql method', () => {
 
     const result = await client.esql({
       metadata: ['_source'],
-      buildPipeline: (q) => q.limit(1),
+      pipeline: esql`LIMIT 1`,
       migrateSource: false,
     });
 
@@ -579,7 +570,7 @@ describe('StorageIndexAdapter - esql method', () => {
       maxResponseSize: 50 * 1024 * 1024,
       requestTimeout: 30_000,
     };
-    await client.esql({ buildPipeline: (q) => q.limit(5), filter }, transportOptions);
+    await client.esql({ pipeline: esql`LIMIT 5`, filter }, transportOptions);
 
     expect(esqlQuery).toHaveBeenCalledWith(expect.objectContaining({ filter }), transportOptions);
   });
@@ -601,7 +592,7 @@ describe('StorageIndexAdapter - esql method', () => {
     const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
     const client = adapter.getClient();
 
-    const esqlPromise = client.esql({ buildPipeline: (q) => q.limit(1) });
+    const esqlPromise = client.esql({ pipeline: esql`LIMIT 1` });
 
     // Microtask flush; the adapter should still be waiting on the alias lookup,
     // so esql.query must not have been issued yet.

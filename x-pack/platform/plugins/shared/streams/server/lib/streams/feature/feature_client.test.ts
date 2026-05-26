@@ -32,7 +32,7 @@ import {
   FEATURE_EXCLUDED_AT,
   FEATURE_SEARCH_EMBEDDING,
 } from './fields';
-import { esql } from '@elastic/esql';
+import type { esql } from '@elastic/esql';
 import { FeatureClient, buildSearchEmbeddingText } from './feature_client';
 import type { FeatureStorageSettings } from './storage_settings';
 import type { StoredFeature } from './stored_feature';
@@ -53,21 +53,14 @@ const createMockStorageClient = () => ({
 });
 
 /** Renders the ES|QL string from a mocked `storageClient.esql` call. */
-const renderEsqlCallQuery = (call: {
-  metadata?: string[];
-  buildPipeline: (q: ReturnType<typeof esql.from>) => unknown;
-}): string => renderEsqlCall(call).query;
+const renderEsqlCallQuery = (call: { pipeline: ReturnType<typeof esql.from> }): string =>
+  renderEsqlCall(call).query;
 
 /** Renders the full ES|QL request (query + params) from a mocked `storageClient.esql` call. */
 const renderEsqlCall = (call: {
-  metadata?: string[];
-  buildPipeline: (q: ReturnType<typeof esql.from>) => unknown;
+  pipeline: ReturnType<typeof esql.from>;
 }): ReturnType<ReturnType<typeof esql.from>['toRequest']> => {
-  const base =
-    call.metadata && call.metadata.length > 0
-      ? esql.from(['test_index'], call.metadata)
-      : esql.from(['test_index']);
-  return (call.buildPipeline(base) as ReturnType<typeof esql.from>).toRequest();
+  return call.pipeline.toRequest();
 };
 
 const createFeatureClient = ({
@@ -555,7 +548,7 @@ describe('FeatureClient', () => {
 
       expect(storageClient.esql).toHaveBeenCalledTimes(1);
       const args = storageClient.esql.mock.calls[0][0];
-      expect(args.buildPipeline).toBeDefined();
+      expect(args.pipeline).toBeDefined();
       expect(storageClient.search).not.toHaveBeenCalled();
     });
 
@@ -607,7 +600,7 @@ describe('FeatureClient', () => {
       expect(storageClient.esql).toHaveBeenCalledTimes(1);
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('falling back to keyword'));
       const fallbackArgs = storageClient.esql.mock.calls[0][0];
-      expect(fallbackArgs.buildPipeline).toBeDefined();
+      expect(fallbackArgs.pipeline).toBeDefined();
     });
 
     it('passes the limit through to the LIMIT clause', async () => {
