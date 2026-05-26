@@ -26,6 +26,7 @@ import type {
   ValidateWorkflowResponseDto,
   WorkflowAggsDto,
   WorkflowDetailDto,
+  WorkflowExecutionCollapseField,
   WorkflowExecutionDto,
   WorkflowExecutionHistoryModel,
   WorkflowExecutionListDto,
@@ -38,6 +39,7 @@ import type { ManagedWorkflowId } from '@kbn/workflows/managed';
 import type {
   ExecuteManagedWorkflowOptions,
   ManagedWorkflowOperationOptions,
+  ManagedWorkflowServiceInstallOptions,
 } from '@kbn/workflows/server/types';
 import type {
   ChildWorkflowExecutionItem,
@@ -78,7 +80,7 @@ import { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
 import type { WorkflowsServerPluginStartDeps } from '../types';
 
 export interface SearchWorkflowExecutionsParams {
-  workflowId: string;
+  workflowId?: string;
   statuses?: ExecutionStatus[];
   executionTypes?: ExecutionType[];
   executedBy?: string[];
@@ -86,6 +88,7 @@ export interface SearchWorkflowExecutionsParams {
   omitStepRuns?: boolean;
   finishedAfter?: string;
   finishedBefore?: string;
+  collapse?: WorkflowExecutionCollapseField;
   sortField?: WorkflowExecutionSortField;
   sortOrder?: WorkflowExecutionSortOrder;
   page?: number;
@@ -421,7 +424,7 @@ export class WorkflowsService {
 
   public async installManagedWorkflow(
     id: ManagedWorkflowId,
-    options: ManagedWorkflowOperationOptions,
+    options: ManagedWorkflowServiceInstallOptions,
     registeredPluginId: string
   ): Promise<void> {
     await this.ensureInitialized();

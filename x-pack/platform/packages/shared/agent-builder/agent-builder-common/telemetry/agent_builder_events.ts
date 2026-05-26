@@ -80,7 +80,6 @@ export interface ReportUiClickParams {
   ebt_action?: string;
   ebt_detail?: string;
   element_kind: AgentBuilderUiClickElementKind;
-  location_pathname: string;
 }
 
 export interface ReportRoundCompleteParams {
@@ -443,13 +442,6 @@ const UI_CLICK_EVENT: AgentBuilderTelemetryEvent = {
       type: 'keyword',
       _meta: {
         description: 'Kind of activated control (button|link|role_button|input_button|other)',
-        optional: false,
-      },
-    },
-    location_pathname: {
-      type: 'keyword',
-      _meta: {
-        description: 'Agent Builder app pathname when the click occurred',
         optional: false,
       },
     },

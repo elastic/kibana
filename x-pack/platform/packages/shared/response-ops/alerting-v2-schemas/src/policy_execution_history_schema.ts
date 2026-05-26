@@ -13,13 +13,13 @@ export const policyExecutionOutcomeSchema = z.enum(['dispatched', 'throttled']);
 export type PolicyExecutionOutcome = z.infer<typeof policyExecutionOutcomeSchema>;
 
 export const listPolicyExecutionHistoryQuerySchema = z.object({
-  page: z.coerce.number().min(1).optional().describe('Page number (1-indexed).'),
+  page: z.coerce.number().min(1).optional().describe('Page number (1-indexed). Defaults to 1.'),
   perPage: z.coerce
     .number()
     .min(1)
     .max(POLICY_EXECUTION_HISTORY_MAX_PER_PAGE)
     .optional()
-    .describe('Number of events per page.'),
+    .describe('Number of events per page. Defaults to 100.'),
 });
 export type ListPolicyExecutionHistoryParams = z.infer<
   typeof listPolicyExecutionHistoryQuerySchema
