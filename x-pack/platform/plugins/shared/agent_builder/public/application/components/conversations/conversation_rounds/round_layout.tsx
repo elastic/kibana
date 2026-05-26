@@ -18,6 +18,7 @@ import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import { findTodosStep } from '@kbn/agent-builder-common/chat/conversation';
 import { isConfirmationPrompt } from '@kbn/agent-builder-common/agents';
+import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import { RoundInput } from './round_input';
 import { RoundThinking } from './round_thinking/round_thinking';
 import { RoundResponse } from './round_response/round_response';
@@ -26,6 +27,8 @@ import { RoundError } from './round_error/round_error';
 import { ConfirmationPrompt } from './round_prompt';
 import { RoundAttachmentReferences } from './round_attachment_references';
 import { TodosStepDisplay } from './round_thinking/steps/todos_step_display';
+import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
+import { InlineAttachmentWithActions } from './round_response/attachments/inline_attachment_with_actions';
 
 interface RoundLayoutProps {
   isCurrentRound: boolean;
@@ -115,6 +118,45 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
     if (!response?.message) return undefined;
     return computeCumulativeRefs(allRounds, roundIndex);
   }, [allRounds, roundIndex, response?.message]);
+
+  /*
+   * Compute the set of conversation attachments to auto-render as
+   * inline widgets under the agent response. Driven by the
+   * `showInResponse` flag on each attachment type's UI definition.
+   *
+   * Use case: ambient session context attachments (e.g. Nightshift's
+   * Agent Brief) that should stay visible and interactive on every
+   * agent reply, without requiring the LLM to emit
+   * `<render_attachment>` tags in its markdown response.
+   *
+   * We only include the highest version of each attachment to avoid
+   * rendering stale snapshots.
+   */
+  const { attachmentsService } = useAgentBuilderServices();
+  const responseAttachments = useMemo(() => {
+    if (!conversationAttachments?.length) return [];
+    return conversationAttachments
+      .filter((att) => !att.hidden)
+      .filter((att) => {
+        const def = attachmentsService.getAttachmentUiDefinition(att.type);
+        return Boolean(def?.showInResponse);
+      })
+      .map((att) => {
+        const latest = getLatestVersion(att);
+        if (!latest) return null;
+        return {
+          attachment: {
+            id: att.id,
+            type: att.type,
+            data: latest.data,
+            hidden: att.hidden,
+            origin: att.origin,
+          },
+          version: latest.version,
+        };
+      })
+      .filter((entry): entry is NonNullable<typeof entry> => entry !== null);
+  }, [conversationAttachments, attachmentsService]);
 
   const confirmationPrompts = useMemo(
     () => (pendingPrompts ?? []).filter(isConfirmationPrompt),
@@ -233,6 +275,36 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
               conversationId={conversationId}
             />
           </EuiFlexItem>
+          {/*
+           * Auto-rendered "session context" attachments — see the
+           * `showInResponse` flag on `AttachmentUIDefinition`. Each
+           * matching attachment renders as a full inline widget
+           * (`InlineAttachmentWithActions`) below the response, so the
+           * user can re-open the canvas or interact with it on every
+           * agent reply without the LLM having to emit a
+           * `<render_attachment>` tag.
+           */}
+          {!isLoadingCurrentRound &&
+            !isErrorCurrentRound &&
+            responseAttachments.length > 0 &&
+            conversationId && (
+              <>
+                <EuiSpacer size="s" />
+                <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
+                  {responseAttachments.map(({ attachment, version }) => (
+                    <EuiFlexItem grow={false} key={`${attachment.id}-v${version}-response`}>
+                      <InlineAttachmentWithActions
+                        attachment={attachment}
+                        attachmentsService={attachmentsService}
+                        isSidebar={false}
+                        conversationId={conversationId}
+                        version={version}
+                      />
+                    </EuiFlexItem>
+                  ))}
+                </EuiFlexGroup>
+              </>
+            )}
           <EuiSpacer />
           <RoundAttachmentReferences
             attachmentRefs={input.attachment_refs}

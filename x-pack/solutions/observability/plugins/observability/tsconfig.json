@@ -141,6 +141,8 @@
     "@kbn/content-management-utils",
     "@kbn/maintenance-windows-plugin",
     "@kbn/agent-builder-browser",
+    "@kbn/agent-builder-server",
+    "@kbn/agent-builder-common",
     "@kbn/synthtrace",
     "@kbn/fleet-plugin",
     "@kbn/ai-assistant-common",

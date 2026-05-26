@@ -8,6 +8,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useKibana } from '../../utils/kibana_react';
+import type { NightshiftStatus } from './nightshift_state';
+import {
+  NIGHTSHIFT_AGENT_BRIEF_TYPE,
+  type NightshiftAgentBriefData,
+} from './agent_brief/nightshift_agent_brief_definition';
 
 /** Kibana app id of the Agent Builder application. */
 const AGENT_BUILDER_APP_ID = 'agent_builder';
@@ -36,6 +41,14 @@ interface StartNightshiftConversationOptions {
    * Defaults to the standard Nightshift "fix my significant events" prompt.
    */
   initialMessage?: string;
+  /**
+   * Nightshift status to capture as an "Agent brief" attachment on the
+   * new conversation. When provided, the new conversation lands with a
+   * pre-staged `nightshift.agentBrief` attachment whose canvas renders
+   * the corresponding Nightshift panel (loading / healthy / critical).
+   * Omit to navigate without attaching a brief.
+   */
+  briefMode?: NightshiftStatus;
 }
 
 /**
@@ -77,9 +90,30 @@ export function useStartNightshiftConversation() {
   }, []);
 
   const start = useCallback(
-    ({ initialMessage = DEFAULT_NIGHTSHIFT_PROMPT }: StartNightshiftConversationOptions = {}) => {
+    ({
+      initialMessage = DEFAULT_NIGHTSHIFT_PROMPT,
+      briefMode,
+    }: StartNightshiftConversationOptions = {}) => {
       if (timeoutRef.current) return; // already in progress
       setIsExiting(true);
+
+      /*
+       * Build the `initialAttachments` payload Agent Builder will
+       * consume in `RoutedConversationsProvider`. The brief is a single
+       * `nightshift.agentBrief` attachment carrying the current
+       * Nightshift mode — the registered UI definition picks the
+       * right Nightshift panel to render inside the canvas flyout.
+       */
+      const initialAttachments = briefMode
+        ? [
+            {
+              id: `nightshift-agent-brief-${briefMode}`,
+              type: NIGHTSHIFT_AGENT_BRIEF_TYPE,
+              data: { mode: briefMode } satisfies NightshiftAgentBriefData,
+            },
+          ]
+        : undefined;
+
       timeoutRef.current = setTimeout(() => {
         application.navigateToApp(AGENT_BUILDER_APP_ID, {
           path: `/agents/${NIGHTSHIFT_AGENT_ID}/conversations/new`,
@@ -89,6 +123,7 @@ export function useStartNightshiftConversation() {
             // Tells AppLayout to render the Agent Builder side panel in
             // its condensed (collapsed) form on first mount.
             sidebarCondensed: true,
+            initialAttachments,
           },
         });
       }, EXIT_FADE_DURATION_MS);

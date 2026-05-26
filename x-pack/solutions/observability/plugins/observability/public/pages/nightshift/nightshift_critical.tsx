@@ -874,7 +874,9 @@ export const NightshiftCritical: React.FC = () => {
                       iconType="productAgent"
                       data-test-subj="nightshiftCriticalRemediateAll"
                       isDisabled={isExiting}
-                      onClick={() => start({ initialMessage: REMEDIATE_PROMPT })}
+                      onClick={() =>
+                        start({ initialMessage: REMEDIATE_PROMPT, briefMode: 'critical' })
+                      }
                     >
                       {i18n.translate(
                         'xpack.observability.nightshift.critical.remediateAll',

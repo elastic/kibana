@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback, useState } from 'react';
+import React, { useMemo, useCallback, useState, useEffect, useRef } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import { useQueryClient } from '@kbn/react-query';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
@@ -54,7 +54,30 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
     [navigateToAgentBuilderUrl]
   );
 
-  const [attachments, setAttachments] = useState<AttachmentInput[] | undefined>(undefined);
+  const [attachments, setAttachments] = useState<AttachmentInput[] | undefined>(
+    () => location.state?.initialAttachments
+  );
+
+  /*
+   * One-shot seed of attachments from `location.state.initialAttachments`.
+   *
+   * The `useState` initializer above primes the very first render with
+   * the deep-linked attachments. This effect handles the case where the
+   * provider mounts before `location.state` is ready (rare with the
+   * React Router types but possible during transitions). It only runs
+   * once and only when there are no attachments yet — subsequent
+   * `upsertAttachments` calls from the user (drag-and-drop, paperclip,
+   * etc.) are preserved.
+   */
+  const seededRef = useRef(Boolean(location.state?.initialAttachments));
+  useEffect(() => {
+    if (seededRef.current) return;
+    const initial = location.state?.initialAttachments;
+    if (initial && initial.length > 0) {
+      setAttachments(initial);
+      seededRef.current = true;
+    }
+  }, [location.state]);
 
   const conversationActions = useConversationActions({
     conversationId,

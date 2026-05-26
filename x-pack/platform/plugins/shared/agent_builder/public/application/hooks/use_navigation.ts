@@ -8,12 +8,21 @@
 import { useCallback, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { combineLatest, map } from 'rxjs';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { AGENTBUILDER_APP_ID } from '../../../common/features';
 import { useKibana } from './use_kibana';
 
 export interface LocationState {
   shouldStickToBottom?: boolean;
   initialMessage?: string;
+  /**
+   * Attachments to pre-stage on the new conversation. The
+   * `RoutedConversationsProvider` reads this on first mount and seeds
+   * the `attachments` context with these inputs. Used by deep-links
+   * from other apps (e.g. Nightshift) that want the user to land in a
+   * conversation with context already attached to the first message.
+   */
+  initialAttachments?: AttachmentInput[];
 }
 
 export const INFERENCE_MANAGEMENT_APP_ID = 'management';

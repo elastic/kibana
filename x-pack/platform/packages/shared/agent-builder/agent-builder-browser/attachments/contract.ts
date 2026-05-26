@@ -168,6 +168,19 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
    * Buttons will appear alongside or below the rendered content.
    */
   getActionButtons?: (params: GetActionButtonsParams<TAttachment>) => ActionButton[];
+  /**
+   * When `true`, the attachment is auto-rendered as an inline widget
+   * underneath every agent response in the conversation, in addition to
+   * any `<render_attachment>` markdown references the agent emits.
+   *
+   * Use this for attachments that represent ambient session context
+   * the agent is working from (e.g. a UI snapshot the user handed off
+   * to the conversation) — the widget gives the user a persistent way
+   * to revisit and interact with that context across rounds.
+   *
+   * Defaults to `false`.
+   */
+  showInResponse?: boolean;
 }
 
 /**

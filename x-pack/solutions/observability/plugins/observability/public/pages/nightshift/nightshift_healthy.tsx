@@ -316,7 +316,7 @@ export const NightshiftHealthy: React.FC = () => {
                   iconType="productAgent"
                   data-test-subj="nightshiftHealthyExplore"
                   isDisabled={isExiting}
-                  onClick={() => start({ initialMessage: EXPLORE_PROMPT })}
+                  onClick={() => start({ initialMessage: EXPLORE_PROMPT, briefMode: 'healthy' })}
                 >
                   {i18n.translate('xpack.observability.nightshift.healthy.explore', {
                     defaultMessage: 'Explore',
@@ -329,7 +329,7 @@ export const NightshiftHealthy: React.FC = () => {
                   size="s"
                   data-test-subj="nightshiftHealthyReview"
                   isDisabled={isExiting}
-                  onClick={() => start({ initialMessage: REVIEW_PROMPT })}
+                  onClick={() => start({ initialMessage: REVIEW_PROMPT, briefMode: 'healthy' })}
                 >
                   {i18n.translate('xpack.observability.nightshift.healthy.reviewResults', {
                     defaultMessage: 'Review results',

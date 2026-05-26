@@ -600,6 +600,35 @@ export class Plugin
       });
     }
 
+    /*
+     * Register the Nightshift "Agent brief" attachment UI definition
+     * against the Agent Builder attachments service. When the user
+     * clicks a Nightshift CTA (Explain this / Explore / Remediate all)
+     * we navigate to Agent Builder with an `initialAttachments` payload
+     * of this type — Agent Builder then pre-stages the brief on the
+     * first conversation round so the user (and the agent) share the
+     * same snapshot of the Nightshift surface.
+     *
+     * Lazy-loaded so the Nightshift page modules + their EUI deps don't
+     * land in the main obs page-load bundle.
+     */
+    if (pluginsStart.agentBuilder) {
+      const { attachments } = pluginsStart.agentBuilder;
+      void import('./pages/nightshift/agent_brief/nightshift_agent_brief_definition').then(
+        ({ createNightshiftAgentBriefDefinition, NIGHTSHIFT_AGENT_BRIEF_TYPE }) => {
+          // `addAttachmentType` throws if a type is already registered;
+          // the public contract doesn't expose a `has` probe so we use
+          // `getAttachmentUiDefinition` as an existence check.
+          if (!attachments.getAttachmentUiDefinition(NIGHTSHIFT_AGENT_BRIEF_TYPE)) {
+            attachments.addAttachmentType(
+              NIGHTSHIFT_AGENT_BRIEF_TYPE,
+              createNightshiftAgentBriefDefinition()
+            );
+          }
+        }
+      );
+    }
+
     return {
       config,
       observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,

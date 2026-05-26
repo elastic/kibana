@@ -28,6 +28,7 @@ import type {
   RuleRegistryPluginStartContract,
 } from '@kbn/rule-registry-plugin/server';
 import type { SharePluginSetup } from '@kbn/share-plugin/server';
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
@@ -52,12 +53,14 @@ import { getCasesFeature } from './features/cases_v1';
 import { getCasesFeatureV2 } from './features/cases_v2';
 import { getCasesFeatureV3 } from './features/cases_v3';
 import { observabilityAlertAttachmentType } from './cases/attachments/alert';
+import { nightshiftAgentBriefAttachmentType } from './agent_brief/nightshift_agent_brief_type';
 import { setEsqlRecommendedQueries } from './lib/esql_extensions/set_esql_recommended_queries';
 
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 
 interface PluginSetup {
   alerting: AlertingServerSetup;
+  agentBuilder?: AgentBuilderPluginSetup;
   cases?: CasesServerSetup;
   features: FeaturesPluginSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
@@ -106,6 +109,13 @@ export class ObservabilityPlugin
       plugins.features.registerKibanaFeature(getCasesFeatureV3(casesCapabilities, casesApiTags));
       plugins.cases.attachmentFramework.registerUnified(observabilityAlertAttachmentType);
     }
+
+    // Register the Nightshift "Agent brief" attachment type with the
+    // Agent Builder runtime so attachments pre-staged by Nightshift CTAs
+    // pass server-side validation when the conversation round is saved.
+    // The client side renders the brief; the server only validates the
+    // payload shape and provides a text representation for the LLM.
+    plugins.agentBuilder?.attachments.registerType(nightshiftAgentBriefAttachmentType);
 
     plugins.features.registerKibanaFeature(getLogsFeature());
 

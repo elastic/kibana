@@ -161,7 +161,6 @@ export function NightshiftPage() {
       width: calc(100% + 32px);
       margin: 0 -16px;
       padding: 8px 16px 16px;
-      
     `,
     [euiTheme]
   );
@@ -204,9 +203,12 @@ export function NightshiftPage() {
 
   const handlePromptSubmit = useCallback(
     (prompt: string) => {
-      start({ initialMessage: prompt });
+      // Pass the current status so the new Agent Builder conversation
+      // lands with the matching Nightshift snapshot pre-attached as the
+      // "Agent brief".
+      start({ initialMessage: prompt, briefMode: status });
     },
-    [start]
+    [start, status]
   );
 
   const StatusPage = STATUS_PAGES[status];

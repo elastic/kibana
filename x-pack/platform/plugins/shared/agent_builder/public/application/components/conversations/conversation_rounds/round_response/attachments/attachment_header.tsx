@@ -82,7 +82,18 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
     z-index: ${euiTheme.levels.content};
   `;
 
-  if (!actionButtons || actionButtons.length === 0) {
+  const hasActionButtons = actionButtons && actionButtons.length > 0;
+
+  /*
+   * Render the header when there is *anything* to put in it — action
+   * buttons, a close button, or a preview badge. Previously this
+   * returned null whenever the action button list was empty, which
+   * meant attachments that opted out of inline actions
+   * (`getActionButtons` returns `[]` in canvas mode) lost their close
+   * button too. The canvas flyout always provides `onClose`, so this
+   * keeps the close affordance reachable from the header.
+   */
+  if (!hasActionButtons && !onClose && previewBadgeState === 'none') {
     return null;
   }
 
@@ -104,7 +115,7 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
             {title}
           </EuiText>
         </EuiFlexItem>
-        {previewBadgeState !== 'previewing' && (
+        {previewBadgeState !== 'previewing' && hasActionButtons && (
           <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
             <AttachmentActions buttons={actionButtons} />
           </EuiFlexItem>

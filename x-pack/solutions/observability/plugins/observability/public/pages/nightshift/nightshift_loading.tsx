@@ -58,7 +58,7 @@ interface WorkflowStep {
 const WORKFLOW_STEPS: WorkflowStep[] = [
   {
     id: 'verdict',
-    label: 'Significant event Verdict',
+    label: 'Significant event Detection',
     status: 'done',
     timestamp: '2 minutes ago',
   },
@@ -70,7 +70,7 @@ const WORKFLOW_STEPS: WorkflowStep[] = [
   },
   {
     id: 'detection',
-    label: 'Significant event Detection',
+    label: 'Significant event Verdict',
     status: 'running',
     timestamp: '2 minutes ago',
   },
@@ -469,7 +469,7 @@ export const NightshiftLoading: React.FC = () => {
                   iconType="productAgent"
                   data-test-subj="nightshiftExplainThis"
                   isDisabled={isExiting}
-                  onClick={() => start({ initialMessage: EXPLAIN_PROMPT })}
+                  onClick={() => start({ initialMessage: EXPLAIN_PROMPT, briefMode: 'loading' })}
                 >
                   {i18n.translate('xpack.observability.nightshift.loading.explainThis', {
                     defaultMessage: 'Explain this',
