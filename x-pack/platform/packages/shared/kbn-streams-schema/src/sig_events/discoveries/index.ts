@@ -26,7 +26,7 @@ const discoveryDetectionSchema = z.object({
 
 export const discoverySchema = z.object({
   '@timestamp': z.iso.datetime(),
-  kind: z.string(),
+  kind: z.enum(['finding', 'clearance']),
   discovery_id: z.string(),
   discovery_slug: z.string(),
   discovered_at: z.iso.datetime().optional(),

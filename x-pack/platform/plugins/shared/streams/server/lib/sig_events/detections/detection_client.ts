@@ -55,7 +55,8 @@ const andWhere = (
 };
 
 const GROUP_BY_FIELD = 'detection_id';
-const KIND_HANDLED = 'handled';
+const KIND_HANDLED = 'handled' satisfies Detection['kind'];
+const KIND_QUIET = 'quiet' satisfies Detection['kind'];
 const PROCESSED_IDS_CHUNK_SIZE = 250;
 
 export class DetectionClient {
@@ -93,7 +94,8 @@ export class DetectionClient {
     return where;
   }
 
-  // Returns detection_ids that have a kind:handled doc — used to derive processed flag.
+  // Returns detection_ids where the latest kind:handled timestamp is on or after the latest
+  // kind:detection OR kind:quiet timestamp, or where only handled docs exist.
   // Chunked to avoid oversized ES|QL IN clauses when many detections are on screen.
   private async getProcessedIds(detectionIds: string[]): Promise<Set<string>> {
     if (!detectionIds.length) return new Set();
@@ -102,11 +104,17 @@ export class DetectionClient {
     for (let i = 0; i < detectionIds.length; i += PROCESSED_IDS_CHUNK_SIZE) {
       const batch = detectionIds.slice(i, i + PROCESSED_IDS_CHUNK_SIZE);
       const idLiterals = batch.map((id) => esql.str(id));
-      let query = esql.from([DETECTIONS_DATA_STREAM]).where`${esql.col('kind')} == ${esql.str(
-        KIND_HANDLED
-      )}`;
-      query = query.where`${esql.col('detection_id')} IN (${idLiterals})`;
-      query = query.pipe`STATS BY ${esql.col('detection_id')}`.keep('detection_id');
+      const kindState = [esql.str('detection'), esql.str(KIND_QUIET)];
+      const allKinds = [...kindState, esql.str(KIND_HANDLED)];
+      const query = esql`FROM ${DETECTIONS_DATA_STREAM}
+        | WHERE kibana.space_ids == ${esql.str(this.clients.space)} OR kibana.space_ids IS NULL
+        | WHERE kind IN (${allKinds})
+        | WHERE detection_id IN (${idLiterals})
+        | STATS max_state_ts = MAX(CASE(kind IN (${kindState}), @timestamp, null)),
+                max_handled_ts = MAX(CASE(kind == ${esql.str(KIND_HANDLED)}, @timestamp, null))
+          BY detection_id
+        | WHERE max_handled_ts >= max_state_ts OR max_state_ts IS NULL
+        | KEEP detection_id`;
 
       const response = await queryEsql({ esClient: this.clients.esClient, query: query.print() });
       const rows = esqlToObjects<{ detection_id?: string }>(response);
@@ -171,8 +179,8 @@ export class DetectionClient {
       idField: GROUP_BY_FIELD,
       idValue: detectionId,
     });
-    // History shows all docs including handled — derive processed from presence of handled doc.
-    const hasHandled = result.hits.some((h) => h.kind === KIND_HANDLED);
-    return { hits: result.hits.map((raw) => this.toDetection(raw, hasHandled)) };
+    // History returns all doc kinds including kind:handled.
+    // Mark each hit processed=true if it is itself a handled doc.
+    return { hits: result.hits.map((raw) => this.toDetection(raw, raw.kind === KIND_HANDLED)) };
   }
 }
