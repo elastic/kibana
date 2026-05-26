@@ -83,6 +83,7 @@ describe('AgentExecutionService', () => {
     taskManager,
     inference: {} as any,
     conversationService: {} as any,
+    projectService: {} as any,
     agentService: {} as any,
     runAgent: jest.fn(),
     attachmentsService,

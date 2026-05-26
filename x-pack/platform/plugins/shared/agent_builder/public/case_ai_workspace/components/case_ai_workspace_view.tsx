@@ -176,6 +176,7 @@ export const CaseAiWorkspaceView: React.FC<CaseAiWorkspaceViewProps> = ({
             sessionTag={sessionTag}
             conversationId={selectedConversationId}
             isNewConversation={selectedConversationId === undefined}
+            onProjectConversationsChange={() => void refetch()}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

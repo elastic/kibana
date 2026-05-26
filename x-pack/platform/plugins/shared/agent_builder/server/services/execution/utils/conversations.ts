@@ -13,7 +13,10 @@ import type {
   RoundCompleteEvent,
   ConversationAction,
 } from '@kbn/agent-builder-common';
+import type { Logger } from '@kbn/logging';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ConversationClient } from '../../conversation';
+import type { ProjectService } from '../../project';
 import { createConversationUpdatedEvent, createConversationCreatedEvent } from './events';
 
 /**
@@ -27,6 +30,9 @@ export const createConversation$ = ({
   roundCompletedEvents$,
   caseId,
   projectId,
+  projectService,
+  request,
+  logger,
 }: {
   agentId: string;
   conversationClient: ConversationClient;
@@ -35,6 +41,9 @@ export const createConversation$ = ({
   roundCompletedEvents$: Observable<RoundCompleteEvent>;
   caseId?: string;
   projectId?: string;
+  projectService?: ProjectService;
+  request?: KibanaRequest;
+  logger?: Logger;
 }) => {
   return forkJoin({
     title: title$,
@@ -54,8 +63,18 @@ export const createConversation$ = ({
         ...(projectId ? { project_id: projectId } : {}),
       });
     }),
-    switchMap((createdConversation) => {
-      return of(createConversationCreatedEvent(createdConversation));
+    switchMap(async (createdConversation) => {
+      if (projectId && projectService && request && createdConversation.id) {
+        try {
+          const projectClient = await projectService.getScopedClient({ request });
+          await projectClient.addConversation(projectId, createdConversation.id);
+        } catch (error) {
+          logger?.warn(
+            `Failed to link conversation ${createdConversation.id} to project ${projectId}: ${error}`
+          );
+        }
+      }
+      return createConversationCreatedEvent(createdConversation);
     })
   );
 };

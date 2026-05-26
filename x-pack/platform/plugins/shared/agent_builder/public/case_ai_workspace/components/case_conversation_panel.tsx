@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { EmbeddableConversationsProvider } from '../../application/context/conversation/embeddable_conversations_provider';
+import { CaseProjectConversationRefetch } from './case_project_conversation_refetch';
 import { EmbeddableAccessBoundary } from '../../embeddable/embeddable_access_boundary';
 import { Conversation } from '../../application/components/conversations/conversation';
 import { conversationBackgroundStyles } from '../../application/components/conversations/conversation.styles';
@@ -40,6 +41,7 @@ export interface CaseConversationPanelProps {
   sessionTag: string;
   conversationId?: string;
   isNewConversation: boolean;
+  onProjectConversationsChange?: () => void;
 }
 
 export const CaseConversationPanel: React.FC<CaseConversationPanelProps> = ({
@@ -53,6 +55,7 @@ export const CaseConversationPanel: React.FC<CaseConversationPanelProps> = ({
   sessionTag,
   conversationId,
   isNewConversation,
+  onProjectConversationsChange,
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -114,6 +117,9 @@ export const CaseConversationPanel: React.FC<CaseConversationPanelProps> = ({
         attachments={attachments}
         ariaLabelledBy="case-ai-workspace-conversation"
       >
+        {onProjectConversationsChange ? (
+          <CaseProjectConversationRefetch onRefetch={onProjectConversationsChange} />
+        ) : null}
         <EmbeddableAccessBoundary>
           <div css={bodyStyles}>
             <Conversation />

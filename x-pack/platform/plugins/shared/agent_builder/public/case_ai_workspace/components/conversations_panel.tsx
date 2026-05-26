@@ -79,10 +79,23 @@ export const ConversationsPanel: React.FC<ConversationsPanelProps> = ({
             defaultMessage: 'New conversation',
           })}
         </EuiButtonEmpty>
-        {conversationIds.length <= 1 ? (
+        {conversationIds.length === 0 ? (
           <EuiText size="xs" color="subdued">
             {conversationSummary}
           </EuiText>
+        ) : conversationIds.length === 1 ? (
+          <EuiListGroup flush gutterSize="none" maxWidth={false}>
+            {listItems.map((item) => (
+              <EuiListGroupItem
+                key={item.id}
+                label={item.label}
+                size="s"
+                isActive={selectedConversationId === item.id}
+                onClick={() => onSelectConversation(item.id)}
+                data-test-subj={`caseAiWorkspaceConversation-${item.id}`}
+              />
+            ))}
+          </EuiListGroup>
         ) : (
           <EuiCollapsibleNavGroup
             title={conversationSummary}

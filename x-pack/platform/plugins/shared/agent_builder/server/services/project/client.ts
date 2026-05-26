@@ -30,6 +30,7 @@ export interface ProjectClient {
   list(options?: { type?: ProjectType; caseId?: string }): Promise<Project[]>;
   create(request: ProjectCreateRequest): Promise<Project>;
   update(request: ProjectUpdateRequest): Promise<Project>;
+  addConversation(projectId: string, conversationId: string): Promise<Project>;
   findByCaseRef(caseId: string, owner: string): Promise<Project | undefined>;
 }
 
@@ -182,6 +183,17 @@ export const createProjectClient = ({
       });
 
       return this.get(request.id);
+    },
+
+    async addConversation(projectId, conversationId) {
+      const project = await this.get(projectId);
+      if (project.conversation_ids.includes(conversationId)) {
+        return project;
+      }
+      return this.update({
+        id: projectId,
+        conversation_ids: [...project.conversation_ids, conversationId],
+      });
     },
 
     async findByCaseRef(caseId, owner) {

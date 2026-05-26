@@ -32,6 +32,7 @@ import type {
 } from '@kbn/agent-builder-server/execution';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import type { ConversationService, ConversationClient } from '../conversation';
+import type { ProjectService } from '../project';
 import type { AgentsServiceStart } from '../agents';
 import {
   generateTitle,
@@ -60,6 +61,7 @@ export interface AgentExecutionDeps {
   logger: Logger;
   inference: InferenceServerStart;
   conversationService: ConversationService;
+  projectService: ProjectService;
   agentService: AgentsServiceStart;
   runAgent: RunAgentFn;
   uiSettings: UiSettingsServiceStart;
@@ -124,7 +126,8 @@ const handleConversationExecution = async ({
     projectId,
   } = execution.agentParams;
 
-  const { logger, runAgent, trackingService, analyticsService, meteringService } = deps;
+  const { logger, runAgent, trackingService, analyticsService, meteringService, projectService } =
+    deps;
 
   // Resolve scoped services
   const { conversationClient, modelProvider, selectedConnectorId } = await resolveServices({
@@ -188,6 +191,9 @@ const handleConversationExecution = async ({
         action,
         caseId,
         projectId,
+        projectService,
+        request,
+        logger,
       })
     : EMPTY;
 
@@ -382,6 +388,9 @@ const buildPersistenceEvents = ({
   action,
   caseId,
   projectId,
+  projectService,
+  request,
+  logger,
 }: {
   agentId: string;
   conversation: ConversationWithOperation;
@@ -392,6 +401,9 @@ const buildPersistenceEvents = ({
   action?: ConversationAction;
   caseId?: string;
   projectId?: string;
+  projectService: ProjectService;
+  request: KibanaRequest;
+  logger: Logger;
 }): Observable<ChatEvent> => {
   const roundCompletedEvents$ = agentEvents$.pipe(filter(isRoundCompleteEvent));
 
@@ -404,6 +416,9 @@ const buildPersistenceEvents = ({
       roundCompletedEvents$,
       caseId,
       projectId,
+      projectService,
+      request,
+      logger,
     });
   }
 
