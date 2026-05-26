@@ -23,10 +23,11 @@ import type {
   LogRateAnalysisEmbeddableWrapperProps,
 } from '../shared_components/log_rate_analysis_embeddable_wrapper';
 
-// Pre-9.5 case attachments stored time_range as timeRange.
+// Pre-9.5 case attachments stored time_range as timeRange and window_parameters as windowParameters.
 type RawAttachmentState = RawLogRateAnalysisState & {
   timeRange?: TimeRange;
   windowParameters?: WindowParameters;
+  window_parameters?: WindowParameters;
 };
 
 export const initComponent = memoize(
@@ -41,7 +42,7 @@ export const initComponent = memoize(
       const inputProps = {
         dataViewId: normalized.data_view_id,
         timeRange: rawState.time_range ?? rawState.timeRange,
-        windowParameters: rawState.windowParameters,
+        windowParameters: rawState.window_parameters ?? rawState.windowParameters,
         embeddingOrigin: 'cases',
       } as LogRateAnalysisEmbeddableWrapperProps;
 
