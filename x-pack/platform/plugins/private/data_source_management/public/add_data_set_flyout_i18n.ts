@@ -19,6 +19,12 @@ export const addDataSetFlyoutStrings = {
       defaultMessage: 'Add data set',
     }),
 
+  titleEdit: (dataSource: string, dataSetId: string) =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.titleEdit', {
+      defaultMessage: 'Edit "{dataSetId}" ({dataSource})',
+      values: { dataSource, dataSetId },
+    }),
+
   sourceLabel: () =>
     i18n.translate('dataSourceManagement.addDataSetFlyout.sourceLabel', {
       defaultMessage: 'Data source',
@@ -98,6 +104,16 @@ export const addDataSetFlyoutStrings = {
   saveButton: () =>
     i18n.translate('dataSourceManagement.addDataSetFlyout.saveButton', {
       defaultMessage: 'Add data set',
+    }),
+
+  editSaveButton: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.editSaveButton', {
+      defaultMessage: 'Save changes',
+    }),
+
+  deleteDataSetButton: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.deleteDataSetButton', {
+      defaultMessage: 'Delete data set',
     }),
 
   datasetIdRequired: () =>

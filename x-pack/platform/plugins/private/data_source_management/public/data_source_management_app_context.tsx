@@ -17,6 +17,11 @@ export interface DataSourceManagementAppContextValue {
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   dataSourcesClient: SampleDataSourcesClient;
   dataSetsClient: SampleDataSetsClient;
+  /**
+   * When true, the user has the Kibana `save` UI capability for External data sets
+   * (feature privilege "All"). Read-only / viewer users do not.
+   */
+  modificationsAllowed: boolean;
 }
 
 const DataSourceManagementAppContext = createContext<DataSourceManagementAppContextValue | null>(
@@ -34,6 +39,10 @@ export const DataSourceManagementAppContextProvider: FunctionComponent<{
       setBreadcrumbs,
       dataSourcesClient: new SampleDataSourcesClient(),
       dataSetsClient: new SampleDataSetsClient(),
+      modificationsAllowed: Boolean(
+        (coreStart.application.capabilities as { data_source_management?: { save?: boolean } })
+          .data_source_management?.save
+      ),
     };
   }, [coreStart, setBreadcrumbs]);
 

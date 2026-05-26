@@ -10,19 +10,18 @@ import React from 'react';
 import type { ScopedHistory } from '@kbn/core/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import { Redirect } from 'react-router-dom';
 import { Router, Route, Routes } from '@kbn/shared-ux-router';
 
 import { PLUGIN_NAME } from '../common';
-import { DataSourcePreviewPage } from './data_source_preview_page';
 import { DataSourcesPage } from './data_sources_page';
+import { DataSourceManagementAppContextProvider } from './data_source_management_app_context';
 import {
-  DataSourceManagementAppContextProvider,
-} from './data_source_management_app_context';
-import { DATA_SOURCE_MANAGEMENT_ROUTES } from './data_source_management_routes';
+  DATA_SOURCE_MANAGEMENT_LIST_QUERY_KEYS,
+  DATA_SOURCE_MANAGEMENT_ROUTES,
+} from './data_source_management_routes';
 
-const DataSourcesListRoute: FunctionComponent = () => (
-  <DataSourcesPage pageTitle={PLUGIN_NAME} />
-);
+const DataSourcesListRoute: FunctionComponent = () => <DataSourcesPage pageTitle={PLUGIN_NAME} />;
 
 export interface DataSourceManagementAppProps {
   history: ScopedHistory;
@@ -36,10 +35,7 @@ export const DataSourceManagementApp: FunctionComponent<DataSourceManagementAppP
   setBreadcrumbs,
 }) => {
   return (
-    <DataSourceManagementAppContextProvider
-      coreStart={coreStart}
-      setBreadcrumbs={setBreadcrumbs}
-    >
+    <DataSourceManagementAppContextProvider coreStart={coreStart} setBreadcrumbs={setBreadcrumbs}>
       <Router history={history}>
         <Routes>
           <Route
@@ -50,7 +46,18 @@ export const DataSourceManagementApp: FunctionComponent<DataSourceManagementAppP
           <Route
             exact
             path={DATA_SOURCE_MANAGEMENT_ROUTES.sourceDetail}
-            component={DataSourcePreviewPage}
+            render={({ match }) => {
+              const migratedSearch = new URLSearchParams({
+                [DATA_SOURCE_MANAGEMENT_LIST_QUERY_KEYS.dataSourceId]: decodeURIComponent(
+                  match.params.sourceId
+                ),
+              }).toString();
+              return (
+                <Redirect
+                  to={{ pathname: DATA_SOURCE_MANAGEMENT_ROUTES.list, search: migratedSearch }}
+                />
+              );
+            }}
           />
           <Route exact path={DATA_SOURCE_MANAGEMENT_ROUTES.list} component={DataSourcesListRoute} />
         </Routes>

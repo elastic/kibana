@@ -250,7 +250,7 @@ export const buildOSSFeatures = ({
             all: [],
             read: [],
           },
-          ui: [],
+          ui: ['save'],
         },
         read: {
           app: ['kibana'],

@@ -8,10 +8,13 @@
 export const DATA_SOURCE_MANAGEMENT_ROUTES = {
   list: '/',
   connect: '/connect',
-  /** React Router path pattern (includes `:sourceId`). */
+  /** Legacy detail URL; redirects into the Data sets tab with filtering. */
   sourceDetail: '/source/:sourceId',
 } as const;
 
-export function getDataSourceDetailPath(sourceId: string): string {
-  return `/source/${encodeURIComponent(sourceId)}`;
-}
+/** Deep-link query keys for `/` stack-management routes (see `data_sources_page.tsx`). */
+export const DATA_SOURCE_MANAGEMENT_LIST_QUERY_KEYS = {
+  dataSourceName: 'dataSourceName',
+  /** Migrates bookmarks from `/source/{id}` until the id maps to the display name. */
+  dataSourceId: 'dataSourceId',
+} as const;

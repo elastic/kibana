@@ -93,4 +93,9 @@ export const dataSourcePreviewPageStrings = {
     i18n.translate('dataSourceManagement.previewPage.editSourceFlyoutSave', {
       defaultMessage: 'Save changes',
     }),
+
+  editSourceFlyoutDelete: () =>
+    i18n.translate('dataSourceManagement.previewPage.editSourceFlyoutDelete', {
+      defaultMessage: 'Delete data source',
+    }),
 };

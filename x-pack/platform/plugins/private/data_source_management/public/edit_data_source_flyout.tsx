@@ -17,28 +17,38 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiFormRow,
+  EuiSpacer,
+  EuiText,
   EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
 
 import type { DataSourceListItem } from '../common/sample_data_sources_client';
 import { createDataSourceFlyoutStrings } from './create_data_source_flyout_i18n';
-import { dataSourcePreviewFlyoutStrings, dataSourcePreviewPageStrings } from './data_source_preview_flyout_i18n';
+import {
+  dataSourcePreviewFlyoutStrings,
+  dataSourcePreviewPageStrings,
+} from './data_source_preview_flyout_i18n';
 
 export interface EditDataSourceFlyoutProps {
   source: DataSourceListItem;
   onClose: () => void;
   onSave: (description: string) => Promise<void>;
+  /** Deletes the source after confirmation in the parent. Parent closes the flyout on success. */
+  onDelete: () => Promise<void>;
 }
 
 export const EditDataSourceFlyout: FunctionComponent<EditDataSourceFlyoutProps> = ({
   source,
   onClose,
   onSave,
+  onDelete,
 }) => {
   const titleId = 'editDataSourceFlyoutTitle';
   const [description, setDescription] = useState(source.description);
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | undefined>();
 
   const handleSave = useCallback(async () => {
     setIsSaving(true);
@@ -48,6 +58,18 @@ export const EditDataSourceFlyout: FunctionComponent<EditDataSourceFlyoutProps> 
       setIsSaving(false);
     }
   }, [description, onSave]);
+
+  const handleDelete = useCallback(async () => {
+    setDeleteError(undefined);
+    setIsDeleting(true);
+    try {
+      await onDelete();
+    } catch (e) {
+      setDeleteError(e instanceof Error ? e.message : 'Unknown error');
+    } finally {
+      setIsDeleting(false);
+    }
+  }, [onDelete]);
 
   return (
     <EuiFlyout
@@ -63,6 +85,14 @@ export const EditDataSourceFlyout: FunctionComponent<EditDataSourceFlyoutProps> 
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
+        {deleteError ? (
+          <>
+            <EuiText color="danger" size="s" data-test-subj="editDataSourceFlyoutDeleteError">
+              {deleteError}
+            </EuiText>
+            <EuiSpacer size="m" />
+          </>
+        ) : null}
         <EuiFormRow label={createDataSourceFlyoutStrings.descriptionLabel()} fullWidth>
           <EuiTextArea
             value={description}
@@ -70,6 +100,7 @@ export const EditDataSourceFlyout: FunctionComponent<EditDataSourceFlyoutProps> 
             data-test-subj="editDataSourceFlyoutDescription"
             fullWidth
             rows={5}
+            disabled={isSaving || isDeleting}
             aria-label={createDataSourceFlyoutStrings.descriptionLabel()}
           />
         </EuiFormRow>
@@ -77,20 +108,40 @@ export const EditDataSourceFlyout: FunctionComponent<EditDataSourceFlyoutProps> 
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty flush="left" data-test-subj="editDataSourceFlyoutClose" onClick={onClose}>
+            <EuiButtonEmpty
+              flush="left"
+              data-test-subj="editDataSourceFlyoutClose"
+              onClick={onClose}
+              disabled={isSaving || isDeleting}
+            >
               {dataSourcePreviewFlyoutStrings.closeButton()}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              data-test-subj="editDataSourceFlyoutSave"
-              onClick={() => void handleSave()}
-              isLoading={isSaving}
-              disabled={isSaving}
-            >
-              {dataSourcePreviewPageStrings.editSourceFlyoutSave()}
-            </EuiButton>
+            <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  color="danger"
+                  data-test-subj="editDataSourceFlyoutDelete"
+                  onClick={() => void handleDelete()}
+                  isLoading={isDeleting}
+                  disabled={isSaving || isDeleting}
+                >
+                  {dataSourcePreviewPageStrings.editSourceFlyoutDelete()}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  fill
+                  data-test-subj="editDataSourceFlyoutSave"
+                  onClick={() => void handleSave()}
+                  isLoading={isSaving}
+                  disabled={isSaving || isDeleting}
+                >
+                  {dataSourcePreviewPageStrings.editSourceFlyoutSave()}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>

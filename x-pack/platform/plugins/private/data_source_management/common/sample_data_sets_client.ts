@@ -117,6 +117,40 @@ export class SampleDataSetsClient {
     this.rows = this.rows.filter((row) => row.sourceName !== sourceName);
   }
 
+  /** Prototype: update editable fields only; id and logical name (`name`) stay the same. */
+  public async update(
+    id: string,
+    patch: {
+      resource: string;
+      description: string;
+      partitionDetection: DataSetPartitionDetection;
+    }
+  ): Promise<void> {
+    const idx = this.rows.findIndex((row) => row.id === id);
+    if (idx === -1) {
+      throw new Error(
+        i18n.translate('dataSourceManagement.errors.dataSetNotFound', {
+          defaultMessage: 'Data set not found.',
+        })
+      );
+    }
+    const resource = patch.resource.trim();
+    if (!resource) {
+      throw new Error(
+        i18n.translate('dataSourceManagement.errors.dataSetResourceRequired', {
+          defaultMessage: 'Resource is required.',
+        })
+      );
+    }
+    const row = this.rows[idx];
+    this.rows[idx] = {
+      ...row,
+      resource,
+      description: patch.description.trim(),
+      partitionDetection: patch.partitionDetection,
+    };
+  }
+
   public async add(input: {
     sourceName: string;
     datasetId: string;

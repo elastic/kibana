@@ -28,11 +28,13 @@ import {
 } from '@elastic/eui';
 
 import type { DataSourceListItem } from '../common/sample_data_sources_client';
-import type { DataSetPartitionDetection } from '../common/sample_data_sets_client';
+import type { DataSetListItem, DataSetPartitionDetection } from '../common/sample_data_sets_client';
 import { addDataSetFlyoutStrings } from './add_data_set_flyout_i18n';
 import { dataSourcePreviewFlyoutStrings } from './data_source_preview_flyout_i18n';
 
 export interface AddDataSetFlyoutPayload {
+  /** When set, the parent saves by updating instead of inserting. */
+  editingSetId?: string;
   sourceName: string;
   datasetId: string;
   resource: string;
@@ -48,6 +50,10 @@ export interface AddDataSetFlyoutProps {
   presetSource?: DataSourceListItem;
   /** When `presetSource` is omitted, used to populate the data source picker. */
   sourcesForPicker?: DataSourceListItem[];
+  /** Used with `presetSource` to preload and update an existing sample data set row. */
+  existingEditSet?: DataSetListItem;
+  /** Called when deleting from edit mode (after confirmation in parent). Closing the flyout is the parent's responsibility on success. */
+  onDeleteExistingSet?: () => Promise<void>;
   onClose: () => void;
   /** Resolve `null` on success, or an error message to display in the flyout. */
   onSave: (values: AddDataSetFlyoutPayload) => Promise<string | null>;
@@ -56,22 +62,31 @@ export interface AddDataSetFlyoutProps {
 export const AddDataSetFlyout: FunctionComponent<AddDataSetFlyoutProps> = ({
   presetSource,
   sourcesForPicker = [],
+  existingEditSet,
+  onDeleteExistingSet,
   onClose,
   onSave,
 }) => {
   const titleId = 'addDataSetFlyoutTitle';
-  const isPickSourceMode = !presetSource;
+  const isEditMode = Boolean(existingEditSet);
+  const isPickSourceMode = !presetSource && !isEditMode;
 
   const [pickedSourceName, setPickedSourceName] = useState('');
-  const [datasetId, setDatasetId] = useState('');
-  const [resource, setResource] = useState('');
-  const [description, setDescription] = useState('');
-  const [partitionDetection, setPartitionDetection] = useState<DataSetPartitionDetection>('none');
+  const [datasetId, setDatasetId] = useState(existingEditSet?.name ?? '');
+  const [resource, setResource] = useState(existingEditSet?.resource ?? '');
+  const [description, setDescription] = useState(existingEditSet?.description ?? '');
+  const [partitionDetection, setPartitionDetection] = useState<DataSetPartitionDetection>(
+    existingEditSet?.partitionDetection ?? 'none'
+  );
   const [sourceError, setSourceError] = useState<string | undefined>();
   const [datasetIdError, setDatasetIdError] = useState<string | undefined>();
   const [resourceError, setResourceError] = useState<string | undefined>();
   const [saveError, setSaveError] = useState<string | undefined>();
+  const [deleteError, setDeleteError] = useState<string | undefined>();
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const showDeleteInFooter = isEditMode && typeof onDeleteExistingSet === 'function';
 
   const partitionOptions = useMemo(
     () => [
@@ -116,7 +131,8 @@ export const AddDataSetFlyout: FunctionComponent<AddDataSetFlyoutProps> = ({
     setIsSaving(true);
     try {
       const message = await onSave({
-        sourceName,
+        editingSetId: existingEditSet?.id,
+        sourceName: isEditMode ? existingEditSet!.sourceName : sourceName,
         datasetId: trimmedId,
         resource: trimmedResource,
         description: description.trim(),
@@ -131,12 +147,29 @@ export const AddDataSetFlyout: FunctionComponent<AddDataSetFlyoutProps> = ({
   }, [
     datasetId,
     description,
+    existingEditSet,
+    isEditMode,
     isPickSourceMode,
     onSave,
     partitionDetection,
     resource,
     resolvedSourceName,
   ]);
+
+  const handleDeleteExisting = useCallback(async () => {
+    if (!onDeleteExistingSet) {
+      return;
+    }
+    setDeleteError(undefined);
+    setIsDeleting(true);
+    try {
+      await onDeleteExistingSet();
+    } catch (e) {
+      setDeleteError(e instanceof Error ? e.message : 'Unknown error');
+    } finally {
+      setIsDeleting(false);
+    }
+  }, [onDeleteExistingSet]);
 
   return (
     <EuiFlyout
@@ -149,7 +182,9 @@ export const AddDataSetFlyout: FunctionComponent<AddDataSetFlyoutProps> = ({
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2 id={titleId}>
-            {presetSource
+            {isEditMode && presetSource && existingEditSet
+              ? addDataSetFlyoutStrings.titleEdit(presetSource.name, existingEditSet.name)
+              : presetSource
               ? addDataSetFlyoutStrings.title(presetSource.name)
               : addDataSetFlyoutStrings.titlePickSource()}
           </h2>
@@ -161,6 +196,14 @@ export const AddDataSetFlyout: FunctionComponent<AddDataSetFlyoutProps> = ({
             <>
               <EuiText color="danger" size="s" data-test-subj="addDataSetFlyoutSaveError">
                 {saveError}
+              </EuiText>
+              <EuiSpacer size="m" />
+            </>
+          ) : null}
+          {deleteError ? (
+            <>
+              <EuiText color="danger" size="s" data-test-subj="addDataSetFlyoutDeleteError">
+                {deleteError}
               </EuiText>
               <EuiSpacer size="m" />
             </>
@@ -197,11 +240,12 @@ export const AddDataSetFlyout: FunctionComponent<AddDataSetFlyoutProps> = ({
           >
             <EuiFieldText
               name="datasetId"
+              disabled={isEditMode}
               value={datasetId}
               onChange={(e) => setDatasetId(e.target.value)}
               isInvalid={Boolean(datasetIdError)}
               data-test-subj="addDataSetFlyoutDatasetId"
-              autoFocus={!isPickSourceMode}
+              autoFocus={!isPickSourceMode && !isEditMode}
               fullWidth
               aria-label={addDataSetFlyoutStrings.datasetIdLabel()}
             />
@@ -219,6 +263,7 @@ export const AddDataSetFlyout: FunctionComponent<AddDataSetFlyoutProps> = ({
               onChange={(e) => setResource(e.target.value)}
               isInvalid={Boolean(resourceError)}
               data-test-subj="addDataSetFlyoutResource"
+              autoFocus={isEditMode}
               fullWidth
               rows={4}
               aria-label={addDataSetFlyoutStrings.resourceLabel()}
@@ -265,21 +310,47 @@ export const AddDataSetFlyout: FunctionComponent<AddDataSetFlyoutProps> = ({
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty flush="left" data-test-subj="addDataSetFlyoutClose" onClick={onClose}>
+            <EuiButtonEmpty
+              flush="left"
+              data-test-subj="addDataSetFlyoutClose"
+              onClick={onClose}
+              disabled={isSaving || isDeleting}
+            >
               {dataSourcePreviewFlyoutStrings.closeButton()}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              type="button"
-              data-test-subj="addDataSetFlyoutSave"
-              onClick={() => void handleSave()}
-              isLoading={isSaving}
-              disabled={isSaving || (isPickSourceMode && sourcesForPicker.length === 0)}
-            >
-              {addDataSetFlyoutStrings.saveButton()}
-            </EuiButton>
+            <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+              {showDeleteInFooter ? (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    color="danger"
+                    data-test-subj="addDataSetFlyoutDelete"
+                    onClick={() => void handleDeleteExisting()}
+                    isLoading={isDeleting}
+                    disabled={isSaving || isDeleting}
+                  >
+                    {addDataSetFlyoutStrings.deleteDataSetButton()}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              ) : null}
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  fill
+                  type="button"
+                  data-test-subj="addDataSetFlyoutSave"
+                  onClick={() => void handleSave()}
+                  isLoading={isSaving}
+                  disabled={
+                    isSaving || isDeleting || (isPickSourceMode && sourcesForPicker.length === 0)
+                  }
+                >
+                  {isEditMode
+                    ? addDataSetFlyoutStrings.editSaveButton()
+                    : addDataSetFlyoutStrings.saveButton()}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>

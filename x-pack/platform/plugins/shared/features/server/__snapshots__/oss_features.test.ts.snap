@@ -1392,7 +1392,9 @@ Array [
         "all": Array [],
         "read": Array [],
       },
-      "ui": Array [],
+      "ui": Array [
+        "save",
+      ],
     },
     "privilegeId": "all",
   },
@@ -2592,7 +2594,9 @@ Array [
         "all": Array [],
         "read": Array [],
       },
-      "ui": Array [],
+      "ui": Array [
+        "save",
+      ],
     },
     "privilegeId": "all",
   },

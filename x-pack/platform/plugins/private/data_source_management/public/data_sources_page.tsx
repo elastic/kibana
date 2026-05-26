@@ -5,13 +5,17 @@
  * 2.0.
  */
 
+import { css } from '@emotion/react';
 import type { FunctionComponent } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiButton,
+  EuiButtonGroup,
+  type EuiButtonGroupOptionProps,
   EuiButtonIcon,
   EuiInMemoryTable,
   EuiLink,
@@ -19,6 +23,7 @@ import {
   EuiPageSection,
   EuiSpacer,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 
 import type { DataSourceType, DataSourceWithSecrets } from '../common';
@@ -28,11 +33,12 @@ import type { SampleDataSetsClient } from '../common/sample_data_sets_client';
 import type { SampleDataSourcesClient } from '../common/sample_data_sources_client';
 import type { DataSetListItem } from '../common/sample_data_sets_client';
 import { CreateDataSourceFlyout } from './create_data_source_flyout';
+import { EditDataSourceFlyout } from './edit_data_source_flyout';
 import { AddDataSetFlyout } from './add_data_set_flyout';
 import type { AddDataSetFlyoutPayload } from './add_data_set_flyout';
 import {
+  DATA_SOURCE_MANAGEMENT_LIST_QUERY_KEYS,
   DATA_SOURCE_MANAGEMENT_ROUTES,
-  getDataSourceDetailPath,
 } from './data_source_management_routes';
 import { useDataSourceManagementAppContext } from './data_source_management_app_context';
 import { getDataSourceTypeLabel } from './get_data_source_type_label';
@@ -41,10 +47,41 @@ import { dataSourcePreviewPageStrings } from './data_source_preview_flyout_i18n'
 const TAB_ID_DATA_SETS = 'data_sets_tab';
 const TAB_ID_DATA_SOURCES = 'data_sources_tab';
 
+/** Renders beside global chrome breadcrumbs via `chrome.setBreadcrumbsAppendExtension`. */
+const PrototypeCatalogChromeToggle: FunctionComponent<{
+  mode: 'sample' | 'empty';
+  options: Array<EuiButtonGroupOptionProps>;
+  onChange: (id: string) => void;
+}> = ({ mode, options, onChange }) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <div
+      css={css({
+        flexShrink: 0,
+        marginInlineStart: euiTheme.size.m,
+      })}
+      data-test-subj="dataSourceManagementPrototypeCatalogToggleChrome"
+    >
+      <EuiButtonGroup
+        buttonSize="compressed"
+        color="primary"
+        legend={i18n.translate('dataSourceManagement.prototype.catalogToggleLegend', {
+          defaultMessage: 'Prototype catalog preview',
+        })}
+        options={options}
+        idSelected={mode === 'empty' ? 'prototype_empty' : 'prototype_sample'}
+        onChange={onChange}
+        data-test-subj="dataSourceManagementPrototypeCatalogToggle"
+      />
+    </div>
+  );
+};
+
 type AddDataSetFlyoutOpenState =
   | { mode: 'closed' }
   | { mode: 'preset'; source: DataSourceListItem }
-  | { mode: 'chooseSource' };
+  | { mode: 'chooseSource' }
+  | { mode: 'edit'; record: DataSetListItem };
 
 type DataSetTableRow = DataSetListItem & { type?: DataSourceType };
 
@@ -56,6 +93,7 @@ interface DataSourcesTabPanelProps {
   dataSourcesClient: SampleDataSourcesClient;
   dataSetsClient: SampleDataSetsClient;
   onRefreshSourcesAndSets: () => Promise<void>;
+  modificationsAllowed: boolean;
   onOpenConnectFlyout: () => void;
 }
 
@@ -67,6 +105,7 @@ const DataSourcesTabPanel: FunctionComponent<DataSourcesTabPanelProps> = ({
   dataSourcesClient,
   dataSetsClient,
   onRefreshSourcesAndSets,
+  modificationsAllowed,
   onOpenConnectFlyout,
 }) => (
   <>
@@ -91,7 +130,7 @@ const DataSourcesTabPanel: FunctionComponent<DataSourcesTabPanelProps> = ({
           },
         },
         toolsLeft:
-          selectedSources.length > 0 ? (
+          modificationsAllowed && selectedSources.length > 0 ? (
             <EuiButton
               color="danger"
               data-test-subj="dataSourceManagementDeleteButton"
@@ -112,7 +151,7 @@ const DataSourcesTabPanel: FunctionComponent<DataSourcesTabPanelProps> = ({
               })}
             </EuiButton>
           ) : undefined,
-        toolsRight: (
+        toolsRight: modificationsAllowed ? (
           <EuiButton
             color="primary"
             fill
@@ -123,13 +162,17 @@ const DataSourcesTabPanel: FunctionComponent<DataSourcesTabPanelProps> = ({
               defaultMessage: 'Connect external source',
             })}
           </EuiButton>
-        ),
+        ) : undefined,
       }}
       rowHeader="name"
-      selection={{
-        selected: selectedSources,
-        onSelectionChange: setSelectedSources,
-      }}
+      selection={
+        modificationsAllowed
+          ? {
+              selected: selectedSources,
+              onSelectionChange: setSelectedSources,
+            }
+          : undefined
+      }
       sorting
       pagination={{
         pageSizeOptions: [5, 10, 20],
@@ -151,19 +194,36 @@ const DataSourcesTabPanel: FunctionComponent<DataSourcesTabPanelProps> = ({
 interface DataSetsTabPanelProps {
   dataSetsWithJoinedType: DataSetTableRow[];
   columns: Array<EuiBasicTableColumn<DataSetTableRow>>;
+  selectedDataSets: DataSetTableRow[];
+  setSelectedDataSets: React.Dispatch<React.SetStateAction<DataSetTableRow[]>>;
+  dataSetsSearchQuery: string;
+  onDataSetsSearchQueryChange: (nextQuery: string) => void;
+  modificationsAllowed: boolean;
   hasDataSources: boolean;
+  /** When false, the catalog has no data sets; show the empty prompt with a link to the Data sources tab. */
+  hasAnyDataSetsInCatalog: boolean;
+  onGoToDataSourcesTab: () => void;
   addDataSetButtonLabel: string;
   addDataSetDisabledTooltip: string;
   onOpenAddDataSetFlyout: () => void;
+  onBulkDeleteSelectedDataSets: () => void;
 }
 
 const DataSetsTabPanel: FunctionComponent<DataSetsTabPanelProps> = ({
   dataSetsWithJoinedType,
   columns,
+  selectedDataSets,
+  setSelectedDataSets,
+  dataSetsSearchQuery,
+  onDataSetsSearchQueryChange,
+  modificationsAllowed,
   hasDataSources,
+  hasAnyDataSetsInCatalog,
+  onGoToDataSourcesTab,
   addDataSetButtonLabel,
   addDataSetDisabledTooltip,
   onOpenAddDataSetFlyout,
+  onBulkDeleteSelectedDataSets,
 }) => {
   const addDataSetButton = (
     <EuiButton
@@ -176,6 +236,35 @@ const DataSetsTabPanel: FunctionComponent<DataSetsTabPanelProps> = ({
       {addDataSetButtonLabel}
     </EuiButton>
   );
+
+  const dataSetsTabNoItemsMessage = useMemo(() => {
+    if (hasAnyDataSetsInCatalog) {
+      return i18n.translate('dataSourceManagement.datasetsTab.noFilteredItemsMessage', {
+        defaultMessage: 'No data sets found',
+      });
+    }
+    return (
+      <FormattedMessage
+        id="dataSourceManagement.datasetsTab.emptyCatalogPromptMessage"
+        defaultMessage="You don't have any data sets yet. To add them, you first must {connectDataSourceLink}."
+        values={{
+          connectDataSourceLink: (
+            <EuiLink
+              onClick={() => {
+                onGoToDataSourcesTab();
+              }}
+              data-test-subj="dataSourceManagementEmptyCatalogConnectLink"
+            >
+              <FormattedMessage
+                id="dataSourceManagement.datasetsTab.connectDataSourceLinkLabel"
+                defaultMessage="Connect a data source"
+              />
+            </EuiLink>
+          ),
+        }}
+      />
+    );
+  }, [hasAnyDataSetsInCatalog, onGoToDataSourcesTab]);
 
   return (
     <>
@@ -201,27 +290,55 @@ const DataSetsTabPanel: FunctionComponent<DataSetsTabPanelProps> = ({
               },
             },
           },
-          toolsRight: hasDataSources ? (
-            addDataSetButton
-          ) : (
-            <EuiToolTip content={addDataSetDisabledTooltip} delay="long" position="bottom">
-              <span tabIndex={0}>{addDataSetButton}</span>
-            </EuiToolTip>
-          ),
+          toolsLeft:
+            modificationsAllowed && selectedDataSets.length > 0 ? (
+              <EuiButton
+                color="danger"
+                data-test-subj="dataSourceManagementSetsBulkDeleteButton"
+                iconType="trash"
+                onClick={onBulkDeleteSelectedDataSets}
+              >
+                {i18n.translate('dataSourceManagement.deleteButtonLabel', {
+                  defaultMessage: 'Delete',
+                })}
+              </EuiButton>
+            ) : undefined,
+          toolsRight:
+            modificationsAllowed && hasDataSources ? (
+              addDataSetButton
+            ) : modificationsAllowed && !hasDataSources ? (
+              <EuiToolTip content={addDataSetDisabledTooltip} delay="long" position="bottom">
+                <span tabIndex={0}>{addDataSetButton}</span>
+              </EuiToolTip>
+            ) : undefined,
+          query: dataSetsSearchQuery,
+          onChange: ({ queryText, error }) => {
+            if (error) {
+              return false;
+            }
+            onDataSetsSearchQueryChange(queryText ?? '');
+            return true;
+          },
         }}
         sorting
         pagination={{
           pageSizeOptions: [5, 10, 20],
           initialPageSize: 10,
         }}
+        selection={
+          modificationsAllowed
+            ? {
+                selected: selectedDataSets,
+                onSelectionChange: setSelectedDataSets,
+              }
+            : undefined
+        }
         data-test-subj="dataSourceManagementSetsTable"
         tableCaption={i18n.translate('dataSourceManagement.datasetsTab.tableCaption', {
           defaultMessage: 'Data sets',
         })}
-        noItemsMessage={i18n.translate('dataSourceManagement.datasetsTab.noItems', {
-          defaultMessage: 'No data sets found',
-        })}
-        tableLayout="auto"
+        noItemsMessage={dataSetsTabNoItemsMessage}
+        tableLayout="fixed"
         responsiveBreakpoint={false}
         rowHeader="name"
       />
@@ -242,7 +359,8 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
   openConnectFlyoutOnMount = false,
 }) => {
   const history = useHistory();
-  const { coreStart, setBreadcrumbs, dataSourcesClient, dataSetsClient } =
+  const location = useLocation();
+  const { coreStart, dataSetsClient, dataSourcesClient, modificationsAllowed, setBreadcrumbs } =
     useDataSourceManagementAppContext();
   const { docTitle } = coreStart.chrome;
   const { overlays } = coreStart;
@@ -250,30 +368,62 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
   const [items, setItems] = useState<DataSourceListItem[]>([]);
   const [dataSets, setDataSets] = useState<DataSetListItem[]>([]);
   const [selectedSources, setSelectedSources] = useState<DataSourceListItem[]>([]);
+  const [selectedDataSets, setSelectedDataSets] = useState<DataSetTableRow[]>([]);
+  const [dataSetsSearchQuery, setDataSetsSearchQuery] = useState('');
   const [selectedTabId, setSelectedTabId] = useState(
-    openConnectFlyoutOnMount ? TAB_ID_DATA_SOURCES : TAB_ID_DATA_SETS
+    openConnectFlyoutOnMount && modificationsAllowed ? TAB_ID_DATA_SOURCES : TAB_ID_DATA_SETS
   );
-  const [isConnectFlyoutOpen, setConnectFlyoutOpen] = useState(openConnectFlyoutOnMount);
+  const [isConnectFlyoutOpen, setConnectFlyoutOpen] = useState(
+    openConnectFlyoutOnMount && modificationsAllowed
+  );
   const [addDataSetFlyout, setAddDataSetFlyout] = useState<AddDataSetFlyoutOpenState>({
     mode: 'closed',
   });
+  const [editDataSource, setEditDataSource] = useState<DataSourceListItem | null>(null);
+
+  /** Prototype-only toggle: hides sample catalog in the UI without mutating backing clients. */
+  const [prototypeCatalogMode, setPrototypeCatalogMode] = useState<'sample' | 'empty'>('sample');
 
   useEffect(() => {
-    if (openConnectFlyoutOnMount) {
-      setConnectFlyoutOpen(true);
-      setSelectedTabId(TAB_ID_DATA_SOURCES);
+    if (!modificationsAllowed || !openConnectFlyoutOnMount) {
+      return;
     }
-  }, [openConnectFlyoutOnMount]);
+    setConnectFlyoutOpen(true);
+    setSelectedTabId(TAB_ID_DATA_SOURCES);
+  }, [modificationsAllowed, openConnectFlyoutOnMount]);
 
-  const refreshDataSets = useCallback(async () => {
-    setDataSets(await dataSetsClient.get());
-  }, [dataSetsClient]);
+  useEffect(() => {
+    if (modificationsAllowed) {
+      return;
+    }
+    setConnectFlyoutOpen(false);
+    setAddDataSetFlyout({ mode: 'closed' });
+    setEditDataSource(null);
+    setSelectedSources([]);
+    setSelectedDataSets([]);
+  }, [modificationsAllowed]);
+
+  const applyFetchedCatalog = useCallback(
+    (sources: DataSourceListItem[], sets: DataSetListItem[]) => {
+      if (prototypeCatalogMode === 'empty') {
+        setItems([]);
+        setDataSets([]);
+      } else {
+        setItems(sources);
+        setDataSets(sets);
+      }
+    },
+    [prototypeCatalogMode]
+  );
+
+  const handleGoToDataSourcesTab = useCallback(() => {
+    setSelectedTabId(TAB_ID_DATA_SOURCES);
+  }, []);
 
   const refreshSourcesAndSets = useCallback(async () => {
     const [sources, sets] = await Promise.all([dataSourcesClient.get(), dataSetsClient.get()]);
-    setItems(sources);
-    setDataSets(sets);
-  }, [dataSetsClient, dataSourcesClient]);
+    applyFetchedCatalog(sources, sets);
+  }, [applyFetchedCatalog, dataSetsClient, dataSourcesClient]);
 
   const handleConnectFlyoutClose = useCallback(() => {
     setConnectFlyoutOpen(false);
@@ -317,13 +467,64 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
       if (cancelled) {
         return;
       }
-      setItems(sources);
-      setDataSets(sets);
+      applyFetchedCatalog(sources, sets);
     })();
     return () => {
       cancelled = true;
     };
-  }, [dataSourcesClient, dataSetsClient]);
+  }, [applyFetchedCatalog, dataSourcesClient, dataSetsClient]);
+
+  const pushFilteredDataSetsView = useCallback(
+    (dataSourceName: string) => {
+      history.push({
+        pathname: DATA_SOURCE_MANAGEMENT_ROUTES.list,
+        search: new URLSearchParams({
+          [DATA_SOURCE_MANAGEMENT_LIST_QUERY_KEYS.dataSourceName]: dataSourceName,
+        }).toString(),
+      });
+    },
+    [history]
+  );
+
+  const handleDataSetsSearchQueryChange = useCallback(
+    (nextQuery: string) => {
+      setDataSetsSearchQuery(nextQuery);
+      const params = new URLSearchParams(history.location.search);
+      params.delete(DATA_SOURCE_MANAGEMENT_LIST_QUERY_KEYS.dataSourceId);
+      if (nextQuery !== '') {
+        params.set(DATA_SOURCE_MANAGEMENT_LIST_QUERY_KEYS.dataSourceName, nextQuery);
+      } else {
+        params.delete(DATA_SOURCE_MANAGEMENT_LIST_QUERY_KEYS.dataSourceName);
+      }
+      const search = params.toString();
+      history.replace({ pathname: history.location.pathname, search });
+    },
+    [history]
+  );
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const nameParam = params.get(DATA_SOURCE_MANAGEMENT_LIST_QUERY_KEYS.dataSourceName);
+    const idParam = params.get(DATA_SOURCE_MANAGEMENT_LIST_QUERY_KEYS.dataSourceId);
+    if (!nameParam && !idParam) {
+      return;
+    }
+    setSelectedTabId(TAB_ID_DATA_SETS);
+    if (nameParam) {
+      setDataSetsSearchQuery(nameParam);
+      return;
+    }
+    if (idParam && items.length > 0) {
+      const sourceForId = items.find((entry) => entry.id === idParam);
+      if (sourceForId) {
+        setDataSetsSearchQuery(sourceForId.name);
+        const nextSearch = new URLSearchParams(location.search);
+        nextSearch.delete(DATA_SOURCE_MANAGEMENT_LIST_QUERY_KEYS.dataSourceId);
+        nextSearch.set(DATA_SOURCE_MANAGEMENT_LIST_QUERY_KEYS.dataSourceName, sourceForId.name);
+        history.replace({ pathname: location.pathname, search: nextSearch.toString() });
+      }
+    }
+  }, [history, items, location.pathname, location.search]);
 
   const handleDeleteSourceRow = useCallback(
     (record: DataSourceListItem) => {
@@ -354,20 +555,27 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
 
   const handleAddDataSetSave = useCallback(
     async (values: AddDataSetFlyoutPayload) => {
-      if (
-        addDataSetFlyout.mode === 'preset' &&
-        values.sourceName !== addDataSetFlyout.source.name
-      ) {
-        return 'Unknown error';
+      if (!values.editingSetId && addDataSetFlyout.mode === 'preset') {
+        if (values.sourceName !== addDataSetFlyout.source.name) {
+          return 'Unknown error';
+        }
       }
       try {
-        await dataSetsClient.add({
-          sourceName: values.sourceName,
-          datasetId: values.datasetId,
-          resource: values.resource,
-          description: values.description,
-          partitionDetection: values.partitionDetection,
-        });
+        if (values.editingSetId) {
+          await dataSetsClient.update(values.editingSetId, {
+            resource: values.resource,
+            description: values.description,
+            partitionDetection: values.partitionDetection,
+          });
+        } else {
+          await dataSetsClient.add({
+            sourceName: values.sourceName,
+            datasetId: values.datasetId,
+            resource: values.resource,
+            description: values.description,
+            partitionDetection: values.partitionDetection,
+          });
+        }
         void refreshSourcesAndSets();
         setAddDataSetFlyout({ mode: 'closed' });
         return null;
@@ -378,14 +586,80 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
     [addDataSetFlyout, dataSetsClient, refreshSourcesAndSets]
   );
 
-  const openAddDataSetFlyoutFromSourceRow = useCallback((record: DataSourceListItem) => {
+  const openEditDataSourceFlyoutFromSourceRow = useCallback((record: DataSourceListItem) => {
     setSelectedSources([]);
-    setAddDataSetFlyout({ mode: 'preset', source: record });
+    setSelectedDataSets([]);
+    setEditDataSource(record);
   }, []);
+
+  const handleCloseEditDataSourceFlyout = useCallback(() => {
+    setEditDataSource(null);
+  }, []);
+
+  const handleSaveEditDataSourceDescription = useCallback(
+    async (description: string) => {
+      if (!editDataSource) {
+        return;
+      }
+      await dataSourcesClient.updateDescription(editDataSource.id, description);
+      void refreshSourcesAndSets();
+      setEditDataSource(null);
+    },
+    [dataSourcesClient, editDataSource, refreshSourcesAndSets]
+  );
 
   const openAddDataSetFlyoutChooseSource = useCallback(() => {
     setAddDataSetFlyout({ mode: 'chooseSource' });
   }, []);
+
+  const resolvePresetSourceForDataSet = useCallback(
+    (record: DataSetListItem): DataSourceListItem =>
+      items.find((s) => s.name === record.sourceName) ?? {
+        id: `orphan:${record.id}`,
+        name: record.sourceName,
+        description: '',
+        type: 's3',
+      },
+    [items]
+  );
+
+  const openEditDataSetFlyout = useCallback((record: DataSetListItem) => {
+    setSelectedDataSets([]);
+    setAddDataSetFlyout({ mode: 'edit', record });
+  }, []);
+
+  const handleBulkDeleteSelectedDataSets = useCallback(() => {
+    if (selectedDataSets.length === 0) {
+      return;
+    }
+    void overlays
+      .openConfirm(
+        i18n.translate('dataSourceManagement.datasetsTab.bulkDeleteConfirmMessage', {
+          defaultMessage:
+            'Delete {count, plural, one {# selected data set} other {# selected data sets}}? This cannot be undone.',
+          values: { count: selectedDataSets.length },
+        }),
+        {
+          title: i18n.translate('dataSourceManagement.datasetsTab.bulkDeleteConfirmTitle', {
+            defaultMessage: 'Delete selected data sets',
+          }),
+          confirmButtonText: i18n.translate('dataSourceManagement.deleteButtonLabel', {
+            defaultMessage: 'Delete',
+          }),
+          cancelButtonText: dataSourcePreviewPageStrings.cancelButton(),
+          buttonColor: 'danger',
+          'data-test-subj': 'dataSourceManagementBulkDeleteDataSetsConfirmModal',
+        }
+      )
+      .then(async (confirmed) => {
+        if (!confirmed) {
+          return;
+        }
+        await dataSetsClient.delete(selectedDataSets.map((r) => r.id));
+        setSelectedDataSets([]);
+        void refreshSourcesAndSets();
+      });
+  }, [dataSetsClient, overlays, refreshSourcesAndSets, selectedDataSets]);
 
   const handleDeleteDataSetRow = useCallback(
     (record: DataSetListItem) => {
@@ -412,19 +686,71 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
             return;
           }
           await dataSetsClient.delete([record.id]);
-          void refreshDataSets();
+          setSelectedDataSets((prev) => prev.filter((row) => row.id !== record.id));
+          void refreshSourcesAndSets();
         });
     },
-    [dataSetsClient, overlays, refreshDataSets]
+    [dataSetsClient, overlays, refreshSourcesAndSets]
   );
 
-  const sourceDetailIdBySourceName = useMemo(
-    () => new Map(items.map((ds) => [ds.name, ds.id])),
-    [items]
-  );
+  const handleDeleteDataSetFromEditFlyout = useCallback(async () => {
+    if (addDataSetFlyout.mode !== 'edit') {
+      return;
+    }
+    const record = addDataSetFlyout.record;
+    const confirmed = await overlays.openConfirm(
+      i18n.translate('dataSourceManagement.datasetsTab.deleteConfirmMessage', {
+        defaultMessage: 'Delete “{name}”? This cannot be undone.',
+        values: { name: record.name },
+      }),
+      {
+        title: i18n.translate('dataSourceManagement.datasetsTab.deleteConfirmTitle', {
+          defaultMessage: 'Delete data set',
+        }),
+        confirmButtonText: i18n.translate('dataSourceManagement.deleteButtonLabel', {
+          defaultMessage: 'Delete',
+        }),
+        cancelButtonText: dataSourcePreviewPageStrings.cancelButton(),
+        buttonColor: 'danger',
+        'data-test-subj': 'dataSourceManagementDeleteDataSetFlyoutConfirmModal',
+      }
+    );
+    if (!confirmed) {
+      return;
+    }
+    await dataSetsClient.delete([record.id]);
+    setAddDataSetFlyout({ mode: 'closed' });
+    setSelectedDataSets((prev) => prev.filter((row) => row.id !== record.id));
+    void refreshSourcesAndSets();
+  }, [addDataSetFlyout, dataSetsClient, overlays, refreshSourcesAndSets]);
 
-  const dataSourcesColumns = useMemo<Array<EuiBasicTableColumn<DataSourceListItem>>>(
-    () => [
+  const handleDeleteDataSourceFromEditFlyout = useCallback(async () => {
+    if (!editDataSource) {
+      return;
+    }
+    const record = editDataSource;
+    const confirmed = await overlays.openConfirm(
+      dataSourcePreviewPageStrings.deleteSourceConfirmMessage(record.name),
+      {
+        title: dataSourcePreviewPageStrings.deleteSourceConfirmTitle(),
+        confirmButtonText: dataSourcePreviewPageStrings.deleteSourceConfirmButton(),
+        cancelButtonText: dataSourcePreviewPageStrings.cancelButton(),
+        buttonColor: 'danger',
+        'data-test-subj': 'dataSourceManagementDeleteSourceFlyoutConfirmModal',
+      }
+    );
+    if (!confirmed) {
+      return;
+    }
+    await dataSetsClient.deleteBySourceName(record.name);
+    await dataSourcesClient.delete([record.name]);
+    setEditDataSource(null);
+    setSelectedSources((prev) => prev.filter((row) => row.id !== record.id));
+    void refreshSourcesAndSets();
+  }, [dataSetsClient, dataSourcesClient, editDataSource, overlays, refreshSourcesAndSets]);
+
+  const dataSourcesColumns = useMemo<Array<EuiBasicTableColumn<DataSourceListItem>>>(() => {
+    const baseColumns: Array<EuiBasicTableColumn<DataSourceListItem>> = [
       {
         field: 'name',
         name: i18n.translate('dataSourceManagement.table.columnName', {
@@ -439,7 +765,7 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
             onClick={(e: React.MouseEvent) => {
               e.preventDefault();
               e.stopPropagation();
-              history.push(getDataSourceDetailPath(record.id));
+              pushFilteredDataSetsView(record.name);
             }}
           >
             {value}
@@ -466,6 +792,12 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
         truncateText: true,
         'data-test-subj': 'dataSourceManagementColDescription',
       },
+    ];
+    if (!modificationsAllowed) {
+      return baseColumns;
+    }
+    return [
+      ...baseColumns,
       {
         name: i18n.translate('dataSourceManagement.table.columnActions', {
           defaultMessage: 'Actions',
@@ -476,26 +808,26 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
           {
             /** EUI disables row actions when any row is selected; keep this control usable and clear selection when opening. */
             render: (item: DataSourceListItem) => {
-              const addLabel = i18n.translate('dataSourceManagement.table.addDataSetsAction', {
-                defaultMessage: 'Add data sets',
+              const editLabel = i18n.translate('dataSourceManagement.table.editSourceAction', {
+                defaultMessage: 'Edit data source',
               });
-              const addDescription = i18n.translate(
-                'dataSourceManagement.table.addDataSetsActionDescription',
+              const editDescription = i18n.translate(
+                'dataSourceManagement.table.editSourceActionDescription',
                 {
-                  defaultMessage: 'Add a data set for this data source.',
+                  defaultMessage: 'Edit the description for this data source.',
                 }
               );
               return (
-                <EuiToolTip content={addDescription} delay="long">
+                <EuiToolTip content={editDescription} delay="long">
                   <EuiButtonIcon
-                    aria-label={addLabel}
+                    aria-label={editLabel}
                     color="primary"
-                    data-test-subj="dataSourceManagementRowAddDataSets"
-                    iconType="plusInCircle"
+                    data-test-subj={`dataSourceManagementRowEditSource-${item.id}`}
+                    iconType="pencil"
                     onClick={(event: React.MouseEvent) => {
                       event.preventDefault();
                       event.stopPropagation();
-                      openAddDataSetFlyoutFromSourceRow(item);
+                      openEditDataSourceFlyoutFromSourceRow(item);
                     }}
                     onMouseDown={(event: React.MouseEvent) => {
                       event.stopPropagation();
@@ -527,12 +859,16 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
           },
         ],
       },
-    ],
-    [handleDeleteSourceRow, history, openAddDataSetFlyoutFromSourceRow]
-  );
+    ];
+  }, [
+    handleDeleteSourceRow,
+    modificationsAllowed,
+    openEditDataSourceFlyoutFromSourceRow,
+    pushFilteredDataSetsView,
+  ]);
 
   const dataSetsColumns = useMemo<Array<EuiBasicTableColumn<DataSetTableRow>>>(() => {
-    return [
+    const baseColumns: Array<EuiBasicTableColumn<DataSetTableRow>> = [
       {
         field: 'name',
         name: i18n.translate('dataSourceManagement.datasetsTab.columnDataSetId', {
@@ -549,24 +885,7 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
         }),
         sortable: true,
         width: '16%',
-        render: (_value: string, record: DataSetTableRow) => {
-          const sourceId = sourceDetailIdBySourceName.get(record.sourceName);
-          return sourceId ? (
-            <EuiLink
-              color="primary"
-              data-test-subj={`dataSourceManagementSetSourceLink-${record.id}`}
-              onClick={(e: React.MouseEvent) => {
-                e.preventDefault();
-                e.stopPropagation();
-                history.push(getDataSourceDetailPath(sourceId));
-              }}
-            >
-              {record.sourceName}
-            </EuiLink>
-          ) : (
-            record.sourceName
-          );
-        },
+        truncateText: true,
         'data-test-subj': 'dataSourceManagementSetsColSource',
       },
       {
@@ -619,15 +938,56 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
           defaultMessage: 'Description',
         }),
         sortable: true,
+        width: '22%',
+        maxWidth: '280px',
         truncateText: true,
         'data-test-subj': 'dataSourceManagementSetsColDescription',
       },
+    ];
+    if (!modificationsAllowed) {
+      return baseColumns;
+    }
+    return [
+      ...baseColumns,
       {
         name: i18n.translate('dataSourceManagement.table.columnActions', {
           defaultMessage: 'Actions',
         }),
-        width: '64px',
+        width: '112px',
+        minWidth: '112px',
+        field: 'id',
         actions: [
+          {
+            render: (item: DataSetTableRow) => {
+              const editLabel = i18n.translate('dataSourceManagement.datasetsTab.editActionLabel', {
+                defaultMessage: 'Edit',
+              });
+              const editHint = i18n.translate(
+                'dataSourceManagement.datasetsTab.editActionDescription',
+                {
+                  defaultMessage: 'Edit resource, partition detection, or description.',
+                }
+              );
+              return (
+                <EuiToolTip content={editHint} delay="long">
+                  <EuiButtonIcon
+                    aria-label={editLabel}
+                    color="primary"
+                    data-test-subj={`dataSourceManagementSetRowEdit-${item.id}`}
+                    iconType="pencil"
+                    onClick={(event: React.MouseEvent) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      openEditDataSetFlyout(item);
+                    }}
+                    onMouseDown={(event: React.MouseEvent) => {
+                      event.stopPropagation();
+                    }}
+                  />
+                </EuiToolTip>
+              );
+            },
+          },
           {
             name: i18n.translate('dataSourceManagement.deleteButtonLabel', {
               defaultMessage: 'Delete',
@@ -651,7 +1011,7 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
         ],
       },
     ];
-  }, [handleDeleteDataSetRow, history, items, sourceDetailIdBySourceName]);
+  }, [handleDeleteDataSetRow, items, modificationsAllowed, openEditDataSetFlyout]);
 
   /** Synthetic `type` supports Data sources column sorting/search. */
   const dataSetsWithJoinedType = useMemo((): DataSetTableRow[] => {
@@ -682,6 +1042,53 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
   );
 
   const isDataSourcesTabSelected = selectedTabId === TAB_ID_DATA_SOURCES;
+
+  const prototypeCatalogButtonGroupOptions = useMemo<Array<EuiButtonGroupOptionProps>>(
+    () => [
+      {
+        id: 'prototype_sample',
+        label: i18n.translate('dataSourceManagement.prototype.catalogWithData', {
+          defaultMessage: 'With sample data',
+        }),
+        'data-test-subj': 'dataSourceManagementPrototypeCatalogWithData',
+      },
+      {
+        id: 'prototype_empty',
+        label: i18n.translate('dataSourceManagement.prototype.catalogEmptyState', {
+          defaultMessage: 'Empty state',
+        }),
+        'data-test-subj': 'dataSourceManagementPrototypeCatalogEmpty',
+      },
+    ],
+    []
+  );
+
+  const handlePrototypeCatalogModeChange = useCallback((selectedId: string) => {
+    setPrototypeCatalogMode(selectedId === 'prototype_empty' ? 'empty' : 'sample');
+    setSelectedSources([]);
+    setSelectedDataSets([]);
+  }, []);
+
+  useEffect(() => {
+    const unregister = coreStart.chrome.setBreadcrumbsAppendExtension({
+      order: 10,
+      content: (
+        <PrototypeCatalogChromeToggle
+          mode={prototypeCatalogMode}
+          options={prototypeCatalogButtonGroupOptions}
+          onChange={handlePrototypeCatalogModeChange}
+        />
+      ),
+    });
+    return () => {
+      unregister();
+    };
+  }, [
+    coreStart.chrome,
+    prototypeCatalogMode,
+    prototypeCatalogButtonGroupOptions,
+    handlePrototypeCatalogModeChange,
+  ]);
 
   const pageHeaderTabs = useMemo(
     () => [
@@ -725,30 +1132,70 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
             dataSetsClient={dataSetsClient}
             dataSourcesClient={dataSourcesClient}
             items={items}
+            modificationsAllowed={modificationsAllowed}
             selectedSources={selectedSources}
             setSelectedSources={setSelectedSources}
-            onOpenConnectFlyout={() => setConnectFlyoutOpen(true)}
+            onOpenConnectFlyout={() => {
+              if (modificationsAllowed) {
+                setConnectFlyoutOpen(true);
+              }
+            }}
             onRefreshSourcesAndSets={refreshSourcesAndSets}
           />
         ) : (
           <DataSetsTabPanel
             columns={dataSetsColumns}
+            dataSetsSearchQuery={dataSetsSearchQuery}
             dataSetsWithJoinedType={dataSetsWithJoinedType}
+            modificationsAllowed={modificationsAllowed}
+            onDataSetsSearchQueryChange={handleDataSetsSearchQueryChange}
+            selectedDataSets={selectedDataSets}
+            setSelectedDataSets={setSelectedDataSets}
             hasDataSources={items.length > 0}
+            hasAnyDataSetsInCatalog={dataSets.length > 0}
+            onGoToDataSourcesTab={handleGoToDataSourcesTab}
             addDataSetButtonLabel={addDataSetTableButtonLabel}
             addDataSetDisabledTooltip={addDataSetTableButtonDisabledTooltip}
             onOpenAddDataSetFlyout={openAddDataSetFlyoutChooseSource}
+            onBulkDeleteSelectedDataSets={handleBulkDeleteSelectedDataSets}
           />
         )}
       </EuiPageSection>
-      {isConnectFlyoutOpen ? (
+      {isConnectFlyoutOpen && modificationsAllowed ? (
         <CreateDataSourceFlyout onClose={handleConnectFlyoutClose} onSave={handleConnectSave} />
       ) : null}
-      {addDataSetFlyout.mode !== 'closed' ? (
+      {modificationsAllowed && editDataSource ? (
+        <EditDataSourceFlyout
+          key={editDataSource.id}
+          source={editDataSource}
+          onClose={handleCloseEditDataSourceFlyout}
+          onDelete={handleDeleteDataSourceFromEditFlyout}
+          onSave={handleSaveEditDataSourceDescription}
+        />
+      ) : null}
+      {modificationsAllowed && addDataSetFlyout.mode !== 'closed' ? (
         <AddDataSetFlyout
-          key={addDataSetFlyout.mode === 'preset' ? addDataSetFlyout.source.id : 'choose-source'}
-          presetSource={addDataSetFlyout.mode === 'preset' ? addDataSetFlyout.source : undefined}
+          key={
+            addDataSetFlyout.mode === 'preset'
+              ? addDataSetFlyout.source.id
+              : addDataSetFlyout.mode === 'chooseSource'
+              ? 'choose-source'
+              : addDataSetFlyout.mode === 'edit'
+              ? `edit-${addDataSetFlyout.record.id}`
+              : 'flyout'
+          }
+          presetSource={
+            addDataSetFlyout.mode === 'preset'
+              ? addDataSetFlyout.source
+              : addDataSetFlyout.mode === 'edit'
+              ? resolvePresetSourceForDataSet(addDataSetFlyout.record)
+              : undefined
+          }
           sourcesForPicker={addDataSetFlyout.mode === 'chooseSource' ? items : undefined}
+          existingEditSet={addDataSetFlyout.mode === 'edit' ? addDataSetFlyout.record : undefined}
+          onDeleteExistingSet={
+            addDataSetFlyout.mode === 'edit' ? handleDeleteDataSetFromEditFlyout : undefined
+          }
           onClose={handleCloseAddDataSetFlyout}
           onSave={handleAddDataSetSave}
         />
