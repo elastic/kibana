@@ -7,10 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
-import { apiTest as baseApiTest } from '@kbn/scout';
-
-export const apiTest = baseApiTest.extend<ScoutTestFixtures, ScoutWorkerFixtures>({});
-
-/** The base API path for dashboard endpoints (no leading slash for apiClient). */
-export const DASHBOARD_API_PATH = 'api/dashboards';
+export { pickTestGroupRunOrder } from './pick_test_group_run_order';
