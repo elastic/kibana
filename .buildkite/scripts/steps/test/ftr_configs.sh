@@ -53,6 +53,7 @@ fi
 
 failedConfigs=""
 results=()
+failure_detail_lines=()
 
 # Capture which configs failed in the previous attempt before the meta-data key is overwritten below.
 # Used in the annotation to distinguish "new failure", "still failing", and "recovered" per config.
@@ -102,6 +103,10 @@ while read -r config; do
   """
   fi
 
+  # Snapshot existing JUnit XML files so we can identify which ones this config produces
+  tmp_xml_before=$(mktemp)
+  find "target/junit/${JOB}" -maxdepth 1 -name "*.xml" 2>/dev/null | sort > "$tmp_xml_before" || true
+
   # prevent non-zero exit code from breaking the loop
   set +e;
   node ./scripts/functional_tests \
@@ -137,6 +142,7 @@ while read -r config; do
 
   config_link="[\`${config}\`](https://github.com/elastic/kibana/blob/${BUILDKITE_COMMIT:-main}/${config})"
   if [ $lastCode -eq 0 ]; then
+    rm -f "$tmp_xml_before"
     # Test was successful, so mark it as executed
     buildkite-agent meta-data set "$CONFIG_EXECUTION_KEY" "true"
     if [[ -n "$prevRunFailedConfigs" ]] && grep -qxF "$config" <<< "$prevRunFailedConfigs"; then
@@ -160,6 +166,28 @@ while read -r config; do
       annotation_rows+=("| ${config_link} | ${duration} | **new failure** (was passing) |")
     else
       annotation_rows+=("| ${config_link} | ${duration} | **failed** |")
+    fi
+
+    # Find JUnit XML files produced by this config and extract individual failing test names
+    tmp_xml_after=$(mktemp)
+    find "target/junit/${JOB}" -maxdepth 1 -name "*.xml" 2>/dev/null | sort > "$tmp_xml_after" || true
+    new_config_xmls=$(comm -13 "$tmp_xml_before" "$tmp_xml_after" 2>/dev/null | grep -v '^[[:space:]]*$' || true)
+    rm -f "$tmp_xml_before" "$tmp_xml_after"
+    if [[ -n "$new_config_xmls" ]]; then
+      tmp_junit=$(mktemp -d)
+      while IFS= read -r f; do
+        [[ -n "$f" ]] && cp "$f" "$tmp_junit/" 2>/dev/null || true
+      done <<< "$new_config_xmls"
+      config_test_failures=$(node scripts/ftr_check_retry_result list-failures "$tmp_junit" 2>/dev/null || true)
+      rm -rf "$tmp_junit"
+      if [[ -n "$config_test_failures" ]]; then
+        failure_detail_lines+=("**Failing tests — \`${config}\`:**")
+        failure_detail_lines+=("")
+        while IFS= read -r t; do
+          [[ -n "$t" ]] && failure_detail_lines+=("- ${t}")
+        done <<< "$config_test_failures"
+        failure_detail_lines+=("")
+      fi
     fi
   fi
 done <<< "$configs"
@@ -271,6 +299,11 @@ write_job_annotation() {
       echo "| Config | Duration | Status |"
       echo "| --- | --- | --- |"
       printf "%s\n" "${annotation_rows[@]}"
+    fi
+
+    if [[ ${#failure_detail_lines[@]} -gt 0 ]]; then
+      echo ""
+      printf "%s\n" "${failure_detail_lines[@]}"
     fi
   } | buildkite-agent annotate \
         --scope job \
