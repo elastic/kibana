@@ -123,7 +123,9 @@ export async function waitForActiveAlert({
   }
 
   const diagnosticBlock =
-    diagnosticLines.length > 0 ? `\nDiagnostics:\n${diagnosticLines.map((l) => `  - ${l}`).join('\n')}` : '';
+    diagnosticLines.length > 0
+      ? `\nDiagnostics:\n${diagnosticLines.map((l) => `  - ${l}`).join('\n')}`
+      : '';
 
   throw new Error(
     `No active alert found for rule ${ruleId} in index ${alertsIndex} after ${timeoutMs}ms${diagnosticBlock}`
@@ -192,8 +194,8 @@ async function appendRuleDiagnostics({
         executionStatus.error?.message
           ? `error=${executionStatus.error.message}`
           : executionStatus.error?.reason
-            ? `error=${executionStatus.error.reason}`
-            : undefined,
+          ? `error=${executionStatus.error.reason}`
+          : undefined,
       ].filter(Boolean);
       lines.push(`rule execution: ${parts.join(', ') || 'unknown'}`);
     }
@@ -311,11 +313,7 @@ async function appendApmDataDiagnostics({
       index: 'traces-*,traces-apm*',
       query: {
         bool: {
-          filter: [
-            timeFilter,
-            serviceFilter,
-            { term: { 'processor.event': 'transaction' } },
-          ],
+          filter: [timeFilter, serviceFilter, { term: { 'processor.event': 'transaction' } }],
         },
       },
     });
@@ -335,11 +333,7 @@ async function appendApmDataDiagnostics({
       index: 'traces-*,traces-apm*',
       query: {
         bool: {
-          filter: [
-            timeFilter,
-            serviceFilter,
-            { term: { 'processor.event': 'error' } },
-          ],
+          filter: [timeFilter, serviceFilter, { term: { 'processor.event': 'error' } }],
         },
       },
     });
