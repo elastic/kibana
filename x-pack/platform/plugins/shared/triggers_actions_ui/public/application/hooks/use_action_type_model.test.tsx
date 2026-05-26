@@ -12,9 +12,9 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { connectorsSpecs } from '@kbn/connector-specs';
 import { serializeConnectorSpec } from '@kbn/connector-specs/src/lib/serialize_connector_spec';
-import { useActionTypeModel } from '@kbn/alerts-ui-shared';
+import { useActionTypeModel } from '@kbn/alerts-ui-shared/src/common/hooks/use_action_type_model';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
-import type { ActionType, ActionTypeModel } from '../../types';
+import type { ActionTypeModel } from '../../types';
 
 const WORKFLOWS_CONNECTOR_FEATURE_ID = 'workflows';
 
@@ -76,7 +76,7 @@ describe('useActionTypeModel', () => {
       () =>
         useActionTypeModel({
           actionTypeRegistry,
-          actionType: null,
+          actionTypeId: undefined,
           http: mockHttp as any,
           uiSettings: mockUiSettings as any,
         }),
@@ -93,18 +93,6 @@ describe('useActionTypeModel', () => {
   });
 
   it('returns registered model synchronously for stack connectors', async () => {
-    const stackActionType: ActionType = {
-      id: 'test-connector',
-      name: 'Test Connector',
-      enabled: true,
-      enabledInConfig: true,
-      enabledInLicense: true,
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      isSystemActionType: false,
-      isDeprecated: false,
-    };
-
     actionTypeRegistry.has.mockReturnValue(true);
     actionTypeRegistry.get.mockReturnValue(mockActionTypeModel);
 
@@ -112,7 +100,7 @@ describe('useActionTypeModel', () => {
       () =>
         useActionTypeModel({
           actionTypeRegistry,
-          actionType: stackActionType,
+          actionTypeId: 'test-connector',
           http: mockHttp as any,
           uiSettings: mockUiSettings as any,
         }),
@@ -130,19 +118,6 @@ describe('useActionTypeModel', () => {
   });
 
   it('fetches spec from API for spec-based connectors not in registry', async () => {
-    const specActionType: ActionType = {
-      id: 'spec-connector',
-      name: 'Spec Connector',
-      enabled: true,
-      enabledInConfig: true,
-      enabledInLicense: true,
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      isSystemActionType: false,
-      isDeprecated: false,
-      source: ACTION_TYPE_SOURCES.spec,
-    };
-
     actionTypeRegistry.has.mockReturnValue(false);
     mockHttp.get.mockResolvedValue(mockSpecResponse);
 
@@ -150,7 +125,8 @@ describe('useActionTypeModel', () => {
       () =>
         useActionTypeModel({
           actionTypeRegistry,
-          actionType: specActionType,
+          actionTypeId: 'spec-connector',
+          source: ACTION_TYPE_SOURCES.spec,
           http: mockHttp as any,
           uiSettings: mockUiSettings as any,
         }),
@@ -175,19 +151,6 @@ describe('useActionTypeModel', () => {
   });
 
   it('surfaces error when connector spec schema cannot be parsed', async () => {
-    const specActionType: ActionType = {
-      id: 'spec-connector',
-      name: 'Spec Connector',
-      enabled: true,
-      enabledInConfig: true,
-      enabledInLicense: true,
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      isSystemActionType: false,
-      isDeprecated: false,
-      source: ACTION_TYPE_SOURCES.spec,
-    };
-
     actionTypeRegistry.has.mockReturnValue(false);
     mockHttp.get.mockResolvedValue({
       ...mockSpecResponse,
@@ -204,7 +167,8 @@ describe('useActionTypeModel', () => {
       () =>
         useActionTypeModel({
           actionTypeRegistry,
-          actionType: specActionType,
+          actionTypeId: 'spec-connector',
+          source: ACTION_TYPE_SOURCES.spec,
           http: mockHttp as any,
           uiSettings: mockUiSettings as any,
         }),
@@ -224,19 +188,6 @@ describe('useActionTypeModel', () => {
   });
 
   it('handles fetch errors correctly', async () => {
-    const specActionType: ActionType = {
-      id: 'spec-connector',
-      name: 'Spec Connector',
-      enabled: true,
-      enabledInConfig: true,
-      enabledInLicense: true,
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      isSystemActionType: false,
-      isDeprecated: false,
-      source: ACTION_TYPE_SOURCES.spec,
-    };
-
     actionTypeRegistry.has.mockReturnValue(false);
     const fetchError = new Error('Failed to fetch spec');
     mockHttp.get.mockRejectedValue(fetchError);
@@ -245,7 +196,8 @@ describe('useActionTypeModel', () => {
       () =>
         useActionTypeModel({
           actionTypeRegistry,
-          actionType: specActionType,
+          actionTypeId: 'spec-connector',
+          source: ACTION_TYPE_SOURCES.spec,
           http: mockHttp as any,
           uiSettings: mockUiSettings as any,
         }),
@@ -262,26 +214,13 @@ describe('useActionTypeModel', () => {
   });
 
   it('does not fetch for non-spec connectors not in registry', async () => {
-    const unknownActionType: ActionType = {
-      id: 'unknown-connector',
-      name: 'Unknown Connector',
-      enabled: true,
-      enabledInConfig: true,
-      enabledInLicense: true,
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      isSystemActionType: false,
-      isDeprecated: false,
-      // No source field - not a spec connector
-    };
-
     actionTypeRegistry.has.mockReturnValue(false);
 
     const { result } = renderHook(
       () =>
         useActionTypeModel({
           actionTypeRegistry,
-          actionType: unknownActionType,
+          actionTypeId: 'unknown-connector',
           http: mockHttp as any,
           uiSettings: mockUiSettings as any,
         }),
@@ -299,19 +238,6 @@ describe('useActionTypeModel', () => {
   });
 
   it('transforms spec response into ActionTypeModel with correct properties', async () => {
-    const specActionType: ActionType = {
-      id: 'spec-connector',
-      name: 'Spec Connector',
-      enabled: true,
-      enabledInConfig: true,
-      enabledInLicense: true,
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      isSystemActionType: false,
-      isDeprecated: false,
-      source: ACTION_TYPE_SOURCES.spec,
-    };
-
     actionTypeRegistry.has.mockReturnValue(false);
     mockHttp.get.mockResolvedValue(mockSpecResponse);
 
@@ -319,7 +245,8 @@ describe('useActionTypeModel', () => {
       () =>
         useActionTypeModel({
           actionTypeRegistry,
-          actionType: specActionType,
+          actionTypeId: 'spec-connector',
+          source: ACTION_TYPE_SOURCES.spec,
           http: mockHttp as any,
           uiSettings: mockUiSettings as any,
         }),
@@ -355,26 +282,14 @@ describe('useActionTypeModel', () => {
     const uiSettingsGet = jest.fn().mockReturnValue(false);
     mockHttp.get.mockResolvedValue(workflowsSpecResponse);
 
-    const specActionType: ActionType = {
-      id: 'workflows-spec-connector',
-      name: 'Workflows Spec',
-      enabled: true,
-      enabledInConfig: true,
-      enabledInLicense: true,
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: [WORKFLOWS_CONNECTOR_FEATURE_ID],
-      isSystemActionType: false,
-      isDeprecated: false,
-      source: ACTION_TYPE_SOURCES.spec,
-    };
-
     actionTypeRegistry.has.mockReturnValue(false);
 
     const { result } = renderHook(
       () =>
         useActionTypeModel({
           actionTypeRegistry,
-          actionType: specActionType,
+          actionTypeId: 'workflows-spec-connector',
+          source: ACTION_TYPE_SOURCES.spec,
           http: mockHttp as any,
           uiSettings: { get: uiSettingsGet } as any,
         }),
