@@ -152,7 +152,7 @@ export const LookupsFileUpload = React.memo<LookupsFileUploadProps>(
           addError(e.message);
           return [];
         });
-        const validLookups = lookups.filter(
+        const validLookups: SiemMigrationResourceData[] = lookups.filter(
           (resource): resource is SiemMigrationResourceData => resource !== undefined
         );
         // Set the loaded lookups to the state
