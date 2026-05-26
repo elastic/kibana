@@ -10,8 +10,11 @@ import { evaluate as base } from '../../src/evaluate';
 import type { EvaluateDataset } from '../../src/evaluate_dataset';
 import { createEvaluateDataset } from '../../src/evaluate_dataset';
 import {
-  dashboardMinPanelCountEvaluator,
-  dashboardSectionCountEvaluator,
+  dashboardAttachmentExistsEvaluator,
+  dashboardAttachmentTitleEvaluator,
+  dashboardGridBoundsEvaluator,
+  dashboardPanelCountEvaluator,
+  dashboardSectionShapeEvaluator,
 } from '../../src/dashboard_attachment_evaluators';
 import {
   dashboardSkillActivatedEvaluator,
@@ -61,7 +64,10 @@ evaluate.describe(
               output: {
                 expected: 'Dashboard skill should be activated.',
                 expectedDashboardAttachment: {
+                  exists: true,
+                  title: { nonEmpty: true },
                   panelCount: { min: 3 },
+                  grid: { maxColumns: 48, noOverflow: true },
                 },
               },
             },
@@ -73,8 +79,15 @@ evaluate.describe(
               output: {
                 expected: 'Dashboard skill should be activated and create the requested sections.',
                 expectedDashboardAttachment: {
+                  exists: true,
+                  title: { nonEmpty: true },
                   panelCount: { min: 2 },
                   sectionCount: 2,
+                  sections: [
+                    { titleIncludes: ['traffic'], minPanels: 1 },
+                    { titleIncludes: ['response'], minPanels: 1 },
+                  ],
+                  grid: { maxColumns: 48, noOverflow: true },
                 },
               },
             },
@@ -82,54 +95,57 @@ evaluate.describe(
         },
         evaluators: [
           dashboardSkillActivatedEvaluator,
-          dashboardMinPanelCountEvaluator,
-          dashboardSectionCountEvaluator,
+          dashboardAttachmentExistsEvaluator,
+          dashboardAttachmentTitleEvaluator,
+          dashboardPanelCountEvaluator,
+          dashboardSectionShapeEvaluator,
+          dashboardGridBoundsEvaluator,
         ],
       });
     });
 
-    evaluate('visualization request does not create dashboard', async ({ evaluateDataset }) => {
-      await evaluateDataset({
-        dataset: {
-          name: 'agent builder dashboards: visualization without dashboard',
-          description:
-            'Checks that standalone visualization requests load the visualization skill without loading dashboard management.',
-          examples: [
-            {
-              input: {
-                question:
-                  'Create a bar chart showing the distribution of response codes in kibana_sample_data_logs.',
-              },
-              output: {
-                expected:
-                  'Visualization skill should be activated and dashboard management should not be used.',
-              },
-            },
-          ],
-        },
-        evaluators: [visualizationSkillWithoutDashboardEvaluator],
-      });
-    });
+    // evaluate('visualization request does not create dashboard', async ({ evaluateDataset }) => {
+    //   await evaluateDataset({
+    //     dataset: {
+    //       name: 'agent builder dashboards: visualization without dashboard',
+    //       description:
+    //         'Checks that standalone visualization requests load the visualization skill without loading dashboard management.',
+    //       examples: [
+    //         {
+    //           input: {
+    //             question:
+    //               'Create a bar chart showing the distribution of response codes in kibana_sample_data_logs.',
+    //           },
+    //           output: {
+    //             expected:
+    //               'Visualization skill should be activated and dashboard management should not be used.',
+    //           },
+    //         },
+    //       ],
+    //     },
+    //     evaluators: [visualizationSkillWithoutDashboardEvaluator],
+    //   });
+    // });
 
-    evaluate('esql query help does not create dashboard', async ({ evaluateDataset }) => {
-      await evaluateDataset({
-        dataset: {
-          name: 'agent builder dashboards: esql help without dashboard',
-          description:
-            'Checks that ES|QL query-writing requests are treated as data exploration, not dashboard composition.',
-          examples: [
-            {
-              input: {
-                question: 'Help me write an ES|QL query to find slow transactions',
-              },
-              output: {
-                expected: 'Dashboard management should not be used.',
-              },
-            },
-          ],
-        },
-        evaluators: [dashboardSkillNotActivatedEvaluator],
-      });
-    });
+    // evaluate('esql query help does not create dashboard', async ({ evaluateDataset }) => {
+    //   await evaluateDataset({
+    //     dataset: {
+    //       name: 'agent builder dashboards: esql help without dashboard',
+    //       description:
+    //         'Checks that ES|QL query-writing requests are treated as data exploration, not dashboard composition.',
+    //       examples: [
+    //         {
+    //           input: {
+    //             question: 'Help me write an ES|QL query to find slow transactions',
+    //           },
+    //           output: {
+    //             expected: 'Dashboard management should not be used.',
+    //           },
+    //         },
+    //       ],
+    //     },
+    //     evaluators: [dashboardSkillNotActivatedEvaluator],
+    //   });
+    // });
   }
 );

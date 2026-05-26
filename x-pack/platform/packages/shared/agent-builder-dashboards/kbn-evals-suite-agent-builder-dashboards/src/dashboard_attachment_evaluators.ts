@@ -10,6 +10,13 @@ import type { DashboardAgentTaskOutput, DashboardDatasetExample } from './evalua
 
 interface DashboardPanel {
   panels?: DashboardPanel[];
+  grid?: {
+    x?: number;
+    y?: number;
+    w?: number;
+    h?: number;
+  };
+  title?: string;
   [key: string]: unknown;
 }
 
@@ -75,6 +82,10 @@ const getDashboardContentPanels = (output: DashboardAgentTaskOutput): DashboardP
   return getLatestDashboardAttachmentContent(output)?.panels ?? [];
 };
 
+const getDashboardSections = (panels: DashboardPanel[]): DashboardPanel[] => {
+  return panels.filter((panel) => Array.isArray(panel.panels));
+};
+
 const countDashboardPanels = (panels: DashboardPanel[]): number => {
   return panels.reduce((total, panel) => {
     if (Array.isArray(panel.panels)) {
@@ -91,52 +102,198 @@ const countDashboardSections = (panels: DashboardPanel[]): number => {
   }, 0);
 };
 
-export const dashboardMinPanelCountEvaluator: Evaluator<
+const getGridOverflowViolations = (
+  panels: DashboardPanel[],
+  maxColumns: number
+): Array<{ id?: unknown; x?: number; w?: number }> => {
+  const violations: Array<{ id?: unknown; x?: number; w?: number }> = [];
+
+  for (const panel of panels) {
+    const { grid } = panel;
+    if (typeof grid?.x === 'number' && typeof grid.w === 'number' && grid.x + grid.w > maxColumns) {
+      violations.push({ id: panel.id, x: grid.x, w: grid.w });
+    }
+
+    if (Array.isArray(panel.panels)) {
+      violations.push(...getGridOverflowViolations(panel.panels, maxColumns));
+    }
+  }
+
+  return violations;
+};
+
+export const dashboardAttachmentExistsEvaluator: Evaluator<
   DashboardDatasetExample,
   DashboardAgentTaskOutput
 > = {
-  name: 'Dashboard minimum panel count',
+  name: 'Dashboard attachment exists',
   kind: 'CODE',
   evaluate: async ({ expected, output }): Promise<EvaluationResult> => {
-    const expectedMinPanels = expected?.expectedDashboardAttachment?.panelCount?.min;
-    if (typeof expectedMinPanels !== 'number') {
+    const expectedExists = expected?.expectedDashboardAttachment?.exists;
+    if (typeof expectedExists !== 'boolean') {
+      return { score: 1, label: 'SKIPPED' };
+    }
+
+    const exists = Boolean(getLatestDashboardAttachmentContent(output));
+    const passed = exists === expectedExists;
+
+    return {
+      score: passed ? 1 : 0,
+      label: passed ? 'PASS' : 'FAIL',
+      explanation: expectedExists
+        ? `Expected a dashboard attachment. Found attachment: ${exists}.`
+        : `Expected no dashboard attachment. Found attachment: ${exists}.`,
+      metadata: { expectedExists, exists },
+    };
+  },
+};
+
+export const dashboardAttachmentTitleEvaluator: Evaluator<
+  DashboardDatasetExample,
+  DashboardAgentTaskOutput
+> = {
+  name: 'Dashboard attachment title',
+  kind: 'CODE',
+  evaluate: async ({ expected, output }): Promise<EvaluationResult> => {
+    const expectsNonEmptyTitle = expected?.expectedDashboardAttachment?.title?.nonEmpty;
+    if (expectsNonEmptyTitle !== true) {
+      return { score: 1, label: 'SKIPPED' };
+    }
+
+    const title = getLatestDashboardAttachmentContent(output)?.title;
+    const passed = typeof title === 'string' && title.trim().length > 0;
+
+    return {
+      score: passed ? 1 : 0,
+      label: passed ? 'PASS' : 'FAIL',
+      explanation: `Expected a non-empty dashboard title. Found: ${title ?? 'none'}.`,
+      metadata: { title },
+    };
+  },
+};
+
+export const dashboardPanelCountEvaluator: Evaluator<
+  DashboardDatasetExample,
+  DashboardAgentTaskOutput
+> = {
+  name: 'Dashboard panel count',
+  kind: 'CODE',
+  evaluate: async ({ expected, output }): Promise<EvaluationResult> => {
+    const panelCountExpectation = expected?.expectedDashboardAttachment?.panelCount;
+    const { min, max } = panelCountExpectation ?? {};
+    if (typeof min !== 'number' && typeof max !== 'number') {
       return { score: 1, label: 'SKIPPED' };
     }
 
     const panels = getDashboardContentPanels(output);
     const panelCount = countDashboardPanels(panels);
-    const passed = panelCount >= expectedMinPanels;
+    const passed =
+      (typeof min !== 'number' || panelCount >= min) &&
+      (typeof max !== 'number' || panelCount <= max);
 
     return {
       score: passed ? 1 : 0,
       label: passed ? 'PASS' : 'FAIL',
-      explanation: `Expected at least ${expectedMinPanels} dashboard panel(s), found ${panelCount}.`,
-      metadata: { expectedMinPanels, panelCount },
+      explanation: `Expected dashboard panel count in range ${min ?? '-∞'}-${
+        max ?? '∞'
+      }, found ${panelCount}.`,
+      metadata: { min, max, panelCount },
     };
   },
 };
 
-export const dashboardSectionCountEvaluator: Evaluator<
+export const dashboardSectionShapeEvaluator: Evaluator<
   DashboardDatasetExample,
   DashboardAgentTaskOutput
 > = {
-  name: 'Dashboard section count',
+  name: 'Dashboard section shape',
   kind: 'CODE',
   evaluate: async ({ expected, output }): Promise<EvaluationResult> => {
-    const expectedSectionCount = expected?.expectedDashboardAttachment?.sectionCount;
-    if (typeof expectedSectionCount !== 'number') {
+    const expectedAttachment = expected?.expectedDashboardAttachment;
+    const expectedSectionCount = expectedAttachment?.sectionCount;
+    const expectedSections = expectedAttachment?.sections ?? [];
+    if (typeof expectedSectionCount !== 'number' && expectedSections.length === 0) {
       return { score: 1, label: 'SKIPPED' };
     }
 
     const panels = getDashboardContentPanels(output);
-    const sectionCount = countDashboardSections(panels);
-    const passed = sectionCount === expectedSectionCount;
+    const sections = getDashboardSections(panels);
+    const sectionCount = sections.length;
+    const sectionCountPassed =
+      typeof expectedSectionCount !== 'number' || sectionCount === expectedSectionCount;
+    const sectionFailures: string[] = [];
+
+    for (const [index, expectedSection] of expectedSections.entries()) {
+      const section = sections[index];
+      if (!section) {
+        sectionFailures.push(`Missing section at index ${index}.`);
+        continue;
+      }
+
+      const title = section.title?.toLowerCase() ?? '';
+      const missingTitleTerms =
+        expectedSection.titleIncludes?.filter((term) => !title.includes(term.toLowerCase())) ?? [];
+      if (missingTitleTerms.length > 0) {
+        sectionFailures.push(
+          `Section ${index} title is missing terms: ${missingTitleTerms.join(', ')}.`
+        );
+      }
+
+      const panelCount = section.panels?.length ?? 0;
+      if (typeof expectedSection.minPanels === 'number' && panelCount < expectedSection.minPanels) {
+        sectionFailures.push(
+          `Section ${index} expected at least ${expectedSection.minPanels} panel(s), found ${panelCount}.`
+        );
+      }
+      if (typeof expectedSection.maxPanels === 'number' && panelCount > expectedSection.maxPanels) {
+        sectionFailures.push(
+          `Section ${index} expected at most ${expectedSection.maxPanels} panel(s), found ${panelCount}.`
+        );
+      }
+    }
+
+    const passed = sectionCountPassed && sectionFailures.length === 0;
 
     return {
       score: passed ? 1 : 0,
       label: passed ? 'PASS' : 'FAIL',
-      explanation: `Expected ${expectedSectionCount} dashboard section(s), found ${sectionCount}.`,
-      metadata: { expectedSectionCount, sectionCount },
+      explanation: passed
+        ? `Dashboard section shape matched expectations. Found ${sectionCount} section(s).`
+        : `Dashboard section shape did not match expectations. Expected ${
+            expectedSectionCount ?? 'any'
+          } section(s), found ${sectionCount}. ${sectionFailures.join(' ')}`,
+      metadata: { expectedSectionCount, sectionCount, sectionFailures },
     };
   },
 };
+
+export const dashboardGridBoundsEvaluator: Evaluator<
+  DashboardDatasetExample,
+  DashboardAgentTaskOutput
+> = {
+  name: 'Dashboard grid bounds',
+  kind: 'CODE',
+  evaluate: async ({ expected, output }): Promise<EvaluationResult> => {
+    const gridExpectation = expected?.expectedDashboardAttachment?.grid;
+    if (gridExpectation?.noOverflow !== true) {
+      return { score: 1, label: 'SKIPPED' };
+    }
+
+    const maxColumns = gridExpectation.maxColumns ?? 48;
+    const panels = getDashboardContentPanels(output);
+    const violations = getGridOverflowViolations(panels, maxColumns);
+    const passed = violations.length === 0;
+
+    return {
+      score: passed ? 1 : 0,
+      label: passed ? 'PASS' : 'FAIL',
+      explanation: passed
+        ? `All dashboard panels fit within ${maxColumns} columns.`
+        : `${violations.length} dashboard panel(s) overflow ${maxColumns} columns.`,
+      metadata: { maxColumns, violations },
+    };
+  },
+};
+
+export const dashboardMinPanelCountEvaluator = dashboardPanelCountEvaluator;
+export const dashboardSectionCountEvaluator = dashboardSectionShapeEvaluator;

@@ -7,7 +7,11 @@
 
 import type { DashboardAgentTaskOutput } from './evaluate_dataset';
 import {
-  dashboardMinPanelCountEvaluator,
+  dashboardAttachmentExistsEvaluator,
+  dashboardAttachmentTitleEvaluator,
+  dashboardGridBoundsEvaluator,
+  dashboardPanelCountEvaluator,
+  dashboardSectionShapeEvaluator,
   getLatestDashboardAttachmentContent,
 } from './dashboard_attachment_evaluators';
 
@@ -50,12 +54,56 @@ describe('dashboard attachment evaluators', () => {
     });
   });
 
-  it('evaluates panel counts from dashboard attachment shape instead of tool id', async () => {
-    const result = await dashboardMinPanelCountEvaluator.evaluate({
+  it('evaluates attachment existence from dashboard attachment shape', async () => {
+    const result = await dashboardAttachmentExistsEvaluator.evaluate({
       input: { question: 'question' },
       expected: {
         expectedDashboardAttachment: {
-          panelCount: { min: 2 },
+          exists: true,
+        },
+      },
+      metadata: undefined,
+      output: createOutput([
+        {
+          type: 'tool_call',
+          tool_id: 'future.dashboard.tool',
+          results: [createDashboardResult('dashboard', [])],
+        },
+      ]),
+    });
+
+    expect(result.score).toBe(1);
+    expect(result.metadata).toEqual(expect.objectContaining({ exists: true }));
+  });
+
+  it('evaluates non-empty dashboard titles', async () => {
+    const result = await dashboardAttachmentTitleEvaluator.evaluate({
+      input: { question: 'question' },
+      expected: {
+        expectedDashboardAttachment: {
+          title: { nonEmpty: true },
+        },
+      },
+      metadata: undefined,
+      output: createOutput([
+        {
+          type: 'tool_call',
+          tool_id: 'future.dashboard.tool',
+          results: [createDashboardResult('Sample logs dashboard', [])],
+        },
+      ]),
+    });
+
+    expect(result.score).toBe(1);
+    expect(result.metadata).toEqual(expect.objectContaining({ title: 'Sample logs dashboard' }));
+  });
+
+  it('evaluates panel count ranges from dashboard attachment shape instead of tool id', async () => {
+    const result = await dashboardPanelCountEvaluator.evaluate({
+      input: { question: 'question' },
+      expected: {
+        expectedDashboardAttachment: {
+          panelCount: { min: 2, max: 3 },
         },
       },
       metadata: undefined,
@@ -78,5 +126,68 @@ describe('dashboard attachment evaluators', () => {
 
     expect(result.score).toBe(1);
     expect(result.metadata).toEqual(expect.objectContaining({ panelCount: 3 }));
+  });
+
+  it('evaluates section shape by title and panel count', async () => {
+    const result = await dashboardSectionShapeEvaluator.evaluate({
+      input: { question: 'question' },
+      expected: {
+        expectedDashboardAttachment: {
+          sectionCount: 1,
+          sections: [{ titleIncludes: ['overview'], minPanels: 2, maxPanels: 3 }],
+        },
+      },
+      metadata: undefined,
+      output: createOutput([
+        {
+          type: 'tool_call',
+          tool_id: 'future.dashboard.tool',
+          results: [
+            createDashboardResult('dashboard', [
+              {
+                id: 'section-1',
+                title: 'Overview metrics',
+                panels: [{ id: 'panel-1' }, { id: 'panel-2' }],
+              },
+            ]),
+          ],
+        },
+      ]),
+    });
+
+    expect(result.score).toBe(1);
+    expect(result.metadata).toEqual(
+      expect.objectContaining({ sectionCount: 1, sectionFailures: [] })
+    );
+  });
+
+  it('evaluates grid overflow across top-level and section panels', async () => {
+    const result = await dashboardGridBoundsEvaluator.evaluate({
+      input: { question: 'question' },
+      expected: {
+        expectedDashboardAttachment: {
+          grid: { maxColumns: 48, noOverflow: true },
+        },
+      },
+      metadata: undefined,
+      output: createOutput([
+        {
+          type: 'tool_call',
+          tool_id: 'future.dashboard.tool',
+          results: [
+            createDashboardResult('dashboard', [
+              { id: 'panel-1', grid: { x: 0, y: 0, w: 24, h: 10 } },
+              {
+                id: 'section-1',
+                panels: [{ id: 'panel-2', grid: { x: 24, y: 0, w: 24, h: 10 } }],
+              },
+            ]),
+          ],
+        },
+      ]),
+    });
+
+    expect(result.score).toBe(1);
+    expect(result.metadata).toEqual(expect.objectContaining({ violations: [] }));
   });
 });
