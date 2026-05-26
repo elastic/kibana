@@ -39,6 +39,7 @@ import type {
   ExecuteManagedWorkflowOptions,
   GetManagedWorkflowStatusOptions,
   ManagedWorkflowOperationOptions,
+  ManagedWorkflowServiceInstallOptions,
   ManagedWorkflowStatusReport,
 } from '@kbn/workflows/server/types';
 import type {
@@ -80,7 +81,7 @@ import { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
 import type { WorkflowsServerPluginStartDeps } from '../types';
 
 export interface SearchWorkflowExecutionsParams {
-  workflowId: string;
+  workflowId?: string;
   statuses?: ExecutionStatus[];
   executionTypes?: ExecutionType[];
   executedBy?: string[];
@@ -423,7 +424,7 @@ export class WorkflowsService {
 
   public async installManagedWorkflow(
     id: ManagedWorkflowId,
-    options: ManagedWorkflowOperationOptions,
+    options: ManagedWorkflowServiceInstallOptions,
     registeredPluginId: string
   ): Promise<void> {
     await this.ensureInitialized();

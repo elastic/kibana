@@ -9,6 +9,7 @@
 
 import { createHash } from 'node:crypto';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import { pickManagedWorkflowFields } from '@kbn/workflows';
 import {
   getManagedWorkflowDefinition,
   getManagedWorkflowDefinitions,
@@ -21,6 +22,7 @@ import type {
   ExecuteManagedWorkflowOptions,
   GetManagedWorkflowStatusOptions,
   ManagedWorkflowOperationOptions,
+  ManagedWorkflowServiceInstallOptions,
   ManagedWorkflowStatus,
   ManagedWorkflowStatusReport,
 } from '@kbn/workflows/server/types';
@@ -129,7 +131,7 @@ export class ManagedWorkflowsService {
 
   public async installManagedWorkflow(
     id: ManagedWorkflowId,
-    options: ManagedWorkflowOperationOptions,
+    options: ManagedWorkflowServiceInstallOptions,
     registeredPluginId: string
   ): Promise<void> {
     for (let attempt = 0; attempt <= MAX_MANAGED_INSTALL_RETRIES; attempt++) {
@@ -150,7 +152,7 @@ export class ManagedWorkflowsService {
 
   private async installManagedWorkflowOnce(
     id: ManagedWorkflowId,
-    options: ManagedWorkflowOperationOptions,
+    options: ManagedWorkflowServiceInstallOptions,
     registeredPluginId: string
   ): Promise<void> {
     const definition = getManagedWorkflowDefinition(id);
@@ -202,7 +204,10 @@ export class ManagedWorkflowsService {
 
     // For unchanged definitions, preserve the current document as-is.
     // Enforced enablement is reapplied only when a managed update is installed.
-    if (existing.definitionHash === definitionHash) {
+    if (
+      existing.definitionHash === definitionHash &&
+      existing.managedVersion === definition.version
+    ) {
       if (this.areTemplateValuesEqual(existing.managedTemplateValues, managedTemplateValues)) {
         return;
       }
@@ -375,11 +380,7 @@ export class ManagedWorkflowsService {
         enabled: existing.enabled,
         definition: existing.definition,
         yaml: existing.yaml,
-        ...(existing.managed === true ? { managed: true } : {}),
-        ...(typeof existing.managedBy === 'string' ? { managedBy: existing.managedBy } : {}),
-        ...(typeof existing.originManagedWorkflowId === 'string'
-          ? { originManagedWorkflowId: existing.originManagedWorkflowId }
-          : {}),
+        ...pickManagedWorkflowFields(existing),
       },
       context,
       request

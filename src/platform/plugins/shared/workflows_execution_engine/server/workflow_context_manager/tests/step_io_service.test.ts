@@ -252,6 +252,42 @@ describe('StepIoService', () => {
 
       expect(service.getOutputSizeStats()).toEqual({ totalBytes: 0, stepCount: 0 });
     });
+
+    it('clears the evicted flag so rehydration does not overwrite fresh output', async () => {
+      const { state, service, stepExecutionRepository } = buildHarness({
+        evictionMinBytes: 0,
+      });
+      seedCompletedStepWithSize(
+        state,
+        service,
+        'step-1',
+        'run_health_check',
+        { stale: true },
+        1,
+        'workflow.execute'
+      );
+      await service.flushStepChanges();
+      await service.flushStepChanges();
+      expect(service.hasEvictedOutputs()).toBe(true);
+
+      service.setStepOutput('step-1', { health: 'ok' });
+
+      expect(service.hasEvictedOutputs()).toBe(false);
+      expect(service.getStepOutput('step-1')).toEqual({ health: 'ok' });
+
+      stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([
+        {
+          id: 'step-1',
+          output: { stale: true },
+          workflowRunId: 'test-workflow-execution-id',
+        } as unknown as EsWorkflowStepExecution,
+      ]);
+
+      await service.rehydrateOutputs(['step-1']);
+
+      expect(service.getStepOutput('step-1')).toEqual({ health: 'ok' });
+      expect(stepExecutionRepository.getStepExecutionsByIds).not.toHaveBeenCalled();
+    });
   });
 
   describe('size threshold (driven through setStepOutput)', () => {
@@ -1296,6 +1332,74 @@ describe('StepIoService', () => {
         node: stepCNode,
         predecessorsResolver: (n) => graph.getAllPredecessors(n.id),
       });
+      expect(stepExecutionRepository.getStepExecutionsByIds).not.toHaveBeenCalled();
+    });
+
+    it('preserves fresh output when a deferred step completes on resume before flush', async () => {
+      const { state, service, stepExecutionRepository } = buildHarness();
+      state.updateWorkflowExecution({ stepExecutionIds: ['exec-child'] });
+
+      stepExecutionRepository.getStepExecutionsByIds.mockResolvedValueOnce([
+        {
+          id: 'exec-child',
+          stepId: 'run_health_check',
+          stepType: 'workflow.execute',
+          status: ExecutionStatus.WAITING_FOR_CHILD,
+        } as EsWorkflowStepExecution,
+      ]);
+      await service.load();
+
+      expect(service.hasEvictedOutputs()).toBe(true);
+      expect(service.getStepOutput('exec-child')).toBeUndefined();
+
+      state.upsertStep({
+        id: 'exec-child',
+        stepId: 'run_health_check',
+        stepType: 'workflow.execute',
+        status: ExecutionStatus.COMPLETED,
+      });
+      const childOutput = { health: 'ok' };
+      service.setStepOutput('exec-child', childOutput);
+
+      const workflow = {
+        name: 'Parent',
+        version: '1',
+        description: 'test',
+        enabled: true,
+        triggers: [],
+        steps: [
+          {
+            name: 'run_health_check',
+            type: 'workflow.execute',
+            with: { 'workflow-id': 'child' },
+          } as ConnectorStep,
+          {
+            name: 'log_result',
+            type: 'console',
+            with: { message: '{{steps.run_health_check.output | json}}' },
+          } as ConnectorStep,
+        ],
+      } as unknown as WorkflowYaml;
+      const graph = WorkflowGraph.fromWorkflowDefinition(workflow);
+      const logResultNode = graph.topologicalOrder
+        .map((nodeId) => graph.getNode(nodeId))
+        .find((n) => n.stepId === 'log_result')!;
+
+      stepExecutionRepository.getStepExecutionsByIds.mockClear();
+      stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([
+        {
+          id: 'exec-child',
+          output: null,
+          workflowRunId: 'test-workflow-execution-id',
+        } as unknown as EsWorkflowStepExecution,
+      ]);
+
+      await service.prepareForRead({
+        node: logResultNode,
+        predecessorsResolver: (n) => graph.getAllPredecessors(n.id),
+      });
+
+      expect(service.getStepOutput('exec-child')).toEqual(childOutput);
       expect(stepExecutionRepository.getStepExecutionsByIds).not.toHaveBeenCalled();
     });
 

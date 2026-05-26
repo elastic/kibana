@@ -1058,6 +1058,7 @@ describe('ManagedWorkflowsService', () => {
           managed: true,
           managedBy: PLUGIN_ID,
           originManagedWorkflowId: WORKFLOW_ID,
+          managedVersion: 1,
         }),
         {
           spaceId: SPACE_ID,
