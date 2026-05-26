@@ -132,14 +132,6 @@ const CreateRulePageComponent: React.FC<{}> = () => {
   const [activeStep, setActiveStep] = useState<RuleStep>(RuleStep.defineRule);
   const getNextStep = (step: RuleStep): RuleStep | undefined =>
     ruleStepsOrder[ruleStepsOrder.indexOf(step) + 1];
-  // @ts-expect-error EUI team to resolve: https://github.com/elastic/eui/issues/5985
-  const defineRuleRef = useRef<EuiAccordion | null>(null);
-  // @ts-expect-error EUI team to resolve: https://github.com/elastic/eui/issues/5985
-  const aboutRuleRef = useRef<EuiAccordion | null>(null);
-  // @ts-expect-error EUI team to resolve: https://github.com/elastic/eui/issues/5985
-  const scheduleRuleRef = useRef<EuiAccordion | null>(null);
-  // @ts-expect-error EUI team to resolve: https://github.com/elastic/eui/issues/5985
-  const ruleActionsRef = useRef<EuiAccordion | null>(null);
 
   const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const [threatIndicesConfig] = useUiSetting$<string[]>(DEFAULT_THREAT_INDEX_KEY);
@@ -303,6 +295,22 @@ const CreateRulePageComponent: React.FC<{}> = () => {
     (isOpen: boolean) => handleAccordionToggle(RuleStep.ruleActions, isOpen),
     [handleAccordionToggle]
   );
+
+  const toggleStepAccordion = useCallback(
+    (step: RuleStep | null) => {
+      if (step === RuleStep.defineRule) {
+        handleAccordionToggle(RuleStep.defineRule, true);
+      } else if (step === RuleStep.aboutRule) {
+        handleAccordionToggle(RuleStep.aboutRule, true);
+      } else if (step === RuleStep.scheduleRule) {
+        handleAccordionToggle(RuleStep.scheduleRule, true);
+      } else if (step === RuleStep.ruleActions) {
+        handleAccordionToggle(RuleStep.ruleActions, true);
+      }
+    },
+    [handleAccordionToggle]
+  );
+
   const goToStep = useCallback(
     (step: RuleStep) => {
       if (
@@ -316,18 +324,6 @@ const CreateRulePageComponent: React.FC<{}> = () => {
     },
     [activeStep, aiRuleCreation, openSteps]
   );
-
-  const toggleStepAccordion = (step: RuleStep | null) => {
-    if (step === RuleStep.defineRule) {
-      defineRuleRef.current?.onToggle();
-    } else if (step === RuleStep.aboutRule) {
-      aboutRuleRef.current?.onToggle();
-    } else if (step === RuleStep.scheduleRule) {
-      scheduleRuleRef.current?.onToggle();
-    } else if (step === RuleStep.ruleActions) {
-      ruleActionsRef.current?.onToggle();
-    }
-  };
 
   const openStepsRef = useRef(openSteps);
   openStepsRef.current = openSteps;
@@ -942,11 +938,11 @@ const CreateRulePageComponent: React.FC<{}> = () => {
                       />
                       <MyEuiPanel zindex={4} hasBorder>
                         <MemoEuiAccordion
+                          forceState={openSteps[RuleStep.defineRule] ? 'open' : 'closed'}
                           initialIsOpen={true}
                           id={RuleStep.defineRule}
                           buttonContent={defineRuleButton}
                           paddingSize="xs"
-                          ref={defineRuleRef}
                           onToggle={toggleDefineStep}
                           extraAction={memoDefineStepExtraAction}
                         >
@@ -956,11 +952,11 @@ const CreateRulePageComponent: React.FC<{}> = () => {
                       <EuiSpacer size="l" />
                       <MyEuiPanel hasBorder zindex={3}>
                         <MemoEuiAccordion
+                          forceState={openSteps[RuleStep.aboutRule] ? 'open' : 'closed'}
                           initialIsOpen={false}
                           id={RuleStep.aboutRule}
                           buttonContent={aboutRuleButton}
                           paddingSize="xs"
-                          ref={aboutRuleRef}
                           onToggle={toggleAboutStep}
                           extraAction={memoAboutStepExtraAction}
                         >
@@ -970,11 +966,11 @@ const CreateRulePageComponent: React.FC<{}> = () => {
                       <EuiSpacer size="l" />
                       <MyEuiPanel hasBorder zindex={2}>
                         <MemoEuiAccordion
+                          forceState={openSteps[RuleStep.scheduleRule] ? 'open' : 'closed'}
                           initialIsOpen={false}
                           id={RuleStep.scheduleRule}
                           buttonContent={scheduleRuleButton}
                           paddingSize="xs"
-                          ref={scheduleRuleRef}
                           onToggle={toggleScheduleStep}
                           extraAction={memoScheduleStepExtraAction}
                         >
@@ -984,11 +980,11 @@ const CreateRulePageComponent: React.FC<{}> = () => {
                       <EuiSpacer size="l" />
                       <MyEuiPanel hasBorder zindex={1}>
                         <MemoEuiAccordion
+                          forceState={openSteps[RuleStep.ruleActions] ? 'open' : 'closed'}
                           initialIsOpen={false}
                           id={RuleStep.ruleActions}
                           buttonContent={ruleActionsButton}
                           paddingSize="xs"
-                          ref={ruleActionsRef}
                           onToggle={toggleActionsStep}
                           extraAction={memoActionsStepExtraAction}
                         >
