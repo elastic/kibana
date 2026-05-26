@@ -169,7 +169,7 @@ export const taskModelVersions: SavedObjectsModelVersionMap = {
         addedMappings: {
           userScope: {
             properties: {
-              userProfileId: { type: 'keyword' },
+              userProfileId: { type: 'keyword', ignore_above: 1024 },
             },
           },
         },

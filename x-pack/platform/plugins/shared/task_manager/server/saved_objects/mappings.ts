@@ -86,6 +86,7 @@ export const taskMappings: SavedObjectsTypeMappingDefinition = {
         },
         userProfileId: {
           type: 'keyword',
+          ignore_above: 1024,
         },
         // NO NEED TO BE INDEXED
         // apiKeyCreatedByUser: {
