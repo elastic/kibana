@@ -27,8 +27,7 @@ import { registerAttachments } from './agent_builder/attachments/register_attach
 import { registerTools } from './agent_builder/tools/register_tools';
 import { registerSkills } from './agent_builder/skills/register_skills';
 import { registerRoutes as registerThreatIntelligenceRoutes } from './threat_intelligence/routes';
-import { installIndexTemplates as installThreatIntelligenceIndexTemplates } from './threat_intelligence/setup/index_templates';
-import { seedDefaultSources as seedThreatIntelligenceDefaultSources } from './threat_intelligence/setup/seed_default_sources';
+import { bootstrapThreatIntelligence } from './threat_intelligence/setup/bootstrap_threat_intelligence';
 import { installBuiltinWorkflows as installThreatIntelligenceBuiltinWorkflows } from './threat_intelligence/workflows';
 import { registerThreatIntelligenceWorkflowSteps } from './threat_intelligence/workflows/step_types';
 import { registerDeprecatedThreatIntelligenceFeature } from './threat_intelligence/feature_deprecation';
@@ -387,6 +386,18 @@ export class Plugin implements ISecuritySolutionPlugin {
           'workflowsExtensions plugin not available — skipping threat_intel.fetch_source registration'
         );
       }
+
+      // Bootstrap indices + the default feed catalog once core start services
+      // (and Elasticsearch) are ready. `start()` can race a cold cluster and
+      // leave `.kibana-threat-intel-sources` empty without retrying.
+      void core.getStartServices().then(([coreStart]) => {
+        void bootstrapThreatIntelligence({
+          esClient: coreStart.elasticsearch.client.asInternalUser,
+          logger: this.logger.get('threatIntelligence'),
+        }).catch((err) => {
+          this.logger.error(`Failed to bootstrap threat intelligence: ${(err as Error).message}`);
+        });
+      });
     } else {
       this.logger.debug(
         'Threat Intelligence routes not registered. Enable via xpack.securitySolution.enableExperimental: ["threatIntelligenceSkillEnabled"]'
@@ -439,22 +450,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.threatIntelligenceInference = plugins.inference;
 
     if (experimentalFeatures.threatIntelligenceSkillEnabled) {
-      const esClient = core.elasticsearch.client.asInternalUser;
       const logger = this.logger.get('threatIntelligence');
-
-      // Index template installation + source seeding are best-effort. Seed
-      // runs only after templates succeed because the seeded indices depend
-      // on the templates having been put. Errors are logged but never thrown
-      // so the rest of security_solution start stays healthy.
-      installThreatIntelligenceIndexTemplates({ esClient, logger })
-        .then(async () => {
-          await seedThreatIntelligenceDefaultSources({ esClient, logger });
-        })
-        .catch((err) => {
-          logger.error(
-            `Failed to install threat-intelligence index templates / seed data: ${err.message}`
-          );
-        });
 
       if (this.threatIntelligenceWorkflowsManagement) {
         // Built-in workflows are upserted idempotently by stable id at every

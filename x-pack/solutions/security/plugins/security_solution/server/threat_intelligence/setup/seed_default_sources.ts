@@ -1883,11 +1883,35 @@ export const verifyCategoryCoverage = (
   }
 };
 
+export interface SeedDefaultSourcesResult {
+  total: number;
+  created: number;
+  skipped: number;
+  failed: number;
+}
+
+const BULK_CREATE_CHUNK_SIZE = 50;
+
+const buildDefaultSourceDocument = (src: DefaultSource, now: string) => ({
+  adapter_type: src.adapter_type,
+  name: src.name,
+  enabled: true,
+  config: src.config,
+  tags: src.tags,
+  // Seeded sources are visible from every space; operator-added
+  // sources are tagged with the originating space.
+  space_id: GLOBAL_SPACE_ID,
+  created_at: now,
+  updated_at: now,
+});
+
+const isCreateConflict = (error: { type?: string; status?: number } | undefined): boolean =>
+  error?.type === 'version_conflict_engine_exception' || error?.status === 409;
+
 /**
- * Idempotent seeding — inserts each default source by stable id with
- * `op_type: index` so re-runs don't duplicate. Operator edits to enabled,
- * tags, or config survive subsequent seeds because we only write the fields
- * that should be authoritative on initial install.
+ * Idempotent seeding — bulk `create` by stable id so re-runs do not duplicate.
+ * Operator edits to enabled, tags, or config survive subsequent seeds because
+ * we only insert missing ids (conflicts are treated as already present).
  */
 export const seedDefaultSources = async ({
   esClient,
@@ -1895,38 +1919,71 @@ export const seedDefaultSources = async ({
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
-}): Promise<void> => {
+}): Promise<SeedDefaultSourcesResult> => {
   const log = logger.get('seed-default-sources');
   verifyCategoryCoverage();
   const now = new Date().toISOString();
 
-  for (const src of DEFAULT_SOURCES) {
+  const result: SeedDefaultSourcesResult = {
+    total: DEFAULT_SOURCES.length,
+    created: 0,
+    skipped: 0,
+    failed: 0,
+  };
+
+  log.info(`Seeding ${result.total} default threat-intelligence sources`);
+
+  for (let offset = 0; offset < DEFAULT_SOURCES.length; offset += BULK_CREATE_CHUNK_SIZE) {
+    const chunk = DEFAULT_SOURCES.slice(offset, offset + BULK_CREATE_CHUNK_SIZE);
+    const operations = chunk.flatMap((src) => [
+      { create: { _index: THREAT_INTEL_SOURCES_INDEX, _id: src.id } },
+      buildDefaultSourceDocument(src, now),
+    ]);
+
     try {
-      const existing = await esClient.get(
-        { index: THREAT_INTEL_SOURCES_INDEX, id: src.id },
-        { ignore: [404] }
-      );
-      if (!existing.found) {
-        await esClient.index({
-          index: THREAT_INTEL_SOURCES_INDEX,
-          id: src.id,
-          document: {
-            adapter_type: src.adapter_type,
-            name: src.name,
-            enabled: true,
-            config: src.config,
-            tags: src.tags,
-            // Seeded sources are visible from every space; operator-added
-            // sources are tagged with the originating space.
-            space_id: GLOBAL_SPACE_ID,
-            created_at: now,
-            updated_at: now,
-          },
-        });
-        log.debug(`Seeded default source ${src.id}`);
+      const bulkResponse = await esClient.bulk({
+        operations,
+        refresh: false,
+      });
+
+      for (const item of bulkResponse.items) {
+        const createItem = item.create;
+        if (!createItem) {
+          result.failed += 1;
+        } else if (createItem.error) {
+          if (isCreateConflict(createItem.error)) {
+            result.skipped += 1;
+          } else {
+            result.failed += 1;
+            log.warn(
+              `Failed to seed default source ${createItem._id}: ${
+                createItem.error.type ?? 'error'
+              } ${createItem.error.reason ?? ''}`
+            );
+          }
+        } else if (createItem.result === 'created') {
+          result.created += 1;
+          log.debug(`Seeded default source ${createItem._id}`);
+        }
       }
     } catch (err) {
-      log.warn(`Failed to seed default source ${src.id}: ${(err as Error).message}`);
+      const message = (err as Error).message;
+      result.failed += chunk.length;
+      log.warn(
+        `Bulk seed failed for sources ${chunk[0]?.id ?? '?'}..${
+          chunk[chunk.length - 1]?.id ?? '?'
+        }: ${message}`
+      );
     }
   }
+
+  if (result.created > 0) {
+    await esClient.indices.refresh({ index: THREAT_INTEL_SOURCES_INDEX });
+  }
+
+  log.info(
+    `Default source seeding finished: ${result.created} created, ${result.skipped} skipped, ${result.failed} failed`
+  );
+
+  return result;
 };

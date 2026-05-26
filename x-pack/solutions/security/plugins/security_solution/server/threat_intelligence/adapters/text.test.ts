@@ -68,7 +68,7 @@ describe('truncate', () => {
 });
 
 describe('buildReportContent', () => {
-  it('mirrors title and body into the bm25 text siblings', () => {
+  it('builds the strict-mapping content block without bm25 siblings', () => {
     expect(
       buildReportContent({
         title: 'Ransomware uptick',
@@ -78,9 +78,18 @@ describe('buildReportContent', () => {
     ).toEqual({
       title: 'Ransomware uptick',
       body_text: 'Campaign details',
-      title_bm25: 'Ransomware uptick',
-      body_text_bm25: 'Campaign details',
       language: 'en',
+    });
+    expect(
+      buildReportContent({
+        title: 'Advisory',
+        bodyText: 'Details',
+        bodyHtml: '<p>Details</p>',
+      })
+    ).toEqual({
+      title: 'Advisory',
+      body_text: 'Details',
+      body_html: '<p>Details</p>',
     });
   });
 });

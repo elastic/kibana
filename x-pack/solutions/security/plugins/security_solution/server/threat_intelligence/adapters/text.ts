@@ -93,16 +93,15 @@ export const truncate = (input: string, maxLength: number): string => {
 export interface ReportContentDocument {
   title: string;
   body_text: string;
-  title_bm25: string;
-  body_text_bm25: string;
   body_html?: string;
   language?: string;
 }
 
 /**
- * Build the `content` object for a threat report. Mirrors plain-text values into
- * the `*_bm25` siblings so `search_reports` field-sorted modes can `multi_match`
- * without touching `semantic_text` fields (which reject match queries).
+ * Build the `content` object for a threat report. The `content.title_bm25` /
+ * `content.body_text_bm25` siblings are populated by Elasticsearch `copy_to`
+ * on index (see `setup/index_templates.ts`) so ingest paths stay aligned with
+ * the strict mapping and `normalizedReportSchema`.
  */
 export const buildReportContent = ({
   title,
@@ -117,8 +116,6 @@ export const buildReportContent = ({
 }): ReportContentDocument => ({
   title,
   body_text: bodyText,
-  title_bm25: title,
-  body_text_bm25: bodyText,
   ...(bodyHtml !== undefined ? { body_html: bodyHtml } : {}),
   ...(language !== undefined ? { language } : {}),
 });
