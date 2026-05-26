@@ -328,6 +328,8 @@ curl -s -u elastic:changeme -X POST http://localhost:5620/s/exploratory-testing/
 ```
 For user-provided environments: replace URL and credentials. For serverless: same endpoint, credentials from config.
 
+> **API key note:** The fake credentials above (`accessKey: test`) are sufficient for testing the connector UI (visibility, selection, error handling). For feature areas that need Kibana to **actually call the AI model** to produce data — e.g., SIEM Migrations translation — real AWS credentials are required. Pass them via env vars in the invocation `Setup` section using `$AWS_ACCESS_KEY` / `$AWS_SECRET_KEY` references, and the agent will resolve them before creating the connector.
+
 **esArchiver fixtures (stateful environments only):**
 
 If the scope `Setup` section lists esArchiver fixtures, load them via the Kibana API. For serverless, attempt the load — if the response is 404 or 400, skip and add to `skipped_setup`:
