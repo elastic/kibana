@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { v5 as uuidv5 } from 'uuid';
+import { escapeQuotes } from '@kbn/es-query';
 import { omit } from 'lodash';
 import { load } from 'js-yaml';
 import deepEqual from 'fast-deep-equal';
@@ -59,7 +60,7 @@ import {
   FLEET_SERVER_PACKAGE,
 } from '../../common/constants';
 import type { ValueOf } from '../../common/types';
-import { normalizeHostsForAgents } from '../../common/services';
+import { normalizeHostsForAgents, validateFleetSavedObjectId } from '../../common/services';
 import {
   FleetEncryptedSavedObjectEncryptionKeyRequired,
   OutputInvalidError,
@@ -134,12 +135,19 @@ async function getAgentPoliciesPerOutput(outputId?: string, isDefault?: boolean)
   const internalSoClientWithoutSpaceExtension =
     appContextService.getInternalUserSOClientWithoutSpaceExtension();
   let agentPoliciesKuery: string;
-  const packagePoliciesKuery: string = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.output_id:"${outputId}"`;
+  let packagePoliciesKuery: string | undefined;
   if (outputId) {
+    packagePoliciesKuery = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.output_id:"${escapeQuotes(
+      outputId
+    )}"`;
     if (isDefault) {
-      agentPoliciesKuery = `${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:"${outputId}" or not ${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:*`;
+      agentPoliciesKuery = `${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:"${escapeQuotes(
+        outputId
+      )}" or not ${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:*`;
     } else {
-      agentPoliciesKuery = `${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:"${outputId}"`;
+      agentPoliciesKuery = `${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:"${escapeQuotes(
+        outputId
+      )}"`;
     }
   } else {
     if (isDefault) {
@@ -160,11 +168,13 @@ async function getAgentPoliciesPerOutput(outputId?: string, isDefault?: boolean)
   // Get package policies using output and derive agent policies from that which
   // are not already identfied above. The IDs cannot be used as part of the kuery
   // above since the underlying saved object client .find() only filters on attributes
-  const packagePolicySOs = await packagePolicyService.list(internalSoClientWithoutSpaceExtension, {
-    kuery: packagePoliciesKuery,
-    perPage: SO_SEARCH_LIMIT,
-    spaceId: '*',
-  });
+  const packagePolicySOs = packagePoliciesKuery
+    ? await packagePolicyService.list(internalSoClientWithoutSpaceExtension, {
+        kuery: packagePoliciesKuery,
+        perPage: SO_SEARCH_LIMIT,
+        spaceId: '*',
+      })
+    : undefined;
   const agentPolicyIdsFromPackagePolicies = [
     ...new Set(
       packagePolicySOs?.items.reduce((acc: string[], packagePolicy) => {
@@ -551,6 +561,8 @@ class OutputService {
   ): Promise<Output> {
     const logger = appContextService.getLogger();
     logger.debug(`Creating new output`);
+
+    validateFleetSavedObjectId(options?.id);
 
     const data: OutputSOAttributes = { ...omit(output, ['ssl', 'secrets']) };
 
