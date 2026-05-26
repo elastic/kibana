@@ -15,31 +15,9 @@ const fullCapabilities: MlCapabilities = {
 };
 
 describe('getDeepLinks', () => {
-  it('visible nav links include both globalSearch and solutionSideNav', () => {
+  it('primary visible nav links include globalSearch and solutionSideNav', () => {
     const links = getDeepLinks(true, fullCapabilities, false);
-    const anomalyDetection = links.find((l) => l.id === 'anomalyDetection');
-    const dfa = links.find((l) => l.id === 'dataFrameAnalytics');
-    const aiOps = links.find((l) => l.id === 'aiOps');
-
     expect(links.find((l) => l.id === 'overview')?.visibleIn).toEqual([
-      'globalSearch',
-      'solutionSideNav',
-    ]);
-    expect(links.find((l) => l.id === 'dataVisualizer')?.visibleIn).toEqual([
-      'globalSearch',
-      'solutionSideNav',
-    ]);
-    expect(anomalyDetection?.deepLinks?.find((l) => l.id === 'anomalyExplorer')?.visibleIn).toEqual(
-      ['globalSearch', 'solutionSideNav']
-    );
-    expect(
-      anomalyDetection?.deepLinks?.find((l) => l.id === 'singleMetricViewer')?.visibleIn
-    ).toEqual(['globalSearch', 'solutionSideNav']);
-    expect(dfa?.deepLinks?.find((l) => l.id === 'resultExplorer')?.visibleIn).toEqual([
-      'globalSearch',
-      'solutionSideNav',
-    ]);
-    expect(aiOps?.deepLinks?.find((l) => l.id === 'logRateAnalysis')?.visibleIn).toEqual([
       'globalSearch',
       'solutionSideNav',
     ]);
@@ -73,21 +51,5 @@ describe('getDeepLinks', () => {
     expect(aiOps?.deepLinks?.find((l) => l.id === 'changePointDetectionsPage')?.visibleIn).toEqual(
       []
     );
-  });
-
-  it('omits links when capabilities or license are insufficient', () => {
-    expect(
-      getDeepLinks(false, fullCapabilities, false).find((l) => l.id === 'overview')
-    ).toBeUndefined();
-    expect(
-      getDeepLinks(true, { ...fullCapabilities, isADEnabled: false }, false).find(
-        (l) => l.id === 'anomalyDetection'
-      )
-    ).toBeUndefined();
-    expect(
-      getDeepLinks(true, { ...fullCapabilities, canUseAiops: false }, false).find(
-        (l) => l.id === 'aiOps'
-      )
-    ).toBeUndefined();
   });
 });

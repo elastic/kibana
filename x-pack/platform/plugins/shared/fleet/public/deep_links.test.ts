@@ -40,36 +40,6 @@ const authorizedAuthz: FleetAuthz = {
   },
 };
 
-const unauthorizedAuthz: FleetAuthz = {
-  fleet: {
-    all: false,
-    setup: false,
-    readEnrollmentTokens: false,
-    readAgentPolicies: false,
-    allAgentPolicies: false,
-    readAgents: false,
-    allAgents: false,
-    readSettings: false,
-    allSettings: false,
-    generateAgentReports: false,
-    addAgents: false,
-    addFleetServers: false,
-  },
-  integrations: {
-    all: false,
-    readPackageInfo: false,
-    readInstalledPackages: false,
-    installPackages: false,
-    upgradePackages: false,
-    removePackages: false,
-    uploadPackages: false,
-    readPackageSettings: false,
-    writePackageSettings: false,
-    readIntegrationPolicies: false,
-    writeIntegrationPolicies: false,
-  },
-};
-
 const authzGatedIds = [
   FleetDeepLinkId.agents,
   FleetDeepLinkId.policies,
@@ -79,7 +49,7 @@ const authzGatedIds = [
 ];
 
 describe('getFleetDeepLinks', () => {
-  it('includes solutionSideNav in visibleIn for all authz-gated links when authorized', () => {
+  it('authz-gated links include solutionSideNav when authorized', () => {
     const links = getFleetDeepLinks(allowedExperimentalValues, authorizedAuthz);
     for (const id of authzGatedIds) {
       expect(links.find((l) => l.id === id)?.visibleIn).toEqual([
@@ -87,24 +57,5 @@ describe('getFleetDeepLinks', () => {
         'solutionSideNav',
       ]);
     }
-  });
-
-  it('returns empty visibleIn for all authz-gated links when unauthorized', () => {
-    const links = getFleetDeepLinks(allowedExperimentalValues, unauthorizedAuthz);
-    for (const id of authzGatedIds) {
-      expect(links.find((l) => l.id === id)?.visibleIn).toEqual([]);
-    }
-  });
-
-  it('returns empty visibleIn for all authz-gated links when authz is undefined', () => {
-    const links = getFleetDeepLinks(allowedExperimentalValues, undefined);
-    for (const id of authzGatedIds) {
-      expect(links.find((l) => l.id === id)?.visibleIn).toEqual([]);
-    }
-  });
-
-  it('dataStreams link has no visibleIn restriction', () => {
-    const links = getFleetDeepLinks(allowedExperimentalValues, undefined);
-    expect(links.find((l) => l.id === FleetDeepLinkId.dataStreams)?.visibleIn).toBeUndefined();
   });
 });

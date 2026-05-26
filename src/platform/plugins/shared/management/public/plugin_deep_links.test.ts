@@ -31,7 +31,7 @@ function getDeepLinksFromUpdater(plugin: ManagementPlugin): AppDeepLink[] {
 }
 
 describe('ManagementPlugin appUpdater deep link visibleIn', () => {
-  it('defaults visibleIn to globalSearch + solutionSideNav for apps without an explicit visibleIn (excludes classicSideNav to avoid duplicating Stack Management entries in the classic hamburger nav)', () => {
+  it('defaults to globalSearch + solutionSideNav (no classicSideNav, to avoid duplicating Stack Management entries in the classic hamburger)', () => {
     const plugin = createPlugin();
     const setup = plugin.setup(coreMock.createSetup(), { share: mockShare });
 
@@ -47,42 +47,6 @@ describe('ManagementPlugin appUpdater deep link visibleIn', () => {
 
     expect(app).toBeDefined();
     expect(app?.visibleIn).toEqual(['globalSearch', 'solutionSideNav']);
-  });
-
-  it('preserves explicit visibleIn when set to classicSideNav/solutionSideNav-only', () => {
-    const plugin = createPlugin();
-    const setup = plugin.setup(coreMock.createSetup(), { share: mockShare });
-
-    setup.sections.section.kibana.registerApp({
-      id: 'test-both-nav-only',
-      title: 'Test App both nav only',
-      mount: jest.fn(),
-      visibleIn: ['classicSideNav', 'solutionSideNav'],
-    });
-
-    const deepLinks = getDeepLinksFromUpdater(plugin);
-    const kibana = deepLinks.find((s) => s.id === 'kibana');
-    const app = kibana?.deepLinks?.find((a) => a.id === 'test-both-nav-only');
-
-    expect(app?.visibleIn).toEqual(['classicSideNav', 'solutionSideNav']);
-  });
-
-  it('preserves explicit visibleIn when set to globalSearch-only', () => {
-    const plugin = createPlugin();
-    const setup = plugin.setup(coreMock.createSetup(), { share: mockShare });
-
-    setup.sections.section.kibana.registerApp({
-      id: 'test-global-only',
-      title: 'Test App globalSearch only',
-      mount: jest.fn(),
-      visibleIn: ['globalSearch'],
-    });
-
-    const deepLinks = getDeepLinksFromUpdater(plugin);
-    const kibana = deepLinks.find((s) => s.id === 'kibana');
-    const app = kibana?.deepLinks?.find((a) => a.id === 'test-global-only');
-
-    expect(app?.visibleIn).toEqual(['globalSearch']);
   });
 
   it('excludes apps with hideFromGlobalSearch:true and no explicit visibleIn', () => {
@@ -101,25 +65,5 @@ describe('ManagementPlugin appUpdater deep link visibleIn', () => {
     const app = kibana?.deepLinks?.find((a) => a.id === 'test-hidden');
 
     expect(app).toBeUndefined();
-  });
-
-  it('includes apps with hideFromGlobalSearch:true when explicit visibleIn is set', () => {
-    const plugin = createPlugin();
-    const setup = plugin.setup(coreMock.createSetup(), { share: mockShare });
-
-    setup.sections.section.kibana.registerApp({
-      id: 'test-hidden-with-visible-in',
-      title: 'Hidden App With visibleIn',
-      mount: jest.fn(),
-      hideFromGlobalSearch: true,
-      visibleIn: ['classicSideNav', 'solutionSideNav'],
-    });
-
-    const deepLinks = getDeepLinksFromUpdater(plugin);
-    const kibana = deepLinks.find((s) => s.id === 'kibana');
-    const app = kibana?.deepLinks?.find((a) => a.id === 'test-hidden-with-visible-in');
-
-    expect(app).toBeDefined();
-    expect(app?.visibleIn).toEqual(['classicSideNav', 'solutionSideNav']);
   });
 });

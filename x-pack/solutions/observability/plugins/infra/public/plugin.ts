@@ -99,7 +99,7 @@ export const getInfraDeepLinks = ({
               defaultMessage: 'Metrics Explorer',
             }),
             path: '/explorer',
-            visibleIn: ['globalSearch', 'solutionSideNav'] as AppDeepLinkLocations[],
+            visibleIn,
           },
         ]
       : []),
@@ -109,7 +109,7 @@ export const getInfraDeepLinks = ({
         defaultMessage: 'Settings',
       }),
       path: '/settings',
-      visibleIn: ['solutionSideNav'],
+      visibleIn: ['globalSearch'],
     },
     {
       id: 'assetDetails',

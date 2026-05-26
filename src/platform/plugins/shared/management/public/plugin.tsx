@@ -83,10 +83,6 @@ export class ManagementPlugin
             title: mgmtApp.title,
             path: mgmtApp.basePath,
             keywords: mgmtApp.keywords,
-            // Default excludes 'classicSideNav' so management sub-apps do not surface as
-            // top-level entries in the classic hamburger nav (the "Stack Management" app
-            // is the entry point there). 'solutionSideNav' is included so solution
-            // navigation trees can keep referencing them by id (e.g. 'management:dataViews').
             visibleIn: mgmtApp.visibleIn ?? ['globalSearch', 'solutionSideNav'],
           })),
       }));

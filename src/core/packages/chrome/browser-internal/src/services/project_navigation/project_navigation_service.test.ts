@@ -250,7 +250,7 @@ describe('initNavigation()', () => {
       expect(node.children?.map((c) => c.id)).toEqual(['management:genAiSettings']);
     });
 
-    test('should filter out deepLinks that only include classicSideNav from visibleIn', async () => {
+    test('removes deepLinks from the solution nav tree when their visibleIn excludes solutionSideNav', async () => {
       const { projectNavigation: svc, navLinksService: nls } = setup({
         navLinkIds: ['management:genAiSettings'],
       });
@@ -273,7 +273,7 @@ describe('initNavigation()', () => {
               type: 'navGroup',
               children: [
                 { link: 'management:genAiSettings' },
-                { link: 'management:evals' }, // classicSideNav only → removed from solution nav
+                { link: 'management:evals' }, // visibleIn excludes solutionSideNav → removed
               ],
             },
           ],

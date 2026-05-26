@@ -102,21 +102,16 @@ export interface App<HistoryLocationState = unknown> extends AppNavOptions {
   status?: AppStatus;
 
   /**
-   * Optional list of locations where the app is visible.
-   *
-   * Accepts the following values:
-   * - "globalSearch": the link will appear in the global search bar
-   * - "home": the link will appear on the Kibana home page
-   * - "kibanaOverview": the link will appear in the Kibana overview page
-   * - "classicSideNav": the link will appear in the classic (hamburger) side navigation only.
-   * - "solutionSideNav": the link will appear in solution navs only, not in the classic side navigation.
-   *   Use this when the link should be accessible from a solution nav but hidden from the classic hamburger menu.
-   *
-   * To appear in both classic and solution navs, use `['classicSideNav', 'solutionSideNav']`.
+   * Locations where the app is visible. Each value enables one surface:
+   * - `globalSearch`: top-bar search results
+   * - `classicSideNav`: classic (hamburger) side navigation
+   * - `solutionSideNav`: solution side navs (Observability, Security, Search)
+   * - `home`: Kibana home page
+   * - `kibanaOverview`: Kibana overview page
    *
    * @default ['globalSearch', 'classicSideNav', 'solutionSideNav']
    * unless the status is marked as `inaccessible`.
-   * @note Set to `[]` (empty array) to hide this link
+   * @note Set to `[]` (empty array) to hide this link from every surface.
    */
   visibleIn?: AppDeepLinkLocations[];
 
@@ -260,6 +255,7 @@ export type PublicAppDeepLinkInfo = Omit<AppDeepLink, 'deepLinks' | 'keywords' |
 export type AppDeepLinkLocations =
   | 'globalSearch'
   | 'classicSideNav'
+  // TODO: rename to 'sideNav' when 'classicSideNav' is removed (classic nav deprecation).
   | 'solutionSideNav'
   | 'home'
   | 'kibanaOverview';
@@ -280,7 +276,8 @@ export type AppDeepLink<Id extends string = string> = {
   /** Optional keywords to match with in deep links search. Omit if this part of the hierarchy does not have a page URL. */
   keywords?: string[];
   /**
-   * Optional list of locations where the deepLink is visible. By default the deepLink is visible in "globalSearch".
+   * Locations where the deep link is visible. See {@link App.visibleIn} for the list of surfaces.
+   * @default ['globalSearch']
    */
   visibleIn?: AppDeepLinkLocations[];
   /**

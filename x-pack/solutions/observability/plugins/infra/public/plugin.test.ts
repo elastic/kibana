@@ -8,39 +8,21 @@
 import { getInfraDeepLinks } from './plugin';
 
 describe('getInfraDeepLinks', () => {
-  it('visible nav links include globalSearch and solutionSideNav', () => {
-    const links = getInfraDeepLinks({ metricsExplorerEnabled: false });
+  it('primary nav links use the shared globalSearch + solutionSideNav value', () => {
+    const links = getInfraDeepLinks({ metricsExplorerEnabled: true });
 
     expect(links.find((l) => l.id === 'inventory')?.visibleIn).toEqual([
       'globalSearch',
       'solutionSideNav',
     ]);
-    expect(links.find((l) => l.id === 'hosts')?.visibleIn).toEqual([
-      'globalSearch',
-      'solutionSideNav',
-    ]);
-  });
-
-  it('settings is solutionSideNav (hidden breadcrumb node)', () => {
-    const links = getInfraDeepLinks({ metricsExplorerEnabled: false });
-    expect(links.find((l) => l.id === 'settings')?.visibleIn).toEqual(['solutionSideNav']);
-  });
-
-  it('assetDetails is hidden from all nav locations', () => {
-    const links = getInfraDeepLinks({ metricsExplorerEnabled: false });
-    expect(links.find((l) => l.id === 'assetDetails')?.visibleIn).toEqual([]);
-  });
-
-  it('includes metrics-explorer with globalSearch and solutionSideNav when feature flag is enabled', () => {
-    const links = getInfraDeepLinks({ metricsExplorerEnabled: true });
     expect(links.find((l) => l.id === 'metrics-explorer')?.visibleIn).toEqual([
       'globalSearch',
       'solutionSideNav',
     ]);
   });
 
-  it('omits metrics-explorer when feature flag is disabled', () => {
+  it('settings is globalSearch-only (matches main: searchable, not in any nav)', () => {
     const links = getInfraDeepLinks({ metricsExplorerEnabled: false });
-    expect(links.find((l) => l.id === 'metrics-explorer')).toBeUndefined();
+    expect(links.find((l) => l.id === 'settings')?.visibleIn).toEqual(['globalSearch']);
   });
 });

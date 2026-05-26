@@ -200,7 +200,7 @@ describe('WorkflowsPlugin', () => {
         ]);
       });
 
-      it('should hide the app from solutionSideNav when the user lacks read capability', () => {
+      it('should hide the app from classicSideNav and solutionSideNav when the user lacks read capability', () => {
         setReadCapability(false);
         setLicenseValid(true);
         const updates = captureAppUpdates();
