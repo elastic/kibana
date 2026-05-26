@@ -27,7 +27,7 @@ import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import {
   apiHasPinnedPanels,
   apiHasSections,
-  initializeUnsavedChanges,
+  initializeStateApi,
   type PublishingSubject,
 } from '@kbn/presentation-publishing';
 
@@ -235,21 +235,16 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
           }
         );
 
-      function serializeState(): OptionsListDSLControlState {
-        return {
+      const stateApi = initializeStateApi<OptionsListDSLControlState>({
+        uuid,
+        parentApi,
+        serializeState: (): OptionsListDSLControlState => ({
           ...dataControlManager.getLatestState(),
           ...selectionsManager.getLatestState(),
           ...editorStateManager.getLatestState(),
-
           // serialize state that cannot be changed to keep it consistent
           display_settings: state.display_settings,
-        };
-      }
-
-      const unsavedChangesApi = initializeUnsavedChanges<OptionsListDSLControlState>({
-        uuid,
-        parentApi,
-        serializeState,
+        }),
         anyStateChange$: merge(
           dataControlManager.anyStateChange$,
           selectionsManager.anyStateChange$,
@@ -270,10 +265,10 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
           exclude: false,
           exists_selected: false,
         },
-        onReset: (lastSaved) => {
-          dataControlManager.reinitializeState(lastSaved);
-          selectionsManager.reinitializeState(lastSaved);
-          editorStateManager.reinitializeState(lastSaved);
+        applySerializedState: (nextState) => {
+          dataControlManager.reinitializeState(nextState);
+          selectionsManager.reinitializeState(nextState);
+          editorStateManager.reinitializeState(nextState);
         },
       });
 
@@ -290,12 +285,11 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
         .subscribe((error) => blockingError$.next(error));
 
       const api = finalizeApi({
-        ...unsavedChangesApi,
+        ...stateApi,
         ...dataControlManager.api,
         blockingError$,
         dataLoading$: temporaryStateManager.api.dataLoading$,
         getTypeDisplayName: OptionsListStrings.control.getDisplayName,
-        serializeState,
         clearSelections: () => clearSelections({ selectionsManager, temporaryStateManager }),
         hasSelections$: hasSelections$ as PublishingSubject<boolean | undefined>,
         setSelectedOptions: selectionsManager.api.setSelectedOptions,

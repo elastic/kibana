@@ -43,7 +43,7 @@ jest.mock('@kbn/core-di-browser', () => ({
     if (token === 'notifications') {
       return {};
     }
-    if (token === 'data' || token === 'dataViews' || token === 'lens') {
+    if (token === 'data' || token === 'dataViews' || token === 'lens' || token === 'uiActions') {
       return {};
     }
     throw new Error(`Unexpected token in useService mock: ${String(token)}`);
