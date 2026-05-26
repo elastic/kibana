@@ -102,14 +102,22 @@ const CollectorGroupRow: React.FC<{
           <EuiFlexItem grow>
             <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
-                  aria-label={i18n.translate('xpack.fleet.collectorGroups.expandRow', {
+                <EuiToolTip
+                  content={i18n.translate('xpack.fleet.collectorGroups.expandRow', {
                     defaultMessage: 'Expand {group}',
                     values: { group: displayName },
                   })}
-                  onClick={onToggle}
-                />
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+                    aria-label={i18n.translate('xpack.fleet.collectorGroups.expandRow', {
+                      defaultMessage: 'Expand {group}',
+                      values: { group: displayName },
+                    })}
+                    onClick={onToggle}
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
               <EuiFlexItem grow>
                 <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
