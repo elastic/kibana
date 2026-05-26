@@ -5741,14 +5741,16 @@ components:
           type: object
         reason:
           $ref: '#/components/schemas/Reason'
-        runtime_mapping_indices:
+        rule_ids:
           description: >-
-            Optional list of index patterns the server reads mappings from to
-            resolve runtime field definitions. Resolved runtime fields are
-            attached to the underlying updateByQuery as runtime_mappings so the
-            exception filter can reference them (e.g. the workaround in
-            elastic/security-ml#677 where a runtime field is defined directly on
-            the ML anomaly results index mapping).
+            Optional list of detection rule_ids (the static rule.rule_id, not
+            the saved-object id) whose declared source indices the server reads
+            runtime field mappings from. Resolved runtime fields are attached to
+            the underlying updateByQuery as runtime_mappings so the exception
+            filter can reference them (e.g. the workaround in
+            elastic/security-ml#677 where a runtime field is defined on the ML
+            anomaly results index). Server-side resolution ensures users cannot
+            supply arbitrary index patterns.
           items:
             type: string
           type: array
@@ -10374,14 +10376,16 @@ components:
         query:
           additionalProperties: true
           type: object
-        runtime_mapping_indices:
+        rule_ids:
           description: >-
-            Optional list of index patterns the server reads mappings from to
-            resolve runtime field definitions. Resolved runtime fields are
-            attached to the underlying updateByQuery as runtime_mappings so the
-            exception filter can reference them (e.g. the workaround in
-            elastic/security-ml#677 where a runtime field is defined directly on
-            the ML anomaly results index mapping).
+            Optional list of detection rule_ids (the static rule.rule_id, not
+            the saved-object id) whose declared source indices the server reads
+            runtime field mappings from. Resolved runtime fields are attached to
+            the underlying updateByQuery as runtime_mappings so the exception
+            filter can reference them (e.g. the workaround in
+            elastic/security-ml#677 where a runtime field is defined on the ML
+            anomaly results index). Server-side resolution ensures users cannot
+            supply arbitrary index patterns.
           items:
             type: string
           type: array
