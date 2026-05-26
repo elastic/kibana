@@ -1,0 +1,150 @@
+# Smoke test for execution_loop_class / WorkflowExecutionDriver
+#
+# Run manually (test run) from Workflows UI. No connectors required.
+#
+# What this exercises:
+# - WorkflowExecutionDriver: start/stop, commitPendingNavigation, per-iteration saveState
+# - Scope stack rebuild via WorkflowGraph.getNodeStack (enter-/exit- nodes, nested foreach/if)
+# - setCurrentScopeId during foreach iterations
+# - loop.continue / loop.break inside nested scopes
+# - while loop navigation
+# - workflow.fail → driver.error + driver.stop()
+# - HTTP step failure with on-failure continue (error bubbling + recovery)
+#
+# Expected (failNested=false):
+#   status: completed
+#   scopeStack: [] (empty at end)
+#   summary trace: ["outer","a","else","a","outer","b","1","inner-ran","3","outer","c","else","c","x","3"]
+#
+# Expected (failNested=true):
+#   status: failed before summary; error message from maybe_fail step
+
+version: '1'
+name: Execution driver smoke test
+description: Manual smoke test for WorkflowExecutionDriver and execution loop refactors
+enabled: false
+tags: ['dev', 'smoke-test', 'execution-driver']
+
+triggers:
+  - type: manual
+    inputs:
+      - name: failNested
+        type: boolean
+        default: false
+        description: When true, triggers workflow.fail to verify driver stop and terminal failure
+
+consts:
+  outerItems: '["a","b","c"]'
+  innerItems: '["1","2","3"]'
+
+steps:
+  - name: init
+    type: data.set
+    with:
+      trace: []
+      counter: 0
+
+  # Nested foreach + if + inner foreach (scope stack sync on enter/exit nodes)
+  - name: outer_loop
+    type: foreach
+    foreach: '{{ consts.outerItems }}'
+    steps:
+      - name: record_outer_marker
+        type: data.set
+        with:
+          trace: '${{ variables.trace | push: "outer" }}'
+
+      - name: record_outer_item
+        type: data.set
+        with:
+          trace: '${{ variables.trace | push: foreach.item }}'
+
+      - name: branch_on_b
+        type: if
+        condition: '${{ foreach.item == "b" }}'
+        steps:
+          - name: inner_loop
+            type: foreach
+            foreach: '{{ consts.innerItems }}'
+            steps:
+              - name: record_inner
+                type: data.set
+                with:
+                  trace: '${{ variables.trace | push: foreach.item }}'
+
+              - name: skip_inner_two
+                type: loop.continue
+                if: '${{ foreach.item == "2" }}'
+
+              - name: inner_marker
+                type: data.set
+                with:
+                  trace: '${{ variables.trace | push: "inner-ran" }}'
+        else:
+          - name: record_else_marker
+            type: data.set
+            with:
+              trace: '${{ variables.trace | push: "else" }}'
+
+          - name: record_else_item
+            type: data.set
+            with:
+              trace: '${{ variables.trace | push: foreach.item }}'
+
+      # Error bubbling + on-failure continue (driver.error cleared by catch handlers)
+      - name: flaky_request
+        type: http
+        on-failure:
+          continue: true
+        with:
+          url: 'http://127.0.0.1:9/unreachable'
+          method: GET
+
+  # loop.break in a separate loop (navigation out of nested scope)
+  - name: break_loop
+    type: foreach
+    foreach: '["x","y","z"]'
+    steps:
+      - name: record_break_candidate
+        type: data.set
+        with:
+          trace: '${{ variables.trace | push: foreach.item }}'
+
+      - name: stop_after_first
+        type: loop.break
+        if: '${{ foreach.index == 0 }}'
+
+      - name: should_not_run_after_break
+        type: data.set
+        with:
+          trace: '${{ variables.trace | push: "after-break" }}'
+
+  # while + loop.break (driver navigates across while enter/exit nodes)
+  - name: while_loop
+    type: while
+    condition: '${{ while.iteration < 20 }}'
+    max-iterations: 20
+    steps:
+      - name: increment_counter
+        type: data.set
+        with:
+          counter: '${{ variables.counter | plus: 1 }}'
+
+      - name: exit_while_at_three
+        type: loop.break
+        if: '${{ variables.counter >= 3 }}'
+
+  # workflow.fail → driver.error + stop (skip when input false)
+  - name: maybe_fail
+    type: workflow.fail
+    if: '${{ inputs.failNested }}'
+    with:
+      message: 'Intentional failure for driver.stop() smoke test'
+
+  - name: summary
+    type: console
+    with:
+      message: |-
+        Execution driver smoke test complete.
+        trace={{ variables.trace | json }}
+        counter={{ variables.counter }}
