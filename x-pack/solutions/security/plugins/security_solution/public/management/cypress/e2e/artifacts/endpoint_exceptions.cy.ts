@@ -12,6 +12,7 @@ import {
 } from '@kbn/securitysolution-list-constants';
 import { ENDPOINT_EXCEPTIONS_PER_POLICY_OPT_IN_ROUTE } from '../../../../../common/endpoint/constants';
 import {
+  APP_ALERTS_PATH,
   APP_ENDPOINT_EXCEPTIONS_PATH,
   APP_MANAGE_PATH,
   APP_PATH,
@@ -154,7 +155,7 @@ describe(
     describe('OR operator', { tags: ['@ess', '@serverless'] }, () => {
       let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
 
-      const setArtifactName: FormAction[] = [
+      const artifactNameActions: FormAction[] = [
         {
           type: 'input',
           selector: 'endpointExceptions-form-name-input',
@@ -167,7 +168,7 @@ describe(
         },
       ];
 
-      const setFirstCondition: FormAction[] = [
+      const firstConditionActions: FormAction[] = [
         {
           type: 'input',
           selector: 'fieldAutocompleteComboBox',
@@ -205,157 +206,188 @@ describe(
         endpointData = undefined;
       });
 
-      it('should create 2 artifacts when using 1 OR operator during CREATE', () => {
-        cy.intercept('POST', EXCEPTION_LIST_ITEM_URL).as('createExceptionItem');
-
-        login();
-        cy.visit(APP_ENDPOINT_EXCEPTIONS_PATH);
-
-        cy.getByTestSubj(`endpointExceptionsListPage-emptyState-addButton`).click();
-
-        performUserActions(setArtifactName);
-        performUserActions(setFirstCondition);
-
-        // OR
+      const addConditionWithOR = (field: string, value: string) => {
         cy.getByTestSubj('exceptionsOrButton').click();
 
-        cy.getByTestSubj('fieldAutocompleteComboBox').last().type('agent.type');
+        cy.getByTestSubj('fieldAutocompleteComboBox').last().type(field);
         cy.getByTestSubj('valuesAutocompleteMatch').last().click();
-        cy.getByTestSubj('valuesAutocompleteMatch').last().type('endpoint');
+        cy.getByTestSubj('valuesAutocompleteMatch').last().type(value);
+      };
 
-        cy.getByTestSubj(`endpointExceptionsListPage-flyout-submitButton`).click();
-
-        // There should be 2 artifacts created
-        cy.get('@createExceptionItem.all').should('have.length', 2);
-        cy.getByTestSubj('endpointExceptionsListPage-card').should('have.length', 2);
-
-        // All with same name
-        cy.getByTestSubj('endpointExceptionsListPage-card-header-title').should(
-          'have.text',
-          'Endpoint exception nameEndpoint exception name'
-        );
-
-        // and different conditions
-        cy.getByTestSubj('endpointExceptionsListPage-card-criteriaConditions-condition').then(
-          ($conditions) => {
+      const shouldHaveConditionsOnScreen = (conditions: string[]) =>
+        cy
+          .getByTestSubj('endpointExceptionsListPage-card-criteriaConditions-condition')
+          .then(($conditions) => {
             const conditionsText = $conditions.map((_, element) => Cypress.$(element).text()).get();
 
-            expect(conditionsText).to.include.members([
-              'AND agent.versionIS 1234',
-              'AND agent.typeIS endpoint',
-            ]);
-          }
-        );
+            expect(conditionsText).to.include.members(conditions);
+          });
+
+      describe('on Artifacts page', () => {
+        it('should create 2 artifacts when using 1 OR operator during CREATE', () => {
+          cy.intercept('POST', EXCEPTION_LIST_ITEM_URL).as('createExceptionItem');
+
+          login();
+          cy.visit(APP_ENDPOINT_EXCEPTIONS_PATH);
+
+          cy.getByTestSubj('endpointExceptionsListPage-emptyState-addButton').click();
+
+          performUserActions(artifactNameActions);
+          performUserActions(firstConditionActions);
+
+          addConditionWithOR('agent.type', 'endpoint');
+
+          cy.getByTestSubj('endpointExceptionsListPage-flyout-submitButton').click();
+
+          // There should be 2 artifacts created
+          cy.get('@createExceptionItem.all').should('have.length', 2);
+
+          // All with same name
+          cy.getByTestSubj('endpointExceptionsListPage-card-header-title')
+            .should('have.length', 2)
+            .each((card) => expect(card).to.have.text('Endpoint exception name'));
+
+          // and different conditions
+          shouldHaveConditionsOnScreen(['AND agent.versionIS 1234', 'AND agent.typeIS endpoint']);
+        });
+
+        it('should create 3 artifacts when using 2 OR operators during CREATE', () => {
+          cy.intercept('POST', EXCEPTION_LIST_ITEM_URL).as('createExceptionItem');
+
+          login();
+          cy.visit(APP_ENDPOINT_EXCEPTIONS_PATH);
+
+          cy.getByTestSubj('endpointExceptionsListPage-emptyState-addButton').click();
+
+          performUserActions(artifactNameActions);
+          performUserActions(firstConditionActions);
+
+          addConditionWithOR('agent.type', 'endpoint');
+          addConditionWithOR('host.user.email', 'cheese');
+
+          cy.getByTestSubj('endpointExceptionsListPage-flyout-submitButton').click();
+
+          // There should be 3 artifacts created
+          cy.get('@createExceptionItem.all').should('have.length', 3);
+
+          // All with same name
+          cy.getByTestSubj('endpointExceptionsListPage-card-header-title')
+            .should('have.length', 3)
+            .each((card) => expect(card).to.have.text('Endpoint exception name'));
+
+          // and different conditions
+          shouldHaveConditionsOnScreen([
+            'AND agent.versionIS 1234',
+            'AND agent.typeIS endpoint',
+            'AND host.user.emailIS cheese',
+          ]);
+        });
+
+        it('should create multiple artifacts when using OR operator during EDIT', () => {
+          login();
+          cy.visit(APP_ENDPOINT_EXCEPTIONS_PATH);
+
+          // Create one artifact
+          cy.getByTestSubj('endpointExceptionsListPage-emptyState-addButton').click();
+          performUserActions(artifactNameActions);
+          performUserActions(firstConditionActions);
+          cy.getByTestSubj('endpointExceptionsListPage-flyout-submitButton').click();
+          cy.getByTestSubj('endpointExceptionsListPage-card').should('have.length', 1);
+
+          // Open artifact to edit
+          cy.getByTestSubj('endpointExceptionsListPage-card-header-actions-button').click();
+          cy.getByTestSubj('endpointExceptionsListPage-card-cardEditAction').click();
+
+          addConditionWithOR('agent.type', 'endpoint');
+          addConditionWithOR('host.user.email', 'cheese');
+
+          cy.intercept('PUT', EXCEPTION_LIST_ITEM_URL).as('updateExceptionItem');
+          cy.intercept('POST', EXCEPTION_LIST_ITEM_URL).as('createExceptionItem');
+
+          cy.getByTestSubj('endpointExceptionsListPage-flyout-submitButton').click();
+
+          // There should be 1 artifact edited and 2 new created
+          cy.get('@updateExceptionItem.all').should('have.length', 1);
+          cy.get('@createExceptionItem.all').should('have.length', 2);
+
+          // All 3 with the same name
+          cy.getByTestSubj('endpointExceptionsListPage-card-header-title')
+            .should('have.length', 3)
+            .each((card) => expect(card).to.have.text('Endpoint exception name'));
+
+          // and different conditions
+          shouldHaveConditionsOnScreen([
+            'AND agent.versionIS 1234',
+            'AND agent.typeIS endpoint',
+            'AND host.user.emailIS cheese',
+          ]);
+        });
       });
 
-      it('should create 3 artifacts when using 2 OR operators during CREATE', () => {
-        cy.intercept('POST', EXCEPTION_LIST_ITEM_URL).as('createExceptionItem');
+      describe('on Alerts page', () => {
+        it('should create 2 artifacts when using 1 OR operator during CREATE', () => {
+          cy.intercept('POST', EXCEPTION_LIST_ITEM_URL).as('createExceptionItem');
 
-        login();
-        cy.visit(APP_ENDPOINT_EXCEPTIONS_PATH);
+          login();
+          cy.visit(APP_ALERTS_PATH);
 
-        cy.getByTestSubj(`endpointExceptionsListPage-emptyState-addButton`).click();
+          cy.getByTestSubj('timeline-context-menu-button').first().click();
+          cy.getByTestSubj('add-endpoint-exception-menu-item').click();
 
-        performUserActions(setArtifactName);
-        performUserActions(setFirstCondition);
+          performUserActions(artifactNameActions);
 
-        // OR
-        cy.getByTestSubj('exceptionsOrButton').click();
+          addConditionWithOR('agent.type', 'endpoint');
 
-        cy.getByTestSubj('fieldAutocompleteComboBox').last().type('agent.type');
-        cy.getByTestSubj('valuesAutocompleteMatch').last().click();
-        cy.getByTestSubj('valuesAutocompleteMatch').last().type('endpoint');
+          cy.getByTestSubj(`add-endpoint-exception-confirm-button`).click();
 
-        // OR
-        cy.getByTestSubj('exceptionsOrButton').click();
+          // There should be 2 artifacts created
+          cy.get('@createExceptionItem.all').should('have.length', 2);
 
-        cy.getByTestSubj('fieldAutocompleteComboBox').last().type('host.user.email');
-        cy.getByTestSubj('valuesAutocompleteMatch').last().click();
-        cy.getByTestSubj('valuesAutocompleteMatch').last().type('cheese');
+          // Navigate to Endpoint Exceptions page to check the artifacts
+          cy.visit(APP_ENDPOINT_EXCEPTIONS_PATH);
 
-        cy.getByTestSubj(`endpointExceptionsListPage-flyout-submitButton`).click();
+          // All with same name
+          cy.getByTestSubj('endpointExceptionsListPage-card-header-title')
+            .should('have.length', 2)
+            .each((card) => expect(card).to.have.text('Endpoint exception name'));
 
-        // There should be 3 artifacts created
-        cy.get('@createExceptionItem.all').should('have.length', 3);
-        cy.getByTestSubj('endpointExceptionsListPage-card').should('have.length', 3);
+          // only manually added conditions are checked, others come from the alert
+          shouldHaveConditionsOnScreen(['AND agent.typeIS endpoint']);
+        });
 
-        // All with same name
-        cy.getByTestSubj('endpointExceptionsListPage-card-header-title').should(
-          'have.text',
-          'Endpoint exception nameEndpoint exception nameEndpoint exception name'
-        );
+        it('should create 3 artifacts when using 2 OR operators during CREATE', () => {
+          cy.intercept('POST', EXCEPTION_LIST_ITEM_URL).as('createExceptionItem');
 
-        // and different conditions
-        cy.getByTestSubj('endpointExceptionsListPage-card-criteriaConditions-condition').then(
-          ($conditions) => {
-            const conditionsText = $conditions.map((_, element) => Cypress.$(element).text()).get();
+          login();
+          cy.visit(APP_ALERTS_PATH);
 
-            expect(conditionsText).to.include.members([
-              'AND agent.versionIS 1234',
-              'AND agent.typeIS endpoint',
-              'AND host.user.emailIS cheese',
-            ]);
-          }
-        );
-      });
+          cy.getByTestSubj('timeline-context-menu-button').first().click();
+          cy.getByTestSubj('add-endpoint-exception-menu-item').click();
 
-      it('should create multiple artifacts when using OR operator during EDIT', () => {
-        login();
-        cy.visit(APP_ENDPOINT_EXCEPTIONS_PATH);
+          performUserActions(artifactNameActions);
 
-        // Create one artifact
-        cy.getByTestSubj(`endpointExceptionsListPage-emptyState-addButton`).click();
-        performUserActions(setArtifactName);
-        performUserActions(setFirstCondition);
-        cy.getByTestSubj(`endpointExceptionsListPage-flyout-submitButton`).click();
-        cy.getByTestSubj('endpointExceptionsListPage-card').should('have.length', 1);
+          addConditionWithOR('agent.type', 'endpoint');
+          addConditionWithOR('host.user.email', 'cheese');
 
-        // Open artifact to edit
-        cy.getByTestSubj('endpointExceptionsListPage-card-header-actions-button').click();
-        cy.getByTestSubj('endpointExceptionsListPage-card-cardEditAction').click();
+          cy.getByTestSubj(`add-endpoint-exception-confirm-button`).click();
 
-        // OR
-        cy.getByTestSubj('exceptionsOrButton').click();
+          // There should be 3 artifacts created
+          cy.get('@createExceptionItem.all').should('have.length', 3);
 
-        cy.getByTestSubj('fieldAutocompleteComboBox').last().type('agent.type');
-        cy.getByTestSubj('valuesAutocompleteMatch').last().click();
-        cy.getByTestSubj('valuesAutocompleteMatch').last().type('endpoint');
+          // Navigate to Endpoint Exceptions page to check the artifacts
+          cy.visit(APP_ENDPOINT_EXCEPTIONS_PATH);
 
-        // OR
-        cy.getByTestSubj('exceptionsOrButton').click();
+          // All with same name
+          cy.getByTestSubj('endpointExceptionsListPage-card-header-title')
+            .should('have.length', 3)
+            .each((card) => expect(card).to.have.text('Endpoint exception name'));
 
-        cy.getByTestSubj('fieldAutocompleteComboBox').last().type('host.user.email');
-        cy.getByTestSubj('valuesAutocompleteMatch').last().click();
-        cy.getByTestSubj('valuesAutocompleteMatch').last().type('cheese');
-
-        cy.intercept('PUT', EXCEPTION_LIST_ITEM_URL).as('updateExceptionItem');
-        cy.intercept('POST', EXCEPTION_LIST_ITEM_URL).as('createExceptionItem');
-
-        cy.getByTestSubj(`endpointExceptionsListPage-flyout-submitButton`).click();
-
-        // There should be 1 artifact edited and 2 new created
-        cy.get('@updateExceptionItem.all').should('have.length', 1);
-        cy.get('@createExceptionItem.all').should('have.length', 2);
-        cy.getByTestSubj('endpointExceptionsListPage-card').should('have.length', 3);
-
-        // All with same name
-        cy.getByTestSubj('endpointExceptionsListPage-card-header-title').should(
-          'have.text',
-          'Endpoint exception nameEndpoint exception nameEndpoint exception name'
-        );
-
-        // and different conditions
-        cy.getByTestSubj('endpointExceptionsListPage-card-criteriaConditions-condition').then(
-          ($conditions) => {
-            const conditionsText = $conditions.map((_, element) => Cypress.$(element).text()).get();
-
-            expect(conditionsText).to.include.members([
-              'AND agent.versionIS 1234',
-              'AND agent.typeIS endpoint',
-              'AND host.user.emailIS cheese',
-            ]);
-          }
-        );
+          // only manually added conditions are checked, others come from the alert
+          shouldHaveConditionsOnScreen([
+            'AND agent.typeIS endpoint',
+            'AND host.user.emailIS cheese',
+          ]);
+        });
       });
     });
   }
