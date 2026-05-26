@@ -156,7 +156,16 @@ const AIValueReportContent: React.FC<AIValueReportContentProps> = (props) => {
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="l" />
-          <AIValueReportLayout {...data} />
+          <AIValueReportLayout
+            isSample={data.isSample}
+            attackAlertIds={data.attackAlertIds}
+            analystHourlyRate={data.analystHourlyRate}
+            minutesPerAlert={data.minutesPerAlert}
+            from={data.from}
+            to={data.to}
+            valueMetrics={data.valueMetrics}
+            valueMetricsCompare={data.valueMetricsCompare}
+          />
         </EuiPanel>
       </>
     );
@@ -183,7 +192,18 @@ const AIValueReportContent: React.FC<AIValueReportContentProps> = (props) => {
     );
   }
 
-  return <AIValueReportLayout {...data} />;
+  return (
+    <AIValueReportLayout
+      isSample={data.isSample}
+      attackAlertIds={data.attackAlertIds}
+      analystHourlyRate={data.analystHourlyRate}
+      minutesPerAlert={data.minutesPerAlert}
+      from={data.from}
+      to={data.to}
+      valueMetrics={data.valueMetrics}
+      valueMetricsCompare={data.valueMetricsCompare}
+    />
+  );
 };
 
 export const AIValueReport: React.FC<Props> = ({
