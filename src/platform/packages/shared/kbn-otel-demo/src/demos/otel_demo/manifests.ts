@@ -420,7 +420,7 @@ export const otelDemoManifests: DemoManifestGenerator = {
           ...finalEnv,
           OTEL_EXPORTER_OTLP_ENDPOINT: `http://otel-collector:${otlpPort}`,
           OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE: 'cumulative',
-          OTEL_RESOURCE_ATTRIBUTES: `service.namespace=${demoId},deployment.environment=${demoId},deployment.environment.name=${demoId}`,
+          OTEL_RESOURCE_ATTRIBUTES: `service.namespace=${demoId},deployment.environment.name=${demoId}`,
           OTEL_SERVICE_NAME: svc.name,
         };
       }
