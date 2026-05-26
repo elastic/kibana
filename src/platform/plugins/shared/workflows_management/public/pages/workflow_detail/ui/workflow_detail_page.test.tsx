@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { render, waitFor } from '@testing-library/react';
+import { fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { WorkflowDetailPage } from './workflow_detail_page';
+import { PLUGIN_ID } from '../../../../common';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
 import { setWorkflow } from '../../../entities/workflows/store/workflow_detail/slice';
 import { mockWorkflowsManagementCapabilities } from '../../../hooks/__mocks__/use_workflows_capabilities';
@@ -23,6 +24,8 @@ interface WorkflowDetailPageProps {
 // Mock the hooks
 const mockUseWorkflowsBreadcrumbs = jest.fn();
 const mockUseWorkflowUrlState = jest.fn();
+const mockNavigateToApp = jest.fn();
+const mockUseKibana = jest.fn();
 
 // Create mock functions that can be changed
 let mockLoadConnectors = jest.fn();
@@ -34,6 +37,9 @@ let mockAsyncThunkState: { isLoading: boolean; error: string | null } = {
 
 jest.mock('../../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs', () => ({
   useWorkflowsBreadcrumbs: () => mockUseWorkflowsBreadcrumbs(),
+}));
+jest.mock('../../../hooks/use_kibana', () => ({
+  useKibana: () => mockUseKibana(),
 }));
 jest.mock('../../../hooks/use_workflow_url_state', () => ({
   useWorkflowUrlState: () => mockUseWorkflowUrlState(),
@@ -149,6 +155,13 @@ describe('WorkflowDetailPage', () => {
     mockUseWorkflowsBreadcrumbs.mockImplementation(() => {
       // Empty function, hook just sets breadcrumbs
     });
+    mockUseKibana.mockReturnValue({
+      services: {
+        application: {
+          navigateToApp: mockNavigateToApp,
+        },
+      },
+    });
     mockUseWorkflowsCapabilities.mockReturnValue(mockWorkflowsManagementCapabilities);
 
     mockUseWorkflowUrlState.mockReturnValue({
@@ -191,6 +204,20 @@ describe('WorkflowDetailPage', () => {
       await waitFor(() => {
         expect(getByText('Unable to load workflow')).toBeInTheDocument();
       });
+    });
+
+    it('should navigate to workflows list when back button is clicked', async () => {
+      mockAsyncThunkState = { isLoading: false, error: 'Failed to load workflow' };
+
+      const { getByTestId } = renderWithProviders({ id: 'test-workflow-123' });
+
+      await waitFor(() => {
+        expect(getByTestId('workflowDetailBackToWorkflowsButton')).toBeInTheDocument();
+      });
+
+      fireEvent.click(getByTestId('workflowDetailBackToWorkflowsButton'));
+
+      expect(mockNavigateToApp).toHaveBeenCalledWith(PLUGIN_ID);
     });
   });
 

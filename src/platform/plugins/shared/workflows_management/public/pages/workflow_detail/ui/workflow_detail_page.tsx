@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { workflowDefaultYaml } from './workflow_default_yml';
@@ -21,6 +22,7 @@ import { WorkflowEditorLayout } from './workflow_detail_layout';
 import { WorkflowDetailLoadingState } from './workflow_detail_loading_state';
 import { WorkflowDetailTestModal } from './workflow_detail_test_modal';
 import { WorkflowDetailTestStepModal } from './workflow_detail_test_step_modal';
+import { PLUGIN_ID } from '../../../../common';
 import type { WorkflowDetailTab } from '../../../common/lib/telemetry/events/workflows/ui/types';
 import { setActiveTab, setExecution, setYamlString } from '../../../entities/workflows/store';
 import {
@@ -34,9 +36,14 @@ import { loadWorkflowsThunk } from '../../../entities/workflows/store/workflow_d
 import { WorkflowExecutionDetail } from '../../../features/workflow_execution_detail';
 import { WorkflowExecutionList } from '../../../features/workflow_execution_list/ui/workflow_execution_list_stateful';
 import { useAsyncThunkState } from '../../../hooks/use_async_thunk';
+import { useKibana } from '../../../hooks/use_kibana';
 import { useTelemetry } from '../../../hooks/use_telemetry';
 import { useWorkflowsBreadcrumbs } from '../../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
+
+const backToWorkflowsLabel = i18n.translate('workflows.workflowDetailHeader.backLink', {
+  defaultMessage: 'Back to Workflows',
+});
 
 export function WorkflowDetailPage({ id }: { id?: string }) {
   const dispatch = useDispatch();
@@ -46,6 +53,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   const [loadWorkflow, { isLoading: isLoadingWorkflow, error }] =
     useAsyncThunkState(loadWorkflowThunk);
   const telemetry = useTelemetry();
+  const { application } = useKibana().services;
 
   const isReady = !isLoadingWorkflow && !isLoadingConnectors;
 
@@ -122,6 +130,10 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     setSelectedExecution(null);
   }, [setSelectedExecution]);
 
+  const onBackToWorkflows = useCallback(() => {
+    application.navigateToApp(PLUGIN_ID);
+  }, [application]);
+
   if (error) {
     return (
       <EuiEmptyPrompt
@@ -143,6 +155,17 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
               values={{ error: error.toString() }}
             />
           </p>
+        }
+        actions={
+          <EuiButton
+            fill
+            iconType="sortLeft"
+            onClick={onBackToWorkflows}
+            aria-label={backToWorkflowsLabel}
+            data-test-subj="workflowDetailBackToWorkflowsButton"
+          >
+            {backToWorkflowsLabel}
+          </EuiButton>
         }
       />
     );
