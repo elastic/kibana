@@ -6,6 +6,7 @@
 // - Lines without `// $ Alert` should NOT trigger warnings
 
 import { schema } from '@kbn/config-schema';
+import * as schemaNs from '@kbn/config-schema';
 
 // =============================================================================
 // BAD: Should be flagged - unbounded arrays (missing maxSize)
@@ -359,6 +360,26 @@ class SchemaBuilder {
     return schema.arrayOf(schema.boolean());  // $ Alert
   }
 }
+
+// =============================================================================
+// namespace import (`import * as schemaNs from '@kbn/config-schema'`): defense-in-depth
+// =============================================================================
+
+// BAD: schemaNs.arrayOf() without maxSize (namespace import)
+router.post({
+  path: '/api/bad/ns-array',
+  validate: {
+    body: schemaNs.arrayOf(schemaNs.string()),  // $ Alert
+  },
+}, handler);
+
+// GOOD: schemaNs.arrayOf() with maxSize (namespace import)
+router.post({
+  path: '/api/good/ns-array-bounded',
+  validate: {
+    body: schemaNs.arrayOf(schemaNs.string(), { maxSize: 100 }),
+  },
+}, handler);
 
 // =============================================================================
 // NON-EXCLUDED CONTEXTS: These look like non-route usage but SHOULD still fire.

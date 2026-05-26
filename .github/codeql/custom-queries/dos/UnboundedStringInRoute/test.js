@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { z } from '@kbn/zod';
 import { z as zv4 } from '@kbn/zod/v4';
 import { z as zBare } from 'zod';
+import * as zNs from '@kbn/zod/v4';
 
 // =============================================================================
 // @kbn/config-schema: BAD - should be flagged (missing maxLength)
@@ -639,6 +640,84 @@ router.post({
   validate: {
     body: zBare.object({
       name: zBare.string().min(1).max(512),
+    }),
+  },
+}, handler);
+
+// =============================================================================
+// namespace import (`import * as zNs from '@kbn/zod/v4'`): BAD - should be flagged
+// =============================================================================
+
+// BAD: zNs.string() bare (namespace import from @kbn/zod/v4)
+router.post({
+  path: '/api/bad/zod-ns-bare',
+  validate: {
+    body: zNs.object({
+      name: zNs.string(),  // $ Alert
+    }),
+  },
+}, handler);
+
+// BAD: zNs.string() with only .min()
+router.post({
+  path: '/api/bad/zod-ns-min-only',
+  validate: {
+    body: zNs.object({
+      name: zNs.string().min(1),  // $ Alert
+    }),
+  },
+}, handler);
+
+// BAD: zNs.string() with .optional() but no .max()
+router.post({
+  path: '/api/bad/zod-ns-optional',
+  validate: {
+    body: zNs.object({
+      name: zNs.string().optional(),  // $ Alert
+    }),
+  },
+}, handler);
+
+// BAD: zNs.string() with .nullable() but no .max()
+router.post({
+  path: '/api/bad/zod-ns-nullable',
+  validate: {
+    body: zNs.object({
+      name: zNs.string().nullable(),  // $ Alert
+    }),
+  },
+}, handler);
+
+// =============================================================================
+// namespace import (`import * as zNs from '@kbn/zod/v4'`): GOOD - should NOT be flagged
+// =============================================================================
+
+// GOOD: zNs.string().max()
+router.post({
+  path: '/api/good/zod-ns-max',
+  validate: {
+    body: zNs.object({
+      name: zNs.string().max(256),
+    }),
+  },
+}, handler);
+
+// GOOD: zNs.string().min().max()
+router.post({
+  path: '/api/good/zod-ns-min-max',
+  validate: {
+    body: zNs.object({
+      name: zNs.string().min(1).max(256),
+    }),
+  },
+}, handler);
+
+// GOOD: zNs.string().max().optional()
+router.post({
+  path: '/api/good/zod-ns-max-optional',
+  validate: {
+    body: zNs.object({
+      name: zNs.string().max(100).optional(),
     }),
   },
 }, handler);

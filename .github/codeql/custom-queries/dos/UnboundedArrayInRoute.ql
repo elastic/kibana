@@ -23,7 +23,11 @@ LocalVariable schemaVariable() {
   exists(ImportDeclaration decl, ImportSpecifier spec |
     decl.getImportedPathExpr().getStringValue() = "@kbn/config-schema" and
     spec = decl.getASpecifier() and
-    spec.getImportedName() = "schema" and
+    (
+      spec.getImportedName() = "schema"
+      or
+      spec instanceof ImportNamespaceSpecifier
+    ) and
     result = spec.getLocal().getVariable()
   )
 }

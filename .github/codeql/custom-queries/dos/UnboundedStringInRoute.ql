@@ -23,7 +23,11 @@ LocalVariable configSchemaVariable() {
   exists(ImportDeclaration decl, ImportSpecifier spec |
     decl.getImportedPathExpr().getStringValue() = "@kbn/config-schema" and
     spec = decl.getASpecifier() and
-    spec.getImportedName() = "schema" and
+    (
+      spec.getImportedName() = "schema"
+      or
+      spec instanceof ImportNamespaceSpecifier
+    ) and
     result = spec.getLocal().getVariable()
   )
 }
@@ -35,7 +39,11 @@ LocalVariable zodVariable() {
   exists(ImportDeclaration decl, ImportSpecifier spec |
     decl.getImportedPathExpr().getStringValue() = ["@kbn/zod", "@kbn/zod/v4", "zod"] and
     spec = decl.getASpecifier() and
-    spec.getImportedName() = "z" and
+    (
+      spec.getImportedName() = "z"
+      or
+      spec instanceof ImportNamespaceSpecifier
+    ) and
     result = spec.getLocal().getVariable()
   )
 }
