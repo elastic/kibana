@@ -59,7 +59,8 @@ export const createRuleAttachmentDefinition = ({
       application={application}
       uiSettings={uiSettings}
       callbacks={callbacks}
+      renderButtons={callbacks !== undefined}
     />
   ),
-  // Buttons are registered dynamically from RuleInlineContent to respect per-card currency and agentBusy state.
+  // Buttons are registered dynamically from RuleInlineContent to respect agentBusy state.
 });

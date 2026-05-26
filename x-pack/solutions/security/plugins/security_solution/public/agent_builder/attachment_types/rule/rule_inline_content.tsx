@@ -98,6 +98,7 @@ interface RuleInlineContentProps extends AttachmentRenderProps<RuleAttachment> {
   application: ApplicationStart;
   uiSettings: IUiSettingsClient;
   callbacks?: InlineRenderCallbacks;
+  renderButtons: boolean;
 }
 
 export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
@@ -106,6 +107,7 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
   application,
   uiSettings,
   callbacks,
+  renderButtons,
 }) => {
   const isDirty = useObservable(aiRuleCreation.dirty$, false);
   const isSaving = useObservable(aiRuleCreation.saving$, false);
@@ -113,27 +115,24 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
     aiRuleCreation.lastSavedRuleId$,
     aiRuleCreation.getLastSavedRuleId()
   );
-  const existingRuleId = useObservable(
-    aiRuleCreation.existingRuleId$,
-    aiRuleCreation.getExistingRuleId()
-  );
   const agentBusy = useObservable(aiRuleCreation.agentBusy$, false);
 
   const rule = useMemo(() => parseRuleFromAttachment(attachment), [attachment]);
 
-  // registerActionButtons is only passed to the latest card — use it as the "is current" proxy.
-  const isCurrentAttachment = callbacks?.registerActionButtons !== undefined;
-  const showButtons = isCurrentAttachment && !agentBusy;
+  const showButtons = renderButtons && !agentBusy;
 
+  // attachment.origin is the durable server-persisted rule id (set by updateAttachmentOrigin
+  // after a save). Prefer it over rule.id in the JSON since it doesn't require a new version.
   const savedIdFromAttachment = (attachment as { origin?: string }).origin ?? rule?.id;
+
   useEffect(() => {
-    if (!isCurrentAttachment || !savedIdFromAttachment) {
+    if (!renderButtons || !savedIdFromAttachment) {
       return;
     }
-    if (aiRuleCreation.getLastSavedRuleId() !== savedIdFromAttachment) {
+    if (aiRuleCreation.getLastSavedRuleId() === null) {
       aiRuleCreation.setLastSavedRuleId(savedIdFromAttachment);
     }
-  }, [isCurrentAttachment, savedIdFromAttachment, aiRuleCreation]);
+  }, [renderButtons, savedIdFromAttachment, aiRuleCreation]);
 
   useRuleActionButtons({
     rule,
@@ -144,7 +143,6 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
     isDirty,
     isSaving,
     lastSavedRuleId,
-    existingRuleId,
     attachmentOrigin: savedIdFromAttachment ?? null,
     showButtons,
   });
@@ -161,7 +159,7 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
 
   return (
     <EuiPanel paddingSize="m" hasShadow={false} hasBorder={false}>
-      {isSaving ? (
+      {isSaving && (
         <>
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
@@ -177,17 +175,6 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
           </EuiFlexGroup>
           <EuiSpacer size="s" />
         </>
-      ) : (
-        !isCurrentAttachment && (
-          <>
-            <EuiBadge color="warning">
-              {i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.modifiedBadge', {
-                defaultMessage: 'Modified',
-              })}
-            </EuiBadge>
-            <EuiSpacer size="s" />
-          </>
-        )
       )}
       {rule.type && (
         <EuiText size="s">
