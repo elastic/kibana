@@ -89,7 +89,6 @@ describe('useActionTypeModel', () => {
       actionTypeModel: null,
       isLoading: false,
       error: null,
-      isFromSpec: false,
       refetch: expect.any(Function),
     });
   });
@@ -113,7 +112,6 @@ describe('useActionTypeModel', () => {
     expect(result.current.actionTypeModel).toBe(mockActionTypeModel);
     expect(result.current.isLoading).toBe(false);
     expect(result.current.error).toBeNull();
-    expect(result.current.isFromSpec).toBe(false);
 
     // Should not call HTTP get for registered connectors
     expect(mockHttp.get).not.toHaveBeenCalled();
@@ -148,29 +146,19 @@ describe('useActionTypeModel', () => {
     // Verify model is returned
     expect(result.current.actionTypeModel).not.toBeNull();
     expect(result.current.actionTypeModel?.id).toBe('spec-connector');
-    expect(result.current.isFromSpec).toBe(true);
     expect(result.current.error).toBeNull();
   });
 
-  it('surfaces error when connector spec schema cannot be parsed', async () => {
+  it('fetches spec as fallback for connectors not in registry even when source is not passed', async () => {
     actionTypeRegistry.has.mockReturnValue(false);
-    mockHttp.get.mockResolvedValue({
-      ...mockSpecResponse,
-      schema: {
-        type: 'object',
-        properties: {
-          config: { type: 'object', properties: {} },
-          secrets: { type: 'string' },
-        },
-      },
-    });
+    mockHttp.get.mockResolvedValue(mockSpecResponse);
 
     const { result } = renderHook(
       () =>
         useActionTypeModel({
           actionTypeRegistry,
           actionTypeId: 'spec-connector',
-          source: ACTION_TYPE_SOURCES.spec,
+          // intentionally no source — simulates workflow context or post-save round-trip
           http: mockHttp as any,
           uiSettings: mockUiSettings as any,
         }),
@@ -181,12 +169,10 @@ describe('useActionTypeModel', () => {
       expect(result.current.isLoading).toBe(false);
     });
 
-    expect(result.current.error).toBeInstanceOf(Error);
-    expect(result.current.error?.message).toBe(
-      'Failed to parse connector spec schema for "spec-connector"'
-    );
-    expect(result.current.actionTypeModel).toBeNull();
-    expect(result.current.isFromSpec).toBe(false);
+    expect(mockHttp.get).toHaveBeenCalled();
+    expect(result.current.actionTypeModel).not.toBeNull();
+    expect(result.current.actionTypeModel?.id).toBe('spec-connector');
+    expect(result.current.error).toBeNull();
   });
 
   it('handles fetch errors correctly', async () => {
@@ -212,31 +198,6 @@ describe('useActionTypeModel', () => {
 
     expect(result.current.error).toEqual(fetchError);
     expect(result.current.actionTypeModel).toBeNull();
-    expect(result.current.isFromSpec).toBe(false);
-  });
-
-  it('does not fetch for non-spec connectors not in registry', async () => {
-    actionTypeRegistry.has.mockReturnValue(false);
-
-    const { result } = renderHook(
-      () =>
-        useActionTypeModel({
-          actionTypeRegistry,
-          actionTypeId: 'unknown-connector',
-          http: mockHttp as any,
-          uiSettings: mockUiSettings as any,
-        }),
-      { wrapper: createWrapper() }
-    );
-
-    // Should not be loading (no fetch triggered)
-    expect(result.current.isLoading).toBe(false);
-    expect(result.current.actionTypeModel).toBeNull();
-    expect(result.current.error).toBeNull();
-    expect(result.current.isFromSpec).toBe(false);
-
-    // Should not call HTTP get for non-spec connectors
-    expect(mockHttp.get).not.toHaveBeenCalled();
   });
 
   it('transforms spec response into ActionTypeModel with correct properties', async () => {

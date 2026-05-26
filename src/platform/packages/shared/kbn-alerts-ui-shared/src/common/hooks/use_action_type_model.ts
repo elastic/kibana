@@ -9,7 +9,6 @@
 
 import { useMemo } from 'react';
 import { useQuery } from '@kbn/react-query';
-import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import type { ActionTypeSource } from '@kbn/actions-types';
 import type { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import type { ActionTypeModel, ActionTypeRegistryContract } from '../types';
@@ -33,20 +32,27 @@ export interface UseActionTypeModelResult {
 }
 
 /**
- * Hook to get an ActionTypeModel for a given action type id and source.
+ * Hook to get an ActionTypeModel for a given action type id.
  *
  * For stack connectors (registered in the actionTypeRegistry), returns the model synchronously.
  * For spec-based connectors, fetches the spec from the API and transforms it into an ActionTypeModel.
+ *
+ * The `source` parameter is accepted for API compatibility but the primary routing decision is
+ * driven by the registry: if the connector type is registered, the registry model is used; if not,
+ * the spec endpoint is tried as a fallback. This means the hook works correctly even when `source`
+ * is not available (e.g. edit flyout opened from workflow context or after an API round-trip that
+ * strips the source field).
  */
 export function useActionTypeModel({
   actionTypeRegistry,
   actionTypeId,
-  source,
+  source: _source,
   http,
   uiSettings,
 }: {
   actionTypeRegistry: ActionTypeRegistryContract;
   actionTypeId: string | undefined;
+  /** @deprecated routing is driven by registry lookup; this parameter is no longer used */
   source?: ActionTypeSource;
   http: HttpSetup;
   uiSettings?: IUiSettingsClient;
@@ -61,7 +67,10 @@ export function useActionTypeModel({
     return null;
   }, [actionTypeId, actionTypeRegistry]);
 
-  const shouldFetchSpec = !!actionTypeId && source === ACTION_TYPE_SOURCES.spec;
+  // Fetch the spec whenever the connector type is not in the registry. Stack connectors are
+  // always registered; spec connectors never are. A 404 from the spec endpoint means the type
+  // is unknown and we return null quietly (no error callout shown to the user).
+  const shouldFetchSpec = !!actionTypeId && registeredModel === null;
 
   const {
     data = null,
@@ -88,7 +97,7 @@ export function useActionTypeModel({
   );
 
   return {
-    actionTypeModel: shouldFetchSpec ? specBasedModel : registeredModel,
+    actionTypeModel: registeredModel ?? specBasedModel,
     isLoading: shouldFetchSpec && isLoading,
     error,
     refetch: () => {
