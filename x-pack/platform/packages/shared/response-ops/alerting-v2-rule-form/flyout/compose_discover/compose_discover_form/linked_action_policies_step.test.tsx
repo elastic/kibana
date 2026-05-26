@@ -10,6 +10,7 @@ import { render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { LinkedActionPoliciesStep } from './linked_action_policies_step';
+import { useWatch } from 'react-hook-form';
 import { useMatchedActionPolicies } from './use_matched_action_policies';
 
 jest.mock('react-hook-form', () => ({
@@ -23,7 +24,7 @@ const mockUseMatchedActionPolicies = useMatchedActionPolicies as jest.MockedFunc
   typeof useMatchedActionPolicies
 >;
 
-const mockUseWatch = require('react-hook-form').useWatch as jest.Mock;
+const mockUseWatch = useWatch as jest.Mock;
 
 const renderComponent = (
   props?: Partial<React.ComponentProps<typeof LinkedActionPoliciesStep>>
