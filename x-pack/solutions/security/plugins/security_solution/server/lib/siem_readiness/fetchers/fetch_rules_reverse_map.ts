@@ -29,9 +29,21 @@ export interface FetchRulesReverseMapDeps {
   esClient: ElasticsearchClient;
   dataViewsService: DataViewsService;
   logger: Logger;
+  /** Map of Fleet package names to display titles, populated via buildPackageToPlatform(fleetPackages) */
   packageToPlatform?: Map<string, string>;
 }
 
+/**
+ * Creates a lookup map from Fleet package names to their display titles.
+ * Used for deriving the affected platform from a rule's related_integrations.
+ *
+ * @param packages - Fleet packages from packageService.asInternalUser.getPackages()
+ * @returns Map where key is package name (e.g., "aws") and value is title (e.g., "AWS")
+ *
+ * @example
+ * // Input: [{ name: "aws", title: "AWS" }, { name: "endpoint", title: "Endpoint Security" }]
+ * // Output: Map { "aws" => "AWS", "endpoint" => "Endpoint Security" }
+ */
 export const buildPackageToPlatform = (
   packages: Array<{ name: string; title: string }>
 ): Map<string, string> => {
@@ -78,15 +90,29 @@ interface AlertingRule {
   params: RuleParams;
 }
 
+/**
+ * Builds a rule entry with platform derivation for blast radius enrichment.
+ *
+ * Platform derivation strategy (in order of precedence):
+ * 1. Fleet package lookup: Uses relatedIntegrations[0].package to look up the
+ *    display title from packageToPlatform map (e.g., "aws" → "AWS")
+ * 2. Domain tag fallback: Extracts platform from "Domain: <platform>" tag
+ *    (e.g., "Domain: Cloud" → "Cloud")
+ * 3. OS tag fallback: Extracts platform from "OS: <platform>" tag
+ *    (e.g., "OS: Windows" → "Windows")
+ * 4. Default: undefined if none of the above match
+ */
 const buildRuleEntry = (
   rule: AlertingRule,
   packageToPlatform: Map<string, string>
 ): RuleIndexEntry => {
+  // 1. Try Fleet package lookup via related_integrations
   const relatedIntegrations = (rule.params as { relatedIntegrations?: RelatedIntegration[] })
     .relatedIntegrations;
   const pkg = relatedIntegrations?.[0]?.package;
   let platform = pkg ? packageToPlatform.get(pkg) : undefined;
 
+  // 2. Fallback to rule tags if Fleet lookup didn't yield a platform
   if (!platform) {
     const { tags } = rule;
     if (tags) {
