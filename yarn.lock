@@ -4759,6 +4759,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/apm-common@link:x-pack/platform/packages/shared/kbn-apm-common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/apm-config-loader@link:src/platform/packages/private/kbn-apm-config-loader":
   version "0.0.0"
   uid ""
