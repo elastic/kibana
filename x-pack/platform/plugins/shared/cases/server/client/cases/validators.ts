@@ -161,6 +161,10 @@ export const validateRequiredCustomFields = ({
 /**
  * Parses applyToAllCases field definitions for the given owner and returns the
  * set of valid extended-field snake_case keys those definitions produce.
+ *
+ * Uses the unsecured SO client directly because the `owner` has already been
+ * validated by `authorization.ensureAuthorized` on the parent case operation —
+ * no additional privilege check is required here.
  */
 export const resolveGlobalFieldKeys = async (
   owner: string,

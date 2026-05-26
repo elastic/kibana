@@ -842,6 +842,19 @@ const createPatchCasesPayload = ({
         customFieldsConfigurationMap.get(originalCase.attributes.owner)
       );
 
+      // Merge incoming extended_fields on top of existing so that concurrent saves
+      // from GlobalCaseFields and TemplateFields (two independent form instances)
+      // don't clobber each other's values.
+      if (
+        trimmedCaseAttributes.extended_fields &&
+        typeof trimmedCaseAttributes.extended_fields === 'object'
+      ) {
+        trimmedCaseAttributes.extended_fields = {
+          ...(originalCase.attributes.extended_fields ?? {}),
+          ...trimmedCaseAttributes.extended_fields,
+        };
+      }
+
       return {
         caseId,
         originalCase,

@@ -22,6 +22,9 @@ export const modelVersion1: SavedObjectsModelVersion = {
     },
     {
       type: 'data_backfill',
+      // Explicitly default to `false` (not `undefined`) so existing documents
+      // behave consistently with newly created ones — no "apply to all" without
+      // an explicit opt-in.
       backfillFn: (doc) => ({
         attributes: { applyToAllCases: doc.attributes.applyToAllCases ?? false },
       }),
