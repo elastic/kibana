@@ -27,11 +27,11 @@ import { metadataSuggestion } from '../../registry/options/metadata';
 import { fuzzySearch } from './shared';
 import { computePrefixRange } from '../../../language/autocomplete/utils/prefix_range';
 
-const removeSourceNameQuotes = (sourceName: string) =>
+export const removeSourceNameQuotes = (sourceName: string) =>
   sourceName.startsWith('"') && sourceName.endsWith('"') ? sourceName.slice(1, -1) : sourceName;
 
 // Function to clean a single index string from failure stores
-const cleanIndex = (inputIndex: string): string => {
+export const cleanIndex = (inputIndex: string): string => {
   let cleaned = inputIndex.trim();
 
   // Remove '::data' suffix
