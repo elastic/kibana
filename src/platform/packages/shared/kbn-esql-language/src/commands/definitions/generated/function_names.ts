@@ -266,10 +266,10 @@ export const esqlFunctionNames = [
   'MOD',
   'MUL',
   'NEG',
+  'NOT_EQUALS',
   'NOT_IN',
   'NOT_LIKE',
   'NOT_RLIKE',
-  'NOT_EQUALS',
   'RLIKE',
   'SUB',
 ];
@@ -514,10 +514,10 @@ export enum EsqlFunctionNames {
   MOD = '%',
   MUL = '*',
   NEG = '-',
+  NOT_EQUALS = '!=',
   NOT_IN = 'not in',
   NOT_LIKE = 'not like',
   NOT_RLIKE = 'not rlike',
-  NOT_EQUALS = '!=',
   RLIKE = 'rlike',
   SUB = '-',
 }
