@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormProvider, useForm, useWatch } from 'react-hook-form';
 import {
   EuiBadge,
@@ -243,6 +243,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
     mode: mode === 'clone' ? 'edit' : mode,
     initialKind,
     initialRecoveryType: hasInitialCustomRecovery ? 'custom' : 'default',
+    isBuilderMode,
   });
 
   // Registered once here so providers persist across Sandbox open/close cycles.
@@ -254,16 +255,6 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
     const definition = RULE_BUILDER_REGISTRY[builderType];
     return definition ? definition.createDefaultState() : undefined;
   });
-
-  const childOpenOverridden = useRef(false);
-  useEffect(() => {
-    if (isBuilderMode && !childOpenOverridden.current) {
-      childOpenOverridden.current = true;
-      if (uiState.childOpen) {
-        dispatch({ type: 'CLOSE_CHILD' });
-      }
-    }
-  }, [isBuilderMode, uiState.childOpen, dispatch]);
 
   // ── Form values (submitted to the API) ──
   const defaultValues = useMemo<ComposeFormValues>(() => {

@@ -60,6 +60,13 @@ describe('createInitialState', () => {
     });
     expect(withSignal.recoveryType).toBe('default');
   });
+
+  it('sets childOpen false in create mode when isBuilderMode is true', () => {
+    const state = createInitialState({ mode: 'create', isBuilderMode: true });
+
+    expect(state.childOpen).toBe(false);
+    expect(state.queryCommitted).toBe(false);
+  });
 });
 
 // ── reducer ───────────────────────────────────────────────────────────────────

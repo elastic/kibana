@@ -30,18 +30,20 @@ export interface InitialStateConfig {
   mode: ComposeDiscoverMode;
   initialKind?: RuleKind;
   initialRecoveryType?: RecoveryType;
+  isBuilderMode?: boolean;
 }
 
 export const createInitialState = ({
   mode,
   initialKind = 'signal',
   initialRecoveryType = 'default',
+  isBuilderMode = false,
 }: InitialStateConfig): ComposeDiscoverState => ({
   mode,
   step: 0,
   recoveryType: initialKind === 'alert' ? initialRecoveryType : 'default',
   activeTab: 'alert',
-  childOpen: mode === 'create',
+  childOpen: mode === 'create' && !isBuilderMode,
   queryCommitted: mode === 'edit',
   yamlMode: false,
 });
