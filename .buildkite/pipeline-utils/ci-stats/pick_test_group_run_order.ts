@@ -12,14 +12,14 @@ import * as Fs from 'fs';
 import * as globby from 'globby';
 import minimatch from 'minimatch';
 
-import { load as loadYaml } from 'js-yaml';
+import { parse as loadYaml } from 'yaml';
 
 import { BuildkiteClient, BuildkiteStep } from '../buildkite';
 import { CiStatsClient, TestGroupRunOrderResponse } from './client';
 import { getTrackedBranch } from '../utils';
 
 import DISABLED_JEST_CONFIGS from '../../disabled_jest_configs.json';
-import { serverless, stateful } from '../../ftr_configs_manifests.json';
+import { serverless, stateful } from '../../ftr-manifests/ftr_configs_manifests.json';
 import {
   getAffectedPackages,
   listChangedFiles,
