@@ -31,7 +31,7 @@ export default {
 };
 
 const formatter = {
-  convert: (value: MultiFieldKey) => {
+  convertToText: (value: MultiFieldKey) => {
     return value.keys.join(' - ');
   },
 } as IFieldFormat;
@@ -70,7 +70,7 @@ const Template: StoryFn<FC<ColorMappingProps>> = (args) => {
                   font-weight: ${match ? 'bold' : 'normal'};
                 `}
               >
-                {formatter.convert(value)}
+                {formatter.convertToText(value)}
               </li>
             );
           })}

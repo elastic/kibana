@@ -226,6 +226,7 @@ export interface ICommandContext {
   isCursorInSubquery?: boolean;
   isFieldsBrowserEnabled?: boolean;
   unmappedFieldsStrategy?: UnmappedFieldsStrategy;
+  isTimeseriesSource?: boolean;
 }
 /**
  * This is a list of locations within an ES|QL query.
