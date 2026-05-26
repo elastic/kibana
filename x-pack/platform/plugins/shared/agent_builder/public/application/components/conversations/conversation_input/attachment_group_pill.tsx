@@ -80,13 +80,15 @@ export const AttachmentGroupPill: React.FC<AttachmentGroupPillProps> = ({ group,
         </EuiFlexItem>
         {onRemove && isHovered && (
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType="cross"
-              size="xs"
-              color="text"
-              aria-label={removeAriaLabel}
-              onClick={onRemove}
-            />
+            <EuiToolTip content={removeAriaLabel} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="cross"
+                size="xs"
+                color="text"
+                aria-label={removeAriaLabel}
+                onClick={onRemove}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
