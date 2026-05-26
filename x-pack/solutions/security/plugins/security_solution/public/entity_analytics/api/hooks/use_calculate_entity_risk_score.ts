@@ -24,7 +24,7 @@ export const useCalculateEntityRiskScore = (
 ) => {
   const { addError } = useAppToasts();
   const { data: riskEngineStatus } = useRiskEngineStatus();
-  const { calculateEntityRiskScore } = useEntityAnalyticsRoutes();
+  const { calculateEntityRiskScore, calculateEntityRiskScoreV2 } = useEntityAnalyticsRoutes();
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
 
   const onError = useCallback(
@@ -39,15 +39,19 @@ export const useCalculateEntityRiskScore = (
     [addError, identifierType]
   );
 
-  const { mutate, isLoading, data } = useMutation(calculateEntityRiskScore, {
+  const { mutate, isLoading } = useMutation(calculateEntityRiskScore, {
+    onSuccess,
+    onError,
+  });
+
+  const { mutate: mutateV2, isLoading: isLoadingV2 } = useMutation(calculateEntityRiskScoreV2, {
     onSuccess,
     onError,
   });
 
   const calculateEntityRiskScoreCb = useCallback(async () => {
     if (entityStoreV2Enabled) {
-      // do nothing if entity store v2 is enabled
-      // until https://github.com/elastic/security-team/issues/16756 is resolved
+      mutateV2({ identifier_type: identifierType, identifier, refresh: 'wait_for' });
       return;
     }
 
@@ -61,14 +65,14 @@ export const useCalculateEntityRiskScore = (
   }, [
     riskEngineStatus?.risk_engine_status,
     mutate,
+    mutateV2,
     identifierType,
     identifier,
     entityStoreV2Enabled,
   ]);
 
   return {
-    isLoading,
+    isLoading: entityStoreV2Enabled ? isLoadingV2 : isLoading,
     calculateEntityRiskScore: calculateEntityRiskScoreCb,
-    data,
   };
 };
