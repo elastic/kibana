@@ -13,6 +13,7 @@ import {
   CONNECTORS_APP_PATH,
   CONNECTORS_LIST_SELECTORS,
   defineIndexThresholdRule,
+  THRESHOLD_TEST_INDEX,
 } from '../fixtures';
 
 // Two FTR tests in the connector-page describe were `it.skip`'d due to the
@@ -61,6 +62,16 @@ test.describe('Slack connector', { tag: tags.stateful.classic }, () => {
   const createdConnectorIds: string[] = [];
   const createdRuleNames: string[] = [];
 
+  test.beforeAll(async ({ esClient }) => {
+    await esClient.indices.create(
+      {
+        index: THRESHOLD_TEST_INDEX,
+        mappings: { properties: { '@timestamp': { type: 'date' } } },
+      },
+      { ignore: [400] }
+    );
+  });
+
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsAdmin();
   });
@@ -75,11 +86,12 @@ test.describe('Slack connector', { tag: tags.stateful.classic }, () => {
     createdRuleNames.length = 0;
   });
 
-  test.afterAll(async ({ apiServices }) => {
+  test.afterAll(async ({ apiServices, esClient }) => {
     await Promise.allSettled(
       createdConnectorIds.map((id) => apiServices.alerting.connectors.delete(id))
     );
     createdConnectorIds.length = 0;
+    await esClient.indices.delete({ index: THRESHOLD_TEST_INDEX }, { ignore: [404] });
   });
 
   test('shows only the Slack webhook card, not the Slack API card', async ({ page, kbnUrl }) => {

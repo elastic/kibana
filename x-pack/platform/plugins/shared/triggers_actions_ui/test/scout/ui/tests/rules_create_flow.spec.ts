@@ -8,7 +8,7 @@
 import type { KbnClient } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { test, defineIndexThresholdRule } from '../fixtures';
+import { test, defineIndexThresholdRule, THRESHOLD_TEST_INDEX } from '../fixtures';
 
 interface RuleFindResponse {
   data: Array<{ id: string; name: string }>;
@@ -38,6 +38,16 @@ const deleteRuleById = async (kbnClient: KbnClient, id: string) => {
 test.describe('Rules create flow', { tag: tags.stateful.classic }, () => {
   const createdRuleNames: string[] = [];
 
+  test.beforeAll(async ({ esClient }) => {
+    await esClient.indices.create(
+      {
+        index: THRESHOLD_TEST_INDEX,
+        mappings: { properties: { '@timestamp': { type: 'date' } } },
+      },
+      { ignore: [400] }
+    );
+  });
+
   test.beforeEach(async ({ browserAuth, page }) => {
     await browserAuth.loginAsAdmin();
     await page.gotoApp('rules');
@@ -49,6 +59,10 @@ test.describe('Rules create flow', { tag: tags.stateful.classic }, () => {
       if (id) await deleteRuleById(kbnClient, id);
     }
     createdRuleNames.length = 0;
+  });
+
+  test.afterAll(async ({ esClient }) => {
+    await esClient.indices.delete({ index: THRESHOLD_TEST_INDEX }, { ignore: [404] });
   });
 
   test('opens the rule type modal and the rule form when a rule type is selected', async ({

@@ -7,8 +7,13 @@
 
 import type { ScoutPage } from '@kbn/scout';
 
+// Visible (non-hidden) test index created in beforeAll by tests that call defineIndexThresholdRule.
+// ES 8.x wildcard searches exclude hidden indices, so .kibana* cannot be used here.
+export const THRESHOLD_TEST_INDEX = 'scout-threshold-rule-test';
+
 // Fills the index-threshold rule form to a state where save is enabled:
-// name + index (first available .k* index) + time field (first non-placeholder option).
+// name + THRESHOLD_TEST_INDEX + time field (first non-placeholder option).
+// Callers must create THRESHOLD_TEST_INDEX (with @timestamp mapping) in beforeAll.
 // Used in both rules_create_flow.spec.ts and connector_slack.spec.ts.
 export const defineIndexThresholdRule = async (page: ScoutPage, name: string) => {
   await page.testSubj.click('createRuleButton');
@@ -23,7 +28,7 @@ export const defineIndexThresholdRule = async (page: ScoutPage, name: string) =>
   await indexCombo.waitFor({ state: 'visible' });
   const indexInput = indexCombo.locator('input');
   await indexInput.click();
-  await indexInput.pressSequentially('.k');
+  await indexInput.pressSequentially('scout-threshold-rule');
   const firstIndexOption = page.locator('[role="listbox"] [role="option"]:nth-of-type(1)');
   await firstIndexOption.waitFor({ state: 'visible', timeout: 30000 });
   await firstIndexOption.click();
