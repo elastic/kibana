@@ -18,6 +18,21 @@ import type { StepContext, StepEvent, StepInput } from './types';
 export type StepActorRef = ActorRefFrom<typeof stepMachine>;
 export type StepActorSnapshot = SnapshotFrom<typeof stepMachine>;
 
+const isDescriptionChanged = (
+  step: StreamlangStepWithUIAttributes,
+  originalStep: StreamlangStepWithUIAttributes
+): boolean => {
+  if (!isActionBlock(step) || !isActionBlock(originalStep)) {
+    return false;
+  }
+  return step.description !== originalStep.description;
+};
+
+const isParentOrBranchChanged = (
+  step: StreamlangStepWithUIAttributes,
+  originalStep: StreamlangStepWithUIAttributes
+): boolean => step.parentId !== originalStep.parentId || step.branch !== originalStep.branch;
+
 export const stepMachine = setup({
   types: {
     input: {} as StepInput,
@@ -73,7 +88,9 @@ export const stepMachine = setup({
       return {
         step: updatedStep,
         previousStep: updatedStep,
-        isUpdated: true,
+        isUpdated:
+          isDescriptionChanged(updatedStep, context.originalStep) ||
+          isParentOrBranchChanged(updatedStep, context.originalStep),
       };
     }),
     changeParent: assign(
@@ -90,7 +107,9 @@ export const stepMachine = setup({
         return {
           step: updatedStep,
           previousStep: updatedStep,
-          isUpdated: true,
+          isUpdated:
+            isDescriptionChanged(updatedStep, context.originalStep) ||
+            isParentOrBranchChanged(updatedStep, context.originalStep),
         };
       }
     ),
@@ -172,6 +191,7 @@ export const stepMachine = setup({
   id: 'processor',
   context: ({ input }) => ({
     parentRef: input.parentRef,
+    originalStep: input.step,
     previousStep: input.step,
     step: input.step,
     isNew: input.isNew ?? false,

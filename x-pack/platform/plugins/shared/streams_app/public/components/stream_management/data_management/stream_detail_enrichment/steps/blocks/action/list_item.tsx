@@ -8,6 +8,7 @@
 import {
   EuiBadge,
   EuiButtonEmpty,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -21,9 +22,13 @@ import { i18n } from '@kbn/i18n';
 import type { Condition } from '@kbn/streamlang';
 import { isActionBlock } from '@kbn/streamlang';
 import { useSelector } from '@xstate/react';
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import useToggle from 'react-use/lib/useToggle';
 import type { ActionBlockProps } from '.';
-import { useStreamEnrichmentSelector } from '../../../state_management/stream_enrichment_state_machine';
+import {
+  useInteractiveModeSelector,
+  useStreamEnrichmentSelector,
+} from '../../../state_management/stream_enrichment_state_machine';
 import { selectValidationErrors } from '../../../state_management/stream_enrichment_state_machine/selectors';
 import { ConditionDisplay } from '../../../../shared';
 import { getStepPanelColour } from '../../../utils';
@@ -54,6 +59,18 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
   // For the inner description we once again invert the colours
   const descriptionPanelColour = getStepPanelColour(level + 1);
 
+  const [isEditingDescription, toggleEditingDescription] = useToggle(false);
+  const [editValue, setEditValue] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
+  const canEdit = useInteractiveModeSelector((snapshot) => snapshot.can({ type: 'step.edit' }));
+
+  useEffect(() => {
+    if (isEditingDescription && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [isEditingDescription]);
+
   if (!isActionBlock(step)) return null;
 
   const stepDescription = getStepDescription(step);
@@ -61,6 +78,32 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
 
   const handleTitleClick = () => {
     stepRef.send({ type: 'step.edit' });
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      saveDescription();
+      toggleEditingDescription(false);
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      toggleEditingDescription(false);
+    }
+  };
+
+  const handleDescriptionClick = () => {
+    if (!readOnly && canEdit) {
+      setEditValue(stepDescription);
+      toggleEditingDescription(true);
+    }
+  };
+
+  const saveDescription = () => {
+    const trimmedEditValue = editValue.trim();
+    if (stepDescription !== trimmedEditValue) {
+      stepRef.send({ type: 'step.changeDescription', description: trimmedEditValue });
+    }
+    toggleEditingDescription(false);
   };
 
   return (
@@ -232,8 +275,42 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
                   }
                 )}
               />
+            ) : isEditingDescription ? (
+              <EuiFieldText
+                compressed
+                fullWidth
+                onBlur={saveDescription}
+                onKeyDown={handleKeyDown}
+                inputRef={inputRef}
+                value={editValue}
+                onChange={(e) => setEditValue(e.target.value)}
+                css={css`
+                  font-family: ${euiTheme.font.familyCode};
+                  font-size: ${euiTheme.size.m};
+                `}
+              />
             ) : (
-              <EuiToolTip content={stepDescription} display="block">
+              <EuiToolTip
+                content={
+                  <>
+                    <p>
+                      <i>{stepDescription}</i>
+                    </p>
+                    <p>
+                      {i18n.translate(
+                        'xpack.streams.actionBlockListItem.tooltip.editProcessorDescriptionLabel',
+                        {
+                          defaultMessage: 'Edit {stepAction} processor description',
+                          values: {
+                            stepAction: step.action,
+                          },
+                        }
+                      )}
+                    </p>
+                  </>
+                }
+                display="block"
+              >
                 <EuiText
                   size="xs"
                   color="subdued"
@@ -242,7 +319,22 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
                   css={css`
                     font-family: ${euiTheme.font.familyCode};
                     ${euiTextTruncate()}
+                    ${!readOnly && canEdit
+                      ? `cursor: pointer;
+                      &:hover {
+                        text-decoration: underline;
+                      }`
+                      : ''}
                   `}
+                  onClick={handleDescriptionClick}
+                  onKeyDown={(e: React.KeyboardEvent) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      handleDescriptionClick();
+                    }
+                  }}
+                  role={!readOnly && canEdit ? 'button' : undefined}
+                  style={{ fontStyle: 'italic' }}
                 >
                   {stepDescription}
                 </EuiText>
