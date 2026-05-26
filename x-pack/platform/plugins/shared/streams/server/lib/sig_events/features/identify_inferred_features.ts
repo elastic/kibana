@@ -356,6 +356,12 @@ export interface IdentifyInferredFeaturesOptions {
   tuning?: IterationTuningParams;
   diverseOffset?: number;
   trackFeaturesIdentified?: (data: FeaturesIdentifiedTelemetry) => void;
+  /**
+   * Optional SCS codebase context pre-fetched by the caller (once per task run).
+   * When present, appended to the system prompt so the LLM has source-code
+   * context when identifying features from log samples.
+   */
+  scsContextSnippet?: string;
 }
 
 export interface IdentifyInferredFeaturesResult {
@@ -383,16 +389,21 @@ export async function identifyInferredFeatures({
   tuning = {},
   diverseOffset = 0,
   trackFeaturesIdentified,
+  scsContextSnippet,
 }: IdentifyInferredFeaturesOptions): Promise<IdentifyInferredFeaturesResult> {
   const [
     { hits: allFeatures },
     { hits: excludedFeatures },
-    { featurePromptOverride: systemPrompt },
+    { featurePromptOverride: baseSystemPrompt },
   ] = await Promise.all([
     featureClient.getFeatures(streamName),
     featureClient.getExcludedFeatures(streamName),
     new PromptsConfigService({ soClient, logger }).getPrompt(),
   ]);
+
+  const systemPrompt = scsContextSnippet
+    ? `${baseSystemPrompt}\n\n${scsContextSnippet}`
+    : baseSystemPrompt;
 
   const discoveredFeatures = allFeatures.filter((f) => !isComputedFeature(f) && f.run_id === runId);
 

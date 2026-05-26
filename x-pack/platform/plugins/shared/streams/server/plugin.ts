@@ -20,6 +20,7 @@ import {
   OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS,
 } from '@kbn/management-settings-ids';
 import { STREAMS_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
+import type { WorkflowsManagementApi } from '@kbn/workflows-management-plugin/server';
 import { registerRoutes } from '@kbn/server-route-repository';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { RulesClient, RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
@@ -107,7 +108,7 @@ export class StreamsPlugin
   private statsTelemetryService = new StatsTelemetryService();
   private processorSuggestionsService: ProcessorSuggestionsService;
   private patternExtractionService?: PatternExtractionService;
-  private workflowsManagementApi?: import('@kbn/workflows-management-plugin/server').WorkflowsManagementApi;
+  private workflowsManagementApi?: WorkflowsManagementApi;
 
   constructor(context: PluginInitializerContext<StreamsConfig>) {
     this.isDev = context.env.mode.dev;

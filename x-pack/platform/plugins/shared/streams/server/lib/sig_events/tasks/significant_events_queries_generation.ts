@@ -84,6 +84,7 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                     esClient: scopedClusterClient.asCurrentUser,
                     uiSettingsClient,
                     searchInferenceEndpoints: taskContext.server.searchInferenceEndpoints,
+                    workflowsManagement: taskContext.server.workflowsManagement,
                     request: fakeRequest,
                     logger: taskLogger,
                     signal: runContext.abortController.signal,
