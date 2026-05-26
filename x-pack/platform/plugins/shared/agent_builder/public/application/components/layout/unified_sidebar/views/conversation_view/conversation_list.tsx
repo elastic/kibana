@@ -16,6 +16,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ConversationDisplayStatus } from '@kbn/agent-builder-common';
 import { appPaths } from '../../../../../utils/app_paths';
 import { useStreamingContext } from '../../../../../context/streaming/streaming_context';
 import { useConversationList } from '../../../../../hooks/use_conversation_list';
@@ -24,7 +25,6 @@ import {
   createActiveConversationListItemStyles,
 } from '../../../../conversations/conversation_list_item_styles';
 import { ConversationListItemRow } from './conversation_list_item_row';
-import { MOCK_STATUS_CYCLE } from './conversation_status_dev_data';
 
 const newConversationLabel = i18n.translate(
   'xpack.agentBuilder.sidebar.conversation.newConversation',
@@ -91,8 +91,8 @@ export const ConversationList: React.FC<ConversationListProps> = ({
     <EuiFlexGroup direction="column" gutterSize="xs">
       {sortedConversations.map((conversation, index) => {
         const isActive = currentConversationId === conversation.id;
-        // TODO: replace with conversation.status once the BE ships the field.
-        const mockStatus = MOCK_STATUS_CYCLE[index % MOCK_STATUS_CYCLE.length];
+        const isStreaming = activeStreams.has(conversation.id);
+        const status = isStreaming ? ConversationDisplayStatus.inProgress : conversation.status;
         return (
           <EuiFlexItem grow={false} key={conversation.id}>
             <ConversationListItemRow
@@ -101,9 +101,9 @@ export const ConversationList: React.FC<ConversationListProps> = ({
               title={conversation.title || conversation.id}
               isActive={isActive}
               routeConversationId={currentConversationId}
-              showActionsMenu={!activeStreams.has(conversation.id)}
+              showActionsMenu={!isStreaming}
               onItemClick={onItemClick}
-              status={mockStatus}
+              status={status}
             />
           </EuiFlexItem>
         );

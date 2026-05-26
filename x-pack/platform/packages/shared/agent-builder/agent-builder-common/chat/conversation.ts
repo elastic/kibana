@@ -263,7 +263,7 @@ export enum ConversationRoundStatus {
 
 /**
  * Display status for a conversation in the conversation list.
- * Derived from the conversation's last round status and streaming state.
+ * Returned directly by the conversations list endpoint.
  */
 export enum ConversationDisplayStatus {
   /** conversation has been read, no pending activity */
@@ -350,6 +350,10 @@ export interface Conversation {
   created_at: string;
   /** update date */
   updated_at: string;
+  /**
+   * Computed display status returned by the conversations list endpoint.
+   */
+  status?: ConversationDisplayStatus;
   /** list of round for this conversation */
   rounds: ConversationRound[];
   /**
