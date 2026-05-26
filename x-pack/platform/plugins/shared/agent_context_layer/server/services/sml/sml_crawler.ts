@@ -22,7 +22,7 @@ import {
   createSmlCrawlerStateStorage,
   type SmlCrawlerStateStorage,
 } from './sml_crawler_state_storage';
-import { createSmlStorage, smlIndexName } from './sml_storage';
+import { createSmlStorage, smlIndexName, type SmlStorage } from './sml_storage';
 
 export type { SmlCrawler };
 
@@ -63,10 +63,11 @@ export class SmlCrawlerImpl implements SmlCrawler {
       logger: this.logger,
     };
 
+    const storage = createSmlStorage({ logger: this.logger, esClient });
     const crawlStartTime = new Date().toISOString();
     this.logger.info(`SML crawler: starting crawl for type '${definition.id}' across all spaces`);
 
-    const indexRebuilt = await this.applyMappingsOrRebuild({ esClient });
+    const indexRebuilt = await this.applyMappingsOrRebuild({ storage });
 
     const integrityResetNeeded =
       indexRebuilt ||
@@ -144,11 +145,10 @@ export class SmlCrawlerImpl implements SmlCrawler {
 
   /** Returns true when the index was dropped due to a mapping conflict or persistent update failure. */
   private async applyMappingsOrRebuild({
-    esClient,
+    storage,
   }: {
-    esClient: ElasticsearchClient;
+    storage: SmlStorage;
   }): Promise<boolean> {
-    const storage = createSmlStorage({ logger: this.logger, esClient });
     const maxAttempts = 4;
 
     const rebuildIndex = async (reason: string) => {
