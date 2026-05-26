@@ -13,6 +13,7 @@ import {
   EuiModalHeader,
   EuiSelectable,
   euiSelectableTemplateSitewideRenderOptions,
+  useEuiBreakpoint,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -23,11 +24,7 @@ import { SearchPlaceholder } from './search_placeholder';
 import { useSearchState } from '../hooks/use_search_state';
 import type { SearchModalProps } from './types';
 import { EmptyMessage } from './empty_message';
-import {
-  SEARCH_MODAL_KEYBOARD_SHORTCUT,
-  SEARCH_MODAL_ROW_HEIGHT,
-  SEARCH_MODAL_SELECTOR_PREFIX,
-} from './types';
+import { SEARCH_MODAL_ROW_HEIGHT_PX, SEARCH_MODAL_SELECTOR_PREFIX } from './types';
 import { CharLimitExceededMessage } from './char_limit_exceeded_message';
 
 export const SearchModalInternal = ({
@@ -39,6 +36,8 @@ export const SearchModalInternal = ({
   onClose,
 }: SearchModalProps) => {
   const { euiTheme } = useEuiTheme();
+  const mediumAndUpBreakpoint = useEuiBreakpoint(['m', 'l', 'xl']);
+
   const {
     searchValue,
     setSearchValue,
@@ -69,22 +68,16 @@ export const SearchModalInternal = ({
     prepend: option.icon ? <EuiIcon color="subdued" size="l" {...option.icon} /> : option.prepend,
   }));
 
-  const selectableStyles = css`
-    display: flex;
-    flex-direction: column;
-    flex: 1 1 auto;
-    overflow: hidden;
-  `;
-
   const headerStyles = css`
-    padding-block: ${euiTheme.size.base};
-    padding-inline: ${euiTheme.size.base};
+    ${mediumAndUpBreakpoint} {
+      padding-block: ${euiTheme.size.base};
+      padding-inline: ${euiTheme.size.base};
+    }
   `;
 
   const bodyStyles = css`
     .euiModalBody__overflow {
-      padding-inline: 0;
-      padding-block: 0;
+      padding-inline: ${euiTheme.size.s};
       display: flex;
       flex-direction: column;
       justify-content: ${isLoading || options.length === 0 ? 'center' : 'flex-start'};
@@ -98,7 +91,6 @@ export const SearchModalInternal = ({
 
   return (
     <EuiSelectable
-      css={selectableStyles}
       isLoading={isLoading}
       isPreFiltered
       onChange={onChange}
@@ -106,9 +98,10 @@ export const SearchModalInternal = ({
       singleSelection={true}
       renderOption={(option) => euiSelectableTemplateSitewideRenderOptions(option, searchValue)}
       listProps={{
-        rowHeight: SEARCH_MODAL_ROW_HEIGHT,
+        rowHeight: SEARCH_MODAL_ROW_HEIGHT_PX,
         showIcons: false,
       }}
+      height="full"
       searchProps={{
         autoFocus: true,
         value: searchValue,
@@ -121,26 +114,24 @@ export const SearchModalInternal = ({
         fullWidth: true,
         isClearable: true,
       }}
-      noMatchesMessage={
-        searchCharLimitExceeded ? undefined : <SearchPlaceholder basePath={basePathUrl} />
+      errorMessage={
+        searchCharLimitExceeded ? <CharLimitExceededMessage basePathUrl={basePathUrl} /> : null
       }
-      searchable
       emptyMessage={<EmptyMessage />}
+      noMatchesMessage={<SearchPlaceholder basePath={basePathUrl} />}
+      searchable
     >
       {(list, search) => (
         <>
           <EuiModalHeader css={headerStyles}>{search}</EuiModalHeader>
           <EuiHorizontalRule margin="none" />
-          <EuiModalBody css={bodyStyles}>
-            {searchCharLimitExceeded ? (
-              <CharLimitExceededMessage basePathUrl={basePathUrl} />
-            ) : (
-              list
-            )}
-          </EuiModalBody>
+          <EuiModalBody css={bodyStyles}>{list}</EuiModalBody>
           <EuiHorizontalRule margin="none" />
-          <EuiModalFooter css={footerStyles}>
-            <SearchFooter shortcutKey={SEARCH_MODAL_KEYBOARD_SHORTCUT.toUpperCase()} />
+          <EuiModalFooter
+            css={footerStyles}
+            data-test-subj={`${SEARCH_MODAL_SELECTOR_PREFIX}Footer`}
+          >
+            <SearchFooter />
           </EuiModalFooter>
         </>
       )}

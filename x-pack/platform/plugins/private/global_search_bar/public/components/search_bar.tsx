@@ -23,13 +23,13 @@ import useEvent from 'react-use/lib/useEvent';
 import useObservable from 'react-use/lib/useObservable';
 import { isMac } from '@kbn/shared-ux-utility';
 import { i18nStrings } from '../strings';
-import { SearchFooter } from './search_footer';
-import { SearchPlaceholder } from './search_placeholder';
-import { useSearchState } from '../hooks/use_search_state';
-import { EmptyMessage } from './empty_message';
-import { CharLimitExceededMessage } from './char_limit_exceeded_message';
-import { blurEvent } from '.';
 import type { SearchBarProps } from './types';
+import { EmptyMessage } from './empty_message';
+import { SearchPlaceholder } from './search_placeholder';
+import { CharLimitExceededMessage } from './char_limit_exceeded_message';
+import { SearchFooter } from './search_footer';
+import { useSearchState } from '../hooks/use_search_state';
+import { blurEvent } from '.';
 
 export const SearchBar = ({
   globalSearch,
@@ -46,6 +46,7 @@ export const SearchBar = ({
   const [isVisible, setIsVisible] = useState(false);
   const visibilityButtonRef = useRef<HTMLButtonElement | null>(null);
 
+  // General hooks
   const [buttonRef, setButtonRef] = useState<HTMLDivElement | null>(null);
   const [showAppend, setShowAppend] = useState<boolean>(true);
 

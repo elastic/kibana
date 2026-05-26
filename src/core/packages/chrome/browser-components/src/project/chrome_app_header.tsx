@@ -15,7 +15,7 @@ import type { AppHeaderBack } from '@kbn/app-header';
 
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { AppHeaderView } from '@kbn/app-header';
-import { useLayoutUpdate } from '@kbn/core-chrome-layout-components';
+import { useLayoutUpdate } from '@kbn/ui-chrome-layout';
 import { useHasLegacyActionMenu } from '../shared/chrome_hooks';
 
 function getBreadcrumbText(crumb: ChromeBreadcrumb): string | undefined {
