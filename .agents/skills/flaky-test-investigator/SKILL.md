@@ -21,6 +21,8 @@ Investigate a flaky Scout, FTR, or Jest test failure and determine what should b
 
 If no link to a `failed-test` issue was provided, search for one in the `elastic/kibana` repository. Prioritize looking at the recent failures, but all failures and issue comments should be looked at.
 
+Ignore any prior root-cause analyses or fix proposals posted by automations; treat them as if they weren't there and reach your own conclusion. Failure-notification comments from `kibanamachine` are still useful as a history signal.
+
 ### Understand the test environment
 
 - **Is it failing on `kibana-on-merge` (local pipeline), on Cloud pipelines, or both?**
