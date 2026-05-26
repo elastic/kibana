@@ -369,7 +369,7 @@ export function XYChart({
   const safeXAccessorLabelRenderer = (value: unknown): string =>
     xAxisColumn && formattedDatatables[dataLayers[0]?.layerId]?.formattedColumns[xAxisColumn.id]
       ? String(value)
-      : String(xAxisFormatter.convert(value));
+      : String(xAxisFormatter.convertToText(value));
 
   const shouldRotate = isHorizontalChart(dataLayers);
 
@@ -986,7 +986,7 @@ export function XYChart({
                     visible: axis.showGridLines,
                   }}
                   hide={axis.hide || dataLayers[0]?.simpleView}
-                  tickFormat={(d) => axis.formatter?.convert(d) || ''}
+                  tickFormat={(d) => axis.formatter?.convertToText(d) || ''}
                   maximumFractionDigits={tickDecimals}
                   style={getYAxesStyle(axis)}
                   domain={getYAxisDomain(axis)}
