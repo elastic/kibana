@@ -19,6 +19,7 @@ project:
 dependsOn:
   - '@kbn/evals'
   - '@kbn/inference-common'
+  - '@kbn/es-snapshot-loader'
 tags:
   - functional-tests
   - package
