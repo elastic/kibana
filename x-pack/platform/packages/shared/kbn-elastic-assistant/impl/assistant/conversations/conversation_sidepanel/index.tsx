@@ -188,7 +188,6 @@ export const ConversationSidePanel = React.memo<Props>(
                 </EuiText>
               </EuiPanel>
               <EuiListGroup
-                size="xs"
                 css={css`
                   padding: 0;
                 `}

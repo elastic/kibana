@@ -195,7 +195,11 @@ const RuleFormContent = ({
           setYamlText={setYamlText}
         />
       ) : (
-        <GuiRuleForm onSubmit={onSubmit} includeQueryEditor={includeQueryEditor} />
+        <GuiRuleForm
+          onSubmit={onSubmit}
+          includeQueryEditor={includeQueryEditor}
+          isEditing={Boolean(ruleId)}
+        />
       )}
 
       {includeSubmission && (

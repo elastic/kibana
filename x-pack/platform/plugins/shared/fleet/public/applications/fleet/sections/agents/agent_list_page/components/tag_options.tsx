@@ -8,12 +8,14 @@
 import type { MouseEvent, ChangeEvent } from 'react';
 import React, { useState, useEffect } from 'react';
 import {
-  EuiButtonEmpty,
+  EuiButton,
   EuiButtonIcon,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
+  EuiLink,
+  EuiSpacer,
+  EuiText,
   EuiWrappingPopover,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -113,39 +115,49 @@ export const TagOptions: React.FC<Props> = ({ tagName, isTagHovered, onTagsUpdat
           closePopover={closePopover}
           anchorPosition="downCenter"
         >
-          <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="xs">
-            <EuiFlexItem>
-              <EuiFieldText
-                placeholder={i18n.translate('xpack.fleet.tagOptions.nameTextFieldPlaceholder', {
-                  defaultMessage: 'Enter new name for tag',
-                })}
-                value={updatedName}
-                required
-                onKeyDown={(e: { key: string }) => {
-                  if (e.key === 'Enter') {
-                    closePopover();
-                  }
-                }}
-                onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                  const newName = e.currentTarget.value;
-                  setUpdatedName(sanitizeTag(newName));
-                }}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiButtonEmpty
+          <EuiFieldText
+            placeholder={i18n.translate('xpack.fleet.tagOptions.nameTextFieldPlaceholder', {
+              defaultMessage: 'Enter new name for tag',
+            })}
+            value={updatedName}
+            required
+            onKeyDown={(e: { key: string }) => {
+              if (e.key === 'Enter') {
+                closePopover();
+              }
+            }}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => {
+              const newName = e.currentTarget.value;
+              setUpdatedName(sanitizeTag(newName));
+            }}
+          />
+          <EuiSpacer size="s" />
+          <EuiFlexGroup direction="row" alignItems="center" justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiButton
                 size="s"
-                color="danger"
                 onClick={() => {
-                  closePopover(true);
+                  closePopover();
                 }}
               >
-                <EuiIcon type="trash" />{' '}
-                <FormattedMessage
-                  id="xpack.fleet.tagOptions.deleteText"
-                  defaultMessage="Delete tag"
-                />
-              </EuiButtonEmpty>
+                <FormattedMessage id="xpack.fleet.tagOptions.saveText" defaultMessage="Save" />
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs">
+                <EuiLink
+                  type="reset"
+                  color="danger"
+                  onClick={() => {
+                    closePopover(true);
+                  }}
+                >
+                  <FormattedMessage
+                    id="xpack.fleet.tagOptions.deleteText"
+                    defaultMessage="Delete tag"
+                  />
+                </EuiLink>
+              </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiWrappingPopover>

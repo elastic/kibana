@@ -92,7 +92,7 @@ export function IdleRoutingStreamEntry({
                   { defaultMessage: 'Drag Handle' }
                 )}
               >
-                <EuiIcon type="drag" />
+                <EuiIcon type="drag" aria-hidden={true} />
               </EuiPanel>
             </EuiFlexItem>
           )}
@@ -123,6 +123,16 @@ export function IdleRoutingStreamEntry({
             alignItems="center"
             responsive={false}
           >
+            {routingRule.draft && (
+              <>
+                <EuiBadge color="hollow" data-test-subj="draftRoutingBadge">
+                  {i18n.translate('xpack.streams.streamDetailRouting.draftBadge', {
+                    defaultMessage: 'Draft',
+                  })}
+                </EuiBadge>
+                <VerticalRule />
+              </>
+            )}
             {!isRoutingEnabled(routingRule.status) && (
               <>
                 <DisabledBadge />

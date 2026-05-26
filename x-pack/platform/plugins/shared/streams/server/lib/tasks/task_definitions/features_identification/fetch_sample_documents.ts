@@ -69,6 +69,7 @@ export async function fetchSampleDocuments({
             end,
             size: diverseSize,
             offset: diverseOffset,
+            logger,
           }).catch((err) => {
             logger.warn(`Diverse sampling query failed: ${parseError(err).message}`);
             return EMPTY_SAMPLE;
@@ -114,7 +115,7 @@ export async function fetchSampleDocuments({
         end,
         sampleSize: entityFilteredSize,
         whereCondition,
-        loadUnmappedFields: true,
+        unmappedFields: 'LOAD',
       }).catch((err) => {
         logger.warn(`Entity-filtered sampling query failed: ${parseError(err).message}`);
         return EMPTY_SAMPLE;
@@ -127,6 +128,7 @@ export async function fetchSampleDocuments({
             end,
             size: diverseSize + entityFilteredSize,
             offset: diverseOffset,
+            logger,
           }).catch((err) => {
             logger.warn(`Diverse sampling query failed: ${parseError(err).message}`);
             return EMPTY_SAMPLE;

@@ -32,7 +32,26 @@ interface GetSampleDocumentsEsqlParams {
   size?: number;
   sampleSize?: number;
   whereCondition?: WhereCondition;
-  loadUnmappedFields?: boolean;
+  /**
+   * Controls the ES|QL `SET unmapped_fields=...` prefix:
+   * - `'LOAD'` reads unmapped fields from `_source` (used by the entity-filter
+   *   sampling arm to query source-only fields).
+   * - `'NULLIFY'` nullifies unmapped fields so full-text-search functions like
+   *   `MATCH_PHRASE` skip them silently instead of raising
+   *   `verification_exception: Unknown column [...]`.
+   * Omitted means ES|QL uses its default unmapped-field behavior (any direct
+   * reference to an unmapped column is a verification error).
+   */
+  unmappedFields?: 'LOAD' | 'NULLIFY';
+  /**
+   * Optional Query DSL filter clauses forwarded as the ES|QL `_query` request's
+   * `filter` parameter. ES applies these at the request layer (before the ES|QL
+   * pipeline runs), so callers can pass raw fixture-style DSL (`term`, `terms`,
+   * `match`, `match_phrase`, `exists`, `bool { should, minimum_should_match }`,
+   * ...) without translating to KQL. Multiple clauses are ANDed with the
+   * internal date-range filter.
+   */
+  dslFilter?: QueryDslQueryContainer | QueryDslQueryContainer[];
 }
 
 interface GetSampleDocumentsEsqlResponse {
@@ -123,9 +142,13 @@ export function getSampleDocuments({
  * oversamples with `SAMPLE`, shuffles the returned rows client-side, then trims
  * to the requested size.
  *
- * `loadUnmappedFields` emits `SET unmapped_fields="LOAD"` so ES|QL predicates
- * can evaluate source-only fields. This replaces the older fieldCaps +
- * runtime_mappings path used for entity-filtered Significant Events sampling.
+ * `unmappedFields` emits `SET unmapped_fields="<mode>"` so ES|QL predicates
+ * can evaluate source-only fields (`'LOAD'`, replaces the older fieldCaps +
+ * runtime_mappings path for entity-filtered sampling) or silently nullify
+ * unmapped columns (`'NULLIFY'`, required when the `WHERE` includes
+ * `MATCH_PHRASE` / `MATCH` against fields that may not be mapped on every
+ * backing index — DSL `match_phrase` no-matches missing fields, but bare
+ * ES|QL full-text functions raise `verification_exception` instead).
  */
 export async function getSampleDocumentsEsql({
   esClient,
@@ -136,15 +159,19 @@ export async function getSampleDocumentsEsql({
   size = 1000,
   sampleSize,
   whereCondition,
-  loadUnmappedFields = false,
+  unmappedFields,
+  dslFilter,
 }: GetSampleDocumentsEsqlParams): Promise<GetSampleDocumentsEsqlResponse> {
   const indices = Array.isArray(index) ? index : [index];
-  const filter = { bool: { filter: dateRangeQuery(start, end) } };
+  const extraDslClauses = dslFilter ? castArray(dslFilter) : [];
+  const filter = {
+    bool: { filter: [...dateRangeQuery(start, end), ...extraDslClauses] },
+  };
 
   const whereExpression = buildWhereExpression({ kql, whereCondition });
   const printQuery = (query: ComposerQuery) => {
-    if (loadUnmappedFields) {
-      query.addSetCommand('unmapped_fields', 'LOAD');
+    if (unmappedFields) {
+      query.addSetCommand('unmapped_fields', unmappedFields);
     }
     return query.print('basic');
   };

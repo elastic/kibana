@@ -14,19 +14,19 @@ import { SESSION_VIEW_TEST_ID } from './test_ids';
 import {
   SESSION_VIEW_NO_DATA_TEST_ID,
   SESSION_VIEW_UPSELL_TEST_ID,
-} from '../../../../flyout_v2/document/components/test_ids';
+} from '../../../../flyout_v2/document/main/components/test_ids';
 import { SessionView } from './session_view';
 import {
   ANCESTOR_INDEX,
   ENTRY_LEADER_ENTITY_ID,
   ENTRY_LEADER_START,
-} from '../../../../flyout_v2/document/constants/field_names';
-import { useSessionViewConfig } from '../../../../flyout_v2/session_view/hooks/use_session_view_config';
+} from '../../../../flyout_v2/document/main/constants/field_names';
+import { useSessionViewConfig } from '../../../../flyout_v2/document/tools/session_view/hooks/use_session_view_config';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { useLicense } from '../../../../common/hooks/use_license';
 
-jest.mock('../../../../flyout_v2/session_view/hooks/use_session_view_config');
+jest.mock('../../../../flyout_v2/document/tools/session_view/hooks/use_session_view_config');
 jest.mock('../../../../common/hooks/use_license');
 jest.mock('../../../../sourcerer/containers');
 

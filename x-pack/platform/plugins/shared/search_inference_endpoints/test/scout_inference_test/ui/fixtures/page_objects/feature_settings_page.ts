@@ -50,6 +50,10 @@ export class FeatureSettingsPage {
   readonly noModelsEmptyPrompt: Locator;
   readonly addModelsButton: Locator;
 
+  // Deprecation / EOL callouts
+  readonly deprecatedModelsCallout: Locator;
+  readonly eolModelsCallout: Locator;
+
   constructor(private readonly page: ScoutPage) {
     // Header
     this.pageHeader = this.page.testSubj.locator('modelSettingsPageHeader');
@@ -98,6 +102,10 @@ export class FeatureSettingsPage {
     // Empty State
     this.noModelsEmptyPrompt = this.page.testSubj.locator('settings-no-models');
     this.addModelsButton = this.page.testSubj.locator('settings-no-models-add-models');
+
+    // Deprecation / EOL callouts
+    this.deprecatedModelsCallout = this.page.testSubj.locator('deprecatedModelsCallout');
+    this.eolModelsCallout = this.page.testSubj.locator('eolModelsCallout');
   }
 
   // --- Navigation ---
@@ -144,6 +152,26 @@ export class FeatureSettingsPage {
 
   public copyToModalCheckbox(featureId: string): Locator {
     return this.page.locator(`#copy-target-${featureId}`);
+  }
+
+  public modelStatusBadge(id: string, kind: 'preview' | 'deprecated' | 'eol'): Locator {
+    let prefix: string;
+    switch (kind) {
+      case 'preview':
+        prefix = 'modelPreviewBadge';
+        break;
+      case 'deprecated':
+        prefix = 'modelDeprecatedBadge';
+        break;
+      case 'eol':
+        prefix = 'modelEolBadge';
+        break;
+    }
+    return this.page.testSubj.locator(`${prefix}-${id}`);
+  }
+
+  public globalDefaultLockedRow(featureId: string): Locator {
+    return this.page.testSubj.locator(`global-default-row-${featureId}`);
   }
 
   // --- Composite actions ---

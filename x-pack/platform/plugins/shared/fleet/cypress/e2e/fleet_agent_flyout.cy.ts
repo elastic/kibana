@@ -99,6 +99,7 @@ describe('Fleet add agent flyout', () => {
           id: 'test-' + Date.now(),
           doc: {
             '@timestamp': new Date().toISOString(),
+            event: { ingested: new Date().toISOString() },
             'agent.id': AGENT_ID,
             message: 'Test log 1',
           },

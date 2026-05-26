@@ -99,7 +99,7 @@ describe('ResolutionClient', () => {
       });
       expect(mockEsClient.bulk).toHaveBeenCalledWith(
         expect.objectContaining({
-          refresh: true,
+          refresh: 'wait_for',
           operations: expect.arrayContaining([
             expect.objectContaining({
               update: expect.objectContaining({
@@ -109,6 +109,21 @@ describe('ResolutionClient', () => {
           ]),
         })
       );
+    });
+
+    it('should forward refresh: false to the bulk call when caller passes it', async () => {
+      const targetDoc = createEntityDoc('target-1');
+      const entity1Doc = createEntityDoc('entity-1');
+
+      mockEsClient.search.mockResolvedValueOnce(
+        createSearchResponse([targetDoc, entity1Doc]) as never
+      );
+      mockEsClient.search.mockResolvedValueOnce(createSearchResponse([]) as never);
+      mockEsClient.bulk.mockResolvedValueOnce({ errors: false, items: [] } as never);
+
+      await client.linkEntities('target-1', ['entity-1'], { refresh: false });
+
+      expect(mockEsClient.bulk).toHaveBeenCalledWith(expect.objectContaining({ refresh: false }));
     });
 
     it('should pass nested doc payloads to ES bulk (not flat dotted keys)', async () => {
@@ -348,7 +363,7 @@ describe('ResolutionClient', () => {
       expect(result).toEqual({ unlinked: ['alias-1'], skipped: [] });
       expect(mockEsClient.bulk).toHaveBeenCalledWith(
         expect.objectContaining({
-          refresh: true,
+          refresh: 'wait_for',
           operations: expect.arrayContaining([
             expect.objectContaining({
               doc: {
@@ -364,6 +379,17 @@ describe('ResolutionClient', () => {
           ]),
         })
       );
+    });
+
+    it('should forward refresh: false to the bulk call when caller passes it', async () => {
+      const aliasDoc = createEntityDoc('alias-1', 'user', 'target-1');
+
+      mockEsClient.search.mockResolvedValueOnce(createSearchResponse([aliasDoc]) as never);
+      mockEsClient.bulk.mockResolvedValueOnce({ errors: false, items: [] } as never);
+
+      await client.unlinkEntities(['alias-1'], { refresh: false });
+
+      expect(mockEsClient.bulk).toHaveBeenCalledWith(expect.objectContaining({ refresh: false }));
     });
 
     it('should throw EntitiesNotFoundError when entities are missing', async () => {

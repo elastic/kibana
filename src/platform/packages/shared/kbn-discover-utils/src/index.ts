@@ -14,6 +14,8 @@ export * from './utils';
 export * from './data_types';
 
 export * from './components/custom_control_columns';
+export { ErrorCallout } from './components/error_callout';
+export type { ErrorCalloutProps } from './components/error_callout';
 export { AppMenuRegistry } from './components/app_menu/app_menu_registry';
 export type {
   DiscoverAppMenuItemType,

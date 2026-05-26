@@ -95,7 +95,7 @@ export const links: LinkItem = {
   path: MANAGE_PATH,
   skipUrlState: true,
   hideTimeline: true,
-  globalNavPosition: 12,
+  globalNavPosition: 13,
   capabilities: [SECURITY_UI_SHOW_PRIVILEGE],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.manage', {

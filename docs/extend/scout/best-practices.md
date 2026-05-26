@@ -213,11 +213,13 @@ test('can see dashboard', async ({ page }) => {
 
 :::::
 
-## Use a global setup hook for one-time setup [move-repeated-one-time-setup-operations-to-a-global-setup-hook]
+## Use the global setup and teardown hooks in parallel test suites [move-repeated-one-time-setup-operations-to-a-global-setup-hook]
 
-If many files share the same “one-time” work (archives, API calls, settings), move it to a [global setup hook](./global-setup-hook.md).
+For parallel suites, move shared “one-time” work (archives, API calls, settings) to a [global setup hook](./global-setup-hook.md), and reset any state that would leak into other Scout configs in a [global teardown hook](./global-setup-hook.md#global-teardown-hook). See [When to use](./global-setup-hook.md#when-to-use) for the full guidance on what belongs here vs. in `beforeAll`/`afterAll`.
 
-:::::{dropdown} Example
+:::::{dropdown} Examples
+
+✔️ **Do:** load shared data once in `global.setup.ts`:
 
 ```ts
 globalSetupHook('Load shared test data (if needed)', async ({ esArchiver, log }) => {
@@ -226,11 +228,19 @@ globalSetupHook('Load shared test data (if needed)', async ({ esArchiver, log })
 });
 ```
 
-:::::
+✔️ **Do:** revert suite-wide state in `global.teardown.ts` so it doesn't leak into other configs:
 
-::::::{note}
-Global setup hooks have **no corresponding teardown**. Keep operations that require cleanup (such as `kbnClient.importExport.load()`) in `beforeAll`/`afterAll` hooks so saved objects are properly removed after tests run. See [Global setup hook: When to use](./global-setup-hook.md#when-to-use) for guidance.
-::::::
+```ts
+globalTeardownHook('Reset shared Kibana state', async ({ kbnClient, apiServices, log }) => {
+  log.debug('[teardown] resetting shared state...');
+  await kbnClient.uiSettings.unset('discover:searchOnPageLoad');
+  await apiServices.core.settings({
+    'feature_flags.overrides': { 'discover.isEsqlDefault': false },
+  });
+});
+```
+
+:::::
 
 ## Only load archives your tests actually use [only-load-archives-your-tests-actually-use]
 

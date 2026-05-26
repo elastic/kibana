@@ -142,8 +142,9 @@ const addTagsFilter = (query: ComposerQuery, tags: string[]) => {
  * `.alert-actions` (last tags / deactivate state per group_hash, last assignee per episode),
  * then narrows to episode rows and derives `effective_status`.
  */
-export const buildEpisodesBaseQuery = (search?: string): ComposerQuery => {
-  const query = esql.from([ALERT_EVENTS_DATA_STREAM, ALERT_ACTIONS_DATA_STREAM], ['_source']);
+export const buildEpisodesBaseQuery = (spaceId: string, search?: string): ComposerQuery => {
+  const query = esql.from([ALERT_EVENTS_DATA_STREAM, ALERT_ACTIONS_DATA_STREAM], ['_source'])
+    .where`space_id == ${spaceId}`;
 
   const trimmedSearch = search?.trim();
   if (trimmedSearch) {
@@ -174,6 +175,7 @@ export const buildEpisodesBaseQuery = (search?: string): ComposerQuery => {
  * is available for `assigneeUid` filtering.
  */
 export const buildEpisodesQuery = (
+  spaceId: string,
   sortState: EpisodesSortState = { sortField: '@timestamp', sortDirection: 'desc' },
   filterState?: EpisodesFilterState
 ): ComposerQuery => {
@@ -181,7 +183,7 @@ export const buildEpisodesQuery = (
   const sortDir = sortState.sortDirection.toUpperCase() as 'ASC' | 'DESC';
   const pageSizeParam = esql.par(undefined, PAGE_SIZE_ESQL_VARIABLE);
 
-  const query = buildEpisodesBaseQuery(filterState?.queryString?.trim());
+  const query = buildEpisodesBaseQuery(spaceId, filterState?.queryString?.trim());
 
   if (filterState?.status) {
     query.where`effective_status == ${filterState.status}`;

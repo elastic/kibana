@@ -14,6 +14,7 @@ export type {
   FileAppenderConfig,
   ConsoleAppenderConfig,
   OtelAppenderConfig,
+  OtelAppenderTlsConfig,
   RollingFileAppenderConfig,
   RewriteAppenderConfig,
   AppenderConfigType,

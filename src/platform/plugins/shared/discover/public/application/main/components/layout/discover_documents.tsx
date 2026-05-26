@@ -491,9 +491,11 @@ function DiscoverDocumentsComponent({
   const latestCascadedDocumentsDataGridsUiState = useLatest(
     useCurrentTabSelector((tab) => tab.uiState.cascadedDocumentsDataGridMap)
   );
-  const { availableCascadeGroups, selectedCascadeGroups } = useCurrentTabSelector(
-    (tab) => tab.cascadedDocumentsState
-  );
+  const {
+    availableCascadeGroups,
+    selectedCascadeGroups,
+    columnsMeta: cascadedColumnsMeta,
+  } = useCurrentTabSelector((tab) => tab.cascadedDocumentsState);
   const setSelectedCascadeGroups = useCurrentTabAction(
     internalStateActions.setSelectedCascadeGroups
   );
@@ -514,6 +516,7 @@ function DiscoverDocumentsComponent({
       cascadedDocumentsFetcher,
       availableCascadeGroups,
       selectedCascadeGroups,
+      cascadedColumnsMeta,
       esqlQuery: query,
       esqlVariables,
       timeRange: requestParams.timeRangeAbsolute,
@@ -537,6 +540,7 @@ function DiscoverDocumentsComponent({
   }, [
     availableCascadeGroups,
     cascadedDocumentsFetcher,
+    cascadedColumnsMeta,
     dispatch,
     esqlVariables,
     expandedDoc$,
@@ -554,6 +558,13 @@ function DiscoverDocumentsComponent({
     setSelectedCascadeGroups,
     viewModeToggle,
   ]);
+
+  const flyoutColumnsMeta = useMemo(() => {
+    if (!expandedDocOwner || expandedDocOwner === DEFAULT_EXPANDED_DOC_OWNER) {
+      return columnsMeta;
+    }
+    return cascadedColumnsMeta;
+  }, [expandedDocOwner, columnsMeta, cascadedColumnsMeta]);
 
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
     return (
@@ -650,7 +661,7 @@ function DiscoverDocumentsComponent({
           hits={renderDocumentViewMeta.displayedRows}
           // if default columns are used, don't make them part of the URL - the context state handling will take care to restore them
           columns={renderDocumentViewMeta.displayedColumns}
-          columnsMeta={columnsMeta}
+          columnsMeta={flyoutColumnsMeta}
           savedSearchId={persistedDiscoverSession?.id!}
           query={query}
           initialTabId={initialDocViewerTabId}

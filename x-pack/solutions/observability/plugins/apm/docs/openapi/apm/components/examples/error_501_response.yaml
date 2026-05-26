@@ -1,0 +1,5 @@
+description: An example of a 501 Not Implemented response, returned when the source map feature is not available on the current deployment.
+value:
+  statusCode: 501
+  error: Not Implemented
+  message: "Not Implemented"

@@ -8,6 +8,7 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
+import { apm } from '@elastic/apm-rum';
 import type { DashboardState } from '../../server';
 import { sanitizeDashboard } from './sanitize_dashboard';
 import type { ExportJsonSanitizedState, ExportJsonStatus } from './types';
@@ -47,7 +48,13 @@ export function useSanitizedDashboardState({
       })
       .catch((e) => {
         if (!isMounted) return;
-        setError(e instanceof Error ? e : new Error(String(e)));
+        const err = e instanceof Error ? e : new Error(String(e));
+        apm.captureError(err, {
+          labels: {
+            error_type: 'SanitizeDashboardFailure',
+          },
+        });
+        setError(err);
         setStatus('error');
       });
 
