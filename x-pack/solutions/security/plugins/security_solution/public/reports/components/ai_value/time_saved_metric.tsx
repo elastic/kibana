@@ -35,7 +35,7 @@ const VISUALIZATION_ACTIONS = [
   VisualizationContextMenuActions.addToExistingCase,
   VisualizationContextMenuActions.addToNewCase,
   VisualizationContextMenuActions.inspect,
-] as const;
+];
 
 interface LiveContentProps {
   from: string;
