@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { EuiCallOut, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { FLEET_ROUTING_PATHS } from '../../constants';
+import { AGENTS_INDEX, AGENTS_PREFIX, FLEET_ROUTING_PATHS } from '../../constants';
 import { DefaultLayout } from '../../layouts';
 import { useBreadcrumbs } from '../../hooks';
+
+import { SearchBar } from '../../components/search_bar';
 
 import { CollectorGroupsTable } from './components/collector_groups_table';
 import { CollectorsTable } from './components/collectors_table';
@@ -26,8 +28,13 @@ const CollectorsListPage: React.FC = () => {
   useBreadcrumbs('collectors');
 
   const [isAutoRefreshOn, setIsAutoRefreshOn] = useState(true);
-  const { groupBy, expandedGroups } = useCollectorsUrlFilters();
+  const { kuery, groupBy, expandedGroups } = useCollectorsUrlFilters();
   const setUrlFilters = useSetCollectorsUrlFilters();
+  const [draftKuery, setDraftKuery] = useState(kuery ?? '');
+
+  useEffect(() => {
+    setDraftKuery(kuery ?? '');
+  }, [kuery]);
 
   const isGrouped = groupBy !== 'none';
   const refetchInterval = isAutoRefreshOn ? REFRESH_INTERVAL_MS : false;
@@ -48,6 +55,22 @@ const CollectorsListPage: React.FC = () => {
         groupAfterKey: undefined,
         expandedGroups: [],
       });
+    },
+    [setUrlFilters]
+  );
+
+  const handleSearchChange = useCallback(
+    (newSearch: string, submit?: boolean) => {
+      setDraftKuery(newSearch);
+      if (submit) {
+        setUrlFilters({
+          kuery: newSearch.trim() || undefined,
+          pageIndex: 0,
+          groupPage: 0,
+          groupAfterKey: undefined,
+          expandedGroups: [],
+        });
+      }
     },
     [setUrlFilters]
   );
@@ -103,6 +126,13 @@ const CollectorsListPage: React.FC = () => {
                 onGroupByChange={handleGroupByChange}
               />
               <EuiSpacer size="m" />
+              <SearchBar
+                value={draftKuery}
+                fieldPrefix={AGENTS_PREFIX}
+                indexPattern={AGENTS_INDEX}
+                onChange={handleSearchChange}
+                dataTestSubj="fleetCollectors.queryInput"
+              />
             </>
           )}
           <EuiSpacer size="m" />

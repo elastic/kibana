@@ -107,7 +107,9 @@ export const CollectorsStatusBar: React.FC<CollectorsStatusBarProps> = ({
                 <FormattedMessage
                   id="xpack.fleet.collectors.statusBar.updatedAt"
                   defaultMessage="Updated {date}"
-                  values={{ date: <FormattedRelative value={dataUpdatedAt} /> }}
+                  values={{
+                    date: <FormattedRelative value={dataUpdatedAt} updateIntervalInSeconds={30} />,
+                  }}
                 />
               </EuiText>
             </EuiFlexItem>
