@@ -7,6 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+const mockValidateQuery = jest.fn();
+
+jest.mock('@kbn/esql-language', () => ({
+  __esModule: true,
+  validateQuery: (...args: unknown[]) => mockValidateQuery(...args),
+}));
+
 // eslint-disable-next-line import/no-nodejs-modules
 import fs from 'fs';
 // eslint-disable-next-line import/no-nodejs-modules
@@ -323,6 +330,10 @@ const SUITES = [
     },
   },
 ] as const;
+
+beforeEach(() => {
+  mockValidateQuery.mockResolvedValue({ errors: [], warnings: [] });
+});
 
 for (const suite of SUITES) {
   // Regression guard for validation latency; per-step budgets fix #261389 CI flake.
