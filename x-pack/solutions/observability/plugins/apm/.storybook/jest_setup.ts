@@ -6,6 +6,6 @@
  */
 
 import { setProjectAnnotations } from '@storybook/react';
-import * as globalStorybookConfig from './preview';
+import * as globalStorybookConfig from './jest_preview';
 
 setProjectAnnotations(globalStorybookConfig);
