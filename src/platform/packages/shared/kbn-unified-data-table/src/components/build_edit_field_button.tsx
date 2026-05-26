@@ -36,7 +36,6 @@ export const buildEditFieldButton = ({
   }
 
   const editFieldButton: EuiListGroupItemProps = {
-    size: 'xs',
     label: (
       <FormattedMessage
         id="unifiedDataTable.grid.editFieldButton"

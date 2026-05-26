@@ -10,7 +10,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 import type { KueryNode } from '@kbn/es-query';
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { fromKueryExpression, toElasticsearchQuery, escapeQuotes } from '@kbn/es-query';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
 
@@ -37,6 +37,7 @@ import { retryTransientEsErrors } from '../epm/elasticsearch/retry';
 
 import { searchHitToAgent, agentSOAttributesToFleetServerAgentDoc } from './helpers';
 import { buildAgentStatusRuntimeField } from './build_status_runtime_field';
+import { SIGNALS_RUNTIME_FIELD } from './build_signals_runtime_field';
 import { getLatestAvailableAgentVersion } from './versions';
 
 const INACTIVE_AGENT_CONDITION = `status:inactive`;
@@ -262,7 +263,9 @@ export async function getAgentsByKuery(
     });
     if (agentlessPolicies.items.length > 0) {
       filters.push(
-        `NOT policy_id: (${agentlessPolicies.items.map((policy) => `"${policy.id}"`).join(' or ')})`
+        `NOT policy_id: (${agentlessPolicies.items
+          .map((policy) => `"${escapeQuotes(policy.id)}"`)
+          .join(' or ')})`
       );
     }
   }
@@ -277,7 +280,10 @@ export async function getAgentsByKuery(
 
   const kueryNode = _joinFilters(filters);
 
-  const runtimeFields = await buildAgentStatusRuntimeField(soClient);
+  const runtimeFields = {
+    ...(await buildAgentStatusRuntimeField(soClient)),
+    ...SIGNALS_RUNTIME_FIELD,
+  };
 
   const sort = getSortConfig(sortField, sortOrder);
 
@@ -761,6 +767,7 @@ export async function updateAgent(
       index: AGENTS_INDEX,
       doc: agentSOAttributesToFleetServerAgentDoc(data),
       refresh: 'wait_for',
+      retry_on_conflict: 5,
     })
   );
 }

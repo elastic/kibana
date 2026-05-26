@@ -9,12 +9,12 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { RULE_PREVIEW_FOOTER_TEST_ID, RULE_PREVIEW_OPEN_RULE_FLYOUT_TEST_ID } from './test_ids';
 import { PreviewFooter } from './footer';
-import { useRuleDetailsLink } from '../../../flyout_v2/rule/hooks/use_rule_details_link';
+import { useRuleDetailsLink } from '../../../flyout_v2/rule/main/hooks/use_rule_details_link';
 import { useAgentBuilderAvailability } from '../../../agent_builder/hooks/use_agent_builder_availability';
 import { TestProviders } from '../../../common/mock';
 import type { RuleResponse } from '../../../../common/api/detection_engine';
 
-jest.mock('../../../flyout_v2/rule/hooks/use_rule_details_link');
+jest.mock('../../../flyout_v2/rule/main/hooks/use_rule_details_link');
 jest.mock('../../../agent_builder/hooks/use_agent_builder_availability');
 
 const renderRulePreviewFooter = ({ isPreviewMode = false }: { isPreviewMode?: boolean } = {}) =>

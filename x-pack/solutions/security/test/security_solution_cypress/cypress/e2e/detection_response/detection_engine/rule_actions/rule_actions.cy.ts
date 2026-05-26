@@ -125,7 +125,7 @@ describe(
         cy.get('[data-test-subj=comboBoxToggleListButton]').click();
       });
       cy.get(CASES_CONNECTOR_GROUP_BY_ALERT_FIELD_OPTIONS_LIST).should('be.visible');
-      cy.get(`${CASES_CONNECTOR_GROUP_BY_ALERT_FIELD_OPTIONS_LIST} button[role=option]`).then(
+      cy.get(`${CASES_CONNECTOR_GROUP_BY_ALERT_FIELD_OPTIONS_LIST} .euiComboBoxOption`).then(
         ($items) => $items.length > 0
       );
     });

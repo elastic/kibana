@@ -21,7 +21,7 @@ import { NetworkDetailsLink } from '../../../common/components/links';
 import { NetworkPanelKey } from '../../../flyout/network_details';
 import { FlyoutLink } from '../../../flyout/shared/components/flyout_link';
 import { ChildLink } from '../../../flyout_v2/shared/components/child_link';
-import { Network } from '../../../flyout_v2/network_details';
+import { Network } from '../../../flyout_v2/network/main';
 import { flyoutProviders } from '../../../flyout_v2/shared/components/flyout_provider';
 import { useDefaultDocumentFlyoutProperties } from '../../../flyout_v2/shared/hooks/use_default_flyout_properties';
 

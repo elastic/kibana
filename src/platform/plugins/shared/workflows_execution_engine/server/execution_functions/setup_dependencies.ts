@@ -8,20 +8,26 @@
  */
 
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
-import type { EsWorkflowExecution, WorkflowSettings } from '@kbn/workflows';
+import type { EsWorkflowExecution } from '@kbn/workflows';
 import { WorkflowRepository } from '@kbn/workflows';
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import { setWorkflowEventChainContext } from '@kbn/workflows-extensions/server';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 
 import { ConnectorExecutor } from '../connector_executor';
-import { extractEventChainDepthFromExecution } from '../lib/telemetry/utils/extract_execution_metadata';
+import { defaultWorkflowSettings } from '../default_workflow_settings';
+import {
+  extractEventChainDepthFromExecution,
+  extractEventChainVisitedWorkflowIdsFromExecution,
+  mergeEmitterWorkflowIntoEventChainVisited,
+} from '../lib/telemetry/utils/extract_execution_metadata';
 import { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_execution_telemetry_client';
 import { StepExecutionRepository } from '../repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import { NodesFactory } from '../step/nodes_factory';
 import type { WorkflowsExecutionEnginePluginStart } from '../types';
 import { StepExecutionRuntimeFactory } from '../workflow_context_manager/step_execution_runtime_factory';
+import { StepIoService } from '../workflow_context_manager/step_io_service';
 import type { ContextDependencies } from '../workflow_context_manager/types';
 import { WorkflowExecutionDriver } from '../workflow_context_manager/workflow_execution_driver';
 import { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
@@ -29,10 +35,6 @@ import { WorkflowExecutionState } from '../workflow_context_manager/workflow_exe
 
 import { WorkflowEventLoggerService } from '../workflow_event_logger';
 import { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
-
-const defaultWorkflowSettings: WorkflowSettings = {
-  timeout: '6h',
-};
 
 export async function setupDependencies(
   workflowRunId: string,
@@ -110,9 +112,15 @@ export async function setupDependencies(
 
   const workflowExecutionState = new WorkflowExecutionState(
     workflowExecution as EsWorkflowExecution,
-    workflowExecutionRepository,
-    stepExecutionRepository
+    workflowExecutionRepository
   );
+
+  const stepIoService = new StepIoService({
+    stepRepository: stepExecutionRepository,
+    state: workflowExecutionState,
+    evictionMinBytes: config.eviction.minPayloadSize.getValueInBytes(),
+    logger,
+  });
 
   // Create telemetry client
   const telemetryClient = new WorkflowExecutionTelemetryClient(coreStart.analytics, logger);
@@ -130,6 +138,7 @@ export async function setupDependencies(
     workflowExecutionDriver,
     workflowLogger,
     workflowExecutionState,
+    stepIoService,
     coreStart,
     dependencies,
     telemetryClient,
@@ -153,6 +162,7 @@ export async function setupDependencies(
   const stepExecutionRuntimeFactory = new StepExecutionRuntimeFactory({
     workflowExecutionGraph,
     workflowExecutionState,
+    stepIoService,
     workflowLogger,
     esClient,
     fakeRequest,
@@ -167,7 +177,7 @@ export async function setupDependencies(
     workflowExecutionGraph,
     stepExecutionRuntimeFactory,
     enhancedDependencies,
-    workflowExecutionState
+    stepIoService
   );
 
   return {
@@ -175,6 +185,7 @@ export async function setupDependencies(
     workflowRuntime,
     stepExecutionRuntimeFactory,
     workflowExecutionState,
+    stepIoService,
     workflowLogger,
     workflowTaskManager,
     nodesFactory,

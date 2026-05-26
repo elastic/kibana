@@ -51,12 +51,12 @@ export function withCloseFilterEditorConfirmModal<
 
     const onCancelModal = useCallback(() => {
       setShowConfirmModal(false);
-    }, [setShowConfirmModal]);
+    }, []);
 
     const onConfirmModal = useCallback(() => {
       setShowConfirmModal(false);
       actionsOnClose?.map((action) => action());
-    }, [actionsOnClose, setShowConfirmModal]);
+    }, [actionsOnClose]);
 
     const onCloseFilterPopover = useCallback(
       (actions?: Action[]) => {
@@ -68,6 +68,7 @@ export function withCloseFilterEditorConfirmModal<
             (!isQueryDslFilter(updatedFilter) &&
               !compareFilters(originalFilter.filter, updatedFilter, {
                 index: true,
+                negate: true,
                 alias: true,
               })));
         if (filtersAreNotEqual) {
@@ -77,7 +78,7 @@ export function withCloseFilterEditorConfirmModal<
           actions?.map((action) => action());
         }
       },
-      [originalFilter, updatedFilter, setShowConfirmModal, setActionsOnClose]
+      [originalFilter, updatedFilter]
     );
 
     return (

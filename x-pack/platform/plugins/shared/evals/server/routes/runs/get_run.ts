@@ -18,7 +18,7 @@ import {
   GetEvaluationRunRequestQuery,
 } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { PLUGIN_ID } from '../../../common';
+import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
 
 interface EvalDocSource {
@@ -49,7 +49,7 @@ export const registerGetRunRoute = ({ router, logger }: RouteDependencies) => {
       path: EVALS_RUN_URL,
       access: INTERNAL_API_ACCESS,
       security: {
-        authz: { requiredPrivileges: [PLUGIN_ID] },
+        authz: { requiredPrivileges: [EVALS_API_PRIVILEGES.read] },
       },
       summary: 'Get evaluation run detail',
     })

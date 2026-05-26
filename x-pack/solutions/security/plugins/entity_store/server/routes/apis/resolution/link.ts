@@ -39,7 +39,9 @@ export function registerResolutionLink(router: EntityStorePluginRouter) {
       access: 'public',
       summary: 'Link entities',
       description:
-        'Link one or more entities to a target entity, creating a resolution group. Requires an enterprise license.',
+        'Link one or more entities to a target entity, creating a resolution group. ' +
+        'Changes become visible on subsequent reads after the next index refresh ' +
+        '(typically <1s). Requires an enterprise license.',
       options: {
         tags: ['oas-tag:Security entity store'],
       },

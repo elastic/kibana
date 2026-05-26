@@ -44,6 +44,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     resultStore,
     skillsStore,
     attachmentStateManager,
+    todoStateManager,
     logger,
     promptManager,
     stateManager,
@@ -51,6 +52,8 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     skillServiceStart,
     pluginsServiceStart,
     toolManager,
+    analyticsService,
+    trackingService,
   } = manager.deps;
 
   const spaceId = getCurrentSpaceId({ request, spaces });
@@ -67,6 +70,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     filestore: true,
     skills: true,
     subagents: isExperimentalEnabled,
+    todos: isExperimentalEnabled,
   };
 
   return {
@@ -87,6 +91,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     resultStore,
     skillsStore,
     attachmentStateManager,
+    todoStateManager,
     filestore,
     stateManager,
     promptManager,
@@ -111,6 +116,8 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     experimentalFeatures,
     executionMode: manager.deps.executionMode,
     subAgentExecutor: manager.deps.subAgentExecutor,
+    analyticsService,
+    trackingService,
   };
 };
 

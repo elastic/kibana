@@ -10,6 +10,12 @@
  */
 export const DATA_STREAM_NAME = '.kibana_change_history';
 /**
+ * Name of the ILM policy applied to the change history data stream.
+ * Documented in the package README so cluster admins can edit it via the
+ * Kibana Index Lifecycle Management UI / Elasticsearch ILM API.
+ */
+export const ILM_POLICY_NAME = '.kibana-change-history-ilm-policy';
+/**
  * Separator char. Used for scoping.
  */
 export const SEPARATOR_CHAR = '|';

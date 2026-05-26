@@ -11,6 +11,7 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiModalBody,
   EuiModalFooter,
   EuiText,
@@ -21,6 +22,7 @@ import {
   AnnouncementReleaseNotesButton,
   announcementModalFooterCss,
 } from '../announcement_ui_shared';
+import { AGENT_BUILDER_LEARN_MORE_URL } from '../announcement_urls';
 import * as i18n from '../translations';
 import type { AnnouncementModalVariantProps } from './types';
 
@@ -39,8 +41,8 @@ export function PriorAssistantAdminRevert({ onContinue }: AnnouncementModalVaria
       margin: ${euiTheme.size.s} 0 0;
       margin-left: 0;
       margin-bottom: 0;
-      padding-left: 0;
-      list-style-position: inside;
+      padding-left: ${euiTheme.size.l};
+      list-style-position: outside;
     }
 
     && li + li {
@@ -64,6 +66,17 @@ export function PriorAssistantAdminRevert({ onContinue }: AnnouncementModalVaria
             data-test-subj="agentBuilderAnnouncementImportantNotes"
           >
             <ul css={notesListCss}>
+              <li>
+                {i18n.NOTE_REPLACES_LEGACY_AGENTS}{' '}
+                <EuiLink
+                  href={AGENT_BUILDER_LEARN_MORE_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  data-test-subj="agentBuilderAnnouncementLearnMoreLink"
+                >
+                  {i18n.NOTE_REPLACES_LEGACY_AGENTS_LEARN_MORE}
+                </EuiLink>
+              </li>
               <li>{i18n.NOTE_HISTORY_UNTOUCHED}</li>
               <li>{i18n.NOTE_CONTACT_ADMIN}</li>
             </ul>

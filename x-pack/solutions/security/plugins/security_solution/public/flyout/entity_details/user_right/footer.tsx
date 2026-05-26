@@ -11,6 +11,8 @@ import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { TakeAction } from '../shared/components/take_action';
 import type { IdentityFields } from '../../document_details/shared/utils';
 import type { EntityStoreRecord } from '../shared/hooks/use_entity_from_store';
+import { AiAssistantButton } from '../../../entity_analytics/components/ai_assistant_button/ai_assistant_button';
+import { EntityType } from '../../../../common/entity_analytics/types';
 
 export const UserPanelFooter = ({
   identityFields,
@@ -37,6 +39,13 @@ export const UserPanelFooter = ({
     <EuiFlyoutFooter>
       <EuiPanel color="transparent">
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <AiAssistantButton
+              entityType={EntityType.user}
+              entityName={userName}
+              telemetryPathway="entity_flyout"
+            />
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <TakeAction
               isDisabled={!userName}

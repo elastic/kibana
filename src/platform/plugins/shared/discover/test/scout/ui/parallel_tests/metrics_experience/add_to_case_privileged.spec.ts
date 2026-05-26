@@ -25,7 +25,7 @@ spaceTest.describe(
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
       // "Add to case" action requires cases 'create' and 'update' capabilities (viewer lacks both)
       await browserAuth.loginAsPrivilegedUser();
-      await pageObjects.discover.goto();
+      await pageObjects.discover.goto({ queryMode: 'esql' });
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {
