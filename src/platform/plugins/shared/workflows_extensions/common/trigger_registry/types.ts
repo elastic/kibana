@@ -42,7 +42,7 @@ export interface TriggerSnippets {
  * - id: globally unique, namespaced format <solution>.<event>
  * - eventSchema: must be a Zod object schema that rejects unknown fields
  *
- * Server and agent tooling read title, description, documentation, and snippets from here.
+ * Server and agent tooling read title and description from here; documentation and snippets are optional.
  * Public definitions spread this object and add UI-only fields (e.g. icon).
  */
 export interface CommonTriggerDefinition<EventSchema extends z.ZodType = z.ZodType> {
@@ -65,9 +65,9 @@ export interface CommonTriggerDefinition<EventSchema extends z.ZodType = z.ZodTy
   /**
    * Documentation (details + YAML examples), aligned with step definitions.
    */
-  documentation: TriggerDocumentation;
+  documentation?: TriggerDocumentation;
   /**
    * Pre-filled values for snippet insertion (e.g. on.condition).
    */
-  snippets: TriggerSnippets;
+  snippets?: TriggerSnippets;
 }

@@ -6,7 +6,7 @@ This section provides a complete guide for contributors who want to add event-dr
 
 **Quick checklist:**
 
-1. Define common trigger (id + eventSchema) in your plugin
+1. Define common trigger (id, eventSchema, title, description; optional documentation and snippets) in your plugin
 2. Register on server and public in plugin `setup()`
 3. Emit events via request context or direct `emitEvent`
 4. Add to approved list and get workflows-eng approval
@@ -20,9 +20,9 @@ Trigger IDs use the following convention:
 - ⚠️ Allowed: Inherited forms from OpenAPI/connectors/platform-owned contracts
 - ❌ Bad: `"my_trigger"` (no namespace), `"custom_trigger"` (event not camelCase)
 
-### Step 1: Define common trigger (id, eventSchema, title, description, documentation and snippets)
+### Step 1: Define common trigger (id, eventSchema, title, description; optional documentation and snippets)
 
-Create a shared definition (e.g. `common/triggers/my_trigger.ts`) in your plugin. Put **title**, **description**, **documentation** (details + YAML examples), and **snippets** here so the server registry, YAML editor, and agent tools share one source of truth (aligned with custom steps):
+Create a shared definition (e.g. `common/triggers/my_trigger.ts`) in your plugin. **title** and **description** are required. **documentation** (details + YAML examples) and **snippets** (e.g. a default `on.condition`) are optional but strongly recommended so the YAML editor, hover docs, and agent tools can guide users (aligned with custom steps):
 
 ```typescript
 import { i18n } from '@kbn/i18n';
@@ -59,7 +59,8 @@ export const commonMyTriggerDefinition: CommonTriggerDefinition = {
 
 - Use `.describe()` on schema fields so the UI and docs show helpful text.
 - `eventSchema` must be a Zod object schema; payloads are validated at emit time.
-- Examples must only reference fields present on `eventSchema` (agents pattern-match YAML examples).
+- When you provide `documentation.examples`, each example must only reference fields present on `eventSchema` (agents pattern-match YAML examples).
+- When you provide `snippets.condition`, it must be valid KQL using only `event.*` fields from `eventSchema` (validated at registration).
 
 ### Step 2: Register on server
 
