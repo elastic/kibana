@@ -17,6 +17,7 @@ import { getMockedFinalizeApi } from '../../mocks/control_mocks';
 import { getOptionsListControlFactory } from './get_options_list_control_factory';
 import { optionsListDSLControlSchema } from '@kbn/controls-schemas';
 import { firstValueFrom, of } from 'rxjs';
+import type { OptionsListControlApi } from './types';
 
 describe('Options List Control Api', () => {
   const uuid = 'myControl1';
@@ -46,9 +47,7 @@ describe('Options List Control Api', () => {
     });
     stubDataView.getFormatterForField = jest.fn().mockImplementation(() => {
       return {
-        getConverterFor: () => {
-          return (value: string) => `${value}:formatted`;
-        },
+        convertToText: (value: string) => `${value}:formatted`,
         toJSON: (value: any) => JSON.stringify(value),
       };
     });
@@ -313,6 +312,44 @@ describe('Options List Control Api', () => {
       });
       const hasUnsavedChanges = await firstValueFrom(embeddable.api.hasUnsavedChanges$);
       expect(hasUnsavedChanges).toBe(false);
+    });
+  });
+
+  describe('anyStateChange$', () => {
+    let embeddableApi: OptionsListControlApi;
+    beforeEach((done) => {
+      factory
+        .buildEmbeddable({
+          initializeDrilldownsManager: jest.fn(),
+          initialState: optionsListDSLControlSchema.validate({
+            data_view_id: 'myDataViewId',
+            field_name: 'myFieldName',
+          }),
+          finalizeApi,
+          uuid,
+          parentApi: {},
+        })
+        .then(({ api }) => {
+          embeddableApi = api;
+          done();
+        })
+        .catch(done);
+    });
+
+    test('should not emit on subscribe and emit when any state changes', (done) => {
+      embeddableApi.anyStateChange$.subscribe(() => {
+        try {
+          const { title } = embeddableApi.serializeState();
+          expect(title).toBe('cute puppies');
+        } catch (error) {
+          // title assertion fails when
+          // anyStateChange$ emits on subscribe
+          done(error);
+          return;
+        }
+        done();
+      });
+      embeddableApi.setTitle('cute puppies');
     });
   });
 });
