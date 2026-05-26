@@ -129,12 +129,6 @@ export const createRenderAttachmentRenderer = ({
 
     const attachment = conversationAttachments?.find((att) => att.id === attachmentId);
 
-    if (!attachment) {
-      // During streaming the conversation query is disabled, so newly created attachments
-      // won't be in conversationAttachments yet. Show a skeleton until data arrives.
-      return <AttachmentLoadingSkeleton />;
-    }
-
     const versionToUse = resolveAttachmentVersion({
       explicitVersion,
       attachmentId,
