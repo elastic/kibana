@@ -69,10 +69,8 @@ jest.mock('../../../../../hooks/use_discover_services', () => ({
   useDiscoverServices: jest.fn(() => ({
     discoverShared: mockDiscoverShared,
     dataViews: mockDataViews,
-    core: {
-      notifications: {
-        showErrorDialog: mockShowErrorDialog,
-      },
+    notifications: {
+      showErrorDialog: mockShowErrorDialog,
     },
     docLinks: {
       links: {

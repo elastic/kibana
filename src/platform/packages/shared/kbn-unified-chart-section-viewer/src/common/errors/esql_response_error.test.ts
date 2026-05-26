@@ -176,6 +176,13 @@ describe('EsqlResponseError', () => {
 });
 
 describe('isEsqlResponseError', () => {
+  it('preserves prototype chain so instanceof works after downlevel emit', () => {
+    const err = new EsqlResponseError({ type: 'x', reason: 'y' });
+
+    expect(Object.getPrototypeOf(err)).toBe(EsqlResponseError.prototype);
+    expect(isEsqlResponseError(err)).toBe(true);
+  });
+
   it('returns true for EsqlResponseError instances', () => {
     expect(isEsqlResponseError(new EsqlResponseError({ type: 'x', reason: 'y' }))).toBe(true);
   });
