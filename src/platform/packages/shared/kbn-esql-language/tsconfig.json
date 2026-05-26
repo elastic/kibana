@@ -13,6 +13,7 @@
     "@kbn/field-types",
     "@kbn/test-es-server",
     "@kbn/tooling-log"
+    "@kbn/esql-scripts",
   ],
   "exclude": ["target/**/*"]
 }

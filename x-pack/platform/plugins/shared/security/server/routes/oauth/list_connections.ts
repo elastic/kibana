@@ -7,9 +7,9 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { OAUTH_MAX_STRING_FIELD_LENGTH } from './schemas';
 import { withOAuthManagementGate } from './with_oauth_management_gate';
 import type { RouteDefinitionParams } from '..';
+import { OAUTH_MAX_STRING_FIELD_LENGTH } from '../../../common/oauth/constants';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
