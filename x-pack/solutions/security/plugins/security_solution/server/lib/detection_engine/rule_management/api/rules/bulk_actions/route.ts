@@ -363,10 +363,8 @@ export const performBulkActionRoute = (
                       },
                     },
                     changeTracking: {
-                      action: SecurityRuleChangeTrackingAction.exceptionsDuplicate,
                       metadata: {
                         bulkCount: rules.length,
-                        originalRuleSoId: rule.id,
                       },
                     },
                     shouldIncrementRevision: () => false,
