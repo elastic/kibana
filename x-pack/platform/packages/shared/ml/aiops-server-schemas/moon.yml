@@ -18,8 +18,8 @@ project:
   sourceRoot: x-pack/platform/packages/shared/ml/aiops-server-schemas
 dependsOn:
   - '@kbn/aiops-change-point-detection'
-  - '@kbn/config-schema'
   - '@kbn/presentation-publishing-schemas'
+  - '@kbn/zod'
 tags:
   - shared-server
   - package
