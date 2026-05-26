@@ -56,6 +56,11 @@ apiTest.describe(
       adminApiCreditials = await requestAuth.getApiKey('admin');
     });
 
+    apiTest.afterAll(async ({ profilingSetup, profilingHelper }) => {
+      await profilingHelper.cleanupPolicies();
+      await profilingSetup.cleanup();
+    });
+
     apiTest('Admin user', async ({ apiClient }) => {
       const adminRes = await apiClient.get(esResourcesEndpoint, {
         headers: {

@@ -8,8 +8,17 @@
 import type { IDataStreamClient } from '@kbn/data-streams';
 import { esql } from '@elastic/esql';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { type CommonSearchOptions } from '../query_utils';
-import { type LatestSourceWhereCondition, runLatestSourceEsqlQuery } from '../latest_source_query';
+import {
+  type CommonSearchOptions,
+  type PaginatedSearchOptions,
+  type PaginatedResponse,
+} from '../query_utils';
+import {
+  type LatestSourceWhereCondition,
+  runLatestSourceEsqlQuery,
+  runPaginatedLatestSourceEsqlQuery,
+  runFindByIdEsqlQuery,
+} from '../latest_source_query';
 import {
   DETECTIONS_DATA_STREAM,
   type Detection,
@@ -25,15 +34,11 @@ export type DetectionDataStreamClient = IDataStreamClient<
 export interface DetectionsSearchOptions extends CommonSearchOptions {
   rule_uuid?: string[];
   rule_name?: string;
-  stream_name?: string;
-  silent?: boolean;
-  superseded?: boolean;
-  superseded_at?: {
-    /** ISO 8601 formatted datetime */
-    from?: string;
-    /** ISO 8601 formatted datetime */
-    to?: string;
-  };
+}
+
+export interface DetectionsPaginatedSearchOptions extends PaginatedSearchOptions {
+  rule_uuid?: string[];
+  rule_name?: string;
 }
 
 const andWhere = (
@@ -42,6 +47,8 @@ const andWhere = (
 ): LatestSourceWhereCondition => {
   return current ? esql.exp`${current} AND ${next}` : next;
 };
+
+const GROUP_BY_FIELD = 'detection_id';
 
 export class DetectionClient {
   constructor(
@@ -59,10 +66,10 @@ export class DetectionClient {
     });
   }
 
-  async findLatest(options: DetectionsSearchOptions = {}): Promise<{ hits: Detection[] }> {
-    const ruleUuidLiterals = options.rule_uuid?.map((ruleUuid) => esql.str(ruleUuid));
+  private buildWhere(options: DetectionsSearchOptions): LatestSourceWhereCondition | undefined {
     let where: LatestSourceWhereCondition | undefined;
 
+    const ruleUuidLiterals = options.rule_uuid?.map((ruleUuid) => esql.str(ruleUuid));
     if (ruleUuidLiterals?.length) {
       where = andWhere(where, esql.exp`${esql.col('rule_uuid')} IN (${ruleUuidLiterals})`);
     }
@@ -71,41 +78,40 @@ export class DetectionClient {
       where = andWhere(where, esql.exp`${esql.col('rule_name')} == ${esql.str(options.rule_name)}`);
     }
 
-    if (options.stream_name) {
-      where = andWhere(where, esql.exp`${esql.col('stream')} == ${esql.str(options.stream_name)}`);
-    }
+    return where;
+  }
 
-    if (options.silent !== undefined) {
-      where = andWhere(where, esql.exp`${esql.col('silent')} == ${options.silent}`);
-    }
-
-    if (options.superseded !== undefined) {
-      where = andWhere(where, esql.exp`${esql.col('superseded')} == ${options.superseded}`);
-    }
-
-    if (options.superseded_at?.from) {
-      where = andWhere(
-        where,
-        esql.exp`${esql.col('superseded_at')} >= TO_DATETIME(${esql.str(
-          options.superseded_at.from
-        )})`
-      );
-    }
-
-    if (options.superseded_at?.to) {
-      where = andWhere(
-        where,
-        esql.exp`${esql.col('superseded_at')} <= TO_DATETIME(${esql.str(options.superseded_at.to)})`
-      );
-    }
-
+  async findLatest(options: DetectionsSearchOptions = {}): Promise<{ hits: Detection[] }> {
     return runLatestSourceEsqlQuery<Detection>({
       esClient: this.clients.esClient,
       space: this.clients.space,
       options,
       index: DETECTIONS_DATA_STREAM,
-      where,
-      groupBy: 'detection_id',
+      where: this.buildWhere(options),
+      groupBy: GROUP_BY_FIELD,
+    });
+  }
+
+  async findLatestPaginated(
+    options: DetectionsPaginatedSearchOptions = {}
+  ): Promise<PaginatedResponse<Detection>> {
+    return runPaginatedLatestSourceEsqlQuery<Detection>({
+      esClient: this.clients.esClient,
+      space: this.clients.space,
+      options,
+      index: DETECTIONS_DATA_STREAM,
+      where: this.buildWhere(options),
+      groupBy: GROUP_BY_FIELD,
+    });
+  }
+
+  async findById(detectionId: string): Promise<{ hits: Detection[] }> {
+    return runFindByIdEsqlQuery<Detection>({
+      esClient: this.clients.esClient,
+      space: this.clients.space,
+      index: DETECTIONS_DATA_STREAM,
+      idField: GROUP_BY_FIELD,
+      idValue: detectionId,
     });
   }
 }

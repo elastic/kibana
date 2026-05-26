@@ -88,7 +88,12 @@ function createStartDependencies() {
     cloud: {},
     share: {},
     uiActions: {},
-  } as AgentBuilderStartDependencies;
+    unifiedSearch: {
+      ui: {
+        SearchBar: () => null,
+      },
+    },
+  } as unknown as AgentBuilderStartDependencies;
 }
 
 function getAST(markdown: string) {
@@ -132,6 +137,7 @@ describe('chat_message_text', () => {
         addCompactionStep: jest.fn(),
         setCompactionStepComplete: jest.fn(),
         addOrUpdateTodosStep: jest.fn(),
+        setAttachments: jest.fn(),
       },
     });
   });

@@ -270,7 +270,7 @@ export const useDslLifecycleSummary = ({
 
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.streams.lifecycleSummary.downsampleStepsUpdated', {
-          defaultMessage: 'Downsampling steps updated',
+          defaultMessage: 'Applied changes to downsample steps',
         }),
       });
 
