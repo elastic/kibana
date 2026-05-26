@@ -18,6 +18,7 @@ import {
 } from '../../../common/domain/definitions/entity_schema';
 import {
   ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
+  type LogSlicePaginationParams,
   type PaginationParams,
 } from './query_builder_commons';
 import {
@@ -268,7 +269,7 @@ export class CcsLogsExtractionClient {
 
     let effectiveFromDateISO = initialFromDateISO;
     let recoveryId = initialRecoveryId;
-    let sliceStart: PaginationParams | undefined;
+    let sliceStart: LogSlicePaginationParams | undefined;
 
     let isLastLogsPage = false;
 
@@ -287,30 +288,41 @@ export class CcsLogsExtractionClient {
         break;
       }
 
-      const { logsPaginationCursor: sliceEnd } = logPaginationCursor;
+      let { logsPaginationCursor: sliceEnd } = logPaginationCursor;
       isLastLogsPage = logPaginationCursor.isLastLogsPage;
-      totalLogs += logPaginationCursor.sliceLogCount;
 
-      // Recovery cursor is only used in the first slice; clear it after consumption
-      const recoveryIdForThisSlice = recoveryId;
-      recoveryId = undefined;
-
-      const { count, pages } = await this.runEntitiesPaginationInnerLoop({
-        type,
-        remoteIndexPatterns,
-        fromDateISO: effectiveFromDateISO,
-        toDateISO,
-        docsLimit: effectiveDocsLimit,
-        entityDefinition,
-        abortController,
+      const bumpedSliceEnd = this.detectLogSliceStall(
         sliceStart,
         sliceEnd,
-        recoveryId: recoveryIdForThisSlice,
-        skipStateUpdates,
-      });
+        logPaginationCursor.sliceLogCount,
+        effectiveMaxLogsPerPage
+      );
+      if (bumpedSliceEnd) {
+        sliceEnd = bumpedSliceEnd;
+      } else {
+        totalLogs += logPaginationCursor.sliceLogCount;
 
-      totalCount += count;
-      totalPages += pages;
+        // Recovery cursor is only used in the first slice; clear it after consumption
+        const recoveryIdForThisSlice = recoveryId;
+        recoveryId = undefined;
+
+        const { count, pages } = await this.runEntitiesPaginationInnerLoop({
+          type,
+          remoteIndexPatterns,
+          fromDateISO: effectiveFromDateISO,
+          toDateISO,
+          docsLimit: effectiveDocsLimit,
+          entityDefinition,
+          abortController,
+          sliceStart,
+          sliceEnd,
+          recoveryId: recoveryIdForThisSlice,
+          skipStateUpdates,
+        });
+
+        totalCount += count;
+        totalPages += pages;
+      }
 
       // Advance the window: the completed slice end becomes the next slice start
       sliceStart = sliceEnd;
@@ -322,7 +334,7 @@ export class CcsLogsExtractionClient {
         });
       }
 
-      if (maxLogsPerWindow > 0 && totalLogs >= maxLogsPerWindow) {
+      if (!bumpedSliceEnd && maxLogsPerWindow > 0 && totalLogs >= maxLogsPerWindow) {
         this.logger.info(
           `CCS entities extracted: ${totalCount}, logs processed: ${totalLogs}, in ${totalPages} pages`
         );
@@ -365,7 +377,7 @@ export class CcsLogsExtractionClient {
     type: EntityType;
     fromDateISO: string;
     toDateISO: string;
-    sliceStart: PaginationParams | undefined;
+    sliceStart: LogSlicePaginationParams | undefined;
     maxLogsPerPage: number;
     abortController?: AbortController;
   }): Promise<LogPaginationCursor> {
@@ -430,8 +442,8 @@ export class CcsLogsExtractionClient {
     docsLimit: number;
     entityDefinition: ManagedEntityDefinition;
     abortController?: AbortController;
-    sliceStart: PaginationParams | undefined;
-    sliceEnd: PaginationParams;
+    sliceStart: LogSlicePaginationParams | undefined;
+    sliceEnd: LogSlicePaginationParams;
     recoveryId: string | undefined;
     skipStateUpdates: boolean;
   }): Promise<{ count: number; pages: number }> {
@@ -498,6 +510,27 @@ export class CcsLogsExtractionClient {
     } while (entityPagination);
 
     return { count, pages };
+  }
+
+  /** Returns the bumped slice-end cursor when a stall is detected, null otherwise. Logs a warning on stall. */
+  private detectLogSliceStall(
+    sliceStart: LogSlicePaginationParams | undefined,
+    sliceEnd: LogSlicePaginationParams,
+    sliceLogCount: number,
+    maxLogsPerPage: number
+  ): LogSlicePaginationParams | null {
+    if (
+      sliceStart &&
+      sliceStart.timestampCursor === sliceEnd.timestampCursor &&
+      sliceLogCount >= maxLogsPerPage
+    ) {
+      const bumpedTs = moment(sliceEnd.timestampCursor).add(1, 'ms').toISOString();
+      this.logger.warn(
+        `CCS log-slice probe stalled at ${sliceEnd.timestampCursor} with a full page (${sliceLogCount} docs); advancing cursor by 1ms. Docs sharing this timestamp beyond maxLogsPerPage will be dropped.`
+      );
+      return { timestampCursor: bumpedTs };
+    }
+    return null;
   }
 
   /**
