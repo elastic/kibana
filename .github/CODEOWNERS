@@ -1328,6 +1328,7 @@ x-pack/solutions/security/packages/kbn-evals-suite-alerts-rag @elastic/security-
 x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery @elastic/security-threat-hunting
 x-pack/solutions/security/packages/kbn-evals-suite-endpoint @elastic/security-defend-workflows
 x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics @elastic/security-entity-analytics
+x-pack/solutions/security/packages/kbn-evals-suite-lead-generation @elastic/security-entity-analytics
 x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance @elastic/security-defend-workflows
 x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules @elastic/security-detection-engine
 x-pack/solutions/security/packages/kbn-evals-suite-security-automatic-migrations @elastic/security-threat-hunting
@@ -1384,6 +1385,11 @@ x-pack/solutions/workplaceai/test @elastic/workchat-eng
 ## Items lower in the file have higher precedence:
 ##  https://help.github.com/articles/about-codeowners/
 ####
+
+# limits.yml changes frequently as bundle sizes shift; no owner means the ops
+# team isn't auto-requested as reviewer on every bump. A GitHub Actions workflow
+# (bundle-size-limits-comment.yml) flags increases ≥15% instead.
+packages/kbn-optimizer/limits.yml
 
 # The #CC# prefix delineates Code Coverage,
 # used for the 'team' designator within Kibana Stats
