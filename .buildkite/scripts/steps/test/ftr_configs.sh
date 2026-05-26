@@ -54,6 +54,13 @@ fi
 failedConfigs=""
 results=()
 
+# Capture which configs failed in the previous attempt before the meta-data key is overwritten below.
+# Used in the annotation to distinguish "new failure", "still failing", and "recovered" per config.
+prevRunFailedConfigs=""
+if [[ "${BUILDKITE_RETRY_COUNT:-0}" -ge "1" ]]; then
+  prevRunFailedConfigs=$(buildkite-agent meta-data get "$FAILED_CONFIGS_KEY" --default '' 2>/dev/null || true)
+fi
+
 while read -r config; do
   if [[ ! "$config" ]]; then
     continue;
@@ -69,7 +76,7 @@ while read -r config; do
 
   if [[ "$IS_CONFIG_EXECUTION" == "true" && "$IS_FLAKY_TEST_RUN" == "false" ]]; then
     echo "--- [ already-tested ] $FULL_COMMAND"
-    annotation_rows+=("| \`${config}\` | — | skipped (already-tested) |")
+    annotation_rows+=("| [\`${config}\`](https://github.com/elastic/kibana/blob/${BUILDKITE_COMMIT:-main}/${config}) | — | skipped (already-tested) |")
     continue
   else
     echo "--- $ $FULL_COMMAND"
@@ -129,10 +136,15 @@ while read -r config; do
     duration: ${duration}
     result: ${lastCode}")
 
+  config_link="[\`${config}\`](https://github.com/elastic/kibana/blob/${BUILDKITE_COMMIT:-main}/${config})"
   if [ $lastCode -eq 0 ]; then
     # Test was successful, so mark it as executed
     buildkite-agent meta-data set "$CONFIG_EXECUTION_KEY" "true"
-    annotation_rows+=("| \`${config}\` | ${duration} | passed |")
+    if [[ -n "$prevRunFailedConfigs" ]] && grep -qxF "$config" <<< "$prevRunFailedConfigs"; then
+      annotation_rows+=("| ${config_link} | ${duration} | recovered |")
+    else
+      annotation_rows+=("| ${config_link} | ${duration} | passed |")
+    fi
   else
     exitCode=10
     echo "FTR exited with code $lastCode"
@@ -143,7 +155,13 @@ while read -r config; do
     else
       failedConfigs="$config"
     fi
-    annotation_rows+=("| \`${config}\` | ${duration} | **failed** |")
+    if [[ -n "$prevRunFailedConfigs" ]] && grep -qxF "$config" <<< "$prevRunFailedConfigs"; then
+      annotation_rows+=("| ${config_link} | ${duration} | **still failing** |")
+    elif [[ -n "$prevRunFailedConfigs" ]]; then
+      annotation_rows+=("| ${config_link} | ${duration} | **new failure** (was passing) |")
+    else
+      annotation_rows+=("| ${config_link} | ${duration} | **failed** |")
+    fi
   fi
 done <<< "$configs"
 
@@ -199,8 +217,9 @@ printf "%s\n" "${results[@]}"
 echo ""
 
 write_job_annotation() {
-  local style attempt_num
+  local style attempt_num prev_attempt_num
   attempt_num=$((${BUILDKITE_RETRY_COUNT:-0} + 1))
+  prev_attempt_num=$((attempt_num - 1))
 
   if [[ "$exitCode" == "0" ]]; then
     style="success"
@@ -208,12 +227,44 @@ write_job_annotation() {
     style="error"
   fi
 
+  local job_log_link=""
+  if [[ -n "${BUILDKITE_BUILD_URL:-}" && -n "${BUILDKITE_JOB_ID:-}" ]]; then
+    job_log_link=" — [view logs](${BUILDKITE_BUILD_URL}#${BUILDKITE_JOB_ID})"
+  fi
+
   {
-    echo "### FTR Configs — \`${JOB}\` (attempt ${attempt_num})"
+    echo "### FTR Configs — \`${JOB}\` (attempt ${attempt_num})${job_log_link}"
     echo ""
+
     if [[ "$retry_recovered" == "true" ]]; then
       echo "**Recovered on retry** — all previously-failing tests passed; step marked green."
       echo ""
+    elif [[ -n "$failedConfigs" && -n "$prevRunFailedConfigs" ]]; then
+      # On a retry, split failures into persistent (seen before) vs new (regression)
+      local persistentFailures="" newFailures=""
+      while IFS= read -r f; do
+        [[ -z "$f" ]] && continue
+        if grep -qxF "$f" <<< "$prevRunFailedConfigs"; then
+          persistentFailures="${persistentFailures:+${persistentFailures}$'\n'}$f"
+        else
+          newFailures="${newFailures:+${newFailures}$'\n'}$f"
+        fi
+      done <<< "$failedConfigs"
+
+      if [[ -n "$persistentFailures" ]]; then
+        echo "**Still failing** (attempt ${prev_attempt_num} → attempt ${attempt_num}):"
+        while IFS= read -r f; do
+          [[ -n "$f" ]] && echo "- \`$f\`"
+        done <<< "$persistentFailures"
+        echo ""
+      fi
+      if [[ -n "$newFailures" ]]; then
+        echo "**New failures** (passed attempt ${prev_attempt_num}, failed attempt ${attempt_num}):"
+        while IFS= read -r f; do
+          [[ -n "$f" ]] && echo "- \`$f\`"
+        done <<< "$newFailures"
+        echo ""
+      fi
     elif [[ -n "$failedConfigs" ]]; then
       echo "**Failed configs:**"
       while IFS= read -r f; do
@@ -221,6 +272,7 @@ write_job_annotation() {
       done <<< "$failedConfigs"
       echo ""
     fi
+
     if [[ ${#annotation_rows[@]} -gt 0 ]]; then
       echo "| Config | Duration | Status |"
       echo "| --- | --- | --- |"
