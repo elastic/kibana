@@ -14,6 +14,7 @@ import {
   EuiBasicTable,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHighlight,
   EuiLink,
   EuiPopover,
   EuiPopoverTitle,
@@ -55,6 +56,8 @@ export interface WorkflowListTableProps {
   canUpdateWorkflow: boolean;
   canDeleteWorkflow: boolean;
   canExecuteWorkflow: boolean;
+  searchQuery?: string;
+  isLoading?: boolean;
 }
 
 export const WorkflowListTable = ({
@@ -77,6 +80,8 @@ export const WorkflowListTable = ({
   canUpdateWorkflow,
   canDeleteWorkflow,
   canExecuteWorkflow,
+  searchQuery = '',
+  isLoading = false,
 }: WorkflowListTableProps) => {
   const allowRowSelection = canUpdateWorkflow || canDeleteWorkflow || canReadWorkflow;
 
@@ -116,7 +121,9 @@ export const WorkflowListTable = ({
                           title={name}
                           data-test-subj="workflowNameLink"
                         >
-                          {name}
+                          <EuiHighlight highlightAll search={searchQuery}>
+                            {name}
+                          </EuiHighlight>
                         </Link>
                       </EuiLink>
                     ) : (
@@ -132,7 +139,9 @@ export const WorkflowListTable = ({
                         title={name}
                         data-test-subj="workflowNameText"
                       >
-                        {name}
+                        <EuiHighlight highlightAll search={searchQuery}>
+                          {name}
+                        </EuiHighlight>
                       </EuiText>
                     )}
                   </EuiFlexItem>
@@ -152,7 +161,11 @@ export const WorkflowListTable = ({
                     width: 100%;
                   `}
                 >
-                  {item.description || (
+                  {item.description ? (
+                    <EuiHighlight highlightAll search={searchQuery}>
+                      {item.description}
+                    </EuiHighlight>
+                  ) : (
                     <FormattedMessage
                       id="workflows.workflowList.noDescription"
                       defaultMessage="No description"
@@ -351,6 +364,7 @@ export const WorkflowListTable = ({
       onExportWorkflow,
       onDeleteWorkflow,
       onRequestRun,
+      searchQuery,
     ]
   );
 
@@ -373,6 +387,7 @@ export const WorkflowListTable = ({
       columns={columns}
       items={items}
       itemId="id"
+      loading={isLoading}
       responsiveBreakpoint="xs"
       tableLayout="fixed"
       onChange={({

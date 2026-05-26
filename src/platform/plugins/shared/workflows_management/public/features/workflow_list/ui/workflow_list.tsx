@@ -17,7 +17,7 @@ import {
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowListItemDto, WorkflowsSearchParams } from '@kbn/workflows';
@@ -36,6 +36,31 @@ import { shouldShowWorkflowsEmptyState } from '../../../shared/utils/workflow_ut
 import type { WorkflowTriggerTab } from '../../run_workflow/ui/types';
 import { WorkflowExecuteModal } from '../../run_workflow/ui/workflow_execute_modal';
 import { WORKFLOWS_TABLE_INITIAL_PAGE_SIZE } from '../constants';
+
+const MIN_LOADING_MS = 1000;
+
+function useMinLoadingTime(isLoading: boolean): boolean {
+  const [showLoading, setShowLoading] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const startedAtRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (isLoading) {
+      if (timerRef.current) clearTimeout(timerRef.current);
+      startedAtRef.current = Date.now();
+      setShowLoading(true);
+    } else {
+      const elapsed = startedAtRef.current ? Date.now() - startedAtRef.current : MIN_LOADING_MS;
+      const remaining = Math.max(0, MIN_LOADING_MS - elapsed);
+      timerRef.current = setTimeout(() => setShowLoading(false), remaining);
+    }
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, [isLoading]);
+
+  return showLoading;
+}
 
 interface WorkflowListProps {
   search: WorkflowsSearchParams;
@@ -76,9 +101,11 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
   const {
     data: workflows,
     isLoading: isLoadingWorkflows,
+    isFetching: isFetchingWorkflows,
     error,
     refetch,
   } = useWorkflows(searchParams);
+  const showLoadingBar = useMinLoadingTime(isFetchingWorkflows);
   const {
     eventDrivenExecutionEnabled,
     isLoading: isLoadingEventDrivenStatus,
@@ -335,6 +362,8 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
         onPageChange={(pageIndex, pageSize) =>
           setSearch({ ...search, page: pageIndex + 1, size: pageSize })
         }
+        searchQuery={search.query}
+        isLoading={showLoadingBar}
         onToggleWorkflow={handleToggleWorkflow}
         onDeleteWorkflow={handleDeleteWorkflow}
         onCloneWorkflow={handleCloneWorkflow}

@@ -9,9 +9,12 @@
 
 import { EuiFieldSearch, EuiFlexItem } from '@elastic/eui';
 import type { ChangeEvent } from 'react';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
 import styled from 'styled-components';
 import * as i18n from '../../../../common/translations';
+
+const SEARCH_DEBOUNCE_MS = 300;
 
 const SearchBarWrapper = styled(EuiFlexItem)`
   min-width: 200px;
@@ -34,21 +37,34 @@ export function WorkflowSearchField({
   placeholder,
 }: WorkflowSearchFieldProps): JSX.Element {
   const [searchText, setSearchText] = useState(initialValue);
-  const handleChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => setSearchText(e.target.value),
-    [setSearchText]
-  );
+  const isUserChange = useRef(false);
+
+  const handleChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+    isUserChange.current = true;
+    setSearchText(e.target.value);
+  }, []);
 
   useEffect(() => {
+    isUserChange.current = false;
     setSearchText(initialValue);
   }, [initialValue]);
+
+  useDebounce(
+    () => {
+      if (isUserChange.current) {
+        onSearch(searchText ?? '');
+      }
+    },
+    SEARCH_DEBOUNCE_MS,
+    [searchText]
+  );
 
   return (
     <SearchBarWrapper grow>
       <EuiFieldSearch
         aria-label={i18n.SEARCH_WORKFLOWS}
         fullWidth
-        incremental={false}
+        incremental
         placeholder={placeholder ?? i18n.SEARCH_PLACEHOLDER}
         value={searchText}
         onChange={handleChange}
