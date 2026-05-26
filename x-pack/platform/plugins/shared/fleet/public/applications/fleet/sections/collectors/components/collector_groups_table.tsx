@@ -185,7 +185,7 @@ const CollectorGroupRow: React.FC<{
                     </EuiText>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiBadge color="hollow">0</EuiBadge>
+                    <EuiBadge color="hollow">-</EuiBadge>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>

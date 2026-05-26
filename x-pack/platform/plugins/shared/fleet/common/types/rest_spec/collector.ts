@@ -15,6 +15,7 @@ export const GetCollectorGroupsRequestSchema = {
     }),
     kuery: schema.maybe(
       schema.string({
+        maxLength: 4096,
         meta: { description: 'A KQL query string to filter collectors before grouping' },
       })
     ),
@@ -26,6 +27,7 @@ export const GetCollectorGroupsRequestSchema = {
     }),
     afterKey: schema.maybe(
       schema.string({
+        maxLength: 2048,
         meta: {
           description:
             'After key is used for cursor-based pagination, use it to get the next page of results',
@@ -41,15 +43,17 @@ export const GetCollectorGroupsRequestSchema = {
 
 export const CollectorGroupSchema = schema.object({
   group: schema.string({
+    maxLength: 1024,
     meta: { description: 'Group key value' },
   }),
   groupDisplayName: schema.string({
+    maxLength: 1024,
     meta: { description: 'Human-readable display name for the group' },
   }),
   docCount: schema.number({
     meta: { description: 'Number of collectors in this group' },
   }),
-  signals: schema.arrayOf(schema.string(), {
+  signals: schema.arrayOf(schema.string({ maxLength: 64 }), {
     maxSize: 10,
     meta: { description: 'Signal types present in this group (e.g. logs, metrics, traces)' },
   }),
@@ -64,7 +68,7 @@ export const CollectorGroupSchema = schema.object({
 
 export const GetCollectorGroupsResponseSchema = schema.object({
   items: schema.arrayOf(CollectorGroupSchema, { maxSize: 1000 }),
-  afterKey: schema.maybe(schema.string()),
+  afterKey: schema.maybe(schema.string({ maxLength: 2048 })),
 });
 
 export type CollectorGroup = TypeOf<typeof CollectorGroupSchema>;

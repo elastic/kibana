@@ -12,11 +12,14 @@ import { AGENTS_INDEX, AGENT_TYPE_OPAMP } from '../../../common/constants';
 import type { CollectorGroup } from '../../../common/types';
 
 import { SIGNALS_RUNTIME_FIELD } from './build_signals_runtime_field';
-import { _joinFilters, getSpaceAwarenessFilterForAgents, includeUnenrolled } from './crud';
+import {
+  ACTIVE_AGENT_CONDITION,
+  ENROLLED_AGENT_CONDITION,
+  _joinFilters,
+  getSpaceAwarenessFilterForAgents,
+  includeUnenrolled,
+} from './crud';
 import { buildAgentStatusRuntimeField } from './build_status_runtime_field';
-
-const ACTIVE_AGENT_CONDITION = 'NOT (status:inactive)';
-const ENROLLED_AGENT_CONDITION = 'NOT status:unenrolled';
 
 const GROUP_BY_FIELDS: Record<string, { valueField: string; nameField: string }> = {
   'collector.group': {
