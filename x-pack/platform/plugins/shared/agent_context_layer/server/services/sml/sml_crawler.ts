@@ -172,9 +172,8 @@ export class SmlCrawlerImpl implements SmlCrawler {
         if (!isResponseError(error)) throw error;
         if (error.statusCode === 404) return false;
 
-        const esError = (
-          error.body as { error?: { type?: string; caused_by?: { type?: string } } }
-        )?.error;
+        const esError = (error.body as { error?: { type?: string; caused_by?: { type?: string } } })
+          ?.error;
         const isKnownIncompatible =
           error.statusCode === 400 &&
           (esError?.type === 'illegal_argument_exception' ||

@@ -654,7 +654,10 @@ describe('SmlCrawlerImpl', () => {
     });
 
     it('known incompatible mapping (illegal_argument_exception): wipes immediately without retrying', async () => {
-      const mappingError = { statusCode: 400, body: { error: { type: 'illegal_argument_exception' } } };
+      const mappingError = {
+        statusCode: 400,
+        body: { error: { type: 'illegal_argument_exception' } },
+      };
       mockUpdateMappingsIfNeeded.mockRejectedValue(mappingError);
 
       const items = [{ id: 'a', updatedAt: '2024-01-01', spaces: ['default'] }];
@@ -683,7 +686,10 @@ describe('SmlCrawlerImpl', () => {
     });
 
     it('unknown mapping error fails on all retries: drops index and forces full re-index', async () => {
-      const mappingError = { statusCode: 400, body: { error: { type: 'mapper_parsing_exception' } } };
+      const mappingError = {
+        statusCode: 400,
+        body: { error: { type: 'mapper_parsing_exception' } },
+      };
       mockUpdateMappingsIfNeeded.mockRejectedValue(mappingError);
 
       const items = [{ id: 'a', updatedAt: '2024-01-01', spaces: ['default'] }];
@@ -705,7 +711,10 @@ describe('SmlCrawlerImpl', () => {
     });
 
     it('mapping update fails transiently then succeeds: does not clean', async () => {
-      const mappingError = { statusCode: 400, body: { error: { type: 'mapper_parsing_exception' } } };
+      const mappingError = {
+        statusCode: 400,
+        body: { error: { type: 'mapper_parsing_exception' } },
+      };
       mockUpdateMappingsIfNeeded
         .mockRejectedValueOnce(mappingError)
         .mockResolvedValueOnce(undefined);
