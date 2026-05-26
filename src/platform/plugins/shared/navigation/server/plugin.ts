@@ -8,7 +8,13 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { CoreSetup, Plugin, PluginInitializerContext, Logger } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
+  Logger,
+} from '@kbn/core/server';
 
 import type {
   NavigationServerSetup,
@@ -17,7 +23,6 @@ import type {
   NavigationServerStartDependencies,
 } from './types';
 import { getUiSettings } from './ui_settings';
-import { registerNavigationUsageCollector } from './collectors/register';
 import {
   NAV_CUSTOMIZATION_STORAGE_KEY,
   NAV_CALLOUT_DISMISSED_STORAGE_KEY,
@@ -54,10 +59,6 @@ export class NavigationServerPlugin
   ) {
     core.uiSettings.register(getUiSettings(core, plugins, this.logger));
 
-    if (plugins.usageCollection) {
-      registerNavigationUsageCollector(plugins.usageCollection);
-    }
-
     core.userStorage.register({
       [NAV_CUSTOMIZATION_STORAGE_KEY]: {
         schema: navCustomizationSchema,
@@ -76,7 +77,7 @@ export class NavigationServerPlugin
     return {};
   }
 
-  start() {
+  start(core: CoreStart, plugins: NavigationServerStartDependencies) {
     return {};
   }
 }
