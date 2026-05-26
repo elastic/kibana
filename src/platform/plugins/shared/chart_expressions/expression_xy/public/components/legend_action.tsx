@@ -84,10 +84,12 @@ export const getLegendAction = (
       return null;
     }
 
-    const hasComputedColumn = isEsqlMode && filterActionData.some((data) => {
-      const column = data.table.columns[data.column];
-      return column?.isComputedColumn === true;
-    });
+    const hasComputedColumn =
+      isEsqlMode &&
+      filterActionData.some((data) => {
+        const column = data.table.columns[data.column];
+        return column?.isComputedColumn === true;
+      });
 
     const filterHandler = ({ negate }: { negate?: boolean } = {}) => {
       if (!hasComputedColumn) {

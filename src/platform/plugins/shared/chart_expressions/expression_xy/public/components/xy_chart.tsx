@@ -39,7 +39,6 @@ import {
 } from '@elastic/charts';
 import { partition } from 'lodash';
 import type { IconType, UseEuiTheme } from '@elastic/eui';
-import { useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { PaletteRegistry } from '@kbn/coloring';

@@ -11,7 +11,6 @@ import type { FC } from 'react';
 import React, { memo, useMemo, useState, useCallback, useRef } from 'react';
 import { css } from '@emotion/react';
 import type { UseEuiTheme } from '@elastic/eui';
-import { useEuiTheme } from '@elastic/eui';
 import moment from 'moment';
 import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
 import type {
