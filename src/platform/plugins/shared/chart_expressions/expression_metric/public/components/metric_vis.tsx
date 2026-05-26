@@ -31,7 +31,7 @@ import type {
   DatatableColumn,
   IInterpreterRenderHandlers,
 } from '@kbn/expressions-plugin/common';
-import type { FieldFormatConvertFunction } from '@kbn/field-formats-plugin/common';
+import type { TextContextTypeConvert } from '@kbn/field-formats-plugin/common';
 
 import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
 import type { MetricVisParam, VisParams } from '../../common';
@@ -150,12 +150,13 @@ export const MetricVis = ({
   );
 
   let breakdownByColumn: DatatableColumn | undefined;
-  let formatBreakdownValue: FieldFormatConvertFunction;
+  let formatBreakdownValue: TextContextTypeConvert;
   if (config.dimensions.breakdownBy) {
     breakdownByColumn = getColumnByAccessor(config.dimensions.breakdownBy, data.columns);
-    formatBreakdownValue = getFormatService()
-      .deserialize(getFormatByAccessor(config.dimensions.breakdownBy, data.columns))
-      .getConverterFor('text');
+    const breakdownFormatter = getFormatService().deserialize(
+      getFormatByAccessor(config.dimensions.breakdownBy, data.columns)
+    );
+    formatBreakdownValue = (v: unknown) => breakdownFormatter.convertToText(v);
   }
 
   const maxColId = config.dimensions.max
