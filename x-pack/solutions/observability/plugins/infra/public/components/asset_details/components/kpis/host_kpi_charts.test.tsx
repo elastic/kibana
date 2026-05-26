@@ -72,10 +72,7 @@ describe('HostKpiCharts', () => {
       'undefined'
     );
     expect(screen.getByTestId('kpi-memoryUsage')).toHaveAttribute('data-value-override', 'NaN');
-    expect(screen.getByTestId('kpi-diskUsage')).toHaveAttribute(
-      'data-value-override',
-      'undefined'
-    );
+    expect(screen.getByTestId('kpi-diskUsage')).toHaveAttribute('data-value-override', 'undefined');
   });
 
   it('renders empty placeholders when hasData is false', () => {
