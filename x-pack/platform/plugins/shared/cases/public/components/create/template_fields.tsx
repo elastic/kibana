@@ -93,10 +93,13 @@ export const CreateCaseTemplateFields: React.FC = () => {
     };
   }, [innerForm, triggerRef]);
 
-  const { resolvedFields: templateFields, isLoading: isLoadingFields } = useResolvedFields(
+  const { resolvedFields: templateFields, isLoading: isLoadingFieldsRaw } = useResolvedFields(
     template?.definition?.fields ?? [],
     template?.owner
   );
+  // A disabled query (no templateId) can sit in "loading" state indefinitely in react-query v4;
+  // treat it as not-loading so the form renders global fields without a template selected.
+  const isLoadingFields = Boolean(templateId) && isLoadingFieldsRaw;
 
   const globalFieldsFragment = useMemo(() => {
     if (!visibleGlobalInlineFields.length) return null;

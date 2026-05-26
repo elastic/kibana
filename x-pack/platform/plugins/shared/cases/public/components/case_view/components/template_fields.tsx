@@ -26,6 +26,7 @@ import {
 } from '../../../../common/utils';
 import { isRefField } from '../../../../common/types/domain/template/fields';
 import * as libI18n from '../../field_library/translations';
+import * as i18n from '../translations';
 import type { OnUpdateFields } from '../types';
 
 type ParsedTemplateDefinition = z.infer<typeof ParsedTemplateDefinitionSchema>;
@@ -135,12 +136,18 @@ export const TemplateFields = React.memo<TemplateFieldsProps>(({ caseData, onUpd
   if (!templateData || !parsedTemplate || parsedTemplate.fields.length === 0) return null;
 
   return (
-    <TemplateFieldsForm
-      parsedTemplate={parsedTemplate}
-      owner={templateData.owner}
-      extendedFields={caseData.extendedFields ?? {}}
-      onUpdateField={onUpdateField}
-    />
+    <div>
+      <EuiTitle size="xs">
+        <h3>{i18n.EXTENDED_FIELDS_TITLE}</h3>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <TemplateFieldsForm
+        parsedTemplate={parsedTemplate}
+        owner={templateData.owner}
+        extendedFields={caseData.extendedFields ?? {}}
+        onUpdateField={onUpdateField}
+      />
+    </div>
   );
 });
 
@@ -199,8 +206,7 @@ export const GlobalCaseFields = React.memo<GlobalCaseFieldsProps>(({ caseData, o
     return null;
 
   return (
-    <>
-      <EuiSpacer size="m" />
+    <div>
       <EuiTitle size="xs">
         <h3>{libI18n.GLOBAL_FIELDS_TITLE}</h3>
       </EuiTitle>
@@ -210,7 +216,7 @@ export const GlobalCaseFields = React.memo<GlobalCaseFieldsProps>(({ caseData, o
         extendedFields={caseData.extendedFields ?? {}}
         onUpdateField={onUpdateField}
       />
-    </>
+    </div>
   );
 });
 

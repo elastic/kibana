@@ -83,9 +83,10 @@ describe('TemplateFields', () => {
     mockUseGetTemplate.mockReturnValue({ data: mockTemplate, isLoading: false });
   });
 
-  it('renders fields for each template definition field', () => {
+  it('renders the Extended fields heading and all template fields', () => {
     render(<TemplateFields {...defaultProps} />);
 
+    expect(screen.getByText('Extended fields')).toBeInTheDocument();
     expect(screen.getByText('Summary')).toBeInTheDocument();
     expect(screen.getByText('Effort')).toBeInTheDocument();
     expect(screen.getByText('Notes')).toBeInTheDocument();

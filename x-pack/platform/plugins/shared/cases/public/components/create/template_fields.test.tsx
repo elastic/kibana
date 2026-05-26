@@ -43,11 +43,9 @@ jest.mock('../templates_v2/field_types/field_types_registry', () => ({
   },
 }));
 
+const mockUseResolvedFields = jest.fn();
 jest.mock('../field_library/hooks/use_resolved_fields', () => ({
-  useResolvedFields: (fields: unknown[]) => ({
-    resolvedFields: fields,
-    isLoading: false,
-  }),
+  useResolvedFields: (...args: unknown[]) => mockUseResolvedFields(...args),
 }));
 
 describe('CreateCaseTemplateFields', () => {
@@ -58,6 +56,10 @@ describe('CreateCaseTemplateFields', () => {
       data: { fieldDefinitions: [] },
       isLoading: false,
     });
+    mockUseResolvedFields.mockImplementation((fields: unknown[]) => ({
+      resolvedFields: fields,
+      isLoading: false,
+    }));
   });
 
   it('shows callout when no template is selected', () => {
@@ -194,6 +196,40 @@ describe('CreateCaseTemplateFields', () => {
     expect(screen.getByText('Global fields')).toBeInTheDocument();
     expect(screen.getByTestId('control-incident_type')).toBeInTheDocument();
     expect(screen.queryByText('Template not selected')).not.toBeInTheDocument();
+  });
+
+  it('renders global fields when no template is selected even if useResolvedFields reports isLoading (react-query v4 disabled-query regression)', () => {
+    // FAILURE SCENARIO: react-query v4 keeps disabled queries in isLoading:true state indefinitely.
+    // When no template is selected, useResolvedFields calls useGetFieldDefinitions({owner: undefined}),
+    // which is disabled and therefore stuck in isLoading:true. Without the fix, the loading guard
+    // would swallow the component output and global fields would never appear.
+    mockUseFormData.mockReturnValue([{ templateId: undefined }]);
+    mockUseTemplateFormSync.mockReturnValue({ template: undefined, isLoading: false });
+    mockUseResolvedFields.mockReturnValue({ resolvedFields: [], isLoading: true });
+    mockUseGetFieldDefinitions.mockReturnValue({
+      data: {
+        fieldDefinitions: [
+          {
+            fieldDefinitionId: 'fd-1',
+            name: 'incident_type',
+            definition: yaml.dump({
+              name: 'incident_type',
+              type: 'keyword',
+              control: 'INPUT_TEXT',
+              label: 'Incident Type',
+            }),
+            owner: 'securitySolution',
+            applyToAllCases: true,
+          },
+        ],
+      },
+      isLoading: false,
+    });
+
+    renderWithTestingProviders(<CreateCaseTemplateFields />);
+
+    expect(screen.getByText('Global fields')).toBeInTheDocument();
+    expect(screen.getByTestId('control-incident_type')).toBeInTheDocument();
   });
 
   it('hides a global field from the global section when the template references it via $ref', () => {
