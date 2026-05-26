@@ -1,3 +1,4 @@
+@launchdarkly/js-client-sdk
 safe-stable-stringify
 ajv-draft-04
 ajv-formats
