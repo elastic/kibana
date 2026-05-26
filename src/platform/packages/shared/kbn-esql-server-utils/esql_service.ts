@@ -186,6 +186,7 @@ export class EsqlService {
         return {
           name: dataStream.name,
           type: isTimeSeries ? SOURCES_TYPES.TIMESERIES : SOURCES_TYPES.DATA_STREAM,
+          // Extra hidden flag to flag system data streams in the UI
           hidden: dataStream.name.startsWith('.'),
         };
       }) ?? []
