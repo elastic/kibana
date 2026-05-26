@@ -13,7 +13,13 @@ import {
   type StoredKnowledgeIndicator,
 } from '../data_stream';
 import { combineWhere, inPredicate, IS_NOT_DELETED, IS_NOT_EXCLUDED } from '../esql_helpers';
-import { KI_TYPE_FEATURE, KI_TYPE_QUERY, STREAM_NAME, TYPE, type KnowledgeIndicatorType } from '../fields';
+import {
+  KI_TYPE_FEATURE,
+  KI_TYPE_QUERY,
+  STREAM_NAME,
+  TYPE,
+  type KnowledgeIndicatorType,
+} from '../fields';
 import { fromStoredFeature, fromStoredQuery } from './serializers';
 import { searchWithKeywordFallback } from '../../errors/search_with_keyword_fallback';
 import type { SearchMode } from '../../../../../common/queries';
@@ -27,7 +33,10 @@ export class IndicatorSearcher {
   constructor(
     private readonly dataStreamClient: KnowledgeIndicatorDataStreamClient,
     private readonly logger: Logger,
-    private readonly config: Pick<SigEventsTuningConfig, 'semantic_min_score' | 'rrf_rank_constant'>,
+    private readonly config: Pick<
+      SigEventsTuningConfig,
+      'semantic_min_score' | 'rrf_rank_constant'
+    >,
     private readonly revisionReader: RevisionReader
   ) {}
 
@@ -195,7 +204,10 @@ export class IndicatorSearcher {
       // Only surface the latest revision for each group — drop ranked rows
       // whose latest revision is missing or does not match this hit.
       const latest = docById.get(`${source['stream.name']}:${source.type}:${source.id}`);
-      if (!latest || latest['@timestamp'] !== source['@timestamp']) {
+      if (
+        !latest ||
+        new Date(latest['@timestamp']).getTime() !== new Date(source['@timestamp']).getTime()
+      ) {
         continue;
       }
       if (isStoredFeatureKnowledgeIndicator(source)) {

@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { QueryLink, StreamQuery } from '@kbn/streams-schema';
-import { QUERY_TYPE_STATS, deriveQueryType } from '@kbn/streams-schema';
+import { QUERY_TYPE_STATS, deriveQueryType, hasSameEsql } from '@kbn/streams-schema';
 import type { Streams } from '@kbn/streams-schema/src/models/streams';
 import { computeRuleId } from '../helpers/compute_rule_id';
 import { installQueries, uninstallQueries } from './rule_orchestration';
@@ -40,8 +40,7 @@ export class QueryRuleOrchestrator {
     }
 
     const currentLinks =
-      options?.currentLinks ??
-      (await this.reader.getStreamToQueryLinksMap([stream]))[stream];
+      options?.currentLinks ?? (await this.reader.getStreamToQueryLinksMap([stream]))[stream];
     const currentByQueryId = new Map(currentLinks.map((link) => [link.query.id, link]));
     const nextIds = new Set(queries.map((q) => q.id));
 
@@ -69,7 +68,7 @@ export class QueryRuleOrchestrator {
           demotedToStats.push(current);
         }
         allNext.push({ query, rule_backed: false, rule_id: current.rule_id });
-      } else if (current.query.esql.query !== query.esql.query) {
+      } else if (!hasSameEsql(current.query.esql.query, query.esql.query)) {
         const link: QueryLink = {
           stream_name: stream,
           rule_backed: true,
@@ -160,16 +159,18 @@ export class QueryRuleOrchestrator {
     const currentByQueryId = new Map(currentLinks.map((link) => [link.query.id, link]));
     const existing = currentByQueryId.get(query.id);
 
+    const scopedLinks = currentLinks.filter((l) => l.rule_backed || l.query.id === query.id);
+
     if (!existing) {
-      // First write: include in syncQueries so the rule is created when eligible.
-      await this.syncQueries(definition, [...currentLinks.map((l) => l.query), query]);
+      await this.syncQueries(definition, [...scopedLinks.map((l) => l.query), query], {
+        currentLinks: scopedLinks,
+      });
       return;
     }
-    // Update path: route through syncQueries so breaking-change handling is
-    // unified.
     await this.syncQueries(
       definition,
-      currentLinks.map((l) => (l.query.id === query.id ? query : l.query))
+      scopedLinks.map((l) => (l.query.id === query.id ? query : l.query)),
+      { currentLinks: scopedLinks }
     );
   }
 
@@ -225,9 +226,7 @@ export class QueryRuleOrchestrator {
   ): Promise<{ promoted: number; skipped_stats: number }> {
     const streamName = definition.name;
     if (!this.isSignificantEventsEnabled) {
-      this.logger.debug(
-        `Skipping promoteQueries because significant events feature is disabled.`
-      );
+      this.logger.debug(`Skipping promoteQueries because significant events feature is disabled.`);
       return { promoted: 0, skipped_stats: 0 };
     }
 
@@ -339,9 +338,7 @@ export class QueryRuleOrchestrator {
   ): Promise<{ demoted: number }> {
     const streamName = definition.name;
     if (!this.isSignificantEventsEnabled) {
-      this.logger.debug(
-        `Skipping demoteQueries because significant events feature is disabled.`
-      );
+      this.logger.debug(`Skipping demoteQueries because significant events feature is disabled.`);
       return { demoted: 0 };
     }
 
@@ -353,7 +350,8 @@ export class QueryRuleOrchestrator {
       return { demoted: 0 };
     }
 
-    // Append demoted revisions, then uninstall rules: storage first, then rule cleanup.
+    await uninstallQueries(this.rulesClient, this.logger, toDemote);
+
     await this.writer.bulk(
       streamName,
       toDemote.map((link) => ({
@@ -366,8 +364,6 @@ export class QueryRuleOrchestrator {
         },
       }))
     );
-
-    await uninstallQueries(this.rulesClient, this.logger, toDemote);
 
     return { demoted: toDemote.length };
   }

@@ -125,15 +125,16 @@ export async function persistQueries(
   // taking the new content).
   if (ruleQueries.length > 0) {
     const newById = new Map(ruleQueries.map((q) => [q.id, q]));
-    const merged: StreamQuery[] = existingLinks.map((link) =>
-      newById.has(link.query.id) ? newById.get(link.query.id)! : link.query
+    const ruleBackedLinks = existingLinks.filter((link) => link.rule_backed);
+    const merged: StreamQuery[] = ruleBackedLinks.map(
+      (link) => newById.get(link.query.id) ?? link.query
     );
     for (const q of ruleQueries) {
       if (!existingById.has(q.id)) {
         merged.push(q);
       }
     }
-    await kiClient.syncQueries(definition, merged, { currentLinks: existingLinks });
+    await kiClient.syncQueries(definition, merged, { currentLinks: ruleBackedLinks });
   }
 
   if (standardOps.length > 0) {

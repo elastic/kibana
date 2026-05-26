@@ -81,7 +81,7 @@ export class IndicatorReader {
 
     const docs = await this.revisionReader.fetchLatestRevisions(where, postGroupingWhere);
     const features = docs.filter(isStoredFeatureKnowledgeIndicator).map(fromStoredFeature);
-    const limited = options.limit ? features.slice(0, options.limit) : features;
+    const limited = options.limit !== undefined ? features.slice(0, options.limit) : features;
     return { hits: limited, total: features.length };
   }
 
