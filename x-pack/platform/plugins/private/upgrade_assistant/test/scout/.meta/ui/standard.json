@@ -1,0 +1,145 @@
+{
+  "sha1": "a7cc2ea8ab3a1097ad8df564986fcf50ebc58192",
+  "tests": [
+    {
+      "id": "1d90445d06d6584-224e5c59cb01ba8",
+      "title": "Upgrade Assistant deprecation pages renders Elasticsearch upgrade readiness deprecations",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/upgrade_assistant/test/scout/ui/tests/deprecation_pages.spec.ts",
+        "line": 39,
+        "column": 9
+      }
+    },
+    {
+      "id": "1d90445d06d6584-2cbbb61ece20774",
+      "title": "Upgrade Assistant deprecation pages renders the Kibana deprecations page",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/upgrade_assistant/test/scout/ui/tests/deprecation_pages.spec.ts",
+        "line": 55,
+        "column": 9
+      }
+    },
+    {
+      "id": "41117db9613f9c0-f7c5f53650943df",
+      "title": "Upgrade Assistant ES deprecation logs flyout shows a warnings callout when there are deprecations",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/upgrade_assistant/test/scout/ui/tests/es_deprecation_logs_page.spec.ts",
+        "line": 29,
+        "column": 9
+      }
+    },
+    {
+      "id": "41117db9613f9c0-f22d9a3561e558b",
+      "title": "Upgrade Assistant ES deprecation logs flyout shows a no warnings callout after resetting the checkpoint",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/upgrade_assistant/test/scout/ui/tests/es_deprecation_logs_page.spec.ts",
+        "line": 33,
+        "column": 9
+      }
+    },
+    {
+      "id": "e443d43f969b5b6-3dde827d571b233",
+      "title": "Upgrade Assistant feature controls shows the Stack Management nav link for a Kibana admin user",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/upgrade_assistant/test/scout/ui/tests/feature_controls.spec.ts",
+        "line": 17,
+        "column": 9
+      }
+    },
+    {
+      "id": "e443d43f969b5b6-6e2ead01695f50c",
+      "title": "Upgrade Assistant feature controls does not render the Stack section for a Kibana admin user",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/upgrade_assistant/test/scout/ui/tests/feature_controls.spec.ts",
+        "line": 27,
+        "column": 9
+      }
+    },
+    {
+      "id": "e443d43f969b5b6-2f8e5662299711e",
+      "title": "Upgrade Assistant feature controls shows the Stack Management nav link for a dashboard read user with Upgrade Assistant privileges",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/upgrade_assistant/test/scout/ui/tests/feature_controls.spec.ts",
+        "line": 42,
+        "column": 9
+      }
+    },
+    {
+      "id": "e443d43f969b5b6-6c1f4a93a326313",
+      "title": "Upgrade Assistant feature controls renders the Stack section with Upgrade Assistant for a dashboard read user with Upgrade Assistant privileges",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/upgrade_assistant/test/scout/ui/tests/feature_controls.spec.ts",
+        "line": 52,
+        "column": 9
+      }
+    },
+    {
+      "id": "b699b1ba88aa6e9-d3e12ba1769adb9",
+      "title": "Upgrade Assistant overview page renders the overview page",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/upgrade_assistant/test/scout/ui/tests/overview_page.spec.ts",
+        "line": 30,
+        "column": 9
+      }
+    },
+    {
+      "id": "b699b1ba88aa6e9-be8400c687984c0",
+      "title": "Upgrade Assistant overview page renders the overview upgrade steps",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/upgrade_assistant/test/scout/ui/tests/overview_page.spec.ts",
+        "line": 34,
+        "column": 9
+      }
+    }
+  ]
+}
