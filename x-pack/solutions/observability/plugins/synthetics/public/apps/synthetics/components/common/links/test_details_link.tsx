@@ -11,6 +11,10 @@ import { useSelectedLocation } from '../../monitor_details/hooks/use_selected_lo
 import { Ping } from '../../../../../../common/runtime_types';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { useDateFormat } from '../../../../../hooks/use_date_format';
+import { useUrlSpaceId } from '../../../hooks/use_url_space_id';
+import { getTestRunDetailLink, getTestRunDetailRelativeLink } from './test_run_urls';
+
+export { getTestRunDetailLink, getTestRunDetailRelativeLink };
 
 export const TestDetailsLink = ({
   isBrowserMonitor,
@@ -24,6 +28,7 @@ export const TestDetailsLink = ({
   const { euiTheme } = useEuiTheme();
   const { basePath } = useSyntheticsSettingsContext();
   const selectedLocation = useSelectedLocation();
+  const spaceId = useUrlSpaceId();
 
   const formatter = useDateFormat();
   const timestampText = (
@@ -40,6 +45,7 @@ export const TestDetailsLink = ({
         checkGroup: ping.monitor.check_group,
         monitorId: ping?.config_id ?? '',
         locationId: selectedLocation?.id,
+        spaceId,
       })}
     >
       {timestampText}
@@ -47,31 +53,4 @@ export const TestDetailsLink = ({
   ) : (
     timestampText
   );
-};
-
-export const getTestRunDetailLink = ({
-  monitorId,
-  basePath,
-  checkGroup,
-  locationId,
-}: {
-  monitorId: string;
-  checkGroup: string;
-  basePath: string;
-  locationId?: string;
-}) => {
-  const testRunUrl = `/monitor/${monitorId}/test-run/${checkGroup}?locationId=${locationId}`;
-  return `${basePath}/app/synthetics${testRunUrl}`;
-};
-
-export const getTestRunDetailRelativeLink = ({
-  monitorId,
-  checkGroup,
-  locationId,
-}: {
-  monitorId: string;
-  checkGroup: string;
-  locationId?: string;
-}) => {
-  return `/monitor/${monitorId}/test-run/${checkGroup}?locationId=${locationId}`;
 };
