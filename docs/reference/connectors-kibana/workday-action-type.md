@@ -1,7 +1,7 @@
 ---
 navigation_title: "Workday"
 type: reference
-description: "Search Workday workers, list organizations, and retrieve job postings with the Workday connector. Reference for OAuth 2.0 setup, connector configuration, and available actions."
+description: "Access Workday HR data across workers, recruiting, learning, expenses, projects, and procurement with the Workday connector. Reference for OAuth 2.0 setup, connector configuration, and available actions."
 applies_to:
   stack: preview
   serverless: preview
@@ -9,11 +9,13 @@ applies_to:
 
 # Workday connector [workday-action-type]
 
-The Workday connector connects directly to the Workday REST API (v1). It enables AI agents to search employees, browse organizational structure, and retrieve job postings from Workday HCM.
+The Workday connector connects directly to the Workday REST API. It enables AI agents to query workers, organizational structure, recruiting pipelines, learning catalogs, expenses, projects, procurement, and more from Workday HCM.
 
 ## Overview
 
-The Workday connector uses Workday's REST API with OAuth 2.0 Client Credentials authentication. To configure the connector, you provide your Workday tenant URL, tenant name, and OAuth credentials.
+The Workday connector uses Workday's REST API with OAuth 2.0 Authorization Code authentication (with non-expiring refresh tokens). To configure the connector, you provide your Workday tenant URL, tenant name, and OAuth credentials.
+
+All actions are read-only. Compensation, payroll, personal contact information, performance ratings, and medical data are not accessible.
 
 ## Create connectors in {{kib}} [define-workday-ui]
 
@@ -28,19 +30,28 @@ You can create a Workday connector in **{{stack-manage-app}} > {{connectors-ui}}
 :   The tenant identifier used in API paths, for example `mycompany`. Typically, this matches the subdomain in your Workday URL.
 
 **Authentication**
-:   OAuth 2.0 Client Credentials. You need a **Client ID**, **Client Secret**, and **Token URL** from a registered Workday API client scoped to an Integration System User (ISU).
-    The token URL follows the pattern `https://wd2-impl-services1.workday.com/ccx/oauth2/<tenantName>/token`.
+:   OAuth 2.0 Authorization Code with non-expiring refresh tokens. You need a **Client ID**, **Client Secret**, **Authorization URL**, and **Token URL** from a registered Workday API client scoped to an Integration System User (ISU).
+    The authorization and token URLs follow the pattern:
+    - `https://wd2-impl-services1.workday.com/ccx/oauth2/<tenantName>/authorize`
+    - `https://wd2-impl-services1.workday.com/ccx/oauth2/<tenantName>/token`
 
 ## Available actions [workday-available-actions]
 
-| Action | Description |
-|--------|-------------|
-| `searchWorkers` | Search for workers (employees and contingent workers) by name. **Parameters:** `search` (optional), `limit`, `offset`. |
-| `getWorker` | Retrieve the full profile of a single worker by WID. **Parameters:** `workerId` (required). |
-| `listOrganizations` | List organizational units such as supervisory orgs, companies, and cost centers. **Parameters:** `type` (optional), `limit`, `offset`. |
-| `getOrganization` | Retrieve full details of a single organization by WID. **Parameters:** `organizationId` (required). |
-| `listJobPostings` | List active or closed job postings. **Parameters:** `status` (optional), `limit`, `offset`. |
-| `getJobPosting` | Retrieve the full details of a single job posting by WID. **Parameters:** `jobPostingId` (required). |
+Actions are grouped by Workday functional area. Each group requires the corresponding OAuth scope (Functional Area) to be enabled on your Workday API client.
+
+| Functional area | Actions | Required scope |
+|-----------------|---------|----------------|
+| Workers & org hierarchy | Search workers, get worker profile, get direct reports, list organizations, get organization | Worker Profile and Skills; Organizations and Roles |
+| Staffing & inbox | List job postings, get job posting, list inbox tasks | Staffing; Tenant Non-Configurable |
+| Time off & calendars | Get time-off balances, list absence types, list holidays | Time Off and Leave; Time Tracking |
+| Recruiting | List job requisitions, get job requisition, list candidates | Recruiting |
+| Learning | List courses, get course, list enrollments | Learning Core |
+| Expenses | List expense reports, get expense report | Expenses |
+| Self-service requests | List request types, list requests | Benefits; Tenant Non-Configurable |
+| Journeys | List journeys | Journeys |
+| Projects & revenue | List projects, get project, list project revenue | Projects; Project Billing; Project Tracking |
+| Procurement | List purchase requisitions, get purchase requisition, list purchase orders | Procurement |
+| Budgets | Check budget availability | Budgets |
 
 ## Connector networking configuration [workday-connector-networking-configuration]
 
@@ -53,16 +64,17 @@ To use the Workday connector, you need to register an API client in Workday and 
 1. Log in to Workday as a system administrator.
 2. Search for and open **Register API Client for Integrations**.
 3. Enter a name for the client (for example, `Kibana Integration`).
-4. From the **Client Grant Type** menu, select **Client Credentials**.
-5. Add the required **Functional Areas** (at minimum: **Worker Data: Workers** for worker search, **Organizations** for org data, and **Staffing** for job postings).
-6. Click **OK** and copy the **Client ID** and **Client Secret** that are displayed. Store the secret securely — Workday displays it only once.
-7. Search for and open **View API Clients**. Find your client and copy the **Token Endpoint** URL.
-8. Create an Integration System User (ISU):
+4. From the **Client Grant Type** menu, select **Authorization Code Grant**.
+5. Enable **Non-Expiring Refresh Tokens**.
+6. Add the **Functional Areas** corresponding to the action groups you want to enable (see the Available actions table above).
+7. Click **OK** and copy the **Client ID** and **Client Secret** that are displayed. Store the secret securely — Workday displays it only once.
+8. Search for and open **View API Clients**. Find your client and copy the **Authorization Endpoint** and **Token Endpoint** URLs.
+9. Create an Integration System User (ISU):
    a. Search for **Create Integration System User** and create a new ISU.
    b. Search for **Manage: Security for Integration System User** and assign the ISU to an **Integration System Security Group (ISSG)**.
-   c. Grant the ISSG domain security policies that cover the data you need (for example, **Get Worker**, **Get Organizations**, and **Get Job Postings**).
-9. To configure the Kibana connector, enter:
-   - **Tenant URL**: your Workday base URL (for example, `https://mycompany.workday.com`)
-   - **Tenant Name**: your tenant identifier (for example, `mycompany`)
-   - **Client ID** and **Client Secret** from step 6
-   - **Token URL** from step 7
+   c. Grant the ISSG domain security policies that cover the data you need.
+10. To configure the Kibana connector, enter:
+    - **Tenant URL**: your Workday base URL (for example, `https://mycompany.workday.com`)
+    - **Tenant Name**: your tenant identifier (for example, `mycompany`)
+    - **Client ID** and **Client Secret** from step 7
+    - **Authorization URL** and **Token URL** from step 8
