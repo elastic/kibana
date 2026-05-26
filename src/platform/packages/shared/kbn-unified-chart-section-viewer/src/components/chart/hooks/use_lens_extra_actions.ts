@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import { OPEN_IN_DISCOVER_TAB_LABEL } from '@kbn/unified-doc-viewer';
+import { OPEN_IN_DISCOVER_TAB_LABEL } from '@kbn/discover-utils';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { useMemo } from 'react';
 import {

@@ -7,13 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { i18n } from '@kbn/i18n';
-
-export const OPEN_IN_DISCOVER_TAB_LABEL = i18n.translate(
-  'unifiedDocViewer.openInDiscoverTabLabel',
-  { defaultMessage: 'Open in a Discover tab' }
-);
-
 /**
  * Shared EUI flyout history key for the Document Viewer flyout and any nested flyouts
  * (e.g. Trace Waterfall). Using the same key groups them into a single back-button
