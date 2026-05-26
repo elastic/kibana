@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
-import { FormProvider, useForm, useWatch } from 'react-hook-form';
 import {
   EuiBadge,
   EuiButton,
@@ -23,27 +21,30 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useDebounceFn } from '@kbn/react-hooks';
-import type { FormValues, RuleNotificationsValue } from '../../form/types';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { FormProvider, useForm, useWatch } from 'react-hook-form';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
 import { RuleFormProvider } from '../../form/contexts/rule_form_context';
-import { serializeFormToYaml, parseYamlToFormValues } from '../../form/utils/yaml_form_utils';
+import type { FormValues, RuleNotificationsValue } from '../../form/types';
+import { parseYamlToFormValues, serializeFormToYaml } from '../../form/utils/yaml_form_utils';
+import { ComposeDiscoverForm, getSteps } from './compose_discover_form';
 import type { ComposeFormValues, RuleQuery } from './compose_form_types';
 import { getBreachQuery } from './compose_form_types';
 import {
-  mapRuleToComposeFormValues,
   composeFormToCreateRequest,
   composeFormToUpdateRequest,
+  mapRuleToComposeFormValues,
   transformQueryIn,
   transformQueryOut,
 } from './compose_mappers';
-import type { ComposeDiscoverMode, QueryTab, RecoveryType } from './types';
-import { useComposeDiscoverState, getSandboxTabs } from './use_compose_discover_state';
-import { ComposeDiscoverForm, getSteps } from './compose_discover_form';
 import { HorizontalMinimalStepper, type MinimalStep } from './horizontal_minimal_stepper';
 import { QuerySandboxFlyout } from './query_sandbox_flyout';
+import { RULE_BUILDER_REGISTRY } from './rule_builder';
+import type { ComposeDiscoverMode, QueryTab, RecoveryType } from './types';
+import { getSandboxTabs, useComposeDiscoverState } from './use_compose_discover_state';
 import { useEsqlAutocomplete } from './use_esql_providers';
+import { guessRecoveryBlock, splitQuery } from './use_heuristic_split';
 import { useSplitQueryCompletion } from './use_split_query_completion';
-import { splitQuery, guessRecoveryBlock } from './use_heuristic_split';
 
 const LazyYamlRuleForm = React.lazy(() =>
   import('../../form/yaml_rule_form').then((m) => ({ default: m.YamlRuleForm }))
@@ -146,6 +147,8 @@ export interface ComposeDiscoverFlyoutProps<TWorkflow extends object = object> {
   onUpdateRule?: (id: string, payload: ReturnType<typeof composeFormToUpdateRequest>) => void;
   /** True while a create/update mutation is in flight. */
   isSaving?: boolean;
+  builderType?: string;
+  initialBuilderState?: unknown;
 }
 
 const FLYOUT_TITLE_ID = 'composeDiscoverFlyoutTitle';
@@ -228,7 +231,10 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
   onCreateRule,
   onUpdateRule,
   isSaving = false,
+  builderType,
+  initialBuilderState,
 }: ComposeDiscoverFlyoutProps<TWorkflow>): React.ReactElement | null {
+  const isBuilderMode = Boolean(builderType);
   /*
    * ── UI state (step navigation, sandbox open/close, tab selection, etc.) ──
    * In edit mode, seed the sandbox draft with the rule's existing query so the
@@ -249,10 +255,18 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
     mode: mode === 'clone' ? 'edit' : mode,
     initialKind,
     initialRecoveryType: hasInitialCustomRecovery ? 'custom' : 'default',
+    isBuilderMode,
   });
 
   // Registered once here so providers persist across Sandbox open/close cycles.
   useEsqlAutocomplete(baseServices);
+
+  const [builderState, setBuilderState] = useState<unknown>(() => {
+    if (!builderType) return undefined;
+    if (initialBuilderState !== undefined) return initialBuilderState;
+    const definition = RULE_BUILDER_REGISTRY[builderType];
+    return definition ? definition.createDefaultState() : undefined;
+  });
 
   // ── Form values (submitted to the API) ──
   const defaultValues = useMemo<ComposeFormValues>(() => {
@@ -321,6 +335,15 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
     [methods, dispatch]
   );
 
+  useEffect(() => {
+    if (!isBuilderMode) return;
+    const sub = methods.watch((values) => {
+      if (values.query) setSandboxQuery(values.query as RuleQuery);
+      if (values.timeField) setSandboxTimeField(values.timeField);
+    });
+    return () => sub.unsubscribe();
+  }, [isBuilderMode, methods]);
+
   const handleRecoveryTypeChange = useCallback(
     (type: RecoveryType) => {
       if (type === 'custom') {
@@ -368,7 +391,7 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
   const isCreate = mode === 'create' || mode === 'clone';
   const title = getFlyoutTitle(mode);
 
-  const steps = getSteps(isAlert);
+  const steps = getSteps(isAlert, builderType);
   const currentStep = steps[uiState.step];
   const isLastStep = uiState.step === steps.length - 1;
 
@@ -425,16 +448,25 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
       setYamlText(serializeFormToYaml(composeFormValuesForYamlSerialize(current)));
     }
     dispatch({ type: 'COMMIT_QUERY' });
+    if (!uiState.yamlMode) {
+      dispatch({ type: 'CLOSE_CHILD' });
+    }
   }, [sandboxQuery, sandboxTimeField, uiState.yamlMode, methods, dispatch]);
 
   const handleSubmit = methods.handleSubmit((values) => {
+    if (builderType) {
+      const definition = RULE_BUILDER_REGISTRY[builderType];
+      if (definition?.validate && !definition.validate(uiState, builderState)) {
+        return;
+      }
+    }
     if (isCreate) {
       onCreateRule(
-        composeFormToCreateRequest(values),
+        composeFormToCreateRequest(values, builderType),
         values.notifications as RuleNotificationsValue<TWorkflow> | undefined
       );
     } else if (ruleId && onUpdateRule) {
-      onUpdateRule(ruleId, composeFormToUpdateRequest(values));
+      onUpdateRule(ruleId, composeFormToUpdateRequest(values, builderType));
     }
   });
 
@@ -454,19 +486,19 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
 
   const handleNext = useCallback(async () => {
     if (currentStep?.validate) {
-      const valid = await currentStep.validate(methods, uiState, baseServices);
+      const valid = await currentStep.validate(methods, uiState, baseServices, builderState);
       if (!valid) return;
     }
     dispatch({ type: 'GO_NEXT', isAlert });
-  }, [currentStep, methods, uiState, isAlert, dispatch, baseServices]);
+  }, [currentStep, methods, uiState, isAlert, dispatch, baseServices, builderState]);
 
   const handleFinalSubmit = useCallback(async () => {
     if (currentStep?.validate) {
-      const valid = await currentStep.validate(methods, uiState, baseServices);
+      const valid = await currentStep.validate(methods, uiState, baseServices, builderState);
       if (!valid) return;
     }
     handleSubmit();
-  }, [currentStep, methods, uiState, baseServices, handleSubmit]);
+  }, [currentStep, methods, uiState, baseServices, builderState, handleSubmit]);
 
   // TODO: recoveryType drives whether the recovery tab appears in YAML mode.
   // Follow schema decisions in #268984 — if recoveryType is superseded by a
@@ -516,17 +548,19 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
                   />
                 )}
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonGroup
-                  legend={EDIT_MODE_LEGEND}
-                  options={EDIT_MODE_OPTIONS}
-                  idSelected={uiState.yamlMode ? 'yaml' : 'form'}
-                  onChange={(id) => handleToggleYamlMode(id === 'yaml')}
-                  isIconOnly
-                  buttonSize="compressed"
-                  data-test-subj="composeDiscoverEditModeToggle"
-                />
-              </EuiFlexItem>
+              {!isBuilderMode && (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonGroup
+                    legend={EDIT_MODE_LEGEND}
+                    options={EDIT_MODE_OPTIONS}
+                    idSelected={uiState.yamlMode ? 'yaml' : 'form'}
+                    onChange={(id) => handleToggleYamlMode(id === 'yaml')}
+                    isIconOnly
+                    buttonSize="compressed"
+                    data-test-subj="composeDiscoverEditModeToggle"
+                  />
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           </EuiFlyoutHeader>
 
@@ -548,6 +582,9 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
                 onRecoveryTypeChange={handleRecoveryTypeChange}
                 onKindChange={handleKindChange}
                 ruleId={ruleId}
+                builderType={builderType}
+                builderState={builderState}
+                onBuilderStateChange={setBuilderState}
               />
             )}
           </EuiFlyoutBody>
@@ -600,7 +637,9 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
                       ) : (
                         <EuiToolTip
                           content={
-                            currentStep?.id === 'alertCondition' && !uiState.queryCommitted
+                            (currentStep?.id === 'alertCondition' ||
+                              currentStep?.id === 'builderCondition') &&
+                            !uiState.queryCommitted
                               ? NEXT_DISABLED_TOOLTIP
                               : undefined
                           }
@@ -611,7 +650,9 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
                             iconSide="right"
                             isDisabled={
                               uiState.childOpen ||
-                              (currentStep?.id === 'alertCondition' && !uiState.queryCommitted)
+                              ((currentStep?.id === 'alertCondition' ||
+                                currentStep?.id === 'builderCondition') &&
+                                !uiState.queryCommitted)
                             }
                             onClick={handleNext}
                             data-test-subj="composeDiscoverNext"
@@ -630,10 +671,10 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
           {uiState.childOpen && (
             <QuerySandboxFlyout
               query={sandboxQuery}
-              onQueryChange={setSandboxQuery}
+              onQueryChange={isBuilderMode ? undefined : setSandboxQuery}
               tabs={sandboxTabs}
               timeField={sandboxTimeField}
-              onTimeFieldChange={setSandboxTimeField}
+              onTimeFieldChange={isBuilderMode ? undefined : setSandboxTimeField}
               dateRange={dateRange}
               onDateRangeChange={setDateRange}
               activeTab={uiState.activeTab}
@@ -644,7 +685,7 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
                 syncSandbox();
                 dispatch({ type: 'CLOSE_CHILD' });
               }}
-              onApply={handleSandboxApply}
+              onApply={isBuilderMode ? undefined : handleSandboxApply}
             />
           )}
         </EuiFlyout>
