@@ -392,9 +392,7 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
       changesContext: {
         action: changeTracking?.action ?? RuleChangeTrackingAction.ruleUpdate,
         timestamp: updateRuleTimestamp,
-        metadata: {
-          bulkCount: changeTracking?.bulkCount,
-        },
+        metadata: changeTracking?.metadata,
       },
     });
   } catch (e) {

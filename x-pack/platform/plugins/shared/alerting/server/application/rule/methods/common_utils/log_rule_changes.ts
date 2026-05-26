@@ -7,6 +7,7 @@
 
 import { every, isUndefined } from 'lodash';
 import type { LogChangeHistoryOptions } from '@kbn/change-history';
+import type { RuleChangeTrackingMetadata } from '@kbn/alerting-types';
 import type { Logger, SavedObject } from '@kbn/core/server';
 import type { RuleChange } from '../../../../rules_client/lib/change_tracking';
 import type { RawRule, RuleTypeRegistry } from '../../../../types';
@@ -34,15 +35,7 @@ interface LogRuleChanges {
     /**
      * Change metadata object to be written to the each change history item
      */
-    metadata?: {
-      /**
-       * Original number of rules affected by the bulk action.
-       *
-       * Due to OCC we can't capture this number deeper in the call stack.
-       * Consumer code should provide this number for bulk actions.
-       *
-       */ bulkCount?: number;
-    } & Record<string, number | boolean | string | undefined>;
+    metadata?: RuleChangeTrackingMetadata;
   };
 }
 
@@ -87,7 +80,7 @@ export async function logRuleChanges({
   try {
     const data: LogChangeHistoryOptions['data'] = every(metadata, isUndefined)
       ? undefined
-      : { metadata };
+      : { metadata: metadata as Record<string, unknown> | undefined };
 
     await changeTrackingService.logBulk(changes, {
       action,

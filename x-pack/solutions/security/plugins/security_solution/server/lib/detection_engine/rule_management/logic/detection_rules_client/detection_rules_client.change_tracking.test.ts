@@ -253,7 +253,7 @@ describe('DetectionRulesClient change tracking', () => {
 
       await detectionRulesClient.bulkDeleteRules({
         ruleIds,
-        changeTracking: { bulkCount: 10 },
+        changeTracking: { metadata: { bulkCount: 10 } },
       });
 
       expect(rulesClient.bulkDeleteRules).toHaveBeenCalledWith(
@@ -289,7 +289,7 @@ describe('DetectionRulesClient change tracking', () => {
         rules: [getImportRulesSchemaMock()],
         overwriteRules: false,
         ruleSourceImporter: mockRuleSourceImporter,
-        changeTracking: { bulkCount: 5 },
+        changeTracking: { metadata: { bulkCount: 5 } },
       });
 
       expect(importRuleSpy).toHaveBeenCalledWith(

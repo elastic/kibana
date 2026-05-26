@@ -31,6 +31,14 @@ export enum RuleChangeTrackingAction {
   ruleDelete = 'rule_delete',
 }
 
+export interface RuleChangeTrackingMetadata {
+  /**
+   * Bulk operation rules count. Due to chunking the actual total number of rules isn't available
+   * inside RulesClient. Passing this number will result in logging in change tracking item's metadata.
+   */
+  bulkCount?: number;
+}
+
 /**
  * Rule change tracking context.
  * Contains information to be logged when change tracking functionality is active.
@@ -44,13 +52,11 @@ export interface RuleChangeTracking<ChangeAction extends string = string> {
    */
   action?: ChangeAction;
   /**
-   * Bulk operation rules count. Due to chunking the actual total number of rules isn't available
-   * inside RulesClient. Passing this number will result in logging in change tracking item's metadata.
+   * Optional change tracking metadata to be logged. It contains extra information regarding the
+   * change. E.g. `metadata.bulkCount` says about how many rules were involved in a bulk operation.
    */
-  bulkCount?: number;
+  metadata?: RuleChangeTrackingMetadata;
 }
-
-export type ChangeTrackingAction = RuleChangeTrackingAction;
 
 export const ISO_WEEKDAYS = [1, 2, 3, 4, 5, 6, 7] as const;
 export type IsoWeekday = (typeof ISO_WEEKDAYS)[number];

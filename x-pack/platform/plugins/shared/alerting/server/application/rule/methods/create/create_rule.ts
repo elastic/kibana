@@ -261,9 +261,7 @@ export async function createRule<Params extends RuleParams = never>(
     changesContext: {
       action: changeTracking?.action ?? RuleChangeTrackingAction.ruleCreate,
       timestamp: createTime,
-      metadata: {
-        bulkCount: changeTracking?.bulkCount,
-      },
+      metadata: changeTracking?.metadata,
     },
   });
 

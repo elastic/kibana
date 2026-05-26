@@ -222,7 +222,9 @@ export const performRuleUpgradeHandler = async (
         );
       } else {
         const changeTracking = {
-          bulkCount: modifiedPrebuiltRuleAssets.length,
+          metadata: {
+            bulkCount: modifiedPrebuiltRuleAssets.length,
+          },
         };
 
         const { results: upgradeResults, errors: installationErrors } = await upgradePrebuiltRules(

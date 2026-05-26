@@ -111,7 +111,10 @@ export async function bulkEditRules<Params extends RuleParams>(
         updateFn: options.updateFn,
         paramsModifier: options.paramsModifier,
         shouldIncrementRevision: options.shouldIncrementRevision,
-        changeTracking: { bulkCount: total, ...options.changeTracking },
+        changeTracking: {
+          ...options.changeTracking,
+          metadata: { bulkCount: total, ...options.changeTracking?.metadata },
+        },
       }),
     finalFilter
   );

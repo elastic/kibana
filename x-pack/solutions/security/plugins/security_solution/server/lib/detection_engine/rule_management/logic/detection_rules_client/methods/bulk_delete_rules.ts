@@ -34,7 +34,7 @@ export const bulkDeleteRules = async ({
   for (const idsChunk of chunks) {
     const { rules, errors } = await rulesClient.bulkDeleteRules({
       ids: idsChunk,
-      changeTracking: { bulkCount: changeTracking?.bulkCount ?? ruleIds.length },
+      changeTracking: { metadata: { bulkCount: ruleIds.length, ...changeTracking?.metadata } },
     });
     allRules.push(...(rules as RuleAlertType[]));
     allErrors.push(...errors);

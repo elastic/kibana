@@ -208,7 +208,7 @@ async function saveBulkUpdatedRules({
       changesContext: {
         action: changeTracking?.action ?? RuleChangeTrackingAction.ruleUpdate,
         timestamp: bulkEditRulesTimestamp,
-        metadata: { bulkCount: changeTracking?.bulkCount },
+        metadata: changeTracking?.metadata,
       },
     });
   } catch (e) {

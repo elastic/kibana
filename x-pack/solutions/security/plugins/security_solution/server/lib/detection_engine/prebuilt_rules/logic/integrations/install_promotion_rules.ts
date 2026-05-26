@@ -115,7 +115,9 @@ export async function installPromotionRules({
     return installedVersion && installedVersion.version < version;
   });
   const upgradeChangeTracking = {
-    bulkCount: promotionRulesToUpgrade.length,
+    metadata: {
+      bulkCount: promotionRulesToUpgrade.length,
+    },
   };
   const { results: upgradeResults, errors: upgradeErrors } = await upgradePrebuiltRules(
     detectionRulesClient,

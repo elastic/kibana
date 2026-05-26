@@ -30,8 +30,11 @@ export const createPrebuiltRules = (
         return detectionRulesClient.createPrebuiltRule({
           params: rule,
           changeTracking: {
-            bulkCount: rules.length,
             ...changeTracking,
+            metadata: {
+              bulkCount: rules.length,
+              ...changeTracking?.metadata,
+            },
           },
         });
       },
