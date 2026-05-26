@@ -11136,6 +11136,12 @@
           "_meta": {
             "description": "The credential type that is configured for the anonymous authentication provider."
           }
+        },
+        "sessionlessUserProfileRetrievalEnabled": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Indicates if sessionless user profile retrieval is enabled for HTTP authentication."
+          }
         }
       }
     },
