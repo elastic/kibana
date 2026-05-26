@@ -9,13 +9,6 @@ import { v4 as uuidV4 } from 'uuid';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { badRequest, notFound } from '@hapi/boom';
-
-const isIndexNotFoundError = (err: unknown): boolean => {
-  const statusCode = (err as { statusCode?: number }).statusCode;
-  if (statusCode === 404) return true;
-  const message = err instanceof Error ? err.message : String(err);
-  return message.includes('index_not_found_exception');
-};
 import { createMemoryHistoryStorage } from './history_storage';
 import { MEMORIES_DATA_STREAM } from '../../../common/constants';
 import type {
@@ -30,13 +23,22 @@ import type {
   MemoryService,
 } from './types';
 
+const isIndexNotFoundError = (err: unknown): boolean => {
+  const statusCode = (err as { statusCode?: number }).statusCode;
+  if (statusCode === 404) return true;
+  const message = err instanceof Error ? err.message : String(err);
+  return message.includes('index_not_found_exception');
+};
+
+type MemoryCollapseField = 'name' | 'id';
+
 /**
  * MemoryServiceImpl backed by two append-only data streams:
- *   - .significant_events-memories  (pages, latest version resolved via collapse on `name`, sorted by version desc)
+ *   - .significant_events-memories  (pages, latest version resolved via field collapse)
  *   - .significant_events-memory-history  (version history, append-only)
  *
  * Pages are written by indexing a new document with the current @timestamp.
- * "Latest" is resolved by collapsing on `name` sorted by `version desc, updated_at desc`.
+ * Lookups by name collapse on `name`; lookups and listings by logical page collapse on `id`.
  * Tombstones bump `version` and set `is_deleted: true`; reads filter those out after collapse.
  */
 export class MemoryServiceImpl implements MemoryService {
@@ -63,10 +65,11 @@ export class MemoryServiceImpl implements MemoryService {
     });
   }
 
-  // ── Reads: collapse on `name` to get latest version ──
+  // ── Reads: field collapse to resolve latest version ──
 
   private async _searchLatest(
     query: QueryDslQueryContainer,
+    collapseField: MemoryCollapseField,
     size = 1
   ): Promise<Array<{ _source: MemoryEntry }>> {
     try {
@@ -75,7 +78,7 @@ export class MemoryServiceImpl implements MemoryService {
         track_total_hits: false,
         size,
         query,
-        collapse: { field: 'name' },
+        collapse: { field: collapseField },
         sort: [{ version: { order: 'desc' } }, { updated_at: { order: 'desc' } }],
       });
       return response.hits.hits as Array<{ _source: MemoryEntry }>;
@@ -85,8 +88,31 @@ export class MemoryServiceImpl implements MemoryService {
     }
   }
 
+  private async _indexNameTombstone(
+    entry: MemoryEntry,
+    name: string,
+    user: string,
+    now: string
+  ): Promise<void> {
+    const tombstone: MemoryEntry = {
+      ...entry,
+      name,
+      version: entry.version + 1,
+      updated_at: now,
+      updated_by: user,
+      is_deleted: true,
+    };
+    await this.esClient.index({
+      index: MEMORIES_DATA_STREAM,
+      document: {
+        '@timestamp': now,
+        ...tombstone,
+      },
+    });
+  }
+
   private async _getCollapsedByName(name: string): Promise<MemoryEntry | undefined> {
-    const hits = await this._searchLatest({ bool: { filter: [{ term: { name } }] } });
+    const hits = await this._searchLatest({ bool: { filter: [{ term: { name } }] } }, 'name');
     return hits[0]?._source;
   }
 
@@ -96,7 +122,7 @@ export class MemoryServiceImpl implements MemoryService {
   }
 
   private async _getById(id: string): Promise<MemoryEntry | undefined> {
-    const hits = await this._searchLatest({ bool: { filter: [{ term: { id } }] } });
+    const hits = await this._searchLatest({ bool: { filter: [{ term: { id } }] } }, 'id');
     const entry = hits[0]?._source;
     return entry?.is_deleted !== true ? entry : undefined;
   }
@@ -129,7 +155,7 @@ export class MemoryServiceImpl implements MemoryService {
         updated_by: user,
       };
       await this._indexPage(restored);
-      await this._writeHistory(restored, 'update', `Restored entry "${name}"`, user);
+      await this._writeHistory(restored, 'create', `Restored entry "${name}"`, user);
       return restored;
     }
 
@@ -168,14 +194,23 @@ export class MemoryServiceImpl implements MemoryService {
     const current = await this._getById(id);
     if (!current) throw notFound(`Memory entry with id '${id}' not found`);
 
-    if (params.name !== undefined && params.name !== current.name) {
-      const existingWithName = await this._getByName(params.name);
+    const newName = params.name;
+    const isRename = newName !== undefined && newName !== current.name;
+    if (isRename) {
+      const existingWithName = await this._getByName(newName);
       if (existingWithName) {
-        throw badRequest(`Memory entry with name '${params.name}' already exists`);
+        throw badRequest(`Memory entry with name '${newName}' already exists`);
       }
     }
 
     const now = new Date().toISOString();
+    let nextVersion = current.version + 1;
+
+    if (isRename) {
+      await this._indexNameTombstone(current, current.name, user, now);
+      nextVersion = current.version + 2;
+    }
+
     const updated: MemoryEntry = {
       ...current,
       ...(params.content !== undefined && { content: params.content }),
@@ -184,15 +219,14 @@ export class MemoryServiceImpl implements MemoryService {
       ...(params.categories !== undefined && { categories: params.categories }),
       ...(params.references !== undefined && { references: params.references }),
       ...(params.tags !== undefined && { tags: params.tags }),
-      version: current.version + 1,
+      version: nextVersion,
       updated_at: now,
       updated_by: user,
     };
 
     await this._indexPage(updated);
 
-    const changeType: MemoryChangeType =
-      params.name !== undefined && params.name !== current.name ? 'rename' : 'update';
+    const changeType: MemoryChangeType = isRename ? 'rename' : 'update';
     await this._writeHistory(
       updated,
       changeType,
@@ -331,7 +365,9 @@ export class MemoryServiceImpl implements MemoryService {
   // ── References ──
 
   async getBacklinks({ id }: { id: string }): Promise<MemoryEntry[]> {
-    return (await this._searchLatest({ bool: { filter: [{ term: { references: id } }] } }, 1000))
+    return (
+      await this._searchLatest({ bool: { filter: [{ term: { references: id } }] } }, 'id', 1000)
+    )
       .map((h) => h._source)
       .filter((entry) => entry.is_deleted !== true);
   }
@@ -352,7 +388,7 @@ export class MemoryServiceImpl implements MemoryService {
       response = await this.esClient.search({
         index: MEMORIES_DATA_STREAM,
         track_total_hits: false,
-        collapse: { field: 'name' },
+        collapse: { field: 'id' },
         sort: [{ version: { order: 'desc' } }, { updated_at: { order: 'desc' } }],
         query: {
           bool: {
@@ -417,7 +453,7 @@ export class MemoryServiceImpl implements MemoryService {
         index: MEMORIES_DATA_STREAM,
         track_total_hits: true,
         query: { match_all: {} },
-        collapse: { field: 'name' },
+        collapse: { field: 'id' },
         sort: [{ version: { order: 'desc' } }, { updated_at: { order: 'desc' } }],
         size: 10000,
       });
@@ -445,7 +481,7 @@ export class MemoryServiceImpl implements MemoryService {
         query: {
           bool: { filter: [{ term: { categories: category } }] },
         },
-        collapse: { field: 'name' },
+        collapse: { field: 'id' },
         sort: [{ version: { order: 'desc' } }, { updated_at: { order: 'desc' } }],
         size: 1000,
       });

@@ -10,7 +10,6 @@ import type { IUiSettingsClient, Logger } from '@kbn/core/server';
 import { OBSERVABILITY_STREAMS_ENABLE_MEMORY } from '@kbn/management-settings-ids';
 import { notFound, forbidden, serverUnavailable } from '@hapi/boom';
 import {
-  STREAMS_MEMORY_SYNTHESIS_WORKFLOW_ID,
   STREAMS_MEMORY_CONSOLIDATION_WORKFLOW_ID,
   STREAMS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
@@ -24,6 +23,7 @@ import type {
   MemoryVersionRecord,
 } from '../../../lib/memory';
 import { MemoryServiceImpl } from '../../../lib/memory';
+import { triggerMemorySynthesisWorkflow } from '../../../lib/memory/trigger_memory_synthesis_workflow';
 
 const assertMemoryEnabled = async (uiSettingsClient: IUiSettingsClient) => {
   const useMemory = await uiSettingsClient.get<boolean>(OBSERVABILITY_STREAMS_ENABLE_MEMORY);
@@ -473,11 +473,37 @@ const consolidateMemoryRoute = createWorkflowTriggerRoute(
   'Trigger memory consolidation'
 );
 
-const synthesizeMemoryRoute = createWorkflowTriggerRoute(
-  'POST /internal/streams/memory/_synthesize',
-  STREAMS_MEMORY_SYNTHESIS_WORKFLOW_ID,
-  'Trigger memory synthesis from significant events'
-);
+const synthesizeMemoryRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/memory/_synthesize',
+  options: { access: 'internal', summary: 'Trigger memory synthesis from significant events' },
+  security: { authz: { requiredPrivileges: [STREAMS_API_PRIVILEGES.manage] } },
+  params: z.object({ body: z.object({}).passthrough().optional() }),
+  handler: async ({
+    request,
+    server,
+    logger,
+    getScopedClients,
+  }): Promise<{ executionId: string }> => {
+    const { uiSettingsClient } = await getScopedClients({ request });
+    await assertMemoryEnabled(uiSettingsClient);
+
+    const executionId = await triggerMemorySynthesisWorkflow({
+      workflowsManagement: server.workflowsManagement,
+      spaces: server.spaces,
+      request,
+      logger,
+      triggeredBy: 'sigevents-memory-ui',
+    });
+
+    if (!executionId) {
+      throw serverUnavailable(
+        'Memory synthesis workflow is not available. Ensure workflows management is enabled and Kibana has finished installing managed workflows.'
+      );
+    }
+
+    return { executionId };
+  },
+});
 
 export const internalMemoryRoutes = {
   ...createEntryRoute,

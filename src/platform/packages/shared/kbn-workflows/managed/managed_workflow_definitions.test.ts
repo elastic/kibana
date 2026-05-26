@@ -10,11 +10,7 @@
 import { parse } from 'yaml';
 import { z } from '@kbn/zod/v4';
 import { managedWorkflowDefinitions } from '.';
-import type {
-  ManagedWorkflowId,
-  ManagedWorkflowTemplateValuesById,
-  TemplatedManagedWorkflowId,
-} from '.';
+import type { ManagedWorkflowTemplateValuesById, TemplatedManagedWorkflowId } from '.';
 import { EXAMPLE_MANAGED_WORKFLOW_ID } from './definitions';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from './types';
 import { WorkflowSchemaBase } from '../spec/schema';
@@ -23,20 +19,12 @@ const ManagedWorkflowSchema = WorkflowSchemaBase.extend({
   triggers: z.array(z.object({ type: z.string().min(1) }).passthrough()).min(1),
 });
 
-type RegistryManagedWorkflowDefinition = (typeof managedWorkflowDefinitions)[number];
-type TemplateManagedWorkflowDefinition = RegistryManagedWorkflowDefinition extends {
-  yamlTemplate: (values: infer _TValues) => string;
-}
-  ? RegistryManagedWorkflowDefinition
-  : never;
 type YamlTemplateManagedWorkflowDefinition = ManagedWorkflowDefinition & {
   yamlTemplate: (values: ManagedWorkflowTemplateValues) => string;
 };
 
 type TemplateOnlyManagedWorkflowTemplateValuesById = {
-  [TId in ManagedWorkflowId as ManagedWorkflowTemplateValuesById[TId] extends never
-    ? never
-    : TId]: ManagedWorkflowTemplateValuesById[TId];
+  [TId in TemplatedManagedWorkflowId]: ManagedWorkflowTemplateValuesById[TId];
 };
 
 const templateRepresentativeValuesById: TemplateOnlyManagedWorkflowTemplateValuesById = {
@@ -55,11 +43,9 @@ const managedDefinitionsById: Array<[string, ManagedWorkflowDefinition]> =
     definition.id,
     definition as ManagedWorkflowDefinition,
   ]);
-const managedTemplateDefinitionsById: Array<[string, TemplateManagedWorkflowDefinition]> =
-  managedDefinitionsById.filter(
-    (definitionEntry): definitionEntry is [string, TemplateManagedWorkflowDefinition] =>
-      hasYamlTemplate(definitionEntry[1])
-  );
+const managedTemplateDefinitionsById = managedDefinitionsById.filter((definitionEntry) =>
+  hasYamlTemplate(definitionEntry[1])
+) as Array<[string, YamlTemplateManagedWorkflowDefinition]>;
 
 function hasYamlTemplate(
   definition: ManagedWorkflowDefinition
@@ -169,7 +155,9 @@ describe('managedWorkflowDefinitions', () => {
     (id, definition) => {
       const representativeValues =
         templateRepresentativeValuesById[id as TemplatedManagedWorkflowId];
-      const renderedYaml = definition.yamlTemplate(representativeValues);
+      const renderedYaml = definition.yamlTemplate(
+        representativeValues as ManagedWorkflowTemplateValues
+      );
 
       expect(typeof renderedYaml).toBe('string');
       expect(renderedYaml.trim()).not.toHaveLength(0);

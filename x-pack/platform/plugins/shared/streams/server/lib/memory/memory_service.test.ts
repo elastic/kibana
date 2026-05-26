@@ -18,7 +18,7 @@ jest.mock('uuid', () => ({
 
 import { v4 as uuidV4 } from 'uuid';
 
-const mockedUuidV4 = uuidV4 as jest.MockedFunction<typeof uuidV4>;
+const mockedUuidV4 = uuidV4 as jest.MockedFunction<() => string>;
 
 type MemoryDocument = MemoryEntry & { '@timestamp'?: string };
 
@@ -273,6 +273,48 @@ describe('MemoryServiceImpl', () => {
     ).rejects.toMatchObject({
       output: { statusCode: 400 },
     });
+  });
+
+  it('renames a page, tombstones the old name, and resolves get by id', async () => {
+    mockedUuidV4
+      .mockReturnValueOnce('entry-uuid-1')
+      .mockReturnValueOnce('history-uuid-1')
+      .mockReturnValueOnce('history-uuid-2');
+    const { service } = createService();
+
+    const created = await service.create({
+      name: 'old-name',
+      title: 'Original title',
+      content: 'original content',
+      user,
+    });
+
+    mockedUuidV4.mockReturnValueOnce('history-uuid-3');
+    const renamed = await service.rename({
+      id: created.id,
+      newName: 'new-name',
+      user,
+    });
+
+    expect(renamed).toMatchObject({
+      id: created.id,
+      name: 'new-name',
+      version: 3,
+    });
+
+    await expect(service.getByName({ name: 'old-name' })).resolves.toBeUndefined();
+    await expect(service.getByName({ name: 'new-name' })).resolves.toMatchObject({
+      id: created.id,
+      name: 'new-name',
+      version: 3,
+    });
+    await expect(service.get({ id: created.id })).resolves.toMatchObject({
+      name: 'new-name',
+      version: 3,
+    });
+    await expect(service.listAll()).resolves.toEqual([
+      expect.objectContaining({ id: created.id, name: 'new-name', version: 3 }),
+    ]);
   });
 
   it('excludes soft-deleted pages from search results', async () => {

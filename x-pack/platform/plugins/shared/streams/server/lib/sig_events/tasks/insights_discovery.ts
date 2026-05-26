@@ -11,13 +11,15 @@ import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import { isInferenceProviderError } from '@kbn/inference-common';
 import { type Insight, getImpactLevel } from '@kbn/streams-schema';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
+import { OBSERVABILITY_STREAMS_ENABLE_MEMORY } from '@kbn/management-settings-ids';
 import type { TaskContext } from '../../tasks/task_definitions';
 import { cancellableTask } from '../../tasks/cancellable_task';
 import type { TaskParams } from '../../tasks/types';
 import { generateInsights } from '../insights/generate_insights';
-import { parseError } from '../../streams/errors/parse_error';
+import { getErrorMessage, parseError } from '../../streams/errors/parse_error';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
 import { resolveConnectorForSignificantEventsDiscovery } from '../../../routes/utils/resolve_connector_for_feature';
+import { triggerMemorySynthesisWorkflow } from '../../memory/trigger_memory_synthesis_workflow';
 
 export interface InsightsDiscoveryTaskResult {
   insights: Insight[];
@@ -57,6 +59,7 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
                 inferenceClient,
                 getQueryClient,
                 insightClient,
+                uiSettingsClient,
               } = await taskContext.getScopedClients({
                 request: runContext.fakeRequest,
               });
@@ -72,6 +75,10 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
                 }));
               taskLogger.debug(`Using connector ${connectorId} for discovery`);
               const boundInferenceClient = inferenceClient.bindTo({ connectorId });
+
+              const useMemory = await uiSettingsClient.get<boolean>(
+                OBSERVABILITY_STREAMS_ENABLE_MEMORY
+              );
 
               try {
                 const result = await generateInsights({
@@ -121,6 +128,24 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
                   { streamNames, connectorId: connectorIdOverride },
                   { insights, tokensUsed: result.tokens_used }
                 );
+
+                if (insights.length > 0 && useMemory && runContext.fakeRequest) {
+                  try {
+                    await triggerMemorySynthesisWorkflow({
+                      workflowsManagement: taskContext.server.workflowsManagement,
+                      spaces: taskContext.server.spaces,
+                      request: runContext.fakeRequest,
+                      logger: taskLogger,
+                      triggeredBy: 'sigevents-insights-discovery',
+                    });
+                  } catch (scheduleError) {
+                    taskLogger.warn(
+                      `Failed to trigger memory synthesis workflow: ${getErrorMessage(
+                        scheduleError
+                      )}`
+                    );
+                  }
+                }
               } catch (error) {
                 let errorMessage = parseError(error).message;
                 try {
