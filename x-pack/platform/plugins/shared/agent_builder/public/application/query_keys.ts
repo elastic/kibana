@@ -19,6 +19,12 @@ export const queryKeys = {
   agentProfiles: {
     all: ['agentProfiles'] as const,
     byId: (agentProfileId?: string) => ['agentProfiles', agentProfileId],
+    acl: (agentProfileId: string) => ['agentProfiles', agentProfileId, 'acl'] as const,
+  },
+  security: {
+    users: ['security', 'users'] as const,
+    suggestUsers: (query: string) => ['security', 'users', 'suggest', query] as const,
+    roles: ['security', 'roles'] as const,
   },
   tools: {
     all: ['tools', 'list'] as const,
@@ -65,5 +71,6 @@ export const queryKeys = {
   },
   oauthClients: {
     all: ['oauthClients', 'list'] as const,
+    byId: (clientId: string) => ['oauthClients', clientId] as const,
   },
 };
