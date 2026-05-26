@@ -256,9 +256,7 @@ describe('Download source form validation', () => {
     it('should treat whitespace-only key or value as missing', () => {
       expect(validateDownloadSourceHeaders([{ key: '   ', value: '\t ' }])).toBeUndefined();
 
-      expect(
-        validateDownloadSourceHeaders([{ key: 'X-Custom-Header', value: '   ' }])
-      ).toEqual([
+      expect(validateDownloadSourceHeaders([{ key: 'X-Custom-Header', value: '   ' }])).toEqual([
         {
           message: 'Missing value for key "X-Custom-Header"',
           index: 0,
