@@ -9,6 +9,8 @@ import { expect } from '@playwright/test';
 import { MessageRole } from '@kbn/inference-common';
 import type { Evaluator } from '@kbn/evals';
 import { evaluate, tags } from '@kbn/evals';
+import { replaySnapshot, createGcsRepository } from '@kbn/es-snapshot-loader';
+import type { LoadResult } from '@kbn/es-snapshot-loader';
 
 interface TaskOutput {
   response: string | undefined;
@@ -111,4 +113,72 @@ evaluate.describe('kbn-evals framework smoke tests', { tag: tags.stateful.classi
       expect(scores.some((s) => typeof s === 'number' && s > 0)).toBe(true);
     }
   );
+
+  evaluate.describe('smoke tests: es-snapshot-loader', () => {
+    let replayResult: LoadResult;
+
+    evaluate.beforeAll(async ({ esClient, log }) => {
+      replayResult = await replaySnapshot({
+        esClient,
+        log,
+        repository: createGcsRepository({
+          bucket: 'obs-ai-datasets',
+          basePath: 'otel-demo/payment-service-failures',
+        }),
+        snapshotName: 'payment-service-failures',
+        patterns: ['logs-*', 'metrics-*', 'traces-*'],
+      });
+    });
+
+    evaluate('snapshot restoration loads data into data streams', async ({ executorClient }) => {
+      const result = await executorClient.runExperiment(
+        {
+          dataset: {
+            name: 'smoke tests: es-snapshot-loader',
+            description:
+              'Verifies that @kbn/es-snapshot-loader can replay a GCS snapshot into data streams',
+            examples: [{ input: { snapshotName: 'payment-service-failures' } }],
+          },
+          task: async () => ({
+            success: replayResult.success,
+            reindexedIndices: replayResult.reindexedIndices ?? [],
+          }),
+        },
+        [
+          {
+            name: 'SnapshotRestored',
+            kind: 'CODE' as const,
+            evaluate: async ({ output }) => {
+              const { success, reindexedIndices } = output as {
+                success: boolean;
+                reindexedIndices: string[];
+              };
+              return { score: success && reindexedIndices.length > 0 ? 1 : 0 };
+            },
+          },
+        ]
+      );
+
+      expect(result.evaluationRuns.length).toBeGreaterThan(0);
+      const scores = result.evaluationRuns.map((r) => r.result?.score);
+      expect(scores.every((s) => s === 1)).toBe(true);
+    });
+
+    evaluate.afterAll(async ({ esClient, log }) => {
+      const indices = [...new Set(replayResult?.reindexedIndices ?? [])];
+      await Promise.all(
+        indices.map(async (index) => {
+          try {
+            await esClient.deleteByQuery({
+              index,
+              query: { match_all: {} },
+              refresh: true,
+            });
+          } catch (error) {
+            log.warning(`Cleanup failed for [${index}]`);
+          }
+        })
+      );
+    });
+  });
 });
