@@ -267,10 +267,6 @@ export const AlertEpisodesListPage = () => {
     [rulesCache, isLoadingRules, rowHeight, services.userProfile]
   );
 
-  const onManageRulesClick = useCallback(() => {
-    services.application.navigateToUrl(services.http.basePath.prepend(paths.ruleList));
-  }, [services.application, services.http.basePath]);
-
   return (
     <div
       data-test-subj="alertingV2EpisodesListPage"
