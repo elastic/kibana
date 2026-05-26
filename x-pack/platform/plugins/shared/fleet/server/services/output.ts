@@ -158,7 +158,6 @@ async function getAgentPoliciesPerOutput(outputId?: string, isDefault?: boolean)
       agentPoliciesKuery = `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:"${escapeQuotes(
         outputId
       )}"`;
-
     }
   } else {
     if (isDefault) {

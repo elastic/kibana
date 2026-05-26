@@ -83,7 +83,9 @@ export async function populateAssignedAgentsCount(
           showInactive: true,
           perPage: 0,
           page: 1,
-          kuery: `${AGENTS_PREFIX}.policy_id:"${escapeQuotes(agentPolicy.id)}" and ${UNPRIVILEGED_AGENT_KUERY}`,
+          kuery: `${AGENTS_PREFIX}.policy_id:"${escapeQuotes(
+            agentPolicy.id
+          )}" and ${UNPRIVILEGED_AGENT_KUERY}`,
         })
         .then(({ total }) => (agentPolicy.unprivileged_agents = total));
       return Promise.all([totalAgents, unprivilegedAgents]);

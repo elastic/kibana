@@ -162,7 +162,6 @@ describe('Fleet proxies service', () => {
     });
   });
 
-
   describe('delete', () => {
     it('should not allow to delete preconfigured proxy', async () => {
       await expect(() =>

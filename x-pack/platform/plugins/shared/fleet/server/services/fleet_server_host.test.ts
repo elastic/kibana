@@ -140,7 +140,6 @@ describe('create', () => {
 });
 
 describe('deleteFleetServerHost', () => {
-
   it('should removeFleetServerHostFromAll agent policies without force if not deleted from preconfiguration', async () => {
     const soMock = savedObjectsClientMock.create();
 
