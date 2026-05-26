@@ -18,17 +18,11 @@ function hasWildcard(name: string) {
 }
 
 /**
- * Returns true if every comma-separated part of `sourceName` is either a known
- * hidden source or a dot-prefixed name (backing indices like `.ds-...` are hidden
- * in Elasticsearch but are not surfaced as individual entries in the sources list).
+ * Returns true when every comma-separated part of `sourceName` starts with a dot.
+ * Covers backing indices like `.ds-logs-default-000001` that are hidden in Elasticsearch
+ * but are never surfaced as individual entries in the sources list.
  */
-function isHiddenOrBackingIndex(sourceName: string, hiddenSources: Set<string>): boolean {
-  if (sourceExists(sourceName, hiddenSources)) {
-    return true;
-  }
-  // Fallback: check each comma-separated part individually using the dot-prefix
-  // heuristic — the only reliable way to identify backing indices that aren't
-  // in the sources list (e.g. .ds-logs-default-000001).
+function isDotPrefixedSource(sourceName: string): boolean {
   return sourceName.split(',').every((part) => {
     const cleaned = removeSourceNameQuotes(cleanIndex(part.trim()));
     // Strip optional CCS cluster prefix (cluster:indexName → indexName)
@@ -53,9 +47,6 @@ export function validateSources(
     ...(context?.views?.map((view) => view.name) ?? []),
     ...(context?.datasets?.map((dataset) => dataset.name) ?? []),
   ]);
-  const hiddenSources = new Set<string>(
-    context?.sources?.filter((s) => s.hidden).map((s) => s.name) ?? []
-  );
   const useGenericDataSourceError = options?.useGenericDataSourceError ?? false;
 
   for (const source of sources) {
@@ -71,7 +62,7 @@ export function validateSources(
       if (
         !sourceExists(sourceName, sourcesMap) &&
         !hasWildcard(sourceName) &&
-        !isHiddenOrBackingIndex(sourceName, hiddenSources)
+        !isDotPrefixedSource(sourceName)
       ) {
         messages.push(
           useGenericDataSourceError ? errors.unknownDataSource(source) : errors.unknownIndex(source)

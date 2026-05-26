@@ -331,12 +331,6 @@ describe('validation logic', () => {
           await expectErrors('FROM "mycluster:.ds-foo"', []);
         });
 
-        test('does not error on known hidden source without dot prefix', async () => {
-          const { expectErrors } = await setup();
-          // hidden_stream is in the mock sources with hidden: true (no leading dot)
-          await expectErrors('FROM hidden_stream', []);
-        });
-
         test('still errors on truly unknown non-hidden sources', async () => {
           const { expectErrors } = await setup();
           await expectErrors('FROM truly_unknown', ['Unknown data source "truly_unknown"']);
