@@ -71,7 +71,7 @@ export const FooterLinkItem = React.memo<FooterLinkItemProps>(
           className="itemPanel"
         >
           <span className="itemIconWrapper">
-            <EuiIcon type={icon} className="itemIcon" />
+            <EuiIcon type={icon} className="itemIcon" aria-hidden={true} />
           </span>
           <EuiSpacer size="m" />
           <EuiTitle size="xxs" className="itemTitle">
@@ -81,7 +81,6 @@ export const FooterLinkItem = React.memo<FooterLinkItemProps>(
           <EuiText size="xs">{description}</EuiText>
           <EuiSpacer size="m" />
           <EuiText size="xs">
-            {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
             <EuiLink
               data-test-subj="footerLinkItem"
               onClick={onClickWithReport}
