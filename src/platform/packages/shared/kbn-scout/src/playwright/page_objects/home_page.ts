@@ -17,6 +17,9 @@ export class HomePage {
   }
 
   public async goto() {
+    await this.page.addInitScript(() => {
+      window.localStorage.setItem('home:welcome:show', 'false');
+    });
     await this.page.gotoApp('home');
     await this.homeApp.waitFor({ state: 'visible' });
   }

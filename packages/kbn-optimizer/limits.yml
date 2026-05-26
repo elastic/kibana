@@ -3,7 +3,7 @@ pageLoadAssetSize:
   advancedSettings: 6196
   agentBuilder: 58540
   agentBuilderDashboards: 7786
-  agentBuilderPlatform: 8737
+  agentBuilderPlatform: 15544
   agentBuilderWorkflows: 24405
   agentContextLayer: 1883
   aiAssistantManagementSelection: 11569
@@ -132,7 +132,7 @@ pageLoadAssetSize:
   observabilityLogsExplorer: 4918
   observabilityOnboarding: 14161
   observabilityShared: 75022
-  osquery: 47422
+  osquery: 48128
   painlessLab: 6299
   presentationUtil: 8391
   productDocBase: 5678
