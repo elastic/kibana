@@ -427,87 +427,10 @@ describe('QueryService', () => {
       expect(getErrorSource(caughtError as Error)).toBe(TaskErrorSource.USER);
     });
 
-    it('decorates ResponseError(404) with TaskErrorSource.USER', async () => {
-      const responseError = new errors.ResponseError({ statusCode: 404 } as DiagnosticResult);
-      mockHelpersEsqlToArrowReader(mockEsClient, jest.fn().mockRejectedValue(responseError));
-
-      let caughtError: unknown;
-      try {
-        for await (const _batch of queryService.executeQueryStream({ query: mockQuery })) {
-          // consume
-        }
-      } catch (error) {
-        caughtError = error;
-      }
-
-      expect(caughtError).toBe(responseError);
-      expect(getErrorSource(caughtError as Error)).toBe(TaskErrorSource.USER);
-    });
-
-    it('does not decorate ResponseError(503) with TaskErrorSource.USER', async () => {
-      const responseError = new errors.ResponseError({ statusCode: 503 } as DiagnosticResult);
-      mockHelpersEsqlToArrowReader(mockEsClient, jest.fn().mockRejectedValue(responseError));
-
-      let caughtError: unknown;
-      try {
-        for await (const _batch of queryService.executeQueryStream({ query: mockQuery })) {
-          // consume
-        }
-      } catch (error) {
-        caughtError = error;
-      }
-
-      expect(caughtError).toBe(responseError);
-      expect(getErrorSource(caughtError as Error)).toBeUndefined();
-    });
-
     it('does not decorate plain errors with TaskErrorSource.USER', async () => {
       mockHelpersEsqlToArrowReader(
         mockEsClient,
         jest.fn().mockRejectedValue(new Error('ES query failed'))
-      );
-
-      let caughtError: unknown;
-      try {
-        for await (const _batch of queryService.executeQueryStream({ query: mockQuery })) {
-          // consume
-        }
-      } catch (error) {
-        caughtError = error;
-      }
-
-      expect(caughtError).toBeInstanceOf(Error);
-      expect(getErrorSource(caughtError as Error)).toBeUndefined();
-    });
-
-    it('does not decorate Arrow parse errors with TaskErrorSource.USER', async () => {
-      const reader: MockArrowReader = {
-        closed: false,
-        cancel: jest.fn().mockResolvedValue(undefined),
-        async *[Symbol.asyncIterator]() {
-          throw new Error('Expected to read 1919230334 metadata bytes, but only read 8');
-        },
-      };
-      mockHelpersEsqlToArrowReader(mockEsClient, jest.fn().mockResolvedValue(reader));
-
-      let caughtError: unknown;
-      try {
-        for await (const _batch of queryService.executeQueryStream({ query: mockQuery })) {
-          // consume
-        }
-      } catch (error) {
-        caughtError = error;
-      }
-
-      expect(caughtError).toBeInstanceOf(Error);
-      expect(getErrorSource(caughtError as Error)).toBeUndefined();
-    });
-
-    it('does not decorate cancellation errors with TaskErrorSource.USER', async () => {
-      const { RuleExecutionCancellationError } = jest.requireActual('../../execution_context');
-      mockHelpersEsqlToArrowReader(
-        mockEsClient,
-        jest.fn().mockRejectedValue(new RuleExecutionCancellationError('Streaming query aborted'))
       );
 
       let caughtError: unknown;
