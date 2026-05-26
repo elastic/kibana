@@ -53,6 +53,7 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const retry = getService('retry');
   const entityStoreUtils = EntityStoreUtils(getService);
+  const maintainerRoutes = entityMaintainerRouteHelpersFactory(supertest);
 
   const uploadCsv = (csvContent: string) =>
     supertest
@@ -121,37 +122,9 @@ export default ({ getService }: FtrProviderContext) => {
   describe('@ess @serverless @skipInServerlessMKI Entity Resolution CSV Upload', () => {
     before(async () => {
       await entityStoreUtils.enableEntityStoreV2();
-
-      // Install schedules autoStart=true, so TM may be mid-run — wait for idle before stopping.
-      const maintainerRoutes = entityMaintainerRouteHelpersFactory(supertest);
-      let lastSeenRuns = -1;
-      await retry.waitForWithTimeout(
-        'automated-resolution maintainer to be idle before stop',
-        60_000,
-        async () => {
-          const { body } = await maintainerRoutes.getMaintainers(200, [
-            AUTOMATED_RESOLUTION_MAINTAINER_ID,
-          ]);
-          const maintainer = body.maintainers.find(
-            (m: { id: string }) => m.id === AUTOMATED_RESOLUTION_MAINTAINER_ID
-          );
-          if (!maintainer || maintainer.taskStatus === 'never_started') return true;
-          if (maintainer.taskStatus === 'stopped') return true;
-
-          const nextRunAt: string | null = maintainer.nextRunAt ?? null;
-          const isNextRunInFuture = nextRunAt != null && new Date(nextRunAt).getTime() > Date.now();
-          if (!isNextRunInFuture) {
-            lastSeenRuns = -1;
-            return false;
-          }
-          const runs: number = maintainer.runs ?? 0;
-          if (runs === lastSeenRuns) return true;
-          lastSeenRuns = runs;
-          return false;
-        }
-      );
+      // Stop before seeding — any TM auto-run between install and stop cannot touch
+      // test entities that haven't been seeded yet, so no wait-for-idle is needed.
       await maintainerRoutes.stopMaintainer(AUTOMATED_RESOLUTION_MAINTAINER_ID);
-
       await cleanEntities();
       await seedEntities();
       await waitForEntities();
