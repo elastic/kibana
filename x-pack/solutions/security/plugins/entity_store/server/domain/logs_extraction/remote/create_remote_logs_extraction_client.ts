@@ -8,11 +8,7 @@
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import {
-  CcsLogExtractionStateTypeName,
-  CpsLogExtractionStateTypeName,
-  RemoteLogExtractionStateClient,
-} from '../../saved_objects';
+import { RemoteLogExtractionStateClient } from '../../saved_objects';
 import { RemoteLogsExtractionClient } from './remote_logs_extraction_client';
 import { createCcsStrategy, createCpsStrategy } from './strategies';
 
@@ -32,12 +28,12 @@ interface CreateRemoteLogsExtractionClientResult {
 }
 
 /**
- * Build the remote-extraction client (and matching state SO client) for the
- * active deployment:
- *  - serverless → CPS (uses `cpsClient`, persists to `entity-store-cps-state`)
- *  - stateful   → CCS (uses `esClient`, persists to `entity-store-ccs-state`)
+ * Build the remote-extraction client (and matching state SO client).
+ * Strategy follows `isServerless` (`buildFlavor === 'serverless'`):
+ *  - CPS when serverless (`cpsClient`)
+ *  - CCS otherwise (`esClient`)
  *
- * Mutually exclusive: a deployment is one or the other.
+ * Both strategies persist to `entity-store-remote-state`. Mutually exclusive.
  */
 export function createRemoteLogsExtractionClient({
   logger,
@@ -47,12 +43,7 @@ export function createRemoteLogsExtractionClient({
   cpsClient,
   isServerless,
 }: CreateRemoteLogsExtractionClientOpts): CreateRemoteLogsExtractionClientResult {
-  const stateClient = new RemoteLogExtractionStateClient(
-    soClient,
-    namespace,
-    logger,
-    isServerless ? CpsLogExtractionStateTypeName : CcsLogExtractionStateTypeName
-  );
+  const stateClient = new RemoteLogExtractionStateClient(soClient, namespace, logger);
   const client = new RemoteLogsExtractionClient(
     logger,
     namespace,

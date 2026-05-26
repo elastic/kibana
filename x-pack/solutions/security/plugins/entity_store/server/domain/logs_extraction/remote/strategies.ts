@@ -20,8 +20,11 @@ export interface RemoteExtractionStrategy {
   buildPatterns(args: { localIndexPatterns: string[]; remoteIndexPatterns: string[] }): string[];
 }
 
-/** Append-only negation that excludes everything on the origin project from the CPS scope. */
-const EXCLUDED_ORIGIN = '-_origin:*' as const;
+/** 
+ * this unique string excludes all indices on the origin project from the CPS scope.
+ * see https://www.elastic.co/docs/reference/query-languages/esql/esql-cross-serverless-projects#exclude-specific-projects
+ */
+const EXCLUDED_ORIGIN = '-_origin:*';
 
 export const createCcsStrategy = (
   esClient: ElasticsearchClient,

@@ -553,7 +553,7 @@ describe('RemoteLogsExtractionClient', () => {
       const probeQuery = mockExecuteEsqlQuery.mock.calls[0][0].query as string;
       expect(probeQuery).toContain(overrideFrom);
       expect(probeQuery).toContain(overrideTo);
-      // Override runs do not touch CCS state.
+      // Override runs do not touch remote extraction state.
       expect(mockStateClient.findOrInit).not.toHaveBeenCalled();
       expect(mockStateClient.update).not.toHaveBeenCalled();
     });
@@ -615,7 +615,7 @@ describe('RemoteLogsExtractionClient', () => {
       expect(result.error).toBeUndefined();
       expect(mockLogger.warn).toHaveBeenCalledTimes(1);
       expect(mockLogger.warn).toHaveBeenCalledWith(
-        expect.stringContaining(`CCS log-slice probe stalled at ${stalledTs}`)
+        expect.stringContaining(`log-slice probe stalled at ${stalledTs}`)
       );
       // The outer loop persists the bumped value as checkpointTimestamp after the stalled slice.
       expect(mockStateClient.update).toHaveBeenCalledWith('host', {

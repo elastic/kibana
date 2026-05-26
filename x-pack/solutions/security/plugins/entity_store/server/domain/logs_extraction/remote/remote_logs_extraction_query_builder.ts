@@ -54,7 +54,7 @@ export interface RemoteLogsExtractionQueryParams {
 }
 
 /**
- * Builds ESQL for remote (CCS or CPS) extraction: same aggregation as main but no LOOKUP JOIN.
+ * Builds ESQL for remote extraction: same aggregation as main but no LOOKUP JOIN.
  * Writes partial entities to updates with @timestamp = nowISO so the next run intakes them.
  */
 export function buildRemoteLogsExtractionEsqlQuery({

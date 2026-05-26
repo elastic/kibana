@@ -47,9 +47,9 @@ export function registerForceRemoteExtractToUpdates(router: EntityStorePluginRou
     .post({
       path: ENTITY_STORE_ROUTES.internal.FORCE_REMOTE_EXTRACT_TO_UPDATES,
       access: 'internal',
-      summary: 'Force cross-cluster search extraction',
+      summary: 'Force remote log extraction',
       description:
-        'Trigger an immediate cross-cluster search extraction for the specified entity type, index patterns, and date range.',
+        'Trigger an immediate remote extraction (CCS or CPS, depending on deployment) for the specified entity type, index patterns, and date range.',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
       },
@@ -81,7 +81,7 @@ export function registerForceRemoteExtractToUpdates(router: EntityStorePluginRou
 
         const logger = baseLogger.get('forceRemoteExtractToUpdates').get(entityType);
         logger.debug(
-          `Force CCS extract to updates API called for entity type: ${entityType}, index patterns: ${indexPatterns.join(
+          `Force remote extract to updates API called for entity type: ${entityType}, index patterns: ${indexPatterns.join(
             ', '
           )}`
         );

@@ -944,11 +944,10 @@ export class LogsExtractionClient {
   }
 
   /**
-   * Returns local index patterns and user-configured CCS-prefixed patterns
-   * (`cluster1:logs-*`) separately. The main extraction uses local only
-   * (LOOKUP JOIN does not support remote clusters); the CCS strategy consumes
-   * the prefixed list as-is. The CPS strategy ignores both and works from the
-   * local list internally.
+   * Returns local index patterns and remote patterns separately.
+   * Cluster-prefixed patterns (`cluster1:logs-*`) go to remote (CCS strategy).
+   * Unqualified patterns stay local; CPS strategy reuses local patterns for linked projects.
+   * Main extraction uses local patterns only (LOOKUP JOIN does not support remote).
    */
   public async getLocalAndRemoteIndexPatterns(
     additionalIndexPatterns: string[] = [],
@@ -995,8 +994,8 @@ export class LogsExtractionClient {
 
   /**
    * Builds the full list of index patterns (updates, additional, security data view),
-   * including CCS-prefixed remote patterns from the data view, without any alerts or
-   * remote-pattern filtering applied.
+   * including cluster-prefixed patterns from the data view, without alerts or
+   * local/remote splitting applied.
    */
   private async getAllIndexPatternsIncludingRemote(
     additionalIndexPatterns: string[] = []

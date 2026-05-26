@@ -9,41 +9,64 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import { SavedObjectsErrorHelpers, type Logger } from '@kbn/core/server';
 import type { EntityType } from '../../../../common/domain/definitions/entity_schema';
 import { RemoteLogExtractionState } from './constants';
-import type { RemoteLogExtractionStateTypeName } from './types';
+import {
+  deleteLegacyCcsLogExtractionState,
+  readLegacyCcsLogExtractionState,
+} from './legacy_ccs_log_extraction_state';
+import { RemoteLogExtractionStateTypeName } from './types';
 
-/**
- * Persistence client for the per-strategy remote-extraction resume state.
- * One instance per active strategy (CCS or CPS) — the constructor takes the SO
- * type name, so the same class backs both `entity-store-ccs-state` and
- * `entity-store-cps-state` rows with strategy-isolated storage.
- */
+/** Persistence client for remote-extraction resume state (`entity-store-remote-state`). */
 export class RemoteLogExtractionStateClient {
   constructor(
     private readonly soClient: SavedObjectsClientContract,
     private readonly namespace: string,
-    private readonly logger: Logger,
-    private readonly typeName: RemoteLogExtractionStateTypeName
+    private readonly logger: Logger
   ) {}
 
   async findOrInit(entityType: EntityType): Promise<RemoteLogExtractionState> {
     const id = this.getSavedObjectId(entityType);
     try {
-      const { attributes } = await this.soClient.get<RemoteLogExtractionState>(this.typeName, id);
+      const { attributes } = await this.soClient.get<RemoteLogExtractionState>(
+        RemoteLogExtractionStateTypeName,
+        id
+      );
       return RemoteLogExtractionState.parse(attributes);
     } catch (err) {
       if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+        const legacyState = await readLegacyCcsLogExtractionState(
+          this.soClient,
+          entityType,
+          this.namespace
+        );
+        if (legacyState) {
+          this.logger.debug(
+            `${RemoteLogExtractionStateTypeName}: migrating legacy remote state for ${entityType}`
+          );
+          await this.soClient.create<RemoteLogExtractionState>(
+            RemoteLogExtractionStateTypeName,
+            legacyState,
+            { id }
+          );
+          await deleteLegacyCcsLogExtractionState(this.soClient, entityType, this.namespace);
+          return legacyState;
+        }
+
         this.logger.debug(
-          `${this.typeName}: log extraction state not found for ${entityType}, creating default`
+          `${RemoteLogExtractionStateTypeName}: log extraction state not found for ${entityType}, creating default`
         );
         const defaultState = RemoteLogExtractionState.parse({});
         try {
-          await this.soClient.create<RemoteLogExtractionState>(this.typeName, defaultState, { id });
+          await this.soClient.create<RemoteLogExtractionState>(
+            RemoteLogExtractionStateTypeName,
+            defaultState,
+            { id }
+          );
           return defaultState;
         } catch (createErr) {
           // A concurrent findOrInit won the race — read and return what it created.
           if (SavedObjectsErrorHelpers.isConflictError(createErr)) {
             const { attributes } = await this.soClient.get<RemoteLogExtractionState>(
-              this.typeName,
+              RemoteLogExtractionStateTypeName,
               id
             );
             return RemoteLogExtractionState.parse(attributes);
@@ -57,10 +80,15 @@ export class RemoteLogExtractionStateClient {
 
   async update(entityType: EntityType, state: Partial<RemoteLogExtractionState>): Promise<void> {
     const id = this.getSavedObjectId(entityType);
-    await this.soClient.update<RemoteLogExtractionState>(this.typeName, id, state, {
-      refresh: 'wait_for',
-      mergeAttributes: true,
-    });
+    await this.soClient.update<RemoteLogExtractionState>(
+      RemoteLogExtractionStateTypeName,
+      id,
+      state,
+      {
+        refresh: 'wait_for',
+        mergeAttributes: true,
+      }
+    );
   }
 
   async clearRecoveryId(entityType: EntityType): Promise<void> {
@@ -69,14 +97,15 @@ export class RemoteLogExtractionStateClient {
 
   async delete(entityType: EntityType): Promise<void> {
     const id = this.getSavedObjectId(entityType);
-    await this.soClient.delete(this.typeName, id).catch((err) => {
+    await this.soClient.delete(RemoteLogExtractionStateTypeName, id).catch((err) => {
       if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
         throw err;
       }
     });
+    await deleteLegacyCcsLogExtractionState(this.soClient, entityType, this.namespace);
   }
 
   private getSavedObjectId(entityType: EntityType): string {
-    return `${this.typeName}-${entityType}-${this.namespace}`;
+    return `${RemoteLogExtractionStateTypeName}-${entityType}-${this.namespace}`;
   }
 }

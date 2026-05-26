@@ -82,7 +82,7 @@ function createMockRemoteLogsExtractionClient(): MockRemoteLogsExtractionClient 
     extractToUpdates: jest.fn().mockResolvedValue({ count: 0, pages: 0 }),
     strategy: {
       id: 'ccs',
-      buildPatterns: ({ remoteIndexPatterns }) => remoteIndexPatterns,
+      buildPatterns: jest.fn(({ remoteIndexPatterns }) => remoteIndexPatterns),
     },
   };
 }
@@ -748,7 +748,7 @@ describe('LogsExtractionClient', () => {
       });
     });
 
-    it.skip('should filter out cross-cluster search (CCS) remote indices from main query and run CCS in parallel', async () => {
+    it('should filter remote index patterns from the main query and run remote extraction in parallel', async () => {
       const mockEsqlResponse: ESQLSearchResponse = {
         columns: [
           { name: '@timestamp', type: 'date' },
@@ -776,12 +776,18 @@ describe('LogsExtractionClient', () => {
       const result = await client.extractLogs('user');
 
       expect(result.success).toBe(true);
-      // Main extraction uses local indices only; CCS client (injected) runs in parallel.
+      // Main path uses local patterns only; remote client runs in parallel via strategy.buildPatterns.
       expect(result.success && result.scannedIndices).toContain('logs-*');
       expect(result.success && result.scannedIndices).toContain('metrics-*');
       expect(result.success && result.scannedIndices).toContain('remote_cluster:logs-*');
       expect(result.success && result.scannedIndices).toContain('other:filebeat-*');
       expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(3);
+      expect(mockRemoteLogsExtractionClient.strategy.buildPatterns).toHaveBeenCalledWith(
+        expect.objectContaining({
+          localIndexPatterns: expect.arrayContaining(['logs-*', 'metrics-*']),
+          remoteIndexPatterns: ['remote_cluster:logs-*', 'other:filebeat-*'],
+        })
+      );
       expect(mockRemoteLogsExtractionClient.extractToUpdates).toHaveBeenCalledTimes(1);
       expect(mockRemoteLogsExtractionClient.extractToUpdates).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -1417,7 +1423,7 @@ describe('LogsExtractionClient', () => {
   });
 
   describe('getLocalAndRemoteIndexPatterns', () => {
-    it('should split local and CCS remote index patterns', async () => {
+    it('should split local and cluster-prefixed remote index patterns', async () => {
       const mockDataView = {
         getIndexPattern: jest
           .fn()
@@ -1511,7 +1517,7 @@ describe('LogsExtractionClient', () => {
       );
 
       expect(indexPatterns).toContain('-logs-proxy-*');
-      // CCS-prefixed exclude is routed to remote and not returned here
+      // Cluster-prefixed excludes are routed to remote and not returned here
       expect(indexPatterns).not.toContain('-remote_cluster:logs-debug-*');
       // remote includes are also not returned
       expect(indexPatterns).not.toContain('remote_cluster:logs-*');

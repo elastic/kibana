@@ -66,7 +66,7 @@ export interface RemoteExtractionWindow {
 }
 
 /**
- * Window for the remote (CCS or CPS) extraction path.
+ * Window for the remote extraction path.
  *
  * Resume order: explicit `windowOverride` → mid entity-page recovery (`paginationRecoveryId` +
  * `checkpointTimestamp`) → slice-boundary recovery (`checkpointTimestamp` only) → lookback fallback.

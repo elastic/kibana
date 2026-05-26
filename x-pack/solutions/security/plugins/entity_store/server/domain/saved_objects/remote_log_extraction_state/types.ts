@@ -8,13 +8,9 @@
 import type { SavedObjectsFullModelVersion } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsType } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import { LEGACY_CCS_LOG_EXTRACTION_STATE_TYPE_NAME } from './legacy_ccs_log_extraction_state';
 
-export const CcsLogExtractionStateTypeName = 'entity-store-ccs-state';
-export const CpsLogExtractionStateTypeName = 'entity-store-cps-state';
-
-export type RemoteLogExtractionStateTypeName =
-  | typeof CcsLogExtractionStateTypeName
-  | typeof CpsLogExtractionStateTypeName;
+export const RemoteLogExtractionStateTypeName = 'entity-store-remote-state';
 
 const stateSchemaV1 = schema.object({
   checkpointTimestamp: schema.nullable(schema.string()),
@@ -38,12 +34,13 @@ const baseType: Omit<SavedObjectsType, 'name'> = {
   hiddenFromHttpApis: true,
 };
 
-export const CcsLogExtractionStateType: SavedObjectsType = {
+export const RemoteLogExtractionStateType: SavedObjectsType = {
   ...baseType,
-  name: CcsLogExtractionStateTypeName,
+  name: RemoteLogExtractionStateTypeName,
 };
 
-export const CpsLogExtractionStateType: SavedObjectsType = {
+/** Read/migrate only — do not create new rows under this type. */
+export const LegacyCcsLogExtractionStateType: SavedObjectsType = {
   ...baseType,
-  name: CpsLogExtractionStateTypeName,
+  name: LEGACY_CCS_LOG_EXTRACTION_STATE_TYPE_NAME,
 };
