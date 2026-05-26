@@ -25,8 +25,6 @@ interface InlineAttachmentWithActionsProps {
   isSidebar: boolean;
   conversationId: string;
   screenContext?: ScreenContextAttachmentData;
-  /** Version number of the attachment being rendered, used for canvas preview comparison */
-  version?: number;
   /**
    * Whether this is the most recent version of this attachment across the whole conversation.
    * When false, `registerActionButtons` is not passed to the content renderer so that action
@@ -48,12 +46,12 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
   isSidebar,
   conversationId,
   screenContext,
-  version,
   isLatestVersion = true,
   previewBadgeState,
 }) => {
   const {
     openCanvas: openCanvasContext,
+    closeCanvas,
     previewedAttachmentKey,
     setPreviewedAttachmentKey,
   } = useCanvasContext();
@@ -61,8 +59,8 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
   const { openSidebarConversation: openSidebarConversationInternal } = useAgentBuilderServices();
 
   const openCanvas = useCallback(() => {
-    openCanvasContext(attachment, isSidebar, version);
-  }, [openCanvasContext, attachment, isSidebar, version]);
+    openCanvasContext(attachment, isSidebar);
+  }, [openCanvasContext, attachment, isSidebar]);
 
   const updateOrigin = useCallback(
     async (origin: string) => {
@@ -78,7 +76,7 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
   }, [conversationId, openSidebarConversationInternal]);
 
   const uiDefinition = attachmentsService.getAttachmentUiDefinition(attachment.type);
-  const attachmentPreviewKey = getAttachmentPreviewKey(attachment.id, version);
+  const attachmentPreviewKey = getAttachmentPreviewKey(attachment.id, attachment.version);
   const [dynamicButtonsState, setDynamicButtonsState] = useState<{
     key: string;
     buttons: ActionButton[];
@@ -136,6 +134,7 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
   }
 
   const title = uiDefinition?.getLabel?.(attachment) ?? attachment.type.toUpperCase();
+  const header = uiDefinition?.getHeader?.({ attachment });
 
   return (
     <EuiSplitPanel.Outer
@@ -147,9 +146,13 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
       `}
     >
       <AttachmentHeader
+        icon={header?.icon}
         title={title}
+        subtitle={header?.subtitle}
+        badges={header?.badges}
         actionButtons={inlineActionButtons}
         previewBadgeState={resolvedPreviewBadgeState}
+        onClosePreview={closeCanvas}
       />
       <EuiSplitPanel.Inner grow={false} paddingSize="none">
         {uiDefinition?.renderInlineContent?.(
