@@ -23,40 +23,6 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { getStringMeta } from '@kbn/evals';
 import type { DashboardAgentEvaluationChatClient } from './chat_client';
 
-const stringifyForDebug = (value: unknown): string => {
-  try {
-    return JSON.stringify(value, null, 2);
-  } catch {
-    return String(value);
-  }
-};
-
-const logConversationDebug = ({
-  log,
-  input,
-  response,
-}: {
-  log: ToolingLog;
-  input: string;
-  response: {
-    messages: Array<{ message: string }>;
-    steps?: Array<Record<string, unknown>>;
-    errors: unknown[];
-    traceId?: string;
-  };
-}) => {
-  log.info(
-    [
-      'Agent Builder dashboards eval conversation debug:',
-      `Input: ${input}`,
-      `Trace ID: ${response.traceId ?? '<none>'}`,
-      `Messages: ${stringifyForDebug(response.messages)}`,
-      `Steps: ${stringifyForDebug(response.steps ?? [])}`,
-      `Errors: ${stringifyForDebug(response.errors)}`,
-    ].join('\n')
-  );
-};
-
 export interface DashboardDatasetExample extends Example {
   input: {
     question: string;
@@ -116,10 +82,6 @@ function configureExperiment({
       messages: [{ message: input.question }],
       options: agentId ? { agentId } : undefined,
     });
-
-    if (metadata?.debugConversation === true) {
-      logConversationDebug({ log, input: input.question, response });
-    }
 
     const [correctnessResult, groundednessResult] = await Promise.all([
       withEvaluatorSpan('CorrectnessAnalysis', {}, () =>
@@ -207,10 +169,6 @@ export function createEvaluateDataset({
           messages: [{ message: input.question }],
           options: agentId ? { agentId } : undefined,
         });
-
-        if (metadata?.debugConversation === true) {
-          logConversationDebug({ log, input: input.question, response });
-        }
 
         return {
           errors: response.errors,

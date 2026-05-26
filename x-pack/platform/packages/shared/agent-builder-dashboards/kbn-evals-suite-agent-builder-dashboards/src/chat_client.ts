@@ -12,14 +12,9 @@ import pRetry from 'p-retry';
 
 type Messages = { message: string }[];
 
-interface Options {
-  agentId?: string;
-}
-
 interface ConverseFunctionParams {
   messages: Messages;
   conversationId?: string;
-  options?: Options;
 }
 
 type ConverseFunction = (params: ConverseFunctionParams) => Promise<{
@@ -29,8 +24,6 @@ type ConverseFunction = (params: ConverseFunctionParams) => Promise<{
   steps?: Array<Record<string, unknown>>;
   traceId?: string;
 }>;
-
-const defaultDashboardAgentId = process.env.AGENT_ID ?? agentBuilderDefaultAgentId;
 
 export class DashboardAgentEvaluationChatClient {
   constructor(
@@ -65,10 +58,8 @@ export class DashboardAgentEvaluationChatClient {
     });
   }
 
-  converse: ConverseFunction = async ({ messages, conversationId, options = {} }) => {
+  converse: ConverseFunction = async ({ messages, conversationId }) => {
     this.log.info('Calling converse');
-
-    const { agentId = defaultDashboardAgentId } = options;
 
     const callConverseApi = async (): Promise<{
       conversationId?: string;
@@ -81,7 +72,7 @@ export class DashboardAgentEvaluationChatClient {
         method: 'POST',
         version: '2023-10-31',
         body: JSON.stringify({
-          agent_id: agentId,
+          agent_id: agentBuilderDefaultAgentId,
           connector_id: this.connectorId,
           conversation_id: conversationId,
           input: messages[messages.length - 1].message,

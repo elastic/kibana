@@ -57,9 +57,6 @@ evaluate.describe(
               output: {
                 expected: 'Dashboard skill should be activated.',
               },
-              metadata: {
-                debugConversation: true,
-              },
             },
           ],
         },
@@ -83,9 +80,6 @@ evaluate.describe(
                 expected:
                   'Visualization skill should be activated and dashboard management should not be used.',
               },
-              metadata: {
-                debugConversation: true,
-              },
             },
           ],
         },
@@ -106,9 +100,6 @@ evaluate.describe(
               },
               output: {
                 expected: 'Dashboard management should not be used.',
-              },
-              metadata: {
-                debugConversation: true,
               },
             },
           ],
