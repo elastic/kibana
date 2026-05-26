@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { DEFAULT_DASHBOARD_STATE } from '../../../../common/default_dashboard_state';
 import type {
   DashboardSavedObjectAttributes,
   SavedDashboardPanel,
@@ -17,13 +18,14 @@ jest.mock('../../../kibana_services', () => ({
   ...jest.requireActual('../../../kibana_services'),
   embeddableService: {
     getTransforms: jest.fn(),
+    getAllEmbeddableSchemas: jest.fn().mockReturnValue({}),
   },
 }));
 
 describe('transformDashboardOut', () => {
   const pinnedPanelSo = {
-    config: { anyKey: 'some value' },
-    type: 'type1',
+    config: {},
+    type: 'time_slider_control',
     order: 0,
   };
 
@@ -39,22 +41,21 @@ describe('transformDashboardOut', () => {
     },
   ];
 
-  test('should not supply defaults for optional top level properties', () => {
-    const input: DashboardSavedObjectAttributes = {
-      description: '',
-      kibanaSavedObjectMeta: {
-        searchSourceJSON: '{}',
-      },
-      optionsJSON: '{}',
-      panelsJSON: '[]',
-      timeRestore: false,
+  test('should supply defaults', () => {
+    const input: Partial<DashboardSavedObjectAttributes> = {
       title: 'my title',
     };
     expect(transformDashboardOut(input)).toMatchInlineSnapshot(`
       Object {
         "dashboardState": Object {
+          "options": Object {
+${JSON.stringify(DEFAULT_DASHBOARD_STATE.options, null, '.')
+  .slice(2, -2)
+  .replaceAll('.', ' '.repeat(12))},
+          },
           "panels": Array [],
           "pinned_panels": Array [],
+          "tags": Array [],
           "title": "my title",
         },
         "warnings": Array [],
@@ -113,8 +114,10 @@ describe('transformDashboardOut', () => {
       Object {
         "dashboardState": Object {
           "description": "description",
+          "filters": Array [],
           "options": Object {
             "auto_apply_filters": false,
+            "hide_panel_borders": false,
             "hide_panel_titles": true,
             "sync_colors": false,
             "sync_cursor": false,
@@ -140,11 +143,13 @@ describe('transformDashboardOut', () => {
           "pinned_panels": Array [
             Object {
               "config": Object {
-                "anyKey": "some value",
+                "end_percentage_of_time_range": 1,
+                "is_anchored": false,
+                "start_percentage_of_time_range": 0,
               },
               "grow": false,
               "id": "foo",
-              "type": "type1",
+              "type": "time_slider_control",
               "width": "small",
             },
           ],
@@ -210,8 +215,10 @@ describe('transformDashboardOut', () => {
       Object {
         "dashboardState": Object {
           "description": "description",
+          "filters": Array [],
           "options": Object {
             "auto_apply_filters": false,
+            "hide_panel_borders": false,
             "hide_panel_titles": true,
             "sync_colors": false,
             "sync_cursor": false,
@@ -237,11 +244,13 @@ describe('transformDashboardOut', () => {
           "pinned_panels": Array [
             Object {
               "config": Object {
-                "anyKey": "some value",
+                "end_percentage_of_time_range": 1,
+                "is_anchored": false,
+                "start_percentage_of_time_range": 0,
               },
               "grow": false,
               "id": "foo",
-              "type": "type1",
+              "type": "time_slider_control",
               "width": "small",
             },
           ],
@@ -249,6 +258,7 @@ describe('transformDashboardOut', () => {
             "expression": "test",
             "language": "kql",
           },
+          "tags": Array [],
           "title": "title",
         },
         "warnings": Array [],

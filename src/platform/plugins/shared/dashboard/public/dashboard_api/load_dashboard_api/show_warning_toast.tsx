@@ -46,13 +46,13 @@ export const showWarningToast = ({ warnings }: { warnings: Warnings }) => {
       values: { droppedPanelsCount },
     });
   } else if (generalWarningCount > 0 && !droppedPanelsCount) {
-    warningMessage = i18n.translate('ashboard.warnings.modal.schemaWarning', {
+    warningMessage = i18n.translate('dashboard.warnings.modal.schemaWarning', {
       defaultMessage:
         'There {warningCount, plural, one {is} other {are}} {warningCount} {warningCount, plural, one {warning} other {warnings}} on this dashboard that could not be automatically resolved.',
       values: { warningCount: warnings.length },
     });
   } else {
-    warningMessage = i18n.translate('ashboard.warnings.modal.multipleWarnings', {
+    warningMessage = i18n.translate('dashboard.warnings.modal.multipleWarnings', {
       defaultMessage:
         '{droppedPanelsCount} {droppedPanelsCount, plural, one {panel has} other {panels have}} been removed, and there {warningCount, plural, one {is} other {are}} {warningCount} other {warningCount, plural, one {warning} other {warnings}} that could not be automatically resolved.',
       values: { droppedPanelsCount, warningCount: warnings.length - droppedPanelsCount },

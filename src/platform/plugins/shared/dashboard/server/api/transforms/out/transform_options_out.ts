@@ -10,7 +10,6 @@
 import type { Writable } from '@kbn/utility-types';
 
 import type { DashboardState } from '../../types';
-import { DEFAULT_DASHBOARD_OPTIONS } from '../../../../common/constants';
 
 const savedObjectToAPIOptionsKeys = {
   hidePanelTitles: 'hide_panel_titles',
@@ -26,7 +25,7 @@ type ParsedSavedObjectOptions = { [key in keyof typeof savedObjectToAPIOptionsKe
 export function transformOptionsOut(
   optionsJSON: string,
   controlGroupShowApplyButtonSetting?: boolean
-): DashboardState['options'] {
+): Partial<DashboardState['options']> {
   const options = JSON.parse(optionsJSON) as ParsedSavedObjectOptions;
   const apiOptions: Writable<Partial<DashboardState['options']>> = {};
   Object.keys(options).forEach((key) => {
@@ -36,7 +35,6 @@ export function transformOptionsOut(
   });
 
   return {
-    ...DEFAULT_DASHBOARD_OPTIONS,
     ...apiOptions,
     ...(apiOptions.auto_apply_filters === undefined &&
       controlGroupShowApplyButtonSetting !== undefined && {

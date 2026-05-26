@@ -87,18 +87,20 @@ export function transformDashboardOut(
    * Handle validating each state key that wasn't already validated above; if any validation fails,
    * just default back to the default state for that key
    */
-  let validatedState: Pick<
-    DashboardState,
-    | 'description'
-    | 'project_routing'
-    | 'refresh_interval'
-    | 'tags'
-    | 'time_range'
-    | 'title'
-    | 'options'
+  let validatedState: Partial<
+    Pick<
+      DashboardState,
+      | 'description'
+      | 'project_routing'
+      | 'refresh_interval'
+      | 'tags'
+      | 'time_range'
+      | 'title'
+      | 'options'
+    >
   > = {
     description,
-    options,
+    options: options as DashboardState['options'], // defaults will be injected, so safe to remove partial. typing
     project_routing: projectRouting,
     ...(refreshInterval && {
       refresh_interval: { pause: refreshInterval.pause, value: refreshInterval.value },
@@ -120,6 +122,10 @@ export function transformDashboardOut(
       };
     }
   });
+  // drop keys that are undefined
+  validatedState = Object.fromEntries(
+    Object.entries(validatedState).filter(([_, value]) => value !== undefined)
+  );
 
   // try to maintain a consistent (alphabetical) order of keys
   return {
