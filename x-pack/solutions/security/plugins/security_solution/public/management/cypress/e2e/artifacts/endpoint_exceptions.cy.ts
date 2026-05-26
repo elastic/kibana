@@ -31,6 +31,7 @@ import { getArtifactsListTestDataForArtifact } from '../../fixtures/artifacts_pa
 import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import type { ReturnTypeFromChainable } from '../../types';
 import { performUserActions, type FormAction } from '../../tasks/perform_user_actions';
+import { getArtifactListEmptyStateAddButton } from '../../screens';
 
 describe(
   'Endpoint exceptions - under Security Management/Assets',
@@ -230,7 +231,7 @@ describe(
           login();
           cy.visit(APP_ENDPOINT_EXCEPTIONS_PATH);
 
-          cy.getByTestSubj('endpointExceptionsListPage-emptyState-addButton').click();
+          getArtifactListEmptyStateAddButton('endpointExceptions').click();
 
           performUserActions(artifactNameActions);
           performUserActions(firstConditionActions);
@@ -257,7 +258,7 @@ describe(
           login();
           cy.visit(APP_ENDPOINT_EXCEPTIONS_PATH);
 
-          cy.getByTestSubj('endpointExceptionsListPage-emptyState-addButton').click();
+          getArtifactListEmptyStateAddButton('endpointExceptions').click();
 
           performUserActions(artifactNameActions);
           performUserActions(firstConditionActions);
@@ -288,7 +289,7 @@ describe(
           cy.visit(APP_ENDPOINT_EXCEPTIONS_PATH);
 
           // Create one artifact
-          cy.getByTestSubj('endpointExceptionsListPage-emptyState-addButton').click();
+          getArtifactListEmptyStateAddButton('endpointExceptions').click();
           performUserActions(artifactNameActions);
           performUserActions(firstConditionActions);
           cy.getByTestSubj('endpointExceptionsListPage-flyout-submitButton').click();
