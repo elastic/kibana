@@ -22,7 +22,12 @@ import {
   DASHBOARD_DEFAULT_BACKGROUND_TOKEN,
   DASHBOARD_DEFAULT_PANEL_BACKGROUND_TOKEN,
 } from './dashboard_background_tokens';
-import { DASHBOARD_DEFAULT_PANEL_TITLE_FONT_SIZE_PX, DASHBOARD_MARGIN_SIZE } from './constants';
+import {
+  DASHBOARD_DEFAULT_PANEL_TITLE_FONT_SIZE_PX,
+  DASHBOARD_DEFAULT_SECTION_HEADER_MARGIN_BOTTOM_PX,
+  DASHBOARD_DEFAULT_SECTION_HEADER_MARGIN_TOP_PX,
+  DASHBOARD_MARGIN_SIZE,
+} from './constants';
 import { DASHBOARD_DEFAULT_MAX_WIDTH_PX } from './dashboard_layout_max_width';
 
 /** A named bundle of layout tweak values for the dashboard Tweakpane. */
@@ -48,6 +53,8 @@ export function getDashboardLayoutTweakpanePresets(
       label: 'Current state',
       values: {
         marginGutterPx: DASHBOARD_MARGIN_SIZE,
+        sectionHeaderMarginTopPx: DASHBOARD_DEFAULT_SECTION_HEADER_MARGIN_TOP_PX,
+        sectionHeaderMarginBottomPx: DASHBOARD_DEFAULT_SECTION_HEADER_MARGIN_BOTTOM_PX,
         maxWidthPx: DASHBOARD_DEFAULT_MAX_WIDTH_PX,
         panelBorderRadiusPx: defaultPanelBorderRadiusPx,
         panelTitleFontSizePx: DASHBOARD_DEFAULT_PANEL_TITLE_FONT_SIZE_PX,
@@ -64,7 +71,9 @@ export function getDashboardLayoutTweakpanePresets(
       id: DASHBOARD_LAYOUT_TWEAKPANE_PRESET_A_ID,
       label: 'Preset A',
       values: {
-        marginGutterPx: 14,
+        marginGutterPx: 12,
+        sectionHeaderMarginTopPx: 12,
+        sectionHeaderMarginBottomPx: 0,
         maxWidthPx: 1920,
         panelBorderRadiusPx: 8,
         panelTitleFontSizePx: 16,

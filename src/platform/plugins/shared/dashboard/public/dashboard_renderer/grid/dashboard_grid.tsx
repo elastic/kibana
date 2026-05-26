@@ -62,9 +62,15 @@ export const DashboardGrid = ({ marginGutterPx }: DashboardGridProps) => {
     [colorMode, euiTheme.colors, layoutTweak]
   );
 
+  const { sectionHeaderMarginTopPx, sectionHeaderMarginBottomPx } = layoutTweak;
+
   const dashboardStyle = useMemo(
-    () => dashboardGridStyles.dashboard(euiTheme, panelBackgroundColor),
-    [euiTheme, panelBackgroundColor]
+    () =>
+      dashboardGridStyles.dashboard(euiTheme, panelBackgroundColor, {
+        sectionHeaderMarginTopPx,
+        sectionHeaderMarginBottomPx,
+      }),
+    [euiTheme, panelBackgroundColor, sectionHeaderMarginTopPx, sectionHeaderMarginBottomPx]
   );
 
   const [topOffset, setTopOffset] = useState(DEFAULT_DASHBOARD_DRAG_TOP_OFFSET);
@@ -252,9 +258,20 @@ const convertGridPanelToDashboardGridData = (panel: GridPanelData): GridData => 
 };
 
 const dashboardGridStyles = {
-  dashboard: (euiTheme: UseEuiTheme['euiTheme'], panelBackgroundColor: string) =>
+  dashboard: (
+    euiTheme: UseEuiTheme['euiTheme'],
+    panelBackgroundColor: string,
+    sectionHeaderMargins: {
+      sectionHeaderMarginTopPx: number;
+      sectionHeaderMarginBottomPx: number;
+    }
+  ) =>
     css({
       position: 'relative',
+      '.kbnGridSectionHeader': {
+        marginTop: `${sectionHeaderMargins.sectionHeaderMarginTopPx}px !important`,
+        marginBottom: `${sectionHeaderMargins.sectionHeaderMarginBottomPx}px !important`,
+      },
       // for dashboards with no controls, increase the z-index of the hover actions in the
       // top row so that they overlap the sticky nav in Dashboard
       ".dshDashboardViewportWrapper:not(:has(.dshDashboardViewport-controls)) & .dshDashboardGrid__item[data-grid-row='0'] .embPanel__hoverActions":

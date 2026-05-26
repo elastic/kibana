@@ -20,6 +20,8 @@ export function DashboardLayoutTweakpaneSync() {
   const internalApi = useDashboardInternalApi();
   const {
     marginGutterPx,
+    sectionHeaderMarginTopPx,
+    sectionHeaderMarginBottomPx,
     maxWidthPx,
     panelBorderRadiusPx,
     panelTitleFontSizePx,
@@ -35,6 +37,8 @@ export function DashboardLayoutTweakpaneSync() {
   useEffect(() => {
     internalApi.layoutTweak$.next({
       marginGutterPx,
+      sectionHeaderMarginTopPx,
+      sectionHeaderMarginBottomPx,
       maxWidthPx,
       panelBorderRadiusPx,
       panelTitleFontSizePx,
@@ -49,6 +53,8 @@ export function DashboardLayoutTweakpaneSync() {
   }, [
     internalApi,
     marginGutterPx,
+    sectionHeaderMarginTopPx,
+    sectionHeaderMarginBottomPx,
     maxWidthPx,
     panelBorderRadiusPx,
     panelTitleFontSizePx,

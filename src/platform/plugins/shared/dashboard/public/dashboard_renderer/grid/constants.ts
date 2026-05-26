@@ -17,6 +17,12 @@ import { DASHBOARD_DEFAULT_MAX_WIDTH_PX } from './dashboard_layout_max_width';
 
 export const DASHBOARD_GRID_HEIGHT = 20;
 export const DASHBOARD_MARGIN_SIZE = 8;
+/** Tweakpane bounds for collapsible section header vertical margins. */
+export const DASHBOARD_SECTION_HEADER_MARGIN_MIN_PX = 0;
+export const DASHBOARD_SECTION_HEADER_MARGIN_MAX_PX = 48;
+/** Matches the default section header top margin in `@kbn/grid-layout` (12px). */
+export const DASHBOARD_DEFAULT_SECTION_HEADER_MARGIN_TOP_PX = 0;
+export const DASHBOARD_DEFAULT_SECTION_HEADER_MARGIN_BOTTOM_PX = 0;
 /** Upper bound (px) for Tweakpane markdown corner padding (right/bottom) on markdown panels. */
 export const DASHBOARD_MARKDOWN_CORNER_PADDING_MAX_PX = 400;
 /** Tweakpane bounds for panel title font size. */
@@ -28,6 +34,8 @@ export const DEFAULT_DASHBOARD_DRAG_TOP_OFFSET = 200;
 /** Initial layout tweak values before Tweakpane sync (panel radius updated on mount from theme). */
 export const INITIAL_DASHBOARD_LAYOUT_TWEAK: DashboardLayoutTweakpaneValues = {
   marginGutterPx: DASHBOARD_MARGIN_SIZE,
+  sectionHeaderMarginTopPx: DASHBOARD_DEFAULT_SECTION_HEADER_MARGIN_TOP_PX,
+  sectionHeaderMarginBottomPx: DASHBOARD_DEFAULT_SECTION_HEADER_MARGIN_BOTTOM_PX,
   maxWidthPx: DASHBOARD_DEFAULT_MAX_WIDTH_PX,
   panelBorderRadiusPx: 6,
   panelTitleFontSizePx: DASHBOARD_DEFAULT_PANEL_TITLE_FONT_SIZE_PX,

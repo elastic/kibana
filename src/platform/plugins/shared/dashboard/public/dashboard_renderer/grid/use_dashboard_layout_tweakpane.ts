@@ -13,10 +13,14 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { DashboardLayoutTweakpaneValues } from '../../dashboard_api/types';
 import {
   DASHBOARD_DEFAULT_PANEL_TITLE_FONT_SIZE_PX,
+  DASHBOARD_DEFAULT_SECTION_HEADER_MARGIN_BOTTOM_PX,
+  DASHBOARD_DEFAULT_SECTION_HEADER_MARGIN_TOP_PX,
   DASHBOARD_MARGIN_SIZE,
   DASHBOARD_MARKDOWN_CORNER_PADDING_MAX_PX,
   DASHBOARD_PANEL_TITLE_FONT_SIZE_MAX_PX,
   DASHBOARD_PANEL_TITLE_FONT_SIZE_MIN_PX,
+  DASHBOARD_SECTION_HEADER_MARGIN_MAX_PX,
+  DASHBOARD_SECTION_HEADER_MARGIN_MIN_PX,
 } from './constants';
 import {
   clampDashboardMaxWidthPx,
@@ -102,6 +106,12 @@ export function useDashboardLayoutTweakpane(): DashboardLayoutTweakpaneValues {
   defaultPanelRadiusRef.current = defaultPanelBorderRadiusPx;
 
   const [marginGutterPx, setMarginGutterPx] = useState(DASHBOARD_MARGIN_SIZE);
+  const [sectionHeaderMarginTopPx, setSectionHeaderMarginTopPx] = useState(
+    DASHBOARD_DEFAULT_SECTION_HEADER_MARGIN_TOP_PX
+  );
+  const [sectionHeaderMarginBottomPx, setSectionHeaderMarginBottomPx] = useState(
+    DASHBOARD_DEFAULT_SECTION_HEADER_MARGIN_BOTTOM_PX
+  );
   const [maxWidthPx, setMaxWidthPx] = useState(DASHBOARD_DEFAULT_MAX_WIDTH_PX);
   const [panelBorderRadiusPx, setPanelBorderRadiusPx] = useState(defaultPanelBorderRadiusPx);
   const [panelTitleFontSizePx, setPanelTitleFontSizePx] = useState(
@@ -146,6 +156,8 @@ export function useDashboardLayoutTweakpane(): DashboardLayoutTweakpaneValues {
 
       const params = {
         marginGutterPx: DASHBOARD_MARGIN_SIZE,
+        sectionHeaderMarginTopPx: DASHBOARD_DEFAULT_SECTION_HEADER_MARGIN_TOP_PX,
+        sectionHeaderMarginBottomPx: DASHBOARD_DEFAULT_SECTION_HEADER_MARGIN_BOTTOM_PX,
         maxWidthPx: DASHBOARD_DEFAULT_MAX_WIDTH_PX,
         panelBorderRadiusPx: defaultPanelRadiusRef.current,
         panelTitleFontSizePx: DASHBOARD_DEFAULT_PANEL_TITLE_FONT_SIZE_PX,
@@ -193,6 +205,14 @@ export function useDashboardLayoutTweakpane(): DashboardLayoutTweakpaneValues {
 
       const applyLayoutTweakValues = (next: DashboardLayoutTweakpaneValues) => {
         params.marginGutterPx = next.marginGutterPx;
+        params.sectionHeaderMarginTopPx = Math.min(
+          DASHBOARD_SECTION_HEADER_MARGIN_MAX_PX,
+          Math.max(DASHBOARD_SECTION_HEADER_MARGIN_MIN_PX, next.sectionHeaderMarginTopPx)
+        );
+        params.sectionHeaderMarginBottomPx = Math.min(
+          DASHBOARD_SECTION_HEADER_MARGIN_MAX_PX,
+          Math.max(DASHBOARD_SECTION_HEADER_MARGIN_MIN_PX, next.sectionHeaderMarginBottomPx)
+        );
         params.maxWidthPx = clampDashboardMaxWidthPx(next.maxWidthPx);
         params.panelBorderRadiusPx = next.panelBorderRadiusPx;
         params.panelTitleFontSizePx = Math.min(
@@ -226,6 +246,8 @@ export function useDashboardLayoutTweakpane(): DashboardLayoutTweakpaneValues {
           params.markdownCornerPaddingBottomPx !== panelV;
 
         setMarginGutterPx(params.marginGutterPx);
+        setSectionHeaderMarginTopPx(params.sectionHeaderMarginTopPx);
+        setSectionHeaderMarginBottomPx(params.sectionHeaderMarginBottomPx);
         setMaxWidthPx(params.maxWidthPx);
         setPanelBorderRadiusPx(params.panelBorderRadiusPx);
         setPanelTitleFontSizePx(params.panelTitleFontSizePx);
@@ -278,6 +300,42 @@ export function useDashboardLayoutTweakpane(): DashboardLayoutTweakpaneValues {
           const next = readNumber(ev.value) ?? params.marginGutterPx;
           params.marginGutterPx = next;
           setMarginGutterPx(next);
+        });
+
+      const clampSectionHeaderMargin = (value: number) =>
+        Math.min(
+          DASHBOARD_SECTION_HEADER_MARGIN_MAX_PX,
+          Math.max(DASHBOARD_SECTION_HEADER_MARGIN_MIN_PX, value)
+        );
+
+      pane
+        .addBinding(params, 'sectionHeaderMarginTopPx', {
+          label: 'Section header margin (top)',
+          min: DASHBOARD_SECTION_HEADER_MARGIN_MIN_PX,
+          max: DASHBOARD_SECTION_HEADER_MARGIN_MAX_PX,
+          step: 1,
+        })
+        .on('change', (ev) => {
+          const next = clampSectionHeaderMargin(
+            readNumber(ev.value) ?? params.sectionHeaderMarginTopPx
+          );
+          params.sectionHeaderMarginTopPx = next;
+          setSectionHeaderMarginTopPx(next);
+        });
+
+      pane
+        .addBinding(params, 'sectionHeaderMarginBottomPx', {
+          label: 'Section header margin (bottom)',
+          min: DASHBOARD_SECTION_HEADER_MARGIN_MIN_PX,
+          max: DASHBOARD_SECTION_HEADER_MARGIN_MAX_PX,
+          step: 1,
+        })
+        .on('change', (ev) => {
+          const next = clampSectionHeaderMargin(
+            readNumber(ev.value) ?? params.sectionHeaderMarginBottomPx
+          );
+          params.sectionHeaderMarginBottomPx = next;
+          setSectionHeaderMarginBottomPx(next);
         });
 
       pane
@@ -476,6 +534,8 @@ export function useDashboardLayoutTweakpane(): DashboardLayoutTweakpaneValues {
 
   return {
     marginGutterPx,
+    sectionHeaderMarginTopPx,
+    sectionHeaderMarginBottomPx,
     maxWidthPx,
     panelBorderRadiusPx,
     panelTitleFontSizePx,

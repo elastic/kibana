@@ -58,6 +58,10 @@ import type { ReadBodyWithResolve } from '../dashboard_client/dashboard_client';
 
 export interface DashboardLayoutTweakpaneValues {
   marginGutterPx: number;
+  /** Vertical margin above collapsible section headers (px). */
+  sectionHeaderMarginTopPx: number;
+  /** Vertical margin below collapsible section headers (px). */
+  sectionHeaderMarginBottomPx: number;
   /** Max width (px) of dashboard content; Tweakpane range 800–5000. */
   maxWidthPx: number;
   panelBorderRadiusPx: number;
