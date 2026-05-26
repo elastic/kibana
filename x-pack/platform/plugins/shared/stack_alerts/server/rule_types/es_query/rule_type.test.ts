@@ -821,7 +821,7 @@ describe('ruleType', () => {
         ],
         values: [],
       };
-      ruleServices.getAsyncSearchClient().search.mockResolvedValueOnce(searchResult);
+      ruleServices.scopedClusterClient.asCurrentUser.esql.query.mockResolvedValueOnce(searchResult);
 
       await invokeExecutor({ params, ruleServices });
       expect(ruleServices.alertsClient.report).not.toHaveBeenCalled();
@@ -841,7 +841,7 @@ describe('ruleType', () => {
           ['timestamp', 'message'],
         ],
       };
-      ruleServices.getAsyncSearchClient().search.mockResolvedValueOnce(searchResult);
+      ruleServices.scopedClusterClient.asCurrentUser.esql.query.mockResolvedValueOnce(searchResult);
 
       await invokeExecutor({ params, ruleServices });
 
