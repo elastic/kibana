@@ -19,6 +19,7 @@ import {
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/public';
+import type { SavedObjectsFindResult } from '@kbn/core/server';
 import type { VisualizationSavedObject } from '../../common/content_management';
 import { saveWithConfirmation } from './saved_objects_utils';
 import type { VisualizationsAppExtension } from '../vis_types/vis_type_alias_registry';
@@ -173,22 +174,29 @@ export async function findListItems(
       },
     }),
   });
+  console.log({ savedObjects });
 
   return {
     total,
-    hits: savedObjects.map((savedObject: VisualizationSavedObject) => {
+    hits: savedObjects.map((savedObject: SavedObjectsFindResult) => {
       const config = extensionByType[savedObject.type];
+      const { updated_at, updated_by, created_at, created_by, ...rest } = savedObject;
+      const visObject = {
+        ...rest,
+        updatedAt: updated_at,
+        createdAt: created_at,
+      } as VisualizationSavedObject;
 
       if (config) {
         return {
           // TODO: understand why this SO can take any shape based on type?
           // This conflicts with the type of `savedObject` value as `VisualizationSavedObject`.
           // See test case titled 'uses type-specific toListItem function, if available'
-          ...config.toListItem(savedObject),
+          ...config.toListItem(visObject),
           references: savedObject.references,
         };
       } else {
-        return mapHitSource(visTypes, savedObject);
+        return mapHitSource(visTypes, visObject);
       }
     }),
   };
