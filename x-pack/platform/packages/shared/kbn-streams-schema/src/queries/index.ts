@@ -136,6 +136,11 @@ export interface QueryLink {
    * domain layer.
    */
   updated_at?: string;
+  /**
+   * ISO timestamp after which this query is considered stale.
+   * Computed as `updated_at + ki_ttl_days` from the tuning config.
+   */
+  expires_at?: string;
 }
 
 /**

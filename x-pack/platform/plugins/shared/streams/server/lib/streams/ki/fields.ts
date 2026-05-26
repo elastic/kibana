@@ -18,6 +18,7 @@ export const STREAM_NAME = 'stream.name';
 export const SEARCH_EMBEDDING = 'search_embedding';
 export const EXCLUDED = 'excluded';
 export const RUN_ID = 'run_id';
+export const EXPIRES_AT = 'expires_at';
 
 // ===== Feature-specific fields =====
 

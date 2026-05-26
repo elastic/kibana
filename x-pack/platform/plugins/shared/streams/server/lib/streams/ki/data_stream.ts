@@ -44,6 +44,7 @@ export const knowledgeIndicatorsMappings = {
     deleted: mappings.boolean(),
     excluded: mappings.boolean(),
     run_id: mappings.keyword(),
+    expires_at: mappings.date({ format: 'strict_date_optional_time' }),
     search_embedding: mappings.semanticText(),
     feature: mappings.object({
       properties: {
@@ -107,6 +108,7 @@ export interface StoredFeatureKnowledgeIndicator extends StoredKiRevisionIdentit
   evidence?: string[];
   excluded?: boolean;
   run_id?: string;
+  expires_at?: string;
   search_embedding?: string;
   feature: StoredFeature;
 }
@@ -117,6 +119,7 @@ export interface StoredQueryKnowledgeIndicator extends StoredKiRevisionIdentity 
   description: string;
   evidence?: string[];
   excluded?: boolean;
+  expires_at?: string;
   search_embedding?: string;
   query: StoredQuery;
 }

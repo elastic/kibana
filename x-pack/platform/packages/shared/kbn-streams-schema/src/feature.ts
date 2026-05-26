@@ -71,14 +71,12 @@ export const ignoredFeatureSchema = z.object({
 export type IgnoredFeature = z.infer<typeof ignoredFeatureSchema>;
 
 /**
- * Server-side feature shape on the unified knowledge indicators data stream.
+ * Server-side feature shape on the knowledge indicators data stream.
  *
- * Note: as part of the unified KI data stream migration, the legacy
- * `uuid`, `status`, `last_seen`, and `expires_at` fields have been removed.
- * Identity is now `(stream.name, type, id)` and revisions are append-only.
- * `updated_at` is read-only at the domain layer — it is derived from the
- * latest revision's `@timestamp` when reading and is not a property of the
- * write payload (`BaseFeature`).
+ * Identity is `(stream.name, type, id)`; revisions are append-only.
+ * `updated_at` and `expires_at` are derived from the latest revision's
+ * `@timestamp` when reading and are not part of the write payload (`BaseFeature`).
+ * `expires_at` is computed as `updated_at + ki_ttl_days` from the tuning config.
  *
  * `excluded` is a root-level marker on the storage doc surfaced here so the
  * UI can split active vs. excluded features when the caller opts into
@@ -90,6 +88,7 @@ export const featureSchema = baseFeatureSchema.and(
     run_id: z.string().optional(),
     excluded: z.boolean().optional(),
     updated_at: z.string().optional(),
+    expires_at: z.string().optional(),
   })
 );
 

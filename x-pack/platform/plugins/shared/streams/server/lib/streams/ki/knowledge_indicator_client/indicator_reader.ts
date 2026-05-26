@@ -8,11 +8,14 @@
 import { esql } from '@elastic/esql';
 import type { Feature, QueryLink } from '@kbn/streams-schema';
 import { QUERY_TYPE_STATS } from '@kbn/streams-schema';
+import { isStoredFeatureKnowledgeIndicator, isStoredQueryKnowledgeIndicator } from '../data_stream';
 import {
-  isStoredFeatureKnowledgeIndicator,
-  isStoredQueryKnowledgeIndicator,
-} from '../data_stream';
-import { combineWhere, inPredicate, IS_NOT_DELETED, IS_NOT_EXCLUDED } from '../esql_helpers';
+  combineWhere,
+  inPredicate,
+  IS_NOT_DELETED,
+  IS_NOT_EXCLUDED,
+  IS_NOT_EXPIRED,
+} from '../esql_helpers';
 import { ID, KI_TYPE_FEATURE, KI_TYPE_QUERY, STREAM_NAME, TYPE } from '../fields';
 import { fromStoredFeature, fromStoredQuery } from './serializers';
 import { StatusError } from '../../errors/status_error';
@@ -45,6 +48,7 @@ export class IndicatorReader {
       minConfidence?: number;
       limit?: number;
       includeExcluded?: boolean;
+      includeExpired?: boolean;
     } = {}
   ): Promise<{ hits: Feature[]; total: number }> {
     const streamNames = Array.isArray(streams) ? streams : [streams];
@@ -70,6 +74,7 @@ export class IndicatorReader {
     const postGroupingWhere = combineWhere(
       IS_NOT_DELETED,
       options.includeExcluded ? undefined : IS_NOT_EXCLUDED,
+      options.includeExpired ? undefined : IS_NOT_EXPIRED,
       featureTypesFilter,
       minConfidenceFilter
     );
@@ -85,11 +90,9 @@ export class IndicatorReader {
       inPredicate(TYPE, [KI_TYPE_FEATURE]),
       inPredicate(STREAM_NAME, [stream])
     );
-    const docs = await this.revisionReader.fetchLatestRevisions(
-      where,
-      esql.exp`excluded == true`,
-      [['@timestamp', 'DESC']]
-    );
+    const docs = await this.revisionReader.fetchLatestRevisions(where, esql.exp`excluded == true`, [
+      ['@timestamp', 'DESC'],
+    ]);
     const features = docs.filter(isStoredFeatureKnowledgeIndicator).map(fromStoredFeature);
     return { hits: features, total: features.length };
   }
@@ -124,7 +127,7 @@ export class IndicatorReader {
 
     const docs = await this.revisionReader.fetchLatestRevisions(
       where,
-      combineWhere(IS_NOT_DELETED, IS_NOT_EXCLUDED, featureTypesFilter)
+      combineWhere(IS_NOT_DELETED, IS_NOT_EXCLUDED, IS_NOT_EXPIRED, featureTypesFilter)
     );
     if (docs.length === 0) return null;
 

@@ -35,14 +35,20 @@ export function buildSearchEmbeddingQuery(
   return parts.join('\n');
 }
 
+function computeExpiresAt(timestamp: string, ttlDays: number): string {
+  return new Date(new Date(timestamp).getTime() + ttlDays * 24 * 60 * 60 * 1000).toISOString();
+}
+
 export function toStoredFeature(
   streamName: string,
   feature: Feature,
-  includeEmbedding: boolean
+  includeEmbedding: boolean,
+  ttlDays: number
 ): StoredFeatureKnowledgeIndicator {
   const embedding = buildSearchEmbeddingFeature(feature, streamName);
+  const timestamp = new Date().toISOString();
   return {
-    '@timestamp': new Date().toISOString(),
+    '@timestamp': timestamp,
     id: feature.id,
     type: KI_TYPE_FEATURE,
     title: feature.title,
@@ -52,6 +58,7 @@ export function toStoredFeature(
     'stream.name': streamName,
     excluded: feature.excluded,
     run_id: feature.run_id,
+    expires_at: computeExpiresAt(timestamp, ttlDays),
     feature: {
       type: feature.type,
       subtype: feature.subtype,
@@ -68,21 +75,24 @@ export function toStoredFeature(
 export function toStoredQuery(
   streamName: string,
   query: StreamQuery & { rule_backed?: boolean; rule_id?: string },
-  includeEmbedding: boolean
+  includeEmbedding: boolean,
+  ttlDays: number
 ): StoredQueryKnowledgeIndicator {
   const embedding = buildSearchEmbeddingQuery(query, streamName);
   const derivedType = deriveQueryType(query.esql.query);
   // STATS queries are never rule-backed.
   const ruleBacked = derivedType === QUERY_TYPE_STATS ? false : Boolean(query.rule_backed);
   const ruleId = query.rule_id ?? computeRuleId(streamName, query.id, query.esql.query);
+  const timestamp = new Date().toISOString();
   return {
-    '@timestamp': new Date().toISOString(),
+    '@timestamp': timestamp,
     id: query.id,
     type: KI_TYPE_QUERY,
     title: query.title,
     description: query.description,
     evidence: query.evidence,
     'stream.name': streamName,
+    expires_at: computeExpiresAt(timestamp, ttlDays),
     query: {
       esql: query.esql.query,
       query_type: derivedType,
@@ -126,6 +136,7 @@ export function fromStoredFeature(doc: StoredFeatureKnowledgeIndicator): Feature
     run_id: doc.run_id,
     excluded: doc.excluded,
     updated_at: doc['@timestamp'],
+    expires_at: doc.expires_at,
   };
 }
 
@@ -145,6 +156,7 @@ export function fromStoredQuery(doc: StoredQueryKnowledgeIndicator): QueryLink {
     rule_backed: ruleBacked,
     rule_id,
     updated_at: doc['@timestamp'],
+    expires_at: doc.expires_at,
     query: {
       id: doc.id,
       type,

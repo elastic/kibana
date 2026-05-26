@@ -21,7 +21,8 @@ export class IndicatorWriter {
   constructor(
     private readonly dataStreamClient: KnowledgeIndicatorDataStreamClient,
     private readonly logger: Logger,
-    private readonly revisionReader: RevisionReader
+    private readonly revisionReader: RevisionReader,
+    private readonly ttlDays: number
   ) {}
 
   async bulk(
@@ -102,15 +103,17 @@ export class IndicatorWriter {
       for (const op of operations) {
         if ('index' in op) {
           if ('feature' in op.index) {
-            docs.push(toStoredFeature(stream, op.index.feature, includeEmbedding));
+            docs.push(toStoredFeature(stream, op.index.feature, includeEmbedding, this.ttlDays));
           } else {
-            docs.push(toStoredQuery(stream, op.index.query, includeEmbedding));
+            docs.push(toStoredQuery(stream, op.index.query, includeEmbedding, this.ttlDays));
           }
         }
       }
       for (const latest of excludableLatest) {
         const feature = fromStoredFeature(latest);
-        docs.push(toStoredFeature(stream, { ...feature, excluded: true }, includeEmbedding));
+        docs.push(
+          toStoredFeature(stream, { ...feature, excluded: true }, includeEmbedding, this.ttlDays)
+        );
       }
       for (const op of deleteOps) {
         docs.push(toTombstone(stream, { id: op.delete.id, type: op.delete.type }));

@@ -44,7 +44,7 @@ export class KnowledgeIndicatorService {
     esClient: ElasticsearchClient;
     soClient: SavedObjectsClientContract;
     rulesClient: RulesClient;
-    config?: Pick<SigEventsTuningConfig, 'semantic_min_score' | 'rrf_rank_constant'>;
+    config?: Pick<SigEventsTuningConfig, 'semantic_min_score' | 'rrf_rank_constant' | 'feature_ttl_days'>;
   }): Promise<KnowledgeIndicatorClient> {
     const [core] = await this.coreSetup.getStartServices();
 

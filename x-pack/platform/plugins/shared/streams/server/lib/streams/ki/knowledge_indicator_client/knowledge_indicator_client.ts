@@ -38,11 +38,16 @@ export class KnowledgeIndicatorClient {
     isSignificantEventsEnabled = false,
     config: Pick<
       SigEventsTuningConfig,
-      'semantic_min_score' | 'rrf_rank_constant'
+      'semantic_min_score' | 'rrf_rank_constant' | 'feature_ttl_days'
     > = DEFAULT_SIG_EVENTS_TUNING_CONFIG
   ) {
     const revisionReader = new RevisionReader(deps.esClient);
-    this.writer = new IndicatorWriter(deps.dataStreamClient, deps.logger, revisionReader);
+    this.writer = new IndicatorWriter(
+      deps.dataStreamClient,
+      deps.logger,
+      revisionReader,
+      config.feature_ttl_days
+    );
     this.reader = new IndicatorReader(revisionReader);
     this.searcher = new IndicatorSearcher(
       deps.dataStreamClient,

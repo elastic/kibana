@@ -10,12 +10,7 @@ import { v5 } from 'uuid';
 
 /**
  * Compute a deterministic rule id for a query knowledge indicator.
- *
- * The legacy implementation hashed `(asset_uuid, esql)`. With the unified
- * KI data stream `asset.uuid` no longer exists, so the input is now
- * `(stream.name, query.id, esql)`. This is a clean break: rule ids
- * generated against the legacy storage will not collide with new rule ids,
- * which is acceptable because the legacy indices are not migrated.
+ * Input is `(stream.name, query.id, esql)`.
  */
 export function computeRuleId(streamName: string, queryId: string, esqlQuery: string): string {
   const queryHash = objectHash([streamName, queryId, esqlQuery]);

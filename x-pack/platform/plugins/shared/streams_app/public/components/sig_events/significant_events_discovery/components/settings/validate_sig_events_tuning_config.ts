@@ -16,6 +16,7 @@ interface FieldBounds {
 const FIELD_BOUNDS: Record<keyof SigEventsTuningConfig, FieldBounds> = {
   sample_size: { min: 1, max: 100, integer: true },
   max_iterations: { min: 1, max: 20, integer: true },
+  feature_ttl_days: { min: 1, integer: true },
   entity_filtered_ratio: { min: 0, max: 1 },
   diverse_ratio: { min: 0, max: 1 },
   max_excluded_features_in_prompt: { min: 0, max: 50, integer: true },

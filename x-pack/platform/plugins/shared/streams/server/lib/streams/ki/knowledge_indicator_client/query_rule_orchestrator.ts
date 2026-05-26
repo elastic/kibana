@@ -353,8 +353,7 @@ export class QueryRuleOrchestrator {
       return { demoted: 0 };
     }
 
-    // Append demoted revisions, then uninstall rules. Order matches the
-    // legacy semantics: storage first, then rule cleanup.
+    // Append demoted revisions, then uninstall rules: storage first, then rule cleanup.
     await this.writer.bulk(
       streamName,
       toDemote.map((link) => ({
