@@ -155,14 +155,16 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
               <EuiSpacer />
               <ResultsTypeField />
             </EuiFlexItem>
-            <EuiFlexGroup direction={'column'} justifyContent={'spaceBetween'}>
-              <EuiFlexItem>
-                <PlatformCheckBoxGroupField />
-              </EuiFlexItem>
-              <EuiFlexItem grow={0}>
-                <TimeoutField />
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiFlexGroup direction={'column'} justifyContent={'spaceBetween'}>
+                <EuiFlexItem>
+                  <PlatformCheckBoxGroupField />
+                </EuiFlexItem>
+                <EuiFlexItem grow={0}>
+                  <TimeoutField />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer />
           <EuiFlexGroup>
