@@ -36,7 +36,6 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid';
 import { createPortal } from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
-import usePrevious from 'react-use/lib/usePrevious';
 import { QuerySource } from '@kbn/esql-types';
 import { isMac } from '@kbn/shared-ux-utility';
 import { useLookupIndexCommand } from './lookup_join';
@@ -196,20 +195,14 @@ const ESQLEditorInternal = function ESQLEditor({
   const variablesService = esqlService?.variablesService;
   const histogramBarTarget = uiSettings?.get('histogram:barTarget') ?? 50;
   const [code, setCode] = useState<string>(fixedQuery ?? '');
-  // To make server side errors less "sticky", register the state of the code when submitting
-  const [codeWhenSubmitted, setCodeStateOnSubmission] = useState(code);
+  // To make server side errors less "sticky", register the query that last errored
+  const [lastErroredCode, setLastErroredCode] = useState(serverErrors?.length ? code : undefined);
 
-  // External submits (e.g. query bar Search / time picker) do not call onQuerySubmit. When a fetch
-  // starts (loading moves from false to true),
-  // record the parent `query` prop as the last executed query so server errors match that query.
-  // `fixedQuery` is omitted from deps so typing after a run does not re-sync.
-  const prevIsLoading = usePrevious(isLoading);
   useEffect(() => {
-    if (!prevIsLoading && isLoading) {
-      setCodeStateOnSubmission(fixedQuery);
-    }
+    setLastErroredCode(serverErrors?.length ? code : undefined);
+    // `code` is omitted from deps so typing after a run does not re-sync.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoading, prevIsLoading]);
+  }, [serverErrors]);
 
   const [editorHeight, setEditorHeight] = useRestorableState(
     'editorHeight',
@@ -328,7 +321,6 @@ const ESQLEditorInternal = function ESQLEditor({
     measuredEditorWidth,
     onTextLangQuerySubmit,
     onQueryUpdate,
-    setCodeStateOnSubmission,
     telemetryService,
   });
 
@@ -614,7 +606,7 @@ const ESQLEditorInternal = function ESQLEditor({
   const { editorMessages, editorMessagesRef, onLookupIndexCreate, onNewFieldsAddedToLookupIndex } =
     useQueryValidation({
       code,
-      codeWhenSubmitted,
+      lastErroredCode,
       editorRef,
       editorModel,
       esqlCallbacks,

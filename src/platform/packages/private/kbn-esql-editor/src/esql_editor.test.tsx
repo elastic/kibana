@@ -287,7 +287,7 @@ describe('ESQLEditor', () => {
       expect(screen.getByTestId('ESQLEditor')).toBeInTheDocument();
     });
 
-    // Simulate query bar Search: parent updates query and sets loading true.
+    // Simulate query bar Search: parent sets loading true.
     await act(async () => {
       rerender(
         renderESQLEditorComponent({
