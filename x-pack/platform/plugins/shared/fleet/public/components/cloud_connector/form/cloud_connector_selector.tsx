@@ -194,7 +194,8 @@ export const CloudConnectorSelector = ({
         setCredentials({
           cloudConnectorId: connector.id,
           ...(roleArnValue !== undefined && roleArnValue !== '' ? { roleArn: roleArnValue } : {}),
-          ...(externalIdValue !== undefined && externalIdValue !== ''
+          ...(externalIdValue !== undefined &&
+          (typeof externalIdValue !== 'string' || externalIdValue !== '')
             ? { externalId: externalIdValue }
             : {}),
         });
