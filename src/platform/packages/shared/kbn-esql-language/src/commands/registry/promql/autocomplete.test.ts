@@ -216,6 +216,17 @@ describe('inside query', () => {
     });
   });
 
+  test.each(['bytes', 'bytes_counter'])(
+    'suggests selector after simple metric %s',
+    async (metric) => {
+      await expectPromqlSuggestions(`PROMQL ${metric} `, {
+        labelsContain: [promqlLabelSelectorItem.label],
+        labelsNotContain: [promqlRangeSelectorItem.label],
+        textsContain: [pipeCompleteItem.text],
+      });
+    }
+  );
+
   test('suggests query items inside empty parens PROMQL (|)', async () => {
     const query = 'PROMQL ()';
     const cursorPosition = query.indexOf('(') + 1;
@@ -1190,7 +1201,7 @@ describe('classifier edge cases', () => {
     expect(labels).toContain(promqlLabelSelectorItem.label);
   });
 
-  test('after_metric suggests operators for top-level metric (no function context)', async () => {
+  test('top-level metric suggests selector and operators', async () => {
     const query = 'PROMQL step="5m" bytes_counter ';
 
     const results = await suggest(query, mockContext, 'promql', getMockCallbacks(), autocomplete);
@@ -1198,6 +1209,7 @@ describe('classifier edge cases', () => {
     const labels = results.map(({ label }) => label);
 
     expect(labels).toEqual(expect.arrayContaining(promqlOperatorLabels));
+    expect(labels).toContain(promqlLabelSelectorItem.label);
     expect(labels).not.toContain(promqlRangeSelectorItem.label);
   });
 });

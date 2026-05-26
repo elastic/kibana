@@ -115,6 +115,10 @@ export function getQueryPosition(
       return { type: 'inside_function_args', signatureTypes: getSignatureTypes() };
     }
 
+    if (cursor > root.location.max) {
+      return resolveAfterQueryPosition(root, cursor, text, textBeforeCursor);
+    }
+
     return resolveTopLevelPosition(root, cursor, text, undefined, textBeforeCursor);
   }
 
@@ -212,9 +216,13 @@ export function getQueryPosition(
 
   // Top-level: complete expression or can add grouping
   const topLevelPosition = resolveTopLevelPosition(root, cursor, text, undefined, textBeforeCursor);
+  const afterQueryPosition =
+    cursor > root.location.max
+      ? resolveAfterQueryPosition(root, cursor, text, textBeforeCursor)
+      : undefined;
 
   if (topLevelPosition.canAddGrouping || isAfterCompleteExpression(root, cursor)) {
-    return topLevelPosition;
+    return afterQueryPosition ?? topLevelPosition;
   }
 
   // Function args: rate(|), rate(metric, |)
@@ -248,6 +256,29 @@ export function getQueryPosition(
 
   // Default: top-level query position
   return resolveTopLevelPosition(root, cursor, text, undefined, textBeforeCursor);
+}
+
+/* Determines if cursor is after a complete top-level query expression. */
+function resolveAfterQueryPosition(
+  root: PromQLAstQueryExpression,
+  cursor: number,
+  text: string,
+  textBeforeCursorArg?: string
+): PromqlDetailedPosition {
+  const topLevelPosition = resolveTopLevelPosition(
+    root,
+    cursor,
+    text,
+    undefined,
+    textBeforeCursorArg
+  );
+  const expression = root.expression;
+
+  return {
+    ...topLevelPosition,
+    type: 'after_query',
+    ...(expression?.type === 'selector' ? { selector: expression } : {}),
+  };
 }
 
 /* Determines if cursor is at a top-level position where grouping or operators can follow. */

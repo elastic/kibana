@@ -18,9 +18,13 @@ import {
   suggestLabelValues,
   suggestMetrics,
 } from './selectors';
-import { buildAddValuePlaceholder } from '../../../../../registry/complete_items';
+import {
+  buildAddValuePlaceholder,
+  promqlLabelSelectorItem,
+} from '../../../../../registry/complete_items';
 import type { ISuggestionItem, ICommandContext } from '../../../../../registry/types';
 import {
+  buildNextActionsSuggestion,
   buildFieldSuggestions,
   buildVectorSuggestions,
   buildCommaWithAutoSuggest,
@@ -39,6 +43,7 @@ export type SuggestionHandler = (input: SuggestionContext) => ISuggestionItem[];
 
 export const positionHandlers: Partial<Record<PromqlDetailedPositionType, SuggestionHandler>> = {
   inside_query: suggestInsideQuery,
+  after_query: suggestAfterQuery,
   after_operator: suggestAfterOperator,
   inside_grouping: suggestInsideGrouping,
   inside_function_args: suggestInsideFunctionArgs,
@@ -50,6 +55,22 @@ export const positionHandlers: Partial<Record<PromqlDetailedPositionType, Sugges
   after_label_selector: ({ position }) => suggestAfterLabelSelector(position),
   after_metric: ({ position }) => suggestMetrics(position),
 };
+
+/** Suggests next actions after a complete top-level query expression. */
+function suggestAfterQuery(input: SuggestionContext): ISuggestionItem[] {
+  const { position, columns, shouldWrap, preGroupedAgg } = input;
+  const suggestions = buildNextActionsSuggestion({
+    columns,
+    shouldWrap,
+    preGroupedAgg,
+    isAfterAggregationName: !!position.isAfterAggregationName,
+    canAddGrouping: !!position.canAddGrouping,
+  });
+
+  return position.selector && !position.selector.labelMap && !position.selector.duration
+    ? [promqlLabelSelectorItem, ...suggestions]
+    : suggestions;
+}
 
 /** Suggests next tokens while cursor is inside query text. */
 function suggestInsideQuery(input: SuggestionContext): ISuggestionItem[] {
