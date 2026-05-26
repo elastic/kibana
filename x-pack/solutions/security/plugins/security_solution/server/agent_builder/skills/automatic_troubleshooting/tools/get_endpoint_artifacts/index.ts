@@ -248,6 +248,8 @@ const fetchSummary = async (
           search,
           perPage: 1,
           page: 1,
+          sortField: 'tie_breaker_id',
+          sortOrder: 'asc',
         });
         return [artifactType, { total: result?.total ?? 0 }] as const;
       } catch (error) {
