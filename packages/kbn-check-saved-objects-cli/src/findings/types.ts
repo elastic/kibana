@@ -81,8 +81,15 @@ export interface TypeChangeDetails {
 
 export interface SavedObjectsCheckReport {
   status: 'pass' | 'fail';
+  /** Requested baseline commit (e.g. merge-base) passed to `--baseline`. */
   baseline?: string;
+  /** GCS snapshot commit actually used when it differs from {@link baseline}. */
+  baselineSnapshotSha?: string;
+  /** True when the baseline snapshot came from an ancestor of {@link baseline}. */
+  baselineSnapshotUsedAncestor?: boolean;
   serverlessBaseline?: string;
+  serverlessBaselineSnapshotSha?: string;
+  serverlessBaselineSnapshotUsedAncestor?: boolean;
   newTypes: string[];
   updatedTypes: string[];
   removedTypes: string[];

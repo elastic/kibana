@@ -87,6 +87,7 @@ describe('buildSuccessBody', () => {
   it('includes the 2-step release reminder when types were updated', () => {
     const body = buildSuccessBody(report({ updatedTypes: ['task'] }));
     expect(body).toMatch(/2-step release/);
+    expect(body).toContain('[!CAUTION]');
     expect(body).toContain('https://www.elastic.co/docs/extend/kibana/saved-objects');
   });
 
@@ -162,6 +163,21 @@ describe('buildSuccessBody', () => {
     const body = buildSuccessBody(report({ updatedTypes: ['task'] }));
     expect(body).toContain('[!IMPORTANT]');
   });
+
+  it('includes the WARNING banner when an ancestor baseline snapshot was used', () => {
+    const body = buildSuccessBody(
+      report({
+        updatedTypes: ['search'],
+        baseline: 'merge-base-sha',
+        baselineSnapshotSha: 'older-sha',
+        baselineSnapshotUsedAncestor: true,
+      })
+    );
+
+    expect(body).toContain('[!WARNING]');
+    expect(body).toContain('older than the requested merge-base');
+    expect(body).toContain('`merge-base-sha` → `older-sha`');
+  });
 });
 
 describe('buildFailureBody', () => {
@@ -217,6 +233,21 @@ describe('buildFailureBody', () => {
     );
 
     expect(body).toContain('node scripts/check_saved_objects --baseline deadbeef');
+  });
+
+  it('includes the WARNING banner when an ancestor baseline snapshot was used', () => {
+    const body = buildFailureBody(
+      report({
+        status: 'fail',
+        baseline: 'merge-base-sha',
+        baselineSnapshotSha: 'older-sha',
+        baselineSnapshotUsedAncestor: true,
+        findings: [finding()],
+      })
+    );
+
+    expect(body).toContain('[!WARNING]');
+    expect(body).toContain('rebase onto the latest `main`');
   });
 
   it('falls back to a placeholder when no baseline is available', () => {

@@ -50,8 +50,15 @@ export interface TypeChangeDetails {
 
 export interface SavedObjectsCheckReport {
   status: 'pass' | 'fail';
+  /** Requested baseline commit (e.g. merge-base) passed to `--baseline`. */
   baseline?: string;
+  /** GCS snapshot commit actually used when it differs from {@link baseline}. */
+  baselineSnapshotSha?: string;
+  /** True when the baseline snapshot came from an ancestor of {@link baseline}. */
+  baselineSnapshotUsedAncestor?: boolean;
   serverlessBaseline?: string;
+  serverlessBaselineSnapshotSha?: string;
+  serverlessBaselineSnapshotUsedAncestor?: boolean;
   newTypes: string[];
   updatedTypes: string[];
   removedTypes: string[];
@@ -154,13 +161,24 @@ function groupFindingsByType(
   return groups;
 }
 
+export function buildBaselineLagBanner(report: SavedObjectsCheckReport): string {
+  if (!report.baselineSnapshotUsedAncestor) {
+    return '';
+  }
+
+  const resolvedSha = report.baselineSnapshotSha ?? report.baseline;
+  return `\n\n> [!WARNING]\n> The snapshot used as a baseline for comparison is older than the requested merge-base (\`${report.baseline}\` → \`${resolvedSha}\`). That can make unrelated Saved Object types appear changed. If you did not modify any SO type and the check is reporting updated types, rebase onto the latest \`main\` and re-run CI.`;
+}
+
 export function buildFailureBody(report: SavedObjectsCheckReport): string {
   if (report.findings.length === 0) {
     return `## Saved Objects CI check failed
 
 The check failed but no structured findings were collected. See ${buildkiteBuildLink()} for details.
 
-See the [Saved Objects troubleshooting guide](${TROUBLESHOOTING_URL}) and the [model versions documentation](${MODEL_VERSIONS_URL}).`;
+See the [Saved Objects troubleshooting guide](${TROUBLESHOOTING_URL}) and the [model versions documentation](${MODEL_VERSIONS_URL}).${buildBaselineLagBanner(
+      report
+    )}`;
   }
 
   const groups = groupFindingsByType(report.findings);
@@ -204,7 +222,9 @@ ${sections.join('\n\n')}
 ${reproCommand}
 \`\`\`
 
-See the [Saved Objects troubleshooting guide](${TROUBLESHOOTING_URL}) and the [model versions documentation](${MODEL_VERSIONS_URL}) for details.`;
+See the [Saved Objects troubleshooting guide](${TROUBLESHOOTING_URL}) and the [model versions documentation](${MODEL_VERSIONS_URL}) for details.${buildBaselineLagBanner(
+    report
+  )}`;
 }
 
 export function buildSuccessBody(report: SavedObjectsCheckReport): string {
@@ -224,12 +244,12 @@ export function buildSuccessBody(report: SavedObjectsCheckReport): string {
       : '';
 
   const reminder = needsTwoStepReleaseReminder(report)
-    ? `\n\n> Some Saved Objects changes (e.g. mapping additions, type removals) require a **2-step release**: ship the change first, then update consumers in a follow-up. Review the [Saved Objects model versions documentation](${MODEL_VERSIONS_URL}) before merging.`
+    ? `\n\n> [!CAUTION]\n> Some Saved Objects changes (e.g. mapping additions, type removals) require a **2-step release**: ship the change first, then update consumers in a follow-up. Review the [Saved Objects model versions documentation](${MODEL_VERSIONS_URL}) before merging.`
     : '';
 
   return `## Saved Objects CI check passed
 
-${summary}${changeDetails}${mappingsBanner}${reminder}`;
+${summary}${changeDetails}${mappingsBanner}${buildBaselineLagBanner(report)}${reminder}`;
 }
 
 export function buildCommentBody(report: SavedObjectsCheckReport): string | null {
