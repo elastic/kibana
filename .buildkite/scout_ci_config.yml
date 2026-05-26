@@ -6,6 +6,7 @@ plugins:
     - data_views
     - console
     - dashboard
+    - data_view_management
     - discover_enhanced
     - exploratory_view
     - index_management

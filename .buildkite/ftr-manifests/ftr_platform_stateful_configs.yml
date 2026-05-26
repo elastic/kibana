@@ -217,7 +217,6 @@ enabled:
   - x-pack/platform/test/functional/apps/cross_cluster_replication/config.ts
   - x-pack/platform/test/functional/apps/dashboard/group1/config.ts
   - x-pack/platform/test/functional/apps/dashboard/group3/config.ts
-  - x-pack/platform/test/functional/apps/data_views/config.ts
   - x-pack/platform/test/functional/apps/dev_tools/config.ts
   - x-pack/platform/test/functional/apps/discover/group1/config.ts
   - x-pack/platform/test/functional/apps/discover/group2/config.ts

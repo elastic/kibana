@@ -1333,7 +1333,6 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 /x-pack/platform/test/api_integration/apis/management/rollup/index_patterns_extensions.js @elastic/kibana-data-discovery
 /x-pack/platform/test/api_integration/apis/search @elastic/kibana-data-discovery
 /x-pack/platform/test/examples/search_examples @elastic/kibana-data-discovery
-/x-pack/platform/test/functional/apps/data_views @elastic/kibana-data-discovery
 /x-pack/platform/test/functional/apps/discover @elastic/kibana-data-discovery
 /x-pack/platform/test/functional/apps/saved_query_management @elastic/kibana-data-discovery
 /x-pack/platform/test/functional_with_es_ssl/apps/discover_ml/discover @elastic/kibana-data-discovery
