@@ -70,7 +70,7 @@ describe('transformDashboardIn', () => {
           "kibanaSavedObjectMeta": Object {
             "searchSourceJSON": "{\\"query\\":{\\"query\\":\\"test\\",\\"language\\":\\"kuery\\"}}",
           },
-          "optionsJSON": "{\\"hidePanelTitles\\":true,\\"hidePanelBorders\\":false,\\"useMargins\\":false,\\"autoApplyFilters\\":true,\\"syncColors\\":false,\\"syncCursor\\":false,\\"syncTooltips\\":false}",
+          "optionsJSON": "{\\"autoApplyFilters\\":true,\\"hidePanelBorders\\":false,\\"hidePanelTitles\\":true,\\"syncColors\\":false,\\"syncCursor\\":false,\\"syncTooltips\\":false,\\"useMargins\\":false}",
           "panelsJSON": "[{\\"title\\":\\"title1\\",\\"type\\":\\"type1\\",\\"embeddableConfig\\":{\\"enhancements\\":{},\\"savedObjectId\\":\\"1\\"},\\"panelIndex\\":\\"1\\",\\"gridData\\":{\\"x\\":0,\\"y\\":0,\\"w\\":10,\\"h\\":10,\\"i\\":\\"1\\"}}]",
           "pinned_panels": Object {
             "panels": Object {
