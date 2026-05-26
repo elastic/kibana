@@ -466,25 +466,24 @@ describe('PackagePolicyInputStreamConfig', () => {
     };
 
     const renderCondition = (
-      streamOverrides: Partial<RegistryStreamWithDataStream> = {},
       policyOverrides: Partial<NewPackagePolicyInputStream> = {},
-      propOverrides: Record<string, unknown> = {}
+      showConditionField = true
     ) => {
       renderResult = testRenderer.render(
         <PackagePolicyInputStreamConfig
-          packageInputStream={{ ...minimalInputStream, ...streamOverrides }}
+          packageInputStream={minimalInputStream}
           packageInfo={mockPackageInfo}
           packagePolicyInputStream={{ ...minimalPolicyInputStream, ...policyOverrides }}
           updatePackagePolicyInputStream={mockUpdatePackagePolicyInputStream}
           inputStreamValidationResults={{ vars: {} }}
           forceShowErrors={false}
           hasStreamToggle={true}
-          {...propOverrides}
+          showConditionField={showConditionField}
         />
       );
     };
 
-    it('shows condition field in advanced options for enabled non-agentless non-otelcol stream', async () => {
+    it('shows condition field in advanced options when showConditionField is true', async () => {
       renderCondition();
       fireEvent.click(renderResult.getByText('Advanced options'));
       await waitFor(() => {
@@ -492,23 +491,8 @@ describe('PackagePolicyInputStreamConfig', () => {
       });
     });
 
-    it('hides condition field for agentless stream', async () => {
-      renderCondition({}, {}, { isAgentless: true });
-      // No advanced toggle rendered — condition field never in DOM
-      expect(
-        renderResult.queryByTestId('packagePolicyStreamConditionInput')
-      ).not.toBeInTheDocument();
-    });
-
-    it('hides condition field for otelcol stream', async () => {
-      renderCondition({ input: 'otelcol' });
-      expect(
-        renderResult.queryByTestId('packagePolicyStreamConditionInput')
-      ).not.toBeInTheDocument();
-    });
-
-    it('hides condition field when stream is disabled', async () => {
-      renderCondition({}, { enabled: false });
+    it('hides condition field when showConditionField is false', async () => {
+      renderCondition({}, false);
       expect(
         renderResult.queryByTestId('packagePolicyStreamConditionInput')
       ).not.toBeInTheDocument();
@@ -529,7 +513,7 @@ describe('PackagePolicyInputStreamConfig', () => {
     });
 
     it('calls updatePackagePolicyInputStream with undefined when field is cleared', async () => {
-      renderCondition({}, { condition: "${host.os.type} == 'linux'" });
+      renderCondition({ condition: "${host.os.type} == 'linux'" });
       fireEvent.click(renderResult.getByText('Advanced options'));
       await waitFor(() => {
         expect(renderResult.getByTestId('packagePolicyStreamConditionInput')).toBeInTheDocument();

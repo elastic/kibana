@@ -1594,4 +1594,107 @@ describe('PackagePolicyInputPanel', () => {
       });
     });
   });
+
+  describe('condition field gating', () => {
+    const minimalStream: RegistryStreamWithDataStream = {
+      input: 'logfile',
+      title: 'Test stream',
+      template_path: 'stream.yml.hbs',
+      vars: [],
+      description: 'Test stream',
+      data_stream: {
+        title: 'Test',
+        release: 'ga',
+        type: 'logs',
+        package: 'test',
+        dataset: 'test.test',
+        path: 'test',
+        elasticsearch: {},
+        ingest_pipeline: 'default',
+        streams: [],
+      },
+    };
+    const minimalValidationResults = { streams: { 'test.test': { vars: {} } } };
+
+    const renderCondition = (
+      inputOverrides: Partial<NewPackagePolicyInput> = {},
+      panelProps: Partial<{ isAgentless: boolean }> = {}
+    ) => {
+      const policyInput: NewPackagePolicyInput = {
+        type: 'logfile',
+        enabled: true,
+        streams: [{ data_stream: { type: 'logs', dataset: 'test.test' }, enabled: true, vars: {} }],
+        ...inputOverrides,
+      };
+      renderResult = testRenderer.render(
+        <PackagePolicyInputPanel
+          packageInfo={mockPackageInfo}
+          packageInput={mockPackageInput}
+          packageInputStreams={[minimalStream]}
+          packagePolicyInput={policyInput}
+          updatePackagePolicyInput={mockUpdatePackagePolicyInput}
+          inputValidationResults={minimalValidationResults}
+          {...panelProps}
+        />
+      );
+    };
+
+    beforeEach(() => {
+      useAgentlessMock.mockReturnValue({
+        isAgentlessEnabled: false,
+        isAgentlessDefault: false,
+        isAgentlessAgentPolicy: jest.fn(),
+        getAgentlessStatusForPackage: jest
+          .fn()
+          .mockReturnValue({ isAgentless: false, isDefaultDeploymentMode: false }),
+        isServerless: false,
+        isCloud: false,
+      });
+    });
+
+    it('shows condition field in advanced options for non-agentless non-otelcol enabled input', async () => {
+      renderCondition();
+      fireEvent.click(renderResult.getByText('Advanced options'));
+      await waitFor(() => {
+        expect(renderResult.getByTestId('packagePolicyInputConditionInput')).toBeInTheDocument();
+      });
+    });
+
+    it('hides condition field when isAgentless is true', async () => {
+      renderCondition({}, { isAgentless: true });
+      expect(
+        renderResult.queryByTestId('packagePolicyInputConditionInput')
+      ).not.toBeInTheDocument();
+    });
+
+    it('hides condition field when input type is otelcol', async () => {
+      const otelStream = { ...minimalStream, input: OTEL_COLLECTOR_INPUT_TYPE };
+      renderResult = testRenderer.render(
+        <PackagePolicyInputPanel
+          packageInfo={mockPackageInfo}
+          packageInput={{ ...mockPackageInput, type: OTEL_COLLECTOR_INPUT_TYPE }}
+          packageInputStreams={[otelStream]}
+          packagePolicyInput={{
+            type: OTEL_COLLECTOR_INPUT_TYPE,
+            enabled: true,
+            streams: [
+              { data_stream: { type: 'logs', dataset: 'test.test' }, enabled: true, vars: {} },
+            ],
+          }}
+          updatePackagePolicyInput={mockUpdatePackagePolicyInput}
+          inputValidationResults={minimalValidationResults}
+        />
+      );
+      expect(
+        renderResult.queryByTestId('packagePolicyInputConditionInput')
+      ).not.toBeInTheDocument();
+    });
+
+    it('hides condition field when input is disabled', async () => {
+      renderCondition({ enabled: false });
+      expect(
+        renderResult.queryByTestId('packagePolicyInputConditionInput')
+      ).not.toBeInTheDocument();
+    });
+  });
 });

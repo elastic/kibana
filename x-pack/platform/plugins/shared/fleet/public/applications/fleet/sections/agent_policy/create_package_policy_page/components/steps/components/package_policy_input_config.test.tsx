@@ -192,7 +192,7 @@ describe('PackagePolicyInputConfig', () => {
 
     const renderCondition = (
       inputOverrides: Record<string, unknown> = {},
-      propOverrides: Record<string, unknown> = {}
+      showConditionField = true
     ) => {
       const renderer = createFleetTestRendererMock();
       const mockOnChange = jest.fn();
@@ -203,30 +203,20 @@ describe('PackagePolicyInputConfig', () => {
           packagePolicyInput={{ ...baseInput, ...inputOverrides }}
           updatePackagePolicyInput={mockOnChange}
           packageInputVars={[]}
-          {...propOverrides}
+          showConditionField={showConditionField}
         />
       );
       return { utils, mockOnChange };
     };
 
-    it('shows condition field in advanced options for enabled non-agentless non-otelcol input', () => {
+    it('shows condition field in advanced options when showConditionField is true', () => {
       const { utils } = renderCondition();
       fireEvent.click(utils.getByText('Advanced options'));
       expect(utils.getByTestId('packagePolicyInputConditionInput')).toBeInTheDocument();
     });
 
-    it('hides condition field for agentless input', () => {
-      const { utils } = renderCondition({}, { isAgentless: true });
-      expect(utils.queryByTestId('packagePolicyInputConditionInput')).not.toBeInTheDocument();
-    });
-
-    it('hides condition field for otelcol input type', () => {
-      const { utils } = renderCondition({ type: 'otelcol' });
-      expect(utils.queryByTestId('packagePolicyInputConditionInput')).not.toBeInTheDocument();
-    });
-
-    it('hides condition field when input is disabled', () => {
-      const { utils } = renderCondition({ enabled: false });
+    it('hides condition field when showConditionField is false', () => {
+      const { utils } = renderCondition({}, false);
       expect(utils.queryByTestId('packagePolicyInputConditionInput')).not.toBeInTheDocument();
     });
 
