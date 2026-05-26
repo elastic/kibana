@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 import type { SavedObject } from '@kbn/core/server';
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import type { RawRule } from '../../../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
@@ -21,7 +22,6 @@ import { deleteRuleParamsSchema } from './schemas';
 import { deleteRuleSo, getDecryptedRuleSo, getRuleSo } from '../../../../data/rule';
 import { softDeleteGaps } from '../../../../lib/rule_gaps/soft_delete/soft_delete_gaps';
 import { logRuleChanges } from '../common_utils/log_rule_changes';
-import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 
 export async function deleteRule(context: RulesClientContext, params: DeleteRuleParams) {
   try {

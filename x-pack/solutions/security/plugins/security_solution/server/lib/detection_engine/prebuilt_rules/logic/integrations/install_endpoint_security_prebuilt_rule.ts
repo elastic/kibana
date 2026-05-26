@@ -7,7 +7,6 @@
 
 import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { AlertingServerStart } from '@kbn/alerting-plugin/server';
-import { SecurityRuleChangeTrackingAction } from '../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import { createDetectionIndex } from '../../../routes/index/create_index_route';
 import type { SecuritySolutionApiRequestHandlerContext } from '../../../../../types';
 import { ELASTIC_SECURITY_RULE_ID } from '../../../../../../common';
@@ -84,8 +83,9 @@ export const installEndpointSecurityPrebuiltRule = async ({
     }
     const ruleAssetsToInstall = await ruleAssetsClient.fetchAssetsByVersion(latestRuleVersion);
     const changeTracking = {
-      action: SecurityRuleChangeTrackingAction.ruleInstall,
-      bulkCount: ruleAssetsToInstall.length,
+      metadata: {
+        bulkCount: ruleAssetsToInstall.length,
+      },
     };
     await createPrebuiltRules(detectionRulesClient, ruleAssetsToInstall, changeTracking, logger);
   } catch (err) {

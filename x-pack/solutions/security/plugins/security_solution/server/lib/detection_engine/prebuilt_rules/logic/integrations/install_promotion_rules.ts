@@ -8,7 +8,6 @@
 import type { Logger, LogMeta } from '@kbn/core/server';
 import type { BulkOperationError, RulesClient } from '@kbn/alerting-plugin/server';
 import { SEARCH_AI_LAKE_PACKAGES } from '@kbn/fleet-plugin/common';
-import { SecurityRuleChangeTrackingAction } from '../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import type { IDetectionRulesClient } from '../../../rule_management/logic/detection_rules_client/detection_rules_client_interface';
 import type { IPrebuiltRuleAssetsClient } from '../rule_assets/prebuilt_rule_assets_client';
 import { createPrebuiltRules } from '../rule_objects/create_prebuilt_rules';
@@ -97,8 +96,9 @@ export async function installPromotionRules({
     return !installedRuleVersionsMap.has(ruleId);
   });
   const installChangeTracking = {
-    action: SecurityRuleChangeTrackingAction.ruleInstall,
-    bulkCount: promotionRulesToInstall.length,
+    metadata: {
+      bulkCount: promotionRulesToInstall.length,
+    },
   };
   const { results: installationResults, errors: installationErrors } = await createPrebuiltRules(
     detectionRulesClient,

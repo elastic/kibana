@@ -8,7 +8,6 @@
 import type { Logger } from '@kbn/core/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
-import { SecurityRuleChangeTrackingAction } from '../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import type { InstallPrebuiltRulesAndTimelinesResponse } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { SecuritySolutionApiRequestHandlerContext } from '../../../../../types';
 import { getExistingPrepackagedRules } from '../../../rule_management/logic/search/get_existing_prepackaged_rules';
