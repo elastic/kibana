@@ -81,7 +81,7 @@ export const PreviewLink: FC<PreviewLinkProps> = ({
   const { telemetry } = useKibana().services;
   const canReadRules = useUserPrivileges().rulesPrivileges.rules.read;
   const shouldShowLink = field === ALERT_RULE_NAME ? canReadRules : true;
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
 
   const resolutionIdentifiers: IdentityFields = useMemo(
     () => identityFields ?? { [field]: value },

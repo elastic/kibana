@@ -8,7 +8,6 @@
  */
 
 export { getSavedSearchFullPathUrl } from './saved_searches_url';
-export { fromSavedSearchAttributes } from './saved_searches_utils';
 export { extractTabs } from './service/extract_tabs';
 
 export type {
@@ -38,4 +37,7 @@ export {
   MAX_DISCOVER_SESSION_TABS,
 } from './constants';
 
-export { toSavedSearchAttributes } from './service/saved_searches_utils';
+export {
+  fromDiscoverSessionAttributesToSavedSearch,
+  toSavedSearchAttributes,
+} from './service/saved_searches_utils';

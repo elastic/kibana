@@ -1,5 +1,5 @@
 {
-  "sha1": "77536c8a138c9091d2b333d449698d3bb4e16540",
+  "sha1": "2b70f3fcb59bf151aebaba39638cabf81e58deca",
   "tests": [
     {
       "id": "686afb1e43c1702-93eb078795ca679",
@@ -13,11 +13,13 @@
         "@local-serverless-security_complete",
         "@cloud-serverless-security_complete",
         "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai"
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/blocked_saved_objects_api.spec.ts",
-        "line": 43,
+        "line": 44,
         "column": 12
       }
     },
@@ -33,11 +35,13 @@
         "@local-serverless-security_complete",
         "@cloud-serverless-security_complete",
         "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai"
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/blocked_saved_objects_api.spec.ts",
-        "line": 43,
+        "line": 44,
         "column": 12
       }
     },
@@ -53,11 +57,13 @@
         "@local-serverless-security_complete",
         "@cloud-serverless-security_complete",
         "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai"
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/blocked_saved_objects_api.spec.ts",
-        "line": 43,
+        "line": 44,
         "column": 12
       }
     },
@@ -73,11 +79,13 @@
         "@local-serverless-security_complete",
         "@cloud-serverless-security_complete",
         "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai"
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/blocked_saved_objects_api.spec.ts",
-        "line": 43,
+        "line": 44,
         "column": 12
       }
     },
@@ -93,11 +101,13 @@
         "@local-serverless-security_complete",
         "@cloud-serverless-security_complete",
         "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai"
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/blocked_saved_objects_api.spec.ts",
-        "line": 43,
+        "line": 44,
         "column": 12
       }
     },
@@ -113,11 +123,13 @@
         "@local-serverless-security_complete",
         "@cloud-serverless-security_complete",
         "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai"
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/blocked_saved_objects_api.spec.ts",
-        "line": 43,
+        "line": 44,
         "column": 12
       }
     },
@@ -133,11 +145,13 @@
         "@local-serverless-security_complete",
         "@cloud-serverless-security_complete",
         "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai"
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/blocked_saved_objects_api.spec.ts",
-        "line": 43,
+        "line": 44,
         "column": 12
       }
     },
@@ -153,11 +167,13 @@
         "@local-serverless-security_complete",
         "@cloud-serverless-security_complete",
         "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai"
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/blocked_saved_objects_api.spec.ts",
-        "line": 43,
+        "line": 44,
         "column": 12
       }
     },
@@ -173,11 +189,13 @@
         "@local-serverless-security_complete",
         "@cloud-serverless-security_complete",
         "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai"
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/blocked_saved_objects_api.spec.ts",
-        "line": 43,
+        "line": 44,
         "column": 12
       }
     },
@@ -193,11 +211,13 @@
         "@local-serverless-security_complete",
         "@cloud-serverless-security_complete",
         "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai"
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/blocked_saved_objects_api.spec.ts",
-        "line": 43,
+        "line": 44,
         "column": 12
       }
     },
@@ -343,11 +363,13 @@
         "@local-serverless-security_complete",
         "@cloud-serverless-security_complete",
         "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai"
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/ui_settings_crud.spec.ts",
-        "line": 37,
+        "line": 38,
         "column": 10
       }
     },
@@ -363,11 +385,13 @@
         "@local-serverless-security_complete",
         "@cloud-serverless-security_complete",
         "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai"
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/ui_settings_crud.spec.ts",
-        "line": 50,
+        "line": 51,
         "column": 10
       }
     },
@@ -383,11 +407,13 @@
         "@local-serverless-security_complete",
         "@cloud-serverless-security_complete",
         "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai"
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/ui_settings_crud.spec.ts",
-        "line": 67,
+        "line": 68,
         "column": 10
       }
     },
@@ -403,11 +429,13 @@
         "@local-serverless-security_complete",
         "@cloud-serverless-security_complete",
         "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai"
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/ui_settings_crud.spec.ts",
-        "line": 89,
+        "line": 90,
         "column": 10
       }
     },
@@ -423,11 +451,13 @@
         "@local-serverless-security_complete",
         "@cloud-serverless-security_complete",
         "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai"
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/ui_settings_crud.spec.ts",
-        "line": 106,
+        "line": 107,
         "column": 10
       }
     },
@@ -443,11 +473,13 @@
         "@local-serverless-security_complete",
         "@cloud-serverless-security_complete",
         "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai"
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/ui_settings_crud.spec.ts",
-        "line": 128,
+        "line": 129,
         "column": 10
       }
     },
@@ -463,11 +495,13 @@
         "@local-serverless-security_complete",
         "@cloud-serverless-security_complete",
         "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai"
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/ui_settings_validate.spec.ts",
-        "line": 31,
+        "line": 32,
         "column": 10
       }
     },
@@ -483,11 +517,13 @@
         "@local-serverless-security_complete",
         "@cloud-serverless-security_complete",
         "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai"
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/ui_settings_validate.spec.ts",
-        "line": 50,
+        "line": 51,
         "column": 10
       }
     },
@@ -503,11 +539,13 @@
         "@local-serverless-security_complete",
         "@cloud-serverless-security_complete",
         "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai"
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/ui_settings_validate.spec.ts",
-        "line": 68,
+        "line": 69,
         "column": 10
       }
     },
@@ -523,11 +561,13 @@
         "@local-serverless-security_complete",
         "@cloud-serverless-security_complete",
         "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai"
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/ui_settings_validate.spec.ts",
-        "line": 85,
+        "line": 86,
         "column": 10
       }
     }

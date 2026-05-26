@@ -1,0 +1,49 @@
+responses:
+  200:
+    description: 'Successful response'
+    content:
+      application/json:
+        examples:
+          getCloudOnboardingDeploymentsByConnectorIdExample:
+            description: 'List of cloud onboarding deployments for a connector'
+            value:
+              items:
+                - id: 'onboarding-deployment-id-1'
+                  provider: 'aws'
+                  connectorId: 'cloud-connector-id-1'
+                  mechanisms:
+                    - 'agentless'
+                  deploymentId: 'arn:aws:cloudformation:us-east-1:123456789012:stack/elastic-aws-onboarding/aaa-bbb-ccc'
+                  deploymentName: 'elastic-aws-onboarding'
+                  services:
+                    - 'cloudwatch_metrics'
+                  status: 'succeeded'
+                  attemptCount: 1
+                  packagePolicyIds:
+                    - 'package-policy-id-1'
+                - id: 'onboarding-deployment-id-2'
+                  provider: 'aws'
+                  connectorId: 'cloud-connector-id-1'
+                  mechanisms:
+                    - 'agentless'
+                    - 'firehose'
+                  services:
+                    - 'cloudfront_logs'
+                  status: 'deploying'
+                  attemptCount: 1
+                  serviceVars:
+                    cloudfront_logs:
+                      - regions:
+                          - 'us-east-1'
+                        s3_bucket_arn: 'arn:aws:s3:::my-cloudfront-logs-bucket'
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'An error message describing what went wrong'
