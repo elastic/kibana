@@ -68,7 +68,7 @@ export const createGridColumns = (
     const column = columnsReverseLookup?.[columnId];
     const contentsIsDefined = rowValue != null;
 
-    const cellContent = formatFactory(column?.meta?.params).convert(rowValue);
+    const cellContent = formatFactory(column?.meta?.params).convertToText(rowValue);
     return { rowValue, contentsIsDefined, cellContent };
   };
 
