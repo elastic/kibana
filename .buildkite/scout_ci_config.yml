@@ -54,6 +54,7 @@ plugins:
     - synthetics
     - transform
     - triggers_actions_ui
+    - unified_search
     - uptime
     - ux
     - workflows_extensions
