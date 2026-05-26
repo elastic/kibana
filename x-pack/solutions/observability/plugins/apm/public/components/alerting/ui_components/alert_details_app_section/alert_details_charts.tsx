@@ -8,7 +8,7 @@
 import type { ReactElement } from 'react';
 import React from 'react';
 import type { RecursivePartial } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
 import type { Theme } from '@elastic/charts';
 import type { TopAlert } from '@kbn/observability-plugin/public';
 import type { ApmRuleType } from '@kbn/rule-data-utils';
@@ -66,6 +66,8 @@ export function AlertDetailsCharts({
         threshold={isPrimary ? thresholdComponent : undefined}
         ruleAggregationType={ruleAggregationType}
         ruleTypeId={alertRuleTypeId}
+        compact
+        showAlertAnnotations
       />
     ),
     failedTransactionRate: (isPrimary) => (
@@ -83,6 +85,8 @@ export function AlertDetailsCharts({
         offset={''}
         threshold={isPrimary ? thresholdComponent : undefined}
         ruleTypeId={alertRuleTypeId}
+        compact
+        showAlertAnnotations
       />
     ),
     throughput: (isPrimary) => (
@@ -100,6 +104,8 @@ export function AlertDetailsCharts({
         timeZone={timeZone}
         threshold={isPrimary ? thresholdComponent : undefined}
         ruleTypeId={alertRuleTypeId}
+        compact
+        showAlertAnnotations
       />
     ),
     errorCount: (isPrimary) => (
@@ -117,19 +123,21 @@ export function AlertDetailsCharts({
         offset=""
         threshold={isPrimary ? thresholdComponent : undefined}
         ruleTypeId={alertRuleTypeId}
+        compact
+        showAlertAnnotations
       />
     ),
   };
 
+  const chartIdsInOrder: ChartId[] = [chartLayout.primary, ...chartLayout.secondary];
+
   return (
-    <EuiFlexItem>
-      {chartRenderers[chartLayout.primary](true)}
-      <EuiSpacer size="s" />
-      <EuiFlexGroup direction="row" gutterSize="s">
-        {chartLayout.secondary.map((chartId) => (
-          <React.Fragment key={chartId}>{chartRenderers[chartId](false)}</React.Fragment>
-        ))}
-      </EuiFlexGroup>
-    </EuiFlexItem>
+    <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
+      {chartIdsInOrder.map((chartId) => (
+        <React.Fragment key={chartId}>
+          {chartRenderers[chartId](chartId === chartLayout.primary)}
+        </React.Fragment>
+      ))}
+    </EuiFlexGroup>
   );
 }

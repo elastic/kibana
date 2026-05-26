@@ -100,7 +100,7 @@ export const MoreActionsRowControlColumn = memo(({ alert }: MoreActionsRowContro
       isOpen={isPopoverOpen}
       panelPaddingSize="none"
     >
-      <EuiContextMenu initialPanelId={0} panels={panels} size="s" />
+      <EuiContextMenu initialPanelId={0} panels={panels} />
     </EuiPopover>
   );
 });

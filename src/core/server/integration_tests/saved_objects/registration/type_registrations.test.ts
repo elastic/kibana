@@ -8,7 +8,7 @@
  */
 
 import { createRoot } from '@kbn/core-test-helpers-kbn-server';
-import { REMOVED_TYPES } from '@kbn/core-saved-objects-server-internal';
+import removedTypes from '@kbn/core-saved-objects-server-internal/removed_types.json';
 
 // Types should NEVER be removed from this array
 const previouslyRegisteredTypes = [
@@ -95,6 +95,7 @@ const previouslyRegisteredTypes = [
   'fleet-setup-lock',
   'fleet-space-settings',
   'fleet-cloud-connector',
+  'fleet-cloud-onboarding-deployment',
   'graph-workspace',
   'guided-setup-state',
   'guided-onboarding-guide-state',
@@ -164,6 +165,7 @@ const previouslyRegisteredTypes = [
   'siem-ui-timeline-note',
   'siem-ui-timeline-pinned-event',
   'slo',
+  'slo-composite',
   'slo-settings',
   'slo_template',
   'space',
@@ -174,6 +176,7 @@ const previouslyRegisteredTypes = [
   'synthetics-param',
   'synthetics-privates-locations',
   'synthetics-private-location',
+  'synthetics-settings-multi-space',
   'tag',
   'task',
   'telemetry',
@@ -242,12 +245,12 @@ describe('SO type registrations', () => {
       .sort();
     await root.shutdown();
 
-    // Make sure that all `REMOVED_TYPES` are in `previouslyRegisteredTypes`
-    expect(previouslyRegisteredTypes.filter((type) => REMOVED_TYPES.includes(type))).toEqual(
-      REMOVED_TYPES // Use array comparison for readable test failure messages
+    // Make sure that all removed types are in `previouslyRegisteredTypes`
+    expect(previouslyRegisteredTypes.filter((type) => removedTypes.includes(type))).toEqual(
+      [...removedTypes].sort() // Use array comparison for readable test failure messages
     );
-    // Make sure that no `REMOVED_TYPES` are in `currentlyRegisteredTypes`
-    expect(currentlyRegisteredTypes.filter((type) => REMOVED_TYPES.includes(type))).toEqual([]);
+    // Make sure that no removed types are in `currentlyRegisteredTypes`
+    expect(currentlyRegisteredTypes.filter((type) => removedTypes.includes(type))).toEqual([]);
 
     // Make sure all new types are added to `previouslyRegisteredTypes`
     // If this assertion fails, add the new type name to the `previouslyRegisteredTypes` array above (alphabetically)
@@ -256,9 +259,9 @@ describe('SO type registrations', () => {
     );
     expect(typesMissingFromPrevious).toEqual([]);
 
-    // Make sure all removed types are added to `REMOVED_TYPES`
-    // If this assertion fails, add the removed type to `REMOVED_TYPES` array in ../../migrations/core/elastic_index.ts
-    expect(previouslyRegisteredTypes.filter((type) => !REMOVED_TYPES.includes(type))).toEqual(
+    // Make sure all removed types are added to removed_types.json
+    // If this assertion fails, add the removed type to `removed_types.json` (via --fix flag on the check_saved_objects script)
+    expect(previouslyRegisteredTypes.filter((type) => !removedTypes.includes(type))).toEqual(
       currentlyRegisteredTypes
     );
   });

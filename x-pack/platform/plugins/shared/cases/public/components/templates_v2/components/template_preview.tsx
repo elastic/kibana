@@ -98,7 +98,12 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({ onFieldDefault
   }, [parsedTemplateData, parentDefinition]);
 
   const parentFieldNames = useMemo(
-    () => new Set(parentDefinition?.fields.map((f) => f.name) ?? []),
+    () =>
+      new Set(
+        (parentDefinition?.fields ?? [])
+          .map((f) => f.name)
+          .filter((name): name is string => typeof name === 'string')
+      ),
     [parentDefinition]
   );
 

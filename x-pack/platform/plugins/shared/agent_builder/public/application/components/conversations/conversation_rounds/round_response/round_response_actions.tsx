@@ -10,8 +10,10 @@ import { css } from '@emotion/react';
 import copy from 'copy-to-clipboard';
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { useToasts } from '../../../../hooks/use_toasts';
-import { useSendMessage } from '../../../../context/send_message/send_message_context';
+import { useConversationStream } from '../../../../hooks/use_conversation_stream';
 
 const labels = {
   copy: i18n.translate('xpack.agentBuilder.roundResponseActions.copy', {
@@ -37,7 +39,7 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
   isLastRound,
 }) => {
   const { addSuccessToast } = useToasts();
-  const { regenerate, isRegenerating, isResponseLoading } = useSendMessage();
+  const { regenerate, isRegenerating, isResponseLoading } = useConversationStream();
 
   const handleCopy = useCallback(() => {
     const isSuccess = copy(content);
@@ -70,6 +72,11 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
           onClick={handleCopy}
           color="text"
           data-test-subj="roundResponseCopyButton"
+          {...getEbtProps({
+            element: AGENT_BUILDER_UI_EBT.element.pageContent,
+            action: AGENT_BUILDER_UI_EBT.action.conversation.COPY_RESPONSE,
+            detail: 'conversation',
+          })}
         />
       </EuiFlexItem>
       {isLastRound && (
@@ -82,6 +89,11 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
             isDisabled={isRegenerateDisabled}
             isLoading={isRegenerating}
             data-test-subj="roundResponseRegenerateButton"
+            {...getEbtProps({
+              element: AGENT_BUILDER_UI_EBT.element.pageContent,
+              action: AGENT_BUILDER_UI_EBT.action.conversation.REGENERATE,
+              detail: 'conversation',
+            })}
           />
         </EuiFlexItem>
       )}

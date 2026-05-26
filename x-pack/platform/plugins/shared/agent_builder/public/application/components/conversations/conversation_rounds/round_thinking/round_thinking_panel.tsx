@@ -17,10 +17,13 @@ import {
 } from '@elastic/eui';
 import React, { useState, useMemo } from 'react';
 import type { ConversationRound, ConversationRoundStep } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useExperimentalFeatures } from '../../../../hooks/use_experimental_features';
+import { useTraceExists } from '../../../../hooks/use_trace_exists';
 import { RoundFlyout } from './round_flyout';
 import { TraceFlyout } from './trace_flyout';
 import { RoundSteps } from './steps/round_steps';
@@ -69,7 +72,12 @@ export const RoundThinkingPanel = ({
     return Array.isArray(id) ? id[0] : id;
   }, [rawRound.trace_id]);
 
-  const TraceWaterfallComponent = services.plugins.evals?.TraceWaterfall;
+  const isExperimentalEnabled = useExperimentalFeatures();
+
+  const { exists: traceExists } = useTraceExists(traceId ?? null, {
+    enabled: isExperimentalEnabled,
+  });
+
   const addToDatasetAction = services.plugins.evals?.getAddToDatasetAction
     ? services.plugins.evals.getAddToDatasetAction({
         initialExample: {
@@ -86,9 +94,8 @@ export const RoundThinkingPanel = ({
         },
       })
     : null;
-  const isExperimentalEnabled = useExperimentalFeatures();
 
-  const showTraceButton = isExperimentalEnabled && !!TraceWaterfallComponent && !!traceId;
+  const showTraceButton = traceExists;
   const showAddToDatasetButton = isExperimentalEnabled && addToDatasetAction != null;
 
   const shadowStyles = useEuiShadow('l');
@@ -123,6 +130,11 @@ export const RoundThinkingPanel = ({
           css={css`
             cursor: pointer;
           `}
+          {...getEbtProps({
+            element: AGENT_BUILDER_UI_EBT.element.pageContent,
+            action: AGENT_BUILDER_UI_EBT.action.conversation.THINKING_TOGGLE,
+            detail: 'conversation',
+          })}
         >
           <EuiFlexGroup responsive={false} gutterSize="m" direction="row" alignItems="center">
             <RoundIcon isLoading={isLoading} />
@@ -152,6 +164,11 @@ export const RoundThinkingPanel = ({
                       color="text"
                       iconSide="left"
                       onClick={addToDatasetAction?.onClick}
+                      {...getEbtProps({
+                        element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                        action: AGENT_BUILDER_UI_EBT.action.conversation.ROUND_ADD_TO_DATASET,
+                        detail: 'conversation',
+                      })}
                     >
                       {addToDatasetAction?.label}
                     </EuiButton>
@@ -164,13 +181,28 @@ export const RoundThinkingPanel = ({
                       color="text"
                       iconSide="left"
                       onClick={() => setShowTraceFlyout(true)}
+                      {...getEbtProps({
+                        element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                        action: AGENT_BUILDER_UI_EBT.action.conversation.VIEW_TRACE,
+                        detail: 'conversation',
+                      })}
                     >
                       {viewTraceButtonLabel}
                     </EuiButton>
                   </EuiFlexItem>
                 )}
                 <EuiFlexItem grow={false}>
-                  <EuiButton iconType="code" color="text" iconSide="left" onClick={toggleFlyout}>
+                  <EuiButton
+                    iconType="code"
+                    color="text"
+                    iconSide="left"
+                    onClick={toggleFlyout}
+                    {...getEbtProps({
+                      element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                      action: AGENT_BUILDER_UI_EBT.action.conversation.VIEW_JSON,
+                      detail: 'conversation',
+                    })}
+                  >
                     {rawResponseButtonLabel}
                   </EuiButton>
                 </EuiFlexItem>
@@ -180,12 +212,8 @@ export const RoundThinkingPanel = ({
         )}
       </EuiFlexGroup>
       <RoundFlyout isOpen={showFlyout} onClose={toggleFlyout} rawRound={rawRound} />
-      {showTraceFlyout && TraceWaterfallComponent && traceId && (
-        <TraceFlyout
-          traceId={traceId}
-          onClose={() => setShowTraceFlyout(false)}
-          TraceWaterfall={TraceWaterfallComponent}
-        />
+      {showTraceFlyout && traceId && (
+        <TraceFlyout traceId={traceId} onClose={() => setShowTraceFlyout(false)} />
       )}
     </>
   );

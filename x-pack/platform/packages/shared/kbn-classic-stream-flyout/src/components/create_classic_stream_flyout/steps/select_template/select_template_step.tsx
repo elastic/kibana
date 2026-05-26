@@ -137,7 +137,7 @@ export const SelectTemplateStep = ({
       >
         {(list, search) => (
           <>
-            <div style={{ paddingLeft: euiTheme.size.l, paddingRight: euiTheme.size.l }}>
+            <div style={{ paddingLeft: euiTheme.size.s, paddingRight: euiTheme.size.s }}>
               {search}
               <EuiSpacer size="s" />
             </div>

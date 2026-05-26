@@ -14,7 +14,6 @@ const useResponderActionItemMock = (): AlertTableContextMenuItem[] => {
       'data-test-subj': 'endpointResponseActions-action-item',
       disabled: false,
       toolTipContent: undefined,
-      size: 's',
       onClick: jest.fn(),
       name: 'Respond',
     },

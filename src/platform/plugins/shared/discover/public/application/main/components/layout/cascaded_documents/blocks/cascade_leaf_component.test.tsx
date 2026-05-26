@@ -11,7 +11,7 @@ import React from 'react';
 import type { AggregateQuery } from '@kbn/es-query';
 import { BehaviorSubject } from 'rxjs';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import type { DataTableRecord } from '@kbn/discover-utils';
+import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import {
@@ -46,6 +46,11 @@ const expandedDoc = buildDataTableRecord(esHitsMock[0], dataViewWithTimefieldMoc
 const nextExpandedDoc = buildDataTableRecord(esHitsMock[1], dataViewWithTimefieldMock);
 const cellData = [expandedDoc, nextExpandedDoc];
 const cellId = 'leaf-1';
+const cascadedColumnsMeta: DataTableColumnsMeta = {
+  category: {
+    type: 'string',
+  },
+};
 
 const createVirtualizerController = () =>
   createChildVirtualizerController({ getRootVirtualizer: () => undefined });
@@ -54,7 +59,9 @@ const createCascadedDocumentsFetcher = (services: DiscoverServices) => {
   const stateManager: CascadedDocumentsStateManager = {
     getIsActiveInstance: jest.fn(() => true),
     getCascadedDocuments: jest.fn(() => undefined),
+    getColumnsMeta: jest.fn(() => ({})),
     setCascadedDocuments: jest.fn(),
+    setColumnsMeta: jest.fn(),
   };
   const scopedProfilesManager = services.profilesManager.createScopedProfilesManager({
     scopedEbtManager: services.ebtManager.createScopedEBTManager(),
@@ -128,6 +135,7 @@ const createContextValue = ({
     availableCascadeGroups: ['category'],
     selectedCascadeGroups: ['category'],
     cascadedDocumentsFetcher: createCascadedDocumentsFetcher(services),
+    cascadedColumnsMeta,
     esqlQuery,
     esqlVariables: undefined,
     timeRange: undefined,
@@ -176,6 +184,7 @@ describe('ESQLDataCascadeLeafCell', () => {
     expect(getExpandedDocSetter).toHaveBeenCalledWith(cellId);
     expect(getRenderDocumentViewMetaSetter).toHaveBeenCalledWith(cellId);
     expect(unifiedDataTableProps.rows).toEqual(cellData);
+    expect(unifiedDataTableProps.columnsMeta).toEqual(cascadedColumnsMeta);
     expect(unifiedDataTableProps.renderDocumentView).toBe('external');
     expect(unifiedDataTableProps.expandedDoc).toEqual(expandedDoc);
     expect(unifiedDataTableProps.setExpandedDoc).toBe(ownerBoundSetExpandedDoc);
@@ -200,6 +209,7 @@ describe('ESQLDataCascadeLeafCell', () => {
     );
 
     let unifiedDataTableProps = unifiedDataTableMock.mock.lastCall?.[0]!;
+    expect(unifiedDataTableProps.columnsMeta).toEqual(cascadedColumnsMeta);
     expect(unifiedDataTableProps.expandedDoc).toBeUndefined();
     expect(unifiedDataTableProps.setExpandedDoc).toBe(ownerBoundSetExpandedDoc);
     expect(unifiedDataTableProps.setRenderDocumentViewMeta).toBeUndefined();

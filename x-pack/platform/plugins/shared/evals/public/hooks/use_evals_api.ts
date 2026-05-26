@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import { useCallback } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { TraceFetcher, TraceSpan } from '@kbn/llm-trace-waterfall';
 import {
   EVALS_RUNS_URL,
   EVALS_RUN_URL,
@@ -494,20 +496,25 @@ export const useExampleScores = (exampleId: string) => {
   });
 };
 
-export const useTrace = (traceId: string | null) => {
+export const useEvalsTraceFetcher = (): TraceFetcher => {
   const { services } = useKibana();
 
-  return useQuery({
-    queryKey: queryKeys.traces.detail(traceId ?? ''),
-    queryFn: async (): Promise<GetTraceResponse> => {
-      if (!traceId) throw new Error('traceId is required');
-      const url = EVALS_TRACE_URL.replace('{traceId}', encodeURIComponent(traceId));
-      return services.http!.get<GetTraceResponse>(url, {
-        version: API_VERSIONS.internal.v1,
-      });
+  return useCallback(
+    async (traceId: string) => {
+      const trace = await services.http!.get<GetTraceResponse>(
+        EVALS_TRACE_URL.replace('{traceId}', encodeURIComponent(traceId)),
+        {
+          version: API_VERSIONS.internal.v1,
+        }
+      );
+
+      return {
+        spans: (trace.spans ?? []) as TraceSpan[],
+        durationMs: trace.duration_ms ?? 0,
+      };
     },
-    enabled: traceId != null,
-  });
+    [services.http]
+  );
 };
 
 interface TracingProjectsFilters {
