@@ -14,7 +14,6 @@ import { EuiBetaBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import type { FieldDefinition, SettingType } from '@kbn/management-settings-types';
-import { isBoolean } from 'lodash';
 
 export interface ExperimentalBadgeProps<T extends SettingType> {
   field: Pick<FieldDefinition<T>, 'experimental'>;
@@ -38,29 +37,26 @@ const badgeBaseProps: Pick<EuiBetaBadgeProps, 'alignment' | 'label' | 'size'> = 
 export const FieldTitleExperimentalBadge = <T extends SettingType>({
   field,
 }: ExperimentalBadgeProps<T>) => {
-  if (!field.experimental) {
+  const { experimental } = field;
+
+  if (!experimental) {
     return null;
   }
 
-  if (isBoolean(field.experimental)) {
-    return <EuiBetaBadge {...badgeBaseProps} tooltipContent={defaultTooltip} />;
-  }
+  const isBooleanExperimental = typeof experimental === 'boolean';
+  const tooltipContent =
+    isBooleanExperimental ? defaultTooltip : experimental.message || defaultTooltip;
 
-  if (!field.experimental.docLinksKey) {
+  if (!isBooleanExperimental && experimental.docLinksKey) {
     return (
       <EuiBetaBadge
         {...badgeBaseProps}
-        tooltipContent={field.experimental.message || defaultTooltip}
+        tooltipContent={tooltipContent}
+        href={experimental.docLinksKey}
+        target="_blank"
       />
     );
   }
 
-  return (
-    <EuiBetaBadge
-      {...badgeBaseProps}
-      tooltipContent={field.experimental.message || defaultTooltip}
-      href={field.experimental.docLinksKey}
-      target="_blank"
-    />
-  );
+  return <EuiBetaBadge {...badgeBaseProps} tooltipContent={tooltipContent} />;
 };
