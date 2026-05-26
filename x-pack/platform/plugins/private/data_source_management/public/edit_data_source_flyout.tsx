@@ -6,29 +6,37 @@
  */
 
 import type { FunctionComponent } from 'react';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiForm,
   EuiFormRow,
+  EuiSelect,
   EuiSpacer,
   EuiText,
   EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
 
+import { ALL_DATA_SOURCE_TYPES } from '../common';
 import type { DataSourceListItem } from '../common/sample_data_sources_client';
 import { createDataSourceFlyoutStrings } from './create_data_source_flyout_i18n';
+import { emptyCreateDataSourceFlyoutFormSettings } from './create_data_source_flyout_form_state';
+import { CreateDataSourceFlyoutTypeSettingsBlock } from './create_data_source_flyout_type_settings';
 import {
   dataSourcePreviewFlyoutStrings,
   dataSourcePreviewPageStrings,
 } from './data_source_preview_flyout_i18n';
+import { getDataSourceTypeLabel } from './get_data_source_type_label';
+import { persistedDataSourceToFormSettings } from './persisted_data_source_to_form_settings';
 
 export interface EditDataSourceFlyoutProps {
   source: DataSourceListItem;
@@ -49,6 +57,26 @@ export const EditDataSourceFlyout: FunctionComponent<EditDataSourceFlyoutProps> 
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | undefined>();
+
+  useEffect(() => {
+    setDescription(source.description);
+  }, [source.description]);
+
+  const readOnlyFormSettings = useMemo(() => {
+    if (!source.persistedConfig) {
+      return emptyCreateDataSourceFlyoutFormSettings();
+    }
+    return persistedDataSourceToFormSettings(source.persistedConfig);
+  }, [source.persistedConfig]);
+
+  const dataSourceTypeOptions = useMemo(
+    () =>
+      ALL_DATA_SOURCE_TYPES.map((value) => ({
+        value,
+        text: getDataSourceTypeLabel(value),
+      })),
+    []
+  );
 
   const handleSave = useCallback(async () => {
     setIsSaving(true);
@@ -93,17 +121,44 @@ export const EditDataSourceFlyout: FunctionComponent<EditDataSourceFlyoutProps> 
             <EuiSpacer size="m" />
           </>
         ) : null}
-        <EuiFormRow label={createDataSourceFlyoutStrings.descriptionLabel()} fullWidth>
-          <EuiTextArea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            data-test-subj="editDataSourceFlyoutDescription"
-            fullWidth
-            rows={5}
-            disabled={isSaving || isDeleting}
-            aria-label={createDataSourceFlyoutStrings.descriptionLabel()}
+        <EuiForm component="div">
+          <EuiFormRow label={createDataSourceFlyoutStrings.typeLabel()} fullWidth>
+            <EuiSelect
+              options={dataSourceTypeOptions}
+              value={source.type}
+              disabled
+              data-test-subj="editDataSourceFlyoutType"
+              fullWidth
+              aria-label={createDataSourceFlyoutStrings.typeAriaLabel()}
+            />
+          </EuiFormRow>
+          <EuiFormRow label={createDataSourceFlyoutStrings.nameLabel()} fullWidth>
+            <EuiFieldText
+              value={source.name}
+              disabled
+              data-test-subj="editDataSourceFlyoutName"
+              fullWidth
+              autoComplete="off"
+            />
+          </EuiFormRow>
+          <EuiFormRow label={createDataSourceFlyoutStrings.descriptionLabel()} fullWidth>
+            <EuiTextArea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              data-test-subj="editDataSourceFlyoutDescription"
+              fullWidth
+              rows={5}
+              disabled={isSaving || isDeleting}
+              aria-label={createDataSourceFlyoutStrings.descriptionLabel()}
+            />
+          </EuiFormRow>
+          <CreateDataSourceFlyoutTypeSettingsBlock
+            dataSourceType={source.type}
+            formSettings={readOnlyFormSettings}
+            onFormSettingsChange={() => {}}
+            disabled
           />
-        </EuiFormRow>
+        </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>

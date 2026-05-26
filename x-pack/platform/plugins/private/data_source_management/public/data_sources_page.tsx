@@ -185,7 +185,7 @@ const DataSourcesTabPanel: FunctionComponent<DataSourcesTabPanelProps> = ({
       noItemsMessage={i18n.translate('dataSourceManagement.table.sourcesNoItems', {
         defaultMessage: 'No data sources found',
       })}
-      tableLayout="auto"
+      tableLayout="fixed"
       responsiveBreakpoint={false}
     />
   </>
@@ -198,6 +198,8 @@ interface DataSetsTabPanelProps {
   setSelectedDataSets: React.Dispatch<React.SetStateAction<DataSetTableRow[]>>;
   dataSetsSearchQuery: string;
   onDataSetsSearchQueryChange: (nextQuery: string) => void;
+  /** Names for the search bar field filter (registered sources and any orphan `sourceName` values from data sets). */
+  dataSourceFilterOptions: ReadonlyArray<{ value: string }>;
   modificationsAllowed: boolean;
   hasDataSources: boolean;
   /** When false, the catalog has no data sets; show the empty prompt with a link to the Data sources tab. */
@@ -216,6 +218,7 @@ const DataSetsTabPanel: FunctionComponent<DataSetsTabPanelProps> = ({
   setSelectedDataSets,
   dataSetsSearchQuery,
   onDataSetsSearchQueryChange,
+  dataSourceFilterOptions,
   modificationsAllowed,
   hasDataSources,
   hasAnyDataSetsInCatalog,
@@ -266,6 +269,29 @@ const DataSetsTabPanel: FunctionComponent<DataSetsTabPanelProps> = ({
     );
   }, [hasAnyDataSetsInCatalog, onGoToDataSourcesTab]);
 
+  const dataSetsSearchFilters = useMemo(
+    () =>
+      dataSourceFilterOptions.length === 0
+        ? undefined
+        : [
+            {
+              type: 'field_value_selection' as const,
+              field: 'sourceName',
+              name: i18n.translate(
+                'dataSourceManagement.datasetsTab.search.dataSourceFilterLabel',
+                {
+                  defaultMessage: 'Data source',
+                }
+              ),
+              multiSelect: 'or' as const,
+              operator: 'exact' as const,
+              options: dataSourceFilterOptions,
+              autoSortOptions: false,
+            },
+          ],
+    [dataSourceFilterOptions]
+  );
+
   return (
     <>
       <EuiSpacer size="m" />
@@ -290,6 +316,7 @@ const DataSetsTabPanel: FunctionComponent<DataSetsTabPanelProps> = ({
               },
             },
           },
+          filters: dataSetsSearchFilters,
           toolsLeft:
             modificationsAllowed && selectedDataSets.length > 0 ? (
               <EuiButton
@@ -758,20 +785,31 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
         }),
         sortable: true,
         width: '24%',
-        render: (value: string, record: DataSourceListItem) => (
-          <EuiLink
-            color="primary"
-            data-test-subj={`dataSourceManagementNameLink-${record.id}`}
-            onClick={(e: React.MouseEvent) => {
-              e.preventDefault();
-              e.stopPropagation();
-              pushFilteredDataSetsView(record.name);
-            }}
-          >
-            {value}
-          </EuiLink>
-        ),
+        truncateText: true,
         'data-test-subj': 'dataSourceManagementColName',
+      },
+      {
+        name: i18n.translate('dataSourceManagement.table.columnDataSets', {
+          defaultMessage: 'Data sets',
+        }),
+        width: '12%',
+        render: (record: DataSourceListItem) => {
+          const count = dataSets.filter((d) => d.sourceName === record.name).length;
+          return (
+            <EuiLink
+              color="primary"
+              data-test-subj={`dataSourceManagementDataSetsCountLink-${record.id}`}
+              onClick={(e: React.MouseEvent) => {
+                e.preventDefault();
+                e.stopPropagation();
+                pushFilteredDataSetsView(record.name);
+              }}
+            >
+              {count}
+            </EuiLink>
+          );
+        },
+        'data-test-subj': 'dataSourceManagementColDataSets',
       },
       {
         field: 'type',
@@ -790,6 +828,7 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
         }),
         sortable: true,
         truncateText: true,
+        width: '32%',
         'data-test-subj': 'dataSourceManagementColDescription',
       },
     ];
@@ -802,7 +841,8 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
         name: i18n.translate('dataSourceManagement.table.columnActions', {
           defaultMessage: 'Actions',
         }),
-        width: '120px',
+        width: '164px',
+        minWidth: '164px',
         field: 'id',
         actions: [
           {
@@ -861,6 +901,7 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
       },
     ];
   }, [
+    dataSets,
     handleDeleteSourceRow,
     modificationsAllowed,
     openEditDataSourceFlyoutFromSourceRow,
@@ -914,23 +955,6 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
         width: '20%',
         truncateText: true,
         'data-test-subj': 'dataSourceManagementSetsColResource',
-      },
-      {
-        field: 'partitionDetection',
-        name: i18n.translate('dataSourceManagement.datasetsTab.columnPartition', {
-          defaultMessage: 'Partition detection',
-        }),
-        render: (value: DataSetListItem['partitionDetection']) =>
-          value === 'hive'
-            ? i18n.translate('dataSourceManagement.datasetsTab.partitionHive', {
-                defaultMessage: 'Hive partitions',
-              })
-            : i18n.translate('dataSourceManagement.datasetsTab.partitionNone', {
-                defaultMessage: 'None',
-              }),
-        sortable: true,
-        width: '14%',
-        'data-test-subj': 'dataSourceManagementSetsColPartition',
       },
       {
         field: 'description',
@@ -1022,11 +1046,28 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
     }));
   }, [dataSets, items]);
 
+  const dataSourceFilterOptions = useMemo(() => {
+    const names = new Set<string>();
+    for (const source of items) {
+      names.add(source.name);
+    }
+    for (const set of dataSets) {
+      names.add(set.sourceName);
+    }
+    return Array.from(names)
+      .sort((a, b) => a.localeCompare(b))
+      .map((name) => ({ value: name }));
+  }, [items, dataSets]);
+
   const dataSetsTabLabel = i18n.translate('dataSourceManagement.tabs.dataSetsTitle', {
     defaultMessage: 'Data sets',
   });
   const dataSourcesTabLabel = i18n.translate('dataSourceManagement.tabs.dataSourcesTitle', {
     defaultMessage: 'Data sources',
+  });
+  const pageHeaderDescription = i18n.translate('dataSourceManagement.pageHeaderDescription', {
+    defaultMessage:
+      'Register external connections and organize them into data sets for use in ES|QL.',
   });
   const addDataSetTableButtonLabel = i18n.translate(
     'dataSourceManagement.datasetsTab.addDataSetButton',
@@ -1120,6 +1161,7 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
         <EuiPageHeader
           bottomBorder
           data-test-subj="dataSourceManagementPageHeader"
+          description={pageHeaderDescription}
           pageTitle={<span data-test-subj="dataSourceManagementPageTitle">{pageTitle}</span>}
           tabs={pageHeaderTabs}
           tabsProps={{
@@ -1145,6 +1187,7 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
         ) : (
           <DataSetsTabPanel
             columns={dataSetsColumns}
+            dataSourceFilterOptions={dataSourceFilterOptions}
             dataSetsSearchQuery={dataSetsSearchQuery}
             dataSetsWithJoinedType={dataSetsWithJoinedType}
             modificationsAllowed={modificationsAllowed}

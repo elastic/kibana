@@ -25,10 +25,13 @@ export function CreateDataSourceFlyoutTypeSettings({
   dataSourceType,
   formSettings,
   onFormSettingsChange,
+  disabled = false,
 }: {
   dataSourceType: DataSourceType;
   formSettings: CreateDataSourceFlyoutFormSettings;
   onFormSettingsChange: (next: CreateDataSourceFlyoutFormSettings) => void;
+  /** When true, all inputs are read-only (e.g. edit data source flyout body). */
+  disabled?: boolean;
 }) {
   const patch = (
     type: DataSourceType,
@@ -48,6 +51,7 @@ export function CreateDataSourceFlyoutTypeSettings({
           fullWidth
         >
           <EuiFieldText
+            disabled={disabled}
             value={v.region}
             onChange={(e) => patch('s3', { region: e.target.value })}
             data-test-subj="createDataSourceFlyoutS3Region"
@@ -62,6 +66,7 @@ export function CreateDataSourceFlyoutTypeSettings({
           fullWidth
         >
           <EuiFieldText
+            disabled={disabled}
             value={v.endpoint}
             onChange={(e) => patch('s3', { endpoint: e.target.value })}
             data-test-subj="createDataSourceFlyoutS3Endpoint"
@@ -76,6 +81,7 @@ export function CreateDataSourceFlyoutTypeSettings({
           fullWidth
         >
           <EuiFieldText
+            disabled={disabled}
             value={v.auth}
             onChange={(e) => patch('s3', { auth: e.target.value })}
             data-test-subj="createDataSourceFlyoutS3Auth"
@@ -90,6 +96,7 @@ export function CreateDataSourceFlyoutTypeSettings({
           fullWidth
         >
           <EuiFieldText
+            disabled={disabled}
             value={v.access_key}
             onChange={(e) => patch('s3', { access_key: e.target.value })}
             data-test-subj="createDataSourceFlyoutS3AccessKey"
@@ -104,6 +111,7 @@ export function CreateDataSourceFlyoutTypeSettings({
           fullWidth
         >
           <EuiFieldPassword
+            disabled={disabled}
             type="dual"
             value={v.secret_key}
             onChange={(e) => patch('s3', { secret_key: e.target.value })}
@@ -127,6 +135,7 @@ export function CreateDataSourceFlyoutTypeSettings({
           fullWidth
         >
           <EuiFieldText
+            disabled={disabled}
             value={v.project_id}
             onChange={(e) => patch('gcs', { project_id: e.target.value })}
             data-test-subj="createDataSourceFlyoutGcsProjectId"
@@ -141,6 +150,7 @@ export function CreateDataSourceFlyoutTypeSettings({
           fullWidth
         >
           <EuiFieldText
+            disabled={disabled}
             value={v.endpoint}
             onChange={(e) => patch('gcs', { endpoint: e.target.value })}
             data-test-subj="createDataSourceFlyoutGcsEndpoint"
@@ -155,6 +165,7 @@ export function CreateDataSourceFlyoutTypeSettings({
           fullWidth
         >
           <EuiFieldText
+            disabled={disabled}
             value={v.token_uri}
             onChange={(e) => patch('gcs', { token_uri: e.target.value })}
             data-test-subj="createDataSourceFlyoutGcsTokenUri"
@@ -169,6 +180,7 @@ export function CreateDataSourceFlyoutTypeSettings({
           fullWidth
         >
           <EuiFieldText
+            disabled={disabled}
             value={v.auth}
             onChange={(e) => patch('gcs', { auth: e.target.value })}
             data-test-subj="createDataSourceFlyoutGcsAuth"
@@ -183,6 +195,7 @@ export function CreateDataSourceFlyoutTypeSettings({
           fullWidth
         >
           <EuiTextArea
+            disabled={disabled}
             value={v.credentialsJson}
             onChange={(e) => patch('gcs', { credentialsJson: e.target.value })}
             data-test-subj="createDataSourceFlyoutGcsCredentials"
@@ -207,6 +220,7 @@ export function CreateDataSourceFlyoutTypeSettings({
           fullWidth
         >
           <EuiFieldText
+            disabled={disabled}
             value={v.endpoint}
             onChange={(e) => patch('azure_blob', { endpoint: e.target.value })}
             data-test-subj="createDataSourceFlyoutAzureEndpoint"
@@ -221,6 +235,7 @@ export function CreateDataSourceFlyoutTypeSettings({
           fullWidth
         >
           <EuiFieldText
+            disabled={disabled}
             value={v.account}
             onChange={(e) => patch('azure_blob', { account: e.target.value })}
             data-test-subj="createDataSourceFlyoutAzureAccount"
@@ -235,6 +250,7 @@ export function CreateDataSourceFlyoutTypeSettings({
           fullWidth
         >
           <EuiFieldText
+            disabled={disabled}
             value={v.auth}
             onChange={(e) => patch('azure_blob', { auth: e.target.value })}
             data-test-subj="createDataSourceFlyoutAzureAuth"
@@ -252,6 +268,7 @@ export function CreateDataSourceFlyoutTypeSettings({
           fullWidth
         >
           <EuiFieldPassword
+            disabled={disabled}
             type="dual"
             value={v.connection_string}
             onChange={(e) => patch('azure_blob', { connection_string: e.target.value })}
@@ -267,6 +284,7 @@ export function CreateDataSourceFlyoutTypeSettings({
           fullWidth
         >
           <EuiFieldPassword
+            disabled={disabled}
             type="dual"
             value={v.key}
             onChange={(e) => patch('azure_blob', { key: e.target.value })}
@@ -282,6 +300,7 @@ export function CreateDataSourceFlyoutTypeSettings({
           fullWidth
         >
           <EuiFieldPassword
+            disabled={disabled}
             type="dual"
             value={v.sas_token}
             onChange={(e) => patch('azure_blob', { sas_token: e.target.value })}
@@ -305,6 +324,7 @@ export function CreateDataSourceFlyoutTypeSettings({
           fullWidth
         >
           <EuiFieldText
+            disabled={disabled}
             value={v.region}
             onChange={(e) => patch('iceberg', { region: e.target.value })}
             data-test-subj="createDataSourceFlyoutIcebergRegion"
@@ -319,6 +339,7 @@ export function CreateDataSourceFlyoutTypeSettings({
           fullWidth
         >
           <EuiFieldText
+            disabled={disabled}
             value={v.endpoint}
             onChange={(e) => patch('iceberg', { endpoint: e.target.value })}
             data-test-subj="createDataSourceFlyoutIcebergEndpoint"
@@ -333,6 +354,7 @@ export function CreateDataSourceFlyoutTypeSettings({
           fullWidth
         >
           <EuiFieldText
+            disabled={disabled}
             value={v.access_key}
             onChange={(e) => patch('iceberg', { access_key: e.target.value })}
             data-test-subj="createDataSourceFlyoutIcebergAccessKey"
@@ -347,6 +369,7 @@ export function CreateDataSourceFlyoutTypeSettings({
           fullWidth
         >
           <EuiFieldPassword
+            disabled={disabled}
             type="dual"
             value={v.secret_key}
             onChange={(e) => patch('iceberg', { secret_key: e.target.value })}
@@ -367,9 +390,9 @@ export function CreateDataSourceFlyoutTypeSettings({
           label={i18n.translate('dataSourceManagement.createFlyout.jdbc.fields.host', {
             defaultMessage: 'Host',
           })}
-          isInvalid={!v.host.trim()}
+          isInvalid={!disabled && !v.host.trim()}
           error={
-            v.host.trim()
+            disabled || v.host.trim()
               ? undefined
               : i18n.translate('dataSourceManagement.createFlyout.jdbc.fields.hostRequired', {
                   defaultMessage: 'Host is required.',
@@ -378,11 +401,12 @@ export function CreateDataSourceFlyoutTypeSettings({
           fullWidth
         >
           <EuiFieldText
+            disabled={disabled}
             value={v.host}
             onChange={(e) => patch('jdbc', { host: e.target.value })}
             data-test-subj="createDataSourceFlyoutJdbcHost"
             fullWidth
-            isInvalid={!v.host.trim()}
+            isInvalid={!disabled && !v.host.trim()}
             autoComplete="off"
           />
         </EuiFormRow>
@@ -390,9 +414,9 @@ export function CreateDataSourceFlyoutTypeSettings({
           label={i18n.translate('dataSourceManagement.createFlyout.jdbc.fields.port', {
             defaultMessage: 'Port',
           })}
-          isInvalid={!v.port.trim()}
+          isInvalid={!disabled && !v.port.trim()}
           error={
-            v.port.trim()
+            disabled || v.port.trim()
               ? undefined
               : i18n.translate('dataSourceManagement.createFlyout.jdbc.fields.portRequired', {
                   defaultMessage: 'Port is required.',
@@ -401,11 +425,12 @@ export function CreateDataSourceFlyoutTypeSettings({
           fullWidth
         >
           <EuiFieldText
+            disabled={disabled}
             value={v.port}
             onChange={(e) => patch('jdbc', { port: e.target.value })}
             data-test-subj="createDataSourceFlyoutJdbcPort"
             fullWidth
-            isInvalid={!v.port.trim()}
+            isInvalid={!disabled && !v.port.trim()}
             autoComplete="off"
           />
         </EuiFormRow>
@@ -413,9 +438,9 @@ export function CreateDataSourceFlyoutTypeSettings({
           label={i18n.translate('dataSourceManagement.createFlyout.jdbc.fields.database', {
             defaultMessage: 'Database',
           })}
-          isInvalid={!v.database.trim()}
+          isInvalid={!disabled && !v.database.trim()}
           error={
-            v.database.trim()
+            disabled || v.database.trim()
               ? undefined
               : i18n.translate('dataSourceManagement.createFlyout.jdbc.fields.databaseRequired', {
                   defaultMessage: 'Database is required.',
@@ -424,16 +449,18 @@ export function CreateDataSourceFlyoutTypeSettings({
           fullWidth
         >
           <EuiFieldText
+            disabled={disabled}
             value={v.database}
             onChange={(e) => patch('jdbc', { database: e.target.value })}
             data-test-subj="createDataSourceFlyoutJdbcDatabase"
             fullWidth
-            isInvalid={!v.database.trim()}
+            isInvalid={!disabled && !v.database.trim()}
             autoComplete="off"
           />
         </EuiFormRow>
         <EuiFormRow hasChildLabel hasEmptyLabelSpace fullWidth>
           <EuiSwitch
+            disabled={disabled}
             label={i18n.translate('dataSourceManagement.createFlyout.jdbc.fields.ssl', {
               defaultMessage: 'SSL',
             })}
@@ -449,6 +476,7 @@ export function CreateDataSourceFlyoutTypeSettings({
           fullWidth
         >
           <EuiFieldText
+            disabled={disabled}
             value={v.username}
             onChange={(e) => patch('jdbc', { username: e.target.value })}
             data-test-subj="createDataSourceFlyoutJdbcUsername"
@@ -463,6 +491,7 @@ export function CreateDataSourceFlyoutTypeSettings({
           fullWidth
         >
           <EuiFieldPassword
+            disabled={disabled}
             type="dual"
             value={v.password}
             onChange={(e) => patch('jdbc', { password: e.target.value })}
@@ -483,9 +512,9 @@ export function CreateDataSourceFlyoutTypeSettings({
           label={i18n.translate('dataSourceManagement.createFlyout.flight.fields.host', {
             defaultMessage: 'Host',
           })}
-          isInvalid={!v.host.trim()}
+          isInvalid={!disabled && !v.host.trim()}
           error={
-            v.host.trim()
+            disabled || v.host.trim()
               ? undefined
               : i18n.translate('dataSourceManagement.createFlyout.flight.fields.hostRequired', {
                   defaultMessage: 'Host is required.',
@@ -494,11 +523,12 @@ export function CreateDataSourceFlyoutTypeSettings({
           fullWidth
         >
           <EuiFieldText
+            disabled={disabled}
             value={v.host}
             onChange={(e) => patch('flight', { host: e.target.value })}
             data-test-subj="createDataSourceFlyoutFlightHost"
             fullWidth
-            isInvalid={!v.host.trim()}
+            isInvalid={!disabled && !v.host.trim()}
             autoComplete="off"
           />
         </EuiFormRow>
@@ -512,6 +542,7 @@ export function CreateDataSourceFlyoutTypeSettings({
           fullWidth
         >
           <EuiFieldText
+            disabled={disabled}
             value={v.port}
             onChange={(e) => patch('flight', { port: e.target.value })}
             data-test-subj="createDataSourceFlyoutFlightPort"
@@ -541,7 +572,9 @@ export function CreateDataSourceFlyoutTypeSettingsBlock(props: {
   dataSourceType: DataSourceType;
   formSettings: CreateDataSourceFlyoutFormSettings;
   onFormSettingsChange: (next: CreateDataSourceFlyoutFormSettings) => void;
+  disabled?: boolean;
 }) {
+  const { disabled = false, dataSourceType, formSettings, onFormSettingsChange } = props;
   return (
     <>
       <EuiSpacer size="m" />
@@ -551,7 +584,12 @@ export function CreateDataSourceFlyoutTypeSettingsBlock(props: {
         })}
       </EuiText>
       <EuiSpacer size="s" />
-      <CreateDataSourceFlyoutTypeSettings {...props} />
+      <CreateDataSourceFlyoutTypeSettings
+        dataSourceType={dataSourceType}
+        formSettings={formSettings}
+        onFormSettingsChange={onFormSettingsChange}
+        disabled={disabled}
+      />
     </>
   );
 }
