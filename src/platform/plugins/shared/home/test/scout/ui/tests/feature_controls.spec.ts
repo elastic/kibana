@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Kibana Home page role-based visibility of solution cards and the Manage
-// section. Migrated from x-pack/platform/test/functional/apps/home/feature_controls.
+// Kibana Home page role-based visibility of solution cards and the Manage section.
 
 import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';

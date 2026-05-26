@@ -9,13 +9,11 @@
 
 // Capabilities contract for the Kibana Home page. Each role drives whether
 // the Stack Management quick-link and Manage section render, via the
-// `navLinks.management` capability. Migrated from the deleted FTR feature-controls
-// suite at x-pack/platform/test/functional/apps/home/feature_controls.
+// `navLinks.management` capability.
 //
 // We use samlAuth.asInteractiveUser + cookieHeader (not API key) because
 // the home page reads capabilities from the interactive session; an API-key
-// based call can resolve to a different shape (see scout-migrate-from-ftr
-// "Scout API auth" guidance).
+// based call can resolve to a different shape.
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
