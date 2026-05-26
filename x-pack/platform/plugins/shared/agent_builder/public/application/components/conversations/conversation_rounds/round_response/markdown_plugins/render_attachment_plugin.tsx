@@ -123,11 +123,11 @@ export const createRenderAttachmentRenderer = ({
       return null;
     }
 
-    if (isStreaming) {
+    const attachment = conversationAttachments?.find((att) => att.id === attachmentId);
+
+    if (isStreaming || !attachment) {
       return <AttachmentLoadingSkeleton />;
     }
-
-    const attachment = conversationAttachments?.find((att) => att.id === attachmentId);
 
     const versionToUse = resolveAttachmentVersion({
       explicitVersion,
