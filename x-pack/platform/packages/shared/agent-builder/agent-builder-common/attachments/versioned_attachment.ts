@@ -215,7 +215,7 @@ export const versionedAttachmentSchema = z.object({
   client_id: z.string().optional(),
   origin: z.string().optional(),
   origin_snapshot_at: z.string().optional(),
-  group_id: z.string().optional(),
+  group_id: z.string().max(256).optional(),
 });
 
 export const attachmentInputSchema = z.object({
@@ -226,7 +226,7 @@ export const attachmentInputSchema = z.object({
   description: z.string().optional(),
   hidden: z.boolean().optional(),
   readonly: z.boolean().optional(),
-  group_id: z.string().optional(),
+  group_id: z.string().max(256).optional(),
 });
 
 /**
@@ -246,8 +246,8 @@ export interface AttachmentGroup {
 
 export const attachmentGroupSchema = z.object({
   type: z.literal('group'),
-  id: z.string(),
-  label: z.string(),
+  id: z.string().max(256),
+  label: z.string().max(1024),
   items: z.array(attachmentInputSchema),
 });
 
