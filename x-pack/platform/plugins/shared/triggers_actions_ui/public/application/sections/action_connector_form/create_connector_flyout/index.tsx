@@ -126,7 +126,6 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   } = useActionTypeModel({
     actionTypeRegistry,
     actionTypeId: actionType?.id,
-    source: actionType?.source,
     http,
     uiSettings,
   });

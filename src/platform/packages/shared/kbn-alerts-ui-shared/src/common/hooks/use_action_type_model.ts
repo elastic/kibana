@@ -9,7 +9,6 @@
 
 import { useMemo } from 'react';
 import { useQuery } from '@kbn/react-query';
-import type { ActionTypeSource } from '@kbn/actions-types';
 import type { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import type { ActionTypeModel, ActionTypeRegistryContract } from '../types';
 import {
@@ -37,23 +36,17 @@ export interface UseActionTypeModelResult {
  * For stack connectors (registered in the actionTypeRegistry), returns the model synchronously.
  * For spec-based connectors, fetches the spec from the API and transforms it into an ActionTypeModel.
  *
- * The `source` parameter is accepted for API compatibility but the primary routing decision is
- * driven by the registry: if the connector type is registered, the registry model is used; if not,
- * the spec endpoint is tried as a fallback. This means the hook works correctly even when `source`
- * is not available (e.g. edit flyout opened from workflow context or after an API round-trip that
- * strips the source field).
+ * Routing is driven by the registry: if the connector type is registered, the registry model is
+ * used; if not, the spec endpoint is tried as a fallback.
  */
 export function useActionTypeModel({
   actionTypeRegistry,
   actionTypeId,
-  source: _source,
   http,
   uiSettings,
 }: {
   actionTypeRegistry: ActionTypeRegistryContract;
   actionTypeId: string | undefined;
-  /** @deprecated routing is driven by registry lookup; this parameter is no longer used */
-  source?: ActionTypeSource;
   http: HttpSetup;
   uiSettings?: IUiSettingsClient;
 }): UseActionTypeModelResult {

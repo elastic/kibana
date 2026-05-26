@@ -73,7 +73,6 @@ export const RuleActionsMessage = (props: RuleActionsMessageProps) => {
   } = useActionTypeModel({
     actionTypeRegistry,
     actionTypeId: actionType?.id,
-    source: actionType?.source,
     http,
   });
 

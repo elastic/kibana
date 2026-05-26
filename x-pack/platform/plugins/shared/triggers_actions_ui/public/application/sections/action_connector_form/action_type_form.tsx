@@ -430,7 +430,6 @@ export const ActionTypeForm = ({
     actionTypeRegistry,
     actionTypeId:
       actionTypesIndex[actionConnector.actionTypeId]?.id ?? actionConnector.actionTypeId,
-    source: actionTypesIndex[actionConnector.actionTypeId]?.source,
     http,
     uiSettings,
   });

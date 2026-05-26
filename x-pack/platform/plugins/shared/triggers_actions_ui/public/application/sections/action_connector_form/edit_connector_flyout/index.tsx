@@ -151,7 +151,6 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   } = useActionTypeModel({
     actionTypeRegistry,
     actionTypeId: connector.actionTypeId,
-    source,
     http,
     uiSettings,
   });
