@@ -291,7 +291,7 @@ export const AlertEpisodesListPage = () => {
             color="text"
             size="s"
             iconType="gear"
-            onClick={onManageRulesClick}
+            href={services.http.basePath.prepend(paths.ruleList)}
             data-test-subj="alertingV2EpisodesListManageRules"
           >
             {i18n.EPISODES_LIST_MANAGE_RULES}
