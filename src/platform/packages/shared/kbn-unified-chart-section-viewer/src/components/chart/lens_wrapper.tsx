@@ -118,14 +118,17 @@ export function LensWrapper({
 
   // EmbeddableRendererContext is the only way to configure the visible quick-action row because
   // Lens does not expose a first-class prop for it (tracked in https://github.com/elastic/kibana/issues/236787).
-  const quickActionView = useMemo(
-    () => quickActionIds ?? DEFAULT_QUICK_ACTION_VIEW,
+  // Memoize the whole context value (not just `view`) so consumers of the context don't re-render
+  // every time LensWrapper does — a fresh `{ quickActions: { view } }` literal each render would
+  // defeat the inner memo.
+  const embeddableRendererContextValue = useMemo(
+    () => ({ quickActions: { view: quickActionIds ?? DEFAULT_QUICK_ACTION_VIEW } }),
     [quickActionIds]
   );
 
   return (
     <div css={chartCss}>
-      <EmbeddableRendererContext.Provider value={{ quickActions: { view: quickActionView } }}>
+      <EmbeddableRendererContext.Provider value={embeddableRendererContextValue}>
         <EmbeddableComponent
           {...lensProps}
           title={lensProps.attributes.title}
