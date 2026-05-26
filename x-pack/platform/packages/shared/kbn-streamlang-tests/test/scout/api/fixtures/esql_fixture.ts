@@ -59,13 +59,15 @@ export const esqlFixture = apiTest.extend<{}, EsqlFixture & EsqlFixtureOptions>(
           throw new Error('ES|QL query must start with a "from" clause.');
         }
 
+        const queryWithDirective = `SET unmapped_fields="LOAD";\n${query}`;
+
         // Retry ES|QL queries to handle cluster state propagation delays.
         // There can be a delay between index creation and
         // when ES|QL can resolve column names from the mapping.
         const response = await pRetry(
           () =>
             esClient.esql.query({
-              query,
+              query: queryWithDirective,
               drop_null_columns: esqlDropNullColumns,
             }),
           {

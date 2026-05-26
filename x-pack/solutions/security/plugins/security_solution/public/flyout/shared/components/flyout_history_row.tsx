@@ -25,11 +25,14 @@ import { FormattedRelativePreferenceDate } from '../../../common/components/form
 import { DocumentDetailsRightPanelKey } from '../../document_details/shared/constants/panel_keys';
 import { useBasicDataFromDetailsData } from '../../document_details/shared/hooks/use_basic_data_from_details_data';
 import { useEventDetails } from '../../document_details/shared/hooks/use_event_details';
-import { getAlertTitle, getEventTitle } from '../../../flyout_v2/document/utils/get_header_title';
+import {
+  getAlertTitle,
+  getEventTitle,
+} from '../../../flyout_v2/document/main/utils/get_header_title';
 import { getField } from '../../document_details/shared/utils';
 import { RulePanelKey } from '../../rule_details/right';
 import { NetworkPanelKey } from '../../network_details';
-import { useRuleDetails } from '../../../flyout_v2/rule/hooks/use_rule_details';
+import { useRuleDetails } from '../../../flyout_v2/rule/main/hooks/use_rule_details';
 import {
   DOCUMENT_DETAILS_HISTORY_ROW_TEST_ID,
   GENERIC_HISTORY_ROW_TEST_ID,

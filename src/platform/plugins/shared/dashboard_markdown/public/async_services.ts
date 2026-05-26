@@ -10,3 +10,4 @@
 export { createMarkdownAction } from './create_markdown_action';
 export { getConvertLegacyMarkdownAction } from './convert_legacy_markdown_action';
 export { markdownEmbeddableFactory } from './markdown_embeddable';
+export { markdownClient } from './markdown_client/markdown_client';

@@ -175,6 +175,11 @@ function generateSchemaLines(lineWriter, prop, mappings) {
     return;
   }
 
+  if (mappings.type === 'flattened') {
+    lineWriter.addLine(`${propKey}: ecsFlattened(),`);
+    return;
+  }
+
   // only handling objects for the rest of this function
   if (mappings.properties == null) {
     logError(`unknown properties to map: ${prop}: ${JSON.stringify(mappings)}`);
@@ -203,10 +208,13 @@ function generateSchemaLines(lineWriter, prop, mappings) {
   }
   lineWriter.dedent();
 
-  lineWriter.addLine('})');
   if (mappings.type === 'nested') {
+    lineWriter.addLine('}),');
+    lineWriter.addLine('{ maxSize: 1000 }');
     lineWriter.dedent();
     lineWriter.addLine(')');
+  } else {
+    lineWriter.addLine('})');
   }
 
   lineWriter.dedent();
@@ -353,6 +361,10 @@ function ecsDateRange() {
 
 function ecsDateRangeMulti() {
   return schema.maybe(schema.arrayOf(ecsDateRangeBase()));
+}
+
+function ecsFlattened() {
+  return schema.maybe(schema.any());
 }
 
 const ISO_DATE_PATTERN = /^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$/;

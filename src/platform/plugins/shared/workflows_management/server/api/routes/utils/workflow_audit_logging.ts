@@ -379,13 +379,21 @@ export class WorkflowManagementAuditLog {
 
   logExecutionResumed(
     request: KibanaRequest,
-    params: { executionId: string; error?: unknown }
+    params: {
+      executionId: string;
+      error?: unknown;
+      /** Present on success; mirrors execution context written by the engine. */
+      resumedBy?: string;
+    }
   ): void {
-    const { executionId, error } = params;
-    const message =
-      error !== undefined
-        ? `User failed to resume workflow execution [executionId=${executionId}]`
-        : `User resumed workflow execution [executionId=${executionId}]`;
+    const { executionId, error, resumedBy } = params;
+    let message: string;
+    if (error !== undefined) {
+      message = `User failed to resume workflow execution [executionId=${executionId}]`;
+    } else {
+      const responderPart = resumedBy !== undefined ? ` [responder=${resumedBy}]` : '';
+      message = `User resumed workflow execution [executionId=${executionId}]${responderPart}`;
+    }
     this.log(
       request,
       createEvent(WorkflowManagementAuditActions.RESUME_EXECUTION, 'change', message, error)

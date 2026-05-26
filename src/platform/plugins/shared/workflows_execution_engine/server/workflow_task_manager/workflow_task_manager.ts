@@ -8,15 +8,81 @@
  */
 
 import { v4 } from 'uuid';
-import type { KibanaRequest } from '@kbn/core/server';
+import { type KibanaRequest, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { type TaskManagerStartContract, TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { EsWorkflowExecution } from '@kbn/workflows';
 import { WORKFLOW_RESUME_TASK_TYPE } from './types';
 import type { ResumeWorkflowExecutionParams } from './types';
 import { generateExecutionTaskScope } from '../utils';
 
+/** Stable task id so idle-timeout (workflow + enclosing step) resumes dedupe per execution. */
+export const getWorkflowGlobalTimeoutResumeTaskId = (workflowExecutionId: string): string =>
+  `workflow-global-timeout-${workflowExecutionId}`;
+
 export class WorkflowTaskManager {
   constructor(private taskManager: TaskManagerStartContract) {}
+
+  /**
+   * Schedules or updates a single `workflow:resume` at the earliest idle deadline (HITL /
+   * sync child). Skips TM writes when runAt and params already match.
+   *
+   * Uses `taskManager.get` once per schedule attempt to dedupe: callers invoke this when
+   * entering `handleExecutionDelay` after a step completes (once per `runNode` pass while the
+   * workflow is waiting), not in an inner hot loop over unchanged state.
+   */
+  async scheduleWorkflowGlobalTimeoutResumeTask({
+    workflowExecution,
+    resumeAt,
+    fakeRequest,
+  }: {
+    workflowExecution: EsWorkflowExecution;
+    resumeAt: Date;
+    fakeRequest: KibanaRequest;
+  }): Promise<{ taskId: string }> {
+    const taskId = getWorkflowGlobalTimeoutResumeTaskId(workflowExecution.id);
+    const desiredRunAtMs = resumeAt.getTime();
+
+    try {
+      const existing = await this.taskManager.get(taskId);
+      if (existing.runAt != null) {
+        const existingRunAtMs = new Date(existing.runAt).getTime();
+        const params = existing.params as ResumeWorkflowExecutionParams | undefined;
+        if (
+          existing.taskType === WORKFLOW_RESUME_TASK_TYPE &&
+          existingRunAtMs === desiredRunAtMs &&
+          params?.workflowRunId === workflowExecution.id &&
+          params?.spaceId === workflowExecution.spaceId
+        ) {
+          return { taskId: existing.id };
+        }
+      }
+    } catch (err) {
+      if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
+        throw err;
+      }
+    }
+
+    await this.taskManager.removeIfExists(taskId);
+
+    const task = await this.taskManager.schedule(
+      {
+        id: taskId,
+        taskType: WORKFLOW_RESUME_TASK_TYPE,
+        params: {
+          workflowRunId: workflowExecution.id,
+          spaceId: workflowExecution.spaceId,
+        } satisfies ResumeWorkflowExecutionParams,
+        state: {},
+        runAt: resumeAt,
+        scope: generateExecutionTaskScope(workflowExecution as EsWorkflowExecution),
+      },
+      { request: fakeRequest }
+    );
+
+    return {
+      taskId: task.id,
+    };
+  }
 
   async scheduleResumeTask({
     workflowExecution,
@@ -54,7 +120,7 @@ export class WorkflowTaskManager {
   }: {
     executionId: string;
     spaceId: string;
-    fakeRequest: KibanaRequest;
+    fakeRequest?: KibanaRequest;
   }): Promise<{ taskId: string }> {
     const task = await this.taskManager.schedule(
       {
@@ -67,7 +133,7 @@ export class WorkflowTaskManager {
         state: {},
         scope: [`workflow:execution:${executionId}`],
       },
-      { request: fakeRequest }
+      fakeRequest ? { request: fakeRequest } : undefined
     );
 
     return {
@@ -75,7 +141,16 @@ export class WorkflowTaskManager {
     };
   }
 
-  async forceRunIdleTasks(workflowExecutionId: string): Promise<void> {
+  async forceRunIdleTasks(
+    workflowExecutionId: string,
+    options?: { spaceId: string; fakeRequest?: KibanaRequest }
+  ): Promise<void> {
+    const scopeTerm = {
+      term: {
+        'task.scope': `workflow:execution:${workflowExecutionId}`,
+      },
+    };
+
     const { docs: idleTasks } = await this.taskManager.fetch({
       query: {
         bool: {
@@ -85,9 +160,30 @@ export class WorkflowTaskManager {
                 'task.status': TaskStatus.Idle,
               },
             },
+            scopeTerm,
+          ],
+        },
+      },
+    });
+
+    const idleTasksToRun = idleTasks.filter(
+      (idleTask) => idleTask.id !== getWorkflowGlobalTimeoutResumeTaskId(workflowExecutionId)
+    );
+
+    if (idleTasksToRun.length) {
+      // TODO: To use bulkRunSoon once available
+      await Promise.all(idleTasksToRun.map((idleTask) => this.taskManager.runSoon(idleTask.id)));
+      return;
+    }
+
+    const { docs: activeTasks } = await this.taskManager.fetch({
+      query: {
+        bool: {
+          must: [
+            scopeTerm,
             {
-              term: {
-                'task.scope': `workflow:execution:${workflowExecutionId}`,
+              terms: {
+                'task.status': [TaskStatus.Running, TaskStatus.Claiming],
               },
             },
           ],
@@ -95,9 +191,17 @@ export class WorkflowTaskManager {
       },
     });
 
-    if (idleTasks.length) {
-      // TODO: To use bulkRunSoon once available
-      await Promise.all(idleTasks.map((idleTask) => this.taskManager.runSoon(idleTask.id)));
+    if (activeTasks.length) {
+      return;
+    }
+
+    if (options?.spaceId) {
+      const { taskId } = await this.scheduleImmediateResume({
+        executionId: workflowExecutionId,
+        spaceId: options.spaceId,
+        fakeRequest: options.fakeRequest,
+      });
+      await this.taskManager.runSoon(taskId);
     }
   }
 }
