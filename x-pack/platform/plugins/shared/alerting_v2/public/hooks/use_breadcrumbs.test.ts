@@ -144,7 +144,7 @@ describe('useBreadcrumbs', () => {
       const breadcrumbs = mockSetBreadcrumbs.mock.calls[0][0];
       expect(breadcrumbs).toHaveLength(2);
       expect(breadcrumbs[0]).toMatchObject({ text: 'Alerting V2' });
-      expect(breadcrumbs[1]).toMatchObject({ text: 'Alert episodes' });
+      expect(breadcrumbs[1]).toMatchObject({ text: 'Alerts' });
     });
 
     it('should not include href on episodes list breadcrumb when on the list page itself', () => {
@@ -160,7 +160,7 @@ describe('useBreadcrumbs', () => {
       const breadcrumbs = mockSetBreadcrumbs.mock.calls[0][0];
       expect(breadcrumbs).toHaveLength(3);
       expect(breadcrumbs[0]).toMatchObject({ text: 'Alerting V2' });
-      expect(breadcrumbs[1]).toMatchObject({ text: 'Alert episodes', href: '/' });
+      expect(breadcrumbs[1]).toMatchObject({ text: 'Alerts', href: '/' });
       expect(breadcrumbs[2]).toMatchObject({ text: 'My Rule' });
     });
 
@@ -178,7 +178,7 @@ describe('useBreadcrumbs', () => {
       const docTitle = mockDocTitleChange.mock.calls[0][0];
       expect(docTitle).toHaveLength(3);
       expect(docTitle[0]).toBe('My Rule');
-      expect(docTitle[1]).toBe('Alert episodes');
+      expect(docTitle[1]).toBe('Alerts');
       expect(docTitle[2]).toBe('Alerting V2');
     });
   });

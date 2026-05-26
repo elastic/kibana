@@ -60,7 +60,7 @@ export const getAlertingV2Breadcrumb = (
     case 'episodes_list':
       return {
         text: i18n.translate('xpack.alertingV2.breadcrumbs.episodesListTitle', {
-          defaultMessage: 'Alert episodes',
+          defaultMessage: 'Alerts',
         }),
       };
     case 'episode_details':
