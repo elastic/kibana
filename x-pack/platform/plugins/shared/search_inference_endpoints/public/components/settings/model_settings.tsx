@@ -397,13 +397,14 @@ export const ModelSettings: React.FC = () => {
             <EuiFlexItem grow={false}>
               <EuiToolTip
                 content={
-                  !defaultModelValidation.isValid &&
-                  i18n.translate(
-                    'xpack.searchInferenceEndpoints.settings.saveButtonTooltipInvalid',
-                    {
-                      defaultMessage: 'Fix invalid settings before saving.',
-                    }
-                  )
+                  !defaultModelValidation.isValid
+                    ? i18n.translate(
+                        'xpack.searchInferenceEndpoints.settings.saveButtonTooltipInvalid',
+                        {
+                          defaultMessage: 'Fix invalid settings before saving.',
+                        }
+                      )
+                    : undefined
                 }
               >
                 <EuiButton
