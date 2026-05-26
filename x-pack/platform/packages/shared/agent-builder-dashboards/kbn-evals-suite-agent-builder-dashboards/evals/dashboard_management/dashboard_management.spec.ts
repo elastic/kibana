@@ -12,6 +12,8 @@ import { createEvaluateDataset } from '../../src/evaluate_dataset';
 import {
   dashboardMinPanelCountEvaluator,
   dashboardSectionCountEvaluator,
+} from '../../src/dashboard_attachment_evaluators';
+import {
   dashboardSkillActivatedEvaluator,
   dashboardSkillNotActivatedEvaluator,
   visualizationSkillWithoutDashboardEvaluator,
