@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -12,9 +14,9 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { connectorsSpecs } from '@kbn/connector-specs';
 import { serializeConnectorSpec } from '@kbn/connector-specs/src/lib/serialize_connector_spec';
-import { useActionTypeModel } from '@kbn/alerts-ui-shared/src/common/hooks/use_action_type_model';
-import { actionTypeRegistryMock } from '../action_type_registry.mock';
-import type { ActionTypeModel } from '../../types';
+import { actionTypeRegistryMock } from '../test_utils/action_type_registry.mock';
+import type { ActionTypeModel } from '../types';
+import { useActionTypeModel } from './use_action_type_model';
 
 const WORKFLOWS_CONNECTOR_FEATURE_ID = 'workflows';
 
