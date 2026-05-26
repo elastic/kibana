@@ -182,6 +182,7 @@ steps:
       JEST_INTEGRATION_SCRIPT: '.buildkite/scripts/steps/test/jest_integration.sh'
       FTR_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/ftr_configs.sh'
       FTR_CONFIGS_DEPS: 'build'
+      LIMIT_CONFIG_TYPE: 'unit'
     retry:
       automatic:
         - exit_status: '*'
