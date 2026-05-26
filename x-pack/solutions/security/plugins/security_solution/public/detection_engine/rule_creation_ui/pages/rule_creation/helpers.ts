@@ -651,7 +651,6 @@ export const filterOutEmptySeverityMappingItems = (severityMapping: SeverityMapp
 export const filterOutEmptyRelatedIntegrations = (relatedIntegrations: RelatedIntegrationArray) =>
   relatedIntegrations.filter((ri) => !isEmpty(ri.package));
 
-// Spec connectors are all regular actions today; this fallback (!has) is safe but latent — see review finding
 export const isRuleAction = (
   action: AlertingRuleAction | AlertingRuleSystemAction,
   actionTypeRegistry: ActionTypeRegistryContract

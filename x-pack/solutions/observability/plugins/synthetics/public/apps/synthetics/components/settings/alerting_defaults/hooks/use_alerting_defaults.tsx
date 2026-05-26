@@ -41,7 +41,6 @@ export const useAlertingDefaults = () => {
               : 'plugs'
           }
           size="s"
-          aria-hidden={true}
         />
       ),
     }));

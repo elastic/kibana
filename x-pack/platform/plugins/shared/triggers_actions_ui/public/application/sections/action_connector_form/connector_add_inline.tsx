@@ -64,7 +64,6 @@ export const AddConnectorInline = ({
   const actionTypeName = actionTypesIndex
     ? actionTypesIndex[actionItem.actionTypeId].name
     : actionItem.actionTypeId;
-
   const actionTypeRegistered = actionTypeRegistry.get(actionItem.actionTypeId);
   const allowGroupConnector = (actionTypeRegistered?.subtype ?? []).map((subtype) => subtype.id);
   const connectorDropdownErrors = useMemo(
@@ -183,7 +182,7 @@ export const AddConnectorInline = ({
                   content={
                     <FormattedMessage
                       defaultMessage="Unable to load connector"
-                      id="xpack.triggersActionsUI.sections.connectorAddInline.unableToLoadConnectorTitle"
+                      id="xpack.triggersActionsUI.sections.connectorAddInline.unableToLoadConnectorTitle'"
                     />
                   }
                 />

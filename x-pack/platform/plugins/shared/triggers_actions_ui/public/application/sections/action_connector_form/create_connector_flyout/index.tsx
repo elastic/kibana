@@ -379,7 +379,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
                       'xpack.triggersActionsUI.sections.actionConnectorAdd.specLoadErrorDescription',
                       {
                         defaultMessage:
-                          'There was an error loading the connector configuration. Check your connection and try again.',
+                          'The connector form could not be loaded. Try again, or contact your administrator if the problem persists.',
                       }
                     )}
                   </p>

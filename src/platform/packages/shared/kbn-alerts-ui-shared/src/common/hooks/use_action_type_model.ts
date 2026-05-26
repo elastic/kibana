@@ -16,6 +16,7 @@ import {
   transformSpecToActionTypeModel,
   type ConnectorSpecResponse,
 } from '../utils/action_type_model_utils';
+import { fromConnectorSpecSchema } from '@kbn/connector-specs/src/lib/deserialize_connector_spec';
 
 const CONNECTOR_SPEC_QUERY_KEY = 'connectorSpec';
 
@@ -73,7 +74,13 @@ export function useActionTypeModel({
   } = useQuery<ConnectorSpecResponse, Error>({
     queryKey: [CONNECTOR_SPEC_QUERY_KEY, actionTypeId],
     queryFn: async ({ signal }) => {
-      return fetchConnectorSpec(http, actionTypeId!, signal);
+      const spec = await fetchConnectorSpec(http, actionTypeId!, signal);
+      // Validate eagerly — fail fast before caching. The schema is re-parsed
+      // lazily inside actionConnectorFields when the form component mounts.
+      if (!fromConnectorSpecSchema(spec.schema)) {
+        throw new Error(`Failed to parse connector spec schema for "${actionTypeId}"`);
+      }
+      return spec;
     },
     enabled: shouldFetchSpec,
     staleTime: 5 * 60 * 1000,

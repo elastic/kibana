@@ -41,8 +41,7 @@ export function shouldHideWorkflowsOnlyConnector(
 }
 
 /**
- * Fetches a connector spec from the API and eagerly validates the schema.
- * Throws if the schema cannot be parsed — fail fast before React Query caches it.
+ * Fetches a connector spec from the API.
  */
 export async function fetchConnectorSpec(
   http: HttpSetup,
@@ -53,8 +52,7 @@ export async function fetchConnectorSpec(
     `/internal/actions/connector_types/${encodeURIComponent(connectorTypeId)}/spec`,
     { signal }
   );
-  const spec = transformConnectorSpecResponse(wire);
-  return spec;
+  return transformConnectorSpecResponse(wire);
 }
 
 /**

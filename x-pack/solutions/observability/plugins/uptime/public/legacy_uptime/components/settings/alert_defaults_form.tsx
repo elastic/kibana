@@ -114,7 +114,6 @@ export const AlertDefaultsForm: React.FC<SettingsFormProps> = ({
               ? actionTypeRegistry.get(type as string).iconClass
               : 'plugs'
           }
-          aria-hidden={true}
         />
         <span>{label}</span>
       </ConnectorSpan>

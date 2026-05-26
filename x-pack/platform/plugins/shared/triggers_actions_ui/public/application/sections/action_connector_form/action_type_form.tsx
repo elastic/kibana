@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import {
-  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -352,14 +351,12 @@ export const ActionTypeForm = ({
         setActionParamsErrors({ errors: {} });
         return;
       }
-      const res: { errors: IErrorObject } = actionTypeRegistry.has(actionItem.actionTypeId)
-        ? await actionTypeRegistry
-            .get(actionItem.actionTypeId)
-            .validateParams(
-              actionItem.params,
-              actionConnector && 'config' in actionConnector ? actionConnector.config : undefined
-            )
-        : { errors: {} };
+      const res: { errors: IErrorObject } = await actionTypeRegistry
+        .get(actionItem.actionTypeId)
+        ?.validateParams(
+          actionItem.params,
+          actionConnector && 'config' in actionConnector ? actionConnector.config : undefined
+        );
       setActionParamsErrors(res);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -424,8 +421,6 @@ export const ActionTypeForm = ({
   const {
     actionTypeModel: actionTypeRegistered,
     isLoading: isLoadingActionTypeModel,
-    error: actionTypeModelError,
-    refetch: refetchConnectorSpec,
   } = useActionTypeModel({
     actionTypeRegistry,
     actionTypeId:
@@ -441,40 +436,6 @@ export const ActionTypeForm = ({
           <EuiLoadingSpinner size="m" data-test-subj="actionTypeFormLoading" />
         </EuiFlexItem>
       </EuiFlexGroup>
-    );
-  }
-
-  if (actionTypeModelError) {
-    return (
-      <EuiCallOut
-        announceOnMount
-        size="s"
-        color="danger"
-        iconType="error"
-        title={i18n.translate(
-          'xpack.triggersActionsUI.sections.actionTypeForm.specLoadErrorTitle',
-          { defaultMessage: 'Failed to load connector configuration' }
-        )}
-      >
-        <p>
-          {i18n.translate(
-            'xpack.triggersActionsUI.sections.actionTypeForm.specLoadErrorDescription',
-            {
-              defaultMessage:
-                'There was an error loading the connector configuration. Check your connection and try again.',
-            }
-          )}
-        </p>
-        <EuiSpacer size="s" />
-        <EuiButton
-          data-test-subj="connector-spec-load-retry"
-          onClick={() => refetchConnectorSpec()}
-        >
-          {i18n.translate('xpack.triggersActionsUI.sections.actionTypeForm.specLoadErrorRetry', {
-            defaultMessage: 'Retry',
-          })}
-        </EuiButton>
-      </EuiCallOut>
     );
   }
 
