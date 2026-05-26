@@ -259,7 +259,22 @@ describe('OAuthStateClient', () => {
       );
     });
 
-    it('throws and logs error on deletion failure', async () => {
+    it('is idempotent: succeeds silently when the state is already gone (concurrent delete)', async () => {
+      const client = createClient();
+      mockUnsecuredSavedObjectsClient.delete.mockRejectedValue(
+        SavedObjectsErrorHelpers.createGenericNotFoundError(
+          OAUTH_STATE_SAVED_OBJECT_TYPE,
+          'state-id-1'
+        )
+      );
+
+      await expect(client.delete('state-id-1')).resolves.toBeUndefined();
+      expect(mockLogger.debug).toHaveBeenCalledWith(
+        expect.stringContaining('"state-id-1" was already deleted')
+      );
+    });
+
+    it('throws and logs error on non-NotFound deletion failure', async () => {
       const client = createClient();
       mockUnsecuredSavedObjectsClient.delete.mockRejectedValue(new Error('delete failed'));
 
@@ -268,85 +283,6 @@ describe('OAuthStateClient', () => {
       expect(mockLogger.error).toHaveBeenCalledWith(
         expect.stringContaining('Failed to delete OAuth state "state-id-1"')
       );
-    });
-  });
-
-  describe('deleteByState', () => {
-    const makeFutureState = (id = 'state-id-1', createdBy: string | undefined = 'owner-uid') => {
-      const futureDate = new Date(Date.now() + 60000).toISOString();
-      mockUnsecuredSavedObjectsClient.find.mockResolvedValue({
-        saved_objects: [{ id, attributes: { state: 'test-state', expiresAt: futureDate } }],
-      });
-      mockEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
-        attributes: {
-          state: 'test-state',
-          codeVerifier: 'verifier',
-          connectorId: 'connector-1',
-          spaceId: 'default',
-          createdAt: new Date().toISOString(),
-          expiresAt: futureDate,
-          createdBy,
-        },
-      });
-    };
-
-    it("returns 'deleted' and deletes when state exists and is owned by the requesting user", async () => {
-      const client = createClient();
-      makeFutureState();
-      mockUnsecuredSavedObjectsClient.delete.mockResolvedValue({});
-
-      const result = await client.deleteByState('test-state', 'owner-uid');
-
-      expect(result).toBe('deleted');
-      expect(mockUnsecuredSavedObjectsClient.delete).toHaveBeenCalledWith(
-        OAUTH_STATE_SAVED_OBJECT_TYPE,
-        'state-id-1'
-      );
-    });
-
-    it("returns 'not_found' when the state does not exist or is expired", async () => {
-      const client = createClient();
-      mockUnsecuredSavedObjectsClient.find.mockResolvedValue({ saved_objects: [] });
-
-      const result = await client.deleteByState('nonexistent-state', 'any-uid');
-
-      expect(result).toBe('not_found');
-      expect(mockUnsecuredSavedObjectsClient.delete).not.toHaveBeenCalled();
-    });
-
-    it("returns 'forbidden' when the state is owned by a different user", async () => {
-      const client = createClient();
-      makeFutureState('state-id-1', 'other-uid');
-
-      const result = await client.deleteByState('test-state', 'requesting-uid');
-
-      expect(result).toBe('forbidden');
-      expect(mockUnsecuredSavedObjectsClient.delete).not.toHaveBeenCalled();
-    });
-
-    it("returns 'forbidden' when the state has no createdBy (unowned state)", async () => {
-      const client = createClient();
-      makeFutureState('state-id-1', undefined);
-
-      const result = await client.deleteByState('test-state', 'any-uid');
-
-      expect(result).toBe('forbidden');
-      expect(mockUnsecuredSavedObjectsClient.delete).not.toHaveBeenCalled();
-    });
-
-    it("returns 'deleted' when the callback concurrently deleted the state (TOCTOU race)", async () => {
-      const client = createClient();
-      makeFutureState();
-      mockUnsecuredSavedObjectsClient.delete.mockRejectedValue(
-        SavedObjectsErrorHelpers.createGenericNotFoundError(
-          OAUTH_STATE_SAVED_OBJECT_TYPE,
-          'state-id-1'
-        )
-      );
-
-      const result = await client.deleteByState('test-state', 'owner-uid');
-
-      expect(result).toBe('deleted');
     });
   });
 

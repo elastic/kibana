@@ -107,9 +107,14 @@ export const oauthCancelRoute = (
           logger: routeLogger,
         });
 
-        const result = await oauthStateClient.deleteByState(state, profileUid);
+        const oauthState = await oauthStateClient.get(state);
 
-        if (result === 'forbidden') {
+        if (!oauthState) {
+          // State not found or already expired — cancel is idempotent
+          return res.noContent();
+        }
+
+        if (!oauthState.createdBy || oauthState.createdBy !== profileUid) {
           return res.forbidden({
             body: {
               message:
@@ -118,9 +123,10 @@ export const oauthCancelRoute = (
           });
         }
 
-        // 'deleted' and 'not_found' both map to 204 — cancel is idempotent
+        await oauthStateClient.delete(oauthState.id);
+
         routeLogger.debug(
-          `OAuth cancel: state ${result} for connector ${connectorId}, user ${profileUid}`
+          `OAuth cancel: deleted state for connector ${connectorId}, user ${profileUid}`
         );
         return res.noContent();
       })

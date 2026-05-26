@@ -21,7 +21,8 @@ const MockOAuthStateClient = OAuthStateClient as jest.MockedClass<typeof OAuthSt
 const mockLogger = loggingSystemMock.create().get();
 
 const mockOAuthStateClientInstance = {
-  deleteByState: jest.fn(),
+  get: jest.fn(),
+  delete: jest.fn(),
 };
 
 const mockEncryptedSavedObjectsClient = {
@@ -102,7 +103,7 @@ describe('oauthCancelRoute', () => {
         message: 'User should be authenticated to cancel OAuth authorization.',
       },
     });
-    expect(mockOAuthStateClientInstance.deleteByState).not.toHaveBeenCalled();
+    expect(mockOAuthStateClientInstance.get).not.toHaveBeenCalled();
   });
 
   it('returns error when profile UID is missing', async () => {
@@ -122,12 +123,17 @@ describe('oauthCancelRoute', () => {
         message: 'Unable to retrieve Kibana user profile ID.',
       },
     });
-    expect(mockOAuthStateClientInstance.deleteByState).not.toHaveBeenCalled();
+    expect(mockOAuthStateClientInstance.get).not.toHaveBeenCalled();
   });
 
   it('returns 204 on successful cancel', async () => {
     mockActionsClient.get.mockResolvedValue({ id: 'connector-1' });
-    mockOAuthStateClientInstance.deleteByState.mockResolvedValue('deleted');
+    mockOAuthStateClientInstance.get.mockResolvedValue({
+      id: 'state-id-1',
+      state: 'some-state',
+      createdBy: 'test-profile-uid',
+    });
+    mockOAuthStateClientInstance.delete.mockResolvedValue(undefined);
 
     const [, handler] = registerRoute();
     const context = createMockContext();
@@ -140,15 +146,13 @@ describe('oauthCancelRoute', () => {
     await handler(context, req, res);
 
     expect(res.noContent).toHaveBeenCalled();
-    expect(mockOAuthStateClientInstance.deleteByState).toHaveBeenCalledWith(
-      'some-state',
-      'test-profile-uid'
-    );
+    expect(mockOAuthStateClientInstance.get).toHaveBeenCalledWith('some-state');
+    expect(mockOAuthStateClientInstance.delete).toHaveBeenCalledWith('state-id-1');
   });
 
   it('returns 204 when state is not found (idempotent)', async () => {
     mockActionsClient.get.mockResolvedValue({ id: 'connector-1' });
-    mockOAuthStateClientInstance.deleteByState.mockResolvedValue('not_found');
+    mockOAuthStateClientInstance.get.mockResolvedValue(null);
 
     const [, handler] = registerRoute();
     const context = createMockContext();
@@ -161,11 +165,16 @@ describe('oauthCancelRoute', () => {
     await handler(context, req, res);
 
     expect(res.noContent).toHaveBeenCalled();
+    expect(mockOAuthStateClientInstance.delete).not.toHaveBeenCalled();
   });
 
   it('returns 403 when state belongs to a different user', async () => {
     mockActionsClient.get.mockResolvedValue({ id: 'connector-1' });
-    mockOAuthStateClientInstance.deleteByState.mockResolvedValue('forbidden');
+    mockOAuthStateClientInstance.get.mockResolvedValue({
+      id: 'state-id-1',
+      state: 'other-users-state',
+      createdBy: 'other-user-uid',
+    });
 
     const [, handler] = registerRoute();
     const context = createMockContext();
@@ -177,13 +186,46 @@ describe('oauthCancelRoute', () => {
 
     await handler(context, req, res);
 
-    expect(res.forbidden).toHaveBeenCalled();
+    expect(res.forbidden).toHaveBeenCalledWith({
+      body: {
+        message:
+          'This authorization flow was not initiated by you. Only the user who started the flow can cancel it.',
+      },
+    });
     expect(res.noContent).not.toHaveBeenCalled();
+    expect(mockOAuthStateClientInstance.delete).not.toHaveBeenCalled();
+  });
+
+  it('returns 403 when state has no createdBy (unowned state)', async () => {
+    mockActionsClient.get.mockResolvedValue({ id: 'connector-1' });
+    mockOAuthStateClientInstance.get.mockResolvedValue({
+      id: 'state-id-1',
+      state: 'unowned-state',
+      createdBy: undefined,
+    });
+
+    const [, handler] = registerRoute();
+    const context = createMockContext();
+    const req = httpServerMock.createKibanaRequest({
+      params: { connectorId: 'connector-1' },
+      body: { state: 'unowned-state' },
+    });
+    const res = httpServerMock.createResponseFactory();
+
+    await handler(context, req, res);
+
+    expect(res.forbidden).toHaveBeenCalled();
+    expect(mockOAuthStateClientInstance.delete).not.toHaveBeenCalled();
   });
 
   it('verifies the connector exists before cancelling', async () => {
     mockActionsClient.get.mockResolvedValue({ id: 'connector-1' });
-    mockOAuthStateClientInstance.deleteByState.mockResolvedValue('deleted');
+    mockOAuthStateClientInstance.get.mockResolvedValue({
+      id: 'state-id-1',
+      state: 'some-state',
+      createdBy: 'test-profile-uid',
+    });
+    mockOAuthStateClientInstance.delete.mockResolvedValue(undefined);
 
     const [, handler] = registerRoute();
     const context = createMockContext();
@@ -211,7 +253,7 @@ describe('oauthCancelRoute', () => {
 
     await expect(handler(context, req, res)).rejects.toThrow('Not found');
 
-    expect(mockOAuthStateClientInstance.deleteByState).not.toHaveBeenCalled();
+    expect(mockOAuthStateClientInstance.get).not.toHaveBeenCalled();
   });
 
   it('calls verifyAccessAndContext with the license state', () => {
@@ -244,7 +286,12 @@ describe('oauthCancelRoute', () => {
     };
 
     mockActionsClient.get.mockResolvedValue({ id: 'connector-1' });
-    mockOAuthStateClientInstance.deleteByState.mockResolvedValue('deleted');
+    mockOAuthStateClientInstance.get.mockResolvedValue({
+      id: 'state-id-1',
+      state: 'some-state',
+      createdBy: 'test-profile-uid',
+    });
+    mockOAuthStateClientInstance.delete.mockResolvedValue(undefined);
 
     const [, handler] = registerRoute();
     const req = httpServerMock.createKibanaRequest({

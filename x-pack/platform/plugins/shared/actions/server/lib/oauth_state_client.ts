@@ -173,32 +173,19 @@ export class OAuthStateClient {
     }
   }
 
-  public async deleteByState(
-    stateParam: string,
-    requestingProfileUid: string
-  ): Promise<'deleted' | 'not_found' | 'forbidden'> {
-    const oauthState = await this.get(stateParam);
-    if (!oauthState) return 'not_found';
-    if (!oauthState.createdBy || oauthState.createdBy !== requestingProfileUid) return 'forbidden';
-    try {
-      await this.delete(oauthState.id);
-    } catch (err) {
-      // The callback may have completed and deleted the state concurrently — treat as success.
-      if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
-        return 'deleted';
-      }
-      throw err;
-    }
-    return 'deleted';
-  }
-
   /**
-   * Delete OAuth state (should be called after a successful token exchange)
+   * Delete OAuth state (should be called after a successful token exchange).
+   * Idempotent: if the state is already gone, this is a no-op.
    */
   public async delete(id: string): Promise<void> {
     try {
       await this.unsecuredSavedObjectsClient.delete(OAUTH_STATE_SAVED_OBJECT_TYPE, id);
     } catch (err) {
+      // The callback may have completed and deleted the state concurrently — treat as success.
+      if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+        this.logger.debug(`OAuth state "${id}" was already deleted.`);
+        return;
+      }
       this.logger.error(`Failed to delete OAuth state "${id}". Error: ${err.message}`);
       throw err;
     }
