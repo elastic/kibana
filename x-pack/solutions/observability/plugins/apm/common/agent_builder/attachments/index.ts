@@ -10,3 +10,15 @@ export {
   serviceMapAttachmentDataSchema,
   type ServiceMapAttachmentData,
 } from './service_map';
+
+export {
+  APM_METRICS_ATTACHMENT_TYPE,
+  apmMetricsAttachmentDataSchema,
+  type ApmMetricsAttachmentData,
+} from './apm_metrics';
+
+export {
+  APM_TIMESERIES_ATTACHMENT_TYPE,
+  apmTimeseriesAttachmentDataSchema,
+  type ApmTimeseriesAttachmentData,
+} from './apm_timeseries';

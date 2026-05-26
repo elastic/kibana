@@ -145,6 +145,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'observability.rca',
   'observability.investigation',
   'observability.service-map',
+  'observability.investigate-apm-alert',
 
   // Search
   `${internalNamespaces.search}.keyword-search`,

@@ -6,8 +6,11 @@
  */
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
+import { createInvestigateApmAlertSkill } from './skills/investigate_apm_alert';
 import { createServiceMapSkill } from './skills/service_map';
 import { createServiceMapAttachmentType } from './attachments/service_map';
+import { createApmMetricsAttachmentType } from './attachments/apm_metrics';
+import { createApmTimeseriesAttachmentType } from './attachments/apm_timeseries';
 
 export const registerServiceMapAgentBuilder = ({
   agentBuilder,
@@ -15,7 +18,14 @@ export const registerServiceMapAgentBuilder = ({
   agentBuilder: AgentBuilderPluginSetup;
 }) => {
   agentBuilder.skills.register(createServiceMapSkill());
+  agentBuilder.skills.register(createInvestigateApmAlertSkill());
   agentBuilder.attachments.registerType(
     createServiceMapAttachmentType() as Parameters<typeof agentBuilder.attachments.registerType>[0]
+  );
+  agentBuilder.attachments.registerType(
+    createApmMetricsAttachmentType() as Parameters<typeof agentBuilder.attachments.registerType>[0]
+  );
+  agentBuilder.attachments.registerType(
+    createApmTimeseriesAttachmentType() as Parameters<typeof agentBuilder.attachments.registerType>[0]
   );
 };

@@ -59,9 +59,29 @@ export interface AiInsightProps {
   insightType: InsightType;
   createStream: (signal: AbortSignal) => Observable<InsightStreamEvent>;
   buildAttachments: (summary: string, context: string) => AiInsightAttachment[];
+  /**
+   * Optional initial message to prefill in the chat when the user clicks
+   * "Start conversation". When set, it is forwarded to `agentBuilder.openChat`
+   * as `initialMessage`.
+   */
+  initialMessage?: string;
+  /**
+   * When `initialMessage` is set, controls whether the prefilled message is
+   * sent automatically (true) or just placed in the input box (false).
+   * Ignored when `initialMessage` is not provided.
+   * @default false
+   */
+  autoSendInitialMessage?: boolean;
 }
 
-export function AiInsight({ title, insightType, createStream, buildAttachments }: AiInsightProps) {
+export function AiInsight({
+  title,
+  insightType,
+  createStream,
+  buildAttachments,
+  initialMessage,
+  autoSendInitialMessage = false,
+}: AiInsightProps) {
   const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -112,8 +132,16 @@ export function AiInsight({ title, insightType, createStream, buildAttachments }
     agentBuilder.openChat({
       newConversation: true,
       attachments: buildAttachments(summary, context),
+      ...(initialMessage ? { initialMessage, autoSendInitialMessage } : {}),
     });
-  }, [agentBuilder, buildAttachments, summary, context]);
+  }, [
+    agentBuilder,
+    buildAttachments,
+    summary,
+    context,
+    initialMessage,
+    autoSendInitialMessage,
+  ]);
 
   const handleFeedback = useCallback(
     (feedback: Feedback) => {
