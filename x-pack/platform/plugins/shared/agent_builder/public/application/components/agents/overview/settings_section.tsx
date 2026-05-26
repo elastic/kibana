@@ -20,6 +20,8 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { labels } from '../../../utils/i18n';
 
 const { agentOverview: overviewLabels } = labels;
@@ -83,6 +85,13 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
             description={overviewLabels.customInstructionsSubtitle}
             textAlign="left"
             onClick={canEditAgent ? onOpenEditFlyout : undefined}
+            {...(canEditAgent
+              ? getEbtProps({
+                  element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                  action: AGENT_BUILDER_UI_EBT.action.agentOverview.EDIT_DETAILS,
+                  detail: AGENT_BUILDER_UI_EBT.entity.AGENT,
+                })
+              : {})}
             footer={
               !currentInstructions && canEditAgent ? (
                 <EuiButtonEmpty
@@ -126,6 +135,13 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
             description={overviewLabels.agentSettingsCardSubtitle}
             textAlign="left"
             onClick={canEditAgent ? onOpenEditFlyout : undefined}
+            {...(canEditAgent
+              ? getEbtProps({
+                  element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                  action: AGENT_BUILDER_UI_EBT.action.agentOverview.EDIT_DETAILS,
+                  detail: AGENT_BUILDER_UI_EBT.entity.AGENT,
+                })
+              : {})}
             css={css`
               height: 100%;
               .euiCard__content p {
