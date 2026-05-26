@@ -68,8 +68,12 @@ export const journey = new Journey({
       timeout: 60000,
     });
     await page.click(subj('streamsAppSchemaChangesReviewModalSubmitButton'));
+    // Adding one new field to a stream that already has 10000 field_overrides
+    // requires the server to apply a mapping update over all 10001 entries, which
+    // observed at ~25s in CI. Give the modal a generous window to close so this
+    // step measures real submit latency rather than racing a short timeout.
     await page.waitForSelector(subj('streamsAppSchemaChangesReviewModalSubmitButton'), {
       state: 'detached',
-      timeout: 30000,
+      timeout: 120000,
     });
   });
