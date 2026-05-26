@@ -91,7 +91,7 @@ export const legacyCreatePrepackagedRules = async (
   const { result: timelinesResult } = await performTimelinesInstallation(context);
 
   const upgradeChangeTracking = {
-    bulkCount: rulesToInstall.length,
+    bulkCount: rulesToUpdate.length,
   };
   await upgradePrebuiltRules(detectionRulesClient, rulesToUpdate, upgradeChangeTracking, logger);
 
