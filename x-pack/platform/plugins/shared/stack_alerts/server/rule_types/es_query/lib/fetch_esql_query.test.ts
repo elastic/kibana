@@ -19,7 +19,7 @@ import type {
   EsqlEsqlClusterInfo,
   EsqlEsqlShardFailure,
 } from '@elastic/elasticsearch/lib/api/types';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 
 const getTimeRange = () => {
   const date = Date.now();
