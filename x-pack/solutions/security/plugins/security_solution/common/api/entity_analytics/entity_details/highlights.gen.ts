@@ -40,6 +40,10 @@ export const EntityDetailsHighlightsRequestBody = lazySchema(() =>
      * The connector id.
      */
     connectorId: z.string(),
+    /**
+     * Dev-only: selects which prompt variant the server resolves for entity highlights. `default` (or omitted) uses the packaged saved-object prompt (`entityDetailsHighlights`). `new` uses the candidate replacement prompt (`entityDetailsHighlightsNew`) which is only resolved via the local fallback. Not intended for production callers.
+     */
+    promptVariant: z.enum(['default', 'new']).optional(),
   })
 );
 export type EntityDetailsHighlightsRequestBody = z.infer<typeof EntityDetailsHighlightsRequestBody>;

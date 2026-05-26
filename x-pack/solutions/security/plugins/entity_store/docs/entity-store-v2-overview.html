@@ -1,0 +1,3477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Entity store v2 — overview, maintainers, and entity lifecycle</title>
+  <style>
+    /* Light palette (separate from dark — dark accents fail on white) */
+    :root {
+      color-scheme: light;
+      --bg-page: #f5f7fa;
+      --bg-surface: #ffffff;
+      --bg-code: #f0f3f7;
+      --text-primary: #343741;
+      --text-secondary: #525252;
+      --text-muted: #69707d;
+      --border: #d3dae6;
+      --accent: #006bb8;
+      --accent-hover: #004c8f;
+      --status-ok-bg: #e6f4ea;
+      --status-ok-text: #1e6b3a;
+      --status-warn-bg: #fff8e6;
+      --status-warn-text: #8a6a00;
+      --status-info-bg: #e6f1fb;
+      --status-info-text: #154a86;
+      --focus-ring: #006bb8;
+      --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --font-mono: ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
+      --nav-height: 3.25rem;
+    }
+
+    [data-theme="dark"] {
+      color-scheme: dark;
+      --bg-page: #141419;
+      --bg-surface: #1d1e24;
+      --bg-code: #25262d;
+      --text-primary: #dfe5ef;
+      --text-secondary: #b8c2cc;
+      --text-muted: #98a2b3;
+      --border: #3d424d;
+      --accent: #1ba9f5;
+      --accent-hover: #63bfff;
+      --status-ok-bg: #1a3326;
+      --status-ok-text: #7dd996;
+      --status-warn-bg: #3d3520;
+      --status-warn-text: #f5d676;
+      --status-info-bg: #1a2a3d;
+      --status-info-text: #8ec5ff;
+      --focus-ring: #1ba9f5;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding-top: var(--nav-height);
+      font-family: var(--font-sans);
+      font-size: 16px;
+      line-height: 1.5;
+      color: var(--text-primary);
+      background: var(--bg-page);
+    }
+
+    .skip-link {
+      position: absolute;
+      left: -9999px;
+      top: auto;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+    }
+
+    .skip-link:focus {
+      position: fixed;
+      left: 1rem;
+      top: calc(var(--nav-height) + 0.5rem);
+      width: auto;
+      height: auto;
+      padding: 0.75rem 1rem;
+      background: var(--bg-surface);
+      color: var(--text-primary);
+      border: 2px solid var(--focus-ring);
+      z-index: 1000;
+      font-size: 16px;
+    }
+
+    header {
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 1.5rem;
+    }
+
+    .header-inner {
+      max-width: 90ch;
+      margin: 0 auto;
+    }
+
+    .header-inner .subtitle {
+      max-width: 66ch;
+    }
+
+    .section-nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 200;
+      min-height: var(--nav-height);
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+    }
+
+    [data-theme="dark"] .section-nav {
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+    }
+
+    .section-nav-inner {
+      max-width: min(100%, 72rem);
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+
+    .section-tabs {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 0;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+    }
+
+    .section-tab {
+      flex: 0 0 auto;
+    }
+
+    .section-tab a {
+      display: block;
+      padding: 0.75rem 1rem;
+      font-size: 16px;
+      line-height: 1.5;
+      color: var(--text-secondary);
+      text-decoration: none;
+      border-bottom: 3px solid transparent;
+      white-space: nowrap;
+    }
+
+    .section-tab a:hover {
+      color: var(--text-primary);
+      background: var(--bg-page);
+    }
+
+    .section-tab a:focus-visible {
+      outline: 2px solid var(--focus-ring);
+      outline-offset: -2px;
+    }
+
+    .section-tab a[aria-current="true"] {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+      font-weight: 700;
+    }
+
+    .prose section {
+      scroll-margin-top: 4rem;
+    }
+
+    .prose h2 {
+      scroll-margin-top: 4rem;
+    }
+
+    h1 {
+      margin: 0 0 0.5rem;
+      font-size: 1.5rem;
+      line-height: 1.5;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      margin: 0;
+      font-size: 16px;
+      color: var(--text-secondary);
+      max-width: 66ch;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+      margin-top: 1rem;
+    }
+
+    button.theme-toggle {
+      font-family: var(--font-sans);
+      font-size: 16px;
+      line-height: 1.5;
+      padding: 0.5rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: var(--bg-page);
+      color: var(--text-primary);
+      cursor: pointer;
+    }
+
+    button.theme-toggle:hover {
+      border-color: var(--accent);
+    }
+
+    button.theme-toggle:focus-visible {
+      outline: 2px solid var(--focus-ring);
+      outline-offset: 2px;
+    }
+
+    main {
+      max-width: 90ch;
+      margin: 0 auto;
+      padding: 1.5rem;
+    }
+
+    .prose {
+      max-width: 90ch;
+    }
+
+    .prose section > p,
+    .prose section > ul,
+    .prose section > ol,
+    .prose section > h3,
+    .prose .narrow {
+      max-width: 66ch;
+    }
+
+    h2 {
+      margin: 2rem 0 0.75rem;
+      font-size: 1.25rem;
+      line-height: 1.5;
+      font-weight: 700;
+    }
+
+    h3 {
+      margin: 1.5rem 0 0.5rem;
+      font-size: 1.0625rem;
+      line-height: 1.5;
+      font-weight: 700;
+    }
+
+    p {
+      margin: 0 0 1rem;
+    }
+
+    ul, ol {
+      margin: 0 0 1rem;
+      padding-left: 1.5rem;
+    }
+
+    li {
+      margin-bottom: 0.5rem;
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: underline;
+    }
+
+    a:hover {
+      color: var(--accent-hover);
+    }
+
+    a:focus-visible {
+      outline: 2px solid var(--focus-ring);
+      outline-offset: 2px;
+    }
+
+    .caption {
+      font-size: 12px;
+      line-height: 1.5;
+      color: var(--text-muted);
+      margin: 0.25rem 0 1rem;
+    }
+
+    .card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1rem 1.25rem;
+      margin: 1rem 0 1.5rem;
+    }
+
+    .card h3 {
+      margin-top: 0;
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 12px;
+      line-height: 1.5;
+      padding: 0.125rem 0.5rem;
+      border-radius: 4px;
+      margin-bottom: 0.5rem;
+    }
+
+    .badge-ok {
+      background: var(--status-ok-bg);
+      color: var(--status-ok-text);
+    }
+
+    .badge-warn {
+      background: var(--status-warn-bg);
+      color: var(--status-warn-text);
+    }
+
+    .badge-info {
+      background: var(--status-info-bg);
+      color: var(--status-info-text);
+    }
+
+    pre {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      line-height: 1.5;
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1rem;
+      overflow-x: auto;
+      margin: 0 0 1rem;
+    }
+
+    code {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    p code,
+    li code,
+    td code {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 0 0.25rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0 1.5rem;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 0.625rem 0.75rem;
+      border: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    th {
+      background: var(--bg-code);
+      font-weight: 700;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      margin: 1rem 0 1.5rem;
+    }
+
+    .flow {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 1.5rem;
+    }
+
+    .flow li {
+      position: relative;
+      padding: 0.75rem 0 0.75rem 2rem;
+      border-left: 2px solid var(--border);
+      margin: 0;
+    }
+
+    .flow li:last-child {
+      border-left-color: transparent;
+    }
+
+    .flow .step-num {
+      position: absolute;
+      left: -0.65rem;
+      top: 0.65rem;
+      width: 1.25rem;
+      height: 1.25rem;
+      background: var(--bg-surface);
+      border: 2px solid var(--accent);
+      border-radius: 50%;
+      font-size: 12px;
+      line-height: 1.25rem;
+      text-align: center;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .callout {
+      background: var(--status-info-bg);
+      color: var(--status-info-text);
+      border: 1px solid var(--status-info-text);
+      border-radius: 4px;
+      padding: 0.75rem 1rem;
+      margin: 1rem 0 1.5rem;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+
+    .callout.warn {
+      background: var(--status-warn-bg);
+      color: var(--status-warn-text);
+      border-color: var(--status-warn-text);
+    }
+
+    .callout p {
+      margin: 0;
+    }
+
+    .callout p + p {
+      margin-top: 0.5rem;
+    }
+
+    footer {
+      max-width: 66ch;
+      margin: 0 auto;
+      padding: 1.5rem;
+      font-size: 12px;
+      line-height: 1.5;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border);
+    }
+
+    .diagram {
+      margin: 1rem 0 1.5rem;
+    }
+
+    .diagram svg {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-width: 100%;
+    }
+
+    .diagram .node-bg {
+      fill: var(--bg-surface);
+      stroke: var(--accent);
+      stroke-width: 1.5;
+    }
+
+    .diagram .node-bg-muted {
+      fill: var(--bg-surface);
+      stroke: var(--text-secondary);
+      stroke-width: 1;
+    }
+
+    .diagram .node-bg-latest {
+      fill: var(--bg-code);
+      stroke: var(--accent);
+      stroke-width: 2;
+    }
+
+    .diagram .node-label {
+      fill: var(--text-primary);
+      font-family: var(--font-sans);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .diagram .node-sub {
+      fill: var(--text-muted);
+      font-family: var(--font-mono);
+      font-size: 12px;
+    }
+
+    .diagram .group-label {
+      fill: var(--text-secondary);
+      font-family: var(--font-sans);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .diagram .arrow {
+      stroke: var(--text-secondary);
+      stroke-width: 1.5;
+      fill: none;
+    }
+
+    .diagram .arrow-head {
+      fill: var(--text-secondary);
+    }
+
+    .diagram .arrow-head-strong {
+      fill: var(--accent);
+    }
+
+    .diagram .arrow-strong {
+      stroke: var(--accent);
+      stroke-width: 1.5;
+      fill: none;
+    }
+
+    .diagram .node-bg-ok {
+      fill: var(--status-ok-bg);
+      stroke: var(--status-ok-text);
+      stroke-width: 1.5;
+    }
+
+    .diagram .node-bg-warn {
+      fill: var(--status-warn-bg);
+      stroke: var(--status-warn-text);
+      stroke-width: 1.5;
+    }
+
+    .diagram .node-bg-neutral {
+      fill: var(--bg-code);
+      stroke: var(--text-secondary);
+      stroke-width: 1.5;
+    }
+
+    .diagram .arrow-label {
+      fill: var(--text-secondary);
+      font-family: var(--font-sans);
+      font-size: 12px;
+    }
+
+    .diagram .axis-line {
+      stroke: var(--text-secondary);
+      stroke-width: 1.5;
+      fill: none;
+    }
+
+    .diagram .axis-tick {
+      stroke: var(--text-secondary);
+      stroke-width: 1;
+    }
+
+    .diagram .stem-source {
+      stroke: var(--text-secondary);
+      stroke-width: 1.5;
+    }
+
+    .diagram .stem-extract {
+      stroke: var(--accent);
+      stroke-width: 1.5;
+    }
+
+    .diagram .stem-maintainer {
+      stroke: var(--status-warn-text);
+      stroke-width: 1.5;
+    }
+
+    .diagram .stem-history {
+      stroke: var(--status-ok-text);
+      stroke-width: 1.5;
+    }
+
+    .diagram .dot-source {
+      fill: var(--text-secondary);
+      stroke: var(--bg-page);
+      stroke-width: 2;
+    }
+
+    .diagram .dot-extract {
+      fill: var(--accent);
+      stroke: var(--bg-page);
+      stroke-width: 2;
+    }
+
+    .diagram .dot-maintainer {
+      fill: var(--status-warn-text);
+      stroke: var(--bg-page);
+      stroke-width: 2;
+    }
+
+    .diagram .dot-history {
+      fill: var(--status-ok-text);
+      stroke: var(--bg-page);
+      stroke-width: 2;
+    }
+
+    .diagram .event-time {
+      fill: var(--text-muted);
+      font-family: var(--font-mono);
+      font-size: 12px;
+    }
+
+    .diagram .event-name {
+      fill: var(--text-primary);
+      font-family: var(--font-sans);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem 1.5rem;
+      margin: 0 0 1rem;
+      padding: 0;
+      list-style: none;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .legend li {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin: 0;
+    }
+
+    .legend .swatch {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      flex: 0 0 12px;
+    }
+
+    .legend .swatch-source {
+      background: var(--text-secondary);
+    }
+
+    .legend .swatch-extract {
+      background: var(--accent);
+    }
+
+    .legend .swatch-maintainer {
+      background: var(--status-warn-text);
+    }
+
+    .legend .swatch-history {
+      background: var(--status-ok-text);
+    }
+
+    /* ------- Maintainer signature palette ------- */
+    :root {
+      --m-risk: #b3261e;
+      --m-risk-bg: #fde8e6;
+      --m-watchlist: #b06c1e;
+      --m-watchlist-bg: #fdf1e1;
+      --m-resolution: #6e44a3;
+      --m-resolution-bg: #efe7f7;
+      --m-accesses: #1e6b3a;
+      --m-accesses-bg: #e6f4ea;
+      --m-communicates: #154a86;
+      --m-communicates-bg: #e6f1fb;
+    }
+
+    [data-theme="dark"] {
+      --m-risk: #ff8a8a;
+      --m-risk-bg: #3a1a1a;
+      --m-watchlist: #ffb87a;
+      --m-watchlist-bg: #3a2a14;
+      --m-resolution: #c499f0;
+      --m-resolution-bg: #2a1f3d;
+      --m-accesses: #7dd996;
+      --m-accesses-bg: #1a3326;
+      --m-communicates: #8ec5ff;
+      --m-communicates-bg: #142a3d;
+    }
+
+    /* ------- Section ribbons + H2 icons ------- */
+    .prose > section {
+      border-left: 4px solid var(--border);
+      padding-left: 1.25rem;
+      margin: 0 0 2.5rem;
+    }
+
+    .prose > section.section-overview { border-left-color: var(--accent); }
+    .prose > section.section-architecture { border-left-color: var(--m-communicates); }
+    .prose > section.section-indices { border-left-color: var(--m-resolution); }
+    .prose > section.section-install { border-left-color: var(--m-accesses); }
+    .prose > section.section-extraction { border-left-color: var(--m-watchlist); }
+    .prose > section.section-maintainers { border-left-color: var(--m-risk); }
+    .prose > section.section-timeline { border-left-color: var(--accent-hover); }
+    .prose > section.section-crud { border-left-color: var(--text-secondary); }
+
+    .h2-with-icon {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+
+    .h2-icon {
+      display: inline-block;
+      width: 22px;
+      height: 22px;
+      flex: 0 0 22px;
+      color: var(--accent);
+    }
+
+    .section-overview .h2-icon { color: var(--accent); }
+    .section-architecture .h2-icon { color: var(--m-communicates); }
+    .section-indices .h2-icon { color: var(--m-resolution); }
+    .section-install .h2-icon { color: var(--m-accesses); }
+    .section-extraction .h2-icon { color: var(--m-watchlist); }
+    .section-maintainers .h2-icon { color: var(--m-risk); }
+    .section-timeline .h2-icon { color: var(--accent-hover); }
+    .section-crud .h2-icon { color: var(--text-secondary); }
+
+    .section-tab a {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .nav-icon {
+      width: 16px;
+      height: 16px;
+      flex: 0 0 16px;
+      color: currentColor;
+    }
+
+    /* ------- Hero tiles ------- */
+    .hero-tiles {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.75rem;
+      margin: 1.25rem 0 0;
+    }
+
+    .hero-tile {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--accent);
+      border-radius: 6px;
+      padding: 0.875rem 1rem;
+      text-decoration: none;
+      color: var(--text-primary);
+      display: block;
+    }
+
+    .hero-tile:hover,
+    .hero-tile:focus-visible {
+      border-color: var(--accent);
+      color: var(--text-primary);
+    }
+
+    .hero-tile-label {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin: 0 0 0.25rem;
+      line-height: 1.5;
+    }
+
+    .hero-tile-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin: 0 0 0.25rem;
+      line-height: 1.5;
+    }
+
+    .hero-tile-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    .hero-tile.tile-latest { border-left-color: var(--accent); }
+    .hero-tile.tile-extract { border-left-color: var(--m-watchlist); }
+    .hero-tile.tile-maintainers { border-left-color: var(--m-risk); }
+    .hero-tile.tile-history { border-left-color: var(--m-accesses); }
+
+    /* ------- "By the numbers" strip ------- */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 0.75rem;
+      margin: 1.5rem 0 2rem;
+    }
+
+    .stat {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.875rem 1rem;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--accent);
+      line-height: 1.2;
+      margin: 0;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin: 0.25rem 0 0;
+    }
+
+    /* ------- Card grids ------- */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1rem;
+      margin: 1rem 0 1.5rem;
+    }
+
+    .card-grid .card {
+      margin: 0;
+      height: 100%;
+    }
+
+    /* ------- Compare cards ------- */
+    .compare-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1rem;
+      margin: 1rem 0 1.5rem;
+    }
+
+    .compare-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-top: 4px solid var(--accent);
+      border-radius: 6px;
+      padding: 1rem 1.25rem;
+    }
+
+    .compare-card-label {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin: 0 0 0.25rem;
+      line-height: 1.5;
+    }
+
+    .compare-card-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin: 0 0 0.5rem;
+      line-height: 1.5;
+    }
+
+    .compare-card.v1 { border-top-color: var(--text-secondary); }
+    .compare-card.v2 { border-top-color: var(--accent); }
+
+    .compare-card p {
+      margin: 0 0 0.5rem;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .compare-card ul {
+      margin: 0;
+      padding-left: 1.25rem;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .compare-card.m-risk { border-top-color: var(--m-risk); }
+    .compare-card.m-watchlist { border-top-color: var(--m-watchlist); }
+    .compare-card.m-resolution { border-top-color: var(--m-resolution); }
+    .compare-card.m-accesses { border-top-color: var(--m-accesses); }
+    .compare-card.m-communicates { border-top-color: var(--m-communicates); }
+
+    .rw-label {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+    }
+
+    /* ------- Step cards (horizontal install flow) ------- */
+    .step-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.5rem;
+      margin: 1rem 0 1.5rem;
+      align-items: stretch;
+    }
+
+    .step-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-top: 3px solid var(--accent);
+      border-radius: 6px;
+      padding: 0.75rem 0.875rem;
+    }
+
+    .step-card-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.5rem;
+      height: 1.5rem;
+      border-radius: 50%;
+      background: var(--accent);
+      color: var(--bg-surface);
+      font-weight: 700;
+      font-size: 13px;
+      margin-bottom: 0.5rem;
+    }
+
+    .step-card-title {
+      font-size: 14px;
+      font-weight: 700;
+      margin: 0 0 0.25rem;
+      line-height: 1.5;
+    }
+
+    .step-card-body {
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--text-secondary);
+      margin: 0;
+    }
+
+    /* ------- Maintainer table row accent ------- */
+    table tr.row-risk td:first-child { box-shadow: inset 4px 0 0 var(--m-risk); }
+    table tr.row-watchlist td:first-child { box-shadow: inset 4px 0 0 var(--m-watchlist); }
+    table tr.row-resolution td:first-child { box-shadow: inset 4px 0 0 var(--m-resolution); }
+    table tr.row-accesses td:first-child { box-shadow: inset 4px 0 0 var(--m-accesses); }
+    table tr.row-communicates td:first-child { box-shadow: inset 4px 0 0 var(--m-communicates); }
+
+    .m-dot {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 0.4rem;
+      flex: 0 0 10px;
+      vertical-align: middle;
+    }
+
+    .m-dot-risk { background: var(--m-risk); }
+    .m-dot-watchlist { background: var(--m-watchlist); }
+    .m-dot-resolution { background: var(--m-resolution); }
+    .m-dot-accesses { background: var(--m-accesses); }
+    .m-dot-communicates { background: var(--m-communicates); }
+
+    /* ------- Annotated JSON document ------- */
+    .annotated-doc {
+      display: grid;
+      grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+      gap: 1rem;
+      margin: 1rem 0 1.5rem;
+      align-items: start;
+    }
+
+    @media (max-width: 760px) {
+      .annotated-doc { grid-template-columns: 1fr; }
+    }
+
+    .annotated-doc pre {
+      margin: 0;
+      min-width: 0;
+      max-width: 100%;
+    }
+
+    .annotated-doc .ann {
+      display: block;
+      box-shadow: inset 3px 0 0 var(--accent);
+    }
+
+    .annotated-doc .ann-extract { box-shadow: inset 3px 0 0 var(--m-watchlist); background: var(--m-watchlist-bg); }
+    .annotated-doc .ann-risk { box-shadow: inset 3px 0 0 var(--m-risk); background: var(--m-risk-bg); }
+    .annotated-doc .ann-watchlist { box-shadow: inset 3px 0 0 var(--m-watchlist); background: var(--m-watchlist-bg); }
+    .annotated-doc .ann-communicates { box-shadow: inset 3px 0 0 var(--m-communicates); background: var(--m-communicates-bg); }
+    .annotated-doc .ann-accesses { box-shadow: inset 3px 0 0 var(--m-accesses); background: var(--m-accesses-bg); }
+    .annotated-doc .ann-asset { box-shadow: inset 3px 0 0 var(--m-resolution); background: var(--m-resolution-bg); }
+
+    .doc-notes {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .doc-note {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--accent);
+      border-radius: 4px;
+      padding: 0.5rem 0.75rem;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .doc-note-title {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin: 0 0 0.25rem;
+    }
+
+    .doc-note p {
+      margin: 0;
+    }
+
+    .doc-note.dn-extract { border-left-color: var(--m-watchlist); }
+    .doc-note.dn-risk { border-left-color: var(--m-risk); }
+    .doc-note.dn-watchlist { border-left-color: var(--m-watchlist); }
+    .doc-note.dn-communicates { border-left-color: var(--m-communicates); }
+    .doc-note.dn-accesses { border-left-color: var(--m-accesses); }
+    .doc-note.dn-asset { border-left-color: var(--m-resolution); }
+
+    /* ------- Anatomy of index name ------- */
+    .anatomy {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1.5rem 1rem 1rem;
+      margin: 1rem 0 1.5rem;
+    }
+
+    .anatomy-row {
+      display: flex;
+      justify-content: center;
+      gap: 0.125rem;
+      font-family: var(--font-mono);
+      font-size: 18px;
+      font-weight: 700;
+      flex-wrap: wrap;
+    }
+
+    .anatomy-seg {
+      padding: 0.25rem 0.4rem;
+      border-bottom: 3px solid var(--text-secondary);
+      color: var(--text-primary);
+      white-space: pre;
+    }
+
+    .anatomy-seg.s-fixed { border-bottom-color: var(--text-muted); color: var(--text-muted); }
+    .anatomy-seg.s-version { border-bottom-color: var(--m-communicates); color: var(--m-communicates); }
+    .anatomy-seg.s-role { border-bottom-color: var(--m-accesses); color: var(--m-accesses); }
+    .anatomy-seg.s-solution { border-bottom-color: var(--m-watchlist); color: var(--m-watchlist); }
+    .anatomy-seg.s-ns { border-bottom-color: var(--m-risk); color: var(--m-risk); }
+    .anatomy-seg.s-rollover { border-bottom-color: var(--m-resolution); color: var(--m-resolution); }
+
+    .anatomy-key {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0.5rem;
+      margin: 1.25rem 0 0;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .anatomy-key-item {
+      display: flex;
+      gap: 0.5rem;
+      align-items: flex-start;
+    }
+
+    .anatomy-key-swatch {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+      margin-top: 0.4rem;
+      flex: 0 0 10px;
+    }
+
+    .anatomy-key-swatch.s-fixed { background: var(--text-muted); }
+    .anatomy-key-swatch.s-version { background: var(--m-communicates); }
+    .anatomy-key-swatch.s-role { background: var(--m-accesses); }
+    .anatomy-key-swatch.s-solution { background: var(--m-watchlist); }
+    .anatomy-key-swatch.s-ns { background: var(--m-risk); }
+    .anatomy-key-swatch.s-rollover { background: var(--m-resolution); }
+
+    .anatomy-key-text {
+      flex: 1 1 auto;
+    }
+
+    .anatomy-key-name {
+      font-weight: 700;
+      font-family: var(--font-mono);
+      font-size: 12px;
+    }
+
+    .anatomy-key-desc {
+      color: var(--text-secondary);
+      font-size: 12px;
+    }
+
+    /* Step-card grids and other visual blocks always allow widening */
+    .step-cards,
+    .card-grid,
+    .compare-grid,
+    .hero-tiles,
+    .stats,
+    .table-wrap,
+    pre,
+    .diagram,
+    .annotated-doc,
+    .anatomy {
+      max-width: 100%;
+    }
+
+    /* ---------- Defensive overflow handling ---------- */
+
+    /* Grid items must be allowed to shrink so long children
+       (especially monospaced code) cannot blow out their column. */
+    .card-grid > *,
+    .hero-tiles > *,
+    .stats > *,
+    .compare-grid > *,
+    .step-cards > *,
+    .anatomy-key > *,
+    .annotated-doc > * {
+      min-width: 0;
+    }
+
+    /* Long identifiers inside cards must wrap rather than overflow. */
+    .card,
+    .hero-tile,
+    .compare-card,
+    .step-card,
+    .doc-note,
+    .stat,
+    .callout,
+    .anatomy-key-item {
+      overflow-wrap: anywhere;
+      word-break: normal;
+    }
+
+    .card code,
+    .hero-tile code,
+    .compare-card code,
+    .step-card code,
+    .doc-note code,
+    .callout code,
+    .stat code,
+    .anatomy-key-item code {
+      overflow-wrap: anywhere;
+      word-break: break-word;
+      white-space: normal;
+    }
+
+    .card h3,
+    .compare-card-title,
+    .step-card-title,
+    .hero-tile-title,
+    .doc-note-title {
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
+    /* Diagram captions inside figures must wrap. */
+    .diagram figcaption {
+      overflow-wrap: anywhere;
+    }
+
+    /* ---------- TL;DR pull-quote ---------- */
+    .tldr {
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--accent);
+      border-radius: 6px;
+      padding: 0.875rem 1rem;
+      margin: 0 0 1.5rem;
+      max-width: 80ch;
+    }
+
+    .tldr-label {
+      flex: 0 0 auto;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      padding: 0.125rem 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: var(--bg-page);
+      line-height: 1.5;
+      margin-top: 0.1rem;
+    }
+
+    .tldr-text {
+      margin: 0;
+      font-size: 1.0625rem;
+      line-height: 1.5;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .section-overview .tldr { border-left-color: var(--accent); }
+    .section-walkthrough .tldr { border-left-color: var(--m-watchlist); }
+    .section-architecture .tldr { border-left-color: var(--m-communicates); }
+    .section-indices .tldr { border-left-color: var(--m-resolution); }
+    .section-install .tldr { border-left-color: var(--m-accesses); }
+    .section-extraction .tldr { border-left-color: var(--m-watchlist); }
+    .section-maintainers .tldr { border-left-color: var(--m-risk); }
+    .section-timeline .tldr { border-left-color: var(--accent-hover); }
+    .section-crud .tldr { border-left-color: var(--text-secondary); }
+    .section-cheatsheet .tldr { border-left-color: var(--accent); }
+
+    /* ---------- Day-in-the-life walkthrough panels ---------- */
+    .walkthrough {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin: 1rem 0 1.5rem;
+    }
+
+    .walkthrough-step {
+      display: grid;
+      grid-template-columns: minmax(120px, 140px) minmax(0, 1fr);
+      gap: 1rem;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--accent);
+      border-radius: 6px;
+      padding: 0.875rem 1rem;
+    }
+
+    @media (max-width: 600px) {
+      .walkthrough-step { grid-template-columns: 1fr; }
+    }
+
+    .walkthrough-time {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 0.04em;
+    }
+
+    .walkthrough-step-num {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin: 0 0 0.25rem;
+    }
+
+    .walkthrough-title {
+      font-size: 15px;
+      font-weight: 700;
+      margin: 0 0 0.5rem;
+      line-height: 1.5;
+    }
+
+    .walkthrough-body {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.75rem;
+    }
+
+    .walkthrough-pane {
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .walkthrough-pane-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin: 0 0 0.25rem;
+    }
+
+    .walkthrough-pane p {
+      margin: 0;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .walkthrough-step.wt-ui { border-left-color: var(--m-communicates); }
+    .walkthrough-step.wt-route { border-left-color: var(--accent); }
+    .walkthrough-step.wt-crud { border-left-color: var(--text-secondary); }
+    .walkthrough-step.wt-extract { border-left-color: var(--m-watchlist); }
+    .walkthrough-step.wt-risk { border-left-color: var(--m-risk); }
+    .walkthrough-step.wt-watchlist { border-left-color: var(--m-watchlist); }
+    .walkthrough-step.wt-rel { border-left-color: var(--m-accesses); }
+    .walkthrough-step.wt-source { border-left-color: var(--text-secondary); }
+
+    /* ---------- Sequence diagram styles ---------- */
+    .diagram .seq-lane {
+      stroke: var(--border);
+      stroke-width: 1;
+      stroke-dasharray: 4 3;
+    }
+
+    .diagram .seq-actor {
+      fill: var(--bg-surface);
+      stroke: var(--accent);
+      stroke-width: 1.5;
+    }
+
+    .diagram .seq-actor-label {
+      fill: var(--text-primary);
+      font-family: var(--font-sans);
+      font-size: 13px;
+      font-weight: 700;
+      text-anchor: middle;
+    }
+
+    .diagram .seq-call {
+      stroke: var(--accent);
+      stroke-width: 1.5;
+      fill: none;
+    }
+
+    .diagram .seq-return {
+      stroke: var(--text-secondary);
+      stroke-width: 1.5;
+      fill: none;
+      stroke-dasharray: 5 3;
+    }
+
+    .diagram .seq-message {
+      fill: var(--text-primary);
+      font-family: var(--font-sans);
+      font-size: 12px;
+      text-anchor: middle;
+    }
+
+    .diagram .seq-message-mono {
+      fill: var(--text-primary);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      text-anchor: middle;
+    }
+
+    .diagram .seq-arrow-head {
+      fill: var(--accent);
+    }
+
+    .diagram .seq-arrow-head-return {
+      fill: var(--text-secondary);
+    }
+
+    .diagram .seq-self-loop {
+      stroke: var(--accent);
+      stroke-width: 1.5;
+      fill: none;
+    }
+
+    /* ---------- Maintainer personality cards ---------- */
+    .personality-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1rem;
+      margin: 1rem 0 1.5rem;
+    }
+
+    .personality-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-top: 4px solid var(--accent);
+      border-radius: 6px;
+      padding: 1rem 1.25rem;
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+
+    .personality-card.m-risk { border-top-color: var(--m-risk); }
+    .personality-card.m-watchlist { border-top-color: var(--m-watchlist); }
+    .personality-card.m-resolution { border-top-color: var(--m-resolution); }
+    .personality-card.m-accesses { border-top-color: var(--m-accesses); }
+    .personality-card.m-communicates { border-top-color: var(--m-communicates); }
+
+    .personality-tagline {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    .personality-character {
+      font-size: 1.125rem;
+      font-weight: 700;
+      margin: 0 0 0.25rem;
+      line-height: 1.5;
+      color: var(--text-primary);
+    }
+
+    .personality-id {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin: 0 0 0.75rem;
+      overflow-wrap: anywhere;
+    }
+
+    .personality-row {
+      display: grid;
+      grid-template-columns: minmax(90px, 110px) minmax(0, 1fr);
+      gap: 0.5rem;
+      padding: 0.5rem 0;
+      border-top: 1px solid var(--border);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .personality-row-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .personality-row-value {
+      color: var(--text-primary);
+    }
+
+    .personality-row-value code {
+      overflow-wrap: anywhere;
+    }
+
+    /* ---------- Cheat sheet ---------- */
+    .cheatsheet {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1rem;
+      margin: 1rem 0 1.5rem;
+    }
+
+    .cheat-panel {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-top: 4px solid var(--accent);
+      border-radius: 6px;
+      padding: 1rem 1.25rem;
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+
+    .cheat-panel h3 {
+      margin: 0 0 0.5rem;
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .cheat-panel ul {
+      margin: 0;
+      padding-left: 1rem;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .cheat-panel li {
+      margin-bottom: 0.4rem;
+    }
+
+    .cheat-panel li code {
+      overflow-wrap: anywhere;
+    }
+
+    .cheat-panel.cs-indices { border-top-color: var(--m-resolution); }
+    .cheat-panel.cs-routes { border-top-color: var(--m-accesses); }
+    .cheat-panel.cs-maintainers { border-top-color: var(--m-risk); }
+    .cheat-panel.cs-statuses { border-top-color: var(--m-watchlist); }
+    .cheat-panel.cs-debug { border-top-color: var(--m-communicates); }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  <nav class="section-nav" id="section-nav" aria-label="Page sections">
+    <div class="section-nav-inner">
+      <ul class="section-tabs" role="list">
+        <li class="section-tab" role="listitem">
+          <a href="#overview-heading" data-section="overview-heading">
+            <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            Overview
+          </a>
+        </li>
+        <li class="section-tab" role="listitem">
+          <a href="#walkthrough-heading" data-section="walkthrough-heading">
+            <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            Day in the life
+          </a>
+        </li>
+        <li class="section-tab" role="listitem">
+          <a href="#architecture-heading" data-section="architecture-heading">
+            <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+            Architecture
+          </a>
+        </li>
+        <li class="section-tab" role="listitem">
+          <a href="#indices-heading" data-section="indices-heading">
+            <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v6c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 11v6c0 1.66 4.03 3 9 3s9-1.34 9-3v-6"/></svg>
+            Indices
+          </a>
+        </li>
+        <li class="section-tab" role="listitem">
+          <a href="#install-heading" data-section="install-heading">
+            <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v3M12 20v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M1 12h3M20 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg>
+            Install &amp; status
+          </a>
+        </li>
+        <li class="section-tab" role="listitem">
+          <a href="#extraction-heading" data-section="extraction-heading">
+            <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
+            Log extraction
+          </a>
+        </li>
+        <li class="section-tab" role="listitem">
+          <a href="#maintainers-heading" data-section="maintainers-heading">
+            <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+            Maintainers
+          </a>
+        </li>
+        <li class="section-tab" role="listitem">
+          <a href="#timeline-heading" data-section="timeline-heading">
+            <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Entity timeline
+          </a>
+        </li>
+        <li class="section-tab" role="listitem">
+          <a href="#crud-heading" data-section="crud-heading">
+            <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            CRUD client
+          </a>
+        </li>
+        <li class="section-tab" role="listitem">
+          <a href="#cheatsheet-heading" data-section="cheatsheet-heading">
+            <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11H1l8-8 8 8h-8z" transform="translate(3 4)"/><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="7" y1="9" x2="17" y2="9"/><line x1="7" y1="13" x2="17" y2="13"/><line x1="7" y1="17" x2="12" y2="17"/></svg>
+            Cheat sheet
+          </a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <header>
+    <div class="header-inner">
+      <h1>Entity store v2: overview, maintainers, and entity lifecycle</h1>
+      <p class="subtitle">A walkthrough of how entity store v2 ingests, stores, and enriches entities — from raw security logs in the source indices to a fully decorated record in <code>.entities.v2.latest.security_*</code> — and how the five entity maintainers feed into that lifecycle.</p>
+      <div class="toolbar">
+        <button type="button" class="theme-toggle" id="theme-toggle" aria-pressed="false">
+          Switch to dark mode
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main-content" class="prose">
+    <div class="hero-tiles" role="list" aria-label="Key concepts">
+      <a class="hero-tile tile-latest" href="#indices-heading" role="listitem">
+        <p class="hero-tile-label">Single source of truth</p>
+        <p class="hero-tile-title">Latest index</p>
+        <p class="hero-tile-desc">One canonical document per entity, keyed by hashed EUID.</p>
+      </a>
+      <a class="hero-tile tile-extract" href="#extraction-heading" role="listitem">
+        <p class="hero-tile-label">Writes the base record</p>
+        <p class="hero-tile-title">Extraction</p>
+        <p class="hero-tile-desc">ES|QL pipeline turns raw logs into entity rows on a schedule.</p>
+      </a>
+      <a class="hero-tile tile-maintainers" href="#maintainers-heading" role="listitem">
+        <p class="hero-tile-label">Enrich specific fields</p>
+        <p class="hero-tile-title">Maintainers</p>
+        <p class="hero-tile-desc">Five background jobs add risk, watchlist, and relationship signals.</p>
+      </a>
+      <a class="hero-tile tile-history" href="#timeline-heading" role="listitem">
+        <p class="hero-tile-label">Periodic copy</p>
+        <p class="hero-tile-title">History snapshot</p>
+        <p class="hero-tile-desc">Reindex latest into a dated history index and reset behaviour lists.</p>
+      </a>
+    </div>
+
+    <div class="stats" role="list" aria-label="Entity store v2 at a glance">
+      <div class="stat" role="listitem">
+        <p class="stat-value">5</p>
+        <p class="stat-label">Maintainers</p>
+      </div>
+      <div class="stat" role="listitem">
+        <p class="stat-value">4</p>
+        <p class="stat-label">Entity types</p>
+      </div>
+      <div class="stat" role="listitem">
+        <p class="stat-value">3</p>
+        <p class="stat-label">Indices / data streams</p>
+      </div>
+      <div class="stat" role="listitem">
+        <p class="stat-value">1</p>
+        <p class="stat-label">Canonical record</p>
+      </div>
+    </div>
+
+    <section class="section-overview" aria-labelledby="overview-heading">
+      <h2 id="overview-heading" class="h2-with-icon">
+        <svg class="h2-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        Overview
+      </h2>
+
+      <div class="tldr">
+        <span class="tldr-label">TL;DR</span>
+        <p class="tldr-text">One namespace, one latest index, one document per entity. Everything else in entity store v2 either feeds that document or enriches it.</p>
+      </div>
+
+      <p>Entity store v2 is a per-namespace store of <strong>Elastic entities</strong> — users, hosts, services, and generic entities — built from raw security logs. Each entity lives as a single document in the <strong>latest index</strong>, keyed by a hashed Elastic UID (EUID). Background tasks pull entities out of source indices, merge them with the existing record, and a set of <strong>entity maintainers</strong> enrich the record over time (risk score, watchlists, relationships, resolution).</p>
+      <p>The mental model that makes everything else easy to read:</p>
+
+      <figure class="diagram">
+        <svg
+          viewBox="0 0 780 360"
+          xmlns="http://www.w3.org/2000/svg"
+          role="img"
+          aria-labelledby="concept-map-title concept-map-desc"
+          preserveAspectRatio="xMidYMid meet"
+        >
+          <title id="concept-map-title">Mental model: how the four key concepts relate</title>
+          <desc id="concept-map-desc">The latest index sits in the middle as the single source of truth. The extraction task on the left writes the base record. Five maintainers on the right enrich specific fields. The history snapshot below is a periodic copy of the latest index.</desc>
+
+          <defs>
+            <marker id="arrowhead-overview" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" class="arrow-head" />
+            </marker>
+          </defs>
+
+          <!-- Extraction box (left) -->
+          <g>
+            <rect class="node-bg" x="20" y="60" width="200" height="100" rx="4" />
+            <text class="node-label" x="120" y="92" text-anchor="middle">Extraction</text>
+            <text class="node-sub" x="120" y="116" text-anchor="middle">writes the base record</text>
+            <text class="node-sub" x="120" y="138" text-anchor="middle">from log evidence</text>
+          </g>
+
+          <!-- LATEST INDEX (center, larger) -->
+          <g>
+            <rect class="node-bg-latest" x="280" y="40" width="220" height="140" rx="6" />
+            <text class="node-label" x="390" y="78" text-anchor="middle">LATEST INDEX</text>
+            <text class="node-sub" x="390" y="104" text-anchor="middle">single canonical surface</text>
+            <text class="node-sub" x="390" y="126" text-anchor="middle">.entities.v2.latest.</text>
+            <text class="node-sub" x="390" y="146" text-anchor="middle">security_{ns}-00002</text>
+          </g>
+
+          <!-- Maintainers box (right) -->
+          <g>
+            <rect class="node-bg" x="560" y="60" width="200" height="100" rx="4" />
+            <text class="node-label" x="660" y="92" text-anchor="middle">Maintainers</text>
+            <text class="node-sub" x="660" y="116" text-anchor="middle">5 enrichment jobs</text>
+            <text class="node-sub" x="660" y="138" text-anchor="middle">rewrite specific fields</text>
+          </g>
+
+          <!-- History snapshot (bottom-center) -->
+          <g>
+            <rect class="node-bg" x="280" y="260" width="220" height="80" rx="4" />
+            <text class="node-label" x="390" y="294" text-anchor="middle">History snapshot</text>
+            <text class="node-sub" x="390" y="318" text-anchor="middle">point-in-time copy</text>
+          </g>
+
+          <!-- Arrows -->
+          <!-- Extraction -> LATEST -->
+          <line class="arrow-strong" x1="220" y1="110" x2="280" y2="110" marker-end="url(#arrowhead-overview)" />
+          <text class="arrow-label" x="250" y="100" text-anchor="middle">writes</text>
+
+          <!-- Maintainers -> LATEST -->
+          <line class="arrow" x1="560" y1="110" x2="500" y2="110" marker-end="url(#arrowhead-overview)" />
+          <text class="arrow-label" x="530" y="100" text-anchor="middle">enrich</text>
+
+          <!-- LATEST -> History -->
+          <line class="arrow" x1="390" y1="180" x2="390" y2="260" marker-end="url(#arrowhead-overview)" />
+          <text class="arrow-label" x="402" y="225" text-anchor="start">copy</text>
+        </svg>
+        <figcaption class="caption">Four concepts, one record. Read the rest of this document as a tour of the lines between these four boxes.</figcaption>
+      </figure>
+
+      <ul>
+        <li>The <strong>latest index</strong> is the single canonical surface. Everything else either feeds it or enriches it.</li>
+        <li><strong>Extraction tasks</strong> write the base record from log evidence.</li>
+        <li><strong>Maintainers</strong> rewrite specific fields on a schedule — they do not own the record, only the fields they enrich.</li>
+        <li><strong>History snapshots</strong> are point-in-time copies of latest, written to a separate dated index.</li>
+      </ul>
+
+      <p class="narrow">This document describes <strong>v2</strong> only. The change of shape between v1 and v2 is the easiest way to see what v2 buys you.</p>
+
+      <div class="compare-grid">
+        <div class="compare-card v1">
+          <p class="compare-card-label">Previous</p>
+          <p class="compare-card-title">Entity store v1</p>
+          <ul>
+            <li>One index <em>per entity type</em> per namespace.</li>
+            <li>Risk scoring lived in a separate <code>risk_engine:risk_scoring</code> task.</li>
+            <li>Enrichment work was spread across ad-hoc tasks with no shared framework.</li>
+          </ul>
+        </div>
+        <div class="compare-card v2">
+          <p class="compare-card-label">Current</p>
+          <p class="compare-card-title">Entity store v2</p>
+          <ul>
+            <li>One <strong>latest index</strong> per namespace for all entity types.</li>
+            <li>Risk scoring is one of the registered maintainers — same framework as the others.</li>
+            <li>v1 artefacts are removed on first install by <code>stopAndRemoveV1()</code>.</li>
+          </ul>
+        </div>
+      </div>
+
+      <p class="caption">Source: entity_store/server/plugin.ts, entity_store/server/infra/remove_v1.ts, entity_store/common/domain/entity_index.ts</p>
+    </section>
+
+    <section class="section-walkthrough" aria-labelledby="walkthrough-heading">
+      <h2 id="walkthrough-heading" class="h2-with-icon">
+        <svg class="h2-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Day in the life
+      </h2>
+
+      <div class="tldr">
+        <span class="tldr-label">TL;DR</span>
+        <p class="tldr-text">The analyst reads one document. Everything they see came from a different system writing to it at a different time. Follow that document backwards and you see the whole entity store at work.</p>
+      </div>
+
+      <p>Sarah is on shift in the SOC. An alert points her at a host called <code>web-prod-01</code>. She clicks the host name in the alert table to open the host flyout. Here is what she sees, and what the entity store is doing behind the scenes — first forwards, then rewound.</p>
+
+      <div class="walkthrough">
+        <div class="walkthrough-step wt-ui">
+          <div>
+            <p class="walkthrough-step-num">Step 1</p>
+            <p class="walkthrough-time">12:01:34 PM</p>
+          </div>
+          <div>
+            <p class="walkthrough-title">Sarah clicks <code>web-prod-01</code></p>
+            <div class="walkthrough-body">
+              <div class="walkthrough-pane">
+                <p class="walkthrough-pane-label">She sees</p>
+                <p>A spinner appears as the host details flyout opens.</p>
+              </div>
+              <div class="walkthrough-pane">
+                <p class="walkthrough-pane-label">Behind the scenes</p>
+                <p>The browser sends a single GET to the security solution entity details route for the host's hashed EUID.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="walkthrough-step wt-crud">
+          <div>
+            <p class="walkthrough-step-num">Step 2</p>
+            <p class="walkthrough-time">+ ~50&nbsp;ms</p>
+          </div>
+          <div>
+            <p class="walkthrough-title">The route asks the CRUD client for one document</p>
+            <div class="walkthrough-body">
+              <div class="walkthrough-pane">
+                <p class="walkthrough-pane-label">She sees</p>
+                <p>Still spinning.</p>
+              </div>
+              <div class="walkthrough-pane">
+                <p class="walkthrough-pane-label">Behind the scenes</p>
+                <p><code>CRUDClient.searchLatestEntities()</code> runs an Elasticsearch GET against <code>.entities.v2.latest.security_default-*</code> by document id. No aggregation, no fan-out.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="walkthrough-step wt-ui">
+          <div>
+            <p class="walkthrough-step-num">Step 3</p>
+            <p class="walkthrough-time">+ ~250&nbsp;ms</p>
+          </div>
+          <div>
+            <p class="walkthrough-title">The flyout paints — one document, many sections</p>
+            <div class="walkthrough-body">
+              <div class="walkthrough-pane">
+                <p class="walkthrough-pane-label">She sees</p>
+                <p>Risk score <strong>82.41 (High)</strong>, two watchlists, two recent rule names, a relationship graph with hosts and users.</p>
+              </div>
+              <div class="walkthrough-pane">
+                <p class="walkthrough-pane-label">Behind the scenes</p>
+                <p>Every panel in the flyout is reading a subtree of the same <code>_source</code>. There is no live join across maintainers — the document already has every field merged.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="walkthrough-step wt-risk">
+          <div>
+            <p class="walkthrough-step-num">Rewind 1&nbsp;min</p>
+            <p class="walkthrough-time">12:00:00 PM</p>
+          </div>
+          <div>
+            <p class="walkthrough-title">Where did the <code>82.41</code> risk score come from?</p>
+            <div class="walkthrough-body">
+              <div class="walkthrough-pane">
+                <p class="walkthrough-pane-label">In the document</p>
+                <p><code>entity.risk.calculated_score_norm</code></p>
+              </div>
+              <div class="walkthrough-pane">
+                <p class="walkthrough-pane-label">Behind the scenes</p>
+                <p>The <code>risk-score</code> maintainer ran at the top of the hour. It pulled alerts for this host, multiplied by the asset criticality modifier (extreme_impact) and the watchlist modifier (production-hosts), and wrote <code>entity.risk.*</code>.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="walkthrough-step wt-watchlist">
+          <div>
+            <p class="walkthrough-step-num">Rewind 51&nbsp;min</p>
+            <p class="walkthrough-time">11:10 AM</p>
+          </div>
+          <div>
+            <p class="walkthrough-title">Where did the <code>production-hosts</code> watchlist tag come from?</p>
+            <div class="walkthrough-body">
+              <div class="walkthrough-pane">
+                <p class="walkthrough-pane-label">In the document</p>
+                <p><code>entity.attributes.watchlists</code></p>
+              </div>
+              <div class="walkthrough-pane">
+                <p class="walkthrough-pane-label">Behind the scenes</p>
+                <p>The <code>watchlist</code> maintainer ran on its 10-minute schedule and matched <code>web-prod-01</code> against the active watchlist source's query. The hit was written straight onto the latest doc.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="walkthrough-step wt-rel">
+          <div>
+            <p class="walkthrough-step-num">Rewind ~1.5&nbsp;hr</p>
+            <p class="walkthrough-time">10:30 AM</p>
+          </div>
+          <div>
+            <p class="walkthrough-title">Where did the relationship edges come from?</p>
+            <div class="walkthrough-body">
+              <div class="walkthrough-pane">
+                <p class="walkthrough-pane-label">In the document</p>
+                <p><code>entity.relationships.communicates_with.ids</code></p>
+              </div>
+              <div class="walkthrough-pane">
+                <p class="walkthrough-pane-label">Behind the scenes</p>
+                <p>The <code>communicates_with</code> maintainer parsed recent cloud / MDM network logs, found two target hosts (<code>api-prod-02</code>, <code>db-prod-01</code>), and called <code>bulkUpdateEntity()</code>.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="walkthrough-step wt-extract">
+          <div>
+            <p class="walkthrough-step-num">Rewind ~2&nbsp;hr</p>
+            <p class="walkthrough-time">10:05 AM</p>
+          </div>
+          <div>
+            <p class="walkthrough-title">Where did the host name, OS, IPs, and behaviour list come from?</p>
+            <div class="walkthrough-body">
+              <div class="walkthrough-pane">
+                <p class="walkthrough-pane-label">In the document</p>
+                <p><code>entity.id</code>, <code>host.*</code>, <code>entity.behaviors.*</code>, <code>entity.lifecycle.*</code></p>
+              </div>
+              <div class="walkthrough-pane">
+                <p class="walkthrough-pane-label">Behind the scenes</p>
+                <p>The per-type extract task fired five minutes after the first event. <code>LogsExtractionClient.extractLogs()</code> ran the ES|QL pipeline, the row was upserted into latest, and the document existed for the first time.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="walkthrough-step wt-source">
+          <div>
+            <p class="walkthrough-step-num">Rewind ~2.05&nbsp;hr</p>
+            <p class="walkthrough-time">10:00 AM</p>
+          </div>
+          <div>
+            <p class="walkthrough-title">And before any of that?</p>
+            <div class="walkthrough-body">
+              <div class="walkthrough-pane">
+                <p class="walkthrough-pane-label">Source</p>
+                <p><code>logs-endpoint.events.process-default</code></p>
+              </div>
+              <div class="walkthrough-pane">
+                <p class="walkthrough-pane-label">Behind the scenes</p>
+                <p>The Endpoint agent on the host indexed a process event into the source data stream. The entity record didn't exist yet — the extract task five minutes later created it.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout">
+        <p><strong>Take-away.</strong> The flyout never asks "which maintainer wrote which field" at read time. Every piece of context Sarah sees was written by a different system on a different schedule and quietly merged into the same record. The next sections walk through each of those systems in turn.</p>
+      </div>
+    </section>
+
+    <section class="section-architecture" aria-labelledby="architecture-heading">
+      <h2 id="architecture-heading" class="h2-with-icon">
+        <svg class="h2-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+        Architecture
+      </h2>
+
+      <div class="tldr">
+        <span class="tldr-label">TL;DR</span>
+        <p class="tldr-text">Six domain clients, one purpose: keep one document per entity correct and current. Routes pick the right client per request.</p>
+      </div>
+
+      <p>The plugin registers a small set of domain clients at setup, each with a focused responsibility. A consuming plugin or HTTP route resolves one of these clients per request via the request handler context.</p>
+
+      <div class="card-grid">
+        <div class="card">
+          <span class="badge badge-info">Orchestrator</span>
+          <h3><code>AssetManagerClient</code></h3>
+          <p>Owns install, start, stop, uninstall, and aggregate status. Removes v1 artefacts on first install and schedules every entity store task.</p>
+          <p class="caption">server/domain/asset_manager/asset_manager_client.ts</p>
+        </div>
+
+        <div class="card">
+          <span class="badge badge-info">Extraction</span>
+          <h3><code>LogsExtractionClient</code> and <code>CcsLogsExtractionClient</code></h3>
+          <p>Run the ES|QL extraction pipeline that turns raw logs into entity documents. The CCS variant stages remote-cluster updates into a separate data stream; the local client folds them in on the next run.</p>
+          <p class="caption">server/domain/logs_extraction/logs_extraction_client.ts and ccs_logs_extraction_client.ts</p>
+        </div>
+
+        <div class="card">
+          <span class="badge badge-info">Read &amp; write</span>
+          <h3><code>CRUDClient</code> and <code>EntityStoreCRUDClient</code></h3>
+          <p>Direct read and write access to the latest index. Other plugins receive a narrowed surface (<code>EntityStoreCRUDClient</code>) via the start contract so they cannot create or delete records directly.</p>
+          <p class="caption">server/domain/crud/crud_client.ts, server/types.ts</p>
+        </div>
+
+        <div class="card">
+          <span class="badge badge-info">Enrichment</span>
+          <h3><code>EntityMaintainersClient</code></h3>
+          <p>Holds the registry of maintainers and schedules them as Task Manager tasks. Mediates the lifecycle transitions (<code>never_started</code> → <code>started</code> → <code>stopped</code>).</p>
+          <p class="caption">server/domain/entity_maintainers/entity_maintainers_client.ts, server/tasks/entity_maintainers/</p>
+        </div>
+
+        <div class="card">
+          <span class="badge badge-info">Backup</span>
+          <h3><code>HistorySnapshotClient</code></h3>
+          <p>Runs the periodic reindex from latest into a dated history index, then resets per-snapshot counters on latest.</p>
+          <p class="caption">server/domain/history_snapshot/history_snapshot_client.ts</p>
+        </div>
+
+        <div class="card">
+          <span class="badge badge-info">Identity</span>
+          <h3><code>ResolutionClient</code></h3>
+          <p>Links and groups entities that resolve to the same real-world identity. Updates resolution relationship fields on the latest document.</p>
+          <p class="caption">server/domain/resolution/resolution_client.ts</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-indices" aria-labelledby="indices-heading">
+      <h2 id="indices-heading" class="h2-with-icon">
+        <svg class="h2-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v6c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 11v6c0 1.66 4.03 3 9 3s9-1.34 9-3v-6"/></svg>
+        Indices
+      </h2>
+
+      <div class="tldr">
+        <span class="tldr-label">TL;DR</span>
+        <p class="tldr-text">Three indices and one mental rule: every name is namespace-scoped and produced by a helper. Never hardcode a name in your code.</p>
+      </div>
+      <p>Three indices and data streams matter, all scoped to a namespace. Names are produced by helpers in <code>common/domain/entity_index.ts</code> so callers never hardcode the patterns.</p>
+
+      <h3>Anatomy of the latest index name</h3>
+      <p>Every part of the latest index name encodes something specific. Once you can read the parts, you can read any of the v2 index names by analogy.</p>
+
+      <div class="anatomy" role="figure" aria-label="Breakdown of the .entities.v2.latest.security_{ns}-00002 index name">
+        <div class="anatomy-row" aria-hidden="true">
+          <span class="anatomy-seg s-fixed">.entities.</span>
+          <span class="anatomy-seg s-version">v2</span>
+          <span class="anatomy-seg s-fixed">.</span>
+          <span class="anatomy-seg s-role">latest</span>
+          <span class="anatomy-seg s-fixed">.</span>
+          <span class="anatomy-seg s-solution">security</span>
+          <span class="anatomy-seg s-fixed">_</span>
+          <span class="anatomy-seg s-ns">{ns}</span>
+          <span class="anatomy-seg s-rollover">-00002</span>
+        </div>
+        <div class="anatomy-key">
+          <div class="anatomy-key-item">
+            <span class="anatomy-key-swatch s-fixed" aria-hidden="true"></span>
+            <span class="anatomy-key-text">
+              <span class="anatomy-key-name">.entities.</span>
+              <span class="anatomy-key-desc"> — fixed prefix for the entity store family of system indices.</span>
+            </span>
+          </div>
+          <div class="anatomy-key-item">
+            <span class="anatomy-key-swatch s-version" aria-hidden="true"></span>
+            <span class="anatomy-key-text">
+              <span class="anatomy-key-name">v2</span>
+              <span class="anatomy-key-desc"> — schema version. v1 indices are removed on v2 install.</span>
+            </span>
+          </div>
+          <div class="anatomy-key-item">
+            <span class="anatomy-key-swatch s-role" aria-hidden="true"></span>
+            <span class="anatomy-key-text">
+              <span class="anatomy-key-name">latest</span>
+              <span class="anatomy-key-desc"> — role: <code>latest</code>, <code>history</code>, or <code>updates</code>.</span>
+            </span>
+          </div>
+          <div class="anatomy-key-item">
+            <span class="anatomy-key-swatch s-solution" aria-hidden="true"></span>
+            <span class="anatomy-key-text">
+              <span class="anatomy-key-name">security</span>
+              <span class="anatomy-key-desc"> — solution that owns the data (currently always <code>security</code>).</span>
+            </span>
+          </div>
+          <div class="anatomy-key-item">
+            <span class="anatomy-key-swatch s-ns" aria-hidden="true"></span>
+            <span class="anatomy-key-text">
+              <span class="anatomy-key-name">{ns}</span>
+              <span class="anatomy-key-desc"> — Kibana space / namespace. Each namespace is fully isolated.</span>
+            </span>
+          </div>
+          <div class="anatomy-key-item">
+            <span class="anatomy-key-swatch s-rollover" aria-hidden="true"></span>
+            <span class="anatomy-key-text">
+              <span class="anatomy-key-name">-00002</span>
+              <span class="anatomy-key-desc"> — rollover suffix. Callers use the stable alias <code>entities-latest-{ns}</code>.</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <caption class="caption">Entity store v2 indices and data streams in namespace <code>{ns}</code>.</caption>
+          <thead>
+            <tr>
+              <th scope="col">Role</th>
+              <th scope="col">Concrete pattern</th>
+              <th scope="col">Alias</th>
+              <th scope="col">Written by</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Latest (canonical)</td>
+              <td><code>.entities.v2.latest.security_{ns}-00002</code></td>
+              <td><code>entities-latest-{ns}</code></td>
+              <td>Extraction, maintainers, CRUD routes</td>
+            </tr>
+            <tr>
+              <td>Updates (CCS staging)</td>
+              <td><code>.entities.v2.updates.security_{ns}</code> (data stream)</td>
+              <td><code>entities-updates-{ns}</code></td>
+              <td><code>CcsLogsExtractionClient</code></td>
+            </tr>
+            <tr>
+              <td>History snapshot</td>
+              <td><code>.entities.v2.history.security_{ns}.{YYYY-MM-DD-HH}</code></td>
+              <td>(no stable alias)</td>
+              <td><code>HistorySnapshotClient</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>The latest index uses a default ingest pipeline named <code>.entities.v2.latest.security_{ns}_ingest_pipeline</code> that expands dotted fields. Templates are installed once per namespace by <code>installIndicesAndDataStreams()</code> in <code>server/infra/elasticsearch/install_assets.ts</code>.</p>
+
+      <figure class="diagram">
+        <svg
+          viewBox="0 0 720 380"
+          xmlns="http://www.w3.org/2000/svg"
+          role="img"
+          aria-labelledby="indices-diagram-title indices-diagram-desc"
+          preserveAspectRatio="xMidYMid meet"
+        >
+          <title id="indices-diagram-title">Data flow between entity store indices and data streams</title>
+          <desc id="indices-diagram-desc">Local extract task writes the latest index. CCS extract client writes the updates data stream. The next local extract run reads the updates data stream and merges its rows into the latest index. The history snapshot task copies the latest index into a dated history index.</desc>
+
+          <defs>
+            <marker id="arrowhead-indices" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" class="arrow-head" />
+            </marker>
+          </defs>
+
+          <!-- Top row: tasks/clients -->
+          <g>
+            <rect class="node-bg" x="20" y="20" width="240" height="60" rx="4" />
+            <text class="node-label" x="140" y="46" text-anchor="middle">Local extract task</text>
+            <text class="node-sub" x="140" y="66" text-anchor="middle">LogsExtractionClient</text>
+          </g>
+
+          <g>
+            <rect class="node-bg-muted" x="460" y="20" width="240" height="60" rx="4" />
+            <text class="node-label" x="580" y="46" text-anchor="middle">CCS extract client</text>
+            <text class="node-sub" x="580" y="66" text-anchor="middle">CcsLogsExtractionClient</text>
+          </g>
+
+          <!-- Middle row: latest + updates -->
+          <g>
+            <rect class="node-bg-latest" x="20" y="160" width="240" height="80" rx="6" />
+            <text class="node-label" x="140" y="194" text-anchor="middle">LATEST INDEX</text>
+            <text class="node-sub" x="140" y="216" text-anchor="middle">.entities.v2.latest.</text>
+            <text class="node-sub" x="140" y="234" text-anchor="middle">security_{ns}-00002</text>
+          </g>
+
+          <g>
+            <rect class="node-bg-muted" x="460" y="170" width="240" height="60" rx="4" />
+            <text class="node-label" x="580" y="196" text-anchor="middle">Updates data stream</text>
+            <text class="node-sub" x="580" y="216" text-anchor="middle">.entities.v2.updates.security_{ns}</text>
+          </g>
+
+          <!-- Bottom row: history snapshot -->
+          <g>
+            <rect class="node-bg" x="20" y="300" width="240" height="60" rx="4" />
+            <text class="node-label" x="140" y="326" text-anchor="middle">History snapshot</text>
+            <text class="node-sub" x="140" y="346" text-anchor="middle">.entities.v2.history.security_{ns}.{YYYY-MM-DD-HH}</text>
+          </g>
+
+          <!-- Arrows -->
+          <!-- Local extract -> LATEST -->
+          <line class="arrow-strong" x1="140" y1="80" x2="140" y2="160" marker-end="url(#arrowhead-indices)" />
+          <text class="arrow-label" x="150" y="125" text-anchor="start">writes (doc_as_upsert)</text>
+
+          <!-- CCS extract -> Updates DS -->
+          <line class="arrow" x1="580" y1="80" x2="580" y2="170" marker-end="url(#arrowhead-indices)" />
+          <text class="arrow-label" x="590" y="120" text-anchor="start">stages remote</text>
+          <text class="arrow-label" x="590" y="138" text-anchor="start">cluster updates</text>
+
+          <!-- Updates DS -> LATEST (merged on next local run) -->
+          <line class="arrow" x1="460" y1="200" x2="260" y2="200" marker-end="url(#arrowhead-indices)" />
+          <text class="arrow-label" x="360" y="190" text-anchor="middle">merged on next</text>
+          <text class="arrow-label" x="360" y="222" text-anchor="middle">local extract run</text>
+
+          <!-- LATEST -> History -->
+          <line class="arrow" x1="140" y1="240" x2="140" y2="300" marker-end="url(#arrowhead-indices)" />
+          <text class="arrow-label" x="150" y="275" text-anchor="start">runHistorySnapshot()</text>
+        </svg>
+        <figcaption class="caption">Solid blue arrow = primary write path (every extract run). Grey arrows = secondary or scheduled paths. Updates DS only exists to stage remote-cluster rows for the next local merge.</figcaption>
+      </figure>
+
+      <div class="callout">
+        <p><strong>Why a separate updates data stream.</strong> Cross-cluster extraction cannot LOOKUP JOIN remote indices in one query, so remote updates are staged locally first. The next local extraction reads the updates DS as just another source pattern and merges the rows into latest using the same ES|QL pipeline.</p>
+      </div>
+    </section>
+
+    <section class="section-install" aria-labelledby="install-heading">
+      <h2 id="install-heading" class="h2-with-icon">
+        <svg class="h2-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v3M12 20v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M1 12h3M20 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg>
+        Install and engine status
+      </h2>
+
+      <div class="tldr">
+        <span class="tldr-label">TL;DR</span>
+        <p class="tldr-text">One HTTP call installs everything. Five of the six install steps are about pointing recurring tasks at the right targets.</p>
+      </div>
+
+      <h3>Install flow</h3>
+
+      <div class="step-cards" role="list" aria-label="Install flow steps">
+        <div class="step-card" role="listitem">
+          <span class="step-card-num" aria-hidden="true">1</span>
+          <p class="step-card-title">Install route called</p>
+          <p class="step-card-body">Caller hits <code>POST /api/security/entity_store/install</code>. Privileges are checked and the request is forwarded to <code>AssetManagerClient.init()</code>.</p>
+        </div>
+        <div class="step-card" role="listitem">
+          <span class="step-card-num" aria-hidden="true">2</span>
+          <p class="step-card-title">Remove v1 artefacts</p>
+          <p class="step-card-body"><code>init()</code> calls <code>stopAndRemoveV1()</code> so v1 schemas cannot conflict with v2.</p>
+        </div>
+        <div class="step-card" role="listitem">
+          <span class="step-card-num" aria-hidden="true">3</span>
+          <p class="step-card-title">Create ES assets</p>
+          <p class="step-card-body"><code>installSharedElasticsearchAssets()</code> creates pipelines, component and index templates, the latest index, and the updates data stream.</p>
+        </div>
+        <div class="step-card" role="listitem">
+          <span class="step-card-num" aria-hidden="true">4</span>
+          <p class="step-card-title">Per-type engines</p>
+          <p class="step-card-body">For each entity type, <code>initEntity()</code> writes the engine descriptor with status <code>installing</code>, then <code>start()</code> flips it to <code>started</code> and schedules the extract task.</p>
+        </div>
+        <div class="step-card" role="listitem">
+          <span class="step-card-num" aria-hidden="true">5</span>
+          <p class="step-card-title">Schedule maintainers</p>
+          <p class="step-card-body"><code>entityMaintainersClient.init(req)</code> schedules every registered maintainer that does not yet have a task document.</p>
+        </div>
+        <div class="step-card" role="listitem">
+          <span class="step-card-num" aria-hidden="true">6</span>
+          <p class="step-card-title">Global tasks</p>
+          <p class="step-card-body">The history snapshot task and the status report task are scheduled at the global level.</p>
+        </div>
+      </div>
+      <p class="caption">Source: server/routes/apis/install/index.ts, server/domain/asset_manager/asset_manager_client.ts</p>
+
+      <h3>Install sequence diagram</h3>
+      <p>The same six steps as messages between four actors. Solid arrows are calls; dashed arrows are returns.</p>
+
+      <figure class="diagram">
+        <svg
+          viewBox="0 0 800 500"
+          xmlns="http://www.w3.org/2000/svg"
+          role="img"
+          aria-labelledby="install-seq-title install-seq-desc"
+          preserveAspectRatio="xMidYMid meet"
+        >
+          <title id="install-seq-title">Install sequence diagram</title>
+          <desc id="install-seq-desc">Four actors arranged left to right: Caller, AssetManagerClient, Elasticsearch, Task Manager. Caller POSTs to the install route, which calls AssetManagerClient.init. AssetManagerClient calls stopAndRemoveV1 on itself, then installSharedElasticsearchAssets on Elasticsearch, then schedules per-type extract tasks, maintainers, and global tasks on Task Manager, then returns 200 OK to the caller.</desc>
+
+          <defs>
+            <marker id="seq-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" class="seq-arrow-head" />
+            </marker>
+            <marker id="seq-arrow-return" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" class="seq-arrow-head-return" />
+            </marker>
+          </defs>
+
+          <!-- Actor boxes -->
+          <g>
+            <rect class="seq-actor" x="20" y="20" width="160" height="40" rx="4" />
+            <text class="seq-actor-label" x="100" y="46">Caller</text>
+          </g>
+          <g>
+            <rect class="seq-actor" x="220" y="20" width="160" height="40" rx="4" />
+            <text class="seq-actor-label" x="300" y="46">AssetManagerClient</text>
+          </g>
+          <g>
+            <rect class="seq-actor" x="420" y="20" width="160" height="40" rx="4" />
+            <text class="seq-actor-label" x="500" y="46">Elasticsearch</text>
+          </g>
+          <g>
+            <rect class="seq-actor" x="620" y="20" width="160" height="40" rx="4" />
+            <text class="seq-actor-label" x="700" y="46">Task Manager</text>
+          </g>
+
+          <!-- Lifelines -->
+          <line class="seq-lane" x1="100" y1="60" x2="100" y2="490" />
+          <line class="seq-lane" x1="300" y1="60" x2="300" y2="490" />
+          <line class="seq-lane" x1="500" y1="60" x2="500" y2="490" />
+          <line class="seq-lane" x1="700" y1="60" x2="700" y2="490" />
+
+          <!-- 1: Caller -> AssetManagerClient -->
+          <text class="seq-message-mono" x="200" y="92">POST /api/security/entity_store/install</text>
+          <line class="seq-call" x1="100" y1="100" x2="300" y2="100" marker-end="url(#seq-arrow)" />
+
+          <!-- 2: AssetManagerClient self-call (stopAndRemoveV1) -->
+          <text class="seq-message-mono" x="370" y="138">stopAndRemoveV1()</text>
+          <path class="seq-self-loop" d="M 300 150 C 360 150, 360 175, 300 175" marker-end="url(#seq-arrow)" />
+
+          <!-- 3: AssetManagerClient -> Elasticsearch (installSharedElasticsearchAssets) -->
+          <text class="seq-message-mono" x="400" y="202">installSharedElasticsearchAssets()</text>
+          <text class="seq-message" x="400" y="218">create pipelines, templates, indices</text>
+          <line class="seq-call" x1="300" y1="226" x2="500" y2="226" marker-end="url(#seq-arrow)" />
+
+          <!-- 4: ack from Elasticsearch -->
+          <text class="seq-message" x="400" y="256">ack</text>
+          <line class="seq-return" x1="500" y1="264" x2="300" y2="264" marker-end="url(#seq-arrow-return)" />
+
+          <!-- 5: AssetManagerClient -> Task Manager: schedule extract tasks -->
+          <text class="seq-message-mono" x="500" y="296">scheduleExtract(per entity type)</text>
+          <line class="seq-call" x1="300" y1="304" x2="700" y2="304" marker-end="url(#seq-arrow)" />
+
+          <!-- 6: schedule maintainers -->
+          <text class="seq-message-mono" x="500" y="334">entityMaintainersClient.init()</text>
+          <line class="seq-call" x1="300" y1="342" x2="700" y2="342" marker-end="url(#seq-arrow)" />
+
+          <!-- 7: schedule history snapshot + status report -->
+          <text class="seq-message-mono" x="500" y="372">scheduleHistorySnapshot()</text>
+          <text class="seq-message-mono" x="500" y="388">scheduleStatusReport()</text>
+          <line class="seq-call" x1="300" y1="396" x2="700" y2="396" marker-end="url(#seq-arrow)" />
+
+          <!-- 8: Task Manager ack -->
+          <text class="seq-message" x="500" y="424">ack</text>
+          <line class="seq-return" x1="700" y1="432" x2="300" y2="432" marker-end="url(#seq-arrow-return)" />
+
+          <!-- 9: 200 OK to caller -->
+          <text class="seq-message" x="200" y="464">200 OK</text>
+          <line class="seq-return" x1="300" y1="472" x2="100" y2="472" marker-end="url(#seq-arrow-return)" />
+        </svg>
+        <figcaption class="caption">The install route is a single HTTP request. By the time it returns, every recurring task is scheduled and Elasticsearch has the assets it needs.</figcaption>
+      </figure>
+
+      <h3>Status states</h3>
+      <p>There are two layers of status. The <strong>aggregate</strong> status is what callers usually check; <strong>per-engine</strong> status is what determines extraction behaviour for a single entity type.</p>
+
+      <div class="card-grid">
+        <div class="card">
+          <span class="badge badge-info">Aggregate</span>
+          <h3>EntityStoreStatus</h3>
+          <p>Values: <code>not_installed</code>, <code>installing</code>, <code>running</code>, <code>stopped</code>, <code>error</code>. Computed by <code>AssetManagerClient.calculateEntityStoreStatus()</code> from the set of per-engine statuses. Returned by <code>GET /api/security/entity_store/status</code>.</p>
+        </div>
+
+        <div class="card">
+          <span class="badge badge-info">Per engine</span>
+          <h3>EngineStatus</h3>
+          <p>Values: <code>installing</code>, <code>started</code>, <code>stopped</code>, <code>updating</code>, <code>error</code>. Persisted on the <code>entity-engine-descriptor-v2</code> saved object with id <code>entity-engine-descriptor-v2-{entityType}-{ns}</code>.</p>
+        </div>
+
+        <div class="card">
+          <span class="badge badge-info">Global</span>
+          <h3>entity-store-global-state</h3>
+          <p>Stores cross-engine config such as <code>logExtraction.additionalIndexPatterns</code> and history snapshot settings. One per namespace: <code>entity-store-global-state-{ns}</code>.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-extraction" aria-labelledby="extraction-heading">
+      <h2 id="extraction-heading" class="h2-with-icon">
+        <svg class="h2-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
+        Log extraction
+      </h2>
+
+      <div class="tldr">
+        <span class="tldr-label">TL;DR</span>
+        <p class="tldr-text">Extraction owns the base record. Maintainers own the rest. If a field is missing, look at one or the other — not both.</p>
+      </div>
+      <p>Extraction is the path that creates and refreshes the base entity record from log evidence. It runs as a Task Manager task per entity type.</p>
+
+      <h3>The task</h3>
+      <p>Each entity type registers its own task type: <code>entity_store:v2:extract_entity_task:user</code>, <code>...:host</code>, <code>...:service</code>, <code>...:generic</code>. The task body is implemented in <code>server/tasks/extract_entity_task.ts</code> and delegates to <code>LogsExtractionClient.extractLogs()</code>.</p>
+
+      <h3>The ES|QL pipeline</h3>
+      <p><code>buildLogsExtractionEsqlQuery()</code> in <code>server/domain/logs_extraction/logs_extraction_query_builder.ts</code> assembles a query that:</p>
+      <ol>
+        <li>Reads logs from Security Solution data view indices plus optional <code>additionalIndexPatterns</code> (alerts indices are filtered out).</li>
+        <li>Aggregates rows into one row per entity using EUID grouping.</li>
+        <li><code>LOOKUP JOIN</code>s the existing latest document so it can merge previous values for fields like <code>entity.behaviors.*</code>, <code>entity.lifecycle.*</code>, and known relationships.</li>
+        <li>Emits the merged shape, ready to upsert into latest.</li>
+      </ol>
+
+      <h3>Ingest</h3>
+      <p>The result is bulk-upserted by <code>ingestEntities()</code> in <code>server/infra/elasticsearch/ingest.ts</code> using <code>doc_as_upsert</code>, with the hashed EUID as the document ID — that is what makes the write idempotent.</p>
+
+<pre><code>// Simplified shape of one extraction run
+await ingestEntities({
+  esClient,
+  targetIndex: getLatestEntitiesIndexName(namespace),
+  esIdField: HASHED_ID_FIELD,
+  rows: esqlRows,
+});</code></pre>
+
+      <div class="callout">
+        <p>Extraction owns the <em>base</em> fields on the record — identifiers, lifecycle, observed behaviours from raw logs. Maintainers own everything else. If a field is missing on the latest record, the most likely culprits are either an ES|QL projection issue in the extraction query or a missing source index in <code>additionalIndexPatterns</code>.</p>
+      </div>
+    </section>
+
+    <section class="section-maintainers" aria-labelledby="maintainers-heading">
+      <h2 id="maintainers-heading" class="h2-with-icon">
+        <svg class="h2-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+        Maintainers
+      </h2>
+
+      <div class="tldr">
+        <span class="tldr-label">TL;DR</span>
+        <p class="tldr-text">Five maintainers, five colours, five personalities. Each one writes a specific subtree of the latest document and nothing else.</p>
+      </div>
+      <p>A maintainer is a registered enrichment job. Each one targets a specific subset of fields on the latest document and runs on its own Task Manager schedule. The shared response type that the UI consumes lives in <code>common/entity_maintainers.ts</code>.</p>
+
+      <h3>Framework</h3>
+      <p>Maintainers are registered through <code>registerEntityMaintainerTask()</code> in <code>server/tasks/entity_maintainers/index.ts</code>, which adds them to the in-memory <code>EntityMaintainersRegistry</code> and registers a dedicated Task Manager task type: <code>entity_store:v2:entity_maintainer_task:{id}</code>. Per-namespace task ids follow <code>{id}:{namespace}</code>. Execution is centralised in <code>executeMaintainerRun()</code>, which short-circuits when the task status is <code>stopped</code>.</p>
+
+      <h3>The five registered maintainers</h3>
+      <div class="table-wrap">
+        <table>
+          <caption class="caption">Maintainers registered in the Kibana fork today. Intervals come from each maintainer's config; license gates may further restrict runs. The left-edge colour bar is reused throughout the doc to identify each maintainer.</caption>
+          <thead>
+            <tr>
+              <th scope="col"><code>id</code></th>
+              <th scope="col">Interval</th>
+              <th scope="col">License gate</th>
+              <th scope="col">Fields touched</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="row-risk">
+              <td><span class="m-dot m-dot-risk" aria-hidden="true"></span><code>risk-score</code></td>
+              <td><code>1h</code></td>
+              <td>platinum + <code>advancedInsights</code></td>
+              <td><code>entity.risk.*</code> via <code>bulkUpdateEntity()</code>, with asset criticality and watchlist modifiers applied at runtime</td>
+            </tr>
+            <tr class="row-watchlist">
+              <td><span class="m-dot m-dot-watchlist" aria-hidden="true"></span><code>watchlist</code></td>
+              <td><code>10m</code></td>
+              <td>platinum (runtime)</td>
+              <td><code>entity.attributes.watchlists</code> on every entity that matches an active watchlist source</td>
+            </tr>
+            <tr class="row-resolution">
+              <td><span class="m-dot m-dot-resolution" aria-hidden="true"></span><code>automated-resolution</code></td>
+              <td><code>5m</code></td>
+              <td>enterprise</td>
+              <td>Resolution relationships on user entities with <code>user.email</code></td>
+            </tr>
+            <tr class="row-accesses">
+              <td><span class="m-dot m-dot-accesses" aria-hidden="true"></span><code>accesses_frequently_and_infrequently</code></td>
+              <td><code>1d</code></td>
+              <td>basic</td>
+              <td><code>entity.relationships.accesses_frequently</code> and <code>accesses_infrequently</code> from auth logs</td>
+            </tr>
+            <tr class="row-communicates">
+              <td><span class="m-dot m-dot-communicates" aria-hidden="true"></span><code>communicates_with</code></td>
+              <td><code>1d</code></td>
+              <td>basic</td>
+              <td><code>entity.relationships.communicates_with</code> from cloud and MDM logs</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Meet the maintainers</h3>
+      <p>Each maintainer is a tiny background worker with one job and one personality. Give them names and you'll find it easier to remember which one wrote which field on the latest document.</p>
+
+      <div class="personality-grid">
+        <div class="personality-card m-risk">
+          <p class="personality-tagline">The score-keeper</p>
+          <p class="personality-character">Riska</p>
+          <p class="personality-id"><code>risk-score</code> &middot; hourly &middot; Enterprise</p>
+          <div class="personality-row">
+            <p class="personality-row-label">Cares about</p>
+            <p class="personality-row-value">Turning every alert, watchlist hit, and criticality tag into one number an analyst can sort on.</p>
+          </div>
+          <div class="personality-row">
+            <p class="personality-row-label">Shows up</p>
+            <p class="personality-row-value">Every hour, on the hour. Skips entities that haven't been touched recently.</p>
+          </div>
+          <div class="personality-row">
+            <p class="personality-row-label">Reads</p>
+            <p class="personality-row-value">Detection alerts, <code>entity.attributes.asset.criticality</code>, <code>entity.attributes.watchlists</code>.</p>
+          </div>
+          <div class="personality-row">
+            <p class="personality-row-label">Writes</p>
+            <p class="personality-row-value"><code>entity.risk.calculated_score</code>, <code>entity.risk.calculated_score_norm</code>, <code>entity.risk.calculated_level</code>.</p>
+          </div>
+          <div class="personality-row">
+            <p class="personality-row-label">Tell I'm broken</p>
+            <p class="personality-row-value">Scores stop updating, every entity sits at the same level, or risk fields disappear from new entities.</p>
+          </div>
+        </div>
+
+        <div class="personality-card m-watchlist">
+          <p class="personality-tagline">The bouncer</p>
+          <p class="personality-character">Wendy</p>
+          <p class="personality-id"><code>watchlist</code> &middot; every 10&nbsp;min &middot; Enterprise</p>
+          <div class="personality-row">
+            <p class="personality-row-label">Cares about</p>
+            <p class="personality-row-value">Checking every entity against the active watchlist queries and tagging the matches.</p>
+          </div>
+          <div class="personality-row">
+            <p class="personality-row-label">Shows up</p>
+            <p class="personality-row-value">Every 10 minutes. One pass per active watchlist source.</p>
+          </div>
+          <div class="personality-row">
+            <p class="personality-row-label">Reads</p>
+            <p class="personality-row-value">Active watchlist sources via <code>entitySourcesService</code>, plus entities that match each watchlist's query.</p>
+          </div>
+          <div class="personality-row">
+            <p class="personality-row-label">Writes</p>
+            <p class="personality-row-value"><code>entity.attributes.watchlists</code>.</p>
+          </div>
+          <div class="personality-row">
+            <p class="personality-row-label">Tell I'm broken</p>
+            <p class="personality-row-value">Watchlist badges never appear in the flyout, or stale tags hang around after a watchlist is deactivated.</p>
+          </div>
+        </div>
+
+        <div class="personality-card m-resolution">
+          <p class="personality-tagline">The matchmaker</p>
+          <p class="personality-character">Reza</p>
+          <p class="personality-id"><code>automated-resolution</code> &middot; daily &middot; Enterprise</p>
+          <div class="personality-row">
+            <p class="personality-row-label">Cares about</p>
+            <p class="personality-row-value">Recognising that the same human shows up under several user entities and linking them together.</p>
+          </div>
+          <div class="personality-row">
+            <p class="personality-row-label">Shows up</p>
+            <p class="personality-row-value">Once a day. Only looks at users that are new since the last run.</p>
+          </div>
+          <div class="personality-row">
+            <p class="personality-row-label">Reads</p>
+            <p class="personality-row-value">New user entities filtered on <code>entity.lifecycle.first_seen</code>, plus their <code>user.email</code>.</p>
+          </div>
+          <div class="personality-row">
+            <p class="personality-row-label">Writes</p>
+            <p class="personality-row-value"><code>entity.relationships.resolution.*</code> linking users that share an identity.</p>
+          </div>
+          <div class="personality-row">
+            <p class="personality-row-label">Tell I'm broken</p>
+            <p class="personality-row-value">Duplicate users for the same person never get linked, even after a few daily runs.</p>
+          </div>
+        </div>
+
+        <div class="personality-card m-accesses">
+          <p class="personality-tagline">The cartographer</p>
+          <p class="personality-character">Aiko</p>
+          <p class="personality-id"><code>accesses_frequently_and_infrequently</code> &middot; daily &middot; Enterprise</p>
+          <div class="personality-row">
+            <p class="personality-row-label">Cares about</p>
+            <p class="personality-row-value">Telling routine activity apart from rare activity by mapping which entities access which others.</p>
+          </div>
+          <div class="personality-row">
+            <p class="personality-row-label">Shows up</p>
+            <p class="personality-row-value">Once a day. Looks at yesterday in one batch.</p>
+          </div>
+          <div class="personality-row">
+            <p class="personality-row-label">Reads</p>
+            <p class="personality-row-value">Yesterday's authentication and access logs.</p>
+          </div>
+          <div class="personality-row">
+            <p class="personality-row-label">Writes</p>
+            <p class="personality-row-value"><code>entity.relationships.accesses_frequently.ids</code>, <code>entity.relationships.accesses_infrequently.ids</code>.</p>
+          </div>
+          <div class="personality-row">
+            <p class="personality-row-label">Tell I'm broken</p>
+            <p class="personality-row-value">"Frequent / infrequent" relationship lists go empty or stop refreshing after the daily window.</p>
+          </div>
+        </div>
+
+        <div class="personality-card m-communicates">
+          <p class="personality-tagline">The network mapper</p>
+          <p class="personality-character">Connie</p>
+          <p class="personality-id"><code>communicates_with</code> &middot; every 30&nbsp;min &middot; Enterprise</p>
+          <div class="personality-row">
+            <p class="personality-row-label">Cares about</p>
+            <p class="personality-row-value">Drawing the live graph of which host or service talks to which other.</p>
+          </div>
+          <div class="personality-row">
+            <p class="personality-row-label">Shows up</p>
+            <p class="personality-row-value">Every 30 minutes. Looks at a short rolling window of network telemetry.</p>
+          </div>
+          <div class="personality-row">
+            <p class="personality-row-label">Reads</p>
+            <p class="personality-row-value">Recent cloud and MDM network logs.</p>
+          </div>
+          <div class="personality-row">
+            <p class="personality-row-label">Writes</p>
+            <p class="personality-row-value"><code>entity.relationships.communicates_with.ids</code>.</p>
+          </div>
+          <div class="personality-row">
+            <p class="personality-row-label">Tell I'm broken</p>
+            <p class="personality-row-value">Relationship graph edges go stale or never appear for hosts that should obviously be connected.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout warn">
+        <p><strong>Asset criticality is not a maintainer.</strong> It is owned by the Asset Criticality API and stored on the entity record as <code>entity.attributes.asset.criticality</code>. The <code>risk-score</code> maintainer reads it at runtime via <code>getCriticalityModifier()</code> when computing a final score.</p>
+      </div>
+
+      <h3>Anatomy of a maintainer run</h3>
+      <p>Every maintainer follows the same loop. Task Manager fires the trigger, the maintainer checks its own status, reads from a source, transforms, and writes back through the CRUD client. If you understand one, you understand all five.</p>
+
+      <figure class="diagram">
+        <svg
+          viewBox="0 0 800 460"
+          xmlns="http://www.w3.org/2000/svg"
+          role="img"
+          aria-labelledby="maintainer-seq-title maintainer-seq-desc"
+          preserveAspectRatio="xMidYMid meet"
+        >
+          <title id="maintainer-seq-title">Maintainer run sequence diagram</title>
+          <desc id="maintainer-seq-desc">Four actors arranged left to right: Task Manager, Maintainer, Source data, CRUDClient. Task Manager triggers the maintainer on a cron, the maintainer checks its own task status, reads source data from Elasticsearch, computes updates, then writes the updates through the CRUD client and reports complete to Task Manager.</desc>
+
+          <defs>
+            <marker id="seq-arrow-m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" class="seq-arrow-head" />
+            </marker>
+            <marker id="seq-arrow-return-m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" class="seq-arrow-head-return" />
+            </marker>
+          </defs>
+
+          <g>
+            <rect class="seq-actor" x="20" y="20" width="160" height="40" rx="4" />
+            <text class="seq-actor-label" x="100" y="46">Task Manager</text>
+          </g>
+          <g>
+            <rect class="seq-actor" x="220" y="20" width="160" height="40" rx="4" />
+            <text class="seq-actor-label" x="300" y="46">Maintainer</text>
+          </g>
+          <g>
+            <rect class="seq-actor" x="420" y="20" width="160" height="40" rx="4" />
+            <text class="seq-actor-label" x="500" y="46">Source data (ES)</text>
+          </g>
+          <g>
+            <rect class="seq-actor" x="620" y="20" width="160" height="40" rx="4" />
+            <text class="seq-actor-label" x="700" y="46">CRUDClient</text>
+          </g>
+
+          <line class="seq-lane" x1="100" y1="60" x2="100" y2="450" />
+          <line class="seq-lane" x1="300" y1="60" x2="300" y2="450" />
+          <line class="seq-lane" x1="500" y1="60" x2="500" y2="450" />
+          <line class="seq-lane" x1="700" y1="60" x2="700" y2="450" />
+
+          <!-- 1: TM -> Maintainer trigger -->
+          <text class="seq-message" x="200" y="92">trigger run (cron)</text>
+          <line class="seq-call" x1="100" y1="100" x2="300" y2="100" marker-end="url(#seq-arrow-m)" />
+
+          <!-- 2: Maintainer self-call: gate on taskStatus -->
+          <text class="seq-message-mono" x="370" y="138">executeMaintainerRun()</text>
+          <text class="seq-message" x="370" y="154">checks taskStatus</text>
+          <path class="seq-self-loop" d="M 300 162 C 360 162, 360 188, 300 188" marker-end="url(#seq-arrow-m)" />
+
+          <!-- 3: Maintainer -> Source ES -->
+          <text class="seq-message" x="400" y="216">read alerts / logs window</text>
+          <line class="seq-call" x1="300" y1="224" x2="500" y2="224" marker-end="url(#seq-arrow-m)" />
+
+          <!-- 4: Source ES -> Maintainer (return) -->
+          <text class="seq-message" x="400" y="252">rows</text>
+          <line class="seq-return" x1="500" y1="260" x2="300" y2="260" marker-end="url(#seq-arrow-return-m)" />
+
+          <!-- 5: Maintainer self-call: compute -->
+          <text class="seq-message" x="370" y="292">compute updates per entity</text>
+          <path class="seq-self-loop" d="M 300 300 C 360 300, 360 326, 300 326" marker-end="url(#seq-arrow-m)" />
+
+          <!-- 6: Maintainer -> CRUDClient -->
+          <text class="seq-message-mono" x="500" y="354">bulkUpdateEntity(updates)</text>
+          <line class="seq-call" x1="300" y1="362" x2="700" y2="362" marker-end="url(#seq-arrow-m)" />
+
+          <!-- 7: CRUDClient ack -->
+          <text class="seq-message" x="500" y="390">ack</text>
+          <line class="seq-return" x1="700" y1="398" x2="300" y2="398" marker-end="url(#seq-arrow-return-m)" />
+
+          <!-- 8: Maintainer -> TM complete -->
+          <text class="seq-message" x="200" y="426">complete</text>
+          <line class="seq-return" x1="300" y1="434" x2="100" y2="434" marker-end="url(#seq-arrow-return-m)" />
+        </svg>
+        <figcaption class="caption">If <code>taskStatus</code> is <code>stopped</code>, step 2 short-circuits and steps 3–7 never run. The task itself stays scheduled.</figcaption>
+      </figure>
+
+      <h3>Lifecycle states</h3>
+      <p>The <code>taskStatus</code> field on <code>EntityMaintainerResponseItem</code> can be one of three values. Each transition has a clear owner.</p>
+
+      <figure class="diagram">
+        <svg
+          viewBox="0 0 720 240"
+          xmlns="http://www.w3.org/2000/svg"
+          role="img"
+          aria-labelledby="lifecycle-states-title lifecycle-states-desc"
+          preserveAspectRatio="xMidYMid meet"
+        >
+          <title id="lifecycle-states-title">Maintainer lifecycle state machine</title>
+          <desc id="lifecycle-states-desc">Three states arranged left to right: never_started, started, and stopped. A maintainer moves from never_started to started by an explicit init. It moves between started and stopped via the stop and start routes. From the stopped state the task remains scheduled but executeMaintainerRun returns early.</desc>
+
+          <defs>
+            <marker id="arrowhead-states" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" class="arrow-head" />
+            </marker>
+          </defs>
+
+          <!-- never_started (neutral) -->
+          <g>
+            <rect class="node-bg-neutral" x="40" y="90" width="160" height="60" rx="30" />
+            <text class="node-label" x="120" y="118" text-anchor="middle">never_started</text>
+            <text class="node-sub" x="120" y="138" text-anchor="middle">no task doc yet</text>
+          </g>
+
+          <!-- started (ok) -->
+          <g>
+            <rect class="node-bg-ok" x="280" y="90" width="160" height="60" rx="30" />
+            <text class="node-label" x="360" y="118" text-anchor="middle">started</text>
+            <text class="node-sub" x="360" y="138" text-anchor="middle">runs execute</text>
+          </g>
+
+          <!-- stopped (warn) -->
+          <g>
+            <rect class="node-bg-warn" x="520" y="90" width="160" height="60" rx="30" />
+            <text class="node-label" x="600" y="118" text-anchor="middle">stopped</text>
+            <text class="node-sub" x="600" y="138" text-anchor="middle">runs skipped</text>
+          </g>
+
+          <!-- never_started -> started -->
+          <line class="arrow-strong" x1="200" y1="120" x2="280" y2="120" marker-end="url(#arrowhead-states)" />
+          <text class="arrow-label" x="240" y="110" text-anchor="middle">init</text>
+          <text class="arrow-label" x="240" y="80" text-anchor="middle">scheduleEntityMaintainerTask()</text>
+
+          <!-- started -> stopped (upper) -->
+          <line class="arrow" x1="440" y1="108" x2="520" y2="108" marker-end="url(#arrowhead-states)" />
+          <text class="arrow-label" x="480" y="98" text-anchor="middle">stop</text>
+
+          <!-- stopped -> started (lower) -->
+          <line class="arrow" x1="520" y1="132" x2="440" y2="132" marker-end="url(#arrowhead-states)" />
+          <text class="arrow-label" x="480" y="156" text-anchor="middle">start</text>
+
+          <!-- Self-loop note for stopped: task remains scheduled -->
+          <text class="arrow-label" x="600" y="194" text-anchor="middle">task remains scheduled,</text>
+          <text class="arrow-label" x="600" y="212" text-anchor="middle">executeMaintainerRun() returns early</text>
+        </svg>
+        <figcaption class="caption">The only way out of <code>never_started</code> is an explicit init. The boundary between <code>started</code> and <code>stopped</code> is bi-directional and lossless — the underlying Task Manager document never goes away.</figcaption>
+      </figure>
+
+      <div class="card-grid">
+        <div class="card">
+          <span class="badge badge-info">never_started</span>
+          <h3>No Task Manager document exists yet</h3>
+          <p>The maintainer is registered in code but has not been scheduled. <code>EntityMaintainersClient.getMaintainers()</code> reports this default when <code>taskManager.get()</code> returns NotFound. The only way out of this state is an explicit init.</p>
+        </div>
+
+        <div class="card">
+          <span class="badge badge-ok">started</span>
+          <h3>Task is scheduled and runs are executing</h3>
+          <p>Set by <code>scheduleEntityMaintainerTask()</code> on first init, and by <code>startEntityMaintainer()</code> when transitioning back from <code>stopped</code>. <code>executeMaintainerRun()</code> proceeds normally unless a runtime license check fails.</p>
+        </div>
+
+        <div class="card">
+          <span class="badge badge-warn">stopped</span>
+          <h3>Task exists but runs are skipped</h3>
+          <p>Set by <code>stopEntityMaintainer()</code> via <code>updateTaskStatus(..., STOPPED)</code>. The Task Manager document remains so the schedule is preserved, but <code>executeMaintainerRun()</code> returns early when it sees this status.</p>
+        </div>
+      </div>
+
+      <h3>Routes that drive transitions</h3>
+      <div class="table-wrap">
+        <table>
+          <caption class="caption">Maintainer management routes and the lifecycle effect they have.</caption>
+          <thead>
+            <tr>
+              <th scope="col">Route</th>
+              <th scope="col">Effect</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>GET /internal/security/entity_store/entity_maintainers</code></td>
+              <td>Returns the full <code>GetEntityMaintainersResponse</code> built by <code>toGetMaintainersResponseItem()</code>.</td>
+            </tr>
+            <tr>
+              <td><code>POST /internal/security/entity_store/entity_maintainers/init</code></td>
+              <td>Schedules any maintainer currently in <code>never_started</code>.</td>
+            </tr>
+            <tr>
+              <td><code>PUT /internal/.../entity_maintainers/start/{id}</code></td>
+              <td>Sets the named maintainer to <code>started</code> and bulk-enables the underlying task.</td>
+            </tr>
+            <tr>
+              <td><code>PUT /internal/.../entity_maintainers/stop/{id}</code></td>
+              <td>Sets the named maintainer to <code>stopped</code>.</td>
+            </tr>
+            <tr>
+              <td><code>POST /internal/.../entity_maintainers/run/{id}?sync=true|false</code></td>
+              <td>Forces an immediate run, optionally awaiting completion.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section-timeline" aria-labelledby="timeline-heading">
+      <h2 id="timeline-heading" class="h2-with-icon">
+        <svg class="h2-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Entity lifecycle timeline
+      </h2>
+
+      <div class="tldr">
+        <span class="tldr-label">TL;DR</span>
+        <p class="tldr-text">Read the timeline left to right. The colour tells you which maintainer fired each event. The annotated document at the bottom shows what each one wrote.</p>
+      </div>
+      <p>This is the path a single entity travels, from a single log line landing in a source index to a fully decorated record in the latest index. Times are illustrative — actual intervals depend on the entity type and the maintainers enabled.</p>
+
+      <h3>Lifecycle at a glance</h3>
+      <p>Source indices feed an extract task that owns the base entity record. Five maintainers enrich specific fields on the same latest document. A separate periodic task copies the latest record into a dated history index.</p>
+
+      <figure class="diagram">
+        <svg
+          viewBox="0 0 780 400"
+          xmlns="http://www.w3.org/2000/svg"
+          role="img"
+          aria-labelledby="lifecycle-diagram-title lifecycle-diagram-desc"
+          preserveAspectRatio="xMidYMid meet"
+        >
+          <title id="lifecycle-diagram-title">Entity store v2 lifecycle</title>
+          <desc id="lifecycle-diagram-desc">Top of the left column shows source indices feeding an extract task that writes into the central latest index. Below the latest index, a history snapshot task copies records to a dated history index. The right column lists the five maintainers — risk-score, watchlist, communicates_with, accesses_frequently_and_infrequently, and automated-resolution — with arrows pointing into the latest index, indicating that maintainers enrich specific fields on the same record.</desc>
+
+          <defs>
+            <marker id="arrowhead" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" class="arrow-head" />
+            </marker>
+          </defs>
+
+          <!-- Left column: source -> extract -> latest -> history -->
+          <g>
+            <rect class="node-bg" x="40" y="20" width="200" height="60" rx="4" />
+            <text class="node-label" x="140" y="48" text-anchor="middle">Source indices</text>
+            <text class="node-sub" x="140" y="68" text-anchor="middle">logs-*, alerts excluded</text>
+          </g>
+          <line class="arrow" x1="140" y1="80" x2="140" y2="100" marker-end="url(#arrowhead)" />
+
+          <g>
+            <rect class="node-bg" x="40" y="100" width="200" height="60" rx="4" />
+            <text class="node-label" x="140" y="128" text-anchor="middle">Extract task</text>
+            <text class="node-sub" x="140" y="148" text-anchor="middle">extract_entity_task:{type}</text>
+          </g>
+          <line class="arrow" x1="140" y1="160" x2="140" y2="180" marker-end="url(#arrowhead)" />
+
+          <g>
+            <rect class="node-bg-latest" x="20" y="180" width="240" height="100" rx="6" />
+            <text class="node-label" x="140" y="218" text-anchor="middle">LATEST INDEX</text>
+            <text class="node-sub" x="140" y="240" text-anchor="middle">.entities.v2.latest.</text>
+            <text class="node-sub" x="140" y="258" text-anchor="middle">security_{ns}-00002</text>
+          </g>
+          <line class="arrow" x1="140" y1="280" x2="140" y2="300" marker-end="url(#arrowhead)" />
+
+          <g>
+            <rect class="node-bg" x="40" y="300" width="200" height="60" rx="4" />
+            <text class="node-label" x="140" y="328" text-anchor="middle">History snapshot</text>
+            <text class="node-sub" x="140" y="348" text-anchor="middle">.entities.v2.history.*</text>
+          </g>
+
+          <!-- Right column: maintainers fanning into LATEST -->
+          <text class="group-label" x="560" y="30" text-anchor="middle">Maintainers</text>
+
+          <g>
+            <rect class="node-bg-muted" x="420" y="48" width="280" height="38" rx="4" />
+            <text class="node-label" x="560" y="72" text-anchor="middle">risk-score</text>
+          </g>
+          <line class="arrow" x1="420" y1="67" x2="262" y2="200" marker-end="url(#arrowhead)" />
+
+          <g>
+            <rect class="node-bg-muted" x="420" y="96" width="280" height="38" rx="4" />
+            <text class="node-label" x="560" y="120" text-anchor="middle">watchlist</text>
+          </g>
+          <line class="arrow" x1="420" y1="115" x2="262" y2="215" marker-end="url(#arrowhead)" />
+
+          <g>
+            <rect class="node-bg-muted" x="420" y="144" width="280" height="38" rx="4" />
+            <text class="node-label" x="560" y="168" text-anchor="middle">communicates_with</text>
+          </g>
+          <line class="arrow" x1="420" y1="163" x2="262" y2="230" marker-end="url(#arrowhead)" />
+
+          <g>
+            <rect class="node-bg-muted" x="420" y="192" width="280" height="38" rx="4" />
+            <text class="node-label" x="560" y="216" text-anchor="middle">accesses_frequently_and_infrequently</text>
+          </g>
+          <line class="arrow" x1="420" y1="211" x2="262" y2="245" marker-end="url(#arrowhead)" />
+
+          <g>
+            <rect class="node-bg-muted" x="420" y="240" width="280" height="38" rx="4" />
+            <text class="node-label" x="560" y="264" text-anchor="middle">automated-resolution</text>
+          </g>
+          <line class="arrow" x1="420" y1="259" x2="262" y2="260" marker-end="url(#arrowhead)" />
+        </svg>
+        <figcaption class="caption">Vertical pipeline: source indices flow into the extract task, which writes the latest index, which the history snapshot task copies. The five maintainers run on independent schedules and update specific fields on the same latest record.</figcaption>
+      </figure>
+
+      <h3>Example: a new host called <code>web-prod-01</code></h3>
+      <p>Imagine an EDR agent on <code>web-prod-01</code> emits its first event into <code>logs-endpoint.events.process-default</code> at <code>10:00:00</code>. The following timeline shows what the entity store does with it.</p>
+
+      <ul class="legend" aria-label="Timeline event types">
+        <li><span class="swatch swatch-source" aria-hidden="true"></span> Source log</li>
+        <li><span class="swatch swatch-extract" aria-hidden="true"></span> Extract task</li>
+        <li><span class="swatch swatch-maintainer" aria-hidden="true"></span> Maintainer</li>
+        <li><span class="swatch swatch-history" aria-hidden="true"></span> History snapshot</li>
+      </ul>
+
+      <figure class="diagram">
+        <svg
+          viewBox="0 0 800 180"
+          xmlns="http://www.w3.org/2000/svg"
+          role="img"
+          aria-labelledby="timeline-diagram-title timeline-diagram-desc"
+          preserveAspectRatio="xMidYMid meet"
+        >
+          <title id="timeline-diagram-title">Worked example timeline for web-prod-01</title>
+          <desc id="timeline-diagram-desc">A horizontal timeline showing eight events as colour-coded dots from 10:00 to the next day. The first event at 10:00 is the raw source log. Event 2 at 10:05 is the extract task writing the latest document. Events 3 through 6 between 10:30 and 12:00 are maintainer runs (communicates_with, risk-score, watchlist, risk-score again). Event 7 at 12:00 is the history snapshot. Event 8, after a visual break, is the next-day accesses_frequently maintainer run.</desc>
+
+          <defs>
+            <marker id="arrowhead-timeline" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" class="arrow-head" />
+            </marker>
+          </defs>
+
+          <!-- Axis -->
+          <line class="axis-line" x1="40" y1="100" x2="760" y2="100" marker-end="url(#arrowhead-timeline)" />
+
+          <!-- Time-gap break between event 7 and 8 -->
+          <line class="axis-line" x1="630" y1="93" x2="640" y2="107" />
+          <line class="axis-line" x1="640" y1="93" x2="650" y2="107" />
+
+          <!-- 1: Raw event (source) -->
+          <g>
+            <line class="axis-tick" x1="80" y1="95" x2="80" y2="105" />
+            <circle class="dot-source" cx="80" cy="100" r="8" />
+            <text class="event-name" x="80" y="78" text-anchor="middle">1</text>
+            <text class="event-time" x="80" y="130" text-anchor="middle">10:00</text>
+          </g>
+
+          <!-- 2: Extract -> latest doc created -->
+          <g>
+            <line class="axis-tick" x1="160" y1="95" x2="160" y2="105" />
+            <circle class="dot-extract" cx="160" cy="100" r="8" />
+            <text class="event-name" x="160" y="78" text-anchor="middle">2</text>
+            <text class="event-time" x="160" y="130" text-anchor="middle">10:05</text>
+          </g>
+
+          <!-- 3: communicates_with -->
+          <g>
+            <line class="axis-tick" x1="240" y1="95" x2="240" y2="105" />
+            <circle class="dot-maintainer" cx="240" cy="100" r="8" />
+            <text class="event-name" x="240" y="78" text-anchor="middle">3</text>
+            <text class="event-time" x="240" y="130" text-anchor="middle">10:30</text>
+          </g>
+
+          <!-- 4: risk-score -->
+          <g>
+            <line class="axis-tick" x1="340" y1="95" x2="340" y2="105" />
+            <circle class="dot-maintainer" cx="340" cy="100" r="8" />
+            <text class="event-name" x="340" y="78" text-anchor="middle">4</text>
+            <text class="event-time" x="340" y="130" text-anchor="middle">11:00</text>
+          </g>
+
+          <!-- 5: watchlist -->
+          <g>
+            <line class="axis-tick" x1="410" y1="95" x2="410" y2="105" />
+            <circle class="dot-maintainer" cx="410" cy="100" r="8" />
+            <text class="event-name" x="410" y="78" text-anchor="middle">5</text>
+            <text class="event-time" x="410" y="130" text-anchor="middle">11:10</text>
+          </g>
+
+          <!-- 6: risk-score (re-run) -->
+          <g>
+            <line class="axis-tick" x1="520" y1="95" x2="520" y2="105" />
+            <circle class="dot-maintainer" cx="520" cy="100" r="8" />
+            <text class="event-name" x="520" y="78" text-anchor="middle">6</text>
+            <text class="event-time" x="520" y="130" text-anchor="middle">12:00</text>
+          </g>
+
+          <!-- 7: history snapshot (same hour) -->
+          <g>
+            <line class="axis-tick" x1="590" y1="95" x2="590" y2="105" />
+            <circle class="dot-history" cx="590" cy="100" r="8" />
+            <text class="event-name" x="590" y="78" text-anchor="middle">7</text>
+            <text class="event-time" x="590" y="130" text-anchor="middle">top of hr</text>
+          </g>
+
+          <!-- 8: accesses_* next day -->
+          <g>
+            <line class="axis-tick" x1="710" y1="95" x2="710" y2="105" />
+            <circle class="dot-maintainer" cx="710" cy="100" r="8" />
+            <text class="event-name" x="710" y="78" text-anchor="middle">8</text>
+            <text class="event-time" x="710" y="130" text-anchor="middle">next day</text>
+          </g>
+        </svg>
+        <figcaption class="caption">Each dot is one event. Colour = who fired it. The double slash on the axis between 7 and 8 marks the visual time-gap before the daily maintainer runs.</figcaption>
+      </figure>
+
+      <ol class="flow">
+        <li>
+          <span class="step-num" aria-hidden="true">1</span>
+          <strong>10:00:00 — Raw event indexed.</strong> The endpoint agent writes a process event to <code>logs-endpoint.events.process-default</code>. No entity record exists yet.
+        </li>
+        <li>
+          <span class="step-num" aria-hidden="true">2</span>
+          <strong>10:05:00 — Host extract task fires.</strong> Task Manager runs <code>entity_store:v2:extract_entity_task:host</code>. <code>runTask()</code> hands off to <code>LogsExtractionClient.extractLogs()</code>.
+        </li>
+        <li>
+          <span class="step-num" aria-hidden="true">3</span>
+          <strong>10:05:01 — ES|QL extraction builds a row.</strong> <code>buildLogsExtractionEsqlQuery()</code> emits one row keyed by the host EUID, with base identifiers and observed behaviours. The <code>LOOKUP JOIN</code> finds no existing latest doc, so previous-state merging is a no-op.
+        </li>
+        <li>
+          <span class="step-num" aria-hidden="true">4</span>
+          <strong>10:05:02 — Latest document created.</strong> <code>ingestEntities()</code> upserts the row into <code>.entities.v2.latest.security_default-00002</code> with the hashed EUID as the doc id. The UI now sees a barebones host record.
+        </li>
+        <li>
+          <span class="step-num" aria-hidden="true">5</span>
+          <strong>10:30:00 — Communicates-with maintainer runs.</strong> <code>entity_store:v2:entity_maintainer_task:communicates_with</code> reads recent network logs, builds the host's <code>entity.relationships.communicates_with</code> list, and calls <code>crudClient.bulkUpdateEntity()</code>.
+        </li>
+        <li>
+          <span class="step-num" aria-hidden="true">6</span>
+          <strong>11:00:00 — Risk score maintainer runs.</strong> <code>entity_store:v2:entity_maintainer_task:risk-score</code> reads alerts for this host, applies the asset criticality modifier (none yet) and any watchlist modifiers (none yet), and writes <code>entity.risk.calculated_score_norm</code> via <code>persistRiskScoresToEntityStore()</code>.
+        </li>
+        <li>
+          <span class="step-num" aria-hidden="true">7</span>
+          <strong>11:10:00 — Watchlist maintainer runs.</strong> An analyst added <code>web-prod-01</code> to a "production hosts" watchlist at 11:05. <code>entitySourcesService.syncAllWatchlists()</code> writes <code>entity.attributes.watchlists</code> on the latest doc.
+        </li>
+        <li>
+          <span class="step-num" aria-hidden="true">8</span>
+          <strong>12:00:00 — Risk score maintainer runs again.</strong> The watchlist now influences the score. The same flow as step 6 produces an updated <code>entity.risk.calculated_score_norm</code>.
+        </li>
+        <li>
+          <span class="step-num" aria-hidden="true">9</span>
+          <strong>Top of the hour — History snapshot.</strong> <code>HistorySnapshotClient.runHistorySnapshot()</code> reindexes latest into <code>.entities.v2.history.security_default.{YYYY-MM-DD-HH}</code> and resets per-snapshot counters on latest.
+        </li>
+        <li>
+          <span class="step-num" aria-hidden="true">10</span>
+          <strong>Next day — Accesses-frequently maintainer runs.</strong> <code>entity_store:v2:entity_maintainer_task:accesses_frequently_and_infrequently</code> rebuilds the access relationship lists from yesterday's auth logs. The same <code>bulkUpdateEntity()</code> call pattern as the other relationship maintainer.
+        </li>
+      </ol>
+
+      <div class="callout">
+        <p><strong>What an analyst sees.</strong> The flyout reads <code>entity-store-{ns}-latest</code> through <code>CRUDClient.searchLatestEntities()</code>. There is no aggregation of multiple maintainers at read time — each maintainer has already written its own fields to the latest document, so the UI just renders the merged record.</p>
+      </div>
+
+      <h3>Resulting entity document</h3>
+      <p>After step 8 above, the latest document for <code>web-prod-01</code> looks roughly like this. Each colour-coded field group is annotated on the right with the maintainer (or task) that wrote it.</p>
+
+      <div class="annotated-doc">
+<pre><code>{
+  "_index": ".entities.v2.latest.security_default-00002",
+  "_id":    "8f2a7c1e3b9d4f6a5c8e0a1b2c3d4e5f",
+  "_source": {
+    "@timestamp": "2026-05-21T12:00:00.000Z",
+    "entity": {
+<span class="ann ann-extract">      "id":   "host:web-prod-01:default",
+      "type": "host",
+      "name": "web-prod-01",
+      "source": [".entities.v2.latest.security_default-00002"],
+      "lifecycle": {
+        "first_seen":    "2026-05-21T10:00:00.000Z",
+        "last_seen":     "2026-05-21T11:58:00.000Z",
+        "last_activity": "2026-05-21T11:58:00.000Z"
+      },
+      "behaviors": {
+        "rule_names": [
+          "Suspicious Process Spawned via SSH",
+          "Privilege Escalation via Suid"
+        ],
+        "anomaly_job_ids": ["linux_anomalous_process_all_hosts"]
+      },</span>
+      "attributes": {
+<span class="ann ann-extract">        "managed": true,</span>
+<span class="ann ann-watchlist">        "watchlists": ["production-hosts", "internet-facing"],</span>
+<span class="ann ann-asset">        "asset":   { "criticality": "extreme_impact" }</span>
+      },
+<span class="ann ann-risk">      "risk": {
+        "calculated_score":      75.62,
+        "calculated_score_norm": 82.41,
+        "calculated_level":      "High"
+      },</span>
+      "relationships": {
+<span class="ann ann-communicates">        "communicates_with": {
+          "ids": ["host:api-prod-02:default", "host:db-prod-01:default"]
+        },</span>
+<span class="ann ann-accesses">        "accesses_frequently": {
+          "ids": ["user:cwilson:default", "service:deploy-bot:default"]
+        }</span>
+      }
+    },
+<span class="ann ann-extract">    "host": {
+      "name": "web-prod-01",
+      "os":   { "name": "Ubuntu", "version": "22.04 LTS" },
+      "ip":   ["10.0.1.42"],
+      "mac":  ["00:1a:2b:3c:4d:5e"]
+    },
+    "event": {
+      "module":  ["endpoint", "system"],
+      "dataset": ["endpoint.events.process", "endpoint.events.network"]
+    }</span>
+  }
+}</code></pre>
+
+        <div class="doc-notes">
+          <div class="doc-note dn-extract">
+            <p class="doc-note-title"><span class="m-dot m-dot-watchlist" aria-hidden="true"></span>Extract task</p>
+            <p>Owns <code>entity.id</code>, <code>type</code>, <code>name</code>, <code>source</code>, <code>lifecycle.*</code>, <code>behaviors.*</code>, <code>attributes.managed</code>, and all ECS sibling fields (<code>host.*</code>, <code>event.*</code>).</p>
+          </div>
+          <div class="doc-note dn-watchlist">
+            <p class="doc-note-title"><span class="m-dot m-dot-watchlist" aria-hidden="true"></span><code>watchlist</code> maintainer</p>
+            <p>Writes <code>entity.attributes.watchlists</code> on every entity that matches an active watchlist source.</p>
+          </div>
+          <div class="doc-note dn-asset">
+            <p class="doc-note-title"><span class="m-dot m-dot-resolution" aria-hidden="true"></span>Asset Criticality API</p>
+            <p>Not a maintainer. The analyst sets criticality; <code>risk-score</code> reads it at runtime via <code>getCriticalityModifier()</code>.</p>
+          </div>
+          <div class="doc-note dn-risk">
+            <p class="doc-note-title"><span class="m-dot m-dot-risk" aria-hidden="true"></span><code>risk-score</code> maintainer</p>
+            <p>Writes <code>entity.risk.*</code> hourly. The second run picks up the watchlist membership added between runs 1 and 2.</p>
+          </div>
+          <div class="doc-note dn-communicates">
+            <p class="doc-note-title"><span class="m-dot m-dot-communicates" aria-hidden="true"></span><code>communicates_with</code> maintainer</p>
+            <p>Writes <code>entity.relationships.communicates_with.ids</code> from recent network logs.</p>
+          </div>
+          <div class="doc-note dn-accesses">
+            <p class="doc-note-title"><span class="m-dot m-dot-accesses" aria-hidden="true"></span><code>accesses_frequently_and_infrequently</code></p>
+            <p>Daily. Writes <code>entity.relationships.accesses_frequently.ids</code> (and the matching <code>infrequently</code> list) from auth logs.</p>
+          </div>
+        </div>
+      </div>
+
+      <p>The <code>_id</code> is the hashed EUID (<code>HASHED_ID_FIELD</code>) — the same value the extract ESQL query emits as the document key — so every maintainer can address this record by id without re-running an aggregation.</p>
+
+      <div class="table-wrap">
+        <table>
+          <caption class="caption">Which step in the worked example writes each field. The extract task owns the base record; maintainers enrich specific subtrees on the same document.</caption>
+          <thead>
+            <tr>
+              <th scope="col">Field path</th>
+              <th scope="col">Written by</th>
+              <th scope="col">When</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>entity.id</code>, <code>entity.type</code>, <code>entity.name</code>, <code>entity.source</code></td>
+              <td>Extract task (<code>LogsExtractionClient</code>)</td>
+              <td>Step 4 — initial upsert</td>
+            </tr>
+            <tr>
+              <td><code>entity.lifecycle.first_seen</code>, <code>entity.lifecycle.last_seen</code>, <code>entity.lifecycle.last_activity</code></td>
+              <td>Extract task (<code>@timestamp</code> aggregation)</td>
+              <td>Step 4, refreshed every extract run</td>
+            </tr>
+            <tr>
+              <td><code>entity.behaviors.rule_names</code>, <code>entity.behaviors.anomaly_job_ids</code></td>
+              <td>Extract task (<code>LOOKUP JOIN</code> merge of prior values)</td>
+              <td>Step 4, periodically reset by history snapshot</td>
+            </tr>
+            <tr>
+              <td><code>entity.relationships.communicates_with.ids</code></td>
+              <td><code>communicates_with</code> maintainer</td>
+              <td>Step 5</td>
+            </tr>
+            <tr>
+              <td><code>entity.risk.calculated_score_norm</code>, <code>entity.risk.calculated_level</code></td>
+              <td><code>risk-score</code> maintainer</td>
+              <td>Step 6, recomputed step 8</td>
+            </tr>
+            <tr>
+              <td><code>entity.attributes.watchlists</code></td>
+              <td><code>watchlist</code> maintainer (<code>entitySourcesService.syncAllWatchlists</code>)</td>
+              <td>Step 7</td>
+            </tr>
+            <tr>
+              <td><code>entity.attributes.asset.criticality</code></td>
+              <td>Asset Criticality API (<em>not</em> a maintainer)</td>
+              <td>When the analyst sets criticality; read by <code>risk-score</code> at runtime</td>
+            </tr>
+            <tr>
+              <td><code>entity.relationships.accesses_frequently.ids</code></td>
+              <td><code>accesses_frequently_and_infrequently</code> maintainer</td>
+              <td>Step 10 (daily)</td>
+            </tr>
+            <tr>
+              <td><code>host.*</code>, <code>event.module</code>, <code>event.dataset</code></td>
+              <td>Extract task (ECS source fields, <code>collectValues</code>)</td>
+              <td>Step 4, refreshed every extract run</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>The same document, copied verbatim, lands in <code>.entities.v2.history.security_default.{YYYY-MM-DD-HH}</code> at step 9. After that, the history snapshot reset clears <code>entity.behaviors.rule_names</code> and <code>entity.behaviors.anomaly_job_ids</code> on the latest doc so behaviour lists reflect the next window rather than growing without bound.</p>
+
+      <h3>What if a maintainer is stopped</h3>
+      <div class="callout warn">
+        <p>Suppose an operator stops the <code>watchlist</code> maintainer via <code>PUT /internal/.../entity_maintainers/stop/watchlist</code>. The Task Manager task continues to be scheduled, but <code>executeMaintainerRun()</code> returns early, so <code>entity.attributes.watchlists</code> is no longer refreshed. The risk score keeps running and continues to apply <em>previously written</em> watchlist memberships until the maintainer is started again and a fresh sync replaces them.</p>
+      </div>
+    </section>
+
+    <section class="section-crud" aria-labelledby="crud-heading">
+      <h2 id="crud-heading" class="h2-with-icon">
+        <svg class="h2-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        CRUD client
+      </h2>
+
+      <div class="tldr">
+        <span class="tldr-label">TL;DR</span>
+        <p class="tldr-text">All reads and writes funnel through the CRUD client. Maintainers get a narrower variant so they can't create or delete — only update.</p>
+      </div>
+      <p>Consuming plugins read and write entity records through <code>EntityStoreCRUDClient</code>, obtained from the entity store start contract. The maintainer framework passes a narrower variant called <code>EntityUpdateClient</code> into <code>setup</code> and <code>run</code> callbacks so maintainers cannot accidentally create or delete entities.</p>
+
+      <div class="table-wrap">
+        <table>
+          <caption class="caption">Methods on the server-side <code>CRUDClient</code>. The exported <code>EntityStoreCRUDClient</code> omits <code>createEntity</code>; the maintainer-scoped <code>EntityUpdateClient</code> also omits <code>deleteEntity</code>.</caption>
+          <thead>
+            <tr>
+              <th scope="col">Method</th>
+              <th scope="col">Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>createEntity(type, doc)</code></td>
+              <td>Create a record from scratch. Not exposed to other plugins.</td>
+            </tr>
+            <tr>
+              <td><code>updateEntity(type, doc, force, options?)</code></td>
+              <td>Patch or upsert a single record.</td>
+            </tr>
+            <tr>
+              <td><code>bulkUpdateEntity({ objects, force })</code></td>
+              <td>Batched updates from maintainers and admin routes.</td>
+            </tr>
+            <tr>
+              <td><code>deleteEntity(id)</code></td>
+              <td>Delete a record by hashed EUID. Not exposed to maintainers.</td>
+            </tr>
+            <tr>
+              <td><code>listEntities(params?)</code></td>
+              <td>Page or cursor through latest.</td>
+            </tr>
+            <tr>
+              <td><code>searchLatestEntities(params)</code></td>
+              <td>Higher-level search wrapper used by UI surfaces.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Example: a consuming plugin writes a custom attribute</h3>
+<pre><code>// In another plugin's server setup
+const crudClient = entityStore.createCRUDClient(esClient, namespace);
+
+await crudClient.bulkUpdateEntity({
+  objects: [
+    {
+      type: 'host',
+      doc: {
+        entity: {
+          id: hostEuid,
+          attributes: { my_plugin: { tag: 'gold' } },
+        },
+      },
+    },
+  ],
+  force: true,
+});</code></pre>
+
+      <p>The same call shape is what every maintainer uses, with a narrower <code>EntityUpdateClient</code> reference. There is no separate write path for maintainers versus other plugins, which is what keeps the record's structure consistent.</p>
+
+      <h3>How a UI read flows through the CRUD client</h3>
+      <p>This is the read path Sarah's flyout used in the day-in-the-life walkthrough, drawn out as a sequence. Notice how thin it is — one Elasticsearch GET, no fan-out, no live joins.</p>
+
+      <figure class="diagram">
+        <svg
+          viewBox="0 0 800 380"
+          xmlns="http://www.w3.org/2000/svg"
+          role="img"
+          aria-labelledby="analyst-seq-title analyst-seq-desc"
+          preserveAspectRatio="xMidYMid meet"
+        >
+          <title id="analyst-seq-title">Analyst view sequence diagram</title>
+          <desc id="analyst-seq-desc">Four actors arranged left to right: Browser, Kibana route, CRUDClient, Elasticsearch (latest index). The browser GETs the entity details route, the route calls searchLatestEntities on the CRUDClient, which runs a search against the latest index, gets back one hit, and the route returns the document as JSON to the browser.</desc>
+
+          <defs>
+            <marker id="seq-arrow-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" class="seq-arrow-head" />
+            </marker>
+            <marker id="seq-arrow-return-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" class="seq-arrow-head-return" />
+            </marker>
+          </defs>
+
+          <g>
+            <rect class="seq-actor" x="20" y="20" width="160" height="40" rx="4" />
+            <text class="seq-actor-label" x="100" y="46">Browser</text>
+          </g>
+          <g>
+            <rect class="seq-actor" x="220" y="20" width="160" height="40" rx="4" />
+            <text class="seq-actor-label" x="300" y="46">Kibana route</text>
+          </g>
+          <g>
+            <rect class="seq-actor" x="420" y="20" width="160" height="40" rx="4" />
+            <text class="seq-actor-label" x="500" y="46">CRUDClient</text>
+          </g>
+          <g>
+            <rect class="seq-actor" x="620" y="20" width="160" height="40" rx="4" />
+            <text class="seq-actor-label" x="700" y="46">.entities.v2.latest</text>
+          </g>
+
+          <line class="seq-lane" x1="100" y1="60" x2="100" y2="370" />
+          <line class="seq-lane" x1="300" y1="60" x2="300" y2="370" />
+          <line class="seq-lane" x1="500" y1="60" x2="500" y2="370" />
+          <line class="seq-lane" x1="700" y1="60" x2="700" y2="370" />
+
+          <!-- 1: Browser -> route -->
+          <text class="seq-message-mono" x="200" y="92">GET /entity_analytics/entity_details/{id}</text>
+          <line class="seq-call" x1="100" y1="100" x2="300" y2="100" marker-end="url(#seq-arrow-a)" />
+
+          <!-- 2: route -> CRUDClient -->
+          <text class="seq-message-mono" x="400" y="138">searchLatestEntities({ id })</text>
+          <line class="seq-call" x1="300" y1="146" x2="500" y2="146" marker-end="url(#seq-arrow-a)" />
+
+          <!-- 3: CRUDClient -> latest index -->
+          <text class="seq-message-mono" x="600" y="184">search by entity.id (hashed EUID)</text>
+          <line class="seq-call" x1="500" y1="192" x2="700" y2="192" marker-end="url(#seq-arrow-a)" />
+
+          <!-- 4: latest -> CRUDClient (return) -->
+          <text class="seq-message" x="600" y="220">1 hit (or zero)</text>
+          <line class="seq-return" x1="700" y1="228" x2="500" y2="228" marker-end="url(#seq-arrow-return-a)" />
+
+          <!-- 5: CRUDClient -> route (return) -->
+          <text class="seq-message" x="400" y="256">entity</text>
+          <line class="seq-return" x1="500" y1="264" x2="300" y2="264" marker-end="url(#seq-arrow-return-a)" />
+
+          <!-- 6: route -> browser (return) -->
+          <text class="seq-message" x="200" y="292">200 + entity JSON</text>
+          <line class="seq-return" x1="300" y1="300" x2="100" y2="300" marker-end="url(#seq-arrow-return-a)" />
+
+          <!-- 7: browser renders -->
+          <text class="seq-message" x="200" y="338">paints risk, watchlists, behaviour, relationships</text>
+          <path class="seq-self-loop" d="M 100 346 C 160 346, 160 364, 100 364" marker-end="url(#seq-arrow-a)" />
+        </svg>
+        <figcaption class="caption">Everything an analyst sees in the entity flyout comes from a single document read. The maintainers do the heavy joining offline so the read path stays this thin.</figcaption>
+      </figure>
+    </section>
+
+    <section class="section-cheatsheet" aria-labelledby="cheatsheet-heading">
+      <h2 id="cheatsheet-heading" class="h2-with-icon">
+        <svg class="h2-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="7" y1="9" x2="17" y2="9"/><line x1="7" y1="13" x2="17" y2="13"/><line x1="7" y1="17" x2="12" y2="17"/></svg>
+        Cheat sheet
+      </h2>
+
+      <div class="tldr">
+        <span class="tldr-label">TL;DR</span>
+        <p class="tldr-text">Three indices, four routes, five maintainers, five lifecycle states. If you remember those numbers, you can hold the whole thing in your head.</p>
+      </div>
+
+      <p>Everything in this document, distilled to a single page you can keep open next to your terminal.</p>
+
+      <div class="cheatsheet">
+        <div class="cheat-panel cs-indices">
+          <h3>Indices</h3>
+          <ul>
+            <li><code>.entities.v2.latest.*</code> — current state. <strong>Read this.</strong></li>
+            <li><code>.entities.v2.history.*</code> — periodic snapshots. Read for audit only.</li>
+            <li><code>.entities.v2.creation.*</code> — append-only raw extracts.</li>
+            <li>Names come from <code>EntityIndexNames</code> helpers — never hardcode.</li>
+          </ul>
+        </div>
+
+        <div class="cheat-panel cs-routes">
+          <h3>Routes</h3>
+          <ul>
+            <li><code>POST /api/security/entity_store/install</code></li>
+            <li><code>GET /api/security/entity_store/status</code></li>
+            <li><code>POST /api/security/entity_store/maintainers/{id}/start</code></li>
+            <li><code>POST /api/security/entity_store/maintainers/{id}/stop</code></li>
+          </ul>
+        </div>
+
+        <div class="cheat-panel cs-maintainers">
+          <h3>Maintainers</h3>
+          <ul>
+            <li><code>risk-score</code> — hourly</li>
+            <li><code>watchlist</code> — every 10&nbsp;min</li>
+            <li><code>automated-resolution</code> — daily</li>
+            <li><code>accesses_frequently_and_infrequently</code> — daily</li>
+            <li><code>communicates_with</code> — every 30&nbsp;min</li>
+          </ul>
+        </div>
+
+        <div class="cheat-panel cs-statuses">
+          <h3>State values</h3>
+          <ul>
+            <li><strong>Install status</strong>: <code>not_installed</code>, <code>installing</code>, <code>installed</code>, <code>error</code>, <code>uninstalling</code></li>
+            <li><strong>Maintainer status</strong>: <code>never_started</code>, <code>started</code>, <code>stopped</code></li>
+            <li>Stopped maintainers stay scheduled — their run gates on status, the task itself is unaffected.</li>
+          </ul>
+        </div>
+
+        <div class="cheat-panel cs-debug">
+          <h3>When something is wrong</h3>
+          <ul>
+            <li><strong>No entity record</strong>: check extract task — base data comes from extraction, not maintainers.</li>
+            <li><strong>Risk score stale</strong>: check <code>risk-score</code> maintainer status + Task Manager log.</li>
+            <li><strong>Watchlist tag missing</strong>: check the watchlist source is active and its query matches.</li>
+            <li><strong>Stale relationships</strong>: check <code>communicates_with</code> / <code>accesses_*</code> task runs.</li>
+            <li><strong>Flyout empty</strong>: run <code>searchLatestEntities</code> by id in dev tools — the API only returns what is on the latest doc.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout">
+        <p><strong>Read the document, not the joins.</strong> Every analyst surface — flyout, list, alert enrichment — reads the latest index by id. If it isn't on the document, the UI can't show it. Push problems back to the maintainer or extract task that owns that field.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Internal reference for entity store v2. Code paths: server/plugin.ts, server/domain/asset_manager/asset_manager_client.ts, server/domain/logs_extraction/logs_extraction_client.ts, server/domain/crud/crud_client.ts, server/domain/entity_maintainers/entity_maintainers_client.ts, server/tasks/entity_maintainers/, server/tasks/extract_entity_task.ts, server/tasks/history_snapshot_task.ts, common/domain/entity_index.ts, common/entity_maintainers.ts.</p>
+    <p>Accessibility: WCAG 2.1 AA contrast targets, 16px body, 12px captions, 66ch prose width, 1.5 line height. Light and dark palettes are separate.</p>
+  </footer>
+
+  <script>
+    (function () {
+      var toggle = document.getElementById('theme-toggle');
+      var storageKey = 'entity-store-v2-overview-theme';
+      var stored = null;
+      try {
+        stored = localStorage.getItem(storageKey);
+      } catch (e) { /* ignore */ }
+
+      function applyTheme(theme) {
+        if (theme === 'dark') {
+          document.documentElement.setAttribute('data-theme', 'dark');
+          toggle.setAttribute('aria-pressed', 'true');
+          toggle.textContent = 'Switch to light mode';
+        } else {
+          document.documentElement.removeAttribute('data-theme');
+          toggle.setAttribute('aria-pressed', 'false');
+          toggle.textContent = 'Switch to dark mode';
+        }
+      }
+
+      applyTheme(stored === 'dark' ? 'dark' : 'light');
+
+      toggle.addEventListener('click', function () {
+        var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        var next = isDark ? 'light' : 'dark';
+        applyTheme(next);
+        try {
+          localStorage.setItem(storageKey, next);
+        } catch (e) { /* ignore */ }
+      });
+
+      var sectionIds = [
+        'overview-heading',
+        'walkthrough-heading',
+        'architecture-heading',
+        'indices-heading',
+        'install-heading',
+        'extraction-heading',
+        'maintainers-heading',
+        'timeline-heading',
+        'crud-heading',
+        'cheatsheet-heading',
+      ];
+      var tabLinks = document.querySelectorAll('.section-tab a[data-section]');
+      var sectionHeadings = sectionIds
+        .map(function (id) {
+          return document.getElementById(id);
+        })
+        .filter(Boolean);
+
+      function setActiveSection(id) {
+        tabLinks.forEach(function (link) {
+          if (link.getAttribute('data-section') === id) {
+            link.setAttribute('aria-current', 'true');
+          } else {
+            link.removeAttribute('aria-current');
+          }
+        });
+      }
+
+      if ('IntersectionObserver' in window && sectionHeadings.length > 0) {
+        var observer = new IntersectionObserver(
+          function (entries) {
+            var visible = entries
+              .filter(function (e) {
+                return e.isIntersecting;
+              })
+              .sort(function (a, b) {
+                return a.boundingClientRect.top - b.boundingClientRect.top;
+              });
+            if (visible.length > 0) {
+              setActiveSection(visible[0].target.id);
+            }
+          },
+          {
+            root: null,
+            rootMargin: '-20% 0px -65% 0px',
+            threshold: 0,
+          }
+        );
+        sectionHeadings.forEach(function (heading) {
+          observer.observe(heading);
+        });
+      } else if (sectionHeadings.length > 0) {
+        setActiveSection(sectionHeadings[0].id);
+      }
+
+      tabLinks.forEach(function (link) {
+        link.addEventListener('click', function () {
+          setActiveSection(link.getAttribute('data-section'));
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

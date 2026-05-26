@@ -414,12 +414,29 @@ export const entityDetailsHighlightsServiceFactory = ({
       query
     );
 
+    const entityField = EntityTypeToIdentifierField[type];
+    const entityName = entityResult.entity?.entity?.name; // handled edge case where entity.name is absent, falls back to empty otherwise
+
+    logger.warn(
+      `[anomalies-debug] entityField=${entityField} entityName=${entityName} ` +
+        `entity.name=${entityResult.entity?.entity?.name} ` +
+        `${type}.name=${
+          type === EntityType.host
+            ? entityResult.entity?.host?.name
+            : type === EntityType.user
+            ? entityResult.entity?.user?.name
+            : type === EntityType.service
+            ? entityResult.entity?.service?.name
+            : undefined
+        } window=${new Date(fromDate).toISOString()}..${new Date(toDate).toISOString()}`
+    );
+
     const anomaliesAnonymized: Record<string, string[]>[] = await getAnomaliesData(
       request,
-      [],
+      entityName ? [{ fieldName: entityField, fieldValue: entityName }] : [],
       fromDate,
-      toDate,
-      query
+      toDate
+      // no influencersFilterQuery — criteriaFields is enough (was query previously)
     );
 
     return {

@@ -711,6 +711,9 @@ export const useEntityAnalyticsRoutes = () => {
         from: number;
         to: number;
         connectorId: string;
+        // POC: dev-only A/B selector. Omit for the packaged prompt; pass 'new'
+        // to resolve the candidate `entityDetailsHighlightsNew` local fallback.
+        promptVariant?: 'default' | 'new';
       },
       signal?: AbortSignal
     ): Promise<EntityDetailsHighlightsResponse> =>

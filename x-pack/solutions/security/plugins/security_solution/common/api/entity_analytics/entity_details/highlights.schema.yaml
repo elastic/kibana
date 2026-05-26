@@ -37,6 +37,17 @@ paths:
                 connectorId:
                   type: string
                   description: The connector id.
+                promptVariant:
+                  type: string
+                  enum:
+                    - default
+                    - new
+                  description: >-
+                    Dev-only: selects which prompt variant the server resolves for entity
+                    highlights. `default` (or omitted) uses the packaged saved-object prompt
+                    (`entityDetailsHighlights`). `new` uses the candidate replacement prompt
+                    (`entityDetailsHighlightsNew`) which is only resolved via the local
+                    fallback. Not intended for production callers.
               required:
                 - entityType
                 - entityIdentifier

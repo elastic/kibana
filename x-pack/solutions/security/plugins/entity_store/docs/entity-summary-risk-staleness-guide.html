@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Entity AI summary — risk score staleness</title>
+  <style>
+    /* Light palette (separate from dark — dark accents fail on white) */
+    :root {
+      color-scheme: light;
+      --bg-page: #f5f7fa;
+      --bg-surface: #ffffff;
+      --bg-code: #f0f3f7;
+      --text-primary: #343741;
+      --text-secondary: #525252;
+      --text-muted: #69707d;
+      --border: #d3dae6;
+      --accent: #006bb8;
+      --accent-hover: #004c8f;
+      --status-ok-bg: #e6f4ea;
+      --status-ok-text: #1e6b3a;
+      --status-warn-bg: #fff8e6;
+      --status-warn-text: #8a6a00;
+      --status-stale-bg: #fce8e8;
+      --status-stale-text: #8a1f1f;
+      --focus-ring: #006bb8;
+      --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --font-mono: ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
+      --nav-height: 3.25rem;
+    }
+
+    [data-theme="dark"] {
+      color-scheme: dark;
+      --bg-page: #141419;
+      --bg-surface: #1d1e24;
+      --bg-code: #25262d;
+      --text-primary: #dfe5ef;
+      --text-secondary: #b8c2cc;
+      --text-muted: #98a2b3;
+      --border: #3d424d;
+      --accent: #1ba9f5;
+      --accent-hover: #63bfff;
+      --status-ok-bg: #1a3326;
+      --status-ok-text: #7dd996;
+      --status-warn-bg: #3d3520;
+      --status-warn-text: #f5d676;
+      --status-stale-bg: #3d2020;
+      --status-stale-text: #f5a8a8;
+      --focus-ring: #1ba9f5;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding-top: var(--nav-height);
+      font-family: var(--font-sans);
+      font-size: 16px;
+      line-height: 1.5;
+      color: var(--text-primary);
+      background: var(--bg-page);
+    }
+
+    .skip-link {
+      position: absolute;
+      left: -9999px;
+      top: auto;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+    }
+
+    .skip-link:focus {
+      position: fixed;
+      left: 1rem;
+      top: calc(var(--nav-height) + 0.5rem);
+      width: auto;
+      height: auto;
+      padding: 0.75rem 1rem;
+      background: var(--bg-surface);
+      color: var(--text-primary);
+      border: 2px solid var(--focus-ring);
+      z-index: 1000;
+      font-size: 16px;
+    }
+
+    header {
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 1.5rem;
+    }
+
+    .header-inner {
+      max-width: 66ch;
+      margin: 0 auto;
+    }
+
+    .section-nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 200;
+      min-height: var(--nav-height);
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+    }
+
+    [data-theme="dark"] .section-nav {
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+    }
+
+    .section-nav-inner {
+      max-width: min(100%, 72rem);
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+
+    .section-tabs {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 0;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+    }
+
+    .section-tab {
+      flex: 0 0 auto;
+    }
+
+    .section-tab a {
+      display: block;
+      padding: 0.75rem 1rem;
+      font-size: 16px;
+      line-height: 1.5;
+      color: var(--text-secondary);
+      text-decoration: none;
+      border-bottom: 3px solid transparent;
+      white-space: nowrap;
+    }
+
+    .section-tab a:hover {
+      color: var(--text-primary);
+      background: var(--bg-page);
+    }
+
+    .section-tab a:focus-visible {
+      outline: 2px solid var(--focus-ring);
+      outline-offset: -2px;
+    }
+
+    .section-tab a[aria-current="true"] {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+      font-weight: 700;
+    }
+
+    .prose section {
+      scroll-margin-top: 4rem;
+    }
+
+    .prose h2 {
+      scroll-margin-top: 4rem;
+    }
+
+    h1 {
+      margin: 0 0 0.5rem;
+      font-size: 1.5rem;
+      line-height: 1.5;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      margin: 0;
+      font-size: 16px;
+      color: var(--text-secondary);
+      max-width: 66ch;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+      margin-top: 1rem;
+    }
+
+    button.theme-toggle {
+      font-family: var(--font-sans);
+      font-size: 16px;
+      line-height: 1.5;
+      padding: 0.5rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: var(--bg-page);
+      color: var(--text-primary);
+      cursor: pointer;
+    }
+
+    button.theme-toggle:hover {
+      border-color: var(--accent);
+    }
+
+    button.theme-toggle:focus-visible {
+      outline: 2px solid var(--focus-ring);
+      outline-offset: 2px;
+    }
+
+    main {
+      max-width: 66ch;
+      margin: 0 auto;
+      padding: 1.5rem;
+    }
+
+    .prose {
+      max-width: 66ch;
+    }
+
+    h2 {
+      margin: 2rem 0 0.75rem;
+      font-size: 1.25rem;
+      line-height: 1.5;
+      font-weight: 700;
+    }
+
+    h3 {
+      margin: 1.5rem 0 0.5rem;
+      font-size: 1.0625rem;
+      line-height: 1.5;
+      font-weight: 700;
+    }
+
+    p {
+      margin: 0 0 1rem;
+    }
+
+    ul, ol {
+      margin: 0 0 1rem;
+      padding-left: 1.5rem;
+    }
+
+    li {
+      margin-bottom: 0.5rem;
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: underline;
+    }
+
+    a:hover {
+      color: var(--accent-hover);
+    }
+
+    a:focus-visible {
+      outline: 2px solid var(--focus-ring);
+      outline-offset: 2px;
+    }
+
+    .caption {
+      font-size: 12px;
+      line-height: 1.5;
+      color: var(--text-muted);
+      margin: 0.25rem 0 1rem;
+    }
+
+    .card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1rem 1.25rem;
+      margin: 1rem 0 1.5rem;
+    }
+
+    .card h3 {
+      margin-top: 0;
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 12px;
+      line-height: 1.5;
+      padding: 0.125rem 0.5rem;
+      border-radius: 4px;
+      margin-bottom: 0.5rem;
+    }
+
+    .badge-ok {
+      background: var(--status-ok-bg);
+      color: var(--status-ok-text);
+    }
+
+    .badge-warn {
+      background: var(--status-warn-bg);
+      color: var(--status-warn-text);
+    }
+
+    .badge-stale {
+      background: var(--status-stale-bg);
+      color: var(--status-stale-text);
+    }
+
+    pre {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      line-height: 1.5;
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1rem;
+      overflow-x: auto;
+      margin: 0 0 1rem;
+    }
+
+    code {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0 1.5rem;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 0.625rem 0.75rem;
+      border: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    th {
+      background: var(--bg-code);
+      font-weight: 700;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      margin: 1rem 0 1.5rem;
+    }
+
+    .flow {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 1.5rem;
+    }
+
+    .flow li {
+      position: relative;
+      padding: 0.75rem 0 0.75rem 2rem;
+      border-left: 2px solid var(--border);
+      margin: 0;
+    }
+
+    .flow li:last-child {
+      border-left-color: transparent;
+    }
+
+    .flow .step-num {
+      position: absolute;
+      left: -0.65rem;
+      top: 0.65rem;
+      width: 1.25rem;
+      height: 1.25rem;
+      background: var(--bg-surface);
+      border: 2px solid var(--accent);
+      border-radius: 50%;
+      font-size: 12px;
+      line-height: 1.25rem;
+      text-align: center;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    footer {
+      max-width: 66ch;
+      margin: 0 auto;
+      padding: 1.5rem;
+      font-size: 12px;
+      line-height: 1.5;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  <nav class="section-nav" id="section-nav" aria-label="Page sections">
+    <div class="section-nav-inner">
+      <ul class="section-tabs" role="list">
+        <li class="section-tab" role="listitem">
+          <a href="#overview-heading" data-section="overview-heading">Overview</a>
+        </li>
+        <li class="section-tab" role="listitem">
+          <a href="#signals-heading" data-section="signals-heading">Signals</a>
+        </li>
+        <li class="section-tab" role="listitem">
+          <a href="#actors-heading" data-section="actors-heading">Processes</a>
+        </li>
+        <li class="section-tab" role="listitem">
+          <a href="#example-heading" data-section="example-heading">Example</a>
+        </li>
+        <li class="section-tab" role="listitem">
+          <a href="#comparison-heading" data-section="comparison-heading">At a glance</a>
+        </li>
+        <li class="section-tab" role="listitem">
+          <a href="#maintainer-heading" data-section="maintainer-heading">Maintainer</a>
+        </li>
+        <li class="section-tab" role="listitem">
+          <a href="#reset-to-zero-heading" data-section="reset-to-zero-heading">Reset to zero</a>
+        </li>
+        <li class="section-tab" role="listitem">
+          <a href="#flyout-heading" data-section="flyout-heading">Flyout</a>
+        </li>
+        <li class="section-tab" role="listitem">
+          <a href="#tuning-heading" data-section="tuning-heading">Tuning</a>
+        </li>
+        <li class="section-tab" role="listitem">
+          <a href="#lists-heading" data-section="lists-heading">Lists vs risk</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <header>
+    <div class="header-inner">
+      <h1>Entity AI summary: risk score staleness</h1>
+      <p class="subtitle">How the flyout decides a saved summary is out of date, and how that interacts with history snapshot and the risk score maintainer.</p>
+      <div class="toolbar">
+        <button type="button" class="theme-toggle" id="theme-toggle" aria-pressed="false">
+          Switch to dark mode
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main-content" class="prose">
+    <section aria-labelledby="overview-heading">
+      <h2 id="overview-heading">Overview</h2>
+      <p>When an analyst saves an AI summary on the entity flyout, Kibana stores a <strong>staleness snapshot</strong> on the entity document. On later visits, the UI compares live entity data to that snapshot.</p>
+      <p>For <strong>risk score</strong>, the rule is symmetric: if both the stored snapshot and the current <code>entity.risk.calculated_score_norm</code> are present, and they differ by more than <strong>0.01</strong>, the summary is marked stale.</p>
+      <p class="caption">Source: entity_summary_staleness.ts — RISK_SCORE_EPSILON = 0.01</p>
+    </section>
+
+    <section aria-labelledby="signals-heading">
+      <h2 id="signals-heading">What is compared (defaults)</h2>
+      <div class="table-wrap">
+        <table>
+          <caption class="caption">Default enabled staleness signals when a summary is saved</caption>
+          <thead>
+            <tr>
+              <th scope="col">Signal</th>
+              <th scope="col">Field on entity</th>
+              <th scope="col">Stale when</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>risk_score</td>
+              <td><code>entity.risk.calculated_score_norm</code></td>
+              <td>Score changes by more than 0.01 (up or down)</td>
+            </tr>
+            <tr>
+              <td>rule_names</td>
+              <td><code>entity.behaviors.rule_names</code></td>
+              <td>New rule names only (removals ignored)</td>
+            </tr>
+            <tr>
+              <td>anomaly_job_ids</td>
+              <td><code>entity.behaviors.anomaly_job_ids</code></td>
+              <td>Not in defaults; same new-only logic if enabled</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p>This guide focuses on <strong>risk_score</strong>, because it is the signal most likely to prompt regenerate during the history snapshot cycle.</p>
+    </section>
+
+    <section aria-labelledby="actors-heading">
+      <h2 id="actors-heading">Three background processes</h2>
+      <ol>
+        <li><strong>History snapshot</strong> (~24h): copies latest entities to a history index, then clears list-like <code>entity.behaviors</code> fields on latest. Does <em>not</em> change <code>entity.risk</code>.</li>
+        <li><strong>Log extraction</strong>: repopulates <code>rule_names</code> and <code>anomaly_job_ids</code> from logs when the entity appears in the extraction window.</li>
+        <li><strong>Risk score maintainer</strong> (~1h): recalculates scores from alerts, then may <code>resetToZero</code> entities that still had a positive score but were not updated in that run.</li>
+      </ol>
+    </section>
+
+    <section aria-labelledby="example-heading">
+      <h2 id="example-heading">Worked example: host server-01</h2>
+      <p>Entity id: <code>host:server-01</code>. Summary saved with risk and rule_names in the staleness snapshot.</p>
+
+      <ol class="flow">
+        <li>
+          <span class="step-num" aria-hidden="true">1</span>
+          <h3>Analyst generates and saves the summary</h3>
+          <span class="badge badge-ok">Not stale</span>
+          <pre>{
+  "entity": {
+    "id": "host:server-01",
+    "risk": { "calculated_score_norm": 72.5 },
+    "behaviors": {
+      "rule_names": ["Brute Force", "Malware Detected"],
+      "anomaly_job_ids": ["job-auth-anomaly"]
+    },
+    "attributes": {
+      "summary": {
+        "generated_at": 1716213600000,
+        "staleness": {
+          "enabled_signals": ["risk_score", "rule_names"],
+          "snapshot": {
+            "risk_score": 72.5,
+            "rule_names": ["Brute Force", "Malware Detected"]
+          }
+        }
+      }
+    }
+  }
+}</pre>
+          <p>Flyout compares current 72.5 to snapshot 72.5. No regenerate prompt.</p>
+        </li>
+
+        <li>
+          <span class="step-num" aria-hidden="true">2</span>
+          <h3>History snapshot runs (scheduled)</h3>
+          <span class="badge badge-warn">Lists empty; risk unchanged</span>
+          <pre>{
+  "@timestamp": "2026-05-21T02:00:00.000Z",
+  "entity": {
+    "id": "host:server-01",
+    "risk": { "calculated_score_norm": 72.5 },
+    "behaviors": {
+      "rule_names": [],
+      "anomaly_job_ids": []
+    },
+    "attributes": {
+      "summary": {
+        "staleness": {
+          "snapshot": {
+            "risk_score": 72.5,
+            "rule_names": ["Brute Force", "Malware Detected"]
+          }
+        }
+      }
+    }
+  }
+}</pre>
+          <p><code>@timestamp</code> and <code>entity.lifecycle.last_activity</code> are set to the snapshot run time. Summary text and staleness snapshot are unchanged.</p>
+          <p><strong>rule_names staleness:</strong> not triggered (new-only; current is empty, nothing new).</p>
+          <p><strong>risk_score staleness:</strong> not triggered yet (still 72.5 vs 72.5).</p>
+        </li>
+
+        <li>
+          <span class="step-num" aria-hidden="true">3</span>
+          <h3>Risk maintainer runs — small recalculation</h3>
+          <span class="badge badge-stale">Stale on risk</span>
+          <pre>{
+  "entity": {
+    "risk": { "calculated_score_norm": 71.0 },
+    "behaviors": { "rule_names": [], "anomaly_job_ids": [] }
+  }
+}</pre>
+          <p>Snapshot still 72.5. Current 71.0. Difference 1.5 &gt; 0.01.</p>
+          <p>User sees: <em>Risk score changed from 72.5 to 71</em> — even while rule lists are still empty.</p>
+        </li>
+
+        <li>
+          <span class="step-num" aria-hidden="true">4</span>
+          <h3>Log extraction repopulates the same rules</h3>
+          <span class="badge badge-ok">Lists: not stale</span>
+          <pre>{
+  "entity": {
+    "risk": { "calculated_score_norm": 71.0 },
+    "behaviors": {
+      "rule_names": ["Brute Force", "Malware Detected"],
+      "anomaly_job_ids": ["job-auth-anomaly"]
+    }
+  }
+}</pre>
+          <p>Same rule names as at generation: still not stale for lists. Risk remains stale until score matches snapshot within epsilon or the user regenerates.</p>
+        </li>
+
+        <li>
+          <span class="step-num" aria-hidden="true">5</span>
+          <h3>Risk maintainer — resetToZero for this entity</h3>
+          <span class="badge badge-stale">Stale on risk (large drop)</span>
+          <pre>{
+  "entity": {
+    "risk": { "calculated_score_norm": 0 }
+  }
+}</pre>
+          <p>Entity had score &gt; 0 in the risk index but was not rescored in this maintainer run. Stage 3 resetToZero wrote 0 to the entity store. See <a href="#reset-to-zero-heading">Reset to zero</a> for why.</p>
+          <p>Snapshot 72.5 vs current 0: strong stale signal. Summary text may still describe a high-risk host.</p>
+        </li>
+
+        <li>
+          <span class="step-num" aria-hidden="true">6</span>
+          <h3>New detection rule appears (optional)</h3>
+          <span class="badge badge-stale">Stale on rule_names if enabled</span>
+          <pre>{
+  "entity": {
+    "risk": { "calculated_score_norm": 71.0 },
+    "behaviors": {
+      "rule_names": [
+        "Brute Force",
+        "Malware Detected",
+        "Suspicious Lateral Movement"
+      ]
+    }
+  }
+}</pre>
+          <p>One new name vs snapshot: stale for rule_names. Risk may also still be stale from step 3 or 5.</p>
+        </li>
+      </ol>
+    </section>
+
+    <section aria-labelledby="comparison-heading">
+      <h2 id="comparison-heading">At a glance: history window vs risk</h2>
+      <div class="table-wrap">
+        <table>
+          <caption class="caption">During the period when behaviors are empty after history snapshot</caption>
+          <thead>
+            <tr>
+              <th scope="col">Signal</th>
+              <th scope="col">Cleared by history snapshot?</th>
+              <th scope="col">Likely stale in empty-behaviors window?</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>rule_names</td>
+              <td>Yes → []</td>
+              <td>No (new-only comparison)</td>
+            </tr>
+            <tr>
+              <td>anomaly_job_ids</td>
+              <td>Yes → []</td>
+              <td>No (new-only; not in defaults)</td>
+            </tr>
+            <tr>
+              <td>risk_score</td>
+              <td>No</td>
+              <td>Yes, after hourly maintainer if score moves</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section aria-labelledby="maintainer-heading">
+      <h2 id="maintainer-heading">Risk maintainer run (simplified)</h2>
+      <pre>Hourly task (risk-score entity maintainer, ~1h interval)
+  │
+  ├─ Stage 1: Score base entities from alerts
+  │     → new score + calculation_run_id for entities in this pass
+  │     → bulkUpdate entity.risk on entity store (when dual-write enabled)
+  │
+  ├─ Stage 2: Resolution scoring (if applicable)
+  │     → may update entity.relationships.resolution.risk
+  │     → staleness compares entity.risk only, not resolution risk
+  │
+  └─ Stage 3: resetToZero (see next section)
+        → entities still &gt; 0 on disk but not rescored this run → 0</pre>
+      <p class="caption">Staleness reads entity.risk.calculated_score_norm via buildEntitySummaryStalenessEntitySnapshot in the flyout.</p>
+    </section>
+
+    <section aria-labelledby="reset-to-zero-heading">
+      <h2 id="reset-to-zero-heading">Reset to zero — what and why</h2>
+      <p>Reset to zero is stage 3 of the risk score maintainer. It is not the same as the history snapshot clearing <code>entity.behaviors</code>. History snapshot does not change <code>entity.risk</code>. Reset to zero changes risk when the engine decides the entity has no current risk inputs.</p>
+
+      <h3>What it does</h3>
+      <p>Each maintainer run creates a unique <code>calculationRunId</code>. Stages 1 and 2 score entities that have qualifying alerts (and resolution targets) and stamp their risk documents with that run id.</p>
+      <p>Stage 3 queries the <strong>risk score index</strong> and finds entities where:</p>
+      <ul>
+        <li>the latest stored score is <strong>greater than 0</strong>, and</li>
+        <li>the latest <code>calculation_run_id</code> is <strong>not</strong> this run’s id (or is missing).</li>
+      </ul>
+      <p>Those entities were not recalculated this hour but still look risky on disk. The maintainer writes <strong>score 0</strong> to the risk index and, when id-based dual-write is on, to <code>entity.risk.calculated_score_norm</code> on the entity store.</p>
+      <p>Before reset runs, the risk index is <strong>refreshed</strong> so scores just written in stages 1–2 are visible. That avoids incorrectly zeroing entities that were scored moments earlier in the same run.</p>
+      <p class="caption">Up to 10,000 base and 10,000 resolution entities per run; remaining stale scores are reset on a later run.</p>
+
+      <h3>Why it exists</h3>
+      <p>Scoring is incremental per run. The maintainer does not recompute every entity every hour — only entities that appear in the alert-driven scoring passes.</p>
+      <p>Without reset to zero, an entity that had alerts last week would <strong>keep a positive risk score forever</strong> even when it has no contributing alerts in the current risk window.</p>
+      <p>Reset to zero is the cleanup rule:</p>
+      <p><strong>If we did not recalculate you in this run and you still show score &gt; 0, set you to 0.</strong> That means “no current risk inputs,” not “delete the entity.”</p>
+
+      <div class="card">
+        <h3>Risk engine setting (retain scores)</h3>
+        <p class="caption">From Risk score preview UI copy (enableResetToZero)</p>
+        <p>When <strong>retain last calculated risk scores</strong> is selected, entities keep their last score until a new input (for example, an alert) triggers recalculation. When that option is off (default), scores reset to zero if no new inputs are found in the run.</p>
+        <p>Default configuration: <code>enableResetToZero: true</code> — scores decay to zero when not rescored.</p>
+      </div>
+
+      <h3>Example: quiet host after a busy Monday</h3>
+      <div class="table-wrap">
+        <table>
+          <caption class="caption">How risk_score on the entity document changes</caption>
+          <thead>
+            <tr>
+              <th scope="col">When</th>
+              <th scope="col">Event</th>
+              <th scope="col">entity.risk.calculated_score_norm</th>
+              <th scope="col">Summary snapshot (72.5)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Monday</td>
+              <td>Alerts; maintainer scores host (run A)</td>
+              <td>72.5</td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td>Tuesday</td>
+              <td>Analyst saves AI summary</td>
+              <td>72.5</td>
+              <td>Stored: 72.5</td>
+            </tr>
+            <tr>
+              <td>Wednesday</td>
+              <td>No alerts in window; host not in stage 1</td>
+              <td>Still 72.5 (old run A on risk index)</td>
+              <td>Still 72.5 — not stale yet</td>
+            </tr>
+            <tr>
+              <td>Wednesday</td>
+              <td>resetToZero (run B)</td>
+              <td>0</td>
+              <td>Stale: “Risk score changed from 72.5 to 0”</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p>The summary may still describe a high-risk host while the flyout now shows zero — prompting regenerate is appropriate.</p>
+
+      <h3>Should entity-summary staleness treat reset differently?</h3>
+      <p><strong>No separate rule is required.</strong> Existing risk_score staleness already compares stored snapshot to current <code>calculated_score_norm</code> with a 0.01 epsilon, symmetrically (up or down).</p>
+      <div class="table-wrap">
+        <table>
+          <caption class="caption">Staleness vs maintainer outcomes</caption>
+          <thead>
+            <tr>
+              <th scope="col">Outcome</th>
+              <th scope="col">Stale for risk_score?</th>
+              <th scope="col">Regenerate makes sense?</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Small recalc (72.5 → 71)</td>
+              <td>Yes</td>
+              <td>Usually yes — posture shifted</td>
+            </tr>
+            <tr>
+              <td>resetToZero (72.5 → 0)</td>
+              <td>Yes</td>
+              <td>Yes — narrative likely outdated</td>
+            </tr>
+            <tr>
+              <td>Rescored this run, same score</td>
+              <td>No</td>
+              <td>No</td>
+            </tr>
+            <tr>
+              <td>enableResetToZero: false (score sticks)</td>
+              <td>Only if a recalc changes the number</td>
+              <td>Depends on retained score</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p>If product later wants fewer nudges, tune epsilon, grace period after <code>generated_at</code>, or “stale only on increase” — that would also affect reset-to-zero drops unless you special-case zero.</p>
+
+      <h3>Edge cases to know</h3>
+      <ul>
+        <li><strong>Dual-write disabled</strong> — reset updates the risk index; entity store may not show 0, so flyout staleness may not see the change.</li>
+        <li><strong>Resolution risk</strong> — reset can zero resolution scores; staleness only reads <code>entity.risk</code>, not <code>entity.relationships.resolution.risk</code>.</li>
+        <li><strong>Batch limit</strong> — some entities reset on the next hour’s run; staleness may lag one cycle.</li>
+        <li><strong>History snapshot</strong> — unrelated; it clears behavior lists only, not risk.</li>
+      </ul>
+
+      <h3>One-line mental model</h3>
+      <pre>Stage 1–2: "Who is risky right now based on current inputs?"
+Stage 3:   "Who still looks risky on disk but we did not just recalculate? Set to 0."</pre>
+      <p class="caption">Code: reset_to_zero.ts, risk_score_maintainer.ts (stage 3 after index refresh).</p>
+    </section>
+
+    <section aria-labelledby="flyout-heading">
+      <h2 id="flyout-heading">Flyout guard after in-session generate</h2>
+      <p>Right after the user clicks Generate, the UI keeps a <strong>generation baseline</strong> in memory. Staleness is suppressed until live signals drift from that baseline. That avoids comparing against the old persisted snapshot before refetch completes.</p>
+      <p>After save + refetch, comparison is again: stored snapshot on the document vs current entity record.</p>
+    </section>
+
+    <section aria-labelledby="tuning-heading">
+      <h2 id="tuning-heading">Tuning options (product / engineering)</h2>
+      <ul>
+        <li><strong>Larger epsilon</strong> — e.g. 1 or 5 points on the 0–100 scale; fewer nudges from small maintainer jitter.</li>
+        <li><strong>Stale only on increase</strong> — ignore score drops and resetToZero; only prompt when risk rises.</li>
+        <li><strong>Grace period</strong> — no risk staleness for N hours after generated_at.</li>
+        <li><strong>Risk-only signals</strong> — drop rule_names from enabled_signals; simpler model, still subject to maintainer timing.</li>
+        <li><strong>Server-side staleness API</strong> — flyout notes this should move server-side before GA for consistent behavior.</li>
+      </ul>
+    </section>
+
+    <section aria-labelledby="lists-heading">
+      <h2 id="lists-heading">Reminder: list signals vs risk</h2>
+      <p>If you keep <strong>new-only</strong> list staleness, the history snapshot clear does not falsely stale rule_names or anomaly_job_ids. The main regenerate pressure in that window is <strong>risk_score</strong> changing on the hourly maintainer while behaviors are temporarily empty.</p>
+      <p>If you later add <strong>removal-based</strong> list staleness plus “ignore when current is empty,” you mitigate history reset false positives but cannot distinguish “temporarily empty” from “genuinely quiet entity” without extra rules (time bounds, risk drop, etc.).</p>
+    </section>
+  </main>
+
+  <footer>
+    <p>Internal reference for Entity Store AI summary staleness. Code paths: entity_summary_staleness.ts, history_snapshot/constants.ts, risk_score_maintainer, reset_to_zero.ts, entity_highlights.tsx.</p>
+    <p>Accessibility: WCAG 2.1 AA contrast targets, 16px body, 12px captions, 66ch prose width, 1.5 line height. Light and dark palettes are separate.</p>
+  </footer>
+
+  <script>
+    (function () {
+      var toggle = document.getElementById('theme-toggle');
+      var stored = null;
+      try {
+        stored = localStorage.getItem('entity-staleness-guide-theme');
+      } catch (e) { /* ignore */ }
+
+      function applyTheme(theme) {
+        if (theme === 'dark') {
+          document.documentElement.setAttribute('data-theme', 'dark');
+          toggle.setAttribute('aria-pressed', 'true');
+          toggle.textContent = 'Switch to light mode';
+        } else {
+          document.documentElement.removeAttribute('data-theme');
+          toggle.setAttribute('aria-pressed', 'false');
+          toggle.textContent = 'Switch to dark mode';
+        }
+      }
+
+      applyTheme(stored === 'dark' ? 'dark' : 'light');
+
+      toggle.addEventListener('click', function () {
+        var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        var next = isDark ? 'light' : 'dark';
+        applyTheme(next);
+        try {
+          localStorage.setItem('entity-staleness-guide-theme', next);
+        } catch (e) { /* ignore */ }
+      });
+
+      var sectionIds = [
+        'overview-heading',
+        'signals-heading',
+        'actors-heading',
+        'example-heading',
+        'comparison-heading',
+        'maintainer-heading',
+        'reset-to-zero-heading',
+        'flyout-heading',
+        'tuning-heading',
+        'lists-heading',
+      ];
+      var tabLinks = document.querySelectorAll('.section-tab a[data-section]');
+      var sectionHeadings = sectionIds
+        .map(function (id) {
+          return document.getElementById(id);
+        })
+        .filter(Boolean);
+
+      function setActiveSection(id) {
+        tabLinks.forEach(function (link) {
+          if (link.getAttribute('data-section') === id) {
+            link.setAttribute('aria-current', 'true');
+          } else {
+            link.removeAttribute('aria-current');
+          }
+        });
+      }
+
+      if ('IntersectionObserver' in window && sectionHeadings.length > 0) {
+        var observer = new IntersectionObserver(
+          function (entries) {
+            var visible = entries
+              .filter(function (e) {
+                return e.isIntersecting;
+              })
+              .sort(function (a, b) {
+                return a.boundingClientRect.top - b.boundingClientRect.top;
+              });
+            if (visible.length > 0) {
+              setActiveSection(visible[0].target.id);
+            }
+          },
+          {
+            root: null,
+            rootMargin: '-20% 0px -65% 0px',
+            threshold: 0,
+          }
+        );
+        sectionHeadings.forEach(function (heading) {
+          observer.observe(heading);
+        });
+      } else if (sectionHeadings.length > 0) {
+        setActiveSection(sectionHeadings[0].id);
+      }
+
+      tabLinks.forEach(function (link) {
+        link.addEventListener('click', function () {
+          setActiveSection(link.getAttribute('data-section'));
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

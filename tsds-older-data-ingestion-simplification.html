@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TSDS older data ingestion simplification — proposal walkthrough</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg-page: #f5f7fa;
+      --bg-surface: #ffffff;
+      --bg-code: #f0f3f7;
+      --text-primary: #343741;
+      --text-secondary: #525252;
+      --text-muted: #69707d;
+      --border: #d3dae6;
+      --accent: #006bb8;
+      --accent-hover: #004c8f;
+      --status-ok-bg: #e6f4ea;
+      --status-ok-text: #1e6b3a;
+      --status-warn-bg: #fff8e6;
+      --status-warn-text: #8a6a00;
+      --status-info-bg: #e6f1fb;
+      --status-info-text: #154a86;
+      --focus-ring: #006bb8;
+      --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --font-mono: ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
+      --nav-height: 3.25rem;
+    }
+
+    [data-theme="dark"] {
+      color-scheme: dark;
+      --bg-page: #141419;
+      --bg-surface: #1d1e24;
+      --bg-code: #25262d;
+      --text-primary: #dfe5ef;
+      --text-secondary: #b8c2cc;
+      --text-muted: #98a2b3;
+      --border: #3d424d;
+      --accent: #1ba9f5;
+      --accent-hover: #63bfff;
+      --status-ok-bg: #1a3326;
+      --status-ok-text: #7dd996;
+      --status-warn-bg: #3d3520;
+      --status-warn-text: #f5d676;
+      --status-info-bg: #1a2a3d;
+      --status-info-text: #8ec5ff;
+      --focus-ring: #1ba9f5;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding-top: var(--nav-height);
+      font-family: var(--font-sans);
+      font-size: 16px;
+      line-height: 1.5;
+      color: var(--text-primary);
+      background: var(--bg-page);
+    }
+
+    .skip-link { position: absolute; left: -9999px; top: auto; width: 1px; height: 1px; overflow: hidden; }
+    .skip-link:focus { position: fixed; left: 1rem; top: calc(var(--nav-height) + 0.5rem); width: auto; height: auto; padding: 0.75rem 1rem; background: var(--bg-surface); color: var(--text-primary); border: 2px solid var(--focus-ring); z-index: 1000; font-size: 16px; }
+
+    header { background: var(--bg-surface); border-bottom: 1px solid var(--border); padding: 1rem 1.5rem; }
+    .header-inner { max-width: 66ch; margin: 0 auto; }
+
+    .section-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 200; min-height: var(--nav-height); background: var(--bg-surface); border-bottom: 1px solid var(--border); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06); }
+    [data-theme="dark"] .section-nav { box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35); }
+    .section-nav-inner { max-width: min(100%, 72rem); margin: 0 auto; padding: 0 1rem; }
+    .section-tabs { display: flex; flex-wrap: nowrap; gap: 0; list-style: none; margin: 0; padding: 0; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: thin; }
+    .section-tab { flex: 0 0 auto; }
+    .section-tab a { display: block; padding: 0.75rem 1rem; font-size: 16px; line-height: 1.5; color: var(--text-secondary); text-decoration: none; border-bottom: 3px solid transparent; white-space: nowrap; }
+    .section-tab a:hover { color: var(--text-primary); background: var(--bg-page); }
+    .section-tab a:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: -2px; }
+    .section-tab a[aria-current="true"] { color: var(--accent); border-bottom-color: var(--accent); font-weight: 700; }
+
+    .prose section { scroll-margin-top: 4rem; }
+    .prose h2 { scroll-margin-top: 4rem; }
+
+    h1 { margin: 0 0 0.5rem; font-size: 1.5rem; line-height: 1.5; font-weight: 700; }
+    .subtitle { margin: 0; font-size: 16px; color: var(--text-secondary); max-width: 66ch; }
+
+    .toolbar { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; margin-top: 1rem; }
+    button.theme-toggle { font-family: var(--font-sans); font-size: 16px; line-height: 1.5; padding: 0.5rem 1rem; border: 1px solid var(--border); border-radius: 4px; background: var(--bg-page); color: var(--text-primary); cursor: pointer; }
+    button.theme-toggle:hover { border-color: var(--accent); }
+    button.theme-toggle:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+
+    main { max-width: 66ch; margin: 0 auto; padding: 1.5rem; }
+    .prose { max-width: 66ch; }
+
+    h2 { margin: 2rem 0 0.75rem; font-size: 1.25rem; line-height: 1.5; font-weight: 700; }
+    h3 { margin: 1.5rem 0 0.5rem; font-size: 1.0625rem; line-height: 1.5; font-weight: 700; }
+    p { margin: 0 0 1rem; }
+    ul, ol { margin: 0 0 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+
+    a { color: var(--accent); text-decoration: underline; }
+    a:hover { color: var(--accent-hover); }
+    a:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+
+    .caption { font-size: 12px; line-height: 1.5; color: var(--text-muted); margin: 0.25rem 0 1rem; }
+
+    .card { background: var(--bg-surface); border: 1px solid var(--border); border-radius: 6px; padding: 1rem 1.25rem; margin: 1rem 0 1.5rem; }
+    .card h3 { margin-top: 0; }
+
+    .badge { display: inline-block; font-size: 12px; line-height: 1.5; padding: 0.125rem 0.5rem; border-radius: 4px; margin-bottom: 0.5rem; }
+    .badge-ok { background: var(--status-ok-bg); color: var(--status-ok-text); }
+    .badge-warn { background: var(--status-warn-bg); color: var(--status-warn-text); }
+    .badge-info { background: var(--status-info-bg); color: var(--status-info-text); }
+
+    pre { font-family: var(--font-mono); font-size: 14px; line-height: 1.5; background: var(--bg-code); border: 1px solid var(--border); border-radius: 4px; padding: 1rem; overflow-x: auto; margin: 0 0 1rem; }
+    code { font-family: var(--font-mono); font-size: 14px; line-height: 1.5; }
+    p code, li code, td code { background: var(--bg-code); border: 1px solid var(--border); border-radius: 3px; padding: 0 0.25rem; }
+
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0 1.5rem; font-size: 16px; line-height: 1.5; }
+    th, td { text-align: left; padding: 0.625rem 0.75rem; border: 1px solid var(--border); vertical-align: top; }
+    th { background: var(--bg-code); font-weight: 700; }
+    .table-wrap { overflow-x: auto; margin: 1rem 0 1.5rem; }
+
+    .flow { list-style: none; padding: 0; margin: 0 0 1.5rem; }
+    .flow li { position: relative; padding: 0.75rem 0 0.75rem 2rem; border-left: 2px solid var(--border); margin: 0; }
+    .flow li:last-child { border-left-color: transparent; }
+    .flow .step-num { position: absolute; left: -0.65rem; top: 0.65rem; width: 1.25rem; height: 1.25rem; background: var(--bg-surface); border: 2px solid var(--accent); border-radius: 50%; font-size: 12px; line-height: 1.25rem; text-align: center; font-weight: 700; color: var(--text-primary); }
+
+    .callout { background: var(--status-info-bg); color: var(--status-info-text); border: 1px solid var(--status-info-text); border-radius: 4px; padding: 0.75rem 1rem; margin: 1rem 0 1.5rem; font-size: 16px; line-height: 1.5; }
+    .callout.warn { background: var(--status-warn-bg); color: var(--status-warn-text); border-color: var(--status-warn-text); }
+    .callout p { margin: 0; }
+    .callout p + p { margin-top: 0.5rem; }
+
+    footer { max-width: 66ch; margin: 0 auto; padding: 1.5rem; font-size: 12px; line-height: 1.5; color: var(--text-muted); border-top: 1px solid var(--border); }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  <nav class="section-nav" id="section-nav" aria-label="Page sections">
+    <div class="section-nav-inner">
+      <ul class="section-tabs" role="list">
+        <li class="section-tab" role="listitem"><a href="#overview-heading" data-section="overview-heading">Overview</a></li>
+        <li class="section-tab" role="listitem"><a href="#core-proposal-heading" data-section="core-proposal-heading">Core proposal</a></li>
+        <li class="section-tab" role="listitem"><a href="#constraints-heading" data-section="constraints-heading">Constraints</a></li>
+        <li class="section-tab" role="listitem"><a href="#backfill-heading" data-section="backfill-heading">Backfill problem</a></li>
+        <li class="section-tab" role="listitem"><a href="#temporary-stream-heading" data-section="temporary-stream-heading">Option 1: temporary stream</a></li>
+        <li class="section-tab" role="listitem"><a href="#target-config-heading" data-section="target-config-heading">Option 2: target config</a></li>
+        <li class="section-tab" role="listitem"><a href="#comparison-heading" data-section="comparison-heading">Comparison</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <header>
+    <div class="header-inner">
+      <h1>TSDS older data ingestion simplification</h1>
+      <p class="subtitle">Walkthrough of the proposal to lazily create past backing indices in Time Series Data Streams, and the two follow-on options for simplifying historical backfill.</p>
+      <div class="toolbar">
+        <button type="button" class="theme-toggle" id="theme-toggle" aria-pressed="false">Switch to dark mode</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main-content" class="prose">
+    <section aria-labelledby="overview-heading">
+      <h2 id="overview-heading">Overview</h2>
+      <p>Time Series Data Streams (TSDS) currently reject any document whose <code>@timestamp</code> falls outside the time range of an existing backing index. That single rule blocks two everyday workflows:</p>
+      <ul>
+        <li><strong>TSDS initialisation</strong> — loading seed data into a brand-new stream that has no backing index covering those timestamps.</li>
+        <li><strong>Backfilling</strong> — loading historical data into an existing stream whose backing indices only cover recent time ranges.</li>
+      </ul>
+      <p>This document summarises the proposal to unblock initialisation by lazily creating past backing indices, the constraints that apply, and two candidate follow-up options for the harder backfill problem.</p>
+
+      <div class="callout">
+        <p>Backfill is treated separately because it requires the cluster to scale to the total historical dataset, not just to the ongoing ingest rate. The proposals below keep that scaling trade-off explicit.</p>
+      </div>
+    </section>
+
+    <section aria-labelledby="core-proposal-heading">
+      <h2 id="core-proposal-heading">Core proposal: lazy past backing index creation</h2>
+      <p>When a document arrives with a timestamp inside the stream's retention writable window, and no backing index yet covers that timestamp, Elasticsearch automatically creates a new backing index for that range and routes the document to it. No manual intervention is needed from the user.</p>
+
+      <div class="card">
+        <span class="badge badge-ok">Unblocked</span>
+        <h3>TSDS initialisation</h3>
+        <p>Loading seed data into a freshly created TSDS no longer requires pre-creating a backing index. The first ingested document creates the index covering its timestamp implicitly.</p>
+      </div>
+
+      <div class="card">
+        <span class="badge badge-info">Scope</span>
+        <h3>Only the writable retention window</h3>
+        <p>The behaviour applies inside the retention writable window. Documents older than that window remain rejected, and read-only backing indices are not modified.</p>
+      </div>
+    </section>
+
+    <section aria-labelledby="constraints-heading">
+      <h2 id="constraints-heading">Constraints</h2>
+      <p>The proposal explicitly preserves a few invariants so that operators retain a predictable model of the cluster.</p>
+
+      <div class="table-wrap">
+        <table>
+          <caption class="caption">Invariants preserved by the lazy backing index behaviour.</caption>
+          <thead>
+            <tr><th scope="col">Constraint</th><th scope="col">Behaviour</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Read-only backing indices</td><td>Unaffected. Documents whose timestamps fall inside a read-only period are still rejected.</td></tr>
+            <tr><td>Lifecycle age</td><td>Relative to the data (the <code>@timestamp</code>), not to the index creation time. A lazily created past index inherits the lifecycle position implied by its data range.</td></tr>
+            <tr><td>Cluster capacity</td><td>Users remain responsible for storage, downsampling, and searchable snapshot planning. Lazy creation does not allocate capacity for them.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section aria-labelledby="backfill-heading">
+      <h2 id="backfill-heading">What about backfill?</h2>
+      <p>The core proposal deliberately does <em>not</em> address bulk historical backfill. Backfilling a full historical dataset forces the cluster to scale linearly with the total size of that history, not just with the live ingest rate.</p>
+
+      <div class="callout warn">
+        <p><strong>Scaling trade-off.</strong> If lazy creation absorbed unrestricted historical writes, a cluster sized for steady-state ingest could be overwhelmed by a single backfill job. The runbook approach below keeps the cluster scaled to the backfill rate rather than the backfill volume.</p>
+      </div>
+
+      <p>The current manual backfill runbook still applies. The two options below propose ways to make that runbook materially simpler without changing its scaling story.</p>
+    </section>
+
+    <section aria-labelledby="temporary-stream-heading">
+      <h2 id="temporary-stream-heading">Option 1 — temporary backfill TSDS</h2>
+      <p>The lighter-touch option. The user still moves backing indices between two streams, but they no longer have to create each backing index by hand.</p>
+
+      <ol class="flow">
+        <li><span class="step-num" aria-hidden="true">1</span>Create a temporary backfill data stream with a fixed start time and <strong>no lifecycle</strong>.</li>
+        <li><span class="step-num" aria-hidden="true">2</span>Migrate historical data into the backfill stream in sliding windows.</li>
+        <li><span class="step-num" aria-hidden="true">3</span>As each window finishes, move its completed backing indices from the backfill stream to the target stream via the Modify Data Stream API.</li>
+        <li><span class="step-num" aria-hidden="true">4</span>For ILM-managed targets, set <code>index.lifecycle.indexing_complete</code> on the moved index and assign the target ILM policy.</li>
+      </ol>
+
+      <div class="card">
+        <span class="badge badge-info">Investment</span>
+        <h3>Smaller engineering lift</h3>
+        <p>This option leans on existing primitives (a second stream plus the Modify Data Stream API). The behavioural change for users is removing the manual create-the-backing-index step from the runbook.</p>
+      </div>
+    </section>
+
+    <section aria-labelledby="target-config-heading">
+      <h2 id="target-config-heading">Option 2 — backfill configuration on the target stream</h2>
+      <p>The heavier option. Backfill happens directly into the target stream, gated by a declared backfill window. No index movement is required.</p>
+
+      <p>A new data stream setting pauses lifecycle actions on past backing indices created during a declared backfill window.</p>
+
+      <div class="card">
+        <span class="badge badge-info">Setting shape</span>
+        <h3>Declared backfill window</h3>
+        <p>The configuration describes:</p>
+        <ul>
+          <li><strong>Start and end time</strong> of the backfill window.</li>
+          <li><strong>Optional:</strong> expected document count and settings overrides.</li>
+        </ul>
+      </div>
+
+      <div class="callout warn">
+        <p><strong>Implementation complexity.</strong> This option requires a new API with a very specific use case and lifecycle semantics that diverge from the steady-state path. The simpler user experience comes at the cost of more machinery in Elasticsearch.</p>
+      </div>
+    </section>
+
+    <section aria-labelledby="comparison-heading">
+      <h2 id="comparison-heading">Comparison</h2>
+      <p>Side-by-side summary of the two backfill simplification options.</p>
+
+      <div class="table-wrap">
+        <table>
+          <caption class="caption">Option 1 vs Option 2 at a glance.</caption>
+          <thead>
+            <tr>
+              <th scope="col">Dimension</th>
+              <th scope="col">Option 1: temporary stream</th>
+              <th scope="col">Option 2: target config</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Where the user writes</td><td>Separate backfill TSDS</td><td>Directly into the target TSDS</td></tr>
+            <tr><td>Index movement required</td><td>Yes — Modify Data Stream API per window</td><td>No</td></tr>
+            <tr><td>ILM steps</td><td>Set <code>index.lifecycle.indexing_complete</code> and assign policy on moved indices</td><td>Lifecycle paused for past indices inside the declared window</td></tr>
+            <tr><td>New APIs</td><td>None beyond what exists today</td><td>New data stream setting / API</td></tr>
+            <tr><td>Engineering investment</td><td>Smaller</td><td>Larger</td></tr>
+            <tr><td>User-facing simplicity</td><td>Removes manual backing-index creation</td><td>Removes manual backing-index creation and index movement</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>Both options preserve the cluster scaling guarantee: cluster capacity scales with the backfill rate, not with the total historical volume. The choice is between a smaller engineering lift with a multi-step runbook (Option 1) and a larger engineering lift with a single-step user experience (Option 2).</p>
+    </section>
+  </main>
+
+  <footer>
+    <p>Internal reference for the TSDS older-data ingestion simplification proposal. Source material: TSDS proposal notes covering lazy past backing index creation and the two backfill simplification options.</p>
+    <p>Accessibility: WCAG 2.1 AA contrast targets, 16px body, 12px captions, 66ch prose width, 1.5 line height. Light and dark palettes are separate.</p>
+  </footer>
+
+  <script>
+    (function () {
+      var toggle = document.getElementById('theme-toggle');
+      var storageKey = 'kibana-doc-theme--tsds-older-data-ingestion-simplification';
+      var stored = null;
+      try { stored = localStorage.getItem(storageKey); } catch (e) { /* ignore */ }
+
+      function applyTheme(theme) {
+        if (theme === 'dark') {
+          document.documentElement.setAttribute('data-theme', 'dark');
+          toggle.setAttribute('aria-pressed', 'true');
+          toggle.textContent = 'Switch to light mode';
+        } else {
+          document.documentElement.removeAttribute('data-theme');
+          toggle.setAttribute('aria-pressed', 'false');
+          toggle.textContent = 'Switch to dark mode';
+        }
+      }
+
+      applyTheme(stored === 'dark' ? 'dark' : 'light');
+
+      toggle.addEventListener('click', function () {
+        var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        var next = isDark ? 'light' : 'dark';
+        applyTheme(next);
+        try { localStorage.setItem(storageKey, next); } catch (e) { /* ignore */ }
+      });
+
+      var sectionIds = [
+        'overview-heading',
+        'core-proposal-heading',
+        'constraints-heading',
+        'backfill-heading',
+        'temporary-stream-heading',
+        'target-config-heading',
+        'comparison-heading',
+      ];
+      var tabLinks = document.querySelectorAll('.section-tab a[data-section]');
+      var sectionHeadings = sectionIds.map(function (id) { return document.getElementById(id); }).filter(Boolean);
+
+      function setActiveSection(id) {
+        tabLinks.forEach(function (link) {
+          if (link.getAttribute('data-section') === id) {
+            link.setAttribute('aria-current', 'true');
+          } else {
+            link.removeAttribute('aria-current');
+          }
+        });
+      }
+
+      if ('IntersectionObserver' in window && sectionHeadings.length > 0) {
+        var observer = new IntersectionObserver(function (entries) {
+          var visible = entries
+            .filter(function (e) { return e.isIntersecting; })
+            .sort(function (a, b) { return a.boundingClientRect.top - b.boundingClientRect.top; });
+          if (visible.length > 0) { setActiveSection(visible[0].target.id); }
+        }, { root: null, rootMargin: '-20% 0px -65% 0px', threshold: 0 });
+        sectionHeadings.forEach(function (heading) { observer.observe(heading); });
+      } else if (sectionHeadings.length > 0) {
+        setActiveSection(sectionHeadings[0].id);
+      }
+
+      tabLinks.forEach(function (link) {
+        link.addEventListener('click', function () {
+          setActiveSection(link.getAttribute('data-section'));
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Entity highlights — old vs new prompt A/B POC</title>
+  <style>
+    /* Light palette (separate from dark — dark accents fail on white) */
+    :root {
+      color-scheme: light;
+      --bg-page: #f5f7fa;
+      --bg-surface: #ffffff;
+      --bg-code: #f0f3f7;
+      --text-primary: #343741;
+      --text-secondary: #525252;
+      --text-muted: #69707d;
+      --border: #d3dae6;
+      --accent: #006bb8;
+      --accent-hover: #004c8f;
+      --status-ok-bg: #e6f4ea;
+      --status-ok-text: #1e6b3a;
+      --status-warn-bg: #fff8e6;
+      --status-warn-text: #8a6a00;
+      --status-info-bg: #e6f1fb;
+      --status-info-text: #154a86;
+      --focus-ring: #006bb8;
+      --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --font-mono: ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
+      --nav-height: 3.25rem;
+    }
+
+    [data-theme="dark"] {
+      color-scheme: dark;
+      --bg-page: #141419;
+      --bg-surface: #1d1e24;
+      --bg-code: #25262d;
+      --text-primary: #dfe5ef;
+      --text-secondary: #b8c2cc;
+      --text-muted: #98a2b3;
+      --border: #3d424d;
+      --accent: #1ba9f5;
+      --accent-hover: #63bfff;
+      --status-ok-bg: #1a3326;
+      --status-ok-text: #7dd996;
+      --status-warn-bg: #3d3520;
+      --status-warn-text: #f5d676;
+      --status-info-bg: #1a2a3d;
+      --status-info-text: #8ec5ff;
+      --focus-ring: #1ba9f5;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding-top: var(--nav-height);
+      font-family: var(--font-sans);
+      font-size: 16px;
+      line-height: 1.5;
+      color: var(--text-primary);
+      background: var(--bg-page);
+    }
+
+    .skip-link {
+      position: absolute;
+      left: -9999px;
+      top: auto;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+    }
+
+    .skip-link:focus {
+      position: fixed;
+      left: 1rem;
+      top: calc(var(--nav-height) + 0.5rem);
+      width: auto;
+      height: auto;
+      padding: 0.75rem 1rem;
+      background: var(--bg-surface);
+      color: var(--text-primary);
+      border: 2px solid var(--focus-ring);
+      z-index: 1000;
+      font-size: 16px;
+    }
+
+    header {
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 1.5rem;
+    }
+
+    .header-inner {
+      max-width: 66ch;
+      margin: 0 auto;
+    }
+
+    .section-nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 200;
+      min-height: var(--nav-height);
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+    }
+
+    [data-theme="dark"] .section-nav {
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+    }
+
+    .section-nav-inner {
+      max-width: min(100%, 72rem);
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+
+    .section-tabs {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 0;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+    }
+
+    .section-tab {
+      flex: 0 0 auto;
+    }
+
+    .section-tab a {
+      display: block;
+      padding: 0.75rem 1rem;
+      font-size: 16px;
+      line-height: 1.5;
+      color: var(--text-secondary);
+      text-decoration: none;
+      border-bottom: 3px solid transparent;
+      white-space: nowrap;
+    }
+
+    .section-tab a:hover {
+      color: var(--text-primary);
+      background: var(--bg-page);
+    }
+
+    .section-tab a:focus-visible {
+      outline: 2px solid var(--focus-ring);
+      outline-offset: -2px;
+    }
+
+    .section-tab a[aria-current="true"] {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+      font-weight: 700;
+    }
+
+    .prose section {
+      scroll-margin-top: 4rem;
+    }
+
+    .prose h2 {
+      scroll-margin-top: 4rem;
+    }
+
+    h1 {
+      margin: 0 0 0.5rem;
+      font-size: 1.5rem;
+      line-height: 1.5;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      margin: 0;
+      font-size: 16px;
+      color: var(--text-secondary);
+      max-width: 66ch;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+      margin-top: 1rem;
+    }
+
+    button.theme-toggle {
+      font-family: var(--font-sans);
+      font-size: 16px;
+      line-height: 1.5;
+      padding: 0.5rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: var(--bg-page);
+      color: var(--text-primary);
+      cursor: pointer;
+    }
+
+    button.theme-toggle:hover {
+      border-color: var(--accent);
+    }
+
+    button.theme-toggle:focus-visible {
+      outline: 2px solid var(--focus-ring);
+      outline-offset: 2px;
+    }
+
+    main {
+      max-width: 66ch;
+      margin: 0 auto;
+      padding: 1.5rem;
+    }
+
+    .prose {
+      max-width: 66ch;
+    }
+
+    h2 {
+      margin: 2rem 0 0.75rem;
+      font-size: 1.25rem;
+      line-height: 1.5;
+      font-weight: 700;
+    }
+
+    h3 {
+      margin: 1.5rem 0 0.5rem;
+      font-size: 1.0625rem;
+      line-height: 1.5;
+      font-weight: 700;
+    }
+
+    p {
+      margin: 0 0 1rem;
+    }
+
+    ul, ol {
+      margin: 0 0 1rem;
+      padding-left: 1.5rem;
+    }
+
+    li {
+      margin-bottom: 0.5rem;
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: underline;
+    }
+
+    a:hover {
+      color: var(--accent-hover);
+    }
+
+    a:focus-visible {
+      outline: 2px solid var(--focus-ring);
+      outline-offset: 2px;
+    }
+
+    .caption {
+      font-size: 12px;
+      line-height: 1.5;
+      color: var(--text-muted);
+      margin: 0.25rem 0 1rem;
+    }
+
+    .card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1rem 1.25rem;
+      margin: 1rem 0 1.5rem;
+    }
+
+    .card h3 {
+      margin-top: 0;
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 12px;
+      line-height: 1.5;
+      padding: 0.125rem 0.5rem;
+      border-radius: 4px;
+      margin-bottom: 0.5rem;
+    }
+
+    .badge-ok {
+      background: var(--status-ok-bg);
+      color: var(--status-ok-text);
+    }
+
+    .badge-warn {
+      background: var(--status-warn-bg);
+      color: var(--status-warn-text);
+    }
+
+    .badge-info {
+      background: var(--status-info-bg);
+      color: var(--status-info-text);
+    }
+
+    pre {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      line-height: 1.5;
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1rem;
+      overflow-x: auto;
+      margin: 0 0 1rem;
+    }
+
+    code {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    p code,
+    li code,
+    td code {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 0 0.25rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0 1.5rem;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 0.625rem 0.75rem;
+      border: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    th {
+      background: var(--bg-code);
+      font-weight: 700;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      margin: 1rem 0 1.5rem;
+    }
+
+    .flow {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 1.5rem;
+    }
+
+    .flow li {
+      position: relative;
+      padding: 0.75rem 0 0.75rem 2rem;
+      border-left: 2px solid var(--border);
+      margin: 0;
+    }
+
+    .flow li:last-child {
+      border-left-color: transparent;
+    }
+
+    .flow .step-num {
+      position: absolute;
+      left: -0.65rem;
+      top: 0.65rem;
+      width: 1.25rem;
+      height: 1.25rem;
+      background: var(--bg-surface);
+      border: 2px solid var(--accent);
+      border-radius: 50%;
+      font-size: 12px;
+      line-height: 1.25rem;
+      text-align: center;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .callout {
+      background: var(--status-info-bg);
+      color: var(--status-info-text);
+      border: 1px solid var(--status-info-text);
+      border-radius: 4px;
+      padding: 0.75rem 1rem;
+      margin: 1rem 0 1.5rem;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+
+    .callout.warn {
+      background: var(--status-warn-bg);
+      color: var(--status-warn-text);
+      border-color: var(--status-warn-text);
+    }
+
+    .callout p {
+      margin: 0;
+    }
+
+    .callout p + p {
+      margin-top: 0.5rem;
+    }
+
+    footer {
+      max-width: 66ch;
+      margin: 0 auto;
+      padding: 1.5rem;
+      font-size: 12px;
+      line-height: 1.5;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  <nav class="section-nav" id="section-nav" aria-label="Page sections">
+    <div class="section-nav-inner">
+      <ul class="section-tabs" role="list">
+        <li class="section-tab" role="listitem">
+          <a href="#overview-heading" data-section="overview-heading">Overview</a>
+        </li>
+        <li class="section-tab" role="listitem">
+          <a href="#resolution-heading" data-section="resolution-heading">Resolution</a>
+        </li>
+        <li class="section-tab" role="listitem">
+          <a href="#kibana-heading" data-section="kibana-heading">Kibana changes</a>
+        </li>
+        <li class="section-tab" role="listitem">
+          <a href="#schema-heading" data-section="schema-heading">Schema</a>
+        </li>
+        <li class="section-tab" role="listitem">
+          <a href="#ui-heading" data-section="ui-heading">UI toggle</a>
+        </li>
+        <li class="section-tab" role="listitem">
+          <a href="#generator-heading" data-section="generator-heading">Docs generator</a>
+        </li>
+        <li class="section-tab" role="listitem">
+          <a href="#usage-heading" data-section="usage-heading">How to use</a>
+        </li>
+        <li class="section-tab" role="listitem">
+          <a href="#safety-heading" data-section="safety-heading">POC safety</a>
+        </li>
+        <li class="section-tab" role="listitem">
+          <a href="#cleanup-heading" data-section="cleanup-heading">Cleanup</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <header>
+    <div class="header-inner">
+      <h1>Entity highlights: old vs new prompt A/B POC</h1>
+      <p class="subtitle">A breakdown of the dev-only prompt-variant switch on the highlights route, the matching UI toggle in the entity flyout, and the side-by-side comparison mode added to <code>entity-summary-analysis</code>.</p>
+      <div class="toolbar">
+        <button type="button" class="theme-toggle" id="theme-toggle" aria-pressed="false">
+          Switch to dark mode
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main-content" class="prose">
+    <section aria-labelledby="overview-heading">
+      <h2 id="overview-heading">Overview</h2>
+      <p>The entity highlights flyout sends a system prompt to the LLM along with the entity summary. That prompt lives as a <strong>saved object</strong> (type <code>security-ai-prompt</code>) installed by the <code>security_ai_prompts</code> Fleet package. The local file in <code>elastic_assistant</code> is only a fallback when no saved object exists.</p>
+      <p>This POC keeps the packaged prompt untouched and adds a second variant resolved purely from local code, plus a request-time switch so the route can serve either one.</p>
+
+      <div class="callout">
+        <p><strong>Why two prompt IDs instead of editing the original.</strong> Renaming the existing constant would break the local fallback for the existing saved object (which still has <code>promptId: entityDetailsHighlights</code>). Adding a second prompt ID with no matching saved object means the local-code text always wins for that ID, and the packaged behaviour stays identical for unchanged callers.</p>
+      </div>
+    </section>
+
+    <section aria-labelledby="resolution-heading">
+      <h2 id="resolution-heading">How <code>getPrompt</code> resolves a variant</h2>
+      <p>The route passes a <code>promptId</code> to <code>@kbn/security-ai-prompts</code>, which checks saved objects first and only falls back to <code>localPrompts</code> when nothing matches.</p>
+
+      <ol class="flow">
+        <li>
+          <span class="step-num" aria-hidden="true">1</span>
+          Route receives <code>promptVariant: 'default' | 'new'</code> (optional). Default is <code>default</code>.
+        </li>
+        <li>
+          <span class="step-num" aria-hidden="true">2</span>
+          Route picks <code>promptDictionary.entityDetailsHighlights</code> for <code>default</code>, or <code>promptDictionary.entityDetailsHighlightsNew</code> for <code>new</code>.
+        </li>
+        <li>
+          <span class="step-num" aria-hidden="true">3</span>
+          <code>getPrompt</code> queries the SO index for <code>security-ai-prompt</code> rows matching that <code>promptId</code> + <code>promptGroupId</code>.
+        </li>
+        <li>
+          <span class="step-num" aria-hidden="true">4</span>
+          For <code>entityDetailsHighlights</code>, the packaged SO matches and is returned (unchanged behaviour).
+        </li>
+        <li>
+          <span class="step-num" aria-hidden="true">5</span>
+          For <code>entityDetailsHighlightsNew</code>, no SO exists, so <code>localPrompts</code> resolves it from <code>ENTITY_DETAILS_HIGHLIGHTS_PROMPT_NEW</code>.
+        </li>
+      </ol>
+      <p class="caption">Source: x-pack/solutions/security/packages/security-ai-prompts/src/get_prompt.ts (findPromptEntry).</p>
+    </section>
+
+    <section aria-labelledby="kibana-heading">
+      <h2 id="kibana-heading">Kibana code changes</h2>
+
+      <div class="table-wrap">
+        <table>
+          <caption class="caption">Files changed in the Kibana fork</caption>
+          <thead>
+            <tr>
+              <th scope="col">File</th>
+              <th scope="col">Change</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>elastic_assistant/server/lib/prompt/prompts.ts</code></td>
+              <td>Restored the original <code>ENTITY_DETAILS_HIGHLIGHTS_PROMPT</code>; added <code>ENTITY_DETAILS_HIGHLIGHTS_PROMPT_NEW</code> with the candidate text.</td>
+            </tr>
+            <tr>
+              <td><code>elastic_assistant/server/lib/prompt/local_prompt_object.ts</code></td>
+              <td>Added <code>promptDictionary.entityDetailsHighlightsNew</code> and a matching <code>localPrompts</code> entry under <code>aiForEntityAnalytics</code>.</td>
+            </tr>
+            <tr>
+              <td><code>security_solution/.../entity_details/highlights.schema.yaml</code></td>
+              <td>Added optional <code>promptVariant</code> enum (<code>default</code> | <code>new</code>) to the request body.</td>
+            </tr>
+            <tr>
+              <td><code>security_solution/.../entity_details/highlights.gen.ts</code></td>
+              <td>Regenerated via <code>yarn openapi:generate</code>.</td>
+            </tr>
+            <tr>
+              <td><code>security_solution/.../routes/entity_details_highlight.ts</code></td>
+              <td>Picks <code>promptId</code> based on <code>request.body.promptVariant</code> (defaults to the packaged ID).</td>
+            </tr>
+            <tr>
+              <td><code>security_solution/public/entity_analytics/api/api.ts</code></td>
+              <td>Forwards optional <code>promptVariant</code> through <code>fetchEntityDetailsHighlights</code>.</td>
+            </tr>
+            <tr>
+              <td><code>...hooks/use_fetch_entity_details_highlights.ts</code></td>
+              <td>Accepts <code>promptVariant</code> and threads it into the POST body and the callback deps.</td>
+            </tr>
+            <tr>
+              <td><code>...components/entity_highlights.tsx</code></td>
+              <td>Adds a <code>EuiButtonGroup</code> dev toggle next to the existing demo controls.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Route handler — variant selection</h3>
+      <pre><code>const promptVariant = request.body.promptVariant ?? 'default';
+const resolvedPromptId =
+  promptVariant === 'new'
+    ? promptDictionary.entityDetailsHighlightsNew
+    : promptDictionary.entityDetailsHighlights;
+
+const prompt = await getPrompt({
+  getInferenceConnectorById: (id) =&gt; inference.getConnectorById(id, request),
+  connectorId,
+  promptId: resolvedPromptId,
+  promptGroupId: promptGroupId.aiForEntityAnalytics,
+  savedObjectsClient: soClient,
+});</code></pre>
+    </section>
+
+    <section aria-labelledby="schema-heading">
+      <h2 id="schema-heading">Schema change</h2>
+      <p>The new field is optional, so existing callers (Kibana UI, tests, generated API clients) keep working without changes.</p>
+      <pre><code>promptVariant:
+  type: string
+  enum:
+    - default
+    - new
+  description: &gt;-
+    Dev-only: selects which prompt variant the server resolves for entity
+    highlights. `default` (or omitted) uses the packaged saved-object prompt
+    (`entityDetailsHighlights`). `new` uses the candidate replacement prompt
+    (`entityDetailsHighlightsNew`) which is only resolved via the local
+    fallback. Not intended for production callers.</code></pre>
+      <p class="caption">Schema file: security_solution/common/api/entity_analytics/entity_details/highlights.schema.yaml</p>
+    </section>
+
+    <section aria-labelledby="ui-heading">
+      <h2 id="ui-heading">UI toggle</h2>
+      <p>The entity flyout accordion now exposes a compressed button group next to the existing demo controls. Selecting a variant updates local state; the next time the analyst clicks Generate, the hook posts that variant to the route.</p>
+
+      <div class="card">
+        <span class="badge badge-info">UI element</span>
+        <h3>Prompt variant button group</h3>
+        <p>Sits inside the accordion's <code>extraAction</code> when at least one AI connector exists. Visible to anyone who can already use the highlights feature, so no extra capability check is added.</p>
+        <ul>
+          <li><strong>Old prompt</strong> — resolves <code>entityDetailsHighlights</code> (packaged SO).</li>
+          <li><strong>New prompt</strong> — resolves <code>entityDetailsHighlightsNew</code> (local code only).</li>
+        </ul>
+        <p>Tagged with <code>data-test-subj="entity-highlights-prompt-variant-toggle"</code>.</p>
+      </div>
+
+      <pre><code>const [promptVariant, setPromptVariant] = useState&lt;'default' | 'new'&gt;('default');
+
+&lt;EuiButtonGroup
+  legend="Prompt variant"
+  options={promptVariantToggleButtons}
+  idSelected={promptVariant}
+  onChange={(id) =&gt; setPromptVariant(id as 'default' | 'new')}
+  buttonSize="compressed"
+  color="primary"
+  data-test-subj="entity-highlights-prompt-variant-toggle"
+/&gt;</code></pre>
+    </section>
+
+    <section aria-labelledby="generator-heading">
+      <h2 id="generator-heading">Docs generator changes</h2>
+      <p>The <code>entity-summary-analysis</code> command measures storage impact of summaries persisted to the entity store. It does <strong>not</strong> call the LLM; it POSTs a placeholder body whose shape matches a real highlights output.</p>
+
+      <p>The script now carries two named placeholder bodies:</p>
+      <ul>
+        <li><code>OLD_PROMPT_HIGHLIGHTS</code> and <code>OLD_PROMPT_RECOMMENDED_ACTIONS</code> — sized like a typical legacy output.</li>
+        <li><code>NEW_PROMPT_HIGHLIGHTS</code> and <code>NEW_PROMPT_RECOMMENDED_ACTIONS</code> — placeholder seeded with realistic structure for the new prompt; replace with a real captured output before running the comparison for keeps.</li>
+      </ul>
+
+      <div class="callout warn">
+        <p><strong>Replace the placeholders with real LLM output.</strong> The storage delta is only meaningful once both constants reflect actual output from each prompt variant. Generate two summaries via the entity flyout (toggle on Old prompt, then New prompt), copy the rendered cards into the script, then run <code>--compare-prompts</code>.</p>
+      </div>
+
+      <h3>Flag matrix</h3>
+      <div class="table-wrap">
+        <table>
+          <caption class="caption">Old and new flags on the entity-summary-analysis command</caption>
+          <thead>
+            <tr>
+              <th scope="col">Flag</th>
+              <th scope="col">Status</th>
+              <th scope="col">Effect</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>--space</code></td>
+              <td><span class="badge badge-ok">Existing</span></td>
+              <td>Kibana space to target.</td>
+            </tr>
+            <tr>
+              <td><code>--sample-pct</code> / <code>--sample-count</code></td>
+              <td><span class="badge badge-ok">Existing</span></td>
+              <td>Single-run sampling controls.</td>
+            </tr>
+            <tr>
+              <td><code>--measure-existing</code></td>
+              <td><span class="badge badge-ok">Existing</span></td>
+              <td>Skip persist; measure summaries already in the store.</td>
+            </tr>
+            <tr>
+              <td><code>--run-all</code></td>
+              <td><span class="badge badge-ok">Existing</span></td>
+              <td>Full adoption sweep (5%, 10%, 25%, 50%, 75%, 100%).</td>
+            </tr>
+            <tr>
+              <td><code>--prompt-variant old|new</code></td>
+              <td><span class="badge badge-info">New</span></td>
+              <td>Pick which placeholder body to POST. Defaults to <code>old</code>.</td>
+            </tr>
+            <tr>
+              <td><code>--compare-prompts</code></td>
+              <td><span class="badge badge-info">New</span></td>
+              <td>Runs the full sweep twice (once per variant) against the same entity set and prints a side-by-side delta table.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>What the comparison report shows</h3>
+      <ul>
+        <li>Per-sample blob size, doc-Δ, index-Δ, and list-API-Δ for both variants.</li>
+        <li>Headline blob change (absolute and percentage) from the largest sample.</li>
+        <li>Projected storage delta in MB at 5k / 10k / 25k / 50k entities and 10 / 50 / 100% adoption — i.e. how much more or less the new prompt would cost at scale.</li>
+      </ul>
+    </section>
+
+    <section aria-labelledby="usage-heading">
+      <h2 id="usage-heading">How to use it locally</h2>
+
+      <h3>Quick visual check in the UI</h3>
+      <ol class="flow">
+        <li>
+          <span class="step-num" aria-hidden="true">1</span>
+          Open an entity flyout and expand the <strong>Entity summary</strong> accordion.
+        </li>
+        <li>
+          <span class="step-num" aria-hidden="true">2</span>
+          Toggle between <strong>Old prompt</strong> and <strong>New prompt</strong> in the header controls.
+        </li>
+        <li>
+          <span class="step-num" aria-hidden="true">3</span>
+          Click <strong>Generate</strong> once per variant. The body of the response will reflect whichever prompt the server resolved.
+        </li>
+        <li>
+          <span class="step-num" aria-hidden="true">4</span>
+          Optionally inspect the <code>prompt</code> field in the network response to confirm which text the server sent to the model.
+        </li>
+      </ol>
+
+      <h3>Storage impact comparison</h3>
+      <pre><code># Old prompt only (default behaviour, unchanged)
+yarn start entity-summary-analysis --run-all
+
+# Single run, new prompt placeholder
+yarn start entity-summary-analysis --run-all --prompt-variant new
+
+# Full side-by-side: two passes, delta table at the end
+yarn start entity-summary-analysis --compare-prompts</code></pre>
+
+      <p>Run from the <code>security-documents-generator</code> repo.</p>
+    </section>
+
+    <section aria-labelledby="safety-heading">
+      <h2 id="safety-heading">POC safety</h2>
+      <ul>
+        <li>The <code>promptVariant</code> field is optional with a server-side default of <code>default</code>. Existing callers, tests, and the generated API client all continue to work without modification.</li>
+        <li>No saved object exists for <code>entityDetailsHighlightsNew</code>, so the new prompt is only reachable from code on this branch. Even if you later install or upgrade the <code>security_ai_prompts</code> Fleet package, it cannot collide.</li>
+        <li>The existing <code>entityDetailsHighlights</code> SO and its packaged text are untouched; uninstalling the package still uses the original <code>ENTITY_DETAILS_HIGHLIGHTS_PROMPT</code> as the local fallback.</li>
+        <li>The docs generator changes are additive. Without <code>--prompt-variant</code> or <code>--compare-prompts</code>, the command behaves exactly as it did before.</li>
+      </ul>
+    </section>
+
+    <section aria-labelledby="cleanup-heading">
+      <h2 id="cleanup-heading">Cleanup before merging</h2>
+
+      <div class="callout warn">
+        <p>This branch is a POC. Anything that does not need to ship should be reverted or feature-flagged.</p>
+      </div>
+
+      <ul>
+        <li>Decide which prompt is the actual replacement. If <code>ENTITY_DETAILS_HIGHLIGHTS_PROMPT_NEW</code> wins, move its text into <code>ENTITY_DETAILS_HIGHLIGHTS_PROMPT</code> and delete the <code>_NEW</code> constant, the <code>entityDetailsHighlightsNew</code> dictionary entry, and the second <code>localPrompts</code> entry.</li>
+        <li>Remove the <code>promptVariant</code> field from the schema and route, regenerate <code>highlights.gen.ts</code>, and drop the parameter from the API client and hook.</li>
+        <li>Remove the prompt-variant button group from <code>entity_highlights.tsx</code> and the related state and toggle config.</li>
+        <li>Once a real new packaged prompt is decided, follow the steps in <code>security-ai-prompts/README.md</code> to regenerate the JSON, bump the <code>security_ai_prompts</code> integration version, and ship the updated package.</li>
+        <li>In <code>security-documents-generator</code>, decide whether to keep the comparison flag long-term. If yes, prune the placeholder constants to one canonical body (or keep both for legacy comparisons but mark them clearly).</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>
+    <p>Internal reference for the entity highlights A/B prompt POC. Code paths: prompts.ts, local_prompt_object.ts, highlights.schema.yaml, entity_details_highlight.ts, use_fetch_entity_details_highlights.ts, entity_highlights.tsx, security-documents-generator entity_summary_analysis.ts.</p>
+    <p>Accessibility: WCAG 2.1 AA contrast targets, 16px body, 12px captions, 66ch prose width, 1.5 line height. Light and dark palettes are separate.</p>
+  </footer>
+
+  <script>
+    (function () {
+      var toggle = document.getElementById('theme-toggle');
+      var storageKey = 'entity-highlights-prompt-ab-poc-theme';
+      var stored = null;
+      try {
+        stored = localStorage.getItem(storageKey);
+      } catch (e) { /* ignore */ }
+
+      function applyTheme(theme) {
+        if (theme === 'dark') {
+          document.documentElement.setAttribute('data-theme', 'dark');
+          toggle.setAttribute('aria-pressed', 'true');
+          toggle.textContent = 'Switch to light mode';
+        } else {
+          document.documentElement.removeAttribute('data-theme');
+          toggle.setAttribute('aria-pressed', 'false');
+          toggle.textContent = 'Switch to dark mode';
+        }
+      }
+
+      applyTheme(stored === 'dark' ? 'dark' : 'light');
+
+      toggle.addEventListener('click', function () {
+        var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        var next = isDark ? 'light' : 'dark';
+        applyTheme(next);
+        try {
+          localStorage.setItem(storageKey, next);
+        } catch (e) { /* ignore */ }
+      });
+
+      var sectionIds = [
+        'overview-heading',
+        'resolution-heading',
+        'kibana-heading',
+        'schema-heading',
+        'ui-heading',
+        'generator-heading',
+        'usage-heading',
+        'safety-heading',
+        'cleanup-heading',
+      ];
+      var tabLinks = document.querySelectorAll('.section-tab a[data-section]');
+      var sectionHeadings = sectionIds
+        .map(function (id) {
+          return document.getElementById(id);
+        })
+        .filter(Boolean);
+
+      function setActiveSection(id) {
+        tabLinks.forEach(function (link) {
+          if (link.getAttribute('data-section') === id) {
+            link.setAttribute('aria-current', 'true');
+          } else {
+            link.removeAttribute('aria-current');
+          }
+        });
+      }
+
+      if ('IntersectionObserver' in window && sectionHeadings.length > 0) {
+        var observer = new IntersectionObserver(
+          function (entries) {
+            var visible = entries
+              .filter(function (e) {
+                return e.isIntersecting;
+              })
+              .sort(function (a, b) {
+                return a.boundingClientRect.top - b.boundingClientRect.top;
+              });
+            if (visible.length > 0) {
+              setActiveSection(visible[0].target.id);
+            }
+          },
+          {
+            root: null,
+            rootMargin: '-20% 0px -65% 0px',
+            threshold: 0,
+          }
+        );
+        sectionHeadings.forEach(function (heading) {
+          observer.observe(heading);
+        });
+      } else if (sectionHeadings.length > 0) {
+        setActiveSection(sectionHeadings[0].id);
+      }
+
+      tabLinks.forEach(function (link) {
+        link.addEventListener('click', function () {
+          setActiveSection(link.getAttribute('data-section'));
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
