@@ -467,7 +467,7 @@ function ButtonVariant({
       {isFieldListFlyoutVisible && (
         <EuiPortal>
           <EuiFlyout
-            size="s"
+            size="fill"
             onClose={() => setIsFieldListFlyoutVisible(false)}
             aria-labelledby="flyoutTitle"
             ownFocus
