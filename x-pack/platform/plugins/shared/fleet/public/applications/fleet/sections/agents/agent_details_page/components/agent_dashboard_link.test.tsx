@@ -181,16 +181,12 @@ describe('AgentDashboardLink', () => {
     expect(link?.getAttribute('href')).toBe('/mock/app/fleet/policies/policy123/settings');
   });
 
-  it('should enable the View more agent metrics link if only logs are enabled (no metrics)', async () => {
+  it('should link to the agent policy settings tab if only logs are enabled (no metrics)', async () => {
     mockedUseGetPackageInfoByKeyQuery.mockReturnValue({
       isLoading: false,
       data: {
         item: {
           status: 'installed',
-          installationInfo: {
-            install_status: 'installed',
-            installed_kibana_space_id: 'default',
-          },
         },
       },
     } as ReturnType<typeof useGetPackageInfoByKeyQuery>);
@@ -212,8 +208,9 @@ describe('AgentDashboardLink', () => {
       />
     );
 
-    expect(result.queryByRole('link')).not.toBeNull();
-    expect(result.getByRole('link').hasAttribute('href')).toBeTruthy();
+    const link = result.queryByRole('link');
+    expect(link).not.toBeNull();
+    expect(link?.getAttribute('href')).toBe('/mock/app/fleet/policies/policy123/settings');
   });
 
   it('it should disable the button if the agent policy is managed', async () => {
@@ -244,7 +241,7 @@ describe('AgentDashboardLink', () => {
     );
 
     expect(
-      result.getByTestId('agentDetails.enableLogsAndMetricsButton').hasAttribute('disabled')
+      result.getByTestId('agentDetails.enableMetricsButton').hasAttribute('disabled')
     ).toBeTruthy();
   });
 
