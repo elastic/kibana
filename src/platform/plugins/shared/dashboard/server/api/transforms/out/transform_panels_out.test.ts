@@ -16,6 +16,7 @@ beforeAll(() => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   require('../../../kibana_services').embeddableService = {
     getTransforms: mockGetTransforms,
+    getAllEmbeddableSchemas: jest.fn().mockReturnValue({}),
   };
 });
 

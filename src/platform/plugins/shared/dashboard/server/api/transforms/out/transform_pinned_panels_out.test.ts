@@ -26,6 +26,7 @@ jest.mock('../../../kibana_services', () => ({
   ...jest.requireActual('../../../kibana_services'),
   embeddableService: {
     getTransforms: jest.fn(),
+    getAllEmbeddableSchemas: jest.fn().mockReturnValue({}),
   },
 }));
 

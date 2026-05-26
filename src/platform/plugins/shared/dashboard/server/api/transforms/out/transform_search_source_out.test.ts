@@ -39,16 +39,21 @@ describe('transformSearchSourceOut', () => {
     expect(result).toEqual({
       filters: [{ data_view_id: 'fizzle-1234', type: 'dsl', dsl: { query: { foo: 'bar' } } }],
       query: { expression: 'test', language: 'kql' },
+      warnings: [],
     });
   });
 
   it('returns empty object if searchSourceJSON is missing', () => {
-    expect(transformSearchSourceOut({}, [], getDashboardStateSchema(false))).toEqual({});
+    expect(transformSearchSourceOut({}, [], getDashboardStateSchema(false))).toEqual({
+      warnings: [],
+    });
   });
 
   it('returns empty object if parseSearchSourceJSON throws', () => {
     const meta = { searchSourceJSON: 'not json' };
-    expect(transformSearchSourceOut(meta, [], getDashboardStateSchema(false))).toEqual({});
+    expect(transformSearchSourceOut(meta, [], getDashboardStateSchema(false))).toEqual({
+      warnings: [],
+    });
   });
 
   it('falls back to no data_view_id injectReferences throws', () => {
@@ -62,6 +67,7 @@ describe('transformSearchSourceOut', () => {
     expect(result).toEqual({
       filters: [{ type: 'dsl', dsl: { query: { foo: 'bar' } } }],
       query: { expression: 'test', language: 'kql' },
+      warnings: [],
     });
   });
 });
