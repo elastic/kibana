@@ -78,7 +78,7 @@ pageLoadAssetSize:
   files: 6037
   filesManagement: 5208
   fileUpload: 22957
-  fleet: 229970
+  fleet: 279001
   genAiSettings: 6342
   globalSearch: 6890
   globalSearchBar: 31212
@@ -92,7 +92,7 @@ pageLoadAssetSize:
   indexManagement: 39694
   inference: 10368
   infra: 56302
-  ingestHub: 12728
+  ingestHub: 12834
   ingestPipelines: 17866
   inputControlVis: 7638
   inspectComponent: 4590

@@ -17,10 +17,12 @@ export {
   type AwsConnectSetupProps,
   type AwsAuthType,
   type AwsStaticKeyCredentials,
+  type AwsTemporaryKeyCredentials,
 } from './aws_connect_setup';
 export {
   AwsAuthTypeSelector,
   AWS_AUTH_TYPE_SELECTOR_TEST_SUBJ,
   AWS_AUTH_TYPE_IF_CARD_TEST_SUBJ,
   AWS_AUTH_TYPE_STATIC_KEYS_CARD_TEST_SUBJ,
+  AWS_AUTH_TYPE_TEMPORARY_KEYS_CARD_TEST_SUBJ,
 } from './aws_connect_setup/aws_auth_type_selector';

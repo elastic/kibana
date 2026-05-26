@@ -19,7 +19,7 @@ interface ConnectStepProps {
 
 export function ConnectStep({ onNext }: ConnectStepProps) {
   const { services } = useKibana<CoreStart & { cloud?: CloudStart }>();
-  const { connectStep, setConnectorId, setStaticKeys } = useOnboardingFlow();
+  const { connectStep, setConnectorId, setStaticKeys, setTemporaryKeys } = useOnboardingFlow();
 
   return (
     <Suspense fallback={<EuiLoadingSpinner data-test-subj="onboardingStep-connect-loading" />}>
@@ -27,9 +27,11 @@ export function ConnectStep({ onNext }: ConnectStepProps) {
         cloud={services.cloud as any}
         initialConnectorId={connectStep.connectorId}
         initialStaticKeys={connectStep.staticKeys}
+        initialTemporaryKeys={connectStep.temporaryKeys}
         onNext={onNext}
         onConnectorIdChange={setConnectorId}
         onStaticKeysChange={setStaticKeys}
+        onTemporaryKeysChange={setTemporaryKeys}
       />
     </Suspense>
   );

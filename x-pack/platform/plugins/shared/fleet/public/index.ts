@@ -136,9 +136,11 @@ export type {
   AwsConnectSetupProps,
   AwsAuthType,
   AwsStaticKeyCredentials,
+  AwsTemporaryKeyCredentials,
 } from './components/cloud_connector';
 export {
   AWS_AUTH_TYPE_SELECTOR_TEST_SUBJ,
   AWS_AUTH_TYPE_IF_CARD_TEST_SUBJ,
   AWS_AUTH_TYPE_STATIC_KEYS_CARD_TEST_SUBJ,
+  AWS_AUTH_TYPE_TEMPORARY_KEYS_CARD_TEST_SUBJ,
 } from './components/cloud_connector';

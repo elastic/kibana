@@ -6,14 +6,36 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiCheckableCard, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiSelect } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
-export type AwsAuthType = 'identity_federation' | 'static_keys';
+export type AwsAuthType = 'identity_federation' | 'static_keys' | 'temporary_keys';
 
 export const AWS_AUTH_TYPE_SELECTOR_TEST_SUBJ = 'awsAuthTypeSelector';
 export const AWS_AUTH_TYPE_IF_CARD_TEST_SUBJ = 'awsAuthTypeCard-identity_federation';
 export const AWS_AUTH_TYPE_STATIC_KEYS_CARD_TEST_SUBJ = 'awsAuthTypeCard-static_keys';
+export const AWS_AUTH_TYPE_TEMPORARY_KEYS_CARD_TEST_SUBJ = 'awsAuthTypeCard-temporary_keys';
+
+const OPTIONS = [
+  {
+    value: 'identity_federation' as AwsAuthType,
+    text: i18n.translate('xpack.fleet.awsConnectSetup.authType.identityFederationLabel', {
+      defaultMessage: 'Federated Identity (Recommended)',
+    }),
+  },
+  {
+    value: 'static_keys' as AwsAuthType,
+    text: i18n.translate('xpack.fleet.awsConnectSetup.authType.staticKeysLabel', {
+      defaultMessage: 'Static Keys',
+    }),
+  },
+  {
+    value: 'temporary_keys' as AwsAuthType,
+    text: i18n.translate('xpack.fleet.awsConnectSetup.authType.temporaryKeysLabel', {
+      defaultMessage: 'Temporary Keys',
+    }),
+  },
+];
 
 interface AwsAuthTypeSelectorProps {
   selectedAuthType: AwsAuthType;
@@ -25,69 +47,11 @@ export const AwsAuthTypeSelector: React.FC<AwsAuthTypeSelectorProps> = ({
   onChange,
 }) => {
   return (
-    <EuiFlexGroup
-      gutterSize="m"
-      direction="column"
+    <EuiSelect
+      options={OPTIONS}
+      value={selectedAuthType}
+      onChange={(e) => onChange(e.target.value as AwsAuthType)}
       data-test-subj={AWS_AUTH_TYPE_SELECTOR_TEST_SUBJ}
-    >
-      <EuiFlexItem>
-        <EuiCheckableCard
-          id="awsAuthType-identity_federation"
-          data-test-subj={AWS_AUTH_TYPE_IF_CARD_TEST_SUBJ}
-          checked={selectedAuthType === 'identity_federation'}
-          onChange={() => onChange('identity_federation')}
-          label={
-            <>
-              <strong>
-                <FormattedMessage
-                  id="xpack.fleet.awsConnectSetup.authType.identityFederationLabel"
-                  defaultMessage="Federated Identity"
-                />{' '}
-                <EuiBadge color="success">
-                  <FormattedMessage
-                    id="xpack.fleet.awsConnectSetup.authType.recommendedBadge"
-                    defaultMessage="Recommended"
-                  />
-                </EuiBadge>
-              </strong>
-              <EuiText size="s">
-                <p>
-                  <FormattedMessage
-                    id="xpack.fleet.awsConnectSetup.authType.identityFederationDescription"
-                    defaultMessage="Grant Elastic temporary access to your AWS account via an IAM role — no long-lived credentials stored."
-                  />
-                </p>
-              </EuiText>
-            </>
-          }
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiCheckableCard
-          id="awsAuthType-static_keys"
-          data-test-subj={AWS_AUTH_TYPE_STATIC_KEYS_CARD_TEST_SUBJ}
-          checked={selectedAuthType === 'static_keys'}
-          onChange={() => onChange('static_keys')}
-          label={
-            <>
-              <strong>
-                <FormattedMessage
-                  id="xpack.fleet.awsConnectSetup.authType.staticKeysLabel"
-                  defaultMessage="Static AWS Keys"
-                />
-              </strong>
-              <EuiText size="s">
-                <p>
-                  <FormattedMessage
-                    id="xpack.fleet.awsConnectSetup.authType.staticKeysDescription"
-                    defaultMessage="Use an IAM user access key and secret. Suitable when Identity Federation is not available in your environment."
-                  />
-                </p>
-              </EuiText>
-            </>
-          }
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    />
   );
 };

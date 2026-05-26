@@ -7,27 +7,30 @@
 
 import React, { useEffect, useState } from 'react';
 import {
+  EuiAccordion,
+  EuiButton,
   EuiFieldPassword,
   EuiFieldText,
   EuiFormRow,
+  EuiLink,
   EuiSpacer,
-  EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+
+import { CloudFormationCloudCredentialsGuide } from '../aws_cloud_connector/aws_cloud_formation_guide';
 
 export const AWS_STATIC_KEYS_FORM_TEST_SUBJ = 'awsStaticKeysForm';
 
 export interface AwsStaticKeyCredentials {
   access_key_id: string;
   secret_access_key: string;
-  session_token: string;
 }
 
 export interface AwsStaticKeysFormProps {
   hasInvalidRequiredVars?: boolean;
   initialValues?: Partial<AwsStaticKeyCredentials>;
+  iacTemplateUrl?: string;
   onReadyChange?: (isReady: boolean) => void;
   onFieldsChange?: (fields: AwsStaticKeyCredentials) => void;
 }
@@ -35,13 +38,13 @@ export interface AwsStaticKeysFormProps {
 export const AwsStaticKeysForm: React.FC<AwsStaticKeysFormProps> = ({
   hasInvalidRequiredVars = false,
   initialValues,
+  iacTemplateUrl,
   onReadyChange,
   onFieldsChange,
 }) => {
   const [fields, setFields] = useState<AwsStaticKeyCredentials>({
     access_key_id: initialValues?.access_key_id ?? '',
     secret_access_key: initialValues?.secret_access_key ?? '',
-    session_token: initialValues?.session_token ?? '',
   });
 
   useEffect(() => {
@@ -59,22 +62,34 @@ export const AwsStaticKeysForm: React.FC<AwsStaticKeysFormProps> = ({
 
   return (
     <div data-test-subj={AWS_STATIC_KEYS_FORM_TEST_SUBJ}>
-      <EuiTitle size="xs">
-        <h4>
-          <FormattedMessage
-            id="xpack.fleet.awsStaticKeysForm.credentialsTitle"
-            defaultMessage="AWS credentials"
-          />
-        </h4>
-      </EuiTitle>
-      <EuiText size="s" color="subdued">
-        <p>
-          <FormattedMessage
-            id="xpack.fleet.awsStaticKeysForm.credentialsDescription"
-            defaultMessage="Enter the access key ID and secret access key for an IAM user with the required permissions."
-          />
-        </p>
-      </EuiText>
+      <EuiAccordion
+        id="awsStaticKeysGuide"
+        buttonContent={
+          <EuiLink>
+            <FormattedMessage
+              id="xpack.fleet.awsStaticKeysForm.stepsToCreateKeys"
+              defaultMessage="Steps to Generate AWS Account Credentials"
+            />
+          </EuiLink>
+        }
+        paddingSize="l"
+      >
+        <CloudFormationCloudCredentialsGuide credentialType="direct_access_keys" />
+      </EuiAccordion>
+      <EuiSpacer size="l" />
+      <EuiButton
+        target="_blank"
+        iconSide="left"
+        iconType="rocket"
+        href={iacTemplateUrl}
+        isDisabled={!iacTemplateUrl}
+        data-test-subj={`${AWS_STATIC_KEYS_FORM_TEST_SUBJ}-launchCloudFormation`}
+      >
+        <FormattedMessage
+          id="xpack.fleet.awsStaticKeysForm.launchCloudFormation"
+          defaultMessage="Launch CloudFormation"
+        />
+      </EuiButton>
       <EuiSpacer size="m" />
 
       <EuiFormRow
@@ -122,33 +137,6 @@ export const AwsStaticKeysForm: React.FC<AwsStaticKeysFormProps> = ({
           isInvalid={secretAccessKeyInvalid}
           onChange={(e) => handleChange('secret_access_key', e.target.value)}
           data-test-subj={`${AWS_STATIC_KEYS_FORM_TEST_SUBJ}-secretAccessKey`}
-        />
-      </EuiFormRow>
-
-      <EuiSpacer size="m" />
-
-      <EuiFormRow
-        label={i18n.translate('xpack.fleet.awsStaticKeysForm.sessionTokenLabel', {
-          defaultMessage: 'Session token',
-        })}
-        labelAppend={
-          <EuiText size="xs" color="subdued">
-            <FormattedMessage
-              id="xpack.fleet.awsStaticKeysForm.optional"
-              defaultMessage="Optional"
-            />
-          </EuiText>
-        }
-        helpText={i18n.translate('xpack.fleet.awsStaticKeysForm.sessionTokenHelp', {
-          defaultMessage: 'Required only when using temporary credentials from AWS STS.',
-        })}
-        fullWidth
-      >
-        <EuiFieldPassword
-          fullWidth
-          value={fields.session_token}
-          onChange={(e) => handleChange('session_token', e.target.value)}
-          data-test-subj={`${AWS_STATIC_KEYS_FORM_TEST_SUBJ}-sessionToken`}
         />
       </EuiFormRow>
     </div>
