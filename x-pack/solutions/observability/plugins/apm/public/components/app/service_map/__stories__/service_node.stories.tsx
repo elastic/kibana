@@ -11,7 +11,6 @@ import { ReactFlowProvider } from '@xyflow/react';
 import { useEuiTheme } from '@elastic/eui';
 import type { ElasticAgentName, OpenTelemetryAgentName } from '@kbn/apm-types';
 import { ServiceNode } from '../../../shared/service_map/service_node';
-import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
 import type { ServiceNodeData } from '../../../../../common/service_map';
 import { ServiceMapSearchProvider } from '../../../shared/service_map/service_map_search_context';
 import { ServiceMapAlertsNavigateProvider } from '../../../shared/service_map/service_map_alerts_navigate_context';
@@ -31,22 +30,21 @@ const meta: Meta<typeof ServiceNode> = {
   component: ServiceNode,
   decorators: [
     (Story) => (
-      <MockApmPluginStorybook routePath="/service-map?rangeFrom=now-15m&rangeTo=now">
-        <ReactFlowProvider>
-          <ServiceMapSearchProvider>
-            <ServiceMapAlertsNavigateProvider
-              makeAlertsNavigateHandler={noopMakeAlertsNavigateHandler}
-            >
-              <div style={{ padding: 40, display: 'flex', justifyContent: 'center' }}>
-                <Story />
-              </div>
-            </ServiceMapAlertsNavigateProvider>
-          </ServiceMapSearchProvider>
-        </ReactFlowProvider>
-      </MockApmPluginStorybook>
+      <ReactFlowProvider>
+        <ServiceMapSearchProvider>
+          <ServiceMapAlertsNavigateProvider
+            makeAlertsNavigateHandler={noopMakeAlertsNavigateHandler}
+          >
+            <div style={{ padding: 40, display: 'flex', justifyContent: 'center' }}>
+              <Story />
+            </div>
+          </ServiceMapAlertsNavigateProvider>
+        </ServiceMapSearchProvider>
+      </ReactFlowProvider>
     ),
   ],
   parameters: {
+    routePath: '/service-map?rangeFrom=now-15m&rangeTo=now',
     layout: 'centered',
     a11y: {
       config: {
