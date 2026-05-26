@@ -85,7 +85,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       viewMode,
       dashboardContainerRef,
       indicateRelatedPanelsId,
-      relatedPanels,
+      blurredPanelIds,
     ] = useBatchedPublishingSubjects(
       dashboardApi.hideBorder$,
       dashboardApi.highlightPanelId$,
@@ -96,7 +96,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       dashboardApi.viewMode$,
       dashboardInternalApi.dashboardContainerRef$,
       dashboardApi.indicateRelatedPanelsId$,
-      useRenderedPanelRelatedPanels$(dashboardApi, id)
+      dashboardApi.blurredPanelIds$
     );
 
     const expandPanel = expandedPanelId !== undefined && expandedPanelId === id;
@@ -105,30 +105,11 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
     const isIndicatingRelatedPanels =
       indicateRelatedPanelsId !== undefined && indicateRelatedPanelsId === id;
 
-    // Focus the panel if it is the focused panel, or if it is being indicated as a related panel
-    const indicatePanel =
-      viewMode === 'edit' &&
-      indicateRelatedPanelsId !== undefined &&
-      relatedPanels.includes(indicateRelatedPanelsId);
     const focusPanel =
-      isIndicatingRelatedPanels ||
-      indicatePanel ||
-      (focusedPanelId !== undefined && focusedPanelId === id);
+      isIndicatingRelatedPanels || (focusedPanelId !== undefined && focusedPanelId === id);
     const focusedForEdit = focusedPanelId !== undefined && focusedPanelId === id;
 
-    // To decide whether to blur the panel, a panel in focus takes precedence over something indicating related panels
-    const idToCompareForBlur =
-      focusedPanelId !== undefined && focusedPanelId !== id
-        ? focusedPanelId
-        : indicateRelatedPanelsId !== undefined && indicateRelatedPanelsId !== id
-        ? indicateRelatedPanelsId
-        : null;
-
-    const blurPanel =
-      !focusPanel &&
-      !indicatePanel &&
-      idToCompareForBlur &&
-      !relatedPanels.includes(idToCompareForBlur);
+    const blurPanel = blurredPanelIds.includes(id);
 
     const showBorder = useMargins && !hidePanelBorders; // we do not show panel borders when margins are disabled
     const classes = classNames('dshDashboardGrid__item', {

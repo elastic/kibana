@@ -8,18 +8,35 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { DashboardBackupService } from '../services/dashboard_backup_service';
 import { initializeTrackPanel } from './track_panel';
+import type { DashboardChildren } from './layout_manager/types';
+
+const buildChild = (
+  uuid: string,
+  relatedPanels?: string[]
+): DefaultEmbeddableApi & { relatedPanels$?: BehaviorSubject<string[]> } => {
+  return {
+    uuid,
+    type: 'testPanelType',
+    ...(relatedPanels ? { relatedPanels$: new BehaviorSubject<string[]>(relatedPanels) } : {}),
+  } as unknown as DefaultEmbeddableApi & { relatedPanels$?: BehaviorSubject<string[]> };
+};
 
 describe('track panel', () => {
-  const mockDashboardContainerRef = document.createElement('div');
-  const dashboardContainerRef$ = new BehaviorSubject<HTMLElement | null>(mockDashboardContainerRef);
-  mockDashboardContainerRef.getBoundingClientRect = jest.fn(() => ({ top: 96 } as DOMRect));
+  const mockChildrenSubject = new BehaviorSubject<DashboardChildren>({});
   const mockBackupService = {
     getIndicateRelatedPanelsId: jest.fn(() => undefined),
     setIndicateRelatedPanelsId: jest.fn(),
   } as unknown as DashboardBackupService;
   const savedObjectId$ = new BehaviorSubject<string | undefined>(undefined);
+  const { api, cleanup } = initializeTrackPanel(
+    async (id: string) => undefined,
+    mockChildrenSubject,
+    mockBackupService,
+    savedObjectId$
+  );
   const {
     expandPanel,
     expandedPanelId$,
@@ -36,12 +53,7 @@ describe('track panel', () => {
     setScrollToPanelId,
     scrollToTop,
     scrollToBottom,
-  } = initializeTrackPanel(
-    async (id: string) => undefined,
-    dashboardContainerRef$,
-    mockBackupService,
-    savedObjectId$
-  );
+  } = api;
 
   document.documentElement.scrollTop = 100;
   document.documentElement.scrollTo = jest.fn();
@@ -52,6 +64,7 @@ describe('track panel', () => {
   const scrollToSpy = jest.spyOn(document.documentElement, 'scrollTo');
 
   afterAll(() => {
+    cleanup();
     jest.restoreAllMocks();
   });
 
@@ -206,6 +219,136 @@ describe('track panel', () => {
         undefined,
         undefined
       );
+    });
+  });
+
+  describe('blurredPanelIds$', () => {
+    // Use an isolated initializeTrackPanel for these tests so we can drive children$ + selection
+    // without other state leaking in from prior cases.
+    const setupBlurTest = () => {
+      const children$ = new BehaviorSubject<DashboardChildren>({});
+      const backupService = {
+        getIndicateRelatedPanelsId: jest.fn(() => undefined),
+        setIndicateRelatedPanelsId: jest.fn(),
+      } as unknown as DashboardBackupService;
+      const savedObjectIdSubject$ = new BehaviorSubject<string | undefined>(undefined);
+      const { api: blurApi, cleanup: blurCleanup } = initializeTrackPanel(
+        async () => undefined,
+        children$,
+        backupService,
+        savedObjectIdSubject$
+      );
+      return { children$, blurApi, blurCleanup };
+    };
+
+    it('starts with no blurred panels', () => {
+      const { blurApi, blurCleanup } = setupBlurTest();
+      expect(blurApi.blurredPanelIds$.value).toEqual([]);
+      blurCleanup();
+    });
+
+    it('blurs all unrelated siblings when the focused panel publishes relatedPanels$', () => {
+      const { children$, blurApi, blurCleanup } = setupBlurTest();
+      children$.next({
+        snake: buildChild('snake', ['lizard']),
+        lizard: buildChild('lizard'),
+        sparrow: buildChild('sparrow'),
+        salamander: buildChild('salamander'),
+      });
+
+      blurApi.setFocusedPanelId('snake');
+
+      // siblings minus focusedChildId minus relatedPanels = ['sparrow', 'salamander']
+      expect(blurApi.blurredPanelIds$.value.sort()).toEqual(['salamander', 'sparrow']);
+      blurCleanup();
+    });
+
+    it('clears blurred panels when focus is removed', () => {
+      const { children$, blurApi, blurCleanup } = setupBlurTest();
+      children$.next({
+        snake: buildChild('snake', ['lizard']),
+        lizard: buildChild('lizard'),
+        sparrow: buildChild('sparrow'),
+      });
+
+      blurApi.setFocusedPanelId('snake');
+      expect(blurApi.blurredPanelIds$.value).toEqual(['sparrow']);
+
+      blurApi.setFocusedPanelId(undefined);
+      expect(blurApi.blurredPanelIds$.value).toEqual([]);
+      blurCleanup();
+    });
+
+    it('falls back to indicateRelatedPanelsId when no panel is focused', () => {
+      const { children$, blurApi, blurCleanup } = setupBlurTest();
+      children$.next({
+        otter: buildChild('otter', ['beaver']),
+        beaver: buildChild('beaver'),
+        crow: buildChild('crow'),
+      });
+
+      blurApi.setIndicateRelatedPanelsId('otter');
+      expect(blurApi.blurredPanelIds$.value).toEqual(['crow']);
+
+      blurApi.setIndicateRelatedPanelsId(undefined);
+      expect(blurApi.blurredPanelIds$.value).toEqual([]);
+      blurCleanup();
+    });
+
+    it('prefers focusedPanelId over indicateRelatedPanelsId when both are set', () => {
+      const { children$, blurApi, blurCleanup } = setupBlurTest();
+      children$.next({
+        fox: buildChild('fox', ['hare']),
+        hare: buildChild('hare'),
+        owl: buildChild('owl', ['mouse']),
+        mouse: buildChild('mouse'),
+      });
+
+      blurApi.setIndicateRelatedPanelsId('owl');
+      expect(blurApi.blurredPanelIds$.value.sort()).toEqual(['fox', 'hare']);
+
+      blurApi.setFocusedPanelId('fox');
+      // now relatedPanels$ of 'fox' is the source of truth: ['hare']
+      // siblings minus focused minus related = ['owl', 'mouse']
+      expect(blurApi.blurredPanelIds$.value.sort()).toEqual(['mouse', 'owl']);
+      blurCleanup();
+    });
+
+    it("derives related panels from siblings when the selected panel doesn't publish relatedPanels$", () => {
+      const { children$, blurApi, blurCleanup } = setupBlurTest();
+      // 'badger' doesn't publish relatedPanels$, but 'mole' and 'hedgehog' both list 'badger' as related.
+      children$.next({
+        badger: buildChild('badger'),
+        mole: buildChild('mole', ['badger']),
+        hedgehog: buildChild('hedgehog', ['badger']),
+        squirrel: buildChild('squirrel', ['acorn']),
+      });
+
+      blurApi.setFocusedPanelId('badger');
+      // siblings minus focused minus derivedRelated(['mole','hedgehog']) = ['squirrel']
+      expect(blurApi.blurredPanelIds$.value).toEqual(['squirrel']);
+      blurCleanup();
+    });
+
+    it("reacts to relatedPanels$ updates on the focused panel's API", () => {
+      const { children$, blurApi, blurCleanup } = setupBlurTest();
+      const wolfRelated$ = new BehaviorSubject<string[]>(['raven']);
+      children$.next({
+        wolf: {
+          uuid: 'wolf',
+          type: 'testPanelType',
+          relatedPanels$: wolfRelated$,
+        } as unknown as DefaultEmbeddableApi,
+        raven: buildChild('raven'),
+        moose: buildChild('moose'),
+      });
+
+      blurApi.setFocusedPanelId('wolf');
+      expect(blurApi.blurredPanelIds$.value).toEqual(['moose']);
+
+      wolfRelated$.next(['moose']);
+      expect(blurApi.blurredPanelIds$.value).toEqual(['raven']);
+      blurCleanup();
     });
   });
 });

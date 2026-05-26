@@ -19,6 +19,7 @@ import {
   useBatchedPublishingSubjects,
   apiPublishesSettings,
   initializeUnsavedChanges,
+  initializeRelatedPanels,
 } from '@kbn/presentation-publishing';
 
 import { DEFAULT_TIME_SLIDER_STATE, TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
@@ -254,8 +255,11 @@ export const getTimesliderControlFactory = (): EmbeddablePublicDefinition<
         },
       });
 
+      const relatedPanelsApi = initializeRelatedPanels({ uuid, parentApi, isFilterControl: true });
+
       const api = finalizeApi({
         ...unsavedChangesApi,
+        ...relatedPanelsApi,
         isPinnable: false, // Disable the user-facing unpin action; panel can still be pinned programatically when it's created
         label$: new BehaviorSubject<string>(displayName),
         appliedTimeslice$: timeslice$,

@@ -15,6 +15,7 @@ import {
   apiHasSections,
   apiPublishesViewMode,
   fetch$,
+  initializeRelatedPanels,
   initializeUnsavedChanges,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
@@ -105,9 +106,12 @@ export const getRangesliderControlFactory = (): EmbeddablePublicDefinition<
         },
       });
 
+      const relatedPanelsApi = initializeRelatedPanels({ uuid, parentApi, isFilterControl: true });
+
       const api = finalizeApi({
         ...unsavedChangesApi,
         ...dataControlManager.api,
+        ...relatedPanelsApi,
         dataLoading$,
         serializeState,
         clearSelections: () => {

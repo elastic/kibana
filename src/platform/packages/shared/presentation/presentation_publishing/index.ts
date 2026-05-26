@@ -210,7 +210,8 @@ export {
   apiCanIndicateRelatedSiblings,
   type CanIndicateRelatedChildren,
   type CanIndicateRelatedSiblings,
-} from './interfaces/containers/can_indicate_related_panels';
+} from './interfaces/containers/related_panels/can_indicate_related_panels';
+export { initializeRelatedPanels } from './interfaces/containers/related_panels/initialize_related_panels';
 
 export {
   apiHasSerializedChildState,

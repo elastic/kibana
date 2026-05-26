@@ -8,7 +8,7 @@
  */
 
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
-import { BehaviorSubject, merge, Subject } from 'rxjs';
+import { BehaviorSubject, concatMap, merge, Observable, of, Subject } from 'rxjs';
 import { v4 } from 'uuid';
 import type { EuiFlyoutProps } from '@elastic/eui';
 import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
@@ -43,6 +43,7 @@ import { initializeViewModeManager } from './view_mode_manager';
 import type { DashboardReadResponseBody } from '../../server';
 import { initializePauseFetchManager } from './pause_fetch_manager';
 import { getDashboardBackupService } from '../services/dashboard_api_services';
+import { DashboardChildren } from './layout_manager/types';
 
 export function getDashboardApi({
   creationOptions,
@@ -82,11 +83,15 @@ export function getDashboardApi({
     createdBy: readResult?.meta?.created_by,
     user,
   });
+
+  const childrenSubject$: BehaviorSubject<Observable<DashboardChildren>> = new BehaviorSubject(
+    of({})
+  );
   const trackPanel = initializeTrackPanel(
     async (id: string) => {
       await layoutManager.api.getChildApi(id);
     },
-    dashboardContainerRef$,
+    childrenSubject$.pipe(concatMap((children) => children)),
     getDashboardBackupService(),
     savedObjectId$
   );
@@ -96,8 +101,9 @@ export function getDashboardApi({
     incomingEmbeddables,
     initialState.panels,
     initialState.pinned_panels,
-    trackPanel
+    trackPanel.api
   );
+  childrenSubject$.next(layoutManager.api.children$);
 
   const dataLoadingManager = initializeDataLoadingManager(layoutManager.api.children$);
   const dataViewsManager = initializeDataViewsManager(layoutManager.api.children$);
@@ -174,7 +180,7 @@ export function getDashboardApi({
     } satisfies DashboardState;
   }
 
-  const trackOverlayApi = initializeTrackOverlay(trackPanel.setFocusedPanelId);
+  const trackOverlayApi = initializeTrackOverlay(trackPanel.api.setFocusedPanelId);
 
   const pauseFetchManager = initializePauseFetchManager(filtersManager);
 
@@ -185,7 +191,7 @@ export function getDashboardApi({
     ...layoutManager.api,
     ...settingsManager.api,
     ...filtersManager.api,
-    ...trackPanel,
+    ...trackPanel.api,
     ...unifiedSearchManager.api,
     ...unsavedChangesManager.api,
     ...projectRoutingManager?.api,
@@ -338,6 +344,7 @@ export function getDashboardApi({
       timesliceManager.cleanup();
       projectRoutingManager?.cleanup();
       pauseFetchManager.cleanup();
+      trackPanel.cleanup();
     },
   };
 }

@@ -30,9 +30,7 @@ export interface DefaultEmbeddableApi<SerializedState extends object = object>
   extends DefaultPresentationPanelApi,
     HasType,
     PublishesPhaseEvents,
-    HasSerializableState<SerializedState> {
-  relatedPanels$?: PublishesRelatedPanels['relatedPanels$'];
-}
+    HasSerializableState<SerializedState> {}
 
 /**
  * Defines the subset of the default embeddable API that the `finalizeApi` method uses, which allows implementors

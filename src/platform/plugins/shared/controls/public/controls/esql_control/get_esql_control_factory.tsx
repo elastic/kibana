@@ -21,6 +21,7 @@ import {
 } from '@kbn/esql-types';
 import {
   apiHasPinnedPanels,
+  initializeRelatedPanels,
   initializeUnsavedChanges,
   type StateComparators,
 } from '@kbn/presentation-publishing';
@@ -102,10 +103,19 @@ export const getESQLControlFactory = <
         },
       });
 
+      const relatedPanelsApi = initializeRelatedPanels({
+        uuid,
+        parentApi,
+        isESQLControl: true,
+        esqlQuery$: selections.api.query$,
+        esqlVariable$: selections.api.esqlVariable$,
+      });
+
       const api = finalizeApi({
         ...unsavedChangesApi,
         ...selections.api,
         ...labelManager.api,
+        ...relatedPanelsApi,
         dataLoading$,
         isExpandable: false,
         isCustomizable: false,

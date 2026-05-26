@@ -21,6 +21,7 @@ import type {
   PublishingSubject,
   PublishesESQLQuery,
   CanIndicateRelatedSiblings,
+  PublishesRelatedPanels,
 } from '@kbn/presentation-publishing';
 import type { SettersOf, SubjectsOf } from '@kbn/presentation-publishing/state_manager/types';
 import type { PublishesTooltipLabel } from '@kbn/controls-schemas/src/types';
@@ -34,6 +35,7 @@ export type ESQLControlApi<State> = DefaultEmbeddableApi<
   PublishesESQLVariable &
   PublishesESQLQuery &
   PublishesUnsavedChanges &
+  PublishesRelatedPanels &
   HasEditCapabilities &
   PublishesDataLoading &
   PublishesTooltipLabel &

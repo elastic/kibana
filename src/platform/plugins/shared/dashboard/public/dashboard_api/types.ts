@@ -199,6 +199,7 @@ export type DashboardApi = CanExpandPanels &
     hasUnsavedChanges$: PublishingSubject<boolean>;
     highlightPanel: (panelRef: HTMLDivElement) => void;
     highlightPanelId$: PublishingSubject<string | undefined>;
+    blurredPanelIds$: PublishingSubject<string[]>;
     isEmbeddedExternally: boolean;
     isEditableByUser: boolean;
     isManaged: boolean;

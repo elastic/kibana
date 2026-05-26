@@ -35,7 +35,7 @@ jest.mock('uuid', () => ({
 const trackPanelMock = {
   setScrollToPanelId: jest.fn(),
   setHighlightPanelId: jest.fn(),
-} as unknown as ReturnType<typeof initializeTrackPanel>;
+} as unknown as ReturnType<typeof initializeTrackPanel>['api'];
 
 const viewModeManagerMock = { api: { viewMode$: new BehaviorSubject('view') } } as ReturnType<
   typeof initializeViewModeManager
@@ -83,7 +83,6 @@ describe('layout manager', () => {
     type: 'testPanelType',
     uuid: PANEL_ONE_ID,
     phase$: {} as unknown as PublishingSubject<PhaseEvent | undefined>,
-    relatedPanels$: new BehaviorSubject<string[]>([]),
     ...titleManager.api,
     anyStateChange$: of(),
     serializeState: () => titleManager.getLatestState(),

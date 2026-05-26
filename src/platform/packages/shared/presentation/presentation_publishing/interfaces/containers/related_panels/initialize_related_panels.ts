@@ -22,18 +22,37 @@ import {
   type Observable,
 } from 'rxjs';
 
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import { apiPublishesESQLVariable } from '@kbn/esql-types';
 import { getESQLQueryVariables } from '@kbn/esql-utils';
+import type { AggregateQuery } from '@kbn/es-query';
+import { apiHasSections, apiPublishesChildren } from '../presentation_container';
 import {
   apiAppliesFilters,
   apiAppliesTimeslice,
-  apiHasSections,
   apiHasUseGlobalFiltersSetting,
-  apiPublishesChildren,
-  apiPublishesESQLQuery,
-  apiPublishesViewMode,
-  type ViewMode,
-} from '@kbn/presentation-publishing';
+} from '../../fetch/applies_filters';
+import { apiPublishesESQLQuery } from '../../publishes_esql_query';
+import type { ViewMode } from '../../publishes_view_mode';
+import { apiPublishesViewMode } from '../../publishes_view_mode';
+import type { PublishingSubject } from '../../../publishing_subject';
+
+interface BaseProps {
+  uuid: string;
+  parentApi: unknown;
+  isFilterControl?: boolean;
+  esqlQuery$?: PublishingSubject<AggregateQuery>;
+}
+
+type ESQLControlProps = BaseProps & {
+  isESQLControl: true;
+  esqlVariable$: PublishingSubject<ESQLControlVariable>;
+};
+
+type NonESQLControlProps = BaseProps & {
+  isESQLControl?: never;
+  esqlVariable$?: never;
+};
 
 /**
  * Initializes `relatedPanels$` for an embeddable based on its role in the dashboard
@@ -42,12 +61,11 @@ import {
 export const initializeRelatedPanels = ({
   uuid,
   parentApi,
-  api,
-}: {
-  uuid: string;
-  parentApi: unknown;
-  api: unknown;
-}): { relatedPanels$: BehaviorSubject<string[]> } => {
+  isFilterControl,
+  isESQLControl,
+  esqlQuery$,
+  esqlVariable$,
+}: ESQLControlProps | NonESQLControlProps): { relatedPanels$: BehaviorSubject<string[]> } => {
   const relatedPanels$ = new BehaviorSubject<string[]>([]);
 
   if (!apiPublishesChildren(parentApi)) {
@@ -60,11 +78,8 @@ export const initializeRelatedPanels = ({
     ? parentApi.viewMode$
     : of('view' as ViewMode);
 
-  const isFilterControl = apiAppliesFilters(api) || apiAppliesTimeslice(api);
-  const isESQLControl = apiPublishesESQLVariable(api);
-  const query$: Observable<string | undefined> = apiPublishesESQLQuery(api)
-    ? api.query$.pipe(map((query) => query?.esql))
-    : of(undefined);
+  const query$: Observable<string | undefined> =
+    esqlQuery$?.pipe(map((query) => query?.esql)) ?? of(undefined);
 
   const teardown$ = childrenApi.children$.pipe(
     pairwise(),
@@ -120,6 +135,7 @@ export const initializeRelatedPanels = ({
                   const isSiblingESQLControl = apiPublishesESQLVariable(sibling);
                   const compatibleScope =
                     section === siblingSection ||
+                    (section === undefined && (isESQLControl || isFilterControl)) ||
                     (siblingSection === undefined &&
                       (isSiblingFilterControl || isSiblingESQLControl));
                   if (!compatibleScope) continue;
@@ -127,7 +143,7 @@ export const initializeRelatedPanels = ({
                   if (isESQLControl) {
                     const siblingUsesESQLVariable =
                       siblingESQL &&
-                      getESQLQueryVariables(siblingESQL).includes(api.esqlVariable$.value.key);
+                      getESQLQueryVariables(siblingESQL).includes(esqlVariable$.value.key);
 
                     if (siblingUsesESQLVariable) {
                       // If a sibling uses this control's ES|QL variable, it's related
