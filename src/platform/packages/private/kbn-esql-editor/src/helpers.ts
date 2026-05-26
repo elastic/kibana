@@ -117,64 +117,73 @@ export const parseWarning = (warning: string): MonacoMessage[] => {
 };
 
 export const parseErrors = (errors: Error[], code: string): MonacoMessage[] => {
-  return errors.map((error) => {
+  return errors.flatMap((error): MonacoMessage[] => {
+    const errorMessage = typeof error.message === 'string' ? error.message : String(error.message);
     try {
       if (
         // Found while testing random commands (as inlinestats)
-        !error.message.includes('esql_illegal_argument_exception') &&
-        error.message.includes('line')
+        !errorMessage.includes('esql_illegal_argument_exception') &&
+        errorMessage.includes('line')
       ) {
-        const text = error.message.split('line')[1];
-        const [lineNumber, startPosition, errorMessage] = text.split(':');
+        const text = errorMessage.split('line')[1];
+        const [lineNumber, startPosition, lineErrorMessage] = text.split(':');
         // initialize the length to 10 in case no error word found
         let errorLength = 10;
-        const [_, wordWithError] = errorMessage.split('[');
+        const [_, wordWithError] = lineErrorMessage.split('[');
         if (wordWithError) {
           errorLength = wordWithError.length - 1;
         }
-        return {
-          message: errorMessage,
-          startColumn: Number(startPosition),
-          startLineNumber: Number(lineNumber),
-          endColumn: Number(startPosition) + errorLength + 1,
-          endLineNumber: Number(lineNumber),
-          severity: monaco.MarkerSeverity.Error,
-          code: 'errorFromES',
-        };
-      } else if (error.message.includes('expression was aborted')) {
-        return {
-          message: i18n.translate('esqlEditor.query.aborted', {
-            defaultMessage: 'Request was aborted',
-          }),
-          startColumn: 1,
-          startLineNumber: 1,
-          endColumn: 10,
-          endLineNumber: 1,
-          severity: monaco.MarkerSeverity.Warning,
-          code: 'abortedRequest',
-        };
+        return [
+          {
+            message: lineErrorMessage,
+            startColumn: Number(startPosition),
+            startLineNumber: Number(lineNumber),
+            endColumn: Number(startPosition) + errorLength + 1,
+            endLineNumber: Number(lineNumber),
+            severity: monaco.MarkerSeverity.Error,
+            code: 'errorFromES',
+          },
+        ];
+      } else if (errorMessage.includes('expression was aborted')) {
+        return [
+          {
+            message: i18n.translate('esqlEditor.query.aborted', {
+              defaultMessage: 'Request was aborted',
+            }),
+            startColumn: 1,
+            startLineNumber: 1,
+            endColumn: 10,
+            endLineNumber: 1,
+            severity: monaco.MarkerSeverity.Warning,
+            code: 'abortedRequest',
+          },
+        ];
       } else {
         // unknown error message
-        return {
-          message: error.message,
+        return [
+          {
+            message: errorMessage,
+            startColumn: 1,
+            startLineNumber: 1,
+            endColumn: 10,
+            endLineNumber: 1,
+            severity: monaco.MarkerSeverity.Error,
+            code: 'unknownError',
+          },
+        ];
+      }
+    } catch (e) {
+      return [
+        {
+          message: errorMessage,
           startColumn: 1,
           startLineNumber: 1,
           endColumn: 10,
           endLineNumber: 1,
           severity: monaco.MarkerSeverity.Error,
           code: 'unknownError',
-        };
-      }
-    } catch (e) {
-      return {
-        message: error.message,
-        startColumn: 1,
-        startLineNumber: 1,
-        endColumn: 10,
-        endLineNumber: 1,
-        severity: monaco.MarkerSeverity.Error,
-        code: 'unknownError',
-      };
+        },
+      ];
     }
   });
 };
