@@ -36,11 +36,11 @@ export interface Attachment<
   versionCount?: number;
   /**
    * Stable identifier for the logical group this attachment belongs to.
-   * Attachments sharing the same group_id were submitted together as a single
+   * Attachments sharing the same groupId were submitted together as a single
    * logical entity (e.g. multiple alert batches from one bulk-add action).
    * Undefined for standalone attachments.
    */
-  group_id?: string;
+  groupId?: string;
 }
 
 /**

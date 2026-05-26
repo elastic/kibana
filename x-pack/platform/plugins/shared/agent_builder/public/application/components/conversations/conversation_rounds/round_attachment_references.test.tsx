@@ -43,12 +43,12 @@ const makeRef = (
   operation,
 });
 
-const makeFallback = (id: string, description?: string, group_id?: string): Attachment => ({
+const makeFallback = (id: string, description?: string, groupId?: string): Attachment => ({
   id,
   type: 'text',
   data: {},
   ...(description !== undefined ? { description } : {}),
-  ...(group_id !== undefined ? { group_id } : {}),
+  ...(groupId !== undefined ? { groupId } : {}),
 });
 
 describe('RoundAttachmentReferences', () => {

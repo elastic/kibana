@@ -88,7 +88,7 @@ const buildFallbackVersionedAttachments = (attachments: Attachment[]): Versioned
     current_version: 1,
     active: true,
     hidden: attachment.hidden,
-    ...(attachment.group_id !== undefined ? { group_id: attachment.group_id } : {}),
+    ...(attachment.groupId !== undefined ? { group_id: attachment.groupId } : {}),
     ...(attachment.description !== undefined ? { description: attachment.description } : {}),
   }));
 };

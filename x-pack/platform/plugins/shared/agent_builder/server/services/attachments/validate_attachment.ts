@@ -48,7 +48,7 @@ export const validateAttachment = async <Type extends string, Data>({
         hidden: attachment.hidden,
         ...(attachment.origin !== undefined ? { origin: attachment.origin } : {}),
         ...(attachment.description !== undefined ? { description: attachment.description } : {}),
-        ...(attachment.group_id !== undefined ? { group_id: attachment.group_id } : {}),
+        ...(attachment.group_id !== undefined ? { groupId: attachment.group_id } : {}),
       },
     };
   } catch (e) {

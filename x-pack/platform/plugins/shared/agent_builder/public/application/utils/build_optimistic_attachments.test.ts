@@ -133,7 +133,7 @@ describe('buildOptimisticAttachments', () => {
 
     const result = buildOptimisticAttachments({ attachments, conversationAttachments: [] });
 
-    expect(result.fallbackAttachments[0].group_id).toBe('group-1');
+    expect(result.fallbackAttachments[0].groupId).toBe('group-1');
   });
 
   it('preserves description on fallback attachment', () => {
@@ -151,7 +151,7 @@ describe('buildOptimisticAttachments', () => {
 
     const result = buildOptimisticAttachments({ attachments, conversationAttachments: [] });
 
-    expect(result.fallbackAttachments[0]).not.toHaveProperty('group_id');
+    expect(result.fallbackAttachments[0]).not.toHaveProperty('groupId');
     expect(result.fallbackAttachments[0]).not.toHaveProperty('description');
   });
 });
