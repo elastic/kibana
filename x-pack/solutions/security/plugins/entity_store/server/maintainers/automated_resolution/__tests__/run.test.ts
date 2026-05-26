@@ -206,9 +206,7 @@ describe('Automated Resolution', () => {
         createDeps(state, mockEsClient, mockResolutionClient)
       );
 
-      expect(mockLinkEntities).toHaveBeenCalledWith('user-okta', ['user-entra'], {
-        refresh: false,
-      });
+      expect(mockLinkEntities).toHaveBeenCalledWith('user-okta', ['user-entra']);
       expect(result.lastRun?.resolutionsCreated).toBe(1);
     });
 
@@ -238,9 +236,7 @@ describe('Automated Resolution', () => {
         createDeps(state, mockEsClient, mockResolutionClient)
       );
 
-      expect(mockLinkEntities).toHaveBeenCalledWith('user-existing-target', ['user-new'], {
-        refresh: false,
-      });
+      expect(mockLinkEntities).toHaveBeenCalledWith('user-existing-target', ['user-new']);
       expect(result.lastRun?.resolutionsCreated).toBe(1);
     });
 

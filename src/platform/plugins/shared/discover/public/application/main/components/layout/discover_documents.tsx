@@ -40,7 +40,6 @@ import {
   getRowHeight,
 } from '@kbn/unified-data-table';
 import {
-  DOC_HIDE_TIME_COLUMN_SETTING,
   MAX_DOC_FIELDS_DISPLAYED,
   ROW_HEIGHT_OPTION,
   SHOW_MULTIFIELDS,
@@ -69,6 +68,7 @@ import {
 } from '../../../../utils/get_allowed_sample_size';
 import { useFetchMoreRecords } from './use_fetch_more_records';
 import { onResizeGridColumn } from '../../../../utils/on_resize_grid_column';
+import { showTimeFieldColumn } from '../../../../utils/show_time_field_column';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import type {
   CellRenderersExtensionParams,
@@ -329,8 +329,8 @@ function DiscoverDocumentsComponent({
 
   // should be aligned with embeddable `showTimeCol` prop
   const showTimeCol = useMemo(
-    () => !uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
-    [uiSettings]
+    () => showTimeFieldColumn({ uiSettings, query }),
+    [uiSettings, query]
   );
 
   const columnsMeta: DataTableColumnsMeta | undefined = useMemo(

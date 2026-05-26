@@ -142,7 +142,9 @@
     "@kbn/core-analytics-browser-mocks",
     "@kbn/core-http-server-mocks",
     "@kbn/reporting-public",
-    "@kbn/react-hooks",
+    "@kbn/logging",
+    "@kbn/logging-mocks",
+    "@kbn/react-hooks"
   ],
   "exclude": ["target/**/*"]
 }
