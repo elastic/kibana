@@ -112,8 +112,9 @@ export const performRuleInstallationHandler = async (
     }
 
     const changeTracking = {
-      action: SecurityRuleChangeTrackingAction.ruleInstall,
-      bulkCount: ruleInstallQueue.length,
+      metadata: {
+        bulkCount: ruleInstallQueue.length,
+      },
     };
 
     const BATCH_SIZE = 100;

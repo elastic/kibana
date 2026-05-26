@@ -74,7 +74,6 @@ export const legacyCreatePrepackagedRules = async (
   );
 
   const installChangeTracking = {
-    action: SecurityRuleChangeTrackingAction.ruleInstall,
     metadata: {
       bulkCount: rulesToInstall.length,
     },
