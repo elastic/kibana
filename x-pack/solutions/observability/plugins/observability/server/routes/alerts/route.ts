@@ -42,8 +42,8 @@ const alertsDynamicDashboardSuggestions = createObservabilityServerRoute({
 
     const dashboardParser = new RelatedDashboardsClient(
       logger,
-      (id: string) => client.read(context, id),
-      (page: number, perPage: number) => scanDashboards(context, page, perPage),
+      (id: string) => client.read(savedObjects.client, id),
+      (page: number, perPage: number) => scanDashboards(savedObjects.client, page, perPage),
       investigateAlertsClient,
       alertId,
       referencedPanelManager
