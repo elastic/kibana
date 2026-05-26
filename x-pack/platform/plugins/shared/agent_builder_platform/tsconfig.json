@@ -21,6 +21,7 @@
     "@kbn/inference-common",
     "@kbn/llm-tasks-plugin",
     "@kbn/i18n",
+    "@kbn/i18n-react",
     "@kbn/agent-builder-browser",
     "@kbn/cases-plugin",
     "@kbn/core-http-server",
