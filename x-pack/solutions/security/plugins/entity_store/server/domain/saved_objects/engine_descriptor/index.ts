@@ -12,7 +12,11 @@ import type {
 import { SavedObjectsErrorHelpers, type Logger } from '@kbn/core/server';
 import type { EntityType } from '../../../../common/domain/definitions/entity_schema';
 import type { EngineLogExtractionConfig, EngineDescriptor } from './constants';
-import { EngineLogExtractionState, extractEntityTaskFrequencyByType, VersionState } from './constants';
+import {
+  EngineLogExtractionState,
+  extractEntityTaskFrequencyByType,
+  VersionState,
+} from './constants';
 import { EngineDescriptorTypeName } from './types';
 import { ENGINE_STATUS } from '../../constants';
 
