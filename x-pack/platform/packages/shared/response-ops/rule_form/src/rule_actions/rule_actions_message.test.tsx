@@ -26,7 +26,6 @@ jest.mock('../hooks', () => ({
 
 const { useRuleFormState } = jest.requireMock('../hooks');
 
-
 const ruleType = {
   id: '.es-query',
   name: 'Test',
@@ -94,8 +93,6 @@ const mockedActionParamsFields = lazy(async () => ({
   },
 }));
 
-const matchingConnectorType = getActionType('1', { id: 'actionTypeModel-1' });
-
 describe('RuleActionsMessage', () => {
   beforeEach(() => {
     const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
@@ -113,7 +110,7 @@ describe('RuleActionsMessage', () => {
       selectedRuleType: ruleType,
       selectedRuleTypeModel: ruleModel,
       connectors: [getConnector('1')],
-      connectorTypes: [matchingConnectorType],
+      connectorTypes: [getActionType('1')],
       aadTemplateFields: [],
     });
   });
@@ -302,7 +299,7 @@ describe('RuleActionsMessage', () => {
       selectedRuleType: ruleType,
       selectedRuleTypeModel: ruleModel,
       connectors: [getConnector('1')],
-      connectorTypes: [matchingConnectorType],
+      connectorTypes: [getActionType('1')],
       aadTemplateFields: [],
     });
 
@@ -351,6 +348,4 @@ describe('RuleActionsMessage', () => {
       1
     );
   });
-
 });
-
