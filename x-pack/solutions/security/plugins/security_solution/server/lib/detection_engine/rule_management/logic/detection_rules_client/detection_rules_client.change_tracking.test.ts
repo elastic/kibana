@@ -258,7 +258,7 @@ describe('DetectionRulesClient change tracking', () => {
 
       expect(rulesClient.bulkDeleteRules).toHaveBeenCalledWith(
         expect.objectContaining({
-          changeTracking: expect.objectContaining({ bulkCount: 10 }),
+          changeTracking: expect.objectContaining({ metadata: { bulkCount: 10 } }),
         })
       );
     });
@@ -270,7 +270,7 @@ describe('DetectionRulesClient change tracking', () => {
 
       expect(rulesClient.bulkDeleteRules).toHaveBeenCalledWith(
         expect.objectContaining({
-          changeTracking: expect.objectContaining({ bulkCount: ruleIds.length }),
+          changeTracking: expect.objectContaining({ metadata: { bulkCount: ruleIds.length } }),
         })
       );
     });
@@ -294,7 +294,7 @@ describe('DetectionRulesClient change tracking', () => {
 
       expect(importRuleSpy).toHaveBeenCalledWith(
         expect.objectContaining({
-          changeTracking: expect.objectContaining({ bulkCount: 5 }),
+          changeTracking: expect.objectContaining({ metadata: { bulkCount: 5 } }),
         })
       );
     });
