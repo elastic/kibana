@@ -70,7 +70,7 @@ export const WorkflowsManagementFeatureConfig: KibanaFeatureConfig = {
                 'platform.plugins.shared.workflows_management.featureRegistry.updateManagedWorkflowsSubFeaturePrivilege',
                 { defaultMessage: 'Update managed workflows' }
               ),
-              includeIn: 'all',
+              includeIn: 'none',
               savedObject: { all: [], read: [] },
               api: [WorkflowsManagementApiActions.updateManagedWorkflows],
               ui: [],

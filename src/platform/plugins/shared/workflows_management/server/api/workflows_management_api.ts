@@ -20,7 +20,6 @@ import {
   getWorkflowJsonSchema,
   pickManagedWorkflowFields,
   transformWorkflowYamlJsontoEsWorkflow,
-  WorkflowsManagementApiActions,
 } from '@kbn/workflows';
 import type {
   BulkScheduleWorkflowResult,
@@ -58,7 +57,6 @@ import type { z } from '@kbn/zod/v4';
 import type { StepExecutionListResult } from './lib/search_step_executions';
 import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_error';
 import { ManagedWorkflowUpdateForbiddenError } from './managed_workflow_errors';
-import { WorkflowUpdateForbiddenError } from './workflow_update_forbidden_error';
 import type {
   SearchWorkflowExecutionsParams,
   WorkflowsService,
@@ -359,24 +357,18 @@ export class WorkflowsManagementApi {
     id: string,
     workflow: Partial<EsWorkflow>,
     spaceId: string,
-    request: KibanaRequest
+    request: KibanaRequest,
+    options?: { allowManagedWorkflowMutation?: boolean }
   ): Promise<UpdatedWorkflowResponseDto> {
     const originalWorkflow = await this.workflowsService.getWorkflow(id, spaceId);
     if (!originalWorkflow) {
       throw new WorkflowNotFoundError(id);
     }
-    const hasUpdatePrivilege = request.authzResult?.[WorkflowsManagementApiActions.update] === true;
-    const hasManagedWorkflowUpdatePrivilege =
-      request.authzResult?.[WorkflowsManagementApiActions.updateManagedWorkflows] === true;
-
-    if (!hasUpdatePrivilege) {
-      throw new WorkflowUpdateForbiddenError();
-    }
 
     if (
       originalWorkflow.managed === true &&
       !isEnablementOnlyUpdate(workflow) &&
-      !hasManagedWorkflowUpdatePrivilege
+      options?.allowManagedWorkflowMutation !== true
     ) {
       throw new ManagedWorkflowUpdateForbiddenError();
     }
