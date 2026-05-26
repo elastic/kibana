@@ -771,6 +771,8 @@ export interface WorkflowsSearchParams {
   createdBy?: string[];
   enabled?: boolean[];
   tags?: string[];
+  sortField?: 'name' | 'enabled';
+  sortDirection?: 'asc' | 'desc';
 }
 
 export interface RequestOptions {

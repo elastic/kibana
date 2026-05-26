@@ -127,7 +127,17 @@ export class WorkflowSearchService {
     spaceId: string,
     options?: { includeExecutionHistory?: boolean }
   ): Promise<WorkflowListDto> {
-    const { size = 100, page = 1, enabled, createdBy, tags, query, managedFilter } = params;
+    const {
+      size = 100,
+      page = 1,
+      enabled,
+      createdBy,
+      tags,
+      query,
+      managedFilter,
+      sortField,
+      sortDirection = 'asc',
+    } = params;
     const from = (page - 1) * size;
 
     const { must, must_not } = buildWorkflowFilters({
@@ -148,6 +158,14 @@ export class WorkflowSearchService {
       must.push(buildWorkflowTextSearchClause(query));
     }
 
+    const ES_SORT_FIELDS: Record<string, string> = {
+      name: 'name.keyword',
+      enabled: 'enabled',
+    };
+    const esSort = sortField
+      ? [{ [ES_SORT_FIELDS[sortField]]: { order: sortDirection } }]
+      : [{ updated_at: { order: 'desc' as const } }];
+
     const searchResponse = await this.deps.workflowStorage.getClient().search({
       size,
       from,
@@ -155,7 +173,7 @@ export class WorkflowSearchService {
       query: {
         bool: { must, must_not },
       },
-      sort: [{ updated_at: { order: 'desc' } }],
+      sort: esSort,
     });
 
     const workflows = searchResponse.hits.hits

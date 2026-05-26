@@ -73,6 +73,8 @@ export interface GetWorkflowsParams {
   query?: string;
   managedFilter?: 'all' | 'managed' | 'unmanaged';
   _full?: boolean;
+  sortField?: 'name' | 'enabled';
+  sortDirection?: 'asc' | 'desc';
 }
 
 export interface DeleteWorkflowsResponse {

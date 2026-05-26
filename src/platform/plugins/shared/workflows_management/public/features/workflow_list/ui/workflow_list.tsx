@@ -335,6 +335,11 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
         onPageChange={(pageIndex, pageSize) =>
           setSearch({ ...search, page: pageIndex + 1, size: pageSize })
         }
+        onSortChange={(field, direction) =>
+          setSearch({ ...search, sortField: field, sortDirection: direction, page: 1 })
+        }
+        sortField={search.sortField}
+        sortDirection={search.sortDirection}
         onToggleWorkflow={handleToggleWorkflow}
         onDeleteWorkflow={handleDeleteWorkflow}
         onCloneWorkflow={handleCloneWorkflow}

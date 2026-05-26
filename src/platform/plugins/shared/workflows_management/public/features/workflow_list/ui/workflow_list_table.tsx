@@ -55,6 +55,9 @@ export interface WorkflowListTableProps {
   canUpdateWorkflow: boolean;
   canDeleteWorkflow: boolean;
   canExecuteWorkflow: boolean;
+  sortField?: 'name' | 'enabled';
+  sortDirection?: 'asc' | 'desc';
+  onSortChange: (field: 'name' | 'enabled', direction: 'asc' | 'desc') => void;
 }
 
 export const WorkflowListTable = ({
@@ -77,6 +80,9 @@ export const WorkflowListTable = ({
   canUpdateWorkflow,
   canDeleteWorkflow,
   canExecuteWorkflow,
+  sortField,
+  sortDirection,
+  onSortChange,
 }: WorkflowListTableProps) => {
   const allowRowSelection = canUpdateWorkflow || canDeleteWorkflow || canReadWorkflow;
 
@@ -86,6 +92,7 @@ export const WorkflowListTable = ({
         field: 'name',
         name: i18n.translate('workflows.workflowList.column.name', { defaultMessage: 'Name' }),
         dataType: 'string',
+        sortable: true,
         render: (name: string, item) => (
           <div
             css={css`
@@ -226,6 +233,7 @@ export const WorkflowListTable = ({
         }),
         field: 'enabled',
         width: '70px',
+        sortable: true,
         render: (value: unknown, item: WorkflowListItemDto) => {
           return (
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
@@ -375,9 +383,25 @@ export const WorkflowListTable = ({
       itemId="id"
       responsiveBreakpoint="xs"
       tableLayout="fixed"
+      sorting={
+        sortField && sortDirection
+          ? { sort: { field: sortField, direction: sortDirection } }
+          : { sort: undefined }
+      }
       onChange={({
         page: { index: pageIndex, size: pageSize },
-      }: CriteriaWithPagination<WorkflowListItemDto>) => onPageChange(pageIndex, pageSize)}
+        sort,
+      }: CriteriaWithPagination<WorkflowListItemDto>) => {
+        const incomingField =
+          sort?.field === 'name' || sort?.field === 'enabled' ? sort.field : undefined;
+        const incomingDirection = sort?.direction ?? 'asc';
+        const sortChanged = incomingField !== sortField || incomingDirection !== sortDirection;
+        if (sortChanged && incomingField) {
+          onSortChange(incomingField, incomingDirection);
+        } else {
+          onPageChange(pageIndex, pageSize);
+        }
+      }}
       {...(allowRowSelection
         ? {
             selection: {
