@@ -263,7 +263,10 @@ export const useAgentBuilderRuleCreation = ({
   useEffect(() => {
     const subscription = aiRuleCreation.aiCreatedRule$.subscribe((rule) => {
       // eslint-disable-next-line no-console
-      console.log('[AI Rule Debug] aiCreatedRule$ subscription fired, rule=', rule ? 'defined' : 'null');
+      console.log(
+        '[AI Rule Debug] aiCreatedRule$ subscription fired, rule=',
+        rule ? 'defined' : 'null'
+      );
       if (rule) {
         updateFormFromChatRef.current(rule);
         aiRuleCreation.clearAiCreatedRule();
