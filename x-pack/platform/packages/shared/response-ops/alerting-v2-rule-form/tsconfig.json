@@ -35,14 +35,14 @@
     "@kbn/alerting-v2-constants",
     "@kbn/yaml-rule-editor",
     "@kbn/core-application-browser-mocks",
-    "@kbn/ambient-ui-types",
     "@kbn/react-hooks",
     "@kbn/field-types",
     "@kbn/lens-plugin",
     "@kbn/visualization-utils",
     "@kbn/expressions-plugin",
     "@kbn/code-editor",
-    "@kbn/esql-language"
+    "@kbn/esql-language",
+    "@kbn/core-http-browser"
   ]
 }
 
