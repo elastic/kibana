@@ -20,7 +20,7 @@ export const defineIndexThresholdRule = async (page: ScoutPage, name: string) =>
 
   await page.testSubj.click('selectIndexExpression');
   const indexCombo = page.testSubj.locator('thresholdIndexesComboBox');
-  await indexCombo.locator('input').fill('.k');
+  await indexCombo.locator('input').click();
   const firstIndexOption = page.locator('[role="listbox"] [role="option"]:nth-of-type(1)');
   await firstIndexOption.waitFor({ state: 'visible', timeout: 30000 });
   await firstIndexOption.click();
