@@ -22,25 +22,33 @@ export interface AppMenuProps {
   menu?: AppMenuConfig;
   hasExplicitShare?: boolean;
   docLink?: string;
+  showAddIntegrations?: boolean;
 }
 
-export const AppMenu = React.memo<AppMenuProps>(({ menu, hasExplicitShare, docLink }) => {
-  const { config, staticItems } = useAppHeaderMenu(menu, !!hasExplicitShare, docLink);
-  const hasLegacyActionMenu = useHasLegacyActionMenu();
-
-  if (config || staticItems?.length) {
-    return (
-      <Suspense>
-        <AppMenuComponent config={config} staticItems={staticItems} />
-      </Suspense>
+export const AppMenu = React.memo<AppMenuProps>(
+  ({ menu, hasExplicitShare, docLink, showAddIntegrations }) => {
+    const { config, staticItems } = useAppHeaderMenu(
+      menu,
+      !!hasExplicitShare,
+      docLink,
+      showAddIntegrations
     );
-  }
+    const hasLegacyActionMenu = useHasLegacyActionMenu();
 
-  if (hasLegacyActionMenu) {
-    return <LegacyHeaderActionMenu />;
-  }
+    if (config || staticItems?.length) {
+      return (
+        <Suspense>
+          <AppMenuComponent config={config} staticItems={staticItems} />
+        </Suspense>
+      );
+    }
 
-  return null;
-});
+    if (hasLegacyActionMenu) {
+      return <LegacyHeaderActionMenu />;
+    }
+
+    return null;
+  }
+);
 
 AppMenu.displayName = 'AppMenu';

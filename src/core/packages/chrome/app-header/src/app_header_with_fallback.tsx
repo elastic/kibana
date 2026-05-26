@@ -43,12 +43,21 @@ export const AppHeaderWithFallback: FC<AppHeaderWithFallbackProps> = ({
   sticky,
   padding,
   docLink,
+  showAddIntegrations,
 }) => {
   const chrome = useChromeService();
 
   if (!chrome.next.isEnabled) {
     if (fallback === null) return null;
     const { pageTitle: classicPageTitle, tabs: classicTabs, ...classicRest } = fallback ?? {};
+
+    // When pageTitle is explicitly null, skip the automatic title fallback.
+    // This enables "children mode" where EuiPageHeaderSection components
+    // can be passed as children for custom multi-section layouts.
+    if (classicPageTitle === null) {
+      return <EuiPageHeader {...classicRest} tabs={classicTabs ?? mapTabsForClassic(tabs)} />;
+    }
+
     return (
       <EuiPageHeader
         {...classicRest}
@@ -74,6 +83,7 @@ export const AppHeaderWithFallback: FC<AppHeaderWithFallbackProps> = ({
       sticky={sticky}
       padding={padding}
       docLink={docLink}
+      showAddIntegrations={showAddIntegrations}
     />
   );
 };

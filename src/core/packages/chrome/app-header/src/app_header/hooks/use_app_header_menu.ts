@@ -18,6 +18,18 @@ import { useChromeService } from '@kbn/core-chrome-browser-context';
 import { useObservable } from '@kbn/use-observable';
 import { i18n } from '@kbn/i18n';
 
+import { useBasePath } from './chrome';
+
+const createIntegrationsMenuItem = (href: string): AppMenuStaticItem => ({
+  label: i18n.translate('core.chrome.appHeader.addIntegrationsMenuItemLabel', {
+    defaultMessage: 'Add integrations',
+  }),
+  id: 'addIntegrations',
+  iconType: 'indexOpen',
+  order: 0,
+  href,
+});
+
 const createFeedbackMenuItem = (feedbackHandler: () => void): AppMenuStaticItem => ({
   label: i18n.translate('core.chrome.appHeader.feedbackMenuItemLabel', {
     defaultMessage: 'Feedback',
@@ -45,8 +57,15 @@ interface ResolvedAppMenu {
   shareItem: AppMenuItemType | undefined;
 }
 
-const useStaticItems = (explicitDocLink?: string) => {
+const useStaticItems = ({
+  docLink: explicitDocLink,
+  showAddIntegrations,
+}: {
+  docLink?: string;
+  showAddIntegrations?: boolean;
+}) => {
   const chrome = useChromeService();
+  const basePath = useBasePath();
   const feedbackHandler = useObservable(chrome.getFeedbackHandler$(), undefined);
   const documentationLink = useObservable(chrome.getAppDocumentationLink$(), undefined);
   const helpExtension = useObservable(chrome.getHelpExtension$(), undefined);
@@ -70,8 +89,19 @@ const useStaticItems = (explicitDocLink?: string) => {
       staticItems.push(createDocumentationMenuItem(docLink));
     }
 
+    if (showAddIntegrations) {
+      staticItems.push(createIntegrationsMenuItem(basePath.prepend('/app/integrations/browse')));
+    }
+
     return staticItems;
-  }, [feedbackHandler, explicitDocLink, documentationLink, helpExtension]);
+  }, [
+    feedbackHandler,
+    basePath,
+    explicitDocLink,
+    documentationLink,
+    helpExtension,
+    showAddIntegrations,
+  ]);
 };
 
 const useResolvedAppMenu = (
@@ -97,13 +127,14 @@ const useResolvedAppMenu = (
 export function useAppHeaderMenu(
   pageAppMenu: AppMenuConfig | undefined,
   hasExplicitShare: boolean,
-  docLink?: string
+  docLink?: string,
+  showAddIntegrations?: boolean
 ): {
   config: AppMenuConfig | undefined;
   staticItems: AppMenuStaticItem[];
 } {
   const { menu } = useResolvedAppMenu(pageAppMenu, hasExplicitShare);
-  const staticItems = useStaticItems(docLink);
+  const staticItems = useStaticItems({ docLink, showAddIntegrations });
 
   return {
     config: menu,
