@@ -32,7 +32,8 @@ jest.mock('react-router-dom', () => ({
 }));
 
 const mockGet = jest.fn();
-const mockGetDefaultDataView = jest.fn();
+const mockGetDefaultId = jest.fn();
+const mockGetIdsWithTitle = jest.fn();
 const mockGetDataViewAndSavedSearch = jest.fn();
 
 const buildKibanaMock = () => ({
@@ -40,7 +41,8 @@ const buildKibanaMock = () => ({
     data: {
       dataViews: {
         get: mockGet,
-        getDefaultDataView: mockGetDefaultDataView,
+        getDefaultId: mockGetDefaultId,
+        getIdsWithTitle: mockGetIdsWithTitle,
       },
     },
     savedSearch: mockGetDataViewAndSavedSearch,
@@ -59,14 +61,13 @@ describe('DataSourceContextProvider', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useMlKibana as jest.Mock).mockReturnValue(buildKibanaMock());
+    mockGetIdsWithTitle.mockResolvedValue([]);
   });
 
   it('uses default data view when no URL params are present', async () => {
     mockLocationSearch.mockReturnValue('');
-    mockGetDefaultDataView.mockResolvedValue({
-      id: 'default-dv',
-      title: 'Default Data View',
-    });
+    mockGetDefaultId.mockResolvedValue('default-dv');
+    mockGet.mockResolvedValue({ id: 'default-dv', title: 'Default Data View' });
 
     renderProvider();
 
@@ -74,16 +75,14 @@ describe('DataSourceContextProvider', () => {
       expect(screen.getByTestId('child-content')).toBeInTheDocument();
     });
 
-    expect(mockGetDefaultDataView).toHaveBeenCalled();
+    expect(mockGetDefaultId).toHaveBeenCalled();
+    expect(mockGet).toHaveBeenCalledWith('default-dv');
   });
 
-  it('uses managed default data view directly without falling back to list', async () => {
+  it('uses default data view when it has an id returned by getDefaultId', async () => {
     mockLocationSearch.mockReturnValue('');
-    mockGetDefaultDataView.mockResolvedValue({
-      id: 'logs-star',
-      title: 'logs-*',
-      managed: true,
-    });
+    mockGetDefaultId.mockResolvedValue('logs-star');
+    mockGet.mockResolvedValue({ id: 'logs-star', title: 'logs-*' });
 
     renderProvider();
 
@@ -91,12 +90,13 @@ describe('DataSourceContextProvider', () => {
       expect(screen.getByTestId('child-content')).toBeInTheDocument();
     });
 
-    expect(mockGetDefaultDataView).toHaveBeenCalled();
+    expect(mockGetDefaultId).toHaveBeenCalled();
+    expect(mockGet).toHaveBeenCalledWith('logs-star');
   });
 
-  it('renders children with null data view when getDefaultDataView throws', async () => {
+  it('renders children with null data view when getDefaultId throws', async () => {
     mockLocationSearch.mockReturnValue('');
-    mockGetDefaultDataView.mockRejectedValue(new Error('No default data view'));
+    mockGetDefaultId.mockRejectedValue(new Error('No default data view'));
 
     renderProvider();
 
@@ -104,13 +104,13 @@ describe('DataSourceContextProvider', () => {
       expect(screen.getByTestId('child-content')).toBeInTheDocument();
     });
 
-    expect(mockGetDefaultDataView).toHaveBeenCalled();
+    expect(mockGetDefaultId).toHaveBeenCalled();
     expect(mockGet).not.toHaveBeenCalled();
   });
 
   it('renders children with null data view when no default and no data views exist', async () => {
     mockLocationSearch.mockReturnValue('');
-    mockGetDefaultDataView.mockResolvedValue(null);
+    mockGetDefaultId.mockResolvedValue(null);
 
     renderProvider();
 
@@ -171,18 +171,19 @@ describe('DataSourceContextProvider', () => {
   it('renders null initially before the async resolve completes', async () => {
     mockLocationSearch.mockReturnValue('');
     let resolvePromise: (value: any) => void;
-    mockGetDefaultDataView.mockReturnValue(
+    mockGetDefaultId.mockReturnValue(
       new Promise((resolve) => {
         resolvePromise = resolve;
       })
     );
+    mockGet.mockResolvedValue({ id: 'default-dv', title: 'Default' });
 
     const { container } = renderProvider();
 
     expect(container.firstChild).toBeNull();
 
     await waitFor(() => {
-      resolvePromise!({ id: 'default-dv', title: 'Default' });
+      resolvePromise!('default-dv');
     });
 
     await waitFor(() => {
