@@ -189,6 +189,7 @@ export class SearchInferenceEndpointsPlugin
           const resolveFeatureEndpoints = (fId: string) =>
             getForFeatureFn(featureRegistry, soClient, getConnectorById, fId, this.logger);
           const getConnectorList = () => plugins.inference.getConnectorList(request);
+          const feature = featureRegistry.get(featureId);
 
           const result = await resolveModelsForFeature({
             getForFeature: resolveFeatureEndpoints,
@@ -196,6 +197,7 @@ export class SearchInferenceEndpointsPlugin
             getConnectorById,
             uiSettingsClient,
             featureId,
+            ignoreGlobalDefault: feature?.ignoreGlobalDefault ?? false,
             logger: this.logger,
           });
 

@@ -244,5 +244,41 @@ describe('RowKebabMenu — export branch', () => {
 
       expect(screen.getByTestId('osqueryExportConfirmButton')).toHaveTextContent('Export 100');
     });
+
+    it('uses row.docs as total fallback when the store has no entry (collapsed row)', () => {
+      useExportFiltersMock.mockReturnValue(undefined);
+
+      render(
+        <I18nProvider>
+          <RowKebabMenu
+            row={{ action_id: 'row-action-id', id: 'row-1', docs: 42 }}
+            actionId="parent-action-id"
+          />
+        </I18nProvider>
+      );
+
+      fireEvent.click(screen.getByTestId('packQueriesTableKebab-row-1'));
+      fireEvent.click(screen.getByTestId('osqueryExportResultsMenuItem'));
+
+      expect(screen.getByTestId('osqueryExportConfirmButton')).toHaveTextContent('Export 42');
+    });
+
+    it('prefers store total over row.docs when both are present', () => {
+      useExportFiltersMock.mockReturnValue({ total: 100 });
+
+      render(
+        <I18nProvider>
+          <RowKebabMenu
+            row={{ action_id: 'row-action-id', id: 'row-1', docs: 42 }}
+            actionId="parent-action-id"
+          />
+        </I18nProvider>
+      );
+
+      fireEvent.click(screen.getByTestId('packQueriesTableKebab-row-1'));
+      fireEvent.click(screen.getByTestId('osqueryExportResultsMenuItem'));
+
+      expect(screen.getByTestId('osqueryExportConfirmButton')).toHaveTextContent('Export 100');
+    });
   });
 });
