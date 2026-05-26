@@ -6,17 +6,21 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { workflowsExtensionsMock } from '@kbn/workflows-extensions/server/mocks';
+import {
+  createWorkflowsClientMock,
+  workflowsExtensionsMock,
+} from '@kbn/workflows-extensions/server/mocks';
 import { WorkflowExtensionsService } from './workflow_extensions_service';
 
 describe('WorkflowExtensionsService', () => {
   it('emitEvent delegates to the injected workflows client', async () => {
     const start = workflowsExtensionsMock.createStart();
     const emitEvent = jest.fn().mockResolvedValue(undefined);
-    start.getClient.mockResolvedValue({
-      isWorkflowsAvailable: true,
-      emitEvent,
-    });
+    start.getClient.mockResolvedValue(
+      createWorkflowsClientMock({
+        emitEvent,
+      })
+    );
 
     const client = await start.getClient(httpServerMock.createKibanaRequest());
     const service = new WorkflowExtensionsService(client);
