@@ -129,6 +129,7 @@ export function registerChatRoutes({
                   description:
                     'Human-readable description of the attachment. Displayed in the chat as "Attachment added: {description}".',
                 },
+                maxLength: 1000,
               })
             ),
           },
