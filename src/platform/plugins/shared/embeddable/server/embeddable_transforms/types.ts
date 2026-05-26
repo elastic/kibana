@@ -53,6 +53,11 @@ export type EmbeddableServerDefinition<
   title: string;
 
   /**
+   * The type used for the saved object library, if applicable
+   */
+  libraryType?: string;
+
+  /**
    * Transforms decouple REST API state from stored state,
    * allowing embeddables to have one shape for REST APIs and another for storage.
    * Embeddable containers, such as dashboard, use transforms to convert EmbeddableState into StoreEmbeddableState and vice versa.

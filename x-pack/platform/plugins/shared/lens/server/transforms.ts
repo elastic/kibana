@@ -24,6 +24,7 @@ import {
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { BY_REF_SCHEMA_META, BY_VALUE_SCHEMA_META } from '@kbn/presentation-publishing-schemas';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
+import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
 import { getTransformIn } from '../common/transforms/transform_in';
 import { getTransformOut } from '../common/transforms/transform_out';
 import type { LensTransforms } from '../common/transforms/types';
@@ -72,6 +73,7 @@ export function registerLensEmbeddableTransforms(
         throw new Error(`Lens "${chartType}" chart type is not supported`);
       }
     },
+    libraryType: LENS_CONTENT_TYPE,
   });
 }
 

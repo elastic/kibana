@@ -48,5 +48,11 @@ export function getEmbeddableServerRegistry(
         ...(typeof throwOnUnmappedPanel === 'boolean' ? { throwOnUnmappedPanel } : {}),
       };
     },
+    getLibraryTypes: (): string[] => {
+      return Object.values(registry).reduce((prev, { libraryType }) => {
+        if (libraryType) return [...prev, libraryType];
+        return prev;
+      }, [] as string[]);
+    },
   };
 }

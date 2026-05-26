@@ -10,12 +10,12 @@
 import type { IRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext, SavedObjectsFindOptionsReference } from '@kbn/core/server';
 import { SEARCH_ROUTE_PATH } from '../../common/constants';
-import type { EmbeddableFactoryRegistry } from '../types';
 import { searchEmbeddablesRequestSchema, searchEmbeddablesResponseSchema } from './types';
+import type { getEmbeddableServerRegistry } from '../embeddable_transforms/registry';
 
 export function registerSearchRoute(
   router: IRouter<RequestHandlerContext>,
-  getEmbeddableFactories: () => EmbeddableFactoryRegistry
+  transformRegistry: ReturnType<typeof getEmbeddableServerRegistry>
 ) {
   router.post(
     {
@@ -46,9 +46,9 @@ export function registerSearchRoute(
       const { core } = await ctx.resolve(['core']);
       const { type, search, tags, limit } = req.body;
 
-      const embeddableTypes = Object.keys(getEmbeddableFactories());
-      const filteredTypes = (typeof type === 'string' ? [type] : type).filter(
-        (t) => !embeddableTypes.includes(t)
+      const libraryTypes = transformRegistry.getLibraryTypes();
+      const filteredTypes = (typeof type === 'string' ? [type] : type).filter((t) =>
+        libraryTypes.includes(t)
       );
       if (!filteredTypes.length) {
         return res.forbidden({

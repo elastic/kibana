@@ -59,6 +59,7 @@ export class VisualizationsPlugin
     plugins.embeddable.registerEmbeddableServerDefinition(VISUALIZE_EMBEDDABLE_TYPE, {
       title: 'Legacy visualization',
       getTransforms,
+      libraryType: CONTENT_ID,
     });
 
     plugins.contentManagement.register({

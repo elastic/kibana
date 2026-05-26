@@ -79,7 +79,7 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
     this.migrateFn = getMigrateFunction(this.getEmbeddableFactory);
 
     const unversionedRouter = core.http.createRouter<RequestHandlerContext>();
-    registerSearchRoute(unversionedRouter, () => this.embeddableFactories);
+    registerSearchRoute(unversionedRouter, this.transformsRegistry);
 
     return {
       registerEmbeddableFactory: this.registerEmbeddableFactory,

@@ -17,7 +17,12 @@ import type {
 } from '@kbn/core/server';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 
-import { CONTENT_ID, LATEST_VERSION, LINKS_EMBEDDABLE_TYPE } from '../common';
+import {
+  CONTENT_ID,
+  LATEST_VERSION,
+  LINKS_EMBEDDABLE_TYPE,
+  LINKS_SAVED_OBJECT_TYPE,
+} from '../common';
 import { transforms } from '../common/embeddable/transforms/transforms';
 import type { LinksState } from './content_management';
 import { LinksStorage } from './content_management';
@@ -55,6 +60,7 @@ export class LinksServerPlugin implements Plugin<object, object> {
       title: 'Links',
       getTransforms: () => transforms,
       getSchema: () => linksEmbeddableSchema,
+      libraryType: LINKS_SAVED_OBJECT_TYPE,
     });
 
     return {};
