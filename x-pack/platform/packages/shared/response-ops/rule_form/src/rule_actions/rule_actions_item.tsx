@@ -595,7 +595,7 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
           <Suspense fallback={null}>
             <EuiIconTip
               content={actionType.name}
-              type={actionTypeModel?.iconClass ?? 'apps'}
+              type={actionTypeModel?.iconClass ?? 'plugs'}
               size="l"
             />
           </Suspense>
@@ -605,13 +605,15 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
   }, [connector, showActionGroupErrorIcon, actionType, actionTypeModel?.iconClass]);
 
   const connectorTitle = useMemo(() => {
-    const title = connector ? ACTION_TITLE(connector) : actionTypeModel?.actionTypeTitle;
+    const title = connector
+      ? ACTION_TITLE(connector)
+      : actionTypeModel?.actionTypeTitle ?? action.actionTypeId;
     return (
       <EuiFlexItem grow={false} className=".eui-textBreakWord">
         <EuiText size="s">{title}</EuiText>
       </EuiFlexItem>
     );
-  }, [connector, actionTypeModel?.actionTypeTitle]);
+  }, [connector, actionTypeModel?.actionTypeTitle, action.actionTypeId]);
 
   const runWhenTitle = useMemo(() => {
     if (!connector) {

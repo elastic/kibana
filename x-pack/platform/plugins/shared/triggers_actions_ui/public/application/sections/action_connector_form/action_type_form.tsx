@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import {
+  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -53,7 +54,7 @@ import {
 import { checkActionFormActionTypeEnabled, transformActionVariables } from '@kbn/alerts-ui-shared';
 import type { ActionGroupWithMessageVariables } from '@kbn/triggers-actions-ui-types';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared/src/common/hooks';
-import { useActionTypeModel } from '@kbn/alerts-ui-shared';
+import { useActionTypeModel } from '@kbn/alerts-ui-shared/src/common/hooks/use_action_type_model';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import { getIsExperimentalFeatureEnabled } from '../../../common/get_experimental_features';
 import type {
@@ -424,9 +425,12 @@ export const ActionTypeForm = ({
     actionTypeModel: actionTypeRegistered,
     isLoading: isLoadingActionTypeModel,
     error: actionTypeModelError,
+    refetch: refetchConnectorSpec,
   } = useActionTypeModel({
     actionTypeRegistry,
-    actionType: actionTypesIndex[actionConnector.actionTypeId] ?? null,
+    actionTypeId:
+      actionTypesIndex[actionConnector.actionTypeId]?.id ?? actionConnector.actionTypeId,
+    source: actionTypesIndex[actionConnector.actionTypeId]?.source,
     http,
     uiSettings,
   });
@@ -458,10 +462,19 @@ export const ActionTypeForm = ({
             'xpack.triggersActionsUI.sections.actionTypeForm.specLoadErrorDescription',
             {
               defaultMessage:
-                'The connector configuration could not be loaded. Try reopening the rule.',
+                'There was an error loading the connector configuration. Check your connection and try again.',
             }
           )}
         </p>
+        <EuiSpacer size="s" />
+        <EuiButton
+          data-test-subj="connector-spec-load-retry"
+          onClick={() => refetchConnectorSpec()}
+        >
+          {i18n.translate('xpack.triggersActionsUI.sections.actionTypeForm.specLoadErrorRetry', {
+            defaultMessage: 'Retry',
+          })}
+        </EuiButton>
       </EuiCallOut>
     );
   }

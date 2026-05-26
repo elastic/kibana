@@ -7,6 +7,7 @@
 
 import React, { Suspense, useMemo } from 'react';
 import {
+  EuiButton,
   EuiCallOut,
   EuiErrorBoundary,
   EuiFlexGroup,
@@ -18,7 +19,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { ActionVariable, RuleActionParam } from '@kbn/alerting-types';
 import type { ActionConnector } from '@kbn/alerts-ui-shared';
-import { ActionConnectorMode, useActionTypeModel } from '@kbn/alerts-ui-shared';
+import { ActionConnectorMode } from '@kbn/alerts-ui-shared';
+import { useActionTypeModel } from '@kbn/alerts-ui-shared/src/common/hooks/use_action_type_model';
 import { useRuleFormState } from '../hooks';
 import type { RuleAction, RuleUiAction } from '../common';
 import { getSelectedActionGroup } from '../utils';
@@ -63,9 +65,15 @@ export const RuleActionsMessage = (props: RuleActionsMessageProps) => {
     [connectorTypes, action.actionTypeId]
   );
 
-  const { actionTypeModel, isLoading, error } = useActionTypeModel({
+  const {
+    actionTypeModel,
+    isLoading,
+    error,
+    refetch: refetchConnectorSpec,
+  } = useActionTypeModel({
     actionTypeRegistry,
-    actionType,
+    actionTypeId: actionType?.id,
+    source: actionType?.source,
     http,
   });
 
@@ -121,10 +129,19 @@ export const RuleActionsMessage = (props: RuleActionsMessageProps) => {
             'xpack.responseOps.ruleForm.ruleActionsMessage.specLoadErrorDescription',
             {
               defaultMessage:
-                'The connector configuration could not be loaded. Try reopening the rule.',
+                'There was an error loading the connector configuration. Check your connection and try again.',
             }
           )}
         </p>
+        <EuiSpacer size="s" />
+        <EuiButton
+          data-test-subj="connector-spec-load-retry"
+          onClick={() => refetchConnectorSpec()}
+        >
+          {i18n.translate('xpack.responseOps.ruleForm.ruleActionsMessage.specLoadErrorRetry', {
+            defaultMessage: 'Retry',
+          })}
+        </EuiButton>
       </EuiCallOut>
     );
   }

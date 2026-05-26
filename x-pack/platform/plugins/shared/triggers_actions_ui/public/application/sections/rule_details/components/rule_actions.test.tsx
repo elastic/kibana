@@ -165,6 +165,41 @@ describe('Rule Actions', () => {
     expect(screen.getByTestId('actionConnectorName-4-Slack1')).toBeInTheDocument();
   });
 
+  it('renders without error when actionTypeRegistry.has returns false for a connector', async () => {
+    const ruleActions = [
+      {
+        id: '1',
+        group: 'default',
+        actionTypeId: '.spec-connector',
+        params: {},
+        frequency: { notifyWhen: 'onActiveAlert', throttle: null, summary: false },
+      },
+    ];
+
+    // Simulate a spec connector not registered in the client registry
+    actionTypeRegistry.has.mockReturnValueOnce(false);
+
+    mockedUseFetchRuleActionConnectorsHook.mockReturnValue({
+      isLoadingActionConnectors: false,
+      actionConnectors: [
+        {
+          id: '1',
+          name: 'Spec Connector',
+          actionTypeId: '.spec-connector',
+        },
+      ] as Array<ActionConnector<Record<string, unknown>>>,
+      errorActionConnectors: undefined,
+      reloadRuleActionConnectors: jest.fn(),
+    });
+
+    actionTypeRegistry.list.mockReturnValue([]);
+
+    render(<RuleActions ruleActions={ruleActions} actionTypeRegistry={actionTypeRegistry} />);
+
+    // The component should render the connector name without crashing
+    expect(await screen.findByText('Spec Connector')).toBeInTheDocument();
+  });
+
   it('shows the correct notify text for system actions', async () => {
     const ruleActions = [
       {

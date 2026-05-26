@@ -270,6 +270,7 @@ describe('ruleActionsConnectorsBody', () => {
     const connector2 = await screen.findByText('connector-2');
     expect(connector2).not.toBeDisabled();
   });
+
   test('should show deprecated badge when the connector is deprecated', async () => {
     const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
     actionTypeRegistry.register(getActionTypeModel('1', { id: 'actionType-1' }));

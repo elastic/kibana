@@ -30,7 +30,7 @@ import {
   DEPRECATED_LLM_CONNECTOR_INFO,
 } from '@kbn/response-ops-rule-form/src/translations';
 import { isLLMConnectorTypeId } from '@kbn/response-ops-rule-form/src/constants';
-import { shouldHideWorkflowsOnlyConnector } from '@kbn/alerts-ui-shared';
+import { shouldHideWorkflowsOnlyConnector } from '@kbn/alerts-ui-shared/src/common/utils/action_type_model_utils';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import type { ActionType, ActionTypeIndex, ActionTypeRegistryContract } from '../../../types';
 import { loadActionTypes } from '../../lib/action_connector_api';

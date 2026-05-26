@@ -30,7 +30,7 @@ import { isEmpty, partition, some } from 'lodash';
 import type { ActionVariable, RuleActionParam } from '@kbn/alerting-plugin/common';
 import type { ActionGroupWithMessageVariables } from '@kbn/triggers-actions-ui-types';
 import { checkActionFormActionTypeEnabled, transformActionVariables } from '@kbn/alerts-ui-shared';
-import { useActionTypeModel } from '@kbn/alerts-ui-shared';
+import { useActionTypeModel } from '@kbn/alerts-ui-shared/src/common/hooks/use_action_type_model';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import type {
   IErrorObject,
@@ -197,7 +197,9 @@ export const SystemActionTypeForm = ({
   const { actionTypeModel: actionTypeRegistered, isLoading: isLoadingActionTypeModel } =
     useActionTypeModel({
       actionTypeRegistry,
-      actionType: actionTypesIndex[actionConnector.actionTypeId] ?? null,
+      actionTypeId:
+        actionTypesIndex[actionConnector.actionTypeId]?.id ?? actionConnector.actionTypeId,
+      source: actionTypesIndex[actionConnector.actionTypeId]?.source,
       http,
       uiSettings,
     });

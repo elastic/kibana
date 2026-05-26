@@ -23,9 +23,7 @@ import {
   EuiButtonEmpty,
   EuiIconTip,
   EuiBetaBadge,
-  EuiLoadingSpinner,
 } from '@elastic/eui';
-import { useActionTypeModel } from '@kbn/alerts-ui-shared';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import type { RuleUiAction, ActionTypeIndex, ActionConnector } from '../../../types';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
@@ -57,8 +55,6 @@ export const AddConnectorInline = ({
   emptyActionsIds,
 }: AddConnectorInFormProps) => {
   const {
-    http,
-    uiSettings,
     application: { capabilities },
   } = useKibana().services;
   const canSave = hasSaveActionsCapability(capabilities);
@@ -69,21 +65,11 @@ export const AddConnectorInline = ({
     ? actionTypesIndex[actionItem.actionTypeId].name
     : actionItem.actionTypeId;
 
-  const {
-    actionTypeModel: actionTypeRegistered,
-    isLoading: isLoadingActionTypeModel,
-    error: actionTypeModelError,
-  } = useActionTypeModel({
-    actionTypeRegistry,
-    actionType: actionTypesIndex[actionItem.actionTypeId] ?? null,
-    http,
-    uiSettings,
-  });
-
+  const actionTypeRegistered = actionTypeRegistry.get(actionItem.actionTypeId);
   const allowGroupConnector = (actionTypeRegistered?.subtype ?? []).map((subtype) => subtype.id);
   const connectorDropdownErrors = useMemo(
-    () => [`Unable to load ${actionTypeRegistered?.actionTypeTitle ?? actionTypeName} connector`],
-    [actionTypeRegistered?.actionTypeTitle, actionTypeName]
+    () => [`Unable to load ${actionTypeRegistered.actionTypeTitle} connector`],
+    [actionTypeRegistered.actionTypeTitle]
   );
 
   const noConnectorsLabel = (
@@ -120,37 +106,6 @@ export const AddConnectorInline = ({
     setIsEmptyActionId(!!emptyActionsIds.find((emptyId: string) => actionItem.id === emptyId));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  if (isLoadingActionTypeModel) {
-    return (
-      <EuiFlexGroup justifyContent="center">
-        <EuiFlexItem grow={false}>
-          <EuiLoadingSpinner size="m" data-test-subj="connectorAddInlineLoading" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
-
-  if (actionTypeModelError || !actionTypeRegistered) {
-    return (
-      <EuiCallOut
-        announceOnMount
-        color="danger"
-        iconType="error"
-        title={i18n.translate(
-          'xpack.triggersActionsUI.sections.connectorAddInline.specLoadErrorTitle',
-          { defaultMessage: 'Unable to load connector' }
-        )}
-      >
-        <p>
-          <FormattedMessage
-            id="xpack.triggersActionsUI.sections.connectorAddInline.specLoadErrorDescription"
-            defaultMessage="The connector configuration could not be loaded. Try reopening the rule."
-          />
-        </p>
-      </EuiCallOut>
-    );
-  }
 
   const connectorsDropdown = (
     <EuiFormRow
@@ -203,7 +158,7 @@ export const AddConnectorInline = ({
         buttonContent={
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiIcon type={actionTypeRegistered?.iconClass ?? 'plugs'} size="m" />
+              <EuiIcon type={actionTypeRegistered.iconClass} size="m" />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText>
@@ -212,7 +167,7 @@ export const AddConnectorInline = ({
                     defaultMessage="{actionConnectorName}"
                     id="xpack.triggersActionsUI.sections.connectorAddInline.newRuleActionTypeEditTitle"
                     values={{
-                      actionConnectorName: actionTypeRegistered?.actionTypeTitle ?? actionTypeName,
+                      actionConnectorName: actionTypeRegistered.actionTypeTitle,
                     }}
                   />
                 </div>
@@ -234,7 +189,7 @@ export const AddConnectorInline = ({
                 />
               </EuiFlexItem>
             )}
-            {actionTypeRegistered?.isExperimental && (
+            {actionTypeRegistered && actionTypeRegistered.isExperimental && (
               <EuiFlexItem grow={false}>
                 <EuiBetaBadge
                   label={TECH_PREVIEW_LABEL}

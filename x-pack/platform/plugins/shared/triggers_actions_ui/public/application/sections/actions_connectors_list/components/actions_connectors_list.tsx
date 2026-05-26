@@ -66,6 +66,8 @@ import { getAlertingSectionBreadcrumb } from '../../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../../lib/doc_title';
 import { routeToConnectors } from '../../../constants';
 
+const LOADING_INDICATOR_DEBOUNCE_MS = 300;
+
 const ConnectorIconTipWithSpacing: React.FC = () => {
   return (
     <EuiIconTip
@@ -133,7 +135,9 @@ const ActionsConnectorsList = ({
   // Delay the loading indicator so quick fetches don't flash a spinner.
   const isAnyLoading = isLoadingActions || isLoadingActionTypes;
   const [showLoadingIndicator, setShowLoadingIndicator] = useState(false);
-  useDebounce(() => setShowLoadingIndicator(isAnyLoading), 300, [isAnyLoading]);
+  useDebounce(() => setShowLoadingIndicator(isAnyLoading), LOADING_INDICATOR_DEBOUNCE_MS, [
+    isAnyLoading,
+  ]);
 
   const disabledActConnectorCss = css`
     .actConnectorsList__tableRowDisabled {
@@ -336,7 +340,7 @@ const ActionsConnectorsList = ({
                     'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.earsDisabledDescription',
                     {
                       defaultMessage:
-                        'EARS authentication is disabled. Enable it via xpack.actions.ears.enabled in kibana.yml.',
+                        'EARS authentication is disabled. Enable it via xpack.actions.auth.ears.enabled in kibana.yml.',
                     }
                   )}
                   position="right"

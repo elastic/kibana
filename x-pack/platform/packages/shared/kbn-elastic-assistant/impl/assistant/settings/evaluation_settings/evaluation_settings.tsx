@@ -38,7 +38,7 @@ import { useLoadConnectors } from '@kbn/inference-connectors';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../../assistant_context';
 import { DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS } from '../../../assistant_context/constants';
-import { getActionTypeTitle, getGenAiConfig } from '../../../connectorland/helpers';
+import { getGenAiConfig } from '../../../connectorland/helpers';
 import { PRECONFIGURED_CONNECTOR } from '../../../connectorland/translations';
 import { usePerformEvaluation } from '../../api/evaluate/use_perform_evaluation';
 import { useEvaluationData } from '../../api/evaluate/use_evaluation_data';
@@ -151,11 +151,11 @@ export const EvaluationSettings: React.FC = React.memo(() => {
     return (
       connectors?.map((c, index) => {
         const apiProvider = getGenAiConfig(c)?.apiProvider;
+        const registeredActionType = actionTypeRegistry.has(c.actionTypeId)
+          ? actionTypeRegistry.get(c.actionTypeId)
+          : null;
         const connectorTypeTitle =
-          apiProvider ??
-          (actionTypeRegistry.has(c.actionTypeId)
-            ? getActionTypeTitle(actionTypeRegistry.get(c.actionTypeId))
-            : c.actionTypeId);
+          apiProvider ?? registeredActionType?.actionTypeTitle ?? c.actionTypeId;
         const connectorDetails = c.isPreconfigured ? PRECONFIGURED_CONNECTOR : connectorTypeTitle;
         return {
           key: c.id,

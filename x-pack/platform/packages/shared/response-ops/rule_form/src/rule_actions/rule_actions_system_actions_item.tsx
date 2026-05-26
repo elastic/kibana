@@ -296,7 +296,7 @@ export const RuleActionsSystemActionsItem = (props: RuleActionsSystemActionsItem
                   <EuiIconTip
                     content={actionType?.name}
                     size="l"
-                    type={actionTypeModel?.iconClass ?? 'apps'}
+                    type={actionTypeModel?.iconClass ?? 'plugs'}
                   />
                 </Suspense>
               )}

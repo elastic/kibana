@@ -11,7 +11,6 @@ import { useMemo } from 'react';
 import { useQuery } from '@kbn/react-query';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import type { ActionTypeSource } from '@kbn/actions-types';
-import { fromConnectorSpecSchema } from '@kbn/connector-specs/src/lib/deserialize_connector_spec';
 import type { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import type { ActionTypeModel, ActionTypeRegistryContract } from '../types';
 import {
@@ -29,8 +28,6 @@ export interface UseActionTypeModelResult {
   isLoading: boolean;
   /** Error if fetching the spec failed */
   error: Error | null;
-  /** Whether the model was derived from a spec (vs from registry) */
-  isFromSpec: boolean;
   /** Re-runs the connector spec query (no-op when the model is from the registry) */
   refetch: () => void;
 }
@@ -74,13 +71,7 @@ export function useActionTypeModel({
   } = useQuery<ConnectorSpecResponse, Error>({
     queryKey: [CONNECTOR_SPEC_QUERY_KEY, actionTypeId],
     queryFn: async ({ signal }) => {
-      const spec = await fetchConnectorSpec(http, actionTypeId!, signal);
-      // Validate eagerly — fail fast before caching. The schema is re-parsed
-      // lazily inside actionConnectorFields when the form component mounts.
-      if (!fromConnectorSpecSchema(spec.schema)) {
-        throw new Error(`Failed to parse connector spec schema for "${actionTypeId}"`);
-      }
-      return spec;
+      return fetchConnectorSpec(http, actionTypeId!, signal);
     },
     enabled: shouldFetchSpec,
     staleTime: 5 * 60 * 1000,
@@ -100,7 +91,6 @@ export function useActionTypeModel({
     actionTypeModel: shouldFetchSpec ? specBasedModel : registeredModel,
     isLoading: shouldFetchSpec && isLoading,
     error,
-    isFromSpec: shouldFetchSpec && specBasedModel != null,
     refetch: () => {
       void refetch();
     },
