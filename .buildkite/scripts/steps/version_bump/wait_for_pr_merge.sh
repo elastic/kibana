@@ -5,7 +5,7 @@
 
 wait_for_pr_merge() {
   local pr_url="${1:?PR URL is required}"
-  local max_wait="${2:-1800}"       # 30 minutes default
+  local max_wait="${2:-3600}"       # 60 minutes default
   local poll_interval="${3:-30}"    # 30 seconds default
 
   echo "--- Waiting for PR to be merged: $pr_url"
