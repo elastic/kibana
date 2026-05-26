@@ -16,11 +16,7 @@ import {
   dashboardPanelCountEvaluator,
   dashboardSectionShapeEvaluator,
 } from '../../src/dashboard_attachment_evaluators';
-import {
-  dashboardSkillActivatedEvaluator,
-  dashboardSkillNotActivatedEvaluator,
-  visualizationSkillWithoutDashboardEvaluator,
-} from '../../src/skill_selection_evaluators';
+import { dashboardSkillActivatedEvaluator } from '../../src/skill_selection_evaluators';
 
 const evaluate = base.extend<{ evaluateDataset: EvaluateDataset }, {}>({
   evaluateDataset: [
