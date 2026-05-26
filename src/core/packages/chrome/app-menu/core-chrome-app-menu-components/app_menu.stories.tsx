@@ -452,3 +452,45 @@ export const SwitchWithItems: Story = {
     },
   },
 };
+
+export const PrimaryActionWithPopover: Story = {
+  name: 'Primary action with popover',
+  args: {
+    staticItems: staticItem,
+    config: {
+      primaryActionItem: {
+        id: 'create',
+        label: 'Create',
+        testId: 'createPopoverButton',
+        iconType: 'plus',
+        popoverWidth: 120,
+        items: [
+          {
+            run: () => action('create-dashboard-clicked'),
+            id: 'createDashboard',
+            order: 1,
+            label: 'Dashboard',
+            iconType: 'productDashboard',
+            testId: 'createDashboardButton',
+          },
+          {
+            run: () => action('create-visualization-clicked'),
+            id: 'createVisualization',
+            order: 2,
+            label: 'Visualization',
+            iconType: 'chartBarVertical',
+            testId: 'createVisualizationButton',
+          },
+          {
+            run: () => action('create-annotation-clicked'),
+            id: 'createAnnotation',
+            order: 3,
+            label: 'Annotation',
+            iconType: 'flag',
+            testId: 'createAnnotationButton',
+          },
+        ],
+      },
+    },
+  },
+};

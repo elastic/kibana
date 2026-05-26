@@ -45,9 +45,7 @@ export type ManagedWorkflowTemplateValuesById = {
 };
 
 export type ManagedWorkflowTemplateValuesForId<TId extends ManagedWorkflowId> =
-  TId extends TemplatedManagedWorkflowId
-    ? ManagedWorkflowTemplateValuesById[TId]
-    : never;
+  TId extends TemplatedManagedWorkflowId ? ManagedWorkflowTemplateValuesById[TId] : never;
 
 export const getManagedWorkflowDefinition = (id: string): ManagedWorkflowDefinition | undefined => {
   return managedWorkflowDefinitions.find(
