@@ -69,15 +69,27 @@ export const useWorkflowBulkActions = ({
   const canReadWorkflow = application?.capabilities.workflowsManagement.readWorkflow;
 
   const isDisabled = selectedWorkflows.length === 0;
+  const hasManagedWorkflows = selectedWorkflows.some((workflow) => workflow.managed === true);
+  const canDeleteSelectedWorkflows = canDeleteWorkflow && !hasManagedWorkflows;
 
   const handleDeleteWorkflows = useCallback(() => {
+    if (hasManagedWorkflows) {
+      return;
+    }
     onAction();
     setShowDeleteModal(true);
-  }, [onAction]);
+  }, [hasManagedWorkflows, onAction]);
 
   const confirmDelete = useCallback(() => {
-    const ids = selectedWorkflows.map((workflow) => workflow.id);
+    const ids = selectedWorkflows
+      .filter((workflow) => workflow.managed !== true)
+      .map((workflow) => workflow.id);
     const count = ids.length;
+    if (count === 0) {
+      setShowDeleteModal(false);
+      deselectWorkflows();
+      return;
+    }
 
     setShowDeleteModal(false);
     deselectWorkflows();
@@ -231,7 +243,7 @@ export const useWorkflowBulkActions = ({
       });
     }
 
-    if (mainPanelItems.length > 0 && canDeleteWorkflow) {
+    if (mainPanelItems.length > 0 && canDeleteSelectedWorkflows) {
       mainPanelItems.push({
         isSeparator: true as const,
         key: 'bulk-actions-separator',
@@ -239,7 +251,7 @@ export const useWorkflowBulkActions = ({
       });
     }
 
-    if (canDeleteWorkflow) {
+    if (canDeleteSelectedWorkflows) {
       mainPanelItems.push({
         name: (
           <EuiTextColor color="danger">
@@ -268,7 +280,7 @@ export const useWorkflowBulkActions = ({
   }, [
     selectedWorkflows,
     canUpdateWorkflow,
-    canDeleteWorkflow,
+    canDeleteSelectedWorkflows,
     canReadWorkflow,
     isDisabled,
     handleEnableWorkflows,

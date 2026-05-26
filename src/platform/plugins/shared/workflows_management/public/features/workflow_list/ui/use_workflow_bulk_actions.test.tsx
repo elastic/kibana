@@ -101,6 +101,9 @@ describe('useWorkflowBulkActions', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockApplication.capabilities.workflowsManagement.deleteWorkflow = true;
+    mockApplication.capabilities.workflowsManagement.updateWorkflow = true;
+    mockApplication.capabilities.workflowsManagement.readWorkflow = true;
   });
 
   it('returns panels and modals', () => {
@@ -156,6 +159,25 @@ describe('useWorkflowBulkActions', () => {
         (item) => 'key' in item && item.key === 'workflows-bulk-action-delete'
       );
       expect(deleteItem).toBeDefined();
+    });
+
+    it('does not include delete action when a managed workflow is selected', () => {
+      const managedWorkflow = createMockWorkflow({ managed: true });
+      const { result } = renderHook(
+        () =>
+          useWorkflowBulkActions({
+            ...defaultProps,
+            selectedWorkflows: [managedWorkflow],
+            allWorkflows: [managedWorkflow],
+          }),
+        { wrapper }
+      );
+
+      const mainPanel = result.current.panels[0];
+      const deleteItem = mainPanel.items?.find(
+        (item) => 'key' in item && item.key === 'workflows-bulk-action-delete'
+      );
+      expect(deleteItem).toBeUndefined();
     });
 
     it('includes export action when there are exportable workflows', () => {

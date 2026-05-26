@@ -334,15 +334,20 @@ export const WorkflowListTable = ({
             onClick: (item: WorkflowListItemDto) => onExportWorkflow(item),
           },
           {
-            enabled: () => canDeleteWorkflow,
+            enabled: (item) => canDeleteWorkflow && item.managed !== true,
             type: 'icon',
             color: 'danger',
             name: i18n.translate('workflows.workflowList.delete', { defaultMessage: 'Delete' }),
             'data-test-subj': 'deleteWorkflowAction',
             icon: 'trash',
-            description: i18n.translate('workflows.workflowList.delete', {
-              defaultMessage: 'Delete workflow',
-            }),
+            description: (item: WorkflowListItemDto) =>
+              item.managed === true
+                ? i18n.translate('workflows.workflowList.deleteManagedDisabled', {
+                    defaultMessage: 'Managed workflows cannot be deleted',
+                  })
+                : i18n.translate('workflows.workflowList.deleteDescription', {
+                    defaultMessage: 'Delete workflow',
+                  }),
             onClick: (item: WorkflowListItemDto) => onDeleteWorkflow(item),
           },
         ],
