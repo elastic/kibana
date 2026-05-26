@@ -123,30 +123,25 @@ export class OtelTelemetryService {
         timeout: TASK_TIMEOUT,
         maxAttempts: 1,
 
-        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
-          const abortController = new AbortController();
+        createTaskRunner: ({
+          taskInstance,
+          abortController,
+        }: {
+          taskInstance: ConcreteTaskInstance;
+          abortController: AbortController;
+        }) => ({
+          async run() {
+            const { state } = taskInstance;
 
-          return {
-            async run() {
-              const { state } = taskInstance;
+            if (service.telemetryConfigProvider.getIsOptedIn()) {
+              await service.publishOtelPerServiceStats(abortController.signal);
+            } else {
+              service.logger.debug('Telemetry opted out, skipping OTel per-service task run');
+            }
 
-              if (service.telemetryConfigProvider.getIsOptedIn()) {
-                await service.publishOtelPerServiceStats(abortController.signal);
-              } else {
-                service.logger.debug('Telemetry opted out, skipping OTel per-service task run');
-              }
-
-              return { state };
-            },
-
-            async cancel() {
-              service.logger.warn('OTel per-service task timed out, aborting', {
-                task: TASK_ID,
-              } as LogMeta);
-              abortController.abort();
-            },
-          };
-        },
+            return { state };
+          },
+        }),
       },
     });
 

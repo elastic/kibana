@@ -203,15 +203,16 @@ describe('OtelTelemetryService', () => {
   });
 
   describe('task runner', () => {
-    let taskRunner: { run: () => Promise<unknown>; cancel?: () => unknown };
+    let taskRunner: { run: () => Promise<unknown> };
+    let taskAbortController: AbortController;
 
     beforeEach(() => {
       service.setup(taskManager);
 
       const taskDef = taskManager.registerTaskDefinitions.mock.calls[0][0][TASK_TYPE];
       const taskInstance = { state: {} } as unknown as ConcreteTaskInstance;
-      const abortController = new AbortController();
-      taskRunner = taskDef.createTaskRunner({ taskInstance, abortController });
+      taskAbortController = new AbortController();
+      taskRunner = taskDef.createTaskRunner({ taskInstance, abortController: taskAbortController });
     });
 
     it('should call publishOtelPerServiceStats when opted in', async () => {
@@ -250,23 +251,14 @@ describe('OtelTelemetryService', () => {
       expect(sender.report).not.toHaveBeenCalled();
     });
 
-    it('should handle task cancellation and log warning', async () => {
-      await taskRunner.cancel?.();
-
-      expect(logger.warn).toHaveBeenCalledWith(
-        'OTel per-service task timed out, aborting',
-        expect.objectContaining({ task: TASK_ID })
-      );
-    });
-
-    it('should abort in-flight ES requests when cancelled', async () => {
+    it('should pass abort signal to receiver and respond to external abort', async () => {
       service.start(taskManagerStart, analytics, esClient, telemetryConfigProvider);
 
       receiver.fetchAllSignals.mockImplementation(async (_config, abortSignal) => {
         expect(abortSignal).toBeDefined();
         expect(abortSignal!.aborted).toBe(false);
 
-        await taskRunner.cancel?.();
+        taskAbortController.abort();
 
         expect(abortSignal!.aborted).toBe(true);
         return { traces: [], metrics: [], logs: [] };
