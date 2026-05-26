@@ -32,8 +32,8 @@ spaceTest.describe(
         await aiValueReportPage.navigate();
 
         await expect(aiValueReportPage.page).toBeVisible({ timeout: 30000 });
-        await expect(aiValueReportPage.sampleBanner).not.toBeVisible();
-        await expect(aiValueReportPage.sampleDataBadge).not.toBeVisible();
+        await expect(aiValueReportPage.sampleBanner).toBeHidden();
+        await expect(aiValueReportPage.sampleDataBadge).toBeHidden();
         await expect(aiValueReportPage.executiveSummary).toBeVisible();
         await expect(aiValueReportPage.exportButton).toBeEnabled();
       }
@@ -60,9 +60,9 @@ spaceTest.describe(
             'Adjust the time range in the top bar to see available results for the Value Report.'
           )
         ).toBeVisible();
-        await expect(aiValueReportPage.sampleBanner).not.toBeVisible();
-        await expect(aiValueReportPage.sampleDataBadge).not.toBeVisible();
-        await expect(aiValueReportPage.executiveSummary).not.toBeVisible();
+        await expect(aiValueReportPage.sampleBanner).toBeHidden();
+        await expect(aiValueReportPage.sampleDataBadge).toBeHidden();
+        await expect(aiValueReportPage.executiveSummary).toBeHidden();
       }
     );
   }
