@@ -58,8 +58,8 @@ test.describe('Create Data View wizard', { tag: tags.stateful.classic }, () => {
 
     await test.step('saving navigates to the data view detail page', async () => {
       await pageObjects.dataViews.save();
-      await expect(page).toHaveURL(/\/management\/kibana\/dataViews\/.+/);
-      await expect(page.testSubj.locator('indexPatternTitle')).toHaveText(DATA_STREAM_NAME);
+      await expect(page).toHaveURL(pageObjects.dataViews.detailUrlPattern);
+      await expect(pageObjects.dataViews.detailPageTitle).toHaveText(DATA_STREAM_NAME);
     });
   });
 });

@@ -73,8 +73,8 @@ test.describe('Stack Management — nav link access', { tag: tags.stateful.class
     });
 
     await test.step('navigating to management directly shows app-not-found', async () => {
-      await page.gotoApp('management');
-      await expect(page.testSubj.locator('appNotFoundPageContent')).toBeVisible();
+      await pageObjects.management.gotoExpectAppNotFound();
+      await expect(pageObjects.management.appNotFoundContent).toBeVisible();
     });
   });
 });

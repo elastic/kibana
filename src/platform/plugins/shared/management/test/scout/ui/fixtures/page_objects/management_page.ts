@@ -16,14 +16,25 @@ export interface SidebarSection {
 
 export class ManagementPage {
   readonly sidebar;
+  readonly appNotFoundContent;
 
   constructor(private readonly page: ScoutPage) {
     this.sidebar = page.locator('.kbnSolutionNav');
+    this.appNotFoundContent = page.testSubj.locator('appNotFoundPageContent');
   }
 
   async goto(): Promise<void> {
     await this.page.gotoApp('management');
     await this.sidebar.waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Navigate to the management app without waiting for the sidebar — used by
+   * tests that expect the app to be inaccessible (no management privileges).
+   */
+  async gotoExpectAppNotFound(): Promise<void> {
+    await this.page.gotoApp('management');
+    await this.appNotFoundContent.waitFor({ state: 'visible' });
   }
 
   /**

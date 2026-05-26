@@ -45,7 +45,6 @@ test.describe('Index Lifecycle Policies', { tag: tags.stateful.classic }, () => 
 
   test('creates a multi-phase policy and shows it in the list', async ({
     browserAuth,
-    page,
     pageObjects,
   }) => {
     await browserAuth.loginWithCustomRole(CUSTOM_ROLES.manage_ilm);
@@ -76,8 +75,8 @@ test.describe('Index Lifecycle Policies', { tag: tags.stateful.classic }, () => 
     await test.step('navigating away from a dirty form shows a confirmation dialog', async () => {
       await pageObjects.ilm.createPolicyButton.click();
       await pageObjects.ilm.policyNameField.fill(POLICY_NAME);
-      await page.testSubj.locator('logo').click();
-      await expect(page.testSubj.locator('navigationBlockConfirmModal')).toBeVisible();
+      await pageObjects.ilm.kibanaLogo.click();
+      await expect(pageObjects.ilm.navigationBlockConfirmModal).toBeVisible();
     });
   });
 });

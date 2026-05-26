@@ -37,22 +37,19 @@ test.describe(
     test('cloning a managed policy does not propagate the managed flag', async ({
       browserAuth,
       esClient,
-      page,
       pageObjects,
     }) => {
       await browserAuth.loginWithCustomRole(CUSTOM_ROLES.manage_ilm);
 
       await test.step('open the managed policy in the editor', async () => {
         await pageObjects.ilm.gotoEditPolicy(MANAGED_POLICY_NAME);
-        await expect(page.testSubj.locator('editManagedPolicyCallOut')).toBeVisible({
+        await expect(pageObjects.ilm.editManagedPolicyCallOut).toBeVisible({
           timeout: 15000,
         });
       });
 
       await test.step('clone via "Save as new policy" and save', async () => {
-        await page.testSubj.locator('saveAsNewSwitch').click();
-        await pageObjects.ilm.policyNameField.fill(CLONED_POLICY_NAME);
-        await pageObjects.ilm.savePolicyButton.click();
+        await pageObjects.ilm.cloneCurrentPolicy(CLONED_POLICY_NAME);
       });
 
       await test.step('flyout opens for the cloned policy', async () => {
@@ -63,8 +60,8 @@ test.describe(
 
       await test.step('cloned policy does not show the managed callout in the editor', async () => {
         await pageObjects.ilm.gotoEditPolicy(CLONED_POLICY_NAME);
-        await expect(page.testSubj.locator('editWarning')).toBeVisible({ timeout: 15000 });
-        await expect(page.testSubj.locator('editManagedPolicyCallOut')).toBeHidden();
+        await expect(pageObjects.ilm.editWarning).toBeVisible({ timeout: 15000 });
+        await expect(pageObjects.ilm.editManagedPolicyCallOut).toBeHidden();
       });
 
       await test.step('cloned policy _meta.managed is not set in Elasticsearch', async () => {

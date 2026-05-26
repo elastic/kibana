@@ -13,6 +13,7 @@ import type { ScoutTestConfig } from '../../types';
 import { CollapsibleNav } from './collapsible_nav';
 import { DashboardApp } from './dashboard_app';
 import { DashboardLinks } from './dashboard_links';
+import { DataViewsPage } from './data_views_page';
 import { DatePicker } from './date_picker';
 import { DiscoverApp } from './discover_app';
 import { FilterBar } from './filter_bar';
@@ -50,6 +51,7 @@ export interface PageObjects {
   discover: DiscoverApp;
   dashboard: DashboardApp;
   dashboardLinks: DashboardLinks;
+  dataViews: DataViewsPage;
   filterBar: FilterBar;
   listingTable: ListingTable;
   home: HomePage;
@@ -75,6 +77,7 @@ export function createCorePageObjects(fixtures: PageObjectsFixtures): PageObject
     datePicker: createLazyPageObject(DatePicker, fixtures.page),
     dashboard: createLazyPageObject(DashboardApp, fixtures.page),
     dashboardLinks: createLazyPageObject(DashboardLinks, fixtures.page),
+    dataViews: createLazyPageObject(DataViewsPage, fixtures.page),
     discover: createLazyPageObject(DiscoverApp, fixtures.page),
     filterBar: createLazyPageObject(FilterBar, fixtures.page),
     listingTable: createLazyPageObject(ListingTable, fixtures.page),

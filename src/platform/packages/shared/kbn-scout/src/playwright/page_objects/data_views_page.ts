@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ScoutPage } from '@kbn/scout';
+import type { ScoutPage } from '..';
+
+// Detail page URL after a data view is saved: /app/management/kibana/dataViews/dataView/<id>
+export const DATA_VIEW_DETAIL_URL_PATTERN = /\/management\/kibana\/dataViews\/.+/;
 
 export class DataViewsPage {
   readonly createDataViewButton;
@@ -16,6 +19,8 @@ export class DataViewsPage {
   readonly timestampField;
   readonly saveButton;
   readonly editorForm;
+  readonly detailPageTitle;
+  readonly detailUrlPattern = DATA_VIEW_DETAIL_URL_PATTERN;
 
   constructor(private readonly page: ScoutPage) {
     this.createDataViewButton = page.testSubj.locator('createDataViewButton');
@@ -24,6 +29,7 @@ export class DataViewsPage {
     this.timestampField = page.testSubj.locator('timestampField');
     this.saveButton = page.testSubj.locator('saveIndexPatternButton');
     this.editorForm = page.testSubj.locator('indexPatternEditorForm');
+    this.detailPageTitle = page.testSubj.locator('indexPatternTitle');
   }
 
   async goto(): Promise<void> {

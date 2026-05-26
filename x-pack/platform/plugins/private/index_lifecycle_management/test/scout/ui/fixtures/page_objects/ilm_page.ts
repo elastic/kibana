@@ -16,6 +16,11 @@ export class IlmPage {
   readonly policyNameField;
   readonly policyFlyoutTitle;
   readonly policyFlyoutCloseButton;
+  readonly editManagedPolicyCallOut;
+  readonly editWarning;
+  readonly saveAsNewSwitch;
+  readonly navigationBlockConfirmModal;
+  readonly kibanaLogo;
 
   constructor(private readonly page: ScoutPage) {
     this.pageHeader = page.testSubj.locator('ilmPageHeader');
@@ -24,6 +29,11 @@ export class IlmPage {
     this.policyNameField = page.testSubj.locator('policyNameField');
     this.policyFlyoutTitle = page.testSubj.locator('policyFlyoutTitle');
     this.policyFlyoutCloseButton = page.testSubj.locator('policyFlyoutCloseButton');
+    this.editManagedPolicyCallOut = page.testSubj.locator('editManagedPolicyCallOut');
+    this.editWarning = page.testSubj.locator('editWarning');
+    this.saveAsNewSwitch = page.testSubj.locator('saveAsNewSwitch');
+    this.navigationBlockConfirmModal = page.testSubj.locator('navigationBlockConfirmModal');
+    this.kibanaLogo = page.testSubj.locator('logo');
   }
 
   async goto(): Promise<void> {
@@ -79,6 +89,16 @@ export class IlmPage {
       await this.page.testSubj.locator('enableDeletePhaseButton').click();
     }
 
+    await this.savePolicyButton.click();
+  }
+
+  /**
+   * Clone the currently-open policy under a new name using "Save as new policy".
+   * Assumes the policy editor is already open.
+   */
+  async cloneCurrentPolicy(newName: string): Promise<void> {
+    await this.saveAsNewSwitch.click();
+    await this.policyNameField.fill(newName);
     await this.savePolicyButton.click();
   }
 }

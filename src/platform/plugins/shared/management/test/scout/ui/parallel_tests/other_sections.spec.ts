@@ -67,7 +67,7 @@ test.describe(
       });
     });
 
-    test('license_management_user sees license_management in the stack section', async ({
+    test('cluster:manage surfaces ingest, data (incl. remote_clusters) and stack (license_management) sections', async ({
       browserAuth,
       pageObjects,
     }) => {
@@ -79,48 +79,8 @@ test.describe(
         expect(navLinks).toContain('Stack Management');
 
         const sections = await pageObjects.management.readSidebarSections();
-        // cluster:manage also surfaces ingest (ingest_pipelines + logstash pipelines) and kibana (settings)
-        expect(sections).toHaveLength(4);
-        expect(sections[0]).toStrictEqual({
-          sectionId: 'ingest',
-          sectionLinks: ['ingest_pipelines', 'pipelines'],
-        });
-        expect(sections[1]).toStrictEqual({
-          sectionId: 'data',
-          sectionLinks: [
-            'index_management',
-            'index_lifecycle_management',
-            'snapshot_restore',
-            'rollup_jobs',
-            'transform',
-            'remote_clusters',
-          ],
-        });
-        expect(sections[2]).toStrictEqual({
-          sectionId: 'kibana',
-          sectionLinks: ['settings'],
-        });
-        expect(sections[3]).toStrictEqual({
-          sectionId: 'stack',
-          sectionLinks: ['license_management'],
-        });
-      });
-    });
-
-    test('license_management_user (remote_clusters role) sees data section including remote_clusters', async ({
-      browserAuth,
-      pageObjects,
-    }) => {
-      // cluster:manage grants both license_management and remote_clusters — same role as dashboard_read_and_license_management
-      await browserAuth.loginWithCustomRole(CUSTOM_ROLES.dashboard_read_and_license_management);
-
-      await test.step('navigate to management and assert nav link + sidebar', async () => {
-        await pageObjects.management.goto();
-        const navLinks = await pageObjects.collapsibleNav.getNavLinks();
-        expect(navLinks).toContain('Stack Management');
-
-        const sections = await pageObjects.management.readSidebarSections();
-        // cluster:manage also surfaces ingest (ingest_pipelines + logstash pipelines) and stack (license_management)
+        // cluster:manage surfaces ingest (ingest_pipelines + logstash pipelines), data (incl. remote_clusters),
+        // kibana (settings, from advancedSettings:read) and stack (license_management).
         expect(sections).toHaveLength(4);
         expect(sections[0]).toStrictEqual({
           sectionId: 'ingest',
