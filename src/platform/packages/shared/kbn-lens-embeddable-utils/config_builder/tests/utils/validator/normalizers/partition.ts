@@ -160,6 +160,30 @@ const clearEmptySecondaryGroups: NormalizerConfig<PartitionAttributes> = {
   },
 };
 
+const clearEmptyCollapseFns: NormalizerConfig<PartitionAttributes> = {
+  original: (attributes) => {
+    const viz = attributes.state.visualization;
+    const layer = viz.layers[0];
+    if (!layer) {
+      return attributes;
+    }
+
+    for (const [key, value] of Object.entries(layer.collapseFns ?? {})) {
+      if (!layer.collapseFns) continue;
+      if (!value) {
+        // empty string collapseFns are undefined -> delete it
+        delete layer.collapseFns[key];
+      }
+    }
+
+    if (Object.keys(layer.collapseFns ?? {}).length === 0) {
+      delete layer.collapseFns;
+    }
+
+    return attributes;
+  },
+};
+
 export const normalizePartition = mergeNormalizers<PartitionAttributes>(
   [
     getCommonNormalizer<PartitionAttributes>(({ state: { visualization } }) => ({
@@ -168,6 +192,7 @@ export const normalizePartition = mergeNormalizers<PartitionAttributes>(
     })),
     alignId,
     clearEmptySecondaryGroups,
+    clearEmptyCollapseFns,
     alignLegacyTypes,
   ],
   [
