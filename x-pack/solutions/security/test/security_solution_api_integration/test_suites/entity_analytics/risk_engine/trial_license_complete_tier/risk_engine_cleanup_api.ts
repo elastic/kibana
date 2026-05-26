@@ -27,7 +27,7 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
-  describe('@ess @ serverless @serverless QA risk_engine_cleanup_api', () => {
+  describe('@ess @ serverless @serverless QA @skipInServerlessMKI risk_engine_cleanup_api', () => {
     const createAndSyncRuleAndAlerts = createAndSyncRuleAndAlertsFactory({ supertest, log });
     const { indexListOfDocuments } = dataGeneratorFactory({
       es,
