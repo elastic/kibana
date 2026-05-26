@@ -8,7 +8,6 @@
 
 const { execFileSync } = require('child_process');
 const { readFileSync, writeFileSync } = require('fs');
-const { Client } = require('@elastic/elasticsearch');
 const { fromRoot } = require('./repo_root');
 const { suiteKeySafe } = require('./suite_key_safe');
 const {
@@ -105,6 +104,7 @@ async function fetchScoresByRun(failingProjects) {
     return {};
   }
 
+  const { Client } = require('@elastic/elasticsearch');
   const client = new Client({
     node: esUrl,
     auth: { apiKey: esApiKey },

@@ -10,6 +10,7 @@ const { readFileSync } = require('fs');
 const {
   buildTriageUserPrompt,
   buildLitellmChatRequest,
+  buildLitellmConnectorFromVault,
   resolveEvaluationConnectorId,
   buildEisChatRequest,
   parseEisStreamResponse,
@@ -95,15 +96,21 @@ async function main() {
   const context = JSON.parse(readFileSync(contextPath, 'utf8'));
   const failingProjects = Array.isArray(context.failingProjects) ? context.failingProjects : [];
 
-  const connectors = decodeConnectors();
-  const connector = connectors[evaluationConnectorId];
+  let connector;
+  try {
+    const connectors = decodeConnectors();
+    connector = connectors[evaluationConnectorId];
+  } catch {
+    connector = undefined;
+  }
+
+  if (!connector && evaluationConnectorId.startsWith('litellm-')) {
+    connector = buildLitellmConnectorFromVault(evaluationConnectorId);
+  }
+
   if (!connector) {
     throw new Error(
-      `Judge connector ${evaluationConnectorId} not found in KIBANA_TESTING_AI_CONNECTORS (available: ${Object.keys(
-        connectors
-      )
-        .slice(0, 10)
-        .join(', ')})`
+      `Judge connector ${evaluationConnectorId} is not available (set KIBANA_TESTING_AI_CONNECTORS or vault litellm config)`
     );
   }
 

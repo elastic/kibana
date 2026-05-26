@@ -66,52 +66,65 @@ SUMMARY_FILE="$(mktemp -t kbn-evals-suite-summary.XXXXXX.md)"
 if [[ "${KBN_EVALS:-}" == "1" ]]; then
   cd "${KIBANA_DIR:-${BUILDKITE_BUILD_CHECKOUT_PATH:-$(pwd)}}"
 
-  if ! node -e "require('@elastic/elasticsearch')" 2>/dev/null; then
-    echo "--- Bootstrap (required for failure context collection)"
+  if [[ ! -d node_modules/@elastic/elasticsearch ]] || ! node -e "require('@elastic/elasticsearch')" 2>/dev/null; then
+    echo "--- Bootstrap (required for judge triage)"
     .buildkite/scripts/bootstrap.sh
   fi
 
   echo "--- Preparing judge connector for triage summary"
   if [[ -n "${KBN_EVALS_CONFIG_B64:-}" ]]; then
-    source .buildkite/scripts/steps/evals/setup_triage_connectors.sh || true
+    if ! source .buildkite/scripts/steps/evals/setup_triage_connectors.sh; then
+      echo "WARNING: setup_triage_connectors failed; summarize will try vault LiteLLM fallback"
+    fi
   else
-    echo "WARNING: KBN_EVALS_CONFIG_B64 is not set; skipping judge triage summary"
+    echo "WARNING: KBN_EVALS_CONFIG_B64 is not set; summarize will try vault LiteLLM fallback if configured"
   fi
 
   CONTEXT_FILE="$(mktemp -t kbn-evals-failure-context.XXXXXX.json)"
   TRIAGE_LOG="$(mktemp -t kbn-evals-triage-log.XXXXXX.log)"
   FAILING_PROJECTS_CSV="$(IFS=,; echo "${failing_projects[*]}")"
 
-  if node x-pack/platform/packages/shared/kbn-evals/scripts/ci/collect_failure_context.js \
+  if ! node x-pack/platform/packages/shared/kbn-evals/scripts/ci/collect_failure_context.js \
     "$EVAL_SUITE_ID" "$CONTEXT_FILE" "$FAILING_PROJECTS_CSV"; then
-    echo "--- Generating judge triage summary"
-    node x-pack/platform/packages/shared/kbn-evals/scripts/ci/summarize_failures_with_judge.js \
-      "$CONTEXT_FILE" >"${TRIAGE_LOG}" 2>&1 || true
+    echo "--- collect_failure_context failed; writing minimal context"
+    export EVAL_SUITE_ID EVAL_SUITE_NAME
+    node -e "
+      const { writeMinimalFailureContext } = require('./x-pack/platform/packages/shared/kbn-evals/scripts/ci/failure_context_helpers');
+      writeMinimalFailureContext(process.argv[1], {
+        suiteId: process.env.EVAL_SUITE_ID,
+        suiteName: process.env.EVAL_SUITE_NAME || process.env.EVAL_SUITE_ID,
+        buildId: process.env.BUILDKITE_BUILD_ID,
+        buildUrl: process.env.BUILDKITE_BUILD_URL,
+        failingProjects: process.argv[2].split(',').filter(Boolean),
+      });
+    " "$CONTEXT_FILE" "$FAILING_PROJECTS_CSV"
+  fi
 
-    TRIAGE_SUMMARY=""
-    if [[ -s "${TRIAGE_LOG}" ]] && ! grep -q '^Judge triage summary failed' "${TRIAGE_LOG}"; then
-      TRIAGE_SUMMARY="$(cat "${TRIAGE_LOG}")"
-    elif [[ -s "${TRIAGE_LOG}" ]]; then
-      echo "--- Judge triage summary failed (see log below; continuing with static summary)"
-      cat "${TRIAGE_LOG}" || true
-    fi
+  echo "--- Generating judge triage summary"
+  node x-pack/platform/packages/shared/kbn-evals/scripts/ci/summarize_failures_with_judge.js \
+    "$CONTEXT_FILE" >"${TRIAGE_LOG}" 2>&1 || true
 
-    if [[ -n "${TRIAGE_SUMMARY}" ]]; then
-      {
-        printf '\n*Triage summary'
-        if [[ -n "${EVALUATION_CONNECTOR_ID:-}" ]]; then
-          printf ' (judge: `%s`)' "${EVALUATION_CONNECTOR_ID}"
-        fi
-        printf ':*\n%s\n' "${TRIAGE_SUMMARY}"
-      } >>"$SUMMARY_FILE"
-    else
-      echo "--- No judge triage summary produced"
-      if [[ -s "${TRIAGE_LOG}" ]]; then
-        cat "${TRIAGE_LOG}"
+  TRIAGE_SUMMARY=""
+  if [[ -s "${TRIAGE_LOG}" ]] && ! grep -q '^Judge triage summary failed' "${TRIAGE_LOG}"; then
+    TRIAGE_SUMMARY="$(cat "${TRIAGE_LOG}")"
+  elif [[ -s "${TRIAGE_LOG}" ]]; then
+    echo "--- Judge triage summary failed (see log below; continuing with static summary)"
+    cat "${TRIAGE_LOG}" || true
+  fi
+
+  if [[ -n "${TRIAGE_SUMMARY}" ]]; then
+    {
+      printf '\n*Triage summary'
+      if [[ -n "${EVALUATION_CONNECTOR_ID:-}" ]]; then
+        printf ' (judge: `%s`)' "${EVALUATION_CONNECTOR_ID}"
       fi
-    fi
+      printf ':*\n%s\n' "${TRIAGE_SUMMARY}"
+    } >>"$SUMMARY_FILE"
   else
-    echo "--- Failed to collect failure context for judge triage (continuing with static summary)"
+    echo "--- No judge triage summary produced"
+    if [[ -s "${TRIAGE_LOG}" ]]; then
+      cat "${TRIAGE_LOG}"
+    fi
   fi
 
   rm -f "$CONTEXT_FILE" "$TRIAGE_LOG"

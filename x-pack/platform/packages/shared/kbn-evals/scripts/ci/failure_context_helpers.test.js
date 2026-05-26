@@ -13,6 +13,8 @@ const {
   truncateContextJson,
   buildTriageUserPrompt,
   buildLitellmChatRequest,
+  connectorIdToLitellmModel,
+  buildLitellmConnectorFromVault,
   resolveEvaluationConnectorId,
   buildEisChatRequest,
   parseEisStreamResponse,
@@ -123,6 +125,35 @@ describe('failure_context_helpers', () => {
         choices: [{ message: { content: 'Provider rate limited several models.' } }],
       })
     ).toBe('Provider rate limited several models.');
+  });
+
+  it('maps litellm connector ids to model groups', () => {
+    expect(connectorIdToLitellmModel('litellm-llm-gateway-gpt-4o')).toBe('llm-gateway/gpt-4o');
+  });
+
+  it('builds litellm connector from vault config', () => {
+    const previousConfig = process.env.KBN_EVALS_CONFIG_B64;
+    process.env.KBN_EVALS_CONFIG_B64 = Buffer.from(
+      JSON.stringify({
+        evaluationConnectorId: 'litellm-llm-gateway-gpt-4o',
+        litellm: {
+          baseUrl: 'https://litellm.example',
+          virtualKey: 'sk-test',
+        },
+      }),
+      'utf8'
+    ).toString('base64');
+
+    const connector = buildLitellmConnectorFromVault('litellm-llm-gateway-gpt-4o');
+    expect(connector.config.apiUrl).toBe('https://litellm.example/v1/chat/completions');
+    expect(connector.config.defaultModel).toBe('llm-gateway/gpt-4o');
+    expect(connector.secrets.apiKey).toBe('sk-test');
+
+    if (previousConfig) {
+      process.env.KBN_EVALS_CONFIG_B64 = previousConfig;
+    } else {
+      delete process.env.KBN_EVALS_CONFIG_B64;
+    }
   });
 
   it('resolves evaluation connector id from vault config', () => {

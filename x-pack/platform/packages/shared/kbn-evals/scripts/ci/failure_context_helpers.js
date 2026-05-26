@@ -6,6 +6,7 @@
  * 2.0.
  */
 
+const { writeFileSync } = require('fs');
 const { suiteKeySafe } = require('./suite_key_safe');
 
 const EVALUATIONS_INDEX = 'kibana-evaluations';
@@ -254,9 +255,89 @@ function buildLitellmChatRequest(connector, messages) {
 }
 
 /**
- * @param {unknown} responseJson
+ * @returns {Record<string, unknown> | null}
+ */
+function parseVaultConfig() {
+  const configB64 = process.env.KBN_EVALS_CONFIG_B64 || '';
+  if (!configB64) {
+    return null;
+  }
+
+  try {
+    const config = JSON.parse(Buffer.from(configB64, 'base64').toString('utf8'));
+    return config && typeof config === 'object' ? config : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Maps a LiteLLM connector id (e.g. litellm-llm-gateway-gpt-4o) to a LiteLLM model group name.
+ *
+ * @param {string} connectorId
  * @returns {string}
  */
+function connectorIdToLitellmModel(connectorId) {
+  const stripped = String(connectorId).replace(/^litellm-/, '');
+  const prefix = 'llm-gateway-';
+  if (stripped.startsWith(prefix)) {
+    return `llm-gateway/${stripped.slice(prefix.length)}`;
+  }
+  return stripped;
+}
+
+/**
+ * Build a minimal LiteLLM connector from vault config when KIBANA_TESTING_AI_CONNECTORS was not generated.
+ *
+ * @param {string} judgeConnectorId
+ * @returns {{ config: { apiUrl: string; defaultModel: string }; secrets: { apiKey: string } }}
+ */
+function buildLitellmConnectorFromVault(judgeConnectorId) {
+  const config = parseVaultConfig();
+  const litellm = config?.litellm;
+  if (!litellm || typeof litellm !== 'object') {
+    throw new Error('Vault config is missing litellm settings');
+  }
+
+  const baseUrl = typeof litellm.baseUrl === 'string' ? litellm.baseUrl : '';
+  const apiKey = typeof litellm.virtualKey === 'string' ? litellm.virtualKey : '';
+  if (!baseUrl || !apiKey) {
+    throw new Error('Vault litellm config is missing baseUrl or virtualKey');
+  }
+
+  return {
+    config: {
+      apiUrl: `${baseUrl.replace(/\/$/, '')}/v1/chat/completions`,
+      defaultModel: connectorIdToLitellmModel(judgeConnectorId),
+    },
+    secrets: { apiKey },
+  };
+}
+
+/**
+ * @param {string} outputPath
+ * @param {{ suiteId: string; suiteName: string; buildId?: string; buildUrl?: string; failingProjects: string[] }} options
+ */
+function writeMinimalFailureContext(outputPath, options) {
+  const models = {};
+  for (const project of options.failingProjects) {
+    models[project] = { hasScoreData: false };
+  }
+
+  writeFileSync(
+    outputPath,
+    truncateContextJson({
+      suiteId: options.suiteId,
+      suiteName: options.suiteName,
+      buildId: options.buildId || undefined,
+      buildUrl: options.buildUrl || undefined,
+      failingProjects: options.failingProjects,
+      models,
+    }),
+    'utf8'
+  );
+}
+
 /**
  * @returns {string}
  */
@@ -266,17 +347,8 @@ function resolveEvaluationConnectorId() {
     return fromEnv;
   }
 
-  const configB64 = process.env.KBN_EVALS_CONFIG_B64 || '';
-  if (!configB64) {
-    return '';
-  }
-
-  try {
-    const config = JSON.parse(Buffer.from(configB64, 'base64').toString('utf8'));
-    return typeof config.evaluationConnectorId === 'string' ? config.evaluationConnectorId : '';
-  } catch {
-    return '';
-  }
+  const config = parseVaultConfig();
+  return typeof config?.evaluationConnectorId === 'string' ? config.evaluationConnectorId : '';
 }
 
 /**
@@ -381,6 +453,10 @@ module.exports = {
   truncateContextJson,
   buildTriageUserPrompt,
   buildLitellmChatRequest,
+  parseVaultConfig,
+  connectorIdToLitellmModel,
+  buildLitellmConnectorFromVault,
+  writeMinimalFailureContext,
   resolveEvaluationConnectorId,
   buildEisChatRequest,
   parseEisStreamResponse,
