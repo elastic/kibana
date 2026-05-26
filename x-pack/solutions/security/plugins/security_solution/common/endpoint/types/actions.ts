@@ -32,7 +32,16 @@ export interface ActionResponseOutput<
   TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
 > {
   type: 'json' | 'text';
-  content: TOutputContent;
+  content: {
+    /**
+     * If action was canceled, this property would include a static value of `manual` or `action`.
+     * `manual`: the action was canceled by a user directly on the host using the `elastic-defend` executable.
+     * `action`: the action was canceled by a `cancel` action
+     */
+    canceled_by?: string;
+    /** If action was canceled by an `action`, this property will have the cancel's action id */
+    canceled_id?: string;
+  } & TOutputContent;
 }
 
 export interface ProcessesEntry {

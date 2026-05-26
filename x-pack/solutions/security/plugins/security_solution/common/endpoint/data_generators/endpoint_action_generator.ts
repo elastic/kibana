@@ -212,6 +212,15 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       output = uploadOutput as typeof output;
     }
 
+    if (command === 'cancel' && !output) {
+      output = {
+        type: 'json',
+        content: {
+          code: 'ra_cancel_success',
+        },
+      } as typeof output;
+    }
+
     return merge(
       {
         '@timestamp': timeStamp.toISOString(),
