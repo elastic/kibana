@@ -1,6 +1,22 @@
 {
   "suites": [
     {
+      "id": "smoke-tests",
+      "name": "@kbn/evals Smoke Tests",
+      "slackChannel": "#obs-ai-team-alerts",
+      "configPath": "x-pack/platform/packages/shared/kbn-evals-suite-smoketests/playwright.config.ts",
+      "tags": [
+        "platform",
+        "smoke"
+      ],
+      "ciLabels": [
+        "evals:smoke-tests"
+      ],
+      "defaultModelGroups": [
+        "eis/anthropic-claude-4.5-haiku"
+      ]
+    },
+    {
       "id": "agent-builder",
       "name": "Agent Builder",
       "slackChannel": "#agent-builder-alerts",
@@ -161,6 +177,20 @@
       "ciLabels": [
         "evals:attack-discovery"
       ]
+    },
+    {
+      "id": "lead-generation",
+      "name": "Lead Generation",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-lead-generation/playwright.config.ts",
+      "tags": [
+        "security",
+        "lead-generation",
+        "entity-analytics"
+      ],
+      "ciLabels": [
+        "evals:lead-generation"
+      ],
+      "serverConfigSet": "evals_lead_generation"
     },
     {
       "id": "workflows",

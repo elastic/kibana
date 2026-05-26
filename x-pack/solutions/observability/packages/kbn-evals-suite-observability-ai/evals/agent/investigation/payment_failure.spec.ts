@@ -42,7 +42,7 @@ evaluate.describe(
         dataset: {
           name: 'payment-failure investigation',
           description:
-            'Evaluates whether the agent correctly investigates checkout failures caused by the payment service throwing errors in its charge logic (paymentFailure feature flag). The payment service is reachable and receives requests — it throws an application error ("Payment request failed. Invalid token.") rather than being unavailable. This distinguishes the scenario from paymentUnreachable where the service never receives requests.',
+            'Evaluates whether the agent correctly investigates the otel-demo paymentFailure scenario, where the payment service throws application errors rather than being unreachable.',
           examples: [
             {
               input: {

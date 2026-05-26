@@ -30,7 +30,7 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
   },
   {
     id: 'ai.classify',
-    handlerHash: 'c6aaf7022e4bb119ed9ce083913cf714093814fcdc670c7314ec326ec7dc7384',
+    handlerHash: '0dcc5fb63038d1cb5fe73dd7ae7744d3eb3dda9d95d7e1dd860e587926177553',
   },
   {
     id: 'ai.prompt',
