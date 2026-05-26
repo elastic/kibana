@@ -356,7 +356,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor('updates after switching to show only selected', async () => {
           fieldNameCells = await find.allByCssSelector('.kbnDocViewer__fieldName');
           fieldNames = await Promise.all(fieldNameCells.map((cell) => cell.getVisibleText()));
-          return fieldNames.join(',') === 'agent.raw,agent';
+          return fieldNames.join(',') === '@timestamp,agent.raw,agent';
         });
 
         await dataGrid.togglePinActionInFlyout('agent');
@@ -364,7 +364,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor('updates after pinning the last field', async () => {
           fieldNameCells = await find.allByCssSelector('.kbnDocViewer__fieldName');
           fieldNames = await Promise.all(fieldNameCells.map((cell) => cell.getVisibleText()));
-          return fieldNames.join(',') === 'agent,agent.raw';
+          return fieldNames.join(',') === 'agent,@timestamp,agent.raw';
         });
 
         await showOnlySelectedFieldsSwitch.click();
