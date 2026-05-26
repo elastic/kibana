@@ -141,7 +141,9 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
 </Fragment>
 `;
 
-exports[`TelemetryManagementSectionComponent renders null because allowChangingOptInStatus is false 1`] = `
+exports[
+  `TelemetryManagementSectionComponent renders null because allowChangingOptInStatus is false 1`
+] = `
 <TelemetryManagementSection
   docLinks={
     Object {

@@ -141,11 +141,8 @@ interface UiSettingsParamsBase<T = unknown> {
 }
 
 /**
-/**
  * UiSettings parameters defined by the plugins.
  * A setting should carry at most one maturity badge — avoid setting both `technicalPreview` and `experimental`.
- * `@public`
- * */
  * @public
  * */
 export interface UiSettingsParams<T = unknown> extends UiSettingsParamsBase<T> {
