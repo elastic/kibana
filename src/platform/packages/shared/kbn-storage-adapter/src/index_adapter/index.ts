@@ -760,6 +760,19 @@ export class StorageIndexAdapter<
 
       const { query: fromStr } = fromQuery.toRequest();
       const { query: pipelineStr, params } = pipeline.toRequest();
+
+      // Reject pipelines that include their own FROM. The adapter owns the
+      // FROM clause; chaining `FROM <ours> | FROM <theirs>` is invalid ES|QL
+      // and would surface as an opaque 400 from ES.
+      if (/^\s*FROM\b/i.test(pipelineStr)) {
+        throw new Error(
+          `StorageClientEsql: pipeline must not start with a FROM clause; the storage adapter owns the FROM. Got: ${pipelineStr.slice(
+            0,
+            80
+          )}`
+        );
+      }
+
       const query = `${fromStr} | ${pipelineStr}`;
 
       try {

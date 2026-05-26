@@ -473,6 +473,17 @@ describe('StorageIndexAdapter - esql method', () => {
     );
   });
 
+  it('throws a clear error when the pipeline starts with a FROM clause', async () => {
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+    const client = adapter.getClient();
+
+    await expect(client.esql({ pipeline: esql`FROM other_index | LIMIT 1` })).rejects.toThrow(
+      /pipeline must not start with a FROM clause/
+    );
+
+    expect(esqlQuery).not.toHaveBeenCalled();
+  });
+
   it('rethrows non-404 errors (verification_exception, etc.)', async () => {
     const verificationError = new errors.ResponseError({
       statusCode: 400,
