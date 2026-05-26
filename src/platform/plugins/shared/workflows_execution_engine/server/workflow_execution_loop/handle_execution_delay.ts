@@ -82,8 +82,9 @@ export async function handleExecutionDelay(
             }`
           );
         });
-    }
 
+      params.workflowExecutionDriver.stop();
+    }
     return;
   }
 

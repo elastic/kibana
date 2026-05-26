@@ -38,13 +38,7 @@ const TASK_MANAGER_ABORT_CANCELLATION_REASON = 'Cancelled because Task Manager a
  * - The execution driver's `stop()` is called while the workflow remains RUNNING
  */
 export async function workflowExecutionLoop(params: WorkflowExecutionLoopParams) {
-  const {
-    workflowExecutionDriver,
-    workflowExecutionState,
-    taskAbortController,
-    workflowLogger,
-    workflowRuntime,
-  } = params;
+  const { workflowExecutionDriver, workflowRuntime } = params;
   // Create an abort controller to signal the persistence loop to exit immediately
   // when execution completes (instead of waiting for the next 500ms flush cycle)
   const persistenceAbortController = new AbortController();

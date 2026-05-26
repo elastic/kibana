@@ -24,7 +24,22 @@ import type { WorkflowExecutionLoopParams } from './types';
  * Each iteration processes a single node execution.
  */
 export async function executionFlowLoop(params: WorkflowExecutionLoopParams) {
+  const MAX_ITERATIONS = 10;
+  let counter = 0;
+  let currentNodeId: string | undefined;
+
   while (params.workflowExecutionDriver.isExecuting) {
+    if (currentNodeId !== params.workflowExecutionDriver.currentNode?.id) {
+      currentNodeId = params.workflowExecutionDriver.currentNode?.id;
+      counter = 0;
+    }
+
+    if (counter >= MAX_ITERATIONS) {
+      throw new Error('Execution flow loop timed out');
+    }
+
+    counter++;
+
     await runNode(params);
     params.workflowExecutionDriver.commitPendingNavigation();
     await params.workflowRuntime.saveState();
