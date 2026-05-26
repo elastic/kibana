@@ -1982,8 +1982,7 @@ paths:
                     - 12345678-1234-1234-1234-123456789012
                     - 98765432-1234-1234-1234-123456789012
             schema:
-              $ref: >-
-                #/components/schemas/BulkActionAttackDiscoverySchedulesRequestBody
+              $ref: '#/components/schemas/BulkActionAttackDiscoverySchedulesRequestBody'
         required: true
       responses:
         '200':
@@ -1999,17 +1998,14 @@ paths:
                       - 98765432-1234-1234-1234-123456789012
                     total: 2
               schema:
-                $ref: >-
-                  #/components/schemas/BulkActionAttackDiscoverySchedulesResponse
+                $ref: '#/components/schemas/BulkActionAttackDiscoverySchedulesResponse'
           description: Successfully processed the bulk delete request.
         '400':
           content:
             application/json:
               examples:
                 BulkDeleteAttackDiscoverySchedulesResponse400Example:
-                  summary: >-
-                    Bad Request error returned when the bulk delete payload is
-                    invalid.
+                  summary: Bad Request error returned when the bulk delete payload is invalid.
                   value:
                     error: Bad Request
                     message: Invalid request parameters.
@@ -2035,8 +2031,7 @@ paths:
                     - 12345678-1234-1234-1234-123456789012
                     - 98765432-1234-1234-1234-123456789012
             schema:
-              $ref: >-
-                #/components/schemas/BulkActionAttackDiscoverySchedulesRequestBody
+              $ref: '#/components/schemas/BulkActionAttackDiscoverySchedulesRequestBody'
         required: true
       responses:
         '200':
@@ -2044,9 +2039,7 @@ paths:
             application/json:
               examples:
                 BulkDisableAttackDiscoverySchedulesResponse200Example:
-                  summary: >-
-                    Bulk disable response for two successfully disabled
-                    schedules.
+                  summary: Bulk disable response for two successfully disabled schedules.
                   value:
                     errors: []
                     ids:
@@ -2054,17 +2047,14 @@ paths:
                       - 98765432-1234-1234-1234-123456789012
                     total: 2
               schema:
-                $ref: >-
-                  #/components/schemas/BulkActionAttackDiscoverySchedulesResponse
+                $ref: '#/components/schemas/BulkActionAttackDiscoverySchedulesResponse'
           description: Successfully processed the bulk disable request.
         '400':
           content:
             application/json:
               examples:
                 BulkDisableAttackDiscoverySchedulesResponse400Example:
-                  summary: >-
-                    Bad Request error returned when the bulk disable payload is
-                    invalid.
+                  summary: Bad Request error returned when the bulk disable payload is invalid.
                   value:
                     error: Bad Request
                     message: Invalid request parameters.
@@ -2090,8 +2080,7 @@ paths:
                     - 12345678-1234-1234-1234-123456789012
                     - 98765432-1234-1234-1234-123456789012
             schema:
-              $ref: >-
-                #/components/schemas/BulkActionAttackDiscoverySchedulesRequestBody
+              $ref: '#/components/schemas/BulkActionAttackDiscoverySchedulesRequestBody'
         required: true
       responses:
         '200':
@@ -2107,17 +2096,14 @@ paths:
                       - 98765432-1234-1234-1234-123456789012
                     total: 2
               schema:
-                $ref: >-
-                  #/components/schemas/BulkActionAttackDiscoverySchedulesResponse
+                $ref: '#/components/schemas/BulkActionAttackDiscoverySchedulesResponse'
           description: Successfully processed the bulk enable request.
         '400':
           content:
             application/json:
               examples:
                 BulkEnableAttackDiscoverySchedulesResponse400Example:
-                  summary: >-
-                    Bad Request error returned when the bulk enable payload is
-                    invalid.
+                  summary: Bad Request error returned when the bulk enable payload is invalid.
                   value:
                     error: Bad Request
                     message: Invalid request parameters.
@@ -3277,9 +3263,8 @@ components:
             $ref: '#/components/schemas/BulkActionAttackDiscoverySchedulesError'
           type: array
         ids:
-          description: >-
-            The unique identifiers of the schedules successfully affected by the
-            bulk action.
+          description: The unique identifiers of the schedules successfully affected by
+            the bulk action.
           items:
             $ref: '#/components/schemas/NonEmptyString'
           type: array
