@@ -43,9 +43,10 @@ describe('WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS', () => {
     // service, mapper) and guards against a future "promote one of
     // these to top level" refactor that would silently break queries.
     const hitl = WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS.properties?.hitl as
-      | { properties: Record<string, { type: string }> }
+      | { type?: string; properties: Record<string, { type: string }> }
       | undefined;
     expect(hitl).toBeDefined();
+    expect(hitl?.type).toBe('object');
     expect(hitl?.properties).toEqual({
       respondedBy: { type: 'keyword' },
       respondedAt: { type: 'date' },

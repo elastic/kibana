@@ -135,6 +135,7 @@ export const WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS: MappingTypeMapping = {
     //
     // [security-team#16706]: https://github.com/elastic/security-team/issues/16706
     hitl: {
+      type: 'object',
       properties: {
         respondedBy: {
           type: 'keyword',
