@@ -12,8 +12,16 @@ import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import { getInputsFromDefinition } from '@kbn/workflows/spec/lib/field_conversion';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
-import { validateWorkflowInputs } from './validate_workflow_inputs';
+import { featureFlags, validateWorkflowInputs } from './validate_workflow_inputs';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+
+const makeDocumentParsingException = () => {
+  const err = new Error('document_parsing_exception');
+  (err as { meta?: unknown }).meta = {
+    body: { error: { type: 'document_parsing_exception' } },
+  };
+  return err;
+};
 
 jest.mock('@kbn/workflows/spec/lib/field_conversion', () => ({
   ...jest.requireActual('@kbn/workflows/spec/lib/field_conversion'),
@@ -243,5 +251,70 @@ describe('validateWorkflowInputs', () => {
     const result = await callValidate(stubWorkflow, {});
 
     expect(result).toBe(true);
+  });
+
+  describe('with legacy `error: text` index mapping (document_parsing_exception)', () => {
+    afterEach(() => {
+      featureFlags.legacyErrorMappingFallback = false;
+    });
+
+    const missingRequiredSchema = (): JsonModelSchemaType => ({
+      properties: { name: { type: 'string' } },
+      required: ['name'],
+    });
+
+    it('does not retry and logs the failure when the flag is off', async () => {
+      featureFlags.legacyErrorMappingFallback = false;
+      mockRepository.updateWorkflowExecution.mockRejectedValueOnce(makeDocumentParsingException());
+      setInputsSchema(missingRequiredSchema());
+
+      const result = await callValidate(stubWorkflow, { inputs: {} });
+
+      expect(result).toBe(false);
+      expect(mockRepository.updateWorkflowExecution).toHaveBeenCalledTimes(1);
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.stringContaining(`Failed to mark execution ${executionId} as FAILED`)
+      );
+    });
+
+    it('retries the update with a stringified error and succeeds when the flag is on', async () => {
+      featureFlags.legacyErrorMappingFallback = true;
+      mockRepository.updateWorkflowExecution
+        .mockRejectedValueOnce(makeDocumentParsingException())
+        .mockResolvedValueOnce(undefined);
+      setInputsSchema(missingRequiredSchema());
+
+      const result = await callValidate(stubWorkflow, { inputs: {} });
+
+      expect(result).toBe(false);
+      expect(mockRepository.updateWorkflowExecution).toHaveBeenCalledTimes(2);
+
+      const firstCall = mockRepository.updateWorkflowExecution.mock.calls[0][0];
+      expect(firstCall.error).toEqual({
+        type: 'InputValidationError',
+        message: expect.stringContaining('Workflow input validation failed'),
+      });
+
+      const retryCall = mockRepository.updateWorkflowExecution.mock.calls[1][0];
+      expect(retryCall.status).toBe(ExecutionStatus.FAILED);
+      expect(typeof retryCall.error).toBe('string');
+      expect(retryCall.error).toEqual(expect.stringContaining('InputValidationError'));
+      expect(retryCall.error).toEqual(expect.stringContaining('Workflow input validation failed'));
+      expect(mockLogger.error).not.toHaveBeenCalled();
+    });
+
+    it('does not retry on unrelated update errors even when the flag is on', async () => {
+      featureFlags.legacyErrorMappingFallback = true;
+      mockRepository.updateWorkflowExecution.mockRejectedValueOnce(new Error('ES unavailable'));
+      setInputsSchema(missingRequiredSchema());
+
+      const result = await callValidate(stubWorkflow, { inputs: {} });
+
+      expect(result).toBe(false);
+      expect(mockRepository.updateWorkflowExecution).toHaveBeenCalledTimes(1);
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.stringContaining(`Failed to mark execution ${executionId} as FAILED`)
+      );
+    });
   });
 });

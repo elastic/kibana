@@ -8,7 +8,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
+import type { SerializedError, WorkflowExecutionEngineModel } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import { buildFieldsZodValidator } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
 import {
@@ -16,6 +16,28 @@ import {
   getInputsFromDefinition,
 } from '@kbn/workflows/spec/lib/field_conversion';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+
+/**
+ * Toggleable feature flags for this module. Exposed as a mutable container so
+ * downstream code (and tests) can flip behavior without re-plumbing config.
+ */
+export const featureFlags = {
+  /**
+   * When true, retry the FAILED-status update with a stringified `error` field
+   * if the structured-object update fails with `document_parsing_exception`.
+   *
+   * Targets legacy `.workflows-executions` indices (created before PR #243395,
+   * 2025-12-02) that have `error` mapped as `text`. Without this fallback, the
+   * execution doc is never flipped to FAILED on those projects and the run
+   * appears stuck in its initial status.
+   */
+  legacyErrorMappingFallback: false,
+};
+
+const isDocumentParsingException = (err: unknown): boolean => {
+  const meta = (err as { meta?: { body?: { error?: { type?: string } } } } | undefined)?.meta;
+  return meta?.body?.error?.type === 'document_parsing_exception';
+};
 
 /**
  * Validates workflow inputs against the workflow's input schema.
@@ -49,19 +71,39 @@ export const validateWorkflowInputs = async (
       .map((issue) => `${issue.path.join('.')}: ${issue.message}`)
       .join('; ');
 
+    const errorPayload: SerializedError = {
+      type: 'InputValidationError',
+      message: `Workflow input validation failed: ${issues}`,
+    };
+
     try {
       await workflowExecutionRepository.updateWorkflowExecution({
         id: executionId,
         status: ExecutionStatus.FAILED,
-        error: {
-          type: 'InputValidationError',
-          message: `Workflow input validation failed: ${issues}`,
-        },
+        error: errorPayload,
       });
     } catch (updateError) {
-      logger.error(
-        `Failed to mark execution ${executionId} as FAILED after input validation error: ${updateError}`
-      );
+      if (featureFlags.legacyErrorMappingFallback && isDocumentParsingException(updateError)) {
+        try {
+          // Legacy `.workflows-executions` indices (pre-PR #243395) have
+          // `error` mapped as `text`, so retry with a stringified payload to
+          // coerce into the legacy mapping. Cast is required because
+          // EsWorkflowExecution.error is typed as SerializedError | null.
+          await workflowExecutionRepository.updateWorkflowExecution({
+            id: executionId,
+            status: ExecutionStatus.FAILED,
+            error: JSON.stringify(errorPayload) as unknown as SerializedError,
+          });
+        } catch (retryError) {
+          logger.error(
+            `Failed to mark execution ${executionId} as FAILED after input validation error (legacy fallback retry also failed): ${retryError}`
+          );
+        }
+      } else {
+        logger.error(
+          `Failed to mark execution ${executionId} as FAILED after input validation error: ${updateError}`
+        );
+      }
     }
 
     return false;
