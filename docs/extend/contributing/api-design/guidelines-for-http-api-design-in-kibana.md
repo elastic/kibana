@@ -6,7 +6,7 @@ description: "Best practices and guidelines for designing consistent, user-frien
 # Guidelines for HTTP API design in Kibana
 
 :::{warning} Work in progress
-This guidance is under active review. If you have a question or intend to apply it to your use-case please reach out to the Kibana Core team first.
+This guidance is under review. If you have a question or intend to apply it to your use-case please reach out to the Kibana Core team first.
 :::
 
 Kibana's public HTTP APIs are the focus of this document. See the section about [Internal vs Public APIs](#internal-vs-public-apis) for more details.
@@ -384,7 +384,7 @@ Both requests and responses should be `application/json`, unless there is a good
 
 `GET /api/my_domain/my_resources` <br />
 => <br />
-`{ items: [{ "id": "1", "name": "My resource" }], page: 1, size: 10, total: 100 }`
+`{ items: [{ "id": "1", "name": "My resource" }], page: 1, per_page: 10, total: 100 }`
 
 See the section on data modelling for more guidance.
 
@@ -439,7 +439,7 @@ For objects stored in ES (which is the case for most Kibana HTTP API resources) 
 
 **Page-based request**
 
-`GET /api/my_domain/my_resources?page=1&size=10`
+`GET /api/my_domain/my_resources?page=1&per_page=10`
 
 **Page-based response**
 
@@ -471,7 +471,7 @@ POST /api/my_domain/my_resources
 }
 ```
 
-Where `pit_id` is the PIT ID  and `["valueA", 123]` are the sort values that identify the last hit from ES ([docs](https://www.elastic.co/docs/reference/elasticsearch/rest-apis/paginate-search-results#search-after)).
+Where `pit_id` is the PIT ID and `["valueA", 123]` are the sort values that identify the last hit from ES ([docs](https://www.elastic.co/docs/reference/elasticsearch/rest-apis/paginate-search-results#search-after)).
 
 **Cursor based response**
 

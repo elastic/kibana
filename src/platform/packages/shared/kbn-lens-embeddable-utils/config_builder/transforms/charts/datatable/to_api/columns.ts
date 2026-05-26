@@ -85,7 +85,7 @@ function buildMetricsAPI(column: ColumnState): APIMetricProps {
     ...buildCommonMetricRowProps(column),
     ...buildColorProps(column),
     ...(summaryRow && summaryRow !== 'none'
-      ? { summary: { type: summaryRow, ...(summaryLabel ? { label: summaryLabel } : {}) } }
+      ? { summary: { type: summaryRow, ...(summaryLabel != null ? { label: summaryLabel } : {}) } }
       : {}),
   };
 }

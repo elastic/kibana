@@ -279,7 +279,88 @@ logging:
       level: debug
 ```
 
+## Instrumenting with OTel Traces
+
+{{kib}} has built-in OpenTelemetry instrumentation for debugging and observability. The following sections cover tracing configuration.
+
+To enable OTel traces, apply the following configuration:
+
+```yaml
+telemetry.tracing:
+  enabled: true
+  sample_rate: 1 # 1 by default
+  exporters:
+    - proto:
+        url: <URL_TO_THE_OTLP_ENDPOINT>
+        headers:
+          authorization: 'ApiKey [REDACTED]'
+```
+
+The OTLP endpoint can be any OTel/EDOT collector. It is recommended to use the mOTLP (Managed OTLP) endpoint that is provided by Elastic Cloud. The instructions to retrieve the OTLP endpoint and the API Key are available in [Get started with traces and APM](https://www.elastic.co/docs/solutions/observability/apm/get-started).
+
+### Supported exporter protocols
+
+{{kib}} supports gRPC, protobuf and plain HTTP protocols to export the OTel Traces. The protocol to use is specified in the config via top property name in the exporter's declaration. The config syntax is the same for all.
+
+```yaml
+telemetry.tracing:
+  enabled: true
+  sample_rate: 1 # 1 by default
+  exporters:
+    - grpc:
+        url: <URL_TO_THE_GRPC_OTLP_ENDPOINT>
+        headers:
+          authorization: 'ApiKey [REDACTED]'
+    - proto:
+        url: <URL_TO_THE_PROTO_OTLP_ENDPOINT>
+        headers:
+          authorization: 'ApiKey [REDACTED]'
+    - http:
+        url: <URL_TO_THE_HTTP_OTLP_ENDPOINT>
+        headers:
+          authorization: 'ApiKey [REDACTED]'
+```
+
+::::{tip}
+gRPC typically operates on a different port to the protobuf and http protocols.
+
+When using the mOTLP endpoint, the port is the same, but the endpoint changes:
+
+- gRPC uses the root path (https://my-ech-deployment.ingest.europe-west1.gcp.elastic-cloud.com:443)
+- Protobuf and HTTP use the path `/v1/traces` (https://my-ech-deployment.ingest.europe-west1.gcp.elastic-cloud.com:443/v1/traces)
+::::
+
+### Enable OTel Traces on the server + Elastic RUM on the browser in {{kib}}
+
+::::{important}
+OTel instrumentation is only available on the server side. For RUM observability, {{kib}} uses [Elastic RUM](https://www.elastic.co/docs/solutions/observability/apm/apm-agents/real-user-monitoring-rum).
+
+OTel instrumentation in the browser will be available in the future, once the [OTel for RUM](https://www.elastic.co/docs/solutions/observability/applications/otel-rum) is ready for production.
+::::
+
+When `telemetry.tracing.enabled` is `true`, server-side Elastic APM is disabled by default, but the `kibana-frontend` (RUM) service remains active. Elastic APM and OpenTelemetry tracing cannot be enabled simultaneously; setting `elastic.apm.active: true` while OTel tracing is enabled causes Kibana to fail on startup. You can still collect browser traces with Elastic RUM.
+
+To enable Elastic RUM alongside OTel tracing, define the APM Server's URL in the Kibana config. [Any settings accepted by the agent](https://www.elastic.co/docs/reference/apm/agents/rum-js/configuration) are also accepted:
+
+```yaml
+elastic:
+  apm:
+    serverUrl: https://my-ech-deployment.apm.europe-west1.gcp.cloud.es.io:443
+    # RUM is enabled by default when telemetry.tracing.enabled is true; serverUrl is required to send data to your deployment.
+    # Below are optional
+    environment: localhost
+    transactionSampleRate: 1
+```
+
+::::{tip}
+RUM sends traces from the browser without embedded credentials. Prefer an Elastic Cloud Hosted (ECH) APM endpoint configured for RUM intake. Serverless APM endpoints often require authenticated intake and are usually not suitable for RUM unless your deployment explicitly supports unauthenticated browser intake.
+::::
+
 ## Debugging Kibana with APM
+
+::::{warning}
+This approach is deprecated. Use [OTel Traces](#instrumenting-with-otel-traces) instead.
+::::
 
 Kibana is integrated with APM's node and RUM agents.
 To learn more about how APM works and what it reports, refer to the [documentation](https://www.elastic.co/guide/en/apm/guide/current/index.html).
