@@ -63,6 +63,7 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
   const [editValue, setEditValue] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
   const canEdit = useInteractiveModeSelector((snapshot) => snapshot.can({ type: 'step.edit' }));
+  const isEditable = !readOnly && canEdit;
 
   useEffect(() => {
     if (isEditingDescription && inputRef.current) {
@@ -92,7 +93,7 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
   };
 
   const handleDescriptionClick = () => {
-    if (!readOnly && canEdit) {
+    if (isEditable) {
       setEditValue(stepDescription);
       toggleEditingDescription(true);
     }
@@ -319,7 +320,7 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
                   css={css`
                     font-family: ${euiTheme.font.familyCode};
                     ${euiTextTruncate()}
-                    ${!readOnly && canEdit
+                    ${isEditable
                       ? `cursor: pointer;
                       &:hover {
                         text-decoration: underline;
@@ -333,7 +334,7 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
                       handleDescriptionClick();
                     }
                   }}
-                  role={!readOnly && canEdit ? 'button' : undefined}
+                  role={isEditable ? 'button' : undefined}
                   style={{ fontStyle: 'italic' }}
                 >
                   {stepDescription}
