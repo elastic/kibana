@@ -84,6 +84,12 @@ export function getQueryPosition(
   };
 
   // Text-based fast paths (operator trailing, label map fallback)
+  const labelMapFallback = getLabelMapTextFallbackPosition(text, cursor);
+
+  if (labelMapFallback) {
+    return labelMapFallback;
+  }
+
   const trailingBinaryOperator = textBeforeCursor.match(PROMQL_TRAILING_BINARY_OP_REGEX)?.[1];
 
   if (trailingBinaryOperator) {
@@ -92,12 +98,6 @@ export function getQueryPosition(
     if (signatureTypes.length) {
       return { type: 'after_operator', signatureTypes };
     }
-  }
-
-  const labelMapFallback = getLabelMapTextFallbackPosition(text, cursor);
-
-  if (labelMapFallback) {
-    return labelMapFallback;
   }
 
   // AST-based binary operator resolution

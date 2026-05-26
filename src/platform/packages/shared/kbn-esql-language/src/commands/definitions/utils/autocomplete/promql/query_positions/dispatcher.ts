@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import { ESQL_STRING_TYPES } from '../../../../types';
 import type { PromqlDetailedPosition, PromqlDetailedPositionType } from '../types';
 import { suggestOperators } from './operators';
@@ -30,6 +31,8 @@ export interface SuggestionContext {
   columns: ICommandContext['columns'] | undefined;
   shouldWrap: boolean;
   preGroupedAgg?: string;
+  variables?: ESQLControlVariable[];
+  supportsControls?: boolean;
 }
 
 export type SuggestionHandler = (input: SuggestionContext) => ISuggestionItem[];
@@ -42,7 +45,8 @@ export const positionHandlers: Partial<Record<PromqlDetailedPositionType, Sugges
   after_complete_arg: suggestAfterCompleteArg,
   after_label_brace: suggestInsideGrouping, // same handler as inside_grouping, kept separate for context readability ({} vs by())
   after_label_name: () => suggestLabelMatchers(),
-  after_label_operator: () => suggestLabelValues(),
+  after_label_operator: ({ variables, supportsControls }) =>
+    suggestLabelValues(variables, supportsControls),
   after_label_selector: ({ position }) => suggestAfterLabelSelector(position),
   after_metric: ({ position }) => suggestMetrics(position),
 };

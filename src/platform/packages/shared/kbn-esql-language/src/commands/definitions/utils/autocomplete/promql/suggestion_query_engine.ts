@@ -8,6 +8,7 @@
  */
 
 import { PromQLParser } from '@elastic/esql';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { ICommandContext, ISuggestionItem } from '../../../../registry/types';
 import { getQueryPosition } from './query_position';
 import { getPreGroupedAggregationName } from '../../promql';
@@ -22,10 +23,12 @@ interface SuggestForPromqlQueryInput {
   shouldWrap: boolean;
   queryText?: string;
   cursorRelative?: number;
+  variables?: ESQLControlVariable[];
+  supportsControls?: boolean;
 }
 
 export function suggestForPromqlQuery(input: SuggestForPromqlQueryInput): ISuggestionItem[] {
-  const { columns, shouldWrap, queryText, cursorRelative } = input;
+  const { columns, shouldWrap, queryText, cursorRelative, variables, supportsControls } = input;
 
   if (!queryText || cursorRelative === undefined) {
     return buildVectorSuggestions(columns, [], shouldWrap);
@@ -51,6 +54,8 @@ export function suggestForPromqlQuery(input: SuggestForPromqlQueryInput): ISugge
       columns,
       shouldWrap,
       preGroupedAgg,
+      variables,
+      supportsControls,
     }) ?? []
   );
 }

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import { mockContext, getMockCallbacks } from '../../../__tests__/commands/context_fixtures';
 import { suggest } from '../../../__tests__/commands/autocomplete';
 import { autocomplete } from './autocomplete';
@@ -984,6 +985,32 @@ describe('label selector suggestions', () => {
       textsContain: ['"${0:value}"'],
     });
   });
+
+  test.each([
+    ['equality', 'PROMQL rate(bytes_counter{job= '],
+    ['inequality', 'PROMQL rate(bytes_counter{job!= '],
+    ['regex match', 'PROMQL rate(bytes_counter{job=~ '],
+    ['regex not match', 'PROMQL rate(bytes_counter{job!~ '],
+  ])(
+    'suggests create control and existing value variables after %s label operator',
+    async (_label, query) => {
+      const variables: ESQLControlVariable[] = [
+        { key: 'env', value: 'prod', type: ESQLVariableType.VALUES },
+        { key: 'region', value: 'eu', type: ESQLVariableType.VALUES },
+        { key: 'metricName', value: 'rate', type: ESQLVariableType.FUNCTIONS },
+      ];
+
+      await expectPromqlSuggestions(
+        query,
+        {
+          labelsContain: ['Create control', '?env', '?region'],
+          labelsNotContain: ['?metricName'],
+        },
+        mockCallbacks,
+        { ...mockContext, supportsControls: true, variables }
+      );
+    }
+  );
 
   test('suggests comma after complete label value', async () => {
     await expectPromqlSuggestions('PROMQL rate(http_requests{job="api" ', {
