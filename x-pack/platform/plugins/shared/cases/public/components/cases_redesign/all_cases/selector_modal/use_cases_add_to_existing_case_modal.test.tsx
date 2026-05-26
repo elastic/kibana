@@ -9,7 +9,7 @@ import { waitFor, renderHook, act, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
-import AllCasesSelectorModal from '.';
+import { AllCasesSelectorModal } from '../../../all_cases/selector_modal/all_cases_selector_modal';
 import type { CaseUI } from '../../../../../common';
 import { CaseStatuses } from '../../../../../common/types/domain';
 import { allCasesPermissions, renderWithTestingProviders } from '../../../../common/mock';
@@ -32,7 +32,7 @@ jest.mock('../../../../common/lib/kibana/use_application');
 jest.mock('../../../../containers/use_create_attachments');
 jest.mock('../../../../containers/use_bulk_post_observables');
 // dummy mock, will call onRowclick when rendering
-jest.mock('./all_cases_selector_modal', () => {
+jest.mock('../../../all_cases/selector_modal/all_cases_selector_modal', () => {
   return {
     AllCasesSelectorModal: jest.fn(),
   };
