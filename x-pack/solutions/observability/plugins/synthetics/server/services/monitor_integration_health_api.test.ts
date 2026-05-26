@@ -21,15 +21,19 @@ import { MonitorIntegrationHealthApi } from './monitor_integration_health_api';
 
 jest.mock('../synthetics_service/get_private_locations');
 jest.mock('../synthetics_service/private_location/synthetics_private_location');
+jest.mock('../synthetics_service/private_location/package_policy_service');
 
-import { getPrivateLocations } from '../synthetics_service/get_private_locations';
+import { getPrivateLocationsForNamespaces } from '../synthetics_service/get_private_locations';
 import { SyntheticsPrivateLocation } from '../synthetics_service/private_location/synthetics_private_location';
+import { PackagePolicyService } from '../synthetics_service/private_location/package_policy_service';
 
-const mockedGetPrivateLocations = getPrivateLocations as jest.MockedFunction<
-  typeof getPrivateLocations
->;
+const mockedGetPrivateLocationsForNamespaces =
+  getPrivateLocationsForNamespaces as jest.MockedFunction<typeof getPrivateLocationsForNamespaces>;
 const MockedSyntheticsPrivateLocation = SyntheticsPrivateLocation as jest.MockedClass<
   typeof SyntheticsPrivateLocation
+>;
+const MockedPackagePolicyService = PackagePolicyService as jest.MockedClass<
+  typeof PackagePolicyService
 >;
 
 const SPACE_ID = 'default';
@@ -70,14 +74,30 @@ const createPackagePolicy = (policyId: string, agentPolicyIds: string[]): Packag
     policy_ids: agentPolicyIds,
   } as unknown as PackagePolicy);
 
-const buildApi = (overrides: {
-  monitorConfigRepository?: { get: jest.Mock };
-  fleetGetByIDs?: jest.Mock;
+interface BuildApiOverrides {
+  monitorConfigRepository?: { getAcrossSpaces: jest.Mock };
+  /**
+   * Mocks the Synthetics PackagePolicyService wrapper that the health API
+   * uses to fetch package policies across spaces.
+   */
+  packagePolicyServiceGetByIds?: jest.Mock;
   fleetAgentPolicyGetByIds?: jest.Mock;
   fleetGetInstallation?: jest.Mock;
   fleetGetAgentStatusForAgentPolicy?: jest.Mock;
-}): MonitorIntegrationHealthApi => {
-  const fleetGetByIDs = overrides.fleetGetByIDs ?? jest.fn().mockResolvedValue([]);
+  getUnsafeInternalClient?: jest.Mock;
+  spaceId?: string;
+}
+
+const buildApi = (overrides: BuildApiOverrides = {}): MonitorIntegrationHealthApi => {
+  const packagePolicyServiceGetByIds =
+    overrides.packagePolicyServiceGetByIds ?? jest.fn().mockResolvedValue([]);
+
+  MockedPackagePolicyService.mockImplementation(
+    () =>
+      ({
+        getByIds: packagePolicyServiceGetByIds,
+      } as any)
+  );
 
   const fleetAgentPolicyGetByIds =
     overrides.fleetAgentPolicyGetByIds ??
@@ -97,10 +117,12 @@ const buildApi = (overrides: {
     coreStart: {
       savedObjects: {
         createInternalRepository: jest.fn().mockReturnValue({}),
+        getUnsafeInternalClient:
+          overrides.getUnsafeInternalClient ??
+          jest.fn().mockReturnValue({ asScopedToNamespace: jest.fn().mockReturnValue({}) }),
       },
     },
     fleet: {
-      packagePolicyService: { getByIDs: fleetGetByIDs },
       agentPolicyService: { getByIds: fleetAgentPolicyGetByIds },
       packageService: {
         asInternalUser: { getInstallation: fleetGetInstallation },
@@ -116,14 +138,14 @@ const buildApi = (overrides: {
   const savedObjectsClient = {} as SavedObjectsClientContract;
 
   const monitorConfigRepository = (overrides.monitorConfigRepository ?? {
-    get: jest.fn(),
+    getAcrossSpaces: jest.fn(),
   }) as unknown as MonitorConfigRepository;
 
   return new MonitorIntegrationHealthApi(
     server,
     savedObjectsClient,
     monitorConfigRepository,
-    SPACE_ID
+    overrides.spaceId ?? SPACE_ID
   );
 };
 
@@ -169,7 +191,7 @@ describe('MonitorIntegrationHealthApi', () => {
         } as any)
     );
 
-    mockedGetPrivateLocations.mockResolvedValue([]);
+    mockedGetPrivateLocationsForNamespaces.mockResolvedValue([]);
   });
 
   describe('monitor fetching and partial errors', () => {
@@ -180,7 +202,7 @@ describe('MonitorIntegrationHealthApi', () => {
       );
       const api = buildApi({
         monitorConfigRepository: {
-          get: jest.fn().mockRejectedValue(notFoundError),
+          getAcrossSpaces: jest.fn().mockRejectedValue(notFoundError),
         },
       });
 
@@ -204,7 +226,7 @@ describe('MonitorIntegrationHealthApi', () => {
         .mockResolvedValueOnce(successSO)
         .mockRejectedValueOnce(notFoundError);
 
-      const api = buildApi({ monitorConfigRepository: { get: getMock } });
+      const api = buildApi({ monitorConfigRepository: { getAcrossSpaces: getMock } });
 
       const result = await api.getHealth(['mon-1', 'mon-2']);
 
@@ -218,7 +240,7 @@ describe('MonitorIntegrationHealthApi', () => {
     it('provides a default error message when rejection has no message', async () => {
       const api = buildApi({
         monitorConfigRepository: {
-          get: jest.fn().mockRejectedValue({}),
+          getAcrossSpaces: jest.fn().mockRejectedValue({}),
         },
       });
 
@@ -235,7 +257,7 @@ describe('MonitorIntegrationHealthApi', () => {
       );
       const api = buildApi({
         monitorConfigRepository: {
-          get: jest.fn().mockRejectedValue(forbiddenError),
+          getAcrossSpaces: jest.fn().mockRejectedValue(forbiddenError),
         },
       });
 
@@ -249,7 +271,7 @@ describe('MonitorIntegrationHealthApi', () => {
     it('defaults statusCode to 500 for generic errors without output.statusCode', async () => {
       const api = buildApi({
         monitorConfigRepository: {
-          get: jest.fn().mockRejectedValue(new Error('Something went wrong')),
+          getAcrossSpaces: jest.fn().mockRejectedValue(new Error('Something went wrong')),
         },
       });
 
@@ -268,7 +290,7 @@ describe('MonitorIntegrationHealthApi', () => {
       });
 
       const api = buildApi({
-        monitorConfigRepository: { get: jest.fn().mockResolvedValue(so) },
+        monitorConfigRepository: { getAcrossSpaces: jest.fn().mockResolvedValue(so) },
       });
 
       const result = await api.getHealth(['mon-1']);
@@ -292,15 +314,15 @@ describe('MonitorIntegrationHealthApi', () => {
         locations: [{ id: 'priv-loc-1', label: 'Private Loc 1', isServiceManaged: false }],
       });
 
-      mockedGetPrivateLocations.mockResolvedValue([privateLoc]);
+      mockedGetPrivateLocationsForNamespaces.mockResolvedValue([privateLoc]);
 
       const expectedPolicyId = 'mon-1-priv-loc-1';
       const packagePolicy = createPackagePolicy(expectedPolicyId, ['agent-policy-1']);
-      const fleetGetByIDs = jest.fn().mockResolvedValue([packagePolicy]);
+      const packagePolicyServiceGetByIds = jest.fn().mockResolvedValue([packagePolicy]);
 
       const api = buildApi({
-        monitorConfigRepository: { get: jest.fn().mockResolvedValue(so) },
-        fleetGetByIDs,
+        monitorConfigRepository: { getAcrossSpaces: jest.fn().mockResolvedValue(so) },
+        packagePolicyServiceGetByIds,
       });
 
       const result = await api.getHealth(['mon-1']);
@@ -331,12 +353,12 @@ describe('MonitorIntegrationHealthApi', () => {
         locations: [{ id: 'priv-loc-1', label: 'Private Loc 1', isServiceManaged: false }],
       });
 
-      mockedGetPrivateLocations.mockResolvedValue([privateLoc]);
+      mockedGetPrivateLocationsForNamespaces.mockResolvedValue([privateLoc]);
 
-      const fleetGetByIDs = jest.fn().mockResolvedValue([]);
+      const packagePolicyServiceGetByIds = jest.fn().mockResolvedValue([]);
       const api = buildApi({
-        monitorConfigRepository: { get: jest.fn().mockResolvedValue(so) },
-        fleetGetByIDs,
+        monitorConfigRepository: { getAcrossSpaces: jest.fn().mockResolvedValue(so) },
+        packagePolicyServiceGetByIds,
       });
 
       const result = await api.getHealth(['mon-1']);
@@ -354,10 +376,10 @@ describe('MonitorIntegrationHealthApi', () => {
         locations: [{ id: 'gone-loc', label: 'Gone Location', isServiceManaged: false }],
       });
 
-      mockedGetPrivateLocations.mockResolvedValue([]);
+      mockedGetPrivateLocationsForNamespaces.mockResolvedValue([]);
 
       const api = buildApi({
-        monitorConfigRepository: { get: jest.fn().mockResolvedValue(so) },
+        monitorConfigRepository: { getAcrossSpaces: jest.fn().mockResolvedValue(so) },
       });
 
       const result = await api.getHealth(['mon-1']);
@@ -374,10 +396,10 @@ describe('MonitorIntegrationHealthApi', () => {
         locations: [{ id: 'gone-loc', isServiceManaged: false }],
       });
 
-      mockedGetPrivateLocations.mockResolvedValue([]);
+      mockedGetPrivateLocationsForNamespaces.mockResolvedValue([]);
 
       const api = buildApi({
-        monitorConfigRepository: { get: jest.fn().mockResolvedValue(so) },
+        monitorConfigRepository: { getAcrossSpaces: jest.fn().mockResolvedValue(so) },
       });
 
       const result = await api.getHealth(['mon-1']);
@@ -393,11 +415,11 @@ describe('MonitorIntegrationHealthApi', () => {
         locations: [{ id: 'priv-loc-1', label: 'Private Loc 1', isServiceManaged: false }],
       });
 
-      mockedGetPrivateLocations.mockResolvedValue([privateLoc]);
+      mockedGetPrivateLocationsForNamespaces.mockResolvedValue([privateLoc]);
 
       const fleetAgentPolicyGetByIds = jest.fn().mockResolvedValue([]);
       const api = buildApi({
-        monitorConfigRepository: { get: jest.fn().mockResolvedValue(so) },
+        monitorConfigRepository: { getAcrossSpaces: jest.fn().mockResolvedValue(so) },
         fleetAgentPolicyGetByIds,
       });
 
@@ -420,17 +442,17 @@ describe('MonitorIntegrationHealthApi', () => {
         ],
       });
 
-      mockedGetPrivateLocations.mockResolvedValue([privateLoc1, privateLoc2]);
+      mockedGetPrivateLocationsForNamespaces.mockResolvedValue([privateLoc1, privateLoc2]);
 
       const expectedPolicyId1 = 'mon-1-loc-1';
-      const fleetGetByIDs = jest
+      const packagePolicyServiceGetByIds = jest
         .fn()
         .mockResolvedValue([createPackagePolicy(expectedPolicyId1, ['existing-agent'])]);
       const fleetAgentPolicyGetByIds = jest.fn().mockResolvedValue([{ id: 'existing-agent' }]);
 
       const api = buildApi({
-        monitorConfigRepository: { get: jest.fn().mockResolvedValue(so) },
-        fleetGetByIDs,
+        monitorConfigRepository: { getAcrossSpaces: jest.fn().mockResolvedValue(so) },
+        packagePolicyServiceGetByIds,
         fleetAgentPolicyGetByIds,
       });
 
@@ -453,15 +475,15 @@ describe('MonitorIntegrationHealthApi', () => {
         locations: [{ id: 'priv-loc-1', label: 'Private Loc 1', isServiceManaged: false }],
       });
 
-      mockedGetPrivateLocations.mockResolvedValue([privateLoc]);
+      mockedGetPrivateLocationsForNamespaces.mockResolvedValue([privateLoc]);
 
       const expectedPolicyId = 'mon-1-priv-loc-1';
       const packagePolicy = createPackagePolicy(expectedPolicyId, ['agent-policy-1']);
-      const fleetGetByIDs = jest.fn().mockResolvedValue([packagePolicy]);
+      const packagePolicyServiceGetByIds = jest.fn().mockResolvedValue([packagePolicy]);
 
       const api = buildApi({
-        monitorConfigRepository: { get: jest.fn().mockResolvedValue(so) },
-        fleetGetByIDs,
+        monitorConfigRepository: { getAcrossSpaces: jest.fn().mockResolvedValue(so) },
+        packagePolicyServiceGetByIds,
       });
 
       const result = await api.getHealth(['mon-1']);
@@ -481,29 +503,29 @@ describe('MonitorIntegrationHealthApi', () => {
         locations: [{ id: 'priv-loc-1', label: 'Private Loc 1', isServiceManaged: false }],
       });
 
-      mockedGetPrivateLocations.mockResolvedValue([privateLoc]);
+      mockedGetPrivateLocationsForNamespaces.mockResolvedValue([privateLoc]);
 
       const expectedPolicyId = `${monitorQueryId}-priv-loc-1`;
       const wrongPolicyId = `so-uuid-priv-loc-1`;
       const packagePolicy = createPackagePolicy(expectedPolicyId, ['agent-policy-1']);
-      const fleetGetByIDs = jest.fn().mockResolvedValue([packagePolicy]);
+      const packagePolicyServiceGetByIds = jest.fn().mockResolvedValue([packagePolicy]);
 
       const api = buildApi({
-        monitorConfigRepository: { get: jest.fn().mockResolvedValue(so) },
-        fleetGetByIDs,
+        monitorConfigRepository: { getAcrossSpaces: jest.fn().mockResolvedValue(so) },
+        packagePolicyServiceGetByIds,
       });
 
       const result = await api.getHealth(['so-uuid']);
 
-      expect(fleetGetByIDs).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.arrayContaining([expectedPolicyId]),
-        expect.anything()
+      expect(packagePolicyServiceGetByIds).toHaveBeenCalledWith(
+        expect.objectContaining({
+          packagePolicyIds: expect.arrayContaining([expectedPolicyId]),
+        })
       );
-      expect(fleetGetByIDs).not.toHaveBeenCalledWith(
-        expect.anything(),
-        expect.arrayContaining([wrongPolicyId]),
-        expect.anything()
+      expect(packagePolicyServiceGetByIds).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          packagePolicyIds: expect.arrayContaining([wrongPolicyId]),
+        })
       );
       expect(result.monitors[0].privateLocations[0].status).toBe(
         PrivateLocationHealthStatusValue.Healthy
@@ -533,9 +555,9 @@ describe('MonitorIntegrationHealthApi', () => {
         ],
       });
 
-      mockedGetPrivateLocations.mockResolvedValue([privateLoc1, privateLoc2]);
+      mockedGetPrivateLocationsForNamespaces.mockResolvedValue([privateLoc1, privateLoc2]);
 
-      const fleetGetByIDs = jest
+      const packagePolicyServiceGetByIds = jest
         .fn()
         .mockResolvedValue([
           createPackagePolicy('mon-1-loc-1', ['agent-1']),
@@ -545,8 +567,8 @@ describe('MonitorIntegrationHealthApi', () => {
       const getMock = jest.fn().mockResolvedValueOnce(so1).mockResolvedValueOnce(so2);
 
       const api = buildApi({
-        monitorConfigRepository: { get: getMock },
-        fleetGetByIDs,
+        monitorConfigRepository: { getAcrossSpaces: getMock },
+        packagePolicyServiceGetByIds,
       });
 
       const result = await api.getHealth(['mon-1', 'mon-2']);
@@ -578,15 +600,15 @@ describe('MonitorIntegrationHealthApi', () => {
         locations: [{ id: 'priv-loc-1', label: 'Private Loc 1', isServiceManaged: false }],
       });
 
-      mockedGetPrivateLocations.mockResolvedValue([privateLoc]);
+      mockedGetPrivateLocationsForNamespaces.mockResolvedValue([privateLoc]);
 
       const legacyPolicyId = `mon-1-priv-loc-1-${SPACE_ID}`;
       const packagePolicy = createPackagePolicy(legacyPolicyId, ['agent-policy-1']);
-      const fleetGetByIDs = jest.fn().mockResolvedValue([packagePolicy]);
+      const packagePolicyServiceGetByIds = jest.fn().mockResolvedValue([packagePolicy]);
 
       const api = buildApi({
-        monitorConfigRepository: { get: jest.fn().mockResolvedValue(so) },
-        fleetGetByIDs,
+        monitorConfigRepository: { getAcrossSpaces: jest.fn().mockResolvedValue(so) },
+        packagePolicyServiceGetByIds,
       });
 
       const result = await api.getHealth(['mon-1']);
@@ -604,11 +626,11 @@ describe('MonitorIntegrationHealthApi', () => {
         locations: [{ id: 'priv-loc-1', label: 'Private Loc 1', isServiceManaged: false }],
       });
 
-      mockedGetPrivateLocations.mockResolvedValue([privateLoc]);
+      mockedGetPrivateLocationsForNamespaces.mockResolvedValue([privateLoc]);
 
       const newPolicyId = 'mon-1-priv-loc-1';
       const legacyPolicyId = `mon-1-priv-loc-1-${SPACE_ID}`;
-      const fleetGetByIDs = jest
+      const packagePolicyServiceGetByIds = jest
         .fn()
         .mockResolvedValue([
           createPackagePolicy(newPolicyId, ['agent-policy-1']),
@@ -616,8 +638,8 @@ describe('MonitorIntegrationHealthApi', () => {
         ]);
 
       const api = buildApi({
-        monitorConfigRepository: { get: jest.fn().mockResolvedValue(so) },
-        fleetGetByIDs,
+        monitorConfigRepository: { getAcrossSpaces: jest.fn().mockResolvedValue(so) },
+        packagePolicyServiceGetByIds,
       });
 
       const result = await api.getHealth(['mon-1']);
@@ -634,15 +656,15 @@ describe('MonitorIntegrationHealthApi', () => {
         locations: [{ id: 'priv-loc-1', label: 'Private Loc 1', isServiceManaged: false }],
       });
 
-      mockedGetPrivateLocations.mockResolvedValue([privateLoc]);
+      mockedGetPrivateLocationsForNamespaces.mockResolvedValue([privateLoc]);
 
       const legacyPolicyId = `mon-1-priv-loc-1-${SPACE_ID}`;
       const packagePolicy = createPackagePolicy(legacyPolicyId, ['wrong-agent']);
-      const fleetGetByIDs = jest.fn().mockResolvedValue([packagePolicy]);
+      const packagePolicyServiceGetByIds = jest.fn().mockResolvedValue([packagePolicy]);
 
       const api = buildApi({
-        monitorConfigRepository: { get: jest.fn().mockResolvedValue(so) },
-        fleetGetByIDs,
+        monitorConfigRepository: { getAcrossSpaces: jest.fn().mockResolvedValue(so) },
+        packagePolicyServiceGetByIds,
       });
 
       const result = await api.getHealth(['mon-1']);
@@ -661,18 +683,18 @@ describe('MonitorIntegrationHealthApi', () => {
         locations: [{ id: 'priv-loc-1', label: 'Private Loc 1', isServiceManaged: false }],
       });
 
-      mockedGetPrivateLocations.mockResolvedValue([privateLoc]);
+      mockedGetPrivateLocationsForNamespaces.mockResolvedValue([privateLoc]);
 
       const expectedPolicyId = 'mon-1-priv-loc-1';
       const packagePolicy = createPackagePolicy(expectedPolicyId, ['agent-policy-1']);
-      const fleetGetByIDs = jest.fn().mockResolvedValue([packagePolicy]);
+      const packagePolicyServiceGetByIds = jest.fn().mockResolvedValue([packagePolicy]);
       const fleetGetAgentStatusForAgentPolicy = jest
         .fn()
         .mockResolvedValue({ all: 0, active: 0, online: 0 });
 
       const api = buildApi({
-        monitorConfigRepository: { get: jest.fn().mockResolvedValue(so) },
-        fleetGetByIDs,
+        monitorConfigRepository: { getAcrossSpaces: jest.fn().mockResolvedValue(so) },
+        packagePolicyServiceGetByIds,
         fleetGetAgentStatusForAgentPolicy,
       });
 
@@ -692,18 +714,18 @@ describe('MonitorIntegrationHealthApi', () => {
         locations: [{ id: 'priv-loc-1', label: 'Private Loc 1', isServiceManaged: false }],
       });
 
-      mockedGetPrivateLocations.mockResolvedValue([privateLoc]);
+      mockedGetPrivateLocationsForNamespaces.mockResolvedValue([privateLoc]);
 
       const expectedPolicyId = 'mon-1-priv-loc-1';
       const packagePolicy = createPackagePolicy(expectedPolicyId, ['agent-policy-1']);
-      const fleetGetByIDs = jest.fn().mockResolvedValue([packagePolicy]);
+      const packagePolicyServiceGetByIds = jest.fn().mockResolvedValue([packagePolicy]);
       const fleetGetAgentStatusForAgentPolicy = jest
         .fn()
         .mockResolvedValue({ all: 2, active: 2, online: 0 });
 
       const api = buildApi({
-        monitorConfigRepository: { get: jest.fn().mockResolvedValue(so) },
-        fleetGetByIDs,
+        monitorConfigRepository: { getAcrossSpaces: jest.fn().mockResolvedValue(so) },
+        packagePolicyServiceGetByIds,
         fleetGetAgentStatusForAgentPolicy,
       });
 
@@ -721,18 +743,18 @@ describe('MonitorIntegrationHealthApi', () => {
         locations: [{ id: 'priv-loc-1', label: 'Private Loc 1', isServiceManaged: false }],
       });
 
-      mockedGetPrivateLocations.mockResolvedValue([privateLoc]);
+      mockedGetPrivateLocationsForNamespaces.mockResolvedValue([privateLoc]);
 
       const expectedPolicyId = 'mon-1-priv-loc-1';
       const packagePolicy = createPackagePolicy(expectedPolicyId, ['agent-policy-1']);
-      const fleetGetByIDs = jest.fn().mockResolvedValue([packagePolicy]);
+      const packagePolicyServiceGetByIds = jest.fn().mockResolvedValue([packagePolicy]);
       const fleetGetAgentStatusForAgentPolicy = jest
         .fn()
         .mockResolvedValue({ all: 3, active: 3, online: 1 });
 
       const api = buildApi({
-        monitorConfigRepository: { get: jest.fn().mockResolvedValue(so) },
-        fleetGetByIDs,
+        monitorConfigRepository: { getAcrossSpaces: jest.fn().mockResolvedValue(so) },
+        packagePolicyServiceGetByIds,
         fleetGetAgentStatusForAgentPolicy,
       });
 
@@ -745,6 +767,250 @@ describe('MonitorIntegrationHealthApi', () => {
     });
   });
 
+  describe('cross-space lookups (issue #270477)', () => {
+    it('passes every space that has monitors to monitorConfigRepository.getAcrossSpaces', async () => {
+      MockedSyntheticsPrivateLocation.mockImplementation(
+        () =>
+          ({
+            getPolicyId: jest.fn(
+              (config: { origin?: string; id: string }, locId: string) => `${config.id}-${locId}`
+            ),
+            getLegacyPolicyIdsForAllSpaces: jest.fn(() => []),
+            getAllSpacesWithMonitors: jest.fn().mockResolvedValue(['space-two', 'space-three']),
+            getPolicyIdFormatInfo: jest.fn(() => ({
+              hasNewFormatPolicyId: false,
+              hasAnyLegacyPolicyId: false,
+              legacyPolicyIds: [],
+            })),
+          } as any)
+      );
+
+      const so = createMonitorSO('mon-1');
+      const getAcrossSpaces = jest.fn().mockResolvedValue(so);
+
+      const api = buildApi({
+        monitorConfigRepository: { getAcrossSpaces },
+        spaceId: 'default',
+      });
+
+      await api.getHealth(['mon-1']);
+
+      expect(getAcrossSpaces).toHaveBeenCalledTimes(1);
+      const [calledId, calledNamespaces] = getAcrossSpaces.mock.calls[0];
+      expect(calledId).toBe('mon-1');
+      expect(new Set(calledNamespaces)).toEqual(new Set(['default', 'space-two', 'space-three']));
+    });
+
+    it('passes additional spaces (excluding the request space) to PackagePolicyService.getByIds', async () => {
+      MockedSyntheticsPrivateLocation.mockImplementation(
+        () =>
+          ({
+            getPolicyId: jest.fn(
+              (config: { origin?: string; id: string }, locId: string) => `${config.id}-${locId}`
+            ),
+            getLegacyPolicyIdsForAllSpaces: jest.fn(() => []),
+            // Reproduces the bug scenario in #270477: caller is in `default`,
+            // monitors live in `space-two`.
+            getAllSpacesWithMonitors: jest.fn().mockResolvedValue(['space-two']),
+            getPolicyIdFormatInfo: jest.fn(
+              (
+                config: { id: string },
+                locId: string,
+                existingPolicies: Array<{ id: string }> | undefined
+              ) => {
+                const newId = `${config.id}-${locId}`;
+                const hasNewFormatPolicyId = existingPolicies?.some((p) => p.id === newId) ?? false;
+                return {
+                  hasNewFormatPolicyId,
+                  hasAnyLegacyPolicyId: false,
+                  legacyPolicyIds: [],
+                };
+              }
+            ),
+          } as any)
+      );
+
+      const privateLoc = createPrivateLocation('priv-loc-1', 'agent-policy-1');
+      mockedGetPrivateLocationsForNamespaces.mockResolvedValue([privateLoc]);
+
+      const so = createMonitorSO('mon-1', {
+        locations: [{ id: 'priv-loc-1', label: 'Private Loc 1', isServiceManaged: false }],
+      });
+
+      const packagePolicyServiceGetByIds = jest
+        .fn()
+        .mockResolvedValue([createPackagePolicy('mon-1-priv-loc-1', ['agent-policy-1'])]);
+
+      const api = buildApi({
+        monitorConfigRepository: { getAcrossSpaces: jest.fn().mockResolvedValue(so) },
+        packagePolicyServiceGetByIds,
+        spaceId: 'default',
+      });
+
+      const result = await api.getHealth(['mon-1']);
+
+      expect(packagePolicyServiceGetByIds).toHaveBeenCalledTimes(1);
+      const [args] = packagePolicyServiceGetByIds.mock.calls[0];
+      expect(args.spaceId).toBe('default');
+      // The request's space must not be repeated under additionalSpaceIds.
+      expect(args.additionalSpaceIds).not.toContain('default');
+      // Any other space that has monitors must be included so cross-space
+      // package policies are discoverable.
+      expect(args.additionalSpaceIds).toEqual(expect.arrayContaining(['space-two']));
+
+      // The monitor's package policy was created in a different space, but the
+      // wrapper finds it — so the location is reported as healthy.
+      expect(result.monitors[0].privateLocations[0].status).toBe(
+        PrivateLocationHealthStatusValue.Healthy
+      );
+    });
+
+    it('uses getUnsafeInternalClient with namespace-scoped clients for agent policy lookup', async () => {
+      const privateLoc = createPrivateLocation('priv-loc-1', 'agent-policy-1');
+      mockedGetPrivateLocationsForNamespaces.mockResolvedValue([privateLoc]);
+
+      const so = createMonitorSO('mon-1', {
+        locations: [{ id: 'priv-loc-1', label: 'Private Loc 1', isServiceManaged: false }],
+      });
+
+      const asScopedToNamespace = jest.fn().mockReturnValue({});
+      const getUnsafeInternalClient = jest.fn().mockReturnValue({ asScopedToNamespace });
+
+      const packagePolicy = createPackagePolicy('mon-1-priv-loc-1', ['agent-policy-1']);
+
+      const api = buildApi({
+        monitorConfigRepository: { getAcrossSpaces: jest.fn().mockResolvedValue(so) },
+        packagePolicyServiceGetByIds: jest.fn().mockResolvedValue([packagePolicy]),
+        getUnsafeInternalClient,
+      });
+
+      await api.getHealth(['mon-1']);
+
+      expect(getUnsafeInternalClient).toHaveBeenCalled();
+      expect(asScopedToNamespace).toHaveBeenCalledWith(SPACE_ID);
+    });
+
+    it('finds agent policies that only exist in a non-default space', async () => {
+      // Reproduces the case in which an agent policy has space_ids: ['space-two'] so an internal
+      // client scoped to 'default' cannot find it.
+      const CUSTOM_SPACE = 'space-two';
+      const privateLoc = createPrivateLocation('priv-loc-1', 'space-agent-policy');
+      mockedGetPrivateLocationsForNamespaces.mockResolvedValue([privateLoc]);
+
+      const so = createMonitorSO('mon-1', {
+        locations: [{ id: 'priv-loc-1', label: 'Private Loc 1', isServiceManaged: false }],
+      });
+
+      // Override so getAllSpacesWithMonitors includes CUSTOM_SPACE, causing the health
+      // API to build spaces = {'default', CUSTOM_SPACE} for agent policy queries.
+      MockedSyntheticsPrivateLocation.mockImplementationOnce(
+        () =>
+          ({
+            getPolicyId: jest.fn(
+              (config: { origin?: string; id: string }, locId: string) => `${config.id}-${locId}`
+            ),
+            getLegacyPolicyIdsForAllSpaces: jest.fn(() => []),
+            getAllSpacesWithMonitors: jest.fn().mockResolvedValue([CUSTOM_SPACE]),
+            getPolicyIdFormatInfo: jest.fn(
+              (
+                config: { id: string },
+                locId: string,
+                existingPolicies: Array<{ id: string }> | undefined
+              ) => ({
+                hasNewFormatPolicyId:
+                  existingPolicies?.some((p) => p.id === `${config.id}-${locId}`) ?? false,
+                hasAnyLegacyPolicyId: false,
+                legacyPolicyIds: [],
+              })
+            ),
+          } as any)
+      );
+
+      // Simulate the policy being absent in 'default' but present in CUSTOM_SPACE.
+      const fleetAgentPolicyGetByIds = jest
+        .fn()
+        .mockResolvedValueOnce([]) // default namespace → not found
+        .mockResolvedValueOnce([{ id: 'space-agent-policy' }]); // CUSTOM_SPACE → found
+
+      const packagePolicy = createPackagePolicy('mon-1-priv-loc-1', ['space-agent-policy']);
+
+      const api = buildApi({
+        monitorConfigRepository: { getAcrossSpaces: jest.fn().mockResolvedValue(so) },
+        packagePolicyServiceGetByIds: jest.fn().mockResolvedValue([packagePolicy]),
+        fleetAgentPolicyGetByIds,
+      });
+
+      const result = await api.getHealth(['mon-1']);
+
+      // Both spaces were queried (default + CUSTOM_SPACE)
+      expect(fleetAgentPolicyGetByIds).toHaveBeenCalledTimes(2);
+      // Policy found in CUSTOM_SPACE → status must not be MissingAgentPolicy
+      expect(result.monitors[0].privateLocations[0].status).not.toBe(
+        PrivateLocationHealthStatusValue.MissingAgentPolicy
+      );
+    });
+
+    it('fetches private locations across all spaces so monitors in non-default spaces are not reported as missing_location (Bug #4)', async () => {
+      // Reproduces the case in which a private location is created in a custom space. When _health is
+      // called from 'default', getPrivateLocations would be scoped to 'default' and could
+      // not find the location → MissingLocation. For this reason, we use getPrivateLocationsForNamespaces
+      // with allSpaces so every relevant namespace is searched.
+      const CUSTOM_SPACE = 'space-two';
+      const privateLoc = createPrivateLocation('priv-loc-1', 'agent-policy-1');
+
+      // Override so getAllSpacesWithMonitors returns CUSTOM_SPACE, causing allSpaces
+      // to include it. The health API then passes allSpaces to getPrivateLocationsForNamespaces.
+      MockedSyntheticsPrivateLocation.mockImplementationOnce(
+        () =>
+          ({
+            getPolicyId: jest.fn(
+              (config: { origin?: string; id: string }, locId: string) => `${config.id}-${locId}`
+            ),
+            getLegacyPolicyIdsForAllSpaces: jest.fn(() => []),
+            getAllSpacesWithMonitors: jest.fn().mockResolvedValue([CUSTOM_SPACE]),
+            getPolicyIdFormatInfo: jest.fn(
+              (
+                config: { id: string },
+                locId: string,
+                existingPolicies: Array<{ id: string }> | undefined
+              ) => ({
+                hasNewFormatPolicyId:
+                  existingPolicies?.some((p) => p.id === `${config.id}-${locId}`) ?? false,
+                hasAnyLegacyPolicyId: false,
+                legacyPolicyIds: [],
+              })
+            ),
+          } as any)
+      );
+
+      mockedGetPrivateLocationsForNamespaces.mockResolvedValue([privateLoc]);
+
+      const so = createMonitorSO('mon-1', {
+        locations: [{ id: 'priv-loc-1', label: 'Private Loc 1', isServiceManaged: false }],
+      });
+
+      const packagePolicy = createPackagePolicy('mon-1-priv-loc-1', ['agent-policy-1']);
+
+      const api = buildApi({
+        monitorConfigRepository: { getAcrossSpaces: jest.fn().mockResolvedValue(so) },
+        packagePolicyServiceGetByIds: jest.fn().mockResolvedValue([packagePolicy]),
+      });
+
+      const result = await api.getHealth(['mon-1']);
+
+      // getPrivateLocationsForNamespaces must be called with allSpaces so cross-space
+      // locations are discoverable — verify both the default and CUSTOM_SPACE are included.
+      expect(mockedGetPrivateLocationsForNamespaces).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.arrayContaining([SPACE_ID, CUSTOM_SPACE])
+      );
+      // Private location was found → status must not be MissingLocation
+      expect(result.monitors[0].privateLocations[0].status).not.toBe(
+        PrivateLocationHealthStatusValue.MissingLocation
+      );
+    });
+  });
+
   describe('healthy status has no reason field', () => {
     it('omits reason for healthy locations', async () => {
       const privateLoc = createPrivateLocation('priv-loc-1', 'agent-policy-1');
@@ -752,15 +1018,15 @@ describe('MonitorIntegrationHealthApi', () => {
         locations: [{ id: 'priv-loc-1', label: 'Private Loc 1', isServiceManaged: false }],
       });
 
-      mockedGetPrivateLocations.mockResolvedValue([privateLoc]);
+      mockedGetPrivateLocationsForNamespaces.mockResolvedValue([privateLoc]);
 
       const expectedPolicyId = 'mon-1-priv-loc-1';
       const packagePolicy = createPackagePolicy(expectedPolicyId, ['agent-policy-1']);
-      const fleetGetByIDs = jest.fn().mockResolvedValue([packagePolicy]);
+      const packagePolicyServiceGetByIds = jest.fn().mockResolvedValue([packagePolicy]);
 
       const api = buildApi({
-        monitorConfigRepository: { get: jest.fn().mockResolvedValue(so) },
-        fleetGetByIDs,
+        monitorConfigRepository: { getAcrossSpaces: jest.fn().mockResolvedValue(so) },
+        packagePolicyServiceGetByIds,
       });
 
       const result = await api.getHealth(['mon-1']);
