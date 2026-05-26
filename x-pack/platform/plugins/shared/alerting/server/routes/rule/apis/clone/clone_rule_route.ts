@@ -18,7 +18,7 @@ import type {
 import { cloneRuleRequestParamsSchemaV1 } from '../../../../../common/routes/rule/apis/clone';
 import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
 import type { Rule } from '../../../../application/rule/types';
-import { transformRuleToRuleResponseV1 } from '../../transforms';
+import { transformRuleToRuleResponseInternalV1 } from '../../transforms';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 import { validateInternalRuleType } from '../../../lib/validate_internal_rule_type';
 
@@ -60,7 +60,7 @@ export const cloneRuleRoute = (
             })) as Rule<RuleParamsV1>;
 
             const response: CloneRuleResponseV1<RuleParamsV1> = {
-              body: transformRuleToRuleResponseV1<RuleParamsV1>(cloneRule),
+              body: transformRuleToRuleResponseInternalV1<RuleParamsV1>(cloneRule),
             };
 
             return res.ok(response);
