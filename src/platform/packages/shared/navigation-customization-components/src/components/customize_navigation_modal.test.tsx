@@ -69,14 +69,14 @@ describe('CustomizeNavigationModal', () => {
   it('should show the space callout when not dismissed', () => {
     renderWithI18n(<CustomizeNavigationModal {...defaultProps} isCalloutDismissed={false} />);
     expect(
-      screen.getByText('The changes will apply to your current space only')
+      screen.getByText('Reorder or hide apps in this space without affecting other users.')
     ).toBeInTheDocument();
   });
 
   it('should not show the space callout when dismissed', () => {
     renderWithI18n(<CustomizeNavigationModal {...defaultProps} isCalloutDismissed={true} />);
     expect(
-      screen.queryByText('The changes will apply to your current space only')
+      screen.queryByText('Reorder or hide apps in this space without affecting other users.')
     ).not.toBeInTheDocument();
   });
 
