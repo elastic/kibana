@@ -154,6 +154,20 @@ describe('transformSentinelRuleToOriginalRule', () => {
     });
   });
 
+  it('uses defaults for mixed calendar durations that cannot be represented as one unit', () => {
+    const result = transformSentinelRuleToOriginalRule({
+      ...baseSentinelRule,
+      queryFrequency: 'P1Y2M',
+      queryPeriod: 'P2M1D',
+    });
+
+    expect(result.annotations).toEqual({
+      from: 'now-360s',
+      to: 'now',
+      interval: '5m',
+    });
+  });
+
   it('uses the default time range when queryPeriod is empty', () => {
     const result = transformSentinelRuleToOriginalRule({
       ...baseSentinelRule,

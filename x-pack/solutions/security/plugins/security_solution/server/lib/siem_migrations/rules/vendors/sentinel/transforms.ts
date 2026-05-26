@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import type { Threat } from '../../../../../../common/api/detection_engine';
 import { DEFAULT_TRANSLATION_FIELDS } from '../../../../../../common/siem_migrations/constants';
 import type { OriginalRule } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
@@ -69,34 +68,52 @@ export function transformSentinelMitreMapping(
 const ISO_8601_DURATION_PATTERN =
   /^P(?=\d|T\d)(?:(?<years>\d+)Y)?(?:(?<months>\d+)M)?(?:(?<days>\d+)D)?(?:T(?=\d)(?:(?<hours>\d+)H)?(?:(?<minutes>\d+)M)?(?:(?<seconds>\d+)S)?)?$/;
 
-function convertToNativeEsqlUnits(isoString: string): string | undefined {
+function convertIsoDurationToDateMath(isoString: string): string | undefined {
   const match = ISO_8601_DURATION_PATTERN.exec(isoString);
   if (!match?.groups) {
     return undefined;
   }
 
-  const duration = moment.duration(isoString);
-  if (!Number.isFinite(duration.asSeconds()) || duration.asSeconds() === 0) {
+  const years = Number(match.groups.years ?? 0);
+  const months = Number(match.groups.months ?? 0);
+  const days = Number(match.groups.days ?? 0);
+  const hours = Number(match.groups.hours ?? 0);
+  const minutes = Number(match.groups.minutes ?? 0);
+  const seconds = Number(match.groups.seconds ?? 0);
+
+  const dateUnits = [
+    { value: years, suffix: 'y' },
+    { value: months, suffix: 'M' },
+    { value: days, suffix: 'd' },
+  ].filter(({ value }) => value > 0);
+  const totalTimeSeconds = hours * 60 * 60 + minutes * 60 + seconds;
+
+  if (dateUnits.length > 1 || (dateUnits.length === 1 && totalTimeSeconds > 0)) {
     return undefined;
   }
 
-  if (match.groups.seconds != null) {
-    return `${duration.asSeconds()}s`;
+  if (dateUnits.length === 1) {
+    const [dateUnit] = dateUnits;
+    return `${dateUnit.value}${dateUnit.suffix}`;
   }
-  if (match.groups.minutes != null) {
-    return `${duration.asMinutes()}m`;
+
+  if (seconds > 0) {
+    return `${totalTimeSeconds}s`;
   }
-  if (match.groups.hours != null) {
-    return `${duration.asHours()}h`;
+  if (minutes > 0) {
+    return `${hours * 60 + minutes}m`;
   }
-  if (match.groups.days != null) {
-    return `${duration.asDays()}d`;
+  if (hours > 0) {
+    return `${hours}h`;
   }
-  if (match.groups.months != null) {
-    return `${duration.asMonths()}M`;
+  if (days > 0) {
+    return `${days}d`;
   }
-  if (match.groups.years != null) {
-    return `${duration.asYears()}y`;
+  if (months > 0) {
+    return `${months}M`;
+  }
+  if (years > 0) {
+    return `${years}y`;
   }
 
   return undefined;
@@ -108,7 +125,7 @@ const isNonEmptyString = (value: string | undefined): value is string =>
 const transformQueryPeriodToTimeRange = (
   queryPeriodIso: string
 ): Pick<MigrationTranslationFields, 'from' | 'to'> | undefined => {
-  const period = convertToNativeEsqlUnits(queryPeriodIso);
+  const period = convertIsoDurationToDateMath(queryPeriodIso);
   if (!period) {
     return undefined;
   }
@@ -145,7 +162,7 @@ export function transformSentinelRuleToOriginalRule(rule: SentinelRule): Origina
             to: DEFAULT_TRANSLATION_FIELDS.to,
           }),
       interval: isNonEmptyString(rule.queryFrequency)
-        ? convertToNativeEsqlUnits(rule.queryFrequency) ?? DEFAULT_TRANSLATION_FIELDS.interval
+        ? convertIsoDurationToDateMath(rule.queryFrequency) ?? DEFAULT_TRANSLATION_FIELDS.interval
         : DEFAULT_TRANSLATION_FIELDS.interval,
     },
   };

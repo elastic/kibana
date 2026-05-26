@@ -10,10 +10,8 @@ import type { SentinelRule } from './types';
 
 type SupportedSentinelRuleKind = 'Scheduled' | 'NRT';
 
-const SUPPORTED_SENTINEL_RULE_KINDS: SupportedSentinelRuleKind[] = ['Scheduled', 'NRT'];
-
 const isSupportedSentinelRuleKind = (kind: string | undefined): kind is SupportedSentinelRuleKind =>
-  SUPPORTED_SENTINEL_RULE_KINDS.includes(kind as SupportedSentinelRuleKind);
+  kind === 'Scheduled' || kind === 'NRT';
 
 /**
  * Processes pre-validated Sentinel ARM template resources into SentinelRule objects.
