@@ -17,7 +17,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { ExecutionStatus, WorkflowRepository } from '@kbn/workflows';
+import { ExecutionStatus, pickManagedWorkflowFields, WorkflowRepository } from '@kbn/workflows';
 import type {
   BulkScheduleWorkflowResult,
   ConcurrencySettings,
@@ -109,10 +109,6 @@ const WORKFLOW_RESUME_TASK_MAX_ATTEMPTS = 3;
 const BULK_CANCEL_PAGE_SIZE = 10;
 
 type SetupDependencies = Pick<ContextDependencies, 'cloudSetup'>;
-type ManagedWorkflowExecutionMetadata = Pick<
-  EsWorkflowExecution,
-  'managed' | 'managedBy' | 'originManagedWorkflowId' | 'managedVersion'
->;
 
 export class WorkflowsExecutionEnginePlugin
   implements
@@ -522,7 +518,7 @@ export class WorkflowsExecutionEnginePlugin
                 id: generateUuid(),
                 spaceId,
                 workflowId: workflow.id,
-                ...this.buildManagedWorkflowExecutionMetadata(workflow),
+                ...pickManagedWorkflowFields(workflow),
                 isTestRun: false,
                 workflowDefinition: workflow.definition,
                 yaml: workflow.yaml,
@@ -638,12 +634,12 @@ export class WorkflowsExecutionEnginePlugin
     // Re-check that a workflow is still enabled right before persisting an
     // execution document.  The route-level check may have read a stale value
     // if a concurrent hard-delete disabled the workflow in the meantime.
-    // Skipped for test runs — unsaved workflows don't exist in the index.
+    // Skipped for ephemeral workflows — unsaved workflows don't exist in the workflow index.
     const ensureWorkflowEnabled = async (
       workflow: WorkflowExecutionEngineModel,
       spaceId: string
     ) => {
-      if (workflow.isTestRun) {
+      if (workflow.isEphemeral) {
         return;
       }
       const stillEnabled = await workflowRepository.isWorkflowEnabled(workflow.id, spaceId, {
@@ -690,7 +686,7 @@ export class WorkflowsExecutionEnginePlugin
         id: generateUuid(),
         spaceId,
         workflowId: workflow.id,
-        ...this.buildManagedWorkflowExecutionMetadata(workflow),
+        ...pickManagedWorkflowFields(workflow),
         isTestRun: workflow.isTestRun,
         workflowDefinition: workflow.definition,
         yaml: workflow.yaml,
@@ -943,9 +939,9 @@ export class WorkflowsExecutionEnginePlugin
         (item.context.spaceId as string | undefined) || 'default';
 
       // Single ES search for the enabled flags of every (workflowId, spaceId)
-      // referenced by the batch. Skips `isTestRun` items (they are not indexed).
+      // referenced by the batch. Skips ephemeral items (they are not indexed as workflows).
       const enabledRefs = items
-        .filter((item) => !item.workflow.isTestRun)
+        .filter((item) => !item.workflow.isEphemeral)
         .map((item) => ({ workflowId: item.workflow.id, spaceId: spaceIdFor(item) }));
       const enabledMap =
         enabledRefs.length === 0
@@ -963,7 +959,7 @@ export class WorkflowsExecutionEnginePlugin
       for (let idx = 0; idx < items.length; idx++) {
         const item = items[idx];
         try {
-          if (!item.workflow.isTestRun) {
+          if (!item.workflow.isEphemeral) {
             const spaceId = spaceIdFor(item);
             const enabled = enabledMap.get(`${spaceId}:${item.workflow.id}`) ?? false;
             if (!enabled) {
@@ -1109,7 +1105,7 @@ export class WorkflowsExecutionEnginePlugin
         spaceId: workflow.spaceId,
         stepId,
         workflowId: workflow.id,
-        ...this.buildManagedWorkflowExecutionMetadata(workflow),
+        ...pickManagedWorkflowFields(workflow),
         isTestRun: workflow.isTestRun,
         workflowDefinition: workflow.definition,
         yaml: workflow.yaml,
@@ -1400,33 +1396,6 @@ export class WorkflowsExecutionEnginePlugin
       concurrencySettings,
       buildWorkflowContext(normalizedWorkflowExecution, coreStart, dependencies)
     );
-  }
-
-  private buildManagedWorkflowExecutionMetadata(
-    workflow: Pick<
-      WorkflowExecutionEngineModel,
-      'managed' | 'managedBy' | 'originManagedWorkflowId' | 'managedVersion'
-    >
-  ): Partial<ManagedWorkflowExecutionMetadata> {
-    const managedMetadata: Partial<ManagedWorkflowExecutionMetadata> = {};
-
-    if (workflow.managed === true) {
-      managedMetadata.managed = true;
-    }
-
-    if (typeof workflow.managedBy === 'string') {
-      managedMetadata.managedBy = workflow.managedBy;
-    }
-
-    if (typeof workflow.originManagedWorkflowId === 'string') {
-      managedMetadata.originManagedWorkflowId = workflow.originManagedWorkflowId;
-    }
-
-    if (typeof workflow.managedVersion === 'number') {
-      managedMetadata.managedVersion = workflow.managedVersion;
-    }
-
-    return managedMetadata;
   }
 
   /**

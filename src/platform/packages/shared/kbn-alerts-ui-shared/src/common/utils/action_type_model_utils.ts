@@ -16,7 +16,6 @@ import { fromConnectorSpecSchema } from '@kbn/connector-specs/src/lib/deserializ
 import type { ConnectorZodSchema } from '@kbn/connector-specs/src/lib/deserialize_connector_spec';
 import { getMeta, setMeta } from '@kbn/connector-specs/src/connector_spec_ui';
 import { narrowSecretsSchemaForAuthMode } from '@kbn/connector-specs/src/lib/narrow_secrets_schema_for_auth_mode';
-import { generateFormFields } from '@kbn/response-ops-form-generator';
 import type {
   ConnectorSpecResponse,
   ConnectorSpecWireResponse,
