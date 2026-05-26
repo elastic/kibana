@@ -144,11 +144,7 @@ export class SmlCrawlerImpl implements SmlCrawler {
   }
 
   /** Returns true when the index was dropped due to a mapping conflict or persistent update failure. */
-  private async applyMappingsOrRebuild({
-    storage,
-  }: {
-    storage: SmlStorage;
-  }): Promise<boolean> {
+  private async applyMappingsOrRebuild({ storage }: { storage: SmlStorage }): Promise<boolean> {
     const maxAttempts = 4;
 
     const rebuildIndex = async (reason: string) => {
