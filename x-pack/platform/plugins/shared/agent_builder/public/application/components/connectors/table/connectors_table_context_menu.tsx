@@ -11,6 +11,7 @@ import {
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiPopover,
+  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { useConnectorOAuthDisconnect } from '@kbn/response-ops-oauth-hooks';
