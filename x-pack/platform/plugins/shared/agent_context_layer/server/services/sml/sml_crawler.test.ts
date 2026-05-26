@@ -653,7 +653,7 @@ describe('SmlCrawlerImpl', () => {
       jest.useRealTimers();
     });
 
-    it('mapping update fails on all retries: drops index and forces full re-index', async () => {
+    it('known incompatible mapping (illegal_argument_exception): wipes immediately without retrying', async () => {
       const mappingError = { statusCode: 400, body: { error: { type: 'illegal_argument_exception' } } };
       mockUpdateMappingsIfNeeded.mockRejectedValue(mappingError);
 
@@ -668,10 +668,10 @@ describe('SmlCrawlerImpl', () => {
       await jest.runAllTimersAsync();
       await crawlPromise;
 
-      expect(mockUpdateMappingsIfNeeded).toHaveBeenCalledTimes(3);
+      expect(mockUpdateMappingsIfNeeded).toHaveBeenCalledTimes(1);
       expect(mockSmlClient.clean).toHaveBeenCalledTimes(1);
       expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('mapping update failed after 3 attempts')
+        expect.stringContaining('incompatible mapping change detected')
       );
       const createOp = mockStateClient.bulk.mock.calls
         .flatMap((c: unknown[]) => (c[0] as { operations?: unknown[] }).operations ?? [])
@@ -682,8 +682,30 @@ describe('SmlCrawlerImpl', () => {
       expect(createOp).toBeDefined();
     });
 
+    it('unknown mapping error fails on all retries: drops index and forces full re-index', async () => {
+      const mappingError = { statusCode: 400, body: { error: { type: 'mapper_parsing_exception' } } };
+      mockUpdateMappingsIfNeeded.mockRejectedValue(mappingError);
+
+      const items = [{ id: 'a', updatedAt: '2024-01-01', spaces: ['default'] }];
+      const definition = createMockDefinition({
+        list: jest.fn().mockReturnValue(yieldPages(items)),
+      });
+      mockStateClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } });
+
+      const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
+      const crawlPromise = crawler.crawl({ definition, esClient, savedObjectsClient });
+      await jest.runAllTimersAsync();
+      await crawlPromise;
+
+      expect(mockUpdateMappingsIfNeeded).toHaveBeenCalledTimes(4);
+      expect(mockSmlClient.clean).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('mapping update failed after 4 attempts')
+      );
+    });
+
     it('mapping update fails transiently then succeeds: does not clean', async () => {
-      const mappingError = { statusCode: 400, body: { error: { type: 'illegal_argument_exception' } } };
+      const mappingError = { statusCode: 400, body: { error: { type: 'mapper_parsing_exception' } } };
       mockUpdateMappingsIfNeeded
         .mockRejectedValueOnce(mappingError)
         .mockResolvedValueOnce(undefined);

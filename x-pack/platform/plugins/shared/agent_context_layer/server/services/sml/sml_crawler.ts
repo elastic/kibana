@@ -142,44 +142,59 @@ export class SmlCrawlerImpl implements SmlCrawler {
     });
   }
 
-  /** Returns true when the index was dropped due to a persistent mapping update failure. */
+  /** Returns true when the index was dropped due to a mapping conflict or persistent update failure. */
   private async applyMappingsOrRebuild({
     esClient,
   }: {
     esClient: ElasticsearchClient;
   }): Promise<boolean> {
     const storage = createSmlStorage({ logger: this.logger, esClient });
-    const maxAttempts = 3;
+    const maxAttempts = 4;
+
+    const rebuildIndex = async (reason: string) => {
+      this.logger.warn(
+        `SML crawler: ${reason} — dropping index '${smlIndexName}' and re-crawling immediately`
+      );
+      try {
+        await storage.getClient().clean();
+      } catch (cleanError) {
+        if (!isResponseError(cleanError) || cleanError.statusCode !== 404) {
+          throw cleanError;
+        }
+      }
+    };
 
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
         await storage.updateMappingsIfNeeded();
         return false;
       } catch (error) {
-        if (!isResponseError(error)) {
-          throw error;
+        if (!isResponseError(error)) throw error;
+        if (error.statusCode === 404) return false;
+
+        const esError = (
+          error.body as { error?: { type?: string; caused_by?: { type?: string } } }
+        )?.error;
+        const isKnownIncompatible =
+          error.statusCode === 400 &&
+          (esError?.type === 'illegal_argument_exception' ||
+            esError?.caused_by?.type === 'illegal_argument_exception');
+
+        if (isKnownIncompatible) {
+          await rebuildIndex('incompatible mapping change detected');
+          return true;
         }
-        if (error.statusCode === 404) {
-          return false;
-        }
+
         if (attempt < maxAttempts) {
-          const delay = 5000 * 2 ** (attempt - 1);
+          const delay = Math.pow(3, attempt) * 1000;
           this.logger.warn(
             `SML crawler: mapping update failed (attempt ${attempt}/${maxAttempts}), retrying in ${delay}ms`
           );
           await new Promise((resolve) => setTimeout(resolve, delay));
           continue;
         }
-        this.logger.warn(
-          `SML crawler: mapping update failed after ${maxAttempts} attempts — dropping index '${smlIndexName}' and re-crawling immediately`
-        );
-        try {
-          await storage.getClient().clean();
-        } catch (cleanError) {
-          if (!isResponseError(cleanError) || cleanError.statusCode !== 404) {
-            throw cleanError;
-          }
-        }
+
+        await rebuildIndex(`mapping update failed after ${maxAttempts} attempts`);
         return true;
       }
     }
