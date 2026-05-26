@@ -484,6 +484,7 @@ export type PendingActionsRequestQuery = TypeOf<typeof ActionStatusRequestSchema
 export interface ActionDetailsAgentState {
   isCompleted: boolean;
   wasSuccessful: boolean;
+  wasCanceled: boolean;
   errors: undefined | string[];
   completedAt: string | undefined;
 }
@@ -526,6 +527,8 @@ export interface ActionDetails<
   isCompleted: boolean;
   /** If the action was successful */
   wasSuccessful: boolean;
+  /** If the action was canceled */
+  wasCanceled: boolean;
   /** Any errors encountered if `wasSuccessful` is `false` */
   errors: undefined | string[];
   /** The date when the initial action request was submitted */
