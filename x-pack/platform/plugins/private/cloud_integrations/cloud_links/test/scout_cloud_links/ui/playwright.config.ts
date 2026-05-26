@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-import { services as functionalServices } from '../functional/services';
+import { createPlaywrightConfig } from '@kbn/scout';
 
-export const services = functionalServices;
+export default createPlaywrightConfig({
+  testDir: './tests',
+});
