@@ -7,11 +7,6 @@
 
 import React, { lazy } from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
-import { connectorsSpecs } from '@kbn/connector-specs';
-import { serializeConnectorSpec } from '@kbn/connector-specs/src/lib/serialize_connector_spec';
-import { httpServiceMock } from '@kbn/core/public/mocks';
 import { RuleActionsMessage } from './rule_actions_message';
 import type { RuleType } from '@kbn/alerting-types';
 import type { ActionParamsProps, ActionTypeModel, RuleTypeModel } from '@kbn/alerts-ui-shared';
@@ -31,23 +26,6 @@ jest.mock('../hooks', () => ({
 
 const { useRuleFormState } = jest.requireMock('../hooks');
 
-const http = httpServiceMock.createStartContract();
-
-const renderWithQueryClient = (ui: React.ReactElement) => {
-  const queryClient = new QueryClient({
-    logger: {
-      log: () => {},
-      warn: () => {},
-      error: () => {},
-    } as QueryClient['logger'],
-    defaultOptions: {
-      queries: {
-        retry: false,
-      },
-    },
-  });
-  return render(<QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>);
-};
 
 const ruleType = {
   id: '.es-query',
@@ -127,12 +105,9 @@ describe('RuleActionsMessage', () => {
       })
     );
 
-    http.get.mockReset();
-
     useRuleFormState.mockReturnValue({
       plugins: {
         actionTypeRegistry,
-        http,
       },
       actionsParamsErrors: {},
       selectedRuleType: ruleType,
@@ -148,7 +123,7 @@ describe('RuleActionsMessage', () => {
   });
 
   test('should render correctly', async () => {
-    renderWithQueryClient(
+    render(
       <RuleActionsMessage
         action={getAction('1', { actionTypeId: 'actionTypeModel-1' })}
         index={1}
@@ -168,7 +143,7 @@ describe('RuleActionsMessage', () => {
   });
 
   test('should display warning if it exists', async () => {
-    renderWithQueryClient(
+    render(
       <RuleActionsMessage
         action={getAction('1', { actionTypeId: 'actionTypeModel-1' })}
         index={1}
@@ -189,7 +164,7 @@ describe('RuleActionsMessage', () => {
   });
 
   test('should render default action message for normal actions', async () => {
-    renderWithQueryClient(
+    render(
       <RuleActionsMessage
         action={getAction('1', { actionTypeId: 'actionTypeModel-1' })}
         index={1}
@@ -210,7 +185,7 @@ describe('RuleActionsMessage', () => {
   });
 
   test('should render default summary message for actions with summaries', async () => {
-    renderWithQueryClient(
+    render(
       <RuleActionsMessage
         action={getAction('1', {
           actionTypeId: 'actionTypeModel-1',
@@ -238,7 +213,7 @@ describe('RuleActionsMessage', () => {
   });
 
   test('should render default recovery message for action recovery group', async () => {
-    renderWithQueryClient(
+    render(
       <RuleActionsMessage
         action={getAction('1', {
           actionTypeId: 'actionTypeModel-1',
@@ -269,12 +244,9 @@ describe('RuleActionsMessage', () => {
       })
     );
 
-    http.get.mockReset();
-
     useRuleFormState.mockReturnValue({
       plugins: {
         actionTypeRegistry,
-        http,
       },
       actionsParamsErrors: {},
       selectedRuleType: ruleType,
@@ -289,7 +261,7 @@ describe('RuleActionsMessage', () => {
       aadTemplateFields: [],
     });
 
-    renderWithQueryClient(
+    render(
       <RuleActionsMessage
         action={getSystemAction('1', {
           actionTypeId: 'actionTypeModel-1',
@@ -320,12 +292,9 @@ describe('RuleActionsMessage', () => {
       })
     );
 
-    http.get.mockReset();
-
     useRuleFormState.mockReturnValue({
       plugins: {
         actionTypeRegistry,
-        http,
       },
       actionsParamsErrors: {
         'uuid-action-1': { paramsKey: 'error' },
@@ -337,7 +306,7 @@ describe('RuleActionsMessage', () => {
       aadTemplateFields: [],
     });
 
-    renderWithQueryClient(
+    render(
       <RuleActionsMessage
         action={getAction('1', { actionTypeId: 'actionTypeModel-1' })}
         index={1}
@@ -358,7 +327,7 @@ describe('RuleActionsMessage', () => {
   });
 
   test('should call onParamsChange if the params are edited', async () => {
-    renderWithQueryClient(
+    render(
       <RuleActionsMessage
         action={getAction('1', { actionTypeId: 'actionTypeModel-1' })}
         index={1}
@@ -383,128 +352,5 @@ describe('RuleActionsMessage', () => {
     );
   });
 
-  test('fetches connector spec and renders when connector is not in registry', async () => {
-    const specConnectorId = 'spec-only-connector';
-    const specResponse = {
-      metadata: {
-        id: specConnectorId,
-        displayName: 'Spec connector',
-        description: 'From spec',
-        minimumLicense: 'basic',
-        supportedFeatureIds: ['alerting'],
-      },
-      schema: serializeConnectorSpec(connectorsSpecs.AlienVaultOTXConnector).schema as Record<
-        string,
-        unknown
-      >,
-    };
-
-    http.get.mockResolvedValue(specResponse);
-
-    const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
-
-    useRuleFormState.mockReturnValue({
-      plugins: {
-        actionTypeRegistry,
-        http,
-      },
-      actionsParamsErrors: {},
-      selectedRuleType: ruleType,
-      selectedRuleTypeModel: ruleModel,
-      connectors: [getConnector('1', { actionTypeId: specConnectorId })],
-      connectorTypes: [
-        getActionType('1', {
-          id: specConnectorId,
-          source: ACTION_TYPE_SOURCES.spec,
-        }),
-      ],
-      aadTemplateFields: [],
-    });
-
-    renderWithQueryClient(
-      <RuleActionsMessage
-        action={getAction('1', { actionTypeId: specConnectorId })}
-        index={1}
-        templateFields={[]}
-        useDefaultMessage
-        connector={getConnector('1', { actionTypeId: specConnectorId })}
-        producerId="stackAlerts"
-        onParamsChange={mockOnParamsChange}
-      />
-    );
-
-    await waitFor(() => {
-      expect(http.get).toHaveBeenCalled();
-    });
-
-    await waitFor(() => {
-      expect(screen.getByTestId('ruleActionsMessage')).toBeInTheDocument();
-    });
-  });
-
-  test('does not call http.get when model is resolved from registry', async () => {
-    renderWithQueryClient(
-      <RuleActionsMessage
-        action={getAction('1', { actionTypeId: 'actionTypeModel-1' })}
-        index={1}
-        templateFields={[]}
-        useDefaultMessage
-        connector={getConnector('1')}
-        producerId="stackAlerts"
-        onParamsChange={mockOnParamsChange}
-      />
-    );
-
-    await waitFor(() => {
-      return expect(screen.getByTestId('actionParamsFieldMock')).toBeInTheDocument();
-    });
-
-    expect(http.get).not.toHaveBeenCalled();
-  });
-
-  test('renders null when spec fetch fails', async () => {
-    const specConnectorId = 'spec-fail-connector';
-
-    http.get.mockRejectedValue(new Error('spec fetch failed'));
-
-    const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
-
-    useRuleFormState.mockReturnValue({
-      plugins: {
-        actionTypeRegistry,
-        http,
-      },
-      actionsParamsErrors: {},
-      selectedRuleType: ruleType,
-      selectedRuleTypeModel: ruleModel,
-      connectors: [getConnector('1', { actionTypeId: specConnectorId })],
-      connectorTypes: [
-        getActionType('1', {
-          id: specConnectorId,
-          source: ACTION_TYPE_SOURCES.spec,
-        }),
-      ],
-      aadTemplateFields: [],
-    });
-
-    const { container } = renderWithQueryClient(
-      <RuleActionsMessage
-        action={getAction('1', { actionTypeId: specConnectorId })}
-        index={1}
-        templateFields={[]}
-        useDefaultMessage
-        connector={getConnector('1', { actionTypeId: specConnectorId })}
-        producerId="stackAlerts"
-        onParamsChange={mockOnParamsChange}
-      />
-    );
-
-    await waitFor(() => {
-      expect(http.get).toHaveBeenCalled();
-    });
-
-    await waitFor(() => {
-      expect(container.firstChild).toBeNull();
-    });
-  });
 });
+

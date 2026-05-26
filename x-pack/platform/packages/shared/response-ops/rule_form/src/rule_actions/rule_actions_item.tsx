@@ -141,9 +141,7 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
   const [isOpen, setIsOpen] = useState(true);
 
   const dispatch = useRuleFormDispatch();
-  const actionTypeModel = actionTypeRegistry.has(action.actionTypeId)
-    ? actionTypeRegistry.get(action.actionTypeId)
-    : undefined;
+  const actionTypeModel = actionTypeRegistry.get(action.actionTypeId);
   const actionType = connectorTypes.find(({ id }) => id === action.actionTypeId);
   const connector = connectors.find(({ id }) => id === action.id);
 
@@ -199,11 +197,9 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
 
   const validateActionParams = useCallback(
     async (params: RuleActionParam) => {
-      const res: { errors: RuleFormParamsErrors } = actionTypeRegistry.has(action.actionTypeId)
-        ? ((await actionTypeRegistry
-            .get(action.actionTypeId)
-            .validateParams(params, connectorConfig)) as { errors: RuleFormParamsErrors })
-        : { errors: {} as RuleFormParamsErrors };
+      const res: { errors: RuleFormParamsErrors } = await actionTypeRegistry
+        .get(action.actionTypeId)
+        ?.validateParams(params, connectorConfig);
 
       dispatch({
         type: 'setActionParamsError',
@@ -259,9 +255,6 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
 
   const setDefaultParams = useCallback(
     (actionGroup: string) => {
-      if (!actionTypeModel) {
-        return;
-      }
       const defaultParams = getDefaultParams({
         group: actionGroup,
         ruleType: selectedRuleType,
@@ -593,27 +586,21 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
           />
         ) : (
           <Suspense fallback={null}>
-            <EuiIconTip
-              content={actionType.name}
-              type={actionTypeModel?.iconClass ?? 'plugs'}
-              size="l"
-            />
+            <EuiIconTip content={actionType.name} type={actionTypeModel.iconClass} size="l" />
           </Suspense>
         )}
       </EuiFlexItem>
     );
-  }, [connector, showActionGroupErrorIcon, actionType, actionTypeModel?.iconClass]);
+  }, [connector, showActionGroupErrorIcon, actionType, actionTypeModel.iconClass]);
 
   const connectorTitle = useMemo(() => {
-    const title = connector
-      ? ACTION_TITLE(connector)
-      : actionTypeModel?.actionTypeTitle ?? action.actionTypeId;
+    const title = connector ? ACTION_TITLE(connector) : actionTypeModel.actionTypeTitle;
     return (
       <EuiFlexItem grow={false} className=".eui-textBreakWord">
         <EuiText size="s">{title}</EuiText>
       </EuiFlexItem>
     );
-  }, [connector, actionTypeModel?.actionTypeTitle, action.actionTypeId]);
+  }, [connector, actionTypeModel]);
 
   const runWhenTitle = useMemo(() => {
     if (!connector) {
@@ -707,7 +694,7 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
             {accordionIcon}
             <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
               {connectorTitle}
-              {actionTypeModel?.isExperimental && (
+              {actionTypeModel.isExperimental && (
                 <EuiFlexItem grow={false}>
                   <EuiBetaBadge
                     alignment="middle"

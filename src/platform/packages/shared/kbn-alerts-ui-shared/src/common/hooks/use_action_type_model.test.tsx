@@ -147,6 +147,64 @@ describe('useActionTypeModel', () => {
     expect(result.current.error).toBeNull();
   });
 
+  it('surfaces error when connector spec schema cannot be parsed', async () => {
+    actionTypeRegistry.has.mockReturnValue(false);
+    mockHttp.get.mockResolvedValue({
+      ...mockSpecResponse,
+      schema: {
+        type: 'object',
+        properties: {
+          config: { type: 'object', properties: {} },
+          secrets: { type: 'string' },
+        },
+      },
+    });
+
+    const { result } = renderHook(
+      () =>
+        useActionTypeModel({
+          actionTypeRegistry,
+          actionTypeId: 'spec-connector',
+          http: mockHttp as any,
+          uiSettings: mockUiSettings as any,
+        }),
+      { wrapper: createWrapper() }
+    );
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(result.current.error).toBeInstanceOf(Error);
+    expect(result.current.error?.message).toBe(
+      'Failed to parse connector spec schema for "spec-connector"'
+    );
+    expect(result.current.actionTypeModel).toBeNull();
+  });
+
+  it('does not fetch for non-spec connectors not in registry', async () => {
+    actionTypeRegistry.has.mockReturnValue(false);
+
+    const { result } = renderHook(
+      () =>
+        useActionTypeModel({
+          actionTypeRegistry,
+          actionTypeId: 'unknown-connector',
+          http: mockHttp as any,
+          uiSettings: mockUiSettings as any,
+        }),
+      { wrapper: createWrapper() }
+    );
+
+    // Should not be loading (no fetch triggered)
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.actionTypeModel).toBeNull();
+    expect(result.current.error).toBeNull();
+
+    // Should not call HTTP get for non-spec connectors
+    expect(mockHttp.get).not.toHaveBeenCalled();
+  });
+
   it('handles fetch errors correctly', async () => {
     actionTypeRegistry.has.mockReturnValue(false);
     const fetchError = new Error('Failed to fetch spec');
