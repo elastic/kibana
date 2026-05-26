@@ -97,7 +97,7 @@ ${additionalContext ?? ''}`,
   ];
 };
 
-export const INLINE_VISUALIZATION_AXIS_TITLE_INSTRUCTIONS = `XY AXIS TITLE RULES:
+export const TITLED_CHART_CONFIG_INSTRUCTIONS = `XY AXIS TITLE RULES:
 - For XY charts, do NOT set axis titles. Rely on the visualization title and column labels to convey meaning.
 - Set axis title visibility to false (e.g. { visible: false }) for both X and Y axes.`;
 

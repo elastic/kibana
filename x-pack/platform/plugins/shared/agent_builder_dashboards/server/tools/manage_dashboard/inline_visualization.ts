@@ -8,7 +8,7 @@
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import {
   buildVisualizationConfig,
-  INLINE_VISUALIZATION_AXIS_TITLE_INSTRUCTIONS,
+  TITLED_CHART_CONFIG_INSTRUCTIONS,
   type VisualizationConfig,
 } from '@kbn/agent-builder-tools-base';
 import { type ModelProvider, type ToolEventEmitter } from '@kbn/agent-builder-server';
@@ -95,7 +95,7 @@ export const createVisualizationResolver = ({
         existingConfig: existingConfig ? JSON.stringify(existingConfig) : undefined,
         parsedExistingConfig: existingConfig,
         includeTimeRange: false,
-        additionalChartConfigInstructions: INLINE_VISUALIZATION_AXIS_TITLE_INSTRUCTIONS,
+        additionalChartConfigInstructions: TITLED_CHART_CONFIG_INSTRUCTIONS,
         modelProvider,
         logger,
         events,

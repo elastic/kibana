@@ -16,7 +16,7 @@ import {
 import { ToolResultType, SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import {
   buildVisualizationConfig,
-  INLINE_VISUALIZATION_AXIS_TITLE_INSTRUCTIONS,
+  TITLED_CHART_CONFIG_INSTRUCTIONS,
   type VisualizationConfig,
 } from '@kbn/agent-builder-tools-base';
 
@@ -116,7 +116,7 @@ This tool will:
             esql,
             existingConfig,
             parsedExistingConfig,
-            additionalChartConfigInstructions: INLINE_VISUALIZATION_AXIS_TITLE_INSTRUCTIONS,
+            additionalChartConfigInstructions: TITLED_CHART_CONFIG_INSTRUCTIONS,
             modelProvider,
             logger,
             events,
