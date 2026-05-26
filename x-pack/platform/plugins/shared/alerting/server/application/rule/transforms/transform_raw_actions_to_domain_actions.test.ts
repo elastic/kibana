@@ -49,6 +49,7 @@ describe('transformRawActionsToDomainActions', () => {
           "actionTypeId": ".test",
           "alertsFilter": Object {
             "query": Object {
+              "dsl": "{}",
               "filters": Array [],
               "kql": "test:1",
             },

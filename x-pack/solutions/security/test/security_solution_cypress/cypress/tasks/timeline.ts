@@ -372,8 +372,10 @@ export const saveTimeline = () => {
 
 export const markAsFavorite = () => {
   cy.intercept('PATCH', 'api/timeline/_favorite').as('markedAsFavourite');
+  cy.intercept('GET', '/api/timelines*').as('timelinesRefreshed');
   cy.get(TIMELINE_PANEL).within(() => cy.get(STAR_ICON).click());
   cy.wait('@markedAsFavourite');
+  cy.wait('@timelinesRefreshed');
 };
 
 export const openTimelineDiscoverAddField = () => {

@@ -18,7 +18,6 @@ describe('utils', () => {
       CaseMetricsFeature.ALERTS_COUNT,
       CaseMetricsFeature.ALERTS_HOSTS,
       CaseMetricsFeature.ALERTS_USERS,
-      CaseMetricsFeature.ACTIONS_ISOLATE_HOST,
       CaseMetricsFeature.CONNECTORS,
       CaseMetricsFeature.LIFESPAN,
     ];
@@ -77,7 +76,7 @@ describe('utils', () => {
     it.each([
       [
         { caseId: 'test-case-id' },
-        'invalid features: [not-exists], please only provide valid features: [actions.isolateHost, alerts.count, alerts.hosts, alerts.users, connectors, lifespan]',
+        'invalid features: [not-exists], please only provide valid features: [alerts.count, alerts.hosts, alerts.users, connectors, lifespan]',
       ],
       [
         { caseId: null },

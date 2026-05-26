@@ -16,7 +16,7 @@ export function generateId(): string {
 
 // Validation constants matching elastic-package requirements
 export const MIN_NAME_LENGTH = 2;
-export const MAX_NAME_LENGTH = 256;
+export const MAX_NAME_LENGTH = 150;
 
 /**
  * Normalizes a title/name for use as an integration or data stream identifier.

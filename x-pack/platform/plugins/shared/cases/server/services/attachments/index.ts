@@ -60,7 +60,6 @@ import type {
   AttachmentsAttachedToCaseArgs,
   BulkCreateAttachments,
   BulkUpdateAttachmentArgs,
-  CountActionsAttachedToCaseArgs,
   CreateAttachmentArgs,
   DeleteAttachmentArgs,
   ServiceContext,
@@ -412,24 +411,6 @@ export class AttachmentService {
       this.context.log.error(
         `Error while attempting to count persistableState and externalReference attachments for case id ${caseId}: ${error}`
       );
-      throw error;
-    }
-  }
-
-  /**
-   * Executes the aggregations against the actions attached to a case.
-   */
-  public async executeCaseActionsAggregations(
-    params: CountActionsAttachedToCaseArgs
-  ): Promise<AggregationResponse | undefined> {
-    try {
-      this.context.log.debug(`Attempting to count actions for case id ${params.caseId}`);
-      return await this.executeCaseAggregations({
-        ...params,
-        attachmentType: AttachmentType.actions,
-      });
-    } catch (error) {
-      this.context.log.error(`Error while counting actions for case id ${params.caseId}: ${error}`);
       throw error;
     }
   }

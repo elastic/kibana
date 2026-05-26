@@ -1,5 +1,5 @@
 {
-  "sha1": "f7b4ca4e38ff1b39ea4618c9042faadd56cfa8d6",
+  "sha1": "a40bfb829f8b42475f03b2decb0300820d4e14b2",
   "tests": [
     {
       "id": "bd41f0240dfdfcb-9b0e8252d0034ea",
@@ -11,8 +11,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/global.teardown.ts",
-        "line": 14,
-        "column": 19
+        "line": 13,
+        "column": 1
       }
     },
     {
