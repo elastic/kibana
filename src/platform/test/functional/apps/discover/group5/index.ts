@@ -16,11 +16,18 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   describe('discover/group5', function () {
     before(async function () {
       await browser.setWindowSize(1300, 800);
-      await esArchiver.loadIfNeeded(
+    });
+
+    after(async function unloadMakelogs() {
+      await esArchiver.unload(
         'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
       );
     });
 
+    // `_no_data` is intentionally first: it expects a clean ES/Kibana state.
+    // Running it after other tests leaves residual managed/default data views
+    // (e.g. "All logs") that prevent Discover from rendering the no-data page.
+    loadTestFile(require.resolve('./_no_data'));
     loadTestFile(require.resolve('./_filter_editor'));
     loadTestFile(require.resolve('./_field_data_with_fields_api'));
     loadTestFile(require.resolve('./_shared_links'));
@@ -28,7 +35,5 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./_large_string'));
     loadTestFile(require.resolve('./_inspector'));
     loadTestFile(require.resolve('./_url_state'));
-    // `_no_data` unloads the archive, so it must run last to avoid breaking the others.
-    loadTestFile(require.resolve('./_no_data'));
   });
 }
