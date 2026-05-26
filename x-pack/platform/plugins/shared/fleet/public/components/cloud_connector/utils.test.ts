@@ -95,8 +95,9 @@ describe('updateInputVarsWithCredentials - AWS support', () => {
     const result = updateInputVarsWithCredentials(mockInputVars, credentials);
 
     expect(result?.role_arn?.value).toBe('arn:aws:iam::123456789012:role/OriginalRole');
-    expect(result?.['aws.role_arn']?.value).toBe('arn:aws:iam::123456789012:role/OriginalRole');
+    expect(result?.['aws.role_arn']?.value).toBe('arn:aws:iam::123456789012:role/OriginalAwsRole');
     expect(result?.external_id?.value).toBe('original-external-id');
+    expect(result?.['aws.credentials.external_id']?.value).toBe('original-aws-external-id');
   });
 
   it('should clear external_id fields when externalId is undefined', () => {

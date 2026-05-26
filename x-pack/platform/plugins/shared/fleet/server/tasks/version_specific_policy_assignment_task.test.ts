@@ -28,7 +28,12 @@ import {
 
 jest.mock('../services');
 jest.mock('../services/agents');
-jest.mock('../services/epm/packages');
+// Explicit factory: auto-mock of '../services/epm/packages' loses re-exported
+// bindings (e.g. getPackageInfo) when transitive deps in this branch shift the
+// auto-mock resolution order. Spell out what we need.
+jest.mock('../services/epm/packages', () => ({
+  getPackageInfo: jest.fn(),
+}));
 jest.mock('../services/epm/packages/get');
 jest.mock('../services/utils/version_specific_policies');
 
