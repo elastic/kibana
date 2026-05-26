@@ -58,7 +58,6 @@ describe('DetectionRulesClient.createPrebuiltRule', () => {
 
     await detectionRulesClient.createPrebuiltRule({
       params,
-      changeTracking: { action: SecurityRuleChangeTrackingAction.ruleInstall },
     });
 
     expect(rulesClient.create).toHaveBeenCalledWith(

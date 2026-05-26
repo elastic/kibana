@@ -16,7 +16,7 @@ import type { IDetectionRulesClient } from '../../../rule_management/logic/detec
 export const createPrebuiltRules = (
   detectionRulesClient: IDetectionRulesClient,
   rules: PrebuiltRuleAsset[],
-  changeTracking?: SecurityRuleChangeTracking,
+  changeTracking?: SecurityRuleChangeTracking<never>,
   logger?: Logger
 ) => {
   return withSecuritySpan('createPrebuiltRules', async () => {

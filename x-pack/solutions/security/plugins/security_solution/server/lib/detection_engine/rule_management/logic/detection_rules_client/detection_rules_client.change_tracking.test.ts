@@ -89,21 +89,6 @@ describe('DetectionRulesClient change tracking', () => {
       );
     });
 
-    it('createPrebuiltRule forwards caller-provided action to rulesClient.create', async () => {
-      await detectionRulesClient.createPrebuiltRule({
-        params: { ...getCreateRulesSchemaMock(), version: 1, rule_id: 'rule-id' },
-        changeTracking: { action: SecurityRuleChangeTrackingAction.ruleInstall },
-      });
-
-      expect(rulesClient.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          changeTracking: expect.objectContaining({
-            action: SecurityRuleChangeTrackingAction.ruleInstall,
-          }),
-        })
-      );
-    });
-
     it('updateRule forwards caller-provided action to rulesClient.update', async () => {
       (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(getRulesSchemaMock());
 

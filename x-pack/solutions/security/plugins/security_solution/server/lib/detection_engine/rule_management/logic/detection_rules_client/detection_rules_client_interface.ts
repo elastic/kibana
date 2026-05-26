@@ -45,7 +45,7 @@ export interface CreateCustomRuleArgs {
 
 export interface CreatePrebuiltRuleArgs {
   params: RuleCreateProps;
-  changeTracking?: SecurityRuleChangeTracking;
+  changeTracking?: SecurityRuleChangeTracking<never>;
 }
 
 export interface UpdateRuleArgs {
