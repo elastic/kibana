@@ -38,9 +38,11 @@ echo "--- Extract results for our teams"
 extract_owner_section() {
   local output="$1"
   local owner="$2"
+  set +o pipefail
   echo "$output" | awk \
     -v owner="## ${owner}" \
     'found && /^## @elastic\// { exit } $0 ~ owner { found=1 } found { print }'
+  set -o pipefail
 }
 
 REPORT=""
