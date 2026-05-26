@@ -22,7 +22,7 @@ import { getAlertsById } from '../tools/get_alerts_by_id';
 import { securityAttachmentDataSchema } from './security_attachment_data_schema';
 
 export const bulkAlertsAttachmentDataSchema = securityAttachmentDataSchema.extend({
-  alertIds: z.array(z.string()).min(1).max(ALERTS_BATCH_MAX_SIZE),
+  alertIds: z.array(z.string().max(512)).min(1).max(ALERTS_BATCH_MAX_SIZE),
 });
 
 export type BulkAlertsAttachmentData = z.infer<typeof bulkAlertsAttachmentDataSchema>;
