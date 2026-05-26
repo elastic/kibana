@@ -14,6 +14,7 @@ export {
   CONTROL_WIDTH_SMALL,
   DEFAULT_AUTO_APPLY_SELECTIONS,
   DEFAULT_PINNED_CONTROL_STATE,
+  MAX_CONTROLS_GROUP_SIZE,
 } from './src/controls_group_constants';
 
 export {

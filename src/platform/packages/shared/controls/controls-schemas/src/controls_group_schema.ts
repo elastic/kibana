@@ -14,6 +14,7 @@ import {
   CONTROL_WIDTH_SMALL,
   DEFAULT_PINNED_CONTROL_STATE,
   ESQL_CONTROL,
+  MAX_CONTROLS_GROUP_SIZE,
   OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,
   TIME_SLIDER_CONTROL,
@@ -119,7 +120,7 @@ export const getControlsGroupSchema = () => {
     ]),
     {
       defaultValue: [],
-      maxSize: 100,
+      maxSize: MAX_CONTROLS_GROUP_SIZE,
       meta: { description: 'An array of control panels and their state in the control group.' },
     }
   );

@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { BehaviorSubject } from 'rxjs';
 import type { DashboardStart } from './plugin';
 import type { DashboardState } from '../common/types';
 import { getDashboardApi } from './dashboard_api/get_dashboard_api';
 import { deserializeLayout } from './dashboard_api/layout_manager/deserialize_layout';
 import type { DashboardReadResponseBody } from '../server';
 import { DEFAULT_DASHBOARD_STATE } from './dashboard_api/default_dashboard_state';
+import type { PanelLimitState } from './dashboard_api/panel_limit_validator';
 
 export type Start = jest.Mocked<DashboardStart>;
 
@@ -70,9 +72,11 @@ export function setupIntersectionObserverMock({
 export function buildMockDashboardApi({
   overrides,
   savedObjectId,
+  panelLimitState,
 }: {
   overrides?: Partial<DashboardState>;
   savedObjectId?: string;
+  panelLimitState?: PanelLimitState;
 } = {}) {
   const initialState = getSampleDashboardState(overrides);
   const results = getDashboardApi({
@@ -89,6 +93,13 @@ export function buildMockDashboardApi({
         } as unknown as DashboardReadResponseBody)
       : undefined,
   });
+
+  if (panelLimitState) {
+    // allow tests to override panel limit state without needing to model full layout behavior
+
+    (results.internalApi as any).panelLimitState$ = new BehaviorSubject(panelLimitState);
+  }
+
   return results;
 }
 

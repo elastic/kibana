@@ -33,6 +33,14 @@ export const DEFAULT_DASHBOARD_OPTIONS = {
   sync_tooltips: false,
 } as const;
 
+/**
+ * Dashboard panel-count limits enforced by the dashboard API schema.
+ *
+ * Note: This applies both to the top-level dashboard `panels` array, and to the `panels` array
+ * within each collapsible section.
+ */
+export const MAX_PANELS = 100;
+
 export const UI_SETTINGS = {
   ENABLE_LABS_UI: 'labs:dashboard:enable_ui',
 };
