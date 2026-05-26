@@ -12,14 +12,14 @@ import { getEsqlFn } from './esql';
 import type { ExecutionContext } from '@kbn/expressions-plugin/common';
 import type {
   ISearchMethods,
-  IESQLSearchParams,
-  IESQLSearchOptions,
-  IESQLSearchResult,
+  IEsqlSearchParams,
+  IEsqlSearchOptions,
+  IEsqlSearchResult,
 } from '@kbn/search-types';
 import type { KibanaContext } from '..';
 
 interface MockTypedSearchService {
-  esql: jest.Mock<Promise<IESQLSearchResult>, [IESQLSearchParams, IESQLSearchOptions?]>;
+  esql: jest.Mock<Promise<IEsqlSearchResult>, [IEsqlSearchParams, IEsqlSearchOptions?]>;
 }
 
 const mockUiSettings = (): UiSettingsCommon =>

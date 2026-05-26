@@ -46,7 +46,7 @@ export interface IBaseSearchOptions {
 /**
  * Parameters for DSL (Elasticsearch Query DSL) search
  */
-export interface IDSLSearchParams {
+export interface IDslSearchParams {
   /**
    * Index pattern to search
    */
@@ -101,7 +101,7 @@ export interface IDSLSearchParams {
 /**
  * Options specific to DSL search
  */
-export interface IDSLSearchOptions extends IBaseSearchOptions {
+export interface IDslSearchOptions extends IBaseSearchOptions {
   /**
    * Control total hits counting precision
    */
@@ -111,7 +111,7 @@ export interface IDSLSearchOptions extends IBaseSearchOptions {
 /**
  * Pagination helpers for DSL search results
  */
-export interface IDSLPagination {
+export interface IDslPagination {
   /**
    * Whether more results are available
    */
@@ -120,13 +120,13 @@ export interface IDSLPagination {
   /**
    * Fetch the next page of results using search_after
    */
-  nextPage: () => Promise<IDSLPaginatedSearchResult | null>;
+  nextPage: () => Promise<IDslPaginatedSearchResult | null>;
 }
 
 /**
  * Result from a DSL search
  */
-export interface IDSLSearchResult {
+export interface IDslSearchResult {
   /**
    * Raw Elasticsearch search response
    */
@@ -140,7 +140,7 @@ export interface IDSLSearchResult {
 /**
  * Result from a paginated DSL search
  */
-export interface IDSLPaginatedSearchResult {
+export interface IDslPaginatedSearchResult {
   /**
    * Raw Elasticsearch search response
    */
@@ -152,7 +152,7 @@ export interface IDSLPaginatedSearchResult {
   /**
    * Pagination helpers for navigating through result pages
    */
-  pagination: IDSLPagination;
+  pagination: IDslPagination;
 }
 
 // ============================================================================
@@ -162,7 +162,7 @@ export interface IDSLPaginatedSearchResult {
 /**
  * Parameters for ES|QL search
  */
-export interface IESQLSearchParams {
+export interface IEsqlSearchParams {
   /**
    * ES|QL query string
    */
@@ -192,7 +192,7 @@ export interface IESQLSearchParams {
 /**
  * Options specific to ES|QL search
  */
-export interface IESQLSearchOptions extends IBaseSearchOptions {
+export interface IEsqlSearchOptions extends IBaseSearchOptions {
   /**
    * Drop columns that only contain null values
    */
@@ -207,7 +207,7 @@ export interface IESQLSearchOptions extends IBaseSearchOptions {
 /**
  * Result from an ES|QL search
  */
-export interface IESQLSearchResult {
+export interface IEsqlSearchResult {
   /**
    * Raw Elasticsearch ES|QL async query response
    */
@@ -225,7 +225,7 @@ export interface IESQLSearchResult {
 /**
  * Parameters for EQL (Event Query Language) search
  */
-export interface IEQLSearchParams {
+export interface IEqlSearchParams {
   /**
    * Index to search
    */
@@ -260,7 +260,7 @@ export interface IEQLSearchParams {
 /**
  * Options specific to EQL search
  */
-export interface IEQLSearchOptions extends IBaseSearchOptions {
+export interface IEqlSearchOptions extends IBaseSearchOptions {
   /**
    * Field containing the event category
    */
@@ -280,7 +280,7 @@ export interface IEQLSearchOptions extends IBaseSearchOptions {
 /**
  * Result from an EQL search
  */
-export interface IEQLSearchResult {
+export interface IEqlSearchResult {
   /**
    * Raw Elasticsearch EQL search response
    */
@@ -298,7 +298,7 @@ export interface IEQLSearchResult {
 /**
  * Parameters for SQL search
  */
-export interface ISQLSearchParams {
+export interface ISqlSearchParams {
   /**
    * SQL query string
    */
@@ -323,7 +323,7 @@ export interface ISQLSearchParams {
 /**
  * Options specific to SQL search
  */
-export interface ISQLSearchOptions extends IBaseSearchOptions {
+export interface ISqlSearchOptions extends IBaseSearchOptions {
   /**
    * Time zone for date calculations
    */
@@ -333,7 +333,7 @@ export interface ISQLSearchOptions extends IBaseSearchOptions {
 /**
  * Result from a SQL search
  */
-export interface ISQLSearchResult {
+export interface ISqlSearchResult {
   /**
    * Raw Elasticsearch SQL query response
    */
@@ -362,28 +362,28 @@ export interface ISearchMethods {
   /**
    * Execute an ES|QL search
    */
-  esql: (params: IESQLSearchParams, options?: IESQLSearchOptions) => Promise<IESQLSearchResult>;
+  esql: (params: IEsqlSearchParams, options?: IEsqlSearchOptions) => Promise<IEsqlSearchResult>;
 
   /**
    * Execute a DSL (Elasticsearch Query DSL) search
    */
-  dsl: (params: IDSLSearchParams, options?: IDSLSearchOptions) => Promise<IDSLSearchResult>;
+  dsl: (params: IDslSearchParams, options?: IDslSearchOptions) => Promise<IDslSearchResult>;
 
   /**
    * Execute a paginated DSL (Elasticsearch Query DSL) search with pagination helpers
    */
   dslPaginated: (
-    params: IDSLSearchParams,
-    options?: Omit<IDSLSearchOptions, 'trackTotalHits'>
-  ) => Promise<IDSLPaginatedSearchResult>;
+    params: IDslSearchParams,
+    options?: Omit<IDslSearchOptions, 'trackTotalHits'>
+  ) => Promise<IDslPaginatedSearchResult>;
 
   /**
    * Execute an EQL (Event Query Language) search
    */
-  eql: (params: IEQLSearchParams, options?: IEQLSearchOptions) => Promise<IEQLSearchResult>;
+  eql: (params: IEqlSearchParams, options?: IEqlSearchOptions) => Promise<IEqlSearchResult>;
 
   /**
    * Execute a SQL search
    */
-  sql: (params: ISQLSearchParams, options?: ISQLSearchOptions) => Promise<ISQLSearchResult>;
+  sql: (params: ISqlSearchParams, options?: ISqlSearchOptions) => Promise<ISqlSearchResult>;
 }
