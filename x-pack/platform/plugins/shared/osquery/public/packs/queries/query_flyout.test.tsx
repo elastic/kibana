@@ -47,6 +47,17 @@ jest.mock('../../saved_queries/saved_queries_dropdown', () => ({
   },
 }));
 
+// Stub ScheduleSection so the flyout tests don't pull in the full EUI form
+// tree. Render a minimal marker that surfaces the schedule type so tests can
+// assert the value the flyout passed in.
+jest.mock('../../components/schedule_section', () => ({
+  ScheduleSection: ({ value }: { value: Record<string, unknown> }) => (
+    <div data-test-subj="mocked-schedule-section">
+      {JSON.stringify(value?.scheduleType ?? 'unknown')}
+    </div>
+  ),
+}));
+
 import { QueryFlyout } from './query_flyout';
 import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
 import { allowedExperimentalValues } from '../../../common/experimental_features';
@@ -164,6 +175,129 @@ describe('QueryFlyout', () => {
 
       fireEvent.click(screen.getByTestId('query-flyout-cancel-button'));
       expect(onClose).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Category E: rrule-mode override toggle
+  // ─────────────────────────────────────────────────────────────────────────
+  describe('rrule-mode override toggle', () => {
+    beforeEach(() => {
+      ExperimentalFeaturesService.init({
+        experimentalFeatures: { ...allowedExperimentalValues, rruleScheduling: true },
+      });
+    });
+
+    afterEach(() => {
+      ExperimentalFeaturesService.init({
+        experimentalFeatures: { ...allowedExperimentalValues, rruleScheduling: false },
+      });
+    });
+
+    // E1 ────────────────────────────────────────────────────────────────────
+    it('E1: should render the override toggle row when rruleScheduling flag is on and packSchedule is set', () => {
+      renderFlyout({
+        packSchedule: {
+          schedule_type: 'rrule',
+          rrule_schedule: {
+            rrule: 'FREQ=DAILY',
+            start_date: '2024-01-01T00:00:00.000Z',
+          },
+        },
+      });
+
+      // The ToggleableRow renders with dataTestSubj="osquery-query-override-pack-schedule"
+      // The row wrapper gets the "-row" suffix.
+      expect(screen.getByTestId('osquery-query-override-pack-schedule-row')).toBeInTheDocument();
+    });
+
+    // E2 ────────────────────────────────────────────────────────────────────
+    it('E2: should show "Using pack schedule" label when override is off and packSchedule is set', () => {
+      renderFlyout({
+        packSchedule: {
+          schedule_type: 'rrule',
+          rrule_schedule: {
+            rrule: 'FREQ=DAILY',
+            start_date: '2024-01-01T00:00:00.000Z',
+          },
+        },
+      });
+
+      // The ToggleableRow row wrapper should be present
+      expect(screen.getByTestId('osquery-query-override-pack-schedule-row')).toBeInTheDocument();
+
+      // "Using pack schedule" helper text should be visible because override
+      // is off by default (override_pack_schedule initializes to false)
+      expect(screen.getByTestId('osquery-using-pack-schedule')).toBeInTheDocument();
+    });
+
+    // E3 ────────────────────────────────────────────────────────────────────
+    it('E3: should show ScheduleSection and hide "Using pack schedule" when override toggle is turned on', async () => {
+      renderFlyout({
+        packSchedule: {
+          schedule_type: 'rrule',
+          rrule_schedule: {
+            rrule: 'FREQ=DAILY',
+            start_date: '2024-01-01T00:00:00.000Z',
+          },
+        },
+      });
+
+      // Initially, the using-pack-schedule label is visible and ScheduleSection
+      // is hidden (override_pack_schedule = false → ToggleableRow children hidden)
+      expect(screen.getByTestId('osquery-using-pack-schedule')).toBeInTheDocument();
+      expect(screen.queryByTestId('mocked-schedule-section')).not.toBeInTheDocument();
+
+      // Click the EuiSwitch to enable the override toggle.
+      // EuiSwitch renders as a button[role="switch"] with the data-test-subj.
+      const overrideSwitch = screen.getByTestId('osquery-query-override-pack-schedule');
+      act(() => {
+        fireEvent.click(overrideSwitch);
+      });
+
+      await waitFor(() => {
+        // After enabling the override, the ScheduleSection should appear
+        expect(screen.getByTestId('mocked-schedule-section')).toBeInTheDocument();
+        // The "Using pack schedule" label should be gone
+        expect(screen.queryByTestId('osquery-using-pack-schedule')).not.toBeInTheDocument();
+      });
+    });
+
+    // E4 ────────────────────────────────────────────────────────────────────
+    it('E4: should call onSave with no schedule fields when override is off at submit', async () => {
+      const onSave = jest.fn().mockResolvedValue(undefined);
+      const onClose = jest.fn();
+
+      renderFlyout({
+        onSave,
+        onClose,
+        packSchedule: {
+          schedule_type: 'rrule',
+          rrule_schedule: {
+            rrule: 'FREQ=DAILY',
+            start_date: '2024-01-01T00:00:00.000Z',
+          },
+        },
+      });
+
+      // Override is off by default — confirm using-pack-schedule label is present
+      expect(screen.getByTestId('osquery-using-pack-schedule')).toBeInTheDocument();
+
+      // Fill in the required ID field
+      const idInput = screen.getByRole('textbox', { name: /ID/i });
+      fireEvent.change(idInput, { target: { value: 'no-override-query' } });
+
+      // Submit the form
+      fireEvent.click(screen.getByTestId('query-flyout-save-button'));
+
+      await waitFor(() => expect(onSave).toHaveBeenCalled());
+
+      const saved = onSave.mock.calls[0][0];
+      // When override is off and pack owns the rrule schedule, the query
+      // must NOT emit schedule fields — the serializer strips them.
+      expect(saved).not.toHaveProperty('schedule_type');
+      expect(saved).not.toHaveProperty('rrule_schedule');
+      expect(saved).not.toHaveProperty('interval');
     });
   });
 });

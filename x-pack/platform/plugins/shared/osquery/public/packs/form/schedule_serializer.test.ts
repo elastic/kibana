@@ -1,0 +1,204 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { serializeSchedule, deserializeSchedule } from './schedule_serializer';
+import type { ScheduleFormData } from '../../components/schedule_section/types';
+import {
+  createDefaultScheduleFormData,
+  createDefaultRecurrence,
+  DEFAULT_INTERVAL_SECONDS,
+} from '../../components/schedule_section/types';
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+const makeIntervalFormData = (interval: number): ScheduleFormData => ({
+  ...createDefaultScheduleFormData('interval'),
+  interval,
+});
+
+const makeRruleFormData = (overrides: Partial<ScheduleFormData> = {}): ScheduleFormData => ({
+  ...createDefaultScheduleFormData('rrule'),
+  scheduleType: 'rrule',
+  startDate: new Date('2024-01-01T00:00:00.000Z'),
+  recurrence: {
+    ...createDefaultRecurrence(),
+    frequency: 'daily',
+  },
+  splay: { enabled: false, value: 30, unit: 'seconds' },
+  stopAfter: { enabled: false, date: new Date('2024-01-01T00:00:00.000Z') },
+  ...overrides,
+});
+
+// ---------------------------------------------------------------------------
+// Category C: serializeSchedule + deserializeSchedule pure unit tests
+// ---------------------------------------------------------------------------
+
+describe('schedule_serializer', () => {
+  describe('serializeSchedule', () => {
+    // C1 ──────────────────────────────────────────────────────────────────────
+    it('C1: should emit schedule_type interval and interval field for interval mode', () => {
+      const result = serializeSchedule(makeIntervalFormData(7200));
+
+      expect(result.schedule_type).toBe('interval');
+      expect(result.interval).toBe(7200);
+      expect(result).not.toHaveProperty('rrule_schedule');
+    });
+
+    // C2 ──────────────────────────────────────────────────────────────────────
+    it('C2: should emit schedule_type rrule and rrule_schedule for rrule mode', () => {
+      const result = serializeSchedule(makeRruleFormData());
+
+      expect(result.schedule_type).toBe('rrule');
+      expect(result.rrule_schedule).toBeDefined();
+      expect(result.rrule_schedule?.rrule).toMatch(/FREQ=DAILY/);
+      expect(result).not.toHaveProperty('interval');
+    });
+
+    // C3 ──────────────────────────────────────────────────────────────────────
+    it('C3: should omit interval from rrule result (mutual exclusivity)', () => {
+      const result = serializeSchedule(makeRruleFormData());
+
+      // The wire shape must not carry `interval` alongside `rrule_schedule` —
+      // the server uses `schedule_type` as the discriminant and rejects mixed
+      // payloads.
+      expect(result.interval).toBeUndefined();
+    });
+
+    // C4 ──────────────────────────────────────────────────────────────────────
+    it('C4: should emit start_date as RFC 3339 string', () => {
+      const RFC3339_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})$/;
+
+      const result = serializeSchedule(
+        makeRruleFormData({ startDate: new Date('2024-06-15T08:30:00.000Z') })
+      );
+
+      expect(result.rrule_schedule?.start_date).toMatch(RFC3339_REGEX);
+    });
+
+    // C5 ──────────────────────────────────────────────────────────────────────
+    it('C5: should omit end_date when stopAfter is disabled', () => {
+      const result = serializeSchedule(
+        makeRruleFormData({
+          stopAfter: { enabled: false, date: new Date('2025-01-01T00:00:00.000Z') },
+        })
+      );
+
+      expect(result.rrule_schedule).not.toHaveProperty('end_date');
+    });
+
+    // C6 ──────────────────────────────────────────────────────────────────────
+    it('C6: should emit end_date when stopAfter is enabled with a valid date', () => {
+      const endDate = new Date('2025-12-31T00:00:00.000Z');
+      const result = serializeSchedule(
+        makeRruleFormData({
+          stopAfter: { enabled: true, date: endDate },
+        })
+      );
+
+      expect(result.rrule_schedule?.end_date).toBeDefined();
+      expect(new Date(result.rrule_schedule!.end_date!).toISOString()).toBe(endDate.toISOString());
+    });
+
+    // C7 ──────────────────────────────────────────────────────────────────────
+    it('C7: should emit splay string when splay is enabled', () => {
+      const result = serializeSchedule(
+        makeRruleFormData({
+          splay: { enabled: true, value: 30, unit: 'seconds' },
+        })
+      );
+
+      expect(result.rrule_schedule?.splay).toBe('30s');
+    });
+
+    // C8 ──────────────────────────────────────────────────────────────────────
+    it('C8: should omit splay when splay is disabled', () => {
+      const result = serializeSchedule(
+        makeRruleFormData({
+          splay: { enabled: false, value: 30, unit: 'seconds' },
+        })
+      );
+
+      expect(result.rrule_schedule).not.toHaveProperty('splay');
+    });
+
+    // C9 ──────────────────────────────────────────────────────────────────────
+    it('C9: should serialize custom (weekly) recurrence with BYDAY', () => {
+      const result = serializeSchedule(
+        makeRruleFormData({
+          recurrence: {
+            frequency: 'custom',
+            interval: 1,
+            byweekday: ['MO', 'WE', 'FR'],
+          },
+        })
+      );
+
+      expect(result.rrule_schedule?.rrule).toContain('FREQ=WEEKLY');
+      expect(result.rrule_schedule?.rrule).toContain('BYDAY=MO,WE,FR');
+    });
+  });
+
+  describe('deserializeSchedule', () => {
+    // C10 ─────────────────────────────────────────────────────────────────────
+    it('C10: should deserialize interval input to interval form state', () => {
+      const result = deserializeSchedule({ schedule_type: 'interval', interval: 7200 });
+
+      expect(result.scheduleType).toBe('interval');
+      expect(result.interval).toBe(7200);
+    });
+
+    // C11 ─────────────────────────────────────────────────────────────────────
+    it('C11: should fall back to default interval when input is undefined (legacy pack)', () => {
+      const result = deserializeSchedule(undefined);
+
+      expect(result.scheduleType).toBe('interval');
+      expect(result.interval).toBe(DEFAULT_INTERVAL_SECONDS);
+    });
+
+    // C12 ─────────────────────────────────────────────────────────────────────
+    it('C12: should deserialize rrule input to rrule form state with correct startDate', () => {
+      const startDateIso = '2024-03-15T09:00:00.000Z';
+      const result = deserializeSchedule({
+        schedule_type: 'rrule',
+        rrule_schedule: {
+          rrule: 'FREQ=DAILY',
+          start_date: startDateIso,
+        },
+      });
+
+      expect(result.scheduleType).toBe('rrule');
+      expect(result.startDate.toISOString()).toBe(startDateIso);
+      expect(result.recurrence.frequency).toBe('daily');
+    });
+
+    // Round-trip check ────────────────────────────────────────────────────────
+    it('should round-trip interval mode: serialize → deserialize', () => {
+      const original = makeIntervalFormData(1800);
+      const serialized = serializeSchedule(original);
+      const restored = deserializeSchedule(serialized);
+
+      expect(restored.scheduleType).toBe('interval');
+      expect(restored.interval).toBe(1800);
+    });
+
+    it('should round-trip rrule daily mode: serialize → deserialize', () => {
+      const startDate = new Date('2024-05-10T00:00:00.000Z');
+      const original = makeRruleFormData({ startDate });
+      const serialized = serializeSchedule(original);
+      const restored = deserializeSchedule({
+        schedule_type: serialized.schedule_type,
+        rrule_schedule: serialized.rrule_schedule,
+      });
+
+      expect(restored.scheduleType).toBe('rrule');
+      expect(restored.startDate.toISOString()).toBe(startDate.toISOString());
+      expect(restored.recurrence.frequency).toBe('daily');
+    });
+  });
+});
