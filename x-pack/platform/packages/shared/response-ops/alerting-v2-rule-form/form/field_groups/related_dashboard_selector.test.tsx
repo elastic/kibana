@@ -27,10 +27,12 @@ const BASE_COMPOSE_VALUES: ComposeFormValues = {
   stateTransitionAlertDelayMode: 'immediate',
   stateTransitionRecoveryDelayMode: 'immediate',
   artifacts: [],
+  dashboardArtifacts: [],
 };
 
 const DASHBOARD_ID = 'dashboard-123';
 const DASHBOARD_TITLE = 'Dashboard 123';
+const MISSING_DASHBOARD_ID = 'missing-dashboard';
 
 interface Dashboard {
   id: string;
@@ -70,7 +72,9 @@ const mockUiActions = {
 
 const ArtifactValueSpy = () => {
   const { watch } = useFormContext<ComposeFormValues>();
-  return <div data-test-subj="artifactValueSpy">{JSON.stringify(watch('artifacts') ?? [])}</div>;
+  return (
+    <div data-test-subj="artifactValueSpy">{JSON.stringify(watch('dashboardArtifacts') ?? [])}</div>
+  );
 };
 
 const createComposeFormWrapper = (
@@ -164,7 +168,9 @@ describe('RelatedDashboardSelector', () => {
       {
         wrapper: createComposeFormWrapper({
           ...BASE_COMPOSE_VALUES,
-          artifacts: [{ id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, value: DASHBOARD_ID }],
+          dashboardArtifacts: [
+            { id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, value: DASHBOARD_ID },
+          ],
         }),
       }
     );
@@ -178,6 +184,39 @@ describe('RelatedDashboardSelector', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('artifactValueSpy').textContent).toContain('[]');
+    });
+  });
+
+  it('prunes stale dashboard artifacts when dashboard titles cannot be loaded', async () => {
+    render(
+      <>
+        <RelatedDashboardSelector />
+        <ArtifactValueSpy />
+      </>,
+      {
+        wrapper: createComposeFormWrapper({
+          ...BASE_COMPOSE_VALUES,
+          dashboardArtifacts: [
+            { id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, value: DASHBOARD_ID },
+            {
+              id: 'missing-dashboard-id',
+              type: DASHBOARD_ARTIFACT_TYPE,
+              value: MISSING_DASHBOARD_ID,
+            },
+          ],
+        }),
+      }
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText(DASHBOARD_TITLE)).toBeTruthy();
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('artifactValueSpy').textContent).toContain(DASHBOARD_ID);
+      expect(screen.getByTestId('artifactValueSpy').textContent).not.toContain(
+        MISSING_DASHBOARD_ID
+      );
     });
   });
 

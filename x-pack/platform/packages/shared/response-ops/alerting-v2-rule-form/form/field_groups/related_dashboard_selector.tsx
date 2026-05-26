@@ -15,14 +15,22 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { useDebounceFn } from '@kbn/react-hooks';
 import { useController, useFormContext } from 'react-hook-form';
 import { useRuleFormServices } from '../contexts';
+import type { FormValues } from '../types';
 import { getDashboardsById, searchRelatedDashboard } from './search_related_dashboards';
 
-interface ArtifactsFormValues {
-  artifacts?: Array<{ id: string; type: string; value: string }>;
-}
-
 const SEARCH_DEBOUNCE_MS = 300;
-const SEARCH_DEBOUNCE_OPTIONS = { wait: SEARCH_DEBOUNCE_MS };
+
+const getOptionIds = (options: Array<EuiComboBoxOptionOption<string>>) =>
+  options.flatMap((option) => (option.value ? [option.value] : []));
+
+const haveSameDashboardIds = (left: string[], right: string[]) => {
+  if (left.length !== right.length) {
+    return false;
+  }
+
+  const rightIds = new Set(right);
+  return left.every((id) => rightIds.has(id));
+};
 
 const RelatedDashboardsComboBox = ({
   uiActions,
@@ -45,13 +53,23 @@ const RelatedDashboardsComboBox = ({
   >([]);
   const [isLoading, setIsLoading] = useState(false);
   const hasLoadedDashboardOptions = useRef(false);
+  const shouldIgnoreNextEmptySearch = useRef(false);
+  const selectedDashboardIds = useRef<string[]>([]);
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
 
   useEffect(() => {
     let ignore = false;
     const loadSelectedDashboards = async () => {
       try {
         const dashboardIds = dashboardsFormData.map((dashboard) => dashboard.id);
+        if (haveSameDashboardIds(dashboardIds, selectedDashboardIds.current)) {
+          return;
+        }
+
         if (!dashboardIds.length) {
+          selectedDashboardIds.current = [];
+          setSelectedDashboards([]);
           return;
         }
 
@@ -64,15 +82,17 @@ const RelatedDashboardsComboBox = ({
           label: dashboard.title,
           value: dashboard.id,
         }));
+        selectedDashboardIds.current = getOptionIds(selectedOptions);
         setSelectedDashboards(selectedOptions);
 
         if (selectedOptions.length !== dashboardsFormData.length) {
-          onChange(selectedOptions);
+          onChangeRef.current(selectedOptions);
         }
       } catch {
         if (!ignore) {
+          selectedDashboardIds.current = [];
           setSelectedDashboards([]);
-          onChange([]);
+          onChangeRef.current([]);
         }
       }
     };
@@ -81,7 +101,7 @@ const RelatedDashboardsComboBox = ({
     return () => {
       ignore = true;
     };
-  }, [dashboardsFormData, onChange, uiActions]);
+  }, [dashboardsFormData, uiActions]);
 
   const loadDashboards = useCallback(
     async (search?: string) => {
@@ -99,7 +119,9 @@ const RelatedDashboardsComboBox = ({
     },
     [uiActions]
   );
-  const { run: debouncedLoadDashboards } = useDebounceFn(loadDashboards, SEARCH_DEBOUNCE_OPTIONS);
+  const { run: debouncedLoadDashboards } = useDebounceFn(loadDashboards, {
+    wait: SEARCH_DEBOUNCE_MS,
+  });
 
   const handleComboBoxFocus = useCallback(() => {
     if (hasLoadedDashboardOptions.current) {
@@ -107,10 +129,27 @@ const RelatedDashboardsComboBox = ({
     }
 
     hasLoadedDashboardOptions.current = true;
+    // EUI fires an empty onSearchChange when the combo opens; focus already loads
+    // the initial options, so skip only that immediate duplicate empty search.
+    shouldIgnoreNextEmptySearch.current = true;
     loadDashboards();
   }, [loadDashboards]);
 
+  const handleSearchChange = useCallback(
+    (search: string) => {
+      if (shouldIgnoreNextEmptySearch.current && !search.trim()) {
+        shouldIgnoreNextEmptySearch.current = false;
+        return;
+      }
+
+      shouldIgnoreNextEmptySearch.current = false;
+      debouncedLoadDashboards(search);
+    },
+    [debouncedLoadDashboards]
+  );
+
   const onSelectionChange = (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
+    selectedDashboardIds.current = getOptionIds(selectedOptions);
     setSelectedDashboards(selectedOptions);
     onChange(selectedOptions);
   };
@@ -126,40 +165,30 @@ const RelatedDashboardsComboBox = ({
       aria-labelledby={labelId}
       onChange={onSelectionChange}
       onFocus={handleComboBoxFocus}
-      onSearchChange={debouncedLoadDashboards}
+      onSearchChange={handleSearchChange}
       data-test-subj="dashboardsSelector"
     />
   );
 };
 
 export const RelatedDashboardSelector: React.FC = () => {
-  const { control } = useFormContext<ArtifactsFormValues>();
+  const { control } = useFormContext<FormValues>();
   const { uiActions } = useRuleFormServices();
   const relatedDashboardsLabelId = useGeneratedHtmlId({ prefix: 'relatedDashboardsLabel' });
   const {
-    field: { value: artifactsValue, onChange },
-  } = useController<ArtifactsFormValues, 'artifacts'>({
-    name: 'artifacts',
+    field: { value: dashboardArtifacts = [], onChange },
+  } = useController<FormValues, 'dashboardArtifacts'>({
+    name: 'dashboardArtifacts',
     control,
   });
 
-  const artifacts = useMemo(() => artifactsValue ?? [], [artifactsValue]);
   const dashboardsFormData = useMemo(
-    () =>
-      artifacts
-        .filter((artifact) => artifact.type === DASHBOARD_ARTIFACT_TYPE)
-        .map((artifact) => ({ id: artifact.value })),
-    [artifacts]
+    () => dashboardArtifacts.map((artifact) => ({ id: artifact.value })),
+    [dashboardArtifacts]
   );
 
   const updateDashboardArtifacts = useCallback(
     (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
-      const dashboardArtifacts = artifacts.filter(
-        (artifact) => artifact.type === DASHBOARD_ARTIFACT_TYPE
-      );
-      const otherArtifacts = artifacts.filter(
-        (artifact) => artifact.type !== DASHBOARD_ARTIFACT_TYPE
-      );
       const nextDashboardArtifacts = selectedOptions.flatMap((selectedOption) => {
         const dashboardId = selectedOption.value;
         if (!dashboardId) {
@@ -179,9 +208,9 @@ export const RelatedDashboardSelector: React.FC = () => {
         ];
       });
 
-      onChange([...otherArtifacts, ...nextDashboardArtifacts]);
+      onChange(nextDashboardArtifacts);
     },
-    [artifacts, onChange]
+    [dashboardArtifacts, onChange]
   );
 
   if (!uiActions) {

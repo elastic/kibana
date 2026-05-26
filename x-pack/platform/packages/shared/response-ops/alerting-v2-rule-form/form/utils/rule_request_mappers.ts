@@ -13,7 +13,12 @@ import type {
 } from '@kbn/alerting-v2-schemas';
 import { DELAY_MODE } from '../types';
 import type { FormValues, StateTransition } from '../types';
-import { mapArtifacts, type RuleArtifactPayload } from './artifact_mappers';
+import {
+  mapArtifacts,
+  mergeArtifactsByType,
+  splitArtifactsByType,
+  type RuleArtifactPayload,
+} from './artifact_mappers';
 
 // ---------------------------------------------------------------------------
 // FormValues → API request
@@ -154,9 +159,8 @@ export interface RuleRequestCommon {
  * both create and update endpoints. Does not include `kind`.
  */
 export const mapFormValuesToRuleRequest = (formValues: FormValues): RuleRequestCommon => {
-  const { metadata, timeField, schedule, evaluation, grouping, recoveryPolicy, artifacts } =
-    formValues;
-  const mappedArtifacts = mapArtifacts(artifacts);
+  const { metadata, timeField, schedule, evaluation, grouping, recoveryPolicy } = formValues;
+  const mappedArtifacts = mapArtifacts(mergeArtifactsByType(formValues));
 
   return {
     metadata: mapMetadata(metadata),
@@ -252,6 +256,6 @@ export const mapRuleResponseToFormValues = (rule: RuleResponse): Partial<FormVal
     stateTransition,
     stateTransitionAlertDelayMode: deriveAlertDelayModeFromStateTransition(stateTransition),
     stateTransitionRecoveryDelayMode: deriveRecoveryDelayModeFromStateTransition(stateTransition),
-    ...(rule.artifacts ? { artifacts: rule.artifacts } : {}),
+    ...splitArtifactsByType(rule.artifacts),
   };
 };

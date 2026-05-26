@@ -34,6 +34,8 @@ const BASE_COMPOSE_VALUES: ComposeFormValues = {
   stateTransitionAlertDelayMode: 'immediate',
   stateTransitionRecoveryDelayMode: 'immediate',
   artifacts: [],
+  runbookArtifacts: [],
+  dashboardArtifacts: [],
 };
 
 interface Dashboard {
@@ -166,12 +168,14 @@ describe('step validation', () => {
     it('renders existing runbook and related dashboard artifacts', async () => {
       renderComposeDiscoverDetailsStep({
         ...BASE_COMPOSE_VALUES,
-        artifacts: [
+        runbookArtifacts: [
           {
             id: 'runbook-id',
             type: RUNBOOK_ARTIFACT_TYPE,
             value: 'Investigate failed transactions\nCheck service logs',
           },
+        ],
+        dashboardArtifacts: [
           { id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, value: DASHBOARD_ID },
         ],
       });

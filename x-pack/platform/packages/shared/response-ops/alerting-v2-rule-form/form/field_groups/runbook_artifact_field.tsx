@@ -25,14 +25,16 @@ import type { FormValues } from '../types';
 
 export const RunbookArtifactField: React.FC = () => {
   const { euiTheme } = useEuiTheme();
-  const { setValue, control } = useFormContext<FormValues>();
+  const { control } = useFormContext<FormValues>();
   const {
-    field: { value: artifacts },
-  } = useController<FormValues, 'artifacts'>({
+    field: { value: runbookArtifacts = [], onChange },
+  } = useController<FormValues, 'runbookArtifacts'>({
     control,
-    name: 'artifacts',
+    name: 'runbookArtifacts',
   });
-  const runbookArtifact = artifacts?.find((artifact) => artifact.type === RUNBOOK_ARTIFACT_TYPE);
+  const runbookArtifact = runbookArtifacts.find(
+    (artifact) => artifact.type === RUNBOOK_ARTIFACT_TYPE
+  );
   const runbookValue = runbookArtifact?.value;
   const hasRunbook = Boolean(runbookValue?.trim());
   const runbookTitle = runbookValue
@@ -60,10 +62,7 @@ export const RunbookArtifactField: React.FC = () => {
   };
 
   const onConfirmDeleteRunbook = () => {
-    const nextArtifacts = (artifacts ?? []).filter(
-      (artifact) => artifact.type !== RUNBOOK_ARTIFACT_TYPE
-    );
-    setValue('artifacts', nextArtifacts);
+    onChange([]);
     closeDeleteConfirm();
   };
 

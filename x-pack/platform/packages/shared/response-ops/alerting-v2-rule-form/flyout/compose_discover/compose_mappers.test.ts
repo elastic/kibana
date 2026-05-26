@@ -338,8 +338,10 @@ describe('composeFormToCreateRequest', () => {
   it('trims runbook and dashboard artifacts', () => {
     const values: ComposeFormValues = {
       ...baseFormValues,
-      artifacts: [
+      runbookArtifacts: [
         { id: 'runbook-id', type: RUNBOOK_ARTIFACT_TYPE, value: '  Runbook steps  ' },
+      ],
+      dashboardArtifacts: [
         { id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, value: '  dashboard-123  ' },
       ],
     };
@@ -355,11 +357,9 @@ describe('composeFormToCreateRequest', () => {
   it('removes empty runbook and dashboard artifacts while preserving other artifacts', () => {
     const values: ComposeFormValues = {
       ...baseFormValues,
-      artifacts: [
-        { id: 'runbook-id', type: RUNBOOK_ARTIFACT_TYPE, value: '   ' },
-        { id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, value: '' },
-        { id: 'other-id', type: 'other', value: 'kept' },
-      ],
+      runbookArtifacts: [{ id: 'runbook-id', type: RUNBOOK_ARTIFACT_TYPE, value: '   ' }],
+      dashboardArtifacts: [{ id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, value: '' }],
+      artifacts: [{ id: 'other-id', type: 'other', value: 'kept' }],
     };
 
     const result = composeFormToCreateRequest(values);
@@ -370,10 +370,8 @@ describe('composeFormToCreateRequest', () => {
   it('generates missing IDs for runbook and dashboard artifacts', () => {
     const values: ComposeFormValues = {
       ...baseFormValues,
-      artifacts: [
-        { id: '', type: RUNBOOK_ARTIFACT_TYPE, value: 'Runbook steps' },
-        { id: '', type: DASHBOARD_ARTIFACT_TYPE, value: 'dashboard-123' },
-      ],
+      runbookArtifacts: [{ id: '', type: RUNBOOK_ARTIFACT_TYPE, value: 'Runbook steps' }],
+      dashboardArtifacts: [{ id: '', type: DASHBOARD_ARTIFACT_TYPE, value: 'dashboard-123' }],
     };
 
     const result = composeFormToCreateRequest(values);
@@ -511,13 +509,23 @@ describe('mapRuleToComposeFormValues', () => {
     expect(result.stateTransition).toBeUndefined();
   });
 
-  it('maps artifacts when present', () => {
+  it('splits artifacts by field ownership when present', () => {
     const rule = {
       ...baseRuleResponse,
-      artifacts: [{ id: 'a1', type: 'runbook', value: 'steps here' }],
+      artifacts: [
+        { id: 'host-id', type: 'host', value: 'host-a' },
+        { id: 'runbook-id', type: 'runbook', value: 'steps here' },
+        { id: 'dashboard-id', type: 'dashboard', value: 'dashboard-123' },
+      ],
     } as RuleResponse;
     const result = mapRuleToComposeFormValues(rule);
-    expect(result.artifacts).toEqual([{ id: 'a1', type: 'runbook', value: 'steps here' }]);
+    expect(result.artifacts).toEqual([{ id: 'host-id', type: 'host', value: 'host-a' }]);
+    expect(result.runbookArtifacts).toEqual([
+      { id: 'runbook-id', type: 'runbook', value: 'steps here' },
+    ]);
+    expect(result.dashboardArtifacts).toEqual([
+      { id: 'dashboard-id', type: 'dashboard', value: 'dashboard-123' },
+    ]);
   });
 
   it('derives recoveries delay mode from recovering_count', () => {

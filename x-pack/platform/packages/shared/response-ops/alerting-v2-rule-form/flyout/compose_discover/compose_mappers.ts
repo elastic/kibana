@@ -6,7 +6,11 @@
  */
 
 import type { RuleResponse, CreateRuleData, UpdateRuleData } from '@kbn/alerting-v2-schemas';
-import { mapArtifacts } from '../../form/utils/artifact_mappers';
+import {
+  mapArtifacts,
+  mergeArtifactsByType,
+  splitArtifactsByType,
+} from '../../form/utils/artifact_mappers';
 import type {
   ComposeFormValues,
   RuleQuery,
@@ -149,7 +153,7 @@ const mapStateTransition = (formValues: ComposeFormValues) => {
 
 export const composeFormToCreateRequest = (formValues: ComposeFormValues): CreateRuleData => {
   const { evaluation, recovery_policy } = transformQueryOut(formValues.query, formValues.kind);
-  const artifacts = mapArtifacts(formValues.artifacts);
+  const artifacts = mapArtifacts(mergeArtifactsByType(formValues));
 
   return {
     kind: formValues.kind,
@@ -232,6 +236,6 @@ export const mapRuleToComposeFormValues = (rule: RuleResponse): ComposeFormValue
     stateTransition,
     stateTransitionAlertDelayMode: deriveAlertDelayMode(stateTransition),
     stateTransitionRecoveryDelayMode: deriveRecoveryDelayMode(stateTransition),
-    ...(rule.artifacts ? { artifacts: rule.artifacts } : {}),
+    ...splitArtifactsByType(rule.artifacts),
   };
 };

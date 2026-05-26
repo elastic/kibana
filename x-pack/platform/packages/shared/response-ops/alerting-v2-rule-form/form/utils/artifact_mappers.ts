@@ -9,6 +9,12 @@ import { DASHBOARD_ARTIFACT_TYPE, RUNBOOK_ARTIFACT_TYPE } from '@kbn/alerting-v2
 
 export type RuleArtifactPayload = Array<{ id: string; type: string; value: string }>;
 
+export interface RuleArtifactSlices {
+  artifacts?: RuleArtifactPayload;
+  runbookArtifacts?: RuleArtifactPayload;
+  dashboardArtifacts?: RuleArtifactPayload;
+}
+
 const NORMALIZED_ARTIFACT_TYPES = new Set([RUNBOOK_ARTIFACT_TYPE, DASHBOARD_ARTIFACT_TYPE]);
 
 const createArtifactId = (artifactType: string) =>
@@ -39,4 +45,41 @@ export const mapArtifacts = (
   });
 
   return normalizedArtifacts.length ? normalizedArtifacts : undefined;
+};
+
+export const splitArtifactsByType = (
+  artifacts: RuleArtifactPayload | undefined
+): RuleArtifactSlices => {
+  const otherArtifacts: RuleArtifactPayload = [];
+  const runbookArtifacts: RuleArtifactPayload = [];
+  const dashboardArtifacts: RuleArtifactPayload = [];
+
+  for (const artifact of artifacts ?? []) {
+    if (artifact.type === RUNBOOK_ARTIFACT_TYPE) {
+      runbookArtifacts.push(artifact);
+    } else if (artifact.type === DASHBOARD_ARTIFACT_TYPE) {
+      dashboardArtifacts.push(artifact);
+    } else {
+      otherArtifacts.push(artifact);
+    }
+  }
+
+  return {
+    ...(otherArtifacts.length ? { artifacts: otherArtifacts } : {}),
+    ...(runbookArtifacts.length ? { runbookArtifacts } : {}),
+    ...(dashboardArtifacts.length ? { dashboardArtifacts } : {}),
+  };
+};
+
+export const mergeArtifactsByType = ({
+  artifacts,
+  runbookArtifacts,
+  dashboardArtifacts,
+}: RuleArtifactSlices): RuleArtifactPayload | undefined => {
+  const mergedArtifacts = [
+    ...(artifacts ?? []),
+    ...(runbookArtifacts ?? []),
+    ...(dashboardArtifacts ?? []),
+  ];
+  return mergedArtifacts.length ? mergedArtifacts : undefined;
 };

@@ -285,6 +285,27 @@ describe('rule_request_mappers', () => {
       expect(result.artifacts).toEqual([{ id: 'artifact-1', type: 'host', value: 'host-a' }]);
     });
 
+    it('merges split artifact fields into API request', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        artifacts: [{ id: 'artifact-1', type: 'host', value: 'host-a' }],
+        runbookArtifacts: [
+          { id: 'runbook-id', type: RUNBOOK_ARTIFACT_TYPE, value: 'Runbook steps' },
+        ],
+        dashboardArtifacts: [
+          { id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, value: 'dashboard-123' },
+        ],
+      };
+
+      const result = mapFormValuesToRuleRequest(formValues);
+
+      expect(result.artifacts).toEqual([
+        { id: 'artifact-1', type: 'host', value: 'host-a' },
+        { id: 'runbook-id', type: RUNBOOK_ARTIFACT_TYPE, value: 'Runbook steps' },
+        { id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, value: 'dashboard-123' },
+      ]);
+    });
+
     it('replaces existing runbook artifact value while preserving artifact id', () => {
       const formValues: FormValues = {
         ...baseFormValues,
@@ -766,20 +787,24 @@ describe('rule_request_mappers', () => {
       expect(result.stateTransitionRecoveryDelayMode).toBe('immediate');
     });
 
-    it('maps artifacts when present', () => {
+    it('splits artifacts by field ownership when present', () => {
       const rule = {
         ...baseRuleResponse,
         artifacts: [
           { id: 'artifact-1', type: 'host', value: 'host-a' },
           { id: 'runbook-id', type: 'runbook', value: 'Runbook from API' },
+          { id: 'dashboard-id', type: 'dashboard', value: 'dashboard-123' },
         ],
       } as RuleResponse;
 
       const result = mapRuleResponseToFormValues(rule);
 
-      expect(result.artifacts).toEqual([
-        { id: 'artifact-1', type: 'host', value: 'host-a' },
+      expect(result.artifacts).toEqual([{ id: 'artifact-1', type: 'host', value: 'host-a' }]);
+      expect(result.runbookArtifacts).toEqual([
         { id: 'runbook-id', type: 'runbook', value: 'Runbook from API' },
+      ]);
+      expect(result.dashboardArtifacts).toEqual([
+        { id: 'dashboard-id', type: 'dashboard', value: 'dashboard-123' },
       ]);
     });
 
@@ -810,6 +835,8 @@ describe('rule_request_mappers', () => {
         stateTransitionAlertDelayMode: formValues.stateTransitionAlertDelayMode!,
         stateTransitionRecoveryDelayMode: formValues.stateTransitionRecoveryDelayMode!,
         artifacts: formValues.artifacts,
+        runbookArtifacts: formValues.runbookArtifacts,
+        dashboardArtifacts: formValues.dashboardArtifacts,
       };
 
       const createPayload = mapFormValuesToCreateRequest(completeFormValues);
