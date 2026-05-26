@@ -23,6 +23,17 @@ import type {
 
 export type Dimension = 'coverage' | 'quality' | 'continuity' | 'retention';
 
+/**
+ * Pre-built reverse maps used to determine blast radius for a finding.
+ *
+ * - indexToRules: concrete index/data stream name → rules that query it
+ * - pipelineToIndices: ingest pipeline name → indices using that pipeline
+ * - categoryToIndices: SIEM category (e.g. "Cloud") → indices in that category
+ * - tacticTotals: tactic ID → total number of rules covering that tactic (for % impact)
+ *
+ * All maps are built once per request by fetchRulesReverseMap and passed into
+ * enrichFinding/enrichFindings.
+ */
 export interface EnrichmentContext {
   indexToRules: IndexToRulesMap;
   pipelineToIndices: PipelineToIndicesMap;
@@ -31,6 +42,8 @@ export interface EnrichmentContext {
   dimension: Dimension;
 }
 
+// A rule can appear in multiple indices (e.g. via wildcard patterns), so when
+// walking pipeline→indices→rules or category→indices→rules we dedupe by id.
 const dedupeRulesById = (rules: RuleIndexEntry[]): RuleIndexEntry[] => {
   const seen = new Set<string>();
   return rules.filter((r) => {
@@ -40,6 +53,15 @@ const dedupeRulesById = (rules: RuleIndexEntry[]): RuleIndexEntry[] => {
   });
 };
 
+/**
+ * Returns the detection rules affected by a finding, using dimension-specific
+ * lookup paths through the reverse maps:
+ *
+ * - quality / retention: finding.resource IS the index name → direct lookup
+ * - continuity: finding.resource is a pipeline → pipeline→indices→rules
+ * - coverage: finding.resource is a SIEM category → category→indices→rules
+ *   (detection_rules findings have no index to look up, so we return nothing)
+ */
 const getRulesForFinding = (
   finding: ActionableFinding,
   ctx: EnrichmentContext
@@ -62,9 +84,7 @@ const getRulesForFinding = (
         return [];
       }
       const indicesInCategory = ctx.categoryToIndices.get(finding.resource) ?? [];
-      const rulesFromCategory = indicesInCategory.flatMap(
-        (idx) => ctx.indexToRules.get(idx) ?? []
-      );
+      const rulesFromCategory = indicesInCategory.flatMap((idx) => ctx.indexToRules.get(idx) ?? []);
       return dedupeRulesById(rulesFromCategory);
     }
 
@@ -73,6 +93,12 @@ const getRulesForFinding = (
   }
 };
 
+/**
+ * Derives the affected platform from the set of impacted rules using a
+ * majority-vote approach:
+ * - If one platform accounts for >50% of rules → return it alone (clear owner)
+ * - Otherwise → return up to the top 3 platforms joined by comma (mixed finding)
+ */
 const derivePlatformFromRules = (rules: RuleIndexEntry[]): string | undefined => {
   const platforms = rules.map((r) => r.platform).filter((p): p is string => p !== undefined);
 
@@ -102,6 +128,11 @@ const createResourceSlug = (resource: string): string => {
     .slice(0, 50);
 };
 
+/**
+ * Builds the list of recommended actions for a finding.
+ * "View affected rules" is omitted for coverage/detection_rules findings because
+ * that finding has no concrete index to pass as a filter to the rules page.
+ */
 const buildRecommendedActionsForFinding = (
   finding: ActionableFinding,
   dimension: Dimension
@@ -151,14 +182,24 @@ const buildRecommendedActionsForFinding = (
   return actions;
 };
 
+/**
+ * Enriches a single finding with blast radius data:
+ * affected rules, MITRE tactics, platform, and recommended actions.
+ *
+ * Fields are omitted (set to undefined) when empty to keep the AI tool payload
+ * concise and avoid misleading "0 rules affected" signals.
+ */
 export const enrichFinding = (
   finding: ActionableFinding,
   ctx: EnrichmentContext
 ): ActionableFinding => {
+  // 1. Resolve which detection rules are affected by this finding
   const rules = getRulesForFinding(finding, ctx);
 
+  // 2. Collect rule id + name (strip internal fields like platform/tactics)
   const affectedRules: AffectedRule[] = rules.map((r) => ({ id: r.id, name: r.name }));
 
+  // 3. Count how many affected rules cover each MITRE tactic
   const tacticCounts = new Map<string, number>();
   for (const rule of rules) {
     for (const tactic of rule.tactics) {
@@ -176,12 +217,15 @@ export const enrichFinding = (
     };
   });
 
+  // 4. Derive the dominant platform via majority vote across affected rules
   const affectedPlatform = derivePlatformFromRules(rules);
 
+  // 5. Build dimension-specific recommended actions
   const recommendedActions = buildRecommendedActionsForFinding(finding, ctx.dimension);
 
   const severity = finding.severity.toUpperCase() as FindingSeverity;
 
+  // 6. Return enriched finding; omit empty arrays to keep payload clean
   return {
     ...finding,
     severity,
