@@ -30,6 +30,7 @@ import type { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AiButton } from '@kbn/shared-ux-ai-components';
 
+import { ShellSpinner } from './shell_spinner';
 import { useStartNightshiftConversation } from './use_start_nightshift_conversation';
 
 /* ----------------------------------------------------------------------- *
@@ -87,6 +88,26 @@ const SIGNIFICANT_EVENTS: SignificantEvent[] = [
     title:
       'Dropped payments on oteldemo.com and video streams on otelfix.com due to unav…',
   },
+  { id: 'password-reset', title: 'Password Reset Feature Downtime' },
+  {
+    id: 'payment-failures',
+    title: 'Payment Service — payment processing failures (steady state)',
+  },
+];
+
+/**
+ * Mock list of significant events currently being worked on by an
+ * agent / on-call engineer. Matches Figma node 902:77309. Each row
+ * shows the title plus a shell-style spinner on the left to signal
+ * "task running in the background".
+ */
+const IN_PROGRESS_EVENTS: SignificantEvent[] = [
+  {
+    id: 'oteldemo-auth',
+    title:
+      'Dropped payments on oteldemo.com and video streams on otelfix.com due to unavailable Auth Service',
+  },
+  { id: '2fa-delay', title: 'Two-factor Authentication Delay Issues' },
   { id: 'password-reset', title: 'Password Reset Feature Downtime' },
   {
     id: 'payment-failures',
@@ -328,7 +349,7 @@ const SignificantEventRow: React.FC<{ event: SignificantEvent; isLast: boolean }
     >
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiIcon type="sortRight" size="s" color={euiTheme.colors.textPrimary} />
+          <EuiIcon type="expand" size="s" color={euiTheme.colors.textPrimary} />
         </EuiFlexItem>
         <EuiFlexItem
           css={css`
@@ -377,7 +398,7 @@ const SignificantEventRow: React.FC<{ event: SignificantEvent; isLast: boolean }
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
-                iconType="sparkles"
+                iconType="productAgent"
                 color="text"
                 size="xs"
                 aria-label={i18n.translate(
@@ -400,6 +421,67 @@ const SignificantEventRow: React.FC<{ event: SignificantEvent; isLast: boolean }
               />
             </EuiFlexItem>
           </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </div>
+  );
+};
+
+/**
+ * Compact row for the "In Progress" tab. Same chrome as
+ * `SignificantEventRow` but with a `ShellSpinner` on the left in place
+ * of the expand icon (signals "task is being worked on right now") and
+ * only an overflow menu on the right — there is no severity badge or
+ * other actions on in-progress items.
+ */
+const InProgressEventRow: React.FC<{ event: SignificantEvent; isLast: boolean }> = ({
+  event,
+  isLast,
+}) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <div
+      css={css`
+        padding: 12px;
+        background: ${euiTheme.colors.backgroundBasePlain};
+        border-bottom: ${isLast ? 'none' : euiTheme.border.thin};
+      `}
+      data-test-subj={`nightshiftCriticalInProgressEvent-${event.id}`}
+    >
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <ShellSpinner size={16} aria-label={`${event.title} in progress`} />
+        </EuiFlexItem>
+        <EuiFlexItem
+          css={css`
+            min-width: 0;
+          `}
+        >
+          <EuiText
+            size="xs"
+            css={css`
+              color: ${euiTheme.colors.textPrimary};
+              font-weight: ${euiTheme.font.weight.semiBold};
+              overflow: hidden;
+              text-overflow: ellipsis;
+              white-space: nowrap;
+            `}
+            title={event.title}
+          >
+            {event.title}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            iconType="boxesHorizontal"
+            color="text"
+            size="xs"
+            aria-label={i18n.translate(
+              'xpack.observability.nightshift.critical.inProgressMoreAriaLabel',
+              { defaultMessage: 'More actions' }
+            )}
+            onClick={() => {}}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>
@@ -471,7 +553,7 @@ export const NightshiftCritical: React.FC = () => {
                 justify-content: center;
               `}
             >
-              <EuiIcon type="agentApp" size="l" color={euiTheme.colors.textDanger} />
+              <EuiIcon type="productAgent" size="l" color={euiTheme.colors.textDanger} />
             </div>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -507,13 +589,35 @@ export const NightshiftCritical: React.FC = () => {
             border-radius: 8px;
           `}
         >
-          <EuiText size="s">
-            <strong>
-              {i18n.translate('xpack.observability.nightshift.critical.stateLabel', {
-                defaultMessage: 'State',
-              })}
-            </strong>
-          </EuiText>
+          <EuiFlexGroup
+            alignItems="center"
+            justifyContent="spaceBetween"
+            responsive={false}
+            gutterSize="s"
+          >
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">
+                <strong>
+                  {i18n.translate('xpack.observability.nightshift.critical.stateLabel', {
+                    defaultMessage: 'State',
+                  })}
+                </strong>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="xs"
+                flush="right"
+                onClick={() => {}}
+                data-test-subj="nightshiftCriticalGoToKnowledgeIndicators"
+              >
+                {i18n.translate(
+                  'xpack.observability.nightshift.critical.goToKnowledgeIndicators',
+                  { defaultMessage: 'Go to Knowledge Indicators' }
+                )}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
           <EuiSpacer size="s" />
           <EuiFlexGrid columns={4} gutterSize="s">
             {AFFECTED_ENTITIES.map((entity) => (
@@ -577,8 +681,6 @@ export const NightshiftCritical: React.FC = () => {
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   size="xs"
-                  iconType="popout"
-                  iconSide="left"
                   onClick={() => {}}
                   data-test-subj="nightshiftCriticalGoToSignificantEventsTop"
                 >
@@ -590,128 +692,198 @@ export const NightshiftCritical: React.FC = () => {
               </EuiFlexItem>
             </EuiFlexGroup>
 
-            <EuiSpacer size="m" />
-
-            {/* Risk summary row */}
-            <EuiPanel paddingSize="m" hasShadow={false} hasBorder color="plain">
-              <EuiFlexGroup alignItems="center" gutterSize="l" responsive={false}>
-                {RISK_SUMMARY.map((stat, index) => (
-                  <React.Fragment key={stat.id}>
-                    <EuiFlexItem>
-                      <RiskStat stat={stat} />
-                    </EuiFlexItem>
-                    {index < RISK_SUMMARY.length - 1 && (
-                      <EuiFlexItem grow={false}>
-                        <div
-                          aria-hidden
-                          css={css`
-                            width: 1px;
-                            height: 46px;
-                            background: ${euiTheme.colors.borderBaseSubdued};
-                          `}
-                        />
-                      </EuiFlexItem>
-                    )}
-                  </React.Fragment>
-                ))}
-              </EuiFlexGroup>
-            </EuiPanel>
-          </div>
-
-          {/* Featured event */}
-          <div
-            css={css`
-              padding: ${euiTheme.size.l};
-              background: ${euiTheme.colors.backgroundBasePlain};
-              border-bottom: ${euiTheme.border.thin};
-            `}
-          >
-            <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <RiskScore value={FEATURED_EVENT.score} />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
-                  <EuiFlexItem grow={false}>
-                    <EuiTitle size="xxs">
-                      <h4>{FEATURED_EVENT.title}</h4>
-                    </EuiTitle>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiFlexGroup gutterSize="xs" responsive={false} wrap>
-                      {FEATURED_EVENT.badges.map((label) => (
-                        <EuiFlexItem grow={false} key={label}>
-                          <EuiBadge color="hollow" iconType="layers" iconSide="left">
-                            {label}
-                          </EuiBadge>
+            {/*
+             * Risk summary + featured event are part of the Active tab
+             * only. The In Progress and Archived tabs render a simpler
+             * list without these summary panels.
+             */}
+            {filter === 'active' && (
+              <>
+                <EuiSpacer size="m" />
+                <EuiPanel paddingSize="m" hasShadow={false} hasBorder color="plain">
+                  <EuiFlexGroup alignItems="center" gutterSize="l" responsive={false}>
+                    {RISK_SUMMARY.map((stat, index) => (
+                      <React.Fragment key={stat.id}>
+                        <EuiFlexItem>
+                          <RiskStat stat={stat} />
                         </EuiFlexItem>
-                      ))}
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+                        {index < RISK_SUMMARY.length - 1 && (
+                          <EuiFlexItem grow={false}>
+                            <div
+                              aria-hidden
+                              css={css`
+                                width: 1px;
+                                height: 46px;
+                                background: ${euiTheme.colors.borderBaseSubdued};
+                              `}
+                            />
+                          </EuiFlexItem>
+                        )}
+                      </React.Fragment>
+                    ))}
+                  </EuiFlexGroup>
+                </EuiPanel>
+              </>
+            )}
           </div>
 
-          {/* Significant events list */}
-          <div>
-            {SIGNIFICANT_EVENTS.map((event, idx) => (
-              <SignificantEventRow
-                key={event.id}
-                event={event}
-                isLast={idx === SIGNIFICANT_EVENTS.length - 1}
-              />
-            ))}
-          </div>
+          {filter === 'active' && (
+            <div
+              css={css`
+                padding: ${euiTheme.size.l};
+                background: ${euiTheme.colors.backgroundBasePlain};
+                border-bottom: ${euiTheme.border.thin};
+              `}
+            >
+              <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <RiskScore value={FEATURED_EVENT.score} />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      <EuiTitle size="xxs">
+                        <h4>{FEATURED_EVENT.title}</h4>
+                      </EuiTitle>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiFlexGroup gutterSize="xs" responsive={false} wrap>
+                        {FEATURED_EVENT.badges.map((label) => (
+                          <EuiFlexItem grow={false} key={label}>
+                            <EuiBadge color="hollow" iconType="layers" iconSide="left">
+                              {label}
+                            </EuiBadge>
+                          </EuiFlexItem>
+                        ))}
+                      </EuiFlexGroup>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </div>
+          )}
+
+          {/*
+           * Body list — content depends on the active filter:
+           *  - active     → severity-tagged significant events
+           *  - inProgress → conversations / tasks currently being worked
+           *                 on (Figma node 902:77309) — shell-spinner
+           *                 row + title + overflow menu, no badges
+           *  - archived   → simple empty state (no archived events yet)
+           */}
+          {filter === 'active' && (
+            <div data-test-subj="nightshiftCriticalActiveList">
+              {SIGNIFICANT_EVENTS.map((event, idx) => (
+                <SignificantEventRow
+                  key={event.id}
+                  event={event}
+                  isLast={idx === SIGNIFICANT_EVENTS.length - 1}
+                />
+              ))}
+            </div>
+          )}
+          {filter === 'inProgress' && (
+            <div data-test-subj="nightshiftCriticalInProgressList">
+              {IN_PROGRESS_EVENTS.map((event, idx) => (
+                <InProgressEventRow
+                  key={event.id}
+                  event={event}
+                  isLast={idx === IN_PROGRESS_EVENTS.length - 1}
+                />
+              ))}
+            </div>
+          )}
+          {filter === 'archived' && (
+            <div
+              data-test-subj="nightshiftCriticalArchivedList"
+              css={css`
+                padding: ${euiTheme.size.xl} ${euiTheme.size.l};
+                background: ${euiTheme.colors.backgroundBasePlain};
+                text-align: center;
+              `}
+            >
+              <EuiText size="s" color="subdued">
+                <p>
+                  {i18n.translate(
+                    'xpack.observability.nightshift.critical.archivedEmpty',
+                    { defaultMessage: 'No archived significant events yet.' }
+                  )}
+                </p>
+              </EuiText>
+            </div>
+          )}
 
           <EuiHorizontalRule margin="none" />
 
-          {/* Footer summary + actions */}
+          {/*
+           * Footer copy + actions.
+           *
+           * Active / Archived tabs get the call-to-action footer
+           * (Remediate all + Go to Significant events). The In Progress
+           * tab swaps that for a passive text-only footer — there's
+           * nothing to remediate, the work is already happening, so the
+           * footer just explains the state.
+           */}
           <div
             css={css`
               padding: ${euiTheme.size.base} ${euiTheme.size.l};
             `}
           >
-            <EuiText size="s">
-              <p>
-                {i18n.translate('xpack.observability.nightshift.critical.summary', {
-                  defaultMessage:
-                    'You can start remediation with Agent Builder now, and get those problems fixed. If you want to see all Significant events, go to the hub.',
-                })}
-              </p>
-            </EuiText>
-            <EuiSpacer size="s" />
-            <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-              <EuiFlexItem grow={false}>
-                <AiButton
-                  variant="base"
-                  size="s"
-                  iconType="productAgent"
-                  data-test-subj="nightshiftCriticalRemediateAll"
-                  isDisabled={isExiting}
-                  onClick={() => start({ initialMessage: REMEDIATE_PROMPT })}
-                >
-                  {i18n.translate('xpack.observability.nightshift.critical.remediateAll', {
-                    defaultMessage: 'Remediate all',
-                  })}
-                </AiButton>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  size="s"
-                  color="text"
-                  iconType="popout"
-                  iconSide="left"
-                  data-test-subj="nightshiftCriticalGoToSignificantEvents"
-                  onClick={() => {}}
-                >
+            {filter === 'inProgress' ? (
+              <EuiText size="s">
+                <p>
                   {i18n.translate(
-                    'xpack.observability.nightshift.critical.goToSignificantEvents',
-                    { defaultMessage: 'Go to Significant events' }
+                    'xpack.observability.nightshift.critical.inProgressSummary',
+                    {
+                      defaultMessage:
+                        'Currently these tasks are being handled by agents, you can follow the progress by opening the conversations for it.',
+                    }
                   )}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+                </p>
+              </EuiText>
+            ) : (
+              <>
+                <EuiText size="s">
+                  <p>
+                    {i18n.translate('xpack.observability.nightshift.critical.summary', {
+                      defaultMessage:
+                        'You can start remediation with Agent Builder now, and get those problems fixed. If you want to see all Significant events, go to the hub.',
+                    })}
+                  </p>
+                </EuiText>
+                <EuiSpacer size="s" />
+                <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <AiButton
+                      variant="base"
+                      size="s"
+                      iconType="productAgent"
+                      data-test-subj="nightshiftCriticalRemediateAll"
+                      isDisabled={isExiting}
+                      onClick={() => start({ initialMessage: REMEDIATE_PROMPT })}
+                    >
+                      {i18n.translate(
+                        'xpack.observability.nightshift.critical.remediateAll',
+                        { defaultMessage: 'Remediate all' }
+                      )}
+                    </AiButton>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      size="s"
+                      color="text"
+                      data-test-subj="nightshiftCriticalGoToSignificantEvents"
+                      onClick={() => {}}
+                    >
+                      {i18n.translate(
+                        'xpack.observability.nightshift.critical.goToSignificantEvents',
+                        { defaultMessage: 'Go to Significant events' }
+                      )}
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </>
+            )}
           </div>
         </EuiPanel>
       </EuiFlexItem>
