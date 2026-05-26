@@ -18,6 +18,7 @@ import type { KibanaRequest, HttpAuth } from '@kbn/core-http-server';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
+import type { UserStorageServiceStart } from '@kbn/core-user-storage-server';
 import {
   type DarkModeValue,
   type ThemeName,
@@ -72,6 +73,7 @@ export class RenderingService {
   private readonly themeName$ = new BehaviorSubject<ThemeName>(DEFAULT_THEME_NAME);
   private airgapped: boolean = false;
   private isCoreRenderingInReactConcurrentMode: boolean = true;
+  private userStorageStart?: UserStorageServiceStart;
   constructor(private readonly coreContext: CoreContext) {}
 
   public async preboot({
@@ -141,7 +143,8 @@ export class RenderingService {
     };
   }
 
-  public start({ featureFlags }: RenderingStartDeps) {
+  public start({ featureFlags, userStorage }: RenderingStartDeps) {
+    this.userStorageStart = userStorage;
     featureFlags
       .getStringValue$<ThemeName>(DEFAULT_THEME_NAME_FEATURE_FLAG, DEFAULT_THEME_NAME)
       // Parse the input feature flag value to ensure it's of type ThemeName
@@ -198,6 +201,7 @@ export class RenderingService {
       globalSettingsUserValues = {},
       userSettingDarkMode,
       userSettingLocale,
+      userStorageValues = {},
     ] = await Promise.all(
       isAnonymousPage
         ? [uiSettings.client?.getRegistered() ?? {}]
@@ -209,12 +213,15 @@ export class RenderingService {
             userSettings?.getUserSettingDarkMode(request),
             // locale
             userSettings?.getUserSettingLocale(request),
+            // user storage
+            this.fetchUserStorageValues(request),
           ] as [
             ReturnType<typeof withAsyncDefaultValues>,
             Promise<Record<string, UserProvidedValues>>,
             Promise<Record<string, UserProvidedValues>>,
             Promise<DarkModeValue> | undefined,
-            Promise<string> | undefined
+            Promise<string> | undefined,
+            Promise<Record<string, unknown>>
           ])
     );
 
@@ -392,6 +399,7 @@ export class RenderingService {
           uiSettings: settings,
           globalUiSettings: globalSettings,
         },
+        userStorage: { values: userStorageValues },
       },
     };
 
@@ -406,6 +414,16 @@ export class RenderingService {
   }
 
   public async stop() {}
+
+  private async fetchUserStorageValues(request: KibanaRequest): Promise<Record<string, unknown>> {
+    const userStorage = this.userStorageStart;
+    if (!userStorage) return {};
+
+    const client = userStorage.asScoped(request);
+    if (!client) return {};
+
+    return client.getForInjection();
+  }
 }
 
 const getUiConfig = async (uiPlugins: UiPlugins, pluginId: string) => {

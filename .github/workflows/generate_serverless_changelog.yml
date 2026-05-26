@@ -46,3 +46,33 @@ jobs:
           script: |
             const generateServerlessChangelog = require('./.github/scripts/generate_serverless_changelog');
             await generateServerlessChangelog({ github, core });
+
+  notify_docs:
+    needs: generate
+    if: github.event.repository.fork == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify docs team
+        continue-on-error: true
+        uses: slackapi/slack-github-action@91efab103c0de0a537f72a35f6b8cda0ee76bf0a # v2.1.1
+        with:
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_TOKEN_FAILED_TEST_NOTIFIER }}
+          payload: |
+            channel: ${{ vars.SLACK_KIBANA_MISSION_CONTROL_CHANNEL }}
+            blocks:
+              - type: section
+                text:
+                  type: mrkdwn
+                  text: |
+                    <!subteam^S09CE7YJJU8|docs-serverless-release-team>
+                    :memo: Generate Serverless Changelog completed successfully.
+                    *Service version:* `${{ inputs.service_version }}`
+                    *Target environment:* `${{ inputs.target_env }}`
+              - type: actions
+                elements:
+                  - type: button
+                    text:
+                      type: plain_text
+                      text: View Workflow Run
+                    url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}

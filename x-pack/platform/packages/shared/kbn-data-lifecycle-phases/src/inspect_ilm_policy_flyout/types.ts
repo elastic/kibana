@@ -8,6 +8,20 @@
 import type { EuiFlyoutProps } from '@elastic/eui';
 import type { SerializedPolicy } from '@kbn/index-lifecycle-management-common-shared';
 
+export interface InspectIlmPolicyFlyoutPrimaryAction {
+  /** Button label shown as the flyout's primary action. */
+  label: string;
+  /**
+   * Called when the user clicks the primary action button.
+   * The current inspected policy name is provided for convenience.
+   */
+  onClick: (policyName: string) => void | Promise<void>;
+  /** Optional test subject for the primary action button. */
+  'data-test-subj'?: string;
+  /** Optional disabled state for the primary action button. */
+  isDisabled?: boolean;
+}
+
 export interface InspectIlmPolicyFlyoutProps {
   /** The name of the ILM policy being inspected. */
   policyName: string;
@@ -24,10 +38,10 @@ export interface InspectIlmPolicyFlyoutProps {
    */
   onEditPolicy: (policyName: string) => void;
   /**
-   * Called when the user clicks "Select policy and apply".
-   * Closes the flyout and applies the selected policy.
+   * Primary action (label + callback) is provided by the calling flyout so it
+   * can match the caller's main action (e.g. "Apply").
    */
-  onSelectAndApply: (policyName: string) => void;
+  primaryAction: InspectIlmPolicyFlyoutPrimaryAction;
   /** Flyout display mode. Defaults to push. */
   type?: EuiFlyoutProps['type'];
 }
