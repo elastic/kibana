@@ -12,10 +12,9 @@ import { pick } from 'lodash';
 import path from 'path';
 import { LogLevel } from '../../lib/utils/create_logger';
 import type { RunCliFlags } from '../run_synthtrace';
+import { discoverRepoRoot } from './read_kibana_config';
 
-// Repo root is 8 levels above this file's source location:
-// utils → cli → src → kbn-synthtrace → shared → packages → platform → src → <root>
-const REPO_ROOT = path.resolve(__dirname, '../../../../../../../../');
+const REPO_ROOT = discoverRepoRoot();
 
 /**
  * Maps short scenario names to their colocated plugin paths.
