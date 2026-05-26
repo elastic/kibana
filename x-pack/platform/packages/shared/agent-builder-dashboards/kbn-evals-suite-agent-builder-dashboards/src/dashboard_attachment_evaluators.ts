@@ -8,42 +8,71 @@
 import type { EvaluationResult, Evaluator } from '@kbn/evals';
 import type { DashboardAgentTaskOutput, DashboardDatasetExample } from './evaluate_dataset';
 
-const DASHBOARD_MANAGEMENT_TOOL_ID = 'platform.dashboard.manage_dashboard';
-
 interface DashboardPanel {
   panels?: DashboardPanel[];
   [key: string]: unknown;
 }
 
-interface DashboardAttachmentResult {
+interface DashboardAttachmentContent {
+  title?: string;
+  description?: string;
+  panels?: DashboardPanel[];
+  [key: string]: unknown;
+}
+
+interface DashboardAttachmentContainer {
   data?: {
     dashboardAttachment?: {
-      content?: {
-        panels?: DashboardPanel[];
-      };
+      content?: DashboardAttachmentContent;
     };
   };
 }
 
-const getDashboardContentPanels = (output: DashboardAgentTaskOutput): DashboardPanel[] => {
-  const steps = output.steps ?? [];
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
 
-  for (const step of steps.toReversed()) {
-    if (step.type !== 'tool_call' || step.tool_id !== DASHBOARD_MANAGEMENT_TOOL_ID) {
-      continue;
-    }
+const getDashboardAttachmentContent = (value: unknown): DashboardAttachmentContent | undefined => {
+  const content = (value as DashboardAttachmentContainer).data?.dashboardAttachment?.content;
+  if (content && Array.isArray(content.panels)) {
+    return content;
+  }
 
-    const results = Array.isArray(step.results) ? step.results : [];
-    for (const result of results.toReversed()) {
-      const panels = (result as DashboardAttachmentResult).data?.dashboardAttachment?.content
-        ?.panels;
-      if (Array.isArray(panels)) {
-        return panels;
+  if (Array.isArray(value)) {
+    for (const item of value.toReversed()) {
+      const nestedContent = getDashboardAttachmentContent(item);
+      if (nestedContent) {
+        return nestedContent;
       }
     }
   }
 
-  return [];
+  if (isRecord(value)) {
+    for (const nestedValue of Object.values(value).toReversed()) {
+      const nestedContent = getDashboardAttachmentContent(nestedValue);
+      if (nestedContent) {
+        return nestedContent;
+      }
+    }
+  }
+
+  return undefined;
+};
+
+export const getLatestDashboardAttachmentContent = (
+  output: DashboardAgentTaskOutput
+): DashboardAttachmentContent | undefined => {
+  for (const step of (output.steps ?? []).toReversed()) {
+    const content = getDashboardAttachmentContent(step);
+    if (content) {
+      return content;
+    }
+  }
+
+  return undefined;
+};
+
+const getDashboardContentPanels = (output: DashboardAgentTaskOutput): DashboardPanel[] => {
+  return getLatestDashboardAttachmentContent(output)?.panels ?? [];
 };
 
 const countDashboardPanels = (panels: DashboardPanel[]): number => {
