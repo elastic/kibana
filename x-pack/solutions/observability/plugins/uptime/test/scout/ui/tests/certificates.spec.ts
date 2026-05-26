@@ -9,8 +9,9 @@ import crypto from 'crypto';
 import moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
 import { expect } from '@kbn/scout-oblt/ui';
-import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
 import { test, testData } from '../fixtures';
+
+const { DYNAMIC_SETTINGS_DEFAULTS } = testData;
 
 const GENERATED_INDEX = 'heartbeat-8-generated-test';
 

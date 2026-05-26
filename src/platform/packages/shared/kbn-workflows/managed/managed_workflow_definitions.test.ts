@@ -10,7 +10,11 @@
 import { parse } from 'yaml';
 import { z } from '@kbn/zod/v4';
 import { managedWorkflowDefinitions } from '.';
-import type { ManagedWorkflowId, ManagedWorkflowTemplateValuesById } from '.';
+import type {
+  ManagedWorkflowId,
+  ManagedWorkflowTemplateValuesById,
+  TemplatedManagedWorkflowId,
+} from '.';
 import { EXAMPLE_MANAGED_WORKFLOW_ID } from './definitions';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from './types';
 import { WorkflowSchemaBase } from '../spec/schema';
@@ -19,7 +23,13 @@ const ManagedWorkflowSchema = WorkflowSchemaBase.extend({
   triggers: z.array(z.object({ type: z.string().min(1) }).passthrough()).min(1),
 });
 
-type TemplateManagedWorkflowDefinition = ManagedWorkflowDefinition & {
+type RegistryManagedWorkflowDefinition = (typeof managedWorkflowDefinitions)[number];
+type TemplateManagedWorkflowDefinition = RegistryManagedWorkflowDefinition extends {
+  yamlTemplate: (values: infer _TValues) => string;
+}
+  ? RegistryManagedWorkflowDefinition
+  : never;
+type YamlTemplateManagedWorkflowDefinition = ManagedWorkflowDefinition & {
   yamlTemplate: (values: ManagedWorkflowTemplateValues) => string;
 };
 
@@ -53,7 +63,7 @@ const managedTemplateDefinitionsById: Array<[string, TemplateManagedWorkflowDefi
 
 function hasYamlTemplate(
   definition: ManagedWorkflowDefinition
-): definition is TemplateManagedWorkflowDefinition {
+): definition is YamlTemplateManagedWorkflowDefinition {
   return typeof definition.yamlTemplate === 'function';
 }
 
@@ -157,8 +167,9 @@ describe('managedWorkflowDefinitions', () => {
   it.each(managedTemplateDefinitionsById)(
     '%s yamlTemplate renders cleanly with representative values',
     (id, definition) => {
-      const representativeValues = templateValuesLookup[id];
-      const renderedYaml = definition.yamlTemplate(representativeValues!);
+      const representativeValues =
+        templateRepresentativeValuesById[id as TemplatedManagedWorkflowId];
+      const renderedYaml = definition.yamlTemplate(representativeValues);
 
       expect(typeof renderedYaml).toBe('string');
       expect(renderedYaml.trim()).not.toHaveLength(0);
