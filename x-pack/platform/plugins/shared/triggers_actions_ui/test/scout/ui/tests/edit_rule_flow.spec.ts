@@ -60,8 +60,8 @@ test.describe('Edit Rule Flow', { tag: tags.stateful.classic }, () => {
 
       await expect(page.testSubj.locator('ruleForm')).toBeVisible();
 
-      const nameValue = await page.testSubj.locator('ruleDetailsNameInput').inputValue();
-      expect(nameValue).toBe(testRuleName);
+      const nameValue = page.testSubj.locator('ruleDetailsNameInput');
+      await expect(nameValue).toHaveValue(testRuleName);
     });
 
     test('returns to rules list after saving', async ({ page }) => {

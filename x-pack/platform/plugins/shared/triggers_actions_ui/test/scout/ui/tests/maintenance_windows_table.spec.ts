@@ -64,9 +64,7 @@ const deleteMw = async (kbnClient: KbnClient, id: string) => {
 // ── Page helpers ─────────────────────────────────────────────────────────────
 
 const searchMws = async (page: ScoutPage, text: string) => {
-  const searchBox = page.locator(
-    '.euiFieldSearch:not(.euiSelectableTemplateSitewide__search)'
-  );
+  const searchBox = page.locator('.euiFieldSearch:not(.euiSelectableTemplateSitewide__search)');
   await searchBox.fill(text);
   await searchBox.press('Enter');
   await page.locator(TABLE_LOADED_CSS).waitFor();
@@ -99,7 +97,8 @@ const clickTableAction = async (page: ScoutPage, action: string) => {
 test.describe('Maintenance windows table', { tag: tags.stateful.classic }, () => {
   const createdIds: string[] = [];
 
-  const uniqueTitle = (prefix: string) => `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+  const uniqueTitle = (prefix: string) =>
+    `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 
   test.beforeEach(async ({ browserAuth, page, kbnUrl }) => {
     await browserAuth.loginAsAdmin();
@@ -233,7 +232,11 @@ test.describe('Maintenance windows table', { tag: tags.stateful.classic }, () =>
 
     const [r1, r2, r3] = await Promise.all([
       createMw(kbnClient, { title: runningTitle }),
-      createMw(kbnClient, { title: finishedTitle, startDate: new Date('2023-05-01'), notRecurring: true }),
+      createMw(kbnClient, {
+        title: finishedTitle,
+        startDate: new Date('2023-05-01'),
+        notRecurring: true,
+      }),
       createMw(kbnClient, { title: upcomingTitle, startDate: tomorrow }),
     ]);
     createdIds.push(r1.id, r2.id, r3.id);
@@ -243,7 +246,7 @@ test.describe('Maintenance windows table', { tag: tags.stateful.classic }, () =>
     await searchMws(page, 'filter-');
 
     const statuses = await getMwRowStatuses(page);
-    expect(statuses.length).toBe(3);
+    expect(statuses).toHaveLength(3);
 
     await page.testSubj.click('status-filter-button');
     await page.testSubj.click('status-filter-upcoming');
@@ -264,7 +267,11 @@ test.describe('Maintenance windows table', { tag: tags.stateful.classic }, () =>
     const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
     const [r1, r2, r3] = await Promise.all([
-      createMw(kbnClient, { title: finishedTitle, startDate: new Date('2023-05-01'), notRecurring: true }),
+      createMw(kbnClient, {
+        title: finishedTitle,
+        startDate: new Date('2023-05-01'),
+        notRecurring: true,
+      }),
       createMw(kbnClient, { title: upcomingTitle, startDate: tomorrow }),
       createMw(kbnClient, { title: runningTitle }),
     ]);
@@ -274,7 +281,7 @@ test.describe('Maintenance windows table', { tag: tags.stateful.classic }, () =>
     await searchMws(page, 'archived-');
 
     let statuses = await getMwRowStatuses(page);
-    expect(statuses.length).toBe(3);
+    expect(statuses).toHaveLength(3);
     // The running MW should be first in the list
     expect(statuses[0]).toBe('Running');
 
