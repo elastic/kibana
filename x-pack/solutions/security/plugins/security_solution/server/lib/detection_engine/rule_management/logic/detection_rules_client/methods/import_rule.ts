@@ -71,7 +71,7 @@ export const importRule = async ({
     const updatedRule = await rulesClient.update({
       id: existingRule.id,
       data: convertRuleResponseToAlertingRule(ruleWithUpdates, actionsClient),
-      changeTracking: { action: SecurityRuleChangeTrackingAction.ruleImport },
+      changeTracking: { action: SecurityRuleChangeTrackingAction.ruleImport, ...changeTracking },
     });
 
     // We strip `enabled` from the rule object to use in the rules client and need to enable it separately if user has enabled the updated rule
