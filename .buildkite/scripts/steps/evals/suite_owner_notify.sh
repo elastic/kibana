@@ -71,19 +71,31 @@ if [[ "${KBN_EVALS:-}" == "1" ]]; then
     .buildkite/scripts/bootstrap.sh
   fi
 
-  # Ensure judge connector is available for LiteLLM-backed triage summaries.
+  echo "--- Preparing judge connector for triage summary"
   if [[ -n "${KBN_EVALS_CONFIG_B64:-}" ]]; then
-    source .buildkite/scripts/steps/evals/setup_connectors.sh
+    source .buildkite/scripts/steps/evals/setup_triage_connectors.sh || true
+  else
+    echo "WARNING: KBN_EVALS_CONFIG_B64 is not set; skipping judge triage summary"
   fi
 
   CONTEXT_FILE="$(mktemp -t kbn-evals-failure-context.XXXXXX.json)"
+  TRIAGE_LOG="$(mktemp -t kbn-evals-triage-log.XXXXXX.log)"
   FAILING_PROJECTS_CSV="$(IFS=,; echo "${failing_projects[*]}")"
 
   if node x-pack/platform/packages/shared/kbn-evals/scripts/ci/collect_failure_context.js \
     "$EVAL_SUITE_ID" "$CONTEXT_FILE" "$FAILING_PROJECTS_CSV"; then
-    TRIAGE_SUMMARY="$(
-      node x-pack/platform/packages/shared/kbn-evals/scripts/ci/summarize_failures_with_judge.js "$CONTEXT_FILE" 2>/dev/null || true
-    )"
+    echo "--- Generating judge triage summary"
+    node x-pack/platform/packages/shared/kbn-evals/scripts/ci/summarize_failures_with_judge.js \
+      "$CONTEXT_FILE" >"${TRIAGE_LOG}" 2>&1 || true
+
+    TRIAGE_SUMMARY=""
+    if [[ -s "${TRIAGE_LOG}" ]] && ! grep -q '^Judge triage summary failed' "${TRIAGE_LOG}"; then
+      TRIAGE_SUMMARY="$(cat "${TRIAGE_LOG}")"
+    elif [[ -s "${TRIAGE_LOG}" ]]; then
+      echo "--- Judge triage summary failed (see log below; continuing with static summary)"
+      cat "${TRIAGE_LOG}" || true
+    fi
+
     if [[ -n "${TRIAGE_SUMMARY}" ]]; then
       {
         printf '\n*Triage summary'
@@ -92,12 +104,17 @@ if [[ "${KBN_EVALS:-}" == "1" ]]; then
         fi
         printf ':*\n%s\n' "${TRIAGE_SUMMARY}"
       } >>"$SUMMARY_FILE"
+    else
+      echo "--- No judge triage summary produced"
+      if [[ -s "${TRIAGE_LOG}" ]]; then
+        cat "${TRIAGE_LOG}"
+      fi
     fi
   else
     echo "--- Failed to collect failure context for judge triage (continuing with static summary)"
   fi
 
-  rm -f "$CONTEXT_FILE"
+  rm -f "$CONTEXT_FILE" "$TRIAGE_LOG"
 fi
 
 echo "--- Suite failure summary"

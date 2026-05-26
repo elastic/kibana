@@ -53,6 +53,15 @@ if [[ -n "${EVALUATION_CONNECTOR_ID:-}" ]] && [[ "${EVALUATION_CONNECTOR_ID}" ==
   NEED_LITELLM_CONNECTORS="true"
 fi
 
+# Suite-owner notify always needs the judge connector for LLM triage summaries.
+if [[ "${KBN_EVALS_SUITE_OWNER_NOTIFY:-}" =~ ^(1|true)$ ]]; then
+  _vault_judge_id="$(jq -r '.evaluationConnectorId // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
+  _notify_judge_id="${EVALUATION_CONNECTOR_ID:-${_vault_judge_id}}"
+  if [[ -n "${_notify_judge_id}" ]] && [[ "${_notify_judge_id}" == litellm-* ]]; then
+    NEED_LITELLM_CONNECTORS="true"
+  fi
+fi
+
 if [[ "$NEED_LITELLM_CONNECTORS" == "true" ]]; then
   echo "--- Generating LiteLLM connectors"
 

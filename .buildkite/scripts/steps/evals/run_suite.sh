@@ -244,6 +244,9 @@ EOF
           EVAL_SUITE_SLACK_CHANNEL: "${EVAL_SUITE_SLACK_CHANNEL:-}"
           EVAL_SUITE_NAME: "${EVAL_SUITE_NAME:-}"
           EVALUATION_CONNECTOR_ID: "${EVALUATION_CONNECTOR_ID:-}"
+          KBN_EVALS_SUITE_OWNER_NOTIFY: "1"
+          FTR_EIS_CCM: "${FTR_EIS_CCM:-}"
+          EVAL_INCLUDE_EIS_MODELS: "${EVAL_INCLUDE_EIS_MODELS:-}"
         depends_on:
 EOF
         for key in "${fanout_step_keys[@]}"; do

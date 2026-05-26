@@ -257,6 +257,99 @@ function buildLitellmChatRequest(connector, messages) {
  * @param {unknown} responseJson
  * @returns {string}
  */
+/**
+ * @returns {string}
+ */
+function resolveEvaluationConnectorId() {
+  const fromEnv = process.env.EVALUATION_CONNECTOR_ID || '';
+  if (fromEnv) {
+    return fromEnv;
+  }
+
+  const configB64 = process.env.KBN_EVALS_CONFIG_B64 || '';
+  if (!configB64) {
+    return '';
+  }
+
+  try {
+    const config = JSON.parse(Buffer.from(configB64, 'base64').toString('utf8'));
+    return typeof config.evaluationConnectorId === 'string' ? config.evaluationConnectorId : '';
+  } catch {
+    return '';
+  }
+}
+
+/**
+ * @param {Record<string, unknown>} connector
+ * @param {Array<{ role: string; content: string }>} messages
+ * @param {string} esUrl
+ * @param {string} apiKey
+ * @returns {{ url: string; headers: Record<string, string>; body: Record<string, unknown> }}
+ */
+function buildEisChatRequest(connector, messages, esUrl, apiKey) {
+  const config = connector.config && typeof connector.config === 'object' ? connector.config : {};
+  const inferenceId = typeof config.inferenceId === 'string' ? config.inferenceId : '';
+  if (!inferenceId) {
+    throw new Error('EIS connector is missing config.inferenceId');
+  }
+
+  const baseUrl = esUrl.replace(/\/$/, '');
+  return {
+    url: `${baseUrl}/_inference/chat_completion/${encodeURIComponent(inferenceId)}/_stream`,
+    headers: {
+      'content-type': 'application/json',
+      authorization: `ApiKey ${apiKey}`,
+    },
+    body: {
+      messages,
+    },
+  };
+}
+
+/**
+ * @param {string} responseText
+ * @returns {string}
+ */
+function parseEisStreamResponse(responseText) {
+  const parts = [];
+  for (const line of responseText.split('\n')) {
+    const trimmed = line.trim();
+    if (!trimmed) {
+      continue;
+    }
+
+    let parsed;
+    try {
+      parsed = JSON.parse(trimmed);
+    } catch {
+      continue;
+    }
+
+    const choices = parsed?.choices;
+    if (!Array.isArray(choices)) {
+      continue;
+    }
+
+    for (const choice of choices) {
+      const deltaContent = choice?.delta?.content;
+      if (typeof deltaContent === 'string') {
+        parts.push(deltaContent);
+      }
+      const messageContent = choice?.message?.content;
+      if (typeof messageContent === 'string') {
+        parts.push(messageContent);
+      }
+    }
+  }
+
+  const content = parts.join('').trim();
+  if (!content) {
+    throw new Error('EIS stream response did not include message content');
+  }
+
+  return content;
+}
+
 function parseLitellmChatContent(responseJson) {
   if (!responseJson || typeof responseJson !== 'object') {
     throw new Error('LiteLLM response was not JSON');
@@ -288,5 +381,8 @@ module.exports = {
   truncateContextJson,
   buildTriageUserPrompt,
   buildLitellmChatRequest,
+  resolveEvaluationConnectorId,
+  buildEisChatRequest,
+  parseEisStreamResponse,
   parseLitellmChatContent,
 };

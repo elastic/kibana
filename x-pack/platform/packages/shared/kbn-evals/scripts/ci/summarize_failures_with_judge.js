@@ -10,6 +10,9 @@ const { readFileSync } = require('fs');
 const {
   buildTriageUserPrompt,
   buildLitellmChatRequest,
+  resolveEvaluationConnectorId,
+  buildEisChatRequest,
+  parseEisStreamResponse,
   parseLitellmChatContent,
 } = require('./failure_context_helpers');
 
@@ -21,9 +24,11 @@ if (!contextPath) {
   process.exit(1);
 }
 
-const evaluationConnectorId = process.env.EVALUATION_CONNECTOR_ID || '';
+const evaluationConnectorId = resolveEvaluationConnectorId();
 if (!evaluationConnectorId) {
-  console.error('EVALUATION_CONNECTOR_ID is required for judge triage summary');
+  console.error(
+    'EVALUATION_CONNECTOR_ID (or vault evaluationConnectorId) is required for judge triage summary'
+  );
   process.exit(0);
 }
 
@@ -48,9 +53,10 @@ function decodeConnectors() {
  * @param {string} url
  * @param {Record<string, string>} headers
  * @param {Record<string, unknown>} body
- * @returns {Promise<unknown>}
+ * @param {{ parseStream?: boolean }} [options]
+ * @returns {Promise<string>}
  */
-async function postJson(url, headers, body) {
+async function postForContent(url, headers, body, options = {}) {
   const response = await fetch(url, {
     method: 'POST',
     headers,
@@ -58,39 +64,34 @@ async function postJson(url, headers, body) {
   });
 
   const text = await response.text();
+  if (!response.ok) {
+    let detail = text.slice(0, 500);
+    try {
+      const json = JSON.parse(text);
+      if (json && typeof json === 'object' && 'error' in json) {
+        detail = JSON.stringify(json.error);
+      }
+    } catch {
+      // keep text slice
+    }
+    throw new Error(`Inference request failed (${response.status}): ${detail}`);
+  }
+
+  if (options.parseStream) {
+    return parseEisStreamResponse(text);
+  }
+
   let json = null;
   try {
     json = text ? JSON.parse(text) : null;
   } catch {
-    // keep null
+    throw new Error('Inference response was not JSON');
   }
 
-  if (!response.ok) {
-    const detail =
-      json && typeof json === 'object' && 'error' in json
-        ? JSON.stringify(json.error)
-        : text.slice(0, 500);
-    throw new Error(`LiteLLM request failed (${response.status}): ${detail}`);
-  }
-
-  return json;
+  return parseLitellmChatContent(json);
 }
 
 async function main() {
-  if (evaluationConnectorId.startsWith('eis-')) {
-    console.error(
-      `Skipping judge triage summary: EIS judge (${evaluationConnectorId}) is not supported in suite_owner_notify yet`
-    );
-    process.exit(0);
-  }
-
-  if (!evaluationConnectorId.startsWith('litellm-')) {
-    console.error(
-      `Skipping judge triage summary: unsupported judge connector id ${evaluationConnectorId}`
-    );
-    process.exit(0);
-  }
-
   const context = JSON.parse(readFileSync(contextPath, 'utf8'));
   const failingProjects = Array.isArray(context.failingProjects) ? context.failingProjects : [];
 
@@ -98,7 +99,11 @@ async function main() {
   const connector = connectors[evaluationConnectorId];
   if (!connector) {
     throw new Error(
-      `Judge connector ${evaluationConnectorId} not found in KIBANA_TESTING_AI_CONNECTORS`
+      `Judge connector ${evaluationConnectorId} not found in KIBANA_TESTING_AI_CONNECTORS (available: ${Object.keys(
+        connectors
+      )
+        .slice(0, 10)
+        .join(', ')})`
     );
   }
 
@@ -110,17 +115,35 @@ async function main() {
     failingProjects,
   });
 
-  const request = buildLitellmChatRequest(connector, [
+  const messages = [
     {
       role: 'system',
       content:
         'You are an SRE assistant triaging failed LLM evaluation CI runs. Be concise, factual, and actionable.',
     },
     { role: 'user', content: userPrompt },
-  ]);
+  ];
 
-  const responseJson = await postJson(request.url, request.headers, request.body);
-  let summary = parseLitellmChatContent(responseJson);
+  let summary;
+  if (evaluationConnectorId.startsWith('litellm-')) {
+    const request = buildLitellmChatRequest(connector, messages);
+    summary = await postForContent(request.url, request.headers, request.body);
+  } else if (evaluationConnectorId.startsWith('eis-')) {
+    const esUrl = process.env.EVALUATIONS_ES_URL || '';
+    const esApiKey = process.env.EVALUATIONS_ES_API_KEY || '';
+    if (!esUrl || !esApiKey) {
+      throw new Error(
+        'EVALUATIONS_ES_URL and EVALUATIONS_ES_API_KEY are required for EIS judge triage summaries'
+      );
+    }
+
+    const request = buildEisChatRequest(connector, messages, esUrl, esApiKey);
+    summary = await postForContent(request.url, request.headers, request.body, {
+      parseStream: true,
+    });
+  } else {
+    throw new Error(`Unsupported judge connector id for triage: ${evaluationConnectorId}`);
+  }
 
   if (summary.length > maxOutputChars) {
     summary = `${summary.slice(0, maxOutputChars - 1)}…`;
