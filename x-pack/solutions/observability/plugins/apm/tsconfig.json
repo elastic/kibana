@@ -165,6 +165,7 @@
     "@kbn/unified-doc-viewer-plugin",
     "@kbn/ebt-click",
     "@kbn/apm-types-shared",
+    "@kbn/apm-common",
     "@kbn/storybook"
   ],
   "exclude": ["target/**/*"]
