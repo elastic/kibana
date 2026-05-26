@@ -1,0 +1,144 @@
+openapi: 3.0.3
+info:
+  description: Manage entity risk scores, asset criticality, and the Entity Store.
+  title: Security Entity Analytics API (Elastic Cloud and self-hosted)
+  version: '1'
+servers:
+  - url: http://{kibana_host}:{port}
+    variables:
+      kibana_host:
+        default: localhost
+      port:
+        default: '5601'
+paths:
+  /api/risk_score/history:
+    get:
+      description: >-
+        Returns time-ordered historical risk score entries from the risk score
+        time-series index for a given entity.
+      operationId: GetRiskScoreHistory
+      parameters:
+        - in: query
+          name: entity_type
+          required: true
+          schema:
+            $ref: '#/components/schemas/IdentifierType'
+        - in: query
+          name: entity_id
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: from
+          required: false
+          schema:
+            default: now-90d
+            type: string
+        - in: query
+          name: to
+          required: false
+          schema:
+            default: now
+            type: string
+        - in: query
+          name: score_type
+          required: false
+          schema:
+            enum:
+              - base
+              - propagated
+              - resolution
+            type: string
+        - in: query
+          name: page_size
+          required: false
+          schema:
+            default: 100
+            maximum: 1000
+            minimum: 1
+            type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RiskScoreHistoryResponse'
+          description: Successful response
+        '400':
+          description: Invalid request
+      summary: Get risk score history for an entity
+      tags:
+        - Security Entity Analytics API
+components:
+  schemas:
+    EntityRiskLevels:
+      enum:
+        - Unknown
+        - Low
+        - Moderate
+        - High
+        - Critical
+      type: string
+    IdentifierType:
+      enum:
+        - host
+        - user
+        - service
+        - generic
+      type: string
+    RiskScoreHistoryEntry:
+      type: object
+      properties:
+        '@timestamp':
+          format: date-time
+          type: string
+        calculated_level:
+          $ref: '#/components/schemas/EntityRiskLevels'
+        calculated_score:
+          format: double
+          type: number
+        calculated_score_norm:
+          format: double
+          maximum: 100
+          minimum: 0
+          type: number
+        category_1_count:
+          type: integer
+        category_1_score:
+          format: double
+          type: number
+        score_type:
+          enum:
+            - base
+            - propagated
+            - resolution
+          type: string
+      required:
+        - '@timestamp'
+        - calculated_score_norm
+        - calculated_level
+    RiskScoreHistoryResponse:
+      type: object
+      properties:
+        entity_id:
+          type: string
+        entity_type:
+          $ref: '#/components/schemas/IdentifierType'
+        entries:
+          items:
+            $ref: '#/components/schemas/RiskScoreHistoryEntry'
+          type: array
+      required:
+        - entity_id
+        - entity_type
+        - entries
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+security:
+  - BasicAuth: []
+tags:
+  - description: ''
+    name: Security Entity Analytics API
+    x-displayName: Security entity analytics
