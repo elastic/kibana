@@ -163,7 +163,7 @@ export class SmlCrawlerImpl implements SmlCrawler {
           return false;
         }
         if (attempt < maxAttempts) {
-          const delay = 1000 * 2 ** (attempt - 1);
+          const delay = 5000 * 2 ** (attempt - 1);
           this.logger.warn(
             `SML crawler: mapping update failed (attempt ${attempt}/${maxAttempts}), retrying in ${delay}ms`
           );
