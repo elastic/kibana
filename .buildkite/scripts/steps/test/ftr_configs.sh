@@ -226,13 +226,8 @@ write_job_annotation() {
     style="error"
   fi
 
-  local job_log_link=""
-  if [[ -n "${BUILDKITE_BUILD_URL:-}" && -n "${BUILDKITE_JOB_ID:-}" ]]; then
-    job_log_link=" — [view logs](${BUILDKITE_BUILD_URL}#${BUILDKITE_JOB_ID})"
-  fi
-
   {
-    echo "### FTR Configs — \`${JOB}\` (attempt ${attempt_num})${job_log_link}"
+    echo "### FTR Configs — \`${JOB}\` (attempt ${attempt_num})"
     echo ""
 
     if [[ "$retry_recovered" == "true" ]]; then
