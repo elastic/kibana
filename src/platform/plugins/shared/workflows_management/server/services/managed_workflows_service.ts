@@ -9,6 +9,7 @@
 
 import { createHash } from 'node:crypto';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import { pickManagedWorkflowFields } from '@kbn/workflows';
 import {
   getManagedWorkflowDefinition,
   getManagedWorkflowDefinitions,
@@ -300,14 +301,7 @@ export class ManagedWorkflowsService {
         enabled: existing.enabled,
         definition: existing.definition,
         yaml: existing.yaml,
-        ...(existing.managed === true ? { managed: true } : {}),
-        ...(typeof existing.managedBy === 'string' ? { managedBy: existing.managedBy } : {}),
-        ...(typeof existing.originManagedWorkflowId === 'string'
-          ? { originManagedWorkflowId: existing.originManagedWorkflowId }
-          : {}),
-        ...(typeof existing.managedVersion === 'number'
-          ? { managedVersion: existing.managedVersion }
-          : {}),
+        ...pickManagedWorkflowFields(existing),
       },
       context,
       request
