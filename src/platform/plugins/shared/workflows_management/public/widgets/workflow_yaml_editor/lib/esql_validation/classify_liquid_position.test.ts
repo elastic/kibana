@@ -7,55 +7,161 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { classifyLiquidPosition, type LiquidMaskedRangeKind } from './classify_liquid_position';
+import {
+  applyLiquidMask,
+  classifyLiquidPosition,
+  isOffsetInsideMaskedRange,
+} from './classify_liquid_position';
 
-function maskedKinds(text: string): readonly LiquidMaskedRangeKind[] {
-  const result = classifyLiquidPosition(text);
-  if (result.kind !== 'all-maskable') {
-    throw new Error(`Expected 'all-maskable', got '${result.kind}' for "${text}"`);
-  }
-  return result.maskedRanges.map((r) => r.kind);
-}
-
-describe('classifyLiquidPosition — masked range kinds', () => {
-  it('tags `{{ … }}` inside a string literal as `expression`', () => {
-    expect(maskedKinds('WHERE host == "{{ inputs.host }}"')).toEqual(['expression']);
+describe('classifyLiquidPosition', () => {
+  it('returns safe with no masks for plain ES|QL', () => {
+    const result = classifyLiquidPosition('FROM logs-* | LIMIT 10');
+    expect(result.kind).toBe('safe');
+    if (result.kind === 'safe') {
+      expect(result.maskedRanges).toEqual([]);
+    }
   });
 
-  it('tags `{% … %}` inside a string literal as `tag`', () => {
-    // Stray block tags inside string literals are unusual but legal Liquid;
-    // the masker still treats them as safe spans.
-    expect(maskedKinds('WHERE x == "{% if x %}prod{% endif %}"')).toEqual(['tag', 'tag']);
+  it('returns safe with no masks for empty input', () => {
+    const result = classifyLiquidPosition('');
+    expect(result.kind).toBe('safe');
+    if (result.kind === 'safe') {
+      expect(result.maskedRanges).toEqual([]);
+    }
   });
 
-  it('tags `{# … #}` as `comment` even when it sits at the top level', () => {
-    // Liquid comments are safe everywhere — at top level OR inside a string.
-    // The classifier emits a `comment` masked range without flagging the
-    // query as structural, because the comment expands to nothing.
-    expect(maskedKinds('FROM logs-* {# todo: filter by env #} | LIMIT 10')).toEqual(['comment']);
+  it('classifies a {{ … }} span inside a double-quoted string as maskable', () => {
+    const text = 'FROM logs-* | WHERE host == "{{ inputs.host }}"';
+    const result = classifyLiquidPosition(text);
+    expect(result.kind).toBe('safe');
+    if (result.kind === 'safe') {
+      expect(result.maskedRanges).toEqual([
+        { start: text.indexOf('{{'), end: text.indexOf('}}') + 2 },
+      ]);
+    }
   });
 
-  it('tags `{# … #}` inside a string literal as `comment`', () => {
-    expect(maskedKinds('WHERE host == "{# disabled #}"')).toEqual(['comment']);
+  it('classifies multiple in-string spans as maskable', () => {
+    const text = 'WHERE a == "{{ x }}" AND b == "{{ y }}"';
+    const result = classifyLiquidPosition(text);
+    expect(result.kind).toBe('safe');
+    if (result.kind === 'safe') {
+      expect(result.maskedRanges).toHaveLength(2);
+    }
   });
 
-  it('reports each Liquid construct in a mixed query with its own kind', () => {
-    expect(
-      maskedKinds(
-        'FROM logs {# audit #} | WHERE host == "{{ inputs.host }}" /* {% if env == "prod" %}log{% endif %} */'
-      )
-    ).toEqual(['comment', 'expression', 'tag', 'tag']);
+  it('classifies a {{ … }} span in identifier position as structural', () => {
+    expect(classifyLiquidPosition('FROM logs-{{ inputs.env }}-*').kind).toBe('has-structural');
   });
 
-  it('classifies a structural `{{ … }}` as `has-structural`, NOT all-maskable', () => {
-    // FROM logs-{{ env }}-* — Liquid sits at an identifier position. The
-    // classifier short-circuits before producing any masked ranges, so the
-    // caller can bail without inspecting kinds.
-    const result = classifyLiquidPosition('FROM logs-{{ env }}-*');
-    expect(result.kind).toBe('has-structural');
+  it('classifies `{% … %}` outside a string as structural', () => {
+    expect(classifyLiquidPosition('{%- if env -%} FROM logs {%- endif -%}').kind).toBe(
+      'has-structural'
+    );
   });
 
-  it('returns `no-liquid` for queries without Liquid markers', () => {
-    expect(classifyLiquidPosition('FROM logs-* | WHERE x == 1').kind).toBe('no-liquid');
+  it('treats `{# … #}` as maskable even outside a string (Liquid comments are inert)', () => {
+    const text = 'FROM logs-* {# pick the right index #} | LIMIT 10';
+    const result = classifyLiquidPosition(text);
+    expect(result.kind).toBe('safe');
+    if (result.kind === 'safe') {
+      expect(result.maskedRanges).toEqual([
+        { start: text.indexOf('{#'), end: text.indexOf('#}') + 2 },
+      ]);
+    }
+  });
+
+  it('still classifies as structural when a structural span sits alongside in-string spans', () => {
+    expect(classifyLiquidPosition('FROM logs-{{ env }}-* | WHERE x == "{{ y }}"').kind).toBe(
+      'has-structural'
+    );
+  });
+
+  it('classifies a Liquid span inside `"""…"""` as maskable', () => {
+    const text = 'WHERE x == """foo {{ bar }} baz"""';
+    const result = classifyLiquidPosition(text);
+    expect(result.kind).toBe('safe');
+    if (result.kind === 'safe') {
+      expect(result.maskedRanges).toEqual([
+        { start: text.indexOf('{{'), end: text.indexOf('}}') + 2 },
+      ]);
+    }
+  });
+
+  it('respects ES|QL string escapes (\\" does not close the string)', () => {
+    // The `"` inside the string is escaped; the cursor is still in-string when
+    // it reaches `{{ env }}`, so the span must be classified as in-string.
+    const text = 'WHERE x == "a \\"quoted\\" {{ env }} tail"';
+    const result = classifyLiquidPosition(text);
+    expect(result.kind).toBe('safe');
+  });
+
+  it('classifies Liquid inside an ES|QL line comment as maskable', () => {
+    const text = 'FROM logs-* // {{ debug }}\n| LIMIT 10';
+    const result = classifyLiquidPosition(text);
+    expect(result.kind).toBe('safe');
+  });
+
+  it('classifies Liquid inside an ES|QL block comment as maskable', () => {
+    const text = 'FROM logs-* /* note: {{ debug }} */ | LIMIT 10';
+    const result = classifyLiquidPosition(text);
+    expect(result.kind).toBe('safe');
+  });
+
+  it('returns has-structural for an unclosed `{{` outside a string', () => {
+    expect(classifyLiquidPosition('FROM logs-* | LIMIT {{ nope').kind).toBe('has-structural');
+  });
+
+  it('returns has-structural for an unclosed `{#` outside a string', () => {
+    expect(classifyLiquidPosition('FROM logs-* {# unclosed').kind).toBe('has-structural');
+  });
+});
+
+describe('applyLiquidMask', () => {
+  it('returns the input unchanged when ranges is empty', () => {
+    expect(applyLiquidMask('FROM logs-*', [])).toBe('FROM logs-*');
+  });
+
+  it('replaces each range with whitespace of the same length', () => {
+    const text = 'WHERE host == "{{ env }}"';
+    const ranges = [{ start: text.indexOf('{{'), end: text.indexOf('}}') + 2 }];
+    const masked = applyLiquidMask(text, ranges);
+    expect(masked).toHaveLength(text.length);
+    expect(masked).toBe('WHERE host == "         "');
+  });
+
+  it('handles multiple non-overlapping ranges', () => {
+    const text = 'a "{{ x }}" "{{ y }}" b';
+    const ranges = [
+      { start: text.indexOf('{{ x'), end: text.indexOf('}}') + 2 },
+      { start: text.lastIndexOf('{{'), end: text.lastIndexOf('}}') + 2 },
+    ];
+    const masked = applyLiquidMask(text, ranges);
+    expect(masked).toHaveLength(text.length);
+    expect(masked.includes('{{')).toBe(false);
+    expect(masked.includes('}}')).toBe(false);
+  });
+});
+
+describe('isOffsetInsideMaskedRange', () => {
+  const ranges = [
+    { start: 10, end: 20 },
+    { start: 30, end: 40 },
+  ];
+
+  it('is true for offsets inside a range', () => {
+    expect(isOffsetInsideMaskedRange(15, ranges)).toBe(true);
+    expect(isOffsetInsideMaskedRange(35, ranges)).toBe(true);
+  });
+
+  it('treats range end as exclusive', () => {
+    expect(isOffsetInsideMaskedRange(20, ranges)).toBe(false);
+    expect(isOffsetInsideMaskedRange(40, ranges)).toBe(false);
+  });
+
+  it('is false for offsets outside any range', () => {
+    expect(isOffsetInsideMaskedRange(0, ranges)).toBe(false);
+    expect(isOffsetInsideMaskedRange(25, ranges)).toBe(false);
+    expect(isOffsetInsideMaskedRange(50, ranges)).toBe(false);
   });
 });

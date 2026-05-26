@@ -31,23 +31,13 @@
  * `triggers[].on.condition` and step `if` conditions.
  */
 
-/**
- * Which Liquid construct produced this masked span. Callers (autocomplete in
- * particular) can use it to distinguish a Liquid comment — where the user is
- * writing prose and any popup is wrong — from a `{{ … }}` / `{% … %}` block
- * where deferring to variable / Liquid completions is the right move.
- */
-export type LiquidMaskedRangeKind = 'expression' | 'tag' | 'comment';
-
 export interface LiquidMaskedRange {
   start: number;
   end: number;
-  kind: LiquidMaskedRangeKind;
 }
 
 export type LiquidPositionClass =
-  | { kind: 'no-liquid' }
-  | { kind: 'all-maskable'; maskedRanges: ReadonlyArray<LiquidMaskedRange> }
+  | { kind: 'safe'; maskedRanges: ReadonlyArray<LiquidMaskedRange> }
   | { kind: 'has-structural' };
 
 const TRIPLE_QUOTE = '"""';
@@ -65,7 +55,7 @@ type ScannerState = 'normal' | 'string-double' | 'string-triple' | 'line-comment
 
 export function classifyLiquidPosition(text: string): LiquidPositionClass {
   if (!text || (!text.includes('{{') && !text.includes('{%') && !text.includes('{#'))) {
-    return { kind: 'no-liquid' };
+    return { kind: 'safe', maskedRanges: [] };
   }
 
   const masked: LiquidMaskedRange[] = [];
@@ -84,10 +74,7 @@ export function classifyLiquidPosition(text: string): LiquidPositionClass {
     i = step.nextIndex;
   }
 
-  if (masked.length === 0) {
-    return { kind: 'no-liquid' };
-  }
-  return { kind: 'all-maskable', maskedRanges: masked };
+  return { kind: 'safe', maskedRanges: masked };
 }
 
 interface ScanStep {
@@ -146,7 +133,7 @@ function scanNormalState(text: string, i: number): ScanStep {
     return {
       nextState: 'normal',
       nextIndex: end,
-      maskedRange: { start: i, end, kind: 'comment' },
+      maskedRange: { start: i, end },
     };
   }
   return { nextState: 'normal', nextIndex: i + 1 };
@@ -163,12 +150,12 @@ function scanDoubleQuotedStringState(text: string, i: number): ScanStep {
 }
 
 function maskLiquidOrAdvance(text: string, i: number, state: ScannerState): ScanStep {
-  const opener = matchLiquidOpen(text, i);
-  if (opener !== null) {
+  const close = matchLiquidOpen(text, i);
+  if (close !== -1) {
     return {
       nextState: state,
-      nextIndex: opener.end,
-      maskedRange: { start: i, end: opener.end, kind: opener.kind },
+      nextIndex: close,
+      maskedRange: { start: i, end: close },
     };
   }
   return { nextState: state, nextIndex: i + 1 };
@@ -217,24 +204,18 @@ function startsAt(text: string, pos: number, marker: string): boolean {
   return true;
 }
 
-interface LiquidOpenerMatch {
-  /** Offset one past the closing delimiter (`}}`, `%}`, or `#}`). */
-  end: number;
-  kind: LiquidMaskedRangeKind;
-}
-
-function matchLiquidOpen(text: string, pos: number): LiquidOpenerMatch | null {
+function matchLiquidOpen(text: string, pos: number): number {
   if (startsAt(text, pos, LIQUID_VAR_OPEN)) {
     const close = text.indexOf(LIQUID_VAR_CLOSE, pos + LIQUID_VAR_OPEN.length);
-    return close === -1 ? null : { end: close + LIQUID_VAR_CLOSE.length, kind: 'expression' };
+    return close === -1 ? -1 : close + LIQUID_VAR_CLOSE.length;
   }
   if (startsAt(text, pos, LIQUID_TAG_OPEN)) {
     const close = text.indexOf(LIQUID_TAG_CLOSE, pos + LIQUID_TAG_OPEN.length);
-    return close === -1 ? null : { end: close + LIQUID_TAG_CLOSE.length, kind: 'tag' };
+    return close === -1 ? -1 : close + LIQUID_TAG_CLOSE.length;
   }
   if (startsAt(text, pos, LIQUID_COMMENT_OPEN)) {
     const close = text.indexOf(LIQUID_COMMENT_CLOSE, pos + LIQUID_COMMENT_OPEN.length);
-    return close === -1 ? null : { end: close + LIQUID_COMMENT_CLOSE.length, kind: 'comment' };
+    return close === -1 ? -1 : close + LIQUID_COMMENT_CLOSE.length;
   }
-  return null;
+  return -1;
 }

@@ -166,9 +166,13 @@ export class WorkflowTaskManager {
       },
     });
 
-    if (idleTasks.length) {
+    const idleTasksToRun = idleTasks.filter(
+      (idleTask) => idleTask.id !== getWorkflowGlobalTimeoutResumeTaskId(workflowExecutionId)
+    );
+
+    if (idleTasksToRun.length) {
       // TODO: To use bulkRunSoon once available
-      await Promise.all(idleTasks.map((idleTask) => this.taskManager.runSoon(idleTask.id)));
+      await Promise.all(idleTasksToRun.map((idleTask) => this.taskManager.runSoon(idleTask.id)));
       return;
     }
 

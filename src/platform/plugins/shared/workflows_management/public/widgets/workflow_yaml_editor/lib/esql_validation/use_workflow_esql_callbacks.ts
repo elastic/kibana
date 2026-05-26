@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useMemo } from 'react';
-import { firstValueFrom } from 'rxjs';
+import { useMemo, useRef } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import { getEsqlColumns, getEsqlPolicies, getESQLSources } from '@kbn/esql-utils';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ILicense } from '@kbn/licensing-types';
+import { useObservable } from '@kbn/use-observable';
 
 export interface UseWorkflowEsqlCallbacksOptions {
   http: CoreStart['http'];
@@ -44,9 +44,12 @@ export function useWorkflowEsqlCallbacks({
   data,
   licensing,
 }: UseWorkflowEsqlCallbacksOptions): ESQLCallbacks {
+  const license = useObservable(licensing.license$);
+  const licenseRef = useRef(license);
+  licenseRef.current = license;
+
   return useMemo(() => {
-    const getLicense = async (): Promise<ILicense | undefined> =>
-      firstValueFrom(licensing.license$);
+    const getLicense = async (): Promise<ILicense | undefined> => licenseRef.current;
 
     return {
       getSources: () => getESQLSources({ http, application }, getLicense),
@@ -65,5 +68,5 @@ export function useWorkflowEsqlCallbacks({
       getPreferences: async () => ({ histogramBarTarget: 50 }),
       getLicense,
     } satisfies ESQLCallbacks;
-  }, [http, application, data, licensing]);
+  }, [http, application, data]);
 }
