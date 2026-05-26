@@ -95,7 +95,9 @@ const TestWrapper = ({
 }) => (
   <EuiProvider highContrastMode={false}>
     <IntlProvider locale="en">
-      <ExternalServicesProvider externalServices={externalServices}>{children}</ExternalServicesProvider>
+      <ExternalServicesProvider externalServices={externalServices}>
+        {children}
+      </ExternalServicesProvider>
     </IntlProvider>
   </EuiProvider>
 );
@@ -276,7 +278,9 @@ describe('MetricsExperienceGrid', () => {
       wrapper: ({ children }) => (
         <TestWrapper
           externalServices={{
-            docLinks: { links: { query: { queryESQL: 'https://www.elastic.co/docs/reference/esql' } } },
+            docLinks: {
+              links: { query: { queryESQL: 'https://www.elastic.co/docs/reference/esql' } },
+            },
           }}
         >
           {children}
