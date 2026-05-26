@@ -32,6 +32,7 @@ dependsOn:
   - '@kbn/saved-search-plugin'
   - '@kbn/shared-ux-utility'
   - '@kbn/unified-search-plugin'
+  - '@kbn/discover-utils'
 tags:
   - shared-common
   - package
