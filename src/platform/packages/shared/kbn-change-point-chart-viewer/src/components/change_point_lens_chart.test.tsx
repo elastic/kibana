@@ -122,7 +122,7 @@ describe('ChangePointLensChart', () => {
     expect(screen.getByTestId('changePointLensChart-0')).toBeInTheDocument();
   });
 
-  it('produces a single series layer (no annotation layer) when card has no annotations', () => {
+  it('produces a single area series layer (no annotation layer) when card has no annotations', () => {
     const capturedLayers: unknown[] = [];
     useChangePointLensProps.mockImplementation(({ chartLayers }: { chartLayers: unknown }) => {
       capturedLayers.push(...(chartLayers as unknown[]));
@@ -134,51 +134,6 @@ describe('ChangePointLensChart', () => {
     expect(capturedLayers).toHaveLength(1);
     expect((capturedLayers[0] as { type?: string }).type).toBe('series');
     expect((capturedLayers[0] as { seriesType?: string }).seriesType).toBe('area');
-  });
-
-  it('renders histogram fallback cards as bar series', () => {
-    const capturedLayers: unknown[] = [];
-    useChangePointLensProps.mockImplementation(({ chartLayers }: { chartLayers: unknown }) => {
-      capturedLayers.push(...(chartLayers as unknown[]));
-      return { lensProps: stubLensProps, buildError: undefined };
-    });
-
-    render(<ChangePointLensChart {...baseProps} card={stubCard({ seriesType: 'bar' })} />);
-
-    expect(capturedLayers).toHaveLength(1);
-    expect((capturedLayers[0] as { type?: string }).type).toBe('series');
-    expect((capturedLayers[0] as { seriesType?: string }).seriesType).toBe('bar');
-  });
-
-  it('applies entity breakdown columns when the fallback card carries breakdownColumns', () => {
-    const capturedLayers: unknown[] = [];
-    useChangePointLensProps.mockImplementation(({ chartLayers }: { chartLayers: unknown }) => {
-      capturedLayers.push(...(chartLayers as unknown[]));
-      return { lensProps: stubLensProps, buildError: undefined };
-    });
-
-    render(
-      <ChangePointLensChart
-        {...baseProps}
-        card={stubCard({ seriesType: 'bar', breakdownColumns: ['host'] })}
-      />
-    );
-
-    expect(capturedLayers).toHaveLength(1);
-    expect((capturedLayers[0] as { breakdown?: unknown }).breakdown).toEqual(['host']);
-  });
-
-  it('does not set breakdown on normal change-point cards', () => {
-    const capturedLayers: unknown[] = [];
-    useChangePointLensProps.mockImplementation(({ chartLayers }: { chartLayers: unknown }) => {
-      capturedLayers.push(...(chartLayers as unknown[]));
-      return { lensProps: stubLensProps, buildError: undefined };
-    });
-
-    render(<ChangePointLensChart {...baseProps} card={stubCard()} />);
-
-    expect(capturedLayers).toHaveLength(1);
-    expect((capturedLayers[0] as { breakdown?: unknown }).breakdown).toBeUndefined();
   });
 
   it('does not populate extraActions when there are no annotations', () => {

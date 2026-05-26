@@ -36,6 +36,10 @@ import type { UnifiedChangePointGridProps } from '../types';
 
 const CHART_HEIGHT_PX = 230;
 
+const focusedViewLabel = i18n.translate('changePointChartViewer.lens.focusedViewLabel', {
+  defaultMessage: 'Focused view',
+});
+
 const EMBEDDABLE_QUICK_ACTIONS = {
   quickActions: {
     view: [ACTION_FOCUSED_VIEW, ACTION_INSPECT_PANEL, ADD_TO_EXISTING_CASE_ACTION_ID] as [
@@ -100,7 +104,7 @@ export const ChangePointLensChart: React.FC<ChangePointLensChartProps> = ({
   const chartLayers = useMemo((): LensXYConfig['layers'] => {
     const seriesLayer: LensSeriesLayer = {
       type: 'series',
-      seriesType: card.seriesType ?? 'area',
+      seriesType: 'area',
       // String xAxis omits `meta.type: date`, so Lens treats X as ordinal — not a time chart and
       // event annotations do not render. Date histogram maps the ES|QL time column as interval/date.
       xAxis: { type: 'dateHistogram', field: timeColumn, minimumInterval: 'auto' },
@@ -110,9 +114,6 @@ export const ChangePointLensChart: React.FC<ChangePointLensChartProps> = ({
           label: valueColumn,
         },
       ],
-      // Split by all entity columns so each (entity..., bucket) combination is unique,
-      // avoiding duplicate chart key warnings when the full BY query data is used.
-      ...(card.breakdownColumns?.length ? { breakdown: [...card.breakdownColumns] } : {}),
     };
 
     if (!card.annotationEvents.length) {
@@ -131,14 +132,7 @@ export const ChangePointLensChart: React.FC<ChangePointLensChartProps> = ({
     };
 
     return [seriesLayer, annotationLayer];
-  }, [
-    card.annotationEvents,
-    card.breakdownColumns,
-    card.seriesType,
-    euiTheme.colors.danger,
-    timeColumn,
-    valueColumn,
-  ]);
+  }, [card.annotationEvents, euiTheme.colors.danger, timeColumn, valueColumn]);
 
   // If any annotation falls before the Discover time range, extend `from` so Lens doesn't clip it.
   // fetchParams.timeRange is always resolved to absolute ISO by processFetchParams, so the
@@ -201,9 +195,9 @@ export const ChangePointLensChart: React.FC<ChangePointLensChartProps> = ({
             },
             async execute() {
               const rawEsql = buildFocusedViewRawQuery(card.lineEsql, card.entityValues);
-              actions.openInNewTab!({
+              actions.openInNewTab?.({
                 query: rawEsql ? { esql: rawEsql } : lensProps.attributes.state.query,
-                tabLabel: `${lensProps.attributes.title} - Focused view`,
+                tabLabel: `${lensProps.attributes.title} - ${focusedViewLabel}`,
                 timeRange,
               });
             },

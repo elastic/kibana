@@ -52,14 +52,6 @@ export interface ChangePointCardModel {
   readonly id: string;
   readonly title: string;
   readonly lineEsql: string;
-  /** Lens XY series type. Defaults to area for change-point charts; bar is used for histogram fallback cards. */
-  readonly seriesType?: 'area' | 'bar';
-  /**
-   * Entity column names to use as a Lens series breakdown for the BY all-null fallback card.
-   * Passing all entity columns avoids duplicate (entity, bucket) rows in a single unsplit series.
-   * Absent on normal change-point cards.
-   */
-  readonly breakdownColumns?: readonly string[];
   /** The BY grouping column names when the query uses `CHANGE_POINT ... BY col[, col]`. */
   readonly byColumns?: readonly string[];
   readonly annotationEvents: Array<{ name: string; datetime: string }>;
@@ -285,12 +277,9 @@ export const buildChangePointCards = (params: {
     groups,
   } = ctx;
 
-  // A query is "split" when it produces distinct entity groups (explicit BY or heuristic).
-  const isSplitQuery = entityColumnIds.length > 0;
-
   // No-split with no table rows: produce one card with an empty annotations list so the source
   // data line is always visible even when no change points were detected.
-  if (!isSplitQuery && groups.size === 0) {
+  if (entityColumnIds.length === 0 && groups.size === 0) {
     const lineEsql = buildChangePointLineDataQuery(esql);
     if (lineEsql) {
       return [
@@ -319,6 +308,7 @@ export const buildChangePointCards = (params: {
     lineEsql = appendEntityFiltersToChangePointLineEsql(lineEsql, firstRow, entityColumnIds);
 
     const annotationEvents: ChangePointCardModel['annotationEvents'] = [];
+    let hasDetectedChangePoint = false;
     let minPvalue: number | undefined;
     const typesSeen = new Set<string>();
     for (const row of rows) {
@@ -328,6 +318,9 @@ export const buildChangePointCards = (params: {
         ? true
         : isChangePointTableRow(row, typeColumnId, pvalueColumnId);
       if (!isAnnotation) continue;
+      // Track detection before the timestamp guard so that a change point with an unresolvable
+      // timestamp (e.g. a null bucket at the edge of the time range) is still counted.
+      hasDetectedChangePoint = true;
       const timeCell = pickTimestampCell(row, timeColumn, table, timestampReservedIds);
       const datetime = formatAnnotationTimestamp(timeCell);
       if (!datetime) continue;
@@ -349,24 +342,22 @@ export const buildChangePointCards = (params: {
       }
     }
 
-    // Split queries: skip entity groups that have no change point annotations.
-    // No-split queries: always include the single card even with zero annotations.
-    if (isSplitQuery && annotationEvents.length === 0) continue;
+    // Skip groups with no detected change point in non-BY mode. This causes buildChangePointCards
+    // to return undefined for queries where ES detects no change points, letting the grid show the
+    // "No change point series to chart" empty state.
+    // In BY mode every row is a change point event, so isByMode guards against over-skipping.
+    // A group with hasDetectedChangePoint = true but empty annotationEvents (unresolvable timestamp,
+    // e.g. a null bucket at the edge of the time range) is intentionally kept — the card is still
+    // correct, just without a rendered annotation marker.
+    if (!isByMode && !hasDetectedChangePoint) continue;
 
     const cardOrdinal = cards.length + 1;
-    // When no change points can be charted, use the full query so Lens renders the same result
-    // rows shown in the table, and set a descriptive title.
-    const noChangePoints = !isByMode && annotationEvents.length === 0;
-    const cardLineEsql = noChangePoints ? esql : lineEsql;
-    const title = noChangePoints
-      ? i18n.translate('changePointChartViewer.card.noChangePointsTitle', {
-          defaultMessage: 'No change points detected',
-        })
-      : buildCardTitle(byColumns, entityColumnIds, firstRow) ||
-        i18n.translate('changePointChartViewer.card.defaultTitleN', {
-          defaultMessage: 'Change point series {ordinal}',
-          values: { ordinal: cardOrdinal },
-        });
+    const title =
+      buildCardTitle(byColumns, entityColumnIds, firstRow) ||
+      i18n.translate('changePointChartViewer.card.defaultTitleN', {
+        defaultMessage: 'Change point series {ordinal}',
+        values: { ordinal: cardOrdinal },
+      });
 
     const entityValues: Record<string, string> = {};
     for (const col of entityColumnIds) {
@@ -382,35 +373,13 @@ export const buildChangePointCards = (params: {
       // Use entity label as the stable card ID so React remounts when the entity changes.
       id: `cp-card-${entityLabel || 'all'}`,
       title,
-      lineEsql: cardLineEsql,
-      seriesType: noChangePoints ? 'bar' : undefined,
+      lineEsql,
       byColumns: byColumns ? [...byColumns] : undefined,
       annotationEvents,
       minPvalue,
       changePointTypes: [...typesSeen],
       entityValues,
       entityDescription,
-    });
-  }
-
-  // BY split query where no entity group produced a chartable change point. Return one aggregate
-  // card using the full query so Lens renders the same result rows shown in the table.
-  // All entity columns are passed as breakdownColumns so Lens splits by entity, ensuring each
-  // (entity..., bucket) combination is unique, avoiding duplicate chart key warnings.
-  if (!isByMode && isSplitQuery && cards.length === 0 && groups.size > 0) {
-    cards.push({
-      id: 'cp-card-all',
-      title: i18n.translate('changePointChartViewer.card.noChangePointsTitle', {
-        defaultMessage: 'No change points detected',
-      }),
-      lineEsql: esql,
-      seriesType: 'bar',
-      breakdownColumns: [...entityColumnIds],
-      annotationEvents: [],
-      changePointTypes: [],
-      entityValues: {},
-      entityDescription: undefined,
-      minPvalue: undefined,
     });
   }
 
