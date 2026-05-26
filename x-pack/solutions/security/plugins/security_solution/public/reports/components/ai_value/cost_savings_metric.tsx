@@ -125,7 +125,13 @@ const SampleCostSavingsMetricContent: React.FC = () => {
  *
  * When `isSample` is true, renders a sample metric backed by `SAMPLE_VALUE_METRICS`.
  */
-const CostSavingsMetricComponent: React.FC<Props> = (props) => {
+const CostSavingsMetricComponent: React.FC<Props> = ({
+  isSample,
+  from,
+  to,
+  minutesPerAlert,
+  analystHourlyRate,
+}) => {
   const {
     euiTheme: { colors },
   } = useEuiTheme();
@@ -157,14 +163,14 @@ const CostSavingsMetricComponent: React.FC<Props> = (props) => {
         }
       `}
     >
-      {props.isSample ? (
+      {isSample ? (
         <SampleCostSavingsMetricContent />
       ) : (
         <LiveCostSavingsMetricContent
-          from={props.from}
-          to={props.to}
-          minutesPerAlert={props.minutesPerAlert}
-          analystHourlyRate={props.analystHourlyRate}
+          from={from}
+          to={to}
+          minutesPerAlert={minutesPerAlert}
+          analystHourlyRate={analystHourlyRate}
         />
       )}
     </div>

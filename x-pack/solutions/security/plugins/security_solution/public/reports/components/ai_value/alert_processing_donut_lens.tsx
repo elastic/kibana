@@ -142,7 +142,7 @@ const SampleAlertProcessingDonut: React.FC = () => {
   );
 };
 
-export const AlertProcessingDonut: React.FC<Props> = (props) => {
+export const AlertProcessingDonut: React.FC<Props> = ({ isSample, attackAlertIds, from, to }) => {
   const {
     euiTheme: { font },
   } = useEuiTheme();
@@ -178,14 +178,10 @@ export const AlertProcessingDonut: React.FC<Props> = (props) => {
         }
       `}
     >
-      {props.isSample ? (
+      {isSample ? (
         <SampleAlertProcessingDonut />
       ) : (
-        <LiveAlertProcessingDonut
-          attackAlertIds={props.attackAlertIds}
-          from={props.from}
-          to={props.to}
-        />
+        <LiveAlertProcessingDonut attackAlertIds={attackAlertIds} from={from} to={to} />
       )}
     </div>
   );

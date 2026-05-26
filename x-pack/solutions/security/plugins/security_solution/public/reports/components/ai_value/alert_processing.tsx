@@ -22,8 +22,13 @@ interface Props {
   to: string;
 }
 
-export const AlertProcessing: React.FC<Props> = (props) => {
-  const { valueMetrics, isSample } = props;
+export const AlertProcessing: React.FC<Props> = ({
+  isSample,
+  valueMetrics,
+  attackAlertIds,
+  from,
+  to,
+}) => {
   const {
     euiTheme: { size },
   } = useEuiTheme();
@@ -56,9 +61,9 @@ export const AlertProcessing: React.FC<Props> = (props) => {
         >
           <AlertProcessingDonut
             isSample={isSample}
-            attackAlertIds={props.attackAlertIds}
-            from={props.from}
-            to={props.to}
+            attackAlertIds={attackAlertIds}
+            from={from}
+            to={to}
           />
           <AlertsProcessingTable
             filteredAlerts={valueMetrics.filteredAlerts}

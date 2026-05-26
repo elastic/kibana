@@ -61,7 +61,7 @@ const SampleThreatsDetectedMetricContent: React.FC = () => (
   />
 );
 
-const ThreatsDetectedMetricComponent: React.FC<Props> = (props) => {
+const ThreatsDetectedMetricComponent: React.FC<Props> = ({ isSample, from, to }) => {
   const {
     euiTheme: { colors },
   } = useEuiTheme();
@@ -105,10 +105,10 @@ const ThreatsDetectedMetricComponent: React.FC<Props> = (props) => {
         }
       `}
     >
-      {props.isSample ? (
+      {isSample ? (
         <SampleThreatsDetectedMetricContent />
       ) : (
-        <LiveThreatsDetectedMetricContent from={props.from} to={props.to} />
+        <LiveThreatsDetectedMetricContent from={from} to={to} />
       )}
     </div>
   );

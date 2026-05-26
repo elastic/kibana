@@ -122,7 +122,7 @@ const SampleTrendVisualization: React.FC<{ from: string; to: string }> = ({ from
         <Axis
           id="left"
           position={Position.Left}
-          tickFormat={(v) => formatDollars(v)}
+          tickFormat={formatDollars}
           /* no title — matches axisTitlesVisibilitySettings.yLeft: false */
         />
         <LineSeries
@@ -139,7 +139,13 @@ const SampleTrendVisualization: React.FC<{ from: string; to: string }> = ({ from
   );
 };
 
-const CostSavingsTrendComponent: React.FC<Props> = (props) => {
+const CostSavingsTrendComponent: React.FC<Props> = ({
+  from,
+  to,
+  minutesPerAlert,
+  analystHourlyRate,
+  isSample,
+}) => {
   const isSmall = useIsWithinMaxBreakpoint('s');
   const {
     euiTheme: { size },
@@ -155,7 +161,7 @@ const CostSavingsTrendComponent: React.FC<Props> = (props) => {
   useEffect(() => {
     // when timerange changes, reset lens response
     setLensResponse(null);
-  }, [props.from, props.to]);
+  }, [from, to]);
 
   return (
     <div
@@ -182,14 +188,14 @@ const CostSavingsTrendComponent: React.FC<Props> = (props) => {
         `}
       >
         <EuiFlexItem>
-          {props.isSample ? (
-            <SampleTrendVisualization from={props.from} to={props.to} />
+          {isSample ? (
+            <SampleTrendVisualization from={from} to={to} />
           ) : (
             <LiveTrendVisualization
-              from={props.from}
-              to={props.to}
-              minutesPerAlert={props.minutesPerAlert}
-              analystHourlyRate={props.analystHourlyRate}
+              from={from}
+              to={to}
+              minutesPerAlert={minutesPerAlert}
+              analystHourlyRate={analystHourlyRate}
               onLoad={handleEmbeddableLoad}
             />
           )}
@@ -200,9 +206,9 @@ const CostSavingsTrendComponent: React.FC<Props> = (props) => {
           `}
         >
           <CostSavingsKeyInsight
-            isSample={props.isSample}
-            from={props.from}
-            to={props.to}
+            isSample={isSample}
+            from={from}
+            to={to}
             lensResponse={lensResponse}
           />
         </EuiFlexItem>

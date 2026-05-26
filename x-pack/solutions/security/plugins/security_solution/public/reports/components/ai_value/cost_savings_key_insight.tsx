@@ -161,14 +161,12 @@ const CostSavingsKeyInsightView: React.FC<ViewProps> = ({ insight }) => {
   );
 };
 
-export const CostSavingsKeyInsight: React.FC<Props> = (props) => {
+export const CostSavingsKeyInsight: React.FC<Props> = ({ isSample, from, to, lensResponse }) => {
   const exportContext = useAIValueExportContext();
   const Loading = useMemo(() => <CostSavingsKeyInsightView insight={''} />, []);
 
-  if (props.isSample) {
-    return (
-      <CostSavingsKeyInsightView insight={getSampleKeyInsightMarkdown(props.from, props.to)} />
-    );
+  if (isSample) {
+    return <CostSavingsKeyInsightView insight={getSampleKeyInsightMarkdown(from, to)} />;
   }
 
   if (exportContext?.forwardedState?.insight) {
@@ -186,7 +184,7 @@ export const CostSavingsKeyInsight: React.FC<Props> = (props) => {
     }
   }
 
-  return <CostSavingsKeyInsightLoader lensResponse={props.lensResponse} />;
+  return <CostSavingsKeyInsightLoader lensResponse={lensResponse} />;
 };
 
 const getPrompt = (result: string, prompts: { part1: string; part2: string }) => {

@@ -78,7 +78,7 @@ const SampleTimeSavedMetricContent: React.FC = () => (
  *
  * When `isSample` is true, renders a sample metric backed by `SAMPLE_VALUE_METRICS`.
  */
-const TimeSavedMetricComponent: React.FC<Props> = (props) => {
+const TimeSavedMetricComponent: React.FC<Props> = ({ isSample, from, to, minutesPerAlert }) => {
   const {
     euiTheme: { colors },
   } = useEuiTheme();
@@ -123,14 +123,10 @@ const TimeSavedMetricComponent: React.FC<Props> = (props) => {
         }
       `}
     >
-      {props.isSample ? (
+      {isSample ? (
         <SampleTimeSavedMetricContent />
       ) : (
-        <LiveTimeSavedMetricContent
-          from={props.from}
-          to={props.to}
-          minutesPerAlert={props.minutesPerAlert}
-        />
+        <LiveTimeSavedMetricContent from={from} to={to} minutesPerAlert={minutesPerAlert} />
       )}
     </div>
   );

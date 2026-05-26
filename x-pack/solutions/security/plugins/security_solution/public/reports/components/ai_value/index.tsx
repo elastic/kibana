@@ -44,8 +44,12 @@ interface Props {
 
 type AIValueReportContentProps = Omit<Props, 'isSourcererLoading'>;
 
-const AIValueReportContent: React.FC<AIValueReportContentProps> = (props) => {
-  const { setHasReportData, setIsDatePickerDisabled } = props;
+const AIValueReportContent: React.FC<AIValueReportContentProps> = ({
+  setHasReportData,
+  setIsDatePickerDisabled,
+  from: propFrom,
+  to: propTo,
+}) => {
   const { settings } = useKibana().services;
   const exportContext = useAIValueExportContext();
   const setReportInputForExportContext = exportContext?.setReportInput;
@@ -67,10 +71,10 @@ const AIValueReportContent: React.FC<AIValueReportContentProps> = (props) => {
       };
     }
     return {
-      from: props.from,
-      to: props.to,
+      from: propFrom,
+      to: propTo,
     };
-  }, [props.from, props.to, exportContext?.forwardedState, forceNow]);
+  }, [propFrom, propTo, exportContext?.forwardedState, forceNow]);
 
   const { analystHourlyRate, minutesPerAlert } = useMemo(
     () => ({
