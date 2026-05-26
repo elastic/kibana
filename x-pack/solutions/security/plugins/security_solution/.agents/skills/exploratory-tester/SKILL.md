@@ -106,6 +106,8 @@ Environment:
 | Skipping checklist steps when the area is complex | When the timebox fires, log remaining steps as `skipped: time budget exhausted`. Never drop silently. |
 | Sub-agent in parallel mode guessing the Explore Loop | The sub-agent prompt must begin with `Read x-pack/.../SKILL.md`. Never describe the loop inline. |
 | Reporting the same duplicate API call across multiple steps | One finding per unique `method + path` pair per flow, regardless of how many steps it reappears in. |
+| Uploading test files from `/tmp` | `browser_file_upload` only accepts paths within the repo directory. Write temp files to `.exploratory-session/` before uploading — never to `/tmp` or any path outside the repo. |
+| Page content hidden after navigation | After `browser_navigate` in Security Solution, a side panel may re-open as a blocking dialog (e.g., "Admin and settings"). Check the first snapshot for an open `dialog` element and press `Escape` before taking any other action. |
 
 ---
 
@@ -297,7 +299,13 @@ _This login is for setup only (creating space, connectors, test user). The agent
 
 **Login URL:**
 - Agent-managed (`stateful-classic`, `stateful-ess`, `serverless`): navigate to `<environment.url>/login?auth_provider_hint=cloud-basic`
-- User-provided: navigate to `<environment.url>/login` (no hint). If the page does not show username/password fields, retry with `?auth_provider_hint=cloud-basic`. If login still fails — **stop** and tell the user to check the auth provider configuration.
+- User-provided: navigate to `<environment.url>/login` (no hint).
+  - If the page shows username/password fields → fill them and submit.
+  - If the page does **not** show username/password fields, or the login attempt returns an authentication error:
+    - **Serverless environment:** retry with `?auth_provider_hint=cloud-saml-kibana`. This triggers the Elastic Cloud SAML flow and redirects to a different domain.
+      - If the SAML page shows a **verification code** or **MFA** input: **stop** and ask the user: _"The SAML login requires an email verification code. Please check your email and provide the code."_ Wait for the user's code, fill it in, and continue.
+    - **Stateful environment:** retry with `?auth_provider_hint=cloud-basic`.
+  - If login still fails after the retry — **stop** and report the exact error visible in the browser.
 
 Fill credentials:
 - Agent-managed environments: username `elastic`, password `changeme`
