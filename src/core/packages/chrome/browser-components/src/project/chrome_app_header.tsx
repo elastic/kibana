@@ -85,7 +85,6 @@ function hasExplicitAppHeaderContent(config: AppHeaderConfig | undefined): boole
     !!config.tabs?.length ||
     !!config.badges?.length ||
     !!config.menu?.items?.length ||
-    !!config.onShare ||
     !!config.favorite
   );
 }
@@ -134,7 +133,6 @@ export const ChromeAppHeaderRenderer = React.memo(() => {
         tabs={config?.tabs}
         badges={config?.badges}
         menu={config?.menu ?? fallback.menu}
-        onShare={config?.onShare}
         favorite={config?.favorite}
         sticky={false}
         padding="m"

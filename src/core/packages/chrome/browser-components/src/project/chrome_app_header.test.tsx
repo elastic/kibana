@@ -22,9 +22,21 @@ const HasContent = () => {
 };
 
 describe('useHasChromeAppHeaderContent', () => {
-  it('detects share-only registered content', () => {
+  it('detects app-menu-only registered content', () => {
     const chrome = chromeServiceMock.createStartContract();
-    chrome.next.appHeader.set({ onShare: jest.fn() });
+    chrome.next.appHeader.set({
+      menu: {
+        items: [
+          {
+            id: 'share',
+            order: 0,
+            label: 'Share',
+            iconType: 'share',
+            run: jest.fn(),
+          },
+        ],
+      },
+    });
 
     render(
       <TestChromeProviders chrome={chrome}>

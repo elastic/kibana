@@ -85,6 +85,8 @@ export const TitleActions = React.memo<TitleActionsProps>(({ shareAction, favori
         </EuiToolTip>
       ) : null}
       {favorite ? (
+        // Temporary slot: favorite is still a caller-owned React node.
+        // Replace with a typed app-header action before treating it as a stable API.
         <div css={styles.favoriteSlot} data-test-subj="appHeaderFavorite">
           {favorite}
         </div>

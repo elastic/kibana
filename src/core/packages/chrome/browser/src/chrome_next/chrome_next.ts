@@ -70,7 +70,6 @@ export interface AppHeaderConfig {
   tabs?: AppHeaderTab[];
   badges?: AppHeaderBadge[];
   menu?: AppMenuConfig;
-  onShare?: () => void;
   favorite?: ReactNode;
 }
 

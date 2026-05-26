@@ -10,7 +10,7 @@
 import React from 'react';
 import '@testing-library/jest-dom';
 import { BehaviorSubject } from 'rxjs';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { EuiButtonIcon } from '@elastic/eui';
 import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal-types';
 import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
@@ -26,11 +26,30 @@ const renderAppHeader = (
 };
 
 describe('AppHeaderView', () => {
-  it('renders when the only content is an explicit share action', () => {
-    renderAppHeader(<AppHeaderView onShare={jest.fn()} />);
+  it('renders legacy app menu share as a title action', () => {
+    const runShare = jest.fn();
+
+    renderAppHeader(
+      <AppHeaderView
+        menu={{
+          items: [
+            {
+              id: 'share',
+              order: 0,
+              label: 'Share',
+              iconType: 'share',
+              testId: 'shareTopNavButton',
+              run: runShare,
+            },
+          ],
+        }}
+      />
+    );
 
     expect(screen.getByTestId('appHeader')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Share' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Share' }));
+
+    expect(runShare).toHaveBeenCalledTimes(1);
   });
 
   it('renders when the only content is a favorite action', () => {

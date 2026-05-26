@@ -69,6 +69,7 @@ const useStaticItems = ({
     }
 
     if (showAddIntegrations) {
+      // FIXME: https://github.com/elastic/kibana/issues/271295 - handle edge case where fleet is not enabled or user doesn't have permissions to view it
       staticItems.push(createIntegrationsMenuItem(basePath.prepend('/app/integrations/browse')));
     }
 
@@ -76,16 +77,14 @@ const useStaticItems = ({
   }, [basePath, explicitDocLink, helpExtension, showAddIntegrations]);
 };
 
-const useResolvedAppMenu = (
-  menu: AppMenuConfig | undefined,
-  hasExplicitShare: boolean
-): ResolvedAppMenu => {
+const useResolvedAppMenu = (menu: AppMenuConfig | undefined): ResolvedAppMenu => {
   return useMemo((): ResolvedAppMenu => {
     if (!menu) return { menu: undefined, shareItem: undefined };
 
-    const shareItem = hasExplicitShare
-      ? undefined
-      : menu.items?.find((item) => item.id === APP_MENU_SHARE_ID);
+    // Temporary bridge: share is still modeled as a legacy app-menu item.
+    // Replace this with a typed app-header action once share requirements are clear.
+    // https://github.com/elastic/kibana/issues/259985
+    const shareItem = menu.items?.find((item) => item.id === APP_MENU_SHARE_ID);
 
     if (!shareItem) return { menu, shareItem: undefined };
 
@@ -93,19 +92,18 @@ const useResolvedAppMenu = (
       menu: { ...menu, items: menu.items?.filter((item) => item.id !== APP_MENU_SHARE_ID) },
       shareItem,
     };
-  }, [menu, hasExplicitShare]);
+  }, [menu]);
 };
 
 export function useAppHeaderMenu(
   pageAppMenu: AppMenuConfig | undefined,
-  hasExplicitShare: boolean,
   docLink?: string,
   showAddIntegrations?: boolean
 ): {
   config: AppMenuConfig | undefined;
   staticItems: AppMenuStaticItem[];
 } {
-  const { menu } = useResolvedAppMenu(pageAppMenu, hasExplicitShare);
+  const { menu } = useResolvedAppMenu(pageAppMenu);
   const staticItems = useStaticItems({ docLink, showAddIntegrations });
 
   return {
@@ -121,14 +119,10 @@ export interface ShareAction {
   testId?: string;
 }
 
-export function useShareAction(
-  pageAppMenu: AppMenuConfig | undefined,
-  onShare?: () => void
-): ShareAction | undefined {
-  const { shareItem } = useResolvedAppMenu(pageAppMenu, !!onShare);
+export function useShareAction(pageAppMenu: AppMenuConfig | undefined): ShareAction | undefined {
+  const { shareItem } = useResolvedAppMenu(pageAppMenu);
 
   return useMemo(() => {
-    if (onShare) return { onClick: onShare };
     if (!shareItem) return undefined;
     const { run, tooltipContent, tooltipTitle, testId } = shareItem;
     if (!run) return undefined;
@@ -144,5 +138,5 @@ export function useShareAction(
       tooltipTitle: title,
       testId,
     };
-  }, [onShare, shareItem]);
+  }, [shareItem]);
 }
