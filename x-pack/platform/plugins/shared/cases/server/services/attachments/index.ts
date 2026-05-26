@@ -60,7 +60,6 @@ import type {
   AttachmentsAttachedToCaseArgs,
   BulkCreateAttachments,
   BulkUpdateAttachmentArgs,
-  CountActionsAttachedToCaseArgs,
   CreateAttachmentArgs,
   DeleteAttachmentArgs,
   ServiceContext,
@@ -416,24 +415,6 @@ export class AttachmentService {
     }
   }
 
-  /**
-   * Executes the aggregations against the actions attached to a case.
-   */
-  public async executeCaseActionsAggregations(
-    params: CountActionsAttachedToCaseArgs
-  ): Promise<AggregationResponse | undefined> {
-    try {
-      this.context.log.debug(`Attempting to count actions for case id ${params.caseId}`);
-      return await this.executeCaseAggregations({
-        ...params,
-        attachmentType: AttachmentType.actions,
-      });
-    } catch (error) {
-      this.context.log.error(`Error while counting actions for case id ${params.caseId}: ${error}`);
-      throw error;
-    }
-  }
-
   public async bulkDelete({ savedObjectIds, refresh }: DeleteAttachmentArgs) {
     try {
       if (savedObjectIds.length <= 0) {
@@ -476,11 +457,7 @@ export class AttachmentService {
       if (savedObjectType === CASE_ATTACHMENT_SAVED_OBJECT) {
         const unifiedAttributes = transformer.toUnifiedSchema(decodedAttributes);
         const { attributes: extractedAttributes, references: extractedReferences } =
-          extractAttachmentSORefsFromAttributes(
-            unifiedAttributes,
-            references ?? [],
-            this.context.persistableStateAttachmentTypeRegistry
-          );
+          extractAttachmentSORefsFromAttributes(unifiedAttributes, references ?? []);
         const unifiedAttachment =
           await this.context.unsecuredSavedObjectsClient.create<UnifiedAttachmentAttributes>(
             CASE_ATTACHMENT_SAVED_OBJECT,
@@ -493,8 +470,7 @@ export class AttachmentService {
           );
         // Restore `attachmentId` on the response so callers see the shape they wrote.
         const injectedAttachment = injectAttachmentSOAttributesFromRefs(
-          unifiedAttachment as unknown as SavedObject<AttachmentPersistedAttributes>,
-          this.context.persistableStateAttachmentTypeRegistry
+          unifiedAttachment as unknown as SavedObject<AttachmentPersistedAttributes>
         );
         // v2 union accepts both unified- and legacy-shape attributes (some
         // unmigrated types still pass through legacy-shaped).
@@ -508,11 +484,7 @@ export class AttachmentService {
 
       const legacyAttributes = transformer.toLegacySchema(decodedAttributes);
       const { attributes: extractedAttributes, references: extractedReferences } =
-        extractAttachmentSORefsFromAttributes(
-          legacyAttributes,
-          references,
-          this.context.persistableStateAttachmentTypeRegistry
-        );
+        extractAttachmentSORefsFromAttributes(legacyAttributes, references);
 
       const attachment =
         await this.context.unsecuredSavedObjectsClient.create<AttachmentPersistedAttributes>(
@@ -525,10 +497,7 @@ export class AttachmentService {
           }
         );
 
-      const transformedAttachment = injectAttachmentSOAttributesFromRefs(
-        attachment,
-        this.context.persistableStateAttachmentTypeRegistry
-      );
+      const transformedAttachment = injectAttachmentSOAttributesFromRefs(attachment);
 
       const validatedAttributes = decodeOrThrow(AttachmentTransformedAttributesRt)(
         transformedAttachment.attributes
@@ -567,8 +536,7 @@ export class AttachmentService {
               const { attributes: extractedAttributes, references: extractedReferences } =
                 extractAttachmentSORefsFromAttributes(
                   unifiedAttributes,
-                  attachment.references ?? [],
-                  this.context.persistableStateAttachmentTypeRegistry
+                  attachment.references ?? []
                 );
 
               return {
@@ -596,11 +564,7 @@ export class AttachmentService {
             );
             const attributesToWrite = transformer.toLegacySchema(decodedAttributes);
             const { attributes: extractedAttributes, references: extractedReferences } =
-              extractAttachmentSORefsFromAttributes(
-                attributesToWrite,
-                attachment.references,
-                this.context.persistableStateAttachmentTypeRegistry
-              );
+              extractAttachmentSORefsFromAttributes(attributesToWrite, attachment.references);
 
             return {
               type: CASE_COMMENT_SAVED_OBJECT,
@@ -634,8 +598,7 @@ export class AttachmentService {
         // Restore `attachmentId` for savedObject-backed unified rows; no-op
         // for other unified types.
         const injectedAttachment = injectAttachmentSOAttributesFromRefs(
-          so as unknown as SavedObject<AttachmentPersistedAttributes>,
-          this.context.persistableStateAttachmentTypeRegistry
+          so as unknown as SavedObject<AttachmentPersistedAttributes>
         );
         // v2 union accepts both unified- and legacy-shape attributes.
         const validatedAttributes = decodeOrThrow(AttachmentAttributesRtV2)(
@@ -648,10 +611,7 @@ export class AttachmentService {
         );
       } else if (so.type === CASE_COMMENT_SAVED_OBJECT) {
         const legacySo = so as SavedObject<AttachmentPersistedAttributes>;
-        const transformedAttachment = injectAttachmentSOAttributesFromRefs(
-          legacySo,
-          this.context.persistableStateAttachmentTypeRegistry
-        );
+        const transformedAttachment = injectAttachmentSOAttributesFromRefs(legacySo);
 
         const validatedAttributes = decodeOrThrow(AttachmentTransformedAttributesRt)(
           transformedAttachment.attributes
@@ -704,11 +664,7 @@ export class AttachmentService {
         attributes: extractedAttributes,
         references: extractedReferences,
         didDeleteOperation,
-      } = extractAttachmentSORefsFromAttributes(
-        legacyAttributes,
-        options?.references ?? [],
-        this.context.persistableStateAttachmentTypeRegistry
-      );
+      } = extractAttachmentSORefsFromAttributes(legacyAttributes, options?.references ?? []);
 
       const shouldUpdateRefs = extractedReferences.length > 0 || didDeleteOperation;
 
@@ -731,8 +687,7 @@ export class AttachmentService {
 
       const transformedAttachment = injectAttachmentSOAttributesFromRefsForPatch(
         legacyAttributes,
-        res,
-        this.context.persistableStateAttachmentTypeRegistry
+        res
       );
 
       assertAlertAttachmentHasRuleName(transformedAttachment.attributes as Record<string, unknown>);
@@ -804,8 +759,7 @@ export class AttachmentService {
               didDeleteOperation,
             } = extractAttachmentSORefsFromAttributes(
               legacyAttributes,
-              c.options?.references ?? [],
-              this.context.persistableStateAttachmentTypeRegistry
+              c.options?.references ?? []
             );
 
             const shouldUpdateRefs = extractedReferences.length > 0 || didDeleteOperation;
@@ -869,8 +823,7 @@ export class AttachmentService {
         const legacyAttributes = transformer.toLegacySchema(decodedAttributes);
         const transformedAttachment = injectAttachmentSOAttributesFromRefsForPatch(
           legacyAttributes,
-          attachment,
-          this.context.persistableStateAttachmentTypeRegistry
+          attachment
         );
 
         assertAlertAttachmentHasRuleName(
@@ -912,8 +865,7 @@ export class AttachmentService {
 
       for (const so of res.saved_objects) {
         const injectedSo = injectAttachmentSOAttributesFromRefs(
-          so as unknown as SavedObject<AttachmentPersistedAttributes>,
-          this.context.persistableStateAttachmentTypeRegistry
+          so as unknown as SavedObject<AttachmentPersistedAttributes>
         ) as unknown as SavedObjectsFindResult<AttachmentAttributesV2>;
         const transformed = transformAttributesForMode({
           attributes: injectedSo.attributes,

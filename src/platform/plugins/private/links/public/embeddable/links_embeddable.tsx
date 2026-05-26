@@ -22,7 +22,7 @@ import {
   useBatchedPublishingSubjects,
   titleComparators,
   apiIsPresentationContainer,
-  initializeUnsavedChanges,
+  initializeStateApi,
 } from '@kbn/presentation-publishing';
 import { css } from '@emotion/react';
 import { openLazyFlyout } from '@kbn/presentation-util';
@@ -86,13 +86,10 @@ export const getLinksEmbeddableFactory = () => {
         };
       }
 
-      const serializeState = () =>
-        isByReference ? serializeByReference(refId) : serializeByValue();
-
-      const unsavedChangesApi = initializeUnsavedChanges<LinksEmbeddableState>({
+      const stateApi = initializeStateApi<LinksEmbeddableState>({
         uuid,
         parentApi,
-        serializeState,
+        serializeState: () => (isByReference ? serializeByReference(refId) : serializeByValue()),
         anyStateChange$: merge(
           titleManager.anyStateChange$,
           layout$.pipe(
@@ -127,24 +124,23 @@ export const getLinksEmbeddableFactory = () => {
             ref_id: 'skip',
           };
         },
-        onReset: async (lastSaved) => {
-          titleManager.reinitializeState(lastSaved);
+        applySerializedState: async (nextState) => {
+          titleManager.reinitializeState(nextState);
           if (!refId) {
-            layout$.next((lastSaved as LinksByValueState)?.layout);
-            resolvedLinks$.next(await resolveLinks((lastSaved as LinksByValueState)?.links ?? []));
+            layout$.next((nextState as LinksByValueState).layout);
+            resolvedLinks$.next(await resolveLinks((nextState as LinksByValueState).links ?? []));
           }
         },
       });
 
       const api = finalizeApi({
         ...titleManager.api,
-        ...unsavedChangesApi,
+        ...stateApi,
         blockingError$,
         defaultTitle$,
         defaultDescription$,
         isEditingEnabled: () => Boolean(blockingError$.value === undefined),
         getTypeDisplayName: () => DISPLAY_NAME,
-        serializeState,
         saveToLibrary: async (newTitle: string) => {
           defaultTitle$.next(newTitle);
           const {
@@ -285,12 +281,19 @@ const styles = ({ euiTheme }: UseEuiTheme) =>
     },
     '&.verticalLayoutWrapper': {
       gap: euiTheme.size.xs,
+      paddingBlock: euiTheme.size.xs,
     },
     '&.horizontalLayoutWrapper': {
-      height: '100%',
+      inlineSize: 'max-content',
+      blockSize: '100%',
       display: 'flex',
       flexWrap: 'nowrap',
       alignItems: 'center',
       flexDirection: 'row',
+    },
+    // The internal list item wrapper has `width: 100%` which needs to be overridden
+    // for the horizontal layout to look as expected
+    '&.horizontalLayoutWrapper .euiListItemLayout__wrapper': {
+      inlineSize: 'auto',
     },
   });

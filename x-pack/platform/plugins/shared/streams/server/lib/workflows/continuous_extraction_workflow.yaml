@@ -14,6 +14,14 @@
 version: "1"
 name: ".streams-continuous-ki-extraction"
 description: "This workflow is used by the system and should not be modified."
+tags:
+  - observability
+  - streams
+  - knowledge-indicators
+  - continuous-extraction
+consts:
+  maxScheduledStreams: 5
+  lookbackHours: 24
 settings:
   # Timeout is 1 minute shorter than the schedule to avoid overlapping runs.
   timeout: "9m"
@@ -26,21 +34,22 @@ triggers:
   - type: scheduled
     with:
       every: "10m"
-inputs:
-  - name: maxScheduledStreams
-    type: number
-    default: 5
-    description: "Max streams to schedule per run; remaining eligible streams are skipped."
-  - name: lookbackHours
-    type: number
-    default: 24
-    description: "Hours of data to sample when identifying KIs."
-  - name: extractionIntervalHours
-    type: number
-    description: "Override for the min hours between extractions per stream. When omitted the Advanced Setting is used."
-  - name: excludedStreamPatterns
-    type: string
-    description: "Override for the comma-separated exclude patterns. When omitted the Advanced Setting is used."
+  - type: manual
+    inputs:
+      - name: maxScheduledStreams
+        type: number
+        default: 5
+        description: "Max streams to schedule per run; remaining eligible streams are skipped."
+      - name: lookbackHours
+        type: number
+        default: 24
+        description: "Hours of data to sample when identifying KIs."
+      - name: extractionIntervalHours
+        type: number
+        description: "Override for the min hours between extractions per stream. When omitted the Advanced Setting is used."
+      - name: excludedStreamPatterns
+        type: string
+        description: "Override for the comma-separated exclude patterns. When omitted the Advanced Setting is used."
 steps:
   # Step 1: Fetch eligible streams from the classification endpoint.
   - name: get_eligible
@@ -48,10 +57,9 @@ steps:
     with:
       method: GET
       path: |-
-        /internal/streams/_extraction/_eligible?maxScheduledStreams={{ inputs.maxScheduledStreams }}&lookbackHours={{ inputs.lookbackHours }}
+        /internal/streams/_extraction/_eligible?maxScheduledStreams={{ inputs.maxScheduledStreams | default: consts.maxScheduledStreams }}&lookbackHours={{ inputs.lookbackHours | default: consts.lookbackHours }}
         {%- if inputs.extractionIntervalHours %}&extractionIntervalHours={{ inputs.extractionIntervalHours }}{% endif -%}
         {%- if inputs.excludedStreamPatterns %}&excludedStreamPatterns={{ inputs.excludedStreamPatterns }}{% endif -%}
-      use_server_info: true
       headers:
         x-elastic-internal-origin: "kibana"
     on-failure:
@@ -77,7 +85,6 @@ steps:
             with:
               method: POST
               path: "/internal/streams/{{ foreach.item.streamName }}/features/_task"
-              use_server_info: true
               headers:
                 x-elastic-internal-origin: "kibana"
               body:
@@ -98,7 +105,6 @@ steps:
                 with:
                   method: GET
                   path: "/internal/streams/{{ foreach.item.streamName }}/features/_status"
-                  use_server_info: true
                   headers:
                     x-elastic-internal-origin: "kibana"
               - name: if_not_started_delay
@@ -126,7 +132,6 @@ steps:
                 with:
                   method: GET
                   path: "/internal/streams/{{ foreach.item.streamName }}/features/_status"
-                  use_server_info: true
                   headers:
                     x-elastic-internal-origin: "kibana"
                 on-failure:

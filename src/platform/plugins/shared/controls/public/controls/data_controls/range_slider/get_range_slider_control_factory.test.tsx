@@ -22,6 +22,7 @@ import { getRangesliderControlFactory } from './get_range_slider_control_factory
 import { rangeSliderControlSchema, type RangeSliderControlState } from '@kbn/controls-schemas';
 import type { Filter, AggregateQuery, TimeRange } from '@kbn/es-query';
 import type { RangeSliderControlApi } from './types';
+import type { DataView } from '@kbn/data-views-plugin/common';
 
 const DEFAULT_TOTAL_RESULTS = 20;
 const DEFAULT_MIN = 0;
@@ -82,9 +83,7 @@ describe('RangeSliderControlApi', () => {
       },
       getFormatterForField: () => {
         return {
-          getConverterFor: () => {
-            return (value: string) => `${value} myUnits`;
-          },
+          convertToText: (value: string) => `${value} myUnits`,
         };
       },
     } as unknown as DataView;
