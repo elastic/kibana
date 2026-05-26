@@ -27,6 +27,8 @@ import { useTimeRangeUpdate } from '../../../../../hooks/use_time_range_update';
 import { EntityDetailFlyout } from '../entity_detail_flyout';
 import { formatTimestamp } from '../../../../../util/formatters';
 
+const MAX_VISIBLE_STREAMS = 3;
+
 const columns: Array<EuiBasicTableColumn<Verdict>> = [
   {
     field: '@timestamp',
@@ -70,14 +72,14 @@ const columns: Array<EuiBasicTableColumn<Verdict>> = [
     }),
     render: (streamNames: string[]) => (
       <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-        {(streamNames ?? []).slice(0, 3).map((name) => (
+        {(streamNames ?? []).slice(0, MAX_VISIBLE_STREAMS).map((name) => (
           <EuiFlexItem key={name} grow={false} style={{ maxWidth: '200px' }}>
             <EuiBadge color="hollow">{name}</EuiBadge>
           </EuiFlexItem>
         ))}
-        {(streamNames ?? []).length > 3 && (
+        {(streamNames ?? []).length > MAX_VISIBLE_STREAMS && (
           <EuiFlexItem grow={false}>
-            <EuiBadge color="hollow">+{streamNames.length - 3}</EuiBadge>
+            <EuiBadge color="hollow">+{streamNames.length - MAX_VISIBLE_STREAMS}</EuiBadge>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>

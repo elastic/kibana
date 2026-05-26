@@ -112,8 +112,9 @@ const buildLatestSourceBaseQuery = ({
   groupBy,
 }: BuildLatestSourceBaseQueryArgs) => {
   // TODO: Remove `IS NULL` fallback once workflows write `kibana.space_ids` on every document.
-  let query = esql.from([index], ['_id', '_source'])
-    .where`\`kibana.space_ids\` == ${space} OR \`kibana.space_ids\` IS NULL`;
+  let query = esql.from([index], ['_id', '_source']).where`${esql.col(
+    'kibana.space_ids'
+  )} == ${space} OR ${esql.col('kibana.space_ids')} IS NULL`;
 
   if (options.from !== undefined) {
     query = query.where`@timestamp >= TO_DATETIME(${esql.str(options.from)})`;
@@ -232,8 +233,9 @@ export const runFindByIdEsqlQuery = async <T>({
   idValue,
 }: RunFindByIdEsqlQueryArgs): Promise<{ hits: T[] }> => {
   // TODO: Remove `IS NULL` fallback once workflows write `kibana.space_ids` on every document.
-  let query = esql.from([index], ['_source'])
-    .where`\`kibana.space_ids\` == ${space} OR \`kibana.space_ids\` IS NULL`;
+  let query = esql.from([index], ['_source']).where`${esql.col(
+    'kibana.space_ids'
+  )} == ${space} OR ${esql.col('kibana.space_ids')} IS NULL`;
 
   query = query.where`${esql.col(idField)} == ${esql.str(idValue)}`;
   query = query.sort(['@timestamp', 'ASC']);
