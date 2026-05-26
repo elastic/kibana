@@ -1,9 +1,6 @@
 {
   "description": "Security: Linux - Looks for commands related to system network configuration discovery from an unusual user context. This can be due to uncommon troubleshooting activity or due to a compromised account. A compromised account may be used by a threat actor to engage in system network configuration discovery to increase their understanding of connected networks and hosts. This information may be used to shape follow-up behaviors such as lateral movement or additional discovery.",
-  "groups": [
-    "security",
-    "linux"
-  ],
+  "groups": ["security", "linux"],
   "analysis_config": {
     "bucket_span": "15m",
     "detectors": [
@@ -14,15 +11,7 @@
         "detector_index": 0
       }
     ],
-    "influencers": [
-      "process.name",
-      "host.name",
-      "host.id",
-      "process.args",
-      "user.name",
-      "user.id",
-      "event.module"
-    ]
+    "influencers": ["process.name", "host.name", "host.id", "process.args", "user.name", "user.id", "event.module"]
   },
   "allow_lazy_open": true,
   "analysis_limits": {
@@ -35,6 +24,8 @@
     "created_by": "ml-module-security-linux-v3",
     "security_app_display_name": "Unusual Linux Network Configuration Discovery",
     "managed": true,
-    "job_revision": 4
+    "job_revision": 4,
+    "threat_tactics": ["TA0007"],
+    "threat_techniques": ["T1016"]
   }
 }
