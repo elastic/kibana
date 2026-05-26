@@ -14,12 +14,12 @@ import {
 } from '@kbn/agent-builder-browser/attachments';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
+import { WorkflowApi } from '@kbn/workflows-ui';
 import { ActionPolicyDefinitionList } from '../../components/action_policy/details_flyout/action_policy_definition_list';
 import { paths } from '../../constants';
 import { ActionPoliciesApi } from '../../services/action_policies_api';
 import { RulesApi } from '../../services/rules_api';
-import { WorkflowsApi } from '../../services/workflows_api';
-import { buildActionPolicyPayload } from '../../../common/agent_builder/action_policy_mappers';
+import { attachmentDataToActionPolicyPayload } from '../../../common/agent_builder/action_policy_mappers';
 import type { ActionPolicyAttachment } from './action_policy_attachment_definition';
 
 const EMPTY_VALUE = '-';
@@ -37,7 +37,7 @@ export const ActionPolicyCanvasContent = ({
 }: ActionPolicyCanvasContentProps) => {
   const actionPoliciesApi = useService(ActionPoliciesApi);
   const rulesApi = useService(RulesApi);
-  const workflowsApi = useService(WorkflowsApi);
+  const workflowApi = useService(WorkflowApi);
   const application = useService(CoreStart('application'));
   const basePath = useService(CoreStart('http')).basePath;
   const notifications = useService(CoreStart('notifications'));
@@ -57,18 +57,18 @@ export const ActionPolicyCanvasContent = ({
     const workflowDestinations = (data.destinations ?? []).filter((d) => d.type === 'workflow');
     for (const dest of workflowDestinations) {
       checks.push(
-        workflowsApi
-          .getWorkflow(dest.id, abortController.signal)
+        workflowApi
+          .getWorkflow(dest.id)
           .then(() => ({ workflow: true }))
           .catch(() => ({ workflow: false }))
       );
     }
 
-    const matcherRuleId = extractRuleIdFromMatcher(data.matcher);
-    if (matcherRuleId) {
+    const linkedRuleId = data.ruleId ?? extractRuleIdFromMatcher(data.matcher);
+    if (linkedRuleId) {
       checks.push(
         rulesApi
-          .getRule(matcherRuleId, abortController.signal)
+          .getRule(linkedRuleId, abortController.signal)
           .then(() => ({ rule: true }))
           .catch(() => ({ rule: false }))
       );
@@ -90,7 +90,7 @@ export const ActionPolicyCanvasContent = ({
     return () => {
       abortController.abort();
     };
-  }, [workflowsApi, rulesApi, data.destinations, data.matcher]);
+  }, [workflowApi, rulesApi, data.destinations, data.ruleId, data.matcher]);
 
   const hasDraftDependencies = dependenciesReady !== true;
 
@@ -120,7 +120,10 @@ export const ActionPolicyCanvasContent = ({
             : undefined,
           handler: async () => {
             try {
-              await actionPoliciesApi.upsertActionPolicy(data.id, buildActionPolicyPayload(data));
+              await actionPoliciesApi.upsertActionPolicy(
+                data.id,
+                attachmentDataToActionPolicyPayload(data)
+              );
               await updateOrigin(data.id);
               notifications.toasts.addSuccess(
                 i18n.translate('xpack.alertingV2.actionPolicyAttachment.createdSuccess', {
@@ -157,7 +160,10 @@ export const ActionPolicyCanvasContent = ({
           : undefined,
         handler: async () => {
           try {
-            await actionPoliciesApi.upsertActionPolicy(data.id, buildActionPolicyPayload(data));
+            await actionPoliciesApi.upsertActionPolicy(
+              data.id,
+              attachmentDataToActionPolicyPayload(data)
+            );
             notifications.toasts.addSuccess(
               i18n.translate('xpack.alertingV2.actionPolicyAttachment.updatedSuccess', {
                 defaultMessage: 'Policy "{name}" updated',
