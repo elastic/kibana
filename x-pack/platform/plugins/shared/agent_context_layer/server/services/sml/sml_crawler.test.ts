@@ -645,6 +645,14 @@ describe('SmlCrawlerImpl', () => {
   });
 
   describe('schema version check', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
     it('mapping update fails on all retries: drops index and forces full re-index', async () => {
       const mappingError = { statusCode: 400, body: { error: { type: 'illegal_argument_exception' } } };
       mockUpdateMappingsIfNeeded.mockRejectedValue(mappingError);
@@ -656,7 +664,9 @@ describe('SmlCrawlerImpl', () => {
       mockStateClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } });
 
       const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
-      await crawler.crawl({ definition, esClient, savedObjectsClient });
+      const crawlPromise = crawler.crawl({ definition, esClient, savedObjectsClient });
+      await jest.runAllTimersAsync();
+      await crawlPromise;
 
       expect(mockUpdateMappingsIfNeeded).toHaveBeenCalledTimes(3);
       expect(mockSmlClient.clean).toHaveBeenCalledTimes(1);
@@ -685,7 +695,9 @@ describe('SmlCrawlerImpl', () => {
       mockStateClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } });
 
       const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
-      await crawler.crawl({ definition, esClient, savedObjectsClient });
+      const crawlPromise = crawler.crawl({ definition, esClient, savedObjectsClient });
+      await jest.runAllTimersAsync();
+      await crawlPromise;
 
       expect(mockUpdateMappingsIfNeeded).toHaveBeenCalledTimes(2);
       expect(mockSmlClient.clean).not.toHaveBeenCalled();
