@@ -9,12 +9,21 @@ import React from 'react';
 import { EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import {
+  AWS_AUTH_TYPE_SELECTOR_TEST_SUBJ,
+  AWS_AUTH_TYPE_IF_CARD_TEST_SUBJ,
+  AWS_AUTH_TYPE_STATIC_KEYS_CARD_TEST_SUBJ,
+  AWS_AUTH_TYPE_TEMPORARY_KEYS_CARD_TEST_SUBJ,
+} from './test_subjects';
+
 export type AwsAuthType = 'identity_federation' | 'static_keys' | 'temporary_keys';
 
-export const AWS_AUTH_TYPE_SELECTOR_TEST_SUBJ = 'awsAuthTypeSelector';
-export const AWS_AUTH_TYPE_IF_CARD_TEST_SUBJ = 'awsAuthTypeCard-identity_federation';
-export const AWS_AUTH_TYPE_STATIC_KEYS_CARD_TEST_SUBJ = 'awsAuthTypeCard-static_keys';
-export const AWS_AUTH_TYPE_TEMPORARY_KEYS_CARD_TEST_SUBJ = 'awsAuthTypeCard-temporary_keys';
+export {
+  AWS_AUTH_TYPE_SELECTOR_TEST_SUBJ,
+  AWS_AUTH_TYPE_IF_CARD_TEST_SUBJ,
+  AWS_AUTH_TYPE_STATIC_KEYS_CARD_TEST_SUBJ,
+  AWS_AUTH_TYPE_TEMPORARY_KEYS_CARD_TEST_SUBJ,
+};
 
 const OPTIONS = [
   {

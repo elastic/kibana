@@ -143,4 +143,4 @@ export {
   AWS_AUTH_TYPE_IF_CARD_TEST_SUBJ,
   AWS_AUTH_TYPE_STATIC_KEYS_CARD_TEST_SUBJ,
   AWS_AUTH_TYPE_TEMPORARY_KEYS_CARD_TEST_SUBJ,
-} from './components/cloud_connector';
+} from './components/cloud_connector/aws_connect_setup/test_subjects';
