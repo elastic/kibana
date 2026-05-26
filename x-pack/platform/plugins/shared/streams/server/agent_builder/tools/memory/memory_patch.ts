@@ -38,10 +38,13 @@ const patchOperationSchema = z
       .optional()
       .describe('Append this text to the end of the document, or under the specified heading.'),
   })
-  .refine((op) => op.old_text !== undefined || op.heading !== undefined || op.append !== undefined, {
-    message:
-      'Each operation must specify one of: old_text (search-and-replace), heading+content (section replace), or append.',
-  });
+  .refine(
+    (op) => op.old_text !== undefined || op.heading !== undefined || op.append !== undefined,
+    {
+      message:
+        'Each operation must specify one of: old_text (search-and-replace), heading+content (section replace), or append.',
+    }
+  );
 
 const memoryPatchSchema = z.object({
   id: z.string().optional().describe('Target page by UUID.'),
@@ -231,7 +234,9 @@ export const createMemoryPatchTool = ({
         return {
           results: [
             createErrorResult({
-              message: `Patch failed — no changes persisted (${appliedCount} of ${operations.length} ops would have succeeded). Errors: ${errors.join('; ')}`,
+              message: `Patch failed — no changes persisted (${appliedCount} of ${
+                operations.length
+              } ops would have succeeded). Errors: ${errors.join('; ')}`,
             }),
           ],
         };
