@@ -7,8 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { PromQLParser } from '@elastic/esql';
 import { EDITOR_MARKER } from '../constants';
-import { correctPromqlQuerySyntax, correctQuerySyntax, getBracketsToClose } from './ast';
+import {
+  addAutocompleteMarker,
+  correctPromqlQuerySyntax,
+  correctQuerySyntax,
+  getBracketsToClose,
+  removeAutocompleteMarkers,
+} from './ast';
 
 describe('getBracketsToClose', () => {
   it('returns the number of brackets to close', () => {
@@ -38,19 +45,33 @@ describe('getBracketsToClose', () => {
   });
 });
 
-describe('correctQuerySyntax', () => {
+describe('addAutocompleteMarker', () => {
   it('appends marker after operator', () => {
     const query = 'FROM foo | EVAL field > ';
-    const result = correctQuerySyntax(query);
+    const result = addAutocompleteMarker(query);
     expect(result.endsWith(EDITOR_MARKER)).toBe(true);
   });
 
   it('appends marker after comma', () => {
     const query = 'FROM foo | STATS field1, ';
-    const result = correctQuerySyntax(query);
+    const result = addAutocompleteMarker(query);
     expect(result.endsWith(EDITOR_MARKER)).toBe(true);
   });
 
+  it('appends marker if all brackets are closed and ends with operator', () => {
+    const query = 'FROM index | STATS AVG(field1) != ';
+    const result = addAutocompleteMarker(query);
+    expect(result.endsWith(EDITOR_MARKER)).toBe(true);
+  });
+
+  it('does not append marker for inline cast type names ending with operator-like suffixes', () => {
+    const query = 'FROM index | EVAL vec = [0.1, 0.2]::dense_vector ';
+    const result = addAutocompleteMarker(query);
+    expect(result).toEqual(query);
+  });
+});
+
+describe('correctQuerySyntax', () => {
   it('closes unclosed brackets', () => {
     const query = 'FROM foo | EVAL foo(bar[baz';
     const result = correctQuerySyntax(query);
@@ -65,22 +86,11 @@ describe('correctQuerySyntax', () => {
     expect(result).toEqual(query);
   });
 
-  it('appends marker if all brackets are closed and ends with operator', () => {
-    const query = 'FROM index | STATS AVG(field1) != ';
-    const result = correctQuerySyntax(query);
-    expect(result.endsWith(EDITOR_MARKER)).toBe(true);
-  });
-
   it('handles incomplete function signature', () => {
     const query = 'FROM foo | EVAL foo(bar, ';
     const result = correctQuerySyntax(query);
-    expect(result.endsWith(`${EDITOR_MARKER})`)).toBe(true);
-  });
-
-  it('does not append marker for inline cast type names ending with operator-like suffixes', () => {
-    const query = 'FROM index | EVAL vec = [0.1, 0.2]::dense_vector ';
-    const result = correctQuerySyntax(query);
-    expect(result).toEqual(query);
+    expect(result.endsWith(')')).toBe(true);
+    expect(result).not.toContain(EDITOR_MARKER);
   });
 });
 
@@ -114,5 +124,13 @@ describe('correctPromqlQuerySyntax', () => {
     const result = correctPromqlQuerySyntax(query);
     const markerMatches = result.match(new RegExp(EDITOR_MARKER, 'g')) ?? [];
     expect(markerMatches).toHaveLength(1);
+  });
+
+  it('normalizes marker nodes from parsed PromQL autocomplete ASTs', () => {
+    const query = correctPromqlQuerySyntax('rate(http_requests_total, ');
+    const { root } = PromQLParser.parse(query);
+    const normalizedRoot = removeAutocompleteMarkers(root);
+
+    expect(JSON.stringify(normalizedRoot)).not.toContain(EDITOR_MARKER);
   });
 });

@@ -37,6 +37,7 @@ import { getColumnsByTypeRetriever } from '../shared/columns_retrieval_helpers';
 import { getUnmappedFieldsStrategy } from '../../commands/definitions/utils/settings';
 import { isTimeseriesSourceCommand } from '../../commands/definitions/utils/timeseries_check';
 import { attachReplacementRanges, ReplacementRangeStrategyKind } from './utils/prefix_range';
+import { correctQuerySyntax } from '../../commands/definitions/utils/ast';
 
 function isSourceCommandSuggestion({ label }: { label: string }) {
   const sourceCommands = esqlCommandRegistry
@@ -63,10 +64,7 @@ export async function suggest(
   offset: number,
   resourceRetriever?: ESQLCallbacks
 ): Promise<ISuggestionItem[]> {
-  const { innerText, correctedQuery, root, astContext } = getAutocompleteCursorContext(
-    fullText,
-    offset
-  );
+  const { innerText, root, astContext } = getAutocompleteCursorContext(fullText, offset);
 
   if (astContext.type === 'comment') {
     return [];
@@ -75,6 +73,7 @@ export async function suggest(
   // Use the appropriate AST context for field retrieval
   // When in a subquery, use the subquery's AST to get only its fields
   const astForFields = astContext.astForContext;
+  const correctedQuery = correctQuerySyntax(innerText);
 
   const { getColumnsByType, getColumnMap } = getColumnsByTypeRetriever(
     getQueryForFields(correctedQuery, astForFields),

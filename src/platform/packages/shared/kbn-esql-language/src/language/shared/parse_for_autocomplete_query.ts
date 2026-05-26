@@ -9,7 +9,12 @@
 
 import { Parser } from '@elastic/esql';
 import type { ESQLAstQueryExpression } from '@elastic/esql/types';
-import { correctQuerySyntax, findAstPosition } from '../../commands/definitions/utils/ast';
+import {
+  addAutocompleteMarker,
+  correctQuerySyntax,
+  findAstPosition,
+  removeAutocompleteMarkers,
+} from '../../commands/definitions/utils/ast';
 import { getCursorContext } from './get_cursor_context';
 
 interface ParsedAutocompleteQuery {
@@ -24,13 +29,13 @@ interface ParsedAutocompleteQuery {
  */
 export function parseAutocompleteQuery(fullText: string, offset: number): ParsedAutocompleteQuery {
   const innerText = fullText.substring(0, offset);
-  const correctedQuery = correctQuerySyntax(innerText);
+  const correctedQuery = correctQuerySyntax(addAutocompleteMarker(innerText));
   const { root } = Parser.parse(correctedQuery, { withFormatting: true });
 
   return {
     innerText,
     correctedQuery,
-    root,
+    root: removeAutocompleteMarkers(root),
   };
 }
 

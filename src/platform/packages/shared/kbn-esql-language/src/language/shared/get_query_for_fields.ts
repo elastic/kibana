@@ -8,7 +8,6 @@
  */
 
 import type { ESQLAstQueryExpression, ESQLAstForkCommand } from '@elastic/esql/types';
-import { EDITOR_MARKER } from '../../commands/definitions/constants';
 import { expandEvals } from './expand_evals';
 
 /**
@@ -50,7 +49,7 @@ export function getQueryForFields(
   }
 
   if (lastCommand && lastCommand.name === 'eval') {
-    const endsWithComma = queryString.replace(EDITOR_MARKER, '').trim().endsWith(',');
+    const endsWithComma = queryString.trim().endsWith(',');
     if (lastCommand.args.length > 1 || endsWithComma) {
       /**
        * If we get here, we know that we have a multi-expression EVAL statement.

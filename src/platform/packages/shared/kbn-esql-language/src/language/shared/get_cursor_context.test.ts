@@ -8,19 +8,25 @@
  */
 
 import { EDITOR_MARKER } from '../../commands/definitions/constants';
-import { correctQuerySyntax, isMarkerNode } from '../../commands/definitions/utils/ast';
+import {
+  addAutocompleteMarker,
+  correctQuerySyntax,
+  isMarkerNode,
+  removeAutocompleteMarkers,
+} from '../../commands/definitions/utils/ast';
 import type { ESQLAstItem } from '@elastic/esql/types';
 import { Parser, Walker } from '@elastic/esql';
 import { getCursorContext } from './get_cursor_context';
 
 const assertMarkerRemoved = (_query: string) => {
-  const query = correctQuerySyntax(_query);
+  const query = correctQuerySyntax(addAutocompleteMarker(_query));
   if (!query.includes(EDITOR_MARKER)) {
     throw new Error(`Query does not contain marker: ${query}`);
   }
 
   const { root } = Parser.parse(query);
-  const result = getCursorContext(query, root, _query.length);
+  const normalizedRoot = removeAutocompleteMarkers(root);
+  const result = getCursorContext(query, normalizedRoot, _query.length);
 
   if (!result.command) {
     throw new Error(`No command found in AST for query: ${query}`);

@@ -37,6 +37,7 @@ import {
 import { suggest } from './autocomplete';
 import { datasets, editorExtensions, views } from '../../__tests__/language/helpers';
 import { mapRecommendedQueriesFromExtensions } from './recommended_queries_helpers';
+import { EDITOR_MARKER } from '../../commands/definitions/constants';
 
 const getRecommendedQueriesSuggestionsFromTemplates = (
   fromCommand: string,
@@ -310,6 +311,41 @@ describe('autocomplete', () => {
       const triggerOffset = statement.lastIndexOf('p') + 1; // drop <here>
       await suggest(statement, triggerOffset + 1, callbackMocks);
       expect(callbackMocks.getColumnsFor).toHaveBeenCalledWith({ query: 'FROM index_d' });
+    });
+    it.each([
+      ['EVAL incomplete assignment', 'FROM marker_eval_assignment | EVAL foo = 1, bar = '],
+      ['EVAL function argument', 'FROM marker_eval_function | EVAL result = ROUND(doubleField, '],
+      ['WHERE list value', 'FROM marker_where_list | WHERE integerField IN (1, '],
+      ['STATS aggregation list', 'FROM marker_stats_agg | STATS total = SUM(integerField), '],
+      [
+        'STATS WHERE predicate',
+        'FROM marker_stats_where | STATS MIN(integerField) WHERE integerField > ',
+      ],
+      ['RERANK ON field list', 'FROM marker_rerank_list | RERANK "search query" ON keywordField, '],
+      [
+        'LOOKUP JOIN ON condition list',
+        'FROM marker_join_list | LOOKUP JOIN join_index ON textField, ',
+      ],
+    ])('should not send autocomplete markers in the columns query for %s', async (_, statement) => {
+      const callbackMocks = createCustomCallbackMocks(undefined, undefined, undefined);
+
+      await suggest(statement, statement.length, callbackMocks);
+
+      const { getColumnsFor } = callbackMocks;
+      if (!getColumnsFor) {
+        throw new Error('Expected getColumnsFor callback to be defined');
+      }
+      const getColumnsForMock = getColumnsFor as jest.MockedFunction<typeof getColumnsFor>;
+
+      expect(getColumnsForMock).toHaveBeenCalled();
+      for (const [params] of getColumnsForMock.mock.calls) {
+        if (!params) {
+          throw new Error('Expected getColumnsFor to be called with query params');
+        }
+
+        expect(params.query).toEqual(expect.any(String));
+        expect(params.query).not.toContain(EDITOR_MARKER);
+      }
     });
   });
 
