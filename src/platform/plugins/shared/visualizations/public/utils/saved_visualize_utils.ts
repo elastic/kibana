@@ -174,7 +174,6 @@ export async function findListItems(
       },
     }),
   });
-  console.log({ savedObjects });
 
   return {
     total,
