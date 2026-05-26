@@ -189,7 +189,7 @@ export function getTransformHealthRuleType(
       } = options;
 
       if (!alertsClient) {
-        throw createTaskRunError(new AlertsClientError(), TaskErrorSource.USER);
+        throw new AlertsClientError();
       }
 
       const fieldFormatsRegistry = await getFieldFormatsStart().fieldFormatServiceFactory(
