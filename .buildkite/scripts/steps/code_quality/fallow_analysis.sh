@@ -7,8 +7,9 @@ source .buildkite/scripts/common/util.sh
 FALLOW_VERSION="2.76.0"
 FALLOW_OWNERS=("@elastic/search-kibana" "@elastic/workchat-eng")
 
-# Extract section for a specific owner from grouped fallow output.
-# Uses flag-based awk (no early exit) to avoid SIGPIPE with pipefail.
+# Extract section body for a specific owner from grouped markdown output.
+# Flag-based awk (no early exit) avoids SIGPIPE with pipefail.
+# Skips the owner header line, prints until next owner section.
 extract_owner_section() {
   local output="$1"
   local owner="$2"
@@ -18,6 +19,14 @@ extract_owner_section() {
      $0 ~ owner { found=1; next }
      found && /^## @elastic\// { found=0 }
      found { print }'
+}
+
+# Extract the count summary for an owner from the single-line summary output.
+# Summary line format: "N groups: ... · @elastic/team-name 98 · ..."
+extract_count() {
+  local summary="$1"
+  local owner="$2"
+  printf '%s\n' "$summary" | grep -oE "${owner//\//\\/} \([^)]+\)" | sed "s|${owner//\//\\/} ||"
 }
 
 echo "--- Install fallow v${FALLOW_VERSION}"
@@ -44,12 +53,29 @@ DUPES_OUTPUT=$(npx "fallow@${FALLOW_VERSION}" dupes \
 DUPES_EXIT=$?
 set -e
 
+echo "--- Extract counts for annotation"
+set +e
+DEAD_CODE_SUMMARY=$(npx "fallow@${FALLOW_VERSION}" dead-code \
+  --group-by owner \
+  --production \
+  --summary \
+  --quiet \
+  2>/dev/null)
+DUPES_SUMMARY=$(npx "fallow@${FALLOW_VERSION}" dupes \
+  --group-by owner \
+  --summary \
+  --quiet \
+  2>/dev/null)
+set -e
+
 echo "+++ Results"
 
-ANNOTATION_PARTS=()
+ANNOTATION=""
 for owner in "${FALLOW_OWNERS[@]}"; do
   dead_section=$(extract_owner_section "$DEAD_CODE_OUTPUT" "$owner")
   dupes_section=$(extract_owner_section "$DUPES_OUTPUT" "$owner")
+  dead_count=$(extract_count "$DEAD_CODE_SUMMARY" "$owner")
+  dupes_count=$(extract_count "$DUPES_SUMMARY" "$owner")
   team_short="${owner#@elastic/}"
 
   echo "━━━ ${owner} ━━━"
@@ -69,17 +95,12 @@ for owner in "${FALLOW_OWNERS[@]}"; do
   fi
   echo ""
 
-  dead_summary=$(printf '%s\n' "$dead_section" | head -1)
-  dupes_summary=$(printf '%s\n' "$dupes_section" | head -1)
-  ANNOTATION_PARTS+=("**${team_short}:** ${dead_summary:-no dead code} · ${dupes_summary:-no duplication}")
+  dead_label="${dead_count:-no dead code}"
+  dupes_label="${dupes_count:-no duplication}"
+  ANNOTATION+="${team_short}: ${dead_label} · ${dupes_label}\n"
 done
 
 echo "--- Post Buildkite annotation"
 
-ANNOTATION_BODY=""
-for part in "${ANNOTATION_PARTS[@]}"; do
-  ANNOTATION_BODY+="${part}\n"
-done
-
-printf "**Code Quality Report**\n\n%b" "$ANNOTATION_BODY" \
+printf "**Code Quality**\n\n%b" "$ANNOTATION" \
   | buildkite-agent annotate --style info --context fallow-report
