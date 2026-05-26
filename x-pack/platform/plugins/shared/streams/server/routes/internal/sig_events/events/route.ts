@@ -8,6 +8,7 @@
 import { sigEventSchema, type SigEvent } from '@kbn/streams-schema';
 import { z } from '@kbn/zod/v4';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
+import type { PaginatedResponse } from '../../../../lib/sig_events/query_utils';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 
@@ -16,7 +17,7 @@ const eventsSearchRoute = createServerRoute({
   options: {
     access: 'internal',
     summary: 'Get latest events',
-    description: 'Search event entities using their latest derived state.',
+    description: 'Search event entities using their latest derived state with pagination.',
   },
   security: {
     authz: {
@@ -27,6 +28,39 @@ const eventsSearchRoute = createServerRoute({
     query: z.object({
       from: z.iso.datetime().optional(),
       to: z.iso.datetime().optional(),
+      page: z.coerce.number().int().min(1).optional(),
+      perPage: z.coerce.number().int().min(1).max(1000).optional(),
+    }),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+  }): Promise<PaginatedResponse<SigEvent>> => {
+    const { getEventClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    return getEventClient().findLatestPaginated(params.query);
+  },
+});
+
+const eventsHistoryRoute = createServerRoute({
+  endpoint: 'GET /internal/sig_events/events/{id}/history',
+  options: {
+    access: 'internal',
+    summary: 'Get event history',
+    description: 'Get all historical versions of a significant event entity.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({
+    path: z.object({
+      id: z.string(),
     }),
   }),
   handler: async ({ params, request, getScopedClients, server }): Promise<{ hits: SigEvent[] }> => {
@@ -34,7 +68,7 @@ const eventsSearchRoute = createServerRoute({
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    return getEventClient().findLatest(params.query);
+    return getEventClient().findById(params.path.id);
   },
 });
 
@@ -64,5 +98,6 @@ const eventsBulkCreateRoute = createServerRoute({
 
 export const internalSigEventsEventsRoutes = {
   ...eventsSearchRoute,
+  ...eventsHistoryRoute,
   ...eventsBulkCreateRoute,
 };
