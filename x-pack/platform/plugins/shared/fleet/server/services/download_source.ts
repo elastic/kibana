@@ -137,9 +137,7 @@ class DownloadSourceService {
 
     validateFleetSavedObjectId(options?.id);
 
-    const data: DownloadSourceSOAttributes = {
-      ...omit(downloadSource, ['ssl', 'auth', 'secrets']),
-    };
+    const data: DownloadSourceSOAttributes = { ...omit(downloadSource, ['ssl', 'secrets']) };
 
     if (!appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt) {
       throw new FleetEncryptedSavedObjectEncryptionKeyRequired(
