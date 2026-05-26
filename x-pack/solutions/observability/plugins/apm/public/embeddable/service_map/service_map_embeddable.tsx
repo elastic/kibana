@@ -9,6 +9,11 @@ import { EuiCallOut, EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
 import React, { useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
+import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
+import { useKibanaQuerySettings } from '@kbn/observability-shared-plugin/public';
+import type { ServiceMapOrientation } from '../../components/app/service_map/service_map_options_panel';
+import { useAdHocApmDataView } from '../../hooks/use_adhoc_apm_data_view';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { getDateRange } from '../../context/url_params_context/helpers';
 import { isActivePlatinumLicense } from '../../../common/license_check';
@@ -58,6 +63,14 @@ export interface ServiceMapEmbeddableProps {
   onEmptyStateChange?: (isEmpty: boolean) => void;
   /** Field-value pairs to pass as filter bar pills in the "View full map" link instead of kuery. */
   filterPills?: Array<{ field: string; value: string }>;
+  /** Initial layout orientation; if `onMapOrientationChange` is also provided, becomes controlled. */
+  mapOrientation?: ServiceMapOrientation;
+  /** Called when the user (or the host) changes orientation. */
+  onMapOrientationChange?: (next: ServiceMapOrientation) => void;
+  /** Parent dashboard filters when the panel opts in to sync. Excludes `service.environment` (handled server-side). */
+  parentFilters?: Filter[];
+  /** Parent dashboard query when the panel opts in to sync. */
+  parentQuery?: Query | AggregateQuery;
 }
 
 function LoadingSpinner() {
@@ -87,6 +100,10 @@ export function ServiceMapEmbeddable({
   strictEnvironmentScope,
   onEmptyStateChange,
   filterPills,
+  mapOrientation,
+  onMapOrientationChange,
+  parentFilters,
+  parentQuery,
 }: ServiceMapEmbeddableProps) {
   const license = useLicenseContext();
   const { config } = useApmPluginContext();
@@ -129,6 +146,30 @@ export function ServiceMapEmbeddable({
   const { sloOverviewFlyout, openSloOverviewFlyout, closeSloOverviewFlyout } =
     useSloOverviewFlyout();
 
+  // Build an ES query from dashboard-level filters/query when the panel opts in to
+  // sync_with_dashboard_filters. Environment is excluded — it's still passed via the
+  // dedicated server param, mirroring service_map_search_bar.tsx.
+  const { dataView } = useAdHocApmDataView();
+  const kibanaQuerySettings = useKibanaQuerySettings();
+  const esQuery = useMemo(() => {
+    const hasParentSearchState =
+      (parentFilters && parentFilters.length > 0) ||
+      (parentQuery && 'query' in parentQuery && typeof parentQuery.query === 'string'
+        ? parentQuery.query.trim().length > 0
+        : Boolean(parentQuery));
+    if (!dataView || !hasParentSearchState) {
+      return undefined;
+    }
+    const filtersWithoutEnv = (parentFilters ?? []).filter(
+      (f) => f.meta?.key !== 'service.environment'
+    );
+    const queries: Query[] =
+      parentQuery && 'query' in parentQuery
+        ? [{ query: String(parentQuery.query ?? ''), language: parentQuery.language ?? 'kuery' }]
+        : [{ query: '', language: 'kuery' }];
+    return buildEsQuery(dataView, queries, filtersWithoutEnv, kibanaQuerySettings);
+  }, [dataView, parentFilters, parentQuery, kibanaQuerySettings]);
+
   const { data, status, error } = useServiceMap({
     environment,
     kuery,
@@ -137,6 +178,7 @@ export function ServiceMapEmbeddable({
     serviceGroupId,
     serviceName,
     strictEnvironmentScope,
+    esQuery,
   });
 
   // Only fire on SUCCESS — loading/error states carry no emptiness signal.
@@ -270,6 +312,8 @@ export function ServiceMapEmbeddable({
           showFocusMap={showFocusMapInPopover}
           alwaysNavigateOnPopoverFocus={alwaysNavigateOnPopoverFocus}
           clearKueryOnPopoverNavigation={clearKueryOnPopoverNavigation}
+          mapOrientation={mapOrientation}
+          onMapOrientationChange={onMapOrientationChange}
         />
       </div>
       {sloOverviewFlyout && (

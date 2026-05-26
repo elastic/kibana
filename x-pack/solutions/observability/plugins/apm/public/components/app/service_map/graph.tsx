@@ -63,6 +63,7 @@ import {
   type ServiceMapOrientation,
 } from './service_map_options_panel';
 import { ServiceMapLegend } from './service_map_legend';
+import { AddToDashboardButton } from './add_to_dashboard_button';
 import type { Environment } from '../../../../common/environment_rt';
 import {
   isServiceNode,
@@ -107,6 +108,12 @@ interface GraphProps {
    * (frame, fill, primary node ring). Blue edges/markers remain tied to explicit selection only.
    */
   highlightedServiceName?: string;
+  /** Controlled initial / current orientation when supplied. Falls back to internal `useState` otherwise. */
+  mapOrientation?: ServiceMapOrientation;
+  /** Called when orientation changes (Options panel or any other host control). */
+  onMapOrientationChange?: (next: ServiceMapOrientation) => void;
+  /** Optional service group filter — forwarded to the "Add to dashboard" panel state. */
+  serviceGroupId?: string;
 }
 
 function GraphInner({
@@ -126,6 +133,9 @@ function GraphInner({
   alwaysNavigateOnPopoverFocus,
   clearKueryOnPopoverNavigation,
   highlightedServiceName,
+  mapOrientation: controlledOrientation,
+  onMapOrientationChange,
+  serviceGroupId,
 }: GraphProps) {
   const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
   const { telemetry } = services;
@@ -144,7 +154,17 @@ function GraphInner({
     DEFAULT_SERVICE_MAP_VIEW_FILTERS
   );
   const [panelExpanded, setPanelExpanded] = useState(true);
-  const [mapOrientation, setMapOrientation] = useState<ServiceMapOrientation>('horizontal');
+  const [internalOrientation, setInternalOrientation] = useState<ServiceMapOrientation>(
+    controlledOrientation ?? 'horizontal'
+  );
+  const mapOrientation = controlledOrientation ?? internalOrientation;
+  const setMapOrientation = useCallback(
+    (next: ServiceMapOrientation) => {
+      setInternalOrientation(next);
+      onMapOrientationChange?.(next);
+    },
+    [onMapOrientationChange]
+  );
 
   // Track the current selected node for use in layout effect without triggering re-layout
   const selectedNodeIdRef = useRef<string | null>(null);
@@ -690,6 +710,19 @@ function GraphInner({
                 />
               )}
             </Panel>
+            {!isEmbedded && (
+              <Panel position="top-right">
+                <AddToDashboardButton
+                  environment={environment}
+                  kuery={kuery}
+                  start={start}
+                  end={end}
+                  serviceName={serviceName}
+                  serviceGroupId={serviceGroupId}
+                  mapOrientation={mapOrientation}
+                />
+              </Panel>
+            )}
             {!isEmbedded && <ServiceMapMinimap />}
           </ReactFlow>
           <MapPopover

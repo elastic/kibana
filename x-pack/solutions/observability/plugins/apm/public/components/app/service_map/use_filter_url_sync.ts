@@ -48,7 +48,7 @@ function getRestoredAppFilters(initialState: AppFilterState | null): Filter[] {
  * (via deepExactRt) before React components mount — so kbnUrlStateStorage
  * won't find `_a` in history.location.search.
  */
-function readInitialAppStateFromRawUrl(): AppFilterState | null {
+export function readInitialAppStateFromRawUrl(): AppFilterState | null {
   try {
     const raw = window.location.href;
     const match = raw.match(/[?&]_a=([^&#]+)/);
