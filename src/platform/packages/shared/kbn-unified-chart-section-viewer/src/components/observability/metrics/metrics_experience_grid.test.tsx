@@ -25,7 +25,10 @@ import type {
 import { getFetchParamsMock, getFetch$Mock } from '@kbn/unified-histogram/__mocks__/fetch_params';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { EsqlResponseError } from '../../../common/errors/esql_response_error';
-import { ExternalServicesProvider } from '../../../context/external_services';
+import {
+  ExternalServicesProvider,
+  type ExternalServices,
+} from '../../../context/external_services';
 import type { ParsedMetricItem, Dimension, UnifiedMetricsGridProps } from '../../../types';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 import * as metricsExperienceStateProvider from './context/metrics_experience_state_provider';
@@ -91,7 +94,7 @@ const TestWrapper = ({
   externalServices,
 }: {
   children: React.ReactNode;
-  externalServices?: { docLinks?: { links: { query: { queryESQL: string } } } };
+  externalServices?: ExternalServices;
 }) => (
   <EuiProvider highContrastMode={false}>
     <IntlProvider locale="en">
@@ -277,11 +280,13 @@ describe('MetricsExperienceGrid', () => {
     const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
       wrapper: ({ children }) => (
         <TestWrapper
-          externalServices={{
-            docLinks: {
-              links: { query: { queryESQL: 'https://www.elastic.co/docs/reference/esql' } },
-            },
-          }}
+          externalServices={
+            {
+              docLinks: {
+                links: { query: { queryESQL: 'https://www.elastic.co/docs/reference/esql' } },
+              },
+            } as ExternalServices
+          }
         >
           {children}
         </TestWrapper>

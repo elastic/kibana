@@ -11,12 +11,15 @@ import { EuiProvider } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { EsqlResponseError } from '../../common/errors/esql_response_error';
-import { ExternalServicesProvider } from '../../context/external_services';
+import {
+  ExternalServicesProvider,
+  type ExternalServices,
+} from '../../context/external_services';
 import { ChartSectionSearchError } from './chart_section_search_error';
 
 const renderChartSectionSearchError = (
   ui: React.ReactElement,
-  externalServices?: { docLinks?: { links: { query: { queryESQL: string } } } }
+  externalServices?: ExternalServices
 ) =>
   render(
     <EuiProvider highContrastMode={false}>
@@ -69,8 +72,10 @@ describe('ChartSectionSearchError', () => {
         isEsqlMode
       />,
       {
-        docLinks: { links: { query: { queryESQL: 'https://www.elastic.co/docs/reference/esql' } } },
-      }
+        docLinks: {
+          links: { query: { queryESQL: 'https://www.elastic.co/docs/reference/esql' } },
+        },
+      } as ExternalServices
     );
 
     expect(screen.getByTestId('discoverErrorCalloutESQLReferenceButton')).toHaveAttribute(
