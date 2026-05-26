@@ -130,7 +130,7 @@ export function transformDashboardOut(
   // try to maintain a consistent (alphabetical) order of keys
   return {
     dashboardState: {
-      ...validatedState,
+      ...(validatedState as DashboardState), // defaults have been injected at this point, so casting is safe
       /** These keys were validated seperately, since they each have unique error handling */
       ...(filters && { filters }),
       panels,
