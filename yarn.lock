@@ -2333,10 +2333,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-2.12.0.tgz#9333e558c6a5786f4aaf984eeda737d35edd17a0"
   integrity sha512-nDOmel4ywBWrc6q/j0nqsXna/yD8yK+QyzS3UapxN9C13dhDZaTychqP7B9om95yYvlHd9k0kzKv6IHTUKfhqg==
 
-"@elastic/esql@4.1.0":
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/@elastic/esql/-/esql-4.1.0.tgz#971e957e22f491e0c222a32126101fbbef724c7b"
-  integrity sha512-03R6w82yKyIHEfqo+S5DIL5XFqO47odt8PzxsCaMMlMPIQHNHTouUGYHPmH5nl+I0pgacS0LyZDC0CepEVfSZA==
+"@elastic/esql@4.2.0":
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/@elastic/esql/-/esql-4.2.0.tgz#06a61135709eb4126ddbd71464008b05d4f68a21"
+  integrity sha512-fcJm30NiVaySNg+Cte33lERz9JI0EL12kolhWPkwBzgk9QKzkNItzY0U8E5gKiReDOoIwm0+dOIkaWzLdBv2yA==
   dependencies:
     antlr4 "4.13.2"
     tree-dump "1.1.0"
@@ -5211,6 +5211,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/context-switcher-components@link:src/platform/packages/shared/context-switcher-components":
+  version "0.0.0"
+  uid ""
+
 "@kbn/control-group-renderer@link:src/platform/packages/shared/controls/control-group-renderer":
   version "0.0.0"
   uid ""
@@ -6908,6 +6912,10 @@
   uid ""
 
 "@kbn/evals-suite-entity-analytics@link:x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics":
+  version "0.0.0"
+  uid ""
+
+"@kbn/evals-suite-lead-generation@link:x-pack/solutions/security/packages/kbn-evals-suite-lead-generation":
   version "0.0.0"
   uid ""
 
