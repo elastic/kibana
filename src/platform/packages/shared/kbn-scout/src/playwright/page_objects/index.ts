@@ -17,6 +17,7 @@ import { DatePicker } from './date_picker';
 import { DiscoverApp } from './discover_app';
 import { FilterBar } from './filter_bar';
 import { MapsPage } from './maps_page';
+import { QueryBar } from './query_bar';
 import { RenderablePage } from './renderable_page';
 import { SavedQueryManagementMenu } from './saved_query_management_menu';
 import { Toasts } from './toasts';
@@ -55,6 +56,7 @@ export interface PageObjects {
   listingTable: ListingTable;
   home: HomePage;
   maps: MapsPage;
+  queryBar: QueryBar;
   renderable: RenderablePage;
   savedQueryManagementMenu: SavedQueryManagementMenu;
   collapsibleNav: CollapsibleNav;
@@ -82,6 +84,7 @@ export function createCorePageObjects(fixtures: PageObjectsFixtures): PageObject
     listingTable: createLazyPageObject(ListingTable, fixtures.page),
     home: createLazyPageObject(HomePage, fixtures.page),
     maps: createLazyPageObject(MapsPage, fixtures.page),
+    queryBar: createLazyPageObject(QueryBar, fixtures.page),
     renderable: createLazyPageObject(RenderablePage, fixtures.page),
     savedQueryManagementMenu: createLazyPageObject(SavedQueryManagementMenu, fixtures.page),
     collapsibleNav: createLazyPageObject(CollapsibleNav, fixtures.page, fixtures.config),

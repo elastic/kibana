@@ -72,7 +72,11 @@ export class SavedQueryManagementMenu {
     if (await this.isOpen()) return;
     await this.menuButton.click();
     await expect(this.menuButton).toHaveAttribute('aria-expanded', 'true');
-    // EUI popover animation has no deterministic settled event; avoid racing inner-panel clicks.
+    // EUI popover animation has no deterministic settled event; inner-panel clicks
+    // race the panel slide. Two-part mitigation: this fixed wait, plus
+    // `dispatchEvent('click')` (instead of `.click()`) on inner-panel buttons in the
+    // action methods below — it bypasses Playwright actionability checks that flicker
+    // while the panel transform is in flight.
     // eslint-disable-next-line playwright/no-wait-for-timeout
     await this.page.waitForTimeout(1000);
   }
@@ -120,6 +124,7 @@ export class SavedQueryManagementMenu {
 
   async saveNewQuery(name: string, options: SaveQueryOptions = {}): Promise<void> {
     await this.open();
+    // dispatchEvent instead of click — see openPopover for the EUI panel-slide rationale.
     await this.saveButton.dispatchEvent('click');
     await this.page.testSubj.locator('saveQueryForm').waitFor({ state: 'visible' });
     await this.submitSaveQueryForm(name, options);

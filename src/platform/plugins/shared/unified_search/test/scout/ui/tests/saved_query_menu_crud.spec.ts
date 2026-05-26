@@ -35,16 +35,16 @@ spaceTest.describe('Saved query menu — CRUD (Discover)', { tag: testData.SQM_U
   spaceTest(
     'save, load, update, save-as-new, delete via the popover',
     async ({ page, pageObjects }) => {
-      const { savedQueryManagementMenu: menu } = pageObjects;
+      const { savedQueryManagementMenu: menu, queryBar } = pageObjects;
       const NEW_QUERY = 'response:418';
       const NEW_QUERY_NAME = `e2e-${Date.now()}`;
       const COPY_QUERY_NAME = `${NEW_QUERY_NAME}-copy`;
 
       await spaceTest.step('save a brand-new query', async () => {
-        await page.testSubj.locator('queryInput').fill(NEW_QUERY);
+        await queryBar.setQuery(NEW_QUERY);
         await menu.saveNewQuery(NEW_QUERY_NAME);
         expect(await menu.hasSavedQuery(NEW_QUERY_NAME)).toBe(true);
-        await page.locator('button[title="Clear input"]').click();
+        await queryBar.clearQuery();
       });
 
       await spaceTest.step('load the preloaded `OKJpgs` query', async () => {
@@ -55,8 +55,7 @@ spaceTest.describe('Saved query menu — CRUD (Discover)', { tag: testData.SQM_U
       });
 
       await spaceTest.step('update the loaded query and re-load it', async () => {
-        await page.locator('button[title="Clear input"]').click();
-        await page.testSubj.fill('queryInput', 'response:404');
+        await queryBar.setQuery('response:404');
         await menu.updateLoadedQuery({ includeFilters: true });
         await menu.clearLoadedQuery();
         await menu.loadSavedQuery(testData.PRELOADED_SAVED_QUERY.title);
@@ -66,7 +65,7 @@ spaceTest.describe('Saved query menu — CRUD (Discover)', { tag: testData.SQM_U
       await spaceTest.step('save the loaded query as a new copy', async () => {
         // The popover's "Save query" item is only enabled when the live query
         // differs from the loaded one; modify it before saving as a copy.
-        await page.testSubj.locator('queryInput').fill('response:500');
+        await queryBar.setQuery('response:500');
         await menu.saveLoadedQueryAsNew(COPY_QUERY_NAME);
         expect(await menu.hasSavedQuery(COPY_QUERY_NAME)).toBe(true);
       });
