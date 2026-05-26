@@ -51,7 +51,6 @@ if [[ -z "${EVAL_SUITE_SLACK_CHANNEL}" ]]; then
 fi
 
 SUMMARY_FILE="$(mktemp -t kbn-evals-suite-summary.XXXXXX.md)"
-NOTIFY_PIPELINE_FILE="$(mktemp -t kbn-evals-notify-pipeline.XXXXXX.yml)"
 
 {
   printf ':rotating_light: *%s* (`%s`) failed in LLM evals.\n\n' "$suite_name" "$EVAL_SUITE_ID"
@@ -71,25 +70,22 @@ buildkite-agent meta-data set "kbn-evals:triage:${suite_key_safe}" "$(cat "$SUMM
 buildkite-agent annotate --context "kbn-evals-summary-${suite_key_safe}" --style 'error' "$(cat "$SUMMARY_FILE")" || true
 
 if [[ -n "${EVAL_SUITE_SLACK_CHANNEL:-}" ]]; then
-  {
-    cat <<EOF
-steps:
-  - label: "LLM Evals: suite owner Slack notify"
-    command: "true"
-    notify:
-      - slack:
-          channels:
-            - "${EVAL_SUITE_SLACK_CHANNEL}"
-          message: |
-EOF
-    sed 's/^/            /' "$SUMMARY_FILE"
-    cat <<'EOF'
-        if: step.outcome == "passed"
-EOF
-  } >"$NOTIFY_PIPELINE_FILE"
+  cd "${KIBANA_DIR:-${BUILDKITE_BUILD_CHECKOUT_PATH:-$(pwd)}}"
 
+  if ! node -e "require('yaml')" 2>/dev/null; then
+    echo "--- Bootstrap (required for generate_suite_notify_pipeline.js)"
+    .buildkite/scripts/bootstrap.sh
+  fi
+
+  NOTIFY_PIPELINE_FILE="$(mktemp -t kbn-evals-notify-pipeline.XXXXXX.yml)"
+  node x-pack/platform/packages/shared/kbn-evals/scripts/ci/generate_suite_notify_pipeline.js \
+    "$SUMMARY_FILE" "$EVAL_SUITE_SLACK_CHANNEL" >"$NOTIFY_PIPELINE_FILE"
+
+  echo "--- Uploading suite owner Slack notify pipeline (channel: ${EVAL_SUITE_SLACK_CHANNEL})"
+  cat "$NOTIFY_PIPELINE_FILE"
   buildkite-agent pipeline upload "$NOTIFY_PIPELINE_FILE"
+  rm -f "$NOTIFY_PIPELINE_FILE"
 fi
 
-rm -f "$SUMMARY_FILE" "$NOTIFY_PIPELINE_FILE"
+rm -f "$SUMMARY_FILE"
 exit 1
