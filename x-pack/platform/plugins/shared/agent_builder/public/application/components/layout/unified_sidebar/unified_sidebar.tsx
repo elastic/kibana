@@ -18,6 +18,7 @@ import {
   getAgentIdFromPath,
   getPathWithSwitchedAgent,
 } from '../../../route_config';
+import { fadeInOnMount } from '../../../utils/fade_in_styles';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
 import { getLastAgentId } from '../../../hooks/use_last_agent_id';
 import { useActiveSpaceId } from '../../../context/active_space_context';
@@ -66,6 +67,7 @@ export const UnifiedSidebar: React.FC<UnifiedSidebarProps> = ({
     border-right: 1px solid ${euiTheme.colors.borderBaseSubdued};
     display: flex;
     flex-direction: column;
+    ${fadeInOnMount(0, false)};
   `;
 
   const sidebarContentStyles = css`

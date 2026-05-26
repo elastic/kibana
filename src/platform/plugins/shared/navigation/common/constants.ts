@@ -21,4 +21,7 @@ export const DEFAULT_ROUTES = {
   security: '/app/security/get_started',
   workplaceai: '/app/workplace_ai',
   vectordb: '/app/vectordb',
+  // Nightshift has its own dedicated welcome page registered by the
+  // observability plugin (see `pages/nightshift/nightshift.tsx`).
+  nightshift: '/app/observability/nightshift',
 };

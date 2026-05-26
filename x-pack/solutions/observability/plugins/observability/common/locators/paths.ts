@@ -9,6 +9,7 @@ export const OBSERVABILITY_BASE_PATH = '/app/observability';
 export const ROOT_PATH = '/' as const;
 export const LANDING_PATH = '/landing' as const;
 export const OVERVIEW_PATH = '/overview' as const;
+export const NIGHTSHIFT_PATH = '/nightshift' as const;
 export const ALERTS_PATH = '/alerts' as const;
 export const ALERT_DETAIL_PATH = '/alerts/:alertId' as const;
 export const EXPLORATORY_VIEW_PATH = '/exploratory-view' as const; // has been moved to its own app. Keeping around for redirecting purposes.

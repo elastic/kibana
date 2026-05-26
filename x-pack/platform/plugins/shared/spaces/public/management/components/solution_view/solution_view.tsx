@@ -25,6 +25,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { Space } from '../../../../common';
+import { getNightshiftIconDataUrl } from '../../../../common';
 import { SOLUTION_VIEW_CLASSIC } from '../../../../common/constants';
 import type { SpaceValidator } from '../../lib';
 import { SectionPanel } from '../section_panel';
@@ -73,6 +74,45 @@ const getOptions = ({ size }: EuiThemeComputed): Array<EuiSuperSelectOption<Solu
         </>
       ),
       'data-test-subj': 'solutionViewSecurityOption',
+    },
+    {
+      value: 'nightshift',
+      inputDisplay: (
+        <>
+          <EuiIcon type={getNightshiftIconDataUrl({ size: 16 })} css={iconCss} />
+          {i18n.translate(
+            'xpack.spaces.management.manageSpacePage.solutionViewSelect.nightshiftOptionLabel',
+            { defaultMessage: 'Nightshift' }
+          )}
+        </>
+      ),
+      dropdownDisplay: (
+        <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type={getNightshiftIconDataUrl({ size: 24 })} size="l" />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText size="s">
+              <strong>
+                {i18n.translate(
+                  'xpack.spaces.management.manageSpacePage.solutionViewSelect.nightshiftOptionLabel',
+                  { defaultMessage: 'Nightshift' }
+                )}
+              </strong>
+            </EuiText>
+            <EuiText size="xs" color="subdued">
+              {i18n.translate(
+                'xpack.spaces.management.manageSpacePage.solutionViewSelect.nightshiftOptionDescription',
+                {
+                  defaultMessage:
+                    'Autonomous mode \u2014 Kibana runs your observability while you sleep.',
+                }
+              )}
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ),
+      'data-test-subj': 'solutionViewNightshiftOption',
     },
     {
       value: 'classic',

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
+import type { NavigationTreeDefinition, SolutionId } from '@kbn/core-chrome-browser';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { AddSolutionNavigationArg } from '@kbn/navigation-plugin/public';
@@ -12,6 +12,7 @@ import { STACK_MANAGEMENT_NAV_ID, DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-
 import { combineLatest, map, of } from 'rxjs';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
+import { getNightshiftIconDataUrl } from '@kbn/spaces-plugin/common';
 import type { Location } from 'history';
 import type { ObservabilityPublicPluginsStart } from './plugin';
 
@@ -22,6 +23,13 @@ const title = i18n.translate(
   }
 );
 const icon = 'logoObservability';
+
+const nightshiftTitle = i18n.translate(
+  'xpack.observability.obltNav.headerSolutionSwitcher.nightshiftSolutionTitle',
+  {
+    defaultMessage: 'Nightshift',
+  }
+);
 
 /**
  * CONTEXT: After restructuring Dashboards to integrate the Visualize library,
@@ -41,27 +49,43 @@ function isEditingFromDashboard(
   return isVizApp && hasOriginatingApp;
 }
 
+/**
+ * Default home node for the Observability solution view. Pulled out so the
+ * Nightshift variant can pass a different home node (different link,
+ * icon, title) while reusing the rest of the body verbatim.
+ */
+type NavBodyItem = NonNullable<NavigationTreeDefinition['body']>[number];
+
+const OBSERVABILITY_HOME_NODE: NavBodyItem = {
+  link: 'observability-overview',
+  title,
+  icon,
+  renderAs: 'home',
+};
+
 function createNavTree({
   streamsAvailable,
   showAiAssistant,
   isCloudEnabled,
   showAlertingV2,
   ingestHubAvailable,
+  homeNode = OBSERVABILITY_HOME_NODE,
 }: {
   streamsAvailable?: boolean;
   showAiAssistant?: boolean;
   isCloudEnabled?: boolean;
   showAlertingV2?: boolean;
   ingestHubAvailable?: boolean;
+  /**
+   * Override the first ("home") body node — used by the Nightshift
+   * variant to swap in the moon icon + Nightshift landing link while
+   * keeping every other section identical to Observability.
+   */
+  homeNode?: NavBodyItem;
 }) {
   const navTree: NavigationTreeDefinition = {
     body: [
-      {
-        link: 'observability-overview',
-        title,
-        icon,
-        renderAs: 'home',
-      },
+      homeNode,
       {
         title: i18n.translate('xpack.observability.obltNav.discover', {
           defaultMessage: 'Discover',
@@ -417,30 +441,45 @@ function createNavTree({
         ],
       },
     ],
-    footer: [
-      ingestHubAvailable
-        ? {
-            link: 'ingestHub' as const,
-            title: i18n.translate('xpack.observability.obltNav.ingestHub', {
-              defaultMessage: 'Ingest Hub',
-            }),
-            icon: 'launch',
-            children: [
-              {
-                link: 'ingestHub' as const,
-                title: i18n.translate('xpack.observability.obltNav.ingestHub.getStarted', {
-                  defaultMessage: 'Get started',
-                }),
-              },
-            ],
-          }
-        : {
-            title: i18n.translate('xpack.observability.obltNav.addData', {
-              defaultMessage: 'Add data',
-            }),
-            link: 'observabilityOnboarding' as const,
-            icon: 'plusInCircle',
-          },
+    footer: createObservabilityFooter({ ingestHubAvailable, isCloudEnabled, showAlertingV2 }),
+  };
+
+  return navTree;
+}
+
+function createObservabilityFooter({
+  ingestHubAvailable,
+  isCloudEnabled,
+  showAlertingV2,
+}: {
+  ingestHubAvailable?: boolean;
+  isCloudEnabled?: boolean;
+  showAlertingV2?: boolean;
+}): NonNullable<NavigationTreeDefinition['footer']> {
+  return [
+    ingestHubAvailable
+      ? {
+          link: 'ingestHub' as const,
+          title: i18n.translate('xpack.observability.obltNav.ingestHub', {
+            defaultMessage: 'Ingest Hub',
+          }),
+          icon: 'launch',
+          children: [
+            {
+              link: 'ingestHub' as const,
+              title: i18n.translate('xpack.observability.obltNav.ingestHub.getStarted', {
+                defaultMessage: 'Get started',
+              }),
+            },
+          ],
+        }
+      : {
+          title: i18n.translate('xpack.observability.obltNav.addData', {
+            defaultMessage: 'Add data',
+          }),
+          link: 'observabilityOnboarding' as const,
+          icon: 'plusInCircle',
+        },
       {
         id: 'devTools',
         title: i18n.translate('xpack.observability.obltNav.devTools', {
@@ -707,10 +746,7 @@ function createNavTree({
           },
         ],
       },
-    ],
-  };
-
-  return navTree;
+  ];
 }
 
 export const createDefinition = (
@@ -732,6 +768,58 @@ export const createDefinition = (
         isCloudEnabled: pluginsStart.cloud?.isCloudEnabled,
         showAlertingV2: Boolean(coreStart.application.capabilities.alertingVTwo),
         ingestHubAvailable,
+      })
+    )
+  ),
+});
+
+/**
+ * Home node for the Nightshift solution view. Links to the dedicated
+ * Nightshift landing page (`/app/observability/nightshift`, registered
+ * as deep link `observability-overview:nightshift`) and renders the
+ * Nightshift moon icon + title in the side-nav logo slot.
+ */
+const NIGHTSHIFT_HOME_NODE: NavBodyItem = {
+  link: 'observability-overview:nightshift',
+  title: nightshiftTitle,
+  icon: getNightshiftIconDataUrl({ size: 24 }),
+  renderAs: 'home',
+};
+
+/**
+ * Experimental "Nightshift" solution view definition. Registered as its
+ * own solution navigation so the space edit page can select it, but it
+ * is not part of the `SolutionId` union (which is the list of serverless
+ * project types). The cast below is the single seam that lets us
+ * register a navigation tree for it without polluting that union.
+ *
+ * The Nightshift sidenav is identical to the Observability sidenav (all
+ * the same Discover / Dashboards / Workflows / Alerts / Cases / SLO /
+ * Streams / Applications / AI / ML / Stack Management sections) — the
+ * only difference is the home node, which uses the Nightshift moon icon
+ * and links to the Nightshift landing page instead of the Observability
+ * overview.
+ */
+export const createNightshiftDefinition = (
+  coreStart: CoreStart,
+  pluginsStart: ObservabilityPublicPluginsStart
+): AddSolutionNavigationArg => ({
+  id: 'nightshift' as SolutionId,
+  title: nightshiftTitle,
+  icon: getNightshiftIconDataUrl({ size: 24 }),
+  navigationTree$: combineLatest([
+    pluginsStart.streams?.navigationStatus$ || of({ status: 'disabled' as const }),
+    coreStart.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE),
+    pluginsStart.ingestHub?.navigationAvailable$ || of(false),
+  ]).pipe(
+    map(([{ status }, chatExperience, ingestHubAvailable]) =>
+      createNavTree({
+        streamsAvailable: status === 'enabled',
+        showAiAssistant: chatExperience !== AIChatExperience.Agent,
+        isCloudEnabled: pluginsStart.cloud?.isCloudEnabled,
+        showAlertingV2: Boolean(coreStart.application.capabilities.alertingVTwo),
+        ingestHubAvailable,
+        homeNode: NIGHTSHIFT_HOME_NODE,
       })
     )
   ),

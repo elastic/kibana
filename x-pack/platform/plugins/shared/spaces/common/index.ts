@@ -14,6 +14,12 @@ export {
   API_VERSIONS,
 } from './constants';
 export { getRouteUrlForSpace } from './get_spaced_route_url';
+export {
+  NIGHTSHIFT_GRADIENT_START,
+  NIGHTSHIFT_GRADIENT_END,
+  getNightshiftIconSvg,
+  getNightshiftIconDataUrl,
+} from './nightshift_icon';
 export { addSpaceIdToPath, getSpaceIdFromPath } from '@kbn/spaces-utils';
 export type {
   Space,

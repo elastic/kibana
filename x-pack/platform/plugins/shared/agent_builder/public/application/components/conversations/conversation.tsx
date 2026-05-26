@@ -36,6 +36,7 @@ import {
   conversationElementWidthStyles,
   fullWidthAndHeightStyles,
 } from './conversation.styles';
+import { fadeInOnMount } from '../../utils/fade_in_styles';
 import { ScrollButton } from './scroll_button';
 import { useAppLeave } from '../../context/app_leave_context';
 import { useNavigationAbort } from '../../hooks/use_navigation_abort';
@@ -119,6 +120,7 @@ export const Conversation: React.FC<{}> = () => {
 
   const containerStyles = css`
     ${fullWidthAndHeightStyles}
+    ${fadeInOnMount(60)};
   `;
 
   const scrollMaskHeight = euiTheme.size.l;

@@ -64,7 +64,7 @@ export interface GetUiSettingsContext {
   request?: KibanaRequest;
 }
 
-export type UiSettingsSolutions = Array<SolutionId | 'classic'>;
+export type UiSettingsSolutions = Array<SolutionId | 'classic' | 'nightshift'>;
 
 /**
  * UiSettings parameters defined by the plugins.

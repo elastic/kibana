@@ -9,6 +9,8 @@ import type { KibanaFeature } from '@kbn/features-plugin/server';
 
 import type { SolutionView } from '../../../common';
 
+type SolutionViewWithFeatures = SolutionId | 'nightshift';
+
 const getFeatureIdsForCategories = (
   features: KibanaFeature[],
   categories: Array<
@@ -36,12 +38,13 @@ const getFeatureIdsForCategories = (
  * These features will be enabled per solution view, even if they fall under a category that is disabled in the solution.
  */
 
-const enabledFeaturesPerSolution: Record<SolutionId, string[]> = {
+const enabledFeaturesPerSolution: Record<SolutionViewWithFeatures, string[]> = {
   es: ['observabilityAIAssistant'],
   oblt: [],
   security: [],
   workplaceai: [],
   vectordb: [],
+  nightshift: [],
 };
 
 /**
@@ -76,6 +79,12 @@ export function withSpaceSolutionDisabledFeatures(
       'securitySolution',
       'workplaceai',
     ]).filter((featureId) => !enabledFeaturesPerSolution.oblt.includes(featureId));
+  } else if (spaceSolution === 'nightshift') {
+    // Nightshift is currently a clone of the Observability solution view.
+    disabledFeatureKeysFromSolution = getFeatureIdsForCategories(features, [
+      'securitySolution',
+      'workplaceai',
+    ]).filter((featureId) => !enabledFeaturesPerSolution.nightshift.includes(featureId));
   } else if (spaceSolution === 'security') {
     disabledFeatureKeysFromSolution = getFeatureIdsForCategories(features, [
       'observability',

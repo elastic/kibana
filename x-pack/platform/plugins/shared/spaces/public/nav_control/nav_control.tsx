@@ -16,6 +16,7 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import type { EventTracker } from '../analytics';
 import type { ConfigType } from '../config';
 import type { SpacesManager } from '../spaces_manager';
+import { NightshiftSidenavGlobalStyles } from './components/nightshift_sidenav_styles';
 
 const LazyNavControlPopover = lazy(() =>
   import('./nav_control_popover').then(({ NavControlPopover }) => ({
@@ -45,6 +46,7 @@ export function initSpacesNavControl(
 
     return (
       <QueryClientProvider client={queryClient}>
+        <NightshiftSidenavGlobalStyles />
         <Suspense
           fallback={
             <EuiSkeletonRectangle
@@ -66,6 +68,7 @@ export function initSpacesNavControl(
             allowSolutionVisibility={config.allowSolutionVisibility}
             eventTracker={eventTracker}
             areAnnouncementsEnabled={core.notifications.tours.isEnabled()}
+            uiSettings={core.uiSettings}
           />
         </Suspense>
       </QueryClientProvider>

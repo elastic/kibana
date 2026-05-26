@@ -185,5 +185,8 @@ function getIsProjectNav(solutionView?: string) {
 }
 
 function isKnownSolutionView(solution?: string): solution is SolutionId {
-  return Boolean(solution) && ['oblt', 'es', 'security'].includes(solution!);
+  // 'nightshift' is a non-serverless, experimental solution view that reuses the
+  // observability navigation tree, so it is not part of SolutionId but should
+  // still activate project-style navigation.
+  return Boolean(solution) && ['oblt', 'es', 'security', 'nightshift'].includes(solution!);
 }

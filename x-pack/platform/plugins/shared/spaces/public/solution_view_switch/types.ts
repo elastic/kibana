@@ -18,7 +18,10 @@ export interface SolutionViewSwitchCalloutProps {
   currentSolution: SupportedSolutionView;
 }
 
-export type SupportedSolutionView = Extract<SolutionView, 'es' | 'oblt' | 'security'>;
+export type SupportedSolutionView = Extract<
+  SolutionView,
+  'es' | 'oblt' | 'security' | 'nightshift'
+>;
 
 export interface SolutionViewSwitchModalProps {
   onClose: () => void;

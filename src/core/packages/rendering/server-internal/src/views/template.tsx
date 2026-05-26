@@ -14,6 +14,7 @@ import { i18n } from '@kbn/i18n';
 import type { RenderingMetadata } from '../types';
 import { Fonts } from './fonts';
 import { Logo } from './logo';
+import { NightshiftWaves } from './nightshift_waves';
 import { Styles } from './styles';
 
 interface Props {
@@ -93,6 +94,7 @@ export const Template: FunctionComponent<Props> = ({
           data: JSON.stringify({ hardenPrototypes }),
         })}
         {createElement('kbn-injected-metadata', { data: JSON.stringify(injectedMetadata) })}
+        <NightshiftWaves />
         <div
           className="kbnWelcomeView"
           id="kbn_loading_message"

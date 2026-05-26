@@ -88,6 +88,7 @@ import { getObservabilityAlertType } from './cases/attachments/alert';
 import {
   ALERTS_PATH,
   CASES_PATH,
+  NIGHTSHIFT_PATH,
   OBSERVABILITY_BASE_PATH,
   OVERVIEW_PATH,
   RULES_PATH,
@@ -219,6 +220,20 @@ export class Plugin
       path: ALERTS_PATH,
       visibleIn: [],
       keywords: ['alerts', 'rules'],
+    },
+    {
+      // Experimental Nightshift landing page (deep link id
+      // `observability-overview:nightshift`, app route
+      // `/app/observability/nightshift`). Referenced by the Nightshift
+      // navigation tree's home node and by `DEFAULT_ROUTES.nightshift`.
+      id: 'nightshift',
+      title: i18n.translate('xpack.observability.nightshiftLinkTitle', {
+        defaultMessage: 'Nightshift',
+      }),
+      order: 8002,
+      path: NIGHTSHIFT_PATH,
+      visibleIn: [],
+      keywords: ['nightshift'],
     },
   ];
 
@@ -543,11 +558,47 @@ export class Plugin
       pricing: coreStart.pricing,
     });
 
-    import('./navigation_tree').then(({ createDefinition }) => {
-      return pluginsStart.navigation.addSolutionNavigation(
-        createDefinition(coreStart, pluginsStart)
+    import('./navigation_tree').then(({ createDefinition, createNightshiftDefinition }) => {
+      pluginsStart.navigation.addSolutionNavigation(createDefinition(coreStart, pluginsStart));
+      // Register an experimental "Nightshift" solution view that currently
+      // reuses the Observability navigation tree.
+      pluginsStart.navigation.addSolutionNavigation(
+        createNightshiftDefinition(coreStart, pluginsStart)
       );
     });
+
+    // Register the Nightshift status dropdown in the right side of the
+    // chrome header. The control hides itself unless the active space's
+    // solution is `'nightshift'`, so it only appears in the Nightshift
+    // solution view. Uses `Number.MAX_SAFE_INTEGER` for `order` so it
+    // renders at the very right edge of the chrome (chrome controls are
+    // sorted ascending by order — higher = further right).
+    if (pluginsStart.spaces) {
+      const activeSpace$ = pluginsStart.spaces.getActiveSpace$();
+      coreStart.chrome.navControls.registerRight({
+        order: Number.MAX_SAFE_INTEGER,
+        mount: (element) => {
+          let cleanup: (() => void) | undefined;
+          Promise.all([
+            import('react'),
+            import('react-dom'),
+            import('./pages/nightshift/nightshift_status_control'),
+          ]).then(([React, ReactDOM, { NightshiftStatusControl }]) => {
+            // Use `createElement` because plugin.ts is .ts (no JSX support).
+            ReactDOM.render(
+              React.createElement(NightshiftStatusControl, { activeSpace$ }),
+              element
+            );
+            cleanup = () => {
+              ReactDOM.unmountComponentAtNode(element);
+            };
+          });
+          return () => {
+            cleanup?.();
+          };
+        },
+      });
+    }
 
     return {
       config,

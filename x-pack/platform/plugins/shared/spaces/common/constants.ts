@@ -38,6 +38,12 @@ export const ENTER_SPACE_PATH = '/spaces/enter';
 export const SOLUTION_VIEW_CLASSIC = 'classic' as const;
 
 /**
+ * The 'nightshift' solution view is an experimental, project-style solution view.
+ * It currently reuses the Observability solution navigation tree.
+ */
+export const SOLUTION_VIEW_NIGHTSHIFT = 'nightshift' as const;
+
+/**
  * The feature privileges constants are used to identify the granularity of the configured feature visibility
  */
 export const FEATURE_PRIVILEGES_ALL = 'all' as const;

@@ -11,6 +11,7 @@ import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { Space } from '../../common';
+import { getNightshiftIconDataUrl } from '../../common';
 
 const SolutionOptions: Record<
   NonNullable<Space['solution']>,
@@ -52,6 +53,15 @@ const SolutionOptions: Record<
       <FormattedMessage
         id="xpack.spaces.spaceSolutionBadge.observability"
         defaultMessage="Observability"
+      />
+    ),
+  },
+  nightshift: {
+    iconType: getNightshiftIconDataUrl({ size: 16 }),
+    label: (
+      <FormattedMessage
+        id="xpack.spaces.spaceSolutionBadge.nightshift"
+        defaultMessage="Nightshift"
       />
     ),
   },

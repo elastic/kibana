@@ -14,10 +14,11 @@ import {
 } from '@elastic/eui';
 import React, { lazy, Suspense, useCallback, useEffect, useState } from 'react';
 
-import type { ApplicationStart, Capabilities } from '@kbn/core/public';
+import type { ApplicationStart, Capabilities, IUiSettingsClient } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { useQueryClient } from '@kbn/react-query';
 
+import { SolutionModeSwitch } from './components/solution_mode_switch';
 import { SpacesMenu } from './components/spaces_menu';
 import { useSolutionViewSwitchAnnouncements } from './hooks/use_solution_view_switch_announcements';
 import { SPACES_QUERY_KEY, useSpaces } from './hooks/use_spaces';
@@ -43,6 +44,7 @@ export interface Props {
   allowSolutionVisibility: boolean;
   eventTracker: EventTracker;
   areAnnouncementsEnabled: boolean;
+  uiSettings?: IUiSettingsClient;
 }
 
 const popoutContentId = 'headerSpacesMenuContent';
@@ -57,6 +59,7 @@ const NavControlPopoverUI = ({
   allowSolutionVisibility,
   eventTracker,
   areAnnouncementsEnabled,
+  uiSettings,
 }: Props) => {
   const { euiTheme } = useEuiTheme();
   const queryClient = useQueryClient();
@@ -189,6 +192,14 @@ const NavControlPopoverUI = ({
         onClickManageSpaceBtn={toggleSpaceSelector}
         isLoading={isLoading}
       />
+      {allowSolutionVisibility && activeSpace && (
+        <SolutionModeSwitch
+          spacesManager={spacesManager}
+          activeSpace={activeSpace}
+          serverBasePath={serverBasePath}
+          uiSettings={uiSettings}
+        />
+      )}
     </EuiPopover>
   );
 };

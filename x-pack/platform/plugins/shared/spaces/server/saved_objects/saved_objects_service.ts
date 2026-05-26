@@ -43,14 +43,15 @@ export class SpacesSavedObjectsService {
           ],
           schemas: {
             create: SpacesSavedObjectSchemas['8.8.0'].extends({
-              solution: schema.maybe(
-                schema.oneOf([
-                  schema.literal('security'),
-                  schema.literal('oblt'),
-                  schema.literal('es'),
-                  schema.literal('classic'),
-                ])
-              ),
+            solution: schema.maybe(
+              schema.oneOf([
+                schema.literal('security'),
+                schema.literal('oblt'),
+                schema.literal('es'),
+                schema.literal('classic'),
+                schema.literal('nightshift'),
+              ])
+            ),
             }),
           },
         },

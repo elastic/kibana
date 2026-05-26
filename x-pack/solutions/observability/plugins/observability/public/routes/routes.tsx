@@ -14,6 +14,7 @@ import { AlertsPage } from '../pages/alerts/alerts';
 import { AlertDetails } from '../pages/alert_details/alert_details';
 import { CasesPage } from '../pages/cases/cases';
 import { LandingPage } from '../pages/landing/landing';
+import { NightshiftPage } from '../pages/nightshift/nightshift';
 import { OverviewPage } from '../pages/overview/overview';
 import { RulesPage } from '../pages/rules/rules';
 import { RuleDetailsPage } from '../pages/rule_details/rule_details';
@@ -28,6 +29,7 @@ import {
   EDIT_RULE_PATH,
   EXPLORATORY_VIEW_PATH,
   LANDING_PATH,
+  NIGHTSHIFT_PATH,
   OLD_SLO_DETAIL_PATH,
   OLD_SLO_EDIT_PATH,
   OLD_SLOS_OUTDATED_DEFINITIONS_PATH,
@@ -123,6 +125,13 @@ const routes: Record<RoutePath, RouteDefinition> = {
           <LandingPage />
         </HasDataContextProvider>
       );
+    },
+    params: {},
+    exact: true,
+  },
+  [NIGHTSHIFT_PATH]: {
+    handler: () => {
+      return <NightshiftPage />;
     },
     params: {},
     exact: true,

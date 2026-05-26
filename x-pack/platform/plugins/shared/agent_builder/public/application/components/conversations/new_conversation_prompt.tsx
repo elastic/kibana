@@ -15,6 +15,7 @@ import {
   conversationElementWidthStyles,
 } from './conversation.styles';
 import { useConversationContext } from '../../context/conversation/conversation_context';
+import { fadeInOnMount } from '../../utils/fade_in_styles';
 
 const titleStyles = css`
   font-weight: 400;
@@ -41,14 +42,14 @@ export const NewConversationPrompt: React.FC<{}> = () => {
       direction="column"
       justifyContent="center"
       gutterSize="l"
-      css={conversationElementWidthStyles}
+      css={[conversationElementWidthStyles, fadeInOnMount(60)]}
       data-test-subj="agentBuilderWelcomePage"
     >
       <EuiFlexItem grow={isEmbeddedContext ? true : false} css={centerFlexItemStyles}>
         <EuiTitle size="m" css={titleStyles}>
           <h2>
             {i18n.translate('xpack.agentBuilder.conversations.newConversationPrompt', {
-              defaultMessage: 'How can I help you?',
+              defaultMessage: 'Hello, how can I help you today?',
             })}
           </h2>
         </EuiTitle>
