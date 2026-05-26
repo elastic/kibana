@@ -52,11 +52,6 @@ interface Props {
   conversationAttachments?: VersionedAttachment[];
   attachmentRefs?: AttachmentVersionRef[];
   conversationId?: string;
-  /**
-   * True while this round is still streaming. Forwarded to `createRenderAttachmentRenderer`
-   * so `<render_attachment>` chips skeleton-render until the round completes — see the
-   * doc on `RenderAttachmentRendererProps.isStreaming` for why.
-   */
   isStreaming?: boolean;
 }
 
