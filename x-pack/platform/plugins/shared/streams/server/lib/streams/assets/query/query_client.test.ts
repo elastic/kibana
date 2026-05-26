@@ -141,11 +141,6 @@ const toEsqlSourceResponse = (docs: Array<Record<string, unknown>>) => ({
   values: docs.map((doc) => [doc]),
 });
 
-/** Wraps a document in the shape returned by storageClient.search (with _source). */
-const toSearchHit = (doc: Record<string, unknown>) => ({
-  _source: doc,
-});
-
 /** Renders the ES|QL string from a mocked `storageClient.esql` call. */
 const renderEsqlCallQuery = (call: {
   metadata?: string[];
