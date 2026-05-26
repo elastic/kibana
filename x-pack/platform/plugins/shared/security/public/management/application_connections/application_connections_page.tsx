@@ -5,15 +5,34 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
+
+import type { HttpStart } from '@kbn/core/public';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
 import { ApplicationConnections } from './application_connections_table/application_connections';
 import { ApplicationConnectionsProvider } from './context/application_connections_provider';
+import { ApplicationConnectionsServicesContext } from './context/application_connections_services_context';
+import { ApplicationConnectionsAPIClient } from './service/application_connections_api_client';
 
-export const ApplicationConnectionsPage = () => {
+export interface ApplicationConnectionsPageProps {
+  http: HttpStart;
+}
+
+export const ApplicationConnectionsPage = ({ http }: ApplicationConnectionsPageProps) => {
+  const queryClient = useMemo(() => new QueryClient(), []);
+  const services = useMemo(
+    () => ({ apiClient: new ApplicationConnectionsAPIClient(http) }),
+    [http]
+  );
+
   return (
-    <ApplicationConnectionsProvider>
-      <ApplicationConnections />
-    </ApplicationConnectionsProvider>
+    <QueryClientProvider client={queryClient}>
+      <ApplicationConnectionsServicesContext.Provider value={services}>
+        <ApplicationConnectionsProvider>
+          <ApplicationConnections />
+        </ApplicationConnectionsProvider>
+      </ApplicationConnectionsServicesContext.Provider>
+    </QueryClientProvider>
   );
 };

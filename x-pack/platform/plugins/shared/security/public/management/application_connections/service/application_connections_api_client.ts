@@ -13,7 +13,6 @@ export type {
   OAuthClientLogo,
   OAuthClientConnectionsSummary,
 } from '@kbn/agent-builder-common';
-export { OAuthClientType } from '@kbn/agent-builder-common';
 
 export interface OAuthConnection {
   id: string;

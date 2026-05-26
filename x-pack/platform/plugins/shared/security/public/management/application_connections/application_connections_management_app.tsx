@@ -6,20 +6,17 @@
  */
 
 import type { History } from 'history';
-import type { PropsWithChildren } from 'react';
-import React, { useMemo } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
 import type { CoreStart, StartServicesAccessor } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { RegisterManagementAppArgs } from '@kbn/management-plugin/public';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { AuthenticationServiceSetup } from '@kbn/security-plugin-types-public';
 import { Router } from '@kbn/shared-ux-router';
 
-import { labels } from './constants/i18n';
-import { ApplicationConnectionsServicesContext } from './context/application_connections_services_context';
-import { ApplicationConnectionsAPIClient } from './service/application_connections_api_client';
 import type { BreadcrumbsChangeHandler } from '../../components/breadcrumb';
 import {
   Breadcrumb,
@@ -37,10 +34,14 @@ interface CreateParams {
 export const applicationConnectionsManagementApp = Object.freeze({
   id: 'application_connections',
   create({ authc, getStartServices }: CreateParams) {
+    const title = i18n.translate('xpack.security.management.applicationConnectionsTitle', {
+      defaultMessage: 'Application connections',
+    });
+
     return {
       id: this.id,
       order: 25,
-      title: labels.page.title,
+      title,
       async mount({ element, setBreadcrumbs, history }) {
         const [[coreStart], { ApplicationConnectionsPage }] = await Promise.all([
           getStartServices(),
@@ -55,8 +56,8 @@ export const applicationConnectionsManagementApp = Object.freeze({
               history={history}
               onChange={createBreadcrumbsChangeHandler(coreStart.chrome, setBreadcrumbs)}
             >
-              <Breadcrumb text={labels.page.title} href="/">
-                <ApplicationConnectionsPage />
+              <Breadcrumb text={title} href="/">
+                <ApplicationConnectionsPage http={coreStart.http} />
               </Breadcrumb>
             </Providers>
           ),
@@ -78,34 +79,18 @@ export interface ProvidersProps {
   onChange?: BreadcrumbsChangeHandler;
 }
 
-export const Providers = ({
+export const Providers: FC<PropsWithChildren<ProvidersProps>> = ({
   services,
   authc,
   history,
   onChange,
   children,
-}: PropsWithChildren<ProvidersProps>) => {
-  const applicationConnectionsServices = useMemo(
-    () => ({ apiClient: new ApplicationConnectionsAPIClient(services.http) }),
-    [services.http]
-  );
-  const queryClient = useMemo(() => new QueryClient(), []);
-
-  return (
-    <KibanaContextProvider services={services}>
-      <AuthenticationProvider authc={authc}>
-        <QueryClientProvider client={queryClient}>
-          <Router history={history}>
-            <BreadcrumbsProvider onChange={onChange}>
-              <ApplicationConnectionsServicesContext.Provider
-                value={applicationConnectionsServices}
-              >
-                {children}
-              </ApplicationConnectionsServicesContext.Provider>
-            </BreadcrumbsProvider>
-          </Router>
-        </QueryClientProvider>
-      </AuthenticationProvider>
-    </KibanaContextProvider>
-  );
-};
+}) => (
+  <KibanaContextProvider services={services}>
+    <AuthenticationProvider authc={authc}>
+      <Router history={history}>
+        <BreadcrumbsProvider onChange={onChange}>{children}</BreadcrumbsProvider>
+      </Router>
+    </AuthenticationProvider>
+  </KibanaContextProvider>
+);

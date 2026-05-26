@@ -11,11 +11,10 @@ import React from 'react';
 
 import { coreMock } from '@kbn/core/public/mocks';
 
-import { ApplicationConnections } from './application_connections';
 import { mockAuthenticatedUser } from '../../../../common/model/authenticated_user.mock';
 import { securityMock } from '../../../mocks';
 import { Providers } from '../application_connections_management_app';
-import { ApplicationConnectionsProvider } from '../context/application_connections_provider';
+import { ApplicationConnectionsPage } from '../application_connections_page';
 
 jest.mock('../assets/illustration_empty_state.svg', () => 'illustration-empty-state-mock.svg', {
   virtual: true,
@@ -49,9 +48,7 @@ function renderPage(coreStart: CoreStartMock) {
   return render(
     coreStart.rendering.addContext(
       <Providers services={coreStart} authc={authc} history={history}>
-        <ApplicationConnectionsProvider>
-          <ApplicationConnections />
-        </ApplicationConnectionsProvider>
+        <ApplicationConnectionsPage http={coreStart.http} />
       </Providers>
     )
   );
