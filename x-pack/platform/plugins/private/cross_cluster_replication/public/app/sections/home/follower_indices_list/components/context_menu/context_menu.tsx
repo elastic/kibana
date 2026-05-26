@@ -14,6 +14,7 @@ import {
   EuiContextMenuItem,
   EuiPopover,
   EuiPopoverTitle,
+  htmlIdGenerator,
   type EuiButtonProps,
   type EuiPopoverProps,
 } from '@elastic/eui';
@@ -45,6 +46,8 @@ export class ContextMenu extends PureComponent<ContextMenuProps, ContextMenuStat
   state: ContextMenuState = {
     isPopoverOpen: false,
   };
+
+  popoverTitleId = htmlIdGenerator()();
 
   onButtonClick = () => {
     this.setState((prevState) => ({
@@ -100,6 +103,7 @@ export class ContextMenu extends PureComponent<ContextMenuProps, ContextMenuStat
 
     return (
       <EuiPopover
+        aria-labelledby={this.popoverTitleId}
         button={button}
         isOpen={this.state.isPopoverOpen}
         closePopover={this.closePopover}
@@ -107,7 +111,7 @@ export class ContextMenu extends PureComponent<ContextMenuProps, ContextMenuStat
         anchorPosition={anchorPosition}
         repositionOnScroll
       >
-        <EuiPopoverTitle paddingSize="s">
+        <EuiPopoverTitle paddingSize="s" id={this.popoverTitleId}>
           <FormattedMessage
             id="xpack.crossClusterReplication.followerIndex.contextMenu.title"
             defaultMessage="Follower {followerIndicesLength, plural, one {index} other {indices}} options"

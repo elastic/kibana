@@ -12,7 +12,7 @@ const mockConverter = jest.fn((name) => `By ${name}`);
 jest.mock('../services', () => ({
   getFormatService: jest.fn(() => ({
     deserialize: jest.fn(() => ({
-      convert: mockConverter,
+      convertToText: mockConverter,
     })),
   })),
 }));
