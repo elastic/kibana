@@ -22,7 +22,6 @@ export const ErrorsTabContent = ({
   errorStates,
   loading,
   upStates,
-  monitorIds,
   errorGroups,
   errorGroupsLoading,
   errorStats,
@@ -31,7 +30,6 @@ export const ErrorsTabContent = ({
   errorStates: PingState[];
   upStates: PingState[];
   loading: boolean;
-  monitorIds: string[];
   errorGroups: ErrorGroup[];
   errorGroupsLoading: boolean;
   errorStats: ErrorStats | null;

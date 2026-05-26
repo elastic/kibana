@@ -70,7 +70,19 @@ export function useAllMonitorErrors() {
 
   const must = query ? [getQueryFilters(query)] : [];
 
-  const { data, loading } = useReduxEsSearch(
+  // Include all filter dimensions in the cache key. `useReduxEsSearch` keys
+  // its result cache by `name`, so without this every filter change would
+  // briefly return the previous filter's data until the new request settles.
+  const filterKey = JSON.stringify({
+    query,
+    monitorTypes,
+    locations,
+    tags,
+    projects,
+    statusCodes,
+  });
+
+  const { data, loading, error } = useReduxEsSearch(
     {
       index: SYNTHETICS_INDEX_PATTERN,
       size: 0,
@@ -126,7 +138,7 @@ export function useAllMonitorErrors() {
       statusCodes,
     ],
     {
-      name: `getAllMonitorErrors/${dateRangeStart}/${dateRangeEnd}`,
+      name: `getAllMonitorErrors/${dateRangeStart}/${dateRangeEnd}/${filterKey}`,
       isRequestReady: true,
     }
   );
@@ -158,15 +170,13 @@ export function useAllMonitorErrors() {
       (a, b) => Number(new Date(a.state.started_at)) - Number(new Date(b.state.started_at))
     );
 
-    const ids = new Set(errorStates.map((state) => state.monitor.id));
-
     return {
       errorStates,
       upStates: upStatesSortedAsc,
       loading,
       data,
+      error,
       hasActiveError,
-      monitorIds: Array.from(ids),
     };
-  }, [data, loading]);
+  }, [data, loading, error]);
 }

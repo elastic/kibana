@@ -29,7 +29,7 @@ export function useErrorGroups() {
     statusCodes,
   } = urlParams;
 
-  const { data, loading } = useFetcher(async () => {
+  const { data, loading, error } = useFetcher(async () => {
     const params = buildErrorFilterParams(urlParams);
     return apiService.get<ErrorGroupsResponse>(SYNTHETICS_API_URLS.ERROR_GROUPS, params);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -48,5 +48,6 @@ export function useErrorGroups() {
   return {
     groups: data?.groups ?? [],
     loading: Boolean(loading),
+    error,
   };
 }

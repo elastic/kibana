@@ -27,7 +27,7 @@ export function useErrorStats() {
     statusCodes,
   } = urlParams;
 
-  const { data, loading } = useFetcher(async () => {
+  const { data, loading, error } = useFetcher(async () => {
     const params = buildErrorFilterParams(urlParams);
     return apiService.get<ErrorStats>(SYNTHETICS_API_URLS.ERROR_STATS, params);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -46,5 +46,6 @@ export function useErrorStats() {
   return {
     stats: data ?? null,
     loading: Boolean(loading),
+    error,
   };
 }
