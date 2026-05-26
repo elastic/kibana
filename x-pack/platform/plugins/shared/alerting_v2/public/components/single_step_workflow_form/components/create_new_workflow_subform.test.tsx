@@ -15,7 +15,7 @@ import { CreateNewWorkflowSubform } from './create_new_workflow_subform';
 
 jest.mock('@kbn/react-query', () => ({
   ...jest.requireActual('@kbn/react-query'),
-  useQueryClient: () => ({ invalidateQueries: jest.fn() }),
+  useQueryClient: () => ({ invalidateQueries: jest.fn(), setQueryData: jest.fn() }),
 }));
 
 let capturedFlyoutProps: Record<string, unknown> = {};
