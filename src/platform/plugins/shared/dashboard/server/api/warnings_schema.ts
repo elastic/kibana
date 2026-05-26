@@ -20,7 +20,7 @@ const generalWarningSchema = schema.object(
   {
     meta: {
       id: 'kbn-dashboard-schema-warning',
-      title: 'Wwarning',
+      title: 'Warning',
       description:
         'A warning about the schema that does not currently have any action associated with it.',
     },

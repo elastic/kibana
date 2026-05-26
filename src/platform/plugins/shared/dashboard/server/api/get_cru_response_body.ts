@@ -23,7 +23,7 @@ export function getDashboardCRUResponseBody(
     | SavedObject<DashboardSavedObjectAttributes>
     | SavedObjectsUpdateResponse<DashboardSavedObjectAttributes>,
   operation: Operation,
-  strictStateSchema: ReturnType<typeof getDashboardStateSchema>,
+  strictValidationSchema: ReturnType<typeof getDashboardStateSchema>,
   isDashboardAppRequest: boolean = false,
   serverTiming?: RequestTiming
 ) {
@@ -37,7 +37,7 @@ export function getDashboardCRUResponseBody(
       savedObject.attributes,
       savedObject.references,
       isDashboardAppRequest,
-      strictStateSchema
+      strictValidationSchema
     ));
     warnings.push(...dashboardStateWarnings);
     if (!isDashboardAppRequest && operation === 'read') {
