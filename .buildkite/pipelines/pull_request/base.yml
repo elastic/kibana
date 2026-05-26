@@ -163,6 +163,8 @@ steps:
     timeout_in_minutes: 60
     env:
       CHECK_GATE: 'true'
+      RESTORE_ARCHIVE: 'true'
+      UPLOAD_ARCHIVE: 'true'
     retry:
       automatic:
         - exit_status: '-1'

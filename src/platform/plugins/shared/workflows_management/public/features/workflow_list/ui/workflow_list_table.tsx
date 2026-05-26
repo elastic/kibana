@@ -14,7 +14,6 @@ import {
   EuiBasicTable,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiLink,
   EuiPopover,
   EuiPopoverTitle,
@@ -29,11 +28,12 @@ import { Link } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowListItemDto } from '@kbn/workflows';
+import { WorkflowTriggersAndSteps } from './workflow_triggers_and_steps';
 import { getRunTooltipContent, StatusBadge, WorkflowStatus } from '../../../shared/ui';
 import { NextExecutionTime } from '../../../shared/ui/next_execution_time';
-import { WorkflowsTriggersList } from '../../../widgets/worflows_triggers_list/worflows_triggers_list';
-import { WorkflowsStepTypesList } from '../../../widgets/workflows_step_types_list/workflows_step_types_list';
 import { WORKFLOWS_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
+
+const MAX_VISIBLE_TAGS = 2;
 
 export interface WorkflowListTableProps {
   items: WorkflowListItemDto[];
@@ -136,7 +136,6 @@ export const WorkflowListTable = ({
                       </EuiText>
                     )}
                   </EuiFlexItem>
-                  <WorkflowTagsBadge tags={item.definition?.tags} />
                 </EuiFlexGroup>
               </EuiFlexItem>
               <EuiFlexItem>
@@ -166,31 +165,37 @@ export const WorkflowListTable = ({
         ),
       },
       {
-        field: 'triggers',
-        name: i18n.translate('workflows.workflowList.column.trigger', {
-          defaultMessage: 'Trigger',
+        field: 'tags',
+        name: i18n.translate('workflows.workflowList.column.tags', {
+          defaultMessage: 'Tags',
         }),
-        width: '12%',
-        render: (value: unknown, item: WorkflowListItemDto) => {
-          if (!item.history || item.history.length === 0) {
-            return <WorkflowsTriggersList triggers={item.definition?.triggers ?? []} />;
-          }
-          return (
-            <NextExecutionTime triggers={item.definition?.triggers ?? []} history={item.history}>
-              <WorkflowsTriggersList triggers={item.definition?.triggers ?? []} />
-            </NextExecutionTime>
-          );
-        },
+        width: '18%',
+        render: (value: unknown, item: WorkflowListItemDto) => (
+          <WorkflowTagsCell tags={item.definition?.tags} />
+        ),
       },
       {
-        field: 'steps',
-        name: i18n.translate('workflows.workflowList.column.steps', {
-          defaultMessage: 'Steps',
+        field: 'triggers',
+        name: i18n.translate('workflows.workflowList.column.triggersAndSteps', {
+          defaultMessage: 'Triggers and Steps',
         }),
-        width: '12%',
-        render: (value: unknown, item: WorkflowListItemDto) => (
-          <WorkflowsStepTypesList steps={item.definition?.steps ?? []} />
-        ),
+        width: '24%',
+        render: (value: unknown, item: WorkflowListItemDto) => {
+          const triggers = item.definition?.triggers ?? [];
+          const steps = item.definition?.steps ?? [];
+          const history = item.history ?? [];
+
+          const cell = <WorkflowTriggersAndSteps triggers={triggers} steps={steps} />;
+
+          if (history.length > 0 && triggers.length > 0) {
+            return (
+              <NextExecutionTime triggers={triggers} history={history}>
+                {cell}
+              </NextExecutionTime>
+            );
+          }
+          return cell;
+        },
       },
       {
         name: i18n.translate('workflows.workflowList.column.lastRun', {
@@ -392,60 +397,87 @@ export const WorkflowListTable = ({
   );
 };
 
-const WorkflowTagsBadge = ({ tags }: { tags: readonly string[] | undefined }) => {
+const tagsRowStyle = css`
+  flex-wrap: nowrap;
+  min-width: 0;
+`;
+
+const visibleTagStyle = css`
+  min-width: 0;
+
+  .euiBadge {
+    max-width: 100%;
+  }
+`;
+
+const overflowPopoverStyle = css`
+  max-height: 200px;
+  max-width: 320px;
+  overflow: auto;
+`;
+
+const WorkflowTagsCell = ({ tags }: { tags: readonly string[] | undefined }) => {
   const [isOpen, setIsOpen] = useState(false);
   const toggle = useCallback(() => setIsOpen((prev) => !prev), []);
   const close = useCallback(() => setIsOpen(false), []);
 
   if (!tags || tags.length === 0) return null;
 
+  const visible = tags.slice(0, MAX_VISIBLE_TAGS);
+  const hidden = tags.slice(MAX_VISIBLE_TAGS);
+
   return (
-    <EuiFlexItem grow={false}>
-      <EuiPopover
-        ownFocus
-        isOpen={isOpen}
-        closePopover={close}
-        aria-label={i18n.translate('workflows.workflowList.tags.ariaLabel', {
-          defaultMessage: 'View tags',
-        })}
-        button={
-          <EuiBadge
-            color="hollow"
-            onClick={toggle}
-            onClickAriaLabel={i18n.translate('workflows.workflowList.tags.ariaLabel', {
-              defaultMessage: 'View tags',
-            })}
-            data-test-subj="workflowTagsBadge"
-          >
-            <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="tag" size="s" aria-hidden={true} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>{tags.length}</EuiFlexItem>
-            </EuiFlexGroup>
+    <EuiFlexGroup
+      alignItems="center"
+      gutterSize="xs"
+      responsive={false}
+      css={tagsRowStyle}
+      data-test-subj="workflowTags"
+    >
+      {visible.map((tag) => (
+        <EuiFlexItem key={tag} grow={false} css={visibleTagStyle}>
+          <EuiBadge color="hollow" title={tag}>
+            {tag}
           </EuiBadge>
-        }
-      >
-        <EuiPopoverTitle>
-          {i18n.translate('workflows.workflowList.tags.popoverTitle', {
-            defaultMessage: 'Tags',
-          })}
-        </EuiPopoverTitle>
-        <EuiBadgeGroup
-          gutterSize="xs"
-          css={css`
-            max-height: 200px;
-            max-width: 400px;
-            overflow: auto;
-          `}
-        >
-          {tags.map((tag) => (
-            <EuiBadge key={tag} color="hollow">
-              {tag}
-            </EuiBadge>
-          ))}
-        </EuiBadgeGroup>
-      </EuiPopover>
-    </EuiFlexItem>
+        </EuiFlexItem>
+      ))}
+      {hidden.length > 0 && (
+        <EuiFlexItem grow={false}>
+          <EuiPopover
+            ownFocus
+            isOpen={isOpen}
+            closePopover={close}
+            aria-label={i18n.translate('workflows.workflowList.tags.popoverTitle', {
+              defaultMessage: 'Tags',
+            })}
+            button={
+              <EuiBadge
+                color="hollow"
+                onClick={toggle}
+                onClickAriaLabel={i18n.translate('workflows.workflowList.tags.moreAriaLabel', {
+                  defaultMessage: 'View more tags',
+                })}
+                data-test-subj="workflowTagsOverflowBadge"
+              >
+                {`+${hidden.length}`}
+              </EuiBadge>
+            }
+          >
+            <EuiPopoverTitle>
+              {i18n.translate('workflows.workflowList.tags.popoverTitle', {
+                defaultMessage: 'Tags',
+              })}
+            </EuiPopoverTitle>
+            <EuiBadgeGroup gutterSize="xs" css={overflowPopoverStyle}>
+              {hidden.map((tag) => (
+                <EuiBadge key={tag} color="hollow">
+                  {tag}
+                </EuiBadge>
+              ))}
+            </EuiBadgeGroup>
+          </EuiPopover>
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
   );
 };

@@ -28,6 +28,7 @@ import {
   WORKFLOWS_INDEX,
   WORKFLOWS_STEP_EXECUTIONS_INDEX,
 } from '../../common';
+import { buildTimeRangeFilter } from '../api/lib/build_time_range_filter';
 import { isIndexNotFoundError } from '../api/lib/es_error_helpers';
 import { getChildWorkflowExecutions } from '../api/lib/get_child_workflow_executions';
 import { getWorkflowExecution } from '../api/lib/get_workflow_execution';
@@ -90,7 +91,7 @@ export class WorkflowExecutionQueryService {
     spaceId: string
   ): Promise<WorkflowExecutionListDto> {
     const must: estypes.QueryDslQueryContainer[] = [
-      { term: { workflowId: params.workflowId } },
+      ...(params.workflowId ? [{ term: { workflowId: params.workflowId } }] : []),
       {
         bool: {
           should: [{ term: { spaceId } }, { bool: { must_not: { exists: { field: 'spaceId' } } } }],
@@ -123,13 +124,38 @@ export class WorkflowExecutionQueryService {
       must.push({ terms: { executedBy: params.executedBy } });
     }
 
+    if (params.concurrencyGroupKey !== undefined) {
+      must.push({ term: { concurrencyGroupKey: params.concurrencyGroupKey } });
+    }
+
     if (params.omitStepRuns) {
       must.push({ bool: { must_not: { exists: { field: 'stepId' } } } });
+    }
+
+    const startedAtRange = buildTimeRangeFilter(
+      'startedAt',
+      params.startedAfter,
+      params.startedBefore
+    );
+    if (startedAtRange) {
+      must.push(startedAtRange);
+    }
+
+    const finishedAtRange = buildTimeRangeFilter(
+      'finishedAt',
+      params.finishedAfter,
+      params.finishedBefore
+    );
+    if (finishedAtRange) {
+      must.push(finishedAtRange);
     }
 
     const page = params.page ?? 1;
     const size = params.size ?? DEFAULT_PAGE_SIZE;
     const from = (page - 1) * size;
+    const sort = params.sortField
+      ? [{ [params.sortField]: { order: params.sortOrder ?? 'desc' } }]
+      : undefined;
 
     return searchWorkflowExecutions({
       esClient: this.deps.esClient,
@@ -139,6 +165,8 @@ export class WorkflowExecutionQueryService {
       size,
       from,
       page,
+      sort,
+      collapse: params.collapse ? { field: params.collapse } : undefined,
     });
   }
 
@@ -207,6 +235,8 @@ export class WorkflowExecutionQueryService {
       sourceExcludes: sourceExcludes.length > 0 ? sourceExcludes : undefined,
       page: params.page,
       size: params.size,
+      startedAfter: params.startedAfter,
+      startedBefore: params.startedBefore,
     });
   }
 

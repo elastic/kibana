@@ -7,7 +7,7 @@
 
 import React, { useEffect } from 'react';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import type {
   HasEditCapabilities,
   PublishesBlockingError,
@@ -24,7 +24,7 @@ import {
   type StateComparators,
   type WithAllKeys,
 } from '@kbn/presentation-publishing';
-import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
+import { initializeStateApi } from '@kbn/presentation-publishing';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import { BehaviorSubject, combineLatest, map, merge } from 'rxjs';
@@ -107,7 +107,7 @@ function buildQueryFromKuery(kuery: string | undefined): Query | undefined {
 }
 
 export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
-  const factory: EmbeddableFactory<ServiceMapEmbeddableState, ServiceMapEmbeddableApi> = {
+  const factory: EmbeddablePublicDefinition<ServiceMapEmbeddableState, ServiceMapEmbeddableApi> = {
     type: APM_SERVICE_MAP_EMBEDDABLE,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const { coreStart } = deps;
@@ -136,18 +136,14 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
       );
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
 
-      function serializeState(): ServiceMapEmbeddableState {
-        return {
+      const stateApi = initializeStateApi<ServiceMapEmbeddableState>({
+        parentApi,
+        uuid,
+        serializeState: () => ({
           ...titleManager.getLatestState(),
           ...timeRangeManager.getLatestState(),
           ...customStateManager.getLatestState(),
-        };
-      }
-
-      const unsavedChangesApi = initializeUnsavedChanges({
-        parentApi,
-        uuid,
-        serializeState,
+        }),
         anyStateChange$: merge(
           titleManager.anyStateChange$,
           timeRangeManager.anyStateChange$,
@@ -158,22 +154,21 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
           ...timeRangeComparators,
           ...customStateComparators,
         }),
-        onReset: (lastSaved) => {
-          titleManager.reinitializeState(lastSaved);
+        applySerializedState: (nextState) => {
+          titleManager.reinitializeState(nextState);
           timeRangeManager.reinitializeState(
-            lastSaved?.time_range
-              ? { time_range: lastSaved.time_range }
+            nextState.time_range
+              ? { time_range: nextState.time_range }
               : { time_range: DEFAULT_TIME_RANGE }
           );
-          customStateManager.reinitializeState(lastSaved);
+          customStateManager.reinitializeState(nextState);
         },
       });
 
       const api = finalizeApi({
         ...titleManager.api,
         ...timeRangeManager.api,
-        ...unsavedChangesApi,
-        serializeState,
+        ...stateApi,
         blockingError$,
         filters$,
         query$,
@@ -196,7 +191,7 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
                     ariaLabelledBy={ariaLabelledBy}
                     deps={deps}
                     timeRange={timeRangeManager.api.timeRange$.getValue()}
-                    initialState={serializeState()}
+                    initialState={stateApi.serializeState()}
                     onCancel={closeFlyout}
                     onSave={(newState: ServiceMapEmbeddableState) => {
                       if (newState.environment !== undefined) {
