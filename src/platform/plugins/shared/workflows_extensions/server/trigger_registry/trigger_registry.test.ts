@@ -21,6 +21,8 @@ const createValidDefinition = (
   overrides: Partial<ServerTriggerDefinition> = {}
 ): ServerTriggerDefinition => ({
   id: 'cases.updated',
+  title: 'Case updated',
+  description: 'Fired when a case is updated.',
   eventSchema: validEventSchema,
   ...overrides,
 });
