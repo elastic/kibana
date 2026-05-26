@@ -36,8 +36,6 @@ jest.mock('../use_featured_items', () => {
   };
 });
 
-
-
 const ContextWrapper = ({ children }: { children: React.ReactNode }) => (
   <EuiThemeProvider>
     <IntlProvider locale="en">{children}</IntlProvider>
