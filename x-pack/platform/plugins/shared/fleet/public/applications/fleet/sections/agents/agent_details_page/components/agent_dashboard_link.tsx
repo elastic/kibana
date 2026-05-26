@@ -96,8 +96,11 @@ export const AgentDashboardLink: React.FunctionComponent<{
   const { isInstalled, link, isLoading } = useAgentDashboardLink(agent, packageName);
   const { getHref } = useLink();
 
+  const monitoringEnabled = agentPolicy?.monitoring_enabled ?? [];
   const isLogAndMetricsEnabled =
-    (agentPolicy?.monitoring_enabled?.length ?? 0) > 0 || agent.type === 'OPAMP';
+    monitoringEnabled.includes('logs') ||
+    monitoringEnabled.includes('metrics') ||
+    agent.type === 'OPAMP';
 
   const buttonArgs =
     !isInstalled || isLoading || !isLogAndMetricsEnabled ? { disabled: true } : { href: link };

@@ -149,6 +149,73 @@ describe('AgentDashboardLink', () => {
     expect(link?.getAttribute('href')).toBe('/mock/app/fleet/policies/policy123/settings');
   });
 
+  it('should link to the agent policy settings tab if only traces are enabled for that policy', async () => {
+    mockedUseGetPackageInfoByKeyQuery.mockReturnValue({
+      isLoading: false,
+      data: {
+        item: {
+          status: 'installed',
+        },
+      },
+    } as ReturnType<typeof useGetPackageInfoByKeyQuery>);
+    const testRenderer = createFleetTestRendererMock();
+
+    const result = testRenderer.render(
+      <AgentDashboardLink
+        agent={
+          {
+            id: 'agent-id-123',
+          } as unknown as Agent
+        }
+        agentPolicy={
+          {
+            id: 'policy123',
+            monitoring_enabled: ['traces'],
+          } as unknown as AgentPolicy
+        }
+      />
+    );
+
+    const link = result.queryByRole('link');
+    expect(link).not.toBeNull();
+    expect(link?.getAttribute('href')).toBe('/mock/app/fleet/policies/policy123/settings');
+  });
+
+  it('should enable the View more agent metrics link if only logs are enabled (no metrics)', async () => {
+    mockedUseGetPackageInfoByKeyQuery.mockReturnValue({
+      isLoading: false,
+      data: {
+        item: {
+          status: 'installed',
+          installationInfo: {
+            install_status: 'installed',
+            installed_kibana_space_id: 'default',
+          },
+        },
+      },
+    } as ReturnType<typeof useGetPackageInfoByKeyQuery>);
+    const testRenderer = createFleetTestRendererMock();
+
+    const result = testRenderer.render(
+      <AgentDashboardLink
+        agent={
+          {
+            id: 'agent-id-123',
+          } as unknown as Agent
+        }
+        agentPolicy={
+          {
+            id: 'policy123',
+            monitoring_enabled: ['logs'],
+          } as unknown as AgentPolicy
+        }
+      />
+    );
+
+    expect(result.queryByRole('link')).not.toBeNull();
+    expect(result.getByRole('link').hasAttribute('href')).toBeTruthy();
+  });
+
   it('it should disable the button if the agent policy is managed', async () => {
     mockedUseGetPackageInfoByKeyQuery.mockReturnValue({
       isLoading: false,
