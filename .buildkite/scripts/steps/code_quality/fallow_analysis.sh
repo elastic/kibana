@@ -73,30 +73,16 @@ for owner in "${FALLOW_OWNERS[@]}"; do
   echo ""
 done
 
-echo "--- Build annotation"
-set +e
-DEAD_CODE_SUMMARY=$(npx "fallow@${FALLOW_VERSION}" dead-code \
-  --group-by owner \
-  --production \
-  --summary \
-  --quiet \
-  2>/dev/null)
-DUPES_SUMMARY=$(npx "fallow@${FALLOW_VERSION}" dupes \
-  --group-by owner \
-  --summary \
-  --quiet \
-  2>/dev/null)
-set -e
+echo "--- Post Buildkite annotation"
 
-ANNOTATION=""
+ANNOTATION="**Code Quality** (see job log for details)\n\n"
 for owner in "${FALLOW_OWNERS[@]}"; do
+  dead_section=$(extract_owner_section "$DEAD_CODE_OUTPUT" "$owner")
+  dupes_section=$(extract_owner_section "$DUPES_OUTPUT" "$owner")
   team_short="${owner#@elastic/}"
-  dead_count=$(extract_count "$DEAD_CODE_SUMMARY" "$owner")
-  dupes_count=$(extract_count "$DUPES_SUMMARY" "$owner")
-  dead_label="${dead_count:-no dead code}"
-  dupes_label="${dupes_count:-no duplication}"
-  ANNOTATION+="${team_short}: ${dead_label} · ${dupes_label}\n"
+  dead_label=$([ -n "$dead_section" ] && echo "has issues" || echo "clean")
+  dupes_label=$([ -n "$dupes_section" ] && echo "has duplication" || echo "clean")
+  ANNOTATION+="${team_short}: dead-code ${dead_label} · duplication ${dupes_label}\n"
 done
 
-printf "**Code Quality**\n\n%b" "$ANNOTATION" \
-  | buildkite-agent annotate --style info --context fallow-report
+buildkite-agent annotate --style info --context fallow-report "$(printf "%b" "$ANNOTATION")"
