@@ -33,7 +33,11 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { getColorsFromMapping } from '@kbn/coloring';
 import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
 import { getKbnPalettes, useKbnPalettes, KbnPalette } from '@kbn/palettes';
-import { getVisualizationDatasourceDefaultsForVisualizationState } from '@kbn/lens-common';
+import {
+  applyDatasourceDefaultsToDatasourceState,
+  getVisualizationDatasourceDefaults,
+  getVisualizationDatasourceDefaultsForVisualizationState,
+} from '@kbn/lens-common';
 
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import type {
@@ -147,7 +151,13 @@ import { AnnotationsPanel } from './xy_config_panel/annotations_config_panel/ann
 import { ReferenceLinePanel } from './xy_config_panel/reference_line_config_panel/reference_line_panel';
 import { convertToRuntimeState } from './runtime_state';
 import { FlyoutToolbar } from '../../shared_components/flyout_toolbar';
-import { XyStyleSettings, XyLegendSettings, updateLayer } from './toolbar';
+import { XyStyleSettings, XyLegendSettings } from './toolbar';
+import {
+  selectDatasourceStates,
+  updateDatasourceState,
+  useLensDispatch,
+  useLensSelector,
+} from '../../state_management';
 
 const XY_ID = 'lnsXY';
 
@@ -277,33 +287,7 @@ export const getXyVisualization = ({
   getDescription,
 
   switchVisualizationType(seriesType: string, state: XYVisualizationState, layerId?: string) {
-    const dataLayer = layerId
-      ? state.layers.find((l) => l.layerId === layerId)
-      : state.layers.at(0);
-    if (dataLayer && !isDataLayer(dataLayer)) {
-      throw new Error('Cannot switch series type for non-data layer');
-    }
-    if (!dataLayer) {
-      return state;
-    }
-    const currentStackingType = stackingTypes.find(({ subtypes }) =>
-      subtypes.includes(dataLayer.seriesType)
-    );
-    const chosenTypeIndex = defaultSeriesTypesByIndex.indexOf(seriesType);
-
-    const compatibleSeriesType: SeriesType = (currentStackingType?.subtypes[chosenTypeIndex] ||
-      seriesType) as SeriesType;
-
-    const switchLayer = (layer: XYLayerConfig): XYLayerConfig =>
-      applySeriesDefaultsIfNeeded(layer, compatibleSeriesType);
-
-    return {
-      ...state,
-      preferredSeriesType: compatibleSeriesType,
-      layers: layerId
-        ? state.layers.map((layer) => (layer.layerId === layerId ? switchLayer(layer) : layer))
-        : state.layers.map(switchLayer),
-    };
+    return switchXYVisualizationType(state, seriesType, layerId);
   },
 
   getSuggestions,
@@ -804,21 +788,17 @@ export const getXyVisualization = ({
   isSubtypeSupported(subtype) {
     return visualizationSubtypes.some(({ id }) => id === subtype);
   },
-  getSubtypeSwitch({ state, setState, layerId }) {
-    const index = state.layers.findIndex((l) => l.layerId === layerId);
-    const layer = state.layers[index];
+  getSubtypeSwitch({ state, setState, layerId, frame }) {
+    const layer = state.layers.find((candidate): candidate is XYDataLayerConfig => {
+      return candidate.layerId === layerId && isDataLayer(candidate);
+    });
 
-    if (!layer || !isDataLayer(layer) || layer.seriesType === 'line') {
+    if (!layer || layer.seriesType === 'line') {
       return null;
     }
 
     return () => (
-      <SubtypeSwitch
-        layer={layer}
-        setLayerState={(newLayer: XYDataLayerConfig) =>
-          setState(updateLayer(state, newLayer, index))
-        }
-      />
+      <SubtypeSwitch state={state} frame={frame} layerId={layerId} setState={setState} />
     );
   },
 
@@ -1314,6 +1294,49 @@ function applySeriesDefaultsIfNeeded(
   return updated;
 }
 
+export function switchXYVisualizationType(
+  state: XYVisualizationState,
+  seriesType: string,
+  layerId?: string
+): XYVisualizationState {
+  const dataLayer = layerId ? state.layers.find((l) => l.layerId === layerId) : state.layers.at(0);
+
+  if (dataLayer && !isDataLayer(dataLayer)) {
+    throw new Error('Cannot switch series type for non-data layer');
+  }
+
+  if (!dataLayer) {
+    return state;
+  }
+
+  const currentStackingType = stackingTypes.find(({ subtypes }) =>
+    subtypes.includes(dataLayer.seriesType)
+  );
+  const chosenTypeIndex = defaultSeriesTypesByIndex.indexOf(seriesType);
+  const compatibleSeriesType: SeriesType = (currentStackingType?.subtypes[chosenTypeIndex] ||
+    seriesType) as SeriesType;
+  const switchLayer = (layer: XYLayerConfig): XYLayerConfig =>
+    applySeriesDefaultsIfNeeded(layer, compatibleSeriesType);
+
+  return {
+    ...state,
+    preferredSeriesType: compatibleSeriesType,
+    layers: layerId
+      ? state.layers.map((layer) => (layer.layerId === layerId ? switchLayer(layer) : layer))
+      : state.layers.map(switchLayer),
+  };
+}
+
+export const applyXYSeriesTypeDatasourceDefaults = <T,>(
+  datasourceState: T,
+  seriesType: SeriesType
+) =>
+  applyDatasourceDefaultsToDatasourceState(
+    datasourceState,
+    getVisualizationDatasourceDefaults(XY_ID, seriesType),
+    { overwriteExisting: true }
+  );
+
 /**
  * Resolves the default palette when switching between series types.
  * Uses direction-specific matching so that user-chosen palettes are preserved:
@@ -1558,13 +1581,26 @@ export const stackingTypes = [
 ];
 
 const SubtypeSwitch = ({
-  layer,
-  setLayerState,
+  state,
+  frame,
+  layerId,
+  setState,
 }: {
-  layer: XYDataLayerConfig;
-  setLayerState: (l: XYDataLayerConfig) => void;
+  state: XYVisualizationState;
+  frame: FramePublicAPI;
+  layerId: string;
+  setState: (newState: XYVisualizationState) => void;
 }): JSX.Element | null => {
+  const dispatch = useLensDispatch();
+  const datasourceStates = useLensSelector(selectDatasourceStates);
   const [flyoutOpen, setFlyoutOpen] = useState(false);
+  const layer = state.layers.find((candidate): candidate is XYDataLayerConfig => {
+    return candidate.layerId === layerId && isDataLayer(candidate);
+  });
+
+  if (!layer) {
+    return null;
+  }
 
   const stackingType = stackingTypes.find(({ subtypes }) => subtypes.includes(layer.seriesType));
   if (!stackingType) {
@@ -1613,10 +1649,29 @@ const SubtypeSwitch = ({
             if (!chosenType) {
               return;
             }
-            setLayerState({
-              ...layer,
-              seriesType: chosenType.value as SeriesType,
-            });
+            const nextSeriesType = chosenType.value as SeriesType;
+            setState(switchXYVisualizationType(state, nextSeriesType, layerId));
+
+            const datasourceId = frame.datasourceLayers[layerId]?.datasourceId;
+            const currentDatasourceState = datasourceId
+              ? datasourceStates[datasourceId]?.state
+              : undefined;
+
+            if (datasourceId && currentDatasourceState !== undefined) {
+              const nextDatasourceState = applyXYSeriesTypeDatasourceDefaults(
+                currentDatasourceState,
+                nextSeriesType
+              );
+
+              if (nextDatasourceState !== currentDatasourceState) {
+                dispatch(
+                  updateDatasourceState({
+                    datasourceId,
+                    newDatasourceState: nextDatasourceState,
+                  })
+                );
+              }
+            }
           }}
         >
           {(list) => list}

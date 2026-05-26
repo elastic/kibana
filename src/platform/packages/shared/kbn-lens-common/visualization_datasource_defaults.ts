@@ -16,22 +16,12 @@ import type { GenericIndexPatternColumn } from './datasources/types';
 import { LENS_DATATABLE_ID } from './visualizations/datatable/constants';
 import { LENS_HEATMAP_ID } from './visualizations/heatmap/constants';
 import { LENS_METRIC_ID } from './visualizations/metric/constants';
+import type { LensPartitionVisualizationState } from './visualizations/partition/types';
 import { isPartitionChartTypeWithEmptyRowsDefault } from './visualizations/partition/utils';
+import type { XYVisualizationState } from './visualizations/xy/types';
 import { isBarSeriesType } from './visualizations/xy/utils';
 
-const XY_VISUALIZATION_ID = 'lnsXY';
-const PARTITION_VISUALIZATION_ID = 'lnsPie';
-const TAGCLOUD_VISUALIZATION_ID = 'lnsTagcloud';
-
-interface StateWithPreferredSeriesType {
-  preferredSeriesType?: unknown;
-}
-
-interface StateWithShape {
-  shape?: unknown;
-}
-
-interface FormBasedLayerStateLike {
+interface FormBasedStateLike {
   layers: Record<
     string,
     {
@@ -40,12 +30,8 @@ interface FormBasedLayerStateLike {
   >;
 }
 
-interface StateWithLayers {
-  layers?: unknown;
-}
-
 interface DatasourceStatesLike {
-  formBased?: FormBasedLayerStateLike;
+  formBased?: FormBasedStateLike;
 }
 
 export interface ApplyDatasourceDefaultsOptions {
@@ -60,46 +46,20 @@ export interface VisualizationDatasourceDefaults {
   };
 }
 
-const EMPTY_ROWS_DEFAULT_OFF: VisualizationDatasourceDefaults = {
-  operationParams: {
-    date_histogram: {
-      includeEmptyRows: false,
-    },
-  },
-};
-
-const EMPTY_ROWS_DEFAULT_ON: VisualizationDatasourceDefaults = {
-  operationParams: {
-    date_histogram: {
-      includeEmptyRows: true,
-    },
-  },
-};
-
 /**
  * This module owns visualization-specific datasource defaults for form-based Lens layers.
  * It resolves defaults from visualization state, then applies them either while a dimension
  * is being created or in bulk when a caller needs to normalize datasource state.
  */
 
-const isDateHistogramColumn = (
-  column: GenericIndexPatternColumn
-): column is DateHistogramIndexPatternColumn => column.operationType === 'date_histogram';
-
-const isRangeColumn = (column: GenericIndexPatternColumn): column is RangeIndexPatternColumn =>
-  column.operationType === 'range';
-
-const isTermsColumn = (column: GenericIndexPatternColumn): column is TermsIndexPatternColumn =>
-  column.operationType === 'terms';
-
 const isFormBasedLayerStateLike = (
   datasourceState: unknown
-): datasourceState is FormBasedLayerStateLike => {
+): datasourceState is FormBasedStateLike => {
   if (!datasourceState || typeof datasourceState !== 'object') {
     return false;
   }
 
-  const { layers } = datasourceState as StateWithLayers;
+  const { layers } = datasourceState as FormBasedStateLike;
   return Boolean(layers && typeof layers === 'object');
 };
 
@@ -108,7 +68,7 @@ const getXYSeriesTypeFromState = (visualizationState: unknown) => {
     return;
   }
 
-  const { preferredSeriesType } = visualizationState as StateWithPreferredSeriesType;
+  const { preferredSeriesType } = visualizationState as Partial<XYVisualizationState>;
   return typeof preferredSeriesType === 'string' ? preferredSeriesType : undefined;
 };
 
@@ -117,103 +77,58 @@ const getPartitionShapeFromState = (visualizationState: unknown) => {
     return;
   }
 
-  const { shape } = visualizationState as StateWithShape;
+  const { shape } = visualizationState as Partial<LensPartitionVisualizationState>;
   return typeof shape === 'string' ? shape : undefined;
 };
 
-const mergeVisualizationDatasourceDefaults = (
-  ...defaults: Array<VisualizationDatasourceDefaults | undefined>
-) => {
-  let hasChanges = false;
-  let mergedOperationParams: VisualizationDatasourceDefaults['operationParams'];
+const createDateHistogramDefaults = (
+  includeEmptyRows: boolean
+): VisualizationDatasourceDefaults => ({
+  operationParams: {
+    date_histogram: {
+      includeEmptyRows,
+    },
+  },
+});
 
-  for (const scopedDefaults of defaults) {
-    if (!scopedDefaults?.operationParams) {
-      continue;
-    }
-
-    hasChanges = true;
-    mergedOperationParams = {
-      ...mergedOperationParams,
-      ...(scopedDefaults.operationParams.date_histogram
-        ? {
-            date_histogram: {
-              ...mergedOperationParams?.date_histogram,
-              ...scopedDefaults.operationParams.date_histogram,
-            },
-          }
-        : {}),
-      ...(scopedDefaults.operationParams.range
-        ? {
-            range: {
-              ...mergedOperationParams?.range,
-              ...scopedDefaults.operationParams.range,
-            },
-          }
-        : {}),
-      ...(scopedDefaults.operationParams.terms
-        ? {
-            terms: {
-              ...mergedOperationParams?.terms,
-              ...scopedDefaults.operationParams.terms,
-            },
-          }
-        : {}),
-    };
-  }
-
-  return hasChanges ? { operationParams: mergedOperationParams } : undefined;
-};
-
-const getGlobalDatasourceDefaults = (): VisualizationDatasourceDefaults | undefined => undefined;
-
-const getChartSpecificDatasourceDefaults = (
+export const getVisualizationDatasourceDefaults = (
   visualizationType: string | null | undefined,
   visualizationSubtype?: string | null
 ) => {
   switch (visualizationType) {
-    case XY_VISUALIZATION_ID:
-      return isBarSeriesType(visualizationSubtype) ? EMPTY_ROWS_DEFAULT_OFF : undefined;
+    case 'lnsXY':
+      return isBarSeriesType(visualizationSubtype) ? createDateHistogramDefaults(false) : undefined;
 
-    case PARTITION_VISUALIZATION_ID:
+    case 'lnsPie':
       return isPartitionChartTypeWithEmptyRowsDefault(visualizationSubtype)
-        ? EMPTY_ROWS_DEFAULT_OFF
+        ? createDateHistogramDefaults(false)
         : undefined;
 
     case LENS_HEATMAP_ID:
     case LENS_METRIC_ID:
-    case TAGCLOUD_VISUALIZATION_ID:
-      return EMPTY_ROWS_DEFAULT_OFF;
+    case 'lnsTagcloud':
+      return createDateHistogramDefaults(false);
 
     case LENS_DATATABLE_ID:
-      return EMPTY_ROWS_DEFAULT_ON;
+      return createDateHistogramDefaults(true);
 
     default:
       return;
   }
 };
 
-export const getVisualizationDatasourceDefaults = (
-  visualizationType: string | null | undefined,
-  visualizationSubtype?: string | null
-) =>
-  mergeVisualizationDatasourceDefaults(
-    getGlobalDatasourceDefaults(),
-    getChartSpecificDatasourceDefaults(visualizationType, visualizationSubtype)
-  );
-
 export const getVisualizationDatasourceDefaultsForVisualizationState = (
   visualizationType: string | null | undefined,
   visualizationState: unknown
 ) => {
-  if (visualizationType === XY_VISUALIZATION_ID) {
+  if (visualizationType === 'lnsXY') {
     return getVisualizationDatasourceDefaults(
       visualizationType,
       getXYSeriesTypeFromState(visualizationState)
     );
   }
 
-  if (visualizationType === PARTITION_VISUALIZATION_ID) {
+  if (visualizationType === 'lnsPie') {
     return getVisualizationDatasourceDefaults(
       visualizationType,
       getPartitionShapeFromState(visualizationState)
@@ -303,37 +218,15 @@ const applyDatasourceDefaultsToColumn = (
   defaults: VisualizationDatasourceDefaults | undefined,
   options?: ApplyDatasourceDefaultsOptions
 ) => {
-  if (isDateHistogramColumn(column)) {
-    const params = applyParamDefaults<DateHistogramIndexPatternColumn['params']>(
-      column.params,
-      defaults?.operationParams?.date_histogram,
-      options
-    );
+  const currentParams = 'params' in column ? column.params : undefined;
+  const nextParams = applyDatasourceDefaultsToColumnParams(
+    column.operationType,
+    currentParams,
+    defaults,
+    options
+  );
 
-    return params === column.params ? column : { ...column, params };
-  }
-
-  if (isRangeColumn(column)) {
-    const params = applyParamDefaults<RangeIndexPatternColumn['params']>(
-      column.params,
-      defaults?.operationParams?.range,
-      options
-    );
-
-    return params === column.params ? column : { ...column, params };
-  }
-
-  if (isTermsColumn(column)) {
-    const params = applyParamDefaults<TermsIndexPatternColumn['params']>(
-      column.params,
-      defaults?.operationParams?.terms,
-      options
-    );
-
-    return params === column.params ? column : { ...column, params };
-  }
-
-  return column;
+  return nextParams === currentParams ? column : { ...column, params: nextParams };
 };
 
 export const applyDatasourceDefaultsToDatasourceState = <T>(
