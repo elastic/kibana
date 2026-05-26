@@ -33,16 +33,16 @@ export const registerTools = ({
 
   const tools: Array<BuiltinToolDefinition<any>> = [
     // searchTool({ coreSetup, topSnippetsDefaults: agentBuilder.topSnippets }),
-    getDocumentByIdTool(),
-    executeEsqlTool(),
+    // getDocumentByIdTool(),
+    // executeEsqlTool(),
     // generateEsqlTool(),
-    getIndexMappingsTool(),
-    listIndicesTool(),
-    indexExplorerTool(),
-    createVisualizationTool(),
-    productDocumentationTool(coreSetup),
-    integrationKnowledgeTool(coreSetup),
-    casesTool(coreSetup),
+    // getIndexMappingsTool(),
+    // listIndicesTool(),
+    // indexExplorerTool(),
+    // createVisualizationTool(),
+    // productDocumentationTool(coreSetup),
+    // integrationKnowledgeTool(coreSetup),
+    // casesTool(coreSetup),
   ];
 
   tools.forEach((tool) => {
