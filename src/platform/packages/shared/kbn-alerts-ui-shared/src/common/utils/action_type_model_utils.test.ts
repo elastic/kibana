@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { connectorsSpecs } from '@kbn/connector-specs';
 import { serializeConnectorSpec } from '@kbn/connector-specs/src/lib/serialize_connector_spec';
 import type { ConnectorSpecWireResponse } from '../apis/fetch_connector_spec';
@@ -92,12 +91,11 @@ describe('action_type_model_utils', () => {
       },
     };
 
-    it('maps base spec metadata, source, subtype, and validateParams', async () => {
+    it('maps base spec metadata, subtype, and validateParams', async () => {
       const model = transformSpecToActionTypeModel(baseSpec);
       expect(model.id).toBe('test-connector');
       expect(model.actionTypeTitle).toBe('Test Connector');
       expect(model.selectMessage).toBe('A test connector description');
-      expect(model.source).toBe(ACTION_TYPE_SOURCES.spec);
       expect(model.subtype).toBeUndefined();
       expect(await model.validateParams({}, null)).toEqual({ errors: {} });
     });

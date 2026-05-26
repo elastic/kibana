@@ -60,11 +60,6 @@ export const RuleActionsMessage = (props: RuleActionsMessageProps) => {
     showMustacheAutocompleteSwitch,
   } = useRuleFormState();
 
-  const actionType = useMemo(
-    () => connectorTypes.find((ct) => ct.id === action.actionTypeId) ?? null,
-    [connectorTypes, action.actionTypeId]
-  );
-
   const {
     actionTypeModel,
     isLoading,
@@ -72,7 +67,7 @@ export const RuleActionsMessage = (props: RuleActionsMessageProps) => {
     refetch: refetchConnectorSpec,
   } = useActionTypeModel({
     actionTypeRegistry,
-    actionTypeId: actionType?.id,
+    actionTypeId: action.actionTypeId,
     http,
   });
 

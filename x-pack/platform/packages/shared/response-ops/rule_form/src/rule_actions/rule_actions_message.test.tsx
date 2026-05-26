@@ -383,7 +383,7 @@ describe('RuleActionsMessage', () => {
     );
   });
 
-  test('loads spec-backed connector and renders message scaffold', async () => {
+  test('fetches connector spec and renders when connector is not in registry', async () => {
     const specConnectorId = 'spec-only-connector';
     const specResponse = {
       metadata: {

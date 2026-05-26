@@ -143,8 +143,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   const disabled =
     hasErrors || !canSave || isLoadingActionTypeModel || !!actionTypeModelError || !actionTypeModel;
   // Only stack connectors (not spec-based) support the test tab
-  const isTestable =
-    !actionTypeModel?.source || actionTypeModel?.source === ACTION_TYPE_SOURCES.stack;
+  const isTestable = !actionType?.source || actionType.source === ACTION_TYPE_SOURCES.stack;
 
   const groupActionTypeModel: Array<ActionTypeModel & { name: string }> =
     actionTypeModel && actionTypeModel.subtype

@@ -160,7 +160,6 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
   subtype?: Array<{ id: string; name: string }>;
   convertParamsBetweenGroups?: (params: ActionParams) => ActionParams | {};
   getHideInUi?: (actionTypes: ActionType[]) => boolean;
-  source?: ActionTypeSource;
   modalWidth?: number;
   isSystemActionType?: boolean;
   subFeature?: SubFeature;

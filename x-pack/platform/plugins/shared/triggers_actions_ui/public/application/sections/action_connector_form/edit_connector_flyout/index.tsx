@@ -462,7 +462,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   const isTestable =
     isTestableProp ??
     (() => {
-      return (actionTypeModel?.source ?? source) === ACTION_TYPE_SOURCES.stack;
+      return source === ACTION_TYPE_SOURCES.stack;
     })();
 
   return (

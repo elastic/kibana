@@ -11,7 +11,6 @@ import React from 'react';
 import type { FC, PropsWithChildren } from 'react';
 import { waitFor, renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { connectorsSpecs } from '@kbn/connector-specs';
 import { serializeConnectorSpec } from '@kbn/connector-specs/src/lib/serialize_connector_spec';
 import { actionTypeRegistryMock } from '../test_utils/action_type_registry.mock';
@@ -126,7 +125,6 @@ describe('useActionTypeModel', () => {
         useActionTypeModel({
           actionTypeRegistry,
           actionTypeId: 'spec-connector',
-          source: ACTION_TYPE_SOURCES.spec,
           http: mockHttp as any,
           uiSettings: mockUiSettings as any,
         }),
@@ -149,32 +147,6 @@ describe('useActionTypeModel', () => {
     expect(result.current.error).toBeNull();
   });
 
-  it('fetches spec as fallback for connectors not in registry even when source is not passed', async () => {
-    actionTypeRegistry.has.mockReturnValue(false);
-    mockHttp.get.mockResolvedValue(mockSpecResponse);
-
-    const { result } = renderHook(
-      () =>
-        useActionTypeModel({
-          actionTypeRegistry,
-          actionTypeId: 'spec-connector',
-          // intentionally no source — simulates workflow context or post-save round-trip
-          http: mockHttp as any,
-          uiSettings: mockUiSettings as any,
-        }),
-      { wrapper: createWrapper() }
-    );
-
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
-    });
-
-    expect(mockHttp.get).toHaveBeenCalled();
-    expect(result.current.actionTypeModel).not.toBeNull();
-    expect(result.current.actionTypeModel?.id).toBe('spec-connector');
-    expect(result.current.error).toBeNull();
-  });
-
   it('handles fetch errors correctly', async () => {
     actionTypeRegistry.has.mockReturnValue(false);
     const fetchError = new Error('Failed to fetch spec');
@@ -185,7 +157,6 @@ describe('useActionTypeModel', () => {
         useActionTypeModel({
           actionTypeRegistry,
           actionTypeId: 'spec-connector',
-          source: ACTION_TYPE_SOURCES.spec,
           http: mockHttp as any,
           uiSettings: mockUiSettings as any,
         }),
@@ -209,7 +180,6 @@ describe('useActionTypeModel', () => {
         useActionTypeModel({
           actionTypeRegistry,
           actionTypeId: 'spec-connector',
-          source: ACTION_TYPE_SOURCES.spec,
           http: mockHttp as any,
           uiSettings: mockUiSettings as any,
         }),
@@ -225,7 +195,6 @@ describe('useActionTypeModel', () => {
     expect(model?.id).toBe('spec-connector');
     expect(model?.actionTypeTitle).toBe('Spec Connector');
     expect(model?.selectMessage).toBe('A spec-based connector');
-    expect(model?.source).toBe(ACTION_TYPE_SOURCES.spec);
     expect(model?.isExperimental).toBe(false);
     expect(model?.actionConnectorFields).toBeDefined();
     expect(model?.actionParamsFields).toBeDefined();
@@ -252,7 +221,6 @@ describe('useActionTypeModel', () => {
         useActionTypeModel({
           actionTypeRegistry,
           actionTypeId: 'workflows-spec-connector',
-          source: ACTION_TYPE_SOURCES.spec,
           http: mockHttp as any,
           uiSettings: { get: uiSettingsGet } as any,
         }),
