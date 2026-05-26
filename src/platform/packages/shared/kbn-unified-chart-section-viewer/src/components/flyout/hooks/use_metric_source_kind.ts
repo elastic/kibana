@@ -10,10 +10,7 @@
 import type { DataViewsPublicPluginStart, MatchedItem } from '@kbn/data-views-plugin/public';
 import { useAbortableAsync } from '@kbn/react-hooks';
 import { useExternalServices } from '../../../context/external_services';
-import {
-  type ReportChartSectionErrorArgs,
-  useReportChartSectionError,
-} from '../../chart/hooks/use_report_chart_section_error';
+import { useReportChartSectionError } from '../../chart/hooks/use_report_chart_section_error';
 import { useMetricsExperienceState } from '../../observability/metrics/context/metrics_experience_state_provider';
 
 // Tag key emitted by data_views.getIndices() / responseToItemArray for plain
@@ -58,7 +55,12 @@ export const useMetricSourceKind = ({
 
   const { value } = useAbortableAsync<ClassifiedSource | undefined>(async () => {
     if (!dataViewsService || !name) return undefined;
-    return resolveSourceKind(dataViewsService, name, profileId, reportError);
+    try {
+      return await resolveSourceKind(dataViewsService, name);
+    } catch (error) {
+      reportError({ error, source: 'useMetricSourceKind', labels: { profile_id: profileId } });
+      return undefined;
+    }
   }, [dataViewsService, name, profileId, reportError]);
 
   // Guard against stale results: `useAbortableAsync` keeps the previous value
@@ -96,9 +98,7 @@ export const resetMetricSourceKindCache = () => {
 
 const resolveSourceKind = async (
   dataViewsService: DataViewsPublicPluginStart,
-  name: string,
-  profileId: string,
-  reportError: (args: ReportChartSectionErrorArgs) => void
+  name: string
 ): Promise<ClassifiedSource> => {
   let pending = cache.get(name);
   if (!pending) {
@@ -116,12 +116,7 @@ const resolveSourceKind = async (
         if (cache.get(name) === pending) cache.delete(name);
       });
   }
-  try {
-    return { name, kind: await pending };
-  } catch (error) {
-    reportError({ error, source: 'useMetricSourceKind', labels: { profile_id: profileId } });
-    return { name, kind: undefined };
-  }
+  return { name, kind: await pending };
 };
 
 const fetchSourceKind = async (
