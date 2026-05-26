@@ -166,7 +166,7 @@ export function transformHealthServiceProvider({
                 details: issue.details,
                 count: issue.count,
                 ...(issue.first_occurrence
-                  ? { first_occurrence: dateFormatter.convert(issue.first_occurrence) }
+                  ? { first_occurrence: dateFormatter.convertToText(issue.first_occurrence) }
                   : {}),
               };
             }),
