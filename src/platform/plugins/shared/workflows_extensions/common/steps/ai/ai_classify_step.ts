@@ -21,15 +21,24 @@ export const ConfigSchema = z.object({
   'connector-id': z.string().optional(),
 });
 
+export const CategorySchema = z.union([
+  z.string(),
+  z.object({ name: z.string(), description: z.string() }),
+]);
+
+export type Category = z.infer<typeof CategorySchema>;
+export const getCategoryName = (category: Category): string =>
+  typeof category === 'string' ? category : category.name;
+
 /**
  * Input schema for the AI classify step.
  */
 export const InputSchema = z.object({
   input: z.union([z.string(), z.array(z.unknown()), z.record(z.string(), z.unknown())]),
-  categories: z.array(z.string()).min(1),
+  categories: z.array(CategorySchema).min(1),
   instructions: z.string().optional(),
   allowMultipleCategories: z.boolean().optional(),
-  fallbackCategory: z.string().optional(),
+  fallbackCategory: CategorySchema.optional(),
   includeRationale: z.boolean().optional(),
   temperature: z.number().min(0).max(1).optional(),
 });
