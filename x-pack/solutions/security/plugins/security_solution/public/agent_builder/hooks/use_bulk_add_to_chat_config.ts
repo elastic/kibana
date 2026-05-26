@@ -15,13 +15,9 @@ export const useBulkAddToChatConfig = (pathway: BulkAlertPathway): BulkAddToChat
   const reportAddToChat = useReportAddToChat();
 
   const convertAlertToAttachment = useCallback(
-    (alertItems: TimelineItem[]) => [alertsToAttachmentGroup(alertItems)],
-    []
-  );
-
-  const onAddedToChat = useCallback(
-    (itemCount: number) => {
-      reportAddToChat({ pathway, attachments: ['alert'], item_count: itemCount });
+    (alertItems: TimelineItem[]) => {
+      reportAddToChat({ pathway, attachments: ['alert'], item_count: alertItems.length });
+      return [alertsToAttachmentGroup(alertItems)];
     },
     [pathway, reportAddToChat]
   );
@@ -29,6 +25,5 @@ export const useBulkAddToChatConfig = (pathway: BulkAlertPathway): BulkAddToChat
   return {
     convertAlertToAttachment,
     initialMessage: BULK_ALERTS_ATTACHMENT_PROMPT,
-    onAddedToChat,
   };
 };

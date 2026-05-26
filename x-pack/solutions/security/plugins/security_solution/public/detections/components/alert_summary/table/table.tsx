@@ -38,6 +38,7 @@ import { combineQueries } from '../../../../common/lib/kuery';
 import { useKibana } from '../../../../common/lib/kibana';
 import { CellValue } from './render_cell';
 import { useBulkAddToChatConfig } from '../../../../agent_builder/hooks/use_bulk_add_to_chat_config';
+import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
 import { buildTimeRangeFilter } from '../../alerts_table/helpers';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 
@@ -174,7 +175,9 @@ export const Table = memo(({ dataView, groupingFilters, packages }: TableProps) 
     ]
   );
 
+  const { isAgentBuilderEnabled } = useAgentBuilderAvailability();
   const bulkAddToChatConfig = useBulkAddToChatConfig('bulk_alerts_alert_summary');
+  const maybeBulkAddToChatConfig = isAgentBuilderEnabled ? bulkAddToChatConfig : undefined;
 
   const getGlobalFiltersSelector = useMemo(() => inputsSelectors.globalFiltersQuerySelector(), []);
   const globalFilters = useDeepEqualSelector(getGlobalFiltersSelector);
@@ -258,7 +261,7 @@ export const Table = memo(({ dataView, groupingFilters, packages }: TableProps) 
         ruleTypeIds={RULE_TYPE_IDS}
         services={services}
         toolbarVisibility={TOOLBAR_VISIBILITY}
-        bulkAddToChatConfig={bulkAddToChatConfig}
+        bulkAddToChatConfig={maybeBulkAddToChatConfig}
       />
     </EuiDataGridStyleWrapper>
   );

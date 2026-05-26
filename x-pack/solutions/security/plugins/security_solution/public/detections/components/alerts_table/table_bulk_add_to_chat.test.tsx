@@ -20,6 +20,14 @@ jest.mock('@kbn/response-ops-alerts-table', () => ({
   AlertsTable: jest.fn(() => null),
 }));
 jest.mock('../../../agent_builder/hooks/use_report_add_to_chat');
+jest.mock('../../../agent_builder/hooks/use_agent_builder_availability', () => ({
+  useAgentBuilderAvailability: jest.fn(() => ({
+    isAgentBuilderEnabled: true,
+    hasAgentBuilderPrivilege: true,
+    isAgentChatExperienceEnabled: true,
+    hasValidAgentBuilderLicense: false,
+  })),
+}));
 jest.mock('../../../agent_builder/helpers', () => ({
   alertsToAttachmentGroup: jest.fn(),
 }));
@@ -153,7 +161,7 @@ describe('Alerts Page Table — bulkAddToChatConfig', () => {
     expect(mockReportAddToChat).toHaveBeenCalledWith({
       pathway: 'bulk_alerts_alerts_page',
       attachments: ['alert'],
-      alert_count: 2,
+      item_count: 2,
     });
   });
 
@@ -164,7 +172,7 @@ describe('Alerts Page Table — bulkAddToChatConfig', () => {
     expect(mockReportAddToChat).toHaveBeenCalledWith({
       pathway: 'bulk_alerts_rule_details',
       attachments: ['alert'],
-      alert_count: 1,
+      item_count: 1,
     });
   });
 

@@ -38,6 +38,7 @@ import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useLicense } from '../../../common/hooks/use_license';
 import { APP_ID, CASES_FEATURE_ID, VIEW_SELECTION } from '../../../../common/constants';
 import { useBulkAddToChatConfig } from '../../../agent_builder/hooks/use_bulk_add_to_chat_config';
+import { useAgentBuilderAvailability } from '../../../agent_builder/hooks/use_agent_builder_availability';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 import { eventsDefaultModel } from '../../../common/components/events_viewer/default_model';
@@ -437,11 +438,13 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
 
   const onLoaded = useCallback(({ alerts }: { alerts: Alert[] }) => onLoad(alerts), [onLoad]);
 
+  const { isAgentBuilderEnabled } = useAgentBuilderAvailability();
   const pathway =
     tableType === TableId.alertsOnRuleDetailsPage
       ? ('bulk_alerts_rule_details' as const)
       : ('bulk_alerts_alerts_page' as const);
   const bulkAddToChatConfig = useBulkAddToChatConfig(pathway);
+  const maybeBulkAddToChatConfig = isAgentBuilderEnabled ? bulkAddToChatConfig : undefined;
 
   /**
    * We want to hide additional controls (like grouping) if the table is being rendered
@@ -500,7 +503,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
               showInspectButton
               showCsvExportButton
               services={services}
-              bulkAddToChatConfig={bulkAddToChatConfig}
+              bulkAddToChatConfig={maybeBulkAddToChatConfig}
               {...tablePropsOverrides}
             />
           </AlertTableCellContextProvider>
