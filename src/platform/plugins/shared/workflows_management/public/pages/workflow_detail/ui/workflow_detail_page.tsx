@@ -46,7 +46,7 @@ const isLoadWorkflowNotFoundError = (error: unknown) =>
   isHttpFetchError(error) && error.response?.status === 404;
 
 const getLoadWorkflowErrorMessage = (error: unknown) =>
-  (isHttpFetchError(error) ? error.body?.message : undefined) ||
+  (isHttpFetchError(error) ? (error.body as { message?: string })?.message : undefined) ||
   (error instanceof Error ? error.message : String(error));
 
 export function WorkflowDetailPage({ id }: { id?: string }) {
