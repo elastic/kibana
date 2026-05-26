@@ -7,4 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { setup as textContentTypeSetup, TEXT_CONTEXT_TYPE } from './text_content_type';
+/**
+ * Formats an array value as a JSON-encoded string of individually converted elements.
+ *
+ * This is the text-path counterpart of {@link formatReactArray}.
+ */
+export function formatTextArray(val: unknown[], convertSingle: (v: unknown) => string): string {
+  return JSON.stringify(val.map(convertSingle));
+}
