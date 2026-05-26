@@ -208,12 +208,6 @@ export const useAgentBuilderRuleCreation = ({
         syncRuleIdRef.current = ruleIdForSync;
       }
 
-      // eslint-disable-next-line no-console
-      console.log('[AI Rule Debug] updateFormFromChat called', {
-        esqlQuery: (stepsData.defineRuleData as { queryBar?: { query?: { query?: string } } })
-          ?.queryBar?.query?.query,
-      });
-
       isAiRuleUpdateRef.current = true;
       aiRuleCreation.activateFormSync();
       defineStepForm.updateFieldValues(stepsData.defineRuleData);
@@ -262,8 +256,6 @@ export const useAgentBuilderRuleCreation = ({
 
   useEffect(() => {
     const subscription = aiRuleCreation.aiCreatedRule$.subscribe((rule) => {
-      // eslint-disable-next-line no-console
-      console.log('[AI Rule Debug] aiCreatedRule$ subscription fired, rule=', rule ? 'defined' : 'null');
       if (rule) {
         updateFormFromChatRef.current(rule);
         aiRuleCreation.clearAiCreatedRule();
