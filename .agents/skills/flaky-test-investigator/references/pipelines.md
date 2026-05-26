@@ -1,6 +1,6 @@
 # Pipelines
 
-This document provides more information on Kibana's CI testing setup. Most tests run either on Elastic Cloud ("Cloud pipeline") or on the machine that triggered the run ("local pipeline", a.k.a. "Kibana CI"). A test that passes locally on the agent's machine may still fail on Cloud. Use the pipeline name to identify where the test ran.
+This document provides more information on Kibana's CI testing setup. Tests run either on Elastic Cloud ("Cloud pipeline") or on the machine that triggered the run ("local pipeline", a.k.a. "Kibana CI"). A test that passes locally on the agent's machine may still fail on Cloud. Use the pipeline name to identify where the test ran.
 
 ## Elastic Cloud pipelines
 
