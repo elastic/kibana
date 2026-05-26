@@ -27,7 +27,9 @@ export const getAllFleetServerAgents = async (
   } catch (error) {
     throw new Error(error.message);
   }
-  const agentPoliciesIds = packagePolicyData?.items.flatMap((item) => item.policy_ids);
+  const agentPoliciesIds = packagePolicyData?.items
+    .map((item) => item.policy_id)
+    .filter((id): id is string => id != null);
 
   if (agentPoliciesIds.length === 0) {
     return [];
