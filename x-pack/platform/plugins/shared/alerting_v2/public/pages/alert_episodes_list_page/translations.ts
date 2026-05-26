@@ -56,6 +56,76 @@ export const EPISODES_ASSIGNEE_UNKNOWN_USER = i18n.translate(
   }
 );
 
+export const EPISODES_KPI_ALERTS_TITLE = i18n.translate('xpack.alertingV2.episodes.kpi.alertsTitle', {
+  defaultMessage: 'Alerts',
+});
+
+export const EPISODES_KPI_ACTIVE_ALERTS = i18n.translate(
+  'xpack.alertingV2.episodes.kpi.activeAlerts',
+  {
+    defaultMessage: 'Active alerts',
+  }
+);
+
+export const EPISODES_KPI_HIGH_SEVERITY = i18n.translate(
+  'xpack.alertingV2.episodes.kpi.highSeverity',
+  {
+    defaultMessage: '> high severity',
+  }
+);
+
+export const EPISODES_KPI_TOTAL_ALERTS = i18n.translate('xpack.alertingV2.episodes.kpi.totalAlerts', {
+  defaultMessage: 'Total',
+});
+
+export const EPISODES_KPI_ACTIONS_TITLE = i18n.translate(
+  'xpack.alertingV2.episodes.kpi.actionsTitle',
+  {
+    defaultMessage: 'Alert actions',
+  }
+);
+
+export const EPISODES_KPI_ASSIGNED_TO_ME = i18n.translate(
+  'xpack.alertingV2.episodes.kpi.assignedToMe',
+  {
+    defaultMessage: 'Assign to me',
+  }
+);
+
+export const EPISODES_KPI_UNASSIGNED = i18n.translate('xpack.alertingV2.episodes.kpi.unassigned', {
+  defaultMessage: 'Unassigned',
+});
+
+export const EPISODES_KPI_ACKNOWLEDGED = i18n.translate(
+  'xpack.alertingV2.episodes.kpi.acknowledged',
+  {
+    defaultMessage: 'Acknowledge',
+  }
+);
+
+export const EPISODES_KPI_SNOOZED = i18n.translate('xpack.alertingV2.episodes.kpi.snoozed', {
+  defaultMessage: 'Snoozed',
+});
+
+export const EPISODES_KPI_RULES_TITLE = i18n.translate('xpack.alertingV2.episodes.kpi.rulesTitle', {
+  defaultMessage: 'Rules',
+});
+
+export const EPISODES_KPI_TOTAL_RULES = i18n.translate('xpack.alertingV2.episodes.kpi.totalRules', {
+  defaultMessage: 'Total rules',
+});
+
+export const EPISODES_KPI_FIRING_RULES = i18n.translate('xpack.alertingV2.episodes.kpi.firingRules', {
+  defaultMessage: 'Firing',
+});
+
+export const EPISODES_KPI_ENABLED_RULES = i18n.translate(
+  'xpack.alertingV2.episodes.kpi.enabledRules',
+  {
+    defaultMessage: 'Enabled',
+  }
+);
+
 export const EPISODES_FILTER_BAR_RESET_FILTERS = i18n.translate(
   'xpack.alertingV2.episodes.filterBar.resetFilters',
   {

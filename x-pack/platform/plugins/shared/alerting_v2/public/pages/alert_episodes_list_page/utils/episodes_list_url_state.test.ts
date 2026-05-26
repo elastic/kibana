@@ -50,6 +50,7 @@ describe('episodes_list_url_state', () => {
       expect(readEpisodesListAppStateFromUrlStorage(storage)).toEqual({
         filterState: {
           status: 'active',
+          alertsKpi: 'active',
           ruleId: 'r1',
           queryString: 'host',
           tags: ['a', 'b'],
@@ -69,6 +70,7 @@ describe('episodes_list_url_state', () => {
       });
       expect(readEpisodesListAppStateFromUrlStorage(storage).filterState).toEqual({
         status: 'active',
+        alertsKpi: 'active',
       });
     });
 
@@ -82,7 +84,18 @@ describe('episodes_list_url_state', () => {
     it('defaults status to active when _a is missing', async () => {
       const storage = await createKbnTestUrlStorage();
       expect(readEpisodesListAppStateFromUrlStorage(storage)).toEqual({
-        filterState: { status: 'active' },
+        filterState: { status: 'active', alertsKpi: 'active' },
+      });
+    });
+
+    it('preserves explicit status when alertsKpi is total', async () => {
+      const storage = await createKbnTestUrlStorage({
+        alertsKpi: 'total',
+        status: 'pending',
+      });
+      expect(readEpisodesListAppStateFromUrlStorage(storage).filterState).toEqual({
+        alertsKpi: 'total',
+        status: 'pending',
       });
     });
   });
@@ -95,7 +108,7 @@ describe('episodes_list_url_state', () => {
 
       await writeEpisodesListAppStateToUrlStorage(
         storage,
-        { status: 'active' },
+        { status: 'active', alertsKpi: 'active' },
         DEFAULT_EPISODES_LIST_TIME_RANGE
       );
 

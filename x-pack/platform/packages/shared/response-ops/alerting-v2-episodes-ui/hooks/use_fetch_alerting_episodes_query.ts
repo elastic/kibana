@@ -20,12 +20,14 @@ import {
   type EpisodesSortState,
 } from '../queries/episodes_query';
 import { normalizeTags } from '../utils/normalize_tags';
+import { resolveEpisodesFilterState } from '../utils/resolve_episodes_filter_state';
 
 export interface UseFetchAlertingEpisodesQueryOptions {
   pageSize: number;
   filterState?: EpisodesFilterState;
   sortState?: EpisodesSortState;
   timeRange?: TimeRange | null;
+  currentUserProfileUid?: string;
   services: UseAlertingEpisodesDataViewOptions['services'] & {
     expressions: ExpressionsStart;
   };
@@ -46,14 +48,16 @@ export const useFetchAlertingEpisodesQuery = ({
   filterState,
   sortState = DEFAULT_SORT,
   timeRange,
+  currentUserProfileUid,
 }: UseFetchAlertingEpisodesQueryOptions) => {
   const spaceId = useSpaceId(services.spaces);
   const dataView = useAlertingEpisodesDataView({ services });
+  const resolvedFilterState = resolveEpisodesFilterState(filterState, currentUserProfileUid);
 
   const queryKey = queryKeys.list(
     spaceId,
     pageSize,
-    filterState,
+    resolvedFilterState,
     sortState,
     timeRange ?? undefined
   );
@@ -67,7 +71,7 @@ export const useFetchAlertingEpisodesQuery = ({
         abortSignal,
         pageSize,
         services,
-        filterState,
+        filterState: resolvedFilterState,
         sortState,
         timeRange,
       }),

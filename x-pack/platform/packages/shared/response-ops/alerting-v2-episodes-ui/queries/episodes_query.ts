@@ -59,6 +59,14 @@ export const ALERT_EPISODE_FIELDS = [
   'episode_data',
 ] as const;
 
+export type EpisodesAlertsKpiFilter = 'active' | 'high_severity' | 'total';
+
+export type EpisodesActionKpiFilter =
+  | 'assigned_to_me'
+  | 'unassigned'
+  | 'acknowledged'
+  | 'snoozed';
+
 export interface EpisodesFilterState {
   /** Single episode status (inactive | pending | active | recovering) or null for All */
   status?: string | null;
@@ -70,7 +78,15 @@ export interface EpisodesFilterState {
   tags?: string[] | null;
   /** Assignee UID — episodes whose last assignee matches this user profile UID */
   assigneeUid?: string;
+  /** Selected Alerts KPI filter (maps to status / severity constraints). */
+  alertsKpi?: EpisodesAlertsKpiFilter;
+  /** Selected Alert actions KPI filter (maps to assignee / ack / snooze constraints). */
+  actionKpi?: EpisodesActionKpiFilter;
+  /** When true, only episodes whose alert data severity is high or critical. */
+  highSeverityOnly?: boolean;
 }
+
+const HIGH_SEVERITY_VALUES = ['HIGH', 'CRITICAL'] as const;
 
 export interface EpisodesSortState {
   sortField: string;
@@ -199,6 +215,26 @@ export const buildEpisodesQuery = (
 
   if (filterState?.assigneeUid) {
     query.where`last_assignee_uid == ${filterState.assigneeUid}`;
+  }
+
+  if (filterState?.actionKpi === 'unassigned') {
+    query.where`last_assignee_uid IS NULL`;
+  }
+
+  if (filterState?.actionKpi === 'acknowledged') {
+    query.where`last_ack_action == "ack"`;
+  }
+
+  if (filterState?.actionKpi === 'snoozed') {
+    query.where`last_snooze_action == "snooze"`;
+  }
+
+  if (filterState?.highSeverityOnly) {
+    query.pipe`EVAL alert_severity = TO_UPPER(COALESCE(JSON_EXTRACT(episode_data, "severity"), ""))`;
+    const severityClause = HIGH_SEVERITY_VALUES.map((s) => `alert_severity == "${s}"`).join(
+      ' OR '
+    );
+    query.pipe(`WHERE (${severityClause})`);
   }
 
   return query.sort([sortField, sortDir]).pipe`LIMIT ${pageSizeParam}`.keep(

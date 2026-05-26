@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { EpisodesFilterState } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
+import type {
+  EpisodesActionKpiFilter,
+  EpisodesAlertsKpiFilter,
+  EpisodesFilterState,
+} from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
 import type { TimeRange } from '@kbn/es-query';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { isArray, isNil, isPlainObject, isString } from 'lodash';
@@ -16,8 +20,11 @@ export const EPISODES_LIST_APP_STATE_KEY = 'episodesList' as const;
 /** Serialized in `_a` so “all statuses” survives reload (distinct from default Active) */
 export const EPISODES_LIST_STATUS_URL_ALL = 'all' as const;
 
-/** Default list filters (Active episodes, no rule/tags/search/assignee). */
-export const DEFAULT_EPISODES_LIST_FILTER: EpisodesFilterState = { status: 'active' };
+/** Default list filters (Active episodes KPI, no rule/tags/search/assignee). */
+export const DEFAULT_EPISODES_LIST_FILTER: EpisodesFilterState = {
+  status: 'active',
+  alertsKpi: 'active',
+};
 
 /** Matches {@link useEpisodesTimeRange} fallback when timefilter has no prior state */
 export const DEFAULT_EPISODES_LIST_TIME_RANGE: TimeRange = {
@@ -53,23 +60,34 @@ function decodeFilterFields(o: Record<string, unknown>): EpisodesFilterState {
   if (isNonEmptyString(o.assigneeUid)) {
     result.assigneeUid = o.assigneeUid;
   }
+  if (isNonEmptyString(o.alertsKpi)) {
+    result.alertsKpi = o.alertsKpi as EpisodesAlertsKpiFilter;
+  }
+  if (isNonEmptyString(o.actionKpi)) {
+    result.actionKpi = o.actionKpi as EpisodesActionKpiFilter;
+  }
+  if (o.highSeverityOnly === true) {
+    result.highSeverityOnly = true;
+  }
   return result;
 }
 
 function splitEpisodesListRaw(raw: unknown): {
   filter: EpisodesFilterState;
   timeRange?: TimeRange;
+  hasExplicitStatus: boolean;
 } {
   if (!isPlainObject(raw)) {
-    return { filter: {} };
+    return { filter: {}, hasExplicitStatus: false };
   }
   const o = raw as Record<string, unknown>;
   const { timeFrom, timeTo, ...rest } = o;
   const filter = decodeFilterFields(rest);
+  const hasExplicitStatus = 'status' in rest;
   if (isNonEmptyString(timeFrom) && isNonEmptyString(timeTo)) {
-    return { filter, timeRange: { from: timeFrom, to: timeTo } };
+    return { filter, hasExplicitStatus, timeRange: { from: timeFrom, to: timeTo } };
   }
-  return { filter };
+  return { filter, hasExplicitStatus };
 }
 
 function encodeFilterFields(state: EpisodesFilterState): Record<string, unknown> {
@@ -91,6 +109,15 @@ function encodeFilterFields(state: EpisodesFilterState): Record<string, unknown>
   }
   if (isNonEmptyString(state.assigneeUid)) {
     result.assigneeUid = state.assigneeUid;
+  }
+  if (state.alertsKpi && state.alertsKpi !== DEFAULT_EPISODES_LIST_FILTER.alertsKpi) {
+    result.alertsKpi = state.alertsKpi;
+  }
+  if (state.actionKpi) {
+    result.actionKpi = state.actionKpi;
+  }
+  if (state.highSeverityOnly) {
+    result.highSeverityOnly = true;
   }
   return result;
 }
@@ -115,9 +142,21 @@ export function readEpisodesListAppStateFromUrlStorage(storage: IKbnUrlStateStor
   timeRange?: TimeRange;
 } {
   const raw = storage.get<AppStateRecord>('_a')?.[EPISODES_LIST_APP_STATE_KEY];
-  const { filter, timeRange } = splitEpisodesListRaw(raw);
+  const { filter, timeRange, hasExplicitStatus } = splitEpisodesListRaw(raw);
+  const filterState: EpisodesFilterState = { ...DEFAULT_EPISODES_LIST_FILTER, ...filter };
+
+  if (!hasExplicitStatus && filter.alertsKpi != null) {
+    if (filter.alertsKpi === 'total') {
+      filterState.status = undefined;
+    } else if (filter.alertsKpi === 'active') {
+      filterState.status = 'active';
+    } else if (filter.alertsKpi === 'high_severity') {
+      filterState.highSeverityOnly = true;
+    }
+  }
+
   return {
-    filterState: { ...DEFAULT_EPISODES_LIST_FILTER, ...filter },
+    filterState,
     ...(timeRange ? { timeRange } : {}),
   };
 }

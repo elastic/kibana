@@ -15,12 +15,14 @@ import {
   EuiScreenReaderOnly,
   EuiSpacer,
   logicalCSS,
+  useEuiFontSize,
   useEuiTheme,
 } from '@elastic/eui';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type { SortOrder } from '@kbn/unified-data-table';
 import {
   DataLoadingState,
+  getRenderCustomToolbarWithElements,
   ROWS_HEIGHT_OPTIONS,
   UnifiedDataTable,
   type CustomCellRenderer,
@@ -44,12 +46,17 @@ import type { AlertEpisodesKibanaServices } from '../../episodes_kibana_services
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import * as i18n from './translations';
 import { EpisodesFilterBar } from './components/episodes_filter_bar';
+import { EpisodesKpiBlocks } from './components/episodes_kpi_blocks';
+import { EpisodesTableToolbarStatus } from './components/episodes_table_toolbar_status';
+import { DEFAULT_EPISODES_LIST_FILTER } from './utils/episodes_list_url_state';
 import { alertEpisodeToDataTableRecord } from './utils';
 import { dataTableRecordToEpisode } from './utils/data_table_record_to_episode';
 import { getDiscoverHrefForRuleAndEpisodeTimestamp } from '../../utils/discover_href_for_episode';
 import { paths } from '../../constants';
 import { useEpisodesListUrlState } from './hooks/use_episodes_list_url_state';
 import { useEpisodesBulkActions } from './hooks/use_episodes_bulk_actions';
+import { useCurrentUserProfileUid } from './hooks/use_current_user_profile_uid';
+import { useEpisodesKpiCounts } from './hooks/use_episodes_kpi_counts';
 import { EpisodeAssigneeCell } from './components/episode_assignee_cell';
 
 const PAGE_SIZE = 1000;
@@ -77,9 +84,11 @@ const CUSTOM_GRID_COLUMNS_CONFIGURATION: CustomGridColumnsConfiguration = {
 
 const getTableCss = (euiTheme: EuiThemeComputed) => css`
   height: 100%;
-  border-radius: ${euiTheme.border.radius.medium};
-  border: ${euiTheme.border.thin};
   overflow: hidden;
+
+  & .euiDataGridHeaderCell {
+    background-color: ${euiTheme.colors.lightestShade};
+  }
 
   & .unifiedDataTable__cellValue {
     font-family: unset;
@@ -101,18 +110,30 @@ const getTableCss = (euiTheme: EuiThemeComputed) => css`
     > .euiFlexGroup {
     justify-content: center;
   }
+
+  & .unifiedDataTableToolbar {
+    padding-bottom: 4px;
+  }
 `;
 
 export const AlertEpisodesListPage = () => {
   const services = useKibana<AlertEpisodesKibanaServices>().services;
   const queryClient = useQueryClient();
   const { euiTheme } = useEuiTheme();
+  const pageTitleSizeM = useEuiFontSize('xl');
   const timefilter = services.data.query.timefilter.timefilter;
 
   useBreadcrumbs('episodes_list');
 
   const { filterState, setFilterState, timeRange, handleTimeChange } =
     useEpisodesListUrlState(timefilter);
+  const currentUserProfileUid = useCurrentUserProfileUid(services.userProfile);
+  const { counts: kpiCounts, isLoading: isLoadingKpiCounts } = useEpisodesKpiCounts({
+    filterState,
+    timeRange,
+    currentUserProfileUid,
+    services,
+  });
   const [sortState, setSortState] = useState<EpisodesSortState>(DEFAULT_SORT);
   const [columns, setColumns] = useState<string[]>([
     'episode.status',
@@ -135,6 +156,7 @@ export const AlertEpisodesListPage = () => {
     filterState,
     sortState,
     timeRange,
+    currentUserProfileUid,
   });
 
   const sort: SortOrder[] = useMemo(
@@ -246,6 +268,28 @@ export const AlertEpisodesListPage = () => {
     setColumns(cols);
   }, []);
 
+  const onClearFilters = useCallback(() => {
+    setFilterState({ ...DEFAULT_EPISODES_LIST_FILTER });
+  }, [setFilterState]);
+
+  const filteredCount = episodesData?.length ?? 0;
+  const viewAllCount = kpiCounts.totalAlerts;
+
+  const renderCustomToolbar = useMemo(
+    () =>
+      getRenderCustomToolbarWithElements({
+        leftSide: (
+          <EpisodesTableToolbarStatus
+            filterState={filterState}
+            filteredCount={filteredCount}
+            viewAllCount={viewAllCount}
+            onClearFilters={onClearFilters}
+          />
+        ),
+      }),
+    [filterState, filteredCount, viewAllCount, onClearFilters]
+  );
+
   const externalCustomRenderers = useMemo<CustomCellRenderer>(
     () => ({
       'episode.status': (props) => <EpisodeStatusCell {...props} />,
@@ -277,7 +321,16 @@ export const AlertEpisodesListPage = () => {
         min-width: 0;
       `}
     >
-      <EuiPageHeader bottomBorder pageTitle={i18n.EPISODES_LIST_PAGE_TITLE} />
+      <EuiPageHeader
+        bottomBorder
+        pageTitle={i18n.EPISODES_LIST_PAGE_TITLE}
+        css={css`
+          .euiPageHeaderContent .euiTitle {
+            font-size: ${pageTitleSizeM.fontSize};
+            line-height: ${pageTitleSizeM.lineHeight};
+          }
+        `}
+      />
       <EuiSpacer size="m" />
 
       <EuiFlexGroup
@@ -300,6 +353,12 @@ export const AlertEpisodesListPage = () => {
             services={services}
           />
           <EuiSpacer size="s" />
+          <EpisodesKpiBlocks
+            filterState={filterState}
+            onFilterChange={setFilterState}
+            counts={kpiCounts}
+            isLoading={isLoadingKpiCounts}
+          />
         </EuiFlexItem>
         <EuiFlexItem
           grow
@@ -321,6 +380,8 @@ export const AlertEpisodesListPage = () => {
                 settings={ALERT_EPISODES_TABLE_SETTINGS}
                 css={getTableCss(euiTheme)}
                 gridStyleOverride={{
+                  border: 'horizontal',
+                  header: 'shade',
                   stripes: false,
                   cellPadding: 'l',
                 }}
@@ -347,6 +408,7 @@ export const AlertEpisodesListPage = () => {
                 rowAdditionalLeadingControls={rowAdditionalLeadingControls}
                 visibleRowLeadingControls={3}
                 enableComparisonMode={false}
+                renderCustomToolbar={renderCustomToolbar}
                 services={services}
               />
             )}

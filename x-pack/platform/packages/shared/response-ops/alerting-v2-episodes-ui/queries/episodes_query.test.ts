@@ -240,6 +240,42 @@ describe('buildEpisodesQuery', () => {
     expect(queryString).not.toContain('QSTR');
   });
 
+  it('should apply action KPI filters for unassigned, acknowledged, and snoozed', () => {
+    const unassigned = buildEpisodesQuery(
+      SPACE_ID,
+      { sortField: '@timestamp', sortDirection: 'desc' },
+      { actionKpi: 'unassigned' }
+    ).print('basic');
+    expect(unassigned).toContain('WHERE last_assignee_uid IS NULL');
+
+    const acknowledged = buildEpisodesQuery(
+      SPACE_ID,
+      { sortField: '@timestamp', sortDirection: 'desc' },
+      { actionKpi: 'acknowledged' }
+    ).print('basic');
+    expect(acknowledged).toContain('WHERE last_ack_action == "ack"');
+
+    const snoozed = buildEpisodesQuery(
+      SPACE_ID,
+      { sortField: '@timestamp', sortDirection: 'desc' },
+      { actionKpi: 'snoozed' }
+    ).print('basic');
+    expect(snoozed).toContain('WHERE last_snooze_action == "snooze"');
+  });
+
+  it('should apply highSeverityOnly filter', () => {
+    const query = buildEpisodesQuery(
+      SPACE_ID,
+      { sortField: '@timestamp', sortDirection: 'desc' },
+      { highSeverityOnly: true }
+    );
+    const queryString = query.print('basic');
+
+    expect(queryString).toContain('EVAL alert_severity = TO_UPPER');
+    expect(queryString).toContain('alert_severity == "HIGH"');
+    expect(queryString).toContain('alert_severity == "CRITICAL"');
+  });
+
   it('should apply assigneeUid filter with per-episode INLINE STATS', () => {
     const query = buildEpisodesQuery(
       SPACE_ID,

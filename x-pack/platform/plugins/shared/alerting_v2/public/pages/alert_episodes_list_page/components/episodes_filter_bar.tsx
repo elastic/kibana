@@ -8,13 +8,11 @@
 import React, {
   useCallback,
   useEffect,
-  useMemo,
   useState,
   type ChangeEvent,
   type SetStateAction,
 } from 'react';
 import {
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFilterGroup,
@@ -31,8 +29,10 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import useDebounce from 'react-use/lib/useDebounce';
-import deepEqual from 'fast-deep-equal';
-import { DEFAULT_EPISODES_LIST_FILTER } from '../utils/episodes_list_url_state';
+import {
+  applyAssigneeFilterChange,
+  applyStatusFilterChange,
+} from '../utils/episodes_kpi_filter_utils';
 import * as i18n from '../translations';
 
 export interface EpisodesFilterBarProps {
@@ -77,7 +77,7 @@ export const EpisodesFilterBar = ({
 
   const onStatusChange = useCallback(
     (status: string | undefined) => {
-      onFilterChange((prev) => ({ ...prev, status }));
+      onFilterChange((prev) => applyStatusFilterChange(prev, status));
     },
     [onFilterChange]
   );
@@ -98,7 +98,7 @@ export const EpisodesFilterBar = ({
 
   const onAssigneeChange = useCallback(
     (assigneeUid: string | undefined) => {
-      onFilterChange((prev) => ({ ...prev, assigneeUid }));
+      onFilterChange((prev) => applyAssigneeFilterChange(prev, assigneeUid));
     },
     [onFilterChange]
   );
@@ -106,16 +106,6 @@ export const EpisodesFilterBar = ({
   const onKueryChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     setQueryStringInput(e.target.value);
   }, []);
-
-  const hasActiveFilters = useMemo(
-    () => !deepEqual(filterState, DEFAULT_EPISODES_LIST_FILTER) || queryStringInput.trim() !== '',
-    [filterState, queryStringInput]
-  );
-
-  const onClearFilters = useCallback(() => {
-    setQueryStringInput('');
-    onFilterChange({ ...DEFAULT_EPISODES_LIST_FILTER });
-  }, [onFilterChange]);
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" wrap={false}>
@@ -165,17 +155,6 @@ export const EpisodesFilterBar = ({
             </EuiFilterGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButtonEmpty
-          size="xs"
-          iconType="cross"
-          disabled={!hasActiveFilters}
-          onClick={onClearFilters}
-          data-test-subj="episodesFilterBar-resetFilters"
-        >
-          {i18n.EPISODES_FILTER_BAR_RESET_FILTERS}
-        </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiSuperDatePicker
