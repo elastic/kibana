@@ -16,6 +16,7 @@ import {
 } from '@kbn/streams-schema/src/insights';
 import {
   OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
+  OBSERVABILITY_STREAMS_ENABLE_MEMORY,
   OBSERVABILITY_STREAMS_ENABLE_DRAFT_STREAMS,
   OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS,
 } from '@kbn/management-settings-ids';
@@ -70,6 +71,8 @@ export interface StreamsTestApiService {
   disableQueryStreams: () => Promise<void>;
   enableSignificantEvents: () => Promise<void>;
   disableSignificantEvents: () => Promise<void>;
+  enableMemory: () => Promise<void>;
+  disableMemory: () => Promise<void>;
   enableWiredStreamViews: () => Promise<void>;
   disableWiredStreamViews: () => Promise<void>;
   enableDraftStreams: () => Promise<void>;
@@ -330,6 +333,22 @@ export function getStreamsTestApiService({
       await measurePerformanceAsync(log, 'streamsTestApi.disableSignificantEvents', async () => {
         await kbnClient.uiSettings.update({
           [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: false,
+        });
+      });
+    },
+
+    async enableMemory() {
+      await measurePerformanceAsync(log, 'streamsTestApi.enableMemory', async () => {
+        await kbnClient.uiSettings.update({
+          [OBSERVABILITY_STREAMS_ENABLE_MEMORY]: true,
+        });
+      });
+    },
+
+    async disableMemory() {
+      await measurePerformanceAsync(log, 'streamsTestApi.disableMemory', async () => {
+        await kbnClient.uiSettings.update({
+          [OBSERVABILITY_STREAMS_ENABLE_MEMORY]: false,
         });
       });
     },
