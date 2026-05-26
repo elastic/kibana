@@ -64,13 +64,14 @@ spaceTest.describe(
 
         const originalTabTestSubj = await discover.getActiveTabTestSubj();
 
-        await spaceTest.step('navigate to last page and select a breakdown', async () => {
-          await metricsExperience.pagination.getPageButton(TOTAL_PAGES - 1).click();
-          await metricsExperience.waitForFirstCard(FIRST_CARD_LAST_PAGE);
+        await spaceTest.step('select a breakdown and navigate to last page', async () => {
           await metricsExperience.breakdownSelector.selectDimension(FIRST_DIMENSION);
           await expect(
             metricsExperience.breakdownSelector.getToggleWithSelection(FIRST_DIMENSION)
           ).toBeVisible();
+
+          await metricsExperience.pagination.getPageButton(TOTAL_PAGES - 1).click();
+          await metricsExperience.waitForFirstCard(FIRST_CARD_LAST_PAGE);
         });
 
         await spaceTest.step('duplicate the active tab', async () => {

@@ -20,7 +20,12 @@ import { SearchButton } from '../../toolbar/right_side_actions/search_button';
 import { MetricsExperienceGridContent } from './metrics_experience_grid_content';
 import { MetricsInfoError } from './metrics_info_error';
 import type { Dimension, UnifiedMetricsGridProps } from '../../../types';
-import { useDimensionsWipe, useDiscoverFieldForBreakdown, useMetricFieldsFilter } from './hooks';
+import {
+  useDimensionsWipe,
+  useDiscoverFieldForBreakdown,
+  useMetricFieldsFilter,
+  useResetPageOnBreakdownChange,
+} from './hooks';
 import { isSuppressedFetchError } from '../../chart/utils/is_suppressed_fetch_error';
 
 export const MetricsExperienceGrid = ({
@@ -72,9 +77,10 @@ export const MetricsExperienceGrid = ({
     breakdownField,
     allDimensions,
     selectedDimensions,
-    onDimensionsChange,
-    onPageChange
+    onDimensionsChange
   );
+
+  useResetPageOnBreakdownChange(breakdownField, onPageChange);
 
   const onToolbarDimensionsChange = useCallback(
     (nextSelectedDimensions: Dimension[]) => {

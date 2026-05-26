@@ -14,7 +14,6 @@ import { MAX_DIMENSIONS_SELECTIONS } from '../../../../common/constants';
 
 describe('useDiscoverFieldForBreakdown', () => {
   const mockOnDimensionsChange = jest.fn();
-  const mockOnPageChange = jest.fn();
 
   const createDimension = (name: string): Dimension => ({
     name,
@@ -511,122 +510,6 @@ describe('useDiscoverFieldForBreakdown', () => {
       await waitFor(() => {
         expect(mockOnDimensionsChange).toHaveBeenCalledWith([serviceDimension]);
       });
-    });
-  });
-
-  describe('page reset on breakdown change', () => {
-    it('does NOT call onPageChange on the first render (tab restore path)', async () => {
-      renderHook(() =>
-        useDiscoverFieldForBreakdown(
-          'host.name',
-          [hostDimension, serviceDimension],
-          [],
-          mockOnDimensionsChange,
-          mockOnPageChange
-        )
-      );
-
-      await waitFor(() => {
-        expect(mockOnDimensionsChange).toHaveBeenCalledWith([hostDimension]);
-      });
-
-      expect(mockOnPageChange).not.toHaveBeenCalled();
-    });
-
-    it('calls onPageChange(0) when breakdownField changes after mount', async () => {
-      const { rerender } = renderHook(
-        ({ breakdownField }) =>
-          useDiscoverFieldForBreakdown(
-            breakdownField,
-            [hostDimension, serviceDimension],
-            [],
-            mockOnDimensionsChange,
-            mockOnPageChange
-          ),
-        {
-          initialProps: {
-            breakdownField: 'host.name' as string | undefined,
-          },
-        }
-      );
-
-      // First render — no page reset.
-      await waitFor(() => {
-        expect(mockOnDimensionsChange).toHaveBeenCalledWith([hostDimension]);
-      });
-      expect(mockOnPageChange).not.toHaveBeenCalled();
-
-      mockOnDimensionsChange.mockClear();
-
-      // Discover-side change (sidebar pick / sibling write) — page must reset.
-      rerender({ breakdownField: 'service.name' });
-
-      await waitFor(() => {
-        expect(mockOnDimensionsChange).toHaveBeenCalledWith([serviceDimension]);
-      });
-      expect(mockOnPageChange).toHaveBeenCalledWith(0);
-    });
-
-    it('does NOT call onPageChange when the same breakdownField becomes selectable (stream catch-up)', async () => {
-      const { rerender } = renderHook(
-        ({ dimensions }) =>
-          useDiscoverFieldForBreakdown(
-            'host.name',
-            dimensions,
-            [],
-            mockOnDimensionsChange,
-            mockOnPageChange
-          ),
-        {
-          initialProps: {
-            dimensions: [] as Dimension[],
-          },
-        }
-      );
-
-      // breakdownField set but dimensions not yet available — nothing fires.
-      expect(mockOnDimensionsChange).not.toHaveBeenCalled();
-
-      // Dimensions become available (stream catch-up) — sync fires but page must NOT reset.
-      rerender({ dimensions: [hostDimension, serviceDimension] });
-
-      await waitFor(() => {
-        expect(mockOnDimensionsChange).toHaveBeenCalledWith([hostDimension]);
-      });
-      expect(mockOnPageChange).not.toHaveBeenCalled();
-    });
-
-    it('calls onPageChange(0) when breakdownField changes to undefined (toolbar clear)', async () => {
-      const { rerender } = renderHook(
-        ({ breakdownField }) =>
-          useDiscoverFieldForBreakdown(
-            breakdownField,
-            [hostDimension, serviceDimension],
-            [],
-            mockOnDimensionsChange,
-            mockOnPageChange
-          ),
-        {
-          initialProps: {
-            breakdownField: 'host.name' as string | undefined,
-          },
-        }
-      );
-
-      await waitFor(() => {
-        expect(mockOnDimensionsChange).toHaveBeenCalledWith([hostDimension]);
-      });
-
-      mockOnDimensionsChange.mockClear();
-      mockOnPageChange.mockClear();
-
-      rerender({ breakdownField: undefined });
-
-      await waitFor(() => {
-        expect(mockOnPageChange).toHaveBeenCalledWith(0);
-      });
-      // Dimension sync does not fire when breakdownField is undefined.
-      expect(mockOnDimensionsChange).not.toHaveBeenCalled();
     });
   });
 });

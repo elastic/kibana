@@ -15,8 +15,7 @@ export function useDiscoverFieldForBreakdown(
   breakdownField: string | undefined,
   dimensions: Dimension[],
   selectedDimensions: Dimension[],
-  onDimensionsChange: (dimensions: Dimension[]) => void,
-  onPageChange?: (page: number) => void
+  onDimensionsChange: (dimensions: Dimension[]) => void
 ) {
   // Helper function to sync breakdownField to selectedDimensions
   const syncBreakdownFieldToDimensions = useCallback(() => {
@@ -56,14 +55,10 @@ export function useDiscoverFieldForBreakdown(
       syncBreakdownFieldToDimensions();
     }
 
-    if (hasBreakdownFieldChanged && !isFirstRenderRef.current) {
-      onPageChange?.(0);
-    }
-
     isFirstRenderRef.current = false;
     prevBreakdownFieldRef.current = breakdownField;
     prevHasMatchingDimensionRef.current = hasMatchingDimension;
-  }, [breakdownField, dimensions, syncBreakdownFieldToDimensions, onPageChange]);
+  }, [breakdownField, dimensions, syncBreakdownFieldToDimensions]);
 }
 
 function hasMatchingDimensionForBreakdown(
