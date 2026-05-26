@@ -16,6 +16,8 @@ jest.mock('./build_status_runtime_field', () => ({
 jest.mock('./crud', () => {
   const actual = jest.requireActual('./crud');
   return {
+    ACTIVE_AGENT_CONDITION: actual.ACTIVE_AGENT_CONDITION,
+    ENROLLED_AGENT_CONDITION: actual.ENROLLED_AGENT_CONDITION,
     _joinFilters: jest.fn((filters: string[]) => {
       const joined = filters.filter(Boolean).join(' AND ');
       return joined ? { type: 'mock', query: joined } : undefined;
