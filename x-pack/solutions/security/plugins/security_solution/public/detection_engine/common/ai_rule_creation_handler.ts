@@ -101,16 +101,13 @@ export const createAiRuleCreationHandler = ({
 
     try {
       let saved: RuleResponse;
-      const savedRuleId =
-        rule.id ??
-        aiRuleCreation.getLastSavedRuleId() ??
-        aiRuleCreation.getExistingRuleId() ??
-        undefined;
+      // The button handler always injects the resolved id before calling requestSaveRule,
+      // so rule.id is the only source needed here.
+      const savedRuleId = rule.id;
       const isUpdate = !!savedRuleId;
       if (savedRuleId) {
-        const ruleWithId = savedRuleId === rule.id ? rule : { ...rule, id: savedRuleId };
         saved = await updateRule({
-          rule: transformOutput(stripRuleId(stripReadOnlyFields(ruleWithId))),
+          rule: transformOutput(stripRuleId(stripReadOnlyFields(rule))),
         });
       } else {
         const { id: _id, ...createProps } = rule as RuleResponse & { id?: string };
@@ -145,7 +142,12 @@ export const createAiRuleCreationHandler = ({
 
       const convId = activeConversationId;
       if (convId) {
-        agentBuilder?.updateAttachmentOrigin(convId, SECURITY_RULE_ATTACHMENT_ID, saved.id);
+        agentBuilder
+          ?.updateAttachmentOrigin(convId, SECURITY_RULE_ATTACHMENT_ID, saved.id)
+          .catch(() => {
+            // Non-fatal: attachment.origin will be missing until the next reload,
+            // but lastSavedRuleId provides the id in-session.
+          });
       }
 
       securitySolutionQueryClient.invalidateQueries(['POST', RULE_MANAGEMENT_RULES_URL_SEARCH], {
@@ -195,8 +197,8 @@ export const createAiRuleCreationHandler = ({
     const ruleAttachment = event.data.attachments?.find(
       (a) => a.type === SecurityAgentBuilderAttachments.rule
     );
-    const hasKnownRule =
-      aiRuleCreation.getLastSavedRuleId() !== null || aiRuleCreation.getExistingRuleId() !== null;
+    // lastSavedRuleId is seeded from existingRuleId on edit pages, so this covers both flows.
+    const hasKnownRule = aiRuleCreation.getLastSavedRuleId() !== null;
     if (hasKnownRule && ruleAttachment) {
       aiRuleCreation.markDirty();
     }

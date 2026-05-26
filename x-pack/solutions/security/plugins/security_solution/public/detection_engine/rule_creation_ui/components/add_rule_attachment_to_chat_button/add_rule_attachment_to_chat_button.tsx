@@ -71,12 +71,12 @@ export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButt
   const { services } = useKibana();
   const { aiRuleCreation } = services;
 
-  // For rule-response usage: register the rule id with the handler so saves know to PATCH not POST.
+  // Seed lastSavedRuleId so saves from the chat card know to PATCH not POST.
   const ruleId = rule?.id;
   useEffect(() => {
     if (!ruleId) return;
-    aiRuleCreation.setExistingRuleId(ruleId);
-    return () => aiRuleCreation.setExistingRuleId(null);
+    aiRuleCreation.setLastSavedRuleId(ruleId);
+    return () => aiRuleCreation.setLastSavedRuleId(null);
   }, [ruleId, aiRuleCreation]);
 
   // Format rule for AI assistant attachment from either form state or an existing rule response.

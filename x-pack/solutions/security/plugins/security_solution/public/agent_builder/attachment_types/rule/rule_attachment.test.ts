@@ -221,7 +221,6 @@ describe('useRuleActionButtons', () => {
       isDirty: false,
       isSaving: false,
       lastSavedRuleId: null,
-      existingRuleId: null,
       attachmentOrigin: null,
       showButtons: true,
     };
@@ -245,23 +244,16 @@ describe('useRuleActionButtons', () => {
     expect(registerActionButtons).toHaveBeenCalledWith([]);
   });
 
-  it('upgrades the save label to "Save changes" when a savedRuleId arrives after mount', () => {
-    const props = { ...baseProps, isDirty: true };
-    const { rerender } = renderHook((p: typeof props) => useRuleActionButtons(p), {
-      initialProps: props,
+  it('always shows "Save changes" regardless of whether a savedRuleId is present', () => {
+    const { rerender } = renderHook((p: typeof baseProps) => useRuleActionButtons(p), {
+      initialProps: { ...baseProps, isDirty: true },
     });
-    expect(saveButton()?.label).toBe('Save rule');
-    rerender({ ...props, lastSavedRuleId: 'saved-id' });
     expect(saveButton()?.label).toBe('Save changes');
-  });
 
-  it('freezes the save label at "Save changes" when a saved rule ID is present at mount', () => {
-    renderHook(() =>
-      useRuleActionButtons({
-        ...baseProps,
-        rule: { ...baseProps.rule!, id: 'rule-123' } as unknown as RuleResponse,
-      })
-    );
+    rerender({ ...baseProps, isDirty: true, lastSavedRuleId: 'saved-id' });
+    expect(saveButton()?.label).toBe('Save changes');
+
+    rerender({ ...baseProps, isDirty: true, attachmentOrigin: 'saved-id' });
     expect(saveButton()?.label).toBe('Save changes');
   });
 
@@ -272,15 +264,14 @@ describe('useRuleActionButtons', () => {
     expect(labels).toContain('View rule');
   });
 
-  it('includes View rule when existingRuleId is set by the page after mount', () => {
+  it('includes View rule when lastSavedRuleId arrives (e.g. seeded from edit page)', () => {
     const { rerender } = renderHook((p: typeof baseProps) => useRuleActionButtons(p), {
       initialProps: baseProps,
     });
     let labels = registerActionButtons.mock.calls.at(-1)![0].map((b: { label: string }) => b.label);
     expect(labels).not.toContain('View rule');
 
-    aiRuleCreation.setExistingRuleId('rule-from-page');
-    rerender({ ...baseProps, existingRuleId: 'rule-from-page' });
+    rerender({ ...baseProps, lastSavedRuleId: 'rule-from-page' });
     labels = registerActionButtons.mock.calls.at(-1)![0].map((b: { label: string }) => b.label);
     expect(labels).toContain('View rule');
   });

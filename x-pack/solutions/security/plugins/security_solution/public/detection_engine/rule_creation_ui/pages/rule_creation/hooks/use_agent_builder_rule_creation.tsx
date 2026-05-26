@@ -90,30 +90,31 @@ export const useAgentBuilderRuleCreation = ({
   existingRuleIdRef.current = existingRuleId;
 
   const getRuleIdForSync = useCallback((): string | undefined => {
-    return (
-      syncRuleIdRef.current ??
-      existingRuleIdRef.current ??
-      aiRuleCreation.getExistingRuleId() ??
-      undefined
-    );
-  }, [aiRuleCreation]);
+    return syncRuleIdRef.current ?? existingRuleIdRef.current ?? undefined;
+  }, []);
 
   useEffect(() => {
     const subscription = aiRuleCreation.formSyncActive$.subscribe(setIsSyncActive);
     return () => subscription.unsubscribe();
   }, [aiRuleCreation]);
 
-  // Stable for page lifetime; not reset on conversation switches unlike lastSavedRuleId.
+  // Seed lastSavedRuleId with the edit-page rule id so it serves as the single
+  // "current rule id" signal for both create (after save) and edit (from URL) flows.
+  // Re-seed whenever the conversation-switch handler resets it to null so the card
+  // always shows "Save changes" / "View rule" while the user is on the edit page.
   useEffect(() => {
-    aiRuleCreation.setExistingRuleId(existingRuleId ?? null);
-    return () => aiRuleCreation.setExistingRuleId(null);
+    if (!existingRuleId) return;
+    aiRuleCreation.setLastSavedRuleId(existingRuleId);
+    const sub = aiRuleCreation.lastSavedRuleId$.subscribe((id) => {
+      if (id === null) {
+        aiRuleCreation.setLastSavedRuleId(existingRuleId);
+      }
+    });
+    return () => {
+      sub.unsubscribe();
+      aiRuleCreation.setLastSavedRuleId(null);
+    };
   }, [existingRuleId, aiRuleCreation]);
-
-  useEffect(() => {
-    if (existingRuleId) {
-      syncRuleIdRef.current = existingRuleId;
-    }
-  }, [existingRuleId]);
 
   // Keep syncRuleIdRef aligned with chat saves; clear on conversation switch for create flows.
   useEffect(() => {

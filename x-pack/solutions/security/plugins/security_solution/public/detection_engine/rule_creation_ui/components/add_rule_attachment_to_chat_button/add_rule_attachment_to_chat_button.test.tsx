@@ -52,7 +52,6 @@ const mockKibanaServices = () => ({
     aiRuleCreation: {
       activateFormSync: mockActivateFormSync,
       setLastSavedRuleId: jest.fn(),
-      setExistingRuleId: jest.fn(),
     },
     agentBuilder: undefined,
   },

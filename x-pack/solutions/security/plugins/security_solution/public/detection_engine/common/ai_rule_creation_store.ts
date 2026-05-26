@@ -17,10 +17,11 @@ export interface AiRuleCreationSession {
 
 export class AiRuleCreationService {
   private readonly saveRuleSubject = new Subject<RuleResponse>();
+  // In-session rule id for PATCH vs POST decisions. Needed because addAttachment re-renders
+  // the attachment card with a snapshot that drops attachment.origin, so it can't be read
+  // from the component after save. On reload, attachment.origin is persisted and available
+  // on mount, making this unnecessary.
   private readonly lastSavedRuleIdSubject = new BehaviorSubject<string | null>(null);
-  // Page-level rule id — set on mount by whichever page knows the rule (details, editing).
-  // Unlike lastSavedRuleId, this is never reset by conversation switches; only by unmount.
-  private readonly existingRuleIdSubject = new BehaviorSubject<string | null>(null);
   private readonly dirtySubject = new BehaviorSubject<boolean>(false);
   private readonly savingSubject = new BehaviorSubject<boolean>(false);
   private readonly aiRuleSubject = new BehaviorSubject<RuleResponse | null>(null);
@@ -31,7 +32,6 @@ export class AiRuleCreationService {
 
   public readonly saveRuleRequest$ = this.saveRuleSubject.asObservable();
   public readonly lastSavedRuleId$ = this.lastSavedRuleIdSubject.asObservable();
-  public readonly existingRuleId$ = this.existingRuleIdSubject.asObservable();
   public readonly dirty$ = this.dirtySubject.pipe(distinctUntilChanged());
   public readonly saving$ = this.savingSubject.pipe(distinctUntilChanged());
   public readonly aiCreatedRule$ = this.aiRuleSubject.asObservable();
@@ -74,14 +74,6 @@ export class AiRuleCreationService {
     return this.lastSavedRuleIdSubject.getValue();
   };
 
-  public setExistingRuleId = (id: string | null): void => {
-    this.existingRuleIdSubject.next(id);
-  };
-
-  public getExistingRuleId = (): string | null => {
-    return this.existingRuleIdSubject.getValue();
-  };
-
   public markDirty = (): void => {
     this.dirtySubject.next(true);
   };
@@ -112,7 +104,6 @@ export class AiRuleCreationService {
 
   public reset = (): void => {
     this.lastSavedRuleIdSubject.next(null);
-    this.existingRuleIdSubject.next(null);
     this.dirtySubject.next(false);
     this.savingSubject.next(false);
     this.aiRuleSubject.next(null);

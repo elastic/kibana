@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   type InlineRenderCallbacks,
@@ -35,7 +35,6 @@ interface UseRuleActionButtonsParams {
   isDirty: boolean;
   isSaving: boolean;
   lastSavedRuleId: string | null | undefined;
-  existingRuleId: string | null | undefined;
   attachmentOrigin: string | null | undefined;
   showButtons: boolean;
 }
@@ -49,13 +48,9 @@ export const useRuleActionButtons = ({
   isDirty,
   isSaving,
   lastSavedRuleId,
-  existingRuleId,
   attachmentOrigin,
   showButtons,
 }: UseRuleActionButtonsParams) => {
-  const frozenSaveLabelRef = useRef<'save_rule' | 'save_changes' | null>(null);
-  const previousSavedRuleIdRef = useRef<string | undefined>();
-
   // Destructure to get a stable reference — callbacks object literal is recreated every render.
   const registerActionButtons = callbacks?.registerActionButtons;
   useEffect(() => {
@@ -70,20 +65,9 @@ export const useRuleActionButtons = ({
       registerActionButtons([]);
       return;
     }
-    const savedRuleId = getSavedRuleId(rule, aiRuleCreation, lastSavedRuleId, attachmentOrigin);
+    const savedRuleId = getSavedRuleId(rule, lastSavedRuleId, attachmentOrigin);
     // Disabled after a save until the agent makes another change; unsaved rules always enabled.
     const isClean = savedRuleId !== undefined && !isDirty;
-    // Freeze label at first registration; upgrade once a saved id appears (e.g. page remounted).
-    if (frozenSaveLabelRef.current === null) {
-      frozenSaveLabelRef.current = savedRuleId ? 'save_changes' : 'save_rule';
-    } else if (
-      savedRuleId &&
-      frozenSaveLabelRef.current === 'save_rule' &&
-      previousSavedRuleIdRef.current === undefined
-    ) {
-      frozenSaveLabelRef.current = 'save_changes';
-    }
-    previousSavedRuleIdRef.current = savedRuleId;
 
     const buttons: ActionButton[] = [
       {
@@ -100,19 +84,17 @@ export const useRuleActionButtons = ({
         },
       },
       {
-        label:
-          frozenSaveLabelRef.current === 'save_changes'
-            ? i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.saveChanges', {
-                defaultMessage: 'Save changes',
-              })
-            : i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.saveRule', {
-                defaultMessage: 'Save rule',
-              }),
+        label: i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.saveChanges', {
+          defaultMessage: 'Save changes',
+        }),
         icon: 'save',
         type: ActionButtonType.PRIMARY,
         disabled: isSaving || isClean,
         handler: () => {
-          aiRuleCreation.requestSaveRule(rule);
+          // Inject the resolved id so the save handler can determine create vs update
+          // purely from rule.id without reading service state.
+          const ruleWithId = savedRuleId ? { ...rule, id: savedRuleId } : rule;
+          aiRuleCreation.requestSaveRule(ruleWithId);
         },
       },
     ];
@@ -137,7 +119,6 @@ export const useRuleActionButtons = ({
     isSaving,
     isDirty,
     lastSavedRuleId,
-    existingRuleId,
     attachmentOrigin,
     showButtons,
     aiRuleCreation,
