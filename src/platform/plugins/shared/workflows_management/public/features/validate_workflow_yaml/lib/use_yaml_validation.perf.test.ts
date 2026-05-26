@@ -111,13 +111,20 @@ function loadYaml(relativePath: string): string {
   return fs.readFileSync(path.resolve(__dirname, relativePath), 'utf-8');
 }
 
+/** Extends the shared fake model with APIs required by validateEsqlSteps. */
+function createPerfMonacoModel(yamlContent: string) {
+  return Object.assign(createFakeMonacoModel(yamlContent), {
+    getValueLength: () => yamlContent.length,
+  });
+}
+
 function runPerStepBenchmarks(yamlContent: string, config: BenchmarkConfig) {
   const lineCounter = new LineCounter();
   const yamlDocument = YAML.parseDocument(yamlContent, {
     lineCounter,
     keepSourceTokens: true,
   });
-  const mockModel = createFakeMonacoModel(yamlContent);
+  const mockModel = createPerfMonacoModel(yamlContent);
   const computed = performComputation(yamlContent);
   const { workflowDefinition, workflowGraph, workflowLookup } = computed;
   const { iterations } = config;
@@ -215,7 +222,7 @@ async function runE2EBenchmark(yamlContent: string, config: BenchmarkConfig) {
       throw new Error(`performComputation returned no document on iteration ${i}`);
     }
 
-    const model = createFakeMonacoModel(yamlContent);
+    const model = createPerfMonacoModel(yamlContent);
 
     start = performance.now();
     validateStepNameUniqueness(yamlDocument, lc);
@@ -311,6 +318,7 @@ const SUITES = [
         validateVariables: 650,
         'connectorIds (collect+validate)': 80,
         validateIfConditions: 80,
+        validateEsqlSteps: 120,
       },
     },
   },
