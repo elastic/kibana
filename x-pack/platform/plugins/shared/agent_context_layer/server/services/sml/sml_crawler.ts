@@ -142,33 +142,34 @@ export class SmlCrawlerImpl implements SmlCrawler {
     });
   }
 
-  /** Returns true when the index was dropped due to an incompatible mapping change. */
+  /** Returns true when the index was dropped due to a persistent mapping update failure. */
   private async applyMappingsOrRebuild({
     esClient,
   }: {
     esClient: ElasticsearchClient;
   }): Promise<boolean> {
     const storage = createSmlStorage({ logger: this.logger, esClient });
+    const maxAttempts = 3;
 
-    try {
-      await storage.updateMappingsIfNeeded();
-      return false;
-    } catch (error) {
-      if (!isResponseError(error)) {
-        throw error;
-      }
-      if (error.statusCode === 404) {
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        await storage.updateMappingsIfNeeded();
         return false;
-      }
-      const esError = (error.body as { error?: { type?: string; caused_by?: { type?: string } } })
-        ?.error;
-      const isMappingConflict =
-        error.statusCode === 400 &&
-        (esError?.type === 'illegal_argument_exception' ||
-          esError?.caused_by?.type === 'illegal_argument_exception');
-      if (isMappingConflict) {
+      } catch (error) {
+        if (!isResponseError(error)) {
+          throw error;
+        }
+        if (error.statusCode === 404) {
+          return false;
+        }
+        if (attempt < maxAttempts) {
+          this.logger.warn(
+            `SML crawler: mapping update failed (attempt ${attempt}/${maxAttempts}), retrying`
+          );
+          continue;
+        }
         this.logger.warn(
-          `SML crawler: incompatible mapping change detected — dropping index '${smlIndexName}' and re-crawling immediately`
+          `SML crawler: mapping update failed after ${maxAttempts} attempts — dropping index '${smlIndexName}' and re-crawling immediately`
         );
         try {
           await storage.getClient().clean();
@@ -179,8 +180,9 @@ export class SmlCrawlerImpl implements SmlCrawler {
         }
         return true;
       }
-      throw error;
     }
+
+    return false;
   }
 
   /**
