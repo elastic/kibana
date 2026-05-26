@@ -20,7 +20,7 @@ export const searchRequestQuerySchema = schema.object({
     schema.string({
       meta: {
         description:
-          'Filters results by `title` and `description` using Elasticsearch [`simple_query_string`](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-simple-query-string-query) syntax. Multi-word terms require all words to match.',
+          'Filters results by `title` and `description` using Elasticsearch [`simple_query_string`](https://www.elastic.co/docs/reference/query-languages/query-dsl/simple-query-string-query) syntax. Multi-word terms require all words to match.',
       },
     })
   ),
@@ -33,7 +33,9 @@ export const searchResponseBodySchema = schema.object({
       id: schema.string({ meta: { description: 'The markdown library item ID.' } }),
       data: schema.object({
         description: schema.maybe(
-          schema.string({ meta: { description: 'The markdown library item description.' } })
+          schema.string({
+            meta: { description: 'A short description of the markdown library item.' },
+          })
         ),
         title: schema.string({ meta: { description: 'The markdown library item title.' } }),
       }),
@@ -42,7 +44,9 @@ export const searchResponseBodySchema = schema.object({
     {
       minSize: 0,
       maxSize: PAGINATION_MAX_SIZE,
-      meta: { description: 'List of markdown library items matching the query.' },
+      meta: {
+        description: 'List of markdown library items matching the query',
+      },
     }
   ),
   meta: asCodePaginationResponseMetaSchema,
