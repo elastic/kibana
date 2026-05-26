@@ -187,6 +187,10 @@ export class ChromeService {
       },
       sidebar,
       featureFlags,
+      componentDeps: {
+        basePath: http.basePath,
+        legacyActionMenu$: application.currentActionMenu$,
+      },
     });
 
     return chrome;

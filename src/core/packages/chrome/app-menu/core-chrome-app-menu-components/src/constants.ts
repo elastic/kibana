@@ -16,3 +16,5 @@
  */
 export const APP_MENU_ITEM_LIMIT = 3;
 export const DEFAULT_POPOVER_WIDTH = 200;
+// Temporary if of the share button in the app menu, used to extract the share action from the app menu config and use it in the app header menu.
+export const APP_MENU_SHARE_ID = 'share';

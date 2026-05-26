@@ -1,0 +1,147 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import React, { useMemo, useState, useLayoutEffect } from 'react';
+import type { ChromeBreadcrumb, AppHeaderConfig } from '@kbn/core-chrome-browser';
+import { useChromeService } from '@kbn/core-chrome-browser-context';
+import { useObservable } from '@kbn/use-observable';
+import type { AppHeaderBack } from '@kbn/app-header';
+
+import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import { AppHeaderView } from '@kbn/app-header';
+import { useLayoutUpdate } from '@kbn/ui-chrome-layout';
+import { useHasLegacyActionMenu } from '../shared/chrome_hooks';
+
+function getBreadcrumbText(crumb: ChromeBreadcrumb): string | undefined {
+  if (typeof crumb.text === 'string') return crumb.text;
+  if (typeof crumb['aria-label'] === 'string') return crumb['aria-label'];
+  return undefined;
+}
+
+interface FallbackProps {
+  hasContent: boolean;
+  back?: AppHeaderBack[];
+  menu?: AppMenuConfig;
+}
+
+function useFallbackProps(): FallbackProps {
+  const chrome = useChromeService();
+
+  const breadcrumbs$ = useMemo(() => chrome.project.getBreadcrumbs$(), [chrome]);
+  const breadcrumbs = useObservable(breadcrumbs$, []);
+
+  const appMenu$ = useMemo(() => chrome.getAppMenu$(), [chrome]);
+  const appMenu = useObservable(appMenu$, undefined);
+
+  const hasLegacyActionMenu = useHasLegacyActionMenu();
+
+  return useMemo(() => {
+    const backTargets: AppHeaderBack[] = [];
+    for (let i = breadcrumbs.length - 2; i >= 0; i--) {
+      const crumb = breadcrumbs[i];
+      if (crumb.href) {
+        backTargets.push({
+          href: crumb.href,
+          onClick: crumb.onClick,
+          label: getBreadcrumbText(crumb),
+        });
+      }
+    }
+
+    const hasBack = backTargets.length > 0;
+    const hasMenu = !!appMenu?.items?.length;
+    const hasContent = hasBack || hasMenu || hasLegacyActionMenu;
+
+    return {
+      hasContent,
+      back: hasBack ? backTargets : undefined,
+      menu: hasMenu ? appMenu : undefined,
+    };
+  }, [breadcrumbs, appMenu, hasLegacyActionMenu]);
+}
+
+function useAppHeaderConfig(): AppHeaderConfig | undefined {
+  const chrome = useChromeService();
+  const config$ = useMemo(() => chrome.next.appHeader.get$(), [chrome]);
+  return useObservable(config$, undefined);
+}
+
+function normalizeAppHeaderBack(
+  back: string | AppHeaderBack | undefined
+): AppHeaderBack | undefined {
+  if (typeof back === 'string') return { href: back };
+  return back;
+}
+
+function hasExplicitAppHeaderContent(config: AppHeaderConfig | undefined): boolean {
+  if (!config) return false;
+  return (
+    config.title !== undefined ||
+    normalizeAppHeaderBack(config.back) !== undefined ||
+    !!config.tabs?.length ||
+    !!config.badges?.length ||
+    !!config.menu?.items?.length
+  );
+}
+
+export function useHasChromeAppHeaderContent(): boolean {
+  const config = useAppHeaderConfig();
+  const fallback = useFallbackProps();
+  return hasExplicitAppHeaderContent(config) || fallback.hasContent;
+}
+
+function useMeasuredAppHeaderHeight(): React.RefCallback<HTMLDivElement> {
+  const updateLayout = useLayoutUpdate();
+  const [el, setEl] = useState<HTMLDivElement | null>(null);
+
+  useLayoutEffect(() => {
+    if (!el) return;
+
+    updateLayout({ applicationTopBarHeight: el.offsetHeight });
+
+    const ro = new ResizeObserver(([entry]) => {
+      const h = entry.borderBoxSize?.[0]?.blockSize ?? el.offsetHeight;
+      updateLayout({ applicationTopBarHeight: h });
+    });
+    ro.observe(el);
+
+    return () => ro.disconnect();
+  }, [el, updateLayout]);
+
+  return setEl;
+}
+
+export const ChromeAppHeaderRenderer = React.memo(() => {
+  const config = useAppHeaderConfig();
+  const fallback = useFallbackProps();
+
+  const back = normalizeAppHeaderBack(config?.back);
+  const hasContent = hasExplicitAppHeaderContent(config) || fallback.hasContent;
+  const measureRef = useMeasuredAppHeaderHeight();
+
+  if (!hasContent) return null;
+
+  return (
+    <div ref={measureRef}>
+      <AppHeaderView
+        title={config?.title}
+        back={back ?? fallback.back}
+        tabs={config?.tabs}
+        badges={config?.badges}
+        menu={config?.menu ?? fallback.menu}
+        onShare={config?.onShare}
+        favorite={config?.favorite}
+        sticky={false}
+        padding="m"
+      />
+    </div>
+  );
+});
+
+ChromeAppHeaderRenderer.displayName = 'ChromeAppHeaderRenderer';

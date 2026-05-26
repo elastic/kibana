@@ -8,8 +8,10 @@
  */
 
 import { BehaviorSubject, of } from 'rxjs';
+import type { Observable } from 'rxjs';
+import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
-import type { ChromeBadge, ChromeBreadcrumb } from '@kbn/core-chrome-browser';
+import type { AppHeaderConfig, ChromeBadge, ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 import type {
   InternalChromeSetup,
   InternalChromeStart,
@@ -24,8 +26,22 @@ const createSetupContractMock = (): DeeplyMockedKeys<InternalChromeSetup> => {
 };
 
 const createStartContractMock = () => {
+  const nextAppHeaderState$ = new BehaviorSubject<AppHeaderConfig | undefined>(undefined);
+
   const startContract: DeeplyMockedKeys<InternalChromeStart> = lazyObject({
     withProvider: jest.fn((children) => children),
+    componentDeps: lazyObject({
+      basePath: lazyObject({
+        get: jest.fn().mockReturnValue(''),
+        prepend: jest.fn((path: string) => path),
+        remove: jest.fn(),
+        serverBasePath: '/',
+        assetsHrefBase: '/',
+      }),
+      legacyActionMenu$: new BehaviorSubject<MountPoint | undefined>(
+        undefined
+      ) as unknown as DeeplyMockedKeys<Observable<MountPoint | undefined>>,
+    }),
     sidebar: lazyObject(sidebarServiceMock.createStartContract()),
     navLinks: lazyObject({
       getNavLinks$: jest.fn().mockReturnValue(new BehaviorSubject([])),
@@ -69,6 +85,7 @@ const createStartContractMock = () => {
     }),
     getBreadcrumbsAppendExtensions$: jest.fn().mockReturnValue(new BehaviorSubject([])),
     getBreadcrumbsAppendExtensionsWithBadges$: jest.fn().mockReturnValue(new BehaviorSubject([])),
+    getBreadcrumbsBadges$: jest.fn().mockReturnValue(new BehaviorSubject([])),
     setBreadcrumbsAppendExtension: jest.fn(),
     getGlobalHelpExtensionMenuLinks$: jest.fn().mockReturnValue(new BehaviorSubject([])),
     registerGlobalHelpExtensionMenuLink: jest.fn(),
@@ -103,6 +120,19 @@ const createStartContractMock = () => {
       globalSearch: lazyObject({
         set: jest.fn(),
         get$: jest.fn().mockReturnValue(new BehaviorSubject(undefined)),
+      }),
+      inlineAppHeader: lazyObject({
+        get$: jest.fn().mockReturnValue(new BehaviorSubject(false)),
+        set: jest.fn(),
+      }),
+      appHeader: lazyObject({
+        get$: jest.fn().mockReturnValue(nextAppHeaderState$),
+        set: jest.fn((config: AppHeaderConfig) => {
+          nextAppHeaderState$.next(config);
+          return () => {
+            nextAppHeaderState$.next(undefined);
+          };
+        }),
       }),
     }),
     setGlobalFooter: jest.fn(),
