@@ -18,14 +18,18 @@ import {
   getCreateThreatMatchRulesSchemaMock,
   getCreateThresholdRulesSchemaMock,
 } from './rule_request_schema.mock';
-import type { SavedQueryRuleCreateProps } from './rule_schemas.gen';
-import { RuleCreatePropsWithSuppressionRefinement as RuleCreateProps } from './utils';
+import type { RuleCreateProps, SavedQueryRuleCreateProps } from './rule_schemas.gen';
+import { RuleCreatePropsWithSuppressionRefinement as RuleCreatePropsSchema } from './utils';
+
+// `RuleCreatePropsSchema` is the cross-field-refined runtime schema (enforces that
+// `alert_suppression` includes `group_by` or `group_by_v2`); the corresponding TS type is
+// re-used from the generated `RuleCreateProps` above.
 
 describe('rules schema', () => {
   test('empty objects do not validate', () => {
     const payload = {};
 
-    const result = RuleCreateProps.safeParse(payload);
+    const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual('type: Invalid input');
   });
@@ -36,7 +40,7 @@ describe('rules schema', () => {
       madeUp: 'hi',
     };
 
-    const result = RuleCreateProps.safeParse(payload);
+    const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseSuccess(result);
     expect(result.data).toEqual(getCreateRulesSchemaMock());
   });
@@ -46,7 +50,7 @@ describe('rules schema', () => {
       rule_id: 'rule-1',
     };
 
-    const result = RuleCreateProps.safeParse(payload);
+    const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual('type: Invalid input');
   });
@@ -57,7 +61,7 @@ describe('rules schema', () => {
       description: 'some description',
     };
 
-    const result = RuleCreateProps.safeParse(payload);
+    const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual('type: Invalid input');
   });
@@ -69,7 +73,7 @@ describe('rules schema', () => {
       from: 'now-5m',
     };
 
-    const result = RuleCreateProps.safeParse(payload);
+    const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual('type: Invalid input');
   });
@@ -82,7 +86,7 @@ describe('rules schema', () => {
       to: 'now',
     };
 
-    const result = RuleCreateProps.safeParse(payload);
+    const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual('type: Invalid input');
   });
@@ -96,7 +100,7 @@ describe('rules schema', () => {
       name: 'some-name',
     };
 
-    const result = RuleCreateProps.safeParse(payload);
+    const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual('type: Invalid input');
   });
@@ -111,7 +115,7 @@ describe('rules schema', () => {
       severity: 'low',
     };
 
-    const result = RuleCreateProps.safeParse(payload);
+    const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual('type: Invalid input');
   });
@@ -127,7 +131,7 @@ describe('rules schema', () => {
       type: 'query',
     };
 
-    const result = RuleCreateProps.safeParse(payload);
+    const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual(
       'risk_score: Invalid input: expected number, received undefined'
@@ -146,7 +150,7 @@ describe('rules schema', () => {
       type: 'query',
     };
 
-    const result = RuleCreateProps.safeParse(payload);
+    const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual(
       'risk_score: Invalid input: expected number, received undefined'
@@ -166,7 +170,7 @@ describe('rules schema', () => {
       index: ['index-1'],
     };
 
-    const result = RuleCreateProps.safeParse(payload);
+    const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual(
       'risk_score: Invalid input: expected number, received undefined'
@@ -188,7 +192,7 @@ describe('rules schema', () => {
       interval: '5m',
     };
 
-    const result = RuleCreateProps.safeParse(payload);
+    const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseSuccess(result);
     expect(result.data).toMatchObject(payload);
   });
@@ -208,7 +212,7 @@ describe('rules schema', () => {
       language: 'kuery',
     };
 
-    const result = RuleCreateProps.safeParse(payload);
+    const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual(
       'risk_score: Invalid input: expected number, received undefined'
@@ -231,7 +235,7 @@ describe('rules schema', () => {
       language: 'kuery',
     };
 
-    const result = RuleCreateProps.safeParse(payload);
+    const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseSuccess(result);
     expect(result.data).toMatchObject(payload);
   });
@@ -253,7 +257,7 @@ describe('rules schema', () => {
       language: 'kuery',
     };
 
-    const result = RuleCreateProps.safeParse(payload);
+    const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseSuccess(result);
     expect(result.data).toMatchObject(payload);
   });
@@ -272,7 +276,7 @@ describe('rules schema', () => {
       risk_score: 50,
     };
 
-    const result = RuleCreateProps.safeParse(payload);
+    const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseSuccess(result);
     expect(result.data).toMatchObject(payload);
   });
@@ -295,7 +299,7 @@ describe('rules schema', () => {
       type: 'query',
     };
 
-    const result = RuleCreateProps.safeParse(payload);
+    const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseSuccess(result);
     expect(result.data).toMatchObject(payload);
   });
@@ -306,7 +310,7 @@ describe('rules schema', () => {
       namespace: 'a namespace',
     };
 
-    const result = RuleCreateProps.safeParse(payload);
+    const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseSuccess(result);
     expect(result.data).toMatchObject(payload);
   });
@@ -317,7 +321,7 @@ describe('rules schema', () => {
       threat: [],
     };
 
-    const result = RuleCreateProps.safeParse(payload);
+    const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseSuccess(result);
     expect(result.data).toMatchObject(payload);
   });
@@ -354,7 +358,7 @@ describe('rules schema', () => {
       ],
     };
 
-    const result = RuleCreateProps.safeParse(payload);
+    const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseSuccess(result);
     expect(result.data).toMatchObject(payload);
   });
@@ -365,7 +369,7 @@ describe('rules schema', () => {
       references: ['index-1'],
     };
 
-    const result = RuleCreateProps.safeParse(payload);
+    const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseSuccess(result);
     expect(result.data).toMatchObject(payload);
   });
@@ -376,7 +380,7 @@ describe('rules schema', () => {
       references: [5],
     };
 
-    const result = RuleCreateProps.safeParse(payload);
+    const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual(
       'references.0: Invalid input: expected string, received number'
@@ -389,7 +393,7 @@ describe('rules schema', () => {
       index: [5],
     };
 
-    const result = RuleCreateProps.safeParse(payload);
+    const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual(
       'index.0: Invalid input: expected string, received number'
@@ -402,7 +406,7 @@ describe('rules schema', () => {
       filters: [],
     };
 
-    const result = RuleCreateProps.safeParse(payload);
+    const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseSuccess(result);
     expect(result.data).toMatchObject(payload);
   });
@@ -413,7 +417,7 @@ describe('rules schema', () => {
       filters: 'some string',
     };
 
-    const result = RuleCreateProps.safeParse(payload);
+    const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual(
       'filters: Invalid input: expected array, received string'
@@ -426,7 +430,7 @@ describe('rules schema', () => {
       language: 'kuery',
     };
 
-    const result = RuleCreateProps.safeParse(payload);
+    const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseSuccess(result);
     expect(result.data).toMatchObject(payload);
   });
@@ -437,7 +441,7 @@ describe('rules schema', () => {
       language: 'lucene',
     };
 
-    const result = RuleCreateProps.safeParse(payload);
+    const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseSuccess(result);
     expect(result.data).toMatchObject(payload);
   });
@@ -448,7 +452,7 @@ describe('rules schema', () => {
       language: 'something-made-up',
     };
 
-    const result = RuleCreateProps.safeParse(payload);
+    const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual(
       'language: Invalid option: expected one of "kuery"|"lucene"'
@@ -461,7 +465,7 @@ describe('rules schema', () => {
       max_signals: -1,
     };
 
-    const result = RuleCreateProps.safeParse(payload);
+    const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual(
       'max_signals: Too small: expected number to be >=1'
@@ -474,7 +478,7 @@ describe('rules schema', () => {
       max_signals: 0,
     };
 
-    const result = RuleCreateProps.safeParse(payload);
+    const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual(
       'max_signals: Too small: expected number to be >=1'
@@ -487,7 +491,7 @@ describe('rules schema', () => {
       max_signals: 1,
     };
 
-    const result = RuleCreateProps.safeParse(payload);
+    const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseSuccess(result);
     expect(result.data).toMatchObject(payload);
   });
@@ -498,7 +502,7 @@ describe('rules schema', () => {
       tags: ['tag_1', 'tag_2'],
     };
 
-    const result = RuleCreateProps.safeParse(payload);
+    const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseSuccess(result);
     expect(result.data).toMatchObject(payload);
   });
@@ -509,7 +513,7 @@ describe('rules schema', () => {
       tags: [0, 1, 2],
     };
 
-    const result = RuleCreateProps.safeParse(payload);
+    const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual(
       'tags.0: Invalid input: expected string, received number, tags.1: Invalid input: expected string, received number, tags.2: Invalid input: expected string, received number'
@@ -537,7 +541,7 @@ describe('rules schema', () => {
       ],
     };
 
-    const result = RuleCreateProps.safeParse(payload);
+    const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual(
       'threat.0.framework: Invalid input: expected string, received undefined'
@@ -561,7 +565,7 @@ describe('rules schema', () => {
       ],
     };
 
-    const result = RuleCreateProps.safeParse(payload);
+    const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual(
       'threat.0.tactic: Invalid input: expected object, received undefined'
@@ -583,7 +587,7 @@ describe('rules schema', () => {
       ],
     };
 
-    const result = RuleCreateProps.safeParse(payload);
+    const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseSuccess(result);
     expect(result.data).toMatchObject(payload);
   });
@@ -594,7 +598,7 @@ describe('rules schema', () => {
       false_positives: ['false_1', 'false_2'],
     };
 
-    const result = RuleCreateProps.safeParse(payload);
+    const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseSuccess(result);
     expect(result.data).toMatchObject(payload);
   });
@@ -605,7 +609,7 @@ describe('rules schema', () => {
       false_positives: [5, 4],
     };
 
-    const result = RuleCreateProps.safeParse(payload);
+    const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual(
       'false_positives.0: Invalid input: expected string, received number, false_positives.1: Invalid input: expected string, received number'
@@ -618,7 +622,7 @@ describe('rules schema', () => {
       risk_score: 101,
     };
 
-    const result = RuleCreateProps.safeParse(payload);
+    const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual(
       'risk_score: Too big: expected number to be <=100'
@@ -631,7 +635,7 @@ describe('rules schema', () => {
       risk_score: -1,
     };
 
-    const result = RuleCreateProps.safeParse(payload);
+    const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual(
       'risk_score: Too small: expected number to be >=0'
@@ -644,7 +648,7 @@ describe('rules schema', () => {
       risk_score: 0,
     };
 
-    const result = RuleCreateProps.safeParse(payload);
+    const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseSuccess(result);
     expect(result.data).toMatchObject(payload);
   });
@@ -655,7 +659,7 @@ describe('rules schema', () => {
       risk_score: 100,
     };
 
-    const result = RuleCreateProps.safeParse(payload);
+    const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseSuccess(result);
     expect(result.data).toMatchObject(payload);
   });
@@ -668,7 +672,7 @@ describe('rules schema', () => {
       },
     };
 
-    const result = RuleCreateProps.safeParse(payload);
+    const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseSuccess(result);
     expect(result.data).toMatchObject(payload);
   });
@@ -679,7 +683,7 @@ describe('rules schema', () => {
       meta: 'should not work',
     };
 
-    const result = RuleCreateProps.safeParse(payload);
+    const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual(
       'meta: Invalid input: expected object, received string'
@@ -693,7 +697,7 @@ describe('rules schema', () => {
       filters: [],
     };
 
-    const result = RuleCreateProps.safeParse(payload);
+    const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseSuccess(result);
     expect(result.data).toMatchObject(payload);
   });
@@ -705,7 +709,7 @@ describe('rules schema', () => {
       timeline_title: 'timeline-title',
     };
 
-    const result = RuleCreateProps.safeParse(payload);
+    const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseSuccess(result);
     expect(result.data).toMatchObject(payload);
   });
@@ -716,7 +720,7 @@ describe('rules schema', () => {
       severity: 'junk',
     };
 
-    const result = RuleCreateProps.safeParse(payload);
+    const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual(
       'severity: Invalid option: expected one of "low"|"medium"|"high"|"critical"'
@@ -729,7 +733,7 @@ describe('rules schema', () => {
       actions: [{ group: 'group', action_type_id: 'action_type_id', params: {} }],
     };
 
-    const result = RuleCreateProps.safeParse(payload);
+    const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual(
       'actions.0.id: Invalid input: expected string, received undefined'
@@ -742,7 +746,7 @@ describe('rules schema', () => {
       actions: [{ group: 'group', id: 'id', params: {} }],
     };
 
-    const result = RuleCreateProps.safeParse(payload);
+    const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual(
       'actions.0.action_type_id: Invalid input: expected string, received undefined'
@@ -755,7 +759,7 @@ describe('rules schema', () => {
       actions: [{ group: 'group', id: 'id', action_type_id: 'action_type_id' }],
     };
 
-    const result = RuleCreateProps.safeParse(payload);
+    const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual(
       'actions.0.params: Invalid input: expected object, received undefined'
@@ -775,7 +779,7 @@ describe('rules schema', () => {
       ],
     };
 
-    const result = RuleCreateProps.safeParse(payload);
+    const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual(
       'actions.0.action_type_id: Invalid input: expected string, received undefined'
@@ -789,7 +793,7 @@ describe('rules schema', () => {
         note: '# documentation markdown here',
       };
 
-      const result = RuleCreateProps.safeParse(payload);
+      const result = RuleCreatePropsSchema.safeParse(payload);
       expectParseSuccess(result);
       expect(result.data).toMatchObject(payload);
     });
@@ -800,7 +804,7 @@ describe('rules schema', () => {
         note: '',
       };
 
-      const result = RuleCreateProps.safeParse(payload);
+      const result = RuleCreatePropsSchema.safeParse(payload);
       expectParseSuccess(result);
       expect(result.data).toMatchObject(payload);
     });
@@ -813,7 +817,7 @@ describe('rules schema', () => {
         },
       };
 
-      const result = RuleCreateProps.safeParse(payload);
+      const result = RuleCreatePropsSchema.safeParse(payload);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toEqual(
         'note: Invalid input: expected string, received object'
@@ -826,7 +830,7 @@ describe('rules schema', () => {
         name: '',
       };
 
-      const result = RuleCreateProps.safeParse(payload);
+      const result = RuleCreatePropsSchema.safeParse(payload);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toEqual(
         'name: Too small: expected string to have >=1 characters'
@@ -839,7 +843,7 @@ describe('rules schema', () => {
         description: '',
       };
 
-      const result = RuleCreateProps.safeParse(payload);
+      const result = RuleCreatePropsSchema.safeParse(payload);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toEqual(
         'description: Too small: expected string to have >=1 characters'
@@ -861,7 +865,7 @@ describe('rules schema', () => {
         note: '# some markdown',
       };
 
-      const result = RuleCreateProps.safeParse(payload);
+      const result = RuleCreatePropsSchema.safeParse(payload);
       expectParseSuccess(result);
       expect(result.data).toMatchObject(payload);
     });
@@ -890,7 +894,7 @@ describe('rules schema', () => {
       rule_id: 'rule-1',
     };
 
-    const result = RuleCreateProps.safeParse(payload);
+    const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseSuccess(result);
     expect(result.data).toMatchObject(payload);
   });
@@ -898,7 +902,7 @@ describe('rules schema', () => {
   test('saved_id is required when type is saved_query and will not validate without it', () => {
     const { saved_id, ...payload } = getCreateSavedQueryRulesSchemaMock();
 
-    const result = RuleCreateProps.safeParse(payload);
+    const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual(
       'saved_id: Invalid input: expected string, received undefined'
@@ -908,7 +912,7 @@ describe('rules schema', () => {
   test('threshold is required when type is threshold and will not validate without it', () => {
     const { threshold, ...payload } = getCreateThresholdRulesSchemaMock();
 
-    const result = RuleCreateProps.safeParse(payload);
+    const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual(
       'threshold: Invalid input: expected object, received undefined'
@@ -919,7 +923,7 @@ describe('rules schema', () => {
     const payload = getCreateThresholdRulesSchemaMock();
     payload.threshold.value = 0;
 
-    const result = RuleCreateProps.safeParse(payload);
+    const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual(
       'threshold.value: Too small: expected number to be >=1'
@@ -944,7 +948,7 @@ describe('rules schema', () => {
         exceptions_list: getListArrayMock(),
       };
 
-      const result = RuleCreateProps.safeParse(payload);
+      const result = RuleCreatePropsSchema.safeParse(payload);
       expectParseSuccess(result);
       expect(result.data).toMatchObject(payload);
     });
@@ -966,7 +970,7 @@ describe('rules schema', () => {
         exceptions_list: [],
       };
 
-      const result = RuleCreateProps.safeParse(payload);
+      const result = RuleCreatePropsSchema.safeParse(payload);
       expectParseSuccess(result);
       expect(result.data).toMatchObject(payload);
     });
@@ -988,7 +992,7 @@ describe('rules schema', () => {
         exceptions_list: [{ id: 'uuid_here', namespace_type: 'not a namespace type' }],
       };
 
-      const result = RuleCreateProps.safeParse(payload);
+      const result = RuleCreatePropsSchema.safeParse(payload);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toEqual(
         'exceptions_list.0.list_id: Invalid input: expected string, received undefined, exceptions_list.0.type: Invalid option: expected one of "detection"|"rule_default"|"endpoint"|"endpoint_trusted_apps"|"endpoint_trusted_devices"|"endpoint_events"|"endpoint_host_isolation_exceptions"|"endpoint_blocklists", exceptions_list.0.namespace_type: Invalid option: expected one of "agnostic"|"single"'
@@ -1011,7 +1015,7 @@ describe('rules schema', () => {
         note: '# some markdown',
       };
 
-      const result = RuleCreateProps.safeParse(payload);
+      const result = RuleCreatePropsSchema.safeParse(payload);
       expectParseSuccess(result);
       expect(result.data).toMatchObject(payload);
     });
@@ -1021,7 +1025,7 @@ describe('rules schema', () => {
     test('You can set a threat query, index, mapping, filters when creating a rule', () => {
       const payload = getCreateThreatMatchRulesSchemaMock();
 
-      const result = RuleCreateProps.safeParse(payload);
+      const result = RuleCreatePropsSchema.safeParse(payload);
       expectParseSuccess(result);
       expect(result.data).toMatchObject(payload);
     });
@@ -1030,7 +1034,7 @@ describe('rules schema', () => {
       const { threat_index, threat_query, threat_mapping, ...payload } =
         getCreateThreatMatchRulesSchemaMock();
 
-      const result = RuleCreateProps.safeParse(payload);
+      const result = RuleCreatePropsSchema.safeParse(payload);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toEqual(
         'threat_query: Invalid input: expected string, received undefined, threat_mapping: Invalid input: expected array, received undefined, threat_index: Invalid input: expected array, received undefined'
@@ -1041,7 +1045,7 @@ describe('rules schema', () => {
       const payload = getCreateThreatMatchRulesSchemaMock();
       payload.threat_mapping = [];
 
-      const result = RuleCreateProps.safeParse(payload);
+      const result = RuleCreatePropsSchema.safeParse(payload);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toEqual(
         'threat_mapping: Too small: expected array to have >=1 items'
@@ -1053,7 +1057,7 @@ describe('rules schema', () => {
     it('should validate correct payload', () => {
       const payload = getCreateEsqlRulesSchemaMock();
 
-      const result = RuleCreateProps.safeParse(payload);
+      const result = RuleCreatePropsSchema.safeParse(payload);
       expectParseSuccess(result);
       expect(result.data).toMatchObject(payload);
     });
@@ -1062,7 +1066,7 @@ describe('rules schema', () => {
       const payload = { ...getCreateEsqlRulesSchemaMock(), index: ['test*'] };
       const expected = getCreateEsqlRulesSchemaMock();
 
-      const result = RuleCreateProps.safeParse(payload);
+      const result = RuleCreatePropsSchema.safeParse(payload);
       expectParseSuccess(result);
       expect(result.data).toEqual(expected);
     });
@@ -1071,7 +1075,7 @@ describe('rules schema', () => {
       const payload = { ...getCreateEsqlRulesSchemaMock(), data_view_id: 'test' };
       const expected = getCreateEsqlRulesSchemaMock();
 
-      const result = RuleCreateProps.safeParse(payload);
+      const result = RuleCreatePropsSchema.safeParse(payload);
       expectParseSuccess(result);
       expect(result.data).toEqual(expected);
     });
@@ -1080,7 +1084,7 @@ describe('rules schema', () => {
       const payload = { ...getCreateEsqlRulesSchemaMock(), filters: [] };
       const expected = getCreateEsqlRulesSchemaMock();
 
-      const result = RuleCreateProps.safeParse(payload);
+      const result = RuleCreatePropsSchema.safeParse(payload);
       expectParseSuccess(result);
       expect(result.data).toEqual(expected);
     });
@@ -1090,7 +1094,7 @@ describe('rules schema', () => {
     test('validates when "data_view_id" and index are defined', () => {
       const payload = { ...getCreateRulesSchemaMockWithDataView(), index: ['auditbeat-*'] };
 
-      const result = RuleCreateProps.safeParse(payload);
+      const result = RuleCreatePropsSchema.safeParse(payload);
       expectParseSuccess(result);
       expect(result.data).toMatchObject(payload);
     });
@@ -1101,7 +1105,7 @@ describe('rules schema', () => {
         data_view_id: 5,
       };
 
-      const result = RuleCreateProps.safeParse(payload);
+      const result = RuleCreatePropsSchema.safeParse(payload);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toEqual(
         'data_view_id: Invalid input: expected string, received number'
@@ -1111,7 +1115,7 @@ describe('rules schema', () => {
     test('it should validate a type of "query" with "data_view_id" defined', () => {
       const payload = getCreateRulesSchemaMockWithDataView();
 
-      const result = RuleCreateProps.safeParse(payload);
+      const result = RuleCreatePropsSchema.safeParse(payload);
       expectParseSuccess(result);
       expect(result.data).toMatchObject(payload);
     });
@@ -1119,7 +1123,7 @@ describe('rules schema', () => {
     test('it should validate a type of "saved_query" with "data_view_id" defined', () => {
       const payload = { ...getCreateSavedQueryRulesSchemaMock(), data_view_id: 'logs-*' };
 
-      const result = RuleCreateProps.safeParse(payload);
+      const result = RuleCreatePropsSchema.safeParse(payload);
       expectParseSuccess(result);
       expect(result.data).toMatchObject(payload);
     });
@@ -1127,7 +1131,7 @@ describe('rules schema', () => {
     test('it should validate a type of "threat_match" with "data_view_id" defined', () => {
       const payload = { ...getCreateThreatMatchRulesSchemaMock(), data_view_id: 'logs-*' };
 
-      const result = RuleCreateProps.safeParse(payload);
+      const result = RuleCreatePropsSchema.safeParse(payload);
       expectParseSuccess(result);
       expect(result.data).toMatchObject(payload);
     });
@@ -1135,7 +1139,7 @@ describe('rules schema', () => {
     test('it should validate a type of "threshold" with "data_view_id" defined', () => {
       const payload = { ...getCreateThresholdRulesSchemaMock(), data_view_id: 'logs-*' };
 
-      const result = RuleCreateProps.safeParse(payload);
+      const result = RuleCreatePropsSchema.safeParse(payload);
       expectParseSuccess(result);
       expect(result.data).toMatchObject(payload);
     });
@@ -1144,7 +1148,7 @@ describe('rules schema', () => {
       const payload = { ...getCreateMachineLearningRulesSchemaMock(), data_view_id: 'logs-*' };
       const expected = getCreateMachineLearningRulesSchemaMock();
 
-      const result = RuleCreateProps.safeParse(payload);
+      const result = RuleCreatePropsSchema.safeParse(payload);
       expectParseSuccess(result);
       expect(result.data).toEqual(expected);
     });
@@ -1153,7 +1157,7 @@ describe('rules schema', () => {
       // getCreateRulesSchemaMock doesn't include investigation_fields
       const payload: RuleCreateProps = getCreateRulesSchemaMock();
 
-      const result = RuleCreateProps.safeParse(payload);
+      const result = RuleCreatePropsSchema.safeParse(payload);
       expectParseSuccess(result);
       expect(result.data).toMatchObject(payload);
     });
@@ -1166,7 +1170,7 @@ describe('rules schema', () => {
         investigation_fields: {},
       };
 
-      const result = RuleCreateProps.safeParse(payload);
+      const result = RuleCreatePropsSchema.safeParse(payload);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toEqual(
         'investigation_fields.field_names: Invalid input: expected array, received undefined'
@@ -1179,7 +1183,7 @@ describe('rules schema', () => {
         investigation_fields: { field_names: ['field1', 'field2'] },
       };
 
-      const result = RuleCreateProps.safeParse(payload);
+      const result = RuleCreatePropsSchema.safeParse(payload);
       expectParseSuccess(result);
       expect(result.data).toMatchObject(payload);
     });
@@ -1190,7 +1194,7 @@ describe('rules schema', () => {
         investigation_fields: { field_names: [] },
       };
 
-      const result = RuleCreateProps.safeParse(payload);
+      const result = RuleCreatePropsSchema.safeParse(payload);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toEqual(
         'investigation_fields.field_names: Too small: expected array to have >=1 items'
@@ -1203,7 +1207,7 @@ describe('rules schema', () => {
         investigation_fields: { field_names: [0, 1, 2] },
       };
 
-      const result = RuleCreateProps.safeParse(payload);
+      const result = RuleCreatePropsSchema.safeParse(payload);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toEqual(
         'investigation_fields.field_names.0: Invalid input: expected string, received number, investigation_fields.field_names.1: Invalid input: expected string, received number, investigation_fields.field_names.2: Invalid input: expected string, received number'
@@ -1216,7 +1220,7 @@ describe('rules schema', () => {
         investigation_fields: { foo: true },
       };
 
-      const result = RuleCreateProps.safeParse(payload);
+      const result = RuleCreatePropsSchema.safeParse(payload);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toEqual(
         'investigation_fields.field_names: Invalid input: expected array, received undefined'
@@ -1236,7 +1240,7 @@ describe('rules schema', () => {
           },
         };
 
-        const result = RuleCreateProps.safeParse(payload);
+        const result = RuleCreatePropsSchema.safeParse(payload);
         expectParseSuccess(result);
         expect(result.data).toEqual({
           ...payload,
@@ -1253,7 +1257,7 @@ describe('rules schema', () => {
           },
         };
 
-        const result = RuleCreateProps.safeParse(payload);
+        const result = RuleCreatePropsSchema.safeParse(payload);
         expectParseSuccess(result);
         expect(result.data).toMatchObject(payload);
       });
@@ -1266,7 +1270,7 @@ describe('rules schema', () => {
           },
         };
 
-        const result = RuleCreateProps.safeParse(payload);
+        const result = RuleCreatePropsSchema.safeParse(payload);
         expectParseError(result);
         expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
           `"alert_suppression.duration: Invalid input: expected object, received undefined"`
@@ -1296,7 +1300,7 @@ describe('rules schema', () => {
             },
           };
 
-          const result = RuleCreateProps.safeParse(payload);
+          const result = RuleCreatePropsSchema.safeParse(payload);
           expectParseSuccess(result);
           expect(result.data).toMatchObject(payload);
         });
@@ -1311,7 +1315,7 @@ describe('rules schema', () => {
             },
           };
 
-          const result = RuleCreateProps.safeParse(payload);
+          const result = RuleCreatePropsSchema.safeParse(payload);
           expectParseSuccess(result);
           expect(result.data).toMatchObject(payload);
         });
@@ -1325,7 +1329,7 @@ describe('rules schema', () => {
             },
           };
 
-          const result = RuleCreateProps.safeParse(payload);
+          const result = RuleCreatePropsSchema.safeParse(payload);
           expectParseError(result);
           expect(stringifyZodError(result.error)).toEqual(
             'alert_suppression.group_by: Invalid input: expected array, received string, alert_suppression.group_by: Too big: expected string to have <=3 characters'
@@ -1341,7 +1345,7 @@ describe('rules schema', () => {
             },
           };
 
-          const result = RuleCreateProps.safeParse(payload);
+          const result = RuleCreatePropsSchema.safeParse(payload);
           expectParseError(result);
           expect(stringifyZodError(result.error)).toContain(
             'Either group_by or group_by_v2 must be provided with at least one field'
@@ -1359,7 +1363,7 @@ describe('rules schema', () => {
             },
           };
 
-          const result = RuleCreateProps.safeParse(payload);
+          const result = RuleCreatePropsSchema.safeParse(payload);
           expectParseSuccess(result);
           expect(result.data).toEqual({
             ...ruleMock,
