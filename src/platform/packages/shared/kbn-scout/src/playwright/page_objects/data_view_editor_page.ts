@@ -12,41 +12,34 @@ import type { ScoutPage } from '..';
 // Detail page URL after a data view is saved: /app/management/kibana/dataViews/dataView/<id>
 export const DATA_VIEW_DETAIL_URL_PATTERN = /\/management\/kibana\/dataViews\/.+/;
 
-export class DataViewsPage {
-  readonly createDataViewButton;
-  readonly editorFlyout;
+/**
+ * Page object for the data view editor flyout.
+ * Use `DataViewsManagementPage.openCreateWizard()` to open the flyout first,
+ * then interact with it through this page object.
+ */
+export class DataViewEditorPage {
+  readonly flyout;
   readonly titleInput;
   readonly timestampField;
   readonly saveButton;
-  readonly editorForm;
+  readonly form;
   readonly detailPageTitle;
   readonly detailUrlPattern = DATA_VIEW_DETAIL_URL_PATTERN;
 
   constructor(private readonly page: ScoutPage) {
-    this.createDataViewButton = page.testSubj.locator('createDataViewButton');
-    this.editorFlyout = page.testSubj.locator('indexPatternEditorFlyout');
+    this.flyout = page.testSubj.locator('indexPatternEditorFlyout');
     this.titleInput = page.testSubj.locator('createIndexPatternTitleInput');
     this.timestampField = page.testSubj.locator('timestampField');
     this.saveButton = page.testSubj.locator('saveIndexPatternButton');
-    this.editorForm = page.testSubj.locator('indexPatternEditorForm');
+    this.form = page.testSubj.locator('indexPatternEditorForm');
     this.detailPageTitle = page.testSubj.locator('indexPatternTitle');
-  }
-
-  async goto(): Promise<void> {
-    await this.page.gotoApp('management/kibana/dataViews');
-    await this.createDataViewButton.waitFor({ state: 'visible' });
-  }
-
-  async openCreateWizard(): Promise<void> {
-    await this.createDataViewButton.click();
-    await this.editorFlyout.waitFor({ state: 'visible' });
   }
 
   // Fills the title field and waits for async validation to settle.
   async setTitle(title: string): Promise<void> {
     await this.titleInput.fill(title);
-    await this.editorForm.waitFor({ state: 'visible' });
-    await this.editorForm
+    await this.form.waitFor({ state: 'visible' });
+    await this.form
       .and(this.page.locator('[data-validation-error="0"]'))
       .waitFor({ state: 'visible' });
   }
@@ -62,6 +55,6 @@ export class DataViewsPage {
 
   async save(): Promise<void> {
     await this.saveButton.click();
-    await this.editorFlyout.waitFor({ state: 'hidden' });
+    await this.flyout.waitFor({ state: 'hidden' });
   }
 }

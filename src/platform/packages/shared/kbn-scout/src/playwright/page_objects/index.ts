@@ -14,7 +14,7 @@ import { CollapsibleNav } from './collapsible_nav';
 import { DashboardApp } from './dashboard_app';
 import { DataViewsManagementPage } from './data_views_management_page';
 import { DashboardLinks } from './dashboard_links';
-import { DataViewsPage } from './data_views_page';
+import { DataViewEditorPage } from './data_view_editor_page';
 import { DatePicker } from './date_picker';
 import { DiscoverApp } from './discover_app';
 import { FilterBar } from './filter_bar';
@@ -39,13 +39,7 @@ import {
 import type { ContentListUrlState } from './content_list';
 import type { KibanaUrl } from '../../common/services/kibana_url';
 
-export {
-  ContentListWrapper,
-  DataViewsManagementPage,
-  ListingTable,
-  buildContentListSearch,
-  buildContentListUrlRegex,
-};
+export { ContentListWrapper, ListingTable, buildContentListSearch, buildContentListUrlRegex };
 export type { ContentListUrlState };
 
 export interface PageObjectsFixtures {
@@ -61,7 +55,7 @@ export interface PageObjects {
   discover: DiscoverApp;
   dashboard: DashboardApp;
   dashboardLinks: DashboardLinks;
-  dataViews: DataViewsPage;
+  dataViewEditor: DataViewEditorPage;
   filterBar: FilterBar;
   listingTable: ListingTable;
   home: HomePage;
@@ -87,10 +81,10 @@ export interface PageObjects {
 export function createCorePageObjects(fixtures: PageObjectsFixtures): PageObjects {
   return {
     datePicker: createLazyPageObject(DatePicker, fixtures.page),
+    dataViewEditor: createLazyPageObject(DataViewEditorPage, fixtures.page),
     dataViewsManagement: createLazyPageObject(DataViewsManagementPage, fixtures.page),
     dashboard: createLazyPageObject(DashboardApp, fixtures.page),
     dashboardLinks: createLazyPageObject(DashboardLinks, fixtures.page),
-    dataViews: createLazyPageObject(DataViewsPage, fixtures.page),
     discover: createLazyPageObject(DiscoverApp, fixtures.page),
     filterBar: createLazyPageObject(FilterBar, fixtures.page),
     listingTable: createLazyPageObject(ListingTable, fixtures.page),

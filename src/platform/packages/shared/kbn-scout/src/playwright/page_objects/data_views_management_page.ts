@@ -15,12 +15,29 @@ export class DataViewsManagementPage {
   public readonly headerBadge: Locator;
   public readonly table: Locator;
   private readonly noDataViewsPrompt: Locator;
+  private readonly editorFlyout: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.createButton = this.page.testSubj.locator('createDataViewButton');
     this.headerBadge = this.page.testSubj.locator('headerBadge');
     this.table = this.page.testSubj.locator('indexPatternTable');
     this.noDataViewsPrompt = this.page.testSubj.locator('noDataViewsPrompt');
+    this.editorFlyout = this.page.testSubj.locator('indexPatternEditorFlyout');
+  }
+
+  /** Navigates to the data views management page and waits for it to be ready. */
+  async goto(): Promise<void> {
+    await this.page.gotoApp('management/kibana/dataViews');
+    await Promise.race([
+      this.table.waitFor({ state: 'visible' }),
+      this.noDataViewsPrompt.waitFor({ state: 'visible' }),
+    ]);
+  }
+
+  /** Clicks the create button and waits for the editor flyout to open. */
+  async openCreateWizard(): Promise<void> {
+    await this.createButton.click();
+    await this.editorFlyout.waitFor({ state: 'visible' });
   }
 
   /** Waits for the empty-state prompt (no data views exist). */

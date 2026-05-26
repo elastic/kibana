@@ -48,7 +48,6 @@ export {
   ContentListWrapper,
   buildContentListSearch,
   buildContentListUrlRegex,
-  DataViewsManagementPage,
   ListingTable,
 } from './src/playwright/page_objects';
 export type { ContentListUrlState } from './src/playwright/page_objects';

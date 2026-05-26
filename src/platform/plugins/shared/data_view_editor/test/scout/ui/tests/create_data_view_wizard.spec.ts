@@ -46,20 +46,20 @@ test.describe('Create Data View wizard', { tag: tags.stateful.classic }, () => {
     await browserAuth.loginWithCustomRole(CUSTOM_ROLES.index_pattern_management_all);
 
     await test.step('open the Create Data View wizard', async () => {
-      await pageObjects.dataViews.goto();
-      await pageObjects.dataViews.openCreateWizard();
+      await pageObjects.dataViewsManagement.goto();
+      await pageObjects.dataViewsManagement.openCreateWizard();
     });
 
     await test.step('wizard auto-detects the timestamp field from the data stream mapping', async () => {
-      await pageObjects.dataViews.setTitle(DATA_STREAM_NAME);
-      const timestampValue = await pageObjects.dataViews.getTimestampFieldValue();
+      await pageObjects.dataViewEditor.setTitle(DATA_STREAM_NAME);
+      const timestampValue = await pageObjects.dataViewEditor.getTimestampFieldValue();
       expect(timestampValue).toBe('@timestamp');
     });
 
     await test.step('saving navigates to the data view detail page', async () => {
-      await pageObjects.dataViews.save();
-      await expect(page).toHaveURL(pageObjects.dataViews.detailUrlPattern);
-      await expect(pageObjects.dataViews.detailPageTitle).toHaveText(DATA_STREAM_NAME);
+      await pageObjects.dataViewEditor.save();
+      await expect(page).toHaveURL(pageObjects.dataViewEditor.detailUrlPattern);
+      await expect(pageObjects.dataViewEditor.detailPageTitle).toHaveText(DATA_STREAM_NAME);
     });
   });
 });
