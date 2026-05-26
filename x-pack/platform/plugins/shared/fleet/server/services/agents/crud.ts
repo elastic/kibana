@@ -180,7 +180,9 @@ export async function getAgentTags(
   const runtimeFields = {
     ...(await buildAgentStatusRuntimeField(soClient)),
     ...SIGNALS_RUNTIME_FIELD,
-    ...(appContextService.getExperimentalFeatures().enableOpAMP ? PIPELINE_CONFIG_RUNTIME_FIELD : {}),
+    ...(appContextService.getExperimentalFeatures().enableOpAMP
+      ? PIPELINE_CONFIG_RUNTIME_FIELD
+      : {}),
   };
   try {
     const result = await retryTransientEsErrors(() =>
@@ -288,7 +290,9 @@ export async function getAgentsByKuery(
   const runtimeFields = {
     ...(await buildAgentStatusRuntimeField(soClient)),
     ...SIGNALS_RUNTIME_FIELD,
-    ...(appContextService.getExperimentalFeatures().enableOpAMP ? PIPELINE_CONFIG_RUNTIME_FIELD : {}),
+    ...(appContextService.getExperimentalFeatures().enableOpAMP
+      ? PIPELINE_CONFIG_RUNTIME_FIELD
+      : {}),
   };
 
   const sort = getSortConfig(sortField, sortOrder);
@@ -487,7 +491,9 @@ export async function fetchAllAgentsByKuery(
   const runtimeFields = {
     ...(await buildAgentStatusRuntimeField(soClient)),
     ...SIGNALS_RUNTIME_FIELD,
-    ...(appContextService.getExperimentalFeatures().enableOpAMP ? PIPELINE_CONFIG_RUNTIME_FIELD : {}),
+    ...(appContextService.getExperimentalFeatures().enableOpAMP
+      ? PIPELINE_CONFIG_RUNTIME_FIELD
+      : {}),
     ...options.runtimeFields,
   };
 
@@ -601,7 +607,9 @@ async function _filterAgents(
   const runtimeFields = {
     ...(await buildAgentStatusRuntimeField(soClient)),
     ...SIGNALS_RUNTIME_FIELD,
-    ...(appContextService.getExperimentalFeatures().enableOpAMP ? PIPELINE_CONFIG_RUNTIME_FIELD : {}),
+    ...(appContextService.getExperimentalFeatures().enableOpAMP
+      ? PIPELINE_CONFIG_RUNTIME_FIELD
+      : {}),
   };
   const currentSpaceId = getCurrentNamespace(soClient);
 
