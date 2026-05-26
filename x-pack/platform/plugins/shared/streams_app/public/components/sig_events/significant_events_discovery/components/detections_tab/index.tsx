@@ -15,15 +15,13 @@ import {
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { Detection } from '@kbn/streams-schema';
 import {
   useFetchDetections,
   useFetchDetectionHistory,
 } from '../../../../../hooks/sig_events/use_fetch_detections';
-import { useTimefilter } from '../../../../../hooks/use_timefilter';
-import { useTimeRange } from '../../../../../hooks/use_time_range';
-import { useTimeRangeUpdate } from '../../../../../hooks/use_time_range_update';
 import { DetectionFlyout } from '../detection_flyout';
 import { formatTimestamp } from '../../../../../util/formatters';
 
@@ -100,7 +98,6 @@ const columns: Array<EuiBasicTableColumn<Detection>> = [
     name: i18n.translate('xpack.streams.detectionsTab.detectedAtColumn', {
       defaultMessage: 'Detected',
     }),
-    sortable: true,
     render: (timestamp: string) => formatTimestamp(timestamp),
   },
   {
@@ -120,14 +117,22 @@ const columns: Array<EuiBasicTableColumn<Detection>> = [
   },
 ];
 
+const DEFAULT_DETECTIONS_RANGE = { from: 'now-24h', to: 'now' };
+
 export const DetectionsTab = () => {
-  const { timeState } = useTimefilter();
-  const { rangeFrom, rangeTo } = useTimeRange();
-  const { updateTimeRange } = useTimeRangeUpdate();
+  const [pickerRange, setPickerRange] = useState(DEFAULT_DETECTIONS_RANGE);
+  const [absoluteRange, setAbsoluteRange] = useState(() =>
+    getAbsoluteTimeRange(DEFAULT_DETECTIONS_RANGE, { forceNow: new Date() })
+  );
+
+  const handleTimeChange = ({ start: s, end: e }: { start: string; end: string }) => {
+    setPickerRange({ from: s, to: e });
+    setAbsoluteRange(getAbsoluteTimeRange({ from: s, to: e }, { forceNow: new Date() }));
+  };
 
   const { data, isLoading, refetch, pagination, setPagination } = useFetchDetections({
-    from: timeState.start,
-    to: timeState.end,
+    from: absoluteRange.from,
+    to: absoluteRange.to,
   });
   const [selectedDetection, setSelectedDetection] = useState<Detection | undefined>();
 
@@ -154,9 +159,9 @@ export const DetectionsTab = () => {
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
             <EuiSuperDatePicker
-              start={rangeFrom}
-              end={rangeTo}
-              onTimeChange={({ start: s, end: e }) => updateTimeRange({ from: s, to: e })}
+              start={pickerRange.from}
+              end={pickerRange.to}
+              onTimeChange={handleTimeChange}
               onRefresh={() => refetch()}
               compressed
               showUpdateButton="iconOnly"
