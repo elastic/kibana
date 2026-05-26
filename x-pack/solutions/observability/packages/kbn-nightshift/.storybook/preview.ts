@@ -8,3 +8,26 @@
 import { EuiThemeProviderDecorator } from '@kbn/kibana-react-plugin/common';
 
 export const decorators = [EuiThemeProviderDecorator];
+
+export const parameters = {
+  options: {
+    storySort: {
+      order: [
+        'app',
+        [
+          'Nightshift',
+          [
+            'NightshiftOverview',
+            [
+              'Act 0: No Detection Workflows',
+              'Act 1: We Know Your System',
+              'Act 2: Something Is Wrong',
+            ],
+          ],
+        ],
+      ],
+    },
+    selectedPanel: 'storybook/canvas',
+    initialActive: 'canvas',
+  },
+};
