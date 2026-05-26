@@ -25,7 +25,7 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 const mockServices = {
   fieldFormats: {
     getDefaultInstance: jest.fn(() => ({
-      reactConvert: (value: unknown) => (value ? value : '-'),
+      convertToReact: (value: unknown) => (value ? value : '-'),
     })),
   },
 };
@@ -67,9 +67,9 @@ describe('Unified data table source document cell rendering', function () {
   });
 
   it('passes values through appropriate formatter when `useTopLevelObjectColumns` is true', () => {
-    const mockReactConvert = jest.fn((value: unknown) => `${value}`.replaceAll('foo', 'bar'));
+    const mockConvertToReact = jest.fn((value: unknown) => `${value}`.replaceAll('foo', 'bar'));
     const mockFieldFormats = {
-      getDefaultInstance: jest.fn(() => ({ reactConvert: mockReactConvert })),
+      getDefaultInstance: jest.fn(() => ({ convertToReact: mockConvertToReact })),
     };
     const row = build({
       _id: '1',
@@ -93,7 +93,7 @@ describe('Unified data table source document cell rendering', function () {
       />
     );
 
-    expect(mockReactConvert).toHaveBeenCalled();
+    expect(mockConvertToReact).toHaveBeenCalled();
     expect(component.html()).toContain('my bar value');
   });
 
