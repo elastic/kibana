@@ -15,6 +15,7 @@ import type {
 import {
   buildExtendedFieldFilterClauses,
   buildFieldLabelExistsClauses,
+  EF_ALL_VALUES_FIELD,
 } from './extended_field_search_utils';
 
 export const DEFAULT_CASE_SEARCH_FIELDS = [
@@ -27,6 +28,8 @@ export const DEFAULT_CASE_NESTED_FIELDS = [
   `${CASE_SAVED_OBJECT}.observables.value`,
   `${CASE_SAVED_OBJECT}.customFields.value`,
 ];
+
+export const DEFAULT_CASE_RUNTIME_FIELDS = [EF_ALL_VALUES_FIELD];
 
 export const DEFAULT_ATTACHMENT_SEARCH_FIELDS = [
   `${CASE_COMMENT_SAVED_OBJECT}.alertId`,
@@ -100,6 +103,9 @@ export const constructSearchQuery = ({
     DEFAULT_CASE_SEARCH_FIELDS.includes(field)
   );
   const nestedFields = searchFields?.filter((field) => DEFAULT_CASE_NESTED_FIELDS.includes(field));
+  const runtimeFields = searchFields?.filter((field) =>
+    DEFAULT_CASE_RUNTIME_FIELDS.includes(field)
+  );
 
   const hasExtendedFieldFilters = extendedFieldFilters && extendedFieldFilters.length > 0;
   const hasFieldLabelFilters = fieldLabelFilters && fieldLabelFilters.length > 0;
@@ -140,6 +146,18 @@ export const constructSearchQuery = ({
             },
           });
         }
+      });
+    }
+
+    if (runtimeFields?.length) {
+      runtimeFields.forEach((field) => {
+        shouldClauses.push({
+          simple_query_string: {
+            query: search.toLowerCase(),
+            fields: [field],
+            default_operator: 'AND',
+          },
+        });
       });
     }
   }

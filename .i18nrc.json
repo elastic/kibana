@@ -133,6 +133,7 @@
     "searchIndexDocuments": "x-pack/solutions/search/packages/kbn-search-index-documents",
     "searchResponseWarnings": "src/platform/packages/shared/kbn-search-response-warnings",
     "searchTypes": "src/platform/packages/shared/kbn-search-types",
+    "vectordbOnboarding": "x-pack/solutions/vectordb/packages/kbn-vectordb-onboarding",
     "securitySolutionPackages": [
       "x-pack/solutions/security/packages/data-table",
       "x-pack/solutions/security/packages/ecs-data-quality-dashboard",
