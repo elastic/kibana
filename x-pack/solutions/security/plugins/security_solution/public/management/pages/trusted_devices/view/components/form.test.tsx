@@ -442,6 +442,30 @@ describe('Trusted devices form', () => {
       expect(renderResult.container.querySelectorAll('.euiFormErrorText').length).toBe(0);
     });
 
+    it('should clear only the changed row value and preserve other rows values', async () => {
+      formProps.item = createItem({
+        entries: [
+          createEntry(TrustedDeviceConditionEntryField.DEVICE_ID, 'match', 'device-123'),
+          createEntry(TrustedDeviceConditionEntryField.HOST, 'match', 'my-host'),
+        ],
+      });
+      latestUpdatedItem = formProps.item;
+      rerenderWithLatestProps();
+
+      await userEvent.click(getEntryFieldSelect(0));
+      await userEvent.click(
+        screen.getByRole('option', {
+          name: CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.PRODUCT_ID],
+        })
+      );
+
+      const lastCall = (formProps.onChange as jest.Mock).mock.calls.at(-1)?.[0];
+      expect(lastCall?.item.entries[0].field).toBe(TrustedDeviceConditionEntryField.PRODUCT_ID);
+      expect(lastCall?.item.entries[0].value).toBe('');
+      expect(lastCall?.item.entries[1].field).toBe(TrustedDeviceConditionEntryField.HOST);
+      expect(lastCall?.item.entries[1].value).toBe('my-host');
+    });
+
     it('should show value required error after blur when empty', async () => {
       await setTextFieldValue(getNameField(), 'some name');
 
@@ -808,6 +832,24 @@ describe('Trusted devices form', () => {
       rerenderWithLatestProps();
 
       expect(renderResult.queryByText(INPUT_ERRORS.entryValueEmpty)).toBeNull();
+    });
+
+    it('should show duplicate-field error when two non-adjacent entries share the same field', async () => {
+      // entries[0] and entries[2] both use DEVICE_ID; entries[1] uses a different field (HOST)
+      formProps.item = createItem({
+        entries: [
+          createEntry(TrustedDeviceConditionEntryField.DEVICE_ID, 'match', 'device-1'),
+          createEntry(TrustedDeviceConditionEntryField.HOST, 'match', 'my-host'),
+          createEntry(TrustedDeviceConditionEntryField.DEVICE_ID, 'match', 'device-3'),
+        ],
+      });
+      await render();
+
+      expect(
+        renderResult.getByText(
+          INPUT_ERRORS.noDuplicateField(TrustedDeviceConditionEntryField.DEVICE_ID)
+        )
+      ).toBeTruthy();
     });
   });
 
