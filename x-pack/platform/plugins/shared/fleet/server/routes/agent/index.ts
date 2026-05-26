@@ -333,6 +333,10 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       .addVersion(
         {
           version: API_VERSIONS.public.v1,
+          options: {
+            oasOperationObject: () =>
+              path.join(__dirname, 'examples/get_collector_groups.yaml'),
+          },
           validate: {
             request: GetCollectorGroupsRequestSchema,
             response: {
