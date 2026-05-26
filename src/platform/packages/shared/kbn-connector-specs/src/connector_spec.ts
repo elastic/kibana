@@ -267,7 +267,7 @@ export interface ConnectorTest {
 
 export interface AuthTypeDef {
   type: string;
-  experimental?: boolean;
+  isExperimental?: boolean;
   defaults: Record<string, unknown>;
   overrides?: {
     meta?: Record<string, Record<string, unknown>>;

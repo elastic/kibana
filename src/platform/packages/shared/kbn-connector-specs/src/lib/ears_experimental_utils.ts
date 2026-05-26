@@ -12,16 +12,14 @@ import * as allSpecs from '../all_specs';
 import { EARS_AUTH_ID } from '../auth_types/ears';
 import type { AuthTypeDef } from '../connector_spec';
 
+export const isEarsExperimentalAuthType = (authType: string | AuthTypeDef): authType is AuthTypeDef =>
+  !isString(authType) &&
+  authType.type === EARS_AUTH_ID &&
+  authType.isExperimental === true;
+
 const experimentalEarsConnectorIds = new Set(
   Object.values(allSpecs)
-    .filter((spec) =>
-      spec.auth?.types.some(
-        (authType) =>
-          !isString(authType) &&
-          (authType as AuthTypeDef).type === EARS_AUTH_ID &&
-          (authType as AuthTypeDef).experimental === true
-      )
-    )
+    .filter((spec) => spec.auth?.types.some(isEarsExperimentalAuthType))
     .map((spec) => spec.metadata.id)
 );
 

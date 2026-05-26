@@ -417,7 +417,7 @@ describe('serializeConnectorSpec', () => {
             'bearer',
             {
               type: 'ears',
-              experimental: true,
+              isExperimental: true,
               defaults: { provider: 'google', scope: 'test-scope' },
             },
           ],

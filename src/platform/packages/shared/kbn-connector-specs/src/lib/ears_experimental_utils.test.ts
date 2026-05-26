@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isEarsExperimentalConnector } from './is_ears_experimental_connector';
+import { isEarsExperimentalConnector } from './ears_experimental_utils';
 
 describe('isEarsExperimentalConnector', () => {
   test('returns true for connector types whose EARS auth is marked experimental', () => {

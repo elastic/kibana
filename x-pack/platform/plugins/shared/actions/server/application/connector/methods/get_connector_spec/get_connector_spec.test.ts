@@ -129,6 +129,32 @@ describe('getConnectorSpecAsJsonSchema', () => {
     expect(authTypes).not.toContain('ears');
   });
 
+  it('includes stable (non-experimental) EARS auth types even when isEarsExperimentalEnabled is false', async () => {
+    const earsEnabledUtils = {
+      getWebhookSettings: () => ({ ssl: { pfx: { enabled: true } } }),
+      isEarsEnabled: () => true,
+      isEarsExperimentalEnabled: () => false,
+    } as unknown as ActionsConfigurationUtilities;
+
+    const result = await getConnectorSpecAsJsonSchema({
+      context: createContext(),
+      id: '.microsoft-teams',
+      configurationUtilities: earsEnabledUtils,
+    });
+
+    const schemaJson = result.schema as {
+      properties?: {
+        secrets?: { oneOf?: Array<{ properties?: { authType?: { const?: string } } }> };
+      };
+    };
+    const secretsOneOf = schemaJson.properties?.secrets?.oneOf || [];
+    const authTypes = secretsOneOf
+      .map((opt) => opt.properties?.authType?.const)
+      .filter(Boolean) as string[];
+
+    expect(authTypes).toContain('ears');
+  });
+
   it('includes experimental EARS auth types when isEarsExperimentalEnabled is true', async () => {
     const earsEnabledUtils = {
       getWebhookSettings: () => ({ ssl: { pfx: { enabled: true } } }),

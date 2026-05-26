@@ -145,7 +145,7 @@ describe('generateSecretsSchema', () => {
         'none',
         {
           type: 'ears',
-          experimental: true,
+          isExperimental: true,
           defaults: { provider: 'google', scope: 'https://www.googleapis.com/auth/calendar' },
         },
       ],
@@ -169,7 +169,7 @@ describe('generateSecretsSchema', () => {
       expect(() =>
         validator.customValidator!({ authType: 'ears', provider: 'google' }, validatorServices)
       ).toThrow(
-        'EARS OAuth authentication is not enabled for this provider. Enable it via xpack.actions.auth.ears.enableExperimental in kibana.yml.'
+        'EARS OAuth authentication is not enabled for the "google" provider. Enable it via xpack.actions.auth.ears.enableExperimental in kibana.yml.'
       );
     });
 

@@ -132,7 +132,7 @@ describe('generateSecretsSchemaFromSpec', () => {
         'bearer',
         {
           type: 'ears',
-          experimental: true,
+          isExperimental: true,
           defaults: { provider: 'google', scope: 'https://www.googleapis.com/auth/calendar' },
         },
       ],

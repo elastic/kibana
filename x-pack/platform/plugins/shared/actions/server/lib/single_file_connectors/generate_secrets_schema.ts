@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { isString } from 'lodash';
-import type { AuthTypeDef, ConnectorSpec } from '@kbn/connector-specs';
-import { EARS_AUTH_ID } from '@kbn/connector-specs';
+import type { ConnectorSpec } from '@kbn/connector-specs';
 import { generateSecretsSchemaFromSpec } from '@kbn/connector-specs/src/lib/generate_secrets_schema_from_spec';
+import { isEarsExperimentalAuthType } from '@kbn/connector-specs/src/lib/ears_experimental_utils';
 import { getSchemaForAuthType } from '@kbn/connector-specs/src/lib/get_schema_for_auth_type';
 import type { ActionTypeSecrets, ValidatorType, ValidatorServices } from '../../types';
 import type { ActionsConfigurationUtilities } from '../../actions_config';
@@ -43,13 +42,11 @@ export const generateSecretsSchema = (
     isEarsExperimentalEnabled: true,
   });
 
-  const hasExperimentalEars =
-    authSpec?.types.some(
-      (authType) =>
-        !isString(authType) &&
-        (authType as AuthTypeDef).type === EARS_AUTH_ID &&
-        (authType as AuthTypeDef).experimental === true
-    ) ?? false;
+  const experimentalEarsAuthType = authSpec?.types.find(isEarsExperimentalAuthType);
+  const hasExperimentalEarsAuthType = experimentalEarsAuthType !== undefined;
+  const experimentalEarsProvider = hasExperimentalEarsAuthType
+    ? String(experimentalEarsAuthType.defaults?.provider ?? 'unknown')
+    : 'unknown';
 
   const allowedHostsFieldsByAuthType = buildAllowedHostsFieldsByAuthType(authSpec);
 
@@ -71,11 +68,11 @@ export const generateSecretsSchema = (
 
       if (
         authType === 'ears' &&
-        hasExperimentalEars &&
+        hasExperimentalEarsAuthType &&
         !configurationUtilities.isEarsExperimentalEnabled()
       ) {
         throw new Error(
-          'EARS OAuth authentication is not enabled for this provider. Enable it via xpack.actions.auth.ears.enableExperimental in kibana.yml.'
+          `EARS OAuth authentication is not enabled for the "${experimentalEarsProvider}" provider. Enable it via xpack.actions.auth.ears.enableExperimental in kibana.yml.`
         );
       }
 

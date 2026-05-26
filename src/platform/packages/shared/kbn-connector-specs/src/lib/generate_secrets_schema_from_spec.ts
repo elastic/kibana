@@ -8,10 +8,10 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { isString } from 'lodash';
-import type { AuthMode, AuthTypeDef, ConnectorSpec } from '../connector_spec';
+import type { AuthMode, ConnectorSpec } from '../connector_spec';
 import * as authTypeSpecs from '../all_auth_types';
 import { getSchemaForAuthType } from '.';
+import { isEarsExperimentalAuthType } from './ears_experimental_utils';
 
 interface GenerateOptions {
   isPfxEnabled?: boolean;
@@ -38,8 +38,7 @@ export const generateSecretsSchemaFromSpec = (
       if (!isEarsEnabled) {
         continue;
       }
-      const isExperimental = !isString(authType) && (authType as AuthTypeDef).experimental === true;
-      if (isExperimental && !isEarsExperimentalEnabled) {
+      if (isEarsExperimentalAuthType(authType) && !isEarsExperimentalEnabled) {
         continue;
       }
     }

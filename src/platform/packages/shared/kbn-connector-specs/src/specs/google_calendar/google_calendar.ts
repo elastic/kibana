@@ -69,7 +69,7 @@ export const GoogleCalendar: ConnectorSpec = {
       },
       {
         type: 'ears',
-        experimental: true,
+        isExperimental: true,
         overrides: {
           meta: { scope: { disabled: true } },
         },
