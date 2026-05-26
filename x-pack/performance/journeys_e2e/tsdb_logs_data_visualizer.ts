@@ -23,7 +23,7 @@ export const journey = new Journey({
   .step('Go to Index data visualizer', async ({ page }) => {
     const createButtons = page.locator(subj('mlDataVisualizerSelectIndexButton'));
     await createButtons.first().click();
-    await page.waitForSelector(subj('dataVisualizerIndexPage'));
+    await page.waitForSelector(subj('mlDataSourceSelectorButton'));
   })
   .step('Go to Data View selection', async ({ page, kibanaPage }) => {
     await page.click(subj('mlDataSourceSelectorButton'));
@@ -33,6 +33,7 @@ export const journey = new Journey({
       .locator(subj('indexPattern-switcher'))
       .locator(`[title="${DATA_VIEW_NAME}"]`)
       .click();
+    await page.waitForSelector(subj('dataVisualizerIndexPage'), { timeout: 60000 });
     await page.click(subj('mlDatePickerButtonUseFullData'));
     await kibanaPage.waitForHeader();
     await page.waitForSelector(subj('dataVisualizerTable-loaded'), { timeout: 60000 });
