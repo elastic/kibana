@@ -79,13 +79,3 @@ export const IDENTITY_PERMISSION_SUMMARY_TEST_SUBJECTS = {
   LAST_VERIFIED: 'cloudConnectorIdentityLastVerified',
   COUNTS: 'cloudConnectorIdentityPermissionCounts',
 };
-
-// Row-expand + timeline — Story 7 (deep-drill view per integration)
-export const PERMISSION_STATUS_ROW_EXPAND_TEST_SUBJECTS = {
-  CONTAINER: 'cloudConnectorPermissionRowExpansion',
-  TIMELINE: 'cloudConnectorVerificationTimeline',
-  TIMELINE_EVENT: 'cloudConnectorVerificationTimelineEvent',
-  TIMELINE_EMPTY: 'cloudConnectorVerificationTimelineEmpty',
-  PERMISSIONS_TABLE: 'cloudConnectorCurrentPermissionsTable',
-  EXPAND_TOGGLE: 'cloudConnectorPermissionStatusExpandToggle',
-};

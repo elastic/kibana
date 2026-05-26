@@ -59,8 +59,6 @@ import { CloudConnectorNameField } from '../form/cloud_connector_name_field';
 import { AccountBadge } from '../components/account_badge';
 import { PermissionStatusCell } from '../permission_status_cell';
 import { IdentityPermissionSummary } from '../identity_permission_summary';
-import { PermissionStatusRowExpansion } from '../permission_status_row_expansion';
-import { PERMISSION_STATUS_ROW_EXPAND_TEST_SUBJECTS } from '../../../../common/services/cloud_connectors/test_subjects';
 
 interface CloudConnectorPoliciesFlyoutProps {
   cloudConnectorId: string;
@@ -78,9 +76,6 @@ interface CloudConnectorPoliciesFlyoutProps {
    * cell state when `verificationPermissions` has no entry for a given package policy.
    */
   verificationStatus?: VerificationStatus;
-  /** Layer 1 lifecycle timestamps — surfaced in each row's verification timeline. */
-  verificationStartedAt?: string;
-  verificationFailedAt?: string;
   onClose: () => void;
 }
 
@@ -92,8 +87,6 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
   provider,
   verificationPermissions,
   verificationStatus,
-  verificationStartedAt,
-  verificationFailedAt,
   onClose,
 }) => {
   const { application } = useKibana().services;
@@ -105,7 +98,6 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
-  const [expandedRowId, setExpandedRowId] = useState<string | null>(null);
 
   const {
     data: usageData,
@@ -239,37 +231,6 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
     [application]
   );
 
-  const toggleExpandedRow = useCallback((itemId: string) => {
-    setExpandedRowId((current) => (current === itemId ? null : itemId));
-  }, []);
-
-  const itemIdToExpandedRowMap = useMemo(() => {
-    if (!expandedRowId) return {};
-    const expandedItem = usageItems.find((item) => item.id === expandedRowId);
-    if (!expandedItem) return {};
-    const summary = verificationPermissions?.find(
-      (entry) => entry.package_policy_id === expandedItem.id
-    );
-    return {
-      [expandedRowId]: (
-        <PermissionStatusRowExpansion
-          summary={summary}
-          verificationStatus={verificationStatus}
-          verificationStartedAt={verificationStartedAt}
-          verificationFailedAt={verificationFailedAt}
-          packagePolicyId={expandedItem.id}
-        />
-      ),
-    };
-  }, [
-    expandedRowId,
-    usageItems,
-    verificationPermissions,
-    verificationStatus,
-    verificationStartedAt,
-    verificationFailedAt,
-  ]);
-
   const columns: Array<EuiBasicTableColumn<(typeof usageItems)[0]>> = useMemo(
     () => [
       {
@@ -311,38 +272,8 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
           />
         ),
       },
-      {
-        align: 'right',
-        width: '40px',
-        isExpander: true,
-        name: '',
-        render: (item: (typeof usageItems)[0]) => (
-          <EuiButtonIcon
-            onClick={() => toggleExpandedRow(item.id)}
-            aria-label={
-              expandedRowId === item.id
-                ? i18n.translate('xpack.fleet.cloudConnector.policiesFlyout.collapseRowAriaLabel', {
-                    defaultMessage: 'Collapse {name}',
-                    values: { name: item.name },
-                  })
-                : i18n.translate('xpack.fleet.cloudConnector.policiesFlyout.expandRowAriaLabel', {
-                    defaultMessage: 'Expand {name}',
-                    values: { name: item.name },
-                  })
-            }
-            iconType={expandedRowId === item.id ? 'arrowDown' : 'arrowRight'}
-            data-test-subj={PERMISSION_STATUS_ROW_EXPAND_TEST_SUBJECTS.EXPAND_TOGGLE}
-          />
-        ),
-      },
     ],
-    [
-      handleNavigateToPolicy,
-      verificationPermissions,
-      verificationStatus,
-      expandedRowId,
-      toggleExpandedRow,
-    ]
+    [handleNavigateToPolicy, verificationPermissions, verificationStatus]
   );
 
   return (
@@ -497,7 +428,6 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
             onChange={onTableChange}
             tableCaption={tableCaption}
             itemId="id"
-            itemIdToExpandedRowMap={itemIdToExpandedRowMap}
             data-test-subj={CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.POLICIES_TABLE}
           />
         )}
