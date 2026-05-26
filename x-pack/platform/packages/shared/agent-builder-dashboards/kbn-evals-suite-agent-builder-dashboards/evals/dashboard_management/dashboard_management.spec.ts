@@ -10,6 +10,8 @@ import { evaluate as base } from '../../src/evaluate';
 import type { EvaluateDataset } from '../../src/evaluate_dataset';
 import { createEvaluateDataset } from '../../src/evaluate_dataset';
 import {
+  dashboardMinPanelCountEvaluator,
+  dashboardSectionCountEvaluator,
   dashboardSkillActivatedEvaluator,
   dashboardSkillNotActivatedEvaluator,
   visualizationSkillWithoutDashboardEvaluator,
@@ -56,11 +58,27 @@ evaluate.describe(
               },
               output: {
                 expected: 'Dashboard skill should be activated.',
+                expectedMinPanels: 3,
+              },
+            },
+            {
+              input: {
+                question:
+                  "Create a dashboard using kibana_sample_data_logs with 2 sections: 'Traffic Volume' with a panel showing requests over time, and 'Response Codes' with a panel showing response.keyword distribution.",
+              },
+              output: {
+                expected: 'Dashboard skill should be activated and create the requested sections.',
+                expectedMinPanels: 2,
+                expectedSectionCount: 2,
               },
             },
           ],
         },
-        evaluators: [dashboardSkillActivatedEvaluator],
+        evaluators: [
+          dashboardSkillActivatedEvaluator,
+          dashboardMinPanelCountEvaluator,
+          dashboardSectionCountEvaluator,
+        ],
       });
     });
 

@@ -29,6 +29,8 @@ export interface DashboardDatasetExample extends Example {
   };
   output: {
     expected?: string;
+    expectedMinPanels?: number;
+    expectedSectionCount?: number;
   };
   metadata?: {
     [key: string]: unknown;

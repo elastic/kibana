@@ -12,9 +12,14 @@ import pRetry from 'p-retry';
 
 type Messages = { message: string }[];
 
+interface Options {
+  agentId?: string;
+}
+
 interface ConverseFunctionParams {
   messages: Messages;
   conversationId?: string;
+  options?: Options;
 }
 
 type ConverseFunction = (params: ConverseFunctionParams) => Promise<{
@@ -58,8 +63,9 @@ export class DashboardAgentEvaluationChatClient {
     });
   }
 
-  converse: ConverseFunction = async ({ messages, conversationId }) => {
+  converse: ConverseFunction = async ({ messages, conversationId, options = {} }) => {
     this.log.info('Calling converse');
+    const { agentId = agentBuilderDefaultAgentId } = options;
 
     const callConverseApi = async (): Promise<{
       conversationId?: string;
@@ -72,7 +78,7 @@ export class DashboardAgentEvaluationChatClient {
         method: 'POST',
         version: '2023-10-31',
         body: JSON.stringify({
-          agent_id: agentBuilderDefaultAgentId,
+          agent_id: agentId,
           connector_id: this.connectorId,
           conversation_id: conversationId,
           input: messages[messages.length - 1].message,
