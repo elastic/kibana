@@ -18,17 +18,47 @@ apiTest.describe(
     let viewerApiCreditials: RoleApiCredentials;
     let adminApiCreditials: RoleApiCredentials;
 
-    apiTest.beforeAll(async ({ profilingHelper, profilingSetup, requestAuth }) => {
-      // Ensure the agent policy that the cloud setup attaches the profiler_collector and
-      // profiler_symbolizer package policies to exists. Without this, setupResources()
-      // returns 500 when this spec runs ahead of (or independently of) has_no_setup.spec.
+    apiTest.beforeAll(async ({ profilingHelper, profilingSetup, esClient, requestAuth }) => {
       await profilingHelper.installPolicies();
+      await profilingSetup.setupResources();
 
-      if (!(await profilingSetup.checkStatus()).has_setup) {
-        await profilingSetup.setupResources();
-      }
+      // Delete documents (not indices) so has_data becomes false while has_setup
+      // stays true. Runs inside the poll because shards of newly-created
+      // .profiling-* data streams may still be initializing right after
+      // setupResources(), causing search_phase_execution_exception.
+      await expect
+        .poll(
+          async () => {
+            try {
+              await esClient.deleteByQuery({
+                index: 'profiling-events-*',
+                query: { match_all: {} },
+                ignore_unavailable: true,
+                refresh: true,
+                conflicts: 'proceed',
+              });
+            } catch {
+              return false;
+            }
+            const status = await profilingSetup.checkStatus();
+            return status.has_setup === true && status.has_data === false;
+          },
+          {
+            timeout: 30_000,
+            intervals: [500, 1000, 2000, 4000],
+            message:
+              'Profiling status did not converge to has_setup: true, has_data: false after deleting profiling documents',
+          }
+        )
+        .toBe(true);
+
       viewerApiCreditials = await requestAuth.getApiKey('viewer');
       adminApiCreditials = await requestAuth.getApiKey('admin');
+    });
+
+    apiTest.afterAll(async ({ profilingSetup, profilingHelper }) => {
+      await profilingHelper.cleanupPolicies();
+      await profilingSetup.cleanup();
     });
 
     apiTest('Admin user', async ({ apiClient }) => {

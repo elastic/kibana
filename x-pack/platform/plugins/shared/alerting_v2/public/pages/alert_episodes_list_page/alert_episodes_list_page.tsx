@@ -27,15 +27,12 @@ import {
   type CustomGridColumnsConfiguration,
   type UnifiedDataTableSettings,
 } from '@kbn/unified-data-table';
-import type { RowControlColumn } from '@kbn/discover-utils';
+import type { RowControlColumn, RowControlRowProps } from '@kbn/discover-utils';
 import { css } from '@emotion/react';
 import { useQueryClient } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useFetchAlertingEpisodesQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_alerting_episodes_query';
-import type {
-  EpisodesFilterState,
-  EpisodesSortState,
-} from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
+import type { EpisodesSortState } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
 import { useAlertingRulesCache } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_cache';
 import { createEpisodeActions, type EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
 import {
@@ -51,7 +48,7 @@ import { alertEpisodeToDataTableRecord } from './utils';
 import { dataTableRecordToEpisode } from './utils/data_table_record_to_episode';
 import { getDiscoverHrefForRuleAndEpisodeTimestamp } from '../../utils/discover_href_for_episode';
 import { paths } from '../../constants';
-import { useEpisodesTimeRange } from './hooks/use_episodes_time_range';
+import { useEpisodesListUrlState } from './hooks/use_episodes_list_url_state';
 import { useEpisodesBulkActions } from './hooks/use_episodes_bulk_actions';
 import { EpisodeAssigneeCell } from './components/episode_assignee_cell';
 
@@ -114,9 +111,8 @@ export const AlertEpisodesListPage = () => {
 
   useBreadcrumbs('episodes_list');
 
-  const { timeRange, handleTimeChange } = useEpisodesTimeRange(timefilter);
-
-  const [filterState, setFilterState] = useState<EpisodesFilterState>({});
+  const { filterState, setFilterState, timeRange, handleTimeChange } =
+    useEpisodesListUrlState(timefilter);
   const [sortState, setSortState] = useState<EpisodesSortState>(DEFAULT_SORT);
   const [columns, setColumns] = useState<string[]>([
     'episode.status',
@@ -192,6 +188,7 @@ export const AlertEpisodesListPage = () => {
         userProfile: services.userProfile,
         docLinks: services.docLinks,
         expressions: services.expressions,
+        spaces: services.spaces,
         queryClient,
         getEpisodeDetailsHref: (id) =>
           services.http.basePath.prepend(paths.alertEpisodeDetails(id)),
@@ -209,15 +206,12 @@ export const AlertEpisodesListPage = () => {
 
   const rowAdditionalLeadingControls: RowControlColumn[] = useMemo(
     () =>
-      episodeActions.map((action, index) => ({
+      episodeActions.map((action) => ({
         id: action.id,
-        // The UnifiedDataTable actions header maxWidth calculation doesn't take into account larger
-        // paddings, causing the column title to wrap. This forces the column width to be larger and
-        // avoids the problem until https://github.com/elastic/kibana/issues/265569 is fixed
-        width: index === 0 ? 38 : undefined,
+        isAvailable: ({ record }: RowControlRowProps) =>
+          action.isCompatible({ episodes: [dataTableRecordToEpisode(record)] }),
         render: (Control, { record }) => {
           const episodes = [dataTableRecordToEpisode(record)];
-          if (!action.isCompatible({ episodes })) return <></>;
           return (
             <Control
               iconType={action.iconType}
@@ -351,6 +345,7 @@ export const AlertEpisodesListPage = () => {
                 configRowHeight={rowHeight}
                 customBulkActions={customBulkActions}
                 rowAdditionalLeadingControls={rowAdditionalLeadingControls}
+                visibleRowLeadingControls={3}
                 enableComparisonMode={false}
                 services={services}
               />

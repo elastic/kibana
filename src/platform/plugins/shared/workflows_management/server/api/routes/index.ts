@@ -12,7 +12,7 @@ import type { SpacesServiceSetup } from '@kbn/spaces-plugin/server';
 import { registerExecutionRoutes } from './executions';
 import { registerInternalRoutes } from './internal';
 import type { RouteDependencies } from './types';
-import { WorkflowManagementAuditLog } from './utils/workflow_audit_logging';
+import type { WorkflowManagementAuditLog } from './utils/workflow_audit_logging';
 import { registerWorkflowRoutes } from './workflows';
 import type { WorkflowsRouter } from '../../types';
 import type { WorkflowsManagementApi } from '../workflows_management_api';
@@ -23,10 +23,9 @@ export function defineRoutes(
   api: WorkflowsManagementApi,
   logger: Logger,
   spaces: SpacesServiceSetup,
-  service: WorkflowsService
-) {
-  const audit = new WorkflowManagementAuditLog({ service });
-
+  service: WorkflowsService,
+  audit: WorkflowManagementAuditLog
+): void {
   const deps: RouteDependencies = {
     router,
     api,

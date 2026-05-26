@@ -33,7 +33,11 @@ export interface ResourceInstaller {
 }
 
 export class DefaultResourceInstaller implements ResourceInstaller {
-  constructor(private esClient: ElasticsearchClient, private logger: Logger) {}
+  constructor(
+    private esClient: ElasticsearchClient,
+    private logger: Logger,
+    private isCompositeSloEnabled: boolean
+  ) {}
 
   public async ensureCommonResourcesInstalled(): Promise<void> {
     try {
@@ -43,17 +47,24 @@ export class DefaultResourceInstaller implements ResourceInstaller {
         this.createOrUpdateComponentTemplate(SLI_SETTINGS_TEMPLATE),
         this.createOrUpdateComponentTemplate(SUMMARY_MAPPINGS_TEMPLATE),
         this.createOrUpdateComponentTemplate(SUMMARY_SETTINGS_TEMPLATE),
-        this.createOrUpdateComponentTemplate(COMPOSITE_SUMMARY_MAPPINGS_TEMPLATE),
+        ...(this.isCompositeSloEnabled
+          ? [this.createOrUpdateComponentTemplate(COMPOSITE_SUMMARY_MAPPINGS_TEMPLATE)]
+          : []),
       ]);
 
       await this.createOrUpdateIndexTemplate(SLI_INDEX_TEMPLATE);
       await this.createOrUpdateIndexTemplate(SUMMARY_INDEX_TEMPLATE);
-      await this.createOrUpdateIndexTemplate(COMPOSITE_SUMMARY_INDEX_TEMPLATE);
+      if (this.isCompositeSloEnabled) {
+        await this.createOrUpdateIndexTemplate(COMPOSITE_SUMMARY_INDEX_TEMPLATE);
+      }
 
       await this.createIndex(SLI_DESTINATION_INDEX_NAME);
       await this.createIndex(SUMMARY_DESTINATION_INDEX_NAME);
       await this.createIndex(SUMMARY_TEMP_INDEX_NAME);
-      await this.createIndex(COMPOSITE_SUMMARY_INDEX_NAME);
+      if (this.isCompositeSloEnabled) {
+        await this.createIndex(COMPOSITE_SUMMARY_INDEX_NAME);
+        await this.updateCompositeSummaryMapping();
+      }
 
       await this.createOrUpdateIndexTemplate(HEALTH_INDEX_TEMPLATE);
       await this.createDataStream(HEALTH_DATA_STREAM_NAME);
@@ -91,6 +102,16 @@ export class DefaultResourceInstaller implements ResourceInstaller {
         throw err;
       }
     }
+  }
+
+  private async updateCompositeSummaryMapping() {
+    const mappings = COMPOSITE_SUMMARY_MAPPINGS_TEMPLATE.template?.mappings;
+    if (!mappings) {
+      return;
+    }
+    await this.execute(() =>
+      this.esClient.indices.putMapping({ index: COMPOSITE_SUMMARY_INDEX_NAME, ...mappings })
+    );
   }
 
   private async createDataStream(dataStreamName: string) {

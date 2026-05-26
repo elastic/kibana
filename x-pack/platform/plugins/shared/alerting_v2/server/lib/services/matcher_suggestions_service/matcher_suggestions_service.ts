@@ -6,15 +6,16 @@
  */
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-import { inject, injectable } from 'inversify';
 import { flattenObject } from '@kbn/object-utils';
-import { EsServiceScopedToken } from '../es_service/tokens';
-import { RuleSavedObjectsClientToken } from '../rules_saved_object_service/tokens';
+import { inject, injectable } from 'inversify';
 import {
   ALERT_EVENTS_DATA_STREAM,
   alertEpisodeStatus,
 } from '../../../resources/datastreams/alert_events';
 import { RULE_SAVED_OBJECT_TYPE, type RuleSavedObjectAttributes } from '../../../saved_objects';
+import { EsServiceScopedToken } from '../es_service/tokens';
+import { RuleSavedObjectsClientToken } from '../rules_saved_object_service/tokens';
+import { buildAlertEventsFiltersFromMatcher } from './build_alert_events_filters_from_matcher';
 
 const MAX_SUGGESTIONS = 10;
 const MAX_DATA_FIELDS = 100;
@@ -107,12 +108,13 @@ export class MatcherSuggestionsService {
     }
   }
 
-  async getDataFieldNames(): Promise<string[]> {
+  async getDataFieldNames(matcher?: string): Promise<string[]> {
     try {
       const result = await this.esClient.search({
         index: ALERT_EVENTS_DATA_STREAM,
         size: DATA_FIELD_SAMPLE_SIZE,
         timeout: '10s',
+        terminate_after: DATA_FIELD_SAMPLE_SIZE,
         _source: ['data'],
         query: {
           bool: {
@@ -121,6 +123,7 @@ export class MatcherSuggestionsService {
               { range: { '@timestamp': { gte: ALERT_EVENTS_LOOKBACK } } },
               { exists: { field: 'data' } },
               { terms: { 'episode.status': ['pending', 'active', 'recovering'] } },
+              ...buildAlertEventsFiltersFromMatcher(matcher ?? ''),
             ],
           },
         },

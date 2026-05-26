@@ -11,6 +11,8 @@ import {
   EuiBasicTable,
   EuiButton,
   EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiPageSection,
   EuiSpacer,
   EuiText,
@@ -22,6 +24,8 @@ import {
 import type { InboxAction, InboxActionStatus } from '@kbn/inbox-common';
 import { DEFAULT_INBOX_ACTIONS_PER_PAGE } from '@kbn/inbox-common';
 import { useInboxActions } from '../../hooks/use_inbox_api';
+import { RespondFlyout } from './components/respond_flyout';
+import { TimeoutChip } from './components/timeout_chip';
 import * as i18n from './translations';
 
 const STATUS_COLOR: Record<InboxActionStatus, 'warning' | 'success' | 'danger'> = {
@@ -40,6 +44,7 @@ export const InboxActionsPage: React.FC = () => {
   const { euiTheme } = useEuiTheme();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(DEFAULT_INBOX_ACTIONS_PER_PAGE);
+  const [activeAction, setActiveAction] = useState<InboxAction | null>(null);
 
   const { data, isLoading, error, refetch } = useInboxActions({
     page: pageIndex + 1,
@@ -68,9 +73,21 @@ export const InboxActionsPage: React.FC = () => {
       {
         field: 'status',
         name: i18n.COLUMN_STATUS,
-        width: '120px',
-        render: (status: InboxActionStatus) => (
-          <EuiBadge color={STATUS_COLOR[status]}>{STATUS_LABEL[status]}</EuiBadge>
+        width: '160px',
+        render: (status: InboxActionStatus, item: InboxAction) => (
+          <EuiFlexGroup gutterSize="xs" wrap responsive={false} alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiBadge color={STATUS_COLOR[status]}>{STATUS_LABEL[status]}</EuiBadge>
+            </EuiFlexItem>
+            {(item.timeout_at || item.response_mode === 'timed_out') && (
+              <EuiFlexItem grow={false}>
+                <TimeoutChip
+                  timeoutAt={item.timeout_at}
+                  expired={item.response_mode === 'timed_out'}
+                />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
         ),
       },
       {
@@ -89,6 +106,21 @@ export const InboxActionsPage: React.FC = () => {
         name: i18n.COLUMN_CREATED_AT,
         width: '200px',
         render: (createdAt: string) => (createdAt ? new Date(createdAt).toLocaleString() : '-'),
+      },
+      {
+        name: i18n.COLUMN_ACTIONS,
+        width: '120px',
+        actions: [
+          {
+            name: i18n.RESPOND_ACTION_LABEL,
+            description: i18n.RESPOND_ACTION_DESCRIPTION,
+            icon: 'pencil',
+            type: 'icon',
+            'data-test-subj': 'inboxActionRespondButton',
+            enabled: (item: InboxAction) => item.status === 'pending',
+            onClick: (item: InboxAction) => setActiveAction(item),
+          },
+        ],
       },
     ],
     []
@@ -148,6 +180,18 @@ export const InboxActionsPage: React.FC = () => {
           onChange={onTableChange}
         />
       )}
+      {activeAction ? (
+        <RespondFlyout
+          action={activeAction}
+          onClose={() => setActiveAction(null)}
+          // The respond mutation already invalidates the inbox actions
+          // query, which v4 refetches automatically — this `onSuccess` is
+          // a belt-and-suspenders signal that also covers the (rare) case
+          // where the mutation cache is bypassed (e.g. via a different
+          // QueryClient in tests).
+          onSuccess={refetch}
+        />
+      ) : null}
     </EuiPageSection>
   );
 };

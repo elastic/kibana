@@ -87,6 +87,7 @@ export interface AgentlessPolicy {
       cpu?: string;
     };
   };
+  cluster_id?: string;
 }
 
 /**
@@ -372,6 +373,7 @@ export interface AgentlessApiListDeploymentResponse {
   deployments: Array<{
     policy_id: string;
     revision_idx?: number;
+    cluster_id?: string;
   }>;
   next_token?: string;
 }

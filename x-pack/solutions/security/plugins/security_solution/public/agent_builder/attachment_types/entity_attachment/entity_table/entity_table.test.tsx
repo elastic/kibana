@@ -10,7 +10,6 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { ISessionService } from '@kbn/data-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EntityType } from '../../../../../common/entity_analytics/types';
 import type { EntityForAttachment } from '../use_entity_for_attachment';
 import { useEntityForAttachment } from '../use_entity_for_attachment';
@@ -18,14 +17,11 @@ import {
   navigateToEntityAnalyticsHomePageInApp,
   navigateToEntityAnalyticsWithFlyoutInApp,
 } from '../../entity_explore_navigation';
+import { EntityAnalyticsAgentNavigationProvider } from '../../entity_analytics_agent_navigation_context';
 import { EntityTable } from './entity_table';
 
 jest.mock('../use_entity_for_attachment', () => ({
   useEntityForAttachment: jest.fn(),
-}));
-
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: jest.fn(),
 }));
 
 jest.mock('../../entity_explore_navigation', () => {
@@ -38,7 +34,6 @@ jest.mock('../../entity_explore_navigation', () => {
 });
 
 const mockedUseEntityForAttachment = useEntityForAttachment as jest.Mock;
-const mockedUseKibana = useKibana as jest.Mock;
 const mockedNavigateToFlyout = navigateToEntityAnalyticsWithFlyoutInApp as jest.Mock;
 const mockedNavigateToHome = navigateToEntityAnalyticsHomePageInApp as jest.Mock;
 
@@ -57,25 +52,34 @@ const baseEntityData = (override: Partial<EntityForAttachment> = {}): EntityForA
   ...override,
 });
 
-const renderTable = (props: Partial<React.ComponentProps<typeof EntityTable>> = {}) =>
-  render(
+const renderTable = (
+  props: Partial<React.ComponentProps<typeof EntityTable>> & {
+    application?: ApplicationStart;
+    searchSession?: ISessionService;
+  } = {}
+) => {
+  const { application, searchSession, ...tableProps } = props;
+  return render(
     <I18nProvider>
-      <EntityTable
-        entities={[
-          { identifierType: 'host', identifier: 'host-1' },
-          { identifierType: 'user', identifier: 'bob' },
-        ]}
-        {...props}
-      />
+      <EntityAnalyticsAgentNavigationProvider
+        application={application}
+        searchSession={searchSession}
+      >
+        <EntityTable
+          entities={[
+            { identifierType: 'host', identifier: 'host-1' },
+            { identifierType: 'user', identifier: 'bob' },
+          ]}
+          {...tableProps}
+        />
+      </EntityAnalyticsAgentNavigationProvider>
     </I18nProvider>
   );
+};
 
 describe('EntityTable', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockedUseKibana.mockReturnValue({
-      services: { application: { navigateToApp: jest.fn() } },
-    });
     mockedUseEntityForAttachment.mockReturnValue({
       data: baseEntityData(),
       isLoading: false,
@@ -97,16 +101,12 @@ describe('EntityTable', () => {
   });
 
   describe('per-row Explore button', () => {
-    it('does not render when no application prop or kibana.services.application is available', () => {
-      // Simulates the embedding environment where the attachment is rendered outside
-      // `KibanaContextProvider`: `useKibana().services.application` is undefined and no
-      // `application` prop is passed, so per-row Explore must be hidden.
-      mockedUseKibana.mockReturnValue({ services: {} });
+    it('does not render when no application is provided to the navigation provider', () => {
       renderTable({ entities: [{ identifierType: 'host', identifier: 'host-1' }] });
       expect(screen.queryAllByTestId('entityAttachmentTableOpenEntity')).toHaveLength(0);
     });
 
-    it('renders when application is passed explicitly', () => {
+    it('renders when application is provided to the navigation provider', () => {
       const application = { navigateToApp: jest.fn() } as unknown as ApplicationStart;
       renderTable({ application });
       const buttons = screen.getAllByTestId('entityAttachmentTableOpenEntity');

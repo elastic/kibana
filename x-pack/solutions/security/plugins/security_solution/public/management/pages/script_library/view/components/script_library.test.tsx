@@ -200,7 +200,7 @@ describe('ScriptLibrary', () => {
 
       const learnMoreLink = banner.querySelector('a');
       expect(learnMoreLink).toBeInTheDocument();
-      expect(learnMoreLink?.getAttribute('href')).toContain('scripts-library');
+      expect(learnMoreLink?.getAttribute('href')).toContain('script-library');
     });
 
     it('should not show new page banner after it is dismissed', async () => {

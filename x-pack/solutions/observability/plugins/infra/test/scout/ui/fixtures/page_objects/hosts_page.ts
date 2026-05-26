@@ -6,7 +6,7 @@
  */
 
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
-import { EXTENDED_TIMEOUT } from '../constants';
+import { EXTENDED_TIMEOUT, KPI_METRICS } from '../constants';
 
 type PreferredSchema = 'ecs' | 'semconv' | null;
 
@@ -96,6 +96,27 @@ export class HostsPage {
     const schemaPart =
       preferredSchema === null ? 'preferredSchema:!n' : `preferredSchema:${preferredSchema}`;
     const risonState = `(dateRange:(from:'${from}',to:'${to}'),filters:!(),limit:100,panelFilters:!(),${schemaPart},query:(language:kuery,query:''))`;
+    await this.page.goto(`${baseUrl}/hosts?_a=${risonState}`);
+    if (!skipLoadWait) {
+      await this.waitForTableToLoad();
+    }
+  }
+
+  public async goToPageWithRelativeRange({
+    rangeFrom,
+    rangeTo,
+    preferredSchema = null,
+    skipLoadWait = false,
+  }: {
+    rangeFrom: string;
+    rangeTo: string;
+    preferredSchema?: PreferredSchema;
+    skipLoadWait?: boolean;
+  }) {
+    const baseUrl = this.kbnUrl.app('metrics');
+    const schemaPart =
+      preferredSchema === null ? 'preferredSchema:!n' : `preferredSchema:${preferredSchema}`;
+    const risonState = `(dateRange:(from:'${rangeFrom}',to:'${rangeTo}'),filters:!(),limit:100,panelFilters:!(),${schemaPart},query:(language:kuery,query:''))`;
     await this.page.goto(`${baseUrl}/hosts?_a=${risonState}`);
     if (!skipLoadWait) {
       await this.waitForTableToLoad();
@@ -323,5 +344,21 @@ export class HostsPage {
     await option.waitFor();
     await option.click();
     await this.waitForTableToLoad();
+  }
+
+  public async clickRefresh() {
+    await this.querySubmitButton.click();
+    await this.waitForTableToLoad();
+  }
+
+  public async getKPIValuesSnapshot(timeout?: number): Promise<Record<string, string | null>> {
+    await this.waitForKPILoadingToFinish(timeout);
+    const snapshot: Record<string, string | null> = {};
+    for (const metric of KPI_METRICS) {
+      const locator = this.getHostKPIChartValueLocator(metric);
+      const count = await locator.count();
+      snapshot[metric] = count > 0 ? await locator.getAttribute('title') : null;
+    }
+    return snapshot;
   }
 }

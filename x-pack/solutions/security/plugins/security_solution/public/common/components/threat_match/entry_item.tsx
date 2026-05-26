@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiFormRow, EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiSuperSelect } from '@elastic/eui';
+import { EuiFormRow, EuiFlexGroup, EuiFlexItem, EuiSuperSelect } from '@elastic/eui';
 import { i18n as i18nTranslate } from '@kbn/i18n';
 import { css } from '@emotion/react';
 
@@ -65,8 +65,9 @@ export const EntryItem: React.FC<EntryItemProps> = ({
   );
 
   const renderFieldInput = useMemo(() => {
-    const comboBox = (
-      <EuiToolTip display="block" position="top" content={entry.field?.name}>
+    const label = showLabel ? i18n.FIELD : '';
+    return (
+      <EuiFormRow label={label} data-test-subj="entryItemFieldInputFormRow">
         <EsFieldSelector
           placeholder={i18n.FIELD_PLACEHOLDER}
           indexPattern={indexPattern}
@@ -77,13 +78,6 @@ export const EntryItem: React.FC<EntryItemProps> = ({
           onChange={handleFieldChange}
           data-test-subj="entryField"
         />
-      </EuiToolTip>
-    );
-
-    const label = showLabel ? i18n.FIELD : '';
-    return (
-      <EuiFormRow label={label} data-test-subj="entryItemFieldInputFormRow">
-        {comboBox}
       </EuiFormRow>
     );
   }, [handleFieldChange, indexPattern, entry, showLabel]);
@@ -115,8 +109,9 @@ export const EntryItem: React.FC<EntryItemProps> = ({
   }, [handleMatchChange, entry, doesNotMatchDisabled]);
 
   const renderThreatFieldInput = useMemo(() => {
-    const comboBox = (
-      <EuiToolTip display="block" position="top" content={entry.value?.name}>
+    const label = showLabel ? i18n.THREAT_FIELD : '';
+    return (
+      <EuiFormRow label={label} data-test-subj="threatFieldInputFormRow">
         <EsFieldSelector
           placeholder={i18n.FIELD_PLACEHOLDER}
           indexPattern={threatIndexPatterns}
@@ -127,13 +122,6 @@ export const EntryItem: React.FC<EntryItemProps> = ({
           onChange={handleThreatFieldChange}
           data-test-subj="threatEntryField"
         />
-      </EuiToolTip>
-    );
-
-    const label = showLabel ? i18n.THREAT_FIELD : '';
-    return (
-      <EuiFormRow label={label} data-test-subj="threatFieldInputFormRow">
-        {comboBox}
       </EuiFormRow>
     );
   }, [handleThreatFieldChange, threatIndexPatterns, entry, showLabel]);

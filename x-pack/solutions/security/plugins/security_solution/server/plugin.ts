@@ -59,9 +59,9 @@ import {
   DEFAULT_DETECTIONS_CLOSE_REASONS_KEY,
   EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER,
   SERVER_APP_ID,
-  CASE_ATTACHMENT_INDICATOR_TYPE_ID,
 } from '../common/constants';
 import { registerCaseAttachments } from './cases/attachments/register';
+import { securityAlertAttachmentType } from './cases/attachments/alert';
 import { DefaultClosingReasonSchema } from '../common/types';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerPolicyRoutes } from './endpoint/routes/policy';
@@ -173,6 +173,8 @@ import { initializeEndpointExceptionsPerPolicyOptInStatus } from './endpoint/lib
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
+const SECURITY_INFERENCE_PARENT_FEATURE_ID = 'security_search_inference_parent';
+
 export class Plugin implements ISecuritySolutionPlugin {
   private readonly pluginContext: PluginInitializerContext;
   private readonly config: ConfigType;
@@ -266,9 +268,11 @@ export class Plugin implements ISecuritySolutionPlugin {
     const experimentalFeatures = this.config.experimentalFeatures;
     const endpointAppContextService = this.endpointAppContextService;
 
-    registerTools(agentBuilder, core, logger, experimentalFeatures).catch((error) => {
-      this.logger.error(`Error registering security tools: ${error}`);
-    });
+    registerTools(agentBuilder, core, logger, experimentalFeatures, this.isServerless).catch(
+      (error) => {
+        this.logger.error(`Error registering security tools: ${error}`);
+      }
+    );
     registerAttachments(agentBuilder).catch((error) => {
       this.logger.error(`Error registering security attachments: ${error}`);
     });
@@ -423,19 +427,11 @@ export class Plugin implements ISecuritySolutionPlugin {
     });
 
     if (plugins.searchInferenceEndpoints) {
+      // The `SECURITY_INFERENCE_PARENT_FEATURE_ID` parent is registered by
+      // `elastic_assistant`, which `security_solution` depends on (so it sets up
+      // first). We only register child features here.
       plugins.searchInferenceEndpoints.features.register({
-        featureId: 'security_search_inference_parent',
-        featureName: 'Security',
-        featureDescription: 'Parent feature for Security',
-        taskType: 'chat_completion',
-        // If no list is set, the Kibana-wide default endpoint will be surfaced first
-        // and the other available endpoints will be made available in the order they're
-        //  returned from the inference API.
-        recommendedEndpoints: [],
-      });
-
-      plugins.searchInferenceEndpoints.features.register({
-        parentFeatureId: 'security_search_inference_parent',
+        parentFeatureId: SECURITY_INFERENCE_PARENT_FEATURE_ID,
         featureId: 'entity_ai_highlight_summary',
         featureName: 'Entity AI Highlight Summary',
         featureDescription: 'Entity AI Highlight Summary inference endpoint configuration',
@@ -445,7 +441,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
       if (!experimentalFeatures.siemMigrationsDisabled) {
         plugins.searchInferenceEndpoints.features.register({
-          parentFeatureId: 'security_search_inference_parent',
+          parentFeatureId: SECURITY_INFERENCE_PARENT_FEATURE_ID,
           featureId: SIEM_MIGRATION_INFERENCE_FEATURE_ID,
           featureName: 'Automatic migration',
           featureDescription: 'Automatic migration inference endpoint configuration',
@@ -455,7 +451,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       }
 
       plugins.searchInferenceEndpoints.features.register({
-        parentFeatureId: 'security_search_inference_parent',
+        parentFeatureId: SECURITY_INFERENCE_PARENT_FEATURE_ID,
         featureId: 'defend_insights',
         featureName: 'Automatic Troubleshooting',
         featureDescription: 'Automatic Troubleshooting inference endpoint configuration',
@@ -464,7 +460,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       });
 
       plugins.searchInferenceEndpoints.features.register({
-        parentFeatureId: 'security_search_inference_parent',
+        parentFeatureId: SECURITY_INFERENCE_PARENT_FEATURE_ID,
         featureId: 'attack_discovery',
         featureName: 'Attack Discovery',
         featureDescription: 'Attack Discovery inference endpoint configuration',
@@ -474,7 +470,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
       if (experimentalFeatures.leadGenerationEnabled) {
         plugins.searchInferenceEndpoints.features.register({
-          parentFeatureId: 'security_search_inference_parent',
+          parentFeatureId: SECURITY_INFERENCE_PARENT_FEATURE_ID,
           featureId: 'lead_generation',
           featureName: 'Threat Hunting Lead Generation',
           featureDescription: 'Lead generation inference endpoint configuration',
@@ -538,6 +534,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);
     this.usageCollection = plugins.usageCollection;
     registerCaseAttachments(plugins.cases.attachmentFramework);
+    plugins.cases.attachmentFramework.registerUnified(securityAlertAttachmentType);
 
     plugins.cases.registerCloseReasonValidator(APP_ID, async (closeReason, request) => {
       const [coreStart] = await core.getStartServices();
@@ -761,10 +758,6 @@ export class Plugin implements ISecuritySolutionPlugin {
           THREAT_INTELLIGENCE_SEARCH_STRATEGY_NAME,
           threatIntelligenceSearchStrategy
         );
-
-        plugins.cases.attachmentFramework.registerExternalReference({
-          id: CASE_ATTACHMENT_INDICATOR_TYPE_ID,
-        });
 
         this.siemMigrationsService.setup({ esClusterClient: coreStart.elasticsearch.client });
       })

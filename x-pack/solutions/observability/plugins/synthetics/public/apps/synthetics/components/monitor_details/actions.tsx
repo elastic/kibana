@@ -34,9 +34,9 @@ export function Actions() {
       }
       isOpen={isPopoverOpen}
       closePopover={closePopover}
+      panelPaddingSize="none"
     >
       <EuiContextMenuPanel
-        size="m"
         items={[
           <EditMonitorContextItem key="edit-monitor" />,
           <RefreshContextItem key="refresh-monitor" />,
