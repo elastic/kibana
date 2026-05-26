@@ -69,7 +69,7 @@ export const dashboardMinPanelCountEvaluator: Evaluator<
   name: 'Dashboard minimum panel count',
   kind: 'CODE',
   evaluate: async ({ expected, output }): Promise<EvaluationResult> => {
-    const expectedMinPanels = expected?.expectedMinPanels;
+    const expectedMinPanels = expected?.expectedDashboardAttachment?.panelCount?.min;
     if (typeof expectedMinPanels !== 'number') {
       return { score: 1, label: 'SKIPPED' };
     }
@@ -94,7 +94,7 @@ export const dashboardSectionCountEvaluator: Evaluator<
   name: 'Dashboard section count',
   kind: 'CODE',
   evaluate: async ({ expected, output }): Promise<EvaluationResult> => {
-    const expectedSectionCount = expected?.expectedSectionCount;
+    const expectedSectionCount = expected?.expectedDashboardAttachment?.sectionCount;
     if (typeof expectedSectionCount !== 'number') {
       return { score: 1, label: 'SKIPPED' };
     }

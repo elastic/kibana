@@ -29,8 +29,26 @@ export interface DashboardDatasetExample extends Example {
   };
   output: {
     expected?: string;
-    expectedMinPanels?: number;
-    expectedSectionCount?: number;
+    expectedDashboardAttachment?: {
+      exists?: boolean;
+      title?: {
+        nonEmpty?: boolean;
+      };
+      panelCount?: {
+        min?: number;
+        max?: number;
+      };
+      sectionCount?: number;
+      sections?: Array<{
+        titleIncludes?: string[];
+        minPanels?: number;
+        maxPanels?: number;
+      }>;
+      grid?: {
+        maxColumns?: number;
+        noOverflow?: boolean;
+      };
+    };
   };
   metadata?: {
     [key: string]: unknown;

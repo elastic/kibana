@@ -60,7 +60,9 @@ evaluate.describe(
               },
               output: {
                 expected: 'Dashboard skill should be activated.',
-                expectedMinPanels: 3,
+                expectedDashboardAttachment: {
+                  panelCount: { min: 3 },
+                },
               },
             },
             {
@@ -70,8 +72,10 @@ evaluate.describe(
               },
               output: {
                 expected: 'Dashboard skill should be activated and create the requested sections.',
-                expectedMinPanels: 2,
-                expectedSectionCount: 2,
+                expectedDashboardAttachment: {
+                  panelCount: { min: 2 },
+                  sectionCount: 2,
+                },
               },
             },
           ],
