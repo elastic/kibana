@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { esql } from '@elastic/esql';
 import type { ComposerSortShorthand } from '@elastic/esql';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import {
@@ -17,6 +16,7 @@ import {
 import { combineWhere, inPredicate, IS_NOT_DELETED } from '../esql_helpers';
 import {
   executeAndDecodeSource,
+  latestSourceFrom,
   pickLatestPerGroup,
   withSort,
   withWhere,
@@ -25,14 +25,17 @@ import {
 import { ID, KI_TYPE_FEATURE, STREAM_NAME, TYPE } from '../fields';
 
 export class RevisionReader {
-  constructor(private readonly esClient: ElasticsearchClient) {}
+  constructor(
+    private readonly esClient: ElasticsearchClient,
+    private readonly space: string
+  ) {}
 
   async fetchLatestRevisions(
     where?: LatestSourceWhereCondition,
     postGroupingWhere?: LatestSourceWhereCondition,
     sort?: ComposerSortShorthand[]
   ): Promise<StoredKnowledgeIndicator[]> {
-    let query = esql.from([KNOWLEDGE_INDICATORS_DATA_STREAM], ['_id', '_source']);
+    let query = latestSourceFrom(KNOWLEDGE_INDICATORS_DATA_STREAM, this.space);
     query = withWhere(query, where);
     query = pickLatestPerGroup(query, ['stream.name', 'type', 'id']);
     query = withWhere(query, postGroupingWhere);

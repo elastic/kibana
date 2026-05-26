@@ -79,6 +79,7 @@ function makeClient(): {
     esClient: {} as KnowledgeIndicatorClientDeps['esClient'],
     rulesClient: {} as KnowledgeIndicatorClientDeps['rulesClient'],
     soClient: {} as KnowledgeIndicatorClientDeps['soClient'],
+    space: 'default',
     logger,
   };
   const client = new KnowledgeIndicatorClient(deps);
@@ -345,6 +346,7 @@ describe('KnowledgeIndicatorClient.findIndicators keyword search', () => {
       esClient: {} as KnowledgeIndicatorClientDeps['esClient'],
       rulesClient: {} as KnowledgeIndicatorClientDeps['rulesClient'],
       soClient: {} as KnowledgeIndicatorClientDeps['soClient'],
+      space: 'default',
       logger,
     };
     const client = new KnowledgeIndicatorClient(deps);
