@@ -15,7 +15,7 @@ import type { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
 import type { AlertingRequestHandlerContext } from '../../../../types';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
-import { transformResolveResponseV1 } from './transforms';
+import { transformResolveResponseInternalV1 } from './transforms';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 
 export type ResolveRuleRequestParamsV1 = TypeOf<typeof resolveParamsSchemaV1>;
@@ -43,10 +43,9 @@ export const resolveRuleRoute = (
         // without fixing all of other solution types
         const rule = (await rulesClient.resolve({
           id,
-          includeSnoozeData: true,
         })) as ResolvedRule<RuleParamsV1>;
         const response: ResolveRuleResponseV1<RuleParamsV1> = {
-          body: transformResolveResponseV1<RuleParamsV1>(rule),
+          body: transformResolveResponseInternalV1<RuleParamsV1>(rule),
         };
         return res.ok(response);
       })

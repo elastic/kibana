@@ -1,0 +1,7 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/agent-builder-dashboards-common",
+  "owner": "@elastic/appex-ai-infra",
+  "group": "platform",
+  "visibility": "shared"
+}

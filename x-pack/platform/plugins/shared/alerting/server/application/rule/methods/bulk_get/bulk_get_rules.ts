@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import pMap from 'p-map';
-import { chunk, omit } from 'lodash';
+import { chunk } from 'lodash';
 import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder } from '@kbn/es-query';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
@@ -94,10 +94,9 @@ export async function bulkGetRules<Params extends RuleParams = never>(
     );
   });
 
-  const paramsForTransform = omit(params, ['ids']);
   const transformedRules = await pMap(
     savedObjects,
-    (rule) => transformRuleSoToSanitizedRule<Params>(context, rule, paramsForTransform),
+    (rule) => transformRuleSoToSanitizedRule<Params>(context, rule),
     { concurrency: 10 }
   );
   result.rules.push(...transformedRules);

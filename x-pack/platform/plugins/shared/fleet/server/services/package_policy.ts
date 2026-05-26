@@ -55,6 +55,7 @@ import {
   getInputEffectiveName,
   getRegistryStreamWithDataStreamForInputType,
   syncDataStreamTypeFromVar,
+  validateFleetSavedObjectId,
 } from '../../common/services';
 import {
   SO_SEARCH_LIMIT,
@@ -521,6 +522,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
   ): Promise<PackagePolicy> {
     const logger = this.getLogger('create');
 
+    validateFleetSavedObjectId(options?.id);
+
     logger.debug(
       () =>
         `Creating [${
@@ -941,6 +944,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       bumpRevision?: boolean;
       force?: true;
       asyncDeploy?: boolean;
+      overwrite?: boolean;
     },
     request?: KibanaRequest
   ): Promise<{
@@ -1092,7 +1096,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     });
 
     const { saved_objects: createdObjects } = await soClient
-      .bulkCreate<PackagePolicySOAttributes>(policiesToCreate)
+      .bulkCreate<PackagePolicySOAttributes>(policiesToCreate, { overwrite: options?.overwrite })
       .catch(catchAndSetErrorStackTrace.withMessage('failed to bulk create package policies'));
 
     // Filter out invalid SOs
