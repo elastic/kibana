@@ -40,19 +40,19 @@ export const showWarningToast = ({ warnings }: { warnings: Warnings }) => {
 
   let warningMessage;
   if (droppedPanelsCount > 0 && !generalWarningCount) {
-    warningMessage = i18n.translate('dashboard.droppedPanelsWarning', {
+    warningMessage = i18n.translate('dashboard.warnings.modal.droppedPanelsWarning', {
       defaultMessage:
         '{droppedPanelsCount} {droppedPanelsCount, plural, one {panel has} other {panels have}} been removed from the dashboard.',
       values: { droppedPanelsCount },
     });
   } else if (generalWarningCount > 0 && !droppedPanelsCount) {
-    warningMessage = i18n.translate('dashboard.schemaWarning', {
+    warningMessage = i18n.translate('ashboard.warnings.modal.schemaWarning', {
       defaultMessage:
         'There {warningCount, plural, one {is} other {are}} {warningCount} {warningCount, plural, one {warning} other {warnings}} on this dashboard that could not be automatically resolved.',
       values: { warningCount: warnings.length },
     });
   } else {
-    warningMessage = i18n.translate('dashboard.multipleWarnings', {
+    warningMessage = i18n.translate('ashboard.warnings.modal.multipleWarnings', {
       defaultMessage:
         '{droppedPanelsCount} {droppedPanelsCount, plural, one {panel has} other {panels have}} been removed, and there {warningCount, plural, one {is} other {are}} {warningCount} other {warningCount, plural, one {warning} other {warnings}} that could not be automatically resolved.',
       values: { droppedPanelsCount, warningCount: warnings.length - droppedPanelsCount },
@@ -65,7 +65,7 @@ export const showWarningToast = ({ warnings }: { warnings: Warnings }) => {
         <EuiModal aria-labelledby={'modalTitleId'} onClose={() => modal.close()}>
           <EuiModalHeader>
             <EuiModalHeaderTitle id={'modalTitleId'}>
-              {i18n.translate('dashboard.warnings.modalTitle', {
+              {i18n.translate('dashboard.warnings.modal.title', {
                 defaultMessage: 'Warning details',
               })}
             </EuiModalHeaderTitle>
@@ -77,7 +77,7 @@ export const showWarningToast = ({ warnings }: { warnings: Warnings }) => {
           </EuiModalBody>
           <EuiModalFooter>
             <EuiButtonEmpty onClick={() => modal.close()}>
-              {i18n.translate('xpack.transform.toastText.closeModalButtonText', {
+              {i18n.translate('dashboard.warnings.modal.closeButtonText', {
                 defaultMessage: 'Close',
               })}
             </EuiButtonEmpty>
