@@ -8,7 +8,7 @@
 import React from 'react';
 import { getReportingShareIntegrationConfig } from './scheduled_report_share_integration';
 import type { ExportShareConfig, ShareContext } from '@kbn/share-plugin/public/types';
-import { ReportingAPIClient } from '@kbn/reporting-public';
+import type { ReportingAPIClient } from '@kbn/reporting-public';
 
 jest.mock('../components/scheduled_report_flyout_share_wrapper', () => ({
   ScheduledReportFlyoutShareWrapper: () => (
