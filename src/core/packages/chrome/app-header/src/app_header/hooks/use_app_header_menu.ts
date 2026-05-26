@@ -18,14 +18,16 @@ import { useChromeService } from '@kbn/core-chrome-browser-context';
 import { useObservable } from '@kbn/use-observable';
 import { i18n } from '@kbn/i18n';
 
-const createIntegrationsMenuItem = (): AppMenuStaticItem => ({
+import { useBasePath } from './chrome';
+
+const createIntegrationsMenuItem = (href: string): AppMenuStaticItem => ({
   label: i18n.translate('core.chrome.appHeader.addIntegrationsMenuItemLabel', {
     defaultMessage: 'Add integrations',
   }),
   id: 'addIntegrations',
   iconType: 'indexOpen',
   order: 0,
-  href: '/app/integrations/browse',
+  href,
 });
 
 const createFeedbackMenuItem = (feedbackHandler: () => void): AppMenuStaticItem => ({
@@ -63,6 +65,7 @@ const useStaticItems = ({
   showAddIntegrations?: boolean;
 }) => {
   const chrome = useChromeService();
+  const basePath = useBasePath();
   const feedbackHandler = useObservable(chrome.getFeedbackHandler$(), undefined);
   const documentationLink = useObservable(chrome.getAppDocumentationLink$(), undefined);
   const helpExtension = useObservable(chrome.getHelpExtension$(), undefined);
@@ -87,11 +90,18 @@ const useStaticItems = ({
     }
 
     if (showAddIntegrations) {
-      staticItems.push(createIntegrationsMenuItem());
+      staticItems.push(createIntegrationsMenuItem(basePath.prepend('/app/integrations/browse')));
     }
 
     return staticItems;
-  }, [feedbackHandler, explicitDocLink, documentationLink, helpExtension, showAddIntegrations]);
+  }, [
+    feedbackHandler,
+    basePath,
+    explicitDocLink,
+    documentationLink,
+    helpExtension,
+    showAddIntegrations,
+  ]);
 };
 
 const useResolvedAppMenu = (
