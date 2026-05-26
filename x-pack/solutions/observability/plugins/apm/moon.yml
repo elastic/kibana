@@ -165,6 +165,7 @@ dependsOn:
   - '@kbn/unified-doc-viewer-plugin'
   - '@kbn/ebt-click'
   - '@kbn/apm-types-shared'
+  - '@kbn/storybook'
 tags:
   - plugin
   - prod
@@ -173,6 +174,7 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
+    - .storybook/**/*
     - common/**/*
     - public/**/*
     - scripts/**/*
