@@ -19,7 +19,7 @@ interface CompactionStepProps {
  * Renders a `CompactionStep` as a static row.
  *
  * - In progress (`token_count_after === 0`): "Compacting context"
- * - Complete: "Context compacted: {before} → {after} tokens, {N} round(s)"
+ * - Complete: "Context condensed: {before} → {after} tokens, {N} round(s)"
  *
  * All three numbers fit on the headline, so this step has no sub-fields and is
  * not clickable.
@@ -40,7 +40,7 @@ export const CompactionStep: React.FC<CompactionStepProps> = ({ step }) => {
             ) : (
               <FormattedMessage
                 id="xpack.agentBuilder.roundEvents.steps.compaction.complete"
-                defaultMessage="Context compacted: {before} → {after} tokens, {count, plural, one {# round} other {# rounds}}"
+                defaultMessage="Context condensed: {before} → {after} tokens, {count, plural, one {# round} other {# rounds}}"
                 values={{
                   before: step.token_count_before.toLocaleString(),
                   after: step.token_count_after.toLocaleString(),
