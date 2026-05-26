@@ -7,7 +7,6 @@
 
 import React, { lazy, useCallback, useEffect, useRef, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSpacer } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
@@ -199,7 +198,6 @@ const RulesPage = () => {
           })),
         }}
       >
-        <EuiSpacer size="l" />
         <Routes>
           <Route exact path="/logs" component={renderLogsList} />
           <Route exact path="/" component={renderRulesList} />

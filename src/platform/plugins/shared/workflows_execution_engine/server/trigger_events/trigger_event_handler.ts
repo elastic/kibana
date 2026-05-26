@@ -17,6 +17,7 @@ import type {
   WorkflowDetailDto,
   WorkflowExecutionEngineModel,
 } from '@kbn/workflows';
+import { pickManagedWorkflowFields } from '@kbn/workflows';
 import { validateWorkflowForExecution, type WorkflowRepository } from '@kbn/workflows/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import {
@@ -510,6 +511,7 @@ export class TriggerEventHandler {
               enabled: workflow.enabled,
               definition: workflow.definition,
               yaml: workflow.yaml,
+              ...pickManagedWorkflowFields(workflow),
             };
             const context: Record<string, unknown> = {
               event: scheduleResult.event,
