@@ -56,12 +56,20 @@ function createScenarioTest(scenario: AlertScenario) {
       });
 
       log.info('Waiting for alert to be created');
+      const { params: ruleParams, rule_type_id: ruleTypeId } = scenario.alertRule.ruleParams;
       alertId = await waitForActiveAlert({
         esClient,
         kbnClient,
         alertsIndex: scenario.alertRule.alertsIndex,
         ruleId,
         log,
+        diagnostics: {
+          scenarioId: scenario.id,
+          ruleTypeId,
+          serviceName: 'serviceName' in ruleParams ? ruleParams.serviceName : undefined,
+          windowSize: 'windowSize' in ruleParams ? ruleParams.windowSize : undefined,
+          windowUnit: 'windowUnit' in ruleParams ? ruleParams.windowUnit : undefined,
+        },
       });
     });
 
