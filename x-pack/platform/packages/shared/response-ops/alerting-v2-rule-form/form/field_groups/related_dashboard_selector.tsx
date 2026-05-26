@@ -53,10 +53,7 @@ const RelatedDashboardsComboBox = ({
   >([]);
   const [isLoading, setIsLoading] = useState(false);
   const hasLoadedDashboardOptions = useRef(false);
-  const shouldIgnoreNextEmptySearch = useRef(false);
   const selectedDashboardIds = useRef<string[]>([]);
-  const onChangeRef = useRef(onChange);
-  onChangeRef.current = onChange;
 
   useEffect(() => {
     let ignore = false;
@@ -86,13 +83,13 @@ const RelatedDashboardsComboBox = ({
         setSelectedDashboards(selectedOptions);
 
         if (selectedOptions.length !== dashboardsFormData.length) {
-          onChangeRef.current(selectedOptions);
+          onChange(selectedOptions);
         }
       } catch {
         if (!ignore) {
           selectedDashboardIds.current = [];
           setSelectedDashboards([]);
-          onChangeRef.current([]);
+          onChange([]);
         }
       }
     };
@@ -101,7 +98,7 @@ const RelatedDashboardsComboBox = ({
     return () => {
       ignore = true;
     };
-  }, [dashboardsFormData, uiActions]);
+  }, [dashboardsFormData, onChange, uiActions]);
 
   const loadDashboards = useCallback(
     async (search?: string) => {
@@ -123,29 +120,16 @@ const RelatedDashboardsComboBox = ({
     wait: SEARCH_DEBOUNCE_MS,
   });
 
-  const handleComboBoxFocus = useCallback(() => {
-    if (hasLoadedDashboardOptions.current) {
-      return;
-    }
-
-    hasLoadedDashboardOptions.current = true;
-    // EUI fires an empty onSearchChange when the combo opens; focus already loads
-    // the initial options, so skip only that immediate duplicate empty search.
-    shouldIgnoreNextEmptySearch.current = true;
-    loadDashboards();
-  }, [loadDashboards]);
-
   const handleSearchChange = useCallback(
     (search: string) => {
-      if (shouldIgnoreNextEmptySearch.current && !search.trim()) {
-        shouldIgnoreNextEmptySearch.current = false;
+      if (!hasLoadedDashboardOptions.current) {
+        hasLoadedDashboardOptions.current = true;
+        loadDashboards();
         return;
       }
-
-      shouldIgnoreNextEmptySearch.current = false;
       debouncedLoadDashboards(search);
     },
-    [debouncedLoadDashboards]
+    [debouncedLoadDashboards, loadDashboards]
   );
 
   const onSelectionChange = (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
@@ -164,7 +148,7 @@ const RelatedDashboardsComboBox = ({
       placeholder={placeholder}
       aria-labelledby={labelId}
       onChange={onSelectionChange}
-      onFocus={handleComboBoxFocus}
+      onFocus={() => handleSearchChange('')}
       onSearchChange={handleSearchChange}
       data-test-subj="dashboardsSelector"
     />

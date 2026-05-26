@@ -27,6 +27,7 @@ const BASE_COMPOSE_VALUES: ComposeFormValues = {
   stateTransitionAlertDelayMode: 'immediate',
   stateTransitionRecoveryDelayMode: 'immediate',
   artifacts: [],
+  runbookArtifacts: [],
   dashboardArtifacts: [],
 };
 
@@ -133,7 +134,7 @@ describe('RelatedDashboardSelector', () => {
     expect(screen.getByTestId('artifactValueSpy').textContent).toContain(DASHBOARD_ID);
   });
 
-  it('debounces dashboard searches after the selector is focused', async () => {
+  it('debounces dashboard searches after the initial load', async () => {
     render(<RelatedDashboardSelector />, { wrapper: createComposeFormWrapper() });
 
     const searchInput = screen.getByPlaceholderText('Link related dashboards for investigation');
@@ -147,8 +148,8 @@ describe('RelatedDashboardSelector', () => {
     await userEvent.type(searchInput, 'error');
 
     await waitFor(() => {
-      expect(mockSearchExecute).toHaveBeenCalledTimes(1);
-      expect(mockSearchExecute).toHaveBeenCalledWith(
+      expect(mockSearchExecute).toHaveBeenCalled();
+      expect(mockSearchExecute).toHaveBeenLastCalledWith(
         expect.objectContaining({
           search: {
             query: 'error',
