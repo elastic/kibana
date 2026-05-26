@@ -11,6 +11,7 @@ import {
   PERSISTABLE_STATE_LEGACY_TO_UNIFIED_MAP,
   PERSISTABLE_STATE_UNIFIED_TO_LEGACY_MAP,
   PERSISTABLE_ATTACHMENT_TYPES,
+  UNIFIED_ATTACHMENT_TYPES,
   UNIFIED_TO_LEGACY_MAP,
   OWNER_TO_PREFIX_MAP,
   LEGACY_EVENT_TYPE,
@@ -23,6 +24,14 @@ export const isMigratedAttachmentType = (type: string, owner: string): boolean =
     MIGRATED_ATTACHMENT_TYPES.has(toUnifiedPersistableStateAttachmentType(type))
   );
 };
+
+/**
+ * True for unified attachment types that have no legacy (v1) equivalent
+ */
+export const isUnifiedOnlyAttachmentType = (type: string): boolean =>
+  UNIFIED_ATTACHMENT_TYPES.has(type) &&
+  !Object.hasOwn(UNIFIED_TO_LEGACY_MAP, type) &&
+  !Object.hasOwn(PERSISTABLE_STATE_UNIFIED_TO_LEGACY_MAP, type);
 
 export const toLegacyAttachmentType = (type?: string): string | undefined => {
   if (typeof type !== 'string') {

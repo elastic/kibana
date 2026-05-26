@@ -52,3 +52,8 @@ export const useApplicationCapabilities = jest.fn().mockReturnValue({
   visualize: { crud: true, read: true },
   dashboard: { crud: true, read: true },
 });
+
+export const useCasesConfig = jest.fn().mockReturnValue({
+  attachmentsEnabled: false,
+  templatesEnabled: false,
+});

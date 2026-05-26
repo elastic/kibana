@@ -15,6 +15,10 @@ export const ATTACH_MENU_FILE = i18n.translate('xpack.cases.caseView.attach.menu
   defaultMessage: 'Upload file',
 });
 
+export const ATTACH_MENU_TIMELINE = i18n.translate('xpack.cases.caseView.attach.menu.timeline', {
+  defaultMessage: 'Timeline',
+});
+
 export const ATTACH_MENU_LABEL = i18n.translate('xpack.cases.caseView.attach.menu.ariaLabel', {
   defaultMessage: 'Attach options',
 });
