@@ -121,11 +121,16 @@ export const ConnectorContextMenu = ({ connector }: ConnectorContextMenuProps) =
         aria-label={labels.connectors.connectorContextMenuButtonLabel}
         panelPaddingSize="s"
         button={
-          <EuiButtonIcon
-            iconType="boxesVertical"
-            onClick={() => setIsOpen((openState) => !openState)}
-            aria-label={labels.connectors.connectorContextMenuButtonLabel}
-          />
+          <EuiToolTip
+            content={labels.connectors.connectorContextMenuButtonLabel}
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              iconType="boxesVertical"
+              onClick={() => setIsOpen((openState) => !openState)}
+              aria-label={labels.connectors.connectorContextMenuButtonLabel}
+            />
+          </EuiToolTip>
         }
         isOpen={isOpen}
         closePopover={closeMenu}

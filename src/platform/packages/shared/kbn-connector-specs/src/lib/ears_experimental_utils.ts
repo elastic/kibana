@@ -12,10 +12,10 @@ import * as allSpecs from '../all_specs';
 import { EARS_AUTH_ID } from '../auth_types/ears';
 import type { AuthTypeDef } from '../connector_spec';
 
-export const isEarsExperimentalAuthType = (authType: string | AuthTypeDef): authType is AuthTypeDef =>
-  !isString(authType) &&
-  authType.type === EARS_AUTH_ID &&
-  authType.isExperimental === true;
+export const isEarsExperimentalAuthType = (
+  authType: string | AuthTypeDef
+): authType is AuthTypeDef =>
+  !isString(authType) && authType.type === EARS_AUTH_ID && authType.isExperimental === true;
 
 const experimentalEarsConnectorIds = new Set(
   Object.values(allSpecs)
