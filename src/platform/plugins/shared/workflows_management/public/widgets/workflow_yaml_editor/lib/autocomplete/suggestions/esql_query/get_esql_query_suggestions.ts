@@ -13,9 +13,9 @@ import { monaco } from '@kbn/monaco';
 import {
   applyLiquidMask,
   classifyLiquidPosition,
-  type LiquidMaskedRange,
+  findMaskedRangeAtOffset,
 } from '../../../esql_validation/classify_liquid_position';
-import type { EsqlStepRegion } from '../../../esql_validation/find_esql_step_regions';
+import type { EsqlStepRegion } from '../../../esql_validation/extract_esql_region';
 import type { ExtendedAutocompleteContext } from '../../context/autocomplete.types';
 import type { WorkflowEsqlCompletionServices } from '../workflow_esql_completion_services';
 
@@ -90,7 +90,7 @@ export async function getEsqlQuerySuggestions(
 
   const maskedRanges = liquid.maskedRanges;
 
-  const containingRange = findRangeContaining(padded.offset, maskedRanges);
+  const containingRange = findMaskedRangeAtOffset(padded.offset, maskedRanges);
   if (containingRange !== null) {
     // Cursor is inside a Liquid construct. Comments suppress the popup
     // entirely (the user is writing prose); expressions and tags defer to
@@ -114,7 +114,7 @@ export async function getEsqlQuerySuggestions(
 }
 
 /**
- * `findEsqlStepRegions` trims trailing whitespace, but the cursor can legitimately
+ * Region extraction trims trailing whitespace, but the cursor can legitimately
  * sit in that whitespace while typing. Pad the text up to the cursor with spaces
  * so `suggest()`'s precondition (text length >= cursor offset) is satisfied.
  */
@@ -156,19 +156,6 @@ function padForStructuralBoundary(input: SuggestInput): SuggestInput {
 
 function isWhitespace(ch: string): boolean {
   return ch === ' ' || ch === '\t' || ch === '\n' || ch === '\r';
-}
-
-/** Returns the first range that contains `offset` (end-exclusive), or `null`. */
-function findRangeContaining(
-  offset: number,
-  ranges: ReadonlyArray<LiquidMaskedRange>
-): LiquidMaskedRange | null {
-  for (const range of ranges) {
-    if (offset >= range.start && offset < range.end) {
-      return range;
-    }
-  }
-  return null;
 }
 
 async function safeSuggest(

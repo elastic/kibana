@@ -18,7 +18,7 @@ import type {
   StepInfo,
   StepPropInfo,
 } from '../../../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
-import type { EsqlStepRegion } from '../../esql_validation/find_esql_step_regions';
+import type { EsqlStepRegion } from '../../esql_validation/extract_esql_region';
 
 export interface AutocompleteContext {
   // what triggered the completion

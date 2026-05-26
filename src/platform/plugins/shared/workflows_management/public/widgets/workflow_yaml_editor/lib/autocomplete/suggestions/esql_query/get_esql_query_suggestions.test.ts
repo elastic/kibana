@@ -11,7 +11,7 @@ import { parseDocument } from 'yaml';
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import { monaco } from '@kbn/monaco';
 import { getEsqlQuerySuggestions } from './get_esql_query_suggestions';
-import { findEsqlStepRegions } from '../../../esql_validation/find_esql_step_regions';
+import { findEsqlStepRegions } from '../../../esql_validation/extract_esql_region';
 import type { ExtendedAutocompleteContext } from '../../context/autocomplete.types';
 
 const mockSuggest = jest.fn();

@@ -31,10 +31,7 @@ import {
 } from './triggers_utils';
 import type { StepInfo, WorkflowDetailState } from '../../../../../entities/workflows/store';
 import { getContextSchemaForPath } from '../../../../../features/workflow_context/lib/get_context_for_path';
-import {
-  type EsqlStepRegion,
-  findEsqlStepRegionsFromText,
-} from '../../esql_validation/find_esql_step_regions';
+import { findEsqlRegionContainingCursor } from '../../esql_validation/extract_esql_region';
 import { getRegisteredTriggerConditionDefinition } from '../get_registered_trigger_condition_definition';
 
 function buildCompletionInsertRange(
@@ -221,60 +218,4 @@ export function buildAutocompleteContext({
     currentWorkflowId: editorState?.workflow?.id ?? null,
     workflowDefinition: workflowDefinition ?? null,
   };
-}
-
-/**
- * Returns the `elasticsearch.esql.query` step region containing the cursor,
- * or `null` if the cursor is outside any.
- *
- * The redux store's yamlDocument is recomputed on a 500ms debounce, but
- * completion runs on every keystroke — the cached document doesn't include
- * the character the user just typed. Re-parse from the current model text
- * here so region offsets always reflect what's on screen. The cheap text
- * guard keeps the YAML parse off the path for workflows without an ES|QL
- * step (the common case).
- */
-function findEsqlRegionContainingCursor(
-  modelText: string,
-  absoluteOffset: number
-): EsqlStepRegion | null {
-  if (!modelText.includes('elasticsearch.esql.query')) {
-    return null;
-  }
-  for (const region of findEsqlStepRegionsFromText(modelText)) {
-    if (cursorBelongsToRegion(absoluteOffset, region, modelText)) {
-      return region;
-    }
-  }
-  return null;
-}
-
-/**
- * `findEsqlStepRegions` trims trailing whitespace off `contentEndInFile` so the
- * validator's diagnostics never point at hanging spaces. Completion needs the
- * opposite: when the user is typing past the last non-whitespace character of
- * the query body (e.g. `FROM logs-* | <cursor>`), the cursor is one or more
- * spaces past `contentEndInFile` but still inside the editable scalar. Treat
- * those positions as in-region as long as everything between
- * `contentEndInFile` and the cursor is intra-line whitespace (space or tab).
- */
-function cursorBelongsToRegion(
-  absoluteOffset: number,
-  region: EsqlStepRegion,
-  modelText: string
-): boolean {
-  if (absoluteOffset < region.contentStartInFile) {
-    return false;
-  }
-  if (absoluteOffset <= region.contentEndInFile) {
-    return true;
-  }
-  for (let i = region.contentEndInFile; i < absoluteOffset; i++) {
-    const ch = modelText.charCodeAt(i);
-    // 0x20 space, 0x09 tab. A newline closes the scalar's last line, so we stop.
-    if (ch !== 0x20 && ch !== 0x09) {
-      return false;
-    }
-  }
-  return true;
 }

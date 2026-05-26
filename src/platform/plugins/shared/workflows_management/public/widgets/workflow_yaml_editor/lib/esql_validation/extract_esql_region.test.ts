@@ -8,7 +8,11 @@
  */
 
 import { LineCounter, parseDocument } from 'yaml';
-import { collectEsqlRegionsFromLookup } from './extract_esql_region';
+import {
+  collectEsqlRegionsFromLookup,
+  findEsqlRegionContainingCursor,
+  findEsqlStepRegions,
+} from './extract_esql_region';
 import { buildWorkflowLookup } from '../../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
 
 function regionsFromText(text: string) {
@@ -86,5 +90,56 @@ describe('collectEsqlRegionsFromLookup', () => {
       message: "elasticsearch.esql.query is documented here"
 `;
     expect(regionsFromText(text)).toHaveLength(0);
+  });
+});
+
+describe('findEsqlStepRegions', () => {
+  it('returns the same regions as collectEsqlRegionsFromLookup for the same workflow text', () => {
+    const text = `steps:
+  - name: esql_a
+    type: elasticsearch.esql.query
+    with:
+      query: |
+        FROM logs-* | LIMIT 10
+  - name: esql_b
+    type: elasticsearch.esql.query
+    with:
+      query: "FROM events | KEEP id"
+`;
+    const lineCounter = new LineCounter();
+    const document = parseDocument(text, { lineCounter, keepSourceTokens: true });
+    const fromLookup = regionsFromText(text);
+    const fromVisit = findEsqlStepRegions(document, text);
+
+    expect(fromVisit).toHaveLength(fromLookup.length);
+    for (let i = 0; i < fromLookup.length; i++) {
+      expect(fromVisit[i]).toEqual(fromLookup[i]);
+    }
+  });
+});
+
+describe('findEsqlRegionContainingCursor', () => {
+  it('resolves the region when the cursor sits in trailing whitespace after the trimmed body', () => {
+    const text = `steps:
+  - type: elasticsearch.esql.query
+    with:
+      query: |
+        FROM logs-*   `;
+    const cursor = text.length;
+    const region = findEsqlRegionContainingCursor(text, cursor);
+    expect(region).not.toBeNull();
+    expect(region!.esql).toBe('        FROM logs-*');
+    expect(cursor).toBeGreaterThan(region!.contentEndInFile);
+  });
+
+  it('returns null when the cursor is outside the query scalar', () => {
+    const text = `steps:
+  - type: elasticsearch.esql.query
+    with:
+      query: |
+        FROM logs
+    name: "after"`;
+    const nameOffset = text.indexOf('after');
+    expect(findEsqlRegionContainingCursor(text, nameOffset)).toBeNull();
   });
 });

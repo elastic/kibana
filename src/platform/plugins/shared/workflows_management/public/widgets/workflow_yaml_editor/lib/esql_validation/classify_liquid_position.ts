@@ -193,12 +193,20 @@ export function isOffsetInsideMaskedRange(
   offset: number,
   ranges: ReadonlyArray<LiquidMaskedRange>
 ): boolean {
+  return findMaskedRangeAtOffset(offset, ranges) !== null;
+}
+
+/** Returns the first masked range containing `offset` (end-exclusive), or `null`. */
+export function findMaskedRangeAtOffset(
+  offset: number,
+  ranges: ReadonlyArray<LiquidMaskedRange>
+): LiquidMaskedRange | null {
   for (const range of ranges) {
     if (offset >= range.start && offset < range.end) {
-      return true;
+      return range;
     }
   }
-  return false;
+  return null;
 }
 
 function startsAt(text: string, pos: number, marker: string): boolean {

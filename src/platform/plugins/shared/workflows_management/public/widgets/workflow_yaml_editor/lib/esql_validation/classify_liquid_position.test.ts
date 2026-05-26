@@ -10,6 +10,7 @@
 import {
   applyLiquidMask,
   classifyLiquidPosition,
+  findMaskedRangeAtOffset,
   isOffsetInsideMaskedRange,
 } from './classify_liquid_position';
 
@@ -146,6 +147,22 @@ describe('applyLiquidMask', () => {
     expect(masked).toHaveLength(text.length);
     expect(masked.includes('{{')).toBe(false);
     expect(masked.includes('}}')).toBe(false);
+  });
+});
+
+describe('findMaskedRangeAtOffset', () => {
+  const ranges = [
+    { start: 10, end: 20, kind: 'comment' as const },
+    { start: 30, end: 40, kind: 'expression' as const },
+  ];
+
+  it('returns the containing range with its kind', () => {
+    expect(findMaskedRangeAtOffset(15, ranges)?.kind).toBe('comment');
+    expect(findMaskedRangeAtOffset(35, ranges)?.kind).toBe('expression');
+  });
+
+  it('returns null when offset is outside every range', () => {
+    expect(findMaskedRangeAtOffset(25, ranges)).toBeNull();
   });
 });
 
