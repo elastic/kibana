@@ -32,6 +32,8 @@ export const CreateCaseTemplateFields: React.FC = () => {
   const parentForm = useParentFormContext();
   const [{ templateId }] = useFormData<{ templateId?: string }>({ watch: ['templateId'] });
   const { owner } = useCasesContext();
+  // The create form is always rendered inside a single-solution CasesContext, so
+  // owner is effectively a single-element array. Taking the first element is safe here.
   const ownerStr = Array.isArray(owner) ? owner[0] : owner;
 
   // Fetch applyToAllCases field definitions for this owner.

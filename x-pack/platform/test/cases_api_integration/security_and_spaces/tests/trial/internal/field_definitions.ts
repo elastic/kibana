@@ -157,6 +157,55 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(body.fieldDefinitions).to.have.length(0);
       });
+
+      describe('applyToAllCases filter', () => {
+        beforeEach(async () => {
+          // Add a second definition with applyToAllCases: true alongside the one from the outer beforeEach
+          await supertest
+            .post(`${getSpaceUrlPrefix('space1')}${FIELD_DEFINITIONS_URL}`)
+            .set('kbn-xsrf', 'true')
+            .send(buildCreateBody({ name: 'severity', applyToAllCases: true }))
+            .expect(200);
+        });
+
+        it('returns only applyToAllCases definitions when filtered with applyToAllCases=true', async () => {
+          const { body } = await supertest
+            .get(`${getSpaceUrlPrefix('space1')}${FIELD_DEFINITIONS_URL}`)
+            .query({ owner: 'securitySolutionFixture', applyToAllCases: true })
+            .expect(200);
+
+          expect(body.fieldDefinitions).to.have.length(1);
+          expect(body.fieldDefinitions[0].name).to.eql('severity');
+          expect(body.fieldDefinitions[0].applyToAllCases).to.eql(true);
+        });
+
+        it('returns all definitions when applyToAllCases is not specified', async () => {
+          const { body } = await supertest
+            .get(`${getSpaceUrlPrefix('space1')}${FIELD_DEFINITIONS_URL}`)
+            .query({ owner: 'securitySolutionFixture' })
+            .expect(200);
+
+          expect(body.total).to.eql(2);
+        });
+
+        it('returns all definitions when applyToAllCases=false (no filter applied)', async () => {
+          const { body } = await supertest
+            .get(`${getSpaceUrlPrefix('space1')}${FIELD_DEFINITIONS_URL}`)
+            .query({ owner: 'securitySolutionFixture', applyToAllCases: false })
+            .expect(200);
+
+          expect(body.total).to.eql(2);
+        });
+
+        it('persists the applyToAllCases flag returned in the response', async () => {
+          const { body } = await supertest
+            .get(`${getSpaceUrlPrefix('space1')}${FIELD_DEFINITIONS_URL}`)
+            .query({ owner: 'securitySolutionFixture', applyToAllCases: true })
+            .expect(200);
+
+          expect(body.fieldDefinitions[0].applyToAllCases).to.eql(true);
+        });
+      });
     });
 
     describe('PUT /internal/cases/field_definitions/{field_definition_id}', () => {

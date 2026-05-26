@@ -41,6 +41,8 @@ export class FieldDefinitionsService {
       .map((o) => `${CASE_FIELD_DEFINITION_SAVED_OBJECT}.attributes.owner: "${escapeKuery(o)}"`)
       .join(' OR ');
 
+    // Only `true` adds a KQL filter; `false` and `undefined` both return all
+    // definitions for the owner without any applyToAllCases restriction.
     const globalFilter =
       applyToAllCases === true
         ? `${CASE_FIELD_DEFINITION_SAVED_OBJECT}.attributes.applyToAllCases: true`
