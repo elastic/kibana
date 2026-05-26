@@ -9,11 +9,13 @@
 
 import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { Logger } from '@kbn/logging';
 import React, { createContext, useContext, useMemo } from 'react';
 
 export interface ExternalServices {
   discoverShared?: DiscoverSharedPublicStart;
   dataViews?: DataViewsPublicPluginStart;
+  logger?: Logger;
 }
 
 const ExternalServicesContext = createContext<ExternalServices | undefined>(undefined);

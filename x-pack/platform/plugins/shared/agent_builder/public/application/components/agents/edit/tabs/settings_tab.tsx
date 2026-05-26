@@ -31,13 +31,17 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   agentBuilderDefaultAgentId,
   AgentVisibility,
+  AGENT_BUILDER_UI_EBT,
   VISIBILITY_ICON,
   canChangeAgentVisibility,
+  type AgentDefinition,
   type UserIdAndName,
 } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import type { Control, FormState } from 'react-hook-form';
-import { Controller } from 'react-hook-form';
+import { Controller, useWatch } from 'react-hook-form';
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
+import { AccessForm } from '../../access/access_form';
 import { labels } from '../../../../utils/i18n';
 import { useAgentLabels } from '../../../../hooks/agents/use_agent_labels';
 import { useAgentBuilderServices } from '../../../../hooks/use_agent_builder_service';
@@ -84,6 +88,16 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
       currentUser,
       isAdmin,
     });
+
+  const currentVisibility = useWatch({ control, name: 'visibility' });
+
+  // Lightweight projection used only by AccessForm — it reads `visibility` to filter
+  // selectable ACL roles. The real entries come from the form's `acl` field via Controller
+  // (seeded from the loaded agent in `useAgentEdit`), not from local state.
+  const accessFormAgent = useMemo(
+    () => ({ id: agentId ?? '', visibility: currentVisibility } as AgentDefinition),
+    [agentId, currentVisibility]
+  );
 
   const showAgentWorkflowsSection = useMemo(() => {
     return isPreExecutionWorkflowEnabled(uiSettings);
@@ -328,6 +342,11 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                 onChange={(e) => onChange(e.target.checked)}
                 disabled={isFormDisabled}
                 data-test-subj="agentSettingsEnableElasticCapabilitiesSwitch"
+                {...getEbtProps({
+                  element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                  action: AGENT_BUILDER_UI_EBT.action.agentOverview.ELASTIC_CAPABILITIES_TOGGLE,
+                  detail: AGENT_BUILDER_UI_EBT.entity.AGENT,
+                })}
               />
             )}
           />
@@ -360,7 +379,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                 'xpack.agentBuilder.agents.form.settings.organizationAccessDescription',
                 {
                   defaultMessage:
-                    'Use labels to organize agents and visibility to control who can view and edit.',
+                    'Use labels to organize agents and control who can view and interact with them.',
                 }
               )}
             </EuiText>
@@ -410,7 +429,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                         'xpack.agentBuilder.agents.form.settings.visibilityMeaningSharedDescription',
                         {
                           defaultMessage:
-                            'Anyone can view. Only the owner or an administrator can edit.',
+                            'Anyone can view. Only the owner, an administrator, or people you explicitly grant access to can edit.',
                         }
                       )}
                     </EuiText>
@@ -428,7 +447,8 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                       {i18n.translate(
                         'xpack.agentBuilder.agents.form.settings.visibilityMeaningPrivateDescription',
                         {
-                          defaultMessage: 'Only the owner or an administrator can view and edit.',
+                          defaultMessage:
+                            'Only the owner, an administrator, or people you explicitly grant access to can view and edit.',
                         }
                       )}
                     </EuiText>
@@ -518,6 +538,25 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
               )}
             />
           </EuiFormRow>
+
+          {!isCreateMode && agentId !== agentBuilderDefaultAgentId && (
+            <>
+              <EuiSpacer size="m" />
+              <Controller
+                name="acl.entries"
+                control={control}
+                render={({ field }) => (
+                  <AccessForm
+                    agent={accessFormAgent}
+                    entries={field.value ?? []}
+                    ownerName={owner?.username}
+                    isDisabled={isFormDisabled}
+                    onChange={field.onChange}
+                  />
+                )}
+              />
+            </>
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
 

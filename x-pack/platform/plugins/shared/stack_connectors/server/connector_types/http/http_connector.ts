@@ -29,6 +29,7 @@ import {
 } from '@kbn/connector-schemas/http';
 import { z } from '@kbn/zod/v4';
 import { SecretsSchema } from '@kbn/connector-schemas/http/schemas/v1';
+import type { HttpFormDataField } from '@kbn/connector-schemas/http/types/v1';
 import { safeJsonStringify } from '@kbn/std';
 import type {
   HttpConnectorType,
@@ -140,6 +141,22 @@ function renderParameterTemplates(
     renderedParams.body = renderMustacheString(logger, params.body, variables, 'json');
   }
 
+  if (params.form_data) {
+    const renderedFormData: HttpFormDataField = {};
+    for (const [key, entry] of Object.entries(params.form_data)) {
+      renderedFormData[key] = {
+        content: renderMustacheString(logger, entry.content, variables, 'json'),
+        filename: entry.filename
+          ? renderMustacheString(logger, entry.filename, variables, 'json')
+          : undefined,
+        content_type: entry.content_type
+          ? renderMustacheString(logger, entry.content_type, variables, 'json')
+          : undefined,
+      };
+    }
+    renderedParams.form_data = renderedFormData;
+  }
+
   if (params.url) {
     renderedParams.url = renderMustacheString(logger, params.url, variables, 'json');
   }
@@ -197,6 +214,56 @@ function serializeHttpRequestBody(body: unknown): string {
   }) as string; // will return a string or throw an error if it fails
 }
 
+function checkFormDataMaxSize(formData: HttpFormDataField, maxSize: number | undefined): void {
+  if (maxSize != null) {
+    let total = 0;
+    for (const spec of Object.values(formData)) {
+      if (spec.encoding === 'base64') {
+        // estimate the size of the base64 encoded content using the 75% rule
+        total += Math.ceil(spec.content.length * 0.75);
+      } else {
+        total += spec.content.length;
+      }
+      if (total > maxSize) {
+        throw new Error(`form_data exceeds max_content_length (${maxSize} bytes)`);
+      }
+    }
+  }
+}
+
+function buildFormData(formData: HttpFormDataField, maxSize: number | undefined): FormData {
+  checkFormDataMaxSize(formData, maxSize);
+
+  const form = new FormData();
+  for (const [fieldName, spec] of Object.entries(formData)) {
+    if (spec.encoding === 'base64') {
+      // Binary field — always go through the Blob branch so the bytes round-trip intact.
+      // Wrap the Buffer in a Uint8Array so the underlying storage is an ArrayBuffer (Buffer's `.buffer` is typed as ArrayBufferLike).
+      const normalized = spec.content.replace(/\s+/g, '');
+      if (normalized.length % 4 !== 0 || !/^[A-Za-z0-9+/]*={0,2}$/.test(normalized)) {
+        throw new Error(`Invalid base64 content in form_data field "${fieldName}"`);
+      }
+      const buf = Buffer.from(normalized, 'base64');
+      const blob = new Blob([new Uint8Array(buf)], {
+        type: spec.content_type ?? 'application/octet-stream',
+      });
+      form.append(fieldName, blob, spec.filename); // filename optional
+    } else if (spec.filename !== undefined) {
+      const blob = new Blob([spec.content], {
+        type: spec.content_type ?? 'application/octet-stream',
+      });
+      form.append(fieldName, blob, spec.filename);
+    } else if (spec.content_type !== undefined) {
+      const blob = new Blob([spec.content], { type: spec.content_type });
+      form.append(fieldName, blob);
+    } else {
+      // Plain HTML-form text field — no per-part Content-Type.
+      form.append(fieldName, spec.content);
+    }
+  }
+  return form;
+}
+
 function processResponseHeaders(headers: object): Record<string, string> {
   return Object.entries(headers || {}).reduce<Record<string, string>>((acc, [key, value]) => {
     if (value != null) {
@@ -206,7 +273,11 @@ function processResponseHeaders(headers: object): Record<string, string> {
   }, {});
 }
 
-// action executor
+/*
+ * Action executor for the HTTP connector. Shared by the regular and system connector types.
+ * @param execOptions - The executor options
+ * @returns The HTTP connector execution response
+ */
 export async function executor(
   execOptions: HttpConnectorTypeExecutorOptions
 ): Promise<HttpConnectorTypeExecutorResult> {
@@ -221,12 +292,35 @@ export async function executor(
     signal,
   } = execOptions;
 
-  const { method, path, body, query, headers: paramsHeaders, fetcher } = params;
+  const {
+    method,
+    path,
+    body,
+    form_data: formData,
+    query,
+    headers: paramsHeaders,
+    fetcher,
+  } = params;
 
   // params always takes precedence over config
   const baseUrl = params.url || config.url;
   if (!baseUrl) {
     return errorResultInvalid(actionId, 'URL is required');
+  }
+
+  if (body != null && formData != null) {
+    return errorResultInvalid(actionId, 'Cannot set both body and form_data');
+  }
+
+  let requestData: unknown;
+  try {
+    if (formData) {
+      requestData = buildFormData(formData, fetcher?.max_content_length);
+    } else {
+      requestData = serializeHttpRequestBody(body);
+    }
+  } catch (error) {
+    return errorResultInvalid(actionId, error.message);
   }
 
   const [axiosConfig, axiosConfigError] = await getAxiosConfig({
@@ -260,8 +354,15 @@ export async function executor(
   const mergedQuery = { ...(secretQueryParams ?? {}), ...(query ?? {}) };
   const url = appendQueryString(combineUrl(baseUrl, path), mergedQuery);
 
-  // Merge headers: params headers take precedence over config headers
-  const finalHeaders = { ...configHeaders, ...(paramsHeaders || {}) };
+  // Merge headers: params headers take precedence over config headers. When
+  // sending multipart/form-data, strip any user-supplied Content-Type so axios
+  // can set the correct multipart Content-Type (with boundary) itself.
+  const mergedHeaders = { ...configHeaders, ...(paramsHeaders || {}) };
+  const finalHeaders = formData
+    ? Object.fromEntries(
+        Object.entries(mergedHeaders).filter(([key]) => key.toLowerCase() !== 'content-type')
+      )
+    : mergedHeaders;
 
   // Connector-level proxy overrides
   const proxyOverrides = getProxySettings({
@@ -299,7 +400,7 @@ export async function executor(
       url,
       logger,
       headers: finalHeaders,
-      data: serializeHttpRequestBody(body),
+      data: requestData,
       configurationUtilities,
       sslOverrides,
       proxyOverrides,
