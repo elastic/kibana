@@ -29,13 +29,26 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 
 // esClient.esql.query() return type doesn't match ESQLSearchResponse.
 // Known typing gap in the ES client — centralized here to avoid scattered assertions.
-const queryEsql = async ({
+export const queryEsql = async ({
   esClient,
   query,
 }: {
   esClient: ElasticsearchClient;
   query: string;
 }): Promise<ESQLSearchResponse> => (await esClient.esql.query({ query })) as ESQLSearchResponse;
+
+// Converts a columnar ESQLSearchResponse into an array of plain objects keyed by column name.
+export const esqlToObjects = <T extends Record<string, unknown>>(
+  response: ESQLSearchResponse
+): T[] =>
+  response.values.map(
+    (row) =>
+      row.reduce<Record<string, unknown>>((acc, value, i) => {
+        const col = response.columns[i];
+        if (col) acc[col.name] = value;
+        return acc;
+      }, {}) as T
+  );
 
 const parseSourceResponse = <T>(response: ESQLSearchResponse): T[] => {
   const sourceIdx = response.columns.findIndex((c) => c.name === '_source');

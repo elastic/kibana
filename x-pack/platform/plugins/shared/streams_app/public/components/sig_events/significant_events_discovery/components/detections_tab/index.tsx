@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import {
   EuiBasicTable,
   EuiBadge,
@@ -24,17 +24,55 @@ import {
 import { useTimefilter } from '../../../../../hooks/use_timefilter';
 import { useTimeRange } from '../../../../../hooks/use_time_range';
 import { useTimeRangeUpdate } from '../../../../../hooks/use_time_range_update';
-import { EntityDetailFlyout } from '../entity_detail_flyout';
+import { DetectionFlyout } from '../detection_flyout';
 import { formatTimestamp } from '../../../../../util/formatters';
+
+const KIND_LABELS: Record<string, string> = {
+  detection: i18n.translate('xpack.streams.detectionsTab.statusActive', {
+    defaultMessage: 'Active',
+  }),
+  quiet: i18n.translate('xpack.streams.detectionsTab.statusQuiet', {
+    defaultMessage: 'Quiet',
+  }),
+  // kept for history view which shows all doc kinds
+  handled: i18n.translate('xpack.streams.detectionsTab.statusHandled', {
+    defaultMessage: 'Investigated',
+  }),
+};
+
+const KIND_COLORS: Record<string, string> = {
+  detection: 'warning',
+  quiet: 'default',
+  handled: 'primary',
+};
+
+const kindLabel = (kind: string) => KIND_LABELS[kind] ?? kind;
+const kindColor = (kind: string) => KIND_COLORS[kind] ?? 'default';
+
+const CHANGE_TYPE_LABELS: Record<string, string> = {
+  distribution_change: i18n.translate('xpack.streams.detectionsTab.changeType.distribution', {
+    defaultMessage: 'Distribution shift',
+  }),
+  spike: i18n.translate('xpack.streams.detectionsTab.changeType.spike', {
+    defaultMessage: 'Spike',
+  }),
+  dip: i18n.translate('xpack.streams.detectionsTab.changeType.dip', { defaultMessage: 'Dip' }),
+  step_change: i18n.translate('xpack.streams.detectionsTab.changeType.step', {
+    defaultMessage: 'Step change',
+  }),
+  stationary: i18n.translate('xpack.streams.detectionsTab.changeType.stationary', {
+    defaultMessage: 'Returned to baseline',
+  }),
+};
 
 const columns: Array<EuiBasicTableColumn<Detection>> = [
   {
-    field: '@timestamp',
-    name: i18n.translate('xpack.streams.detectionsTab.timestampColumn', {
-      defaultMessage: 'Timestamp',
+    field: 'kind',
+    name: i18n.translate('xpack.streams.detectionsTab.statusColumn', {
+      defaultMessage: 'Status',
     }),
-    sortable: true,
-    render: (timestamp: string) => formatTimestamp(timestamp),
+    width: '90px',
+    render: (kind: string) => <EuiBadge color={kindColor(kind)}>{kindLabel(kind)}</EuiBadge>,
   },
   {
     field: 'rule_name',
@@ -43,29 +81,42 @@ const columns: Array<EuiBasicTableColumn<Detection>> = [
     }),
   },
   {
+    name: i18n.translate('xpack.streams.detectionsTab.changeTypeColumn', {
+      defaultMessage: 'Change',
+    }),
+    render: (detection: Detection) =>
+      CHANGE_TYPE_LABELS[detection.detection_evidence?.change_point_type ?? ''] ??
+      detection.detection_evidence?.change_point_type ??
+      '-',
+  },
+  {
     field: 'stream_name',
     name: i18n.translate('xpack.streams.detectionsTab.streamColumn', {
       defaultMessage: 'Stream',
     }),
   },
   {
-    field: 'peak_30m_alert_count',
-    name: i18n.translate('xpack.streams.detectionsTab.alertCountColumn', {
-      defaultMessage: 'Peak alerts (30m)',
+    field: 'detected_at',
+    name: i18n.translate('xpack.streams.detectionsTab.detectedAtColumn', {
+      defaultMessage: 'Detected',
     }),
+    sortable: true,
+    render: (timestamp: string) => formatTimestamp(timestamp),
   },
   {
     field: 'processed',
-    name: i18n.translate('xpack.streams.detectionsTab.processedColumn', {
-      defaultMessage: 'Processed',
+    name: i18n.translate('xpack.streams.detectionsTab.investigatedColumn', {
+      defaultMessage: 'Investigated',
     }),
-    render: (processed: boolean) => (
-      <EuiBadge color={processed ? 'success' : 'default'}>
-        {processed
-          ? i18n.translate('xpack.streams.detectionsTab.processedYes', { defaultMessage: 'Yes' })
-          : i18n.translate('xpack.streams.detectionsTab.processedNo', { defaultMessage: 'No' })}
-      </EuiBadge>
-    ),
+    width: '100px',
+    render: (processed: boolean) =>
+      processed ? (
+        <EuiBadge color="success">
+          {i18n.translate('xpack.streams.detectionsTab.investigatedYes', {
+            defaultMessage: 'Yes',
+          })}
+        </EuiBadge>
+      ) : null,
   },
 ];
 
@@ -96,81 +147,6 @@ export const DetectionsTab = () => {
     totalItemCount: data?.total ?? 0,
     pageSizeOptions: [10, 25, 50],
   };
-
-  const flyoutDetails = selectedDetection
-    ? [
-        {
-          title: i18n.translate('xpack.streams.detectionsTab.flyout.detectionId', {
-            defaultMessage: 'Detection ID',
-          }),
-          description: selectedDetection.detection_id ?? '-',
-        },
-        {
-          title: i18n.translate('xpack.streams.detectionsTab.flyout.rule', {
-            defaultMessage: 'Rule',
-          }),
-          description: selectedDetection.rule_name ?? '-',
-        },
-        {
-          title: i18n.translate('xpack.streams.detectionsTab.flyout.ruleUuid', {
-            defaultMessage: 'Rule UUID',
-          }),
-          description: selectedDetection.rule_uuid ?? '-',
-        },
-        {
-          title: i18n.translate('xpack.streams.detectionsTab.flyout.stream', {
-            defaultMessage: 'Stream',
-          }),
-          description: selectedDetection.stream_name ?? '-',
-        },
-        {
-          title: i18n.translate('xpack.streams.detectionsTab.flyout.peakAlerts', {
-            defaultMessage: 'Peak alerts (30m)',
-          }),
-          description: String(selectedDetection.peak_30m_alert_count ?? '-'),
-        },
-        {
-          title: i18n.translate('xpack.streams.detectionsTab.flyout.silent', {
-            defaultMessage: 'Silent',
-          }),
-          description: selectedDetection.silent
-            ? i18n.translate('xpack.streams.detectionsTab.flyout.silentYes', {
-                defaultMessage: 'Yes',
-              })
-            : i18n.translate('xpack.streams.detectionsTab.flyout.silentNo', {
-                defaultMessage: 'No',
-              }),
-        },
-        {
-          title: i18n.translate('xpack.streams.detectionsTab.flyout.processed', {
-            defaultMessage: 'Processed',
-          }),
-          description: selectedDetection.processed
-            ? i18n.translate('xpack.streams.detectionsTab.flyout.processedYes', {
-                defaultMessage: 'Yes',
-              })
-            : i18n.translate('xpack.streams.detectionsTab.flyout.processedNo', {
-                defaultMessage: 'No',
-              }),
-        },
-      ]
-    : [];
-
-  const historyEntries = useMemo(
-    () =>
-      (historyData?.hits ?? []).map((entry) => ({
-        timestamp: formatTimestamp(entry['@timestamp']),
-        summary: i18n.translate('xpack.streams.detectionsTab.historySummary', {
-          defaultMessage: 'Rule: {ruleName}, Peak 30m: {peakAlerts}, Processed: {processed}',
-          values: {
-            ruleName: entry.rule_name ?? '-',
-            peakAlerts: String(entry.peak_30m_alert_count ?? '-'),
-            processed: entry.processed ? 'Yes' : 'No',
-          },
-        }),
-      })),
-    [historyData]
-  );
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
@@ -211,11 +187,9 @@ export const DetectionsTab = () => {
         />
       </EuiFlexItem>
       {selectedDetection && (
-        <EntityDetailFlyout
-          title={selectedDetection.rule_name ?? 'Detection'}
-          entityId={selectedDetection.detection_id ?? '-'}
-          details={flyoutDetails}
-          history={historyEntries}
+        <DetectionFlyout
+          detection={selectedDetection}
+          history={historyData?.hits ?? []}
           isHistoryLoading={isHistoryLoading}
           onClose={() => setSelectedDetection(undefined)}
         />

@@ -19,7 +19,11 @@ export const eventsMappings = {
     event_id: mappings.keyword(),
     discovery_id: mappings.keyword(),
     discovery_slug: mappings.keyword(),
-    rule_names: mappings.keyword(),
+    evidences: mappings.object({
+      properties: {
+        rule_name: { type: 'keyword' as const },
+      },
+    }),
   },
 } satisfies MappingsDefinition;
 

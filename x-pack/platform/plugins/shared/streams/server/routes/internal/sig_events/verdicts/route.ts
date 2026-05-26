@@ -69,7 +69,7 @@ const verdictsHistoryRoute = createServerRoute({
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    return getVerdictClient().findByDiscoveryId(params.path.discoveryId);
+    return getVerdictClient().findByDiscoverySlug(params.path.discoveryId);
   },
 });
 

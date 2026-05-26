@@ -20,6 +20,7 @@ const discoveryDetectionSchema = z.object({
   stream_name: z.string().optional(),
   change_point_type: z.string().optional(),
   event_count: z.number().optional(),
+  alert_count: z.number().optional(),
   detected_at: z.string().optional(),
 });
 
@@ -28,6 +29,7 @@ export const discoverySchema = z.object({
   kind: z.string(),
   discovery_id: z.string(),
   discovery_slug: z.string(),
+  discovered_at: z.iso.datetime().optional(),
   rule_names: z.array(z.string()),
   stream_names: z.array(z.string()),
   title: z.string(),

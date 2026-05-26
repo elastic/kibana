@@ -59,7 +59,7 @@ export const useFetchDiscoveriesEntities = ({ from, to }: UseFetchDiscoveriesPar
   return { ...query, pagination, setPagination };
 };
 
-export const useFetchDiscoveryHistory = (discoveryId: string | undefined) => {
+export const useFetchDiscoveryHistory = (discoverySlug: string | undefined) => {
   const {
     dependencies: {
       start: {
@@ -70,14 +70,14 @@ export const useFetchDiscoveryHistory = (discoveryId: string | undefined) => {
   const showFetchErrorToast = useFetchErrorToast();
 
   return useQuery<{ hits: Discovery[] }, Error>({
-    queryKey: ['discoveryHistory', discoveryId],
+    queryKey: ['discoveryHistory', discoverySlug],
     queryFn: async ({ signal }) => {
       return streamsRepositoryClient.fetch('GET /internal/sig_events/discoveries/{id}/history', {
-        params: { path: { id: discoveryId! } },
+        params: { path: { id: discoverySlug! } },
         signal: signal ?? null,
       });
     },
-    enabled: !!discoveryId,
+    enabled: !!discoverySlug,
     onError: showFetchErrorToast,
   });
 };
