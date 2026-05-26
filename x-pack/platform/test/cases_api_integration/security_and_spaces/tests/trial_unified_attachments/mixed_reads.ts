@@ -7,7 +7,12 @@
 
 import expect from '@kbn/expect';
 import { AttachmentType } from '@kbn/cases-plugin/common/types/domain';
-import { LENS_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common/constants';
+import {
+  COMMENT_ATTACHMENT_TYPE,
+  LENS_ATTACHMENT_TYPE,
+  OSQUERY_ATTACHMENT_TYPE,
+} from '@kbn/cases-plugin/common/constants';
+import type { AttachmentRequestV2 } from '@kbn/cases-plugin/common/types/api';
 import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { postCaseReq, postCommentUserReq } from '../../../common/lib/mock';
 import {
@@ -141,6 +146,53 @@ export default ({ getService }: FtrProviderContext): void => {
         const ids = bulkResult.attachments.map((a: { id: string }) => a.id);
         expect(ids).to.contain(legacyId);
         expect(ids).to.contain(unifiedId);
+      });
+
+      it('bulk get retrieves osquery alongside a legacy user comment from both SO indices', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        // Legacy v1 user comment lands in cases-comments.
+        const legacyCase = await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: postCommentUserReq,
+        });
+        const legacyId = legacyCase.comments![0].id;
+
+        // Unified osquery lands in cases-attachments.
+        const osqueryCase = await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: {
+            type: OSQUERY_ATTACHMENT_TYPE,
+            attachmentId: 'mixed-osquery-1',
+            metadata: { agentIds: ['agent-mixed'], queryId: 'mixed-query' },
+            owner: 'securitySolutionFixture',
+          } as AttachmentRequestV2,
+        });
+        const osqueryId = osqueryCase.comments!.find((c) => c.id !== legacyId)!.id;
+
+        const bulkResult = await bulkGetAttachments({
+          supertest,
+          caseId: postedCase.id,
+          savedObjectIds: [legacyId, osqueryId],
+        });
+
+        expect(bulkResult.attachments.length).to.be(2);
+        // The internal `bulkGetAttachments` route reads with `mode: 'unified'`, so a
+        // legacy `user` SO from `cases-comments` is projected to the unified
+        // `comment` shape and a unified `osquery` SO from `cases-attachments` is
+        // returned in its native unified shape.
+        const byId = new Map<string, { type: string; attachmentId?: string }>(
+          bulkResult.attachments.map((a: { id: string; type: string; attachmentId?: string }) => [
+            a.id,
+            a,
+          ])
+        );
+        expect(byId.get(legacyId)!.type).to.be(COMMENT_ATTACHMENT_TYPE);
+        const osqueryAttachment = byId.get(osqueryId)!;
+        expect(osqueryAttachment.type).to.be(OSQUERY_ATTACHMENT_TYPE);
+        expect(osqueryAttachment.attachmentId).to.be('mixed-osquery-1');
       });
 
       it('handles mixed legacy v1 and unified v2 payloads in bulk create', async () => {

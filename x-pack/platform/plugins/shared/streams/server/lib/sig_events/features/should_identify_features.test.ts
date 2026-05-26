@@ -6,7 +6,6 @@
  */
 
 import { INFERRED_FEATURE_TYPES } from '@kbn/streams-schema';
-import { FEATURE_LAST_SEEN } from '../../streams/feature/fields';
 import type { FeatureClient } from '../../streams/feature/feature_client';
 import { shouldIdentifyFeatures } from './should_identify_features';
 
@@ -48,7 +47,7 @@ describe('shouldIdentifyFeatures', () => {
     expect(featureClient.getFeatures).toHaveBeenCalledWith(streamName, {
       type: [...INFERRED_FEATURE_TYPES],
       limit: 1,
-      sort: [{ [FEATURE_LAST_SEEN]: { order: 'desc' } }],
+      sortBy: 'lastSeen',
     });
   });
 
