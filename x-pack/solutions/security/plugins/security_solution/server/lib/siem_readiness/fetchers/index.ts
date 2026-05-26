@@ -11,3 +11,11 @@ export { fetchRetention } from './fetch_retention';
 export { fetchIndicesDocCounts } from './fetch_indices_doc_counts';
 export { fetchRulesReverseMap, buildPackageToPlatform } from './fetch_rules_reverse_map';
 export type { FetchRulesReverseMapDeps } from './fetch_rules_reverse_map';
+export {
+  getSiemReadinessSharedContext,
+  fetchSiemReadinessSharedContext,
+} from './fetch_siem_readiness_shared_context';
+export type {
+  SiemReadinessSharedContext,
+  FetchSiemReadinessSharedContextDeps,
+} from './fetch_siem_readiness_shared_context';

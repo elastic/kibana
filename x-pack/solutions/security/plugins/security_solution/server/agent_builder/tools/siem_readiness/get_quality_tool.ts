@@ -11,14 +11,13 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { Logger } from '@kbn/logging';
 import type { MainCategories } from '@kbn/siem-readiness';
-import { getIndexCategoryMap, isQualityIncompatible } from '@kbn/siem-readiness';
+import { getIndexCategoryMap, isQualityIncompatible, enrichFindings } from '@kbn/siem-readiness';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
 import { getQuality } from '../../../lib/siem_readiness/dimensions';
 import {
-  fetchCategories,
-  fetchRulesReverseMap,
-  buildPackageToPlatform,
+  getSiemReadinessSharedContext,
+  fetchSiemReadinessSharedContext,
 } from '../../../lib/siem_readiness/fetchers';
 import { SIEM_READINESS_QUALITY_TOOL_ID } from './tool_ids';
 
@@ -43,40 +42,36 @@ export const getQualityTool = (
   handler: async (_params, { esClient, logger: handlerLogger, request }) => {
     try {
       const [coreStart, startPlugins] = await core.getStartServices();
-      const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
-      const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(request);
-      const dataViewsService = await startPlugins.dataViews.dataViewsServiceFactory(
-        savedObjectsClient,
-        esClient.asCurrentUser
+
+      // Phase 1: shared context (rules reverse map + categories) — lazy per-request
+      const { reverseMapResult, categoriesResult } = await getSiemReadinessSharedContext(
+        request,
+        async () => {
+          const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(request);
+          const dataViewsService = await startPlugins.dataViews.dataViewsServiceFactory(
+            coreStart.savedObjects.getScopedClient(request),
+            esClient.asCurrentUser
+          );
+          return fetchSiemReadinessSharedContext({
+            rulesClient,
+            esClient: esClient.asCurrentUser,
+            dataViewsService,
+            fleet: startPlugins.fleet,
+            logger: handlerLogger,
+          });
+        }
       );
 
-      let packageToPlatform = new Map<string, string>();
-      try {
-        if (startPlugins.fleet) {
-          const fleetPackages = await startPlugins.fleet.packageService.asInternalUser.getPackages();
-          packageToPlatform = buildPackageToPlatform(fleetPackages);
-        }
-      } catch (e) {
-        handlerLogger.warn(
-          'Failed to fetch Fleet packages, platform mapping will use tag fallback'
-        );
-      }
-
-      const [reverseMapResult, categoriesResult] = await Promise.all([
-        fetchRulesReverseMap({
-          rulesClient,
-          esClient: esClient.asCurrentUser,
-          dataViewsService,
-          logger: handlerLogger,
-          packageToPlatform,
-        }),
-        fetchCategories({ esClient: esClient.asCurrentUser, logger: handlerLogger }),
-      ]);
-
+      // Phase 2: dimension-specific data (quality check results)
       const payload = await getQuality({
         esClient: esClient.asCurrentUser,
         logger: handlerLogger,
-        reverseMapResult,
+      });
+
+      // Phase 3: blast radius enrichment
+      const allEnrichedFindings = enrichFindings(payload.actionableFindings ?? [], {
+        ...reverseMapResult,
+        dimension: 'quality',
       });
 
       const indexToCategoryMap = getIndexCategoryMap(categoriesResult);
@@ -85,7 +80,7 @@ export const getQualityTool = (
         indexToCategoryMap.has(result.indexName)
       );
 
-      const enrichedFindings = (payload.actionableFindings ?? [])
+      const enrichedFindings = allEnrichedFindings
         .filter((finding) => indexToCategoryMap.has(finding.resource))
         .map((finding) => {
           const category = indexToCategoryMap.get(finding.resource) as MainCategories | undefined;

@@ -18,6 +18,7 @@ import type {
   TacticTotals,
   MachineLearningRuleIndex,
   ReverseMapResult,
+  CategoriesResponse,
 } from '@kbn/siem-readiness';
 
 import { findRules } from '../../detection_engine/rule_management/logic/search/find_rules';
@@ -31,6 +32,11 @@ export interface FetchRulesReverseMapDeps {
   logger: Logger;
   /** Map of Fleet package names to display titles, populated via buildPackageToPlatform(fleetPackages) */
   packageToPlatform?: Map<string, string>;
+  /**
+   * Pre-fetched categories result. When provided, the internal fetchCategories call is skipped,
+   * eliminating the duplicate ES aggregation that occurs when callers already hold this data.
+   */
+  categoriesData?: CategoriesResponse;
 }
 
 /**
@@ -192,6 +198,7 @@ export const fetchRulesReverseMap = async ({
   dataViewsService,
   logger,
   packageToPlatform = new Map(),
+  categoriesData,
 }: FetchRulesReverseMapDeps): Promise<ReverseMapResult> => {
   const indexToRules: IndexToRulesMap = new Map();
   const pipelineToIndices: PipelineToIndicesMap = new Map();
@@ -219,10 +226,11 @@ export const fetchRulesReverseMap = async ({
     // Pipeline mapping failed, continue without it
   }
 
-  // 2. Build category -> indices map from fetchCategories
+  // 2. Build category -> indices map. Use pre-fetched categoriesData if provided
+  //    to avoid a duplicate ES aggregation call when the caller already holds it.
   try {
-    const categoriesData = await fetchCategories({ esClient, logger });
-    for (const categoryGroup of categoriesData.mainCategoriesMap) {
+    const resolvedCategories = categoriesData ?? (await fetchCategories({ esClient, logger }));
+    for (const categoryGroup of resolvedCategories.mainCategoriesMap) {
       const indices = categoryGroup.indices.map((idx) => idx.indexName);
       categoryToIndices.set(categoryGroup.category, indices);
     }

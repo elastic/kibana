@@ -15,14 +15,14 @@ import {
   getIndexCategoryMap,
   isCriticalFailureRate,
   filterPipelinesByCategories,
+  enrichFindings,
 } from '@kbn/siem-readiness';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
 import { getContinuity } from '../../../lib/siem_readiness/dimensions';
 import {
-  fetchCategories,
-  fetchRulesReverseMap,
-  buildPackageToPlatform,
+  getSiemReadinessSharedContext,
+  fetchSiemReadinessSharedContext,
 } from '../../../lib/siem_readiness/fetchers';
 import { SIEM_READINESS_CONTINUITY_TOOL_ID } from './tool_ids';
 
@@ -48,41 +48,37 @@ export const getContinuityTool = (
   handler: async (_params, { esClient, logger: handlerLogger, request }) => {
     try {
       const [coreStart, startPlugins] = await core.getStartServices();
-      const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
-      const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(request);
-      const dataViewsService = await startPlugins.dataViews.dataViewsServiceFactory(
-        savedObjectsClient,
-        esClient.asCurrentUser
+
+      // Phase 1: shared context (rules reverse map + categories) — lazy per-request
+      const { reverseMapResult, categoriesResult } = await getSiemReadinessSharedContext(
+        request,
+        async () => {
+          const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(request);
+          const dataViewsService = await startPlugins.dataViews.dataViewsServiceFactory(
+            coreStart.savedObjects.getScopedClient(request),
+            esClient.asCurrentUser
+          );
+          return fetchSiemReadinessSharedContext({
+            rulesClient,
+            esClient: esClient.asCurrentUser,
+            dataViewsService,
+            fleet: startPlugins.fleet,
+            logger: handlerLogger,
+          });
+        }
       );
 
-      let packageToPlatform = new Map<string, string>();
-      try {
-        if (startPlugins.fleet) {
-          const fleetPackages = await startPlugins.fleet.packageService.asInternalUser.getPackages();
-          packageToPlatform = buildPackageToPlatform(fleetPackages);
-        }
-      } catch (e) {
-        handlerLogger.warn(
-          'Failed to fetch Fleet packages, platform mapping will use tag fallback'
-        );
-      }
-
-      const [reverseMapResult, categoriesResult] = await Promise.all([
-        fetchRulesReverseMap({
-          rulesClient,
-          esClient: esClient.asCurrentUser,
-          dataViewsService,
-          logger: handlerLogger,
-          packageToPlatform,
-        }),
-        fetchCategories({ esClient: esClient.asCurrentUser, logger: handlerLogger }),
-      ]);
-
+      // Phase 2: dimension-specific data (pipelines)
       const payload = await getContinuity({
         esClient: esClient.asCurrentUser,
         isServerless,
         logger: handlerLogger,
-        reverseMapResult,
+      });
+
+      // Phase 3: blast radius enrichment
+      const allEnrichedFindings = enrichFindings(payload.actionableFindings ?? [], {
+        ...reverseMapResult,
+        dimension: 'continuity',
       });
 
       const indexToCategoryMap = getIndexCategoryMap(categoriesResult);
@@ -90,7 +86,7 @@ export const getContinuityTool = (
       // Shared predicate — same function used by the UI continuity tab
       const categorizedItems = filterPipelinesByCategories(payload.items, categoriesResult);
 
-      const enrichedFindings = (payload.actionableFindings ?? [])
+      const enrichedFindings = allEnrichedFindings
         .filter((finding) => categorizedItems.some((p) => p.name === finding.resource))
         .map((finding) => {
           const pipeline = categorizedItems.find((p) => p.name === finding.resource);

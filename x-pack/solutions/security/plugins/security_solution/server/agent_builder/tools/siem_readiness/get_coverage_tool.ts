@@ -10,10 +10,14 @@ import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { Logger } from '@kbn/logging';
+import { enrichFindings } from '@kbn/siem-readiness';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
 import { getCoverage } from '../../../lib/siem_readiness/dimensions';
-import { fetchRulesReverseMap, buildPackageToPlatform } from '../../../lib/siem_readiness/fetchers';
+import {
+  getSiemReadinessSharedContext,
+  fetchSiemReadinessSharedContext,
+} from '../../../lib/siem_readiness/fetchers';
 import { SIEM_READINESS_COVERAGE_TOOL_ID } from './tool_ids';
 
 const schema = z.object({});
@@ -34,47 +38,56 @@ export const getCoverageTool = (
       return getAgentBuilderResourceAvailability({ core, request, logger });
     },
   },
-  handler: async (_params, { esClient, savedObjectsClient, logger: handlerLogger, request }) => {
+  handler: async (_params, { esClient, logger: handlerLogger, request }) => {
     try {
       const [coreStart, startPlugins] = await core.getStartServices();
-      const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(request);
-      const dataViewsService = await startPlugins.dataViews.dataViewsServiceFactory(
-        savedObjectsClient,
-        esClient.asCurrentUser
+
+      // Phase 1: shared context (rules reverse map + categories) — lazy per-request
+      const { reverseMapResult, categoriesResult } = await getSiemReadinessSharedContext(
+        request,
+        async () => {
+          const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(request);
+          const dataViewsService = await startPlugins.dataViews.dataViewsServiceFactory(
+            coreStart.savedObjects.getScopedClient(request),
+            esClient.asCurrentUser
+          );
+          return fetchSiemReadinessSharedContext({
+            rulesClient,
+            esClient: esClient.asCurrentUser,
+            dataViewsService,
+            fleet: startPlugins.fleet,
+            logger: handlerLogger,
+          });
+        }
       );
 
-      let packageToPlatform = new Map<string, string>();
-      try {
-        if (startPlugins.fleet) {
-          const fleetPackages = await startPlugins.fleet.packageService.asInternalUser.getPackages();
-          packageToPlatform = buildPackageToPlatform(fleetPackages);
-        }
-      } catch (e) {
-        handlerLogger.warn(
-          'Failed to fetch Fleet packages, platform mapping will use tag fallback'
-        );
-      }
+      // Derive from the reverse map — avoids a savedObjectsClient query that lacks
+      // access to alert objects in the Agent Builder context.
+      // A rule is "present" if it resolved to any index, contributed to tactic totals, or is an ML rule.
+      const hasDetectionRules =
+        reverseMapResult.indexToRules.size > 0 ||
+        reverseMapResult.tacticTotals.size > 0 ||
+        reverseMapResult.mlRules.length > 0;
 
-      const reverseMapResult = await fetchRulesReverseMap({
-        rulesClient,
-        esClient: esClient.asCurrentUser,
-        dataViewsService,
-        logger: handlerLogger,
-        packageToPlatform,
-      });
-
+      // Phase 2: dimension-specific data
       const payload = await getCoverage({
-        esClient: esClient.asCurrentUser,
-        savedObjectsClient,
         logger: handlerLogger,
-        reverseMapResult,
+        categoriesData: categoriesResult,
+        hasDetectionRules,
       });
+
+      // Phase 3: blast radius enrichment
+      const enrichedFindings = enrichFindings(payload.actionableFindings ?? [], {
+        ...reverseMapResult,
+        dimension: 'coverage',
+      });
+
       return {
         results: [
           {
             tool_result_id: getToolResultId(),
             type: ToolResultType.other,
-            data: payload,
+            data: { ...payload, actionableFindings: enrichedFindings },
           },
         ],
       };

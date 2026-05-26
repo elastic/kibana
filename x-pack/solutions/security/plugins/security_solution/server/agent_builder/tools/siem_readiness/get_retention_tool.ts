@@ -11,14 +11,17 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { Logger } from '@kbn/logging';
 import type { MainCategories } from '@kbn/siem-readiness';
-import { isRetentionNonCompliant, filterRetentionItemsByCategories } from '@kbn/siem-readiness';
+import {
+  isRetentionNonCompliant,
+  filterRetentionItemsByCategories,
+  enrichFindings,
+} from '@kbn/siem-readiness';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
 import { getRetention } from '../../../lib/siem_readiness/dimensions';
 import {
-  fetchCategories,
-  fetchRulesReverseMap,
-  buildPackageToPlatform,
+  getSiemReadinessSharedContext,
+  fetchSiemReadinessSharedContext,
 } from '../../../lib/siem_readiness/fetchers';
 import { SIEM_READINESS_RETENTION_TOOL_ID } from './tool_ids';
 
@@ -44,41 +47,37 @@ export const getRetentionTool = (
   handler: async (_params, { esClient, logger: handlerLogger, request }) => {
     try {
       const [coreStart, startPlugins] = await core.getStartServices();
-      const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
-      const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(request);
-      const dataViewsService = await startPlugins.dataViews.dataViewsServiceFactory(
-        savedObjectsClient,
-        esClient.asCurrentUser
+
+      // Phase 1: shared context (rules reverse map + categories) — lazy per-request
+      const { reverseMapResult, categoriesResult } = await getSiemReadinessSharedContext(
+        request,
+        async () => {
+          const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(request);
+          const dataViewsService = await startPlugins.dataViews.dataViewsServiceFactory(
+            coreStart.savedObjects.getScopedClient(request),
+            esClient.asCurrentUser
+          );
+          return fetchSiemReadinessSharedContext({
+            rulesClient,
+            esClient: esClient.asCurrentUser,
+            dataViewsService,
+            fleet: startPlugins.fleet,
+            logger: handlerLogger,
+          });
+        }
       );
 
-      let packageToPlatform = new Map<string, string>();
-      try {
-        if (startPlugins.fleet) {
-          const fleetPackages = await startPlugins.fleet.packageService.asInternalUser.getPackages();
-          packageToPlatform = buildPackageToPlatform(fleetPackages);
-        }
-      } catch (e) {
-        handlerLogger.warn(
-          'Failed to fetch Fleet packages, platform mapping will use tag fallback'
-        );
-      }
-
-      const [reverseMapResult, categoriesResult] = await Promise.all([
-        fetchRulesReverseMap({
-          rulesClient,
-          esClient: esClient.asCurrentUser,
-          dataViewsService,
-          logger: handlerLogger,
-          packageToPlatform,
-        }),
-        fetchCategories({ esClient: esClient.asCurrentUser, logger: handlerLogger }),
-      ]);
-
+      // Phase 2: dimension-specific data (ILM/DSL retention)
       const payload = await getRetention({
         esClient: esClient.asCurrentUser,
         isServerless,
         logger: handlerLogger,
-        reverseMapResult,
+      });
+
+      // Phase 3: blast radius enrichment
+      const allEnrichedFindings = enrichFindings(payload.actionableFindings ?? [], {
+        ...reverseMapResult,
+        dimension: 'retention',
       });
 
       // Shared predicate — same function used by the UI retention tab
@@ -95,7 +94,7 @@ export const getRetentionTool = (
         }
       }
 
-      const enrichedFindings = (payload.actionableFindings ?? [])
+      const enrichedFindings = allEnrichedFindings
         .filter((finding) => resourceToCategoryMap.has(finding.resource))
         .map((finding) => {
           const category = resourceToCategoryMap.get(finding.resource);
@@ -134,9 +133,8 @@ export const getRetentionTool = (
         ],
       };
     } catch (error: unknown) {
-      const e = error as { message?: string; stack?: string };
+      const e = error as { message?: string };
       handlerLogger.error(`[get_retention_tool] Error: ${e.message ?? 'unknown error'}`);
-      handlerLogger.error(`[get_retention_tool] Stack: ${e.stack ?? 'no stack'}`);
       return {
         results: [
           {
