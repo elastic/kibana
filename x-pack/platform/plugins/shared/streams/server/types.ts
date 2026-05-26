@@ -6,6 +6,7 @@
  */
 
 import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
+import type { AlertingServerStart as AlertingV2ServerStart } from '@kbn/alerting-v2-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
@@ -85,6 +86,7 @@ export interface StreamsPluginStartDependencies {
   licensing: LicensingPluginStart;
   taskManager: TaskManagerStartContract;
   alerting: AlertingServerStart;
+  alertingVTwo?: AlertingV2ServerStart;
   inference: InferenceServerStart;
   ruleRegistry: RuleRegistryPluginStart;
   fieldsMetadata: FieldsMetadataServerStart;
