@@ -27,7 +27,7 @@ export const actionFrequencySchema = schema.object(
         validate: validateDurationV1,
         meta: {
           description:
-            'The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if `notify_when` is set to `onThrottleInterval`. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.',
+            'The throttle interval defines how frequently rule actions are triggered. It is specified in seconds, minutes, hours, or days and only applies when `notify_when` is set to `onThrottleInterval`. You cannot set the throttle interval at both the rule and action level. The recommended approach is to set it for each action individually. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.',
         },
       })
     ),
@@ -62,11 +62,13 @@ export const actionAlertsFilterSchema = schema.object(
             {
               start: schema.string({
                 validate: validateHoursV1,
-                meta: { description: 'The start of the time frame in 24-hour notation (`hh:mm`).' },
+                meta: {
+                  description: 'The start of the time frame, in 24-hour notation (`hh:mm`).',
+                },
               }),
               end: schema.string({
                 validate: validateHoursV1,
-                meta: { description: 'The end of the time frame in 24-hour notation (`hh:mm`).' },
+                meta: { description: 'The end of the time frame, in 24-hour notation (`hh:mm`).' },
               }),
             },
             {
@@ -80,7 +82,7 @@ export const actionAlertsFilterSchema = schema.object(
             validate: validateTimezoneV1,
             meta: {
               description:
-                'The ISO time zone for the `hours` values. Values such as `UTC` and `UTC+1` also work but lack built-in daylight savings time support and are not recommended.',
+                'The ISO time zone for the `hours` values. Values such as `UTC` and `UTC+1` also work but lack built-in support for daylight savings time and are not recommended.',
             },
           }),
         },
@@ -164,7 +166,7 @@ export const updateBodySchema = schema.object(
           validate: validateDurationV1,
           meta: {
             description:
-              'Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how often an alert generates repeated actions. NOTE: You cannot specify the throttle interval at both the rule and action level. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.',
+              'Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.',
           },
         })
       )

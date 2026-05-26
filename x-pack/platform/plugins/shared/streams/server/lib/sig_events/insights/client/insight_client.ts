@@ -6,12 +6,17 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { esql } from '@elastic/esql';
 import type { IStorageClient } from '@kbn/storage-adapter';
-import { isNotFoundError } from '@kbn/es-errors';
 import type { Insight, InsightImpactLevel } from '@kbn/streams-schema';
 import { INSIGHT_IMPACT, INSIGHT_IMPACT_LEVEL, INSIGHT_GENERATED_AT } from './fields';
 import type { InsightStorageSettings } from './storage_settings';
 import { StatusError } from '../../../streams/errors/status_error';
+import {
+  normalizeColumn,
+  getColumnIndex,
+  getSourceColumnIndex,
+} from '../../../streams/helpers/esql';
 
 interface InsightBulkIndexOperation {
   index: Insight;
@@ -49,14 +54,20 @@ export class InsightClient {
    * Get a single insight by ID
    */
   async get(id: string): Promise<Insight> {
-    const hit = await this.clients.storageClient.get({ id }).catch((err) => {
-      if (isNotFoundError(err)) {
-        throw new StatusError(`Insight ${id} not found`, 404);
-      }
-      throw err;
+    const response = await this.clients.storageClient.esql({
+      metadata: ['_id', '_source'],
+      pipeline: esql`WHERE _id == ${{ id }} | LIMIT 1`,
     });
 
-    return hit._source!;
+    const sourceIdx = getSourceColumnIndex(response);
+    const source =
+      sourceIdx >= 0 ? (response.values[0]?.[sourceIdx] as Insight | undefined) : undefined;
+
+    if (!source) {
+      throw new StatusError(`Insight ${id} not found`, 404);
+    }
+
+    return source;
   }
 
   /**
@@ -73,31 +84,20 @@ export class InsightClient {
       });
     }
 
-    const response = await this.clients.storageClient.search({
-      size: 10_000,
-      track_total_hits: false,
-      sort: [
-        { [INSIGHT_IMPACT_LEVEL]: 'asc' as const },
-        { [INSIGHT_GENERATED_AT]: 'desc' as const },
-      ],
-      query:
-        filterClauses.length > 0
-          ? {
-              bool: {
-                filter: filterClauses,
-              },
-            }
-          : { match_all: {} },
+    const response = await this.clients.storageClient.esql({
+      metadata: ['_id', '_source'],
+      pipeline: esql`SORT ${normalizeColumn(INSIGHT_IMPACT_LEVEL)} ASC, ${normalizeColumn(
+        INSIGHT_GENERATED_AT
+      )} DESC | LIMIT ${esql.num(10_000)}`,
+      ...(filterClauses.length > 0 ? { filter: { bool: { filter: filterClauses } } } : {}),
     });
 
-    const insights = response.hits.hits.map((hit) => hit._source!);
+    const sourceIdx = getSourceColumnIndex(response);
+    const insights = sourceIdx >= 0 ? response.values.map((row) => row[sourceIdx] as Insight) : [];
 
     return {
       insights,
-      total:
-        typeof response.hits.total === 'number'
-          ? response.hits.total
-          : response.hits.total?.value ?? 0,
+      total: insights.length,
     };
   }
 
@@ -124,17 +124,18 @@ export class InsightClient {
     });
 
     if (deleteIds.length > 0) {
-      const existingDocs = await this.clients.storageClient.search({
-        size: deleteIds.length,
-        track_total_hits: false,
-        query: {
-          bool: {
-            filter: [{ terms: { _id: deleteIds } }],
-          },
-        },
+      // ES|QL `IN (?param)` does not expand array params — emit one literal per value.
+      const idLiterals = deleteIds.map((id) => esql.str(id));
+
+      const existingResponse = await this.clients.storageClient.esql({
+        metadata: ['_id', '_source'],
+        pipeline: esql`WHERE _id IN (${idLiterals}) | LIMIT ${esql.num(deleteIds.length)}`,
       });
 
-      const existingIds = new Set(existingDocs.hits.hits.map((hit) => hit._id));
+      const idIdx = getColumnIndex(existingResponse, '_id');
+      const existingIds = new Set(
+        idIdx >= 0 ? existingResponse.values.map((row) => row[idIdx] as string) : []
+      );
       const missingIds = deleteIds.filter((id) => !existingIds.has(id));
 
       if (missingIds.length > 0) {
