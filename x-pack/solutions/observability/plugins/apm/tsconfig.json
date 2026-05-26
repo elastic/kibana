@@ -5,6 +5,7 @@
   },
   "include": [
     "../../../../../typings/**/*",
+    ".storybook/**/*",
     "common/**/*",
     "public/**/*",
     "scripts/**/*",
@@ -163,7 +164,8 @@
     "@kbn/presentation-util",
     "@kbn/unified-doc-viewer-plugin",
     "@kbn/ebt-click",
-    "@kbn/apm-types-shared"
+    "@kbn/apm-types-shared",
+    "@kbn/storybook"
   ],
   "exclude": ["target/**/*"]
 }
