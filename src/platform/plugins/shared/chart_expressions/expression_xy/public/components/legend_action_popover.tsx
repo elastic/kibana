@@ -37,7 +37,7 @@ const getEsqlComputedColumnFilterDisabledMessage = (
 const legendActionPopoverStyles = {
   message: ({ euiTheme }: UseEuiTheme) =>
     css`
-      padding: ${euiTheme.size.s};
+      padding: ${euiTheme.size.m};
       color: ${euiTheme.colors.textSubdued};
       border-block-start: ${euiTheme.border.thin};
       margin-block: ${euiTheme.size.s} -${euiTheme.size.s};
