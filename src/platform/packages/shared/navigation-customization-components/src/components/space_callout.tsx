@@ -8,7 +8,14 @@
  */
 
 import React from 'react';
-import { EuiButtonIcon, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 interface Props {
@@ -29,19 +36,26 @@ export const SpaceCallout = ({ onDismissCallout }: Props) => (
             })}
           </EuiFlexItem>
           <EuiFlexItem component="span" grow={false}>
-            <EuiButtonIcon
-              iconType="cross"
-              iconSize="s"
-              color="primary"
-              display="empty"
-              size="xs"
-              aria-label={i18n.translate('navigationCustomizationComponents.dismissCallout', {
+            <EuiToolTip
+              content={i18n.translate('navigationCustomizationComponents.dismissCallout', {
                 defaultMessage: 'Dismiss',
               })}
-              onClick={() => {
-                onDismissCallout();
-              }}
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                iconType="cross"
+                iconSize="s"
+                color="primary"
+                display="empty"
+                size="xs"
+                aria-label={i18n.translate('navigationCustomizationComponents.dismissCallout', {
+                  defaultMessage: 'Dismiss',
+                })}
+                onClick={() => {
+                  onDismissCallout();
+                }}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>
       }
