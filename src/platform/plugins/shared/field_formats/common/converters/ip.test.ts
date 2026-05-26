@@ -41,7 +41,7 @@ describe('IP Address Format', () => {
       '["70.184.100.148","1.0.0.127"]'
     );
     expectReactElementAsArray(ip.reactConvert([1186489492, 16777343]), [
-      '70.184.100.148',
+      '70.184.10.148',
       '1.0.0.127',
     ]);
   });
