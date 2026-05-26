@@ -11,6 +11,7 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
 import type { ILicense } from '@kbn/licensing-types';
+import { SecurityRuleChangeTrackingAction } from '../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import type { DetectionRulesAuthz } from '../../../../../../common/detection_engine/rule_management/authz';
 import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
@@ -114,7 +115,10 @@ export const createDetectionRulesClient = ({
             immutable: true,
           },
           mlAuthz,
-          changeTracking: args.changeTracking,
+          changeTracking: {
+            action: SecurityRuleChangeTrackingAction.ruleInstall,
+            ...args.changeTracking,
+          },
         });
       });
     },
