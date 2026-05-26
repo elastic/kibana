@@ -168,7 +168,7 @@ export function Wrapper({
   const viewInDiscoverLabel = i18n.translate(
     'xpack.streams.entityDetailViewWithoutParams.openInDiscoverBadgeLabel',
     {
-      defaultMessage: 'View in Discover',
+      defaultMessage: 'Open in Discover',
     }
   );
 
