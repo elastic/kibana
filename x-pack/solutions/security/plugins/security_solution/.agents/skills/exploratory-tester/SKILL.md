@@ -46,14 +46,14 @@ Explore a feature area of Kibana Security Solution through the browser, collect 
 **Inline — single mode (default):**
 ```
 Read and follow exploratory-tester/SKILL.md
-Area: Detection Engine rules
+Area: SIEM Migrations dashboards
 Flows:
-  - create a custom query rule
-  - enable and disable a rule
-    entry: Security > Rules > Detection Rules
-    expected: rule toggles state without page reload or error
+  - rename with special characters
+  - cancel mid-progress
+    entry: SIEM Migrations > Dashboards > click rename on any migration card
+    expected: migration returns to previous state, no orphaned process
     timeout: 8
-Setup: role: t1_analyst
+Setup: Bedrock connector, role: t1_analyst
 ```
 
 **Inline — parallel mode:**
@@ -179,7 +179,7 @@ If no `## Exploratory testing scope` comment is found — **stop** and show the 
 ### Step 0c — Resolve role and area slug
 
 **Area slug:** lowercase the Area value, replace spaces with hyphens.
-`"Detection Engine rules"` → `detection-engine-rules`
+`"SIEM Migrations dashboards"` → `siem-migrations-dashboards`
 
 **Role resolution — never use `admin` for exploration.** If the scope requests `admin`, substitute and warn the user: _"Role 'admin' is not allowed for exploratory testing — findings must reflect a realistic user's perspective. Substituting with `<platform_engineer | t2_analyst>`."_
 
@@ -328,7 +328,7 @@ curl -s -u elastic:changeme -X POST http://localhost:5620/s/exploratory-testing/
 ```
 For user-provided environments: replace URL and credentials. For serverless: same endpoint, credentials from config.
 
-> **API key note:** The fake credentials above (`accessKey: test`) are sufficient for testing the connector UI (visibility, selection, error handling). For feature areas that need Kibana to **actually call the AI model** to produce data, real AWS credentials are required. Pass them via env vars in the invocation `Setup` section using `$AWS_ACCESS_KEY` / `$AWS_SECRET_KEY` references, and the agent will resolve them before creating the connector.
+> **API key note:** The fake credentials above (`accessKey: test`) are sufficient for testing the connector UI (visibility, selection, error handling). For feature areas that need Kibana to **actually call the AI model** to produce data — e.g., SIEM Migrations translation — real AWS credentials are required. Pass them via env vars in the invocation `Setup` section using `$AWS_ACCESS_KEY` / `$AWS_SECRET_KEY` references, and the agent will resolve them before creating the connector.
 
 **esArchiver fixtures (stateful environments only):**
 
@@ -377,7 +377,7 @@ Navigate to the first flow's `entry` path within the test space (prefix with `/s
 
 _This step runs as the test user (after Step 1d). If still logged in as `elastic`, go back and complete Step 1d first._
 
-If the page shows an empty state (e.g., "No rules to display", "No data", empty illustration with a CTA):
+If the page shows an empty state (e.g., "No migrations to view", "No data", empty illustration with a CTA):
 
 1. **Attempt to create the required data automatically:**
    - Look for visible `Create`, `Add`, `Import`, or `Get started` CTAs and follow them
@@ -489,7 +489,7 @@ Default timebox: `timeout_minutes` from the flow in `config.json` (default 4 min
 2. `browser_network_requests` — capture requests triggered by the action. Then:
    - Group by `method + path` (strip query strings). If any group has **2+ entries** triggered by a single user action: log a **Level 2** finding — "Duplicate API call: `<METHOD> <path>` called `<N>` times." Exception: exclude polling paths (`/health`, `/status`, `/metrics`, `/fleet-setup`).
    - If the same GET fires 2+ times within ~500ms of one action with no intervening navigation: note "Rapid duplicate GETs may indicate component remounting" in the finding.
-3. `browser_take_screenshot` — save to `.exploratory-session/screenshots/<area_slug>-flow<N>-step<M>-<checklist-step-slug>.png` (e.g. `detection-engine-rules-flow1-step1-happy-path.png`)
+3. `browser_take_screenshot` — save to `.exploratory-session/screenshots/<area_slug>-flow<N>-step<M>-<checklist-step-slug>.png` (e.g. `siem-migrations-dashboards-flow1-step1-happy-path.png`)
 4. Append one entry to `findings-flow-<N>.md` **immediately** — even if nothing went wrong
 
 **How to navigate to the flow:**
@@ -499,7 +499,7 @@ All navigation must happen within the test space (`space_id` from `config.json`)
 1. Use `entry` from `config.json` if provided:
    - If `entry` starts with `/app/`: navigate to `<environment.url>/s/<space_id><entry>`
    - If `entry` starts with `/s/`: navigate to `<environment.url><entry>` as-is
-   - If `entry` is a natural-language description (e.g., "Security > Rules > Detection Rules"): navigate from `<environment.url>/s/<space_id>/app/security` and follow the path
+   - If `entry` is a natural-language description (e.g., "Security > SIEM Migrations"): navigate from `<environment.url>/s/<space_id>/app/security` and follow the path
 2. After navigation, verify the resulting URL contains `/s/<space_id>/`. If you were redirected to an unrelated page (e.g. `/get_started`, `/overview`) or the space prefix is missing: log a Level 2 finding with the redirect chain, then try navigating to a more specific sub-path
 3. If no `entry`: call `browser_snapshot`, read the visible UI, navigate from what's on screen (within the test space)
 4. Check `knowledge/<area_slug>.md` for navigation patterns accumulated from prior sessions
