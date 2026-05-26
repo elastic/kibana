@@ -81,7 +81,7 @@ import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_sel
 import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
 import { sourcererSelectors } from '../../../../sourcerer/store';
 import { useEntityFromStore } from '../../../entity_details/shared/hooks/use_entity_from_store';
-import { useObservedUser } from '../../../entity_details/user_right/hooks/use_observed_user';
+import { useObservedUser } from '../../../../flyout_v2/entity/user/main/hooks/use_observed_user';
 import {
   buildRiskScoreStateFromEntityRecord,
   getRiskFromEntityRecord,

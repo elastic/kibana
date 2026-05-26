@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
 import type { Entity } from '../../../../../common/api/entity_analytics';
-import { ObservedDataSection } from './components/observed_data_section';
+import { ObservedDataSection } from '../../shared/components/observed_data_section';
 import { useHasEntityResolutionLicense } from '../../../../common/hooks/use_has_entity_resolution_license';
 import { EntityHighlightsAccordion } from '../../../../entity_analytics/components/entity_details_flyout/components/entity_highlights';
 import { EntityInsight } from '../../../../cloud_security_posture/components/entity_insight';
@@ -19,7 +19,7 @@ import { EntityIdentifierFields, EntityType } from '../../../../../common/entity
 import { HOST_PANEL_OBSERVED_HOST_QUERY_ID, HOST_PANEL_RISK_SCORE_QUERY_ID } from './constants';
 import type { EntityDetailsPath } from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import type { IdentityFields } from '../../../../flyout/document_details/shared/utils';
-import type { ObservedEntityData } from '../../../../flyout/entity_details/shared/components/observed_entity/types';
+import type { ObservedEntityData } from '../../shared/components/observed_entity/types';
 import type { EntityRiskScore, HostItem } from '../../../../../common/search_strategy';
 import { VisualizationsSection } from '../../../../flyout/entity_details/shared/components/right/visualizations_section';
 import { ResolutionSection } from '../../../../entity_analytics/components/entity_resolution/resolution_section';
@@ -146,7 +146,8 @@ export const Content = ({
         hideHeaderIcons={hideHeaderIcons}
       />
       <ObservedDataSection
-        observedHost={observedHost}
+        entityType={EntityType.host}
+        observedData={observedHost}
         contextID={contextID}
         identityFields={identityFields}
         entityRecord={entityRecord}

@@ -74,7 +74,14 @@ jest.mock('./threat_intelligence_overview', () => ({
   ThreatIntelligenceOverview: () => <div data-test-subj="threatIntelligenceOverviewMock" />,
 }));
 jest.mock('./entities_overview', () => ({
-  EntitiesOverview: () => <div data-test-subj="entitiesOverviewMock" />,
+  EntitiesOverview: ({ onShowEntitiesDetails }: { onShowEntitiesDetails: () => void }) => (
+    <button type="button" data-test-subj="entitiesOverviewMock" onClick={onShowEntitiesDetails}>
+      {'Show entities'}
+    </button>
+  ),
+}));
+jest.mock('../../tools/entities', () => ({
+  EntityDetails: () => null,
 }));
 const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>
   ({
@@ -191,6 +198,21 @@ describe('InsightsSection', () => {
     );
 
     expect(queryByTestId('threatIntelligenceOverviewMock')).not.toBeInTheDocument();
+  });
+
+  it('opens a tools flyout when clicking entities overview', () => {
+    const { getByTestId } = renderInsightsSection();
+
+    fireEvent.click(getByTestId('entitiesOverviewMock'));
+
+    expect(mockOpenSystemFlyout).toHaveBeenCalledTimes(1);
+    expect(mockOpenSystemFlyout).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        historyKey: documentFlyoutHistoryKey,
+        session: 'start',
+      })
+    );
   });
 
   it('opens a tools flyout when clicking correlations overview', () => {

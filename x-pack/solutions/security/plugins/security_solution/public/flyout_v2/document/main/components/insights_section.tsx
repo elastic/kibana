@@ -32,6 +32,7 @@ import { flyoutProviders } from '../../../shared/components/flyout_provider';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 import { CorrelationsDetails } from '../../tools/correlations';
 import { ThreatIntelligenceDetails } from '../../tools/threat_intelligence';
+import { EntityDetails as EntitiesDetails } from '../../tools/entities';
 import {
   defaultToolsFlyoutProperties,
   useDefaultDocumentFlyoutProperties,
@@ -151,6 +152,22 @@ export const InsightsSection = memo(
       ]
     );
 
+    const onShowEntitiesDetails = useCallback(() => {
+      overlays.openSystemFlyout(
+        flyoutProviders({
+          services,
+          store,
+          history,
+          children: <EntitiesDetails hit={hit} />,
+        }),
+        {
+          ...defaultToolsFlyoutProperties,
+          historyKey,
+          session: 'start',
+        }
+      );
+    }, [history, historyKey, hit, overlays, services, store]);
+
     const onShowCorrelationsDetails = useCallback(() => {
       overlays.openSystemFlyout(
         flyoutProviders({
@@ -224,7 +241,12 @@ export const InsightsSection = memo(
         sectionId={LOCAL_STORAGE_SECTION_KEY}
         title={INSIGHTS_SECTION_TITLE}
       >
-        <EntitiesOverview hit={hit} renderCellActions={renderCellActions} showIcon={false} />
+        <EntitiesOverview
+          hit={hit}
+          renderCellActions={renderCellActions}
+          showIcon={false}
+          onShowEntitiesDetails={onShowEntitiesDetails}
+        />
         {isAlert && (
           <ThreatIntelligenceOverview
             hit={hit}

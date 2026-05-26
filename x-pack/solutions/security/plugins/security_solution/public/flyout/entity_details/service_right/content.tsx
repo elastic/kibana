@@ -14,8 +14,8 @@ import { FlyoutRiskSummary } from '../../../entity_analytics/components/risk_sum
 import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import { SERVICE_PANEL_RISK_SCORE_QUERY_ID } from '.';
-import { ObservedEntity } from '../shared/components/observed_entity';
-import type { ObservedEntityData } from '../shared/components/observed_entity/types';
+import { ObservedEntity } from '../../../flyout_v2/entity/shared/components/observed_entity';
+import type { ObservedEntityData } from '../../../flyout_v2/entity/shared/components/observed_entity/types';
 import { useObservedServiceItems } from './hooks/use_observed_service_items';
 import type { EntityDetailsPath } from '../shared/components/left_panel/left_panel_header';
 import { VisualizationsSection } from '../shared/components/right/visualizations_section';

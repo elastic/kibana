@@ -13,10 +13,12 @@ import {
   IP_FIELD_TYPE,
   LEGACY_SIGNAL_RULE_NAME_FIELD_NAME,
   SIGNAL_RULE_NAME_FIELD_NAME,
+  USER_NAME_FIELD_NAME,
 } from '../../../timelines/components/timeline/body/renderers/constants';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import { Network } from '../../network/main';
 import { Host } from '../../entity/host/main';
+import { User } from '../../entity/user/main';
 import { RuleDetails } from '../../rule/main';
 
 /**
@@ -27,6 +29,7 @@ import { RuleDetails } from '../../rule/main';
  * - IP fields → Network details flyout (value = IP address)
  * - Rule name field → Rule details flyout (value = rule ID)
  * - Host name → Host details flyout (pass hit for entity resolution)
+ * - User name → User details flyout (pass hit for entity resolution)
  */
 export const buildFlyoutContent = (
   field: string,
@@ -49,6 +52,10 @@ export const buildFlyoutContent = (
 
   if (field === HOST_NAME_FIELD_NAME) {
     return <Host hostName={value} hit={hit} />;
+  }
+
+  if (field === USER_NAME_FIELD_NAME) {
+    return <User userName={value} hit={hit} />;
   }
 
   return null;
