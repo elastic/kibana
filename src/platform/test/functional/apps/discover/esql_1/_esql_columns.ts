@@ -76,7 +76,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should render custom columns for non-transformational commands correctly', async () => {
-      const columns = ['bytes', 'extension'];
+      const columns = ['@timestamp', 'bytes', 'extension'];
       await unifiedFieldList.clickFieldListItemAdd('bytes');
       await unifiedFieldList.clickFieldListItemAdd('extension');
       await header.waitUntilLoadingHasFinished();
@@ -113,7 +113,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await unifiedFieldList.clickFieldListItemAdd('bytes');
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
-      expect(await dataGrid.getHeaderFields()).to.eql(['bytes']);
+      expect(await dataGrid.getHeaderFields()).to.eql(['@timestamp', 'bytes']);
 
       // different index pattern => reset columns
       await monacoEditor.setCodeEditorValue('from logstash-* | limit 500');
@@ -125,7 +125,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await unifiedFieldList.clickFieldListItemAdd('extension');
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
-      expect(await dataGrid.getHeaderFields()).to.eql(['extension']);
+      expect(await dataGrid.getHeaderFields()).to.eql(['@timestamp', 'extension']);
 
       // same index pattern => don't reset columns
       await monacoEditor.setCodeEditorValue(
@@ -134,7 +134,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('querySubmitButton');
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
-      expect(await dataGrid.getHeaderFields()).to.eql(['extension']);
+      expect(await dataGrid.getHeaderFields()).to.eql(['@timestamp', 'extension']);
     });
 
     it('should render initial columns for a transformational command correctly', async () => {
@@ -247,7 +247,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.loadSavedSearch(SAVED_SEARCH_NON_TRANSFORMATIONAL_CUSTOM_COLUMNS);
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
-      expect(await dataGrid.getHeaderFields()).to.eql(['bytes', 'extension']);
+      expect(await dataGrid.getHeaderFields()).to.eql(['@timestamp', 'bytes', 'extension']);
 
       await discover.loadSavedSearch(SAVED_SEARCH_TRANSFORMATIONAL_INITIAL_COLUMNS);
       await header.waitUntilLoadingHasFinished();

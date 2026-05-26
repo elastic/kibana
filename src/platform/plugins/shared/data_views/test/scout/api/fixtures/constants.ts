@@ -53,3 +53,44 @@ export const FIELDS_ROUTE_PATH = 'internal/data_views/fields';
 export const RESOLVE_INDEX_PATH = 'internal/index-pattern-management/resolve_index';
 export const SWAP_REFERENCES_PATH = `${SERVICE_PATH}/swap_references`;
 export const SWAP_REFERENCES_PREVIEW_PATH = `${SERVICE_PATH}/swap_references/_preview`;
+
+export const CAPABILITIES_API_PATH = '/api/core/capabilities';
+
+export const ES_ARCHIVE_LOGSTASH_FUNCTIONAL =
+  'x-pack/platform/test/fixtures/es_archives/logstash_functional';
+
+export const INDEX_PATTERNS_ALL_ROLE = {
+  elasticsearch: {
+    cluster: [],
+    indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
+  },
+  kibana: [{ base: [], feature: { indexPatterns: ['all'] }, spaces: ['*'] }],
+};
+
+export const INDEX_PATTERNS_READ_ROLE = {
+  elasticsearch: {
+    cluster: [],
+    indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
+  },
+  kibana: [{ base: [], feature: { indexPatterns: ['read'] }, spaces: ['*'] }],
+};
+
+export const NO_INDEX_PATTERNS_ROLE = {
+  elasticsearch: {
+    cluster: [],
+    indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
+  },
+  kibana: [{ base: [], feature: { discover: ['read'] }, spaces: ['*'] }],
+};
+
+export const API_CUSTOM_SPACE = {
+  id: 'api_data_views_custom_space',
+  name: 'api_data_views_custom_space',
+  disabledFeatures: [],
+};
+
+export const API_CUSTOM_SPACE_INDEX_PATTERNS_DISABLED = {
+  id: 'api_data_views_index_patterns_disabled',
+  name: 'api_data_views_index_patterns_disabled',
+  disabledFeatures: ['indexPatterns'],
+};
