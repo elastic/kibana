@@ -18,6 +18,9 @@ project:
   sourceRoot: src/platform/plugins/shared/workflows_management
 dependsOn:
   - '@kbn/core'
+  - '@kbn/esql-language'
+  - '@kbn/esql-types'
+  - '@kbn/esql-utils'
   - '@kbn/kibana-react-plugin'
   - '@kbn/i18n'
   - '@kbn/i18n-react'
@@ -50,7 +53,7 @@ dependsOn:
   - '@kbn/ui-actions-plugin'
   - '@kbn/storybook'
   - '@kbn/react-kibana-context-theme'
-  - '@kbn/core-chrome-layout'
+  - '@kbn/ui-chrome-layout'
   - '@kbn/react-kibana-context-theme'
   - '@kbn/react-field'
   - '@kbn/storage-adapter'
