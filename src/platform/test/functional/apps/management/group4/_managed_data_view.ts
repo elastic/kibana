@@ -13,6 +13,7 @@ import type { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const testSubjects = getService('testSubjects');
   const flyout = getService('flyout');
   const PageObjects = getPageObjects(['settings', 'common', 'header']);
 
@@ -62,6 +63,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await PageObjects.settings.expectDisabledFieldEditor();
         await flyout.closeFlyout();
+      });
+
+      it('delete option is not available on the detail page', async function () {
+        await PageObjects.settings.clickKibanaIndexPatterns();
+        await PageObjects.settings.clickIndexPatternLogstash();
+        await testSubjects.missingOrFail('moreActionsButton');
+        await testSubjects.missingOrFail('deleteIndexPatternButton');
+      });
+
+      it('delete action is disabled on the list page', async function () {
+        await PageObjects.settings.clickKibanaIndexPatterns();
+        const isEnabled = await testSubjects.isEnabled('action-delete');
+        expect(isEnabled).to.be(false);
       });
     });
   });
