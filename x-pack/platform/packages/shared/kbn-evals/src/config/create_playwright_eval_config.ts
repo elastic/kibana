@@ -69,7 +69,10 @@ export function createPlaywrightEvalsConfig({
   const experimentRepetitions =
     parseInt(process.env.EVALUATION_REPETITIONS || '', 10) || repetitions || 1;
 
-  const setupProjects = projects?.filter((project) => project.name === 'setup-local') ?? [];
+  const setupProjects =
+    projects?.filter(
+      (project) => project.name === 'setup-local' || project.name === 'teardown-local'
+    ) ?? [];
 
   // get just the 'local' project (for now)
   const nextProjects = connectors.flatMap((connector) => {
