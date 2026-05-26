@@ -48,3 +48,4 @@ export {
 } from './get_streams_location/get_streams_location';
 
 export type { StreamSummary } from './stream_summary';
+export type { PaginatedResponse } from './pagination';
