@@ -11,7 +11,13 @@ import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } 
 import type { UiCounterMetricType } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { EuiFlexGroup, EuiFlexItem, EuiHideFor, useEuiTheme } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHideFor,
+  useEuiTheme,
+  useIsWithinBreakpoints,
+} from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 import type { BehaviorSubject } from 'rxjs';
 import { of } from 'rxjs';
@@ -362,6 +368,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     [onRemoveField]
   );
 
+  const isMobile = useIsWithinBreakpoints(['xs', 's']);
   const isSidebarCollapsed = useObservable(
     unifiedFieldListSidebarContainerApi?.sidebarVisibility.isCollapsed$ ?? of(false),
     false
@@ -410,7 +417,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       gutterSize="none"
       css={css`
         height: 100%;
-        display: ${isSidebarCollapsed ? 'none' : 'flex'};
+        display: ${isSidebarCollapsed && !isMobile ? 'none' : 'flex'};
         // Make Discover's field list background distinguished for the "new chrome"
         background-color: ${chromeStyle === 'project'
           ? euiTheme.colors.backgroundBasePlain
