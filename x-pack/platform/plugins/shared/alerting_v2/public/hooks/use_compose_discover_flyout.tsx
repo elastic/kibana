@@ -180,7 +180,7 @@ export const useComposeDiscoverFlyout = ({
             if (ruleNotifications) {
               setupNotificationsMutation.mutate(
                 { rule, workflow: ruleNotifications.workflow },
-                { onSuccess: closeAndRedirect }
+                { onSuccess: closeAndRedirect, onError: closeAndRedirect }
               );
             } else {
               closeAndRedirect();

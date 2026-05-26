@@ -24,7 +24,7 @@ export const getStepIds = (isAlert: boolean): StepId[] =>
 export const getBuilderStepIds = (isAlert: boolean): StepId[] =>
   isAlert
     ? ['builderCondition', 'recoveryCondition', 'details', 'notifications']
-    : ['builderCondition', 'details', 'notifications'];
+    : ['builderCondition', 'details'];
 
 export interface InitialStateConfig {
   mode: ComposeDiscoverMode;

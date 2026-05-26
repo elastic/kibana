@@ -69,7 +69,7 @@ export const NotificationsStep: React.FC<NotificationsStepProps> = ({ services }
             />
           </Suspense>
         </div>
-      ) : (
+      ) : workflowForm.supported !== false ? (
         <EuiButton
           iconType="plusInCircle"
           onClick={handleCreate}
@@ -79,7 +79,7 @@ export const NotificationsStep: React.FC<NotificationsStepProps> = ({ services }
         >
           {createSingleActionLabel}
         </EuiButton>
-      )}
+      ) : null}
     </>
   );
 };

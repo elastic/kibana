@@ -21,26 +21,6 @@ export interface SetupRuleNotificationsParams {
   workflow: SingleStepWorkflowFormValue;
 }
 
-const resolveWorkflowId = async (
-  value: SingleStepWorkflowFormValue,
-  workflowApi: WorkflowApi
-): Promise<string> => {
-  if (value.mode === 'create') {
-    const created = await workflowApi.createWorkflow({
-      yaml: buildSingleStepWorkflowYaml(value),
-    });
-    return created.id;
-  }
-  if (!value.workflowId) {
-    throw new Error(
-      i18n.translate('xpack.alertingV2.useSetupRuleNotifications.workflowRequiredError', {
-        defaultMessage: 'A workflow must be selected when notifications are enabled.',
-      })
-    );
-  }
-  return value.workflowId;
-};
-
 export const useSetupRuleNotifications = () => {
   const workflowApi = useService(WorkflowApi);
   const actionPoliciesApi = useService(ActionPoliciesApi);
@@ -48,16 +28,42 @@ export const useSetupRuleNotifications = () => {
 
   return useMutation({
     mutationFn: async ({ rule, workflow }: SetupRuleNotificationsParams) => {
-      const workflowId = await resolveWorkflowId(workflow, workflowApi);
-      await actionPoliciesApi.createActionPolicy({
-        name: `${rule.metadata.name} notifications`,
-        description: `Notifications for rule "${rule.metadata.name}"`,
-        type: 'single_rule',
-        ruleId: rule.id,
-        destinations: [{ type: 'workflow', id: workflowId }],
-        groupingMode: 'per_episode',
-        throttle: { strategy: 'on_status_change', interval: null },
-      });
+      let createdWorkflowId: string | null = null;
+
+      let workflowId: string;
+      if (workflow.mode === 'create') {
+        const created = await workflowApi.createWorkflow({
+          yaml: buildSingleStepWorkflowYaml(workflow),
+        });
+        workflowId = created.id;
+        createdWorkflowId = workflowId;
+      } else {
+        if (!workflow.workflowId) {
+          throw new Error(
+            i18n.translate('xpack.alertingV2.useSetupRuleNotifications.workflowRequiredError', {
+              defaultMessage: 'A workflow must be selected when notifications are enabled.',
+            })
+          );
+        }
+        workflowId = workflow.workflowId;
+      }
+
+      try {
+        await actionPoliciesApi.createActionPolicy({
+          name: `${rule.metadata.name} notifications`,
+          description: `Notifications for rule "${rule.metadata.name}"`,
+          type: 'single_rule',
+          ruleId: rule.id,
+          destinations: [{ type: 'workflow', id: workflowId }],
+          groupingMode: 'per_episode',
+          throttle: { strategy: 'on_status_change', interval: null },
+        });
+      } catch (err) {
+        if (createdWorkflowId) {
+          await workflowApi.deleteWorkflow(createdWorkflowId).catch(() => {});
+        }
+        throw err;
+      }
     },
     onSuccess: () => {
       toasts.addSuccess(

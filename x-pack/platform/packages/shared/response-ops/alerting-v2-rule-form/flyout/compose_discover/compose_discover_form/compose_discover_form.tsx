@@ -131,7 +131,7 @@ export const getSteps = (isAlert: boolean, builderType?: string): StepDefinition
             });
           },
           validate: definition.validate
-            ? (_methods, s, bs) => definition.validate!(s, bs)
+            ? (_methods, s, _services, bs) => definition.validate!(s, bs)
             : base.validate,
         };
       }

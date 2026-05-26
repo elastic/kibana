@@ -25,12 +25,18 @@ export interface RuleFormServices<TWorkflow extends object = object> {
     defaultValue: () => TWorkflow;
     /** Returns true when the current workflow value satisfies submission requirements. */
     isValid?: (value: TWorkflow) => boolean;
+    /**
+     * Set to false to hide the single-action create UI entirely.
+     * Defaults to true when omitted.
+     */
+    supported?: boolean;
   };
 }
 
 export const NOOP_WORKFLOW_FORM: RuleFormServices['workflowForm'] = {
   Component: () => null,
   defaultValue: () => ({}),
+  supported: false,
 };
 
 export type RuleFormLayout = 'page' | 'flyout';

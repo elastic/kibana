@@ -44,9 +44,14 @@ export const ConnectorSelector = ({ connectorTypeId, value, onChange }: Connecto
   const handleConnectorCreated = (connector: ActionConnector) => {
     queryClient.setQueryData<SingleStepConnector[]>(ALL_CONNECTORS_KEY, (old = []) => [
       ...old,
-      { id: connector.id, name: connector.name, connectorTypeId, isMissingSecrets: false, isDeprecated: false },
+      {
+        id: connector.id,
+        name: connector.name,
+        connectorTypeId,
+        isMissingSecrets: false,
+        isDeprecated: false,
+      },
     ]);
-    queryClient.invalidateQueries({ queryKey: ALL_CONNECTORS_KEY });
     onChange(connector.id);
     setIsCreateFlyoutOpen(false);
   };
