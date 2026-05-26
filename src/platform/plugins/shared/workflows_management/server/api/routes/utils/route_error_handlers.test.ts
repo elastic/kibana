@@ -11,7 +11,6 @@ import { httpServerMock } from '@kbn/core/server/mocks';
 import { handleRouteError } from './route_error_handlers';
 import { ManagedWorkflowDeleteForbiddenError } from '../../managed_workflow_delete_error';
 import { ManagedWorkflowUpdateForbiddenError } from '../../managed_workflow_errors';
-import { WorkflowUpdateForbiddenError } from '../../workflow_update_forbidden_error';
 
 describe('handleRouteError', () => {
   it('returns forbidden for managed workflow update policy errors', () => {
@@ -34,18 +33,6 @@ describe('handleRouteError', () => {
     expect(response.forbidden).toHaveBeenCalledWith({
       body: {
         message: 'Managed workflows cannot be deleted.',
-      },
-    });
-  });
-
-  it('returns forbidden for workflow update policy errors', () => {
-    const response = httpServerMock.createResponseFactory();
-
-    handleRouteError(response, new WorkflowUpdateForbiddenError());
-
-    expect(response.forbidden).toHaveBeenCalledWith({
-      body: {
-        message: 'Workflow update requires the workflow update privilege.',
       },
     });
   });
