@@ -258,7 +258,7 @@ export class IndexUpdateService {
       : esql`FROM ${indexName}`;
 
     if (qstr) {
-      query.pipe`WHERE qstr(${`*${qstr}* OR ${qstr}`})`;
+      query.pipe`WHERE KQL(${qstr})`;
     }
 
     query.pipe`LIMIT ${DOCS_PER_FETCH}`;
@@ -759,6 +759,11 @@ export class IndexUpdateService {
               )
               .pipe(
                 catchError((e) => {
+                  this.notifications.toasts.addError(e, {
+                    title: i18n.translate('indexEditor.indexUpdateService.fetchErrorTitle', {
+                      defaultMessage: 'Error fetching documents',
+                    }),
+                  });
                   // query might be invalid, so we return an empty response
                   return of({
                     rawResponse: {

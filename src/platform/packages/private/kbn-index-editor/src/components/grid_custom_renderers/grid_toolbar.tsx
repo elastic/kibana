@@ -47,7 +47,7 @@ export const getGridToolbar =
             {additionalControls && <EuiFlexItem grow={false}>{additionalControls}</EuiFlexItem>}
           </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} css={{ width: '50%' }}>
           <QueryBar onOpenIndexInDiscover={onOpenIndexInDiscover} />
         </EuiFlexItem>
       </EuiFlexGroup>

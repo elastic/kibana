@@ -8,17 +8,11 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import {
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiSearchBar,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
+import type { Query } from '@kbn/es-query';
 import type { EditLookupIndexContentContext, KibanaContextExtra } from '../types';
 
 const openInDiscoverTooltip = i18n.translate('indexEditor.toolbar.openInDiscoverTooltip', {
@@ -31,9 +25,10 @@ export const QueryBar = ({
   onOpenIndexInDiscover?: EditLookupIndexContentContext['onOpenIndexInDiscover'];
 }) => {
   const {
-    services: { share, data, indexUpdateService, indexEditorTelemetryService },
+    services: { share, data, indexUpdateService, indexEditorTelemetryService, kql },
   } = useKibana<KibanaContextExtra>();
 
+  const KQLComponent = kql.QueryStringInput;
   const dataView = useObservable(indexUpdateService.dataView$);
   const esqlDiscoverQuery = useObservable(indexUpdateService.esqlDiscoverQuery$, '');
   const searchQuery = useObservable(indexUpdateService.qstr$, '');
@@ -43,7 +38,7 @@ export const QueryBar = ({
   );
   const indexName = useObservable(indexUpdateService.indexName$, null);
 
-  const [queryError, setQueryError] = useState<string>('');
+  const [kqlQuery, setKqlQuery] = useState<string>('');
 
   const discoverLocator = useMemo(() => {
     return share?.url.locators.get('DISCOVER_APP_LOCATOR');
@@ -88,28 +83,31 @@ export const QueryBar = ({
 
   return (
     <EuiFlexGroup alignItems={'flexStart'} gutterSize={'s'}>
-      <EuiFlexItem grow>
-        <EuiFormRow isInvalid={!!queryError} error={queryError} fullWidth>
-          <EuiSearchBar
-            defaultQuery={''}
-            box={{
-              'data-test-subj': 'indexEditorQueryBar',
-              disabled: !isIndexCreated,
-              compressed: true,
-              placeholder: i18n.translate('indexEditor.queryBar.placeholder', {
-                defaultMessage: 'Type to filter...',
-              }),
-            }}
-            onChange={({ queryText, error }) => {
-              if (error) {
-                setQueryError(error.message);
-              } else {
-                setQueryError('');
-                indexUpdateService.setQstr(queryText);
-              }
-            }}
-          />
-        </EuiFormRow>
+      <EuiFlexItem grow css={{ minWidth: 200 }}>
+        <KQLComponent
+          isDisabled={!isIndexCreated}
+          disableLanguageSwitcher
+          disableAutoFocus
+          autoSubmit
+          indexPatterns={[dataView]}
+          bubbleSubmitEvent={false}
+          query={{
+            query: kqlQuery,
+            language: 'kuery',
+          }}
+          placeholder={i18n.translate('indexEditor.queryBar.placeholder', {
+            defaultMessage: 'Filter your data using KQL',
+          })}
+          onChange={(newQuery: Query) => {
+            setKqlQuery(newQuery.query as string);
+          }}
+          onSubmit={(newQuery: Query) => {
+            indexUpdateService.setQstr(newQuery.query as string);
+          }}
+          appName="esqlIndexEditor"
+          dataTestSubj="indexEditorQueryBar"
+          size="s"
+        />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiToolTip content={openInDiscoverTooltip} disableScreenReaderOutput>
