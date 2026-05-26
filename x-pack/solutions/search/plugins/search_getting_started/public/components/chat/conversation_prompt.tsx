@@ -85,19 +85,25 @@ export const ConversationPrompt = () => {
             }}
           />
           <div css={NewConversationSendButton}>
-            <EuiButtonIcon
-              iconType="kqlFunction"
-              display="fill"
-              size="m"
-              onClick={expandConversation}
-              aria-label={i18n.translate(
-                'xpack.search.gettingStarted.chat.conversationPrompt.send',
-                {
-                  defaultMessage: 'Open the AI agent chat',
-                }
-              )}
-              data-test-subj="searchGettingStartedChatPromptSend"
-            />
+            <EuiToolTip
+              content={i18n.translate('xpack.search.gettingStarted.chat.conversationPrompt.send', {
+                defaultMessage: 'Open the AI agent chat',
+              })}
+            >
+              <EuiButtonIcon
+                iconType="kqlFunction"
+                display="fill"
+                size="m"
+                onClick={expandConversation}
+                aria-label={i18n.translate(
+                  'xpack.search.gettingStarted.chat.conversationPrompt.send',
+                  {
+                    defaultMessage: 'Open the AI agent chat',
+                  }
+                )}
+                data-test-subj="searchGettingStartedChatPromptSend"
+              />
+            </EuiToolTip>
           </div>
         </ConversationInputShell>
       </div>
