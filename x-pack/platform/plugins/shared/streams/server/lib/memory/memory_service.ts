@@ -85,9 +85,13 @@ export class MemoryServiceImpl implements MemoryService {
     }
   }
 
-  private async _getByName(name: string): Promise<MemoryEntry | undefined> {
+  private async _getCollapsedByName(name: string): Promise<MemoryEntry | undefined> {
     const hits = await this._searchLatest({ bool: { filter: [{ term: { name } }] } });
-    const entry = hits[0]?._source;
+    return hits[0]?._source;
+  }
+
+  private async _getByName(name: string): Promise<MemoryEntry | undefined> {
+    const entry = await this._getCollapsedByName(name);
     return entry?.is_deleted !== true ? entry : undefined;
   }
 
@@ -108,6 +112,27 @@ export class MemoryServiceImpl implements MemoryService {
     }
 
     const now = new Date().toISOString();
+    const tombstone = await this._getCollapsedByName(name);
+    if (tombstone?.is_deleted === true) {
+      const restored: MemoryEntry = {
+        id: tombstone.id,
+        name,
+        title,
+        content,
+        categories,
+        references,
+        tags,
+        version: tombstone.version + 1,
+        created_at: tombstone.created_at,
+        updated_at: now,
+        created_by: tombstone.created_by,
+        updated_by: user,
+      };
+      await this._indexPage(restored);
+      await this._writeHistory(restored, 'update', `Restored entry "${name}"`, user);
+      return restored;
+    }
+
     const entry: MemoryEntry = {
       id: uuidV4(),
       name,
