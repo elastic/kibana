@@ -197,12 +197,7 @@ export class MemoryServiceImpl implements MemoryService {
         ...tombstone,
       },
     });
-    await this._writeHistory(
-      tombstone,
-      'delete',
-      `Deleted entry "${current.name}"`,
-      user
-    );
+    await this._writeHistory(tombstone, 'delete', `Deleted entry "${current.name}"`, user);
   }
 
   async rename({
@@ -311,9 +306,7 @@ export class MemoryServiceImpl implements MemoryService {
   // ── References ──
 
   async getBacklinks({ id }: { id: string }): Promise<MemoryEntry[]> {
-    return (
-      await this._searchLatest({ bool: { filter: [{ term: { references: id } }] } }, 1000)
-    )
+    return (await this._searchLatest({ bool: { filter: [{ term: { references: id } }] } }, 1000))
       .map((h) => h._source)
       .filter((entry) => entry.is_deleted !== true);
   }
