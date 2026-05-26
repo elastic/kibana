@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { isHttpFetchError } from '@kbn/core-http-browser';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { workflowDefaultYaml } from './workflow_default_yml';
@@ -22,6 +22,7 @@ import { WorkflowEditorLayout } from './workflow_detail_layout';
 import { WorkflowDetailLoadingState } from './workflow_detail_loading_state';
 import { WorkflowDetailTestModal } from './workflow_detail_test_modal';
 import { WorkflowDetailTestStepModal } from './workflow_detail_test_step_modal';
+import { WorkflowNotFoundPage } from './workflow_not_found_page';
 import { PLUGIN_ID } from '../../../../common';
 import type { WorkflowDetailTab } from '../../../common/lib/telemetry/events/workflows/ui/types';
 import { setActiveTab, setExecution, setYamlString } from '../../../entities/workflows/store';
@@ -41,9 +42,12 @@ import { useTelemetry } from '../../../hooks/use_telemetry';
 import { useWorkflowsBreadcrumbs } from '../../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 
-const backToWorkflowsLabel = i18n.translate('workflows.workflowDetailHeader.backLink', {
-  defaultMessage: 'Back to Workflows',
-});
+const isLoadWorkflowNotFoundError = (error: unknown) =>
+  isHttpFetchError(error) && error.response?.status === 404;
+
+const getLoadWorkflowErrorMessage = (error: unknown) =>
+  (isHttpFetchError(error) ? error.body?.message : undefined) ||
+  (error instanceof Error ? error.message : String(error));
 
 export function WorkflowDetailPage({ id }: { id?: string }) {
   const dispatch = useDispatch();
@@ -135,6 +139,10 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   }, [application]);
 
   if (error) {
+    if (isLoadWorkflowNotFoundError(error)) {
+      return <WorkflowNotFoundPage onBackToWorkflows={onBackToWorkflows} />;
+    }
+
     return (
       <EuiEmptyPrompt
         iconType="error"
@@ -152,20 +160,9 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
             <FormattedMessage
               id="workflows.workflowDetail.error.body"
               defaultMessage="There was an error loading the workflow. {error}"
-              values={{ error: error.toString() }}
+              values={{ error: getLoadWorkflowErrorMessage(error) }}
             />
           </p>
-        }
-        actions={
-          <EuiButton
-            fill
-            iconType="sortLeft"
-            onClick={onBackToWorkflows}
-            aria-label={backToWorkflowsLabel}
-            data-test-subj="workflowDetailBackToWorkflowsButton"
-          >
-            {backToWorkflowsLabel}
-          </EuiButton>
         }
       />
     );
