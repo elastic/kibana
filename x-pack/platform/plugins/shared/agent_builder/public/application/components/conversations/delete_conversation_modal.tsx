@@ -41,6 +41,7 @@ export const BaseDeleteConversationModal: React.FC<BaseDeleteConversationModalPr
       ebt_element: AGENT_BUILDER_UI_EBT.element.pageContent,
       ebt_action: AGENT_BUILDER_UI_EBT.action.conversation.DELETE_CONFIRM,
       element_kind: 'button',
+      location_pathname: window.location.pathname,
     });
     setIsLoading(true);
     try {
@@ -56,6 +57,7 @@ export const BaseDeleteConversationModal: React.FC<BaseDeleteConversationModalPr
       ebt_element: AGENT_BUILDER_UI_EBT.element.pageContent,
       ebt_action: AGENT_BUILDER_UI_EBT.action.conversation.DELETE_CANCEL,
       element_kind: 'button',
+      location_pathname: window.location.pathname,
     });
     onClose();
   }, [analytics, onClose]);
