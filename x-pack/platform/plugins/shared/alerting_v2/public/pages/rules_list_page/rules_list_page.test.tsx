@@ -43,7 +43,7 @@ jest.mock('@kbn/core-di-browser', () => ({
     if (token === 'notifications') {
       return {};
     }
-    if (token === 'data' || token === 'dataViews' || token === 'lens') {
+    if (token === 'data' || token === 'dataViews' || token === 'lens' || token === 'uiActions') {
       return {};
     }
     throw new Error(`Unexpected token in useService mock: ${String(token)}`);
@@ -840,7 +840,7 @@ describe('RulesListPage', () => {
     fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
     expect(mockDeleteMutate).toHaveBeenCalledWith(
-      'rule-1',
+      { id: 'rule-1', name: 'Rule One' },
       expect.objectContaining({
         onSettled: expect.any(Function),
       })
