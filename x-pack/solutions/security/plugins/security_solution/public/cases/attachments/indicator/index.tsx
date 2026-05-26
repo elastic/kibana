@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
-import { defineAttachment } from '@kbn/cases-plugin/public';
+import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public/types';
+import { defineAttachment } from '@kbn/cases-plugin/common/attachment_framework/define_attachment';
 import { INDICATOR_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import type { JsonValue } from '@kbn/utility-types';
 import React from 'react';

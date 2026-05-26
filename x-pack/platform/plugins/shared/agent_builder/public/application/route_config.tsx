@@ -30,6 +30,7 @@ import { AgentBuilderPluginsPage } from './pages/plugins';
 import { AgentBuilderPluginDetailsPage } from './pages/plugin_details';
 import { AgentBuilderMcpClientsPage } from './pages/mcp_clients';
 import { AgentBuilderMcpClientCreatePage } from './pages/mcp_client_create';
+import { AgentBuilderProjectsPage } from './pages/projects';
 import { agentBuilderViewIds } from './agent_builder_view_ids';
 import { appPaths } from './utils/app_paths';
 
@@ -79,6 +80,9 @@ const navLabels = {
   }),
   agents: i18n.translate('xpack.agentBuilder.routeConfig.agents', {
     defaultMessage: 'Agents',
+  }),
+  projects: i18n.translate('xpack.agentBuilder.routeConfig.projects', {
+    defaultMessage: 'Projects',
   }),
 };
 
@@ -238,6 +242,14 @@ export const manageRoutes: RouteDefinition[] = [
     viewId: agentBuilderViewIds.manageToolDetails,
     sidebarView: 'manage',
     element: <AgentBuilderToolDetailsPage />,
+  },
+  {
+    path: '/manage/projects',
+    viewId: agentBuilderViewIds.manageProjects,
+    sidebarView: 'manage',
+    isExperimental: true,
+    navLabel: navLabels.projects,
+    element: <AgentBuilderProjectsPage />,
   },
 ];
 

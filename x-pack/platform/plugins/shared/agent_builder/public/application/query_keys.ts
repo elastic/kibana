@@ -67,4 +67,10 @@ export const queryKeys = {
     all: ['oauthClients', 'list'] as const,
     byId: (clientId: string) => ['oauthClients', clientId] as const,
   },
+  projects: {
+    all: ['projects', 'list'] as const,
+    list: (filters?: { type?: string; caseId?: string }) =>
+      ['projects', 'list', filters ?? {}] as const,
+    byId: (projectId?: string) => ['projects', projectId] as const,
+  },
 };

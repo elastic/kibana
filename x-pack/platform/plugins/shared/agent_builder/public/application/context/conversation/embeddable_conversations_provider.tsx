@@ -22,6 +22,7 @@ import { StreamingProvider } from '../streaming/streaming_context';
 import { useConversationActions } from './use_conversation_actions';
 import { ConversationChangeNotifier } from './conversation_change_notifier';
 import { usePersistedConversationId } from '../../hooks/use_persisted_conversation_id';
+import { useResolveCaseProject } from '../../hooks/projects/use_resolve_case_project';
 import { AppLeaveContext } from '../app_leave_context';
 
 const noopOnAppLeave = () => {};
@@ -212,6 +213,14 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     setCurrentProps((prev) => ({ ...prev, agentId: id, newConversation: true }));
   }, []);
 
+  const resolvedProjectId = useResolveCaseProject({
+    projectsService: services.projectsService,
+    caseId: currentProps.caseId,
+    caseOwner: currentProps.caseOwner,
+    caseTitle: currentProps.caseTitle,
+    projectId: currentProps.projectId,
+  });
+
   const conversationContextValue = useMemo(
     () => ({
       conversationId,
@@ -220,7 +229,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       sessionTag: currentProps.sessionTag,
       agentId: currentProps.agentId ?? agentBuilderDefaultAgentId,
       caseId: currentProps.caseId,
-      projectId: currentProps.projectId,
+      projectId: resolvedProjectId,
       initialMessage: currentProps.initialMessage,
       autoSendInitialMessage: currentProps.autoSendInitialMessage ?? false,
       resetInitialMessage,
@@ -237,6 +246,9 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       conversationId,
       currentProps.sessionTag,
       currentProps.agentId,
+      currentProps.caseId,
+      currentProps.caseOwner,
+      resolvedProjectId,
       currentProps.initialMessage,
       currentProps.autoSendInitialMessage,
       currentProps.browserApiTools,

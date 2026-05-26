@@ -42,6 +42,7 @@ import {
   SmlService,
   OAuthClientsService,
   PluginsService,
+  ProjectsService,
   EventsService,
   type AgentBuilderInternalService,
 } from './services';
@@ -161,6 +162,7 @@ export class AgentBuilderPlugin
     const skillsService = new SkillsService({ http });
     const smlService = new SmlService({ http });
     const pluginsService = new PluginsService({ http });
+    const projectsService = new ProjectsService({ http });
     const oauthClientsService = new OAuthClientsService({ http });
     const accessChecker = new AgentBuilderAccessChecker({ licensing, inference });
 
@@ -228,6 +230,7 @@ export class AgentBuilderPlugin
       skillsService,
       smlService,
       pluginsService,
+      projectsService,
       oauthClientsService,
       startDependencies,
       usageCollection,

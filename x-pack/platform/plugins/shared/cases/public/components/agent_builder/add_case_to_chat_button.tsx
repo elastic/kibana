@@ -54,6 +54,8 @@ export const AddCaseToChatButton: React.FC<AddCaseToChatButtonProps> = ({ caseDa
       initialMessage: CASE_ATTACHMENT_PROMPT,
       attachments: [attachment],
       caseId: caseData.id,
+      caseOwner: owner,
+      caseTitle: caseData.title,
       sessionTag: `cases-${owner}`,
     });
   }, [agentBuilder, caseData]);

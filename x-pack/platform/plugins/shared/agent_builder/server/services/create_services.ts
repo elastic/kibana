@@ -104,6 +104,7 @@ export class ServiceManager {
     trackingService,
     analyticsService,
     searchInferenceEndpoints,
+    getCasesClientWithRequest,
   }: ServicesStartDeps): InternalStartServices {
     if (!this.services) {
       throw new Error('#startServices called before #setupServices');
@@ -205,7 +206,7 @@ export class ServiceManager {
       security,
       elasticsearch,
       spaces,
-      getCasesClientWithRequest: startDeps.getCasesClientWithRequest,
+      getCasesClientWithRequest,
     });
 
     const auditLogService = new AuditLogService({

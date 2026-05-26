@@ -29,22 +29,9 @@
       "uiActions",
       "workflowsExtensions"
     ],
-    "optionalPlugins": [
-      "cloud",
-      "home",
-      "taskManager",
-      "usageCollection",
-      "spaces",
-      "serverless",
-      "agentBuilder"
-    ],
-    "requiredBundles": [
-      "esUiShared",
-      "kibanaReact",
-      "kibanaUtils",
-      "savedObjectsFinder",
-      "agentBuilder"
-    ],
+    "optionalPlugins": ["cloud", "home", "taskManager", "usageCollection", "spaces", "serverless"],
+    "runtimePluginDependencies": ["agentBuilder"],
+    "requiredBundles": ["esUiShared", "kibanaReact", "kibanaUtils", "savedObjectsFinder"],
     "extraPublicDirs": ["common"]
   }
 }

@@ -80,6 +80,16 @@ export interface EmbeddableConversationProps {
   caseId?: string;
 
   /**
+   * Cases owner for `caseId` (e.g. `securitySolution`). Used to get-or-create a case-typed project.
+   */
+  caseOwner?: string;
+
+  /**
+   * Optional case title when auto-creating a case-typed project for `caseId` + `caseOwner`.
+   */
+  caseTitle?: string;
+
+  /**
    * Agent Builder project ID when chat belongs to a project workspace.
    */
   projectId?: string;

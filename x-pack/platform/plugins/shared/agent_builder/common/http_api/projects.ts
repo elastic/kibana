@@ -7,12 +7,29 @@
 
 import type { Project } from '@kbn/agent-builder-common';
 
+export interface ProjectKnowledgeSummary {
+  case_id: string;
+  owner: string;
+  title?: string;
+  description?: string;
+  status?: string;
+  severity?: string;
+  total_alerts?: number;
+  total_comments?: number;
+}
+
 export interface ListProjectsResponse {
   results: Project[];
 }
 
 export interface GetProjectResponse {
   project: Project;
+  knowledge?: ProjectKnowledgeSummary;
+}
+
+export interface ListProjectsQuery {
+  type?: string;
+  case_id?: string;
 }
 
 export interface CreateProjectFromCaseBody {
