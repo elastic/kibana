@@ -101,8 +101,10 @@ function normalizeESQLAdHocDataViews(
     delete attributes.state.datasourceStates.textBased.indexPatternRefs;
   }
 
-  const textBasedLayers = Object.values(attributes.state.datasourceStates.textBased?.layers ?? {});
-  if (textBasedLayers.length === 0) return internalReferences;
+  const textBasedLayerEntries = Object.entries(
+    attributes.state.datasourceStates.textBased?.layers ?? {}
+  );
+  if (textBasedLayerEntries.length === 0) return internalReferences;
 
   // Remove 'textBasedLanguages-datasource-layer-*' references — they are rebuilt below
   const refs = internalReferences.filter(
@@ -113,7 +115,7 @@ function normalizeESQLAdHocDataViews(
     attributes.state.adHocDataViews = {};
   }
 
-  for (const layer of textBasedLayers) {
+  for (const [layerId, layer] of textBasedLayerEntries) {
     const esqlQuery = layer.query?.esql;
     const oldIndex = layer.index;
 
@@ -133,8 +135,12 @@ function normalizeESQLAdHocDataViews(
 
       layer.index = newId;
       adHocDataView.id = newId;
+      // Transform always sets type: 'esql' on ESQL adHocDataViews (via getAdHocDataViewSpec)
+      adHocDataView.type = 'esql';
       attributes.state.adHocDataViews[newId] = adHocDataView;
-      delete attributes.state.adHocDataViews[oldIndex];
+      if (newId !== oldIndex) {
+        delete attributes.state.adHocDataViews[oldIndex];
+      }
     } else if (esqlQuery) {
       // No adHocDataView exists: create one from the ES|QL query (matches what the transform produces)
       const indexPattern = getIndexPatternFromESQLQuery(esqlQuery);
@@ -151,11 +157,19 @@ function normalizeESQLAdHocDataViews(
     }
 
     if (layer.index) {
-      refs.push({
-        id: layer.index,
-        name: `indexpattern-datasource-layer-${DEFAULT_LAYER_ID}`,
-        type: 'index-pattern',
-      });
+      // Mutate the existing layer ref in place to keep references; fall back to pushing if no existing ref is found.
+      const layerRefName = `indexpattern-datasource-layer-${layerId}`;
+      const existingRef = refs.find((r) => r.name === layerRefName);
+      if (existingRef) {
+        existingRef.id = layer.index;
+        existingRef.name = `indexpattern-datasource-layer-${DEFAULT_LAYER_ID}`;
+      } else {
+        refs.push({
+          id: layer.index,
+          name: `indexpattern-datasource-layer-${DEFAULT_LAYER_ID}`,
+          type: 'index-pattern',
+        });
+      }
     }
   }
 
@@ -433,8 +447,11 @@ export const getCommonNormalizer = <T extends LensAttributes>(
 
         if (layerIdMap.has(id)) {
           const newId = layerIdMap.get(id)!;
-          dsState.layers[newId] = layer;
-          delete dsState.layers[id];
+          // Avoid deleting the layer when the canonical id matches the current id
+          if (newId !== id) {
+            dsState.layers[newId] = layer;
+            delete dsState.layers[id];
+          }
         }
       }
 

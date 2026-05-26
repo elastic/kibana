@@ -433,6 +433,9 @@ function buildVisualizationState(
   }
 
   if (isAPIMosaicChartLayer(config)) {
+    const secondaryGroups = config.group_breakdown_by?.map((_, index) =>
+      getAccessorName('group_breakdown_by', index)
+    );
     return {
       shape: config.type,
       ...(isLegacyColor && { ...colorMapping }),
@@ -440,10 +443,7 @@ function buildVisualizationState(
         {
           metrics,
           primaryGroups,
-          secondaryGroups:
-            config.group_breakdown_by?.map((_, index) =>
-              getAccessorName('group_breakdown_by', index)
-            ) ?? [],
+          ...(secondaryGroups?.length ? { secondaryGroups } : {}),
           // there's no multiple metrics support in mosaic charts
           allowMultipleMetrics: false,
           ...sharedState,

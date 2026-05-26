@@ -132,6 +132,12 @@ const alignLegacyTypes: NormalizerConfig<PartitionAttributes> = {
       delete layer.legendStats;
     }
 
+    // When `legendStats` is undefined (legacy saved objects), values are shown by default
+    // (matching the rendering behavior in `getLegendStats`)
+    if (viz.shape === 'waffle' && layer.legendStats == null) {
+      layer.legendStats = ['value'];
+    }
+
     // legendMaxLines is ignored at runtime when truncateLegend is false or undefined -> delete it
     if (!layer.truncateLegend) {
       delete layer.legendMaxLines;
