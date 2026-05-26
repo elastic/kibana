@@ -14,10 +14,8 @@ import {
   cleanObservabilityDataStreams,
 } from '../../src/data_generators/replay';
 import { getAlertScenarios, type AlertScenario } from '../../src/scenarios/alert_scenarios';
+import { waitForActiveAlert } from '../../src/wait_for_active_alert';
 import { evaluate } from './evaluate_ai_insights';
-
-const ALERT_CREATION_WAIT_MS = 3000;
-const INDEX_REFRESH_WAIT_MS = 2500;
 
 const scenarios = getAlertScenarios();
 
@@ -58,31 +56,13 @@ function createScenarioTest(scenario: AlertScenario) {
       });
 
       log.info('Waiting for alert to be created');
-      await new Promise((resolve) => setTimeout(resolve, ALERT_CREATION_WAIT_MS));
-
-      await esClient.indices.refresh({ index: scenario.alertRule.alertsIndex });
-
-      log.debug('Waiting to make sure all indices are refreshed');
-      await new Promise((resolve) => setTimeout(resolve, INDEX_REFRESH_WAIT_MS));
-      const alertsResponse = await esClient.search({
-        index: scenario.alertRule.alertsIndex,
-        query: {
-          bool: {
-            filter: [
-              { term: { 'kibana.alert.rule.uuid': ruleId } },
-              { term: { 'kibana.alert.status': 'active' } },
-            ],
-          },
-        },
-        size: 1,
+      alertId = await waitForActiveAlert({
+        esClient,
+        kbnClient,
+        alertsIndex: scenario.alertRule.alertsIndex,
+        ruleId,
+        log,
       });
-
-      const alertDoc = alertsResponse.hits.hits[0];
-      if (!alertDoc) {
-        throw new Error(`No alert found for rule ${ruleId} in scenario ${scenario.id}`);
-      }
-      alertId = alertDoc._id as string;
-      log.info(`Found alert with ID: ${alertId}`);
     });
 
     evaluate(
@@ -117,7 +97,7 @@ function createScenarioTest(scenario: AlertScenario) {
       await Promise.all([
         esClient.deleteByQuery({
           index: scenario.alertRule.alertsIndex,
-          query: { match_all: {} },
+          query: { term: { 'kibana.alert.rule.uuid': ruleId } },
           conflicts: 'proceed',
           refresh: true,
         }),

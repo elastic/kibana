@@ -127,7 +127,7 @@ export const ALERT_SCENARIOS: Record<string, AlertScenario> = {
         params: {
           threshold: 10,
           aggregationType: '95th' as TransactionDurationAggregationType,
-          windowSize: 30,
+          windowSize: 5,
           windowUnit: 'm',
           serviceName: 'ad',
           environment: 'ENVIRONMENT_ALL',
