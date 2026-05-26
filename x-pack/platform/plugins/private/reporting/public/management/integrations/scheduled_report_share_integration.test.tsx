@@ -17,7 +17,7 @@ jest.mock('../components/scheduled_report_flyout_share_wrapper', () => ({
 }));
 
 describe('getReportingShareIntegrationConfig', () => {
-  const mockApiClient = {} as jest.Mocked<ReportingAPIClient>;;
+  const mockApiClient = {} as jest.Mocked<ReportingAPIClient>;
   const mockServices = {} as any;
   const mockShareContext = {
     sharingData: { exportType: 'pngV2' },
