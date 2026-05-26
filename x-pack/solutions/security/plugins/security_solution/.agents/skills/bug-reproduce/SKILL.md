@@ -40,10 +40,12 @@ any phase is a protocol violation regardless of how clear the root cause appears
 
 ## Phase 0: Analyze
 
-Start the Scout server in the background immediately — it takes 5+ minutes to boot and
-can warm up while analysis runs:
+Kill any existing Scout instance and start fresh in the background — ensures a clean state
+regardless of prior sessions (a previously running server may have stale data or wrong
+feature flags). Boot takes 5+ minutes and can warm up while analysis runs:
 
 ```bash
+pkill -f 'node.*scripts/scout' 2>/dev/null; pkill -f 'org.elasticsearch' 2>/dev/null
 node scripts/scout.js start-server --arch stateful --domain classic &
 ```
 

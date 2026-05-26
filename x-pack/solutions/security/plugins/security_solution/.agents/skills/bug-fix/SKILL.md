@@ -221,7 +221,7 @@ If confirmed:
 Before running `gh pr create`, re-read the `--title` value for typos. Fix it in the command — do not submit and edit after.
 
 ```bash
-git checkout -b fix/<issue-number>
+git checkout fix/<issue-number> 2>/dev/null || git checkout -b fix/<issue-number>
 git add -- <files listed in the Fix Plan>
 git commit -m "Fix #<number> — <short description>"
 git push -u origin HEAD
