@@ -31,7 +31,7 @@ import type {
   LensPartitionVisualizationState,
   FormBasedPersistedState,
 } from '@kbn/lens-common';
-import { getEmptyRowsDefaultForVisualizationState } from '@kbn/lens-common';
+import { getVisualizationDatasourceDefaultsForVisualizationState } from '@kbn/lens-common';
 import {
   getColumnToLabelMap,
   getSortedAccessorsForGroup,
@@ -225,7 +225,10 @@ export const getPieVisualization = ({
       })
       .unsubscribe();
 
-    const emptyRowsDefault = getEmptyRowsDefaultForVisualizationState('lnsPie', state);
+    const datasourceDefaults = getVisualizationDatasourceDefaultsForVisualizationState(
+      'lnsPie',
+      state
+    );
 
     const getPrimaryGroupConfig = (): VisualizationDimensionGroupConfig => {
       const originalOrder = getSortedAccessorsForGroup(datasource, layer, 'primaryGroups');
@@ -249,9 +252,7 @@ export const getPieVisualization = ({
         accessors,
         enableDimensionEditor: true,
         filterOperations: bucketedOperations,
-        paramEditorCustomProps: {
-          emptyRowsDefault,
-        },
+        datasourceDefaults,
       };
 
       // We count multiple metrics as a bucket dimension.
@@ -352,9 +353,7 @@ export const getPieVisualization = ({
         accessors,
         enableDimensionEditor: true,
         filterOperations: bucketedOperations,
-        paramEditorCustomProps: {
-          emptyRowsDefault,
-        },
+        datasourceDefaults,
       };
 
       const totalNonCollapsedAccessors = accessors.reduce(

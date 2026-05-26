@@ -74,14 +74,18 @@ Object {
         },
       ],
       "dataTestSubj": "lnsMetric_breakdownByDimensionPanel",
+      "datasourceDefaults": Object {
+        "operationParams": Object {
+          "date_histogram": Object {
+            "includeEmptyRows": false,
+          },
+        },
+      },
       "enableDimensionEditor": true,
       "enableFormatSelector": true,
       "filterOperations": [Function],
       "groupId": "breakdownBy",
       "groupLabel": "Break down by",
-      "paramEditorCustomProps": Object {
-        "emptyRowsDefault": false,
-      },
       "supportsMoreColumns": false,
     },
   ],

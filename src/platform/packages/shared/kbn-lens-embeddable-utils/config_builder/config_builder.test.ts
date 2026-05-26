@@ -11,12 +11,19 @@ import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema
 import type { DateHistogramIndexPatternColumn, TypedLensByValueInput } from '@kbn/lens-common';
 import { LensConfigBuilder } from './config_builder';
 import { lensApiConfigSchemaNoESQL } from './schema';
+import type { DatatableConfig } from './schema/charts/datatable';
+import type { XYConfig } from './schema/charts/xy';
 import { mockDataViewsService } from './charts/mock_utils';
 import { multiMetricRowSplitByDatatableWithAdhocDataView } from './tests/datatable/lens_api_config_dsl.mock';
 import { basicTagcloudWithDataView } from './tests/tagcloud/lens_api_config.mock';
 import { apiXYWithNoYTitleAndInsideLegend } from './tests/xy/basicXY.mock';
 
 type LensAttributes = TypedLensByValueInput['attributes'];
+type XYLayer = XYConfig['layers'][number];
+type XYLayerWithX = Extract<XYLayer, { x?: unknown }>;
+type DatatableRow = NonNullable<DatatableConfig['rows']>[number];
+type DateHistogramXAxis = Extract<NonNullable<XYLayerWithX['x']>, { operation: 'date_histogram' }>;
+type DateHistogramDatatableRow = Extract<DatatableRow, { operation: 'date_histogram' }>;
 
 const getDateHistogramColumn = (attributes: LensAttributes) => {
   const formBasedLayers = attributes.state.datasourceStates.formBased?.layers ?? {};
@@ -28,6 +35,54 @@ const getDateHistogramColumn = (attributes: LensAttributes) => {
       }
     }
   }
+};
+
+const hasXAxis = (layer: XYLayer): layer is XYLayerWithX & { x: NonNullable<XYLayerWithX['x']> } =>
+  'x' in layer && layer.x !== undefined;
+
+const isDateHistogramXAxis = (x: XYLayerWithX['x']): x is DateHistogramXAxis =>
+  Boolean(x && 'operation' in x && x.operation === 'date_histogram');
+
+const isDateHistogramRow = (row: DatatableRow): row is DateHistogramDatatableRow =>
+  'operation' in row && row.operation === 'date_histogram';
+
+const removeIncludeEmptyRowsFromXYConfig = (config: XYConfig): XYConfig => {
+  const nextConfig = structuredClone(config);
+  const [firstLayer] = nextConfig.layers;
+
+  if (!firstLayer || !hasXAxis(firstLayer)) {
+    throw new Error(
+      'Expected the XY test config to start with a data layer that has an x dimension'
+    );
+  }
+
+  if (!isDateHistogramXAxis(firstLayer.x)) {
+    throw new Error('Expected the XY test config to use a date histogram x dimension');
+  }
+
+  const { include_empty_rows: _includeEmptyRows, ...x } = firstLayer.x;
+
+  return {
+    ...nextConfig,
+    layers: [{ ...firstLayer, x }, ...nextConfig.layers.slice(1)] as XYConfig['layers'],
+  } as XYConfig;
+};
+
+const removeIncludeEmptyRowsFromDatatableRows = (config: DatatableConfig): DatatableConfig => {
+  const nextConfig = structuredClone(config);
+  const rows = (nextConfig.rows ?? []).map((row) => {
+    if (!isDateHistogramRow(row)) {
+      return row;
+    }
+
+    const { include_empty_rows: _includeEmptyRows, ...dateHistogramRow } = row;
+    return dateHistogramRow;
+  }) as NonNullable<DatatableConfig['rows']>;
+
+  return {
+    ...nextConfig,
+    rows,
+  } as DatatableConfig;
 };
 
 describe('LensConfigBuilder', () => {
@@ -84,13 +139,10 @@ describe('LensConfigBuilder', () => {
 
   it('defaults empty rows off when converting XY API configs', () => {
     const builder = new LensConfigBuilder();
-    const { include_empty_rows: _includeEmptyRows, ...x } =
-      apiXYWithNoYTitleAndInsideLegend.layers[0].x;
 
-    const result = builder.fromAPIFormat({
-      ...apiXYWithNoYTitleAndInsideLegend,
-      layers: [{ ...apiXYWithNoYTitleAndInsideLegend.layers[0], x }],
-    }) as LensAttributes;
+    const result = builder.fromAPIFormat(
+      removeIncludeEmptyRowsFromXYConfig(apiXYWithNoYTitleAndInsideLegend)
+    ) as LensAttributes;
 
     expect(result.state.visualization).toMatchObject({ preferredSeriesType: 'bar_stacked' });
     expect(getDateHistogramColumn(result)?.params.includeEmptyRows).toBe(false);
@@ -98,13 +150,10 @@ describe('LensConfigBuilder', () => {
 
   it('defaults empty rows off after validating XY API configs through the route schema', () => {
     const builder = new LensConfigBuilder();
-    const { include_empty_rows: _includeEmptyRows, ...x } =
-      apiXYWithNoYTitleAndInsideLegend.layers[0].x;
 
-    const validated = lensApiConfigSchemaNoESQL.validate({
-      ...apiXYWithNoYTitleAndInsideLegend,
-      layers: [{ ...apiXYWithNoYTitleAndInsideLegend.layers[0], x }],
-    });
+    const validated = lensApiConfigSchemaNoESQL.validate(
+      removeIncludeEmptyRowsFromXYConfig(apiXYWithNoYTitleAndInsideLegend)
+    );
 
     const result = builder.fromAPIFormat(validated) as LensAttributes;
 
@@ -152,19 +201,9 @@ describe('LensConfigBuilder', () => {
 
   it('keeps empty rows on when converting datatable API configs', () => {
     const builder = new LensConfigBuilder();
-    const rows = multiMetricRowSplitByDatatableWithAdhocDataView.rows.map((row) => {
-      if (row.operation !== 'date_histogram') {
-        return row;
-      }
-
-      const { include_empty_rows: _includeEmptyRows, ...dateHistogramRow } = row;
-      return dateHistogramRow;
-    });
-
-    const result = builder.fromAPIFormat({
-      ...multiMetricRowSplitByDatatableWithAdhocDataView,
-      rows,
-    }) as LensAttributes;
+    const result = builder.fromAPIFormat(
+      removeIncludeEmptyRowsFromDatatableRows(multiMetricRowSplitByDatatableWithAdhocDataView)
+    ) as LensAttributes;
 
     expect(getDateHistogramColumn(result)?.params.includeEmptyRows).toBe(true);
   });

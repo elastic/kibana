@@ -21,6 +21,7 @@ import type {
   TermsIndexPatternColumn,
 } from '@kbn/lens-common';
 import type {
+  VisualizationDatasourceDefaults,
   FramePublicAPI,
   IndexPattern,
   IndexPatternField,
@@ -29,6 +30,7 @@ import type {
   BaseIndexPatternColumn,
   DatasourceFixAction,
 } from '@kbn/lens-common';
+import { applyDatasourceDefaultsToColumnParams } from '@kbn/lens-common';
 import { nonNullable } from '../../../utils';
 import {
   operationDefinitionMap,
@@ -80,47 +82,29 @@ interface ColumnCopy {
   shouldDeleteSource?: boolean;
 }
 
-interface EmptyRowsParamEditorCustomProps {
-  emptyRowsDefault?: boolean;
-}
-
-// Visualization configs pass per-dimension defaults through paramEditorCustomProps.
+// Visualization configs pass datasource defaults through the dimension group config.
 // This only backfills values while the editor is creating or replacing a column;
 // chart switch, suggestion, and config-builder bulk updates use the shared
 // `@kbn/lens-common` datasource normalization helpers instead.
-const getEmptyRowsDefaultForTargetGroup = (
+const getDatasourceDefaultsForTargetGroup = (
   visualizationGroups: VisualizationDimensionGroupConfig[],
   targetGroup?: string
-) => {
-  const customProps = targetGroup
-    ? visualizationGroups.find((group) => group.groupId === targetGroup)?.paramEditorCustomProps
-    : undefined;
-  const defaultValue = (customProps as EmptyRowsParamEditorCustomProps | undefined)
-    ?.emptyRowsDefault;
+) =>
+  (targetGroup
+    ? visualizationGroups.find((group) => group.groupId === targetGroup)?.datasourceDefaults
+    : undefined) as VisualizationDatasourceDefaults | undefined;
 
-  return typeof defaultValue === 'boolean' ? defaultValue : undefined;
-};
-
-const applyEmptyRowsDefault = (
+const applyDatasourceDefaults = (
   op: OperationType,
   columnParams: Record<string, unknown> | undefined,
   visualizationGroups: VisualizationDimensionGroupConfig[],
   targetGroup?: string
-) => {
-  if (op !== 'date_histogram' || columnParams?.includeEmptyRows !== undefined) {
-    return columnParams;
-  }
-
-  const defaultValue = getEmptyRowsDefaultForTargetGroup(visualizationGroups, targetGroup);
-  if (defaultValue === undefined) {
-    return columnParams;
-  }
-
-  return {
-    ...(columnParams ?? {}),
-    includeEmptyRows: defaultValue,
-  };
-};
+) =>
+  applyDatasourceDefaultsToColumnParams(
+    op,
+    columnParams,
+    getDatasourceDefaultsForTargetGroup(visualizationGroups, targetGroup)
+  );
 
 export function copyColumn({ layers, source, target }: ColumnCopy): Record<string, FormBasedLayer> {
   return createCopiedColumn(layers, target, source);
@@ -398,7 +382,7 @@ export function insertNewColumn({
     // @ts-expect-error upgrade typescript v5.9.3
     previousColumn: { ...incompleteParams, ...initialParams, ...layer.columns[columnId] },
   };
-  const nextColumnParams = applyEmptyRowsDefault(
+  const nextColumnParams = applyDatasourceDefaults(
     op,
     columnParams,
     visualizationGroups,
@@ -665,7 +649,7 @@ export function replaceColumn({
     indexPattern,
     previousColumn,
   };
-  const nextColumnParams = applyEmptyRowsDefault(
+  const nextColumnParams = applyDatasourceDefaults(
     op,
     initialParams?.params,
     visualizationGroups,

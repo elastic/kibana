@@ -95,6 +95,7 @@ import type {
 } from './visualizations/types';
 import type { DatasourceStates, GeneralDatasourceState } from './datasources/types';
 import type { LENS_ITEM_LATEST_VERSION } from './content_management/constants';
+import type { VisualizationDatasourceDefaults } from './visualization_datasource_defaults';
 
 export interface LensInspector {
   getInspectorAdapters: () => Adapters;
@@ -1116,6 +1117,7 @@ export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   // used by text based datasource to restrict the field selection only to number fields for the metric dimensions
   isMetricDimension?: boolean;
   isBreakdownDimension?: boolean;
+  datasourceDefaults?: VisualizationDatasourceDefaults;
   paramEditorCustomProps?: ParamEditorCustomProps;
   enableFormatSelector?: boolean;
   labels?: { buttonAriaLabel: string; buttonLabel: string };

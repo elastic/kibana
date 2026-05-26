@@ -30,7 +30,7 @@ import type {
   UserMessage,
   Visualization,
 } from '@kbn/lens-common';
-import { getEmptyRowsDefaultForVisualizationState } from '@kbn/lens-common';
+import { getVisualizationDatasourceDefaultsForVisualizationState } from '@kbn/lens-common';
 import type { HeatmapVisualizationState } from './types';
 import { getSuggestions } from './suggestions';
 import {
@@ -214,16 +214,17 @@ export const getHeatmapVisualization = ({
       state.valueAccessor,
       state?.palette && state.palette.accessor === state.valueAccessor ? state.palette : undefined
     );
-    const emptyRowsDefault = getEmptyRowsDefaultForVisualizationState(LENS_HEATMAP_ID, state);
+    const datasourceDefaults = getVisualizationDatasourceDefaultsForVisualizationState(
+      LENS_HEATMAP_ID,
+      state
+    );
     return {
       groups: [
         {
           layerId: state.layerId,
           groupId: GROUP_ID.X,
           groupLabel: getAxisName(GROUP_ID.X),
-          paramEditorCustomProps: {
-            emptyRowsDefault,
-          },
+          datasourceDefaults,
           accessors: state.xAccessor ? [{ columnId: state.xAccessor }] : [],
           filterOperations: filterOperationsAxis,
           supportsMoreColumns: !state.xAccessor,
@@ -234,9 +235,7 @@ export const getHeatmapVisualization = ({
           layerId: state.layerId,
           groupId: GROUP_ID.Y,
           groupLabel: getAxisName(GROUP_ID.Y),
-          paramEditorCustomProps: {
-            emptyRowsDefault,
-          },
+          datasourceDefaults,
           accessors: state.yAccessor ? [{ columnId: state.yAccessor }] : [],
           filterOperations: filterOperationsAxis,
           supportsMoreColumns: !state.yAccessor,

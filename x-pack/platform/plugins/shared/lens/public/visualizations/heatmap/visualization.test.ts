@@ -138,8 +138,12 @@ describe('heatmap', () => {
             layerId: 'first',
             groupId: GROUP_ID.X,
             groupLabel: 'Horizontal axis',
-            paramEditorCustomProps: {
-              emptyRowsDefault: false,
+            datasourceDefaults: {
+              operationParams: {
+                date_histogram: {
+                  includeEmptyRows: false,
+                },
+              },
             },
             accessors: [{ columnId: 'x-accessor' }],
             filterOperations: filterOperationsAxis,
@@ -151,8 +155,12 @@ describe('heatmap', () => {
             layerId: 'first',
             groupId: GROUP_ID.Y,
             groupLabel: 'Vertical axis',
-            paramEditorCustomProps: {
-              emptyRowsDefault: false,
+            datasourceDefaults: {
+              operationParams: {
+                date_histogram: {
+                  includeEmptyRows: false,
+                },
+              },
             },
             accessors: [{ columnId: 'y-accessor' }],
             filterOperations: filterOperationsAxis,
@@ -204,8 +212,12 @@ describe('heatmap', () => {
             layerId: 'first',
             groupId: GROUP_ID.X,
             groupLabel: 'Horizontal axis',
-            paramEditorCustomProps: {
-              emptyRowsDefault: false,
+            datasourceDefaults: {
+              operationParams: {
+                date_histogram: {
+                  includeEmptyRows: false,
+                },
+              },
             },
             accessors: [{ columnId: 'x-accessor' }],
             filterOperations: filterOperationsAxis,
@@ -217,8 +229,12 @@ describe('heatmap', () => {
             layerId: 'first',
             groupId: GROUP_ID.Y,
             groupLabel: 'Vertical axis',
-            paramEditorCustomProps: {
-              emptyRowsDefault: false,
+            datasourceDefaults: {
+              operationParams: {
+                date_histogram: {
+                  includeEmptyRows: false,
+                },
+              },
             },
             accessors: [],
             filterOperations: filterOperationsAxis,
@@ -268,8 +284,12 @@ describe('heatmap', () => {
             layerId: 'first',
             groupId: GROUP_ID.X,
             groupLabel: 'Horizontal axis',
-            paramEditorCustomProps: {
-              emptyRowsDefault: false,
+            datasourceDefaults: {
+              operationParams: {
+                date_histogram: {
+                  includeEmptyRows: false,
+                },
+              },
             },
             accessors: [{ columnId: 'x-accessor' }],
             filterOperations: filterOperationsAxis,
@@ -281,8 +301,12 @@ describe('heatmap', () => {
             layerId: 'first',
             groupId: GROUP_ID.Y,
             groupLabel: 'Vertical axis',
-            paramEditorCustomProps: {
-              emptyRowsDefault: false,
+            datasourceDefaults: {
+              operationParams: {
+                date_histogram: {
+                  includeEmptyRows: false,
+                },
+              },
             },
             accessors: [{ columnId: 'y-accessor' }],
             filterOperations: filterOperationsAxis,

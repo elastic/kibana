@@ -33,7 +33,7 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { getColorsFromMapping } from '@kbn/coloring';
 import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
 import { getKbnPalettes, useKbnPalettes, KbnPalette } from '@kbn/palettes';
-import { getEmptyRowsDefaultForVisualizationState } from '@kbn/lens-common';
+import { getVisualizationDatasourceDefaultsForVisualizationState } from '@kbn/lens-common';
 
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import type {
@@ -503,15 +503,16 @@ export const getXyVisualization = ({
       );
       colors = palette.getCategoricalColors(10, dataLayer.palette?.params);
     }
-    const emptyRowsDefault = getEmptyRowsDefaultForVisualizationState('lnsXY', state);
+    const datasourceDefaults = getVisualizationDatasourceDefaultsForVisualizationState(
+      'lnsXY',
+      state
+    );
     return {
       groups: [
         {
           groupId: 'x',
           groupLabel: getAxisName('x', { isHorizontal }),
-          paramEditorCustomProps: {
-            emptyRowsDefault,
-          },
+          datasourceDefaults,
           accessors: dataLayer.xAccessor ? [{ columnId: dataLayer.xAccessor }] : [],
           filterOperations: isBucketed,
           supportsMoreColumns: !dataLayer.xAccessor,
@@ -533,9 +534,7 @@ export const getXyVisualization = ({
           groupLabel: i18n.translate('xpack.lens.xyChart.splitSeries', {
             defaultMessage: 'Breakdown',
           }),
-          paramEditorCustomProps: {
-            emptyRowsDefault,
-          },
+          datasourceDefaults,
           accessors: dataLayer.splitAccessors
             ? dataLayer.splitAccessors.map((splitAccessor, i) => ({
                 columnId: splitAccessor,

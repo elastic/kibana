@@ -28,7 +28,10 @@ import type {
   VisualizationState,
   DataViewsState,
 } from '@kbn/lens-common';
-import { applyEmptyRowsDefaultToDatasourceState } from '@kbn/lens-common';
+import {
+  applyDatasourceDefaultsToDatasourceState,
+  getVisualizationDatasourceDefaultsForVisualizationState,
+} from '@kbn/lens-common';
 import { showMemoizedErrorNotification } from '../../lens_ui_errors';
 import type { LensDispatch } from '../../state_management';
 import { switchVisualization, applyChanges } from '../../state_management';
@@ -268,10 +271,13 @@ function getVisualizationSuggestions(
         query,
       })
       .map(({ state, ...visualizationSuggestion }) => {
-        const datasourceState = applyEmptyRowsDefaultToDatasourceState(
-          datasourceSuggestion.state,
+        const datasourceDefaults = getVisualizationDatasourceDefaultsForVisualizationState(
           visualizationId,
-          state,
+          state
+        );
+        const datasourceState = applyDatasourceDefaultsToDatasourceState(
+          datasourceSuggestion.state,
+          datasourceDefaults,
           { overwriteExisting: true }
         );
 

@@ -398,11 +398,14 @@ export {
 } from './visualizations/xy/constants';
 export { LENS_SHARE_STATE_ACTION } from './locator_types';
 export { defaultSeriesType } from './visualizations/xy/types';
+export type { VisualizationDatasourceDefaults } from './visualization_datasource_defaults';
 export {
-  applyEmptyRowsDefaultToDatasourceState,
-  applyEmptyRowsDefaultToDatasourceStates,
-  getEmptyRowsDefaultForVisualizationState,
-} from './date_histogram_empty_rows_default';
+  applyDatasourceDefaultsToColumnParams,
+  applyDatasourceDefaultsToDatasourceState,
+  applyDatasourceDefaultsToDatasourceStates,
+  getVisualizationDatasourceDefaults,
+  getVisualizationDatasourceDefaultsForVisualizationState,
+} from './visualization_datasource_defaults';
 export {
   getLensLayerTypeTabDisplayName,
   lensLayerTypeTabDisplayNames,

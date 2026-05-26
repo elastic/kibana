@@ -18,7 +18,7 @@ import type { PaletteRegistry } from '@kbn/coloring';
 import { getColorsFromMapping } from '@kbn/coloring';
 import { IconChartTagcloud } from '@kbn/chart-icons';
 import type { SystemPaletteExpressionFunctionDefinition } from '@kbn/charts-plugin/common';
-import { getEmptyRowsDefaultForVisualizationState } from '@kbn/lens-common';
+import { getVisualizationDatasourceDefaultsForVisualizationState } from '@kbn/lens-common';
 import useObservable from 'react-use/lib/useObservable';
 import { getKbnPalettes } from '@kbn/palettes';
 import type { FormatFactory } from '@kbn/visualization-ui-components';
@@ -142,7 +142,10 @@ export const getTagcloudVisualization = ({
         .get(state.palette?.name || 'default')
         .getCategoricalColors(10, state.palette?.params);
     }
-    const emptyRowsDefault = getEmptyRowsDefaultForVisualizationState('lnsTagcloud', state);
+    const datasourceDefaults = getVisualizationDatasourceDefaultsForVisualizationState(
+      'lnsTagcloud',
+      state
+    );
     return {
       groups: [
         {
@@ -150,9 +153,7 @@ export const getTagcloudVisualization = ({
           groupLabel: i18n.translate('xpack.lens.tagcloud.tagLabel', {
             defaultMessage: 'Tags',
           }),
-          paramEditorCustomProps: {
-            emptyRowsDefault,
-          },
+          datasourceDefaults,
           layerId: state.layerId,
           accessors: state.tagAccessor
             ? [

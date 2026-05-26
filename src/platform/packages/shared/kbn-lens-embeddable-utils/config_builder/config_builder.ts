@@ -8,7 +8,10 @@
  */
 
 import type { LensEmbeddableInput } from '@kbn/lens-common';
-import { applyEmptyRowsDefaultToDatasourceStates } from '@kbn/lens-common';
+import {
+  applyDatasourceDefaultsToDatasourceStates,
+  getVisualizationDatasourceDefaultsForVisualizationState,
+} from '@kbn/lens-common';
 import { v4 as uuidv4 } from 'uuid';
 import type { LensAttributes, LensConfig, LensConfigOptions, DataViewsCommon } from './types';
 import {
@@ -166,6 +169,29 @@ export class LensConfigBuilder {
     this.enableAPITransforms = enabled;
   }
 
+  private applyVisualizationDatasourceDefaults<T extends LensAttributes>(lensState: T): T {
+    const datasourceDefaults = getVisualizationDatasourceDefaultsForVisualizationState(
+      lensState.visualizationType,
+      lensState.state.visualization
+    );
+    const datasourceStates = applyDatasourceDefaultsToDatasourceStates(
+      lensState.state.datasourceStates,
+      datasourceDefaults
+    );
+
+    if (datasourceStates === lensState.state.datasourceStates) {
+      return lensState;
+    }
+
+    return {
+      ...lensState,
+      state: {
+        ...lensState.state,
+        datasourceStates,
+      },
+    };
+  }
+
   isSupported(chartType?: string | null): boolean {
     if (!chartType) return false;
     const type = compatibilityMap[chartType] ?? chartType;
@@ -220,22 +246,7 @@ export class LensConfigBuilder {
         query: options.query || { language: 'kuery', query: '' },
       },
     };
-    // Normalize visualization-specific datasource defaults after building the chart state.
-    const datasourceStates = applyEmptyRowsDefaultToDatasourceStates(
-      chartState.state.datasourceStates,
-      chartState.visualizationType,
-      chartState.state.visualization
-    );
-    const normalizedChartState =
-      datasourceStates === chartState.state.datasourceStates
-        ? chartState
-        : {
-            ...chartState,
-            state: {
-              ...chartState.state,
-              datasourceStates,
-            },
-          };
+    const normalizedChartState = this.applyVisualizationDatasourceDefaults(chartState);
 
     if (options.embeddable) {
       return {
@@ -263,6 +274,8 @@ export class LensConfigBuilder {
       attributes.references ?? []
     );
     const lensState = {
+      // @TODO investigate why it complains about missing type
+      // type: 'lens',
       ...attributes,
       references: [...(attributes.references ?? []), ...references],
       state: {
@@ -272,24 +285,7 @@ export class LensConfigBuilder {
         filters,
       },
     };
-    // Normalize visualization-specific datasource defaults after API conversion, too.
-    const datasourceStates = applyEmptyRowsDefaultToDatasourceStates(
-      lensState.state.datasourceStates,
-      lensState.visualizationType,
-      lensState.state.visualization
-    );
-
-    if (datasourceStates === lensState.state.datasourceStates) {
-      return lensState;
-    }
-
-    return {
-      ...lensState,
-      state: {
-        ...lensState.state,
-        datasourceStates,
-      },
-    };
+    return this.applyVisualizationDatasourceDefaults(lensState);
   }
 
   toAPIFormat(config: LensAttributes): LensApiConfig {

@@ -126,8 +126,12 @@ const createVisualizationGroups = (defaultValue: boolean): VisualizationDimensio
     accessors: [],
     supportsMoreColumns: true,
     filterOperations: () => true,
-    paramEditorCustomProps: {
-      emptyRowsDefault: defaultValue,
+    datasourceDefaults: {
+      operationParams: {
+        date_histogram: {
+          includeEmptyRows: defaultValue,
+        },
+      },
     },
   },
 ];
@@ -560,7 +564,7 @@ describe('layer_helpers', () => {
       ).toEqual(expect.objectContaining({ columnOrder: ['col1', 'col2'] }));
     });
 
-    it('applies the visualization empty rows default when inserting a date histogram', () => {
+    it('applies the visualization datasource defaults when inserting a date histogram', () => {
       const result = insertNewColumn({
         layer: { indexPatternId: '1', columnOrder: [], columns: {} },
         columnId: 'col1',
@@ -1007,7 +1011,7 @@ describe('layer_helpers', () => {
       );
     });
 
-    it('applies the visualization empty rows default when switching from managed reference to date histogram', () => {
+    it('applies the visualization datasource defaults when switching from managed reference to date histogram', () => {
       const result = replaceColumn({
         layer: {
           indexPatternId: '1',
@@ -1142,7 +1146,7 @@ describe('layer_helpers', () => {
       );
     });
 
-    it('applies the visualization empty rows default when switching to date histogram', () => {
+    it('applies the visualization datasource defaults when switching to date histogram', () => {
       const result = replaceColumn({
         layer: {
           indexPatternId: '1',

@@ -18,7 +18,10 @@ import type {
   DatasourceStates,
   Suggestion,
 } from '@kbn/lens-common';
-import { applyEmptyRowsDefaultToDatasourceState } from '@kbn/lens-common';
+import {
+  applyDatasourceDefaultsToDatasourceState,
+  getVisualizationDatasourceDefaultsForVisualizationState,
+} from '@kbn/lens-common';
 import { ExperimentalBadge } from '../../../../shared_components';
 import { getSuggestions, switchToSuggestion } from '../../suggestion_helpers';
 import { showMemoizedErrorNotification } from '../../../../lens_ui_errors';
@@ -100,18 +103,19 @@ export const ChartSwitch = memo(function ChartSwitch({
 
   const commitSelection = (selection: VisualizationSelection) => {
     const visualizationState = selection.getVisualizationState();
+    const datasourceDefaults = getVisualizationDatasourceDefaultsForVisualizationState(
+      selection.visualizationId,
+      visualizationState
+    );
     const currentDatasourceState = activeDatasourceId
       ? datasourceStates[activeDatasourceId]?.state
       : undefined;
     const updatedDatasourceState =
       selection.datasourceState ??
       (selection.sameDatasources && currentDatasourceState !== undefined
-        ? applyEmptyRowsDefaultToDatasourceState(
-            currentDatasourceState,
-            selection.visualizationId,
-            visualizationState,
-            { overwriteExisting: true }
-          )
+        ? applyDatasourceDefaultsToDatasourceState(currentDatasourceState, datasourceDefaults, {
+            overwriteExisting: true,
+          })
         : undefined);
 
     switchToSuggestion(
