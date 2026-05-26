@@ -19,7 +19,7 @@ Investigate a flaky Scout, FTR, or Jest test failure and determine what should b
 
 ### Identify the failing GitHub issue
 
-If no link to a `failed-test` issue was provided, search for one in the `elastic/kibana` repository. Prioritize looking at thee recent failures, but all failures and issue comments should be looked at.
+If no link to a `failed-test` issue was provided, search for one in the `elastic/kibana` repository. Prioritize looking at the recent failures, but all failures and issue comments should be looked at.
 
 ### Understand the test environment
 
@@ -28,7 +28,7 @@ If no link to a `failed-test` issue was provided, search for one in the `elastic
   - Recommended: learn more about local versus Elastic Cloud pipelines in `references/local-vs-cloud-pipelines.md`
 - **Did it fail in Buildkite builds with many other unrelated test failures?**
   - _Why it matters:_ broad failure across unrelated tests points to an environment or infrastructure problem, not a problem with this test.
-- **Understand the test server configuration.** are Scout tests using the **default** or a **custom** test server configuration? Do FTR tests belong to a test config that defines custom server arguments that aren't supported on e.g., Elastic Cloud?
+- **Understand the test server configuration.** Are Scout tests using the **default** or a **custom** test server configuration? Do FTR tests belong to a test config that defines custom server arguments that aren't supported on e.g., Elastic Cloud?
   - _Why it matters:_ custom server configurations are a common source of flakiness — they diverge from the configurations used by the broader test suite, so issues affecting only them won't surface elsewhere. They also tend to be less actively maintained.
 - **For Scout, which lane and neighbors shared servers with the failure?** Scout configs in the same Playwright lane share Kibana/Elasticsearch test servers — state can leak between configs. Map the job's `step_key` (e.g. `scout_test_lane_4`) to its config list by downloading `.scout/test_lane_loads.json` from the build's `Scout Test Run Builder` job (`step_key: build_scout_tests`). The same key is scheduled separately per `<arch>/<server-config>`; the job `name` (e.g. "Scout Lane #4 - stateful-classic / default") disambiguates the physical lane. Parallel configs (`parallel.playwright.config.ts`, `workers > 1`) also have multiple workers competing for the same servers, which can surface as transient timeouts under load.
   - _Why it matters:_ if the same neighbor configs and arch/server-config combo recur across failing builds, suspect lane pollution rather than a test bug. Resource pressure in parallel configs can look test-specific but isn't on its own a reason to drop `workers` to 1.
