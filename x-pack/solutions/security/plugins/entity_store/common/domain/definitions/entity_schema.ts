@@ -16,7 +16,7 @@ export const ALL_ENTITY_TYPES = Object.values(EntityType.enum);
 const mappingSchema = z.any();
 
 const retentionOperationSchema = z.discriminatedUnion('operation', [
-  z.object({ operation: z.literal('collect_values'), maxLength: z.number() }),
+  z.object({ operation: z.literal('collect_values') }),
   z.object({ operation: z.literal('prefer_newest_value') }),
   z.object({ operation: z.literal('prefer_oldest_value') }),
 ]);
