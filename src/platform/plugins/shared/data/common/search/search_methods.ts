@@ -233,24 +233,6 @@ export class SearchMethodsService implements ISearchMethods {
           pagination: self.buildDSLPagination(nextResponse.rawResponse, nextParams, options),
         };
       },
-      async *getAllPages(maxPages = 100) {
-        let currentResult: IDSLPaginatedSearchResult = {
-          rawResponse,
-          requestParams: undefined,
-          pagination: self.buildDSLPagination(rawResponse, originalParams, options),
-        };
-        let pageCount = 1;
-
-        yield currentResult;
-
-        while (currentResult.pagination.hasNextPage && pageCount < maxPages) {
-          const nextResult = await currentResult.pagination.nextPage();
-          if (!nextResult) break;
-          currentResult = nextResult;
-          pageCount++;
-          yield currentResult;
-        }
-      },
     };
   }
 

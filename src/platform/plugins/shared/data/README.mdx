@@ -189,11 +189,6 @@ const result = await data.search.dslPaginated({
 if (result.pagination.hasNextPage) {
   const nextPage = await result.pagination.nextPage();
 }
-
-// Or iterate all pages
-for await (const page of result.pagination.getAllPages(10)) {
-  console.log(`Page has ${page.rawResponse.hits.hits.length} hits`);
-}
 ```
 
 #### EQL Search
