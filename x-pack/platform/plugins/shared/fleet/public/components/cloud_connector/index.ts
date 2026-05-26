@@ -12,3 +12,15 @@ export {
   type CloudConnectorTabsProps,
 } from './cloud_connector_tabs';
 export type { UpdatePolicy, CloudConnectorCredentials } from './types';
+export {
+  AwsConnectSetup,
+  type AwsConnectSetupProps,
+  type AwsAuthType,
+  type AwsStaticKeyCredentials,
+} from './aws_connect_setup';
+export {
+  AwsAuthTypeSelector,
+  AWS_AUTH_TYPE_SELECTOR_TEST_SUBJ,
+  AWS_AUTH_TYPE_IF_CARD_TEST_SUBJ,
+  AWS_AUTH_TYPE_STATIC_KEYS_CARD_TEST_SUBJ,
+} from './aws_connect_setup/aws_auth_type_selector';
