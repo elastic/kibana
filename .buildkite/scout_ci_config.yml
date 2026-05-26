@@ -18,6 +18,7 @@ plugins:
     - data
     - data_view_editor
     - data_views
+    - data_view_management
     - dev_tools
     - discover
     - discover_enhanced
@@ -67,6 +68,7 @@ plugins:
     - task_manager
     - transform
     - triggers_actions_ui
+    - unified_search
     - upgrade_assistant
     - uptime
     - ux
