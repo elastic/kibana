@@ -8,6 +8,7 @@
 import expect from 'expect';
 import { v4 as uuidv4 } from 'uuid';
 import { ModeEnum } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import { BulkActionTypeEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management';
 import { DETECTION_ENGINE_RULES_IMPORT_URL } from '@kbn/security-solution-plugin/common/constants';
 import { deleteAllRules } from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
@@ -360,6 +361,34 @@ export default ({ getService }: FtrProviderContext): void => {
 
         // Most recent event (index 0) is the upgrade; index 1 is the original install.
         expect(body.items[0].action).toBe('rule_upgrade');
+      });
+
+      it('records rule_duplicate when duplicating a rule', async () => {
+        const { body: original } = await detectionsApi
+          .createRule({ body: getCustomQueryRuleParams() })
+          .expect(200);
+
+        const { body: bulkResponse } = await detectionsApi
+          .performRulesBulkAction({
+            query: {},
+            body: {
+              action: BulkActionTypeEnum.duplicate,
+              duplicate: { include_exceptions: false, include_expired_exceptions: false },
+            },
+          })
+          .expect(200);
+
+        const duplicatedRuleId = bulkResponse.attributes.results.created[0].id;
+
+        await refreshHistory();
+
+        const { body } = await detectionsApi
+          .ruleChangesHistory({ params: { ruleId: duplicatedRuleId }, query: {} })
+          .expect(200);
+
+        expect(body.items).toHaveLength(1);
+        expect(body.items[0].action).toBe('rule_duplicate');
+        expect(body.items[0].metadata?.originalRuleSoId).toBe(original.id);
       });
 
       it('records rule_revert when reverting a prebuilt rule', async () => {

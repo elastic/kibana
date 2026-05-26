@@ -37,6 +37,10 @@ export interface RuleChangeTrackingMetadata {
    * inside RulesClient. Passing this number will result in logging in change tracking item's metadata.
    */
   bulkCount?: number;
+  /**
+   * Rule duplication action original rule's Saved Object id
+   */
+  originalRuleSoId?: string;
 }
 
 /**

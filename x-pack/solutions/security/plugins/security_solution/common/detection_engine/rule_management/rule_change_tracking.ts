@@ -16,6 +16,7 @@ export enum SecurityRuleChangeTrackingAction {
   ruleInstall = 'rule_install',
   ruleUpgrade = 'rule_upgrade',
   ruleDuplicate = 'rule_duplicate',
+  exceptionsDuplicate = 'exceptions_duplicate',
   ruleImport = 'rule_import',
   ruleRevert = 'rule_revert',
 }
