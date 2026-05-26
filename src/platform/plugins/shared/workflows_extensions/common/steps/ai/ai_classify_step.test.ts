@@ -41,10 +41,7 @@ describe('ai_classify_step common', () => {
     it('InputSchema accepts categories and fallbackCategory as objects with name and description', () => {
       const result = InputSchema.safeParse({
         input: 'text',
-        categories: [
-          { name: 'Critical', description: 'Immediate action required' },
-          'Info',
-        ],
+        categories: [{ name: 'Critical', description: 'Immediate action required' }, 'Info'],
         fallbackCategory: { name: 'Unknown', description: 'No clear match' },
       });
       expect(result.success).toBe(true);
@@ -76,7 +73,7 @@ describe('ai_classify_step common', () => {
 
       expect(schema.shape).toHaveProperty('category');
       expect(schema.shape).not.toHaveProperty('categories');
-      expect(schema.shape).not.toHaveProperty('metadata');
+      expect(schema.shape).toHaveProperty('metadata');
       expect(schema.shape).not.toHaveProperty('rationale');
     });
 
@@ -127,6 +124,7 @@ describe('ai_classify_step common', () => {
       const result = schema.safeParse({
         categories: ['A'],
         rationale: 'because',
+        metadata: {},
       });
       expect(result.success).toBe(true);
     });
@@ -141,17 +139,20 @@ describe('ai_classify_step common', () => {
       expect(result.success).toBe(false);
     });
 
-    it('returned schema rejects metadata from the model (added by the step handler)', () => {
+    it('returned schema requires metadata field', () => {
       const schema = buildStructuredOutputSchema({
         input: 'text',
         categories: ['A'],
       });
 
-      const result = schema.safeParse({
+      const withoutMetadata = schema.safeParse({ category: 'A' });
+      expect(withoutMetadata.success).toBe(false);
+
+      const withMetadata = schema.safeParse({
         category: 'A',
         metadata: { model: 'test' },
       });
-      expect(result.success).toBe(false);
+      expect(withMetadata.success).toBe(true);
     });
   });
 });
