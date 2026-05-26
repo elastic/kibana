@@ -36,7 +36,8 @@ import type {
  *   - .significant_events-memory-history  (version history, append-only)
  *
  * Pages are written by indexing a new document with the current @timestamp.
- * "Latest" is resolved by collapsing on `name` sorted by `version desc, @timestamp desc`.
+ * "Latest" is resolved by collapsing on `name` sorted by `version desc, updated_at desc`.
+ * Tombstones bump `version` and set `is_deleted: true`; reads filter those out after collapse.
  */
 export class MemoryServiceImpl implements MemoryService {
   private readonly esClient: ElasticsearchClient;
@@ -75,7 +76,7 @@ export class MemoryServiceImpl implements MemoryService {
         size,
         query,
         collapse: { field: 'name' },
-        sort: [{ version: { order: 'desc' } }, { '@timestamp': { order: 'desc' } }],
+        sort: [{ version: { order: 'desc' } }, { updated_at: { order: 'desc' } }],
       });
       return response.hits.hits as Array<{ _source: MemoryEntry }>;
     } catch (err) {
@@ -181,19 +182,23 @@ export class MemoryServiceImpl implements MemoryService {
     if (!current) throw notFound(`Memory entry with id '${id}' not found`);
 
     const now = new Date().toISOString();
-    // Append a soft-delete tombstone
+    const tombstone: MemoryEntry = {
+      ...current,
+      version: current.version + 1,
+      updated_at: now,
+      updated_by: user,
+      is_deleted: true,
+    };
+    // Append a soft-delete tombstone (version must increase so collapse picks it over the live doc).
     await this.esClient.index({
       index: MEMORIES_DATA_STREAM,
       document: {
         '@timestamp': now,
-        ...current,
-        updated_at: now,
-        updated_by: user,
-        is_deleted: true,
+        ...tombstone,
       },
     });
     await this._writeHistory(
-      { ...current, updated_at: now },
+      tombstone,
       'delete',
       `Deleted entry "${current.name}"`,
       user
@@ -307,11 +312,10 @@ export class MemoryServiceImpl implements MemoryService {
 
   async getBacklinks({ id }: { id: string }): Promise<MemoryEntry[]> {
     return (
-      await this._searchLatest(
-        { bool: { filter: [{ term: { references: id } }, { term: { is_deleted: false } }] } },
-        1000
-      )
-    ).map((h) => h._source);
+      await this._searchLatest({ bool: { filter: [{ term: { references: id } }] } }, 1000)
+    )
+      .map((h) => h._source)
+      .filter((entry) => entry.is_deleted !== true);
   }
 
   // ── Search & browse ──
@@ -320,7 +324,7 @@ export class MemoryServiceImpl implements MemoryService {
     const { query, tags, categories, references, size = 10 } = params;
     const escapedQuery = query.toLowerCase().replace(/[\\*?]/g, '\\$&');
 
-    const filters: QueryDslQueryContainer[] = [{ term: { is_deleted: false } }];
+    const filters: QueryDslQueryContainer[] = [];
     if (tags?.length) filters.push({ terms: { tags } });
     if (categories?.length) filters.push({ terms: { categories } });
     if (references?.length) filters.push({ terms: { references } });
@@ -331,7 +335,7 @@ export class MemoryServiceImpl implements MemoryService {
         index: MEMORIES_DATA_STREAM,
         track_total_hits: false,
         collapse: { field: 'name' },
-        sort: [{ version: { order: 'desc' } }, { '@timestamp': { order: 'desc' } }],
+        sort: [{ version: { order: 'desc' } }, { updated_at: { order: 'desc' } }],
         query: {
           bool: {
             filter: filters,
@@ -367,21 +371,26 @@ export class MemoryServiceImpl implements MemoryService {
       throw err;
     }
 
-    return response.hits.hits.map((hit) => {
-      const source = hit._source as MemoryEntry;
-      const highlight = (hit as { highlight?: Record<string, string[]> }).highlight;
-      return {
-        id: source.id,
-        name: source.name,
-        title: source.title,
-        snippet: highlight?.content?.[0] ?? source.content.substring(0, 200),
-        score: hit._score ?? 0,
-        updated_at: source.updated_at,
-        updated_by: source.updated_by,
-        tags: source.tags ?? [],
-        categories: source.categories ?? [],
-      };
-    });
+    return response.hits.hits
+      .map((hit) => {
+        const source = hit._source as MemoryEntry;
+        if (source.is_deleted === true) {
+          return undefined;
+        }
+        const highlight = (hit as { highlight?: Record<string, string[]> }).highlight;
+        return {
+          id: source.id,
+          name: source.name,
+          title: source.title,
+          snippet: highlight?.content?.[0] ?? source.content.substring(0, 200),
+          score: hit._score ?? 0,
+          updated_at: source.updated_at,
+          updated_by: source.updated_by,
+          tags: source.tags ?? [],
+          categories: source.categories ?? [],
+        };
+      })
+      .filter((result): result is MemorySearchResult => result !== undefined);
   }
 
   async listAll(): Promise<MemoryEntry[]> {
@@ -389,9 +398,9 @@ export class MemoryServiceImpl implements MemoryService {
       const response = await this.esClient.search({
         index: MEMORIES_DATA_STREAM,
         track_total_hits: true,
-        query: { bool: { filter: [{ term: { is_deleted: false } }] } },
+        query: { match_all: {} },
         collapse: { field: 'name' },
-        sort: [{ version: { order: 'desc' } }, { '@timestamp': { order: 'desc' } }],
+        sort: [{ version: { order: 'desc' } }, { updated_at: { order: 'desc' } }],
         size: 10000,
       });
 
@@ -401,7 +410,9 @@ export class MemoryServiceImpl implements MemoryService {
           `Memory listAll: total ${total.value} exceeds 10000, some entries may be missing`
         );
       }
-      return response.hits.hits.map((h) => h._source as MemoryEntry);
+      return response.hits.hits
+        .map((h) => h._source as MemoryEntry)
+        .filter((entry) => entry.is_deleted !== true);
     } catch (err) {
       if (isIndexNotFoundError(err)) return [];
       throw err;
@@ -414,13 +425,15 @@ export class MemoryServiceImpl implements MemoryService {
         index: MEMORIES_DATA_STREAM,
         track_total_hits: false,
         query: {
-          bool: { filter: [{ term: { categories: category } }, { term: { is_deleted: false } }] },
+          bool: { filter: [{ term: { categories: category } }] },
         },
         collapse: { field: 'name' },
-        sort: [{ version: { order: 'desc' } }, { '@timestamp': { order: 'desc' } }],
+        sort: [{ version: { order: 'desc' } }, { updated_at: { order: 'desc' } }],
         size: 1000,
       });
-      return response.hits.hits.map((h) => h._source as MemoryEntry);
+      return response.hits.hits
+        .map((h) => h._source as MemoryEntry)
+        .filter((entry) => entry.is_deleted !== true);
     } catch (err) {
       if (isIndexNotFoundError(err)) return [];
       throw err;
