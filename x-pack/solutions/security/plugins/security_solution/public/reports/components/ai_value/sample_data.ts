@@ -29,13 +29,6 @@ export const SAMPLE_VALUE_METRICS_COMPARE: ValueMetrics = {
   costSavings: 136500,
 };
 
-export const SAMPLE_FROM = '2025-07-18T23:59:59.999Z';
-export const SAMPLE_TO = '2025-08-18T00:00:00.000Z';
-
-const SAMPLE_TREND_START_TIMESTAMP = new Date(SAMPLE_FROM).getTime();
-export const SAMPLE_INTERVAL_HOURS = 12;
-const TWELVE_HOURS_MS = SAMPLE_INTERVAL_HOURS * 60 * 60 * 1000;
-
 const SAMPLE_TREND_COST_SAVINGS = [
   401, 485, 559, 491, 456, 510, 471, 488, 369, 315, 210, 200, 271, 367, 375, 331, 397, 469, 600,
   600, 486, 405, 370, 344, 377, 281, 231, 121, 244, 370, 473, 464, 503, 455, 521, 541, 503, 415,
@@ -43,20 +36,25 @@ const SAMPLE_TREND_COST_SAVINGS = [
   290, 371, 403, 425, 412,
 ] as const;
 
-export const SAMPLE_TREND_DATA = SAMPLE_TREND_COST_SAVINGS.map((costSavings, index) => ({
-  timestamp: SAMPLE_TREND_START_TIMESTAMP + index * TWELVE_HOURS_MS,
-  costSavings,
-}));
+export const getSampleTrendData = (from: string, to: string) => {
+  const fromMs = new Date(from).getTime();
+  const toMs = new Date(to).getTime();
+  const step = (toMs - fromMs) / (SAMPLE_TREND_COST_SAVINGS.length - 1);
+  return SAMPLE_TREND_COST_SAVINGS.map((costSavings, index) => ({
+    timestamp: fromMs + index * step,
+    costSavings,
+  }));
+};
 
 // Key insight descriptive values — derived from SAMPLE_TREND_COST_SAVINGS above.
 // Update these if the trend data changes.
 const SAMPLE_KEY_INSIGHT_AVERAGED_COST = '$400';
-const SAMPLE_KEY_INSIGHT_COST_RANGE = '$450\u2013$600';
+const SAMPLE_KEY_INSIGHT_COST_RANGE = '$450–$600';
 const SAMPLE_KEY_INSIGHT_PROJECTED_ANNUAL_SAVINGS = '$200K';
 
-export const getSampleKeyInsightMarkdown = (): string => {
-  const from = moment(SAMPLE_FROM).format('LL');
-  const to = moment(SAMPLE_TO).format('LL');
+export const getSampleKeyInsightMarkdown = (from: string, to: string): string => {
+  const fromFormatted = moment(from).format('LL');
+  const toFormatted = moment(to).format('LL');
 
   const averagedValue = i18n.translate(
     'xpack.securitySolution.reports.aiValue.sampleKeyInsightBullet1.averagedValueLabel',
@@ -82,8 +80,8 @@ export const getSampleKeyInsightMarkdown = (): string => {
       'xpack.securitySolution.reports.aiValue.sampleKeyInsightBullet1.descriptionDetail',
       {
         defaultMessage:
-          'Between {from} and {to}, {intervalHours}-hour cost savings **{averagedValue}**, appearing frequently throughout the period.',
-        values: { from, to, intervalHours: SAMPLE_INTERVAL_HOURS, averagedValue },
+          'Between {from} and {to}, cost savings **{averagedValue}**, appearing frequently throughout the period.',
+        values: { from: fromFormatted, to: toFormatted, averagedValue },
       }
     )}`,
     `- ${i18n.translate(

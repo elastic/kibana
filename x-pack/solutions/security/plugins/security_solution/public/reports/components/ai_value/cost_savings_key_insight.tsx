@@ -30,6 +30,8 @@ import { getSampleKeyInsightMarkdown } from './sample_data';
 
 interface Props {
   isSample: boolean;
+  from: string;
+  to: string;
   lensResponse: VisualizationTablesWithMeta | null;
 }
 
@@ -164,7 +166,9 @@ export const CostSavingsKeyInsight: React.FC<Props> = (props) => {
   const Loading = useMemo(() => <CostSavingsKeyInsightView insight={''} />, []);
 
   if (props.isSample) {
-    return <CostSavingsKeyInsightView insight={getSampleKeyInsightMarkdown()} />;
+    return (
+      <CostSavingsKeyInsightView insight={getSampleKeyInsightMarkdown(props.from, props.to)} />
+    );
   }
 
   if (exportContext?.forwardedState?.insight) {

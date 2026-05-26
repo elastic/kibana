@@ -11,8 +11,6 @@ import { useValueReportData } from './use_value_report_data';
 import { useValueMetrics } from '../components/ai_value/hooks/use_value_metrics';
 import { useHasLatelyUsedAttackDiscovery } from '../components/ai_value/hooks/use_has_lately_used_attack_discovery';
 import {
-  SAMPLE_FROM,
-  SAMPLE_TO,
   SAMPLE_VALUE_METRICS,
   SAMPLE_VALUE_METRICS_COMPARE,
 } from '../components/ai_value/sample_data';
@@ -100,8 +98,8 @@ describe('useValueReportData', () => {
         attackAlertIds: [],
         analystHourlyRate: PROPS.analystHourlyRate,
         minutesPerAlert: PROPS.minutesPerAlert,
-        from: SAMPLE_FROM,
-        to: SAMPLE_TO,
+        from: PROPS.from,
+        to: PROPS.to,
         valueMetrics: SAMPLE_VALUE_METRICS,
         valueMetricsCompare: SAMPLE_VALUE_METRICS_COMPARE,
       });

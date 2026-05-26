@@ -16,12 +16,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import { useValueMetrics } from './hooks/use_value_metrics';
 import { useHasLatelyUsedAttackDiscovery } from './hooks/use_has_lately_used_attack_discovery';
 import { AIValueReportLayout } from './ai_value_report_layout';
-import {
-  SAMPLE_FROM,
-  SAMPLE_TO,
-  SAMPLE_VALUE_METRICS,
-  SAMPLE_VALUE_METRICS_COMPARE,
-} from './sample_data';
+import { SAMPLE_VALUE_METRICS, SAMPLE_VALUE_METRICS_COMPARE } from './sample_data';
 import type { StartServices } from '../../../types';
 import { useAIValueExportContext } from '../../providers/ai_value/export_provider';
 
@@ -186,8 +181,8 @@ describe('AIValueReport', () => {
     expect(mockAIValueReportLayout).toHaveBeenCalledWith(
       expect.objectContaining({
         isSample: true,
-        from: SAMPLE_FROM,
-        to: SAMPLE_TO,
+        from: defaultProps.from,
+        to: defaultProps.to,
         valueMetrics: SAMPLE_VALUE_METRICS,
         valueMetricsCompare: SAMPLE_VALUE_METRICS_COMPARE,
       }),

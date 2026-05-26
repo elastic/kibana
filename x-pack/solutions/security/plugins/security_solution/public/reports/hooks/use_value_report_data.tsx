@@ -8,8 +8,6 @@
 import { useMemo } from 'react';
 import type { ValueMetrics } from '../components/ai_value/metrics';
 import {
-  SAMPLE_FROM,
-  SAMPLE_TO,
   SAMPLE_VALUE_METRICS,
   SAMPLE_VALUE_METRICS_COMPARE,
 } from '../components/ai_value/sample_data';
@@ -42,8 +40,9 @@ export interface ValueReportData {
  * don't have to branch on `isSample` to read fields.
  *
  * Sample mode is only entered when the user has never used Attack Discovery
- * AND the current range has zero discoveries. Otherwise we render live data,
- * even when the range happens to be empty.
+ * AND the current range has zero discoveries. In sample mode only the metrics
+ * and alert IDs are swapped; `from`/`to` always reflect the actual selected
+ * range so the displayed dates stay in sync with the date picker.
  */
 export const useValueReportData = ({
   from,
@@ -73,24 +72,22 @@ export const useValueReportData = ({
 
   const isSample = !isLoading && shouldCheckHistory && !hasEverUsedAttackDiscovery;
 
-  return useMemo<ValueReportData>(() => {
-    if (isSample) {
-      return {
-        isLoading,
-        isSample: true,
-        hasEverUsedAttackDiscovery,
-        attackAlertIds: [],
-        analystHourlyRate,
-        minutesPerAlert,
-        from: SAMPLE_FROM,
-        to: SAMPLE_TO,
-        valueMetrics: SAMPLE_VALUE_METRICS,
-        valueMetricsCompare: SAMPLE_VALUE_METRICS_COMPARE,
-      };
-    }
-    return {
+  return useMemo<ValueReportData>(
+    () => ({
       isLoading,
-      isSample: false,
+      isSample,
+      hasEverUsedAttackDiscovery,
+      attackAlertIds: isSample ? [] : attackAlertIds,
+      analystHourlyRate,
+      minutesPerAlert,
+      from,
+      to,
+      valueMetrics: isSample ? SAMPLE_VALUE_METRICS : valueMetrics,
+      valueMetricsCompare: isSample ? SAMPLE_VALUE_METRICS_COMPARE : valueMetricsCompare,
+    }),
+    [
+      isLoading,
+      isSample,
       hasEverUsedAttackDiscovery,
       attackAlertIds,
       analystHourlyRate,
@@ -99,17 +96,6 @@ export const useValueReportData = ({
       to,
       valueMetrics,
       valueMetricsCompare,
-    };
-  }, [
-    isLoading,
-    isSample,
-    hasEverUsedAttackDiscovery,
-    attackAlertIds,
-    analystHourlyRate,
-    minutesPerAlert,
-    from,
-    to,
-    valueMetrics,
-    valueMetricsCompare,
-  ]);
+    ]
+  );
 };

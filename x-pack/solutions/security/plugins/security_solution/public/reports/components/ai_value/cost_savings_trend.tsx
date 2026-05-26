@@ -30,7 +30,7 @@ import { VisualizationEmbeddable } from '../../../common/components/visualizatio
 import { getCostSavingsTrendAreaLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/ai/cost_savings_trend_area';
 import { CostSavingsKeyInsight } from './cost_savings_key_insight';
 import { formatDollars } from './metrics';
-import { SAMPLE_TREND_DATA } from './sample_data';
+import { getSampleTrendData } from './sample_data';
 import { useThemes } from '../../../common/components/charts/common';
 import { COST_SAVINGS_TITLE } from './translations';
 
@@ -82,8 +82,9 @@ const LiveTrendVisualization: React.FC<{
   );
 };
 
-const SampleTrendVisualization: React.FC = () => {
+const SampleTrendVisualization: React.FC<{ from: string; to: string }> = ({ from, to }) => {
   const { baseTheme, theme } = useThemes();
+  const data = useMemo(() => getSampleTrendData(from, to), [from, to]);
 
   return (
     <div data-test-subj="sample-cost-savings-trend">
@@ -131,7 +132,7 @@ const SampleTrendVisualization: React.FC = () => {
           yScaleType={ScaleType.Linear}
           xAccessor="timestamp"
           yAccessors={['costSavings']}
-          data={SAMPLE_TREND_DATA}
+          data={data}
         />
       </Chart>
     </div>
@@ -182,7 +183,7 @@ const CostSavingsTrendComponent: React.FC<Props> = (props) => {
       >
         <EuiFlexItem>
           {props.isSample ? (
-            <SampleTrendVisualization />
+            <SampleTrendVisualization from={props.from} to={props.to} />
           ) : (
             <LiveTrendVisualization
               from={props.from}
@@ -198,7 +199,12 @@ const CostSavingsTrendComponent: React.FC<Props> = (props) => {
             max-width: ${isSmall ? 'auto' : '600px'};
           `}
         >
-          <CostSavingsKeyInsight isSample={props.isSample} lensResponse={lensResponse} />
+          <CostSavingsKeyInsight
+            isSample={props.isSample}
+            from={props.from}
+            to={props.to}
+            lensResponse={lensResponse}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>
