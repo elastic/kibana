@@ -97,7 +97,7 @@ describe('getServiceMapEmbeddableFactory', () => {
       anyStateChange$: customStateAnyStateChange$,
       reinitializeState: jest.fn(),
     });
-    mockInitializeStateApi.mockImplementation(() => ({ unsavedApi: true }));
+    mockInitializeStateApi.mockImplementation(() => ({ stateApi: true }));
     mockUseBatchedPublishingSubjects.mockReturnValue([
       ENVIRONMENT_ALL.value,
       undefined,
@@ -115,7 +115,7 @@ describe('getServiceMapEmbeddableFactory', () => {
 
     expect(factory.type).toBe(APM_SERVICE_MAP_EMBEDDABLE);
 
-    const embeddable = await factory.buildEmbeddable({
+    await factory.buildEmbeddable({
       initialState: {},
       finalizeApi,
       uuid: 'panel-1',
@@ -126,15 +126,15 @@ describe('getServiceMapEmbeddableFactory', () => {
     expect(finalizeApi).toHaveBeenCalledWith(
       expect.objectContaining({
         titleApi: true,
-        unsavedApi: true,
-        serializeState: expect.any(Function),
+        stateApi: true,
         isEditingEnabled: expect.any(Function),
         onEdit: expect.any(Function),
         getTypeDisplayName: expect.any(Function),
         blockingError$: expect.any(Object),
       })
     );
-    expect(embeddable.api.serializeState()).toEqual({
+    const stateApi = mockInitializeStateApi.mock.calls[0][0];
+    expect(stateApi.serializeState()).toEqual({
       title: 'Saved title',
       time_range: { from: 'now-15m', to: 'now' },
       environment: ENVIRONMENT_ALL.value,
@@ -348,7 +348,8 @@ describe('getServiceMapEmbeddableFactory', () => {
       from: 'now-15m',
       to: 'now',
     });
-    expect(embeddable.api.serializeState().time_range).toEqual({ from: 'now-15m', to: 'now' });
+    const stateApi = mockInitializeStateApi.mock.calls[0][0];
+    expect(stateApi.serializeState().time_range).toEqual({ from: 'now-15m', to: 'now' });
   });
 
   it('exposes setTimeRange to update time range', async () => {
